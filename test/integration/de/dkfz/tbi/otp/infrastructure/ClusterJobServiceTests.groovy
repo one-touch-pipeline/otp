@@ -388,6 +388,30 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
     }
 
     @Test
+    void test_handleObviouslyFailedClusterJob_WhenElapsedWalltimeUnderDurationJobObviuoslyFailed_ShouldChangeExitStatusToFailed() {
+        ClusterJob job = createClusterJob([queued: SDATE_DATETIME,
+                                           started: SDATE_DATETIME,
+                                           ended: SDATE_DATETIME.plusMillis(ClusterJobService.DURATION_JOB_OBVIOUSLY_FAILED.millis as int),
+                                           exitStatus: ClusterJob.Status.COMPLETED])
+
+        clusterJobService.handleObviouslyFailedClusterJob(job)
+
+        assert job.exitStatus == ClusterJob.Status.FAILED
+    }
+
+    @Test
+    void test_handleObviouslyFailedClusterJob_WhenElapsedWalltimeOverDurationJobObviuoslyFailed_ShouldKeepExitStatusCompleted() {
+        ClusterJob job = createClusterJob([queued: SDATE_DATETIME,
+                                           started: SDATE_DATETIME,
+                                           ended: SDATE_DATETIME.plusMillis(ClusterJobService.DURATION_JOB_OBVIOUSLY_FAILED.millis + 1 as int),
+                                           exitStatus: ClusterJob.Status.COMPLETED])
+
+        clusterJobService.handleObviouslyFailedClusterJob(job)
+
+        assert job.exitStatus == ClusterJob.Status.COMPLETED
+    }
+
+    @Test
     void test_findAllClusterJobsByDateBetween_WhenNoJobsFound_ShouldReturnEmptyList() {
         assert [] == clusterJobService.findAllClusterJobsByDateBetween(SDATE_LOCALDATE, EDATE_LOCALDATE, "", 0, 10, 'clusterJobId', 'asc')
     }

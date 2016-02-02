@@ -33,6 +33,8 @@ class ClusterJobService {
     private static Map<Object, FlowControlClient> clientCache = [:]
     public static final String FORMAT_STRING = "yyyy-MM-dd HH:mm:ss"
     public static final Long HOURS_TO_MILLIS = HOURS.toMillis(1)
+    // we assume that jobs with an elapsed walltime under 10ms "obviously failed"
+    public static final Duration DURATION_JOB_OBVIOUSLY_FAILED = Duration.millis(9)
 
     private static final QUERY_BY_TIMESPAN = """
  job.queued >= ?
@@ -106,6 +108,8 @@ class ClusterJobService {
         job.nReads = getReadsSum(job)
         job.fileSize = getFileSizesSum(job)
         assert job.save(flush: true, failOnError: true)
+
+        handleObviouslyFailedClusterJob(job)
     }
 
     /**
@@ -255,6 +259,18 @@ class ClusterJobService {
     public static List<ClusterJob> findAllClusterJobsToOtpJob(ClusterJob job) {
         ProcessingStep processingStep = ProcessingStep.findTopMostProcessingStep(job.processingStep)
         return ClusterJob.findAllByProcessingStepAndJobClass(processingStep, job.jobClass)
+    }
+
+    /**
+     * checks if a {@link ClusterJob} has an elapsed walltime under the duration we assume jobs being failed
+     * sometimes the flowControl-API returns jobs with an elapsed walltime in the range zero but an exit Status 'COMPLETED'
+     * this can result to misleading statistics
+     */
+    public void handleObviouslyFailedClusterJob(ClusterJob job) {
+        if (job.getElapsedWalltime() <= DURATION_JOB_OBVIOUSLY_FAILED) {
+            job.exitStatus = ClusterJob.Status.FAILED
+            job.save(flush: true, failOnError: true)
+        }
     }
 
     /**
