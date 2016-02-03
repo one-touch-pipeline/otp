@@ -142,9 +142,13 @@ class AlignmentQualityOverviewController {
         List<AbstractQualityAssessment> dataChromosomeXY = chromosomeQualityAssessmentMergedService.qualityAssessmentMergedForSpecificChromosomes(chromosomes, dataOverall*.qualityAssessmentMergedPass)
         Map<Long, Map<String, List<AbstractQualityAssessment>>> chromosomeMapXY = dataChromosomeXY.groupBy ([{it.qualityAssessmentMergedPass.id}, {it.chromosomeName}])
 
-        List sequenceLengthsAndReferenceGenomeLengthWithoutN = overallQualityAssessmentMergedService.findSequenceLengthAndReferenceGenomeLengthWithoutNForQualityAssessmentMerged(dataOverall)
+        List sequenceLengths = overallQualityAssessmentMergedService.findSequenceLengthForQualityAssessmentMerged(dataOverall)
         // TODO: has to be adapted when issue OTP-1670 is solved
-        Map sequenceLengthsAndReferenceGenomeLengthWithoutNMap = sequenceLengthsAndReferenceGenomeLengthWithoutN.groupBy{it[0]}
+        Map sequenceLengthsMap = sequenceLengths.groupBy{it[0]}
+
+        Map<Long, Map<String, List<ReferenceGenomeEntry>>> chromosomeLengthForChromosome =
+                overallQualityAssessmentMergedService.findChromosomeLengthForQualityAssessmentMerged(chromosomes, dataOverall).
+                        groupBy({it.referenceGenome.id}, {it.alias})
 
         dataToRender.iTotalRecords = dataOverall.size()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
@@ -155,7 +159,7 @@ class AlignmentQualityOverviewController {
             Set<LibraryPreparationKit> kit = qualityAssessmentMergedPass.containedSeqTracks*.libraryPreparationKit.findAll().unique() //findAll removes null values
             double duplicates = it.duplicates / it.totalReadCounter * 100.0 //%duplicates (picard)
             double properlyPaired = it.properlyPaired / it.pairedInSequencing * 100.0
-            double readLength = sequenceLengthsAndReferenceGenomeLengthWithoutNMap[it.id][0][1] as double
+            double readLength = sequenceLengthsMap[it.id][0][1] as double
             double diffChr = it.withMateMappedToDifferentChr / it.totalReadCounter * 100.0 // % diff chrom
 
             Map map = [
@@ -189,22 +193,22 @@ class AlignmentQualityOverviewController {
 
             switch (seqType.name) {
                 case SeqTypeNames.WHOLE_GENOME.seqTypeName:
-                    long referenceGenomeLengthWithoutN = sequenceLengthsAndReferenceGenomeLengthWithoutNMap[it.id][0][2] as long
                     Double coverageX
                     Double coverageY
-                    if (referenceGenomeLengthWithoutN) {
+                    if (chromosomeLengthForChromosome[it.referenceGenome.id]) {
                         Map<String, List<AbstractQualityAssessment>> chromosomeMap = chromosomeMapXY[qualityAssessmentMergedPass.id]
                         AbstractQualityAssessment x = getQualityAssessmentForFirstMatchingChromosomeName(chromosomeMap, [Chromosomes.CHR_X.alias, CHR_X_HG19])
                         AbstractQualityAssessment y = getQualityAssessmentForFirstMatchingChromosomeName(chromosomeMap, [Chromosomes.CHR_Y.alias, CHR_Y_HG19])
                         long qcBasesMappedXChromosome = x.qcBasesMapped
                         long qcBasesMappedYChromosome = y.qcBasesMapped
-                        coverageX = qcBasesMappedXChromosome / referenceGenomeLengthWithoutN
-                        coverageY = qcBasesMappedYChromosome / referenceGenomeLengthWithoutN
+                        long chromosomeLengthX = chromosomeLengthForChromosome[it.referenceGenome.id][Chromosomes.CHR_X.alias][0].lengthWithoutN
+                        long chromosomeLengthY = chromosomeLengthForChromosome[it.referenceGenome.id][Chromosomes.CHR_Y.alias][0].lengthWithoutN
+                        coverageX = qcBasesMappedXChromosome / chromosomeLengthX
+                        coverageY = qcBasesMappedYChromosome / chromosomeLengthY
                     }
 
                     map << [
                         coverageWithoutN: FormatHelper.formatToTwoDecimalsNullSave(abstractMergedBamFile.coverage), //Coverage w/o N
-                        coverageWitN: FormatHelper.formatToTwoDecimalsNullSave(abstractMergedBamFile.coverageWithN), //Coverage wN
                         coverageX: FormatHelper.formatToTwoDecimalsNullSave(coverageX), //ChrX Coverage w/o N
                         coverageY: FormatHelper.formatToTwoDecimalsNullSave(coverageY), //ChrY Coverage w/o N
                     ]

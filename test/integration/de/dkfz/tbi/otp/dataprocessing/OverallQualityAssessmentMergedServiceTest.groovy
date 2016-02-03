@@ -15,8 +15,6 @@ class OverallQualityAssessmentMergedServiceTest extends AbstractIntegrationTest 
 
     final static String SEQUENCE_LENGTH = '100'
 
-    final static long LENGTH_WITHOUT_N = 222
-
     OverallQualityAssessmentMergedService overallQualityAssessmentMergedService
 
     OverallQualityAssessmentMerged overallQualityAssessmentMerged
@@ -34,14 +32,13 @@ class OverallQualityAssessmentMergedServiceTest extends AbstractIntegrationTest 
         abstractBamFile.fileSize = 10000
         abstractBamFile.qualityAssessmentStatus = AbstractBamFile.QaProcessingStatus.FINISHED
         abstractBamFile.withdrawn = false
-        overallQualityAssessmentMerged.referenceGenome.lengthWithoutN = LENGTH_WITHOUT_N
         abstractBamFile.workPackage.bamFileInProjectFolder = abstractBamFile
         overallQualityAssessmentMerged.save(flush: true)
     }
 
 
 
-    private void prepareFindSequenceLengthAndReferenceGenomeLengthWithoutNForOverallQualityAssessmentMerged() {
+    private void prepareFindSequenceLengthForOverallQualityAssessmentMerged() {
         ProcessedBamFile processedBamFile = DomainFactory.assignNewProcessedBamFile(overallQualityAssessmentMerged.mergingSet)
         [1..3].each {
             FastqcBasicStatistics fastqcBasicStatistics = FastqcBasicStatistics.build(sequenceLength: SEQUENCE_LENGTH)
@@ -191,47 +188,46 @@ class OverallQualityAssessmentMergedServiceTest extends AbstractIntegrationTest 
 
 
     @Test
-    void testFindSequenceLengthAndReferenceGenomeLengthWithoutNForQualityAssessmentMerged() {
-        prepareFindSequenceLengthAndReferenceGenomeLengthWithoutNForOverallQualityAssessmentMerged()
+    void testFindSequenceLengthForQualityAssessmentMerged() {
+        prepareFindSequenceLengthForOverallQualityAssessmentMerged()
         List expected = [
             [
                 overallQualityAssessmentMerged.id,
                 SEQUENCE_LENGTH,
-                LENGTH_WITHOUT_N,
             ]
         ]
 
-        List result = overallQualityAssessmentMergedService.findSequenceLengthAndReferenceGenomeLengthWithoutNForQualityAssessmentMerged([
+        List result = overallQualityAssessmentMergedService.findSequenceLengthForQualityAssessmentMerged([
             overallQualityAssessmentMerged
         ])
         assert expected == result
     }
 
     @Test
-    void testFindSequenceLengthAndReferenceGenomeLengthWithoutNForQualityAssessmentMerged_listIsEmpty() {
+    void testFindSequenceLengthForQualityAssessmentMerged_listIsEmpty() {
         //these objects are created to ensure, the database is not empty
-        prepareFindSequenceLengthAndReferenceGenomeLengthWithoutNForOverallQualityAssessmentMerged()
+        prepareFindSequenceLengthForOverallQualityAssessmentMerged()
         List expected = []
 
-        List result = overallQualityAssessmentMergedService.findSequenceLengthAndReferenceGenomeLengthWithoutNForQualityAssessmentMerged([])
+        List result = overallQualityAssessmentMergedService.findSequenceLengthForQualityAssessmentMerged([])
         assert expected == result
     }
 
     @Test
-    void testFindSequenceLengthAndReferenceGenomeLengthWithoutNForQualityAssessmentMerged_listIsNull() {
+    void testFindSequenceLengthForQualityAssessmentMerged_listIsNull() {
         //these objects are created to ensure, the database is not empty
-        prepareFindSequenceLengthAndReferenceGenomeLengthWithoutNForOverallQualityAssessmentMerged()
+        prepareFindSequenceLengthForOverallQualityAssessmentMerged()
         List expected = []
 
-        List result = overallQualityAssessmentMergedService.findSequenceLengthAndReferenceGenomeLengthWithoutNForQualityAssessmentMerged(null)
+        List result = overallQualityAssessmentMergedService.findSequenceLengthForQualityAssessmentMerged(null)
         assert expected == result
     }
 
     @Test
-    void testFindSequenceLengthAndReferenceGenomeLengthWithoutNForQualityAssessmentMerged_noFastqcAvailable() {
+    void testFindSequenceLengthForQualityAssessmentMerged_noFastqcAvailable() {
         List expected = []
 
-        List result = overallQualityAssessmentMergedService.findSequenceLengthAndReferenceGenomeLengthWithoutNForQualityAssessmentMerged([
+        List result = overallQualityAssessmentMergedService.findSequenceLengthForQualityAssessmentMerged([
             overallQualityAssessmentMerged
         ])
         assert expected == result

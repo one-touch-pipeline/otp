@@ -153,6 +153,43 @@ class DomainFactory {
         ], properties)
     }
 
+    public static QualityAssessmentMergedPass createQualityAssessmentMergedPass(Map properties = [:]) {
+        return createDomainObject(QualityAssessmentMergedPass, [
+                abstractMergedBamFile: {createProcessedMergedBamFile()}
+        ], properties)
+    }
+
+    public static Map defaultValuesForAbstractQualityAssessment = [
+            qcBasesMapped: 0,
+            totalReadCounter: 0,
+            qcFailedReads: 0,
+            duplicates: 0,
+            totalMappedReadCounter: 0,
+            pairedInSequencing: 0,
+            pairedRead1: 0,
+            pairedRead2: 0,
+            properlyPaired: 0,
+            withItselfAndMateMapped: 0,
+            withMateMappedToDifferentChr: 0,
+            withMateMappedToDifferentChrMaq: 0,
+            singletons: 0,
+            insertSizeMedian: 0,
+            insertSizeSD: 0,
+    ].asImmutable()
+
+    public static OverallQualityAssessmentMerged createOverallQualityAssessmentMerged(Map properties = [:]) {
+        return createDomainObject(OverallQualityAssessmentMerged, defaultValuesForAbstractQualityAssessment + [
+                qualityAssessmentMergedPass: {createQualityAssessmentMergedPass()},
+        ], properties)
+    }
+
+    public static ChromosomeQualityAssessmentMerged createChromosomeQualityAssessmentMerged(Map properties = [:]) {
+        return createDomainObject(ChromosomeQualityAssessmentMerged, defaultValuesForAbstractQualityAssessment + [
+                chromosomeName: "chromosomeName_${counter++}",
+                qualityAssessmentMergedPass: {createQualityAssessmentMergedPass()},
+        ], properties)
+    }
+
     public static JobExecutionPlan createJobExecutionPlan(Map properties = [:]) {
         return createDomainObject(JobExecutionPlan, [
                 name: "planName_${counter++}",

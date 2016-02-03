@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
+
 class RoddyQualityAssessment extends AbstractQualityAssessment {
 
     // We could also link directly to RoddyBamFile, but then Grails fails to start up the application context for an
@@ -62,4 +64,9 @@ class RoddyQualityAssessment extends AbstractQualityAssessment {
     String getChromosomeName() {
         return chromosome
     }
+
+    ReferenceGenome getReferenceGenome() {
+        return qualityAssessmentMergedPass.referenceGenome
+    }
+
 }

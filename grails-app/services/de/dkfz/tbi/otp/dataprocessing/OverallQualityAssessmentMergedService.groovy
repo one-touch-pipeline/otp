@@ -1,9 +1,10 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import groovy.transform.EqualsAndHashCode
+import groovy.transform.ToString
+import groovy.transform.TupleConstructor
 import org.springframework.security.access.prepost.PreAuthorize
-import de.dkfz.tbi.otp.ngsdata.Project
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
-import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.*
 
 class OverallQualityAssessmentMergedService {
 
@@ -57,7 +58,7 @@ where
     }
 
 
-    List findSequenceLengthAndReferenceGenomeLengthWithoutNForQualityAssessmentMerged(List<AbstractQualityAssessment> abstractQualityAssessments) {
+    List findSequenceLengthForQualityAssessmentMerged(List<AbstractQualityAssessment> abstractQualityAssessments) {
         if (!abstractQualityAssessments) {
             return []
         }
@@ -71,8 +72,7 @@ where
         final String HQL = '''
             select distinct
                 abstractQualityAssessment.id,
-                fastqcBasicStatistics.sequenceLength,
-                abstractQualityAssessment.qualityAssessmentMergedPass.abstractMergedBamFile.workPackage.referenceGenome.lengthWithoutN
+                fastqcBasicStatistics.sequenceLength
             from
                 AbstractQualityAssessment abstractQualityAssessment,
                 FastqcBasicStatistics fastqcBasicStatistics,
@@ -81,6 +81,7 @@ where
             where
                 abstractQualityAssessment.qualityAssessmentMergedPass.abstractMergedBamFile.workPackage.sample = seqTrack.sample
                 and abstractQualityAssessment.qualityAssessmentMergedPass.abstractMergedBamFile.workPackage.seqType = seqTrack.seqType
+                and abstractQualityAssessment.qualityAssessmentMergedPass.abstractMergedBamFile.workPackage.seqPlatformGroup = seqTrack.seqPlatform.seqPlatformGroup
                 and seqTrack = fastqcBasicStatistics.fastqcProcessedFile.dataFile.seqTrack
                 and dataFile.seqTrack = seqTrack
                 and dataFile.fileWithdrawn = false
@@ -94,4 +95,28 @@ where
         return result
     }
 
+    List<ReferenceGenomeEntry> findChromosomeLengthForQualityAssessmentMerged(List<String> chromosomeAliases, List<AbstractQualityAssessment> abstractQualityAssessments) {
+        if (!abstractQualityAssessments) {
+            return []
+        }
+        final String HQL = '''
+            select distinct
+                referenceGenomeEntry
+            from
+                AbstractQualityAssessment abstractQualityAssessment,
+                ReferenceGenomeEntry referenceGenomeEntry
+            where
+                abstractQualityAssessment.qualityAssessmentMergedPass.abstractMergedBamFile.workPackage.referenceGenome = referenceGenomeEntry.referenceGenome
+                and abstractQualityAssessment.id in :abstractQualityAssessmentIds
+                and referenceGenomeEntry.alias in :chromosomeAliases
+        '''
+        Map parameters = [
+                abstractQualityAssessmentIds: abstractQualityAssessments*.id,
+                chromosomeAliases: chromosomeAliases,
+        ]
+
+        List<ReferenceGenomeEntry> result = ReferenceGenomeEntry.executeQuery(HQL, parameters, [readOnly: true])
+        return result
+    }
 }
+
