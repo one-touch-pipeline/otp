@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.job.processing
 
 import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Realm
 import grails.buildtestdata.mixin.Build
 import grails.test.mixin.TestFor
@@ -28,10 +29,9 @@ class JobStatusLoggingServiceUnitTests {
     final static String ARBITRARY_PBS_ID = '4711'
 
     static ProcessingStep createFakeProcessingStep() {
-        return ProcessingStep.build([
+        return DomainFactory.createProcessingStep([
                 id           : ARBITRARY_ID,
-                jobDefinition: JobDefinition.build(plan: JobExecutionPlan.build([name: 'SomeWorkflowName'])),
-                process      : Process.build([id: ARBITRARY_PROCESS_ID]),
+                process      : DomainFactory.createProcess([id: ARBITRARY_PROCESS_ID]),
                 jobClass     : 'this.is.a.DummyJob',
         ])
     }
@@ -81,13 +81,13 @@ class JobStatusLoggingServiceUnitTests {
     void testConstructMessageWhenPbsIdIsNotPassed() {
         ProcessingStep processingStep = createFakeProcessingStep()
         def actual = service.constructMessage(processingStep)
-        assert "SomeWorkflowName,DummyJob,${ARBITRARY_ID},${service.SHELL_SNIPPET_GET_NUMERIC_PBS_ID}" == actual
+        assert "${processingStep.jobExecutionPlan.name},DummyJob,${ARBITRARY_ID},${service.SHELL_SNIPPET_GET_NUMERIC_PBS_ID}" == actual
     }
 
     @Test
     void testConstructMessageWhenPbsIdIsPassed() {
         ProcessingStep processingStep = createFakeProcessingStep()
         def actual = service.constructMessage(processingStep, ARBITRARY_PBS_ID)
-        assert "SomeWorkflowName,DummyJob,${ARBITRARY_ID},${ARBITRARY_PBS_ID}" == actual
+        assert "${processingStep.jobExecutionPlan.name},DummyJob,${ARBITRARY_ID},${ARBITRARY_PBS_ID}" == actual
     }
 }
