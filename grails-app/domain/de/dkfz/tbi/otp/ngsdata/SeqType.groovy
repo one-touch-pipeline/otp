@@ -6,11 +6,11 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 
 class SeqType {
 
-    final static LIBRARYLAYOUT_PAIRED = "PAIRED"
+    final static LIBRARYLAYOUT_PAIRED = LibraryLayout.PAIRED.name()
 
-    final static LIBRARYLAYOUT_SINGLE = "SINGLE"
+    final static LIBRARYLAYOUT_SINGLE = LibraryLayout.SINGLE.name()
 
-    final static LIBRARYLAYOUT_MATE_PAIR = "MATE_PAIR"
+    final static LIBRARYLAYOUT_MATE_PAIR = LibraryLayout.MATE_PAIR.name()
 
     /**
      * One of {@link SeqTypeNames#seqTypeName}.
