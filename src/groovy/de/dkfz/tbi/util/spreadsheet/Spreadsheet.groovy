@@ -141,6 +141,11 @@ class Cell {
         return getColumnAddress(columnIndex)
     }
 
+    @Override
+    String toString() {
+        return "${cellAddress}@${Integer.toHexString(hashCode())}"
+    }
+
     /**
      * The column address as shown by spreadsheet software (A, B, ..., Z, AA, AB, ...)
      */

@@ -1,0 +1,252 @@
+package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
+
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+
+import java.util.regex.*
+
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
+import de.dkfz.tbi.util.spreadsheet.validation.*
+import grails.test.mixin.Mock
+import spock.lang.Specification
+
+@Mock([
+        Individual,
+        ProcessingOption,
+        Project,
+        Sample,
+        SampleIdentifier,
+        SampleType,
+])
+class SampleValidatorSpec extends Specification {
+
+    static final Pattern PATTERN = Pattern.compile(/^P:([^ ]+) I:([^ ]+) S:([^ ]+)$/)
+
+    SampleValidator validator = withSampleIdentifierService(new SampleValidator())
+
+    void 'validate, when identifier is not parseable but in DB, succeeds'() {
+
+        given:
+        MetadataValidationContext context = MetadataValidationContextFactory.createContext(
+                "${SAMPLE_ID}\nABC")
+        DomainFactory.createSampleIdentifier(name: 'ABC')
+
+        when:
+        validator.validate(context)
+
+        then:
+        context.problems.isEmpty()
+    }
+
+    void 'validate, when identifier is not parseable and not in DB, adds error'() {
+
+        given:
+        MetadataValidationContext context = MetadataValidationContextFactory.createContext(
+                "${SAMPLE_ID}\nABC")
+
+        when:
+        validator.validate(context)
+
+        then:
+        Problem problem = exactlyOneElement(context.problems)
+        problem.level == Level.ERROR
+        problem.message == "Sample identifier 'ABC' is neither registered in the OTP database nor can be parsed."
+    }
+
+    void 'validate, when identifier is not in DB but parseable and project is not in DB, adds error'() {
+
+        given:
+        MetadataValidationContext context = MetadataValidationContextFactory.createContext(
+                "${SAMPLE_ID}\nP:X I:Y S:Z")
+
+        when:
+        validator.validate(context)
+
+        then:
+        Problem problem = exactlyOneElement(context.problems)
+        problem.level == Level.ERROR
+        problem.message == "Sample identifier 'P:X I:Y S:Z' is not registered in the OTP database. It looks like it belongs to project 'X', but no project with that name is registered in the OTP database."
+    }
+
+    void 'validate, when identifier is not in DB but parseable and project is not in DB but individual is, adds errors'() {
+
+        given:
+        MetadataValidationContext context = MetadataValidationContextFactory.createContext(
+                "${SAMPLE_ID}\nP:X I:Y S:Z")
+        Individual individual = DomainFactory.createIndividual(pid: 'Y')
+        Collection<Problem> expectedProblems = [
+                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.ERROR,
+                        "Sample identifier 'P:X I:Y S:Z' is not registered in the OTP database. It looks like it belongs to project 'X', but no project with that name is registered in the OTP database."),
+                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.ERROR,
+                        "Sample identifier 'P:X I:Y S:Z' is not registered in the OTP database. It looks like it belongs to project 'X' and individual 'Y', but individual 'Y' is already registered in the OTP database with project '${individual.project.name}'.")
+        ]
+
+        when:
+        validator.validate(context)
+
+        then:
+        containSame(context.problems, expectedProblems)
+    }
+
+    void 'validate, when identifier is not in DB but parseable and individual belongs to different project, adds error'() {
+
+        given:
+        MetadataValidationContext context = MetadataValidationContextFactory.createContext(
+                "${SAMPLE_ID}\nP:X I:Y S:Z")
+        DomainFactory.createProject(name: 'X')
+        Individual individual = DomainFactory.createIndividual(pid: 'Y')
+
+        when:
+        validator.validate(context)
+
+        then:
+        Problem problem = exactlyOneElement(context.problems)
+        problem.level == Level.ERROR
+        problem.message == "Sample identifier 'P:X I:Y S:Z' is not registered in the OTP database. It looks like it belongs to project 'X' and individual 'Y', but individual 'Y' is already registered in the OTP database with project '${individual.project.name}'.".toString()
+    }
+
+    void 'validate, when identifier is not in DB but parseable and project is in DB, succeeds'() {
+
+        given:
+        MetadataValidationContext context = MetadataValidationContextFactory.createContext(
+                "${SAMPLE_ID}\nP:X I:Y S:Z")
+        DomainFactory.createProject(name: 'X')
+
+        when:
+        validator.validate(context)
+
+        then:
+        context.problems.isEmpty()
+    }
+
+    void 'validate, when identifier is in DB and parseable and project is inconsistent, adds warning'() {
+
+        given:
+        MetadataValidationContext context = MetadataValidationContextFactory.createContext(
+                "${SAMPLE_ID}\nP:X I:Y S:Z")
+        createSampleIdentifier(context.spreadsheet.dataRows.get(0).cells.get(0).text, 'A', 'Y', 'Z')
+
+        when:
+        validator.validate(context)
+
+        then:
+        Problem problem = exactlyOneElement(context.problems)
+        problem.level == Level.WARNING
+        problem.message == "Sample identifier 'P:X I:Y S:Z' looks like it belongs to project 'X', but it is already registered in the OTP database with project 'A'. If you ignore this warning, OTP will keep the assignment of the sample identifier to project 'A'."
+    }
+
+    void 'validate, when identifier is in DB and parseable and individual is inconsistent, adds warning'() {
+
+        given:
+        MetadataValidationContext context = MetadataValidationContextFactory.createContext(
+                "${SAMPLE_ID}\nP:X I:Y S:Z")
+        createSampleIdentifier(context.spreadsheet.dataRows.get(0).cells.get(0).text, 'X', 'B', 'Z')
+
+        when:
+        validator.validate(context)
+
+        then:
+        Problem problem = exactlyOneElement(context.problems)
+        problem.level == Level.WARNING
+        problem.message == "Sample identifier 'P:X I:Y S:Z' looks like it belongs to individual 'Y', but it is already registered in the OTP database with individual 'B'. If you ignore this warning, OTP will keep the assignment of the sample identifier to individual 'B'."
+    }
+
+    void 'validate, when identifier is in DB and parseable and sample type is inconsistent, adds warning'() {
+
+        given:
+        MetadataValidationContext context = MetadataValidationContextFactory.createContext(
+                "${SAMPLE_ID}\nP:X I:Y S:Z")
+        createSampleIdentifier(context.spreadsheet.dataRows.get(0).cells.get(0).text, 'X', 'Y', 'C')
+
+        when:
+        validator.validate(context)
+
+        then:
+        Problem problem = exactlyOneElement(context.problems)
+        problem.level == Level.WARNING
+        problem.message == "Sample identifier 'P:X I:Y S:Z' looks like it belongs to sample type 'Z', but it is already registered in the OTP database with sample type 'C' If you ignore this warning, OTP will keep the assignment of the sample identifier to sample type 'C'."
+    }
+
+    void 'validate, when identifiers belong to different projects, adds warning'() {
+
+        given:
+        MetadataValidationContext context = MetadataValidationContextFactory.createContext(
+                "${SAMPLE_ID}\n" +
+                        "SampleA\n" +
+                        "SampleB\n" +
+                        "SampleC\n" +
+                        "P:B I:M S:N\n" +
+                        "P:C I:M S:N\n")
+        createSampleIdentifier('SampleB', 'B', 'W', 'X')
+        createSampleIdentifier('SampleC', 'C', 'Y', 'Z')
+        Collection<Problem> expectedProblems = [
+                new Problem(context.spreadsheet.dataRows[1].cells +
+                        context.spreadsheet.dataRows[2].cells +
+                        context.spreadsheet.dataRows[3].cells +
+                        context.spreadsheet.dataRows[4].cells as Set, Level.WARNING,
+                        "The sample identifiers belong to different projects:\nProject 'B': 'P:B I:M S:N', 'SampleB'\nProject 'C': 'P:C I:M S:N', 'SampleC'"),
+                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.ERROR,
+                        "Sample identifier 'SampleA' is neither registered in the OTP database nor can be parsed.")
+        ]
+
+        when:
+        validator.validate(context)
+
+        then:
+        containSame(context.problems, expectedProblems)
+    }
+
+    void 'validate, when identifiers belong to the same project, adds no warning about different projects'() {
+
+        given:
+        MetadataValidationContext context = MetadataValidationContextFactory.createContext(
+                "${SAMPLE_ID}\n" +
+                        "SampleA\n" +
+                        "SampleB\n" +
+                        "P:B I:M S:N\n")
+        createSampleIdentifier('SampleB', 'B', 'W', 'X')
+        Collection<Problem> expectedProblems = [
+                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.ERROR,
+                        "Sample identifier 'SampleA' is neither registered in the OTP database nor can be parsed.")
+        ]
+
+        when:
+        validator.validate(context)
+
+        then:
+        containSame(context.problems, expectedProblems)
+    }
+
+    private static SampleIdentifier createSampleIdentifier(String sampleIdentifierName, String projectName, String pid, String sampleTypeName) {
+        return DomainFactory.createSampleIdentifier(
+                sample: DomainFactory.createSample(
+                        individual: DomainFactory.createIndividual(
+                                project: DomainFactory.createProject(
+                                        name: projectName,
+                                ),
+                                pid: pid,
+                        ),
+                        sampleType: DomainFactory.createSampleType(
+                                name: sampleTypeName,
+                        ),
+                ),
+                name: sampleIdentifierName,
+        )
+    }
+
+    private static SampleValidator withSampleIdentifierService(SampleValidator validator) {
+        validator.sampleIdentifierService = [
+                parseSampleIdentifier: { String sampleIdentifier ->
+                    Matcher matcher = PATTERN.matcher(sampleIdentifier)
+                    if (matcher.matches()) {
+                        return new DefaultParsedSampleIdentifier(matcher.group(1), matcher.group(2), matcher.group(3), sampleIdentifier)
+                    } else {
+                        return null
+                    }
+                }
+        ] as SampleIdentifierService
+        return validator
+    }
+}
