@@ -582,7 +582,11 @@ class MetaDataService {
             [regExpr: /^.*ATRT\d+_lib\d*_([12]).fastq.gz$/, readGroupNumber: 1],
             //AS-78215-LR-10213_R1.fastq.gz
             [regExpr: /^AS-.*-LR-.*_R([12]).fastq.gz$/, readGroupNumber: 1],
+            //SOMEPID_control_0097062_1.fastq.gz
+            [regExpr: /^.*_(control|tumor)_.*_(\d).fastq.gz$/, readGroupNumber: 2]
         ]
+
+
 
         def readNumbers = patterns.collect { pattern ->
             def matches = dataFileName =~ pattern.regExpr
