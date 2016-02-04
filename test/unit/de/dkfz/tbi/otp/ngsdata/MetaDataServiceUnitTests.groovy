@@ -174,6 +174,8 @@ class MetaDataServiceUnitTests {
             [name: 'FOOBAR_ATRT999_lib424242_2.fastq.gz', readNumber: 2],
             [name: 'AS-78217-LR-10215_R1.fastq.gz', readNumber: 1],
             [name: 'AS-78217-LR-10219_R2.fastq.gz', readNumber: 2],
+            [name: 'SOMEPID_control_0097062_1.fastq.gz', readNumber: 1],
+            [name: 'SOMEPID_control_0097062_2.fastq.gz', readNumber: 2],
         ]
         files.each { file ->
             assertEquals(file.readNumber, MetaDataService.findOutReadNumber(file.name))
