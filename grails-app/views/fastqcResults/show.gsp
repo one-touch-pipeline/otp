@@ -3,14 +3,14 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="layout" content="main"/>
-    <title><g:message code="fastqc.show.title" args="[pid, runName, laneId, readNumber]"/></title>
+    <title><g:message code="fastqc.show.title" args="[pid, runName, laneId, mateNumber]"/></title>
     <asset:javascript src="modules/lightbox"/>
     <asset:stylesheet src="modules/lightbox"/>
   </head>
   <body>
     <div class="body">
       <div class="fastqc">
-        <h1><g:message code="fastqc.show.fastqcReport" args="[pid, runName, laneId, readNumber]"/></h1>
+        <h1><g:message code="fastqc.show.fastqcReport" args="[pid, runName, laneId, mateNumber]"/></h1>
         <div class="modules">
           <div class="module" align="right">
             <g:link target="_blank" controller="fastqcResults" action="renderFile" params="[id: id, withinZipPath: 'fastqc_data.txt']">fastqc_data.txt</g:link>

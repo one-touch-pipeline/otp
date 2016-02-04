@@ -159,7 +159,7 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
     }
 
 
-    DataFile createDataFile(SeqTrack seqTrack, Integer readNumber, String fastqFilename, String fastqFilepath) {
+    DataFile createDataFile(SeqTrack seqTrack, Integer mateNumber, String fastqFilename, String fastqFilepath) {
         DataFile dataFile = new DataFile()
         dataFile.fileName = fastqFilename
         dataFile.runSegment = runSegment
@@ -173,7 +173,7 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
         dataFile.pathName = ""  // TODO check what is going on here and why this is needed..
         dataFile.fileExists = true
         dataFile.fileSize = 100
-        dataFile.readNumber = readNumber
+        dataFile.mateNumber = mateNumber
         assertNotNull(dataFile.save([flush: true]))
         return dataFile
     }

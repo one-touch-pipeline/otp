@@ -665,7 +665,7 @@ class DomainFactory {
                 fileExists: true,
                 fileLinked: true,
                 fileSize: counter++,
-                readNumber: 1,
+                mateNumber: 1,
         ], properties)
     }
 
@@ -718,12 +718,12 @@ class DomainFactory {
         Map defaultMap1 = [
                 fileName: 'DataFileFileName_R1.gz',
                 vbpFileName: 'DataFileFileName_R1.gz',
-                readNumber: 1,
+                mateNumber: 1,
         ]
         Map defaultMap2 = [
                 fileName: 'DataFileFileName_R2.gz',
                 vbpFileName: 'DataFileFileName_R2.gz',
-                readNumber: 2,
+                mateNumber: 2,
         ]
         SeqTrack seqTrack = buildSeqTrackWithDataFile(seqTrackProperties, defaultMap1 + dataFileProperties1)
         buildSequenceDataFile(defaultMap2 + dataFileProperties2 + [seqTrack: seqTrack])

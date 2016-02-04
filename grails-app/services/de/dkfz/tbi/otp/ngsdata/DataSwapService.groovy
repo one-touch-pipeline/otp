@@ -273,9 +273,9 @@ mv '${oldDataFileName}' '${newDataFileName}';
             String old = it.fileName
             it.project = newProject
             it.fileName = it.vbpFileName = dataFileMap[it.fileName]
-            if (it.readNumber == null && it.fileWithdrawn && it.fileType && it.fileType.type == FileType.Type.SEQUENCE && it.fileType.vbpPath == "/sequence/") {
-                outputStringBuilder << "\n====> set read number for withdrawn data file"
-                it.readNumber = MetaDataService.findOutReadNumberIfSingleEndOrByFileName(it.fileName, it.seqTrack.seqType.libraryLayout == 'SINGLE')
+            if (it.mateNumber == null && it.fileWithdrawn && it.fileType && it.fileType.type == FileType.Type.SEQUENCE && it.fileType.vbpPath == "/sequence/") {
+                outputStringBuilder << "\n====> set mate number for withdrawn data file"
+                it.mateNumber = MetaDataService.findOutMateNumberIfSingleEndOrByFileName(it.fileName, it.seqTrack.seqType.libraryLayout == 'SINGLE')
             }
             it.save(flush: true)
             outputStringBuilder << "\n    changed ${old} to ${it.fileName}"

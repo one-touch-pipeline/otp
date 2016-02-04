@@ -2,7 +2,6 @@ package de.dkfz.tbi.otp.ngsqc
 
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.dataprocessing.*
-import grails.converters.JSON
 
 class RenderFileCommand {
     Long id
@@ -34,7 +33,7 @@ class FastqcResultsController {
             pid: dataFile.individual.displayName,
             runName: dataFile.run.name,
             laneId: dataFile.seqTrack.laneId,
-            readNumber: dataFile.readNumber,
+            mateNumber: dataFile.mateNumber,
             fileName: dataFile.fileName,
             moduleStatus: moduleStatus,
             moduleText: moduleText,

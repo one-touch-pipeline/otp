@@ -92,7 +92,7 @@ class ConveyBwaAlignmentWorkflowTests extends WorkflowTestCase {
         assert seqTrack.save(flush: true, failOnError: true)
 
         dataFile = DomainFactory.buildSequenceDataFile(
-                readNumber: 1,
+                mateNumber: 1,
                 fileExists: true,
                 fileSize: 1,
                 fileWithdrawn: false,
@@ -103,7 +103,7 @@ class ConveyBwaAlignmentWorkflowTests extends WorkflowTestCase {
         assert dataFile.save(flush: true, failOnError: true)
 
         dataFile2 = DomainFactory.buildSequenceDataFile(
-                readNumber: 2,
+                mateNumber: 2,
                 fileExists: true,
                 fileSize: 1,
                 fileWithdrawn: false,

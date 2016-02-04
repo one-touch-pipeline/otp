@@ -28,7 +28,7 @@ class DataFile implements Commentable{
     long fileSize = 0              // size of the file
 
 
-    Integer readNumber
+    Integer mateNumber
 
     Comment comment
 
@@ -75,7 +75,7 @@ class DataFile implements Commentable{
 
         comment(nullable: true)
 
-        readNumber nullable: true, validator: { val, obj ->
+        mateNumber nullable: true, validator: { val, obj ->
             if (obj.fileType && obj.fileType.type == FileType.Type.SEQUENCE && obj.fileType.vbpPath == "/sequence/") {
                 return (val == 1 || val == 2)
             } else {

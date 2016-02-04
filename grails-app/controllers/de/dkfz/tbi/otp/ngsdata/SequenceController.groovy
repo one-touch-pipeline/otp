@@ -49,7 +49,7 @@ class SequenceController {
             for (def sequence in dataToRender.aaData) {
                 if (df.seqTrack.id == sequence.seqTrackId) {
                     if (sequence.containsKey("fastQCFiles")) {
-                        df.readNumber == 1 ? sequence.fastQCFiles = [df, sequence.fastQCFiles].flatten() : sequence.fastQCFiles << df
+                        df.mateNumber == 1 ? sequence.fastQCFiles = [df, sequence.fastQCFiles].flatten() : sequence.fastQCFiles << df
                     } else {
                         sequence.fastQCFiles = [df]
                     }

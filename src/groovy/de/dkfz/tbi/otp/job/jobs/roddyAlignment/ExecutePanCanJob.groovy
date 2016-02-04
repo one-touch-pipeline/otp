@@ -47,7 +47,7 @@ class ExecutePanCanJob extends AbstractRoddyJob {
         roddyBamFile.seqTracks.each { SeqTrack seqTrack ->
             List<DataFile> dataFiles = DataFile.findAllBySeqTrack(seqTrack)
             assert 2 == dataFiles.size()
-            dataFiles.sort {it.readNumber}.each { DataFile dataFile ->
+            dataFiles.sort {it.mateNumber}.each { DataFile dataFile ->
                 File file = new File(lsdfFilesService.getFileViewByPidPath(dataFile))
                 LsdfFilesService.ensureFileIsReadableAndNotEmpty(file)
                 assert dataFile.fileSize == file.length()

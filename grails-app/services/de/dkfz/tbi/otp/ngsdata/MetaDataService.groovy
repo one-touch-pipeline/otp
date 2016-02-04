@@ -165,7 +165,7 @@ class MetaDataService {
                 assignFileName(dataFile)
                 fillVbpFileName(dataFile)
                 fillMD5Sum(dataFile)
-                addReadNumber(dataFile, type)
+                addMateNumber(dataFile, type)
                 assignFileType(dataFile, type)
                 createSeqTypeMetaDataEntryFromDirNameIfNeeded(dataFile)
                 checkIfWithdrawn(dataFile)
@@ -312,8 +312,8 @@ class MetaDataService {
     private void fillVbpFileName(DataFile dataFile) {
         if (needsVBPNameChange(dataFile)) {
             String lane = metaDataValue(dataFile, "LANE_NO")
-            String readId = readStringFormFileName(dataFile.fileName)
-            String name =  "s_" + lane + "_" + readId + "_sequence.txt.gz"
+            String mateId = mateStringFormFileName(dataFile.fileName)
+            String name =  "s_" + lane + "_" + mateId + "_sequence.txt.gz"
             dataFile.vbpFileName = name
             log.debug("${dataFile.fileName} ${dataFile.vbpFileName}")
         } else {
@@ -334,14 +334,14 @@ class MetaDataService {
         return true
     }
 
-    private String readStringFormFileName(String fileName) {
-        String readId = "0"
+    private String mateStringFormFileName(String fileName) {
+        String mateId = "0"
         if (fileName.contains("read1")) {
-            readId = "1"
+            mateId = "1"
         } else if (fileName.contains("read2")) {
-            readId = "2"
+            mateId = "2"
         }
-        return readId
+        return mateId
     }
 
     private void fillMD5Sum(DataFile dataFile) {
@@ -398,13 +398,13 @@ class MetaDataService {
     }
 
 
-    private void addReadNumber(DataFile dataFile, FileType.Type type) {
+    private void addMateNumber(DataFile dataFile, FileType.Type type) {
         FileType fileType = FileTypeService.getFileType(dataFile.fileName, type)
         if (fileType.type == FileType.Type.SEQUENCE && fileType.vbpPath == "/sequence/") {
             String fileName = dataFile.fileName
             String libraryLayout = getLibraryLayoutFromMetadata(dataFile)
             boolean isSingle = libraryLayout == SeqType.LIBRARYLAYOUT_SINGLE
-            dataFile.readNumber = findOutReadNumberIfSingleEndOrByFileName(fileName, isSingle)
+            dataFile.mateNumber = findOutMateNumberIfSingleEndOrByFileName(fileName, isSingle)
             assert dataFile.save(flush: true)
         }
     }
@@ -502,48 +502,48 @@ class MetaDataService {
      * Ensures that the two file names are equal except for one character, and that this character is '1' for the first
      * file name and '2' for the second file name.
      */
-    static void ensurePairedSequenceFileNameConsistency(final String read1FileName, final String read2FileName) {
+    static void ensurePairedSequenceFileNameConsistency(final String mate1FileName, final String mate2FileName) {
         try {
-            assert read1FileName.length() == read2FileName.length()
-            final int readNumberCharIndex = StringUtils.commonPrefixLength(read1FileName, read2FileName)
-            assert readNumberCharIndex < read1FileName.length()
-            assert read1FileName.charAt(readNumberCharIndex) == '1'
-            assert read2FileName.charAt(readNumberCharIndex) == '2'
-            assert read1FileName.substring(readNumberCharIndex + 1) == read2FileName.substring(readNumberCharIndex + 1)
+            assert mate1FileName.length() == mate2FileName.length()
+            final int mateNumberCharIndex = StringUtils.commonPrefixLength(mate1FileName, mate2FileName)
+            assert mateNumberCharIndex < mate1FileName.length()
+            assert mate1FileName.charAt(mateNumberCharIndex) == '1'
+            assert mate2FileName.charAt(mateNumberCharIndex) == '2'
+            assert mate1FileName.substring(mateNumberCharIndex + 1) == mate2FileName.substring(mateNumberCharIndex + 1)
         } catch (final AssertionError e) {
-            throw new RuntimeException("${read1FileName} and ${read2FileName} are not consistent as paired sequence file names.", e)
+            throw new RuntimeException("${mate1FileName} and ${mate2FileName} are not consistent as paired sequence file names.", e)
         }
     }
 
     // such method exists because of the current desing of meta data workflow
     // (dataFile.fileType is set before dataFile.seqType).
-    // the method is to keep findOutReadNumber(..) clean.
+    // the method is to keep findOutMateNumber(..) clean.
     /**
-     * tries to find out read number of fastq files but returns 1 if the library layout is single end.
+     * tries to find out mate number of fastq files but returns 1 if the library layout is single end.
      * @param dataFileName name of fastq file
      * @param isSingleEnd is true if the library layout is single end, otherwise - false
-     * @return read number, 1 or 2
-     * @throws RuntimeException if the read number cannot be found.
+     * @return mate number, 1 or 2
+     * @throws RuntimeException if the mate number cannot be found.
      */
-    private static int findOutReadNumberIfSingleEndOrByFileName(String dataFileName, boolean isSingleEnd) {
+    private static int findOutMateNumberIfSingleEndOrByFileName(String dataFileName, boolean isSingleEnd) {
 	if (isSingleEnd) {
 	    return 1
 	} else {
-	    return findOutReadNumber(dataFileName)
+	    return findOutMateNumber(dataFileName)
 	}
     }
 
     /**
-     * tries to find out read number of a fastq file.
+     * tries to find out mate number of a fastq file.
      * @param dataFileName name of fastq file
-     * @return read number, 1 or 2
-     * @throws RuntimeException if the read number cannot be found.
+     * @return mate number, 1 or 2
+     * @throws RuntimeException if the mate number cannot be found.
      */
-    private static int findOutReadNumber(String dataFileName) {
-	assert dataFileName, "for non single-read fastq files, file name must be provided"
+    private static int findOutMateNumber(String dataFileName) {
+	assert dataFileName, "for non single-mate fastq files, file name must be provided"
         def patterns = [
             //SOMEPID_L001_R2.fastq.gz
-            [regExpr: /.+_L00\d{1,2}.R([12]).+/, readGroupNumber: 1],
+            [regExpr: /.+_L00\d{1,2}.R([12]).+/, mateGroupNumber: 1],
             //s_101202_7_1.fastq.gz
             //s_101202_7_2.fastq.gz
             //s_110421_3.read2.fastq.gz
@@ -552,51 +552,51 @@ class MetaDataService {
             //s_111201_2a_1_sequence.txt.gz
             //SOMEPID_s_6_1_sequence.txt.gz
             //SOMEPID_s_3_1_sequence.txt.gz
-            [regExpr: /.*s(_\d{6})?_\d{1,2}([a-z])?(_|\.read|_\d{3}_)([12]).+/, readGroupNumber: 4],
+            [regExpr: /.*s(_\d{6})?_\d{1,2}([a-z])?(_|\.read|_\d{3}_)([12]).+/, mateGroupNumber: 4],
             //AB-1234_CDE_EFGH_091_lib14837_1189_7_1.fastq.tar.bz
             //AB-1234_5647_lib12345_1_sequence.fastq.bz2
             //CD-2345_6789_lib234567_7890_1.fastq.bz2
-            [regExpr: /^[A-Z]{2}-\d{4}_.+_lib\d{5,6}(_\d{4})?(_\d{1,2})?_([12])(_sequence)?\.fastq.+/, readGroupNumber: 3],
+            [regExpr: /^[A-Z]{2}-\d{4}_.+_lib\d{5,6}(_\d{4})?(_\d{1,2})?_([12])(_sequence)?\.fastq.+/, mateGroupNumber: 3],
             //NB_E_789_R.1.fastq.gz
             //NB_E_789_R.2.fastq.gz
             //NB_E_234_R5.2.fastq.gz
             //NB_E_345_T1S.2.fastq.gz
             //NB_E_456_O_lane5.2.fastq.gz
-            [regExpr: /^NB_E_\d{3}_[A-Z0-9]{1,3}(_lane\d)?\.([12])\.fastq.+/, readGroupNumber: 2],
+            [regExpr: /^NB_E_\d{3}_[A-Z0-9]{1,3}(_lane\d)?\.([12])\.fastq.+/, mateGroupNumber: 2],
             //00_MCF10A_GHI_JKL_WGBS_I.A34002.137487.C2RT2ACXX.1.1.fastq.gz
             //00_MCF10A_GHI_JKL_H3K4me1_I.IX1239-A26685-ACTTGA.134224.D2B0LACXX.2.1.fastq.gz
-            [regExpr: /^00_MCF10A.+\.\d{6}\.[A-Z0-9]{9}\.\d{1,2}\.([12])\.fastq.+/, readGroupNumber: 1],
+            [regExpr: /^00_MCF10A.+\.\d{6}\.[A-Z0-9]{9}\.\d{1,2}\.([12])\.fastq.+/, mateGroupNumber: 1],
             //
-            [regExpr: /^RB\d{1,2}_(Blut|Tumor)_R([12])\.fastq.+/, readGroupNumber: 2],
+            [regExpr: /^RB\d{1,2}_(Blut|Tumor)_R([12])\.fastq.+/, mateGroupNumber: 2],
             //P021_WXYZ_L1_Rep3_2.fastq.gz
             //H019_ASDF_L1_lib54321_1.fastq.gz
             //FE-0100_H021_WXYZ_L1_5_1.fastq.gz
-            [regExpr: /.*[HP]\d\d[A-Z0-9]_[A-Z0-9]{4}_L\d_.+_([12])\.fastq.+/, readGroupNumber: 1],
+            [regExpr: /.*[HP]\d\d[A-Z0-9]_[A-Z0-9]{4}_L\d_.+_([12])\.fastq.+/, mateGroupNumber: 1],
             //lane6mp25PE2_2_sequence.txt.gz
             //lane211s003107_1_sequence.txt.gz
             //lane8wwmp44PE2_1_sequence.txt.gz
             //SOMEPID_lane511s003237_1_sequence.txt.gz
-            [regExpr: /.*[Ll]ane\d.+_([12])_sequence.txt.gz$/, readGroupNumber: 1],
+            [regExpr: /.*[Ll]ane\d.+_([12])_sequence.txt.gz$/, mateGroupNumber: 1],
             //180824_I234_ABCDEFGHIJK_L5_WHAIPI000042-43_2.raw.fq.gz
-            [regExpr: /^\d{6}_I\d{3}_[A-Z0-9]{11}_L\d_WHAIPI\d{6}-\d{2}(\+1)?_([12]).raw.fq.gz$/, readGroupNumber: 2],
+            [regExpr: /^\d{6}_I\d{3}_[A-Z0-9]{11}_L\d_WHAIPI\d{6}-\d{2}(\+1)?_([12]).raw.fq.gz$/, mateGroupNumber: 2],
             //FOOBAR_ATRT999_lib424242_1.fastq.gz
-            [regExpr: /^.*ATRT\d+_lib\d*_([12]).fastq.gz$/, readGroupNumber: 1],
+            [regExpr: /^.*ATRT\d+_lib\d*_([12]).fastq.gz$/, mateGroupNumber: 1],
             //AS-78215-LR-10213_R1.fastq.gz
-            [regExpr: /^AS-.*-LR-.*_R([12]).fastq.gz$/, readGroupNumber: 1],
+            [regExpr: /^AS-.*-LR-.*_R([12]).fastq.gz$/, mateGroupNumber: 1],
             //SOMEPID_control_0097062_1.fastq.gz
-            [regExpr: /^.*_(control|tumor)_.*_(\d).fastq.gz$/, readGroupNumber: 2]
+            [regExpr: /^.*_(control|tumor)_.*_(\d).fastq.gz$/, mateGroupNumber: 2]
         ]
 
 
 
-        def readNumbers = patterns.collect { pattern ->
+        def mateNumbers = patterns.collect { pattern ->
             def matches = dataFileName =~ pattern.regExpr
-            matches ? matches[0][pattern.readGroupNumber] : null
+            matches ? matches[0][pattern.mateGroupNumber] : null
         }.findAll { it }
-        if (!readNumbers) {
-	    throw new RuntimeException("cannot find readNumber for $dataFileName")
+        if (!mateNumbers) {
+	    throw new RuntimeException("cannot find mateNumber for $dataFileName")
 	}
-        assert readNumbers.size() == 1, "$dataFileName matches to more then one pattern"
-        return readNumbers.first() as int // without the "as" the conversion is wrong
+        assert mateNumbers.size() == 1, "$dataFileName matches to more then one pattern"
+        return mateNumbers.first() as int // without the "as" the conversion is wrong
     }
 }

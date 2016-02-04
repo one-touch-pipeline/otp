@@ -60,21 +60,21 @@ class QAResultStatisticsService {
     static final String INSERT_SIZE_SD = 'insertSizeSD'
     static final String INSERT_SIZE_MEDIAN = 'insertSizeMedian'
     static final String INSERT_SIZE_MEAN = 'insertSizeMean'
-    static final String DUPLICATES_READ_1 = 'duplicatesRead1'
-    static final String DUPLICATES_READ_2 = 'duplicatesRead2'
+    static final String DUPLICATES_MATE_1 = 'duplicatesRead1'
+    static final String DUPLICATES_MATE_2 = 'duplicatesRead2'
     static final String PE_READS_MAPPED_ON_DIFF_CHR = 'peReadsMappedOnDiffChromosomes'
     static final String INCORRECT_PE_ORIENTATION = 'incorrectPEOrientation'
     static final String INCORRECT_PROPER_PAIR = 'incorrectProperPair'
     static final String PERCENTAGE_QC_BASES_MAPPED_WITHOUT_N = 'percentageQCBasesMappedWithoutN'
     static final String PERCENTAGE_QC_BASES_MAPPED_WITH_N = 'percentageQCBasesMappedWithN'
-    static final String NOT_MAPPED_READ_1 = 'notMappedR1'
-    static final String NOT_MAPPED_READ_2 = 'notMappedR2'
-    static final String MAPPED_SHORT_READ_1 = 'mappedShortR1'
-    static final String MAPPED_SHORT_READ_2 = 'mappedShortR2'
-    static final String MAPPED_LOW_QUALITY_READ_1 = 'mappedLowQualityR1'
-    static final String MAPPED_LOW_QUALITY_READ_2 = 'mappedLowQualityR2'
-    static final String MAPPED_QUALITY_LONG_READ_1 = 'mappedQualityLongR1'
-    static final String MAPPED_QUALITY_LONG_READ_2 = 'mappedQualityLongR2'
+    static final String NOT_MAPPED_MATE_1 = 'notMappedR1'
+    static final String NOT_MAPPED_MATE_2 = 'notMappedR2'
+    static final String MAPPED_SHORT_MATE_1 = 'mappedShortR1'
+    static final String MAPPED_SHORT_MATE_2 = 'mappedShortR2'
+    static final String MAPPED_LOW_QUALITY_MATE_1 = 'mappedLowQualityR1'
+    static final String MAPPED_LOW_QUALITY_MATE_2 = 'mappedLowQualityR2'
+    static final String MAPPED_QUALITY_LONG_MATE_1 = 'mappedQualityLongR1'
+    static final String MAPPED_QUALITY_LONG_MATE_2 = 'mappedQualityLongR2'
     static final String LIBRARY_PREPARATION_KIT = "libraryPreparationKit"
 
     /**
@@ -185,21 +185,21 @@ class QAResultStatisticsService {
         long referenceGenomeLengthWithN = preparation[REFERENCE_GENOME].length
         long referenceGenomeLengthWithoutN = preparation[REFERENCE_GENOME].lengthWithoutN
         Map statisticResults = [
-            (DUPLICATES_READ_1): abstractQualityAssessment.duplicateR1,
-            (DUPLICATES_READ_2): abstractQualityAssessment.duplicateR2,
-            (PE_READS_MAPPED_ON_DIFF_CHR): abstractQualityAssessment.percentReadPairsMapToDiffChrom,
-            (INCORRECT_PE_ORIENTATION): abstractQualityAssessment.percentIncorrectPEorientation,
-            (INCORRECT_PROPER_PAIR): abstractQualityAssessment.properPairStrandConflict,
-            (PERCENTAGE_QC_BASES_MAPPED_WITHOUT_N): "${qcBasesMapped}/${referenceGenomeLengthWithoutN}",
-            (PERCENTAGE_QC_BASES_MAPPED_WITH_N): "${qcBasesMapped}/${referenceGenomeLengthWithN}",
-            (NOT_MAPPED_READ_1): abstractQualityAssessment.notMappedR1,
-            (NOT_MAPPED_READ_2): abstractQualityAssessment.notMappedR2,
-            (MAPPED_SHORT_READ_1): abstractQualityAssessment.mappedShortR1,
-            (MAPPED_SHORT_READ_2): abstractQualityAssessment.mappedShortR2,
-            (MAPPED_LOW_QUALITY_READ_1): abstractQualityAssessment.mappedLowQualityR1,
-            (MAPPED_LOW_QUALITY_READ_2): abstractQualityAssessment.mappedLowQualityR2,
-            (MAPPED_QUALITY_LONG_READ_1): abstractQualityAssessment.mappedQualityLongR1,
-            (MAPPED_QUALITY_LONG_READ_2): abstractQualityAssessment.mappedQualityLongR2,
+                (DUPLICATES_MATE_1)                   : abstractQualityAssessment.duplicateR1,
+                (DUPLICATES_MATE_2)                   : abstractQualityAssessment.duplicateR2,
+                (PE_READS_MAPPED_ON_DIFF_CHR)         : abstractQualityAssessment.percentReadPairsMapToDiffChrom,
+                (INCORRECT_PE_ORIENTATION)            : abstractQualityAssessment.percentIncorrectPEorientation,
+                (INCORRECT_PROPER_PAIR)               : abstractQualityAssessment.properPairStrandConflict,
+                (PERCENTAGE_QC_BASES_MAPPED_WITHOUT_N): "${qcBasesMapped}/${referenceGenomeLengthWithoutN}",
+                (PERCENTAGE_QC_BASES_MAPPED_WITH_N): "${qcBasesMapped}/${referenceGenomeLengthWithN}",
+                (NOT_MAPPED_MATE_1)             : abstractQualityAssessment.notMappedR1,
+            (NOT_MAPPED_MATE_2)             : abstractQualityAssessment.notMappedR2,
+            (MAPPED_SHORT_MATE_1)           : abstractQualityAssessment.mappedShortR1,
+            (MAPPED_SHORT_MATE_2)           : abstractQualityAssessment.mappedShortR2,
+            (MAPPED_LOW_QUALITY_MATE_1)     : abstractQualityAssessment.mappedLowQualityR1,
+            (MAPPED_LOW_QUALITY_MATE_2)     : abstractQualityAssessment.mappedLowQualityR2,
+            (MAPPED_QUALITY_LONG_MATE_1)    : abstractQualityAssessment.mappedQualityLongR1,
+                (MAPPED_QUALITY_LONG_MATE_2): abstractQualityAssessment.mappedQualityLongR2,
         ]
         if (preparation[SEQTYPE].name.equals(SeqTypeNames.EXOME.seqTypeName)) {
             statisticResults.put(TARGET_MAPPED_BASES, abstractQualityAssessment.onTargetMappedBases)
@@ -289,21 +289,21 @@ class QAResultStatisticsService {
         ]
 
         List<String> sortOrderExtendedGeneral = [
-            DUPLICATES_READ_1,
-            DUPLICATES_READ_2,
-            PE_READS_MAPPED_ON_DIFF_CHR,
-            INCORRECT_PE_ORIENTATION,
-            INCORRECT_PROPER_PAIR,
-            PERCENTAGE_QC_BASES_MAPPED_WITHOUT_N,
-            PERCENTAGE_QC_BASES_MAPPED_WITH_N,
-            NOT_MAPPED_READ_1,
-            NOT_MAPPED_READ_2,
-            MAPPED_SHORT_READ_1,
-            MAPPED_SHORT_READ_2,
-            MAPPED_LOW_QUALITY_READ_1,
-            MAPPED_LOW_QUALITY_READ_2,
-            MAPPED_QUALITY_LONG_READ_1,
-            MAPPED_QUALITY_LONG_READ_2
+                DUPLICATES_MATE_1,
+                DUPLICATES_MATE_2,
+                PE_READS_MAPPED_ON_DIFF_CHR,
+                INCORRECT_PE_ORIENTATION,
+                INCORRECT_PROPER_PAIR,
+                PERCENTAGE_QC_BASES_MAPPED_WITHOUT_N,
+                PERCENTAGE_QC_BASES_MAPPED_WITH_N,
+                NOT_MAPPED_MATE_1,
+                NOT_MAPPED_MATE_2,
+                MAPPED_SHORT_MATE_1,
+                MAPPED_SHORT_MATE_2,
+                MAPPED_LOW_QUALITY_MATE_1,
+                MAPPED_LOW_QUALITY_MATE_2,
+                MAPPED_QUALITY_LONG_MATE_1,
+                MAPPED_QUALITY_LONG_MATE_2
         ]
         List<String> sortOrderExtended = []
         if (seqType.name.equals(SeqTypeNames.EXOME.seqTypeName)) {
@@ -321,44 +321,44 @@ class QAResultStatisticsService {
         String lengthWithOutN = fetchResultsSmall.first()."${REFERENCE_GENOME_LENGTH_WITHOUT_N}"
 
         Map<String, String> columnNames = [
-            (PID): "pid",
-            (MOCK_FULL_NAME): "mock full name",
-            (SAMPLE_TYPE): "sample type",
-            (RUN_ID): "run id",
-            (LANE): "lane",
-            (COVERAGE_WITHOUT_N): "Coverage w/o N (${lengthWithOutN}Mbp)",
-            (COVERAGE_WITH_N): "Coverage wN (${lengthWithN}Mbp)",
-            (COVERAGE_WITHOUT_N_CHR_X): "ChrX Coverage w/o N",
-            (COVERAGE_WITHOUT_N_CHR_Y): "ChrY Coverage w/o N",
-            (QC_BASES_MAPPED): "#QC bases mapped",
-            (TOTAL_READ_COUNT): "#total read count (flagstat)",
-            (MAPPED_READ_COUNT): "#mapped read count (flagstat)",
-            (PERCENTAGE_MAPPED_READS): "%mapped reads (flagstat)",
-            (PROPERLY_PAIRED): "%properly_paired (flagstat)",
-            (SINGLETONS): "%singletons (flagstat)",
-            (DUPLICATES): "%duplicates (picard)",
-            (INSERT_SIZE_SD): "Standard Deviation PE_insertsize",
-            (INSERT_SIZE_MEDIAN): "Median PE_insertsize",
-            (INSERT_SIZE_MEAN): "Mean PE_insertsize",
-            (DUPLICATES_READ_1): "#duplicates Read1",
-            (DUPLICATES_READ_2): "#duplicates Read2",
-            (PE_READS_MAPPED_ON_DIFF_CHR): "%PE reads mapped on diff chromosomes",
-            (INCORRECT_PE_ORIENTATION): "%incorrect PE orientation",
-            (INCORRECT_PROPER_PAIR): "incorrect proper pair",
-            (PERCENTAGE_QC_BASES_MAPPED_WITHOUT_N): "QC bases/ total bases w/o N",
-            (PERCENTAGE_QC_BASES_MAPPED_WITH_N): "QC bases/ total bases w N",
-            (NOT_MAPPED_READ_1): "mapq=0 read1",
-            (NOT_MAPPED_READ_2): "mapq=0 read2",
-            (MAPPED_SHORT_READ_1): "mapq>0,readlength<minlength read1",
-            (MAPPED_SHORT_READ_2): "mapq>0,readlength<minlength read2",
-            (MAPPED_LOW_QUALITY_READ_1): "mapq>0,BaseQualityMedian<basequalCutoff read1",
-            (MAPPED_LOW_QUALITY_READ_2): "mapq>0,BaseQualityMedian<basequalCutoff read2",
-            (MAPPED_QUALITY_LONG_READ_1): "mapq>0,BaseQualityMedian>=basequalCutoff read1",
-            (MAPPED_QUALITY_LONG_READ_2): "mapq>0,BaseQualityMedian>=basequalCutoff read2",
-            (TARGET_COVERAGE): "target Coverage",
-            (TARGET_MAPPED_BASES): "target mapped bases",
-            (ALL_MAPPED_BASES): "all mapped bases",
-            (ON_TARGET_RATE): "%onTarget",
+                (PID): "pid",
+                (MOCK_FULL_NAME): "mock full name",
+                (SAMPLE_TYPE): "sample type",
+                (RUN_ID): "run id",
+                (LANE): "lane",
+                (COVERAGE_WITHOUT_N): "Coverage w/o N (${lengthWithOutN}Mbp)",
+                (COVERAGE_WITH_N): "Coverage wN (${lengthWithN}Mbp)",
+                (COVERAGE_WITHOUT_N_CHR_X): "ChrX Coverage w/o N",
+                (COVERAGE_WITHOUT_N_CHR_Y): "ChrY Coverage w/o N",
+                (QC_BASES_MAPPED): "#QC bases mapped",
+                (TOTAL_READ_COUNT)                    : "#total read count (flagstat)",
+                (MAPPED_READ_COUNT)                   : "#mapped read count (flagstat)",
+                (PERCENTAGE_MAPPED_READS)             : "%mapped reads (flagstat)",
+                (PROPERLY_PAIRED)                     : "%properly_paired (flagstat)",
+                (SINGLETONS)                          : "%singletons (flagstat)",
+                (DUPLICATES)                          : "%duplicates (picard)",
+                (INSERT_SIZE_SD)                      : "Standard Deviation PE_insertsize",
+                (INSERT_SIZE_MEDIAN)                  : "Median PE_insertsize",
+                (INSERT_SIZE_MEAN)                    : "Mean PE_insertsize",
+                (DUPLICATES_MATE_1)                   : "#duplicates mate1",
+                (DUPLICATES_MATE_2)                   : "#duplicates mate2",
+                (PE_READS_MAPPED_ON_DIFF_CHR)         : "%PE reads mapped on diff chromosomes",
+                (INCORRECT_PE_ORIENTATION)            : "%incorrect PE orientation",
+                (INCORRECT_PROPER_PAIR)               : "incorrect proper pair",
+                (PERCENTAGE_QC_BASES_MAPPED_WITHOUT_N): "QC bases/ total bases w/o N",
+                (PERCENTAGE_QC_BASES_MAPPED_WITH_N): "QC bases/ total bases w N",
+                (NOT_MAPPED_MATE_1)             : "mapq=0 mate1",
+                (NOT_MAPPED_MATE_2)         : "mapq=0 mate2",
+                (MAPPED_SHORT_MATE_1)       : "mapq>0,readlength<minlength mate1",
+                (MAPPED_SHORT_MATE_2)       : "mapq>0,readlength<minlength mate2",
+                (MAPPED_LOW_QUALITY_MATE_1) : "mapq>0,BaseQualityMedian<basequalCutoff mate1",
+                (MAPPED_LOW_QUALITY_MATE_2) : "mapq>0,BaseQualityMedian<basequalCutoff mate2",
+                (MAPPED_QUALITY_LONG_MATE_1): "mapq>0,BaseQualityMedian>=basequalCutoff mate1",
+                (MAPPED_QUALITY_LONG_MATE_2): "mapq>0,BaseQualityMedian>=basequalCutoff mate2",
+                (TARGET_COVERAGE)           : "target Coverage",
+                (TARGET_MAPPED_BASES)       : "target mapped bases",
+                (ALL_MAPPED_BASES)          : "all mapped bases",
+                (ON_TARGET_RATE)            : "%onTarget",
         ]
 
         // Merge the two maps

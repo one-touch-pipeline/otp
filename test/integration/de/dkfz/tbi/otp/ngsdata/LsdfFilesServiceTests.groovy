@@ -142,7 +142,7 @@ class LsdfFilesServiceTests {
         dataFile.fileType = fileType
         dataFile.vbpFileName = fastqFilename
         dataFile.pathName = ""  // TODO check what is going on here and why this is needed..
-        dataFile.readNumber = 1
+        dataFile.mateNumber = 1
         assertNotNull(dataFile.save([flush: true]))
         return dataFile
     }

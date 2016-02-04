@@ -20,10 +20,10 @@ import org.junit.Test
 @Build([AlignmentPass, ProcessedSaiFile, ReferenceGenome])
 class BwaPairingAndSortingJobUnitTest {
 
-    static final String FILE_READ1 = "file_R1_abc.fastq.gz"
-    static final String FILE_READ2 = "file_R2_abc.fastq.gz"
-    static final String SAI_FILE1 = "${FILE_READ1}.sai"
-    static final String SAI_FILE2 = "${FILE_READ2}.sai"
+    static final String FILE_MATE1 = "file_R1_abc.fastq.gz"
+    static final String FILE_MATE2 = "file_R2_abc.fastq.gz"
+    static final String SAI_FILE1 = "${FILE_MATE1}.sai"
+    static final String SAI_FILE2 = "${FILE_MATE2}.sai"
 
 
     BwaPairingAndSortingJob bwaPairingAndSortingJob
@@ -47,8 +47,8 @@ class BwaPairingAndSortingJobUnitTest {
         }
 
         alignmentPass = TestData.createAndSaveAlignmentPass()
-        DataFile dataFile1 = DataFile.build(fileName: FILE_READ1, vbpFileName: FILE_READ1, readNumber: 1)
-        DataFile dataFile2 = DataFile.build(fileName: FILE_READ2, vbpFileName: FILE_READ2, readNumber: 2)
+        DataFile dataFile1 = DataFile.build(fileName: FILE_MATE1, vbpFileName: FILE_MATE1, mateNumber: 1)
+        DataFile dataFile2 = DataFile.build(fileName: FILE_MATE2, vbpFileName: FILE_MATE2, mateNumber: 2)
         processedSaiFile1 = ProcessedSaiFile.build(alignmentPass: alignmentPass, dataFile: dataFile1)
         processedSaiFile2 = ProcessedSaiFile.build(alignmentPass: alignmentPass, dataFile: dataFile2)
     }
@@ -75,8 +75,8 @@ class BwaPairingAndSortingJobUnitTest {
         String[] files = ret.split(" ")
         assert SAI_FILE1 == files[0]
         assert SAI_FILE2 == files[1]
-        assert FILE_READ1 == files[2]
-        assert FILE_READ2 == files[3]
+        assert FILE_MATE1 == files[2]
+        assert FILE_MATE2 == files[3]
     }
 
     @Test
@@ -89,8 +89,8 @@ class BwaPairingAndSortingJobUnitTest {
         String[] files = ret.split(" ")
         assert SAI_FILE1 == files[0]
         assert SAI_FILE2 == files[1]
-        assert FILE_READ1 == files[2]
-        assert FILE_READ2 == files[3]
+        assert FILE_MATE1 == files[2]
+        assert FILE_MATE2 == files[3]
     }
 
     @Test

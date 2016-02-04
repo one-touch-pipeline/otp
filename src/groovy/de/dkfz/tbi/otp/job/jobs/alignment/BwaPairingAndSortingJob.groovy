@@ -93,12 +93,12 @@ class BwaPairingAndSortingJob extends AbstractJobImpl {
             throw new ProcessingException("Not paired library. Number of sai files: ${saiFiles.size()}")
         }
         saiFiles = saiFiles.sort {
-            it.dataFile.readNumber
+            it.dataFile.mateNumber
         }
         def (ProcessedSaiFile saiFile1, ProcessedSaiFile saiFile2) = saiFiles
         def (DataFile dataFile1, DataFile dataFile2) = saiFiles*.dataFile
-        assert 1 == dataFile1.readNumber
-        assert 2 == dataFile2.readNumber
+        assert 1 == dataFile1.mateNumber
+        assert 2 == dataFile2.mateNumber
         MetaDataService.ensurePairedSequenceFileNameConsistency(dataFile1.fileName, dataFile2.fileName)
         MetaDataService.ensurePairedSequenceFileNameConsistency(dataFile1.vbpFileName, dataFile2.vbpFileName)
         String sai1 = processedSaiFileService.getFilePath(saiFile1)

@@ -21,7 +21,7 @@ class DataFileUnitTests {
 
 
     @Test
-    void testReadConstraint_Alignment() {
+    void testMateNumberConstraint_Alignment() {
         FileType fileType = FileType.build([type: FileType.Type.ALIGNMENT])
         DataFile dataFile = new DataFile(fileType: fileType)
 
@@ -29,7 +29,7 @@ class DataFileUnitTests {
     }
 
     @Test
-    void testReadConstraint_SequenceButNotFastq() {
+    void testMateNumberConstraint_SequenceButNotFastq() {
         FileType fileType = FileType.build([type: FileType.Type.SEQUENCE, vbpPath: 'SomeOtherDirectory'])
         DataFile dataFile = new DataFile(fileType: fileType)
 
@@ -37,43 +37,43 @@ class DataFileUnitTests {
     }
 
     @Test
-    void testReadConstraint_SequenceFastq_OK_ReadIsOne() {
+    void testMateNumberConstraint_SequenceFastq_OK_ReadIsOne() {
         FileType fileType = FileType.build([type: FileType.Type.SEQUENCE, vbpPath: SEQUENCE_DIRECTORY])
-        DataFile dataFile = new DataFile(fileType: fileType, readNumber: 1)
+        DataFile dataFile = new DataFile(fileType: fileType, mateNumber: 1)
 
         assert dataFile.validate()
     }
 
     @Test
-    void testReadConstraint_SequenceFastq_OK_ReadIsTwo() {
+    void testMateNumberConstraint_SequenceFastq_OK_ReadIsTwo() {
         FileType fileType = FileType.build([type: FileType.Type.SEQUENCE, vbpPath: SEQUENCE_DIRECTORY])
-        DataFile dataFile = new DataFile(fileType: fileType, readNumber: 2)
+        DataFile dataFile = new DataFile(fileType: fileType, mateNumber: 2)
 
         assert dataFile.validate()
     }
 
     @Test
-    void testReadConstraint_SequenceFastq_NoReadNumber() {
+    void testMateNumberConstraint_SequenceFastq_NoMateNumber() {
         FileType fileType = FileType.build([type: FileType.Type.SEQUENCE, vbpPath: SEQUENCE_DIRECTORY])
-        DataFile dataFile = new DataFile(fileType: fileType, readNumber: null)
+        DataFile dataFile = new DataFile(fileType: fileType, mateNumber: null)
 
-        TestCase.assertValidateError(dataFile, "readNumber", "validator.invalid", null)
+        TestCase.assertValidateError(dataFile, "mateNumber", "validator.invalid", null)
     }
 
     @Test
-    void testReadConstraint_SequenceFastq_ReadNumberIsZero() {
+    void testMateNumberConstraint_SequenceFastq_MateNumberIsZero() {
         FileType fileType = FileType.build([type: FileType.Type.SEQUENCE, vbpPath: SEQUENCE_DIRECTORY])
-        DataFile dataFile = new DataFile(fileType: fileType, readNumber: 0)
+        DataFile dataFile = new DataFile(fileType: fileType, mateNumber: 0)
 
-        TestCase.assertValidateError(dataFile, "readNumber", "validator.invalid", 0)
+        TestCase.assertValidateError(dataFile, "mateNumber", "validator.invalid", 0)
     }
 
     @Test
-    void testReadConstraint_SequenceFastq_ReadNumberIsToBig() {
+    void testMateNumberConstraint_SequenceFastq_MateNumberIsToBig() {
         FileType fileType = FileType.build([type: FileType.Type.SEQUENCE, vbpPath: SEQUENCE_DIRECTORY])
-        DataFile dataFile = new DataFile(fileType: fileType, readNumber: 3)
+        DataFile dataFile = new DataFile(fileType: fileType, mateNumber: 3)
 
-        TestCase.assertValidateError(dataFile, "readNumber", "validator.invalid", 3)
+        TestCase.assertValidateError(dataFile, "mateNumber", "validator.invalid", 3)
     }
 
 

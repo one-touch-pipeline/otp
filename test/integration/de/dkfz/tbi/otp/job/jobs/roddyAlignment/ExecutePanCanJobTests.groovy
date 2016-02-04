@@ -125,7 +125,7 @@ class ExecutePanCanJobTests {
     private void prepareDataFilesOnFileSystem() {
         assert 1 == roddyBamFile.seqTracks.size()
         seqTrack = roddyBamFile.seqTracks.iterator()[0]
-        List<DataFile> dataFiles = DataFile.findAllBySeqTrack(seqTrack, [sort: 'readNumber'])
+        List<DataFile> dataFiles = DataFile.findAllBySeqTrack(seqTrack, [sort: 'mateNumber'])
         assert 2 == dataFiles.size()
         dataFile1File = new File(executePanCanJob.lsdfFilesService.getFileViewByPidPath(dataFiles[0]))
         createFileAndAddFileSize(dataFile1File, dataFiles[0])
@@ -406,7 +406,7 @@ possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}"\
 
 
     @Test
-    void testPrepareAndReturnWorkflowSpecificCommand_WhenReadNumberOrderIsWrong_ShouldBeOk() {
+    void testPrepareAndReturnWorkflowSpecificCommand_WhenMateNumberOrderIsWrong_ShouldBeOk() {
         executePanCanJob.executeRoddyCommandService.metaClass.createWorkOutputDirectory = { Realm realm, File file -> }
 
         String expectedCmd =  """\
@@ -429,7 +429,7 @@ possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}"\
         List<DataFile> dataFiles = []
 
         roddyBamFile.seqTracks.each { seqTrack ->
-            DataFile.findAllBySeqTrack(seqTrack).sort {it.readNumber}.each { DataFile dataFile ->
+            DataFile.findAllBySeqTrack(seqTrack).sort {it.mateNumber}.each { DataFile dataFile ->
                 dataFiles << dataFile
             }
         }
@@ -438,8 +438,8 @@ possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}"\
         dataFiles.last().fileName = "DataFileFileName_R1.gz"
         dataFiles.first().vbpFileName = "DataFileFileName_R2.gz"
         dataFiles.last().vbpFileName = "DataFileFileName_R1.gz"
-        dataFiles.first().readNumber = 2
-        dataFiles.last().readNumber = 1
+        dataFiles.first().mateNumber = 2
+        dataFiles.last().mateNumber = 1
         assert dataFiles.first().save(flush: true)
         assert dataFiles.last().save(flush: true)
 
