@@ -1,0 +1,95 @@
+@ERROR: #FF6060;
+@WARNING: #FFF070;
+@ALL: #D9EDF7;
+@th: #D0D0D0;
+@td: #F0F0F0;
+@hover: #E8E8FF;
+
+#border {
+    border-style: solid;
+    border-width: 10px;
+    padding: 5px;
+}
+
+.borderMetadataImportERROR {
+    border-color: @ERROR;
+}
+
+.borderMetadataImportWARNING {
+    border-color: @WARNING;
+}
+
+.borderMetadataImportALL {
+    border-color: green;
+}
+
+.ERROR {
+    background-color: @ERROR !important;
+}
+
+.WARNING {
+    background-color: @WARNING !important;
+}
+
+li.ALL {
+    background-color: @ALL;
+}
+
+th {
+    background-color: @th;
+}
+
+td {
+    background-color: @td;
+}
+
+tr:hover td {
+    background-color: @hover;
+}
+
+.sticky-wrap {
+    position: relative;
+}
+
+.options td {
+    background-color: white;
+}
+
+.options tr:hover td {
+    background-color: white;
+}
+
+.sticky-wrap .sticky-thead,
+.sticky-col,
+.sticky-intersect {
+    opacity: 1;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.sticky-wrap .sticky-thead,
+.sticky-col {
+    z-index: 50;
+}
+
+.fixed-scrollbar {
+    z-index: 100;
+}
+
+.sticky-intersect {
+    opacity: 0;
+    z-index: 75;
+}
+
+table, td, th {
+    border: 1px solid white;
+    border-spacing: 0;
+}
+
+span.anchor {
+    display: block;
+    position: relative;
+    top: -100px;
+    visibility: hidden;
+}

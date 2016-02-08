@@ -3,14 +3,13 @@
 <%@ page import="de.dkfz.tbi.util.spreadsheet.validation.Level" %>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-<asset:stylesheet src="metadataImport/metadataImport.css"/>
-<title>
-    <g:message code="metadataImport.title"/>
-    <sec:ifAllGranted roles="ROLE_OPERATOR">
-        <g:message code="metadataImport.titleOperator"/>
-    </sec:ifAllGranted>
-</title>
+    <meta name="layout" content="metadataLayout" />
+    <title>
+        <g:message code="metadataImport.title"/>
+        <sec:ifAllGranted roles="ROLE_OPERATOR">
+            <g:message code="metadataImport.titleOperator"/>
+        </sec:ifAllGranted>
+    </title>
 </head>
 <body>
     <g:if test="${cmd}">
@@ -20,55 +19,70 @@
             </g:if>
             <g:else>
                 <ul>
-                <g:each var="problem" in="${context.problems}" >
-                    <li class="${Level.normalize(problem.level).name}">${problem.getLevelAndMessage().encodeAsHTML().replace('\n', '<br/>')}
-                        <g:each var="cell" in="${problem.affectedCells}" >
-                            <a href="#${cell.cellAddress}">${cell.cellAddress}</a>
-                        </g:each>
-                    </li>
-                </g:each>
+                    <g:each var="problem" in="${context.problems}" >
+                        <li class="${Level.normalize(problem.level).name}">${problem.getLevelAndMessage().encodeAsHTML().replace('\n', '<br/>')}
+                            <g:each var="cell" in="${problem.affectedCells}" >
+                                <a href="#${cell.cellAddress}">${cell.cellAddress}</a>
+                            </g:each>
+                        </li>
+                    </g:each>
                 </ul>
             </g:else>
-            <p class="table">
-            <g:if test="${context.spreadsheet}">
-                <table>
-                    <thead>
-                        <tr>
-                            <g:each var="cell" in="${context.spreadsheet.header.cells}" >
-                                <g:set var="cellProblems" value ="${context.getProblems(cell)}"/>
-                                <th
-                                    id="${cell.cellAddress}"
-                                    class="${Level.normalize(Problems.getMaximumProblemLevel(cellProblems)).name}"
-                                    title="${cellProblems*.getLevelAndMessage().join('\n\n').encodeAsHTML()}"
-                                >
-                                    ${cell.text.encodeAsHTML()}
-                                </th>
-                            </g:each>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <g:each var="row" in="${context.spreadsheet.dataRows}" >
+            <div class="fixed-scrollbar-container">
+                <g:if test="${context.spreadsheet}">
+                    <table>
+                        <thead>
                             <tr>
-                                <g:each var="cell" in="${row.cells}" >
+                                <th></th>
+                                <g:each var="cell" in="${context.spreadsheet.header.cells}" >
+                                    <th>
+                                        ${cell.columnAddress}
+                                    </th>
+                                </g:each>
+                            </tr>
+                            <tr>
+                                <th>
+                                    ${context.spreadsheet.header.cells.first().rowAddress}
+                                </th>
+                                <g:each var="cell" in="${context.spreadsheet.header.cells}" >
                                     <g:set var="cellProblems" value ="${context.getProblems(cell)}"/>
-                                    <td
-                                        id="${cell.cellAddress}"
+                                    <th
                                         class="${Level.normalize(Problems.getMaximumProblemLevel(cellProblems)).name}"
                                         title="${cellProblems*.getLevelAndMessage().join('\n\n').encodeAsHTML()}"
                                     >
+                                        <span class="anchor" id="${cell.cellAddress}"></span>
                                         ${cell.text.encodeAsHTML()}
-                                    </td>
+                                    </th>
                                 </g:each>
                             </tr>
-                        </g:each>
-                    </tbody>
-                </table>
-            </g:if>
+                        </thead>
+                        <tbody>
+                            <g:each var="row" in="${context.spreadsheet.dataRows}" >
+                                <tr>
+                                    <th>
+                                        ${row.cells.first().rowAddress}
+                                    </th>
+                                    <g:each var="cell" in="${row.cells}" >
+                                        <g:set var="cellProblems" value ="${context.getProblems(cell)}"/>
+                                        <td
+                                            class="${Level.normalize(Problems.getMaximumProblemLevel(cellProblems)).name}"
+                                            title="${cellProblems*.getLevelAndMessage().join('\n\n').encodeAsHTML()}"
+                                        >
+                                        <span class="anchor" id="${cell.cellAddress}"></span>
+                                            ${cell.text.encodeAsHTML()}
+                                        </td>
+                                    </g:each>
+                                </tr>
+                            </g:each>
+                        </tbody>
+                    </table>
+                </g:if>
+            </div>
         </div>
     </g:if>
     <div>
     <g:form controller="MetadataImport" action="index">
-        <table>
+        <table class="options">
             <tr>
                 <td><g:message code="metadataImport.path"/></td>
                 <td><g:textField name="path" size="130" value="${cmd?.path}"/></td>
