@@ -478,6 +478,12 @@ class DomainFactory {
         ], properties)
     }
 
+    public static SequencingKitLabel createSequencingKitLabel(Map properties = [:]) {
+        return createDomainObject(SequencingKitLabel, [
+                name: 'SequencingKitLabel_' + (counter++),
+        ], properties)
+    }
+
     public static SeqPlatformGroup createSeqPlatformGroup(Map properties = [:]) {
         return createDomainObject(SeqPlatformGroup, [
                 name: 'seqPlatformGroup_' + (counter++),

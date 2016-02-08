@@ -96,6 +96,17 @@ class TestCase {
         return CollectionUtils.containSame(c1, c2)
     }
 
+    public static <T> boolean assertContainSame(final Collection<? extends T> c1, final Collection<? extends T> c2) {
+        if (!CollectionUtils.containSame(c1, c2)) {
+            Set c1Set = c1.toSet()
+            Set c2Set = c2.toSet()
+            c1Set.removeAll(c2)
+            c2Set.removeAll(c1)
+            throw new AssertionError("\nIn c1, but not in c2:\n${c1Set.join('\n')}\nIn c2, but not in c1:\n${c2Set.join('\n')}")
+        }
+        return true
+    }
+
     /**
      * Helper to check that a validation failed for the given constraint on the given field with the given value.
      * The assert fails if
