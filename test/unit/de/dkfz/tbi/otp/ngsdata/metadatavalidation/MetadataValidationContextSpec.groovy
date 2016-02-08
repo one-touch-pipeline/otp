@@ -61,12 +61,12 @@ class MetadataValidationContextSpec extends Specification {
         context.directoryStructure == directoryStructure
         context.metadataFile == file
         context.metadataFileMd5sum.equalsIgnoreCase(md5sum)
-        context.spreadsheet.header.cells[0].text ==~ firstCellRegex
+        context.spreadsheet.dataRows[0].cells[0].text ==~ firstCellRegex
 
         where:
         bytes || md5sum | firstCellRegex | problemMessage
-        'M\u00e4use'.getBytes('ISO-8859-1') || 'a8a625101e3dae99e646f9c392ede3d4' | '^M.{0,2}use$' | 'not properly encoded with UTF-8'
-        'a"b'.getBytes(MetadataValidationContext.CHARSET) || 'c8f88ec84680a7ec056720570290dd34' | '^a.{0,2}b$' | 'contains one or more quotation marks'
+        'x\nM\u00e4use'.getBytes('ISO-8859-1') || '577c31bc9f9d49ef016288cf94605c2a' | '^M.{0,2}use$' | 'not properly encoded with UTF-8'
+        'x\na"b'.getBytes(MetadataValidationContext.CHARSET) || '01a73fb20c4582eb9668dc39431c4748' | '^a.{0,2}b$' | 'contains one or more quotation marks'
     }
 
     void 'createFromFile, when there are multiple columns with the same title, adds an error'() {
@@ -90,7 +90,7 @@ class MetadataValidationContextSpec extends Specification {
     void 'createFromFile, when file can be parsed successfully, does not add problems'() {
         given:
         File file = temporaryFolder.newFile("${HelperUtils.uniqueString}.tsv")
-        file.bytes = 'M\u00e4use'.getBytes(MetadataValidationContext.CHARSET)
+        file.bytes = 'x\nM\u00e4use'.getBytes(MetadataValidationContext.CHARSET)
 
         when:
         MetadataValidationContext context = MetadataValidationContext.createFromFile(file, directoryStructure)
@@ -99,8 +99,37 @@ class MetadataValidationContextSpec extends Specification {
         context.problems.isEmpty()
         context.directoryStructure == directoryStructure
         context.metadataFile == file
-        context.metadataFileMd5sum.equalsIgnoreCase('9e904c83916d4e86082bd6ebe0d5339e')
-        context.spreadsheet.header.cells[0].text == 'M\u00e4use'
+        context.metadataFileMd5sum.equalsIgnoreCase('2628f03624261e75bba6960ff9d15291')
+        context.spreadsheet.dataRows[0].cells[0].text == 'M\u00e4use'
+    }
+
+    void 'createFromFile removes tabs and newlines at end of file'() {
+        given:
+        File file = temporaryFolder.newFile("${HelperUtils.uniqueString}.tsv")
+        file.bytes = 'a\nb\t\r\n\t\t\r\n'.getBytes(MetadataValidationContext.CHARSET)
+
+        when:
+        MetadataValidationContext context = MetadataValidationContext.createFromFile(file, directoryStructure)
+
+        then:
+        context.spreadsheet.dataRows.size() == 1
+        context.spreadsheet.dataRows[0].cells.size() == 1
+    }
+
+    void 'createFromFile, when file contains only one line, adds error'() {
+        given:
+        File file = temporaryFolder.newFile("${HelperUtils.uniqueString}.tsv")
+        file.bytes = 'a\n\n'.getBytes(MetadataValidationContext.CHARSET)
+
+        when:
+        MetadataValidationContext context = MetadataValidationContext.createFromFile(file, directoryStructure)
+
+        then:
+        Problem problem = exactlyOneElement(context.problems)
+        problem.affectedCells.isEmpty()
+        problem.level == Level.ERROR
+        problem.message.contains('contains less than two lines')
+        context.spreadsheet == null
     }
 
     private static File makeNotReadable(File file) {

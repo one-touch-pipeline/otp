@@ -53,7 +53,11 @@ class MetadataValidationContext extends ValidationContext {
                 if (document.contains('"')) {
                     problems.addProblem(Collections.emptySet(), Level.WARNING, "The content of '${metadataFile}' contains one or more quotation marks. OTP might not parse the file as expected.")
                 }
-                spreadsheet = new Spreadsheet(document)
+                spreadsheet = new Spreadsheet(document.replaceFirst(/[\t\r\n]+$/, ''))
+                if (spreadsheet.dataRows.size() < 1) {
+                    spreadsheet = null
+                    problems.addProblem(Collections.emptySet(), Level.ERROR, "'${metadataFile}' contains less than two lines.")
+                }
             } catch (Exception e) {
                 problems.addProblem(Collections.emptySet(), Level.ERROR, e.message)
             }
