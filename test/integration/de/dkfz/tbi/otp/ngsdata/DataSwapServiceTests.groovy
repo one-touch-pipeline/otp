@@ -1,10 +1,16 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.TestConstants
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvJobResult
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvProcessingStates
 import de.dkfz.tbi.otp.fileSystemConsistency.*
 import de.dkfz.tbi.otp.ngsqc.*
 import de.dkfz.tbi.otp.testing.GroovyScriptAwareTestCase
+import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.CreateRoddyFileHelper
 import grails.plugin.springsecurity.SpringSecurityUtils
 import org.junit.Before
@@ -18,16 +24,20 @@ import static de.dkfz.tbi.otp.ngsdata.Realm.OperationType.DATA_PROCESSING
 class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     DataSwapService dataSwapService
     LsdfFilesService lsdfFilesService
+    ProcessedMergedBamFileService processedMergedBamFileService
+    DataProcessingFilesService dataProcessingFilesService
 
 
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder()
 
+    File outputFolder
+
     @Before
     void setUp() {
         createUserAndRoles()
+        outputFolder = temporaryFolder.newFolder("outputFolder")
     }
-
 
 
     @Test
@@ -643,6 +653,309 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
         TestCase.shouldFailWithMessageContaining(AssertionError, "seqTracks only linked") {
             dataSwapService.throwExceptionInCaseOfSeqTracksAreOnlyLinked([seqTrack])
         }
+    }
+
+
+    @Test
+    public void testDeleteProcessingFilesOfProject_EmptyProject() {
+        Project project = DomainFactory.createProject()
+
+        shouldFail AssertionError, {
+            dataSwapService.deleteProcessingFilesOfProject(project.name, outputFolder.path)
+        }
+    }
+
+
+    @Test
+    public void testDeleteProcessingFilesOfProject_NoProcessedData_FastqFilesMissing() {
+        SeqTrack seqTrack = deleteProcessingFilesOfProject_NoProcessedData_Setup()
+        Project project = seqTrack.project
+
+        shouldFail FileNotFoundException, {
+            dataSwapService.deleteProcessingFilesOfProject(project.name, outputFolder.path)
+        }
+    }
+
+
+    @Test
+    public void testDeleteProcessingFilesOfProject_NoProcessedData_FastqFilesAvailable() {
+        Project project = deleteProcessingFilesOfProject_NoProcessedData_SetupWithFiles()
+
+        dataSwapService.deleteProcessingFilesOfProject(project.name, outputFolder.path)
+    }
+
+
+    @Test
+    public void testDeleteProcessingFilesOfProject_NoProcessedData_FastqFilesLinked() {
+        Project project = deleteProcessingFilesOfProject_NoProcessedData_SetupWithFiles()
+        markFilesAsLinked(SeqTrack.list())
+
+        shouldFail FileNotFoundException, {
+            dataSwapService.deleteProcessingFilesOfProject(project.name, outputFolder.path)
+        }
+
+    }
+
+    @Test
+    public void testDeleteProcessingFilesOfProject_NoProcessedData_FastqFilesLinked_Verified() {
+        Project project = deleteProcessingFilesOfProject_NoProcessedData_SetupWithFiles()
+        markFilesAsLinked(SeqTrack.list())
+
+        dataSwapService.deleteProcessingFilesOfProject(project.name, outputFolder.path, true)
+    }
+
+
+    private SeqTrack deleteProcessingFilesOfProject_NoProcessedData_Setup() {
+        SeqTrack seqTrack = DomainFactory.buildSeqTrackWithTwoDataFiles()
+        Project project = seqTrack.project
+
+        DomainFactory.createRealmDataProcessing(name: project.realmName, processingRootPath: outputFolder.path)
+        DomainFactory.createRealmDataManagement(name: project.realmName, rootPath: outputFolder.path)
+        return seqTrack
+    }
+
+
+    private Project deleteProcessingFilesOfProject_NoProcessedData_SetupWithFiles() {
+        SeqTrack seqTrack = deleteProcessingFilesOfProject_NoProcessedData_Setup()
+
+        createFastqFiles([seqTrack])
+
+        return seqTrack.project
+    }
+
+    private void markFilesAsLinked(List<SeqTrack> seqTracks) {
+        seqTracks.each {
+            it.linkedExternally = true
+            assert it.save(flush: true)
+        }
+    }
+
+    private void createFastqFiles(List<SeqTrack> seqTracks) {
+        RunSegment runSegment = DomainFactory.createRunSegment()
+        DataFile.findAllBySeqTrackInList(seqTracks).each {
+            it.runSegment = runSegment
+            assert it.save(flush: true)
+            CreateFileHelper.createFile(new File(lsdfFilesService.getFileViewByPidPath(it)))
+        }
+    }
+
+
+    private void createFastqFiles(AbstractMergedBamFile bamFile) {
+        createFastqFiles(bamFile.getContainedSeqTracks() as List)
+    }
+
+    private void dataBaseSetupForMergedBamFiles(AbstractMergedBamFile bamFile, boolean addRealms = true) {
+        MergingWorkPackage mergingWorkPackage = bamFile.mergingWorkPackage
+        mergingWorkPackage.bamFileInProjectFolder = bamFile
+        assert mergingWorkPackage.save(flush: true)
+        Project project = bamFile.project
+
+        if (addRealms) {
+            DomainFactory.createRealmDataProcessing(name: project.realmName, processingRootPath: outputFolder.path)
+            DomainFactory.createRealmDataManagement(name: project.realmName, rootPath: outputFolder.path)
+        }
+    }
+
+
+    private ProcessedMergedBamFile deleteProcessingFilesOfProject_PMBF_Setup() {
+        ProcessedMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFile([
+                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
+                md5sum:TestConstants.TEST_MD5SUM,
+                fileSize: 1000
+        ])
+        dataBaseSetupForMergedBamFiles(bamFile)
+        createFastqFiles(bamFile)
+
+        File processingBamFile = new File(dataProcessingFilesService.getOutputDirectory(bamFile.individual, DataProcessingFilesService.OutputDirectories.MERGING))
+        File finalBamFile = new File(AbstractMergedBamFileService.destinationDirectory(bamFile))
+        CreateFileHelper.createFile(new File(processingBamFile, "test.bam"))
+        CreateFileHelper.createFile(new File(finalBamFile, "test.bam"))
+
+        return bamFile
+    }
+
+
+    private void deleteProcessingFilesOfProject_PMBF_Validation(ProcessedMergedBamFile bamFile) {
+        File processingBamFile = new File(dataProcessingFilesService.getOutputDirectory(bamFile.individual, DataProcessingFilesService.OutputDirectories.MERGING))
+        File finalBamFile = new File(AbstractMergedBamFileService.destinationDirectory(bamFile))
+
+        File outputFile = new File(outputFolder.absoluteFile, "Delete_${bamFile.project.name}.sh")
+        assert outputFile.text.contains(processingBamFile.path) && outputFile.text.contains(finalBamFile.path)
+
+        assert AbstractBamFile.list().empty
+        assert MergingWorkPackage.list().empty
+        assert AlignmentPass.list().empty
+        assert MergingPass.list().empty
+    }
+
+
+    @Test
+    public void testDeleteProcessingFilesOfProject_PMBF() {
+        ProcessedMergedBamFile bamFile = deleteProcessingFilesOfProject_PMBF_Setup()
+
+        dataSwapService.deleteProcessingFilesOfProject(bamFile.project.name, outputFolder.path, true)
+
+        deleteProcessingFilesOfProject_PMBF_Validation(bamFile)
+    }
+
+
+    @Test
+    public void testDeleteProcessingFilesOfProject_PMBF_notVerified() {
+        ProcessedMergedBamFile bamFile = deleteProcessingFilesOfProject_PMBF_Setup()
+
+        dataSwapService.deleteProcessingFilesOfProject(bamFile.project.name, outputFolder.path)
+
+        deleteProcessingFilesOfProject_PMBF_Validation(bamFile)
+    }
+
+
+    private RoddyBamFile deleteProcessingFilesOfProject_RBF_Setup() {
+        RoddyBamFile bamFile = DomainFactory.createRoddyBamFile()
+
+        dataBaseSetupForMergedBamFiles(bamFile)
+        createFastqFiles(bamFile)
+
+        File finalBamFile = new File(AbstractMergedBamFileService.destinationDirectory(bamFile))
+        CreateFileHelper.createFile(new File(finalBamFile, "test.bam"))
+
+        return bamFile
+    }
+
+
+    private void deleteProcessingFilesOfProject_RBF_Validation(RoddyBamFile bamFile) {
+        File finalBamFile = new File(AbstractMergedBamFileService.destinationDirectory(bamFile))
+
+        File outputFile = new File(outputFolder.absoluteFile, "Delete_${bamFile.project.name}.sh")
+        assert outputFile.text.contains(finalBamFile.path)
+
+        assert AbstractBamFile.list().empty
+        assert MergingWorkPackage.list().empty
+    }
+
+
+    @Test
+    public void testDeleteProcessingFilesOfProject_RBF() {
+        RoddyBamFile bamFile = deleteProcessingFilesOfProject_RBF_Setup()
+
+        dataSwapService.deleteProcessingFilesOfProject(bamFile.project.name, outputFolder.path, true)
+
+        deleteProcessingFilesOfProject_RBF_Validation(bamFile)
+    }
+
+
+    @Test
+    public void testDeleteProcessingFilesOfProject_RBF_notVerified() {
+        RoddyBamFile bamFile = deleteProcessingFilesOfProject_RBF_Setup()
+
+        dataSwapService.deleteProcessingFilesOfProject(bamFile.project.name, outputFolder.path)
+
+        deleteProcessingFilesOfProject_RBF_Validation(bamFile)
+    }
+
+
+    private SnvCallingInstance deleteProcessingFilesOfProject_RBF_SNV_Setup() {
+        SnvCallingInstance snvCallingInstance = DomainFactory.createSnvInstanceWithRoddyBamFiles(processingState: SnvProcessingStates.FINISHED)
+
+        AbstractMergedBamFile tumorBamFiles = snvCallingInstance.sampleType1BamFile
+        dataBaseSetupForMergedBamFiles(tumorBamFiles)
+        createFastqFiles(tumorBamFiles)
+
+        AbstractMergedBamFile controlBamFiles = snvCallingInstance.sampleType2BamFile
+        dataBaseSetupForMergedBamFiles(controlBamFiles, false)
+        createFastqFiles(controlBamFiles)
+
+        File snvFolder = snvCallingInstance.getSnvInstancePath().absoluteDataManagementPath
+        CreateFileHelper.createFile(new File(snvFolder, "test.vcf"))
+
+        return snvCallingInstance
+    }
+
+
+    private void deleteProcessingFilesOfProject_RBF_SNV_Validation(SnvCallingInstance snvCallingInstance) {
+        File snvFolder = snvCallingInstance.getSnvInstancePath().absoluteDataManagementPath
+
+        File outputFile = new File(outputFolder.absoluteFile, "Delete_${snvCallingInstance.project.name}.sh")
+        assert outputFile.text.contains(snvFolder.path) && outputFile.text.contains(snvFolder.parent)
+
+        assert SnvCallingInstance.list().empty
+        assert SamplePair.list().empty
+        assert SnvJobResult.list().empty
+    }
+
+
+    @Test
+    public void testDeleteProcessingFilesOfProject_RBF_SNV() {
+        SnvCallingInstance snvCallingInstance = deleteProcessingFilesOfProject_RBF_SNV_Setup()
+
+        dataSwapService.deleteProcessingFilesOfProject(snvCallingInstance.project.name, outputFolder.path, true)
+
+        deleteProcessingFilesOfProject_RBF_SNV_Validation(snvCallingInstance)
+    }
+
+
+    @Test
+    public void testDeleteProcessingFilesOfProject_RBF_SNV_notVerified() {
+        SnvCallingInstance snvCallingInstance = deleteProcessingFilesOfProject_RBF_SNV_Setup()
+
+        dataSwapService.deleteProcessingFilesOfProject(snvCallingInstance.project.name, outputFolder.path)
+
+        deleteProcessingFilesOfProject_RBF_SNV_Validation(snvCallingInstance)
+    }
+
+
+    private ExternallyProcessedMergedBamFile deleteProcessingFilesOfProject_ExternalBamFilesAttached_Setup() {
+        Project project = deleteProcessingFilesOfProject_NoProcessedData_SetupWithFiles()
+        ReferenceGenome referenceGenome = DomainFactory.createReferenceGenome()
+        FastqSet fastqSet = DomainFactory.createFastqSet(seqTracks: [SeqTrack.list().find {
+            it.project.id == project.id
+        }])
+
+        ExternallyProcessedMergedBamFile bamFile = DomainFactory.createExternallyProcessedMergedBamFile(referenceGenome: referenceGenome, fastqSet: fastqSet)
+        CreateFileHelper.createFile(bamFile.getNonOtpFolder().absoluteDataManagementPath)
+
+        return bamFile
+    }
+
+
+    private void deleteProcessingFilesOfProject_ExternalBamFilesAttached_Verified_Validation(ExternallyProcessedMergedBamFile bamFile) {
+        File nonOtpFolder = bamFile.getNonOtpFolder().absoluteDataManagementPath
+        File outputFile = new File(outputFolder.absoluteFile, "Delete_${bamFile.project.name}.sh")
+
+        assert !outputFile.text.contains(nonOtpFolder.path)
+        assert ExternallyProcessedMergedBamFile.list().contains(bamFile)
+    }
+
+
+    @Test
+    public void testDeleteProcessingFilesOfProject_ExternalBamFilesAttached() {
+        ExternallyProcessedMergedBamFile bamFile = deleteProcessingFilesOfProject_ExternalBamFilesAttached_Setup()
+
+        TestCase.shouldFailWithMessageContaining(AssertionError, "external merged bam files", {
+            dataSwapService.deleteProcessingFilesOfProject(bamFile.project.name, outputFolder.path)
+        })
+    }
+
+
+    @Test
+    public void testDeleteProcessingFilesOfProject_ExternalBamFilesAttached_Verified() {
+        ExternallyProcessedMergedBamFile bamFile = deleteProcessingFilesOfProject_ExternalBamFilesAttached_Setup()
+
+        dataSwapService.deleteProcessingFilesOfProject(bamFile.project.name, outputFolder.path, true)
+
+        deleteProcessingFilesOfProject_ExternalBamFilesAttached_Verified_Validation(bamFile)
+    }
+
+
+    @Test
+    public void testDeleteProcessingFilesOfProject_ExternalBamFilesAttached_nonMergedSeqTrackExists_Verified() {
+        ExternallyProcessedMergedBamFile bamFile = deleteProcessingFilesOfProject_ExternalBamFilesAttached_Setup()
+
+        SeqTrack seqTrack = DomainFactory.buildSeqTrackWithTwoDataFiles(sample: bamFile.sample, seqType: bamFile.seqType)
+        createFastqFiles([seqTrack])
+
+        dataSwapService.deleteProcessingFilesOfProject(bamFile.project.name, outputFolder.path, true)
+
+        deleteProcessingFilesOfProject_ExternalBamFilesAttached_Verified_Validation(bamFile)
     }
 
 

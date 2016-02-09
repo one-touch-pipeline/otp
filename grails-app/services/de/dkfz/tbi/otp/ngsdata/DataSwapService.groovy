@@ -944,12 +944,14 @@ chmod 440 ${newDirectFileName}
      * !! Be aware that the run information, alignmentLog information, mergingLog information and the seqTrack are not deleted.
      * !! If it is not needed to delete this information, this method can be used without pre-work.
      */
-    List<File> deleteAllProcessingInformationAndResultOfOneSeqTrack(SeqTrack seqTrack) {
+    List<File> deleteAllProcessingInformationAndResultOfOneSeqTrack(SeqTrack seqTrack, boolean enableChecks = true) {
         notNull(seqTrack, "The input seqTrack of the method deleteAllProcessingInformationAndResultOfOneSeqTrack is null")
         List<File> dirsToDelete = []
 
-        throwExceptionInCaseOfExternalMergedBamFileIsAttached([seqTrack])
-        throwExceptionInCaseOfSeqTracksAreOnlyLinked([seqTrack])
+        if (enableChecks) {
+            throwExceptionInCaseOfSeqTracksAreOnlyLinked([seqTrack])
+            throwExceptionInCaseOfExternalMergedBamFileIsAttached([seqTrack])
+        }
 
         List<DataFile> dataFiles = DataFile.findAllBySeqTrack(seqTrack)
 
@@ -1152,6 +1154,116 @@ chmod 440 ${newDirectFileName}
         outputStringBuilder << dirsToDelete.flatten()*.path.join('\n')
         outputStringBuilder << "And do not forget the other files/directories which belongs to the run"
         return dirsToDelete
+    }
+
+
+    /*
+     * Deletes all processed files after the fastqc step from the give project.
+     *
+     * For the cases where the fastq files are not available in the project folder it has to be checked if the fastq files are still available on midterm.
+     * If this is the case the GPCF has to be informed that the must not delete these fastq files during the sample swap.
+     * If ExternallyProcessedMergedBamFiles were imported for this project, an exception is thrown to give the opportunity for clarification.
+     * If everything was clarified the method can be called with true for "everythingVerified" so that the mentioned checks won't be executed anymore.
+     * If the fastq files are not available an error is thrown.
+     */
+    void deleteProcessingFilesOfProject(String projectName, String scriptOutputDirectory, boolean everythingVerified = false) throws FileNotFoundException {
+
+        Project project = Project.findByName(projectName)
+        assert project : "Project does not exist"
+
+        Set<String> dirsToDelete = new HashSet<String>()
+        Set<String> externalMergedBamFolders = new HashSet<String>()
+
+        StringBuilder output = new StringBuilder()
+
+        List<DataFile> dataFiles = DataFile.createCriteria().list {
+            seqTrack {
+                sample {
+                    individual {
+                        eq('project', project)
+                    }
+                }
+            }
+        }
+        output << "found ${dataFiles.size()} data files for this project\n\n"
+        assert !dataFiles.empty : "There are no SeqTracks attached to this project ${projectName}"
+
+        List<SeqTrack> seqTracks = dataFiles*.seqTrack.unique()
+
+        StringBuilder filesToClarify = new StringBuilder()
+        StringBuilder missingFiles = new StringBuilder()
+        boolean throwException = false
+
+        dataFiles.each {
+            if (new File(lsdfFilesService.getFileViewByPidPath(it)).exists()) {
+                if (it.seqTrack.linkedExternally && !everythingVerified) {
+                    filesToClarify.append("${lsdfFilesService.getFileInitialPath(it)}\n")
+                    throwException = true
+                }
+            } else {
+                missingFiles.append("${it.toString()}\n")
+                throwException = true
+            }
+        }
+
+        if (missingFiles.toString() != "") {
+            output << "The fastq files of the following data files are missing: \n${missingFiles.toString()}\n\n"
+        }
+
+        if (filesToClarify.toString() != "") {
+            output << "Talk to the sequencing center not to remove the following fastq files until the realignment is finished: \n ${filesToClarify.toString()}\n\n"
+        }
+
+        List<ExternallyProcessedMergedBamFile> externallyProcessedMergedBamFiles = seqTrackService.returnExternallyProcessedMergedBamFiles(seqTracks)
+        assert (!externallyProcessedMergedBamFiles || everythingVerified) :
+                "There are ${externallyProcessedMergedBamFiles.size()} external merged bam files attached to this project. Clarify if the realignment shall be done anyway."
+
+
+        if (throwException) {
+            println output
+            throw new FileNotFoundException()
+        }
+
+        output << "delete content in db...\n\n"
+
+        seqTracks.each { SeqTrack seqTrack ->
+
+            File processingDir = new File(dataProcessingFilesService.getOutputDirectory(seqTrack.individual, DataProcessingFilesService.OutputDirectories.MERGING))
+            if (processingDir.exists()) {
+                dirsToDelete.add(processingDir.path)
+            }
+
+            AbstractBamFile latestBamFile = MergingWorkPackage.findBySampleAndSeqType(seqTrack.sample, seqTrack.seqType)?.bamFileInProjectFolder
+            if (latestBamFile) {
+                File mergingDir = new File(AbstractMergedBamFileService.destinationDirectory(latestBamFile))
+                if (mergingDir.exists()) {
+                    List<ExternallyProcessedMergedBamFile> files = seqTrackService.returnExternallyProcessedMergedBamFiles([seqTrack])
+                    files.each {
+                        externalMergedBamFolders.add(it.getNonOtpFolder().getAbsoluteDataManagementPath().path)
+                    }
+                    mergingDir.listFiles().each {
+                        dirsToDelete.add(it.path)
+                    }
+                }
+            }
+            deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack, false).flatten().each {
+                if (it) {
+                    dirsToDelete.add(it.path)
+                }
+            }
+        }
+
+
+        File bashScriptToMoveFiles = createFileSafely("${scriptOutputDirectory}", "Delete_${projectName}.sh")
+        bashScriptToMoveFiles << bashHeader
+
+        (dirsToDelete - externalMergedBamFolders).each {
+            bashScriptToMoveFiles << "rm -rf ${it}\n"
+        }
+
+        output << "bash script to remove files on file system created\n\n"
+
+        println output
     }
 
     /**

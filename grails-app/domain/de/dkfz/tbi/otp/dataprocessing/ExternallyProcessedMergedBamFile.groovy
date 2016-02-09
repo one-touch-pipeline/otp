@@ -53,9 +53,13 @@ class ExternallyProcessedMergedBamFile extends AbstractFileSystemBamFile {
 
 
     public OtpPath getFilePath() {
-        String relative = MergedAlignmentDataFileService.buildRelativePath(seqType, sample)
-        return new OtpPath(project, relative, "nonOTP",
+        return new OtpPath(nonOtpFolder,
                 "${source}_${referenceGenome}", fileName)
+    }
+
+    public OtpPath getNonOtpFolder() {
+        String relative = MergedAlignmentDataFileService.buildRelativePath(seqType, sample)
+        return new OtpPath(project, relative, "nonOTP")
     }
 
 

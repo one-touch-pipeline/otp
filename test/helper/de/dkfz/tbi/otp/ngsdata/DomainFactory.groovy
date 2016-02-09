@@ -965,4 +965,20 @@ class DomainFactory {
         return secondBamFile
     }
 
+    static FastqSet createFastqSet(Map properties = [:]) {
+        return createDomainObject(FastqSet, [
+                seqTracks: { [createSeqTrack()] }
+        ], properties)
+    }
+
+    static ExternallyProcessedMergedBamFile createExternallyProcessedMergedBamFile(Map properties = [:]) {
+        return createDomainObject(ExternallyProcessedMergedBamFile, [
+                fileName: 'runName_' + (counter++),
+                source  : "SOURCE",
+                fastqSet: { createFastqSet() },
+                referenceGenome: { createReferenceGenome() },
+                type: AbstractBamFile.BamType.MDUP
+        ], properties)
+    }
+
 }
