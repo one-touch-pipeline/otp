@@ -71,7 +71,7 @@ class MetadataImportService {
     }
 
     protected Collection<MetadataValidator> getMetadataValidators() {
-        return applicationContext.getBeansOfType(MetadataValidator).values().sort { it.getClass().simpleName }
+        return applicationContext.getBeansOfType(MetadataValidator).values().sort { it.getClass().name }
     }
 
     protected static String getDirectoryStructureBeanName(String directoryStructureName, File metadataFile) {
