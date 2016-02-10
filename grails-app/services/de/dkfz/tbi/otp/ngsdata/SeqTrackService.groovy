@@ -351,7 +351,7 @@ LIMIT 1
     }
 
     private Set<String> getSetOfLanes(Run run) {
-        MetaDataKey key = MetaDataKey.findByName("LANE_NO")
+        MetaDataKey key = MetaDataKey.findByName(MetaDataColumn.LANE_NO.name())
         Set<String> lanes = new HashSet<String>()
         DataFile.findAllByRun(run).each { DataFile dataFile ->
             if (!fileTypeService.isGoodSequenceDataFile(dataFile)) {
@@ -472,7 +472,7 @@ LIMIT 1
     }
 
     private Sample getSample(DataFile file) {
-        String sampleName = metaDataValue(file, "SAMPLE_ID")
+        String sampleName = metaDataValue(file, MetaDataColumn.SAMPLE_ID.name())
         SampleIdentifier idx = SampleIdentifier.findByName(sampleName)
         return idx.sample
     }
@@ -487,8 +487,8 @@ LIMIT 1
     }
 
     private SeqType getSeqType(DataFile file) {
-        String type = metaDataValue(file, "SEQUENCING_TYPE")
-        String layout = metaDataValue(file, "LIBRARY_LAYOUT")
+        String type = metaDataValue(file, MetaDataColumn.SEQUENCING_TYPE.name())
+        String layout = metaDataValue(file, MetaDataColumn.LIBRARY_LAYOUT.name())
         SeqType seqType = SeqType.findByNameAndLibraryLayout(type, layout)
         if (!seqType) {
             throw new SeqTypeNotDefinedException(type, layout)
@@ -529,7 +529,7 @@ LIMIT 1
 
 
     private SoftwareTool getPipeline(DataFile file) {
-        String name = metaDataValue(file, "PIPELINE_VERSION")
+        String name = metaDataValue(file, MetaDataColumn.PIPELINE_VERSION.name())
         List<SoftwareToolIdentifier> idx = SoftwareToolIdentifier.findAllByName(name)
         for(SoftwareToolIdentifier si in idx) {
             if (si.softwareTool.type == SoftwareTool.Type.BASECALLING) {
@@ -573,20 +573,20 @@ LIMIT 1
     }
 
     private void fillInsertSize(SeqTrack seqTrack, List<DataFile> files) {
-        seqTrack.insertSize = metaDataLongValue(files.get(0), "INSERT_SIZE")
+        seqTrack.insertSize = metaDataLongValue(files.get(0), MetaDataColumn.INSERT_SIZE.name())
     }
 
     private void fillReadCount(SeqTrack seqTrack, List<DataFile> files) {
         seqTrack.nReads = 0
         for(DataFile file in files) {
-            seqTrack.nReads += metaDataLongValue(file, "READ_COUNT")
+            seqTrack.nReads += metaDataLongValue(file, MetaDataColumn.READ_COUNT.name())
         }
     }
 
     private void fillBaseCount(SeqTrack seqTrack, List<DataFile> files) {
         seqTrack.nBasePairs = 0
         for(DataFile file in files) {
-            seqTrack.nBasePairs += metaDataLongValue(file, "BASE_COUNT")
+            seqTrack.nBasePairs += metaDataLongValue(file, MetaDataColumn.BASE_COUNT.name())
         }
     }
 
@@ -634,7 +634,7 @@ LIMIT 1
     }
 
     SoftwareTool getAlignmentPipeline(DataFile file) {
-        String name = metaDataValue(file, "ALIGN_TOOL")
+        String name = metaDataValue(file, MetaDataColumn.ALIGN_TOOL.name())
         List<SoftwareToolIdentifier> idx = SoftwareToolIdentifier.findAllByName(name)
         for(SoftwareToolIdentifier si in idx) {
             if (si.softwareTool.type == SoftwareTool.Type.ALIGNMENT) {
@@ -675,7 +675,7 @@ LIMIT 1
      * @return
      */
     private def getRunFilesWithTypeAndLane(Run run, FileType.Type type, String lane) {
-        MetaDataKey key = MetaDataKey.findByName("LANE_NO")
+        MetaDataKey key = MetaDataKey.findByName(MetaDataColumn.LANE_NO.name())
         def dataFiles = DataFile.executeQuery('''
 SELECT dataFile FROM MetaDataEntry as entry
 INNER JOIN entry.dataFile as dataFile

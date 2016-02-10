@@ -279,7 +279,7 @@ class MetaDataService {
      * this function also fills MD5 check sum field from meta-data
      */
     private void assignFileName(DataFile dataFile) {
-        def keyNames = ["FASTQ_FILE", "ALIGN_FILE"]
+        def keyNames = [MetaDataColumn.FASTQ_FILE.name(), "ALIGN_FILE"]
         keyNames.each {
             MetaDataEntry entry = getMetaDataEntry(dataFile, it)
             if (!entry) {
@@ -311,7 +311,7 @@ class MetaDataService {
 
     private void fillVbpFileName(DataFile dataFile) {
         if (needsVBPNameChange(dataFile)) {
-            String lane = metaDataValue(dataFile, "LANE_NO")
+            String lane = metaDataValue(dataFile, MetaDataColumn.LANE_NO.name())
             String mateId = mateStringFormFileName(dataFile.fileName)
             String name =  "s_" + lane + "_" + mateId + "_sequence.txt.gz"
             dataFile.vbpFileName = name
@@ -345,7 +345,7 @@ class MetaDataService {
     }
 
     private void fillMD5Sum(DataFile dataFile) {
-        MetaDataEntry entry = getMetaDataEntry(dataFile, "MD5")
+        MetaDataEntry entry = getMetaDataEntry(dataFile, MetaDataColumn.MD5.name())
         dataFile.md5sum = entry?.value
     }
 
@@ -354,7 +354,7 @@ class MetaDataService {
      * Mark file, if the file is withdrawn
      */
     private void checkIfWithdrawn(DataFile dataFile) {
-        MetaDataEntry entry = getMetaDataEntry(dataFile, "WITHDRAWN")
+        MetaDataEntry entry = getMetaDataEntry(dataFile, MetaDataColumn.WITHDRAWN.name())
         dataFile.fileWithdrawn = (entry?.value == "1")
     }
 
@@ -464,7 +464,7 @@ class MetaDataService {
      */
     private String correctedKey(String token) {
         if (token == "lane" || token == "SLIDE_NO") {
-            return "LANE_NO"
+            return MetaDataColumn.LANE_NO.name()
         }
         return token
     }

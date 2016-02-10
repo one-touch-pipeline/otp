@@ -64,10 +64,10 @@ class MetaDataValidationService {
         MetaDataEntry.Status valid = MetaDataEntry.Status.VALID
         MetaDataEntry.Status invalid = MetaDataEntry.Status.INVALID
         switch(entry.key.name) {
-            case "RUN_ID":
+            case MetaDataColumn.RUN_ID.name():
                 entry.status = (run.name == entry.value) ? valid : invalid
                 break
-            case "SAMPLE_ID":
+            case MetaDataColumn.SAMPLE_ID.name():
                 if (checkSampleIdentifier(entry.value)) {
                     boolean sampleIdentifierExists = SampleIdentifier.findByName(entry.value) ||
                             sampleIdentifierService.parseAndFindOrSaveSampleIdentifier(entry.value)
@@ -76,7 +76,7 @@ class MetaDataValidationService {
                     entry.status = invalid
                 }
                 break
-            case "CENTER_NAME":
+            case MetaDataColumn.CENTER_NAME.name():
                 entry.status = invalid
                 SeqCenter center = run.seqCenter
                 if (center.dirName == entry.value.toLowerCase()) {
@@ -85,30 +85,30 @@ class MetaDataValidationService {
                     entry.status = valid
                 }
                 break
-            case "SEQUENCING_TYPE":
+            case MetaDataColumn.SEQUENCING_TYPE.name():
                 boolean status = checkAndCorrectSequencingType(entry)
                 entry.status = (status) ? valid : invalid
                 break
-            case "LIBRARY_LAYOUT":
+            case MetaDataColumn.LIBRARY_LAYOUT.name():
                 SeqType seqType = SeqType.findByLibraryLayout(entry.value)
                 entry.status = (seqType != null) ? valid : invalid
                 break
-            case "INSERT_SIZE":
+            case MetaDataColumn.INSERT_SIZE.name():
                 entry.status = (checkAndCorrectInsertSize(entry)) ? valid : invalid
                 break
-            case "PIPELINE_VERSION":
-            case "ALIGN_TOOL":
+            case MetaDataColumn.PIPELINE_VERSION.name():
+            case MetaDataColumn.ALIGN_TOOL.name():
                 boolean status = checkSoftwareTool(entry)
                 entry.status = (status) ? valid : invalid
                 break
-            case "LIB_PREP_KIT":
+            case MetaDataColumn.LIB_PREP_KIT.name():
                 entry.status = checkLibraryPreparationKit(entry) ? valid : invalid
                 break
-            case "SEQUENCING_KIT":
+            case MetaDataColumn.SEQUENCING_KIT.name():
                 entry.status = !entry.value || sequencingKitLabelService.findSequencingKitLabelByNameOrAlias(entry.value) ? valid : invalid
                 break
-            case "ANTIBODY_TARGET":
-                MetaDataEntry metaDataEntry = metaDataEntry(entry.dataFile, "SEQUENCING_TYPE")
+            case MetaDataColumn.ANTIBODY_TARGET.name():
+                MetaDataEntry metaDataEntry = metaDataEntry(entry.dataFile, MetaDataColumn.SEQUENCING_TYPE.name())
                 boolean isSequenceOfTypeChipSeq = metaDataEntry?.value == SeqTypeNames.CHIP_SEQ.seqTypeName
                 if (isSequenceOfTypeChipSeq) {
                     checkAndCorrectAntibodyTarget(entry)
@@ -167,7 +167,7 @@ class MetaDataValidationService {
         String libPrepKitName = entry.value
 
         LibraryPreparationKit libraryPreparationKit = libraryPreparationKitService.findLibraryPreparationKitByNameOrAlias(libPrepKitName)
-        MetaDataEntry metaDataEntry = metaDataEntry(entry.dataFile, "SEQUENCING_TYPE")
+        MetaDataEntry metaDataEntry = metaDataEntry(entry.dataFile, MetaDataColumn.SEQUENCING_TYPE.name())
 
         if (libraryPreparationKit) {
             return true
@@ -318,7 +318,7 @@ class MetaDataValidationService {
         if (file.fileType.type != FileType.Type.ALIGNMENT) {
             return
         }
-        MetaDataKey key = getKey("ALIGN_TOOL")
+        MetaDataKey key = getKey(MetaDataColumn.ALIGN_TOOL.name())
         MetaDataEntry entry = MetaDataEntry.findByDataFileAndKey(file, key)
         if (entry) {
             return
@@ -350,11 +350,11 @@ class MetaDataValidationService {
 
 
     private void combineLaneAndIndex(DataFile file) {
-        MetaDataEntry index = metaDataEntryFromList(file, ["INDEX_NO", "BARCODE"])
+        MetaDataEntry index = metaDataEntryFromList(file, ["INDEX_NO", MetaDataColumn.BARCODE.name()])
         if (!index || index.value.isAllWhitespace()) {
             return
         }
-        MetaDataEntry lane = metaDataEntry(file, "LANE_NO")
+        MetaDataEntry lane = metaDataEntry(file, MetaDataColumn.LANE_NO.name())
         String oldValue = lane.value
         if (!oldValue.endsWith(index.value)) {
             String value = lane.value + "_" + index.value

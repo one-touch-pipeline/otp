@@ -77,9 +77,9 @@ boolean showFinishedEntries = false
 SeqType wholeGenomePaired = SeqType.findByNameAndLibraryLayout("WHOLE_GENOME", SeqType.LIBRARYLAYOUT_PAIRED)
 SeqType exonPaired = SeqType.findByNameAndLibraryLayout("EXON", SeqType.LIBRARYLAYOUT_PAIRED)
 
-MetaDataKey libPrepKitKey = MetaDataKey.findByName("LIB_PREP_KIT")
+MetaDataKey libPrepKitKey = MetaDataKey.findByName(MetaDataColumn.LIB_PREP_KIT.name())
 MetaDataKey enrichmentKitKey = MetaDataKey.findByName("ENRICHMENT_KIT")
-MetaDataKey commentKey = MetaDataKey.findByName("COMMENT")
+MetaDataKey commentKey = MetaDataKey.findByName(MetaDataColumn.COMMENT.name())
 
 
 List blackList_MergingSetId = ([12174511] as long[]) as List

@@ -50,7 +50,7 @@ class RunDateParserService {
     * @return
     */
    private Date getDateFromMetaData(DataFile dataFile) {
-       MetaDataKey key = MetaDataKey.findByName("RUN_DATE")
+       MetaDataKey key = MetaDataKey.findByName(MetaDataColumn.RUN_DATE.name())
        MetaDataEntry entry = MetaDataEntry.findByDataFileAndKey(dataFile, key)
        if (!entry) {
            return null

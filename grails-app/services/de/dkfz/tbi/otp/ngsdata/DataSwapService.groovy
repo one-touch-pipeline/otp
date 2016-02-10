@@ -230,7 +230,7 @@ mv '${oldDataFileName}' '${newDataFileName}';
             String oldSampleIdentifier = sampleIdentifier.name
             sampleIdentifier.name += postfix
             sampleIdentifier.save()
-            changeMetadataEntry(sample, "SAMPLE_ID", oldSampleIdentifier, sampleIdentifier.name)
+            changeMetadataEntry(sample, MetaDataColumn.SAMPLE_ID.name(), oldSampleIdentifier, sampleIdentifier.name)
         }
     }
 

@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page import="de.dkfz.tbi.otp.ngsdata.MetaDataColumn" contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -119,7 +119,7 @@
                         <otp:editorSwitch roles="ROLE_ADMIN" link="${g.createLink(controller: 'dataFile', action: 'updateMetaData', id: metaDataEntry.id)}" value="${metaDataEntry.value}"/>
                     </sec:ifAllGranted>
                     <sec:ifNotGranted roles="ROLE_ADMIN">
-                        <g:if test="${metaDataEntry.key.name == 'SAMPLE_ID'}">
+                        <g:if test="${metaDataEntry.key.name == MetaDataColumn.SAMPLE_ID.name()}">
                             <g:message code="datafile.showDetails.hiddenSampleIdentifier"/>
                         </g:if>
                         <g:else>

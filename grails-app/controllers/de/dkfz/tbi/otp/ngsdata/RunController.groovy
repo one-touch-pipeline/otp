@@ -27,8 +27,8 @@ class RunController {
             return
         }
         List<MetaDataKey> keys = []
-        keys[0] = MetaDataKey.findByName("SAMPLE_ID")
-        keys[1] = MetaDataKey.findByName("WITHDRAWN")
+        keys[0] = MetaDataKey.findByName(MetaDataColumn.SAMPLE_ID.name())
+        keys[1] = MetaDataKey.findByName(MetaDataColumn.WITHDRAWN.name())
 
         return [
             run: run,

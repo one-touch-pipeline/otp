@@ -56,7 +56,7 @@ class MultiplexingService {
 
 
     private void appendBarcode(DataFile file, String barcode) {
-        MetaDataKey key = MetaDataKey.findByName("LANE_NO")
+        MetaDataKey key = MetaDataKey.findByName(MetaDataColumn.LANE_NO.name())
         MetaDataEntry entry = MetaDataEntry.findByDataFileAndKey(file, key)
         if (entry.value.contains(barcode)) {
             return
