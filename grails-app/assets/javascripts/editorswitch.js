@@ -18,16 +18,6 @@ $(function() {
         existingValue = $("span.wordBreak", td).text();
         $("p.edit-switch-drop-down-editor", outerContainer).show();
         $("p.edit-switch-drop-down-label", outerContainer).hide();
-        options = $(".dropDown").empty();
-        options.append($("<option />").val(existingValue).text(existingValue));
-        $.getJSON($.otp.contextPath + "/individual/typeDropDown", function (result) {
-            var options = $(".dropDown");
-            $.each(result, function () {
-                if (this.name !== existingValue) {
-                    options.append($("<option />").val(this.name).text(this.name));
-                }
-            });
-        });
     });
 
     $("div.edit-switch-new-value p.edit-switch-new-value-label button.insert").click(function () {
@@ -36,13 +26,6 @@ $(function() {
         outerContainer = $(this).parent().parent();
         $("p.edit-switch-new-value-editor", outerContainer).show();
         $("p.edit-switch-new-value-label", outerContainer).hide();
-        options = $(".dropDown").empty();
-        $.getJSON($.otp.contextPath + "/individual/sampleTypeDropDown", function (result) {
-            var options = $(".dropDown");
-            $.each(result, function () {
-                options.append($("<option />").val(this).text(this));
-            });
-        });
     });
 
     $("div.edit-switch-new-free-text-value p.edit-switch-new-free-text-value-label button.insert").click(function () {
@@ -197,7 +180,7 @@ $(function() {
                 model: $("input:text[name=Model]", container).val(),
                 kit: $("input:text[name=Kit]", container).val(),
                 email: $("input:text[name=E-Mail]", container).val(),
-                aspera: $("input:text[name=Aspera]", container).val()
+                aspera: $("input:text[name='Aspera Account']", container).val()
             },
             success: function (data) {
                 if (data.success) {

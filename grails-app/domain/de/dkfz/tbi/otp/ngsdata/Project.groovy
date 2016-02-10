@@ -4,6 +4,19 @@ import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
 
 class Project {
+
+    /**
+     * This enum defines if SNV calling should be done for this project.
+     * Default is unknown
+     */
+    enum Snv {
+        YES,
+        NO,
+        UNKNOWN
+    }
+
+    Snv snv = Snv.UNKNOWN
+
     String name
     String dirName
     String realmName

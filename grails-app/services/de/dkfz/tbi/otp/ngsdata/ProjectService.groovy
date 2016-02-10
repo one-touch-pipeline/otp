@@ -127,4 +127,11 @@ AND ace.granting = true
         }
         return false
     }
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void setSnv(Project project, Project.Snv snv) {
+        assert project: "the input project must not be null"
+        assert snv: "the input snv must not be null"
+        project.snv = snv
+        project.save(flush: true, failOnError: true)
+    }
 }

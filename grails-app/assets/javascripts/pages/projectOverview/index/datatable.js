@@ -139,8 +139,8 @@ $.otp.projectOverviewTable = {
         });
     },
 
-    updateValue: function (property, contactPersonName, value) {
-        var input = prompt("Enter new " + property, value);
+    updateValue: function (property, contactPersonName, value, account) {
+        var input = prompt("Enter new " + property + account, value);
         var action = 'update'+property;
         if (input != null) {
             $.ajax({
@@ -190,7 +190,7 @@ $.otp.projectOverviewTable = {
                     row[2] = contactPersonEmail;
                     row[3] ='<input class= "edit-button-left" type="button" onclick="$.otp.projectOverviewTable.updateValue(\'Email\',\'' + contactPersonName + '\',\'' + contactPersonEmail + '\')"/>';
                     row[4] = contactPersonAspera;
-                    row[5] = '<input class= "edit-button-left" type="button" onclick="$.otp.projectOverviewTable.updateValue(\'Aspera\',\'' + contactPersonName + '\',\'' + contactPersonAspera + '\')"/>';
+                    row[5] = '<input class= "edit-button-left" type="button" onclick="$.otp.projectOverviewTable.updateValue(\'Aspera\',\'' + contactPersonName + '\',\'' + contactPersonAspera + '\',\' Account\')"/>';
                     row[6] = '<input type="button" value="Delete" onclick="$.otp.projectOverviewTable.deleteUser(\'' + contactPersonName + '\')"/>';
                 }
                 return json;

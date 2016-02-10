@@ -38,7 +38,9 @@ class IndividualController {
             previous: individualService.previousIndividual(ind),
             next: individualService.nextIndividual(ind),
             igvMap: igvSessionFileService.createMapOfIgvEnabledScans(ind.seqScans),
-            comment: ind.comment
+            comment: ind.comment,
+            typeDropDown: Individual.Type.values(),
+            sampleTypeDropDown: individualService.getSampleTypeNames()
         ]
     }
 
@@ -166,14 +168,6 @@ class IndividualController {
             data = [error: e.message]
         }
         render data as JSON
-    }
-
-    def typeDropDown() {
-        render Individual.Type.values() as JSON
-    }
-
-    def sampleTypeDropDown() {
-        render individualService.getSampleTypeNames() as JSON
     }
 
     def retrieveSampleIdentifiers(RetrieveSampleIdentifiersCommand cmd) {

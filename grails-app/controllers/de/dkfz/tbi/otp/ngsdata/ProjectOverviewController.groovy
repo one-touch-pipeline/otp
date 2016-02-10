@@ -2,7 +2,11 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.AlignmentDecider
+import de.dkfz.tbi.otp.dataprocessing.ProcessingThresholds
+import de.dkfz.tbi.otp.dataprocessing.ProcessingThresholdsService
 import de.dkfz.tbi.otp.dataprocessing.Workflow
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import grails.converters.JSON
 import org.springframework.security.access.prepost.PreAuthorize
 import de.dkfz.tbi.otp.utils.DataTableCommand
@@ -24,6 +28,12 @@ class ProjectOverviewController {
     SeqTrackService seqTrackService
 
     ContactPersonService contactPersonService
+
+    SampleTypePerProjectService sampleTypePerProjectService
+
+    ProcessingThresholdsService processingThresholdsService
+
+    SeqTypeService seqTypeService
 
     Map index() {
         String projectName = params.projectName
@@ -68,12 +78,39 @@ class ProjectOverviewController {
             alignmentError = e.message
             log.error(e.message, e)
         }
+        List thresholdsTable = []
+        List configTable
 
+        thresholdsTable.add(buildHeadline())
+        sampleTypePerProjectService.findByProject(project).each() { sampleTypePerProject ->
+            List row = []
+            row.add(sampleTypePerProject.sampleType.name)
+            row.add(sampleTypePerProject.category)
+            seqTypeService.alignableSeqTypes().each {
+                ProcessingThresholds processingThresholds = processingThresholdsService.findByProjectAndSampleTypeAndSeqType(project, sampleTypePerProject.sampleType, it)
+                row.add(processingThresholds?.numberOfLanes)
+                row.add(processingThresholds?.coverage)
+            }
+            thresholdsTable.add(row)
+        }
+        thresholdsTable = removeEmptyColumns(thresholdsTable)
+        List thresholdsHeadline = getHeadline(thresholdsTable)
+        thresholdsTable.remove(thresholdsHeadline)
+
+        configTable = buildTableForConfig(project)
+        List configTableHeadline = getHeadline(configTable)
+        configTable.remove(configTableHeadline)
         return [
                 projects: projects*.name,
                 project: project.name,
                 alignmentInfo: alignmentInfo,
                 alignmentError: alignmentError,
+                snv: project.snv,
+                thresholdsHeadline: thresholdsHeadline,
+                thresholdsTable: thresholdsTable,
+                configTableHeadline: configTableHeadline,
+                configTable: configTable,
+                snvDropDown: Project.Snv.values(),
         ]
     }
 
@@ -347,6 +384,14 @@ class ProjectOverviewController {
         render dataToRender as JSON
     }
 
+    JSON updateSnv(UpdateSnvCommand cmd) {
+        checkErrorAndCallMethod(cmd, { projectService.setSnv(projectService.getProjectByName(cmd.projectName), Project.Snv.valueOf(cmd.value))})
+    }
+
+    JSON snvDropDown() {
+        render Project.Snv.values() as JSON
+    }
+
 
     private void checkErrorAndCallMethod(Serializable cmd, Closure method) {
         Map data
@@ -361,6 +406,51 @@ class ProjectOverviewController {
 
     private Map getErrorData(FieldError errors) {
         return [success: false, error: "'" + errors.getRejectedValue() + "' is not a valid value for '" + errors.getField() + "'. Error code: '" + errors.code + "'"]
+    }
+
+    private List buildTableForConfig(Project project) {
+        List table = []
+        table.add(["", "Config uploaded", "Version"])
+        seqTypeService.alignableSeqTypes().each {
+            List row = []
+            row.add(it.displayName)
+            SnvConfig snvConfig = CollectionUtils.atMostOneElement(SnvConfig.findAllByProjectAndSeqTypeAndObsoleteDate(project, it, null))
+            if (snvConfig) {
+                row.add("Yes")
+                row.add(snvConfig.externalScriptVersion)
+            } else {
+                row.add("No")
+                row.add("")
+            }
+            table.add(row)
+        }
+        return table.transpose()
+    }
+
+    private List buildHeadline() {
+        List headline = []
+        headline.add("Sample Type")
+        headline.add("Category")
+        seqTypeService.alignableSeqTypes().each {
+            headline.add("Number of Lanes ("+ it.displayName + " " + it.libraryLayout + ")")
+            headline.add("Coverage ("+ it.displayName + " " + it.libraryLayout + ")")
+        }
+        return headline
+    }
+
+    private List removeEmptyColumns(List list) {
+        list = list.transpose()
+        list.removeAll {
+            it.findAll {it == null}.size() == (it.size() - 1)
+        }
+        return list.transpose()
+    }
+
+    private List getHeadline(List list) {
+        if (list) {
+            return list.first()
+        }
+        return []
     }
 }
 
@@ -467,5 +557,13 @@ class UpdateContactPersonAsperaCommand implements Serializable {
     }
     void setValue(String value) {
         this.newAspera = value?.trim()?.replaceAll(" +", " ")
+    }
+}
+
+class UpdateSnvCommand implements Serializable {
+    String projectName
+    String value
+    void setId(String id) {
+        this.projectName = id
     }
 }

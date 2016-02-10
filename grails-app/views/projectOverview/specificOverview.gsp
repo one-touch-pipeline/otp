@@ -1,4 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8"%>
+<%@ page import="de.dkfz.tbi.otp.ngsdata.Project.Snv" %>
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -46,7 +47,7 @@
         <p>
             <otp:editorSwitch roles="ROLE_OPERATOR"
                     template="newFreeTextValues"
-                    fields="${["Name","E-Mail","Aspera"]}"
+                    fields="${["Name","E-Mail","Aspera Account"]}"
                     link="${g.createLink(controller: "projectOverview", action: "createContactPersonOrAddProject", id: project)}"
                     value=""/>
         </p>
@@ -70,6 +71,62 @@
             <g:else>
                 ${alignmentError ?: g.message(code: 'projectOverview.alignmentInformation.noAlign')}
             </g:else>
+        </div>
+        <br>
+        <div>
+            <h3>${g.message(code: 'projectOverview.snv.title')}</h3>
+            <table  class="snv">
+                <tr>
+                    <td><g:message code="projectOverview.snv"/></td>
+                    <td class="myValue typeDropDown">
+                        <otp:editorSwitch roles="ROLE_OPERATOR"
+                                            template="dropDown"
+                                            link="${g.createLink(controller: 'ProjectOverview', action: 'updateSnv', id: project)}"
+                                            values="${snvDropDown}"
+                                            value="${snv}"/>
+                    </td>
+                </tr>
+            </table>
+            <br>
+            <table>
+                <tr>
+                    <g:each var="cell" in="${configTableHeadline}">
+                        <th>
+                           ${cell}
+                         </th>
+                    </g:each>
+                </tr>
+                <g:each var="rows" in="${configTable}">
+                    <tr>
+                        <g:each var="cell" in="${rows}">
+                            <td class="tableEntry">
+                                ${cell}
+                            </td>
+                        </g:each>
+                    </tr>
+                </g:each>
+            </table>
+            <g:if test="${snv==Snv.YES}">
+            <br>
+                <table>
+                    <tr>
+                        <g:each var="cell" in="${thresholdsHeadline}">
+                            <th>
+                               ${cell}
+                             </th>
+                        </g:each>
+                    </tr>
+                    <g:each var="rows" in="${thresholdsTable}">
+                        <tr>
+                            <g:each var="cell" in="${rows}">
+                                <td class="tableEntry">
+                                    ${cell}
+                                </td>
+                            </g:each>
+                        </tr>
+                    </g:each>
+                </table>
+            </g:if>
         </div>
     </div>
     <asset:script>

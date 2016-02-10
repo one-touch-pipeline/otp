@@ -59,7 +59,14 @@
                 </sec:ifAllGranted>
                 <tr>
                     <td class="myKey"><g:message code="individual.show.details.type"/></td>
-                    <td class="myValue typeDropDown"><otp:editorSwitch roles="ROLE_OPERATOR" template="dropDown" link="${g.createLink(controller: 'individual', action: 'updateField', id: ind.id, params: [key: 'type'])}" value="${ind.type}"/></td>
+                    <td class="myValue typeDropDown">
+                        <otp:editorSwitch
+                            roles="ROLE_OPERATOR"
+                            template="dropDown"
+                            link="${g.createLink(controller: 'individual', action: 'updateField', id: ind.id, params: [key: 'type'])}"
+                            value="${ind.type}"
+                            values="${typeDropDown}"/>
+                    </td>
                 </tr>
                 <tr>
                     <td class="myKey"><g:message code="individual.show.details.project"/></td>
@@ -68,7 +75,12 @@
             </table>
         </div>
         <h1 id="samples" style="display:inline-block"><g:message code="individual.show.samples"/>
-            <otp:editorSwitch roles="ROLE_OPERATOR" template="newValue" link="${g.createLink(controller: 'individual', action: 'newSampleType', id: ind.id)}" value="${ind.type}"/>
+            <otp:editorSwitch
+                roles="ROLE_OPERATOR"
+                template="newValue"
+                link="${g.createLink(controller: 'individual', action: 'newSampleType', id: ind.id)}"
+                value="${ind.type}"
+                values="${sampleTypeDropDown}"/>
         </h1>
         <div class="tableBlock">
             <table>
