@@ -189,7 +189,7 @@ class MetaDataFieldsControllerSpec extends Specification implements UserAndRoles
         sequencingKitLabel.save(flush: true)
 
         when:
-        controller.params.name = name
+        controller.params.platform = platform
         controller.params.group = group
         controller.params.model = model
         controller.params.kit = kit
@@ -201,14 +201,14 @@ class MetaDataFieldsControllerSpec extends Specification implements UserAndRoles
         controller.response.status == 200
         controller.response.json.success
         SeqPlatform.findByNameAndSeqPlatformModelLabelAndSequencingKitLabelAndSeqPlatformGroup(
-                name,
+                platform,
                 controller.params.model? seqPlatformModelLabel:null,
                 controller.params.kit? sequencingKitLabel:null,
                 controller.params.group? seqPlatformGroup:null
         )
 
         where:
-        name                | group                     | model                         | kit
+        platform            | group                     | model                         | kit
         'SeqPlatform'       | ''                        | 'SeqPlatformModelLabel'       | ''
         'SeqPlatform'       | 'SeqPlatformGroup'        | 'SeqPlatformModelLabel'       | ''
         'SeqPlatform'       | ''                        | 'SeqPlatformModelLabel'       | 'SequencingKitLabel'
@@ -237,7 +237,7 @@ class MetaDataFieldsControllerSpec extends Specification implements UserAndRoles
         )
 
         when:
-        controller.params.name = name
+        controller.params.platform = platform
         controller.params.group = group
         controller.params.model = model
         controller.params.kit = kit
@@ -249,14 +249,14 @@ class MetaDataFieldsControllerSpec extends Specification implements UserAndRoles
         controller.response.status == 200
         controller.response.json.success
         SeqPlatform.findByNameAndSeqPlatformModelLabelAndSequencingKitLabelAndSeqPlatformGroup(
-                name,
+                platform,
                 controller.params.model? SeqPlatformModelLabel.findByName(model):null,
                 controller.params.kit? SequencingKitLabel.findByName(kit):null,
                 controller.params.group? SeqPlatformGroup.findByName(group):null
         )
 
         where:
-        name                | group                     | model                         | kit
+        platform            | group                     | model                         | kit
         'SeqPlatform2'      | 'SeqPlatformGroup'        | 'SeqPlatformModelLabel'       | 'SequencingKitLabel'
         'SeqPlatform'       | 'SeqPlatformGroup'        | 'SeqPlatformModelLabel2'      | 'SequencingKitLabel'
         'SeqPlatform'       | 'SeqPlatformGroup'        | 'SeqPlatformModelLabel'       | 'SequencingKitLabel2'
@@ -279,7 +279,7 @@ class MetaDataFieldsControllerSpec extends Specification implements UserAndRoles
         seqPlatform.save(flush: true)
 
         when:
-        controller.params.name = name
+        controller.params.platform = platform
         controller.params.group = group
         controller.params.model = model
         controller.params.kit = kit
@@ -292,7 +292,7 @@ class MetaDataFieldsControllerSpec extends Specification implements UserAndRoles
         !controller.response.json.success
 
         where:
-        name                | group                     | model                         | kit
+        platform            | group                     | model                         | kit
         ''                  | ''                        | ''                            | ''
         ''                  | 'SeqPlatformGroup'        | ''                            | ''
         ''                  | ''                        | 'SeqPlatformModelLabel'       | ''

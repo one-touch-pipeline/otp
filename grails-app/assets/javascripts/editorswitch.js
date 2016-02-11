@@ -192,6 +192,7 @@ $(function() {
                 anyLayout: ($("input:checked[name=SINGLE]", container).is( ":checked" )||
                                   $("input:checked[name=PAIRED]", container).is( ":checked" )||
                                   $("input:checked[name=MATE_PAIR]", container).is( ":checked" )),
+                platform: $("input:text[name=Platform]", container).val(),
                 group: $("input:text[name=Group]", container).val(),
                 model: $("input:text[name=Model]", container).val(),
                 kit: $("input:text[name=Kit]", container).val(),

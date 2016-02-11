@@ -95,7 +95,7 @@ class MetaDataFieldsController {
     }
 
     JSON createSeqPlatform(UpdateCommandSeqPlatform cmd) {
-        checkErrorAndCallMethod(cmd, { seqPlatformService.createNewSeqPlatform(cmd.name, cmd.group, cmd.model, cmd.kit) })
+        checkErrorAndCallMethod(cmd, { seqPlatformService.createNewSeqPlatform(cmd.platform, cmd.group, cmd.model, cmd.kit) })
     }
 
     JSON createModelAlias(UpdateCommandModelAlias cmd) {
@@ -232,14 +232,14 @@ class UpdateCommandSeqCenter implements Serializable {
 }
 
 class UpdateCommandSeqPlatform implements Serializable {
-        String name
+        String platform
         String group
         String model
         String kit
         static constraints = {
-            name(blank: false,
+            platform(blank: false,
                     validator: {val, obj ->
-                        if (SeqPlatformService.findSeqPlatform(obj.name, obj.model, obj.kit)) {
+                        if (SeqPlatformService.findSeqPlatform(obj.platform, obj.model, obj.kit)) {
                             return 'Duplicate'
                         }
                     })
@@ -247,8 +247,8 @@ class UpdateCommandSeqPlatform implements Serializable {
             model(blank: false, nullable: false)
             kit(blank: false, nullable: true)
         }
-        void setName(String name) {
-            this.name = name?.trim()?.replaceAll(" +", " ")
+        void setPlatform(String platform) {
+            this.platform = platform?.trim()?.replaceAll(" +", " ")
         }
         void setGroup(String group) {
             this.group = group?.trim()?.replaceAll(" +", " ")

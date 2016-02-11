@@ -180,7 +180,7 @@
                     <otp:editorSwitch
                         roles="ROLE_OPERATOR"
                         template="newFreeTextValues"
-                        fields="${["Group", "Name", "Model", "Kit"]}"
+                        fields="${["Group", "Platform", "Model", "Kit"]}"
                         link="${g.createLink(controller: 'metaDataFields', action: 'createSeqPlatform')}"
                         value=""/>
                 </td>
