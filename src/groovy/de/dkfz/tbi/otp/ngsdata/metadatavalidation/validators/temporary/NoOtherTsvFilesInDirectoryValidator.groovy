@@ -10,13 +10,21 @@ class NoOtherTsvFilesInDirectoryValidator implements MetadataValidator {
 
     @Override
     Collection<String> getDescriptions() {
-        return ['The directory containing the metadata file contains only one *.tsv file. (This restriction is planned to be removed in the future.)']
+        return ['The directory containing the metadata file contains no other *fastq*.tsv or *align*.tsv file. (This restriction is planned to be removed in the future.)']
     }
 
     @Override
     void validate(MetadataValidationContext context) {
-        if (context.metadataFile.parentFile.listFiles().find { it.name.endsWith('.tsv') && it != context.metadataFile }) {
-            context.addProblem(Collections.emptySet(), Level.ERROR, "Directory '${context.metadataFile.parentFile}' contains other *.tsv files than '${context.metadataFile.name}'. This is currently not supported.")
+        if (!context.metadataFile.name.contains('fastq')) {
+            context.addProblem(Collections.emptySet(), Level.ERROR, "The file name of '${context.metadataFile}' does not contain 'fastq'.")
+        } else {
+            Collection<File> files = context.metadataFile.parentFile.listFiles().findAll {
+                it.name.endsWith('.tsv') && (it.name.contains('fastq') || it.name.contains('align'))
+            }
+            assert files.contains(context.metadataFile)
+            if (files.size() > 1) {
+                context.addProblem(Collections.emptySet(), Level.WARNING, "Directory '${context.metadataFile.parentFile}' contains multiple files which would be imported:\n'${files*.name.join("'\n'")}'")
+            }
         }
     }
 }

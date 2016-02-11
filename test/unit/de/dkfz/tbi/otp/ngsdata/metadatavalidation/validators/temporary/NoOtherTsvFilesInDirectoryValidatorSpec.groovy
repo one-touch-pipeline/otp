@@ -15,13 +15,34 @@ class NoOtherTsvFilesInDirectoryValidatorSpec extends Specification {
     @Rule
     TemporaryFolder temporaryFolder
 
-    void 'validate, when directory contains other .tsv file, adds error'() {
+    void 'validate, when directory contains other importable files, adds warning'() {
 
         given:
         File testDirectory = temporaryFolder.newFolder()
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(testDirectory: testDirectory)
-        assert context.metadataFile.parentFile.mkdir()
-        CreateFileHelper.createFile(new File(context.metadataFile.parentFile, 'otherMetadata.tsv'))
+        CreateFileHelper.createFile(context.metadataFile)
+        CreateFileHelper.createFile(new File(context.metadataFile.parentFile, 'metadata_align.tsv'))
+        CreateFileHelper.createFile(new File(context.metadataFile.parentFile, 'otherMetadata_fastq.tsv'))
+
+        when:
+        new NoOtherTsvFilesInDirectoryValidator().validate(context)
+
+        then:
+        Problem problem = exactlyOneElement(context.problems)
+        problem.level == Level.WARNING
+        problem.message.startsWith("Directory '${context.metadataFile.parentFile}' contains multiple files which would be imported:\n'")
+        problem.message.contains("'${context.metadataFile.name}'")
+        problem.message.contains("'metadata_align.tsv'")
+        problem.message.contains("'otherMetadata_fastq.tsv'")
+    }
+
+    void "validate, when file name does not contain 'fastq', adds error"() {
+
+        given:
+        MetadataValidationContext context = MetadataValidationContextFactory.createContext(
+                metadataFile: temporaryFolder.newFile('metadata.tsv'))
+        CreateFileHelper.createFile(context.metadataFile)
+        CreateFileHelper.createFile(new File(context.metadataFile.parentFile, 'otherMetadata_fastq.tsv'))
 
         when:
         new NoOtherTsvFilesInDirectoryValidator().validate(context)
@@ -29,15 +50,28 @@ class NoOtherTsvFilesInDirectoryValidatorSpec extends Specification {
         then:
         Problem problem = exactlyOneElement(context.problems)
         problem.level == Level.ERROR
-        problem.message.contains('contains other *.tsv files')
+        problem.message == "The file name of '${context.metadataFile}' does not contain 'fastq'."
     }
 
+    void 'validate, when directory contains other non-importable .tsv file, does nothing'() {
+
+        given:
+        File testDirectory = temporaryFolder.newFolder()
+        MetadataValidationContext context = MetadataValidationContextFactory.createContext(testDirectory: testDirectory)
+        CreateFileHelper.createFile(context.metadataFile)
+        CreateFileHelper.createFile(new File(context.metadataFile.parentFile, 'metadata.tsv'))
+
+        when:
+        new NoOtherTsvFilesInDirectoryValidator().validate(context)
+
+        then:
+        context.problems.isEmpty()
+    }
     void 'validate, when directory contains no other .tsv file, does nothing'() {
 
         given:
         File testDirectory = temporaryFolder.newFolder()
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(testDirectory: testDirectory)
-        assert context.metadataFile.parentFile.mkdir()
         CreateFileHelper.createFile(context.metadataFile)
 
         when:
