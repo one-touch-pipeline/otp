@@ -1,13 +1,21 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.ProcessingStatus
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.SampleType
 import de.dkfz.tbi.otp.ngsdata.SampleTypePerProject
+import grails.validation.ValidationException
+import org.junit.After
 import org.junit.Test
 
 class SamplePairTests {
+
+    @After
+    void tearDown() {
+        SamplePair.metaClass = null
+    }
 
     @Test
     void testSetProcessingStatusNeedsProcessing() {
@@ -44,5 +52,41 @@ class SamplePairTests {
         assert nonPersistedSamplePair.processingStatus == processingStatus
         assert nonPersistedSamplePair.id
         assert persistedSamplePair.processingStatus == processingStatus
+    }
+
+    @Test
+    void testConstraints_DifferentIndividual_shouldFail() {
+        SamplePair samplePair = DomainFactory.createSamplePair()
+
+        MergingWorkPackage mergingWorkPackage1 = samplePair.mergingWorkPackage1
+        mergingWorkPackage1.sample.individual = DomainFactory.createIndividual()
+        assert mergingWorkPackage1.sample.save(flush: true)
+
+        SamplePair.metaClass.getIndividual = { -> return mergingWorkPackage1.individual}
+
+        TestCase.shouldFailWithMessageContaining(ValidationException, "individual", { samplePair.save() })
+    }
+
+    @Test
+    void testConstraints_DifferentWorkflow_shouldFail() {
+        SamplePair samplePair = DomainFactory.createSamplePair()
+        MergingWorkPackage mergingWorkPackage1 = samplePair.mergingWorkPackage1
+        mergingWorkPackage1.workflow = DomainFactory.createPanCanWorkflow()
+        mergingWorkPackage1.statSizeFileName = "statSizeFileName.tab"
+        assert mergingWorkPackage1.save(flush: true)
+
+        TestCase.shouldFailWithMessageContaining(ValidationException, "workflow", { samplePair.save(flush: true) })
+    }
+
+    @Test
+    void testConstraints_DifferentSeqType_ShouldFail() {
+        SamplePair samplePair = DomainFactory.createSamplePair()
+        MergingWorkPackage mergingWorkPackage1 = samplePair.mergingWorkPackage1
+        mergingWorkPackage1.seqType = DomainFactory.createSeqType()
+        assert mergingWorkPackage1.save(flush: true)
+
+        SamplePair.metaClass.getSeqType = { -> return mergingWorkPackage1.seqType }
+
+        TestCase.shouldFailWithMessageContaining(ValidationException, "seqType", { samplePair.save(flush: true) })
     }
 }

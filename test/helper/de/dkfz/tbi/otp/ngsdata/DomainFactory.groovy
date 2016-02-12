@@ -442,13 +442,15 @@ class DomainFactory {
                 externalScriptVersion: externalScript.scriptVersion
         )
 
-        SnvCallingInstance snvCallingInstance = SnvCallingInstance.build( [
+        SnvCallingInstance snvCallingInstance = createSnvCallingInstance([
+                instanceName: "2014-08-25_15h32",
                 samplePair: samplePair,
                 sampleType1BamFile: disease,
                 sampleType2BamFile: control,
                 config: snvConfig,
                 latestDataFileCreationDate: AbstractBamFile.getLatestSequenceDataFileCreationDate(disease, control),
         ] + properties)
+        assert snvCallingInstance.save(flush: true)
         return snvCallingInstance
     }
 

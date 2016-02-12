@@ -76,9 +76,9 @@ class SamplePair {
             if (val == obj.mergingWorkPackage1) {
                 errors.reject(null, "mergingWorkPackage1 and mergingWorkPackage2 are equal.")
             }
-            // Pairs of MergingWorkPackages with different reference genomes are allowed, particularly if the disease
-            // sample is a xenograft. -> OTP-1677
-            (mergingWorkPackageEqualProperties + ['individual'] - ['referenceGenome']).each {
+            // For one sample pair the individual, the seqType and the workflow must be the same.
+            // To provide the possibility to create sample pairs manually other properties are ignored here.
+            (['individual', 'seqType', 'workflow']).each {
                 def mwp1Value = obj.mergingWorkPackage1."${it}"
                 def mwp2Value = val."${it}"
                 if (mwp1Value != mwp2Value && !(mwp1Value?.hasProperty('id') && mwp2Value?.hasProperty('id') && mwp1Value.id == mwp2Value.id)) {
