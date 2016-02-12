@@ -51,34 +51,46 @@
                         <li class="menuContainerLCss" id="sequence"><g:link controller="sequence" action="index"><g:message code="otp.menu.sequences"/></g:link></li>
                         <li class="menuContainerLCss" id="run"><g:link controller="run" action="list"><g:message code="otp.menu.runs"/></g:link></li>
                         <li class="menuContainerLCss" id="processes"><g:link controller="processes" action="list"><g:message code="otp.menu.processes"/></g:link></li>
-                        <li class="overview_nav menuContainerLCss">
+                        <li class="navigation menuContainerLCss" id="overview">
                             <ul>
                                 <li class="overview_nav_container" id="overview"><g:link ><g:message code="otp.menu.statistics"/> &#9661;</g:link>
                                     <ul>
                                         <sec:ifAllGranted roles="ROLE_OPERATOR">
                                             <li class="allGranted_general" id="overviewMB"><g:link controller="overviewMB" action="index"><g:message code="otp.menu.generalStatistics"/></g:link></li><br>
-                                            <li id="clusterJobGeneral"><g:link controller="clusterJobGeneral" action="index"><g:message code="otp.menu.jobstats.general"/></g:link></li><br>
-                                            <li id="clusterJobJobTypeSpecific"><g:link controller="clusterJobJobTypeSpecific" action="index"><g:message code="otp.menu.jobstats.jobTypeSpecific"/></g:link></li><br>
+                                            <li class="allGranted" id="clusterJobGeneral"><g:link controller="clusterJobGeneral" action="index"><g:message code="otp.menu.jobstats.general"/></g:link></li><br>
+                                            <li class="allGranted" id="clusterJobJobTypeSpecific"><g:link controller="clusterJobJobTypeSpecific" action="index"><g:message code="otp.menu.jobstats.jobTypeSpecific"/></g:link></li><br>
                                         </sec:ifAllGranted>
                                         <li id="index"><g:link controller="projectOverview" action="index"><g:message code="otp.menu.projectSpecificStatistics"/></g:link></li><br>
                                         <li id="specificOverview"><g:link controller="projectOverview" action="specificOverview"><g:message code="otp.menu.projectSpecificStatisticsTableOverview"/></g:link></li><br>
                                         <sec:ifAllGranted roles="ROLE_MMML_MAPPING">
-                                            <li id="mmmlIdentifierMapping"><g:link controller="projectOverview" action="mmmlIdentifierMapping"><g:message code="otp.menu.mmmlIdentifierMapping"/></g:link></li><br>
+                                            <li class="allGranted" id="mmmlIdentifierMapping"><g:link controller="projectOverview" action="mmmlIdentifierMapping"><g:message code="otp.menu.mmmlIdentifierMapping"/></g:link></li><br>
                                         </sec:ifAllGranted>
                                         <li id="index"><g:link controller="alignmentQualityOverview" action="index"><g:message code="otp.menu.alignmentQuality"/></g:link></li><br>
                                     </ul>
                                 </li>
                             </ul>
                         </li>
-                         <sec:ifAnyGranted roles="ROLE_ADMIN">
-                            <li id="snv"><g:link controller="snv"  action="index"><g:message code="otp.menu.snv"/></g:link></li>
+                        <sec:ifAnyGranted roles="ROLE_OPERATOR">
+                            <li class="navigation menuContainerLCss" id="snv">
+                                <ul>
+                                    <li class="overview_nav_container" id="overview"><g:link ><g:message code="otp.menu.snv"/> &#9661;</g:link>
+                                        <ul>
+                                            <li class="allGranted_general" id="snv"><g:link controller="snv"  action="index"><g:message code="otp.menu.snv.processing"/></g:link></li><br>
+                                            <li id="snv"><g:link controller="snv"  action="results"><g:message code="otp.menu.snv.results"/></g:link></li><br>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
                         </sec:ifAnyGranted>
+                        <sec:ifNotGranted roles="ROLE_OPERATOR">
+                            <li id="snv" class="menuContainerLCss"><g:link controller="snv"  action="results"><g:message code="otp.menu.snv.results"/></g:link></li>
+                        </sec:ifNotGranted>
                         <sec:ifAllGranted roles="ROLE_OPERATOR">
                             <li class="allGranted menuContainerLCss" id="projectProgress"><g:link controller="projectProgress" action="progress"><g:message code="otp.menu.progress"/></g:link></li>
                             <li class="allGranted menuContainerLCss" id="runSubmit"><g:link controller="runSubmit" action="index"><g:message code="otp.menu.runSubmit"/></g:link></li>
                         </sec:ifAllGranted>
                         <sec:ifAnyGranted roles="ROLE_ADMIN">
-                            <li class="admin_nav menuContainerLCss">
+                            <li class="navigation menuContainerLCss" id="admin"s>
                                 <ul>
                                     <li class="allGranted admin_nav_container" id="admin"><g:link><g:message code="otp.menu.adminSection"/> &#9661;</g:link>
                                         <ul>

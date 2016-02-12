@@ -34,6 +34,10 @@ class SnvController {
         return map
     }
 
+    Map results() {
+        return [:]
+    }
+
     private handleSubmit(Map params, Project project) {
         Project.withTransaction {
             Map map = fetchData(project)
