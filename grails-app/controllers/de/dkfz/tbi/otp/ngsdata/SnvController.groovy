@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
 import grails.converters.JSON
 import de.dkfz.tbi.otp.ProcessingThresholds.*
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -14,6 +15,7 @@ class SnvController {
     SeqTypeService seqTypeService
     ProcessingThresholdsService processingThresholdsService
     IndividualService individualService
+    SnvService snvService
 
     Map index() {
         String projectName = params.projectName
@@ -35,6 +37,20 @@ class SnvController {
     }
 
     Map results() {
+        String projectName = params.projectName
+        List<String> projects = projectService.getAllProjects()*.name
+        if (!projectName) {
+            projectName = projects.first()
+        }
+        Project project = projectService.getProjectByName(projectName)
+
+        return [
+            projects: projects,
+            project: project.name,
+        ]
+    }
+
+    Map plots() {
         return [:]
     }
 
@@ -90,5 +106,13 @@ class SnvController {
         render dataToRender as JSON
     }
 
+    JSON dataTableSnvResults(DataTableCommand cmd) {
+        Map dataToRender = cmd.dataToRender()
+        List data = snvService.getSnvCallingInstanceForProject(params.project)
+        dataToRender.iTotalRecords = data.size()
+        dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
+        dataToRender.aaData = data
+        render dataToRender as JSON
+    }
 }
 
