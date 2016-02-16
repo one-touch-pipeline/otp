@@ -121,6 +121,10 @@ class SnvCallingInstance implements ProcessParameterObject{
         return new OtpPath(samplePair.samplePairPath, "config_${step.configFileNameSuffix}_${instanceName}.txt")
     }
 
+    OtpPath getAllSNVdiagnosticsPlots() {
+        return new OtpPath(snvInstancePath, "snvs_${getIndividual().pid}_allSNVdiagnosticsPlots.pdf")
+    }
+
     @Override
     Set<SeqTrack> getContainedSeqTracks() {
         return sampleType1BamFile.containedSeqTracks + sampleType2BamFile.containedSeqTracks

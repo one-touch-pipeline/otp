@@ -69,7 +69,7 @@ $.otp.snvResultsTable = {
                         $.otp.createLinkMarkup({
                             controller: 'snv',
                             action: 'plots',
-                            id: null,
+                            id: row[6],
                             text: 'Plots'
                         }),
                     ];

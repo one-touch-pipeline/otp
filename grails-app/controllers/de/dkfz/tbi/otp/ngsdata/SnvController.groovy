@@ -50,8 +50,52 @@ class SnvController {
         ]
     }
 
-    Map plots() {
-        return [:]
+    Map plots(RenderFileCommand cmd) {
+        if (cmd.hasErrors()) {
+            render status: 404
+            return
+        }
+        SnvCallingInstance snvCallingInstance = snvService.getSnvCallingInstance(cmd.id as long)
+        if (!snvCallingInstance) {
+            return [
+                    error: "Sorry, invalid snv calling instance",
+                    pid: "Individual not found"
+            ]
+        }
+        if (!snvCallingInstance.getAllSNVdiagnosticsPlots().absoluteDataManagementPath.exists()) {
+            return [
+                    error: "Sorry, there is no file available",
+                    pid: snvCallingInstance.individual.pid
+            ]
+        }
+        return [
+            id: cmd.id,
+            pid: snvCallingInstance.individual.pid,
+            error: null
+        ]
+    }
+
+    def renderPDF(RenderFileCommand cmd) {
+        if (cmd.hasErrors()) {
+            response.sendError(404)
+            return
+        }
+        SnvCallingInstance snvCallingInstance = snvService.getSnvCallingInstance(cmd.id as long)
+        if (!snvCallingInstance) {
+            render status: 404
+            return
+        }
+        File stream = snvCallingInstance.getAllSNVdiagnosticsPlots().absoluteDataManagementPath
+        if (!stream) {
+            render status: 404
+            return
+        }
+        if (!stream.exists()) {
+            render status: 404
+            return
+        }
+
+        render file: stream , contentType: "application/pdf"
     }
 
     private handleSubmit(Map params, Project project) {
@@ -116,3 +160,10 @@ class SnvController {
     }
 }
 
+class RenderFileCommand {
+    String id
+
+    static constraints = {
+        id nullable: false
+    }
+}
