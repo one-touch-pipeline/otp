@@ -487,10 +487,28 @@ class DomainFactory {
             )
         }
 
-        SnvJobResult snvJobResult = SnvJobResult.build(map)
-
-        return snvJobResult
+        return createSnvJobResult(map)
     }
+
+
+    public static SnvJobResult createSnvJobResult(Map properties) {
+        return createDomainObject(SnvJobResult, [
+                step: SnvCallingStep.CALLING,
+                externalScript: { createExternalScript() },
+                snvCallingInstance: { createSnvCallingInstance() }
+        ], properties)
+    }
+
+
+    public static ExternalScript createExternalScript(Map properties) {
+        return createDomainObject(ExternalScript, [
+            scriptIdentifier: "testIdentifier",
+            scriptVersion: "testVersion",
+            filePath: "testPath",
+            author: "testAuthor"
+        ], properties)
+    }
+
 
     public static AntibodyTarget createAntibodyTarget(Map properties = [:]) {
         return createDomainObject(AntibodyTarget, [
