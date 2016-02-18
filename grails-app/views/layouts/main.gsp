@@ -102,6 +102,7 @@
                                             <li id="processingOption"><g:link controller="processingOption"><g:message code="otp.menu.processingOptions"/></g:link></li><br>
                                             <li id="softwareTool"><g:link controller="softwareTool" action="list"><g:message code="otp.menu.softwareTool"/></g:link></li><br>
                                             <li id="metaDataFields"><g:link controller="metaDataFields" action="index"><g:message code="otp.menu.metaDataFields"/></g:link></li><br>
+                                            <li id="createProject"><g:link controller="createProject" action="index"><g:message code="otp.menu.createProject"/></g:link></li><br>
                                         </ul>
                                      </li>
                                 </ul>

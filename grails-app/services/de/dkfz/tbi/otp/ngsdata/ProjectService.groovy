@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.administration.GroupCommand
+import de.dkfz.tbi.otp.administration.GroupService
 import grails.plugin.springsecurity.SpringSecurityUtils
 import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.access.prepost.PostFilter
@@ -23,6 +25,8 @@ class ProjectService {
      * Dependency Injection of Spring Security Service - needed for ACL checks
      */
     def springSecurityService
+
+    GroupService groupService
 
     /**
      *
@@ -81,6 +85,29 @@ class ProjectService {
         }
         return project
     }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    public Project createProject(String name, String dirName, String realmName, String alignmentDeciderBeanName, String projectGroup, String nameInMetadataFiles, boolean copyFiles) {
+        Project project = createProject(name, dirName, realmName, alignmentDeciderBeanName)
+        project.hasToBeCopied = copyFiles
+        project.nameInMetadataFiles = nameInMetadataFiles
+        project.setProjectGroup(ProjectGroup.findByName(projectGroup))
+        assert project.save(flush: true, failOnError: true)
+        GroupCommand groupCommand = new GroupCommand(
+                name: name,
+                description: "group for ${name}",
+                readProject: false,
+                writeProject: false,
+                readJobSystem: false,
+                writeJobSystem: false,
+                readSequenceCenter: false,
+                writeSequenceCenter: false,
+        )
+        Group group = groupService.createGroup(groupCommand)
+        groupService.aclUtilService.addPermission(project, new GrantedAuthoritySid(group.role.authority), BasePermission.READ)
+        return project
+    }
+
 
     /**
      * Discovers if a user has Projects.

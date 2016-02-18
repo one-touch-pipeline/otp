@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 class Project {
 
@@ -25,21 +26,31 @@ class Project {
     String alignmentDeciderBeanName
 
     /**
+     * The name which is used in the {@link MetaDataColumn#PROJECT} column of metadata files.
+     */
+    String nameInMetadataFiles
+
+    /**
      * this flag defines if the fastq files of this project have to be copied (instead of linked) regardless of whether
      * they will be processed or not
      */
     boolean hasToBeCopied = false
 
     static belongsTo = [
-        projectGroup: ProjectGroup
+            projectGroup: ProjectGroup
     ]
 
     static hasMany =  [
-        contactPersons: ContactPerson
+            contactPersons: ContactPerson
     ]
 
     static constraints = {
-        name(blank: false, unique: true)
+        name(blank: false, unique: true, validator: {val, obj ->
+            Project project = atMostOneElement(Project.findAllByNameInMetadataFiles(val))
+            if (project && project.id != obj.id) {
+                return 'this name is already used in another project as nameInMetadataFiles entry'
+            }
+        })
         dirName(blank: false, unique: true, validator: { String val ->
             OtpPath.isValidRelativePath(val) &&
                     ['icgc', 'dkfzlsdf', 'lsdf', 'project'].every { !val.startsWith("${it}/") }
@@ -48,6 +59,18 @@ class Project {
         projectGroup(nullable: true)
         processingPriority max: ProcessingPriority.MAXIMUM_PRIORITY
         alignmentDeciderBeanName(blank: false)  // If no alignment is desired, set to noAlignmentDecider instead of leaving blank
+        nameInMetadataFiles(nullable: true, blank: false,  validator: {val, obj ->
+            if (val) {
+                Project projectByMetadata = atMostOneElement(Project.findAllByNameInMetadataFiles(val))
+                Project projectByName = atMostOneElement(Project.findAllByName(val))
+                if (projectByMetadata && projectByMetadata.id != obj.id) {
+                    return 'this nameInMetadataFiles is already used in another project as nameInMetadataFiles entry'
+                }
+                if (projectByName && projectByName.id != obj.id) {
+                    return 'this nameInMetadataFiles is already used in another project as name entry'
+                }
+            }
+        })
     }
 
     String toString() {
