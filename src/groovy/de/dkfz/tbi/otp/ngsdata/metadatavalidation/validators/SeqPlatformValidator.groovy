@@ -38,7 +38,7 @@ class SeqPlatformValidator extends ValueTuplesValidator<MetadataValidationContex
     void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> allValueTuples) {
         allValueTuples.each {
             if (!SeqPlatformService.findSeqPlatform(it.getValue(INSTRUMENT_PLATFORM.name()), it.getValue(INSTRUMENT_MODEL.name()), it.getValue(SEQUENCING_KIT.name()) ?: null)) {
-                context.addProblem(it.cells, Level.ERROR, "The combination of instrument platform '${it.getValue(INSTRUMENT_PLATFORM.name())}', instrument model '${it.getValue(INSTRUMENT_MODEL.name())}' and sequencing kit '${it.getValue(SEQUENCING_KIT.name())}' is not registered in the OTP database.")
+                context.addProblem(it.cells, Level.ERROR, "The combination of instrument platform '${it.getValue(INSTRUMENT_PLATFORM.name())}', instrument model '${it.getValue(INSTRUMENT_MODEL.name())}' and sequencing kit '${it.getValue(SEQUENCING_KIT.name()) ?: ''}' is not registered in the OTP database.")
             }
         }
     }
