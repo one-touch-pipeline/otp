@@ -502,10 +502,10 @@ class DomainFactory {
 
     public static ExternalScript createExternalScript(Map properties) {
         return createDomainObject(ExternalScript, [
-            scriptIdentifier: "testIdentifier",
-            scriptVersion: "testVersion",
-            filePath: "testPath",
-            author: "testAuthor"
+            scriptIdentifier: "scriptIdentifier_${counter++}",
+            scriptVersion: "scriptVersion_${counter++}",
+            filePath: TestCase.uniqueNonExistentPath,
+            author: "author_${counter++}",
         ], properties)
     }
 
