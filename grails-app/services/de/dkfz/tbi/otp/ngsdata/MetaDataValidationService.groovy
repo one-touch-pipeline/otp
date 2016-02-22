@@ -69,9 +69,8 @@ class MetaDataValidationService {
                 break
             case "SAMPLE_ID":
                 if (checkSampleIdentifier(entry.value)) {
-                    boolean sampleIdentifierExists =
-                            sampleIdentifierService.parseAndFindOrSaveSampleIdentifier(entry.value) ||
-                            SampleIdentifier.findByName(entry.value)
+                    boolean sampleIdentifierExists = SampleIdentifier.findByName(entry.value) ||
+                            sampleIdentifierService.parseAndFindOrSaveSampleIdentifier(entry.value)
                     entry.status = sampleIdentifierExists ? valid : invalid
                 } else {
                     entry.status = invalid
