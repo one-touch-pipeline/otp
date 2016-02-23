@@ -59,7 +59,7 @@ class DataFile implements Commentable{
 
         fileType(nullable: true)
         pathName(nullable: true, validator: { !it || OtpPath.isValidRelativePath(it) })
-        md5sum(nullable: true, matches: /^[0-9a-fA-F]{32}$/)
+        md5sum(nullable: true, matches: /^[0-9a-f]{32}$/)
 
         project(nullable: true)
 

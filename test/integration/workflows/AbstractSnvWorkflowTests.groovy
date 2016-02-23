@@ -9,6 +9,7 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.job.jobs.snvcalling.SnvCallingJob
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.ExternalScript
+import de.dkfz.tbi.otp.utils.HelperUtils
 import org.joda.time.Duration
 import org.junit.Test
 
@@ -269,7 +270,7 @@ abstract class AbstractSnvWorkflowTests extends WorkflowTestCase {
                 withdrawn: false,
                 externalScript: callingScript,
                 chromosomeJoinExternalScript: joiningScript,
-                md5sum: "123456789012345678901234567890AB",
+                md5sum: HelperUtils.randomMd5sum,
                 fileSize: 1,
         )
         assertNotNull(jobResultCalling.save(flush: true))
@@ -286,7 +287,7 @@ abstract class AbstractSnvWorkflowTests extends WorkflowTestCase {
                     processingState: SnvProcessingStates.FINISHED,
                     withdrawn: false,
                     externalScript: annotationScript,
-                    md5sum: "123456789012345678901234567890AB",
+                    md5sum: HelperUtils.randomMd5sum,
                     fileSize: 1,
             )
             assertNotNull(jobResultAnnotation.save(flush: true))
@@ -298,7 +299,7 @@ abstract class AbstractSnvWorkflowTests extends WorkflowTestCase {
                     processingState: SnvProcessingStates.FINISHED,
                     withdrawn: false,
                     externalScript: deepAnnotationScript,
-                    md5sum: "123456789012345678901234567890AB",
+                    md5sum: HelperUtils.randomMd5sum,
                     fileSize: 1,
             )
             assertNotNull(jobResultDeepAnnotation.save(flush: true))

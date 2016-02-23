@@ -305,7 +305,7 @@ class ProcessedMergedBamFileService {
         notNull(file, "the input 'file' for the method storeMD5Digest is null")
         notNull(md5, "the input 'md5' for the method storeMD5Digest is null")
         file.updateFileOperationStatus(FileOperationStatus.PROCESSED)
-        file.md5sum = md5
+        file.md5sum = md5.toLowerCase(Locale.ENGLISH)
         return (file.save(flush: true) != null)
     }
 

@@ -94,7 +94,7 @@ class SnvJobResult {
             }
         }
         md5sum nullable: true, validator: { val, obj ->
-            return validateFileInformation (val, obj, { val ==~ /^[0-9a-fA-F]{32}$/ })
+            return validateFileInformation (val, obj, { val ==~ /^[0-9a-f]{32}$/ })
         }
 
         fileSize nullable: true, validator: { val, obj ->

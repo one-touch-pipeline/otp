@@ -346,7 +346,7 @@ class MetaDataService {
 
     private void fillMD5Sum(DataFile dataFile) {
         MetaDataEntry entry = getMetaDataEntry(dataFile, MetaDataColumn.MD5.name())
-        dataFile.md5sum = entry?.value
+        dataFile.md5sum = entry?.value?.toLowerCase(Locale.ENGLISH)
     }
 
     /**

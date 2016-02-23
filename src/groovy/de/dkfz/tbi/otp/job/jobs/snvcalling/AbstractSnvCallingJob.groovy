@@ -151,7 +151,7 @@ rm ${configFileInStagingDirectory}
         File resultFile = result.getResultFilePath().absoluteDataManagementPath
         File md5sumFile = new File("${resultFile.path}.md5sum")
         result.fileSize = resultFile.size()
-        result.md5sum = md5sumFile.text.split(" ")[0]
+        result.md5sum = md5sumFile.text.split(" ")[0].toLowerCase(Locale.ENGLISH)
     }
 
     SnvJobResult getSnvJobResult(SnvCallingInstance instance) {
@@ -165,7 +165,7 @@ rm ${configFileInStagingDirectory}
 
     protected File getExistingBamFilePath(final AbstractMergedBamFile bamFile) {
         final File file = bamFile.getPathForFurtherProcessing()
-        assert bamFile.md5sum ==~ /^[0-9a-fA-F]{32}$/
+        assert bamFile.md5sum ==~ /^[0-9a-f]{32}$/
         assert bamFile.fileSize > 0L
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(file)
         assert file.length() == bamFile.fileSize

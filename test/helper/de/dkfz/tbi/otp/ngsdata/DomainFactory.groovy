@@ -1037,7 +1037,7 @@ class DomainFactory {
 
         ProcessedMergedBamFile secondBamFile = DomainFactory.createProcessedMergedBamFile(mergingPass, [
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
-                md5sum: TestConstants.TEST_MD5SUM,
+                md5sum: HelperUtils.randomMd5sum,
                 fileSize: 1000,
         ])
         assert secondBamFile.save(flush: true)

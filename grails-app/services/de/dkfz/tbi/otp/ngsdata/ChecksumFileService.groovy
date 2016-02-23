@@ -51,7 +51,7 @@ class ChecksumFileService {
         } catch (final Exception e) {
             throw new RuntimeException("Failed to parse MD5 file ${path}", e)
         }
-        return (md5sum.trim() == file.md5sum.trim())
+        return (md5sum.trim().toLowerCase(Locale.ENGLISH) == file.md5sum)
     }
 
     public String firstMD5ChecksumFromFile(String file) {

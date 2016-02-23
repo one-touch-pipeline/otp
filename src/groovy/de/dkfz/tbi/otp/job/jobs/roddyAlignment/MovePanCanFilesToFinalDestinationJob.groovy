@@ -73,7 +73,7 @@ class MovePanCanFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl 
             RoddyBamFile.withTransaction {
                 roddyBamFile.fileOperationStatus = FileOperationStatus.PROCESSED
                 roddyBamFile.fileSize = roddyBamFile.workBamFile.size()
-                roddyBamFile.md5sum = md5sumFile.text.replaceAll("\n", "")
+                roddyBamFile.md5sum = md5sumFile.text.replaceAll("\n", "").toLowerCase(Locale.ENGLISH)
                 roddyBamFile.fileExists = true
                 roddyBamFile.dateFromFileSystem = new Date(roddyBamFile.workBamFile.lastModified())
                 assert roddyBamFile.save(flush: true)

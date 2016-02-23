@@ -12,6 +12,7 @@ import de.dkfz.tbi.otp.ngsqc.*
 import de.dkfz.tbi.otp.testing.GroovyScriptAwareTestCase
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.CreateRoddyFileHelper
+import de.dkfz.tbi.otp.utils.HelperUtils
 import grails.plugin.springsecurity.SpringSecurityUtils
 import org.junit.Before
 import org.junit.Rule
@@ -760,7 +761,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     private ProcessedMergedBamFile deleteProcessingFilesOfProject_PMBF_Setup() {
         ProcessedMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFile([
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
-                md5sum:TestConstants.TEST_MD5SUM,
+                md5sum: HelperUtils.randomMd5sum,
                 fileSize: 1000
         ])
         dataBaseSetupForMergedBamFiles(bamFile)
