@@ -1,6 +1,5 @@
 package de.dkfz.tbi.otp.utils
 
-import grails.plugin.springsecurity.acl.AclClass
 import grails.plugin.springsecurity.acl.AclSid
 
 import de.dkfz.tbi.otp.notification.Notification

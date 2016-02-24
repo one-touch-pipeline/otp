@@ -5,7 +5,6 @@ import de.dkfz.tbi.otp.ngsqc.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.processing.*
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.stereotype.Component
 
 class CalculateFastqcSummaryJob extends AbstractEndStateAwareJobImpl {
 

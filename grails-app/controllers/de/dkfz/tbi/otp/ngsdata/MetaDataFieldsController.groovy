@@ -1,9 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
-import de.dkfz.tbi.otp.utils.DataTableCommand
 import grails.converters.JSON
-import grails.validation.Validateable
 import org.springframework.validation.FieldError
 
 class MetaDataFieldsController {

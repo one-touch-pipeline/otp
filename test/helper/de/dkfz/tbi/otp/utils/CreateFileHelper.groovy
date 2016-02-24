@@ -1,7 +1,5 @@
 package de.dkfz.tbi.otp.utils
 
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-
 class CreateFileHelper {
 
     static File createFile(File file, String content = "some content") {

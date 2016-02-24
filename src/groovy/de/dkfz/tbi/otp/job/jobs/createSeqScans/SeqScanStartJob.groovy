@@ -2,7 +2,6 @@ package de.dkfz.tbi.otp.job.jobs.createSeqScans
 
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component

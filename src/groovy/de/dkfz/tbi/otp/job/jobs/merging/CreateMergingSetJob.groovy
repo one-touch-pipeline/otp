@@ -3,7 +3,6 @@ package de.dkfz.tbi.otp.job.jobs.merging
 import org.springframework.beans.factory.annotation.Autowired
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
-import de.dkfz.tbi.otp.ngsdata.MetaDataService
 
 class CreateMergingSetJob extends AbstractEndStateAwareJobImpl {
 

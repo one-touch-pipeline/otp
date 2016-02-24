@@ -1,8 +1,6 @@
 package de.dkfz.tbi.otp.testing
 
 import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
-import de.dkfz.tbi.otp.job.processing.ExecutionState
-import de.dkfz.tbi.otp.job.processing.EndStateAwareJob
 
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component

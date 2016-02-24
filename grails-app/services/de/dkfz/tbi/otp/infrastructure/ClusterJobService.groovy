@@ -5,7 +5,6 @@ import de.dkfz.tbi.flowcontrol.ws.api.response.JobInfos
 import de.dkfz.tbi.flowcontrol.ws.client.ClientKeys
 import de.dkfz.tbi.flowcontrol.ws.client.FlowControlClient
 import de.dkfz.tbi.otp.infrastructure.ClusterJob.Status
-import de.dkfz.tbi.otp.job.processing.ProcessParameter
 import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.ngsdata.DataFile
@@ -22,7 +21,6 @@ import org.joda.time.Period
 import javax.sql.DataSource
 import javax.xml.ws.soap.SOAPFaultException
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 import static java.util.concurrent.TimeUnit.HOURS
 

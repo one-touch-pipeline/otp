@@ -5,7 +5,6 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.filehandling.FileNames
 import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
 import de.dkfz.tbi.otp.job.processing.ExecutionHelperService
-import de.dkfz.tbi.otp.job.scheduler.ProcessStatusService
 import de.dkfz.tbi.otp.ngsdata.*
 
 class MoveFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl {

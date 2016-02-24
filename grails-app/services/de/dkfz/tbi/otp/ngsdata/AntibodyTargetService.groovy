@@ -1,8 +1,5 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
-
-import static org.springframework.util.Assert.*
 import org.springframework.security.access.prepost.PreAuthorize
 
 class AntibodyTargetService {

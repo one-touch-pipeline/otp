@@ -1,7 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import static org.springframework.util.Assert.*
-import de.dkfz.tbi.otp.ngsdata.MetaDataEntry
 import de.dkfz.tbi.otp.ngsdata.SavingException
 
 /**

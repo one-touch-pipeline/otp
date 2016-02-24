@@ -6,7 +6,6 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.WaitingFileUtils
 import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
 
 

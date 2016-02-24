@@ -4,8 +4,6 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.processing.*
 import org.springframework.beans.factory.annotation.Autowired
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
-
 class MergingCompleteJob extends AbstractEndStateAwareJobImpl {
 
     @Autowired

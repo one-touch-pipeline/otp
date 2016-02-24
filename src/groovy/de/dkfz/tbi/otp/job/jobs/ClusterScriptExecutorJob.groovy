@@ -1,6 +1,5 @@
 package de.dkfz.tbi.otp.job.jobs
 
-import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.job.processing.AbstractOtpJob
 import de.dkfz.tbi.otp.job.processing.ExecutionHelperService
 import de.dkfz.tbi.otp.ngsdata.Realm

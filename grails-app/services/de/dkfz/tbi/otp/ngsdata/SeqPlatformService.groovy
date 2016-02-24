@@ -1,10 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.utils.CollectionUtils
-
-import static org.springframework.util.Assert.*
 import org.springframework.context.annotation.Scope
-import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.utils.ReferencedClass
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import org.springframework.security.access.prepost.PreAuthorize

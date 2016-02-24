@@ -1,6 +1,5 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.dataprocessing.AlignmentPassService
 import groovy.transform.ToString
 
 

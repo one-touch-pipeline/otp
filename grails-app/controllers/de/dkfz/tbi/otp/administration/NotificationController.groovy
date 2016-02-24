@@ -10,7 +10,6 @@ import de.dkfz.tbi.otp.notification.Trigger
 import de.dkfz.tbi.otp.utils.DataTableCommand
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
-import grails.util.GrailsNameUtils
 
 /**
  * Controller to configure the Notifications.

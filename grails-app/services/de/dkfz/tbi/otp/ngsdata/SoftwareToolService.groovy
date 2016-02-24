@@ -1,6 +1,5 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.security.User
 import org.springframework.security.access.prepost.PreAuthorize
 
 class SoftwareToolService {

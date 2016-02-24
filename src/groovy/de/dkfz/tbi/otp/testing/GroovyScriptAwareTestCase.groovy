@@ -5,9 +5,6 @@ import grails.test.mixin.integration.IntegrationTestMixin
 import org.codehaus.groovy.control.CompilerConfiguration
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.codehaus.groovy.runtime.InvokerHelper
-import org.springframework.beans.factory.annotation.Autowired
-
-import static org.springframework.util.Assert.isTrue
 
 /**
  * This is a first version of a class helping to call groovy scripts

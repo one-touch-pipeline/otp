@@ -1,9 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.qualityAssessmentMerged
 
-import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
-import de.dkfz.tbi.otp.job.plan.StartJobDefinition
 import de.dkfz.tbi.otp.job.processing.*
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.context.annotation.Scope

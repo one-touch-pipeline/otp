@@ -10,7 +10,6 @@ import de.dkfz.tbi.otp.job.processing.ExecutionHelperService
 import de.dkfz.tbi.otp.ngsdata.ConfigService
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.utils.WaitingFileUtils
 import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
 
 class SnvDeepAnnotationJob extends AbstractSnvCallingJob {

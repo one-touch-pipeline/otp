@@ -1,7 +1,5 @@
 package de.dkfz.tbi.otp.job.processing
 
-import org.springframework.beans.factory.annotation.Autowired
-
 /**
  * Abstract base class for {@link PbsJob}s.
  * @see PbsJob

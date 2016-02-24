@@ -1,8 +1,5 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import groovy.transform.EqualsAndHashCode
-import groovy.transform.ToString
-import groovy.transform.TupleConstructor
 import org.springframework.security.access.prepost.PreAuthorize
 import de.dkfz.tbi.otp.ngsdata.*
 

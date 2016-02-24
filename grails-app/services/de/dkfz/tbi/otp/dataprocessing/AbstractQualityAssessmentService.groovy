@@ -5,7 +5,6 @@ import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeService
 import de.dkfz.tbi.otp.ngsdata.SavingException
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqTypeNames
-import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import org.codehaus.groovy.grails.web.json.JSONObject
 

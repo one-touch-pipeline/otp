@@ -7,7 +7,6 @@ import grails.plugin.springsecurity.SpringSecurityUtils
 import org.springframework.security.acls.domain.BasePermission
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.util.Assert;
 import static org.springframework.util.Assert.*
 
 class ProcessingOptionService {

@@ -1,7 +1,5 @@
 package de.dkfz.tbi.otp.utils
 
-import static org.springframework.util.Assert.notNull
-
 class FormatHelper {
 
     /**

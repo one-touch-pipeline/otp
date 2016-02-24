@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
 import de.dkfz.tbi.otp.job.processing.ExecutionHelperService
-import de.dkfz.tbi.otp.job.scheduler.ProcessStatusService
 import de.dkfz.tbi.otp.ngsdata.*
 
 class CheckQaResultsChecksumMD5Job extends AbstractEndStateAwareJobImpl {

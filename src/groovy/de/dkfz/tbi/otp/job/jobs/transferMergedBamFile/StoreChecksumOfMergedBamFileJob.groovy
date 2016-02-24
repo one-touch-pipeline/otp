@@ -3,7 +3,6 @@ package de.dkfz.tbi.otp.job.jobs.transferMergedBamFile
 import org.springframework.beans.factory.annotation.Autowired
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
-import de.dkfz.tbi.otp.job.scheduler.ProcessStatusService
 import de.dkfz.tbi.otp.ngsdata.ChecksumFileService
 
 class StoreChecksumOfMergedBamFileJob extends AbstractEndStateAwareJobImpl {

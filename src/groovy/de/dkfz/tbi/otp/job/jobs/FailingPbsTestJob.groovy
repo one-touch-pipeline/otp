@@ -1,7 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs
 
 import de.dkfz.tbi.otp.job.processing.AbstractJobImpl
-import de.dkfz.tbi.otp.job.processing.Parameter
 import de.dkfz.tbi.otp.job.processing.PbsJob
 
 /**

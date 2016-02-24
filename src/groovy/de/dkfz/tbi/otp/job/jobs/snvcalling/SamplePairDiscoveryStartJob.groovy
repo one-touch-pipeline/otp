@@ -4,7 +4,6 @@ import org.springframework.context.annotation.Scope
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
 import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
 
 @Component('samplePairDiscoveryStartJob')

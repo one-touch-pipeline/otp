@@ -1,7 +1,6 @@
 package de.dkfz.tbi.otp.job.plan
 
 import de.dkfz.tbi.otp.job.processing.EndStateAwareJob
-import de.dkfz.tbi.otp.job.processing.Parameter
 import de.dkfz.tbi.otp.job.processing.ParameterMapping
 import de.dkfz.tbi.otp.job.processing.ParameterType
 import de.dkfz.tbi.otp.job.processing.ParameterUsage

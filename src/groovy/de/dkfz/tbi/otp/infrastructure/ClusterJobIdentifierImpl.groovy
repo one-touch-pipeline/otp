@@ -2,7 +2,6 @@ package de.dkfz.tbi.otp.infrastructure
 
 import de.dkfz.tbi.otp.ngsdata.Realm
 import groovy.transform.EqualsAndHashCode
-import groovy.transform.TupleConstructor
 
 @EqualsAndHashCode
 public class ClusterJobIdentifierImpl implements ClusterJobIdentifier {
