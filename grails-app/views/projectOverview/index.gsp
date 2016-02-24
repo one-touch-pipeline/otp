@@ -121,6 +121,7 @@
         $(function() {
             $.otp.projectOverviewTable.register();
             $.otp.graph.project.init();
+            $.otp.projectOverviewTable.referenceGenome();
             $.otp.projectOverviewTable.updateAlignmentInformation();
         });
     </asset:script>

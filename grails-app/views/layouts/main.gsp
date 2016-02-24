@@ -90,7 +90,7 @@
                             <li class="allGranted menuContainerLCss" id="runSubmit"><g:link controller="runSubmit" action="index"><g:message code="otp.menu.runSubmit"/></g:link></li>
                         </sec:ifAllGranted>
                         <sec:ifAnyGranted roles="ROLE_ADMIN">
-                            <li class="navigation menuContainerLCss" id="admin"s>
+                            <li class="navigation menuContainerLCss" id="admin">
                                 <ul>
                                     <li class="allGranted admin_nav_container" id="admin"><g:link><g:message code="otp.menu.adminSection"/> &#9661;</g:link>
                                         <ul>

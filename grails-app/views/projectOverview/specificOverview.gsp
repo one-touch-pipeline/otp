@@ -13,7 +13,7 @@
     <div class="body">
         <form class="blue_label" id="projectsGroupbox">
             <span class="blue_label"><g:message code="home.projectfilter"/> :</span>
-            <g:select class="criteria" id="project" name='project'
+            <g:select class="criteria" id="project_select" name='project'
                 from='${projects}' value='${project}' onChange='submit();' />
         </form>
         <div id="projectOverviewDates">
@@ -73,6 +73,18 @@
             </g:else>
         </div>
         <br>
+        <div class="otpDataTables">
+        <h3>${g.message(code: 'projectOverview.listReferenceGenome.title')}</h3>
+            <otp:dataTable
+                codes="${[
+                    'projectOverview.index.referenceGenome.sequenceTypeName',
+                    'projectOverview.index.referenceGenome.sampleTypeName',
+                    'projectOverview.index.referenceGenome',
+                    'projectOverview.index.statSizeFile',
+                ] }"
+                id="listReferenceGenome" />
+        </div>
+        <br>
         <div>
             <h3>${g.message(code: 'projectOverview.snv.title')}</h3>
             <table  class="snv">
@@ -106,8 +118,8 @@
                     </tr>
                 </g:each>
             </table>
-            <g:if test="${snv==Snv.YES}">
             <br>
+            <g:if test="${snv==Snv.YES}">
                 <table>
                     <tr>
                         <g:each var="cell" in="${thresholdsHeadline}">
@@ -132,6 +144,7 @@
     <asset:script>
         $(function() {
             $.otp.projectOverviewTable.specificOverview();
+            $.otp.projectOverviewTable.referenceGenome();
         });
     </asset:script>
 </body>

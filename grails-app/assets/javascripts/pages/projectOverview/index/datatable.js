@@ -86,7 +86,7 @@ $.otp.projectOverviewTable = {
             controller : 'projectOverview',
             action : 'updateDates'
         }), {
-            projectName : $('#project').val()
+            projectName : $('#project_select').val()
         }, function (data) {
             var message, i;
             if (data) {
@@ -123,7 +123,7 @@ $.otp.projectOverviewTable = {
             cache: 'false',
             data: {
                 contactPersonName: contactPersonName,
-                projectName: $('#project').val()
+                projectName: $('#project_select').val()
             },
             success: function (data) {
                 if (data.success) {
@@ -154,7 +154,7 @@ $.otp.projectOverviewTable = {
                 data: {
                     value: input,
                     contactPersonName: contactPersonName,
-                    projectName: $('#project').val()
+                    projectName: $('#project_select').val()
                 },
                 success: function (data) {
                     if (data.success) {
@@ -178,7 +178,7 @@ $.otp.projectOverviewTable = {
             $.otp.createLink({
                 controller: 'projectOverview',
                 action: 'dataTableContactPerson',
-                parameters: {projectName : $('#project').val()}
+                parameters: {projectName : $('#project_select').val()}
             }),
             function (json) {
                 for (var i = 0; i < json.aaData.length; i += 1) {
@@ -197,11 +197,22 @@ $.otp.projectOverviewTable = {
             }
         );
         $.otp.projectOverviewTable.updateDates();
-        $('#project').change(function () {
+    },
+
+    referenceGenome: function () {
+        "use strict";
+        var oTable = $.otp.projectOverviewTable.registerDataTable(
+            "#listReferenceGenome",
+            $.otp.createLink({
+                controller : 'projectOverview',
+                action : 'dataTableSourceReferenceGenome'
+            }),
+            $.otp.projectOverviewTable.returnParameterUnchanged
+        );
+        $('#project_select').change(function () {
             var oSettings = oTable.fnSettings();
             oSettings.oFeatures.bServerSide = true;
             oTable.fnDraw();
-            $.otp.projectOverviewTable.updateDates();
         });
     },
 
@@ -252,14 +263,6 @@ $.otp.projectOverviewTable = {
             }),
             $.otp.projectOverviewTable.returnParameterUnchanged
         );
-        var oTableReferenceGenome = $.otp.projectOverviewTable.registerDataTable(
-                "#listReferenceGenome",
-                $.otp.createLink({
-                    controller : 'projectOverview',
-                    action : 'dataTableSourceReferenceGenome'
-                }),
-                $.otp.projectOverviewTable.returnParameterUnchanged
-            );
         $.otp.projectOverviewTable.updatePatientCount();
         $('#project_select').change(function () {
             var oSettings1 = oTable1.fnSettings();
@@ -274,9 +277,6 @@ $.otp.projectOverviewTable = {
             var oSettings5 = oTable5.fnSettings();
             oSettings5.oFeatures.bServerSide = true;
             oTable5.fnDraw();
-            var oSettings6 = oTableReferenceGenome.fnSettings();
-            oSettings6.oFeatures.bServerSide = true;
-            oTableReferenceGenome.fnDraw();
             $.otp.graph.project.init();
             $.otp.projectOverviewTable.updatePatientCount();
             $.otp.projectOverviewTable.updateAlignmentInformation();
