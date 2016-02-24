@@ -118,15 +118,6 @@ class ConveyBwaAlignmentWorkflowTests extends WorkflowTestCase {
                 dataFile: dataFile,
         ).save(flush: true, failOnError: true)
 
-        new FastqcBasicStatistics(
-                fastqcProcessedFile: fastqcProcessedFile,
-                totalSequences: 20000,
-                fileType: "fileType",
-                encoding: "UTF-8",
-                sequenceLength: "34 petabases",
-                filteredSequences: 2500,
-        ).save(flush: true, failOnError: true)
-
         alignmentPass = TestData.createAndSaveAlignmentPass(
                 seqTrack: seqTrack,
                 identifier: AlignmentPass.nextIdentifier(seqTrack),

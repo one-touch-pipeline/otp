@@ -8,7 +8,6 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvJobResult
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvProcessingStates
 import de.dkfz.tbi.otp.fileSystemConsistency.*
-import de.dkfz.tbi.otp.ngsqc.*
 import de.dkfz.tbi.otp.testing.GroovyScriptAwareTestCase
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.CreateRoddyFileHelper
@@ -316,28 +315,10 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     public void testDeleteFastQCInformationFromDataFile() throws Exception {
         DataFile dataFile = DataFile.build()
         FastqcProcessedFile fastqcProcessedFile = FastqcProcessedFile.build(dataFile: dataFile)
-        FastqcBasicStatistics fastqcBasicStatistics = FastqcBasicStatistics.build(fastqcProcessedFile: fastqcProcessedFile)
-        FastqcModuleStatus fastqcModuleStatus = FastqcModuleStatus.build(fastqcProcessedFile: fastqcProcessedFile)
-        FastqcOverrepresentedSequences fastqcOverrepresentedSequences = FastqcOverrepresentedSequences.build(fastqcProcessedFile: fastqcProcessedFile)
-        FastqcPerBaseSequenceAnalysis fastqcPerBaseSequenceAnalysis = FastqcPerBaseSequenceAnalysis.build(fastqcProcessedFile: fastqcProcessedFile)
-        FastqcPerSequenceGCContent fastqcPerSequenceGCContent = FastqcPerSequenceGCContent.build(fastqcProcessedFile: fastqcProcessedFile)
-        FastqcPerSequenceQualityScores fastqcPerSequenceQualityScores = FastqcPerSequenceQualityScores.build(fastqcProcessedFile: fastqcProcessedFile)
-        FastqcKmerContent fastqcKmerContent = FastqcKmerContent.build(fastqcProcessedFile: fastqcProcessedFile)
-        FastqcSequenceDuplicationLevels fastqcSequenceDuplicationLevels = FastqcSequenceDuplicationLevels.build(fastqcProcessedFile: fastqcProcessedFile)
-        FastqcSequenceLengthDistribution fastqcSequenceLengthDistribution = FastqcSequenceLengthDistribution.build(fastqcProcessedFile: fastqcProcessedFile)
 
         dataSwapService.deleteFastQCInformationFromDataFile(dataFile)
 
         assert !FastqcProcessedFile.get(fastqcProcessedFile.id)
-        assert !FastqcBasicStatistics.get(fastqcBasicStatistics.id)
-        assert !FastqcModuleStatus.get(fastqcModuleStatus.id)
-        assert !FastqcOverrepresentedSequences.get(fastqcOverrepresentedSequences.id)
-        assert !FastqcPerBaseSequenceAnalysis.get(fastqcPerBaseSequenceAnalysis.id)
-        assert !FastqcPerSequenceGCContent.get(fastqcPerSequenceGCContent.id)
-        assert !FastqcPerSequenceQualityScores.get(fastqcPerSequenceQualityScores.id)
-        assert !FastqcKmerContent.get(fastqcKmerContent.id)
-        assert !FastqcSequenceDuplicationLevels.get(fastqcSequenceDuplicationLevels.id)
-        assert !FastqcSequenceLengthDistribution.get(fastqcSequenceLengthDistribution.id)
     }
 
     @Test
@@ -467,15 +448,6 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     public void testDeleteDataFile() throws Exception {
         DataFile dataFile = DataFile.build()
         FastqcProcessedFile fastqcProcessedFile = FastqcProcessedFile.build(dataFile: dataFile)
-        FastqcBasicStatistics fastqcBasicStatistics = FastqcBasicStatistics.build(fastqcProcessedFile: fastqcProcessedFile)
-        FastqcModuleStatus fastqcModuleStatus = FastqcModuleStatus.build(fastqcProcessedFile: fastqcProcessedFile)
-        FastqcOverrepresentedSequences fastqcOverrepresentedSequences = FastqcOverrepresentedSequences.build(fastqcProcessedFile: fastqcProcessedFile)
-        FastqcPerBaseSequenceAnalysis fastqcPerBaseSequenceAnalysis = FastqcPerBaseSequenceAnalysis.build(fastqcProcessedFile: fastqcProcessedFile)
-        FastqcPerSequenceGCContent fastqcPerSequenceGCContent = FastqcPerSequenceGCContent.build(fastqcProcessedFile: fastqcProcessedFile)
-        FastqcPerSequenceQualityScores fastqcPerSequenceQualityScores = FastqcPerSequenceQualityScores.build(fastqcProcessedFile: fastqcProcessedFile)
-        FastqcKmerContent fastqcKmerContent = FastqcKmerContent.build(fastqcProcessedFile: fastqcProcessedFile)
-        FastqcSequenceDuplicationLevels fastqcSequenceDuplicationLevels = FastqcSequenceDuplicationLevels.build(fastqcProcessedFile: fastqcProcessedFile)
-        FastqcSequenceLengthDistribution fastqcSequenceLengthDistribution = FastqcSequenceLengthDistribution.build(fastqcProcessedFile: fastqcProcessedFile)
 
         MetaDataEntry metaDataEntry = MetaDataEntry.build(dataFile: dataFile)
 
@@ -484,18 +456,6 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
         dataSwapService.deleteDataFile(dataFile)
 
         assert !FastqcProcessedFile.get(fastqcProcessedFile.id)
-        assert !FastqcBasicStatistics.get(fastqcBasicStatistics.id)
-        assert !FastqcModuleStatus.get(fastqcModuleStatus.id)
-        assert !FastqcOverrepresentedSequences.get(fastqcOverrepresentedSequences.id)
-        assert !FastqcPerBaseSequenceAnalysis.get(fastqcPerBaseSequenceAnalysis.id)
-        assert !FastqcPerSequenceGCContent.get(fastqcPerSequenceGCContent.id)
-        assert !FastqcPerSequenceQualityScores.get(fastqcPerSequenceQualityScores.id)
-        assert !FastqcKmerContent.get(fastqcKmerContent.id)
-        assert !FastqcSequenceDuplicationLevels.get(fastqcSequenceDuplicationLevels.id)
-        assert !FastqcSequenceLengthDistribution.get(fastqcSequenceLengthDistribution.id)
-        assert !MetaDataEntry.get(metaDataEntry.id)
-        assert !ConsistencyStatus.get(consistencyStatus.id)
-        assert !DataFile.get(dataFile.id)
     }
 
     @Test

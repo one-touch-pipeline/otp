@@ -8,7 +8,6 @@ import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QaProcessingStatus
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsqc.FastqcBasicStatistics
 import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
 
 class QualityAssessmentPassServiceTests extends AbstractIntegrationTest {
@@ -286,13 +285,6 @@ class QualityAssessmentPassServiceTests extends AbstractIntegrationTest {
                         dataFile: dataFile)
         assertNotNull(fastqcProcessedFile.save(flush: true))
 
-        FastqcBasicStatistics fastqcBasicStats = new FastqcBasicStatistics(
-                        fileType: "fileType",
-                        encoding: "encoding",
-                        sequenceLength: "101",
-                        fastqcProcessedFile: fastqcProcessedFile)
-        assertNotNull(fastqcBasicStats.save(flush: true))
-
         assertNotNull(qualityAssessmentPassService.createPass())
     }
 
@@ -345,13 +337,6 @@ class QualityAssessmentPassServiceTests extends AbstractIntegrationTest {
                         contentUploaded: true,
                         dataFile: dataFile)
         assertNotNull(fastqcProcessedFile.save(flush: true))
-
-        FastqcBasicStatistics fastqcBasicStats = new FastqcBasicStatistics(
-                        fileType: "fileType",
-                        encoding: "encoding",
-                        sequenceLength: "101",
-                        fastqcProcessedFile: fastqcProcessedFile)
-        assertNotNull(fastqcBasicStats.save(flush: true))
 
         assertNotNull(qualityAssessmentPassService.createPass())
     }

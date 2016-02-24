@@ -62,9 +62,6 @@
                 'run.list.storageRealm',
                 'run.list.dateCreated',
                 'run.list.dateExecuted',
-                'run.list.blacklisted',
-                'run.list.multipleSource',
-                'run.list.fastqcState'
                 ] }" id="runTable"/>
         </div>
     </div>

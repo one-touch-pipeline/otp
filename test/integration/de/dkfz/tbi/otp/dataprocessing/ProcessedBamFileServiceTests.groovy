@@ -2,7 +2,6 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.dataprocessing.AlignmentPass.AlignmentState
 import de.dkfz.tbi.otp.filehandling.BwaLogFileParser
-import de.dkfz.tbi.otp.ngsqc.FastqcBasicStatistics
 
 import static org.junit.Assert.*
 
@@ -126,12 +125,6 @@ class ProcessedBamFileServiceTests {
 
         fastqcProcessedFile = testData.createFastqcProcessedFile([dataFile: datafile])
         assertNotNull(fastqcProcessedFile.save([flush: true, failOnError: true]))
-
-        FastqcBasicStatistics fastqcBasicStatistics = testData.createFastqcBasicStatistics([
-                totalSequences: READ_NUMBER,
-                fastqcProcessedFile: fastqcProcessedFile
-        ])
-        assertNotNull(fastqcBasicStatistics.save([flush: true, failOnError: true]))
 
         alignmentPass = testData.createAlignmentPass(
                         identifier: 1,

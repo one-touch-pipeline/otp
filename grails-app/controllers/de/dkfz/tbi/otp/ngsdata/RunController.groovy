@@ -41,7 +41,6 @@ class RunController {
             nextRun: runService.nextRun(run),
             previousRun: runService.previousRun(run),
             fastqcLinks: fastqcResultsService.fastqcLinkMap(run),
-            fastqcSummary: fastqcResultsService.fastqcSummaryMap(run)
         ]
     }
 
@@ -68,9 +67,6 @@ class RunController {
                 storageRealm: run.storageRealm?.toString()?.toLowerCase(),
                 dateCreated: run.dateCreated?.format("yyyy-MM-dd"),
                 dateExecuted: run.dateExecuted?.format("yyyy-MM-dd"),
-                blacklisted: run.blacklisted,
-                multipleSource: run.multipleSource,
-                qualityEvaluated: run.qualityEvaluated ? String.format("%.2f", run.dataQuality) : "NaN"
             ]
         }
         render dataToRender as JSON

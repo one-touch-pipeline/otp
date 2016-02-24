@@ -63,17 +63,14 @@ $.otp.run = {
                                 row.seqCenters,
                                 row.storageRealm,
                                 row.dateCreated,
-                                row.dateExecuted,
-                                row.blacklisted,
-                                row.multipleSource,
-                                row.qualityEvaluated
+                                row.dateExecuted
                             ];
                             json.aaData[i] = rowData;
                         }
                         fnCallback(json);
                     }
                 });
-            }
+            },
         });
     }
 };

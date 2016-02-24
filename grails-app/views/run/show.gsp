@@ -109,7 +109,6 @@
                     <td>
                         <g:if test="${fastqcLinks.get(file.id)}">
                             <g:link controller="fastqcResults" action="show" id="${file.id}"><g:message code="run.show.fastqc"/></g:link>
-                            ${fastqcSummary.get(file.id)}
                         </g:if>
                     </td>
                 </tr>

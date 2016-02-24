@@ -27,9 +27,6 @@ class Run implements ProcessParameterObject{
     enum StorageRealm {DKFZ, BIOQUANT, MIXED}
     StorageRealm storageRealm
 
-    Double dataQuality = null
-    boolean qualityEvaluated = false
-
     static belongsTo = [
         SeqCenter,
         SeqPlatform
@@ -40,8 +37,6 @@ class Run implements ProcessParameterObject{
         storageRealm(nullable: true)
         dateExecuted(nullable: true)
         dateCreated()
-        dataQuality(nullable: true)
-        qualityEvaluated(nullable: true)
     }
 
     String toString() {

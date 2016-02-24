@@ -720,16 +720,6 @@ chmod 440 ${newDirectFileName}
             //delete first fastqc stuff
             List<FastqcProcessedFile> fastqcProcessedFiles = FastqcProcessedFile.findAllByDataFile(it)
 
-            FastqcBasicStatistics.findAllByFastqcProcessedFileInList(fastqcProcessedFiles)*.delete(flush: true)
-            FastqcKmerContent.findAllByFastqcProcessedFileInList(fastqcProcessedFiles)*.delete(flush: true)
-            FastqcModuleStatus.findAllByFastqcProcessedFileInList(fastqcProcessedFiles)*.delete(flush: true)
-            FastqcOverrepresentedSequences.findAllByFastqcProcessedFileInList(fastqcProcessedFiles)*.delete(flush: true)
-            FastqcPerBaseSequenceAnalysis.findAllByFastqcProcessedFileInList(fastqcProcessedFiles)*.delete(flush: true)
-            FastqcPerSequenceGCContent.findAllByFastqcProcessedFileInList(fastqcProcessedFiles)*.delete(flush: true)
-            FastqcPerSequenceQualityScores.findAllByFastqcProcessedFileInList(fastqcProcessedFiles)*.delete(flush: true)
-            FastqcSequenceDuplicationLevels.findAllByFastqcProcessedFileInList(fastqcProcessedFiles)*.delete(flush: true)
-            FastqcSequenceLengthDistribution.findAllByFastqcProcessedFileInList(fastqcProcessedFiles)*.delete(flush: true)
-
             fastqcProcessedFiles*.delete(flush: true)
 
             List<MetaDataEntry> metaDataEntries = MetaDataEntry.findAllByDataFile(it)
@@ -761,16 +751,6 @@ chmod 440 ${newDirectFileName}
     void deleteFastQCInformationFromDataFile(DataFile dataFile) {
         notNull(dataFile, "The input dataFile is null")
         List<FastqcProcessedFile> fastqcProcessedFiles = FastqcProcessedFile.findAllByDataFile(dataFile)
-
-        FastqcBasicStatistics.findAllByFastqcProcessedFileInList(fastqcProcessedFiles)*.delete()
-        FastqcModuleStatus.findAllByFastqcProcessedFileInList(fastqcProcessedFiles)*.delete()
-        FastqcOverrepresentedSequences.findAllByFastqcProcessedFileInList(fastqcProcessedFiles)*.delete()
-        FastqcPerBaseSequenceAnalysis.findAllByFastqcProcessedFileInList(fastqcProcessedFiles)*.delete()
-        FastqcPerSequenceGCContent.findAllByFastqcProcessedFileInList(fastqcProcessedFiles)*.delete()
-        FastqcPerSequenceQualityScores.findAllByFastqcProcessedFileInList(fastqcProcessedFiles)*.delete()
-        FastqcKmerContent.findAllByFastqcProcessedFileInList(fastqcProcessedFiles)*.delete()
-        FastqcSequenceDuplicationLevels.findAllByFastqcProcessedFileInList(fastqcProcessedFiles)*.delete()
-        FastqcSequenceLengthDistribution.findAllByFastqcProcessedFileInList(fastqcProcessedFiles)*.delete()
 
         fastqcProcessedFiles*.delete()
     }

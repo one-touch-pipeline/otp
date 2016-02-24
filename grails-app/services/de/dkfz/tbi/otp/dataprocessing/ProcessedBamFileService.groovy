@@ -2,7 +2,6 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.dataprocessing.AlignmentPass.AlignmentState
 import de.dkfz.tbi.otp.filehandling.BwaLogFileParser
-import de.dkfz.tbi.otp.ngsqc.FastqcBasicStatistics
 import de.dkfz.tbi.otp.ngsqc.FastqcResultsService
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*

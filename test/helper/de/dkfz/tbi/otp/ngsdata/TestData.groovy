@@ -9,7 +9,6 @@ import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.AlignmentPass.AlignmentState
 import de.dkfz.tbi.otp.ngsdata.RunSegment.DataFormat
 import de.dkfz.tbi.otp.ngsdata.RunSegment.FilesStatus
-import de.dkfz.tbi.otp.ngsqc.FastqcBasicStatistics
 
 import static org.junit.Assert.assertNotNull
 import static org.junit.Assert.assertTrue
@@ -228,16 +227,6 @@ class TestData {
             fileExists: true,
             contentUploaded: true,
             dataFile: dataFile,
-        ] + properties)
-    }
-
-    static FastqcBasicStatistics createFastqcBasicStatistics(Map properties = [:]) {
-        return new FastqcBasicStatistics([
-            fileType         : 'Conventional base calls',
-            encoding         : 'Sanger / Illumina 1.9',
-            totalSequences   : 1,
-            filteredSequences: 1,
-            sequenceLength   : 1,
         ] + properties)
     }
 

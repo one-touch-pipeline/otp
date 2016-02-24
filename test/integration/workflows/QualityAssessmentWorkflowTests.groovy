@@ -2,7 +2,6 @@ package workflows
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsqc.FastqcBasicStatistics
 import org.junit.Ignore
 
 import static org.junit.Assert.assertNotNull
@@ -36,26 +35,6 @@ class QualityAssessmentWorkflowTests extends QualityAssessmentAbstractWorkflowTe
         seqTrack.pipelineVersion = SoftwareTool.list().first()
         seqTrack.fastqcState = SeqTrack.DataProcessingState.FINISHED
         assertNotNull(seqTrack.save([flush: true]))
-
-        FastqcBasicStatistics fastqcBasicStats
-        2.times {
-            DataFile dataFile = new DataFile(seqTrack: seqTrack)
-            assertNotNull(dataFile.save(flush: true))
-
-            FastqcProcessedFile fastqcProcessedFile = new FastqcProcessedFile(
-                            contentUploaded: true,
-                            dataFile: dataFile)
-            assertNotNull(fastqcProcessedFile.save(flush: true))
-
-            fastqcBasicStats = new FastqcBasicStatistics(
-                            fileType: "fileType",
-                            encoding: "encoding",
-                            sequenceLength: "101",
-                            fastqcProcessedFile: fastqcProcessedFile)
-            assertNotNull(fastqcBasicStats.save(flush: true))
-        }
-
-        fastqcBasicStats.totalSequences = totalSequences
 
         AlignmentPass alignmentPass = TestData.createAndSaveAlignmentPass(
                         referenceGenome: referenceGenome,

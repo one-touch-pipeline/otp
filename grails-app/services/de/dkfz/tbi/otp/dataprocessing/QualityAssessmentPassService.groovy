@@ -3,7 +3,6 @@ package de.dkfz.tbi.otp.dataprocessing
 import static org.springframework.util.Assert.notNull
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsqc.FastqcBasicStatistics
 import de.dkfz.tbi.otp.ngsqc.FastqcResultsService
 import de.dkfz.tbi.otp.ngsdata.QualityAssessmentException
 import grails.orm.HibernateCriteriaBuilder
