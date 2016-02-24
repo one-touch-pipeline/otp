@@ -82,6 +82,7 @@ class ProcessedMergedBamFile extends AbstractMergedBamFile implements ProcessPar
     }
 
     File getPathForFurtherProcessing() {
+        mergingWorkPackage.refresh() //Sometimes the mergingWorkPackage.processableBamFileInProjectFolder is empty but should have a value
         AbstractMergedBamFile processableBamFileInProjectFolder = mergingWorkPackage.processableBamFileInProjectFolder
         if (this.id == processableBamFileInProjectFolder?.id) {
             return new File(baseDirectory, bamFileName)
