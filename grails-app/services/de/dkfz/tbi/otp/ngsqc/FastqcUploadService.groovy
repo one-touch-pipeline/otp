@@ -19,7 +19,7 @@ class FastqcUploadService {
         String pathToFile = fastqcDataFilesService.fastqcOutputFile(fastqc.dataFile)
         final String dataFileName = "fastqc_data.txt"
         try {
-            uploadFileContentsToDataBasePrivate(fastqc, fastqcDataFilesService.getInputStreamFromZip(pathToFile, dataFileName).text)
+            uploadFileContentsToDataBasePrivate(fastqc, fastqcDataFilesService.getInputStreamFromZipFile(fastqc.dataFile, dataFileName).text)
         } catch (final Throwable t) {
             throw new RuntimeException("Failed to load data from ${dataFileName} inside ${pathToFile} into the database.", t)
         }

@@ -84,7 +84,8 @@ class FastqcResultsController {
         } else {
             InputStream stream
             try {
-                stream = fastqcDataFilesService.getInputStreamFromZipFile(cmd.dataFile, cmd.path)
+                DataFile dataFile = metaDataService.getDataFile(cmd.dataFile.id as long)
+                stream = fastqcDataFilesService.getInputStreamFromZipFile(dataFile, cmd.path)
             } catch (FileNotReadableException e) {
                 render status: 404
                 return

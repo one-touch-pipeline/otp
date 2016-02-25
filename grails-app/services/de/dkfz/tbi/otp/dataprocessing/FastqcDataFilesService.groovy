@@ -86,7 +86,6 @@ class FastqcDataFilesService {
      * @param withinZipPath Path to the resource within the zip file
      * @return An inputStream for the combination of zipPath and the withinZipPath parameters
      */
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#dataFile.project, read)")
     public InputStream getInputStreamFromZipFile(DataFile dataFile, String withinZipPath) {
         String zipPath = fastqcOutputFile(dataFile)
         withinZipPath = "${fastqcFileNameWithoutZipSuffix(dataFile)}/${withinZipPath}"
