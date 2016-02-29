@@ -13,7 +13,7 @@ import org.springframework.security.acls.domain.BasePermission
 
 class OverallQualityAssessmentMergedServiceTest extends AbstractIntegrationTest {
 
-    final static long SEQUENCE_LENGTH = 100
+    final static String SEQUENCE_LENGTH = "100"
 
     OverallQualityAssessmentMergedService overallQualityAssessmentMergedService
 
@@ -198,6 +198,7 @@ class OverallQualityAssessmentMergedServiceTest extends AbstractIntegrationTest 
         List result = overallQualityAssessmentMergedService.findSequenceLengthForQualityAssessmentMerged([
             overallQualityAssessmentMerged
         ])
+
         assert expected == result
     }
 

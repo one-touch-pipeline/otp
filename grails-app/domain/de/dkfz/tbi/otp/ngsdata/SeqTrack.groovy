@@ -167,7 +167,7 @@ class SeqTrack implements ProcessParameterObject {
         return DataFile.findAllBySeqTrack(this).sum { it.nReads } as Long
     }
 
-    Long getSequenceLength() {
+    String getSequenceLength() {
         return exactlyOneElement(DataFile.findAllBySeqTrack(this)*.sequenceLength.unique())
     }
 

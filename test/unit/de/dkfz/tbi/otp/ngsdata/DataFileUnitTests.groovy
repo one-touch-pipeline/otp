@@ -76,5 +76,26 @@ class DataFileUnitTests {
         TestCase.assertValidateError(dataFile, "mateNumber", "validator.invalid", 3)
     }
 
+    @Test
+    void testSequenceLengthConstraint_WhenSequenceLengthIsANumberAsString_ShouldPassValidation() {
+        DataFile dataFile = new DataFile(sequenceLength: "123")
 
+        assert dataFile.validate()
+    }
+
+    @Test
+    void testSequenceLengthConstraint_WhenSequenceLengthIsARangeAsString_ShouldPassValidation() {
+        DataFile dataFile = new DataFile(sequenceLength: "123-321")
+
+        assert dataFile.validate()
+    }
+
+    @Test
+    void testSequenceLengthConstraint_WhenSequenceLengthIsSomethingElse_ShouldPassValidation() {
+        DataFile dataFile = new DataFile(sequenceLength: "!1§2%3&")
+
+        TestCase.shouldFail(RuntimeException) {
+            dataFile.validate()
+        }
+    }
 }

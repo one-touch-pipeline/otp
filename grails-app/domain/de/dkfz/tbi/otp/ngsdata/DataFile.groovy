@@ -29,7 +29,8 @@ class DataFile implements Commentable{
 
     // number of reads
     Long nReads
-    Long sequenceLength
+    // must be String, ranges are possible, e.g. '60-90'
+    String sequenceLength
 
     Integer mateNumber
 
@@ -77,7 +78,13 @@ class DataFile implements Commentable{
         runSegment(nullable: true)
 
         nReads(nullable: true)
-        sequenceLength(nullable: true)
+        sequenceLength nullable: true, validator: { val, obj ->
+            if (val) {
+                if (!(val.matches(/\d+/) || val.matches(/\d+\-\d+/))) {
+                    throw new RuntimeException("The sequence length of ${obj} with value ${val} is not a valid value (number or range).")
+                }
+            }
+        }
 
         comment(nullable: true)
 

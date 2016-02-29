@@ -118,12 +118,12 @@ Sequences flagged as poor quality\t0\t
     @Test
     void test_uploadFastQCFileContentsToDataBase_WhenAllFine_ShouldFillDataFile() {
         long parsedNReads = 100
-        long parsedSequenceLength = 101
+        String parsedSequenceLength = "101"
 
         FastqcUploadService.metaClass.parseFastQCFile = { FastqcProcessedFile a, Map b ->
             return [
                 nReads: parsedNReads as String,
-                sequenceLength: parsedSequenceLength as String,
+                sequenceLength: parsedSequenceLength,
             ]
         }
 

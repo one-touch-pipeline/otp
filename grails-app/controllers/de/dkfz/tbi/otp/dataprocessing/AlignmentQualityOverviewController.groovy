@@ -159,7 +159,8 @@ class AlignmentQualityOverviewController {
             Set<LibraryPreparationKit> kit = qualityAssessmentMergedPass.containedSeqTracks*.libraryPreparationKit.findAll().unique() //findAll removes null values
             double duplicates = it.duplicates / it.totalReadCounter * 100.0 //%duplicates (picard)
             double properlyPaired = it.properlyPaired / it.pairedInSequencing * 100.0
-            double readLength = sequenceLengthsMap[it.id][0][1] as double
+            String readLengthString = sequenceLengthsMap[it.id][0][1]
+            double readLength = readLengthString.contains('-') ? (readLengthString.split('-').sum { it as double } / 2) : readLengthString as double
             double diffChr = it.withMateMappedToDifferentChr / it.totalReadCounter * 100.0 // % diff chrom
 
             Map map = [
