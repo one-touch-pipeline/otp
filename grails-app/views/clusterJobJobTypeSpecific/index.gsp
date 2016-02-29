@@ -133,14 +133,6 @@
                 <br>
                 <canvas id="jobTypeSpecificGraphWalltimes" class="scatterChart" width=1000px height=500px></canvas>
             </div>
-            <div class="scatterGraphContainer">
-                <div class="graphDescription"><g:message code="jobstats.jobTypeSpecific.graphs.memoryUsage"/></div>
-                <div class="toolTipContainer">
-                    <span class="toolTip"><g:message code="jobstats.jobTypeSpecific.graphs.toolTip.memoryUsage"/></span>
-                </div>
-                <br>
-                <canvas id="jobTypeSpecificGraphMemories" class="scatterChart" width=1000px height=500px></canvas>
-            </div>
         </div>
         <br>
     </div>

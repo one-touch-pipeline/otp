@@ -205,14 +205,6 @@ $.otp.clusterJobJobTypeSpecificGraph = {
         }), function () {
             $.otp.clusterJobJobTypeSpecificGraph.getJobTypeSpecificWalltimes(this);
         });
-
-        RGraph.AJAX($.otp.createLink({
-            controller : 'clusterJobJobTypeSpecific',
-            action : 'getJobTypeSpecificMemories',
-            parameters: {'jobClass': jobClassSelect, 'seqType': seqTypeSelect, 'from': startDate, 'to': $.otp.clusterJobJobTypeSpecific.getToday()}
-        }),function () {
-            $.otp.clusterJobJobTypeSpecificGraph.getJobTypeSpecificMemoryUsage(this);
-        });
     },
 
     update: function () {
@@ -239,11 +231,6 @@ $.otp.clusterJobJobTypeSpecificGraph = {
     getJobTypeSpecificWalltimes: function (data) {
         "use strict";
         $.otp.clusterJobJobTypeSpecificGraph.generateScatterGraphic('jobTypeSpecificGraphWalltimes', data);
-    },
-
-    getJobTypeSpecificMemoryUsage: function (data) {
-        "use strict";
-        $.otp.clusterJobJobTypeSpecificGraph.generateScatterGraphic('jobTypeSpecificGraphMemories', data);
     },
 
     generatePieGraphic : function (id, data) {
@@ -289,8 +276,8 @@ $.otp.clusterJobJobTypeSpecificGraph = {
         graph.Set('xmax', json.xMax);
         graph.Set('tickmarks', 'circle');
         graph.Set('ticksize', 10);
-        graph.Set('title.xaxis', 'USED');
-        graph.Set('title.yaxis', 'REQUESTED');
+        graph.Set('title.xaxis', 'Million Reads');
+        graph.Set('title.yaxis', 'Walltime in Minutes');
         graph.Set('chart.gutter.bottom', 100);
         graph.Set('chart.gutter.left', 120);
         graph.Set('title.yaxis.pos', 0.1);
@@ -300,7 +287,7 @@ $.otp.clusterJobJobTypeSpecificGraph = {
         graph.Set('text.size', 8);
         graph.Set('events.click', function (e, shape) {
             var index = shape[4];
-            var id = shape['object']['data'][0][index][2];
+            var id = shape['object']['data'][0][index][3];
             window.location.href = $.otp.createLink({
                 controller: 'clusterJobDetail',
                 action: 'show',

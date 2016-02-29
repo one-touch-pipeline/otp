@@ -108,10 +108,6 @@ class ClusterJobJobTypeSpecificController {
         renderDiagramDataAsJSON(clusterJobService.&findJobClassAndSeqTypeSpecificWalltimesByDateBetween)
     }
 
-    def getJobTypeSpecificMemories() {
-        renderDiagramDataAsJSON(clusterJobService.&findJobClassAndSeqTypeSpecificMemoriesByDateBetween)
-    }
-
     private renderDataAsJSON (Closure method) {
         Map dataToRender = [:]
 

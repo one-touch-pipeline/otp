@@ -1040,72 +1040,23 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
                                             ended: EDATE_DATETIME,
                                             jobClass: 'jobClass1',
                                             seqType: seqType,
-                                            requestedWalltime: new Duration(12 * HOURS_TO_MILLIS),
-                                            exitStatus: ClusterJob.Status.COMPLETED])
+                                            exitStatus: ClusterJob.Status.COMPLETED,
+                                            xten: false,
+                                            nReads: 100 * 1000 * 1000])
 
         ClusterJob job2 = createClusterJob([queued: SDATE_DATETIME,
                                             started: SDATE_DATETIME.plusHours(18),
                                             ended: EDATE_DATETIME,
                                             jobClass: 'jobClass1',
                                             seqType: seqType,
-                                            requestedWalltime: new Duration(12 * HOURS_TO_MILLIS),
-                                            exitStatus: ClusterJob.Status.COMPLETED])
+                                            exitStatus: ClusterJob.Status.COMPLETED,
+                                            xten: true,
+                                            nReads: 100 * 1000 * 1000])
 
         Map walltimeMap = clusterJobService.findJobClassAndSeqTypeSpecificWalltimesByDateBetween('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE)
 
-        assert [[12 * HOURS_TO_MILLIS, 12 * HOURS_TO_MILLIS, job1.id], [6 * HOURS_TO_MILLIS, 12 * HOURS_TO_MILLIS, job2.id]] == walltimeMap.data
-        assert 12 * HOURS_TO_MILLIS == walltimeMap.xMax
-    }
-
-    @Test
-    void test_findJobClassAndSeqTypeSpecificMemoriesByDateBetween_WhenNoJobsFound_ShouldReturnMapInInitialState() {
-        Map memoryMap = clusterJobService.findJobClassAndSeqTypeSpecificMemoriesByDateBetween('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE)
-
-        assert [] == memoryMap.data
-        assert 0 == memoryMap.xMax
-    }
-
-    @Test
-    void test_findJobClassAndSeqTypeSpecificMemoriesByDateBetween_WhenJobIsOutOfTimeSpan_ShouldReturnNullValue() {
-        createClusterJob([queued: SDATE_DATETIME.minusDays(1),
-                          started: SDATE_DATETIME.minusDays(1),
-                          ended: SDATE_DATETIME.minusDays(1),
-                          jobClass: 'jobClass1',
-                          seqType: seqType,
-                          usedMemory: GiB_TO_KiB,
-                          requestedMemory: GiB_TO_KiB,
-                          exitStatus: ClusterJob.Status.COMPLETED])
-
-        Map memoryMap = clusterJobService.findJobClassAndSeqTypeSpecificMemoriesByDateBetween('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE)
-
-        assert [] == memoryMap.data
-        assert 0 == memoryMap.xMax
-    }
-
-    @Test
-    void test_findJobClassAndSeqTypeSpecificMemoriesByDateBetween_WhenSeveralJobsAreFound_ShouldReturnMaximumMemoryUsageAndListWithMemoryUsagesPerJob() {
-        ClusterJob job1 = createClusterJob([queued: SDATE_DATETIME,
-                                            started: SDATE_DATETIME,
-                                            ended: EDATE_DATETIME,
-                                            jobClass: 'jobClass1',
-                                            seqType: seqType,
-                                            usedMemory: GiB_TO_KiB,
-                                            requestedMemory: GiB_TO_KiB,
-                                            exitStatus: ClusterJob.Status.COMPLETED])
-
-        ClusterJob job2 = createClusterJob([queued: SDATE_DATETIME,
-                                            started: SDATE_DATETIME,
-                                            ended: EDATE_DATETIME,
-                                            jobClass: 'jobClass1',
-                                            seqType: seqType,
-                                            usedMemory: GiB_TO_KiB,
-                                            requestedMemory: 2 * GiB_TO_KiB,
-                                            exitStatus: ClusterJob.Status.COMPLETED])
-
-        Map memoryMap = clusterJobService.findJobClassAndSeqTypeSpecificMemoriesByDateBetween('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE)
-
-        assert [[GiB_TO_KiB, GiB_TO_KiB, job1.id], [GiB_TO_KiB, 2 * GiB_TO_KiB, job2.id]] == memoryMap.data
-        assert GiB_TO_KiB == memoryMap.xMax
+        assert [[100, 12 * HOURS_TO_MILLIS /1000 /60, 'black', job1.id], [100, 6 * HOURS_TO_MILLIS /1000 /60, 'blue', job2.id]] == walltimeMap.data
+        assert 100 == walltimeMap.xMax
     }
 
     @Test

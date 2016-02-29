@@ -734,9 +734,10 @@ SELECT
 
         String query = """
 SELECT
- job.ended - job.started AS elapsedWalltime,
- job.requested_walltime AS requestedWalltime,
- job.id AS id
+ (job.ended - job.started) /1000 /60 AS elapsedWalltime,
+ job.n_reads /1000 /1000 AS reads,
+ job.id AS id,
+ job.xten AS xten
  FROM cluster_job AS job
  WHERE
  ${QUERY_BY_TIMESPAN_JOBCLASS_SEQTYPE_NOTFAILED}
@@ -745,45 +746,13 @@ SELECT
         def walltimeData = []
 
         sql.eachRow(query, [startDate.millis, endDate.millis, jobClass, seqType.id]) {
-            walltimeData << [it.elapsedWalltime, it.requestedWalltime, it.id]
+            walltimeData << [it.reads, it.elapsedWalltime, it.xten ? 'blue' : 'black', it.id]
         }
 
         def xAxisMax = walltimeData ? walltimeData*.get(0).max() : 0
         def labels = xAxisMax != 0 ? getLabels(xAxisMax, 10) : []
 
         return ["data": walltimeData, "labels": labels, "xMax": xAxisMax]
-    }
-
-    /**
-     * returns requested and elapsed memories of a specific job class and sequencing type,
-     * the maximum values for both, to align the graphics and
-     * aligned labels for the graphic
-     */
-    public Map findJobClassAndSeqTypeSpecificMemoriesByDateBetween(String jobClass, SeqType seqType, LocalDate sDate, LocalDate eDate) {
-        def (DateTime startDate, DateTime endDate) = parseDateArgs(sDate, eDate)
-
-        def sql = new Sql(dataSource)
-
-        String query = """
-SELECT
- job.used_memory AS usedMemory,
- job.requested_memory AS requestedMemory,
- job.id AS id
- FROM cluster_job AS job
- WHERE
- ${QUERY_BY_TIMESPAN_JOBCLASS_SEQTYPE_NOTFAILED}
-"""
-
-        def memoryData = []
-
-        sql.eachRow(query, [startDate.millis, endDate.millis, jobClass, seqType.id]) {
-            memoryData << [it.usedMemory, it.requestedMemory, it.id]
-        }
-
-        def xAxisMax = memoryData ? memoryData*.get(0).max() : 0
-        def labels = xAxisMax != 0 ? getLabels(xAxisMax, 10) : []
-
-        return ["data": memoryData, "labels": labels, "xMax": xAxisMax]
     }
 
     /**
