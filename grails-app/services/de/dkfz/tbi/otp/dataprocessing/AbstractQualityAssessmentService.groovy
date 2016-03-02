@@ -90,6 +90,8 @@ class AbstractQualityAssessmentService {
                 Object previousAllBasesMapped = chromosomeValues.put('allBasesMapped', allBasesMapped)
                 assert previousAllBasesMapped == null
                 if (qualityControlTargetExtractJson != null) {
+                    chromosomeValues.remove('genomeWithoutNCoverageQcBases')
+                    chromosomeValues.put('genomeWithoutNCoverageQcBases', qualityControlTargetExtractJson.get(chromosome).get('genomeWithoutNCoverageQcBases'))
                     Object onTargetMappedBases = qualityControlTargetExtractJson.get(chromosome).get('qcBasesMapped')
                     assert onTargetMappedBases != null
                     Object previousOnTargetMappedBases = chromosomeValues.put('onTargetMappedBases', onTargetMappedBases)
