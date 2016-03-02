@@ -326,9 +326,8 @@ AND i.id > :indId
      * Fetches all SampleTypes available
      * @return List of SampleTypes
      */
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     public List<String> getSampleTypeNames() {
-        return SampleType.list([sort: "name", order: "asc"]).name
+        return SampleType.list([sort: "name", order: "asc"])*.name
     }
 
     /**
