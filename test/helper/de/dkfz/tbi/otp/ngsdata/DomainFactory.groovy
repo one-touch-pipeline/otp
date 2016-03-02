@@ -69,6 +69,23 @@ class DomainFactory {
     }
 
     /**
+     * Check whether one or more domain objects with the given parameterProperties exists,
+     * if yes return an arbitrary one, otherwise create a new one and return it.
+     */
+    private static <T> T createDomainObjectLazy(Class<T> domainClass, Map defaultProperties, Map parameterProperties, boolean saveAndValidate = true) {
+        T domainObject
+        if(parameterProperties) {
+            domainObject = domainClass.findWhere(parameterProperties)
+        } else {
+            domainObject = domainClass.list(limit: 1)?.first()
+        }
+        if(!domainObject) {
+            domainObject = createDomainObject(domainClass, defaultProperties, parameterProperties, saveAndValidate)
+        }
+        return domainObject
+    }
+
+    /**
      * @deprecated Use {@link #createRealmDataManagement()} instead.
      */
     @Deprecated
@@ -898,21 +915,23 @@ class DomainFactory {
     }
 
     static SeqType createWholeGenomeSeqType() {
-        SeqType.buildLazy(
+        createDomainObjectLazy(SeqType, [:], [
                 name: SeqTypeNames.WHOLE_GENOME.seqTypeName,
                 alias: "WGS",
                 roddyName: "WGS",
-                libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED
-        )
+                dirName: SeqTypeNames.WHOLE_GENOME.seqTypeName,
+                libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED,
+        ]).refresh()
     }
 
     static SeqType createExomeSeqType() {
-        SeqType.buildLazy(
+        createDomainObjectLazy(SeqType, [:], [
                 name: SeqTypeNames.EXOME.seqTypeName,
                 alias: "EXOME",
                 roddyName: "WES",
-                libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED
-        )
+                dirName: SeqTypeNames.EXOME.seqTypeName,
+                libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED,
+        ]).refresh()
     }
 
     static List<SeqType> createAlignableSeqTypes() {
