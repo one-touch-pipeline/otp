@@ -623,6 +623,15 @@ class DomainFactory {
         ], softwareToolProperties)
     }
 
+
+    public static SoftwareToolIdentifier createSoftwareToolIdentifier(Map properties = [:]) {
+        return createDomainObject(SoftwareToolIdentifier, [
+                name: 'softwareToolIdentifier_' + (counter++),
+                softwareTool: { createSoftwareTool() },
+        ], properties)
+    }
+
+
     static LibraryPreparationKit createLibraryPreparationKit(Map properties = [:]) {
         return createDomainObject(LibraryPreparationKit, [
                 name: "name_${counter++}",
