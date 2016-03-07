@@ -359,12 +359,9 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
     /**
      * return for old structure the final bam file and for the new structure the work bam file
      */
-    File getPathForFurtherProcessing() {
-        if (this.id == mergingWorkPackage.processableBamFileInProjectFolder?.id) {
-            return isOldStructureUsed() ? finalBamFile : workBamFile
-        } else {
-            throw new IllegalStateException()
-        }
+    @Override
+    protected File getPathForFurtherProcessingNoCheck() {
+        return isOldStructureUsed() ? finalBamFile : workBamFile
     }
 
 

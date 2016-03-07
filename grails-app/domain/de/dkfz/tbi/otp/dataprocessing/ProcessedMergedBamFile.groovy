@@ -81,13 +81,9 @@ class ProcessedMergedBamFile extends AbstractMergedBamFile implements ProcessPar
         return "${body}.bam"
     }
 
-    File getPathForFurtherProcessing() {
-        mergingWorkPackage.refresh() //Sometimes the mergingWorkPackage.processableBamFileInProjectFolder is empty but should have a value
-        AbstractMergedBamFile processableBamFileInProjectFolder = mergingWorkPackage.processableBamFileInProjectFolder
-        if (this.id == processableBamFileInProjectFolder?.id) {
-            return new File(baseDirectory, bamFileName)
-        }
-        throw new IllegalStateException("This BAM file is not in the project folder or not processable.\nthis: ${this}\nprocessableBamFileInProjectFolder: ${processableBamFileInProjectFolder}")
+    @Override
+    protected File getPathForFurtherProcessingNoCheck() {
+        return new File(baseDirectory, bamFileName)
     }
 
     void withdraw() {

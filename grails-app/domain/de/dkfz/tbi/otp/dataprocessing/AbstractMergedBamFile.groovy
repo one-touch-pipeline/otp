@@ -122,6 +122,16 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile {
         return new File(AbstractMergedBamFileService.destinationDirectory(this))
     }
 
-    abstract File getPathForFurtherProcessing()
+    File getPathForFurtherProcessing() {
+        mergingWorkPackage.refresh() //Sometimes the mergingWorkPackage.processableBamFileInProjectFolder is empty but should have a value
+        AbstractMergedBamFile processableBamFileInProjectFolder = mergingWorkPackage.processableBamFileInProjectFolder
+        if (this.id == processableBamFileInProjectFolder?.id) {
+            return getPathForFurtherProcessingNoCheck()
+        } else {
+            throw new IllegalStateException("This BAM file is not in the project folder or not processable.\nthis: ${this}\nprocessableBamFileInProjectFolder: ${processableBamFileInProjectFolder}")
+        }
+    }
+
+    protected abstract File getPathForFurtherProcessingNoCheck()
 
 }
