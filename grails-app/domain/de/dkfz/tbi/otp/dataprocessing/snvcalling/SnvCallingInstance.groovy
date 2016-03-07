@@ -68,7 +68,7 @@ class SnvCallingInstance implements ProcessParameterObject{
             // there must be at least one withdrawn {@link SnvJobResult}
             // if {@link this#processingState} is {@link SnvProcessingStates#FAILED}
             if (obj.processingState == SnvProcessingStates.FAILED) {
-                return !SnvJobResult.findAllBySnvCallingInstanceAndWithdrawn(obj, true).empty
+                return !SnvJobResult.findAllBySnvCallingInstanceAndWithdrawn(obj, true).empty || SnvJobResult.findAllBySnvCallingInstance(obj).empty
             } else {
                 return true
             }

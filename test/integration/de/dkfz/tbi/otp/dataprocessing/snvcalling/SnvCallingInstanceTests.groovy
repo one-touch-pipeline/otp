@@ -130,6 +130,13 @@ class SnvCallingInstanceTests {
     }
 
     @Test
+    void testProcessingStateIsFailedAndNoSnvJobResults() {
+        def instance = testData.createAndSaveSnvCallingInstance()
+        instance.processingState = SnvProcessingStates.FAILED
+        assert instance.validate()
+    }
+
+    @Test
     void testProcessingStateIsFailedAndNoWithdrawnSnvJobResults() {
         def instance = createSnvCallingInstanceAndSnvJobResults()
         instance.processingState = SnvProcessingStates.FAILED
