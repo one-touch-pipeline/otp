@@ -71,7 +71,7 @@ abstract class ColumnSetValidator<C extends ValidationContext> implements Valida
         context.addProblem(Collections.emptySet(), Level.ERROR, "Mandatory column '${columnTitle}' is missing.")
     }
 
-    void optionalColumnMissing(C context, String columnTitle) {
-        context.addProblem(Collections.emptySet(), Level.WARNING, "Optional column '${columnTitle}' is missing.")
+    void optionalColumnMissing(C context, String columnTitle, String additionalWarningMessage = '') {
+        context.addProblem(Collections.emptySet(), Level.WARNING, "Optional column '${columnTitle}' is missing.${additionalWarningMessage}")
     }
 }
