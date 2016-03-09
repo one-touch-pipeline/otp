@@ -380,7 +380,7 @@ class ProjectOverviewController {
             }
         }
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-        Map dataToRender = [creationDate: simpleDateFormat.format(timestamps[0]), lastReceivedDate: simpleDateFormat.format(timestamps[1])]
+        Map dataToRender = [creationDate: timestamps[0] ? simpleDateFormat.format(timestamps[0]) : null, lastReceivedDate: timestamps[0] ? simpleDateFormat.format(timestamps[1]) : null]
         render dataToRender as JSON
     }
 
