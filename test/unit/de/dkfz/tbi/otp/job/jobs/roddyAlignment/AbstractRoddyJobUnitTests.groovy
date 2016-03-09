@@ -5,7 +5,6 @@ import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.roddy.JobStateLogFile
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
-import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifierImpl
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.SeqPlatform
@@ -41,7 +40,7 @@ class AbstractRoddyJobUnitTests {
     void setUp() {
         roddyBamFile = DomainFactory.createRoddyBamFile()
         abstractRoddyJob = [processingStepId: 123456789, getProcessParameterObject: { roddyBamFile }] as AbstractRoddyJob
-        clusterJobIdentifier = new ClusterJobIdentifierImpl(DomainFactory.createRealmDataProcessingDKFZ(), "pbsId")
+        clusterJobIdentifier = new ClusterJobIdentifier(DomainFactory.createRealmDataProcessing(), "pbsId", "userName")
     }
 
     @Test
@@ -104,10 +103,11 @@ class AbstractRoddyJobUnitTests {
 
     @Test
     void testFailedOrNotFinishedClusterJobs_WhenSeveralJobStates_ShouldReturnCorrectMap() {
-        ClusterJobIdentifier identifierA = new ClusterJobIdentifierImpl(DomainFactory.createRealmDataProcessingDKFZ(), "pbsId1")
-        ClusterJobIdentifier identifierB = new ClusterJobIdentifierImpl(DomainFactory.createRealmDataProcessingDKFZ(), "pbsId2")
-        ClusterJobIdentifier identifierC = new ClusterJobIdentifierImpl(DomainFactory.createRealmDataProcessingDKFZ(), "pbsId3")
-        ClusterJobIdentifier identifierD = new ClusterJobIdentifierImpl(DomainFactory.createRealmDataProcessingDKFZ(), "pbsId4")
+        Realm realm = DomainFactory.createRealmDataProcessing()
+        ClusterJobIdentifier identifierA = new ClusterJobIdentifier(realm, "pbsId1", "userName")
+        ClusterJobIdentifier identifierB = new ClusterJobIdentifier(realm, "pbsId2", "userName")
+        ClusterJobIdentifier identifierC = new ClusterJobIdentifier(realm, "pbsId3", "userName")
+        ClusterJobIdentifier identifierD = new ClusterJobIdentifier(realm, "pbsId4", "userName")
 
         // JOB A, 2 entries, statusCode = 0 => sucessfully finished job, no output,
         //                                   same identifier in older executionStore marked as failed, should be ignored

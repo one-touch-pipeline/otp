@@ -18,6 +18,8 @@ import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.HelperUtils
+import de.dkfz.tbi.otp.utils.ProcessHelperService.ProcessOutput
+
 
 class SnvJoiningJobTests {
 
@@ -58,14 +60,14 @@ class SnvJoiningJobTests {
     @Test
     void testMaybeSubmit() {
         boolean querySshCalled = false
-        executionService.metaClass.querySsh = { String host, int port, int timeout, String username, String password, File keyFile, boolean useSshAgent, String command, File script, String options ->
+        executionService.metaClass.querySsh = { String host, int port, int timeout, String username, String password, File keyFile, boolean useSshAgent, String command ->
             assert !querySshCalled
             querySshCalled = true
             File snvFile = new OtpPath(snvCallingInstance.snvInstancePath, SnvCallingStep.CALLING.getResultFileName(snvCallingInstance.individual, null)).absoluteDataManagementPath
             String scriptCommandPart = "${testData.externalScript_Joining.scriptFilePath}; " +
                     "md5sum ${snvFile} > ${snvFile}.md5sum"
             assert command.contains(scriptCommandPart)
-            return [HelperUtils.uniqueString]
+            return new ProcessOutput("123.pbs", "", 0)
         }
 
         testData.createBamFile(snvCallingInstance.sampleType1BamFile)

@@ -1,18 +1,13 @@
 package de.dkfz.tbi.otp.job.processing
 
-import de.dkfz.tbi.otp.job.scheduler.PbsJobInfo
-
-import static de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifierImpl.*
 
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
-import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifierImpl
 import de.dkfz.tbi.otp.job.scheduler.PbsMonitorService
 import de.dkfz.tbi.otp.job.scheduler.Scheduler
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
-import de.dkfz.tbi.otp.ngsdata.Realm
 
 /**
  * Base class for jobs which submit cluster jobs and wait for them to finish and optionally do other
@@ -40,8 +35,8 @@ public abstract class AbstractMultiJob extends AbstractEndStateAwareJobImpl impl
     SchedulerService schedulerService
 
     final Object lockForJobCollections = new Object()
-    Collection<ClusterJobIdentifierImpl> monitoredClusterJobs = null
-    Collection<ClusterJobIdentifierImpl> finishedClusterJobs = null
+    Collection<ClusterJobIdentifier> monitoredClusterJobs = null
+    Collection<ClusterJobIdentifier> finishedClusterJobs = null
 
     private final Object lockForResumable = new Object()
     private boolean suspendPlanned = false
@@ -52,7 +47,7 @@ public abstract class AbstractMultiJob extends AbstractEndStateAwareJobImpl impl
         synchronized (lockForJobCollections) {
             assert monitoredClusterJobs == null
             assert finishedClusterJobs == null
-            monitoredClusterJobs = asClusterJobIdentifierImplList(ClusterJob.findAllByProcessingStepAndValidated(processingStep, false))
+            monitoredClusterJobs = ClusterJobIdentifier.asClusterJobIdentifierList(ClusterJob.findAllByProcessingStepAndValidated(processingStep, false))
             final List<ProcessingStepUpdate> updates = ProcessingStepUpdate.findAllByProcessingStep(
                     processingStep, [sort: "id", order: "desc", max: 2])
             assert updates[0].state == ExecutionState.STARTED
@@ -73,22 +68,21 @@ public abstract class AbstractMultiJob extends AbstractEndStateAwareJobImpl impl
         synchronized (lockForJobCollections) {
             log.info "Waiting for ${monitoredClusterJobs.size()} cluster jobs to finish: ${monitoredClusterJobs}"
             pbsMonitorService.monitor(monitoredClusterJobs.collect {
-                new PbsJobInfo(pbsId: it.clusterJobId, realm: it.realm)
+                new ClusterJobIdentifier(it.realm, it.clusterJobId, it.userName)
             }, this)
         }
     }
 
     @Override
-    public void finished(final String clusterJobId, final Realm realm) {
+    public void finished(final ClusterJobIdentifier finishedClusterJob) {
         final boolean allFinished
         final int finishedCount
         synchronized (lockForJobCollections) {
-            final ClusterJobIdentifierImpl finishedClusterJob = new ClusterJobIdentifierImpl(realm, clusterJobId)
             if (monitoredClusterJobs.remove(finishedClusterJob)) {
                 finishedClusterJobs << finishedClusterJob
             } else {
-                throw new RuntimeException("Received a notification that cluster job ${clusterJobId}" +
-                        " on realm ${realm} has finished although we are not monitoring that cluster job.")
+                throw new RuntimeException("Received a notification that cluster job ${finishedClusterJob} " +
+                        "has finished although we are not monitoring that cluster job.")
             }
             allFinished = monitoredClusterJobs.empty
             finishedCount = finishedClusterJobs.size()
@@ -141,7 +135,7 @@ public abstract class AbstractMultiJob extends AbstractEndStateAwareJobImpl impl
                 }
                 final Collection<ClusterJob> submittedClusterJobs = ClusterJob.findAllByProcessingStepAndValidated(processingStep, false)
                 synchronized (lockForJobCollections) {
-                    monitoredClusterJobs = asClusterJobIdentifierImplList(submittedClusterJobs)
+                    monitoredClusterJobs = ClusterJobIdentifier.asClusterJobIdentifierList(submittedClusterJobs)
                     finishedClusterJobs = []
                 }
                 performAction(action)

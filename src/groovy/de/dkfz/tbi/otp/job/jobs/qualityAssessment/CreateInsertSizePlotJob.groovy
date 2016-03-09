@@ -2,14 +2,14 @@ package de.dkfz.tbi.otp.job.jobs.qualityAssessment
 
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.job.processing.ExecutionHelperService
+import de.dkfz.tbi.otp.job.processing.PbsService
 import de.dkfz.tbi.otp.job.processing.AbstractJobImpl
 import org.springframework.beans.factory.annotation.Autowired
 
 class CreateInsertSizePlotJob extends AbstractJobImpl {
 
     @Autowired
-    ExecutionHelperService executionHelperService
+    PbsService pbsService
 
     @Autowired
     QualityAssessmentPassService qualityAssessmentPassService
@@ -26,7 +26,7 @@ class CreateInsertSizePlotJob extends AbstractJobImpl {
         String plotFilePath = processedBamFileQaFileService.insertSizePlotFilePath(pass)
         String allChromosomeName = Chromosomes.overallChromosomesLabel()
         String cmd = "insertSizePlot.sh '${dataFilePath}' '${allChromosomeName}' '${plotFilePath}'; chmod 440 ${plotFilePath}"
-        String pbsID = executionHelperService.sendScript(realm, cmd)
+        String pbsID = pbsService.executeJob(realm, cmd)
         addOutputParameter("__pbsIds", pbsID)
         addOutputParameter("__pbsRealm", realm.id.toString())
     }

@@ -14,7 +14,7 @@ class SnvAnnotationJob extends AbstractSnvCallingJob {
     @Autowired
     ConfigService configService
     @Autowired
-    ExecutionHelperService executionHelperService
+    PbsService pbsService
 
     @Override
     SnvCallingStep getStep() {
@@ -84,7 +84,7 @@ class SnvAnnotationJob extends AbstractSnvCallingJob {
             if (inputFileCopy.absolutePath != inputResultFile.absolutePath) {
                 script << " rm -f ${inputFileCopy.absolutePath}"
             }
-            executionHelperService.sendScript(realm, script.toString(), qsubParameters)
+            pbsService.executeJob(realm, script.toString(), qsubParameters)
 
             return NextAction.WAIT_FOR_CLUSTER_JOBS
         } else {

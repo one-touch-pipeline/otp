@@ -381,7 +381,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
 
     @Test
     void testDeleteConfigFileLinkOfPreviousInstance_NoPreviousInstance_NothingToDelete() {
-        executionService.metaClass.executeCommand = {Realm realm, String command ->
+        executionService.metaClass.executeCommand = { Realm realm, String command ->
             throw  new RuntimeException("This method should not be reached since nothing has to be deleted")
         }
 
@@ -401,7 +401,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         File fileToDelete = snvCallingInstance2.getStepConfigFileLinkedPath(SnvCallingStep.CALLING).absoluteDataManagementPath
         fileToDelete.parentFile.mkdirs()
         fileToDelete.createNewFile()
-        executionService.metaClass.executeCommand = {Realm realm, String command ->
+        executionService.metaClass.executeCommand = { Realm realm, String command ->
             assert command.contains("rm -f ${fileToDelete.path}")
             fileToDelete.delete()
         }
@@ -431,7 +431,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         fileToDelete.parentFile.mkdirs()
         fileToDelete.createNewFile()
 
-        executionService.metaClass.executeCommand = {Realm realm, String command ->
+        executionService.metaClass.executeCommand = { Realm realm, String command ->
             assert command.contains("rm -f ${fileToDelete.path}")
             fileToDelete.delete()
         }

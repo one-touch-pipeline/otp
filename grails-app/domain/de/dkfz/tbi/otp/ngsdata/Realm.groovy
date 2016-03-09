@@ -52,6 +52,7 @@ class Realm implements Serializable {
     String host                        // PBS head address
     int port
     String unixUser
+    String roddyUser
     int timeout
     String pbsOptions                  // realm dependent options of the PBS system
 
@@ -75,6 +76,7 @@ class Realm implements Serializable {
         flowControlKey blank:true, nullable:true, maxSize: 3072
         flowControlHost blank:true, nullable:true
         flowControlPort nullable:true
+        roddyUser blank: false, nullable: true
         pbsOptions validator: {
             PbsOptionMergingService.jsonStringToMap(it)  // will throw an exception if invalid
             return true

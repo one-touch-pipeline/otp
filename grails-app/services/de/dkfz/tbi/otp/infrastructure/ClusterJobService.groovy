@@ -59,7 +59,7 @@ class ClusterJobService {
     /**
      * creates a cluster job object with at this time known attributes
      */
-    public ClusterJob createClusterJob(Realm realm, String clusterJobId,
+    public ClusterJob createClusterJob(Realm realm, String clusterJobId, String userName,
                                        ProcessingStep processingStep, SeqType seqType = null,
                                        String clusterJobName = processingStep.getPbsJobDescription(),
                                        String jobClass = processingStep.nonQualifiedJobClass) {
@@ -67,10 +67,11 @@ class ClusterJobService {
                                     processingStep: processingStep,
                                     realm: realm,
                                     clusterJobId: clusterJobId,
+                                    userName: userName,
                                     clusterJobName: clusterJobName,
                                     jobClass: jobClass,
                                     seqType: seqType,
-                                    queued: new DateTime()
+                                    queued: new DateTime(),
                                 ).save(flush: true)
         assert job != null
         return job

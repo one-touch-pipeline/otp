@@ -1,12 +1,9 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.buildtestdata.mixin.Build
-import grails.test.mixin.*
-
 import org.junit.*
 
 
-@TestFor(ProjectOverviewService)
 @Build([
     ReferenceGenomeProjectSeqType,
     SampleType,

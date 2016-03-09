@@ -12,7 +12,6 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
-import org.springframework.context.ApplicationContext
 
 @Build([Realm])
 class LinkFileUtilsUnitTests {
@@ -48,8 +47,7 @@ class LinkFileUtilsUnitTests {
         linkFileUtils.lsdfFilesService.createClusterScriptService = new CreateClusterScriptService()
         linkFileUtils.lsdfFilesService.executionService = executionService
 
-        linkFileUtils.applicationContext = [:] as ApplicationContext
-        linkFileUtils.applicationContext.metaClass.executionService = executionService
+        linkFileUtils.executionService = executionService
     }
 
     @After
@@ -128,9 +126,13 @@ class LinkFileUtilsUnitTests {
         sourceFile.createNewFile()
         File linkFile = new File(testDirectory, "linkFile")
 
-        linkFileUtils.applicationContext.executionService.metaClass.executeCommand = { Realm realm, String command ->
-            assert realm == realm
-        }
+        linkFileUtils.lsdfFilesService = new LsdfFilesService()
+        linkFileUtils.lsdfFilesService.createClusterScriptService = new CreateClusterScriptService()
+        linkFileUtils.lsdfFilesService.executionService = [
+                executeCommand: { Realm realm, String command ->
+                    assert realm == realm
+                }
+        ] as ExecutionService
 
         TestCase.shouldFail(PowerAssertionError) {
             linkFileUtils.createAndValidateLinks([(sourceFile): linkFile], realm)

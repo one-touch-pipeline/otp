@@ -28,7 +28,7 @@ import org.joda.time.format.PeriodFormat
  *
  * all timestamps using joda-time, e.g. DateTime queued, get saved as UTC-timezone
  **/
-class ClusterJob implements ClusterJobIdentifier{
+class ClusterJob {
 
     public static final String JOB_INFO_NOT_SET_MESSAGE = "Job info is not set (yet)."
 
@@ -50,6 +50,10 @@ class ClusterJob implements ClusterJobIdentifier{
      * Id of the cluster job
      */
     String clusterJobId
+    /**
+     * user executing the job
+     */
+    String userName
     /**
      * name of the cluster job
      */
@@ -142,6 +146,7 @@ class ClusterJob implements ClusterJobIdentifier{
         validated(nullable:false)
         realm(nullable: false)
         clusterJobId(blank: false, nullable: false)
+        userName blank: false
         clusterJobName(blank: false, nullable: false, validator: { clusterJobName, clusterJob -> clusterJobName.endsWith("_${clusterJob.jobClass}") } )
         jobClass(blank: false, nullable: false)
         seqType(nullable: true)                                 // gets filled after initialization, must be nullable

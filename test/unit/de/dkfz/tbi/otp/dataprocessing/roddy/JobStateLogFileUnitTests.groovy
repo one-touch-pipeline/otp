@@ -4,7 +4,6 @@ import de.dkfz.tbi.TestCase
 
 import static de.dkfz.tbi.otp.dataprocessing.roddy.JobStateLogFile.JOB_STATE_LOG_FILE_NAME
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
-import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifierImpl
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.CreateFileHelper
@@ -36,7 +35,7 @@ class JobStateLogFileUnitTests {
 
     @Before
     void setUp() {
-        clusterJobIdentifier = new ClusterJobIdentifierImpl(DomainFactory.createRealmDataProcessingDKFZ(), "pbsId")
+        clusterJobIdentifier = new ClusterJobIdentifier(DomainFactory.createRealmDataProcessing(), "pbsId", "userName")
     }
 
     @After

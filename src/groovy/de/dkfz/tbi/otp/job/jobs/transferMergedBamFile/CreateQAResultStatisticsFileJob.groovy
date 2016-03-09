@@ -21,7 +21,7 @@ class CreateQAResultStatisticsFileJob extends AbstractEndStateAwareJobImpl {
     ConfigService configService
 
     @Autowired
-    ExecutionHelperService executionHelperService
+    PbsService pbsService
 
     @Autowired
     ChecksumFileService checksumFileService
@@ -43,7 +43,7 @@ class CreateQAResultStatisticsFileJob extends AbstractEndStateAwareJobImpl {
         Project project = processedMergedBamFileService.project(mergedBamFile)
         String cmd = scriptText(temporalDestinationDir, results, statisticsFiles, fastqFiles, mergedBamFile)
         Realm realm = configService.getRealmDataManagement(project)
-        String jobId = executionHelperService.sendScript(realm, cmd)
+        String jobId = pbsService.executeJob(realm, cmd)
         log.debug "Job ${jobId} submitted to PBS"
 
         addOutputParameter(JOB, jobId)

@@ -8,10 +8,12 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
 import de.dkfz.tbi.otp.job.processing.CreateClusterScriptService
 import de.dkfz.tbi.otp.job.processing.ExecutionService
+import de.dkfz.tbi.otp.job.processing.PbsService
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.ExternalScript
 import de.dkfz.tbi.otp.utils.LinkFileUtils
+import de.dkfz.tbi.otp.utils.ProcessHelperService.ProcessOutput
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -38,6 +40,9 @@ class SnvCallingJobTests {
 
     @Autowired
     ExecutionService executionService
+
+    @Autowired
+    PbsService pbsService
 
     @Autowired
     SchedulerService schedulerService
@@ -170,6 +175,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         processedMergedBamFile2 = null
         removeMetaClass(CreateClusterScriptService, createClusterScriptService)
         removeMetaClass(ExecutionService, executionService)
+        removeMetaClass(PbsService, pbsService)
         removeMetaClass(SnvCallingJob, snvCallingJob)
         removeMetaClass(LinkFileUtils, linkFileUtils)
         removeMetaClass(LsdfFilesService, lsdfFilesService)
@@ -212,7 +218,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
 
         DomainFactory.createProcessParameter(snvCallingJob.processingStep.process, snvCallingInstance)
         snvCallingInstance.metaClass.findLatestResultForSameBamFiles = { SnvCallingStep step -> return null }
-        executionService.metaClass.sendScript = { Realm realm, String text, String qsubParameters ->
+        pbsService.metaClass.executeJob = { Realm realm, String text, String qsubParameters ->
             throw new RuntimeException("This area should not be reached since the calling job shall not run")
         }
         shouldFail(RuntimeException, { snvCallingJob.maybeSubmit(snvCallingInstance) })
@@ -225,7 +231,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
         snvCallingJob.metaClass.createAndSaveSnvJobResult = { SnvCallingInstance instance, ExternalScript externalScript, SnvJobResult inputResult ->
             return true
         }
-        executionService.metaClass.querySsh = { String host, int port, int timeout, String username, String password, File keyFile, boolean useSshAgent, String command, File script, String options ->
+        executionService.metaClass.querySsh = { String host, int port, int timeout, String username, String password, File keyFile, boolean useSshAgent, String command ->
             if (command.contains('PARM_CHR_INDEX=')) {
                 String chromosome = command.split('PARM_CHR_INDEX=')[1].split(',')[0]
                 File snvFile = new OtpPath(snvCallingInstance.snvInstancePath, SnvCallingStep.CALLING.getResultFileName(snvCallingInstance.individual, chromosome)).absoluteStagingPath
@@ -254,7 +260,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
                 assert command.contains(scriptCommandPart)
             }
 
-            return [PBS_ID]
+            return new ProcessOutput("${PBS_ID}.pbs", "", 0)
         }
 
         snvCallingJob.metaClass.writeConfigFile = { SnvCallingInstance instance ->

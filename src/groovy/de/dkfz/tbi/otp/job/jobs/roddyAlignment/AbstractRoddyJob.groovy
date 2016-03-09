@@ -148,7 +148,7 @@ abstract class AbstractRoddyJob extends AbstractMaybeSubmitWaitValidateJob{
                 String jobClass = m.group(2)
                 String pbsId = m.group(3)
 
-                submittedClusterJobs.add(clusterJobService.createClusterJob(realm, pbsId, processingStep, seqType, jobName, jobClass))
+                submittedClusterJobs.add(clusterJobService.createClusterJob(realm, pbsId, realm.roddyUser, processingStep, seqType, jobName, jobClass))
             } else {
                 throw new RuntimeException("Could not match '${it}' against '${roddyOutputPattern}")
             }

@@ -3,7 +3,7 @@ package de.dkfz.tbi.otp.job.jobs.transferMergedBamFile
 import org.springframework.beans.factory.annotation.Autowired
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
-import de.dkfz.tbi.otp.job.processing.ExecutionHelperService
+import de.dkfz.tbi.otp.job.processing.PbsService
 import de.dkfz.tbi.otp.ngsdata.*
 
 class CheckQaResultsChecksumMD5Job extends AbstractEndStateAwareJobImpl {
@@ -18,7 +18,7 @@ class CheckQaResultsChecksumMD5Job extends AbstractEndStateAwareJobImpl {
     ConfigService configService
 
     @Autowired
-    ExecutionHelperService executionHelperService
+    PbsService pbsService
 
     @Autowired
     ChecksumFileService checksumFileService
@@ -36,7 +36,7 @@ class CheckQaResultsChecksumMD5Job extends AbstractEndStateAwareJobImpl {
         Project project = processedMergedBamFileService.project(file)
         String cmd = scriptText(temporalqaDestinationDir)
         Realm realm = configService.getRealmDataManagement(project)
-        String jobId = executionHelperService.sendScript(realm, cmd)
+        String jobId = pbsService.executeJob(realm, cmd)
         log.debug "Job ${jobId} submitted to PBS"
 
         addOutputParameter(JOB, jobId)

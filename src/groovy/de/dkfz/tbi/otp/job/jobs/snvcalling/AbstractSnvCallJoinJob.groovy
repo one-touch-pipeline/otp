@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
-import de.dkfz.tbi.otp.job.processing.ExecutionHelperService
+import de.dkfz.tbi.otp.job.processing.PbsService
 import de.dkfz.tbi.otp.ngsdata.ConfigService
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.ExternalScript
@@ -14,7 +14,7 @@ abstract class AbstractSnvCallJoinJob extends AbstractSnvCallingJob {
     @Autowired
     ConfigService configService
     @Autowired
-    ExecutionHelperService executionHelperService
+    PbsService pbsService
 
     final static String CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER = "CHROMOSOME_VCF_JOIN"
 
@@ -55,7 +55,7 @@ abstract class AbstractSnvCallJoinJob extends AbstractSnvCallingJob {
                     "CONTROL_BAMFILE_FULLPATH_BP=${sampleType2BamFilePath}"
 
             submit(jobResult, realm, { String clusterScript, String specificQsubParameters ->
-                executionHelperService.sendScript(realm, clusterScript, "{" +
+                pbsService.executeJob(realm, clusterScript, "{" +
                         "'-v': '${qsubParametersGeneral},${specificQsubParameters}'" +
                         "}")
             })

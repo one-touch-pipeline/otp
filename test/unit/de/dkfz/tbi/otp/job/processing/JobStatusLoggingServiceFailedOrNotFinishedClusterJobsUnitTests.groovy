@@ -2,7 +2,6 @@ package de.dkfz.tbi.otp.job.processing
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
-import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifierImpl
 import de.dkfz.tbi.otp.ngsdata.Realm
 import grails.buildtestdata.mixin.Build
 import grails.test.mixin.TestFor
@@ -60,12 +59,12 @@ class JobStatusLoggingServiceFailedOrNotFinishedClusterJobsUnitTests extends Tes
         assert new File(service.logFileBaseDir(realm1, processingStep)).mkdirs()
         realm2 = Realm.build([id: realmId++, name: 'realm2', loggingRootPath: new File(tempDirectory, '2').path])
         assert new File(service.logFileBaseDir(realm2, processingStep)).mkdirs()
-        realmWithEmptyLogFile = new Realm([id: realmId++, name: 'realmWithEmptyLogFile', loggingRootPath: new File(tempDirectory, '3').path])
+        realmWithEmptyLogFile = new Realm([id: realmId++, name: 'realmWithEmptyLogFile', loggingRootPath: new File(tempDirectory, '3').path, unixUser: "notEmtpy"])
         assert new File(service.logFileBaseDir(realmWithEmptyLogFile, processingStep)).mkdirs()
-        realmWithoutLogFile = new Realm([id: realmId++, name: 'realmWithoutLogFile', loggingRootPath: new File(tempDirectory, '4').path])
+        realmWithoutLogFile = new Realm([id: realmId++, name: 'realmWithoutLogFile', loggingRootPath: new File(tempDirectory, '4').path, unixUser: "notEmtpy"])
         assert new File(service.logFileBaseDir(realmWithoutLogFile, processingStep)).mkdirs()
-        realmWithoutLogDir = new Realm([id: realmId++, name: 'realmWithoutLogDir', loggingRootPath: new File(tempDirectory, '5').path])
-        realmWithSameLogDirAs1 = new Realm([id: realmId++, name: 'realmWithSameLogDirAs1', loggingRootPath: realm1.loggingRootPath])
+        realmWithoutLogDir = new Realm([id: realmId++, name: 'realmWithoutLogDir', loggingRootPath: new File(tempDirectory, '5').path, unixUser: "notEmtpy"])
+        realmWithSameLogDirAs1 = new Realm([id: realmId++, name: 'realmWithSameLogDirAs1', loggingRootPath: realm1.loggingRootPath, unixUser: "notEmtpy"])
 
         final String id1 = '1001'
         final String id2 = '1002'
@@ -77,17 +76,17 @@ class JobStatusLoggingServiceFailedOrNotFinishedClusterJobsUnitTests extends Tes
         final String suffixOfId3 = '34'
         final String id3 = prefixOfId3 + suffixOfId3
         final String id5 = '1005'
-        successfulJobOnRealm1 = new ClusterJobIdentifierImpl(realm1, id1)
-        failedJobOnRealm1 = new ClusterJobIdentifierImpl(realm1, id2)
+        successfulJobOnRealm1 = new ClusterJobIdentifier(realm1, id1, realm1.unixUser)
+        failedJobOnRealm1 = new ClusterJobIdentifier(realm1, id2, realm1.unixUser)
         jobIdsOnRealm1 = [
                 successfulJobOnRealm1.clusterJobId,
                 failedJobOnRealm1.clusterJobId,
         ]
-        successfulJobOnRealm2 = new ClusterJobIdentifierImpl(realm2, id3)
-        failedJob1OnRealm2 = new ClusterJobIdentifierImpl(realm2, prefixOfId3)
-        failedJob2OnRealm2 = new ClusterJobIdentifierImpl(realm2, suffixOfId3)
-        mixedUpJob1 = new ClusterJobIdentifierImpl(realm2, successfulJobOnRealm1.clusterJobId)
-        mixedUpJob2 = new ClusterJobIdentifierImpl(realm2, failedJobOnRealm1.clusterJobId)
+        successfulJobOnRealm2 = new ClusterJobIdentifier(realm2, id3, realm2.unixUser)
+        failedJob1OnRealm2 = new ClusterJobIdentifier(realm2, prefixOfId3, realm2.unixUser)
+        failedJob2OnRealm2 = new ClusterJobIdentifier(realm2, suffixOfId3, realm2.unixUser)
+        mixedUpJob1 = new ClusterJobIdentifier(realm2, successfulJobOnRealm1.clusterJobId, realm2.unixUser)
+        mixedUpJob2 = new ClusterJobIdentifier(realm2, failedJobOnRealm1.clusterJobId, realm2.unixUser)
         jobIdsOnRealm2 = [
                 successfulJobOnRealm2.clusterJobId,
                 failedJob1OnRealm2.clusterJobId,
@@ -101,11 +100,11 @@ class JobStatusLoggingServiceFailedOrNotFinishedClusterJobsUnitTests extends Tes
                 mixedUpJob1,
                 mixedUpJob2,
         ]
-        jobOnRealmWithEmptyLogFile = new ClusterJobIdentifierImpl(realmWithEmptyLogFile, id5)
-        jobOnRealmWithoutLogFile = new ClusterJobIdentifierImpl(realmWithoutLogFile, id5)
-        jobOnRealmWithoutLogDir = new ClusterJobIdentifierImpl(realmWithoutLogDir, id5)
-        successfulJobOnRealmWithSameLogDirAs1 = new ClusterJobIdentifierImpl(realmWithSameLogDirAs1, failedJobOnRealm1.clusterJobId)
-        failedJobOnRealmWithSameLogDirAs1 = new ClusterJobIdentifierImpl(realmWithSameLogDirAs1, successfulJobOnRealm1.clusterJobId)
+        jobOnRealmWithEmptyLogFile = new ClusterJobIdentifier(realmWithEmptyLogFile, id5, realmWithEmptyLogFile.unixUser)
+        jobOnRealmWithoutLogFile = new ClusterJobIdentifier(realmWithoutLogFile, id5, realmWithoutLogFile.unixUser)
+        jobOnRealmWithoutLogDir = new ClusterJobIdentifier(realmWithoutLogDir, id5, realmWithoutLogDir.unixUser)
+        successfulJobOnRealmWithSameLogDirAs1 = new ClusterJobIdentifier(realmWithSameLogDirAs1, failedJobOnRealm1.clusterJobId, realmWithSameLogDirAs1.unixUser)
+        failedJobOnRealmWithSameLogDirAs1 = new ClusterJobIdentifier(realmWithSameLogDirAs1, successfulJobOnRealm1.clusterJobId, realmWithSameLogDirAs1.unixUser)
         jobIdsOnRealmWithSameLogDirAs1 = [
                 successfulJobOnRealmWithSameLogDirAs1.clusterJobId,
                 failedJobOnRealmWithSameLogDirAs1.clusterJobId,
@@ -136,14 +135,14 @@ class JobStatusLoggingServiceFailedOrNotFinishedClusterJobsUnitTests extends Tes
     @Test
     void testFailedOrNotFinishedClusterJobsWithArgumentsRealmAndCollectionOfIds_Realm1() {
         final Collection<ClusterJobIdentifier> unsuccessfulClusterJobs
-        unsuccessfulClusterJobs = service.failedOrNotFinishedClusterJobs(processingStep, realm1, jobIdsOnRealm1)
+        unsuccessfulClusterJobs = service.failedOrNotFinishedClusterJobs(processingStep, [(realm1): jobIdsOnRealm1.collect { new ClusterJobIdentifier(realm1, it, realm1.unixUser) }])
         assert unsuccessfulClusterJobs == [failedJobOnRealm1]
     }
 
     @Test
     void testFailedOrNotFinishedClusterJobsWithArgumentsRealmAndCollectionOfIds_Realm2() {
         final Collection<ClusterJobIdentifier> unsuccessfulClusterJobs
-        unsuccessfulClusterJobs = service.failedOrNotFinishedClusterJobs(processingStep, realm2, jobIdsOnRealm2)
+        unsuccessfulClusterJobs = service.failedOrNotFinishedClusterJobs(processingStep, [(realm2): jobIdsOnRealm2.collect { new ClusterJobIdentifier(realm2, it, realm2.unixUser) }])
         assertAndContinue { assert unsuccessfulClusterJobs.size() == unsuccessfulJobsOnRealm2.size() }
         assertAndContinue { assert unsuccessfulClusterJobs.containsAll(unsuccessfulJobsOnRealm2) }
     }
@@ -151,16 +150,16 @@ class JobStatusLoggingServiceFailedOrNotFinishedClusterJobsUnitTests extends Tes
     @Test
     void testFailedOrNotFinishedClusterJobsWithArgumentsRealmAndCollectionOfIds_RealmWithEmptyLogFile() {
         final Collection<ClusterJobIdentifier> unsuccessfulClusterJobs
-        unsuccessfulClusterJobs = service.failedOrNotFinishedClusterJobs(processingStep, realmWithEmptyLogFile, [
-                jobOnRealmWithEmptyLogFile.clusterJobId,
-        ])
+        unsuccessfulClusterJobs = service.failedOrNotFinishedClusterJobs(processingStep,
+                [(realmWithEmptyLogFile): [jobOnRealmWithEmptyLogFile],]
+        )
         assert unsuccessfulClusterJobs == [jobOnRealmWithEmptyLogFile]
     }
 
     @Test
     void testFailedOrNotFinishedClusterJobsWithArgumentsRealmAndCollectionOfIds_RealmWithSameLogDirAs1() {
         final Collection<ClusterJobIdentifier> unsuccessfulClusterJobs
-        unsuccessfulClusterJobs = service.failedOrNotFinishedClusterJobs(processingStep, realmWithSameLogDirAs1, jobIdsOnRealmWithSameLogDirAs1)
+        unsuccessfulClusterJobs = service.failedOrNotFinishedClusterJobs(processingStep, [(realmWithSameLogDirAs1): jobIdsOnRealmWithSameLogDirAs1.collect { new ClusterJobIdentifier(realmWithSameLogDirAs1, it, realmWithSameLogDirAs1.unixUser) }])
         assert unsuccessfulClusterJobs == [failedJobOnRealmWithSameLogDirAs1]
     }
 
@@ -189,12 +188,12 @@ class JobStatusLoggingServiceFailedOrNotFinishedClusterJobsUnitTests extends Tes
     void testFailedOrNotFinishedClusterJobsWithArgumentMap() {
         final Collection<ClusterJobIdentifier> unsuccessfulClusterJobs
         unsuccessfulClusterJobs = service.failedOrNotFinishedClusterJobs(processingStep, [
-                (realm1): jobIdsOnRealm1,
-                (realm2): jobIdsOnRealm2,
-                (realmWithEmptyLogFile): [jobOnRealmWithEmptyLogFile.clusterJobId],
-                (realmWithoutLogFile): [jobOnRealmWithoutLogFile.clusterJobId],
-                (realmWithoutLogDir): [jobOnRealmWithoutLogDir.clusterJobId],
-                (realmWithSameLogDirAs1): jobIdsOnRealmWithSameLogDirAs1,
+                (realm1): jobIdsOnRealm1.collect { new ClusterJobIdentifier(realm1, it, realm1.unixUser) },
+                (realm2): jobIdsOnRealm2.collect { new ClusterJobIdentifier(realm2, it, realm2.unixUser) },
+                (realmWithEmptyLogFile): [new ClusterJobIdentifier(realmWithEmptyLogFile, jobOnRealmWithEmptyLogFile.clusterJobId, realmWithEmptyLogFile.unixUser)],
+                (realmWithoutLogFile): [new ClusterJobIdentifier(realmWithoutLogFile, jobOnRealmWithoutLogFile.clusterJobId, realmWithoutLogFile.unixUser)],
+                (realmWithoutLogDir): [new ClusterJobIdentifier(realmWithoutLogDir, jobOnRealmWithoutLogDir.clusterJobId, realmWithoutLogDir.unixUser)],
+                (realmWithSameLogDirAs1): jobIdsOnRealmWithSameLogDirAs1.collect { new ClusterJobIdentifier(realmWithSameLogDirAs1, it, realmWithSameLogDirAs1.unixUser) },
         ])
         assertAndContinue { assert unsuccessfulClusterJobs.size() == allUnsuccessfulJobs.size() }
         assertAndContinue { assert unsuccessfulClusterJobs.containsAll(allUnsuccessfulJobs) }

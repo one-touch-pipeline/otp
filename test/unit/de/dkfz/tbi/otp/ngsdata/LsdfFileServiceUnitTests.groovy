@@ -8,15 +8,22 @@ import org.codehaus.groovy.control.io.NullWriter
 
 import de.dkfz.tbi.otp.job.processing.ExecutionService
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
-import grails.test.mixin.TestFor
 import grails.buildtestdata.mixin.Build
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 
-@TestFor(LsdfFilesService)
+
 @Build([Realm])
 class LsdfFileServiceUnitTests {
+
+    LsdfFilesService service
+
+    @Before
+    void setUp() {
+        service = new LsdfFilesService()
+    }
 
     @Rule
     public TemporaryFolder tempFolder = new TemporaryFolder()

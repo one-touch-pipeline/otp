@@ -1,12 +1,11 @@
 package de.dkfz.tbi.otp.job.jobs
 
+import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
 import de.dkfz.tbi.otp.job.processing.MonitoringJob
 import de.dkfz.tbi.otp.job.processing.Parameter
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
-import de.dkfz.tbi.otp.job.scheduler.PbsJobInfo
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 import static de.dkfz.tbi.TestConstants.ARBITRARY_CLUSTER_JOB_ID
@@ -16,22 +15,22 @@ class MonitoringTestJob extends AbstractEndStateAwareJobImpl implements Monitori
 
     SchedulerService schedulerService
 
-    PbsJobInfo pbsJobInfo
+    ClusterJobIdentifier jobIdentifier
     boolean fail
     boolean executed = false
 
-    MonitoringTestJob(ProcessingStep processingStep, Collection<Parameter> inputParameters, SchedulerService schedulerService, PbsJobInfo pbsJobInfo, boolean fail) {
+    MonitoringTestJob(ProcessingStep processingStep, Collection<Parameter> inputParameters, SchedulerService schedulerService, ClusterJobIdentifier jobIdentifier, boolean fail) {
         super(processingStep, inputParameters)
         this.schedulerService = schedulerService
-        this.pbsJobInfo = pbsJobInfo
+        this.jobIdentifier = jobIdentifier
         this.fail = fail
     }
 
     @Override
-    void finished(String pbsId, Realm realm) {
+    void finished(ClusterJobIdentifier finishedClusterJob) {
         assert schedulerService.jobExecutedByCurrentThread == this
         assert LogThreadLocal.threadLog == this.log
-        assert pbsId == ARBITRARY_CLUSTER_JOB_ID && realm.is(pbsJobInfo.realm)
+        assert finishedClusterJob.clusterJobId == ARBITRARY_CLUSTER_JOB_ID && finishedClusterJob.realm.is(jobIdentifier.realm)
         executed = true
         if (fail) {
             throw new NumberFormatException(ARBITRARY_MESSAGE)

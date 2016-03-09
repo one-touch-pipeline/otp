@@ -70,7 +70,7 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
     void testCreateClusterJobAndCompleteClusterJob() {
         def(job, run) = createClusterJobWithRun()
 
-        ClusterJobIdentifier clusterJobIdentifier = new ClusterJobIdentifierImpl(job.realm, job.clusterJobId)
+        ClusterJobIdentifier clusterJobIdentifier = new ClusterJobIdentifier(job.realm, job.clusterJobId, job.userName)
         JobInfo jobInfo = new JobInfo()
         jobInfo.setState(JobState.FAILED)
         jobInfo.setExitcode(5)
@@ -1255,7 +1255,7 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
         ProcessingStep processingStep = DomainFactory.createAndSaveProcessingStep(props.jobClass)
         assert processingStep
 
-        ClusterJob job = clusterJobService.createClusterJob(realm, props.clusterJobId, processingStep, props.seqType)
+        ClusterJob job = clusterJobService.createClusterJob(realm, props.clusterJobId, realm.unixUser, processingStep, props.seqType)
         job.clusterJobName = "test_" + processingStep.getNonQualifiedJobClass()
 
         props.remove(['jobClass', 'clusterJobId', 'seqType'])

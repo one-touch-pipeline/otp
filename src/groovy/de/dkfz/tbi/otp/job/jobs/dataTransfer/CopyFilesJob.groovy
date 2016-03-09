@@ -24,7 +24,7 @@ class CopyFilesJob extends AbstractJobImpl {
     RunProcessingService runProcessingService
 
     @Autowired
-    ExecutionHelperService executionHelperService
+    PbsService pbsService
 
     @Autowired
     ExecutionService executionService
@@ -48,7 +48,7 @@ class CopyFilesJob extends AbstractJobImpl {
                 assert executionService.executeCommand(realm, "ln -s ${initialPath} ${finalPath}; echo \$?") ==~ /0\s*/
             } else {
                 String cmd = "echo \$HOST;cp ${initialPath} ${finalPath};chmod 440 ${finalPath}"
-                String jobId = executionHelperService.sendScript(realm, cmd)
+                String jobId = pbsService.executeJob(realm, cmd)
                 pbsIds << jobId
                 realmIds << realm.id.toString()
             }

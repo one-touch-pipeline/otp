@@ -1,7 +1,7 @@
 package de.dkfz.tbi.otp.job.jobs
 
 import de.dkfz.tbi.otp.job.processing.AbstractOtpJob
-import de.dkfz.tbi.otp.job.processing.ExecutionHelperService
+import de.dkfz.tbi.otp.job.processing.PbsService
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.HelperUtils
 import org.springframework.beans.factory.annotation.Autowired
@@ -15,7 +15,7 @@ import static de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys.SCRIPT
 class ClusterScriptExecutorJob extends AbstractOtpJob {
 
     @Autowired
-    ExecutionHelperService executionHelperService
+    PbsService pbsService
 
     @Override
     protected NextAction maybeSubmit() throws Throwable {
@@ -50,7 +50,7 @@ class ClusterScriptExecutorJob extends AbstractOtpJob {
         script = """
 bash ${scriptFile.absolutePath}
 """
-        executionHelperService.sendScript(realm, script) // Will NOT add output parameters
+        pbsService.executeJob(realm, script) // Will NOT add output parameters
         return NextAction.WAIT_FOR_CLUSTER_JOBS
     }
 

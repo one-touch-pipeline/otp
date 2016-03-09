@@ -1,7 +1,5 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
-import org.apache.commons.logging.impl.NoOpLog
-
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*

@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs
 
-import de.dkfz.tbi.otp.job.scheduler.PbsJobInfo
+import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import java.util.concurrent.locks.Lock
@@ -84,24 +84,26 @@ class WatchdogJob extends AbstractEndStateAwareJobImpl implements MonitoringJob 
             schedulerService.doEndCheck(this)
         } else {
             Realm realm = CollectionUtils.exactlyOneElement(Realm.findAllById(Long.parseLong(realmIdFromJob)))
-            pbsMonitorService.monitor(queuedClusterJobIds.collect { new PbsJobInfo(realm: realm, pbsId: it) }, this)
+            pbsMonitorService.monitor(queuedClusterJobIds.collect { new ClusterJobIdentifier(realm, it, realm.unixUser) }, this)
         }
     }
 
     @Override
-    void finished(String pbsId, Realm realm) {
+    void finished(ClusterJobIdentifier finishedClusterJob) {
         final boolean allFinished
         lock.lock()
         try {
-            queuedClusterJobIds.remove(pbsId)
-            log.debug "PBS job ${pbsId} finished"
+            queuedClusterJobIds.remove(finishedClusterJob.clusterJobId)
+            log.debug "PBS job ${finishedClusterJob.clusterJobId} finished"
             allFinished = queuedClusterJobIds.empty
         } finally {
             lock.unlock()
         }
         if (allFinished) {
             ProcessingStep.withTransaction {
-                def failedClusterJobs = jobStatusLoggingService.failedOrNotFinishedClusterJobs(monitoredProcessingStep, realm, allClusterJobIds)
+                List<ClusterJobIdentifier> allClusterJobs = allClusterJobIds.collect { new ClusterJobIdentifier(finishedClusterJob.realm, it, finishedClusterJob.userName) }
+
+                def failedClusterJobs = jobStatusLoggingService.failedOrNotFinishedClusterJobs(monitoredProcessingStep, allClusterJobs)
 
                 // Output and finish
                 if (failedClusterJobs.empty) {

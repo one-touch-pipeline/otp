@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.filehandling.FileNames
 import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
-import de.dkfz.tbi.otp.job.processing.ExecutionHelperService
+import de.dkfz.tbi.otp.job.processing.PbsService
 import de.dkfz.tbi.otp.ngsdata.*
 
 class MoveFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl {
@@ -22,7 +22,7 @@ class MoveFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl {
     ConfigService configService
 
     @Autowired
-    ExecutionHelperService executionHelperService
+    PbsService pbsService
 
     @Autowired
     ChecksumFileService checksumFileService
@@ -41,7 +41,7 @@ class MoveFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl {
         String cmd = scriptText(dest, temporalDestinationDir, temporalQADestinationDir, qaDestinationDirectory)
         mergedBamFile.validateAndSetBamFileInProjectFolder()
         log.debug "Attempting to move files from the tmp directory to the final destination"
-        String jobId = executionHelperService.sendScript(realm, cmd)
+        String jobId = pbsService.executeJob(realm, cmd)
         log.debug "Job ${jobId} submitted to PBS"
 
         addOutputParameter(JOB, jobId)

@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.job.jobs.WatchdogJob
 import de.dkfz.tbi.otp.job.processing.AbstractJobImpl
-import de.dkfz.tbi.otp.job.processing.ExecutionHelperService
+import de.dkfz.tbi.otp.job.processing.PbsService
 import de.dkfz.tbi.otp.ngsdata.*
 
 public class CalculateChecksumJob extends AbstractJobImpl {
@@ -14,7 +14,7 @@ public class CalculateChecksumJob extends AbstractJobImpl {
     ChecksumFileService checksumFileService
 
     @Autowired
-    ExecutionHelperService executionHelperService
+    PbsService pbsService
 
     @Autowired
     ConfigService configService
@@ -36,7 +36,7 @@ public class CalculateChecksumJob extends AbstractJobImpl {
             }
             String cmd = scriptText(file)
             Realm realm = configService.getRealmDataManagement(file.project)
-            String jobId = executionHelperService.sendScript(realm, cmd)
+            String jobId = pbsService.executeJob(realm, cmd)
             pbsIds << jobId
             realmIds << realm.id.toString()
         }

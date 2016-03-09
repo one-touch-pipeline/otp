@@ -8,7 +8,6 @@ import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.infrastructure.ClusterJobService
 import de.dkfz.tbi.otp.job.processing.AbstractMultiJob
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
-import de.dkfz.tbi.otp.job.scheduler.PbsJobInfo
 import de.dkfz.tbi.otp.ngsdata.ConfigService
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Realm
@@ -76,7 +75,11 @@ class AbstractRoddyJobTests {
         validateCounter = 0
 
         roddyBamFile = DomainFactory.createRoddyBamFile()
-        realm = Realm.build([name: roddyBamFile.project.realmName, operationType: Realm.OperationType.DATA_MANAGEMENT])
+        realm = Realm.build(
+                name: roddyBamFile.project.realmName,
+                operationType: Realm.OperationType.DATA_MANAGEMENT,
+                roddyUser: "roddyuser",
+        )
 
         roddyJob = [
                 getProcessParameterObject: { -> roddyBamFile },
@@ -115,7 +118,7 @@ Creating the following execution directory to store information about this proce
 ${workExecutionDir.absolutePath}
 newLine"""
 
-        ProcessHelperService.metaClass.static.executeCommandAndAssertExistCodeAndReturnProcessOutput = {String cmd ->
+        ProcessHelperService.metaClass.static.executeCommandAndAssertExistCodeAndReturnProcessOutput = { String cmd ->
             executeCommandCounter++
             return new ProcessHelperService.ProcessOutput(stdout: stdout, stderr: stderr, exitCode: 0)
         }
@@ -124,7 +127,7 @@ newLine"""
     }
 
     private void mockProcessOutput_noClusterJobsSubmitted() {
-        ProcessHelperService.metaClass.static.executeCommandAndAssertExistCodeAndReturnProcessOutput = {String cmd ->
+        ProcessHelperService.metaClass.static.executeCommandAndAssertExistCodeAndReturnProcessOutput = { String cmd ->
             executeCommandCounter++
             return OUTPUT_NO_CLUSTER_JOBS_SUBMITTED
         }
@@ -209,10 +212,10 @@ newLine"""
         ProcessingStep processingStep = DomainFactory.createAndSaveProcessingStep()
         assert processingStep
 
-        ClusterJob clusterJob = clusterJobService.createClusterJob(realm, "0000", processingStep)
+        ClusterJob clusterJob = clusterJobService.createClusterJob(realm, "0000", realm.roddyUser, processingStep)
         assert clusterJob
 
-        final PbsJobInfo pbsJobInfo = new PbsJobInfo(realm: realm, pbsId: clusterJob.clusterJobId)
+        final ClusterJobIdentifier pbsJobInfo = new ClusterJobIdentifier(realm, clusterJob.clusterJobId, realm.roddyUser)
 
         roddyJob.metaClass.maybeSubmit = {
             throw new RuntimeException("should not come here")

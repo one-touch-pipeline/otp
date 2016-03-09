@@ -42,7 +42,6 @@ class ProcessesController {
      */
     JobExecutionPlanService jobExecutionPlanService
     ProcessService processService
-    ExecutionService executionService
     CommentService commentService
 
     def index() {

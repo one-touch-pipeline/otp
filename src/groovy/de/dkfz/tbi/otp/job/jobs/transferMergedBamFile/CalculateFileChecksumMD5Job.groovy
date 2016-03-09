@@ -16,7 +16,7 @@ class CalculateFileChecksumMD5Job extends AbstractJobImpl {
     ChecksumFileService checksumFileService
 
     @Autowired
-    ExecutionHelperService executionHelperService
+    PbsService pbsService
 
     @Autowired
     ConfigService configService
@@ -42,7 +42,7 @@ class CalculateFileChecksumMD5Job extends AbstractJobImpl {
         Realm realm = configService.getRealmDataProcessing(project)
         String projectDir = configService.getProjectRootPath(project) + "/" + project.dirName
         String cmd = scriptText(bamFile, locations, projectDir)
-        String jobId = executionHelperService.sendScript(realm, cmd)
+        String jobId = pbsService.executeJob(realm, cmd)
         log.debug "Job " + jobId + " submitted to PBS"
         addOutputParameter(JOB, jobId)
         addOutputParameter(REALM, realm.id.toString())

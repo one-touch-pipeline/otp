@@ -6,7 +6,6 @@ import static org.springframework.util.Assert.notNull
 import java.util.regex.Pattern
 
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
-import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifierImpl
 import de.dkfz.tbi.otp.ngsdata.Realm
 
 /**
@@ -77,23 +76,6 @@ class JobStatusLoggingService {
     /**
      * Checks if cluster jobs have finished successfully.
      *
-     * @param clusterJobIds The IDs of the cluster jobs to be checked.
-     *
-     * @return The jobs which have not completed successfully. This includes jobs which have failed and jobs which have
-     *     not finished yet.
-     */
-    public Collection<ClusterJobIdentifier> failedOrNotFinishedClusterJobs(
-            final ProcessingStep processingStep, final Realm realm, final Collection<String> clusterJobIds) {
-        notNull processingStep
-        notNull realm
-        notNull clusterJobIds
-        return failedOrNotFinishedClusterJobs(processingStep, [(realm): clusterJobIds])
-    }
-
-
-    /**
-     * Checks if cluster jobs have finished successfully.
-     *
      * @param clusterJobs The cluster jobs to be checked.
      *
      * @return The jobs which have not completed successfully. This includes jobs which have failed and jobs which have
@@ -106,8 +88,8 @@ class JobStatusLoggingService {
         notNull clusterJobs
         def invalidInput = clusterJobs.findAll( { it == null || it.realm == null || it.clusterJobId == null } )
         assert invalidInput == []: "clusterJobs argument contains null values: ${invalidInput}"
-        final Map<Realm, Collection<String>> map = clusterJobs.groupBy( {it.realm} ).collectEntries { realm, clusterJob ->
-            [(realm): clusterJob.clusterJobId]
+        final Map<Realm, Collection<ClusterJobIdentifier>> map = clusterJobs.groupBy( {it.realm} ).collectEntries { realm, clusterJob ->
+            [(realm): clusterJob]
         }
         assert map.values().sum { it.size() } == clusterJobs.size()
         return failedOrNotFinishedClusterJobs(processingStep, map)
@@ -117,25 +99,25 @@ class JobStatusLoggingService {
     /**
      * Checks if cluster jobs have finished successfully.
      *
-     * @param clusterJobs The cluster jobs to be checked. Mapping from {@link Realm} to a collection of IDs of cluster
-     *     jobs on that realm.
+     * @param clusterJobMap The cluster jobs to be checked. Mapping from {@link Realm} to a collection of cluster
+     *     job identifiers on that realm.
      *
      * @return The jobs which have not completed successfully. This includes jobs which have failed and jobs which have
      *     not finished yet.
      */
     public Collection<ClusterJobIdentifier> failedOrNotFinishedClusterJobs(
-            final ProcessingStep processingStep, final Map<Realm, Collection<String>> clusterJobs) {
+            final ProcessingStep processingStep, final Map<Realm, Collection<ClusterJobIdentifier>> clusterJobMap) {
         notNull processingStep
-        notNull clusterJobs
+        notNull clusterJobMap
 
         // OTP-967: try to figure out why processingStep sometimes returns NULL for .jobClass
         // lets try explicitly reconnecting it..
         processingStep.refresh()
 
         final Collection<ClusterJobIdentifier> failedOrNotFinishedClusterJobs = []
-        clusterJobs.each { Realm realm, Collection<String> clusterJobIds ->
+        clusterJobMap.each { Realm realm, Collection<ClusterJobIdentifier> clusterJobs ->
             notNull realm
-            notNull clusterJobIds
+            notNull clusterJobs
             final File logFile = new File(logFileLocation(realm, processingStep))
             final String logFileText
             try {
@@ -144,12 +126,12 @@ class JobStatusLoggingService {
                 threadLog?.debug "Cluster job status log file ${logFile} not found."
                 logFileText = ''
             }
-            clusterJobIds.each {
+            clusterJobs.each {
                 notNull it
-                final String expectedLogMessage = constructMessage(processingStep, it)
+                final String expectedLogMessage = constructMessage(processingStep, it.clusterJobId)
                 if (!(logFileText =~ /(?:^|\s)${Pattern.quote(expectedLogMessage)}(?:$|\s)/)) {
                     threadLog?.debug "Did not find \"${expectedLogMessage}\" in ${logFile}."
-                    failedOrNotFinishedClusterJobs.add(new ClusterJobIdentifierImpl(realm, it))
+                    failedOrNotFinishedClusterJobs.add(new ClusterJobIdentifier(it))
                 }
             }
         }

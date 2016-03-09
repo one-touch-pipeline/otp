@@ -8,6 +8,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
 import de.dkfz.tbi.otp.job.processing.ExecutionService
+import de.dkfz.tbi.otp.job.processing.PbsService
 import de.dkfz.tbi.otp.job.processing.ParameterType
 import de.dkfz.tbi.otp.job.processing.ParameterUsage
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
@@ -15,6 +16,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.ExternalScript
 import de.dkfz.tbi.otp.utils.LinkFileUtils
 import de.dkfz.tbi.otp.utils.WaitingFileUtils
+import de.dkfz.tbi.otp.utils.ProcessHelperService.ProcessOutput
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -35,6 +37,9 @@ class FilterVcfJobTests {
 
     @Autowired
     ExecutionService executionService
+
+    @Autowired
+    PbsService pbsService
 
     @Autowired
     SchedulerService schedulerService
@@ -220,6 +225,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         WaitingFileUtils.metaClass = null
         assert testDirectory.deleteDir()
         removeMetaClass(ExecutionService, executionService)
+        removeMetaClass(PbsService, pbsService)
         removeMetaClass(LinkFileUtils, linkFileUtils)
     }
 
@@ -244,7 +250,7 @@ RUN_FILTER_VCF=0
 CHROMOSOME_INDICES=( {1..21} XY)
 """
         snvCallingInstance2.metaClass.findLatestResultForSameBamFiles = { SnvCallingStep step -> return snvJobResultFilter1 }
-        executionService.metaClass.sendScript = { Realm realm, String text, String qsubParameters ->
+        pbsService.metaClass.executeJob = { Realm realm, String text, String qsubParameters ->
             throw new RuntimeException("This area should not be reached since the filter job shall not run")
         }
         assertEquals(NextAction.SUCCEED, filterVcfJob.maybeSubmit(snvCallingInstance2))
@@ -273,7 +279,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
         File pmbf1 = snvCallingInstanceTestData.createBamFile(processedMergedBamFile1)
         snvCallingInstanceTestData.createBamFile(processedMergedBamFile2)
 
-        executionService.metaClass.querySsh = { String host, int port, int timeout, String username, String password, File keyFile, boolean useSshAgent, String command, File script, String options ->
+        executionService.metaClass.querySsh = { String host, int port, int timeout, String username, String password, File keyFile, boolean useSshAgent, String command ->
             SnvJobResult inputResult = snvCallingInstance2.findLatestResultForSameBamFiles(SnvCallingStep.SNV_DEEPANNOTATION)
             File inputResultFile = inputResult.resultFilePath.absoluteDataManagementPath
 
@@ -296,7 +302,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
                 assert command.contains(scriptCommandPart)
                 assert command.contains(qsubParameterCommandPart)
 
-            return [PBS_ID]
+            return new ProcessOutput("${PBS_ID}.pbs", "", 0)
         }
 
         filterVcfJob.metaClass.deleteResultFileIfExists = { File resultFile, Realm realm ->

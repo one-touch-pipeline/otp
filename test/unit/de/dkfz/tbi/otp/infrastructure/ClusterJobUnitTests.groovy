@@ -15,7 +15,7 @@ class ClusterJobUnitTests {
     @Test
     void testFindByClusterJobIdentifier() {
         ClusterJob clusterJob = ClusterJob.build()
-        ClusterJobIdentifier identifier = new ClusterJobIdentifierImpl(clusterJob)
+        ClusterJobIdentifier identifier = new ClusterJobIdentifier(clusterJob)
         ClusterJob differentJobId = ClusterJob.build(
                 realm: identifier.realm,
                 clusterJobId: getUniqueString(),

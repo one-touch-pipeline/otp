@@ -7,7 +7,7 @@ import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QaProcessingStatus
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.filehandling.FileNames
 import de.dkfz.tbi.otp.job.jobs.transferMergedBamFile.MoveFilesToFinalDestinationJob
-import de.dkfz.tbi.otp.job.processing.ExecutionHelperService
+import de.dkfz.tbi.otp.job.processing.PbsService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.FileType.Type
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
@@ -592,7 +592,7 @@ class TransferMergedBamFileWorkflowTests extends WorkflowTestCase {
                 assert processedMergedBamFile.save(failOnError: true)
                 return processedMergedBamFile.id as String
             }
-            moveFilesToFinalDestinationJob.executionHelperService.metaClass.sendScript = { Realm realm, String text ->
+            moveFilesToFinalDestinationJob.pbsService.metaClass.executeJob = { Realm realm, String text ->
                 throw new RuntimeException(exceptionMessage)
             }
             assert processedMergedBamFile.mergingWorkPackage.bamFileInProjectFolder == null
@@ -601,7 +601,7 @@ class TransferMergedBamFileWorkflowTests extends WorkflowTestCase {
             } == exceptionMessage
             assert processedMergedBamFile.mergingWorkPackage.bamFileInProjectFolder == processedMergedBamFile
         } finally {
-            TestCase.removeMetaClass(ExecutionHelperService, moveFilesToFinalDestinationJob.executionHelperService)
+            TestCase.removeMetaClass(PbsService, moveFilesToFinalDestinationJob.pbsService)
             TestCase.removeMetaClass(MoveFilesToFinalDestinationJob, moveFilesToFinalDestinationJob)
         }
     }

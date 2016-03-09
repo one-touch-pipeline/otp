@@ -8,6 +8,7 @@ import grails.test.mixin.*
 import grails.test.mixin.support.*
 import de.dkfz.tbi.otp.ngsdata.*
 import org.junit.After
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
@@ -17,98 +18,26 @@ import org.junit.rules.TemporaryFolder
  *
  */
 @TestMixin(GrailsUnitTestMixin)
-@TestFor(ExecutionHelperService)
 @Mock([ProcessingStep, Realm])
 class ExecutionHelperServiceUnitTests {
-
-    final static String FIRST_PBS_ID = '1234'
-    final static String SECOND_PBS_ID = '2345'
-    final static String SCRIPT_CONTENT = '# I am a script'
-    final static String QSUB_PARAMETERS = "-j oe -M otptest@dkfz.de"
 
     final static String DUMMY_GROUP = "DUMMY_GROUP"
     final static String DUMMY_PERMISSION = "DUMMY_PERMISSION"
 
+    ExecutionHelperService service
+
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder()
+
+    @Before
+    void setUp() {
+        service = new ExecutionHelperService()
+    }
 
     @After
     void tearDown() {
         GroovySystem.metaClassRegistry.removeMetaClass(ProcessHelperService)
     }
-
-    private createFakeExecutionService() {
-        [
-            executeJob: { realm, text, qsubParameters -> 'some PBS response' },
-            extractPbsIds: { pbsResponse -> [FIRST_PBS_ID]},
-        ] as ExecutionService
-    }
-
-    private createFakeExecutionServiceSeveralPBSIDs() {
-        [
-            executeJob: { realm, text, qsubParameters -> 'some PBS response' },
-            extractPbsIds: { pbsResponse -> [FIRST_PBS_ID, SECOND_PBS_ID]},
-        ] as ExecutionService
-    }
-
-    private createFakeExecutionServicePBSisNull() {
-        [
-            executeJob: { realm, text, qsubParameters -> 'some PBS response' },
-            extractPbsIds: { pbsResponse -> []},
-        ] as ExecutionService
-    }
-
-    // Script via closure
-
-    @Test
-    void testSendScriptWithClosure() {
-        service.executionService = createFakeExecutionService()
-        Realm fakeRealm = new Realm()
-        String output = service.sendScript(fakeRealm) { SCRIPT_CONTENT }
-        assert FIRST_PBS_ID == output
-    }
-
-    @Test
-    void testSendScriptWithClosureWhenMoreThanOnePBSIDIsReturned() {
-        service.executionService = createFakeExecutionServiceSeveralPBSIDs()
-        shouldFail ProcessingException, { service.sendScript(new Realm()) { SCRIPT_CONTENT } }
-    }
-
-    @Test
-    void testSendScriptWithClosureWhenPBSIDisEmpty() {
-        service.executionService = createFakeExecutionServicePBSisNull()
-        shouldFail ProcessingException, { service.sendScript(new Realm()) { SCRIPT_CONTENT } }
-    }
-
-    // Script as String
-
-    @Test
-    void testSendScriptWithString() {
-        service.executionService = createFakeExecutionService()
-        Realm fakeRealm = new Realm()
-        String output = service.sendScript(fakeRealm, SCRIPT_CONTENT)
-        assert FIRST_PBS_ID == output
-    }
-
-    @Test
-    void testSendScriptWithStringWhenMoreThanOnePBSIDIsReturned() {
-        service.executionService = createFakeExecutionServiceSeveralPBSIDs()
-        shouldFail ProcessingException, { service.sendScript(new Realm()) { SCRIPT_CONTENT } }
-    }
-
-    @Test
-    void testSendScriptWithStringWhenPBSIDisEmpty() {
-        service.executionService = createFakeExecutionServicePBSisNull()
-        shouldFail ProcessingException, { service.sendScript(new Realm()) { SCRIPT_CONTENT } }
-    }
-
-    @Test
-    void testSendScriptWithQsubParameter() {
-        service.executionService = createFakeExecutionService()
-        String output = service.sendScript(new Realm(), SCRIPT_CONTENT, QSUB_PARAMETERS)
-        assert FIRST_PBS_ID == output
-    }
-
 
 
     @Test

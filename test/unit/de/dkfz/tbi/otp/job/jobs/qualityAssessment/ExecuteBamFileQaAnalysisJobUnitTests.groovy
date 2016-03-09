@@ -63,9 +63,9 @@ class ExecuteBamFileQaAnalysisJobUnitTests {
             libraryPreparationKit: {libraryPreparationKit}
             ] as ProcessedBamFileService
 
-        def executionHelperService = [
-            sendScript: { realmIn, cmd -> 'pbsID' }
-            ] as ExecutionHelperService
+        def pbsService = [
+            executeJob: { realmIn, cmd -> 'pbsID' }
+            ] as PbsService
 
         def processingOptionService = [
             findOptionAssure: { a1, a2, a3 -> 'qualityAssessment.sh ${processedBamFilePath} ${processedBaiFilePath} ${qualityAssessmentFilePath} ${coverageDataFilePath} ${insertSizeDataFilePath} false ${allChromosomeName} 36 25 0 1 1000 10 false ${bedFilePath} ${refGenMetaInfoFilePath}'}
@@ -89,7 +89,7 @@ class ExecuteBamFileQaAnalysisJobUnitTests {
                 processingOptionService: processingOptionService,
                 referenceGenomeService: referenceGenomeService,
                 bedFileService: bedFileService,
-                executionHelperService: executionHelperService,
+                pbsService: pbsService,
                 log: log
                 )
 
@@ -109,11 +109,11 @@ class ExecuteBamFileQaAnalysisJobUnitTests {
             )
         assertNotNull(bedfile.save([flush: true, validate: false]))
 
-        job.executionHelperService = [sendScript: { realm, cmd ->
+        job.pbsService = [executeJob: { realm, cmd ->
                 String expCommand = "qualityAssessment.sh processedBamFileFilePath baiFilePath qualityAssessmentDataFilePath coverageDataFilePath insertSizeDataFilePath false ${Chromosomes.overallChromosomesLabel()} 36 25 0 1 1000 10 false bedFilePath referenceGenomeMetaInformationPath; chmod 440 qualityAssessmentDataFilePath coverageDataFilePath insertSizeDataFilePath"
                 assertEquals(expCommand, cmd)
                 return 'pbsID'
-            }] as ExecutionHelperService
+            }] as PbsService
 
         job.execute()
     }
@@ -124,9 +124,9 @@ class ExecuteBamFileQaAnalysisJobUnitTests {
         seqType.name = SeqTypeNames.EXOME.seqTypeName
         seqType.libraryLayout = 'PAIRED'
 
-        job.executionHelperService = [sendScript: { realm, cmd ->
+        job.pbsService = [executeJob: { realm, cmd ->
             assert false //this method should not be executed
-        }] as ExecutionHelperService
+        }] as PbsService
 
         assert "Could not find a bed file for ${referenceGenome} and LibraryPreparationKit" == shouldFail(ProcessingException) {
             job.execute()
@@ -139,11 +139,11 @@ class ExecuteBamFileQaAnalysisJobUnitTests {
         seqType.name = SeqTypeNames.WHOLE_GENOME.seqTypeName
         seqType.libraryLayout = 'PAIRED'
 
-        job.executionHelperService = [sendScript: { realm, cmd ->
+        job.pbsService = [executeJob: { realm, cmd ->
                 String expCommand = "qualityAssessment.sh processedBamFileFilePath baiFilePath qualityAssessmentDataFilePath coverageDataFilePath insertSizeDataFilePath false ${Chromosomes.overallChromosomesLabel()} 36 25 0 1 1000 10 false; chmod 440 qualityAssessmentDataFilePath coverageDataFilePath insertSizeDataFilePath"
                 assertEquals(expCommand, cmd)
                 return 'pbsID'
-            }] as ExecutionHelperService
+            }] as PbsService
 
         job.execute()
     }

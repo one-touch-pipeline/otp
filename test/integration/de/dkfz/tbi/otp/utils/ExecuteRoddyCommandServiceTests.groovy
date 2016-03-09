@@ -8,7 +8,6 @@ import de.dkfz.tbi.otp.job.processing.ExecutionService
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.ngsdata.SeqTypeNames
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import org.junit.After
 import org.junit.Before
@@ -347,7 +346,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testCorrectPermission_AllFine() {
-        ProcessHelperService.metaClass.static.executeCommandAndAssertExistCodeAndReturnProcessOutput = {String cmd ->
+        ProcessHelperService.metaClass.static.executeCommandAndAssertExistCodeAndReturnProcessOutput = { String cmd ->
             assert cmd ==~ "cd /tmp && sudo -u OtherUnixUser ${temporaryFolder.getRoot()}/.*/correctPathPermissionsOtherUnixUserRemoteWrapper.sh ${roddyBamFile.workDirectory}"
             return new ProcessHelperService.ProcessOutput('', '', 0)
         }
@@ -389,7 +388,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testCorrectGroup_AllFine() {
-        ProcessHelperService.metaClass.static.executeCommandAndAssertExistCodeAndReturnProcessOutput = {String cmd ->
+        ProcessHelperService.metaClass.static.executeCommandAndAssertExistCodeAndReturnProcessOutput = { String cmd ->
             assert cmd ==~ "cd /tmp && sudo -u OtherUnixUser ${temporaryFolder.getRoot()}/.*/correctGroupOtherUnixUserRemoteWrapper.sh ${roddyBamFile.workDirectory}"
             return new ProcessHelperService.ProcessOutput('', '', 0)
         }
@@ -408,7 +407,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testDeleteContentOfOtherUnixUserDirectory_AllFine() {
-        ProcessHelperService.metaClass.static.executeCommandAndAssertExistCodeAndReturnProcessOutput = {String cmd ->
+        ProcessHelperService.metaClass.static.executeCommandAndAssertExistCodeAndReturnProcessOutput = { String cmd ->
             assert cmd ==~ "cd /tmp && sudo -u OtherUnixUser ${temporaryFolder.getRoot()}/.*/deleteContentOfRoddyDirectoriesRemoteWrapper.sh ${roddyBamFile.workDirectory}"
             return new ProcessHelperService.ProcessOutput('', '', 0)
         }

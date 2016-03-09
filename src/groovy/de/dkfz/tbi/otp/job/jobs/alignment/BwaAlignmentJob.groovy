@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired
 class BwaAlignmentJob extends AbstractJobImpl {
 
     @Autowired
-    ExecutionHelperService executionHelperService
+    PbsService pbsService
 
     @Autowired
     SeqTrackService seqTrackService
@@ -63,7 +63,7 @@ class BwaAlignmentJob extends AbstractJobImpl {
         String bwaCmd = "${bwaCommand} aln ${nCores} ${qaSwitch} ${qParameter} -f ${saiFilePath} ${referenceGenomePath} ${dataFilePath}"
         String chmodCmd = "chmod 440 ${saiFilePath}"
         String cmd = "${bwaCmd} ; ${chmodCmd}"
-        return executionHelperService.sendScript(realm, cmd)
+        return pbsService.executeJob(realm, cmd)
     }
 
     private String bwaCommand(AlignmentPass alignmentPass) {

@@ -1,13 +1,14 @@
 package de.dkfz.tbi.otp.job.scheduler
 
 import de.dkfz.tbi.otp.infrastructure.ClusterJobService
+import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
+import de.dkfz.tbi.otp.job.processing.PbsService
+import de.dkfz.tbi.otp.job.processing.PbsService.ClusterJobStatus
+import grails.util.Pair
 
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 
-import org.springframework.beans.factory.annotation.Autowired
-
-import de.dkfz.tbi.otp.job.processing.ExecutionService
 import de.dkfz.tbi.otp.job.processing.ExecutionState
 import de.dkfz.tbi.otp.job.processing.InvalidStateException
 import de.dkfz.tbi.otp.job.processing.MonitoringJob
@@ -26,20 +27,15 @@ import grails.util.Environment
 class PbsMonitorService {
     static transactional = false
 
-    @Autowired
     ClusterJobService clusterJobService
-
-    @Autowired
-    ExecutionService executionService
-
-    @Autowired
+    PbsService pbsService
     Scheduler scheduler
 
     /**
      * Map of currently monitored jobs on the PBS (value) ordered
      * by the MonitoringJob which registered it (key).
      */
-    private Map<MonitoringJob, List<PbsJobInfo>> queuedJobs = [:]
+    protected Map<MonitoringJob, List<ClusterJobIdentifier>> queuedJobs = [:]
     /**
      * Lock to protect the queuedJobs. Needed because registering a
      * Job and checking the PBS for whether a Job finished might be
@@ -49,19 +45,17 @@ class PbsMonitorService {
 
     /**
      * Registers the given PBS ID for monitoring on the given realm.
-     * @param info The PbsJobInfo containing the PBS id of the job and the realm on which the PBS job is running
+     * @param info The ClusterJobIdentifier containing the PBS id of the job and the realm on which the PBS job is running
      * @param pbsMonitor The monitoring Job to notify when the job finished on the PBS
      */
-    void monitor(PbsJobInfo info, MonitoringJob pbsMonitor) {
+    void monitor(ClusterJobIdentifier info, MonitoringJob pbsMonitor) {
         lock.lock()
         try {
             if (queuedJobs.containsKey(pbsMonitor)) {
                 boolean append = true
                 queuedJobs.get(pbsMonitor).each {
-                    if (it.pbsId == info.pbsId) {
-                        if (it.realm == info.realm || !it.realm) {
-                            append = false
-                        }
+                    if (it == info) {
+                        append = false
                     }
                 }
                 if (append) {
@@ -79,13 +73,13 @@ class PbsMonitorService {
 
     /**
      * Registers the given PBS IDs for monitoring.
-     * @param pbsJobInfos A collection of PbsJobInfos containing the PBS id of the job and the realm on which the PBS job is running
+     * @param pbsJobInfos A collection of ClusterJobIdentifiers containing the PBS id of the job and the realm on which the PBS job is running
      * @param pbsMonitor The monitoring Job to notify when the job finished on the PBS
      */
-    void monitor(Collection<PbsJobInfo> pbsJobInfos, MonitoringJob pbsMonitor) {
+    void monitor(Collection<ClusterJobIdentifier> pbsJobInfos, MonitoringJob pbsMonitor) {
         lock.lock()
         try {
-            pbsJobInfos.each { PbsJobInfo info ->
+            pbsJobInfos.each { ClusterJobIdentifier info ->
                 monitor(info, pbsMonitor)
             }
         } finally {
@@ -94,36 +88,41 @@ class PbsMonitorService {
     }
 
     public void check() {
-        if (queuedJobs.empty) {
+        if (queuedJobs.isEmpty()) {
             return
         }
 
-        List<Realm> realms = Realm.findAllByEnv(Environment.current.name)
+        // get all jobs the PBS cluster knows about
+        // if a cluster from a realm is not reachable, save it to a list so we don't assume that jobs on this realm are completed
+        Map<ClusterJobIdentifier, ClusterJobStatus> jobStates = [:]
+        List<Pair<String, String>> failedClusterQueries = []
 
-        Map<MonitoringJob, List<PbsJobInfo>> removal = [:]
+        queuedJobs.values().sum().unique { a, b -> a.realmId == b.realmId && a.userName == b.userName ? 0 : 1 }.each { ClusterJobIdentifier job ->
+            try {
+                jobStates.putAll(pbsService.knownJobsWithState(job.realm, job.userName))
+            } catch (Throwable e) {
+                failedClusterQueries.add(new Pair(job.realm, job.userName))
+            }
+        }
+
+        Map<MonitoringJob, List<ClusterJobIdentifier>> removal = [:]
         // we create a copy of the queuedJobs as a different thread might append elements to
         // queuedJobs which might end up in concurrency issues
-        (new HashMap(queuedJobs)).each { MonitoringJob pbsMonitor, List<PbsJobInfo> pbsInfos ->
+        (new HashMap<MonitoringJob, List<ClusterJobIdentifier>>(queuedJobs)).each { MonitoringJob pbsMonitor, List<ClusterJobIdentifier> pbsInfos ->
             // for each of the queuedJobs we go over the pbsInfos and check whether the job on the
             // PBS systems is still running
-            List<PbsJobInfo> finishedJobs = []
+            List<ClusterJobIdentifier> finishedJobs = []
             // again a copy for thread safety
-            (new ArrayList(pbsInfos)).each { PbsJobInfo info ->
-                log.debug("Checking pbs id ${info.pbsId}")
-                boolean running = false
-                if (info.realm) {
-                    running = executionService.checkRunningJob(info.pbsId, info.realm)
-                } else {
-                    for (Realm realm in realms) {
-                        if (executionService.checkRunningJob(info.pbsId, realm)) {
-                            running = true
-                            break
-                        }
-                    }
-                }
-                log.debug("${info.pbsId} still running: ${running ? 'yes' : 'no'}")
-                if (!running) {
-                    log.info("${info.pbsId} finished on Realm ${info.realm}")
+            (new ArrayList<ClusterJobIdentifier>(pbsInfos)).each { ClusterJobIdentifier info ->
+                log.debug("Checking pbs id ${info.clusterJobId}")
+                boolean completed
+                // a job is considered complete if it either has status "completed" or it is not known anymore,
+                // unless the cluster it runs on couldn't be checked
+                ClusterJobStatus status = jobStates.getOrDefault(info, ClusterJobStatus.COMPLETED)
+                completed = (status == ClusterJobStatus.COMPLETED && !failedClusterQueries.contains(new Pair(info.realm, info.userName)))
+                log.debug("${info.clusterJobId} still running: ${completed ? 'no' : 'yes'}")
+                if (completed) {
+                    log.info("${info.clusterJobId} finished on Realm ${info.realm}")
                     try {
                         clusterJobService.completeClusterJob(info)
                     } catch (Throwable e) {
@@ -149,10 +148,10 @@ class PbsMonitorService {
             List<MonitoringJob> finishedMonitors = []
             lock.lock()
             try {
-                removal.each { MonitoringJob pbsMonitor, List<PbsJobInfo> pbsInfos ->
+                removal.each { MonitoringJob pbsMonitor, List<ClusterJobIdentifier> pbsInfos ->
                     // we get the list of PbsJobs for the monitor
                     // and remove the finished pbsJob Info
-                    List<PbsJobInfo> existing = queuedJobs.get(pbsMonitor)
+                    List<ClusterJobIdentifier> existing = queuedJobs.get(pbsMonitor)
                     existing.removeAll(pbsInfos)
                     if (existing.empty) {
                         // in case the list is after removal of the pbsJob Info empty
@@ -174,7 +173,7 @@ class PbsMonitorService {
         }
     }
 
-    private void notifyJobAboutFinishedClusterJob(final MonitoringJob monitoringJob, final PbsJobInfo clusterJob) {
+    protected void notifyJobAboutFinishedClusterJob(final MonitoringJob monitoringJob, final ClusterJobIdentifier clusterJob) {
         scheduler.doWithErrorHandling(monitoringJob, {
             boolean jobHasFinished
             ExecutionState jobEndState
@@ -188,18 +187,18 @@ class PbsMonitorService {
             }
             if (jobHasFinished) {
                 if (jobEndState == ExecutionState.FAILURE) {
-                    log.info("NOT notifying ${monitoringJob} that cluster job ${clusterJob.pbsId}" +
+                    log.info("NOT notifying ${monitoringJob} that cluster job ${clusterJob.clusterJobId}" +
                             " has finished on realm ${clusterJob.realm}, because that job has already failed.")
                 } else {
                     throw new RuntimeException("${monitoringJob} is still monitoring cluster job" +
-                            " ${clusterJob.pbsId} on realm ${clusterJob.realm}, although it has" +
+                            " ${clusterJob.clusterJobId} on realm ${clusterJob.realm}, although it has" +
                             " already finished with end state ${jobEndState}.")
                 }
             } else {
-                log.info("Notifying ${monitoringJob} that cluster job ${clusterJob.pbsId}" +
+                log.info("Notifying ${monitoringJob} that cluster job ${clusterJob.clusterJobId}" +
                         " has finished on realm ${clusterJob.realm}.")
                 scheduler.doInJobContext(monitoringJob, {
-                    monitoringJob.finished(clusterJob.pbsId, clusterJob.realm)
+                    monitoringJob.finished(clusterJob)
                 })
             }
         }, false)

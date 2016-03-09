@@ -10,7 +10,7 @@ class SendUnpackJob extends AbstractJobImpl {
     ConfigService configService
 
     @Autowired
-    ExecutionHelperService executionHelperService
+    PbsService pbsService
 
     String pbsIds = ""
 
@@ -23,7 +23,7 @@ class SendUnpackJob extends AbstractJobImpl {
         for(RunSegment segment in segments) {
             Realm realm = configService.getRealmForInitialFTPPath(segment.dataPath)
             String cmd = createUnpackCommand(segment)
-            String pbsId = executionHelperService.sendScript(realm, cmd)
+            String pbsId = pbsService.executeJob(realm, cmd)
             addPbsId(pbsId)
         }
         addOutputParameter("__pbsIds", pbsIds)

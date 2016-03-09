@@ -3,7 +3,6 @@ package de.dkfz.tbi.otp.job.processing
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
-import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifierImpl
 import de.dkfz.tbi.otp.infrastructure.ClusterJobService
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Realm
@@ -30,11 +29,11 @@ class AbstractMaybeSubmitWaitValidateJobTests extends TestCase {
         ProcessingStep processingStep = DomainFactory.createAndSaveProcessingStep()
         assert processingStep
 
-        ClusterJob clusterJob1 = clusterJobService.createClusterJob(realm, "1111", processingStep)
-        ClusterJobIdentifier identifier1 = new ClusterJobIdentifierImpl(clusterJob1)
+        ClusterJob clusterJob1 = clusterJobService.createClusterJob(realm, "1111", realm.unixUser, processingStep)
+        ClusterJobIdentifier identifier1 = new ClusterJobIdentifier(clusterJob1)
 
-        ClusterJob clusterJob2 = clusterJobService.createClusterJob(realm, "2222", processingStep)
-        ClusterJobIdentifier identifier2 = new ClusterJobIdentifierImpl(clusterJob2)
+        ClusterJob clusterJob2 = clusterJobService.createClusterJob(realm, "2222", realm.unixUser, processingStep)
+        ClusterJobIdentifier identifier2 = new ClusterJobIdentifier(clusterJob2)
 
         Map failedClusterJobs = [(identifier2): "Failed2.", (identifier1): "Failed1."]
         List finishedClusterJobs = [identifier2, identifier1]

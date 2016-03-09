@@ -15,7 +15,7 @@ class TransferMergedQAResultJob extends AbstractEndStateAwareJobImpl{
     ChecksumFileService checksumFileService
 
     @Autowired
-    ExecutionHelperService executionHelperService
+    PbsService pbsService
 
     @Autowired
     ConfigService configService
@@ -40,7 +40,7 @@ class TransferMergedQAResultJob extends AbstractEndStateAwareJobImpl{
 
         String cmd = scriptText(bamFile)
         Realm realm = configService.getRealmDataProcessing(project)
-        String jobId = executionHelperService.sendScript(realm, cmd)
+        String jobId = pbsService.executeJob(realm, cmd)
         log.debug "Job ${jobId} submitted to PBS"
 
         addOutputParameter(JOB, jobId)

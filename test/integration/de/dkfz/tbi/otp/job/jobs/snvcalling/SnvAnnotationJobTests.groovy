@@ -17,10 +17,13 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFileService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.job.processing.ExecutionService
+import de.dkfz.tbi.otp.job.processing.PbsService
 import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.ExternalScript
+import de.dkfz.tbi.otp.utils.ProcessHelperService.ProcessOutput
+
 
 class SnvAnnotationJobTests {
 
@@ -29,6 +32,9 @@ class SnvAnnotationJobTests {
 
     @Autowired
     ExecutionService executionService
+
+    @Autowired
+    PbsService pbsService
 
     @Autowired
     SchedulerService schedulerService
@@ -143,6 +149,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         snvJobResultInput = null
         processedMergedBamFile1 = null
         TestCase.removeMetaClass(ExecutionService, executionService)
+        TestCase.removeMetaClass(PbsService, pbsService)
         TestCase.removeMetaClass(LinkFileUtils, linkFileUtils)
         LsdfFilesService.metaClass = null
         WaitingFileUtils.metaClass = null
@@ -166,7 +173,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
 """
 
         snvCallingInstance2.metaClass.findLatestResultForSameBamFiles = { SnvCallingStep step -> return snvJobResult }
-        executionService.metaClass.sendScript = { Realm realm, String text, String qsubParameters ->
+        pbsService.metaClass.executeJob = { Realm realm, String text, String qsubParameters ->
             throw new RuntimeException("This area should not be reached since the annotation job shall not run")
         }
         snvAnnotationJob.log = new NoOpLog()
@@ -205,7 +212,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
                     snvCallingInstance2.config.configuration)
         }
 
-        executionService.metaClass.querySsh = { String host, int port, int timeout, String username, String password, File keyFile, boolean useSshAgent, String command, File script, String options ->
+        executionService.metaClass.querySsh = { String host, int port, int timeout, String username, String password, File keyFile, boolean useSshAgent, String command ->
             SnvCallingStep callingStep = SnvCallingStep.CALLING
             File inputFile = snvCallingInstance.findLatestResultForSameBamFiles(callingStep).resultFilePath.absoluteDataManagementPath
             File inputFileCopy = new File(snvCallingInstance2.snvInstancePath.absoluteDataManagementPath, inputFile.name)
@@ -233,7 +240,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
             assert command.contains(commandScriptPart)
             assert command.contains(commandDeletePart)
             assert command.contains(commandParameterPart)
-            return [PBS_ID]
+            return new ProcessOutput("${PBS_ID}.pbs", "", 0)
         }
         snvCallingInstance.metaClass.findLatestResultForSameBamFiles = { SnvCallingStep step -> return snvJobResultInput }
         LsdfFilesService.metaClass.static.ensureFileIsReadableAndNotEmpty = { File file -> return true }

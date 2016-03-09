@@ -11,7 +11,7 @@ class ExecuteMappingFilteringSortingToCoverageTableJob extends AbstractJobImpl {
     ProcessedBamFileQaFileService processedBamFileQaFileService
 
     @Autowired
-    ExecutionHelperService executionHelperService
+    PbsService pbsService
 
     @Autowired
     QualityAssessmentPassService qualityAssessmentPassService
@@ -37,7 +37,7 @@ class ExecuteMappingFilteringSortingToCoverageTableJob extends AbstractJobImpl {
         }
         cmd += "; chmod 440 ${mappedFilteredSortedCoverageDataFilePath}"
         Realm realm = qualityAssessmentPassService.realmForDataProcessing(pass)
-        String pbsID = executionHelperService.sendScript(realm, cmd)
+        String pbsID = pbsService.executeJob(realm, cmd)
         addOutputParameter("__pbsIds", pbsID)
         addOutputParameter("__pbsRealm", realm.id.toString())
     }

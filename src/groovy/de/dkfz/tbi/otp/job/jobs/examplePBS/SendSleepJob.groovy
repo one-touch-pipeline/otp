@@ -9,7 +9,7 @@ class SendSleepJob extends AbstractJobImpl {
     final int nJobs = 4
 
     @Autowired
-    ExecutionHelperService executionHelperService
+    PbsService pbsService
 
 
     @Override
@@ -18,7 +18,7 @@ class SendSleepJob extends AbstractJobImpl {
         Realm realm = Realm.list().get(0)
         List<String> pbsIDs = []
         for(int i=0; i<nJobs; i++) {
-            pbsIDs.add(executionHelperService.sendScript(realm, cmd))
+            pbsIDs.add(pbsService.executeJob(realm, cmd))
         }
         addOutputParameter("__pbsIds", pbsIDs.join(","))
         addOutputParameter("__pbsRealm", realm.id.toString())

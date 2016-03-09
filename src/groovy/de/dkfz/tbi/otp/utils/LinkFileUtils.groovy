@@ -1,18 +1,18 @@
 package de.dkfz.tbi.otp.utils
 
 import de.dkfz.tbi.otp.job.processing.CreateClusterScriptService
+import de.dkfz.tbi.otp.job.processing.ExecutionService
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.ngsdata.Realm
 import static de.dkfz.tbi.otp.utils.WaitingFileUtils.*
 import org.springframework.stereotype.Component
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.ApplicationContext
 
 @Component
 class LinkFileUtils {
 
     @Autowired
-    ApplicationContext applicationContext
+    ExecutionService executionService
 
     @Autowired
     CreateClusterScriptService createClusterScriptService
@@ -43,7 +43,7 @@ class LinkFileUtils {
                 command << "ln -sf ${source.path} ${link.path}\n"
             }
 
-            applicationContext.executionService.executeCommand(realm, command.toString())
+            executionService.executeCommand(realm, command.toString())
 
             sourceLinkMap.each { File source, File link ->
                 waitUntilExists(link)

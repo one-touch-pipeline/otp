@@ -1,8 +1,8 @@
 package de.dkfz.tbi.otp.job.processing
 
+import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.job.scheduler.PbsMonitorService
 import de.dkfz.tbi.otp.job.scheduler.Scheduler
-import de.dkfz.tbi.otp.ngsdata.Realm
 
 /**
  * Interface for {@link Job}s which are long running. An example is to
@@ -37,9 +37,6 @@ interface MonitoringJob extends EndStateAwareJob {
      *
      * <p>
      * If this method throws an exception, this MonitoringJob will be marked as failed and finished.
-     *
-     * @param pbsId The ID of the job on the PBS system
-     * @param realm The Realm where the Job finished, may be {@code null} if Realm is unknown
      */
-    void finished(String pbsId, Realm realm)
+    void finished(ClusterJobIdentifier finishedClusterJob)
 }

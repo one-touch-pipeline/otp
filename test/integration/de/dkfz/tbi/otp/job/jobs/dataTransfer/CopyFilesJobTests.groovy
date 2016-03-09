@@ -3,7 +3,7 @@ package de.dkfz.tbi.otp.job.jobs.dataTransfer
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.job.jobs.WatchdogJob
 import de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys
-import de.dkfz.tbi.otp.job.processing.ExecutionHelperService
+import de.dkfz.tbi.otp.job.processing.PbsService
 import de.dkfz.tbi.otp.job.processing.ExecutionService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import org.junit.*
@@ -13,7 +13,6 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.Realm.OperationType
 import org.springframework.beans.factory.annotation.Autowired
 
-import static junit.framework.TestCase.assertEquals
 import static junit.framework.TestCase.assertNotNull
 
 
@@ -32,7 +31,7 @@ class CopyFilesJobTests {
         testData = null
         TestCase.removeMetaClass(ProcessedMergedBamFileService, job.processedMergedBamFileService)
         TestCase.removeMetaClass(ExecutionService, job.executionService)
-        TestCase.removeMetaClass(ExecutionHelperService, job.executionHelperService)
+        TestCase.removeMetaClass(PbsService, job.pbsService)
         TestCase.removeMetaClass(RunProcessingService, job.runProcessingService)
         TestCase.removeMetaClass(LsdfFilesService, job.lsdfFilesService)
         TestCase.removeMetaClass(CopyFilesJob, job)
@@ -102,7 +101,7 @@ class CopyFilesJobTests {
 
 
     private void mockServicesForFileCopyingAndRunService(Map paths) {
-        job.executionHelperService.metaClass.sendScript = { Realm realm1, String text ->
+        job.pbsService.metaClass.executeJob = { Realm realm1, String text ->
             assert text.contains("cp ${paths.initialPath} ${paths.finalPath};chmod 440 ${paths.finalPath}")
             return PBS_ID
         }

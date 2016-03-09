@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.job.scheduler
 
 import org.apache.commons.logging.impl.NoOpLog
 
+import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.job.jobs.MonitoringTestJob
 import de.dkfz.tbi.otp.job.processing.Job
 import de.dkfz.tbi.otp.job.processing.MonitoringJob
@@ -33,7 +34,8 @@ class PbsMonitorServiceTests extends AbstractIntegrationTest {
     }
 
     private MonitoringJob notifyJobAboutFinishedClusterJob(final boolean fail) {
-        final PbsJobInfo pbsJobInfo = new PbsJobInfo([realm: new Realm(), pbsId: ARBITRARY_CLUSTER_JOB_ID])
+        Realm realm = new Realm()
+        final ClusterJobIdentifier pbsJobInfo = new ClusterJobIdentifier(realm, ARBITRARY_CLUSTER_JOB_ID, "user name")
         final Job testJob = new MonitoringTestJob(createAndSaveProcessingStep(), null, schedulerService, pbsJobInfo, fail)
 
         testJob.log = new NoOpLog()

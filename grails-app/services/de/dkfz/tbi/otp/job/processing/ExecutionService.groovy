@@ -1,13 +1,6 @@
 package de.dkfz.tbi.otp.job.processing
 
 
-import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.*
-import static org.springframework.util.Assert.notNull
-import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
-
-import java.util.regex.Matcher
-import java.util.regex.Pattern
-import org.apache.commons.logging.Log
 import com.jcraft.jsch.Channel
 import com.jcraft.jsch.ChannelExec
 import com.jcraft.jsch.JSch
@@ -17,209 +10,71 @@ import com.jcraft.jsch.IdentityRepository
 import com.jcraft.jsch.agentproxy.Connector
 import com.jcraft.jsch.agentproxy.ConnectorFactory
 import com.jcraft.jsch.agentproxy.RemoteIdentityRepository
-import de.dkfz.tbi.otp.infrastructure.ClusterJob
-import de.dkfz.tbi.otp.infrastructure.ClusterJobService
-import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+import org.apache.commons.logging.Log
+import de.dkfz.tbi.otp.utils.ProcessHelperService.ProcessOutput
+
 
 /**
  * @short Helper class providing functionality for remote execution of jobs.
  *
- * Provides connection to a remote host via ssh and validation of
- * pbs ids. Specifically the remote hosts are PBS' meaning that a
- * format specific for usage on a PBS is built and executed.
- *
+ * Provides connection to a remote host via SSH
  */
 class ExecutionService {
 
-    //Job ID                    Name             User            Time Use S Queue
-    public static final String KNOWN_JOB_ID_PATTERN = /(?i)\s*Job\sID\s*Name\s*User.*/
-    //qstat: Unknown Job Id 22.headnode.long-domain
-    //qstat: Unknown Job Id Error 22.headnode.long-domain
-    public static final String UNKNOWN_JOB_ID_PATTERN = /(?i)\s*qstat:\s*Unknown\sJob\sID\s(Error)?\d*.*/
-
-    enum ClusterJobStatus {
-        COMPLETED("C"),
-        HELD("H"),
-        RUNNING("R"),
-        QUEUED("Q")
-
-        private final String value
-
-        public String value() {
-            return value
-        }
-
-        ClusterJobStatus(String value) {
-            this.value = value
-        }
-
-        public boolean equals(String value) {
-            return this.value == value
-        }
-    }
-
-    /**
-     * Dependency injection of grailsApplication
-     */
-    @SuppressWarnings("GrailsStatelessService")
-    def grailsApplication
-    /**
-     * Dependency injection of config service
-     */
     @SuppressWarnings("GrailsStatelessService")
     def configService
 
-    PbsOptionMergingService pbsOptionMergingService
-    JobStatusLoggingService jobStatusLoggingService
-    SchedulerService schedulerService
-    ClusterJobService clusterJobService
 
     /**
-     * Executes a command on a specified host
+     * Executes a command on a specified host and logs stdout and stderr
      *
-     * The host the command is to be executed
-     * is identified by the realm.
      * @param realm The realm which identifies the host
      * @param command The command to be executed
-     * @return what the server sends back
+     * @param userName The user name used to log in (optional; if not set, unixUser of realm is used)
+     * @return standard output of the command executed
      */
-    public String executeCommand(Realm realm, String command) {
-        if (!command) {
-            throw new ProcessingException("No command specified")
-        }
-        List<String> values = executeRemoteJob(realm, command)
-        return concatResults(values)
+    public String executeCommand(Realm realm, String command, String userName = null) {
+        return executeCommandReturnProcessOutput(realm, command, userName).stdout
     }
 
+
     /**
-     * Executes a job on a specified host.
+     * Executes a command on a specified host and logs stdout and stderr
      *
      * @param realm The realm which identifies the host
-     * @param text The script to be run a pbs system
-     * @param qsubParameters The parameters which are needed for some qsub commands and can not be included in the text parameter
-     * The qsubParameters must be in JSON format!
-     * @return what the server sends back
-     */
-    public String executeJob(Realm realm, String text, String qsubParameters = "") {
-        if (!text) {
-            throw new ProcessingException("No job text specified.")
-        }
-        notNull realm, 'No realm specified.'
-
-        ProcessingStep processingStep = schedulerService.jobExecutedByCurrentThread.processingStep
-        ProcessParameterObject domainObject = processingStep.processParameterObject
-
-        SeqType seqType = domainObject?.seqType
-        short processingPriority = domainObject?.processingPriority ?: ProcessingPriority.NORMAL_PRIORITY
-
-
-        // check if the project has FASTTRACK priority
-        String fastTrackParameter
-        if (processingPriority >= ProcessingPriority.FAST_TRACK_PRIORITY) {
-            fastTrackParameter = '{"-A": "FASTTRACK"}'
-        }
-
-        String pbsOptions = pbsOptionMergingService.mergePbsOptions(processingStep, realm, qsubParameters, fastTrackParameter)
-
-        String pbsJobDescription = processingStep.getPbsJobDescription()
-        String scriptText = """
-#PBS -S /bin/bash
-#PBS -N ${pbsJobDescription}
-
-# OTP: Fail on first non-zero exit code
-set -e
-
-umask 0027
-
-# BEGIN ORIGINAL SCRIPT
-${text}
-# END ORIGINAL SCRIPT
-"""
-        /*
-         * Only log job status if a processing step is passed (to be backwards-compatible). Getting a processing
-         * step should always be the case when a closure is used. Other jobs need to be adopted to do this explicitly.
-         * The log file will be locked at the time of writing so concurrent (cluster) jobs will not corrupt the file.
-         */
-        if (processingStep) {
-            String logFile = jobStatusLoggingService.logFileLocation(realm, processingStep)
-            String logMessage = jobStatusLoggingService.constructMessage(processingStep)
-
-            scriptText += """
-touch '${logFile}'
-chmod 0640 ${logFile}
-flock -x '${logFile}' -c "echo \\"${logMessage}\\" >> '${logFile}'"
-"""
-        }
-        String command = "echo '${scriptText}' | qsub " + pbsOptions
-        List<String> values = executeRemoteJob(realm, command)
-
-
-        String concatenatedValues = concatResults(values)
-
-        String pbsId
-        try {
-            pbsId = exactlyOneElement(extractPbsIds(concatenatedValues))
-        } catch (AssertionError e) {
-            throw new RuntimeException("Could not extract exactly one pbs id from '${concatenatedValues}'", e)
-        }
-        ClusterJob clusterJob = clusterJobService.createClusterJob(realm, pbsId, processingStep, seqType, pbsJobDescription)
-        threadLog?.info(AbstractOtpJob.getLogFileNames(clusterJob))
-
-        return concatenatedValues
-    }
-
-    /**
-     * Triggers the sending of remote jobs
-     *
-     * Commands are executed on remote servers using a pbs infrastructure.
-     * The host can be specified and so the service is flexible for
-     * executing on several different servers. Either command or script
-     * have to be specified otherwise it does not work and an exception
-     * is thrown.
-     *
-     * @param host The host on which the command shall be executed
-     * @param port The port to be addressed on the server
-     * @param timeout The timeout in milliseconds after which execution interrupts
-     * @param username The user name for the connection
-     * @param password The password for the user
-     * @param command The command to be executed on the remote server
-     * @param script The script to be executed on the remote server
-     * @param options The options To make the command more specific
-     *
-     * @return List of Strings containing the output of the triggered remote job
+     * @param command The command to be executed
+     * @param userName The user name used to log in (optional; if not set, unixUser of realm is used)
+     * @return process output of the command executed
      */
 
-    protected List<String> executeRemoteJob(Realm realm, String command = null, File script = null) {
-        if (!command && !script) {
-            throw new ProcessingException("Neither a command nor a script specified to be run remotely.")
-        }
+    public ProcessOutput executeCommandReturnProcessOutput(Realm realm, String command, String userName = null) {
+        assert realm : "No realm specified."
+        assert command : "No command specified to be run remotely."
         String password = configService.getPbsPassword()
         File keyFile = configService.getSshKeyFile()
         boolean useSshAgent = configService.useSshAgent()
-        return querySsh(realm.host, realm.port, realm.timeout, realm.unixUser, password, keyFile, useSshAgent, command, script, realm.pbsOptions)
+        return querySsh(realm.host, realm.port, realm.timeout, userName ?: realm.unixUser, password, keyFile, useSshAgent, command)
     }
 
     /**
-     * Queries ssh on a pbs infrastructure
+     * Executes a command on a specified host and logs stdout and stderr
      *
-     * Opens an ssh connection to a specified host with specific credentials.
-     * With the parameter options can options for the command be specified.
+     * Opens an SSH connection to a specified host with specific credentials.
      *
      * @param host The host on which the command shall be executed
      * @param port The port to be addressed on the server
      * @param timeout The timeout to use for the ssh connection
      * @param username The user name for the connection
      * @param password The password for the user
+     * @param keyFile The key file which contains the SSH key for passwordless login
+     * @param useSshAgent Whether the SSH agent should be used to decrypt the SSH key
      * @param command The command to be executed on the remote server
-     * @param script The script to be executed on the remote server
-     * @param options The options To make the command more specific
-     * @return List of Strings containing the output of the executed job
+     * @return process output of the command executed
      */
-    protected List<String> querySsh(String host, int port, int timeout, String username, String password, File keyFile, boolean useSshAgent, String command, File script, String options) {
+    protected ProcessOutput querySsh(String host, int port, int timeout, String username, String password, File keyFile, boolean useSshAgent, String command) {
+        assert command : "No command specified."
         if (!password && !keyFile) {
             throw new ProcessingException("Neither password nor key file for remote connection specified.")
         }
@@ -254,33 +109,22 @@ flock -x '${logFile}' -c "echo \\"${logMessage}\\" >> '${logFile}'"
             } catch (JSchException e) {
                 throw new ProcessingException("Connecting to ${host}:${port} with username ${username} failed.", e)
             }
-            Channel channel = session.openChannel("exec")
-            if (command) {
-                logToJob("executed command: " + command)
-                ((ChannelExec)channel).setCommand(command)
-            } else if (script) {
-                command = "qsub"
-                if (options) {
-                    command += " ${options}"
-                }
-                logToJob("executed script: " + script + " with command: " + command)
-                ((ChannelExec)channel).setCommand(command)
-                ((ChannelExec)channel).setInputStream(script.newInputStream())
+            ChannelExec channel = (ChannelExec)session.openChannel("exec")
+            logToJob("executed command: " + command)
+            channel.setCommand(command)
+
+            ProcessOutput processOutput = getOutput(channel)
+
+            if (processOutput.exitCode != 0) {
+                logToJob("received exit code:\n" + processOutput.exitCode)
             }
-            OutputStream outputErrorStream = new ByteArrayOutputStream()
-            ((ChannelExec)channel).setErrStream(outputErrorStream)
-            List<String> values = getInputStream(channel)
-            if (values == null) {
-                // TODO: How to handle this?
-                throw new ProcessingException("test!")
+            logToJob("received response:\n" + processOutput.stdout)
+            if (processOutput.stderr) {
+                logToJob("received error response:\n" + processOutput.stderr)
             }
-            logToJob("received response: " + concatResults(values))
-            String errorOutput = outputErrorStream.toString()
-            if (errorOutput) {
-                logToJob("received error response:\n" + errorOutput)
-            }
+
             disconnectSsh(channel)
-            return values
+            return processOutput
         } catch (Exception e) {
             log.info(e.toString(), e)
             throw new ProcessingException(e)
@@ -293,157 +137,32 @@ flock -x '${logFile}' -c "echo \\"${logMessage}\\" >> '${logFile}'"
      *
      * @param channel The channel to be disconnected
      */
-    private void disconnectSsh(Channel channel) {
+    private static void disconnectSsh(Channel channel) {
         channel.session.disconnect()
         channel.disconnect()
     }
 
     /**
-     * Retrives the input stream and converts it to a List of Strings
+     * Retrieves the command output
      *
-     * @param channel The channel to read the input stream from
-     * @return List of Strings containing the returned stream
+     * @param channel The channel to read from
+     * @return The output of the finished process
      */
-    private List<String> getInputStream(Channel channel) {
-        InputStream inputStream = channel.getInputStream()
+    private static ProcessOutput getOutput(ChannelExec channel) {
+        OutputStream outputErrorStream = new ByteArrayOutputStream()
+        OutputStream outputStream = new ByteArrayOutputStream()
+        channel.setOutputStream(outputStream)
+        channel.setErrStream(outputErrorStream)
+
         channel.connect()
-        byte[] tmp = new byte[1024]
-        List<String> values = []
-        while (true) {
-            while (inputStream.available() > 0) {
-                int i = inputStream.read(tmp, 0, 1024)
-                if (i < 0) {
-                    break
-                }
-                values.add(new String(tmp, 0, i))
-            }
-            if (channel.isClosed()) {
-                break
-            }
-            try {
-                Thread.sleep(1000)
-            } catch(Exception ee){
-            }
+        while(!channel.isClosed()) {
+            Thread.sleep(10)
         }
-        return values
-    }
-
-    private String concatResults(List<String> values) {
-        String answer = ""
-        values.each { String value ->
-            if (value) {
-                answer += value
-            }
-        }
-        return answer
-    }
-
-    /**
-     * Extracts pbs ids from a given String
-     *
-     * @param sshOutput List of Strings containing output of ssh session from pbs
-     * @return List of Strings each of them a pbs id
-     */
-    public List<String> extractPbsIds(String sshOutput) {
-        Pattern pattern = Pattern.compile("\\d+")
-        List<String> pbsIds = []
-        sshOutput.eachLine { String line ->
-            Matcher m = pattern.matcher(line)
-            if (m.find()) {
-                pbsIds.add(m.group())
-            }
-            else {
-                return null
-            }
-        }
-        return pbsIds
-    }
-
-    /**
-     * Validates if jobs of which the pbs ids are are handed over are running
-     *
-     * @param pbsIds Pbs ids to be validated
-     * @return Map of pbs ids with associated validation identifiers, which are Boolean values
-     */
-    public Map<String, Boolean> validate(List<String> pbsIds) {
-        if (!pbsIds) {
-            throw new InvalidStateException("No pbs ids handed over to be validated.")
-        }
-        // TODO: improve algorithm to query PBS once
-        List<Realm> realms = Realm.list()
-        Map<String, Boolean> stats = [:]
-        for (String pbsId in pbsIds) {
-            stats.put(pbsId, false)
-            for (Realm realm in realms) {
-                if (checkRunningJob(pbsId, realm)) {
-                    stats.put(pbsId, true)
-                    // no need to query further Realms, it's running
-                    break
-                }
-            }
-        }
-        return stats
-    }
-
-    /**
-     * Checks whether the given PBS Ids are running on the given PBS Realm.
-     * @param pbsIds The list of PBS Ids to query for
-     * @param realm The PBS Realm which should be checked
-     * @return Map of pbs ids with associated validation identifiers, which are Boolean values
-     */
-    public Map<String, Boolean> checkRunning(List<String> pbsIds, Realm realm) {
-        if (!pbsIds) {
-            throw new InvalidStateException("No pbs ids handed over to be validated.")
-        }
-        Map<String, Boolean> stats = [:]
-        for (String pbsId in pbsIds) {
-            stats.put(pbsId, checkRunningJob(pbsId, realm))
-        }
-        return stats
-    }
-
-    /**
-     * Checks whether the given pbsId is pending on the given Realm
-     * @param pbsId The PBS Job Id to check whether it is pending
-     * @param realm The PBS Realm on which it should be checked whether the Job pending
-     * @return true if pending, false otherwise
-     */
-    public boolean checkRunningJob(String pbsId, Realm realm) {
-        boolean isRunning = true
-        try {
-            String qstatOut = executeCommand(realm, "qstat ${pbsId} 2>&1")
-            if(qstatOut =~ KNOWN_JOB_ID_PATTERN) {
-                isRunning = !isExistingJobCompleted(qstatOut)
-            } else if(qstatOut =~ UNKNOWN_JOB_ID_PATTERN) {
-                isRunning = false
-            } else {
-                if(qstatOut == '') {
-                    log.info("qstat returned empty result.")
-                } else {
-                    log.info("qstat returned ${qstatOut}")
-                }
-                isRunning = true
-            }
-        } catch (Exception e) {
-            /*
-             * Catch all exceptions, which can appear during the check if the job is still running.
-             * If an exception is thrown it is assumed that the job is still running,
-             * since it can appear when it is not possible to connect to the server
-             */
-            log.info("An Exception was thrown in checkRunningJob due to the following reason: ", e)
-        }
-        return isRunning
-    }
-
-    private boolean isExistingJobCompleted(String output) {
-        return ClusterJobStatus.COMPLETED.value == existingJobStatus(output)
-    }
-
-    private String existingJobStatus(String output) {
-        final int STATUS_INDEX = 4
-        List<String> lines = output.readLines()
-        String jobStatus = lines.last()
-        return jobStatus.split()[STATUS_INDEX]
+        return new ProcessOutput(
+                outputStream.toString("UTF-8"),
+                outputErrorStream.toString("UTF-8"),
+                channel.getExitStatus()
+        )
     }
 
     private void logToJob(String message) {

@@ -2,7 +2,7 @@ package de.dkfz.tbi.otp.job.jobs.examplePBS
 
 import de.dkfz.tbi.otp.job.jobs.WatchdogJob
 import de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys
-import de.dkfz.tbi.otp.job.scheduler.PbsJobInfo
+import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import java.util.concurrent.locks.Lock
@@ -47,22 +47,23 @@ class MyPBSWatchdogJob extends AbstractEndStateAwareJobImpl implements Monitorin
             assert realmIds != WatchdogJob.SKIP_WATCHDOG
             realms = parseInputString(realmIds).collect( { CollectionUtils.exactlyOneElement(Realm.findAllById(Long.parseLong(it))) } )
             if (realms.size() == 1) {
-                pbsMonitorService.monitor(queuedJobIds.collect { new PbsJobInfo(realm: realms.first(), pbsId: it) }, this)
+                Realm realm = CollectionUtils.exactlyOneElement(realms)
+                pbsMonitorService.monitor(queuedJobIds.collect { new ClusterJobIdentifier(realm, it, realm.unixUser) }, this)
             } else {
-                Collection<PbsJobInfo> pbsJobInfos = [queuedJobIds, realms].transpose().collect {
-                    new PbsJobInfo(pbsId: it[0], realm: it[1])
+                Collection<ClusterJobIdentifier> pbsJobInfos = [realms, queuedJobIds].transpose().collect {
+                    new ClusterJobIdentifier(it[0], it[1], it[0].unixUser)
                 }
                 pbsMonitorService.monitor(pbsJobInfos, this)
             }
         }
     }
 
-    void finished(String pbsId, Realm realm) {
+    void finished(ClusterJobIdentifier finishedClusterJob) {
         final boolean allFinished
         lock.lock()
         try {
-            queuedJobIds.remove(pbsId)
-            log.debug("${pbsId} on realm ${realm} finished")
+            queuedJobIds.remove(finishedClusterJob.clusterJobId)
+            log.debug("${finishedClusterJob} finished")
             allFinished = queuedJobIds.empty
         } finally {
             lock.unlock()

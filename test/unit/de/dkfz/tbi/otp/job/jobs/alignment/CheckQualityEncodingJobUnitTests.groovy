@@ -14,8 +14,6 @@ import org.junit.rules.TemporaryFolder
 import java.util.zip.GZIPOutputStream
 
 @Mock([
-    LsdfFilesService,
-    ConfigService,
     DataFile,
     FileType,
     Individual,

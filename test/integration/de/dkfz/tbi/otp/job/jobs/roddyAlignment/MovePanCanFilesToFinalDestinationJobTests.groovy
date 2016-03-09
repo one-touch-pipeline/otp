@@ -59,7 +59,7 @@ class MovePanCanFilesToFinalDestinationJobTests {
         SeqTrack seqTrack = roddyBamFile.seqTracks.iterator()[0]
         DomainFactory.createRoddyProcessingOptions(temporaryFolder.newFolder())
 
-        ProcessHelperService.metaClass.static.executeCommandAndAssertExistCodeAndReturnProcessOutput = {String cmd ->
+        ProcessHelperService.metaClass.static.executeCommandAndAssertExistCodeAndReturnProcessOutput = { String cmd ->
             assert cmd ==~ "cd /tmp && sudo -u OtherUnixUser ${temporaryFolder.getRoot()}/.*/correctPathPermissionsOtherUnixUserRemoteWrapper.sh ${temporaryFolder.getRoot()}/.*/merged-alignment"
             return new ProcessHelperService.ProcessOutput('', '', 0)
         }

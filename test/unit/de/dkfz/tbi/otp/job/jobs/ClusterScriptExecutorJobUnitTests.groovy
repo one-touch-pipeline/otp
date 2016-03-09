@@ -2,7 +2,7 @@ package de.dkfz.tbi.otp.job.jobs
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.job.processing.AbstractMultiJob
-import de.dkfz.tbi.otp.job.processing.ExecutionHelperService
+import de.dkfz.tbi.otp.job.processing.PbsService
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.ngsdata.Realm
 import grails.test.mixin.Mock
@@ -11,7 +11,7 @@ import org.junit.Test
 import static de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys.REALM
 import static de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys.SCRIPT
 
-@Mock([ExecutionHelperService, Realm])
+@Mock([Realm])
 class ClusterScriptExecutorJobUnitTests {
 
     final static String ARBITRARY_REALM_ID = '1'
@@ -77,9 +77,9 @@ class ClusterScriptExecutorJobUnitTests {
 
     private static ClusterScriptExecutorJob createClusterScriptExecutorJobWithRealmIdAndScript(String realmID, String script) {
         ClusterScriptExecutorJob clusterScriptExecutorJob = new ClusterScriptExecutorJob(
-                executionHelperService: [
-                        sendScript: { Realm r, String s -> ARBITRARY_JOB_ID }
-                ] as ExecutionHelperService
+                pbsService: [
+                        executeJob: { Realm r, String s -> ARBITRARY_JOB_ID }
+                ] as PbsService
         )
         clusterScriptExecutorJob.metaClass.getParameterValueOrClass = { String param ->
             switch (param) {

@@ -2,7 +2,7 @@ package de.dkfz.tbi.otp.job.jobs.snvcalling
 
 import org.springframework.beans.factory.annotation.Autowired
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
-import de.dkfz.tbi.otp.job.processing.ExecutionHelperService
+import de.dkfz.tbi.otp.job.processing.PbsService
 import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
 import de.dkfz.tbi.otp.ngsdata.*
 
@@ -11,7 +11,7 @@ class FilterVcfJob extends AbstractSnvCallingJob {
     @Autowired
     ConfigService configService
     @Autowired
-    ExecutionHelperService executionHelperService
+    PbsService pbsService
 
     @Override
     public SnvCallingStep getStep() {
@@ -71,7 +71,7 @@ class FilterVcfJob extends AbstractSnvCallingJob {
                 script << "rm -f ${inputFileCopy.absolutePath}"
             }
 
-            executionHelperService.sendScript(realm, script.toString(), qsubParameters)
+            pbsService.executeJob(realm, script.toString(), qsubParameters)
 
             return NextAction.WAIT_FOR_CLUSTER_JOBS
         } else {

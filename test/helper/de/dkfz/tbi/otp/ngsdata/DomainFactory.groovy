@@ -141,6 +141,7 @@ class DomainFactory {
                 host              : 'test.host.invalid',
                 port              : -1,
                 unixUser          : '!fakeuser',
+                roddyUser         : '!fakeroddyuser',
                 timeout           : -1,
                 pbsOptions        : '{}',
                 cluster           : Cluster.DKFZ,
@@ -911,6 +912,7 @@ class DomainFactory {
                 processingStep: processingStep,
                 realm: clusterJobIdentifier.realm,
                 clusterJobId: clusterJobIdentifier.clusterJobId,
+                userName: clusterJobIdentifier.userName,
         ] + myProps)
     }
 

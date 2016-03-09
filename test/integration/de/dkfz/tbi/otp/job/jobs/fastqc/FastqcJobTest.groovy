@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.job.jobs.fastqc
 import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.job.processing.ExecutionHelperService
+import de.dkfz.tbi.otp.job.processing.PbsService
 import de.dkfz.tbi.otp.ngsdata.*
 import org.junit.Test
 
@@ -27,13 +28,13 @@ class FastqcJobTest {
         ] as FastqcDataFilesService
         fastqcJob.seqTrackService = [ getSequenceFilesForSeqTrack: {s -> [dataFile]} ] as SeqTrackService
         fastqcJob.lsdfFilesService = [ getFileFinalPath: {s -> 'finalPath'} ] as LsdfFilesService
-        fastqcJob.executionHelperService = [
-                sendScript: {Realm inputRealm, String inputCommand ->
+        fastqcJob.pbsService = [
+                executeJob: {Realm inputRealm, String inputCommand ->
                     assert realm == inputRealm
                     assert "fastqc-0.10.1 finalPath --noextract --nogroup -o outputDir;chmod -R 440 outputDir/*.zip" == inputCommand
                     return 'pbsJobId'
                 }
-        ] as ExecutionHelperService
+        ] as PbsService
         fastqcJob.metaClass.addOutputParameter {String name, String value -> 'pbsJobId' == value || realm.id.toString() == value}
 
         fastqcJob.execute()

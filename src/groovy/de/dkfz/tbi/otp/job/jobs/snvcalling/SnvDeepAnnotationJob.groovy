@@ -6,7 +6,7 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingStep
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvJobResult
-import de.dkfz.tbi.otp.job.processing.ExecutionHelperService
+import de.dkfz.tbi.otp.job.processing.PbsService
 import de.dkfz.tbi.otp.ngsdata.ConfigService
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.ngsdata.Realm
@@ -17,7 +17,7 @@ class SnvDeepAnnotationJob extends AbstractSnvCallingJob {
     @Autowired
     ConfigService configService
     @Autowired
-    ExecutionHelperService executionHelperService
+    PbsService pbsService
 
 
     @Override
@@ -80,7 +80,7 @@ class SnvDeepAnnotationJob extends AbstractSnvCallingJob {
                     "${step.getExternalScript(config.externalScriptVersion).scriptFilePath}; " +
                     "md5sum ${deepAnnotationResultFile} > ${deepAnnotationResultFile}.md5sum"
 
-            executionHelperService.sendScript(realm, script, qsubParameters)
+            pbsService.executeJob(realm, script, qsubParameters)
 
             return NextAction.WAIT_FOR_CLUSTER_JOBS
         } else {
