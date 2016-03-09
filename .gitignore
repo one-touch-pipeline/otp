@@ -41,7 +41,8 @@ cobertura.ser
 target-eclipse
 
 ## IntelliJ
-.idea
+.idea/*
+!.idea/codeStyleSettings.xml
 *.iml
 *.ipr
 *.iws
