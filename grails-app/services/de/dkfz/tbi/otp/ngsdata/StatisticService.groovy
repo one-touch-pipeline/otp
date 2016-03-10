@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.ngsdata
 import groovy.sql.Sql
 import org.joda.time.Days
 import org.joda.time.LocalDate
+import org.joda.time.Months
 import org.joda.time.YearMonth
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.DateTimeFormatter
@@ -14,7 +15,7 @@ class StatisticService {
     ProjectService projectService
     DataSource dataSource
 
-    private DateTimeFormatter simpleDateFormatter = DateTimeFormat.forPattern("MMM yy").withLocale(Locale.ENGLISH)
+    private DateTimeFormatter simpleDateFormatter = DateTimeFormat.forPattern("MMM yyyy").withLocale(Locale.ENGLISH)
 
     public List projectDateSortAfterDate(ProjectGroup projectGroup) {
         List seq = Sequence.withCriteria {
@@ -198,8 +199,27 @@ SELECT DISTINCT seq.seq_track_id
     private List<String> monthLabels(YearMonth firstDate, YearMonth lastDate) {
         List<String> labels = []
         YearMonth cal = firstDate
+        List<Integer> validMonths
+        switch (Months.monthsBetween(cal,lastDate).months) {
+            case 0..20:
+                validMonths = [1,2,3,4,5,6,7,8,9,10,11,12]
+                break
+            case 21..50:
+                validMonths = [1,4,7,10]
+                break
+            case 51..100:
+                validMonths = [1,7]
+                break
+            default:
+                validMonths = [1]
+                break
+        }
         while (cal < lastDate) {
-            labels << simpleDateFormatter.print(cal)
+            if (validMonths.contains(cal.monthOfYear)) {
+                labels << simpleDateFormatter.print(cal)
+            } else {
+                labels << ""
+            }
             cal = cal.plusMonths(1)
         }
         return labels
