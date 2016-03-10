@@ -4,6 +4,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.Column
 import de.dkfz.tbi.util.spreadsheet.Row
+import de.dkfz.tbi.util.spreadsheet.Spreadsheet
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import groovy.transform.TupleConstructor
@@ -63,6 +64,9 @@ abstract class SingleValueValidator<C extends ValidationContext> extends ValueTu
 
     @Override
     void validateValueTuples(C context, Collection<ValueTuple> valueTuples) {
+        if (!context.spreadsheet.getColumn(getColumnTitle(context))) {
+            return
+        }
         valueTuples.each {
             validateValue(context, CollectionUtils.exactlyOneElement(it.valuesByColumnTitle.values()), it.cells)
         }
