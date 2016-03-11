@@ -120,7 +120,7 @@ class LsdfFilesService {
         return true
     }
 
-    private String seqTypeDirectory(DataFile file) {
+    public String seqTypeDirectory(DataFile file) {
         if (file.seqTrack) {
             return file.seqTrack.seqType?.dirName
         }
