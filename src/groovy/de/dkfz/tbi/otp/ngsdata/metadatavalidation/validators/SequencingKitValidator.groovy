@@ -14,7 +14,7 @@ class SequencingKitValidator extends SingleValueValidator<MetadataValidationCont
 
     @Override
     Collection<String> getDescriptions() {
-        return ['The sequencing kit is registered in the OTP database or is empty, column optional.']
+        return ['The sequencing kit, if provided, is registered in the OTP database.']
     }
 
     @Override
@@ -23,14 +23,13 @@ class SequencingKitValidator extends SingleValueValidator<MetadataValidationCont
     }
 
     @Override
-    boolean columnMissing(MetadataValidationContext context, String columnTitle) {
-        optionalColumnMissing(context, columnTitle)
-        return true
+    void columnMissing(MetadataValidationContext context) {
+        optionalColumnMissing(context, MetaDataColumn.SEQUENCING_KIT.name())
     }
 
     @Override
     void validateValue(MetadataValidationContext context, String sequencingKitLabelNameOrAlias, Set<Cell> cells) {
-        if (!sequencingKitLabelNameOrAlias.empty &&!SequencingKitLabelService.findSequencingKitLabelByNameOrAlias(sequencingKitLabelNameOrAlias)) {
+        if (!sequencingKitLabelNameOrAlias.empty && !SequencingKitLabelService.findSequencingKitLabelByNameOrAlias(sequencingKitLabelNameOrAlias)) {
             context.addProblem(cells, Level.ERROR, "Sequencing kit '${sequencingKitLabelNameOrAlias}' is not registered in the OTP database.")
         }
     }
