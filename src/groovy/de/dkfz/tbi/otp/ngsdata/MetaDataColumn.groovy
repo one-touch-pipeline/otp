@@ -31,4 +31,5 @@ enum MetaDataColumn {
     LIB_PREP_KIT,
     SEQUENCING_KIT,
     ILSE_NO,
+    PROJECT,
 }
