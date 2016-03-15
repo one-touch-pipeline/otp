@@ -173,6 +173,15 @@ $.otp.projectOverviewTable = {
 
     specificOverview: function () {
         "use strict";
+        $.getJSON($.otp.createLink({
+                controller: 'projectOverview',
+                action: 'contactPersons'
+            }),
+            function (data) {
+                $("input:text[name=Name]").autocomplete({
+                    source: data
+            });
+        });
         var oTable = $.otp.projectOverviewTable.registerDataTable(
             '#listContactPerson',
             $.otp.createLink({

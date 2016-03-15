@@ -392,6 +392,11 @@ class ProjectOverviewController {
         render Project.Snv.values() as JSON
     }
 
+    JSON contactPersons() {
+        List<String> contactPersons = contactPersonService.getAllContactPersons()*.fullName
+        render contactPersons as JSON
+    }
+
 
     private void checkErrorAndCallMethod(Serializable cmd, Closure method) {
         Map data

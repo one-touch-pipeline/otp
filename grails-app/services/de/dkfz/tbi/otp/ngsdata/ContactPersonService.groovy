@@ -78,6 +78,11 @@ class ContactPersonService {
         return contactPerson
     }
 
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    public List<ContactPerson> getAllContactPersons() {
+        return ContactPerson.list(sort: "fullName", order: "asc")
+    }
+
     private deleteContactPerson(ContactPerson contactPerson) {
         contactPerson.delete(flush: true, failOnError: true)
     }
