@@ -32,4 +32,5 @@ enum MetaDataColumn {
     SEQUENCING_KIT,
     ILSE_NO,
     PROJECT,
+    MATE,
 }
