@@ -84,6 +84,10 @@ class RunDateParserService {
        return date
    }
 
+    public Date parseDateFromRunName(String runName) {
+        return parseDate("yyMMdd", runName.substring(0, 6))
+    }
+
    /**
     * Best effort to parse a text with a format
     * @param format
@@ -91,7 +95,7 @@ class RunDateParserService {
     * @return
     */
    private Date parseDate(String format, String text) {
-       Date date = null 
+       Date date = null
        try {
            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(format)
            date = simpleDateFormat.parse(text)
