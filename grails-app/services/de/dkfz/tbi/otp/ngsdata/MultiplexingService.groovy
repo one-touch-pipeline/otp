@@ -6,6 +6,8 @@ import de.dkfz.tbi.otp.utils.ReferencedClass
 
 class MultiplexingService {
 
+    public static final String BARCODE_DELIMITER = '_'
+
     def runProcessingService
 
     public boolean needsMultiplexingHandling(Run run) {
@@ -61,10 +63,18 @@ class MultiplexingService {
         if (entry.value.contains(barcode)) {
             return
         }
-        String newValue = "${entry.value}_${barcode}"
+        String newValue = combineLaneNumberAndBarcode(entry.value, barcode)
         buildChangeLog(entry, newValue)
         entry.value = newValue
         entry.save(flush: true)
+    }
+
+    public static String combineLaneNumberAndBarcode(String laneNumber, String barcode) {
+        if (barcode != null) {
+            return "${laneNumber}${BARCODE_DELIMITER}${barcode}"
+        } else {
+            return laneNumber
+        }
     }
 
     private void buildChangeLog(MetaDataEntry entry, String to) {

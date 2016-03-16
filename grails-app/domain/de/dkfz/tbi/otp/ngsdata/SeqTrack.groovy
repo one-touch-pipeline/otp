@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
@@ -70,7 +71,7 @@ class SeqTrack implements ProcessParameterObject {
     ]
 
     static constraints = {
-        laneId()
+        laneId(validator: { OtpPath.isValidPathComponent(it) })
         hasOriginalBam()
         hasFinalBam()
         usingOriginalBam()

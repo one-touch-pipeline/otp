@@ -105,7 +105,7 @@ class ExternallyProcessedMergedBamFileIntegrationTests {
                 lengthRefChromosomesWithoutN: 7,
         )
 
-        SeqTrack seqTrack = createSeqTrack("lane no. 1")
+        SeqTrack seqTrack = createSeqTrack()
 
         FastqSet fastqSet = FastqSet.build(
                 seqTracks: [seqTrack]
