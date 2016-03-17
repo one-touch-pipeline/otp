@@ -19,9 +19,9 @@ class SampleValidator extends ValueTuplesValidator<MetadataValidationContext> im
     @Override
     Collection<String> getDescriptions() {
         return [
-                'The sample identifier is registered in the OTP database or can be parsed.',
-                'If the sample identifier can be parsed and is already registered in the OTP database, the parsed values match those in the database.',
-                'All sample identifiers belong to the same project.',
+                'The sample identifier must be registered in OTP or parsable using a pattern known to OTP.',
+                'If the sample identifier can be parsed and is already registered in the OTP database, the parsed values should match those in the database.',
+                'All sample identifiers in the metadata file should belong to the same project.',
         ]
     }
 
@@ -32,34 +32,39 @@ class SampleValidator extends ValueTuplesValidator<MetadataValidationContext> im
 
     @Override
     void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {
+        Collection<String> missingIdentifiers = []
         Map<String, Collection<ValueTuple>> byProjectName = valueTuples.groupBy {
             String sampleId = it.getValue(SAMPLE_ID.name())
             ParsedSampleIdentifier parsedIdentifier = sampleIdentifierService.parseSampleIdentifier(sampleId)
             SampleIdentifier sampleIdentifier = atMostOneElement(SampleIdentifier.findAllByName(sampleId))
             if (!parsedIdentifier && !sampleIdentifier) {
-                context.addProblem(it.cells, Level.ERROR, "Sample identifier '${sampleId}' is neither registered in the OTP database nor can be parsed.")
+                context.addProblem(it.cells, Level.ERROR, "Sample identifier '${sampleId}' is neither registered in OTP nor matches a pattern known to OTP.")
+                missingIdentifiers.add(sampleId)
             }
             if (parsedIdentifier && !sampleIdentifier) {
                 if (!atMostOneElement(Project.findAllByName(parsedIdentifier.projectName))) {
-                    context.addProblem(it.cells, Level.ERROR, "Sample identifier '${sampleId}' is not registered in the OTP database. It looks like it belongs to project '${parsedIdentifier.projectName}', but no project with that name is registered in the OTP database.")
+                    context.addProblem(it.cells, Level.ERROR, "Sample identifier '${sampleId}' is not registered in OTP. It looks like it belongs to project '${parsedIdentifier.projectName}', but no project with that name is registered in OTP.")
                 }
                 Individual individual = atMostOneElement(Individual.findAllByPid(parsedIdentifier.pid))
                 if (individual && individual.project.name != parsedIdentifier.projectName) {
-                    context.addProblem(it.cells, Level.ERROR, "Sample identifier '${sampleId}' is not registered in the OTP database. It looks like it belongs to project '${parsedIdentifier.projectName}' and individual '${parsedIdentifier.pid}', but individual '${parsedIdentifier.pid}' is already registered in the OTP database with project '${individual.project.name}'.")
+                    context.addProblem(it.cells, Level.ERROR, "Sample identifier '${sampleId}' is not registered in OTP. It looks like it belongs to project '${parsedIdentifier.projectName}' and individual '${parsedIdentifier.pid}', but individual '${parsedIdentifier.pid}' is already registered in OTP with project '${individual.project.name}'.")
                 }
             }
             if (parsedIdentifier && sampleIdentifier) {
                 if (sampleIdentifier.project.name != parsedIdentifier.projectName) {
-                    context.addProblem(it.cells, Level.WARNING, "Sample identifier '${sampleId}' looks like it belongs to project '${parsedIdentifier.projectName}', but it is already registered in the OTP database with project '${sampleIdentifier.project.name}'. If you ignore this warning, OTP will keep the assignment of the sample identifier to project '${sampleIdentifier.project.name}'.")
+                    context.addProblem(it.cells, Level.WARNING, "Sample identifier '${sampleId}' looks like it belongs to project '${parsedIdentifier.projectName}', but it is already registered in OTP with project '${sampleIdentifier.project.name}'. If you ignore this warning, OTP will keep the assignment of the sample identifier to project '${sampleIdentifier.project.name}'.")
                 }
                 if (sampleIdentifier.individual.pid != parsedIdentifier.pid) {
-                    context.addProblem(it.cells, Level.WARNING, "Sample identifier '${sampleId}' looks like it belongs to individual '${parsedIdentifier.pid}', but it is already registered in the OTP database with individual '${sampleIdentifier.individual.pid}'. If you ignore this warning, OTP will keep the assignment of the sample identifier to individual '${sampleIdentifier.individual.pid}'.")
+                    context.addProblem(it.cells, Level.WARNING, "Sample identifier '${sampleId}' looks like it belongs to individual '${parsedIdentifier.pid}', but it is already registered in OTP with individual '${sampleIdentifier.individual.pid}'. If you ignore this warning, OTP will keep the assignment of the sample identifier to individual '${sampleIdentifier.individual.pid}'.")
                 }
                 if (sampleIdentifier.sampleType.name != parsedIdentifier.sampleTypeDbName) {
-                    context.addProblem(it.cells, Level.WARNING, "Sample identifier '${sampleId}' looks like it belongs to sample type '${parsedIdentifier.sampleTypeDbName}', but it is already registered in the OTP database with sample type '${sampleIdentifier.sampleType.name}' If you ignore this warning, OTP will keep the assignment of the sample identifier to sample type '${sampleIdentifier.sampleType.name}'.")
+                    context.addProblem(it.cells, Level.WARNING, "Sample identifier '${sampleId}' looks like it belongs to sample type '${parsedIdentifier.sampleTypeDbName}', but it is already registered in OTP with sample type '${sampleIdentifier.sampleType.name}' If you ignore this warning, OTP will keep the assignment of the sample identifier to sample type '${sampleIdentifier.sampleType.name}'.")
                 }
             }
             return sampleIdentifier?.project?.name ?: parsedIdentifier?.projectName
+        }
+        if (!missingIdentifiers.isEmpty()) {
+            context.addProblem(Collections.emptySet(), Level.INFO, "All sample identifiers which are neither registered in OTP nor match a pattern known to OTP:\n${missingIdentifiers.sort().join('\n')}")
         }
         byProjectName.remove(null)
         if (byProjectName.size() > 1) {
