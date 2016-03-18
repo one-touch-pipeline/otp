@@ -1,3 +1,5 @@
+import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
+
 import static de.dkfz.tbi.otp.job.processing.PbsOptionMergingService.PBS_PREFIX
 
 import de.dkfz.tbi.otp.job.jobs.dataTransfer.*
@@ -5,7 +7,9 @@ import de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys
 
 import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
 
-plan("DataInstallationWorkflow") {
+String workflow = 'DataInstallationWorkflow'
+
+plan(workflow) {
     start("start", "dataInstallationStartJob")
     //job("checkInitialDataNotCompressed", "checkInitialDataNotCompressedJob")
     job("checkInputFiles", "checkInputFilesJob")
@@ -61,3 +65,18 @@ println ctx.processingOptionService.createOrUpdate(
   "set the walltime for the CopyFilesJob to 2h to get in the faster queue"
 )
 
+ctx.processingOptionService.createOrUpdate(
+        AbstractStartJobImpl.TOTAL_SLOTS_OPTION_NAME,
+        workflow,
+        null,
+        '20',
+        ''
+)
+
+ctx.processingOptionService.createOrUpdate(
+        AbstractStartJobImpl.SLOTS_RESERVED_FOR_FAST_TRACK_OPTION_NAME,
+        workflow,
+        null,
+        '10',
+        ''
+)
