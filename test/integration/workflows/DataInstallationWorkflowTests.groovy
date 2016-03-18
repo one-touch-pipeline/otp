@@ -1,5 +1,6 @@
 package workflows
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.WaitingFileUtils
@@ -277,6 +278,45 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
         checkThatWorkflowWasSuccessful(seqTrack)
     }
 
+    @Test
+    void testWithAlreadyExistingRunSegment() {
+        //setup:
+        File nonExistingDirectory = TestCase.uniqueNonExistentPath
+        SeqTrack seqTrack = createWholeGenomeSetup()
+
+        Realm anotherRealm = DomainFactory.createRealmDataManagement(nonExistingDirectory)
+        Project anotherProject = DomainFactory.createProject(
+                realmName: anotherRealm.name
+        )
+
+        RunSegment existingRunSegment = DomainFactory.createRunSegment(
+                run: run,
+                metaDataStatus: RunSegment.Status.COMPLETE,
+                initialFormat: RunSegment.DataFormat.FILES_IN_DIRECTORY,
+                currentFormat: RunSegment.DataFormat.FILES_IN_DIRECTORY,
+                dataPath: nonExistingDirectory.path,
+                filesStatus: RunSegment.FilesStatus.FILES_CORRECT,
+                mdPath: nonExistingDirectory.path,
+        )
+
+        SeqTrack existingSeqTrack = DomainFactory.createSeqTrack(
+                run: run,
+        )
+        2.times {
+            DomainFactory.createDataFile(
+                    run: run,
+                    runSegment: existingRunSegment,
+                    seqTrack: existingSeqTrack,
+                    project: anotherProject,
+            )
+        }
+
+        //when:
+        execute()
+
+        //then:
+        checkThatWorkflowWasSuccessful(seqTrack)
+    }
 
     private SeqTrack createSeqTrack(SeqType seqType) {
         SeqTrack seqTrack = new SeqTrack()
@@ -297,7 +337,10 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
         seqTrack.refresh()
         assertEquals(SeqTrack.DataProcessingState.NOT_STARTED, seqTrack.fastqcState)
 
-        DataFile.list().collect {
+        [
+                DataFile.findAllBySeqTrack(seqTrack),
+                DataFile.findAllByAlignmentLogInList(AlignmentLog.findAllBySeqTrack(seqTrack))
+        ].flatten().collect {
             [
                 lsdfFilesService.getFileFinalPath(it),
                 lsdfFilesService.getFileViewByPidPath(it)
