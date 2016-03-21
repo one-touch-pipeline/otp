@@ -35,7 +35,7 @@ class PbsMonitorServiceSpec extends Specification {
     void "test check, queued job found on cluster"(ClusterJobStatus status, boolean noneQueued, int notifyCalls) {
         setup:
         pbsMonitorService.pbsService = [
-                knownJobsWithState: { realm, user ->
+                retrieveKnownJobsWithState: { realm, user ->
                     Map<ClusterJobIdentifier, ClusterJobStatus> result = [:]
                     result.put(clusterJob, status)
                     return result
@@ -66,7 +66,7 @@ class PbsMonitorServiceSpec extends Specification {
     void "test check, cluster failure"() {
         setup:
         pbsMonitorService.pbsService = [
-                knownJobsWithState: { Realm realm, user ->
+                retrieveKnownJobsWithState: { Realm realm, user ->
                     throw new IllegalStateException()
                 }
         ] as PbsService
@@ -84,7 +84,7 @@ class PbsMonitorServiceSpec extends Specification {
     void "test check, no jobs running"() {
         setup:
         pbsMonitorService.pbsService = [
-                knownJobsWithState: { Realm realm, user ->
+                retrieveKnownJobsWithState: { Realm realm, user ->
                     return [:]
                 }
         ] as PbsService

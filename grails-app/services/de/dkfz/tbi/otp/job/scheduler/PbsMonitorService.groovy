@@ -12,8 +12,6 @@ import java.util.concurrent.locks.ReentrantLock
 import de.dkfz.tbi.otp.job.processing.ExecutionState
 import de.dkfz.tbi.otp.job.processing.InvalidStateException
 import de.dkfz.tbi.otp.job.processing.MonitoringJob
-import de.dkfz.tbi.otp.ngsdata.Realm
-import grails.util.Environment
 
 /**
  * This service is able to track the execution of jobs on the PBS.
@@ -97,10 +95,11 @@ class PbsMonitorService {
         Map<ClusterJobIdentifier, ClusterJobStatus> jobStates = [:]
         List<Pair<String, String>> failedClusterQueries = []
 
-        queuedJobs.values().sum().unique { a, b -> a.realmId == b.realmId && a.userName == b.userName ? 0 : 1 }.each { ClusterJobIdentifier job ->
+        queuedJobs.values().flatten().unique { a, b -> a.realmId == b.realmId && a.userName == b.userName ? 0 : 1 }.each { ClusterJobIdentifier job ->
             try {
-                jobStates.putAll(pbsService.knownJobsWithState(job.realm, job.userName))
+                jobStates.putAll(pbsService.retrieveKnownJobsWithState(job.realm, job.userName))
             } catch (Throwable e) {
+                log.error("Retrieving job states for ${job.realm} user ${job.userName} failed:", e)
                 failedClusterQueries.add(new Pair(job.realm, job.userName))
             }
         }

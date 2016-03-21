@@ -34,7 +34,7 @@ class PbsServiceSpec extends Specification {
         ] as ExecutionService
 
         when:
-        service.knownJobsWithState(realm, realm.unixUser)
+        service.retrieveKnownJobsWithState(realm, realm.unixUser)
 
         then:
         thrown(IllegalStateException)
@@ -53,14 +53,14 @@ class PbsServiceSpec extends Specification {
         Realm realm = DomainFactory.createRealmDataProcessing()
         service.executionService = [
                 executeCommandReturnProcessOutput: { realm1, command, userName -> new ProcessOutput(
-                        stdout: "",
+                        stdout: command.tokenize().last(),
                         stderr: "",
                         exitCode: 0,
                 ) },
         ] as ExecutionService
 
         when:
-        Map<ClusterJobIdentifier, ClusterJobStatus> result = service.knownJobsWithState(realm, realm.unixUser)
+        Map<ClusterJobIdentifier, ClusterJobStatus> result = service.retrieveKnownJobsWithState(realm, realm.unixUser)
 
         then:
         result.isEmpty()
@@ -81,7 +81,7 @@ class PbsServiceSpec extends Specification {
         ] as ExecutionService
 
         when:
-        Map<ClusterJobIdentifier, ClusterJobStatus> result = service.knownJobsWithState(realm, realm.unixUser)
+        Map<ClusterJobIdentifier, ClusterJobStatus> result = service.retrieveKnownJobsWithState(realm, realm.unixUser)
 
         then:
         def job = new ClusterJobIdentifier(realm, jobId, realm.unixUser)
@@ -112,8 +112,17 @@ ${jobId}.clust_head.ine  OtherUnixUser    fast     r160224_18005293    --      1
 """
     }
 
+    void "test validateQstatResult, no jobs returned, succeeds"() {
+        when:
+        String end = HelperUtils.getUniqueString()
+        PbsService.validateQstatResult(end, end)
 
-    void "test validateQstatResult, succeeds"() {
+        then:
+        notThrown(IllegalStateException)
+    }
+
+
+    void "test validateQstatResult, one job returned, succeeds"() {
         when:
         String end = HelperUtils.getUniqueString()
         PbsService.validateQstatResult(qstatOutput("5075615", ClusterJobStatus.COMPLETED) + end, end)

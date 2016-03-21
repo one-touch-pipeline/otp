@@ -12,9 +12,7 @@ import de.dkfz.tbi.otp.utils.ProcessHelperService.ProcessOutput
 import groovy.transform.TupleConstructor
 
 import java.util.regex.Matcher
-import java.util.regex.Pattern
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.getThreadLog
 import static org.springframework.util.Assert.notNull
 
@@ -148,7 +146,7 @@ flock -x '${logFile}' -c "echo \\"${logMessage}\\" >> '${logFile}'"
      * @param userName The name of the user whose jobs should be checked
      * @return A map containing job identifiers and their status
      */
-    public Map<ClusterJobIdentifier, ClusterJobStatus> knownJobsWithState(Realm realm, String userName) throws Exception {
+    public Map<ClusterJobIdentifier, ClusterJobStatus> retrieveKnownJobsWithState(Realm realm, String userName) throws Exception {
         assert realm : "No realm specified."
         assert userName : "No user name specified."
         Map<ClusterJobIdentifier, ClusterJobStatus> jobStates = [:]
@@ -157,7 +155,7 @@ flock -x '${logFile}' -c "echo \\"${logMessage}\\" >> '${logFile}'"
         ProcessOutput out = executionService.executeCommandReturnProcessOutput(realm,
                 "qstat -u ${userName} && echo ${endString}", userName)
         if(out.exitCode != 0 || out.stderr != "") {
-            throw new IllegalStateException("qstat returned error.")
+            throw new IllegalStateException("qstat returned error, exit code: '${out.exitCode}', stderr: '${out.stderr}'")
         }
         validateQstatResult(out.stdout, endString)
         out.stdout.eachLine { String line ->
@@ -173,7 +171,7 @@ flock -x '${logFile}' -c "echo \\"${logMessage}\\" >> '${logFile}'"
     protected static void validateQstatResult(String out, String endString) {
         List<String> lines = out.readLines()
 
-        if(!(lines.empty || (
+        if(!((lines.size() == 1 && lines[0] == endString) || (
                 lines[0] == "" &&
                 lines[1] =~ /^.*:\s*$/ &&
                 lines[2] =~ /^\s+Req'd\s+Req'd\s+Elap\s*$/ &&
@@ -184,7 +182,7 @@ flock -x '${logFile}' -c "echo \\"${logMessage}\\" >> '${logFile}'"
                 } &&
                 lines[lines.size() - 1] == endString
         ))) {
-            throw new IllegalStateException("qstat output doesn't match expected output.")
+            throw new IllegalStateException("qstat output doesn't match expected output: '${out}'")
         }
     }
 }
