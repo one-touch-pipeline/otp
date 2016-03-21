@@ -15,6 +15,9 @@ class CreateOutputDirectoryJob extends AbstractJobImpl {
     @Autowired
     ConfigService configService
 
+    @Autowired
+    RunProcessingService runProcessingService
+
     @Override
     public void execute() throws Exception {
 
@@ -35,7 +38,8 @@ class CreateOutputDirectoryJob extends AbstractJobImpl {
 
     private Set<Project> projects(Run run) {
         Set<Project> projects = new HashSet<Project>()
-        List<DataFile> files = DataFile.findAllByRun(run)
+        List<RunSegment> runSegments = runProcessingService.runSegmentsWithFilesInProcessing(run)
+        List<DataFile> files = DataFile.findAllByRunSegmentInList(runSegments)
         for (DataFile file in files) {
             if (file.project) {
                 projects << file.project
