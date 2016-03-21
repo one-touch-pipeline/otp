@@ -3,6 +3,12 @@
   <component name="ProjectCodeStyleSettingsManager">
     <option name="PER_PROJECT_SETTINGS">
       <value>
+        <GroovyCodeStyleSettings>
+          <option name="USE_FQ_CLASS_NAMES_IN_JAVADOC" value="false" />
+          <option name="USE_SINGLE_CLASS_IMPORTS" value="false" />
+          <option name="CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND" value="1" />
+          <option name="NAMES_COUNT_TO_USE_IMPORT_ON_DEMAND" value="1" />
+        </GroovyCodeStyleSettings>
         <XML>
           <option name="XML_LEGACY_SETTINGS_IMPORTED" value="true" />
         </XML>
