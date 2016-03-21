@@ -25,15 +25,17 @@ class FastqcJobTest {
 
     SeqTrack seqTrack
     DataFile dataFile
+    RunSegment runSegment
+
+    File testDirectory
 
     @Before
     void setUp() {
-        File testDirectory = TestCase.createEmptyTestDirectory()
+        testDirectory = TestCase.createEmptyTestDirectory()
 
         seqTrack = DomainFactory.createSeqTrack()
 
-
-        RunSegment runSegment = DomainFactory.createRunSegment(
+        runSegment = DomainFactory.createRunSegment(
                 run: seqTrack.run,
                 dataPath: testDirectory.path,
         )
@@ -136,5 +138,89 @@ class FastqcJobTest {
 
         assert fastqcProcessedFile.contentUploaded == true
         assert seqTrack.fastqcState == SeqTrack.DataProcessingState.FINISHED
+    }
+
+    @Test
+    void testValidate_totalSequencesIsSameForAllDataFiles_ShouldPassValidation() {
+        long nReads = 100
+
+        dataFile.nReads = nReads
+        dataFile.save(flush: true, failOnError: true)
+        DomainFactory.createFastqcProcessedFile([dataFile: dataFile])
+
+        DataFile dataFile2 = DomainFactory.createDataFile([seqTrack: seqTrack, project: seqTrack.project, run: seqTrack.run, runSegment: runSegment, nReads: nReads])
+        DomainFactory.createFastqcProcessedFile([dataFile: dataFile2])
+
+        fastqcJob.fastqcUploadService.metaClass.uploadFastQCFileContentsToDataBase = { FastqcProcessedFile fastqc -> }
+        fastqcJob.validate()
+    }
+
+    @Test
+    void testValidate_totalSequencesIsDifferentForAllDataFiles_ShouldFail() {
+        long nReads1 = 100
+        long nReads2 = 105
+
+        dataFile.nReads = nReads1
+        dataFile.save(flush: true, failOnError: true)
+        DomainFactory.createFastqcProcessedFile([dataFile: dataFile])
+
+        DataFile dataFile2 = DomainFactory.createDataFile([seqTrack: seqTrack, project: seqTrack.project, run: seqTrack.run, runSegment: runSegment, nReads: nReads2])
+        DomainFactory.createFastqcProcessedFile([dataFile: dataFile2])
+
+        fastqcJob.fastqcUploadService.metaClass.uploadFastQCFileContentsToDataBase = { FastqcProcessedFile fastqc -> }
+
+        TestCase.shouldFail(AssertionError) {
+            fastqcJob.validate()
+        }
+    }
+
+    @Test
+    void testValidate_sequenceLengthIsIntegerValueAndIsSameForAllDataFiles_ShouldPassValidation() {
+        String sequenceLength = "100"
+
+        dataFile.sequenceLength = sequenceLength
+        dataFile.save(flush: true, failOnError: true)
+        DomainFactory.createFastqcProcessedFile([dataFile: dataFile])
+
+        DataFile dataFile2 = DomainFactory.createDataFile([seqTrack: seqTrack, project: seqTrack.project, run: seqTrack.run, runSegment: runSegment, sequenceLength: sequenceLength])
+        DomainFactory.createFastqcProcessedFile([dataFile: dataFile2])
+
+        fastqcJob.fastqcUploadService.metaClass.uploadFastQCFileContentsToDataBase = { FastqcProcessedFile fastqc -> }
+        fastqcJob.validate()
+    }
+
+    @Test
+    void testValidate_sequenceLengthIsRangeValueAndIsDifferentForAllDataFiles_ShouldPassValidation() {
+        String sequenceLength1 = "0-50"
+        String sequenceLength2 = "50-100"
+
+        dataFile.sequenceLength = sequenceLength1
+        dataFile.save(flush: true, failOnError: true)
+        DomainFactory.createFastqcProcessedFile([dataFile: dataFile])
+
+        DataFile dataFile2 = DomainFactory.createDataFile([seqTrack: seqTrack, project: seqTrack.project, run: seqTrack.run, runSegment: runSegment, sequenceLength: sequenceLength2])
+        DomainFactory.createFastqcProcessedFile([dataFile: dataFile2])
+
+        fastqcJob.fastqcUploadService.metaClass.uploadFastQCFileContentsToDataBase = { FastqcProcessedFile fastqc -> }
+        fastqcJob.validate()
+    }
+
+    @Test
+    void testValidate_sequenceLengthIsDifferentForAllDataFiles_ShouldFail() {
+        String sequenceLength1 = "50"
+        String sequenceLength2 = "100"
+
+        dataFile.sequenceLength = sequenceLength1
+        dataFile.save(flush: true, failOnError: true)
+        DomainFactory.createFastqcProcessedFile([dataFile: dataFile])
+
+        DataFile dataFile2 = DomainFactory.createDataFile([seqTrack: seqTrack, project: seqTrack.project, run: seqTrack.run, runSegment: runSegment, sequenceLength: sequenceLength2])
+        DomainFactory.createFastqcProcessedFile([dataFile: dataFile2])
+
+        fastqcJob.fastqcUploadService.metaClass.uploadFastQCFileContentsToDataBase = { FastqcProcessedFile fastqc -> }
+
+        TestCase.shouldFail(AssertionError) {
+            fastqcJob.validate()
+        }
     }
 }
