@@ -39,7 +39,6 @@ class Sequence implements Serializable {
     boolean hasOriginalBam
     boolean usingOriginalBam
     long nBasePairs
-    long nReads
     int insertSize
 
     SeqTrack.QualityEncoding qualityEncoding
@@ -55,8 +54,6 @@ class Sequence implements Serializable {
     boolean blacklisted
     boolean multipleSource
     Run.StorageRealm storageRealm
-    Double dataQuality
-    boolean qualityEvaluated
 
     // fields from SeqPlatform
     /**
@@ -131,8 +128,6 @@ class Sequence implements Serializable {
         // nullable constraints from Run
         storageRealm(nullable: true)
         dateExecuted(nullable: true)
-        dataQuality(nullable: true)
-        qualityEvaluated(nullable: true)
         // nullable constraints from SeqPlatform
         seqPlatformModelLabelId(nullable: true)
         sequencingKitLabelId(nullable: true)

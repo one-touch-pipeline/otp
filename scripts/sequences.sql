@@ -23,8 +23,6 @@ st.lane_id,
 st.insert_size,
 st.has_original_bam,
 st.has_final_bam,
-r.quality_evaluated,
-r.data_quality,
 r.storage_realm,
 r.name,
 r.multiple_source,
@@ -70,4 +68,4 @@ ON r.seq_center_id = sc.id
 LEFT OUTER JOIN seq_platform_model_label spml
 ON sp.seq_platform_model_label_id = spml.id
 LEFT OUTER JOIN sequencing_kit_label skl
-ON sp.sequencing_kit_label_id = skl.id
+ON sp.sequencing_kit_label_id = skl.id;
