@@ -7,5 +7,4 @@ digraph workflows {
   Fastqc [label="Fastqc (per lane)"];
   LoadMetaData -> DataInstallation -> Fastqc
   DataInstallation -> "PanCan (per merged BAM file)" -> "Snv (per pair of merged BAM files)"
-  Fastqc -> "FastqcSummary (per lane)";
 }

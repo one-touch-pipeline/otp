@@ -79,9 +79,6 @@ enum RunSortColumn {
     STORAGEREALM("storageRealm"),
     DATECREATED("dateCreated"),
     DATEEXECUTED("dateExecuted"),
-    BLACKLISTED("blacklisted"),
-    MULTIPLESOURCE("multipleSource"),
-    QUALITYEVALUATED("qualityEvaluated"),
 
     private final String columnName
 
@@ -101,12 +98,6 @@ enum RunSortColumn {
                 return RunSortColumn.DATECREATED
             case 4:
                 return RunSortColumn.DATEEXECUTED
-            case 5:
-                return RunSortColumn.BLACKLISTED
-            case 6:
-                return RunSortColumn.MULTIPLESOURCE
-            case 7:
-                return RunSortColumn.QUALITYEVALUATED
             default:
                 return RunSortColumn.RUN
         }
@@ -123,7 +114,6 @@ class RunFiltering {
     List<StorageRealm> storageRealm = []
     List<List<Date>> dateCreated = []
     List<List<Date>> dateExecuted = []
-    List<Double> qualityEvaluated = []
 
     boolean enabled = false
 

@@ -50,7 +50,7 @@ $.otp.run = {
                         fnCallback({aaData: [], iTotalRecords: 0, iTotalDisplayRecords: 0});
                     },
                     "success": function (json) {
-                        var i, j, rowData, row, dataQuality;
+                        var i, rowData, row;
                         for (i = 0; i < json.aaData.length; i += 1) {
                             row = json.aaData[i];
                             rowData = [
