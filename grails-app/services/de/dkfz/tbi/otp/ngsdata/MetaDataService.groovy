@@ -539,8 +539,8 @@ class MetaDataService {
      * @return mate number, 1 or 2
      * @throws RuntimeException if the mate number cannot be found.
      */
-    private static int findOutMateNumber(String dataFileName) {
-	assert dataFileName, "for non single-mate fastq files, file name must be provided"
+    public static int findOutMateNumber(String dataFileName) {
+        assert dataFileName, "for non single-mate fastq files, file name must be provided"
         def patterns = [
             //SOMEPID_L001_R2.fastq.gz
             /.+_L00\d{1,2}.R([12]).+/,
@@ -594,8 +594,8 @@ class MetaDataService {
             matches ? matches[0][1] : null
         }.findAll { it }
         if (!mateNumbers) {
-	    throw new RuntimeException("cannot find mateNumber for $dataFileName")
-	}
+            throw new RuntimeException("cannot find mateNumber for $dataFileName")
+        }
         assert mateNumbers.size() == 1, "$dataFileName matches to more then one pattern"
         return mateNumbers.first() as int // without the "as" the conversion is wrong
     }

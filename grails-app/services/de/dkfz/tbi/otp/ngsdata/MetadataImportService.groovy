@@ -1,15 +1,16 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
-
-import java.util.logging.Level
-
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.ApplicationContext
-import org.springframework.security.access.prepost.PreAuthorize
-
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
-import groovy.transform.TupleConstructor
+import de.dkfz.tbi.util.spreadsheet.*
+import groovy.transform.*
+import org.springframework.beans.factory.annotation.*
+import org.springframework.context.*
+import org.springframework.security.access.prepost.*
+
+import java.util.logging.*
+
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 /**
  * Metadata import 2.0 (OTP-34)
@@ -118,6 +119,75 @@ class MetadataImportService {
                 align,
         )
     }
+
+    public static ExtractedValue extractBarcode(Row row) {
+        String barcode = null
+        Set<Cell> cells = [] as Set
+
+        Cell barcodeCell = row.getCellByColumnTitle(BARCODE.name())
+        if (barcodeCell) {
+            cells.add(barcodeCell)
+            barcode = barcodeCell.text ?: null
+        }
+
+        Cell filenameCell = row.getCellByColumnTitle(FASTQ_FILE.name())
+        if (filenameCell) {
+            String barcodeFromFilename = MultiplexingService.barcode(filenameCell.text)
+            if (barcodeFromFilename) {
+                if (!barcode?.contains(barcodeFromFilename)) {
+                    cells.add(filenameCell)
+                    if (!barcode) {
+                        barcode = barcodeFromFilename
+                    } else {
+                        // Yes, this is what the metadata import currently does
+                        barcode = MultiplexingService.combineLaneNumberAndBarcode(barcode, barcodeFromFilename)
+                    }
+                }
+            } else if (!barcode) {
+                cells.add(filenameCell)
+            }
+        }
+
+        if (cells) {
+            return new ExtractedValue(barcode, cells)
+        } else {
+            return null
+        }
+    }
+
+    public static ExtractedValue extractMateNumber(Row row) {
+        Cell libraryLayoutCell = row.getCellByColumnTitle(LIBRARY_LAYOUT.name())
+        if (libraryLayoutCell && libraryLayoutCell.text == LibraryLayout.SINGLE.name()) {
+            return new ExtractedValue('1', [libraryLayoutCell] as Set)
+        }
+        Cell filenameCell = row.getCellByColumnTitle(FASTQ_FILE.name())
+        if (!filenameCell) {
+            return null
+        }
+        int mateNumber
+        try {
+            mateNumber = MetaDataService.findOutMateNumber(filenameCell.text)
+        } catch (RuntimeException e) {
+            if (e.message == "cannot find mateNumber for ${filenameCell.text}".toString()) {
+                return null
+            } else {
+                throw e
+            }
+        }
+        return new ExtractedValue(Integer.toString(mateNumber), [filenameCell] as Set)
+    }
+}
+
+@TupleConstructor
+class ExtractedValue {
+
+    final String value
+
+    /**
+     * The cells the value has been extracted from
+     */
+    final Set<Cell> cells
+
 }
 
 @TupleConstructor
