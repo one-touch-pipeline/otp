@@ -503,15 +503,11 @@ class MetaDataService {
      * file name and '2' for the second file name.
      */
     static void ensurePairedSequenceFileNameConsistency(final String mate1FileName, final String mate2FileName) {
-        try {
-            assert mate1FileName.length() == mate2FileName.length()
-            final int mateNumberCharIndex = StringUtils.commonPrefixLength(mate1FileName, mate2FileName)
-            assert mateNumberCharIndex < mate1FileName.length()
-            assert mate1FileName.charAt(mateNumberCharIndex) == '1'
-            assert mate2FileName.charAt(mateNumberCharIndex) == '2'
-            assert mate1FileName.substring(mateNumberCharIndex + 1) == mate2FileName.substring(mateNumberCharIndex + 1)
-        } catch (final AssertionError e) {
-            throw new RuntimeException("${mate1FileName} and ${mate2FileName} are not consistent as paired sequence file names.", e)
+        Map<String, Character> differentCharacters = StringUtils.extractDistinguishingCharacter([mate1FileName, mate2FileName])
+        if (!differentCharacters ||
+                differentCharacters.get(mate1FileName) != '1' ||
+                differentCharacters.get(mate2FileName) != '2') {
+            throw new RuntimeException("${mate1FileName} and ${mate2FileName} are not consistent as paired sequence file names.")
         }
     }
 
