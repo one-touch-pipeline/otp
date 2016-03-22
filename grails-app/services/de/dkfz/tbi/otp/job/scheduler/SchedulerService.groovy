@@ -971,7 +971,7 @@ class SchedulerService {
      * Getter for Unit Tests
      * @return
      */
-    protected List<Job> getRunning() {
+    List<Job> getRunning() {
         return this.running
     }
 }

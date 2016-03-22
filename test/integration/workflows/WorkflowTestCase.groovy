@@ -6,6 +6,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.scheduler.ErrorLogService
+import de.dkfz.tbi.otp.job.scheduler.PbsMonitorService
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.testing.GroovyScriptAwareTestCase
@@ -52,6 +53,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
     DataSource dataSource
     SchedulerService schedulerService
 
+    PbsMonitorService pbsMonitorService
 
     // The scheduler needs to access the created objects while the test is being executed
     boolean transactional = false
@@ -59,7 +61,6 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
     // set this to true if you are working on the tests and want to keep the workflow results
     // don't forget to delete them manually
     protected static final boolean KEEP_TEMP_FOLDER = false
-
 
     // fast queue, here we come!
     static final String pbsOptions = '{"-l": {nodes: "1", walltime: "20:00", mem: "5g"}, "-j": "oe"}'
@@ -87,7 +88,6 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
 
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1)
     private boolean startJobRunning = false
-
 
     /**
      * This method must return a list of relative paths (as strings) to the workflow scripts
@@ -129,6 +129,9 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         createUserAndRoles()
         loadWorkflow()
 
+        assert schedulerService.running.empty
+        assert schedulerService.queue.empty
+        assert !ProcessingStep.list()
 
         // manually set up scheduled tasks
         // this is done here so they will be stopped when each test is finished,
@@ -144,6 +147,11 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         // stop scheduled tasks in SchedulerService and start job
         scheduler.shutdownNow()
         startJobRunning = false
+        assert scheduler.awaitTermination(1, TimeUnit.MINUTES)
+
+        schedulerService.running.clear()
+        schedulerService.queue.clear()
+        pbsMonitorService.queuedJobs.clear()
 
         if (sql) {
             sql.execute("DROP ALL OBJECTS")
@@ -191,7 +199,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
                 new File(realm.loggingRootPath, JobStatusLoggingService.STATUS_LOGGING_BASE_DIR),
                 new File(realm.stagingRootPath),
         ])
-     }
+    }
 
     public void createDirectories(List<File> files) {
         createDirectories(files, "2770")
