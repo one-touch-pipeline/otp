@@ -31,7 +31,7 @@ class BarcodeValidatorSpec extends Specification {
     }
 
 
-    void 'validate, when barcode is invalid, adds warnings'() {
+    void 'validate, when barcode use valid chars but does not pass the regular expression, adds warnings'() {
         given:
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
@@ -48,6 +48,31 @@ class BarcodeValidatorSpec extends Specification {
         problem.level == Level.WARNING
         containSame(problem.affectedCells*.cellAddress, ['A2'])
         problem.message.contains("The barcode 'invalidBarcode' does not match the usually used regular expression: '${BarcodeValidator.REGEX}.'")
+    }
+
+    void 'validate, when barcode contains invalid chars, adds error'() {
+        given:
+        MetadataValidationContext context = MetadataValidationContextFactory.createContext(
+                "${MetaDataColumn.BARCODE}\n" +
+                "${barcode}\n"
+        )
+
+        when:
+        new BarcodeValidator().validate(context)
+
+
+        then:
+        Problem problem = exactlyOneElement(context.problems)
+        problem.level == Level.ERROR
+        containSame(problem.affectedCells*.cellAddress, ['A2'])
+        problem.message.contains("'${barcode}' is not a well-formed barcode. It must contain only digits (0 to 9) and/or letters (a to z, A to Z). It should match the regular expression '${BarcodeValidator.REGEX}'.")
+
+        where:
+        barcode << [
+                ' ',
+                '_',
+                '-',
+        ]
     }
 
 

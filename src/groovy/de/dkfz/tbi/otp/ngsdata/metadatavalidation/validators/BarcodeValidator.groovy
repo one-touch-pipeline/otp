@@ -31,7 +31,9 @@ class BarcodeValidator extends SingleValueValidator<MetadataValidationContext> i
 
     @Override
     void validateValue(MetadataValidationContext context, String barcode, Set<Cell> cells) {
-        if (!(barcode == "" || barcode ==~ REGEX )) {
+        if (!(barcode ==~ /^[0-9a-zA-Z]*$/)) {
+            context.addProblem(cells, Level.ERROR, "'${barcode}' is not a well-formed barcode. It must contain only digits (0 to 9) and/or letters (a to z, A to Z). It should match the regular expression '${REGEX}'.")
+        } else if (!(barcode ==~ REGEX) && !barcode.empty) {
             context.addProblem(cells, Level.WARNING, "The barcode '${barcode}' does not match the usually used regular expression: '${REGEX}.'")
         }
     }
