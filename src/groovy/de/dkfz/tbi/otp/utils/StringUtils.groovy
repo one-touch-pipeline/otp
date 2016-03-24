@@ -2,6 +2,10 @@ package de.dkfz.tbi.otp.utils
 
 class StringUtils {
 
+    static String escapeForSqlLike(String string) {
+        return string.replaceAll(/([\\_%])/, /\\$1/)
+    }
+
     /**
      * @return The length of the longest prefix that two strings have in common.
      */
