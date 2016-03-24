@@ -38,8 +38,6 @@ String refGenName = ''
  * - GRCm38mm10:
  *   - GRCm38mm10.fa.chrLenOnlyACGT_realChromosomes.tab
  *   - GRCm38mm10.fa.chrLenOnlyACGT.tab
- *   - mm10_1-19_X_Y_M.fa.chrLenOnlyACGT_realChromosomes.tab
- *   - mm10_1-19_X_Y_M.fa.chrLenOnlyACGT.tab
  * - hs37d5_GRCm38mm:
  *   - hs37d5_GRCm38mm.fa.chrLenOnlyACGT_realChromosomes.tab
  *   - hs37d5_GRCm38mm.fa.chrLenOnlyACGT.tab
