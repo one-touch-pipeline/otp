@@ -57,6 +57,9 @@
         </p>
         <div>
             <h3>${g.message(code: 'projectOverview.alignmentInformation.title')}</h3>
+                    <div class="show_button">
+                        <g:link controller='ConfigureAlignment' action='index' params='[projectName: project]' class="configure"><input type="button" value="Configure Alignment"/></g:link>
+                    </div>
             <g:if test="${alignmentInfo}">
                 <table>
                     <tr>

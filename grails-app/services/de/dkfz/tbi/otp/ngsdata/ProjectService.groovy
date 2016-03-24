@@ -2,6 +2,12 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.administration.GroupCommand
 import de.dkfz.tbi.otp.administration.GroupService
+import de.dkfz.tbi.otp.dataprocessing.OtpPath
+import de.dkfz.tbi.otp.dataprocessing.Workflow
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
+import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.HelperUtils
+import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import grails.plugin.springsecurity.SpringSecurityUtils
 import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.access.prepost.PostFilter
@@ -11,6 +17,10 @@ import org.springframework.security.acls.domain.GrantedAuthoritySid
 import org.springframework.security.acls.model.Sid
 import org.springframework.security.core.userdetails.UserDetails
 import de.dkfz.tbi.otp.security.Group
+import de.dkfz.tbi.otp.job.processing.ExecutionService
+
+
+import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 /**
  * Service providing methods to access information about Projects.
@@ -27,6 +37,10 @@ class ProjectService {
     def springSecurityService
 
     GroupService groupService
+    ReferenceGenomeService referenceGenomeService
+    ExecutionService executionService
+    static final String PICARD = "Picard"
+    static final String BIOBAMBAM = "BioBamBam"
 
     /**
      *
@@ -166,5 +180,165 @@ AND ace.granting = true
         assert snv: "the input snv must not be null"
         project.snv = snv
         project.save(flush: true, failOnError: true)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void configureNoAlignmentDeciderProject(Project project) {
+        setReferenceGenomeProjectSeqTypeDeprecated(project)
+        project.alignmentDeciderBeanName = "noAlignmentDecider"
+        project.save(flush: true, failOnError: true)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void configureDefaultOtpAlignmentDecider(Project project, String referenceGenomeName) {
+        setReferenceGenomeProjectSeqTypeDeprecated(project)
+        project.alignmentDeciderBeanName = "defaultOtpAlignmentDecider"
+        project.save(flush: true, failOnError: true)
+        ReferenceGenome referenceGenome = exactlyOneElement(ReferenceGenome.findAllByName(referenceGenomeName))
+        SeqType seqType_wgp = SeqType.getWholeGenomePairedSeqType()
+        SeqType seqType_exome = SeqType.getExomePairedSeqType()
+        [seqType_wgp, seqType_exome].each {seqType ->
+            ReferenceGenomeProjectSeqType refSeqType = new ReferenceGenomeProjectSeqType()
+            refSeqType.project = project
+            refSeqType.seqType = seqType
+            refSeqType.referenceGenome = referenceGenome
+            refSeqType.sampleType = null
+            refSeqType.save(flush: true, failOnError: true)
+        }
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void configurePanCanAlignmentDeciderProject(Project project, String referenceGenomeName, String pluginVersion, String statSizeFileName, String unixGroup, String mergeTool, String configVersion) {
+        setReferenceGenomeProjectSeqTypeDeprecated(project)
+        project.alignmentDeciderBeanName = "panCanAlignmentDecider"
+        project.save(flush: true, failOnError: true)
+        ReferenceGenome referenceGenome = exactlyOneElement(ReferenceGenome.findAllByName(referenceGenomeName))
+        assert mergeTool in [PICARD, BIOBAMBAM]: "Merge Tool must be '${PICARD}' or '${BIOBAMBAM}'"
+        boolean useBioBamBam = mergeTool == BIOBAMBAM
+        boolean useConvey = false
+        String pluginName = 'QualityControlWorkflows'
+        assert OtpPath.isValidPathComponent(pluginVersion): "pluginVersion is invalid path component"
+        assert OtpPath.isValidPathComponent(unixGroup): "unixGroup contains invalid characters"
+        Workflow workflow = CollectionUtils.exactlyOneElement(Workflow.findAllByTypeAndName(
+                Workflow.Type.ALIGNMENT,
+                Workflow.Name.PANCAN_ALIGNMENT,
+        ))
+
+        SeqType seqType_wgp = SeqType.getWholeGenomePairedSeqType()
+        SeqType seqType_exome = SeqType.getExomePairedSeqType()
+        [seqType_wgp, seqType_exome].each {seqType ->
+            ReferenceGenomeProjectSeqType refSeqType = new ReferenceGenomeProjectSeqType()
+            refSeqType.project = project
+            refSeqType.seqType = seqType
+            refSeqType.referenceGenome = referenceGenome
+            refSeqType.sampleType = null
+            refSeqType.statSizeFileName = statSizeFileName
+            refSeqType.save(flush: true, failOnError: true)
+        }
+
+        File statDir = referenceGenomeService.pathToChromosomeSizeFilesPerReference(project, referenceGenome)
+        File statSizeFile = new File(statDir, statSizeFileName)
+        assert statSizeFile.exists(): "The statSizeFile ${statSizeFile} could not be found in ${statDir}"
+
+        String xmlConfig = """
+<configuration
+        configurationType='project'
+        name='${Workflow.Name.PANCAN_ALIGNMENT.name()}_${pluginName}:${pluginVersion}_${configVersion}'
+        description='Align with BWA-MEM (${useConvey ? 'convey' : 'software'}) and mark duplicates with ${mergeTool}.' imports="otpPanCanAlignmentWorkflow-1.3 ">
+    <subconfigurations>
+
+        <configuration name="config" usedresourcessize="xl">
+            <availableAnalyses>
+                <analysis id='WGS' configuration='qcAnalysis' killswitches='FilenameSection'/>
+                <analysis id='WES' configuration='exomeAnalysis' killswitches='FilenameSection'/>
+            </availableAnalyses>
+            <configurationvalues>
+
+                <!-- Unix group -->
+                <cvalue name='outputFileGroup' value='${unixGroup}'
+                    description="For OTP this needs to be set to the Unix group of the project."/>
+
+                <!-- Using of Convey -->
+                <cvalue name='useAcceleratedHardware' value='${useConvey}' type="boolean"
+                    description='Map reads with Convey BWA-MEM (true) or software BWA-MEM (false; PCAWF standard)'/>
+
+                <!-- Picard / BioBamBam -->
+                <cvalue name='useBioBamBamMarkDuplicates' value='${useBioBamBam}' type="boolean"
+                    description='Merge and mark duplicates with biobambam (true; PCAWF standard) or Picard (false).'/>
+
+            </configurationvalues>
+        </configuration>
+
+    </subconfigurations>
+</configuration>
+"""
+
+        Realm realm = ConfigService.getRealm(project, Realm.OperationType.DATA_MANAGEMENT)
+
+        File projectDirectory = LsdfFilesService.getPath(
+                realm.rootPath,
+                project.dirName,
+        )
+
+        File configDirectory = LsdfFilesService.getPath(
+                projectDirectory.path,
+                'configFiles',
+                Workflow.Name.PANCAN_ALIGNMENT.name(),
+        )
+        File configFilePath = new File(configDirectory, "${Workflow.Name.PANCAN_ALIGNMENT.name()}_${pluginVersion}_${configVersion}.xml")
+        String md5 = HelperUtils.getRandomMd5sum()
+
+        String createProjectDirectory = ''
+        if (!projectDirectory.exists()) {
+            createProjectDirectory = """\
+mkdir -p -m 2750 ${projectDirectory}
+
+chgrp ${unixGroup} ${projectDirectory}
+"""
+        }
+
+        String createConfigDirectory = ''
+        if (!configDirectory.exists()) {
+            createConfigDirectory = """\
+mkdir -p -m 2750 ${configDirectory}
+"""
+        }
+
+        String script = """\
+#!/bin/bash
+set -evx
+
+umask 0027
+
+${createProjectDirectory}
+
+${createConfigDirectory}
+
+cat <<${md5} > ${configFilePath}
+${xmlConfig}
+${md5}
+
+chmod 0440 ${configFilePath}
+
+echo 'OK'
+"""
+
+        LogThreadLocal.withThreadLog(System.out) {
+            assert executionService.executeCommand(realm, script).trim() == "OK"
+        }
+
+        RoddyWorkflowConfig.importProjectConfigFile(
+                project,
+                "${pluginName}:${pluginVersion}",
+                workflow,
+                configFilePath.path,
+                configVersion,
+        )
+    }
+
+    private void setReferenceGenomeProjectSeqTypeDeprecated(Project project) {
+        Set<ReferenceGenomeProjectSeqType> referenceGenomeProjectSeqTypes = ReferenceGenomeProjectSeqType.findAllByProjectAndDeprecatedDateIsNull(project)
+        referenceGenomeProjectSeqTypes*.deprecatedDate = new Date()
+        referenceGenomeProjectSeqTypes*.save(flush: true, failOnError: true)
     }
 }

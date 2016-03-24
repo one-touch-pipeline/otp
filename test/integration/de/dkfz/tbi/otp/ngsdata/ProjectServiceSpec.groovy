@@ -1,13 +1,30 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.dataprocessing.Workflow
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
+import de.dkfz.tbi.otp.job.processing.ExecutionService
 import de.dkfz.tbi.otp.testing.UserAndRoles
+import de.dkfz.tbi.otp.utils.ProcessHelperService
 import grails.plugin.springsecurity.SpringSecurityUtils
+import org.codehaus.groovy.grails.commons.GrailsApplication
+import org.junit.Rule
+import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
-
+import java.nio.file.*
+import java.nio.file.attribute.*
+import grails.validation.ValidationException
 
 class ProjectServiceSpec extends Specification implements UserAndRoles {
 
     ProjectService projectService
+
+    ReferenceGenomeService referenceGenomeService
+
+    GrailsApplication grailsApplication
+
+    @Rule
+    TemporaryFolder temporaryFolder
 
     def setup() {
         createUserAndRoles()
@@ -15,12 +32,29 @@ class ProjectServiceSpec extends Specification implements UserAndRoles {
         DomainFactory.createProject(name: 'testProject3', nameInMetadataFiles: null)
         ProjectGroup projectGroup = new ProjectGroup(name: 'projectGroup')
         projectGroup.save(flush: true, failOnError: true)
+
+        int counter = 0
+        Realm realm = DomainFactory.createRealmDataManagement(temporaryFolder.newFolder())
+        DomainFactory.createRealmDataProcessing(temporaryFolder.newFolder(), [name: realm.name])
+        DomainFactory.createProject(name: 'testProjectAlignment', realmName: realm.name, alignmentDeciderBeanName: 'test')
+        DomainFactory.createReferenceGenome(name: 'testReferenceGenome')
+        DomainFactory.createReferenceGenome(name: 'testReferenceGenome2')
+        DomainFactory.createWholeGenomeSeqType()
+        DomainFactory.createExomeSeqType()
+        DomainFactory.createPanCanWorkflow()
+        projectService.executionService = Stub(ExecutionService) {
+            executeCommand(_, _) >> { Realm realm2, String command ->
+                File script = temporaryFolder.newFile('script'+ counter++ +'.sh')
+                script.text = command
+                return ProcessHelperService.executeCommandAndAssertExistCodeAndReturnProcessOutput("bash ${script.absolutePath}").stdout
+            }
+        }
     }
 
     void "test createProject valid input"() {
         when:
         Project project
-        SpringSecurityUtils.doWithAuth("admin"){
+        SpringSecurityUtils.doWithAuth("admin") {
             project = projectService.createProject(name,  dirName,  'DKFZ_13.1', 'noAlignmentDecider',  projectGroup,  nameInMetadataFiles,  copyFiles)
         }
 
@@ -44,12 +78,12 @@ class ProjectServiceSpec extends Specification implements UserAndRoles {
     void "test createProject invalid input"() {
         when:
         Project project
-        SpringSecurityUtils.doWithAuth("admin"){
+        SpringSecurityUtils.doWithAuth("admin") {
             project = projectService.createProject(name, dirName, 'DKFZ_13.1', 'noAlignmentDecider', projectGroup, nameInMetadataFiles, copyFiles)
         }
 
         then:
-            grails.validation.ValidationException ex = thrown()
+            ValidationException ex = thrown()
             ex.message.contains(errorName) && ex.message.contains(errorLocaction)
 
         where:
@@ -83,19 +117,363 @@ class ProjectServiceSpec extends Specification implements UserAndRoles {
     void "test updateNameInMetadata invalid input"() {
         when:
         Project project = Project.findByName("testProject3")
-        SpringSecurityUtils.doWithAuth("admin"){
+        SpringSecurityUtils.doWithAuth("admin") {
             projectService.updateNameInMetadata(name, project)
         }
 
         then:
-        grails.validation.ValidationException ex = thrown()
+        ValidationException ex = thrown()
         ex.message.contains(errorName) && ex.message.contains(errorLocaction)
 
 
         where:
-        name            || errorName                                                                                    | errorLocaction
-        'testProject'   || 'this nameInMetadataFiles is already used in another project as name entry'                  | 'on field \'nameInMetadataFiles\': rejected value [testProject]'
-        'testProject2'  || 'this nameInMetadataFiles is already used in another project as nameInMetadataFiles entry'   | 'on field \'nameInMetadataFiles\': rejected value [testProject2]'
-        ''              || 'blank'                                                                                      | 'on field \'nameInMetadataFiles\': rejected value []'
+        name           || errorName | errorLocaction
+        'testProject'  || 'this nameInMetadataFiles is already used in another project as name entry' | 'on field \'nameInMetadataFiles\': rejected value [testProject]'
+        'testProject2' || 'this nameInMetadataFiles is already used in another project as nameInMetadataFiles entry' | 'on field \'nameInMetadataFiles\': rejected value [testProject2]'
+        ''             || 'blank' | 'on field \'nameInMetadataFiles\': rejected value []'
+    }
+
+    void "test configureNoAlignmentDeciderProject"() {
+        setup:
+        Project project = Project.findByName("testProjectAlignment")
+
+        when:
+        SpringSecurityUtils.doWithAuth("admin") {
+            projectService.configureNoAlignmentDeciderProject(project)
+        }
+
+        then:
+        project.alignmentDeciderBeanName == "noAlignmentDecider"
+        ReferenceGenomeProjectSeqType.findAllByProject(project).size == 0
+    }
+
+    void "test configureDefaultOtpAlignmentDecider valid input"() {
+        setup:
+        Project project = Project.findByName("testProjectAlignment")
+        ReferenceGenome referenceGenome = ReferenceGenome.findByName("testReferenceGenome")
+
+        when:
+        SpringSecurityUtils.doWithAuth("admin") {
+            projectService.configureDefaultOtpAlignmentDecider(project, referenceGenome.name)
+        }
+
+        then:
+        project.alignmentDeciderBeanName == "defaultOtpAlignmentDecider"
+        Set <ReferenceGenomeProjectSeqType> referenceGenomeProjectSeqTypes = ReferenceGenomeProjectSeqType.findAllByProjectAndDeprecatedDateIsNull(project)
+        referenceGenomeProjectSeqTypes.every {it.referenceGenome == referenceGenome}
+        referenceGenomeProjectSeqTypes.size() == 2
+    }
+
+    void "test configureDefaultOtpAlignmentDecider valid input, twice"() {
+        setup:
+        Project project = Project.findByName("testProjectAlignment")
+        ReferenceGenome referenceGenome = ReferenceGenome.findByName("testReferenceGenome")
+        ReferenceGenome referenceGenome2 = ReferenceGenome.findByName("testReferenceGenome2")
+
+        when:
+        SpringSecurityUtils.doWithAuth("admin") {
+            projectService.configureDefaultOtpAlignmentDecider(project, referenceGenome.name)
+            projectService.configureDefaultOtpAlignmentDecider(project, referenceGenome2.name)
+        }
+
+        then:
+        project.alignmentDeciderBeanName == "defaultOtpAlignmentDecider"
+        Set <ReferenceGenomeProjectSeqType> referenceGenomeProjectSeqTypes = ReferenceGenomeProjectSeqType.findAllByProjectAndDeprecatedDateIsNull(project)
+        referenceGenomeProjectSeqTypes.every {it.referenceGenome == referenceGenome2}
+        referenceGenomeProjectSeqTypes.size() == 2
+    }
+
+    void "test configureDefaultOtpAlignmentDecider invalid input"() {
+        setup:
+        Project project = Project.findByName("testProjectAlignment")
+        ReferenceGenome referenceGenome = ReferenceGenome.findByName("testReferenceGenome")
+
+        when:
+        SpringSecurityUtils.doWithAuth("admin") {
+                projectService.configureDefaultOtpAlignmentDecider(project, "error")
+        }
+
+        then:
+        AssertionError exception = thrown()
+        exception.message == "Collection contains 0 elements. Expected 1."
+    }
+
+    void "test configurePanCanAlignmentDeciderProject valid input"() {
+        setup:
+        Project project = Project.findByName("testProjectAlignment")
+        ReferenceGenome referenceGenome = ReferenceGenome.findByName("testReferenceGenome")
+        String statFileName = "testStatSizeFileName.tab"
+        File statFile = makeStatFile(project, referenceGenome, statFileName)
+        String group = grailsApplication.config.otp.testing.group
+
+
+        when:
+        SpringSecurityUtils.doWithAuth("admin") {
+            projectService.configurePanCanAlignmentDeciderProject(project, referenceGenome.name, "1.0.182", statFileName, group, ProjectService.PICARD, "v1_0")
+        }
+
+        then:
+        project.alignmentDeciderBeanName == "panCanAlignmentDecider"
+        RoddyWorkflowConfig.findAllByProjectAndWorkflowInListAndPluginVersionAndObsoleteDateIsNull(
+                project,
+                Workflow.findAllByTypeAndName(Workflow.Type.ALIGNMENT,Workflow.Name.PANCAN_ALIGNMENT,),
+                "QualityControlWorkflows:1.0.182"
+        ).size == 1
+        File roddyWorkflowConfig = getRoddyWorkflowConfig(project)
+        roddyWorkflowConfig.exists()
+        PosixFileAttributes attrs = Files.readAttributes(roddyWorkflowConfig.toPath(), PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
+        attrs.group().toString() == group
+        TestCase.assertContainSame(attrs.permissions(), [PosixFilePermission.OWNER_READ, PosixFilePermission.GROUP_READ])
+    }
+
+    void "test configurePanCanAlignmentDeciderProject valid input, twice"() {
+        setup:
+        Project project = Project.findByName("testProjectAlignment")
+        ReferenceGenome referenceGenome = ReferenceGenome.findByName("testReferenceGenome")
+        String statFileName = "testStatSizeFileName.tab"
+        makeStatFile(project, referenceGenome, statFileName)
+
+        ReferenceGenome referenceGenome2 = ReferenceGenome.findByName("testReferenceGenome2")
+        String statFileName2 = "testStatSizeFileName2.tab"
+        File statFile2 = makeStatFile(project, referenceGenome2, statFileName2)
+        String group = grailsApplication.config.otp.testing.group
+
+
+        when:
+        SpringSecurityUtils.doWithAuth("admin") {
+            projectService.configurePanCanAlignmentDeciderProject(project, referenceGenome.name, "1.0.182", statFileName, group, ProjectService.PICARD, "v1_0")
+            projectService.configurePanCanAlignmentDeciderProject(project, referenceGenome2.name, "1.0.182", statFileName2, group, ProjectService.PICARD, "v1_1")
+        }
+
+        then:
+        project.alignmentDeciderBeanName == "panCanAlignmentDecider"
+        Set<RoddyWorkflowConfig> roddyWorkflowConfigs = RoddyWorkflowConfig.findAllByProjectAndWorkflowInListAndPluginVersion(
+                project,
+                Workflow.findAllByTypeAndName(Workflow.Type.ALIGNMENT,Workflow.Name.PANCAN_ALIGNMENT,),
+                "QualityControlWorkflows:1.0.182"
+        )
+        roddyWorkflowConfigs.size() == 2
+        roddyWorkflowConfigs.findAll({it.obsoleteDate == null}).size() == 1
+        statFile2.exists()
+    }
+
+    void "test configurePanCanAlignmentDeciderProject invalid referenceGenome input"() {
+        setup:
+        Project project = Project.findByName("testProjectAlignment")
+        ReferenceGenome referenceGenome = ReferenceGenome.findByName("testReferenceGenome")
+        String statFileName = "testStatSizeFileName.tab"
+        makeStatFile(project, referenceGenome, statFileName)
+        String group = grailsApplication.config.otp.testing.group
+
+
+        when:
+        SpringSecurityUtils.doWithAuth("admin") {
+            projectService.configurePanCanAlignmentDeciderProject(project, "invalidReferenceGenome", "1.0.182", statFileName, group, ProjectService.PICARD, "v1_0")
+        }
+
+        then:
+        AssertionError exception = thrown()
+        exception.message == "Collection contains 0 elements. Expected 1."
+    }
+
+    void "test configurePanCanAlignmentDeciderProject invalid pluginVersion input"() {
+        setup:
+        Project project = Project.findByName("testProjectAlignment")
+        ReferenceGenome referenceGenome = ReferenceGenome.findByName("testReferenceGenome")
+        String statFileName = "testStatSizeFileName.tab"
+        makeStatFile(project, referenceGenome, statFileName)
+        String group = grailsApplication.config.otp.testing.group
+
+
+        when:
+        SpringSecurityUtils.doWithAuth("admin") {
+            projectService.configurePanCanAlignmentDeciderProject(project, referenceGenome.name, "1.0.182/", statFileName, group, ProjectService.PICARD, "v1_0")
+        }
+
+        then:
+        AssertionError exception = thrown()
+        exception.message == "pluginVersion is invalid path component. Expression: de.dkfz.tbi.otp.dataprocessing.OtpPath.isValidPathComponent(pluginVersion)"
+    }
+
+
+    void "test configurePanCanAlignmentDeciderProject invalid statSizeFileName input"() {
+        setup:
+        Project project = Project.findByName("testProjectAlignment")
+        ReferenceGenome referenceGenome = ReferenceGenome.findByName("testReferenceGenome")
+        File statDirectory = referenceGenomeService.pathToChromosomeSizeFilesPerReference(project, referenceGenome, false)
+        assert statDirectory.mkdirs()
+        String group = grailsApplication.config.otp.testing.group
+
+        when:
+        SpringSecurityUtils.doWithAuth("admin") {
+            projectService.configurePanCanAlignmentDeciderProject(project, referenceGenome.name, "1.0.182", "invalidStatSizeFileName.tab", group, ProjectService.PICARD, "v1_0")
+        }
+
+        then:
+        AssertionError exception = thrown()
+        exception.message == "The statSizeFile " + statDirectory + "/invalidStatSizeFileName.tab could not be found in " + statDirectory + ". Expression: statSizeFile.exists()"
+    }
+
+    void "test configurePanCanAlignmentDeciderProject invalid unixGroup input"() {
+        setup:
+        Project project = Project.findByName("testProjectAlignment")
+        ReferenceGenome referenceGenome = ReferenceGenome.findByName("testReferenceGenome")
+        String statFileName = "testStatSizeFileName.tab"
+        makeStatFile(project, referenceGenome, statFileName)
+
+        when:
+        SpringSecurityUtils.doWithAuth("admin") {
+            projectService.configurePanCanAlignmentDeciderProject(project, referenceGenome.name, "1.0.182", statFileName, groupName, ProjectService.PICARD, "v1_0")
+        }
+
+        then:
+        AssertionError exception = thrown()
+        exception.message == message
+
+        where:
+        groupName       || message
+        "invalidGroup"  || "The exit value is not 0, but 1. Expression: (process.exitValue() == 0)"
+        "invalidGroup/" || "unixGroup contains invalid characters. Expression: de.dkfz.tbi.otp.dataprocessing.OtpPath.isValidPathComponent(unixGroup)"
+    }
+
+    void "test configurePanCanAlignmentDeciderProject invalid mergeTool input"() {
+        setup:
+        Project project = Project.findByName("testProjectAlignment")
+        ReferenceGenome referenceGenome = ReferenceGenome.findByName("testReferenceGenome")
+        String statFileName = "testStatSizeFileName.tab"
+        makeStatFile(project, referenceGenome, statFileName)
+        String group = grailsApplication.config.otp.testing.group
+
+        when:
+        SpringSecurityUtils.doWithAuth("admin") {
+            projectService.configurePanCanAlignmentDeciderProject(project, referenceGenome.name, "1.0.182", statFileName, group, "invalidMergeTool", "v1_0")
+        }
+
+        then:
+        AssertionError exception = thrown()
+        exception.message == "Merge Tool must be '" + ProjectService.PICARD + "' or '" + ProjectService.BIOBAMBAM + "'. Expression: (mergeTool in [PICARD, BIOBAMBAM]). Values: mergeTool = invalidMergeTool"
+    }
+
+    void "test configurePanCanAlignmentDeciderProject invalid configVersion input"() {
+        setup:
+        Project project = Project.findByName("testProjectAlignment")
+        ReferenceGenome referenceGenome = ReferenceGenome.findByName("testReferenceGenome")
+        String statFileName = "testStatSizeFileName.tab"
+        makeStatFile(project, referenceGenome, statFileName)
+        String group = grailsApplication.config.otp.testing.group
+
+        when:
+        SpringSecurityUtils.doWithAuth("admin") {
+            projectService.configurePanCanAlignmentDeciderProject(project, referenceGenome.name, "1.0.182", statFileName, group, ProjectService.PICARD, "v1.0")
+        }
+
+        then:
+        ValidationException exception = thrown()
+        exception.message.contains("[Property [{0}] of class [{1}] with value [{2}] does not match the required pattern [{3}]]")
+    }
+
+    void "test configurePanCanAlignmentDeciderProject to configureDefaultOtpAlignmentDecider"() {
+        setup:
+        Project project = Project.findByName("testProjectAlignment")
+        ReferenceGenome referenceGenome = ReferenceGenome.findByName("testReferenceGenome")
+        String statFileName = "testStatSizeFileName.tab"
+        makeStatFile(project, referenceGenome, statFileName)
+        String group = grailsApplication.config.otp.testing.group
+
+
+        when:
+        SpringSecurityUtils.doWithAuth("admin") {
+            projectService.configurePanCanAlignmentDeciderProject(project, referenceGenome.name, "1.0.182", statFileName, group, ProjectService.PICARD, "v1_0")
+            projectService.configureDefaultOtpAlignmentDecider(project, referenceGenome.name)
+        }
+
+        then:
+        project.alignmentDeciderBeanName == "defaultOtpAlignmentDecider"
+        Set <ReferenceGenomeProjectSeqType> referenceGenomeProjectSeqTypes = ReferenceGenomeProjectSeqType.findAllByProjectAndDeprecatedDateIsNull(project)
+        referenceGenomeProjectSeqTypes.every {it.referenceGenome == referenceGenome}
+        referenceGenomeProjectSeqTypes.size() == 2
+    }
+
+    void "test configurePanCanAlignmentDeciderProject to configureNoAlignmentDeciderProject"() {
+        setup:
+        Project project = Project.findByName("testProjectAlignment")
+        ReferenceGenome referenceGenome = ReferenceGenome.findByName("testReferenceGenome")
+        String statFileName = "testStatSizeFileName.tab"
+        makeStatFile(project, referenceGenome, statFileName)
+        String group = grailsApplication.config.otp.testing.group
+
+
+        when:
+        SpringSecurityUtils.doWithAuth("admin") {
+            projectService.configurePanCanAlignmentDeciderProject(project, referenceGenome.name, "1.0.182", statFileName, group, ProjectService.PICARD, "v1_0")
+            projectService.configureNoAlignmentDeciderProject(project)
+        }
+
+        then:
+        project.alignmentDeciderBeanName == "noAlignmentDecider"
+        ReferenceGenomeProjectSeqType.findAllByProjectAndDeprecatedDateIsNull(project).size == 0
+    }
+
+    void "test configureDefaultOtpAlignmentDecider to configurePanCanAlignmentDeciderProject"() {
+        setup:
+        Project project = Project.findByName("testProjectAlignment")
+        ReferenceGenome referenceGenome = ReferenceGenome.findByName("testReferenceGenome")
+        String statFileName = "testStatSizeFileName.tab"
+        File statFile = makeStatFile(project, referenceGenome, statFileName)
+        String group = grailsApplication.config.otp.testing.group
+
+
+        when:
+        SpringSecurityUtils.doWithAuth("admin") {
+            projectService.configureDefaultOtpAlignmentDecider(project, referenceGenome.name)
+            projectService.configurePanCanAlignmentDeciderProject(project, referenceGenome.name, "1.0.182", statFileName, group, ProjectService.PICARD, "v1_0")
+        }
+
+        then:
+        project.alignmentDeciderBeanName == "panCanAlignmentDecider"
+        RoddyWorkflowConfig.findAllByProjectAndWorkflowInListAndPluginVersionAndObsoleteDateIsNull(
+                project,
+                Workflow.findAllByTypeAndName(Workflow.Type.ALIGNMENT,Workflow.Name.PANCAN_ALIGNMENT,),
+                "QualityControlWorkflows:1.0.182"
+        ).size == 1
+        statFile.exists()
+    }
+
+    void "test configureDefaultOtpAlignmentDecider to configureNoAlignmentDeciderProject"() {
+        setup:
+        Project project = Project.findByName("testProjectAlignment")
+        ReferenceGenome referenceGenome = ReferenceGenome.findByName("testReferenceGenome")
+
+
+        when:
+        SpringSecurityUtils.doWithAuth("admin") {
+            projectService.configureDefaultOtpAlignmentDecider(project, referenceGenome.name)
+            projectService.configureNoAlignmentDeciderProject(project)
+        }
+
+        then:
+        project.alignmentDeciderBeanName == "noAlignmentDecider"
+        ReferenceGenomeProjectSeqType.findAllByProjectAndDeprecatedDateIsNull(project).size == 0
+    }
+
+    private File makeStatFile(Project project, ReferenceGenome referenceGenome, String statFileName) {
+        File statDirectory = referenceGenomeService.pathToChromosomeSizeFilesPerReference(project, referenceGenome, false)
+        assert statDirectory.mkdirs()
+        File statFile = new File(statDirectory, statFileName)
+        statFile.text = "someText"
+        return statFile
+    }
+
+    private File getRoddyWorkflowConfig(Project project) {
+        Realm realm = ConfigService.getRealm(project, Realm.OperationType.DATA_MANAGEMENT)
+        File configDirectory = LsdfFilesService.getPath(
+                LsdfFilesService.getPath(
+                        realm.rootPath,
+                        project.dirName,
+                ).path,
+                'configFiles',
+                Workflow.Name.PANCAN_ALIGNMENT.name(),
+        )
+        return new File(configDirectory, "${Workflow.Name.PANCAN_ALIGNMENT.name()}_1.0.182_v1_0.xml")
     }
 }

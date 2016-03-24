@@ -77,4 +77,8 @@ class ReferenceGenome {
     String toString() {
         name
     }
+
+    List<StatSizeFileName> getStatSizeFileNames() {
+        return StatSizeFileName.findAllByReferenceGenome(this, [sort: "name", order: "asc"])
+    }
 }
