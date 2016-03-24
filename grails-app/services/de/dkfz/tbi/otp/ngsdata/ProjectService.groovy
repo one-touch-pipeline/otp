@@ -294,6 +294,7 @@ AND ace.granting = true
 mkdir -p -m 2750 ${projectDirectory}
 
 chgrp ${unixGroup} ${projectDirectory}
+chmod 2750 ${projectDirectory}
 """
         }
 
