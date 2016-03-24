@@ -43,13 +43,18 @@ class InformSampleIdentifierParser implements SampleIdentifierParser {
 
     private String buildSampleTypeDbName(Matcher matcher) {
         assert matcher.matches()
-        return "${InformTissueType.fromKey(matcher.group('tissueTypeKey'))}0${matcher.group('sampleTypeNumber')}"
+        String tissueType = "${InformTissueType.fromKey(matcher.group('tissueTypeKey'))}"
+
+        if (matcher.group('sampleTypeNumber') != 'X') {
+            tissueType += "0${matcher.group('sampleTypeNumber')}"
+        }
+        return tissueType
     }
 
     private static String createRegex() {
         String treatingCenterId = "([0-9]{3})"
         String patientId =  "([0-9]{3})"
-        String sampleTypeNumber = "(?<sampleTypeNumber>([0-9]))"
+        String sampleTypeNumber = "(?<sampleTypeNumber>([0-9X]))"
         String tissueTypeKey = "(?<tissueTypeKey>([TMCFL]))"
         String sampleId = "(${sampleTypeNumber}${tissueTypeKey}[0-9]_[DRPI][0-9])"
         return "^"+

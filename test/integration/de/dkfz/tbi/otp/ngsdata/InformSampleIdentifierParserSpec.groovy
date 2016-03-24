@@ -53,6 +53,7 @@ class InformSampleIdentifierParserSpec extends Specification{
         'I123_456_1T2_D1'   || 'I123_456'   | 'TUMOR01'
         'I123_456_2T1_D1'   || 'I123_456'   | 'TUMOR02'
         'I123_456_3T1_D1'   || 'I123_456'   | 'TUMOR03'
+        'I123_456_XT1_D1'   || 'I123_456'   | 'TUMOR'
         'I123_456_0C2_D1'   || 'I123_456'   | 'CONTROL00'
         'I123_456_1C1_D1'   || 'I123_456'   | 'CONTROL01'
         'I123_456_3C1_D1'   || 'I123_456'   | 'CONTROL03'
