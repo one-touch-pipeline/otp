@@ -72,8 +72,6 @@ class FastqcJob extends AbstractOtpJob {
         final SeqTrack seqTrack = getProcessParameterObject()
 
         File finalDir = new File(fastqcDataFilesService.fastqcOutputDirectory(seqTrack))
-        lsdfFilesService.ensureDirIsReadableAndNotEmpty(finalDir)
-
         DataFile.findAllBySeqTrack(seqTrack).each { DataFile dataFile ->
             lsdfFilesService.ensureFileIsReadableAndNotEmpty(new File("${finalDir}/${fastqcDataFilesService.fastqcFileName(dataFile)}"))
         }

@@ -1,38 +1,30 @@
 package workflows
 
-import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.WorkflowTestRealms
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
-import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
+import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.job.scheduler.ErrorLogService
-import de.dkfz.tbi.otp.job.scheduler.PbsMonitorService
-import de.dkfz.tbi.otp.job.scheduler.SchedulerService
-import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.testing.GroovyScriptAwareTestCase
+import de.dkfz.tbi.otp.job.scheduler.*
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.testing.*
 import de.dkfz.tbi.otp.utils.*
-import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
-import grails.plugin.springsecurity.SpringSecurityUtils
-import grails.test.mixin.TestMixin
-import grails.test.mixin.integration.IntegrationTestMixin
-import grails.util.Environment
-import grails.util.Holders
-import groovy.sql.Sql
-import groovy.util.logging.Log4j
-import org.hibernate.SessionFactory
-import org.joda.time.Duration
-import org.joda.time.format.PeriodFormat
-import org.junit.After
-import org.junit.Assume
-import org.junit.Before
+import de.dkfz.tbi.otp.utils.logging.*
+import grails.plugin.springsecurity.*
+import grails.test.mixin.*
+import grails.test.mixin.integration.*
+import grails.util.*
+import groovy.sql.*
+import groovy.util.logging.*
+import org.hibernate.*
+import org.joda.time.*
+import org.joda.time.format.*
+import org.junit.*
 
-import javax.sql.DataSource
-import java.util.concurrent.Executors
-import java.util.concurrent.ScheduledExecutorService
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.TimeoutException
+import javax.sql.*
+import java.util.concurrent.*
 
-import static CollectionUtils.exactlyOneElement
+import static de.dkfz.tbi.otp.utils.ProcessHelperService.*
 
 /**
  * Base class for work-flow integration test cases.
@@ -231,9 +223,10 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
 
 
     private void cleanupDirectories() {
-        String cleanUpCommand = createClusterScriptService.removeDirs([getBaseDirectory()], CreateClusterScriptService.RemoveOption.RECURSIVE_FORCE)
         if(!KEEP_TEMP_FOLDER) {
-            assert executionService.executeCommand(realm, cleanUpCommand).toInteger() == 0
+            String cleanUpCommand = createClusterScriptService.removeDirs([getBaseDirectory()], CreateClusterScriptService.RemoveOption.RECURSIVE_FORCE)
+            ProcessOutput out = executionService.executeCommandReturnProcessOutput(realm, cleanUpCommand)
+            assert out.exitCode == 0 : "Deletion failed: '${out.stderr}', exit code: ${out.exitCode}"
         } else {
             println "Base directory: ${getBaseDirectory()}"
         }
@@ -450,7 +443,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         WaitingFileUtils.waitUntilExists(file)
         String md5sum
         LogThreadLocal.withThreadLog(System.out) {
-            md5sum = ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout("md5sum ${file}").split(' ')[0]
+            md5sum = executeAndAssertExitCodeAndErrorOutAndReturnStdout("md5sum ${file}").split(' ')[0]
         }
         assert md5sum ==~ /^[a-f0-9]{32}$/
         return md5sum

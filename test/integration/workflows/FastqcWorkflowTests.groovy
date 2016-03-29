@@ -6,8 +6,8 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.LinkFileUtils
+import grails.plugin.springsecurity.SpringSecurityUtils
 import org.joda.time.Duration
-import org.junit.After
 import org.junit.Before
 import org.junit.Ignore
 import org.junit.Test
@@ -73,13 +73,12 @@ class FastqcWorkflowTests extends WorkflowTestCase {
         )
 
         linkFileUtils.createAndValidateLinks([(sourceFastq): new File(lsdfFilesService.getFileFinalPath(dataFile))], realm)
+
+        SpringSecurityUtils.doWithAuth("admin") {
+            processingOptionService.createOrUpdate('basesPerBytesFastQ', null, null, "1", "description")
+        }
     }
 
-    @After
-    void tearDown() {
-        seqCenter = null
-        dataFile = null
-    }
 
     @Test
     void testWorkflow_FastQcDataAvailable() {
