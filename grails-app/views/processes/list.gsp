@@ -12,14 +12,12 @@
         <div id="workflowOverview">
             <div class="otpDataTables">
                 <otp:dataTable codes="${[
-                    'otp.blank',
-                    'otp.blank',
                     'workflow.list.table.headers.workflow',
                     'workflow.list.table.headers.count',
                     'workflow.list.table.headers.countFailed',
+                    'workflow.list.table.headers.countRunning',
                     'workflow.list.table.headers.lastSuccess',
                     'workflow.list.table.headers.lastFailure',
-                    'workflow.list.table.headers.duration'
                  ]}" id="workflowOverviewTable"/>
             </div>
         </div>

@@ -19,7 +19,7 @@ import grails.util.Environment
  * @see Process
  * @see ProcessingStepUpdate
  * @see JobDefinition
- * @see groovy.de.dkfz.tbi.otp.job.processing.Job
+ * @see de.dkfz.tbi.otp.job.processing.Job
  * @see Parameter
  **/
 public class ProcessingStep implements Serializable {

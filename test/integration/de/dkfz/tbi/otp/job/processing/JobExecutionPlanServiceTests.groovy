@@ -1,19 +1,15 @@
 package de.dkfz.tbi.otp.job.processing
 
-import grails.plugin.springsecurity.SpringSecurityService
+import de.dkfz.tbi.otp.job.plan.*
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.testing.*
+import grails.plugin.springsecurity.*
+import org.junit.*
+import org.springframework.security.access.*
+import org.springframework.security.acls.domain.*
 
 import static org.junit.Assert.*
 
-import de.dkfz.tbi.otp.job.plan.JobDefinition
-import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
-import de.dkfz.tbi.otp.job.plan.StartJobDefinition
-import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
-import de.dkfz.tbi.otp.testing.TestSingletonStartJob
-
-import grails.plugin.springsecurity.SpringSecurityUtils
-import org.junit.*
-import org.springframework.security.access.AccessDeniedException
-import org.springframework.security.acls.domain.BasePermission
 
 class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
     def jobExecutionPlanService
@@ -112,14 +108,14 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
     @Test
     void testGetAllJobExecutionPlans() {
         JobExecutionPlanService service = new JobExecutionPlanService()
-        assertTrue(service.getAllJobExecutionPlans().isEmpty())
+        assertTrue(service.getJobExecutionPlans().isEmpty())
 
         JobExecutionPlan plan = new JobExecutionPlan(name: "test", obsoleted: true)
         assertNotNull(plan.save())
-        assertTrue(service.getAllJobExecutionPlans().isEmpty())
-        JobExecutionPlan plan2 = new JobExecutionPlan(name: "test2", previousPlan: plan, obsoleted: false, planVersion: 1)
+        assertTrue(service.getJobExecutionPlans().isEmpty())
+        JobExecutionPlan plan2 = new JobExecutionPlan(name: "test", previousPlan: plan, obsoleted: false, planVersion: 1)
         assertNotNull(plan2.save())
-        List<JobExecutionPlan> plans = service.getAllJobExecutionPlans()
+        List<JobExecutionPlan> plans = service.getJobExecutionPlans()
         assertEquals(1, plans.size())
         assertSame(plan2, plans[0])
 
@@ -131,7 +127,7 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
         JobExecutionPlan plan5 = new JobExecutionPlan(name: "test5", obsoleted: false)
         assertNotNull(plan5.save())
         // service should return four objects
-        plans = service.getAllJobExecutionPlans()
+        plans = service.getJobExecutionPlans()
         assertEquals(4, plans.size())
         assertTrue(plans.contains(plan2))
         assertTrue(plans.contains(plan3))
@@ -142,13 +138,15 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
         assertNotNull(plan3.save(flush: true))
         plan4.obsoleted = true
         plan4.previousPlan = plan3
+        plan4.name = "test3"
         plan4.planVersion = 1
         assertNotNull(plan4.save(flush: true))
         plan5.previousPlan = plan4
+        plan5.name = "test3"
         plan5.planVersion = 2
         assertNotNull(plan4.save(flush: true))
         // service should return two objects
-        plans = service.getAllJobExecutionPlans()
+        plans = service.getJobExecutionPlans()
         assertEquals(2, plans.size())
         assertTrue(plans.contains(plan2))
         assertTrue(plans.contains(plan5))
@@ -224,478 +222,6 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
         assertFalse(service.isProcessRunning(plan2))
         assertFalse(service.isProcessRunning(plan3))
         assertFalse(service.isProcessRunning(plan4))
-    }
-
-    @Test
-    void testGetLastSucceededProcess() {
-        JobExecutionPlanService service = new JobExecutionPlanService()
-        JobExecutionPlan plan = new JobExecutionPlan(name: "testGetLastSucceededProcess", obsoleted: true, planVersion: 0)
-        assertNotNull(plan.save())
-        // no Process created - should be null
-        assertNull(service.getLastSucceededProcess(plan))
-        // create a Process - but not with any Processing Steps
-        Process process = new Process(finished: true, jobExecutionPlan: plan, started: new Date(), startJobClass: "foo", startJobVersion: "1")
-        assertNotNull(process.save())
-        assertNull(service.getLastSucceededProcess(plan))
-        // create a ProcessingStep for this Process - but not succeeded
-        JobDefinition jobDefinition = new JobDefinition(name: "test", bean: "foo", plan: plan)
-        assertNotNull(jobDefinition.save())
-        ProcessingStep step = new ProcessingStep(process: process, jobDefinition: jobDefinition)
-        assertNotNull(step.save())
-        assertNull(service.getLastSucceededProcess(plan))
-        // add a ProcessingStepUpdate to this Process - should not change anything
-        ProcessingStepUpdate created = new ProcessingStepUpdate(state: ExecutionState.CREATED, date: new Date(), processingStep: step)
-        assertNotNull(created.save())
-        assertNull(service.getLastSucceededProcess(plan))
-        // now lets try to add a success event
-        ProcessingStepUpdate success = new ProcessingStepUpdate(state: ExecutionState.SUCCESS, date: new Date(), processingStep: step, previous: created)
-        assertNotNull(success.save())
-        assertSame(process, service.getLastSucceededProcess(plan))
-        // now we are evil and add another processing step
-        JobDefinition jobDefinition2 = new JobDefinition(name: "test2", bean: "foo", plan: plan, previous: jobDefinition)
-        assertNotNull(jobDefinition2)
-        jobDefinition.next = jobDefinition2
-        assertNotNull(jobDefinition2.save())
-        ProcessingStep step2 = new ProcessingStep(process: process, jobDefinition: jobDefinition2, next: null)
-        assertNotNull(step2.save())
-        step.next = step2
-        assertNotNull(step.save())
-        // lets fail
-        ProcessingStepUpdate created2 = new ProcessingStepUpdate(state: ExecutionState.CREATED, date: new Date(), processingStep: step2)
-        assertNotNull(created2.save(flush: true))
-        assertNull(service.getLastSucceededProcess(plan))
-    }
-
-    @Test
-    void testGetLastSucceededProcessMultipleProcesses() {
-        JobExecutionPlanService service = new JobExecutionPlanService()
-        JobExecutionPlan plan = new JobExecutionPlan(name: "testGetLastSucceededProcessMultipleProcesses", obsoleted: true, planVersion: 0)
-        assertNotNull(plan.save())
-        // let's create some processes
-        Process process1 = new Process(finished: true, jobExecutionPlan: plan, started: new Date(), startJobClass: "foo", startJobVersion: "1")
-        Process process2 = new Process(finished: false, jobExecutionPlan: plan, started: new Date(), startJobClass: "foo", startJobVersion: "1")
-        Process process3 = new Process(finished: true, jobExecutionPlan: plan, started: new Date(), startJobClass: "foo", startJobVersion: "1")
-        Process process4 = new Process(finished: false, jobExecutionPlan: plan, started: new Date(), startJobClass: "foo", startJobVersion: "1")
-        Process process5 = new Process(finished: true, jobExecutionPlan: plan, started: new Date(), startJobClass: "foo", startJobVersion: "1")
-        assertNotNull(process1.save())
-        assertNotNull(process2.save())
-        assertNotNull(process3.save())
-        assertNotNull(process4.save())
-        assertNotNull(process5.save())
-        // let's create a processing step for each of the Processes
-        JobDefinition jobDefinition = new JobDefinition(name: "test", bean: "foo", plan: plan)
-        assertNotNull(jobDefinition.save())
-        ProcessingStep step1 = new ProcessingStep(process: process1, jobDefinition: jobDefinition)
-        assertNotNull(step1.save())
-        ProcessingStep step2 = new ProcessingStep(process: process2, jobDefinition: jobDefinition)
-        assertNotNull(step2.save())
-        ProcessingStep step3 = new ProcessingStep(process: process3, jobDefinition: jobDefinition)
-        assertNotNull(step3.save())
-        ProcessingStep step4 = new ProcessingStep(process: process4, jobDefinition: jobDefinition)
-        assertNotNull(step4.save())
-        ProcessingStep step5 = new ProcessingStep(process: process5, jobDefinition: jobDefinition)
-        assertNotNull(step5.save())
-        // so far nothing should be done - so no process succeeded
-        assertNull(service.getLastSucceededProcess(plan))
-        // now a created processing step update for each
-        ProcessingStepUpdate created1 = new ProcessingStepUpdate(state: ExecutionState.CREATED, date: new Date(), processingStep: step1)
-        assertNotNull(created1.save())
-        ProcessingStepUpdate created2 = new ProcessingStepUpdate(state: ExecutionState.CREATED, date: nextDate(created1), processingStep: step2)
-        assertNotNull(created2.save())
-        ProcessingStepUpdate created3 = new ProcessingStepUpdate(state: ExecutionState.CREATED, date: nextDate(created2), processingStep: step3)
-        assertNotNull(created3.save())
-        ProcessingStepUpdate created4 = new ProcessingStepUpdate(state: ExecutionState.CREATED, date: nextDate(created3), processingStep: step4)
-        assertNotNull(created4.save())
-        ProcessingStepUpdate created5 = new ProcessingStepUpdate(state: ExecutionState.CREATED, date: nextDate(created4), processingStep: step5)
-        assertNotNull(created5.save())
-        // so far nothing should be done - so no process succeeded
-        assertNull(service.getLastSucceededProcess(plan))
-        // let's create a success for process1
-        ProcessingStepUpdate success1 = new ProcessingStepUpdate(state: ExecutionState.SUCCESS, date: nextDate(created5), processingStep: step1, previous: created1)
-        assertNotNull(success1.save())
-        assertSame(process1, service.getLastSucceededProcess(plan))
-        // let's create a success for process5
-        ProcessingStepUpdate success5 = new ProcessingStepUpdate(state: ExecutionState.SUCCESS, date: nextDate(success1), processingStep: step5, previous: created5)
-        assertNotNull(success5.save())
-        assertSame(process5, service.getLastSucceededProcess(plan))
-        // let's create a success for process4 - it is not finished, so it shouldn't change anything
-        ProcessingStepUpdate success4 = new ProcessingStepUpdate(state: ExecutionState.SUCCESS, date: nextDate(success5), processingStep: step4, previous: created4)
-        assertNotNull(success4.save())
-        assertSame(process5, service.getLastSucceededProcess(plan))
-        // last but not least create a success for process3 - we create it before success5, so it should not change anything
-        ProcessingStepUpdate success3 = new ProcessingStepUpdate(state: ExecutionState.SUCCESS, date: nextDate(created5), processingStep: step3, previous: created3)
-        assertNotNull(success3.save())
-        assertSame(process5, service.getLastSucceededProcess(plan))
-    }
-
-    @Test
-    void testGetLastSucceededProcessMultiplePlans() {
-        JobExecutionPlanService service = new JobExecutionPlanService()
-        JobExecutionPlan plan1 = new JobExecutionPlan(id: 1, name: "testGetLastSucceededProcessMultiplePlans", obsoleted: true, planVersion: 0)
-        assertNotNull(plan1.save())
-        JobExecutionPlan plan2 = new JobExecutionPlan(id: 2, name: "testGetLastSucceededProcessMultiplePlans", obsoleted: true, planVersion: 1, previousPlan: plan1)
-        assertNotNull(plan2.save())
-        plan1.previousPlan = null
-        assertNotNull(plan1.save())
-        JobExecutionPlan plan3 = new JobExecutionPlan(id: 3, name: "testGetLastSucceededProcessMultiplePlans", obsoleted: false, planVersion: 2, previousPlan: plan2)
-        assertNotNull(plan3.save())
-        plan2.previousPlan = plan1
-        assertNotNull(plan2.save())
-        plan1.previousPlan = null
-        assertNotNull(plan1.save())
-        // an unrelated Plan
-        JobExecutionPlan plan4 = new JobExecutionPlan(id: 4, name: "otherPlan", obsoleted: false, planVersion: 0)
-        assertNotNull(plan4.save())
-        // let's create some processes
-        Process process1 = new Process(finished: true, jobExecutionPlan: plan1, started: new Date(), startJobClass: "foo", startJobVersion: "1")
-        Process process2 = new Process(finished: true, jobExecutionPlan: plan2, started: new Date(), startJobClass: "foo", startJobVersion: "1")
-        Process process3 = new Process(finished: true, jobExecutionPlan: plan3, started: new Date(), startJobClass: "foo", startJobVersion: "1")
-        Process process4 = new Process(finished: true, jobExecutionPlan: plan4, started: new Date(), startJobClass: "foo", startJobVersion: "1")
-        assertNotNull(process1.save())
-        assertNotNull(process2.save())
-        assertNotNull(process3.save())
-        assertNotNull(process4.save())
-        // for none of the plans there should be a succeeded
-        assertNull(service.getLastSucceededProcess(plan1))
-        assertNull(service.getLastSucceededProcess(plan2))
-        assertNull(service.getLastSucceededProcess(plan3))
-        assertNull(service.getLastSucceededProcess(plan4))
-        // now create some Processing Steps
-        JobDefinition jobDefinition1 = new JobDefinition(name: "test", bean: "foo", plan: plan1)
-        assertNotNull(jobDefinition1.save())
-        JobDefinition jobDefinition2 = new JobDefinition(name: "test", bean: "foo", plan: plan2)
-        assertNotNull(jobDefinition2.save())
-        JobDefinition jobDefinition3 = new JobDefinition(name: "test", bean: "foo", plan: plan3)
-        assertNotNull(jobDefinition3.save())
-        JobDefinition jobDefinition4 = new JobDefinition(name: "test", bean: "foo", plan: plan4)
-        assertNotNull(jobDefinition4.save())
-        ProcessingStep step1 = new ProcessingStep(process: process1, jobDefinition: jobDefinition1)
-        assertNotNull(step1.save())
-        ProcessingStep step2 = new ProcessingStep(process: process2, jobDefinition: jobDefinition2)
-        assertNotNull(step2.save())
-        ProcessingStep step3 = new ProcessingStep(process: process3, jobDefinition: jobDefinition3)
-        assertNotNull(step3.save())
-        ProcessingStep step4 = new ProcessingStep(process: process4, jobDefinition: jobDefinition4)
-        assertNotNull(step4.save())
-        // now a created processing step update for each
-        ProcessingStepUpdate created1 = new ProcessingStepUpdate(state: ExecutionState.CREATED, date: new Date(), processingStep: step1)
-        assertNotNull(created1.save())
-        ProcessingStepUpdate created2 = new ProcessingStepUpdate(state: ExecutionState.CREATED, date: nextDate(created1), processingStep: step2)
-        assertNotNull(created2.save())
-        ProcessingStepUpdate created3 = new ProcessingStepUpdate(state: ExecutionState.CREATED, date: nextDate(created2), processingStep: step3)
-        assertNotNull(created3.save())
-        ProcessingStepUpdate created4 = new ProcessingStepUpdate(state: ExecutionState.CREATED, date: nextDate(created3), processingStep: step4)
-        assertNotNull(created4.save())
-        // there should still be nothing
-        assertNull(service.getLastSucceededProcess(plan1))
-        assertNull(service.getLastSucceededProcess(plan2))
-        assertNull(service.getLastSucceededProcess(plan3))
-        assertNull(service.getLastSucceededProcess(plan4))
-        // create a success for ProcessingStep 4
-        ProcessingStepUpdate success4 = new ProcessingStepUpdate(state: ExecutionState.SUCCESS, date: nextDate(created4), processingStep: step4, previous: created4)
-        assertNotNull(success4.save())
-        // should render process4 for plan4
-        assertNull(service.getLastSucceededProcess(plan1))
-        assertNull(service.getLastSucceededProcess(plan2))
-        assertNull(service.getLastSucceededProcess(plan3))
-        assertSame(process4, service.getLastSucceededProcess(plan4))
-        // now create a success for ProcessingStep 3
-        ProcessingStepUpdate success3 = new ProcessingStepUpdate(state: ExecutionState.SUCCESS, date: nextDate(success4), processingStep: step3, previous: created3)
-        assertNotNull(success3.save())
-        assertNull(service.getLastSucceededProcess(plan1))
-        assertNull(service.getLastSucceededProcess(plan2))
-        assertSame(process3, service.getLastSucceededProcess(plan3))
-        assertSame(process4, service.getLastSucceededProcess(plan4))
-        // now one for ProcessingStep1
-        ProcessingStepUpdate success1 = new ProcessingStepUpdate(state: ExecutionState.SUCCESS, date: nextDate(success3), processingStep: step1, previous: created1)
-        assertNotNull(success1.save())
-        assertSame(process1, service.getLastSucceededProcess(plan1))
-        assertSame(process1, service.getLastSucceededProcess(plan2))
-        assertSame(process1, service.getLastSucceededProcess(plan3))
-        assertSame(process4, service.getLastSucceededProcess(plan4))
-        // last but not least for ProcessingStep2
-        ProcessingStepUpdate success2 = new ProcessingStepUpdate(state: ExecutionState.SUCCESS, date: nextDate(success1), processingStep: step2, previous: created2)
-        assertNotNull(success2.save())
-        assertSame(process1, service.getLastSucceededProcess(plan1))
-        assertSame(process2, service.getLastSucceededProcess(plan2))
-        assertSame(process2, service.getLastSucceededProcess(plan3))
-        assertSame(process4, service.getLastSucceededProcess(plan4))
-    }
-
-    @Test
-    void testGetLastFailedProcess() {
-        JobExecutionPlanService service = new JobExecutionPlanService()
-        JobExecutionPlan plan = new JobExecutionPlan(name: "testGetLastFailedProcess", obsoleted: true, planVersion: 0)
-        assertNotNull(plan.save())
-        // no Process created - should be null
-        assertNull(service.getLastFailedProcess(plan))
-        // create a Process - but not with any Processing Steps
-        Process process = new Process(finished: true, jobExecutionPlan: plan, started: new Date(), startJobClass: "foo", startJobVersion: "1")
-        assertNotNull(process.save())
-        assertNull(service.getLastFailedProcess(plan))
-        // create a ProcessingStep for this Process - but not succeeded
-        JobDefinition jobDefinition = new JobDefinition(name: "test", bean: "foo", plan: plan)
-        assertNotNull(jobDefinition.save())
-        ProcessingStep step = new ProcessingStep(process: process, jobDefinition: jobDefinition)
-        assertNotNull(step.save())
-        assertNull(service.getLastFailedProcess(plan))
-        // add a ProcessingStepUpdate to this Process - should not change anything
-        ProcessingStepUpdate created = new ProcessingStepUpdate(state: ExecutionState.CREATED, date: new Date(), processingStep: step)
-        assertNotNull(created.save())
-        assertNull(service.getLastFailedProcess(plan))
-        // now lets try to add a failure event
-        ProcessingStepUpdate success = new ProcessingStepUpdate(state: ExecutionState.FAILURE, date: new Date(), processingStep: step, previous: created)
-        assertNotNull(success.save())
-        assertSame(process, service.getLastFailedProcess(plan))
-        // now we are evil and add another processing step
-        JobDefinition jobDefinition2 = new JobDefinition(name: "test2", bean: "foo", plan: plan, previous: jobDefinition)
-        assertNotNull(jobDefinition2.save())
-        jobDefinition.next = jobDefinition2
-        assertNotNull(jobDefinition.save())
-        ProcessingStep step2 = new ProcessingStep(process: process, jobDefinition: jobDefinition2, next: null)
-        assertNotNull(step2.save())
-        step.next = step2
-        assertNotNull(step.save())
-        // lets fail
-        ProcessingStepUpdate created2 = new ProcessingStepUpdate(state: ExecutionState.CREATED, date: new Date(), processingStep: step2)
-        assertNotNull(created2.save(flush: true))
-        assertNull(service.getLastFailedProcess(plan))
-    }
-
-    @Test
-    void testGetLastFailedProcessMultipleProcesses() {
-        JobExecutionPlanService service = new JobExecutionPlanService()
-        JobExecutionPlan plan = new JobExecutionPlan(name: "testGetLastFailedProcessMultipleProcesses", obsoleted: true, planVersion: 0)
-        assertNotNull(plan.save())
-        // let's create some processes
-        Process process1 = new Process(finished: true, jobExecutionPlan: plan, started: new Date(), startJobClass: "foo", startJobVersion: "1")
-        Process process2 = new Process(finished: false, jobExecutionPlan: plan, started: new Date(), startJobClass: "foo", startJobVersion: "1")
-        Process process3 = new Process(finished: true, jobExecutionPlan: plan, started: new Date(), startJobClass: "foo", startJobVersion: "1")
-        Process process4 = new Process(finished: false, jobExecutionPlan: plan, started: new Date(), startJobClass: "foo", startJobVersion: "1")
-        Process process5 = new Process(finished: true, jobExecutionPlan: plan, started: new Date(), startJobClass: "foo", startJobVersion: "1")
-        assertNotNull(process1.save())
-        assertNotNull(process2.save())
-        assertNotNull(process3.save())
-        assertNotNull(process4.save())
-        assertNotNull(process5.save())
-        // let's create a processing step for each of the Processes
-        JobDefinition jobDefinition = new JobDefinition(name: "test", bean: "foo", plan: plan)
-        assertNotNull(jobDefinition.save())
-        ProcessingStep step1 = new ProcessingStep(process: process1, jobDefinition: jobDefinition)
-        assertNotNull(step1.save())
-        ProcessingStep step2 = new ProcessingStep(process: process2, jobDefinition: jobDefinition)
-        assertNotNull(step2.save())
-        ProcessingStep step3 = new ProcessingStep(process: process3, jobDefinition: jobDefinition)
-        assertNotNull(step3.save())
-        ProcessingStep step4 = new ProcessingStep(process: process4, jobDefinition: jobDefinition)
-        assertNotNull(step4.save())
-        ProcessingStep step5 = new ProcessingStep(process: process5, jobDefinition: jobDefinition)
-        assertNotNull(step5.save())
-        // so far nothing should be done - so no process failed
-        assertNull(service.getLastFailedProcess(plan))
-        // now a created processing step update for each
-        ProcessingStepUpdate created1 = new ProcessingStepUpdate(state: ExecutionState.CREATED, date: new Date(), processingStep: step1)
-        assertNotNull(created1.save())
-        ProcessingStepUpdate created2 = new ProcessingStepUpdate(state: ExecutionState.CREATED, date: nextDate(created1), processingStep: step2)
-        assertNotNull(created2.save())
-        ProcessingStepUpdate created3 = new ProcessingStepUpdate(state: ExecutionState.CREATED, date: nextDate(created2), processingStep: step3)
-        assertNotNull(created3.save())
-        ProcessingStepUpdate created4 = new ProcessingStepUpdate(state: ExecutionState.CREATED, date: nextDate(created3), processingStep: step4)
-        assertNotNull(created4.save())
-        ProcessingStepUpdate created5 = new ProcessingStepUpdate(state: ExecutionState.CREATED, date: nextDate(created4), processingStep: step5)
-        assertNotNull(created5.save())
-        // so far nothing should be done - so no process failed
-        assertNull(service.getLastSucceededProcess(plan))
-        // let's create a failure for process1
-        ProcessingStepUpdate failure1 = new ProcessingStepUpdate(state: ExecutionState.FAILURE, date: nextDate(created5), processingStep: step1, previous: created1)
-        assertNotNull(failure1.save())
-        assertSame(process1, service.getLastFailedProcess(plan))
-        // let's create a failure for process5
-        ProcessingStepUpdate failure5 = new ProcessingStepUpdate(state: ExecutionState.FAILURE, date: nextDate(failure1), processingStep: step5, previous: created5)
-        assertNotNull(failure5.save())
-        assertSame(process5, service.getLastFailedProcess(plan))
-        // let's create a failure for process4 - it is not finished, so it shouldn't change anything
-        ProcessingStepUpdate failure4 = new ProcessingStepUpdate(state: ExecutionState.FAILURE, date: nextDate(failure5), processingStep: step4, previous: created4)
-        assertNotNull(failure4.save())
-        assertSame(process5, service.getLastFailedProcess(plan))
-        // last but not least create a failure for process3 - we create it before failure5, so it should not change anything
-        ProcessingStepUpdate failure3 = new ProcessingStepUpdate(state: ExecutionState.FAILURE, date: nextDate(created5), processingStep: step3, previous: created3)
-        assertNotNull(failure3.save())
-        assertSame(process5, service.getLastFailedProcess(plan))
-    }
-
-    @Test
-    void testGetLastFailedProcessMultiplePlans() {
-        JobExecutionPlanService service = new JobExecutionPlanService()
-        JobExecutionPlan plan1 = new JobExecutionPlan(id: 1, name: "testGetLastFailedProcessMultiplePlans", obsoleted: true, planVersion: 0)
-        assertNotNull(plan1.save())
-        JobExecutionPlan plan2 = new JobExecutionPlan(id: 2, name: "testGetLastFailedProcessMultiplePlans", obsoleted: true, planVersion: 1, previousPlan: plan1)
-        assertNotNull(plan2.save())
-        plan1.previousPlan = null
-        assertNotNull(plan1.save())
-        JobExecutionPlan plan3 = new JobExecutionPlan(id: 3, name: "testGetLastFailedProcessMultiplePlans", obsoleted: false, planVersion: 2, previousPlan: plan2)
-        assertNotNull(plan3.save())
-        plan2.previousPlan = plan1
-        assertNotNull(plan2.save())
-        plan1.previousPlan = null
-        assertNotNull(plan1.save())
-        // an unrelated Plan
-        JobExecutionPlan plan4 = new JobExecutionPlan(id: 4, name: "otherPlan", obsoleted: false, planVersion: 0)
-        assertNotNull(plan4.save())
-        // let's create some processes
-        Process process1 = new Process(finished: true, jobExecutionPlan: plan1, started: new Date(), startJobClass: "foo", startJobVersion: "1")
-        Process process2 = new Process(finished: true, jobExecutionPlan: plan2, started: new Date(), startJobClass: "foo", startJobVersion: "1")
-        Process process3 = new Process(finished: true, jobExecutionPlan: plan3, started: new Date(), startJobClass: "foo", startJobVersion: "1")
-        Process process4 = new Process(finished: true, jobExecutionPlan: plan4, started: new Date(), startJobClass: "foo", startJobVersion: "1")
-        assertNotNull(process1.save())
-        assertNotNull(process2.save())
-        assertNotNull(process3.save())
-        assertNotNull(process4.save())
-        // for none of the plans there should be a failed
-        assertNull(service.getLastFailedProcess(plan1))
-        assertNull(service.getLastFailedProcess(plan2))
-        assertNull(service.getLastFailedProcess(plan3))
-        assertNull(service.getLastFailedProcess(plan4))
-        // now create some Processing Steps
-        JobDefinition jobDefinition1 = new JobDefinition(name: "test", bean: "foo", plan: plan1)
-        assertNotNull(jobDefinition1.save())
-        JobDefinition jobDefinition2 = new JobDefinition(name: "test", bean: "foo", plan: plan2)
-        assertNotNull(jobDefinition2.save())
-        JobDefinition jobDefinition3 = new JobDefinition(name: "test", bean: "foo", plan: plan3)
-        assertNotNull(jobDefinition3.save())
-        JobDefinition jobDefinition4 = new JobDefinition(name: "test", bean: "foo", plan: plan4)
-        assertNotNull(jobDefinition4.save())
-        ProcessingStep step1 = new ProcessingStep(process: process1, jobDefinition: jobDefinition1)
-        assertNotNull(step1.save())
-        ProcessingStep step2 = new ProcessingStep(process: process2, jobDefinition: jobDefinition2)
-        assertNotNull(step2.save())
-        ProcessingStep step3 = new ProcessingStep(process: process3, jobDefinition: jobDefinition3)
-        assertNotNull(step3.save())
-        ProcessingStep step4 = new ProcessingStep(process: process4, jobDefinition: jobDefinition4)
-        assertNotNull(step4.save())
-        // now a created processing step update for each
-        ProcessingStepUpdate created1 = new ProcessingStepUpdate(state: ExecutionState.CREATED, date: new Date(), processingStep: step1)
-        assertNotNull(created1.save())
-        ProcessingStepUpdate created2 = new ProcessingStepUpdate(state: ExecutionState.CREATED, date: nextDate(created1), processingStep: step2)
-        assertNotNull(created2.save())
-        ProcessingStepUpdate created3 = new ProcessingStepUpdate(state: ExecutionState.CREATED, date: nextDate(created2), processingStep: step3)
-        assertNotNull(created3.save())
-        ProcessingStepUpdate created4 = new ProcessingStepUpdate(state: ExecutionState.CREATED, date: nextDate(created3), processingStep: step4)
-        assertNotNull(created4.save())
-        // there should still be nothing
-        assertNull(service.getLastFailedProcess(plan1))
-        assertNull(service.getLastFailedProcess(plan2))
-        assertNull(service.getLastFailedProcess(plan3))
-        assertNull(service.getLastFailedProcess(plan4))
-        // create a failure for ProcessingStep 4
-        ProcessingStepUpdate failure4 = new ProcessingStepUpdate(state: ExecutionState.FAILURE, date: nextDate(created4), processingStep: step4, previous: created4)
-        assertNotNull(failure4.save())
-        // should render process4 for plan4
-        assertNull(service.getLastFailedProcess(plan1))
-        assertNull(service.getLastFailedProcess(plan2))
-        assertNull(service.getLastFailedProcess(plan3))
-        assertSame(process4, service.getLastFailedProcess(plan4))
-        // now create a failure for ProcessingStep 3
-        ProcessingStepUpdate failure3 = new ProcessingStepUpdate(state: ExecutionState.FAILURE, date: nextDate(failure4), processingStep: step3, previous: created3)
-        assertNotNull(failure3.save())
-        assertNull(service.getLastFailedProcess(plan1))
-        assertNull(service.getLastFailedProcess(plan2))
-        assertSame(process3, service.getLastFailedProcess(plan3))
-        assertSame(process4, service.getLastFailedProcess(plan4))
-        // now one for ProcessingStep1
-        ProcessingStepUpdate failure1 = new ProcessingStepUpdate(state: ExecutionState.FAILURE, date: nextDate(failure3), processingStep: step1, previous: created1)
-        assertNotNull(failure1.save())
-        assertSame(process1, service.getLastFailedProcess(plan1))
-        assertSame(process1, service.getLastFailedProcess(plan2))
-        assertSame(process1, service.getLastFailedProcess(plan3))
-        assertSame(process4, service.getLastFailedProcess(plan4))
-        // last but not least for ProcessingStep2
-        ProcessingStepUpdate failure2 = new ProcessingStepUpdate(state: ExecutionState.FAILURE, date: nextDate(failure1), processingStep: step2, previous: created2)
-        assertNotNull(failure2.save())
-        assertSame(process1, service.getLastFailedProcess(plan1))
-        assertSame(process2, service.getLastFailedProcess(plan2))
-        assertSame(process2, service.getLastFailedProcess(plan3))
-        assertSame(process4, service.getLastFailedProcess(plan4))
-    }
-
-    @Test
-    public void testGetLastFinishedProcess() {
-        JobExecutionPlanService service = new JobExecutionPlanService()
-        JobExecutionPlan plan = new JobExecutionPlan(name: "testGetLastFinishedProcess", obsoleted: false, planVersion: 0)
-        assertNotNull(plan.save())
-        // there should not be a finished Process
-        assertNull(service.getLastFinishedProcess(plan))
-        Process process1 = new Process(finished: true, jobExecutionPlan: plan, started: new Date(), startJobClass: "foo", startJobVersion: "1")
-        assertNotNull(process1.save())
-        Process process2 = new Process(finished: true, jobExecutionPlan: plan, started: new Date(), startJobClass: "foo", startJobVersion: "1")
-        assertNotNull(process2.save())
-        assertNull(service.getLastFinishedProcess(plan))
-        // now create some Processing Steps
-        JobDefinition jobDefinition1 = new JobDefinition(name: "test", bean: "foo", plan: plan)
-        assertNotNull(jobDefinition1.save())
-        ProcessingStep step1 = new ProcessingStep(process: process1, jobDefinition: jobDefinition1)
-        assertNotNull(step1.save())
-        ProcessingStep step2 = new ProcessingStep(process: process2, jobDefinition: jobDefinition1)
-        assertNotNull(step2.save())
-        assertNull(service.getLastFinishedProcess(plan))
-        // now a created processing step update for each
-        ProcessingStepUpdate created1 = new ProcessingStepUpdate(state: ExecutionState.CREATED, date: new Date(), processingStep: step1)
-        assertNotNull(created1.save())
-        ProcessingStepUpdate created2 = new ProcessingStepUpdate(state: ExecutionState.CREATED, date: nextDate(created1), processingStep: step2)
-        assertNotNull(created2.save())
-        assertNull(service.getLastFinishedProcess(plan))
-        // let's create a failure for process1
-        ProcessingStepUpdate failure1 = new ProcessingStepUpdate(state: ExecutionState.FAILURE, date: nextDate(created2), processingStep: step1, previous: created1)
-        assertNotNull(failure1.save())
-        // process1 failed, but none succeeded
-        assertSame(process1, service.getLastFailedProcess(plan))
-        assertSame(process1, service.getLastFinishedProcess(plan))
-        assertNull(service.getLastSucceededProcess(plan))
-        // let's create a success event for the second process
-        ProcessingStepUpdate success1 = new ProcessingStepUpdate(state: ExecutionState.SUCCESS, date: nextDate(failure1), processingStep: step2, previous: created2)
-        assertNotNull(success1.save())
-        // all methods should return something useful
-        assertSame(process1, service.getLastFailedProcess(plan))
-        assertSame(process2, service.getLastFinishedProcess(plan))
-        assertSame(process2, service.getLastSucceededProcess(plan))
-
-        // we tested with first a failure than a success, no let's turn it around
-        // create second processing step
-        JobDefinition jobDefinition2 = new JobDefinition(name: "test2", bean: "foo", plan: plan, previous: jobDefinition1)
-        assertNotNull(jobDefinition2.save())
-        ProcessingStep step3 = new ProcessingStep(process: process1, jobDefinition: jobDefinition2, previous: step1)
-        assertNotNull(step3.save(flush: true))
-        step1.next = step3
-        assertNotNull(step1.save(flush: true))
-        // now we have a succeeded, but no failed
-        assertSame(process2, service.getLastFinishedProcess(plan))
-        assertSame(process2, service.getLastSucceededProcess(plan))
-        assertNull(service.getLastFailedProcess(plan))
-        ProcessingStepUpdate created3 = new ProcessingStepUpdate(state: ExecutionState.CREATED, date: nextDate(success1), processingStep: step3)
-        assertNotNull(created3.save())
-        // nothing should have changed
-        assertSame(process2, service.getLastFinishedProcess(plan))
-        assertSame(process2, service.getLastSucceededProcess(plan))
-        assertNull(service.getLastFailedProcess(plan))
-        ProcessingStepUpdate success2 = new ProcessingStepUpdate(state: ExecutionState.SUCCESS, date: nextDate(created3), processingStep: step3, previous: created3)
-        assertNotNull(success2.save())
-        // now process1 should be last succeeded
-        assertSame(process1, service.getLastFinishedProcess(plan))
-        assertSame(process1, service.getLastSucceededProcess(plan))
-        assertNull(service.getLastFailedProcess(plan))
-        // let's make Process2 fail
-        ProcessingStep step4 = new ProcessingStep(process: process2, jobDefinition: jobDefinition2, previous: step2)
-        assertNotNull(step4.save())
-        step2.next = step4
-        assertNotNull(step2.save())
-        ProcessingStepUpdate created4 = new ProcessingStepUpdate(state: ExecutionState.CREATED, date: nextDate(success2), processingStep: step4)
-        assertNotNull(created4.save())
-        ProcessingStepUpdate failure2 = new ProcessingStepUpdate(state: ExecutionState.FAILURE, date: nextDate(created4), processingStep: step4, previous: created4)
-        assertNotNull(failure2.save())
-        // now process1 should be last succeeded, process2 should be last failed, also in general
-        assertSame(process2, service.getLastFinishedProcess(plan))
-        assertSame(process1, service.getLastSucceededProcess(plan))
-        assertSame(process2, service.getLastFailedProcess(plan))
     }
 
     @Test
@@ -1060,22 +586,22 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
         }
         // user should get an empty list
         SpringSecurityUtils.doWithAuth("testuser") {
-            assertTrue(jobExecutionPlanService.getAllJobExecutionPlans().empty)
+            assertTrue(jobExecutionPlanService.getJobExecutionPlans().empty)
         }
         // an operator should see all three plans
         SpringSecurityUtils.doWithAuth("operator") {
-            assertEquals(3, jobExecutionPlanService.getAllJobExecutionPlans().size())
+            assertEquals(3, jobExecutionPlanService.getJobExecutionPlans().size())
         }
         // admin should see all three plans
         SpringSecurityUtils.doWithAuth("admin") {
-            assertEquals(3, jobExecutionPlanService.getAllJobExecutionPlans().size())
+            assertEquals(3, jobExecutionPlanService.getJobExecutionPlans().size())
             // grant read to testuser
             aclUtilService.addPermission(plan, "testuser", BasePermission.READ)
         }
         // now testuser should be able to see them
         SpringSecurityUtils.doWithAuth("testuser") {
-            assertEquals(1, jobExecutionPlanService.getAllJobExecutionPlans().size())
-            assertSame(plan, jobExecutionPlanService.getAllJobExecutionPlans().first())
+            assertEquals(1, jobExecutionPlanService.getJobExecutionPlans().size())
+            assertSame(plan, jobExecutionPlanService.getJobExecutionPlans().first())
         }
         // give grant for other plans
         SpringSecurityUtils.doWithAuth("admin") {
@@ -1084,13 +610,13 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
             aclUtilService.addPermission(plan2, "testuser", BasePermission.READ)
         }
         SpringSecurityUtils.doWithAuth("testuser") {
-            assertEquals(3, jobExecutionPlanService.getAllJobExecutionPlans().size())
-            assertSame(plan2, jobExecutionPlanService.getAllJobExecutionPlans().first())
-            assertSame(plan, jobExecutionPlanService.getAllJobExecutionPlans().last())
+            assertEquals(3, jobExecutionPlanService.getJobExecutionPlans().size())
+            assertSame(plan, jobExecutionPlanService.getJobExecutionPlans().first())
+            assertSame(plan2, jobExecutionPlanService.getJobExecutionPlans().last())
         }
         // but other user should not see anything
         SpringSecurityUtils.doWithAuth("user") {
-            assertTrue(jobExecutionPlanService.getAllJobExecutionPlans().empty)
+            assertTrue(jobExecutionPlanService.getJobExecutionPlans().empty)
         }
     }
 
@@ -1227,105 +753,6 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
     }
 
     @Test
-    void testGetLastSucceddedProcessSecurity() {
-        JobExecutionPlan plan = new JobExecutionPlan(name: "test", obsoleted: false, planVersion: 0, enabled: true)
-        plan = plan.save(flush: true)
-        assertNotNull(plan)
-        // user should not be able to retrieve the last succeeded Process for the plan
-        SpringSecurityUtils.doWithAuth("testuser") {
-            shouldFail(AccessDeniedException) {
-                jobExecutionPlanService.getLastSucceededProcess(plan)
-            }
-        }
-        // an operator should be able tor retrieve the last succeeded Process
-        SpringSecurityUtils.doWithAuth("operator") {
-            assertNull(jobExecutionPlanService.getLastSucceededProcess(plan))
-        }
-        // but admin should
-        SpringSecurityUtils.doWithAuth("admin") {
-            assertNull(jobExecutionPlanService.getLastSucceededProcess(plan))
-            // grant read to user
-            aclUtilService.addPermission(plan, "testuser", BasePermission.READ)
-        }
-        // now user should also be able to retrieve the information
-        SpringSecurityUtils.doWithAuth("testuser") {
-            assertNull(jobExecutionPlanService.getLastSucceededProcess(plan))
-        }
-        // but a different user should not
-        SpringSecurityUtils.doWithAuth("user") {
-            shouldFail(AccessDeniedException) {
-                jobExecutionPlanService.getLastSucceededProcess(plan)
-            }
-        }
-    }
-
-    @Test
-    void testGetLastFailedProcessSecurity() {
-        JobExecutionPlan plan = new JobExecutionPlan(name: "test", obsoleted: false, planVersion: 0, enabled: true)
-        plan = plan.save(flush: true)
-        assertNotNull(plan)
-        // user should not be able to retrieve the last failed Process for the plan
-        SpringSecurityUtils.doWithAuth("testuser") {
-            shouldFail(AccessDeniedException) {
-                jobExecutionPlanService.getLastFailedProcess(plan)
-            }
-        }
-        // an operator should be able to retrieve the last failed Process
-        SpringSecurityUtils.doWithAuth("operator") {
-            assertNull(jobExecutionPlanService.getLastFailedProcess(plan))
-        }
-        // but admin should
-        SpringSecurityUtils.doWithAuth("admin") {
-            assertNull(jobExecutionPlanService.getLastFailedProcess(plan))
-            // grant read to user
-            aclUtilService.addPermission(plan, "testuser", BasePermission.READ)
-        }
-        // now user should also be able to retrieve the information
-        SpringSecurityUtils.doWithAuth("testuser") {
-            assertNull(jobExecutionPlanService.getLastFailedProcess(plan))
-        }
-        // but a different user should not
-        SpringSecurityUtils.doWithAuth("user") {
-            shouldFail(AccessDeniedException) {
-                jobExecutionPlanService.getLastFailedProcess(plan)
-            }
-        }
-    }
-
-    @Test
-    void testGetLastFinishedProcessSecurity() {
-        JobExecutionPlan plan = new JobExecutionPlan(name: "test", obsoleted: false, planVersion: 0, enabled: true)
-        plan = plan.save(flush: true)
-        assertNotNull(plan)
-        // user should not be able to retrieve the last finished Process for the plan
-        SpringSecurityUtils.doWithAuth("testuser") {
-            shouldFail(AccessDeniedException) {
-                jobExecutionPlanService.getLastFinishedProcess(plan)
-            }
-        }
-        // an operator should be able to retrieve the last finished Process
-        SpringSecurityUtils.doWithAuth("operator") {
-            assertNull(jobExecutionPlanService.getLastFinishedProcess(plan))
-        }
-        // but admin should
-        SpringSecurityUtils.doWithAuth("admin") {
-            assertNull(jobExecutionPlanService.getLastFinishedProcess(plan))
-            // grant read to user
-            aclUtilService.addPermission(plan, "testuser", BasePermission.READ)
-        }
-        // now user should also be able to retrieve the information
-        SpringSecurityUtils.doWithAuth("testuser") {
-            assertNull(jobExecutionPlanService.getLastFinishedProcess(plan))
-        }
-        // but a different user should not
-        SpringSecurityUtils.doWithAuth("user") {
-            shouldFail(AccessDeniedException) {
-                jobExecutionPlanService.getLastFinishedProcess(plan)
-            }
-        }
-    }
-
-    @Test
     void testGetLastExecutedProcessSecurity() {
         JobExecutionPlan plan = new JobExecutionPlan(name: "test", obsoleted: false, planVersion: 0, enabled: true)
         plan = plan.save(flush: true)
@@ -1392,72 +819,6 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
     }
 
     @Test
-    void testGetNumberOfSuccessfulFinishedProcessesSecurity() {
-        JobExecutionPlan plan = new JobExecutionPlan(name: "test", obsoleted: false, planVersion: 0, enabled: true)
-        plan = plan.save(flush: true)
-        assertNotNull(plan)
-        // user should not be able to retrieve the number of successfully finished Processes for the plan
-        SpringSecurityUtils.doWithAuth("testuser") {
-            shouldFail(AccessDeniedException) {
-                jobExecutionPlanService.getNumberOfSuccessfulFinishedProcesses(plan)
-            }
-        }
-        // an operator should be able to retrieve the number of successfully finished Processes
-        SpringSecurityUtils.doWithAuth("operator") {
-            assertEquals(0, jobExecutionPlanService.getNumberOfSuccessfulFinishedProcesses(plan))
-        }
-        // but admin should
-        SpringSecurityUtils.doWithAuth("admin") {
-            assertEquals(0, jobExecutionPlanService.getNumberOfSuccessfulFinishedProcesses(plan))
-            // grant read to user
-            aclUtilService.addPermission(plan, "testuser", BasePermission.READ)
-        }
-        // now user should also be able to retrieve the information
-        SpringSecurityUtils.doWithAuth("testuser") {
-            assertEquals(0, jobExecutionPlanService.getNumberOfSuccessfulFinishedProcesses(plan))
-        }
-        // but a different user should not
-        SpringSecurityUtils.doWithAuth("user") {
-            shouldFail(AccessDeniedException) {
-                jobExecutionPlanService.getNumberOfSuccessfulFinishedProcesses(plan)
-            }
-        }
-    }
-
-    @Test
-    void testGetNumberOfFinishedProcessesSecurity() {
-        JobExecutionPlan plan = new JobExecutionPlan(name: "test", obsoleted: false, planVersion: 0, enabled: true)
-        plan = plan.save(flush: true)
-        assertNotNull(plan)
-        // user should not be able to retrieve the number of finished Processes for the plan
-        SpringSecurityUtils.doWithAuth("testuser") {
-            shouldFail(AccessDeniedException) {
-                jobExecutionPlanService.getNumberOfFinishedProcesses(plan)
-            }
-        }
-        // an operator should be able to retrieve the number of finished Processes
-        SpringSecurityUtils.doWithAuth("operator") {
-            assertEquals(0, jobExecutionPlanService.getNumberOfFinishedProcesses(plan))
-        }
-        // but admin should
-        SpringSecurityUtils.doWithAuth("admin") {
-            assertEquals(0, jobExecutionPlanService.getNumberOfFinishedProcesses(plan))
-            // grant read to user
-            aclUtilService.addPermission(plan, "testuser", BasePermission.READ)
-        }
-        // now user should also be able to retrieve the information
-        SpringSecurityUtils.doWithAuth("testuser") {
-            assertEquals(0, jobExecutionPlanService.getNumberOfFinishedProcesses(plan))
-        }
-        // but a different user should not
-        SpringSecurityUtils.doWithAuth("user") {
-            shouldFail(AccessDeniedException) {
-                jobExecutionPlanService.getNumberOfFinishedProcesses(plan)
-            }
-        }
-    }
-
-    @Test
     void testPlanInformation() {
         JobExecutionPlan plan = new JobExecutionPlan(name: "test", obsoleted: false, planVersion: 0, enabled: true)
         plan = plan.save(flush: true)
@@ -1498,7 +859,7 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
         return new Date(update.date.time + 1)
     }
 
-    private ProcessingStepUpdate mockProcessingStepAsFinished(ProcessingStep step) {
+    private static ProcessingStepUpdate mockProcessingStepAsFinished(ProcessingStep step) {
         ProcessingStepUpdate update = new ProcessingStepUpdate(
             date: new Date(),
             state: ExecutionState.CREATED,
@@ -1523,25 +884,104 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
         return update
     }
 
-    private void mockProcessingStepAsFailed(ProcessingStep step) {
+    private static ProcessingStepUpdate mockProcessingStepAsState(ProcessingStep step, ExecutionState state) {
         ProcessingStepUpdate update = mockProcessingStepAsFinished(step)
         update = new ProcessingStepUpdate(
             date: new Date(),
-            state: ExecutionState.FAILURE,
+            state: state,
             previous: update,
             processingStep: step
-            )
+        )
         assertNotNull(update.save(flush: true))
+        return update
     }
 
-    private void mockProcessingStepAsSucceeded(ProcessingStep step) {
-        ProcessingStepUpdate update = mockProcessingStepAsFinished(step)
-        update = new ProcessingStepUpdate(
-            date: new Date(),
-            state: ExecutionState.SUCCESS,
-            previous: update,
-            processingStep: step
-            )
-        assertNotNull(update.save(flush: true))
+
+    @Test
+    void "test processCount"() {
+        setup:
+        createJepsWithProcesses()
+
+        when:
+        def result = jobExecutionPlanService.processCount()
+
+        then:
+        assert result == [fastqcQualityAssessment: 2L, conveySamplePairConsistency: 2L]
+    }
+
+    @Test
+    void "test finishedProcessCount"() {
+        setup:
+        createJepsWithProcesses()
+
+        when:
+        def result = jobExecutionPlanService.finishedProcessCount()
+
+        then:
+        assert result == [fastqcQualityAssessment: 1L, conveySamplePairConsistency: 2L]
+    }
+
+    private static void createJepsWithProcesses() {
+        // JEP with two processes, one finished
+        def jep1 = DomainFactory.createJobExecutionPlan(name: "fastqcQualityAssessment")
+        DomainFactory.createProcess(jobExecutionPlan: jep1, finished: true)
+        DomainFactory.createProcess(jobExecutionPlan: jep1, finished: false)
+
+        // JEP with one process and an obsolete predecessor JEP with one process, both finished
+        def obsoleteJep2 = DomainFactory.createJobExecutionPlan(name: "conveySamplePairConsistency", obsoleted: true, planVersion: 0)
+        DomainFactory.createProcess(jobExecutionPlan: obsoleteJep2, finished: true)
+        def jep2 = DomainFactory.createJobExecutionPlan(name: "conveySamplePairConsistency", planVersion: 1, previousPlan: obsoleteJep2)
+        DomainFactory.createProcess(jobExecutionPlan: jep2, finished: true)
+
+        // JEP without processes
+        DomainFactory.createJobExecutionPlan(name: "SnvAlignmentDiscovery")
+    }
+
+    @Test
+    void "test successProcessCount"() {
+        setup:
+        // JEP with an obsolete predecessor JEP
+        def jep = DomainFactory.createJobExecutionPlan(name: "runSeqScan", finishedSuccessful: 20, obsoleted: true, planVersion: 0)
+        DomainFactory.createJobExecutionPlan(name: "runSeqScan", finishedSuccessful: 5, planVersion: 1, previousPlan: jep)
+
+        // JEP without successful processes
+        DomainFactory.createJobExecutionPlan(name: "SnvAlignmentDiscovery")
+
+        when:
+        def result = jobExecutionPlanService.successfulProcessCount()
+
+        then:
+        assert result == [runSeqScan: 25L, SnvAlignmentDiscovery: 0L]
+    }
+
+    @Test
+    void "test lastProcessDate, finds date of newest update with the given state" () {
+        setup:
+        // create a JEP with processes, processing states and updates
+        Date date = createLastDateStructure("panCanInstallation", ExecutionState.SUCCESS)
+
+        when:
+        def result = jobExecutionPlanService.lastProcessDate(ExecutionState.SUCCESS)
+
+        then:
+        assert result == [panCanInstallation: date]
+    }
+
+
+    private static Date createLastDateStructure(String planName, ExecutionState state) {
+        JobExecutionPlan jep = DomainFactory.createJobExecutionPlan(name: planName)
+        Process proc = DomainFactory.createProcess(jobExecutionPlan: jep, finished: true)
+        ProcessingStep step = DomainFactory.createProcessingStep(process: proc, next: null)
+        Date date = mockProcessingStepAsState(step, state).date
+
+        Process proc2 = DomainFactory.createProcess(jobExecutionPlan: jep, finished: false)
+        ProcessingStep step2 = DomainFactory.createProcessingStep(process: proc2, next: null)
+        mockProcessingStepAsState(step2, state)
+
+        Process proc3 = DomainFactory.createProcess(jobExecutionPlan: jep, finished: true)
+        ProcessingStep nextStep = DomainFactory.createProcessingStep(process: proc3, next: null)
+        ProcessingStep step3 = DomainFactory.createProcessingStep(process: proc3, next: nextStep)
+        mockProcessingStepAsState(step3, state)
+        return date
     }
 }

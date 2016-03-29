@@ -1,18 +1,15 @@
 package de.dkfz.tbi.otp.job.processing
 
-import de.dkfz.tbi.otp.job.scheduler.ErrorLogService
-import de.dkfz.tbi.otp.job.scheduler.SchedulerService
-import grails.plugin.springsecurity.SpringSecurityService
-import grails.plugin.springsecurity.SpringSecurityUtils
-import grails.plugin.springsecurity.acl.AclUtilService
-import org.codehaus.groovy.grails.commons.GrailsApplication
-import org.springframework.security.access.prepost.PostAuthorize
-import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.security.acls.domain.BasePermission
-import org.springframework.security.core.context.SecurityContextHolder
-import org.codehaus.groovy.grails.web.mapping.LinkGenerator
+import de.dkfz.tbi.otp.job.plan.*
+import de.dkfz.tbi.otp.job.scheduler.*
+import grails.plugin.springsecurity.*
+import grails.plugin.springsecurity.acl.*
+import org.codehaus.groovy.grails.commons.*
+import org.codehaus.groovy.grails.web.mapping.*
+import org.springframework.security.access.prepost.*
+import org.springframework.security.acls.domain.*
+import org.springframework.security.core.context.*
 
-import de.dkfz.tbi.otp.job.plan.PlanInformation
 
 /**
  * Service providing methods to access information about Processes.
@@ -20,7 +17,6 @@ import de.dkfz.tbi.otp.job.plan.PlanInformation
  */
 class ProcessService {
     static transactional = true
-    static final profiled = true
 
     /** Needed to restart Processing Steps. */
     SchedulerService schedulerService
@@ -144,52 +140,6 @@ class ProcessService {
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#step.process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read)")
     public int getNumberOfUpdates(ProcessingStep step) {
         return ProcessingStepUpdate.countByProcessingStep(step)
-    }
-
-    /**
-     * Retrieves the date when the given Process finished.
-     * In case the Process has not yet finished a runtime exception is thrown.
-     * @param process The Process for which the end date has to be retrieved
-     * @return The date when the Process finished
-     */
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read)")
-    public Date getFinishDate(Process process) {
-        if (!process.finished) {
-            throw new IllegalArgumentException("Process is not finished")
-        }
-        String query =
-                        '''
-SELECT u.date
-FROM ProcessingStepUpdate AS u
-INNER JOIN u.processingStep AS step
-INNER JOIN step.process AS process
-WHERE
-step.next IS NULL
-AND
-process.id = :process
-ORDER BY u.id desc
-'''
-        List results = ProcessingStepUpdate.executeQuery(query, [process: process.id], [max: 1])
-        if (results.isEmpty()) {
-            throw new RuntimeException("No ProcessingStepUpdates for last ProcessingStep")
-        }
-        return results[0]
-    }
-
-    /**
-     * Calculates the duration between the starting of the Process and the finish date.
-     * In case the Process has not yet finished a runtime exception is thrown.
-     * The returned duration is in milliseconds.
-     * @param process The Process for which the duration should be retrieved
-     * @return The number of msec the Process took
-     */
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read)")
-    public long getDuration(Process process) {
-        if (!process.finished) {
-            throw new IllegalArgumentException("Process is not finished")
-        }
-        Date endDate = getFinishDate(process)
-        return endDate.time - process.started.time
     }
 
     /**

@@ -23,34 +23,7 @@ $.otp.workflows = {
             id: $.otp.workflows.statusToImage(status)
         }) + '" alt="' + status + '" title="' + status + '"/>';
     },
-    /**
-     * Creates the HTML markup for the health image.
-     * @param succeeded The number of succeeded processes
-     * @param finished The number of finished processes
-     * @return HTML string for health image
-     */
-    healthImageHtml: function (succeeded, finished) {
-        "use strict";
-        var percent, image, title;
-        percent = (finished > 0) ? succeeded / finished * 100 : 0;
-        if (percent <= 19) {
-            image = "health-00to19.png";
-        } else if (percent <= 39) {
-            image = "health-20to39.png";
-        } else if (percent <= 59) {
-            image = "health-40to59.png";
-        } else if (percent <= 79) {
-            image = "health-60to79.png";
-        } else {
-            image = "health-80plus.png";
-        }
-        title = succeeded + ' of ' + finished + ' Processes finished successfully';
-        return '<img src="' + $.otp.createLink({
-            controller: 'assets',
-            action: 'status',
-            id: image
-        }) + '" alt="' + title + '" title="' + title + '"/>';
-    },
+
     /**
      * Converts the status name into the image name which is used to represent the status.
      * @param status The name as listed in documentation for statusImageHtml
@@ -442,44 +415,48 @@ $.otp.workflows = {
         $.otp.createListView(selector, $.otp.createLink({
             controller: 'processes',
             action: 'listData'
-        }), true, function (json) {
-            var i, processId, rowData;
-            for (i = 0; i < json.aaData.length; i += 1) {
-                rowData = json.aaData[i];
-                processId = rowData[2].id;
-                rowData[0] = $.otp.workflows.statusImageHtml(rowData[0].name);
-                if (rowData[1]) {
-                    rowData[1] = $.otp.workflows.healthImageHtml(rowData[1].succeeded, rowData[1].finished);
-                } else {
-                    rowData[1] = "-";
-                }
-                rowData[2] = $.otp.createLinkMarkup({
-                    controller: 'processes',
-                    action: 'plan',
-                    id: processId,
-                    text: rowData[2].name
-                });
-                rowData[4] = $.otp.createLinkMarkup({
-                    controller: 'processes',
-                    action: 'plan',
-                    id: processId,
-                    parameters: {
-                        failed: true
-                    },
-                    text: rowData[4]
-                });
-                rowData[5] = $.otp.workflows.renderDate(rowData[5]);
-                rowData[6] = $.otp.workflows.renderDate(rowData[6]);
-                if (rowData[7]) {
-                    rowData[7] = $.otp.workflows.formatTimespan(rowData[7]);
-                } else {
-                    rowData[7] = "-";
-                }
-            }
-        },
+        }), true, undefined,
+            [
+                { "mRender": function (data, type, row) {
+                    return $.otp.createLinkMarkup({
+                        controller: 'processes',
+                        action: 'plan',
+                        id: row.id,
+                        text: row.name
+                    });
+                }, "aTargets": [0] },
+                { "mData": "allProcessesCount", "aTargets": [1] },
+                { "mRender": function (data, type, row) {
+                    if (row.failedProcessesCount) {
+                        return $.otp.createLinkMarkup({
+                            controller: 'processes',
+                            action: 'plan',
+                            id: row.id,
+                            parameters: {
+                                failed: true
+                            },
+                            text: row.failedProcessesCount
+                        });
+                    }
+                    return "-";
+                }, "aTargets": [2] },
+                { "mData": "runningProcessesCount", "sDefaultContent": "-", "aTargets": [3] },
+                { "mRender": function (data, type, row) {
+                    return $.otp.workflows.renderDate(row.lastSuccessfulDate);
+                }, "aTargets": [4] },
+                { "mRender": function (data, type, row) {
+                    return $.otp.workflows.renderDate(row.lastFailureDate);
+                }, "aTargets": [5] }
+            ],
             undefined,
-            undefined,
-            140);
+            140, {
+                "aaSorting": [],
+                "fnRowCallback": function (nRow, aData, iDisplayIndex, iDisplayIndexFull) {
+                    if (aData.enabled === false) {
+                        $(nRow).addClass("withdrawn");
+                    }
+                }
+            });
     },
     /**
      * Creates the datatables view for the list of all Processes for a given JobExecutionPlan

@@ -48,6 +48,7 @@ class JobExecutionPlanTests {
         jobExecutionPlan.planVersion = 1
         // Assign small planVersion value for previousPlan
         jobExecutionPlan.previousPlan.planVersion = 0
+        jobExecutionPlan.previousPlan.name = "testPlan"
         assertTrue(jobExecutionPlan.validate())
     }
 

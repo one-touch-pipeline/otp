@@ -20,7 +20,7 @@ class NotificationController {
     def notificationService
 
     def index() {
-        [workflows: jobExecutionPlanService.getAllJobExecutionPlans()]
+        [workflows: jobExecutionPlanService.getJobExecutionPlans()]
     }
 
     def dataTableSource(DataTableCommand cmd) {

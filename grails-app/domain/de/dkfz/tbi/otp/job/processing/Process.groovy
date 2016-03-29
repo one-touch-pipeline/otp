@@ -19,9 +19,9 @@ import de.dkfz.tbi.otp.Comment
  * @see Process
  * @see ProcessingStep
  * @see JobExecutionPlan
- * @see JobDefinition
- * @see groovy.de.dkfz.tbi.otp.job.processing.Job
- * @see groovy.de.dkfz.tbi.otp.job.processing.StartJob
+ * @see de.dkfz.tbi.otp.job.plan.JobDefinition
+ * @see de.dkfz.tbi.otp.job.processing.Job
+ * @see de.dkfz.tbi.otp.job.processing.StartJob
  **/
 public class Process implements Serializable, Commentable {
     /**

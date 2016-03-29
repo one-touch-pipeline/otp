@@ -55,7 +55,7 @@ class JobExecutionPlan implements Serializable {
         planVersion(min: 0)
         previousPlan(nullable: true, validator: { JobExecutionPlan value, JobExecutionPlan current ->
             if (value) {
-                return current.planVersion > 0
+                return current.planVersion > 0 && value.name == current.name
             } else {
                 return current.planVersion == 0
             }

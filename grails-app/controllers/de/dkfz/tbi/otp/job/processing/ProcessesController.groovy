@@ -1,13 +1,16 @@
 package de.dkfz.tbi.otp.job.processing
 
-import de.dkfz.tbi.otp.CommentService
-import de.dkfz.tbi.otp.utils.CommentCommand
-import grails.converters.JSON
-import grails.util.GrailsNameUtils
-import org.springframework.security.core.context.SecurityContextHolder
-import de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys
-import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
-import de.dkfz.tbi.otp.utils.DataTableCommand
+import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.job.jobs.utils.*
+import de.dkfz.tbi.otp.job.plan.*
+import de.dkfz.tbi.otp.utils.*
+import grails.converters.*
+import grails.util.*
+import groovyx.gpars.*
+import org.springframework.security.core.*
+import org.springframework.security.core.context.*
+
+import java.util.concurrent.*
 
 @SuppressWarnings("GrailsPublicControllerMethod")
 class ProcessesController {
@@ -20,7 +23,7 @@ class ProcessesController {
          * The plan is disabled
          */
         DISABLED,
-        /**
+         /**
          * At least one Process is running
          */
         RUNNING,
@@ -55,79 +58,88 @@ class ProcessesController {
     def listData(DataTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()
 
-        List<JobExecutionPlan> plans = jobExecutionPlanService.getAllJobExecutionPlans()
+        List<JobExecutionPlan> plans = jobExecutionPlanService.getJobExecutionPlans()
         dataToRender.iTotalRecords = plans.size()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
 
-        List futures = []
-        def auth = SecurityContextHolder.context.authentication
-        plans.each { JobExecutionPlan mainThreadPlan ->
-            def planId = mainThreadPlan.id
-            // spin off threads to fetch the data in parallel
-            futures << callAsync {
+        Map<String, Long> processCounts
+        Map<String, Long> successProcessCounts
+        Map<String, Long> finishedProcessCounts
+        Map<String, Date> lastSuccessDates
+        Map<String, Date> lastFailureDates
+
+        Authentication auth = SecurityContextHolder.context.authentication
+
+        GParsPool.withPool() {
+            Closure lastSuccessDatesClosure = {
                 SecurityContextHolder.context.authentication = auth
-                JobExecutionPlan plan = JobExecutionPlan.get(planId)
-                Process lastSucceededProcess = jobExecutionPlanService.getLastSucceededProcess(plan)
-                Process lastFailedProcess = jobExecutionPlanService.getLastFailedProcess(plan)
-                Process lastFinishedProcess = jobExecutionPlanService.getLastFinishedProcess(plan)
-                Map data = [:]
-                data.put("planId", planId)
-                data.put("lastSucceededProcessId", lastSucceededProcess?.id)
-                data.put("lastFinishedProcessId", lastFinishedProcess?.id)
-                data.put("succeeded", jobExecutionPlanService.getNumberOfSuccessfulFinishedProcesses(plan))
-                data.put("finished", jobExecutionPlanService.getNumberOfFinishedProcesses(plan))
-                data.put("numberOfProcesses", jobExecutionPlanService.getNumberOfProcesses(plan))
-                data.put("lastSuccessDate", lastSucceededProcess ? processService.getFinishDate(lastSucceededProcess) : null)
-                data.put("lastFailureDate", lastFailedProcess ? processService.getFinishDate(lastFailedProcess) : null)
-                data.put("duration", lastFinishedProcess ? processService.getDuration(lastFinishedProcess) : null)
-                return data
+                try {
+                    jobExecutionPlanService.lastProcessDate(ExecutionState.SUCCESS)
+                } finally {
+                    SecurityContextHolder.context.authentication = null
+                }
+            }
+            Closure lastSuccessDatesClosureAsync = lastSuccessDatesClosure.async()
+            Future lastSuccessDatesFuture = lastSuccessDatesClosureAsync()
+
+            Closure lastFailureDatesClosure = {
+                SecurityContextHolder.context.authentication = auth
+                try {
+                    jobExecutionPlanService.lastProcessDate(ExecutionState.FAILURE)
+                } finally {
+                    SecurityContextHolder.context.authentication = null
+                }
+            }
+            Closure lastFailureDatesClosureAsync = lastFailureDatesClosure.async()
+            Future lastFailureDatesFuture = lastFailureDatesClosureAsync()
+
+            processCounts = jobExecutionPlanService.processCount()
+            successProcessCounts = jobExecutionPlanService.successfulProcessCount()
+            finishedProcessCounts = jobExecutionPlanService.finishedProcessCount()
+            lastSuccessDates = lastSuccessDatesFuture.get()
+            lastFailureDates = lastFailureDatesFuture.get()
+
+            dataToRender.aaData = plans.collectParallel { plan ->
+                long allProcessesCount = processCounts[plan.name] ?: 0L
+                long successfulProcessesCount = successProcessCounts[plan.name] ?: 0L
+                long finishedProcessesCount = finishedProcessCounts[plan.name] ?: 0L
+                Date successDate = lastSuccessDates[plan.name]
+                Date failureDate = lastFailureDates[plan.name]
+
+                [
+                        name                    : plan.name,
+                        id                      : plan.id,
+                        enabled                 : plan.enabled,
+                        allProcessesCount       : allProcessesCount,
+                        finishedProcessesCount  : finishedProcessesCount,
+                        successfulProcessesCount: successfulProcessesCount,
+                        failedProcessesCount    : finishedProcessesCount - successfulProcessesCount,
+                        runningProcessesCount   : allProcessesCount - finishedProcessesCount,
+                        lastSuccessfulDate      : successDate,
+                        lastFailureDate         : failureDate,
+                ]
             }
         }
-        futures.each { future ->
-            def data = future.get()
-            JobExecutionPlan plan = JobExecutionPlan.get(data.planId)
-            dataToRender.aaData << [
-                calculateStatus(plan, Process.get(data.lastSucceededProcessId), Process.get(data.lastFinishedProcessId)),
-                data.finished > 0 ? [succeeded: data.succeeded, finished: data.finished] : null,
-                [id: data.planId, name: plan.name],
-                data.numberOfProcesses,
-                data.finished - data.succeeded,
-                data.lastSuccessDate,
-                data.lastFailureDate,
-                data.duration
-            ]
-        }
+
         // perform sorting on fetched data
         // this is acceptable, as we do not use pagination for the process overview
         // fetch the data with multiple queries, that means we cannot sort in the query directly
         // so we have to sort the fetched data
         dataToRender.aaData.sort { a, b ->
             switch (cmd.iSortCol_0) {
-                case 0: // status
-                    return a[0] <=> b[0]
-                case 1: // succeeded/finished
-                    if (a[1] && b[1]) {
-                        return a[1].succeeded/a[1].finished <=> b[1].succeeded/b[1].finished
-                    } else if (a[1]) {
-                        return 1
-                    } else if (b[1]) {
-                        return -1
-                    } else {
-                        return 0
-                    }
-                case 3: // number of processes
-                    return a[3] <=> b[3]
-                case 4: // number of failed
-                    return a[4] <=> b[4]
-                case 5: // last succeeded
-                    return a[5] <=> b[5]
-                case 6: // last failed
-                    return a[6] <=> b[6]
-                case 7: // duration
-                    return a[7] <=> b[7]
-                case 2: // id -> default
+                case 1: // number of processes
+                    return a.allProcessesCount <=> b.allProcessesCount
+                case 2: // number of failed
+                    return a.failedProcessesCount <=> b.failedProcessesCount
+                case 3: // number of running
+                    return a.runningProcessesCount <=> b.runningProcessesCount
+                case 4: // last succeeded
+                    return a.lastSuccessfulDate <=> b.lastSuccessfulDate
+                case 5: // last failed
+                    return a.lastFailureDate <=> b.lastFailureDate
+                case 0:
                 default:
-                    return a[2].id <=> b[2].id
+                    return a.name.toLowerCase() <=> b.name.toLowerCase()
             }
         }
         // reverse sort order if descending
@@ -340,24 +352,6 @@ class ProcessesController {
 
     def getProcessingErrorStackTrace() {
         render text: processService.getProcessingErrorStackTrace(params.id as long), contentType: "text/plain"
-    }
-
-    private PlanStatus calculateStatus(JobExecutionPlan plan, Process lastSuccess, Process lastFinished) {
-        if (!plan.enabled) {
-            return PlanStatus.DISABLED
-        }
-        final boolean active = jobExecutionPlanService.isProcessRunning(plan)
-        if (!lastFinished && !active) {
-            return PlanStatus.NEW
-        }
-        if (!lastFinished && active) {
-            return PlanStatus.RUNNING
-        }
-        if (lastFinished == lastSuccess) {
-            return active ? PlanStatus.RUNNING : PlanStatus.SUCCESS
-        }
-        // now only failed are here
-        return active ? PlanStatus.RUNNINGFAILEDBEFORE : PlanStatus.FAILURE
     }
 
     private PlanStatus stateForExecutionState(Process process, ExecutionState state) {
