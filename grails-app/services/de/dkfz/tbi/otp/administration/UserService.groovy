@@ -69,7 +69,7 @@ class UserService {
 
     @PreAuthorize("hasRole('ROLE_USER')")
     User getCurrentUser() {
-        return User.findByUsername(springSecurityService.authentication.principal.username).sanitizedUser()
+        return User.findByUsername(springSecurityService.authentication.principal.username as String)?.sanitizedUser()
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN') or authentication.name==#username")

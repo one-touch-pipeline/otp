@@ -32,44 +32,26 @@ class ShutdownService implements DisposableBean {
      * Dependency Injection of SpringSecurityService
      **/
     def springSecurityService
+
+    def userService
+
     // all methods in this service contain critical sections to not start two shutdowns
     private final ReentrantLock lock = new ReentrantLock()
 
     void destroy() {
         ShutdownInformation.withNewSession { session ->
             if (isShutdownPlanned()) {
-                ShutdownInformation info = ShutdownInformation.findBySucceededIsNullAndCanceledIsNull()
+                ShutdownInformation info = findShutdownInformationForPlannedShutdown()
                 if (!info) {
                     log.error("Shutdown Information is missing")
                     return
                 }
-                info.succeeded = new Date()
-                if (!info.validate()) {
-                    info.error("Succeeded date for Shutdown Information could not be stored")
-                }
-                if (!info.save(flush: true)) {
-                    info.error("Succeeded date for Shutdown Information could not be stored")
-                }
+                markPlannedShutdownAsSucceeded(info)
                 // TODO: check that all jobs have really stopped
                 List<ProcessingStep> runningJobs = schedulerService.retrieveRunningProcessingSteps()
                 runningJobs.each { ProcessingStep step ->
-                    boolean jobIsResumable
-                    try {
-                        jobIsResumable = schedulerService.isJobResumable(step)
-                    } catch (final Throwable e) {
-                        log.warn("Failed to determine whether ProcessingStep ${step.id} is resumable. Treating it as not resumable.", e)
-                        jobIsResumable = false
-                    }
-                    if (jobIsResumable) {
-                        ProcessingStepUpdate update = new ProcessingStepUpdate(
-                            date: new Date(),
-                            state: ExecutionState.SUSPENDED,
-                            previous: step.latestProcessingStepUpdate,
-                            processingStep: step
-                        )
-                        if (!update.save(flush: true)) {
-                            log.error("ProcessingStep ${step.id} could not be suspended")
-                        }
+                    if (isJobResumable(step)) {
+                        suspendProcessingStep(step)
                         log.info("ProcessingStep ${step.id} has been suspended")
                     } else {
                         log.warn("ProcessingStep ${step.id} is not resumable, but the server is shutting down")
@@ -96,7 +78,7 @@ class ShutdownService implements DisposableBean {
                 return
             }
             ShutdownInformation.withTransaction { status ->
-                User user = User.findByUsername(springSecurityService.authentication.principal.username)
+                User user = userService.currentUser
                 ShutdownInformation info = new ShutdownInformation(initiatedBy: user, initiated: new Date(), reason: reason)
                 if (!info.validate()) {
                     println info.errors
@@ -126,12 +108,12 @@ class ShutdownService implements DisposableBean {
                 // TODO: throw Exception
             }
             ShutdownInformation.withTransaction { status ->
-                ShutdownInformation info = ShutdownInformation.findBySucceededIsNullAndCanceledIsNull()
+                ShutdownInformation info = findShutdownInformationForPlannedShutdown()
                 if (!info) {
                     status.setRollbackOnly()
                     // TODO: throw exception
                 }
-                info.canceledBy = User.findByUsername(springSecurityService.authentication.principal.username)
+                info.canceledBy = userService.currentUser
                 info.canceled = new Date()
                 if (!info.validate()) {
                     println info.errors
@@ -159,7 +141,7 @@ class ShutdownService implements DisposableBean {
         lock.lock()
         try {
             ShutdownInformation.withTransaction {
-                ShutdownInformation info = ShutdownInformation.findBySucceededIsNullAndCanceledIsNull()
+                ShutdownInformation info = findShutdownInformationForPlannedShutdown()
                 if (info) {
                     planned = true
                 } else {
@@ -178,7 +160,7 @@ class ShutdownService implements DisposableBean {
      **/
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     ShutdownInformation getCurrentPlannedShutdown() {
-        return ShutdownInformation.findBySucceededIsNullAndCanceledIsNull()
+        return findShutdownInformationForPlannedShutdown()
     }
 
     /**
@@ -191,9 +173,48 @@ class ShutdownService implements DisposableBean {
     }
 
     /**
-     * Calls {@link SchedulerService#isJobResumable(ProcessingStep)}.
+     * Finds the ShutdownInformation for the planned shutdown. A shutdown is planned if an entry exists that is
+     * neither marked as succeed nor cancelled.
+     *
+     * @return The ShutdownInformation for a requested shutdown, or {@code null} otherwise.
+     */
+    private static ShutdownInformation findShutdownInformationForPlannedShutdown() {
+        ShutdownInformation.findBySucceededIsNullAndCanceledIsNull()
+    }
+
+    /**
+     * Safely determines if the job of that processing step is resumeable.
      **/
     boolean isJobResumable(ProcessingStep step) {
-        return schedulerService.isJobResumable(step)
+        try {
+            return schedulerService.isJobResumable(step)
+        } catch (final Throwable e) {
+            log.warn("Failed to determine whether ProcessingStep ${step.id} is resumable. Treating it as not resumable.", e)
+            return false
+        }
+    }
+
+    private static void markPlannedShutdownAsSucceeded(ShutdownInformation info) {
+        info.succeeded = new Date()
+        if (!info.validate()) {
+            // ???
+            info.error("Succeeded date for Shutdown Information could not be stored")
+        }
+        if (!info.save(flush: true)) {
+            // ???????????????
+            info.error("Succeeded date for Shutdown Information could not be stored")
+        }
+    }
+
+    private void suspendProcessingStep(ProcessingStep step) {
+        ProcessingStepUpdate update = new ProcessingStepUpdate(
+                date: new Date(),
+                state: ExecutionState.SUSPENDED,
+                previous: step.latestProcessingStepUpdate,
+                processingStep: step
+        )
+        if (!update.save(flush: true)) {
+            log.error("ProcessingStep ${step.id} could not be suspended")
+        }
     }
 }
