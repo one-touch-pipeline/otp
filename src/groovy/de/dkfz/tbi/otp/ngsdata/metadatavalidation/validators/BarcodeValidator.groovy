@@ -16,7 +16,7 @@ class BarcodeValidator extends SingleValueValidator<MetadataValidationContext> i
 
     @Override
     Collection<String> getDescriptions() {
-        return ['The barcode is empty or matches the regular expression ${REGEX}.']
+        return ["Barcodes should match the regular expression '${REGEX}'."]
     }
 
     @Override
@@ -34,7 +34,7 @@ class BarcodeValidator extends SingleValueValidator<MetadataValidationContext> i
         if (!(barcode ==~ /^[0-9a-zA-Z]*$/)) {
             context.addProblem(cells, Level.ERROR, "'${barcode}' is not a well-formed barcode. It must contain only digits (0 to 9) and/or letters (a to z, A to Z). It should match the regular expression '${REGEX}'.")
         } else if (!(barcode ==~ REGEX) && !barcode.empty) {
-            context.addProblem(cells, Level.WARNING, "The barcode '${barcode}' does not match the usually used regular expression: '${REGEX}.'")
+            context.addProblem(cells, Level.WARNING, "The barcode '${barcode}' has an unusual format. It should match the regular expression '${REGEX}'.")
         }
     }
 }
