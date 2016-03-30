@@ -27,9 +27,30 @@ class DataFile implements Commentable{
     boolean fileLinked = false     // is the file properly linked
     long fileSize = 0              // size of the file
 
-    // number of reads
+    /**
+     * In paired-end sequencing, short DNA fragments with adapters at both ends get sequenced twice,
+     * once in each direction, starting from the adapter. nReads is the number of reads in a single FASTQ file.
+     * <p>
+     * The value gets parsed out of the FastQC result file.
+     * <p>
+     * Typical values are:
+     * <ul>
+     * <li>185,000,000 in average for WGS</li>
+     * <li>18,500,000 in average for WES</li>
+     * </ul>
+     */
     Long nReads
-    // must be String, ranges are possible, e.g. '60-90'
+    /**
+     * The number of base pairs in a single read stored in a FASTQ file.
+     * <p>
+     * The value gets parsed out of the FastQC result file.
+     * <p>
+     * Typical values are:
+     * <ul>
+     * <li>"101"</li>
+     * <li>ranges are also possible e.g. "88-100", therefore of datatype String</li>
+     * </ul>
+     */
     String sequenceLength
 
     Integer mateNumber

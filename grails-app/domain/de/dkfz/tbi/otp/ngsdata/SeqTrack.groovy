@@ -34,7 +34,32 @@ class SeqTrack implements ProcessParameterObject {
      * {@code false} if they are copied.
      */
     boolean linkedExternally = false
+    /**
+     * The number of bases of all FASTQ files belonging to a single {@link SeqTrack}
+     * <p>
+     * SeqTrack.nBasePairs = {@link DataFile#nReads} * {@link DataFile#sequenceLength} * number of DataFiles
+     * <p>
+     * Typical values:
+     * <ul>
+     * <li>38,000,000,000 in average for WGS, non-mutliplexed</li>
+     * <li>3,800,000,000 in average for WES, non-multiplexed</li>
+     * </ul>
+     */
     long nBasePairs = 0
+    /**
+     * In paired-end sequencing the insert size describes the size in base pairs of the DNA (or RNA) fragment between two adapters.
+     * Insert size = length of read 1 + length of read 2 + inner distance (unknown region between reads)
+     * <p>
+     * This value gets set before sequencing. Recommended values depend on the sequencing platform.
+     * <p>
+     * Default value is set to -1 to differentiate between unknown and 0
+     * <p>
+     * Typical values:
+     * <ul>
+     * <li>HiSeq 2000: ~400 bps</li>
+     * <li>HiSeq X Ten: ~450 bps</li>
+     * </ul>
+     */
     int insertSize = -1
     Run run
     Sample sample
