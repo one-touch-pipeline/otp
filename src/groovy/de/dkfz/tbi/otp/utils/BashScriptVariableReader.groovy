@@ -27,11 +27,18 @@ class BashScriptVariableReader {
 
         final Process process = 'bash'.execute()
         final CharArrayWriter err = new CharArrayWriter()
-        process.consumeProcessErrorStream(err)
+        final CharArrayWriter out = new CharArrayWriter()
+        Thread threadError = process.consumeProcessErrorStream(err)
+        Thread threadOutput = process.consumeProcessOutputStream(out)
         process.withWriter { Writer writer ->
             writer << scriptWithEchos
         }
         process.waitForOrKill(5000L)
+
+        //ensure that output andd error read completly
+        threadError.join()
+        threadOutput.join()
+
         final Closure checkExitCode = { final int exitCode ->
             if (exitCode != 0) {
                 throw new RuntimeException("Script failed with exit code ${exitCode}. Error output:\n${err}")
@@ -42,7 +49,7 @@ class BashScriptVariableReader {
         // of the failed statement if any.
         checkExitCode(process.exitValue())
 
-        final String output = process.text
+        final String output = out.toString()
         final Matcher matcher = output =~ regex.toString()
         if (!matcher.find() || !matcher.hitEnd()) {
             throw new RuntimeException("Output does not match the regular expression.\nOutput:\n${output}\nRegular expression:\n${regex}")
