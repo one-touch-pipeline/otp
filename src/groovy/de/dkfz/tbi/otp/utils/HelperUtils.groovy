@@ -15,4 +15,9 @@ class HelperUtils {
     public static String getRandomMd5sum() {
         return sprintf('%016x', random.nextLong()) + sprintf('%016x', random.nextLong())
     }
+
+    public static String byteArrayToHexString(byte[] bytes) {
+        assert bytes
+        return new BigInteger(1, bytes).toString(16).padLeft(bytes.length * 2, '0')
+    }
 }

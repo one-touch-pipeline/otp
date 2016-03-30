@@ -1,14 +1,15 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
-
-import org.junit.ClassRule
-import org.junit.rules.TemporaryFolder
-
-import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.util.spreadsheet.validation.*
+import org.junit.*
+import org.junit.rules.*
 import spock.lang.*
+
+import java.nio.file.*
+
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 class MetadataValidationContextSpec extends Specification {
 
@@ -36,8 +37,8 @@ class MetadataValidationContextSpec extends Specification {
         where:
         file                                                                        || problemMessage
         new File('metadata.tsv')                                                    || 'not a valid absolute path'
-        TestCase.uniqueNonExistentPath                                              || 'could not be found by OTP'
-        temporaryFolder.newFolder()                                                 || 'is not a file'
+        new File(TestCase.uniqueNonExistentPath, 'metadata.tsv')                    || 'could not be found by OTP'
+        temporaryFolder.newFolder('folder.tsv')                                     || 'is not a file'
         temporaryFolder.newFile("${HelperUtils.uniqueString}.xls")                  || "does not end with '.tsv'."
         makeNotReadable(temporaryFolder.newFile("${HelperUtils.uniqueString}.tsv")) || 'is not readable'
         temporaryFolder.newFile("${HelperUtils.uniqueString}.tsv")                  || 'is empty'
@@ -60,7 +61,7 @@ class MetadataValidationContextSpec extends Specification {
         problem.message.contains(problemMessage)
         context.directoryStructure == directoryStructure
         context.metadataFile == file
-        context.metadataFileMd5sum.equalsIgnoreCase(md5sum)
+        context.metadataFileMd5sum == md5sum
         context.spreadsheet.dataRows[0].cells[0].text ==~ firstCellRegex
 
         where:
@@ -83,7 +84,7 @@ class MetadataValidationContextSpec extends Specification {
         problem.message.contains("Duplicate column 'a'")
         context.directoryStructure == directoryStructure
         context.metadataFile == file
-        context.metadataFileMd5sum.equalsIgnoreCase('51cfcea2dc88d9baff201d447d2316df')
+        context.metadataFileMd5sum == '51cfcea2dc88d9baff201d447d2316df'
         context.spreadsheet == null
     }
 
@@ -99,7 +100,7 @@ class MetadataValidationContextSpec extends Specification {
         context.problems.isEmpty()
         context.directoryStructure == directoryStructure
         context.metadataFile == file
-        context.metadataFileMd5sum.equalsIgnoreCase('2628f03624261e75bba6960ff9d15291')
+        context.metadataFileMd5sum == '2628f03624261e75bba6960ff9d15291'
         context.spreadsheet.dataRows[0].cells[0].text == 'M\u00e4use'
     }
 
@@ -130,6 +131,49 @@ class MetadataValidationContextSpec extends Specification {
         problem.level == Level.ERROR
         problem.message.contains('contains less than two lines')
         context.spreadsheet == null
+    }
+
+    void 'pathForMessage, when path does not point to a symlink, returns the path'() {
+        given:
+        File targetPath = TestCase.uniqueNonExistentPath
+        String expected = "'${targetPath}'"
+
+        when:
+        String actual = MetadataValidationContext.pathForMessage(targetPath)
+
+        then:
+        actual == expected
+    }
+
+    void 'pathForMessage, when path points to a symlink, returns path of symlink and path of target'() {
+        given:
+        File linkPath = new File(temporaryFolder.newFolder(), 'i_am_a_symlink')
+        File targetPath = TestCase.uniqueNonExistentPath
+        Files.createSymbolicLink(linkPath.toPath(), targetPath.toPath())
+        String expected = "'${targetPath}' (linked from '${linkPath}')"
+
+        when:
+        String actual = MetadataValidationContext.pathForMessage(linkPath)
+
+        then:
+        actual == expected
+    }
+
+    void 'pathForMessage, when path points to a symlink to a symlink, returns path of symlink and path of final target'() {
+        given:
+        File folder = temporaryFolder.newFolder()
+        File sourceSymlink = new File(folder, 'source_symlink')
+        File middleSymlink = new File(folder, 'middle_symlink')
+        File targetPath = TestCase.uniqueNonExistentPath
+        Files.createSymbolicLink(sourceSymlink.toPath(), middleSymlink.toPath())
+        Files.createSymbolicLink(middleSymlink.toPath(), targetPath.toPath())
+        String expected = "'${targetPath}' (linked from '${sourceSymlink}')"
+
+        when:
+        String actual = MetadataValidationContext.pathForMessage(sourceSymlink)
+
+        then:
+        actual == expected
     }
 
     private static File makeNotReadable(File file) {

@@ -1,12 +1,14 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation
 
-import java.nio.charset.Charset
-import java.security.MessageDigest
-import javax.xml.bind.DatatypeConverter
-
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
-import de.dkfz.tbi.util.spreadsheet.Spreadsheet
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.util.spreadsheet.*
 import de.dkfz.tbi.util.spreadsheet.validation.*
+
+import java.nio.charset.*
+import java.nio.file.*
+import java.security.*
+
+import static de.dkfz.tbi.otp.utils.HelperUtils.*
 
 class MetadataValidationContext extends ValidationContext {
 
@@ -30,38 +32,62 @@ class MetadataValidationContext extends ValidationContext {
         Spreadsheet spreadsheet = null
         if (!OtpPath.isValidAbsolutePath(metadataFile.path)) {
             problems.addProblem(Collections.emptySet(), Level.ERROR, "'${metadataFile}' is not a valid absolute path.")
-        } else if (!metadataFile.exists()) {
-            problems.addProblem(Collections.emptySet(), Level.ERROR, "'${metadataFile}' could not be found by OTP.")
-        } else if (!metadataFile.isFile()) {
-            problems.addProblem(Collections.emptySet(), Level.ERROR, "'${metadataFile}' is not a file.")
         } else if (!metadataFile.name.endsWith('.tsv')) {
             problems.addProblem(Collections.emptySet(), Level.ERROR, "The file name of '${metadataFile}' does not end with '.tsv'.")
+        } else if (!metadataFile.exists()) {
+            problems.addProblem(Collections.emptySet(), Level.ERROR, "${pathForMessage(metadataFile)} could not be found by OTP.")
+        } else if (!metadataFile.isFile()) {
+            problems.addProblem(Collections.emptySet(), Level.ERROR, "${pathForMessage(metadataFile)} is not a file.")
         } else if (!metadataFile.canRead()) {
-            problems.addProblem(Collections.emptySet(), Level.ERROR, "'${metadataFile}' is not readable.")
+            problems.addProblem(Collections.emptySet(), Level.ERROR, "${pathForMessage(metadataFile)} is not readable.")
         } else if (metadataFile.length() == 0L) {
-            problems.addProblem(Collections.emptySet(), Level.ERROR, "'${metadataFile}' is empty.")
+            problems.addProblem(Collections.emptySet(), Level.ERROR, "${pathForMessage(metadataFile)} is empty.")
         } else if (metadataFile.length() > MAX_METADATA_FILE_SIZE_IN_MIB * 1024L * 1024L) {
-            problems.addProblem(Collections.emptySet(), Level.ERROR, "'${metadataFile}' is larger than ${MAX_METADATA_FILE_SIZE_IN_MIB} MiB.")
+            problems.addProblem(Collections.emptySet(), Level.ERROR, "${pathForMessage(metadataFile)} is larger than ${MAX_METADATA_FILE_SIZE_IN_MIB} MiB.")
         } else {
             try {
                 byte[] bytes = metadataFile.bytes
-                metadataFileMd5sum = DatatypeConverter.printHexBinary(MessageDigest.getInstance('MD5').digest(bytes))
+                metadataFileMd5sum = byteArrayToHexString(MessageDigest.getInstance('MD5').digest(bytes))
                 String document = new String(bytes, CHARSET)
                 if (document.getBytes(CHARSET) != bytes) {
-                    problems.addProblem(Collections.emptySet(), Level.WARNING, "The content of '${metadataFile}' is not properly encoded with ${CHARSET.name()}. Characters might be corrupted.")
+                    problems.addProblem(Collections.emptySet(), Level.WARNING, "The content of ${pathForMessage(metadataFile)} is not properly encoded with ${CHARSET.name()}. Characters might be corrupted.")
                 }
                 if (document.contains('"')) {
-                    problems.addProblem(Collections.emptySet(), Level.WARNING, "The content of '${metadataFile}' contains one or more quotation marks. OTP might not parse the file as expected.")
+                    problems.addProblem(Collections.emptySet(), Level.WARNING, "The content of ${pathForMessage(metadataFile)} contains one or more quotation marks. OTP might not parse the file as expected.")
                 }
                 spreadsheet = new Spreadsheet(document.replaceFirst(/[\t\r\n]+$/, ''))
                 if (spreadsheet.dataRows.size() < 1) {
                     spreadsheet = null
-                    problems.addProblem(Collections.emptySet(), Level.ERROR, "'${metadataFile}' contains less than two lines.")
+                    problems.addProblem(Collections.emptySet(), Level.ERROR, "${pathForMessage(metadataFile)} contains less than two lines.")
                 }
             } catch (Exception e) {
                 problems.addProblem(Collections.emptySet(), Level.ERROR, e.message)
             }
         }
         return new MetadataValidationContext(metadataFile, metadataFileMd5sum, spreadsheet, problems, directoryStructure)
+    }
+
+    static String pathForMessage(File file) {
+        return pathForMessage(file.toPath())
+    }
+
+    static String pathForMessage(Path path) {
+        Path canonicalPath = canonicalPath(path)
+        if (canonicalPath == path) {
+            return "'${path}'"
+        } else {
+            return "'${canonicalPath}' (linked from '${path}')"
+        }
+    }
+
+    /**
+     * Replacement for {@link File#getCanonicalPath()}, which does not work when the target does not exist
+     */
+    static Path canonicalPath(Path path) {
+        if (Files.isSymbolicLink(path)) {
+            return canonicalPath(Files.readSymbolicLink(path))
+        } else {
+            return path
+        }
     }
 }
