@@ -11,9 +11,11 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 @Component
 class WithdrawnDateValidator extends SingleValueValidator<MetadataValidationContext> implements MetadataValidator {
 
+    static final String NONE = 'NONE'
+
     @Override
     Collection<String> getDescriptions() {
-        return ["If a '${WITHDRAWN_DATE}' column exists, it must be empty."]
+        return ["If a '${WITHDRAWN_DATE}' column exists, it must only contain cells which are empty or contain 'None'."]
     }
 
     @Override
@@ -27,8 +29,9 @@ class WithdrawnDateValidator extends SingleValueValidator<MetadataValidationCont
 
     @Override
     void validateValue(MetadataValidationContext context, String value, Set<Cell> cells) {
-        if(value != "") {
-            context.addProblem(cells, Level.ERROR, "Withdrawn data cannot be imported into OTP.")
+        final String uppercaseValue = value.toUpperCase(Locale.ENGLISH)
+        if (value != "" && uppercaseValue != NONE) {
+            context.addProblem(cells, Level.ERROR, "'${value}' is not an acceptable '${WITHDRAWN_DATE}' value. It must be empty or 'None'. Withdrawn data cannot be imported into OTP.")
         }
     }
 }

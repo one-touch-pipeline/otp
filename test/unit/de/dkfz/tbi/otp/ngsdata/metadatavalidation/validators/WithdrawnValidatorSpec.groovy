@@ -1,12 +1,10 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
+import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
 import de.dkfz.tbi.util.spreadsheet.validation.*
 import spock.lang.*
-
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
-
 
 class WithdrawnValidatorSpec extends Specification {
 
@@ -20,23 +18,27 @@ class WithdrawnValidatorSpec extends Specification {
                         "1\n" +
                         "-1\n" +
                         "\n" +
-                        "0\n")
+                        "0\n" +
+                        "none\n" +
+                        "NONE\n" +
+                        "None\n"
+        )
         Collection<Problem> expectedProblems = [
                 new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.ERROR,
-                        "Withdrawn data cannot be imported into OTP."),
+                        "'YES' is not an acceptable '${MetaDataColumn.WITHDRAWN.name()}' value. It must be empty or '0' or 'None'. Withdrawn data cannot be imported into OTP."),
                 new Problem(context.spreadsheet.dataRows[1].cells as Set, Level.ERROR,
-                        "Withdrawn data cannot be imported into OTP."),
+                        "'TRUE' is not an acceptable '${MetaDataColumn.WITHDRAWN.name()}' value. It must be empty or '0' or 'None'. Withdrawn data cannot be imported into OTP."),
                 new Problem(context.spreadsheet.dataRows[2].cells as Set, Level.ERROR,
-                        "Withdrawn data cannot be imported into OTP."),
+                        "'1' is not an acceptable '${MetaDataColumn.WITHDRAWN.name()}' value. It must be empty or '0' or 'None'. Withdrawn data cannot be imported into OTP."),
                 new Problem(context.spreadsheet.dataRows[3].cells as Set, Level.ERROR,
-                        "Withdrawn data cannot be imported into OTP."),
+                        "'-1' is not an acceptable '${MetaDataColumn.WITHDRAWN.name()}' value. It must be empty or '0' or 'None'. Withdrawn data cannot be imported into OTP."),
         ]
 
         when:
         new WithdrawnValidator().validate(context)
 
         then:
-        containSame(context.problems, expectedProblems)
+        TestCase.assertContainSame(context.problems, expectedProblems)
     }
 
 
