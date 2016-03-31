@@ -29,7 +29,7 @@ class FastqcUploadServiceTest {
     }
 
     @Test
-    void test_parseFastQCFile_WhenAllFine_ShouldReturnParsedValues() {
+    void test_parseFastQCFile_WhenAllFine_WithTabAtTheEnd_ShouldReturnParsedValues() {
         FastqcUploadService.metaClass.getFastQCFileContent = { FastqcProcessedFile a ->
             return """
 ##FastQC\t0.11.2\t
@@ -42,6 +42,26 @@ Total Sequences\t100\t
 Sequences flagged as poor quality\t0\t
 Sequence length\t101\t
 %GC\t48\t
+>>END_MODULE"""
+        }
+
+        assert [nReads: "100", sequenceLength: "101"] == fastqcUploadService.parseFastQCFile(fastqcProcessedFile, FastqcUploadService.PROPERTIES_REGEX_TO_BE_PARSED)
+    }
+
+    @Test
+    void test_parseFastQCFile_WhenAllFine_WithoutTabAtTheEnd_ShouldReturnParsedValues() {
+        FastqcUploadService.metaClass.getFastQCFileContent = { FastqcProcessedFile a ->
+            return """
+##FastQC\t0.11.2
+>>Basic Statistics\tpass
+#Measure\tValue
+Filename\tAS-100221-LR-14142_R1.fastq.gz
+File type\tConventional base calls
+Encoding\tSanger / Illumina 1.9
+Total Sequences\t100
+Sequences flagged as poor quality\t0
+Sequence length\t101
+%GC\t48
 >>END_MODULE"""
         }
 
