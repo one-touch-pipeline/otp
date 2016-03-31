@@ -198,6 +198,7 @@ class ClusterJobService {
 
     /**
      * returns true if a job belongs to data that is multiplexing data
+     * WARNING: This method incorrectly returns false in some cases (OTP-1973)
      */
     public static Boolean isMultiplexing(ClusterJob job) {
         ProcessParameterObject workflowObject = findProcessParameterObjectByClusterJob(job)

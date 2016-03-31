@@ -89,6 +89,7 @@ class ClusterJob {
     Float basesPerBytesFastq
     /**
      * multiplexing was used for processing
+     * WARNING: This field has been filled with incorrect values (OTP-1973)
      */
     Boolean multiplexing
     /**
