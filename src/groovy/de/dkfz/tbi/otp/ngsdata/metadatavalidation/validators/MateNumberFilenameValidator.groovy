@@ -59,8 +59,8 @@ class MateNumberFilenameValidator extends ValueTuplesValidator<MetadataValidatio
                         context.addProblem(valueTuple.cells.findAll({
                             it.columnIndex == fastqFileColumnIndex ||
                             it.columnIndex == mateColumnIndex
-                        }), Level.WARNING, "The value '${mateNumber}' in the MATE column is different from the mate number '${fileNameMateNumber}' parsed from the filename '${fileName}'. " +
-                                "If you ignore this warning, OTP will use the mate number parsed from the filename and ignore the value in the MATE column.")
+                        }), Level.WARNING, "The value '${mateNumber}' in the ${MATE} column is different from the mate number '${fileNameMateNumber}' parsed from the filename '${fileName}'. " +
+                                "If you ignore this warning, OTP will use the mate number parsed from the filename and ignore the value in the ${MATE} column.")
 
                     }
                 }
