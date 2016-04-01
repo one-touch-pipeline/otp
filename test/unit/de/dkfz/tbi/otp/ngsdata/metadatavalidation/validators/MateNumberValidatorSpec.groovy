@@ -13,7 +13,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 class MateNumberValidatorSpec extends Specification {
 
-    void 'validate, when column is missing, adds error'() {
+    void 'validate, when column is missing, adds no error'() {
 
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
@@ -25,10 +25,7 @@ SomeValue
         new MateNumberValidator().validate(context)
 
         then:
-        Problem problem = exactlyOneElement(context.problems)
-        problem.level == Level.ERROR
-        containSame(problem.affectedCells*.cellAddress, [])
-        problem.message.contains("Mandatory column 'MATE' is missing.")
+        context.problems.empty
     }
 
     void 'validate, all are fine'() {

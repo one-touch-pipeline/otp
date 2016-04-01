@@ -23,6 +23,10 @@ class MateNumberValidator extends SingleValueValidator<MetadataValidationContext
     }
 
     @Override
+    void columnMissing(MetadataValidationContext context) {
+    }
+
+    @Override
     void validateValue(MetadataValidationContext context, String mateNumber, Set<Cell> cells) {
         if (!mateNumber) {
             context.addProblem(cells, Level.ERROR, "The mate number must be provided and must be a positive integer (value >= 1).")
