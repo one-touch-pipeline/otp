@@ -1,14 +1,10 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
-import de.dkfz.tbi.otp.ngsdata.LibraryLayout
-import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
-import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContext
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidator
-import de.dkfz.tbi.util.spreadsheet.validation.Level
-import de.dkfz.tbi.util.spreadsheet.validation.ValueTuple
-import de.dkfz.tbi.util.spreadsheet.validation.ValueTuplesValidator
-import org.springframework.stereotype.Component
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
+import de.dkfz.tbi.util.spreadsheet.validation.*
+import org.springframework.stereotype.*
+import org.springsource.loaded.*
 
 @Component
 class MateNumberLibraryLayoutValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
@@ -22,6 +18,16 @@ class MateNumberLibraryLayoutValidator extends ValueTuplesValidator<MetadataVali
     List<String> getColumnTitles(MetadataValidationContext context) {
         return [MetaDataColumn.MATE.name(),
                 MetaDataColumn.LIBRARY_LAYOUT.name()]
+    }
+
+    @Override
+    boolean columnMissing(MetadataValidationContext context, String columnTitle) {
+        if (columnTitle == MetaDataColumn.MATE.name()) {
+            optionalColumnMissing(context, columnTitle)
+        } else {
+            mandatoryColumnMissing(context, columnTitle)
+        }
+        return false
     }
 
     @Override

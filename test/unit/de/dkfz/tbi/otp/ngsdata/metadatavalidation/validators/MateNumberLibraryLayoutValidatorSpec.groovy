@@ -31,8 +31,8 @@ value1\tvalue2
         where:
         header || messages
         "${MetaDataColumn.MATE.name()}\tlayout" || ["Mandatory column 'LIBRARY_LAYOUT' is missing."]
-        "nomate\t${MetaDataColumn.LIBRARY_LAYOUT.name()}" || ["Mandatory column 'MATE' is missing."]
-        "nomate\tlayout" || ["Mandatory column 'MATE' is missing.", "Mandatory column 'LIBRARY_LAYOUT' is missing."]
+        "nomate\t${MetaDataColumn.LIBRARY_LAYOUT.name()}" || ["Optional column 'MATE' is missing."]
+        "nomate\tlayout" || ["Optional column 'MATE' is missing.", "Mandatory column 'LIBRARY_LAYOUT' is missing."]
     }
 
     void 'validate, all are fine'() {
