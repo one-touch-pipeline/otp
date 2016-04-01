@@ -645,7 +645,6 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
         dataSwapService.deleteProcessingFilesOfProject(project.name, outputFolder.path)
     }
 
-
     @Test
     public void testDeleteProcessingFilesOfProject_NoProcessedData_FastqFilesLinked() {
         Project project = deleteProcessingFilesOfProject_NoProcessedData_SetupWithFiles()
@@ -665,6 +664,49 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
         dataSwapService.deleteProcessingFilesOfProject(project.name, outputFolder.path, true)
     }
 
+    @Test
+    public void testDeleteProcessingFilesOfProject_NoProcessedData_FastqFilesWithdrawn() {
+        SeqTrack seqTrack = deleteProcessingFilesOfProject_NoProcessedData_Setup()
+        Project project = seqTrack.project
+        markFilesAsWithdrawn([seqTrack])
+
+        shouldFail FileNotFoundException, {
+            dataSwapService.deleteProcessingFilesOfProject(project.name, outputFolder.path, true)
+        }
+    }
+
+    @Test
+    public void testDeleteProcessingFilesOfProject_NoProcessedData_FastqFilesWithdrawn_IgnoreWithdrawn() {
+        SeqTrack seqTrack = deleteProcessingFilesOfProject_NoProcessedData_Setup()
+        Project project = seqTrack.project
+        markFilesAsWithdrawn([seqTrack])
+
+        dataSwapService.deleteProcessingFilesOfProject(project.name, outputFolder.path, true, true)
+    }
+
+    @Test
+    public void testDeleteProcessingFileSOfProject_NoProcessedData_FastqFilesAvailalbe_SpecificIndividual() {
+        SeqTrack stInd1 = deleteProcessingFilesOfProject_NoProcessedData_Setup()
+        SeqTrack stInd2 = deleteProcessingFilesOfProject_NoProcessedData_Setup()
+        createFastqFiles([stInd1, stInd2])
+        Project project = stInd1.project
+        stInd2.sample.individual.project = project
+        stInd2.save(flush: true)
+
+        assert [stInd1] == dataSwapService.deleteProcessingFilesOfProject(project.name, outputFolder.path, true, true, [individual: [stInd1.individual]])
+    }
+
+    @Test
+    public void testDeleteProcessingFileSOfProject_NoProcessedData_FastqFilesAvailalbe_SpecificSeqType() {
+        SeqTrack stSeqType1 =  deleteProcessingFilesOfProject_NoProcessedData_Setup()
+        SeqTrack stSeqType2 = deleteProcessingFilesOfProject_NoProcessedData_Setup()
+        createFastqFiles([stSeqType1, stSeqType2])
+        Project project = stSeqType1.project
+        stSeqType2.sample.individual.project = project
+        stSeqType2.save(flush: true)
+
+        assert [stSeqType1] == dataSwapService.deleteProcessingFilesOfProject(project.name, outputFolder.path, true, true, [seqType: [stSeqType1.seqType]])
+    }
 
     private SeqTrack deleteProcessingFilesOfProject_NoProcessedData_Setup() {
         SeqTrack seqTrack = DomainFactory.buildSeqTrackWithTwoDataFiles()
@@ -689,6 +731,12 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
             it.linkedExternally = true
             assert it.save(flush: true)
         }
+    }
+
+    private void markFilesAsWithdrawn(List<SeqTrack> seqTracks) {
+        List<DataFile> dataFiles = DataFile.findAllBySeqTrackInList(seqTracks)
+        dataFiles*.fileWithdrawn = true
+        assert dataFiles*.save(flush: true)
     }
 
     private void createFastqFiles(List<SeqTrack> seqTracks) {
@@ -768,7 +816,6 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
 
         deleteProcessingFilesOfProject_PMBF_Validation(bamFile)
     }
-
 
     private RoddyBamFile deleteProcessingFilesOfProject_RBF_Setup() {
         RoddyBamFile bamFile = DomainFactory.createRoddyBamFile()

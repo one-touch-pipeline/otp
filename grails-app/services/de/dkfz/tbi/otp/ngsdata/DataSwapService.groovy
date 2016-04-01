@@ -3,7 +3,6 @@ package de.dkfz.tbi.otp.ngsdata
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.fileSystemConsistency.*
-import de.dkfz.tbi.otp.ngsqc.*
 
 import javax.sql.DataSource
 
@@ -1145,8 +1144,15 @@ chmod 440 ${newDirectFileName}
      * If ExternallyProcessedMergedBamFiles were imported for this project, an exception is thrown to give the opportunity for clarification.
      * If everything was clarified the method can be called with true for "everythingVerified" so that the mentioned checks won't be executed anymore.
      * If the fastq files are not available an error is thrown.
+     * If withdrawn data should be ignored, set ignoreWithdrawn "true"
+     *
+     * Restrict affected Files by defining optionsMap.
+     * optionsMap[seqType] contains the seqTypes to be queried for
+     * optionsMap[individual] contains the individuals to be queried for
+     *
+     * Return a list containing the affected seqTracks
      */
-    void deleteProcessingFilesOfProject(String projectName, String scriptOutputDirectory, boolean everythingVerified = false) throws FileNotFoundException {
+    List<SeqTrack> deleteProcessingFilesOfProject(String projectName, String scriptOutputDirectory, boolean everythingVerified = false, boolean ignoreWithdrawn = false, Map optionsMap = [:]) throws FileNotFoundException {
 
         Project project = Project.findByName(projectName)
         assert project : "Project does not exist"
@@ -1162,42 +1168,67 @@ chmod 440 ${newDirectFileName}
                     individual {
                         eq('project', project)
                     }
+                    if (optionsMap.containsKey("individual")) {
+                        'in' ('individual', optionsMap.get("individual"))
+                    }
+                }
+                if (optionsMap.containsKey("seqType")) {
+                    'in' ("seqType", optionsMap.get("seqType"))
                 }
             }
         }
         output << "found ${dataFiles.size()} data files for this project\n\n"
         assert !dataFiles.empty : "There are no SeqTracks attached to this project ${projectName}"
 
-        List<SeqTrack> seqTracks = dataFiles*.seqTrack.unique()
+        List<DataFile> withdrawnDataFiles = []
+        List<DataFile> missingFiles = []
+        List<String> filesToClarify = []
 
-        StringBuilder filesToClarify = new StringBuilder()
-        StringBuilder missingFiles = new StringBuilder()
         boolean throwException = false
 
         dataFiles.each {
             if (new File(lsdfFilesService.getFileViewByPidPath(it)).exists()) {
                 if (it.seqTrack.linkedExternally && !everythingVerified) {
-                    filesToClarify.append("${lsdfFilesService.getFileInitialPath(it)}\n")
+                    filesToClarify << lsdfFilesService.getFileInitialPath(it)
                     throwException = true
                 }
             } else {
-                missingFiles.append("${it.toString()}\n")
-                throwException = true
+                // withdrawn data must have no existing fastq files,
+                // to distinguish between missing files and withdrawn files this gets queried
+                // an error is thrown as long as ignoreWithdrawn is false
+                if (it.fileWithdrawn) {
+                    withdrawnDataFiles << it
+                    if (!ignoreWithdrawn) {
+                        throwException = true
+                    }
+                } else {
+                    throwException = true
+                    missingFiles << it
+                }
             }
         }
 
-        if (missingFiles.toString() != "") {
-            output << "The fastq files of the following data files are missing: \n${missingFiles.toString()}\n\n"
+        if (withdrawnDataFiles) {
+            output << "The fastq files of the following ${withdrawnDataFiles.size()} data files are withdrawn: \n${withdrawnDataFiles.join("\n")}\n\n"
         }
 
-        if (filesToClarify.toString() != "") {
-            output << "Talk to the sequencing center not to remove the following fastq files until the realignment is finished: \n ${filesToClarify.toString()}\n\n"
+        if (missingFiles) {
+            output << "The fastq files of the following ${missingFiles.size()} data files are missing: \n${missingFiles.join("\n")}\n\n"
         }
 
-        List<ExternallyProcessedMergedBamFile> externallyProcessedMergedBamFiles = seqTrackService.returnExternallyProcessedMergedBamFiles(seqTracks)
-        assert (!externallyProcessedMergedBamFiles || everythingVerified) :
-                "There are ${externallyProcessedMergedBamFiles.size()} external merged bam files attached to this project. Clarify if the realignment shall be done anyway."
+        if (filesToClarify) {
+            output << "Talk to the sequencing center not to remove the following ${filesToClarify.size()} fastq files until the realignment is finished: \n ${filesToClarify.join("\n")}\n\n"
+        }
 
+        dataFiles = dataFiles - withdrawnDataFiles
+        List<SeqTrack> seqTracks = dataFiles*.seqTrack.unique()
+
+        // in case there are no dataFiles/seqTracks left this can be ignored.
+        if (seqTracks) {
+            List<ExternallyProcessedMergedBamFile> externallyProcessedMergedBamFiles = seqTrackService.returnExternallyProcessedMergedBamFiles(seqTracks)
+            assert (!externallyProcessedMergedBamFiles || everythingVerified):
+                    "There are ${externallyProcessedMergedBamFiles.size()} external merged bam files attached to this project. Clarify if the realignment shall be done anyway."
+        }
 
         if (throwException) {
             println output
@@ -1244,6 +1275,8 @@ chmod 440 ${newDirectFileName}
         output << "bash script to remove files on file system created\n\n"
 
         println output
+
+        return seqTracks
     }
 
     /**
