@@ -102,7 +102,7 @@ class TestCase {
             Set c2Set = c2.toSet()
             c1Set.removeAll(c2)
             c2Set.removeAll(c1)
-            throw new AssertionError("\nIn c1, but not in c2:\n${c1Set.join('\n')}\nIn c2, but not in c1:\n${c2Set.join('\n')}")
+            throw new AssertionError("\nIn c1, but not in c2:\n${c1Set*.toString().sort().join('\n')}\nIn c2, but not in c1:\n${c2Set*.toString().sort().join('\n')}")
         }
         return true
     }
