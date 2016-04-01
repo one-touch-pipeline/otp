@@ -32,7 +32,7 @@ class DeepSampleIdentifierParser implements SampleIdentifierParser{
         String cellType = "(Ad|CM|Ec|EM|Fi|He|HG|HR|Ku|Ma|Mc|Mo|Mu|NP|PM|TA|Th|Ti|TM4|TM8|TN|TN8|T8)"
         String disease = "(CD|Ci|Ct|C[0-9]|Db[0-9]|D[1-9]|Oa|OC|OS|PH|PS|RA|SC|Si|SL|SO|SP[1-9]|St|TE|TO|T[1-9]|UC)"
         String diseaseSuffix = "([0-9])"
-        String libraryStrategy = "(CTCF|DNase|H3K27ac|H3K27me3|H3K36me3|H3K4me1|H3K4me2|H3K4me3|H3K9me3|Input|mRNA|NOMe|PpargAb[12]|reH3K4me3|reH3K27me3|RRBS|snRNA|tRNA|WGBS)"
+        String libraryStrategy = "(ATAC|CTCF|DNase|H3K27ac|H3K27me3|H3K36me3|H3K4me1|H3K4me2|H3K4me3|H3K9me3|Input|mRNA|NOMe|PpargAb[12]|reH3K4me3|reH3K27me3|RRBS|snRNA|tRNA|WGBS)"
         String sequenceCenter = "(B|E|F|K|M|S|I|R)"
         String replicateNr = "([1-9])"
         String optChange = ""
