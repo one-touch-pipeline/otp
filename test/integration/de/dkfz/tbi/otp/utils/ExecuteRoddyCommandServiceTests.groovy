@@ -28,6 +28,9 @@ class ExecuteRoddyCommandServiceTests {
     final String CONFIG_NAME = "WORKFLOW_VERSION"
     final String ANALYSIS_ID = "WHOLE_GENOME"
 
+    public static final String RODDY_EXECUTION_DIR_NAME_1 = "exec_000000_000000000_a_a"
+    public static final String RODDY_EXECUTION_DIR_NAME_2 = "exec_000000_000000000_b_b"
+
     File roddyPath
     File roddyCommand
     File tmpOutputDir
@@ -241,26 +244,59 @@ class ExecuteRoddyCommandServiceTests {
     }
 
 
-    @Test
-    void testDefaultRoddyExecutionCommand_AllFine() {
+    void helperFor_testDefaultRoddyExecutionCommand_AllFine() {
         executeRoddyCommandService.metaClass.createWorkOutputDirectory = { Realm realm, File file -> }
 
         String viewByPid = roddyBamFile.individual.getViewByPidPathBase(roddyBamFile.seqType).absoluteDataManagementPath.path
 
         String expectedCmd = "cd /tmp && " +
-"sudo -u OtherUnixUser ${roddyCommand} rerun ${CONFIG_NAME}.config@${ANALYSIS_ID} " +
-"${roddyBamFile.individual.pid} " +
-"--useconfig=${applicationIniPath} " +
-"--usefeaturetoggleconfig=${featureTogglesConfigPath} " +
-"--useRoddyVersion=${roddyVersion} " +
-"--usePluginVersion=${roddyBamFile.config.pluginVersion} " +
-"--configurationDirectories=${new File(roddyBamFile.config.configFilePath).parent},${roddyBaseConfigsPath} " +
-"--useiodir=${viewByPid},${roddyBamFile.workDirectory} "
+                "sudo -u OtherUnixUser ${roddyCommand} rerun ${CONFIG_NAME}.config@${ANALYSIS_ID} " +
+                "${roddyBamFile.individual.pid} " +
+                "--useconfig=${applicationIniPath} " +
+                "--usefeaturetoggleconfig=${featureTogglesConfigPath} " +
+                "--useRoddyVersion=${roddyVersion} " +
+                "--usePluginVersion=${roddyBamFile.config.pluginVersion} " +
+                "--configurationDirectories=${new File(roddyBamFile.config.configFilePath).parent},${roddyBaseConfigsPath} " +
+                "--useiodir=${viewByPid},${roddyBamFile.workDirectory} "
 
         LogThreadLocal.withThreadLog(System.out) {
             String actualCmd = executeRoddyCommandService.defaultRoddyExecutionCommand(roddyBamFile, CONFIG_NAME, ANALYSIS_ID, realm)
             assert expectedCmd == actualCmd
         }
+    }
+
+    @Test
+    void testDefaultRoddyExecutionCommand_firstRun_AllFine() {
+        helperFor_testDefaultRoddyExecutionCommand_AllFine()
+
+        assert roddyBamFile.roddyExecutionDirectoryNames.empty
+    }
+
+    @Test
+    void testDefaultRoddyExecutionCommand_restartWithoutDeletedWorkDirectory_AllFine() {
+        roddyBamFile.roddyExecutionDirectoryNames = [
+                RODDY_EXECUTION_DIR_NAME_1
+        ]
+        roddyBamFile.save(flush: true, failOnError: true)
+        assert roddyBamFile.workDirectory.mkdirs()
+
+        helperFor_testDefaultRoddyExecutionCommand_AllFine()
+
+        assert 1 == roddyBamFile.roddyExecutionDirectoryNames.size()
+        assert [RODDY_EXECUTION_DIR_NAME_1] == roddyBamFile.roddyExecutionDirectoryNames
+    }
+
+    @Test
+    void testDefaultRoddyExecutionCommand_restartWithDeletedWorkDirectory_AllFine() {
+        roddyBamFile.roddyExecutionDirectoryNames = [
+                RODDY_EXECUTION_DIR_NAME_1,
+                RODDY_EXECUTION_DIR_NAME_2,
+        ]
+        roddyBamFile.save(flush: true, failOnError: true)
+
+        helperFor_testDefaultRoddyExecutionCommand_AllFine()
+
+        assert roddyBamFile.roddyExecutionDirectoryNames.empty
     }
 
     @Test

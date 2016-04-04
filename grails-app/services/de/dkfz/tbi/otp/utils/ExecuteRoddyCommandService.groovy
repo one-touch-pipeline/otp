@@ -38,6 +38,11 @@ class ExecuteRoddyCommandService {
         assert analysisIDinConfigFile : "The input analysisIDinConfigFile is not allowed to be null"
         assert realm : "The input realm is not allowed to be null"
 
+        if (roddyResult.roddyExecutionDirectoryNames && !roddyResult.workDirectory.exists()) {
+            roddyResult.roddyExecutionDirectoryNames.clear()
+            roddyResult.save(flush: true)
+        }
+
         File workOutputDir = roddyResult.workDirectory
         createWorkOutputDirectory(realm, workOutputDir)
 
