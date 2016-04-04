@@ -60,9 +60,7 @@ class ShutdownController {
     }
 
     def closeApplication() {
-        runAsync {
-            grailsApplication.mainContext.close()
-        }
+        shutdownService.destroy()
         def data = [shutdown: true]
         render data as JSON
     }

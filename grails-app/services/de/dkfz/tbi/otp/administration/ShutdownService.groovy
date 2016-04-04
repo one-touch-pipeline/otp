@@ -38,6 +38,7 @@ class ShutdownService implements DisposableBean {
     // all methods in this service contain critical sections to not start two shutdowns
     private final ReentrantLock lock = new ReentrantLock()
 
+    @Override
     void destroy() {
         ShutdownInformation.withNewSession { session ->
             if (isShutdownPlanned()) {
@@ -47,19 +48,23 @@ class ShutdownService implements DisposableBean {
                     return
                 }
                 markPlannedShutdownAsSucceeded(info)
-                // TODO: check that all jobs have really stopped
-                List<ProcessingStep> runningJobs = schedulerService.retrieveRunningProcessingSteps()
-                runningJobs.each { ProcessingStep step ->
-                    if (isJobResumable(step)) {
-                        suspendProcessingStep(step)
-                        log.info("ProcessingStep ${step.id} has been suspended")
-                    } else {
-                        log.warn("ProcessingStep ${step.id} is not resumable, but the server is shutting down")
-                    }
-                }
+                suspendResumeableJobs()
                 log.info("OTP is shutting down")
             } else {
                 log.warn("OTP is shutting down without a planned shutdown")
+            }
+        }
+    }
+
+    void suspendResumeableJobs() {
+        // TODO: check that all jobs have really stopped
+        List<ProcessingStep> runningJobs = schedulerService.retrieveRunningProcessingSteps()
+        runningJobs.each { ProcessingStep step ->
+            if (isJobResumable(step)) {
+                suspendProcessingStep(step)
+                log.info("ProcessingStep ${step.id} has been suspended")
+            } else {
+                log.warn("ProcessingStep ${step.id} is not resumable, but the server is shutting down")
             }
         }
     }
@@ -78,7 +83,7 @@ class ShutdownService implements DisposableBean {
                 return
             }
             ShutdownInformation.withTransaction { status ->
-                User user = userService.currentUser
+                User user = User.findByUsername(springSecurityService.authentication.principal.username)
                 ShutdownInformation info = new ShutdownInformation(initiatedBy: user, initiated: new Date(), reason: reason)
                 if (!info.validate()) {
                     println info.errors
@@ -113,7 +118,7 @@ class ShutdownService implements DisposableBean {
                     status.setRollbackOnly()
                     // TODO: throw exception
                 }
-                info.canceledBy = userService.currentUser
+                info.canceledBy = User.findByUsername(springSecurityService.authentication.principal.username)
                 info.canceled = new Date()
                 if (!info.validate()) {
                     println info.errors
@@ -206,6 +211,7 @@ class ShutdownService implements DisposableBean {
         }
     }
 
+    @SuppressWarnings("GrMethodMayBeStatic" /* because accessing "log" */)
     private void suspendProcessingStep(ProcessingStep step) {
         ProcessingStepUpdate update = new ProcessingStepUpdate(
                 date: new Date(),
