@@ -103,6 +103,7 @@ class ProjectOverviewController {
         return [
                 projects: projects*.name,
                 project: project.name,
+                nameInMetadata: project.nameInMetadataFiles?: '',
                 alignmentInfo: alignmentInfo,
                 alignmentError: alignmentError,
                 snv: project.snv,
@@ -352,6 +353,10 @@ class ProjectOverviewController {
         checkErrorAndCallMethod(cmd, { contactPersonService.updateAspera(cmd.contactPersonName, cmd.newAspera) })
     }
 
+    JSON updateNameInMetadataFiles(UpdateNameInMetadataCommand cmd) {
+        checkErrorAndCallMethod(cmd, { projectService.updateNameInMetadata(cmd.newNameInMetadata, projectService.getProjectByName(cmd.projectName)) })
+    }
+
     JSON dataTableContactPerson(DataTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()
         List data = ContactPerson.withCriteria
@@ -562,6 +567,29 @@ class UpdateContactPersonAsperaCommand implements Serializable {
     }
     void setValue(String value) {
         this.newAspera = value?.trim()?.replaceAll(" +", " ")
+    }
+}
+
+class UpdateNameInMetadataCommand implements Serializable {
+    String newNameInMetadata
+    String projectName
+    static constraints = {
+        newNameInMetadata(nullable: true, validator: { val, obj ->
+            Project projectByNameInMetadata = Project.findByNameInMetadataFiles(val)
+            if (val && projectByNameInMetadata && projectByNameInMetadata.name != obj.projectName) {
+                return '\'' + val + '\' exists already in another project as nameInMetadataFiles entry'
+            }
+            if (val != obj.projectName && Project.findByName(val)) {
+                return '\'' + val + '\' is used in another project as project name'
+            }
+        })
+        projectName(blank: false)
+    }
+    void setValue(String value) {
+        this.newNameInMetadata = value?.trim()?.replaceAll(" +", " ")
+        if (this.newNameInMetadata == "") {
+            this.newNameInMetadata = null
+        }
     }
 }
 

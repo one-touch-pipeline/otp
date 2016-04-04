@@ -26,6 +26,10 @@
                     <td class="myKey"><g:message code="projectOverview.lastDate"/></td>
                     <td id="last-received-date"></td>
                 </tr>
+                <tr>
+                    <td class="myKey"><g:message code="projectOverview.nameInMetadata"/></td>
+                    <td id="nameInMetadata">${nameInMetadata} <input class= "edit-button-left" type="button" onclick="$.otp.projectOverviewTable.updateValue('NameInMetadataFiles','','${nameInMetadata}', '')"/></td>
+                </tr>
             </table>
         </div>
         <div class="otpDataTables">

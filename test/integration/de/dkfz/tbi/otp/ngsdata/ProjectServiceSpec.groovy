@@ -61,4 +61,41 @@ class ProjectServiceSpec extends Specification implements UserAndRoles {
         'project'       | 'dir'     | ''            | ''                    | true      || 'blank'                                                                                      | 'on field \'nameInMetadataFiles\': rejected value []'
         'project'       | 'testDir' | ''            | ''                    | true      || 'unique'                                                                                     | 'on field \'dirName\': rejected value [testDir]'
     }
+
+    void "test updateNameInMetadata valid input"() {
+        when:
+        Project project = Project.findByName("testProject")
+        SpringSecurityUtils.doWithAuth("admin"){
+            projectService.updateNameInMetadata(name, project)
+        }
+
+        then:
+        project.nameInMetadataFiles == name
+
+        where:
+        name                | _
+        'testProject'       | _
+        'testProject2'      | _
+        'newTestProject'    | _
+        null                | _
+    }
+
+    void "test updateNameInMetadata invalid input"() {
+        when:
+        Project project = Project.findByName("testProject3")
+        SpringSecurityUtils.doWithAuth("admin"){
+            projectService.updateNameInMetadata(name, project)
+        }
+
+        then:
+        grails.validation.ValidationException ex = thrown()
+        ex.message.contains(errorName) && ex.message.contains(errorLocaction)
+
+
+        where:
+        name            || errorName                                                                                    | errorLocaction
+        'testProject'   || 'this nameInMetadataFiles is already used in another project as name entry'                  | 'on field \'nameInMetadataFiles\': rejected value [testProject]'
+        'testProject2'  || 'this nameInMetadataFiles is already used in another project as nameInMetadataFiles entry'   | 'on field \'nameInMetadataFiles\': rejected value [testProject2]'
+        ''              || 'blank'                                                                                      | 'on field \'nameInMetadataFiles\': rejected value []'
+    }
 }
