@@ -37,7 +37,8 @@ class SeqTrack implements ProcessParameterObject {
     /**
      * The number of bases of all FASTQ files belonging to a single {@link SeqTrack}
      * <p>
-     * SeqTrack.nBasePairs = {@link DataFile#nReads} * {@link DataFile#sequenceLength} * number of DataFiles
+     * SeqTrack.nBasePairs = sum of the product {@link DataFile#nReads} * {@link DataFile#sequenceLength} of all
+     * DataFiles belonging to the SeqTrack
      * <p>
      * Typical values:
      * <ul>
