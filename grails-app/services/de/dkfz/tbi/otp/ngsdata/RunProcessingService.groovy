@@ -8,48 +8,6 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 
 class RunProcessingService {
 
-    /**
-     * Returns a run which has new RunSegment
-     * @return
-     */
-    Run runWithNewMetaData() {
-        RunSegment segment =
-            RunSegment.findByMetaDataStatusAndCurrentFormatNotEqual(
-                    RunSegment.Status.NEW, RunSegment.DataFormat.TAR
-                 )
-        return (segment) ? segment.run : null
-    }
-
-    void blockMetaData(Run run) {
-        def c = RunSegment.createCriteria()
-        List<RunSegment> segments = c.list {
-            and{
-                eq("run", run)
-                eq("metaDataStatus", RunSegment.Status.NEW)
-                ne("currentFormat", RunSegment.DataFormat.TAR)
-            }
-        }
-        for (RunSegment segment in segments) {
-            segment.metaDataStatus = RunSegment.Status.BLOCKED
-            segment.save(flush: true)
-        }
-    }
-
-    public List<DataFile> dataFilesWithMetaDataInProcessing(Run run) {
-        List<RunSegment> segments =
-            RunSegment.findAllByRunAndMetaDataStatus(run, RunSegment.Status.PROCESSING)
-        return DataFile.findAllByRunSegmentInList(segments)
-    }
-
-    void setMetaDataComplete(Run run) {
-        List<RunSegment> segments =
-            RunSegment.findAllByRunAndMetaDataStatus(run, RunSegment.Status.PROCESSING)
-        for (RunSegment segment in segments) {
-            segment.metaDataStatus = RunSegment.Status.COMPLETE
-            segment.save(flush: true)
-        }
-    }
-
     Run runReadyToCheckFinalLocation() {
         def c = RunSegment.createCriteria()
         List<RunSegment> segments = c.list {

@@ -578,12 +578,7 @@ projectProgress.progress.samples
 projectProgress.progress.runs
 
 #RunSubmit
-runSubmit.title
-runSubmit.runNameAndDataLocation
-runSubmit.sequencingCenter
-runSubmit.sequencingPlatform
 runSubmit.align
-runSubmit.error
 
 # Processes
 processes.list.title

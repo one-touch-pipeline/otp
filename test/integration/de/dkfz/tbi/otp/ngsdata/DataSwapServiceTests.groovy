@@ -540,12 +540,10 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     public void testDeleteRunAndRunSegmentsWithoutDataOfOtherProjects() throws Exception {
         Run run = Run.build()
         Project project = Project.build()
-        RunByProject runByProject = RunByProject.build(run: run, project: project)
         RunSegment runSegment = RunSegment.build(run: run)
 
         dataSwapService.deleteRunAndRunSegmentsWithoutDataOfOtherProjects(run, project)
 
-        assert !RunByProject.get(runByProject.id)
         assert !Run.get(run.id)
         assert !RunSegment.get(runSegment.id)
     }
@@ -554,7 +552,6 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     public void testDeleteRun() throws Exception {
         StringBuilder outputStringBuilder = new StringBuilder()
         Run run = Run.build()
-        RunByProject runByProject = RunByProject.build(run: run)
         RunSegment runSegment = RunSegment.build(run: run)
         DataFile dataFile = DataFile.build(run: run)
         MetaDataFile metaDataFile = DomainFactory.createMetaDataFile(runSegment: runSegment)
@@ -562,7 +559,6 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
         dataSwapService.deleteRun(run, outputStringBuilder)
 
         assert !Run.get(run.id)
-        assert !RunByProject.get(runByProject.id)
         assert !RunSegment.get(runSegment.id)
         assert !DataFile.get(dataFile.id)
         assert !MetaDataFile.get(metaDataFile.id)
@@ -572,7 +568,6 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     public void testDeleteRunByName() throws Exception {
         StringBuilder outputStringBuilder = new StringBuilder()
         Run run = Run.build()
-        RunByProject runByProject = RunByProject.build(run: run)
         RunSegment runSegment = RunSegment.build(run: run)
         DataFile dataFile = DataFile.build(run: run)
         MetaDataFile metaDataFile = DomainFactory.createMetaDataFile(runSegment: runSegment)
@@ -580,7 +575,6 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
         dataSwapService.deleteRunByName(run.name, outputStringBuilder)
 
         assert !Run.get(run.id)
-        assert !RunByProject.get(runByProject.id)
         assert !RunSegment.get(runSegment.id)
         assert !DataFile.get(dataFile.id)
         assert !MetaDataFile.get(metaDataFile.id)

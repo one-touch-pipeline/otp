@@ -223,53 +223,6 @@ class SeqPlatformServiceTests {
     }
 
     @Test
-    void test_validateSeqPlatform_PlatformGivenByNameAndModelAndKit_shouldReturnTrue() {
-        def (run, dataFile) = createDataFor_validateSeqPlatform()
-
-        assert seqPlatformService.validateSeqPlatform(run.id)
-    }
-
-    @Test
-    void test_validateSeqPlatform_PlatformGivenByNameAndModelAndKit_shouldReturnFalse_unknownModel() {
-        def (run, dataFile) = createDataFor_validateSeqPlatform(model: 'invalid model')
-        checkedLogger.addError("Could not find a SeqPlatformModelLabel for 'invalid model' (requested by file ${dataFile})")
-
-        assert !seqPlatformService.validateSeqPlatform(run.id)
-    }
-
-    @Test
-    void test_validateSeqPlatform_PlatformGivenByNameAndModelAndKit_shouldReturnFalse_unknownKit() {
-        def (run, dataFile) = createDataFor_validateSeqPlatform(kit: 'invalid kit')
-        checkedLogger.addError("Could not find a SequencingKitLabel for 'invalid kit' (requested by file ${dataFile})")
-
-        assert !seqPlatformService.validateSeqPlatform(run.id)
-    }
-
-    @Test
-    void test_validateSeqPlatform_PlatformGivenByNameAndModelAndKit_shouldReturnFalse_modelIsEmpty() {
-        def (run, dataFile) = createDataFor_validateSeqPlatform(model: '')
-        checkedLogger.addError("Could not find a SeqPlatform for 'INSTRUMENT_PLATFORM:${PLATFORM_NAME}' and 'INSTRUMENT_MODEL:' and 'SEQUENCING_KIT:${KIT_NAME}' (requested by file ${dataFile})")
-
-        assert !seqPlatformService.validateSeqPlatform(run.id)
-    }
-
-    @Test
-    void test_validateSeqPlatform_PlatformGivenByNameAndModelAndKit_shouldReturnFalse_kitIsEmpty() {
-        def (run, dataFile) = createDataFor_validateSeqPlatform(kit: '')
-        checkedLogger.addError("Could not find a SeqPlatform for 'INSTRUMENT_PLATFORM:${PLATFORM_NAME}' and 'INSTRUMENT_MODEL:${MODEL_NAME}' and 'SEQUENCING_KIT:' (requested by file ${dataFile})")
-
-        assert !seqPlatformService.validateSeqPlatform(run.id)
-    }
-
-    @Test
-    void test_validateSeqPlatform_PlatformGivenByNameAndModelAndKit_shouldReturnFalse_platFormsAreIncompatible() {
-        def (run, dataFile) = createDataFor_validateSeqPlatform([:], true)
-        checkedLogger.addError("The found seqPlatform '${PLATFORM_NAME} ${MODEL_NAME} unknown kit' differs from the one of the run '${PLATFORM_NAME} ${MODEL_NAME} ${KIT_NAME}'")
-
-        assert !seqPlatformService.validateSeqPlatform(run.id)
-    }
-
-    @Test
     void testCreateNewSeqPlatform_SeqPlatformExistsAlready_shouldFail() {
         SeqPlatform.build(
                 name: PLATFORM_NAME,

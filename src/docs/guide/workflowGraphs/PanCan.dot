@@ -2,9 +2,8 @@ digraph workflows {
   labelloc="t";
   label="PanCan workflow";
 
-  LoadMetaData [label="LoadMetaData (per run)"]
   DataInstallation [label="DataInstallation (per run)"];
   Fastqc [label="Fastqc (per lane)"];
-  LoadMetaData -> DataInstallation -> Fastqc
+  DataInstallation -> Fastqc
   DataInstallation -> "PanCan (per merged BAM file)" -> "Snv (per pair of merged BAM files)"
 }

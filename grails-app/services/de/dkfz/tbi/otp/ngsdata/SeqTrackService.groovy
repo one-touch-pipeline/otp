@@ -17,7 +17,6 @@ import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.job.processing.ProcessingException
 import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 import static org.springframework.util.Assert.notNull
 
@@ -46,10 +45,6 @@ class SeqTrackService {
 
     @Autowired
     ApplicationContext applicationContext
-
-    MultiplexingService multiplexingService
-
-    LibraryPreparationKitService libraryPreparationKitService
 
     /**
      * Retrieves the Sequences matching the given filtering the user has access to.
@@ -304,152 +299,14 @@ LIMIT 1
         return filteredFiles
     }
 
-    /**
-     *
-     * A sequence track corresponds to one lane in Illumina
-     * and one slide in Solid.
-     *
-     * This method build sequence tracks for a given run.
-     * To each sequence track there are raw data and alignment
-     * data attached
-     *
-     * @param runId
-     */
-    public void buildSequenceTracks(long runId) {
-        Run run = Run.get(runId)
-        Set<String> lanes = getSetOfLanes(run)
-        lanes.each{String laneId ->
-            buildOneSequenceTrack(run, laneId)
-        }
-    }
-
-    private Set<String> getSetOfLanes(Run run) {
-        MetaDataKey key = MetaDataKey.findByName(MetaDataColumn.LANE_NO.name())
-        Set<String> lanes = new HashSet<String>()
-        DataFile.findAllByRun(run).each { DataFile dataFile ->
-            if (!fileTypeService.isGoodSequenceDataFile(dataFile)) {
-                return
-            }
-            MetaDataEntry laneValue = MetaDataEntry.findByDataFileAndKey(dataFile, key)
-            if (!laneValue) {
-                throw new LaneNotDefinedException(run.name, dataFile.fileName)
-            }
-            lanes << laneValue.value
-        }
-        return lanes
-    }
-
-    /**
-     * builds one sequence track (SeqTrack).
-     * If the seqTrack for a given run and given lane already exists
-     * it is used and only alignment files could be attached.
-     * Once the seqTrack is created it is not possible to add sequence files to it.
-     *
-     * @param run Run for which sequence track is build
-     * @param lane Lane identifier
-     */
-    private void buildOneSequenceTrack(Run run, String lane) {
-        SeqTrack seqTrack = SeqTrack.findByRunAndLaneId(run, lane)
-        if (!seqTrack) {
-            seqTrack = buildFastqSeqTrack(run, lane)
-        }
-        appendAlignmentToSeqTrack(seqTrack)
-    }
-
-    private SeqTrack buildFastqSeqTrack(Run run, String lane) {
-        // find sequence files
-        List<DataFile> dataFiles =
-                        getRunFilesWithTypeAndLane(run, FileType.Type.SEQUENCE, lane)
-        if (!dataFiles) {
-            throw new ProcessingException("No laneDataFiles found.")
-        }
-        Sample sample = getSample(dataFiles.get(0))
-        assertConsistentSample(sample, dataFiles)
-
-        SeqType seqType = getSeqType(dataFiles.get(0))
-        assertConsistentSeqType(seqType, dataFiles)
-
-        assertConsistentLibraryPreparationKit(dataFiles)
-
-        SoftwareTool pipeline = getPipeline(dataFiles.get(0))
-        assertConsistentPipeline(pipeline, dataFiles)
-
-        String ilseId = assertAndReturnConcistentIlseId(dataFiles)
-
-        SeqTrack seqTrack = createSeqTrack(dataFiles.get(0), run, sample, seqType, lane, pipeline, ilseId)
-        consumeDataFiles(dataFiles, seqTrack)
-        fillInsertSizeForSeqTrack(seqTrack)
-        assert seqTrack.save(failOnError: true, flush: true)
-
-        boolean willBeAligned = decideAndPrepareForAlignment(seqTrack)
-        determineAndStoreIfFastqFilesHaveToBeLinked(seqTrack, willBeAligned)
-
-        return seqTrack
-    }
-
-    private SeqTrack createSeqTrack(DataFile dataFile, Run run, Sample sample, SeqType seqType, String lane, SoftwareTool pipeline, String ilseId = null) {
-        SeqTrackBuilder builder = new SeqTrackBuilder(lane, run, sample, seqType, run.seqPlatform, pipeline, ilseId)
-        builder.setHasFinalBam(false).setHasOriginalBam(false).setUsingOriginalBam(false)
-
-        extractAndSetLibraryPreparationKit(dataFile, builder, run, sample)
-
-        /*
-         * There is one special case which needs a specific treatment.
-         * For all other cases the default suffices.
-         */
-        if (seqType.name == SeqTypeNames.CHIP_SEQ.seqTypeName) {
-            annotateSeqTrackForChipSeq(dataFile, builder)
-        }
-
-        SeqTrack seqTrack = builder.create()
-        seqTrack.save(flush: true)
-        return seqTrack
-    }
-
-
-    void extractAndSetLibraryPreparationKit(DataFile dataFile, SeqTrackBuilder builder, Run run, Sample sample) {
-        notNull(dataFile, "The input dataFile of the method annotateSeqTrackForExome is null")
-        notNull(builder, "The input builder of the method annotateSeqTrackForExome is null")
-        notNull(run, "The input run of the method annotateSeqTrackForExome is null")
-        notNull(sample, "The input sample of the method annotateSeqTrackForExome is null")
-
-        MetaDataKey key = MetaDataKey.findByName(MetaDataColumn.LIB_PREP_KIT.name())
-        MetaDataEntry metaDataEntry = MetaDataEntry.findByDataFileAndKey(dataFile, key)
-        if (metaDataEntry == null) {
-            builder.setInformationReliability(InformationReliability.UNKNOWN_UNVERIFIED)
-        } else if (!metaDataEntry.value) {
-            assert builder.seqType.name != SeqTypeNames.EXOME.seqTypeName
-            builder.setInformationReliability(InformationReliability.UNKNOWN_UNVERIFIED)
-        } else if (metaDataEntry.value == InformationReliability.UNKNOWN_VERIFIED.rawValue) {
-            builder.setInformationReliability(InformationReliability.UNKNOWN_VERIFIED)
-        } else {
-            LibraryPreparationKit libraryPreparationKit = libraryPreparationKitService.findLibraryPreparationKitByNameOrAlias(metaDataEntry.value)
-            notNull(libraryPreparationKit, "There is no LibraryPreparationKit in the DB for the metaDataEntry ${metaDataEntry.value} of run ${run}")
-            builder.setLibraryPreparationKit(libraryPreparationKit)
-        }
-    }
-
-
-    private void annotateSeqTrackForChipSeq(DataFile dataFile, SeqTrackBuilder builder) {
-        notNull(dataFile, "The input dataFile of method annotateSeqTrackForChipSeq is null")
-        notNull(builder, "The input builder of the method annotateSeqTrackForChipSeq is null")
-        MetaDataKey key = MetaDataKey.findByName(MetaDataColumn.ANTIBODY_TARGET.name())
-        MetaDataEntry metaDataEntry = MetaDataEntry.findByDataFileAndKey(dataFile, key)
-        notNull(metaDataEntry, "There is no metaDataEntry for the key " + key + " and the file " + dataFile)
-        builder.setAntibodyTarget(AntibodyTarget.findByName(metaDataEntry.value))
-        key = MetaDataKey.findByName(MetaDataColumn.ANTIBODY.name())
-        metaDataEntry = MetaDataEntry.findByDataFileAndKey(dataFile, key)
-        if (metaDataEntry) {
-            builder.setAntibody(metaDataEntry.value)
-        }
-    }
-
+    // TODO OTP-2040: Do we still need this method?
     private Sample getSample(DataFile file) {
         String sampleName = metaDataValue(file, MetaDataColumn.SAMPLE_ID.name())
         SampleIdentifier idx = SampleIdentifier.findByName(sampleName)
         return idx.sample
     }
 
+    // TODO OTP-2040: Do we still need this method?
     private void assertConsistentSample(Sample sample, List<DataFile> files) {
         for(DataFile file in files) {
             Sample fileSample = getSample(file)
@@ -457,89 +314,6 @@ LIMIT 1
                 throw new SampleInconsistentException(files, sample, fileSample)
             }
         }
-    }
-
-    private SeqType getSeqType(DataFile file) {
-        String type = metaDataValue(file, MetaDataColumn.SEQUENCING_TYPE.name())
-        String layout = metaDataValue(file, MetaDataColumn.LIBRARY_LAYOUT.name())
-        SeqType seqType = SeqType.findByNameAndLibraryLayout(type, layout)
-        if (!seqType) {
-            throw new SeqTypeNotDefinedException(type, layout)
-        }
-        return seqType
-    }
-
-    private void assertConsistentSeqType(SeqType seqType, List<DataFile> files) {
-        for(DataFile file in files) {
-            SeqType fileSeqType = getSeqType(file)
-            if (!seqType.equals(fileSeqType)) {
-                throw new MetaDataInconsistentException(files, seqType.name, fileSeqType.name)
-            }
-        }
-    }
-
-    private void assertConsistentLibraryPreparationKit(List<DataFile> files) {
-        assertConsistentWithinSeqTrack(files, MetaDataColumn.LIB_PREP_KIT)
-    }
-
-    private String assertAndReturnConcistentIlseId(List<DataFile> files) {
-        return assertConsistentWithinSeqTrack(files, MetaDataColumn.ILSE_NO)
-    }
-
-    private String assertConsistentWithinSeqTrack(List<DataFile> files, MetaDataColumn metaDataColumn) {
-        List<String> values = files.collect { DataFile dataFile ->
-            MetaDataKey key = MetaDataKey.findByName(metaDataColumn.name())
-            MetaDataEntry metaDataEntry = MetaDataEntry.findByDataFileAndKey(dataFile, key)
-            return metaDataEntry?.value
-        }
-        String value = values.first()
-        if (!values.every { it == value }) {
-            throw new ProcessingException("Not using the same ${metaDataColumn.name()} (files: ${files*.fileName})")
-        }
-        return value
-    }
-
-
-
-    private SoftwareTool getPipeline(DataFile file) {
-        String name = metaDataValue(file, MetaDataColumn.PIPELINE_VERSION.name())
-        List<SoftwareToolIdentifier> idx = SoftwareToolIdentifier.findAllByName(name)
-        for(SoftwareToolIdentifier si in idx) {
-            if (si.softwareTool.type == SoftwareTool.Type.BASECALLING) {
-                return si.softwareTool
-            }
-        }
-        return null
-    }
-
-    private void assertConsistentPipeline(SoftwareTool pipeline, List<DataFile> files) {
-        for (DataFile file in files) {
-            SoftwareTool filePipeline = getPipeline(file)
-            if (!pipeline.equals(filePipeline)) {
-                throw new MetaDataInconsistentException(files, pipeline.programName, filePipeline.programName)
-            }
-        }
-    }
-
-    private void consumeDataFiles(List<DataFile> files, SeqTrack seqTrack) {
-        files.each {DataFile dataFile ->
-            dataFile.seqTrack = seqTrack
-            dataFile.project = seqTrack.project
-            dataFile.used = true
-            dataFile.save(flush: true)
-        }
-    }
-
-    /**
-     *
-     * Fills the numbers in the SeqTrack object using MetaDataEntry
-     * objects from the DataFile objects belonging to this SeqTrack.
-     *
-     * @param seqTrack
-     * @return manipulated seqTrack
-     */
-    private void fillInsertSizeForSeqTrack(SeqTrack seqTrack) {
-        seqTrack.insertSize = metaDataLongValue(DataFile.findBySeqTrack(seqTrack), MetaDataColumn.INSERT_SIZE.name())
     }
 
     public void fillBaseCount(SeqTrack seqTrack) {
@@ -552,6 +326,7 @@ LIMIT 1
         assert seqTrack.save(flush: true)
     }
 
+    // TODO OTP-2040: Do we still need this method?
     /**
      * Attach alignment files to a given seq track
      * @param seqTrack
@@ -586,6 +361,7 @@ LIMIT 1
         seqTrack.save(flush: true)
     }
 
+    // TODO OTP-2040: Do we still need this method?
     Set<SoftwareTool> getAlignmentPipelineSet(List<DataFile> alignFiles) {
         Set<SoftwareTool> set = new HashSet<SoftwareTool>()
         for(DataFile file in alignFiles) {
@@ -595,6 +371,7 @@ LIMIT 1
         return set
     }
 
+    // TODO OTP-2040: Do we still need this method?
     SoftwareTool getAlignmentPipeline(DataFile file) {
         String name = metaDataValue(file, MetaDataColumn.ALIGN_TOOL.name())
         List<SoftwareToolIdentifier> idx = SoftwareToolIdentifier.findAllByName(name)
@@ -606,6 +383,7 @@ LIMIT 1
         return null
     }
 
+    // TODO OTP-2040: Do we still need this method?
     private AlignmentParams getAlignmentParams(SoftwareTool pipeline) {
         AlignmentParams alignParams = AlignmentParams.findByPipeline(pipeline)
         if (!alignParams) {
@@ -615,6 +393,7 @@ LIMIT 1
         return alignParams
     }
 
+    // TODO OTP-2040: Do we still need this method?
     private void consumeAlignmentFiles(AlignmentLog alignLog, List<DataFile> files, SoftwareTool pipeline) {
         for(DataFile file in files) {
             SoftwareTool filePipeline = getAlignmentPipeline(file)
@@ -627,6 +406,7 @@ LIMIT 1
         }
     }
 
+    // TODO OTP-2040: Do we still need this method?
     /**
      * Return all dataFiles for a given run, type and lane
      * Only dataFiles which are not used are returned
@@ -653,38 +433,7 @@ AND entry.value = :value
         return dataFiles
     }
 
-
-    /**
-     *
-     * checks if all sequence (raw and aligned) data files are attached
-     * to SeqTrack objects. If yes the field DataFile.used field is set to true.
-     * if data file is a sequence or alignment type and is
-     * not used it contains errors in meta-data
-     *
-     * @param runId
-     */
-    public boolean checkSequenceTracks(long runId) {
-        Run run = Run.get(runId)
-        List<RunSegment> segments = RunSegment.findAllByRun(run)
-        boolean allUsed = true
-        for (RunSegment segment in segments) {
-            segment.allFilesUsed = true
-            List<DataFile> files = DataFile.findAllByRunSegment(segment)
-            for (DataFile file in files) {
-                if (fileTypeService.isRawDataFile(file)) {
-                    if (!file.used) {
-                        segment.allFilesUsed = false
-                        allUsed = false
-                        LogThreadLocal.getThreadLog()?.error("Datafile " + file + " is not used in a seq track" +
-                                        (file.fileWithdrawn ? " (reason: withdrawn)": ""))
-                    }
-                }
-            }
-            segment.save(flush: true)
-        }
-        return allUsed
-    }
-
+    // TODO OTP-2040: Do we still need this method?
     private MetaDataEntry metaDataEntry(DataFile file, String keyName) {
         MetaDataKey key = MetaDataKey.findByName(keyName)
         MetaDataEntry entry = MetaDataEntry.findByDataFileAndKey(file, key)
@@ -694,17 +443,10 @@ AND entry.value = :value
         return MetaDataEntry.findByDataFileAndKey(file, key)
     }
 
+    // TODO OTP-2040: Do we still need this method?
     private String metaDataValue(DataFile file, String keyName) {
         MetaDataEntry entry = metaDataEntry(file, keyName)
         return entry.value
-    }
-
-    private long metaDataLongValue(DataFile file, String keyName) {
-        MetaDataEntry entry = metaDataEntry(file, keyName)
-        if (entry.value.isLong()) {
-            return entry.value as long
-        }
-        return 0
     }
 
     @PostAuthorize("hasRole('ROLE_OPERATOR') or (returnObject == null) or hasPermission(returnObject.sample.individual.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', read)")

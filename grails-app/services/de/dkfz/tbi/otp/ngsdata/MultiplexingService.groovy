@@ -2,34 +2,9 @@ package de.dkfz.tbi.otp.ngsdata
 
 import java.util.regex.Matcher
 
-import de.dkfz.tbi.otp.utils.ReferencedClass
-
 class MultiplexingService {
 
     public static final String BARCODE_DELIMITER = '_'
-
-    def runProcessingService
-
-    public boolean needsMultiplexingHandling(Run run) {
-        List<DataFile> files = runProcessingService.dataFilesWithMetaDataInProcessing(run)
-        for (DataFile file in files) {
-            if (barcode(file.fileName)) {
-                return true
-            }
-        }
-        return false
-    }
-
-    public void executeMultiplexing(Run run) {
-        List<DataFile> files = runProcessingService.dataFilesWithMetaDataInProcessing(run)
-        for (DataFile file in files) {
-            String barcode = barcode(file.fileName)
-            if (barcode) {
-                appendBarcode(file, barcode)
-            }
-        }
-    }
-
 
     /**
      * find and extract barcodes of the file. It uses the following patterns in the given order:
@@ -56,19 +31,6 @@ class MultiplexingService {
         return null
     }
 
-
-    private void appendBarcode(DataFile file, String barcode) {
-        MetaDataKey key = MetaDataKey.findByName(MetaDataColumn.LANE_NO.name())
-        MetaDataEntry entry = MetaDataEntry.findByDataFileAndKey(file, key)
-        if (entry.value.contains(barcode)) {
-            return
-        }
-        String newValue = combineLaneNumberAndBarcode(entry.value, barcode)
-        buildChangeLog(entry, newValue)
-        entry.value = newValue
-        entry.save(flush: true)
-    }
-
     public static String combineLaneNumberAndBarcode(String laneNumber, String barcode) {
         assert laneNumber
         if (barcode != null) {
@@ -76,19 +38,5 @@ class MultiplexingService {
         } else {
             return laneNumber
         }
-    }
-
-    private void buildChangeLog(MetaDataEntry entry, String to) {
-        ReferencedClass clazz = ReferencedClass.findOrSaveByClassName(MetaDataEntry.class.getName())
-        ChangeLog changeLog = new ChangeLog(
-            rowId: entry.id,
-            ReferencedClass: clazz,
-            columnName: "value",
-            fromValue: entry.value,
-            toValue: to,
-            comment: "appending BARCODE to lane number",
-            source: ChangeLog.Source.SYSTEM
-        )
-        changeLog.save(flush: true)
     }
 }

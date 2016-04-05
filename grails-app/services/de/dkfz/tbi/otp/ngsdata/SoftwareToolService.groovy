@@ -32,11 +32,6 @@ class SoftwareToolService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public boolean existSoftwareToolWithId(Long id) {
-        return (SoftwareTool.get(id) != null)
-    }
-
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     public SoftwareTool updateSoftwareTool(Long id, String version) {
         SoftwareTool softwareTool = getSoftwareTool(id)
         softwareTool.programVersion = version
@@ -52,11 +47,6 @@ class SoftwareToolService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<SoftwareToolIdentifier> findSoftwareToolIdentifiersBySoftwareToolSortedAfterName(SoftwareTool softwareTool) {
         return SoftwareToolIdentifier.findAllBySoftwareTool(softwareTool, [sort: "name"])
-    }
-
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public boolean existSoftwareToolIdentifierOfSoftwareToolAndName(SoftwareTool softwareTool, String name) {
-        return (SoftwareToolIdentifier.findBySoftwareToolAndName(softwareTool, name) != null)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")

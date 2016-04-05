@@ -1034,8 +1034,6 @@ chmod 440 ${newDirectFileName}
         notNull(run, "The input run of the method deleteRunAndRunSegmentsWithoutDataOfOtherProjects is null")
         notNull(project, "The input project of the method deleteRunAndRunSegmentsWithoutDataOfOtherProjects is null")
 
-        RunByProject.findByRunAndProject(run, project)*.delete()
-
         boolean allRunSegmentsOfTheRunCanBeDeleted = true
         List<RunSegment> runSegmentsPerRun = RunSegment.findAllByRun(run)
 
@@ -1078,8 +1076,6 @@ chmod 440 ${newDirectFileName}
         notNull(run, "The input run of the method deleteRun is null")
         outputStringBuilder << "\n\nstart deletion of run ${run}"
         List<File> dirsToDelete = []
-
-        RunByProject.findByRun(run)*.delete()
 
         List<RunSegment> runSegmentsPerRun = RunSegment.findAllByRun(run)
 
