@@ -27,18 +27,18 @@ class DataFileExistenceValidatorSpec extends Specification {
         temporaryFolder.newFile('empty')
         CreateFileHelper.createFile(new File(dir, 'not_empty'))
 
-        DirectoryStructure directoryStructure = [
-                getDescription: { 'test directory structure' },
-                getColumnTitles: { ['FILENAME'] },
-                getDataFilePath: { MetadataValidationContext context, ValueTuple valueTuple ->
-                    Matcher matcher = valueTuple.getValue('FILENAME') =~ /^(.+) .$/
-                    if (matcher) {
-                        return new File(dir, matcher.group(1))
-                    } else {
-                        return null
-                    }
-                },
-        ] as DirectoryStructure
+        DirectoryStructure directoryStructure = Mock(DirectoryStructure) {
+            getDescription() >> 'test directory structure'
+            getColumnTitles() >> ['FILENAME']
+            getDataFilePath(_, _) >> { MetadataValidationContext context, ValueTuple valueTuple ->
+                Matcher matcher = valueTuple.getValue('FILENAME') =~ /^(.+) .$/
+                if (matcher) {
+                    return new File(dir, matcher.group(1))
+                } else {
+                    return null
+                }
+            }
+        }
         MetadataValidationContext context = createContext(
                 "FILENAME\n" +
                         "invalid\n" +

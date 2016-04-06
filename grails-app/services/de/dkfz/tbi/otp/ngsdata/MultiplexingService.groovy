@@ -70,6 +70,7 @@ class MultiplexingService {
     }
 
     public static String combineLaneNumberAndBarcode(String laneNumber, String barcode) {
+        assert laneNumber
         if (barcode != null) {
             return "${laneNumber}${BARCODE_DELIMITER}${barcode}"
         } else {

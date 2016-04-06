@@ -109,7 +109,13 @@ class DataFile implements Commentable{
 
         comment(nullable: true)
 
-        mateNumber nullable: true, validator: { val, obj ->
+        mateNumber nullable: true, min: 1, validator: { val, obj ->
+            if (val != null) {
+                Integer mateCount = LibraryLayout.values().find { it.name() == obj.seqTrack?.seqType?.libraryLayout }?.mateCount
+                if (mateCount != null && val > mateCount) {
+                    return false
+                }
+            }
             if (obj.fileType && obj.fileType.type == FileType.Type.SEQUENCE && obj.fileType.vbpPath == "/sequence/") {
                 return (val == 1 || val == 2)
             } else {

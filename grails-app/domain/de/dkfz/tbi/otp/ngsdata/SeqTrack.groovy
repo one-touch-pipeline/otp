@@ -11,6 +11,8 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 
 class SeqTrack implements ProcessParameterObject {
 
+    static final Closure<? extends SeqTrack> FACTORY = { Map properties -> new SeqTrack(properties) }
+
     enum DataProcessingState {
         UNKNOWN,
         NOT_STARTED,

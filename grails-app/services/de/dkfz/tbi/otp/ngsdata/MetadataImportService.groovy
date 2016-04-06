@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
 import de.dkfz.tbi.util.spreadsheet.*
 import groovy.transform.*
@@ -11,6 +12,7 @@ import java.util.logging.*
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+import static de.dkfz.tbi.otp.utils.StringUtils.*
 
 /**
  * Metadata import 2.0 (OTP-34)
@@ -24,6 +26,8 @@ class MetadataImportService {
     ApplicationContext applicationContext
 
     RunSubmitService runSubmitService
+    SampleIdentifierService sampleIdentifierService
+    SeqTrackService seqTrackService
 
     /**
      * @return A collection of descriptions of the validations which are performed
@@ -66,6 +70,7 @@ class MetadataImportService {
         MetadataValidationContext context = validate(metadataFile, directoryStructureName)
         Long runId = null
         if (mayImport(context, ignoreWarnings, previousValidationMd5sum)) {
+            // TODO OTP-1948: call importMetadataFile instead
             runId = doImport(context, align)
         }
         return new ValidateAndImportResult(context, runId)
@@ -102,7 +107,7 @@ class MetadataImportService {
         return false
     }
 
-    // TODO: rewrite this method to trigger the metadata import 2.0
+    // TODO OTP-1948: delete this method
     private long doImport(MetadataValidationContext context, boolean align) {
         Closure uniqueColumnValue = { MetaDataColumn column ->
             return exactlyOneElement(context.spreadsheet.dataRows*.getCellByColumnTitle(column.name())*.text.unique())
@@ -118,6 +123,179 @@ class MetadataImportService {
                 context.metadataFile.parentFile.parentFile.path,
                 align,
         )
+    }
+
+    protected MetaDataFile importMetadataFile(MetadataValidationContext context, boolean align) {
+        RunSegment runSegment = new RunSegment(
+                metaDataStatus: RunSegment.Status.COMPLETE,
+                allFilesUsed: true,
+                align: align,
+                filesStatus: RunSegment.FilesStatus.NEEDS_INSTALLATION,
+                initialFormat: RunSegment.DataFormat.FILES_IN_DIRECTORY,
+                currentFormat: RunSegment.DataFormat.FILES_IN_DIRECTORY,
+                dataPath: context.metadataFile.parentFile.parent,
+                mdPath: context.metadataFile.parentFile.parent,
+        )
+        // TODO OTP-1952: un-comment
+        //assert runSegment.save(flush: true)
+
+        importRuns(context, runSegment, context.spreadsheet.dataRows)
+
+        MetaDataFile metaDataFile = new MetaDataFile(
+                fileName: context.metadataFile.name,
+                filePath: context.metadataFile.parent,
+                used: true,
+                md5sum: context.metadataFileMd5sum,
+                runSegment: runSegment,
+        )
+        assert metaDataFile.save(flush: true)
+
+        return metaDataFile
+    }
+
+    private void importRuns(MetadataValidationContext context, RunSegment runSegment, Collection<Row> metadataFileRows) {
+        metadataFileRows.groupBy { it.getCellByColumnTitle(RUN_ID.name()).text }.each { String runName, List<Row> rows ->
+            Run run = Run.findOrSaveWhere(
+                    name: runName,
+                    seqCenter: exactlyOneElement(SeqCenter.findAllWhere(name: uniqueColumnValue(rows, CENTER_NAME))),
+                    seqPlatform: SeqPlatformService.findSeqPlatform(
+                            uniqueColumnValue(rows, INSTRUMENT_PLATFORM),
+                            uniqueColumnValue(rows, INSTRUMENT_MODEL),
+                            uniqueColumnValue(rows, SEQUENCING_KIT) ?: null),
+                    dateExecuted: Objects.requireNonNull(
+                            RunDateParserService.parseDate('yyyy-MM-dd', uniqueColumnValue(rows, RUN_DATE))),
+            )
+
+            // TODO OTP-1952: delete the following 3 lines
+            assert runSegment.run == null
+            runSegment.run = run
+            assert runSegment.save(flush: true)
+
+            importSeqTracks(context, runSegment, run, rows)
+        }
+    }
+
+    private void importSeqTracks(MetadataValidationContext context, RunSegment runSegment, Run run, Collection<Row> runRows) {
+        runRows.groupBy { MultiplexingService.combineLaneNumberAndBarcode(it.getCellByColumnTitle(LANE_NO.name()).text,
+                extractBarcode(it).value) }.each { String laneId, List<Row> rows ->
+            SeqType seqType = exactlyOneElement(SeqType.findAllWhere(
+                    name: uniqueColumnValue(rows, SEQUENCING_TYPE),
+                    libraryLayout: uniqueColumnValue(rows, LIBRARY_LAYOUT),
+            ))
+            SeqTypeNames seqTypeName = seqType.seqTypeName
+            String pipelineVersionString = uniqueColumnValue(rows, PIPELINE_VERSION) ?: 'unknown'
+            String sampleIdString = uniqueColumnValue(rows, SAMPLE_ID)
+            String libPrepKitString = uniqueColumnValue(rows, LIB_PREP_KIT)
+            InformationReliability kitInfoReliability
+            LibraryPreparationKit libraryPreparationKit = null
+            if (!libPrepKitString) {
+                assert seqTypeName != SeqTypeNames.EXOME
+                kitInfoReliability = InformationReliability.UNKNOWN_UNVERIFIED
+            } else if (libPrepKitString == InformationReliability.UNKNOWN_VERIFIED.rawValue) {
+                kitInfoReliability = InformationReliability.UNKNOWN_VERIFIED
+            } else {
+                kitInfoReliability = InformationReliability.KNOWN
+                libraryPreparationKit = Objects.requireNonNull(
+                        LibraryPreparationKitService.findLibraryPreparationKitByNameOrAlias(libPrepKitString))
+            }
+            Map properties = [
+                    laneId: laneId,
+                    ilseId: uniqueColumnValue(rows, ILSE_NO) ?: null,
+                    // TODO OTP-2051: Use a different fallback value? Or remove this line completely?
+                    nBasePairs: rows.collect { tryParseLong(it.getCellByColumnTitle(BASE_COUNT.name())?.text, 0) }.sum(),
+                    // TODO OTP-2050: Use a different fallback value?
+                    insertSize: tryParseInt(uniqueColumnValue(rows, INSERT_SIZE), 0),
+                    run: run,
+                    sample: (atMostOneElement(SampleIdentifier.findAllWhere(name: sampleIdString)) ?:
+                            sampleIdentifierService.parseAndFindOrSaveSampleIdentifier(sampleIdString)).sample,
+                    seqType: seqType,
+                    seqPlatform: run.seqPlatform,
+                    pipelineVersion: SoftwareToolService.getBaseCallingTool(pipelineVersionString).softwareTool,
+                    kitInfoReliability: kitInfoReliability,
+                    libraryPreparationKit: libraryPreparationKit,
+            ]
+            if (seqTypeName == SeqTypeNames.CHIP_SEQ) {
+                properties['antibodyTarget'] = exactlyOneElement(AntibodyTarget.findAllByNameIlike(
+                        escapeForSqlLike(uniqueColumnValue(rows, ANTIBODY_TARGET))))
+                properties['antibody'] = uniqueColumnValue(rows, ANTIBODY) ?: null
+            }
+
+            SeqTrack seqTrack = (seqTypeName?.factory ?: SeqTrack.FACTORY).call(properties)
+            assert seqTrack.save(flush: true)
+
+            importDataFiles(context, runSegment, seqTrack, rows)
+
+            boolean willBeAligned = seqTrackService.decideAndPrepareForAlignment(seqTrack)
+            seqTrackService.determineAndStoreIfFastqFilesHaveToBeLinked(seqTrack, willBeAligned)
+        }
+    }
+
+    private static void importDataFiles(MetadataValidationContext context, RunSegment runSegment, SeqTrack seqTrack, Collection<Row> seqTrackRows) {
+        Map<Integer, Collection<Row>> seqTrackRowsByMateNumber =
+                seqTrackRows.groupBy { Integer.valueOf(extractMateNumber(it).value) }
+        assert seqTrackRows.size() == (
+                LibraryLayout.values().find { it.name() == seqTrack.seqType.libraryLayout }?.mateCount
+                        ?: seqTrackRowsByMateNumber.keySet().max()
+        )
+        seqTrackRowsByMateNumber.each { Integer mateNumber, List<Row> rows ->
+            Row row = exactlyOneElement(rows)
+            File file = context.directoryStructure.getDataFilePath(context, row)
+            DataFile dataFile = new DataFile(
+                    pathName: '',
+                    fileName: file.name,
+                    vbpFileName: file.name,
+                    md5sum: row.getCellByColumnTitle(MD5.name()).text.toLowerCase(Locale.ENGLISH),
+                    project: seqTrack.project,
+                    dateExecuted: seqTrack.run.dateExecuted,
+                    used: true,
+                    mateNumber: mateNumber,
+                    run: seqTrack.run,
+                    runSegment: runSegment,
+                    seqTrack: seqTrack,
+                    fileType: FileTypeService.getFileType(file.name, FileType.Type.SEQUENCE),
+            )
+            assert dataFile.save(flush: true)
+
+            assert new File(LsdfFilesService.getFileInitialPath(dataFile)) == file
+
+            importMetadataEntries(context, dataFile, row)
+        }
+    }
+
+    private static void importMetadataEntries(MetadataValidationContext context, DataFile dataFile, Row row) {
+        for (Cell it : context.spreadsheet.header.cells) {
+            assert new MetaDataEntry(
+                    dataFile: dataFile,
+                    key: MetaDataKey.findOrSaveWhere(name: it.text),
+                    value: row.cells[it.columnIndex].text,
+                    source: MetaDataEntry.Source.MDFILE,
+            ).save(flush: true)
+        }
+    }
+
+    private static Integer tryParseInt(String string, Integer fallbackValue) {
+        try {
+            return Integer.valueOf(string?.trim())
+        } catch (NumberFormatException e) {
+            return fallbackValue
+        }
+    }
+
+    private static Long tryParseLong(String string, Long fallbackValue) {
+        try {
+            return Long.valueOf(string?.trim())
+        } catch (NumberFormatException e) {
+            return fallbackValue
+        }
+    }
+
+    private static uniqueColumnValue(Collection<Row> rows, MetaDataColumn column) {
+        Column col = rows.first().spreadsheet.getColumn(column.name())
+        return uniqueColumnValue(rows, col)
+    }
+
+    private static uniqueColumnValue(Collection<Row> rows, Column column) {
+        return exactlyOneElement(rows*.getCell(column)*.text.unique())
     }
 
     public static ExtractedValue extractBarcode(Row row) {

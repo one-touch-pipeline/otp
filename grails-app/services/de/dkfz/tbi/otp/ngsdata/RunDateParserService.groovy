@@ -94,7 +94,7 @@ class RunDateParserService {
     * @param text
     * @return
     */
-   private Date parseDate(String format, String text) {
+   static Date parseDate(String format, String text) {
        Date date = null
        try {
            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(format)

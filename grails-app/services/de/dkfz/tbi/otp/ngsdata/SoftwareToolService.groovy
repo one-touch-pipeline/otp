@@ -4,6 +4,14 @@ import org.springframework.security.access.prepost.PreAuthorize
 
 class SoftwareToolService {
 
+    static SoftwareToolIdentifier getBaseCallingTool(String name) {
+        return (SoftwareToolIdentifier)SoftwareToolIdentifier.createCriteria().get {
+            eq('name', name)
+            softwareTool {
+                eq('type', SoftwareTool.Type.BASECALLING)
+            }
+        }
+    }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     SoftwareTool getSoftwareTool(long id) {

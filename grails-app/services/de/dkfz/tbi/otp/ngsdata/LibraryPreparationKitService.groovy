@@ -11,7 +11,7 @@ class LibraryPreparationKitService {
      * @param nameOrAlias the name used for look up
      * @return the found {@link LibraryPreparationKit} or <code>null</code>
      */
-    public LibraryPreparationKit findLibraryPreparationKitByNameOrAlias(String nameOrAlias) {
+    public static LibraryPreparationKit findLibraryPreparationKitByNameOrAlias(String nameOrAlias) {
         notNull(nameOrAlias, "the input 'nameOrAlias' is null")
         LibraryPreparationKit libraryPreparationKit = LibraryPreparationKit.findByName(nameOrAlias)
         if (!libraryPreparationKit) { //not found by name, try aliases

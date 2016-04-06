@@ -1,7 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
-import de.dkfz.tbi.otp.ngsdata.SoftwareTool
-import de.dkfz.tbi.otp.ngsdata.SoftwareToolIdentifier
+import de.dkfz.tbi.otp.ngsdata.SoftwareToolService
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidator
 import de.dkfz.tbi.util.spreadsheet.Cell
@@ -26,17 +25,8 @@ class PipelineVersionValidator extends SingleValueValidator<MetadataValidationCo
 
     @Override
     void validateValue(MetadataValidationContext context, String pipelineVersion, Set<Cell> cells) {
-        if (pipelineVersion != "") {
-            def identifier = SoftwareToolIdentifier.createCriteria().list {
-                eq('name', pipelineVersion)
-                softwareTool {
-                    eq('type', SoftwareTool.Type.BASECALLING)
-                }
-            }
-            if (!identifier) {
-                context.addProblem(cells, Level.ERROR, "Pipeline version '${pipelineVersion}' is not registered in the OTP database.")
-
-            }
+        if (pipelineVersion && !SoftwareToolService.getBaseCallingTool(pipelineVersion)) {
+            context.addProblem(cells, Level.ERROR, "Pipeline version '${pipelineVersion}' is not registered in the OTP database.")
         }
     }
 }

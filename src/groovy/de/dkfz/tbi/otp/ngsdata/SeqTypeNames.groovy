@@ -10,10 +10,10 @@ public enum SeqTypeNames {
     WHOLE_GENOME_BISULFITE,
     RNA,
     MI_RNA,
-    EXOME("EXON", ExomeSeqTrack),
+    EXOME("EXON", ExomeSeqTrack, { Map properties -> new ExomeSeqTrack(properties) }),
     MEDIP,
     SNC_RNA("sncRNA"),
-    CHIP_SEQ("ChIP Seq", ChipSeqSeqTrack),
+    CHIP_SEQ("ChIP Seq", ChipSeqSeqTrack, { Map properties -> new ChipSeqSeqTrack(properties) }),
     WHOLE_GENOME_BISULFITE_TAGMENTATION
 
     /**
@@ -23,9 +23,15 @@ public enum SeqTypeNames {
 
     final Class<? extends SeqTrack> seqTrackClass
 
-    private SeqTypeNames(String seqTypeName = null, Class<? extends SeqTrack> seqTrackClass = SeqTrack) {
+    final Closure<? extends SeqTrack> factory
+
+    private SeqTypeNames(String seqTypeName = null,
+                         Class<? extends SeqTrack> seqTrackClass = SeqTrack,
+                         Closure<? extends SeqTrack> factory = SeqTrack.FACTORY) {
+        assert factory([:]).getClass() == seqTrackClass
         this.seqTypeName = seqTypeName ?: name()
         this.seqTrackClass = seqTrackClass
+        this.factory = factory
     }
 
     public static SeqTypeNames fromSeqTypeName(String seqTypeName) {

@@ -55,7 +55,7 @@ class LsdfFilesService {
      * This function return path to the initial location
      * of the given dataFile
      */
-    public String getFileInitialPath(DataFile dataFile) {
+    public static String getFileInitialPath(DataFile dataFile) {
         Run run = dataFile.run
         //String prefix = (run.legacyRun) ? "run" : ""
         String initialPath = dataFile.runSegment.dataPath

@@ -65,7 +65,7 @@ class DataFileUnitTests {
         FileType fileType = FileType.build([type: FileType.Type.SEQUENCE, vbpPath: SEQUENCE_DIRECTORY])
         DataFile dataFile = new DataFile(fileType: fileType, mateNumber: 0)
 
-        TestCase.assertValidateError(dataFile, "mateNumber", "validator.invalid", 0)
+        TestCase.assertAtLeastExpectedValidateError(dataFile, "mateNumber", "validator.invalid", 0)
     }
 
     @Test

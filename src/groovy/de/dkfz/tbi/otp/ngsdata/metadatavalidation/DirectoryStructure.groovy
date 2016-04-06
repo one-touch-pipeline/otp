@@ -1,18 +1,35 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation
 
-import de.dkfz.tbi.util.spreadsheet.validation.ValueTuple
+import de.dkfz.tbi.util.spreadsheet.*
+import de.dkfz.tbi.util.spreadsheet.validation.*
 
-interface DirectoryStructure {
+trait DirectoryStructure {
 
-    String getDescription()
+    abstract String getDescription()
 
     /**
      * The titles of the columns which the paths are constructed from
      */
-    List<String> getColumnTitles()
+    abstract List<String> getColumnTitles()
 
     /**
      * @return The path of the data file or {@code null} if it cannot be constructed
      */
-    File getDataFilePath(MetadataValidationContext context, ValueTuple valueTuple)
+    abstract File getDataFilePath(MetadataValidationContext context, ValueTuple valueTuple)
+
+    /**
+     * @return The path of the data file or {@code null} if it cannot be constructed
+     */
+    File getDataFilePath(MetadataValidationContext context, Row row) {
+        Map<String, String> valuesByColumnTitle = [:]
+        Set<Cell> cells = new LinkedHashSet<Cell>()
+        getColumnTitles().each {
+            Cell cell = row.getCellByColumnTitle(it)
+            if (cell) {
+                valuesByColumnTitle.put(it, cell.text)
+                cells.add(cell)
+            }
+        }
+        return getDataFilePath(context, new ValueTuple(valuesByColumnTitle.asImmutable(), cells.asImmutable()))
+    }
 }
