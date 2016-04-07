@@ -192,14 +192,18 @@ abstract class AbstractBamFile {
 
 
     private withdrawDownstreamBamFiles() {
-        ProcessedMergedBamFile.createCriteria().list {
-            mergingPass {
-                mergingSet {
-                    'in'('id', MergingSetAssignment.findAllByBamFile(this)*.mergingSet*.id)
+        List<MergingSetAssignment> assignments = MergingSetAssignment.findAllByBamFile(this)*.mergingSet*.id
+
+        if (assignments) {
+            ProcessedMergedBamFile.createCriteria().list {
+                mergingPass {
+                    mergingSet {
+                        'in'('id', assignments)
+                    }
                 }
+            }.each {
+                it.withdraw()
             }
-        }.each {
-            it.withdraw()
         }
     }
 }
