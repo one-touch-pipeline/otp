@@ -96,6 +96,10 @@ class SchedulerService {
 
     private final ThreadLocal<Job> jobByThread = new ThreadLocal<Job>()
 
+    boolean isActive() {
+        schedulerActive
+    }
+
     /**
      * Starts the Scheduler at Server startup.
      * This method inspects the state of the Job system before the shutdown. In case of a clean

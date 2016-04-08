@@ -70,6 +70,9 @@ abstract class AbstractStartJobImpl implements StartJob, ApplicationListener<Job
      * then for the job execution plan by that job definition.
      */
     private initializeJobExecutionPlan() {
+        if (!schedulerService.active) {
+            return
+        }
         if (plan == null && Environment.current != Environment.TEST) {
             final String name = jobExecutionPlanName
             if (name == null) {
