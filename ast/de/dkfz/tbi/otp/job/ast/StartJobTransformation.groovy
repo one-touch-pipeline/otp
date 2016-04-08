@@ -1,25 +1,13 @@
 package de.dkfz.tbi.otp.job.ast
 
-import groovyjarjarasm.asm.Opcodes
-import org.codehaus.groovy.ast.ASTNode
-import org.codehaus.groovy.ast.ClassNode
-import org.codehaus.groovy.ast.ConstructorNode
-import org.codehaus.groovy.ast.MethodNode
-import org.codehaus.groovy.ast.Parameter
-import org.codehaus.groovy.ast.expr.ArgumentListExpression
-import org.codehaus.groovy.ast.expr.ConstantExpression
-import org.codehaus.groovy.ast.expr.ConstructorCallExpression
-import org.codehaus.groovy.ast.expr.MethodCallExpression;
-import org.codehaus.groovy.ast.expr.VariableExpression
-import org.codehaus.groovy.ast.stmt.BlockStatement
-import org.codehaus.groovy.ast.stmt.ExpressionStatement
-import org.codehaus.groovy.ast.stmt.ReturnStatement
-import org.codehaus.groovy.ast.stmt.Statement
-import org.codehaus.groovy.ast.stmt.TryCatchStatement;
-import org.codehaus.groovy.control.CompilePhase
-import org.codehaus.groovy.control.SourceUnit
-import org.codehaus.groovy.transform.ASTTransformation
-import org.codehaus.groovy.transform.GroovyASTTransformation
+import groovyjarjarasm.asm.*
+import org.codehaus.groovy.ast.*
+import org.codehaus.groovy.ast.expr.*
+import org.codehaus.groovy.ast.stmt.*
+import org.codehaus.groovy.control.*
+import org.codehaus.groovy.transform.*
+
+import static org.codehaus.groovy.ast.expr.ArgumentListExpression.*
 
 /**
  * AST Transformation for the StartJob classes.
@@ -64,12 +52,22 @@ class StartJobTransformation extends AbstractJobTransformation implements
                 classNode.addMethod("getVersion", Opcodes.ACC_PUBLIC, new ClassNode(String), Parameter.EMPTY_ARRAY, ClassNode.EMPTY_ARRAY, new ReturnStatement(new ConstantExpression("")))
 
                 // create the try-finally block for persistenceInterceptor in execute method
-                MethodNode executeMethod = classNode.getMethod("execute", Parameter.EMPTY_ARRAY)
-                BlockStatement methodCode = new BlockStatement()
-                methodCode.addStatement(new ExpressionStatement(new MethodCallExpression(new VariableExpression("persistenceInterceptor"), "init", ArgumentListExpression.EMPTY_ARGUMENTS)))
-                methodCode.addStatement(executeMethod.code)
-                TryCatchStatement tryCatchStatement = new TryCatchStatement(methodCode, createPersistenceInterceptorFinally())
-                executeMethod.setCode(methodCode)
+                MethodNode executeMethod = classNode.getMethod('execute', Parameter.EMPTY_ARRAY)
+                VariableScope scope = executeMethod.variableScope
+
+                Statement wrappedExecuteMethod = new TryCatchStatement(
+                        // try
+                        new BlockStatement([
+                                persistenceInterceptor('init'),
+                                executeMethod.code,
+                        ], scope),
+                        // finally
+                        new BlockStatement([
+                                persistenceInterceptor('flush'),
+                                persistenceInterceptor('destroy'),
+                        ], scope)
+                )
+                executeMethod.setCode(wrappedExecuteMethod)
             }
 
             classNode.getMethods().each { MethodNode method ->
@@ -78,10 +76,7 @@ class StartJobTransformation extends AbstractJobTransformation implements
         }
     }
 
-    private Statement createPersistenceInterceptorFinally() {
-        BlockStatement stmt = new BlockStatement()
-        stmt.addStatement(new ExpressionStatement(new MethodCallExpression(new VariableExpression("persistenceInterceptor"), "flush", ArgumentListExpression.EMPTY_ARGUMENTS)))
-        stmt.addStatement(new ExpressionStatement(new MethodCallExpression(new VariableExpression("persistenceInterceptor"), "destroy", ArgumentListExpression.EMPTY_ARGUMENTS)))
-        return stmt
+    private static Statement persistenceInterceptor(String method) {
+        new ExpressionStatement(new MethodCallExpression(new VariableExpression('persistenceInterceptor'), method, EMPTY_ARGUMENTS))
     }
 }
