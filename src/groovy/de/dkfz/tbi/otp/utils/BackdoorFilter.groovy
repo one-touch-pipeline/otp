@@ -1,27 +1,20 @@
 package de.dkfz.tbi.otp.utils
 
-import grails.util.Environment
+import grails.util.*
+import groovy.transform.*
+import org.codehaus.groovy.grails.commons.*
+import org.springframework.beans.factory.annotation.*
+import org.springframework.context.annotation.*
+import org.springframework.security.authentication.*
+import org.springframework.security.core.*
+import org.springframework.security.core.authority.*
+import org.springframework.security.core.context.*
+import org.springframework.security.web.context.*
+import org.springframework.stereotype.*
+import org.springframework.web.filter.*
 
-import java.io.IOException
-
-import javax.servlet.FilterChain
-import javax.servlet.ServletException
-import javax.servlet.ServletRequest
-import javax.servlet.ServletResponse
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
-
-import org.codehaus.groovy.grails.commons.GrailsApplication;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
-import org.springframework.security.core.Authentication
-import org.springframework.security.core.GrantedAuthority
-import org.springframework.security.core.authority.GrantedAuthorityImpl
-import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.security.web.context.HttpRequestResponseHolder
-import org.springframework.stereotype.Component
-import org.springframework.web.filter.GenericFilterBean
+import javax.servlet.*
+import javax.servlet.http.*
 
 /**
  * Filter to give a configured user access to the web application in development mode.
@@ -55,7 +48,10 @@ class BackdoorFilter extends GenericFilterBean {
     /**
      * The filter injects a user with the ROLE_USER and ROLE_ADMIN authorities
      */
-    private List<GrantedAuthority> authorities = [new GrantedAuthorityImpl("ROLE_USER"), new GrantedAuthorityImpl("ROLE_ADMIN")]
+    private List<GrantedAuthority> authorities = [
+            new SimpleGrantedAuthority("ROLE_USER"),
+            new SimpleGrantedAuthority("ROLE_ADMIN"),
+    ]
 
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
@@ -84,7 +80,8 @@ class BackdoorFilter extends GenericFilterBean {
         try {
             Authentication authentication = SecurityContextHolder.context.authentication
             if (!authentication || !authentication.isAuthenticated()) {
-                SecurityContextHolder.context.authentication = new UsernamePasswordAuthenticationToken(grailsApplication.config.otp.security.backdoorUser, null, authorities)
+                Principal principal = new Principal(username: grailsApplication.config.otp.security.backdoorUser)
+                SecurityContextHolder.context.authentication = new UsernamePasswordAuthenticationToken(principal, null, authorities)
             }
             chain.doFilter(holder.getRequest(), holder.getResponse())
 
@@ -92,4 +89,9 @@ class BackdoorFilter extends GenericFilterBean {
             request.removeAttribute(FILTER_APPLIED)
         }
     }
+}
+
+@Immutable
+class Principal {
+    String username
 }
