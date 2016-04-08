@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.ngsdata
 import de.dkfz.tbi.otp.testing.UserAndRoles
 import grails.plugin.springsecurity.SpringSecurityUtils
 import spock.lang.Specification
+import spock.lang.Unroll
 
 class MetaDataFieldsControllerSpec extends Specification implements UserAndRoles {
 
@@ -14,8 +15,8 @@ class MetaDataFieldsControllerSpec extends Specification implements UserAndRoles
 
     void "test JSON createLibraryPreparationKit valid input"() {
         when:
-        controller.params.name = name
-        controller.params.shortDisplayName = shortDisplayName
+        controller.params.name = 'LibraryPreparationKit'
+        controller.params.shortDisplayName = 'LPK'
         SpringSecurityUtils.doWithAuth("operator"){
             controller.createLibraryPreparationKit()
         }
@@ -23,13 +24,10 @@ class MetaDataFieldsControllerSpec extends Specification implements UserAndRoles
         then:
         controller.response.status == 200
         controller.response.json.success
-        LibraryPreparationKit.findByName(name)
-
-        where:
-        name                    | shortDisplayName
-        'LibraryPreparationKit' | 'LPK'
+        LibraryPreparationKit.findByName('LibraryPreparationKit')
     }
 
+    @Unroll
     void "test JSON createLibraryPreparationKit invalid input"() {
         given:
         LibraryPreparationKit libraryPreparationKit = new LibraryPreparationKit(name: 'LibraryPreparationKit', shortDisplayName: 'LPK')
@@ -64,7 +62,7 @@ class MetaDataFieldsControllerSpec extends Specification implements UserAndRoles
         controller.params.id = 'LibraryPreparationKit'
 
         when:
-        controller.params.alias = alias
+        controller.params.alias = 'LibraryPreparationKitSynonym'
         SpringSecurityUtils.doWithAuth("operator"){
             controller.createLibraryPreparationKitAlias()
         }
@@ -72,12 +70,10 @@ class MetaDataFieldsControllerSpec extends Specification implements UserAndRoles
         then:
         controller.response.status == 200
         controller.response.json.success
-        LibraryPreparationKitSynonym.findByName(alias)
-
-        where:
-        alias << ['LibraryPreparationKitSynonym']
+        LibraryPreparationKitSynonym.findByName('LibraryPreparationKitSynonym')
     }
 
+    @Unroll
     void "test JSON createLibraryPreparationKitSynonym invalid input"() {
         given:
         LibraryPreparationKit libraryPreparationKit = new LibraryPreparationKit(name: 'LibraryPreparationKit', shortDisplayName: 'LibraryPreparationKit')
@@ -102,7 +98,7 @@ class MetaDataFieldsControllerSpec extends Specification implements UserAndRoles
 
     void "test JSON createAntibodyTarget valid input"() {
         when:
-        controller.params.name = name
+        controller.params.name = 'AntibodyTarget'
         SpringSecurityUtils.doWithAuth("operator"){
             controller.createAntibodyTarget()
         }
@@ -110,12 +106,10 @@ class MetaDataFieldsControllerSpec extends Specification implements UserAndRoles
         then:
         controller.response.status == 200
         controller.response.json.success
-        AntibodyTarget.findByName(name)
-
-        where:
-        name << ['AntibodyTarget']
+        AntibodyTarget.findByName('AntibodyTarget')
     }
 
+    @Unroll
     void "test JSON createAntibodyTarget invalid input"() {
         given:
         AntibodyTarget antibodyTarget = new AntibodyTarget(name: 'AntibodyTarget')
@@ -137,8 +131,8 @@ class MetaDataFieldsControllerSpec extends Specification implements UserAndRoles
 
     void "test JSON createSeqCenter valid input"() {
         when:
-        controller.params.name = name
-        controller.params.dirName = dirName
+        controller.params.name = 'SEQCENTER'
+        controller.params.dirName = 'seqcenter'
         SpringSecurityUtils.doWithAuth("operator"){
             controller.createSeqCenter()
         }
@@ -146,13 +140,10 @@ class MetaDataFieldsControllerSpec extends Specification implements UserAndRoles
         then:
         controller.response.status == 200
         controller.response.json.success
-        SeqCenter.findByNameAndDirName(name, dirName)
-
-        where:
-        name            | dirName
-        'SEQCENTER'     | 'seqcenter'
+        SeqCenter.findByNameAndDirName('SEQCENTER', 'seqcenter')
     }
 
+    @Unroll
     void "test JSON createSeqCenter invalid input"() {
         given:
         SeqCenter seqCenter = new SeqCenter(name: 'SEQCENTER', dirName: 'seqcenter')
@@ -179,6 +170,7 @@ class MetaDataFieldsControllerSpec extends Specification implements UserAndRoles
         'SEQCENTER'     | 'seqcenter2'
     }
 
+    @Unroll
     void "test JSON createSeqPlatform valid input"() {
         given:
         SeqPlatformGroup seqPlatformGroup = new SeqPlatformGroup(name: "SeqPlatformGroup")
@@ -215,6 +207,7 @@ class MetaDataFieldsControllerSpec extends Specification implements UserAndRoles
         'SeqPlatform'       | 'SeqPlatformGroup'        | 'SeqPlatformModelLabel'       | 'SequencingKitLabel'
     }
 
+    @Unroll
     void "test JSON createSeqPlatform valid input with preexisting SeqPlatform"() {
         given:
         SeqPlatformGroup seqPlatformGroup = new SeqPlatformGroup(name: "SeqPlatformGroup")
@@ -262,6 +255,7 @@ class MetaDataFieldsControllerSpec extends Specification implements UserAndRoles
         'SeqPlatform'       | 'SeqPlatformGroup'        | 'SeqPlatformModelLabel'       | 'SequencingKitLabel2'
     }
 
+    @Unroll
     void "test JSON createSeqPlatform invalid input"() {
         given:
         SeqPlatformGroup seqPlatformGroup = new SeqPlatformGroup(name: "SeqPlatformGroup")
@@ -312,7 +306,7 @@ class MetaDataFieldsControllerSpec extends Specification implements UserAndRoles
         controller.params.id = "SeqPlatformModelLabel"
 
         when:
-        controller.params.alias = alias
+        controller.params.alias = 'SeqPlatformModelLabelAlias'
         SpringSecurityUtils.doWithAuth("operator"){
             controller.createModelAlias()
         }
@@ -320,13 +314,10 @@ class MetaDataFieldsControllerSpec extends Specification implements UserAndRoles
         then:
         controller.response.status == 200
         controller.response.json.success
-        SeqPlatformModelLabelService.findSeqPlatformModelLabelByNameOrAlias(alias)
-
-
-        where:
-        alias << ['SeqPlatformModelLabelAlias']
+        SeqPlatformModelLabelService.findSeqPlatformModelLabelByNameOrAlias('SeqPlatformModelLabelAlias')
     }
 
+    @Unroll
     void "test JSON createModelAlias invalid input"() {
         given:
         SeqPlatformModelLabel seqPlatformModelLabel = new SeqPlatformModelLabel(name: "SeqPlatformModelLabel", alias: "SeqPlatformModelLabelAlias")
@@ -354,7 +345,7 @@ class MetaDataFieldsControllerSpec extends Specification implements UserAndRoles
         controller.params.id = "SequencingKitLabel"
 
         when:
-        controller.params.alias = alias
+        controller.params.alias = 'SequencingKitLabelAlias'
         SpringSecurityUtils.doWithAuth("operator"){
             controller.createSequencingKitAlias()
         }
@@ -362,12 +353,10 @@ class MetaDataFieldsControllerSpec extends Specification implements UserAndRoles
         then:
         controller.response.status == 200
         controller.response.json.success
-        SequencingKitLabelService.findSequencingKitLabelByNameOrAlias(alias)
-
-        where:
-        alias << ['SequencingKitLabelAlias']
+        SequencingKitLabelService.findSequencingKitLabelByNameOrAlias('SequencingKitLabelAlias')
     }
 
+    @Unroll
     void "test JSON createSequencingKitAlias invalid input"() {
         given:
         SequencingKitLabel sequencingKitLabel = new SequencingKitLabel(name: "SequencingKitLabel", alias: "SequencingKitLabelAlias")
@@ -388,6 +377,7 @@ class MetaDataFieldsControllerSpec extends Specification implements UserAndRoles
         alias << ['', 'SequencingKitLabel', 'SequencingKitLabelAlias']
     }
 
+    @Unroll
     void "test JSON createSeqType valid input"() {
         when:
         controller.params.type = type
@@ -420,6 +410,7 @@ class MetaDataFieldsControllerSpec extends Specification implements UserAndRoles
         'SEQTYPE'   | 'seqtype'     | 'SEQ TYPE'    | true      | false     | false
     }
 
+    @Unroll
     void "test JSON createSeqType invalid input"() {
         given:
         SeqType seqType = new SeqType(name: 'SEQTYPE', dirName: 'seqtype', alias: 'SEQ TYPE',libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE)
@@ -453,6 +444,7 @@ class MetaDataFieldsControllerSpec extends Specification implements UserAndRoles
         'SEQTYPE2'  | 'seqtype2'    | 'SEQ TYPE'    | true      | false     | false
     }
 
+    @Unroll
     void "test JSON createLayout valid input"() {
         given:
         SeqType seqType = new SeqType(name: 'SEQTYPE', dirName: 'SEQTYPE',libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE)
@@ -492,6 +484,7 @@ class MetaDataFieldsControllerSpec extends Specification implements UserAndRoles
         'SEQTYPE3'  | true      | true      | false
     }
 
+    @Unroll
     void "test JSON createLayout invalid input"() {
         given:
         SeqType seqType = new SeqType(name: 'SEQTYPE', dirName: 'SEQTYPE',libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE)
