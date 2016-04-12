@@ -20,7 +20,7 @@
         </div>
         <h1><g:message code="crashRecovery.title"/></h1>
         <div>
-            <p>Select one of the Crashed Jobs and click one of the actions underneath the table.
+            <p>Select one of the Crashed Jobs and click one of the actions underneath the table. Jobs that are at least sometimes resumable are preselected.</p>
             <ul>
                 <li><strong>Mark as Finished:</strong> The Job has finished and a later Job will decide whether the Job succeeded or failed. Next Job will be scheduled.</li>
                 <li><strong>Mark as Succeeded:</strong> The Job succeeded. Next Job will be scheduled.</li>
@@ -28,7 +28,6 @@
                 <li><strong>Restart:</strong> The Job failed and is scheduled for another execution.</li>
                  <li><strong>Start Scheduler:</strong> Tries to restart the Scheduler. Only use after all Jobs have been triaged.</li>
             </ul>
-            </p>
         </div>
         <table id="crashRecoveryTable">
             <thead>

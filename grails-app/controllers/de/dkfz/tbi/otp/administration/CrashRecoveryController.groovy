@@ -1,20 +1,18 @@
 package de.dkfz.tbi.otp.administration
 
-import de.dkfz.tbi.otp.utils.DataTableCommand
-import grails.converters.JSON
-import grails.plugin.springsecurity.annotation.Secured
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.job.scheduler.*
+import de.dkfz.tbi.otp.utils.*
+import grails.converters.*
+import grails.plugin.springsecurity.annotation.*
 
 @Secured(['ROLE_ADMIN'])
 class CrashRecoveryController {
-    /**
-     * Dependency Injection of CrashRecoveryService
-     **/
-    def crashRecoveryService
-    /**
-     * Dependency Injection of SchedulerService.
-     * Required to restart the scheduler
-     **/
-    def schedulerService
+
+    CrashRecoveryService crashRecoveryService
+    /** SchedulerService required to restart the scheduler */
+    SchedulerService schedulerService
+
 
     def index() {
         if (!crashRecoveryService.crashRecovery) {
@@ -31,21 +29,28 @@ class CrashRecoveryController {
     def datatable(DataTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()
 
-        List crashedJobs = crashRecoveryService.crashedJobs()
+        List<ProcessingStep> crashedJobs = crashRecoveryService.crashedJobs()
         dataToRender.iTotalRecords = crashedJobs.size()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
 
         // TODO: sorting
-        crashedJobs.each { step ->
+        crashedJobs.each { ProcessingStep step ->
+            boolean resumable = isJobResumable(step)
             dataToRender.aaData << [
                 step.id,
                 [id: step.process.jobExecutionPlan.id, name: step.process.jobExecutionPlan.name],
                 step.process.id,
                 [id: step.id, name: step.jobDefinition.name],
-                ["class": step.jobClass, version: step.jobVersion]
+                ["class": step.jobClass, version: step.jobVersion],
+                resumable,
             ]
         }
         render dataToRender as JSON
+    }
+
+    private boolean isJobResumable(ProcessingStep step) {
+        Class jobClass = grailsApplication.classLoader.loadClass(step.jobClass)
+        return jobClass.isAnnotationPresent(ResumableJob) || SometimesResumableJob.class.isAssignableFrom(jobClass)
     }
 
     def markFailed() {

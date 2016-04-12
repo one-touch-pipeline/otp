@@ -30,7 +30,7 @@ $.otp.crashRecovery.createListView = function () {
         var i, rowData;
         for (i = 0; i < json.aaData.length; i += 1) {
             rowData = json.aaData[i];
-            rowData[0] = '<input type="checkbox" name="processingStep" value="' + rowData[0] + '"/>';
+            rowData[0] = '<input type="checkbox" name="processingStep" value="' + rowData[0] + '" ' + (rowData[5] ? "checked" : "") +' />';
             rowData[1] = $.otp.createLinkMarkup({
                 controller: 'processes',
                 action: 'plan',
@@ -54,7 +54,8 @@ $.otp.crashRecovery.createListView = function () {
     },
         undefined,
         undefined,
-        140);
+        140,
+        { bSort: false });
 };
 
 $.otp.crashRecovery.showParametersDialog = function (ids, target) {
@@ -183,6 +184,7 @@ $.otp.crashRecovery.startSchedulerButton = function () {
         }
     });
 };
+
 $.otp.crashRecovery.setupView = function () {
     "use strict";
     $.otp.crashRecovery.createListView();
