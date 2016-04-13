@@ -59,17 +59,18 @@ $.otp.snvResultsTable = {
                         $.otp.createLinkMarkup({
                             controller: 'individual',
                             action: 'show',
-                            id: row[0],
-                            text: row[1]
+                            id: row.individualId,
+                            text: row.individualPid,
                         }),
-                        row[2] + " - " + row[4],
-                        row[3],
-                        row[7],
-                        row[5].name,
+                        row.sampleType1 + " - " + row.sampleType2,
+                        row.seqType,
+                        row.libPrepKits,
+                        row.snvInstanceName,
+                        row.snvProcessingState.name,
                         $.otp.createLinkMarkup({
                             controller: 'snv',
                             action: 'plots',
-                            id: row[6],
+                            id: row.snvInstanceName,
                             text: 'Plots'
                         }),
                     ];

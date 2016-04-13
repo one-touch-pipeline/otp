@@ -1,9 +1,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvProcessingStates
-import org.springframework.security.access.prepost.PostAuthorize
-
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
+import org.hibernate.criterion.CriteriaSpecification
+import org.springframework.security.access.prepost.*
 
 class SnvService {
 
@@ -14,8 +13,8 @@ class SnvService {
         return SnvCallingInstance.get(id)
     }
 
-    List getSnvCallingInstanceForProject(String projectName) {
-        return SnvCallingInstance.createCriteria().list {
+    List getSnvCallingInstancesForProject(String projectName) {
+        return SnvCallingInstance.withCriteria {
             samplePair {
                 mergingWorkPackage1 {
                     sample {
@@ -27,33 +26,40 @@ class SnvService {
                     }
                 }
             }
+            resultTransformer(CriteriaSpecification.ALIAS_TO_ENTITY_MAP)
             projections {
                 samplePair {
                     mergingWorkPackage1 {
                         sample {
                             individual {
-                                property('id')
-                                property('pid')
+                                property('id', 'individualId')
+                                property('pid', 'individualPid')
                             }
                             sampleType {
-                                property('name')
+                                property('name', 'sampleType1')
                             }
                         }
                         seqType {
-                            property('displayName')
+                            property('displayName', 'seqType')
+                        }
+                        libraryPreparationKit {
+                            property('shortDisplayName', 'libPrepKit1')
                         }
                     }
                     mergingWorkPackage2 {
                         sample {
                             sampleType {
-                                property('name')
+                                property('name', 'sampleType2')
                             }
+                        }
+                        libraryPreparationKit {
+                            property('shortDisplayName', 'libPrepKit2')
                         }
                     }
                 }
-                property('processingState')
-                property('id')
-                property('instanceName')
+                property('processingState', 'snvProcessingState')
+                property('id', 'snvInstanceId')
+                property('instanceName', 'snvInstanceName')
             }
         }
     }

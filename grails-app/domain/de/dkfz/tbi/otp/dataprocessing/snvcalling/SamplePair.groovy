@@ -59,12 +59,6 @@ class SamplePair {
     Date dateCreated
     Date lastUpdated
 
-    /**
-     * The names of the properties of {@link #mergingWorkPackage1} and {@link #mergingWorkPackage2} which must be equal.
-     */
-    static final Collection<String> mergingWorkPackageEqualProperties =
-            (MergingWorkPackage.seqTrackPropertyNames - ['sample'] + MergingWorkPackage.processingParameterNames).asImmutable()
-
     static constraints = {
         mergingWorkPackage1 validator: { MergingWorkPackage val, SamplePair obj, Errors errors ->
             final SampleType.Category category = val.sampleType.getCategory(obj.project)
@@ -78,7 +72,7 @@ class SamplePair {
             }
             // For one sample pair the individual, the seqType and the workflow must be the same.
             // To provide the possibility to create sample pairs manually other properties are ignored here.
-            (['individual', 'seqType', 'workflow']).each {
+            ['individual', 'seqType', 'workflow'].each {
                 def mwp1Value = obj.mergingWorkPackage1."${it}"
                 def mwp2Value = val."${it}"
                 if (mwp1Value != mwp2Value && !(mwp1Value?.hasProperty('id') && mwp2Value?.hasProperty('id') && mwp1Value.id == mwp2Value.id)) {
@@ -88,7 +82,7 @@ class SamplePair {
             // Using a new session prevents Hibernate from trying to auto-flush this object, which would fail
             // because it is still in validation.
             withNewSession {
-                if (atMostOneElement(SamplePair.findAllWhere(
+                if (atMostOneElement(findAllWhere(
                         mergingWorkPackage1: val,
                         mergingWorkPackage2: obj.mergingWorkPackage1,
                 ))) {
@@ -183,6 +177,12 @@ class SamplePair {
     }
 
     /**
+     * The names of the properties of {@link #mergingWorkPackage1} and {@link #mergingWorkPackage2} which must be equal.
+     */
+    static final Collection<String> mergingWorkPackageEqualProperties =
+            (MergingWorkPackage.seqTrackPropertyNames - ['sample', 'libraryPreparationKit'] + MergingWorkPackage.processingParameterNames).asImmutable()
+
+    /**
      * Finds distinct combinations of [mergingWorkPackage1, mergingWorkPackage2] with these criteria:
      * <ul>
      *     <li>mergingWorkPackage1 and mergingWorkPackage2 differ only in their sampleType.</li>
@@ -193,7 +193,7 @@ class SamplePair {
      * The results are returned as SamplePair instances, <em>which have not been persisted yet</em>.
      */
     static Collection<SamplePair> findMissingDiseaseControlSamplePairs() {
-        final Collection queryResults = SamplePair.executeQuery("""
+        final Collection queryResults = executeQuery("""
             SELECT DISTINCT
               mwp1,
               mwp2
@@ -215,6 +215,9 @@ class SamplePair {
               stpp2.sampleType = sampleType_2 AND
               stpp1.category = :disease AND
               stpp2.category = :control AND
+              (mwp1.libraryPreparationKit = mwp2.libraryPreparationKit OR
+              (mwp1.libraryPreparationKit IS NULL AND mwp2.libraryPreparationKit IS NULL) OR
+              mwp1.seqType.name in (:doNotCareSeqTypeNames)) AND
               NOT EXISTS (
                 FROM
                   SamplePair
@@ -224,11 +227,12 @@ class SamplePair {
             """, [
                 disease: SampleType.Category.DISEASE,
                 control: SampleType.Category.CONTROL,
+                doNotCareSeqTypeNames: [SeqTypeNames.WHOLE_GENOME.seqTypeName, SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName]
             ], [readOnly: true])
         return queryResults.collect {
-            createInstance(
-                mergingWorkPackage1: it[0],
-                mergingWorkPackage2: it[1],
+            return createInstance(
+                    mergingWorkPackage1: it[0],
+                    mergingWorkPackage2: it[1]
             )
         }
     }

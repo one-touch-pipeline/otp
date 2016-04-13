@@ -410,7 +410,7 @@ class DomainFactory {
 
     static SamplePair createSamplePair(Map properties = [:]) {
         MergingWorkPackage mergingWorkPackage1 = createMergingWorkPackage()
-        SampleTypePerProject sampleTypePerProject = SampleTypePerProject.build(
+        SampleTypePerProject.build(
                 sampleType: mergingWorkPackage1.sampleType,
                 project: mergingWorkPackage1.project,
                 category: SampleType.Category.DISEASE,

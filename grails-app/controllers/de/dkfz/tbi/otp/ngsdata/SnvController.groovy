@@ -1,11 +1,11 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
-import grails.converters.JSON
 import de.dkfz.tbi.otp.ProcessingThresholds.*
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.ngsdata.SampleType.Category
-import de.dkfz.tbi.otp.utils.DataTableCommand
+import de.dkfz.tbi.otp.utils.*
+import grails.converters.*
 
 class SnvController {
 
@@ -152,10 +152,18 @@ class SnvController {
 
     JSON dataTableSnvResults(DataTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()
-        List data = snvService.getSnvCallingInstanceForProject(params.project)
+        List results = snvService.getSnvCallingInstancesForProject(params.project)
+        List data = results.collect { Map properties ->
+            properties.libPrepKits = [properties.libPrepKit1, properties.libPrepKit2].unique().join(" / <br>")
+            properties.remove('libPrepKit1')
+            properties.remove('libPrepKit2')
+            return properties
+        }
+
         dataToRender.iTotalRecords = data.size()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
         dataToRender.aaData = data
+
         render dataToRender as JSON
     }
 }

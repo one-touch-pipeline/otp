@@ -21,6 +21,7 @@
                         'projectOverview.index.PID',
                         'snv.sampleTypes',
                         'snv.seqType',
+                        'snv.libPrepKits',
                         'snv.processingDate',
                         'snv.progress',
                         'snv.plots',

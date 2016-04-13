@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
+import grails.test.mixin.gorm.Domain
+
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 import org.junit.Before
@@ -83,6 +85,34 @@ class SamplePairFindMissingDiseaseControlSamplePairsTests {
 
         assertFindsOne(diseaseMwp, DomainFactory.createMergingWorkPackage(
                 diseaseMwp, Sample.build(individual: individual, sampleType: controlSampleType)))
+    }
+
+    @Test
+    void testDiseaseLibPrepKitMismatch_WGS() {
+        diseaseMwp.libraryPreparationKit = DomainFactory.createLibraryPreparationKit()
+        diseaseMwp.save(flush: true)
+
+        assertFindsOne()
+    }
+
+    @Test
+    void testDiseaseLibPrepKitMismatch_NonWGSNonWGBS() {
+        diseaseMwp.libraryPreparationKit = DomainFactory.createLibraryPreparationKit()
+        diseaseMwp.seqType = exome
+        diseaseMwp.save(flush: true)
+
+        controlMwp.seqType = exome
+        controlMwp.save(flush: true)
+
+        assertFindsNothing()
+    }
+
+    @Test
+    void testDiseaseLibPrepKitMismatch_LibPrepKitNull() {
+        diseaseMwp.libraryPreparationKit = null
+        diseaseMwp.save(flush: true)
+
+        assertFindsOne()
     }
 
     @Test
