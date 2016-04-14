@@ -195,15 +195,21 @@ class ProcessedMergedBamFileQaFileService {
 
     /**
      * validates the existence (read access and size bigger zero) of the QA data files.
-     *
-     * @return <code>true</code>, if all files exist, <code>false</code> otherwise
      */
-    public boolean validateQADataFiles(QualityAssessmentMergedPass pass) {
+    public void validateQADataFiles(QualityAssessmentMergedPass pass) {
         notNull(pass, "the quality assessment merged pass is null")
-        boolean coverageDataFileExists = validateFile(coverageDataFilePath(pass))
-        boolean qualityAssessmentFileExists = validateFile(qualityAssessmentDataFilePath(pass))
-        boolean insertSizeDataFileExists = validateFile(insertSizeDataFilePath(pass))
-        return coverageDataFileExists && qualityAssessmentFileExists && insertSizeDataFileExists
+        String errors = [
+            coverage : coverageDataFilePath(pass),
+            qualityAssessment : qualityAssessmentDataFilePath(pass),
+            insertSizeData : insertSizeDataFilePath(pass),
+        ].findAll {String key, String file ->
+            !validateFile(file)
+        }.collect { String key, String file ->
+            "The ${key} file is not valid: ${file}"
+        }.join('\n')
+        if (errors) {
+            throw new RuntimeException("Error in MergedQaOutputFileJob:\n${errors}")
+        }
     }
 
     /**

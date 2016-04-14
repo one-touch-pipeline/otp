@@ -160,7 +160,7 @@ testDataConfig {
         'de.dkfz.tbi.otp.ngsdata.DataFile': [de.dkfz.tbi.otp.ngsdata.FileType, de.dkfz.tbi.otp.ngsdata.RunSegment],
         'de.dkfz.tbi.otp.ngsdata.ReferenceGenome': [de.dkfz.tbi.otp.ngsdata.ReferenceGenomeProjectSeqType],
         'de.dkfz.tbi.otp.ngsdata.SeqPlatform': [de.dkfz.tbi.otp.ngsdata.SeqPlatformGroup, de.dkfz.tbi.otp.ngsdata.SeqPlatformModelLabel],
-        'de.dkfz.tbi.otp.ngsdata.SeqTrack': [de.dkfz.tbi.otp.ngsdata.ChipSeqSeqTrack, de.dkfz.tbi.otp.ngsdata.ExomeSeqTrack, de.dkfz.tbi.otp.ngsdata.DataFile, de.dkfz.tbi.otp.ngsdata.LibraryPreparationKit],
+        'de.dkfz.tbi.otp.ngsdata.SeqTrack': [de.dkfz.tbi.otp.ngsdata.ChipSeqSeqTrack, de.dkfz.tbi.otp.ngsdata.ExomeSeqTrack, de.dkfz.tbi.otp.ngsdata.DataFile, de.dkfz.tbi.otp.ngsdata.LibraryPreparationKit, de.dkfz.tbi.otp.ngsdata.SeqPlatform],
         'de.dkfz.tbi.otp.dataprocessing.AbstractBamFile': [de.dkfz.tbi.otp.ngsdata.SeqTrack],
         'de.dkfz.tbi.otp.dataprocessing.QualityAssessmentMergedPass': [de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile],
         'de.dkfz.tbi.otp.dataprocessing.MergingSet': [de.dkfz.tbi.otp.dataprocessing.MergingSetAssignment],

@@ -13,6 +13,7 @@ class MergedQaOutputFileValidationJob extends AbstractEndStateAwareJobImpl {
     public void execute() throws Exception {
         long passId = getProcessParameterValue() as long
         QualityAssessmentMergedPass pass = QualityAssessmentMergedPass.get(passId)
-        processedMergedBamFileQaFileService.validateQADataFiles(pass) ? succeed() : fail()
+        processedMergedBamFileQaFileService.validateQADataFiles(pass)
+        succeed()
     }
 }
