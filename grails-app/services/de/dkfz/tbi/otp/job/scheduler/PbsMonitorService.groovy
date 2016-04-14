@@ -100,7 +100,7 @@ class PbsMonitorService {
                 jobStates.putAll(pbsService.retrieveKnownJobsWithState(job.realm, job.userName))
             } catch (Throwable e) {
                 log.error("Retrieving job states for ${job.realm} user ${job.userName} failed:", e)
-                failedClusterQueries.add(new Pair(job.realm, job.userName))
+                failedClusterQueries.add(new Pair(job.realm.id, job.userName))
             }
         }
 
@@ -118,7 +118,7 @@ class PbsMonitorService {
                 // a job is considered complete if it either has status "completed" or it is not known anymore,
                 // unless the cluster it runs on couldn't be checked
                 ClusterJobStatus status = jobStates.getOrDefault(info, ClusterJobStatus.COMPLETED)
-                completed = (status == ClusterJobStatus.COMPLETED && !failedClusterQueries.contains(new Pair(info.realm, info.userName)))
+                completed = (status == ClusterJobStatus.COMPLETED && !failedClusterQueries.contains(new Pair(info.realm.id, info.userName)))
                 log.debug("${info.clusterJobId} still running: ${completed ? 'no' : 'yes'}")
                 if (completed) {
                     log.info("${info.clusterJobId} finished on Realm ${info.realm}")
