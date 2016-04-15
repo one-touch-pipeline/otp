@@ -903,7 +903,10 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
         createJepsWithProcesses()
 
         when:
-        def result = jobExecutionPlanService.processCount()
+        def result
+        SpringSecurityUtils.doWithAuth("admin") {
+            result = jobExecutionPlanService.processCount()
+        }
 
         then:
         assert result == [fastqcQualityAssessment: 2L, conveySamplePairConsistency: 2L]
@@ -915,7 +918,10 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
         createJepsWithProcesses()
 
         when:
-        def result = jobExecutionPlanService.finishedProcessCount()
+        def result
+        SpringSecurityUtils.doWithAuth("admin") {
+            result = jobExecutionPlanService.finishedProcessCount()
+        }
 
         then:
         assert result == [fastqcQualityAssessment: 1L, conveySamplePairConsistency: 2L]
@@ -948,7 +954,10 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
         DomainFactory.createJobExecutionPlan(name: "SnvAlignmentDiscovery")
 
         when:
-        def result = jobExecutionPlanService.successfulProcessCount()
+        def result
+        SpringSecurityUtils.doWithAuth("admin") {
+            result = jobExecutionPlanService.successfulProcessCount()
+        }
 
         then:
         assert result == [runSeqScan: 25L, SnvAlignmentDiscovery: 0L]
@@ -961,7 +970,10 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
         Date date = createLastDateStructure("panCanInstallation", ExecutionState.SUCCESS)
 
         when:
-        def result = jobExecutionPlanService.lastProcessDate(ExecutionState.SUCCESS)
+        def result
+        SpringSecurityUtils.doWithAuth("admin") {
+            result = jobExecutionPlanService.lastProcessDate(ExecutionState.SUCCESS)
+        }
 
         then:
         assert result == [panCanInstallation: date]
