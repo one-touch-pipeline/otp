@@ -29,7 +29,7 @@ class AntibodyAntibodyTargetSeqTypeValidatorSpec extends Specification {
     }
 
 
-    void 'validate, when no ANTIBODY column exists and seqType is ChIP seq, adds warnings'() {
+    void 'validate, when no ANTIBODY column exists and seqType is ChIP seq, succeeds'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${SEQUENCING_TYPE}\t${ANTIBODY_TARGET}\n" +
@@ -40,14 +40,11 @@ class AntibodyAntibodyTargetSeqTypeValidatorSpec extends Specification {
         new AntibodyAntibodyTargetSeqTypeValidator().validate(context)
 
         then:
-        Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.WARNING, "Antibody is not provided although data is ChIP seq data."),
-        ]
-        assertContainSame(context.problems, expectedProblems)
+        assertContainSame(context.problems, [])
     }
 
 
-    void 'validate, when ANTIBODY column is empty and seqType is ChIP seq, adds warnings'() {
+    void 'validate, when ANTIBODY column is empty and seqType is ChIP seq, succeeds'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${SEQUENCING_TYPE}\t${ANTIBODY_TARGET}\t${ANTIBODY}\n" +
@@ -58,14 +55,11 @@ class AntibodyAntibodyTargetSeqTypeValidatorSpec extends Specification {
         new AntibodyAntibodyTargetSeqTypeValidator().validate(context)
 
         then:
-        Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.WARNING, "Antibody is not provided although data is ChIP seq data."),
-        ]
-        assertContainSame(context.problems, expectedProblems)
+        assertContainSame(context.problems, [])
     }
 
 
-    void 'validate, when no ANTIBODY_TARGET column exists and seqType is ChIP seq, adds errors'() {
+    void 'validate, when no ANTIBODY_TARGET column exists and seqType is ChIP seq, adds error'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${SEQUENCING_TYPE}\t${ANTIBODY}\n" +
@@ -83,7 +77,7 @@ class AntibodyAntibodyTargetSeqTypeValidatorSpec extends Specification {
     }
 
 
-    void 'validate, when ANTIBODY_TARGET column is empty and seqType is ChIP seq, adds errors'() {
+    void 'validate, when ANTIBODY_TARGET column is empty and seqType is ChIP seq, adds error'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${SEQUENCING_TYPE}\t${ANTIBODY_TARGET}\t${ANTIBODY}\n" +
@@ -101,7 +95,7 @@ class AntibodyAntibodyTargetSeqTypeValidatorSpec extends Specification {
     }
 
 
-    void 'validate, when ANTIBODY_TARGET and ANTIBODY column exist and seqType is not ChIP seq, adds warnings'() {
+    void 'validate, when ANTIBODY_TARGET and ANTIBODY column exist and seqType is not ChIP seq, adds warning'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${SEQUENCING_TYPE}\t${ANTIBODY_TARGET}\t${ANTIBODY}\n" +

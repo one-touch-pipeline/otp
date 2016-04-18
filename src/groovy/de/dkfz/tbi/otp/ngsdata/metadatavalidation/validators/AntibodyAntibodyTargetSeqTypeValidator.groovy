@@ -17,7 +17,11 @@ class AntibodyAntibodyTargetSeqTypeValidator extends ValueTuplesValidator<Metada
 
     @Override
     Collection<String> getDescriptions() {
-        return ["Antibody and antibody target are given if and only if the sequencing type is '${SeqTypeNames.CHIP_SEQ.seqTypeName}'."]
+        return [
+                "Antibody target must be given if the sequencing type is '${SeqTypeNames.CHIP_SEQ.seqTypeName}'.",
+                "Antibody target and antibody should not be given if the sequencing type is not '${SeqTypeNames.CHIP_SEQ.seqTypeName}'.",
+
+        ]
     }
 
     @Override
@@ -47,9 +51,6 @@ class AntibodyAntibodyTargetSeqTypeValidator extends ValueTuplesValidator<Metada
             }
             if (seqType == SeqTypeNames.CHIP_SEQ.seqTypeName && !antibodyTarget) {
                 context.addProblem(valueTuple.cells, Level.ERROR, "Antibody target is not provided although data is ChIP seq data.")
-            }
-            if (seqType == SeqTypeNames.CHIP_SEQ.seqTypeName && !antibody) {
-                context.addProblem(valueTuple.cells, Level.WARNING, "Antibody is not provided although data is ChIP seq data.")
             }
         }
     }
