@@ -89,7 +89,7 @@ class SeqTrack implements ProcessParameterObject {
     InformationReliability kitInfoReliability = InformationReliability.UNKNOWN_UNVERIFIED
     /**
      * Reference to the used {@link LibraryPreparationKit}.
-     * If present, the value of {link #kitInfoReliability} has to be {@link kitInfoReliability#KNOWN}
+     * If present, the value of {link #kitInfoReliability} has to be {@link InformationReliability#KNOWN}
      */
     LibraryPreparationKit libraryPreparationKit
 
