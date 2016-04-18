@@ -783,7 +783,7 @@ class SchedulerService {
             final SometimesResumableJob job
             lock.lock()
             try {
-                job = (SometimesResumableJob) running.find { it.processingStep == step }
+                job = (SometimesResumableJob) running.find { it.processingStep.id == step.id }
             } finally {
                 lock.unlock()
             }
