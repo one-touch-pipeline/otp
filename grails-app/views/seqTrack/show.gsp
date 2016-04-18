@@ -49,7 +49,7 @@
        </tr>
        <tr>
             <td class="myKey"><g:message code="seqTrack.show.details.nReads"/></td>
-            <td class="myValue">${seqTrack.nReads}</td>
+            <td class="myValue">${seqTrack.getNReads()}</td>
        </tr>
        <tr>
             <td class="myKey"><g:message code="seqTrack.show.details.insertSize"/></td>
