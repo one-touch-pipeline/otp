@@ -26,7 +26,7 @@
                 </tr>
             </tbody>
         </table>
-        <h2>List of running Jobs which cannot be restarted</h2>
+        <h2>List of running Jobs which cannot be resumed</h2>
         <table>
             <thead>
                 <tr>
@@ -47,7 +47,7 @@
                 </g:each>
             </tbody>
         <table>
-        <h2>List of running Jobs which can be restarted</h2>
+        <h2>List of running Jobs which can be resumed</h2>
         <table>
             <thead>
                 <tr>
