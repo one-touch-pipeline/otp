@@ -23,11 +23,15 @@ public class DeepFilenameValidatorSpec extends Specification {
 
     DeepFilenameValidator validator = withSampleIdentifierService(new DeepFilenameValidator())
 
+    static String parsableDeepSampleName = "02_MCF10A_CoAd_Ct1_H3K36me3_I_1"
+    static String sampleName = "a_deep_sample"
+
+
     void "validate with data containing mismatching file name and sample ID using SampleIdentifierParser"() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${FASTQ_FILE}\t${SAMPLE_ID}\n" +
-                "asdf.fastq\t02_MCF10A_CoAd_Ct1_H3K36me3_I_1"
+                "asdf.fastq\t${parsableDeepSampleName}"
         )
 
         Collection<Problem> expectedProblems = [
@@ -45,7 +49,6 @@ public class DeepFilenameValidatorSpec extends Specification {
 
     void "validate with data containing mismatching file name and sample ID using existing SampleIdentifier"() {
         given:
-        String sampleName = "a_deep_dample"
         Sample sample = DomainFactory.createSample(individual: DomainFactory.createIndividual(project: DomainFactory.createProject(name: "DEEP")))
         DomainFactory.createSampleIdentifier(name: sampleName, sample: sample).save(flush: true)
 
@@ -67,10 +70,9 @@ public class DeepFilenameValidatorSpec extends Specification {
     }
 
 
-    void "validate with correct data"(String document) {
+    void "validate with correct data"(String document, String projectName) {
         given:
-        String sampleName = "a_deep_dample"
-        Sample sample = DomainFactory.createSample(individual: DomainFactory.createIndividual(project: DomainFactory.createProject(name: "DEEP")))
+        Sample sample = DomainFactory.createSample(individual: DomainFactory.createIndividual(project: DomainFactory.createProject(name: projectName)))
         DomainFactory.createSampleIdentifier(name: sampleName, sample: sample).save(flush: true)
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(document)
@@ -82,11 +84,14 @@ public class DeepFilenameValidatorSpec extends Specification {
         context.problems.empty
 
         where:
-        document                                                                                              | _
-        "${FASTQ_FILE}\t${SAMPLE_ID}\n"                                                                       | _
-        "${FASTQ_FILE}\t${SAMPLE_ID}\nasdf\tasdf"                                                             | _
-        "${FASTQ_FILE}\t${SAMPLE_ID}\n02_MCF10A_CoAd_Ct1_H3K36me3_I_1.fastq\t02_MCF10A_CoAd_Ct1_H3K36me3_I_1" | _
-        "${FASTQ_FILE}\t${SAMPLE_ID}\n{sampleName}.fastq\t{sampleName}"                                       | _
+        document                                                                                  | projectName
+        "${FASTQ_FILE}\t${SAMPLE_ID}\n${parsableDeepSampleName}.fastq\t${parsableDeepSampleName}" | "dont_care"
+        "${FASTQ_FILE}\t${SAMPLE_ID}\n${sampleName}.fastq\t${sampleName}"                         | "DEEP"
+        "${FASTQ_FILE}\t${SAMPLE_ID}\n"                                                           | "dont_care"
+        "${FASTQ_FILE}\t${SAMPLE_ID}\nasdf\tasdf"                                                 | "dont_care"
+        "${FASTQ_FILE}\t${SAMPLE_ID}\n${sampleName}.fastq\t${sampleName}"                         | "not_DEEP"
+        "${FASTQ_FILE}\t${SAMPLE_ID}\nasdf.fastq\t${sampleName}"                                  | "not_DEEP"
+
     }
 
 

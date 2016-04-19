@@ -36,7 +36,7 @@ class DeepFilenameValidator extends ValueTuplesValidator<MetadataValidationConte
         valueTuples.each { ValueTuple valueTuple ->
             String sampleId = valueTuple.getValue(SAMPLE_ID.name())
             if((atMostOneElement(SampleIdentifier.findAllByName(sampleId))?.project?.name ?:
-                    sampleIdentifierService.parseSampleIdentifier(sampleId)?.projectName == "DEEP") &&
+                    sampleIdentifierService.parseSampleIdentifier(sampleId)?.projectName) == "DEEP" &&
                     !valueTuple.getValue(FASTQ_FILE.name()).startsWith(valueTuple.getValue(SAMPLE_ID.name()))) {
                 context.addProblem(valueTuple.cells, Level.WARNING, "In the DEEP project, name of FASTQ file should start with sample ID.")
             }
