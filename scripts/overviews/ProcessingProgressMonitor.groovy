@@ -35,6 +35,8 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvProcessingStates
 import de.dkfz.tbi.otp.job.jobs.roddyAlignment.*
+import de.dkfz.tbi.otp.infrastructure.ClusterJob
+import de.dkfz.tbi.otp.utils.ProcessHelperService
 
 //name of runs
 def runString = """
@@ -71,6 +73,11 @@ boolean allProcessed = false
 
 //flag if for all workflows the finished entries should be shown
 boolean showFinishedEntries = false
+
+//Flag to check for cluster jobs still running although OTP thinks they are failed.
+//The flag works only for MultiJobs
+//since every cluster job id is checked, it can take some time
+boolean checkForRunningClusterJobs = false
 
 //==================================================
 
@@ -132,6 +139,20 @@ def checkProcessesForObject = { String workflow, List noProcess, List processWit
     ProcessingStepUpdate update = ps.latestProcessingStepUpdate
     def state = update?.state
     if (state == ExecutionState.FAILURE || update == null) {
+        if (checkForRunningClusterJobs) {
+            List<ClusterJob> clusterJobs = ClusterJob.findAllByProcessingStepAndEndedIsNullAndValidated(ps, false)
+            if (clusterJobs) {
+                Realm realm = ctx.configService.getRealmDataProcessing(object.project)
+                String command = "qstat ${clusterJobs*.clusterJobId.join('; qstat ')}"
+                ProcessHelperService.ProcessOutput out = ctx.executionService.executeCommandReturnProcessOutput(realm, command)
+                if (out.stdout) {
+                    output << "${INDENT}Some cluster jobs are still running but OTP thinks they have failed:"
+                    output << "${INDENT}${INDENT}${object}"
+                    output << "${INDENT}${INDENT}${clusterJobs*.clusterJobId}"
+                    return false
+                }
+            }
+        }
         hasError = true
         output << "${INDENT}An error occur for the object: ${valueToShow(object)}"
         output << "${INDENT}${INDENT}object class/id: ${object.class} / ${object.id}"
@@ -608,12 +629,12 @@ def showSeqTracksRoddy = {List<SeqTrack> seqTracksToAlign ->
 
     List<MergingWorkPackage> mergingWorkPackages = MergingWorkPackage.createCriteria().list {
         and {
-          sample {
-            'in' ('id', seqTracksToAlign*.sample*.id)
-          }
-          seqType{
-            'in' ('id', seqTracksToAlign*.seqType*.id)
-          }
+            sample {
+                'in' ('id', seqTracksToAlign*.sample*.id)
+            }
+            seqType{
+                'in' ('id', seqTracksToAlign*.seqType*.id)
+            }
         }
     }
 
