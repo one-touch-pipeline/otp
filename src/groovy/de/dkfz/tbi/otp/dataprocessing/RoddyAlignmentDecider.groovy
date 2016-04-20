@@ -5,8 +5,6 @@ import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.SeqTypeNames
 
-import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.getThreadLog
-
 abstract class RoddyAlignmentDecider extends AbstractAlignmentDecider {
 
     // See integration test for explanation in which cases workpackages needs processing
@@ -17,7 +15,7 @@ abstract class RoddyAlignmentDecider extends AbstractAlignmentDecider {
         def setNeedsProcessing = { String reason ->
             workPackage.needsProcessing = true
             assert workPackage.save(failOnError: true)
-            threadLog?.info("Will align ${seqTrack} for ${workPackage} because ${reason}.")
+            seqTrack.log("Will align{0} for ${workPackage} because ${reason}.")
         }
 
         if (!latestValidBamFile) {
@@ -28,11 +26,11 @@ abstract class RoddyAlignmentDecider extends AbstractAlignmentDecider {
             setNeedsProcessing("latest bam file is withdrawn.")
         } else {
             if(forceRealign) {
-                threadLog?.info("Will not align ${seqTrack} for ${workPackage} " +
+                seqTrack.log("Will not align{0} for ${workPackage} " +
                         "because the latest bam file already contains the seqtrack. " +
                         "(You can only realign if you set the latest bam file (ID ${latestValidBamFile.id}) to withdrawn).")
             } else {
-                threadLog?.info("Will not align ${seqTrack} for ${workPackage} " +
+                seqTrack.log("Will not align{0} for ${workPackage} " +
                         "because the latest bam file already contains the seqtrack.")
             }
         }

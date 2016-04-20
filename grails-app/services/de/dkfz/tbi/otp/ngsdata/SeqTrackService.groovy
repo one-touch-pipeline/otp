@@ -19,7 +19,6 @@ import de.dkfz.tbi.otp.job.processing.ProcessingException
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
-import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.getThreadLog
 import static org.springframework.util.Assert.notNull
 
 
@@ -176,9 +175,9 @@ class SeqTrackService {
         return applicationContext.getBean(alignmentDeciderBeanName, AlignmentDecider)
     }
 
-    static boolean mayAlign(SeqTrack seqTrack) {
+    static boolean mayAlign(SeqTrack seqTrack, boolean alsoLogToSeqTrack = true) {
 
-        def notAligning = { String reason -> AbstractAlignmentDecider.logNotAligning(seqTrack, reason) }
+        def notAligning = { String reason -> AbstractAlignmentDecider.logNotAligning(seqTrack, reason, alsoLogToSeqTrack) }
 
         if (seqTrack.withdrawn) {
             notAligning('it is withdrawn')
@@ -842,8 +841,8 @@ AND i.id > :seqTrackId
         boolean onMidterm = areFilesLocatedOnMidTermStorage(seqTrack)
         boolean projectAllowsLinking = !seqTrack.project.hasToBeCopied
         boolean link = willBeAligned && fromCore && onMidterm && projectAllowsLinking
-        threadLog?.info("Fastq files of ${seqTrack} will be ${link ? "linked" : "copied"}, because " +
-                "willBeAligned=${willBeAligned}, fromCore=${fromCore}, onMidterm=${onMidterm}, projectAllowsLinking=${projectAllowsLinking})")
+        seqTrack.log(("Fastq files{0} will be ${link ? "linked" : "copied"}, because " +
+                "willBeAligned=${willBeAligned}, fromCore=${fromCore}, onMidterm=${onMidterm}, projectAllowsLinking=${projectAllowsLinking})"))
         if (link) {
             seqTrack.linkedExternally = true
             assert seqTrack.save(flush: true)
@@ -873,5 +872,4 @@ where seqTracks in (:seqTrackList)
 """, ["seqTrackList": seqTracks])
 
     }
-
 }

@@ -5,8 +5,6 @@ import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
-import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.getThreadLog
-
 /**
  * An {@link AlignmentDecider} which decides to do the default OTP alignment if the conditions for that are satisfied.
  */
@@ -28,9 +26,9 @@ class DefaultOtpAlignmentDecider extends AbstractAlignmentDecider {
                     identifier: AlignmentPass.nextIdentifier(seqTrack),
                     alignmentState: AlignmentState.NOT_STARTED,
             ).save(failOnError: true)
-            threadLog?.info("Will align ${seqTrack} for ${workPackage}.")
+            seqTrack.log("Will align{0} for ${workPackage}.")
         } else {
-            threadLog?.info("Not realigning ${seqTrack} for ${workPackage}, because forceRealign is false.")
+            seqTrack.log("Not realigning{0} for ${workPackage}, because forceRealign is false.")
         }
     }
 

@@ -111,4 +111,30 @@ class SeqTrackTests {
         assert message.contains(SampleType.SpecificReferenceGenome.UNKNOWN.toString())
     }
 
+    @Test
+    void testLog() {
+        seqTrack.log("Test")
+        TestCase.assertContainSame(seqTrack.logMessages*.message, ["Test"])
+    }
+
+    @Test
+    void testLog_Twice() {
+        seqTrack.log("Test")
+        seqTrack.log("Test2")
+        TestCase.assertContainSame(seqTrack.logMessages*.message, ["Test", "Test2"])
+    }
+
+    @Test
+    void testLog_WrongOrder() {
+        seqTrack.log("Test")
+        seqTrack.log("Test2")
+        TestCase.assertContainSame(seqTrack.logMessages*.message, ["Test", "Test2"])
+        shouldFail {
+            assert seqTrack.logMessages.message[0] == "Test2"
+        }
+        shouldFail {
+            assert seqTrack.logMessages.message[1] == "Test"
+        }
+
+    }
 }

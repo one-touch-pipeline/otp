@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.LogMessage
 import org.junit.After
 
 import de.dkfz.tbi.TestCase
@@ -15,6 +16,7 @@ import org.junit.Test
     RunSegment,
     SeqPlatformGroup,
     SeqTrack,
+    LogMessage,
 ])
 class SeqTrackServiceUnitTests {
 

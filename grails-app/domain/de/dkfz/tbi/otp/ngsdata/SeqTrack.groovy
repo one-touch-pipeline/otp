@@ -1,13 +1,18 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.LogMessage
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
+
+import java.text.MessageFormat
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 import de.dkfz.tbi.otp.dataprocessing.AlignmentPass
 import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.utils.CollectionUtils
+
+import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.getThreadLog
 
 class SeqTrack implements ProcessParameterObject {
 
@@ -88,6 +93,8 @@ class SeqTrack implements ProcessParameterObject {
      */
     LibraryPreparationKit libraryPreparationKit
 
+    List<LogMessage> logMessages = []
+
     static belongsTo = [
         Run,
         Sample,
@@ -95,6 +102,10 @@ class SeqTrack implements ProcessParameterObject {
         SeqPlatform,
         LibraryPreparationKit,
 
+    ]
+
+    static hasMany = [
+            logMessages: LogMessage
     ]
 
     static constraints = {
@@ -250,6 +261,18 @@ class SeqTrack implements ProcessParameterObject {
                             )
         } catch (AssertionError e) {
             throw new RuntimeException("Could not find a reference genome for project '${project}' and '${seqType}' and '${sampleType}'", e)
+        }
+    }
+
+    public void log(String message, boolean saveInSeqTrack = true) {
+        threadLog?.info(MessageFormat.format(message, " " + this))
+        if (saveInSeqTrack) {
+            withTransaction {
+                LogMessage logMessage = new LogMessage(message: MessageFormat.format(message, ""), timestamp: new Date())
+                logMessage.save(flush: true, failOnError: true)
+                logMessages.add(logMessage)
+                this.save(flush: true, failOnError: true)
+            }
         }
     }
 

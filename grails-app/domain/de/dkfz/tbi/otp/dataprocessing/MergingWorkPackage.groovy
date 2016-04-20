@@ -127,7 +127,7 @@ class MergingWorkPackage {
 
         return SeqTrack.findAll(mergeableSeqTracksQuery, properties).findAll {
             assert satisfiesCriteria(it)
-            return SeqTrackService.mayAlign(it)
+            return SeqTrackService.mayAlign(it, false)
         }
     }
 

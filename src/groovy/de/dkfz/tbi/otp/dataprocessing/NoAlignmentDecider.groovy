@@ -1,7 +1,5 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.*
-
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
@@ -16,7 +14,7 @@ class NoAlignmentDecider implements AlignmentDecider {
 
     @Override
     Collection<MergingWorkPackage> decideAndPrepareForAlignment(SeqTrack seqTrack, boolean forceRealign) {
-        threadLog?.info("Not aligning ${seqTrack}, because it is configured to use the ${this.getClass().simpleName}.")
+        seqTrack.log("Not aligning{0}, because it is configured to use the ${this.getClass().simpleName}.")
         return Collections.emptyList()
     }
 

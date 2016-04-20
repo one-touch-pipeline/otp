@@ -10,8 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
-import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.getThreadLog
-
 
 abstract class AbstractAlignmentDecider implements AlignmentDecider {
 
@@ -110,8 +108,8 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
         return [workPackage]
     }
 
-    static void logNotAligning(SeqTrack seqTrack, String reason) {
-        threadLog?.info("Not aligning ${seqTrack}, because ${reason}.")
+    static void logNotAligning(SeqTrack seqTrack, String reason, boolean saveInSeqTrack = true) {
+        seqTrack.log("Not aligning{0}, because ${reason}.", saveInSeqTrack)
     }
 
     boolean canWorkflowAlign(SeqTrack seqTrack) {
