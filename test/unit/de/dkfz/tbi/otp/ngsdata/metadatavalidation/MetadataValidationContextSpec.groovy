@@ -37,7 +37,7 @@ class MetadataValidationContextSpec extends Specification {
         where:
         file                                                                        || problemMessage
         new File('metadata.tsv')                                                    || 'not a valid absolute path'
-        new File(TestCase.uniqueNonExistentPath, 'metadata.tsv')                    || 'could not be found by OTP'
+        new File(TestCase.uniqueNonExistentPath, 'metadata.tsv')                    || 'does not exist'
         temporaryFolder.newFolder('folder.tsv')                                     || 'is not a file'
         temporaryFolder.newFile("${HelperUtils.uniqueString}.xls")                  || "does not end with '.tsv'."
         makeNotReadable(temporaryFolder.newFile("${HelperUtils.uniqueString}.tsv")) || 'is not readable'

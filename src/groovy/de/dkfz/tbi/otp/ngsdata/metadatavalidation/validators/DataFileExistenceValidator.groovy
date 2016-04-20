@@ -44,7 +44,7 @@ class DataFileExistenceValidator extends ValueTuplesValidator<MetadataValidation
             }
             String message = null
             if (!path.exists()) {
-                message = "${pathForMessage(path)} could not be found by OTP."
+                message = "${pathForMessage(path)} does not exist or cannot be accessed by OTP."
             } else if (!path.isFile()) {
                 message = "${pathForMessage(path)} is not a file."
             } else if (path.length() == 0L) {

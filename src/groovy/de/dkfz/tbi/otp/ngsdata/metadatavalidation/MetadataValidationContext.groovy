@@ -35,7 +35,7 @@ class MetadataValidationContext extends ValidationContext {
         } else if (!metadataFile.name.endsWith('.tsv')) {
             problems.addProblem(Collections.emptySet(), Level.ERROR, "The file name of '${metadataFile}' does not end with '.tsv'.")
         } else if (!metadataFile.exists()) {
-            problems.addProblem(Collections.emptySet(), Level.ERROR, "${pathForMessage(metadataFile)} could not be found by OTP.")
+            problems.addProblem(Collections.emptySet(), Level.ERROR, "${pathForMessage(metadataFile)} does not exist or cannot be accessed by OTP.")
         } else if (!metadataFile.isFile()) {
             problems.addProblem(Collections.emptySet(), Level.ERROR, "${pathForMessage(metadataFile)} is not a file.")
         } else if (!metadataFile.canRead()) {

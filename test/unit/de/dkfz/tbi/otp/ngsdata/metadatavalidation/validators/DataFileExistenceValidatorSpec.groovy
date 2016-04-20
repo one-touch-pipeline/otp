@@ -68,17 +68,17 @@ class DataFileExistenceValidatorSpec extends Specification {
                 new Problem((context.spreadsheet.dataRows[5].cells + context.spreadsheet.dataRows[6].cells) as Set<Cell>,
                         Level.WARNING, "Multiple rows reference the same file '${new File(dir, 'not_found1')}'."),
                 new Problem((context.spreadsheet.dataRows[5].cells + context.spreadsheet.dataRows[6].cells) as Set<Cell>,
-                        Level.ERROR, "'${new File(dir, 'not_found1')}' could not be found by OTP."),
+                        Level.ERROR, "'${new File(dir, 'not_found1')}' does not exist or cannot be accessed by OTP."),
                 new Problem((context.spreadsheet.dataRows[7].cells + context.spreadsheet.dataRows[8].cells) as Set<Cell>,
                         Level.WARNING, "Multiple rows reference the same file '${new File(dir, 'not_found2')}'."),
                 new Problem((context.spreadsheet.dataRows[7].cells + context.spreadsheet.dataRows[8].cells) as Set<Cell>,
-                        Level.ERROR, "'${new File(dir, 'not_found2')}' could not be found by OTP."),
+                        Level.ERROR, "'${new File(dir, 'not_found2')}' does not exist or cannot be accessed by OTP."),
                 new Problem((context.spreadsheet.dataRows[ 9].cells + context.spreadsheet.dataRows[10].cells +
                              context.spreadsheet.dataRows[11].cells + context.spreadsheet.dataRows[12].cells) as Set<Cell>,
                         Level.WARNING, "Multiple rows reference the same file '${new File(dir, 'not_found3')}'."),
                 new Problem((context.spreadsheet.dataRows[ 9].cells + context.spreadsheet.dataRows[10].cells +
                              context.spreadsheet.dataRows[11].cells + context.spreadsheet.dataRows[12].cells) as Set<Cell>,
-                        Level.ERROR, "'${new File(dir, 'not_found3')}' could not be found by OTP."),
+                        Level.ERROR, "'${new File(dir, 'not_found3')}' does not exist or cannot be accessed by OTP."),
         ]
 
         when:
