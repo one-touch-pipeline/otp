@@ -1,16 +1,14 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
-import de.dkfz.tbi.otp.InformationReliability
-import de.dkfz.tbi.otp.ngsdata.LibraryPreparationKitService
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContext
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidator
-import de.dkfz.tbi.util.spreadsheet.Cell
-import de.dkfz.tbi.util.spreadsheet.validation.Level
-import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.stereotype.Component
+import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
+import de.dkfz.tbi.util.spreadsheet.*
+import de.dkfz.tbi.util.spreadsheet.validation.*
+import org.springframework.beans.factory.annotation.*
+import org.springframework.stereotype.*
 
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.LIB_PREP_KIT
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 
 @Component
 class LibPrepKitValidator extends SingleValueValidator<MetadataValidationContext> implements MetadataValidator {
@@ -26,6 +24,11 @@ class LibPrepKitValidator extends SingleValueValidator<MetadataValidationContext
     @Override
     String getColumnTitle(MetadataValidationContext context) {
         return LIB_PREP_KIT.name()
+    }
+
+    @Override
+    void columnMissing(MetadataValidationContext context) {
+        optionalColumnMissing(context, LIB_PREP_KIT.name())
     }
 
     @Override
