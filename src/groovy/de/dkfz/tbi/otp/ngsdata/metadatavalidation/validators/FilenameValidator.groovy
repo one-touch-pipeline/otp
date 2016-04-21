@@ -1,23 +1,25 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContext
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidator
-import de.dkfz.tbi.util.spreadsheet.Cell
-import de.dkfz.tbi.util.spreadsheet.validation.Level
-import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
-import org.springframework.stereotype.Component
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.FASTQ_FILE
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
+import de.dkfz.tbi.util.spreadsheet.*
+import de.dkfz.tbi.util.spreadsheet.validation.*
+import org.springframework.stereotype.*
+
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 
 @Component
 class FilenameValidator extends SingleValueValidator<MetadataValidationContext> implements MetadataValidator {
 
+    FileTypeService fileTypeService
+
     @Override
     Collection<String> getDescriptions() {
         return [
-                "The filename ends with '.gz'.",
-                "The filename contains 'fastq'.",
-                "The filename contains only legal characters."
+                "The filename must end with '.gz'.",
+                "The filename must contain '_fastq' or '.fastq'.",
+                "The filename must contain only legal characters.",
         ]
     }
 
@@ -29,13 +31,15 @@ class FilenameValidator extends SingleValueValidator<MetadataValidationContext> 
     @Override
     void validateValue(MetadataValidationContext context, String filename, Set<Cell> cells) {
         if (!filename.endsWith('.gz')) {
-            context.addProblem(cells, Level.ERROR, "Filename must end with '.gz'.")
+            context.addProblem(cells, Level.ERROR, "Filename '${filename}' does not end with '.gz'.")
         }
-        if (!filename.contains('fastq')) {
-            context.addProblem(cells, Level.WARNING, "Filename should contain 'fastq'.")
+        try {
+            fileTypeService.getFileType(filename, FileType.Type.SEQUENCE)
+        } catch (FileTypeUndefinedException) {
+            context.addProblem(cells, Level.ERROR, "Filename '${filename}' contains neither '_fastq' nor '.fastq'.")
         }
         if (!OtpPath.isValidPathComponent(filename)) {
-            context.addProblem(cells, Level.ERROR, "Filename contains invalid characters.")
+            context.addProblem(cells, Level.ERROR, "Filename '${filename}' contains invalid characters.")
         }
     }
 }
