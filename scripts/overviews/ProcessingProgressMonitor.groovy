@@ -36,6 +36,7 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvProcessingStates
 import de.dkfz.tbi.otp.job.jobs.roddyAlignment.*
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.ProcessHelperService
 
 //name of runs
@@ -425,7 +426,15 @@ def handleStateMapRoddy = {Map<AbstractMergedBamFile.FileOperationStatus, Collec
 def handleStateMapSnv = { List next ->
     output << "\nsnvWorkflow"
 
-    Map stateMap = ['disabled': [], 'noConfig': [], 'running': [], 'finished': [], 'waiting': [], 'notTriggered': []]
+    Map stateMap = [
+            'disabled': [],
+            'noConfig': [],
+            'alreadyRunning': [],
+            'running': [],
+            'finished': [],
+            'waiting': [],
+            'notTriggered': [],
+    ]
 
     List samplePairs = []
     List unknownDiseaseStatus = []
@@ -440,14 +449,14 @@ def handleStateMapSnv = { List next ->
                 eq('mergingWorkPackage2', ambf.mergingWorkPackage)
             }
         }
-        if (samplePairsForBamFile) {
-            samplePairs += samplePairsForBamFile
-        } else if (!SampleTypePerProject.findByProjectAndSampleType(ambf.project, ambf.sampleType)) {
+        if (!SampleTypePerProject.findByProjectAndSampleType(ambf.project, ambf.sampleType)) {
             unknownDiseaseStatus << "${ambf.project} ${ambf.sampleType.name}"
         } else if (SampleTypePerProject.findByProjectAndSampleType(ambf.project, ambf.sampleType).category == SampleType.Category.IGNORED) {
             ignoredDiseaseStatus << "${ambf.project} ${ambf.sampleType.name}"
         } else if (!ProcessingThresholds.findByProjectAndSampleTypeAndSeqType(ambf.project, ambf.sampleType, ambf.seqType)) {
             unknownThreshold << "${ambf.project} ${ambf.sampleType.name} ${ambf.seqType}"
+        } else  if (samplePairsForBamFile) {
+            samplePairs += samplePairsForBamFile
         } else {
             noPairFound << "${ambf.project} ${ambf.individual} ${ambf.sampleType.name} ${ambf.seqType}"
         }
@@ -463,10 +472,12 @@ def handleStateMapSnv = { List next ->
             if (samplePair.processingStatus == SamplePair.ProcessingStatus.DISABLED) {
                 stateMap.disabled << samplePair
             } else if (samplePair.processingStatus == SamplePair.ProcessingStatus.NEEDS_PROCESSING) {
-                if (SnvConfig.findByProjectAndSeqTypeAndObsoleteDateIsNull(samplePair.project, samplePair.seqType)) {
-                    stateMap.waiting << samplePair
-                } else {
+                if (!SnvConfig.findByProjectAndSeqTypeAndObsoleteDateIsNull(samplePair.project, samplePair.seqType)) {
                     stateMap.noConfig << "${samplePair.project} ${samplePair.seqType}"
+                } else if (SnvCallingInstance.findBySamplePairAndProcessingStateInList(samplePair, [SnvProcessingStates.IN_PROGRESS])) {
+                    stateMap.alreadyRunning << samplePair
+                } else {
+                    stateMap.waiting << samplePair
                 }
             } else {
                 // get latest SnvCallingInstance for this SamplePair
@@ -491,7 +502,52 @@ def handleStateMapSnv = { List next ->
     showUniqueList('For the following project seqtype combination no config is defined', stateMap.noConfig)
     showList('disabled', stateMap.disabled)
     showList('notTriggered', stateMap.notTriggered)
-    showWaiting(stateMap.waiting)
+    showList('old instance running', stateMap.alreadyRunning)
+    showWaiting(stateMap.waiting, {
+        List<String> ret = []
+        [
+                disease: it.mergingWorkPackage1,
+                control: it.mergingWorkPackage2,
+        ].each { String key, MergingWorkPackage mergingWorkPackage ->
+            AbstractMergedBamFile bamFile = AbstractMergedBamFile.findByWorkPackage(mergingWorkPackage, [sort: 'id', order: 'desc'])
+            if (bamFile == null) {
+                ret << "${key} bam file does not exist"
+            } else if (bamFile.withdrawn) {
+                ret << "${key} bam file is withdrawn"
+            } else if (bamFile.md5sum == null) {
+                ret << "${key} bam file is in processing"
+            } else {
+                Set<SeqTrack> containedSeqTracks = bamFile.getContainedSeqTracks()
+                Set<SeqTrack> availableSeqTracks = bamFile.workPackage.findMergeableSeqTracks()
+                if (!CollectionUtils.containSame(containedSeqTracks*.id, availableSeqTracks*.id)) {
+                    Set<SeqTrack> missingSeqTracks = availableSeqTracks.findAll {
+                        containedSeqTracks*.id.contains(it.id)
+                    }
+                    Set<SeqTrack> additionalSeqTrack = containedSeqTracks.findAll {
+                        availableSeqTracks*.id.contains(it.id)
+                    }
+                    if (missingSeqTracks) {
+                        ret << "${key} bam file misses following seqtracks: ${missingSeqTracks.collect {"<${it.run} ${it.laneId}>"}.join('; ')}"
+                    }
+                    if (additionalSeqTrack) {
+                        ret << "${key} bam file contains unexpected  seqtracks: ${additionalSeqTrack.collect {"<${it.run} ${it.laneId}>"}.join('; ')}"
+                    }
+                }
+                ProcessingThresholds processingThresholds = ProcessingThresholds.findByProjectAndSeqTypeAndSampleType(bamFile.project, bamFile.seqType, bamFile.sampleType)
+                if (!processingThresholds) {
+                    ret << "No thresholds could be found for ${key}"
+                } else {
+                    if (!processingThresholds.isAboveLaneThreshold(bamFile)) {
+                        ret << "${key} bam file has too few lanes (${bamFile.numberOfMergedLanes} of ${processingThresholds.numberOfLanes})"
+                    }
+                    if (!processingThresholds.isAboveCoverageThreshold(bamFile)) {
+                        ret << "${key} bam file has insufficient coverage (${bamFile.coverage.round(2)} of ${processingThresholds.coverage})"
+                    }
+                }
+            }
+        }
+        "${it} ${ret ? " (${ret.join(', ')})" : ''}"
+    })
     showRunning("SnvWorkflow", stateMap.running)
     showFinished(stateMap.finished)
 

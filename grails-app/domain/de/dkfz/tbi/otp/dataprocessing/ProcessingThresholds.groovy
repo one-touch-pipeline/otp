@@ -43,4 +43,16 @@ class ProcessingThresholds {
             return (val != null && val > 0) || (val == null && obj.coverage != null)
         }
     }
+
+    boolean isAboveLaneThreshold(AbstractMergedBamFile bamFile) {
+        assert bamFile : 'bam file may not be null'
+        assert bamFile.numberOfMergedLanes : 'property numberOfMergedLanes of the bam has to be set'
+        return numberOfLanes == null || numberOfLanes <= bamFile.numberOfMergedLanes
+    }
+
+    boolean isAboveCoverageThreshold(AbstractMergedBamFile bamFile) {
+        assert bamFile : 'bam file may not be null'
+        assert bamFile.coverage : 'property coverage of the bam has to be set'
+        return coverage == null || coverage <= bamFile.coverage
+    }
 }
