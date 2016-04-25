@@ -38,7 +38,7 @@ class Sequence implements Serializable {
     boolean hasFinalBam
     boolean hasOriginalBam
     boolean usingOriginalBam
-    long nBasePairs
+    Long nBasePairs
     int insertSize
 
     SeqTrack.QualityEncoding qualityEncoding
@@ -138,6 +138,7 @@ class Sequence implements Serializable {
         // nullable constraints from SeqType
         seqTypeAlias(nullable: true)
         seqTypeDisplayName(nullable: true)
+        nBasePairs(nullable: true)
     }
 
     String getLibraryLayoutDirName() {

@@ -56,9 +56,6 @@ class LoadMetaDataTests extends WorkflowTestCase {
     String laneNoKitId = "2"
     String laneNoUnknown = "3"
 
-    String baseCount = "8781211000"
-    String readCount = "87812110"
-    String cycleCount = "101"
     String insertSize = "162"
 
     ReferenceGenome referenceGenome
@@ -79,9 +76,6 @@ class LoadMetaDataTests extends WorkflowTestCase {
             (MetaDataColumn.CENTER_NAME): seqCenterName,
             (MetaDataColumn.RUN_ID): runName,
             (MetaDataColumn.RUN_DATE): runDate,
-            (MetaDataColumn.BASE_COUNT): baseCount,
-            (MetaDataColumn.READ_COUNT): readCount,
-            (MetaDataColumn.CYCLE_COUNT): cycleCount,
             (MetaDataColumn.SAMPLE_ID): sampleID,
             (MetaDataColumn.INSTRUMENT_PLATFORM): instrumentPlatform,
             (MetaDataColumn.INSTRUMENT_MODEL): instrumentModel,

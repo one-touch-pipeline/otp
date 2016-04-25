@@ -53,7 +53,7 @@ class SeqTrack implements ProcessParameterObject {
      * <li>3,800,000,000 in average for WES, non-multiplexed</li>
      * </ul>
      */
-    long nBasePairs = 0
+    Long nBasePairs
     /**
      * In paired-end sequencing the insert size describes the size in base pairs of the DNA (or RNA) fragment between two adapters.
      * Insert size = length of read 1 + length of read 2 + inner distance (unknown region between reads)
@@ -118,6 +118,7 @@ class SeqTrack implements ProcessParameterObject {
         pipelineVersion()
         // for old data and data which is sequenced from external core facilities this information might not be provided.
         ilseId nullable: true
+        nBasePairs nullable: true
 
         //libraryPreparationKit and inferred state
         kitInfoReliability(nullable: false)
@@ -151,13 +152,9 @@ class SeqTrack implements ProcessParameterObject {
     }
 
     String nBaseString() {
-        return String.format("%.1f G",(nBasePairs/1e9))
+        return nBasePairs ? String.format("%.1f G",(nBasePairs/1e9)) : "N/A"
     }
 
-    String basePairsString() {
-        String nbase = String.format("%.1f G",(nBasePairs/1e9))
-        "${laneId} ${sample} ${nbase} ${insertSize}"
-    }
 
     String alignmentLogString() {
         String text = ""

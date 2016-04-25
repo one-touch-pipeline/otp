@@ -102,7 +102,14 @@ class FastqcJobTest {
 
     @Test
     void testMaybeSubmit_FastQcResultsAvailable_executesCopyCommand() {
+        long nReads = 100
+        String sequenceLength = "90"
+
         File fastqcFile = CreateFileHelper.createFile(fastqcJob.fastqcDataFilesService.pathToFastQcResultFromSeqCenter(dataFile))
+
+        dataFile.nReads = nReads
+        dataFile.sequenceLength = sequenceLength
+        assert dataFile.save(flush: true)
 
         fastqcJob.pbsService.metaClass.executeJob = { Realm inputRealm, String inputCommand ->
             assert false : "this method should not be reached"
@@ -129,7 +136,14 @@ class FastqcJobTest {
 
     @Test
     void testValidate_DataNotFromGPCF_shallBeUploadToDB() {
+        long nReads = 100
+        String sequenceLength = "90"
+
         FastqcProcessedFile fastqcProcessedFile = DomainFactory.createFastqcProcessedFile([dataFile: dataFile])
+
+        dataFile.nReads = nReads
+        dataFile.sequenceLength = sequenceLength
+        assert dataFile.save(flush: true)
 
         assert fastqcProcessedFile.contentUploaded == false
 
@@ -143,12 +157,14 @@ class FastqcJobTest {
     @Test
     void testValidate_totalSequencesIsSameForAllDataFiles_ShouldPassValidation() {
         long nReads = 100
+        String sequenceLength = "90"
 
         dataFile.nReads = nReads
+        dataFile.sequenceLength = sequenceLength
         dataFile.save(flush: true, failOnError: true)
         DomainFactory.createFastqcProcessedFile([dataFile: dataFile])
 
-        DataFile dataFile2 = DomainFactory.createDataFile([seqTrack: seqTrack, project: seqTrack.project, run: seqTrack.run, runSegment: runSegment, nReads: nReads])
+        DataFile dataFile2 = DomainFactory.createDataFile([seqTrack: seqTrack, project: seqTrack.project, run: seqTrack.run, runSegment: runSegment, nReads: nReads, sequenceLength: sequenceLength])
         DomainFactory.createFastqcProcessedFile([dataFile: dataFile2])
 
         fastqcJob.fastqcUploadService.metaClass.uploadFastQCFileContentsToDataBase = { FastqcProcessedFile fastqc -> }
@@ -159,12 +175,14 @@ class FastqcJobTest {
     void testValidate_totalSequencesIsDifferentForAllDataFiles_ShouldFail() {
         long nReads1 = 100
         long nReads2 = 105
+        String sequenceLength = "90"
 
         dataFile.nReads = nReads1
+        dataFile.sequenceLength = sequenceLength
         dataFile.save(flush: true, failOnError: true)
         DomainFactory.createFastqcProcessedFile([dataFile: dataFile])
 
-        DataFile dataFile2 = DomainFactory.createDataFile([seqTrack: seqTrack, project: seqTrack.project, run: seqTrack.run, runSegment: runSegment, nReads: nReads2])
+        DataFile dataFile2 = DomainFactory.createDataFile([seqTrack: seqTrack, project: seqTrack.project, run: seqTrack.run, runSegment: runSegment, nReads: nReads2, sequenceLength: sequenceLength])
         DomainFactory.createFastqcProcessedFile([dataFile: dataFile2])
 
         fastqcJob.fastqcUploadService.metaClass.uploadFastQCFileContentsToDataBase = { FastqcProcessedFile fastqc -> }
@@ -177,12 +195,14 @@ class FastqcJobTest {
     @Test
     void testValidate_sequenceLengthIsIntegerValueAndIsSameForAllDataFiles_ShouldPassValidation() {
         String sequenceLength = "100"
+        long nReads = 100
 
         dataFile.sequenceLength = sequenceLength
+        dataFile.nReads = nReads
         dataFile.save(flush: true, failOnError: true)
         DomainFactory.createFastqcProcessedFile([dataFile: dataFile])
 
-        DataFile dataFile2 = DomainFactory.createDataFile([seqTrack: seqTrack, project: seqTrack.project, run: seqTrack.run, runSegment: runSegment, sequenceLength: sequenceLength])
+        DataFile dataFile2 = DomainFactory.createDataFile([seqTrack: seqTrack, project: seqTrack.project, run: seqTrack.run, runSegment: runSegment, sequenceLength: sequenceLength, nReads: nReads])
         DomainFactory.createFastqcProcessedFile([dataFile: dataFile2])
 
         fastqcJob.fastqcUploadService.metaClass.uploadFastQCFileContentsToDataBase = { FastqcProcessedFile fastqc -> }
@@ -193,12 +213,14 @@ class FastqcJobTest {
     void testValidate_sequenceLengthIsRangeValueAndIsDifferentForAllDataFiles_ShouldPassValidation() {
         String sequenceLength1 = "0-50"
         String sequenceLength2 = "50-100"
+        long nReads = 100
 
         dataFile.sequenceLength = sequenceLength1
+        dataFile.nReads = nReads
         dataFile.save(flush: true, failOnError: true)
         DomainFactory.createFastqcProcessedFile([dataFile: dataFile])
 
-        DataFile dataFile2 = DomainFactory.createDataFile([seqTrack: seqTrack, project: seqTrack.project, run: seqTrack.run, runSegment: runSegment, sequenceLength: sequenceLength2])
+        DataFile dataFile2 = DomainFactory.createDataFile([seqTrack: seqTrack, project: seqTrack.project, run: seqTrack.run, runSegment: runSegment, sequenceLength: sequenceLength2, nReads: nReads])
         DomainFactory.createFastqcProcessedFile([dataFile: dataFile2])
 
         fastqcJob.fastqcUploadService.metaClass.uploadFastQCFileContentsToDataBase = { FastqcProcessedFile fastqc -> }
@@ -209,12 +231,14 @@ class FastqcJobTest {
     void testValidate_sequenceLengthIsDifferentForAllDataFiles_ShouldFail() {
         String sequenceLength1 = "50"
         String sequenceLength2 = "100"
+        long nReads = 100
 
         dataFile.sequenceLength = sequenceLength1
+        dataFile.nReads = nReads
         dataFile.save(flush: true, failOnError: true)
         DomainFactory.createFastqcProcessedFile([dataFile: dataFile])
 
-        DataFile dataFile2 = DomainFactory.createDataFile([seqTrack: seqTrack, project: seqTrack.project, run: seqTrack.run, runSegment: runSegment, sequenceLength: sequenceLength2])
+        DataFile dataFile2 = DomainFactory.createDataFile([seqTrack: seqTrack, project: seqTrack.project, run: seqTrack.run, runSegment: runSegment, sequenceLength: sequenceLength2, nReads: nReads])
         DomainFactory.createFastqcProcessedFile([dataFile: dataFile2])
 
         fastqcJob.fastqcUploadService.metaClass.uploadFastQCFileContentsToDataBase = { FastqcProcessedFile fastqc -> }

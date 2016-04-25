@@ -3,7 +3,7 @@ package de.dkfz.tbi.otp.ngsdata
 class SeqScan {
 
     int nLanes = 0
-    long nBasePairs = 0       // calculated from seqTracks
+    Long nBasePairs       // calculated from seqTracks
     double coverage = 0.0     // from somewhere
 
     enum State {DECLARED, PROCESSING, FINISHED, OBSOLETE}
@@ -37,6 +37,7 @@ class SeqScan {
         seqCenters()
         qcState()
         insertSize(nullable: true)
+        nBasePairs (nullable: true)
     }
 
     String toString() {
@@ -44,7 +45,7 @@ class SeqScan {
     }
 
     String basePairsString() {
-        return String.format("%.1f G",(nBasePairs/1e9))
+        return nBasePairs ? String.format("%.1f G",(nBasePairs/1e9)) : "N/A"
     }
 
     boolean isMerged() {

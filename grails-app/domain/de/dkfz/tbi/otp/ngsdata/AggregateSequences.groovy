@@ -16,8 +16,8 @@ class AggregateSequences implements Serializable {
 
     // fields from SeqTrack
     long laneCount
-    long sum_N_BasePairs
-    long sum_N_BasePairsGb
+    Long sum_N_BasePairs
+    Long sum_N_BasePairsGb
 
     // fields from SeqPlatform
     /**

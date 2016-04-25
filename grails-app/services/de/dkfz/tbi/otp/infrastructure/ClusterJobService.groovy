@@ -215,7 +215,7 @@ class ClusterJobService {
      */
     public static Long getBasesSum(ClusterJob job) {
         return normalizePropertyToClusterJobs(job) { ProcessParameterObject workflowObject ->
-            workflowObject.getContainedSeqTracks()?.sum { it.nBasePairs }
+            workflowObject.getContainedSeqTracks()?.sum { it.nBasePairs ?: 0 }
         }
     }
 

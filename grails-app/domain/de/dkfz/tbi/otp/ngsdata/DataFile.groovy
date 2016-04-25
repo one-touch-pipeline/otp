@@ -159,4 +159,22 @@ class DataFile implements Commentable{
         alignmentLog index: "data_file_alignment_log_idx"
         fileType index: "data_file_file_type_idx"
     }
+
+
+    int getMeanSequenceLength() {
+        int length
+        try {
+            length = this.sequenceLength.toInteger()
+        } catch (NumberFormatException) {
+            def sum = 0
+            def count = 0
+            this.sequenceLength.split("-").each {
+                sum += it.toInteger()
+                count++
+            }
+            assert sum: "It was not possible to extract values from the sequence length"
+            length = sum / count
+        }
+        return length
+    }
 }

@@ -210,8 +210,6 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
                 ILSE_NO: ILSE_ID,
                 LIBRARY_LAYOUT: SeqType.LIBRARYLAYOUT_PAIRED,
                 INSERT_SIZE: "10000",
-                BASE_COUNT: "100000",
-                READ_COUNT: "1000",
         ]
         createAndSaveDataFileAndMetaDataEntry(data + [(key): valueRead1], run, runSegment)
         createAndSaveDataFileAndMetaDataEntry(data + [(key): valueRead2], run, runSegment)

@@ -181,8 +181,6 @@ class MetadataImportService {
             Map properties = [
                     laneId: laneId,
                     ilseId: uniqueColumnValue(rows, ILSE_NO) ?: null,
-                    // TODO OTP-2051: Use a different fallback value? Or remove this line completely?
-                    nBasePairs: rows.collect { tryParseLong(it.getCellByColumnTitle(BASE_COUNT.name())?.text, 0) }.sum(),
                     // TODO OTP-2050: Use a different fallback value?
                     insertSize: tryParseInt(uniqueColumnValue(rows, INSERT_SIZE), 0),
                     run: run,

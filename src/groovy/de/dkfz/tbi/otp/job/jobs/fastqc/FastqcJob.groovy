@@ -1,6 +1,9 @@
 package de.dkfz.tbi.otp.job.jobs.fastqc
 
+import de.dkfz.tbi.otp.infrastructure.ClusterJob
+import de.dkfz.tbi.otp.infrastructure.ClusterJobService
 import de.dkfz.tbi.otp.ngsqc.FastqcUploadService
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.ProcessHelperService
 import de.dkfz.tbi.otp.utils.WaitingFileUtils
 import org.springframework.beans.factory.annotation.Autowired
@@ -76,8 +79,8 @@ class FastqcJob extends AbstractOtpJob {
             lsdfFilesService.ensureFileIsReadableAndNotEmpty(new File("${finalDir}/${fastqcDataFilesService.fastqcFileName(dataFile)}"))
         }
 
-        synchronized (seqTrackService) {
-            DataFile.withTransaction { //Ensure that all updates are executed together
+        SeqTrack.withTransaction {
+            synchronized (seqTrackService) {
                 List<DataFile> files = seqTrackService.getSequenceFilesForSeqTrack(seqTrack)
                 for (DataFile file in files) {
                     FastqcProcessedFile fastqc = fastqcDataFilesService.getAndUpdateFastqcProcessedFile(file)
@@ -89,9 +92,18 @@ class FastqcJob extends AbstractOtpJob {
                 assert files*.sequenceLength.unique().size() == 1 || files*.sequenceLength.any { it.contains('-') }
                 seqTrackService.setFastqcFinished(seqTrack)
             }
+            seqTrackService.fillBaseCount(seqTrack)
+            setnBasesInClusterJobForFastqc(processingStep)
         }
     }
 
+
+    private setnBasesInClusterJobForFastqc(ProcessingStep processingStep) {
+        ClusterJob.findAllByProcessingStep(processingStep).each {
+            it.nBases = ClusterJobService.getBasesSum(it)
+            it.save(flush: true)
+        }
+    }
 
     private void createAndExecuteFastQcCommand(Realm realm, List<DataFile> dataFiles, File outDir) {
         dataFiles.each { dataFile ->

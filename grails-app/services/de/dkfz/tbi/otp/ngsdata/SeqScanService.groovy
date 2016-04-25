@@ -202,7 +202,10 @@ class SeqScanService {
         seqScan.nLanes = MergingAssignment.countBySeqScan(seqScan)
         long nbp = 0
         MergingAssignment.findAllBySeqScan(seqScan).each { MergingAssignment mergingAssignment ->
-            nbp += mergingAssignment.seqTrack.nBasePairs
+            Long basePairs = mergingAssignment.seqTrack.nBasePairs
+            if (basePairs) {
+                nbp += basePairs
+            }
         }
         seqScan.nBasePairs = nbp
     }

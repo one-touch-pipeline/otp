@@ -33,7 +33,6 @@ class LsdfFilesServiceTests {
     String libraryPreparationKit = "Agilent SureSelect V3"
     String laneNo = "1"
     long baseCount = 8781211000
-    long readCount = 87812110
     int insertSize = 162
 
     Run run

@@ -25,8 +25,6 @@ class SeqTrackValidator extends ColumnSetValidator<MetadataValidationContext> im
             INSERT_SIZE,
             PIPELINE_VERSION,
             ILSE_NO,
-            // TODO OTP-1937: BASE_COUNT?
-            // TODO OTP-1937: READ_COUNT?
     ].asImmutable()
 
     @Override

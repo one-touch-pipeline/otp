@@ -27,6 +27,7 @@ class FastqcWorkflowTests extends WorkflowTestCase {
     File expectedFastqc
     DataFile dataFile
     SeqCenter seqCenter
+    SeqTrack seqTrack
 
     @Before
     void setUp() {
@@ -55,7 +56,7 @@ class FastqcWorkflowTests extends WorkflowTestCase {
 
         seqCenter = run.seqCenter
 
-        SeqTrack seqTrack = SeqTrack.build(
+        seqTrack = SeqTrack.build(
                 sample: sample,
                 fastqcState: SeqTrack.DataProcessingState.NOT_STARTED,
                 seqType: SeqType.wholeGenomePairedSeqType,
@@ -107,6 +108,8 @@ class FastqcWorkflowTests extends WorkflowTestCase {
         dataFile.refresh()
         assert null != dataFile.sequenceLength
         assert null != dataFile.nReads
+        seqTrack.refresh()
+        assert seqTrack.nBasePairs
     }
 
     private void checkExistenceOfResultsFiles(){

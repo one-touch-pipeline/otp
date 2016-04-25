@@ -286,4 +286,59 @@ class SeqTrackServiceUnitTests {
 
         assert !SeqTrackService.mayAlign(seqTrack)
     }
+
+    @Test
+    void testFillBaseCount_sequenceLengthDoesNotExist_shouldFail() {
+        String sequenceLength = null
+        Long nReads = 12345689
+        SeqTrack seqTrack = createTestSeqTrack(sequenceLength, nReads)
+        shouldFail(AssertionError) {seqTrackService.fillBaseCount(seqTrack)}
+    }
+
+    @Test
+    void testFillBaseCount_nReadsDoesNotExist_shouldFail() {
+        String sequenceLength = "101"
+        Long nReads = null
+        SeqTrack seqTrack = createTestSeqTrack(sequenceLength, nReads)
+        shouldFail(AssertionError) {seqTrackService.fillBaseCount(seqTrack)}
+    }
+
+
+    @Test
+    void testFillBaseCount_sequenceLengthIsSingleValue_LibraryLayoutSingle() {
+        String sequenceLength = "101"
+        Long nReads = 12345689
+        Long expectedBasePairs = sequenceLength.toInteger() * nReads
+        SeqTrack seqTrack = createTestSeqTrack(sequenceLength, nReads)
+        seqTrackService.fillBaseCount(seqTrack)
+        assert seqTrack.nBasePairs == expectedBasePairs
+    }
+
+
+    @Test
+    void testFillBaseCount_sequenceLengthIsSingleValue_LibraryLayoutPaired() {
+        String sequenceLength = "101"
+        Long nReads = 12345689
+        Long expectedBasePairs = sequenceLength.toInteger() * nReads * 2
+        SeqTrack seqTrack = createTestSeqTrack(sequenceLength, nReads)
+        DomainFactory.buildSequenceDataFile([nReads: nReads, sequenceLength: sequenceLength, seqTrack: seqTrack])
+        seqTrack.seqType.libraryLayout = LibraryLayout.PAIRED
+        seqTrackService.fillBaseCount(seqTrack)
+        assert seqTrack.nBasePairs == expectedBasePairs
+    }
+
+    @Test
+    void testFillBaseCount_sequenceLengthIsIntegerRange() {
+        String sequenceLength = "90-100"
+        int meanSequenceLength = sequenceLength.split('-').sum {it.toInteger()}/2
+        Long nReads = 12345689
+        Long expectedBasePairs = meanSequenceLength * nReads
+        SeqTrack seqTrack = createTestSeqTrack(sequenceLength, nReads)
+        seqTrackService.fillBaseCount(seqTrack)
+        assert seqTrack.nBasePairs == expectedBasePairs
+    }
+
+    private SeqTrack createTestSeqTrack(String sequenceLength, Long nReads) {
+        return DomainFactory.buildSeqTrackWithDataFile([:], [nReads:nReads, sequenceLength:sequenceLength])
+    }
 }

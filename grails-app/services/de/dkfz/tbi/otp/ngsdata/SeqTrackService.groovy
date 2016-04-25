@@ -378,7 +378,7 @@ LIMIT 1
 
         SeqTrack seqTrack = createSeqTrack(dataFiles.get(0), run, sample, seqType, lane, pipeline, ilseId)
         consumeDataFiles(dataFiles, seqTrack)
-        fillReadsForSeqTrack(seqTrack)
+        fillInsertSizeForSeqTrack(seqTrack)
         assert seqTrack.save(failOnError: true, flush: true)
 
         boolean willBeAligned = decideAndPrepareForAlignment(seqTrack)
@@ -538,21 +538,18 @@ LIMIT 1
      * @param seqTrack
      * @return manipulated seqTrack
      */
-    private void fillReadsForSeqTrack(SeqTrack seqTrack) {
-        List<DataFile> dataFiles = DataFile.findAllBySeqTrack(seqTrack)
-        fillInsertSize(seqTrack, dataFiles)
-        fillBaseCount(seqTrack, dataFiles)
+    private void fillInsertSizeForSeqTrack(SeqTrack seqTrack) {
+        seqTrack.insertSize = metaDataLongValue(DataFile.findBySeqTrack(seqTrack), MetaDataColumn.INSERT_SIZE.name())
     }
 
-    private void fillInsertSize(SeqTrack seqTrack, List<DataFile> files) {
-        seqTrack.insertSize = metaDataLongValue(files.get(0), MetaDataColumn.INSERT_SIZE.name())
-    }
-
-    private void fillBaseCount(SeqTrack seqTrack, List<DataFile> files) {
-        seqTrack.nBasePairs = 0
-        for(DataFile file in files) {
-            seqTrack.nBasePairs += metaDataLongValue(file, MetaDataColumn.BASE_COUNT.name())
+    public void fillBaseCount(SeqTrack seqTrack) {
+        long basePairs = 0
+        DataFile.findAllBySeqTrack(seqTrack).each { DataFile file ->
+            assert (file.sequenceLength && file.nReads): "The sequence length or nReads for datafile ${file} are not provided."
+            basePairs += file.meanSequenceLength * file.nReads
         }
+        seqTrack.nBasePairs = basePairs
+        assert seqTrack.save(flush: true)
     }
 
     /**
