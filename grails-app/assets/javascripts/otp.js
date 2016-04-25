@@ -528,6 +528,8 @@ $.otp.initCommentBox = function (id, element) {
             promise = $.otp.saveComment(id, cBox.val(), "processes", "saveProcessComment");
         } else if (element == "#dataFileCommentBox") {
             promise = $.otp.saveComment(id, cBox.val(), "dataFile", "saveDataFileComment");
+        } else if (element == "#projectCommentBox") {
+            promise = $.otp.saveComment(id, cBox.val(), "projectOverview", "saveProjectComment");
         }
         promise.success(function (data) {
             $(element + ' #commentDateLabel').html(data.date);

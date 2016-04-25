@@ -11,6 +11,16 @@
 </head>
 <body>
     <div class="body">
+        <div id="projectCommentBox" class="commentBoxContainer">
+            <div id="commentLabel">Comment:</div>
+            <textarea id="commentBox">${comment?.comment?.encodeAsHTML()}</textarea>
+            <div id="commentButtonArea">
+                <button id="saveComment" disabled>&nbsp;&nbsp;&nbsp;<g:message code="commentBox.save" /></button>
+                <button id="cancelComment" disabled><g:message code="commentBox.cancel" /></button>
+            </div>
+            <div id="commentDateLabel">${comment?.modificationDate?.format('EEE, d MMM yyyy HH:mm')}</div>
+            <div id="commentAuthorLabel">${comment?.author}</div>
+        </div>
         <form class="blue_label" id="projectsGroupbox">
             <span class="blue_label"><g:message code="home.projectfilter"/> :</span>
             <g:select class="criteria" id="project_select" name='project'
@@ -152,6 +162,7 @@
         $(function() {
             $.otp.projectOverviewTable.specificOverview();
             $.otp.projectOverviewTable.referenceGenome();
+            $.otp.initCommentBox(${id}, "#projectCommentBox");
         });
     </asset:script>
 </body>

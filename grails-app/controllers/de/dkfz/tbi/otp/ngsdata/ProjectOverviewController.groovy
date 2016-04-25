@@ -1,21 +1,19 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
-import de.dkfz.tbi.otp.dataprocessing.AlignmentDecider
-import de.dkfz.tbi.otp.dataprocessing.ProcessingThresholds
-import de.dkfz.tbi.otp.dataprocessing.ProcessingThresholdsService
-import de.dkfz.tbi.otp.dataprocessing.Workflow
+import de.dkfz.tbi.otp.CommentService
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.CommentCommand
+import de.dkfz.tbi.otp.utils.DataTableCommand
 import grails.converters.JSON
 import org.springframework.security.access.prepost.PreAuthorize
-import de.dkfz.tbi.otp.utils.DataTableCommand
 import org.springframework.validation.FieldError
 
+import java.sql.Timestamp
 import java.text.SimpleDateFormat
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.getOrPut
-import java.sql.Timestamp
 
 class ProjectOverviewController {
 
@@ -34,6 +32,8 @@ class ProjectOverviewController {
     ProcessingThresholdsService processingThresholdsService
 
     SeqTypeService seqTypeService
+
+    CommentService commentService
 
     Map index() {
         String projectName = params.projectName
@@ -103,6 +103,8 @@ class ProjectOverviewController {
         return [
                 projects: projects*.name,
                 project: project.name,
+                id: project.id,
+                comment: project.comment,
                 nameInMetadata: project.nameInMetadataFiles?: '',
                 alignmentInfo: alignmentInfo,
                 alignmentError: alignmentError,
@@ -393,6 +395,13 @@ class ProjectOverviewController {
     JSON contactPersons() {
         List<String> contactPersons = contactPersonService.getAllContactPersons()*.fullName
         render contactPersons as JSON
+    }
+
+    JSON saveProjectComment(CommentCommand cmd) {
+        Project project = projectService.getProject(cmd.id)
+        commentService.saveComment(project, cmd.comment)
+        def dataToRender = [date: project.comment.modificationDate.format('EEE, d MMM yyyy HH:mm'), author: project.comment.author]
+        render dataToRender as JSON
     }
 
 

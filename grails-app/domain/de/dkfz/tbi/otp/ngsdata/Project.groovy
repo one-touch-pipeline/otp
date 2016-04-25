@@ -1,10 +1,13 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.Comment
+import de.dkfz.tbi.otp.Commentable
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
-class Project {
+import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
+
+class Project implements Commentable{
 
     /**
      * This enum defines if SNV calling should be done for this project.
@@ -35,6 +38,8 @@ class Project {
      * they will be processed or not
      */
     boolean hasToBeCopied = false
+
+    Comment comment
 
     static belongsTo = [
             projectGroup: ProjectGroup
@@ -71,6 +76,7 @@ class Project {
                 }
             }
         })
+        comment(nullable: true)
     }
 
     String toString() {
