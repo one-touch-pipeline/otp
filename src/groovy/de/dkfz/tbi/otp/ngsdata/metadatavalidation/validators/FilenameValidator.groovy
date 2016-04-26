@@ -12,8 +12,6 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 @Component
 class FilenameValidator extends SingleValueValidator<MetadataValidationContext> implements MetadataValidator {
 
-    FileTypeService fileTypeService
-
     @Override
     Collection<String> getDescriptions() {
         return [
@@ -34,8 +32,8 @@ class FilenameValidator extends SingleValueValidator<MetadataValidationContext> 
             context.addProblem(cells, Level.ERROR, "Filename '${filename}' does not end with '.gz'.")
         }
         try {
-            fileTypeService.getFileType(filename, FileType.Type.SEQUENCE)
-        } catch (FileTypeUndefinedException) {
+            FileTypeService.getFileType(filename, FileType.Type.SEQUENCE)
+        } catch (FileTypeUndefinedException e) {
             context.addProblem(cells, Level.ERROR, "Filename '${filename}' contains neither '_fastq' nor '.fastq'.")
         }
         if (!OtpPath.isValidPathComponent(filename)) {

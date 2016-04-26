@@ -36,7 +36,7 @@ class FilenameValidatorSpec extends Specification {
         ]
 
         when:
-        new FilenameValidator(fileTypeService: new FileTypeService()).validate(context)
+        new FilenameValidator().validate(context)
 
         then:
         TestCase.assertContainSame(expectedProblems, context.problems)
@@ -48,7 +48,7 @@ class FilenameValidatorSpec extends Specification {
         MetadataValidationContext context = MetadataValidationContextFactory.createContext()
 
         when:
-        new FilenameValidator(fileTypeService: new FileTypeService()).validate(context)
+        new FilenameValidator().validate(context)
 
         then:
         Problem problem = exactlyOneElement(context.problems)
