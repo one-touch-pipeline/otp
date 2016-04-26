@@ -24,6 +24,7 @@ import org.junit.*
 import javax.sql.*
 import java.util.concurrent.*
 
+import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 import static de.dkfz.tbi.otp.utils.ProcessHelperService.*
 
 /**
