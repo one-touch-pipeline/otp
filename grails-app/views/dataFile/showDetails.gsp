@@ -74,6 +74,10 @@
                 <td class="myKey"><g:message code="datafile.showDetails.fileSize"/></td>
                 <td class="myValue">${dataFile.fileSizeString()}</td>
             </tr>
+            <tr>
+                <td class="myKey"><g:message code="datafile.showDetails.import"/></td>
+                <td class="myValue"><g:link controller="metadataImport" action="details" id="${dataFile.runSegmentId}">Import</g:link></td>
+            </tr>
         </table>
         <H1><g:message code="datafile.showDetails.dates"/></H1>
         <table>

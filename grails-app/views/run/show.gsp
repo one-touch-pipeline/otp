@@ -78,7 +78,7 @@
             <g:each var="file" in="${metaDataFiles}">
             <tbody>
                 <tr>
-                    <td>${file.filePath}/${file.fileName}</td>
+                    <td><g:link controller="metadataImport" action="details" id="${file.runSegmentId}">${file.filePath}/${file.fileName}</g:link></td>
                     <td>${(new Date(file.dateCreated.getTime())).format("yyyy-MM-dd")}</td>
                     <td>${file.used}</td>
                 </tr>

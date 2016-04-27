@@ -1,12 +1,13 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContext
-import de.dkfz.tbi.util.spreadsheet.validation.Problems
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
+import groovy.transform.*
 
 
 class MetadataImportController {
 
     MetadataImportService metadataImportService
+
 
     def index(MetadataImportControllerSubmitCommand cmd) {
         MetadataValidationContext metadataValidationContext
@@ -28,6 +29,69 @@ class MetadataImportController {
                 implementedValidations: metadataImportService.getImplementedValidations()
         ]
     }
+
+    def details() {
+        [data: getMetadataDetails(RunSegment.get(params.id))]
+    }
+
+    private static MetadataDetails getMetadataDetails(RunSegment importInstance) {
+        List<DataFile> dataFilesNotAssignedToSeqTrack = []
+
+        List<MetaDataFile> metaDataFiles = MetaDataFile.findAllByRunSegment(importInstance, [sort: "dateCreated", order: "desc"])
+
+        List<DataFile> dataFiles = DataFile.createCriteria().list {
+            createAlias('run', 'r')
+            createAlias('seqTrack', 'st')
+            eq('runSegment', importInstance)
+            order('r.name', 'asc')
+            order('st.laneId', 'asc')
+            order('mateNumber', 'asc')
+        }
+
+        List<RunWithSeqTracks> runs = []
+        dataFiles.each { DataFile dataFile ->
+            if (dataFile.seqTrack) {
+                RunWithSeqTracks run = runs.find { it.run.id == dataFile.run.id }
+                if (run) {
+                    SeqTrackWithDataFiles st = run.seqTracks.find { it.seqTrack.id == dataFile.seqTrack.id }
+                    if (st) {
+                        st.dataFiles.add(dataFile)
+                    } else {
+                        run.seqTracks.add(new SeqTrackWithDataFiles(dataFile.seqTrack, [dataFile]))
+                    }
+                } else {
+                    runs.add(new RunWithSeqTracks(dataFile.run, [new SeqTrackWithDataFiles(dataFile.seqTrack, [dataFile])]))
+                }
+            } else {
+                dataFilesNotAssignedToSeqTrack.add(dataFile)
+            }
+        }
+
+        return new MetadataDetails(
+                metaDataFiles: metaDataFiles,
+                dataFilesNotAssignedToSeqTrack: dataFilesNotAssignedToSeqTrack,
+                runs: runs,
+        )
+    }
+}
+
+@Immutable
+class MetadataDetails {
+    List<MetaDataFile> metaDataFiles
+    List<DataFile> dataFilesNotAssignedToSeqTrack
+    List<RunWithSeqTracks> runs
+}
+
+@TupleConstructor
+class RunWithSeqTracks {
+    Run run
+    List<SeqTrackWithDataFiles> seqTracks
+}
+
+@TupleConstructor
+class SeqTrackWithDataFiles {
+    SeqTrack seqTrack
+    List<DataFile> dataFiles
 }
 
 class MetadataImportControllerSubmitCommand implements Serializable {

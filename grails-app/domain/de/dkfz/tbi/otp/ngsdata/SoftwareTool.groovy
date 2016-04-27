@@ -15,7 +15,11 @@ class SoftwareTool {
         type()
     }
 
-    String toString() {
+    String getDisplayName() {
         return "${programName} ${programVersion}"
+    }
+
+    String toString() {
+        return getDisplayName()
     }
 }
