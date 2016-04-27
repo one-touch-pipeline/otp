@@ -16,8 +16,8 @@ class MetadataImportController {
         } else if (cmd.submit == "Import") {
             ValidateAndImportResult validateAndImportResult = metadataImportService.validateAndImport(new File(cmd.path), cmd.directory, cmd.align, cmd.ignoreWarnings, cmd.md5)
             metadataValidationContext = validateAndImportResult.context
-            if (validateAndImportResult.runId != null) {
-                redirect(controller: "run", action: "show", id: validateAndImportResult.runId)
+            if (validateAndImportResult.metadataFile != null) {
+                redirect(action: "details", id: validateAndImportResult.metadataFile.runSegment.id)
             }
         } else {
             cmd = null

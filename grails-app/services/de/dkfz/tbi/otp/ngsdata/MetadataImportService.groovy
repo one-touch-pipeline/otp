@@ -25,7 +25,6 @@ class MetadataImportService {
     @Autowired
     ApplicationContext applicationContext
 
-    RunSubmitService runSubmitService
     SampleIdentifierService sampleIdentifierService
     SeqTrackService seqTrackService
 
@@ -68,12 +67,11 @@ class MetadataImportService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     ValidateAndImportResult validateAndImport(File metadataFile, String directoryStructureName, boolean align, boolean ignoreWarnings, String previousValidationMd5sum) {
         MetadataValidationContext context = validate(metadataFile, directoryStructureName)
-        Long runId = null
+        MetaDataFile metadataFileObject = null
         if (mayImport(context, ignoreWarnings, previousValidationMd5sum)) {
-            // TODO OTP-1948: call importMetadataFile instead
-            runId = doImport(context, align)
+            metadataFileObject = importMetadataFile(context, align)
         }
-        return new ValidateAndImportResult(context, runId)
+        return new ValidateAndImportResult(context, metadataFileObject)
     }
 
     protected Collection<MetadataValidator> getMetadataValidators() {
@@ -105,24 +103,6 @@ class MetadataImportService {
             }
         }
         return false
-    }
-
-    // TODO OTP-1948: delete this method
-    private long doImport(MetadataValidationContext context, boolean align) {
-        Closure uniqueColumnValue = { MetaDataColumn column ->
-            return exactlyOneElement(context.spreadsheet.dataRows*.getCellByColumnTitle(column.name())*.text.unique())
-        }
-        return runSubmitService.submit(
-                uniqueColumnValue(MetaDataColumn.RUN_ID),
-                SeqPlatformService.findSeqPlatform(
-                        uniqueColumnValue(MetaDataColumn.INSTRUMENT_PLATFORM),
-                        uniqueColumnValue(MetaDataColumn.INSTRUMENT_MODEL),
-                        uniqueColumnValue(MetaDataColumn.SEQUENCING_KIT) ?: null,
-                ).id.toString(),
-                uniqueColumnValue(MetaDataColumn.CENTER_NAME),
-                context.metadataFile.parentFile.parentFile.path,
-                align,
-        )
     }
 
     protected MetaDataFile importMetadataFile(MetadataValidationContext context, boolean align) {
@@ -376,5 +356,5 @@ class ValidateAndImportResult {
     /**
      * {@code null} if the import has been rejected
      */
-    final Long runId
+    final MetaDataFile metadataFile
 }
