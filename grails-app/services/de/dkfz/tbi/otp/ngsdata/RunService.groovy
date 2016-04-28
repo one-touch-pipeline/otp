@@ -141,6 +141,11 @@ class RunService {
         }
     }
 
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#run, read)")
+    Run checkPermission(Run run) {
+        return run
+    }
+
     @PostAuthorize("hasRole('ROLE_OPERATOR') or returnObject == null or hasPermission(returnObject.seqCenter.id, 'de.dkfz.tbi.otp.ngsdata.SeqCenter', read)")
     Run getRun(String identifier) {
         if (!identifier) {

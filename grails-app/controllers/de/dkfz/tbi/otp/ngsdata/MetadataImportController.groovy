@@ -7,7 +7,7 @@ import groovy.transform.*
 class MetadataImportController {
 
     MetadataImportService metadataImportService
-
+    RunService runService
 
     def index(MetadataImportControllerSubmitCommand cmd) {
         MetadataValidationContext metadataValidationContext
@@ -34,7 +34,7 @@ class MetadataImportController {
         [data: getMetadataDetails(RunSegment.get(params.id))]
     }
 
-    private static MetadataDetails getMetadataDetails(RunSegment importInstance) {
+    private MetadataDetails getMetadataDetails(RunSegment importInstance) {
         List<DataFile> dataFilesNotAssignedToSeqTrack = []
 
         List<MetaDataFile> metaDataFiles = MetaDataFile.findAllByRunSegment(importInstance, [sort: "dateCreated", order: "desc"])
@@ -60,6 +60,7 @@ class MetadataImportController {
                         run.seqTracks.add(new SeqTrackWithDataFiles(dataFile.seqTrack, [dataFile]))
                     }
                 } else {
+                    runService.checkPermission(dataFile.run)
                     runs.add(new RunWithSeqTracks(dataFile.run, [new SeqTrackWithDataFiles(dataFile.seqTrack, [dataFile])]))
                 }
             } else {
