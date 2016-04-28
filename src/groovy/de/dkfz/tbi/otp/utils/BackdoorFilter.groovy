@@ -94,4 +94,9 @@ class BackdoorFilter extends GenericFilterBean {
 @Immutable
 class Principal {
     String username
+
+    @Override
+    String toString() {
+        return username
+    }
 }
