@@ -20,6 +20,19 @@ class ProjectOverviewService {
     @Autowired
     ApplicationContext applicationContext
 
+    static final Collection PROJECT_TO_HIDE_SAMPLE_IDENTIFIER = [
+            "MMML",
+            "MMML_XP",
+            "MMML_RARE_LYMPHOMA_XP",
+    ].asImmutable()
+
+    /**
+     * determine, if the column sample identifier should be hide in the view
+     */
+    static boolean hideSampleIdentifier(Project project) {
+        return PROJECT_TO_HIDE_SAMPLE_IDENTIFIER.contains(project.name)
+    }
+
 
     Map<String, AlignmentInfo> getAlignmentInfo(Project project) throws Exception {
         try {
@@ -347,7 +360,7 @@ where
     public List tableForMMMLMapping(){
         def seq = Individual.withCriteria {
             project {
-                'in'("name", ["MMML", "MMML_XP"])
+                'in'("name", PROJECT_TO_HIDE_SAMPLE_IDENTIFIER)
             }
             projections {
                 property("id")

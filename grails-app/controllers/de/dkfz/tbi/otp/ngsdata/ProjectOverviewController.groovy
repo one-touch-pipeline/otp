@@ -54,7 +54,7 @@ class ProjectOverviewController {
 
         return [
             projects: projects,
-            hideSampleIdentifier: hideSampleIdentifier(project),
+            hideSampleIdentifier: ProjectOverviewService.hideSampleIdentifier(project),
             project: projectName,
             seqTypes: seqTypes,
             sampleTypes: sampleTypes,
@@ -115,13 +115,6 @@ class ProjectOverviewController {
         ]
     }
 
-    /**
-     * determine, if the column sample identifier should be hide in the view
-     */
-    private boolean hideSampleIdentifier(Project project) {
-        return project.name == "MMML" || project.name == "MMML_XP"
-    }
-
     class InfoAboutOneSample {
         String sampleIdentifier
         // Map<SeqType.id, value>>
@@ -147,7 +140,7 @@ class ProjectOverviewController {
         Project project = projectService.getProjectByName(params.project)
 
         List<SeqType> seqTypes = projectOverviewService.seqTypeByProject(project)
-        boolean hideSampleIdentifier = hideSampleIdentifier(project)
+        boolean hideSampleIdentifier = ProjectOverviewService.hideSampleIdentifier(project)
         /*Map<mockPid, Map<sampleTypeName, InformationOfSample>>*/
         Map dataLastMap = [:]
 
