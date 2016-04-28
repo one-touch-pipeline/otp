@@ -1,27 +1,21 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.TestConstants
-import de.dkfz.tbi.otp.InformationReliability
+import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
-import de.dkfz.tbi.otp.infrastructure.ClusterJob
-import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
-import de.dkfz.tbi.otp.job.plan.JobDefinition
-import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
+import de.dkfz.tbi.otp.infrastructure.*
+import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.FileType.Type
 import de.dkfz.tbi.otp.ngsdata.Realm.Cluster
 import de.dkfz.tbi.otp.ngsdata.SampleType.SpecificReferenceGenome
-import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
-import de.dkfz.tbi.otp.utils.ExternalScript
-import de.dkfz.tbi.otp.utils.HelperUtils
-import grails.util.Environment
-import org.joda.time.DateTime
-import org.joda.time.Duration
+import de.dkfz.tbi.otp.tracking.*
+import de.dkfz.tbi.otp.utils.*
+import grails.util.*
+import org.joda.time.*
 
 class DomainFactory {
 
@@ -964,6 +958,20 @@ class DomainFactory {
 
     static MetaDataEntry createMetaDataKeyAndEntry(DataFile dataFile, MetaDataColumn key, String value) {
         return createMetaDataKeyAndEntry(dataFile, key.name(), value)
+    }
+
+    static MetaDataFile createMetaDatafile(Map properties = [:]) {
+        return createDomainObject(MetaDataFile,[
+                fileName: "MetaDataFileName_${counter++}",
+                filePath: TestCase.getUniqueNonExistentPath().path,
+                runSegment: { createRunSegment() },
+        ], properties)
+    }
+
+    static OtrsTicket createOtrsTicket(Map properties = [:]) {
+        return createDomainObject(OtrsTicket,[
+                ticketNumber: "20000101"+String.format("%08d", counter++),
+        ], properties)
     }
 
     static void createRoddyProcessingOptions(File basePath) {
