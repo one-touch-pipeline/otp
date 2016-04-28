@@ -70,8 +70,8 @@ class ReferenceGenomeServiceTests {
     @Test
     void testChromosomeStatSizeFile_NoStatSizeFileIsDefined_ShouldFail() {
         MergingWorkPackage mergingWorkPackage = createDataForChromosomeStatSizeFile()
-        mergingWorkPackage.statSizeFileName = null
         mergingWorkPackage.workflow = DomainFactory.createDefaultOtpWorkflow()
+        mergingWorkPackage.statSizeFileName = null
         mergingWorkPackage.save(flush: true)
         assert TestCase.shouldFail(AssertionError) {
             referenceGenomeService.chromosomeStatSizeFile(mergingWorkPackage, false)

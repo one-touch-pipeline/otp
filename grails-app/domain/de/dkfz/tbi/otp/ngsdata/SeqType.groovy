@@ -11,6 +11,11 @@ class SeqType implements Entity {
 
     final static LIBRARYLAYOUT_MATE_PAIR = LibraryLayout.MATE_PAIR.name()
 
+    public static final Collection<SeqTypeNames> WGBS_SEQ_TYPE_NAMES = [
+            SeqTypeNames.WHOLE_GENOME_BISULFITE,
+            SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION,
+    ].asImmutable()
+
     /**
      * One of {@link SeqTypeNames#seqTypeName}.
      * Used in file system paths, for example by ProcessedMergedBamFileService.fileNameNoSuffix(ProcessedMergedBamFile).
@@ -73,6 +78,10 @@ class SeqType implements Entity {
         return seqTypeName?.seqTrackClass ?: SeqTrack
     }
 
+    boolean isWgbs() {
+        return WGBS_SEQ_TYPE_NAMES.contains(seqTypeName)
+    }
+
     String toString() {
         "${displayName} ${libraryLayout}"
     }
@@ -88,9 +97,5 @@ class SeqType implements Entity {
         return CollectionUtils.exactlyOneElement(
                 findAllByNameAndLibraryLayout(SeqTypeNames.EXOME.seqTypeName, LIBRARYLAYOUT_PAIRED)
         )
-    }
-
-    static List<String> getWgbsSeqTypeNames() {
-        return ["WHOLE_GENOME_BISULFITE", "WHOLE_GENOME_BISULFITE_TAGMENTATION"]
     }
 }

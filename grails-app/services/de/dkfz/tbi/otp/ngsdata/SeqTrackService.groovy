@@ -579,7 +579,7 @@ AND i.id > :seqTrackId
         boolean fromCore = seqTrack.run.seqCenter.id == core.id
         boolean onMidterm = areFilesLocatedOnMidTermStorage(seqTrack)
         boolean projectAllowsLinking = !seqTrack.project.hasToBeCopied
-        boolean wgbsSeqType = SeqType.wgbsSeqTypeNames.contains(seqTrack.seqType.name)
+        boolean wgbsSeqType = seqTrack.seqType.isWgbs()
         boolean link = willBeAligned && fromCore && onMidterm && projectAllowsLinking && !wgbsSeqType
         seqTrack.log("Fastq files{0} will be ${link ? "linked" : "copied"}, because " +
                 "willBeAligned=${willBeAligned}, fromCore=${fromCore}, onMidterm=${onMidterm}, projectAllowsLinking=${projectAllowsLinking}, isWgbs=${wgbsSeqType}")

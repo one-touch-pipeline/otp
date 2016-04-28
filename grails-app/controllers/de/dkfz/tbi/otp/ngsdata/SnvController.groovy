@@ -154,7 +154,15 @@ class SnvController {
         Map dataToRender = cmd.dataToRender()
         List results = snvService.getSnvCallingInstancesForProject(params.project)
         List data = results.collect { Map properties ->
-            properties.libPrepKits = [properties.libPrepKit1, properties.libPrepKit2].unique().join(" / <br>")
+            Collection<String> libPrepKitShortNames
+            if (SeqTypeNames.fromSeqTypeName(properties.seqTypeName)?.isWgbs()) {
+                assert properties.libPrepKit1 == null && properties.libPrepKit2 == null
+                libPrepKitShortNames = SnvCallingInstance.get(properties.snvInstanceId).containedSeqTracks*.
+                        libraryPreparationKit*.shortDisplayName
+            } else {
+                libPrepKitShortNames = [(String) properties.libPrepKit1, (String) properties.libPrepKit2]
+            }
+            properties.libPrepKits = libPrepKitShortNames.unique().collect { it ?: 'unknown' }.join(", <br>")
             properties.remove('libPrepKit1')
             properties.remove('libPrepKit2')
             if (properties.snvProcessingState != SnvProcessingStates.FINISHED) {

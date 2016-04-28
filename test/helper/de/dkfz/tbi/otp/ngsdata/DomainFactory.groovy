@@ -143,11 +143,17 @@ class DomainFactory {
     }
 
     static Workflow createPanCanWorkflow() {
-        return Workflow.buildLazy(name: Workflow.Name.PANCAN_ALIGNMENT, type: Workflow.Type.ALIGNMENT)
+        return createDomainObjectLazy(Workflow, [:], [
+                name: Workflow.Name.PANCAN_ALIGNMENT,
+                type: Workflow.Type.ALIGNMENT,
+        ])
     }
 
     static Workflow createDefaultOtpWorkflow() {
-        return Workflow.buildLazy(name: Workflow.Name.DEFAULT_OTP, type: Workflow.Type.ALIGNMENT)
+        return createDomainObjectLazy(Workflow, [:], [
+                name: Workflow.Name.DEFAULT_OTP,
+                type: Workflow.Type.ALIGNMENT,
+        ])
     }
 
     static Workflow returnOrCreateAnyWorkflow() {
@@ -709,6 +715,7 @@ class DomainFactory {
                 pipelineVersion: { createSoftwareTool() },
                 run            : { createRun() },
                 seqPlatform    : { createSeqPlatform() },
+                kitInfoReliability: seqTrackProperties.libraryPreparationKit ? InformationReliability.KNOWN : InformationReliability.UNKNOWN_UNVERIFIED,
         ], seqTrackProperties)
     }
 
@@ -721,7 +728,7 @@ class DomainFactory {
 
     public static MergingWorkPackage createMergingWorkPackage(Map properties = [:]) {
         return createDomainObject(MergingWorkPackage, [
-                libraryPreparationKit: { createLibraryPreparationKit() },
+                libraryPreparationKit: { properties.get('seqType')?.isWgbs() ? null : createLibraryPreparationKit() },
                 sample:                { createSample() },
                 seqType:               { createSeqType() },
                 seqPlatformGroup:      { createSeqPlatformGroup() },
@@ -776,13 +783,22 @@ class DomainFactory {
         ], properties, saveAndValidate)
     }
 
-    public static SeqTrack buildSeqTrackWithDataFile(MergingWorkPackage mergingWorkPackage, Map seqTrackProperties = [:]) {
-        Map map = [
+    public static SeqTrack createSeqTrack(MergingWorkPackage mergingWorkPackage, Map seqTrackProperties = [:]) {
+        return createSeqTrack(getMergingProperties(mergingWorkPackage) + seqTrackProperties)
+    }
+
+    public static Map getMergingProperties(MergingWorkPackage mergingWorkPackage) {
+        return [
                 sample: mergingWorkPackage.sample,
                 seqType: mergingWorkPackage.seqType,
-                kitInfoReliability:  mergingWorkPackage.libraryPreparationKit ? InformationReliability.KNOWN : InformationReliability.UNKNOWN_UNVERIFIED,
                 libraryPreparationKit: mergingWorkPackage.libraryPreparationKit,
-                seqPlatform: SeqPlatform.build(seqPlatformGroup: mergingWorkPackage.seqPlatformGroup),
+                seqPlatform: createSeqPlatform(seqPlatformGroup: mergingWorkPackage.seqPlatformGroup),
+        ]
+    }
+
+    public static SeqTrack buildSeqTrackWithDataFile(MergingWorkPackage mergingWorkPackage, Map seqTrackProperties = [:]) {
+        Map map = getMergingProperties(mergingWorkPackage) + [
+                kitInfoReliability:  mergingWorkPackage.libraryPreparationKit ? InformationReliability.KNOWN : InformationReliability.UNKNOWN_UNVERIFIED,
         ] + seqTrackProperties
         SeqTrack seqTrack
         if (mergingWorkPackage.seqType.libraryLayout == SeqType.LIBRARYLAYOUT_PAIRED) {

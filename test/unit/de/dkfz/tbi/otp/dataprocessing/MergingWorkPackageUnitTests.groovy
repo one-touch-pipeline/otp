@@ -286,7 +286,7 @@ class MergingWorkPackageUnitTests {
 
 
     @Test
-    void test_constraint_libraryPreparationKit_WhenNoExomeAndNoLibraryPreparationKit_ShouldBeValid() {
+    void test_constraint_libraryPreparationKit_WhenNeitherExomeNorWgbsAndNoLibraryPreparationKit_ShouldBeValid() {
         MergingWorkPackage mergingWorkPackage = MergingWorkPackage.buildWithoutSave([
                 libraryPreparationKit: null,
                 seqType: SeqType.build(),
@@ -295,7 +295,7 @@ class MergingWorkPackageUnitTests {
     }
 
     @Test
-    void test_constraint_libraryPreparationKit_WhenNoExomeAndWithLibraryPreparationKit_ShouldBeValid() {
+    void test_constraint_libraryPreparationKit_WhenNeitherExomeNorWgbsAndWithLibraryPreparationKit_ShouldBeValid() {
         MergingWorkPackage mergingWorkPackage = MergingWorkPackage.buildWithoutSave([
                 libraryPreparationKit: LibraryPreparationKit.build(),
                 seqType: SeqType.build(),
@@ -321,4 +321,21 @@ class MergingWorkPackageUnitTests {
         TestCase.assertValidateError(mergingWorkPackage, 'libraryPreparationKit', 'validator.invalid', null)
     }
 
+    @Test
+    void test_constraint_libraryPreparationKit_WhenWgbsAndWithLibraryPreparationKit_ShouldFail() {
+        MergingWorkPackage mergingWorkPackage = MergingWorkPackage.buildWithoutSave([
+                libraryPreparationKit: LibraryPreparationKit.build(),
+                seqType: DomainFactory.createSeqType(name: SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName),
+        ])
+        TestCase.assertValidateError(mergingWorkPackage, 'libraryPreparationKit', 'validator.invalid', mergingWorkPackage.libraryPreparationKit)
+    }
+
+    @Test
+    void test_constraint_libraryPreparationKit_WhenWgbsAndNoLibraryPreparationKit_ShouldBeValid() {
+        MergingWorkPackage mergingWorkPackage = MergingWorkPackage.buildWithoutSave([
+                libraryPreparationKit: null,
+                seqType: DomainFactory.createSeqType(name: SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName),
+        ])
+        assert mergingWorkPackage.validate()
+    }
 }

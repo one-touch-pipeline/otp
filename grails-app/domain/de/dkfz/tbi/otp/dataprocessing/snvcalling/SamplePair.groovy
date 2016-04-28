@@ -217,8 +217,8 @@ class SamplePair implements Entity {
               stpp1.category = :disease AND
               stpp2.category = :control AND
               (mwp1.libraryPreparationKit = mwp2.libraryPreparationKit OR
-              (mwp1.libraryPreparationKit IS NULL AND mwp2.libraryPreparationKit IS NULL) OR
-              mwp1.seqType.name in (:doNotCareSeqTypeNames)) AND
+              mwp1.libraryPreparationKit IS NULL AND mwp2.libraryPreparationKit IS NULL OR
+              mwp1.seqType.name in (:mwpLibPrepKitsMayMismatchSeqTypeNames)) AND
               NOT EXISTS (
                 FROM
                   SamplePair
@@ -228,7 +228,7 @@ class SamplePair implements Entity {
             """, [
                 disease: SampleType.Category.DISEASE,
                 control: SampleType.Category.CONTROL,
-                doNotCareSeqTypeNames: [SeqTypeNames.WHOLE_GENOME.seqTypeName, SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName]
+                mwpLibPrepKitsMayMismatchSeqTypeNames: (SeqType.WGBS_SEQ_TYPE_NAMES + SeqTypeNames.WHOLE_GENOME)*.seqTypeName,
             ], [readOnly: true])
         return queryResults.collect {
             return createInstance(
@@ -286,18 +286,23 @@ class SamplePair implements Entity {
                   category = :disease
               ) AND
               NOT EXISTS (
-${sciQueryPart('sp')}
-                      ${(MergingWorkPackage.qualifiedSeqTrackPropertyNames - ['sample']).collect{
-                          "(seqTrack.${it} = sp.mergingWorkPackage1.${MergingWorkPackage.nonQualifiedPropertyName(it)} OR " +
-                          "seqTrack.${it} IS NULL AND sp.mergingWorkPackage1.${MergingWorkPackage.nonQualifiedPropertyName(it)} IS NULL)"
-                      }.join(' AND\n')} AND
-                      seqTrack.sample.individual = sp.mergingWorkPackage1.sample.individual AND
-                      seqTrack.sample.sampleType IN (sp.mergingWorkPackage1.sample.sampleType, sp.mergingWorkPackage2.sample.sampleType)
+                ${sciQueryPart('sp')}
+                      (${[1, 2].collect { index -> """
+                        (${(MergingWorkPackage.qualifiedSeqTrackPropertyNames).collect{
+                            String criterion = "seqTrack.${it} = sp.mergingWorkPackage${index}.${MergingWorkPackage.nonQualifiedPropertyName(it)} OR " +
+                                     "seqTrack.${it} IS NULL AND sp.mergingWorkPackage${index}.${MergingWorkPackage.nonQualifiedPropertyName(it)} IS NULL"
+                            if (it == 'libraryPreparationKit') {
+                                criterion += " OR sp.mergingWorkPackage${index}.seqType.name IN (:seqTrackKitAndMwpKitMayMismatchSeqTypeNames)"
+                            }
+                            return criterion
+                        }.join(') AND\n(')})
+                      """}.join(' OR\n')})
                   )
               )
             """, [
                 noProcessingNeeded: ProcessingStatus.NO_PROCESSING_NEEDED,
                 disease: SampleType.Category.DISEASE,
+                seqTrackKitAndMwpKitMayMismatchSeqTypeNames: SeqType.WGBS_SEQ_TYPE_NAMES*.seqTypeName,
                 fileType: FileType.Type.SEQUENCE
         ], [readOnly: true])
         return candidates.findAll {

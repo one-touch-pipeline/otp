@@ -62,7 +62,7 @@ $.otp.snvResultsTable = {
                             id: row.individualId,
                             text: row.individualPid,
                         }),
-                        row.sampleType1 + " - " + row.sampleType2,
+                        row.sampleType1 + " \u2013 " + row.sampleType2,
                         row.seqType,
                         row.libPrepKits,
                         row.snvInstanceName,

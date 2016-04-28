@@ -34,6 +34,10 @@ public enum SeqTypeNames {
         this.factory = factory
     }
 
+    public boolean isWgbs() {
+        return SeqType.WGBS_SEQ_TYPE_NAMES.contains(this)
+    }
+
     public static SeqTypeNames fromSeqTypeName(String seqTypeName) {
         return values().find { it.seqTypeName == seqTypeName }
     }

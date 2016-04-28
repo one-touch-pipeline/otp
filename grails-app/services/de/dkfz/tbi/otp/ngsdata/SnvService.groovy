@@ -41,6 +41,7 @@ class SnvService {
                         }
                         seqType {
                             property('displayName', 'seqType')
+                            property('name', 'seqTypeName')
                         }
                         libraryPreparationKit {
                             property('shortDisplayName', 'libPrepKit1')

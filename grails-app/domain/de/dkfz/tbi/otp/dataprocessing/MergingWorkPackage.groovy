@@ -75,8 +75,11 @@ class MergingWorkPackage implements Entity {
         needsProcessing(validator: {val, obj -> !val || obj.workflow.name == Workflow.Name.PANCAN_ALIGNMENT})
         workflow(validator: {workflow -> workflow.type == Workflow.Type.ALIGNMENT})
         libraryPreparationKit nullable: true, validator: {val, obj ->
-            if (obj.seqType?.name == SeqTypeNames.EXOME.seqTypeName) {
+            SeqTypeNames seqTypeName = obj.seqType?.seqTypeName
+            if (seqTypeName == SeqTypeNames.EXOME) {
                 return val != null
+            } else if (seqTypeName?.isWgbs()) {
+                return val == null
             } else {
                 return true
             }
@@ -117,14 +120,17 @@ class MergingWorkPackage implements Entity {
         Map properties = [:]
         String mergeableSeqTracksQuery = 'FROM SeqTrack WHERE ' + qualifiedSeqTrackPropertyNames.collect { String qualifiedPropertyName ->
             String nonQualifiedPropertyName = nonQualifiedPropertyName(qualifiedPropertyName)
+            if (nonQualifiedPropertyName == 'libraryPreparationKit' && seqType.isWgbs()) {
+                return null
+            }
             def value = this."${nonQualifiedPropertyName}"
             if (value) {
                 properties."${nonQualifiedPropertyName}" = value
-                "${qualifiedPropertyName} = :${nonQualifiedPropertyName}"
+                return "${qualifiedPropertyName} = :${nonQualifiedPropertyName}"
             } else {
-                "${qualifiedPropertyName} is null"
+                return "${qualifiedPropertyName} is null"
             }
-        }.join(' AND ')
+        }.findAll().join(' AND ')
 
         return SeqTrack.findAll(mergeableSeqTracksQuery, properties).findAll {
             assert satisfiesCriteria(it)
@@ -133,8 +139,12 @@ class MergingWorkPackage implements Entity {
     }
 
     static Map getMergingProperties(SeqTrack seqTrack) {
+        Collection<String> propertyNames = seqTrackPropertyNames
+        if (seqTrack.seqType.isWgbs()) {
+            propertyNames -= 'libraryPreparationKit'
+        }
         Map properties = [:]
-        seqTrackPropertyNames.each {
+        propertyNames.each {
             properties."${it}" = seqTrack."${it}"
         }
         return properties
@@ -184,6 +194,6 @@ class MergingWorkPackage implements Entity {
 
     @Override
     String toString() {
-        return "MWP ${id}: ${toStringWithoutIdAndWorkflow()} ${workflow}"
+        return "MWP ${id}: ${toStringWithoutIdAndWorkflow()} ${workflow.name}"
     }
 }

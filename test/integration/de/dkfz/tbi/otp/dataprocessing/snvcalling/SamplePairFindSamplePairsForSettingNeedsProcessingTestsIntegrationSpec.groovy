@@ -223,6 +223,36 @@ class SamplePairFindSamplePairsForSettingNeedsProcessingTestsIntegrationSpec ext
         assertFindsNothing()
     }
 
+    void testLaterDataFileForOtherLibPrepKitExists(boolean wgbs) {
+        final DataFile dataFile = createSnvCallingInstanceAndLaterDataFile(sampleType1)
+        dataFile.seqTrack.libraryPreparationKit = DomainFactory.createLibraryPreparationKit()
+        assert dataFile.seqTrack.save(failOnError: true, flush: true)
+        if (wgbs) {
+            SeqType seqType = DomainFactory.createSeqType(name: SeqType.WGBS_SEQ_TYPE_NAMES.first().seqTypeName)
+            [samplePair.mergingWorkPackage1, samplePair.mergingWorkPackage2].each {
+                it.seqType = seqType
+                it.libraryPreparationKit = null
+                assert it.save(flush: true)
+            }
+            SeqTrack.list().each {
+                it.seqType = seqType
+                assert it.save(flush: true)
+            }
+        }
+
+        expect:
+        if (wgbs) {
+            assertFindsOne()
+        } else {
+            assertFindsNothing()
+        }
+
+        where:
+        wgbs  | _
+        true  | _
+        false | _
+    }
+
     private DataFile createSnvCallingInstanceAndLaterDataFile(
             final SampleType sampleType,
             AbstractMergedBamFile bamfileTumor = snvCallingInstanceTestData.bamFileTumor,
