@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
 import de.dkfz.tbi.util.spreadsheet.*
 import de.dkfz.tbi.util.spreadsheet.validation.*
+import groovyx.gpars.*
 import org.springframework.stereotype.*
 
 import static de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContext.*
@@ -35,24 +36,34 @@ class DataFileExistenceValidator extends ValueTuplesValidator<MetadataValidation
             }
         }
 
-        allValueTuples.groupBy { context.directoryStructure.getDataFilePath(context, it)
-        }.findAll { it.key != null }.each { File path, List<ValueTuple> valueTuples ->
-            if (valueTuples*.cells.sum()*.row.unique().size() != 1) {
-                addDirectoryStructureInfo()
-                context.addProblem((Set<Cell>)valueTuples*.cells.sum(), Level.WARNING,
-                        "Multiple rows reference the same file '${path}'.")
-            }
-            String message = null
-            if (!path.exists()) {
-                message = "${pathForMessage(path)} does not exist or cannot be accessed by OTP."
-            } else if (!path.isFile()) {
-                message = "${pathForMessage(path)} is not a file."
-            } else if (path.length() == 0L) {
-                message = "${pathForMessage(path)} is empty."
-            }
-            if (message) {
-                addDirectoryStructureInfo()
-                context.addProblem((Set<Cell>)valueTuples*.cells.sum(), Level.ERROR, message)
+        Object sync = new Object()
+
+        GParsPool.withPool(16) {
+            allValueTuples.groupBy { context.directoryStructure.getDataFilePath(context, it)
+            }.findAll { it.key != null }.eachParallel { File path, List<ValueTuple> valueTuples ->
+                if (valueTuples*.cells.sum()*.row.unique().size() != 1) {
+                    synchronized (sync) {
+                        addDirectoryStructureInfo()
+                        context.addProblem((Set<Cell>)valueTuples*.cells.sum(), Level.WARNING,
+                                "Multiple rows reference the same file '${path}'.")
+                    }
+                }
+                String message = null
+                if (!path.isFile()) {
+                    if (!path.exists()) {
+                        message = "${pathForMessage(path)} does not exist or cannot be accessed by OTP."
+                    } else {
+                        message = "${pathForMessage(path)} is not a file."
+                    }
+                } else if (path.length() == 0L) {
+                    message = "${pathForMessage(path)} is empty."
+                }
+                if (message) {
+                    synchronized (sync) {
+                        addDirectoryStructureInfo()
+                        context.addProblem((Set<Cell>)valueTuples*.cells.sum(), Level.ERROR, message)
+                    }
+                }
             }
         }
     }

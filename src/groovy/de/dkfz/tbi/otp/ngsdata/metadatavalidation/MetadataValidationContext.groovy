@@ -34,10 +34,12 @@ class MetadataValidationContext extends ValidationContext {
             problems.addProblem(Collections.emptySet(), Level.ERROR, "'${metadataFile}' is not a valid absolute path.")
         } else if (!metadataFile.name.endsWith('.tsv')) {
             problems.addProblem(Collections.emptySet(), Level.ERROR, "The file name of '${metadataFile}' does not end with '.tsv'.")
-        } else if (!metadataFile.exists()) {
-            problems.addProblem(Collections.emptySet(), Level.ERROR, "${pathForMessage(metadataFile)} does not exist or cannot be accessed by OTP.")
         } else if (!metadataFile.isFile()) {
-            problems.addProblem(Collections.emptySet(), Level.ERROR, "${pathForMessage(metadataFile)} is not a file.")
+            if (!metadataFile.exists()) {
+                problems.addProblem(Collections.emptySet(), Level.ERROR, "${pathForMessage(metadataFile)} does not exist or cannot be accessed by OTP.")
+            } else {
+                problems.addProblem(Collections.emptySet(), Level.ERROR, "${pathForMessage(metadataFile)} is not a file.")
+            }
         } else if (!metadataFile.canRead()) {
             problems.addProblem(Collections.emptySet(), Level.ERROR, "${pathForMessage(metadataFile)} is not readable.")
         } else if (metadataFile.length() == 0L) {
