@@ -6,9 +6,10 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidator
 import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.validation.Level
 import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
+import org.springframework.stereotype.*
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.RUN_ID
 
-
+@Component
 class RunNameValidator extends SingleValueValidator<MetadataValidationContext> implements MetadataValidator {
 
     @Override
