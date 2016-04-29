@@ -1,25 +1,16 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.TestConstants
+import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvJobResult
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvProcessingStates
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.fileSystemConsistency.*
-import de.dkfz.tbi.otp.testing.GroovyScriptAwareTestCase
-import de.dkfz.tbi.otp.utils.CreateFileHelper
-import de.dkfz.tbi.otp.utils.CreateRoddyFileHelper
-import de.dkfz.tbi.otp.utils.HelperUtils
-import grails.plugin.springsecurity.SpringSecurityUtils
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.TemporaryFolder
+import de.dkfz.tbi.otp.testing.*
+import de.dkfz.tbi.otp.utils.*
+import grails.plugin.springsecurity.*
+import org.junit.*
+import org.junit.rules.*
 
-import static de.dkfz.tbi.otp.ngsdata.Realm.OperationType.DATA_MANAGEMENT
-import static de.dkfz.tbi.otp.ngsdata.Realm.OperationType.DATA_PROCESSING
+import static de.dkfz.tbi.otp.ngsdata.Realm.OperationType.*
 
 class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     DataSwapService dataSwapService
@@ -685,27 +676,23 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     }
 
     @Test
-    public void testDeleteProcessingFileSOfProject_NoProcessedData_FastqFilesAvailalbe_SpecificIndividual() {
-        SeqTrack stInd1 = deleteProcessingFilesOfProject_NoProcessedData_Setup()
-        SeqTrack stInd2 = deleteProcessingFilesOfProject_NoProcessedData_Setup()
-        createFastqFiles([stInd1, stInd2])
-        Project project = stInd1.project
-        stInd2.sample.individual.project = project
-        stInd2.save(flush: true)
+    public void testDeleteProcessingFileSOfProject_NoProcessedData_FastqFilesAvailalbe_explicitSeqTrack() {
+        SeqTrack st = deleteProcessingFilesOfProject_NoProcessedData_Setup()
+        createFastqFiles([st])
 
-        assert [stInd1] == dataSwapService.deleteProcessingFilesOfProject(project.name, outputFolder.path, true, true, [individual: [stInd1.individual]])
+        assert [st] == dataSwapService.deleteProcessingFilesOfProject(st.project.name, outputFolder.path, true, true, [st])
     }
 
     @Test
-    public void testDeleteProcessingFileSOfProject_NoProcessedData_FastqFilesAvailalbe_SpecificSeqType() {
-        SeqTrack stSeqType1 =  deleteProcessingFilesOfProject_NoProcessedData_Setup()
-        SeqTrack stSeqType2 = deleteProcessingFilesOfProject_NoProcessedData_Setup()
-        createFastqFiles([stSeqType1, stSeqType2])
-        Project project = stSeqType1.project
-        stSeqType2.sample.individual.project = project
-        stSeqType2.save(flush: true)
+    public void testDeleteProcessingFileSOfProject_NoProcessedData_FastqFilesAvailalbe_explicitSeqTrackDifferentProject_ShouldFail() {
+        SeqTrack st = deleteProcessingFilesOfProject_NoProcessedData_Setup()
+        createFastqFiles([st])
 
-        assert [stSeqType1] == dataSwapService.deleteProcessingFilesOfProject(project.name, outputFolder.path, true, true, [seqType: [stSeqType1.seqType]])
+        Project project = DomainFactory.createProject()
+
+        shouldFail AssertionError, {
+            assert [st] == dataSwapService.deleteProcessingFilesOfProject(project.name, outputFolder.path, true, true, [st])
+        }
     }
 
     private SeqTrack deleteProcessingFilesOfProject_NoProcessedData_Setup() {

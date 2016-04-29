@@ -3,12 +3,12 @@ package de.dkfz.tbi.otp.ngsdata
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.fileSystemConsistency.*
+import de.dkfz.tbi.otp.utils.*
+import groovy.sql.*
 
-import javax.sql.DataSource
+import javax.sql.*
 
 import static org.springframework.util.Assert.*
-
-import groovy.sql.Sql
 
 class DataSwapService {
 
@@ -1146,13 +1146,11 @@ chmod 440 ${newDirectFileName}
      * If the fastq files are not available an error is thrown.
      * If withdrawn data should be ignored, set ignoreWithdrawn "true"
      *
-     * Restrict affected Files by defining optionsMap.
-     * optionsMap[seqType] contains the seqTypes to be queried for
-     * optionsMap[individual] contains the individuals to be queried for
+     * If explicitSeqTracks is defined, the defined list of seqTracks will be querried
      *
      * Return a list containing the affected seqTracks
      */
-    List<SeqTrack> deleteProcessingFilesOfProject(String projectName, String scriptOutputDirectory, boolean everythingVerified = false, boolean ignoreWithdrawn = false, Map optionsMap = [:]) throws FileNotFoundException {
+    List<SeqTrack> deleteProcessingFilesOfProject(String projectName, String scriptOutputDirectory, boolean everythingVerified = false, boolean ignoreWithdrawn = false, List<SeqTrack> explicitSeqTracks = []) throws FileNotFoundException {
 
         Project project = Project.findByName(projectName)
         assert project : "Project does not exist"
@@ -1162,21 +1160,23 @@ chmod 440 ${newDirectFileName}
 
         StringBuilder output = new StringBuilder()
 
-        List<DataFile> dataFiles = DataFile.createCriteria().list {
-            seqTrack {
-                sample {
-                    individual {
-                        eq('project', project)
+        List<DataFile> dataFiles
+
+        if (explicitSeqTracks.empty) {
+            dataFiles = DataFile.createCriteria().list {
+                seqTrack {
+                    sample {
+                        individual {
+                            eq('project', project)
+                        }
                     }
-                    if (optionsMap.containsKey("individual")) {
-                        'in' ('individual', optionsMap.get("individual"))
-                    }
-                }
-                if (optionsMap.containsKey("seqType")) {
-                    'in' ("seqType", optionsMap.get("seqType"))
                 }
             }
+        } else {
+            assert CollectionUtils.exactlyOneElement(explicitSeqTracks*.project).first() == project : "Given SeqTracks do not belong or belong to more than to project ${project}."
+            dataFiles = DataFile.findAllBySeqTrackInList(explicitSeqTracks)
         }
+
         output << "found ${dataFiles.size()} data files for this project\n\n"
         assert !dataFiles.empty : "There are no SeqTracks attached to this project ${projectName}"
 
