@@ -119,6 +119,20 @@ class SeqTrackServiceUnitTests {
         }
     }
 
+    @Test
+    void testDetermineAndStoreIfFastqFilesHaveToBeLinked_WgbsData_MustBeCopied() {
+        withTestMidtermStorageMountPoint {
+            SeqTrack seqTrack = createDataForDetermineAndStoreIfFastqFilesHaveToBeLinked()
+
+            SeqType wgbsSeqType = DomainFactory.createSeqType(name: "WHOLE_GENOME_BISULFITE")
+            seqTrack.seqType = wgbsSeqType
+
+            seqTrackService.determineAndStoreIfFastqFilesHaveToBeLinked(seqTrack, true)
+
+            assert seqTrack.linkedExternally == false
+        }
+    }
+
 
     @Test
     void testAreFilesLocatedOnMidTermStorage_SeqTrackIsNull_ShouldFail() {

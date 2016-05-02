@@ -90,4 +90,8 @@ class SeqType {
                 findAllByNameAndLibraryLayout(SeqTypeNames.EXOME.seqTypeName, LIBRARYLAYOUT_PAIRED)
         )
     }
+
+    static List<String> getWgbsSeqTypeNames() {
+        return ["WHOLE_GENOME_BISULFITE", "WHOLE_GENOME_BISULFITE_TAGMENTATION"]
+    }
 }
