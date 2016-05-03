@@ -557,7 +557,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
         RunByProject runByProject = RunByProject.build(run: run)
         RunSegment runSegment = RunSegment.build(run: run)
         DataFile dataFile = DataFile.build(run: run)
-        MetaDataFile metaDataFile = MetaDataFile.build(runSegment: runSegment)
+        MetaDataFile metaDataFile = DomainFactory.createMetaDataFile(runSegment: runSegment)
 
         dataSwapService.deleteRun(run, outputStringBuilder)
 
@@ -575,7 +575,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
         RunByProject runByProject = RunByProject.build(run: run)
         RunSegment runSegment = RunSegment.build(run: run)
         DataFile dataFile = DataFile.build(run: run)
-        MetaDataFile metaDataFile = MetaDataFile.build(runSegment: runSegment)
+        MetaDataFile metaDataFile = DomainFactory.createMetaDataFile(runSegment: runSegment)
 
         dataSwapService.deleteRunByName(run.name, outputStringBuilder)
 

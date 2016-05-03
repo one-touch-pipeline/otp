@@ -71,9 +71,9 @@ class OtrsTicketSpec extends Specification {
         RunSegment runSegment01 = DomainFactory.createRunSegment(otrsTicket: otrsTicket01)
         RunSegment runSegment02 = DomainFactory.createRunSegment(otrsTicket: otrsTicket02)
 
-        MetaDataFile metadataFile01 = DomainFactory.createMetaDatafile([runSegment: runSegment02])
-        MetaDataFile metadataFile02 = DomainFactory.createMetaDatafile([runSegment: runSegment01])
-        MetaDataFile metadataFile03 = DomainFactory.createMetaDatafile([runSegment: runSegment01])
+        MetaDataFile metadataFile01 = DomainFactory.createMetaDataFile([runSegment: runSegment02])
+        MetaDataFile metadataFile02 = DomainFactory.createMetaDataFile([runSegment: runSegment01])
+        MetaDataFile metadataFile03 = DomainFactory.createMetaDataFile([runSegment: runSegment01])
 
 
         expect:

@@ -960,7 +960,7 @@ class DomainFactory {
         return createMetaDataKeyAndEntry(dataFile, key.name(), value)
     }
 
-    static MetaDataFile createMetaDatafile(Map properties = [:]) {
+    static MetaDataFile createMetaDataFile(Map properties = [:]) {
         return createDomainObject(MetaDataFile,[
                 fileName: "MetaDataFileName_${counter++}",
                 filePath: TestCase.getUniqueNonExistentPath().path,

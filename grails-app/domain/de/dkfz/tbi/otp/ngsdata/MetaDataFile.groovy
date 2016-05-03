@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.dataprocessing.*
+
 class MetaDataFile {
 
     String fileName
@@ -17,8 +19,8 @@ class MetaDataFile {
         runSegment : RunSegment
     ]
     static constraints = {
-        fileName()
-        filePath()
+        fileName(validator: { OtpPath.isValidPathComponent(it) })
+        filePath(validator: { OtpPath.isValidAbsolutePath(it) })
         runSegment()
         dateCreated()
         md5sum(nullable: true, matches: /^[0-9a-f]{32}$/)
