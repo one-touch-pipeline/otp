@@ -1,6 +1,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
-class MergingLog {
+import de.dkfz.tbi.otp.utils.Entity
+
+class MergingLog implements Entity {
 
     // quality control flag
     enum QCState {NON, PASS, BLOCK}

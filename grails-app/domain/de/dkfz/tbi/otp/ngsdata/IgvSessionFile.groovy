@@ -1,6 +1,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
-class IgvSessionFile {
+import de.dkfz.tbi.otp.utils.Entity
+
+class IgvSessionFile implements Entity {
 
     String name
     String userName

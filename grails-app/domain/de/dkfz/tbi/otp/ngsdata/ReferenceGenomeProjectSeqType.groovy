@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
+import de.dkfz.tbi.otp.utils.Entity
 
 /**
  * Represents connection between {@link Project}, {@link SeqType}
@@ -8,7 +9,7 @@ import de.dkfz.tbi.otp.dataprocessing.OtpPath
  *
  *
  */
-class ReferenceGenomeProjectSeqType {
+class ReferenceGenomeProjectSeqType implements Entity {
 
     static final String TAB_FILE_PATTERN = /[0-9a-zA-Z-_\.]+\.tab/
 

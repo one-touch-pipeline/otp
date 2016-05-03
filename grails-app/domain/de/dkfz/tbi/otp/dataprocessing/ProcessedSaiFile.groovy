@@ -1,8 +1,9 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.Entity
 
-class ProcessedSaiFile {
+class ProcessedSaiFile implements Entity {
 
     boolean fileExists
     Date dateCreated = new Date()

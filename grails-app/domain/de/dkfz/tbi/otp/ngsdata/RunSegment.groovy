@@ -2,8 +2,9 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
+import de.dkfz.tbi.otp.utils.Entity
 
-class RunSegment {
+class RunSegment implements Entity {
 
     enum Status {NEW, BLOCKED, PROCESSING, COMPLETE}
     Status metaDataStatus = Status.NEW

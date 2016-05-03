@@ -1,13 +1,14 @@
 package de.dkfz.tbi.otp.fileSystemConsistency
 
 import de.dkfz.tbi.otp.ngsdata.DataFile
+import de.dkfz.tbi.otp.utils.Entity
 
 /**
  * Class representing the status of a DataFile after a consistency check is performed.
  * Only not consistent status should be stored.
  *
  */
-class ConsistencyStatus {
+class ConsistencyStatus implements Entity {
 
     enum Status {
         NO_FILE,                // path is not null but file does not exist

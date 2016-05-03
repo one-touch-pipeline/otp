@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
+import de.dkfz.tbi.otp.utils.Entity
 import org.springframework.validation.Errors
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
@@ -13,7 +14,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
  * The sample pairs can also be used for other purposes i.e. coverage combination between disease and control
  *
  */
-class SamplePair {
+class SamplePair implements Entity {
 
     /**
      * Creates an instance. Does <em>not</em> persist it.

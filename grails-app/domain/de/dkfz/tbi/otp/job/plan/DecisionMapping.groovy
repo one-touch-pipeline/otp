@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.job.plan
 
+import de.dkfz.tbi.otp.utils.Entity
+
 /**
  * The DecisionMapping holds the mapping between {@link JobDecision}s
  * and {@link JobDefinition}s. It is used as a lookup table to find the
@@ -9,7 +11,7 @@ package de.dkfz.tbi.otp.job.plan
  * @see JobDecision
  * @see DecisionJob
  */
-class DecisionMapping {
+class DecisionMapping implements Entity {
     /**
      * The Decision which maps to...
      */

@@ -1,6 +1,8 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-class Workflow {
+import de.dkfz.tbi.otp.utils.Entity
+
+class Workflow implements Entity {
 
     enum Name {
         DEFAULT_OTP("bwa&nbsp;aln"),

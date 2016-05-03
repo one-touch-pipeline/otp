@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.Entity
 
 /**
  * To be more flexible the configuration shall be stored in the database instead of in the code.
@@ -8,7 +9,7 @@ import de.dkfz.tbi.otp.ngsdata.*
  * If the configuration changes, the old database entry is set to obsolete and the new entry refers to the old entry.
  *
  */
-abstract class ConfigPerProject {
+abstract class ConfigPerProject implements Entity {
 
     static belongsTo = [
         project: Project

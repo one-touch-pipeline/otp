@@ -1,10 +1,12 @@
 package de.dkfz.tbi.otp.security
 
+import de.dkfz.tbi.otp.utils.Entity
+
 /**
  * Auto generated class by spring security plugin.
  *
  */
-class Role {
+class Role implements Entity {
 
     String authority
 

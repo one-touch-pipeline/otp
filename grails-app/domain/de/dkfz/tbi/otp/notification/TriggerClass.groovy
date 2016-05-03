@@ -1,10 +1,12 @@
 package de.dkfz.tbi.otp.notification
 
+import de.dkfz.tbi.otp.utils.Entity
+
 /**
  * Simple wrapper around a class name to not have a String in the Trigger class.
  * @see Trigger
  */
-class TriggerClass {
+class TriggerClass implements Entity {
 
     String className
 

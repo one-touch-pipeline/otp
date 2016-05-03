@@ -1,12 +1,14 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.utils.Entity
+
 /**
  * many to many connection between
  * {@link MergingSet} and {@link ProcessedBamFile}
  *
  *
  */
-class MergingSetAssignment {
+class MergingSetAssignment implements Entity {
     static belongsTo = [
         mergingSet: MergingSet,
         bamFile: AbstractBamFile

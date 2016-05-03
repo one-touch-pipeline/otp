@@ -1,10 +1,12 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.utils.Entity
+
 /**
  * Be aware of semantic differences between the values produced by
  * qa.jar and by Roddy QC. See the comments of OTP-1731 for details.
  */
-class AbstractQualityAssessment {
+class AbstractQualityAssessment implements Entity {
 
     /**
      * length of the chromosome/genome of the reference

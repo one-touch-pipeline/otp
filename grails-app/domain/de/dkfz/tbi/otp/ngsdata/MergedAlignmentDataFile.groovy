@@ -1,6 +1,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
-class MergedAlignmentDataFile {
+import de.dkfz.tbi.otp.utils.Entity
+
+class MergedAlignmentDataFile implements Entity {
 
     String fileSystem
     String filePath

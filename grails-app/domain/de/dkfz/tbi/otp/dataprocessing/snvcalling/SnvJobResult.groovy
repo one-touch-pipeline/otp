@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
+import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.utils.ExternalScript
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
@@ -11,7 +12,7 @@ import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
  *
  *
  */
-class SnvJobResult {
+class SnvJobResult implements Entity {
 
     Date dateCreated
 

@@ -618,14 +618,14 @@ class DomainFactory {
         ], properties)
     }
 
-    public static SeqType createSeqType(Map seqTypeProperties = [:]) {
+    public static SeqType createSeqType(Map seqTypeProperties = [:], boolean saveAndValidate = true) {
         String defaultName = 'seqTypeName_' + (counter++)
         return createDomainObject(SeqType, [
                 name         : defaultName,
                 libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE,
                 dirName      : 'seqTypeDirName_' + (counter++),
                 displayName  : seqTypeProperties.get('alias') ?: seqTypeProperties.get('name') ?: defaultName,
-        ], seqTypeProperties)
+        ], seqTypeProperties, saveAndValidate)
     }
 
     public static SoftwareTool createSoftwareTool(Map softwareToolProperties = [:]) {

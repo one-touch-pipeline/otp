@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.ngsdata
 import de.dkfz.tbi.otp.LogMessage
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
+import de.dkfz.tbi.otp.utils.Entity
 
 import java.text.MessageFormat
 
@@ -14,7 +15,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.getThreadLog
 
-class SeqTrack implements ProcessParameterObject {
+class SeqTrack implements ProcessParameterObject, Entity {
 
     static final Closure<? extends SeqTrack> FACTORY = { Map properties -> new SeqTrack(properties) }
 

@@ -4,7 +4,7 @@ package de.dkfz.tbi.otp.utils
  * Helper class for referencing another domain class by name.
  *
  */
-class ReferencedClass {
+class ReferencedClass implements Entity {
     String className
 
     static constraints = {

@@ -1,6 +1,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
-class FileType {
+import de.dkfz.tbi.otp.utils.Entity
+
+class FileType implements Entity {
 
     enum Type {
         SOURCE, MERGED, RESULT, SEQUENCE, ALIGNMENT, UNKNOWN

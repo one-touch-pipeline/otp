@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.job.processing
 
 import de.dkfz.tbi.otp.job.plan.JobDefinition
+import de.dkfz.tbi.otp.utils.Entity
 
 /**
  * The ParameterMapping describes the mapping of an output {@link Parameter}
@@ -8,7 +9,7 @@ import de.dkfz.tbi.otp.job.plan.JobDefinition
  *
  *
  */
-class ParameterMapping implements Serializable {
+class ParameterMapping implements Serializable, Entity {
     /**
      * The ParameterType of the output Parameter of the previous Job
      */

@@ -1,6 +1,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
-class Mutation {
+import de.dkfz.tbi.otp.utils.Entity
+
+class Mutation implements Entity {
 
     String chromosome
     long startPosition

@@ -2,11 +2,12 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.Entity
 
 /**
  * Each execution of the Quality Assessment Merged Workflow on the particular data file (merged bam file) is represented as QualityAssessmentMergedPass.
  */
-class QualityAssessmentMergedPass implements ProcessParameterObject {
+class QualityAssessmentMergedPass implements ProcessParameterObject, Entity {
 
     static belongsTo = [
             abstractMergedBamFile: AbstractMergedBamFile

@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.Entity
 
 /**
  * Instance of this class represent instance of merging process
@@ -9,7 +10,7 @@ import de.dkfz.tbi.otp.ngsdata.*
  *
  *
  */
-class MergingPass implements ProcessParameterObject{
+class MergingPass implements ProcessParameterObject, Entity {
 
     /**
      * identifier unique in the scope of corresponding

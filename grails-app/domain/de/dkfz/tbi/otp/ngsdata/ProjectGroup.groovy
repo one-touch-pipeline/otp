@@ -1,6 +1,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
-class ProjectGroup {
+import de.dkfz.tbi.otp.utils.Entity
+
+class ProjectGroup implements Entity {
     String name
 
     static constraints = {

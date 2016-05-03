@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.ngsdata
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
 import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
+import de.dkfz.tbi.otp.utils.Entity
 
 /**
  * Run represents one sequencing Run. It is one of the most important classes
@@ -11,7 +12,7 @@ import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
  * projects. The initial locations are stored in RunSegment objects.
  */
 
-class Run implements ProcessParameterObject{
+class Run implements ProcessParameterObject, Entity {
 
     String name                      // run name
 

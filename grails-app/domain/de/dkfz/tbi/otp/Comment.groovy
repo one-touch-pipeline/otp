@@ -1,6 +1,8 @@
 package de.dkfz.tbi.otp
 
-class Comment {
+import de.dkfz.tbi.otp.utils.Entity
+
+class Comment implements Entity {
 
     String comment
     String author

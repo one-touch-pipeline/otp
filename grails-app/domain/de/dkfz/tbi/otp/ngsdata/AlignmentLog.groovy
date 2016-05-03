@@ -1,6 +1,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
-class AlignmentLog {
+import de.dkfz.tbi.otp.utils.Entity
+
+class AlignmentLog implements Entity {
 
     // quality control flag
     enum QCState {NON, PASS, BLOCK}

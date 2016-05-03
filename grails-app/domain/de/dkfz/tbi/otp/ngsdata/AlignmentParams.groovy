@@ -1,6 +1,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
-class AlignmentParams {
+import de.dkfz.tbi.otp.utils.Entity
+
+class AlignmentParams implements Entity {
 
     SoftwareTool pipeline
     String genome

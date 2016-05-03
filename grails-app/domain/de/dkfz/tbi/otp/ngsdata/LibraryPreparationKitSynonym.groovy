@@ -1,10 +1,12 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.utils.Entity
+
 /**
  * represents different spellings of the {@link LibraryPreparationKit}
  *
  */
-class LibraryPreparationKitSynonym {
+class LibraryPreparationKitSynonym implements Entity {
 
     /**
      * possible spelling of the related {@link LibraryPreparationKit}

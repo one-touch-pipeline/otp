@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.job.processing
 
 import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
+import de.dkfz.tbi.otp.utils.Entity
 import grails.util.Environment
 
 /**
@@ -22,7 +23,7 @@ import grails.util.Environment
  * @see de.dkfz.tbi.otp.job.processing.Job
  * @see Parameter
  **/
-public class ProcessingStep implements Serializable {
+public class ProcessingStep implements Serializable, Entity {
     /**
      * Input Parameters added to this ProcessingStep.
      */

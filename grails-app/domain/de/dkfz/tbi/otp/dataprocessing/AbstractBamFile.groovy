@@ -1,10 +1,12 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.utils.Entity
+
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 import de.dkfz.tbi.otp.ngsdata.*
 
-abstract class AbstractBamFile {
+abstract class AbstractBamFile implements Entity {
 
     /**
      * This ENUM declares the different states a {@link AbstractBamFile} can have while it is assigned to a {@link MergingSet}

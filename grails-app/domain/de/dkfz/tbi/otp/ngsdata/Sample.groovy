@@ -1,6 +1,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
-class Sample {
+import de.dkfz.tbi.otp.utils.Entity
+
+class Sample implements Entity {
 
     static belongsTo = [
         individual : Individual,

@@ -1,8 +1,9 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.utils.Entity
 
-class SampleIdentifier {
+class SampleIdentifier implements Entity {
 
     static final REGEX_OPTION_NAME = 'sampleIdentifierRegex'
 

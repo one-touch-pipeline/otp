@@ -1,6 +1,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
-class SeqScan {
+import de.dkfz.tbi.otp.utils.Entity
+
+class SeqScan implements Entity {
 
     int nLanes = 0
     Long nBasePairs       // calculated from seqTracks

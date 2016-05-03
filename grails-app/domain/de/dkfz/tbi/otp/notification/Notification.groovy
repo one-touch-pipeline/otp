@@ -1,10 +1,12 @@
 package de.dkfz.tbi.otp.notification
 
+import de.dkfz.tbi.otp.utils.Entity
+
 /**
  * A Notification describes who should be notified when about what in which way.
  *
  */
-class Notification {
+class Notification implements Entity {
     /**
      * The recipients of this Notification.
      */

@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
 import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
+import de.dkfz.tbi.otp.utils.Entity
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
@@ -14,7 +15,7 @@ import de.dkfz.tbi.otp.ngsdata.*
  *
  *
  */
-class SnvCallingInstance implements ProcessParameterObject{
+class SnvCallingInstance implements ProcessParameterObject, Entity {
     /**
      * Refers to the config file which is stored in the database and is used as a basis for all the files in the filesystem.
      */

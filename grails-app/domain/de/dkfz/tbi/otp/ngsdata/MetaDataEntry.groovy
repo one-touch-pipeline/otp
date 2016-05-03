@@ -1,6 +1,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
-class MetaDataEntry {
+import de.dkfz.tbi.otp.utils.Entity
+
+class MetaDataEntry implements Entity {
 
     String value
     DataFile dataFile

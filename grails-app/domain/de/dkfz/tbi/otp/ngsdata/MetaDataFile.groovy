@@ -1,8 +1,10 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.utils.Entity
 
-class MetaDataFile {
+class MetaDataFile implements Entity {
+
 
     String fileName
     String filePath

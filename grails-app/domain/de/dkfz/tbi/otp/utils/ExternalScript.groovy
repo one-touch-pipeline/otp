@@ -13,7 +13,7 @@ import de.dkfz.tbi.otp.dataprocessing.OtpPath
  * If there are little changes like in the comment the current object can be updated.
  *
  */
-class ExternalScript {
+class ExternalScript implements Entity {
 
     /**
      * Identifier which is used in the code. This must stay the same for all script files for one purpose.

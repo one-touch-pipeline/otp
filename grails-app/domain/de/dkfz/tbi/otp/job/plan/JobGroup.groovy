@@ -1,6 +1,8 @@
 package de.dkfz.tbi.otp.job.plan
 
-class JobGroup {
+import de.dkfz.tbi.otp.utils.Entity
+
+class JobGroup implements Entity {
 
     static constraints = {
     }

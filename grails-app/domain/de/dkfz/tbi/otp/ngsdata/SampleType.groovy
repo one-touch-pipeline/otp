@@ -1,12 +1,14 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.utils.Entity
+
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import groovy.transform.ToString
 
 @ToString()
-class SampleType {
+class SampleType implements Entity {
 
     /**
      * This enum specifies if the sample type belongs to a disease or a control.

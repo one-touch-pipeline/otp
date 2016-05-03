@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.job.processing
 
 import de.dkfz.tbi.otp.job.plan.JobDefinition
+import de.dkfz.tbi.otp.utils.Entity
 
 /**
  * The ParameterType is the generic description for {@link Parameter}s of a {@link JobDefinition}.
@@ -15,7 +16,7 @@ import de.dkfz.tbi.otp.job.plan.JobDefinition
  * @see Parameter
  * @see JobDefinition
  */
-class ParameterType implements Serializable {
+class ParameterType implements Serializable, Entity {
     /**
      * The name for this parameter
      */

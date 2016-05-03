@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.security
 
 import de.dkfz.tbi.otp.administration.GroupCommand
+import de.dkfz.tbi.otp.utils.Entity
 
 /**
  * A Group defines a relationship between a group of users and
@@ -25,7 +26,7 @@ import de.dkfz.tbi.otp.administration.GroupCommand
  *
  *
  */
-class Group {
+class Group implements Entity {
     /**
      * The name of this Group. It is used as the base name for
      * the Role which is to be created by using: GROUP_name

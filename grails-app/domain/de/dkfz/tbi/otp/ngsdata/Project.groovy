@@ -4,10 +4,11 @@ import de.dkfz.tbi.otp.Comment
 import de.dkfz.tbi.otp.Commentable
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
+import de.dkfz.tbi.otp.utils.Entity
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
-class Project implements Commentable{
+class Project implements Commentable, Entity {
 
     /**
      * This enum defines if SNV calling should be done for this project.

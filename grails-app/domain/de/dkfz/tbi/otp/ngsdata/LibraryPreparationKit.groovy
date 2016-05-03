@@ -1,12 +1,14 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.utils.Entity
+
 /**
  * This class represents library preparation kits which are used
  * for the library creation for sequencing purpose.
  *
  *
  */
-class LibraryPreparationKit {
+class LibraryPreparationKit implements Entity {
 
     /**
      * This is supposed to be the canonical human readable name of the kit.

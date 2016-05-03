@@ -1,6 +1,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
-class Study {
+import de.dkfz.tbi.otp.utils.Entity
+
+class Study implements Entity {
     String name
     String title
     String authors

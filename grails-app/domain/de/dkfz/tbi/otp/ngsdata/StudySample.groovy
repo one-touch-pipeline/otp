@@ -1,6 +1,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
-class StudySample {
+import de.dkfz.tbi.otp.utils.Entity
+
+class StudySample implements Entity {
     String studyIdentifier
     static belongsTo = [
         study: Study,

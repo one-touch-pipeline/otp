@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.Entity
 
 /**
  * Represents a set of {@link ProcessedBamFile}s to be merged
@@ -11,7 +12,7 @@ import de.dkfz.tbi.otp.ngsdata.*
  *
  *
  */
-class MergingSet {
+class MergingSet implements Entity {
 
     /**
      * state of processing of {@link MergingSet} instance

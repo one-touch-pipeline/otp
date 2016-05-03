@@ -1,6 +1,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
-class ResultsDataFile {
+import de.dkfz.tbi.otp.utils.Entity
+
+class ResultsDataFile implements Entity {
 
     String identifier
     Date dateCreated = new Date()

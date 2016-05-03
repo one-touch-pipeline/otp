@@ -1,6 +1,8 @@
 package de.dkfz.tbi.otp
 
-class LogMessage {
+import de.dkfz.tbi.otp.utils.Entity
+
+class LogMessage implements Entity {
 
     String message
     Date dateCreated

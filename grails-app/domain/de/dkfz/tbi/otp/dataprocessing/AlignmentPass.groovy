@@ -2,8 +2,9 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.Entity
 
-class AlignmentPass implements ProcessParameterObject {
+class AlignmentPass implements ProcessParameterObject, Entity {
 
     enum AlignmentState {
         NOT_STARTED,

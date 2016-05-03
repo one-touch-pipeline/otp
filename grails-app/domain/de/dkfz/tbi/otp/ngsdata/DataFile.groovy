@@ -3,8 +3,9 @@ package de.dkfz.tbi.otp.ngsdata
 import de.dkfz.tbi.otp.Comment
 import de.dkfz.tbi.otp.Commentable
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
+import de.dkfz.tbi.otp.utils.Entity
 
-class DataFile implements Commentable{
+class DataFile implements Commentable, Entity {
 
     String fileName                // file name
     String pathName                // path from run folder to file or full path

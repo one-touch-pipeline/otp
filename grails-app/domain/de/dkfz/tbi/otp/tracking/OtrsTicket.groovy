@@ -2,10 +2,11 @@ package de.dkfz.tbi.otp.tracking
 
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.Entity
 import org.joda.time.*
 import org.joda.time.format.*
 
-class OtrsTicket implements Commentable {
+class OtrsTicket implements Commentable, Entity {
 
     String ticketNumber
 

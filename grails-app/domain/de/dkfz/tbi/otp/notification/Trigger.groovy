@@ -1,11 +1,13 @@
 package de.dkfz.tbi.otp.notification
 
+import de.dkfz.tbi.otp.utils.Entity
+
 /**
  * A Trigger represents a Domain object for which Notifications are sent.
  * E.g. a JobExecutionPlan and it's Id.
  *
  */
-class Trigger {
+class Trigger implements Entity {
     /**
      * The Class for the Trigger.
      */

@@ -1,9 +1,10 @@
 package de.dkfz.tbi.otp.job.plan
 
 import de.dkfz.tbi.otp.job.processing.ProcessParameter
+import de.dkfz.tbi.otp.utils.Entity
 
 
-class JobExecutionPlan implements Serializable {
+class JobExecutionPlan implements Serializable, Entity {
     /**
      * A descriptive name for this Job Execution Plan
      */

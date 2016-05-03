@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.job.processing
 
+import de.dkfz.tbi.otp.utils.Entity
+
 /**
  * Domain class to store error information for a failure ProcessingStepUpdate.
  * 
@@ -10,7 +12,7 @@ package de.dkfz.tbi.otp.job.processing
  *
  * @see ProcessingStepUpdate
  */
-class ProcessingError {
+class ProcessingError implements Entity {
     static belongsTo = [processingStepUpdate: ProcessingStepUpdate]
     /**
      * The ProcessingStepUpdate this error has been logged for.

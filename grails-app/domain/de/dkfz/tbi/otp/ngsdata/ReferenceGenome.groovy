@@ -1,13 +1,14 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
+import de.dkfz.tbi.otp.utils.Entity
 
 /**
  * Represents a reference genome.
  *
  *
  */
-class ReferenceGenome {
+class ReferenceGenome implements Entity {
 
     /**
      * Name of a reference genome.

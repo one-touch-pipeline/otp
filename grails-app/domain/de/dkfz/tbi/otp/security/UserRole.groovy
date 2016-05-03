@@ -1,12 +1,13 @@
 package de.dkfz.tbi.otp.security
 
+import de.dkfz.tbi.otp.utils.Entity
 import org.apache.commons.lang.builder.HashCodeBuilder
 
 /**
  * Auto generated class by spring security plugin.
  *
  */
-class UserRole implements Serializable {
+class UserRole implements Serializable, Entity {
 
     User user
     Role role

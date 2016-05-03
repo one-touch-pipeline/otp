@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.utils.Entity
 import groovy.transform.ToString
 import de.dkfz.tbi.otp.ngsdata.*
 
@@ -11,7 +12,7 @@ import de.dkfz.tbi.otp.ngsdata.*
  *
  */
 @ToString
-class ProcessingThresholds {
+class ProcessingThresholds implements Entity {
 
     Project project
 

@@ -1,8 +1,9 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
+import de.dkfz.tbi.otp.utils.Entity
 
-class SeqCenter {
+class SeqCenter implements Entity {
 
     String name
     String dirName

@@ -1,12 +1,13 @@
 package de.dkfz.tbi.otp.security
 
 import de.dkfz.tbi.otp.TimeStamped
+import de.dkfz.tbi.otp.utils.Entity
 
 /**
  * Auto generated class by spring security plugin.
  *
  */
-class User implements TimeStamped {
+class User implements TimeStamped, Entity {
 
     transient springSecurityService
 

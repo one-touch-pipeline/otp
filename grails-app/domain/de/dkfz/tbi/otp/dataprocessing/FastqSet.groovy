@@ -5,13 +5,14 @@ import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.ngsdata.Sample
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.utils.Entity
 
 /**
  * Represents a set of SeqTracks that were aligned and merged into one bam file.
  * It was introduced for files that were processed outside of OTP and imported later,
  * but may also be used for as a short cut for files processed by OTP
  */
-class FastqSet {
+class FastqSet implements Entity {
 
     static hasMany = [
         seqTracks: SeqTrack

@@ -1,6 +1,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
-class MergingAssignment {
+import de.dkfz.tbi.otp.utils.Entity
+
+class MergingAssignment implements Entity {
     SeqTrack seqTrack
     SeqScan seqScan
 

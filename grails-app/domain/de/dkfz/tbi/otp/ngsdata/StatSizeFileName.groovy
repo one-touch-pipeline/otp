@@ -1,6 +1,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
-class StatSizeFileName {
+import de.dkfz.tbi.otp.utils.Entity
+
+class StatSizeFileName implements Entity {
 
     String name
 

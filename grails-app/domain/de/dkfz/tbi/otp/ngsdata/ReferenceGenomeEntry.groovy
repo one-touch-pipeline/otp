@@ -1,11 +1,13 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.utils.Entity
+
 /**
  * This class represents a reference genome entry as found in reference genome fasta file.
  *
  */
 
-class ReferenceGenomeEntry {
+class ReferenceGenomeEntry implements Entity {
 
     /**
      * Determines the different kinds of content the reference genome contains

@@ -1,6 +1,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
-class SoftwareTool {
+import de.dkfz.tbi.otp.utils.Entity
+
+class SoftwareTool implements Entity {
 
     String programName
     String programVersion

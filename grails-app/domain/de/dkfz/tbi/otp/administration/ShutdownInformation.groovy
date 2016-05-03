@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.administration
 
 import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.utils.Entity
 
 /**
  * ShutdownInformation holds information about a regular shutdown.
@@ -9,7 +10,7 @@ import de.dkfz.tbi.otp.security.User
  * possible to cancel a shutdown process in which case this is stored as well.
  *
  */
-class ShutdownInformation {
+class ShutdownInformation implements Entity {
     /**
      * The User who initiated the Shutdown process
      */

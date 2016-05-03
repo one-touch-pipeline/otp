@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.infrastructure
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.utils.Entity
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
@@ -28,7 +29,7 @@ import org.joda.time.format.PeriodFormat
  *
  * all timestamps using joda-time, e.g. DateTime queued, get saved as UTC-timezone
  **/
-class ClusterJob {
+class ClusterJob implements Entity {
 
     public static final String JOB_INFO_NOT_SET_MESSAGE = "Job info is not set (yet)."
 

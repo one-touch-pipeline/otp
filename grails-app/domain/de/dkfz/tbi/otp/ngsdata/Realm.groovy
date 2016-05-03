@@ -1,8 +1,9 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.job.processing.PbsOptionMergingService
+import de.dkfz.tbi.otp.utils.Entity
 
-class Realm implements Serializable {
+class Realm implements Entity, Serializable {
 
     /**
      * Defines the available clusters.

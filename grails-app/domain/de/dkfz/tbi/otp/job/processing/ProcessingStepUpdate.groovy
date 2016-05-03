@@ -1,6 +1,8 @@
 package de.dkfz.tbi.otp.job.processing
 
-public class ProcessingStepUpdate implements Serializable {
+import de.dkfz.tbi.otp.utils.Entity
+
+public class ProcessingStepUpdate implements Serializable, Entity {
     static belongsTo = [processingStep: ProcessingStep]
     /**
      * Link to the ProcessingStepUpdate before this one, may be null.

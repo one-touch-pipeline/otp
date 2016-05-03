@@ -1,6 +1,8 @@
 package de.dkfz.tbi.otp.job.processing
 
-class Parameter implements Serializable {
+import de.dkfz.tbi.otp.utils.Entity
+
+class Parameter implements Serializable, Entity {
     ParameterType type
     String value
 

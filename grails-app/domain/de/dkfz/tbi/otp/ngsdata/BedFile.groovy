@@ -1,12 +1,13 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
+import de.dkfz.tbi.otp.utils.Entity
 
 /**
  * This class represents a Bed file
  *
  */
-class BedFile {
+class BedFile implements Entity {
 
     /**
      * Name of the bed file located in a sub-directory

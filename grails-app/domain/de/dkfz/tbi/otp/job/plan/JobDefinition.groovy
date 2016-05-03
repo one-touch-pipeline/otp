@@ -2,8 +2,9 @@ package de.dkfz.tbi.otp.job.plan
 
 import de.dkfz.tbi.otp.job.processing.Parameter
 import de.dkfz.tbi.otp.job.processing.ParameterMapping
+import de.dkfz.tbi.otp.utils.Entity
 
-class JobDefinition implements Serializable {
+class JobDefinition implements Serializable, Entity {
     /**
      * Mapping of parameters.
      */

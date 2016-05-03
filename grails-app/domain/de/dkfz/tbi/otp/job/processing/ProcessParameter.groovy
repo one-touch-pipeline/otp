@@ -1,8 +1,10 @@
 package de.dkfz.tbi.otp.job.processing
 
+import de.dkfz.tbi.otp.utils.Entity
+
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
-class ProcessParameter {
+class ProcessParameter implements Entity {
     String value
     String className
     Process process

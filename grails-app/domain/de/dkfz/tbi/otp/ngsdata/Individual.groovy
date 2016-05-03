@@ -3,8 +3,9 @@ package de.dkfz.tbi.otp.ngsdata
 import de.dkfz.tbi.otp.Comment
 import de.dkfz.tbi.otp.Commentable
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
+import de.dkfz.tbi.otp.utils.Entity
 
-class Individual implements Commentable{
+class Individual implements Commentable, Entity {
 
     /**
      * Identifier used in the file system. It should never change.

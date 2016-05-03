@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.job.processing
 
+import de.dkfz.tbi.otp.utils.Entity
+
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 import de.dkfz.tbi.otp.Commentable
@@ -23,7 +25,7 @@ import de.dkfz.tbi.otp.Comment
  * @see de.dkfz.tbi.otp.job.processing.Job
  * @see de.dkfz.tbi.otp.job.processing.StartJob
  **/
-public class Process implements Serializable, Commentable {
+public class Process implements Serializable, Commentable, Entity {
     /**
      * The Date when this process was started.
      **/

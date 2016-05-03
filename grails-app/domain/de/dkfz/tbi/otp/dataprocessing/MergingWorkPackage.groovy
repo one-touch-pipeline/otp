@@ -2,13 +2,14 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
+import de.dkfz.tbi.otp.utils.Entity
 
 /**
  * Represents all generations of one merged BAM file (whereas an {@link AbstractMergedBamFile} represents a single
  * generation). It specifies the concrete criteria for the {@link SeqTrack}s that are merged into the BAM file, and
  * processing parameters used for alignment and merging.
  */
-class MergingWorkPackage {
+class MergingWorkPackage implements Entity {
 
     /**
      * The BAM file which moving to the final destination has been initiated for most recently.

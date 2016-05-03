@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.utils.Entity
 import groovy.transform.ToString
 
 
@@ -11,7 +12,7 @@ import groovy.transform.ToString
  *
  */
 @ToString
-class SampleTypePerProject {
+class SampleTypePerProject implements Entity {
 
     Project project
 

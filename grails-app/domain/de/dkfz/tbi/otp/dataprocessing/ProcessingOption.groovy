@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.ngsdata.Project
+import de.dkfz.tbi.otp.utils.Entity
 
 /**
  * ProcessingOption stores options for external programs processing data
@@ -9,7 +10,7 @@ import de.dkfz.tbi.otp.ngsdata.Project
  *
  */
 
-class ProcessingOption {
+class ProcessingOption implements Entity {
 
     String name
     String type

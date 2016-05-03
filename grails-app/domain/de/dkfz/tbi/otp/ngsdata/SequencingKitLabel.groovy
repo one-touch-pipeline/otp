@@ -1,11 +1,13 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.utils.Entity
+
 /**
  * This class stores the sequencing kits which were used to prepare the sequencing machines.
  * Furthermore a list of possible aliases is referenced.
  *
  */
-class SequencingKitLabel {
+class SequencingKitLabel implements Entity {
 
     String name
 

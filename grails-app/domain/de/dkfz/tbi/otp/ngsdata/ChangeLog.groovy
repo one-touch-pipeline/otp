@@ -1,8 +1,9 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.utils.ReferencedClass
 
-class ChangeLog {
+class ChangeLog implements Entity {
 
     long rowId
     /**
