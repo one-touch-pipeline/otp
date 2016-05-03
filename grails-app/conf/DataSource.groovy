@@ -1,7 +1,8 @@
 import org.hibernate.dialect.H2Dialect
 import org.hibernate.dialect.PostgreSQL9Dialect
 
-import static java.util.concurrent.TimeUnit.SECONDS
+import static java.util.concurrent.TimeUnit.*
+
 
 Properties databaseProperties = new Properties()
 String propertiesFile = System.getenv("OTP_PROPERTIES")
@@ -43,7 +44,26 @@ hibernate {
 environments {
     // Everything is set in general data source
     production {
+        //noinspection GroovyAssignabilityCheck
         dataSource {
+            //the properties are described on http://tomcat.apache.org/tomcat-7.0-doc/jdbc-pool.html
+            properties {
+                maxAge = HOURS.toMillis(1)                              //the time after which a connection will be closed
+                minEvictableIdleTimeMillis = MINUTES.toMillis(1)        //minimum time a connection need to be idle before remove
+
+                maxWait = SECONDS.toMillis(10)                          //max time a request wait for a free connection
+
+                testWhileIdle = true                                    //test idle connection
+                timeBetweenEvictionRunsMillis = MINUTES.toMillis(1)     //how often idle connections are checked
+
+                testOnBorrow = true                                     //validate connection before return
+                validationInterval = SECONDS.toMillis(10)               //min interval of check a connection on borrow
+
+                validationQuery = "SELECT 1"                            //validation query
+                validationQueryTimeout = SECONDS.toSeconds(5)           //timeout in seconds for validation query
+
+                logValidationErrors = true                              //log errors during validation
+            }
         }
     }
     // Everything is set in general data source
