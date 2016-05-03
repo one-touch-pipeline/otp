@@ -201,7 +201,16 @@ class SeqTrack implements ProcessParameterObject, Entity {
     }
 
     Long getNReads() {
-        return DataFile.findAllBySeqTrack(this).sum { it.nReads } as Long
+        Long nReads = 0
+        Boolean isNull = false
+        DataFile.findAllBySeqTrack(this).each {
+            if (it.nReads == null) {
+                isNull = true
+            } else {
+                nReads += it.nReads
+            }
+        }
+        return isNull ? null : nReads
     }
 
     String getSequenceLength() {
