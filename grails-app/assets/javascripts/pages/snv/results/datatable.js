@@ -67,13 +67,19 @@ $.otp.snvResultsTable = {
                         row.libPrepKits,
                         row.snvInstanceName,
                         row.snvProcessingState.name,
-                        $.otp.createLinkMarkup({
-                            controller: 'snv',
-                            action: 'plots',
-                            id: row.snvInstanceId,
-                            text: 'Plots'
-                        }),
                     ];
+                    if (row.snvInstanceId) {
+                        rowData.push(
+                            $.otp.createLinkMarkup({
+                                controller: 'snv',
+                                action: 'plots',
+                                id: row.snvInstanceId,
+                                text: 'Plots'
+                            })
+                        );
+                    } else {
+                        rowData.push("")
+                    }
                     json.aaData[i] = rowData;
                 }
                 return json;

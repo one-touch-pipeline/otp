@@ -157,6 +157,9 @@ class SnvController {
             properties.libPrepKits = [properties.libPrepKit1, properties.libPrepKit2].unique().join(" / <br>")
             properties.remove('libPrepKit1')
             properties.remove('libPrepKit2')
+            if (properties.snvProcessingState != SnvProcessingStates.FINISHED) {
+                properties.remove('snvInstanceId')
+            }
             return properties
         }
 
