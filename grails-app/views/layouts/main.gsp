@@ -50,7 +50,6 @@
                         <li class="menuContainerLCss" id="individual"><g:link controller="individual" action="list"><g:message code="otp.menu.individuals"/></g:link></li>
                         <li class="menuContainerLCss" id="sequence"><g:link controller="sequence" action="index"><g:message code="otp.menu.sequences"/></g:link></li>
                         <li class="menuContainerLCss" id="run"><g:link controller="run" action="list"><g:message code="otp.menu.runs"/></g:link></li>
-                        <li class="menuContainerLCss" id="processes"><g:link controller="processes" action="list"><g:message code="otp.menu.processes"/></g:link></li>
                         <li class="navigation menuContainerLCss" id="overview">
                             <ul>
                                 <li class="overview_nav_container" id="overview"><g:link ><g:message code="otp.menu.statistics"/> &#9661;</g:link>
@@ -72,25 +71,26 @@
                                 </li>
                             </ul>
                         </li>
+                        <li class="menuContainerLCss"><g:link controller="snv" action="results"><g:message code="otp.menu.snv.results"/></g:link></li>
                         <sec:ifAnyGranted roles="ROLE_OPERATOR">
-                            <li class="navigation menuContainerLCss" id="snv">
+                            <li class="navigation menuContainerLCss" id="operator">
                                 <ul>
-                                    <li class="overview_nav_container" id="overview"><g:link ><g:message code="otp.menu.snv"/> &#9661;</g:link>
+                                    <li class="allGranted operator_nav_container" id="operator"><g:link><g:message code="otp.menu.operatorSection"/> &#9661;</g:link>
                                         <ul>
-                                            <li class="allGranted_general" id="snv"><g:link controller="snv"  action="index"><g:message code="otp.menu.snv.processing"/></g:link></li><br>
-                                            <li id="snv"><g:link controller="snv"  action="results"><g:message code="otp.menu.snv.results"/></g:link></li><br>
+                                            <li id="metadataImport"><g:link controller="metadataImport" action="index"><g:message code="otp.menu.importAndValidation"/></g:link></li>
+                                            <li id="createProject"><g:link controller="createProject" action="index"><g:message code="otp.menu.createProject"/></g:link></li><br>
+                                            <li id="specificOverview"><g:link controller="projectOverview" action="specificOverview"><g:message code="otp.menu.projectSpecificStatisticsTableOverview"/></g:link></li><br>
+                                            <li id="individualInsert"><g:link controller="individual" action="insert"><g:message code="otp.menu.createIndividual"/></g:link></li>
+                                            <li id="processes"><g:link controller="processes" action="list"><g:message code="otp.menu.processes"/></g:link></li>
+                                            <li id="snv"><g:link controller="snv" action="index"> <g:message code="otp.menu.snv.processing"/></g:link></li><br>
+                                            <li id="metaDataFields"><g:link controller="metaDataFields" action="index"><g:message code="otp.menu.metaDataFields"/></g:link></li><br>
+                                            <li id="softwareTool"><g:link controller="softwareTool" action="list"><g:message code="otp.menu.softwareTool"/></g:link></li><br>
+                                            <li id="projectProgress"><g:link controller="projectProgress" action="progress"><g:message code="otp.menu.progress"/></g:link></li>
                                         </ul>
                                     </li>
                                 </ul>
                             </li>
                         </sec:ifAnyGranted>
-                        <sec:ifNotGranted roles="ROLE_OPERATOR">
-                            <li id="snv" class="menuContainerLCss"><g:link controller="snv"  action="results"><g:message code="otp.menu.snv.results"/></g:link></li>
-                        </sec:ifNotGranted>
-                        <sec:ifAllGranted roles="ROLE_OPERATOR">
-                            <li class="allGranted menuContainerLCss" id="projectProgress"><g:link controller="projectProgress" action="progress"><g:message code="otp.menu.progress"/></g:link></li>
-                            <li class="allGranted menuContainerLCss" id="runSubmit"><g:link controller="runSubmit" action="index"><g:message code="otp.menu.runSubmit"/></g:link></li>
-                        </sec:ifAllGranted>
                         <sec:ifAnyGranted roles="ROLE_ADMIN">
                             <li class="navigation menuContainerLCss" id="admin">
                                 <ul>
@@ -99,19 +99,13 @@
                                             <li id="userAdministration"><g:link controller="userAdministration"><g:message code="otp.menu.userAdministration"/></g:link></li><br>
                                             <li id="group"><g:link controller="group"><g:message code="otp.menu.groupAdministration"/></g:link></li><br>
                                             <li id="crashRecovery"><g:link controller="crashRecovery"><g:message code="otp.menu.crashRecovery"/></g:link></li><br>
-                                            <li id="shutdown"><g:link controller="shutdown"><g:message code="otp.menu.planServerShutdown"/></g:link></li><br>
-                                            <li id="notification"><g:link controller="notification"><g:message code="otp.menu.manageNotifications"/></g:link></li><br>
                                             <li id="processingOption"><g:link controller="processingOption"><g:message code="otp.menu.processingOptions"/></g:link></li><br>
-                                            <li id="softwareTool"><g:link controller="softwareTool" action="list"><g:message code="otp.menu.softwareTool"/></g:link></li><br>
-                                            <li id="metaDataFields"><g:link controller="metaDataFields" action="index"><g:message code="otp.menu.metaDataFields"/></g:link></li><br>
-                                            <li id="createProject"><g:link controller="createProject" action="index"><g:message code="otp.menu.createProject"/></g:link></li><br>
+                                            <li id="notification"><g:link controller="notification"><g:message code="otp.menu.manageNotifications"/></g:link></li><br>
+                                            <li id="shutdown"><g:link controller="shutdown"><g:message code="otp.menu.planServerShutdown"/></g:link></li><br>
                                         </ul>
-                                     </li>
+                                    </li>
                                 </ul>
                             </li>
-                        </sec:ifAnyGranted>
-                        <sec:ifAnyGranted roles="ROLE_SWITCH_USER">
-                            <li class="switchUserRight menuContainerLCss" id="switchUser"><g:link controller="switchUser"><g:message code="otp.menu.switchUser"/></g:link></li>
                         </sec:ifAnyGranted>
                         <sec:ifSwitched>
                             <li><a href='${request.contextPath}/j_spring_security_exit_user'>Resume as <sec:switchedUserOriginalUsername/></a></li>
