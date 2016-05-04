@@ -37,11 +37,24 @@
                     <td id="last-received-date"></td>
                 </tr>
                 <tr>
+                    <td class="myKey"><g:message code="projectOverview.directory"/></td>
+                    <td id="projectDirectory">${directory}</td>
+                </tr>
+                <tr>
                     <td class="myKey"><g:message code="projectOverview.nameInMetadata"/></td>
                     <td id="nameInMetadata">${nameInMetadata} <input class= "edit-button-left" type="button" onclick="$.otp.projectOverviewTable.updateValue('NameInMetadataFiles','','${nameInMetadata}', '')"/></td>
                 </tr>
+                <tr>
+                    <td class="myKey"><g:message code="projectOverview.group"/></td>
+                    <td id="group">${projectGroup}</td>
+                </tr>
+                <tr>
+                    <td class="myKey"><g:message code="projectOverview.copyFiles"/></td>
+                    <td id="copyFiles">${copyFiles}</td>
+                </tr>
             </table>
         </div>
+
         <div class="otpDataTables">
             <h3 class="statisticTitle">
                 <g:message code="projectOverview.contactPerson.headline" />

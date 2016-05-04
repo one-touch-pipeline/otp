@@ -100,6 +100,13 @@ class ProjectOverviewController {
         configTable = buildTableForConfig(project)
         List configTableHeadline = getHeadline(configTable)
         configTable.remove(configTableHeadline)
+
+        Realm realm = ConfigService.getRealm(project, Realm.OperationType.DATA_MANAGEMENT)
+        File projectDirectory = LsdfFilesService.getPath(
+                realm.rootPath,
+                project.dirName,
+        )
+
         return [
                 projects: projects*.name,
                 project: project.name,
@@ -114,6 +121,9 @@ class ProjectOverviewController {
                 configTableHeadline: configTableHeadline,
                 configTable: configTable,
                 snvDropDown: Project.Snv.values(),
+                directory: projectDirectory,
+                projectGroup: project.projectGroup,
+                copyFiles: project.hasToBeCopied,
         ]
     }
 
