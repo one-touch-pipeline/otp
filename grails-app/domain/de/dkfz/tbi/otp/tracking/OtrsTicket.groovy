@@ -41,14 +41,8 @@ class OtrsTicket implements Commentable, Entity {
 
 
     static constraints = {
-        ticketNumber(nullable: false, unique: true, matches: /^[0-9]{16}$/, validator: { val, obj ->
-            try {
-                DateTimeFormatter format = DateTimeFormat.forPattern("yyyyMMdd")
-                format.parseDateTime(val.substring(0,8))
-                return true
-            } catch (IllegalFieldValueException e) {
-                return e.message
-            }
+        ticketNumber(nullable: false, unique: true, validator: { val, obj ->
+            return ticketNumberConstraint(val) ?: true
         })
 
         installationStarted(nullable: true)
@@ -76,6 +70,20 @@ class OtrsTicket implements Commentable, Entity {
             projections {
                 min("dateCreated")
             }
+        }
+    }
+
+    static String ticketNumberConstraint(String val) {
+        if (val =~ /^[0-9]{16}$/) {
+            try {
+                DateTimeFormatter format = DateTimeFormat.forPattern("yyyyMMdd")
+                format.parseDateTime(val.substring(0,8))
+                return null
+            } catch (IllegalFieldValueException e) {
+                return e.message
+            }
+        } else {
+            return "does not match the required pattern"
         }
     }
 }

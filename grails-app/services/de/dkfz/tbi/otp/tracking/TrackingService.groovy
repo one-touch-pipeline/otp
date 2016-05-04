@@ -1,8 +1,30 @@
 package de.dkfz.tbi.otp.tracking
 
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.*
 
 class TrackingService {
+
+    public OtrsTicket createOtrsTicket(String ticketNumber) {
+        OtrsTicket otrsTicket = new OtrsTicket(ticketNumber: ticketNumber)
+        assert otrsTicket.save(flush: true, failOnError: true)
+        return otrsTicket
+    }
+
+    public OtrsTicket createOrResetOtrsTicket(String ticketNumber) {
+        OtrsTicket otrsTicket = CollectionUtils.atMostOneElement(OtrsTicket.findAllByTicketNumber(ticketNumber))
+        if (!otrsTicket) {
+            return createOtrsTicket(ticketNumber)
+        } else {
+            otrsTicket.installationFinished = null
+            otrsTicket.fastqcFinished = null
+            otrsTicket.alignmentFinished = null
+            otrsTicket.snvFinished = null
+            otrsTicket.finalNotificationSent = false
+            assert otrsTicket.save(flush: true, failOnError: true)
+            return otrsTicket
+        }
+    }
 
     public void setStartedForSeqTracks(Collection<SeqTrack> seqTracks, OtrsTicket.ProcessingStep step) {
         setStarted(findAllOtrsTickets(seqTracks), step)

@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
+import de.dkfz.tbi.otp.tracking.*
 import de.dkfz.tbi.util.spreadsheet.*
 import groovy.transform.*
 import org.springframework.beans.factory.annotation.*
@@ -27,6 +28,7 @@ class MetadataImportService {
 
     SampleIdentifierService sampleIdentifierService
     SeqTrackService seqTrackService
+    TrackingService trackingService
 
     /**
      * @return A collection of descriptions of the validations which are performed
@@ -65,11 +67,11 @@ class MetadataImportService {
      * @param previousValidationMd5sum May be {@code null}
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    ValidateAndImportResult validateAndImport(File metadataFile, String directoryStructureName, boolean align, boolean ignoreWarnings, String previousValidationMd5sum) {
+    ValidateAndImportResult validateAndImport(File metadataFile, String directoryStructureName, boolean align, boolean ignoreWarnings, String previousValidationMd5sum, String ticketNumber) {
         MetadataValidationContext context = validate(metadataFile, directoryStructureName)
         MetaDataFile metadataFileObject = null
         if (mayImport(context, ignoreWarnings, previousValidationMd5sum)) {
-            metadataFileObject = importMetadataFile(context, align)
+            metadataFileObject = importMetadataFile(context, align, ticketNumber)
         }
         return new ValidateAndImportResult(context, metadataFileObject)
     }
@@ -105,7 +107,7 @@ class MetadataImportService {
         return false
     }
 
-    protected MetaDataFile importMetadataFile(MetadataValidationContext context, boolean align) {
+    protected MetaDataFile importMetadataFile(MetadataValidationContext context, boolean align, String ticketNumber) {
         RunSegment runSegment = new RunSegment(
                 metaDataStatus: RunSegment.Status.COMPLETE,
                 allFilesUsed: true,
@@ -115,6 +117,7 @@ class MetadataImportService {
                 currentFormat: RunSegment.DataFormat.FILES_IN_DIRECTORY,
                 dataPath: context.metadataFile.parentFile.parent,
                 mdPath: context.metadataFile.parentFile.parent,
+                otrsTicket: ticketNumber ? trackingService.createOrResetOtrsTicket(ticketNumber) : null,
         )
         // TODO OTP-1952: un-comment
         //assert runSegment.save(flush: true)

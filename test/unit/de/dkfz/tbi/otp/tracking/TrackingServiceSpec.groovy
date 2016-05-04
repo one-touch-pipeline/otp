@@ -3,8 +3,11 @@ package de.dkfz.tbi.otp.tracking
 import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.ngsdata.*
 import grails.test.mixin.*
+import grails.test.mixin.web.*
+import grails.validation.*
 import spock.lang.*
 
+@TestMixin(ControllerUnitTestMixin)
 @Mock([
     DataFile,
     FileType,
@@ -22,6 +25,63 @@ import spock.lang.*
     SoftwareTool,
 ])
 class TrackingServiceSpec extends Specification {
+
+    final static String TICKET_NUMBER = "2000010112345678"
+
+    def 'test createOrResetOtrsTicket, when no OtrsTicket with ticket number exists, creates one' () {
+        given:
+        OtrsTicket otrsTicket
+        TrackingService trackingService = new TrackingService()
+
+        when:
+        otrsTicket = trackingService.createOrResetOtrsTicket(TICKET_NUMBER)
+
+        then:
+        testTicket(otrsTicket)
+    }
+
+    def 'test createOrResetOtrsTicket, when OtrsTicket with ticket number exists, resets it' () {
+        given:
+        OtrsTicket otrsTicket = DomainFactory.createOtrsTicket([
+                ticketNumber: '2000010112345678',
+                installationFinished: new Date(),
+                fastqcFinished: new Date(),
+                alignmentFinished: new Date(),
+                snvFinished: new Date(),
+                finalNotificationSent: true,
+        ])
+        TrackingService trackingService = new TrackingService()
+
+        when:
+        otrsTicket = trackingService.createOrResetOtrsTicket(TICKET_NUMBER)
+
+        then:
+        testTicket(otrsTicket)
+    }
+
+    def 'test createOrResetOtrsTicket, when ticket number is null, throws ValidationException' () {
+        given:
+        TrackingService trackingService = new TrackingService()
+
+        when:
+        trackingService.createOrResetOtrsTicket(null)
+
+        then:
+        ValidationException ex = thrown()
+        ex.message.contains("on field 'ticketNumber': rejected value [null]")
+    }
+
+    def 'test createOrResetOtrsTicket, when ticket number is blank, throws ValidationException' () {
+        given:
+        TrackingService trackingService = new TrackingService()
+
+        when:
+        trackingService.createOrResetOtrsTicket("")
+
+        then:
+        ValidationException ex = thrown()
+        ex.message.contains("on field 'ticketNumber': rejected value []")
+    }
 
     def 'test findAllOtrsTickets' () {
         given:
@@ -95,4 +155,13 @@ class TrackingServiceSpec extends Specification {
         date.is(otrsTicket.installationStarted)
     }
 
+    private boolean testTicket(OtrsTicket otrsTicket) {
+        assert otrsTicket.ticketNumber == TICKET_NUMBER
+        assert otrsTicket.installationFinished == null
+        assert otrsTicket.fastqcFinished == null
+        assert otrsTicket.alignmentFinished == null
+        assert otrsTicket.snvFinished == null
+        assert !otrsTicket.finalNotificationSent
+        return true
+    }
 }

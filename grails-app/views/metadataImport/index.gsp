@@ -12,7 +12,7 @@
     </title>
 </head>
 <body>
-    <g:if test="${cmd}">
+    <g:if test="${context}">
         <div id= "border" class="borderMetadataImport${Level.normalize(context.getMaximumProblemLevel()).name}">
             <g:if test="${context.problems.isEmpty()}">
                 No problems found :)
@@ -80,22 +80,28 @@
             </div>
         </div>
     </g:if>
+    <g:if test="${errorMessage}">
+        <div class="errorMessage"><g:message code="${errorMessage}"/></div>
+    </g:if>
     <div>
     <g:form controller="MetadataImport" action="index">
         <table class="options">
+            <sec:ifAllGranted roles="ROLE_OPERATOR">
+                <tr>
+                    <td><g:message code="metadataImport.otrs"/></td>
+                    <td>
+                        <g:textField name="ticketNumber" size="30" value="${cmd.ticketNumber}"/>
+                    </td>
+                </tr>
+            </sec:ifAllGranted>
             <tr>
                 <td><g:message code="metadataImport.path"/></td>
-                <td><g:textField name="path" size="130" value="${cmd?.path}"/></td>
+                <td><g:textField name="path" size="130" value="${cmd.path}"/></td>
             </tr>
             <tr>
                 <td><g:message code="metadataImport.directory"/></td>
                 <td>
-                <g:if test="${cmd}">
-                    <g:set var="active" value ="${cmd?.directory}"/>
-                </g:if>
-                <g:else>
-                    <g:set var="active" value ="${directoryStructures.keySet().first()}"/>
-                </g:else>
+                    <g:set var="active" value="${cmd.directory ?: directoryStructures.keySet().first()}"/>
                     <g:radioGroup name="directory" labels="${directoryStructures.values()}" values="${directoryStructures.keySet()}" value="${active}">
                         <label>
                             ${it.radio}
@@ -106,7 +112,7 @@
             </tr>
             <tr>
                 <td><label><g:message code="runSubmit.align"/></label></td>
-                <td><g:checkBox name="align" checked="${cmd == null || cmd?.align}"/></td>
+                <td><g:checkBox name="align" checked="${cmd.align}"/></td>
             </tr>
         </table>
         <g:submitButton name="submit" value="Validate"/>
@@ -119,9 +125,7 @@
                 </label>
             </g:if>
         </sec:ifAllGranted>
-        <g:if test="${cmd}">
-            <g:hiddenField name="md5" value="${context.metadataFileMd5sum}"/>
-        </g:if>
+        <g:hiddenField name="md5" value="${context?.metadataFileMd5sum}"/>
     </g:form>
     <h3><g:message code="metadataImport.implementedValidations"/></h3>
         <ul>

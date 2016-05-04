@@ -1,8 +1,10 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
+import de.dkfz.tbi.otp.tracking.*
 import groovy.transform.*
-
+import java.util.regex.*
+import org.springframework.validation.*
 
 class MetadataImportController {
 
@@ -11,22 +13,26 @@ class MetadataImportController {
 
     def index(MetadataImportControllerSubmitCommand cmd) {
         MetadataValidationContext metadataValidationContext
-        if (cmd.submit == "Validate") {
-            metadataValidationContext = metadataImportService.validate(new File(cmd.path), cmd.directory)
-        } else if (cmd.submit == "Import") {
-            ValidateAndImportResult validateAndImportResult = metadataImportService.validateAndImport(new File(cmd.path), cmd.directory, cmd.align, cmd.ignoreWarnings, cmd.md5)
+        String errorMessage
+        if (cmd.hasErrors()) {
+            FieldError fieldError = cmd.errors.getFieldError()
+            errorMessage = "'${fieldError.getRejectedValue()}' is not a valid value for '${fieldError.getField()}'. Error code: '${fieldError.code}'"
+        }
+        if (cmd.submit == "Import" && !errorMessage) {
+            ValidateAndImportResult validateAndImportResult = metadataImportService.validateAndImport(new File(cmd.path), cmd.directory, cmd.align, cmd.ignoreWarnings, cmd.md5, cmd.ticketNumber)
             metadataValidationContext = validateAndImportResult.context
             if (validateAndImportResult.metadataFile != null) {
                 redirect(action: "details", id: validateAndImportResult.metadataFile.runSegment.id)
             }
-        } else {
-            cmd = null
+        } else if (cmd.submit != null) {
+            metadataValidationContext = metadataImportService.validate(new File(cmd.path), cmd.directory)
         }
         return [
-                directoryStructures: metadataImportService.getSupportedDirectoryStructures(),
-                cmd                : cmd,
-                context            : metadataValidationContext,
-                implementedValidations: metadataImportService.getImplementedValidations()
+            directoryStructures: metadataImportService.getSupportedDirectoryStructures(),
+            cmd                : cmd,
+            errorMessage       : errorMessage,
+            context            : metadataValidationContext,
+            implementedValidations: metadataImportService.getImplementedValidations()
         ]
     }
 
@@ -100,6 +106,29 @@ class MetadataImportControllerSubmitCommand implements Serializable {
     String directory
     String md5
     String submit
-    boolean align
+    String ticketNumber
+    boolean align = true
     boolean ignoreWarnings
+
+    static constraints = {
+        path(nullable:true)
+        directory(nullable:true)
+        md5(nullable:true)
+        submit(nullable:true)
+        ticketNumber(nullable:true, validator: { val, obj ->
+            if (val == null) {
+                return true
+            }
+            return OtrsTicket.ticketNumberConstraint(val) ?: true
+        })
+    }
+    void setTicketNumber(String ticketNumber) {
+        Matcher matcher = ticketNumber =~ /^\s*(((Ticket)?#)?(?<number>(\d{16})))?\s*$/
+        if (matcher.matches()) {
+            this.ticketNumber = matcher.group('number') ?: null
+        } else {
+            this.ticketNumber = ticketNumber
+        }
+
+    }
 }
