@@ -265,7 +265,7 @@ class SeqTrack implements ProcessParameterObject {
         threadLog?.info(MessageFormat.format(message, " " + this))
         if (saveInSeqTrack) {
             withTransaction {
-                LogMessage logMessage = new LogMessage(message: MessageFormat.format(message, ""), timestamp: new Date())
+                LogMessage logMessage = new LogMessage(message: MessageFormat.format(message, ""))
                 logMessage.save(flush: true, failOnError: true)
                 logMessages.add(logMessage)
                 this.save(flush: true, failOnError: true)

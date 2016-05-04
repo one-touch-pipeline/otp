@@ -47,7 +47,7 @@
               <li>${g.message(code: "metadataImport.details.mateNumber")} ${dataFile.mateNumber}: <g:link controller="dataFile" action="showDetails" id="${dataFile.id}">${dataFile.fileName}</g:link></li>
             </g:each>
             <g:each in="${seqTrack.seqTrack.logMessages}" var="msg">
-              <li>${new DateTime(msg.timestamp).toString("yyyy-MM-dd HH:mm:ss ZZ")}: ${msg.message.encodeAsHTML()}</li>
+              <li>${new DateTime(msg.dateCreated).toString("yyyy-MM-dd HH:mm:ss ZZ")}: ${msg.message.encodeAsHTML()}</li>
             </g:each>
           </ul>
         </li>

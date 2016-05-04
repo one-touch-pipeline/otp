@@ -3,7 +3,7 @@ package de.dkfz.tbi.otp
 class LogMessage {
 
     String message
-    Date timestamp
+    Date dateCreated
 
     static mapping = {
         message type: "text"
