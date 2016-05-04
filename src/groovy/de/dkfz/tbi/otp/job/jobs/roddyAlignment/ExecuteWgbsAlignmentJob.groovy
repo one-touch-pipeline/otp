@@ -35,7 +35,7 @@ class ExecuteWgbsAlignmentJob extends AbstractExecutePanCanJob {
 
         final Realm realm = configService.getRealmDataManagement(roddyBamFile.project)
 
-        File metadataFile = roddyBamFile.getMetaDataTableFile()
+        File metadataFile = roddyBamFile.getWorkMetadataTableFile()
         LsdfFilesService.ensureDirIsReadable(metadataFile.parentFile)
 
         StringBuilder builder = new StringBuilder()
@@ -44,7 +44,7 @@ class ExecuteWgbsAlignmentJob extends AbstractExecutePanCanJob {
 
         builder << DataFile.findAllBySeqTrackInList(roddyBamFile.seqTracks).sort { it.mateNumber }.collect { DataFile dataFile ->
             [dataFile.sampleType.dirName, // it is correct that the header is 'Sample', this is because of the different names for the same things
-             dataFile.seqTrack.getStandardizedLibraryName(),
+             dataFile.seqTrack.getLibraryDirectoryName(),
              dataFile.individual.pid,
              dataFile.seqType.libraryLayoutDirName,
              dataFile.run.dirName,
@@ -71,7 +71,7 @@ chmod 0440 ${metadataFile.path}
 
     @Override
     protected void workflowSpecificValidation(RoddyBamFile roddyBamFile) {
-        (["merged"] + roddyBamFile.seqTracks.collect { it.standardizedLibraryName }).unique().each {
+        (["merged"] + roddyBamFile.seqTracks.collect { it.libraryDirectoryName }).unique().each {
             LsdfFilesService.ensureDirIsReadableAndNotEmpty(new File(roddyBamFile.workMethylationDirectory, it))
         }
     }

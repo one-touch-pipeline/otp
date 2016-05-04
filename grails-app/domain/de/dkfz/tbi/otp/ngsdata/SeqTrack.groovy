@@ -159,7 +159,7 @@ class SeqTrack implements ProcessParameterObject, Entity {
 
 
     // To be consistent on the filesystem the library value to use is create like this and not directly derived from libraryName
-    String getStandardizedLibraryName() {
+    String getLibraryDirectoryName() {
         return (libraryName ? "lib${normalizedLibraryName}" : "libNA")
     }
 

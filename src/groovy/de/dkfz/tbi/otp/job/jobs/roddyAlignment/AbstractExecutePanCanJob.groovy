@@ -80,7 +80,7 @@ abstract class AbstractExecutePanCanJob extends AbstractRoddyJob {
 
         RoddyBamFile roddyBamFile = roddyResult as RoddyBamFile
 
-        executeRoddyCommandService.correctPermissions(roddyBamFile)
+        executeRoddyCommandService.correctPermissions(roddyBamFile, configService.getRealmDataProcessing(roddyBamFile.project))
 
         try {
             ensureCorrectBaseBamFileIsOnFileSystem(roddyBamFile.baseBamFile)

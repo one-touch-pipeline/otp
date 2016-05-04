@@ -3,14 +3,12 @@ package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.ngsdata.BedFile
-import de.dkfz.tbi.otp.ngsdata.BedFileService
 import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.ngsdata.MetaDataService
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqTypeNames
-import org.springframework.beans.factory.annotation.Autowired
 
 import static de.dkfz.tbi.otp.ngsdata.LsdfFilesService.ensureFileIsReadableAndNotEmpty
 

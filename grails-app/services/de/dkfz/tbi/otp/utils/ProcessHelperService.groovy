@@ -10,6 +10,10 @@ class ProcessHelperService {
         String stdout
         String stderr
         int exitCode
+
+        boolean isStderrEmptyAndExitCodeZero() {
+            return stderr.isEmpty() && exitCode == 0
+        }
     }
 
     static Process executeCommand(String cmd) {

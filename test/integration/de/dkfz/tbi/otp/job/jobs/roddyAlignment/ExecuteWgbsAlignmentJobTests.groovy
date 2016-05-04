@@ -102,7 +102,7 @@ class ExecuteWgbsAlignmentJobTests {
 
     @Test
     void testPrepareAndReturnWorkflowSpecificParameter_MetadataFileCreationDidNotWork_ExitCodeNotNull_ShouldFail() {
-        File metaDataTableFile = roddyBamFile.metaDataTableFile
+        File metaDataTableFile = roddyBamFile.workMetadataTableFile
         assert metaDataTableFile.parentFile.mkdirs()
 
         executeWgbsAlignmentJob.executionService.metaClass.executeCommandReturnProcessOutput = { Realm realm, String cmd ->
@@ -121,7 +121,7 @@ class ExecuteWgbsAlignmentJobTests {
 
     @Test
     void testPrepareAndReturnWorkflowSpecificParameter_MetadataFileCreationDidNotWork_FileNotAvailable_ShouldFail() {
-        File metaDataTableFile = roddyBamFile.metaDataTableFile
+        File metaDataTableFile = roddyBamFile.workMetadataTableFile
         assert metaDataTableFile.parentFile.mkdirs()
 
         executeWgbsAlignmentJob.executionService.metaClass.executeCommandReturnProcessOutput = { Realm realm, String cmd ->
@@ -134,7 +134,7 @@ class ExecuteWgbsAlignmentJobTests {
 
         assert TestCase.shouldFail(AssertionError) {
             executeWgbsAlignmentJob.prepareAndReturnWorkflowSpecificParameter(roddyBamFile)
-        }.contains(roddyBamFile.metaDataTableFile.path)
+        }.contains(roddyBamFile.workMetadataTableFile.path)
     }
 
 
@@ -157,10 +157,10 @@ class ExecuteWgbsAlignmentJobTests {
             assert seqTrack.save(flush: true)
         }
 
-        File metaDataTableFile = roddyBamFile.metaDataTableFile
+        File metaDataTableFile = roddyBamFile.workMetadataTableFile
         assert metaDataTableFile.parentFile.mkdirs()
 
-        String expectedCommand = "--usemetadatatable=${roddyBamFile.metaDataTableFile.path} "
+        String expectedCommand = "--usemetadatatable=${roddyBamFile.workMetadataTableFile.path} "
         assert expectedCommand == executeWgbsAlignmentJob.prepareAndReturnWorkflowSpecificParameter(roddyBamFile)
 
         assert metaDataTableFile.exists()
@@ -171,7 +171,7 @@ class ExecuteWgbsAlignmentJobTests {
 
 
         DataFile.findAllBySeqTrackInList(roddyBamFile.seqTracks).each {
-            String oneLine = "${it.sampleType.dirName}\t${it.seqTrack.getStandardizedLibraryName()}\t${it.individual.pid}\t${it.seqType.libraryLayoutDirName}\t${it.run.dirName}\t${it.mateNumber}\t${lsdfFilesService.getFileViewByPidPath(it)}"
+            String oneLine = "${it.sampleType.dirName}\t${it.seqTrack.getLibraryDirectoryName()}\t${it.individual.pid}\t${it.seqType.libraryLayoutDirName}\t${it.run.dirName}\t${it.mateNumber}\t${lsdfFilesService.getFileViewByPidPath(it)}"
 
             assert lines.contains(oneLine)
         }

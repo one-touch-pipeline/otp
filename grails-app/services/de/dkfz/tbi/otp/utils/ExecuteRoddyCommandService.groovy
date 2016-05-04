@@ -12,12 +12,6 @@ import groovy.transform.TupleConstructor
 
 class ExecuteRoddyCommandService {
 
-    static final String CORRECT_PERMISSION_SCRIPT_NAME = "OtherUnixUserCorrectPermissionScript"
-
-    static final String CORRECT_GROUP_SCRIPT_NAME = "OtherUnixUserCorrectGroupScript"
-
-    static final String DELETE_CONTENT_OF_OTHERUNIXUSER_DIRECTORIES_SCRIPT = "OtherUnixUserDeleteContentOfOtherUserDirectoriesScript"
-
     static final String FEATURE_TOGGLES_CONFIG_PATH = "OtherUnixUserFeatureTogglesConfigPath"
 
 
@@ -129,35 +123,54 @@ class ExecuteRoddyCommandService {
         WaitingFileUtils.waitUntilExists(file)
     }
 
-    String correctPermissionCommand(File basePath) {
-        assert basePath : "basePath is not allowed to be null"
-        File permissionScript = ProcessingOptionService.getValueOfProcessingOption(CORRECT_PERMISSION_SCRIPT_NAME) as File
-        return "cd /tmp && ${executeCommandAsRoddyUser()} ${permissionScript} ${basePath}"
-    }
-
-    void correctPermissions(RoddyBamFile roddyBamFile) {
+    void correctPermissions(RoddyBamFile roddyBamFile, Realm realm) {
         assert roddyBamFile : "RoddyBamFile should not be null"
-        String cmd = correctPermissionCommand(roddyBamFile.workDirectory)
-        ProcessHelperService.executeCommandAndAssertExistCodeAndReturnProcessOutput(cmd)
+        String cmd = """\
+set -e
+cd "${roddyBamFile.workDirectory}"
+
+echo ""
+echo "correct directory permission"
+find -type d -user ${realm.roddyUser} -not -perm 2750 -print -exec chmod 2750 '{}' \\; | wc -l
+
+echo ""
+echo "correct file permission for non bam/bai files"
+# The file is not changed, since it needs to be stay writable"
+find -type f -user ${realm.roddyUser} -not -perm 440 -not -name "*.bam" -not -name "*.bai" -not -name ".roddyExecCache.txt" -print -exec chmod 440 '{}' \\; | wc -l
+
+echo ""
+echo "correct file permission for bam/bai files"
+find -type f -user ${realm.roddyUser} -not -perm 444 \\( -name "*.bam" -or -name "*.bai" \\) -print -exec chmod 444 '{}' \\; | wc -l
+"""
+        assert executionService.executeCommandReturnProcessOutput(realm, cmd, realm.roddyUser).isStderrEmptyAndExitCodeZero()
     }
 
-    String correctGroupCommand(File basePath) {
-        assert basePath : "basePath is not allowed to be null"
-        File permissionScript = ProcessingOptionService.getValueOfProcessingOption(CORRECT_GROUP_SCRIPT_NAME) as File
-        return "cd /tmp && ${executeCommandAsRoddyUser()} ${permissionScript} ${basePath}"
-    }
-
-    void correctGroups(RoddyBamFile roddyBamFile) {
+    void correctGroups(RoddyBamFile roddyBamFile, Realm realm) {
         assert roddyBamFile : "RoddyBamFile should not be null"
-        String cmd = correctGroupCommand(roddyBamFile.workDirectory)
-        ProcessHelperService.executeCommandAndAssertExistCodeAndReturnProcessOutput(cmd)
+        String cmd = """\
+set -e
+cd "${roddyBamFile.workDirectory}"
+
+#correct group
+groupname=`stat -c '%G' .`
+echo ""
+echo "correct group permission to" \$groupname
+find -not -type l -user ${realm.roddyUser} -not -group \$groupname -print -exec chgrp \$groupname '{}' \\;
+"""
+        assert executionService.executeCommandReturnProcessOutput(realm, cmd, realm.roddyUser).isStderrEmptyAndExitCodeZero()
     }
 
-    void deleteContentOfOtherUnixUserDirectory(File basePath) {
+    void deleteContentOfOtherUnixUserDirectory(File basePath, Realm realm) {
         assert basePath : "basePath is not allowed to be null"
-        File script = ProcessingOptionService.getValueOfProcessingOption(DELETE_CONTENT_OF_OTHERUNIXUSER_DIRECTORIES_SCRIPT) as File
-        String cmd = "cd /tmp && ${executeCommandAsRoddyUser()} ${script} ${basePath}"
-        ProcessHelperService.executeCommandAndAssertExistCodeAndReturnProcessOutput(cmd)
+        String cmd = """\
+set -e
+cd "${basePath}"
+
+echo ""
+echo "delete directory content of " `pwd`
+find -mindepth 1 -user ${realm.roddyUser} -prune -print -execdir rm -r '{}' \\;
+"""
+        assert executionService.executeCommandReturnProcessOutput(realm, cmd, realm.roddyUser).isStderrEmptyAndExitCodeZero()
     }
 
     File featureTogglesConfigPath() {

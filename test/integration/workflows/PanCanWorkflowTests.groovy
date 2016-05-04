@@ -45,7 +45,7 @@ class PanCanWorkflowTests extends WorkflowTestCase {
             movePanCanFilesToFinalDestinationJob.configService.metaClass.getRealmDataManagement = { Project project ->
                 return Realm.build()
             }
-            movePanCanFilesToFinalDestinationJob.metaClass.cleanupWorkDirectory = { RoddyBamFile roddyBamFile, Realm realm ->
+            movePanCanFilesToFinalDestinationJob.linkFilesToFinalDestinationService.metaClass.cleanupWorkDirectory = { RoddyBamFile roddyBamFile, Realm realm ->
                 throw new RuntimeException(exceptionMessage)
             }
 

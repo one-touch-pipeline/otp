@@ -1,17 +1,15 @@
 package de.dkfz.tbi.otp.utils
 
-import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.job.processing.CreateClusterScriptService
-import de.dkfz.tbi.otp.job.processing.ExecutionService
-import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
-import de.dkfz.tbi.otp.ngsdata.Realm
-import grails.buildtestdata.mixin.Build
-import org.codehaus.groovy.runtime.powerassert.PowerAssertionError
-import org.junit.After
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.TemporaryFolder
+import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.ngsdata.*
+import grails.buildtestdata.mixin.*
+import org.codehaus.groovy.runtime.powerassert.*
+import org.junit.*
+import org.junit.rules.*
+
+import java.nio.file.*
+
 
 @Build([Realm])
 class LinkFileUtilsUnitTests {
@@ -81,6 +79,7 @@ class LinkFileUtilsUnitTests {
 
         linkFileUtils.createAndValidateLinks([(sourceFile):linkFile], realm)
         assert linkFile.exists()
+        assert Paths.get(sourceFile.absolutePath) == Paths.get(linkFile.absolutePath).toRealPath()
     }
 
     @Test
@@ -94,6 +93,7 @@ class LinkFileUtilsUnitTests {
         linkFileUtils.createAndValidateLinks([(sourceFile):linkFile], realm)
         assert linkFile.exists()
         assert linkFile.text != oldContent
+        assert Paths.get(sourceFile.absolutePath) == Paths.get(linkFile.absolutePath).toRealPath()
     }
 
     @Test
@@ -105,6 +105,7 @@ class LinkFileUtilsUnitTests {
 
         linkFileUtils.createAndValidateLinks([(sourceFile):linkFile], realm)
         assert linkFile.exists() && !linkFile.isDirectory()
+        assert Paths.get(sourceFile.absolutePath) == Paths.get(linkFile.absolutePath).toRealPath()
     }
 
     @Test
@@ -117,6 +118,7 @@ class LinkFileUtilsUnitTests {
 
         linkFileUtils.createAndValidateLinks([(sourceFile):linkFile], realm)
         assert linkFile.exists()
+        assert Paths.get(sourceFile.absolutePath) == Paths.get(linkFile.absolutePath).toRealPath()
     }
 
 

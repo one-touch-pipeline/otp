@@ -1061,31 +1061,6 @@ class DomainFactory {
         )
         assert processingOptionPath.save(flush: true)
 
-        assert new ProcessingOption(
-                name: ExecuteRoddyCommandService.CORRECT_PERMISSION_SCRIPT_NAME,
-                type: "",
-                project: null,
-                value: "${basePath}/correctPathPermissionsOtherUnixUserRemoteWrapper.sh",
-                comment: "some comment",
-        ).save(flush: true)
-
-
-        assert new ProcessingOption(
-                name: ExecuteRoddyCommandService.CORRECT_GROUP_SCRIPT_NAME,
-                type: "",
-                project: null,
-                value: "${basePath}/correctGroupOtherUnixUserRemoteWrapper.sh",
-                comment: "some comment",
-        ).save(flush: true)
-
-        assert new ProcessingOption(
-                name: ExecuteRoddyCommandService.DELETE_CONTENT_OF_OTHERUNIXUSER_DIRECTORIES_SCRIPT,
-                type: "",
-                project: null,
-                value:  "${basePath}/deleteContentOfRoddyDirectoriesRemoteWrapper.sh",
-                comment: "some comment",
-        ).save(flush: true)
-
         ProcessingOption processingOptionVersion = new ProcessingOption(
             name: "roddyVersion",
             type: "",

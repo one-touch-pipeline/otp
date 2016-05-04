@@ -16,10 +16,6 @@ import de.dkfz.tbi.otp.utils.StringUtils
  */
 class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, ProcessParameterObject {
 
-    /*
-     * the value is also used in a check in the bash script: 'bashScripts/OtherUnixUser/checkInputParameter.sh'.
-     * If the value is changed here, it needs also to be changed there.
-     */
     static final String WORK_DIR_PREFIX = ".merging"
 
     static final String QUALITY_CONTROL_DIR = "qualitycontrol"
@@ -237,6 +233,30 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
         return new File(this.workQADirectory, MERGED_DIR)
     }
 
+    Set<File> getFinalLibraryQADirectories() {
+        return getLibraryDirectories(this.finalQADirectory)
+    }
+
+    Set<File> getWorkLibraryQADirectories() {
+        return getLibraryDirectories(this.workQADirectory)
+    }
+
+    File getFinalMergedMethylationDirectory() {
+        return new File(this.finalMethylationDirectory, MERGED_DIR)
+    }
+
+    File getWorkMergedMethylationDirectory() {
+        return new File(this.workMethylationDirectory, MERGED_DIR)
+    }
+
+    Set<File> getFinalLibraryMethylationDirectories() {
+        return getLibraryDirectories(this.finalMethylationDirectory)
+    }
+
+    Set<File> getWorkLibraryMethylationDirectories() {
+        return getLibraryDirectories(this.workMethylationDirectory)
+    }
+
     File getFinalMergedQAJsonFile() {
         return new File(finalMergedQADirectory, QUALITY_CONTROL_JSON_FILE_NAME)
     }
@@ -263,6 +283,10 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
 
     Map<SeqTrack, File> getWorkSingleLaneQAJsonFiles() {
         return getSingleLaneQAJsonFiles('Work')
+    }
+
+    private Set<File> getLibraryDirectories(File baseDirectory) {
+        seqTracks*.libraryDirectoryName.unique().collect( { new File(baseDirectory, it) })
     }
 
     private Map<SeqTrack, File> getSingleLaneQAJsonFiles(String workOrFinal) {
@@ -347,11 +371,13 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
         return new File(workDirectory, this.md5sumFileName)
     }
 
-    File getMetaDataTableFile() {
-        return new File(workDirectory, METADATATABLE_FILE)
+    File getFinalMetadataTableFile() {
+        return new File(baseDirectory, METADATATABLE_FILE)
     }
 
-
+    File getWorkMetadataTableFile() {
+        return new File(workDirectory, METADATATABLE_FILE)
+    }
 
     /**
      * returns whether the old or the new file structure is used.

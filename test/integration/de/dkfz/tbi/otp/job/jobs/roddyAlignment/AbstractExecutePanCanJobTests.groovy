@@ -60,6 +60,7 @@ class AbstractExecutePanCanJobTests {
         abstractExecutePanCanJob.lsdfFilesService = new LsdfFilesService()
         abstractExecutePanCanJob.executeRoddyCommandService = new ExecuteRoddyCommandService()
         abstractExecutePanCanJob.bedFileService = new BedFileService()
+        abstractExecutePanCanJob.configService = new ConfigService()
 
         File processingRootPath = dataProcessing.processingRootPath as File
 
@@ -88,7 +89,7 @@ class AbstractExecutePanCanJobTests {
         chromosomeStatSizeFile = abstractExecutePanCanJob.referenceGenomeService.chromosomeStatSizeFile(roddyBamFile.mergingWorkPackage, false)
         CreateFileHelper.createFile(chromosomeStatSizeFile)
 
-        abstractExecutePanCanJob.executeRoddyCommandService.metaClass.correctPermissions = { RoddyBamFile bamFile -> }
+        abstractExecutePanCanJob.executeRoddyCommandService.metaClass.correctPermissions = { RoddyBamFile bamFile, Realm realm -> }
     }
 
 
@@ -232,7 +233,7 @@ PBS_AccountName:FASTTRACK"\
     void testValidate_PermissionChangeFail_ShouldFail() {
         String message = HelperUtils.uniqueString
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
-        abstractExecutePanCanJob.executeRoddyCommandService.metaClass.correctPermissions = { RoddyBamFile bamFile -> assert false, message }
+        abstractExecutePanCanJob.executeRoddyCommandService.metaClass.correctPermissions = { RoddyBamFile bamFile, Realm realm -> assert false, message }
 
         assert TestCase.shouldFail(AssertionError) {
             abstractExecutePanCanJob.validate(roddyBamFile)

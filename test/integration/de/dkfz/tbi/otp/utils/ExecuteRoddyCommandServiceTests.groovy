@@ -1,23 +1,22 @@
 package de.dkfz.tbi.otp.utils
 
-import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
-import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.job.processing.ExecutionService
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
-import org.junit.After
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.TemporaryFolder
+import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.logging.*
+import org.codehaus.groovy.grails.commons.*
+import org.junit.*
+import org.junit.rules.*
+
+import static de.dkfz.tbi.otp.utils.ProcessHelperService.*
+
 
 /**
  */
 class ExecuteRoddyCommandServiceTests {
+
+    GrailsApplication grailsApplication
 
     ExecuteRoddyCommandService executeRoddyCommandService = new ExecuteRoddyCommandService()
 
@@ -55,6 +54,7 @@ class ExecuteRoddyCommandServiceTests {
                 name: roddyBamFile.project.realmName,
                 rootPath: "${tmpOutputDir}/root",
                 processingRootPath: "${tmpOutputDir}/processing",
+                roddyUser: System.getProperty("user.name"),
         ])
         assert realm.save(flush: true)
 
@@ -355,87 +355,101 @@ class ExecuteRoddyCommandServiceTests {
     }
 
 
-
     @Test
-    void testCorrectPermissionCommand_AllFine() {
-        String expected = "cd /tmp && sudo -u OtherUnixUser ${ProcessingOptionService.getValueOfProcessingOption(ExecuteRoddyCommandService.CORRECT_PERMISSION_SCRIPT_NAME)} ${tmpOutputDir}"
-        String cmd = executeRoddyCommandService.correctPermissionCommand(tmpOutputDir)
+    void testCorrectPermission_AllOkay() {
+        executeRoddyCommandService.executionService = [
+                executeCommandReturnProcessOutput: { Realm realm1, String cmd, String user ->
+                    assert realm1 == realm
+                    assert user == realm.roddyUser
+                    ProcessOutput out =  waitForCommand(cmd)
+                    assert out.stderrEmptyAndExitCodeZero
+                    assert out.stdout == """
+correct directory permission
+2
 
-        assert expected == cmd
-    }
+correct file permission for non bam/bai files
+1
 
-    @Test
-    void testCorrectPermissionCommand_BasePathIsNull_ShouldFail() {
-        assert TestCase.shouldFail(AssertionError) {
-            executeRoddyCommandService.correctPermissionCommand(null)
-        }.contains('basePath is not allowed to be null')
-    }
+correct file permission for bam/bai files
+2
+"""
+                    return out
+                }
+        ] as ExecutionService
 
-    @Test
-    void testCorrectPermissionCommand_processingOptionNotSet_ShouldFail() {
-        ProcessingOption.findByName(ExecuteRoddyCommandService.CORRECT_PERMISSION_SCRIPT_NAME).delete(flush: true)
+        CreateFileHelper.createFile(new File(roddyBamFile.workDirectory, "file"))
+        CreateFileHelper.createFile(new File(roddyBamFile.workDirectory, roddyBamFile.baiFileName))
+        CreateFileHelper.createFile(new File(roddyBamFile.workDirectory, roddyBamFile.bamFileName))
+        assert new File(roddyBamFile.workDirectory, "dir").mkdirs()
 
-        assert TestCase.shouldFail(AssertionError) {
-            executeRoddyCommandService.correctPermissionCommand(tmpOutputDir)
-        }.contains('Collection contains 0 elements. Expected 1.')
-    }
+        assert executeAndAssertExitCodeAndErrorOutAndReturnStdout("""\
+chmod 777 ${roddyBamFile.workDirectory}/dir
+chmod 777 ${roddyBamFile.workDirectory}/file
+chmod 777 ${roddyBamFile.workDirectory}/${roddyBamFile.baiFileName}
+chmod 777 ${roddyBamFile.workDirectory}/${roddyBamFile.bamFileName}
+""").empty
 
-    @Test
-    void testCorrectPermission_AllFine() {
-        ProcessHelperService.metaClass.static.executeCommandAndAssertExistCodeAndReturnProcessOutput = { String cmd ->
-            assert cmd ==~ "cd /tmp && sudo -u OtherUnixUser ${temporaryFolder.getRoot()}/.*/correctPathPermissionsOtherUnixUserRemoteWrapper.sh ${roddyBamFile.workDirectory}"
-            return new ProcessHelperService.ProcessOutput('', '', 0)
-        }
 
-        executeRoddyCommandService.correctPermissions(roddyBamFile)
+        executeRoddyCommandService.correctPermissions(roddyBamFile, realm)
+
+
+        assert executeAndAssertExitCodeAndErrorOutAndReturnStdout("""\
+stat -c %a ${roddyBamFile.workDirectory}/dir
+stat -c %a ${roddyBamFile.workDirectory}/file
+stat -c %a ${roddyBamFile.workDirectory}/${roddyBamFile.baiFileName}
+stat -c %a ${roddyBamFile.workDirectory}/${roddyBamFile.bamFileName}
+""") == """\
+2750
+440
+444
+444
+"""
     }
 
     @Test
     void testCorrectPermission_BamFileIsNull_shouldFail() {
         assert TestCase.shouldFail(AssertionError) {
-            executeRoddyCommandService.correctPermissions(null)
+            executeRoddyCommandService.correctPermissions(null, realm)
         }.contains('RoddyBamFile')
-    }
-
-
-    @Test
-    void testCorrectGroupCommand_AllFine() {
-        String expected = "cd /tmp && sudo -u OtherUnixUser ${ProcessingOptionService.getValueOfProcessingOption(ExecuteRoddyCommandService.CORRECT_GROUP_SCRIPT_NAME)} ${tmpOutputDir}"
-        String cmd = executeRoddyCommandService.correctGroupCommand(tmpOutputDir)
-
-        assert expected == cmd
-    }
-
-    @Test
-    void testCorrectGroupCommand_BasePathIsNull_ShouldFail() {
-        assert TestCase.shouldFail(AssertionError) {
-            executeRoddyCommandService.correctGroupCommand(null)
-        }.contains('basePath is not allowed to be null')
-    }
-
-    @Test
-    void testCorrectGroupCommand_processingOptionNotSet_ShouldFail() {
-        ProcessingOption.findByName(ExecuteRoddyCommandService.CORRECT_GROUP_SCRIPT_NAME).delete(flush: true)
-
-        assert TestCase.shouldFail(AssertionError) {
-            executeRoddyCommandService.correctGroupCommand(tmpOutputDir)
-        }.contains('Collection contains 0 elements. Expected 1.')
     }
 
     @Test
     void testCorrectGroup_AllFine() {
-        ProcessHelperService.metaClass.static.executeCommandAndAssertExistCodeAndReturnProcessOutput = { String cmd ->
-            assert cmd ==~ "cd /tmp && sudo -u OtherUnixUser ${temporaryFolder.getRoot()}/.*/correctGroupOtherUnixUserRemoteWrapper.sh ${roddyBamFile.workDirectory}"
-            return new ProcessHelperService.ProcessOutput('', '', 0)
-        }
+        String primaryGroup = waitForCommand("id -g -n").stdout.trim()
+        executeRoddyCommandService.executionService = [
+                executeCommandReturnProcessOutput: { Realm realm1, String cmd, String user ->
+                    assert realm1 == realm
+                    assert user == realm.roddyUser
+                    ProcessOutput out =  waitForCommand(cmd)
+                    assert out.stderrEmptyAndExitCodeZero
+                    assert out.stdout == """
+correct group permission to ${primaryGroup}
+./file
+""" as String
+                    return out
+                }
+        ] as ExecutionService
 
-        executeRoddyCommandService.correctGroups(roddyBamFile)
+        String testingGroup = grailsApplication.config.otp.testing.group
+        assert testingGroup: '"otp.testing.group" is not set in your "otp.properties". Please add it with an existing secondary group.'
+
+        CreateFileHelper.createFile(new File(roddyBamFile.workDirectory, "file"))
+        assert executeAndAssertExitCodeAndErrorOutAndReturnStdout("chgrp ${testingGroup} ${roddyBamFile.workDirectory}/file").empty
+
+        executeRoddyCommandService.correctGroups(roddyBamFile, realm)
+
+
+        assert executeAndAssertExitCodeAndErrorOutAndReturnStdout("""\
+stat -c %G ${roddyBamFile.workDirectory}/file
+""") == """\
+${primaryGroup}
+""" as String
     }
 
     @Test
     void testCorrectGroup_BamFileIsNull_shouldFail() {
         assert TestCase.shouldFail(AssertionError) {
-            executeRoddyCommandService.correctGroups(null)
+            executeRoddyCommandService.correctGroups(null, realm)
         }.contains('RoddyBamFile')
     }
 
@@ -443,28 +457,31 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testDeleteContentOfOtherUnixUserDirectory_AllFine() {
-        ProcessHelperService.metaClass.static.executeCommandAndAssertExistCodeAndReturnProcessOutput = { String cmd ->
-            assert cmd ==~ "cd /tmp && sudo -u OtherUnixUser ${temporaryFolder.getRoot()}/.*/deleteContentOfRoddyDirectoriesRemoteWrapper.sh ${roddyBamFile.workDirectory}"
-            return new ProcessHelperService.ProcessOutput('', '', 0)
-        }
+        executeRoddyCommandService.executionService = [
+                executeCommandReturnProcessOutput: { Realm realm1, String cmd, String user ->
+                    assert realm1 == realm
+                    assert user == realm.roddyUser
+                    ProcessOutput out =  waitForCommand(cmd)
+                    assert out.stderrEmptyAndExitCodeZero
+                    assert out.stdout.startsWith("\ndelete directory content of  ${roddyBamFile.workDirectory}\n")
+                    assert out.stdout.contains("./file")
+                    assert out.stdout.contains("./dir")
+                    return out
+                }
+        ] as ExecutionService
 
-        executeRoddyCommandService.deleteContentOfOtherUnixUserDirectory(roddyBamFile.workDirectory)
+        assert new File(roddyBamFile.workDirectory, "dir").mkdirs()
+        CreateFileHelper.createFile(new File(roddyBamFile.workDirectory, "file"))
+
+        executeRoddyCommandService.deleteContentOfOtherUnixUserDirectory(roddyBamFile.workDirectory, realm)
+
+        assert roddyBamFile.workDirectory.list().length == 0
     }
-
-    @Test
-    void testDeleteContentOfOtherUnixUserDirectory_processingOptionNotSet_ShouldFail() {
-        ProcessingOption.findByName(ExecuteRoddyCommandService.DELETE_CONTENT_OF_OTHERUNIXUSER_DIRECTORIES_SCRIPT).delete(flush: true)
-
-        assert TestCase.shouldFail(AssertionError) {
-            executeRoddyCommandService.deleteContentOfOtherUnixUserDirectory(roddyBamFile.workDirectory)
-        }.contains('Collection contains 0 elements. Expected 1.')
-    }
-
 
     @Test
     void testDeleteContentOfOtherUnixUserDirectory_BamFileIsNull_shouldFail() {
         assert TestCase.shouldFail(AssertionError) {
-            executeRoddyCommandService.deleteContentOfOtherUnixUserDirectory(null)
+            executeRoddyCommandService.deleteContentOfOtherUnixUserDirectory(null, realm)
         }.contains('basePath is not allowed to be null')
     }
 }

@@ -1,24 +1,13 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
-import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
-import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
-import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
-import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
+import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.CreateFileHelper
-import de.dkfz.tbi.otp.utils.CreateRoddyFileHelper
-import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
-import de.dkfz.tbi.otp.utils.HelperUtils
-import grails.plugin.springsecurity.acl.AclUtilService
-import org.junit.After
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.TemporaryFolder
-import org.springframework.beans.factory.annotation.Autowired
+import de.dkfz.tbi.otp.utils.*
+import org.junit.*
+import org.junit.rules.*
+import org.springframework.beans.factory.annotation.*
+
 
 class ExecutePanCanJobTests {
 

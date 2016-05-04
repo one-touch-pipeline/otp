@@ -2,7 +2,6 @@ package de.dkfz.tbi.otp.utils
 
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.Realm
 
 
 class CreateRoddyFileHelper {
@@ -12,6 +11,17 @@ class CreateRoddyFileHelper {
 
         roddyBamFile."get${workOrFinal}SingleLaneQAJsonFiles"().values().each {
             assert CreateFileHelper.createFile(it)
+        }
+
+        if (roddyBamFile.seqType.isWgbs()) {
+            assert roddyBamFile."get${workOrFinal}MergedMethylationDirectory"().mkdirs()
+            roddyBamFile."get${workOrFinal}LibraryQADirectories"().each {
+                assert it.mkdirs()
+            }
+            roddyBamFile."get${workOrFinal}LibraryMethylationDirectories"().each {
+                assert it.mkdirs()
+            }
+            assert roddyBamFile."get${workOrFinal}MetadataTableFile"().createNewFile()
         }
 
         assert roddyBamFile."get${workOrFinal}ExecutionStoreDirectory"().mkdirs()
@@ -28,7 +38,7 @@ class CreateRoddyFileHelper {
             File methylationMergedDir = new File(methylationDir, "merged")
             assert new File(methylationMergedDir, "results").mkdirs()
             roddyBamFile.seqTracks.each {
-                String libraryName = it.standardizedLibraryName
+                String libraryName = it.libraryDirectoryName
                 File methylationLibraryDir = new File(methylationDir, libraryName)
                 assert new File(methylationLibraryDir, "results").mkdirs()
             }

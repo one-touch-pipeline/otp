@@ -1,5 +1,3 @@
-import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
-
 /**
  *
  * Script to add
@@ -15,30 +13,6 @@ println ctx.processingOptionService.createOrUpdate(
         null,
         "/path/to/programs/otp/Roddy/",
         "Path to the roddy.sh on the current cluster (***REMOVED***cluster 13.1)",
-)
-
-println ctx.processingOptionService.createOrUpdate(
-        ExecuteRoddyCommandService.CORRECT_PERMISSION_SCRIPT_NAME,
-        null,
-        null,
-        "/path/to/programs/otp/OtherUnixUserBashScripts/correctPathPermissionsOtherUnixUserRemoteWrapper.sh",
-        "Script to correct file/directoryPermissions",
-)
-
-println ctx.processingOptionService.createOrUpdate(
-        ExecuteRoddyCommandService.CORRECT_GROUP_SCRIPT_NAME,
-        null,
-        null,
-        "/path/to/programs/otp/OtherUnixUserBashScripts/correctGroupOtherUnixUserRemoteWrapper.sh",
-        "Script to correct file system groups",
-)
-
-println ctx.processingOptionService.createOrUpdate(
-        ExecuteRoddyCommandService.DELETE_CONTENT_OF_OTHERUNIXUSER_DIRECTORIES_SCRIPT,
-        null,
-        null,
-        "/path/to/programs/otp/OtherUnixUserBashScripts/deleteContentOfRoddyDirectoriesRemoteWrapper.sh",
-        "Script to delete content of directories owned by OtherUnixUser",
 )
 
 println ctx.processingOptionService.createOrUpdate(

@@ -1,25 +1,24 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
+import de.dkfz.tbi.otp.dataprocessing.LinkFilesToFinalDestinationService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import org.springframework.beans.factory.annotation.*
 
-
 /**
- *
  * This is the last job of the PanCan workflow.
  * Within this job the merged bam file, the corresponding index file, the QA-folder and the roddyExecutionStore folder
  * are linked from the working processing folder in the project folder.
  * After linking, tmp roddy files and not used files in older work directories are deleted.
  */
-class MovePanCanFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl {
-
-    @Autowired
-    ConfigService configService
+class LinkWgbsAlignmentFilesJob extends AbstractEndStateAwareJobImpl {
 
     @Autowired
     LinkFilesToFinalDestinationService linkFilesToFinalDestinationService
+
+    @Autowired
+    ConfigService configService
 
     @Override
     void execute() throws Exception {
@@ -33,4 +32,5 @@ class MovePanCanFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl 
 
         succeed()
     }
+
 }

@@ -1,12 +1,14 @@
 package de.dkfz.tbi.otp.utils
 
-import de.dkfz.tbi.otp.job.processing.CreateClusterScriptService
-import de.dkfz.tbi.otp.job.processing.ExecutionService
-import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
-import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.ngsdata.*
+import org.springframework.beans.factory.annotation.*
+import org.springframework.stereotype.*
+
+import java.nio.file.*
+
 import static de.dkfz.tbi.otp.utils.WaitingFileUtils.*
-import org.springframework.stereotype.Component
-import org.springframework.beans.factory.annotation.Autowired
+
 
 @Component
 class LinkFileUtils {
@@ -21,7 +23,7 @@ class LinkFileUtils {
     LsdfFilesService lsdfFilesService
 
     /**
-     * Creates symbolic links.
+     * Creates relative symbolic links.
      * Links which already exist are overwritten, parent directories are created automatically if necessary.
      * @param sourceLinkMap The values of the map are used as link names, the keys as the link targets.
      */
@@ -40,7 +42,10 @@ class LinkFileUtils {
 
             //create command to create links
             sourceLinkMap.each { File source, File link ->
-                command << "ln -sf ${source.path} ${link.path}\n"
+                Path sourceParentPath = Paths.get(source.parent)
+                Path linkParentPath = Paths.get(link.parent)
+                Path relativePath = linkParentPath.relativize(sourceParentPath)
+                command << "ln -sf ${relativePath.toString() ?: "."}/${source.name} ${link.path}\n"
             }
 
             executionService.executeCommand(realm, command.toString())

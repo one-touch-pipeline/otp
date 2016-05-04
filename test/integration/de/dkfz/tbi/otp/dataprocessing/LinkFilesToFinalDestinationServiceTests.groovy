@@ -1,42 +1,24 @@
-package de.dkfz.tbi.otp.job.jobs.roddyAlignment
+package de.dkfz.tbi.otp.dataprocessing
 
-import org.apache.commons.logging.impl.NoOpLog
+import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.*
+import grails.validation.*
+import org.apache.commons.logging.impl.*
+import org.junit.*
+import org.junit.rules.*
+import org.springframework.beans.factory.annotation.*
 
-import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
-import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.job.processing.CreateClusterScriptService
-import de.dkfz.tbi.otp.job.processing.ExecutionHelperService
-import de.dkfz.tbi.otp.job.processing.ExecutionService
-import de.dkfz.tbi.otp.ngsdata.ConfigService
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.otp.utils.CreateRoddyFileHelper
-import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
-import de.dkfz.tbi.otp.utils.HelperUtils
-import de.dkfz.tbi.otp.utils.ProcessHelperService
-import grails.validation.ValidationException
-import org.junit.After
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.TemporaryFolder
 
-/**
- */
-class MovePanCanFilesToFinalDestinationJobTests {
+class LinkFilesToFinalDestinationServiceTests {
 
-    final static int COUNT_FILES = 2
-    final static int COUNT_DIRS = 3
-
-    MovePanCanFilesToFinalDestinationJob movePanCanFilesToFinalDestinationJob
+    @Autowired
+    LinkFilesToFinalDestinationService linkFilesToFinalDestinationService
 
     RoddyBamFile roddyBamFile
     Realm realm
 
-    final static String WRONG_COMMAND = "The command is wrong"
 
     final static String SOME_GROUP = "GROUP"
 
@@ -58,39 +40,39 @@ class MovePanCanFilesToFinalDestinationJobTests {
         assert roddyBamFile.project.save(flush: true, failOnError: true)
         SeqTrack seqTrack = roddyBamFile.seqTracks.iterator()[0]
         DomainFactory.createRoddyProcessingOptions(temporaryFolder.newFolder())
-
-        ProcessHelperService.metaClass.static.executeCommandAndAssertExistCodeAndReturnProcessOutput = { String cmd ->
-            assert cmd ==~ "cd /tmp && sudo -u OtherUnixUser ${temporaryFolder.getRoot()}/.*/correctPathPermissionsOtherUnixUserRemoteWrapper.sh ${temporaryFolder.getRoot()}/.*/merged-alignment"
-            return new ProcessHelperService.ProcessOutput('', '', 0)
-        }
     }
 
     @After
     void tearDown() {
-        TestCase.removeMetaClass(MovePanCanFilesToFinalDestinationJob, movePanCanFilesToFinalDestinationJob)
-        TestCase.removeMetaClass(ConfigService, movePanCanFilesToFinalDestinationJob.configService)
-        TestCase.removeMetaClass(ExecutionService, movePanCanFilesToFinalDestinationJob.executionService)
-        TestCase.removeMetaClass(ExecutionHelperService, movePanCanFilesToFinalDestinationJob.executionHelperService)
-        TestCase.removeMetaClass(ExecuteRoddyCommandService, movePanCanFilesToFinalDestinationJob.executeRoddyCommandService)
-        TestCase.removeMetaClass(CreateClusterScriptService, movePanCanFilesToFinalDestinationJob.createClusterScriptService)
+        TestCase.removeMetaClass(LinkFilesToFinalDestinationService, linkFilesToFinalDestinationService)
+        TestCase.removeMetaClass(ExecutionService, linkFilesToFinalDestinationService.executionService)
+        TestCase.removeMetaClass(ExecutionHelperService, linkFilesToFinalDestinationService.executionHelperService)
+        TestCase.removeMetaClass(ExecuteRoddyCommandService, linkFilesToFinalDestinationService.executeRoddyCommandService)
+        TestCase.removeMetaClass(CreateClusterScriptService, linkFilesToFinalDestinationService.createClusterScriptService)
+        TestCase.removeMetaClass(LinkFileUtils, linkFilesToFinalDestinationService.linkFileUtils)
         GroovySystem.metaClassRegistry.removeMetaClass(ProcessHelperService)
     }
 
     void setUp_allFine() {
-        movePanCanFilesToFinalDestinationJob.metaClass.getProcessParameterObject = { -> roddyBamFile }
-        movePanCanFilesToFinalDestinationJob.metaClass.cleanupWorkDirectory = { RoddyBamFile roddyBamFile, Realm realm -> }
-        movePanCanFilesToFinalDestinationJob.metaClass.deleteOldLinks = { RoddyBamFile roddyBamFile, Realm realm -> }
-        movePanCanFilesToFinalDestinationJob.metaClass.linkNewResults = { RoddyBamFile roddyBamFile, Realm realm -> }
-        movePanCanFilesToFinalDestinationJob.metaClass.cleanupOldResults = { RoddyBamFile roddyBamFile, Realm realm -> }
-        movePanCanFilesToFinalDestinationJob.executeRoddyCommandService.metaClass.correctGroups = { RoddyBamFile roddyBamFile -> }
-        movePanCanFilesToFinalDestinationJob.executionHelperService.metaClass.setPermission = {Realm realm, File directory, String group -> }
-        movePanCanFilesToFinalDestinationJob.executionHelperService.metaClass.getGroup = {File directory -> SOME_GROUP }
-        movePanCanFilesToFinalDestinationJob.executionHelperService.metaClass.setGroup = {Realm realm, File directory, String group -> }
+        linkFilesToFinalDestinationService.metaClass.getProcessParameterObject = { -> roddyBamFile }
+        linkFilesToFinalDestinationService.metaClass.cleanupWorkDirectory = { RoddyBamFile roddyBamFile, Realm realm -> }
+        linkFilesToFinalDestinationService.metaClass.deleteOldLinks = { RoddyBamFile roddyBamFile, Realm realm -> }
+        linkFilesToFinalDestinationService.metaClass.linkNewResults = { RoddyBamFile roddyBamFile, Realm realm -> }
+        linkFilesToFinalDestinationService.metaClass.cleanupOldResults = { RoddyBamFile roddyBamFile, Realm realm -> }
+        linkFilesToFinalDestinationService.executeRoddyCommandService.metaClass.correctGroups = { RoddyBamFile roddyBamFile, Realm realm -> }
+        linkFilesToFinalDestinationService.executionHelperService.metaClass.setPermission = { Realm realm, File directory, String group -> }
+        linkFilesToFinalDestinationService.executionHelperService.metaClass.getGroup = { File directory -> SOME_GROUP }
+        linkFilesToFinalDestinationService.executionHelperService.metaClass.setGroup = { Realm realm, File directory, String group -> }
     }
 
     @Test
     void testCleanupWorkDirectory_allFine_withTmpFilesAndTmpDirs() {
         helper_testCleanupWorkDirectory_allFine(1, 1)
+    }
+
+    @Test
+    void testCleanupWorkDirectory_allFine_withTmpFilesAndTmpDirs_WGBS() {
+        helper_testCleanupWorkDirectory_allFine(1, 1, true)
     }
 
     @Test
@@ -110,20 +92,20 @@ class MovePanCanFilesToFinalDestinationJobTests {
 
     @Test
     void testCleanupWorkDirectory_allFine_withManyTmpFilesAndAndManyTmpDirs() {
-        helper_testCleanupWorkDirectory_allFine(COUNT_FILES, COUNT_DIRS)
+        helper_testCleanupWorkDirectory_allFine(2, 3)
     }
 
     @Test
     void testCleanupWorkDirectory_bamFileIsNull_shouldFail() {
         TestCase.shouldFailWithMessageContaining(AssertionError, "roddyBamFile") {
-            movePanCanFilesToFinalDestinationJob.cleanupWorkDirectory(null, realm)
+            linkFilesToFinalDestinationService.cleanupWorkDirectory(null, realm)
         }
     }
 
     @Test
     void testCleanupWorkDirectory_realmIsNull_shouldFail() {
         TestCase.shouldFailWithMessageContaining(AssertionError, "realm") {
-            movePanCanFilesToFinalDestinationJob.cleanupWorkDirectory(roddyBamFile, null)
+            linkFilesToFinalDestinationService.cleanupWorkDirectory(roddyBamFile, null)
         }
     }
 
@@ -134,7 +116,7 @@ class MovePanCanFilesToFinalDestinationJobTests {
         roddyBamFile.save(flush: true, failOnError: true)
 
         TestCase.shouldFailWithMessageContaining(AssertionError, "isOldStructureUsed") {
-            movePanCanFilesToFinalDestinationJob.cleanupWorkDirectory(roddyBamFile, realm)
+            linkFilesToFinalDestinationService.cleanupWorkDirectory(roddyBamFile, realm)
         }
     }
 
@@ -142,14 +124,14 @@ class MovePanCanFilesToFinalDestinationJobTests {
     void testCleanupWorkDirectory_deleteContentOfOtherUnixUserDirectoryThrowsException_shouldFail() {
         final String FAIL_MESSAGE = HelperUtils.uniqueString
 
-        movePanCanFilesToFinalDestinationJob.executeRoddyCommandService.metaClass.deleteContentOfOtherUnixUserDirectory = {File basePath ->
+        linkFilesToFinalDestinationService.executeRoddyCommandService.metaClass.deleteContentOfOtherUnixUserDirectory = { File basePath, Realm realm ->
             assert false: FAIL_MESSAGE
         }
         File file = new File(roddyBamFile.workDirectory, HelperUtils.uniqueString)
         assert file.mkdirs()
 
         TestCase.shouldFailWithMessageContaining(AssertionError, FAIL_MESSAGE) {
-            movePanCanFilesToFinalDestinationJob.cleanupWorkDirectory(roddyBamFile, realm)
+            linkFilesToFinalDestinationService.cleanupWorkDirectory(roddyBamFile, realm)
         }
     }
 
@@ -159,12 +141,12 @@ class MovePanCanFilesToFinalDestinationJobTests {
         assert new File(roddyBamFile.workDirectory, HelperUtils.uniqueString).createNewFile()
         final String FAIL_MESSAGE = HelperUtils.uniqueString
 
-        movePanCanFilesToFinalDestinationJob.createClusterScriptService.metaClass.removeDirs = {Collection<File> dirs, CreateClusterScriptService.RemoveOption option ->
+        linkFilesToFinalDestinationService.createClusterScriptService.metaClass.removeDirs = { Collection<File> dirs, CreateClusterScriptService.RemoveOption option ->
             assert false: FAIL_MESSAGE
         }
 
         TestCase.shouldFailWithMessageContaining(AssertionError, FAIL_MESSAGE) {
-            movePanCanFilesToFinalDestinationJob.cleanupWorkDirectory(roddyBamFile, realm)
+            linkFilesToFinalDestinationService.cleanupWorkDirectory(roddyBamFile, realm)
         }
     }
 
@@ -174,16 +156,22 @@ class MovePanCanFilesToFinalDestinationJobTests {
         assert new File(roddyBamFile.workDirectory, HelperUtils.uniqueString).createNewFile()
         final String FAIL_MESSAGE = HelperUtils.uniqueString
 
-        movePanCanFilesToFinalDestinationJob.executionService.metaClass.executeCommand = {Realm realm, String command ->
+        linkFilesToFinalDestinationService.executionService.metaClass.executeCommand = { Realm realm, String command ->
             assert false: FAIL_MESSAGE
         }
 
         TestCase.shouldFailWithMessageContaining(AssertionError, FAIL_MESSAGE) {
-            movePanCanFilesToFinalDestinationJob.cleanupWorkDirectory(roddyBamFile, realm)
+            linkFilesToFinalDestinationService.cleanupWorkDirectory(roddyBamFile, realm)
         }
     }
 
-    private void helper_testCleanupWorkDirectory_allFine(int countTmpFiles, int countTmpDir) {
+    private void helper_testCleanupWorkDirectory_allFine(int countTmpFiles, int countTmpDir, boolean wgbs = false) {
+        if (wgbs) {
+            SeqType seqType = roddyBamFile.mergingWorkPackage.seqType
+            seqType.name = SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName
+            seqType.save(flush: true, failOnError: true)
+        }
+
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
         int callDeletedRoddy = 0
         boolean callDeleted = false
@@ -194,6 +182,12 @@ class MovePanCanFilesToFinalDestinationJobTests {
                 roddyBamFile.workQADirectory,
                 roddyBamFile.workExecutionStoreDirectory,
         ]
+
+        if (wgbs) {
+            filesNotToBeCalledFor += [roddyBamFile.workMethylationDirectory,
+                                      roddyBamFile.workMetadataTableFile,
+            ]
+        }
 
         List<File> tmpFiles = []
         countTmpFiles.times {
@@ -209,14 +203,14 @@ class MovePanCanFilesToFinalDestinationJobTests {
         }
         assert countTmpDir == tmpDirectories.size()
 
-        movePanCanFilesToFinalDestinationJob.executeRoddyCommandService.metaClass.deleteContentOfOtherUnixUserDirectory = { File file ->
+        linkFilesToFinalDestinationService.executeRoddyCommandService.metaClass.deleteContentOfOtherUnixUserDirectory = { File file, Realm realm ->
             assert roddyBamFile.workDirectory == file.parentFile
             assert !filesNotToBeCalledFor.contains(file)
             assert tmpDirectories.contains(file)
             callDeletedRoddy++
         }
 
-        movePanCanFilesToFinalDestinationJob.executionService.metaClass.executeCommand = { Realm realm, String command ->
+        linkFilesToFinalDestinationService.executionService.metaClass.executeCommand = { Realm realm, String command ->
             assert filesNotToBeCalledFor.every{
                 !command.contains(it.path)
             }
@@ -231,9 +225,9 @@ class MovePanCanFilesToFinalDestinationJobTests {
             callDeleted = true
             return stdout
         }
-        assert filesNotToBeCalledFor.size() + tmpFiles.size() + tmpDirectories.size() == roddyBamFile.workDirectory.listFiles().size()
+        assert (filesNotToBeCalledFor + tmpFiles + tmpDirectories) as Set == roddyBamFile.workDirectory.listFiles() as Set
 
-        movePanCanFilesToFinalDestinationJob.cleanupWorkDirectory(roddyBamFile, realm)
+        linkFilesToFinalDestinationService.cleanupWorkDirectory(roddyBamFile, realm)
 
         assert callDeleted  == (countTmpDir + countTmpFiles > 0)
         assert countTmpDir == callDeletedRoddy
@@ -262,7 +256,7 @@ class MovePanCanFilesToFinalDestinationJobTests {
                 roddyBamFile.finalSingleLaneQAJsonFiles.values(),
         ].flatten()
 
-        movePanCanFilesToFinalDestinationJob.executionService.metaClass.executeCommand = { Realm realm, String command ->
+        linkFilesToFinalDestinationService.executionService.metaClass.executeCommand = { Realm realm, String command ->
             return ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
         }
 
@@ -270,25 +264,60 @@ class MovePanCanFilesToFinalDestinationJobTests {
             assert !it.exists()
         }
 
-        movePanCanFilesToFinalDestinationJob.linkNewResults(roddyBamFile, realm)
+        linkFilesToFinalDestinationService.linkNewResults(roddyBamFile, realm)
 
         linkedFiles.each {
             assert it.exists()
         }
     }
 
+    @Test
+    void testLinkNewResults_methylation_AllFine() {
+        SeqType seqType = roddyBamFile.mergingWorkPackage.seqType
+        seqType.name = SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName
+        seqType.save(flush: true, failOnError: true)
+
+        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
+
+        List<File> linkedFiles = [
+                roddyBamFile.finalBamFile,
+                roddyBamFile.finalBaiFile,
+                roddyBamFile.finalMd5sumFile,
+                roddyBamFile.finalMergedQADirectory,
+                roddyBamFile.finalMergedQAJsonFile,
+                roddyBamFile.finalMergedMethylationDirectory,
+                roddyBamFile.getFinalExecutionDirectories(),
+                roddyBamFile.finalSingleLaneQADirectories.values(),
+                roddyBamFile.finalSingleLaneQAJsonFiles.values(),
+                roddyBamFile.finalMetadataTableFile,
+        ].flatten()
+
+        linkFilesToFinalDestinationService.executionService.metaClass.executeCommand = { Realm realm, String command ->
+            return ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
+        }
+
+        linkedFiles.each {
+            assert !it.exists()
+        }
+
+        linkFilesToFinalDestinationService.linkNewResults(roddyBamFile, realm)
+
+        linkedFiles.each {
+            assert it.exists()
+        }
+    }
 
     @Test
     void testLinkNewResults_bamFileIsNull_shouldFail() {
         TestCase.shouldFailWithMessageContaining(AssertionError, "roddyBamFile") {
-            movePanCanFilesToFinalDestinationJob.linkNewResults(null, realm)
+            linkFilesToFinalDestinationService.linkNewResults(null, realm)
         }
     }
 
     @Test
     void testLinkNewResults_realmIsNull_shouldFail() {
         TestCase.shouldFailWithMessageContaining(AssertionError, "realm") {
-            movePanCanFilesToFinalDestinationJob.linkNewResults(roddyBamFile, null)
+            linkFilesToFinalDestinationService.linkNewResults(roddyBamFile, null)
         }
     }
 
@@ -298,7 +327,7 @@ class MovePanCanFilesToFinalDestinationJobTests {
         roddyBamFile.save(flush: true, failOnError: true)
 
         TestCase.shouldFailWithMessageContaining(AssertionError, "isOldStructureUsed") {
-            movePanCanFilesToFinalDestinationJob.linkNewResults(roddyBamFile, realm)
+            linkFilesToFinalDestinationService.linkNewResults(roddyBamFile, realm)
         }
     }
 
@@ -306,12 +335,12 @@ class MovePanCanFilesToFinalDestinationJobTests {
     void testLinkNewResults_deleteContentOfOtherUnixUserDirectoryThrowsException_shouldFail() {
         final String FAIL_MESSAGE = HelperUtils.uniqueString
 
-        movePanCanFilesToFinalDestinationJob.linkFileUtils.metaClass.createAndValidateLinks = { Map<File, File> sourceLinkMap, Realm realm ->
+        linkFilesToFinalDestinationService.linkFileUtils.metaClass.createAndValidateLinks = { Map<File, File> sourceLinkMap, Realm realm ->
             assert false: FAIL_MESSAGE
         }
 
         TestCase.shouldFailWithMessageContaining(AssertionError, FAIL_MESSAGE) {
-            movePanCanFilesToFinalDestinationJob.linkNewResults(roddyBamFile, realm)
+            linkFilesToFinalDestinationService.linkNewResults(roddyBamFile, realm)
         }
     }
 
@@ -324,14 +353,14 @@ class MovePanCanFilesToFinalDestinationJobTests {
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile2)
 
-        movePanCanFilesToFinalDestinationJob.executionService.metaClass.executeCommand = { Realm realm, String command ->
+        linkFilesToFinalDestinationService.executionService.metaClass.executeCommand = { Realm realm, String command ->
             return ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
         }
 
         List<File> filesToDelete = [
                 roddyBamFile.workBamFile,
                 roddyBamFile.workBaiFile,
-                ]
+        ]
         List<File> filesToKeep = [
                 roddyBamFile.workMd5sumFile,
                 roddyBamFile.workExecutionDirectories,
@@ -342,7 +371,7 @@ class MovePanCanFilesToFinalDestinationJobTests {
             assert it.exists()
         }
 
-        movePanCanFilesToFinalDestinationJob.cleanupOldResults(roddyBamFile2, realm)
+        linkFilesToFinalDestinationService.cleanupOldResults(roddyBamFile2, realm)
 
         filesToDelete.each {
             assert !it.exists()
@@ -360,45 +389,45 @@ class MovePanCanFilesToFinalDestinationJobTests {
         RoddyBamFile roddyBamFile2 = DomainFactory.createRoddyBamFile(roddyBamFile)
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile2)
 
-        movePanCanFilesToFinalDestinationJob.executionService.metaClass.executeCommand = { Realm realm, String command ->
+        linkFilesToFinalDestinationService.executionService.metaClass.executeCommand = { Realm realm, String command ->
             assert false: 'should not be called'
         }
 
-        movePanCanFilesToFinalDestinationJob.executeRoddyCommandService.metaClass.deleteContentOfOtherUnixUserDirectory = { File basePath ->
+        linkFilesToFinalDestinationService.executeRoddyCommandService.metaClass.deleteContentOfOtherUnixUserDirectory = { File basePath, Realm realm ->
             assert false: 'should not be called'
         }
 
-        movePanCanFilesToFinalDestinationJob.cleanupOldResults(roddyBamFile2, realm)
+        linkFilesToFinalDestinationService.cleanupOldResults(roddyBamFile2, realm)
     }
 
     @Test
     void testCleanupOldResults_withoutBaseBamFile_butBamFilesOfWorkPackageExist_allFine() {
-        DomainFactory.createRoddyBamFile(workPackage:  roddyBamFile.workPackage)
-        RoddyBamFile roddyBamFile2 = DomainFactory.createRoddyBamFile(workPackage:  roddyBamFile.workPackage)
+        DomainFactory.createRoddyBamFile(workPackage: roddyBamFile.workPackage)
+        RoddyBamFile roddyBamFile2 = DomainFactory.createRoddyBamFile(workPackage: roddyBamFile.workPackage)
         CreateRoddyFileHelper.createRoddyAlignmentFinalResultFiles(roddyBamFile)
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile2)
         boolean hasCalled_deleteContentOfOtherUnixUserDirectory = false
         assert roddyBamFile.workDirectory.exists()
 
-        movePanCanFilesToFinalDestinationJob.executionService.metaClass.executeCommand = { Realm realm, String command ->
+        linkFilesToFinalDestinationService.executionService.metaClass.executeCommand = { Realm realm, String command ->
             return ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
         }
 
-        movePanCanFilesToFinalDestinationJob.executeRoddyCommandService.metaClass.deleteContentOfOtherUnixUserDirectory = { File basePath ->
+        linkFilesToFinalDestinationService.executeRoddyCommandService.metaClass.deleteContentOfOtherUnixUserDirectory = { File basePath, Realm realm ->
             hasCalled_deleteContentOfOtherUnixUserDirectory = true
             assert basePath.exists()
             assert basePath.isDirectory()
             assert basePath.deleteDir()
         }
 
-        movePanCanFilesToFinalDestinationJob.cleanupOldResults(roddyBamFile2, realm)
+        linkFilesToFinalDestinationService.cleanupOldResults(roddyBamFile2, realm)
 
         assert hasCalled_deleteContentOfOtherUnixUserDirectory
         assert !roddyBamFile.workDirectory.exists()
         assert roddyBamFile2.workDirectory.exists()
-        assert roddyBamFile.finalExecutionStoreDirectory.listFiles().length == 0
-        assert [null, roddyBamFile.finalMergedQADirectory].contains(CollectionUtils.atMostOneElement(roddyBamFile.finalQADirectory.listFiles() as List))
+        assert !roddyBamFile.finalExecutionStoreDirectory.exists()
+        assert !roddyBamFile.finalQADirectory.exists()
     }
 
     @Test
@@ -422,12 +451,12 @@ class MovePanCanFilesToFinalDestinationJobTests {
         assert roddyBamFile2.workDirectory.exists()
         boolean isCalledForMergedQaDirectory = false
 
-        movePanCanFilesToFinalDestinationJob.executionService.metaClass.executeCommand = { Realm realm, String command ->
+        linkFilesToFinalDestinationService.executionService.metaClass.executeCommand = { Realm realm, String command ->
             assert latestIsOld == !command.contains(RoddyBamFile.WORK_DIR_PREFIX)
             return ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
         }
 
-        movePanCanFilesToFinalDestinationJob.executeRoddyCommandService.metaClass.deleteContentOfOtherUnixUserDirectory = { File basePath ->
+        linkFilesToFinalDestinationService.executeRoddyCommandService.metaClass.deleteContentOfOtherUnixUserDirectory = { File basePath, Realm realm ->
             assert !basePath.absolutePath.contains(RoddyBamFile.WORK_DIR_PREFIX)
             assert basePath.deleteDir()
             if (basePath.path.contains("${RoddyBamFile.QUALITY_CONTROL_DIR}/${RoddyBamFile.MERGED_DIR}")) {
@@ -435,7 +464,7 @@ class MovePanCanFilesToFinalDestinationJobTests {
             }
         }
 
-        movePanCanFilesToFinalDestinationJob.cleanupOldResults(roddyBamFile2, realm)
+        linkFilesToFinalDestinationService.cleanupOldResults(roddyBamFile2, realm)
         assert roddyBamFile2.workDirectory.exists()
         roddyBamFile.finalExecutionDirectories.each {
             assert !it.exists()
@@ -450,15 +479,15 @@ class MovePanCanFilesToFinalDestinationJobTests {
     void testCleanupOldResults_withoutBaseBamFileAndWithoutOtherBamFilesOfTheSameWorkPackage_allFine() {
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
 
-        movePanCanFilesToFinalDestinationJob.executionService.metaClass.executeCommand = { Realm realm, String command ->
+        linkFilesToFinalDestinationService.executionService.metaClass.executeCommand = { Realm realm, String command ->
             assert false: 'should not be called'
         }
 
-        movePanCanFilesToFinalDestinationJob.executeRoddyCommandService.metaClass.deleteContentOfOtherUnixUserDirectory = { File basePath ->
+        linkFilesToFinalDestinationService.executeRoddyCommandService.metaClass.deleteContentOfOtherUnixUserDirectory = { File basePath, Realm realm ->
             assert false: 'should not be called'
         }
 
-        movePanCanFilesToFinalDestinationJob.cleanupOldResults(roddyBamFile, realm)
+        linkFilesToFinalDestinationService.cleanupOldResults(roddyBamFile, realm)
 
         assert roddyBamFile.workDirectory.exists()
     }
@@ -466,14 +495,14 @@ class MovePanCanFilesToFinalDestinationJobTests {
     @Test
     void testCleanupOldResults_bamFileIsNull_shouldFail() {
         TestCase.shouldFailWithMessageContaining(AssertionError, "roddyBamFile") {
-            movePanCanFilesToFinalDestinationJob.cleanupOldResults(null, realm)
+            linkFilesToFinalDestinationService.cleanupOldResults(null, realm)
         }
     }
 
     @Test
     void testCleanupOldResults_realmIsNull_shouldFail() {
         TestCase.shouldFailWithMessageContaining(AssertionError, "realm") {
-            movePanCanFilesToFinalDestinationJob.cleanupOldResults(roddyBamFile, null)
+            linkFilesToFinalDestinationService.cleanupOldResults(roddyBamFile, null)
         }
     }
 
@@ -483,7 +512,7 @@ class MovePanCanFilesToFinalDestinationJobTests {
         roddyBamFile.save(flush: true, failOnError: true)
 
         TestCase.shouldFailWithMessageContaining(AssertionError, "isOldStructureUsed") {
-            movePanCanFilesToFinalDestinationJob.cleanupOldResults(roddyBamFile, realm)
+            linkFilesToFinalDestinationService.cleanupOldResults(roddyBamFile, realm)
         }
     }
 
@@ -495,14 +524,14 @@ class MovePanCanFilesToFinalDestinationJobTests {
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile2)
 
-        movePanCanFilesToFinalDestinationJob.executeRoddyCommandService.metaClass.deleteContentOfOtherUnixUserDirectory = { File basePath -> }
+        linkFilesToFinalDestinationService.executeRoddyCommandService.metaClass.deleteContentOfOtherUnixUserDirectory = { File basePath, Realm realm -> }
 
-        movePanCanFilesToFinalDestinationJob.createClusterScriptService.metaClass.removeDirs = { Collection<File> dirs, CreateClusterScriptService.RemoveOption option ->
+        linkFilesToFinalDestinationService.createClusterScriptService.metaClass.removeDirs = { Collection<File> dirs, CreateClusterScriptService.RemoveOption option ->
             assert false: FAIL_MESSAGE
         }
 
         TestCase.shouldFailWithMessageContaining(AssertionError, FAIL_MESSAGE) {
-            movePanCanFilesToFinalDestinationJob.cleanupOldResults(roddyBamFile2, realm)
+            linkFilesToFinalDestinationService.cleanupOldResults(roddyBamFile2, realm)
         }
     }
 
@@ -514,14 +543,14 @@ class MovePanCanFilesToFinalDestinationJobTests {
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile2)
 
-        movePanCanFilesToFinalDestinationJob.executeRoddyCommandService.metaClass.deleteContentOfOtherUnixUserDirectory = { File basePath -> }
+        linkFilesToFinalDestinationService.executeRoddyCommandService.metaClass.deleteContentOfOtherUnixUserDirectory = { File basePath, Realm realm -> }
 
-        movePanCanFilesToFinalDestinationJob.executionService.metaClass.executeCommand = { Realm realm, String command ->
+        linkFilesToFinalDestinationService.executionService.metaClass.executeCommand = { Realm realm, String command ->
             assert false: FAIL_MESSAGE
         }
 
         TestCase.shouldFailWithMessageContaining(AssertionError, FAIL_MESSAGE) {
-            movePanCanFilesToFinalDestinationJob.cleanupOldResults(roddyBamFile2, realm)
+            linkFilesToFinalDestinationService.cleanupOldResults(roddyBamFile2, realm)
         }
     }
 
@@ -532,7 +561,7 @@ class MovePanCanFilesToFinalDestinationJobTests {
         setUp_allFine()
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
 
-        movePanCanFilesToFinalDestinationJob.execute()
+        linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanup(roddyBamFile, realm)
         assert roddyBamFile.fileOperationStatus == AbstractMergedBamFile.FileOperationStatus.PROCESSED
         assert roddyBamFile.md5sum == DomainFactory.DEFAULT_MD5_SUM
         assert roddyBamFile.fileSize > 0
@@ -546,7 +575,7 @@ class MovePanCanFilesToFinalDestinationJobTests {
         roddyBamFile.metaClass.isMostRecentBamFile = { -> false}
 
         assert shouldFail (AssertionError) {
-            movePanCanFilesToFinalDestinationJob.execute()
+            linkFilesToFinalDestinationService.prepareRoddyBamFile(roddyBamFile)
         } ==~ /.*The BamFile .* is not the most recent one.*/
     }
 
@@ -557,8 +586,8 @@ class MovePanCanFilesToFinalDestinationJobTests {
         roddyBamFile.save(flush: true, failOnError: true)
 
         assert shouldFail (AssertionError) {
-            movePanCanFilesToFinalDestinationJob.execute()
-        }.contains('assert [FileOperationStatus.NEEDS_PROCESSING, FileOperationStatus.INPROGRESS].contains(roddyBamFile.fileOperationStatus)')
+            linkFilesToFinalDestinationService.prepareRoddyBamFile(roddyBamFile)
+        }.contains('assert [NEEDS_PROCESSING, INPROGRESS].contains(roddyBamFile.fileOperationStatus)')
     }
 
     @Test
@@ -574,7 +603,7 @@ class MovePanCanFilesToFinalDestinationJobTests {
         ])
 
         assert shouldFail (AssertionError) {
-            movePanCanFilesToFinalDestinationJob.execute()
+            linkFilesToFinalDestinationService.prepareRoddyBamFile(roddyBamFile)
         }.contains('Collection contains 2 elements. Expected 1.')
     }
 
@@ -582,10 +611,10 @@ class MovePanCanFilesToFinalDestinationJobTests {
     void testExecute_FailInCleanupWorkDirectory_ShouldFail() {
         setUp_allFine()
         final String FAIL_MESSAGE = HelperUtils.uniqueString
-        movePanCanFilesToFinalDestinationJob.metaClass.cleanupWorkDirectory = { RoddyBamFile roddyBamFile, Realm realm -> assert false: FAIL_MESSAGE }
+        linkFilesToFinalDestinationService.metaClass.cleanupWorkDirectory = { RoddyBamFile roddyBamFile, Realm realm -> assert false: FAIL_MESSAGE }
 
         TestCase.shouldFailWithMessageContaining (AssertionError, FAIL_MESSAGE) {
-            movePanCanFilesToFinalDestinationJob.execute()
+            linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanup(roddyBamFile, realm)
         }
     }
 
@@ -593,20 +622,20 @@ class MovePanCanFilesToFinalDestinationJobTests {
     void testExecute_FailInSetPermission_ShouldFail() {
         setUp_allFine()
         final String FAIL_MESSAGE = HelperUtils.uniqueString
-        movePanCanFilesToFinalDestinationJob.executionHelperService.metaClass.setPermission = {Realm realm, File directory, String group -> assert false: FAIL_MESSAGE  }
+        linkFilesToFinalDestinationService.executionHelperService.metaClass.setPermission = { Realm realm, File directory, String group -> assert false: FAIL_MESSAGE  }
 
         TestCase.shouldFailWithMessageContaining (AssertionError, FAIL_MESSAGE) {
-            movePanCanFilesToFinalDestinationJob.execute()
+            linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanup(roddyBamFile, realm)
         }
     }
     @Test
     void testExecute_FailInGetGroup_ShouldFail() {
         setUp_allFine()
         final String FAIL_MESSAGE = HelperUtils.uniqueString
-        movePanCanFilesToFinalDestinationJob.executionHelperService.metaClass.getGroup = {File directory -> assert false: FAIL_MESSAGE  }
+        linkFilesToFinalDestinationService.executionHelperService.metaClass.getGroup = { File directory -> assert false: FAIL_MESSAGE  }
 
         TestCase.shouldFailWithMessageContaining (AssertionError, FAIL_MESSAGE) {
-            movePanCanFilesToFinalDestinationJob.execute()
+            linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanup(roddyBamFile, realm)
         }
     }
 
@@ -614,10 +643,10 @@ class MovePanCanFilesToFinalDestinationJobTests {
     void testExecute_FailInSetGroup_ShouldFail() {
         setUp_allFine()
         final String FAIL_MESSAGE = HelperUtils.uniqueString
-        movePanCanFilesToFinalDestinationJob.executionHelperService.metaClass.setGroup = {Realm realm, File directory, String group -> assert false: FAIL_MESSAGE }
+        linkFilesToFinalDestinationService.executionHelperService.metaClass.setGroup = { Realm realm, File directory, String group -> assert false: FAIL_MESSAGE }
 
         TestCase.shouldFailWithMessageContaining (AssertionError, FAIL_MESSAGE) {
-            movePanCanFilesToFinalDestinationJob.execute()
+            linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanup(roddyBamFile, realm)
         }
     }
 
@@ -625,10 +654,10 @@ class MovePanCanFilesToFinalDestinationJobTests {
     void testExecute_FailInCorrectGroups_ShouldFail() {
         setUp_allFine()
         final String FAIL_MESSAGE = HelperUtils.uniqueString
-        movePanCanFilesToFinalDestinationJob.executeRoddyCommandService.metaClass.correctGroups = { RoddyBamFile roddyBamFile -> assert false: FAIL_MESSAGE }
+        linkFilesToFinalDestinationService.executeRoddyCommandService.metaClass.correctGroups = { RoddyBamFile roddyBamFile, Realm realm -> assert false: FAIL_MESSAGE }
 
         TestCase.shouldFailWithMessageContaining (AssertionError, FAIL_MESSAGE) {
-            movePanCanFilesToFinalDestinationJob.execute()
+            linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanup(roddyBamFile, realm)
         }
     }
 
@@ -636,10 +665,10 @@ class MovePanCanFilesToFinalDestinationJobTests {
     void testExecute_FailLinkNewResults_ShouldFail() {
         setUp_allFine()
         final String FAIL_MESSAGE = HelperUtils.uniqueString
-        movePanCanFilesToFinalDestinationJob.metaClass.linkNewResults = { RoddyBamFile roddyBamFile, Realm realm -> assert false: FAIL_MESSAGE }
+        linkFilesToFinalDestinationService.metaClass.linkNewResults = { RoddyBamFile roddyBamFile, Realm realm -> assert false: FAIL_MESSAGE }
 
         TestCase.shouldFailWithMessageContaining (AssertionError, FAIL_MESSAGE) {
-            movePanCanFilesToFinalDestinationJob.execute()
+            linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanup(roddyBamFile, realm)
         }
     }
 
@@ -647,10 +676,10 @@ class MovePanCanFilesToFinalDestinationJobTests {
     void testExecute_FailInCleanupOldResults_ShouldFail() {
         setUp_allFine()
         final String FAIL_MESSAGE = HelperUtils.uniqueString
-        movePanCanFilesToFinalDestinationJob.metaClass.cleanupOldResults = { RoddyBamFile roddyBamFile, Realm realm -> assert false: FAIL_MESSAGE }
+        linkFilesToFinalDestinationService.metaClass.cleanupOldResults = { RoddyBamFile roddyBamFile, Realm realm -> assert false: FAIL_MESSAGE }
 
         TestCase.shouldFailWithMessageContaining (AssertionError, FAIL_MESSAGE) {
-            movePanCanFilesToFinalDestinationJob.execute()
+            linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanup(roddyBamFile, realm)
         }
     }
 
@@ -659,7 +688,7 @@ class MovePanCanFilesToFinalDestinationJobTests {
         setUp_allFine()
 
         assert shouldFail (AssertionError) {
-            movePanCanFilesToFinalDestinationJob.execute()
+            linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanup(roddyBamFile, realm)
         } ==~ /The md5sum file of .* does not exist.*/
     }
 
@@ -671,7 +700,7 @@ class MovePanCanFilesToFinalDestinationJobTests {
         roddyBamFile.workMd5sumFile.text = md5sum
 
         assert shouldFail(ValidationException) {
-            movePanCanFilesToFinalDestinationJob.execute()
+            linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanup(roddyBamFile, realm)
         }.contains(md5sum)
     }
 
@@ -682,7 +711,7 @@ class MovePanCanFilesToFinalDestinationJobTests {
         roddyBamFile.workMd5sumFile.setText("")
 
         assert shouldFail(AssertionError) {
-            movePanCanFilesToFinalDestinationJob.execute()
+            linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanup(roddyBamFile, realm)
         } ==~ /.*The md5sum file of .* is empty.*/
     }
 
@@ -692,24 +721,24 @@ class MovePanCanFilesToFinalDestinationJobTests {
         roddyBamFile.withdrawn = true
         assert roddyBamFile.save(flush: true)
 
-        movePanCanFilesToFinalDestinationJob.metaClass.cleanupWorkDirectory = { RoddyBamFile roddyBamFile, Realm realm ->
+        linkFilesToFinalDestinationService.metaClass.cleanupWorkDirectory = { RoddyBamFile roddyBamFile, Realm realm ->
             throw new Exception("Should not reach this method")
         }
-        movePanCanFilesToFinalDestinationJob.executeRoddyCommandService.metaClass.correctGroups = { RoddyBamFile roddyBamFile, Realm realm ->
+        linkFilesToFinalDestinationService.executeRoddyCommandService.metaClass.correctGroups = { RoddyBamFile roddyBamFile, Realm realm ->
             throw new Exception("Should not reach this method")
         }
-        movePanCanFilesToFinalDestinationJob.metaClass.deleteOldLinks = { RoddyBamFile roddyBamFile, Realm realm ->
+        linkFilesToFinalDestinationService.metaClass.deleteOldLinks = { RoddyBamFile roddyBamFile, Realm realm ->
             throw new Exception("Should not reach this method")
         }
-        movePanCanFilesToFinalDestinationJob.metaClass.linkNewResults = { RoddyBamFile roddyBamFile, Realm realm ->
+        linkFilesToFinalDestinationService.metaClass.linkNewResults = { RoddyBamFile roddyBamFile, Realm realm ->
             throw new Exception("Should not reach this method")
         }
-        movePanCanFilesToFinalDestinationJob.metaClass.cleanupOldResults = { RoddyBamFile roddyBamFile, Realm realm ->
+        linkFilesToFinalDestinationService.metaClass.cleanupOldResults = { RoddyBamFile roddyBamFile, Realm realm ->
             throw new Exception("Should not reach this method")
         }
-        movePanCanFilesToFinalDestinationJob.log = new NoOpLog()
+        linkFilesToFinalDestinationService.log = new NoOpLog()
 
-        movePanCanFilesToFinalDestinationJob.execute()
+        linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanup(roddyBamFile, realm)
         assert roddyBamFile.fileOperationStatus == AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING
     }
 
