@@ -31,11 +31,24 @@ class OtrsTicketSpec extends Specification {
         OtrsTicket otrsTicket
 
         when:
-        otrsTicket = DomainFactory.createOtrsTicket([ticketNumber: '20000101a2345678'])
+        DomainFactory.createOtrsTicket([ticketNumber: '20000101a2345678'])
 
         then:
         ValidationException ex = thrown()
         ex.message.contains("does not match the required pattern")
+    }
+
+    def 'test creation, duplicate String' () {
+        given:
+        OtrsTicket otrsTicket
+
+        when:
+        DomainFactory.createOtrsTicket([ticketNumber: '2000010112345678'])
+        DomainFactory.createOtrsTicket([ticketNumber: '2000010112345678'])
+
+        then:
+        ValidationException ex = thrown()
+        ex.message.contains("OtrsTicket.ticketNumber.unique.error")
     }
 
     def 'test creation, incorrect date' () {
@@ -43,7 +56,7 @@ class OtrsTicketSpec extends Specification {
         OtrsTicket otrsTicket
 
         when:
-        otrsTicket = DomainFactory.createOtrsTicket([ticketNumber: '2000910112345678'])
+        DomainFactory.createOtrsTicket([ticketNumber: '2000910112345678'])
 
         then:
         ValidationException ex = thrown()

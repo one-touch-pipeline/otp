@@ -29,7 +29,7 @@ class OtrsTicket implements Commentable {
 
 
     static constraints = {
-        ticketNumber(nullable: false, matches: /^[0-9]{16}$/, validator: { val, obj ->
+        ticketNumber(nullable: false, unique: true, matches: /^[0-9]{16}$/, validator: { val, obj ->
             try {
                 DateTimeFormatter format = DateTimeFormat.forPattern("yyyyMMdd")
                 format.parseDateTime(val.substring(0,8))
