@@ -77,8 +77,8 @@ class OtrsTicketSpec extends Specification {
 
 
         expect:
-        otrsTicket02.getImportDate() == metadataFile01.dateCreated
-        otrsTicket01.getImportDate() == metadataFile02.dateCreated
-        otrsTicket01.getImportDate() != metadataFile03.dateCreated
+        otrsTicket02.getImportDate().is(metadataFile01.dateCreated)
+        otrsTicket01.getImportDate().is(metadataFile02.dateCreated)
+        !otrsTicket01.getImportDate().is(metadataFile03.dateCreated)
     }
 }
