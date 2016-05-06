@@ -651,7 +651,6 @@ alignment.quality.mappedReadCount
 alignment.quality.totalReadCount
 alignment.quality.properlyPaired
 alignment.quality.singletons
-alignment.quality.standardDeviationPE_Insertsize
 alignment.quality.medianPE_insertsize
 alignment.quality.meanPE_Insertsize
 alignment.quality.date

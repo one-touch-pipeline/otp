@@ -41,7 +41,6 @@ class AlignmentQualityOverviewController {
         'alignment.quality.duplicates',
         'alignment.quality.properlyPaired',
         'alignment.quality.singletons',
-        'alignment.quality.standardDeviationPE_Insertsize',
         'alignment.quality.medianPE_insertsize',
         'alignment.quality.diffChr',
         'alignment.quality.workflow',
@@ -58,7 +57,6 @@ class AlignmentQualityOverviewController {
         'alignment.quality.duplicates',
         'alignment.quality.properlyPaired',
         'alignment.quality.singletons',
-        'alignment.quality.standardDeviationPE_Insertsize',
         'alignment.quality.medianPE_insertsize',
         'alignment.quality.diffChr',
         'alignment.quality.workflow',
@@ -171,7 +169,6 @@ class AlignmentQualityOverviewController {
                 diffChr: FormatHelper.formatToTwoDecimalsNullSave(diffChr),
                 properlyPaired: FormatHelper.formatToTwoDecimalsNullSave(properlyPaired), //%properly_paired (flagstat)
                 singletons: FormatHelper.formatToTwoDecimalsNullSave(it.singletons / it.totalReadCounter * 100.0), //%singletons (flagstat)
-                standardDeviationPE_Insertsize: FormatHelper.formatToTwoDecimalsNullSave(it.insertSizeSD), //Standard Deviation PE_insertsize
                 medianPE_insertsize: FormatHelper.formatToTwoDecimalsNullSave(it.insertSizeMedian), //Median PE_insertsize
                 dateFromFileSystem:abstractMergedBamFile.dateFromFileSystem?.format("yyyy-MM-dd"),
                 //warning for duplicates

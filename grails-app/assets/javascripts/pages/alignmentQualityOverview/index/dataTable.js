@@ -78,7 +78,6 @@ $.otp.alignmentQualityOverviewTable = {
                                 "<span class='" + row.duplicateWarning + "'>" + row.duplicates + " </span>",
                                 "<span class='" + row.properlyPpairedWarning + "'>" + row.properlyPaired + " </span>",
                                 row.singletons,
-                                row.standardDeviationPE_Insertsize,
                                 "<span class='" + row.medianWarning + "'>" + row.medianPE_insertsize + " </span>",
                                 "<span class='" + row.diffChrWarning + "'>" + row.diffChr + " </span>",
                                 row.workflow,
