@@ -9,6 +9,7 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
 import de.dkfz.tbi.otp.ngsdata.RunSegment
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.tracking.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import org.springframework.scheduling.annotation.Scheduled
@@ -41,10 +42,13 @@ abstract class RoddyAlignmentStartJob extends AbstractStartJobImpl {
         }
     }
 
-    static List<MergingWorkPackage> findProcessableMergingWorkPackages(short minPriority) {
+    abstract List<SeqType> getSeqTypes()
+
+    List<MergingWorkPackage> findProcessableMergingWorkPackages(short minPriority) {
         return MergingWorkPackage.findAll(
                 'FROM MergingWorkPackage mwp ' +
                 'WHERE needsProcessing = true ' +
+                'AND seqType IN (:seqTypes)' +
                 'AND NOT EXISTS ( ' +
                     'FROM RoddyBamFile ' +
                     'WHERE workPackage = mwp ' +
@@ -56,6 +60,7 @@ abstract class RoddyAlignmentStartJob extends AbstractStartJobImpl {
                 [
                         processed: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
                         minPriority: minPriority,
+                        seqTypes: seqTypes,
                 ]
         )
     }
@@ -103,7 +108,7 @@ abstract class RoddyAlignmentStartJob extends AbstractStartJobImpl {
      *     <li>is not withdrawn</li>
      * </ul>
      */
-    static RoddyBamFile findUsableBaseBamFile(MergingWorkPackage mergingWorkPackage) {
+    RoddyBamFile findUsableBaseBamFile(MergingWorkPackage mergingWorkPackage) {
         assert mergingWorkPackage
         RoddyBamFile bamFile = findBamFileInProjectFolder(mergingWorkPackage)
         if (!bamFile || bamFile.withdrawn) {

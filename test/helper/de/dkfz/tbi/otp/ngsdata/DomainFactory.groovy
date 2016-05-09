@@ -244,6 +244,16 @@ class DomainFactory {
     }
 
 
+    public static ProcessingOption createProcessingOption(Map properties = [:]) {
+        return createDomainObject(ProcessingOption, [
+                 name: "processingOptionName_${counter++}",
+                 type: "processingOptionType_${counter++}",
+                 value:  "processingOptionValue_${counter++}",
+                 comment: "processingOptionComment_${counter++}",
+        ], properties)
+    }
+
+
     public static MergingPass createMergingPass(final MergingSet mergingSet) {
         return new MergingPass(
                 mergingSet: mergingSet,
@@ -344,7 +354,7 @@ class DomainFactory {
                 md5sum: HelperUtils.randomMd5sum,
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
                 fileSize: 10000,
-                roddyVersion: ProcessingOption.build(),
+                roddyVersion: DomainFactory.createProcessingOption(),
                 ] + bamFileProperties)
         assert bamFile.save(flush: true) // build-test-data does not flush, only saves
         return bamFile
@@ -933,24 +943,30 @@ class DomainFactory {
         ] + myProps)
     }
 
-    static SeqType createWholeGenomeSeqType() {
+    static SeqType createSeqTypeLazy(SeqTypeNames seqTypeNames, String alias, String roddyName = '', String libraryLayout = SeqType.LIBRARYLAYOUT_PAIRED) {
         createDomainObjectLazy(SeqType, [:], [
-                name: SeqTypeNames.WHOLE_GENOME.seqTypeName,
-                alias: "WGS",
-                roddyName: "WGS",
-                dirName: SeqTypeNames.WHOLE_GENOME.seqTypeName,
-                libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED,
+                name: seqTypeNames.seqTypeName,
+                alias: alias,
+                roddyName: roddyName,
+                dirName: seqTypeNames.seqTypeName,
+                libraryLayout: libraryLayout,
         ]).refresh()
     }
 
+    static SeqType createWholeGenomeSeqType() {
+        createSeqTypeLazy(SeqTypeNames.WHOLE_GENOME, 'WGS', 'WGS')
+    }
+
     static SeqType createExomeSeqType() {
-        createDomainObjectLazy(SeqType, [:], [
-                name: SeqTypeNames.EXOME.seqTypeName,
-                alias: "EXOME",
-                roddyName: "WES",
-                dirName: SeqTypeNames.EXOME.seqTypeName,
-                libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED,
-        ]).refresh()
+        createSeqTypeLazy(SeqTypeNames.EXOME, 'EXOME', 'WES')
+    }
+
+    static SeqType createWholeGenomeBisulfiteSeqType() {
+        createSeqTypeLazy(SeqTypeNames.WHOLE_GENOME_BISULFITE, 'WGBS', 'WGBS')
+    }
+
+    static SeqType createWholeGenomeBisulfiteTagmentationSeqType() {
+        createSeqTypeLazy(SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION, 'WGBS_TAG', 'WGBS')
     }
 
     static List<SeqType> createAlignableSeqTypes() {

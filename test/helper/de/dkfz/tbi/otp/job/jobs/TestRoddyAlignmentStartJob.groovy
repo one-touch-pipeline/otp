@@ -1,9 +1,10 @@
 package de.dkfz.tbi.otp.job.jobs
 
-import de.dkfz.tbi.otp.job.jobs.roddyAlignment.RoddyAlignmentStartJob
-import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
-import org.springframework.context.annotation.Scope
-import org.springframework.stereotype.Component
+import de.dkfz.tbi.otp.job.jobs.roddyAlignment.*
+import de.dkfz.tbi.otp.job.plan.*
+import de.dkfz.tbi.otp.ngsdata.*
+import org.springframework.context.annotation.*
+import org.springframework.stereotype.*
 
 @Component('testRoddyAlignmentStartJob')
 @Scope('singleton')
@@ -20,4 +21,15 @@ class TestRoddyAlignmentStartJob extends RoddyAlignmentStartJob {
     protected String getJobExecutionPlanName() {
         throw new UnsupportedOperationException()
     }
+
+    @Override
+    List<SeqType> getSeqTypes() {
+        return [SeqType.getWholeGenomePairedSeqType()]
+    }
+
+    @Override
+    String getVersion() {
+        return 'version'
+    }
+
 }
