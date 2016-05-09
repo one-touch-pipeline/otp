@@ -60,7 +60,8 @@ environments {
                 validationInterval = SECONDS.toMillis(10)               //min interval of check a connection on borrow
 
                 validationQuery = "SELECT 1"                            //validation query
-                validationQueryTimeout = SECONDS.toSeconds(5)           //timeout in seconds for validation query
+                //comment out because 9.1.21 does not support the option
+                //validationQueryTimeout = SECONDS.toSeconds(5)           //timeout in seconds for validation query
 
                 logValidationErrors = true                              //log errors during validation
             }
