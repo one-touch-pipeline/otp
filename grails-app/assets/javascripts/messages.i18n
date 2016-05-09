@@ -106,9 +106,8 @@ otp.menu.generalStatistics
 otp.menu.projectSpecificStatistics
 otp.menu.alignmentQuality
 otp.menu.mmmlIdentifierMapping
-otp.menu.projectSpecificStatisticsTableOverview
+otp.menu.projectConfig
 otp.menu.progress
-otp.menu.runSubmit
 otp.menu.adminSection
 otp.menu.userAdministration
 otp.menu.groupAdministration
