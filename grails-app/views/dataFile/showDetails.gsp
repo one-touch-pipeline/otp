@@ -40,9 +40,19 @@
                 <td class="myValue"><span class="wordBreak">${dataFile.pathName}</span></td>
             </tr>
             </g:if>
-                <tr>
+            <tr>
                 <td class="myKey"><g:message code="datafile.showDetails.viewByPidName"/></td>
                 <td class="myValue"><span class="wordBreak">${dataFile.vbpFileName}</span></td>
+            </tr>
+            <tr>
+                <td class="myKey"><g:message code="datafile.showDetails.fastqcReport"/></td>
+                <td class="myValue"><span class="wordBreak">
+                    <g:if test="${fastqcAvailable == true}">
+                        <g:link controller="fastqcResults" action="show" id="${dataFile.id}">
+                            <g:message code="datafile.showDetails.fastqcReport"/>
+                        </g:link>
+                    </g:if>
+                </span></td>
             </tr>
             <g:if test="${!dataFile.vbpFilePath.isAllWhitespace()}">
             <tr>

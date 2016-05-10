@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.CommentService
+import de.dkfz.tbi.otp.ngsqc.FastqcResultsService
 import de.dkfz.tbi.otp.utils.CommentCommand
 import grails.converters.JSON
 
@@ -9,6 +10,7 @@ class DataFileController {
     LsdfFilesService lsdfFilesService
     MetaDataService metaDataService
     CommentService commentService
+    FastqcResultsService fastqcResultsService
 
     def showDetails(ShowDetailsCommand cmd) {
         if (cmd.hasErrors()) {
@@ -38,7 +40,8 @@ class DataFileController {
                 entries: entries,
                 values: values,
                 changelogs: changelogs,
-                comment: dataFile.comment
+                comment: dataFile.comment,
+                fastqcAvailable: fastqcResultsService.isFastqcAvailable(dataFile),
         ]
     }
 
