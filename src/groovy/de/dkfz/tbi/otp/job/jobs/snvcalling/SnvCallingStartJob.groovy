@@ -10,6 +10,7 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig
 import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
+import de.dkfz.tbi.otp.tracking.*
 import org.joda.time.DateTimeZone
 import org.joda.time.Instant
 import org.joda.time.format.DateTimeFormat
@@ -21,9 +22,6 @@ import org.springframework.stereotype.Component
 @Component("snvStartJob")
 @Scope("singleton")
 class SnvCallingStartJob extends AbstractStartJobImpl {
-
-    @Autowired
-    ProcessingOptionService optionService
 
     @Autowired
     SnvCallingService snvCallingService
@@ -58,7 +56,7 @@ class SnvCallingStartJob extends AbstractStartJobImpl {
                         latestDataFileCreationDate: AbstractBamFile.getLatestSequenceDataFileCreationDate(sampleType1BamFile, sampleType2BamFile),
                         )
                 snvCallingInstance.save(flush: true)
-
+                trackingService.setStartedForSeqTracks(snvCallingInstance.getContainedSeqTracks(), OtrsTicket.ProcessingStep.SNV)
                 samplePair.processingStatus = ProcessingStatus.NO_PROCESSING_NEEDED
                 samplePair.save()
 

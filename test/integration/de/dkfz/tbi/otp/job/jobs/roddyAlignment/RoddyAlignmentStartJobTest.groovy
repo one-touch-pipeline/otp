@@ -1,24 +1,17 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
-import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
-import de.dkfz.tbi.otp.job.jobs.TestRoddyAlignmentStartJob
-import de.dkfz.tbi.otp.job.plan.JobDefinition
-import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
-import de.dkfz.tbi.otp.job.processing.Process
-import de.dkfz.tbi.otp.job.processing.ProcessParameter
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.Run
-import de.dkfz.tbi.otp.ngsdata.RunSegment
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import org.junit.After
-import org.junit.Test
-import org.springframework.beans.factory.annotation.Autowired
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
+import de.dkfz.tbi.otp.job.jobs.*
+import de.dkfz.tbi.otp.job.plan.*
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.tracking.*
+import org.junit.*
+import org.springframework.beans.factory.annotation.*
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
-
-import de.dkfz.tbi.otp.utils.HelperUtils
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 class RoddyAlignmentStartJobTest {
 
@@ -290,6 +283,20 @@ class RoddyAlignmentStartJobTest {
         ProcessParameter processParameter = exactlyOneElement(ProcessParameter.findAllByProcess(process))
         RoddyBamFile bamFile = processParameter.toObject()
         assertRoddyBamFileConsistencyWithMwp(bamFile, mwp)
+    }
+
+    @Test
+    void executeCallsSetStartedForSeqTracks() {
+        createMergingWorkPackage()
+        OtrsTicket otrsTicket = DomainFactory.createOtrsTicket()
+        DataFile.findAll()*.runSegment = DomainFactory.createRunSegment(otrsTicket: otrsTicket)
+        DomainFactory.createRoddyProcessingOptions(TestCase.uniqueNonExistentPath)
+
+        withJobExecutionPlan {
+            testRoddyAlignmentStartJob.startRoddyAlignment()
+        }
+
+        assert otrsTicket.alignmentStarted != null
     }
 
     private void assertRoddyBamFileConsistencyWithMwp(RoddyBamFile rbf, MergingWorkPackage mwp) {

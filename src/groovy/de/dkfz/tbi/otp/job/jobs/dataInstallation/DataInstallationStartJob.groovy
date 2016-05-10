@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.job.jobs.dataInstallation
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
+import de.dkfz.tbi.otp.tracking.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope
 import org.springframework.scheduling.annotation.Scheduled
@@ -16,9 +17,6 @@ class DataInstallationStartJob extends AbstractStartJobImpl {
     @Autowired
     RunProcessingService runProcessingService
 
-    @Autowired
-    ProcessingOptionService optionService
-
     @Scheduled(fixedDelay=5000l)
     void execute() {
         short minPriority = minimumProcessingPriorityForOccupyingASlot
@@ -28,6 +26,7 @@ class DataInstallationStartJob extends AbstractStartJobImpl {
         Run.withTransaction {
             Run run = runProcessingService.runReadyToInstall(minPriority)
             if (run) {
+                trackingService.setStartedForSeqTracks(run.containedSeqTracks, OtrsTicket.ProcessingStep.INSTALLATION)
                 runProcessingService.blockInstallation(run)
                 createProcess(run)
                 log.debug "Installing Run: ${run.name}"

@@ -1,23 +1,21 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.ProcessingStatus
-import de.dkfz.tbi.otp.job.processing.ProcessParameter
-
-import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
-
-import grails.plugin.springsecurity.SpringSecurityUtils
-import org.junit.Test
-import org.springframework.beans.factory.annotation.Autowired
-import org.joda.time.DateTimeUtils
-import org.joda.time.format.DateTimeFormat
-
-import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
+import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
-import de.dkfz.tbi.otp.job.jobs.TestJobHelper
-import de.dkfz.tbi.otp.job.processing.Process
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.ProcessingStatus
+import de.dkfz.tbi.otp.job.jobs.*
+import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.testing.GroovyScriptAwareTestCase
+import de.dkfz.tbi.otp.testing.*
+import de.dkfz.tbi.otp.tracking.*
+import grails.plugin.springsecurity.*
+import org.joda.time.*
+import org.joda.time.format.*
+import org.junit.*
+import org.springframework.beans.factory.annotation.*
+
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 public class SnvCallingStartJobTests extends GroovyScriptAwareTestCase {
 
@@ -87,6 +85,9 @@ public class SnvCallingStartJobTests extends GroovyScriptAwareTestCase {
             // set a fixed timestamp to test the instance name
             DateTimeUtils.setCurrentMillisFixed(ARBITRARY_TIMESTAMP)
 
+            // set runSegment to test setStartedForSeqTracks
+            OtrsTicket otrsTicket = DomainFactory.createOtrsTicket()
+            DataFile.findAll()*.runSegment = DomainFactory.createRunSegment(otrsTicket: otrsTicket)
 
             // act: run the startjob
             snvCallingStartJob.execute()
@@ -108,6 +109,7 @@ public class SnvCallingStartJobTests extends GroovyScriptAwareTestCase {
 
             assert mockSamplePair.processingStatus == ProcessingStatus.NO_PROCESSING_NEEDED
 
+            assert otrsTicket.snvStarted != null
         } finally {
             TestCase.removeMetaClass(SnvCallingService.class, snvCallingService)
             DateTimeUtils.setCurrentMillisSystem()

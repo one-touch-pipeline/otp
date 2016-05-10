@@ -9,7 +9,7 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
 import de.dkfz.tbi.otp.ngsdata.RunSegment
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
-
+import de.dkfz.tbi.otp.tracking.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import org.springframework.scheduling.annotation.Scheduled
 
@@ -35,6 +35,7 @@ abstract class RoddyAlignmentStartJob extends AbstractStartJobImpl {
                 mergingWorkPackage.needsProcessing = false
                 assert mergingWorkPackage.save(failOnError: true)
                 RoddyBamFile roddyBamFile = createRoddyBamFile(mergingWorkPackage, findUsableBaseBamFile(mergingWorkPackage))
+                trackingService.setStartedForSeqTracks(roddyBamFile.containedSeqTracks, OtrsTicket.ProcessingStep.ALIGNMENT)
                 createProcess(roddyBamFile)
             }
         }

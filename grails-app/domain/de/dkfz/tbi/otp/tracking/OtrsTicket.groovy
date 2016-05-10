@@ -8,6 +8,17 @@ import org.joda.time.format.*
 
 class OtrsTicket implements Commentable, Entity {
 
+    enum ProcessingStep {
+        INSTALLATION,
+        FASTQC,
+        ALIGNMENT,
+        SNV
+
+        public String toString() {
+            return name().toLowerCase(Locale.ENGLISH)
+        }
+    }
+
     String ticketNumber
 
     Date dateCreated
