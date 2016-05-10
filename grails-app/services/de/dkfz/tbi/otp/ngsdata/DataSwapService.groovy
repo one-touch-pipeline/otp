@@ -1169,7 +1169,7 @@ chmod 440 ${newDirectFileName}
                 }
             }
         } else {
-            assert CollectionUtils.exactlyOneElement(explicitSeqTracks*.project).first() == project : "Given SeqTracks do not belong or belong to more than to project ${project}."
+            assert CollectionUtils.exactlyOneElement(explicitSeqTracks*.project.unique()) == project
             dataFiles = DataFile.findAllBySeqTrackInList(explicitSeqTracks)
         }
 
