@@ -94,34 +94,6 @@ class MetaDataService {
     }
 
     /**
-     * This method tokenizes a string
-     *
-     * Standard java method can not be used because two subsequent tabs
-     * shall return empty token. The tokens are stripped from quotation
-     * marks
-     *
-     * @param line - input string
-     * @param tab - separator (typically '\t')
-     * @return - array of strings
-     */
-    // TODO: OTP-1899: Revise this method
-    static List<String> tokenize(String line, String tab) {
-        List<String> tokens = []
-        int idx = 0
-        for (int i=0; i < line.length(); i++) {
-            if ((line.charAt(i) == tab) || (i == line.length() - 1)) {
-                int end = ((i == line.length() - 1) ? i + 1 : i)
-                String token = line.substring(idx, end)
-                token = token.replaceAll('\"', '')
-                token = token.replaceAll(tab, '')
-                tokens << token
-                idx = i + 1
-            }
-        }
-        return tokens
-    }
-
-    /**
      * Ensures that the two file names are equal except for one character, and that this character is '1' for the first
      * file name and '2' for the second file name.
      */

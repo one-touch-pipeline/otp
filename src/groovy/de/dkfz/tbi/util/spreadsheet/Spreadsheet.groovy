@@ -1,7 +1,5 @@
 package de.dkfz.tbi.util.spreadsheet
 
-import de.dkfz.tbi.otp.ngsdata.MetaDataService  // TODO: OTP-1899: This util class should not reference anything inside de.dkfz.tbi.otp.**
-
 /**
  * An immutable in-memory representation of a tab-separated spreadsheet file
  *
@@ -60,7 +58,7 @@ class Row {
         this.spreadsheet = spreadsheet
         this.rowIndex = rowIndex
         int columnIndex = 0
-        List<Cell> cells = MetaDataService.tokenize(line, '\t').collect{new Cell(this, columnIndex++, it)}
+        List<Cell> cells = line.split('\t').collect{new Cell(this, columnIndex++, it)}
         if (spreadsheet.header) {
             // Make sure that this row has at least as many cells as the header
             while (columnIndex < spreadsheet.header.cells.size()) {
