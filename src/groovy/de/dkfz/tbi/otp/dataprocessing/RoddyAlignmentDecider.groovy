@@ -12,18 +12,16 @@ abstract class RoddyAlignmentDecider extends AbstractAlignmentDecider {
     void prepareForAlignment(MergingWorkPackage workPackage, SeqTrack seqTrack, boolean forceRealign) {
         RoddyBamFile latestValidBamFile = getLatestBamFileWhichHasBeenOrCouldBeCopied(workPackage)
 
-        def setNeedsProcessing = { String reason ->
+        def setNeedsProcessing = {
             workPackage.needsProcessing = true
             assert workPackage.save(failOnError: true)
-            seqTrack.log("Will align{0} for ${workPackage} because ${reason}.")
+            seqTrack.log("Will align{0} for ${workPackage}.")
         }
 
-        if (!latestValidBamFile) {
-            setNeedsProcessing("no valid bam file for this work package exists yet")
-        } else if(!latestValidBamFile.getContainedSeqTracks().contains(seqTrack)) {
-            setNeedsProcessing("it's not contained in latest bam file.")
-        } else if(latestValidBamFile.withdrawn) {
-            setNeedsProcessing("latest bam file is withdrawn.")
+        if (!latestValidBamFile ||
+                !latestValidBamFile.getContainedSeqTracks().contains(seqTrack) ||
+                latestValidBamFile.withdrawn) {
+            setNeedsProcessing()
         } else {
             if(forceRealign) {
                 seqTrack.log("Will not align{0} for ${workPackage} " +
