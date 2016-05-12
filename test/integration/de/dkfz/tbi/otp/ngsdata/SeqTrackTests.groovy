@@ -36,29 +36,6 @@ class SeqTrackTests {
     }
 
     @Test
-    void testGetConfiguredReferenceGenome_ProjectDefault_WrongProject() {
-        seqTrack.sampleType.specificReferenceGenome = SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        seqTrack.sampleType.save(flush: true)
-        referenceGenomeProjectSeqTypeWithoutSampleType.project = Project.build()
-        referenceGenomeProjectSeqTypeWithoutSampleType.save(flush: true)
-
-        ReferenceGenome referenceGenome = seqTrack.getConfiguredReferenceGenome()
-        assert null == referenceGenome
-    }
-
-    @Test
-    void testGetConfiguredReferenceGenome_ProjectDefault_WrongSeqType() {
-        seqTrack.sampleType.specificReferenceGenome = SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        seqTrack.sampleType.save(flush: true)
-        referenceGenomeProjectSeqTypeWithoutSampleType.seqType = SeqType.build()
-        referenceGenomeProjectSeqTypeWithoutSampleType.save(flush: true)
-
-        ReferenceGenome referenceGenome = seqTrack.getConfiguredReferenceGenome()
-        assert null == referenceGenome
-    }
-
-
-    @Test
     void testGetConfiguredReferenceGenome_SampleTypeSpecific() {
         seqTrack.sampleType.specificReferenceGenome = SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC
 
@@ -66,50 +43,7 @@ class SeqTrackTests {
         assert referenceGenomeProjectSeqTypeWithSampleType.referenceGenome == referenceGenome
     }
 
-    @Test
-    void testGetConfiguredReferenceGenome_SampleTypeSpecific_WrongProject() {
-        seqTrack.sampleType.specificReferenceGenome = SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC
-        seqTrack.sampleType.save(flush: true)
-        referenceGenomeProjectSeqTypeWithSampleType.project = Project.build()
-        referenceGenomeProjectSeqTypeWithSampleType.save(flush: true)
 
-        ReferenceGenome referenceGenome = seqTrack.getConfiguredReferenceGenome()
-        assert null == referenceGenome
-    }
-
-    @Test
-    void testGetConfiguredReferenceGenome_SampleTypeSpecific_WrongSeqType() {
-        seqTrack.sampleType.specificReferenceGenome = SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC
-        seqTrack.sampleType.save(flush: true)
-        referenceGenomeProjectSeqTypeWithSampleType.seqType = SeqType.build()
-        referenceGenomeProjectSeqTypeWithSampleType.save(flush: true)
-
-        ReferenceGenome referenceGenome = seqTrack.getConfiguredReferenceGenome()
-        assert null == referenceGenome
-    }
-
-    @Test
-    void testGetConfiguredReferenceGenome_SampleTypeSpecific_WrongSampleType() {
-        seqTrack.sampleType.specificReferenceGenome = SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC
-        seqTrack.sampleType.save(flush: true)
-        referenceGenomeProjectSeqTypeWithSampleType.sampleType = SampleType.build()
-        referenceGenomeProjectSeqTypeWithSampleType.save(flush: true)
-
-        ReferenceGenome referenceGenome = seqTrack.getConfiguredReferenceGenome()
-        assert null == referenceGenome
-    }
-
-
-    @Test
-    void testGetConfiguredReferenceGenome_NotDefined() {
-        seqTrack.sampleType.specificReferenceGenome = SampleType.SpecificReferenceGenome.UNKNOWN
-        seqTrack.sampleType.save(flush: true)
-
-        String message = TestCase.shouldFail(RuntimeException) {
-            seqTrack.getConfiguredReferenceGenome()
-        }
-        assert message.contains(SampleType.SpecificReferenceGenome.UNKNOWN.toString())
-    }
 
     @Test
     void testLog() {

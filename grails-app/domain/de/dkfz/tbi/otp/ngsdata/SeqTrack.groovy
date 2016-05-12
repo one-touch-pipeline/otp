@@ -228,38 +228,7 @@ class SeqTrack implements ProcessParameterObject, Entity {
     }
 
     ReferenceGenomeProjectSeqType getConfiguredReferenceGenomeProjectSeqType() {
-        switch (sampleType.specificReferenceGenome) {
-            case SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT:
-                return getConfiguredReferenceGenomeProjectSeqTypeUsingProjectDefault()
-            case SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC:
-                return getConfiguredReferenceGenomeProjectSeqTypeUsingSampleTypeSpecific()
-            case SampleType.SpecificReferenceGenome.UNKNOWN:
-                    throw new RuntimeException("For sample type '${sampleType} the way to fetch the reference genome is not defined.")
-            default:
-                    throw new RuntimeException("The value ${sampleType.specificReferenceGenome} for specific reference genome is not known")
-        }
-    }
-
-    private ReferenceGenomeProjectSeqType getConfiguredReferenceGenomeProjectSeqTypeUsingProjectDefault() {
-        assert SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT == sampleType.specificReferenceGenome
-        try {
-            return CollectionUtils.atMostOneElement(
-                            ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(project, seqType)
-                            )
-        } catch (AssertionError e) {
-            throw new RuntimeException("Could not find a reference genome for project '${project}' and '${seqType}'", e)
-        }
-    }
-
-    private ReferenceGenomeProjectSeqType getConfiguredReferenceGenomeProjectSeqTypeUsingSampleTypeSpecific() {
-        assert SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC == sampleType.specificReferenceGenome
-        try {
-            return CollectionUtils.atMostOneElement(
-                            ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeAndDeprecatedDateIsNull(project, seqType, sampleType)
-                            )
-        } catch (AssertionError e) {
-            throw new RuntimeException("Could not find a reference genome for project '${project}' and '${seqType}' and '${sampleType}'", e)
-        }
+        ReferenceGenomeProjectSeqType.getConfiguredReferenceGenomeProjectSeqType(this)
     }
 
     public void log(String message, boolean saveInSeqTrack = true) {
