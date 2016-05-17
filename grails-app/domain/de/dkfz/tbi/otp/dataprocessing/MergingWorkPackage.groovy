@@ -189,7 +189,7 @@ class MergingWorkPackage implements Entity {
     }
 
     String toStringWithoutIdAndWorkflow() {
-        return "${sample} ${seqType} ${seqPlatformGroup} ${referenceGenome} ${libraryPreparationKit ?: ''}"
+        return "${sample} ${seqType} ${libraryPreparationKit ?: ''} ${seqPlatformGroup} ${referenceGenome}"
     }
 
     @Override
