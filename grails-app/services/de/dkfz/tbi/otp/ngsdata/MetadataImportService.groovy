@@ -8,6 +8,7 @@ import groovy.transform.*
 import org.springframework.beans.factory.annotation.*
 import org.springframework.context.*
 import org.springframework.security.access.prepost.*
+import org.codehaus.groovy.runtime.typehandling.GroovyCastException
 
 import java.util.logging.*
 
@@ -316,14 +317,25 @@ class MetadataImportService {
 
     public static ExtractedValue extractMateNumber(Row row) {
         Cell libraryLayoutCell = row.getCellByColumnTitle(LIBRARY_LAYOUT.name())
-        if (libraryLayoutCell && libraryLayoutCell.text == LibraryLayout.SINGLE.name()) {
+        Cell mateNumberCell = row.getCellByColumnTitle(MATE.name())
+        int mateNumber
+
+        if (mateNumberCell) {
+            try {
+                mateNumber = (mateNumberCell.text).toInteger()
+            } catch (NumberFormatException e) {
+                return null
+            }
+            return new ExtractedValue(mateNumberCell.text, [mateNumberCell] as Set)
+        }
+
+        if (libraryLayoutCell && LibraryLayout.values().find { it.name() == libraryLayoutCell.text }?.mateCount == 1) {
             return new ExtractedValue('1', [libraryLayoutCell] as Set)
         }
         Cell filenameCell = row.getCellByColumnTitle(FASTQ_FILE.name())
         if (!filenameCell) {
             return null
         }
-        int mateNumber
         try {
             mateNumber = MetaDataService.findOutMateNumber(filenameCell.text)
         } catch (RuntimeException e) {

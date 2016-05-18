@@ -22,9 +22,7 @@ class MateNumberLibraryLayoutValidator extends ValueTuplesValidator<MetadataVali
 
     @Override
     boolean columnMissing(MetadataValidationContext context, String columnTitle) {
-        if (columnTitle == MetaDataColumn.MATE.name()) {
-            optionalColumnMissing(context, columnTitle)
-        } else {
+        if (columnTitle == MetaDataColumn.LIBRARY_LAYOUT.name()) {
             mandatoryColumnMissing(context, columnTitle)
         }
         return false

@@ -29,9 +29,10 @@ class MateNumberFilenameValidator extends ValueTuplesValidator<MetadataValidatio
         if (columnTitle == FASTQ_FILE.name()) {
             mandatoryColumnMissing(context, columnTitle)
             return false
-        } else {
-            return true
+        } else if (columnTitle == MATE.name()) {
+            optionalColumnMissing(context, columnTitle, " OTP will try to guess the mate numbers from the filenames.")
         }
+        return true
     }
 
     @Override
@@ -51,8 +52,8 @@ class MateNumberFilenameValidator extends ValueTuplesValidator<MetadataValidatio
                         context.addProblem(valueTuple.cells.findAll({
                             it.columnIndex == fastqFileColumnIndex ||
                                     it.columnIndex == libraryLayoutColumnIndex
-                        }), Level.WARNING, "The mate number '${fileNameMateNumber}' parsed from filename '${fileName}' is not viable with library layout '${libraryLayout}'." +
-                                " If you ignore this warning, OTP will ignore the mate number parsed from the filename.")
+                        }), Level.WARNING, "The mate number '${fileNameMateNumber}' parsed from filename '${fileName}' is not viable with library layout '${libraryLayout}'. " +
+                                "If you ignore this warning, OTP will ignore the mate number parsed from the filename.")
                     }
                 } else {
                     if (mateNumber != null && fileNameMateNumber.toString() != mateNumber) {
@@ -60,8 +61,7 @@ class MateNumberFilenameValidator extends ValueTuplesValidator<MetadataValidatio
                             it.columnIndex == fastqFileColumnIndex ||
                             it.columnIndex == mateColumnIndex
                         }), Level.WARNING, "The value '${mateNumber}' in the ${MATE} column is different from the mate number '${fileNameMateNumber}' parsed from the filename '${fileName}'. " +
-                                "If you ignore this warning, OTP will use the mate number parsed from the filename and ignore the value in the ${MATE} column.")
-
+                                "If you ignore this warning, OTP will use the mate number from the ${MATE} column and ignore the value parsed from the filename.")
                     }
                 }
             } catch (RuntimeException e) {

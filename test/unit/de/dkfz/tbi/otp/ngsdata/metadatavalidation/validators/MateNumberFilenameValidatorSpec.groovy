@@ -9,16 +9,32 @@ import spock.lang.Specification
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
+import static de.dkfz.tbi.TestCase.*
 
 class MateNumberFilenameValidatorSpec extends Specification {
 
     void 'validate, when column FASTQ_FILE missing, then add expected problem'() {
         given:
 
-        MetadataValidationContext context = MetadataValidationContextFactory.createContext()
+        MetadataValidationContext context = MetadataValidationContextFactory.createContext("${MATE}\n")
         Collection<Problem> expectedProblems = [
                 new Problem(Collections.emptySet(), Level.ERROR,
                         "Mandatory column 'FASTQ_FILE' is missing.")
+        ]
+        when:
+        new MateNumberFilenameValidator().validate(context)
+
+        then:
+        containSame(context.problems, expectedProblems)
+    }
+
+    void 'validate, when column MATE missing, then add expected problem'() {
+        given:
+
+        MetadataValidationContext context = MetadataValidationContextFactory.createContext("${FASTQ_FILE}\n")
+        Collection<Problem> expectedProblems = [
+                new Problem(Collections.emptySet(), Level.WARNING,
+                        "Optional column 'MATE' is missing. OTP will try to guess the mate numbers from the filenames.")
         ]
         when:
         new MateNumberFilenameValidator().validate(context)
@@ -39,6 +55,8 @@ class MateNumberFilenameValidatorSpec extends Specification {
                         "testFileName.fastq.gz\ttestLibraryLayout\n"
         )
         Collection<Problem> expectedProblems = [
+                new Problem(Collections.emptySet(), Level.WARNING,
+                        "Optional column 'MATE' is missing. OTP will try to guess the mate numbers from the filenames."),
                 new Problem(context.spreadsheet.dataRows[1].cells as Set, Level.WARNING,
                         "The mate number '2' parsed from filename 'NB_E_789_R.2.fastq.gz' is not viable with library layout 'SINGLE'." +
                                 " If you ignore this warning, OTP will ignore the mate number parsed from the filename."),
@@ -67,10 +85,10 @@ class MateNumberFilenameValidatorSpec extends Specification {
         Collection<Problem> expectedProblems = [
                 new Problem(context.spreadsheet.dataRows[1].cells as Set, Level.WARNING,
                         "The value '2' in the MATE column is different from the mate number '1' parsed from the filename 'NB_E_789_R.1.fastq.gz'. " +
-                                "If you ignore this warning, OTP will use the mate number parsed from the filename and ignore the value in the MATE column."),
+                                "If you ignore this warning, OTP will use the mate number from the MATE column and ignore the value parsed from the filename."),
                 new Problem(context.spreadsheet.dataRows[2].cells as Set, Level.WARNING,
                         "The value 'abc' in the MATE column is different from the mate number '1' parsed from the filename 'NB_E_789_R.1.fastq.gz'. " +
-                                "If you ignore this warning, OTP will use the mate number parsed from the filename and ignore the value in the MATE column."),
+                                "If you ignore this warning, OTP will use the mate number from the MATE column and ignore the value parsed from the filename."),
         ]
         when:
         new MateNumberFilenameValidator().validate(context)
@@ -112,10 +130,10 @@ class MateNumberFilenameValidatorSpec extends Specification {
                                 " If you ignore this warning, OTP will ignore the mate number parsed from the filename."),
                 new Problem(context.spreadsheet.dataRows[10].cells.findAll({it.columnAddress=="A" || it.columnAddress=="C"}) as Set, Level.WARNING,
                         "The value '2' in the MATE column is different from the mate number '1' parsed from the filename 'NB_E_789_R.1.fastq.gz'. " +
-                                "If you ignore this warning, OTP will use the mate number parsed from the filename and ignore the value in the MATE column."),
+                                "If you ignore this warning, OTP will use the mate number from the MATE column and ignore the value parsed from the filename."),
                 new Problem(context.spreadsheet.dataRows[11].cells.findAll({it.columnAddress=="A" || it.columnAddress=="C"}) as Set, Level.WARNING,
                         "The value 'abc' in the MATE column is different from the mate number '1' parsed from the filename 'NB_E_789_R.1.fastq.gz'. " +
-                                "If you ignore this warning, OTP will use the mate number parsed from the filename and ignore the value in the MATE column."),
+                                "If you ignore this warning, OTP will use the mate number from the MATE column and ignore the value parsed from the filename."),
                 new Problem(context.spreadsheet.dataRows[12].cells.findAll({it.columnAddress=="A" || it.columnAddress=="B"}) as Set, Level.ERROR,
                         "Cannot parse mate number from filename 'testFileName.fastq.gz' or imply from the library layout 'testLibraryLayout'."),
                 new Problem(context.spreadsheet.dataRows[13].cells.findAll({it.columnAddress=="A" || it.columnAddress=="B"}) as Set, Level.ERROR,
@@ -127,6 +145,6 @@ class MateNumberFilenameValidatorSpec extends Specification {
         new MateNumberFilenameValidator().validate(context)
 
         then:
-        containSame(context.problems, expectedProblems)
+        assertContainSame(context.problems, expectedProblems)
     }
 }

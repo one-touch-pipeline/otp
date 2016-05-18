@@ -31,8 +31,7 @@ class SeqTrackValidatorSpec extends Specification {
 
     private static final Collection<MetaDataColumn> seqTrackColumns = [RUN_ID, LANE_NO, BARCODE].asImmutable()
 
-    // TODO OTP-1636: change FASTQ_FILE to MATE
-    private static final Collection<MetaDataColumn> mateColumns = (seqTrackColumns + FASTQ_FILE).asImmutable()
+    private static final Collection<MetaDataColumn> mateColumns = (seqTrackColumns + MATE).asImmutable()
 
     private static Set<Cell> cells(MetadataValidationContext context, Collection<MetaDataColumn> columns, int... rowIndices) {
         Set<Cell> cells = [] as Set
@@ -485,7 +484,7 @@ class SeqTrackValidatorSpec extends Specification {
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, mateColumns, 0, 1),
                         Level.ERROR, "There must be no more than one row for run 'runA', lane 'L1', barcode 'ABC', mate '1'."),
-                new Problem(cells(context, mateColumns + FASTQ_FILE, 0, 1),
+                new Problem(cells(context, seqTrackColumns + FASTQ_FILE, 0, 1),
                         Level.ERROR, "The filenames 's_101202_7_1.fastq.gz', 's_101202_7_1.fastq.gz' for run 'runA', lane 'L1', barcode 'ABC' do not differ in exactly one character. They must differ in exactly one character which is the mate number."),
         ]
 
@@ -520,8 +519,6 @@ class SeqTrackValidatorSpec extends Specification {
         assertContainSame(context.problems, expectedProblems)
     }
 
-    // TODO OTP-1636: un-ignore
-    @Ignore
     void 'validate, when two mates are missing, adds error'() {
         given:
         MetadataValidationContext context = createContext((
@@ -642,16 +639,15 @@ class SeqTrackValidatorSpec extends Specification {
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, mateColumns, 0, 1),
                         Level.ERROR, "There must be no more than one row for run 'runA', lane 'L1', barcode 'ABC', mate '1'."),
-                new Problem(cells(context, mateColumns + FASTQ_FILE, 0, 1),
+                new Problem(cells(context, seqTrackColumns + FASTQ_FILE, 0, 1),
                         Level.ERROR, "The filenames 's_101202_4_1.fastq.gz', 's_101202_4_1.fastq.gz' for run 'runA', lane 'L1', barcode 'ABC' do not differ in exactly one character. They must differ in exactly one character which is the mate number."),
-                new Problem(cells(context, mateColumns + FASTQ_FILE, 2, 3),
+                new Problem(cells(context, seqTrackColumns + FASTQ_FILE, 2, 3),
                         Level.ERROR, "The filenames 's_101202_5_2.fastq.gz', 's_101202_6_1.fastq.gz' for run 'runA', lane 'L1', barcode 'DEF' do not differ in exactly one character. They must differ in exactly one character which is the mate number."),
-                // TODO OTP-1636: un-comment
-//                new Problem(cells(context, mateColumns, 4, 5),
-//                        Level.ERROR, "There must be no more than one row for run 'runB', lane 'L1', barcode 'ABC', mate '1'."),
-                new Problem(cells(context, mateColumns + FASTQ_FILE, 4, 5),
+                new Problem(cells(context, mateColumns, 4, 5),
+                        Level.ERROR, "There must be no more than one row for run 'runB', lane 'L1', barcode 'ABC', mate '1'."),
+                new Problem(cells(context, seqTrackColumns + FASTQ_FILE, 4, 5),
                         Level.ERROR, "The filenames 'not_parseable_4_1.fastq.gz', 'not_parseable_4_1.fastq.gz' for run 'runB', lane 'L1', barcode 'ABC' do not differ in exactly one character. They must differ in exactly one character which is the mate number."),
-                new Problem(cells(context, mateColumns + FASTQ_FILE, 6, 7),
+                new Problem(cells(context, seqTrackColumns + FASTQ_FILE, 6, 7),
                         Level.ERROR, "The filenames 'not_parseable_5_2.fastq.gz', 'not_parseable_6_1.fastq.gz' for run 'runB', lane 'L1', barcode 'DEF' do not differ in exactly one character. They must differ in exactly one character which is the mate number."),
         ]
 
@@ -676,24 +672,14 @@ class SeqTrackValidatorSpec extends Specification {
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, seqTrackColumns + FASTQ_FILE, 0, 1) + cells(context, mateColumns, 0),
                         Level.ERROR, "The filenames 's_101202_3_1.fastq.gz', 's_101202_4_1.fastq.gz' for run 'runA', lane 'L1', barcode 'ABC' differ in exactly one character as expected, but the distinguishing character '3' in filename 's_101202_3_1.fastq.gz' is not the mate number '1'."),
-                // TODO OTP-1636: remove the following four problems
-                new Problem(cells(context, mateColumns, 0, 1),
-                        Level.ERROR, "There must be no more than one row for run 'runA', lane 'L1', barcode 'ABC', mate '1'."),
-                new Problem(cells(context, mateColumns, 2, 3),
-                        Level.ERROR, "There must be no more than one row for run 'runA', lane 'L2', barcode 'ABC', mate '1'."),
                 new Problem(cells(context, seqTrackColumns + FASTQ_FILE, 0, 1) + cells(context, mateColumns, 1),
-                        Level.ERROR, "The filenames 's_101202_3_1.fastq.gz', 's_101202_4_1.fastq.gz' for run 'runA', lane 'L1', barcode 'ABC' differ in exactly one character as expected, but the distinguishing character '4' in filename 's_101202_4_1.fastq.gz' is not the mate number '1'."),
+                        Level.ERROR, "The filenames 's_101202_3_1.fastq.gz', 's_101202_4_1.fastq.gz' for run 'runA', lane 'L1', barcode 'ABC' differ in exactly one character as expected, but the distinguishing character '4' in filename 's_101202_4_1.fastq.gz' is not the mate number '2'."),
                 new Problem(cells(context, seqTrackColumns + FASTQ_FILE, 2, 3) + cells(context, mateColumns, 3),
-                        Level.ERROR, "The filenames 's_101202_1_1.fastq.gz', 's_101202_3_1.fastq.gz' for run 'runA', lane 'L2', barcode 'ABC' differ in exactly one character as expected, but the distinguishing character '3' in filename 's_101202_3_1.fastq.gz' is not the mate number '1'."),
-                // TODO OTP-1636: un-comment
-//                new Problem(cells(context, seqTrackColumns + FASTQ_FILE, 0, 1) + cells(context, mateColumns, 1),
-//                        Level.ERROR, "The filenames 's_101202_3_1.fastq.gz', 's_101202_4_1.fastq.gz' for run 'runA', lane 'L1', barcode 'ABC' differ in exactly one character as expected, but the distinguishing character '4' in filename 's_101202_4_1.fastq.gz' is not the mate number '2'."),
-//                new Problem(cells(context, seqTrackColumns + FASTQ_FILE, 2, 3) + cells(context, mateColumns, 3),
-//                        Level.ERROR, "The filenames 's_101202_1_1.fastq.gz', 's_101202_3_1.fastq.gz' for run 'runA', lane 'L2', barcode 'ABC' differ in exactly one character as expected, but the distinguishing character '3' in filename 's_101202_3_1.fastq.gz' is not the mate number '2'."),
-//                new Problem(cells(context, seqTrackColumns + FASTQ_FILE, 4, 5) + cells(context, mateColumns, 4),
-//                        Level.ERROR, "The filenames 'not_parseable_1.fastq.gz', 'not_parseable_2.fastq.gz' for run 'runB', lane 'L1', barcode 'ABC' differ in exactly one character as expected, but the distinguishing character '2' in filename 'not_parseable_2.fastq.gz' is not the mate number '1'."),
-//                new Problem(cells(context, seqTrackColumns + FASTQ_FILE, 4, 5) + cells(context, mateColumns, 5),
-//                        Level.ERROR, "The filenames 'not_parseable_1.fastq.gz', 'not_parseable_2.fastq.gz' for run 'runB', lane 'L1', barcode 'ABC' differ in exactly one character as expected, but the distinguishing character '1' in filename 'not_parseable_1.fastq.gz' is not the mate number '2'."),
+                        Level.ERROR, "The filenames 's_101202_1_1.fastq.gz', 's_101202_3_1.fastq.gz' for run 'runA', lane 'L2', barcode 'ABC' differ in exactly one character as expected, but the distinguishing character '3' in filename 's_101202_3_1.fastq.gz' is not the mate number '2'."),
+                new Problem(cells(context, seqTrackColumns + FASTQ_FILE, 4, 5) + cells(context, mateColumns, 4),
+                        Level.ERROR, "The filenames 'not_parseable_1.fastq.gz', 'not_parseable_2.fastq.gz' for run 'runB', lane 'L1', barcode 'ABC' differ in exactly one character as expected, but the distinguishing character '2' in filename 'not_parseable_2.fastq.gz' is not the mate number '1'."),
+                new Problem(cells(context, seqTrackColumns + FASTQ_FILE, 4, 5) + cells(context, mateColumns, 5),
+                        Level.ERROR, "The filenames 'not_parseable_1.fastq.gz', 'not_parseable_2.fastq.gz' for run 'runB', lane 'L1', barcode 'ABC' differ in exactly one character as expected, but the distinguishing character '1' in filename 'not_parseable_1.fastq.gz' is not the mate number '2'."),
         ]
 
         when:
