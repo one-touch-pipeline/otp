@@ -157,7 +157,10 @@ class MetaDataService {
             //AS-78215-LR-10213_R1.fastq.gz
             /^AS-.*-LR-.*_R([12]).fastq.gz$/,
             //SOMEPID_control_0097062_1.fastq.gz
-            /^.*_(?:control|tumor)_.*_(\d).fastq.gz$/
+            /^.*_(?:control|tumor)_.*_(\d).fastq.gz$/,
+            //EGAR00001234567_ABCDE_RNAseq_1.fq.gz
+            //EGAR00001234567_ABCDE_RNAseq_2.fq.gz
+            /^EGAR\d*_.*_.*_([12]).fq.gz$/,
         ]
 
 

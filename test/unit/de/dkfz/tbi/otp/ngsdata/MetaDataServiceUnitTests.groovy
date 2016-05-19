@@ -86,6 +86,8 @@ class MetaDataServiceUnitTests {
             [name: 'AS-78217-LR-10219_R2.fastq.gz', mateNumber: 2],
             [name: 'SOMEPID_control_0097062_1.fastq.gz', mateNumber: 1],
             [name: 'SOMEPID_control_0097062_2.fastq.gz', mateNumber: 2],
+            [name: 'EGAR00001234567_ABCDE_RNAseq_1.fq.gz', mateNumber: 1],
+            [name: 'EGAR00001234567_ABCDE_RNAseq_2.fq.gz', mateNumber: 2],
         ]
         files.each { file ->
             assertEquals(file.mateNumber, MetaDataService.findOutMateNumber(file.name))
