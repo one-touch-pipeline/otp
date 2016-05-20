@@ -161,6 +161,8 @@ class MetaDataService {
             //EGAR00001234567_ABCDE_RNAseq_1.fq.gz
             //EGAR00001234567_ABCDE_RNAseq_2.fq.gz
             /^EGAR\d*_.*_.*_([12]).fq.gz$/,
+            //K002000023_42438_1.fq.gz
+            /^K\d{9}_\d{5}_([12]).fq.gz$/,
         ]
 
 
