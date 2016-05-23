@@ -154,6 +154,12 @@ class SeqTrack implements ProcessParameterObject, Entity {
         }
     }
 
+
+    // To be consistent on the filesystem the library value to use is create like this and not directly derived from libraryName
+    String getStandardizedLibraryName() {
+        return (libraryName ? "lib${normalizedLibraryName}" : "libNA")
+    }
+
     /**
      * @deprecated This method fails if a SeqTrack is aligned by multiple workflows or with different parameters.
      */

@@ -1115,4 +1115,21 @@ class DomainFactory {
         ], properties)
     }
 
+
+    static void changeSeqType(RoddyBamFile bamFile, SeqType seqType, String libraryName = null) {
+
+        bamFile.mergingWorkPackage.seqType = seqType
+        if (seqType.isWgbs()) {
+            bamFile.mergingWorkPackage.libraryPreparationKit = null
+        }
+        assert bamFile.mergingWorkPackage.save(flush: true)
+
+        bamFile.seqTracks.each {
+            it.seqType = seqType
+            it.libraryName = libraryName
+            it.normalizedLibraryName = SeqTrack.normalizeLibraryName(it.libraryName)
+            assert it.save(flush: true)
+        }
+    }
+
 }

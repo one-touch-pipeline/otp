@@ -23,6 +23,7 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
     static final String WORK_DIR_PREFIX = ".merging"
 
     static final String QUALITY_CONTROL_DIR = "qualitycontrol"
+    static final String METHYLATION_DIR = "methylation"
 
     static final String QUALITY_CONTROL_JSON_FILE_NAME = "qualitycontrol.json"
     static final String QUALITY_CONTROL_TARGET_EXTRACT_JSON_FILE_NAME = "qualitycontrol_targetExtract.json"
@@ -34,6 +35,8 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
     static final String RUN_PREFIX = "run"
 
     static final String RODDY_EXECUTION_DIR_PATTERN = /exec_\d{6}_\d{8,9}_.+_.+/
+
+    static final String METADATATABLE_FILE = "metadataTable.tsv"
 
     RoddyBamFile baseBamFile
 
@@ -218,6 +221,14 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
         return new File(workDirectory, QUALITY_CONTROL_DIR)
     }
 
+    File getWorkMethylationDirectory() {
+        return new File(workDirectory, METHYLATION_DIR)
+    }
+
+    File getFinalMethylationDirectory() {
+        return new File(baseDirectory, METHYLATION_DIR)
+    }
+
     File getFinalMergedQADirectory() {
         return new File(this.finalQADirectory, MERGED_DIR)
     }
@@ -334,6 +345,10 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
 
     File getWorkMd5sumFile() {
         return new File(workDirectory, this.md5sumFileName)
+    }
+
+    File getMetaDataTableFile() {
+        return new File(workDirectory, METADATATABLE_FILE)
     }
 
 

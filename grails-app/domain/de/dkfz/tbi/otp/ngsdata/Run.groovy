@@ -96,4 +96,8 @@ class Run implements ProcessParameterObject, Entity {
         seqCenter index: "run_seq_center_idx"
         seqPlatform index: "run_seq_platform_idx"
     }
+
+    String getDirName() {
+        return "run${name}"
+    }
 }

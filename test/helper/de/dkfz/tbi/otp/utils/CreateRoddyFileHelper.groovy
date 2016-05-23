@@ -4,11 +4,10 @@ import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Realm
 
-/**
- */
+
 class CreateRoddyFileHelper {
 
-    static private createRoddyAlignmentWorkOrFinalResultFiles(Realm realm, RoddyBamFile roddyBamFile, String workOrFinal) {
+    static private createRoddyAlignmentWorkOrFinalResultFiles(RoddyBamFile roddyBamFile, String workOrFinal) {
         assert CreateFileHelper.createFile(roddyBamFile."get${workOrFinal}MergedQAJsonFile"())
 
         roddyBamFile."get${workOrFinal}SingleLaneQAJsonFiles"().values().each {
@@ -23,16 +22,27 @@ class CreateRoddyFileHelper {
         roddyBamFile."get${workOrFinal}BamFile"() << "content"
         roddyBamFile."get${workOrFinal}BaiFile"() << "content"
         roddyBamFile."get${workOrFinal}Md5sumFile"() << DomainFactory.DEFAULT_MD5_SUM
+
+        if (roddyBamFile.seqType.isWgbs()) {
+            File methylationDir = roddyBamFile."get${workOrFinal}MethylationDirectory"()
+            File methylationMergedDir = new File(methylationDir, "merged")
+            assert new File(methylationMergedDir, "results").mkdirs()
+            roddyBamFile.seqTracks.each {
+                String libraryName = it.standardizedLibraryName
+                File methylationLibraryDir = new File(methylationDir, libraryName)
+                assert new File(methylationLibraryDir, "results").mkdirs()
+            }
+        }
     }
 
-    static void createRoddyAlignmentWorkResultFiles(Realm realm, RoddyBamFile roddyBamFile) {
+    static void createRoddyAlignmentWorkResultFiles(RoddyBamFile roddyBamFile) {
         assert roddyBamFile.workDirectory.mkdirs()
-        createRoddyAlignmentWorkOrFinalResultFiles(realm, roddyBamFile, "Work")
+        createRoddyAlignmentWorkOrFinalResultFiles(roddyBamFile, "Work")
     }
 
-    static void createRoddyAlignmentFinalResultFiles(Realm realm, RoddyBamFile roddyBamFile) {
+    static void createRoddyAlignmentFinalResultFiles(RoddyBamFile roddyBamFile) {
         assert roddyBamFile.baseDirectory.mkdirs()
-        createRoddyAlignmentWorkOrFinalResultFiles(realm, roddyBamFile, "Final")
+        createRoddyAlignmentWorkOrFinalResultFiles(roddyBamFile, "Final")
     }
 
 }

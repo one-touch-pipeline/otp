@@ -152,6 +152,14 @@ class DataFile implements Commentable, Entity {
         return seqTrack.individual
     }
 
+    SampleType getSampleType() {
+        return seqTrack.sampleType
+    }
+
+    SeqType getSeqType() {
+        return seqTrack.seqType
+    }
+
     static mapping = {
         run index: "data_file_run_idx"
         runSegment index: "data_file_run_segment_idx"

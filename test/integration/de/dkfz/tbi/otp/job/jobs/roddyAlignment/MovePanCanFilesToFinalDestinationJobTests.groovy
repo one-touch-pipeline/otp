@@ -184,7 +184,7 @@ class MovePanCanFilesToFinalDestinationJobTests {
     }
 
     private void helper_testCleanupWorkDirectory_allFine(int countTmpFiles, int countTmpDir) {
-        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(realm, roddyBamFile)
+        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
         int callDeletedRoddy = 0
         boolean callDeleted = false
         List<File> filesNotToBeCalledFor = [
@@ -249,7 +249,7 @@ class MovePanCanFilesToFinalDestinationJobTests {
 
     @Test
     void testLinkNewResults_allFine() {
-        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(realm, roddyBamFile)
+        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
 
         List<File> linkedFiles = [
                 roddyBamFile.finalBamFile,
@@ -321,8 +321,8 @@ class MovePanCanFilesToFinalDestinationJobTests {
     void testCleanupOldResults_withBaseBamFile_allFine() {
         finishOperationStateOfRoddyBamFile(roddyBamFile)
         RoddyBamFile roddyBamFile2 = DomainFactory.createRoddyBamFile(roddyBamFile)
-        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(realm, roddyBamFile)
-        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(realm, roddyBamFile2)
+        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
+        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile2)
 
         movePanCanFilesToFinalDestinationJob.executionService.metaClass.executeCommand = { Realm realm, String command ->
             return ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
@@ -358,7 +358,7 @@ class MovePanCanFilesToFinalDestinationJobTests {
         roddyBamFile.workDirectoryName = null
         roddyBamFile.save(flush: true, failOnError: true)
         RoddyBamFile roddyBamFile2 = DomainFactory.createRoddyBamFile(roddyBamFile)
-        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(realm, roddyBamFile2)
+        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile2)
 
         movePanCanFilesToFinalDestinationJob.executionService.metaClass.executeCommand = { Realm realm, String command ->
             assert false: 'should not be called'
@@ -375,9 +375,9 @@ class MovePanCanFilesToFinalDestinationJobTests {
     void testCleanupOldResults_withoutBaseBamFile_butBamFilesOfWorkPackageExist_allFine() {
         DomainFactory.createRoddyBamFile(workPackage:  roddyBamFile.workPackage)
         RoddyBamFile roddyBamFile2 = DomainFactory.createRoddyBamFile(workPackage:  roddyBamFile.workPackage)
-        CreateRoddyFileHelper.createRoddyAlignmentFinalResultFiles(realm, roddyBamFile)
-        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(realm, roddyBamFile)
-        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(realm, roddyBamFile2)
+        CreateRoddyFileHelper.createRoddyAlignmentFinalResultFiles(roddyBamFile)
+        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
+        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile2)
         boolean hasCalled_deleteContentOfOtherUnixUserDirectory = false
         assert roddyBamFile.workDirectory.exists()
 
@@ -417,8 +417,8 @@ class MovePanCanFilesToFinalDestinationJobTests {
         roddyBamFile.workDirectoryName = null
         roddyBamFile.save(flush: true, failOnError: true)
         RoddyBamFile roddyBamFile2 = DomainFactory.createRoddyBamFile(workPackage:  roddyBamFile.workPackage)
-        CreateRoddyFileHelper.createRoddyAlignmentFinalResultFiles(realm, roddyBamFile)
-        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(realm, roddyBamFile2)
+        CreateRoddyFileHelper.createRoddyAlignmentFinalResultFiles(roddyBamFile)
+        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile2)
         assert roddyBamFile2.workDirectory.exists()
         boolean isCalledForMergedQaDirectory = false
 
@@ -448,7 +448,7 @@ class MovePanCanFilesToFinalDestinationJobTests {
 
     @Test
     void testCleanupOldResults_withoutBaseBamFileAndWithoutOtherBamFilesOfTheSameWorkPackage_allFine() {
-        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(realm, roddyBamFile)
+        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
 
         movePanCanFilesToFinalDestinationJob.executionService.metaClass.executeCommand = { Realm realm, String command ->
             assert false: 'should not be called'
@@ -492,8 +492,8 @@ class MovePanCanFilesToFinalDestinationJobTests {
         final String FAIL_MESSAGE = HelperUtils.uniqueString
         finishOperationStateOfRoddyBamFile(roddyBamFile)
         RoddyBamFile roddyBamFile2 = DomainFactory.createRoddyBamFile(roddyBamFile)
-        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(realm, roddyBamFile)
-        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(realm, roddyBamFile2)
+        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
+        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile2)
 
         movePanCanFilesToFinalDestinationJob.executeRoddyCommandService.metaClass.deleteContentOfOtherUnixUserDirectory = { File basePath -> }
 
@@ -511,8 +511,8 @@ class MovePanCanFilesToFinalDestinationJobTests {
         final String FAIL_MESSAGE = HelperUtils.uniqueString
         finishOperationStateOfRoddyBamFile(roddyBamFile)
         RoddyBamFile roddyBamFile2 = DomainFactory.createRoddyBamFile(roddyBamFile)
-        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(realm, roddyBamFile)
-        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(realm, roddyBamFile2)
+        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
+        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile2)
 
         movePanCanFilesToFinalDestinationJob.executeRoddyCommandService.metaClass.deleteContentOfOtherUnixUserDirectory = { File basePath -> }
 
@@ -530,7 +530,7 @@ class MovePanCanFilesToFinalDestinationJobTests {
     @Test
     void testExecute_AllFine() {
         setUp_allFine()
-        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(realm, roddyBamFile)
+        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
 
         movePanCanFilesToFinalDestinationJob.execute()
         assert roddyBamFile.fileOperationStatus == AbstractMergedBamFile.FileOperationStatus.PROCESSED

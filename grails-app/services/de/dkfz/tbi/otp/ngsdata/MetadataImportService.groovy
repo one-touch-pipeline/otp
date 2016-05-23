@@ -183,7 +183,7 @@ class MetadataImportService {
                         LibraryPreparationKitService.findLibraryPreparationKitByNameOrAlias(libPrepKitString))
             }
             String libraryName = uniqueColumnValue(rows, CUSTOM_LIBRARY) ?: ""
-            String normalizedLibraryName = libraryName ? SeqTrack.normalizeLibraryName(libraryName): ""
+            String normalizedLibraryName = SeqTrack.normalizeLibraryName(libraryName)
             Map properties = [
                     laneId: laneId,
                     ilseId: uniqueColumnValue(rows, ILSE_NO) ?: null,

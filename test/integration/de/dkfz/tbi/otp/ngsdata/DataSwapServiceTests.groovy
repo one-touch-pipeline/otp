@@ -52,8 +52,8 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
         String dataFileName1 = 'DataFileFileName_R1.gz'
         String dataFileName2 = 'DataFileFileName_R2.gz'
 
-        CreateRoddyFileHelper.createRoddyAlignmentFinalResultFiles(realm, bamFile)
-        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(realm, bamFile)
+        CreateRoddyFileHelper.createRoddyAlignmentFinalResultFiles(bamFile)
+        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(bamFile)
         List<File> roddyFilesToDelete = createRoddyFileListToDelete(bamFile)
         File destinationDirectory = bamFile.baseDirectory
 
@@ -124,8 +124,8 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
         File missedFile = bamFile.finalMd5sumFile
         File unexpectedFile = new File(bamFile.baseDirectory, 'notExpectedFile.txt')
 
-        CreateRoddyFileHelper.createRoddyAlignmentFinalResultFiles(realm, bamFile)
-        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(realm, bamFile)
+        CreateRoddyFileHelper.createRoddyAlignmentFinalResultFiles(bamFile)
+        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(bamFile)
         assert missedFile.delete()
         assert unexpectedFile.createNewFile()
 

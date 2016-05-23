@@ -106,7 +106,7 @@ class LsdfFilesService {
         }
         String centerDir = file.run.seqCenter.dirName
         String basePath = configService.getProjectSequencePath(file.project)
-        String path = "${basePath}/${seqTypeDir}/${centerDir}/run${file.run.name}/${file.pathName}/${file?.fileName}"
+        String path = "${basePath}/${seqTypeDir}/${centerDir}/${file.run.dirName}/${file.pathName}/${file?.fileName}"
         return path
     }
 
@@ -237,9 +237,14 @@ class LsdfFilesService {
     }
 
     static void ensureDirIsReadableAndNotEmpty(final File dir) {
+        ensureDirIsReadable(dir)
+        assert dir.listFiles().length != 0
+    }
+
+    static void ensureDirIsReadable(final File dir) {
         waitUntilExists(dir)
         assert dir.directory
-        assert dir.listFiles().length != 0
+        assert dir.canRead()
     }
 
 

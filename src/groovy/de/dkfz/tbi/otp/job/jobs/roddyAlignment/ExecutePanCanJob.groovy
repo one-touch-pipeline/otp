@@ -1,47 +1,55 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
-import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
 
-import static de.dkfz.tbi.otp.ngsdata.LsdfFilesService.*
-
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.ngsdata.BedFile
 import de.dkfz.tbi.otp.ngsdata.BedFileService
 import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.ngsdata.MetaDataService
 import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeService
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqTypeNames
-import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
 import org.springframework.beans.factory.annotation.Autowired
 
+import static de.dkfz.tbi.otp.ngsdata.LsdfFilesService.ensureFileIsReadableAndNotEmpty
 
-class ExecutePanCanJob extends AbstractRoddyJob {
 
-    @Autowired
-    ReferenceGenomeService referenceGenomeService
-
-    @Autowired
-    LsdfFilesService lsdfFilesService
-
-    @Autowired
-    ExecuteRoddyCommandService executeRoddyCommandService
-
-    @Autowired
-    BedFileService bedFileService
+class ExecutePanCanJob extends AbstractExecutePanCanJob {
 
     @Override
-    protected String prepareAndReturnWorkflowSpecificCommand(RoddyResult roddyResult, Realm realm) throws Throwable {
-        assert roddyResult : "roddyResult must not be null"
-        assert realm : "realm must not be null"
+    protected String prepareAndReturnWorkflowSpecificCValues(RoddyBamFile roddyBamFile) {
+        assert roddyBamFile : "roddyBamFile must not be null"
 
-        RoddyBamFile roddyBamFile = roddyResult as RoddyBamFile
+        List<String> filesToMerge = getFilesToMerge(roddyBamFile)
+
         RoddyBamFile baseBamFile = roddyBamFile.baseBamFile
+        ensureCorrectBaseBamFileIsOnFileSystem(baseBamFile)
 
+        String additionalCValues = ''
+        if (roddyBamFile.seqType.name == SeqTypeNames.EXOME.seqTypeName) {
+            BedFile bedFile = roddyBamFile.bedFile
+            Realm dataProcessingRealm = configService.getRealmDataProcessing(roddyBamFile.project)
+            File bedFilePath = bedFileService.filePath(dataProcessingRealm, bedFile) as File
+            additionalCValues += "TARGET_REGIONS_FILE:${bedFilePath},"
+            additionalCValues += "TARGETSIZE:${bedFile.targetSize},"
+        }
+
+        return ",fastq_list:${filesToMerge.join(";")}," +
+                "${baseBamFile ? "bam:${baseBamFile.getPathForFurtherProcessing()}," : ""}" +
+                additionalCValues +
+                "possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}"
+    }
+
+
+    @Override
+    protected String prepareAndReturnWorkflowSpecificParameter(RoddyBamFile roddyBamFile) {
+        return ""
+    }
+
+
+    protected List<File> getFilesToMerge(RoddyBamFile roddyBamFile) {
+        assert roddyBamFile : "roddyBamFile must not be null"
         List<File> vbpDataFiles = []
 
         roddyBamFile.seqTracks.each { SeqTrack seqTrack ->
@@ -59,85 +67,14 @@ class ExecutePanCanJob extends AbstractRoddyJob {
             MetaDataService.ensurePairedSequenceFileNameConsistency(it.first().path, it.last().path)
         }
 
-        String seqTracksToMerge = vbpDataFiles.join(";")
-
-        File referenceGenomeFastaFile = referenceGenomeService.fastaFilePath(roddyBamFile.project, roddyBamFile.referenceGenome) as File
-        assert referenceGenomeFastaFile : "Path to the reference genome file is null"
-        LsdfFilesService.ensureFileIsReadableAndNotEmpty(referenceGenomeFastaFile)
-
-
-        File chromosomeStatSizeFile = referenceGenomeService.chromosomeStatSizeFile(roddyBamFile.mergingWorkPackage)
-        assert chromosomeStatSizeFile : "Path to the chromosome stat size file is null"
-        LsdfFilesService.ensureFileIsReadableAndNotEmpty(chromosomeStatSizeFile)
-
-        String analysisIDinConfigFile = executeRoddyCommandService.getAnalysisIDinConfigFile(roddyBamFile)
-        String nameInConfigFile = roddyBamFile.config.getNameUsedInConfig()
-
-        ensureCorrectBaseBamFileIsOnFileSystem(baseBamFile)
-        LsdfFilesService.ensureFileIsReadableAndNotEmpty(new File(roddyBamFile.config.configFilePath))
-
-        String additionalCValues = ''
-        if (roddyBamFile.seqType.name == SeqTypeNames.EXOME.seqTypeName) {
-            BedFile bedFile = roddyBamFile.bedFile
-            Realm dataProcessingRealm = configService.getRealmDataProcessing(roddyBamFile.project)
-            File bedFilePath = bedFileService.filePath(dataProcessingRealm, bedFile) as File
-            additionalCValues += "TARGET_REGIONS_FILE:${bedFilePath},"
-            additionalCValues += "TARGETSIZE:${bedFile.targetSize},"
-        }
-
-
-        return executeRoddyCommandService.defaultRoddyExecutionCommand(roddyBamFile, nameInConfigFile, analysisIDinConfigFile, realm) +
-                    "--cvalues=\"fastq_list:${seqTracksToMerge},"  +
-                    "${baseBamFile ? "bam:${baseBamFile.getPathForFurtherProcessing()}," : ""}" +
-                    "REFERENCE_GENOME:${referenceGenomeFastaFile}," +
-                    "INDEX_PREFIX:${referenceGenomeFastaFile}," +
-                    "CHROM_SIZES_FILE:${chromosomeStatSizeFile}," +
-                    additionalCValues +
-                    "possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}" +
-                    "${(roddyBamFile.processingPriority >= ProcessingPriority.FAST_TRACK_PRIORITY) ? ",PBS_AccountName:FASTTRACK" : ""}\""
+        return vbpDataFiles
     }
 
 
     @Override
-    protected void validate(RoddyResult roddyResult) throws Throwable {
-        assert roddyResult : "Input roddyResultObject must not be null"
-
-        RoddyBamFile roddyBamFile = roddyResult as RoddyBamFile
-
-        executeRoddyCommandService.correctPermissions(roddyBamFile)
-
-        try {
-            ensureCorrectBaseBamFileIsOnFileSystem(roddyBamFile.baseBamFile)
-        } catch (AssertionError e) {
-            throw new RuntimeException('The input BAM file seems to have changed on the file system while this job was processing it.', e)
-        }
-
-        ['Bam', 'Bai', 'Md5sum'].each {
-            LsdfFilesService.ensureFileIsReadableAndNotEmpty(roddyBamFile."work${it}File")
-        }
-
-        ['MergedQA', 'ExecutionStore'].each {
-            LsdfFilesService.ensureDirIsReadableAndNotEmpty(roddyBamFile."work${it}Directory")
-        }
-
-        ensureFileIsReadableAndNotEmpty(roddyBamFile.workMergedQAJsonFile)
+    protected void workflowSpecificValidation(RoddyBamFile roddyBamFile) {
         if (roddyBamFile.seqType.seqTypeName == SeqTypeNames.EXOME) {
             ensureFileIsReadableAndNotEmpty(roddyBamFile.workMergedQATargetExtractJsonFile)
-        }
-        roddyBamFile.workSingleLaneQAJsonFiles.values().each {
-            ensureFileIsReadableAndNotEmpty(it)
-        }
-
-        assert [FileOperationStatus.DECLARED, FileOperationStatus.NEEDS_PROCESSING].contains(roddyBamFile.fileOperationStatus)
-        roddyBamFile.fileOperationStatus = FileOperationStatus.NEEDS_PROCESSING
-        assert roddyBamFile.save(flush: true)
-    }
-
-    void ensureCorrectBaseBamFileIsOnFileSystem(RoddyBamFile baseBamFile) {
-        if (baseBamFile) {
-            File bamFilePath = baseBamFile.getPathForFurtherProcessing()
-            assert bamFilePath.exists()
-            assert baseBamFile.fileSize == bamFilePath.length()
         }
     }
 }
