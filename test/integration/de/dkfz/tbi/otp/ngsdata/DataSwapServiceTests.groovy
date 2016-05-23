@@ -950,8 +950,9 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
 
     private List<File> createRoddyFileListToDelete(RoddyBamFile roddyBamFile) {
         [
-                roddyBamFile.workQADirectory,
-                roddyBamFile.workExecutionStoreDirectory
-        ]*.absolutePath
+                roddyBamFile.workExecutionDirectories,
+                roddyBamFile.workMergedQADirectory,
+                roddyBamFile.workSingleLaneQADirectories.values(),
+        ].flatten()*.absolutePath
     }
 }

@@ -1302,7 +1302,8 @@ chmod 440 ${newDirectFileName}
                 } else {
                     bashScriptToMoveFilesAsOtherUser <<
                             "#rm -rf ${roddyBamFile.getWorkExecutionDirectories()*.absolutePath.join("\n#rm -rf ")}\n" +
-                            "#rm -rf ${roddyBamFile.getWorkSingleLaneQADirectories().values()*.listFiles().flatten()*.absolutePath.join("\n#rm -rf ")}\n"
+                            "#rm -rf ${roddyBamFile.getWorkMergedQADirectory().absolutePath}\n" +
+                            "#rm -rf ${roddyBamFile.getWorkSingleLaneQADirectories().values()*.absolutePath.join("\n#rm -rf ")}\n"
                 }
             }
             Set<File> expectedContent = [
