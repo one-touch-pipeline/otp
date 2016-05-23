@@ -6,16 +6,17 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.job.processing.ExecutionService
 import de.dkfz.tbi.otp.testing.UserAndRoles
 import de.dkfz.tbi.otp.utils.ProcessHelperService
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import grails.plugin.springsecurity.SpringSecurityUtils
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
-import spock.lang.Specification
+import grails.test.spock.IntegrationSpec
 import java.nio.file.*
 import java.nio.file.attribute.*
 import grails.validation.ValidationException
 
-class ProjectServiceSpec extends Specification implements UserAndRoles {
+class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
 
     ProjectService projectService
 
@@ -26,6 +27,8 @@ class ProjectServiceSpec extends Specification implements UserAndRoles {
     @Rule
     TemporaryFolder temporaryFolder
 
+    final static String REALM_NAME = 'DKFZ_13.1'
+
     def setup() {
         createUserAndRoles()
         DomainFactory.createProject(name: 'testProject', nameInMetadataFiles: 'testProject2', dirName: 'testDir')
@@ -34,7 +37,7 @@ class ProjectServiceSpec extends Specification implements UserAndRoles {
         projectGroup.save(flush: true, failOnError: true)
 
         int counter = 0
-        Realm realm = DomainFactory.createRealmDataManagement(temporaryFolder.newFolder())
+        Realm realm = DomainFactory.createRealmDataManagement(temporaryFolder.newFolder(), [name: REALM_NAME])
         DomainFactory.createRealmDataProcessing(temporaryFolder.newFolder(), [name: realm.name])
         DomainFactory.createProject(name: 'testProjectAlignment', realmName: realm.name, alignmentDeciderBeanName: 'test')
         DomainFactory.createReferenceGenome(name: 'testReferenceGenome')
@@ -52,10 +55,13 @@ class ProjectServiceSpec extends Specification implements UserAndRoles {
     }
 
     void "test createProject valid input"() {
+        given:
+        String group = grailsApplication.config.otp.testing.group
+
         when:
         Project project
         SpringSecurityUtils.doWithAuth("admin") {
-            project = projectService.createProject(name,  dirName,  'DKFZ_13.1', 'noAlignmentDecider',  projectGroup,  nameInMetadataFiles,  copyFiles)
+            project = projectService.createProject(name,  dirName,  REALM_NAME, 'noAlignmentDecider', group, projectGroup,  nameInMetadataFiles,  copyFiles)
         }
 
         then:
@@ -75,16 +81,44 @@ class ProjectServiceSpec extends Specification implements UserAndRoles {
         'project'   | 'dir'     | ''                | 'project'             | false
     }
 
-    void "test createProject invalid input"() {
+    void "test createProject if directory is created"() {
+        given:
+        String group = grailsApplication.config.otp.testing.group
+
         when:
         Project project
         SpringSecurityUtils.doWithAuth("admin") {
-            project = projectService.createProject(name, dirName, 'DKFZ_13.1', 'noAlignmentDecider', projectGroup, nameInMetadataFiles, copyFiles)
+            project = projectService.createProject('project',  'dir',  REALM_NAME, 'noAlignmentDecider', group, '', null,  false)
+        }
+
+        then:
+        Realm realm = ConfigService.getRealm(project, Realm.OperationType.DATA_MANAGEMENT)
+
+        File projectDirectory = LsdfFilesService.getPath(
+                realm.rootPath,
+                project.dirName,
+        )
+        assert projectDirectory.exists()
+        PosixFileAttributes attrs = Files.readAttributes(projectDirectory.toPath(), PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
+        attrs.group().toString() == group
+        TestCase.assertContainSame(attrs.permissions(),
+                [PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE, PosixFilePermission.OWNER_EXECUTE, PosixFilePermission.GROUP_READ, PosixFilePermission.GROUP_EXECUTE])
+    }
+
+    void "test createProject invalid input"() {
+        given:
+        String group = grailsApplication.config.otp.testing.group
+
+        when:
+        Project project
+        SpringSecurityUtils.doWithAuth("admin") {
+            project = projectService.createProject(name, dirName, REALM_NAME, 'noAlignmentDecider', group, projectGroup, nameInMetadataFiles, copyFiles)
         }
 
         then:
             ValidationException ex = thrown()
             ex.message.contains(errorName) && ex.message.contains(errorLocaction)
+
 
         where:
         name            | dirName   | projectGroup  | nameInMetadataFiles   | copyFiles || errorName                            | errorLocaction
@@ -94,6 +128,42 @@ class ProjectServiceSpec extends Specification implements UserAndRoles {
         'project'       | 'dir'     | ''            | 'testProject2'        | true      || 'this nameInMetadataFiles is already used in another project as nameInMetadataFiles entry'   | 'on field \'nameInMetadataFiles\': rejected value [testProject2]'
         'project'       | 'dir'     | ''            | ''                    | true      || 'blank'                                                                                      | 'on field \'nameInMetadataFiles\': rejected value []'
         'project'       | 'testDir' | ''            | ''                    | true      || 'unique'                                                                                     | 'on field \'dirName\': rejected value [testDir]'
+    }
+
+    void "test createProject invalid unix group"() {
+        when:
+        Project project
+        SpringSecurityUtils.doWithAuth("admin") {
+            project = projectService.createProject('project',  'dir',  REALM_NAME, 'noAlignmentDecider', 'invalidValue', '', null,  false)
+        }
+
+        then:
+        AssertionError ex = thrown()
+        ex.message.contains('The exit value is not 0, but 1')
+    }
+
+    void "test createProject valid input, when directory with wrong unix group already exists"() {
+        given:
+        String group = grailsApplication.config.otp.testing.group
+        Realm realm = CollectionUtils.exactlyOneElement(Realm.findAllByOperationType(Realm.OperationType.DATA_MANAGEMENT))
+        File projectDirectory = LsdfFilesService.getPath(
+                realm.rootPath,
+                "/dir",
+        )
+
+        when:
+        new File("${projectDirectory}").mkdirs()
+
+        then:
+        projectDirectory.exists()
+        Files.readAttributes(projectDirectory.toPath(), PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS).group().toString() != group
+
+        when:
+        SpringSecurityUtils.doWithAuth("admin") {
+            projectService.createProject('project',  'dir',  REALM_NAME, 'noAlignmentDecider', group, '', null,  false)
+        }
+        then:
+        Files.readAttributes(projectDirectory.toPath(), PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS).group().toString() == group
     }
 
     void "test updateNameInMetadata valid input"() {

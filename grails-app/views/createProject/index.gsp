@@ -31,8 +31,12 @@
                 <td><g:textField name="nameInMetadataFiles" size="130" value="${cmd.nameInMetadataFiles}"/></td>
             </tr>
             <tr>
-                <td class="myKey"><g:message code="createProject.group"/></td>
-                <td><g:select class="criteria" id="group" name='group' from='${groups}' value="${cmd.group}"></g:select></td>
+                <td class="myKey"><g:message code="createProject.unixGroup"/></td>
+                <td><g:textField name="unixGroup" size="130" value="${cmd.unixGroup}"/></td>
+            </tr>
+            <tr>
+                <td class="myKey"><g:message code="createProject.projectGroup"/></td>
+                <td><g:select class="criteria" id="group" name='projectGroup' from='${projectGroups}' value="${cmd.projectGroup}"></g:select></td>
             </tr>
             <tr>
                 <td class="myKey"><g:message code="createProject.copyFiles"/></td>

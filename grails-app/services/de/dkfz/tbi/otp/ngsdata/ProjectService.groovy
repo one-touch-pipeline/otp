@@ -18,7 +18,11 @@ import org.springframework.security.acls.model.Sid
 import org.springframework.security.core.userdetails.UserDetails
 import de.dkfz.tbi.otp.security.Group
 import de.dkfz.tbi.otp.job.processing.ExecutionService
+import de.dkfz.tbi.otp.utils.WaitingFileUtils
 
+import java.nio.file.Files
+import java.nio.file.LinkOption
+import java.nio.file.attribute.PosixFileAttributes
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
@@ -101,12 +105,14 @@ class ProjectService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public Project createProject(String name, String dirName, String realmName, String alignmentDeciderBeanName, String projectGroup, String nameInMetadataFiles, boolean copyFiles) {
+    public Project createProject(String name, String dirName, String realmName, String alignmentDeciderBeanName, String unixGroup, String projectGroup, String nameInMetadataFiles, boolean copyFiles) {
+        assert OtpPath.isValidPathComponent(unixGroup): "unixGroup contains invalid characters"
         Project project = createProject(name, dirName, realmName, alignmentDeciderBeanName)
         project.hasToBeCopied = copyFiles
         project.nameInMetadataFiles = nameInMetadataFiles
         project.setProjectGroup(ProjectGroup.findByName(projectGroup))
         assert project.save(flush: true, failOnError: true)
+
         GroupCommand groupCommand = new GroupCommand(
                 name: name,
                 description: "group for ${name}",
@@ -119,6 +125,17 @@ class ProjectService {
         )
         Group group = groupService.createGroup(groupCommand)
         groupService.aclUtilService.addPermission(project, new GrantedAuthoritySid(group.role.authority), BasePermission.READ)
+
+        File projectDirectory = getProjectDirectory(project)
+        if (projectDirectory.exists()) {
+            PosixFileAttributes attrs = Files.readAttributes(projectDirectory.toPath(), PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
+            if (attrs.group().toString() == unixGroup) {
+                return project
+            }
+        }
+        executeScript(buildCreateProjectDirectory(unixGroup, projectDirectory), project)
+        WaitingFileUtils.waitUntilExists(projectDirectory)
+
         return project
     }
 
@@ -273,12 +290,7 @@ AND ace.granting = true
 </configuration>
 """
 
-        Realm realm = ConfigService.getRealm(project, Realm.OperationType.DATA_MANAGEMENT)
-
-        File projectDirectory = LsdfFilesService.getPath(
-                realm.rootPath,
-                project.dirName,
-        )
+        File projectDirectory = getProjectDirectory(project)
 
         File configDirectory = LsdfFilesService.getPath(
                 projectDirectory.path,
@@ -290,12 +302,7 @@ AND ace.granting = true
 
         String createProjectDirectory = ''
         if (!projectDirectory.exists()) {
-            createProjectDirectory = """\
-mkdir -p -m 2750 ${projectDirectory}
-
-chgrp ${unixGroup} ${projectDirectory}
-chmod 2750 ${projectDirectory}
-"""
+            createProjectDirectory = buildCreateProjectDirectory(unixGroup, projectDirectory)
         }
 
         String createConfigDirectory = ''
@@ -306,10 +313,6 @@ mkdir -p -m 2750 ${configDirectory}
         }
 
         String script = """\
-#!/bin/bash
-set -evx
-
-umask 0027
 
 ${createProjectDirectory}
 
@@ -321,12 +324,9 @@ ${md5}
 
 chmod 0440 ${configFilePath}
 
-echo 'OK'
 """
+        executeScript(script, project)
 
-        LogThreadLocal.withThreadLog(System.out) {
-            assert executionService.executeCommand(realm, script).trim() == "OK"
-        }
 
         RoddyWorkflowConfig.importProjectConfigFile(
                 project,
@@ -335,6 +335,41 @@ echo 'OK'
                 configFilePath.path,
                 configVersion,
         )
+    }
+
+    private File getProjectDirectory(Project project) {
+        Realm realm = ConfigService.getRealm(project, Realm.OperationType.DATA_MANAGEMENT)
+        return LsdfFilesService.getPath(
+                realm.rootPath,
+                project.dirName,
+        )
+    }
+
+
+    private String buildCreateProjectDirectory(String unixGroup, File projectDirectory) {
+        return """\
+mkdir -p -m 2750 ${projectDirectory}
+
+chgrp ${unixGroup} ${projectDirectory}
+chmod 2750 ${projectDirectory}
+"""
+    }
+
+    private void executeScript(String input, Project project) {
+        Realm realm = ConfigService.getRealm(project, Realm.OperationType.DATA_MANAGEMENT)
+        String script = """\
+#!/bin/bash
+set -evx
+
+umask 0027
+
+${input}
+
+echo 'OK'
+"""
+        LogThreadLocal.withThreadLog(System.out) {
+            assert executionService.executeCommand(realm, script).trim() == "OK"
+        }
     }
 
     private void setReferenceGenomeProjectSeqTypeDeprecated(Project project) {

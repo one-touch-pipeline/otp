@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import org.springframework.validation.FieldError
+import de.dkfz.tbi.otp.dataprocessing.OtpPath
 
 class CreateProjectController {
 
@@ -17,11 +18,11 @@ class CreateProjectController {
                 message = "'" + errors.getRejectedValue() + "' is not a valid value for '" + errors.getField() + "'. Error code: '" + errors.code + "'"
             }
             else {
-                message = "Created Project " + projectService.createProject(cmd.name, cmd.directory, 'DKFZ_13.1', 'noAlignmentDecider', cmd.group, cmd.nameInMetadataFiles, cmd.copyFiles).toString()
+                message = "Created Project " + projectService.createProject(cmd.name, cmd.directory, 'DKFZ_13.1', 'noAlignmentDecider', cmd.unixGroup, cmd.projectGroup, cmd.nameInMetadataFiles, cmd.copyFiles).toString()
             }
         }
         return [
-            groups: ["No Group"] + projectGroupService.availableProjectGroups()*.name,
+            projectGroups: ["No Group"] + projectGroupService.availableProjectGroups()*.name,
             message: message,
             cmd: cmd,
             hasErrors: hasErrors
@@ -33,7 +34,8 @@ class CreateProjectControllerSubmitCommand implements Serializable {
     String name
     String directory
     String nameInMetadataFiles
-    String group
+    String unixGroup
+    String projectGroup
     String submit
     boolean copyFiles
 
@@ -49,6 +51,14 @@ class CreateProjectControllerSubmitCommand implements Serializable {
         directory(blank: false, validator: {val, obj ->
             if (Project.findByDirName(val)) {
                 return 'This path \'' + val + '\' is used by another project already'
+            }
+        })
+        unixGroup(blank: false, validator: {val, obj ->
+            if (val == "") {
+                return 'Empty'
+            }
+            if (!(OtpPath.isValidPathComponent(val))) {
+                return 'Unix group contains invalid characters'
             }
         })
         nameInMetadataFiles(nullable: true, validator: {val, obj ->
@@ -67,6 +77,10 @@ class CreateProjectControllerSubmitCommand implements Serializable {
 
     void setDirectory(String directory) {
         this.directory = directory?.trim()?.replaceAll(" +", " ")
+    }
+
+    void setUnixGroup(String unixGroup) {
+        this.unixGroup = unixGroup?.trim()?.replaceAll(" +", " ")
     }
 
     void setNameInMetadataFiles(String nameInMetadataFiles) {
