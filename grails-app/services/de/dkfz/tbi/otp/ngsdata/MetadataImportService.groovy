@@ -323,10 +323,10 @@ class MetadataImportService {
         if (mateNumberCell) {
             try {
                 mateNumber = (mateNumberCell.text).toInteger()
-            } catch (NumberFormatException e) {
+            } catch (NumberFormatException ignored) {
                 return null
             }
-            return new ExtractedValue(mateNumberCell.text, [mateNumberCell] as Set)
+            return new ExtractedValue(Integer.toString(mateNumber), [mateNumberCell] as Set)
         }
 
         if (libraryLayoutCell && LibraryLayout.values().find { it.name() == libraryLayoutCell.text }?.mateCount == 1) {

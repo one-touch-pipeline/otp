@@ -191,7 +191,7 @@ class SeqTrackValidator extends ColumnSetValidator<MetadataValidationContext> im
             Collection<Cell> filenameCells = seqTrackRows*.row*.getCell(filenameColumn)
             Map<String, Character> extractedMateNumbers = extractDistinguishingCharacter(filenameCells*.text)
             if (extractedMateNumbers == null) {
-                context.addProblem(seqTrackCells(seqTrackRows) + filenameCells,
+                context.addProblem(mateCells(seqTrackRows) + filenameCells,
                         Level.ERROR, "The filenames '${filenameCells*.text.sort().join("', '")}' for ${seqTrackRows.first().seqTrackString} do not differ in exactly one character. They must differ in exactly one character which is the mate number.")
             } else {
                 seqTrackRows.each {
