@@ -88,4 +88,8 @@ class Project implements Commentable, Entity {
         projectGroup index: "project_project_group_idx"
         processingPriority index: "project_processing_priority_idx"
     }
+
+    File getProjectDirectory() {
+        new OtpPath(this, dirName).absoluteDataManagementPath
+    }
 }

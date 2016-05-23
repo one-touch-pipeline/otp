@@ -8,6 +8,7 @@ import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.*
 import grails.plugin.springsecurity.*
+import jdk.nashorn.internal.ir.annotations.*
 import org.springframework.security.access.prepost.*
 import org.springframework.security.acls.domain.*
 import org.springframework.security.acls.model.*
@@ -23,6 +24,9 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
  *
  */
 class ProjectService {
+
+    static final String PHIX_INFIX = 'PhiX'
+
     /**
      * Dependency Injection for aclUtilService
      */
@@ -35,8 +39,6 @@ class ProjectService {
     GroupService groupService
     ReferenceGenomeService referenceGenomeService
     ExecutionService executionService
-    static final String PICARD = "Picard"
-    static final String BIOBAMBAM = "BioBamBam"
 
     /**
      *
@@ -118,7 +120,7 @@ class ProjectService {
         Group group = groupService.createGroup(groupCommand)
         groupService.aclUtilService.addPermission(project, new GrantedAuthoritySid(group.role.authority), BasePermission.READ)
 
-        File projectDirectory = getProjectDirectory(project)
+        File projectDirectory = project.getProjectDirectory()
         if (projectDirectory.exists()) {
             PosixFileAttributes attrs = Files.readAttributes(projectDirectory.toPath(), PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
             if (attrs.group().toString() == unixGroup) {
@@ -217,85 +219,60 @@ AND ace.granting = true
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void configurePanCanAlignmentDeciderProject(Project project, String referenceGenomeName, String pluginVersion, String statSizeFileName, String unixGroup, String mergeTool, String configVersion) {
-        setReferenceGenomeProjectSeqTypeDeprecated(project)
-        project.alignmentDeciderBeanName = "panCanAlignmentDecider"
-        project.save(flush: true, failOnError: true)
-        ReferenceGenome referenceGenome = exactlyOneElement(ReferenceGenome.findAllByName(referenceGenomeName))
-        assert mergeTool in [PICARD, BIOBAMBAM]: "Merge Tool must be '${PICARD}' or '${BIOBAMBAM}'"
-        boolean useBioBamBam = mergeTool == BIOBAMBAM
-        boolean useConvey = false
-        String pluginName = 'QualityControlWorkflows'
-        assert OtpPath.isValidPathComponent(pluginVersion): "pluginVersion is invalid path component"
-        assert OtpPath.isValidPathComponent(unixGroup): "unixGroup contains invalid characters"
+    void configurePanCanAlignmentDeciderProject(PanCanAlignmentConfiguration panCanAlignmentConfiguration) {
+        if (panCanAlignmentConfiguration.project.alignmentDeciderBeanName == AlignmentDeciderBeanNames.OTP_ALIGNMENT.bean) {
+            setReferenceGenomeProjectSeqTypeDeprecated(panCanAlignmentConfiguration.project)
+        } else {
+            setReferenceGenomeProjectSeqTypeDeprecated(panCanAlignmentConfiguration.project, panCanAlignmentConfiguration.seqType)
+        }
+        panCanAlignmentConfiguration.project.alignmentDeciderBeanName = AlignmentDeciderBeanNames.PAN_CAN_ALIGNMENT.bean
+        panCanAlignmentConfiguration.project.save(flush: true, failOnError: true)
+
+        ReferenceGenome referenceGenome = exactlyOneElement(ReferenceGenome.findAllByName(panCanAlignmentConfiguration.referenceGenome))
+
+        assert panCanAlignmentConfiguration.mergeTool in MergeConstants.ALL_MERGE_TOOLS: "Invalid merge tool: '${panCanAlignmentConfiguration.mergeTool}', possible values: ${MergeConstants.ALL_MERGE_TOOLS}"
+
+        assert OtpPath.isValidPathComponent(panCanAlignmentConfiguration.pluginName): "pluginName '${panCanAlignmentConfiguration.pluginName}' is an invalid path component"
+        assert OtpPath.isValidPathComponent(panCanAlignmentConfiguration.pluginVersion): "pluginVersion '${panCanAlignmentConfiguration.pluginVersion}' is an invalid path component"
+        assert OtpPath.isValidPathComponent(panCanAlignmentConfiguration.baseProjectConfig): "baseProjectConfig '${panCanAlignmentConfiguration.baseProjectConfig}' is an invalid path component"
+        assert panCanAlignmentConfiguration.configVersion ==~ RoddyWorkflowConfig.CONFIG_VERSION_PATTERN: "configVersion '${panCanAlignmentConfiguration.configVersion}' has not expected pattern: ${RoddyWorkflowConfig.CONFIG_VERSION_PATTERN}"
+
+        //Reference genomes with PHIX_INFIX only works with sambamba
+        if (referenceGenome.name.contains(PHIX_INFIX)) {
+            assert panCanAlignmentConfiguration.mergeTool == MergeConstants.MERGE_TOOL_SAMBAMBA : "Only sambamba supported for reference genome with Phix"
+        }
+
+        File statDir = referenceGenomeService.pathToChromosomeSizeFilesPerReference(panCanAlignmentConfiguration.project, referenceGenome)
+        File statSizeFile = new File(statDir, panCanAlignmentConfiguration.statSizeFileName)
+        assert statSizeFile.exists(): "The statSizeFile '${panCanAlignmentConfiguration.statSizeFileName}' could not be found in ${statDir}"
+
         Pipeline pipeline = CollectionUtils.exactlyOneElement(Pipeline.findAllByTypeAndName(
                 Pipeline.Type.ALIGNMENT,
                 Pipeline.Name.PANCAN_ALIGNMENT,
         ))
 
-        SeqType seqType_wgp = SeqType.getWholeGenomePairedSeqType()
-        SeqType seqType_exome = SeqType.getExomePairedSeqType()
-        [seqType_wgp, seqType_exome].each {seqType ->
-            ReferenceGenomeProjectSeqType refSeqType = new ReferenceGenomeProjectSeqType()
-            refSeqType.project = project
-            refSeqType.seqType = seqType
-            refSeqType.referenceGenome = referenceGenome
-            refSeqType.sampleType = null
-            refSeqType.statSizeFileName = statSizeFileName
-            refSeqType.save(flush: true, failOnError: true)
-        }
+        ReferenceGenomeProjectSeqType refSeqType = new ReferenceGenomeProjectSeqType()
+        refSeqType.project = panCanAlignmentConfiguration.project
+        refSeqType.seqType = panCanAlignmentConfiguration.seqType
+        refSeqType.referenceGenome = referenceGenome
+        refSeqType.sampleType = null
+        refSeqType.statSizeFileName = panCanAlignmentConfiguration.statSizeFileName
+        refSeqType.save(flush: true, failOnError: true)
 
-        File statDir = referenceGenomeService.pathToChromosomeSizeFilesPerReference(project, referenceGenome)
-        File statSizeFile = new File(statDir, statSizeFileName)
-        assert statSizeFile.exists(): "The statSizeFile ${statSizeFile} could not be found in ${statDir}"
+        String xmlConfig = RoddyPanCanConfigTemplate.createConfigBashEscaped(panCanAlignmentConfiguration)
 
-        String xmlConfig = """
-<configuration
-        configurationType='project'
-        name='${Pipeline.Name.PANCAN_ALIGNMENT.name()}_${pluginName}:${pluginVersion}_${configVersion}'
-        description='Align with BWA-MEM (${useConvey ? 'convey' : 'software'}) and mark duplicates with ${mergeTool}.' imports="otpPanCanAlignmentWorkflow-1.3 ">
-    <subconfigurations>
+        File projectDirectory = panCanAlignmentConfiguration.project.getProjectDirectory()
+        assert projectDirectory.exists()
 
-        <configuration name="config" usedresourcessize="xl">
-            <availableAnalyses>
-                <analysis id='WGS' configuration='qcAnalysis' killswitches='FilenameSection'/>
-                <analysis id='WES' configuration='exomeAnalysis' killswitches='FilenameSection'/>
-            </availableAnalyses>
-            <configurationvalues>
-
-                <!-- Unix group -->
-                <cvalue name='outputFileGroup' value='${unixGroup}'
-                    description="For OTP this needs to be set to the Unix group of the project."/>
-
-                <!-- Using of Convey -->
-                <cvalue name='useAcceleratedHardware' value='${useConvey}' type="boolean"
-                    description='Map reads with Convey BWA-MEM (true) or software BWA-MEM (false; PCAWF standard)'/>
-
-                <!-- Picard / BioBamBam -->
-                <cvalue name='useBioBamBamMarkDuplicates' value='${useBioBamBam}' type="boolean"
-                    description='Merge and mark duplicates with biobambam (true; PCAWF standard) or Picard (false).'/>
-
-            </configurationvalues>
-        </configuration>
-
-    </subconfigurations>
-</configuration>
-"""
-
-        File projectDirectory = getProjectDirectory(project)
-
-        File configDirectory = LsdfFilesService.getPath(
-                projectDirectory.path,
-                'configFiles',
-                Pipeline.Name.PANCAN_ALIGNMENT.name(),
+        File configFilePath = RoddyWorkflowConfig.getStandardConfigFile(
+                panCanAlignmentConfiguration.project,
+                pipeline.name,
+                panCanAlignmentConfiguration.seqType,
+                panCanAlignmentConfiguration.pluginVersion,
+                panCanAlignmentConfiguration.configVersion,
         )
-        File configFilePath = new File(configDirectory, "${Pipeline.Name.PANCAN_ALIGNMENT.name()}_${pluginVersion}_${configVersion}.xml")
+        File configDirectory = configFilePath.parentFile
         String md5 = HelperUtils.getRandomMd5sum()
-
-        String createProjectDirectory = ''
-        if (!projectDirectory.exists()) {
-            createProjectDirectory = buildCreateProjectDirectory(unixGroup, projectDirectory)
-        }
 
         String createConfigDirectory = ''
         if (!configDirectory.exists()) {
@@ -306,8 +283,6 @@ mkdir -p -m 2750 ${configDirectory}
 
         String script = """\
 
-${createProjectDirectory}
-
 ${createConfigDirectory}
 
 cat <<${md5} > ${configFilePath}
@@ -317,26 +292,18 @@ ${md5}
 chmod 0440 ${configFilePath}
 
 """
-        executeScript(script, project)
-
+        executeScript(script, panCanAlignmentConfiguration.project)
 
         RoddyWorkflowConfig.importProjectConfigFile(
-                project,
-                null, //TODO OTP-2142 Update Roddy project XML template.
-                "${pluginName}:${pluginVersion}",
+                panCanAlignmentConfiguration.project,
+                panCanAlignmentConfiguration.seqType,
+                "${panCanAlignmentConfiguration.pluginName}:${panCanAlignmentConfiguration.pluginVersion}",
                 pipeline,
                 configFilePath.path,
-                configVersion,
+                panCanAlignmentConfiguration.configVersion,
         )
     }
 
-    private File getProjectDirectory(Project project) {
-        Realm realm = ConfigService.getRealm(project, Realm.OperationType.DATA_MANAGEMENT)
-        return LsdfFilesService.getPath(
-                realm.rootPath,
-                project.dirName,
-        )
-    }
 
 
     private String buildCreateProjectDirectory(String unixGroup, File projectDirectory) {
@@ -370,4 +337,23 @@ echo 'OK'
         referenceGenomeProjectSeqTypes*.deprecatedDate = new Date()
         referenceGenomeProjectSeqTypes*.save(flush: true, failOnError: true)
     }
+
+    private void setReferenceGenomeProjectSeqTypeDeprecated(Project project, SeqType seqType) {
+        Set<ReferenceGenomeProjectSeqType> referenceGenomeProjectSeqTypes = ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndDeprecatedDateIsNull(project, seqType)
+        referenceGenomeProjectSeqTypes*.deprecatedDate = new Date()
+        referenceGenomeProjectSeqTypes*.save(flush: true, failOnError: true)
+    }
+}
+
+@Immutable
+class PanCanAlignmentConfiguration {
+    Project project
+    SeqType seqType
+    String referenceGenome
+    String statSizeFileName
+    String mergeTool
+    String pluginName
+    String pluginVersion
+    String baseProjectConfig
+    String configVersion
 }

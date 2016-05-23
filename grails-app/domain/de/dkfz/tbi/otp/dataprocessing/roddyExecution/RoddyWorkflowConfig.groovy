@@ -27,6 +27,8 @@ class RoddyWorkflowConfig extends ConfigPerProject {
     //dot makes problems in roddy config identifiers, therefore an underscore is used
     final static String CONFIG_VERSION_PATTERN =  /^v\d+_\d+$/
 
+    final static String CONFIG_PATH_ELEMENT = 'configFiles'
+
     Pipeline pipeline
 
     SeqType seqType
@@ -34,8 +36,8 @@ class RoddyWorkflowConfig extends ConfigPerProject {
     /**
      * the full path to the config file which is used in this project and pipeline. The name of the config file contains the version number.
      *
-     * The file should be located in: $OTP_ROOT_PATH/$PROJECT/configFiles/$Workflow/
-     * The file should be named as: ${Workflow}_${seqType.roddyName}_${WorkflowVersion}_${configVersion}.xml
+     * The file should be located in: $OTP_ROOT_PATH/$Project/configFiles/${Pipeline}/
+     * The file should be named as: ${Pipeline}_${seqType.roddyName}_${PluginVersion}_${configVersion}.xml
      *
      * for example: $OTP_ROOT_PATH/$PROJECT/configFiles/PANCAN_ALIGNMENT/PANCAN_ALIGNMENT_WES_1.0.177_v1_0.xml
      */
@@ -87,7 +89,7 @@ class RoddyWorkflowConfig extends ConfigPerProject {
         try {
             return atMostOneElement(RoddyWorkflowConfig.findAllByProjectAndSeqTypeAndPipelineAndObsoleteDate(project, seqType, pipeline, null))
         } catch (final Throwable t) {
-            throw new RuntimeException("Found more than one RoddyWorkflowConfig for Project ${project} and Pipeline ${pipeline}. ${t.message ?: ''}", t)
+            throw new RuntimeException("Found more than one RoddyWorkflowConfig for Project ${project}, SeqType ${seqType} and Pipeline ${pipeline}. ${t.message ?: ''}", t)
         }
     }
 
@@ -104,7 +106,42 @@ class RoddyWorkflowConfig extends ConfigPerProject {
 
     String getNameUsedInConfig() {
         assert configVersion != null : 'Config version is not set'
-        return "${pipeline.name}_${seqType.roddyName}_${pluginVersion}_${configVersion}"
+        return getNameUsedInConfig(pipeline.name, seqType, pluginVersion, configVersion)
+    }
+
+    static String getNameUsedInConfig(Pipeline.Name pipelineName, SeqType seqType, String pluginVersion, String configVersion) {
+        assert pipelineName
+        assert seqType
+        assert pluginVersion
+        assert configVersion
+
+        return "${pipelineName.name()}_${seqType.roddyName}_${pluginVersion}_${configVersion}"
+    }
+
+
+    static File getStandardConfigDirectory(Project project, Pipeline.Name pipelineName) {
+        assert project
+        assert pipelineName
+        LsdfFilesService.getPath(
+                project.getProjectDirectory().path,
+                CONFIG_PATH_ELEMENT,
+                pipelineName.name(),
+        )
+    }
+
+    static String getConfigFileName(Pipeline.Name pipelineName, SeqType seqType, String pluginVersion, String configVersion) {
+        assert pipelineName
+        assert seqType
+        assert pluginVersion
+        assert configVersion
+
+        assert seqType.roddyName
+        assert configVersion ==~ CONFIG_VERSION_PATTERN
+        return "${getNameUsedInConfig(pipelineName, seqType, pluginVersion, configVersion)}.xml"
+    }
+
+    static File getStandardConfigFile(Project project, Pipeline.Name pipelineName, SeqType seqType, String pluginVersion, String configVersion) {
+        return new File(getStandardConfigDirectory(project, pipelineName), getConfigFileName(pipelineName, seqType, pluginVersion, configVersion))
     }
 
 }

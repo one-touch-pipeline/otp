@@ -135,9 +135,9 @@ class SeqType implements Entity {
     }
 
     static List<SeqType> getAllAlignableSeqTypes() {
-        return (
-                getDefaultOtpAlignableSeqTypes() +
-                getPanCanAlignableSeqTypes()
-        ).unique()
+        return [
+                getDefaultOtpAlignableSeqTypes(),
+                getPanCanAlignableSeqTypes(),
+        ].flatten().unique()
     }
 }

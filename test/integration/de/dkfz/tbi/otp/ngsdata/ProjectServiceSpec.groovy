@@ -12,10 +12,10 @@ import grails.validation.*
 import org.codehaus.groovy.grails.commons.*
 import org.junit.*
 import org.junit.rules.*
+import spock.lang.*
 
 import java.nio.file.*
 import java.nio.file.attribute.*
-
 
 class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
 
@@ -43,12 +43,11 @@ class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
         DomainFactory.createProject(name: 'testProjectAlignment', realmName: realm.name, alignmentDeciderBeanName: 'test')
         DomainFactory.createReferenceGenome(name: 'testReferenceGenome')
         DomainFactory.createReferenceGenome(name: 'testReferenceGenome2')
-        DomainFactory.createWholeGenomeSeqType()
-        DomainFactory.createExomeSeqType()
+        DomainFactory.createPanCanAlignableSeqTypes()
         DomainFactory.createPanCanPipeline()
         projectService.executionService = Stub(ExecutionService) {
             executeCommand(_, _) >> { Realm realm2, String command ->
-                File script = temporaryFolder.newFile('script'+ counter++ +'.sh')
+                File script = temporaryFolder.newFile('script' + counter++ + '.sh')
                 script.text = command
                 return ProcessHelperService.executeCommandAndAssertExistCodeAndReturnProcessOutput("bash ${script.absolutePath}").stdout
             }
@@ -62,7 +61,7 @@ class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
         when:
         Project project
         SpringSecurityUtils.doWithAuth("admin") {
-            project = projectService.createProject(name,  dirName,  REALM_NAME, 'noAlignmentDecider', group, projectGroup,  nameInMetadataFiles,  copyFiles)
+            project = projectService.createProject(name, dirName, REALM_NAME, AlignmentDeciderBeanNames.NO_ALIGNMENT.bean, group, projectGroup, nameInMetadataFiles, copyFiles)
         }
 
         then:
@@ -89,7 +88,7 @@ class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
         when:
         Project project
         SpringSecurityUtils.doWithAuth("admin") {
-            project = projectService.createProject('project',  'dir',  REALM_NAME, 'noAlignmentDecider', group, '', null,  false)
+            project = projectService.createProject('project', 'dir', REALM_NAME, AlignmentDeciderBeanNames.NO_ALIGNMENT.bean, group, '', null, false)
         }
 
         then:
@@ -113,7 +112,7 @@ class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
         when:
         Project project
         SpringSecurityUtils.doWithAuth("admin") {
-            project = projectService.createProject(name, dirName, REALM_NAME, 'noAlignmentDecider', group, projectGroup, nameInMetadataFiles, copyFiles)
+            project = projectService.createProject(name, dirName, REALM_NAME, AlignmentDeciderBeanNames.NO_ALIGNMENT.bean, group, projectGroup, nameInMetadataFiles, copyFiles)
         }
 
         then:
@@ -135,7 +134,7 @@ class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
         when:
         Project project
         SpringSecurityUtils.doWithAuth("admin") {
-            project = projectService.createProject('project',  'dir',  REALM_NAME, 'noAlignmentDecider', 'invalidValue', '', null,  false)
+            project = projectService.createProject('project', 'dir', REALM_NAME, AlignmentDeciderBeanNames.NO_ALIGNMENT.bean, 'invalidValue', '', null, false)
         }
 
         then:
@@ -161,7 +160,7 @@ class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
 
         when:
         SpringSecurityUtils.doWithAuth("admin") {
-            projectService.createProject('project',  'dir',  REALM_NAME, 'noAlignmentDecider', group, '', null,  false)
+            projectService.createProject('project', 'dir', REALM_NAME, AlignmentDeciderBeanNames.NO_ALIGNMENT.bean, group, '', null, false)
         }
         then:
         Files.readAttributes(projectDirectory.toPath(), PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS).group().toString() == group
@@ -229,9 +228,9 @@ class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
         }
 
         then:
-        project.alignmentDeciderBeanName == "defaultOtpAlignmentDecider"
-        Set <ReferenceGenomeProjectSeqType> referenceGenomeProjectSeqTypes = ReferenceGenomeProjectSeqType.findAllByProjectAndDeprecatedDateIsNull(project)
-        referenceGenomeProjectSeqTypes.every {it.referenceGenome == referenceGenome}
+        project.alignmentDeciderBeanName == AlignmentDeciderBeanNames.OTP_ALIGNMENT.bean
+        Set<ReferenceGenomeProjectSeqType> referenceGenomeProjectSeqTypes = ReferenceGenomeProjectSeqType.findAllByProjectAndDeprecatedDateIsNull(project)
+        referenceGenomeProjectSeqTypes.every { it.referenceGenome == referenceGenome }
         referenceGenomeProjectSeqTypes.size() == 2
     }
 
@@ -248,9 +247,9 @@ class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
         }
 
         then:
-        project.alignmentDeciderBeanName == "defaultOtpAlignmentDecider"
-        Set <ReferenceGenomeProjectSeqType> referenceGenomeProjectSeqTypes = ReferenceGenomeProjectSeqType.findAllByProjectAndDeprecatedDateIsNull(project)
-        referenceGenomeProjectSeqTypes.every {it.referenceGenome == referenceGenome2}
+        project.alignmentDeciderBeanName == AlignmentDeciderBeanNames.OTP_ALIGNMENT.bean
+        Set<ReferenceGenomeProjectSeqType> referenceGenomeProjectSeqTypes = ReferenceGenomeProjectSeqType.findAllByProjectAndDeprecatedDateIsNull(project)
+        referenceGenomeProjectSeqTypes.every { it.referenceGenome == referenceGenome2 }
         referenceGenomeProjectSeqTypes.size() == 2
     }
 
@@ -261,7 +260,7 @@ class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
 
         when:
         SpringSecurityUtils.doWithAuth("admin") {
-                projectService.configureDefaultOtpAlignmentDecider(project, "error")
+            projectService.configureDefaultOtpAlignmentDecider(project, "error")
         }
 
         then:
@@ -269,80 +268,86 @@ class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
         exception.message == "Collection contains 0 elements. Expected 1."
     }
 
-    @spock.lang.Ignore('Will be fixed with OTP-2142')
     void "test configurePanCanAlignmentDeciderProject valid input"() {
         setup:
-        Project project = Project.findByName("testProjectAlignment")
-        ReferenceGenome referenceGenome = ReferenceGenome.findByName("testReferenceGenome")
-        String statFileName = "testStatSizeFileName.tab"
-        File statFile = makeStatFile(project, referenceGenome, statFileName)
-        String group = grailsApplication.config.otp.testing.group
-
+        PanCanAlignmentConfiguration configuration = createPanCanAlignmentConfiguration()
 
         when:
         SpringSecurityUtils.doWithAuth("admin") {
-            projectService.configurePanCanAlignmentDeciderProject(project, referenceGenome.name, "1.0.182", statFileName, group, ProjectService.PICARD, "v1_0")
+            projectService.configurePanCanAlignmentDeciderProject(configuration)
         }
 
         then:
-        project.alignmentDeciderBeanName == "panCanAlignmentDecider"
-        RoddyWorkflowConfig.findAllByProjectAndSeqTypeAndPipelineInListAndPluginVersionAndObsoleteDateIsNull(
-                project,
-                seqType,
-                Pipeline.findAllByTypeAndName(Pipeline.Type.ALIGNMENT,Pipeline.Name.PANCAN_ALIGNMENT,),
-                "QualityControlWorkflows:1.0.182"
-        ).size == 1
-        File roddyWorkflowConfig = getRoddyWorkflowConfig(project)
+        configuration.project.alignmentDeciderBeanName == AlignmentDeciderBeanNames.PAN_CAN_ALIGNMENT.bean
+        List<RoddyWorkflowConfig> roddyWorkflowConfigs = RoddyWorkflowConfig.findAllByProjectAndSeqTypeAndPipelineInListAndPluginVersionAndObsoleteDateIsNull(
+                configuration.project,
+                configuration.seqType,
+                Pipeline.findAllByTypeAndName(Pipeline.Type.ALIGNMENT, Pipeline.Name.PANCAN_ALIGNMENT,),
+                "${configuration.pluginName}:${configuration.pluginVersion}"
+        )
+        roddyWorkflowConfigs.size() == 1
+        File roddyWorkflowConfig = new File(roddyWorkflowConfigs.configFilePath.first())
         roddyWorkflowConfig.exists()
-        PosixFileAttributes attrs = Files.readAttributes(roddyWorkflowConfig.toPath(), PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
-        attrs.group().toString() == group
-        TestCase.assertContainSame(attrs.permissions(), [PosixFilePermission.OWNER_READ, PosixFilePermission.GROUP_READ])
+        PosixFileAttributes attributes = Files.readAttributes(roddyWorkflowConfig.toPath(), PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
+        TestCase.assertContainSame(attributes.permissions(), [PosixFilePermission.OWNER_READ, PosixFilePermission.GROUP_READ])
     }
 
-    @spock.lang.Ignore('Will be fixed with OTP-2142')
     void "test configurePanCanAlignmentDeciderProject valid input, twice"() {
         setup:
-        Project project = Project.findByName("testProjectAlignment")
-        ReferenceGenome referenceGenome = ReferenceGenome.findByName("testReferenceGenome")
-        String statFileName = "testStatSizeFileName.tab"
-        makeStatFile(project, referenceGenome, statFileName)
-
-        ReferenceGenome referenceGenome2 = ReferenceGenome.findByName("testReferenceGenome2")
-        String statFileName2 = "testStatSizeFileName2.tab"
-        File statFile2 = makeStatFile(project, referenceGenome2, statFileName2)
-        String group = grailsApplication.config.otp.testing.group
-
+        PanCanAlignmentConfiguration configuration = createPanCanAlignmentConfiguration()
+        PanCanAlignmentConfiguration configuration2 = createPanCanAlignmentConfiguration([
+                referenceGenome : "testReferenceGenome2",
+                statSizeFileName: "testStatSizeFileName2.tab",
+                configVersion   : 'v1_1'
+        ])
 
         when:
         SpringSecurityUtils.doWithAuth("admin") {
-            projectService.configurePanCanAlignmentDeciderProject(project, referenceGenome.name, "1.0.182", statFileName, group, ProjectService.PICARD, "v1_0")
-            projectService.configurePanCanAlignmentDeciderProject(project, referenceGenome2.name, "1.0.182", statFileName2, group, ProjectService.PICARD, "v1_1")
+            projectService.configurePanCanAlignmentDeciderProject(configuration)
+            projectService.configurePanCanAlignmentDeciderProject(configuration2)
         }
 
         then:
-        project.alignmentDeciderBeanName == "panCanAlignmentDecider"
+        configuration.project.alignmentDeciderBeanName == AlignmentDeciderBeanNames.PAN_CAN_ALIGNMENT.bean
         Set<RoddyWorkflowConfig> roddyWorkflowConfigs = RoddyWorkflowConfig.findAllByProjectAndPipelineInListAndPluginVersion(
-                project,
-                Pipeline.findAllByTypeAndName(Pipeline.Type.ALIGNMENT,Pipeline.Name.PANCAN_ALIGNMENT,),
-                "QualityControlWorkflows:1.0.182"
+                configuration.project,
+                Pipeline.findAllByTypeAndName(Pipeline.Type.ALIGNMENT, Pipeline.Name.PANCAN_ALIGNMENT,),
+                "${configuration2.pluginName}:${configuration2.pluginVersion}"
         )
         roddyWorkflowConfigs.size() == 2
-        roddyWorkflowConfigs.findAll({it.obsoleteDate == null}).size() == 1
-        statFile2.exists()
+        roddyWorkflowConfigs.findAll({ it.obsoleteDate == null }).size() == 1
+        ReferenceGenomeProjectSeqType.findAllByDeprecatedDateIsNull().size() == 1
+    }
+
+    void "test configurePanCanAlignmentDeciderProject valid input, multiple SeqTypes"() {
+        setup:
+        List<PanCanAlignmentConfiguration> configurations = DomainFactory.createPanCanAlignableSeqTypes().collect {
+                    createPanCanAlignmentConfiguration(seqType: it)
+        }
+        int count = configurations.size()
+
+        when:
+        SpringSecurityUtils.doWithAuth("admin") {
+            configurations.each {
+                projectService.configurePanCanAlignmentDeciderProject(it)
+            }
+        }
+
+        then:
+        Set<RoddyWorkflowConfig> roddyWorkflowConfigs = RoddyWorkflowConfig.list()
+        roddyWorkflowConfigs.size() == count
+        roddyWorkflowConfigs.findAll({ it.obsoleteDate == null }).size() == count
+        ReferenceGenomeProjectSeqType.findAllByDeprecatedDateIsNull().size() == count
     }
 
     void "test configurePanCanAlignmentDeciderProject invalid referenceGenome input"() {
         setup:
-        Project project = Project.findByName("testProjectAlignment")
-        ReferenceGenome referenceGenome = ReferenceGenome.findByName("testReferenceGenome")
-        String statFileName = "testStatSizeFileName.tab"
-        makeStatFile(project, referenceGenome, statFileName)
-        String group = grailsApplication.config.otp.testing.group
-
+        PanCanAlignmentConfiguration configuration = createPanCanAlignmentConfiguration()
+        configuration.referenceGenome = 'invalidReferenceGenome'
 
         when:
         SpringSecurityUtils.doWithAuth("admin") {
-            projectService.configurePanCanAlignmentDeciderProject(project, "invalidReferenceGenome", "1.0.182", statFileName, group, ProjectService.PICARD, "v1_0")
+            projectService.configurePanCanAlignmentDeciderProject(configuration)
         }
 
         then:
@@ -350,171 +355,182 @@ class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
         exception.message == "Collection contains 0 elements. Expected 1."
     }
 
-    void "test configurePanCanAlignmentDeciderProject invalid pluginVersion input"() {
+    void "test configurePanCanAlignmentDeciderProject invalid pluginName input"() {
         setup:
-        Project project = Project.findByName("testProjectAlignment")
-        ReferenceGenome referenceGenome = ReferenceGenome.findByName("testReferenceGenome")
-        String statFileName = "testStatSizeFileName.tab"
-        makeStatFile(project, referenceGenome, statFileName)
-        String group = grailsApplication.config.otp.testing.group
-
+        PanCanAlignmentConfiguration configuration = createPanCanAlignmentConfiguration(
+                pluginName: 'invalid/name'
+        )
 
         when:
         SpringSecurityUtils.doWithAuth("admin") {
-            projectService.configurePanCanAlignmentDeciderProject(project, referenceGenome.name, "1.0.182/", statFileName, group, ProjectService.PICARD, "v1_0")
+            projectService.configurePanCanAlignmentDeciderProject(configuration)
         }
 
         then:
         AssertionError exception = thrown()
-        exception.message == "pluginVersion is invalid path component. Expression: de.dkfz.tbi.otp.dataprocessing.OtpPath.isValidPathComponent(pluginVersion)"
+        exception.message ==~ /pluginName '.*' is an invalid path component\..*/
     }
 
+    void "test configurePanCanAlignmentDeciderProject invalid pluginVersion input"() {
+        setup:
+        PanCanAlignmentConfiguration configuration = createPanCanAlignmentConfiguration(
+                pluginVersion: 'invalid/version'
+        )
+
+        when:
+        SpringSecurityUtils.doWithAuth("admin") {
+            projectService.configurePanCanAlignmentDeciderProject(configuration)
+        }
+
+        then:
+        AssertionError exception = thrown()
+        exception.message ==~ /pluginVersion '.*' is an invalid path component\..*/
+    }
+
+    @Unroll
+    void "test configurePanCanAlignmentDeciderProject invalid baseProjectConfig input"() {
+        setup:
+        PanCanAlignmentConfiguration configuration = createPanCanAlignmentConfiguration(
+                baseProjectConfig: baseProjectConfig
+        )
+
+        when:
+        SpringSecurityUtils.doWithAuth("admin") {
+            projectService.configurePanCanAlignmentDeciderProject(configuration)
+        }
+
+        then:
+        AssertionError exception = thrown()
+        exception.message ==~ message
+
+        where:
+        baseProjectConfig || message
+        ''                || /baseProjectConfig '.*' is an invalid path component\..*/
+        "invalid/path"    || /baseProjectConfig '.*' is an invalid path component\..*/
+    }
 
     void "test configurePanCanAlignmentDeciderProject invalid statSizeFileName input"() {
         setup:
-        Project project = Project.findByName("testProjectAlignment")
-        ReferenceGenome referenceGenome = ReferenceGenome.findByName("testReferenceGenome")
-        File statDirectory = referenceGenomeService.pathToChromosomeSizeFilesPerReference(project, referenceGenome, false)
-        assert statDirectory.mkdirs()
-        String group = grailsApplication.config.otp.testing.group
+        PanCanAlignmentConfiguration configuration = createPanCanAlignmentConfiguration()
+        configuration.statSizeFileName = 'nonExistingFile.tab'
 
         when:
         SpringSecurityUtils.doWithAuth("admin") {
-            projectService.configurePanCanAlignmentDeciderProject(project, referenceGenome.name, "1.0.182", "invalidStatSizeFileName.tab", group, ProjectService.PICARD, "v1_0")
+            projectService.configurePanCanAlignmentDeciderProject(configuration)
         }
 
         then:
         AssertionError exception = thrown()
-        exception.message == "The statSizeFile " + statDirectory + "/invalidStatSizeFileName.tab could not be found in " + statDirectory + ". Expression: statSizeFile.exists()"
+        exception.message ==~ /The statSizeFile '.*${configuration.statSizeFileName}' could not be found in .*/
     }
 
-    void "test configurePanCanAlignmentDeciderProject invalid unixGroup input"() {
-        setup:
-        Project project = Project.findByName("testProjectAlignment")
-        ReferenceGenome referenceGenome = ReferenceGenome.findByName("testReferenceGenome")
-        String statFileName = "testStatSizeFileName.tab"
-        makeStatFile(project, referenceGenome, statFileName)
-
-        when:
-        SpringSecurityUtils.doWithAuth("admin") {
-            projectService.configurePanCanAlignmentDeciderProject(project, referenceGenome.name, "1.0.182", statFileName, groupName, ProjectService.PICARD, "v1_0")
-        }
-
-        then:
-        AssertionError exception = thrown()
-        exception.message == message
-
-        where:
-        groupName       || message
-        "invalidGroup"  || "The exit value is not 0, but 1. Expression: (process.exitValue() == 0)"
-        "invalidGroup/" || "unixGroup contains invalid characters. Expression: de.dkfz.tbi.otp.dataprocessing.OtpPath.isValidPathComponent(unixGroup)"
-    }
 
     void "test configurePanCanAlignmentDeciderProject invalid mergeTool input"() {
         setup:
-        Project project = Project.findByName("testProjectAlignment")
-        ReferenceGenome referenceGenome = ReferenceGenome.findByName("testReferenceGenome")
-        String statFileName = "testStatSizeFileName.tab"
-        makeStatFile(project, referenceGenome, statFileName)
-        String group = grailsApplication.config.otp.testing.group
+        PanCanAlignmentConfiguration configuration = createPanCanAlignmentConfiguration(
+                mergeTool: 'invalidMergeTool',
+        )
 
         when:
         SpringSecurityUtils.doWithAuth("admin") {
-            projectService.configurePanCanAlignmentDeciderProject(project, referenceGenome.name, "1.0.182", statFileName, group, "invalidMergeTool", "v1_0")
+            projectService.configurePanCanAlignmentDeciderProject(configuration)
         }
 
         then:
         AssertionError exception = thrown()
-        exception.message == "Merge Tool must be '" + ProjectService.PICARD + "' or '" + ProjectService.BIOBAMBAM + "'. Expression: (mergeTool in [PICARD, BIOBAMBAM]). Values: mergeTool = invalidMergeTool"
+        exception.message ==~ /Invalid merge tool: 'invalidMergeTool',.*/
     }
 
-    @spock.lang.Ignore('Will be fixed with OTP-2142')
+    @Unroll
+    void "test configurePanCanAlignmentDeciderProject phix reference genome require sambamba for merge"() {
+        setup:
+        PanCanAlignmentConfiguration configuration = createPanCanAlignmentConfiguration(
+                referenceGenome: DomainFactory.createReferenceGenome(name: "referencegenome_${ProjectService.PHIX_INFIX}").name,
+                mergeTool: tool,
+        )
+
+        when:
+        SpringSecurityUtils.doWithAuth("admin") {
+            projectService.configurePanCanAlignmentDeciderProject(configuration)
+        }
+
+        then:
+        AssertionError exception = thrown()
+        exception.message ==~ /Only sambamba supported for reference genome with Phix.*/
+
+        where:
+        tool << [MergeConstants.MERGE_TOOL_PICARD, MergeConstants.MERGE_TOOL_BIOBAMBAM]
+    }
+
+
     void "test configurePanCanAlignmentDeciderProject invalid configVersion input"() {
         setup:
-        Project project = Project.findByName("testProjectAlignment")
-        ReferenceGenome referenceGenome = ReferenceGenome.findByName("testReferenceGenome")
-        String statFileName = "testStatSizeFileName.tab"
-        makeStatFile(project, referenceGenome, statFileName)
-        String group = grailsApplication.config.otp.testing.group
+        PanCanAlignmentConfiguration configuration = createPanCanAlignmentConfiguration(
+                configVersion: 'invalid/Version',
+        )
 
         when:
         SpringSecurityUtils.doWithAuth("admin") {
-            projectService.configurePanCanAlignmentDeciderProject(project, referenceGenome.name, "1.0.182", statFileName, group, ProjectService.PICARD, "v1.0")
+            projectService.configurePanCanAlignmentDeciderProject(configuration)
         }
 
         then:
-        ValidationException exception = thrown()
-        exception.message.contains("[Property [{0}] of class [{1}] with value [{2}] does not match the required pattern [{3}]]")
+        AssertionError exception = thrown()
+        exception.message ==~ /configVersion 'invalid\/Version' has not expected pattern.*/
     }
 
-    @spock.lang.Ignore('Will be fixed with OTP-2142')
     void "test configurePanCanAlignmentDeciderProject to configureDefaultOtpAlignmentDecider"() {
         setup:
-        Project project = Project.findByName("testProjectAlignment")
-        ReferenceGenome referenceGenome = ReferenceGenome.findByName("testReferenceGenome")
-        String statFileName = "testStatSizeFileName.tab"
-        makeStatFile(project, referenceGenome, statFileName)
-        String group = grailsApplication.config.otp.testing.group
-
+        PanCanAlignmentConfiguration configuration = createPanCanAlignmentConfiguration()
 
         when:
         SpringSecurityUtils.doWithAuth("admin") {
-            projectService.configurePanCanAlignmentDeciderProject(project, referenceGenome.name, "1.0.182", statFileName, group, ProjectService.PICARD, "v1_0")
-            projectService.configureDefaultOtpAlignmentDecider(project, referenceGenome.name)
+            projectService.configurePanCanAlignmentDeciderProject(configuration)
+            projectService.configureDefaultOtpAlignmentDecider(configuration.project, configuration.referenceGenome)
         }
 
         then:
-        project.alignmentDeciderBeanName == "defaultOtpAlignmentDecider"
-        Set <ReferenceGenomeProjectSeqType> referenceGenomeProjectSeqTypes = ReferenceGenomeProjectSeqType.findAllByProjectAndDeprecatedDateIsNull(project)
-        referenceGenomeProjectSeqTypes.every {it.referenceGenome == referenceGenome}
+        configuration.project.alignmentDeciderBeanName == AlignmentDeciderBeanNames.OTP_ALIGNMENT.bean
+        Collection<ReferenceGenomeProjectSeqType> referenceGenomeProjectSeqTypes = ReferenceGenomeProjectSeqType.findAllByDeprecatedDateIsNull()
+        referenceGenomeProjectSeqTypes.every {
+            it.referenceGenome.name == configuration.referenceGenome && it.statSizeFileName == null
+        }
         referenceGenomeProjectSeqTypes.size() == 2
     }
 
-    @spock.lang.Ignore('Will be fixed with OTP-2142')
     void "test configurePanCanAlignmentDeciderProject to configureNoAlignmentDeciderProject"() {
         setup:
-        Project project = Project.findByName("testProjectAlignment")
-        ReferenceGenome referenceGenome = ReferenceGenome.findByName("testReferenceGenome")
-        String statFileName = "testStatSizeFileName.tab"
-        makeStatFile(project, referenceGenome, statFileName)
-        String group = grailsApplication.config.otp.testing.group
-
+        PanCanAlignmentConfiguration configuration = createPanCanAlignmentConfiguration()
 
         when:
         SpringSecurityUtils.doWithAuth("admin") {
-            projectService.configurePanCanAlignmentDeciderProject(project, referenceGenome.name, "1.0.182", statFileName, group, ProjectService.PICARD, "v1_0")
-            projectService.configureNoAlignmentDeciderProject(project)
+            projectService.configurePanCanAlignmentDeciderProject(configuration)
+            projectService.configureNoAlignmentDeciderProject(configuration.project)
         }
 
         then:
-        project.alignmentDeciderBeanName == "noAlignmentDecider"
-        ReferenceGenomeProjectSeqType.findAllByProjectAndDeprecatedDateIsNull(project).size == 0
+        configuration.project.alignmentDeciderBeanName == AlignmentDeciderBeanNames.NO_ALIGNMENT.bean
+        ReferenceGenomeProjectSeqType.findAllByDeprecatedDateIsNull().size() == 0
     }
 
-    @spock.lang.Ignore('Will be fixed with OTP-2142')
     void "test configureDefaultOtpAlignmentDecider to configurePanCanAlignmentDeciderProject"() {
         setup:
-        Project project = Project.findByName("testProjectAlignment")
-        ReferenceGenome referenceGenome = ReferenceGenome.findByName("testReferenceGenome")
-        String statFileName = "testStatSizeFileName.tab"
-        File statFile = makeStatFile(project, referenceGenome, statFileName)
-        String group = grailsApplication.config.otp.testing.group
-
+        PanCanAlignmentConfiguration configuration = createPanCanAlignmentConfiguration()
 
         when:
         SpringSecurityUtils.doWithAuth("admin") {
-            projectService.configureDefaultOtpAlignmentDecider(project, referenceGenome.name)
-            projectService.configurePanCanAlignmentDeciderProject(project, referenceGenome.name, "1.0.182", statFileName, group, ProjectService.PICARD, "v1_0")
+            projectService.configureDefaultOtpAlignmentDecider(configuration.project, configuration.referenceGenome)
+            projectService.configurePanCanAlignmentDeciderProject(configuration)
         }
 
         then:
-        project.alignmentDeciderBeanName == "panCanAlignmentDecider"
+        configuration.project.alignmentDeciderBeanName == AlignmentDeciderBeanNames.PAN_CAN_ALIGNMENT.bean
         RoddyWorkflowConfig.findAllByProjectAndPipelineInListAndPluginVersionAndObsoleteDateIsNull(
-                project,
-                Pipeline.findAllByTypeAndName(Pipeline.Type.ALIGNMENT,Pipeline.Name.PANCAN_ALIGNMENT,),
-                "QualityControlWorkflows:1.0.182"
-        ).size == 1
-        statFile.exists()
+                configuration.project,
+                Pipeline.findAllByTypeAndName(Pipeline.Type.ALIGNMENT, Pipeline.Name.PANCAN_ALIGNMENT,),
+                "${configuration.pluginName}:${configuration.pluginVersion}"
+        ).size() == 1
+        ReferenceGenomeProjectSeqType.findAllByDeprecatedDateIsNull().size() == 1
     }
 
     void "test configureDefaultOtpAlignmentDecider to configureNoAlignmentDeciderProject"() {
@@ -530,28 +546,38 @@ class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
         }
 
         then:
-        project.alignmentDeciderBeanName == "noAlignmentDecider"
-        ReferenceGenomeProjectSeqType.findAllByProjectAndDeprecatedDateIsNull(project).size == 0
+        project.alignmentDeciderBeanName == AlignmentDeciderBeanNames.NO_ALIGNMENT.bean
+        ReferenceGenomeProjectSeqType.findAllByDeprecatedDateIsNull().size() == 0
     }
 
     private File makeStatFile(Project project, ReferenceGenome referenceGenome, String statFileName) {
         File statDirectory = referenceGenomeService.pathToChromosomeSizeFilesPerReference(project, referenceGenome, false)
-        assert statDirectory.mkdirs()
+        assert statDirectory.exists() || statDirectory.mkdirs()
         File statFile = new File(statDirectory, statFileName)
         statFile.text = "someText"
         return statFile
     }
 
-    private File getRoddyWorkflowConfig(Project project) {
-        Realm realm = ConfigService.getRealm(project, Realm.OperationType.DATA_MANAGEMENT)
-        File configDirectory = LsdfFilesService.getPath(
-                LsdfFilesService.getPath(
-                        realm.rootPath,
-                        project.dirName,
-                ).path,
-                'configFiles',
-                Pipeline.Name.PANCAN_ALIGNMENT.name(),
+    private PanCanAlignmentConfiguration createPanCanAlignmentConfiguration(Map properties = [:]) {
+        PanCanAlignmentConfiguration configuration = new PanCanAlignmentConfiguration([
+                project          : Project.findByName("testProjectAlignment"),
+                seqType          : SeqType.wholeGenomePairedSeqType,
+                referenceGenome  : "testReferenceGenome",
+                statSizeFileName : 'testStatSizeFileName.tab',
+                mergeTool        : MergeConstants.MERGE_TOOL_PICARD,
+                pluginName       : 'plugin',
+                pluginVersion    : '1.2.3',
+                baseProjectConfig: 'baseConfig',
+                configVersion    : 'v1_0',
+        ] + properties)
+        Realm realm = ConfigService.getRealm(configuration.project, Realm.OperationType.DATA_MANAGEMENT)
+        File projectDirectory = LsdfFilesService.getPath(
+                realm.rootPath,
+                configuration.project.dirName,
         )
-        return new File(configDirectory, "${Pipeline.Name.PANCAN_ALIGNMENT.name()}_1.0.182_v1_0.xml")
+        assert projectDirectory.exists() || projectDirectory.mkdirs()
+
+        makeStatFile(configuration.project, ReferenceGenome.findByName(configuration.referenceGenome), configuration.statSizeFileName)
+        return configuration
     }
 }

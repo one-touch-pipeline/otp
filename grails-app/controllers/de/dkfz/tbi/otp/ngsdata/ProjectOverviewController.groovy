@@ -113,6 +113,7 @@ class ProjectOverviewController {
                 id: project.id,
                 comment: project.comment,
                 nameInMetadata: project.nameInMetadataFiles?: '',
+                seqTypes: SeqType.allAlignableSeqTypes,
                 alignmentInfo: alignmentInfo,
                 alignmentError: alignmentError,
                 snv: project.snv,
@@ -131,7 +132,7 @@ class ProjectOverviewController {
         String sampleIdentifier
         // Map<SeqType.id, value>>
         Map<Long, String> laneCountRegistered = [:]
-        // Map<SeqType.id, Map<Workflow.id, Collection<bamFileInProjectFolder>>>
+        // Map<SeqType.id, Map<Pipeline.id, Collection<bamFileInProjectFolder>>>
         Map<Long, Map<Long, Collection<AbstractMergedBamFile>>> bamFilesInProjectFolder = [:]
     }
 

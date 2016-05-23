@@ -655,6 +655,13 @@ class DomainFactory {
         ], projectProperties)
     }
 
+    public static Project createProjectWithRealms(Map projectProperties = [:]) {
+        Project project = createProject(projectProperties)
+        createRealmDataManagement(name: project.realmName)
+        createRealmDataProcessing(name: project.realmName)
+        return project
+    }
+
     public static Individual createIndividual(Map individualProperties = [:]) {
         return createDomainObject(Individual, [
                 pid         : 'pid_' + (counter++),
@@ -1033,7 +1040,7 @@ class DomainFactory {
     }
 
     static SeqType createWholeGenomeBisulfiteTagmentationSeqType() {
-        createSeqTypeLazy(SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION, 'WGBS_TAG', 'WGBS')
+        createSeqTypeLazy(SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION, 'WGBS_TAG', 'WGBSTAG')
     }
 
     static List<SeqType> createAlignableSeqTypes() {

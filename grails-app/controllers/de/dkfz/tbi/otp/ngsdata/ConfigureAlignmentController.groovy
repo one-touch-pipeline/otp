@@ -1,11 +1,11 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.dataprocessing.Pipeline
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
-import de.dkfz.tbi.otp.utils.CollectionUtils
-import grails.converters.JSON
-import org.springframework.validation.FieldError
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.roddy.*
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
+import de.dkfz.tbi.otp.utils.*
+import grails.converters.*
+import org.springframework.validation.*
 
 class ConfigureAlignmentController {
 
@@ -13,96 +13,137 @@ class ConfigureAlignmentController {
     ReferenceGenomeService referenceGenomeService
 
 
-
     Map index(ConfigureAlignmentSubmitCommand cmd) {
         Project project
-        if (params.projectName) {
+        SeqType seqType
+        if (params.projectName && params.seqTypeName && params.libraryLayout) {
             project = projectService.getProjectByName(params.projectName)
+            seqType = CollectionUtils.atMostOneElement(SeqType.findAllByNameAndLibraryLayout(params.seqTypeName, params.libraryLayout))
         } else {
             response.sendError(404)
             return
         }
-        if (!project) {
+        if (!project || !seqType) {
             response.sendError(404)
             return
         }
 
-        boolean hasErrors
-        String message = ""
-        List<String> deciders = [
-                "No Alignment",
-                "OTP Alignment",
-                "PanCan Alignment"
-        ]
-        String decider
-        switch (project.alignmentDeciderBeanName) {
-            case "noAlignmentDecider":
-                decider = "No Alignment"
-                break
-            case "defaultOtpAlignmentDecider":
-                decider = "OTP Alignment"
-                break
-            case "panCanAlignmentDecider":
-                decider = "PanCan Alignment"
-                break
-        }
-        String workflowName = "QualityControlWorkflows"
         Pipeline pipeline = CollectionUtils.exactlyOneElement(Pipeline.findAllByTypeAndName(
                 Pipeline.Type.ALIGNMENT,
                 Pipeline.Name.PANCAN_ALIGNMENT,
         ))
-        String pluginVersion= "1.0.182"
-        String configVersion = CollectionUtils.atMostOneElement(RoddyWorkflowConfig.findAllByPipelineAndPluginVersionAndProjectAndObsoleteDateIsNull(pipeline, "${workflowName}:${pluginVersion}", project))?.configVersion
-        if (configVersion) {
-            Set<String> versions = configVersion.split("_")
-            configVersion = versions[0] + "_" + (versions[1].toInteger() + 1)
-        } else {
-            configVersion="v1_0"
-        }
+
+        boolean hasErrors
+        String message = ""
 
         if (cmd.submit == "Submit") {
             hasErrors = cmd.hasErrors()
-            boolean invalidConfigVersion = false
-            RoddyWorkflowConfig.findAllByPipelineAndPluginVersionAndProject(pipeline, "${workflowName}:${cmd.plugin}", project).each({
+            boolean duplicateConfigVersion = false
+            RoddyWorkflowConfig.findAllWhere([
+                    project      : project,
+                    seqType      : seqType,
+                    pipeline     : pipeline,
+                    pluginVersion: "${cmd.pluginName}:${cmd.pluginVersion}"
+
+            ]).each({
                 if (it.configVersion == cmd.config) {
-                    invalidConfigVersion = true
+                    duplicateConfigVersion = true
                 }
             })
             if (hasErrors) {
                 FieldError errors = cmd.errors.getFieldError()
                 message = "'" + errors.getRejectedValue() + "' is not a valid value for '" + errors.getField() + "'. Error code: '" + errors.code + "'"
-            } else if (invalidConfigVersion && cmd.decider == "PanCan Alignment+") {
+            } else if (duplicateConfigVersion) {
                 hasErrors = true
-                message = "'"+cmd.config+"' is not a valid value for 'Config Version'. Error code: 'duplicate'"
-            }
-            else {
-                message = "Successfully changed alignment decider of project '" + project.name + "' to"
-                if (cmd.decider == "No Alignment") {
-                    projectService.configureNoAlignmentDeciderProject(project)
-                    message += " to 'No Alignment'"
-                } else if (cmd.decider == "OTP Alignment") {
-                    projectService.configureDefaultOtpAlignmentDecider(project, cmd.referenceGenome)
-                    message += " to 'OTP Alignment'"
-                } else if (cmd.decider == "PanCan Alignment") {
-                    projectService.configurePanCanAlignmentDeciderProject(project, cmd.referenceGenome, cmd.plugin, cmd.statSizeFileName, cmd.unixGroup, cmd.mergeTool, cmd.config)
-                    message += " to 'PanCan Alignment'"
-                }
+                message = "'${cmd.config}' is not a valid value for 'Config Version'. Error code: 'duplicate'"
+            } else {
+                PanCanAlignmentConfiguration panCanAlignmentConfiguration = new PanCanAlignmentConfiguration([
+                        project          : project,
+                        seqType          : seqType,
+                        referenceGenome  : cmd.referenceGenome,
+                        statSizeFileName : cmd.statSizeFileName,
+                        mergeTool        : cmd.mergeTool,
+                        pluginName       : cmd.pluginName,
+                        pluginVersion    : cmd.pluginVersion,
+                        baseProjectConfig: cmd.baseProjectConfig,
+                        configVersion    : cmd.config,
+                ])
+                projectService.configurePanCanAlignmentDeciderProject(panCanAlignmentConfiguration)
+                message = "Successfully changed alignment decider of project '${project.name}' to '${AlignmentDeciderBeanNames.PAN_CAN_ALIGNMENT.displayName}'"
+                redirect(controller: "projectOverview", action: "specificOverview", params: [project: project.name])
             }
         }
-        return [
-            projectName: project.name,
-            deciders: deciders,
-            decider: (cmd.submit == "Submit") ? cmd.decider : decider,
-            referenceGenomes: ReferenceGenome.list(sort: "name", order: "asc")*.name,
-            referenceGenome: (cmd.submit == "Submit") ? cmd.referenceGenome : ReferenceGenomeProjectSeqType.findByProjectAndDeprecatedDateIsNull(project)?.referenceGenome?.name?: "hs37d5",
-            plugin: (cmd.submit == "Submit") ? cmd.plugin : pluginVersion,
-            unixGroup: (cmd.submit == "Submit") ? cmd.unixGroup : "",
-            mergeTools: [ProjectService.PICARD, ProjectService.BIOBAMBAM],
-            mergeTool: (cmd.submit == "Submit") ? cmd.mergeTool : ProjectService.PICARD,
-            config: (cmd.submit == "Submit") ? cmd.config : configVersion,
-            message: message,
-            hasErrors: hasErrors,
+
+        String defaultPluginName = ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_RODDY_ALIGNMENT_PLUGIN_NAME, seqType.roddyName, null)
+        String defaultPluginVersion = ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_RODDY_ALIGNMENT_PLUGIN_VERSION, seqType.roddyName, null)
+        String defaultBaseProjectConfig = ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_BASE_PROJECT_CONFIG, seqType.roddyName, null)
+        String defaultReferenceGenome = ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_DEFAULT_REFERENCE_GENOME, seqType.roddyName, null)
+        String defaultMergeTool = ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_DEFAULT_MERGE_TOOL, seqType.roddyName, null)
+        List<String> allMergeTools = ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_ALL_MERGE_TOOLS, seqType.roddyName, null).split(',')*.trim()
+
+        assert MergeConstants.ALL_MERGE_TOOLS.contains(defaultMergeTool)
+        assert MergeConstants.ALL_MERGE_TOOLS.containsAll(allMergeTools)
+        assert ReferenceGenome.findByName(defaultReferenceGenome)
+
+        RoddyWorkflowConfig roddyWorkflowConfig = RoddyWorkflowConfig.getLatest(project, seqType, pipeline)
+        String configVersion = roddyWorkflowConfig?.configVersion
+        if (configVersion) {
+            Set<String> versions = configVersion.split("_")
+            final int MAIN_CONFIG_VERSION_INDEX = 0
+            final int SUB_CONFIG_VERSION_INDEX = 1
+            configVersion = versions[MAIN_CONFIG_VERSION_INDEX] + "_" + (versions[SUB_CONFIG_VERSION_INDEX].toInteger() + 1)
+        } else {
+            configVersion = "v1_0"
+        }
+
+        String lastRoddyConfig = (roddyWorkflowConfig?.configFilePath as File)?.text
+
+        String referenceGenome = ReferenceGenomeProjectSeqType.findByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(project, seqType)?.referenceGenome?.name ?: defaultReferenceGenome
+        List<String> referenceGenomes = ReferenceGenome.list(sort: "name", order: "asc")*.name
+
+        assert project.getProjectDirectory().exists()
+
+        Map ret = [
+                projectName             : project.name,
+                seqType                 : seqType,
+
+                referenceGenome         : referenceGenome,
+                referenceGenomes        : referenceGenomes,
+                defaultReferenceGenome  : defaultReferenceGenome,
+                statSizeFileName        : null,
+
+                mergeTool               : defaultMergeTool,
+                mergeTools              : allMergeTools,
+                defaultMergeTool        : defaultMergeTool,
+
+                pluginName              : defaultPluginName,
+                defaultPluginName       : defaultPluginName,
+
+                pluginVersion           : defaultPluginVersion,
+                defaultPluginVersion    : defaultPluginVersion,
+
+                baseProjectConfig       : defaultBaseProjectConfig,
+                defaultBaseProjectConfig: defaultBaseProjectConfig,
+
+                config                  : configVersion,
+                lastRoddyConfig         : lastRoddyConfig,
+
+                message                 : message,
+                hasErrors               : hasErrors,
         ]
+
+        if (cmd.submit == "Submit") {
+            ret += [
+                    referenceGenome  : cmd.referenceGenome,
+                    statSizeFileName : cmd.statSizeFileName,
+                    mergeTool        : cmd.mergeTool,
+                    pluginName       : cmd.pluginName,
+                    pluginVersion    : cmd.pluginVersion,
+                    baseProjectConfig: cmd.baseProjectConfig,
+                    config           : cmd.config,
+            ]
+        }
+        return ret
     }
 
     JSON getStatSizeFileNames(String referenceGenome) {
@@ -111,65 +152,57 @@ class ConfigureAlignmentController {
         ]
         render data as JSON
     }
-
 }
 
+
 class ConfigureAlignmentSubmitCommand implements Serializable {
-    String decider
     String referenceGenome
-    String plugin
+    String pluginName
+    String pluginVersion
     String statSizeFileName
-    String unixGroup
     String mergeTool
+    String baseProjectConfig
     String config
     String submit
 
     static constraints = {
-        plugin(validator: {val, obj ->
-            if (obj.decider == "PanCan Alignment") {
-                if (val == "") {
-                    return 'Empty'
-                }
-                if (!(OtpPath.isValidPathComponent(val))) {
-                    return 'Invalid path component'
-                }
+        pluginName(nullable: true, validator: { val, obj ->
+            if (!val) {
+                return 'Empty'
+            }
+            if (!(OtpPath.isValidPathComponent(val))) {
+                return 'Invalid path component'
             }
         })
-        statSizeFileName(nullable: true, validator: {val, obj ->
-            if (obj.decider == "PanCan Alignment") {
-                if (!val) {
-                    return 'Invalid statSizeFileName'
-                }
+        pluginVersion(nullable: true, validator: { val, obj ->
+            if (!val) {
+                return 'Empty'
+            }
+            if (!(OtpPath.isValidPathComponent(val))) {
+                return 'Invalid path component'
             }
         })
-        unixGroup(validator: {val, obj ->
-            if (obj.decider == "PanCan Alignment") {
-                if (val == "") {
-                    return 'Empty'
-                }
-                if (!(OtpPath.isValidPathComponent(val))) {
-                    return 'Unix group contains invalid characters'
-                }
+        statSizeFileName(nullable: true, validator: { val, obj ->
+            if (!val) {
+                return 'Invalid statSizeFileName'
+            }
+            if (!(val ==~ ReferenceGenomeProjectSeqType.TAB_FILE_PATTERN)) {
+                return 'Invalid file name pattern'
             }
         })
-        config(validator: {val, obj ->
-            if (obj.decider == "PanCan Alignment") {
-                if (val == "") {
-                    return 'Empty'
-                }
-                if (!(val ==~ /^v\d+_\d+$/)) {
-                    return "Not a valid config version. Must look like 'v1_0'"
-                }
+        config(nullable: true, validator: { val, obj ->
+            if (!val) {
+                return 'Empty'
+            }
+            if (!(val ==~ /^v\d+_\d+$/)) {
+                return "Not a valid config version. Must look like 'v1_0'"
             }
         })
-    }
-
-    void setPlugin(String plugin) {
-        this.plugin = plugin?.trim()?.replaceAll(" +", " ")
-    }
-
-    void setUnixGroup(String unixGroup) {
-        this.unixGroup = unixGroup?.trim()?.replaceAll(" +", " ")
+        baseProjectConfig(nullable: false, blank: false, validator: { val, obj ->
+            if (val && !OtpPath.isValidPathComponent(val)) {
+                return "Invalid path component"
+            }
+        })
     }
 
     void setConfig(String config) {

@@ -1,5 +1,7 @@
 How to add a new reference genome to OTP:
 
+Reference genomes with Phix or Lambda should mention it in its name
+
 1. Run getReferenceGenomeInfo.py on a fasta file for the new reference genome ${name}
 2. Create groovy script (LoadReferenceGenome_${name}.groovy); use an exiting file
    which uses ReferenceGenomeService.loadReferenceGenome as template.
