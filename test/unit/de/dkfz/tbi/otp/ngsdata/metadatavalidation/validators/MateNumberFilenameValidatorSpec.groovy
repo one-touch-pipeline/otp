@@ -61,7 +61,7 @@ class MateNumberFilenameValidatorSpec extends Specification {
                         "The mate number '2' parsed from filename 'NB_E_789_R.2.fastq.gz' is not viable with library layout 'SINGLE'." +
                                 " If you ignore this warning, OTP will ignore the mate number parsed from the filename."),
                 new Problem(context.spreadsheet.dataRows[4].cells as Set, Level.ERROR,
-                        "Cannot parse mate number from filename 'testFileName.fastq.gz' or imply from the library layout 'testLibraryLayout'."),
+                        "Cannot extract mate number, because neither a ${MATE} column exists, nor can a mate number be parsed from filename 'testFileName.fastq.gz' using any pattern known to OTP, nor can one be implied from the library layout 'testLibraryLayout'."),
         ]
         when:
         new MateNumberFilenameValidator().validate(context)
@@ -134,12 +134,6 @@ class MateNumberFilenameValidatorSpec extends Specification {
                 new Problem(context.spreadsheet.dataRows[11].cells.findAll({it.columnAddress=="A" || it.columnAddress=="C"}) as Set, Level.WARNING,
                         "The value 'abc' in the MATE column is different from the mate number '1' parsed from the filename 'NB_E_789_R.1.fastq.gz'. " +
                                 "If you ignore this warning, OTP will use the mate number from the MATE column and ignore the value parsed from the filename."),
-                new Problem(context.spreadsheet.dataRows[12].cells.findAll({it.columnAddress=="A" || it.columnAddress=="B"}) as Set, Level.ERROR,
-                        "Cannot parse mate number from filename 'testFileName.fastq.gz' or imply from the library layout 'testLibraryLayout'."),
-                new Problem(context.spreadsheet.dataRows[13].cells.findAll({it.columnAddress=="A" || it.columnAddress=="B"}) as Set, Level.ERROR,
-                        "Cannot parse mate number from filename 'testFileName.fastq.gz' or imply from the library layout 'testLibraryLayout'."),
-                new Problem(context.spreadsheet.dataRows[14].cells.findAll({it.columnAddress=="A" || it.columnAddress=="B"}) as Set, Level.ERROR,
-                        "Cannot parse mate number from filename 'testFileName.fastq.gz' or imply from the library layout 'testLibraryLayout'."),
         ]
         when:
         new MateNumberFilenameValidator().validate(context)

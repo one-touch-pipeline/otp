@@ -65,12 +65,12 @@ class MateNumberFilenameValidator extends ValueTuplesValidator<MetadataValidatio
                     }
                 }
             } catch (RuntimeException e) {
-                if (libraryLayout != null && mateCount != 1) {
+                if (mateNumber == null && libraryLayout != null && mateCount != 1) {
                     if (e.message == "cannot find mateNumber for ${fileName}".toString()) {
                         context.addProblem(valueTuple.cells.findAll({
                             it.columnIndex == fastqFileColumnIndex ||
                             it.columnIndex == libraryLayoutColumnIndex
-                        }), Level.ERROR, "Cannot parse mate number from filename '${fileName}' or imply from the library layout '${libraryLayout}'.")
+                        }), Level.ERROR, "Cannot extract mate number, because neither a ${MATE} column exists, nor can a mate number be parsed from filename '${fileName}' using any pattern known to OTP, nor can one be implied from the library layout '${libraryLayout}'.")
                     } else {
                         throw e
                     }
