@@ -1037,7 +1037,7 @@ if (allProcessed) {
     """).each {
         def mergeableSeqTracks = it.findMergeableSeqTracks()
         if(mergeableSeqTracks) {
-            seqTracks += mergeableSeqTracks - RoddyAlignmentStartJob.findUsableBaseBamFile(it)?.containedSeqTracks
+            seqTracks += mergeableSeqTracks - (it.seqType.isWgbs() ? ctx.WgbsAlignmentStartJob : ctx.PanCanStartJob).findUsableBaseBamFile(it)?.containedSeqTracks
         }
     }
 
