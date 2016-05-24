@@ -5,6 +5,7 @@ import de.dkfz.tbi.otp.utils.CommentCommand
 import grails.converters.JSON
 import groovy.json.JsonSlurper
 import de.dkfz.tbi.otp.utils.DataTableCommand
+import org.springframework.validation.FieldError
 
 class IndividualController {
 
@@ -100,9 +101,12 @@ class IndividualController {
 
     def save(IndividualCommand cmd) {
         if (cmd.hasErrors()) {
-            render cmd.errors as JSON
+            FieldError errors = cmd.errors.getFieldError()
+            Map data = [success: false, error: "'${errors.getRejectedValue()}' is not a valid value for '${errors.getField()}'. Error code: '${errors.getField()}' already exists."]
+            render data as JSON
             return
         }
+
         try {
             List<SamplesParser> parsedSamples = new SamplesParser().insertSamplesFromJSON(cmd.samples)
             Individual individual = individualService.createIndividual(projectService.getProject(cmd.project), cmd, parsedSamples)
