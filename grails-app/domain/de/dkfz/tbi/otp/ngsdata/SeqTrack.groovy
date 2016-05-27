@@ -94,6 +94,13 @@ class SeqTrack implements ProcessParameterObject, Entity {
      */
     LibraryPreparationKit libraryPreparationKit
 
+    /**
+     * null for all SeqTracks created before the metadata import parsed the CUSTOM_LIBRARY column
+     * empty for SeqTracks where the metadata import found the column to be missing or empty.
+     */
+    String libraryName
+    String normalizedLibraryName
+
     List<LogMessage> logMessages = []
 
     static belongsTo = [
@@ -130,7 +137,21 @@ class SeqTrack implements ProcessParameterObject, Entity {
                 return val == null
             }
         })
+        libraryName(nullable: true, validator: { String val, SeqTrack obj ->
+            !val || OtpPath.isValidPathComponent(val)
+        })
+        normalizedLibraryName(nullable: true, validator: {String val, SeqTrack obj ->
+            (val == null) ? (obj.libraryName == null) : (val == normalizeLibraryName(obj.libraryName))
+        })
+    }
 
+
+    static String normalizeLibraryName(String libraryName) {
+        if (libraryName != null) {
+            return libraryName.trim().replaceAll(/(?<!\d)0+/, '0').replaceAll(/(?<!\d)0([1-9])/, '$1').toLowerCase(Locale.ENGLISH).replaceAll(/(?:^lib(?:rary)?)|[_-]/, '')
+        } else {
+            return null
+        }
     }
 
     /**
@@ -258,5 +279,6 @@ class SeqTrack implements ProcessParameterObject, Entity {
         seqType index: "seq_track_seq_type_idx"
         seqPlatform index: "seq_track_seq_platform_idx"
         libraryPreparationKit index: "seq_track_library_preparation_kit_idx"
+        normalizedLibraryName inxex: "seq_track_normalized_library_name_idx"
     }
 }

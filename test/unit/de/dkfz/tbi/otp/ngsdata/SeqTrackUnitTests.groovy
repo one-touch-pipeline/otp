@@ -122,6 +122,20 @@ class SeqTrackUnitTests {
     }
 
 
+    @Test
+    void testNormalizeLibraryName_InputNull_MustReturnNull() {
+        assertNull(SeqTrack.normalizeLibraryName(null))
+    }
+
+    @Test
+    void testNormalizeLibraryName_NormalizeInput() {
+        assert "1" == SeqTrack.normalizeLibraryName("lib_1")
+        assert "1" == SeqTrack.normalizeLibraryName("lib-1")
+        assert "0" == SeqTrack.normalizeLibraryName("lib000")
+        assert "1" == SeqTrack.normalizeLibraryName("lib0001")
+        assert "1" == SeqTrack.normalizeLibraryName("library1")
+    }
+
 
     private SeqTrack createSeqTrack() throws Exception {
         return new SeqTrack(

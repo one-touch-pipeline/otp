@@ -182,6 +182,8 @@ class MetadataImportService {
                 libraryPreparationKit = Objects.requireNonNull(
                         LibraryPreparationKitService.findLibraryPreparationKitByNameOrAlias(libPrepKitString))
             }
+            String libraryName = uniqueColumnValue(rows, CUSTOM_LIBRARY) ?: ""
+            String normalizedLibraryName = libraryName ? SeqTrack.normalizeLibraryName(libraryName): ""
             Map properties = [
                     laneId: laneId,
                     ilseId: uniqueColumnValue(rows, ILSE_NO) ?: null,
@@ -195,6 +197,8 @@ class MetadataImportService {
                     pipelineVersion: SoftwareToolService.getBaseCallingTool(pipelineVersionString).softwareTool,
                     kitInfoReliability: kitInfoReliability,
                     libraryPreparationKit: libraryPreparationKit,
+                    libraryName: libraryName,
+                    normalizedLibraryName: normalizedLibraryName,
             ]
             if (seqTypeName == SeqTypeNames.CHIP_SEQ) {
                 properties['antibodyTarget'] = exactlyOneElement(AntibodyTarget.findAllByNameIlike(
