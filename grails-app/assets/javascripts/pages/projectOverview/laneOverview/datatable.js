@@ -52,7 +52,7 @@ $.otp.projectOverviewTable = {
                                         mockPid: mockPid
                                     }
                                 });
-                            if ($('#project').val() != "MMML" && $('#project').val() != "MMML_XP" && $('#project').val() != "MMML_RARE_LYMPHOMA_XP") {
+                            if ($('#project').val() != "MMML" && $('#project').val() != "MMML_XP" && $('#project').val() != "MMML_RARE_LYMPHOMA_XP" && $('#project').val() != "MMML_RARE_LYMPHOMA_EXOMES") {
                                 row[2] = $.otp.createLinkMarkup({
                                         controller: 'individual',
                                         action: 'show',

@@ -24,6 +24,7 @@ class ProjectOverviewService {
             "MMML",
             "MMML_XP",
             "MMML_RARE_LYMPHOMA_XP",
+            "MMML_RARE_LYMPHOMA_EXOMES",
     ].asImmutable()
 
     /**
