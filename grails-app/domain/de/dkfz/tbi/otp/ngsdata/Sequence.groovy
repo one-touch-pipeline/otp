@@ -35,6 +35,7 @@ class Sequence implements Serializable {
 
     // fields from SeqTrack
     String laneId
+    String libraryName
     boolean hasFinalBam
     boolean hasOriginalBam
     boolean usingOriginalBam

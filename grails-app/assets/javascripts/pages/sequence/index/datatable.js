@@ -141,6 +141,7 @@ $.otp.sequence = {
                                     text: row.name
                                 }),
                                 row.laneId,
+                                row.libraryName,
                                 fastQC,
                                 row.dateCreated
                             ];
@@ -152,7 +153,7 @@ $.otp.sequence = {
             },
             fnRowCallback: function (nRow) {
                 var fastqc;
-                fastqc = $("td:eq(8)", nRow);
+                fastqc = $("td:eq(9)", nRow);
                 if ($("a", fastqc).length > 0) {
                     fastqc.addClass("true");
                 } else {

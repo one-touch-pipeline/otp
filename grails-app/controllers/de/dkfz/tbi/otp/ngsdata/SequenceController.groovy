@@ -74,6 +74,7 @@ class SequenceController {
                     row.seqCenterName,
                     row.name,
                     row.laneId,
+                    row.libraryName,
                     row.dateCreated?.format("yyyy-MM-dd"),
             ].join(",")
         }.join("\n")
@@ -86,6 +87,7 @@ class SequenceController {
             'Sequence Center',
             'Run',
             'Lane',
+            'Library',
             'Run Date'
         ].join(',')
         def content = "${contentHeader}\n${contentBody}\n"

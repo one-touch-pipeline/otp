@@ -60,6 +60,7 @@
                     'sequence.list.headers.seqCenter',
                     'sequence.list.headers.run',
                     'sequence.list.headers.lane',
+                    'sequence.list.headers.library',
                     'sequence.list.headers.fastqc',
                     'sequence.list.headers.date'
             ]}" id="sequenceTable"/>
