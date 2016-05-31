@@ -84,5 +84,18 @@ $.otp.addIndividual = {
         $("div.addSample button").click(this.addSample);
         $("div.newSampleIdentifier button").click(this.addSampleIdentifier);
         $("#add-individual-form").submit(this.submitIndividual);
+        var lastPid = $("#pid").val();
+        $("#pid").keyup(function() {
+            var pid = $("#pid").val();
+            var mockPid = $("#mockPid").val();
+            var mockFullName = $("#mockFullName").val();
+            if (lastPid == mockPid) {
+                $("#mockPid").val(pid);
+            }
+            if (lastPid == mockFullName) {
+                $("#mockFullName").val(pid);
+            }
+            lastPid = $("#pid").val();
+        });
     }
 };
