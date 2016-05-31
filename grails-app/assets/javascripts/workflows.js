@@ -425,7 +425,12 @@ $.otp.workflows = {
                         text: row.name
                     });
                 }, "aTargets": [0] },
-                { "mData": "allProcessesCount", "aTargets": [1] },
+                { "mRender": function (data, type, row) {
+                    if (row.allProcessesCount) {
+                        return row.allProcessesCount;
+                    }
+                    return "-";
+                }, "aTargets": [1] },
                 { "mRender": function (data, type, row) {
                     if (row.failedProcessesCount) {
                         return $.otp.createLinkMarkup({
@@ -440,7 +445,12 @@ $.otp.workflows = {
                     }
                     return "-";
                 }, "aTargets": [2] },
-                { "mData": "runningProcessesCount", "sDefaultContent": "-", "aTargets": [3] },
+                { "mRender": function (data, type, row) {
+                    if (row.runningProcessesCount) {
+                        return row.runningProcessesCount;
+                    }
+                    return "-";
+                }, "aTargets": [3] },
                 { "mRender": function (data, type, row) {
                     return $.otp.workflows.renderDate(row.lastSuccessfulDate);
                 }, "aTargets": [4] },
