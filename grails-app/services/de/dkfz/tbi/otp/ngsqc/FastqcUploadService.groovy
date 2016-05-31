@@ -11,7 +11,7 @@ class FastqcUploadService {
     public static final String DATA_FILE_NAME = "fastqc_data.txt"
     public static final Map<String, String> PROPERTIES_REGEX_TO_BE_PARSED= [
             nReads: /\nTotal\sSequences\t(\d+)\t?\n/,
-            sequenceLength: /\nSequence\slength\t(\d+)\t?\n/
+            sequenceLength: /\nSequence\slength\t(\d+(?:-\d+)?)\t?\n/
     ]
 
     FastqcDataFilesService fastqcDataFilesService

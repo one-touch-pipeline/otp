@@ -49,6 +49,26 @@ Sequence length\t101\t
     }
 
     @Test
+    void test_parseFastQCFile_SequenceLengthIsRange_WhenAllFine_WithTabAtTheEnd_ShouldReturnParsedValues() {
+        FastqcUploadService.metaClass.getFastQCFileContent = { FastqcProcessedFile a ->
+            return """
+##FastQC\t0.11.2\t
+>>Basic Statistics\tpass\t
+#Measure\tValue\t
+Filename\tAS-100221-LR-14142_R1.fastq.gz\t
+File type\tConventional base calls\t
+Encoding\tSanger / Illumina 1.9\t
+Total Sequences\t100\t
+Sequences flagged as poor quality\t0\t
+Sequence length\t35-76\t
+%GC\t48\t
+>>END_MODULE"""
+        }
+
+        assert [nReads: "100", sequenceLength: "35-76"] == fastqcUploadService.parseFastQCFile(fastqcProcessedFile, FastqcUploadService.PROPERTIES_REGEX_TO_BE_PARSED)
+    }
+
+    @Test
     void test_parseFastQCFile_WhenAllFine_WithoutTabAtTheEnd_ShouldReturnParsedValues() {
         FastqcUploadService.metaClass.getFastQCFileContent = { FastqcProcessedFile a ->
             return """
@@ -66,6 +86,26 @@ Sequence length\t101
         }
 
         assert [nReads: "100", sequenceLength: "101"] == fastqcUploadService.parseFastQCFile(fastqcProcessedFile, FastqcUploadService.PROPERTIES_REGEX_TO_BE_PARSED)
+    }
+
+    @Test
+    void test_parseFastQCFile_SequenceLengthIsRange_WhenAllFine_WithoutTabAtTheEnd_ShouldReturnParsedValues() {
+        FastqcUploadService.metaClass.getFastQCFileContent = { FastqcProcessedFile a ->
+            return """
+##FastQC\t0.11.2
+>>Basic Statistics\tpass
+#Measure\tValue
+Filename\tAS-100221-LR-14142_R1.fastq.gz
+File type\tConventional base calls
+Encoding\tSanger / Illumina 1.9
+Total Sequences\t100
+Sequences flagged as poor quality\t0
+Sequence length\t35-76
+%GC\t48
+>>END_MODULE"""
+        }
+
+        assert [nReads: "100", sequenceLength: "35-76"] == fastqcUploadService.parseFastQCFile(fastqcProcessedFile, FastqcUploadService.PROPERTIES_REGEX_TO_BE_PARSED)
     }
 
     @Test
