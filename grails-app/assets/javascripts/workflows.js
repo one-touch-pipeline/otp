@@ -460,7 +460,7 @@ $.otp.workflows = {
             ],
             undefined,
             140, {
-                "aaSorting": [],
+                "aaSorting": [[5, 'desc']],
                 "fnRowCallback": function (nRow, aData, iDisplayIndex, iDisplayIndexFull) {
                     if (aData.enabled === false) {
                         $(nRow).addClass("withdrawn");
