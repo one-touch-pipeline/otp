@@ -45,23 +45,13 @@ class FastqcResultsController {
             elements.select("img").iterator().each { Element img ->
                 String file = img.attr("src")
                 String link
-                switch (file) {
-                    case "Icons/tick.png":
-                        link = createLink(controller: "assets", action: "ok.png")
-                        break
-                    case "Icons/warning.png":
-                        link = createLink(controller: "assets", action: "warning.png")
-                        break
-                    case "Icons/error.png":
-                        link = createLink(controller: "assets", action: "error.png")
-                        break
-                    default:
-                        link = createLink(controller: "fastqcResults",
-                                action: "renderFile",
-                                params: ["dataFile.id": dataFile.id, path: file]
-                        )
+                if (!file.startsWith("data:")) {
+                    link = createLink(controller: "fastqcResults",
+                            action: "renderFile",
+                            params: ["dataFile.id": dataFile.id, path: file]
+                    )
+                    img.attr("src", link)
                 }
-                img.attr("src", link)
             }
             result = elements.toString()
         }
