@@ -83,7 +83,7 @@ on the general cluster job page
                     <td></td>
                     <td></td>
                     <td><g:message code="jobstats.jobSpecific.detail.table.attribute.name"/></td>
-                    <td>${job.clusterJobName.replace("_", "_<br>")}</td>
+                    <td style="white-space: pre">${job.clusterJobName.replace("_", "_\n")}</td>
                 </tr>
             </table>
         </div>

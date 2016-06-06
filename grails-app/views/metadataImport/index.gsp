@@ -20,7 +20,7 @@
             <g:else>
                 <ul>
                     <g:each var="problem" in="${context.problems}" >
-                        <li class="${Level.normalize(problem.level).name}">${problem.getLevelAndMessage().encodeAsHTML().replace('\n', '<br/>')}
+                        <li class="${Level.normalize(problem.level).name}"><span style="white-space: pre-line "> ${problem.getLevelAndMessage()}</span>
                             <g:each var="cell" in="${problem.affectedCells}" >
                                 <a href="#${cell.cellAddress}">${cell.cellAddress}</a>
                             </g:each>
@@ -48,10 +48,10 @@
                                     <g:set var="cellProblems" value ="${context.getProblems(cell)}"/>
                                     <th
                                         class="${Level.normalize(Problems.getMaximumProblemLevel(cellProblems)).name}"
-                                        title="${cellProblems*.getLevelAndMessage().join('\n\n').encodeAsHTML()}"
+                                        title="${cellProblems*.getLevelAndMessage().join('\n\n')}"
                                     >
                                         <span class="anchor" id="${cell.cellAddress}"></span>
-                                        ${cell.text.encodeAsHTML()}
+                                        ${cell.text}
                                     </th>
                                 </g:each>
                             </tr>
@@ -66,10 +66,10 @@
                                         <g:set var="cellProblems" value ="${context.getProblems(cell)}"/>
                                         <td
                                             class="${Level.normalize(Problems.getMaximumProblemLevel(cellProblems)).name}"
-                                            title="${cellProblems*.getLevelAndMessage().join('\n\n').encodeAsHTML()}"
+                                            title="${cellProblems*.getLevelAndMessage().join('\n\n')}"
                                         >
                                         <span class="anchor" id="${cell.cellAddress}"></span>
-                                            ${cell.text.encodeAsHTML()}
+                                            ${cell.text}
                                         </td>
                                     </g:each>
                                 </tr>
@@ -130,7 +130,7 @@
     <h3><g:message code="metadataImport.implementedValidations"/></h3>
         <ul>
             <g:each var="implementedValidation" in="${implementedValidations}" >
-                <li>${implementedValidation.encodeAsHTML()}</li>
+                <li>${implementedValidation}</li>
             </g:each>
         </ul>
     </div>

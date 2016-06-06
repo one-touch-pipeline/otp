@@ -32,10 +32,10 @@
         <div id="processCommentBox" class="commentBoxContainer">
             <div id="commentLabel">Comment:</div>
             <sec:ifNotGranted roles="ROLE_OPERATOR">
-                <textarea id="commentBox" readonly>${comment?.comment?.encodeAsHTML()}</textarea>
+                <textarea id="commentBox" readonly>${comment?.comment}</textarea>
             </sec:ifNotGranted>
             <sec:ifAllGranted roles="ROLE_OPERATOR">
-                <textarea id="commentBox">${comment?.comment?.encodeAsHTML()}</textarea>
+                <textarea id="commentBox">${comment?.comment}</textarea>
                 <div id="commentButtonArea">
                     <button id="saveComment" disabled>&nbsp;&nbsp;&nbsp;<g:message code="commentBox.save" /></button>
                     <button id="cancelComment" disabled><g:message code="commentBox.cancel" /></button>

@@ -9,7 +9,7 @@
     <div class="body">
       <div class="fastqc">
         <h1><g:message code="fastqc.show.fastqcReport" args="[pid, runName, laneId, mateNumber]"/></h1>
-        ${html}
+        ${raw(html)}
       </div>
     </div>
   </body>

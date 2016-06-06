@@ -21,8 +21,8 @@
   <h2>${g.message(code: "metadataImport.details.dataFiles")}</h2>
   <g:each in="${data.runs}" var="run">
     <h3>${g.message(code: "metadataImport.details.run")}
+      <g:link controller="run" action="show" id="${run.run.id}">${run.run.name}</g:link>,
       ${[
-        g.link([controller: "run", action: "show", id: run.run.id], run.run.name),
         run.run.seqCenter.name,
         run.run.seqPlatform.fullName(),
         run.run.dateExecuted?.format("yyyy-MM-dd")
@@ -31,11 +31,14 @@
     <ul>
       <g:each in="${run.seqTracks}" var="seqTrack">
         <li>
+          <g:link controller="seqTrack" action="show" id="${seqTrack.seqTrack.id}"><g:message code="metadataImport.details.lane"/>${seqTrack.seqTrack.laneId}</g:link>,
           ${[
-            g.link([controller: "seqTrack", action: "show", id: seqTrack.seqTrack.id], "${g.message(code: "metadataImport.details.lane")} ${seqTrack.seqTrack.laneId}"),
             seqTrack.seqTrack.ilseId ? "${g.message(code: "metadataImport.details.ilse")} ${seqTrack.seqTrack.ilseId}" : null,
             seqTrack.seqTrack.project.name,
-            "${g.link([controller: "individual", action: "show", id: seqTrack.seqTrack.individual.id], seqTrack.seqTrack.individual.displayName)} ${seqTrack.seqTrack.sampleType.name}",
+          ].findAll().join(', ')},
+          <g:link controller="individual" action="show" id="${seqTrack.seqTrack.individual.id}">${seqTrack.seqTrack.individual.displayName}</g:link>,
+          ${[
+            seqTrack.seqTrack.sampleType.name,
             "${seqTrack.seqTrack.seqType.name} ${seqTrack.seqTrack.seqType.libraryLayout}",
             seqTrack.seqTrack instanceof ChipSeqSeqTrack ? seqTrack.seqTrack.antibodyTarget.name : null,
             seqTrack.seqTrack instanceof ChipSeqSeqTrack ? seqTrack.seqTrack.antibody : null,
@@ -44,10 +47,16 @@
           ].findAll().join(', ')}
           <ul>
             <g:each in="${seqTrack.dataFiles}" var="dataFile">
-              <li>${g.message(code: "metadataImport.details.mateNumber")} ${dataFile.mateNumber}: <g:link controller="dataFile" action="showDetails" id="${dataFile.id}">${dataFile.fileName}</g:link></li>
+              <li>
+                <g:message code="metadataImport.details.mateNumber" />
+                ${dataFile.mateNumber}:
+                <g:link controller="dataFile" action="showDetails" id="${dataFile.id}">
+                  ${dataFile.fileName}
+                </g:link>
+              </li>
             </g:each>
             <g:each in="${seqTrack.seqTrack.logMessages}" var="msg">
-              <li>${new DateTime(msg.dateCreated).toString("yyyy-MM-dd HH:mm:ss ZZ")}: ${msg.message.encodeAsHTML()}</li>
+              <li>${new DateTime(msg.dateCreated).toString("yyyy-MM-dd HH:mm:ss ZZ")}: ${msg.message}</li>
             </g:each>
           </ul>
         </li>
