@@ -279,6 +279,6 @@ class SeqTrack implements ProcessParameterObject, Entity {
         seqType index: "seq_track_seq_type_idx"
         seqPlatform index: "seq_track_seq_platform_idx"
         libraryPreparationKit index: "seq_track_library_preparation_kit_idx"
-        normalizedLibraryName inxex: "seq_track_normalized_library_name_idx"
+        normalizedLibraryName index: "seq_track_normalized_library_name_idx"
     }
 }
