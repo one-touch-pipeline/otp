@@ -76,10 +76,8 @@ class DataSwapService {
         assert seqTrack.class == seqTrack.seqType.seqTrackClass
         if (seqTrack.seqType.id != newSeqType.id) {
             if (seqTrack.class != newSeqType.seqTrackClass) {
-                [seqTrack.seqType, newSeqType]*.seqTrackClass.each {
-                    if (![SeqTrack, ExomeSeqTrack].contains(it)) {
-                        throw new UnsupportedOperationException("Changing the SeqTrack class from or to ${it} is not supported yet.")
-                    }
+                if (newSeqType.name == SeqTypeNames.CHIP_SEQ.name()) {
+                    throw new UnsupportedOperationException("Changing to ${SeqTypeNames.CHIP_SEQ.name()} is not supported yet.")
                 }
                 Sql sql = new Sql(dataSource)
                 assert 1 == sql.executeUpdate("update seq_track set class = ${newSeqType.seqTrackClass.name} where id = ${seqTrack.id} and class = ${seqTrack.class.name};")
