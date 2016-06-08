@@ -24,21 +24,24 @@ class ErrorsController {
 
     def error500 = {
         def exception = request.getAttribute('exception')
-        String digest = ''
+        String stackTrace = ''
         if (exception) {
-            if (exception.message) {
-                digest = exception.message
-            }
-            exception.stackTrace.each {
-                digest += it.toString()
-            }
+            StringWriter stackTraceBuffer = new StringWriter()
+            PrintWriter stackTracePrintWriter = new PrintWriter(stackTraceBuffer)
+            exception.printStackTrace(stackTracePrintWriter)
+            stackTrace = stackTraceBuffer.toString()
         }
-        digest = digest.encodeAsMD5()
+        String digest = stackTrace.encodeAsMD5()
+        log.error("Displaying exception with digest ${digest}.")
         if (springSecurityService.isAjax(request)) {
             render digest
             return
         } else {
-            [code: digest]
+            [
+                    code: digest,
+                    message: exception?.message,
+                    stackTrace: stackTrace,
+            ]
         }
     }
 }
