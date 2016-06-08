@@ -22,7 +22,7 @@ class GroupCommandTests {
         GroupCommand group = new GroupCommand(writeProject: true, name: "test", description: "")
         // write project is enabled, but read project is disabled - should not validate
         assertFalse(group.validate())
-        assertEquals("validator.invalid", group.errors.getFieldError("writeProject").code)
+        assertEquals("Write without read", group.errors.getFieldError("writeProject").code)
         // disabling write project should validate
         group = new GroupCommand(name: "test", description: "")
         assertTrue(group.validate())
@@ -39,7 +39,7 @@ class GroupCommandTests {
         GroupCommand group = new GroupCommand(writeJobSystem: true, name: "test", description: "")
         // write job system is enabled, but read job system is disabled - should not validate
         assertFalse(group.validate())
-        assertEquals("validator.invalid", group.errors.getFieldError("writeJobSystem").code)
+        assertEquals("Write without read", group.errors.getFieldError("writeJobSystem").code)
         // disabling write job system should validate
         group = new GroupCommand(name: "test", description: "")
         assertTrue(group.validate())
@@ -56,7 +56,7 @@ class GroupCommandTests {
         GroupCommand group = new GroupCommand(writeSequenceCenter: true, name: "test", description: "")
         // write sequence center is enabled, but read sequence center is disabled - should not validate
         assertFalse(group.validate())
-        assertEquals("validator.invalid", group.errors.getFieldError("writeSequenceCenter").code)
+        assertEquals("Write without read", group.errors.getFieldError("writeSequenceCenter").code)
         // disabling write sequence center should validate
         group = new GroupCommand(name: "test", description: "")
         assertTrue(group.validate())
@@ -74,15 +74,15 @@ class GroupCommandTests {
         role.save(flush: true)
         GroupCommand group = new GroupCommand(name: "test", description: "")
         assertFalse(group.validate())
-        assertEquals("validator.invalid", group.errors.getFieldError("name").code)
+        assertEquals("Group already exists.", group.errors.getFieldError("name").code)
         group = new GroupCommand(name: "tEsT", description: "")
         assertFalse(group.validate())
-        assertEquals("validator.invalid", group.errors.getFieldError("name").code)
+        assertEquals("Group already exists.", group.errors.getFieldError("name").code)
         role = new Role(authority: "GROUP_TEST_2")
         role.save(flush: true)
         group = new GroupCommand(name: "tEsT 2", description: "")
         assertFalse(group.validate())
-        assertEquals("validator.invalid", group.errors.getFieldError("name").code)
+        assertEquals("Group already exists.", group.errors.getFieldError("name").code)
         group = new GroupCommand(name: "tEsT 3", description: "")
         assertTrue(group.validate())
     }

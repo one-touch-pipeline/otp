@@ -13,11 +13,11 @@
                     <tbody>
                         <tr>
                             <td><label for="create-group-name"><g:message code="group.create.ui.name"/></label></td>
-                            <td><input type="text" name="name" id="create-group-name"/><span class="error-marker"></span></td>
+                            <td><input type="text" name="name" id="create-group-name"/></td>
                         </tr>
                         <tr>
                             <td><label for="create-group-description"><g:message code="group.create.ui.description"/></label></td>
-                            <td><input type="text" name="description" id="create-group-description"/><span class="error-marker"></span></td>
+                            <td><input type="text" name="description" id="create-group-description"/></td>
                         </tr>
                     </tbody>
                 </table>
@@ -33,17 +33,17 @@
                         <tr>
                             <th><g:message code="group.create.ui.project"/></th>
                             <td><input type="checkbox" name="readProject"/></td>
-                            <td><input type="checkbox" name="writeProject"/><span class="error-marker"></span></td>
+                            <td><input type="checkbox" name="writeProject"/></td>
                         </tr>
                         <tr>
                             <th><g:message code="group.create.ui.jobSystem"/></th>
                             <td><input type="checkbox" name="readJobSystem"/></td>
-                            <td><input type="checkbox" name="writeJobSystem"/><span class="error-marker"></span></td>
+                            <td><input type="checkbox" name="writeJobSystem"/></td>
                         </tr>
                         <tr>
                             <th><g:message code="group.create.ui.seqeuenceCenter"/></th>
                             <td><input type="checkbox" name="readSequenceCenter"/></td>
-                            <td><input type="checkbox" name="writeSequenceCenter"/><span class="error-marker"></span></td>
+                            <td><input type="checkbox" name="writeSequenceCenter"/></td>
                         </tr>
                     </tbody>
                 </table>
@@ -149,14 +149,10 @@
                 </div>
             </div>
         </div>
-        <asset:script>
-            $(function() {
-                $.otp.userAdministration.editUser.register.call($.otp.userAdministration.editUser);
-            });
-        </asset:script>
     </body>
     <asset:script>
         $(function() {
+            $.otp.userAdministration.editUser.register.call($.otp.userAdministration.editUser);
             $.otp.growBodyInit(240);
         });
     </asset:script>

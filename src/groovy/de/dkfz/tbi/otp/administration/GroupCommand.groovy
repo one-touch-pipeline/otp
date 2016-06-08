@@ -24,17 +24,25 @@ class GroupCommand {
 
     static constraints = {
         name(blank: false, validator: { String value ->
-            return Role.findByAuthority("GROUP_" + value.toUpperCase().replace(' ', '_')) == null
+            if (Role.findByAuthority("GROUP_" + value.toUpperCase().replace(' ', '_'))) {
+                return "Group already exists."
+            }
         })
         description(blank: true)
         writeProject(validator: { boolean value, GroupCommand object ->
-            return object.readProject || !value
+            if (!object.readProject && value) {
+                return 'Write without read'
+            }
         })
         writeJobSystem(validator: { boolean value, GroupCommand object ->
-            return object.readJobSystem || !value
+            if (!object.readJobSystem && value) {
+                return 'Write without read'
+            }
         })
         writeSequenceCenter(validator: { boolean value, GroupCommand object ->
-            return object.readSequenceCenter || !value
+            if (!object.readSequenceCenter && value) {
+                return 'Write without read'
+            }
         })
     }
 }

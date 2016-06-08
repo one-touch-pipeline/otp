@@ -177,7 +177,9 @@ $.otp.userAdministration.editUser = {
         /**
          * jQuery object pointing to the div containing the markup for the new Group dialog.
          */
-        dialog: $("#create-group-dialog"),
+        getDiv: function() {
+            return $("#create-group-dialog");
+        },
         /**
          * Removes the error class from the direct parent of all input elements
          * of type checkbox and text.
@@ -186,8 +188,10 @@ $.otp.userAdministration.editUser = {
         removeErrors: function () {
             "use strict";
             var textFields;
-            textFields = $("input[type=text], input[type=checkbox]", this.dialog);
+            textFields = $("input[type=text], input[type=checkbox]", this.getDiv());
             textFields.parent().removeClass("error");
+            textFields.parent().removeClass("error-checkbox");
+            textFields.parent().removeAttr("title");
             textFields.removeAttr("title");
         },
         /**
@@ -197,8 +201,8 @@ $.otp.userAdministration.editUser = {
          */
         resetFields: function () {
             "use strict";
-            $("input[type=text]", this.dialog).val("");
-            $("input[type=checkbox]", this.dialog).attr("checked", false);
+            $("input[type=text]", this.getDiv()).val("");
+            $("input[type=checkbox]", this.getDiv()).attr("checked", false);
             this.removeErrors();
         },
         /**
@@ -207,9 +211,8 @@ $.otp.userAdministration.editUser = {
          * In case of success the new Group is added to the list of available Groups,
          * the dialog fields are reset and the dialog is closed.
          *
-         * In case of error the table cells containing errors are highlighted with
-         * the class error. In addition the title attribute is set on the error field
-         * and on an error-marker provided as an additional span in the same table cell.
+         * In case of error the table cells containing errors are highlighted.
+         * In addition the title attribute is set on the error field.
          * Before setting the new errors, the previous ones are removed.
          *
          * The passed in param data structure is expected to be valid JSON in the following
@@ -238,16 +241,19 @@ $.otp.userAdministration.editUser = {
                 $("<td><input type=\"hidden\" value=\"" + data.group.id + "\"/><a href=\"#\" rel=\"userGroups-" + data.group.id + "\">" + $L("user.administration.userGroup.ui.addGroup") + "</a></td>")
                     .appendTo(row)
                     .click($.otp.userAdministration.editUser.addRemoveGroups);
-                this.resetFields($("#create-group-dialog"));
-                $("#create-group-dialog").dialog("close");
+                this.getDiv().dialog("close");
             } else if (data.errors) {
                 this.removeErrors();
                 if (Array.isArray(data.errors)) {
                     data.errors.forEach(function (error) {
-                        var errorField = $("#create-group-dialog input[name=" + error.field + "]");
+                        var errorField = $("input[name=" + error.field + "]");
+                        if (error.field == 'name') {
+                            errorField.parent().addClass("error");
+                        } else {
+                            errorField.parent().addClass("error-checkbox");
+                            errorField.parent().attr("title", error.message);
+                        }
                         errorField.attr("title", error.message);
-                        $("span.error-marker", errorField.parent()).attr("title", error.message);
-                        errorField.parent().addClass("error");
                     });
                 }
             }
@@ -255,7 +261,7 @@ $.otp.userAdministration.editUser = {
         showDialog: function () {
             "use strict";
             this.resetFields();
-            this.dialog.dialog({
+            this.getDiv().dialog({
                 buttons: [
                     {
                         text: $L("default.button.cancel.label"),

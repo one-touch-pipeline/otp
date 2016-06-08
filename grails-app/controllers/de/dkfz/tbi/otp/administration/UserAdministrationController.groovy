@@ -1,14 +1,11 @@
 package de.dkfz.tbi.otp.administration
 
-import grails.plugin.springsecurity.annotation.Secured
-import grails.converters.JSON
-import de.dkfz.tbi.otp.security.Group
-import de.dkfz.tbi.otp.security.User
-import de.dkfz.tbi.otp.user.RoleNotFoundException
-import de.dkfz.tbi.otp.user.UserNotFoundException
-import de.dkfz.tbi.otp.utils.DataTableCommand
-import de.dkfz.tbi.otp.OtpException
-
+import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.security.*
+import de.dkfz.tbi.otp.user.*
+import de.dkfz.tbi.otp.utils.*
+import grails.converters.*
+import grails.plugin.springsecurity.annotation.*
 /**
  * @short Controller for user management.
  *
@@ -110,7 +107,7 @@ class UserAdministrationController {
     }
 
     /**
-     * Action to (un)expire the password of a given user 
+     * Action to (un)expire the password of a given user
      */
     def expirePassword = {
         try {
@@ -234,11 +231,16 @@ class UserAdministrationController {
      * @return
      */
     def createGroup(GroupCommand command) {
+        Map result = [:]
         if (command.hasErrors()) {
-            render command.errors as JSON
+            List errors = []
+            command.errors.allErrors.each {
+                errors.add([field: it.getArguments()[0], message: "Error code: ${it.code}"])
+            }
+            result.put("errors", errors)
+            render result as JSON
             return
         }
-        Map result = [:]
         try {
             Group group = groupService.createGroup(command)
             result.put("success", true)
