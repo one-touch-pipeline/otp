@@ -1,4 +1,5 @@
 import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
+import de.dkfz.tbi.otp.tracking.OtrsTicket
 
 import static de.dkfz.tbi.otp.job.processing.PbsOptionMergingService.PBS_PREFIX
 
@@ -44,6 +45,9 @@ plan(workflow) {
     //job("checkArchivingPossible", "checkArchivingPossible")
     //job("archiveInitialData", "archiveInitialDataJob")
     //job("checkFinalArchive", "checkFinalArchive")
+    job("notifyProcessFinished", "notifyProcessFinishedJob") {
+        constantParameter("step", OtrsTicket.ProcessingStep.INSTALLATION.name())
+    }
 }
 
 

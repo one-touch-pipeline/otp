@@ -1,3 +1,5 @@
+import de.dkfz.tbi.otp.tracking.OtrsTicket
+
 import static de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl.getSLOTS_RESERVED_FOR_FAST_TRACK_OPTION_NAME
 import static de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl.getTOTAL_SLOTS_OPTION_NAME
 import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
@@ -89,6 +91,10 @@ plan(workflowName) {
     }
 
     job("storeChecksumOfMergedBamFile", "storeChecksumOfMergedBamFileJob")
+
+    job("notifyProcessFinished", "notifyProcessFinishedJob") {
+        constantParameter("step", OtrsTicket.ProcessingStep.ALIGNMENT.name())
+    }
 }
 
 // number of all TransferMergedBamFile workflows which can be executed in parallel

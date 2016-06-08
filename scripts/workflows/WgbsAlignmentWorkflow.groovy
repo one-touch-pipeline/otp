@@ -1,3 +1,5 @@
+import de.dkfz.tbi.otp.tracking.OtrsTicket
+
 import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
 import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl;
 
@@ -8,6 +10,9 @@ plan(workflow, ctx, true) {
     job("executeWgbsAlignment", "executeWgbsAlignmentJob")
     job("parsePanCanQc", "parsePanCanQcJob") // this job will be implemented in OTP-2099, currently the general parsing job will be used
     job("linkWgbsAlignmentFiles", "linkWgbsAlignmentFilesJob")
+    job("notifyProcessFinished", "notifyProcessFinishedJob") {
+        constantParameter("step", OtrsTicket.ProcessingStep.ALIGNMENT.name())
+    }
 }
 
 println ctx.processingOptionService.createOrUpdate(AbstractStartJobImpl.TOTAL_SLOTS_OPTION_NAME, workflow, null, '5', '')

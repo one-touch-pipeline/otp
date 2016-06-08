@@ -1,4 +1,6 @@
 import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
+import de.dkfz.tbi.otp.tracking.OtrsTicket
+
 import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
 
 String workflow = 'FastqcWorkflow'
@@ -9,6 +11,9 @@ plan(workflow) {
      */
     start("start", "fastqcStartJob")
     job("fastqc", "fastqcJob")
+    job("notifyProcessFinished", "notifyProcessFinishedJob") {
+        constantParameter("step", OtrsTicket.ProcessingStep.FASTQC.name())
+    }
 }
 
 
