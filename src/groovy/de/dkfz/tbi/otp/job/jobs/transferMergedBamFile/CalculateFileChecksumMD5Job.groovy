@@ -70,11 +70,21 @@ cd ${source}
 # The md5sum file produced by PICARD does not contain the name of the bam file.
 # Therefore the bam file name is added to the md5 sum.
 # To be consistent in the naming the md5sum file is renamed.
-sed -e "s,\$,  ${bamFile}," -i ${picardMd5}
-mv ${picardMd5} ${md5Bam}
-chmod 0640 ${md5Bam}
-md5sum ${baiFile} > ${md5Bai}
-chmod 0640 ${md5Bai}
+
+if [ -f ${picardMd5} ]
+then
+    if ! grep -q ${bamFile} ${picardMd5}
+    then
+        sed -e "s,\$,  ${bamFile}," -i ${picardMd5}
+    fi
+    mv ${picardMd5} ${md5Bam}
+    chmod 0640 ${md5Bam}
+fi
+if [ ! -f ${md5Bai} ] || [ ! -s ${md5Bai} ]
+then
+    md5sum ${baiFile} > ${md5Bai}
+    chmod 0640 ${md5Bai}
+fi
 cd ${qaResultDirectory}
 rm -f ${qaResultMd5sumFile}
 find . -type f -a -not -name ${processedMergedBamFileQaFileService.MD5SUM_NAME} -exec md5sum '{}' \\; >> ${qaResultMd5sumFile}
