@@ -79,7 +79,6 @@ where
                 and abstractQualityAssessment.qualityAssessmentMergedPass.abstractMergedBamFile.workPackage.seqType = seqTrack.seqType
                 and abstractQualityAssessment.qualityAssessmentMergedPass.abstractMergedBamFile.workPackage.seqPlatformGroup = seqTrack.seqPlatform.seqPlatformGroup
                 and dataFile.seqTrack = seqTrack
-                and dataFile.fileWithdrawn = false
                 and abstractQualityAssessment.id in :abstractQualityAssessmentIds
         '''
         Map parameters = [
