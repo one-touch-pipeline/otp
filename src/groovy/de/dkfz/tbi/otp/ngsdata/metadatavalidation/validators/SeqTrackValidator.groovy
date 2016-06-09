@@ -26,6 +26,7 @@ class SeqTrackValidator extends ColumnSetValidator<MetadataValidationContext> im
             PIPELINE_VERSION,
             ILSE_NO,
             ADAPTER_FILE,
+            CUSTOMER_LIBRARY,
     ].asImmutable()
 
     @Override

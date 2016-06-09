@@ -411,21 +411,24 @@ class SeqTrackValidatorSpec extends Specification {
     void 'validate, when columns which must have equal values for a SeqTrack have different values, adds errors'() {
         given:
         MetadataValidationContext context = createContext((
-                "${SAMPLE_ID} ${SEQUENCING_TYPE} ${PIPELINE_VERSION} ${RUN_ID} ${LANE_NO} ${BARCODE}\n" +
-                        "A F K runA L1\n" +
-                        "B F L runA L1\n" +
-                        "A F K runA L3 ABC\n" +
-                        "A G K runA L3 ABC\n" +
-                        "C H M runA L3 DEF\n" +  // unrelated barcode
-                        "D I N runA L2\n" +  // unrelated lane
-                        "E J O runB L1\n"      // unrelated run
+                "${SAMPLE_ID} ${SEQUENCING_TYPE} ${PIPELINE_VERSION} ${RUN_ID} ${LANE_NO} ${CUSTOMER_LIBRARY} ${BARCODE}\n" +
+                        "A F K runA L1 1\n" +
+                        "A F K runA L1 2\n" +
+                        "B F L runA L1 1\n" +
+                        "A F K runA L3 1 ABC\n" +
+                        "A G K runA L3 1 ABC\n" +
+                        "C H M runA L3 1 DEF\n" +  // unrelated barcode
+                        "D I N runA L2 1\n" +  // unrelated lane
+                        "E J O runB L1 1\n"      // unrelated run
         ).replace(' ', '\t'))
         Collection<Problem> expectedProblems = [
-                new Problem(cells(context, seqTrackColumns + SAMPLE_ID, 0, 1),
+                new Problem(cells(context, seqTrackColumns + SAMPLE_ID, 0, 1, 2),
                         Level.ERROR, "All rows for run 'runA', lane 'L1', no barcode must have the same value in column '${SAMPLE_ID}'."),
-                new Problem(cells(context, seqTrackColumns + PIPELINE_VERSION, 0, 1),
+                new Problem(cells(context, seqTrackColumns + PIPELINE_VERSION, 0, 1, 2),
                         Level.ERROR, "All rows for run 'runA', lane 'L1', no barcode must have the same value in column '${PIPELINE_VERSION}'."),
-                new Problem(cells(context, seqTrackColumns + SEQUENCING_TYPE, 2, 3),
+                new Problem(cells(context, seqTrackColumns + CUSTOMER_LIBRARY, 0, 1, 2),
+                        Level.ERROR, "All rows for run 'runA', lane 'L1', no barcode must have the same value in column '${CUSTOMER_LIBRARY}'."),
+                new Problem(cells(context, seqTrackColumns + SEQUENCING_TYPE, 3, 4),
                         Level.ERROR, "All rows for run 'runA', lane 'L3', barcode 'ABC' must have the same value in column '${SEQUENCING_TYPE}'."),
         ]
 

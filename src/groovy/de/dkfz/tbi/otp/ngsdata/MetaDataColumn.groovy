@@ -30,7 +30,7 @@ enum MetaDataColumn {
     ILSE_NO,
     PROJECT,
     MATE,
-    CUSTOM_LIBRARY,
+    CUSTOMER_LIBRARY,
     ADAPTER_FILE,
     SAMPLE_SUBMISSION_TYPE,
 }

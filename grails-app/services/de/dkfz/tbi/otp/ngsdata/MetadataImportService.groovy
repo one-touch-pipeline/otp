@@ -182,7 +182,7 @@ class MetadataImportService {
                 libraryPreparationKit = Objects.requireNonNull(
                         LibraryPreparationKitService.findLibraryPreparationKitByNameOrAlias(libPrepKitString))
             }
-            String libraryName = uniqueColumnValue(rows, CUSTOM_LIBRARY) ?: ""
+            String libraryName = uniqueColumnValue(rows, CUSTOMER_LIBRARY) ?: ""
             String normalizedLibraryName = SeqTrack.normalizeLibraryName(libraryName)
             String adapterFileName = uniqueColumnValue(rows, ADAPTER_FILE)
             AdapterFile adapterFile = adapterFileName ? CollectionUtils.exactlyOneElement(AdapterFile.findAllByFileName(adapterFileName)) : null
