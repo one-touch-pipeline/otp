@@ -163,7 +163,7 @@ class FastqcJobTest {
         dataFile.save(flush: true, failOnError: true)
         DomainFactory.createFastqcProcessedFile([dataFile: dataFile])
 
-        DataFile dataFile2 = DomainFactory.createDataFile([seqTrack: seqTrack, project: seqTrack.project, run: seqTrack.run, runSegment: runSegment, nReads: nReads, sequenceLength: sequenceLength])
+        DataFile dataFile2 = DomainFactory.createDataFile([seqTrack: seqTrack, project: seqTrack.project, run: seqTrack.run, runSegment: runSegment, nReads: nReads, sequenceLength: sequenceLength, fileType: dataFile.fileType])
         DomainFactory.createFastqcProcessedFile([dataFile: dataFile2])
 
         fastqcJob.fastqcUploadService.metaClass.uploadFastQCFileContentsToDataBase = { FastqcProcessedFile fastqc -> }
@@ -201,7 +201,7 @@ class FastqcJobTest {
         dataFile.save(flush: true, failOnError: true)
         DomainFactory.createFastqcProcessedFile([dataFile: dataFile])
 
-        DataFile dataFile2 = DomainFactory.createDataFile([seqTrack: seqTrack, project: seqTrack.project, run: seqTrack.run, runSegment: runSegment, sequenceLength: sequenceLength, nReads: nReads])
+        DataFile dataFile2 = DomainFactory.createDataFile([seqTrack: seqTrack, project: seqTrack.project, run: seqTrack.run, runSegment: runSegment, sequenceLength: sequenceLength, nReads: nReads, fileType: dataFile.fileType])
         DomainFactory.createFastqcProcessedFile([dataFile: dataFile2])
 
         fastqcJob.fastqcUploadService.metaClass.uploadFastQCFileContentsToDataBase = { FastqcProcessedFile fastqc -> }
@@ -219,7 +219,7 @@ class FastqcJobTest {
         dataFile.save(flush: true, failOnError: true)
         DomainFactory.createFastqcProcessedFile([dataFile: dataFile])
 
-        DataFile dataFile2 = DomainFactory.createDataFile([seqTrack: seqTrack, project: seqTrack.project, run: seqTrack.run, runSegment: runSegment, sequenceLength: sequenceLength2, nReads: nReads])
+        DataFile dataFile2 = DomainFactory.createDataFile([seqTrack: seqTrack, project: seqTrack.project, run: seqTrack.run, runSegment: runSegment, sequenceLength: sequenceLength2, nReads: nReads, fileType: dataFile.fileType])
         DomainFactory.createFastqcProcessedFile([dataFile: dataFile2])
 
         fastqcJob.fastqcUploadService.metaClass.uploadFastQCFileContentsToDataBase = { FastqcProcessedFile fastqc -> }

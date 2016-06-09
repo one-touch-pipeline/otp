@@ -821,6 +821,7 @@ class DomainFactory {
     static createFileType(Map properties = [:]) {
         return createDomainObject(FileType, [
                 type: FileType.Type.SEQUENCE,
+                vbpPath: "sequence_${counter++}",
         ], properties)
     }
 
@@ -836,7 +837,7 @@ class DomainFactory {
                 dateFileSystem: new Date(),
                 dateCreated: new Date(),
                 fileWithdrawn: false,
-                fileType: {createFileType(type: Type.SEQUENCE, vbpPath: '/sequence/')},
+                fileType: {createFileType()},
                 used: true,
                 fileExists: true,
                 fileLinked: true,
@@ -902,14 +903,17 @@ class DomainFactory {
     }
 
     public static SeqTrack createSeqTrackWithTwoDataFiles(Map seqTrackProperties = [:], Map dataFileProperties1 = [:], Map dataFileProperties2 = [:]) {
+        FileType fileType = DomainFactory.createFileType()
         Map defaultMap1 = [
                 fileName: 'DataFileFileName_R1.gz',
                 vbpFileName: 'DataFileFileName_R1.gz',
+                fileType: fileType,
                 mateNumber: 1,
         ]
         Map defaultMap2 = [
                 fileName: 'DataFileFileName_R2.gz',
                 vbpFileName: 'DataFileFileName_R2.gz',
+                fileType: fileType,
                 mateNumber: 2,
         ]
         SeqTrack seqTrack = createSeqTrackWithOneDataFile([seqType: createSeqType(libraryLayout: LibraryLayout.PAIRED)] + seqTrackProperties, defaultMap1 + dataFileProperties1)
@@ -919,7 +923,6 @@ class DomainFactory {
 
     public static DataFile createSequenceDataFile(final Map properties = [:]) {
         Map defaultProperties = [
-                fileType   : createFileType([type: Type.SEQUENCE]),
                 dateCreated: new Date(),  // In unit tests Grails (sometimes) does not automagically set dateCreated.
                 used       : true,
         ]
@@ -1096,7 +1099,7 @@ class DomainFactory {
             name: "roddyPath",
             type: "",
             project: null,
-            value: "${basePath}/tbi_cluster/13.1/x86_64/otp/Roddy/",
+            value: "${basePath}/roddy/",
             comment: "Path to the roddy.sh on the current cluster (***REMOVED***cluster 13.1)",
         )
         assert processingOptionPath.save(flush: true)
@@ -1114,7 +1117,7 @@ class DomainFactory {
                 name: "roddyBaseConfigsPath",
                 type: "",
                 project: null,
-                value: "${basePath}/tbi_cluster/13.1/x86_64/otp/RoddyBaseConfigs/",
+                value: "${basePath}/roddyBaseConfigs/",
                 comment: "Path to the baseConfig-files which are needed to execute Roddy",
         )
         assert processingOptionBaseConfigsPath.save(flush: true)
@@ -1123,7 +1126,7 @@ class DomainFactory {
                 name: "roddyApplicationIni",
                 type: "",
                 project: null,
-                value: "${basePath}/tbi_cluster/13.1/x86_64/otp/RoddyBaseConfigs/applicationProperties.ini",
+                value: "${basePath}/roddyBaseConfigs/applicationProperties.ini",
                 comment: "Path to the application.ini which is needed to execute Roddy"
         )
         assert processingOptionApplicationIni.save(flush: true)
@@ -1132,7 +1135,7 @@ class DomainFactory {
                 name: ExecuteRoddyCommandService.FEATURE_TOGGLES_CONFIG_PATH,
                 type: null,
                 project: null,
-                value: "${basePath}/tbi_cluster/11.4/x86_64/otp/RoddyBaseConfigs/featureToggles.ini",
+                value: "${basePath}/roddyBaseConfigs/featureToggles.ini",
                 comment: "Path to featureToggles.ini which contains feature toggles for Roddy",
         )
         assert featureTogglesConfigPath.save(flush: true)
