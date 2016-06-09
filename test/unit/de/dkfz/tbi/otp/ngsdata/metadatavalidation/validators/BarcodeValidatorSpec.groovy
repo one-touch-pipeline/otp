@@ -47,7 +47,7 @@ class BarcodeValidatorSpec extends Specification {
         Problem problem = exactlyOneElement(context.problems)
         problem.level == Level.WARNING
         containSame(problem.affectedCells*.cellAddress, ['A2'])
-        problem.message.contains("The barcode 'invalidBarcode' has an unusual format. It should match the regular expression '${BarcodeValidator.REGEX}'.")
+        problem.message.contains("The barcode 'invalidBarcode' has an unusual format. It should match the regular expression '${BarcodeValidator.SHOULD_REGEX}'.")
     }
 
     void 'validate, when barcode contains invalid chars, adds error'() {
@@ -65,13 +65,12 @@ class BarcodeValidatorSpec extends Specification {
         Problem problem = exactlyOneElement(context.problems)
         problem.level == Level.ERROR
         containSame(problem.affectedCells*.cellAddress, ['A2'])
-        problem.message.contains("'${barcode}' is not a well-formed barcode. It must contain only digits (0 to 9) and/or letters (a to z, A to Z). It should match the regular expression '${BarcodeValidator.REGEX}'.")
+        problem.message.contains("'${barcode}' is not a well-formed barcode. It must match the regular expression '${BarcodeValidator.MUST_REGEX}'. It should match the regular expression '${BarcodeValidator.SHOULD_REGEX}'.")
 
         where:
         barcode << [
                 ' ',
                 '_',
-                '-',
         ]
     }
 
