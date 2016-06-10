@@ -97,6 +97,7 @@ class PbsService {
         String scriptText = """
 #PBS -S /bin/bash
 #PBS -N ${pbsJobDescription}
+#PBS -j oe
 
 # OTP: Fail on first non-zero exit code
 set -e

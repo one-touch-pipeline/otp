@@ -768,7 +768,7 @@ $.otp.workflows = {
                             if (j > 4) {
                                 rowData[3] += ' style="display: none;"';
                             }
-                            rowData[3] += ">" + rowData[4] + ".e" +ids[j] + "</li>";
+                            rowData[3] += ">" + ids[j] + "</li>";
                         }
                         if (ids.length >= 5) {
                             rowData[3] += '<li><a href="#">...</a></li>';

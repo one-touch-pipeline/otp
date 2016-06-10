@@ -16,8 +16,7 @@ abstract class AbstractOtpJob extends AbstractMaybeSubmitWaitValidateJob{
     }
 
     public static String getLogFileNames(ClusterJob clusterJob) {
-        return "Output log file: ${clusterJob.clusterJobName}.o${clusterJob.clusterJobId}\n" +
-                "Error log file: ${clusterJob.clusterJobName}.e${clusterJob.clusterJobId}"
+        return "Log file: ${clusterJob.clusterJobName}.o${clusterJob.clusterJobId}"
     }
 
     @Override

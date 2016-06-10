@@ -13,8 +13,7 @@ class AbstractOtpJobUnitTests {
     @Test
     void testGetLogFileNames() {
         ClusterJob clusterJob = ClusterJob.build()
-        String expected = "Output log file: ${clusterJob.clusterJobName}.o${clusterJob.clusterJobId}\n" +
-                "Error log file: ${clusterJob.clusterJobName}.e${clusterJob.clusterJobId}"
+        String expected = "Log file: ${clusterJob.clusterJobName}.o${clusterJob.clusterJobId}"
 
         assert AbstractOtpJob.getLogFileNames(clusterJob) == expected
     }
