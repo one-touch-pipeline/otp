@@ -103,7 +103,7 @@ class MergingSetUnitTests {
         final Set<SeqTrack> allSeqTracks = seqTracks1 + seqTracks2
         assert allSeqTracks.size() == 3
 
-        final MergingSet mergingSet = MergingSet.build()
+        final MergingSet mergingSet = DomainFactory.createMergingSet()
         assert mergingSet.containedSeqTracks == Collections.emptySet()
 
         final ProcessedBamFile bamFile1 = DomainFactory.assignNewProcessedBamFile(mergingSet)

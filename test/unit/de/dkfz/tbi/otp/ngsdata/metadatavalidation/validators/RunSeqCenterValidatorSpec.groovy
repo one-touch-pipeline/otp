@@ -13,6 +13,7 @@ import spock.lang.Specification
         Run,
         SeqCenter,
         SeqPlatform,
+        SeqPlatformGroup,
 ])
 class RunSeqCenterValidatorSpec extends Specification {
 

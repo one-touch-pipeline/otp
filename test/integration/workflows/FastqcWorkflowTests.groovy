@@ -63,7 +63,7 @@ class FastqcWorkflowTests extends WorkflowTestCase {
                 run: run,
         )
 
-        dataFile = DomainFactory.buildSequenceDataFile(
+        dataFile = DomainFactory.createSequenceDataFile(
                 fileExists: true,
                 fileSize: 1,
                 fileName: 'asdf.fastq.gz',

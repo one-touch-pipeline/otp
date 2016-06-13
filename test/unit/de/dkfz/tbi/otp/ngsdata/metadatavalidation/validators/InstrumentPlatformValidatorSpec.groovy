@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
 import de.dkfz.tbi.otp.ngsdata.SeqPlatform
+import de.dkfz.tbi.otp.ngsdata.SeqPlatformGroup
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
@@ -14,7 +15,7 @@ import spock.lang.Specification
 import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
-@Mock(SeqPlatform)
+@Mock([SeqPlatform, SeqPlatformGroup])
 class InstrumentPlatformValidatorSpec extends Specification {
 
     void 'validate, when column is missing, adds error'() {

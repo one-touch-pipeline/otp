@@ -690,7 +690,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     }
 
     private SeqTrack deleteProcessingFilesOfProject_NoProcessedData_Setup() {
-        SeqTrack seqTrack = DomainFactory.buildSeqTrackWithTwoDataFiles()
+        SeqTrack seqTrack = DomainFactory.createSeqTrackWithTwoDataFiles()
         Project project = seqTrack.project
 
         DomainFactory.createRealmDataProcessing(name: project.realmName, processingRootPath: outputFolder.path)
@@ -939,7 +939,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     public void testDeleteProcessingFilesOfProject_ExternalBamFilesAttached_nonMergedSeqTrackExists_Verified() {
         ExternallyProcessedMergedBamFile bamFile = deleteProcessingFilesOfProject_ExternalBamFilesAttached_Setup()
 
-        SeqTrack seqTrack = DomainFactory.buildSeqTrackWithTwoDataFiles(sample: bamFile.sample, seqType: bamFile.seqType)
+        SeqTrack seqTrack = DomainFactory.createSeqTrackWithTwoDataFiles([sample: bamFile.sample, seqType: bamFile.seqType])
         createFastqFiles([seqTrack])
 
         dataSwapService.deleteProcessingFilesOfProject(bamFile.project.name, outputFolder.path, true)

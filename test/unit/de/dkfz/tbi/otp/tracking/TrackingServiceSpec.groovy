@@ -7,6 +7,8 @@ import grails.test.mixin.web.*
 import grails.validation.*
 import spock.lang.*
 
+import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus.*
+
 @TestMixin(ControllerUnitTestMixin)
 @Mock([
     DataFile,
@@ -14,12 +16,15 @@ import spock.lang.*
     Individual,
     OtrsTicket,
     Project,
+    ReferenceGenome,
+    ReferenceGenomeProjectSeqType,
     Run,
     RunSegment,
     Sample,
     SampleType,
     SeqCenter,
     SeqPlatform,
+    SeqPlatformGroup,
     SeqTrack,
     SeqType,
     SoftwareTool,
@@ -27,6 +32,8 @@ import spock.lang.*
 class TrackingServiceSpec extends Specification {
 
     final static String TICKET_NUMBER = "2000010112345678"
+
+    TrackingService trackingService = new TrackingService()
 
     def 'test createOrResetOtrsTicket, when no OtrsTicket with ticket number exists, creates one' () {
         given:
@@ -153,6 +160,38 @@ class TrackingServiceSpec extends Specification {
 
         then:
         date.is(otrsTicket.installationStarted)
+    }
+
+    void "getInstallationProcessingStatus returns expected status"() {
+        expect:
+        SeqTrack seqTrack = DomainFactory.createSeqTrackWithTwoDataFiles([:], [fileLinked: df1_fileLinked], [fileLinked: df2_fileLinked])
+        installationStatus == trackingService.getInstallationProcessingStatus([seqTrack] as Set).installationProcessingStatus
+
+        where:
+        df1_fileLinked | df2_fileLinked || installationStatus
+        true           | true           || ALL_DONE
+        true           | false          || PARTLY_DONE_MIGHT_DO_MORE
+        false          | false          || NOTHING_DONE_MIGHT_DO
+    }
+
+    void "getFastqcProcessingStatus returns expected status"() {
+        expect:
+        SeqTrack seqTrack1 = DomainFactory.createSeqTrack([fastqcState: st1_fastqcState])
+        SeqTrack seqTrack2 = DomainFactory.createSeqTrack([fastqcState: st2_fastqcState])
+        fastqcStatus == trackingService.getFastqcProcessingStatus([seqTrack1, seqTrack2] as Set).fastqcProcessingStatus
+
+        where:
+        st1_fastqcState                          | st2_fastqcState                          || fastqcStatus
+        SeqTrack.DataProcessingState.FINISHED    | SeqTrack.DataProcessingState.FINISHED    || ALL_DONE
+        SeqTrack.DataProcessingState.FINISHED    | SeqTrack.DataProcessingState.IN_PROGRESS || PARTLY_DONE_MIGHT_DO_MORE
+        SeqTrack.DataProcessingState.FINISHED    | SeqTrack.DataProcessingState.NOT_STARTED || PARTLY_DONE_MIGHT_DO_MORE
+        SeqTrack.DataProcessingState.FINISHED    | SeqTrack.DataProcessingState.UNKNOWN     || PARTLY_DONE_MIGHT_DO_MORE
+        SeqTrack.DataProcessingState.IN_PROGRESS | SeqTrack.DataProcessingState.IN_PROGRESS || NOTHING_DONE_MIGHT_DO
+        SeqTrack.DataProcessingState.IN_PROGRESS | SeqTrack.DataProcessingState.NOT_STARTED || NOTHING_DONE_MIGHT_DO
+        SeqTrack.DataProcessingState.IN_PROGRESS | SeqTrack.DataProcessingState.UNKNOWN     || NOTHING_DONE_MIGHT_DO
+        SeqTrack.DataProcessingState.NOT_STARTED | SeqTrack.DataProcessingState.NOT_STARTED || NOTHING_DONE_MIGHT_DO
+        SeqTrack.DataProcessingState.NOT_STARTED | SeqTrack.DataProcessingState.UNKNOWN     || NOTHING_DONE_MIGHT_DO
+        SeqTrack.DataProcessingState.UNKNOWN     | SeqTrack.DataProcessingState.UNKNOWN     || NOTHING_DONE_MIGHT_DO
     }
 
     private boolean testTicket(OtrsTicket otrsTicket) {

@@ -4,6 +4,8 @@ import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.ngsdata.*
 import grails.test.spock.*
 
+import static de.dkfz.tbi.otp.ngsdata.DomainFactory.PROCESSED_BAM_FILE_PROPERTIES
+
 class MergingWorkPackageIntegrationSpec extends IntegrationSpec {
 
     // Must be an integration test, because "String-based queries like[findAll] are
@@ -17,12 +19,12 @@ class MergingWorkPackageIntegrationSpec extends IntegrationSpec {
 
         SeqTrack libPrepKitNull = DomainFactory.createSeqTrack(workPackage)
         assert libPrepKitNull.libraryPreparationKit == null
-        DomainFactory.buildSequenceDataFile(seqTrack: libPrepKitNull)
+        DomainFactory.createSequenceDataFile(seqTrack: libPrepKitNull)
 
         SeqTrack libPrepKitSet = DomainFactory.createSeqTrack(workPackage,
                 [libraryPreparationKit: DomainFactory.createLibraryPreparationKit()])
         assert libPrepKitSet.libraryPreparationKit != null
-        DomainFactory.buildSequenceDataFile(seqTrack: libPrepKitSet)
+        DomainFactory.createSequenceDataFile(seqTrack: libPrepKitSet)
 
         expect:
         !MergingWorkPackage.getMergingProperties(libPrepKitNull).containsKey('libraryPreparationKit')
@@ -30,5 +32,60 @@ class MergingWorkPackageIntegrationSpec extends IntegrationSpec {
         workPackage.satisfiesCriteria(libPrepKitNull)
         workPackage.satisfiesCriteria(libPrepKitSet)
         TestCase.assertContainSame([libPrepKitNull, libPrepKitSet], workPackage.findMergeableSeqTracks())
+    }
+
+    void 'getCompleteProcessableBamFileInProjectFolder, when bamFileInProjectFolder set, not withdrawn, FileOperationStatus PROCESSED, seqTracks match, returns bamFile'() {
+        given:
+        RoddyBamFile bamFile = DomainFactory.createRoddyBamFile(PROCESSED_BAM_FILE_PROPERTIES)
+
+        bamFile.workPackage.bamFileInProjectFolder = bamFile
+        bamFile.workPackage.save(flush: true)
+
+        expect:
+        bamFile == bamFile.workPackage.completeProcessableBamFileInProjectFolder
+    }
+
+    void 'getCompleteProcessableBamFileInProjectFolder, when bamFileInProjectFolder not set, not withdrawn, FileOperationStatus PROCESSED, seqTracks match, returns null'() {
+        given:
+        RoddyBamFile bamFile = DomainFactory.createRoddyBamFile(PROCESSED_BAM_FILE_PROPERTIES)
+
+        expect:
+        null == bamFile.workPackage.completeProcessableBamFileInProjectFolder
+    }
+
+    void 'getCompleteProcessableBamFileInProjectFolder, when bamFileInProjectFolder set, withdrawn, FileOperationStatus PROCESSED, seqTracks match, returns null'() {
+        given:
+        RoddyBamFile bamFile = DomainFactory.createRoddyBamFile(PROCESSED_BAM_FILE_PROPERTIES)
+        bamFile.withdrawn = true
+        bamFile.save(flush: true)
+
+        bamFile.workPackage.bamFileInProjectFolder = bamFile
+        bamFile.workPackage.save(flush: true)
+
+        expect:
+        null == bamFile.workPackage.completeProcessableBamFileInProjectFolder
+    }
+
+    void 'getCompleteProcessableBamFileInProjectFolder, when bamFileInProjectFolder set, not withdrawn, FileOperationStatus INPROGRESS, seqTracks match, returns null'() {
+        given:
+        RoddyBamFile bamFile = DomainFactory.createRoddyBamFile([fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.INPROGRESS, md5sum: null])
+
+        bamFile.workPackage.bamFileInProjectFolder = bamFile
+        bamFile.workPackage.save(flush: true)
+
+        expect:
+        null == bamFile.workPackage.completeProcessableBamFileInProjectFolder
+    }
+
+    void 'getCompleteProcessableBamFileInProjectFolder, when bamFileInProjectFolder set, not withdrawn, FileOperationStatus PROCESSED, seqTracks do not match, returns null'() {
+        given:
+        RoddyBamFile bamFile = DomainFactory.createRoddyBamFile(PROCESSED_BAM_FILE_PROPERTIES)
+        DomainFactory.createSeqTrackWithDataFiles(bamFile.workPackage)
+
+        bamFile.workPackage.bamFileInProjectFolder = bamFile
+        bamFile.workPackage.save(flush: true)
+
+        expect:
+        null == bamFile.workPackage.completeProcessableBamFileInProjectFolder
     }
 }

@@ -242,7 +242,7 @@ class SnvCallingServiceTests {
     void testBamFile1DoesNotContainAllSeqTracks() {
         assertEquals(samplePair, snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY))
 
-        DomainFactory.buildSeqTrackWithDataFile(processedMergedBamFile1.mergingWorkPackage)
+        DomainFactory.createSeqTrackWithDataFiles(processedMergedBamFile1.mergingWorkPackage)
 
         assertNull(snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY))
     }
@@ -251,7 +251,7 @@ class SnvCallingServiceTests {
     void testBamFile2DoesNotContainAllSeqTracks() {
         assertEquals(samplePair, snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY))
 
-        DomainFactory.buildSeqTrackWithDataFile(processedMergedBamFile2.mergingWorkPackage)
+        DomainFactory.createSeqTrackWithDataFiles(processedMergedBamFile2.mergingWorkPackage)
 
         assertNull(snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY))
     }
@@ -483,28 +483,6 @@ class SnvCallingServiceTests {
         assertEquals(samplePair, snvCallingService.samplePairForSnvProcessing(ProcessingPriority.FAST_TRACK_PRIORITY))
     }
 
-
-    @Test
-    void testCheckIfAllAvailableSeqTracksAreIncludedAllIncluded() {
-        assertTrue(snvCallingService.checkIfAllAvailableSeqTracksAreIncluded(processedMergedBamFile1))
-    }
-
-    @Test
-    void testCheckIfAllAvailableSeqTracksAreIncludedOneMissing() {
-        DomainFactory.buildSeqTrackWithDataFile(processedMergedBamFile1.mergingWorkPackage)
-
-        assertFalse(snvCallingService.checkIfAllAvailableSeqTracksAreIncluded(processedMergedBamFile1))
-    }
-
-    @Test
-    void testCheckIfAllAvailableSeqTracksAreIncludedSeqTrackIsWithdrawn() {
-        SeqTrack seqTrack = DomainFactory.buildSeqTrackWithDataFile(processedMergedBamFile1.mergingWorkPackage)
-        DataFile dataFile = DataFile.findBySeqTrack(seqTrack)
-        dataFile.fileWithdrawn = true
-        assert dataFile.save(failOnError: true)
-
-        assertTrue(snvCallingService.checkIfAllAvailableSeqTracksAreIncluded(processedMergedBamFile1))
-    }
 
     private ProcessedMergedBamFile createProcessedMergedBamFile(MergingWorkPackage mergingWorkPackage, Map properties = [:]) {
         final ProcessedMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFile(mergingWorkPackage, properties + DomainFactory.PROCESSED_BAM_FILE_PROPERTIES)

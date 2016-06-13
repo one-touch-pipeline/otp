@@ -87,4 +87,19 @@ class SamplePairTests {
 
         TestCase.shouldFailWithMessageContaining(ValidationException, "seqType", { samplePair.save(flush: true) })
     }
+
+    @Test
+    void testFindLatestSnvCallingInstance_whenNoSnvCallingInstanceExists_ShouldReturnNull() {
+        SamplePair sp = DomainFactory.createSamplePair()
+
+        assert null == sp.findLatestSnvCallingInstance()
+    }
+
+    @Test
+    void testFindLatestSnvCallingInstance_whenSnvCallingInstanceExists_ShouldReturnLatest() {
+        DomainFactory.createSnvInstanceWithRoddyBamFiles()
+        SnvCallingInstance latest = DomainFactory.createSnvInstanceWithRoddyBamFiles()
+
+        assert latest == latest.samplePair.findLatestSnvCallingInstance()
+    }
 }

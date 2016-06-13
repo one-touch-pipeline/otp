@@ -33,7 +33,7 @@ public class RoddyAlignmentDeciderTest {
 
         SeqTrack seqTrack = bamFileContainsSeqTrack ?
                 bamFile.seqTracks.iterator().next() :
-                DomainFactory.buildSeqTrackWithDataFile(bamFile.workPackage)
+                DomainFactory.createSeqTrackWithDataFiles(bamFile.workPackage)
 
         assert bamFile.workPackage.satisfiesCriteria(seqTrack)
         assert !bamFile.workPackage.needsProcessing

@@ -265,7 +265,7 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
     void testGetBasesSum_WhenContainedSeqTracksContainNoBases_ShouldReturnNull() {
         def(job, run) = setupClusterJobsOfSameProcessingStepAndRun()
 
-        DomainFactory.createSeqTrack([run: run]).save(flush: true)
+        DomainFactory.createSeqTrack([run: run])
 
         assert null == ClusterJobService.getBasesSum(job)
     }
@@ -274,8 +274,8 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
     void testGetFileSizesSum_WhenContainedDataFilesContainFileSizesAndSeveralJobsBelongToOtpJob_ShouldReturnNormalizedSumOfFileSizes() {
         def(job, run) = setupClusterJobsOfSameProcessingStepAndRun()
 
-        DomainFactory.buildSeqTrackWithDataFile([run: run], [fileSize: 150L])
-        DomainFactory.buildSeqTrackWithDataFile([run: run], [fileSize: 150L])
+        DomainFactory.createSeqTrackWithOneDataFile([run: run], [fileSize: 150L])
+        DomainFactory.createSeqTrackWithOneDataFile([run: run], [fileSize: 150L])
 
         assert 100L == ClusterJobService.getFileSizesSum(job)
     }
@@ -288,20 +288,11 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
     }
 
     @Test
-    void testGetFileSizesSum_WhenContainedDataFilesContainNoBases_ShouldReturnNull() {
-        def(job, run) = setupClusterJobsOfSameProcessingStepAndRun()
-
-        DomainFactory.buildSeqTrackWithDataFile([run: run])
-
-        assert null == ClusterJobService.getFileSizesSum(job)
-    }
-
-    @Test
     void testGetReadsSum_WhenContainedSeqTracksContainBasesAndSeveralJobsBelongToOtpJob_ShouldReturnNormalizedSumOfReads() {
         def(job, run) = setupClusterJobsOfSameProcessingStepAndRun()
 
-        DomainFactory.buildSeqTrackWithDataFile([run: run], [nReads: 150L])
-        DomainFactory.buildSeqTrackWithDataFile([run: run], [nReads: 150L])
+        DomainFactory.createSeqTrackWithOneDataFile([run: run], [nReads: 150L])
+        DomainFactory.createSeqTrackWithOneDataFile([run: run], [nReads: 150L])
 
         assert 100L == ClusterJobService.getReadsSum(job)
     }
@@ -317,7 +308,7 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
     void testGetReadsSum_WhenContainedSeqTracksContainNoBases_ShouldReturnNull() {
         def(job, run) = setupClusterJobsOfSameProcessingStepAndRun()
 
-        DomainFactory.createSeqTrack([run: run]).save(flush: true)
+        DomainFactory.createSeqTrack([run: run])
 
         assert null == ClusterJobService.getReadsSum(job)
     }
@@ -363,7 +354,7 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
     void testIsMultiplexing_WhenDataFileIsMultiplexing_ShouldReturnTrue() {
         def(job, run) = createClusterJobWithRun()
 
-        DomainFactory.buildSeqTrackWithDataFile([run: run], [fileName: "example_ACACAC_fileR1_1.fastq.gz"])
+        DomainFactory.createSeqTrackWithOneDataFile([run: run], [fileName: "example_ACACAC_fileR1_1.fastq.gz"])
 
         assert ClusterJobService.isMultiplexing(job)
     }
@@ -372,7 +363,7 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
     void testIsMultiplexing_WhenDataFileIsNotMultiplexing_ShouldReturnTrue() {
         def(job, run) = createClusterJobWithRun()
 
-        DomainFactory.buildSeqTrackWithDataFile([run: run], [fileName: "example.fastq.gz"])
+        DomainFactory.createSeqTrackWithOneDataFile([run: run], [fileName: "example.fastq.gz"])
 
         assertFalse(ClusterJobService.isMultiplexing(job))
     }
@@ -381,8 +372,8 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
     void testIsMultiplexing_WhenDataFilesMixedTypes_ShouldReturnNull() {
         def(job, run) = createClusterJobWithRun()
 
-        SeqTrack seqTrack = DomainFactory.buildSeqTrackWithDataFile([run: run], [fileName: "example_ACACAC_fileR1_1.fastq.gz"])
-        DomainFactory.buildSequenceDataFile(seqTrack: seqTrack, fileName: "example.fastqz.gz")
+        SeqTrack seqTrack = DomainFactory.createSeqTrackWithOneDataFile([run: run], [fileName: "example_ACACAC_fileR1_1.fastq.gz"])
+        DomainFactory.createSequenceDataFile(seqTrack: seqTrack, fileName: "example.fastqz.gz")
 
         assertNull(ClusterJobService.isMultiplexing(job))
     }

@@ -1,13 +1,14 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.ProcessingStatus
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
-import static org.springframework.util.Assert.*
 
 class SnvCallingService {
+
+    static final List<SnvProcessingStates> processingStatesNotProcessable = [
+            SnvProcessingStates.IN_PROGRESS
+    ]
 
     /**
      * The method goes through the list of sample pairs and checks if there is a disease/control pair
@@ -23,11 +24,7 @@ class SnvCallingService {
      * - pair is not already in processing
      * - config file is available
      */
-    SamplePair samplePairForSnvProcessing(short minPriority) {
-
-        List<SnvProcessingStates> unallowedProcessingStates = [
-            SnvProcessingStates.IN_PROGRESS
-        ]
+    SamplePair samplePairForSnvProcessing(short minPriority, SamplePair sp = null) {
 
         final String WORKPACKAGE = "workPackage"
         final String SAMPLE = "${WORKPACKAGE}.sample"
@@ -57,6 +54,7 @@ class SnvCallingService {
                 "FROM SamplePair sp " +
                 //check that sample pair shall be processed
                 "WHERE sp.processingStatus = :needsProcessing " +
+                (sp ? "AND sp = :sp " : '') +
                 //check that processing priority of the corresponding project is high enough
                 'AND sp.mergingWorkPackage1.sample.individual.project.processingPriority >= :minPriority ' +
 
@@ -85,39 +83,24 @@ class SnvCallingService {
 
                 "ORDER BY sp.mergingWorkPackage1.sample.individual.project.processingPriority DESC, sp.dateCreated"
 
-        List<SamplePair> samplePairs = SamplePair.findAll(
-                pairForSnvProcessing,
-                [
-                        needsProcessing: ProcessingStatus.NEEDS_PROCESSING,
-                        processingStates: unallowedProcessingStates,
-                        minPriority: minPriority,
-                ])
+        Map parameters = [
+                needsProcessing: ProcessingStatus.NEEDS_PROCESSING,
+                processingStates: processingStatesNotProcessable,
+                minPriority: minPriority,
+        ]
+        if (sp) {
+            parameters.sp = sp
+        }
+        List<SamplePair> samplePairs = SamplePair.findAll(pairForSnvProcessing, parameters)
 
         if (samplePairs) {
             return samplePairs.find {
-
-                //get the latest AbstractMergedBamFiles for both sample Types
-                AbstractMergedBamFile abstractMergedBamFile1 = it.mergingWorkPackage1.processableBamFileInProjectFolder
-                AbstractMergedBamFile abstractMergedBamFile2 = it.mergingWorkPackage2.processableBamFileInProjectFolder
-
-
-                //check that the latest AbstractMergedBamFiles contain all available seqTracks
-                abstractMergedBamFile1 && abstractMergedBamFile2 && checkIfAllAvailableSeqTracksAreIncluded(abstractMergedBamFile1) &&
-                        checkIfAllAvailableSeqTracksAreIncluded(abstractMergedBamFile2)
+                it.mergingWorkPackage1.completeProcessableBamFileInProjectFolder &&
+                it.mergingWorkPackage2.completeProcessableBamFileInProjectFolder
             }
         } else {
             return null
         }
-    }
-
-    /**
-     * returns if all seqTracks for one sample and seqType, which are available in OTP, are merged in the given bam file
-     */
-    boolean checkIfAllAvailableSeqTracksAreIncluded(AbstractMergedBamFile abstractMergedBamFile) {
-        notNull(abstractMergedBamFile, "The input of method checkIfAllAvailableSeqTracksAreIncluded is null")
-        Set<SeqTrack> containedSeqTracks = abstractMergedBamFile.getContainedSeqTracks()
-        Set<SeqTrack> availableSeqTracks = abstractMergedBamFile.workPackage.findMergeableSeqTracks()
-        return containedSeqTracks*.id as Set == availableSeqTracks*.id as Set
     }
 
     void markSnvCallingInstanceAsFailed(SnvCallingInstance instance, List<SnvCallingStep> stepsToWithdrawSnvJobResults) {

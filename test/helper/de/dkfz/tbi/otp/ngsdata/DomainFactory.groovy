@@ -309,7 +309,7 @@ class DomainFactory {
 
     public static ProcessedBamFile createProcessedBamFile(final MergingWorkPackage mergingWorkPackage, Map properties = [:]) {
 
-        SeqTrack seqTrack = buildSeqTrackWithDataFile(mergingWorkPackage)
+        SeqTrack seqTrack = createSeqTrackWithDataFiles(mergingWorkPackage)
 
         final ProcessedBamFile bamFile = ProcessedBamFile.build([
                 alignmentPass: TestData.createAndSaveAlignmentPass(
@@ -340,21 +340,21 @@ class DomainFactory {
                     statSizeFileName: workPackage.statSizeFileName,
             )
         }
-        SeqTrack seqTrack = DomainFactory.buildSeqTrackWithDataFile(workPackage)
+        SeqTrack seqTrack = createSeqTrackWithDataFiles(workPackage)
         RoddyBamFile bamFile = RoddyBamFile.build([
                 numberOfMergedLanes: 1,
                 workDirectoryName: "${RoddyBamFile.WORK_DIR_PREFIX}_${counter++}",
                 seqTracks: [seqTrack],
                 workPackage: workPackage,
                 identifier: RoddyBamFile.nextIdentifier(workPackage),
-                config: DomainFactory.createRoddyWorkflowConfig(
+                config: createRoddyWorkflowConfig(
                         workflow: workPackage.workflow,
                         project: workPackage.project,
                 ),
                 md5sum: HelperUtils.randomMd5sum,
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
+                fileOperationStatus: FileOperationStatus.PROCESSED,
                 fileSize: 10000,
-                roddyVersion: DomainFactory.createProcessingOption(),
+                roddyVersion: createProcessingOption(),
                 ] + bamFileProperties)
         assert bamFile.save(flush: true) // build-test-data does not flush, only saves
         return bamFile
@@ -363,14 +363,14 @@ class DomainFactory {
     public static createRoddyBamFile(RoddyBamFile baseBamFile, Map bamFileProperties = [:]) {
         RoddyBamFile bamFile = RoddyBamFile.build([
                 baseBamFile: baseBamFile,
-                config: bamFileProperties.config ?: DomainFactory.createRoddyWorkflowConfig(workflow: baseBamFile.config.workflow),
+                config: bamFileProperties.config ?: createRoddyWorkflowConfig(workflow: baseBamFile.config.workflow),
                 workPackage: baseBamFile.workPackage,
                 identifier: baseBamFile.identifier + 1,
                 numberOfMergedLanes: baseBamFile.numberOfMergedLanes + 1,
                 workDirectoryName: "${RoddyBamFile.WORK_DIR_PREFIX}_${counter++}",
-                seqTracks: bamFileProperties.seqTracks ?: [DomainFactory.buildSeqTrackWithDataFile(baseBamFile.workPackage)],
+                seqTracks: bamFileProperties.seqTracks ?: [createSeqTrackWithDataFiles(baseBamFile.workPackage)],
                 md5sum: HelperUtils.randomMd5sum,
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
+                fileOperationStatus: FileOperationStatus.PROCESSED,
                 fileSize: 10000,
                 ] + bamFileProperties
         )
@@ -450,18 +450,31 @@ class DomainFactory {
         return samplePair
     }
 
-    public static SnvCallingInstance createSnvInstanceWithRoddyBamFiles(Map properties = [:]) {
+    public static SnvConfig createSnvConfigForSnvCallingInstance(SnvCallingInstance snvCallingInstance) {
+        ExternalScript externalScript = ExternalScript.buildLazy (
+                scriptVersion: "v1",
+                deprecatedDate: null,
+        )
+
+        SnvConfig.buildLazy (
+                project: snvCallingInstance.project,
+                seqType: snvCallingInstance.seqType,
+                externalScriptVersion: externalScript.scriptVersion
+        )
+    }
+
+    public static SnvCallingInstance createSnvInstanceWithRoddyBamFiles(Map properties = [:], Map bamFile1Properties = [:], Map bamFile2Properties = [:]) {
         Workflow workflow = createPanCanWorkflow()
 
         MergingWorkPackage controlWorkPackage = MergingWorkPackage.build(
                 workflow: workflow,
-                statSizeFileName: DomainFactory.DEFAULT_TAB_FILE_NAME,
+                statSizeFileName: DEFAULT_TAB_FILE_NAME,
         )
         SamplePair samplePair = createDisease(controlWorkPackage)
         MergingWorkPackage diseaseWorkPackage = samplePair.mergingWorkPackage1
 
-        RoddyBamFile disease = createRoddyBamFile(workPackage: diseaseWorkPackage)
-        RoddyBamFile control = createRoddyBamFile(workPackage: controlWorkPackage)
+        RoddyBamFile disease = createRoddyBamFile([workPackage: diseaseWorkPackage] + bamFile1Properties)
+        RoddyBamFile control = createRoddyBamFile([workPackage: controlWorkPackage] + bamFile2Properties)
 
         ExternalScript externalScript = ExternalScript.buildLazy()
 
@@ -554,6 +567,7 @@ class DomainFactory {
     public static SeqPlatform createSeqPlatform(Map seqPlatformProperties = [:]) {
         return createDomainObject(SeqPlatform, [
                 name: 'seqPlatform_' + (counter++),
+                seqPlatformGroup: { createSeqPlatformGroup() },
         ], seqPlatformProperties)
     }
 
@@ -729,6 +743,16 @@ class DomainFactory {
         ], seqTrackProperties)
     }
 
+    public static ExomeSeqTrack createExomeSeqTrack(Map exomSeqTrackProperties = [:]) {
+        return createDomainObject(ExomeSeqTrack, [
+                laneId         : 'laneId_' + counter++,
+                seqType        : { createExomeSeqType() },
+                sample         : { createSample() },
+                pipelineVersion: { createSoftwareTool() },
+                run            : { createRun() },
+                seqPlatform    : { createSeqPlatform() },
+        ], exomSeqTrackProperties)
+    }
 
     public static FastqcProcessedFile createFastqcProcessedFile(Map properties = [:]) {
         return createDomainObject(FastqcProcessedFile, [
@@ -768,7 +792,7 @@ class DomainFactory {
                 vbpFilePath: "vbpPath_${counter}",
                 metaDataValid: true,
                 fileWithdrawn: false,
-                fileType: {createFileType(type: FileType.Type.SEQUENCE, vbpPath: 'sequence')},
+                fileType: {createFileType(type: Type.SEQUENCE, vbpPath: '/sequence/')},
                 used: true,
                 fileExists: true,
                 fileLinked: true,
@@ -806,32 +830,32 @@ class DomainFactory {
         ]
     }
 
-    public static SeqTrack buildSeqTrackWithDataFile(MergingWorkPackage mergingWorkPackage, Map seqTrackProperties = [:]) {
+    public static SeqTrack createSeqTrackWithDataFiles(MergingWorkPackage mergingWorkPackage, Map seqTrackProperties = [:], Map dataFileProperties = [:]) {
         Map map = getMergingProperties(mergingWorkPackage) + [
                 kitInfoReliability:  mergingWorkPackage.libraryPreparationKit ? InformationReliability.KNOWN : InformationReliability.UNKNOWN_UNVERIFIED,
         ] + seqTrackProperties
         SeqTrack seqTrack
         if (mergingWorkPackage.seqType.libraryLayout == SeqType.LIBRARYLAYOUT_PAIRED) {
-            seqTrack = buildSeqTrackWithTwoDataFiles(map)
+            seqTrack = createSeqTrackWithTwoDataFiles(map, dataFileProperties, dataFileProperties)
         } else {
-            seqTrack = buildSeqTrackWithDataFile(map)
+            seqTrack = createSeqTrackWithOneDataFile(map, dataFileProperties)
         }
         assert mergingWorkPackage.satisfiesCriteria(seqTrack)
         return seqTrack
     }
 
-    public static SeqTrack buildSeqTrackWithDataFile(Map seqTrackProperties = [:], Map dataFileProperties = [:]) {
+    public static SeqTrack createSeqTrackWithOneDataFile(Map seqTrackProperties = [:], Map dataFileProperties = [:]) {
         SeqTrack seqTrack
         if (seqTrackProperties.seqType?.name == SeqTypeNames.EXOME.seqTypeName) {
-            seqTrack = ExomeSeqTrack.build(seqTrackProperties)
+            seqTrack = createExomeSeqTrack(seqTrackProperties)
         } else {
-            seqTrack = SeqTrack.build(seqTrackProperties)
+            seqTrack = createSeqTrack(seqTrackProperties)
         }
-        buildSequenceDataFile(dataFileProperties + [seqTrack: seqTrack])
+        createSequenceDataFile(dataFileProperties + [seqTrack: seqTrack])
         return seqTrack
     }
 
-    public static SeqTrack buildSeqTrackWithTwoDataFiles(Map seqTrackProperties = [:], Map dataFileProperties1 = [:], Map dataFileProperties2 = [:]) {
+    public static SeqTrack createSeqTrackWithTwoDataFiles(Map seqTrackProperties = [:], Map dataFileProperties1 = [:], Map dataFileProperties2 = [:]) {
         Map defaultMap1 = [
                 fileName: 'DataFileFileName_R1.gz',
                 vbpFileName: 'DataFileFileName_R1.gz',
@@ -842,26 +866,22 @@ class DomainFactory {
                 vbpFileName: 'DataFileFileName_R2.gz',
                 mateNumber: 2,
         ]
-        SeqTrack seqTrack = buildSeqTrackWithDataFile(seqTrackProperties, defaultMap1 + dataFileProperties1)
-        buildSequenceDataFile(defaultMap2 + dataFileProperties2 + [seqTrack: seqTrack])
+        SeqTrack seqTrack = createSeqTrackWithOneDataFile([seqType: createSeqType(libraryLayout: LibraryLayout.PAIRED)] + seqTrackProperties, defaultMap1 + dataFileProperties1)
+        createSequenceDataFile(defaultMap2 + dataFileProperties2 + [seqTrack: seqTrack])
         return seqTrack
     }
 
-    public static DataFile buildSequenceDataFile(final Map properties = [:]) {
-        DataFile dataFile = DataFile.build([
-                fileType: FileType.buildLazy(type: Type.SEQUENCE),
+    public static DataFile createSequenceDataFile(final Map properties = [:]) {
+        Map defaultProperties = [
+                fileType   : createFileType([type: Type.SEQUENCE]),
                 dateCreated: new Date(),  // In unit tests Grails (sometimes) does not automagically set dateCreated.
-                used: true,
-        ] + properties)
-        if (!dataFile.run) {
-            dataFile.run = dataFile.seqTrack?.run
-            dataFile.save(flush: true, failOnError: true)
+                used       : true,
+        ]
+        if (properties.seqTrack) {
+            defaultProperties.project = properties.seqTrack.project
+            defaultProperties.run = properties.seqTrack.run
         }
-        if (!dataFile.project) {
-            dataFile.project = dataFile.seqTrack?.project
-            dataFile.save(flush: true, failOnError: true)
-        }
-        return dataFile
+        return createDataFile(defaultProperties + properties)
     }
 
     public static SnvCallingInstance createSnvCallingInstance(Map properties) {
@@ -1115,6 +1135,15 @@ class DomainFactory {
         ], properties)
     }
 
+    static ProcessingThresholds createProcessingThresholdsForBamFile (AbstractBamFile bamFile, properties = [:]) {
+        return createDomainObject(ProcessingThresholds, [
+                project: bamFile.project,
+                seqType: bamFile.seqType,
+                sampleType: bamFile.sampleType,
+                coverage: 30.0,
+                numberOfLanes: 3
+        ], properties)
+    }
 
     static void changeSeqType(RoddyBamFile bamFile, SeqType seqType, String libraryName = null) {
 
@@ -1131,5 +1160,4 @@ class DomainFactory {
             assert it.save(flush: true)
         }
     }
-
 }

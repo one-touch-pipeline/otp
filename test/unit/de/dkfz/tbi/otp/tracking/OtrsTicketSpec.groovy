@@ -12,6 +12,7 @@ import spock.lang.*
     RunSegment,
     SeqCenter,
     SeqPlatform,
+    SeqPlatformGroup,
 ])
 class OtrsTicketSpec extends Specification {
 

@@ -170,9 +170,13 @@ class SeqTrackService {
         return applicationContext.getBean(alignmentDeciderBeanName, AlignmentDecider)
     }
 
-    static boolean mayAlign(SeqTrack seqTrack, boolean alsoLogToSeqTrack = true) {
+    static boolean mayAlign(SeqTrack seqTrack, boolean log = true) {
 
-        def notAligning = { String reason -> AbstractAlignmentDecider.logNotAligning(seqTrack, reason, alsoLogToSeqTrack) }
+        def notAligning = { String reason ->
+            if (log) {
+                AbstractAlignmentDecider.logNotAligning(seqTrack, reason)
+            }
+        }
 
         if (seqTrack.withdrawn) {
             notAligning('it is withdrawn')

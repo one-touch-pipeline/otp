@@ -5,6 +5,8 @@ package de.dkfz.tbi.otp.dataprocessing
  */
 class ProcessingPriority {
 
+    static final short MINIMUM_PRIORITY = Short.MIN_VALUE
+
     static final short NORMAL_PRIORITY = 0
 
     static final short FAST_TRACK_PRIORITY = 10000

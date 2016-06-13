@@ -177,6 +177,14 @@ class SamplePair implements Entity {
         return "SP ${id}: ${toStringWithoutId()}"
     }
 
+    SnvCallingInstance findLatestSnvCallingInstance() {
+        return SnvCallingInstance.createCriteria().get {
+            eq ('samplePair', this)
+            order('id', 'desc')
+            maxResults(1)
+        }
+    }
+
     /**
      * The names of the properties of {@link #mergingWorkPackage1} and {@link #mergingWorkPackage2} which must be equal.
      */

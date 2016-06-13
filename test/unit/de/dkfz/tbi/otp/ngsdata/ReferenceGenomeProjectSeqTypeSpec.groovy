@@ -12,6 +12,7 @@ import spock.lang.*
         SampleType,
         SeqCenter,
         SeqPlatform,
+        SeqPlatformGroup,
         SeqType,
         SoftwareTool,
         ReferenceGenome,

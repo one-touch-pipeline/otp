@@ -279,7 +279,7 @@ class SamplePairFindSamplePairsForSettingNeedsProcessingTestsIntegrationSpec ext
         )
         final SeqTrack seqTrack = SeqTrack.findWhere(sample: sample, seqType: instance.seqType)
         assert ThreadUtils.waitFor( { System.currentTimeMillis() > instance.latestDataFileCreationDate.time }, 1, 1)
-        final DataFile dataFile = DomainFactory.buildSequenceDataFile(seqTrack: seqTrack)
+        final DataFile dataFile = DomainFactory.createSequenceDataFile(seqTrack: seqTrack)
         assert dataFile.dateCreated > instance.latestDataFileCreationDate
         return dataFile
     }

@@ -14,6 +14,7 @@ import spock.lang.Specification
         Run,
         SeqCenter,
         SeqPlatform,
+        SeqPlatformGroup,
         SeqPlatformModelLabel,
         SequencingKitLabel,
 ])

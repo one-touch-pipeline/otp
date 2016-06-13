@@ -21,6 +21,7 @@ import static de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationConte
     SampleType,
     SeqCenter,
     SeqPlatform,
+    SeqPlatformGroup,
     SeqTrack,
     SeqType,
     SoftwareTool,

@@ -180,6 +180,15 @@ class MergingWorkPackage implements Entity {
         }
     }
 
+    AbstractMergedBamFile getCompleteProcessableBamFileInProjectFolder() {
+        AbstractMergedBamFile bamFile = getProcessableBamFileInProjectFolder()
+        if (bamFile && bamFile.containedSeqTracks == findMergeableSeqTracks().toSet()) {
+            return bamFile
+        } else {
+            return null
+        }
+    }
+
     static mapping = {
         sample index: "merging_work_package_sample_idx"
         seqType index: "merging_work_package_seq_type_idx"

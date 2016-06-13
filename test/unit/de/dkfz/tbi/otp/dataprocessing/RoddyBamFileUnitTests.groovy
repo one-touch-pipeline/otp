@@ -14,7 +14,7 @@ import static de.dkfz.tbi.TestCase.shouldFail
 import static de.dkfz.tbi.otp.dataprocessing.RoddyBamFile.RODDY_EXECUTION_STORE_DIR
 import static de.dkfz.tbi.otp.dataprocessing.RoddyBamFile.QUALITY_CONTROL_JSON_FILE_NAME
 
-@Build([RoddyBamFile, SeqPlatform])
+@Build([RoddyBamFile, Run, SeqCenter, SeqPlatform, SoftwareTool])
 class RoddyBamFileUnitTests {
 
     public static final String RODDY_EXECUTION_DIR_NAME = "exec_000000_000000000_a_a"
@@ -215,7 +215,7 @@ class RoddyBamFileUnitTests {
     @Test
     void testGetReadGroupName_SameDataFileName_ShouldFail() {
         SeqTrack seqTrack = roddyBamFile.seqTracks.iterator()[0]
-        assert DomainFactory.buildSequenceDataFile([seqTrack: seqTrack]).save(flush: true)
+        assert DomainFactory.createSequenceDataFile([seqTrack: seqTrack])
         TestCase.shouldFail(AssertionError) {
             RoddyBamFile.getReadGroupName(roddyBamFile.seqTracks.iterator()[0])
         }
@@ -245,7 +245,7 @@ class RoddyBamFileUnitTests {
     @Test
     void testGetWorkSingleLaneQADirectories_TwoSeqTracks() {
         updateDataFileNames(roddyBamFile.seqTracks.iterator()[0])
-        SeqTrack seqTrack = DomainFactory.buildSeqTrackWithDataFile(roddyBamFile.workPackage)
+        SeqTrack seqTrack = DomainFactory.createSeqTrackWithDataFiles(roddyBamFile.workPackage)
         updateDataFileNames(seqTrack)
         roddyBamFile.seqTracks.add(seqTrack)
         Map<SeqTrack, File> expected = new HashMap<>()
@@ -283,7 +283,7 @@ class RoddyBamFileUnitTests {
     @Test
     void testGetFinalRoddySingleLaneQADirectories_TwoSeqTracks() {
         updateDataFileNames(roddyBamFile.seqTracks.iterator()[0])
-        SeqTrack seqTrack = DomainFactory.buildSeqTrackWithDataFile(roddyBamFile.workPackage)
+        SeqTrack seqTrack = DomainFactory.createSeqTrackWithDataFiles(roddyBamFile.workPackage)
         updateDataFileNames(seqTrack)
         roddyBamFile.seqTracks.add(seqTrack)
         Map<SeqTrack, File> expected = new HashMap<>()

@@ -4,6 +4,7 @@ import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Run
 import de.dkfz.tbi.otp.ngsdata.SeqCenter
 import de.dkfz.tbi.otp.ngsdata.SeqPlatform
+import de.dkfz.tbi.otp.ngsdata.SeqPlatformGroup
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.util.spreadsheet.validation.Level
@@ -18,7 +19,8 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 @Mock([
         Run,
         SeqCenter,
-        SeqPlatform
+        SeqPlatform,
+        SeqPlatformGroup,
 ])
 class RunRunDateValidatorSpec extends Specification {
 

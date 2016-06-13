@@ -11,7 +11,7 @@ import org.junit.*
 import de.dkfz.tbi.otp.ngsdata.DataFile
 import grails.test.mixin.Mock
 
-@Mock([DataFile, FastqcProcessedFile, FileType, Individual, Project, Realm, Run, RunSegment, Sample, SampleType, SeqCenter, SeqPlatform, SeqTrack, SeqType, SoftwareTool])
+@Mock([DataFile, FastqcProcessedFile, FileType, Individual, Project, Realm, Run, RunSegment, Sample, SampleType, SeqCenter, SeqPlatform, SeqPlatformGroup, SeqTrack, SeqType, SoftwareTool])
 @TestFor(FastqcDataFilesService)
 class FastqcDataFilesServiceUnitTests {
 

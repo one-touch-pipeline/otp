@@ -7,7 +7,11 @@ import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.ngsdata.Run
+import de.dkfz.tbi.otp.ngsdata.SeqCenter
 import de.dkfz.tbi.otp.ngsdata.SeqPlatform
+import de.dkfz.tbi.otp.ngsdata.SeqPlatformGroup
+import de.dkfz.tbi.otp.ngsdata.SoftwareTool
 import de.dkfz.tbi.otp.utils.CreateJobStateLogFileHelper
 import grails.buildtestdata.mixin.Build
 import org.junit.Before
@@ -21,7 +25,11 @@ import static de.dkfz.tbi.TestCase.shouldFailWithMessage
 @Build([
         ClusterJob,
         RoddyBamFile,
+        Run,
+        SeqCenter,
         SeqPlatform,
+        SeqPlatformGroup,
+        SoftwareTool,
 ])
 class AbstractRoddyJobUnitTests {
 

@@ -14,6 +14,7 @@ import org.junit.Test
 @Build([
     DataFile,
     RunSegment,
+    SeqCenter,
     SeqPlatformGroup,
     SeqTrack,
     LogMessage,
@@ -221,14 +222,14 @@ class SeqTrackServiceUnitTests {
 
     @Test
     void testMayAlign_everythingIsOkay_shouldReturnTrue() {
-        SeqTrack seqTrack = DomainFactory.buildSeqTrackWithDataFile()
+        SeqTrack seqTrack = DomainFactory.createSeqTrackWithOneDataFile()
 
         assert SeqTrackService.mayAlign(seqTrack)
     }
 
     @Test
     void testMayAlign_whenDataFileWithdrawn_shouldReturnFalse() {
-        SeqTrack seqTrack = DomainFactory.buildSeqTrackWithDataFile([:], [
+        SeqTrack seqTrack = DomainFactory.createSeqTrackWithOneDataFile([:], [
                 fileWithdrawn: true,
         ])
 
@@ -244,7 +245,7 @@ class SeqTrackServiceUnitTests {
 
     @Test
     void testMayAlign_whenWrongFileType_shouldReturnFalse() {
-        SeqTrack seqTrack = DomainFactory.buildSeqTrackWithDataFile([:], [
+        SeqTrack seqTrack = DomainFactory.createSeqTrackWithOneDataFile([:], [
                 fileType: FileType.build(type: FileType.Type.SOURCE),
         ])
 
@@ -280,7 +281,7 @@ class SeqTrackServiceUnitTests {
 
     @Test
     void testMayAlign_whenSeqPlatformGroupIsNull_shouldReturnFalse() {
-        SeqTrack seqTrack = DomainFactory.buildSeqTrackWithDataFile([
+        SeqTrack seqTrack = DomainFactory.createSeqTrackWithOneDataFile([
                 seqPlatform: SeqPlatform.build(seqPlatformGroup: null),
         ])
 
@@ -321,7 +322,7 @@ class SeqTrackServiceUnitTests {
         Long nReads = 12345689
         Long expectedBasePairs = sequenceLength.toInteger() * nReads * 2
         SeqTrack seqTrack = createTestSeqTrack(sequenceLength, nReads)
-        DomainFactory.buildSequenceDataFile([nReads: nReads, sequenceLength: sequenceLength, seqTrack: seqTrack])
+        DomainFactory.createSequenceDataFile([nReads: nReads, sequenceLength: sequenceLength, seqTrack: seqTrack])
         seqTrack.seqType.libraryLayout = LibraryLayout.PAIRED
         seqTrackService.fillBaseCount(seqTrack)
         assert seqTrack.nBasePairs == expectedBasePairs
@@ -339,6 +340,6 @@ class SeqTrackServiceUnitTests {
     }
 
     private SeqTrack createTestSeqTrack(String sequenceLength, Long nReads) {
-        return DomainFactory.buildSeqTrackWithDataFile([:], [nReads:nReads, sequenceLength:sequenceLength])
+        return DomainFactory.createSeqTrackWithOneDataFile([:], [nReads:nReads, sequenceLength:sequenceLength])
     }
 }

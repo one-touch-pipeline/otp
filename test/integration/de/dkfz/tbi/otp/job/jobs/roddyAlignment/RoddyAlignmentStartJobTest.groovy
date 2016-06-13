@@ -192,7 +192,7 @@ class RoddyAlignmentStartJobTest {
     void testCreateRoddyBamFile_WhenBaseBamFileIsNull() {
         MergingWorkPackage mwp = createMergingWorkPackage()
         DomainFactory.createRoddyWorkflowConfig([workflow: mwp.workflow, project: mwp.project])
-        DomainFactory.buildSeqTrackWithDataFile(mwp)
+        DomainFactory.createSeqTrackWithDataFiles(mwp)
         Collection<SeqTrack> seqTracks = mwp.findMergeableSeqTracks()
         DomainFactory.createRoddyProcessingOptions(TestCase.uniqueNonExistentPath)
 
@@ -212,9 +212,9 @@ class RoddyAlignmentStartJobTest {
         RoddyBamFile baseBamFile = DomainFactory.createRoddyBamFile()
         MergingWorkPackage mwp = baseBamFile.mergingWorkPackage
         Collection<SeqTrack> additionalSeqTracks = [
-                DomainFactory.buildSeqTrackWithDataFile(mwp),
-                DomainFactory.buildSeqTrackWithDataFile(mwp),
-                DomainFactory.buildSeqTrackWithDataFile(mwp),
+                DomainFactory.createSeqTrackWithDataFiles(mwp),
+                DomainFactory.createSeqTrackWithDataFiles(mwp),
+                DomainFactory.createSeqTrackWithDataFiles(mwp),
         ]
 
         DomainFactory.createRoddyProcessingOptions(TestCase.uniqueNonExistentPath)
@@ -233,7 +233,7 @@ class RoddyAlignmentStartJobTest {
     @Test
     void testCreateRoddyBamFile_WhenBaseBamFileIsNullAndNoConfigAvailable_ShouldFail() {
         MergingWorkPackage mwp = createMergingWorkPackage()
-        DomainFactory.buildSeqTrackWithDataFile(mwp)
+        DomainFactory.createSeqTrackWithDataFiles(mwp)
         Collection<SeqTrack> seqTracks = mwp.findMergeableSeqTracks()
         DomainFactory.createRoddyProcessingOptions()
         RoddyWorkflowConfig.list()*.delete(flush: true)
@@ -247,7 +247,7 @@ class RoddyAlignmentStartJobTest {
     @Test
     void testCreateRoddyBamFile_WhenBaseBamFileIsNullAndProcessingOptionDoesNotExist_ShouldFail() {
         MergingWorkPackage mwp = createMergingWorkPackage()
-        DomainFactory.buildSeqTrackWithDataFile(mwp)
+        DomainFactory.createSeqTrackWithDataFiles(mwp)
         Collection<SeqTrack> seqTracks = mwp.findMergeableSeqTracks()
         DomainFactory.createRoddyWorkflowConfig([workflow: mwp.workflow, project: mwp.project])
 
@@ -324,7 +324,7 @@ class RoddyAlignmentStartJobTest {
     MergingWorkPackage createMergingWorkPackageWithRunFileStatus(RunSegment.FilesStatus filesStatus) {
         MergingWorkPackage mergingWorkPackage = createMergingWorkPackage()
         Run run = DomainFactory.createRun()
-        DomainFactory.buildSeqTrackWithDataFile(mergingWorkPackage, [run: run])
+        DomainFactory.createSeqTrackWithDataFiles(mergingWorkPackage, [run: run])
         DomainFactory.createRunSegment(run: run, filesStatus: filesStatus)
         return mergingWorkPackage
     }

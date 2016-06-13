@@ -11,6 +11,7 @@ import spock.lang.Specification
 
 @Mock([
         SeqPlatform,
+        SeqPlatformGroup,
         SeqPlatformModelLabel,
         SequencingKitLabel,
 ])

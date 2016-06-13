@@ -236,7 +236,7 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
     SeqTrack createSeqTrack(String readGroupNum) {
         MergingWorkPackage workPackage = exactlyOneElement(MergingWorkPackage.findAll())
 
-        SeqTrack seqTrack = DomainFactory.buildSeqTrackWithDataFile(workPackage, [laneId: readGroupNum])
+        SeqTrack seqTrack = DomainFactory.createSeqTrackWithDataFiles(workPackage, [laneId: readGroupNum])
 
         DataFile.findAllBySeqTrack(seqTrack).eachWithIndex { DataFile dataFile, int index ->
             dataFile.vbpFileName = dataFile.fileName = "fastq_${seqTrack.individual.pid}_${seqTrack.sampleType.name}_${seqTrack.laneId}_${index + 1}.fastq.gz"

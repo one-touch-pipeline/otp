@@ -216,7 +216,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
                 fastqcState: SeqTrack.DataProcessingState.NOT_STARTED,
                 run: run
         )
-        DataFile dataFile = DomainFactory.buildSequenceDataFile(
+        DataFile dataFile = DomainFactory.createSequenceDataFile(
                 seqTrack: seqTrack,
                 run: runSegment.run,
                 runSegment: runSegment,
@@ -242,7 +242,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
                 seqType: seqTrack.seqType,
         ).save(flush: true)
 
-        DomainFactory.buildSequenceDataFile(
+        DomainFactory.createSequenceDataFile(
                 seqTrack: seqTrack,
                 fileWithdrawn: false,
                 fileExists: true,
