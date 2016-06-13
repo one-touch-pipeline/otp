@@ -56,5 +56,7 @@ class DeepSampleIdentifierParserSpec extends Specification{
         '02_HepaRG_InAs_D31_WGBS_S_2'   || '02_HepaRG_InAs_D31'  | 'Replicate1'      | '02_HepaRG_InAs_D31_WGBS_S_2'
         '01_Mm3T3L1_CoAd_T1_CTCF_R_1'   || '01_Mm3T3L1_CoAd_T1'  | 'Replicate1'      | '01_Mm3T3L1_CoAd_T1_CTCF_R_1'
         '02_Hf3T3L1_NNAd_T1_CTCF_R_1'   || '02_Hf3T3L1_NNAd_T1'  | 'Replicate1'      | '02_Hf3T3L1_NNAd_T1_CTCF_R_1'
+        '02_Hf3T3L1_NNAs_T1_CTCF_R_1'   || '02_Hf3T3L1_NNAs_T1'  | 'Replicate1'      | '02_Hf3T3L1_NNAs_T1_CTCF_R_1'
+        '02_Hf3T3L1_NNAl_T1_CTCF_R_1'   || '02_Hf3T3L1_NNAl_T1'  | 'Replicate1'      | '02_Hf3T3L1_NNAl_T1_CTCF_R_1'
     }
 }
