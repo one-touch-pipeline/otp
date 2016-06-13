@@ -174,6 +174,14 @@ public class ProcessingStep implements Serializable, Entity {
     }
 
     /**
+     * @return The first {@link ProcessingStepUpdate} belonging to this {@link ProcessingStep} or
+     * <code>null</code> if this {@link ProcessingStep} has no {@link ProcessingStepUpdate}s.
+     */
+    public ProcessingStepUpdate getFirstProcessingStepUpdate() {
+        return ProcessingStepUpdate.findByProcessingStep(this, [sort: "id", order: "asc"])
+    }
+
+    /**
      * Convenience method to retrieve the non-qualified class name of the {@link Job} used for this {@link ProcessingStep}.
      *
      * @return the non-qualified class name, or <code>null</code> if {@link #jobClass} is <code>null</code>.

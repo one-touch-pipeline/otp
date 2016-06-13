@@ -1,9 +1,12 @@
 package de.dkfz.tbi.otp.job.processing
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.infrastructure.ClusterJobService
+import de.dkfz.tbi.otp.job.plan.JobDefinition
+import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.PbsService.ClusterJobStatus
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
@@ -16,6 +19,12 @@ import spock.lang.Specification
 
 
 @Mock([
+        ClusterJob,
+        JobDefinition,
+        JobExecutionPlan,
+        Process,
+        ProcessingStep,
+        ProcessingStepUpdate,
         Realm,
         SeqType,
 ])
@@ -211,9 +220,11 @@ ${jobId}.clust_head.ine  OtherUnixUser    fast     r160224_18005293    --      1
         service.jobStatusLoggingService = Stub(JobStatusLoggingService)
         service.executionService = Mock(ExecutionService)
         service.clusterJobService = Mock(ClusterJobService)
+        service.clusterJobLoggingService = Mock(ClusterJobLoggingService)
 
         ProcessOutput out = new ProcessOutput("${clusterJobId}.pbs", "", 0)
-        ClusterJob clusterJob = new ClusterJob(clusterJobId: clusterJobId, clusterJobName: "name")
+        ClusterJob clusterJob = DomainFactory.createClusterJob(clusterJobId: clusterJobId, realm: realm)
+        DomainFactory.createProcessingStepUpdate(processingStep: clusterJob.processingStep)
 
         when:
         String result = service.executeJob(realm, "run the job", "")
@@ -221,6 +232,7 @@ ${jobId}.clust_head.ine  OtherUnixUser    fast     r160224_18005293    --      1
         then:
         1 * service.executionService.executeCommandReturnProcessOutput(realm, _ as String) >> out
         1 * service.clusterJobService.createClusterJob(realm, clusterJobId, realm.unixUser, step, seqType, _ as String) >> clusterJob
+        1 * service.clusterJobLoggingService.createAndGetLogDirectory(_, _) >> {TestCase.uniqueNonExistentPath}
         result == clusterJobId
     }
 }

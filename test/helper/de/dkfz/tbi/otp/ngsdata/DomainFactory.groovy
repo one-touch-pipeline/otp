@@ -119,6 +119,7 @@ class DomainFactory {
         createRealmDataProcessing([
                 processingRootPath: new File(testDirectory, 'processing').path,
                 stagingRootPath:    new File(testDirectory, 'staging').path,
+                loggingRootPath:    new File(testDirectory, 'logging').path,
         ] + properties)
     }
 
@@ -243,6 +244,26 @@ class DomainFactory {
         ], properties)
     }
 
+    public static ProcessingStepUpdate createProcessingStepUpdate(Map properties = [:]) {
+        return createDomainObject(ProcessingStepUpdate, [
+                processingStep: {createProcessingStep()},
+                state: ExecutionState.CREATED,
+                previous: {properties.step ? properties.step.latestProcessingStepUpdate : null },
+                date: new Date(),
+        ], properties)
+    }
+
+    public static ClusterJob createClusterJob(Map properties = [:]) {
+        return createDomainObject(ClusterJob, [
+                processingStep: {createProcessingStep()},
+                realm: {createRealmDataProcessing()},
+                clusterJobId: "clusterJobId_${counter++}",
+                userName: "userName_${counter++}",
+                clusterJobName: "clusterJobName_${counter++}_jobClass",
+                jobClass: "jobClass",
+                queued: new DateTime(),
+        ], properties)
+    }
 
     public static ProcessingOption createProcessingOption(Map properties = [:]) {
         return createDomainObject(ProcessingOption, [

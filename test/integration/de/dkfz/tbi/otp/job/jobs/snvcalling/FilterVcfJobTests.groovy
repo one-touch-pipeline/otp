@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
+import de.dkfz.tbi.otp.job.processing.ClusterJobLoggingService
+import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import org.apache.commons.logging.impl.NoOpLog
 
 import de.dkfz.tbi.TestCase
@@ -227,6 +229,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         removeMetaClass(ExecutionService, executionService)
         removeMetaClass(PbsService, pbsService)
         removeMetaClass(LinkFileUtils, linkFileUtils)
+        removeMetaClass(ClusterJobLoggingService, pbsService.clusterJobLoggingService)
     }
 
 
@@ -274,6 +277,10 @@ CHROMOSOME_INDICES=( {1..21} XY)
         TestCase.mockCreateDirectory(lsdfFilesService)
         filterVcfJob.metaClass.createAndSaveSnvJobResult = { SnvCallingInstance instance, ExternalScript externalScript, SnvJobResult inputResult ->
             return true
+        }
+
+        pbsService.clusterJobLoggingService.metaClass.createAndGetLogDirectory = { Realm realm, ProcessingStep processingStep ->
+            return TestCase.uniqueNonExistentPath
         }
 
         File pmbf1 = snvCallingInstanceTestData.createBamFile(processedMergedBamFile1)

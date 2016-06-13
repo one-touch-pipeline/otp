@@ -330,9 +330,14 @@ class LsdfFilesService {
 
     public createDirectory(File dir, Project project) {
         Realm realm = configService.getRealmDataProcessing(project)
+        createDirectory(dir, realm)
+    }
+
+    public createDirectory(File dir, Realm realm) {
         String cmd = createClusterScriptService.makeDirs([dir], "2770")
         assert executionService.executeCommand(realm, cmd) ==~ /^0\s*$/
     }
+
 
     public deleteDirectoryRecursive(Realm realm, File dir) {
         waitUntilExists(dir)

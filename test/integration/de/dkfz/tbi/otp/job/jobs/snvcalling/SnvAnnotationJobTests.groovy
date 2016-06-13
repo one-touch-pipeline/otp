@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
+import de.dkfz.tbi.otp.job.processing.ClusterJobLoggingService
+import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import org.apache.commons.logging.impl.NoOpLog
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFileService
@@ -151,6 +153,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         TestCase.removeMetaClass(ExecutionService, executionService)
         TestCase.removeMetaClass(PbsService, pbsService)
         TestCase.removeMetaClass(LinkFileUtils, linkFileUtils)
+        TestCase.removeMetaClass(ClusterJobLoggingService, pbsService.clusterJobLoggingService)
         LsdfFilesService.metaClass = null
         WaitingFileUtils.metaClass = null
         TestCase.cleanTestDirectory()
@@ -202,6 +205,9 @@ CHROMOSOME_INDICES=( {1..21} XY)
     @Test
     void testMaybeSubmit() {
         TestCase.mockCreateDirectory(lsdfFilesService)
+        pbsService.clusterJobLoggingService.metaClass.createAndGetLogDirectory = { Realm realm, ProcessingStep processingStep ->
+            return TestCase.uniqueNonExistentPath
+        }
         snvAnnotationJob.metaClass.createAndSaveSnvJobResult = { SnvCallingInstance instance, ExternalScript externalScript, SnvJobResult inputResult -> }
         snvAnnotationJob.metaClass.getExistingBamFilePath = {ProcessedMergedBamFile bamFile ->
             return new File(AbstractMergedBamFileService.destinationDirectory(processedMergedBamFile1), processedMergedBamFile1.getBamFileName())

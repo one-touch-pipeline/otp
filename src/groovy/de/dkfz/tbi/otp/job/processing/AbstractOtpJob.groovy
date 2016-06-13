@@ -16,7 +16,7 @@ abstract class AbstractOtpJob extends AbstractMaybeSubmitWaitValidateJob{
     }
 
     public static String getLogFileNames(ClusterJob clusterJob) {
-        return "Log file: ${clusterJob.clusterJobName}.o${clusterJob.clusterJobId}"
+        return "Log file: ${ClusterJobLoggingService.logDirectory(clusterJob.realm, clusterJob.processingStep)}/${clusterJob.clusterJobName}.o${clusterJob.clusterJobId}"
     }
 
     @Override

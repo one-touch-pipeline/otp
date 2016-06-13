@@ -30,6 +30,8 @@ class PbsService {
     ClusterJobService clusterJobService
     ExecutionService executionService
 
+    ClusterJobLoggingService clusterJobLoggingService
+
 
     private static final String JOB_LIST_PATTERN = /^(\d+)\.(?:\S+\s+){9}(\w)\s+\S+\s*$/
 
@@ -94,10 +96,14 @@ class PbsService {
         String pbsJobDescription = processingStep.getPbsJobDescription()
         String logFile = jobStatusLoggingService.logFileLocation(realm, processingStep)
         String logMessage = jobStatusLoggingService.constructMessage(processingStep)
+        File clusterLogDirectory = clusterJobLoggingService.createAndGetLogDirectory(realm, processingStep)
+
         String scriptText = """
 #PBS -S /bin/bash
 #PBS -N ${pbsJobDescription}
 #PBS -j oe
+#PBS -o ${clusterLogDirectory}
+#PBS -W umask=027
 
 # OTP: Fail on first non-zero exit code
 set -e
