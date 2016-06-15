@@ -1,23 +1,14 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
-import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.job.processing.ExecutionService
-import de.dkfz.tbi.otp.ngsdata.DataFile
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
-import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.utils.CreateRoddyFileHelper
-import de.dkfz.tbi.otp.utils.ProcessHelperService
+import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.ProcessHelperService.ProcessOutput
-import org.junit.After
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.TemporaryFolder
-import org.springframework.beans.factory.annotation.Autowired
+import org.junit.*
+import org.junit.rules.*
+import org.springframework.beans.factory.annotation.*
 
 
 class ExecuteWgbsAlignmentJobTests {
@@ -80,6 +71,22 @@ class ExecuteWgbsAlignmentJobTests {
         DomainFactory.createReferenceGenomeEntries(roddyBamFile.referenceGenome, chromosomeNames)
 
         assert ",CHROMOSOME_INDICES:( ${chromosomeNames.join(' ')} )" == executeWgbsAlignmentJob.prepareAndReturnWorkflowSpecificCValues(roddyBamFile)
+    }
+
+    @Test
+    void testPrepareAndReturnWorkflowSpecificCValues_cytosinePositionIndexFilePath() {
+        List<String> chromosomeNames = ["1", "2", "3", "4", "5", "M", "X", "Y"]
+        DomainFactory.createReferenceGenomeEntries(roddyBamFile.referenceGenome, chromosomeNames)
+
+        roddyBamFile.referenceGenome.cytosinePositionsIndex = "cytosine_idx.pos.gz"
+        roddyBamFile.referenceGenome.save(flush: true, failOnError: true)
+        File cpiFile = CreateFileHelper.createFile(
+                new File("${tmpDir.root}/processing/reference_genomes/${roddyBamFile.referenceGenome.path}",
+                        roddyBamFile.referenceGenome.cytosinePositionsIndex)
+        )
+
+        assert ",CHROMOSOME_INDICES:( ${chromosomeNames.join(' ')} ),CYTOSINE_POSITIONS_INDEX:${cpiFile.absolutePath}" ==
+                executeWgbsAlignmentJob.prepareAndReturnWorkflowSpecificCValues(roddyBamFile)
     }
 
 

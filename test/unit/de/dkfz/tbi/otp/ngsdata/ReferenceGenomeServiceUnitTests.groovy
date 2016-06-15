@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import org.apache.commons.io.FileUtils
 import org.junit.rules.TemporaryFolder
@@ -17,7 +18,7 @@ import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 
 @TestFor(ReferenceGenomeService)
 @TestMixin(GrailsUnitTestMixin)
-@Mock([Realm, Project, ReferenceGenome, ReferenceGenomeEntry])
+@Mock([Realm, Project, ReferenceGenome, ReferenceGenomeEntry, StatSizeFileName])
 class ReferenceGenomeServiceUnitTests {
 
     final static Long ARBITRARY_REFERENCE_GENOME_LENGTH = 100
@@ -59,6 +60,7 @@ class ReferenceGenomeServiceUnitTests {
         referenceGenome.name = "hg19_1_24"
         referenceGenome.path = "referenceGenome"
         referenceGenome.fileNamePrefix = "prefixName"
+        referenceGenome.cytosinePositionsIndex = "cytosine_idx.pos.gz"
         referenceGenome.length = ARBITRARY_REFERENCE_GENOME_LENGTH
         referenceGenome.lengthWithoutN = ARBITRARY_REFERENCE_GENOME_LENGTH
         referenceGenome.lengthRefChromosomes = ARBITRARY_REFERENCE_GENOME_LENGTH
@@ -221,7 +223,7 @@ class ReferenceGenomeServiceUnitTests {
     }
 
     @Test
-    void testPathToChromosomeSizeFilesPerReference_DirectoryDoesNotExist_WithExistCheck_ShoulFail() {
+    void testPathToChromosomeSizeFilesPerReference_DirectoryDoesNotExist_WithExistCheck_ShouldFail() {
         assert TestCase.shouldFail(RuntimeException) {
             referenceGenomeService.pathToChromosomeSizeFilesPerReference(project, referenceGenome, true)
         }.contains(ReferenceGenomeService.CHROMOSOME_SIZE_FILES_PREFIX)
@@ -240,5 +242,57 @@ class ReferenceGenomeServiceUnitTests {
         CreateFileHelper.createFile(pathExp)
         File pathAct = referenceGenomeService.pathToChromosomeSizeFilesPerReference(project, referenceGenome, true)
         assertEquals(pathExp, pathAct)
+    }
+
+    @Test
+    void test_cytosinePositionIndexFilePath_AllFine() {
+        File pathExp = new File(directory, referenceGenome.cytosinePositionsIndex)
+        CreateFileHelper.createFile(pathExp)
+
+        assertEquals pathExp, referenceGenomeService.cytosinePositionIndexFilePath(project, referenceGenome)
+    }
+
+    @Test
+    void test_cytosinePositionIndexFilePath_fileDoesntExist_shouldFail() {
+        assert TestCase.shouldFail(RuntimeException) {
+            referenceGenomeService.cytosinePositionIndexFilePath(project, referenceGenome)
+        }.contains(referenceGenome.cytosinePositionsIndex)
+    }
+
+    @Test
+    void test_loadReferenceGenome() {
+        String name = "my_reference_gnome"
+        String path = "bwa06_my_reference_gnome"
+        String fileNamePrefix = "my_reference_gnome"
+        String cytosinePositionsIndex = null
+        String statSizeFileName = "my_reference_gnome.fa.chrLenOnlyACGT.tab"
+
+        String fastaName = "chr21"
+        String fastaAlias = "21"
+        long fastaLength = 249250621
+        long fastaLengthWithoutN = 238204518
+        Classification fastaClassification = Classification.CHROMOSOME
+
+        List<FastaEntry> fastaEntries = [
+                new FastaEntry(fastaName, fastaAlias, fastaLength, fastaLengthWithoutN, fastaClassification),
+        ]
+
+        referenceGenomeService.loadReferenceGenome(name, path, fileNamePrefix, cytosinePositionsIndex,
+                fastaEntries, [statSizeFileName])
+
+        ReferenceGenome referenceGenome = CollectionUtils.exactlyOneElement(ReferenceGenome.findAllByName(name))
+        assert referenceGenome.path == path
+        assert referenceGenome.fileNamePrefix == fileNamePrefix
+        assert referenceGenome.cytosinePositionsIndex == cytosinePositionsIndex
+
+        ReferenceGenomeEntry entry = CollectionUtils.exactlyOneElement(ReferenceGenomeEntry.findAllByName(fastaName))
+        assert entry.referenceGenome == referenceGenome
+        assert entry.alias == fastaAlias
+        assert entry.length == fastaLength
+        assert entry.lengthWithoutN == fastaLengthWithoutN
+        assert entry.classification == fastaClassification
+
+        StatSizeFileName statSizeFileName1 = CollectionUtils.exactlyOneElement(StatSizeFileName.findAllByName(statSizeFileName))
+        assert statSizeFileName1.referenceGenome == referenceGenome
     }
 }

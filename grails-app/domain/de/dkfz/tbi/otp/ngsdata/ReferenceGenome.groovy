@@ -63,6 +63,11 @@ class ReferenceGenome implements Entity {
     long lengthRefChromosomesWithoutN
 
     /**
+     * File name of cytosine positions index
+     */
+    String cytosinePositionsIndex
+
+    /**
      * It has to be ensured that there is only one reference genome stored per directory -> unique path
      */
     static constraints = {
@@ -73,6 +78,8 @@ class ReferenceGenome implements Entity {
         lengthWithoutN shared: 'greaterThanZero'
         lengthRefChromosomes shared: 'greaterThanZero'
         lengthRefChromosomesWithoutN shared: 'greaterThanZero'
+        cytosinePositionsIndex nullable: true, blank: false,
+                validator: { !it || OtpPath.isValidPathComponent(it) }
     }
 
     String toString() {

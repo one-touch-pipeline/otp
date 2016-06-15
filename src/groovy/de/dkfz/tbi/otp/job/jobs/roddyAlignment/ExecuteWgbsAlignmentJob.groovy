@@ -6,6 +6,7 @@ import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeService
 import de.dkfz.tbi.otp.utils.ProcessHelperService.ProcessOutput
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -16,6 +17,9 @@ class ExecuteWgbsAlignmentJob extends AbstractExecutePanCanJob {
     @Autowired
     ExecutionService executionService
 
+    @Autowired
+    ReferenceGenomeService referenceGenomeService
+
     final String HEADER = "Sample\tLibrary\tPID\tReadLayout\tRun\tMate\tSequenceFile\n"
 
 
@@ -25,7 +29,11 @@ class ExecuteWgbsAlignmentJob extends AbstractExecutePanCanJob {
         List<String> chromosomeNames = ReferenceGenomeEntry.findAllByReferenceGenomeAndClassificationInList(roddyBamFile.referenceGenome,
                 [ReferenceGenomeEntry.Classification.CHROMOSOME, ReferenceGenomeEntry.Classification.MITOCHONDRIAL])*.name
         assert chromosomeNames : "No chromosome names could be found for reference genome ${roddyBamFile.referenceGenome}"
-        return ",CHROMOSOME_INDICES:( ${chromosomeNames.join(' ')} )"
+        return ",CHROMOSOME_INDICES:( ${chromosomeNames.join(' ')} )" +
+                (roddyBamFile.referenceGenome.cytosinePositionsIndex ?
+                        ",CYTOSINE_POSITIONS_INDEX:${referenceGenomeService.cytosinePositionIndexFilePath(roddyBamFile.project, roddyBamFile.referenceGenome).absolutePath}" :
+                        ""
+                )
     }
 
 

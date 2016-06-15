@@ -1,9 +1,12 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
+import groovy.transform.*
+import org.springframework.security.access.prepost.*
 
 import static org.springframework.util.Assert.*
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
+
 
 class ReferenceGenomeService {
 
@@ -37,7 +40,7 @@ class ReferenceGenomeService {
     }
 
     /**
-     * @param realm - directory path is created relatively to this {@link Realm.OperationType.DATA_PROCESSING} realm
+     * @param realm - directory path is created relatively to this {@link Realm.OperationType#DATA_PROCESSING} realm
      * @param referenceGenome - the reference genome for which the directory path is created
      * @return path to a directory storing files for the given reference genome on the given realm
      */
@@ -86,6 +89,16 @@ class ReferenceGenomeService {
     }
 
     /**
+     * returns the path to the cytosine position index file for the given reference genome depending on project
+     * @param the reference genome for which the file path is created and the belonging project
+     */
+    public File cytosinePositionIndexFilePath(Project project, ReferenceGenome referenceGenome) {
+        assert referenceGenome.cytosinePositionsIndex : "cytosinePositionsIndex is not set"
+        File file = new File(filePathToDirectory(project, referenceGenome), referenceGenome.cytosinePositionsIndex)
+        return checkFileExistence(file, true)
+    }
+
+    /**
      * returns the path to the file containing the reference genome meta information (names, length values)
      */
     public String referenceGenomeMetaInformationPath(Realm realm, ReferenceGenome referenceGenome) {
@@ -117,4 +130,73 @@ class ReferenceGenomeService {
         }
     }
 
+    /**
+     * This method is used to import new {@link ReferenceGenome}s and the corresponding {@link ReferenceGenomeEntry}s
+     * and {@link StatSizeFileName}s.
+     *
+     * @param fastaEntries use 'scripts/ReferenceGenome/getReferenceGenomeInfo.py' to create the values for this parameter
+     */
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    public void loadReferenceGenome(String name, String path, String fileNamePrefix, String cytosinePositionsIndex,
+                                    List<FastaEntry> fastaEntries, List<String> statSizeFileNames) {
+        // get list of all standard chromosomes (1…22, X, Y)
+        List<String> standardChromosomes = Chromosomes.allLabels()
+        standardChromosomes.remove("M")
+        assert standardChromosomes.size() == 24
+
+        // calculate length values
+        long length = 0
+        long lengthWithoutN = 0
+        long lengthRefChromosomes = 0
+        long lengthRefChromosomesWithoutN = 0
+        fastaEntries.each { entry ->
+            // overall count
+            length += entry.length
+            lengthWithoutN += entry.lengthWithoutN
+            // count if entry is a standard chromosome
+            if (standardChromosomes.contains(entry.alias)) {
+                lengthRefChromosomes += entry.length
+                lengthRefChromosomesWithoutN += entry.lengthWithoutN
+            }
+        }
+
+        ReferenceGenome referenceGenome = new ReferenceGenome(
+                name: name,
+                path: path,
+                fileNamePrefix: fileNamePrefix,
+                cytosinePositionsIndex: cytosinePositionsIndex,
+                length: length,
+                lengthWithoutN: lengthWithoutN,
+                lengthRefChromosomes: lengthRefChromosomes,
+                lengthRefChromosomesWithoutN: lengthRefChromosomesWithoutN,
+        ).save(flush: true, failOnError: true)
+
+
+        fastaEntries.each { entry ->
+            new ReferenceGenomeEntry(
+                    name: entry.name,
+                    alias: entry.alias,
+                    length: entry.length,
+                    lengthWithoutN: entry.lengthWithoutN,
+                    classification: entry.classification,
+                    referenceGenome: referenceGenome,
+            ).save(flush: true, failOnError: true)
+        }
+
+        statSizeFileNames.each { String fileName ->
+            new StatSizeFileName(
+                    name: fileName,
+                    referenceGenome: referenceGenome
+            ).save(flush: true, failOnError: true)
+        }
+    }
+}
+
+@TupleConstructor
+class FastaEntry {
+    String name
+    String alias
+    long length
+    long lengthWithoutN
+    Classification classification
 }
