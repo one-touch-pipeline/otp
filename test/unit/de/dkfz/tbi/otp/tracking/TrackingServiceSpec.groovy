@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.tracking
 
 import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.*
 import grails.test.mixin.*
 import grails.test.mixin.web.*
 import grails.validation.*
@@ -160,6 +161,81 @@ class TrackingServiceSpec extends Specification {
 
         then:
         date.is(otrsTicket.installationStarted)
+    }
+
+    void 'sendNotification, when finalNotification is false, sends normal notification with correct subject and content'() {
+        given:
+        OtrsTicket ticket = DomainFactory.createOtrsTicket()
+        ProcessingStatus status = new ProcessingStatus(
+                installationProcessingStatus: ALL_DONE,
+                fastqcProcessingStatus: PARTLY_DONE_MIGHT_DO_MORE,
+                alignmentProcessingStatus: NOTHING_DONE_MIGHT_DO,
+                snvProcessingStatus: NOTHING_DONE_WONT_DO,
+        )
+        Run runA = DomainFactory.createRun(name: 'runA')
+        Run runB = DomainFactory.createRun(name: 'runB')
+        Sample sample = DomainFactory.createSample()
+        SeqType seqType = DomainFactory.createSeqType()
+        String sampleText = "${sample.project.name}, ${sample.individual.pid}, ${sample.sampleType.name}, ${seqType.name} ${seqType.libraryLayout}"
+        Set<SeqTrack> seqTracks = [
+                DomainFactory.createSeqTrack(sample: sample, seqType: seqType, ilseId: '2', run: runA, laneId: '1'),
+                DomainFactory.createSeqTrack(sample: sample, seqType: seqType, ilseId: '1', run: runB, laneId: '2'),
+                DomainFactory.createSeqTrack(sample: sample, seqType: seqType, ilseId: '1', run: runA, laneId: '4'),
+                DomainFactory.createSeqTrack(sample: sample, seqType: seqType, ilseId: '1', run: runA, laneId: '3'),
+                DomainFactory.createSeqTrack(sample: sample, seqType: seqType, ilseId: null, run: runB, laneId: '8'),
+                DomainFactory.createSeqTrack(sample: sample, seqType: seqType, ilseId: null, run: runA, laneId: '8'),
+        ] as Set
+        String expectedContent = """
+Installation: ALL_DONE
+FastQC:       PARTLY_DONE_MIGHT_DO_MORE
+Alignment:    NOTHING_DONE_MIGHT_DO
+SNV:          NOTHING_DONE_WONT_DO
+
+6 SeqTrack(s) in ticket ${ticket.ticketNumber}:
+runA, lane 8, ${sampleText}
+runB, lane 8, ${sampleText}
+ILSe 1, runA, lane 3, ${sampleText}
+ILSe 1, runA, lane 4, ${sampleText}
+ILSe 1, runB, lane 2, ${sampleText}
+ILSe 2, runA, lane 1, ${sampleText}
+"""
+
+        String otrsRecipient = HelperUtils.uniqueString
+        int callCount = 0
+        trackingService.mailHelperService = new MailHelperService() {
+            @Override
+            String getOtrsRecipient() {
+                return otrsRecipient
+            }
+
+            @Override
+            void sendEmail(String emailSubject, String content, String recipient) {
+                callCount++
+                assertEquals("DMG #${ticket.ticketNumber} Processing Status Update".toString(), emailSubject)
+                assertEquals(otrsRecipient, recipient)
+                assertEquals(expectedContent, content)
+            }
+        }
+
+        when:
+        trackingService.sendNotification(ticket, seqTracks, status, false)
+
+        then:
+        callCount  == 1
+    }
+
+    void 'sendNotification, when finalNotification is true, sends final notification with correct subject'() {
+        given:
+        OtrsTicket ticket = DomainFactory.createOtrsTicket()
+
+        String otrsRecipient = HelperUtils.uniqueString
+        trackingService.mailHelperService = Mock(MailHelperService) {
+            getOtrsRecipient() >> otrsRecipient
+            1 * sendEmail("DMG #${ticket.ticketNumber} Final Processing Status Update", _, otrsRecipient)
+        }
+
+        expect:
+        trackingService.sendNotification(ticket, Collections.emptySet(), new ProcessingStatus(), true)
     }
 
     void "getInstallationProcessingStatus returns expected status"() {

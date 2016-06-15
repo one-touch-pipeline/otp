@@ -485,7 +485,7 @@ class SnvCallingServiceTests {
 
 
     private ProcessedMergedBamFile createProcessedMergedBamFile(MergingWorkPackage mergingWorkPackage, Map properties = [:]) {
-        final ProcessedMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFile(mergingWorkPackage, properties + DomainFactory.PROCESSED_BAM_FILE_PROPERTIES)
+        final ProcessedMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFile(mergingWorkPackage, properties + DomainFactory.randomProcessedBamFileProperties)
         setThresholds(bamFile)
         return bamFile
     }

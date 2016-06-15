@@ -4,13 +4,210 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.TrackingService.SamplePairDiscovery
+import de.dkfz.tbi.otp.utils.*
 import grails.test.spock.*
 
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus.*
+import static org.junit.Assert.*
 
 class TrackingServiceIntegrationSpec extends IntegrationSpec {
 
-    TrackingService trackingService = new TrackingService()
+    TrackingService trackingService
+    MailHelperService mailHelperService
+    SnvCallingService snvCallingService
+
+    void setup() {
+        // Overwrite the autowired service with a new instance for each test, so mocks do not have to be cleaned up
+        trackingService = new TrackingService(
+                mailHelperService: mailHelperService,
+                snvCallingService: snvCallingService,
+        )
+    }
+
+    void 'processFinished calls setFinishedTimestampsAndNotify for the tickets of the passed SeqTracks'() {
+        given:
+        OtrsTicket ticketA = DomainFactory.createOtrsTicket()
+        SeqTrack seqTrackA = DomainFactory.createSeqTrackWithOneDataFile(
+                [fastqcState: SeqTrack.DataProcessingState.IN_PROGRESS],
+                [runSegment: DomainFactory.createRunSegment(otrsTicket: ticketA), fileLinked: true])
+
+        OtrsTicket ticketB = DomainFactory.createOtrsTicket()
+        SeqTrack seqTrackB1 = DomainFactory.createSeqTrackWithOneDataFile(
+                [fastqcState: SeqTrack.DataProcessingState.FINISHED],
+                [runSegment: DomainFactory.createRunSegment(otrsTicket: ticketB), fileLinked: true])
+        SeqTrack seqTrackB2 = DomainFactory.createSeqTrackWithOneDataFile(
+                [fastqcState: SeqTrack.DataProcessingState.IN_PROGRESS],
+                [runSegment: DomainFactory.createRunSegment(otrsTicket: ticketB), fileLinked: true])
+
+        when:
+        trackingService.processFinished([seqTrackA, seqTrackB1] as Set, OtrsTicket.ProcessingStep.FASTQC)
+
+        then:
+        ticketA.installationFinished != null
+        ticketB.installationFinished != null
+        ticketB.fastqcFinished == null
+    }
+
+    void 'setFinishedTimestampsAndNotify, when final notification has already been sent, does nothing'() {
+        given:
+        // Installation: finished timestamp set,     all done,     won't do more
+        // FastQC:       finished timestamp not set, all done,     won't do more
+        // Alignment:    finished timestamp not set, nothing done, won't do more
+        // SNV:          finished timestamp not set, nothing done, won't do more
+        Date installationFinished = new Date()
+        OtrsTicket ticket = DomainFactory.createOtrsTicket(
+                installationFinished: installationFinished,
+                finalNotificationSent: true,
+        )
+        RunSegment runSegment = DomainFactory.createRunSegment(otrsTicket: ticket)
+        DomainFactory.createSeqTrackWithOneDataFile(
+                [fastqcState: SeqTrack.DataProcessingState.FINISHED],
+                [runSegment: runSegment, fileLinked: true])
+
+        // mailHelperService shall be null such that the test fails with a NullPointerException if the method tries to
+        // send a notification
+        trackingService.mailHelperService = null
+
+        when:
+        trackingService.setFinishedTimestampsAndNotify(ticket, new SamplePairDiscovery())
+
+        then:
+        ticket.installationFinished == installationFinished
+        ticket.fastqcFinished == null
+        ticket.alignmentFinished == null
+        ticket.snvFinished == null
+        ticket.finalNotificationSent
+    }
+
+    void 'setFinishedTimestampsAndNotify, when nothing just completed, does nothing'() {
+        given:
+        // Installation: finished timestamp set,     all done,     won't do more
+        // FastQC:       finished timestamp not set, partly done,  might do more
+        // Alignment:    finished timestamp not set, nothing done, won't do more
+        // SNV:          finished timestamp not set, nothing done, won't do more
+        Date installationFinished = new Date()
+        OtrsTicket ticket = DomainFactory.createOtrsTicket(
+                installationFinished: installationFinished,
+        )
+        RunSegment runSegment = DomainFactory.createRunSegment(otrsTicket: ticket)
+        DomainFactory.createSeqTrackWithOneDataFile(
+                [fastqcState: SeqTrack.DataProcessingState.FINISHED],
+                [runSegment: runSegment, fileLinked: true])
+        DomainFactory.createSeqTrackWithOneDataFile(
+                [fastqcState: SeqTrack.DataProcessingState.IN_PROGRESS],
+                [runSegment: runSegment, fileLinked: true])
+
+        // mailHelperService shall be null such that the test fails with a NullPointerException if the method tries to
+        // send a notification
+        trackingService.mailHelperService = null
+
+        when:
+        trackingService.setFinishedTimestampsAndNotify(ticket, new SamplePairDiscovery())
+
+        then:
+        ticket.installationFinished == installationFinished
+        ticket.fastqcFinished == null
+        ticket.alignmentFinished == null
+        ticket.snvFinished == null
+        !ticket.finalNotificationSent
+    }
+
+    void 'setFinishedTimestampsAndNotify, when something just completed and might do more, sends normal notification'() {
+        given:
+        // Installation: finished timestamp not set, all done,     won't do more
+        // FastQC:       finished timestamp not set, nothing done, might do more
+        // Alignment:    finished timestamp not set, nothing done, won't do more
+        // SNV:          finished timestamp not set, nothing done, won't do more
+        OtrsTicket ticket = DomainFactory.createOtrsTicket()
+        RunSegment runSegment = DomainFactory.createRunSegment(otrsTicket: ticket)
+        DomainFactory.createSeqTrackWithOneDataFile(
+                [fastqcState: SeqTrack.DataProcessingState.IN_PROGRESS],
+                [runSegment: runSegment, fileLinked: true])
+        ProcessingStatus expectedStatus = new ProcessingStatus(
+                installationProcessingStatus: ALL_DONE,
+                fastqcProcessingStatus: NOTHING_DONE_MIGHT_DO,
+                alignmentProcessingStatus: NOTHING_DONE_WONT_DO,
+                snvProcessingStatus: NOTHING_DONE_WONT_DO,
+        )
+
+        String otrsRecipient = HelperUtils.uniqueString
+        int callCount = 0
+        trackingService.mailHelperService = [
+                getOtrsRecipient: { otrsRecipient },
+                sendEmail: { String emailSubject, String content, String recipient ->
+                    callCount++
+                    assertEquals(otrsRecipient, recipient)
+                    assert content.contains(expectedStatus.toString())
+                    assertEquals("DMG #${ticket.ticketNumber} Processing Status Update".toString(), emailSubject)
+                }
+        ] as MailHelperService
+
+        when:
+        trackingService.setFinishedTimestampsAndNotify(ticket, new SamplePairDiscovery())
+
+        then:
+        ticket.installationFinished != null
+        ticket.fastqcFinished == null
+        ticket.alignmentFinished == null
+        ticket.snvFinished == null
+        !ticket.finalNotificationSent
+        callCount == 1
+    }
+
+    void "setFinishedTimestampsAndNotify, when something just completed and won't do more, sends final notification"() {
+        given:
+        // Installation: finished timestamp not set, all done,     won't do more
+        // FastQC:       finished timestamp not set, all done,     won't do more
+        // Alignment:    finished timestamp not set, partly done,  won't do more
+        // SNV:          finished timestamp not set, nothing done, won't do more
+        OtrsTicket ticket = DomainFactory.createOtrsTicket()
+        RunSegment runSegment = DomainFactory.createRunSegment(otrsTicket: ticket)
+        DomainFactory.createSeqTrackWithOneDataFile(
+                [fastqcState: SeqTrack.DataProcessingState.FINISHED],
+                [runSegment: runSegment, fileLinked: true])
+        SeqTrack seqTrack = DomainFactory.createSeqTrackWithOneDataFile(
+                [fastqcState: SeqTrack.DataProcessingState.FINISHED],
+                [runSegment: runSegment, fileLinked: true]
+        )
+        setBamFileInProjectFolder(DomainFactory.createRoddyBamFile(
+                DomainFactory.createRoddyBamFile([
+                        workPackage: DomainFactory.createMergingWorkPackage(
+                                MergingWorkPackage.getMergingProperties(seqTrack) +
+                                        [workflow: DomainFactory.createPanCanWorkflow()]
+                        )
+                ]),
+                DomainFactory.randomProcessedBamFileProperties + [seqTracks: [seqTrack] as Set],
+        ))
+        ProcessingStatus expectedStatus = new ProcessingStatus(
+                installationProcessingStatus: ALL_DONE,
+                fastqcProcessingStatus: ALL_DONE,
+                alignmentProcessingStatus: PARTLY_DONE_WONT_DO_MORE,
+                snvProcessingStatus: NOTHING_DONE_WONT_DO,
+        )
+
+        String otrsRecipient = HelperUtils.uniqueString
+        int callCount = 0
+        trackingService.mailHelperService = [
+            getOtrsRecipient: { otrsRecipient },
+            sendEmail: { String emailSubject, String content, String recipient ->
+                callCount++
+                assertEquals(otrsRecipient, recipient)
+                assert content.contains(expectedStatus.toString())
+                assertEquals("DMG #${ticket.ticketNumber} Final Processing Status Update".toString(), emailSubject)
+            }
+        ] as MailHelperService
+
+        when:
+        trackingService.setFinishedTimestampsAndNotify(ticket, new SamplePairDiscovery())
+
+        then:
+        ticket.installationFinished != null
+        ticket.fastqcFinished == ticket.installationFinished
+        ticket.alignmentFinished == ticket.installationFinished
+        ticket.snvFinished == null
+        ticket.finalNotificationSent
+        callCount == 1
+    }
 
     void "getAlignmentAndDownstreamProcessingStatus, No ST, returns NOTHING_DONE_WONT_DO"() {
         expect:
@@ -27,7 +224,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
 
     void "getAlignmentAndDownstreamProcessingStatus, 1 MWP ALL_DONE, returns ALL_DONE"() {
         given:
-        AbstractMergedBamFile bamFile = createBamFileInProjectFolder(DomainFactory.PROCESSED_BAM_FILE_PROPERTIES)
+        AbstractMergedBamFile bamFile = createBamFileInProjectFolder(DomainFactory.randomProcessedBamFileProperties)
 
         Set<SeqTrack> seqTracks = bamFile.containedSeqTracks
 
@@ -37,7 +234,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
 
     void "getAlignmentAndDownstreamProcessingStatus, 1 MWP NOTHING_DONE_MIGHT_DO, returns NOTHING_DONE_MIGHT_DO"() {
         given:
-        AbstractMergedBamFile bamFile = createBamFileInProjectFolder(DomainFactory.PROCESSED_BAM_FILE_PROPERTIES)
+        AbstractMergedBamFile bamFile = createBamFileInProjectFolder(DomainFactory.randomProcessedBamFileProperties)
 
         Set<SeqTrack> seqTracks = [DomainFactory.createSeqTrackWithDataFiles(bamFile.mergingWorkPackage)]
 
@@ -47,7 +244,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
 
     void "getAlignmentAndDownstreamProcessingStatus, 1 ST not alignable, 1 MWP ALL_DONE, returns PARTLY_DONE_WONT_DO_MORE"() {
         given:
-        AbstractMergedBamFile bamFile = createBamFileInProjectFolder(DomainFactory.PROCESSED_BAM_FILE_PROPERTIES)
+        AbstractMergedBamFile bamFile = createBamFileInProjectFolder(DomainFactory.randomProcessedBamFileProperties)
 
         Set<SeqTrack> seqTracks = bamFile.containedSeqTracks + [DomainFactory.createSeqTrackWithDataFiles(bamFile.mergingWorkPackage, [:], [fileWithdrawn: true])]
 
@@ -73,7 +270,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
 
     void "getAlignmentAndDownstreamProcessingStatus, 2 MergingProperties, 1 MWP ALL_DONE, returns PARTLY_DONE_WONT_DO_MORE"() {
         given:
-        AbstractMergedBamFile bamFile = createBamFileInProjectFolder(DomainFactory.PROCESSED_BAM_FILE_PROPERTIES)
+        AbstractMergedBamFile bamFile = createBamFileInProjectFolder(DomainFactory.randomProcessedBamFileProperties)
 
         Set<SeqTrack> seqTracks = bamFile.containedSeqTracks + [DomainFactory.createSeqTrackWithOneDataFile()]
 
@@ -93,8 +290,8 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
 
     void "getAlignmentAndDownstreamProcessingStatus, 2 MergingProperties, 1 MWP NOTHING_DONE_MIGHT_DO, 1 MWP ALL_DONE, returns PARTLY_DONE_MIGHT_DO_MORE"() {
         given:
-        AbstractMergedBamFile bamFile1 = createBamFileInProjectFolder(DomainFactory.PROCESSED_BAM_FILE_PROPERTIES)
-        AbstractMergedBamFile bamFile2 = createBamFileInProjectFolder(DomainFactory.PROCESSED_BAM_FILE_PROPERTIES)
+        AbstractMergedBamFile bamFile1 = createBamFileInProjectFolder(DomainFactory.randomProcessedBamFileProperties)
+        AbstractMergedBamFile bamFile2 = createBamFileInProjectFolder(DomainFactory.randomProcessedBamFileProperties)
 
         Set<SeqTrack> seqTracks = bamFile1.containedSeqTracks + bamFile2.containedSeqTracks
 

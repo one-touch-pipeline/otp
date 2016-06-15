@@ -60,17 +60,37 @@ class OtrsTicket implements Commentable, Entity {
         comment(nullable: true)
     }
 
-    Date getImportDate() {
+    Date getFirstImportTimestamp() {
         //Doesn't work as a single Query, probably a Unit test problem
         def runSegment = RunSegment.withCriteria {
             eq ('otrsTicket', this)
         }
-        return MetaDataFile.createCriteria().get {
+        return (Date) MetaDataFile.createCriteria().get {
             'in'('runSegment', runSegment)
             projections {
                 min("dateCreated")
             }
         }
+    }
+
+    Date getLastImportTimestamp() {
+        //Doesn't work as a single Query, probably a Unit test problem
+        def runSegment = RunSegment.withCriteria {
+            eq ('otrsTicket', this)
+        }
+        return (Date) MetaDataFile.createCriteria().get {
+            'in'('runSegment', runSegment)
+            projections {
+                max("dateCreated")
+            }
+        }
+    }
+
+    Set<SeqTrack> findAllSeqTracks() {
+        return new LinkedHashSet<SeqTrack>(SeqTrack.findAll(
+                'FROM SeqTrack st WHERE EXISTS (FROM DataFile df WHERE df.seqTrack = st AND df.runSegment.otrsTicket = :otrsTicket)',
+                [otrsTicket: this]
+        ))
     }
 
     static String ticketNumberConstraint(String val) {

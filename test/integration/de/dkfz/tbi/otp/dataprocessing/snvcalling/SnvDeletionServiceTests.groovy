@@ -179,7 +179,7 @@ class SnvDeletionServiceTests {
     private SnvCallingInstance prepareForTwoBamFilesTests() {
         instance.processingState = SnvProcessingStates.FINISHED
         ProcessedMergedBamFile bamFile2 = DomainFactory.createProcessedMergedBamFile(
-                testdata.bamFileTumor.mergingWorkPackage, DomainFactory.PROCESSED_BAM_FILE_PROPERTIES)
+                testdata.bamFileTumor.mergingWorkPackage, DomainFactory.randomProcessedBamFileProperties)
         SnvCallingInstance instance2 = testdata.createSnvCallingInstance([
             sampleType1BamFile: bamFile2,
             samplePair: testdata.samplePair,

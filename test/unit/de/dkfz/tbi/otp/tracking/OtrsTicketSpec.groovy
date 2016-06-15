@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.tracking
 
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.*
 import grails.test.mixin.*
 import grails.validation.*
 import spock.lang.*
@@ -28,9 +29,6 @@ class OtrsTicketSpec extends Specification {
     }
 
     def 'test creation, incorrect String' () {
-        given:
-        OtrsTicket otrsTicket
-
         when:
         DomainFactory.createOtrsTicket([ticketNumber: '20000101a2345678'])
 
@@ -40,9 +38,6 @@ class OtrsTicketSpec extends Specification {
     }
 
     def 'test creation, duplicate String' () {
-        given:
-        OtrsTicket otrsTicket
-
         when:
         DomainFactory.createOtrsTicket([ticketNumber: '2000010112345678'])
         DomainFactory.createOtrsTicket([ticketNumber: '2000010112345678'])
@@ -53,9 +48,6 @@ class OtrsTicketSpec extends Specification {
     }
 
     def 'test creation, incorrect date' () {
-        given:
-        OtrsTicket otrsTicket
-
         when:
         DomainFactory.createOtrsTicket([ticketNumber: '2000910112345678'])
 
@@ -64,22 +56,27 @@ class OtrsTicketSpec extends Specification {
         ex.message.contains("Cannot parse \"20009101\": Value 91 for monthOfYear must be in the range [1,12]")
     }
 
-    def 'test getImportDate' () {
+    def 'getFirstImportTimestamp and getLastImportTimestamp return expected result'() {
         given:
-        OtrsTicket otrsTicket01 = DomainFactory.createOtrsTicket()
-        OtrsTicket otrsTicket02 = DomainFactory.createOtrsTicket()
+        OtrsTicket otrsTicketA = DomainFactory.createOtrsTicket()
+        OtrsTicket otrsTicketB = DomainFactory.createOtrsTicket()
 
-        RunSegment runSegment01 = DomainFactory.createRunSegment(otrsTicket: otrsTicket01)
-        RunSegment runSegment02 = DomainFactory.createRunSegment(otrsTicket: otrsTicket02)
+        RunSegment runSegmentA = DomainFactory.createRunSegment(otrsTicket: otrsTicketA)
+        RunSegment runSegmentB = DomainFactory.createRunSegment(otrsTicket: otrsTicketB)
 
-        MetaDataFile metadataFile01 = DomainFactory.createMetaDataFile([runSegment: runSegment02])
-        MetaDataFile metadataFile02 = DomainFactory.createMetaDataFile([runSegment: runSegment01])
-        MetaDataFile metadataFile03 = DomainFactory.createMetaDataFile([runSegment: runSegment01])
+        MetaDataFile metadataFileB1 = DomainFactory.createMetaDataFile([runSegment: runSegmentB])
+        assert ThreadUtils.waitFor({ System.currentTimeMillis() > metadataFileB1.dateCreated.time }, 1, 1)
+        MetaDataFile metadataFileA1 = DomainFactory.createMetaDataFile([runSegment: runSegmentA])
+        assert ThreadUtils.waitFor({ System.currentTimeMillis() > metadataFileA1.dateCreated.time }, 1, 1)
+        MetaDataFile metadataFileA2 = DomainFactory.createMetaDataFile([runSegment: runSegmentA])
 
+        assert metadataFileA1.dateCreated > metadataFileB1.dateCreated
+        assert metadataFileA2.dateCreated > metadataFileA1.dateCreated
 
         expect:
-        otrsTicket02.getImportDate().is(metadataFile01.dateCreated)
-        otrsTicket01.getImportDate().is(metadataFile02.dateCreated)
-        !otrsTicket01.getImportDate().is(metadataFile03.dateCreated)
+        otrsTicketA.firstImportTimestamp == metadataFileA1.dateCreated
+        otrsTicketA.lastImportTimestamp == metadataFileA2.dateCreated
+        otrsTicketB.firstImportTimestamp == metadataFileB1.dateCreated
+        otrsTicketB.lastImportTimestamp == metadataFileB1.dateCreated
     }
 }

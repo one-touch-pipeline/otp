@@ -11,6 +11,10 @@ class MailHelperService {
 
     MailService mailService
 
+    String getOtrsRecipient() {
+        return grailsApplication.config.otp.mail.notification.fasttrack.to
+    }
+
     void sendNotificationEmail(String subject, String content) {
         sendEmail(subject, content, grailsApplication.config.otp.mail.notification.to)
     }

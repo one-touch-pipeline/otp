@@ -4,7 +4,7 @@ import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.ngsdata.*
 import grails.test.spock.*
 
-import static de.dkfz.tbi.otp.ngsdata.DomainFactory.PROCESSED_BAM_FILE_PROPERTIES
+import static de.dkfz.tbi.otp.ngsdata.DomainFactory.getRandomProcessedBamFileProperties
 
 class MergingWorkPackageIntegrationSpec extends IntegrationSpec {
 
@@ -36,7 +36,7 @@ class MergingWorkPackageIntegrationSpec extends IntegrationSpec {
 
     void 'getCompleteProcessableBamFileInProjectFolder, when bamFileInProjectFolder set, not withdrawn, FileOperationStatus PROCESSED, seqTracks match, returns bamFile'() {
         given:
-        RoddyBamFile bamFile = DomainFactory.createRoddyBamFile(PROCESSED_BAM_FILE_PROPERTIES)
+        RoddyBamFile bamFile = DomainFactory.createRoddyBamFile(randomProcessedBamFileProperties)
 
         bamFile.workPackage.bamFileInProjectFolder = bamFile
         bamFile.workPackage.save(flush: true)
@@ -47,7 +47,7 @@ class MergingWorkPackageIntegrationSpec extends IntegrationSpec {
 
     void 'getCompleteProcessableBamFileInProjectFolder, when bamFileInProjectFolder not set, not withdrawn, FileOperationStatus PROCESSED, seqTracks match, returns null'() {
         given:
-        RoddyBamFile bamFile = DomainFactory.createRoddyBamFile(PROCESSED_BAM_FILE_PROPERTIES)
+        RoddyBamFile bamFile = DomainFactory.createRoddyBamFile(randomProcessedBamFileProperties)
 
         expect:
         null == bamFile.workPackage.completeProcessableBamFileInProjectFolder
@@ -55,7 +55,7 @@ class MergingWorkPackageIntegrationSpec extends IntegrationSpec {
 
     void 'getCompleteProcessableBamFileInProjectFolder, when bamFileInProjectFolder set, withdrawn, FileOperationStatus PROCESSED, seqTracks match, returns null'() {
         given:
-        RoddyBamFile bamFile = DomainFactory.createRoddyBamFile(PROCESSED_BAM_FILE_PROPERTIES)
+        RoddyBamFile bamFile = DomainFactory.createRoddyBamFile(randomProcessedBamFileProperties)
         bamFile.withdrawn = true
         bamFile.save(flush: true)
 
@@ -79,7 +79,7 @@ class MergingWorkPackageIntegrationSpec extends IntegrationSpec {
 
     void 'getCompleteProcessableBamFileInProjectFolder, when bamFileInProjectFolder set, not withdrawn, FileOperationStatus PROCESSED, seqTracks do not match, returns null'() {
         given:
-        RoddyBamFile bamFile = DomainFactory.createRoddyBamFile(PROCESSED_BAM_FILE_PROPERTIES)
+        RoddyBamFile bamFile = DomainFactory.createRoddyBamFile(randomProcessedBamFileProperties)
         DomainFactory.createSeqTrackWithDataFiles(bamFile.workPackage)
 
         bamFile.workPackage.bamFileInProjectFolder = bamFile

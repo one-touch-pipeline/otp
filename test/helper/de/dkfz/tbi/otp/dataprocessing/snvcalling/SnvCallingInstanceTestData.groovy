@@ -26,7 +26,7 @@ class SnvCallingInstanceTestData {
     ExternalScript externalScript_Joining
 
     void createSnvObjects(File testDirectory = null) {
-        bamFileControl = DomainFactory.createProcessedMergedBamFile(DomainFactory.createMergingSet(), DomainFactory.PROCESSED_BAM_FILE_PROPERTIES)
+        bamFileControl = DomainFactory.createProcessedMergedBamFile(DomainFactory.createMergingSet(), DomainFactory.randomProcessedBamFileProperties)
         if (testDirectory) {
             ['Management', 'Processing'].each {
                 this."realm${it}" = DomainFactory."createRealmData${it}"(testDirectory, [
@@ -62,7 +62,7 @@ class SnvCallingInstanceTestData {
         SamplePair samplePair = DomainFactory.createDisease(controlMwp)
         ProcessedMergedBamFile diseaseBamFile = DomainFactory.createProcessedMergedBamFile(
                 samplePair.mergingWorkPackage1,
-                DomainFactory.PROCESSED_BAM_FILE_PROPERTIES)
+                DomainFactory.randomProcessedBamFileProperties)
         assert diseaseBamFile.save(flush: true)
         return [diseaseBamFile, samplePair]
     }

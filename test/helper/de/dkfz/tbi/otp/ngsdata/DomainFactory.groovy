@@ -31,11 +31,6 @@ class DomainFactory {
     static final String DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY = 'exec_123456_123456789_test_test'
     static final long DEFAULT_FILE_SIZE = 123456
     static final String TEST_CONFIG_VERSION = 'v1_0'
-    static final Map PROCESSED_BAM_FILE_PROPERTIES = [
-            fileSize: 123456789,
-            md5sum: HelperUtils.randomMd5sum,
-            fileOperationStatus: FileOperationStatus.PROCESSED,
-    ].asImmutable()
 
     /**
      * Counter to create unique names.
@@ -280,6 +275,14 @@ class DomainFactory {
                 mergingSet: mergingSet,
                 identifier: MergingPass.nextIdentifier(mergingSet),
         ).save(flush: true)
+    }
+
+    public static Map getRandomProcessedBamFileProperties() {
+        return [
+                fileSize: ++counter,
+                md5sum: HelperUtils.randomMd5sum,
+                fileOperationStatus: FileOperationStatus.PROCESSED,
+        ]
     }
 
     public static ProcessedMergedBamFile createProcessedMergedBamFile(MergingWorkPackage mergingWorkPackage, Map properties = [:]) {

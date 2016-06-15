@@ -13,6 +13,7 @@ import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus
 
 class TrackingService {
 
+    MailHelperService mailHelperService
     SnvCallingService snvCallingService
 
     public OtrsTicket createOtrsTicket(String ticketNumber) {
@@ -63,6 +64,69 @@ class TrackingService {
                 assert it.save(flush: true)
             }
         }
+    }
+
+    public void processFinished(Set<SeqTrack> seqTracks, OtrsTicket.ProcessingStep step) {
+        SamplePairDiscovery samplePairDiscovery = new SamplePairDiscovery()
+        for (OtrsTicket ticket : findAllOtrsTickets(seqTracks)) {
+            setFinishedTimestampsAndNotify(ticket, samplePairDiscovery)
+        }
+    }
+
+    void setFinishedTimestampsAndNotify(OtrsTicket ticket, SamplePairDiscovery samplePairDiscovery) {
+        if (ticket.finalNotificationSent) {
+            return
+        }
+        Date now = new Date()
+        Set<SeqTrack> seqTracks = ticket.findAllSeqTracks()
+        ProcessingStatus status = getProcessingStatus(seqTracks, samplePairDiscovery)
+        boolean anythingJustCompleted = false
+        boolean mightDoMore = false
+        for (OtrsTicket.ProcessingStep step : OtrsTicket.ProcessingStep.values()) {
+            WorkflowProcessingStatus stepStatus = status."${step}ProcessingStatus"
+            if (ticket."${step}Finished" == null && stepStatus.done != NOTHING && !stepStatus.mightDoMore) {
+                anythingJustCompleted = true
+                ticket."${step}Finished" = now
+            }
+            if (stepStatus.mightDoMore) {
+                mightDoMore = true
+            }
+        }
+        if (anythingJustCompleted) {
+            sendNotification(ticket, seqTracks, status, !mightDoMore)
+            if (!mightDoMore) {
+                ticket.finalNotificationSent = true
+            }
+            assert ticket.save(flush: true)
+        }
+    }
+
+    void sendNotification(OtrsTicket ticket, Set<SeqTrack> seqTracks, ProcessingStatus status, boolean finalNotification) {
+        StringBuilder subject = new StringBuilder()
+        // TODO: regarding the ticket number prefix see OTP-2187
+        subject.append('DMG #').append(ticket.ticketNumber)
+        if (finalNotification) {
+            subject.append(' Final')
+        }
+        subject.append(' Processing Status Update')
+
+        StringBuilder content = new StringBuilder()
+        content.append(status.toString())
+        content.append('\n').append(seqTracks.size()).append(' SeqTrack(s) in ticket ').append(ticket.ticketNumber).append(':\n')
+        for (SeqTrack seqTrack : seqTracks.sort { a, b -> a.ilseId <=> b.ilseId ?: a.run.name <=> b.run.name ?: a.laneId <=> b.laneId }) {
+            appendSeqTrackString(content, seqTrack)
+            content.append('\n')
+        }
+
+        mailHelperService.sendEmail(subject.toString(), content.toString(), mailHelperService.otrsRecipient)
+    }
+
+    void appendSeqTrackString(StringBuilder sb, SeqTrack seqTrack) {
+        if (seqTrack.ilseId) {
+            sb.append("ILSe ${seqTrack.ilseId}, ")
+        }
+        sb.append("${seqTrack.run.name}, lane ${seqTrack.laneId}, ${seqTrack.project.name}, ${seqTrack.individual.pid}, " +
+                "${seqTrack.sampleType.name}, ${seqTrack.seqType.name} ${seqTrack.seqType.libraryLayout}")
     }
 
     ProcessingStatus getProcessingStatus(Set<SeqTrack> seqTracks, SamplePairDiscovery samplePairDiscovery, ProcessingStatus status = new ProcessingStatus()) {

@@ -62,4 +62,8 @@ class RunSegment implements Entity {
         align(nullable: true)
         otrsTicket(nullable: true)
     }
+
+    static mapping = {
+        otrsTicket index: "run_segment_otrs_ticket_idx"
+    }
 }

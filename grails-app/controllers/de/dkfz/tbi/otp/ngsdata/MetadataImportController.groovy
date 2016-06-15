@@ -123,7 +123,8 @@ class MetadataImportControllerSubmitCommand implements Serializable {
         })
     }
     void setTicketNumber(String ticketNumber) {
-        Matcher matcher = ticketNumber =~ /^\s*(((Ticket)?#)?(?<number>(\d{16})))?\s*$/
+        // TODO: regarding the ticket number prefix see OTP-2187
+        Matcher matcher = ticketNumber =~ /^\s*(((DMG )?#)?(?<number>(\d{16})))?\s*$/
         if (matcher.matches()) {
             this.ticketNumber = matcher.group('number') ?: null
         } else {

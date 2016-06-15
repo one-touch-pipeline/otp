@@ -60,7 +60,7 @@ abstract class AbstractSnvWorkflowTests extends WorkflowTestCase {
     final String SNV_PIPELINE_SCRIPTS_PATH = "${CO_SCRIPTS_BASE_DIR}/snvPipeline"
     final String ANALYSIS_SCRIPTS_PATH = "${CO_SCRIPTS_BASE_DIR}/tools"
     final Double COVERAGE = 30.0
-    final Map PROCESSED_BAM_FILE_PROPERTIES = DomainFactory.PROCESSED_BAM_FILE_PROPERTIES + [
+    final Map PROCESSED_BAM_FILE_PROPERTIES = DomainFactory.randomProcessedBamFileProperties + [
             coverage: COVERAGE,
     ]
 
