@@ -8,6 +8,7 @@ class MetaDataFile implements Entity {
 
     String fileName
     String filePath
+    /** @deprecated <code>true</code> for all instances */ @Deprecated
     boolean used = false
     Date dateCreated = null
 

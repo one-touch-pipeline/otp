@@ -46,8 +46,10 @@ class RunSegment implements Entity {
     DataFormat currentFormat
 
     String dataPath                  // path to data (ftp area)
+    /** @deprecated Use {@link MetaDataFile#filePath} */ @Deprecated
     String mdPath                    // path to meta-data
 
+    /** @deprecated OTP-1952 */ @Deprecated
     Run run
 
     OtrsTicket otrsTicket

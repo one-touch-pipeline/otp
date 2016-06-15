@@ -18,8 +18,10 @@ class DataFile implements Commentable, Entity {
     Date dateFileSystem = null     // when the file was created on LSDF
     Date dateCreated = null        // when the object was created in db
 
+    /** @deprecated Not used */ @Deprecated
     String vbpFilePath = ""        // viev by pid structure
 
+    /** @deprecated OTP no longer imports invalid metadata */ @Deprecated
     boolean metaDataValid = true
     boolean fileWithdrawn = false
 

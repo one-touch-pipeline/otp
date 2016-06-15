@@ -6,6 +6,7 @@ class SoftwareTool implements Entity {
 
     String programName
     String programVersion
+    /** @deprecated <code>null</code> for all instances */ @Deprecated
     String qualityCode
     enum Type {BASECALLING, ALIGNMENT}
     Type type

@@ -20,12 +20,14 @@ class Run implements ProcessParameterObject, Entity {
     Date dateCreated  = new Date()   // do we need object creation ?
 
     boolean blacklisted = false      // run is known to be invalid
+    /** @deprecated Not used */ @Deprecated
     boolean multipleSource = false   // for runs for more than one projects
 
     SeqCenter seqCenter
     SeqPlatform seqPlatform
 
     enum StorageRealm {DKFZ, BIOQUANT, MIXED}
+    /** @deprecated Use {@link Project#realmName} */ @Deprecated
     StorageRealm storageRealm
 
     static belongsTo = [

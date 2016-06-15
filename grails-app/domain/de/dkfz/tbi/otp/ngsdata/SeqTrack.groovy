@@ -34,8 +34,10 @@ class SeqTrack implements ProcessParameterObject, Entity {
 
     String laneId
     String ilseId
+    /** @deprecated <code>false</code> for all instances */ @Deprecated
     boolean hasFinalBam = false
     boolean hasOriginalBam = false
+    /** @deprecated <code>false</code> for all instances */ @Deprecated
     boolean usingOriginalBam = false
     /**
      * {@code true} if the data files belonging to this {@link SeqTrack} are symlinked to the project folder.
@@ -73,6 +75,7 @@ class SeqTrack implements ProcessParameterObject, Entity {
     Run run
     Sample sample
     SeqType seqType
+    /** @deprecated Use <code>run.seqPlatform</code> */ @Deprecated
     SeqPlatform seqPlatform
     SoftwareTool pipelineVersion
 
