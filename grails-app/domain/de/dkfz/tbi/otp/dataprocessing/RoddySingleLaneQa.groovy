@@ -17,8 +17,4 @@ class RoddySingleLaneQa extends RoddyQualityAssessment {
             obj.roddyBamFile.seqTracks*.id.contains(val.id)
         })
     }
-
-    String getSingleLaneIdentifier() {
-        return roddyBamFile.getReadGroupName(seqTrack)
-    }
 }
