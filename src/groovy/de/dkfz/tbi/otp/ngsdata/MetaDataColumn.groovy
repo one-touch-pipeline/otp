@@ -31,4 +31,5 @@ enum MetaDataColumn {
     PROJECT,
     MATE,
     CUSTOM_LIBRARY,
+    ADAPTER_FILE,
 }

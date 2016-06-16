@@ -279,10 +279,16 @@ class DomainFactory {
 
     public static Map getRandomProcessedBamFileProperties() {
         return [
-                fileSize: ++counter,
-                md5sum: HelperUtils.randomMd5sum,
+                fileSize           : ++counter,
+                md5sum             : HelperUtils.randomMd5sum,
                 fileOperationStatus: FileOperationStatus.PROCESSED,
         ]
+    }
+
+    public static AdapterFile createAdapterFile(Map properties = [:]) {
+        return createDomainObject(AdapterFile, [
+                fileName: "fileName_${counter++}",
+        ], properties)
     }
 
     public static ProcessedMergedBamFile createProcessedMergedBamFile(MergingWorkPackage mergingWorkPackage, Map properties = [:]) {

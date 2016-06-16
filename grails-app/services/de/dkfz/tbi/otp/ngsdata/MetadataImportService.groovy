@@ -3,12 +3,12 @@ package de.dkfz.tbi.otp.ngsdata
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
 import de.dkfz.tbi.otp.tracking.*
+import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.util.spreadsheet.*
 import groovy.transform.*
 import org.springframework.beans.factory.annotation.*
 import org.springframework.context.*
 import org.springframework.security.access.prepost.*
-import org.codehaus.groovy.runtime.typehandling.GroovyCastException
 
 import java.util.logging.*
 
@@ -184,6 +184,8 @@ class MetadataImportService {
             }
             String libraryName = uniqueColumnValue(rows, CUSTOM_LIBRARY) ?: ""
             String normalizedLibraryName = SeqTrack.normalizeLibraryName(libraryName)
+            String adapterFileName = uniqueColumnValue(rows, ADAPTER_FILE)
+            AdapterFile adapterFile = adapterFileName ? CollectionUtils.exactlyOneElement(AdapterFile.findAllByFileName(adapterFileName)) : null
             Map properties = [
                     laneId: laneId,
                     ilseId: uniqueColumnValue(rows, ILSE_NO) ?: null,
@@ -199,6 +201,7 @@ class MetadataImportService {
                     libraryPreparationKit: libraryPreparationKit,
                     libraryName: libraryName,
                     normalizedLibraryName: normalizedLibraryName,
+                    adapterFile: adapterFile,
             ]
             if (seqTypeName == SeqTypeNames.CHIP_SEQ) {
                 properties['antibodyTarget'] = exactlyOneElement(AntibodyTarget.findAllByNameIlike(
