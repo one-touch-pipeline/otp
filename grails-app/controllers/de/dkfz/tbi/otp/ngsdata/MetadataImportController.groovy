@@ -1,7 +1,10 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
 import de.dkfz.tbi.otp.tracking.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import groovy.transform.*
 import java.util.regex.*
 import org.springframework.validation.*
@@ -37,7 +40,12 @@ class MetadataImportController {
     }
 
     def details() {
-        [data: getMetadataDetails(RunSegment.get(params.id))]
+        RunSegment runSegment = (RunSegment.get(params.id))
+        [
+                data: getMetadataDetails(runSegment),
+                ticketNumber: runSegment.otrsTicket?.ticketNumber,
+                url: ProcessingOptionService.getValueOfProcessingOption("otrsServerUrl"),
+        ]
     }
 
     private MetadataDetails getMetadataDetails(RunSegment importInstance) {

@@ -8,6 +8,13 @@
 
 <body>
 <div class="body">
+  <h2>${g.message(code: "metadataImport.details.otrsTicket")}</h2>
+  <g:if test="${ticketNumber}">
+    <g:message code="metadataImport.details.otrsTicketNumber" />
+    <g:link url="${url}/index.pl?Action=AgentTicketZoom;TicketNumber=${ticketNumber}">${ticketNumber}</g:link>
+  </g:if><g:else>
+    ${g.message(code: "metadataImport.details.ticketMissing")}
+  </g:else>
   <h2>${g.message(code: "metadataImport.details.metadataFiles")}</h2>
   <ul>
     <g:each in="${data.metaDataFiles}" var="metaDataFile">
