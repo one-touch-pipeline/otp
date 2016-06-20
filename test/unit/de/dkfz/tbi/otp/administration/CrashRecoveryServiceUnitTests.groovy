@@ -1,26 +1,14 @@
 
 package de.dkfz.tbi.otp.administration
 
-import grails.buildtestdata.mixin.Build
+import de.dkfz.tbi.otp.job.plan.*
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.job.scheduler.*
+import grails.buildtestdata.mixin.*
 import grails.test.mixin.*
 import grails.test.mixin.support.*
-
-import org.codehaus.groovy.runtime.powerassert.PowerAssertionError
+import org.codehaus.groovy.runtime.powerassert.*
 import org.junit.*
-
-import de.dkfz.tbi.otp.job.plan.JobDefinition
-import de.dkfz.tbi.otp.job.processing.ExecutionState
-import de.dkfz.tbi.otp.job.processing.Parameter
-import de.dkfz.tbi.otp.job.processing.ParameterType
-import de.dkfz.tbi.otp.job.processing.ParameterUsage
-import de.dkfz.tbi.otp.job.processing.Process
-import de.dkfz.tbi.otp.job.processing.ProcessingError
-import de.dkfz.tbi.otp.job.processing.ProcessingException
-import de.dkfz.tbi.otp.job.processing.ProcessingStep
-import de.dkfz.tbi.otp.job.processing.ProcessingStepUpdate
-import de.dkfz.tbi.otp.job.scheduler.SchedulerService
-
-
 
 @TestFor(CrashRecoveryService)
 @TestMixin(GrailsUnitTestMixin)
@@ -77,6 +65,7 @@ class CrashRecoveryServiceUnitTests {
                 callRestartProcessingStepCount++
             },
         ] as SchedulerService
+        service.processService = new ProcessService()
     }
 
     void createProcessingSteps(boolean createparameterTypes = false) {

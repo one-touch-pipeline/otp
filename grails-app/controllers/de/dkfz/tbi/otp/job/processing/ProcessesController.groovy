@@ -215,10 +215,18 @@ class ProcessesController {
         [
                 name: process.jobExecutionPlan.name,
                 id: process.id,
+                operatorIsAwareOfFailure: process.operatorIsAwareOfFailure,
+                hasError: processService.getError(process),
                 planId: process.jobExecutionPlan.id,
                 parameter: processParameterData(process),
                 comment: process.comment
         ]
+    }
+
+    def updateOperatorIsAwareOfFailure(OperatorIsAwareOfFailureSubmitCommand cmd) {
+        Process process = cmd.process
+        processService.setOperatorIsAwareOfFailureWithAuthentication(process, cmd.operatorIsAwareOfFailure)
+        redirect action: 'process', params: [id: process.id]
     }
 
     def processData(DataTableCommand cmd) {
@@ -389,4 +397,9 @@ class ProcessesController {
         def dataToRender = [date: process.comment.modificationDate.format('EEE, d MMM yyyy HH:mm'), author: process.comment.author]
         render dataToRender as JSON
     }
+}
+
+class OperatorIsAwareOfFailureSubmitCommand implements Serializable {
+    Process process
+    boolean operatorIsAwareOfFailure
 }

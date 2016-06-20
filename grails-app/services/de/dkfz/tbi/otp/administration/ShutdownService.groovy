@@ -213,6 +213,7 @@ class ShutdownService implements DisposableBean {
 
     @SuppressWarnings("GrMethodMayBeStatic" /* because accessing "log" */)
     private void suspendProcessingStep(ProcessingStep step) {
+        processService.setOperatorIsAwareOfFailure(step.process, false)
         ProcessingStepUpdate update = new ProcessingStepUpdate(
                 date: new Date(),
                 state: ExecutionState.SUSPENDED,

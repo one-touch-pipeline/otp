@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.job.scheduler
 
 import de.dkfz.tbi.otp.job.JobMailService
+import de.dkfz.tbi.otp.job.processing.ProcessService
 
 import static org.springframework.util.Assert.*
 
@@ -58,6 +59,9 @@ class Scheduler {
 
     @Autowired
     JobMailService jobMailService
+
+    @Autowired
+    ProcessService processService
 
     /**
      * Log for this class.
@@ -155,6 +159,7 @@ class Scheduler {
                 (job as ValidatingJob).setValidatorFor(validatedStep)
             }
             // add a ProcessingStepUpdate to the ProcessingStep
+            processService.setOperatorIsAwareOfFailure(step.process, false)
             ProcessingStepUpdate update = new ProcessingStepUpdate(
                     date: new Date(),
                     state: ExecutionState.STARTED,
@@ -228,6 +233,7 @@ class Scheduler {
         try {
             schedulerService.removeRunningJob(job)
             // add a ProcessingStepUpdate to the ProcessingStep
+            processService.setOperatorIsAwareOfFailure(step.process, false)
             ProcessingStepUpdate update = new ProcessingStepUpdate(
                     date: new Date(),
                     state: ExecutionState.FAILURE,

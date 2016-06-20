@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.job.scheduler
 
 import de.dkfz.tbi.otp.job.JobMailService
+import de.dkfz.tbi.otp.job.processing.ProcessService
 import de.dkfz.tbi.otp.job.processing.ResumableJob
 
 import static org.springframework.util.Assert.*
@@ -68,6 +69,8 @@ class SchedulerService {
     @SuppressWarnings("GrailsStatelessService")
     PersistenceContextInterceptor persistenceInterceptor
 
+    ProcessService processService
+
     /**
      * Queue of next to be started ProcessingSteps
      */
@@ -132,6 +135,7 @@ class SchedulerService {
                     if (last.state == ExecutionState.CREATED) {
                         processesToRestart << step
                     } else if (last.state == ExecutionState.SUSPENDED) {
+                        processService.setOperatorIsAwareOfFailure(step.process, false)
                         ProcessingStepUpdate update = new ProcessingStepUpdate(
                             date: new Date(),
                             state: ExecutionState.RESUMED,
@@ -378,6 +382,7 @@ class SchedulerService {
         ProcessingStep step = ProcessingStep.get(job.processingStep.id)
         if (!ProcessingStepUpdate.findByProcessingStepAndState(step, ExecutionState.FAILURE)) {
             // add a ProcessingStepUpdate to the ProcessingStep
+            processService.setOperatorIsAwareOfFailure(step.process, false)
             ProcessingStepUpdate update = new ProcessingStepUpdate(
                 date: new Date(),
                 state: ExecutionState.FINISHED,
@@ -497,6 +502,7 @@ class SchedulerService {
                 }
                 ProcessingStepUpdate endStateUpdate
                 if (endState == ExecutionState.FAILURE || !ProcessingStepUpdate.findByProcessingStepAndState(step, ExecutionState.FAILURE)) {
+                    processService.setOperatorIsAwareOfFailure(step.process, false)
                     endStateUpdate = new ProcessingStepUpdate(
                             date: new Date(),
                             state: endState,
@@ -532,6 +538,7 @@ class SchedulerService {
                     ProcessingStep validatedStep = ProcessingStep.get(validatingJob.validatorFor.id)
                     boolean succeeded = validatingJob.hasValidatedJobSucceeded()
 
+                    processService.setOperatorIsAwareOfFailure(step.process, false)
                     ProcessingStepUpdate validatedUpdate = new ProcessingStepUpdate(
                             date: new Date(),
                             state: succeeded ? ExecutionState.SUCCESS : ExecutionState.FAILURE,
@@ -605,6 +612,7 @@ class SchedulerService {
      * @throws ProcessingException In case the ProcessingError cannot be saved.
      **/
     public void createError(ProcessingStep step, String errorMessage, Class jobClass) {
+        processService.setOperatorIsAwareOfFailure(step.process, false)
         ProcessingStepUpdate update = new ProcessingStepUpdate(
             date: new Date(),
             state: ExecutionState.FAILURE,
@@ -683,8 +691,9 @@ class SchedulerService {
             if (lastUpdate.state != ExecutionState.FAILURE) {
                 throw new IncorrectProcessingException("ProcessingStep ${step.id} cannot be restarted as it is in state ${lastUpdate.state}")
             }
-            if(step.belongsToMultiJob() && resume3in1job) {
+            if (step.belongsToMultiJob() && resume3in1job) {
                 restartedStep = step
+                processService.setOperatorIsAwareOfFailure(step.process, false)
                 ProcessingStepUpdate resumed = new ProcessingStepUpdate(
                         date: new Date(),
                         state: ExecutionState.SUSPENDED,
@@ -695,6 +704,7 @@ class SchedulerService {
                 }
             } else {
                 // create restart event
+                processService.setOperatorIsAwareOfFailure(step.process, false)
                 ProcessingStepUpdate restart = new ProcessingStepUpdate(
                     date: new Date(),
                     state: ExecutionState.RESTARTED,
@@ -722,6 +732,7 @@ class SchedulerService {
                         throw new SchedulerPersistencyException("Could not update previous ProcessingStep of ProcessingStep ${step.id}")
                     }
                 }
+                processService.setOperatorIsAwareOfFailure(step.process, false)
                 ProcessingStepUpdate created = new ProcessingStepUpdate(state: ExecutionState.CREATED, date: new Date(), processingStep: restartedStep)
                 if (!created.save(flush: true)) {
                     throw new SchedulerPersistencyException("Could not save the first ProcessingStepUpdate for RestartedProcessingStep ${restartedStep.id}")
@@ -860,6 +871,7 @@ class SchedulerService {
             if (!step) {
                 throw new SchedulerPersistencyException("Could not save the ProcessingStep for Process ${process.id}")
             }
+            processService.setOperatorIsAwareOfFailure(step.process, false)
             ProcessingStepUpdate created = new ProcessingStepUpdate(state: ExecutionState.CREATED, date: new Date(), processingStep: step)
             if (!created.save(flush: true)) {
                 throw new SchedulerPersistencyException("Could not save the first ProcessingStep for Process ${process.id}")
@@ -868,6 +880,7 @@ class SchedulerService {
                 if (!created.save()) {
                     throw new SchedulerPersistencyException("Could not save ProcessingStepUpdate for Process ${process.id}")
                 }
+                processService.setOperatorIsAwareOfFailure(step.process, false)
                 ProcessingStepUpdate failure = new ProcessingStepUpdate(state: ExecutionState.FAILURE, date: new Date(), previous: created, processingStep: step)
                 ProcessingError error = new ProcessingError(errorMessage: "Failed to add constant input parameter ${failedConstantParameter.id} of type ${failedConstantParameter.type.name} to new processing step",
                         processingStepUpdate: failure)

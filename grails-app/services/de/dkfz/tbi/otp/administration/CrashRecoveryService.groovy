@@ -5,6 +5,7 @@ import de.dkfz.tbi.otp.job.processing.Parameter
 import de.dkfz.tbi.otp.job.processing.ParameterType
 import de.dkfz.tbi.otp.job.processing.ParameterUsage
 import de.dkfz.tbi.otp.job.processing.Process
+import de.dkfz.tbi.otp.job.processing.ProcessService
 import de.dkfz.tbi.otp.job.processing.ProcessingError
 import de.dkfz.tbi.otp.job.processing.ProcessingException
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
@@ -16,6 +17,8 @@ import org.springframework.security.access.prepost.PreAuthorize
 class CrashRecoveryService {
 
     SchedulerService schedulerService
+
+    ProcessService processService
 
     /**
      * @return Whether there is currently a crash recovery in process
@@ -161,6 +164,7 @@ class CrashRecoveryService {
      * @param state The ExecutionState for the update
      **/
     private ProcessingStepUpdate createNewProcessingStepUpdate(ProcessingStep step, ExecutionState state) {
+        processService.setOperatorIsAwareOfFailure(step.process, false)
         ProcessingStepUpdate update = new ProcessingStepUpdate(
             date: new Date(),
             state: state,

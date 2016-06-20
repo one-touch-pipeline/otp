@@ -11,6 +11,12 @@
         <div id="processInfoBox">
             <otp:autoRefresh/>
             <h1><g:message code="processes.process.title.listOfProcessingSteps" args="${ [id] }"/>  <g:link action="plan" id="${planId}"><g:message code="processes.process.title.workflow" args="${ [name] }"/></g:link></h1>
+            <g:if test="${hasError}">
+                <g:form name="operatorIsAwareOfFailureForm" controller="processes" action="updateOperatorIsAwareOfFailure">
+                    <g:message code="processes.process.operatorIsAwareOfFailure" /> <g:checkBox name="operatorIsAwareOfFailure" value="${operatorIsAwareOfFailure}" onChange="submit();"/>
+                    <g:hiddenField name="process.id" value="${id}"/>
+                </g:form>
+            </g:if>
             <g:if test="${parameter}">
                 <p><g:message code="processes.process.operatesOn"/>
                     <g:if test="parameter.controller">

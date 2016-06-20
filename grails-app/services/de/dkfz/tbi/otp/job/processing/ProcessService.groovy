@@ -332,6 +332,16 @@ class ProcessService {
         return plan
     }
 
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    public void setOperatorIsAwareOfFailureWithAuthentication(Process process, boolean operatorIsAwareOfFailure) {
+        setOperatorIsAwareOfFailure(process, operatorIsAwareOfFailure)
+    }
+
+    public void setOperatorIsAwareOfFailure(Process process, boolean operatorIsAwareOfFailure) {
+        process.operatorIsAwareOfFailure = operatorIsAwareOfFailure
+        process.save(flush: true)
+    }
+
     /**
      * Retrieves the stacktrace saved for the ProcessingError.
      * @param id The id of the ProcessingError

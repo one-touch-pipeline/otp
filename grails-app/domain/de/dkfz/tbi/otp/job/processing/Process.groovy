@@ -47,6 +47,8 @@ public class Process implements Serializable, Commentable, Entity {
      **/
     boolean finished = false
 
+    boolean operatorIsAwareOfFailure = false
+
     Comment comment
 
 
