@@ -185,7 +185,9 @@ class RoddyAlignmentStartJobTest {
 
         mwp.bamFileInProjectFolder = bamFile
 
-        assert bamFile == testRoddyAlignmentStartJob.findUsableBaseBamFile(bamFile.mergingWorkPackage)
+        // TODO OTP-2192: incremental merging is currently not supported by Roddy
+        //assert bamFile == testRoddyAlignmentStartJob.findUsableBaseBamFile(bamFile.mergingWorkPackage)
+        assert null == testRoddyAlignmentStartJob.findUsableBaseBamFile(bamFile.mergingWorkPackage)
     }
 
     @Test

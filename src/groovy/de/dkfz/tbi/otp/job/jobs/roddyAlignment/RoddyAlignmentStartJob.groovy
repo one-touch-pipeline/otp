@@ -109,6 +109,10 @@ abstract class RoddyAlignmentStartJob extends AbstractStartJobImpl {
      * </ul>
      */
     RoddyBamFile findUsableBaseBamFile(MergingWorkPackage mergingWorkPackage) {
+
+        // TODO OTP-2192: incremental merging is currently not supported by Roddy
+        return null
+
         assert mergingWorkPackage
         RoddyBamFile bamFile = findBamFileInProjectFolder(mergingWorkPackage)
         if (!bamFile || bamFile.withdrawn) {

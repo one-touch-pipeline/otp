@@ -108,11 +108,13 @@ abstract class PanCanAlignmentWorkflowTests extends AbstractPanCanAlignmentWorkf
         checkQC(bamFile)
     }
 
+    @Ignore('OTP-2192')
     @Test
     void testAlignBaseBamAndNewLanes_allFine() {
         alignBaseBamAndNewLanesHelper(false)
     }
 
+    @Ignore('OTP-2192')
     @Test
     void testAlignBaseBamAndNewLanes_allFine_oldStructure() {
         alignBaseBamAndNewLanesHelper(true)
