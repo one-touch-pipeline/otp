@@ -51,7 +51,7 @@ grails.project.dependency.resolution = {
         runtime "com.jcraft:jsch.agentproxy.connector-factory:0.0.9"
 
         // library for easy HTML editing
-        compile "org.jsoup:jsoup:1.8.3"
+        compile "org.jsoup:jsoup:1.9.2"
     }
 
     plugins {
