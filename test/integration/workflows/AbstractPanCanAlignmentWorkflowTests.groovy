@@ -153,7 +153,7 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
         firstBamFile = new File(baseTestDataDir, 'first-bam-file/first-bam-file_merged.mdup.bam')
         refGenDir = new File(baseTestDataDir, 'reference-genomes/bwa06_1KGRef')
         chromosomeNamesFile = new File(baseTestDataDir, 'reference-genomes/chromosome-names.txt')
-        projectConfigFile = new File(baseTestDataDir, 'project-config/projectTestAlignment.xml')
+        projectConfigFile = new File(baseTestDataDir, 'project-config/configPerSeqType/projectTestAlignment.xml')
         conveyProjectConfigFile = new File(baseTestDataDir, 'project-config/conveyProjectTestAlignment.xml')
         roddyFailsProjectConfig = new File(baseTestDataDir, 'project-config/roddy-fails-project-config.xml')
     }
@@ -211,12 +211,13 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
 
         String pluginVersion = getPluginVersion(projectConfigFile)
 
-        RoddyWorkflowConfig.build(
+        DomainFactory.createRoddyWorkflowConfig(
                 configFilePath: projectConfigFile.absolutePath,
                 pipeline: workPackage.pipeline,
                 pluginVersion: pluginVersion,
                 configVersion: DomainFactory.TEST_CONFIG_VERSION,
                 project: workPackage.project,
+                seqType: workPackage.seqType,
                 obsoleteDate: null
         )
         //ensure that expected identifier is available

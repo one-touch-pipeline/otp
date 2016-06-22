@@ -840,12 +840,14 @@ class DomainFactory {
 
     static RoddyWorkflowConfig createRoddyWorkflowConfig(Map properties = [:], boolean saveAndValidate = true) {
         Pipeline pipeline = properties.containsKey('pipeline') ? properties.pipeline : createPanCanPipeline()
+        SeqType seqType =  properties.containsKey('seqType') ? properties.seqType : createWholeGenomeSeqType()
         String pluginVersion = properties.containsKey('pluginVersion') ? properties.pluginVersion : "pluginVersion:1.1.${counter++}"
         String configVersion = properties.containsKey('configVersion') ? properties.configVersion : "v1_${counter++}"
 
         return createDomainObject(RoddyWorkflowConfig, [
                 pipeline: pipeline,
-                configFilePath: {"${TestCase.uniqueNonExistentPath}/${pipeline.name.name()}_${pluginVersion.substring(pluginVersion.indexOf(':') + 1)}_${configVersion}.xml"},
+                seqType: seqType,
+                configFilePath: {"${TestCase.uniqueNonExistentPath}/${pipeline.name.name()}_${seqType.roddyName}_${pluginVersion.substring(pluginVersion.indexOf(':') + 1)}_${configVersion}.xml"},
                 pluginVersion: pluginVersion,
                 configVersion: configVersion,
                 project: {createProject()},

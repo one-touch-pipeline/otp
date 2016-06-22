@@ -38,12 +38,12 @@ class ProjectOverviewService {
         try {
             switch (applicationContext.getBean(project.alignmentDeciderBeanName).class) {
                 case PanCanAlignmentDecider:
-                    RoddyWorkflowConfig workflowConfig = RoddyWorkflowConfig.getLatest(project, Pipeline.findByNameAndType(Pipeline.Name.PANCAN_ALIGNMENT, Pipeline.Type.ALIGNMENT))
-                    String nameInConfigFile = workflowConfig.getNameUsedInConfig()
-
                     List<ReferenceGenomeProjectSeqType> rgpst = ReferenceGenomeProjectSeqType.findAllByProjectAndDeprecatedDateIsNull(project)
                     Map<String, AlignmentInfo> result = [:]
                     rgpst*.seqType.unique().each { SeqType seqType ->
+                        RoddyWorkflowConfig workflowConfig = RoddyWorkflowConfig.getLatest(project, seqType, Pipeline.findByNameAndType(Pipeline.Name.PANCAN_ALIGNMENT, Pipeline.Type.ALIGNMENT))
+                        String nameInConfigFile = workflowConfig.getNameUsedInConfig()
+
                         ProcessOutput output = waitForCommand(
                                 executeRoddyCommandService.roddyGetRuntimeConfigCommand(workflowConfig, nameInConfigFile, seqType.roddyName)
                         )

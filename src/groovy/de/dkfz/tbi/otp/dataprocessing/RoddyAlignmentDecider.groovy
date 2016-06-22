@@ -49,8 +49,8 @@ abstract class RoddyAlignmentDecider extends AbstractAlignmentDecider {
     @Override
     public void ensureConfigurationIsComplete(SeqTrack seqTrack) {
         super.ensureConfigurationIsComplete(seqTrack)
-        if (RoddyWorkflowConfig.getLatest(seqTrack.project, pipeline) == null) {
-            throw new RuntimeException("RoddyWorkflowConfig is missing for ${seqTrack.project} ${pipeline}.")
+        if (RoddyWorkflowConfig.getLatest(seqTrack.project, seqTrack.seqType, pipeline) == null) {
+            throw new RuntimeException("RoddyWorkflowConfig is missing for ${seqTrack.project} ${seqTrack.seqType} ${pipeline}.")
         }
     }
 

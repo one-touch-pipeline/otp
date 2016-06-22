@@ -4,16 +4,17 @@ import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
-import grails.buildtestdata.mixin.*
 import grails.test.mixin.*
 import grails.test.mixin.web.*
 import org.junit.*
 
-/**
- */
 
-@TestFor(RoddyWorkflowConfig)
-@Build([Project, Pipeline])
+@Mock([
+        Project,
+        RoddyWorkflowConfig,
+        SeqType,
+        Pipeline,
+])
 @TestMixin(ControllerUnitTestMixin)
 public class RoddyWorkflowConfigUnitTests {
 
@@ -100,29 +101,30 @@ public class RoddyWorkflowConfigUnitTests {
 
         RoddyWorkflowConfig roddyWorkflowConfig2 = DomainFactory.createRoddyWorkflowConfig([
                 project: roddyWorkflowConfig1.project,
+                seqType: roddyWorkflowConfig1.seqType,
                 pipeline: roddyWorkflowConfig1.pipeline,
                 configFilePath: roddyWorkflowConfig1.configFilePath,
                 configVersion: DomainFactory.TEST_CONFIG_VERSION,
                 ], false)
 
          assert !roddyWorkflowConfig2.validate()
-
     }
 
     @Test
     void testGetNameUsedInConfig_withConfigVersion_shouldBeCorrect() {
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig()
-        String expected = "${roddyWorkflowConfig.pipeline.name}_${roddyWorkflowConfig.pluginVersion}_${roddyWorkflowConfig.configVersion}"
+        String expected = "${roddyWorkflowConfig.pipeline.name}_${roddyWorkflowConfig.seqType.roddyName}_${roddyWorkflowConfig.pluginVersion}_${roddyWorkflowConfig.configVersion}"
 
         assert expected == roddyWorkflowConfig.nameUsedInConfig
     }
 
     @Test
-    void testGetNameUsedInConfig_withoutConfigVersion_shouldBeCorrect() {
+    void testGetNameUsedInConfig_withoutConfigVersion_shouldThrowException() {
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig(configVersion: null)
-        String expected = "${roddyWorkflowConfig.pipeline.name}_${roddyWorkflowConfig.pluginVersion}"
 
-        assert expected == roddyWorkflowConfig.nameUsedInConfig
+        TestCase.shouldFailWithMessageContaining(AssertionError, 'Config version is not set') {
+            roddyWorkflowConfig.nameUsedInConfig
+        }
     }
 
 
@@ -136,7 +138,7 @@ public class RoddyWorkflowConfigUnitTests {
     }
 
     @Test
-    void tesValidateConfig_shouldFailForMissingFile() {
+    void testValidateConfig_shouldFailForMissingFile() {
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig()
 
         TestCase.shouldFailWithMessageContaining(AssertionError, 'not found.') {
@@ -145,7 +147,7 @@ public class RoddyWorkflowConfigUnitTests {
     }
 
     @Test
-    void tesValidateConfig_shouldFailForFileName() {
+    void testValidateConfig_shouldFailForFileName() {
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig()
         File file = new File(configDir, "${HelperUtils.uniqueString}.xml")
         roddyWorkflowConfig.configFilePath = file.path
@@ -157,7 +159,7 @@ public class RoddyWorkflowConfigUnitTests {
     }
 
     @Test
-    void tesValidateConfig_shouldFailForPluginVersionInName() {
+    void testValidateConfig_shouldFailForPluginVersionInName() {
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig()
         createXml(roddyWorkflowConfig, roddyWorkflowConfig.getNameUsedInConfig())
         roddyWorkflowConfig.pluginVersion = "plugin:invalid"
@@ -168,7 +170,7 @@ public class RoddyWorkflowConfigUnitTests {
     }
 
     @Test
-    void tesValidateConfig_shouldFailForLabelInFile() {
+    void testValidateConfig_shouldFailForLabelInFile() {
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig()
         createXml(roddyWorkflowConfig, 'label')
 

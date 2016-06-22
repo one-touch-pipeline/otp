@@ -322,6 +322,7 @@ chmod 0440 ${configFilePath}
 
         RoddyWorkflowConfig.importProjectConfigFile(
                 project,
+                null, //TODO OTP-2142 Update Roddy project XML template.
                 "${pluginName}:${pluginVersion}",
                 pipeline,
                 configFilePath.path,

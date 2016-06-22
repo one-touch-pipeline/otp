@@ -300,6 +300,7 @@ public class RoddyAlignmentDeciderTest {
         )
         DomainFactory.createRoddyWorkflowConfig(
                 project: seqTrack.project,
+                seqType: seqTrack.seqType,
                 pipeline: decider.pipeline,
         )
 
@@ -311,6 +312,7 @@ public class RoddyAlignmentDeciderTest {
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
         DomainFactory.createRoddyWorkflowConfig(
                 project: seqTrack.project,
+                seqType: seqTrack.seqType,
                 pipeline: decider.pipeline,
         )
 
