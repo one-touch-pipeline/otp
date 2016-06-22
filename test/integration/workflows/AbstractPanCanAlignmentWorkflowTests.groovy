@@ -1,25 +1,22 @@
 package workflows
 
-import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
-import de.dkfz.tbi.otp.utils.ProcessHelperService
-import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
-import grails.plugin.springsecurity.SpringSecurityUtils
-import org.codehaus.groovy.grails.web.json.JSONObject
-import org.junit.After
-import org.junit.Before
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
-import grails.converters.JSON
+import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.utils.logging.*
+import grails.converters.*
+import grails.plugin.springsecurity.*
+import org.codehaus.groovy.grails.web.json.*
+import org.joda.time.*
+import org.junit.*
+import org.junit.rules.*
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
-import de.dkfz.tbi.otp.utils.LinkFileUtils
-import org.joda.time.Duration
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+import static de.dkfz.tbi.otp.utils.ProcessHelperService.*
+
 
 // TODO: change owner of input files to otptest
 
@@ -136,11 +133,9 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
 
     @After
     void changeFilePermissionForRoddyFiles() {
-        String cmd = "${executeRoddyCommandService.executeCommandAsRoddyUser()} bashScripts/OtherUnixUser/changePermissionForWorkflowTestCleanup.sh ${getBaseDirectory()}"
-        LogThreadLocal.withThreadLog(System.out) {
-            ProcessHelperService.ProcessOutput processOutput = ProcessHelperService.waitForCommand(cmd)
-            assert processOutput.stderr.empty && processOutput.exitCode == 0
-        }
+        GString cmd = "find \'${getBaseDirectory().absolutePath}\' -user OtherUnixUser -not -type l -print -exec chmod 2770 '{}' \\;"
+        ProcessOutput processOutput = executionService.executeCommandReturnProcessOutput(realm, cmd, realm.roddyUser)
+        assert processOutput.isStderrEmptyAndExitCodeZero()
     }
 
     void setUpFilesVariables() {
@@ -547,7 +542,7 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
 
         // content of the bam file
         LogThreadLocal.withThreadLog(System.out) {
-            ProcessHelperService.ProcessOutput processOutput = ProcessHelperService.executeCommandAndAssertExistCodeAndReturnProcessOutput("zcat ${bamFile.finalBamFile} 1> /dev/null")
+            ProcessOutput processOutput = executeCommandAndAssertExistCodeAndReturnProcessOutput("zcat ${bamFile.finalBamFile} 1> /dev/null")
             assert processOutput.stderr.length() == 0: "Stderr is not null, but ${processOutput.stderr.toString()}"
             assert bamFile.finalBamFile.length() == bamFile.fileSize
         }
