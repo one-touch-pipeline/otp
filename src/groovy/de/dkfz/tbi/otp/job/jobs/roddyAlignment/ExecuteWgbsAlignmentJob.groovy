@@ -1,14 +1,12 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
-import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.job.processing.ExecutionService
-import de.dkfz.tbi.otp.ngsdata.DataFile
-import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
-import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeService
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.ProcessHelperService.ProcessOutput
-import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.*
+
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 
 class ExecuteWgbsAlignmentJob extends AbstractExecutePanCanJob {
@@ -20,6 +18,9 @@ class ExecuteWgbsAlignmentJob extends AbstractExecutePanCanJob {
     @Autowired
     ReferenceGenomeService referenceGenomeService
 
+    @Autowired
+    AdapterFileService adapterFileService
+
     final String HEADER = "Sample\tLibrary\tPID\tReadLayout\tRun\tMate\tSequenceFile\n"
 
 
@@ -29,11 +30,17 @@ class ExecuteWgbsAlignmentJob extends AbstractExecutePanCanJob {
         List<String> chromosomeNames = ReferenceGenomeEntry.findAllByReferenceGenomeAndClassificationInList(roddyBamFile.referenceGenome,
                 [ReferenceGenomeEntry.Classification.CHROMOSOME, ReferenceGenomeEntry.Classification.MITOCHONDRIAL])*.name
         assert chromosomeNames : "No chromosome names could be found for reference genome ${roddyBamFile.referenceGenome}"
-        return ",CHROMOSOME_INDICES:( ${chromosomeNames.join(' ')} )" +
-                (roddyBamFile.referenceGenome.cytosinePositionsIndex ?
-                        ",CYTOSINE_POSITIONS_INDEX:${referenceGenomeService.cytosinePositionIndexFilePath(roddyBamFile.project, roddyBamFile.referenceGenome).absolutePath}" :
-                        ""
-                )
+        GString chromosomeIndices = ",CHROMOSOME_INDICES:( ${chromosomeNames.join(' ')} )"
+        String cytosinePositionIndex = (roddyBamFile.referenceGenome.cytosinePositionsIndex ?
+                ",CYTOSINE_POSITIONS_INDEX:${referenceGenomeService.cytosinePositionIndexFilePath(roddyBamFile.project, roddyBamFile.referenceGenome).absolutePath}" :
+                ""
+        )
+        AdapterFile adapterFile = exactlyOneElement(roddyBamFile.seqTracks*.adapterFile.unique())
+        String clipIndex = (adapterFile ?
+                ",CLIP_INDEX:${adapterFileService.fullPath(adapterFile)}" :
+                ""
+        )
+        return chromosomeIndices + cytosinePositionIndex + clipIndex
     }
 
 

@@ -89,6 +89,24 @@ class ExecuteWgbsAlignmentJobTests {
                 executeWgbsAlignmentJob.prepareAndReturnWorkflowSpecificCValues(roddyBamFile)
     }
 
+    @Test
+    void testPrepareAndReturnWorkflowSpecificCValues_adapterFile() {
+        List<String> chromosomeNames = ["1", "2", "3", "4", "5", "M", "X", "Y"]
+        DomainFactory.createReferenceGenomeEntries(roddyBamFile.referenceGenome, chromosomeNames)
+
+        String adapterName = "test_adapter"
+        File file = new File(tmpDir.root, adapterName)
+        file.createNewFile()
+        DomainFactory.createProcessingOption(name: AdapterFileService.BASE_PATH_PROCESSING_OPTION_NAME, value: tmpDir.root)
+
+        AdapterFile adapterFile = DomainFactory.createAdapterFile(fileName: adapterName)
+        roddyBamFile.seqTracks.each { SeqTrack seqTrack ->
+            seqTrack.adapterFile = adapterFile
+            seqTrack.save(flush: true, failOnError: true)
+        }
+        assert ",CHROMOSOME_INDICES:( ${chromosomeNames.join(' ')} ),CLIP_INDEX:${file.absolutePath}" as String ==
+                executeWgbsAlignmentJob.prepareAndReturnWorkflowSpecificCValues(roddyBamFile)
+    }
 
     @Test
     void testPrepareAndReturnWorkflowSpecificParameter_InputBamIsNull_ShouldFail() {
