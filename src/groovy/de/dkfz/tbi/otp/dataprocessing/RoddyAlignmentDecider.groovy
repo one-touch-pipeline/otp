@@ -49,13 +49,13 @@ abstract class RoddyAlignmentDecider extends AbstractAlignmentDecider {
     @Override
     public void ensureConfigurationIsComplete(SeqTrack seqTrack) {
         super.ensureConfigurationIsComplete(seqTrack)
-        if (RoddyWorkflowConfig.getLatest(seqTrack.project, workflow) == null) {
-            throw new RuntimeException("RoddyWorkflowConfig is missing for ${seqTrack.project} ${workflow}.")
+        if (RoddyWorkflowConfig.getLatest(seqTrack.project, pipeline) == null) {
+            throw new RuntimeException("RoddyWorkflowConfig is missing for ${seqTrack.project} ${pipeline}.")
         }
     }
 
     @Override
-    boolean canWorkflowAlign(SeqTrack seqTrack) {
+    boolean canPipelineAlign(SeqTrack seqTrack) {
         return SeqType.createCriteria()({
             'in'("name", [SeqTypeNames.WHOLE_GENOME.seqTypeName, SeqTypeNames.EXOME.seqTypeName])
             eq("libraryLayout", SeqType.LIBRARYLAYOUT_PAIRED)

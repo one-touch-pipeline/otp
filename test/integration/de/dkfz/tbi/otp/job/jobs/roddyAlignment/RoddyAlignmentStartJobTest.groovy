@@ -193,7 +193,7 @@ class RoddyAlignmentStartJobTest {
     @Test
     void testCreateRoddyBamFile_WhenBaseBamFileIsNull() {
         MergingWorkPackage mwp = createMergingWorkPackage()
-        DomainFactory.createRoddyWorkflowConfig([workflow: mwp.workflow, project: mwp.project])
+        DomainFactory.createRoddyWorkflowConfig([pipeline: mwp.pipeline, project: mwp.project])
         DomainFactory.createSeqTrackWithDataFiles(mwp)
         Collection<SeqTrack> seqTracks = mwp.findMergeableSeqTracks()
         DomainFactory.createRoddyProcessingOptions(TestCase.uniqueNonExistentPath)
@@ -251,7 +251,7 @@ class RoddyAlignmentStartJobTest {
         MergingWorkPackage mwp = createMergingWorkPackage()
         DomainFactory.createSeqTrackWithDataFiles(mwp)
         Collection<SeqTrack> seqTracks = mwp.findMergeableSeqTracks()
-        DomainFactory.createRoddyWorkflowConfig([workflow: mwp.workflow, project: mwp.project])
+        DomainFactory.createRoddyWorkflowConfig([pipeline: mwp.pipeline, project: mwp.project])
 
         assert TestCase.shouldFail (AssertionError) {
             RoddyBamFile rbf = RoddyAlignmentStartJob.createRoddyBamFile(mwp, null)
@@ -277,7 +277,7 @@ class RoddyAlignmentStartJobTest {
     void testStartRoddyAlignment_WhenEverythingIsOkay_ShouldCreateProcess() {
         MergingWorkPackage mwp = createMergingWorkPackageWithRunFileStatus(RunSegment.FilesStatus.FILES_CORRECT)
         DomainFactory.createRoddyProcessingOptions(TestCase.uniqueNonExistentPath)
-        DomainFactory.createRoddyWorkflowConfig([workflow: mwp.workflow, project: mwp.project])
+        DomainFactory.createRoddyWorkflowConfig([pipeline: mwp.pipeline, project: mwp.project])
 
         withJobExecutionPlan {
             testRoddyAlignmentStartJob.startRoddyAlignment()
@@ -296,7 +296,7 @@ class RoddyAlignmentStartJobTest {
         OtrsTicket otrsTicket = DomainFactory.createOtrsTicket()
         DataFile.findAll()*.runSegment = DomainFactory.createRunSegment(otrsTicket: otrsTicket)
         DomainFactory.createRoddyProcessingOptions(TestCase.uniqueNonExistentPath)
-        DomainFactory.createRoddyWorkflowConfig([workflow: mwp.workflow, project: mwp.project])
+        DomainFactory.createRoddyWorkflowConfig([pipeline: mwp.pipeline, project: mwp.project])
 
         withJobExecutionPlan {
             testRoddyAlignmentStartJob.startRoddyAlignment()
@@ -310,7 +310,7 @@ class RoddyAlignmentStartJobTest {
     private void assertRoddyBamFileConsistencyWithMwp(RoddyBamFile rbf, MergingWorkPackage mwp) {
         assert mwp == rbf.workPackage
         assert RoddyBamFile.maxIdentifier(mwp) == rbf.identifier
-        assert mwp.workflow == rbf.config.workflow
+        assert mwp.pipeline == rbf.config.pipeline
         assert mwp.project == rbf.config.project
         assert null == rbf.config.obsoleteDate
     }
@@ -319,7 +319,7 @@ class RoddyAlignmentStartJobTest {
         return DomainFactory.createMergingWorkPackage([
                 seqType        : DomainFactory.createWholeGenomeSeqType(),
                 needsProcessing: true,
-                workflow       : DomainFactory.createPanCanWorkflow(),
+                pipeline       : DomainFactory.createPanCanPipeline(),
         ])
     }
 

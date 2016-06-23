@@ -34,7 +34,7 @@ public class AbstractAlignmentDeciderTest {
     private AbstractAlignmentDecider newDecider(Map methods = [:]) {
         AbstractAlignmentDecider decider = ([
                 prepareForAlignment: { MergingWorkPackage workPackage, SeqTrack seqTrack, boolean forceRealign -> },
-                getWorkflow: { return Workflow.findOrSaveByNameAndType(Workflow.Name.DEFAULT_OTP, Workflow.Type.ALIGNMENT) },
+                getPipeline: { return Pipeline.findOrSaveByNameAndType(Pipeline.Name.DEFAULT_OTP, Pipeline.Type.ALIGNMENT) },
         ] + methods) as AbstractAlignmentDecider
         decider.applicationContext = applicationContext
         decider.mailHelperService = applicationContext.mailHelperService
@@ -63,7 +63,7 @@ public class AbstractAlignmentDeciderTest {
     }
 
     @Test
-    void testDecideAndPrepareForAlignment_whenCanWorkflowAlignReturnsFalse_shouldReturnEmptyList() {
+    void testDecideAndPrepareForAlignment_whenCanPipelineAlignReturnsFalse_shouldReturnEmptyList() {
         SeqTrack st = buildSeqTrack()
         st.seqType = SeqType.build(name: "Invalid")
         st.save(failOnError: true)
@@ -81,7 +81,7 @@ public class AbstractAlignmentDeciderTest {
                 seqType: seqTrack.seqType,
                 seqPlatformGroup: seqTrack.seqPlatformGroup,
                 referenceGenome: ReferenceGenome.build(),
-                workflow: Workflow.findOrSaveByNameAndType(Workflow.Name.DEFAULT_OTP, Workflow.Type.ALIGNMENT),
+                pipeline: Pipeline.findOrSaveByNameAndType(Pipeline.Name.DEFAULT_OTP, Pipeline.Type.ALIGNMENT),
         )
         workPackage.save(failOnError: true)
 
@@ -91,7 +91,7 @@ public class AbstractAlignmentDeciderTest {
     }
 
     @Test
-    void testDecideAndPrepareForAlignment_whenWrongWorkflow_shouldThrowAssertionError() {
+    void testDecideAndPrepareForAlignment_whenWrongPipeline_shouldThrowAssertionError() {
         SeqTrack seqTrack = buildSeqTrack()
 
         MergingWorkPackage workPackage = new MergingWorkPackage(
@@ -99,7 +99,7 @@ public class AbstractAlignmentDeciderTest {
                 seqType: seqTrack.seqType,
                 seqPlatformGroup: seqTrack.seqPlatformGroup,
                 referenceGenome: exactlyOneElement(ReferenceGenome.list()),
-                workflow: Workflow.findOrSaveByNameAndType(Workflow.Name.PANCAN_ALIGNMENT, Workflow.Type.ALIGNMENT),
+                pipeline: Pipeline.findOrSaveByNameAndType(Pipeline.Name.PANCAN_ALIGNMENT, Pipeline.Type.ALIGNMENT),
                 statSizeFileName: DomainFactory.DEFAULT_TAB_FILE_NAME,
         )
         workPackage.save(failOnError: true)
@@ -120,7 +120,7 @@ public class AbstractAlignmentDeciderTest {
                 seqType: seqTrack.seqType,
                 seqPlatformGroup: SeqPlatformGroup.build(),
                 referenceGenome: exactlyOneElement(ReferenceGenome.list()),
-                workflow: Workflow.findOrSaveByNameAndType(Workflow.Name.DEFAULT_OTP, Workflow.Type.ALIGNMENT),
+                pipeline: Pipeline.findOrSaveByNameAndType(Pipeline.Name.DEFAULT_OTP, Pipeline.Type.ALIGNMENT),
         )
         workPackage.save(failOnError: true)
 
@@ -151,7 +151,7 @@ public class AbstractAlignmentDeciderTest {
                 seqPlatformGroup: seqTrack.seqPlatformGroup,
                 referenceGenome: exactlyOneElement(ReferenceGenome.list()),
                 libraryPreparationKit: LibraryPreparationKit.build(),
-                workflow: Workflow.findOrSaveByNameAndType(Workflow.Name.DEFAULT_OTP, Workflow.Type.ALIGNMENT),
+                pipeline: Pipeline.findOrSaveByNameAndType(Pipeline.Name.DEFAULT_OTP, Pipeline.Type.ALIGNMENT),
         )
         workPackage.save(failOnError: true)
 
@@ -177,7 +177,7 @@ public class AbstractAlignmentDeciderTest {
                 seqType: seqTrack.seqType,
                 seqPlatformGroup: seqTrack.seqPlatformGroup,
                 referenceGenome: exactlyOneElement(ReferenceGenome.list()),
-                workflow: Workflow.findOrSaveByNameAndType(Workflow.Name.DEFAULT_OTP, Workflow.Type.ALIGNMENT),
+                pipeline: Pipeline.findOrSaveByNameAndType(Pipeline.Name.DEFAULT_OTP, Pipeline.Type.ALIGNMENT),
         )
         workPackage.save(failOnError: true)
 
@@ -249,18 +249,18 @@ public class AbstractAlignmentDeciderTest {
 
 
     @Test
-    void testCanWorkflowAlign_whenEverythingIsOkay_shouldReturnTrue() {
+    void testCanPipelineAlign_whenEverythingIsOkay_shouldReturnTrue() {
         TestData testData = new TestData()
         testData.createObjects()
 
         SeqTrack seqTrack = testData.createSeqTrack()
         seqTrack.save(failOnError: true)
 
-        assert decider.canWorkflowAlign(seqTrack)
+        assert decider.canPipelineAlign(seqTrack)
     }
 
     @Test
-    void testCanWorkflowAlign_whenWrongSeqType_shouldReturnFalse() {
+    void testCanPipelineAlign_whenWrongSeqType_shouldReturnFalse() {
         TestData testData = new TestData()
         testData.createObjects()
 
@@ -273,7 +273,7 @@ public class AbstractAlignmentDeciderTest {
         SeqTrack seqTrack = testData.createSeqTrack(seqType: seqType)
         seqTrack.save(failOnError: true)
 
-        assert !decider.canWorkflowAlign(seqTrack)
+        assert !decider.canPipelineAlign(seqTrack)
     }
 
 

@@ -63,7 +63,7 @@
             </p>
         </div>
         <div class="otpDataTables">
-            <table id="laneOverviewId"  data-ignore-filter-columns="${hideSampleIdentifier ? 2 : 3}" data-workflow-size="${workflows.size()}">
+            <table id="laneOverviewId"  data-ignore-filter-columns="${hideSampleIdentifier ? 2 : 3}" data-workflow-size="${pipelines.size()}">
                 <thead>
                     <tr>
                         <th></th>
@@ -72,7 +72,7 @@
                             <th></th>
                         </g:if>
                         <g:each var="seqType" in="${seqTypes}">
-                            <th colspan="${workflows.size() + 1}">${seqType}</th>
+                            <th colspan="${pipelines.size() + 1}">${seqType}</th>
                         </g:each>
                     </tr>
                     <tr>
@@ -83,7 +83,7 @@
                         </g:if>
                         <g:each var="seqType" in="${seqTypes}">
                             <th><g:message code="projectOverview.index.registeredLanes"/></th>
-                            <g:each var="workflow" in="${workflows}">
+                            <g:each var="workflow" in="${pipelines}">
                                 <th>${raw(workflow.html)}<br><g:message code="projectOverview.index.lanesAndCoverage"/></th>
                             </g:each>
                         </g:each>

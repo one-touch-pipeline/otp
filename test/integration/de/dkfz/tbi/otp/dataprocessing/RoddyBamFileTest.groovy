@@ -38,16 +38,16 @@ class RoddyBamFileTest {
     }
 
     @Test
-    void testConstraints_notRoddyWorkflowName_shouldFail() {
+    void testConstraints_notRoddyPipelineName_shouldFail() {
         RoddyBamFile bamFile = DomainFactory.createRoddyBamFile()
-        bamFile.workPackage.workflow.name = Workflow.Name.DEFAULT_OTP
+        bamFile.workPackage.pipeline.name = Pipeline.Name.DEFAULT_OTP
         TestCase.assertValidateError(bamFile, 'workPackage', 'validator.invalid', bamFile.workPackage)
     }
 
     @Test
-    void testConstraints_workflowInConfigAndWorkPackageInconsistent_shouldFail() {
+    void testConstraints_pipelineInConfigAndWorkPackageInconsistent_shouldFail() {
         RoddyBamFile bamFile = DomainFactory.createRoddyBamFile()
-        bamFile.config.workflow = Workflow.build(name: Workflow.Name.DEFAULT_OTP)
+        bamFile.config.pipeline = Pipeline.build(name: Pipeline.Name.DEFAULT_OTP)
         TestCase.assertValidateError(bamFile, 'config', 'validator.invalid', bamFile.config)
     }
 

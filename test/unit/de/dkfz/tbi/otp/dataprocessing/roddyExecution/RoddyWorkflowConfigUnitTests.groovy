@@ -1,24 +1,19 @@
 package de.dkfz.tbi.otp.dataprocessing.roddyExecution
 
-import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.dataprocessing.Workflow
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.Project
-import de.dkfz.tbi.otp.utils.CreateFileHelper
-import de.dkfz.tbi.otp.utils.HelperUtils
-import grails.buildtestdata.mixin.Build
-import grails.test.mixin.TestFor
-import grails.test.mixin.TestMixin
-import grails.test.mixin.web.ControllerUnitTestMixin
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
+import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.*
+import grails.buildtestdata.mixin.*
+import grails.test.mixin.*
+import grails.test.mixin.web.*
+import org.junit.*
 
 /**
  */
 
 @TestFor(RoddyWorkflowConfig)
-@Build([Project, Workflow])
+@Build([Project, Pipeline])
 @TestMixin(ControllerUnitTestMixin)
 public class RoddyWorkflowConfigUnitTests {
 
@@ -45,9 +40,9 @@ public class RoddyWorkflowConfigUnitTests {
     @Test
     void testSaveRoddyWorkflowConfig_NoWorkflow_ShouldFail() {
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig()
-        roddyWorkflowConfig.workflow = null
+        roddyWorkflowConfig.pipeline = null
 
-        TestCase.assertValidateError(roddyWorkflowConfig, 'workflow', 'nullable', null)
+        TestCase.assertValidateError(roddyWorkflowConfig, 'pipeline', 'nullable', null)
     }
 
     @Test
@@ -105,7 +100,7 @@ public class RoddyWorkflowConfigUnitTests {
 
         RoddyWorkflowConfig roddyWorkflowConfig2 = DomainFactory.createRoddyWorkflowConfig([
                 project: roddyWorkflowConfig1.project,
-                workflow: roddyWorkflowConfig1.workflow,
+                pipeline: roddyWorkflowConfig1.pipeline,
                 configFilePath: roddyWorkflowConfig1.configFilePath,
                 configVersion: DomainFactory.TEST_CONFIG_VERSION,
                 ], false)
@@ -117,7 +112,7 @@ public class RoddyWorkflowConfigUnitTests {
     @Test
     void testGetNameUsedInConfig_withConfigVersion_shouldBeCorrect() {
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig()
-        String expected = "${roddyWorkflowConfig.workflow.name}_${roddyWorkflowConfig.pluginVersion}_${roddyWorkflowConfig.configVersion}"
+        String expected = "${roddyWorkflowConfig.pipeline.name}_${roddyWorkflowConfig.pluginVersion}_${roddyWorkflowConfig.configVersion}"
 
         assert expected == roddyWorkflowConfig.nameUsedInConfig
     }
@@ -125,7 +120,7 @@ public class RoddyWorkflowConfigUnitTests {
     @Test
     void testGetNameUsedInConfig_withoutConfigVersion_shouldBeCorrect() {
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig(configVersion: null)
-        String expected = "${roddyWorkflowConfig.workflow.name}_${roddyWorkflowConfig.pluginVersion}"
+        String expected = "${roddyWorkflowConfig.pipeline.name}_${roddyWorkflowConfig.pluginVersion}"
 
         assert expected == roddyWorkflowConfig.nameUsedInConfig
     }

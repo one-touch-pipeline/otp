@@ -1,30 +1,22 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.administration.GroupCommand
-import de.dkfz.tbi.otp.administration.GroupService
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
-import de.dkfz.tbi.otp.dataprocessing.Workflow
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
-import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.otp.utils.HelperUtils
-import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
-import grails.plugin.springsecurity.SpringSecurityUtils
-import org.springframework.security.access.prepost.PostAuthorize
-import org.springframework.security.access.prepost.PostFilter
-import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.security.acls.domain.BasePermission
-import org.springframework.security.acls.domain.GrantedAuthoritySid
-import org.springframework.security.acls.model.Sid
-import org.springframework.security.core.userdetails.UserDetails
-import de.dkfz.tbi.otp.security.Group
-import de.dkfz.tbi.otp.job.processing.ExecutionService
-import de.dkfz.tbi.otp.utils.WaitingFileUtils
+import de.dkfz.tbi.otp.administration.*
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.security.*
+import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.utils.logging.*
+import grails.plugin.springsecurity.*
+import org.springframework.security.access.prepost.*
+import org.springframework.security.acls.domain.*
+import org.springframework.security.acls.model.*
+import org.springframework.security.core.userdetails.*
 
-import java.nio.file.Files
-import java.nio.file.LinkOption
-import java.nio.file.attribute.PosixFileAttributes
+import java.nio.file.*
+import java.nio.file.attribute.*
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 /**
  * Service providing methods to access information about Projects.
@@ -236,9 +228,9 @@ AND ace.granting = true
         String pluginName = 'QualityControlWorkflows'
         assert OtpPath.isValidPathComponent(pluginVersion): "pluginVersion is invalid path component"
         assert OtpPath.isValidPathComponent(unixGroup): "unixGroup contains invalid characters"
-        Workflow workflow = CollectionUtils.exactlyOneElement(Workflow.findAllByTypeAndName(
-                Workflow.Type.ALIGNMENT,
-                Workflow.Name.PANCAN_ALIGNMENT,
+        Pipeline pipeline = CollectionUtils.exactlyOneElement(Pipeline.findAllByTypeAndName(
+                Pipeline.Type.ALIGNMENT,
+                Pipeline.Name.PANCAN_ALIGNMENT,
         ))
 
         SeqType seqType_wgp = SeqType.getWholeGenomePairedSeqType()
@@ -260,7 +252,7 @@ AND ace.granting = true
         String xmlConfig = """
 <configuration
         configurationType='project'
-        name='${Workflow.Name.PANCAN_ALIGNMENT.name()}_${pluginName}:${pluginVersion}_${configVersion}'
+        name='${Pipeline.Name.PANCAN_ALIGNMENT.name()}_${pluginName}:${pluginVersion}_${configVersion}'
         description='Align with BWA-MEM (${useConvey ? 'convey' : 'software'}) and mark duplicates with ${mergeTool}.' imports="otpPanCanAlignmentWorkflow-1.3 ">
     <subconfigurations>
 
@@ -295,9 +287,9 @@ AND ace.granting = true
         File configDirectory = LsdfFilesService.getPath(
                 projectDirectory.path,
                 'configFiles',
-                Workflow.Name.PANCAN_ALIGNMENT.name(),
+                Pipeline.Name.PANCAN_ALIGNMENT.name(),
         )
-        File configFilePath = new File(configDirectory, "${Workflow.Name.PANCAN_ALIGNMENT.name()}_${pluginVersion}_${configVersion}.xml")
+        File configFilePath = new File(configDirectory, "${Pipeline.Name.PANCAN_ALIGNMENT.name()}_${pluginVersion}_${configVersion}.xml")
         String md5 = HelperUtils.getRandomMd5sum()
 
         String createProjectDirectory = ''
@@ -331,7 +323,7 @@ chmod 0440 ${configFilePath}
         RoddyWorkflowConfig.importProjectConfigFile(
                 project,
                 "${pluginName}:${pluginVersion}",
-                workflow,
+                pipeline,
                 configFilePath.path,
                 configVersion,
         )

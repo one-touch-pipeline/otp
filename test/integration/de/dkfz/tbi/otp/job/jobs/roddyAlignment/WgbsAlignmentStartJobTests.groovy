@@ -17,7 +17,7 @@ class WgbsAlignmentStartJobTests {
         MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage([
                 seqType        : DomainFactory.createWholeGenomeBisulfiteSeqType(),
                 needsProcessing: true,
-                workflow       : DomainFactory.createPanCanWorkflow(),
+                pipeline       : DomainFactory.createPanCanPipeline(),
         ])
         RoddyBamFile bamFile = DomainFactory.createRoddyBamFile([
                 workPackage: mergingWorkPackage,

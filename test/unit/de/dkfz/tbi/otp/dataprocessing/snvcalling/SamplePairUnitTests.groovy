@@ -3,7 +3,6 @@ package de.dkfz.tbi.otp.dataprocessing.snvcalling
 import org.junit.Test
 
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
-import de.dkfz.tbi.otp.dataprocessing.Workflow
 import grails.buildtestdata.mixin.Build
 import grails.test.mixin.*
 import de.dkfz.tbi.otp.dataprocessing.OtpPath

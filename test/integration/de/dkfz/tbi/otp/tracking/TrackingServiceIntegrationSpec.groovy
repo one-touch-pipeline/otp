@@ -184,7 +184,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
                 DomainFactory.createRoddyBamFile([
                         workPackage: DomainFactory.createMergingWorkPackage(
                                 MergingWorkPackage.getMergingProperties(seqTrack) +
-                                        [workflow: DomainFactory.createPanCanWorkflow()]
+                                        [pipeline: DomainFactory.createPanCanPipeline()]
                         )
                 ]),
                 DomainFactory.randomProcessedBamFileProperties + [seqTracks: [seqTrack] as Set],

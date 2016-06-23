@@ -15,10 +15,10 @@ public class RoddyAlignmentDeciderTest {
     RoddyAlignmentDecider decider
 
     @Test
-    void testGetWorkflow() {
-        Workflow wf = decider.getWorkflow()
-        assert wf.name == Workflow.Name.PANCAN_ALIGNMENT
-        assert wf.type == Workflow.Type.ALIGNMENT
+    void testGetPipeline() {
+        Pipeline pipeline = decider.getPipeline()
+        assert pipeline.name == Pipeline.Name.PANCAN_ALIGNMENT
+        assert pipeline.type == Pipeline.Type.ALIGNMENT
     }
 
 
@@ -163,14 +163,14 @@ public class RoddyAlignmentDeciderTest {
     void testPrepareForAlignment_noBamFileFound_shouldSetNeedsProcessing() {
         SeqTrack seqTrack = SeqTrack.build()
 
-        Workflow workflow = decider.getWorkflow()
+        Pipeline pipeline = decider.getPipeline()
 
         MergingWorkPackage workPackage = TestData.createMergingWorkPackage(
                 sample: seqTrack.sample,
                 seqType: seqTrack.seqType,
                 seqPlatformGroup: seqTrack.seqPlatformGroup,
-                workflow: workflow,
-                statSizeFileName: workflow.name == Workflow.Name.PANCAN_ALIGNMENT ? DomainFactory.DEFAULT_TAB_FILE_NAME : null
+                pipeline: pipeline,
+                statSizeFileName: pipeline.name == Pipeline.Name.PANCAN_ALIGNMENT ? DomainFactory.DEFAULT_TAB_FILE_NAME : null
         )
         workPackage.save(failOnError: true)
 
@@ -300,7 +300,7 @@ public class RoddyAlignmentDeciderTest {
         )
         DomainFactory.createRoddyWorkflowConfig(
                 project: seqTrack.project,
-                workflow: decider.workflow,
+                pipeline: decider.pipeline,
         )
 
         decider.ensureConfigurationIsComplete(seqTrack)
@@ -311,7 +311,7 @@ public class RoddyAlignmentDeciderTest {
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
         DomainFactory.createRoddyWorkflowConfig(
                 project: seqTrack.project,
-                workflow: decider.workflow,
+                pipeline: decider.pipeline,
         )
 
         assert shouldFail {
@@ -341,7 +341,7 @@ public class RoddyAlignmentDeciderTest {
         SeqTrack seqTrack = testData.createSeqTrack()
         seqTrack.save(failOnError: true)
 
-        assert decider.canWorkflowAlign(seqTrack)
+        assert decider.canPipelineAlign(seqTrack)
     }
 
     @Test
@@ -358,7 +358,7 @@ public class RoddyAlignmentDeciderTest {
         SeqTrack seqTrack = testData.createSeqTrack(seqType: seqType)
         seqTrack.save(failOnError: true)
 
-        assert !decider.canWorkflowAlign(seqTrack)
+        assert !decider.canPipelineAlign(seqTrack)
     }
 
     @Test
@@ -375,6 +375,6 @@ public class RoddyAlignmentDeciderTest {
         SeqTrack seqTrack = testData.createSeqTrack(seqType: seqType)
         seqTrack.save(failOnError: true)
 
-        assert !decider.canWorkflowAlign(seqTrack)
+        assert !decider.canPipelineAlign(seqTrack)
     }
 }

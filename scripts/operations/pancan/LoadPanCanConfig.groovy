@@ -2,12 +2,9 @@
  * A script to load a the roddy pancan project config into the database.
  */
 
-import de.dkfz.tbi.otp.dataprocessing.Workflow
+import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.ngsdata.Project
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeProjectSeqType
-import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 
@@ -50,15 +47,15 @@ Project.withTransaction {
 
     Project project = CollectionUtils.exactlyOneElement(Project.findAllByName(projectName))
 
-    Workflow workflow = CollectionUtils.exactlyOneElement(Workflow.findAllByTypeAndName(
-            Workflow.Type.ALIGNMENT,
-            Workflow.Name.PANCAN_ALIGNMENT,
+    Pipeline pipeline = CollectionUtils.exactlyOneElement(Pipeline.findAllByTypeAndName(
+            Pipeline.Type.ALIGNMENT,
+            Pipeline.Name.PANCAN_ALIGNMENT,
     ))
 
     RoddyWorkflowConfig.importProjectConfigFile(
             project,
             pluginVersionToUse,
-            workflow,
+            pipeline,
             configFilePath,
             configVersion,
     )

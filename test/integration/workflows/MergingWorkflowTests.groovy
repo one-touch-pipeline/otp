@@ -4,20 +4,17 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QaProcessingStatus
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.CollectionUtils
-import grails.plugin.springsecurity.SpringSecurityUtils
-import grails.test.mixin.TestMixin
-import grails.test.mixin.integration.IntegrationTestMixin
-import org.joda.time.Duration
-import org.junit.Before
-import org.junit.Ignore
-import org.junit.Test
+import de.dkfz.tbi.otp.utils.*
+import grails.plugin.springsecurity.*
+import grails.test.mixin.*
+import grails.test.mixin.integration.*
+import org.joda.time.*
+import org.junit.*
 
-import static de.dkfz.tbi.otp.dataprocessing.Workflow.Name.DEFAULT_OTP
-import static de.dkfz.tbi.otp.ngsdata.Individual.Type.REAL
-import static de.dkfz.tbi.otp.ngsdata.SoftwareTool.Type.ALIGNMENT
-import static org.junit.Assert.assertEquals
-import static org.junit.Assert.assertNotNull
+import static de.dkfz.tbi.otp.dataprocessing.Pipeline.Name.*
+import static de.dkfz.tbi.otp.ngsdata.Individual.Type.*
+import static de.dkfz.tbi.otp.ngsdata.SoftwareTool.Type.*
+import static org.junit.Assert.*
 
 @Ignore
 @TestMixin(IntegrationTestMixin)
@@ -138,18 +135,18 @@ class MergingWorkflowTests extends WorkflowTestCase {
         )
         assert referenceGenome.save(flush: true)
 
-        Workflow workflow = new Workflow(
+        Pipeline pipeline = new Pipeline(
                 name: DEFAULT_OTP,
-                type: Workflow.Type.ALIGNMENT,
+                type: Pipeline.Type.ALIGNMENT,
         )
-        assert workflow.save(flush: true)
+        assert pipeline.save(flush: true)
 
         MergingWorkPackage mergingWorkPackage = new MergingWorkPackage(
                 sample: sample,
                 seqType: seqType,
                 seqPlatformGroup: seqPlatformGroup,
                 referenceGenome: referenceGenome,
-                workflow: workflow,
+                pipeline: pipeline,
                 needsProcessing: false,
         )
         assert mergingWorkPackage.save(flush: true)

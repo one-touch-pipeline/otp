@@ -157,8 +157,8 @@ abstract class AbstractBamFile implements Entity {
         return mergingWorkPackage.seqType
     }
 
-    Workflow getWorkflow() {
-        return mergingWorkPackage.workflow
+    Pipeline getPipeline() {
+        return mergingWorkPackage.pipeline
     }
 
     /**

@@ -71,8 +71,8 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
             }
         }
         baseBamFile nullable: true
-        workPackage validator: { val, obj -> val?.workflow?.name == Workflow.Name.PANCAN_ALIGNMENT }
-        config validator: { val, obj -> val?.workflow?.id == obj.workPackage?.workflow?.id }
+        workPackage validator: { val, obj -> val?.pipeline?.name == Pipeline.Name.PANCAN_ALIGNMENT }
+        config validator: { val, obj -> val?.pipeline?.id == obj.workPackage?.pipeline?.id }
         identifier unique: 'workPackage'
         roddyExecutionDirectoryNames nullable: true
         workDirectoryName nullable: true, unique: 'workPackage', validator: { it == null || OtpPath.isValidPathComponent(it) } //needs to be nullable for objects created before link structure was used
@@ -127,8 +127,8 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
         return errors
     }
 
-    Workflow getWorkflow() {
-        return workPackage.workflow
+    Pipeline getPipeline() {
+        return workPackage.pipeline
     }
 
     @Override
@@ -185,7 +185,7 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
     String toString() {
         String latest = isMostRecentBamFile() ? ' (latest)' : ''
         String withdrawn = withdrawn ? ' (withdrawn)' : ''
-        return "RBF ${id}: ${identifier}${latest}${withdrawn} ${mergingWorkPackage.toStringWithoutIdAndWorkflow()}"
+        return "RBF ${id}: ${identifier}${latest}${withdrawn} ${mergingWorkPackage.toStringWithoutIdAndPipeline()}"
     }
 
     // Example: blood_somePid_merged.mdup.bam

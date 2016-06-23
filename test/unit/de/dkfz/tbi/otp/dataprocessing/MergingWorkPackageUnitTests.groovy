@@ -207,7 +207,7 @@ class MergingWorkPackageUnitTests {
     void test_constraint_onStatSizeFileName_withCorrectNameForPanCan_ShouldBeValid() {
         MergingWorkPackage mergingWorkPackage = MergingWorkPackage.buildWithoutSave([
                 statSizeFileName: DomainFactory.DEFAULT_TAB_FILE_NAME,
-                workflow: DomainFactory.createPanCanWorkflow(),
+                pipeline        : DomainFactory.createPanCanPipeline(),
         ])
         assert mergingWorkPackage.validate()
     }
@@ -216,7 +216,7 @@ class MergingWorkPackageUnitTests {
     void test_constraint_onStatSizeFileName_withCorrectNameNoPanCan_ShouldBeInvalid() {
         MergingWorkPackage mergingWorkPackage = MergingWorkPackage.buildWithoutSave([
                 statSizeFileName: DomainFactory.DEFAULT_TAB_FILE_NAME,
-                workflow: DomainFactory.createDefaultOtpWorkflow(),
+                pipeline        : DomainFactory.createDefaultOtpPipeline(),
         ])
         TestCase.assertValidateError(mergingWorkPackage, 'statSizeFileName', 'validator.invalid', DomainFactory.DEFAULT_TAB_FILE_NAME)
     }
@@ -225,7 +225,7 @@ class MergingWorkPackageUnitTests {
     void test_constraint_onStatSizeFileName_withNullNoPanCan_ShouldBeValid() {
         MergingWorkPackage mergingWorkPackage = MergingWorkPackage.buildWithoutSave([
                 statSizeFileName: null,
-                workflow: DomainFactory.createDefaultOtpWorkflow(),
+                pipeline        : DomainFactory.createDefaultOtpPipeline(),
         ])
         assert mergingWorkPackage.validate()
     }
@@ -234,7 +234,7 @@ class MergingWorkPackageUnitTests {
     void test_constraint_onStatSizeFileName_withNullForPanCan_ShouldBeInvalid() {
         MergingWorkPackage mergingWorkPackage = MergingWorkPackage.buildWithoutSave([
                 statSizeFileName: null,
-                workflow: DomainFactory.createPanCanWorkflow(),
+                pipeline        : DomainFactory.createPanCanPipeline(),
         ])
         TestCase.assertValidateError(mergingWorkPackage, 'statSizeFileName', 'validator.invalid', null)
     }
@@ -249,14 +249,14 @@ class MergingWorkPackageUnitTests {
 
     @Test
     void test_constraint_onStatSizeFileName_WhenValidSpecialChar_ShouldBeValid() {
-        Workflow workflow = DomainFactory.createPanCanWorkflow()
+        Pipeline pipeline = DomainFactory.createPanCanPipeline()
 
         "-_.".each {
             try {
                 String name = "File${it}.tab"
                 MergingWorkPackage mergingWorkPackage = MergingWorkPackage.buildWithoutSave([
                         statSizeFileName: name,
-                        workflow: workflow,
+                        pipeline        : pipeline,
                 ])
                 mergingWorkPackage.validate()
                 assert 0 == mergingWorkPackage.errors.errorCount
@@ -268,14 +268,14 @@ class MergingWorkPackageUnitTests {
 
     @Test
     void test_constraint_onStatSizeFileName_WhenInvalidSpecialChar_ShouldBeInvalid() {
-        Workflow workflow = DomainFactory.createPanCanWorkflow()
+        Pipeline pipeline = DomainFactory.createPanCanPipeline()
 
         "\"',:;%\$§&<>|^§!?=äöüÄÖÜß´`".each {
             try {
                 String name = "File${it}.tab"
                 MergingWorkPackage mergingWorkPackage = MergingWorkPackage.buildWithoutSave([
                         statSizeFileName: name,
-                        workflow: workflow,
+                        pipeline        : pipeline,
                 ])
                 TestCase.assertAtLeastExpectedValidateError(mergingWorkPackage, 'statSizeFileName', 'matches.invalid', name)
             } catch (Throwable e) {

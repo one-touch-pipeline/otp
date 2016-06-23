@@ -71,9 +71,9 @@ class SamplePair implements Entity {
             if (val == obj.mergingWorkPackage1) {
                 errors.reject(null, "mergingWorkPackage1 and mergingWorkPackage2 are equal.")
             }
-            // For one sample pair the individual, the seqType and the workflow must be the same.
+            // For one sample pair the individual, the seqType and the pipeline must be the same.
             // To provide the possibility to create sample pairs manually other properties are ignored here.
-            ['individual', 'seqType', 'workflow'].each {
+            ['individual', 'seqType', 'pipeline'].each {
                 def mwp1Value = obj.mergingWorkPackage1."${it}"
                 def mwp2Value = val."${it}"
                 if (mwp1Value != mwp2Value && !(mwp1Value?.hasProperty('id') && mwp2Value?.hasProperty('id') && mwp1Value.id == mwp2Value.id)) {

@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.dataprocessing.Workflow
+import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import grails.converters.JSON
@@ -47,12 +47,12 @@ class ConfigureAlignmentController {
                 break
         }
         String workflowName = "QualityControlWorkflows"
-        Workflow workflow = CollectionUtils.exactlyOneElement(Workflow.findAllByTypeAndName(
-                Workflow.Type.ALIGNMENT,
-                Workflow.Name.PANCAN_ALIGNMENT,
+        Pipeline pipeline = CollectionUtils.exactlyOneElement(Pipeline.findAllByTypeAndName(
+                Pipeline.Type.ALIGNMENT,
+                Pipeline.Name.PANCAN_ALIGNMENT,
         ))
         String pluginVersion= "1.0.182"
-        String configVersion = CollectionUtils.atMostOneElement(RoddyWorkflowConfig.findAllByWorkflowAndPluginVersionAndProjectAndObsoleteDateIsNull(workflow, "${workflowName}:${pluginVersion}", project))?.configVersion
+        String configVersion = CollectionUtils.atMostOneElement(RoddyWorkflowConfig.findAllByWorkflowAndPluginVersionAndProjectAndObsoleteDateIsNull(pipeline, "${workflowName}:${pluginVersion}", project))?.configVersion
         if (configVersion) {
             Set<String> versions = configVersion.split("_")
             configVersion = versions[0] + "_" + (versions[1].toInteger() + 1)
@@ -63,7 +63,7 @@ class ConfigureAlignmentController {
         if (cmd.submit == "Submit") {
             hasErrors = cmd.hasErrors()
             boolean invalidConfigVersion = false
-            RoddyWorkflowConfig.findAllByWorkflowAndPluginVersionAndProject(workflow, "${workflowName}:${cmd.plugin}", project).each({
+            RoddyWorkflowConfig.findAllByPipelineAndPluginVersionAndProject(pipeline, "${workflowName}:${cmd.plugin}", project).each({
                 if (it.configVersion == cmd.config) {
                     invalidConfigVersion = true
                 }

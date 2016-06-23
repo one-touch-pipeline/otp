@@ -27,7 +27,7 @@ class AlignmentPass implements ProcessParameterObject, Entity {
         identifier(unique: 'seqTrack')
         seqTrack(validator: { SeqTrack seqTrack, AlignmentPass pass ->
             pass.workPackage?.satisfiesCriteria(seqTrack) })
-        workPackage(validator: {workPackage -> workPackage.workflow.name == Workflow.Name.DEFAULT_OTP})
+        workPackage(validator: {workPackage -> workPackage.pipeline.name == Pipeline.Name.DEFAULT_OTP})
     }
 
     /**

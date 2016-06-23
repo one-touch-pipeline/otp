@@ -21,7 +21,7 @@ class ProcessedMergedBamFile extends AbstractMergedBamFile implements ProcessPar
         mergingPass nullable: false, unique: true
         workPackage validator: { val, obj ->
             val.id == obj.mergingSet.mergingWorkPackage.id &&
-            val?.workflow?.name == Workflow.Name.DEFAULT_OTP
+            val?.pipeline?.name == Pipeline.Name.DEFAULT_OTP
         }
     }
 

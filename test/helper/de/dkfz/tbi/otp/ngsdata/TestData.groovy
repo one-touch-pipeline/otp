@@ -375,7 +375,7 @@ class TestData {
         final MergingWorkPackage workPackage = findOrSaveMergingWorkPackage(
                 seqTrack,
                 properties.get('referenceGenome'),
-                properties.get('workflow')
+                properties.get('pipeline')
         )
         final AlignmentPass alignmentPass = new AlignmentPass([
             identifier: AlignmentPass.nextIdentifier(seqTrack),
@@ -406,8 +406,8 @@ class TestData {
         ] + properties)
     }
 
-    static Workflow findOrSaveWorkflow() {
-        return Workflow.findOrCreateByNameAndType(Workflow.Name.DEFAULT_OTP, Workflow.Type.ALIGNMENT)
+    static Pipeline findOrSavePipeline() {
+        return Pipeline.findOrCreateByNameAndType(Pipeline.Name.DEFAULT_OTP, Pipeline.Type.ALIGNMENT)
                 .save(failOnError: true, flush: true)
     }
 
@@ -417,13 +417,13 @@ class TestData {
                 seqPlatformGroup: properties.get('seqPlatformGroup') ?: SeqPlatformGroup.build(),
                 referenceGenome: properties.get('referenceGenome') ?: findOrSaveReferenceGenome(),
                 libraryPreparationKit: properties.get('libraryPreparationKit'),
-                workflow: properties.get('workflow') ?: findOrSaveWorkflow(),
+                pipeline: properties.get('pipeline') ?: findOrSavePipeline(),
         ] + properties)
         return mergingWorkPackage
     }
 
-    static MergingWorkPackage findOrSaveMergingWorkPackage(SeqTrack seqTrack, ReferenceGenome referenceGenome = null, Workflow workflow = null) {
-        if (referenceGenome == null || workflow == null) {
+    static MergingWorkPackage findOrSaveMergingWorkPackage(SeqTrack seqTrack, ReferenceGenome referenceGenome = null, Pipeline pipeline = null) {
+        if (referenceGenome == null || pipeline == null) {
             MergingWorkPackage workPackage = MergingWorkPackage.findWhere(
                     sample: seqTrack.sample,
                     seqType: seqTrack.seqType,
@@ -441,7 +441,7 @@ class TestData {
                 seqPlatformGroup: seqTrack.seqPlatform.seqPlatformGroup,
                 referenceGenome: referenceGenome ?: findOrSaveReferenceGenome(),
                 libraryPreparationKit: seqTrack.libraryPreparationKit,
-                workflow: workflow ?: findOrSaveWorkflow(),
+                pipeline: pipeline ?: findOrSavePipeline(),
         )
         return mergingWorkPackage
     }

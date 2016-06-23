@@ -2,14 +2,14 @@
  * Script to create the pancan workflow object in the database. It is executed one time.
  */
 
-import de.dkfz.tbi.otp.dataprocessing.Workflow
+import de.dkfz.tbi.otp.dataprocessing.Pipeline
 
 
 
-Workflow.withTransaction {
-    Workflow workflow = new Workflow(
-            type: Workflow.Type.ALIGNMENT,
-            name: Workflow.Name.PANCAN_ALIGNMENT,
+Pipeline.withTransaction {
+    Pipeline pipeline = new Pipeline(
+            type: Pipeline.Type.ALIGNMENT,
+            name: Pipeline.Name.PANCAN_ALIGNMENT,
     )
-    assert workflow.save(flush: true, failOnError: true)
+    assert pipeline.save(flush: true, failOnError: true)
 }

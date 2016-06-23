@@ -132,10 +132,10 @@ abstract class RoddyAlignmentStartJob extends AbstractStartJobImpl {
         RoddyWorkflowConfig config = exactlyOneElement(
                 RoddyWorkflowConfig.findAllWhere(
                         project: mergingWorkPackage.project,
-                        workflow: mergingWorkPackage.workflow,
+                        pipeline: mergingWorkPackage.pipeline,
                         obsoleteDate: null,
                 ),
-                "Could not find one RoddyWorkflowConfig for ${mergingWorkPackage.project} and ${mergingWorkPackage.workflow}")
+                "Could not find one RoddyWorkflowConfig for ${mergingWorkPackage.project} and ${mergingWorkPackage.pipeline}")
 
         ProcessingOption roddyVersion = CollectionUtils.exactlyOneElement(
                 ProcessingOption.findAllByNameAndDateObsoleted("roddyVersion", null),

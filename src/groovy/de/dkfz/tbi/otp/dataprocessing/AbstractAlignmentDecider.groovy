@@ -19,15 +19,15 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
     @Autowired
     MailHelperService mailHelperService
 
-    Workflow getWorkflow() {
-        Workflow workflow = atMostOneElement(Workflow.findAllByNameAndType(workflowName, Workflow.Type.ALIGNMENT))
-        if(!workflow) {
-            workflow = new Workflow(
-                    name: workflowName,
-                    type: Workflow.Type.ALIGNMENT
+    Pipeline getPipeline() {
+        Pipeline pipeline = atMostOneElement(Pipeline.findAllByNameAndType(pipelineName(), Pipeline.Type.ALIGNMENT))
+        if(!pipeline) {
+            pipeline = new Pipeline(
+                    name: pipelineName(),
+                    type: Pipeline.Type.ALIGNMENT
             ).save(failOnError: true)
         }
-        return workflow
+        return pipeline
     }
 
     @Override
@@ -37,7 +37,7 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
             return Collections.emptyList()
         }
 
-        if (!canWorkflowAlign(seqTrack)) {
+        if (!canPipelineAlign(seqTrack)) {
             logNotAligning(seqTrack, "${this.getClass().simpleName} says it cannot do so")
             return Collections.emptyList()
         }
@@ -49,7 +49,7 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
                 seqTrack,
                 referenceGenomeProjectSeqType.referenceGenome,
                 referenceGenomeProjectSeqType.statSizeFileName,
-                workflow,
+                pipeline,
         )
 
         workPackages.each {
@@ -69,9 +69,9 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
     }
 
     Collection<MergingWorkPackage> findOrSaveWorkPackages(SeqTrack seqTrack,
-                                                                 ReferenceGenome referenceGenome,
-                                                                 String statSizeFileName,
-                                                                 Workflow workflow) {
+                                                          ReferenceGenome referenceGenome,
+                                                          String statSizeFileName,
+                                                          Pipeline pipeline) {
 
         // TODO OTP-1401: In the future there may be more than one MWP for the sample and seqType.
         MergingWorkPackage workPackage = atMostOneElement(
@@ -79,7 +79,7 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
         if (workPackage != null) {
             assert workPackage.referenceGenome.id == referenceGenome.id
             assert workPackage.statSizeFileName == statSizeFileName
-            assert workPackage.workflow.id == workflow.id
+            assert workPackage.pipeline.id == pipeline.id
             if (!workPackage.satisfiesCriteria(seqTrack)) {
                 logNotAligning(seqTrack, "it does not satisfy the criteria of the existing MergingWorkPackage ${workPackage}.")
                 List<String> body = []
@@ -100,7 +100,7 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
                     MergingWorkPackage.getMergingProperties(seqTrack) + [
                     referenceGenome: referenceGenome,
                     statSizeFileName: statSizeFileName,
-                    workflow: workflow,
+                    pipeline: pipeline,
             ]).save(failOnError: true)
             assert workPackage
         }
@@ -112,11 +112,11 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
         seqTrack.log("Not aligning{0}, because ${reason}.", saveInSeqTrack)
     }
 
-    boolean canWorkflowAlign(SeqTrack seqTrack) {
+    boolean canPipelineAlign(SeqTrack seqTrack) {
         return SeqTypeService.alignableSeqTypes()*.id.contains(seqTrack.seqType.id)
     }
 
     abstract void prepareForAlignment(MergingWorkPackage workPackage, SeqTrack seqTrack, boolean forceRealign)
 
-    abstract Workflow.Name getWorkflowName()
+    abstract Pipeline.Name pipelineName()
 }

@@ -107,7 +107,7 @@ testDataConfig {
             name = {'softwareToolIdentifier_' + (counter++)}
         }
         'de.dkfz.tbi.otp.dataprocessing.MergingSet' {
-            mergingWorkPackage = { MergingWorkPackage.build(workflow: DomainFactory.createDefaultOtpWorkflow()) }
+            mergingWorkPackage = { MergingWorkPackage.build(pipeline: DomainFactory.createDefaultOtpPipeline()) }
         }
         'de.dkfz.tbi.otp.dataprocessing.MergingSetAssignment' {
             //Ensure to use this subclass of AbstractBamFile
@@ -115,7 +115,7 @@ testDataConfig {
             bamFile = {ProcessedBamFile.build()}
         }
         'de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage' {
-            workflow = { DomainFactory.createDefaultOtpWorkflow() }
+            pipeline = { DomainFactory.createDefaultOtpPipeline() }
         }
         'de.dkfz.tbi.otp.ngsdata.MetaDataKey' {
             name = {'name_' + (counter++)}
@@ -141,7 +141,7 @@ testDataConfig {
         }
         'de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig' {
             configFilePath = { new File(TestCase.uniqueNonExistentPath, 'roddy-workflow-config').path }
-            workflow = { DomainFactory.createPanCanWorkflow() }
+            pipeline = { DomainFactory.createPanCanPipeline() }
         }
         'de.dkfz.tbi.otp.utils.ExternalScript' {
             filePath = { new File(TestCase.uniqueNonExistentPath, 'ExternalScript').path }

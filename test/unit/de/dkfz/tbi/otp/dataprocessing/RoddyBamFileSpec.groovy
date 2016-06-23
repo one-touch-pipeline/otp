@@ -28,7 +28,7 @@ import spock.lang.Unroll
         SoftwareTool,
         Realm,
         ReferenceGenome,
-        Workflow,
+        Pipeline,
 ])
 class RoddyBamFileSpec extends Specification {
 

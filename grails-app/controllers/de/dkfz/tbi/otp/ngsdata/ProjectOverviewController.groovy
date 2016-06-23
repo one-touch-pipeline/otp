@@ -59,7 +59,7 @@ class ProjectOverviewController {
             seqTypes: seqTypes,
             sampleTypes: sampleTypes,
             sampleType: sampleTypeName,
-            workflows: findWorkflows(),
+            pipelines: findPipelines(),
         ]
     }
 
@@ -184,7 +184,7 @@ class ProjectOverviewController {
         projectOverviewService.abstractMergedBamFilesInProjectFolder(project).each {
             assert it.numberOfMergedLanes != null
             InfoAboutOneSample informationOfSample = getDataForMockPidAndSampleTypeName(it.individual.mockPid, it.sampleType.name)
-            getOrPut(getOrPut(informationOfSample.bamFilesInProjectFolder, it.seqType.id, [:]), it.workflow.id, []).add(it)
+            getOrPut(getOrPut(informationOfSample.bamFilesInProjectFolder, it.seqType.id, [:]), it.pipeline.id, []).add(it)
         }
 
         if (!hideSampleIdentifier) {
@@ -207,9 +207,9 @@ class ProjectOverviewController {
 
                     Map<Long, Collection<AbstractMergedBamFile>> bamFilesPerWorkflow = informationOfSample.bamFilesInProjectFolder.get(seqType.id)
 
-                    findWorkflows().each { Workflow workflow ->
+                    findPipelines().each { Pipeline pipeline ->
                         String cell = ""
-                        bamFilesPerWorkflow?.get(workflow.id).each {
+                        bamFilesPerWorkflow?.get(pipeline.id).each {
                             String subCell = "${it.numberOfMergedLanes} | ${it.coverage ? String.format(Locale.ENGLISH, '%.2f', it.coverage) : "unknown"}"
                             if (it.withdrawn) {
                                 anythingWithdrawn = true
@@ -233,8 +233,8 @@ class ProjectOverviewController {
         render dataToRender as JSON
     }
 
-    private List<Workflow> findWorkflows() {
-        Workflow.findAllByType(Workflow.Type.ALIGNMENT, [sort: "id"])
+    private List<Pipeline> findPipelines() {
+        Pipeline.findAllByType(Pipeline.Type.ALIGNMENT, [sort: "id"])
     }
 
     JSON individualCountByProject(String projectName) {

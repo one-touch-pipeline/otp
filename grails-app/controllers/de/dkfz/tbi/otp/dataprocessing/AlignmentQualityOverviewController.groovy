@@ -174,18 +174,18 @@ class AlignmentQualityOverviewController {
                 //warning for duplicates
                 duplicateWarning: warningLevelForDuplicates(duplicates).styleClass,
 
-                //warning for Median PE_insertsize
+                    //warning for Median PE_insertsize
                 medianWarning: warningLevelForMedian(it.insertSizeMedian, readLength).styleClass,
 
-                //warning for properlyPpaired
+                    //warning for properlyPpaired
                 properlyPpairedWarning: warningLevelForProperlyPaired(properlyPaired).styleClass,
 
-                //warning for diff chrom
+                    //warning for diff chrom
                 diffChrWarning: warningLevelForDiffChrom(diffChr).styleClass,
 
                 plot: it.id,
                 withdrawn: abstractMergedBamFile.withdrawn,
-                workflow: abstractMergedBamFile.workPackage.workflow.html,
+                pipeline: abstractMergedBamFile.workPackage.pipeline.html,
                 kit: [name: kit*.name.join(", ") ?: "", shortName: kit*.shortDisplayName.join(", ") ?: "-"],
             ]
 

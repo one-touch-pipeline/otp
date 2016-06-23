@@ -8,12 +8,12 @@ import org.springframework.stereotype.Component
 class PanCanAlignmentDecider extends RoddyAlignmentDecider {
 
     @Override
-    Workflow.Name getWorkflowName() {
-        return Workflow.Name.PANCAN_ALIGNMENT
+    Pipeline.Name pipelineName() {
+        return Pipeline.Name.PANCAN_ALIGNMENT
     }
 
     @Override
     String alignmentMessage() {
-        return "will be aligned with the PanCan workflow"
+        return "will be aligned with the PanCan pipeline"
     }
 }

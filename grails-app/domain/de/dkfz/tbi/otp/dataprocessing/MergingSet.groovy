@@ -128,7 +128,7 @@ class MergingSet implements Entity {
 
     static constraints = {
         identifier(unique: 'mergingWorkPackage')
-        mergingWorkPackage(validator: {mergingWorkPackage -> mergingWorkPackage.workflow.name == Workflow.Name.DEFAULT_OTP})
+        mergingWorkPackage(validator: {mergingWorkPackage -> mergingWorkPackage.pipeline.name == Pipeline.Name.DEFAULT_OTP})
     }
 
     static mapping = {

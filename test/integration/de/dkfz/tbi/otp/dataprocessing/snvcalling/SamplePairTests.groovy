@@ -4,7 +4,6 @@ import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.ProcessingStatus
 import de.dkfz.tbi.otp.ngsdata.*
-import grails.test.mixin.gorm.Domain
 import grails.validation.*
 import org.junit.*
 
@@ -69,11 +68,11 @@ class SamplePairTests {
     void testConstraints_DifferentWorkflow_shouldFail() {
         SamplePair samplePair = DomainFactory.createSamplePair()
         MergingWorkPackage mergingWorkPackage1 = samplePair.mergingWorkPackage1
-        mergingWorkPackage1.workflow = DomainFactory.createPanCanWorkflow()
+        mergingWorkPackage1.pipeline = DomainFactory.createPanCanPipeline()
         mergingWorkPackage1.statSizeFileName = "statSizeFileName.tab"
         assert mergingWorkPackage1.save(flush: true)
 
-        TestCase.shouldFailWithMessageContaining(ValidationException, "workflow", { samplePair.save(flush: true) })
+        TestCase.shouldFailWithMessageContaining(ValidationException, "pipeline", { samplePair.save(flush: true) })
     }
 
     @Test

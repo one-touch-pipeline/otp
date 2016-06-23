@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing.roddyExecution
 
-import de.dkfz.tbi.otp.dataprocessing.Workflow
+import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.ngsdata.Individual
 import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.ngsdata.SeqType
@@ -19,7 +19,7 @@ public interface RoddyResult {
 
     public SeqType getSeqType()
 
-    public Workflow getWorkflow()
+    public Pipeline getPipeline()
 
     public RoddyWorkflowConfig getConfig()
 

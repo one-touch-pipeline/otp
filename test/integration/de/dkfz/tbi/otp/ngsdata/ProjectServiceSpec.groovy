@@ -1,20 +1,20 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.dataprocessing.Workflow
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
-import de.dkfz.tbi.otp.job.processing.ExecutionService
-import de.dkfz.tbi.otp.testing.UserAndRoles
-import de.dkfz.tbi.otp.utils.ProcessHelperService
-import de.dkfz.tbi.otp.utils.CollectionUtils
-import grails.plugin.springsecurity.SpringSecurityUtils
-import org.codehaus.groovy.grails.commons.GrailsApplication
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
-import grails.test.spock.IntegrationSpec
+import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.testing.*
+import de.dkfz.tbi.otp.utils.*
+import grails.plugin.springsecurity.*
+import grails.test.spock.*
+import grails.validation.*
+import org.codehaus.groovy.grails.commons.*
+import org.junit.*
+import org.junit.rules.*
+
 import java.nio.file.*
 import java.nio.file.attribute.*
-import grails.validation.ValidationException
 
 class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
 
@@ -44,7 +44,7 @@ class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
         DomainFactory.createReferenceGenome(name: 'testReferenceGenome2')
         DomainFactory.createWholeGenomeSeqType()
         DomainFactory.createExomeSeqType()
-        DomainFactory.createPanCanWorkflow()
+        DomainFactory.createPanCanPipeline()
         projectService.executionService = Stub(ExecutionService) {
             executeCommand(_, _) >> { Realm realm2, String command ->
                 File script = temporaryFolder.newFile('script'+ counter++ +'.sh')
@@ -284,9 +284,9 @@ class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
 
         then:
         project.alignmentDeciderBeanName == "panCanAlignmentDecider"
-        RoddyWorkflowConfig.findAllByProjectAndWorkflowInListAndPluginVersionAndObsoleteDateIsNull(
+        RoddyWorkflowConfig.findAllByProjectAndPipelineInListAndPluginVersionAndObsoleteDateIsNull(
                 project,
-                Workflow.findAllByTypeAndName(Workflow.Type.ALIGNMENT,Workflow.Name.PANCAN_ALIGNMENT,),
+                Pipeline.findAllByTypeAndName(Pipeline.Type.ALIGNMENT,Pipeline.Name.PANCAN_ALIGNMENT,),
                 "QualityControlWorkflows:1.0.182"
         ).size == 1
         File roddyWorkflowConfig = getRoddyWorkflowConfig(project)
@@ -317,9 +317,9 @@ class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
 
         then:
         project.alignmentDeciderBeanName == "panCanAlignmentDecider"
-        Set<RoddyWorkflowConfig> roddyWorkflowConfigs = RoddyWorkflowConfig.findAllByProjectAndWorkflowInListAndPluginVersion(
+        Set<RoddyWorkflowConfig> roddyWorkflowConfigs = RoddyWorkflowConfig.findAllByProjectAndPipelineInListAndPluginVersion(
                 project,
-                Workflow.findAllByTypeAndName(Workflow.Type.ALIGNMENT,Workflow.Name.PANCAN_ALIGNMENT,),
+                Pipeline.findAllByTypeAndName(Pipeline.Type.ALIGNMENT,Pipeline.Name.PANCAN_ALIGNMENT,),
                 "QualityControlWorkflows:1.0.182"
         )
         roddyWorkflowConfigs.size() == 2
@@ -501,9 +501,9 @@ class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
 
         then:
         project.alignmentDeciderBeanName == "panCanAlignmentDecider"
-        RoddyWorkflowConfig.findAllByProjectAndWorkflowInListAndPluginVersionAndObsoleteDateIsNull(
+        RoddyWorkflowConfig.findAllByProjectAndPipelineInListAndPluginVersionAndObsoleteDateIsNull(
                 project,
-                Workflow.findAllByTypeAndName(Workflow.Type.ALIGNMENT,Workflow.Name.PANCAN_ALIGNMENT,),
+                Pipeline.findAllByTypeAndName(Pipeline.Type.ALIGNMENT,Pipeline.Name.PANCAN_ALIGNMENT,),
                 "QualityControlWorkflows:1.0.182"
         ).size == 1
         statFile.exists()
@@ -542,8 +542,8 @@ class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
                         project.dirName,
                 ).path,
                 'configFiles',
-                Workflow.Name.PANCAN_ALIGNMENT.name(),
+                Pipeline.Name.PANCAN_ALIGNMENT.name(),
         )
-        return new File(configDirectory, "${Workflow.Name.PANCAN_ALIGNMENT.name()}_1.0.182_v1_0.xml")
+        return new File(configDirectory, "${Pipeline.Name.PANCAN_ALIGNMENT.name()}_1.0.182_v1_0.xml")
     }
 }

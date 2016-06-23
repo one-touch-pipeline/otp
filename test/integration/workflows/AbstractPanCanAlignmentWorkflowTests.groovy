@@ -164,9 +164,9 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
         DomainFactory.createAlignableSeqTypes()
         SeqType seqType = findSeqType()
 
-        Workflow workflow = Workflow.build(
-                name: Workflow.Name.PANCAN_ALIGNMENT,
-                type: Workflow.Type.ALIGNMENT,
+        Pipeline pipeline = Pipeline.build(
+                name: Pipeline.Name.PANCAN_ALIGNMENT,
+                type: Pipeline.Type.ALIGNMENT,
         )
 
         ReferenceGenome referenceGenome = ReferenceGenome.build(
@@ -189,7 +189,7 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
         assert kit.save(flush: true, failOnError: true)
 
         MergingWorkPackage workPackage = MergingWorkPackage.build(
-                workflow: workflow,
+                pipeline: pipeline,
                 seqType: seqType,
                 referenceGenome: referenceGenome,
                 needsProcessing: false,
@@ -218,14 +218,14 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
 
         RoddyWorkflowConfig.build(
                 configFilePath: configFile.absolutePath,
-                workflow: workPackage.workflow,
+                pipeline: workPackage.pipeline,
                 pluginVersion: pluginVersion,
                 configVersion: DomainFactory.TEST_CONFIG_VERSION,
                 project: workPackage.project,
                 obsoleteDate: null
         )
         //ensure that expected identifier is available
-        assert configFile.text.contains("${workPackage.workflow.name}_${pluginVersion}_${DomainFactory.TEST_CONFIG_VERSION}")
+        assert configFile.text.contains("${workPackage.pipeline.name}_${pluginVersion}_${DomainFactory.TEST_CONFIG_VERSION}")
     }
 
     SeqTrack createSeqTrack(String readGroupNum) {
@@ -607,7 +607,7 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
     String getPluginVersion(File projectConfig) {
         def configuration = new XmlParser().parseText(projectConfig.text)
         String nameValue = configuration.@name
-        return nameValue.replaceAll("${Workflow.Name.PANCAN_ALIGNMENT}_", "").replaceAll("_${DomainFactory.TEST_CONFIG_VERSION}", '')
+        return nameValue.replaceAll("${Pipeline.Name.PANCAN_ALIGNMENT}_", "").replaceAll("_${DomainFactory.TEST_CONFIG_VERSION}", '')
     }
 
     void setPluginVersion(String pluginVersion) {

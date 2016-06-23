@@ -3,7 +3,6 @@ package de.dkfz.tbi.otp.ngsdata
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.utils.CreateFileHelper
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
@@ -23,7 +22,7 @@ class ReferenceGenomeServiceTests {
     private MergingWorkPackage createDataForChromosomeStatSizeFile()  {
         MergingWorkPackage mergingWorkPackage = MergingWorkPackage.build (
                 statSizeFileName: DomainFactory.DEFAULT_TAB_FILE_NAME,
-                workflow: DomainFactory.createPanCanWorkflow(),
+                pipeline: DomainFactory.createPanCanPipeline(),
         )
         Realm realm = Realm.build([
                 operationType: Realm.OperationType.DATA_PROCESSING,
@@ -70,7 +69,7 @@ class ReferenceGenomeServiceTests {
     @Test
     void testChromosomeStatSizeFile_NoStatSizeFileIsDefined_ShouldFail() {
         MergingWorkPackage mergingWorkPackage = createDataForChromosomeStatSizeFile()
-        mergingWorkPackage.workflow = DomainFactory.createDefaultOtpWorkflow()
+        mergingWorkPackage.pipeline = DomainFactory.createDefaultOtpPipeline()
         mergingWorkPackage.statSizeFileName = null
         mergingWorkPackage.save(flush: true)
         assert TestCase.shouldFail(AssertionError) {

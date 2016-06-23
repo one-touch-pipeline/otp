@@ -1,32 +1,17 @@
 package workflows
 
-import de.dkfz.tbi.otp.InformationReliability
-import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
-import de.dkfz.tbi.otp.dataprocessing.AlignmentPass
-import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
-import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
-import de.dkfz.tbi.otp.dataprocessing.ProcessedBamFile
-import de.dkfz.tbi.otp.dataprocessing.ProcessedBamFileService
-import de.dkfz.tbi.otp.dataprocessing.ProcessedSaiFile
-import de.dkfz.tbi.otp.dataprocessing.ProcessedSaiFileService
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
-import de.dkfz.tbi.otp.dataprocessing.Workflow
-import de.dkfz.tbi.otp.job.jobs.alignment.ConveyBwaAlignmentJob
+import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.job.jobs.alignment.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsqc.*
-import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.otp.utils.LinkFileUtils
-import de.dkfz.tbi.otp.utils.ProcessHelperService
-import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
-import grails.plugin.springsecurity.SpringSecurityUtils
-import org.joda.time.Duration
-import org.junit.Before
-import org.junit.Ignore
-import org.junit.Test
+import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.utils.logging.*
+import grails.plugin.springsecurity.*
+import org.joda.time.*
+import org.junit.*
 
-import static de.dkfz.tbi.otp.job.processing.PbsOptionMergingService.getPBS_PREFIX
-import static de.dkfz.tbi.otp.ngsdata.SeqTypeNames.WHOLE_GENOME
-
+import static de.dkfz.tbi.otp.job.processing.PbsOptionMergingService.*
+import static de.dkfz.tbi.otp.ngsdata.SeqTypeNames.*
 
 @Ignore
 class ConveyBwaAlignmentWorkflowTests extends WorkflowTestCase {
@@ -168,9 +153,9 @@ class ConveyBwaAlignmentWorkflowTests extends WorkflowTestCase {
     MergingWorkPackage createWorkPackage(SeqPlatformGroup seqPlatformGroup) {
         SeqType seqType = findSeqType()
 
-        Workflow workflow = Workflow.build(
-                name: Workflow.Name.DEFAULT_OTP,
-                type: Workflow.Type.ALIGNMENT,
+        Pipeline pipeline = Pipeline.build(
+                name: Pipeline.Name.DEFAULT_OTP,
+                type: Pipeline.Type.ALIGNMENT,
         )
 
         ReferenceGenome referenceGenome = ReferenceGenome.build(
@@ -184,7 +169,7 @@ class ConveyBwaAlignmentWorkflowTests extends WorkflowTestCase {
         assert kit.save(flush: true, failOnError: true)
 
         MergingWorkPackage workPackage = MergingWorkPackage.build(
-                workflow: workflow,
+                pipeline: pipeline,
                 seqType: seqType,
                 referenceGenome: referenceGenome,
                 needsProcessing: false,

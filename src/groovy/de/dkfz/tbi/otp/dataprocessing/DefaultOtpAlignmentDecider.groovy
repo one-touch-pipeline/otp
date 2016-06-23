@@ -13,8 +13,8 @@ import org.springframework.stereotype.Component
 class DefaultOtpAlignmentDecider extends AbstractAlignmentDecider {
 
     @Override
-    Workflow.Name getWorkflowName() {
-        return Workflow.Name.DEFAULT_OTP
+    Pipeline.Name pipelineName() {
+        return Pipeline.Name.DEFAULT_OTP
     }
 
     @Override

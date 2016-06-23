@@ -1,17 +1,16 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
-import de.dkfz.tbi.otp.job.processing.ExecutionService
-import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
-import groovy.transform.Immutable
-import org.springframework.beans.factory.NoSuchBeanDefinitionException
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.ApplicationContext
-import org.springframework.security.access.prepost.PreAuthorize
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.utils.*
+import groovy.transform.*
+import org.springframework.beans.factory.*
+import org.springframework.beans.factory.annotation.*
+import org.springframework.context.*
+import org.springframework.security.access.prepost.*
 
 import static de.dkfz.tbi.otp.utils.ProcessHelperService.*
-
 
 class ProjectOverviewService {
     ExecutionService executionService
@@ -39,7 +38,7 @@ class ProjectOverviewService {
         try {
             switch (applicationContext.getBean(project.alignmentDeciderBeanName).class) {
                 case PanCanAlignmentDecider:
-                    RoddyWorkflowConfig workflowConfig = RoddyWorkflowConfig.getLatest(project, Workflow.findByNameAndType(Workflow.Name.PANCAN_ALIGNMENT, Workflow.Type.ALIGNMENT))
+                    RoddyWorkflowConfig workflowConfig = RoddyWorkflowConfig.getLatest(project, Pipeline.findByNameAndType(Pipeline.Name.PANCAN_ALIGNMENT, Pipeline.Type.ALIGNMENT))
                     String nameInConfigFile = workflowConfig.getNameUsedInConfig()
 
                     List<ReferenceGenomeProjectSeqType> rgpst = ReferenceGenomeProjectSeqType.findAllByProjectAndDeprecatedDateIsNull(project)

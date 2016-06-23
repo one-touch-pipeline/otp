@@ -58,10 +58,10 @@ class MergingWorkPackage implements Entity {
     LibraryPreparationKit libraryPreparationKit
 
     // Processing parameters, part of merging criteria
-    static final Collection<String> processingParameterNames = ['referenceGenome', 'statSizeFileName', 'workflow'].asImmutable()
+    static final Collection<String> processingParameterNames = ['referenceGenome', 'statSizeFileName', 'pipeline'].asImmutable()
     ReferenceGenome referenceGenome
     String statSizeFileName
-    Workflow workflow
+    Pipeline pipeline
 
     boolean needsProcessing
 
@@ -72,8 +72,8 @@ class MergingWorkPackage implements Entity {
         // As soon a you loosen this constraint, un-ignore:
         // - AlignmentPassUnitTests.testIsLatestPass_2PassesDifferentWorkPackages
         sample unique: 'seqType'
-        needsProcessing(validator: {val, obj -> !val || obj.workflow.name == Workflow.Name.PANCAN_ALIGNMENT})
-        workflow(validator: {workflow -> workflow.type == Workflow.Type.ALIGNMENT})
+        needsProcessing(validator: {val, obj -> !val || obj.pipeline.name == Pipeline.Name.PANCAN_ALIGNMENT})
+        pipeline(validator: { pipeline -> pipeline.type == Pipeline.Type.ALIGNMENT})
         libraryPreparationKit nullable: true, validator: {val, obj ->
             SeqTypeNames seqTypeName = obj.seqType?.seqTypeName
             if (seqTypeName == SeqTypeNames.EXOME) {
@@ -85,12 +85,12 @@ class MergingWorkPackage implements Entity {
             }
         }
         statSizeFileName nullable: true, blank: false, matches: ReferenceGenomeProjectSeqType.TAB_FILE_PATTERN, validator : { val, obj ->
-            if (obj.workflow?.name == Workflow.Name.PANCAN_ALIGNMENT) {
+            if (obj.pipeline?.name == Pipeline.Name.PANCAN_ALIGNMENT) {
                 val != null && OtpPath.isValidPathComponent(val)
-            } else if (obj.workflow?.name == Workflow.Name.DEFAULT_OTP) {
+            } else if (obj.pipeline?.name == Pipeline.Name.DEFAULT_OTP) {
                 val == null
             } else {
-                assert false: "Workflow name is unknown: ${obj.workflow?.name}"
+                assert false: "Pipeline name is unknown: ${obj.pipeline?.name}"
             }
         }
         bamFileInProjectFolder nullable: true, validator: { AbstractMergedBamFile val, MergingWorkPackage obj ->
@@ -197,12 +197,12 @@ class MergingWorkPackage implements Entity {
         bamFileInProjectFolder index: "merging_work_package_bam_file_in_project_folder_idx"
     }
 
-    String toStringWithoutIdAndWorkflow() {
+    String toStringWithoutIdAndPipeline() {
         return "${sample} ${seqType} ${libraryPreparationKit ?: ''} ${seqPlatformGroup} ${referenceGenome}"
     }
 
     @Override
     String toString() {
-        return "MWP ${id}: ${toStringWithoutIdAndWorkflow()} ${workflow.name}"
+        return "MWP ${id}: ${toStringWithoutIdAndPipeline()} ${pipeline.name}"
     }
 }

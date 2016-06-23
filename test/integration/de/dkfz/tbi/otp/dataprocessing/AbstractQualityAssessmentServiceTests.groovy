@@ -106,7 +106,7 @@ class AbstractQualityAssessmentServiceTests {
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile(
                 workPackage: DomainFactory.createMergingWorkPackage(
                         seqType: seqType,
-                        workflow: DomainFactory.createPanCanWorkflow(),
+                        pipeline: DomainFactory.createPanCanPipeline(),
                 )
         )
         DomainFactory.createRealmDataManagement(temporaryFolder.newFolder(), [name: roddyBamFile.project.realmName])

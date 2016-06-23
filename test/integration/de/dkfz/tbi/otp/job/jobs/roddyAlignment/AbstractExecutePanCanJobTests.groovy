@@ -141,7 +141,7 @@ class AbstractExecutePanCanJobTests {
 
         String expectedCmd =  """\
 cd /tmp \
-&& sudo -u OtherUnixUser ${roddyCommand} rerun ${roddyBamFile.workflow.name}_${roddyBamFile.config.pluginVersion}_${roddyBamFile.config.configVersion}.config@WGS \
+&& sudo -u OtherUnixUser ${roddyCommand} rerun ${roddyBamFile.pipeline.name}_${roddyBamFile.config.pluginVersion}_${roddyBamFile.config.configVersion}.config@WGS \
 ${roddyBamFile.individual.pid} \
 --useconfig=${roddyApplicationIni} \
 --usefeaturetoggleconfig=${featureTogglesConfigPath} \

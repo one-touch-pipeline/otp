@@ -138,26 +138,26 @@ class DomainFactory {
         ], realmProperties)
     }
 
-    static Workflow createPanCanWorkflow() {
-        return createDomainObjectLazy(Workflow, [:], [
-                name: Workflow.Name.PANCAN_ALIGNMENT,
-                type: Workflow.Type.ALIGNMENT,
+    static Pipeline createPanCanPipeline() {
+        return createDomainObjectLazy(Pipeline, [:], [
+                name: Pipeline.Name.PANCAN_ALIGNMENT,
+                type: Pipeline.Type.ALIGNMENT,
         ])
     }
 
-    static Workflow createDefaultOtpWorkflow() {
-        return createDomainObjectLazy(Workflow, [:], [
-                name: Workflow.Name.DEFAULT_OTP,
-                type: Workflow.Type.ALIGNMENT,
+    static Pipeline createDefaultOtpPipeline() {
+        return createDomainObjectLazy(Pipeline, [:], [
+                name: Pipeline.Name.DEFAULT_OTP,
+                type: Pipeline.Type.ALIGNMENT,
         ])
     }
 
-    static Workflow returnOrCreateAnyWorkflow() {
-        return (CollectionUtils.atMostOneElement(Workflow.list(max: 1)) ?: createPanCanWorkflow())
+    static Pipeline returnOrCreateAnyPipeline() {
+        return (CollectionUtils.atMostOneElement(Pipeline.list(max: 1)) ?: createPanCanPipeline())
     }
 
     public static MergingSet createMergingSet(Map properties = [:]) {
-        return createMergingSet(createMergingWorkPackage(workflow: createDefaultOtpWorkflow()), properties)
+        return createMergingSet(createMergingWorkPackage(pipeline: createDefaultOtpPipeline()), properties)
     }
 
     public static MergingSet createMergingSet(final MergingWorkPackage mergingWorkPackage, Map properties = [:]) {
@@ -368,9 +368,9 @@ class DomainFactory {
         MergingWorkPackage workPackage = bamFileProperties.workPackage
         if (!workPackage) {
             SeqType seqType = createWholeGenomeSeqType()
-            Workflow workflow = createPanCanWorkflow()
+            Pipeline pipeline = createPanCanPipeline()
             workPackage = createMergingWorkPackage(
-                    workflow: workflow,
+                    pipeline: pipeline,
                     seqType: seqType,
             )
             createReferenceGenomeProjectSeqType(
@@ -388,7 +388,7 @@ class DomainFactory {
                 workPackage: workPackage,
                 identifier: RoddyBamFile.nextIdentifier(workPackage),
                 config: createRoddyWorkflowConfig(
-                        workflow: workPackage.workflow,
+                        pipeline: workPackage.pipeline,
                         project: workPackage.project,
                 ),
                 md5sum: HelperUtils.randomMd5sum,
@@ -402,7 +402,7 @@ class DomainFactory {
     public static createRoddyBamFile(RoddyBamFile baseBamFile, Map bamFileProperties = [:]) {
         RoddyBamFile bamFile = RoddyBamFile.build([
                 baseBamFile: baseBamFile,
-                config: bamFileProperties.config ?: createRoddyWorkflowConfig(workflow: baseBamFile.config.workflow),
+                config: bamFileProperties.config ?: createRoddyWorkflowConfig(pipeline: baseBamFile.config.pipeline),
                 workPackage: baseBamFile.workPackage,
                 identifier: baseBamFile.identifier + 1,
                 numberOfMergedLanes: baseBamFile.numberOfMergedLanes + 1,
@@ -503,10 +503,10 @@ class DomainFactory {
     }
 
     public static SnvCallingInstance createSnvInstanceWithRoddyBamFiles(Map properties = [:], Map bamFile1Properties = [:], Map bamFile2Properties = [:]) {
-        Workflow workflow = createPanCanWorkflow()
+        Pipeline pipeline = createPanCanPipeline()
 
         MergingWorkPackage controlWorkPackage = MergingWorkPackage.build(
-                workflow: workflow,
+                pipeline: pipeline,
                 statSizeFileName: DEFAULT_TAB_FILE_NAME,
         )
         SamplePair samplePair = createDisease(controlWorkPackage)
@@ -806,9 +806,9 @@ class DomainFactory {
                 seqType:               { createSeqType() },
                 seqPlatformGroup:      { createSeqPlatformGroup() },
                 referenceGenome:       { createReferenceGenome() },
-                statSizeFileName:      { properties.get('workflow')?.name == Workflow.Name.PANCAN_ALIGNMENT ?
+                statSizeFileName:      { properties.get('pipeline')?.name == Pipeline.Name.PANCAN_ALIGNMENT ?
                                             "statSizeFileName_${counter++}.tab" : null },
-                workflow:              { createDefaultOtpWorkflow() },
+                pipeline:              { createDefaultOtpPipeline() },
         ], properties)
     }
 
@@ -841,13 +841,13 @@ class DomainFactory {
     }
 
     static RoddyWorkflowConfig createRoddyWorkflowConfig(Map properties = [:], boolean saveAndValidate = true) {
-        Workflow workflow = properties.containsKey('workflow') ? properties.workflow : createPanCanWorkflow()
+        Pipeline pipeline = properties.containsKey('pipeline') ? properties.pipeline : createPanCanPipeline()
         String pluginVersion = properties.containsKey('pluginVersion') ? properties.pluginVersion : "pluginVersion:1.1.${counter++}"
         String configVersion = properties.containsKey('configVersion') ? properties.configVersion : "v1_${counter++}"
 
         return createDomainObject(RoddyWorkflowConfig, [
-                workflow: workflow,
-                configFilePath: {"${TestCase.uniqueNonExistentPath}/${workflow.name.name()}_${pluginVersion.substring(pluginVersion.indexOf(':') + 1)}_${configVersion}.xml"},
+                pipeline: pipeline,
+                configFilePath: {"${TestCase.uniqueNonExistentPath}/${pipeline.name.name()}_${pluginVersion.substring(pluginVersion.indexOf(':') + 1)}_${configVersion}.xml"},
                 pluginVersion: pluginVersion,
                 configVersion: configVersion,
                 project: {createProject()},

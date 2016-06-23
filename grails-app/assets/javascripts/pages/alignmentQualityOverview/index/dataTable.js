@@ -80,7 +80,7 @@ $.otp.alignmentQualityOverviewTable = {
                                 row.singletons,
                                 "<span class='" + row.medianWarning + "'>" + row.medianPE_insertsize + " </span>",
                                 "<span class='" + row.diffChrWarning + "'>" + row.diffChr + " </span>",
-                                row.workflow,
+                                row.pipeline,
                                 row.dateFromFileSystem,
                             ];
                             var rowdata = identifier.concat(coverage, general);
