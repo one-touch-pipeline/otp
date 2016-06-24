@@ -6,7 +6,9 @@ import de.dkfz.tbi.otp.job.jobs.snvcalling.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.ProcessingStatus.Done
 import de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus
+import de.dkfz.tbi.otp.user.UserException
 import de.dkfz.tbi.otp.utils.*
+import org.springframework.security.access.prepost.PreAuthorize
 
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.Done.*
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus.*
@@ -75,7 +77,7 @@ class TrackingService {
         }
     }
 
-    void setFinishedTimestampsAndNotify(OtrsTicket ticket, SamplePairDiscovery samplePairDiscovery) {
+    void setFinishedTimestampsAndNotify(OtrsTicket ticket, SamplePairDiscovery samplePairDiscovery = new SamplePairDiscovery()) {
         if (ticket.finalNotificationSent) {
             return
         }
@@ -132,7 +134,54 @@ class TrackingService {
                 "${seqTrack.sampleType.name}, ${seqTrack.seqType.name} ${seqTrack.seqType.libraryLayout}")
     }
 
-    ProcessingStatus getProcessingStatus(Set<SeqTrack> seqTracks, SamplePairDiscovery samplePairDiscovery, ProcessingStatus status = new ProcessingStatus()) {
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void assignOtrsTicketToRunSegment(String ticketNumber, Long runSegmentId) {
+        RunSegment runSegment = RunSegment.get(runSegmentId)
+        assert runSegment : "No RunSegment found for ${runSegmentId}."
+
+        OtrsTicket oldOtrsTicket = runSegment.otrsTicket
+
+        if (oldOtrsTicket && oldOtrsTicket.ticketNumber == ticketNumber) {
+            return
+        }
+
+        if (OtrsTicket.ticketNumberConstraint(ticketNumber)) {
+            throw new UserException("Ticket number ${ticketNumber} does not pass validation or error while saving. An OTRS ticket must consist of 16 successive digits.")
+        }
+
+        // assigning a runSegment that belongs to an otrsTicket which consists of several other runSegments is not allowed,
+        // because it is not possible to calculate the right "Started"/"Finished" dates
+        if (oldOtrsTicket && oldOtrsTicket.runSegments.size() != 1) {
+            throw new UserException("Assigning a runSegment that belongs to an OTRS-Ticket which consists of several other runSegments is not allowed.")
+        }
+
+        OtrsTicket newOtrsTicket = CollectionUtils.atMostOneElement(OtrsTicket.findAllByTicketNumber(ticketNumber))
+        if (!newOtrsTicket) {
+            newOtrsTicket = createOtrsTicket(ticketNumber)
+        }
+
+        if (newOtrsTicket.finalNotificationSent) {
+            throw new UserException("It is not allowed to assign to an finally notified OTRS-Ticket.")
+        }
+
+        runSegment.otrsTicket = newOtrsTicket
+        assert runSegment.save(flush: true, failOnError: true)
+
+        ProcessingStatus status = getProcessingStatus(newOtrsTicket.findAllSeqTracks())
+        for (OtrsTicket.ProcessingStep step : OtrsTicket.ProcessingStep.values()) {
+            WorkflowProcessingStatus stepStatus = status."${step}ProcessingStatus"
+            if (stepStatus.mightDoMore) {
+                newOtrsTicket."${step}Finished" = null
+            } else {
+                newOtrsTicket."${step}Finished" = [oldOtrsTicket?."${step}Finished", newOtrsTicket."${step}Finished"].max()
+            }
+            newOtrsTicket."${step}Started" = [oldOtrsTicket?."${step}Started", newOtrsTicket."${step}Started"].min()
+        }
+
+        assert newOtrsTicket.save(flush: true, failOnError: true)
+    }
+
+    ProcessingStatus getProcessingStatus(Set<SeqTrack> seqTracks, SamplePairDiscovery samplePairDiscovery = new SamplePairDiscovery(), ProcessingStatus status = new ProcessingStatus()) {
         status = getInstallationProcessingStatus(seqTracks, status)
         status = getFastqcProcessingStatus(seqTracks, status)
         status = getAlignmentAndDownstreamProcessingStatus(seqTracks, samplePairDiscovery, status)

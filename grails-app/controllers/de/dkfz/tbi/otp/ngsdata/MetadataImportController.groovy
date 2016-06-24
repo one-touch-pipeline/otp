@@ -1,16 +1,20 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
 import de.dkfz.tbi.otp.tracking.*
+import de.dkfz.tbi.otp.user.*
+import grails.converters.*
 import groovy.transform.*
-import java.util.regex.*
 import org.springframework.validation.*
+
+import java.util.regex.*
 
 class MetadataImportController {
 
     MetadataImportService metadataImportService
     RunService runService
+    TrackingService trackingService
 
     def index(MetadataImportControllerSubmitCommand cmd) {
         MetadataValidationContext metadataValidationContext
@@ -41,8 +45,7 @@ class MetadataImportController {
         RunSegment runSegment = (RunSegment.get(params.id))
         [
                 data: getMetadataDetails(runSegment),
-                ticketNumber: runSegment.otrsTicket?.ticketNumber,
-                url: ProcessingOptionService.getValueOfProcessingOption("otrsServerUrl"),
+                runSegment: runSegment,
         ]
     }
 
@@ -85,6 +88,19 @@ class MetadataImportController {
                 dataFilesNotAssignedToSeqTrack: dataFilesNotAssignedToSeqTrack,
                 runs: runs,
         )
+    }
+
+    def assignOtrsTicketToRunSegment() {
+        def dataToRender = [:]
+
+        try {
+            trackingService.assignOtrsTicketToRunSegment(params.value, params.id as Long)
+            dataToRender.put("success", true)
+        } catch (UserException e) {
+            dataToRender.put("error", e.toString())
+        }
+
+        render dataToRender as JSON
     }
 }
 

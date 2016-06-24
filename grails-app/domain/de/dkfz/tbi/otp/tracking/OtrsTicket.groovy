@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.tracking
 
 import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.Entity
 import org.joda.time.*
@@ -61,12 +62,8 @@ class OtrsTicket implements Commentable, Entity {
     }
 
     Date getFirstImportTimestamp() {
-        //Doesn't work as a single Query, probably a Unit test problem
-        def runSegment = RunSegment.withCriteria {
-            eq ('otrsTicket', this)
-        }
         return (Date) MetaDataFile.createCriteria().get {
-            'in'('runSegment', runSegment)
+            'in'('runSegment', runSegments)
             projections {
                 min("dateCreated")
             }
@@ -74,15 +71,18 @@ class OtrsTicket implements Commentable, Entity {
     }
 
     Date getLastImportTimestamp() {
-        //Doesn't work as a single Query, probably a Unit test problem
-        def runSegment = RunSegment.withCriteria {
-            eq ('otrsTicket', this)
-        }
         return (Date) MetaDataFile.createCriteria().get {
-            'in'('runSegment', runSegment)
+            'in'('runSegment', runSegments)
             projections {
                 max("dateCreated")
             }
+        }
+    }
+
+    List<RunSegment> getRunSegments() {
+        //Doesn't work as a single Query, probably a Unit test problem
+        return RunSegment.withCriteria {
+            eq ('otrsTicket', this)
         }
     }
 
@@ -105,5 +105,9 @@ class OtrsTicket implements Commentable, Entity {
         } else {
             return "does not match the required pattern"
         }
+    }
+
+    String getUrl() {
+        return "${ProcessingOptionService.getValueOfProcessingOption("otrsServerUrl")}/index.pl?Action=AgentTicketZoom;TicketNumber=${ticketNumber}"
     }
 }

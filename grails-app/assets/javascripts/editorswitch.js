@@ -10,6 +10,13 @@ $(function() {
         $("p.edit-switch-label", outerContainer).hide();
     });
 
+    $("div.edit-switch-url p.edit-switch-url-label button.edit-button-left").click(function () {
+        "use strict";
+        var outerContainer = $(this).parent().parent();
+        $("p.edit-switch-url-editor", outerContainer).show();
+        $("p.edit-switch-url-label", outerContainer).hide();
+    });
+
     $("div.edit-switch-drop-down p.edit-switch-drop-down-label button.edit").click(function () {
         "use strict";
         var outerContainer, existingValue, td, options;
@@ -71,6 +78,31 @@ $(function() {
         $("p.edit-switch-editor", outerContainer).hide();
         $("p.edit-switch-label", outerContainer).show();
     });
+
+    /*jslint unparam: true */
+    $("div.edit-switch-url p.edit-switch-url-editor button.save").click(function () {
+        "use strict";
+        var container, outerContainer;
+        container = $(this).parent();
+        outerContainer = container.parent();
+        $.ajax({
+            url: $("input:hidden[name=target]", container).val(),
+            dataType: 'json',
+            data: {value: $("input:text[name=value]", container).val()},
+            success: function (data) {
+                if (data.success) {
+                    $.otp.infoMessage($L("editorswitch.notification.success"));
+                    $("p.edit-switch-url-label span", outerContainer).text($("input:text[name=value]", container).val());
+                } else {
+                    $.otp.warningMessage(data.error);
+                    $("input:text[name=value]", container).val($("p.edit-switch-url-label span", outerContainer).text());
+                }
+            },
+        });
+        $("p.edit-switch-url-editor", outerContainer).hide();
+        $("p.edit-switch-url-label", outerContainer).show();
+    });
+
     $("div.edit-switch-drop-down p.edit-switch-drop-down-editor button.save").click(function () {
         "use strict";
         var container, outerContainer;
@@ -96,6 +128,7 @@ $(function() {
         $("p.edit-switch-drop-down-label", outerContainer).show();
         window.setTimeout('location.reload()', 300); //reloads page after 0.3 seconds
     });
+
     /*jslint unparam: true */
     $("div.edit-switch-new-value p.edit-switch-new-value-editor button.save").click(function () {
         "use strict";
@@ -198,6 +231,14 @@ $(function() {
         $("span.edit-switch-new-free-text-values-label", outerContainer).show();
     });
 
+    $("div.edit-switch-url p.edit-switch-url-editor button.cancel").click(function () {
+        "use strict";
+        var outerContainer = $(this).parent().parent();
+        $("p.edit-switch-url-editor", outerContainer).hide();
+        $("p.edit-switch-url-label", outerContainer).show();
+        $("input:text[name=value]", $(this).parent()).val($("p.edit-switch-url-label span", outerContainer).text());
+    });
+
     $("div.edit-switch p.edit-switch-editor button.cancel").click(function () {
         "use strict";
         var outerContainer = $(this).parent().parent();
@@ -205,24 +246,28 @@ $(function() {
         $("p.edit-switch-label", outerContainer).show();
         $("input:text[name=value]", $(this).parent()).val($("p.edit-switch-label span", outerContainer).text());
     });
+
     $("div.edit-switch-drop-down p.edit-switch-drop-down-editor button.cancel").click(function () {
         "use strict";
         var outerContainer = $(this).parent().parent();
         $("p.edit-switch-drop-down-editor", outerContainer).hide();
         $("p.edit-switch-drop-down-label", outerContainer).show();
     });
+
     $("div.edit-switch-new-value p.edit-switch-new-value-editor button.cancel").click(function () {
         "use strict";
         var outerContainer = $(this).parent().parent();
         $("p.edit-switch-new-value-editor", outerContainer).hide();
         $("p.edit-switch-new-value-label", outerContainer).show();
     });
+
     $("div.edit-switch-new-free-text-value p.edit-switch-new-free-text-value-editor button.cancel").click(function () {
         "use strict";
         var outerContainer = $(this).parent().parent();
         $("p.edit-switch-new-free-text-value-editor", outerContainer).hide();
         $("p.edit-switch-new-free-text-value-label", outerContainer).show();
     });
+
     $("div.edit-switch-new-free-text-values span.edit-switch-new-free-text-values-editor button.cancel").click(function () {
         "use strict";
         var outerContainer = $(this).parent().parent();

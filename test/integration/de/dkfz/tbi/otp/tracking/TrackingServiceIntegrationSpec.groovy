@@ -1,9 +1,11 @@
 package de.dkfz.tbi.otp.tracking
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.TrackingService.SamplePairDiscovery
+import de.dkfz.tbi.otp.user.UserException
 import de.dkfz.tbi.otp.utils.*
 import grails.test.spock.*
 
@@ -22,6 +24,10 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
                 mailHelperService: mailHelperService,
                 snvCallingService: snvCallingService,
         )
+    }
+
+    void cleanup() {
+        TestCase.removeMetaClass(TrackingService, trackingService)
     }
 
     void 'processFinished calls setFinishedTimestampsAndNotify for the tickets of the passed SeqTracks'() {
@@ -458,5 +464,116 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         bamFile.mergingWorkPackage.save(flush: true)
 
         return bamFile
+    }
+
+    void "assignOtrsTicketToRunSegment, no RunSegment for runSegementId, throws AssertionError "() {
+        when:
+        trackingService.assignOtrsTicketToRunSegment("", 1)
+
+        then:
+        AssertionError error = thrown()
+        error.message.contains("No RunSegment found")
+    }
+
+    void "assignOtrsTicketToRunSegment, new ticketNumber equals old ticketNumber, returns true"() {
+        given:
+        OtrsTicket otrsTicket = DomainFactory.createOtrsTicket(ticketNumber: '2000010112345678')
+        RunSegment runSegment = DomainFactory.createRunSegment(otrsTicket: otrsTicket)
+
+        expect:
+        trackingService.assignOtrsTicketToRunSegment(otrsTicket.ticketNumber, runSegment.id)
+    }
+
+    void "assignOtrsTicketToRunSegment, new ticketNumber does not pass custom validation, throws UserException"() {
+        given:
+        OtrsTicket otrsTicket = DomainFactory.createOtrsTicket(ticketNumber: '2000010112345678')
+        RunSegment runSegment = DomainFactory.createRunSegment(otrsTicket: otrsTicket)
+
+        when:
+        trackingService.assignOtrsTicketToRunSegment('abc', runSegment.id)
+
+        then:
+        UserException error = thrown()
+        error.message.contains("does not pass validation or error while saving.")
+    }
+
+    void "assignOtrsTicketToRunSegment, old OtrsTicket consists of several other RunSegements, throws UserException"() {
+        given:
+        OtrsTicket otrsTicket = DomainFactory.createOtrsTicket(ticketNumber: '2000010112345678')
+        RunSegment runSegment = DomainFactory.createRunSegment(otrsTicket: otrsTicket)
+        DomainFactory.createRunSegment(otrsTicket: otrsTicket)
+
+        when:
+        trackingService.assignOtrsTicketToRunSegment('2000010112345679', runSegment.id)
+
+        then:
+        UserException error = thrown()
+        error.message.contains("Assigning a runSegment that belongs to an OTRS-Ticket which consists of several other runSegments is not allowed.")
+    }
+
+    void "assignOtrsTicketToRunSegment, new OtrsTicket final notification already sent, throws UserException"() {
+        given:
+        OtrsTicket oldOtrsTicket = DomainFactory.createOtrsTicket(ticketNumber: '2000010112345678')
+        RunSegment runSegment = DomainFactory.createRunSegment(otrsTicket: oldOtrsTicket)
+        OtrsTicket newOtrsTicket = DomainFactory.createOtrsTicket(ticketNumber: '2000010112345679', finalNotificationSent: true)
+
+        when:
+        trackingService.assignOtrsTicketToRunSegment(newOtrsTicket.ticketNumber, runSegment.id)
+
+        then:
+        UserException error = thrown()
+        error.message.contains("It is not allowed to assign to an finally notified OTRS-Ticket.")
+    }
+
+    void "assignOtrsTicketToRunSegment, adjust ProcessingStatus of new OtrsTicket"() {
+        given:
+        Date minDate = new Date().minus(1)
+        Date maxDate = new Date().plus(1)
+
+        OtrsTicket oldOtrsTicket = DomainFactory.createOtrsTicket(
+                ticketNumber: '2000010112345678',
+                installationStarted: minDate,
+                installationFinished: minDate,
+                fastqcStarted: maxDate,
+                fastqcFinished: maxDate,
+                alignmentStarted: null,
+                alignmentFinished: maxDate,
+                snvStarted: null,
+                snvFinished: null
+        )
+        RunSegment runSegment = DomainFactory.createRunSegment(otrsTicket: oldOtrsTicket)
+        OtrsTicket newOtrsTicket = DomainFactory.createOtrsTicket(
+                ticketNumber: '2000010112345679',
+                installationStarted: maxDate,
+                installationFinished: maxDate,
+                fastqcStarted: minDate,
+                fastqcFinished: minDate,
+                alignmentStarted: minDate,
+                alignmentFinished: null,
+                snvStarted: null,
+                snvFinished: null
+        )
+
+        trackingService.metaClass.getProcessingStatus = { Set<SeqTrack> set ->
+            return new ProcessingStatus(
+                    installationProcessingStatus: ALL_DONE,
+                    fastqcProcessingStatus: ALL_DONE,
+                    alignmentProcessingStatus: PARTLY_DONE_MIGHT_DO_MORE,
+                    snvProcessingStatus: NOTHING_DONE_MIGHT_DO
+            )
+        }
+
+        when:
+        trackingService.assignOtrsTicketToRunSegment(newOtrsTicket.ticketNumber, runSegment.id)
+
+        then:
+        minDate == newOtrsTicket.installationStarted
+        maxDate == newOtrsTicket.installationFinished
+        minDate == newOtrsTicket.fastqcStarted
+        maxDate == newOtrsTicket.fastqcFinished
+        minDate == newOtrsTicket.alignmentStarted
+        null == newOtrsTicket.alignmentFinished
+        null == newOtrsTicket.snvStarted
+        null == newOtrsTicket.snvFinished
     }
 }

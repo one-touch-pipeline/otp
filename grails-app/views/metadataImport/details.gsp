@@ -1,20 +1,25 @@
-<%@ page import="org.joda.time.DateTime; de.dkfz.tbi.otp.ngsdata.ChipSeqSeqTrack"
+<%@ page import="de.dkfz.tbi.otp.ngsdata.RunSegment; de.dkfz.tbi.otp.tracking.OtrsTicket; org.joda.time.DateTime; de.dkfz.tbi.otp.ngsdata.ChipSeqSeqTrack"
         contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
   <meta name="layout" content="main"/>
   <title>${g.message(code: "metadataImport.details.title")}</title>
+  <asset:javascript src="modules/editorSwitch"/>
 </head>
 
 <body>
 <div class="body">
   <h2>${g.message(code: "metadataImport.details.otrsTicket")}</h2>
-  <g:if test="${ticketNumber}">
-    <g:message code="metadataImport.details.otrsTicketNumber" />
-    <g:link url="${url}/index.pl?Action=AgentTicketZoom;TicketNumber=${ticketNumber}">${ticketNumber}</g:link>
-  </g:if><g:else>
-    ${g.message(code: "metadataImport.details.ticketMissing")}
-  </g:else>
+  <g:message code="metadataImport.details.otrsTicketNumber" />
+  <otp:editorSwitch
+          template="urlValue"
+          roles="ROLE_OPERATOR"
+          link="${g.createLink(
+                  controller: 'metadataImport',
+                  action: 'assignOtrsTicketToRunSegment',
+                  id: runSegment.id)}"
+          url="${runSegment.otrsTicket?.url ?: "#"}"
+          value="${runSegment.otrsTicket?.ticketNumber ?: g.message(code: "metadataImport.details.ticketMissing")}"/>
   <h2>${g.message(code: "metadataImport.details.metadataFiles")}</h2>
   <ul>
     <g:each in="${data.metaDataFiles}" var="metaDataFile">
@@ -84,4 +89,5 @@
 </g:else>
 </div>
 </body>
+
 </html>
