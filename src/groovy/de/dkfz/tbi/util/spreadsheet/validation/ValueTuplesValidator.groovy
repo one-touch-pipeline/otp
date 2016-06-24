@@ -60,6 +60,11 @@ abstract class SingleValueValidator<C extends ValidationContext> extends ValueTu
         return [getColumnTitle(context)]
     }
 
+    @Override
+    final boolean columnsMissing(C context, Collection<String> columnTitles) {
+        return super.columnsMissing(context, columnTitles)
+    }
+
     abstract String getColumnTitle(C context)
 
     @Override

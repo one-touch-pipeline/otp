@@ -32,4 +32,5 @@ enum MetaDataColumn {
     MATE,
     CUSTOM_LIBRARY,
     ADAPTER_FILE,
+    SAMPLE_SUBMISSION_TYPE,
 }
