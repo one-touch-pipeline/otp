@@ -312,7 +312,6 @@ class ProjectOverviewController {
         render dataToRender as JSON
     }
 
-    @PreAuthorize("hasRole('ROLE_MMML_MAPPING')")
     JSON dataTableMMMLMapping(DataTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()
         List data = projectOverviewService.tableForMMMLMapping()
