@@ -186,7 +186,10 @@ mv '${oldDataFileName}' '${newDataFileName}';
             if (newDataFile.exists()) {
                 bashCommand = "# ${newDataFileName} is already at the correct position"
             } else {
-                String message = "The fastqcFile (${newDataFileName}) can not be found"
+                String message = """The fastqcFile can not be found:
+oldName: ${oldDataFileName}
+newName: ${newDataFileName}
+"""
                 if(failOnMissingFiles) {
                     throw new RuntimeException(message)
                 } else {
@@ -272,7 +275,11 @@ mv '${oldDataFileName}' '${newDataFileName}';
             it.fileName = it.vbpFileName = dataFileMap[it.fileName]
             if (it.mateNumber == null && it.fileWithdrawn && it.fileType && it.fileType.type == FileType.Type.SEQUENCE && it.fileType.vbpPath == "/sequence/") {
                 outputStringBuilder << "\n====> set mate number for withdrawn data file"
-                it.mateNumber = MetaDataService.findOutMateNumberIfSingleEndOrByFileName(it.fileName, it.seqTrack.seqType.libraryLayout == 'SINGLE')
+                if (it.seqTrack.seqType.libraryLayout == 'SINGLE') {
+                    it.mateNumber = '1'
+                } else {
+                    it.mateNumber = MetaDataService.findOutMateNumber(it.fileName)
+                }
             }
             it.save(flush: true)
             outputStringBuilder << "\n    changed ${old} to ${it.fileName}"
