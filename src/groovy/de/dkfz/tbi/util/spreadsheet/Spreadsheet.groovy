@@ -11,7 +11,7 @@ class Spreadsheet {
 
     final Row header
     private final Map<String, Column> columnsByTitle
-    final List<Row> dataRows
+    private final List<Row> dataRows
 
     Spreadsheet(String document) {
         Map<String, Column> columnsByTitle = [:]
@@ -42,6 +42,10 @@ class Spreadsheet {
      */
     Column getColumn(String columnTitle) {
         return columnsByTitle.get(columnTitle)
+    }
+
+    List<Row> getDataRows() {
+        return dataRows
     }
 }
 

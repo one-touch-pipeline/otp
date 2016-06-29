@@ -8,6 +8,7 @@ import java.nio.charset.*
 import java.nio.file.*
 import java.security.*
 
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 import static de.dkfz.tbi.otp.utils.HelperUtils.*
 
 class MetadataValidationContext extends ValidationContext {
@@ -57,7 +58,10 @@ class MetadataValidationContext extends ValidationContext {
                 if (document.contains('"')) {
                     problems.addProblem(Collections.emptySet(), Level.WARNING, "The content of ${pathForMessage(metadataFile)} contains one or more quotation marks. OTP might not parse the file as expected.")
                 }
-                spreadsheet = new Spreadsheet(document.replaceFirst(/[\t\r\n]+$/, ''))
+                spreadsheet = new FilteredSpreadsheet(document.replaceFirst(/[\t\r\n]+$/, ''), { Row row ->
+                    !row.getCellByColumnTitle(FASTQ_FILE.name())?.text?.startsWith('Undetermined') ||
+                    !row.getCellByColumnTitle(SAMPLE_ID.name())?.text?.startsWith('Undetermined')
+                })
                 if (spreadsheet.dataRows.size() < 1) {
                     spreadsheet = null
                     problems.addProblem(Collections.emptySet(), Level.ERROR, "${pathForMessage(metadataFile)} contains less than two lines.")
