@@ -16,6 +16,8 @@ class TrackingService {
     MailHelperService mailHelperService
     SnvCallingService snvCallingService
 
+    public static final String TICKET_NUMBER_PREFIX = "otrsTicketNumberPrefix"
+
     public OtrsTicket createOtrsTicket(String ticketNumber) {
         OtrsTicket otrsTicket = new OtrsTicket(ticketNumber: ticketNumber)
         assert otrsTicket.save(flush: true, failOnError: true)
@@ -103,8 +105,9 @@ class TrackingService {
 
     void sendNotification(OtrsTicket ticket, Set<SeqTrack> seqTracks, ProcessingStatus status, boolean finalNotification) {
         StringBuilder subject = new StringBuilder()
-        // TODO: regarding the ticket number prefix see OTP-2187
-        subject.append('DMG #').append(ticket.ticketNumber)
+
+        String prefix = ProcessingOptionService.getValueOfProcessingOption(TICKET_NUMBER_PREFIX)
+        subject.append("$prefix #").append(ticket.ticketNumber)
         if (finalNotification) {
             subject.append(' Final')
         }

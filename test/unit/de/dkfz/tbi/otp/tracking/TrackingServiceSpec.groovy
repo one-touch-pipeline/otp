@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.tracking
 
 import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 import grails.test.mixin.*
@@ -16,6 +17,7 @@ import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus
     FileType,
     Individual,
     OtrsTicket,
+    ProcessingOption,
     Project,
     ReferenceGenome,
     ReferenceGenomeProjectSeqType,
@@ -166,6 +168,8 @@ class TrackingServiceSpec extends Specification {
     void 'sendNotification, when finalNotification is false, sends normal notification with correct subject and content'() {
         given:
         OtrsTicket ticket = DomainFactory.createOtrsTicket()
+        String prefix = "the prefix"
+        DomainFactory.createProcessingOptionForOtrsTicketPrefix(prefix)
         ProcessingStatus status = new ProcessingStatus(
                 installationProcessingStatus: ALL_DONE,
                 fastqcProcessingStatus: PARTLY_DONE_MIGHT_DO_MORE,
@@ -211,7 +215,7 @@ ILSe 2, runA, lane 1, ${sampleText}
             @Override
             void sendEmail(String emailSubject, String content, String recipient) {
                 callCount++
-                assertEquals("DMG #${ticket.ticketNumber} Processing Status Update".toString(), emailSubject)
+                assertEquals("${prefix} #${ticket.ticketNumber} Processing Status Update".toString(), emailSubject)
                 assertEquals(otrsRecipient, recipient)
                 assertEquals(expectedContent, content)
             }
@@ -227,11 +231,12 @@ ILSe 2, runA, lane 1, ${sampleText}
     void 'sendNotification, when finalNotification is true, sends final notification with correct subject'() {
         given:
         OtrsTicket ticket = DomainFactory.createOtrsTicket()
-
+        String prefix = "the prefix"
+        DomainFactory.createProcessingOptionForOtrsTicketPrefix(prefix)
         String otrsRecipient = HelperUtils.uniqueString
         trackingService.mailHelperService = Mock(MailHelperService) {
             getOtrsRecipient() >> otrsRecipient
-            1 * sendEmail("DMG #${ticket.ticketNumber} Final Processing Status Update", _, otrsRecipient)
+            1 * sendEmail("${prefix} #${ticket.ticketNumber} Final Processing Status Update", _, otrsRecipient)
         }
 
         expect:

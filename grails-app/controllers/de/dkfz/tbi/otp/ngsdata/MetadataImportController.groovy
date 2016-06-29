@@ -1,10 +1,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
 import de.dkfz.tbi.otp.tracking.*
-import de.dkfz.tbi.otp.utils.CollectionUtils
 import groovy.transform.*
 import java.util.regex.*
 import org.springframework.validation.*
@@ -131,8 +129,8 @@ class MetadataImportControllerSubmitCommand implements Serializable {
         })
     }
     void setTicketNumber(String ticketNumber) {
-        // TODO: regarding the ticket number prefix see OTP-2187
-        Matcher matcher = ticketNumber =~ /^\s*(((DMG )?#)?(?<number>(\d{16})))?\s*$/
+        String prefix = Pattern.quote(ProcessingOptionService.getValueOfProcessingOption(TrackingService.TICKET_NUMBER_PREFIX))
+        Matcher matcher = ticketNumber =~ /^\s*((($prefix)?#)?(?<number>(\d{16})))?\s*$/
         if (matcher.matches()) {
             this.ticketNumber = matcher.group('number') ?: null
         } else {

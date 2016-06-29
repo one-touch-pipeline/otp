@@ -39,6 +39,8 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
                 [fastqcState: SeqTrack.DataProcessingState.IN_PROGRESS],
                 [runSegment: DomainFactory.createRunSegment(otrsTicket: ticketB), fileLinked: true])
 
+        DomainFactory.createProcessingOptionForOtrsTicketPrefix("the prefix")
+
         when:
         trackingService.processFinished([seqTrackA, seqTrackB1] as Set, OtrsTicket.ProcessingStep.FASTQC)
 
@@ -130,6 +132,9 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
                 snvProcessingStatus: NOTHING_DONE_WONT_DO,
         )
 
+        String prefix = "the prefix"
+        DomainFactory.createProcessingOptionForOtrsTicketPrefix(prefix)
+
         String otrsRecipient = HelperUtils.uniqueString
         int callCount = 0
         trackingService.mailHelperService = [
@@ -138,7 +143,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
                     callCount++
                     assertEquals(otrsRecipient, recipient)
                     assert content.contains(expectedStatus.toString())
-                    assertEquals("DMG #${ticket.ticketNumber} Processing Status Update".toString(), emailSubject)
+                    assertEquals("${prefix} #${ticket.ticketNumber} Processing Status Update".toString(), emailSubject)
                 }
         ] as MailHelperService
 
@@ -185,6 +190,9 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
                 snvProcessingStatus: NOTHING_DONE_WONT_DO,
         )
 
+        String prefix = "the prefix"
+        DomainFactory.createProcessingOptionForOtrsTicketPrefix(prefix)
+
         String otrsRecipient = HelperUtils.uniqueString
         int callCount = 0
         trackingService.mailHelperService = [
@@ -193,7 +201,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
                 callCount++
                 assertEquals(otrsRecipient, recipient)
                 assert content.contains(expectedStatus.toString())
-                assertEquals("DMG #${ticket.ticketNumber} Final Processing Status Update".toString(), emailSubject)
+                assertEquals("${prefix} #${ticket.ticketNumber} Final Processing Status Update".toString(), emailSubject)
             }
         ] as MailHelperService
 

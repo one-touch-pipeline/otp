@@ -269,6 +269,16 @@ class DomainFactory {
         ], properties)
     }
 
+    public static void createProcessingOptionForOtrsTicketPrefix(String prefix){
+        ProcessingOptionService option = new ProcessingOptionService()
+        option.createOrUpdate(
+                "otrsTicketNumberPrefix",
+                null,
+                null,
+                prefix,
+                "comment to the number prefix"
+        )
+    }
 
     public static MergingPass createMergingPass(final MergingSet mergingSet) {
         return new MergingPass(
