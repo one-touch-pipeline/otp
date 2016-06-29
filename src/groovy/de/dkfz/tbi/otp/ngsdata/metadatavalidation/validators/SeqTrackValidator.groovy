@@ -214,7 +214,7 @@ class SeqTrackValidator extends ColumnSetValidator<MetadataValidationContext> im
     }
 
     static Set<Cell> mateCells(Collection<RowWithExtractedValues> rows) {
-        return seqTrackCells(rows) + (Set<Cell>)rows*.mateNumber*.cells.sum()
+        return seqTrackCells(rows) + (Set<Cell>)rows*.mateNumber.findAll()*.cells.sum()
     }
 }
 
