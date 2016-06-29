@@ -50,7 +50,9 @@ class SeqTrackValidator extends ColumnSetValidator<MetadataValidationContext> im
 
     @Override
     void validate(MetadataValidationContext context) {
-        getRowsWithExtractedValues(context).groupBy { it.runName.value }.values().each { List<RowWithExtractedValues> runRows ->
+        getRowsWithExtractedValues(context).groupBy {
+            it.runName.value
+        }.values().each { List<RowWithExtractedValues> runRows ->
             runRows.groupBy { it.laneNumber.value }.values().each { List<RowWithExtractedValues> laneRows ->
                 Map<String, List<RowWithExtractedValues>> laneRowsByBarcode =
                         laneRows.findAll { it.barcode }.groupBy { it.barcode.value }
@@ -119,7 +121,7 @@ class SeqTrackValidator extends ColumnSetValidator<MetadataValidationContext> im
                 maxResults 1
             }) {
                 List<RowWithExtractedValues> laneRowsWithBarcode =
-                        (List<RowWithExtractedValues>)laneRowsByBarcode.findAll { it.key != null }.values().sum()
+                        (List<RowWithExtractedValues>) laneRowsByBarcode.findAll { it.key != null }.values().sum()
                 context.addProblem(seqTrackCells(laneRowsWithBarcode),
                         Level.WARNING, "At least one row for ${anyLaneRow.laneString} has a barcode, but for that run and lane there already is data without a barcode registered in OTP.")
             }
@@ -214,7 +216,7 @@ class SeqTrackValidator extends ColumnSetValidator<MetadataValidationContext> im
     }
 
     static Set<Cell> mateCells(Collection<RowWithExtractedValues> rows) {
-        return seqTrackCells(rows) + (Set<Cell>)rows*.mateNumber.findAll()*.cells.sum()
+        return seqTrackCells(rows) + (Set<Cell>) rows*.mateNumber.findAll()*.cells.sum()
     }
 }
 

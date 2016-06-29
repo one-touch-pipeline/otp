@@ -43,8 +43,8 @@ class LibrarySeqTypeValidatorSpec extends Specification {
         given:
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${CUSTOMER_LIBRARY}\t${SEQUENCING_TYPE}\n" +
-                        "lib1\${SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName}\n" +
+                "${CUSTOMER_LIBRARY}\t${SEQUENCING_TYPE}\t${TAGMENTATION_BASED_LIBRARY}\n" +
+                        "lib1\${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\ttrue\n" +
                         "\tseqType"
         )
 
@@ -59,8 +59,8 @@ class LibrarySeqTypeValidatorSpec extends Specification {
     void 'validate, when CUSTOMER_LIBRARY is empty and SEQUENCING_TYPE is WHOLE_GENOME_BISULFITE_TAGMENTATION, adds warning'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${CUSTOMER_LIBRARY}\t${SEQUENCING_TYPE}\n" +
-                        "\t${SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName}"
+                "${CUSTOMER_LIBRARY}\t${SEQUENCING_TYPE}\t${TAGMENTATION_BASED_LIBRARY}\n" +
+                        "\t${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\ttrue"
         )
 
         when:
@@ -78,8 +78,8 @@ class LibrarySeqTypeValidatorSpec extends Specification {
     void 'validate, when CUSTOMER_LIBRARY is missing and SEQUENCING_TYPE is WHOLE_GENOME_BISULFITE_TAGMENTATION, adds warning'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${SEQUENCING_TYPE}\n" +
-                        "${SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName}\n" +
+                "${SEQUENCING_TYPE}\t${TAGMENTATION_BASED_LIBRARY}\n" +
+                        "${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\ttrue\n" +
                         ""
         )
 

@@ -5,6 +5,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
 import de.dkfz.tbi.otp.tracking.*
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.util.spreadsheet.*
+import de.dkfz.tbi.util.spreadsheet.validation.ValueTuple
 import groovy.transform.*
 import org.springframework.beans.factory.annotation.*
 import org.springframework.context.*
@@ -162,7 +163,7 @@ class MetadataImportService {
         runRows.groupBy { MultiplexingService.combineLaneNumberAndBarcode(it.getCellByColumnTitle(LANE_NO.name()).text,
                 extractBarcode(it).value) }.each { String laneId, List<Row> rows ->
             SeqType seqType = exactlyOneElement(SeqType.findAllWhere(
-                    name: uniqueColumnValue(rows, SEQUENCING_TYPE),
+                    name: uniqueColumnValue(rows, SEQUENCING_TYPE) + (uniqueColumnValue(rows, TAGMENTATION_BASED_LIBRARY) ? '_TAGMENTATION' : ''),
                     libraryLayout: uniqueColumnValue(rows, LIBRARY_LAYOUT),
             ))
             SeqTypeNames seqTypeName = seqType.seqTypeName
@@ -354,6 +355,11 @@ class MetadataImportService {
         }
         return new ExtractedValue(Integer.toString(mateNumber), [filenameCell] as Set)
     }
+
+    public static String getSeqTypeNameFromMetadata(ValueTuple tuple) {
+        return tuple.getValue(SEQUENCING_TYPE.name()) + (tuple.getValue(TAGMENTATION_BASED_LIBRARY.name()) ? '_TAGMENTATION' : '')
+    }
+
 }
 
 @TupleConstructor

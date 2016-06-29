@@ -31,11 +31,14 @@ class BedFileValidator extends ValueTuplesValidator<MetadataValidationContext> i
 
     @Override
     List<String> getColumnTitles(MetadataValidationContext context) {
-        return [SEQUENCING_TYPE.name(), LIBRARY_LAYOUT.name(), LIB_PREP_KIT.name(), SAMPLE_ID.name()]
+        return [SEQUENCING_TYPE.name(), LIBRARY_LAYOUT.name(), LIB_PREP_KIT.name(), SAMPLE_ID.name(), TAGMENTATION_BASED_LIBRARY.name()]
     }
 
     @Override
     boolean columnMissing(MetadataValidationContext context, String columnTitle) {
+        if (columnTitle == TAGMENTATION_BASED_LIBRARY.name()) {
+            return true
+        }
         return false
     }
 
@@ -47,7 +50,8 @@ class BedFileValidator extends ValueTuplesValidator<MetadataValidationContext> i
     }
 
     void validateValueTuple(MetadataValidationContext context, ValueTuple valueTuple) {
-        if (valueTuple.getValue(SEQUENCING_TYPE.name()) != SeqTypeNames.EXOME.seqTypeName || valueTuple.getValue(LIBRARY_LAYOUT.name()) != SeqType.LIBRARYLAYOUT_PAIRED) {
+        String seqType = MetadataImportService.getSeqTypeNameFromMetadata(valueTuple)
+        if (seqType != SeqTypeNames.EXOME.seqTypeName || valueTuple.getValue(LIBRARY_LAYOUT.name()) != SeqType.LIBRARYLAYOUT_PAIRED) {
             return
         }
 

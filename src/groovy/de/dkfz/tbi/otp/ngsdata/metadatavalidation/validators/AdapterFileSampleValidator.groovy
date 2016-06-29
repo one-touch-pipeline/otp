@@ -32,6 +32,7 @@ class AdapterFileSampleValidator extends ValueTuplesValidator<MetadataValidation
                 SEQUENCING_TYPE.name(),
                 SAMPLE_SUBMISSION_TYPE.name(),
                 ADAPTER_FILE.name(),
+                TAGMENTATION_BASED_LIBRARY.name(),
         ]
     }
 
@@ -43,12 +44,13 @@ class AdapterFileSampleValidator extends ValueTuplesValidator<MetadataValidation
     @Override
     void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {
         valueTuples.each { ValueTuple tuple ->
-            if (SeqType.WGBS_SEQ_TYPE_NAMES*.seqTypeName.contains(tuple.getValue(SEQUENCING_TYPE.name())) &&
+            String seqType = MetadataImportService.getSeqTypeNameFromMetadata(tuple)
+            if (SeqType.WGBS_SEQ_TYPE_NAMES*.seqTypeName.contains(seqType) &&
                     tuple.getValue(SAMPLE_SUBMISSION_TYPE.name()) != SAMPLE &&
                     !tuple.getValue(ADAPTER_FILE.name())
             ) {
                 context.addProblem(tuple.cells, Level.WARNING, "There should be an entry in the ${ADAPTER_FILE} column " +
-                        "for sequencing type '${tuple.getValue(SEQUENCING_TYPE.name())}'.")
+                        "for sequencing type '${seqType}'.")
             }
         }
     }

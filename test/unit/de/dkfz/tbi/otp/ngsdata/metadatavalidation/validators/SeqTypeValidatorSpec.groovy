@@ -53,4 +53,27 @@ class SeqTypeValidatorSpec extends Specification {
         containSame(problem.affectedCells*.cellAddress, ['A2', 'A4'])
         problem.message.contains("Sequencing type 'SeqType1' is not registered in the OTP database.")
     }
+
+    void 'validate, when column TAGMENTATION_BASED_LIBRARY exists, adds expected error'() {
+
+        given:
+        MetadataValidationContext context = MetadataValidationContextFactory.createContext(
+                "${MetaDataColumn.SEQUENCING_TYPE}\t${MetaDataColumn.TAGMENTATION_BASED_LIBRARY}\n" +
+                        "SeqType1\t\n" +
+                        "SeqType1\ttrue\n" +
+                        "SeqType2\t\n" +
+                        "SeqType2\ttrue\n")
+        DomainFactory.createSeqType(name: 'SeqType1', libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE)
+        DomainFactory.createSeqType(name: 'SeqType2', libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED)
+        DomainFactory.createSeqType(name: 'SeqType1_TAGMENTATION', libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED)
+
+        when:
+        new SeqTypeValidator().validate(context)
+
+        then:
+        Problem problem = exactlyOneElement(context.problems)
+        problem.level == Level.ERROR
+        containSame(problem.affectedCells*.cellAddress, ['A5', 'B5'])
+        problem.message.contains("Sequencing type 'SeqType2_TAGMENTATION' is not registered in the OTP database.")
+    }
 }

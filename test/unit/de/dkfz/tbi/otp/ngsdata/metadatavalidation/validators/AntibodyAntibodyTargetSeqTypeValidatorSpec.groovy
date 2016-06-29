@@ -10,6 +10,7 @@ import static de.dkfz.tbi.TestCase.assertContainSame
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.ANTIBODY
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.ANTIBODY_TARGET
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SEQUENCING_TYPE
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.TAGMENTATION_BASED_LIBRARY
 
 class AntibodyAntibodyTargetSeqTypeValidatorSpec extends Specification {
 
@@ -98,8 +99,10 @@ class AntibodyAntibodyTargetSeqTypeValidatorSpec extends Specification {
     void 'validate, when ANTIBODY_TARGET and ANTIBODY column exist and seqType is not ChIP seq, adds warning'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${SEQUENCING_TYPE}\t${ANTIBODY_TARGET}\t${ANTIBODY}\n" +
-                        "some seqtype\tsome_antibody_target\tsome_antibody"
+                "${SEQUENCING_TYPE}\t${ANTIBODY_TARGET}\t${ANTIBODY}\t${TAGMENTATION_BASED_LIBRARY}\n" +
+                        "some seqtype\tsome_antibody_target\tsome_antibody\t\n" +
+                        "ChIP Seq\tsome_antibody_target\tsome_antibody\t\n" +
+                        "ChIP Seq\tsome_antibody_target\tsome_antibody\ttrue"
         )
 
         when:
@@ -108,6 +111,7 @@ class AntibodyAntibodyTargetSeqTypeValidatorSpec extends Specification {
         then:
         Collection<Problem> expectedProblems = [
                 new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.WARNING, "Antibody target ('some_antibody_target') and/or antibody ('some_antibody') are/is provided although data is no ChIP seq data. OTP will ignore the values."),
+                new Problem(context.spreadsheet.dataRows[2].cells as Set, Level.WARNING, "Antibody target ('some_antibody_target') and/or antibody ('some_antibody') are/is provided although data is no ChIP seq data. OTP will ignore the values."),
         ]
         assertContainSame(context.problems, expectedProblems)
     }

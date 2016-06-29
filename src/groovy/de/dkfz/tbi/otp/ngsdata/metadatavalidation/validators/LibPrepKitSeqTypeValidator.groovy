@@ -17,7 +17,7 @@ class LibPrepKitSeqTypeValidator extends ValueTuplesValidator<MetadataValidation
 
     @Override
     List<String> getColumnTitles(MetadataValidationContext context) {
-        return [SEQUENCING_TYPE.name(), LIB_PREP_KIT.name()]
+        return [SEQUENCING_TYPE.name(), LIB_PREP_KIT.name(), TAGMENTATION_BASED_LIBRARY.name()]
     }
 
     @Override
@@ -31,7 +31,8 @@ class LibPrepKitSeqTypeValidator extends ValueTuplesValidator<MetadataValidation
     @Override
     void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {
         valueTuples.each { ValueTuple valueTuple ->
-            if ((valueTuple.getValue(SEQUENCING_TYPE.name()) == SeqTypeNames.EXOME.seqTypeName) &&
+            String seqType = MetadataImportService.getSeqTypeNameFromMetadata(valueTuple)
+            if ((seqType == SeqTypeNames.EXOME.seqTypeName) &&
                     (!valueTuple.getValue(LIB_PREP_KIT.name()))) {
                 context.addProblem(valueTuple.cells, Level.ERROR, "If the sequencing type is '${SeqTypeNames.EXOME.seqTypeName}', the library preparation kit must be given.")
             }

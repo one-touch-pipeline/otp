@@ -16,9 +16,9 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 class LibPrepKitSeqTypeValidatorSpec extends Specification {
 
     static final String VALID_METADATA =
-            "${MetaDataColumn.LIB_PREP_KIT}\t${MetaDataColumn.SEQUENCING_TYPE}\n" +
-                    "lib_prep_kit\t${SeqTypeNames.EXOME.seqTypeName}\n" +
-                    "${InformationReliability.UNKNOWN_VERIFIED.rawValue}\t${SeqTypeNames.EXOME.seqTypeName}\n"
+            "${MetaDataColumn.LIB_PREP_KIT}\t${MetaDataColumn.SEQUENCING_TYPE}\t${MetaDataColumn.TAGMENTATION_BASED_LIBRARY}\n" +
+                    "lib_prep_kit\t${SeqTypeNames.EXOME.seqTypeName}\t\n" +
+                    "${InformationReliability.UNKNOWN_VERIFIED.rawValue}\t${SeqTypeNames.EXOME.seqTypeName}\t\n"
 
     void setup() {
         DomainFactory.createLibraryPreparationKit(name: 'lib_prep_kit')
@@ -45,7 +45,7 @@ class LibPrepKitSeqTypeValidatorSpec extends Specification {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 VALID_METADATA +
-                        "\t${SeqTypeNames.EXOME.seqTypeName}\n"
+                        "\t${SeqTypeNames.EXOME.seqTypeName}\t\n"
         )
 
         when:
@@ -54,7 +54,7 @@ class LibPrepKitSeqTypeValidatorSpec extends Specification {
         then:
         Problem problem = exactlyOneElement(context.problems)
         problem.level == Level.ERROR
-        containSame(problem.affectedCells*.cellAddress, ['A4', 'B4'])
+        containSame(problem.affectedCells*.cellAddress, ['A4', 'B4', 'C4',])
         problem.message.contains("If the sequencing type is '${SeqTypeNames.EXOME.seqTypeName}', the library preparation kit must be given.")
     }
 
@@ -63,7 +63,8 @@ class LibPrepKitSeqTypeValidatorSpec extends Specification {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 VALID_METADATA +
-                        "\t${SeqTypeNames.WHOLE_GENOME.seqTypeName}\n"
+                        "\t${SeqTypeNames.WHOLE_GENOME.seqTypeName}\t\n" +
+                        "\t${SeqTypeNames.EXOME.seqTypeName}\ttrue\n"
         )
 
         when:

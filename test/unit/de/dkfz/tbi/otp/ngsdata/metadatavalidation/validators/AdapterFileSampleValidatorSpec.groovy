@@ -18,11 +18,11 @@ class AdapterFileSampleValidatorSpec extends Specification {
     static final String adapterName = "adapter"
 
     static final String VALID_METADATA =
-        "${SEQUENCING_TYPE.name()}\t${SAMPLE_SUBMISSION_TYPE.name()}\t${ADAPTER_FILE.name()}\n" +
-        "${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\tSample\t\n" +
-        "${SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName}\tSample\t\n" +
-        "${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\tSample\t${adapterName}\n" +
-        "${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\tasdf\t${adapterName}\n"
+        "${SEQUENCING_TYPE.name()}\t${SAMPLE_SUBMISSION_TYPE.name()}\t${ADAPTER_FILE.name()}\t${TAGMENTATION_BASED_LIBRARY}\n" +
+        "${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\tSample\t\t\n" +
+        "${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\tSample\t\ttrue\n" +
+        "${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\tSample\t${adapterName}\t\n" +
+        "${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\tasdf\t${adapterName}\t\n"
 
     void setup() {
         DomainFactory.createAdapterFile(fileName: adapterName).save(flush: true, failOnError: true)
@@ -86,7 +86,7 @@ class AdapterFileSampleValidatorSpec extends Specification {
         then:
         Problem problem = exactlyOneElement(context.problems)
         problem.level == Level.WARNING
-        containSame(problem.affectedCells*.cellAddress, ['A6', 'B6', 'C6'])
+        containSame(problem.affectedCells*.cellAddress, ['A6', 'B6', 'C6', 'D6'])
         problem.message.contains("There should be an entry in the ADAPTER_FILE column for sequencing type '${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}'")
     }
 }

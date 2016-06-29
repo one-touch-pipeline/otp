@@ -1,16 +1,15 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
-import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
+import de.dkfz.tbi.otp.ngsdata.MetadataImportService
 import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContext
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidator
-import de.dkfz.tbi.util.spreadsheet.Cell
-import de.dkfz.tbi.util.spreadsheet.validation.Level
-import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
-import org.springframework.stereotype.Component
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
+import de.dkfz.tbi.util.spreadsheet.validation.*
+import org.springframework.stereotype.*
+
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 
 @Component
-class SeqTypeValidator extends SingleValueValidator<MetadataValidationContext> implements MetadataValidator {
+class SeqTypeValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
 
     @Override
     Collection<String> getDescriptions() {
@@ -18,14 +17,26 @@ class SeqTypeValidator extends SingleValueValidator<MetadataValidationContext> i
     }
 
     @Override
-    String getColumnTitle(MetadataValidationContext context) {
-        return MetaDataColumn.SEQUENCING_TYPE.name()
+    List<String> getColumnTitles(MetadataValidationContext context) {
+        return [SEQUENCING_TYPE.name(), TAGMENTATION_BASED_LIBRARY.name()]
     }
 
     @Override
-    void validateValue(MetadataValidationContext context, String seqTypeName, Set<Cell> cells) {
-        if (!SeqType.findByName(seqTypeName)) {
-            context.addProblem(cells, Level.ERROR, "Sequencing type '${seqTypeName}' is not registered in the OTP database.")
+    boolean columnMissing(MetadataValidationContext context, String columnTitle) {
+        if (columnTitle == SEQUENCING_TYPE.name()) {
+            mandatoryColumnMissing(context, columnTitle)
+            return false
+        }
+        return true
+    }
+
+    @Override
+    void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {
+        valueTuples.each { ValueTuple valueTuple ->
+            String seqType = MetadataImportService.getSeqTypeNameFromMetadata(valueTuple)
+            if (!SeqType.findByName(seqType)) {
+                context.addProblem(valueTuple.cells, Level.ERROR, "Sequencing type '${seqType}' is not registered in the OTP database.")
+            }
         }
     }
 }

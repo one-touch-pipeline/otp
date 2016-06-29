@@ -41,16 +41,18 @@ value1\tvalue2
 
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
-${MetaDataColumn.SEQUENCING_TYPE}\t${MetaDataColumn.LIBRARY_LAYOUT}
-SeqType1\tLibraryLayout1
-SeqType1\tLibraryLayout2
-SeqType2\tLibraryLayout1
-SeqType2\tLibraryLayout2
+${MetaDataColumn.SEQUENCING_TYPE}\t${MetaDataColumn.LIBRARY_LAYOUT}\t${MetaDataColumn.TAGMENTATION_BASED_LIBRARY}
+SeqType1\tLibraryLayout1\t
+SeqType1\tLibraryLayout2\t
+SeqType2\tLibraryLayout1\t
+SeqType2\tLibraryLayout2\t
+SeqType2\tLibraryLayout2\ttrue
 """)
         DomainFactory.createSeqType(name: 'SeqType1', libraryLayout: 'LibraryLayout1')
         DomainFactory.createSeqType(name: 'SeqType1', libraryLayout: 'LibraryLayout2')
         DomainFactory.createSeqType(name: 'SeqType2', libraryLayout: 'LibraryLayout1')
         DomainFactory.createSeqType(name: 'SeqType2', libraryLayout: 'LibraryLayout2')
+        DomainFactory.createSeqType(name: 'SeqType2_TAGMENTATION', libraryLayout: 'LibraryLayout2')
 
         when:
         new SeqTypeLibraryLayoutValidator().validate(context)
@@ -63,16 +65,17 @@ SeqType2\tLibraryLayout2
 
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
-${MetaDataColumn.SEQUENCING_TYPE}\t${MetaDataColumn.LIBRARY_LAYOUT}
-SeqType1\tLibraryLayout1
-SeqType1\tLibraryLayout2
-SeqType1\tLibraryLayout3
-SeqType2\tLibraryLayout1
-SeqType2\tLibraryLayout2
-SeqType2\tLibraryLayout3
-SeqType3\tLibraryLayout1
-SeqType3\tLibraryLayout2
-SeqType3\tLibraryLayout3
+${MetaDataColumn.SEQUENCING_TYPE}\t${MetaDataColumn.LIBRARY_LAYOUT}\t${MetaDataColumn.TAGMENTATION_BASED_LIBRARY}
+SeqType1\tLibraryLayout1\t
+SeqType1\tLibraryLayout2\t
+SeqType1\tLibraryLayout3\t
+SeqType2\tLibraryLayout1\t
+SeqType2\tLibraryLayout2\t
+SeqType2\tLibraryLayout3\t
+SeqType3\tLibraryLayout1\t
+SeqType3\tLibraryLayout2\t
+SeqType3\tLibraryLayout3\t
+SeqType3\tLibraryLayout3\ttrue
 """)
         DomainFactory.createSeqType(name: 'SeqType1', libraryLayout: 'LibraryLayout1')
         DomainFactory.createSeqType(name: 'SeqType2', libraryLayout: 'LibraryLayout2')
@@ -92,6 +95,8 @@ SeqType3\tLibraryLayout3
                         "The combination of sequencing type 'SeqType3' and library layout 'LibraryLayout2' is not registered in the OTP database."),
                 new Problem(context.spreadsheet.dataRows[8].cells as Set, Level.ERROR,
                         "The combination of sequencing type 'SeqType3' and library layout 'LibraryLayout3' is not registered in the OTP database."),
+                new Problem(context.spreadsheet.dataRows[9].cells as Set, Level.ERROR,
+                        "The combination of sequencing type 'SeqType3_TAGMENTATION' and library layout 'LibraryLayout3' is not registered in the OTP database."),
         ]
 
         when:
