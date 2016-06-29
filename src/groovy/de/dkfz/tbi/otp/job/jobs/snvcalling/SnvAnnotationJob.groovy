@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
+import de.dkfz.tbi.otp.job.jobs.AutoRestartable
+
 import static de.dkfz.tbi.otp.job.processing.CreateClusterScriptService.*
 import org.springframework.beans.factory.annotation.Autowired
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -9,7 +11,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
 
 
-class SnvAnnotationJob extends AbstractSnvCallingJob {
+class SnvAnnotationJob extends AbstractSnvCallingJob implements AutoRestartable{
 
     @Autowired
     ConfigService configService

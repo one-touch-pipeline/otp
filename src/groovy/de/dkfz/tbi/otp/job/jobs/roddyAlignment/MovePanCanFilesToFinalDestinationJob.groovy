@@ -4,7 +4,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import org.springframework.beans.factory.annotation.*
-
+import de.dkfz.tbi.otp.job.jobs.AutoRestartable
 
 /**
  *
@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.*
  * are linked from the working processing folder in the project folder.
  * After linking, tmp roddy files and not used files in older work directories are deleted.
  */
-class MovePanCanFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl {
+class MovePanCanFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl implements AutoRestartable {
 
     @Autowired
     ConfigService configService

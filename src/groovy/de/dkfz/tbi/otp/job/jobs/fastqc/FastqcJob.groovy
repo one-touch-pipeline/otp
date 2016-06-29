@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.job.jobs.fastqc
 
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.ClusterJobService
+import de.dkfz.tbi.otp.job.jobs.AutoRestartable
 import de.dkfz.tbi.otp.ngsqc.FastqcUploadService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.ProcessHelperService
@@ -12,7 +13,7 @@ import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
 
-class FastqcJob extends AbstractOtpJob {
+class FastqcJob extends AbstractOtpJob implements AutoRestartable{
 
     @Autowired
     FastqcDataFilesService fastqcDataFilesService
