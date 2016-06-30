@@ -192,17 +192,6 @@ class ExecuteRoddyCommandServiceTests {
     }
 
     @Test
-    void testDefaultRoddyExecutionCommand_ProcessingOptionRoddyVersionIsNull_ShouldFail() {
-        executeRoddyCommandService.metaClass.createWorkOutputDirectory = { Realm realm, File file -> }
-
-        ProcessingOption.findByName("roddyVersion").delete(flush: true)
-        assert !ProcessingOption.findByName("roddyVersion")
-        assert TestCase.shouldFail(AssertionError) {
-            executeRoddyCommandService.defaultRoddyExecutionCommand(roddyBamFile, CONFIG_NAME, ANALYSIS_ID, realm)
-        }.contains("Collection contains 0 elements")
-    }
-
-    @Test
     void testDefaultRoddyExecutionCommand_ProcessingOptionRoddyBaseConfigsPathIsNull_ShouldFail() {
         executeRoddyCommandService.metaClass.createWorkOutputDirectory = { Realm realm, File file -> }
 
@@ -254,7 +243,6 @@ class ExecuteRoddyCommandServiceTests {
                 "${roddyBamFile.individual.pid} " +
                 "--useconfig=${applicationIniPath} " +
                 "--usefeaturetoggleconfig=${featureTogglesConfigPath} " +
-                "--useRoddyVersion=${roddyVersion} " +
                 "--usePluginVersion=${roddyBamFile.config.pluginVersion} " +
                 "--configurationDirectories=${new File(roddyBamFile.config.configFilePath).parent},${roddyBaseConfigsPath} " +
                 "--useiodir=${viewByPid},${roddyBamFile.workDirectory} "
@@ -305,7 +293,6 @@ class ExecuteRoddyCommandServiceTests {
 "sudo -u OtherUnixUser ${roddyCommand} printidlessruntimeconfig ${CONFIG_NAME}.config@${ANALYSIS_ID} " +
 "--useconfig=${applicationIniPath} " +
 "--usefeaturetoggleconfig=${featureTogglesConfigPath} " +
-"--useRoddyVersion=${roddyVersion} " +
 "--usePluginVersion=${roddyBamFile.config.pluginVersion} " +
 "--configurationDirectories=${new File(roddyBamFile.config.configFilePath).parent},${roddyBaseConfigsPath} "
 

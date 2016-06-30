@@ -145,7 +145,6 @@ cd /tmp \
 ${roddyBamFile.individual.pid} \
 --useconfig=${roddyApplicationIni} \
 --usefeaturetoggleconfig=${featureTogglesConfigPath} \
---useRoddyVersion=${roddyVersion} \
 --usePluginVersion=${roddyBamFile.config.pluginVersion} \
 --configurationDirectories=${new File(roddyBamFile.config.configFilePath).parent},${roddyBaseConfigsPath} \
 --useiodir=${viewByPidString()},${roddyBamFile.workDirectory} \

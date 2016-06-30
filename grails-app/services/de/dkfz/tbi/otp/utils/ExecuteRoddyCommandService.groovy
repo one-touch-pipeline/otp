@@ -59,7 +59,6 @@ class ExecuteRoddyCommandService {
 
 
     String commonRoddy(RoddyWorkflowConfig config) {
-        String roddyVersion = ProcessingOptionService.getValueOfProcessingOption("roddyVersion")
         File roddyBaseConfigsPath = ProcessingOptionService.getValueOfProcessingOption("roddyBaseConfigsPath") as File
         File applicationIniPath = ProcessingOptionService.getValueOfProcessingOption("roddyApplicationIni") as File
 
@@ -74,7 +73,6 @@ class ExecuteRoddyCommandService {
         return \
             "--useconfig=${applicationIniPath} " +
             "--usefeaturetoggleconfig=${featureTogglesConfigPath()} " +
-            "--useRoddyVersion=${roddyVersion} " +
             "--usePluginVersion=${pluginVersion} " +
             "--configurationDirectories=${configFile.parent},${roddyBaseConfigsPath} "
     }
