@@ -15,10 +15,10 @@ class CreateRoddyFileHelper {
 
         if (roddyBamFile.seqType.isWgbs()) {
             assert roddyBamFile."get${workOrFinal}MergedMethylationDirectory"().mkdirs()
-            roddyBamFile."get${workOrFinal}LibraryQADirectories"().each {
+            roddyBamFile."get${workOrFinal}LibraryQADirectories"().values().each {
                 assert it.mkdirs()
             }
-            roddyBamFile."get${workOrFinal}LibraryMethylationDirectories"().each {
+            roddyBamFile."get${workOrFinal}LibraryMethylationDirectories"().values().each {
                 assert it.mkdirs()
             }
             assert roddyBamFile."get${workOrFinal}MetadataTableFile"().createNewFile()

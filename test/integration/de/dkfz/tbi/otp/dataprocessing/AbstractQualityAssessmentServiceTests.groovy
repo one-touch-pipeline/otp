@@ -24,6 +24,7 @@ class AbstractQualityAssessmentServiceTests {
     final static long SOME_VALUE_1 = 1111111
     final static long SOME_VALUE_2 = 2222222
     final static long SOME_VALUE_3 = 3333333
+    final static long SOME_VALUE_4 = 4444444
 
     TestData data = new TestData()
 
@@ -110,11 +111,13 @@ class AbstractQualityAssessmentServiceTests {
         )
         DomainFactory.createRealmDataManagement(temporaryFolder.newFolder(), [name: roddyBamFile.project.realmName])
         createReferenceGenomeEntries(roddyBamFile.referenceGenome)
-        createQaFileOnFileSystem(roddyBamFile.workMergedQAJsonFile, SOME_VALUE_1)
-        createQaFileOnFileSystem(roddyBamFile.workMergedQATargetExtractJsonFile, SOME_VALUE_2)
-        createQaFileOnFileSystem(exactlyOneElement(roddyBamFile.workSingleLaneQAJsonFiles.values()), SOME_VALUE_3)
+        DomainFactory.createQaFileOnFileSystem(roddyBamFile.workMergedQAJsonFile, SOME_VALUE_1)
+        DomainFactory.createQaFileOnFileSystem(roddyBamFile.workMergedQATargetExtractJsonFile, SOME_VALUE_2)
+        DomainFactory.createQaFileOnFileSystem(exactlyOneElement(roddyBamFile.workSingleLaneQAJsonFiles.values()), SOME_VALUE_3)
+        DomainFactory.createQaFileOnFileSystem(exactlyOneElement(roddyBamFile.workLibraryQAJsonFiles.values()), SOME_VALUE_4)
         assert RoddyMergedBamQa.list().empty
         assert RoddySingleLaneQa.list().empty
+        assert RoddyLibraryQa.list().empty
         return roddyBamFile
     }
 
@@ -165,6 +168,10 @@ class AbstractQualityAssessmentServiceTests {
         testParseRoddyMergedBamQaStatistics_allFine("SingleLane", DomainFactory.createExomeSeqType(), null, SOME_VALUE_3, null)
     }
 
+    @Test
+    void testParseRoddyLibraryQaStatistics_WGBS_allFine() {
+        testParseRoddyMergedBamQaStatistics_allFine("Library", DomainFactory.createWholeGenomeBisulfiteSeqType(), SOME_VALUE_4, null, null)
+    }
 
     @Test
     void testAssertListContainsAllChromosomeNamesInReferenceGenome_listAreSame_shouldBeFine() {
@@ -199,13 +206,6 @@ class AbstractQualityAssessmentServiceTests {
     }
 
 
-
-
-    static void createReferenceGenomeEntriesAndQaFileOnFilesystem(ReferenceGenome referenceGenome, File qaFile) {
-        createReferenceGenomeEntries(referenceGenome)
-        createQaFileOnFileSystem(qaFile)
-    }
-
     static void createReferenceGenomeEntries(ReferenceGenome referenceGenome) {
         ['7', '8'].each {
             ReferenceGenomeEntry.build(
@@ -216,49 +216,6 @@ class AbstractQualityAssessmentServiceTests {
         }
     }
 
-    static void createQaFileOnFileSystem(File qaFile, long chromosome8QcBasesMapped = 1866013) {
-        qaFile.parentFile.mkdirs()
-        // the values are from the documentation on the Wiki: https://wiki.local/NGS/OTP-Roddy+Interface#HTheQCData
-        qaFile <<
-"""
-{
-  "8": {
-    "genomeWithoutNCoverageQcBases": 0.01,
-    "referenceLength": 146364022,
-    "chromosome": 8,
-    "qcBasesMapped": ${chromosome8QcBasesMapped}
-  },
-  "all": {
-    "pairedRead1": 209146,
-    "pairedInSequencing": 421309,
-    "withMateMappedToDifferentChr": 33635,
-    "qcFailedReads": 0,
-    "totalReadCounter": 421309,
-    "totalMappedReadCounter": 420369,
-    "genomeWithoutNCoverageQcBases": 0.01,
-    "singletons": 1080,
-    "withMateMappedToDifferentChrMaq": 6161,
-    "insertSizeMedian": 399,
-    "insertSizeSD": 93,
-    "pairedRead2": 212163,
-    "percentageMatesOnDifferentChr": 1.55,
-    "chromosome": "all",
-    "withItselfAndMateMapped": 419289,
-    "qcBasesMapped": 35857865,
-    "duplicates": 805,
-    "insertSizeCV": 23,
-    "referenceLength": 3095677412,
-    "properlyPaired": 384766
-  },
-  "7": {
-    "referenceLength": 159138663,
-    "genomeWithoutNCoverageQcBases": 0.01,
-    "qcBasesMapped": 1942176,
-    "chromosome": 7
-  }
-}
-"""
-    }
 
     private ProcessedBamFile createProcessedBamFile() {
 

@@ -4,10 +4,10 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 class RoddyLibraryQa extends RoddyQualityAssessment {
 
-    String normalizedLibraryName
+    String libraryDirectoryName
 
     static constraints = {
-        chromosome(unique: ['qualityAssessmentMergedPass', 'normalizedLibraryName'])
-        normalizedLibraryName(blank: false, validator: { val -> !val || SeqTrack.normalizeLibraryName(val) == val })
+        chromosome(unique: ['qualityAssessmentMergedPass', 'libraryDirectoryName'])
+        libraryDirectoryName(blank: false, validator: { val -> !val || val.startsWith("lib") })
     }
 }

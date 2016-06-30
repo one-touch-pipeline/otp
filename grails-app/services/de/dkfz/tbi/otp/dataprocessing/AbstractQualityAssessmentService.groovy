@@ -71,7 +71,9 @@ class AbstractQualityAssessmentService {
         }
     }
 
-    private void parseRoddyQaStatistics(RoddyBamFile roddyBamFile, SeqTrack seqTrack, File qualityControlJsonFile, Closure qualityControlTargetExtractJsonFile) {
+    private Map<String, Map> parseRoddyQaStatistics(RoddyBamFile roddyBamFile, File qualityControlJsonFile, Closure qualityControlTargetExtractJsonFile) {
+        Map<String, Map> chromosomeInformation = [:]
+
         boolean isExome = roddyBamFile.seqType.seqTypeName == SeqTypeNames.EXOME
         JSONObject qualityControlJson = JSON.parse(qualityControlJsonFile.text)
         JSONObject qualityControlTargetExtractJson
@@ -98,31 +100,52 @@ class AbstractQualityAssessmentService {
                     assert previousOnTargetMappedBases == null
                 }
             }
-            RoddyQualityAssessment qa
-            if (seqTrack) {
-                qa = new RoddySingleLaneQa(chromosomeValues)
-                qa.seqTrack = seqTrack
-            } else {
-                qa = new RoddyMergedBamQa(chromosomeValues)
-            }
-            assert qa.chromosome == chromosome
-            qa.qualityAssessmentMergedPass = roddyBamFile.findOrSaveQaPass()
-            assert qa.save(flush: true)
+            chromosomeInformation.put(chromosome, chromosomeValues)
         }
         assertListContainsAllChromosomeNamesInReferenceGenome(allChromosomeNames, roddyBamFile.referenceGenome)
+        return chromosomeInformation
     }
 
     void parseRoddySingleLaneQaStatistics(RoddyBamFile roddyBamFile) {
         Map<SeqTrack, File> qaFilesPerSeqTrack = roddyBamFile.getWorkSingleLaneQAJsonFiles()
         qaFilesPerSeqTrack.each { seqTrack, qaFile ->
-            parseRoddyQaStatistics(roddyBamFile, seqTrack, qaFile, null)
+            Map<String, Map> chromosomeInformation = parseRoddyQaStatistics(roddyBamFile, qaFile, null)
+            chromosomeInformation.each { chromosome, chromosomeValues ->
+                RoddySingleLaneQa qa = new RoddySingleLaneQa(chromosomeValues)
+                qa.seqTrack = seqTrack
+                assert qa.chromosome == chromosome
+                qa.qualityAssessmentMergedPass = roddyBamFile.findOrSaveQaPass()
+                assert qa.save(flush: true)
+            }
         }
     }
 
 
     void parseRoddyMergedBamQaStatistics(RoddyBamFile roddyBamFile) {
         File qaFile = roddyBamFile.getWorkMergedQAJsonFile()
-        parseRoddyQaStatistics(roddyBamFile, null, qaFile, { roddyBamFile.workMergedQATargetExtractJsonFile })
+        Map<String, Map> chromosomeInformation = parseRoddyQaStatistics(roddyBamFile, qaFile, { roddyBamFile.workMergedQATargetExtractJsonFile })
+
+        chromosomeInformation.each { chromosome, chromosomeValues ->
+            RoddyMergedBamQa qa = new RoddyMergedBamQa(chromosomeValues)
+            assert qa.chromosome == chromosome
+            qa.qualityAssessmentMergedPass = roddyBamFile.findOrSaveQaPass()
+            assert qa.save(flush: true)
+        }
+    }
+
+    void parseRoddyLibraryQaStatistics(RoddyBamFile roddyBamFile) {
+        Map<String, File> qaFilesPerLibrary = roddyBamFile.getWorkLibraryQAJsonFiles()
+
+        qaFilesPerLibrary.each { lib, qaFile ->
+            Map<String, Map> chromosomeInformation = parseRoddyQaStatistics(roddyBamFile, qaFile, null)
+            chromosomeInformation.each { chromosome, chromosomeValues ->
+                RoddyLibraryQa qa = new RoddyLibraryQa(chromosomeValues)
+                qa.libraryDirectoryName = lib
+                assert qa.chromosome == chromosome
+                qa.qualityAssessmentMergedPass = roddyBamFile.findOrSaveQaPass()
+                assert qa.save(flush: true)
+            }
+        }
     }
 
     void saveCoverageToRoddyBamFile(RoddyBamFile roddyBamFile) {

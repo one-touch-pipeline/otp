@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
 import de.dkfz.tbi.otp.utils.HelperUtils
@@ -11,7 +12,7 @@ import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.springframework.beans.factory.annotation.Autowired
 
-import static de.dkfz.tbi.otp.dataprocessing.AbstractQualityAssessmentServiceTests.createReferenceGenomeEntriesAndQaFileOnFilesystem
+
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 class ParsePanCanQcJobTests {
@@ -29,7 +30,11 @@ class ParsePanCanQcJobTests {
         SeqTrack seqTrack = exactlyOneElement(roddyBamFile.seqTracks)
         roddyBamFile.metaClass.getWorkMergedQAJsonFile = { -> qaFile }
         roddyBamFile.metaClass.getWorkSingleLaneQAJsonFiles = { -> [(seqTrack): qaFile] }
-        createReferenceGenomeEntriesAndQaFileOnFilesystem(roddyBamFile.referenceGenome, qaFile)
+
+        ReferenceGenome referenceGenome = DomainFactory.createReferenceGenome()
+        DomainFactory.createReferenceGenomeEntries(referenceGenome, ['7', '8'])
+        DomainFactory.createQaFileOnFileSystem(qaFile)
+
         ParsePanCanQcJob job = [
                 getProcessParameterObject: { -> roddyBamFile },
         ] as ParsePanCanQcJob

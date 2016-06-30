@@ -373,7 +373,7 @@ class DomainFactory {
                     workflow: workflow,
                     seqType: seqType,
             )
-            ReferenceGenomeProjectSeqType.build(
+            createReferenceGenomeProjectSeqType(
                     referenceGenome: workPackage.referenceGenome,
                     project: workPackage.project,
                     seqType: workPackage.seqType,
@@ -381,7 +381,7 @@ class DomainFactory {
             )
         }
         SeqTrack seqTrack = createSeqTrackWithDataFiles(workPackage)
-        RoddyBamFile bamFile = RoddyBamFile.build([
+        RoddyBamFile bamFile = createDomainObject(RoddyBamFile, [
                 numberOfMergedLanes: 1,
                 workDirectoryName: "${RoddyBamFile.WORK_DIR_PREFIX}_${counter++}",
                 seqTracks: [seqTrack],
@@ -395,8 +395,7 @@ class DomainFactory {
                 fileOperationStatus: FileOperationStatus.PROCESSED,
                 fileSize: 10000,
                 roddyVersion: createProcessingOption(),
-                ] + bamFileProperties)
-        assert bamFile.save(flush: true) // build-test-data does not flush, only saves
+                ], bamFileProperties)
         return bamFile
     }
 
@@ -1175,4 +1174,49 @@ class DomainFactory {
             assert it.save(flush: true)
         }
     }
+
+    static void createQaFileOnFileSystem(File qaFile, long chromosome8QcBasesMapped = 1866013) {
+        qaFile.parentFile.mkdirs()
+        // the values are from the documentation on the Wiki: https://wiki.local/NGS/OTP-Roddy+Interface#HTheQCData
+        qaFile <<
+                """
+{
+  "8": {
+    "genomeWithoutNCoverageQcBases": 0.011,
+    "referenceLength": 14636402211,
+    "chromosome": 8,
+    "qcBasesMapped": ${chromosome8QcBasesMapped}
+  },
+  "all": {
+    "pairedRead1": 2091461,
+    "pairedInSequencing": 4213091,
+    "withMateMappedToDifferentChr": 336351,
+    "qcFailedReads": 10,
+    "totalReadCounter": 4213091,
+    "totalMappedReadCounter": 4203691,
+    "genomeWithoutNCoverageQcBases": 0.011,
+    "singletons": 10801,
+    "withMateMappedToDifferentChrMaq": 61611,
+    "insertSizeMedian": 3991,
+    "insertSizeSD": 931,
+    "pairedRead2": 2121631,
+    "percentageMatesOnDifferentChr": 1.551,
+    "chromosome": "all",
+    "withItselfAndMateMapped": 4192891,
+    "qcBasesMapped": ${chromosome8QcBasesMapped},
+    "duplicates": 8051,
+    "insertSizeCV": 231,
+    "referenceLength": 30956774121,
+    "properlyPaired": 3847661
+  },
+  "7": {
+    "referenceLength": 1591386631,
+    "genomeWithoutNCoverageQcBases": 0.011,
+    "qcBasesMapped": ${chromosome8QcBasesMapped},
+    "chromosome": 7
+  }
+}
+"""
+    }
+
 }

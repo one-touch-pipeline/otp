@@ -8,7 +8,7 @@ String workflow = "WgbsAlignmentWorkflow"
 plan(workflow, ctx, true) {
     start("WgbsAlignmentStart", "WgbsAlignmentStartJob")
     job("executeWgbsAlignment", "executeWgbsAlignmentJob")
-    job("parsePanCanQc", "parsePanCanQcJob") // this job will be implemented in OTP-2099, currently the general parsing job will be used
+    job("parseWgbsAlignmentQc", "parseWgbsAlignmentQcJob")
     job("linkWgbsAlignmentFiles", "linkWgbsAlignmentFilesJob")
     job("notifyProcessFinished", "notifyProcessFinishedJob") {
         constantParameter("step", OtrsTicket.ProcessingStep.ALIGNMENT.name())

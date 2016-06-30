@@ -233,11 +233,11 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
         return new File(this.workQADirectory, MERGED_DIR)
     }
 
-    Set<File> getFinalLibraryQADirectories() {
+    Map<String, File> getFinalLibraryQADirectories() {
         return getLibraryDirectories(this.finalQADirectory)
     }
 
-    Set<File> getWorkLibraryQADirectories() {
+    Map<String, File> getWorkLibraryQADirectories() {
         return getLibraryDirectories(this.workQADirectory)
     }
 
@@ -249,11 +249,11 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
         return new File(this.workMethylationDirectory, MERGED_DIR)
     }
 
-    Set<File> getFinalLibraryMethylationDirectories() {
+    Map<String, File> getFinalLibraryMethylationDirectories() {
         return getLibraryDirectories(this.finalMethylationDirectory)
     }
 
-    Set<File> getWorkLibraryMethylationDirectories() {
+    Map<String, File> getWorkLibraryMethylationDirectories() {
         return getLibraryDirectories(this.workMethylationDirectory)
     }
 
@@ -285,13 +285,29 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
         return getSingleLaneQAJsonFiles('Work')
     }
 
-    private Set<File> getLibraryDirectories(File baseDirectory) {
-        seqTracks*.libraryDirectoryName.unique().collect( { new File(baseDirectory, it) })
+    private Map<String, File> getLibraryDirectories(File baseDirectory) {
+        return seqTracks.collectEntries {
+            [(it.libraryDirectoryName): new File(baseDirectory, it.libraryDirectoryName)]
+        }
     }
 
     private Map<SeqTrack, File> getSingleLaneQAJsonFiles(String workOrFinal) {
         return "get${workOrFinal}SingleLaneQADirectories"().collectEntries { SeqTrack seqTrack, File directory ->
             [(seqTrack): new File(directory, QUALITY_CONTROL_JSON_FILE_NAME)]
+        }
+    }
+
+    Map<String, File> getFinalLibraryQAJsonFiles() {
+        return getLibraryQAJsonFiles('Final')
+    }
+
+    Map<String, File> getWorkLibraryQAJsonFiles() {
+        return getLibraryQAJsonFiles('Work')
+    }
+
+    private Map<String, File> getLibraryQAJsonFiles(String workOrFinal) {
+        return "get${workOrFinal}LibraryQADirectories"().collectEntries { String lib, File directory ->
+            [(lib): new File(directory, QUALITY_CONTROL_JSON_FILE_NAME)]
         }
     }
 
