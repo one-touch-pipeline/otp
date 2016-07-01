@@ -57,7 +57,6 @@ class SeqTrackService {
      * @return List of matching Sequences
      */
     public List<Sequence> listSequences(int offset, int max, boolean sortOrder, SequenceSortColumn column, SequenceFiltering filtering) {
-        String columnName = "projectId"
         if (filtering.enabled) {
             def c = Sequence.createCriteria()
             return c.list {
@@ -83,6 +82,9 @@ class SeqTrackService {
                 }
                 if (filtering.seqCenter) {
                     'in'('seqCenterId', filtering.seqCenter)
+                }
+                if (filtering.ilseId) {
+                    'in'('ilseId', filtering.ilseId)
                 }
                 if (filtering.run) {
                     or {
@@ -133,6 +135,9 @@ class SeqTrackService {
                 }
                 if (filtering.seqCenter) {
                     'in'('seqCenterId', filtering.seqCenter)
+                }
+                if (filtering.ilseId) {
+                    'in'('ilseId', filtering.ilseId)
                 }
                 if (filtering.run) {
                     or {

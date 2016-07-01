@@ -143,6 +143,7 @@ $.otp.sequence = {
                                 row.laneId,
                                 row.libraryName,
                                 fastQC,
+                                row.ilseId,
                                 row.dateCreated
                             ];
                             json.aaData[i] = rowData;

@@ -32,6 +32,7 @@ class Sequence implements Serializable {
     long sampleTypeId
     long individualId
     long projectId
+    String ilseId
 
     // fields from SeqTrack
     String laneId
@@ -121,6 +122,7 @@ class Sequence implements Serializable {
         sampleTypeId column: 'sample_type_id'
         individualId column: 'individual_id'
         projectId column: 'project_id'
+        ilseId column: 'ilse_id'
         id composite: ['seqTrackId', 'seqTypeId', 'seqPlatformId', 'sampleId', 'runId', 'pipelineVersionId', 'seqCenterId', 'sampleTypeId', 'individualId', 'projectId']
         dayCreated formula: 'DATE(date_created)'
     }

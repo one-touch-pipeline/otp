@@ -75,6 +75,7 @@ class SequenceController {
                     row.name,
                     row.laneId,
                     row.libraryName,
+                    row.ilseId,
                     row.dateCreated?.format("yyyy-MM-dd"),
             ].join(",")
         }.join("\n")
@@ -88,6 +89,7 @@ class SequenceController {
             'Run',
             'Lane',
             'Library',
+            'ILSe',
             'Run Date'
         ].join(',')
         def content = "${contentHeader}\n${contentBody}\n"
@@ -106,7 +108,9 @@ enum SequenceSortColumn {
     SEQ_CENTER("seqCenterName"),
     RUN("name"),
     LANE("laneId"),
+    LIBRARY("libraryName"),
     FASTQC("fastqcState"),
+    ILSEID("ilseId"),
     DATE("dateCreated")
 
     private final String columnName
@@ -134,8 +138,12 @@ enum SequenceSortColumn {
             case 7:
                 return SequenceSortColumn.LANE
             case 8:
-                return SequenceSortColumn.FASTQC
+                return SequenceSortColumn.LIBRARY
             case 9:
+                return SequenceSortColumn.FASTQC
+            case 10:
+                return SequenceSortColumn.ILSEID
+            case 11:
                 return SequenceSortColumn.DATE
             default:
                 return SequenceSortColumn.PROJECT
@@ -153,6 +161,7 @@ class SequenceFiltering {
     List<Long> sampleType = []
     List<String> seqType = []
     List<String> libraryLayout = []
+    List<String> ilseId = []
     List<Long> seqCenter = []
     List<String> run = []
 
