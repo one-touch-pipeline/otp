@@ -167,8 +167,18 @@ set -e
 cd "${basePath}"
 
 echo ""
-echo "delete directory content of " `pwd`
-find -mindepth 1 -user ${realm.roddyUser} -prune -print -execdir rm -r '{}' \\;
+echo "delete ${realm.roddyUser} directory content of" `pwd`
+find -user ${realm.roddyUser} -type d -not -empty -prune | \\
+while read line
+do
+  echo ""
+  echo "delete content of" \$line
+  (
+    set -e
+    cd \$line
+    rm -rf *
+  )
+done
 """
         assert executionService.executeCommandReturnProcessOutput(realm, cmd, realm.roddyUser).isStderrEmptyAndExitCodeZero()
     }

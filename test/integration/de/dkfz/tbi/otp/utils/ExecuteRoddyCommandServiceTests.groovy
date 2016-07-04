@@ -454,28 +454,46 @@ ${primaryGroup}
     }
 
 
-
-    @Test
-    void testDeleteContentOfOtherUnixUserDirectory_AllFine() {
+    void helperTestDeleteContentOfOtherUnixUserDirectory_AllFine(boolean fileExist, Closure checkCallback) {
         executeRoddyCommandService.executionService = [
                 executeCommandReturnProcessOutput: { Realm realm1, String cmd, String user ->
                     assert realm1 == realm
                     assert user == realm.roddyUser
                     ProcessOutput out =  waitForCommand(cmd)
                     assert out.stderrEmptyAndExitCodeZero
-                    assert out.stdout.startsWith("\ndelete directory content of  ${roddyBamFile.workDirectory}\n")
-                    assert out.stdout.contains("./file")
-                    assert out.stdout.contains("./dir")
+                    assert out.stdout.startsWith("\ndelete ${user} directory content of ${roddyBamFile.workDirectory}\n")
+                    checkCallback(out.stdout)
                     return out
                 }
         ] as ExecutionService
 
-        assert new File(roddyBamFile.workDirectory, "dir").mkdirs()
-        CreateFileHelper.createFile(new File(roddyBamFile.workDirectory, "file"))
+        File ownDir = new File(roddyBamFile.workDirectory, "ownDir")
+        assert ownDir.mkdirs()
+        File ownFileInDir = CreateFileHelper.createFile(new File(roddyBamFile.workDirectory, "ownFileInDir"))
+        File ownFile = CreateFileHelper.createFile(new File(ownDir, "ownFile"))
+
+        //For a real test it would be necessary to create dirs and files as another user
 
         executeRoddyCommandService.deleteContentOfOtherUnixUserDirectory(roddyBamFile.workDirectory, realm)
 
-        assert roddyBamFile.workDirectory.list().length == 0
+        assert fileExist == ownFileInDir.exists()
+        assert fileExist == ownFile.exists()
+    }
+
+    @Test
+    void testDeleteContentOfOtherUnixUserDirectory_AllFineCorrectUser() {
+        helperTestDeleteContentOfOtherUnixUserDirectory_AllFine(false) { String output ->
+            assert output.contains("delete content of .")
+        }
+    }
+
+    @Test
+    void testDeleteContentOfOtherUnixUserDirectory_AllFineWrongUser() {
+        realm.roddyUser = grailsApplication.config.otp.testing.workflows.account
+        realm.save(flush: true)
+        helperTestDeleteContentOfOtherUnixUserDirectory_AllFine(true) { String output ->
+            assert !output.contains("delete content of")
+        }
     }
 
     @Test
