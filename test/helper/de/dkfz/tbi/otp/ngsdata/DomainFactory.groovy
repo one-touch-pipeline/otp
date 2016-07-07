@@ -1043,6 +1043,16 @@ class DomainFactory {
         ]
     }
 
+    static List<SeqType> createPanCanAlignableSeqTypes() {
+        [
+                createWholeGenomeSeqType(),
+                createExomeSeqType(),
+                createWholeGenomeBisulfiteSeqType(),
+                createWholeGenomeBisulfiteTagmentationSeqType(),
+        ]
+    }
+
+
     static MetaDataEntry createMetaDataKeyAndEntry(DataFile dataFile, String key, String value) {
         MetaDataKey metaDataKey = MetaDataKey.buildLazy(name: key)
 

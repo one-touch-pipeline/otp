@@ -4,6 +4,8 @@ import org.springframework.security.access.prepost.PreAuthorize
 
 class SeqTypeService {
 
+    @Deprecated
+    /** @deprecated Use {@link SeqType#getAllAlignableSeqTypes()}, {@link SeqType#getDefaultOtpAlignableSeqTypes()} or {@link SeqType#getPanCanAlignableSeqTypes()} instead. */
     static List<SeqType> alignableSeqTypes() {
         final List<String> alignableSeqTypeNames = [
             SeqTypeNames.EXOME,

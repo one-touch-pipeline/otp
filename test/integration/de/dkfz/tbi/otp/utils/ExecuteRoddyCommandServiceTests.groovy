@@ -124,7 +124,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testGetAnalysisIDinConfigFile_SeqTypeWGS() {
-        DomainFactory.createAlignableSeqTypes()
+        DomainFactory.createPanCanAlignableSeqTypes()
         roddyBamFile.mergingWorkPackage.seqType = SeqType.wholeGenomePairedSeqType
         assert roddyBamFile.mergingWorkPackage.save(flush: true)
 
@@ -133,7 +133,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testGetAnalysisIDinConfigFile_SeqTypeEXOME() {
-        DomainFactory.createAlignableSeqTypes()
+        DomainFactory.createPanCanAlignableSeqTypes()
         roddyBamFile.mergingWorkPackage.seqType = SeqType.exomePairedSeqType
         assert roddyBamFile.mergingWorkPackage.save(flush: true)
 
@@ -142,7 +142,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testGetAnalysisIDinConfigFile_DifferentSeqType_ShouldFail() {
-        DomainFactory.createAlignableSeqTypes()
+        DomainFactory.createPanCanAlignableSeqTypes()
         roddyBamFile.mergingWorkPackage.seqType = SeqType.build(name: "differentSeqType")
         assert roddyBamFile.mergingWorkPackage.save(flush: true)
 

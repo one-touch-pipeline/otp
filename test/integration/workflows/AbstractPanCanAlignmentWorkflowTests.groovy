@@ -161,7 +161,7 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
     abstract SeqType findSeqType()
 
     MergingWorkPackage createWorkPackage() {
-        DomainFactory.createAlignableSeqTypes()
+        DomainFactory.createPanCanAlignableSeqTypes()
         SeqType seqType = findSeqType()
 
         Pipeline pipeline = Pipeline.build(

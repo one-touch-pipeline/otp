@@ -100,4 +100,39 @@ class SeqType implements Entity {
                 findAllByNameAndLibraryLayout(SeqTypeNames.EXOME.seqTypeName, LIBRARYLAYOUT_PAIRED)
         )
     }
+
+    static SeqType getWholeGenomeBisulfitePairedSeqType() {
+        return CollectionUtils.exactlyOneElement(
+                findAllByNameAndLibraryLayout(SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName, LIBRARYLAYOUT_PAIRED)
+        )
+    }
+
+    static SeqType getWholeGenomeBisulfiteTagmentationPairedSeqType() {
+        return CollectionUtils.exactlyOneElement(
+                findAllByNameAndLibraryLayout(SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName, LIBRARYLAYOUT_PAIRED)
+        )
+    }
+
+    static List<SeqType> getDefaultOtpAlignableSeqTypes() {
+        return [
+                getExomePairedSeqType(),
+                getWholeGenomePairedSeqType(),
+        ]
+    }
+
+    static List<SeqType> getPanCanAlignableSeqTypes() {
+        return [
+                getExomePairedSeqType(),
+                getWholeGenomePairedSeqType(),
+                getWholeGenomeBisulfitePairedSeqType(),
+                getWholeGenomeBisulfiteTagmentationPairedSeqType(),
+        ]
+    }
+
+    static List<SeqType> getAllAlignableSeqTypes() {
+        return (
+                getDefaultOtpAlignableSeqTypes() +
+                getPanCanAlignableSeqTypes()
+        ).unique()
+    }
 }
