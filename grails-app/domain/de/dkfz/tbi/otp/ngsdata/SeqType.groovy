@@ -43,7 +43,9 @@ class SeqType implements Entity {
         alias(nullable: true, blank: false)
         //For unknown reason the object creation fail, if it is not set as nullable
         displayName(nullable: true, blank: false)
-        roddyName(nullable: true, blank: false)
+        roddyName(nullable: true, blank: false, validator: {
+            !it?.contains('_')  // Roddy has problems with underscores
+        })
     }
 
     static mapping = {
