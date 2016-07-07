@@ -148,6 +148,10 @@ abstract class AbstractRoddyJob extends AbstractMaybeSubmitWaitValidateJob{
                 String jobClass = m.group(2)
                 String pbsId = m.group(3)
 
+                if (!pbsId.matches(/[1-9]\d*/)) {
+                    throw new RuntimeException("'${pbsId}' is not a valid PBS ID.")
+                }
+
                 submittedClusterJobs.add(clusterJobService.createClusterJob(realm, pbsId, realm.roddyUser, processingStep, seqType, jobName, jobClass))
             }
         }
