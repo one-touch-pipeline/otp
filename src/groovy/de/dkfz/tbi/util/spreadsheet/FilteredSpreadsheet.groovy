@@ -6,7 +6,7 @@ class FilteredSpreadsheet extends Spreadsheet {
 
     FilteredSpreadsheet(String document, Closure<Boolean> dataRowFilter) {
         super(document)
-        dataRows = super.dataRows.findAll { dataRowFilter(it) }.asImmutable()
+        dataRows = super.dataRows.findAll(dataRowFilter).asImmutable()
     }
 
     @Override
