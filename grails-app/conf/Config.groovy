@@ -240,7 +240,7 @@ otp {
         // Default settings for work-flow integration tests
         workflows {
             account = otpProperties.getProperty("otp.testing.workflows.account")
-            rootdir = (otpConfig.otp.testing.workflows.rootdir) ?: 'WORKFLOW_ROOT'
+            rootdir = otpProperties.getProperty("otp.testing.workflows.rootdir")
         }
         group = otpConfig.otp.testing.group ?: ''    //A real group of the developer but not the primary one
     }

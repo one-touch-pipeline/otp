@@ -209,15 +209,10 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
     void createProjectConfig(MergingWorkPackage workPackage) {
         assert projectConfigFile.exists()
 
-        //The config file needs to be accessible by the OtherUnixUser user on the local host
-        //The workflow directories are mounted via sshfs, they can only be accessed by one user
-        File configFile = new File(temporaryFolder.newFolder(projectConfigFile.parentFile.name), projectConfigFile.name)
-        configFile.text = projectConfigFile.text
-
         String pluginVersion = getPluginVersion(projectConfigFile)
 
         RoddyWorkflowConfig.build(
-                configFilePath: configFile.absolutePath,
+                configFilePath: projectConfigFile.absolutePath,
                 pipeline: workPackage.pipeline,
                 pluginVersion: pluginVersion,
                 configVersion: DomainFactory.TEST_CONFIG_VERSION,
@@ -225,7 +220,7 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
                 obsoleteDate: null
         )
         //ensure that expected identifier is available
-        assert configFile.text.contains("${workPackage.pipeline.name}_${pluginVersion}_${DomainFactory.TEST_CONFIG_VERSION}")
+        assert projectConfigFile.text.contains("${workPackage.pipeline.name}_${workPackage.seqType.roddyName}_${pluginVersion}_${DomainFactory.TEST_CONFIG_VERSION}")
     }
 
     SeqTrack createSeqTrack(String readGroupNum) {
@@ -619,14 +614,9 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
     void resetProjectConfig(File sourceProjectConfig) {
         assert sourceProjectConfig.exists()
 
-        //The config file needs to be accessible by the OtherUnixUser user on the local host
-        //The workflow directories are mounted via sshfs, they can only be accessed by one user
-        File configFile = new File(temporaryFolder.newFolder(sourceProjectConfig.name), sourceProjectConfig.name)
-        configFile.text = sourceProjectConfig.text
-
         RoddyWorkflowConfig config = exactlyOneElement(RoddyWorkflowConfig.findAll())
-        config.configFilePath = configFile.absolutePath
+        config.configFilePath = sourceProjectConfig.absolutePath
         config.save(flush: true, failOnError: true)
-        setPluginVersion(getPluginVersion(configFile))
+        setPluginVersion(getPluginVersion(sourceProjectConfig))
     }
 }
