@@ -21,7 +21,6 @@ import de.dkfz.tbi.otp.job.processing.Parameter
 import de.dkfz.tbi.otp.job.processing.ParameterMapping
 import de.dkfz.tbi.otp.job.processing.ParameterType
 import de.dkfz.tbi.otp.job.processing.ParameterUsage
-import de.dkfz.tbi.otp.job.processing.PbsJob
 import de.dkfz.tbi.otp.job.processing.Process
 import de.dkfz.tbi.otp.job.processing.ProcessParameter
 import de.dkfz.tbi.otp.job.processing.ProcessingError
@@ -32,7 +31,6 @@ import de.dkfz.tbi.otp.job.processing.RestartedProcessingStep
 import de.dkfz.tbi.otp.job.processing.SometimesResumableJob
 import de.dkfz.tbi.otp.job.processing.StartJob
 import de.dkfz.tbi.otp.job.processing.ValidatingJob
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.notification.NotificationEvent
 import de.dkfz.tbi.otp.notification.NotificationType
 import de.dkfz.tbi.otp.utils.ExceptionUtils
@@ -411,57 +409,6 @@ class SchedulerService {
         if (!step.save(flush: true)) {
             log.fatal("Could not create a FINISHED Update for Job of type ${job.class}")
             throw new ProcessingException("Could not create a FINISHED Update for Job")
-        }
-        if (job instanceof PbsJob) {
-            List<String> pbsIds = (job as PbsJob).getPbsIds()
-            if (pbsIds.empty) {
-                // list of Process IDs is empty - watchdog cannot be started
-                createError(step, "PbsJob does not provide PBS Process Ids", job.class)
-                log.error("PbsJob for JobDefinition ${step.jobDefinition.id} does not provide PBS Process Ids")
-                markProcessAsFailed(step, "PbsJob for JobDefinition ${step.jobDefinition.id} does not provide PBS Process Ids.")
-                return
-            }
-            String pbsParameterValue = ""
-            pbsIds.eachWithIndex { id, i ->
-                if (i > 0) {
-                    pbsParameterValue = pbsParameterValue + ","
-                }
-                pbsParameterValue = pbsParameterValue + id
-            }
-            ParameterType pbsIdType = ParameterType.findByJobDefinitionAndParameterUsageAndName(step.jobDefinition, ParameterUsage.OUTPUT, "__pbsIds")
-            if (!pbsIdType) {
-                // output type is missing
-                createError(step, "PbsJob does not have required output parameter type", job.class)
-                log.error("PbsJob for JobDefinition ${step.jobDefinition.id} does not have required output parameter type")
-                markProcessAsFailed(step, "PbsJob for JobDefinition ${step.jobDefinition.id} does not have required output parameter type.")
-                return
-            }
-            Parameter pbsIdParameter = new Parameter(type: pbsIdType, value: pbsParameterValue)
-            step.addToOutput(pbsIdParameter)
-            // get the Realm
-            Long realmId = (job as PbsJob).getRealm()
-            Realm realm = Realm.get(realmId)
-            if (!realm) {
-                // output type is missing
-                createError(step, "PbsJob does not provide the Realm it is operating on or Realm Id is incorrect", job.class)
-                log.error("PbsJob for JobDefinition ${step.jobDefinition.id} does not provide the Realm it is operating on or Realm Id is incorrect")
-                markProcessAsFailed(step, "PbsJob for JobDefinition ${step.jobDefinition.id} does not provide the Realm it is operating on or Realm Id is incorrect.")
-                return
-            }
-            ParameterType pbsRealmType = ParameterType.findByJobDefinitionAndParameterUsageAndName(step.jobDefinition, ParameterUsage.OUTPUT, "__pbsRealm")
-            if (!pbsRealmType) {
-                // output type is missing
-                createError(step, "PbsJob does not have required output parameter type for pbs realm", job.class)
-                log.error("PbsJob for JobDefinition ${step.jobDefinition.id} does not have required output parameter type for pbs realm")
-                markProcessAsFailed(step, "PbsJob for JobDefinition ${step.jobDefinition.id} does not have required output parameter type for pbs realm.")
-                return
-            }
-            Parameter realmIdParameter = new Parameter(type: pbsRealmType, value: realmId)
-            step.addToOutput(realmIdParameter)
-            if (!step.save(flush: true)) {
-                log.fatal("Could not add the PbsIds Parameter to Job of type ${job.class}")
-                throw new ProcessingException("Could not add the PbsIds Parameter to Job")
-            }
         }
         if (failedOutputParameter) {
             // at least one output parameter is wrong - set to failure

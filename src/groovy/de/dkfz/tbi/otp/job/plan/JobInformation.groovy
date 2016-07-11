@@ -4,7 +4,6 @@ import de.dkfz.tbi.otp.job.processing.EndStateAwareJob
 import de.dkfz.tbi.otp.job.processing.ParameterMapping
 import de.dkfz.tbi.otp.job.processing.ParameterType
 import de.dkfz.tbi.otp.job.processing.ParameterUsage
-import de.dkfz.tbi.otp.job.processing.PbsJob
 import de.dkfz.tbi.otp.job.processing.StartJob
 
 /**
@@ -17,7 +16,6 @@ class JobInformation implements Serializable {
     String bean
     boolean startJob
     boolean endStateAware
-    boolean pbsJob
     List<ParameterInformation> constantParameters = []
     List<ParameterInformation> inputParameters = []
     List<ParameterInformation> outputParameters = []
@@ -41,7 +39,6 @@ class JobInformation implements Serializable {
         def bean = job.domainClass.grailsApplication.mainContext.getBean(job.bean)
         ret.startJob = (bean instanceof StartJob)
         ret.endStateAware = (bean instanceof EndStateAwareJob)
-        ret.pbsJob = (bean instanceof PbsJob)
         ret.bean = job.bean
         ret.id = job.id
         ret.name = job.name

@@ -218,9 +218,6 @@ class JobExecutionPlanDSL {
             c.metaClass.job = { String n, String bean, closure = null ->
                 JobExecutionPlanDSL.jobClosure(jep, helper, n, bean, closure)
             }
-            c.metaClass.pbsJob = { String jobName, String bean, String realmId, closure = null ->
-                JobExecutionPlanDSL.pbsJobClosure(jep, helper, jobName, bean, realmId, closure)
-            }
             c.metaClass.validatingJob = { String jobName, String bean, String validatorForName, closure = null ->
                 JobExecutionPlanDSL.validatingJobClosure(jep, helper, jobName, bean, validatorForName, closure)
             }

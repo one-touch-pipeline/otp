@@ -209,10 +209,6 @@ $.otp.workflows = {
                 // normal jobs are rects
                 element = r.rect(n.point[0] - 75, n.point[1] - 25, 150, 50);
             }
-            if (n.pbsJob) {
-                // pbsJobs are orange
-                attr.fill = 'orange';
-            }
             textElement = r.text(n.point[0], n.point[1], (n.label || n.id));
             if (n.processingStep !== undefined && n.processingStep !== null) {
                 if (n.failed) {
