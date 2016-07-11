@@ -1,5 +1,8 @@
 package de.dkfz.tbi.otp.job.processing
 
+import de.dkfz.tbi.otp.infrastructure.*
+import org.springframework.beans.factory.annotation.Autowired
+
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 /**
@@ -19,6 +22,9 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 abstract class AbstractJobImpl implements Job {
 
     def grailsApplication
+
+    @Autowired
+    JobStatusLoggingService jobStatusLoggingService
 
     // Not storing a reference to the {@link ProcessingStep} instance here, because it may be detached by the time it is
     // used again. Accessing it would result in Hibernate proxy errors (OTP-967).
@@ -220,5 +226,26 @@ abstract class AbstractJobImpl implements Job {
 
     public ProcessParameter getProcessParameter() {
         return exactlyOneElement(ProcessParameter.findAllByProcess(processingStep.process))
+    }
+
+    public Collection<ClusterJob> failedOrNotFinishedClusterJobs() {
+        // For none multi jobs the LogFiles belong to the otp job sending the cluster job and not to the job validating the cluster job, which can fail.
+        // The sending cluster job is two steps before the validating one.
+        ProcessingStep sendStep = processingStep.previous?.previous
+        if (!sendStep) {
+            throw new RuntimeException("No sending processing step found for ${processingStep}")
+        }
+
+        Collection<ClusterJob> clusterJobs = ClusterJob.findAllByProcessingStep(sendStep)
+        if (!clusterJobs) {
+            throw new RuntimeException("No ClusterJobs found for ${sendStep}")
+        }
+
+        return jobStatusLoggingService.failedOrNotFinishedClusterJobs(
+                sendStep,
+                ClusterJobIdentifier.asClusterJobIdentifierList(clusterJobs)
+        ).collect { ClusterJobIdentifier identifier ->
+            return ClusterJob.findByClusterJobIdentifier(identifier)
+        }
     }
 }

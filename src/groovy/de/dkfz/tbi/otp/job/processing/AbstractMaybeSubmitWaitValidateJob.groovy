@@ -1,7 +1,6 @@
 package de.dkfz.tbi.otp.job.processing
 
-import de.dkfz.tbi.otp.infrastructure.ClusterJob
-import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
+import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
 
 /**
@@ -25,7 +24,7 @@ abstract class AbstractMaybeSubmitWaitValidateJob extends AbstractMultiJob {
         }
     }
 
-    public String createExceptionString(Map<ClusterJobIdentifier,
+    protected String createExceptionString(Map<ClusterJobIdentifier,
             String> failedClusterJobs, Collection<? extends ClusterJobIdentifier> finishedClusterJobs) {
         """
 ${failedClusterJobs.size()} of ${finishedClusterJobs.size()} cluster jobs failed:
@@ -37,6 +36,20 @@ ${
         "${clusterJobIdentifier}: ${reason}\n${getLogFilePaths(ClusterJob.findByClusterJobIdentifier(clusterJobIdentifier))}\n"
     }.join("\n")
 }"""
+    }
+
+    @Override
+    Collection<ClusterJob> failedOrNotFinishedClusterJobs() {
+        Collection<ClusterJob> clusterJobs = ClusterJob.findAllByProcessingStep(processingStep)
+        if (!clusterJobs) {
+            throw new RuntimeException("No ClusterJobs found for ${processingStep}")
+        }
+
+        return failedOrNotFinishedClusterJobs(
+                ClusterJobIdentifier.asClusterJobIdentifierList(clusterJobs)
+        ).collect { ClusterJobIdentifier identifier, String error ->
+            return ClusterJob.findByClusterJobIdentifier(identifier)
+        }
     }
 
     /**

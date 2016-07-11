@@ -1,14 +1,8 @@
 package de.dkfz.tbi.otp.job.processing
 
-import org.springframework.beans.factory.annotation.Autowired
-
-import de.dkfz.tbi.otp.infrastructure.ClusterJob
-import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
+import de.dkfz.tbi.otp.infrastructure.*
 
 abstract class AbstractOtpJob extends AbstractMaybeSubmitWaitValidateJob{
-
-    @Autowired
-    JobStatusLoggingService jobStatusLoggingService
 
     @Override
     protected String getLogFilePaths(ClusterJob clusterJob) {

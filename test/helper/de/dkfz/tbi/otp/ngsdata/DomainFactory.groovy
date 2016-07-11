@@ -968,6 +968,14 @@ class DomainFactory {
         )
     }
 
+    public static ProcessingStep createProcessingStepWithUpdates(ProcessingStep processingStep = DomainFactory.createProcessingStep()) {
+        ProcessingStepUpdate last = DomainFactory.createProcessingStepUpdate(processingStep: processingStep, state: ExecutionState.CREATED)
+        last = DomainFactory.createProcessingStepUpdate(processingStep: processingStep, state: ExecutionState.STARTED, previous: last)
+        last = DomainFactory.createProcessingStepUpdate(processingStep: processingStep, state: ExecutionState.FINISHED, previous: last)
+        DomainFactory.createProcessingStepUpdate(processingStep: processingStep, state: ExecutionState.SUCCESS, previous: last)
+        return processingStep
+    }
+
     public static ProcessParameter createProcessParameter(final Process process, final ProcessParameterObject parameterValue, Map properties = [:]) {
         return createDomainObject(ProcessParameter, [
                 process: process,

@@ -32,7 +32,6 @@ import de.dkfz.tbi.otp.ngsdata.Realm
 @ResumableJob
 class WatchdogJob extends AbstractEndStateAwareJobImpl implements MonitoringJob {
 
-    @Autowired JobStatusLoggingService jobStatusLoggingService
     @Autowired PbsMonitorService pbsMonitorService
     @Autowired SchedulerService schedulerService
 

@@ -1,29 +1,21 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
-import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.utils.ProcessHelperService
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.roddy.*
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
+import de.dkfz.tbi.otp.infrastructure.*
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.job.scheduler.*
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.ProcessHelperService.ProcessOutput
-import de.dkfz.tbi.otp.utils.WaitingFileUtils
+import org.springframework.beans.factory.annotation.*
+
+import java.util.regex.*
 
 import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.*
 
-import de.dkfz.tbi.otp.dataprocessing.roddy.JobStateLogFile
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
-import de.dkfz.tbi.otp.infrastructure.ClusterJob
-import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
-import de.dkfz.tbi.otp.infrastructure.ClusterJobService
-import de.dkfz.tbi.otp.job.processing.AbstractMaybeSubmitWaitValidateJob
-import de.dkfz.tbi.otp.job.processing.ProcessingStep
-import de.dkfz.tbi.otp.job.scheduler.SchedulerService
-import de.dkfz.tbi.otp.ngsdata.ConfigService
-import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
-import org.springframework.beans.factory.annotation.Autowired
 import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
-
-import java.util.regex.Matcher
-import java.util.regex.Pattern
 
 /**
  * class for roddy jobs that handle failed or not finished cluster jobs, analyse them and provide
