@@ -13,11 +13,14 @@ class SeqPlatform implements Entity {
      */
     SeqPlatformGroup seqPlatformGroup
 
+    String identifierInRunName
+
     static constraints = {
         name(blank: false, unique: ['seqPlatformModelLabel','sequencingKitLabel'])
         seqPlatformModelLabel(nullable: true)
         sequencingKitLabel(nullable: true)
         seqPlatformGroup(nullable: true)
+        identifierInRunName(nullable: true, matches: /^[A-Z]{4}$/)
     }
 
     String toString() {
