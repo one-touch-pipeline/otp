@@ -151,7 +151,6 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
         runSegment.metaDataStatus = RunSegment.Status.COMPLETE
         runSegment.initialFormat = RunSegment.DataFormat.FILES_IN_DIRECTORY
         runSegment.currentFormat = RunSegment.DataFormat.FILES_IN_DIRECTORY
-        runSegment.dataPath = ftpDir
         runSegment.filesStatus = RunSegment.FilesStatus.NEEDS_INSTALLATION
         runSegment.mdPath = ftpDir
         runSegment.run = run
@@ -175,6 +174,7 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
         dataFile.fileExists = true
         dataFile.fileSize = 100
         dataFile.mateNumber = mateNumber
+        dataFile.initialDirectory = "${ftpDir}/${run.name}"
         assertNotNull(dataFile.save([flush: true]))
         return dataFile
     }
@@ -200,6 +200,7 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
             fileExists: true,
             fileSize: 100,
             alignmentLog: alignmentLog,
+            initialDirectory: "${ftpDir}/${run.name}",
         )
         assert dataFile.save(flush: true)
         return dataFile
@@ -293,7 +294,6 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
                 metaDataStatus: RunSegment.Status.COMPLETE,
                 initialFormat: RunSegment.DataFormat.FILES_IN_DIRECTORY,
                 currentFormat: RunSegment.DataFormat.FILES_IN_DIRECTORY,
-                dataPath: nonExistingDirectory.path,
                 filesStatus: RunSegment.FilesStatus.FILES_CORRECT,
                 mdPath: nonExistingDirectory.path,
         )

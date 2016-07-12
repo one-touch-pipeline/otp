@@ -23,7 +23,7 @@ class DataFileUnitTests {
     @Test
     void testMateNumberConstraint_Alignment() {
         FileType fileType = FileType.build([type: FileType.Type.ALIGNMENT])
-        DataFile dataFile = new DataFile(fileType: fileType)
+        DataFile dataFile = new DataFile(fileType: fileType, initialDirectory: TestCase.getUniqueNonExistentPath().path)
 
         assert dataFile.validate()
     }
@@ -31,7 +31,7 @@ class DataFileUnitTests {
     @Test
     void testMateNumberConstraint_SequenceButNotFastq() {
         FileType fileType = FileType.build([type: FileType.Type.SEQUENCE, vbpPath: 'SomeOtherDirectory'])
-        DataFile dataFile = new DataFile(fileType: fileType)
+        DataFile dataFile = new DataFile(fileType: fileType, initialDirectory: TestCase.getUniqueNonExistentPath().path)
 
         assert dataFile.validate()
     }
@@ -39,7 +39,7 @@ class DataFileUnitTests {
     @Test
     void testMateNumberConstraint_SequenceFastq_OK_ReadIsOne() {
         FileType fileType = FileType.build([type: FileType.Type.SEQUENCE, vbpPath: SEQUENCE_DIRECTORY])
-        DataFile dataFile = new DataFile(fileType: fileType, mateNumber: 1)
+        DataFile dataFile = new DataFile(fileType: fileType, mateNumber: 1, initialDirectory: TestCase.getUniqueNonExistentPath().path)
 
         assert dataFile.validate()
     }
@@ -47,7 +47,7 @@ class DataFileUnitTests {
     @Test
     void testMateNumberConstraint_SequenceFastq_OK_ReadIsTwo() {
         FileType fileType = FileType.build([type: FileType.Type.SEQUENCE, vbpPath: SEQUENCE_DIRECTORY])
-        DataFile dataFile = new DataFile(fileType: fileType, mateNumber: 2)
+        DataFile dataFile = new DataFile(fileType: fileType, mateNumber: 2, initialDirectory: TestCase.getUniqueNonExistentPath().path)
 
         assert dataFile.validate()
     }
@@ -55,7 +55,7 @@ class DataFileUnitTests {
     @Test
     void testMateNumberConstraint_SequenceFastq_NoMateNumber() {
         FileType fileType = FileType.build([type: FileType.Type.SEQUENCE, vbpPath: SEQUENCE_DIRECTORY])
-        DataFile dataFile = new DataFile(fileType: fileType, mateNumber: null)
+        DataFile dataFile = new DataFile(fileType: fileType, mateNumber: null, initialDirectory: TestCase.getUniqueNonExistentPath().path)
 
         TestCase.assertValidateError(dataFile, "mateNumber", "validator.invalid", null)
     }
@@ -63,7 +63,7 @@ class DataFileUnitTests {
     @Test
     void testMateNumberConstraint_SequenceFastq_MateNumberIsZero() {
         FileType fileType = FileType.build([type: FileType.Type.SEQUENCE, vbpPath: SEQUENCE_DIRECTORY])
-        DataFile dataFile = new DataFile(fileType: fileType, mateNumber: 0)
+        DataFile dataFile = new DataFile(fileType: fileType, mateNumber: 0, initialDirectory: TestCase.getUniqueNonExistentPath().path)
 
         TestCase.assertAtLeastExpectedValidateError(dataFile, "mateNumber", "validator.invalid", 0)
     }
@@ -71,28 +71,28 @@ class DataFileUnitTests {
     @Test
     void testMateNumberConstraint_SequenceFastq_MateNumberIsToBig() {
         FileType fileType = FileType.build([type: FileType.Type.SEQUENCE, vbpPath: SEQUENCE_DIRECTORY])
-        DataFile dataFile = new DataFile(fileType: fileType, mateNumber: 3)
+        DataFile dataFile = new DataFile(fileType: fileType, mateNumber: 3, initialDirectory: TestCase.getUniqueNonExistentPath().path)
 
         TestCase.assertValidateError(dataFile, "mateNumber", "validator.invalid", 3)
     }
 
     @Test
     void testSequenceLengthConstraint_WhenSequenceLengthIsANumberAsString_ShouldPassValidation() {
-        DataFile dataFile = new DataFile(sequenceLength: "123")
+        DataFile dataFile = new DataFile(sequenceLength: "123", initialDirectory: TestCase.getUniqueNonExistentPath().path)
 
         assert dataFile.validate()
     }
 
     @Test
     void testSequenceLengthConstraint_WhenSequenceLengthIsARangeAsString_ShouldPassValidation() {
-        DataFile dataFile = new DataFile(sequenceLength: "123-321")
+        DataFile dataFile = new DataFile(sequenceLength: "123-321", initialDirectory: TestCase.getUniqueNonExistentPath().path)
 
         assert dataFile.validate()
     }
 
     @Test
     void testSequenceLengthConstraint_WhenSequenceLengthIsSomethingElse_ShouldPassValidation() {
-        DataFile dataFile = new DataFile(sequenceLength: "!1§2%3&")
+        DataFile dataFile = new DataFile(sequenceLength: "!1§2%3&", initialDirectory: TestCase.getUniqueNonExistentPath().path)
 
         TestCase.shouldFail(RuntimeException) {
             dataFile.validate()

@@ -25,6 +25,7 @@ testDataConfig {
             vbpFileName = 'DataFileFileName_R1.gz'
             pathName = 'path'
             fileType = {FileType.buildLazy(type: FileType.Type.SEQUENCE)}
+            initialDirectory = TestCase.getUniqueNonExistentPath().path
         }
         'de.dkfz.tbi.otp.ngsdata.LibraryPreparationKit' {
             name = {'name_' + (counter++)}
@@ -70,7 +71,6 @@ testDataConfig {
             name = {'runName_' + (counter++)}
         }
         'de.dkfz.tbi.otp.ngsdata.RunSegment' {
-            dataPath = {TestCase.getUniqueNonExistentPath()}
             mdPath = {TestCase.getUniqueNonExistentPath()}
         }
         'de.dkfz.tbi.otp.ngsdata.SampleType' {

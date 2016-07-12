@@ -1,21 +1,18 @@
 package workflows
 
-import de.dkfz.tbi.otp.InformationReliability
+import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QaProcessingStatus
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
-import de.dkfz.tbi.otp.filehandling.FileNames
+import de.dkfz.tbi.otp.filehandling.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.FileType.Type
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
-import org.joda.time.Duration
-import org.junit.Before
-import org.junit.Ignore
-import org.junit.Test
+import org.joda.time.*
+import org.junit.*
 
 import static org.junit.Assert.*
-
 @Ignore
 class TransferMergedBamFileWorkflowSeqTypeExomeTests extends WorkflowTestCase {
 
@@ -207,14 +204,14 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends WorkflowTestCase {
                         )
         assertNotNull(fileType.save([flush: true, failOnError: true]))
 
-        DataFile dataFile = new DataFile(
+        DataFile dataFile = DomainFactory.createDataFile(
                         fileName: "dataFile1",
                         seqTrack: seqTrack,
                         fileType: fileType
                         )
         assertNotNull(dataFile.save([flush: true, failOnError: true]))
 
-        DataFile dataFile1 = new DataFile(
+        DataFile dataFile1 = DomainFactory.createDataFile(
                         fileName: "dataFile2",
                         seqTrack: seqTrack,
                         fileType: fileType
@@ -275,14 +272,14 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends WorkflowTestCase {
                         )
         assertNotNull(seqTrack1.save([flush: true, failOnError: true]))
 
-        DataFile dataFile2 = new DataFile(
+        DataFile dataFile2 = DomainFactory.createDataFile(
                         fileName: "dataFile3",
                         seqTrack: seqTrack1,
                         fileType: fileType
                         )
         assertNotNull(dataFile2.save([flush: true, failOnError: true]))
 
-        DataFile dataFile3 = new DataFile(
+        DataFile dataFile3 = DomainFactory.createDataFile(
                         fileName: "dataFile4",
                         seqTrack: seqTrack1,
                         fileType: fileType

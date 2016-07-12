@@ -1,17 +1,13 @@
 package de.dkfz.tbi.otp.job.jobs.alignment
 
 import de.dkfz.tbi.otp.ngsdata.*
-import grails.buildtestdata.mixin.Build
-import grails.test.mixin.Mock
-import grails.test.mixin.TestMixin
-import grails.test.mixin.support.GrailsUnitTestMixin
-import org.junit.After
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.TemporaryFolder
+import grails.buildtestdata.mixin.*
+import grails.test.mixin.*
+import grails.test.mixin.support.*
+import org.junit.*
+import org.junit.rules.*
 
-import java.util.zip.GZIPOutputStream
+import java.util.zip.*
 
 @Mock([
     DataFile,
@@ -127,7 +123,7 @@ class CheckQualityEncodingJobUnitTests {
                         )
         assertNotNull(fileType.save(flush: true))
 
-        dataFile = new DataFile(
+        dataFile = DomainFactory.createDataFile(
                         fileName: "dataFile1.fastq",
                         pathName: "testPath",
                         run: run,

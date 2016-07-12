@@ -116,7 +116,6 @@ class MetadataImportService {
                 filesStatus: RunSegment.FilesStatus.NEEDS_INSTALLATION,
                 initialFormat: RunSegment.DataFormat.FILES_IN_DIRECTORY,
                 currentFormat: RunSegment.DataFormat.FILES_IN_DIRECTORY,
-                dataPath: context.metadataFile.parentFile.parent,
                 mdPath: context.metadataFile.parentFile.parent,
                 otrsTicket: ticketNumber ? trackingService.createOrResetOtrsTicket(ticketNumber) : null,
         )
@@ -232,6 +231,7 @@ class MetadataImportService {
             DataFile dataFile = new DataFile(
                     pathName: '',
                     fileName: file.name,
+                    initialDirectory: file.parent,
                     vbpFileName: file.name,
                     md5sum: row.getCellByColumnTitle(MD5.name()).text.toLowerCase(Locale.ENGLISH),
                     project: seqTrack.project,

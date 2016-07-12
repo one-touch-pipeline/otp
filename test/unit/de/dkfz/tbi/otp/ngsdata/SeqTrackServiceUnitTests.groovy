@@ -1,14 +1,10 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.LogMessage
-import org.junit.After
-
-import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.InformationReliability
-import grails.buildtestdata.mixin.Build
-import grails.test.mixin.Mock
-import org.junit.Before
-import org.junit.Test
+import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.*
+import grails.buildtestdata.mixin.*
+import grails.test.mixin.*
+import org.junit.*
 
 @Mock([SeqTypeService])
 @Build([
@@ -100,7 +96,6 @@ class SeqTrackServiceUnitTests {
     void testDetermineAndStoreIfFastqFilesHaveToBeLinked_DataNotOnMidterm() {
         withTestMidtermStorageMountPoint {
             SeqTrack seqTrack = createDataForDetermineAndStoreIfFastqFilesHaveToBeLinked()
-            RunSegment.list()[0].dataPath = TestCase.uniqueNonExistentPath
 
             seqTrackService.determineAndStoreIfFastqFilesHaveToBeLinked(seqTrack, false)
 
@@ -166,28 +161,9 @@ class SeqTrackServiceUnitTests {
         assert false == seqTrackService.areFilesLocatedOnMidTermStorage(seqTrack)
     }
 
-    @Test
-    void testAreFilesLocatedOnMidTermStorage_NoDataFilesForSeqTrack_ShouldFail() {
-        SeqTrack seqTrack = SeqTrack.build()
-
-        shouldFail(AssertionError) {seqTrackService.areFilesLocatedOnMidTermStorage(seqTrack)}
-
-    }
-
-    @Test
-    void testAreFilesLocatedOnMidTermStorage_DataFilesFromDifferentRunSegments_ShouldFail() {
-        withTestMidtermStorageMountPoint {
-            SeqTrack seqTrack = createDataForAreFilesLocatedOnMidTermStorage()
-            DataFile.build(seqTrack: seqTrack, runSegment: RunSegment.build())
-
-            shouldFail(AssertionError) { seqTrackService.areFilesLocatedOnMidTermStorage(seqTrack) }
-        }
-    }
-
-
     private SeqTrack createDataForDetermineAndStoreIfFastqFilesHaveToBeLinked(int pos = 0) {
         Run run = Run.build(seqCenter: SeqCenter.build(name: "DKFZ"))
-        RunSegment runSegment = RunSegment.build(dataPath: LsdfFilesService.midtermStorageMountPoint[pos], run: run)
+        RunSegment runSegment = RunSegment.build(run: run)
         SeqTrack seqTrack = SeqTrack.build(
                 run: run,
                 sample: Sample.build(
@@ -197,16 +173,16 @@ class SeqTrackServiceUnitTests {
                 )
         )
 
-        DataFile.build(seqTrack: seqTrack, run: run, runSegment: runSegment)
-        DataFile.build(seqTrack: seqTrack, run: run, runSegment: runSegment)
+        DomainFactory.createDataFile(seqTrack: seqTrack, run: run, runSegment: runSegment, initialDirectory: LsdfFilesService.midtermStorageMountPoint[pos])
+        DomainFactory.createDataFile(seqTrack: seqTrack, run: run, runSegment: runSegment, initialDirectory: LsdfFilesService.midtermStorageMountPoint[pos])
         return seqTrack
     }
 
     private SeqTrack createDataForAreFilesLocatedOnMidTermStorage(int pos = 0) {
-        RunSegment runSegment = RunSegment.build(dataPath: LsdfFilesService.midtermStorageMountPoint[pos])
+        RunSegment runSegment = RunSegment.build()
         SeqTrack seqTrack = SeqTrack.build()
-        DataFile.build(seqTrack: seqTrack, runSegment: runSegment)
-        DataFile.build(seqTrack: seqTrack, runSegment: runSegment)
+        DomainFactory.createDataFile(seqTrack: seqTrack, runSegment: runSegment, initialDirectory: LsdfFilesService.midtermStorageMountPoint[pos])
+        DomainFactory.createDataFile(seqTrack: seqTrack, runSegment: runSegment, initialDirectory: LsdfFilesService.midtermStorageMountPoint[pos])
         return seqTrack
     }
 
@@ -258,7 +234,7 @@ class SeqTrackServiceUnitTests {
         RunSegment runSegment = RunSegment.build(
                 align: false,
         )
-        DataFile.build(
+        DomainFactory.createDataFile(
                 seqTrack: seqTrack,
                 runSegment: runSegment,
         )
@@ -272,9 +248,7 @@ class SeqTrackServiceUnitTests {
                 libraryPreparationKit: null,
                 kitInfoReliability: InformationReliability.UNKNOWN_VERIFIED,
         )
-        DataFile.build(
-                seqTrack: seqTrack,
-        )
+        DomainFactory.createDataFile(seqTrack: seqTrack)
 
         assert !SeqTrackService.mayAlign(seqTrack)
     }

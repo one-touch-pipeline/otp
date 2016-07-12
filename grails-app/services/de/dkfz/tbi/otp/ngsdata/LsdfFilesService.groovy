@@ -56,10 +56,7 @@ class LsdfFilesService {
      * of the given dataFile
      */
     public static String getFileInitialPath(DataFile dataFile) {
-        Run run = dataFile.run
-        //String prefix = (run.legacyRun) ? "run" : ""
-        String initialPath = dataFile.runSegment.dataPath
-        return "${initialPath}/${run.name}/${dataFile.pathName}/${dataFile.fileName}"
+        return "${dataFile.initialDirectory}/${dataFile.fileName}"
     }
 
     /**
@@ -306,7 +303,7 @@ class LsdfFilesService {
             if (path) {
                 paths << path
             } else  {
-                paths << file.runSegment.dataPath
+                paths << file.initialDirectory
             }
         }
         return (String[])paths.toArray()

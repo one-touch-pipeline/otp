@@ -642,7 +642,6 @@ class DomainFactory {
                 initialFormat: RunSegment.DataFormat.FILES_IN_DIRECTORY,
                 filesStatus  : RunSegment.FilesStatus.FILES_CORRECT,
                 run          : { createRun() },
-                dataPath     : { TestCase.getUniqueNonExistentPath().path },
                 mdPath       : { TestCase.getUniqueNonExistentPath().path },
         ], runSegmentProperties)
     }
@@ -823,13 +822,12 @@ class DomainFactory {
                 fileName: "DataFileFileName_${counter}_R1.gz",
                 vbpFileName: "VbpDataFileFileName_${counter}_R1.gz",
                 pathName: "path_${counter}",
+                initialDirectory: TestCase.getUniqueNonExistentPath().path,
                 md5sum: {HelperUtils.getRandomMd5sum()},
                 project: {createProject()},
                 dateExecuted: new Date(),
                 dateFileSystem: new Date(),
                 dateCreated: new Date(),
-                vbpFilePath: "vbpPath_${counter}",
-                metaDataValid: true,
                 fileWithdrawn: false,
                 fileType: {createFileType(type: Type.SEQUENCE, vbpPath: '/sequence/')},
                 used: true,

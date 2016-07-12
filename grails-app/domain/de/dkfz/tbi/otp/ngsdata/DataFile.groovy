@@ -8,9 +8,13 @@ import de.dkfz.tbi.otp.utils.Entity
 class DataFile implements Commentable, Entity {
 
     String fileName                // file name
-    String pathName                // path from run folder to file or full path
+    String pathName                // path from run folder to file
     String vbpFileName             // file name used in view-by-pid linking
     String md5sum
+    /**
+     * Absolute path of the directory which this data file has been imported from.
+     */
+    String initialDirectory
 
     Project project = null;
 
@@ -18,11 +22,7 @@ class DataFile implements Commentable, Entity {
     Date dateFileSystem = null     // when the file was created on LSDF
     Date dateCreated = null        // when the object was created in db
 
-    /** @deprecated Not used */ @Deprecated
-    String vbpFilePath = ""        // viev by pid structure
-
     /** @deprecated OTP no longer imports invalid metadata */ @Deprecated
-    boolean metaDataValid = true
     boolean fileWithdrawn = false
 
     boolean used = false           // is this file used in any seqTrack
@@ -77,7 +77,6 @@ class DataFile implements Commentable, Entity {
 
     static constraints = {
 
-        metaDataValid()
         used()
         fileExists()
         fileLinked()
@@ -88,6 +87,7 @@ class DataFile implements Commentable, Entity {
         fileType(nullable: true)
         pathName(nullable: true, validator: { !it || OtpPath.isValidRelativePath(it) })
         md5sum(nullable: true, matches: /^[0-9a-f]{32}$/)
+        initialDirectory(blank: false, validator: { OtpPath.isValidAbsolutePath(it) })
 
         project(nullable: true)
 
@@ -135,17 +135,6 @@ class DataFile implements Commentable, Entity {
         return fileSize
     }
 
-    /**
-     * return formated file name starting from run directory
-     * @return
-     */
-    public String formFileName() {
-        if (pathName) {
-            pathName + "/" + fileName
-        }
-        return fileName
-    }
-
     String toString() {
         fileName
     }
@@ -179,7 +168,7 @@ class DataFile implements Commentable, Entity {
         } catch (NumberFormatException) {
             def sum = 0
             def count = 0
-            this.sequenceLength.split("-").each {
+            this.sequenceLength?.split("-")?.each {
                 sum += it.toInteger()
                 count++
             }

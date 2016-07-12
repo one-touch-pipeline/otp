@@ -1053,7 +1053,7 @@ chmod 440 ${newDirectFileName}
                 throw new RuntimeException("Although all dataFiles of this run should be deleted already it is not the case.")
             } else {
                 allRunSegmentsOfTheRunCanBeDeleted = false
-                println "RunSegment " + runSegment.dataPath + " can not be deleted, since it contains data from other projects."
+                println "RunSegment " + runSegment.id + " can not be deleted, since it contains data from other projects."
             }
         }
 

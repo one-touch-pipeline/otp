@@ -1,14 +1,13 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import org.springframework.security.acls.domain.BasePermission
+import de.dkfz.tbi.otp.testing.*
+import grails.plugin.springsecurity.*
+import grails.plugin.springsecurity.acl.*
+import org.junit.*
+import org.springframework.security.access.*
+import org.springframework.security.acls.domain.*
 
 import static org.junit.Assert.*
-
-import grails.plugin.springsecurity.acl.AclUtilService
-import org.junit.*
-import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
-import grails.plugin.springsecurity.SpringSecurityUtils
-import org.springframework.security.access.AccessDeniedException
 
 class MetaDataServiceTests extends AbstractIntegrationTest {
     MetaDataService metaDataService
@@ -469,7 +468,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
      * @return
      */
     private MetaDataEntry mockEntry() {
-        DataFile dataFile = new DataFile()
+        DataFile dataFile = DomainFactory.createDataFile()
         assertTrue(dataFile.validate())
         assertNotNull(dataFile.save(flush: true))
         MetaDataKey key = new MetaDataKey(name: "Test")

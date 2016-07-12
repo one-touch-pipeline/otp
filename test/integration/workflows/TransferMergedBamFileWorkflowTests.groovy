@@ -1,26 +1,22 @@
 package workflows
 
-import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QaProcessingStatus
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
-import de.dkfz.tbi.otp.filehandling.FileNames
-import de.dkfz.tbi.otp.job.jobs.transferMergedBamFile.MoveFilesToFinalDestinationJob
-import de.dkfz.tbi.otp.job.processing.PbsService
+import de.dkfz.tbi.otp.filehandling.*
+import de.dkfz.tbi.otp.job.jobs.transferMergedBamFile.*
+import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.FileType.Type
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
-import de.dkfz.tbi.otp.utils.HelperUtils
-import org.joda.time.Duration
-import org.junit.Before
-import org.junit.Ignore
-import org.junit.Test
-import org.springframework.beans.factory.annotation.Autowired
+import de.dkfz.tbi.otp.utils.*
+import org.joda.time.*
+import org.junit.*
+import org.springframework.beans.factory.annotation.*
 
-import static org.junit.Assert.assertEquals
-import static org.junit.Assert.assertNotNull
-
+import static org.junit.Assert.*
 @Ignore
 class TransferMergedBamFileWorkflowTests extends WorkflowTestCase {
 
@@ -178,14 +174,14 @@ class TransferMergedBamFileWorkflowTests extends WorkflowTestCase {
                         )
         assertNotNull(fileType.save([flush: true, failOnError: true]))
 
-        DataFile dataFile1 = new DataFile(
+        DataFile dataFile1 = DomainFactory.createDataFile(
                         fileName: "dataFile1",
                         seqTrack: seqTrack,
                         fileType: fileType
                         )
         assertNotNull(dataFile1.save([flush: true, failOnError: true]))
 
-        DataFile dataFile2 = new DataFile(
+        DataFile dataFile2 = DomainFactory.createDataFile(
                         fileName: "dataFile2",
                         seqTrack: seqTrack,
                         fileType: fileType
@@ -255,14 +251,14 @@ class TransferMergedBamFileWorkflowTests extends WorkflowTestCase {
                         )
         assertNotNull(seqTrack1.save([flush: true, failOnError: true]))
 
-        DataFile dataFile3 = new DataFile(
+        DataFile dataFile3 = DomainFactory.createDataFile(
                         fileName: "dataFile3",
                         seqTrack: seqTrack1,
                         fileType: fileType
                         )
         assertNotNull(dataFile3.save([flush: true, failOnError: true]))
 
-        DataFile dataFile4 = new DataFile(
+        DataFile dataFile4 = DomainFactory.createDataFile(
                         fileName: "dataFile4",
                         seqTrack: seqTrack1,
                         fileType: fileType

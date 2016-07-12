@@ -48,12 +48,6 @@ class ConfigService {
         return "${base}/${proj.dirName}/sequencing/"
     }
 
-    Realm getRealmForInitialFTPPath(String path) {
-        int idx = path.indexOf("/ftp")
-        String prefix = path.substring(0, idx)
-        return Realm.findByRootPathLikeAndOperationType("${prefix}%", Realm.OperationType.DATA_MANAGEMENT)
-    }
-
     String igvPath() {
         return "http://www.broadinstitute.org/igv/projects/current/igv.php?sessionURL="
     }

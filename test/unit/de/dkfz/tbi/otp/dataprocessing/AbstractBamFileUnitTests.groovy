@@ -1,19 +1,9 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.ngsdata.Project
-import de.dkfz.tbi.otp.ngsdata.SampleType
-import org.joda.time.DateTime
-
-import de.dkfz.tbi.otp.ngsdata.DataFile
-import de.dkfz.tbi.otp.ngsdata.FileType
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
-import de.dkfz.tbi.otp.ngsdata.Sample
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.ngsdata.Individual
-
-import grails.buildtestdata.mixin.Build
+import de.dkfz.tbi.otp.ngsdata.*
+import grails.buildtestdata.mixin.*
 import grails.test.mixin.*
+import org.joda.time.*
 import org.junit.*
 
 @TestFor(MockAbstractBamFile)
@@ -87,23 +77,23 @@ class AbstractBamFileUnitTests {
         final FileType sequenceFileType = FileType.build(type: FileType.Type.SEQUENCE)
 
         final SeqTrack seqTrack1 = SeqTrack.build()
-        final DataFile dataFile11 = DataFile.build(
+        final DataFile dataFile11 = DomainFactory.createDataFile(
                 seqTrack: seqTrack1,
                 fileType: sequenceFileType,
         )
 
         final SeqTrack seqTrack2 = SeqTrack.build()
-        final DataFile dataFile21 = DataFile.build(
+        final DataFile dataFile21 = DomainFactory.createDataFile(
                 seqTrack: seqTrack2,
                 fileType: sequenceFileType,
                 dateCreated: new DateTime(dataFile11.dateCreated).plusHours(1).toDate(),
         )
-        final DataFile dataFile22 = DataFile.build(
+        final DataFile dataFile22 = DomainFactory.createDataFile(
                 seqTrack: seqTrack2,
                 fileType: sequenceFileType,
                 dateCreated: new DateTime(dataFile11.dateCreated).plusHours(2).toDate(),
         )
-        final DataFile dataFile23 = DataFile.build(
+        final DataFile dataFile23 = DomainFactory.createDataFile(
                 seqTrack: seqTrack2,
                 fileType: FileType.build(type: FileType.Type.ALIGNMENT),
                 dateCreated: new DateTime(dataFile11.dateCreated).plusHours(3).toDate(),

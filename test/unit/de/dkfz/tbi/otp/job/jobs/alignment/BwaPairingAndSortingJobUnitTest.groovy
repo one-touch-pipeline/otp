@@ -6,6 +6,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessedSaiFile
 import de.dkfz.tbi.otp.dataprocessing.ProcessedSaiFileService
 import de.dkfz.tbi.otp.job.processing.ProcessingException
 import de.dkfz.tbi.otp.ngsdata.DataFile
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.ngsdata.TestData
@@ -47,8 +48,8 @@ class BwaPairingAndSortingJobUnitTest {
         }
 
         alignmentPass = TestData.createAndSaveAlignmentPass()
-        DataFile dataFile1 = DataFile.build(fileName: FILE_MATE1, vbpFileName: FILE_MATE1, mateNumber: 1)
-        DataFile dataFile2 = DataFile.build(fileName: FILE_MATE2, vbpFileName: FILE_MATE2, mateNumber: 2)
+        DataFile dataFile1 = DomainFactory.createDataFile(fileName: FILE_MATE1, vbpFileName: FILE_MATE1, mateNumber: 1)
+        DataFile dataFile2 = DomainFactory.createDataFile(fileName: FILE_MATE2, vbpFileName: FILE_MATE2, mateNumber: 2)
         processedSaiFile1 = ProcessedSaiFile.build(alignmentPass: alignmentPass, dataFile: dataFile1)
         processedSaiFile2 = ProcessedSaiFile.build(alignmentPass: alignmentPass, dataFile: dataFile2)
     }
@@ -106,7 +107,7 @@ class BwaPairingAndSortingJobUnitTest {
 
     @Test
     void testCreateSequenceAndSaiFiles_tooMany() {
-        ProcessedSaiFile processedSaiFile3 = ProcessedSaiFile.build(alignmentPass: alignmentPass)
+        ProcessedSaiFile processedSaiFile3 = ProcessedSaiFile.build(alignmentPass: alignmentPass, dataFile: DomainFactory.createDataFile())
         ProcessedSaiFile.metaClass.static.findAllByAlignmentPassAndFileExists = { AlignmentPass pass, boolean exists ->
             return [processedSaiFile1, processedSaiFile2, processedSaiFile3]
         }

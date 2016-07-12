@@ -10,9 +10,6 @@ class FileTypeService {
     }
 
     boolean isGoodSequenceDataFile(DataFile dataFile) {
-        if (!dataFile.metaDataValid) {
-            return false
-        }
         if (dataFile.fileWithdrawn) {
             return false
         }

@@ -1,15 +1,10 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.ngsdata.*
-
-import static org.junit.Assert.*
 import grails.test.mixin.*
 import org.junit.*
-import de.dkfz.tbi.otp.ngsdata.DataFile
-import grails.test.mixin.Mock
+
+import static org.junit.Assert.*
 
 @Mock([DataFile, FastqcProcessedFile, FileType, Individual, Project, Realm, Run, RunSegment, Sample, SampleType, SeqCenter, SeqPlatform, SeqPlatformGroup, SeqTrack, SeqType, SoftwareTool])
 @TestFor(FastqcDataFilesService)
@@ -36,7 +31,6 @@ class FastqcDataFilesServiceUnitTests {
 
         runSegment = DomainFactory.createRunSegment(
                 run: seqTrack.run,
-                dataPath: TestCase.uniqueNonExistentPath.path,
         )
 
         dataFile = DomainFactory.createDataFile([seqTrack: seqTrack, project: seqTrack.project, run: seqTrack.run, runSegment: runSegment])
@@ -175,7 +169,7 @@ class FastqcDataFilesServiceUnitTests {
 
     @Test
     void testPathToFastQcResultFromSeqCenter() {
-        String expected = "${runSegment.dataPath}/${seqTrack.run.name}/${dataFile.pathName}/${fastqcDataFilesService.fastqcFileName(dataFile)}"
+        String expected = "${dataFile.initialDirectory}/${fastqcDataFilesService.fastqcFileName(dataFile)}"
         String actual = fastqcDataFilesService.pathToFastQcResultFromSeqCenter(dataFile)
         assert actual == expected
     }

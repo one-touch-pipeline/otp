@@ -1,13 +1,11 @@
 
 package de.dkfz.tbi.otp.dataprocessing
 
-import grails.buildtestdata.mixin.Build
-import grails.test.mixin.*
-
-import org.junit.*
-
-import de.dkfz.tbi.TestConstants
+import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.ngsdata.*
+import grails.buildtestdata.mixin.*
+import grails.test.mixin.*
+import org.junit.*
 
 @TestFor(ProcessedSaiFileService)
 @Build([

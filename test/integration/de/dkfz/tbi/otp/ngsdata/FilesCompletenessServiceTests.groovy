@@ -1,13 +1,11 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import static org.junit.Assert.*
-
-import org.codehaus.groovy.grails.commons.GrailsApplication
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.testing.*
+import org.codehaus.groovy.grails.commons.*
 import org.junit.*
 
-import de.dkfz.tbi.otp.job.processing.ProcessingException
-import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
-import de.dkfz.tbi.otp.ngsdata.RunSegment
+import static org.junit.Assert.*
 
 class FilesCompletenessServiceTests extends AbstractIntegrationTest {
 
@@ -93,7 +91,7 @@ class FilesCompletenessServiceTests extends AbstractIntegrationTest {
         shouldFail(NullPointerException) {
             filesCompletenessService.checkInitialSequenceFiles(run)
         }
-        RunSegment runInitialPath = new RunSegment(dataPath: dataPath.absolutePath, mdPath: mdPath.absolutePath, run: run)
+        RunSegment runInitialPath = new RunSegment(mdPath: mdPath.absolutePath, run: run)
         assert(runInitialPath.save())
         dataFile1.runInitialPath = runInitialPath
         dataFile2.runInitialPath = runInitialPath
@@ -141,16 +139,16 @@ class FilesCompletenessServiceTests extends AbstractIntegrationTest {
         FileType fileType = new FileType(type: FileType.Type.ALIGNMENT)
         assert(fileType.save())
         // three data files (of which two are associated with the run) to be able to loop over more than one data file
-        DataFile dataFile1 = new DataFile(fileName: "dataFile1", pathName: "testPath1", used: true, vbpFilePath: "testPath1", run: run, fileType: fileType, seqTrack: seqTrack1, project: project)
+        DataFile dataFile1 = new DataFile(fileName: "dataFile1", pathName: "testPath1", used: true, run: run, fileType: fileType, seqTrack: seqTrack1, project: project)
         assert(dataFile1.save())
-        DataFile dataFile2 = new DataFile(fileName: "dataFile2", pathName: "testPath2", used: true, vbpFilePath: "testPath2", run: run, fileType: fileType, seqTrack: seqTrack2, project: project)
+        DataFile dataFile2 = new DataFile(fileName: "dataFile2", pathName: "testPath2", used: true, run: run, fileType: fileType, seqTrack: seqTrack2, project: project)
         assert(dataFile2.save())
         // not used for the run due to run set to null
         DataFile dataFile3 = new DataFile(fileName: "dataFile3", pathName: "testPath3", run: null, fileType: fileType)
         assert(dataFile3.save())
         // the complete paths to be checked have to be created
-        String tmpPath1 = dataPath.absolutePath + "/" + project.dirName + "/sequencing/" + seqType1.dirName + "/" + seqCenter.dirName + "/run" + run.name + "/" + dataFile1.vbpFilePath + "/" + dataFile1.fileName
-        String tmpPath2 = dataPath.absolutePath + "/" + project.dirName + "/sequencing/" + seqType2.dirName + "/" + seqCenter.dirName + "/run" + run.name + "/" + dataFile2.vbpFilePath + "/" + dataFile2.fileName
+        String tmpPath1 = dataPath.absolutePath + "/" + project.dirName + "/sequencing/" + seqType1.dirName + "/" + seqCenter.dirName + "/run" + run.name + "/" + dataFile1.fileName
+        String tmpPath2 = dataPath.absolutePath + "/" + project.dirName + "/sequencing/" + seqType2.dirName + "/" + seqCenter.dirName + "/run" + run.name + "/" + dataFile2.fileName
         new File(tmpPath1).mkdirs()
         new File(tmpPath2).mkdirs()
         // fake dataPath normally read from configuration

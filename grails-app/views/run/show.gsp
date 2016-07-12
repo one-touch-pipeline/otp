@@ -101,7 +101,7 @@
                     <td>s</td>
                     <td><g:link controller="dataFile" action="showDetails" id="${file.id}">${file.fileName}</g:link></td>
                     <td><b><g:link controller="projectOverview" action="index" params="[projectName: file.project]">${file.project}</g:link></b></td>
-                    <td class="${file.metaDataValid}">metadata</td>
+                    <td class="true">metadata</td>
                     <td class="${file.fileExists}">lsdf</td>
                     <td class="${file.fileLinked}">linked</td>
                     <td>${String.format("%.1f GB", file.fileSize/1e9)}</td>
@@ -144,7 +144,7 @@
                     <td><g:link controller="dataFile" action="showDetails" id="${file.id}">${file.fileName}</g:link></td>
                     <td>${de.dkfz.tbi.otp.ngsdata.MetaDataEntry.findByDataFileAndKey(file, keys[0])?.value}</td>
                     <td>${de.dkfz.tbi.otp.ngsdata.MetaDataEntry.findAllByDataFileAndKey(file, keys[1])}</td>
-                    <td class="${file.metaDataValid}"><g:message code="run.show.metaData"/></td>
+                    <td class="true"><g:message code="run.show.metaData"/></td>
                 </tr>
             </g:each>
             </tbody>

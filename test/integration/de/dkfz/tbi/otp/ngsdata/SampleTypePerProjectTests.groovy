@@ -76,7 +76,7 @@ class SampleTypePerProjectTests extends TestCase {
                 [project2, sampleType2],
         ])
 
-        DataFile.build(seqTrack: sampleProject1Type1WholeGenome, fileType: sequenceFileType, fileWithdrawn: true)
+        DomainFactory.createDataFile(seqTrack: sampleProject1Type1WholeGenome, fileType: sequenceFileType, fileWithdrawn: true)
         // SeqTrack withdrawn, other SeqTrack for same combination is still valid
         assert containSame(SampleTypePerProject.findMissingCombinations(), [
                 [project1, sampleType1],
@@ -85,7 +85,7 @@ class SampleTypePerProjectTests extends TestCase {
                 [project2, sampleType2],
         ])
 
-        DataFile.build(seqTrack: sampleProject1Type1Exome, fileType: sequenceFileType, fileWithdrawn: true)
+        DomainFactory.createDataFile(seqTrack: sampleProject1Type1Exome, fileType: sequenceFileType, fileWithdrawn: true)
         // both withdrawn
         assert containSame(SampleTypePerProject.findMissingCombinations(), [
                 [project1, sampleType2],

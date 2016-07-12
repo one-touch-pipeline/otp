@@ -1,14 +1,14 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import static org.junit.Assert.*
-import static de.dkfz.tbi.otp.dataprocessing.AbstractBamFileServiceTests.*
-
-import org.junit.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QaProcessingStatus
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
+import de.dkfz.tbi.otp.testing.*
+import org.junit.*
+
+import static de.dkfz.tbi.otp.dataprocessing.AbstractBamFileServiceTests.*
+import static org.junit.Assert.*
 
 class QualityAssessmentPassServiceTests extends AbstractIntegrationTest {
 
@@ -274,7 +274,7 @@ class QualityAssessmentPassServiceTests extends AbstractIntegrationTest {
         fileType.signature = ".fastq"
         assertNotNull(fileType.save(flush: true))
 
-        DataFile dataFile = new DataFile(
+        DataFile dataFile = DomainFactory.createDataFile(
                         fileType: fileType,
                         seqTrack: seqTrack,
                         mateNumber: 1)
@@ -327,7 +327,7 @@ class QualityAssessmentPassServiceTests extends AbstractIntegrationTest {
                         )
         assertNotNull(fileType.save(flush: true))
 
-        DataFile dataFile = new DataFile(
+        DataFile dataFile = DomainFactory.createDataFile(
                         fileType: fileType,
                         seqTrack: seqTrack,
                         mateNumber: 1)
@@ -354,7 +354,7 @@ class QualityAssessmentPassServiceTests extends AbstractIntegrationTest {
 
         List<DataFile> dataFiles = []
 
-        DataFile dataFile = new DataFile(
+        DataFile dataFile = DomainFactory.createDataFile(
                         fileType: fileType,
                         seqTrack: seqTrack,
                         mateNumber: 1)
@@ -366,7 +366,7 @@ class QualityAssessmentPassServiceTests extends AbstractIntegrationTest {
                         dataFile: dataFile)
         assertNotNull(fastqcProcessedFile.save(flush: true))
 
-        dataFile = new DataFile(
+        dataFile = DomainFactory.createDataFile(
                         fileType: fileType,
                         seqTrack: seqTrack,
                         mateNumber: 1)

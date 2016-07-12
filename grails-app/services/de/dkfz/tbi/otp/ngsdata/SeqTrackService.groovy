@@ -596,8 +596,9 @@ AND i.id > :seqTrackId
     private boolean areFilesLocatedOnMidTermStorage(SeqTrack seqTrack) {
         assert seqTrack: "The input seqTrack for areFilesLocatedOnMidTermStorage must not be null"
         List<DataFile> files = DataFile.findAllBySeqTrack(seqTrack)
-        RunSegment runSegment = CollectionUtils.exactlyOneElement( files*.runSegment.unique() )
-        return LsdfFilesService.midtermStorageMountPoint.any{runSegment.dataPath.startsWith(it)}
+        return files.every { DataFile dataFile ->
+            LsdfFilesService.midtermStorageMountPoint.any { dataFile.initialDirectory.startsWith(it) }
+        }
     }
 
 

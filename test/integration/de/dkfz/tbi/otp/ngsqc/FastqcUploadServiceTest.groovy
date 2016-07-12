@@ -1,16 +1,11 @@
 package de.dkfz.tbi.otp.ngsqc
 
-import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
-import de.dkfz.tbi.otp.ngsdata.DataFile
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
+import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.ngsdata.*
+import org.junit.*
 
-import static de.dkfz.tbi.TestCase.shouldFail
-import static de.dkfz.tbi.TestCase.shouldFailWithMessageContaining
+import static de.dkfz.tbi.TestCase.*
 
 class FastqcUploadServiceTest {
 

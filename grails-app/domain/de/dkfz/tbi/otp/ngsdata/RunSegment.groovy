@@ -45,7 +45,6 @@ class RunSegment implements Entity {
     DataFormat initialFormat
     DataFormat currentFormat
 
-    String dataPath                  // path to data (ftp area)
     /** @deprecated Use {@link MetaDataFile#filePath} */ @Deprecated
     String mdPath                    // path to meta-data
 
@@ -56,7 +55,6 @@ class RunSegment implements Entity {
 
     static belongsTo = [run : Run]
     static constraints = {
-        dataPath blank: false, validator: { OtpPath.isValidAbsolutePath(it) }
         mdPath blank: false, validator: { OtpPath.isValidAbsolutePath(it) }
         //the field can be null, since for the old data the information is not needed; only for new incoming runSegments
         align(nullable: true)

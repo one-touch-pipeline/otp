@@ -54,12 +54,6 @@
                     </g:if>
                 </span></td>
             </tr>
-            <g:if test="${!dataFile.vbpFilePath.isAllWhitespace()}">
-            <tr>
-                <td class="myKey"><g:message code="datafile.showDetails.viewByPidPath"/></td>
-                <td class="myValue"><span class="wordBreak">${dataFile.vbpFilePath}</span></td>
-            </tr>
-            </g:if>
             <tr>
                 <td class="myKey"><g:message code="datafile.showDetails.checkSum"/></td>
                 <td class="myValue">${dataFile.md5sum}</td>
@@ -113,10 +107,6 @@
             <tr>
                 <td class="myKey"><g:message code="datafile.showDetails.metaDataStatus.isFileUsed"/></td>
                 <td class="${dataFile.used}">${dataFile.used}</td>
-            </tr>
-            <tr>
-                <td class="myKey"><g:message code="datafile.showDetails.metaDataStatus.isMetaDataValid"/></td>
-                <td class="${dataFile.metaDataValid}">${dataFile.metaDataValid}</td>
             </tr>
             <tr>
                 <td class="myKey"><g:message code="datafile.showDetails.metaDataStatus.isWithdrawn"/></td>

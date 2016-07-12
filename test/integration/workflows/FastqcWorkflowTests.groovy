@@ -1,20 +1,13 @@
 package workflows
 
-import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
-import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.otp.utils.LinkFileUtils
-import grails.plugin.springsecurity.SpringSecurityUtils
-import org.joda.time.Duration
-import org.junit.Before
-import org.junit.Ignore
-import org.junit.Test
+import de.dkfz.tbi.otp.utils.*
+import grails.plugin.springsecurity.*
+import org.joda.time.*
+import org.junit.*
 
-import java.util.zip.ZipEntry
-import java.util.zip.ZipFile
-
+import java.util.zip.*
 @Ignore
 class FastqcWorkflowTests extends WorkflowTestCase {
     ProcessingOptionService processingOptionService
@@ -51,7 +44,6 @@ class FastqcWorkflowTests extends WorkflowTestCase {
 
         RunSegment runSegment = DomainFactory.createRunSegment(
                 run: run,
-                dataPath: stagingRootPath,
         )
 
         seqCenter = run.seqCenter
@@ -71,6 +63,7 @@ class FastqcWorkflowTests extends WorkflowTestCase {
                 seqTrack: seqTrack,
                 run: run,
                 runSegment: runSegment,
+                initialDirectory: "${stagingRootPath}/${run.name}",
         )
 
         linkFileUtils.createAndValidateLinks([(sourceFastq): new File(lsdfFilesService.getFileFinalPath(dataFile))], realm)

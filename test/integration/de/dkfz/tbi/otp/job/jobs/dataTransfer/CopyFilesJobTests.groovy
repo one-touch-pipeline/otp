@@ -1,20 +1,18 @@
 package de.dkfz.tbi.otp.job.jobs.dataTransfer
 
-import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.job.jobs.WatchdogJob
-import de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys
-import de.dkfz.tbi.otp.job.processing.PbsService
-import de.dkfz.tbi.otp.job.processing.ExecutionService
-import de.dkfz.tbi.otp.utils.CollectionUtils
-import org.junit.*
+import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
+import de.dkfz.tbi.otp.job.jobs.*
+import de.dkfz.tbi.otp.job.jobs.utils.*
+import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.Realm.OperationType
-import org.springframework.beans.factory.annotation.Autowired
+import de.dkfz.tbi.otp.utils.*
+import org.junit.*
+import org.springframework.beans.factory.annotation.*
 
-import static junit.framework.TestCase.assertNotNull
-
+import static junit.framework.TestCase.*
 
 class CopyFilesJobTests {
 
@@ -124,7 +122,7 @@ class CopyFilesJobTests {
         seqTrack.project.realmName = realm.name
         DataFile dataFile
         if (createAlignBamFile) {
-            dataFile = DataFile.build(
+            dataFile = DomainFactory.createDataFile(
                 run: run,
                 seqTrack: null,
                 alignmentLog: AlignmentLog.build(seqTrack: seqTrack),
@@ -132,7 +130,7 @@ class CopyFilesJobTests {
                 fileType : FileType.buildLazy(type: FileType.Type.ALIGNMENT)
                 )
         } else {
-            dataFile = DataFile.build(run: run, seqTrack: seqTrack, project: seqTrack.project)
+            dataFile = DomainFactory.createDataFile(run: run, seqTrack: seqTrack, project: seqTrack.project)
         }
         dataFile.runSegment = DomainFactory.createRunSegment(run: run)
         assert dataFile.save(failOnError: true, flush: true)

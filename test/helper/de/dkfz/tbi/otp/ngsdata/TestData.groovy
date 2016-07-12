@@ -242,6 +242,7 @@ class TestData {
     DataFile createDataFile(Map properties = [:]) {
         return new DataFile([
             fileName: "datafile",
+            initialDirectory: TestCase.getUniqueNonExistentPath().path,
             fileExists: true,
             fileSize: 1,
             fileType: fileType,
@@ -291,7 +292,6 @@ class TestData {
             run: run,
             initialFormat: DataFormat.FILES_IN_DIRECTORY,
             currentFormat: DataFormat.FILES_IN_DIRECTORY,
-            dataPath: "/tmp",
             mdPath: "/tmp",
         ] + properties)
     }

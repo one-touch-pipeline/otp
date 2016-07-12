@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.TestCase
+
 import static org.junit.Assert.*
 
 import org.junit.*
@@ -120,7 +122,6 @@ class LsdfFilesServiceTests {
         runSegment.metaDataStatus = RunSegment.Status.COMPLETE
         runSegment.initialFormat = RunSegment.DataFormat.FILES_IN_DIRECTORY
         runSegment.currentFormat = RunSegment.DataFormat.FILES_IN_DIRECTORY
-        runSegment.dataPath = ftpDir
         runSegment.filesStatus = RunSegment.FilesStatus.NEEDS_INSTALLATION
         runSegment.mdPath = ftpDir
         runSegment.run = run
@@ -130,6 +131,7 @@ class LsdfFilesServiceTests {
     DataFile createDataFile(SeqTrack seqTrack, String fastqFilename) {
         DataFile dataFile = new DataFile()
         dataFile.fileName = fastqFilename
+        dataFile.initialDirectory = TestCase.getUniqueNonExistentPath().path
         dataFile.runSegment = runSegment
         dataFile.used = true // is this file used in any seqTrack
         dataFile.project = project

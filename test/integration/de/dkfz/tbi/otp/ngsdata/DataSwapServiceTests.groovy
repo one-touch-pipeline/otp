@@ -189,7 +189,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     void test_changeMetadataEntry() {
         Sample sample = Sample.build()
         SeqTrack seqTrack = SeqTrack.build(sample: sample)
-        DataFile dataFile = DataFile.build(seqTrack: seqTrack)
+        DataFile dataFile = DomainFactory.createDataFile(seqTrack: seqTrack)
         MetaDataKey metaDataKey = MetaDataKey.build()
         String newValue = "NEW"
         MetaDataEntry metaDataEntry = MetaDataEntry.build(key: metaDataKey, dataFile: dataFile)
@@ -221,7 +221,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
         SampleIdentifier sampleIdentifier = SampleIdentifier.build(sample: sample)
         String sampleIdentifierName = sampleIdentifier.name
         SeqTrack seqTrack = SeqTrack.build(sample: sample)
-        DataFile dataFile = DataFile.build(seqTrack: seqTrack)
+        DataFile dataFile = DomainFactory.createDataFile(seqTrack: seqTrack)
         MetaDataKey metaDataKey = MetaDataKey.build(name: "SAMPLE_ID")
         MetaDataEntry metaDataEntry = MetaDataEntry.build(key: metaDataKey, dataFile: dataFile)
 
@@ -274,7 +274,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     void test_getAndValidateAndShowDataFilesForSeqTracks() {
         SeqTrack seqTrack = SeqTrack.build()
         List<SeqTrack> seqTracks = [seqTrack]
-        DataFile dataFile = DataFile.build(seqTrack: seqTrack)
+        DataFile dataFile = DomainFactory.createDataFile(seqTrack: seqTrack)
         Map<String, String> dataFileMap = [(dataFile.fileName): ""]
 
         assert [dataFile] == dataSwapService.getAndValidateAndShowDataFilesForSeqTracks(seqTracks, dataFileMap, new StringBuilder())
@@ -284,19 +284,20 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     void test_getAndValidateAndShowAlignmentDataFilesForSeqTracks() {
         SeqTrack seqTrack = SeqTrack.build()
         List<SeqTrack> seqTracks = [seqTrack]
-        DataFile dataFile = DataFile.build(seqTrack: seqTrack)
+        DataFile dataFile = DomainFactory.createDataFile(seqTrack: seqTrack)
         Map<String, String> dataFileMap = [(dataFile.fileName): ""]
 
         assert [] == dataSwapService.getAndValidateAndShowAlignmentDataFilesForSeqTracks(seqTracks, dataFileMap, new StringBuilder())
 
         AlignmentLog alignmentLog = AlignmentLog.build(seqTrack: seqTrack)
-        DataFile dataFile2 = DataFile.build(alignmentLog: alignmentLog)
+        DataFile dataFile2 = DomainFactory.createDataFile(alignmentLog: alignmentLog)
+        dataFileMap = [(dataFile2.fileName): ""]
         assert [dataFile2] == dataSwapService.getAndValidateAndShowAlignmentDataFilesForSeqTracks(seqTracks, dataFileMap, new StringBuilder())
     }
 
     @Test
     void test_collectFileNamesOfDataFiles() {
-        DataFile dataFile = DataFile.build()
+        DataFile dataFile = DomainFactory.createDataFile(used: false)
 
         assert [(dataFile): [directFileName: lsdfFilesService.getFileFinalPath(dataFile), vbpFileName: lsdfFilesService.getFileViewByPidPath(dataFile)]] ==
                 dataSwapService.collectFileNamesOfDataFiles([dataFile])
@@ -304,7 +305,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
 
     @Test
     public void testDeleteFastQCInformationFromDataFile() throws Exception {
-        DataFile dataFile = DataFile.build()
+        DataFile dataFile = DomainFactory.createDataFile()
         FastqcProcessedFile fastqcProcessedFile = FastqcProcessedFile.build(dataFile: dataFile)
 
         dataSwapService.deleteFastQCInformationFromDataFile(dataFile)
@@ -314,7 +315,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
 
     @Test
     public void testDeleteMetaDataEntryForDataFile() throws Exception {
-        DataFile dataFile = DataFile.build()
+        DataFile dataFile = DomainFactory.createDataFile()
         MetaDataEntry metaDataEntry = MetaDataEntry.build(dataFile: dataFile)
 
         dataSwapService.deleteMetaDataEntryForDataFile(dataFile)
@@ -324,7 +325,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
 
     @Test
     public void testDeleteConsistencyStatusInformationForDataFile() throws Exception {
-        DataFile dataFile = DataFile.build()
+        DataFile dataFile = DomainFactory.createDataFile()
         ConsistencyStatus consistencyStatus = ConsistencyStatus.build(dataFile: dataFile)
 
         dataSwapService.deleteConsistencyStatusInformationForDataFile(dataFile)
@@ -437,7 +438,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
 
     @Test
     public void testDeleteDataFile() throws Exception {
-        DataFile dataFile = DataFile.build()
+        DataFile dataFile = DomainFactory.createDataFile()
         FastqcProcessedFile fastqcProcessedFile = FastqcProcessedFile.build(dataFile: dataFile)
 
         MetaDataEntry metaDataEntry = MetaDataEntry.build(dataFile: dataFile)
@@ -453,7 +454,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     public void testDeleteConnectionFromSeqTrackRepresentingABamFile() throws Exception {
         SeqTrack seqTrack = SeqTrack.build()
         AlignmentLog alignmentLog = AlignmentLog.build(seqTrack: seqTrack)
-        DataFile dataFile = DataFile.build(alignmentLog: alignmentLog)
+        DataFile dataFile = DomainFactory.createDataFile(alignmentLog: alignmentLog)
 
         dataSwapService.deleteConnectionFromSeqTrackRepresentingABamFile(seqTrack)
 
@@ -464,7 +465,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     @Test
     public void testDeleteAllProcessingInformationAndResultOfOneSeqTrack_ProcessedBamFile() throws Exception {
         SeqTrack seqTrack = SeqTrack.build()
-        DataFile dataFile = DataFile.build(seqTrack: seqTrack)
+        DataFile dataFile = DomainFactory.createDataFile(seqTrack: seqTrack)
         ProcessedSaiFile processedSaiFile = ProcessedSaiFile.build(dataFile: dataFile)
 
         TestData testData = new TestData()
@@ -516,7 +517,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     public void testDeleteSeqTrack() throws Exception {
         SeqTrack seqTrack = SeqTrack.build()
         MergingAssignment mergingAssignment = MergingAssignment.build(seqTrack: seqTrack)
-        DataFile dataFile = DataFile.build(seqTrack: seqTrack)
+        DataFile dataFile = DomainFactory.createDataFile(seqTrack: seqTrack)
 
         dataSwapService.deleteSeqTrack(seqTrack)
 
@@ -553,7 +554,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
         StringBuilder outputStringBuilder = new StringBuilder()
         Run run = Run.build()
         RunSegment runSegment = RunSegment.build(run: run)
-        DataFile dataFile = DataFile.build(run: run)
+        DataFile dataFile = DomainFactory.createDataFile(run: run)
         MetaDataFile metaDataFile = DomainFactory.createMetaDataFile(runSegment: runSegment)
 
         dataSwapService.deleteRun(run, outputStringBuilder)
@@ -569,7 +570,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
         StringBuilder outputStringBuilder = new StringBuilder()
         Run run = Run.build()
         RunSegment runSegment = RunSegment.build(run: run)
-        DataFile dataFile = DataFile.build(run: run)
+        DataFile dataFile = DomainFactory.createDataFile(run: run)
         MetaDataFile metaDataFile = DomainFactory.createMetaDataFile(runSegment: runSegment)
 
         dataSwapService.deleteRunByName(run.name, outputStringBuilder)

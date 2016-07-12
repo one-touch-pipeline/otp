@@ -517,7 +517,7 @@ class RunServiceTests extends AbstractIntegrationTest {
     }
 
     private RunSegment mockRunSegment(Run run, String path) {
-        RunSegment segment = new RunSegment(run: run, dataPath: path, mdPath: "${path}.md5")
+        RunSegment segment = new RunSegment(run: run, mdPath: "${path}.md5")
         assertNotNull(segment.save())
         return segment
     }

@@ -1,15 +1,11 @@
 package de.dkfz.tbi.otp.job.jobs.alignment
 
-import org.junit.Before
-import org.junit.Test
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.ngsdata.*
+import org.junit.*
+import org.junit.rules.*
 
 import static org.junit.Assert.*
-
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
-
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.dataprocessing.*
 
 class BwaPairingAndSortingJobTests {
 
@@ -191,7 +187,7 @@ class BwaPairingAndSortingJobTests {
         )
         assertNotNull(fileType.save(flush: true))
 
-        DataFile dataFile1 = new DataFile(
+        DataFile dataFile1 = DomainFactory.createDataFile(
             fileName: "dataFile1.fastq",
             pathName: "testPath",
             run: run,
@@ -205,7 +201,7 @@ class BwaPairingAndSortingJobTests {
         dataFile1.validate()
         assertNotNull(dataFile1.save(flush: true))
 
-        DataFile dataFile2 = new DataFile(
+        DataFile dataFile2 = DomainFactory.createDataFile(
             fileName: "dataFile2.fastq",
             pathName: "testPath",
             run: run,

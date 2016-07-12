@@ -1,15 +1,9 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.ngsdata.DataFile
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.Project
-import de.dkfz.tbi.otp.ngsdata.Run
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.ngsdata.TestData
-import grails.buildtestdata.mixin.Build
-import org.junit.Test
-
-import grails.test.mixin.Mock
+import de.dkfz.tbi.otp.ngsdata.*
+import grails.buildtestdata.mixin.*
+import grails.test.mixin.*
+import org.junit.*
 
 @Build([
         DataFile,
@@ -70,7 +64,7 @@ class ProcessingPriorityUnitTest {
     void testGetProcessingPriority() {
         Project project = Project.build(processingPriority: ProcessingPriority.NORMAL_PRIORITY)
         Run run = Run.build()
-        DataFile datafile = DataFile.build(run: run)
+        DataFile datafile = DomainFactory.createDataFile(run: run)
         assert ProcessingPriority.NORMAL_PRIORITY == run.processingPriority
 
         datafile.project = project
@@ -78,7 +72,7 @@ class ProcessingPriorityUnitTest {
         assert ProcessingPriority.NORMAL_PRIORITY == run.processingPriority
 
         Project projectFasttrack = Project.build(processingPriority: ProcessingPriority.FAST_TRACK_PRIORITY)
-        DataFile datafileFasttrack = DataFile.build(project: projectFasttrack, run: run)
+        DataFile datafileFasttrack = DomainFactory.createDataFile(project: projectFasttrack, run: run)
 
         assert ProcessingPriority.FAST_TRACK_PRIORITY == run.processingPriority
     }
