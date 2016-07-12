@@ -149,7 +149,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
                     callCount++
                     assertEquals(otrsRecipient, recipient)
                     assert content.contains(expectedStatus.toString())
-                    assertEquals("${prefix} #${ticket.ticketNumber} Processing Status Update".toString(), emailSubject)
+                    assertEquals("${prefix}#${ticket.ticketNumber} Processing Status Update".toString(), emailSubject)
                 }
         ] as MailHelperService
 
@@ -207,7 +207,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
                 callCount++
                 assertEquals(otrsRecipient, recipient)
                 assert content.contains(expectedStatus.toString())
-                assertEquals("${prefix} #${ticket.ticketNumber} Final Processing Status Update".toString(), emailSubject)
+                assertEquals("${prefix}#${ticket.ticketNumber} Final Processing Status Update".toString(), emailSubject)
             }
         ] as MailHelperService
 

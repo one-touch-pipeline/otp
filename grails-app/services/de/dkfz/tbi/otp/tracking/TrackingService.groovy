@@ -109,7 +109,7 @@ class TrackingService {
         StringBuilder subject = new StringBuilder()
 
         String prefix = ProcessingOptionService.getValueOfProcessingOption(TICKET_NUMBER_PREFIX)
-        subject.append("$prefix #").append(ticket.ticketNumber)
+        subject.append("$prefix#").append(ticket.ticketNumber)
         if (finalNotification) {
             subject.append(' Final')
         }

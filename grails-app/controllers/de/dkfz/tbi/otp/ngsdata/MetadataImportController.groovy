@@ -145,8 +145,8 @@ class MetadataImportControllerSubmitCommand implements Serializable {
         })
     }
     void setTicketNumber(String ticketNumber) {
-        String prefix = Pattern.quote(ProcessingOptionService.getValueOfProcessingOption(TrackingService.TICKET_NUMBER_PREFIX))
-        Matcher matcher = ticketNumber =~ /^\s*((($prefix)?#)?(?<number>(\d{16})))?\s*$/
+        String prefix = ProcessingOptionService.getValueOfProcessingOption(TrackingService.TICKET_NUMBER_PREFIX)
+        Matcher matcher = ticketNumber =~ /^\s*(((${Pattern.quote(prefix)})?#)?(?<number>(\d{16})))?\s*$/
         if (matcher.matches()) {
             this.ticketNumber = matcher.group('number') ?: null
         } else {

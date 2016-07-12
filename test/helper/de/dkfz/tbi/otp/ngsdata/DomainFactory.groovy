@@ -272,7 +272,7 @@ class DomainFactory {
     public static void createProcessingOptionForOtrsTicketPrefix(String prefix){
         ProcessingOptionService option = new ProcessingOptionService()
         option.createOrUpdate(
-                "otrsTicketNumberPrefix",
+                TrackingService.TICKET_NUMBER_PREFIX,
                 null,
                 null,
                 prefix,

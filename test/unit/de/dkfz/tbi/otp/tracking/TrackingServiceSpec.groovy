@@ -215,7 +215,7 @@ ILSe 2, runA, lane 1, ${sampleText}
             @Override
             void sendEmail(String emailSubject, String content, String recipient) {
                 callCount++
-                assertEquals("${prefix} #${ticket.ticketNumber} Processing Status Update".toString(), emailSubject)
+                assertEquals("${prefix}#${ticket.ticketNumber} Processing Status Update".toString(), emailSubject)
                 assertEquals(otrsRecipient, recipient)
                 assertEquals(expectedContent, content)
             }
@@ -236,7 +236,7 @@ ILSe 2, runA, lane 1, ${sampleText}
         String otrsRecipient = HelperUtils.uniqueString
         trackingService.mailHelperService = Mock(MailHelperService) {
             getOtrsRecipient() >> otrsRecipient
-            1 * sendEmail("${prefix} #${ticket.ticketNumber} Final Processing Status Update", _, otrsRecipient)
+            1 * sendEmail("${prefix}#${ticket.ticketNumber} Final Processing Status Update", _, otrsRecipient)
         }
 
         expect:
