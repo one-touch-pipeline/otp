@@ -239,22 +239,11 @@ class LinkFilesToFinalDestinationServiceTests {
         }
     }
 
-
-
     @Test
     void testLinkNewResults_allFine() {
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
 
-        List<File> linkedFiles = [
-                roddyBamFile.finalBamFile,
-                roddyBamFile.finalBaiFile,
-                roddyBamFile.finalMd5sumFile,
-                roddyBamFile.finalMergedQADirectory,
-                roddyBamFile.finalMergedQAJsonFile,
-                roddyBamFile.getFinalExecutionDirectories(),
-                roddyBamFile.finalSingleLaneQADirectories.values(),
-                roddyBamFile.finalSingleLaneQAJsonFiles.values(),
-        ].flatten()
+        List<File> linkedFiles = createLinkedFilesList()
 
         linkFilesToFinalDestinationService.executionService.metaClass.executeCommand = { Realm realm, String command ->
             return ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
@@ -272,39 +261,36 @@ class LinkFilesToFinalDestinationServiceTests {
     }
 
     @Test
-    void testLinkNewResults_methylation_AllFine() {
-        SeqType seqType = roddyBamFile.mergingWorkPackage.seqType
-        seqType.name = SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName
-        seqType.save(flush: true, failOnError: true)
+    void testLinkNewResults_methylation_OneLibrary_AllFine() {
+        testLinkNewResults_methylation_setup()
 
-        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
+        List<File> linkedFiles = createLinkedFilesList()
+        linkedFiles.addAll(roddyBamFile.finalMergedMethylationDirectory)
+        linkedFiles.addAll(roddyBamFile.finalMetadataTableFile)
 
-        List<File> linkedFiles = [
-                roddyBamFile.finalBamFile,
-                roddyBamFile.finalBaiFile,
-                roddyBamFile.finalMd5sumFile,
-                roddyBamFile.finalMergedQADirectory,
-                roddyBamFile.finalMergedQAJsonFile,
-                roddyBamFile.finalMergedMethylationDirectory,
-                roddyBamFile.getFinalExecutionDirectories(),
-                roddyBamFile.finalSingleLaneQADirectories.values(),
-                roddyBamFile.finalSingleLaneQAJsonFiles.values(),
-                roddyBamFile.finalMetadataTableFile,
-        ].flatten()
+        testLinkNewResults_helper(linkedFiles)
+    }
 
-        linkFilesToFinalDestinationService.executionService.metaClass.executeCommand = { Realm realm, String command ->
-            return ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
-        }
+    @Test
+    void testLinkNewResults_methylation_TwoLibraries_AllFine() {
+        MergingWorkPackage workPackage = roddyBamFile.mergingWorkPackage
 
-        linkedFiles.each {
-            assert !it.exists()
-        }
+        SeqTrack seqTrack = DomainFactory.createSeqTrackWithDataFiles(workPackage, [libraryName: 'library14', normalizedLibraryName: SeqTrack.normalizeLibraryName('library14')])
+        assert seqTrack.save(flush: true)
 
-        linkFilesToFinalDestinationService.linkNewResults(roddyBamFile, realm)
+        roddyBamFile.seqTracks.add(seqTrack)
+        roddyBamFile.numberOfMergedLanes = 2
+        assert roddyBamFile.save(flush: true)
 
-        linkedFiles.each {
-            assert it.exists()
-        }
+        testLinkNewResults_methylation_setup()
+
+        List<File> linkedFiles = createLinkedFilesList()
+        linkedFiles.addAll(roddyBamFile.finalMergedMethylationDirectory)
+        linkedFiles.addAll(roddyBamFile.finalMetadataTableFile)
+        linkedFiles.addAll(roddyBamFile.finalLibraryMethylationDirectories.values())
+        linkedFiles.addAll(roddyBamFile.finalLibraryQADirectories.values())
+
+        testLinkNewResults_helper(linkedFiles)
     }
 
     @Test
@@ -344,7 +330,42 @@ class LinkFilesToFinalDestinationServiceTests {
         }
     }
 
+    private void testLinkNewResults_methylation_setup(){
+        SeqType seqType = roddyBamFile.mergingWorkPackage.seqType
+        seqType.name = SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName
+        seqType.save(flush: true, failOnError: true)
 
+        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
+    }
+
+    private void testLinkNewResults_helper(List<File> linkedFiles){
+        linkFilesToFinalDestinationService.executionService.metaClass.executeCommand = { Realm realm, String command ->
+            return ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
+        }
+
+        linkedFiles.each {
+            assert !it.exists()
+        }
+
+        linkFilesToFinalDestinationService.linkNewResults(roddyBamFile, realm)
+
+        linkedFiles.each {
+            assert it.exists()
+        }
+    }
+
+    private List<File> createLinkedFilesList(){
+        return [
+                roddyBamFile.finalBamFile,
+                roddyBamFile.finalBaiFile,
+                roddyBamFile.finalMd5sumFile,
+                roddyBamFile.finalMergedQADirectory,
+                roddyBamFile.finalMergedQAJsonFile,
+                roddyBamFile.getFinalExecutionDirectories(),
+                roddyBamFile.finalSingleLaneQADirectories.values(),
+                roddyBamFile.finalSingleLaneQAJsonFiles.values(),
+        ].flatten()
+    }
 
     @Test
     void testCleanupOldResults_withBaseBamFile_allFine() {

@@ -87,11 +87,13 @@ class LinkFilesToFinalDestinationService {
 
         if (roddyBamFile.seqType.isWgbs()) {
             linkMapSourceLink.put(roddyBamFile.workMergedMethylationDirectory, roddyBamFile.finalMergedMethylationDirectory)
-            [roddyBamFile.workLibraryQADirectories.values().asList().sort(), roddyBamFile.finalLibraryQADirectories.values().asList().sort()].transpose().each {
-                linkMapSourceLink.put(it[0], it[1])
-            }
-            [roddyBamFile.workLibraryMethylationDirectories.values().asList().sort(), roddyBamFile.finalLibraryMethylationDirectories.values().asList().sort()].transpose().each {
-                linkMapSourceLink.put(it[0], it[1])
+            if (roddyBamFile.getContainedSeqTracks()*.normalizedLibraryName.unique().size() > 1) {
+                [roddyBamFile.workLibraryQADirectories.values().asList().sort(), roddyBamFile.finalLibraryQADirectories.values().asList().sort()].transpose().each {
+                    linkMapSourceLink.put(it[0], it[1])
+                }
+                [roddyBamFile.workLibraryMethylationDirectories.values().asList().sort(), roddyBamFile.finalLibraryMethylationDirectories.values().asList().sort()].transpose().each {
+                    linkMapSourceLink.put(it[0], it[1])
+                }
             }
             linkMapSourceLink.put(roddyBamFile.workMetadataTableFile, roddyBamFile.finalMetadataTableFile)
         }

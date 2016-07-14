@@ -32,24 +32,57 @@ class ParseWgbsAlignmentQcJobTests {
     public TemporaryFolder temporaryFolder = new TemporaryFolder()
 
     @Test
-    void testExecute() {
+    void testExecute_OnlyOneLibraryInMergedBamFile() {
         RoddyBamFile roddyBamFile = testExecuteSetup()
+        File singleLaneQaFile = CollectionUtils.exactlyOneElement(roddyBamFile.workSingleLaneQAJsonFiles.values())
+        DomainFactory.createQaFileOnFileSystem(singleLaneQaFile, SINGLE_LANE_QA_VALUE)
 
         parseWgbsAlignmentQcJob.execute()
 
         assert TestCase.containSame(["8", "all", "7"], RoddySingleLaneQa.list()*.chromosome)
-        assert TestCase.containSame(["8", "all", "7"], RoddyMergedBamQa.list()*.chromosome)
-        assert TestCase.containSame(["8", "all", "7"], RoddyLibraryQa.list()*.chromosome)
+        assert RoddyLibraryQa.list().isEmpty()
 
-        RoddySingleLaneQa.list().each { assert it.qcBasesMapped == SINGLE_LANE_QA_VALUE }
-        RoddyMergedBamQa.list().each { assert it.qcBasesMapped == MERGED_QA_VALUE }
-        RoddyLibraryQa.list().each { assert it.qcBasesMapped == LIBRARY_QA_VALUE }
-
-        assert roddyBamFile.coverage != null
-        assert roddyBamFile.coverageWithN != null
-        assert roddyBamFile.qualityAssessmentStatus == AbstractBamFile.QaProcessingStatus.FINISHED
+        validateCommonExecutionResults(roddyBamFile)
     }
 
+
+    @Test
+    void testExecute_TwoLibrariesInMergedBamFile() {
+        RoddyBamFile roddyBamFile = testExecuteSetup()
+
+        MergingWorkPackage workPackage = roddyBamFile.mergingWorkPackage
+
+        SeqTrack seqTrack2 = DomainFactory.createSeqTrackWithDataFiles(workPackage, [libraryName: 'library14', normalizedLibraryName: SeqTrack.normalizeLibraryName('library14')])
+        assert seqTrack2.save(flush: true)
+
+        roddyBamFile.seqTracks.add(seqTrack2)
+        roddyBamFile.numberOfMergedLanes = 2
+        assert roddyBamFile.save(flush: true)
+
+        roddyBamFile.workLibraryQAJsonFiles.values().each {
+            DomainFactory.createQaFileOnFileSystem(it, LIBRARY_QA_VALUE)
+        }
+
+        roddyBamFile.workSingleLaneQAJsonFiles.values().each {
+            DomainFactory.createQaFileOnFileSystem(it, SINGLE_LANE_QA_VALUE)
+        }
+
+        parseWgbsAlignmentQcJob.execute()
+
+        List expectedElements = ["8", "all", "7", "8", "all", "7"]
+        List actualSingleLaneElements = RoddySingleLaneQa.list()*.chromosome
+        List actualLibraryElements = RoddyLibraryQa.list()*.chromosome
+
+        assert expectedElements.size() == actualSingleLaneElements.size()
+        assert expectedElements.size() == actualLibraryElements.size()
+
+        assert TestCase.containSame(expectedElements as Set, actualSingleLaneElements as Set)
+        assert TestCase.containSame(expectedElements as Set, actualLibraryElements as Set)
+
+        RoddyLibraryQa.list().each { assert it.qcBasesMapped == LIBRARY_QA_VALUE }
+
+        validateCommonExecutionResults(roddyBamFile)
+    }
 
     private RoddyBamFile testExecuteSetup() {
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
@@ -63,18 +96,24 @@ class ParseWgbsAlignmentQcJobTests {
         ReferenceGenome referenceGenome = DomainFactory.createReferenceGenome()
         DomainFactory.createReferenceGenomeEntries(referenceGenome, ['7', '8'])
 
-        File libraryQaFile = CollectionUtils.exactlyOneElement(roddyBamFile.workLibraryQAJsonFiles.values())
-        File singleLaneQaFile = CollectionUtils.exactlyOneElement(roddyBamFile.workSingleLaneQAJsonFiles.values())
         File mergedQaFile = roddyBamFile.workMergedQAJsonFile
-
-        DomainFactory.createQaFileOnFileSystem(libraryQaFile, LIBRARY_QA_VALUE)
-        DomainFactory.createQaFileOnFileSystem(singleLaneQaFile, SINGLE_LANE_QA_VALUE)
         DomainFactory.createQaFileOnFileSystem(mergedQaFile, MERGED_QA_VALUE)
 
         ProcessingStep step = DomainFactory.createAndSaveProcessingStep(ParseWgbsAlignmentQcJob.class.toString(), roddyBamFile)
         parseWgbsAlignmentQcJob = context.getBean('parseWgbsAlignmentQcJob', step, null)
 
         return roddyBamFile
+    }
+
+    private void validateCommonExecutionResults(RoddyBamFile roddyBamFile){
+        RoddySingleLaneQa.list().each { assert it.qcBasesMapped == SINGLE_LANE_QA_VALUE }
+        RoddyMergedBamQa.list().each { assert it.qcBasesMapped == MERGED_QA_VALUE }
+
+        assert TestCase.containSame(["8", "all", "7"], RoddyMergedBamQa.list()*.chromosome)
+
+        assert roddyBamFile.coverage != null
+        assert roddyBamFile.coverageWithN != null
+        assert roddyBamFile.qualityAssessmentStatus == AbstractBamFile.QaProcessingStatus.FINISHED
     }
 
 }
