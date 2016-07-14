@@ -52,7 +52,7 @@ class ConfigureAlignmentController {
                 Pipeline.Name.PANCAN_ALIGNMENT,
         ))
         String pluginVersion= "1.0.182"
-        String configVersion = CollectionUtils.atMostOneElement(RoddyWorkflowConfig.findAllByWorkflowAndPluginVersionAndProjectAndObsoleteDateIsNull(pipeline, "${workflowName}:${pluginVersion}", project))?.configVersion
+        String configVersion = CollectionUtils.atMostOneElement(RoddyWorkflowConfig.findAllByPipelineAndPluginVersionAndProjectAndObsoleteDateIsNull(pipeline, "${workflowName}:${pluginVersion}", project))?.configVersion
         if (configVersion) {
             Set<String> versions = configVersion.split("_")
             configVersion = versions[0] + "_" + (versions[1].toInteger() + 1)
