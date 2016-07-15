@@ -66,7 +66,7 @@ class LibrarySampleValidator extends ValueTuplesValidator<MetadataValidationCont
                     context.addProblem(cells, Level.WARNING, "All rows for project '${Project.get(projectId)}' which look similar to '${normalizedLibraryName}' should have the same value in column '${CUSTOMER_LIBRARY}'.")
                 }
 
-                List<String> result = SeqTrack.createCriteria().listDistinct {
+                List<String> result = SeqTrack.createCriteria().list {
                     eq('normalizedLibraryName', normalizedLibraryName)
                     sample {
                         individual {
@@ -76,15 +76,15 @@ class LibrarySampleValidator extends ValueTuplesValidator<MetadataValidationCont
                         }
                     }
                     projections {
-                        property('libraryName')
+                        distinct('libraryName')
                     }
                 }
-                if (result.size() != 0) {
+                if (result) {
                     //This is done, to remove correct rows from cells. Correct rows are rows where result.size is 1 and equal to the library name.
                     if (result.size() == 1) {
                         cells = rows.findAll{it.libraryName != result[0]}*.cells.sum() as Set<Cell>
                     }
-                    if (cells.size() != 0) {
+                    if (cells) {
                         context.addProblem(cells, Level.WARNING, "In project '${Project.get(projectId)}' the following library names which look similar to '${normalizedLibraryName}' are already registered: '${result.join("', '")}'.")
                     }
                 }

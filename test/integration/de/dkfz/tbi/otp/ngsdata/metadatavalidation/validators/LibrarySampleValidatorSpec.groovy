@@ -5,7 +5,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
 import de.dkfz.tbi.util.spreadsheet.validation.*
 import spock.lang.*
 
-import java.util.regex.Matcher
+import java.util.regex.*
 
 import static de.dkfz.tbi.TestCase.*
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
@@ -25,7 +25,8 @@ class LibrarySampleValidatorSpec extends Specification {
                         "lib2\tsample01\n" +
                         "lib2\tsample01\n" +
                         "lib2\tsample02\n" +
-                        "lib1\tsample01\n"
+                        "lib1\tsample01\n" +
+                        "\tsample04\n"
         )
 
         when:
@@ -102,8 +103,11 @@ class LibrarySampleValidatorSpec extends Specification {
 
         DomainFactory.createSeqTrack(libraryName: 'lib1', normalizedLibraryName: SeqTrack.normalizeLibraryName('lib1'), sample: sample01)
         DomainFactory.createSeqTrack(libraryName: 'lib1', normalizedLibraryName: SeqTrack.normalizeLibraryName('lib1'), sample: sample02)
+        DomainFactory.createSeqTrack(libraryName: 'lib2', normalizedLibraryName: SeqTrack.normalizeLibraryName('lib2'), sample: sample02)
         DomainFactory.createSeqTrack(libraryName: 'library1', normalizedLibraryName: SeqTrack.normalizeLibraryName('library1'), sample: sample03)
         DomainFactory.createSeqTrack(libraryName: 'lib1', normalizedLibraryName: SeqTrack.normalizeLibraryName('lib1'), sample: sample04)
+        DomainFactory.createSeqTrack(libraryName: null, normalizedLibraryName: SeqTrack.normalizeLibraryName(null), sample: sample04)
+        DomainFactory.createSeqTrack(libraryName: '', normalizedLibraryName: SeqTrack.normalizeLibraryName(''), sample: sample04)
     }
 
     private LibrarySampleValidator createLibrarySampleValidator() {
