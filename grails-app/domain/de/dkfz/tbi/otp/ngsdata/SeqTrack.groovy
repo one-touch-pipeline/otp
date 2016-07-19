@@ -15,6 +15,10 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.getThreadLog
 
+/*
+ * In the GUI and e-mails sent by OTP this shall be called "Lane", even if it is only part of a multiplexed physical
+ * lane. An explaining tooltip should be provided. (Decided together with the OTP Product Owner on 2016-07-19.)
+ */
 class SeqTrack implements ProcessParameterObject, Entity {
 
     static final Closure<? extends SeqTrack> FACTORY = { Map properties -> new SeqTrack(properties) }

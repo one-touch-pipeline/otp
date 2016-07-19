@@ -3,6 +3,11 @@ package de.dkfz.tbi.otp.ngsdata
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.utils.*
 
+/*
+ * In the GUI and e-mails sent by OTP this shall be called "Sequencing Type" (or "Seq Type" where little space is
+ * available), no matter if the library layout is included in the displayed value or not. (Decided together with the OTP
+ * Product Owner on 2016-07-19.)
+ */
 class SeqType implements Entity {
 
     final static LIBRARYLAYOUT_PAIRED = LibraryLayout.PAIRED.name()
