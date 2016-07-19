@@ -19,6 +19,16 @@ class AbstractJobImplSpec extends Specification {
 
     AbstractJobImpl abstractJobImpl
 
+    void "test getLogFileAbsolutePath returns expected path"() {
+        given:
+        ClusterJob clusterJob = DomainFactory.createClusterJob()
+        DomainFactory.createProcessingStepUpdate(processingStep: clusterJob.processingStep)
+        String expected = "${ClusterJobLoggingService.logDirectory(clusterJob.realm, clusterJob.processingStep)}/${clusterJob.clusterJobName}.o${clusterJob.clusterJobId}"
+
+        expect:
+        expected == AbstractOtpJob.getLogFileAbsolutePath(clusterJob).path
+    }
+
     void "test failedOrNotFinishedClusterJobs, no send step, throws RunTimeException"() {
         given:
         abstractJobImpl = [

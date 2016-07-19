@@ -248,4 +248,12 @@ abstract class AbstractJobImpl implements Job {
             return ClusterJob.findByClusterJobIdentifier(identifier)
         }
     }
+
+    protected File getLogFilePath(ClusterJob clusterJob) {
+        return getLogFileAbsolutePath(clusterJob)
+    }
+
+    public static File getLogFileAbsolutePath(ClusterJob clusterJob) {
+        return new File(ClusterJobLoggingService.logDirectory(clusterJob.realm, clusterJob.processingStep), "${clusterJob.clusterJobName}.o${clusterJob.clusterJobId}")
+    }
 }

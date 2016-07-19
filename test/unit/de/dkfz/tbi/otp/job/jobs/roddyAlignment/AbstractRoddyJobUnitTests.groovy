@@ -52,7 +52,7 @@ class AbstractRoddyJobUnitTests {
     }
 
     @Test
-    void testGetLogFilePaths() {
+    void testGetLogFilePath() {
         Realm realm = Realm.build(
                 name: roddyBamFile.project.realmName,
                 rootPath: tmpDir.root.path,
@@ -65,7 +65,7 @@ class AbstractRoddyJobUnitTests {
 
         String expected = "Log file: ${new File(logDirectory, "${clusterJob.clusterJobName}.o${clusterJob.clusterJobId}")}"
 
-        assert abstractRoddyJob.getLogFilePaths(clusterJob) == expected
+        assert "Log file: ${abstractRoddyJob.getLogFilePath(clusterJob)}" == expected
     }
 
     @Test

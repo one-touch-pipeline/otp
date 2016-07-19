@@ -53,7 +53,7 @@ abstract class AbstractRoddyJob extends AbstractMaybeSubmitWaitValidateJob{
             if (submittedClusterJobs) {
                 saveRoddyExecutionStoreDirectory(roddyResult, output.stderr)
                 submittedClusterJobs.each {
-                    threadLog?.info(getLogFilePaths(it))
+                    threadLog?.info("Log file: ${getLogFilePath(it)}" )
                 }
                 return NextAction.WAIT_FOR_CLUSTER_JOBS
             } else {
@@ -83,9 +83,9 @@ abstract class AbstractRoddyJob extends AbstractMaybeSubmitWaitValidateJob{
     protected abstract void validate(RoddyResult roddyResultObject) throws Throwable
 
     @Override
-    protected String getLogFilePaths(ClusterJob clusterJob) {
+    protected File getLogFilePath(ClusterJob clusterJob) {
         File logDirectory = ((RoddyResult) getRefreshedProcessParameterObject()).latestWorkExecutionDirectory
-        return "Log file: ${new File(logDirectory, "${clusterJob.clusterJobName}.o${clusterJob.clusterJobId}")}"
+        return new File(logDirectory, "${clusterJob.clusterJobName}.o${clusterJob.clusterJobId}")
     }
 
     @Override

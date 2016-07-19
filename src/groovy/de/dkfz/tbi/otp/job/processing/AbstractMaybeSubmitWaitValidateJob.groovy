@@ -33,7 +33,7 @@ ${
     failedClusterJobs.sort(
             { ClusterJobIdentifier identifier1, ClusterJobIdentifier identifier2 -> identifier1.clusterJobId <=> identifier2.clusterJobId } as Comparator
     ).collect { ClusterJobIdentifier clusterJobIdentifier, String reason ->
-        "${clusterJobIdentifier}: ${reason}\n${getLogFilePaths(ClusterJob.findByClusterJobIdentifier(clusterJobIdentifier))}\n"
+        "${clusterJobIdentifier}: ${reason}\n${"Log file: ${getLogFilePath(ClusterJob.findByClusterJobIdentifier(clusterJobIdentifier))}" }\n"
     }.join("\n")
 }"""
     }
@@ -51,12 +51,6 @@ ${
             return ClusterJob.findByClusterJobIdentifier(identifier)
         }
     }
-
-    /**
-     * Returns a string containing the absolute or relative path(s) of the log file(s) written by the specified cluster
-     * job.
-     */
-    protected abstract String getLogFilePaths(ClusterJob clusterJob)
 
     /**
      * Returns all failed or not finished ClusterJobs

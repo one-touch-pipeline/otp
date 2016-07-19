@@ -8,6 +8,7 @@ import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Realm
 import org.junit.Before
 import org.junit.Test
+import org.springframework.beans.factory.annotation.Autowired
 
 class AbstractMaybeSubmitWaitValidateJobTests extends TestCase {
 
@@ -16,9 +17,7 @@ class AbstractMaybeSubmitWaitValidateJobTests extends TestCase {
 
     @Before
     void setUp() {
-        abstractMaybeSubmitWaitValidateJob = [
-                getLogFilePaths: { clusterJob -> AbstractOtpJob.getLogFileNames(clusterJob) }
-        ] as AbstractMaybeSubmitWaitValidateJob
+        abstractMaybeSubmitWaitValidateJob = [:] as AbstractMaybeSubmitWaitValidateJob
     }
 
     @Test
@@ -42,10 +41,10 @@ class AbstractMaybeSubmitWaitValidateJobTests extends TestCase {
 2 of 2 cluster jobs failed:
 
 ${identifier1}: Failed1.
-${AbstractOtpJob.getLogFileNames(clusterJob1)}
+Log file: ${AbstractOtpJob.getLogFileAbsolutePath(clusterJob1).path}
 
 ${identifier2}: Failed2.
-${AbstractOtpJob.getLogFileNames(clusterJob2)}
+Log file: ${AbstractOtpJob.getLogFileAbsolutePath(clusterJob2).path}
 """
 
         String actual = abstractMaybeSubmitWaitValidateJob.createExceptionString(failedClusterJobs, finishedClusterJobs)

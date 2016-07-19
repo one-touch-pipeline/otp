@@ -124,7 +124,7 @@ flock -x '${logFile}' -c "echo \\"${logMessage}\\" >> '${logFile}'"
         String pbsId = extractPbsId(output.stdout)
 
         ClusterJob clusterJob = clusterJobService.createClusterJob(realm, pbsId, realm.unixUser, processingStep, seqType, pbsJobDescription)
-        threadLog?.info(AbstractOtpJob.getLogFileNames(clusterJob))
+        threadLog?.info("Log file: ${AbstractOtpJob.getLogFileAbsolutePath(clusterJob).path}")
 
         return pbsId
     }
