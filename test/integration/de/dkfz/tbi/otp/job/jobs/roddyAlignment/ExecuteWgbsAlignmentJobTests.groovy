@@ -24,6 +24,7 @@ class ExecuteWgbsAlignmentJobTests {
     @Rule
     public TemporaryFolder tmpDir = new TemporaryFolder()
 
+    File cpiFile
 
     @Before
     void setUp() {
@@ -31,6 +32,13 @@ class ExecuteWgbsAlignmentJobTests {
         SeqType wgbsSeqType = DomainFactory.createWholeGenomeBisulfiteSeqType()
         DomainFactory.changeSeqType(roddyBamFile, wgbsSeqType)
         roddyBamFile.workPackage.metaClass.findMergeableSeqTracks = { -> SeqTrack.list() }
+
+        roddyBamFile.referenceGenome.cytosinePositionsIndex = "cytosine_idx.pos.gz"
+        roddyBamFile.referenceGenome.save(flush: true, failOnError: true)
+        cpiFile = CreateFileHelper.createFile(
+                new File("${tmpDir.root}/processing/reference_genomes/${roddyBamFile.referenceGenome.path}",
+                        roddyBamFile.referenceGenome.cytosinePositionsIndex)
+        )
 
         executeWgbsAlignmentJob.executionService.metaClass.executeCommandReturnProcessOutput = { Realm realm, String cmd ->
             ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(cmd)
@@ -66,28 +74,27 @@ class ExecuteWgbsAlignmentJobTests {
     }
 
     @Test
-    void testPrepareAndReturnWorkflowSpecificCValues() {
-        List<String> chromosomeNames = ["1", "2", "3", "4", "5", "M", "X", "Y"]
-        DomainFactory.createReferenceGenomeEntries(roddyBamFile.referenceGenome, chromosomeNames)
-
-        assert ",CHROMOSOME_INDICES:( ${chromosomeNames.join(' ')} )" == executeWgbsAlignmentJob.prepareAndReturnWorkflowSpecificCValues(roddyBamFile)
-    }
-
-    @Test
     void testPrepareAndReturnWorkflowSpecificCValues_cytosinePositionIndexFilePath() {
         List<String> chromosomeNames = ["1", "2", "3", "4", "5", "M", "X", "Y"]
         DomainFactory.createReferenceGenomeEntries(roddyBamFile.referenceGenome, chromosomeNames)
 
-        roddyBamFile.referenceGenome.cytosinePositionsIndex = "cytosine_idx.pos.gz"
-        roddyBamFile.referenceGenome.save(flush: true, failOnError: true)
-        File cpiFile = CreateFileHelper.createFile(
-                new File("${tmpDir.root}/processing/reference_genomes/${roddyBamFile.referenceGenome.path}",
-                        roddyBamFile.referenceGenome.cytosinePositionsIndex)
-        )
-
         assert ",CHROMOSOME_INDICES:( ${chromosomeNames.join(' ')} ),CYTOSINE_POSITIONS_INDEX:${cpiFile.absolutePath}" ==
                 executeWgbsAlignmentJob.prepareAndReturnWorkflowSpecificCValues(roddyBamFile)
     }
+
+    @Test
+    void testPrepareAndReturnWorkflowSpecificCValues_CytosinePositionIndexNotDefined_ShouldThrowException() {
+        roddyBamFile.referenceGenome.cytosinePositionsIndex = null
+        roddyBamFile.referenceGenome.save(flush: true)
+
+        List<String> chromosomeNames = ["1", "2", "3", "4", "5", "M", "X", "Y"]
+        DomainFactory.createReferenceGenomeEntries(roddyBamFile.referenceGenome, chromosomeNames)
+
+        assert TestCase.shouldFail(RuntimeException) {
+            executeWgbsAlignmentJob.prepareAndReturnWorkflowSpecificCValues(roddyBamFile)
+        }.contains("Cytosine position index for reference genome")
+    }
+
 
     @Test
     void testPrepareAndReturnWorkflowSpecificCValues_adapterFile() {
@@ -104,7 +111,7 @@ class ExecuteWgbsAlignmentJobTests {
             seqTrack.adapterFile = adapterFile
             seqTrack.save(flush: true, failOnError: true)
         }
-        assert ",CHROMOSOME_INDICES:( ${chromosomeNames.join(' ')} ),CLIP_INDEX:${file.absolutePath}" as String ==
+        assert ",CHROMOSOME_INDICES:( ${chromosomeNames.join(' ')} ),CYTOSINE_POSITIONS_INDEX:${cpiFile.absolutePath},CLIP_INDEX:${file.absolutePath}" as String ==
                 executeWgbsAlignmentJob.prepareAndReturnWorkflowSpecificCValues(roddyBamFile)
     }
 

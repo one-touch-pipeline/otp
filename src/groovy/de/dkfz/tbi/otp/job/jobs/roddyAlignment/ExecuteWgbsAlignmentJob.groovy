@@ -27,14 +27,19 @@ class ExecuteWgbsAlignmentJob extends AbstractExecutePanCanJob {
     @Override
     protected String prepareAndReturnWorkflowSpecificCValues(RoddyBamFile roddyBamFile) {
         assert roddyBamFile : "roddyBamFile must not be null"
+
         List<String> chromosomeNames = ReferenceGenomeEntry.findAllByReferenceGenomeAndClassificationInList(roddyBamFile.referenceGenome,
                 [ReferenceGenomeEntry.Classification.CHROMOSOME, ReferenceGenomeEntry.Classification.MITOCHONDRIAL])*.name
         assert chromosomeNames : "No chromosome names could be found for reference genome ${roddyBamFile.referenceGenome}"
         GString chromosomeIndices = ",CHROMOSOME_INDICES:( ${chromosomeNames.join(' ')} )"
-        String cytosinePositionIndex = (roddyBamFile.referenceGenome.cytosinePositionsIndex ?
-                ",CYTOSINE_POSITIONS_INDEX:${referenceGenomeService.cytosinePositionIndexFilePath(roddyBamFile.project, roddyBamFile.referenceGenome).absolutePath}" :
-                ""
-        )
+
+        String cytosinePositionIndex = ""
+        if (roddyBamFile.referenceGenome.cytosinePositionsIndex) {
+            cytosinePositionIndex = ",CYTOSINE_POSITIONS_INDEX:${referenceGenomeService.cytosinePositionIndexFilePath(roddyBamFile.project, roddyBamFile.referenceGenome).absolutePath}"
+        } else {
+            throw new RuntimeException("Cytosine position index for reference genome ${roddyBamFile.referenceGenome} is not defined.")
+        }
+
         AdapterFile adapterFile = exactlyOneElement(roddyBamFile.seqTracks*.adapterFile.unique())
         String clipIndex = (adapterFile ?
                 ",CLIP_INDEX:${adapterFileService.fullPath(adapterFile)}" :

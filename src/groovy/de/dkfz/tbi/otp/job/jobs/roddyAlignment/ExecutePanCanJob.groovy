@@ -30,14 +30,13 @@ class ExecutePanCanJob extends AbstractExecutePanCanJob implements AutoRestartab
             BedFile bedFile = roddyBamFile.bedFile
             Realm dataProcessingRealm = configService.getRealmDataProcessing(roddyBamFile.project)
             File bedFilePath = bedFileService.filePath(dataProcessingRealm, bedFile) as File
-            additionalCValues += "TARGET_REGIONS_FILE:${bedFilePath},"
-            additionalCValues += "TARGETSIZE:${bedFile.targetSize},"
+            additionalCValues += ",TARGET_REGIONS_FILE:${bedFilePath}"
+            additionalCValues += ",TARGETSIZE:${bedFile.targetSize}"
         }
 
-        return ",fastq_list:${filesToMerge.join(";")}," +
-                "${baseBamFile ? "bam:${baseBamFile.getPathForFurtherProcessing()}," : ""}" +
-                additionalCValues +
-                "possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}"
+        return ",fastq_list:${filesToMerge.join(";")}" +
+                "${baseBamFile ? ",bam:${baseBamFile.getPathForFurtherProcessing()}" : ""}" +
+                additionalCValues
     }
 
 

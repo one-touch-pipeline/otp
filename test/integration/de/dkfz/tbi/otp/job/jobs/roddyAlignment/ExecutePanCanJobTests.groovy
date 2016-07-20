@@ -84,10 +84,9 @@ class ExecutePanCanJobTests {
         assert roddyBamFile.mergingWorkPackage.save(flush: true)
 
         String expectedCommand =  """\
-,fastq_list:${fastqFilesAsString(roddyBamFile)},\
-TARGET_REGIONS_FILE:BedFilePath,\
-TARGETSIZE:1,\
-possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}\
+,fastq_list:${fastqFilesAsString(roddyBamFile)}\
+,TARGET_REGIONS_FILE:BedFilePath\
+,TARGETSIZE:1\
 """
         String actualCommand = executePanCanJob.prepareAndReturnWorkflowSpecificCValues(roddyBamFile)
 
@@ -99,8 +98,7 @@ possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}\
     void testPrepareAndReturnWorkflowSpecificCValues_WholeGenomeSeqType_NoBaseBamFile_AllFine() {
 
         String expectedCommand = """\
-,fastq_list:${fastqFilesAsString(roddyBamFile)},\
-possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}\
+,fastq_list:${fastqFilesAsString(roddyBamFile)}\
 """
         String actualCommand = executePanCanJob.prepareAndReturnWorkflowSpecificCValues(roddyBamFile)
 
@@ -124,9 +122,8 @@ possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}\
         prepareDataFilesOnFileSystem(roddyBamFile2)
 
         String expectedCommand = """\
-,fastq_list:${fastqFilesAsString(roddyBamFile2)},\
-bam:${roddyBamFile.workBamFile.path},\
-possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}\
+,fastq_list:${fastqFilesAsString(roddyBamFile2)}\
+,bam:${roddyBamFile.workBamFile.path}\
 """
 
         String actualCommand = executePanCanJob.prepareAndReturnWorkflowSpecificCValues(roddyBamFile2)
