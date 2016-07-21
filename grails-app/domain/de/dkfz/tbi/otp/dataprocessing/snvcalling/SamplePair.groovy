@@ -80,16 +80,6 @@ class SamplePair implements Entity {
                     errors.reject(null, "${it} of mergingWorkPackage1 and mergingWorkPackage2 are different:\n${mwp1Value}\n${mwp2Value}")
                 }
             }
-            // Using a new session prevents Hibernate from trying to auto-flush this object, which would fail
-            // because it is still in validation.
-            withNewSession {
-                if (atMostOneElement(findAllWhere(
-                        mergingWorkPackage1: val,
-                        mergingWorkPackage2: obj.mergingWorkPackage1,
-                ))) {
-                    errors.reject(null, "A ${SamplePair.getClass().simpleName} for the same ${MergingWorkPackage.getClass().simpleName}s (in different order) already exists.")
-                }
-            }
         }
         relativePath unique: true, validator: { String val, SamplePair obj ->
             return OtpPath.isValidRelativePath(val) && val == obj.buildPath().relativePath.path
