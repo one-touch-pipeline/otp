@@ -121,7 +121,7 @@ class MetadataImportService {
                 otrsTicket: ticketNumber ? trackingService.createOrResetOtrsTicket(ticketNumber) : null,
         )
         // TODO OTP-1952: un-comment
-        //assert runSegment.save(flush: true)
+        //assert runSegment.save()
 
         importRuns(context, runSegment, context.spreadsheet.dataRows)
 
@@ -132,7 +132,7 @@ class MetadataImportService {
                 md5sum: context.metadataFileMd5sum,
                 runSegment: runSegment,
         )
-        assert metaDataFile.save(flush: true)
+        assert metaDataFile.save()
 
         return metaDataFile
     }
@@ -153,7 +153,7 @@ class MetadataImportService {
             // TODO OTP-1952: delete the following 3 lines
             assert runSegment.run == null
             runSegment.run = run
-            assert runSegment.save(flush: true)
+            assert runSegment.save()
 
             importSeqTracks(context, runSegment, run, rows)
         }
@@ -210,7 +210,7 @@ class MetadataImportService {
             }
 
             SeqTrack seqTrack = (seqTypeName?.factory ?: SeqTrack.FACTORY).call(properties)
-            assert seqTrack.save(flush: true)
+            assert seqTrack.save()
 
             importDataFiles(context, runSegment, seqTrack, rows)
 
@@ -244,7 +244,7 @@ class MetadataImportService {
                     seqTrack: seqTrack,
                     fileType: FileTypeService.getFileType(file.name, FileType.Type.SEQUENCE),
             )
-            assert dataFile.save(flush: true)
+            assert dataFile.save()
 
             assert new File(LsdfFilesService.getFileInitialPath(dataFile)) == file
 
@@ -259,7 +259,7 @@ class MetadataImportService {
                     key: MetaDataKey.findOrSaveWhere(name: it.text),
                     value: row.cells[it.columnIndex].text,
                     source: MetaDataEntry.Source.MDFILE,
-            ).save(flush: true)
+            ).save()
         }
     }
 
