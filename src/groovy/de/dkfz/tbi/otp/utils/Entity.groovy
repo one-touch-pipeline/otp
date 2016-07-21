@@ -11,8 +11,12 @@ trait Entity {
 
     @Override
     boolean equals(Object other) {
-        return this.is(other) ||
-                getClassWithoutInitializingProxy(this) == getClassWithoutInitializingProxy(other) &&
+        if (this.is(other)) {
+            return true
+        }
+        Class thisClass = getClassWithoutInitializingProxy(this)
+        Class otherClass = getClassWithoutInitializingProxy(other)
+        return (thisClass == otherClass || thisClass.isAssignableFrom(otherClass) || otherClass.isAssignableFrom(thisClass)) &&
                 this.id && other?.id == this.id
     }
 }
