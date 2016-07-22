@@ -86,7 +86,7 @@ class SnvCallingServiceTests {
 
     @Test
     void testSnvConfigIsNullOtherProject() {
-        Project otherProject = TestData.createProject(name: "otherProject", dirName: "tmp", realmName: "DKFZ")
+        Project otherProject = DomainFactory.createProject(name: "otherProject", dirName: "tmp", realmName: "DKFZ")
         assert otherProject.save(flush: true)
 
         snvConfig.project = otherProject

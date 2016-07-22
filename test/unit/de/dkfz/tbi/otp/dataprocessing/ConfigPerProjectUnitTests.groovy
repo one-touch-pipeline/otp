@@ -1,7 +1,9 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Project
+import de.dkfz.tbi.otp.ngsdata.ProjectCategory
 import de.dkfz.tbi.otp.ngsdata.TestData
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
@@ -11,7 +13,7 @@ import org.junit.Test
 class ConfigPerProjectImpl extends ConfigPerProject { }
 
 @TestFor(ConfigPerProjectImpl)
-@Mock([Project])
+@Mock([Project, ProjectCategory,])
 class ConfigPerProjectUnitTests {
 
     String configuration = "configuration"
@@ -22,14 +24,14 @@ class ConfigPerProjectUnitTests {
                 )
         TestCase.assertValidateError(configPerProject, 'project', 'nullable', null)
 
-        configPerProject.project = TestData.createProject()
+        configPerProject.project = DomainFactory.createProject()
         assertTrue(configPerProject.validate())
     }
 
     @Test
     void testSaveWithObsoleteDate() {
         ConfigPerProject configPerProject = new ConfigPerProjectImpl(
-                project: TestData.createProject(),
+                project: DomainFactory.createProject(),
                 obsoleteDate: new Date(),
                 )
         assertTrue(configPerProject.validate())
@@ -38,12 +40,12 @@ class ConfigPerProjectUnitTests {
     @Test
     void testSaveWithReferenceToPreviousConfigWithoutObsolete_shouldFail() {
         ConfigPerProject validConfigPerProject = new ConfigPerProjectImpl(
-                project: TestData.createProject(),
+                project: DomainFactory.createProject(),
         )
         validConfigPerProject.save()
 
         ConfigPerProject newConfigPerProject = new ConfigPerProjectImpl(
-                project: TestData.createProject(),
+                project: DomainFactory.createProject(),
                 previousConfig: validConfigPerProject,
                 )
         TestCase.assertValidateError(newConfigPerProject, 'previousConfig', 'validator.invalid', validConfigPerProject)

@@ -97,7 +97,7 @@ class TransferMergedBamFileWorkflowTests extends WorkflowTestCase {
         String runDirName = "run${runName}"
 
 
-        Project project = TestData.createProject(
+        Project project = DomainFactory.createProject(
                         name: projectName,
                         dirName: projectDirName,
                         realmName: realm.name

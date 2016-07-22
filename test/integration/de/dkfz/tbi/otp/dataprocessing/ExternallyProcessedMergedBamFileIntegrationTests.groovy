@@ -23,7 +23,7 @@ class ExternallyProcessedMergedBamFileIntegrationTests {
 
     @Before
     void setUp() {
-        project = TestData.createProject(
+        project = DomainFactory.createProject(
                         name: "project",
                         dirName: "project-dir",
                         realmName: 'DKFZ',

@@ -15,7 +15,7 @@ class MergingSetUnitTests {
 
     @Before
     void setUp() {
-        Project project = TestData.createProject(
+        Project project = DomainFactory.createProject(
             name: "project",
             dirName: "dirName",
             realmName: "DKFZ")

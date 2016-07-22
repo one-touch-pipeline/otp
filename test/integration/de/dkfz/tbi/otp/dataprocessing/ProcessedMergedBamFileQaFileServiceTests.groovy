@@ -29,7 +29,7 @@ class ProcessedMergedBamFileQaFileServiceTests {
     }
 
     private MergingPass createMergingPass() {
-        Project project = TestData.createProject(
+        Project project = DomainFactory.createProject(
                         name: "project",
                         dirName: "project-dir",
                         realmName: 'DKFZ',

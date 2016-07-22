@@ -36,6 +36,7 @@ class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
         DomainFactory.createProject(name: 'testProject3', nameInMetadataFiles: null)
         ProjectGroup projectGroup = new ProjectGroup(name: 'projectGroup')
         projectGroup.save(flush: true, failOnError: true)
+        DomainFactory.createProjectCategory(name: 'category')
 
         int counter = 0
         Realm realm = DomainFactory.createRealmDataManagement(temporaryFolder.newFolder(), [name: REALM_NAME])
@@ -61,7 +62,7 @@ class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
         when:
         Project project
         SpringSecurityUtils.doWithAuth("admin") {
-            project = projectService.createProject(name, dirName, REALM_NAME, AlignmentDeciderBeanNames.NO_ALIGNMENT.bean, group, projectGroup, nameInMetadataFiles, copyFiles)
+            project = projectService.createProject(name, dirName, REALM_NAME, AlignmentDeciderBeanNames.NO_ALIGNMENT.bean, 'category', group, projectGroup, nameInMetadataFiles, copyFiles)
         }
 
         then:
@@ -70,15 +71,14 @@ class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
         project.projectGroup == ProjectGroup.findByName(projectGroup)
         project.nameInMetadataFiles == nameInMetadataFiles
         project.hasToBeCopied == copyFiles
-
-
+        project.category == ProjectCategory.findByName('category')
 
         where:
-        name        | dirName   | projectGroup      | nameInMetadataFiles   | copyFiles
-        'project'   | 'dir'     | ''                | 'project'             | true
-        'project'   | 'dir'     | ''                | null                  | true
-        'project'   | 'dir'     | 'projectGroup'    | 'project'             | true
-        'project'   | 'dir'     | ''                | 'project'             | false
+        name        | dirName   | projectGroup    | nameInMetadataFiles   | copyFiles
+        'project'   | 'dir'     | ''              | 'project'             | true
+        'project'   | 'dir'     | ''              | null                  | true
+        'project'   | 'dir'     | 'projectGroup'  | 'project'             | true
+        'project'   | 'dir'     | ''              | 'project'             | false
     }
 
     void "test createProject if directory is created"() {
@@ -88,7 +88,7 @@ class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
         when:
         Project project
         SpringSecurityUtils.doWithAuth("admin") {
-            project = projectService.createProject('project', 'dir', REALM_NAME, AlignmentDeciderBeanNames.NO_ALIGNMENT.bean, group, '', null, false)
+            project = projectService.createProject('project', 'dir', REALM_NAME, AlignmentDeciderBeanNames.NO_ALIGNMENT.bean, 'category', group, '', null, false)
         }
 
         then:
@@ -112,7 +112,7 @@ class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
         when:
         Project project
         SpringSecurityUtils.doWithAuth("admin") {
-            project = projectService.createProject(name, dirName, REALM_NAME, AlignmentDeciderBeanNames.NO_ALIGNMENT.bean, group, projectGroup, nameInMetadataFiles, copyFiles)
+            project = projectService.createProject(name, dirName, REALM_NAME, AlignmentDeciderBeanNames.NO_ALIGNMENT.bean, 'category', group, '', nameInMetadataFiles, true)
         }
 
         then:
@@ -121,20 +121,20 @@ class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
 
 
         where:
-        name            | dirName   | projectGroup  | nameInMetadataFiles   | copyFiles || errorName                            | errorLocaction
-        'testProject'   | 'dir'     | ''            | 'project'             | true      || 'unique'                                                                                     | 'on field \'name\': rejected value [testProject]'
-        'testProject2'  | 'dir'     | ''            | 'project'             | true      || 'this name is already used in another project as nameInMetadataFiles entry'                  | 'on field \'name\': rejected value [testProject2]'
-        'project'       | 'dir'     | ''            | 'testProject'         | true      || 'this nameInMetadataFiles is already used in another project as name entry'                  | 'on field \'nameInMetadataFiles\': rejected value [testProject]'
-        'project'       | 'dir'     | ''            | 'testProject2'        | true      || 'this nameInMetadataFiles is already used in another project as nameInMetadataFiles entry'   | 'on field \'nameInMetadataFiles\': rejected value [testProject2]'
-        'project'       | 'dir'     | ''            | ''                    | true      || 'blank'                                                                                      | 'on field \'nameInMetadataFiles\': rejected value []'
-        'project'       | 'testDir' | ''            | ''                    | true      || 'unique'                                                                                     | 'on field \'dirName\': rejected value [testDir]'
+        name            | dirName    | nameInMetadataFiles  || errorName                                                                                    | errorLocaction
+        'testProject'   | 'dir'      | 'project'            || 'unique'                                                                                     | 'on field \'name\': rejected value [testProject]'
+        'testProject2'  | 'dir'      | 'project'            || 'this name is already used in another project as nameInMetadataFiles entry'                  | 'on field \'name\': rejected value [testProject2]'
+        'project'       | 'dir'      | 'testProject'        || 'this nameInMetadataFiles is already used in another project as name entry'                  | 'on field \'nameInMetadataFiles\': rejected value [testProject]'
+        'project'       | 'dir'      | 'testProject2'       || 'this nameInMetadataFiles is already used in another project as nameInMetadataFiles entry'   | 'on field \'nameInMetadataFiles\': rejected value [testProject2]'
+        'project'       | 'dir'      | ''                   || 'blank'                                                                                      | 'on field \'nameInMetadataFiles\': rejected value []'
+        'project'       | 'testDir'  | ''                   || 'unique'                                                                                     | 'on field \'dirName\': rejected value [testDir]'
     }
 
     void "test createProject invalid unix group"() {
         when:
         Project project
         SpringSecurityUtils.doWithAuth("admin") {
-            project = projectService.createProject('project', 'dir', REALM_NAME, AlignmentDeciderBeanNames.NO_ALIGNMENT.bean, 'invalidValue', '', null, false)
+            project = projectService.createProject('project', 'dir', REALM_NAME, AlignmentDeciderBeanNames.NO_ALIGNMENT.bean, 'category', 'invalidValue', '', null, false)
         }
 
         then:
@@ -160,7 +160,7 @@ class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
 
         when:
         SpringSecurityUtils.doWithAuth("admin") {
-            projectService.createProject('project', 'dir', REALM_NAME, AlignmentDeciderBeanNames.NO_ALIGNMENT.bean, group, '', null, false)
+            projectService.createProject('project', 'dir', REALM_NAME, AlignmentDeciderBeanNames.NO_ALIGNMENT.bean, 'category', group, '', null, false)
         }
         then:
         Files.readAttributes(projectDirectory.toPath(), PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS).group().toString() == group
@@ -201,6 +201,50 @@ class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
         'testProject'  || 'this nameInMetadataFiles is already used in another project as name entry' | 'on field \'nameInMetadataFiles\': rejected value [testProject]'
         'testProject2' || 'this nameInMetadataFiles is already used in another project as nameInMetadataFiles entry' | 'on field \'nameInMetadataFiles\': rejected value [testProject2]'
         ''             || 'blank' | 'on field \'nameInMetadataFiles\': rejected value []'
+    }
+
+    void "test createProject invalid project category should fail"() {
+        given:
+        String group = grailsApplication.config.otp.testing.group
+
+        when:
+        Project project
+        SpringSecurityUtils.doWithAuth("admin") {
+            project = projectService.createProject('project', 'dir', REALM_NAME, 'noAlignmentDecider', 'invalid category', group, '', 'project', true)
+        }
+
+        then:
+        AssertionError ex = thrown()
+        ex.message.contains("Collection contains 0 elements. Expected 1.")
+    }
+
+    void "test updateCategory invalid project category should fail"() {
+        given:
+        Project project = Project.findByName("testProject")
+
+        when:
+        SpringSecurityUtils.doWithAuth("admin") {
+            projectService.updateCategory('not available', project)
+        }
+
+        then:
+        AssertionError ex = thrown()
+        ex.message.contains("Collection contains 0 elements. Expected 1.")
+    }
+
+    void "test updateCategory valid project category"() {
+        given:
+        Project project = Project.findByName("testProject")
+        ProjectCategory projectCategory = DomainFactory.createProjectCategory(name: 'valid category')
+
+        when:
+        assert project.category != projectCategory
+        SpringSecurityUtils.doWithAuth("admin") {
+            projectService.updateCategory(projectCategory.name, project)
+        }
+
+        then:
+        project.category == projectCategory
     }
 
     void "test configureNoAlignmentDeciderProject"() {

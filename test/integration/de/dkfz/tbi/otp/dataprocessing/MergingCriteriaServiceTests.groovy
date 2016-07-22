@@ -27,7 +27,7 @@ class MergingCriteriaServiceTests {
 
     @Before
     void setUp() {
-        Project project = TestData.createProject(
+        Project project = DomainFactory.createProject(
                         name: "name",
                         dirName: "dirName",
                         realmName: "realmName"

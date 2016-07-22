@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.ConfigPerProject
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.TestData
@@ -39,7 +40,7 @@ class SnvConfigUnitTests {
         externalScript = ExternalScript.build(scriptVersion: HelperUtils.uniqueString)
 
         validSnvConfig = new SnvConfig(
-                project: TestData.createProject(),
+                project: DomainFactory.createProject(),
                 seqType: new SeqType(),
                 configuration: LEGAL_EXECUTE_FLAGS,
                 externalScriptVersion: externalScript.scriptVersion,
@@ -62,7 +63,7 @@ class SnvConfigUnitTests {
     @Test
     void testSave_noScriptVersion_shouldNotValidate_shouldFail() {
         ConfigPerProject configPerProject = new SnvConfig(
-                project: TestData.createProject(),
+                project: DomainFactory.createProject(),
                 seqType: new SeqType(),
                 configuration: LEGAL_EXECUTE_FLAGS,
         )
@@ -75,7 +76,7 @@ class SnvConfigUnitTests {
     @Test
     void testSave_emptyScriptVersion_shouldNotValidate_shouldFail() {
         SnvConfig configPerProject = new SnvConfig(
-                project: TestData.createProject(),
+                project: DomainFactory.createProject(),
                 seqType: new SeqType(),
                 configuration: LEGAL_EXECUTE_FLAGS,
                 externalScriptVersion: ""
@@ -92,7 +93,7 @@ class SnvConfigUnitTests {
             it.delete()
         }
         SnvConfig configPerProject = new SnvConfig(
-                project: TestData.createProject(),
+                project: DomainFactory.createProject(),
                 seqType: new SeqType(),
                 configuration: LEGAL_EXECUTE_FLAGS,
                 externalScriptVersion: externalScript.scriptVersion
@@ -104,7 +105,7 @@ class SnvConfigUnitTests {
     void testObsoleteInstanceRefersToDeprecatedExternalScript_AllFine() {
         ExternalScript externalScript = ExternalScript.build(deprecatedDate: new Date())
         SnvConfig configPerProject = new SnvConfig(
-                project: TestData.createProject(),
+                project: DomainFactory.createProject(),
                 seqType: new SeqType(),
                 configuration: LEGAL_EXECUTE_FLAGS,
                 externalScriptVersion: externalScript.scriptVersion,
@@ -117,7 +118,7 @@ class SnvConfigUnitTests {
     void testNonObsoleteInstanceRefersToDeprecatedExternalScript_ShouldNotValidate() {
         ExternalScript externalScript = ExternalScript.build(deprecatedDate: new Date())
         SnvConfig configPerProject = new SnvConfig(
-                project: TestData.createProject(),
+                project: DomainFactory.createProject(),
                 seqType: new SeqType(),
                 configuration: LEGAL_EXECUTE_FLAGS,
                 externalScriptVersion: externalScript.scriptVersion
@@ -128,7 +129,7 @@ class SnvConfigUnitTests {
     @Test
     void testSaveWithoutSeqType_shouldFail() {
         SnvConfig snvConfig = new SnvConfig(
-                project: TestData.createProject(),
+                project: DomainFactory.createProject(),
                 configuration: LEGAL_EXECUTE_FLAGS,
                 externalScriptVersion: externalScript.scriptVersion,
                 )
@@ -141,7 +142,7 @@ class SnvConfigUnitTests {
     @Test
     void testSaveWithoutConfig_shouldFail() {
         SnvConfig snvConfig = new SnvConfig(
-            project: TestData.createProject(),
+            project: DomainFactory.createProject(),
             seqType: new SeqType(),
             externalScriptVersion: externalScript.scriptVersion,
             )
@@ -154,7 +155,7 @@ class SnvConfigUnitTests {
     @Test
     void testSaveWithEmptyConfig_shouldFail() {
         SnvConfig snvConfig = new SnvConfig(
-            project: TestData.createProject(),
+            project: DomainFactory.createProject(),
             seqType: new SeqType(),
             configuration: "",
             externalScriptVersion: externalScript.scriptVersion,

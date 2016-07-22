@@ -135,7 +135,7 @@ class ProcessedMergedBamFileServiceUnitTests {
 
 
     private Sample createSampleAndDBConnections() {
-        Project project = testData.createProject()
+        Project project = DomainFactory.createProject()
         assert project.save()
         Individual individual = testData.createIndividual([project: project])
         assert individual.save()

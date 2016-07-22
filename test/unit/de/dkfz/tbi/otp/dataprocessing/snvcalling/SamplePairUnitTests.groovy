@@ -19,8 +19,8 @@ class SamplePairUnitTests {
 
     List setUpForPathTests() {
         TestData testData = new TestData()
-        Realm realm = DomainFactory.createRealmDataManagementDKFZ()
-        Project project = testData.createProject([realmName: realm.name])
+        Realm realm = DomainFactory.createRealmDataManagement()
+        Project project = DomainFactory.createProject([realmName: realm.name])
         project.save(flush: true)
         Individual individual = testData.createIndividual([project: project])
         individual.save(flush: true)
@@ -41,7 +41,7 @@ class SamplePairUnitTests {
         SamplePair samplePair = DomainFactory.createSamplePair(mergingWorkPackage1,
                 DomainFactory.createMergingWorkPackage(mergingWorkPackage1, sampleType2))
 
-        String path = "dirName/sequencing/whole_genome_sequencing/view-by-pid/654321/snv_results/paired/tumor_control"
+        String path = "${project.dirName}/sequencing/whole_genome_sequencing/view-by-pid/654321/snv_results/paired/tumor_control"
         return [path, samplePair, project]
     }
 

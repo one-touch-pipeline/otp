@@ -5,6 +5,7 @@ import spock.lang.*
 
 @Mock([
         Project,
+        ProjectCategory,
         Individual,
         Run,
         SeqTrack,

@@ -70,7 +70,7 @@ class AlignmentPassServiceUnitTests extends TestData {
     @Test
     void testReferenceGenomePath_referenceGenomeNotSet() {
         alignmentPass.workPackage.referenceGenome = null
-        Project project2 = TestData.createProject()
+        Project project2 = DomainFactory.createProject()
         project2.name = "test"
         project2.dirName = HelperUtils.uniqueString
         project2.realmName = "test"

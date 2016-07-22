@@ -61,7 +61,7 @@ class MergingJobCreateCommandTests {
                         )
         assertNotNull(seqType.save([flush: true, failOnError: true]))
 
-        Project project = TestData.createProject(
+        Project project = DomainFactory.createProject(
                         name: "name_1",
                         dirName: "dirName",
                         realmName: realm.name

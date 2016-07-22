@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
 import de.dkfz.tbi.otp.ngsdata.Project
+import de.dkfz.tbi.otp.ngsdata.ProjectCategory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.util.spreadsheet.validation.Level
@@ -13,7 +14,7 @@ import spock.lang.Specification
 import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
-@Mock([Project])
+@Mock([Project, ProjectCategory,])
 class ProjectValidatorSpec extends Specification {
 
     void 'validate, when column does not exist, succeeds'() {

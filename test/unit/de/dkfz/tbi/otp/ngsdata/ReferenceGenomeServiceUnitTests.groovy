@@ -18,7 +18,7 @@ import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 
 @TestFor(ReferenceGenomeService)
 @TestMixin(GrailsUnitTestMixin)
-@Mock([Realm, Project, ReferenceGenome, ReferenceGenomeEntry, StatSizeFileName])
+@Mock([Realm, Project, ProjectCategory, ReferenceGenome, ReferenceGenomeEntry, StatSizeFileName])
 class ReferenceGenomeServiceUnitTests {
 
     final static Long ARBITRARY_REFERENCE_GENOME_LENGTH = 100
@@ -50,7 +50,7 @@ class ReferenceGenomeServiceUnitTests {
             processingRootPath: temporaryFolder.getRoot().path,
             ]).save([flush: true])
 
-        project = TestData.createProject()
+        project = DomainFactory.createProject()
         project.name = "SOME_PROJECT"
         project.dirName = HelperUtils.uniqueString
         project.realmName = realm.name

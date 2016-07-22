@@ -41,8 +41,19 @@
                     <td id="projectDirectory">${directory}</td>
                 </tr>
                 <tr>
+                    <td class="myKey"><g:message code="projectOverview.category"/></td>
+                    <td>
+                        <otp:editorSwitch
+                                roles="ROLE_OPERATOR"
+                                template="dropDown"
+                                link="${g.createLink(controller: 'projectOverview', action: 'updateCategory', params: [projectName: project])}"
+                                value="${category} "
+                                values="${projectCategories}"/>
+                    </td>
+                </tr>
+                <tr>
                     <td class="myKey"><g:message code="projectOverview.nameInMetadata"/></td>
-                    <td id="nameInMetadata">${nameInMetadata} <input class= "edit-button-left" type="button" onclick="$.otp.projectOverviewTable.updateValue('NameInMetadataFiles','','${nameInMetadata}', '')"/></td>
+                    <td id="nameInMetadata">${nameInMetadata} <input class="edit-button-left" type="button" onclick="$.otp.projectOverviewTable.updateValue('NameInMetadataFiles','','${nameInMetadata}', '')"/></td>
                 </tr>
                 <tr>
                     <td class="myKey"><g:message code="projectOverview.group"/></td>

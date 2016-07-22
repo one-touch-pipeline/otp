@@ -8,14 +8,14 @@ import org.junit.*
  * See the API for {@link grails.test.mixin.support.GrailsUnitTestMixin} for usage instructions
  */
 @TestMixin(GrailsUnitTestMixin)
-@Mock([Project, SampleType])
+@Mock([Project, ProjectCategory, SampleType])
 @TestFor(SampleTypePerProject)
 class SampleTypePerProjectUnitTests {
 
     @Test
     void testSaveSampleTypePerProject() {
         SampleTypePerProject sampleTypePerProject = new SampleTypePerProject()
-        sampleTypePerProject.project = TestData.createProject()
+        sampleTypePerProject.project = DomainFactory.createProject()
         sampleTypePerProject.sampleType = new SampleType()
         sampleTypePerProject.category = SampleType.Category.DISEASE
         assertTrue(sampleTypePerProject.validate())
@@ -26,7 +26,7 @@ class SampleTypePerProjectUnitTests {
     void testSaveSampleTypePerProjectOnlyProject() {
         SampleTypePerProject sampleTypePerProject = new SampleTypePerProject()
 
-        sampleTypePerProject.project = TestData.createProject()
+        sampleTypePerProject.project = DomainFactory.createProject()
         assertFalse(sampleTypePerProject.validate())
     }
 

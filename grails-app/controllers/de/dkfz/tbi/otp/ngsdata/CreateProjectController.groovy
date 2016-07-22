@@ -7,6 +7,7 @@ class CreateProjectController {
 
     ProjectService projectService
     ProjectGroupService projectGroupService
+    ProjectCategoryService projectCategoryService
 
     def index(CreateProjectControllerSubmitCommand cmd) {
         String message;
@@ -18,11 +19,12 @@ class CreateProjectController {
                 message = "'" + errors.getRejectedValue() + "' is not a valid value for '" + errors.getField() + "'. Error code: '" + errors.code + "'"
             }
             else {
-                redirect(controller:"projectOverview", action: "specificOverview", params: [project: projectService.createProject(cmd.name, cmd.directory, 'DKFZ_13.1', 'noAlignmentDecider', cmd.unixGroup, cmd.projectGroup, cmd.nameInMetadataFiles, cmd.copyFiles).name])
+                redirect(controller:"projectOverview", action: "specificOverview", params: [project: projectService.createProject(cmd.name, cmd.directory, 'DKFZ_13.1', 'noAlignmentDecider', cmd.unixGroup, cmd.projectGroup, cmd.projectCategory, cmd.nameInMetadataFiles, cmd.copyFiles).name])
             }
         }
         return [
             projectGroups: ["No Group"] + projectGroupService.availableProjectGroups()*.name,
+            projectCategories: ProjectCategory.listOrderByName(),
             message: message,
             cmd: cmd,
             hasErrors: hasErrors
@@ -36,6 +38,7 @@ class CreateProjectControllerSubmitCommand implements Serializable {
     String nameInMetadataFiles
     String unixGroup
     String projectGroup
+    String projectCategory
     String submit
     boolean copyFiles
 

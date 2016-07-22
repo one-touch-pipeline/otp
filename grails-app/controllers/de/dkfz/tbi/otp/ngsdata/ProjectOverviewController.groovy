@@ -7,7 +7,6 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.CommentCommand
 import de.dkfz.tbi.otp.utils.DataTableCommand
 import grails.converters.JSON
-import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.FieldError
 
 import java.sql.Timestamp
@@ -34,6 +33,8 @@ class ProjectOverviewController {
     SeqTypeService seqTypeService
 
     CommentService commentService
+
+    ProjectCategoryService projectCategoryService
 
     Map index() {
         String projectName = params.projectName
@@ -123,8 +124,10 @@ class ProjectOverviewController {
                 configTable: configTable,
                 snvDropDown: Project.Snv.values(),
                 directory: projectDirectory,
+                category: project.category.name,
                 projectGroup: project.projectGroup,
                 copyFiles: project.hasToBeCopied,
+                projectCategories: ProjectCategory.listOrderByName(),
         ]
     }
 
@@ -360,6 +363,10 @@ class ProjectOverviewController {
 
     JSON updateNameInMetadataFiles(UpdateNameInMetadataCommand cmd) {
         checkErrorAndCallMethod(cmd, { projectService.updateNameInMetadata(cmd.newNameInMetadata, projectService.getProjectByName(cmd.projectName)) })
+    }
+
+    JSON updateCategory(UpdateCategoryCommand cmd) {
+        checkErrorAndCallMethod(cmd, { projectService.updateCategory(cmd.category, projectService.getProjectByName(cmd.projectName)) })
     }
 
     JSON dataTableContactPerson(DataTableCommand cmd) {
@@ -610,5 +617,13 @@ class UpdateSnvCommand implements Serializable {
     String value
     void setId(String id) {
         this.projectName = id
+    }
+}
+
+class UpdateCategoryCommand implements Serializable {
+    String category
+    String projectName
+    void setValue(String category) {
+        this.category = category
     }
 }

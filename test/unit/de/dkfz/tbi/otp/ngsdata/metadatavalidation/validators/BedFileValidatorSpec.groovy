@@ -17,6 +17,7 @@ import static de.dkfz.tbi.TestCase.*
         LibraryPreparationKit,
         LibraryPreparationKitSynonym,
         Project,
+        ProjectCategory,
         ProcessingOption,
         Sample,
         SampleIdentifier,

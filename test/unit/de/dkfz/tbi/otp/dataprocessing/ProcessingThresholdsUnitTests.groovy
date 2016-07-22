@@ -8,7 +8,7 @@ import de.dkfz.tbi.otp.ngsdata.*
  * See the API for {@link grails.test.mixin.domain.DomainClassUnitTestMixin} for usage instructions
  */
 @TestFor(ProcessingThresholds)
-@Mock([Project, SeqType, SampleType])
+@Mock([Project, ProjectCategory, SeqType, SampleType])
 class ProcessingThresholdsUnitTests {
 
     Double coverage = 30.00
@@ -25,14 +25,14 @@ class ProcessingThresholdsUnitTests {
                         )
         assertFalse(processingThresholds.validate())
 
-        processingThresholds.project = TestData.createProject()
+        processingThresholds.project = DomainFactory.createProject()
         assertTrue(processingThresholds.validate())
     }
 
     @Test
     void testSaveNoSeqType() {
         ProcessingThresholds processingThresholds = new ProcessingThresholds(
-                        project: TestData.createProject(),
+                        project: DomainFactory.createProject(),
                         sampleType: new SampleType(),
                         coverage: coverage,
                         numberOfLanes: numberOfLanes,
@@ -48,7 +48,7 @@ class ProcessingThresholdsUnitTests {
     void testSaveNoSampleType() {
         ProcessingThresholds processingThresholds = new ProcessingThresholds(
                         seqType: new SeqType(),
-                        project: TestData.createProject(),
+                        project: DomainFactory.createProject(),
                         coverage: coverage,
                         numberOfLanes: numberOfLanes,
                         )
@@ -61,7 +61,7 @@ class ProcessingThresholdsUnitTests {
     @Test
     void testSaveNoCoverageAndNumberOfLanes() {
         ProcessingThresholds processingThresholds = new ProcessingThresholds(
-                        project: TestData.createProject(),
+                        project: DomainFactory.createProject(),
                         seqType: new SeqType(),
                         sampleType: new SampleType(),
                         )
@@ -75,7 +75,7 @@ class ProcessingThresholdsUnitTests {
     @Test
     void testSaveNoCoverage() {
         ProcessingThresholds processingThresholds = new ProcessingThresholds(
-                        project: TestData.createProject(),
+                        project: DomainFactory.createProject(),
                         seqType: new SeqType(),
                         sampleType: new SampleType(),
                         coverage: coverage,
@@ -87,7 +87,7 @@ class ProcessingThresholdsUnitTests {
     @Test
     void testSaveCoverageBelowZero() {
         ProcessingThresholds processingThresholds = new ProcessingThresholds(
-                        project: TestData.createProject(),
+                        project: DomainFactory.createProject(),
                         seqType: new SeqType(),
                         sampleType: new SampleType(),
                         coverage: -30.00,
@@ -98,7 +98,7 @@ class ProcessingThresholdsUnitTests {
     @Test
     void testSaveNoNumberOfLanes() {
         ProcessingThresholds processingThresholds = new ProcessingThresholds(
-                        project: TestData.createProject(),
+                        project: DomainFactory.createProject(),
                         seqType: new SeqType(),
                         sampleType: new SampleType(),
                         numberOfLanes: numberOfLanes,
@@ -109,7 +109,7 @@ class ProcessingThresholdsUnitTests {
     @Test
     void testSaveNumberOfLanesBelowZero() {
         ProcessingThresholds processingThresholds = new ProcessingThresholds(
-                        project: TestData.createProject(),
+                        project: DomainFactory.createProject(),
                         seqType: new SeqType(),
                         sampleType: new SampleType(),
                         numberOfLanes: -3,
@@ -120,7 +120,7 @@ class ProcessingThresholdsUnitTests {
     @Test
     void testSaveAllCorrect() {
         ProcessingThresholds processingThresholds = new ProcessingThresholds(
-                        project: TestData.createProject(),
+                        project: DomainFactory.createProject(),
                         seqType: new SeqType(),
                         sampleType: new SampleType(),
                         coverage: coverage,

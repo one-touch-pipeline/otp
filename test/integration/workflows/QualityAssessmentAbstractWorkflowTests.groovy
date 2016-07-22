@@ -219,7 +219,7 @@ abstract class QualityAssessmentAbstractWorkflowTests extends WorkflowTestCase {
     }
 
     private void createData() {
-        Project project = TestData.createProject(
+        Project project = DomainFactory.createProject(
                         name: "project",
                         dirName: "project-dir",
                         realmName: realm.name

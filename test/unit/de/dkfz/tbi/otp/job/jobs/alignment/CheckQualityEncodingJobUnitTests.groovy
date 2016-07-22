@@ -14,6 +14,7 @@ import java.util.zip.*
     FileType,
     Individual,
     Project,
+    ProjectCategory,
     Realm,
     Run,
     SampleType,
@@ -50,7 +51,7 @@ class CheckQualityEncodingJobUnitTests {
 
         checkQualityEncodingJob.log = this.log
 
-        Project project = TestData.createProject(
+        Project project = DomainFactory.createProject(
                         name: "projectName",
                         dirName: "dirName",
                         realmName: 'DKFZ',

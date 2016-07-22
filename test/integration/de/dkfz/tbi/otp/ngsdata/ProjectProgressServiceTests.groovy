@@ -19,7 +19,7 @@ class ProjectProgressServiceTests {
         testData = new TestData()
         testData.createObjects()
 
-        Project project = testData.createProject().save(flush: true)
+        Project project = DomainFactory.createProject().save(flush: true)
         projects = Project.list()
 
         run1 = createRunWithDatafile(project, 5)

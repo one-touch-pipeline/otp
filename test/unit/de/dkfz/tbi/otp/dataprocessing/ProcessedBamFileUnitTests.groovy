@@ -34,7 +34,7 @@ class ProcessedBamFileUnitTests {
     void setUp() {
         testData = new TestData()
 
-        project = TestData.createProject(
+        project = DomainFactory.createProject(
             name: "name",
             dirName: "dirName",
             realmName: "realmName"

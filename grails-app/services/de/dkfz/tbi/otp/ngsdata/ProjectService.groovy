@@ -76,12 +76,13 @@ class ProjectService {
      * @return The created project
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public Project createProject(String name, String dirName, String realmName, String alignmentDeciderBeanName) {
+    public Project createProject(String name, String dirName, String realmName, String alignmentDeciderBeanName, String categoryName) {
         Project project = new Project(
                 name: name,
                 dirName: dirName,
                 realmName: realmName,
                 alignmentDeciderBeanName: alignmentDeciderBeanName,
+                category: exactlyOneElement(ProjectCategory.findAllByName(categoryName)),
         )
         project = project.save(flush: true)
         assert(project != null)
@@ -99,9 +100,9 @@ class ProjectService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public Project createProject(String name, String dirName, String realmName, String alignmentDeciderBeanName, String unixGroup, String projectGroup, String nameInMetadataFiles, boolean copyFiles) {
+    public Project createProject(String name, String dirName, String realmName, String alignmentDeciderBeanName, String categoryName, String unixGroup, String projectGroup, String nameInMetadataFiles, boolean copyFiles) {
         assert OtpPath.isValidPathComponent(unixGroup): "unixGroup contains invalid characters"
-        Project project = createProject(name, dirName, realmName, alignmentDeciderBeanName)
+        Project project = createProject(name, dirName, realmName, alignmentDeciderBeanName, categoryName)
         project.hasToBeCopied = copyFiles
         project.nameInMetadataFiles = nameInMetadataFiles
         project.setProjectGroup(ProjectGroup.findByName(projectGroup))
@@ -139,6 +140,12 @@ class ProjectService {
         project.save(flush: true, failOnError: true)
     }
 
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    public void updateCategory(String categoryName, Project project) {
+        ProjectCategory categoryEntry = exactlyOneElement(ProjectCategory.findAllByName(categoryName))
+        project.category = categoryEntry
+        project.save(flush: true, failOnError: true)
+    }
 
     /**
      * Discovers if a user has Projects.

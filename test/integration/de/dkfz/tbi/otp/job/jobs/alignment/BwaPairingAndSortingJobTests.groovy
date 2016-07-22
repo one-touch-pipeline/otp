@@ -26,7 +26,7 @@ class BwaPairingAndSortingJobTests {
     void setUp() {
         bwaPairingAndSortingJob.log = this.log
 
-        Project project = TestData.createProject(
+        Project project = DomainFactory.createProject(
             name: "projectName",
             dirName: "dirName",
             realmName: 'DKFZ',

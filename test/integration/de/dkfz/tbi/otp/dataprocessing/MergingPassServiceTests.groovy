@@ -181,7 +181,7 @@ class MergingPassServiceTests {
     }
 
     private MergingSet createMergingSet(String uniqueId) {
-        Project project = TestData.createProject(
+        Project project = DomainFactory.createProject(
                         name: "project_" + uniqueId,
                         dirName: "project_" + uniqueId,
                         realmName: 'DKFZ',

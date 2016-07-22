@@ -8,7 +8,7 @@ class SampleTypePerProjectTests extends TestCase {
 
     @Test
     void testUniqueConstraint() {
-        Project project = TestData.createProject(
+        Project project = DomainFactory.createProject(
                         name: "project",
                         dirName: "dirName",
                         realmName: "DKFZ"

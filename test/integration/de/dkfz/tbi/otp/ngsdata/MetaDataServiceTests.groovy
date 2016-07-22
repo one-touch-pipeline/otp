@@ -486,7 +486,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
      * @return
      */
     private Project mockProject() {
-        Project project = TestData.createProject(name: "test", dirName: "test", realmName: "test")
+        Project project = DomainFactory.createProject(name: "test", dirName: "test", realmName: "test")
         assertNotNull(project.save(flush: true))
         return project
     }

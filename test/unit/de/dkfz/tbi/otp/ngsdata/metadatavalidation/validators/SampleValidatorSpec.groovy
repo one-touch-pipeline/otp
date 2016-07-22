@@ -17,6 +17,7 @@ import spock.lang.Specification
         Individual,
         ProcessingOption,
         Project,
+        ProjectCategory,
         Sample,
         SampleIdentifier,
         SampleType,

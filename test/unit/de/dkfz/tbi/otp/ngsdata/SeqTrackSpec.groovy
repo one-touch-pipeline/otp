@@ -7,6 +7,7 @@ import spock.lang.*
     FileType,
     Individual,
     Project,
+    ProjectCategory,
     Run,
     Sample,
     SampleType,

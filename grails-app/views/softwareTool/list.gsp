@@ -30,7 +30,7 @@
                                         <otp:editorSwitch
                                             roles="ROLE_OPERATOR"
                                             link="${g.createLink(controller: 'softwareTool', action: 'updateSoftwareTool', id: version.id)}"
-                                            value="${version.programVersion}"/>
+                                            value="${version.programVersion} "/>
                                     </div>
                                 </td>
                                 <td>
@@ -38,7 +38,7 @@
                                         <otp:editorSwitch
                                             roles="ROLE_OPERATOR"
                                             link="${g.createLink(controller: 'softwareTool', action: 'updateSoftwareToolIdentifier', id: softwareToolIdentifier.id)}"
-                                            value="${softwareToolIdentifier.name}"/>
+                                            value="${softwareToolIdentifier.name} "/>
                                     </g:each>
                                     <otp:editorSwitch
                                         roles="ROLE_OPERATOR"

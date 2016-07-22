@@ -481,9 +481,7 @@ class SnvJobResultUnitTests {
 
 
     Map preparationForGetResultFilePath(SnvCallingStep step) {
-        Project project = TestData.createProject(
-            dirName: TestCase.uniqueNonExistentPath,
-            )
+        Project project = DomainFactory.createProject()
 
         OtpPath path = new OtpPath(project, "testPath")
         SnvCallingInstance.metaClass.getSnvInstancePath = { return path }

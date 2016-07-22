@@ -160,7 +160,7 @@ LIBRARY\tUNPAIRED_READS_EXAMINED\tREAD_PAIRS_EXAMINED\tUNMAPPED_READS\tUNPAIRED_
     }
 
     private ProcessedMergedBamFile createProcessedMergedBamFile() {
-        Project project = TestData.createProject(
+        Project project = DomainFactory.createProject(
                         name: "project",
                         dirName: "project-dir",
                         realmName: realm.name

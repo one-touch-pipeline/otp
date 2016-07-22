@@ -18,7 +18,7 @@ class MergingSetAssignmentTests {
 
     @Before
     void setUp() {
-        Project project = TestData.createProject()
+        Project project = DomainFactory.createProject()
         project.name = "SOME_PROJECT"
         project.dirName = "some/relative/path"
         project.realmName = "def"

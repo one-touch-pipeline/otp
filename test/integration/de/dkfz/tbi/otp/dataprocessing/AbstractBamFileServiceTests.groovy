@@ -55,7 +55,7 @@ class AbstractBamFileServiceTests {
     @Before
     void setUp() {
 
-        Project project = TestData.createProject(
+        Project project = DomainFactory.createProject(
                 name: "project",
                 dirName: "project-dir",
                 realmName: "realmName"

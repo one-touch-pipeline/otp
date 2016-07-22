@@ -16,6 +16,7 @@ import static de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationConte
 @Mock([
     Individual,
     Project,
+    ProjectCategory,
     Run,
     Sample,
     SampleType,

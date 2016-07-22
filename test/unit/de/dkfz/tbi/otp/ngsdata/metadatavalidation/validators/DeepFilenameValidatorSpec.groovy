@@ -15,6 +15,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
         Individual,
         ProcessingOption,
         Project,
+        ProjectCategory,
         Sample,
         SampleIdentifier,
         SampleType,

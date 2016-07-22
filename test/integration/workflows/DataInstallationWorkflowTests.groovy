@@ -97,7 +97,7 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
         sampleType.name = "someSampleType"
         assertNotNull(sampleType.save(flush: true))
 
-        project = TestData.createProject()
+        project = DomainFactory.createProject()
         project.name = projectName
         project.dirName = projectName
         project.realmName = realm.name

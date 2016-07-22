@@ -61,7 +61,7 @@ class LsdfFilesServiceTests {
         sampleType.name = sampleTypeName
         assertNotNull(sampleType.save(flush: true))
 
-        project = TestData.createProject()
+        project = DomainFactory.createProject()
         project.name = projectName
         project.dirName = projectName
         project.realmName = realmName

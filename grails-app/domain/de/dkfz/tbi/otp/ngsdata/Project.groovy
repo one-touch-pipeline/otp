@@ -40,6 +40,8 @@ class Project implements Commentable, Entity {
      */
     boolean hasToBeCopied = false
 
+    ProjectCategory category
+
     Comment comment
 
     static belongsTo = [

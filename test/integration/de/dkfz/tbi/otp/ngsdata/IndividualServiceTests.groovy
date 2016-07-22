@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.Comment
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import static org.junit.Assert.*
 
@@ -18,6 +19,7 @@ class IndividualServiceTests extends AbstractIntegrationTest {
     @Before
     void setUp() {
         createUserAndRoles()
+        DomainFactory.createProjectCategory(name: 'category')
     }
 
     @After
@@ -1300,6 +1302,6 @@ ${indOld.comment.comment}""" == indNew.comment.comment
     }
 
     private Project mockProject(String name = "test") {
-        return Project.findOrSaveWhere(name: name, dirName: name, realmName: name, alignmentDeciderBeanName: 'dummyNonExistentAlignmentDecider')
+        return Project.findOrSaveWhere(name: name, dirName: name, realmName: name, alignmentDeciderBeanName: 'dummyNonExistentAlignmentDecider', category: CollectionUtils.exactlyOneElement(ProjectCategory.findAllByName('category')))
     }
 }

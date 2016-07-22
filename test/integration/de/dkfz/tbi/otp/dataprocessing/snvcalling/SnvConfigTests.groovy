@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.TestData
@@ -44,7 +45,7 @@ class SnvConfigTests {
     void setUp() {
         externalScript = SnvCallingInstanceTestData.createOrFindExternalScript()
 
-        project = TestData.createProject(
+        project = DomainFactory.createProject(
                 name: "projectName",
                 dirName: "projectDirName",
                 realmName: "realmName"
@@ -78,7 +79,7 @@ class SnvConfigTests {
 
         assertEquals(config, SnvConfig.getLatest(project, seqType))
 
-        Project project2 = TestData.createProject(
+        Project project2 = DomainFactory.createProject(
                 name: "project2Name",
                 dirName: "project2DirName",
                 realmName: "realmName"

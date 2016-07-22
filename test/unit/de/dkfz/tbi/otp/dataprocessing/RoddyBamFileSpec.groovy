@@ -13,6 +13,7 @@ import spock.lang.Unroll
         LibraryPreparationKit,
         MergingWorkPackage,
         Project,
+        ProjectCategory,
         ProcessingOption,
         RoddyBamFile,
         ReferenceGenomeProjectSeqType,

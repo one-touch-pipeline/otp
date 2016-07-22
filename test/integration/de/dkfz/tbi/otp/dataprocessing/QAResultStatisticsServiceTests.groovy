@@ -49,7 +49,7 @@ class QAResultStatisticsServiceTests {
 
     @Before
     void setUp() {
-        project = TestData.createProject(
+        project = DomainFactory.createProject(
                         name: "projectName",
                         dirName: "projectDirName",
                         realmName: 'DKFZ',

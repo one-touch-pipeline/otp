@@ -10,7 +10,7 @@ import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 
 @TestFor(ChromosomeIdentifierMappingService)
 @TestMixin(GrailsUnitTestMixin)
-@Mock([ReferenceGenome, ReferenceGenomeEntry, Realm, Project, SeqType, ReferenceGenomeProjectSeqType])
+@Mock([ReferenceGenome, ReferenceGenomeEntry, Realm, Project, ProjectCategory, SeqType, ReferenceGenomeProjectSeqType])
 class ChromosomeIdentifierMappingServiceTests {
 
     final static Long ARBITRARY_REFERENCE_GENOME_LENGTH = 100
@@ -30,7 +30,7 @@ class ChromosomeIdentifierMappingServiceTests {
 
         Realm realm = DomainFactory.createRealmDataProcessingDKFZ()
 
-        project = TestData.createProject()
+        project = DomainFactory.createProject()
         project.name = "SOME_PROJECT"
         project.dirName = HelperUtils.uniqueString
         project.realmName = realm.name

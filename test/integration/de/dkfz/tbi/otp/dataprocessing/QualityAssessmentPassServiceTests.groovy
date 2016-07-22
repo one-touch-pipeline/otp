@@ -24,7 +24,7 @@ class QualityAssessmentPassServiceTests extends AbstractIntegrationTest {
 
     @Before
     void setUp() {
-        project = TestData.createProject(
+        project = DomainFactory.createProject(
                         name: "TheProject",
                         dirName: "project-dir",
                         realmName: 'DKFZ',

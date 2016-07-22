@@ -6,6 +6,7 @@ import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.FileType
 import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
 import de.dkfz.tbi.otp.ngsdata.Project
+import de.dkfz.tbi.otp.ngsdata.ProjectCategory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.otp.utils.CollectionUtils
@@ -20,6 +21,7 @@ import spock.lang.Specification
         DataFile,
         FileType,
         Project,
+        ProjectCategory,
 ])
 class Md5sumUniqueValidatorSpec extends Specification {
 

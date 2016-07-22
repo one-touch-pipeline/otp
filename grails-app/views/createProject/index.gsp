@@ -36,7 +36,11 @@
             </tr>
             <tr>
                 <td class="myKey"><g:message code="createProject.projectGroup"/></td>
-                <td><g:select class="criteria" id="group" name='projectGroup' from='${projectGroups}' value="${cmd.projectGroup}"></g:select></td>
+                <td><g:select class="criteria" id="group" name='projectGroup' from='${projectGroups}' value="${cmd.projectGroup}"/></td>
+            </tr>
+            <tr>
+                <td class="myKey"><g:message code="createProject.category"/></td>
+                <td><g:select class="criteria" id="projectCategory" name="projectCategory" from="${projectCategories}" value="${cmd.projectCategory}"/></td>
             </tr>
             <tr>
                 <td class="myKey"><g:message code="createProject.copyFiles"/></td>

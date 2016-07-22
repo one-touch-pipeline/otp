@@ -9,7 +9,7 @@ import org.junit.*
 
 @TestMixin(GrailsUnitTestMixin)
 @TestFor(SeqTrack)
-@Mock([DataFile, Sample, Individual, Project])
+@Mock([DataFile, Sample, Individual, Project, ProjectCategory,])
 class SeqTrackUnitTests {
 
     @Test
@@ -33,7 +33,7 @@ class SeqTrackUnitTests {
 
     @Test
     void testGetProject() {
-        Project project = TestData.createProject()
+        Project project = DomainFactory.createProject()
         assert null != project.save(validate: false)
 
         Individual individual = new Individual (project: project)

@@ -19,6 +19,7 @@ import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus
     OtrsTicket,
     ProcessingOption,
     Project,
+    ProjectCategory,
     ReferenceGenome,
     ReferenceGenomeProjectSeqType,
     Run,

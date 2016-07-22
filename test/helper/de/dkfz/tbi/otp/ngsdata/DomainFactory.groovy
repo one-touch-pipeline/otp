@@ -651,7 +651,14 @@ class DomainFactory {
                 name                    : 'project_' + (counter++),
                 dirName                 : 'projectDirName_' + (counter++),
                 realmName               : 'realmName_' + (counter++),
-                alignmentDeciderBeanName: 'DUMMY_BEAN_NAME'
+                alignmentDeciderBeanName: 'DUMMY_BEAN_NAME',
+                category                : { createProjectCategory() },
+        ], projectProperties)
+    }
+
+    public static ProjectCategory createProjectCategory(Map projectProperties = [:]) {
+        return createDomainObject(ProjectCategory, [
+                name: 'projectCategory_' + (counter++),
         ], projectProperties)
     }
 
