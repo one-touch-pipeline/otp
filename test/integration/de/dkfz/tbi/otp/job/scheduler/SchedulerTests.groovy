@@ -1,41 +1,32 @@
 package de.dkfz.tbi.otp.job.scheduler
 
-import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.job.JobMailService
-import de.dkfz.tbi.otp.utils.MailHelperService
+import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.job.*
+import de.dkfz.tbi.otp.job.jobs.*
+import de.dkfz.tbi.otp.job.plan.*
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.job.restarting.*
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.testing.*
+import org.apache.commons.logging.impl.*
+import org.codehaus.groovy.grails.commons.*
+import org.junit.*
+
+import java.util.concurrent.*
+import java.util.regex.*
 
 import static org.junit.Assert.*
-import java.util.concurrent.ExecutorService
-
-import org.apache.commons.logging.impl.NoOpLog
-
-import de.dkfz.tbi.otp.job.plan.JobDefinition
-import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
-import de.dkfz.tbi.otp.job.processing.EndStateAwareJob
-import de.dkfz.tbi.otp.job.processing.ExecutionState
-import de.dkfz.tbi.otp.job.processing.Job
-import de.dkfz.tbi.otp.job.processing.Parameter
-import de.dkfz.tbi.otp.job.processing.ParameterType
-import de.dkfz.tbi.otp.job.processing.ParameterUsage
-import de.dkfz.tbi.otp.job.processing.Process
-import de.dkfz.tbi.otp.job.processing.ProcessingStep
-import de.dkfz.tbi.otp.job.processing.ProcessingStepUpdate
-import de.dkfz.tbi.otp.job.processing.InvalidStateException
-import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
-import de.dkfz.tbi.otp.ngsdata.Realm
-import org.codehaus.groovy.grails.commons.GrailsApplication
-import org.junit.*
 
 class SchedulerTests extends AbstractIntegrationTest {
 
     GrailsApplication grailsApplication
-    PbsMonitorService pbsMonitorService
     Scheduler scheduler
     SchedulerService schedulerService
 
     @After
     void tearDown() {
         TestCase.removeMetaClass(JobMailService, scheduler.jobMailService)
+        TestCase.removeMetaClass(RestartHandlerService, scheduler.restartHandlerService)
     }
 
     @Test
@@ -117,6 +108,9 @@ class SchedulerTests extends AbstractIntegrationTest {
         shouldFail(InvalidStateException) {
             endStateAwareJob.getEndState()
         }
+        scheduler.restartHandlerService.metaClass.handleRestart = { Job job ->
+            assert false: 'Should not reach this point'
+        }
         scheduler.executeJob(endStateAwareJob)
         assertEquals(ExecutionState.SUCCESS, endStateAwareJob.endState)
         // now we should have three processingStepUpdates for the processing step
@@ -142,7 +136,7 @@ class SchedulerTests extends AbstractIntegrationTest {
 
     @Test
     void testFailingEndStateAwareJobExecution() {
-        JobExecutionPlan jep = new JobExecutionPlan(name: "testFailureEndStateAware", planVersion: 0, startJobBean: "someBean")
+        JobExecutionPlan jep = new JobExecutionPlan(name: "testFailureEndStateAware", planVersion: 0, startJobBean: "testStartJob")
         assertNotNull(jep.save())
         JobDefinition jobDefinition = createTestEndStateAwareJob("testEndStateAware", jep, null, "testFailureEndStateAwareJob")
         jep.firstJob = jobDefinition
@@ -189,26 +183,34 @@ class SchedulerTests extends AbstractIntegrationTest {
     }
 
     @Test
-    void testFailingExecution() {
-        JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0, startJobBean: "someBean")
-        assertNotNull(jep.save())
-        JobDefinition jobDefinition = new JobDefinition(name: "test", bean: "failingTestJob", plan: jep)
-        assertNotNull(jobDefinition.save())
+    void testFailingExecutionWithoutRestart() {
+        helperForFailingExecution(/nonTesting/, [ExecutionState.CREATED, ExecutionState.STARTED, ExecutionState.FAILURE])
+    }
+
+    @Test
+    void testFailingExecutionWitRestart() {
+        helperForFailingExecution(Pattern.quote(FailingTestJob.EXCEPTION_MESSAGE), [ExecutionState.CREATED, ExecutionState.STARTED, ExecutionState.FAILURE, ExecutionState.RESTARTED])
+    }
+
+    void helperForFailingExecution(String errorExpression, List<ExecutionState> expectedExecutionStates) {
+        JobExecutionPlan jep = DomainFactory.createJobExecutionPlan(name: 'testStartJob')
+        JobDefinition jobDefinition = DomainFactory.createJobDefinition(name: 'test', bean: 'failingTestJob', plan: jep)
+        DomainFactory.createJobErrorDefinition(
+                action: JobErrorDefinition.Action.RESTART_JOB,
+                type: JobErrorDefinition.Type.MESSAGE,
+                errorExpression: errorExpression,
+                jobDefinitions: [jobDefinition],
+        )
         jep.firstJob = jobDefinition
-        assertNotNull(jep.save(flush: true))
-        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
-        assertNotNull(process.save())
-        ProcessingStep step = new ProcessingStep(process: process, jobDefinition: jobDefinition)
-        assertNotNull(step.save())
+        assert jep.save(flush: true)
+        Process process = DomainFactory.createProcess(jobExecutionPlan: jep, startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests")
+        ProcessingStep step = DomainFactory.createProcessingStep(process: process, jobDefinition: jobDefinition, jobClass: FailingTestJob.name)
         Job job = grailsApplication.mainContext.getBean("failingTestJob", step, [] as Set) as Job
         job.log = new NoOpLog()
-        ProcessingStepUpdate update = new ProcessingStepUpdate(
-            date: new Date(),
+        DomainFactory.createProcessingStepUpdate(
             state: ExecutionState.CREATED,
-            previous: null,
             processingStep: step
             )
-        assertNotNull(update.save(flush: true))
         boolean notified = false
         scheduler.jobMailService.metaClass.sendErrorNotificationIfFastTrack = { ProcessingStep step2, Throwable exceptionToBeHandled ->
             if (notified) {
@@ -218,18 +220,15 @@ class SchedulerTests extends AbstractIntegrationTest {
             }
         }
 
-        shouldFail(Exception) {
+        String message = shouldFail(Exception) {
             scheduler.executeJob(job)
         }
-        // now we should have three processingStepUpdates for the processing step
+        assert message.contains(FailingTestJob.EXCEPTION_MESSAGE)
         step.refresh()
-        assertEquals(3, ProcessingStepUpdate.countByProcessingStep(step))
         List<ProcessingStepUpdate> updates = ProcessingStepUpdate.findAllByProcessingStep(step).sort { it.id }
-        assertEquals(ExecutionState.CREATED, updates[0].state)
-        assertEquals(ExecutionState.STARTED, updates[1].state)
-        assertEquals(ExecutionState.FAILURE, updates[2].state)
+        assert expectedExecutionStates == updates*.state
         assertNotNull(updates[2].error)
-        assertEquals("Testing", updates[2].error.errorMessage)
+        assertEquals(FailingTestJob.EXCEPTION_MESSAGE, updates[2].error.errorMessage)
         assert notified
     }
 

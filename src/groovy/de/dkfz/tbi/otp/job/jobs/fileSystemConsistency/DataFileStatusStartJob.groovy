@@ -19,7 +19,7 @@ class DataFileStatusStartJob extends AbstractStartJobImpl {
     }
 
     @Override
-    protected String getJobExecutionPlanName() {
+    String getJobExecutionPlanName() {
         return "FileSystemConsistencyWorkflow"
     }
 }

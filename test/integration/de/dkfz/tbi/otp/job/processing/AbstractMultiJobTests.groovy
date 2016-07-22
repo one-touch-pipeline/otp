@@ -1,34 +1,24 @@
 package de.dkfz.tbi.otp.job.processing
 
-import org.apache.commons.logging.impl.NoOpLog
-
-import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.infrastructure.ClusterJob
-import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
-import de.dkfz.tbi.otp.job.plan.JobDefinition
-import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
+import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.infrastructure.*
+import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
-import de.dkfz.tbi.otp.job.scheduler.PbsMonitorService
-import de.dkfz.tbi.otp.job.scheduler.Scheduler
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.Realm
-import org.junit.AfterClass
-import org.junit.Before
-import org.junit.Test
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.ApplicationContext
+import de.dkfz.tbi.otp.job.restarting.*
+import de.dkfz.tbi.otp.job.scheduler.*
+import de.dkfz.tbi.otp.ngsdata.*
+import org.apache.commons.logging.impl.*
+import org.junit.*
+import org.springframework.beans.factory.annotation.*
+import org.springframework.context.*
 
-import java.util.concurrent.Semaphore
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.*
+import java.util.concurrent.atomic.*
 
-import static de.dkfz.tbi.TestConstants.ARBITRARY_MESSAGE
-import static de.dkfz.tbi.otp.job.scheduler.SchedulerTests.assertFailed
-import static de.dkfz.tbi.otp.job.scheduler.SchedulerTests.assertSucceeded
+import static de.dkfz.tbi.TestConstants.*
+import static de.dkfz.tbi.otp.job.scheduler.SchedulerTests.*
 import static de.dkfz.tbi.otp.ngsdata.DomainFactory.*
-import static junit.framework.TestCase.assertEquals
-import static junit.framework.TestCase.assertTrue
+import static junit.framework.TestCase.*
 
 class AbstractMultiJobTests {
 
@@ -39,6 +29,7 @@ class AbstractMultiJobTests {
     @Autowired
     ApplicationContext applicationContext
     PbsMonitorService pbsMonitorService
+    RestartCheckerService restartCheckerService
     Scheduler scheduler
 
     final ProcessingStep step = createAndSaveProcessingStep()
@@ -62,6 +53,12 @@ class AbstractMultiJobTests {
         assert realm1.save(flush: true)
         assert realm2.save(flush: true)
         pbsMonitorService.queuedJobs = [:]
+        restartCheckerService.metaClass.canWorkflowBeRestarted = { ProcessingStep step -> false }
+    }
+
+    @After
+    void tearDown() {
+        TestCase.removeMetaClass(RestartCheckerService, restartCheckerService)
     }
 
     @AfterClass

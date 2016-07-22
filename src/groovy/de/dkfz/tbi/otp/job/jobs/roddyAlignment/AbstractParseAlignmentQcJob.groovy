@@ -3,12 +3,12 @@ package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.AbstractQualityAssessmentService
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.job.jobs.AutoRestartable
+import de.dkfz.tbi.otp.job.jobs.AutoRestartableJob
 import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
 import org.springframework.beans.factory.annotation.Autowired
 
 
-abstract class AbstractParseAlignmentQcJob extends AbstractEndStateAwareJobImpl implements AutoRestartable {
+abstract class AbstractParseAlignmentQcJob extends AbstractEndStateAwareJobImpl implements AutoRestartableJob {
 
     @Autowired
     AbstractQualityAssessmentService abstractQualityAssessmentService

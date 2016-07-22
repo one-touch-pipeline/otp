@@ -3,7 +3,7 @@ package de.dkfz.tbi.otp.job.jobs.snvcalling
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingStep
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig
-import de.dkfz.tbi.otp.job.jobs.AutoRestartable
+import de.dkfz.tbi.otp.job.jobs.AutoRestartableJob
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.utils.LinkFileUtils
 import de.dkfz.tbi.otp.utils.WaitingFileUtils
@@ -27,7 +27,7 @@ import static de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvProcessingStates.FINI
  * SnvCallingInstance to FINISHED.
  * </p>
  */
-class SnvCompletionJob extends AbstractEndStateAwareJobImpl implements AutoRestartable{
+class SnvCompletionJob extends AbstractEndStateAwareJobImpl implements AutoRestartableJob {
     @Autowired
     ExecutionService executionService
     @Autowired

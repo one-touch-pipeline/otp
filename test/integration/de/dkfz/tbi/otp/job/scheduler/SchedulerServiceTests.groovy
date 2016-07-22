@@ -1,54 +1,37 @@
 package de.dkfz.tbi.otp.job.scheduler
 
-import java.util.concurrent.ExecutionException
-
-import static org.junit.Assert.*
-import de.dkfz.tbi.otp.job.jobs.ResumableSometimesResumableTestJob
-import de.dkfz.tbi.otp.job.jobs.ResumableTestJob
-import de.dkfz.tbi.otp.job.jobs.SometimesResumableTestJob
-import de.dkfz.tbi.otp.job.jobs.TestJob
-import de.dkfz.tbi.otp.job.plan.DecidingJobDefinition
-import de.dkfz.tbi.otp.job.plan.DecisionMapping
-import de.dkfz.tbi.otp.job.plan.JobDecision
-import de.dkfz.tbi.otp.job.plan.JobDefinition
-import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
-import de.dkfz.tbi.otp.job.plan.StartJobDefinition
-import de.dkfz.tbi.otp.job.plan.ValidatingJobDefinition
-import de.dkfz.tbi.otp.job.processing.DecisionProcessingStep
-import de.dkfz.tbi.otp.job.processing.ExecutionState
-import de.dkfz.tbi.otp.job.processing.IncorrectProcessingException
-import de.dkfz.tbi.otp.job.processing.Job
-import de.dkfz.tbi.otp.job.processing.Parameter
-import de.dkfz.tbi.otp.job.processing.ParameterMapping
-import de.dkfz.tbi.otp.job.processing.ParameterUsage
-import de.dkfz.tbi.otp.job.processing.ParameterType
-import de.dkfz.tbi.otp.job.processing.Process
-import de.dkfz.tbi.otp.job.processing.ProcessParameter
-import de.dkfz.tbi.otp.job.processing.ProcessingStep
-import de.dkfz.tbi.otp.job.processing.ProcessingStepUpdate
-import de.dkfz.tbi.otp.job.processing.RestartedProcessingStep
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.job.processing.StartJob
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
-
+import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.job.jobs.*
+import de.dkfz.tbi.otp.job.plan.*
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.job.restarting.*
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.testing.*
 import org.junit.*
 
+import java.util.concurrent.*
+
+import static org.junit.Assert.*
+
 class SchedulerServiceTests extends AbstractIntegrationTest {
-    /**
-     * Dependency Injection of grailsApplication
-     */
+
     def grailsApplication
-    /**
-     * Dependency Injection of schedulerService
-     */
+
+    RestartCheckerService restartCheckerService
     SchedulerService schedulerService
+
+    Scheduler scheduler
 
     @Before
     void setUp() {
         schedulerService.queue.clear()
         schedulerService.running.clear()
+        restartCheckerService.metaClass.canWorkflowBeRestarted = { ProcessingStep step -> false }
+    }
+
+    @After
+    void tearDown() {
+        TestCase.removeMetaClass(RestartCheckerService, restartCheckerService)
     }
 
 

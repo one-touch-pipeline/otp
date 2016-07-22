@@ -35,7 +35,7 @@ class DataInstallationStartJob extends AbstractStartJobImpl {
     }
 
     @Override
-    protected String getJobExecutionPlanName() {
+    String getJobExecutionPlanName() {
         return "DataInstallationWorkflow"
     }
 }

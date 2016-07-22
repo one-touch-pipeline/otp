@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
-import de.dkfz.tbi.otp.job.jobs.AutoRestartable
+import de.dkfz.tbi.otp.job.jobs.AutoRestartableJob
 
 import static de.dkfz.tbi.otp.job.processing.CreateClusterScriptService.*
 
@@ -8,7 +8,7 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.ngsdata.Realm
 
-class SnvCallingJob extends AbstractSnvCallJoinJob implements AutoRestartable {
+class SnvCallingJob extends AbstractSnvCallJoinJob implements AutoRestartableJob {
 
     @Override
     protected void submit(SnvJobResult jobResult, Realm realm, Closure sendClusterScript) throws Throwable {

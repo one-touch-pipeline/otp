@@ -1,13 +1,13 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
-import de.dkfz.tbi.otp.job.jobs.AutoRestartable
+import de.dkfz.tbi.otp.job.jobs.AutoRestartableJob
 import org.springframework.beans.factory.annotation.Autowired
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.job.processing.PbsService
 import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
 import de.dkfz.tbi.otp.ngsdata.*
 
-class FilterVcfJob extends AbstractSnvCallingJob implements AutoRestartable{
+class FilterVcfJob extends AbstractSnvCallingJob implements AutoRestartableJob {
 
     @Autowired
     ConfigService configService

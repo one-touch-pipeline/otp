@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.job.processing
 
-import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.job.plan.*
+import de.dkfz.tbi.otp.utils.*
 
 /**
  * Domain class to store error information for a failure ProcessingStepUpdate.
@@ -41,4 +42,17 @@ class ProcessingError implements Entity {
         errorMessage(nullable: false, empty: false)
         stackTraceIdentifier(nullable: true)
     }
+
+    ProcessParameterObject getProcessParameterObject() {
+        return processingStepUpdate.processParameterObject
+    }
+
+    ProcessingStep getProcessingStep() {
+        return processingStepUpdate.processingStep
+    }
+
+    JobDefinition getJobDefinition() {
+        return processingStepUpdate.jobDefinition
+    }
+
 }

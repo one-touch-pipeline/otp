@@ -18,7 +18,7 @@ class TestRoddyAlignmentStartJob extends RoddyAlignmentStartJob {
     }
 
     @Override
-    protected String getJobExecutionPlanName() {
+    String getJobExecutionPlanName() {
         throw new UnsupportedOperationException()
     }
 

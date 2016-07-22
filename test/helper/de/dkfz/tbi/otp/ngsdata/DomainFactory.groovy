@@ -262,6 +262,21 @@ class DomainFactory {
         ], properties)
     }
 
+    static ProcessingError createProcessingError(Map properties = [:]) {
+        return createDomainObject(ProcessingError, [
+                errorMessage        : "errorMessage_${counter++}",
+                processingStepUpdate: {
+                    ProcessingStep step = createProcessingStep()
+                    ProcessingStepUpdate update = createProcessingStepUpdate([processingStep: step])
+                    createProcessingStepUpdate([
+                            state         : ExecutionState.FAILURE,
+                            processingStep: step,
+                            previous      : update,
+                    ])
+                },
+        ], properties)
+    }
+
     public static ClusterJob createClusterJob(Map properties = [:]) {
         return createDomainObject(ClusterJob, [
                 processingStep: {createProcessingStep()},
@@ -280,6 +295,17 @@ class DomainFactory {
                  type: "processingOptionType_${counter++}",
                  value:  "processingOptionValue_${counter++}",
                  comment: "processingOptionComment_${counter++}",
+        ], properties)
+    }
+
+    static JobErrorDefinition createJobErrorDefinition(Map properties = [:]) {
+        return createDomainObject(JobErrorDefinition, [
+                type : JobErrorDefinition.Type.MESSAGE,
+                action: JobErrorDefinition.Action.STOP,
+                errorExpression: /.*/,
+                jobDefinitions: { (1..3).collect {
+                    createJobDefinition()
+                }}
         ], properties)
     }
 

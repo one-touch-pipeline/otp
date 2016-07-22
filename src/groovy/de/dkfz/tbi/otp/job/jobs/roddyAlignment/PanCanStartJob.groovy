@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component
 class PanCanStartJob extends RoddyAlignmentStartJob {
 
     @Override
-    protected String getJobExecutionPlanName() {
+    String getJobExecutionPlanName() {
         return 'PanCanWorkflow'
     }
 

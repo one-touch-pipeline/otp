@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
-import de.dkfz.tbi.otp.job.jobs.AutoRestartable
+import de.dkfz.tbi.otp.job.jobs.AutoRestartableJob
 import org.springframework.beans.factory.annotation.Autowired
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
@@ -13,7 +13,7 @@ import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
 
-class SnvDeepAnnotationJob extends AbstractSnvCallingJob implements AutoRestartable {
+class SnvDeepAnnotationJob extends AbstractSnvCallingJob implements AutoRestartableJob {
 
     @Autowired
     ConfigService configService

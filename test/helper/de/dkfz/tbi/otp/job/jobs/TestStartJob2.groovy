@@ -44,7 +44,7 @@ class TestStartJob2 extends AbstractStartJobImpl {
     }
 
     @Override
-    protected String getJobExecutionPlanName() {
+    String getJobExecutionPlanName() {
         throw new UnsupportedOperationException()
     }
 }

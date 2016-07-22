@@ -11,7 +11,7 @@ import org.springframework.stereotype.*
 class WgbsAlignmentStartJob extends RoddyAlignmentStartJob {
 
     @Override
-    protected String getJobExecutionPlanName() {
+    String getJobExecutionPlanName() {
         return 'WgbsAlignmentWorkflow'
     }
 

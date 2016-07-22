@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.job.processing
 
-import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.job.plan.*
+import de.dkfz.tbi.otp.utils.*
 
 public class ProcessingStepUpdate implements Serializable, Entity {
     static belongsTo = [processingStep: ProcessingStep]
@@ -94,4 +95,13 @@ public class ProcessingStepUpdate implements Serializable, Entity {
             return obj.state == ExecutionState.FAILURE
         })
     }
+
+    ProcessParameterObject getProcessParameterObject() {
+        return processingStep.processParameterObject
+    }
+
+    JobDefinition getJobDefinition() {
+        return processingStep.jobDefinition
+    }
+
 }

@@ -1,27 +1,37 @@
 package de.dkfz.tbi.otp.job.scheduler
 
-import org.apache.commons.logging.impl.NoOpLog
+import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.infrastructure.*
+import de.dkfz.tbi.otp.job.jobs.*
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.job.restarting.*
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.testing.*
+import de.dkfz.tbi.otp.utils.logging.*
+import org.apache.commons.logging.impl.*
+import org.junit.*
 
-import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
-import de.dkfz.tbi.otp.job.jobs.MonitoringTestJob
-import de.dkfz.tbi.otp.job.processing.Job
-import de.dkfz.tbi.otp.job.processing.MonitoringJob
-import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
-import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
-import org.junit.Test
-
-import static de.dkfz.tbi.TestConstants.ARBITRARY_CLUSTER_JOB_ID
-import static de.dkfz.tbi.TestConstants.ARBITRARY_MESSAGE
-import static de.dkfz.tbi.otp.job.scheduler.SchedulerTests.assertFailed
-import static de.dkfz.tbi.otp.job.scheduler.SchedulerTests.assertSucceeded
-import static de.dkfz.tbi.otp.ngsdata.DomainFactory.createAndSaveProcessingStep
+import static de.dkfz.tbi.TestConstants.*
+import static de.dkfz.tbi.otp.job.scheduler.SchedulerTests.*
+import static de.dkfz.tbi.otp.ngsdata.DomainFactory.*
 
 class PbsMonitorServiceTests extends AbstractIntegrationTest {
 
     PbsMonitorService pbsMonitorService
+    RestartCheckerService restartCheckerService
     Scheduler scheduler
     SchedulerService schedulerService
+
+    @Before
+    void before() {
+        restartCheckerService.metaClass.canWorkflowBeRestarted = { ProcessingStep step -> false }
+    }
+
+    @After
+    void tearDown() {
+        TestCase.removeMetaClass(RestartCheckerService, restartCheckerService)
+    }
+
 
     @Test
     void testNotifyJobAboutFinishedClusterJob_success() {

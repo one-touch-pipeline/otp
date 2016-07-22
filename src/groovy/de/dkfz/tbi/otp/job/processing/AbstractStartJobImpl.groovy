@@ -54,7 +54,7 @@ abstract class AbstractStartJobImpl implements StartJob, ApplicationListener<Job
         this.plan = plan
     }
 
-    protected abstract String getJobExecutionPlanName()
+    abstract String getJobExecutionPlanName()
 
     /**
      * Sets the JobExecutionPlan of this StartJob if not already set.

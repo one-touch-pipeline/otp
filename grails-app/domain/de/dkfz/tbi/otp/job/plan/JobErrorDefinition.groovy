@@ -51,7 +51,8 @@ class JobErrorDefinition implements Entity {
             jobDefinitions: JobDefinition,
     ]
 
-    static mappedBy = [
-            CurrentJobError: 'checkFurtherJobErrors'
-    ]
+    @Override
+    String toString() {
+        return "JobErrorDefinition(id=${id}, type=${type}, action=${action}, errorExpression=${errorExpression})"
+    }
 }

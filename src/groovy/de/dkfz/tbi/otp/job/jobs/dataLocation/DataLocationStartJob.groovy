@@ -53,7 +53,7 @@ class DataLocationStartJob extends AbstractStartJobImpl {
     }
 
     @Override
-    protected String getJobExecutionPlanName() {
+    String getJobExecutionPlanName() {
         return "DataLocationWorkflow"
     }
 }

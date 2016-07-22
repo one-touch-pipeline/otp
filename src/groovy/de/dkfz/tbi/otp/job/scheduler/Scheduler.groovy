@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.job.scheduler
 
 import de.dkfz.tbi.otp.job.JobMailService
 import de.dkfz.tbi.otp.job.processing.ProcessService
+import de.dkfz.tbi.otp.job.restarting.RestartHandlerService
 
 import static org.springframework.util.Assert.*
 
@@ -62,6 +63,9 @@ class Scheduler {
 
     @Autowired
     ProcessService processService
+
+    @Autowired
+    RestartHandlerService restartHandlerService
 
     /**
      * Log for this class.
@@ -213,7 +217,7 @@ class Scheduler {
             doUnsafeErrorHandling(job, exceptionToBeHandled)
         } catch (final Throwable exceptionDuringExceptionHandling) {
             final String identifier = System.currentTimeMillis() + "-" + sprintf('%016X', new Random().nextLong())
-            log.error "An exception was thrown during exception handling. The original exception (ID ${identifier}), " +
+            job.log.error "An exception was thrown during exception handling. The original exception (ID ${identifier}), " +
                     "which triggered the exception handling, is:\n" +
                     "${ExceptionUtils.getStackTrace(exceptionToBeHandled)}\n" +
                     "And the exception which was thrown during exception handling is:\n" +
@@ -265,6 +269,7 @@ class Scheduler {
             }
             markProcessAsFailed(step, error.errorMessage)
             log.debug("doErrorHandling performed for ${job.class} with ProcessingStep ${step.id}")
+            restartHandlerService.handleRestart(job)
         } finally {
             jobMailService.sendErrorNotificationIfFastTrack(step, exceptionToBeHandled)
         }

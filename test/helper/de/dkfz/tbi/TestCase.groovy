@@ -68,6 +68,10 @@ class TestCase {
         Assert.assertEquals(expected.toString(), actual)
     }
 
+    public static String createUniqueString() {
+        return HelperUtils.getUniqueString()
+    }
+
     public static File getUniqueNonExistentPath() {
         return new File("/dev/null/otp-test/${HelperUtils.uniqueString}")
     }

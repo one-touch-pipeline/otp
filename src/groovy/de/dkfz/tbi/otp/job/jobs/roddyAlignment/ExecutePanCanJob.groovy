@@ -2,7 +2,7 @@ package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
 
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.job.jobs.AutoRestartable
+import de.dkfz.tbi.otp.job.jobs.AutoRestartableJob
 import de.dkfz.tbi.otp.ngsdata.BedFile
 import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
@@ -14,7 +14,7 @@ import de.dkfz.tbi.otp.ngsdata.SeqTypeNames
 import static de.dkfz.tbi.otp.ngsdata.LsdfFilesService.ensureFileIsReadableAndNotEmpty
 
 
-class ExecutePanCanJob extends AbstractExecutePanCanJob implements AutoRestartable{
+class ExecutePanCanJob extends AbstractExecutePanCanJob implements AutoRestartableJob {
 
     @Override
     protected String prepareAndReturnWorkflowSpecificCValues(RoddyBamFile roddyBamFile) {

@@ -77,4 +77,17 @@ class CommentServiceSpec extends Specification implements UserAndRoles {
         comment.author == "admin"
         process.comment == comment
     }
+
+    void "test createOrUpdateComment with Process"() {
+        given:
+        Commentable process = DomainFactory.createProcess()
+
+        when:
+        Comment comment = commentService.createOrUpdateComment(process, 'testMessage', 'some user')
+
+        then:
+        comment.comment == 'testMessage'
+        comment.author == 'some user'
+        process.comment == comment
+    }
 }

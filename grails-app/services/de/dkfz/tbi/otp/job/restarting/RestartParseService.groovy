@@ -1,0 +1,108 @@
+package de.dkfz.tbi.otp.job.restarting
+
+import de.dkfz.tbi.otp.job.plan.*
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.job.scheduler.*
+import de.dkfz.tbi.otp.utils.*
+
+class RestartParseService {
+
+    static final int MEGABYTE = 1000 * 1000
+
+    static int threshold = 10 * MEGABYTE
+
+    ErrorLogService errorLogService
+
+    SchedulerService schedulerService
+
+
+    JobErrorDefinition.Action handleTypeMessage(Job job, Collection<JobErrorDefinition> jobErrorDefinitions) {
+        job.log.debug("Checking error message.")
+        ProcessingError error = job.processingStep.latestProcessingStepUpdate.error
+        return extractMatchingAction(job, 'error message', error.errorMessage, jobErrorDefinitions)
+    }
+
+    JobErrorDefinition.Action handleTypeStackTrace(Job job, Collection<JobErrorDefinition> jobErrorDefinitions) {
+        job.log.debug("Checking stacktrace.")
+        ProcessingError error = job.processingStep.latestProcessingStepUpdate.error
+        File file = errorLogService.getStackTracesFile(error.stackTraceIdentifier)
+        if (!file.exists()) {
+            job.log.debug("The stack trace file '${file}' does not exist.")
+            return null
+        }
+        return extractMatchingAction(job, 'stack trace', file.text, jobErrorDefinitions)
+    }
+
+    JobErrorDefinition.Action handleTypeClusterLogs(Job job, Collection<JobErrorDefinition> jobErrorDefinitions) {
+        job.log.debug("Checking cluster job log(s).")
+        Collection<File> logFiles = job.failedOrNotFinishedClusterJobs().collect { job.getLogFilePath(it) }
+        if (logFiles.empty) {
+            job.log.debug("Could not find any cluster job log.")
+            return JobErrorDefinition.Action.STOP
+        }
+
+        List<JobErrorDefinition.Action> actions = logFiles.collect { File file ->
+            if (!file.exists()) {
+                job.log.debug("Log file '${file}' does not exist in file system, will be skipped.")
+                return null
+            } else if (file.size() > threshold) {
+                job.log.debug("Stopping, because log file '${file}' is too big with ${(int) (file.size() / MEGABYTE)} MB for processing.")
+                return JobErrorDefinition.Action.STOP
+            }
+            return extractMatchingAction(job, file.path, file.text, jobErrorDefinitions)
+        }.findAll().unique()
+
+        switch (actions.size()) {
+            case 0:
+                job.log.debug("For none of the cluster job logs a matching rule could be found.")
+                return null
+            case 1:
+                job.log.debug("Found action ${actions.first()} for cluster job logs.")
+                return actions.first()
+            default:
+                job.log.debug("Stopping, because multiple rules found for cluster job logs: \n- ${actions.join('\n- ')}")
+                return JobErrorDefinition.Action.STOP
+        }
+    }
+
+    JobErrorDefinition.Action detectAndHandleType(Job job, Collection<JobErrorDefinition> jobErrorDefinitions) {
+        JobErrorDefinition.Type type = CollectionUtils.exactlyOneElement(jobErrorDefinitions*.type.unique())
+
+        switch (type) {
+            case JobErrorDefinition.Type.MESSAGE:
+                return handleTypeMessage(job, jobErrorDefinitions)
+
+            case JobErrorDefinition.Type.STACKTRACE:
+                return handleTypeStackTrace(job, jobErrorDefinitions)
+
+            case JobErrorDefinition.Type.CLUSTER_LOG:
+                return handleTypeClusterLogs(job, jobErrorDefinitions)
+
+            default:
+                throw new RuntimeException("Unknown message type: ${type}")
+        }
+    }
+
+    JobErrorDefinition.Action extractMatchingAction(Job job, String it, String text, Collection<JobErrorDefinition> jobErrorDefinitions) {
+        Collection<JobErrorDefinition> matching = jobErrorDefinitions.findAll {
+            text =~ it.errorExpression
+        }
+
+        switch (matching.size()) {
+            case 0:
+                job.log.debug("No matching rule found for ${it}.")
+                return null
+            case 1:
+                JobErrorDefinition definition = CollectionUtils.exactlyOneElement(matching)
+                job.log.debug("Rule ${definition} matches ${it}.")
+                if (definition.action == JobErrorDefinition.Action.CHECK_FURTHER) {
+                    return detectAndHandleType(job, definition.checkFurtherJobErrors)
+                } else {
+                    return definition.action
+                }
+            default:
+                job.log.debug("Stopping, because multiple rules match ${it}: \n- ${jobErrorDefinitions.join('\n- ')}")
+                return JobErrorDefinition.Action.STOP
+        }
+    }
+}
