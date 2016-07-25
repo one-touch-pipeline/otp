@@ -1,15 +1,15 @@
 package de.dkfz.tbi.otp.job.plan
 
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.*
+import grails.test.mixin.*
+import grails.validation.*
 import spock.lang.*
-import de.dkfz.tbi.otp.utils.CollectionUtils
-
-import grails.validation.ValidationException
-
 
 @Mock([
-        JobExecutionPlan,
         JobDefinition,
+        JobErrorDefinition,
+        JobExecutionPlan,
 ])
 
 class JobErrorDefinitionSpec extends Specification {
