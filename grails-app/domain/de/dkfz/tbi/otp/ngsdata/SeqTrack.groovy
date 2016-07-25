@@ -134,7 +134,7 @@ class SeqTrack implements ProcessParameterObject, Entity {
         sample()
         pipelineVersion()
         // for old data and data which is sequenced from external core facilities this information might not be provided.
-        ilseId nullable: true
+        ilseId nullable: true, blank: false
         nBasePairs nullable: true
 
         //libraryPreparationKit and inferred state
