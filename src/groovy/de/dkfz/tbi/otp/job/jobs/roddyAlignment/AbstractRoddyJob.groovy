@@ -99,10 +99,6 @@ abstract class AbstractRoddyJob extends AbstractMaybeSubmitWaitValidateJob{
         File latestExecutionDirectory = roddyResult.latestWorkExecutionDirectory
         JobStateLogFile jobStateLogFile = JobStateLogFile.getInstance(latestExecutionDirectory)
 
-        if (jobStateLogFile.isEmpty()) {
-            throw new RuntimeException("${jobStateLogFile.getFilePath()} is empty.")
-        }
-
         return analyseFinishedClusterJobs(finishedClusterJobs, jobStateLogFile)
     }
 

@@ -85,18 +85,6 @@ class AbstractRoddyJobUnitTests {
     }
 
     @Test
-    void testFailedOrNotFinishedClusterJobs_WhenJobStateLogFileIsEmpty_ShouldFail() {
-        CreateJobStateLogFileHelper.withJobStateLogFile(tmpDir, []) {
-            roddyBamFile.roddyExecutionDirectoryNames.add(it.name)
-            roddyBamFile.save(flush: true)
-
-            shouldFailWithMessage(RuntimeException, /${it}\/${JobStateLogFile.JOB_STATE_LOG_FILE_NAME}\sis\sempty\./) {
-                abstractRoddyJob.failedOrNotFinishedClusterJobs([])
-            }
-        }
-    }
-
-    @Test
     void testFailedOrNotFinishedClusterJobs_WhenJobStateLogFileIsCorrect_ShouldWork() {
         CreateJobStateLogFileHelper.withJobStateLogFile(tmpDir, [
                 CreateJobStateLogFileHelper.createJobStateLogFileEntry([pbsId: clusterJobIdentifier.clusterJobId, statusCode: STATUS_CODE_STARTED])
