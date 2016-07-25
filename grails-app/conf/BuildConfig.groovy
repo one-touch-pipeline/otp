@@ -40,6 +40,7 @@ grails.project.dependency.resolution = {
         compile 'bedUtils:bedUtils:0.7'
 
         // general dependencies
+        compile "commons-logging:commons-logging:1.2"  // LogThreadLocal.withThreadLog requires version >= 1.0.4
         compile "joda-time:joda-time:2.3"
         compile "org.jadira.usertype:usertype.jodatime:2.0.1"
         // dependencies for the flowControl API

@@ -50,6 +50,8 @@ class LogThreadLocal {
         assert code != null
         assert threadLog == null
         threadLog = new SimpleLog('ThreadLog') {
+            // The write method has been introduced in commons-logging version 1.0.4
+            @Override
             protected void write(StringBuffer buffer) {
                 out.append(buffer)
                 out.append('\n')
