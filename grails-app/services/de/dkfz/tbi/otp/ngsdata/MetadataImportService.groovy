@@ -3,7 +3,6 @@ package de.dkfz.tbi.otp.ngsdata
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
 import de.dkfz.tbi.otp.tracking.*
-import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.util.spreadsheet.*
 import de.dkfz.tbi.util.spreadsheet.validation.ValueTuple
 import groovy.transform.*
@@ -12,6 +11,7 @@ import org.springframework.context.*
 import org.springframework.security.access.prepost.*
 
 import java.util.logging.*
+import java.util.regex.*
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
@@ -22,8 +22,11 @@ import static de.dkfz.tbi.otp.utils.StringUtils.*
  */
 class MetadataImportService {
 
+    static int MAX_ILSE_NUMBER_RANGE_SIZE = 20
+
     static final String AUTO_DETECT_DIRECTORY_STRUCTURE_NAME = ''
     static final String DATA_FILES_IN_SAME_DIRECTORY_BEAN_NAME = 'dataFilesInSameDirectory'
+    static final String MIDTERM_ILSE_DIRECTORY_STRUCTURE_BEAN_NAME = 'dataFilesOnGpcfMidTerm'
 
     @Autowired
     ApplicationContext applicationContext
@@ -36,7 +39,7 @@ class MetadataImportService {
      * @return A collection of descriptions of the validations which are performed
      */
     Collection<String> getImplementedValidations() {
-        return metadataValidators.sum { it.descriptions }
+        return (Collection<String>) metadataValidators.sum { it.descriptions }
     }
 
     /**
@@ -55,6 +58,10 @@ class MetadataImportService {
      * @param directoryStructureName As returned by {@link #getSupportedDirectoryStructures()}
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")  // TODO: OTP-1908: Relax this restriction
+    MetadataValidationContext validateWithAuth(File metadataFile, String directoryStructureName) {
+        return validate(metadataFile, directoryStructureName)
+    }
+
     MetadataValidationContext validate(File metadataFile, String directoryStructureName) {
         MetadataValidationContext context = MetadataValidationContext.createFromFile(metadataFile,
                 getDirectoryStructure(getDirectoryStructureBeanName(directoryStructureName, metadataFile)))
@@ -69,6 +76,10 @@ class MetadataImportService {
      * @param previousValidationMd5sum May be {@code null}
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    ValidateAndImportResult validateAndImportWithAuth(File metadataFile, String directoryStructureName, boolean align, boolean ignoreWarnings, String previousValidationMd5sum, String ticketNumber) {
+        return validateAndImport(metadataFile, directoryStructureName, align, ignoreWarnings, previousValidationMd5sum, ticketNumber)
+    }
+
     ValidateAndImportResult validateAndImport(File metadataFile, String directoryStructureName, boolean align, boolean ignoreWarnings, String previousValidationMd5sum, String ticketNumber) {
         MetadataValidationContext context = validate(metadataFile, directoryStructureName)
         MetaDataFile metadataFileObject = null
@@ -78,13 +89,64 @@ class MetadataImportService {
         return new ValidateAndImportResult(context, metadataFileObject)
     }
 
+    List<ValidateAndImportResult> validateAndImportMultiple(String otrsTicketNumber, String ilseNumbers) {
+        return validateAndImportMultiple(otrsTicketNumber,
+                parseIlseNumbers(ilseNumbers).collect { getMetadataFilePathForIlseNumber(it) },
+                MIDTERM_ILSE_DIRECTORY_STRUCTURE_BEAN_NAME)
+    }
+
+    List<ValidateAndImportResult> validateAndImportMultiple(String otrsTicketNumber, Collection<File> metadataFiles, String directoryStructureName) {
+        List<ValidateAndImportResult> results = metadataFiles.collect {
+            validateAndImport(it, directoryStructureName, true, false, null, otrsTicketNumber)
+        }
+        List<MetadataValidationContext> failedValidations = results.findAll { it.metadataFile == null }*.context
+        if (failedValidations.isEmpty()) {
+            return results
+        } else {
+            throw new MultiImportFailedException(failedValidations)
+        }
+    }
+
+    protected static File getMetadataFilePathForIlseNumber(int ilseNumber) {
+        String ilseNumberString = Integer.toString(ilseNumber)
+        return new File(LsdfFilesService.midtermStorageMountPoint.first(),
+                "${ilseNumberString.padLeft(6, '0')}/data/${ilseNumberString}_meta.tsv")
+    }
+
+    protected static List<Integer> parseIlseNumbers(String ilseNumbers) {
+        List<Integer> result = []
+        ilseNumbers.split(/\s*[,+&]\s*/).each {
+            if (it ==~ /^\d{4,6}$/) {
+                result.add(Integer.parseInt(it))
+            } else {
+                Matcher matcher = it =~ /^(\d{4,6})\s*-\s*(\d{4,6})$/
+                if (matcher) {
+                    int min = Integer.parseInt(matcher.group(1))
+                    int max = Integer.parseInt(matcher.group(2))
+                    if (min >= max) {
+                        throw new IllegalArgumentException("Illegal range of ILSe numbers: '${it}'")
+                    }
+                    if (max - min - 1 > MAX_ILSE_NUMBER_RANGE_SIZE) {
+                        throw new IllegalArgumentException("Range of ILSe numbers is too large: '${it}'")
+                    }
+                    for (int i = min; i <= max; i++) {
+                        result.add(i)
+                    }
+                } else {
+                    throw new IllegalArgumentException("Cannot parse '${it}' as an ILSe number or a range of ILSe numbers.")
+                }
+            }
+        }
+        return result
+    }
+
     protected Collection<MetadataValidator> getMetadataValidators() {
         return applicationContext.getBeansOfType(MetadataValidator).values().sort { it.getClass().name }
     }
 
     protected static String getDirectoryStructureBeanName(String directoryStructureName, File metadataFile) {
         if (directoryStructureName == AUTO_DETECT_DIRECTORY_STRUCTURE_NAME) {
-            // TODO: Really do auto-detection based on the metadata file path when more directories structures are supported
+            // TODO: Really do auto-detection based on the metadata file path
             return DATA_FILES_IN_SAME_DIRECTORY_BEAN_NAME
         } else {
             return directoryStructureName
@@ -185,7 +247,7 @@ class MetadataImportService {
             String libraryName = uniqueColumnValue(rows, CUSTOMER_LIBRARY) ?: ""
             String normalizedLibraryName = SeqTrack.normalizeLibraryName(libraryName)
             String adapterFileName = uniqueColumnValue(rows, ADAPTER_FILE)
-            AdapterFile adapterFile = adapterFileName ? CollectionUtils.exactlyOneElement(AdapterFile.findAllByFileName(adapterFileName)) : null
+            AdapterFile adapterFile = adapterFileName ? exactlyOneElement(AdapterFile.findAllByFileName(adapterFileName)) : null
             Map properties = [
                     laneId: laneId,
                     ilseId: uniqueColumnValue(rows, ILSE_NO) ?: null,
@@ -383,4 +445,9 @@ class ValidateAndImportResult {
      * {@code null} if the import has been rejected
      */
     final MetaDataFile metadataFile
+}
+
+@TupleConstructor
+class MultiImportFailedException extends RuntimeException {
+    final List<MetadataValidationContext> failedValidations
 }

@@ -24,13 +24,13 @@ class MetadataImportController {
             errorMessage = "'${fieldError.getRejectedValue()}' is not a valid value for '${fieldError.getField()}'. Error code: '${fieldError.code}'"
         }
         if (cmd.submit == "Import" && !errorMessage) {
-            ValidateAndImportResult validateAndImportResult = metadataImportService.validateAndImport(new File(cmd.path), cmd.directory, cmd.align, cmd.ignoreWarnings, cmd.md5, cmd.ticketNumber)
+            ValidateAndImportResult validateAndImportResult = metadataImportService.validateAndImportWithAuth(new File(cmd.path), cmd.directory, cmd.align, cmd.ignoreWarnings, cmd.md5, cmd.ticketNumber)
             metadataValidationContext = validateAndImportResult.context
             if (validateAndImportResult.metadataFile != null) {
                 redirect(action: "details", id: validateAndImportResult.metadataFile.runSegment.id)
             }
         } else if (cmd.submit != null) {
-            metadataValidationContext = metadataImportService.validate(new File(cmd.path), cmd.directory)
+            metadataValidationContext = metadataImportService.validateWithAuth(new File(cmd.path), cmd.directory)
         }
         return [
             directoryStructures: metadataImportService.getSupportedDirectoryStructures(),
@@ -101,6 +101,33 @@ class MetadataImportController {
         }
 
         render dataToRender as JSON
+    }
+
+    def autoImport() {
+        render text: doAutoImport(params.ticketNumber, params.ilseNumbers), contentType: "text/plain"
+    }
+
+    StringBuilder doAutoImport(String otrsTicketNumber, String ilseNumbers) {
+        StringBuilder text = new StringBuilder()
+        try {
+            Collection<ValidateAndImportResult> results =
+                    metadataImportService.validateAndImportMultiple(otrsTicketNumber, ilseNumbers)
+            text.append('Automatic import succeeded :-)')
+            results.each {
+                text.append("\n\n${it.context.metadataFile}:\n")
+                text.append(g.createLink(action: 'details', id: it.metadataFile.runSegment.id, absolute: 'true'))
+            }
+        } catch (MultiImportFailedException e) {
+            if (e.failedValidations.size() == 1) {
+                text.append('This metadata file failed validation:')
+            } else {
+                text.append('These metadata files failed validation:')
+            }
+            e.failedValidations.each {
+                text.append("\n${it.metadataFile}")
+            }
+        }
+        return text
     }
 }
 

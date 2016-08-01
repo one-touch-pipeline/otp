@@ -19,7 +19,7 @@ class LsdfFilesService {
     ExecutionService executionService
     CreateClusterScriptService createClusterScriptService
 
-    static List<String> midtermStorageMountPoint = [
+    static List<String> midtermStorageMountPoint = [  // the first entry shall be the canonical one
             "STORAGE_ROOT/midterm/",
             "STORAGE_ROOTSEQUENCING_INBOX/",
             "STORAGE_ROOT/midterm/",

@@ -300,6 +300,7 @@ grails.plugin.springsecurity.controllerAnnotations.staticRules = [
     "/images/**":            ["permitAll"],
     "/js/**":                ["permitAll"],
     "/igvSessionFiles/**":   ["permitAll"],
+    "/metadataImport/autoImport": ["permitAll"],
     "/console/**":           ['ROLE_ADMIN'],
     "/plugins/console*/**":  ['ROLE_ADMIN'],
     "/plugins/**":           ['denyAll'],
