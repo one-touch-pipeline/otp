@@ -38,10 +38,7 @@ eventCompileStart = {
 
     def proc = "git rev-parse --short HEAD".execute()
     proc.waitFor()
-    ant.mkdir(dir: "grails-app/views/templates/")
-    FileOutputStream out = new FileOutputStream("grails-app/views/templates/_version.gsp", false)
-    out << proc.in.text
-    out << " ("
+    String revision = proc.in.text.trim()
     // get the branch name
     // first check for an environment variable
     // the GIT_BRANCH variable is available in Jenkins
@@ -58,8 +55,13 @@ eventCompileStart = {
     if (branchName.startsWith("origin/")) {
         branchName = branchName.substring(7)
     }
-    out << branchName
-    out << ")"
+    if (branchName.startsWith("production/")) {
+        branchName = "Version ${branchName.substring(11)}"
+    } else {
+        branchName = "Branch ${branchName}"
+    }
+    ant.mkdir(dir: "grails-app/views/templates/")
+    new File("grails-app/views/templates/_version.gsp").text = "${branchName} (${revision})"
 }
 
 eventCompileEnd = {

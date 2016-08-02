@@ -132,4 +132,23 @@ class OtpTagLib {
                 return "/templates/editorSwitch"
         }
     }
+
+    def modal = { attrs, body ->
+        out << "<div id='${attrs.modalId}' class='modal fade' role='dialog'>"
+        out << "<div class='modal-dialog'>"
+        out << "<div class='modal-content'>"
+        out << "<div class='modal-header'>"
+        out << "<button type='button' class='close' data-dismiss='modal'>&times;</button>"
+        out << "<h4 class='modal-title'>${attrs.title}</h4>"
+        out << "</div>"
+        out << "<div class='modal-body'>"
+        out << body.call()
+        out << "</div>"
+        out << "<div class='modal-footer'>"
+        out << "<button type='button' class='btn btn-primary' data-dismiss='modal'>Close</button>"
+        out << "</div>"
+        out << "</div>"
+        out << "</div>"
+        out << "</div>"
+    }
 }

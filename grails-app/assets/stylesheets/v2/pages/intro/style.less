@@ -1,0 +1,315 @@
+@import "../../definitions";
+
+/*******************
+Layout
+********************/
+.mainpage {
+  border-radius: 50px 0 0 0;
+  margin-top: 10px;
+}
+
+.wrapper {
+  padding-top: 50px;
+  margin-bottom: 5px;
+  background: @white;
+  box-shadow: 5px 5px 15px @almostblack;
+}
+
+/*******************
+Login
+********************/
+.login {
+  background-color: @lightgrey;
+}
+
+#login-form {
+  margin: 20px 0;
+  background-color: @lightgrey;
+  padding-top: 20px;
+  padding-bottom: 15px;
+  .form-control {
+    border-radius: 0;
+  }
+  .form-control:focus {
+    color: @orange;
+    border-color: @orange;
+  }
+}
+
+.login-btn {
+  float: right;
+}
+
+.register-btn {
+  float: right;
+  padding: 8px 10px 0 0;
+}
+
+.input-group-addon {
+  border-radius: 0;
+}
+
+.input-group {
+  margin: 10px 0;
+}
+
+.navbar-form {
+  .input-group {
+    display: table;
+  }
+}
+
+/*******************
+Header
+********************/
+.slogan {
+  padding-top: 85px;
+  float: left;
+}
+
+.logo-container {
+  width: 375px;
+}
+
+
+.logo {
+  display: block;
+  float: left;
+  padding: 0 15px 5px 0;
+}
+
+.logo-img {
+  width: 200px;
+  float: left;
+}
+
+/*******************
+News
+********************/
+.news-container {
+  margin-bottom: 10px;
+}
+
+.news-box {
+  background-color: @darkgrey;
+  padding: 15px;
+  a {
+    padding: 5px 15px 0 15px;
+    font-weight: 300;
+  }
+}
+
+.news-text {
+  font-size: 12px;
+  color: @white;
+  padding: 5px 15px 0 15px;
+}
+
+.date {
+  font-size: 12px;
+  color: @white;
+  font-weight: 700;
+  padding: 5px 0 0 15px;
+}
+
+/*******************
+Statistics
+********************/
+.statistics {
+  background-color: @lightgrey;
+  padding: 15px;
+  margin-bottom: 10px;
+}
+
+.projects {
+  color: @blue;
+  font-weight: 900;
+  font-size: 16px;
+}
+
+.highlight {
+  color: @orange;
+  font-weight: 900;
+  font-size: 20px;
+  padding-left: 5px;
+}
+
+.chart {
+  background-color: @lightgrey;
+  width: 100%;
+  padding: 15px;
+  margin-bottom: 10px;
+  canvas {
+    margin: auto;
+  }
+  .headline {
+    color: @blue;
+    font-weight: 900;
+    font-size: 16px;
+    height: 50px;
+  }
+}
+
+.pie-chart {
+  padding-left: 0;
+}
+
+/*******************
+Partner
+********************/
+#partner {
+  img {
+    width: auto;
+    max-height: 120px;
+    display: inline;
+  }
+  ul {
+    margin: 0 10px;
+    padding: 0;
+    list-style-type: none;
+  }
+  .otp-partner {
+    padding: 0;
+    margin-bottom: 20px;
+  }
+  li {
+    line-height: 5;
+  }
+}
+
+/*******************
+Footer links
+********************/
+.copyright {
+  color: @blue;
+}
+
+.footer-navi {
+  font-weight: 900;
+  li {
+    display: inline-block;
+    &:after {
+      content: " |";
+      font-weight: 900;
+      margin: 0 5px 0 5px;
+      color: @gray;
+    }
+  }
+  ul {
+    margin: 0;
+    padding: 0;
+  }
+  a {
+    color: @gray;
+    &:hover {
+      color: @darkgrey;
+    }
+  }
+}
+
+.copyright-claim {
+  font-weight: 900;
+  li {
+    display: inline-block;
+  }
+  ul {
+    padding: 0;
+  }
+  a {
+    color: @gray;
+  }
+  img {
+    padding-top: 5px;
+  }
+}
+
+#prefooter {
+  margin: 0 15px;
+  li {
+    line-height: 40px;
+  }
+  ul li .img-responsive {
+    padding-left: 10px;
+  }
+  .footer-nav {
+    padding: 0;
+    margin-top: 20px;
+  }
+}
+
+/*******************
+Responsivity
+********************/
+@media (max-width: 1199px) {
+  .container {
+    width: 100%;
+  }
+
+  #partner img {
+    max-height: 90px;
+  }
+}
+
+@media (max-width: 991px) {
+  .pie-chart {
+    padding-right: 30px;
+    margin: 0 15px;
+  }
+
+  .footer-nav {
+    font-size: 12px;
+  }
+
+  #partner img {
+    max-height: 70px;
+  }
+
+  .main {
+    font-size: 12px;
+  }
+  .chart .headline, .projects {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 793px) {
+  .logo {
+    margin-bottom: 20px;
+  }
+}
+
+@media (max-width: 767px) {
+  .logo-container {
+    margin: auto;
+  }
+
+  #login-form {
+    margin: 0;
+    padding-bottom: 45px;
+  }
+
+  .chart .headline {
+    height: 70px;
+  }
+
+  .container {
+    padding-right: 0;
+    padding-left: 0;
+  }
+
+  #partner img {
+    max-height: 65px;
+  }
+}
+
+@media (min-width: 500px) and (max-width: 767px) {
+  .login {
+    margin: auto;
+    width: 455px;
+  }
+}
+
+// logo is shown to big in Seamonkey otherwise
+.logo img {
+  width: 100%
+}

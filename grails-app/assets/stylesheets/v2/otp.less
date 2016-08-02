@@ -1,0 +1,183 @@
+@import "definitions";
+
+/*******************
+Fonts
+********************/
+@font-face {
+  font-family: 'Asap';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Asap-Regular'), url('Asap-Regular.woff') format('woff');
+}
+@font-face {
+  font-family: 'Asap';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Asap-Bold'), url('Asap-Bold.woff') format('woff');
+}
+@font-face {
+  font-family: 'Asap';
+  font-style: italic;
+  font-weight: 400;
+  src: local('Asap-Italic'), url('Asap-Italic.woff') format('woff');
+}
+@font-face {
+  font-family: 'Asap';
+  font-style: italic;
+  font-weight: 700;
+  src: local('Asap-BoldItalic'), url('Asap-BoldItalic.woff') format('woff');
+}
+
+/*******************
+General
+********************/
+body {
+  font-family: 'Asap', sans-serif;
+  margin: 0;
+  background: #2c353b;
+  background: -moz-linear-gradient(top, #2c353b 0%, #52636f 100%); /* FF3.6-15 */
+  background: -webkit-linear-gradient(top, #2c353b 0%,#52636f 100%); /* Chrome10-25,Safari5.1-6 */
+  background: linear-gradient(to bottom, #2c353b 0%,#52636f 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#2c353b', endColorstr='#52636f',GradientType=0 ); /* IE6-9 */
+}
+
+* {
+  text-decoration: none;
+}
+
+a {
+  color: @orange;
+  cursor: pointer;
+  &:hover, &:focus {
+    color: @darkorange;
+    text-decoration: none !important;
+    outline: none;
+  }
+  &:active {
+    color: @orange;
+  }
+}
+
+hr {
+  background-color: @lightblue;
+  height: 1px;
+  margin-top: -5px;
+  width: 100%;
+}
+
+h1 {
+  font-size: 24px;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: @middledarkgray;
+  margin: 0;
+}
+
+h2 {
+  font-size: 24px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: @gray;
+  margin-top: 25px;
+  margin-bottom: 5px;
+  a {
+    text-transform: none;
+    font-size: 12px;
+    margin-top: 10px;
+  }
+}
+
+h3 {
+  color: @orange;
+  text-transform: uppercase;
+  font-size: 14px;
+  padding: 0 15px 0 15px;
+  margin: 0;
+  font-weight: 900;
+}
+
+li:last-child::after {
+  content: " " !important;
+}
+
+.container {
+  padding-right: 75px;
+  padding-left: 75px;
+}
+
+.alert {
+  margin-top: -25px;
+}
+
+.row {
+  margin: 0;
+}
+
+.btn {
+  background-color: @orange;
+  border-color: @darkorange;
+  border-radius: 0;
+  &:hover, &:focus {
+    background-color: @darkorange;
+    border-color: @darkestorange;
+  }
+}
+
+.environmentName {
+  color: @darkorange;
+}
+
+/*******************
+Footer
+********************/
+#footer {
+  .wrapper {
+    padding-top: 0;
+    border-radius: 0;
+  }
+  ul {
+    margin: 5px 0;
+    padding: 0;
+  }
+}
+
+.footer-copyright {
+  text-align: center;
+  li {
+    display: inline;
+    font-size: 11px;
+    font-weight: 900;
+    &:after {
+      content: " |";
+      font-size: 12px;
+      margin: 0 5px 0 5px;
+      color: @black;
+    }
+  }
+}
+
+/*******************
+Scroll to top
+********************/
+.scroll-to-top {
+  background-color: @darkorange;
+  display: none;
+  font-size: 24px;
+  font-weight: bold;
+  height: 35px;
+  width: 35px;
+  line-height: 40px;
+  position: fixed;
+  right: 15px;
+  bottom: 15px;
+  text-align: center;
+}
+
+/*******************
+Responsivity
+********************/
+@media (max-width: 500px) {
+  .hide-on-xs {
+    display: none;
+  }
+}

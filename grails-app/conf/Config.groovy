@@ -295,6 +295,7 @@ grails.plugin.springsecurity.controllerAnnotations.staticRules = [
     "/login/**":             ['IS_AUTHENTICATED_ANONYMOUSLY'],
     "/logout/**":            ['IS_AUTHENTICATED_ANONYMOUSLY'],
     "/info/**":              ['permitAll'],
+    "/intro/**":             ['permitAll'],
     "/":                     ['permitAll'],
     "/metadataImport/autoImport": ["permitAll"],
     "/console/**":           ['ROLE_ADMIN'],
@@ -314,7 +315,12 @@ grails.plugin.springsecurity.roleHierarchy = '''
 '''
 
 grails.plugin.springsecurity.useSwitchUserFilter = true
+/* TODO: OTP-2282 uncomment when switching to the new layout
+grails.plugin.springsecurity.auth.loginFormUrl = "/?login=required"*/
 grails.plugin.springsecurity.successHandler.defaultTargetUrl = '/home/index'
+/*grails.plugin.springsecurity.failureHandler.defaultFailureUrl = "/?login=failed"
+grails.plugin.springsecurity.adh.errorPage = null
+grails.plugin.springsecurity.apf.storeLastUsername = true*/
 
 // exclude unused plugins
 if (pluginsToExclude) {

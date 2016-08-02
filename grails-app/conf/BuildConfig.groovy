@@ -82,11 +82,11 @@ grails.project.dependency.resolution = {
         // jQuery
         runtime ":jquery:1.11.1"
         runtime ":jquery-ui:1.10.4"
+        runtime ':twitter-bootstrap:3.3.5'
 
         compile ":asset-pipeline:2.9.1"
         provided ":less-asset-pipeline:2.3.0"
         compile ":i18n-asset-pipeline:1.0.5"
-
 
         test ":build-test-data:2.4.0" //http://grails.org/plugin/build-test-data
         if ((Environment.getCurrent().getName() == "WORKFLOW_TEST")) {

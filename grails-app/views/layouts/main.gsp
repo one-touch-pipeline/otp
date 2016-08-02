@@ -124,7 +124,7 @@
         </div>
         <div id="infoBox"></div>
         <g:layoutBody/>
-        <div class="footer" role="contentinfo"><a href="http://ibios.dkfz.de/tbi/index.php/data-management/software/otp" target="_blank">OneTouchPipeline</a>  | <a href="http://ibios.dkfz.de/tbi/index.php" target="_blank">Eils Labs</a> | TBI DKFZ | Build: <g:render template="/templates/version"/></div>
+        <div class="footer" role="contentinfo"><a href="http://ibios.dkfz.de/tbi/index.php/data-management/software/otp" target="_blank">OneTouchPipeline</a>  | <a href="http://ibios.dkfz.de/tbi/index.php" target="_blank">Eils Labs</a> | TBI DKFZ | <g:render template="/templates/version"/></div>
         <div id="spinner" class="spinner" style="display:none;"><g:message code="spinner.alt" default="Loading&hellip;"/></div>
     </div>
     <asset:deferredScripts/>
