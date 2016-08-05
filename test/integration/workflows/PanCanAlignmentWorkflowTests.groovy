@@ -1,18 +1,12 @@
 package workflows
 
-import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
-import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
-import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.job.jobs.roddyAlignment.PanCanStartJob
-import de.dkfz.tbi.otp.job.processing.Process
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import org.junit.Ignore
-import org.junit.Test
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.job.jobs.roddyAlignment.*
+import de.dkfz.tbi.otp.job.processing.*
+import org.junit.*
+import org.springframework.beans.factory.annotation.*
 
-import org.springframework.beans.factory.annotation.Autowired
-
-import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
-
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 /**
  * test for PanCanAlignment workflow
@@ -21,6 +15,7 @@ abstract class PanCanAlignmentWorkflowTests extends AbstractPanCanAlignmentWorkf
 
     @Autowired
     PanCanStartJob panCanStartJob
+
 
     @Test
     void testNoProcessableObjectFound() {
@@ -86,28 +81,6 @@ abstract class PanCanAlignmentWorkflowTests extends AbstractPanCanAlignmentWorkf
         alignLanesOnly_NoBaseBamExist_TwoLanes()
     }
 
-    //helper
-    protected void alignLanesOnly_NoBaseBamExist_TwoLanes() {
-
-        // prepare
-        SeqTrack firstSeqTrack = createSeqTrack("readGroup1")
-        SeqTrack secondSeqTrack = createSeqTrack("readGroup2")
-
-        // run
-        execute()
-
-        // check
-        checkWorkPackageState()
-
-        RoddyBamFile bamFile = exactlyOneElement(RoddyBamFile.findAll())
-        checkLatestBamFileState(bamFile, null, [seqTracks: [firstSeqTrack, secondSeqTrack], identifier: 0L,])
-        assertBamFileFileSystemPropertiesSet(bamFile)
-
-        checkFileSystemState(bamFile)
-
-        checkQC(bamFile)
-    }
-
     @Ignore('OTP-2192')
     @Test
     void testAlignBaseBamAndNewLanes_allFine() {
@@ -155,28 +128,5 @@ abstract class PanCanAlignmentWorkflowTests extends AbstractPanCanAlignmentWorkf
         checkFirstBamFileState(bamFiles[1], true, [identifier: 1])
         assertBamFileFileSystemPropertiesSet(bamFiles[1])
         checkFileSystemState(bamFiles[1])
-    }
-
-
-    private executeAndVerify_AlignLanesOnly_AllFine() {
-        // run
-        execute()
-
-        // check
-        checkWorkPackageState()
-
-        RoddyBamFile bamFile = exactlyOneElement(RoddyBamFile.findAll())
-        checkFirstBamFileState(bamFile, true)
-        assertBamFileFileSystemPropertiesSet(bamFile)
-
-        checkFileSystemState(bamFile)
-
-        checkQC(bamFile)
-    }
-
-    private fastTrackSetup() {
-        SeqTrack seqTrack = createSeqTrack("readGroup1")
-        seqTrack.project.processingPriority = ProcessingPriority.FAST_TRACK_PRIORITY
-        assert seqTrack.project.save(flush: true)
     }
 }

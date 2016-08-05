@@ -1,16 +1,11 @@
 package workflows
 
-import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
-import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.ngsdata.SeqTypeNames
-import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.otp.utils.HelperUtils
-import org.junit.Ignore
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.*
+import org.junit.*
 
-import static de.dkfz.tbi.TestCase.shouldFail
-import org.junit.Test
+import static de.dkfz.tbi.TestCase.*
 
 /**
  * tests for AbstractRoddyJob using PanCanAlignmentWorkflow
@@ -103,7 +98,7 @@ class AbstractRoddyJobIntegrationTests extends AbstractPanCanAlignmentWorkflowTe
         // repair
 
         workPackage.refresh()
-        workPackage.statSizeFileName = CHROMOSOME_STAT_FILE_NAME
+        workPackage.statSizeFileName = getChromosomeStatFileName()
         workPackage.save(flush: true, failOnError: true)
 
         // run

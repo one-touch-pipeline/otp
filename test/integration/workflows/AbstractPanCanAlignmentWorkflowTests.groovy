@@ -14,6 +14,7 @@ import org.joda.time.*
 import org.junit.*
 import org.junit.rules.*
 
+import static de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 import static de.dkfz.tbi.otp.utils.ProcessHelperService.*
 
@@ -28,8 +29,14 @@ import static de.dkfz.tbi.otp.utils.ProcessHelperService.*
 
 abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
 
-    final static String REG_GEN_FILE_NAME_PREFIX = 'hs37d5'
-    protected final static String CHROMOSOME_STAT_FILE_NAME = 'hs37d5.fa.chrLenOnlyACGT_realChromosomes.tab'
+    public String getRefGenFileNamePrefix() {
+        return 'hs37d5'
+    }
+    protected String getChromosomeStatFileName() {
+        return 'hs37d5.fa.chrLenOnlyACGT_realChromosomes.tab'
+    }
+
+    protected String getCytosinePositionsIndex() {}
 
     // some text to be used to fill in files created on the fly
     protected final static String TEST_CONTENT = 'DummyContent'
@@ -112,15 +119,16 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
 
         createProjectConfig(workPackage)
 
-
-        BedFile bedFile = new BedFile(
-                referenceGenome: workPackage.referenceGenome,
-                libraryPreparationKit: workPackage.libraryPreparationKit,
-                fileName: "TruSeqExomeTargetedRegions_plain.bed",
-                targetSize: 62085295,
-                mergedTargetSize: 62085286,
-        )
-        assert bedFile.save(flush: true, failOnError: true)
+        if (SeqType.getExomePairedSeqType() == findSeqType()) {
+            BedFile bedFile = new BedFile(
+                    referenceGenome: workPackage.referenceGenome,
+                    libraryPreparationKit: workPackage.libraryPreparationKit,
+                    fileName: "TruSeqExomeTargetedRegions_plain.bed",
+                    targetSize: 62085295,
+                    mergedTargetSize: 62085286,
+            )
+            assert bedFile.save(flush: true, failOnError: true)
+        }
 
         //OtherUnixUser user has very limited permissions, it must be checked in the tests
         //that roddy has enough permissions to work and does not try to damage other files
@@ -170,7 +178,8 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
         )
 
         ReferenceGenome referenceGenome = ReferenceGenome.build(
-                fileNamePrefix: REG_GEN_FILE_NAME_PREFIX,
+                fileNamePrefix: refGenFileNamePrefix,
+                cytosinePositionsIndex: cytosinePositionsIndex,
         )
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(chromosomeNamesFile)
         chromosomeNamesFile.eachLine { String chromosomeName ->
@@ -182,18 +191,21 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
             )
         }
 
-        LibraryPreparationKit kit = new LibraryPreparationKit(
-                name: "~* xX liBrArYprEPaRaTioNkiT Xx *~",
-                shortDisplayName: "~* xX lPk Xx *~",
-        )
-        assert kit.save(flush: true, failOnError: true)
+        LibraryPreparationKit kit = null
+        if (!seqType.isWgbs()) {
+            kit = new LibraryPreparationKit(
+                    name: "~* xX liBrArYprEPaRaTioNkiT Xx *~",
+                    shortDisplayName: "~* xX lPk Xx *~",
+            )
+            assert kit.save(flush: true, failOnError: true)
+        }
 
         MergingWorkPackage workPackage = MergingWorkPackage.build(
                 pipeline: pipeline,
                 seqType: seqType,
                 referenceGenome: referenceGenome,
                 needsProcessing: false,
-                statSizeFileName: CHROMOSOME_STAT_FILE_NAME,
+                statSizeFileName: getChromosomeStatFileName(),
                 libraryPreparationKit: kit,
         )
 
@@ -224,10 +236,14 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
         assert projectConfigFile.text.contains("${workPackage.pipeline.name}_${workPackage.seqType.roddyName}_${pluginVersion}_${DomainFactory.TEST_CONFIG_VERSION}")
     }
 
-    SeqTrack createSeqTrack(String readGroupNum) {
+    SeqTrack createSeqTrack(String readGroupNum, String library = null) {
         MergingWorkPackage workPackage = exactlyOneElement(MergingWorkPackage.findAll())
 
-        SeqTrack seqTrack = DomainFactory.createSeqTrackWithDataFiles(workPackage, [laneId: readGroupNum])
+        Map seqTrackProperties = [laneId: readGroupNum]
+        if (library) {
+            seqTrackProperties += [libraryName: "lib${library}", normalizedLibraryName: library]
+        }
+        SeqTrack seqTrack = DomainFactory.createSeqTrackWithDataFiles(workPackage, seqTrackProperties)
 
         DataFile.findAllBySeqTrack(seqTrack).eachWithIndex { DataFile dataFile, int index ->
             dataFile.vbpFileName = dataFile.fileName = "fastq_${seqTrack.individual.pid}_${seqTrack.sampleType.name}_${seqTrack.laneId}_${index + 1}.fastq.gz"
@@ -397,6 +413,12 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
         assert bamFile.coverageWithN == abstractBamFileService.calculateCoverageWithN(bamFile)
 
         assert bamFile.qualityAssessmentStatus == AbstractBamFile.QaProcessingStatus.FINISHED
+
+        if (bamFile.seqType.isWgbs() && bamFile.hasMultipleLibraries()) {
+            List<RoddyLibraryQa> libraryQas = RoddyLibraryQa.findAllByQualityAssessmentMergedPass(qaPass)
+            assert libraryQas
+            assert libraryQas*.libraryDirectoryName as Set == bamFile.seqTracks*.libraryDirectoryName as Set
+        }
     }
 
     void checkAllAfterRoddyPbsJobsRestartAndSuccessfulExecution_alignBaseBamAndNewLanes() {
@@ -497,15 +519,29 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
                 bamFile.workDirectory,
         ]
 
-        List<File> rootFileLinks = [
+        List<File> rootLinks = [
                 bamFile.finalBamFile,
                 bamFile.finalBaiFile,
                 bamFile.finalMd5sumFile,
+                bamFile.finalMergedQADirectory,
         ]
+        if (bamFile.seqType.isWgbs()) {
+            rootDirs += [
+                    bamFile.finalMethylationDirectory,
+            ]
+            rootLinks += [
+                    bamFile.finalMetadataTableFile,
+                    bamFile.finalMergedMethylationDirectory,
+            ]
+            if (bamFile.hasMultipleLibraries()) {
+                rootLinks += bamFile.finalLibraryMethylationDirectories.values() +
+                        bamFile.finalLibraryQADirectories.values()
+            }
+        }
         if (bamFile.baseBamFile && !bamFile.baseBamFile.isOldStructureUsed()) {
             rootDirs << bamFile.baseBamFile.workDirectory
         }
-        TestCase.checkDirectoryContentHelper(bamFile.baseDirectory, rootDirs, [], rootFileLinks)
+        TestCase.checkDirectoryContentHelper(bamFile.baseDirectory, rootDirs, [], rootLinks)
 
         //check work directories
         checkWorkDirFileSystemState(bamFile)
@@ -517,17 +553,21 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
         assert bamFile.md5sum == bamFile.finalMd5sumFile.text.replaceAll("\n", "")
 
         // content of the final dir: qa
-        List<File> qaDirs = [
-                bamFile.finalSingleLaneQADirectories.values(),
-                bamFile.finalMergedQADirectory,
-        ]
+        List<File> qaDirs = bamFile.finalSingleLaneQADirectories.values() + [bamFile.finalMergedQADirectory]
         if (bamFile.baseBamFile) {
-            qaDirs << bamFile.baseBamFile.finalSingleLaneQADirectories.values()
+            qaDirs.addAll(bamFile.baseBamFile.finalSingleLaneQADirectories.values())
         }
-        TestCase.checkDirectoryContentHelper(bamFile.finalQADirectory, [], [], qaDirs.flatten())
+        if (bamFile.seqType.isWgbs() && bamFile.hasMultipleLibraries()) {
+            qaDirs.addAll(bamFile.finalLibraryQADirectories.values())
+        }
+        TestCase.checkDirectoryContentHelper(bamFile.finalQADirectory, [], [], qaDirs)
 
         // qa only for merged and one for each read group
-        assert bamFile.numberOfMergedLanes + 1 == bamFile.finalQADirectory.list().length
+        int numberOfFilesInFinalQaDir = bamFile.numberOfMergedLanes + 1
+        if (bamFile.seqType.isWgbs() && bamFile.hasMultipleLibraries()) {
+            numberOfFilesInFinalQaDir += bamFile.seqTracks*.libraryDirectoryName.unique().size()
+        }
+        assert numberOfFilesInFinalQaDir == bamFile.finalQADirectory.list().length
 
         // all roddyExecutionDirs have been linked
         List<File> expectedRoddyExecutionDirs = bamFile.finalExecutionDirectories
@@ -550,9 +590,10 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
 
     void checkWorkDirFileSystemState(RoddyBamFile bamFile, boolean isBaseBamFile = false) {
         // content of the work dir: root
-        List<File> rootDir = [
+        List<File> rootDirs = [
                 bamFile.workQADirectory,
                 bamFile.workExecutionStoreDirectory,
+                bamFile.workMergedQADirectory,
         ]
         List<File> rootFiles
         if (isBaseBamFile) {
@@ -566,12 +607,28 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
                     bamFile.workMd5sumFile,
             ]
         }
-        TestCase.checkDirectoryContentHelper(bamFile.workDirectory, rootDir, rootFiles)
+        if (bamFile.seqType.isWgbs()) {
+            rootDirs += [
+                    bamFile.workMethylationDirectory,
+                    bamFile.workMergedMethylationDirectory,
+            ]
+            rootFiles.add(bamFile.workMetadataTableFile)
+            if (bamFile.hasMultipleLibraries()) {
+                rootDirs += bamFile.workLibraryMethylationDirectories.values() +
+                    bamFile.workLibraryQADirectories.values()
+            }
+        }
+        TestCase.checkDirectoryContentHelper(bamFile.workDirectory, rootDirs, rootFiles)
 
         // content of the work dir: qa
         List<File> qaDirs = bamFile.workSingleLaneQADirectories.values() as List
         List<File> qaJson = bamFile.workSingleLaneQAJsonFiles.values() as List
         qaDirs << bamFile.workMergedQADirectory
+        if (bamFile.seqType.isWgbs() && bamFile.hasMultipleLibraries()) {
+            qaDirs.addAll(bamFile.workLibraryQADirectories.values())
+            qaJson.addAll(bamFile.workLibraryQAJsonFiles.values())
+        }
+
         qaJson << bamFile.workMergedQAJsonFile
         TestCase.checkDirectoryContentHelper(bamFile.workQADirectory, qaDirs)
         qaJson.each {
@@ -603,7 +660,7 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
     String getPluginVersion(File projectConfig) {
         def configuration = new XmlParser().parseText(projectConfig.text)
         String nameValue = configuration.@name
-        return nameValue.replaceAll("${Pipeline.Name.PANCAN_ALIGNMENT}_", "").replaceAll("_${DomainFactory.TEST_CONFIG_VERSION}", '')
+        return nameValue.replaceAll("${Pipeline.Name.PANCAN_ALIGNMENT}_", "").replaceAll("${findSeqType().roddyName}_", "").replaceAll("_${DomainFactory.TEST_CONFIG_VERSION}", "")
     }
 
     void setPluginVersion(String pluginVersion) {
@@ -619,5 +676,54 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
         config.configFilePath = sourceProjectConfig.absolutePath
         config.save(flush: true, failOnError: true)
         setPluginVersion(getPluginVersion(sourceProjectConfig))
+    }
+
+    void executeAndVerify_AlignLanesOnly_AllFine() {
+        // run
+        execute()
+
+        // check
+        checkWorkPackageState()
+
+        RoddyBamFile bamFile = exactlyOneElement(RoddyBamFile.findAll())
+        checkFirstBamFileState(bamFile, true)
+        assertBamFileFileSystemPropertiesSet(bamFile)
+
+        checkFileSystemState(bamFile)
+
+        checkQC(bamFile)
+    }
+
+    void fastTrackSetup() {
+        SeqTrack seqTrack = createSeqTrack("readGroup1")
+        seqTrack.project.processingPriority = ProcessingPriority.FAST_TRACK_PRIORITY
+        assert seqTrack.project.save(flush: true)
+    }
+
+    //helper
+    protected void alignLanesOnly_NoBaseBamExist_TwoLanes(boolean setLibrary = false) {
+        // prepare
+        SeqTrack firstSeqTrack, secondSeqTrack
+        if (setLibrary) {
+            firstSeqTrack = createSeqTrack("readGroup1", "1")
+            secondSeqTrack = createSeqTrack("readGroup2", "5")
+        } else {
+            firstSeqTrack = createSeqTrack("readGroup1")
+            secondSeqTrack = createSeqTrack("readGroup2")
+        }
+
+        // run
+        execute()
+
+        // check
+        checkWorkPackageState()
+
+        RoddyBamFile bamFile = exactlyOneElement(RoddyBamFile.findAll())
+        checkLatestBamFileState(bamFile, null, [seqTracks: [firstSeqTrack, secondSeqTrack], identifier: 0L,])
+        assertBamFileFileSystemPropertiesSet(bamFile)
+
+        checkFileSystemState(bamFile)
+
+        checkQC(bamFile)
     }
 }

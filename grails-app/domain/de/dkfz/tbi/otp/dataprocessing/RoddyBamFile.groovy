@@ -145,6 +145,10 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
         )
     }
 
+    boolean hasMultipleLibraries() {
+        this.seqTracks*.libraryName.unique().size() > 1
+    }
+
     @Override
     AbstractQualityAssessment getOverallQualityAssessment() {
         return CollectionUtils.exactlyOneElement(RoddyMergedBamQa.createCriteria().list {

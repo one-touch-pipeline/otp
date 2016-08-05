@@ -1,14 +1,11 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeService
-import de.dkfz.tbi.otp.ngsdata.SavingException
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.ngsdata.SeqTypeNames
+import de.dkfz.tbi.otp.ngsdata.*
+import grails.converters.*
+import org.codehaus.groovy.grails.web.json.*
 
-import org.codehaus.groovy.grails.web.json.JSONObject
+import static de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification.*
 
-import grails.converters.JSON
 
 class AbstractQualityAssessmentService {
 
@@ -80,9 +77,10 @@ class AbstractQualityAssessmentService {
         if (isExome && qualityControlTargetExtractJsonFile != null) {
             qualityControlTargetExtractJson = JSON.parse(qualityControlTargetExtractJsonFile().text)
         }
+        List<String> chromosomeNames = ReferenceGenomeEntry.findAllByReferenceGenomeAndClassificationInList(roddyBamFile.referenceGenome, [CONTIG, UNDEFINED])*.name
         Iterator chromosomes = qualityControlJson.keys()
         Collection<String> allChromosomeNames = []
-        chromosomes.each { String chromosome ->
+        chromosomes.findAll { !chromosomeNames.contains(it) } .each { String chromosome ->
             allChromosomeNames.add(chromosome)
             Map chromosomeValues = qualityControlJson.get(chromosome)
             if (isExome) {

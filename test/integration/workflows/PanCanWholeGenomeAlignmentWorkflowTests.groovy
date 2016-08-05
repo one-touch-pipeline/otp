@@ -1,10 +1,8 @@
 package workflows
 
-import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.ngsdata.SeqTypeNames
-import de.dkfz.tbi.otp.utils.CollectionUtils
-import org.junit.Ignore
-
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.*
+import org.junit.*
 
 @Ignore
 class PanCanWholeGenomeAlignmentWorkflowTests extends PanCanAlignmentWorkflowTests {

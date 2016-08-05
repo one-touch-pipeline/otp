@@ -12,6 +12,7 @@ import org.junit.runners.model.MultipleFailureException
 import org.springframework.validation.Errors
 import org.springframework.validation.FieldError
 
+import java.nio.file.Files
 import java.util.concurrent.Callable
 
 /**
@@ -181,10 +182,10 @@ class TestCase {
             assert it.exists() && it.isFile() && it.canRead() && it.size() > 0
         }
         expectedLinks.each {
-            assert it.exists() && it.canRead()
+            assert it.exists() && Files.isSymbolicLink(it.toPath()) && it.canRead()
         }
 
-        Set<File> expectedEntries = [expectedDirs, expectedFiles, expectedLinks].flatten() as Set
+        Set<File> expectedEntries = (expectedDirs + expectedFiles + expectedLinks).findAll {it.parentFile == baseDir} as Set
         Set<File> foundEntries = baseDir.listFiles() as Set
         assert expectedEntries == foundEntries
     }
