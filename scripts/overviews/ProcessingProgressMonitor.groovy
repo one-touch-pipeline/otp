@@ -732,19 +732,25 @@ def showSeqTracks = {Collection<SeqTrack> seqTracks ->
 
     List<DataFile> datafiles = DataFile.findAllBySeqTrackInList(seqTracks)
     if (datafiles) {
-        Map <Collection<RunSegment.FilesStatus>, Collection<DataFile>> dataFilesByInProgress = datafiles.groupBy{
-            RunSegment.FilesStatus.FILES_CORRECT != it.runSegment.filesStatus
+        output << "\nDataInstallationWorkflow: "
+        Map <Collection<RunSegment.FilesStatus>, Collection<DataFile>> dataFilesGroupedByStatus = datafiles.groupBy {
+            it.runSegment.filesStatus
         }
-        if (dataFilesByInProgress[true]) {
-            output << "\nDataInstallationWorkflow: "
-            output << "${INDENT}${dataFilesByInProgress[true].size()} Lanes are still in data installation workflow. They will be ignored"
-            showRunning('DataInstallationWorkflow', dataFilesByInProgress[true]*.run.unique(), {it}, {it})
-            seqTracks = dataFilesByInProgress[false]*.seqTrack?.unique()
-            allFinished=false
-            if (!seqTracks){
-                output << "No lanes left"
-                return
-            }
+
+        allFinished &= dataFilesGroupedByStatus.keySet() == [RunSegment.FilesStatus.FILES_CORRECT] as Set
+
+        Collection<DataFile> runningDataFiles = dataFilesGroupedByStatus.findAll {key, value ->
+            RunSegment.PROCESSING_FILE_STATUSES.contains(key)
+        }.values().flatten()
+
+        showWaiting(dataFilesGroupedByStatus[RunSegment.FilesStatus.NEEDS_INSTALLATION]*.run?.unique(), {it})
+        showRunning('DataInstallationWorkflow', runningDataFiles*.run?.unique(), {it}, {it})
+        showFinished(dataFilesGroupedByStatus[RunSegment.FilesStatus.FILES_CORRECT]*.run?.unique(), {it})
+
+        seqTracks = dataFilesGroupedByStatus[RunSegment.FilesStatus.FILES_CORRECT]*.seqTrack?.unique()
+        if (!seqTracks){
+            output << "No lanes left"
+            return
         }
         datafiles = null
     }
