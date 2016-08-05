@@ -1,19 +1,12 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
-import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
-import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
-import de.dkfz.tbi.otp.ngsdata.BedFileService
-import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
-import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeService
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.ngsdata.SeqTypeNames
-import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
-import org.springframework.beans.factory.annotation.Autowired
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.*
+import org.springframework.beans.factory.annotation.*
 
-import static de.dkfz.tbi.otp.ngsdata.LsdfFilesService.ensureFileIsReadableAndNotEmpty
+import static de.dkfz.tbi.otp.ngsdata.LsdfFilesService.*
 
 
 abstract class AbstractExecutePanCanJob extends AbstractRoddyJob {
@@ -60,8 +53,8 @@ abstract class AbstractExecutePanCanJob extends AbstractRoddyJob {
         assert chromosomeStatSizeFile : "Path to the chromosome stat size file is null"
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(chromosomeStatSizeFile)
 
-        return "--cvalues=\"INDEX_PREFIX:${referenceGenomeFastaFile}," +
-                "CHROM_SIZES_FILE:${chromosomeStatSizeFile}" +
+        return "--cvalues=\"INDEX_PREFIX:${referenceGenomeFastaFile}" +
+                ",CHROM_SIZES_FILE:${chromosomeStatSizeFile}" +
                 prepareAndReturnWorkflowSpecificCValues(roddyBamFile) +
                 "${(roddyBamFile.processingPriority >= ProcessingPriority.FAST_TRACK_PRIORITY) ? ",PBS_AccountName:FASTTRACK" : ""}" +
                 ",possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}\""

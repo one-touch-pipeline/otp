@@ -40,6 +40,7 @@ class AbstractQualityAssessmentServiceTests {
             setLengthWithoutN REFERENCE_GENOME_LENGTH
         }
         assert data.referenceGenome.save([flush: true])
+        DomainFactory.createPanCanAlignableSeqTypes()
     }
 
     @Test

@@ -95,7 +95,7 @@ class AbstractBamFileService {
     Double calculateCoverageWithoutN(AbstractBamFile bamFile) {
         assert bamFile : 'Parameter bamFile must not be null'
 
-        if ([SeqTypeNames.WHOLE_GENOME.seqTypeName, SeqTypeNames.EXOME.seqTypeName].contains(bamFile.seqType.name)) {
+        if (SeqType.getAllAlignableSeqTypes().contains(bamFile.seqType)) {
             calculateCoverage(bamFile, 'lengthWithoutN')
         } else {
             throw new RuntimeException("The 'without N' coverage calculation for seq Type ${bamFile.seqType.name} is not possible yet.")
@@ -106,7 +106,7 @@ class AbstractBamFileService {
     Double calculateCoverageWithN(AbstractBamFile bamFile) {
         assert bamFile : 'Parameter bamFile must not be null'
 
-        if (bamFile.seqType.name == SeqTypeNames.WHOLE_GENOME.seqTypeName) {
+        if (bamFile.seqType.name == SeqTypeNames.WHOLE_GENOME.seqTypeName || bamFile.seqType.isWgbs()) {
             calculateCoverage(bamFile, 'length')
         } else if (bamFile.seqType.name == SeqTypeNames.EXOME.seqTypeName) {
             //In case of Exome sequencing this value stays 'null' since there is no differentiation between 'with N' and 'without N'
@@ -123,7 +123,7 @@ class AbstractBamFileService {
         Long length
         Long basesMapped
 
-        if (bamFile.seqType.name == SeqTypeNames.WHOLE_GENOME.seqTypeName) {
+        if (bamFile.seqType.name == SeqTypeNames.WHOLE_GENOME.seqTypeName || bamFile.seqType.isWgbs()) {
             ReferenceGenome referenceGenome = bamFile.referenceGenome
             assert referenceGenome : "Unable to find a reference genome for the BAM file ${bamFile}"
 

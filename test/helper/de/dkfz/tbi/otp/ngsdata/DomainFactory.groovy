@@ -1020,30 +1020,30 @@ class DomainFactory {
         ] + myProps)
     }
 
-    static SeqType createSeqTypeLazy(SeqTypeNames seqTypeNames, String alias, String roddyName = '', String libraryLayout = SeqType.LIBRARYLAYOUT_PAIRED) {
+    static SeqType createSeqTypeLazy(SeqTypeNames seqTypeNames, String alias, String dirName, String roddyName = '', String libraryLayout = SeqType.LIBRARYLAYOUT_PAIRED) {
         createDomainObjectLazy(SeqType, [:], [
                 name: seqTypeNames.seqTypeName,
                 alias: alias,
                 roddyName: roddyName,
-                dirName: seqTypeNames.seqTypeName,
+                dirName: dirName,
                 libraryLayout: libraryLayout,
         ]).refresh()
     }
 
     static SeqType createWholeGenomeSeqType() {
-        createSeqTypeLazy(SeqTypeNames.WHOLE_GENOME, 'WGS', 'WGS')
+        createSeqTypeLazy(SeqTypeNames.WHOLE_GENOME, 'WGS', 'whole_genome_sequencing', 'WGS')
     }
 
     static SeqType createExomeSeqType() {
-        createSeqTypeLazy(SeqTypeNames.EXOME, 'EXOME', 'WES')
+        createSeqTypeLazy(SeqTypeNames.EXOME, 'EXOME', 'exon_sequencing', 'WES')
     }
 
     static SeqType createWholeGenomeBisulfiteSeqType() {
-        createSeqTypeLazy(SeqTypeNames.WHOLE_GENOME_BISULFITE, 'WGBS', 'WGBS')
+        createSeqTypeLazy(SeqTypeNames.WHOLE_GENOME_BISULFITE, 'WGBS', 'whole_genome_bisulfite_sequencing', 'WGBS')
     }
 
     static SeqType createWholeGenomeBisulfiteTagmentationSeqType() {
-        createSeqTypeLazy(SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION, 'WGBS_TAG', 'WGBSTAG')
+        createSeqTypeLazy(SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION, 'WGBS_TAG', 'whole_genome_bisulfite_tagmentation_sequencing', 'WGBSTAG')
     }
 
     static List<SeqType> createAlignableSeqTypes() {

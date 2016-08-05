@@ -224,6 +224,10 @@ class ExecuteWgbsAlignmentJobTests {
 
     @Test
     void testWorkflowSpecificValidation_MethylationLibraryDirDoesNotExist_ShouldFail() {
+        roddyBamFile.seqTracks.add(DomainFactory.createSeqTrackWithDataFiles(roddyBamFile.workPackage, [libraryName: "lib1", normalizedLibraryName: "1"]))
+        roddyBamFile.numberOfMergedLanes = 2
+        roddyBamFile.save(flush: true)
+
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
         File methylationLibraryDir = new File(roddyBamFile.getWorkMethylationDirectory(), "libNA")
         methylationLibraryDir.deleteDir()

@@ -77,7 +77,7 @@ class ExecuteWgbsAlignmentJob extends AbstractExecutePanCanJob {
 cat <<EOD > ${metadataFile.path}
 ${builder.toString()}
 EOD
-chmod 0440 ${metadataFile.path}
+chmod 0444 ${metadataFile.path}
 """
 
 
@@ -91,8 +91,11 @@ chmod 0440 ${metadataFile.path}
 
     @Override
     protected void workflowSpecificValidation(RoddyBamFile roddyBamFile) {
-        (["merged"] + roddyBamFile.seqTracks.collect { it.libraryDirectoryName }).unique().each {
-            LsdfFilesService.ensureDirIsReadableAndNotEmpty(new File(roddyBamFile.workMethylationDirectory, it))
+        LsdfFilesService.ensureDirIsReadableAndNotEmpty(new File(roddyBamFile.workMethylationDirectory, "merged"))
+        if (roddyBamFile.seqTracks*.libraryName.unique().size() > 1) {
+            roddyBamFile.seqTracks.collect { it.libraryDirectoryName }.unique().each {
+                LsdfFilesService.ensureDirIsReadableAndNotEmpty(new File(roddyBamFile.workMethylationDirectory, it))
+            }
         }
     }
 }

@@ -107,19 +107,9 @@ class AbstractBamFileServiceTests {
                 )
         assertNotNull(sample.save([flush: true]))
 
-        SeqType wholeGenomeSeqType = new SeqType(
-                name: SeqTypeNames.WHOLE_GENOME.seqTypeName,
-                libraryLayout:"library",
-                dirName: "seq-type-dir-whole-genome"
-                )
-        assertNotNull(wholeGenomeSeqType.save([flush: true]))
-
-        SeqType exomeSeqType = new SeqType(
-                name:SeqTypeNames.EXOME.seqTypeName,
-                libraryLayout:"library",
-                dirName: "seq-type-dir-exome"
-                )
-        assertNotNull(exomeSeqType.save([flush: true]))
+        DomainFactory.createPanCanAlignableSeqTypes()
+        SeqType wholeGenomeSeqType = DomainFactory.createWholeGenomeSeqType()
+        SeqType exomeSeqType = DomainFactory.createExomeSeqType()
 
         ReferenceGenome referenceGenome = new ReferenceGenome([
             name                        : 'Arbitrary Reference Genome Name',

@@ -101,17 +101,8 @@ class TestData {
         sample = createSample()
         assertNotNull(sample.save(flush: true))
 
-        seqType = new SeqType()
-        seqType.name = "WHOLE_GENOME"
-        seqType.libraryLayout = SeqType.LIBRARYLAYOUT_PAIRED
-        seqType.dirName = "whole_genome_sequencing"
-        assertNotNull(seqType.save(flush: true))
-
-        exomeSeqType = new SeqType()
-        exomeSeqType.name = SeqTypeNames.EXOME.seqTypeName
-        exomeSeqType.libraryLayout = SeqType.LIBRARYLAYOUT_PAIRED
-        exomeSeqType.dirName = "exome_sequencing"
-        assertNotNull(exomeSeqType.save(flush: true))
+        seqType = DomainFactory.createWholeGenomeSeqType()
+        exomeSeqType = DomainFactory.createExomeSeqType()
 
         seqCenter = new SeqCenter()
         seqCenter.name = "DKFZ"
