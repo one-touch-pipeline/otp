@@ -17,7 +17,7 @@ import org.junit.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 @Ignore
-class PanCanWorkflowTests extends WorkflowTestCase {
+class MovePanCanFilesToFinalDestinationJobIntegrationTests extends WorkflowTestCase {
 
     @Autowired
     MovePanCanFilesToFinalDestinationJob movePanCanFilesToFinalDestinationJob
