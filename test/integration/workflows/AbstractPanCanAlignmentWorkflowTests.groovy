@@ -111,6 +111,8 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
         assert group: '"otp.testing.group" is not set in your "otp.properties". Please add it with an existing secondary group.'
         executionHelperService.setGroup(realm, realm.rootPath as File, group)
 
+        DomainFactory.createPanCanAlignableSeqTypes()
+
         setUpFilesVariables()
 
         MergingWorkPackage workPackage = createWorkPackage()
@@ -161,7 +163,7 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
         firstBamFile = new File(baseTestDataDir, 'first-bam-file/first-bam-file_merged.mdup.bam')
         refGenDir = new File(baseTestDataDir, 'reference-genomes/bwa06_1KGRef')
         chromosomeNamesFile = new File(baseTestDataDir, 'reference-genomes/chromosome-names.txt')
-        projectConfigFile = new File(baseTestDataDir, 'project-config/configPerSeqType/projectTestAlignment.xml')
+        projectConfigFile = new File(baseTestDataDir, "project-config/configPerSeqType/projectTestAlignment-newroddy-${findSeqType().roddyName.toLowerCase()}.xml")
         conveyProjectConfigFile = new File(baseTestDataDir, 'project-config/conveyProjectTestAlignment.xml')
         roddyFailsProjectConfig = new File(baseTestDataDir, 'project-config/roddy-fails-project-config.xml')
     }
@@ -169,7 +171,6 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
     abstract SeqType findSeqType()
 
     MergingWorkPackage createWorkPackage() {
-        DomainFactory.createPanCanAlignableSeqTypes()
         SeqType seqType = findSeqType()
 
         Pipeline pipeline = Pipeline.build(
