@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
+import de.dkfz.tbi.otp.utils.ProcessHelperService
 import org.apache.commons.logging.impl.NoOpLog
 
 import de.dkfz.tbi.TestCase
@@ -200,6 +201,11 @@ RUN_FILTER_VCF=1
 CHROMOSOME_INDICES=( {1..21} XY)
 """
 
+        linkFileUtils.metaClass.createAndValidateLinks = { Map<File, File> map, Realm realm ->
+            assert map ==
+                    [(snvCallingInstance2.snvInstancePath.absoluteDataManagementPath):
+                    new File(snvCallingInstance.snvInstancePath.absoluteDataManagementPath, SnvCallingStep.CALLING.getResultFileName(snvCallingInstance2.individual, null))]
+        }
         DomainFactory.createProcessParameter(snvCallingJob.processingStep.process, snvCallingInstance2)
         snvCallingInstance2.metaClass.findLatestResultForSameBamFiles = { SnvCallingStep step -> return snvJobResult }
         snvCallingJob.log = new NoOpLog()
@@ -253,6 +259,8 @@ CHROMOSOME_INDICES=( {1..21} XY)
                 assert command.contains(scriptCommandPart)
                 assert command.contains(qsubParameterCommandPart)
 
+            } else if (command.startsWith("mkdir -p ")) {
+                return ProcessHelperService.executeCommandAndAssertExitCodeAndReturnProcessOutput(command)
             } else {
                 File snvFile = new OtpPath(snvCallingInstance.snvInstancePath, SnvCallingStep.CALLING.getResultFileName(snvCallingInstance.individual, null)).absoluteDataManagementPath
                 String scriptCommandPart = "/tmp/scriptLocation/joining.sh; " +

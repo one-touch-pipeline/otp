@@ -100,7 +100,7 @@ public class SnvCallingStartJobTests extends GroovyScriptAwareTestCase {
             assert snvCallingInstance.sampleType2BamFile == mockBam2
             assert snvCallingInstance.samplePair == mockSamplePair
             assert snvCallingInstance.config == config
-            assert snvCallingInstance.instanceName == DateTimeFormat.forPattern("yyyy-MM-dd_HH'h'mm_Z").print(ARBITRARY_TIMESTAMP)
+            assert snvCallingInstance.instanceName == DateTimeFormat.forPattern("yyyy-MM-dd_HH'h'mm").print(ARBITRARY_TIMESTAMP)
 
             ProcessParameter processParameter = exactlyOneElement(ProcessParameter.findAll())
             assert processParameter.className == SnvCallingInstance.class.name

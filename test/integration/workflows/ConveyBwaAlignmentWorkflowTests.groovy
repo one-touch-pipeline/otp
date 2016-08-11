@@ -201,7 +201,7 @@ class ConveyBwaAlignmentWorkflowTests extends WorkflowTestCase {
         assert new File(processedBamFileService.bwaSampeErrorLogFilePath(processedBamFile)).exists()
 
         LogThreadLocal.withThreadLog(System.out) {
-            ProcessHelperService.ProcessOutput processOutput = ProcessHelperService.executeCommandAndAssertExistCodeAndReturnProcessOutput("zcat ${bamFilePath} 1> /dev/null")
+            ProcessHelperService.ProcessOutput processOutput = ProcessHelperService.executeCommandAndAssertExitCodeAndReturnProcessOutput("zcat ${bamFilePath} 1> /dev/null")
             assert processOutput.stderr.length() == 0: "Stderr is not null, but ${processOutput.stderr.toString()}"
             assert bamFilePath.length() == processedBamFile.fileSize
         }

@@ -10,6 +10,7 @@ import de.dkfz.tbi.otp.job.processing.ExecutionService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.ExternalScript
 import de.dkfz.tbi.otp.utils.LinkFileUtils
+import de.dkfz.tbi.otp.utils.ProcessHelperService
 import org.springframework.beans.factory.annotation.Autowired
 import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
@@ -91,14 +92,15 @@ abstract class AbstractSnvCallingJob extends AbstractOtpJob {
         lsdfFilesService.ensureFileIsReadableAndNotEmpty(configFileInStagingDirectory)
         assertStagingConfigContentsOk(instance)
 
-        String command = """
+        String command = """\
 mkdir -p ${configFileInProjectDirectory.parent}; \
 chmod 2750 ${configFileInProjectDirectory.parent}; \
 cp ${configFileInStagingDirectory} ${configFileInProjectDirectory}; \
 chmod 640 ${configFileInProjectDirectory}; \
 rm ${configFileInStagingDirectory}
 """
-        executionService.executeCommand(realm, command)
+        ProcessHelperService.ProcessOutput out = executionService.executeCommandReturnProcessOutput(realm, command)
+        assert out.stderrEmptyAndExitCodeZero
 
         waitUntilExists(configFileInProjectDirectory)
         assertDataManagementConfigContentsOk(instance)
@@ -219,4 +221,10 @@ rm ${configFileInStagingDirectory}
         changeProcessingStateOfJobResult(instance, SnvProcessingStates.FINISHED)
     }
 
+    protected void linkPreviousResults(SnvCallingInstance instance, Realm realm) {
+        String resultFileName = step.getResultFileName(instance.individual)
+        File previousResult = new File(instance.previousFinishedInstance.snvInstancePath.absoluteDataManagementPath, resultFileName)
+        File currentResult = new File(instance.snvInstancePath.absoluteDataManagementPath, resultFileName)
+        linkFileUtils.createAndValidateLinks([(previousResult): currentResult], realm)
+    }
 }

@@ -8,6 +8,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CreateSNVFileHelper
 import de.dkfz.tbi.otp.utils.ExternalScript
 import de.dkfz.tbi.otp.utils.LinkFileUtils
+import de.dkfz.tbi.otp.utils.ProcessHelperService
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -188,21 +189,19 @@ CHROMOSOME_INDICES=( {1..21} X Y)
             return realm_processing
         }
 
-        abstractSnvCallingJob.executionService.metaClass.executeCommand = { Realm realm, String command ->
-
-            String expectedCommandPart= "mkdir -p ${configFileInProjectDirectory.parent}; " +
+        abstractSnvCallingJob.executionService.metaClass.executeCommandReturnProcessOutput = { Realm realm, String command ->
+            String expectedCommand = "mkdir -p ${configFileInProjectDirectory.parent}; " +
                     "chmod 2750 ${configFileInProjectDirectory.parent}; " +
                     "cp ${configFileInStagingDirectory} ${configFileInProjectDirectory}; " +
                     "chmod 640 ${configFileInProjectDirectory}; " +
                     "rm ${configFileInStagingDirectory}"
 
-            assert command.contains(expectedCommandPart)
+            assert command.contains(expectedCommand)
 
             testData.createConfigFileWithContentInFileSystem(
                     snvCallingInstance.configFilePath.absoluteDataManagementPath,
                     CONFIGURATION)
-
-            return PBS_ID
+            return new ProcessHelperService.ProcessOutput("", "", 0)
         }
 
         assertEquals(configFileInProjectDirectory, abstractSnvCallingJob.writeConfigFile(snvCallingInstance))
@@ -263,21 +262,26 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         }
         abstractSnvCallingJob.executionService.metaClass.executeCommand = { Realm realm, String command ->
 
-            String expectedCommandPart_first = "mkdir --parents --mode 2770 ${configFileInProjectDirectory.parent}"
+            String expectedCommand = "mkdir --parents --mode 2770 ${configFileInStagingDirectory.parent}"
 
-            String expectedCommandPart_second= "mkdir -p ${configFileInProjectDirectory.parent}; " +
-                    "chmod 2750 ${configFileInProjectDirectory.parent}; " +
-                    "cp ${configFileInStagingDirectory} ${configFileInProjectDirectory}; " +
-                    "chmod 640 ${configFileInProjectDirectory}; " +
-                    "rm ${configFileInStagingDirectory}"
+            assert command.contains(expectedCommand)
 
-            assert (command.contains(expectedCommandPart_first) || command.contains(expectedCommandPart_second))
+            return ""
+        }
+
+        abstractSnvCallingJob.executionService.metaClass.executeCommandReturnProcessOutput = { Realm realm, String command ->
+            String expectedCommand = "mkdir -p ${configFileInProjectDirectory.parent}; " +
+                "chmod 2750 ${configFileInProjectDirectory.parent}; " +
+                "cp ${configFileInStagingDirectory} ${configFileInProjectDirectory}; " +
+                "chmod 640 ${configFileInProjectDirectory}; " +
+                "rm ${configFileInStagingDirectory}"
+
+            assert command.contains(expectedCommand)
 
             testData.createConfigFileWithContentInFileSystem(
                     snvCallingInstance.configFilePath.absoluteDataManagementPath,
                     CONFIGURATION)
-
-            return PBS_ID
+            return new ProcessHelperService.ProcessOutput("", "", 0)
         }
 
         File file = snvCallingInstance.configFilePath.absoluteDataManagementPath

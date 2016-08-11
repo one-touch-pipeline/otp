@@ -27,6 +27,7 @@ class FilterVcfJob extends AbstractSnvCallingJob implements AutoRestartable{
     @Override
     protected NextAction maybeSubmit(final SnvCallingInstance instance) throws Throwable {
         final SnvConfig config = instance.config.evaluate()
+        final Realm realm = configService.getRealmDataProcessing(instance.project)
         if (config.getExecuteStepFlag(step)) {
 
             // Get results from the previous (deep annotation) step
@@ -44,8 +45,6 @@ class FilterVcfJob extends AbstractSnvCallingJob implements AutoRestartable{
             // the filter script of the CO group writes its output in the same folder where its input is,
             // so we link the input file to output folder if they are different
             File inputFileCopy = new File(instance.snvInstancePath.absoluteDataManagementPath, inputResultFile.name)
-
-            final Realm realm = configService.getRealmDataProcessing(instance.project)
 
             final File checkpointFile = step.getCheckpointFilePath(instance).absoluteDataManagementPath
             deleteResultFileIfExists(checkpointFile, realm)
@@ -77,6 +76,7 @@ class FilterVcfJob extends AbstractSnvCallingJob implements AutoRestartable{
             return NextAction.WAIT_FOR_CLUSTER_JOBS
         } else {
             checkIfResultFilesExistsOrThrowException(instance)
+            linkPreviousResults(instance, realm)
             return NextAction.SUCCEED
         }
     }

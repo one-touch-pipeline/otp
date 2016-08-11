@@ -101,7 +101,8 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         snvCallingInstance1 = snvCallingInstanceTestData.createSnvCallingInstance([
             sampleType1BamFile: processedMergedBamFile1,
             sampleType2BamFile: processedMergedBamFile2,
-            instanceName: SOME_INSTANCE_NAME
+            instanceName: SOME_INSTANCE_NAME,
+            processingState: SnvProcessingStates.FINISHED,
         ])
         assert snvCallingInstance1.save()
 
@@ -252,6 +253,12 @@ RUN_SNV_DEEPANNOTATION=0
 RUN_FILTER_VCF=0
 CHROMOSOME_INDICES=( {1..21} XY)
 """
+
+        linkFileUtils.metaClass.createAndValidateLinks = { Map<File, File> map, Realm realm ->
+            assert map ==
+                    [(new File(snvCallingInstance1.snvInstancePath.absoluteDataManagementPath, SnvCallingStep.FILTER_VCF.getResultFileName(snvCallingInstance2.individual))):
+                    new File(snvCallingInstance2.snvInstancePath.absoluteDataManagementPath, SnvCallingStep.FILTER_VCF.getResultFileName(snvCallingInstance2.individual))]
+        }
         snvCallingInstance2.metaClass.findLatestResultForSameBamFiles = { SnvCallingStep step -> return snvJobResultFilter1 }
         pbsService.metaClass.executeJob = { Realm realm, String text, String qsubParameters ->
             throw new RuntimeException("This area should not be reached since the filter job shall not run")
@@ -321,8 +328,6 @@ CHROMOSOME_INDICES=( {1..21} XY)
                     snvCallingInstance2.configFilePath.absoluteDataManagementPath,
                     snvCallingInstance2.config.configuration)
         }
-
-        filterVcfJob.metaClass.linkResultFiles = { SnvCallingInstance instance -> }
 
         snvCallingInstanceTestData.createInputResultFile_Production(snvCallingInstance1, SnvCallingStep.SNV_DEEPANNOTATION)
         snvCallingInstanceTestData.createInputResultFile_Production(snvCallingInstance2, SnvCallingStep.CALLING)

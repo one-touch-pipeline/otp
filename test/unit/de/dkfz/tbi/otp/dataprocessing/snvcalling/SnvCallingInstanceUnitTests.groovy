@@ -78,7 +78,7 @@ class SnvCallingInstanceUnitTests {
         OtpPath snvInstancePath = instance.getSnvInstancePath()
 
         assertEquals(instance.project, snvInstancePath.project)
-        File expectedRelativePath = new File(getSnvInstancePathHelper(testData.samplePair, instance))
+        File expectedRelativePath = new File(getSnvInstancePathHelper(instance))
         assertEquals(expectedRelativePath, snvInstancePath.relativePath)
     }
 
@@ -88,7 +88,7 @@ class SnvCallingInstanceUnitTests {
         OtpPath configFilePath = instance.getConfigFilePath()
 
         assertEquals(instance.project, configFilePath.project)
-        File expectedRelativePath = new File("${getSnvInstancePathHelper(testData.samplePair, instance)}/config.txt")
+        File expectedRelativePath = new File("${getSnvInstancePathHelper(instance)}/config.txt")
         assertEquals(expectedRelativePath, configFilePath.relativePath)
     }
 
@@ -102,7 +102,28 @@ class SnvCallingInstanceUnitTests {
         assertEquals(expectedRelativePath, stepConfigFileLinkedPath.relativePath)
     }
 
-    String getSnvInstancePathHelper(SamplePair samplePair, SnvCallingInstance instance) {
+    @Test
+    void testGetPreviousInstance_onlyOneInstance_returnsNull() {
+        SnvCallingInstance instance = createSnvCallingInstance().save(failOnError: true)
+        assert instance.previousFinishedInstance == null
+    }
+
+    @Test
+    void testGetPreviousInstance_twoInstances_returnsOlder() {
+        SnvCallingInstance instance = createSnvCallingInstance()
+        instance.processingState = SnvProcessingStates.FINISHED
+        instance.save(failOnError: true)
+        SnvCallingInstance instance2 = createSnvCallingInstance(
+                sampleType1BamFile: instance.sampleType1BamFile,
+                sampleType2BamFile: instance.sampleType2BamFile,
+                config: instance.config,
+                instanceName: "2015-08-25_15h32",
+                samplePair: instance.samplePair,
+        ).save(failOnError: true)
+        assert instance2.previousFinishedInstance == instance
+    }
+
+    String getSnvInstancePathHelper(SnvCallingInstance instance) {
         return "${samplePairPath}/${instance.instanceName}"
     }
 

@@ -31,6 +31,7 @@ class SnvAnnotationJob extends AbstractSnvCallingJob implements AutoRestartable{
     @Override
     protected NextAction maybeSubmit(final SnvCallingInstance instance) throws Throwable {
         final SnvConfig config = instance.config.evaluate()
+        final Realm realm = configService.getRealmDataProcessing(instance.project)
         if (config.getExecuteStepFlag(step)) {
             // Get results from the previous (calling) step
             SnvJobResult inputResult = instance.findLatestResultForSameBamFiles(previousStep)
@@ -51,7 +52,6 @@ class SnvAnnotationJob extends AbstractSnvCallingJob implements AutoRestartable{
             // To prevent mixing up results of old and new SnvCallingInstances we link the input file to output folder.
             File inputFileCopy = new File(instance.snvInstancePath.absoluteDataManagementPath, inputResultFile.name)
 
-            final Realm realm = configService.getRealmDataProcessing(instance.project)
             /*
              * Input which is needed for the Annotation script. It is just for Roddy intern job system handling.
              * File can be deleted afterwards. Delete it if it exists already.
@@ -81,16 +81,12 @@ class SnvAnnotationJob extends AbstractSnvCallingJob implements AutoRestartable{
             script << "${ensureFileHasExpectedSizeScript(sampleType1BamFile, instance.sampleType1BamFile.fileSize)} "
             script << "${ensureFileDoesNotExistScript(annotationResultFile)} "
             script << "${step.getExternalScript(config.externalScriptVersion).scriptFilePath} "
-            // In case the input file had to be linked to the output folder it has to be deleted afterwards.
-            // Otherwise it would be twice in the file system.
-            if (inputFileCopy.absolutePath != inputResultFile.absolutePath) {
-                script << " rm -f ${inputFileCopy.absolutePath}"
-            }
             pbsService.executeJob(realm, script.toString(), qsubParameters)
 
             return NextAction.WAIT_FOR_CLUSTER_JOBS
         } else {
             checkIfResultFilesExistsOrThrowException(instance)
+            linkPreviousResults(instance, realm)
             return NextAction.SUCCEED
         }
     }

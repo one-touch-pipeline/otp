@@ -305,19 +305,17 @@ abstract class AbstractSnvWorkflowTests extends WorkflowTestCase {
             assertNotNull(jobResultDeepAnnotation.save(flush: true))
 
             File previousResultDir = new File("${getWorkflowDirectory()}/resultFiles_${VERSION}")
+            File annotationResultFile = jobResultAnnotation.getResultFilePath().absoluteDataManagementPath
             File deepAnnotationResultFile = jobResultDeepAnnotation.getResultFilePath().absoluteDataManagementPath
 
-            previousResultDir.eachFileRecurse (groovy.io.FileType.FILES) { File resultFile ->
-                if (resultFile.name =~ /annotation/) {
-                    sourceFilesForFilter << resultFile
-                    targetFilesForFilter << new File(deepAnnotationResultFile.parentFile.parent, resultFile.name)
-                }
-            }
-
+            sourceFiles << new File(previousResultDir, "snvs_stds.vcf.gz")
+            sourceFiles << new File(previousResultDir, "snvs_stds.vcf.gz.tbi")
             sourceFiles << new File(previousResultDir, "snvs_stds.vcf.gz")
             sourceFiles << new File(previousResultDir, "snvs_stds.vcf.gz.tbi")
             targetFiles << deepAnnotationResultFile
             targetFiles << new File("${deepAnnotationResultFile}.tbi")
+            targetFiles << annotationResultFile
+            targetFiles << new File("${annotationResultFile}.tbi")
         }   else if (startWith != SnvCallingStep.SNV_ANNOTATION) {
             throw new UnsupportedOperationException()
         }
@@ -363,6 +361,18 @@ abstract class AbstractSnvWorkflowTests extends WorkflowTestCase {
             expected = new GZIPInputStream(new FileInputStream(resultFileCalling)).readLines()
             actual = new GZIPInputStream(new FileInputStream(callingResult.getResultFilePath().absoluteDataManagementPath)).readLines()
             compareFiles(expected, actual)
+
+            File roddyResultsDir = new File(getWorkflowDirectory(), "resultFiles_${VERSION}")
+            File otpResultsDir = createdInstance.snvInstancePath.absoluteDataManagementPath
+            roddyResultsDir.eachFileRecurse (groovy.io.FileType.FILES) { File resultFile ->
+                File otpResultFile = new File(otpResultsDir, resultFile.name)
+                if (!resultFile.name =~ /^snvCallingCheckPoint/) {
+                    assert otpResultFile.exists()
+                }
+                if (resultFile.name =~ /\.vcf$/ || resultFile.name =~ /\.txt$/) {
+                    compareFiles([resultFile.readLines()], [otpResultFile.readLines()])
+                }
+            }
         } else {
             assert SnvCallingInstance.count() == 2
         }
@@ -387,17 +397,7 @@ abstract class AbstractSnvWorkflowTests extends WorkflowTestCase {
         assert filterResult.inputResult == deepAnnotationResult
         assert filterResult.externalScript == filterScript
 
-        File roddyResultsDir = new File(getWorkflowDirectory(), "resultFiles_${VERSION}")
-        File otpResultsDir = createdInstance.samplePair.samplePairPath.absoluteDataManagementPath
-        roddyResultsDir.eachFileRecurse (groovy.io.FileType.FILES) { File resultFile ->
-            File otpResultFile = new File(otpResultsDir, resultFile.name)
-            if (!resultFile.name =~ /^snvCallingCheckPoint/) {
-                assert otpResultFile.exists()
-            }
-            if (resultFile.name =~ /\.vcf$/ || resultFile.name =~ /\.txt$/) {
-                compareFiles([resultFile.readLines()], [otpResultFile.readLines()])
-            }
-        }
+
     }
 
     static void compareFiles(List<String> expected, List<String> actual) {

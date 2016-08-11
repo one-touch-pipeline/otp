@@ -50,7 +50,7 @@ class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
             executeCommand(_, _) >> { Realm realm2, String command ->
                 File script = temporaryFolder.newFile('script' + counter++ + '.sh')
                 script.text = command
-                return ProcessHelperService.executeCommandAndAssertExistCodeAndReturnProcessOutput("bash ${script.absolutePath}").stdout
+                return ProcessHelperService.executeCommandAndAssertExitCodeAndReturnProcessOutput("bash ${script.absolutePath}").stdout
             }
         }
     }

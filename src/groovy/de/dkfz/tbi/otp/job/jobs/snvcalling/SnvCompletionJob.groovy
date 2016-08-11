@@ -43,14 +43,6 @@ class SnvCompletionJob extends AbstractEndStateAwareJobImpl implements AutoResta
     void execute() throws Exception {
         final SnvCallingInstance snvCallingInstance = getProcessParameterObject()
         assert snvCallingInstance.processingState == IN_PROGRESS
-        final Realm realm = configService.getRealmDataProcessing(snvCallingInstance.project)
-
-        /**
-         * link the result files of the snvCallingInstance and the config files to the sample pair folder
-         */
-        linkResultFiles(snvCallingInstance)
-        deleteConfigFileLinkOfPreviousInstance(realm, snvCallingInstance)
-        linkConfigFiles(snvCallingInstance)
 
         deleteStagingDirectory snvCallingInstance
         snvCallingInstance.updateProcessingState FINISHED
@@ -64,65 +56,5 @@ class SnvCompletionJob extends AbstractEndStateAwareJobImpl implements AutoResta
 
         Realm realm = configService.getRealmDataProcessing(instance.project)
         filesService.deleteDirectoryRecursive(realm, parentPath)
-    }
-
-    /**
-     * This is a helper method which links all files in the SNV instance folder to the sample pair folder.
-     * Links which exist already are overwritten.
-     */
-    protected void linkResultFiles(SnvCallingInstance instance) {
-        notNull(instance, "The input instance must not be null")
-
-        File directory = instance.snvInstancePath.absoluteDataManagementPath
-        Map<File, File> sourceLinkMap = [:]
-        File configFile = instance.configFilePath.absoluteDataManagementPath
-        directory.eachFileRecurse (FileType.FILES) { File file ->
-            if (file.getName() != configFile.getName()) {
-                File linkToFile = new OtpPath(instance.samplePair.samplePairPath, file.getName()).absoluteDataManagementPath
-                sourceLinkMap.put(file, linkToFile)
-            }
-        }
-        linkFileUtils.createAndValidateLinks(sourceLinkMap, configService.getRealmDataProcessing(instance.project))
-    }
-
-    /**
-     * This is a helper method which creates one link of the config file in the instance folder to the sample pair folder
-     * for each job which was processed in this instance.
-     */
-    protected void linkConfigFiles(SnvCallingInstance instance) {
-        notNull(instance, "The input instance must not be null")
-
-        File configFile = instance.configFilePath.absoluteDataManagementPath
-        SnvConfig config = instance.config.evaluate()
-        SnvCallingStep.values().each {
-            if (config.getExecuteStepFlag(it)) {
-                File linkToFile = instance.getStepConfigFileLinkedPath(it).absoluteDataManagementPath
-                linkFileUtils.createAndValidateLinks([(configFile): linkToFile], configService.getRealmDataProcessing(instance.project))
-            }
-        }
-    }
-
-
-    /**
-     * Deletes config files links for processed SNV steps of previous SnvCallingInstances for the SamplePair
-     * if they exist in the file system.
-     */
-    void deleteConfigFileLinkOfPreviousInstance(Realm realm, SnvCallingInstance snvCallingInstance) {
-        notNull(realm)
-        notNull(snvCallingInstance)
-        SnvConfig config = snvCallingInstance.config.evaluate()
-        List<SnvCallingInstance> allInstancesForTheSamplePair = SnvCallingInstance.findAllBySamplePair(snvCallingInstance.samplePair)
-        List<SnvCallingInstance> previousInstances = allInstancesForTheSamplePair - snvCallingInstance
-        previousInstances.each { SnvCallingInstance instance ->
-            SnvCallingStep.values().each { SnvCallingStep step ->
-                if (config.getExecuteStepFlag(step)) {
-                    File configFileLink = instance.getStepConfigFileLinkedPath(step).absoluteDataManagementPath
-                    if (configFileLink.exists()) {
-                        executionService.executeCommand(realm, "rm -f ${configFileLink.path}")
-                        WaitingFileUtils.waitUntilDoesNotExist(configFileLink)
-                    }
-                }
-            }
-        }
     }
 }

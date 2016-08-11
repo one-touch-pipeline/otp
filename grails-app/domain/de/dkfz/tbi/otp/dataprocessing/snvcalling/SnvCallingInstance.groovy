@@ -1,13 +1,15 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
-import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
-import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.*
+import org.hibernate.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
-import de.dkfz.tbi.otp.ngsdata.*
 
 /**
  * For each tumor-control pair the snv pipeline will be called.
@@ -19,7 +21,7 @@ class SnvCallingInstance implements ProcessParameterObject, Entity {
     /**
      * Refers to the config file which is stored in the database and is used as a basis for all the files in the filesystem.
      */
-    SnvConfig config
+    ConfigPerProject config
 
     AbstractMergedBamFile sampleType1BamFile
 
@@ -48,7 +50,7 @@ class SnvCallingInstance implements ProcessParameterObject, Entity {
     /**
      * The overall processing state of this SNV calling run.
      * Because the SNV StartJob creates an instance of a SnvCallingInstance immediately when starting it, this will always start
-     * as {@link SnvProcessingStates.IN_PROGRESS}.
+     * as {@link SnvProcessingStates#IN_PROGRESS}.
      */
     SnvProcessingStates processingState = SnvProcessingStates.IN_PROGRESS
 
@@ -73,6 +75,9 @@ class SnvCallingInstance implements ProcessParameterObject, Entity {
             } else {
                 return true
             }
+        }
+        config validator: { val, obj ->
+            SnvConfig.isAssignableFrom(Hibernate.getClass(val)) || RoddyWorkflowConfig.isAssignableFrom(Hibernate.getClass(val))
         }
     }
 
@@ -169,6 +174,10 @@ class SnvCallingInstance implements ProcessParameterObject, Entity {
             processingState = state
             this.save([flush: true])
         }
+    }
+
+    SnvCallingInstance getPreviousFinishedInstance() {
+        return SnvCallingInstance.findBySamplePairAndProcessingStateAndIdLessThan(samplePair, SnvProcessingStates.FINISHED, this.id, [max: 1, sort: 'id', order: 'desc'])
     }
 
     @Override

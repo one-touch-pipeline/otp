@@ -89,7 +89,7 @@ class ProcessHelperServiceUnitTests {
 
     @Test
     void testExecuteCommandAndAssertExistCodeAndReturnProcessOutput_AllFine() {
-        ProcessHelperService.ProcessOutput processOutput = ProcessHelperService.executeCommandAndAssertExistCodeAndReturnProcessOutput(COMMAND)
+        ProcessHelperService.ProcessOutput processOutput = ProcessHelperService.executeCommandAndAssertExitCodeAndReturnProcessOutput(COMMAND)
 
         assert processOutput.stdout.toString().trim() == STDOUT_TEXT
         assert processOutput.stderr.toString().trim() == STDERR_TEXT
@@ -98,14 +98,14 @@ class ProcessHelperServiceUnitTests {
     @Test
     void testExecuteCommandAndAssertExistCodeAndReturnProcessOutput_InputCommandIsNull_ShouldFail() {
         assert TestCase.shouldFail(AssertionError) {
-            ProcessHelperService.executeCommandAndAssertExistCodeAndReturnProcessOutput(null)
+            ProcessHelperService.executeCommandAndAssertExitCodeAndReturnProcessOutput(null)
         }.contains("The input cmd must not be null")
     }
 
     @Test
     void testExecuteCommandAndAssertExistCodeAndReturnProcessOutput_ProcessEndsNotNormal_ShouldFail() {
         assert TestCase.shouldFail(AssertionError) {
-            ProcessHelperService.executeCommandAndAssertExistCodeAndReturnProcessOutput(INVALID_COMMAND)
+            ProcessHelperService.executeCommandAndAssertExitCodeAndReturnProcessOutput(INVALID_COMMAND)
         }.contains("The exit value is not 0")
     }
 

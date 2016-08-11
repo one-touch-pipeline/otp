@@ -49,7 +49,7 @@ class SnvCallingStartJob extends AbstractStartJobImpl {
 
                 SnvCallingInstance snvCallingInstance = new SnvCallingInstance(
                         samplePair: samplePair,
-                        instanceName: DateTimeFormat.forPattern("yyyy-MM-dd_HH'h'mm_Z").withZone(DateTimeZone.getDefault()).print(Instant.now()),
+                        instanceName: DateTimeFormat.forPattern("yyyy-MM-dd_HH'h'mm").withZone(DateTimeZone.getDefault()).print(Instant.now()),
                         config: config,
                         sampleType1BamFile: sampleType1BamFile,
                         sampleType2BamFile: sampleType2BamFile,

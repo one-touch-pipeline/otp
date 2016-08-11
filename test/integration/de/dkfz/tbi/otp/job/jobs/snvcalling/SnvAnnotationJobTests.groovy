@@ -90,7 +90,8 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         snvCallingInstance = testData.createSnvCallingInstance([
             sampleType1BamFile: processedMergedBamFile1,
             sampleType2BamFile: processedMergedBamFile2,
-            instanceName: SOME_INSTANCE_NAME
+            instanceName: SOME_INSTANCE_NAME,
+            processingState: SnvProcessingStates.FINISHED,
         ])
         assert snvCallingInstance.save()
 
@@ -175,6 +176,11 @@ RUN_FILTER_VCF=1
 CHROMOSOME_INDICES=( {1..21} XY)
 """
 
+        linkFileUtils.metaClass.createAndValidateLinks = { Map<File, File> map, Realm realm ->
+            assert map ==
+                    [(new File(snvCallingInstance.snvInstancePath.absoluteDataManagementPath, SnvCallingStep.SNV_ANNOTATION.getResultFileName(snvCallingInstance2.individual))):
+                    new File(snvCallingInstance2.snvInstancePath.absoluteDataManagementPath, SnvCallingStep.SNV_ANNOTATION.getResultFileName(snvCallingInstance2.individual))]
+        }
         snvCallingInstance2.metaClass.findLatestResultForSameBamFiles = { SnvCallingStep step -> return snvJobResult }
         pbsService.metaClass.executeJob = { Realm realm, String text, String qsubParameters ->
             throw new RuntimeException("This area should not be reached since the annotation job shall not run")
@@ -230,8 +236,6 @@ CHROMOSOME_INDICES=( {1..21} XY)
 
             String commandScriptPart = "/tmp/scriptLocation/annotation.sh"
 
-            String commandDeletePart = "rm -f ${inputFileCopy.path}"
-
             String commandParameterPart = "-v CONFIG_FILE=" +
                     "${snvCallingInstance2.configFilePath.absoluteDataManagementPath}," +
                     "pid=${snvCallingInstance2.individual.pid}," +
@@ -244,7 +248,6 @@ CHROMOSOME_INDICES=( {1..21} XY)
 
             assert command.contains(commandLinkPart)
             assert command.contains(commandScriptPart)
-            assert command.contains(commandDeletePart)
             assert command.contains(commandParameterPart)
             return new ProcessOutput("${PBS_ID}.pbs", "", 0)
         }

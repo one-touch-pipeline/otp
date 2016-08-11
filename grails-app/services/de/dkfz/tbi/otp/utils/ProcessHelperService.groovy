@@ -49,7 +49,7 @@ class ProcessHelperService {
         assert process.exitValue() == 0 : "The exit value is not 0, but ${process.exitValue()}"
     }
 
-    static ProcessOutput executeCommandAndAssertExistCodeAndReturnProcessOutput(String cmd) {
+    static ProcessOutput executeCommandAndAssertExitCodeAndReturnProcessOutput(String cmd) {
         Process process = executeCommand(cmd)
         ProcessOutput processOutput = waitForCommand(process)
         assertProcessFinishedSuccessful(process)

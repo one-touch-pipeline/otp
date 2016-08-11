@@ -47,7 +47,7 @@ abstract class AbstractRoddyJob extends AbstractMaybeSubmitWaitValidateJob{
             final Realm realm = configService.getRealmDataManagement(roddyResult.project)
             String cmd = prepareAndReturnWorkflowSpecificCommand(roddyResult, realm)
 
-            ProcessHelperService.ProcessOutput output =  ProcessHelperService.executeCommandAndAssertExistCodeAndReturnProcessOutput(cmd)
+            ProcessHelperService.ProcessOutput output = ProcessHelperService.executeCommandAndAssertExitCodeAndReturnProcessOutput(cmd)
 
             Collection<ClusterJob> submittedClusterJobs = createClusterJobObjects(roddyResult, realm, output)
             if (submittedClusterJobs) {

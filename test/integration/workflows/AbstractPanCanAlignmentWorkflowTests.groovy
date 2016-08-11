@@ -14,7 +14,6 @@ import org.joda.time.*
 import org.junit.*
 import org.junit.rules.*
 
-import static de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 import static de.dkfz.tbi.otp.utils.ProcessHelperService.*
 
@@ -579,7 +578,7 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
 
         // content of the bam file
         LogThreadLocal.withThreadLog(System.out) {
-            ProcessOutput processOutput = executeCommandAndAssertExistCodeAndReturnProcessOutput("zcat ${bamFile.finalBamFile} 1> /dev/null")
+            ProcessOutput processOutput = executeCommandAndAssertExitCodeAndReturnProcessOutput("zcat ${bamFile.finalBamFile} 1> /dev/null")
             assert processOutput.stderr.length() == 0: "Stderr is not null, but ${processOutput.stderr.toString()}"
             assert bamFile.finalBamFile.length() == bamFile.fileSize
         }
