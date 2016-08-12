@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.administration
 
 import de.dkfz.tbi.otp.job.processing.ExecutionState
+import de.dkfz.tbi.otp.job.processing.ProcessService
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.job.processing.ProcessingStepUpdate
 import de.dkfz.tbi.otp.security.User
@@ -32,6 +33,8 @@ class ShutdownService implements DisposableBean {
      * Dependency Injection of SpringSecurityService
      **/
     def springSecurityService
+
+    ProcessService processService
 
     def userService
 
