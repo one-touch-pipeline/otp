@@ -11,6 +11,7 @@ import org.junit.*
 
 @Mock([
         Project,
+        ProjectCategory,
         RoddyWorkflowConfig,
         SeqType,
         Pipeline,

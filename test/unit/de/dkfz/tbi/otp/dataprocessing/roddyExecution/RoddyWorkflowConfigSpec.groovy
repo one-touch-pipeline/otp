@@ -8,6 +8,7 @@ import spock.lang.*
 
 @Mock([
         Project,
+        ProjectCategory,
         Realm,
         RoddyWorkflowConfig,
         SeqType,

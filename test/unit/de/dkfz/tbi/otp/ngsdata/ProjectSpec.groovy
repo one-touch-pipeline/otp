@@ -6,6 +6,7 @@ import spock.lang.*
 
 @Mock([
         Project,
+        ProjectCategory,
         Realm,
 ])
 class ProjectSpec extends Specification {

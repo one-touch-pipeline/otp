@@ -7,7 +7,6 @@ class CreateProjectController {
 
     ProjectService projectService
     ProjectGroupService projectGroupService
-    ProjectCategoryService projectCategoryService
 
     def index(CreateProjectControllerSubmitCommand cmd) {
         String message;

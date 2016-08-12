@@ -34,8 +34,6 @@ class ProjectOverviewController {
 
     CommentService commentService
 
-    ProjectCategoryService projectCategoryService
-
     Map index() {
         String projectName = params.projectName
         return [projects: projectService.getAllProjects()*.name, project: projectName]
