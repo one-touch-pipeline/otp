@@ -13,6 +13,7 @@ import java.util.regex.*
 class MetadataImportController {
 
     MetadataImportService metadataImportService
+    ProcessingOptionService processingOptionService
     RunService runService
     TrackingService trackingService
 
@@ -108,6 +109,9 @@ class MetadataImportController {
     }
 
     StringBuilder doAutoImport(String otrsTicketNumber, String ilseNumbers) {
+        if (processingOptionService.findOption('autoImportEnabled', null, null) != '1') {
+            throw new IllegalStateException('Automatic import is currently disabled. Set processing option autoImportEnabled to 1 to enable it.')
+        }
         StringBuilder text = new StringBuilder()
         try {
             Collection<ValidateAndImportResult> results =
