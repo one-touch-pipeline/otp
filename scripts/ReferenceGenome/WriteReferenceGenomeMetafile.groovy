@@ -25,7 +25,7 @@ notNull referenceGenome
 
 // create the Realm to build the path to the reference genome
 String env = Environment.getCurrent().getName()
-Realm realm = Realm.findByNameAndOperationTypeAndEnv("DKFZ", Realm.OperationType.DATA_PROCESSING, env)
+Realm realm = Realm.findByNameAndOperationTypeAndEnv("DKFZ_13.1", Realm.OperationType.DATA_PROCESSING, env)
 notNull realm
 
 // prepare to store the meta information
