@@ -296,10 +296,6 @@ grails.plugin.springsecurity.controllerAnnotations.staticRules = [
     "/logout/**":            ['IS_AUTHENTICATED_ANONYMOUSLY'],
     "/info/**":              ['permitAll'],
     "/":                     ['permitAll'],
-    "/css/**":               ["permitAll"],
-    "/images/**":            ["permitAll"],
-    "/js/**":                ["permitAll"],
-    "/igvSessionFiles/**":   ["permitAll"],
     "/metadataImport/autoImport": ["permitAll"],
     "/console/**":           ['ROLE_ADMIN'],
     "/plugins/console*/**":  ['ROLE_ADMIN'],
@@ -307,7 +303,6 @@ grails.plugin.springsecurity.controllerAnnotations.staticRules = [
     "/snv/index/**":         ['ROLE_OPERATOR'],
     "/j_spring_security_switch_user": ['ROLE_SWITCH_USER', 'IS_AUTHENTICATED_FULLY'],
     "/**":                   ['ROLE_USER'],
-
 ]
 
 // hierarchy of roles
