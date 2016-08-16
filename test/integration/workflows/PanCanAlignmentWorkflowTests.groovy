@@ -48,6 +48,18 @@ abstract class PanCanAlignmentWorkflowTests extends AbstractPanCanAlignmentWorkf
     }
 
     @Test
+    void testAlignLanesOnly_NoBaseBamExist_OneLane_workflow_1_0_182_1_allFine() {
+
+        // prepare
+        createSeqTrack("readGroup1")
+
+        resetProjectConfig(oldProjectConfigFile)
+
+        executeAndVerify_AlignLanesOnly_AllFine()
+    }
+
+
+    @Test
     void testAlignLanesOnly_NoBaseBamExist_OneLane_FastTrack_allFine() {
 
         fastTrackSetup()
@@ -84,6 +96,13 @@ abstract class PanCanAlignmentWorkflowTests extends AbstractPanCanAlignmentWorkf
     @Ignore('OTP-2192')
     @Test
     void testAlignBaseBamAndNewLanes_allFine() {
+        alignBaseBamAndNewLanesHelper(false)
+    }
+
+    @Ignore('OTP-2192')
+    @Test
+    void testAlignBaseBamAndNewLanes_workflow_1_0_182_1_allFine() {
+        resetProjectConfig(oldProjectConfigFile)
         alignBaseBamAndNewLanesHelper(false)
     }
 

@@ -72,6 +72,9 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
     // test project config (binary aligner)
     File projectConfigFile
 
+    // test project config (binary aligner) for old plugin
+    File oldProjectConfigFile
+
     // test project config (convey aligner)
     File conveyProjectConfigFile
 
@@ -163,6 +166,7 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
         refGenDir = new File(baseTestDataDir, 'reference-genomes/bwa06_1KGRef')
         chromosomeNamesFile = new File(baseTestDataDir, 'reference-genomes/chromosome-names.txt')
         projectConfigFile = new File(baseTestDataDir, "project-config/configPerSeqType/projectTestAlignment-newroddy-${findSeqType().roddyName.toLowerCase()}.xml")
+        oldProjectConfigFile = new File(baseTestDataDir, "project-config/configPerSeqType/projectTestAlignment-newroddy-${findSeqType().roddyName.toLowerCase()}-1.0.182-1.xml")
         conveyProjectConfigFile = new File(baseTestDataDir, 'project-config/conveyProjectTestAlignment.xml')
         roddyFailsProjectConfig = new File(baseTestDataDir, 'project-config/roddy-fails-project-config.xml')
     }
