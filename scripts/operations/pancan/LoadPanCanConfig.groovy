@@ -7,8 +7,10 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 
-
 String projectName = ''
+
+// The PID is optional. It must only be set if the config is individual specific.
+String individualPid = ''
 
 
 //The roddy plugin version. It needs to be a valid value for Roddy.
@@ -66,14 +68,27 @@ Project.withTransaction {
             Pipeline.Name.PANCAN_ALIGNMENT,
     ))
 
-    RoddyWorkflowConfig.importProjectConfigFile(
-            project,
-            seqType,
-            pluginVersionToUse,
-            pipeline,
-            configFilePath,
-            configVersion,
-    )
+    if (!individualPid) {
+        RoddyWorkflowConfig.importProjectConfigFile(
+                project,
+                seqType,
+                pluginVersionToUse,
+                pipeline,
+                configFilePath,
+                configVersion,
+        )
+    } else {
+        Individual individual = CollectionUtils.exactlyOneElement(Individual.findAllByPid(individualPid))
+        RoddyWorkflowConfigService.loadPanCanConfigAndTriggerAlignment(
+                project,
+                seqType,
+                pluginVersionToUse,
+                pipeline,
+                configFilePath,
+                configVersion,
+                individual,
+        )
+    }
 
     assert ctx[panCanAlignmentDeciderBeanName]
     project.alignmentDeciderBeanName = panCanAlignmentDeciderBeanName

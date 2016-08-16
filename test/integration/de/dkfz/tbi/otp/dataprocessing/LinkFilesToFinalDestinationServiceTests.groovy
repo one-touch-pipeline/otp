@@ -423,8 +423,8 @@ class LinkFilesToFinalDestinationServiceTests {
 
     @Test
     void testCleanupOldResults_withoutBaseBamFile_butBamFilesOfWorkPackageExist_allFine() {
-        DomainFactory.createRoddyBamFile(workPackage: roddyBamFile.workPackage)
-        RoddyBamFile roddyBamFile2 = DomainFactory.createRoddyBamFile(workPackage: roddyBamFile.workPackage)
+        DomainFactory.createRoddyBamFile(workPackage: roddyBamFile.workPackage, config: roddyBamFile.config)
+        RoddyBamFile roddyBamFile2 = DomainFactory.createRoddyBamFile(workPackage: roddyBamFile.workPackage, config: roddyBamFile.config)
         CreateRoddyFileHelper.createRoddyAlignmentFinalResultFiles(roddyBamFile)
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile2)
@@ -453,20 +453,20 @@ class LinkFilesToFinalDestinationServiceTests {
 
     @Test
     void testCleanupOldResults_withoutBaseBamFile_butBamFilesOfWorkPackageExistInOldStructure_latestIsOld_allFine() {
-        DomainFactory.createRoddyBamFile(workPackage:  roddyBamFile.workPackage, workDirectoryName: null)
+        DomainFactory.createRoddyBamFile(workPackage:  roddyBamFile.workPackage, workDirectoryName: null, config: roddyBamFile.config)
         helper_testCleanupOldResults_withoutBaseBamFile_butBamFilesOfWorkPackageExistInOldStructure(true)
     }
 
     @Test
     void testCleanupOldResults_withoutBaseBamFile_butBamFilesOfWorkPackageExistInOldAndNewStructure_latestIsNew_allFine() {
-        DomainFactory.createRoddyBamFile(workPackage:  roddyBamFile.workPackage)
+        DomainFactory.createRoddyBamFile(workPackage:  roddyBamFile.workPackage, config: roddyBamFile.config)
         helper_testCleanupOldResults_withoutBaseBamFile_butBamFilesOfWorkPackageExistInOldStructure(false)
     }
 
     void helper_testCleanupOldResults_withoutBaseBamFile_butBamFilesOfWorkPackageExistInOldStructure(boolean latestIsOld) {
         roddyBamFile.workDirectoryName = null
         roddyBamFile.save(flush: true, failOnError: true)
-        RoddyBamFile roddyBamFile2 = DomainFactory.createRoddyBamFile(workPackage:  roddyBamFile.workPackage)
+        RoddyBamFile roddyBamFile2 = DomainFactory.createRoddyBamFile(workPackage:  roddyBamFile.workPackage, config: roddyBamFile.config)
         CreateRoddyFileHelper.createRoddyAlignmentFinalResultFiles(roddyBamFile)
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile2)
         assert roddyBamFile2.workDirectory.exists()
@@ -621,6 +621,7 @@ class LinkFilesToFinalDestinationServiceTests {
                 md5sum: null,
                 fileSize: -1,
                 identifier: roddyBamFile.identifier - 1,
+                config: roddyBamFile.config,
         ])
 
         assert shouldFail (AssertionError) {

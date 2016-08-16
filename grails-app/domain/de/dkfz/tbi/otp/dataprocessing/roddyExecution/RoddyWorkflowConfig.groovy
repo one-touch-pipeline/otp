@@ -1,14 +1,10 @@
 package de.dkfz.tbi.otp.dataprocessing.roddyExecution
 
-import de.dkfz.tbi.otp.dataprocessing.ConfigPerProject
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
-import de.dkfz.tbi.otp.dataprocessing.Pipeline
-import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
-import de.dkfz.tbi.otp.ngsdata.Project
-import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.*
 
-import java.util.regex.Matcher
-import java.util.regex.Pattern
+import java.util.regex.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
@@ -47,6 +43,11 @@ class RoddyWorkflowConfig extends ConfigPerProject {
 
     String configVersion
 
+    /**
+     * In general this field should not be used but only in cases where the standard configuration does not fit.
+     */
+    Individual individual
+
     static constraints = {
         configFilePath unique: true, validator: { OtpPath.isValidAbsolutePath(it) }
         pipeline ()
@@ -55,11 +56,40 @@ class RoddyWorkflowConfig extends ConfigPerProject {
                     obj.id ? true : val != null
                 }
         pluginVersion blank: false
-        obsoleteDate unique: ['project', 'seqType', 'pipeline']  // partial index: WHERE obsolete_date IS NULL
-        configVersion nullable: true, blank: false, unique: ['project', 'seqType', 'pipeline', 'pluginVersion'], matches: CONFIG_VERSION_PATTERN //needs to be nullable because of old data
+        obsoleteDate validator: { obsolete, config ->
+            if (!obsolete) {
+                // This validator asserts that the config is unique for the given properties.
+                // Unique constraint can't be used since individual is optional and can be null.
+                Long id = CollectionUtils.atMostOneElement(RoddyWorkflowConfig.findAllWhere(
+                        project: config.project,
+                        seqType: config.seqType,
+                        pipeline: config.pipeline,
+                        individual: config.individual,
+                        obsoleteDate: null,
+                ))?.id
+                !id || id == config.id
+            }
+        }
+        configVersion nullable: true, //needs to be nullable because of old data
+                blank: false, matches: CONFIG_VERSION_PATTERN, validator: { version, config ->
+            if (version) {
+                // This validator asserts that the config is unique for the given properties.
+                // Unique constraint can't be used since individual is optional and can be null.
+                Long id = CollectionUtils.atMostOneElement(RoddyWorkflowConfig.findAllWhere(
+                        project: config.project,
+                        seqType: config.seqType,
+                        pipeline: config.pipeline,
+                        individual: config.individual,
+                        pluginVersion: config.pluginVersion,
+                        configVersion: config.configVersion,
+                ))?.id
+                !id || id == config.id
+            }
+        }
+        individual nullable: true
     }
 
-    static void importProjectConfigFile(Project project, SeqType seqType, String pluginVersionToUse, Pipeline pipeline, String configFilePath, String configVersion) {
+    static void importProjectConfigFile(Project project, SeqType seqType, String pluginVersionToUse, Pipeline pipeline, String configFilePath, String configVersion, Individual individual = null) {
         assert project : "The project is not allowed to be null"
         assert seqType : "The seqType is not allowed to be null"
         assert pipeline : "The pipeline is not allowed to be null"
@@ -67,7 +97,7 @@ class RoddyWorkflowConfig extends ConfigPerProject {
         assert configFilePath : "The configFilePath is not allowed to be null"
         assert configVersion : "The configVersion is not allowed to be null"
 
-        RoddyWorkflowConfig roddyWorkflowConfig = getLatest(project, seqType, pipeline)
+        RoddyWorkflowConfig roddyWorkflowConfig = getLatest(project, seqType, pipeline, individual)
 
         RoddyWorkflowConfig config = new RoddyWorkflowConfig(
                 project: project,
@@ -77,20 +107,27 @@ class RoddyWorkflowConfig extends ConfigPerProject {
                 pluginVersion: pluginVersionToUse,
                 previousConfig: roddyWorkflowConfig,
                 configVersion: configVersion,
+                individual: individual,
         )
         config.validateConfig()
         config.createConfigPerProject()
     }
 
-    static RoddyWorkflowConfig getLatest(final Project project, final SeqType seqType, final Pipeline pipeline) {
+
+    static RoddyWorkflowConfig getLatest(final Project project, final SeqType seqType, final Pipeline pipeline, Individual individual = null) {
         assert project : "The project is not allowed to be null"
         assert seqType : "The seqType is not allowed to be null"
         assert pipeline : "The pipeline is not allowed to be null"
         try {
-            return atMostOneElement(RoddyWorkflowConfig.findAllByProjectAndSeqTypeAndPipelineAndObsoleteDate(project, seqType, pipeline, null))
+            return atMostOneElement(RoddyWorkflowConfig.findAllByProjectAndSeqTypeAndPipelineAndObsoleteDateAndIndividual(project, seqType, pipeline, null, individual))
         } catch (final Throwable t) {
-            throw new RuntimeException("Found more than one RoddyWorkflowConfig for Project ${project}, SeqType ${seqType} and Pipeline ${pipeline}. ${t.message ?: ''}", t)
+            throw new RuntimeException("Found more than one RoddyWorkflowConfig for Project ${project}, SeqType ${seqType}, Individual ${individual} and Pipeline ${pipeline}. ${t.message ?: ''}", t)
         }
+    }
+
+
+    static RoddyWorkflowConfig getLatestForIndividual(final Project project, final SeqType seqType, final Pipeline pipeline, Individual individual) {
+        return getLatest(project, seqType, pipeline, individual) ?: getLatest(project, seqType, pipeline)
     }
 
     void validateConfig() {
@@ -102,6 +139,9 @@ class RoddyWorkflowConfig extends ConfigPerProject {
         assert pluginVersion.endsWith(":${matcher.group(1)}")
         def configuration = new XmlParser().parseText(configFile.text)
         assert configuration.@name == getNameUsedInConfig()
+        if (individual) {
+            assert configFilePath.contains(individual.pid)
+        }
     }
 
     String getNameUsedInConfig() {

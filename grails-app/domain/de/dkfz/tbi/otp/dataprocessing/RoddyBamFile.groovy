@@ -437,8 +437,8 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
                 it.withdraw()
             }
 
-            LogThreadLocal.threadLog.info "Execute WithdrawnFilesRename.groovy script afterwards"
-            LogThreadLocal.threadLog.info "Withdrawing ${this}"
+            LogThreadLocal.threadLog?.info "Execute WithdrawnFilesRename.groovy script afterwards"
+            LogThreadLocal.threadLog?.info "Withdrawing ${this}"
             withdrawn = true
             assert save(flush: true)
         }

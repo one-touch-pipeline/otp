@@ -10,11 +10,12 @@ import org.junit.*
 
 
 @Mock([
+        Individual,
+        Pipeline,
         Project,
         ProjectCategory,
         RoddyWorkflowConfig,
         SeqType,
-        Pipeline,
 ])
 @TestMixin(ControllerUnitTestMixin)
 public class RoddyWorkflowConfigUnitTests {
@@ -97,18 +98,154 @@ public class RoddyWorkflowConfigUnitTests {
     }
 
     @Test
-    void testUniqueConstraint() {
+    void testConfigVersionValidator_NoIndividual() {
+        RoddyWorkflowConfig roddyWorkflowConfig1 = DomainFactory.createRoddyWorkflowConfig(
+                obsoleteDate: new Date(),
+        )
+
+        RoddyWorkflowConfig roddyWorkflowConfig2 = DomainFactory.createRoddyWorkflowConfig([
+                project: roddyWorkflowConfig1.project,
+                seqType: roddyWorkflowConfig1.seqType,
+                pipeline: roddyWorkflowConfig1.pipeline,
+                configVersion: roddyWorkflowConfig1.configVersion,
+                pluginVersion: roddyWorkflowConfig1.pluginVersion,
+                ], false)
+
+        TestCase.assertValidateError(roddyWorkflowConfig2, "configVersion", "validator.invalid", roddyWorkflowConfig2.configVersion)
+    }
+
+    @Test
+    void testConfigVersionValidator_WithIndividualInOneConfig() {
+        RoddyWorkflowConfig roddyWorkflowConfig1 = DomainFactory.createRoddyWorkflowConfig(
+                individual: DomainFactory.createIndividual(),
+                obsoleteDate: new Date(),
+        )
+
+        RoddyWorkflowConfig roddyWorkflowConfig2 = DomainFactory.createRoddyWorkflowConfig([
+                project: roddyWorkflowConfig1.project,
+                seqType: roddyWorkflowConfig1.seqType,
+                pipeline: roddyWorkflowConfig1.pipeline,
+                configVersion: roddyWorkflowConfig1.configVersion,
+                pluginVersion: roddyWorkflowConfig1.pluginVersion,
+        ], false)
+
+        assert roddyWorkflowConfig2.validate()
+    }
+
+    @Test
+    void testConfigVersionValidator_WithIndividualInBothConfigs() {
+        RoddyWorkflowConfig roddyWorkflowConfig1 = DomainFactory.createRoddyWorkflowConfig(
+                individual: DomainFactory.createIndividual(),
+                obsoleteDate: new Date(),
+        )
+
+        RoddyWorkflowConfig roddyWorkflowConfig2 = DomainFactory.createRoddyWorkflowConfig([
+                project: roddyWorkflowConfig1.project,
+                seqType: roddyWorkflowConfig1.seqType,
+                pipeline: roddyWorkflowConfig1.pipeline,
+                pluginVersion: roddyWorkflowConfig1.pluginVersion,
+                configVersion: roddyWorkflowConfig1.configVersion,
+                individual: roddyWorkflowConfig1.individual,
+        ], false)
+
+        TestCase.assertValidateError(roddyWorkflowConfig2, "configVersion", "validator.invalid", roddyWorkflowConfig2.configVersion)
+    }
+
+    @Test
+    void testConfigVersionValidator_WithDifferentIndividualInBothConfigs() {
+        RoddyWorkflowConfig roddyWorkflowConfig1 = DomainFactory.createRoddyWorkflowConfig(individual: DomainFactory.createIndividual())
+
+        RoddyWorkflowConfig roddyWorkflowConfig2 = DomainFactory.createRoddyWorkflowConfig([
+                project: roddyWorkflowConfig1.project,
+                seqType: roddyWorkflowConfig1.seqType,
+                pipeline: roddyWorkflowConfig1.pipeline,
+                pluginVersion: roddyWorkflowConfig1.pluginVersion,
+                configVersion: roddyWorkflowConfig1.configVersion,
+                individual: DomainFactory.createIndividual(),
+        ], false)
+
+        assert roddyWorkflowConfig2.validate()
+   }
+
+    @Test
+    void testObsoleteDateValidator_NoIndividual_invalid() {
         RoddyWorkflowConfig roddyWorkflowConfig1 = DomainFactory.createRoddyWorkflowConfig()
 
         RoddyWorkflowConfig roddyWorkflowConfig2 = DomainFactory.createRoddyWorkflowConfig([
                 project: roddyWorkflowConfig1.project,
                 seqType: roddyWorkflowConfig1.seqType,
                 pipeline: roddyWorkflowConfig1.pipeline,
-                configFilePath: roddyWorkflowConfig1.configFilePath,
-                configVersion: DomainFactory.TEST_CONFIG_VERSION,
-                ], false)
+        ], false)
 
-         assert !roddyWorkflowConfig2.validate()
+        TestCase.assertValidateError(roddyWorkflowConfig2, "obsoleteDate", "validator.invalid", null)
+    }
+
+    @Test
+    void testObsoleteDateValidator_NoIndividual_valid() {
+        RoddyWorkflowConfig roddyWorkflowConfig1 = DomainFactory.createRoddyWorkflowConfig(obsoleteDate: new Date())
+
+        RoddyWorkflowConfig roddyWorkflowConfig2 = DomainFactory.createRoddyWorkflowConfig([
+                project: roddyWorkflowConfig1.project,
+                seqType: roddyWorkflowConfig1.seqType,
+                pipeline: roddyWorkflowConfig1.pipeline,
+        ], false)
+
+        assert roddyWorkflowConfig2.validate()
+    }
+
+    @Test
+    void testObsoleteDateValidator_WithIndividualInOneConfig_valid() {
+        RoddyWorkflowConfig roddyWorkflowConfig1 = DomainFactory.createRoddyWorkflowConfig(individual: DomainFactory.createIndividual())
+
+        RoddyWorkflowConfig roddyWorkflowConfig2 = DomainFactory.createRoddyWorkflowConfig([
+                project: roddyWorkflowConfig1.project,
+                seqType: roddyWorkflowConfig1.seqType,
+                pipeline: roddyWorkflowConfig1.pipeline,
+        ], false)
+
+        assert roddyWorkflowConfig2.validate()
+    }
+
+    @Test
+    void testObsoleteDateValidator_WithIndividualInBothConfigs_invalid() {
+        RoddyWorkflowConfig roddyWorkflowConfig1 = DomainFactory.createRoddyWorkflowConfig(individual: DomainFactory.createIndividual())
+
+        RoddyWorkflowConfig roddyWorkflowConfig2 = DomainFactory.createRoddyWorkflowConfig([
+                project: roddyWorkflowConfig1.project,
+                seqType: roddyWorkflowConfig1.seqType,
+                pipeline: roddyWorkflowConfig1.pipeline,
+                individual: roddyWorkflowConfig1.individual,
+        ], false)
+
+        TestCase.assertValidateError(roddyWorkflowConfig2, "obsoleteDate", "validator.invalid", null)
+    }
+
+    @Test
+    void testObsoleteDateValidator_WithIndividualInBothConfigs_valid() {
+        RoddyWorkflowConfig roddyWorkflowConfig1 = DomainFactory.createRoddyWorkflowConfig(obsoleteDate: new Date(), individual: DomainFactory.createIndividual())
+
+        RoddyWorkflowConfig roddyWorkflowConfig2 = DomainFactory.createRoddyWorkflowConfig([
+                project: roddyWorkflowConfig1.project,
+                seqType: roddyWorkflowConfig1.seqType,
+                pipeline: roddyWorkflowConfig1.pipeline,
+                individual: roddyWorkflowConfig1.individual,
+        ], false)
+
+        assert roddyWorkflowConfig2.validate()
+    }
+
+    @Test
+    void testObsoleteDateValidator_WithDifferentIndividualInBothConfigs_valid() {
+        RoddyWorkflowConfig roddyWorkflowConfig1 = DomainFactory.createRoddyWorkflowConfig(obsoleteDate: new Date(), individual: DomainFactory.createIndividual())
+
+        RoddyWorkflowConfig roddyWorkflowConfig2 = DomainFactory.createRoddyWorkflowConfig([
+                project: roddyWorkflowConfig1.project,
+                seqType: roddyWorkflowConfig1.seqType,
+                pipeline: roddyWorkflowConfig1.pipeline,
+                individual: DomainFactory.createIndividual(),
+        ], false)
+
+        assert roddyWorkflowConfig2.validate()
     }
 
     @Test
@@ -131,7 +268,7 @@ public class RoddyWorkflowConfigUnitTests {
 
 
     @Test
-    void tesValidateConfig_shouldBeValid() {
+    void testValidateConfig_shouldBeValid() {
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig()
         createXml(roddyWorkflowConfig, roddyWorkflowConfig.getNameUsedInConfig())
 
@@ -180,7 +317,27 @@ public class RoddyWorkflowConfigUnitTests {
         }
     }
 
+    @Test
+    void testValidateConfig_withIndividual_PidInPath_shouldBeValid() {
+        Individual individual = DomainFactory.createIndividual()
+        RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig(individual: individual)
+        configDir = new File(configDir, individual.pid)
+        createXml(roddyWorkflowConfig, roddyWorkflowConfig.getNameUsedInConfig())
 
+        roddyWorkflowConfig.validateConfig()
+    }
+
+
+    @Test
+    void testValidateConfig_withIndividual_PidNotInPath_shouldBeInvalid() {
+        Individual individual = DomainFactory.createIndividual()
+        RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig(individual: individual)
+        createXml(roddyWorkflowConfig, roddyWorkflowConfig.getNameUsedInConfig())
+
+        TestCase.shouldFailWithMessageContaining(AssertionError, "assert configFilePath.contains(individual.pid)") {
+            roddyWorkflowConfig.validateConfig()
+        }
+    }
 
     void createXml(RoddyWorkflowConfig roddyWorkflowConfig, String label) {
         File file = new File(configDir, new File(roddyWorkflowConfig.configFilePath).name)

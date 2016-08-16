@@ -129,7 +129,7 @@ abstract class RoddyAlignmentStartJob extends AbstractStartJobImpl {
         List<Long> containedSeqTracks = baseBamFile?.containedSeqTracks*.id
         Set<SeqTrack> seqTracks = SeqTrack.getAll(mergableSeqtracks - containedSeqTracks) as Set
 
-        RoddyWorkflowConfig config = RoddyWorkflowConfig.getLatest(mergingWorkPackage.project, mergingWorkPackage.seqType, mergingWorkPackage.pipeline)
+        RoddyWorkflowConfig config = RoddyWorkflowConfig.getLatestForIndividual(mergingWorkPackage.project, mergingWorkPackage.seqType, mergingWorkPackage.pipeline, mergingWorkPackage.individual)
         assert config: "Could not find one RoddyWorkflowConfig for ${mergingWorkPackage.project}, ${mergingWorkPackage.seqType} and ${mergingWorkPackage.pipeline}"
 
         ProcessingOption roddyVersion = CollectionUtils.exactlyOneElement(

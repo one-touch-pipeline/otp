@@ -78,7 +78,7 @@ class RoddyWorkflowConfigSpec extends Specification {
 
     void "test constraint, when project, seqType, pipeline, pluginVersion and configVersion combination is not unique, then validate should return false"() {
         given:
-        RoddyWorkflowConfig config1 = DomainFactory.createRoddyWorkflowConfig()
+        RoddyWorkflowConfig config1 = DomainFactory.createRoddyWorkflowConfig(obsoleteDate: new Date())
         RoddyWorkflowConfig config2 = DomainFactory.createRoddyWorkflowConfig()
 
         when:
@@ -89,7 +89,7 @@ class RoddyWorkflowConfigSpec extends Specification {
         config2.configVersion = config1.configVersion
 
         then:
-        TestCase.assertValidateError(config2, 'configVersion', 'unique', config2.configVersion)
+        TestCase.assertValidateError(config2, 'configVersion', 'validator.invalid', config2.configVersion)
     }
 
     void "test getStandardConfigDirectory all fine should return correct path for project"() {

@@ -189,6 +189,7 @@ public class RoddyAlignmentDeciderTest {
                 identifier: bamFile1.identifier + 1,
                 workPackage: bamFile1.workPackage,
                 seqTracks: [bamFile1.seqTracks.iterator().next()] as Set<SeqTrack>,
+                config: bamFile1.config,
         )
         RoddyBamFile bamFile3 = DomainFactory.createRoddyBamFile([
                 withdrawn: withdrawn,
@@ -197,7 +198,8 @@ public class RoddyAlignmentDeciderTest {
                 workPackage: bamFile1.workPackage,
                 seqTracks: [bamFile1.seqTracks.iterator().next()] as Set<SeqTrack>,
                 fileOperationStatus: md5sumNotNull ? FileOperationStatus.PROCESSED : FileOperationStatus.DECLARED,
-                fileSize: md5sumNotNull ? 10000 : -1
+                fileSize: md5sumNotNull ? 10000 : -1,
+                config: bamFile1.config,
                 ]
         )
 
@@ -225,7 +227,8 @@ public class RoddyAlignmentDeciderTest {
                 workPackage: bamFile1.workPackage,
                 seqTracks: [bamFile1.seqTracks.iterator().next()] as Set<SeqTrack>,
                 fileOperationStatus: md5sumNotNull ? FileOperationStatus.PROCESSED : FileOperationStatus.DECLARED,
-                fileSize: md5sumNotNull ? 10000 : -1
+                fileSize: md5sumNotNull ? 10000 : -1,
+                config: bamFile1.config,
                 ]
         )
         RoddyBamFile bamFile3 = DomainFactory.createRoddyBamFile(
@@ -236,6 +239,7 @@ public class RoddyAlignmentDeciderTest {
                 identifier: bamFile1.identifier + 2,
                 workPackage: bamFile1.workPackage,
                 seqTracks: [bamFile1.seqTracks.iterator().next()] as Set<SeqTrack>,
+                config: bamFile1.config,
         )
 
         def bamFileResult = decider.getLatestBamFileWhichHasBeenOrCouldBeCopied(bamFile1.workPackage)
@@ -267,6 +271,7 @@ public class RoddyAlignmentDeciderTest {
                 identifier: bamFile1.identifier + 1,
                 workPackage: bamFile1.workPackage,
                 seqTracks: [bamFile1.seqTracks.iterator().next()] as Set<SeqTrack>,
+                config: bamFile1.config,
         )
         RoddyBamFile bamFile3 = DomainFactory.createRoddyBamFile(
                 withdrawn: true,
@@ -276,6 +281,7 @@ public class RoddyAlignmentDeciderTest {
                 identifier: bamFile1.identifier + 2,
                 workPackage: bamFile1.workPackage,
                 seqTracks: [bamFile1.seqTracks.iterator().next()] as Set<SeqTrack>,
+                config: bamFile1.config,
         )
 
         def bamFileResult = decider.getLatestBamFileWhichHasBeenOrCouldBeCopied(bamFile1.workPackage)

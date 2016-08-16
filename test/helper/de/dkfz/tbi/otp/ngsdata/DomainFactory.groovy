@@ -387,10 +387,10 @@ class DomainFactory {
                 seqTracks: [seqTrack],
                 workPackage: workPackage,
                 identifier: RoddyBamFile.nextIdentifier(workPackage),
-                config: createRoddyWorkflowConfig(
+                config: { createRoddyWorkflowConfig(
                         pipeline: workPackage.pipeline,
                         project: workPackage.project,
-                ),
+                )},
                 md5sum: HelperUtils.randomMd5sum,
                 fileOperationStatus: FileOperationStatus.PROCESSED,
                 fileSize: 10000,
@@ -513,7 +513,7 @@ class DomainFactory {
         MergingWorkPackage diseaseWorkPackage = samplePair.mergingWorkPackage1
 
         RoddyBamFile disease = createRoddyBamFile([workPackage: diseaseWorkPackage] + bamFile1Properties)
-        RoddyBamFile control = createRoddyBamFile([workPackage: controlWorkPackage] + bamFile2Properties)
+        RoddyBamFile control = createRoddyBamFile([workPackage: controlWorkPackage, config: disease.config] + bamFile2Properties)
 
         ExternalScript externalScript = ExternalScript.buildLazy()
 
