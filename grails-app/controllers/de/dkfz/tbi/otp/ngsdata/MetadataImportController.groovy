@@ -5,7 +5,9 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
 import de.dkfz.tbi.otp.tracking.*
 import de.dkfz.tbi.otp.user.*
 import grails.converters.*
+import grails.validation.Validateable
 import groovy.transform.*
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.validation.*
 
 import java.util.regex.*
@@ -16,6 +18,7 @@ class MetadataImportController {
     ProcessingOptionService processingOptionService
     RunService runService
     TrackingService trackingService
+    IlseSubmissionService ilseSubmissionService
 
     def index(MetadataImportControllerSubmitCommand cmd) {
         MetadataValidationContext metadataValidationContext
@@ -132,6 +135,38 @@ class MetadataImportController {
             }
         }
         return text
+    }
+
+    def blacklistedIlseNumbers(BlackListedIlseCommand command) {
+        if (command?.addButton) {
+            if (command.validate()) {
+                if (ilseSubmissionService.checkIfIlseNumberDoesNotExist(command.ilse)) {
+                    ilseSubmissionService.createNewIlseSubmission(command.ilse, command.comment)
+                    redirect action: 'blacklistedIlseNumbers'
+                    return
+                } else {
+                    command.errors.rejectValue('ilse', 'code', 'ilse number exists already')
+                }
+            }
+        }
+        List<IlseSubmission> ilseSubmissions = ilseSubmissionService.getSortedBlacklistedIlseSubmissions()
+        return [
+                ilseSubmissions: ilseSubmissions,
+                command        : command,
+        ]
+    }
+}
+
+@Validateable
+class BlackListedIlseCommand {
+
+    String addButton
+    Integer ilse
+    String comment
+
+    static constraints = {
+        ilse nullable: false, min: 1000, max: 999999
+        comment nullable: false, blank: false
     }
 }
 

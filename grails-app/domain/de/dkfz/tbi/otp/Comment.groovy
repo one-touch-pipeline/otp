@@ -11,4 +11,8 @@ class Comment implements Entity {
     static mapping = {
         comment type: "text"
     }
+
+    String displayString() {
+        return "Author: ${author}\nlast modified at: ${modificationDate.format('yyyy-MM-dd')}\ncomment: ${comment}"
+    }
 }

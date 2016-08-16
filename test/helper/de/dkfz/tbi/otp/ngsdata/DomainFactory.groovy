@@ -341,6 +341,22 @@ class DomainFactory {
         ], properties)
     }
 
+    public static createComment(Map properties = [:]) {
+        return createDomainObject(Comment, [
+                comment: "comment ${counter++}",
+                author:  "author ${counter++}",
+                modificationDate: {new Date()},
+        ], properties)
+    }
+
+    public static createIlseSubmission(Map properties = [:], boolean saveAndValidate = true) {
+        return createDomainObject(IlseSubmission, [
+                ilseNumber: { counter++ % 999000 + 1000 },
+                warning: false,
+                comment: {createComment()}
+                ], properties, saveAndValidate)
+    }
+
     public static ProcessedMergedBamFile createProcessedMergedBamFile(MergingWorkPackage mergingWorkPackage, Map properties = [:]) {
         MergingSet mergingSet = createMergingSet(mergingWorkPackage)
         return createProcessedMergedBamFile(mergingSet, properties)
