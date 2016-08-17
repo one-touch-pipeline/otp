@@ -47,12 +47,11 @@ class RunSeqPlatformSeqKitValidatorSpec extends Specification {
         then:
         if (result) {
             Problem problem = exactlyOneElement(context.problems)
-            problem.level == Level.WARNING
-            containSame(problem.affectedCells, context.spreadsheet.dataRows[0].cells)
-            problem.message.contains("The run name ${runName} does not contain the sequencing kit and sequencing platform specific run identifier ${identifier}.")
-
+            assert problem.level == Level.WARNING
+            assert containSame(problem.affectedCells, context.spreadsheet.dataRows[0].cells)
+            assert problem.message.contains("The run name ${runName} does not contain the sequencing kit and sequencing platform specific run identifier ${identifier}.")
         } else {
-            context.problems.isEmpty()
+            assert context.problems.isEmpty()
         }
 
         where:

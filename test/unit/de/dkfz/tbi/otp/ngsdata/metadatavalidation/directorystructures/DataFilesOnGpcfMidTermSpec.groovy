@@ -32,14 +32,14 @@ class DataFilesOnGpcfMidTermSpec extends Specification {
 
         then:
         if (valid) {
-            dataFilePath == new File(directory, "run_name/asdf/fastq/asdf_R1.fastq.gz")
-            context.problems.isEmpty()
+            assert dataFilePath == new File(directory, "run_name/asdf/fastq/asdf_R1.fastq.gz")
+            assert context.problems.isEmpty()
         } else {
-            dataFilePath == null
+            assert dataFilePath == null
             Problem problem = exactlyOneElement(context.problems)
-            problem.level == Level.ERROR
-            problem.affectedCells == invalidCells
-            problem.message.contains('Cannot construct a valid GPCF midterm storage path')
+            assert problem.level == Level.ERROR
+            assert problem.affectedCells == invalidCells
+            assert problem.message.contains('Cannot construct a valid GPCF midterm storage path')
         }
 
         where:
