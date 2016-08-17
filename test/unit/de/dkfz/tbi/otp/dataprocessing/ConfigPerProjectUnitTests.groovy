@@ -4,7 +4,6 @@ import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.ngsdata.ProjectCategory
-import de.dkfz.tbi.otp.ngsdata.TestData
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import org.junit.Test
@@ -13,7 +12,7 @@ import org.junit.Test
 class ConfigPerProjectImpl extends ConfigPerProject { }
 
 @TestFor(ConfigPerProjectImpl)
-@Mock([Project, ProjectCategory,])
+@Mock([Pipeline, Project, ProjectCategory,])
 class ConfigPerProjectUnitTests {
 
     String configuration = "configuration"
@@ -21,6 +20,7 @@ class ConfigPerProjectUnitTests {
     @Test
     void testSaveWithoutProject_shouldFail() {
         ConfigPerProject configPerProject = new ConfigPerProjectImpl(
+                pipeline: DomainFactory.createOtpSnvPipelineLazy(),
                 )
         TestCase.assertValidateError(configPerProject, 'project', 'nullable', null)
 
@@ -33,6 +33,7 @@ class ConfigPerProjectUnitTests {
         ConfigPerProject configPerProject = new ConfigPerProjectImpl(
                 project: DomainFactory.createProject(),
                 obsoleteDate: new Date(),
+                pipeline: DomainFactory.createOtpSnvPipelineLazy(),
                 )
         assertTrue(configPerProject.validate())
     }
@@ -41,11 +42,13 @@ class ConfigPerProjectUnitTests {
     void testSaveWithReferenceToPreviousConfigWithoutObsolete_shouldFail() {
         ConfigPerProject validConfigPerProject = new ConfigPerProjectImpl(
                 project: DomainFactory.createProject(),
+                pipeline: DomainFactory.createOtpSnvPipelineLazy(),
         )
         validConfigPerProject.save()
 
         ConfigPerProject newConfigPerProject = new ConfigPerProjectImpl(
                 project: DomainFactory.createProject(),
+                pipeline: DomainFactory.createOtpSnvPipelineLazy(),
                 previousConfig: validConfigPerProject,
                 )
         TestCase.assertValidateError(newConfigPerProject, 'previousConfig', 'validator.invalid', validConfigPerProject)

@@ -53,6 +53,7 @@ class SnvCallingInstanceTestData {
                 seqType: samplePair.seqType,
                 configuration: configuration,
                 externalScriptVersion: "v1",
+                pipeline: DomainFactory.createOtpSnvPipelineLazy(),
         )
         assert snvConfig.save(flush: true, failOnError: true)
         return snvConfig

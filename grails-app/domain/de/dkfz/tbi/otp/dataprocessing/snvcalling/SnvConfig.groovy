@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
+import de.dkfz.tbi.otp.dataprocessing.Pipeline
+
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 import de.dkfz.tbi.otp.dataprocessing.ConfigPerProject
@@ -43,6 +45,9 @@ class SnvConfig extends ConfigPerProject {
             }
         }
         seqType unique: ['project', 'obsoleteDate']  // partial index: WHERE obsolete_date IS NULL
+        pipeline validator: { pipeline ->
+            pipeline?.name == Pipeline.Name.OTP_SNV
+        }
     }
 
     static mapping = {
@@ -170,6 +175,7 @@ ${CHROMOSOME_NAMES_VARIABLE_NAME}=\${CHROMOSOME_INDICES[@]}
                 configuration: configFile.text,
                 externalScriptVersion: externalScriptVersion,
                 previousConfig: snvConfig,
+                pipeline: exactlyOneElement(Pipeline.findAllByNameAndType(Pipeline.Name.OTP_SNV, Pipeline.Type.SNV))
         ).evaluate()
         config.createConfigPerProject()
         return config

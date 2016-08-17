@@ -2,13 +2,13 @@ package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
-import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
+import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
-import org.hibernate.*
+import de.dkfz.tbi.otp.utils.Entity
+import org.hibernate.proxy.HibernateProxyHelper
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
 
 /**
@@ -76,8 +76,10 @@ class SnvCallingInstance implements ProcessParameterObject, Entity {
                 return true
             }
         }
-        config validator: { val, obj ->
-            SnvConfig.isAssignableFrom(Hibernate.getClass(val)) || RoddyWorkflowConfig.isAssignableFrom(Hibernate.getClass(val))
+        config validator: { val, SnvCallingInstance obj ->
+            (SnvConfig.isAssignableFrom(HibernateProxyHelper.getClassWithoutInitializingProxy(val)) ||
+                    RoddyWorkflowConfig.isAssignableFrom(HibernateProxyHelper.getClassWithoutInitializingProxy(val))) &&
+            val?.pipeline?.type == Pipeline.Type.SNV
         }
     }
 

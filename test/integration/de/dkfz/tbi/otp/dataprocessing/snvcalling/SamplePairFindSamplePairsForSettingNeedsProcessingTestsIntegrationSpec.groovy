@@ -98,11 +98,12 @@ class SamplePairFindSamplePairsForSettingNeedsProcessingTestsIntegrationSpec ext
         def (ProcessedMergedBamFile bamFileTumor2, SamplePair samplePair2) = snvCallingInstanceTestData.createDisease(snvCallingInstanceTestData.bamFileControl.mergingWorkPackage)
 
         SnvConfig snvConfig = new SnvConfig(
-                    project: samplePair2.project,
-                    seqType: samplePair2.seqType,
-                    configuration: "test config",
-                    externalScriptVersion: "v1",
-            )
+                project: samplePair2.project,
+                seqType: samplePair2.seqType,
+                configuration: "test config",
+                externalScriptVersion: "v1",
+                pipeline: DomainFactory.createOtpSnvPipelineLazy(),
+        )
         assert snvConfig.save(flush: true, failOnError: true)
 
 
@@ -123,6 +124,7 @@ class SamplePairFindSamplePairsForSettingNeedsProcessingTestsIntegrationSpec ext
                 seqType: snvCallingInstanceTestData.samplePair.seqType,
                 configuration: "test config",
                 externalScriptVersion: "v1",
+                pipeline: DomainFactory.createOtpSnvPipelineLazy(),
         )
         assert snvConfig.save(flush: true, failOnError: true)
 
@@ -275,10 +277,11 @@ class SamplePairFindSamplePairsForSettingNeedsProcessingTestsIntegrationSpec ext
                         seqType: bamfileTumor.seqType,
                         configuration: "test config",
                         externalScriptVersion: "v1",
+                        pipeline: DomainFactory.createOtpSnvPipelineLazy(),
                 ).save(flush: true, failOnError: true)
         )
         final SeqTrack seqTrack = SeqTrack.findWhere(sample: sample, seqType: instance.seqType)
-        assert ThreadUtils.waitFor( { System.currentTimeMillis() > instance.latestDataFileCreationDate.time }, 1, 1)
+        assert ThreadUtils.waitFor({ System.currentTimeMillis() > instance.latestDataFileCreationDate.time }, 1, 1)
         final DataFile dataFile = DomainFactory.createSequenceDataFile(seqTrack: seqTrack)
         assert dataFile.dateCreated > instance.latestDataFileCreationDate
         return dataFile

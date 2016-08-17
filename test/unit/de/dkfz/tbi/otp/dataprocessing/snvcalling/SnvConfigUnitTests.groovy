@@ -2,10 +2,10 @@ package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.ConfigPerProject
+import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.ngsdata.TestData
 import de.dkfz.tbi.otp.utils.ExternalScript
 import de.dkfz.tbi.otp.utils.HelperUtils
 import grails.buildtestdata.mixin.Build
@@ -19,15 +19,15 @@ import org.junit.Test
 import static de.dkfz.tbi.TestCase.createEmptyTestDirectory
 
 @TestFor(SnvConfig)
-@Build([ExternalScript, Project, SeqType])
+@Build([ExternalScript, Pipeline, Project, SeqType])
 @TestMixin(ControllerUnitTestMixin)
 class SnvConfigUnitTests {
 
     static final String LEGAL_EXECUTE_FLAGS =
-    "RUN_CALLING=0\n" +
-    "RUN_SNV_ANNOTATION=1\n" +
-    "RUN_SNV_DEEPANNOTATION=1\n" +
-    "RUN_FILTER_VCF=1"
+            "RUN_CALLING=0\n" +
+                    "RUN_SNV_ANNOTATION=1\n" +
+                    "RUN_SNV_DEEPANNOTATION=1\n" +
+                    "RUN_FILTER_VCF=1"
 
     ExternalScript externalScript
     SnvConfig validSnvConfig
@@ -44,6 +44,7 @@ class SnvConfigUnitTests {
                 seqType: new SeqType(),
                 configuration: LEGAL_EXECUTE_FLAGS,
                 externalScriptVersion: externalScript.scriptVersion,
+                pipeline: DomainFactory.createOtpSnvPipelineLazy(),
         )
         validSnvConfig.save()
 
@@ -66,6 +67,7 @@ class SnvConfigUnitTests {
                 project: DomainFactory.createProject(),
                 seqType: new SeqType(),
                 configuration: LEGAL_EXECUTE_FLAGS,
+                pipeline: DomainFactory.createOtpSnvPipelineLazy(),
         )
         TestCase.assertValidateError(configPerProject, 'externalScriptVersion', 'nullable', null)
 
@@ -79,7 +81,8 @@ class SnvConfigUnitTests {
                 project: DomainFactory.createProject(),
                 seqType: new SeqType(),
                 configuration: LEGAL_EXECUTE_FLAGS,
-                externalScriptVersion: ""
+                externalScriptVersion: "",
+                pipeline: DomainFactory.createOtpSnvPipelineLazy(),
         )
         TestCase.assertValidateError(configPerProject, 'externalScriptVersion', 'blank', '')
 
@@ -96,7 +99,8 @@ class SnvConfigUnitTests {
                 project: DomainFactory.createProject(),
                 seqType: new SeqType(),
                 configuration: LEGAL_EXECUTE_FLAGS,
-                externalScriptVersion: externalScript.scriptVersion
+                externalScriptVersion: externalScript.scriptVersion,
+                pipeline: DomainFactory.createOtpSnvPipelineLazy(),
         )
         TestCase.assertValidateError(configPerProject, 'externalScriptVersion', 'validator.invalid', externalScript.scriptVersion)
     }
@@ -109,7 +113,8 @@ class SnvConfigUnitTests {
                 seqType: new SeqType(),
                 configuration: LEGAL_EXECUTE_FLAGS,
                 externalScriptVersion: externalScript.scriptVersion,
-                obsoleteDate: new Date()
+                obsoleteDate: new Date(),
+                pipeline: DomainFactory.createOtpSnvPipelineLazy(),
         )
         assert configPerProject.validate()
     }
@@ -121,7 +126,8 @@ class SnvConfigUnitTests {
                 project: DomainFactory.createProject(),
                 seqType: new SeqType(),
                 configuration: LEGAL_EXECUTE_FLAGS,
-                externalScriptVersion: externalScript.scriptVersion
+                externalScriptVersion: externalScript.scriptVersion,
+                pipeline: DomainFactory.createOtpSnvPipelineLazy(),
         )
         TestCase.assertValidateError(configPerProject, 'externalScriptVersion', 'validator.invalid', externalScript.scriptVersion)
     }
@@ -132,7 +138,8 @@ class SnvConfigUnitTests {
                 project: DomainFactory.createProject(),
                 configuration: LEGAL_EXECUTE_FLAGS,
                 externalScriptVersion: externalScript.scriptVersion,
-                )
+                pipeline: DomainFactory.createOtpSnvPipelineLazy(),
+        )
         assertFalse(snvConfig.validate())
 
         snvConfig.seqType = new SeqType()
@@ -142,10 +149,11 @@ class SnvConfigUnitTests {
     @Test
     void testSaveWithoutConfig_shouldFail() {
         SnvConfig snvConfig = new SnvConfig(
-            project: DomainFactory.createProject(),
-            seqType: new SeqType(),
-            externalScriptVersion: externalScript.scriptVersion,
-            )
+                project: DomainFactory.createProject(),
+                seqType: new SeqType(),
+                externalScriptVersion: externalScript.scriptVersion,
+                pipeline: DomainFactory.createOtpSnvPipelineLazy(),
+        )
         assertFalse(snvConfig.validate())
 
         snvConfig.configuration = LEGAL_EXECUTE_FLAGS
@@ -155,10 +163,11 @@ class SnvConfigUnitTests {
     @Test
     void testSaveWithEmptyConfig_shouldFail() {
         SnvConfig snvConfig = new SnvConfig(
-            project: DomainFactory.createProject(),
-            seqType: new SeqType(),
-            configuration: "",
-            externalScriptVersion: externalScript.scriptVersion,
+                project: DomainFactory.createProject(),
+                seqType: new SeqType(),
+                configuration: "",
+                externalScriptVersion: externalScript.scriptVersion,
+                pipeline: DomainFactory.createOtpSnvPipelineLazy(),
         )
         assertFalse(snvConfig.validate())
 
@@ -196,5 +205,19 @@ class SnvConfigUnitTests {
         shouldFail RuntimeException, {
             validSnvConfig.writeToFile(configFile, false)
         }
+    }
+
+
+    @Test
+    void testPipelineConstraint_correctPipeline() {
+        DomainFactory.createSnvConfig()
+    }
+
+
+    @Test
+    void testPipelineConstraint_wrongPipeline() {
+        shouldFail {
+            DomainFactory.createSnvConfig(pipeline:  DomainFactory.createRoddySnvPipelineLazy())
+        }.contains("pipeline")
     }
 }

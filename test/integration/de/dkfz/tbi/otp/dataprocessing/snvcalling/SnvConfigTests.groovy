@@ -4,7 +4,6 @@ import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.ngsdata.TestData
 import de.dkfz.tbi.otp.utils.ExternalScript
 import grails.validation.ValidationException
 import org.junit.After
@@ -58,6 +57,8 @@ class SnvConfigTests {
                 dirName: "seqTypeDirName"
         )
         assert seqType.save(flush: true)
+
+        DomainFactory.createOtpSnvPipelineLazy()
     }
 
     @After
@@ -74,6 +75,7 @@ class SnvConfigTests {
                 seqType: seqType,
                 configuration: "testConfig",
                 externalScriptVersion: "v1",
+                pipeline: DomainFactory.createOtpSnvPipelineLazy(),
         )
         assert config.save(flush:true)
 
@@ -98,6 +100,7 @@ class SnvConfigTests {
                 seqType: seqType2,
                 configuration: "testConfig",
                 externalScriptVersion: "v1",
+                pipeline: DomainFactory.createOtpSnvPipelineLazy(),
                 )
         assert config2.save(flush:true)
         assertEquals(config, SnvConfig.getLatest(project, seqType))
@@ -230,6 +233,7 @@ class SnvConfigTests {
                 seqType: seqType,
                 configuration: configuration,
                 externalScriptVersion: "v1",
+                pipeline: DomainFactory.createOtpSnvPipelineLazy(),
         )
         assert config.save()
         assertNotEvaluated(config)

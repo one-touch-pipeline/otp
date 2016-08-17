@@ -7,12 +7,12 @@ import grails.test.mixin.*
 import spock.lang.*
 
 @Mock([
+        Pipeline,
         Project,
         ProjectCategory,
         Realm,
         RoddyWorkflowConfig,
         SeqType,
-        Pipeline,
 ])
 class RoddyWorkflowConfigSpec extends Specification {
 
@@ -229,5 +229,15 @@ class RoddyWorkflowConfigSpec extends Specification {
         Pipeline.Name.PANCAN_ALIGNMENT | null                                               | PLUGIN_VERSION | CONFIG_VERSION || 'seqType'
         Pipeline.Name.PANCAN_ALIGNMENT | DomainFactory.createSeqType(roddyName: RODDY_NAME) | null           | CONFIG_VERSION || 'pluginVersion'
         Pipeline.Name.PANCAN_ALIGNMENT | DomainFactory.createSeqType(roddyName: RODDY_NAME) | PLUGIN_VERSION | null           || 'configVersion'
+    }
+
+
+    void "test pipeline constraint when pipeline not valid"() {
+        given:
+        Pipeline pipeline = DomainFactory.createOtpSnvPipelineLazy()
+        RoddyWorkflowConfig config = DomainFactory.createRoddyWorkflowConfig([pipeline: pipeline], false)
+
+        expect:
+        TestCase.assertValidateError(config, 'pipeline', 'validator.invalid', pipeline)
     }
 }

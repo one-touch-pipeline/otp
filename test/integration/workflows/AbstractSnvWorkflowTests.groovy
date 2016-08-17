@@ -85,6 +85,7 @@ abstract class AbstractSnvWorkflowTests extends WorkflowTestCase {
 
     protected void setupForLoadingWorkflow() {
         DomainFactory.createAlignableSeqTypes()
+        DomainFactory.createOtpSnvPipelineLazy()
     }
 
     @Test

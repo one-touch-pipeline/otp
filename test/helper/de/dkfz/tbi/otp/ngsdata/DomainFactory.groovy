@@ -9,7 +9,6 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.ngsdata.FileType.Type
 import de.dkfz.tbi.otp.ngsdata.Realm.Cluster
 import de.dkfz.tbi.otp.ngsdata.SampleType.SpecificReferenceGenome
 import de.dkfz.tbi.otp.tracking.*
@@ -151,6 +150,21 @@ class DomainFactory {
                 type: Pipeline.Type.ALIGNMENT,
         ])
     }
+
+    static Pipeline createOtpSnvPipelineLazy() {
+        return createDomainObjectLazy(Pipeline, [:], [
+                name: Pipeline.Name.OTP_SNV,
+                type: Pipeline.Type.SNV,
+        ])
+    }
+
+    static Pipeline createRoddySnvPipelineLazy() {
+        return createDomainObjectLazy(Pipeline, [:], [
+                name: Pipeline.Name.RODDY_SNV,
+                type: Pipeline.Type.SNV,
+        ])
+    }
+
 
     static Pipeline returnOrCreateAnyPipeline() {
         return (CollectionUtils.atMostOneElement(Pipeline.list(max: 1)) ?: createPanCanPipeline())
@@ -498,8 +512,19 @@ class DomainFactory {
         SnvConfig.buildLazy (
                 project: snvCallingInstance.project,
                 seqType: snvCallingInstance.seqType,
-                externalScriptVersion: externalScript.scriptVersion
+                externalScriptVersion: externalScript.scriptVersion,
+                pipeline: DomainFactory.createOtpSnvPipelineLazy(),
         )
+    }
+
+    public static SnvConfig createSnvConfig(Map properties = [:]) {
+        return createDomainObject(SnvConfig, [
+                configuration: "configuration_${counter++}",
+                externalScriptVersion: { DomainFactory.createExternalScript().scriptVersion },
+                seqType: { createSeqType() },
+                project: { createProject() },
+                pipeline: { createOtpSnvPipelineLazy() }
+        ], properties)
     }
 
     public static SnvCallingInstance createSnvInstanceWithRoddyBamFiles(Map properties = [:], Map bamFile1Properties = [:], Map bamFile2Properties = [:]) {
@@ -517,7 +542,7 @@ class DomainFactory {
 
         ExternalScript externalScript = ExternalScript.buildLazy()
 
-        SnvConfig snvConfig = SnvConfig.buildLazy(
+        SnvConfig snvConfig = createSnvConfig(
                 seqType: samplePair.seqType,
                 externalScriptVersion: externalScript.scriptVersion
         )
@@ -580,7 +605,7 @@ class DomainFactory {
     }
 
 
-    public static ExternalScript createExternalScript(Map properties) {
+    public static ExternalScript createExternalScript(Map properties = [:]) {
         return createDomainObject(ExternalScript, [
             scriptIdentifier: "scriptIdentifier_${counter++}",
             scriptVersion: "scriptVersion_${counter++}",

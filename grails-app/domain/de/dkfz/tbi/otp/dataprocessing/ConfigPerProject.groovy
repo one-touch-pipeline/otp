@@ -20,6 +20,8 @@ abstract class ConfigPerProject implements Entity {
     Date dateCreated
     Date lastUpdated
 
+    Pipeline pipeline
+
     /**
      * When changes appear in the configuration, a new ConfigPerProject entry is created and the old entry is set to obsolete.
      */

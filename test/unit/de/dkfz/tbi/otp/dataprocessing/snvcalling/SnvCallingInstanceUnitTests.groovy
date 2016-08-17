@@ -1,9 +1,11 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.MergingPass
 import de.dkfz.tbi.otp.dataprocessing.MergingSetAssignment
 import de.dkfz.tbi.otp.dataprocessing.ProcessedBamFile
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import grails.buildtestdata.mixin.Build
 import grails.test.mixin.*
 import org.junit.*
@@ -129,5 +131,24 @@ class SnvCallingInstanceUnitTests {
 
     SnvCallingInstance createSnvCallingInstance(Map properties = [:]) {
         return testData.createSnvCallingInstance(properties)
+    }
+
+
+    @Test
+    void testConfigConstraint_valid() {
+        SnvConfig config = DomainFactory.createSnvConfig()
+        SnvCallingInstance instance = DomainFactory.createSnvInstanceWithRoddyBamFiles(config: config)
+
+        assert instance.validate()
+    }
+
+
+    @Test
+    void testConfigConstraint_invalid() {
+        RoddyWorkflowConfig config = DomainFactory.createRoddyWorkflowConfig()
+        SnvCallingInstance instance = DomainFactory.createSnvInstanceWithRoddyBamFiles()
+        instance.config = config
+
+        TestCase.assertValidateError(instance, "config", "validator.invalid", config)
     }
 }

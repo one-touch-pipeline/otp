@@ -123,6 +123,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
                 seqType: seqType,
                 configuration: CONFIGURATION,
                 externalScriptVersion: "v1",
+                pipeline: DomainFactory.createOtpSnvPipelineLazy(),
         )
         assert snvConfig.save()
 

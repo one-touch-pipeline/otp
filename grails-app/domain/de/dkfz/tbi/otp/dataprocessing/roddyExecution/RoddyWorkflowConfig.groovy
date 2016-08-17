@@ -25,8 +25,6 @@ class RoddyWorkflowConfig extends ConfigPerProject {
 
     final static String CONFIG_PATH_ELEMENT = 'configFiles'
 
-    Pipeline pipeline
-
     SeqType seqType
 
     /**
@@ -50,7 +48,6 @@ class RoddyWorkflowConfig extends ConfigPerProject {
 
     static constraints = {
         configFilePath unique: true, validator: { OtpPath.isValidAbsolutePath(it) }
-        pipeline ()
         seqType nullable: true, //needs to be nullable because of old data, should never be null for new data
                 validator: {val, obj ->
                     obj.id ? true : val != null
@@ -87,6 +84,9 @@ class RoddyWorkflowConfig extends ConfigPerProject {
             }
         }
         individual nullable: true
+        pipeline validator: { pipeline ->
+            pipeline?.name != Pipeline.Name.OTP_SNV
+        }
     }
 
     static void importProjectConfigFile(Project project, SeqType seqType, String pluginVersionToUse, Pipeline pipeline, String configFilePath, String configVersion, Individual individual = null) {
