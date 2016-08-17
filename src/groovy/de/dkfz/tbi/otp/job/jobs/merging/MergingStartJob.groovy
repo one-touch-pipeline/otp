@@ -19,22 +19,21 @@ class MergingStartJob extends AbstractStartJobImpl implements RestartableStartJo
     @Autowired
     MergingPassService mergingPassService
 
-    final int MAX_RUNNING = 4
-
     @Scheduled(fixedDelay = 60000l)
     void execute() {
+        doWithPersistenceInterceptor {
+            short minPriority = minimumProcessingPriorityForOccupyingASlot
+            if (minPriority > ProcessingPriority.MAXIMUM_PRIORITY) {
+                return
+            }
 
-        short minPriority = minimumProcessingPriorityForOccupyingASlot
-        if (minPriority > ProcessingPriority.MAXIMUM_PRIORITY) {
-            return
-        }
-
-        MergingPass.withTransaction {
-            MergingPass mergingPass = mergingPassService.create(minPriority)
-            if (mergingPass) {
-                mergingPassService.mergingPassStarted(mergingPass)
-                createProcess(mergingPass)
-                log.debug "MergingStartJob started for: ${mergingPass.toString()}"
+            MergingPass.withTransaction {
+                MergingPass mergingPass = mergingPassService.create(minPriority)
+                if (mergingPass) {
+                    mergingPassService.mergingPassStarted(mergingPass)
+                    createProcess(mergingPass)
+                    log.debug "MergingStartJob started for: ${mergingPass.toString()}"
+                }
             }
         }
     }

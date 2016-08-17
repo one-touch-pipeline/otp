@@ -13,8 +13,10 @@ class SamplePairDiscoveryStartJob extends AbstractStartJobImpl {
     @Override
     @Scheduled(cron = '0 7 12,20 * * *')
     void execute() {
-        if (freeSlotAvailable) {
-            createProcess([])
+        doWithPersistenceInterceptor {
+            if (freeSlotAvailable) {
+                createProcess([])
+            }
         }
     }
 }

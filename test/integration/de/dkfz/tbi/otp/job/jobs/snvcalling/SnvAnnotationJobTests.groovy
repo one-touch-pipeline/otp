@@ -154,8 +154,8 @@ CHROMOSOME_INDICES=( {1..21} X Y)
                 )
         assert snvJobResult.save()
 
-        snvAnnotationJob = applicationContext.getBean('snvAnnotationJob',
-                DomainFactory.createAndSaveProcessingStep(SnvAnnotationJob.toString(), snvCallingInstance2), [])
+        snvAnnotationJob = applicationContext.getBean('snvAnnotationJob')
+        snvAnnotationJob.processingStep = DomainFactory.createAndSaveProcessingStep(SnvAnnotationJob.toString(), snvCallingInstance2)
         snvAnnotationJob.log = new NoOpLog()
     }
 

@@ -1,11 +1,17 @@
 package de.dkfz.tbi.otp.job.jobs
 
-import de.dkfz.tbi.otp.job.processing.AbstractJobImpl
+import de.dkfz.tbi.otp.job.ast.*
+import de.dkfz.tbi.otp.job.processing.*
+import org.springframework.context.annotation.*
+import org.springframework.stereotype.*
 
 /**
  * Very simple TestJob, just printing something to sysout.
  *
  */
+@Component
+@Scope("prototype")
+@UseJobLog
 class TestJob extends AbstractJobImpl {
     @Override
     public void execute() throws Exception {

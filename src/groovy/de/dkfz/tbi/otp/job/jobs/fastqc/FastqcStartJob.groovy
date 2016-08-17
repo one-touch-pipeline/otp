@@ -19,18 +19,20 @@ class FastqcStartJob extends AbstractStartJobImpl implements RestartableStartJob
 
     @Scheduled(fixedDelay=10000l)
     void execute() {
-        short minPriority = minimumProcessingPriorityForOccupyingASlot
-        if (minPriority > ProcessingPriority.MAXIMUM_PRIORITY) {
-            return
-        }
+        doWithPersistenceInterceptor {
+            short minPriority = minimumProcessingPriorityForOccupyingASlot
+            if (minPriority > ProcessingPriority.MAXIMUM_PRIORITY) {
+                return
+            }
 
-        SeqTrack.withTransaction {
-            SeqTrack seqTrack = seqTrackService.getSeqTrackReadyForFastqcProcessing(minPriority)
-            if (seqTrack) {
-                trackingService.setStartedForSeqTracks(seqTrack.containedSeqTracks, OtrsTicket.ProcessingStep.FASTQC)
-                log.debug "Creating fastqc process for seqTrack ${seqTrack}"
-                seqTrackService.setFastqcInProgress(seqTrack)
-                createProcess(seqTrack)
+            SeqTrack.withTransaction {
+                SeqTrack seqTrack = seqTrackService.getSeqTrackReadyForFastqcProcessing(minPriority)
+                if (seqTrack) {
+                    trackingService.setStartedForSeqTracks(seqTrack.containedSeqTracks, OtrsTicket.ProcessingStep.FASTQC)
+                    log.debug "Creating fastqc process for seqTrack ${seqTrack}"
+                    seqTrackService.setFastqcInProgress(seqTrack)
+                    createProcess(seqTrack)
+                }
             }
         }
     }

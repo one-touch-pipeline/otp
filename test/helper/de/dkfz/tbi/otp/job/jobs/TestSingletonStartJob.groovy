@@ -1,4 +1,4 @@
-package de.dkfz.tbi.otp.testing
+package de.dkfz.tbi.otp.job.jobs
 
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.JobExecutionPlanChangedEvent
@@ -24,6 +24,11 @@ class TestSingletonStartJob implements StartJob, ApplicationListener<JobExecutio
     private JobExecutionPlan plan
     private boolean planNeedsRefresh = false
 
+    TestSingletonStartJob() {}
+    TestSingletonStartJob(JobExecutionPlan plan) {
+        this.plan = plan
+    }
+
     @Override
     public JobExecutionPlan getJobExecutionPlan() {
         if (planNeedsRefresh) {
@@ -33,15 +38,8 @@ class TestSingletonStartJob implements StartJob, ApplicationListener<JobExecutio
         return plan
     }
 
-    @Override
-    public String getVersion() {
-        return "test"
-    }
-
     @SuppressWarnings("EmptyMethod")
-    @Override
-    public void execute() {
-    }
+    void execute() {}
 
     public void setExecutionPlan(JobExecutionPlan plan) {
         this.plan = JobExecutionPlan.get(plan?.id)

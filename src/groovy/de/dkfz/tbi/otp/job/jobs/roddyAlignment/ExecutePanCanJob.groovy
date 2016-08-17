@@ -1,22 +1,18 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
+import de.dkfz.tbi.otp.job.ast.*
+import de.dkfz.tbi.otp.job.jobs.*
+import de.dkfz.tbi.otp.ngsdata.*
+import org.springframework.context.annotation.*
+import org.springframework.stereotype.*
 
-import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
-import de.dkfz.tbi.otp.job.jobs.AutoRestartableJob
-import de.dkfz.tbi.otp.ngsdata.BedFile
-import de.dkfz.tbi.otp.ngsdata.DataFile
-import de.dkfz.tbi.otp.ngsdata.LibraryLayout
-import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
-import de.dkfz.tbi.otp.ngsdata.MetaDataService
-import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.ngsdata.SeqTypeNames
+import static de.dkfz.tbi.otp.ngsdata.LsdfFilesService.*
 
-import static de.dkfz.tbi.otp.ngsdata.LsdfFilesService.ensureFileIsReadableAndNotEmpty
-
-
+@Component
+@Scope("prototype")
+@UseJobLog
 class ExecutePanCanJob extends AbstractRoddyAlignmentJob implements AutoRestartableJob {
 
     @Override

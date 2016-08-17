@@ -1,4 +1,4 @@
-package de.dkfz.tbi.otp.testing
+package de.dkfz.tbi.otp.job.jobs
 
 import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
 

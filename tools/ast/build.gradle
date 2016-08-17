@@ -1,0 +1,12 @@
+apply plugin: 'java'
+
+repositories {
+    maven {
+        url "$ARTIFACTORY_URL"
+    }
+}
+
+dependencies {
+    compile 'org.codehaus.groovy:groovy-all:2.4.5'
+    compile 'commons-logging:commons-logging:1.2'
+}

@@ -50,8 +50,8 @@ class SnvJoiningJobTests {
         snvCallingInstance = testData.createAndSaveSnvCallingInstance()
         jobResult = testData.createAndSaveSnvJobResult(snvCallingInstance, SnvCallingStep.CALLING, null, AnalysisProcessingStates.IN_PROGRESS)
 
-        job = applicationContext.getBean('snvJoiningJob',
-                DomainFactory.createAndSaveProcessingStep(SnvJoiningJob.toString(), snvCallingInstance), [])
+        job = applicationContext.getBean('snvJoiningJob')
+        job.processingStep = DomainFactory.createAndSaveProcessingStep(SnvJoiningJob.toString(), snvCallingInstance)
         job.log = new NoOpLog()
     }
 

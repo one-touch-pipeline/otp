@@ -1,11 +1,17 @@
 package de.dkfz.tbi.otp.job.jobs.merging
 
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.job.ast.*
+import de.dkfz.tbi.otp.job.processing.*
+import org.springframework.beans.factory.annotation.*
+import org.springframework.context.annotation.*
+import org.springframework.stereotype.*
+
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
-import org.springframework.beans.factory.annotation.Autowired
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.job.processing.*
-
+@Component
+@Scope("prototype")
+@UseJobLog
 class MergingValidationJob extends AbstractEndStateAwareJobImpl {
 
     @Autowired

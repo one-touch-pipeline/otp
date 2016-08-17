@@ -194,8 +194,8 @@ CHROMOSOME_INDICES=( {1..21} X Y)
                 )
         assert snvJobResultFilter2.save()
 
-        filterVcfJob = applicationContext.getBean('filterVcfJob',
-                DomainFactory.createAndSaveProcessingStep(FilterVcfJob.toString(), snvCallingInstance2), [])
+        filterVcfJob = applicationContext.getBean('filterVcfJob')
+        filterVcfJob.processingStep = DomainFactory.createAndSaveProcessingStep(FilterVcfJob.toString(), snvCallingInstance2)
         filterVcfJob.log = new NoOpLog()
 
         ParameterType typeRealm = new ParameterType(

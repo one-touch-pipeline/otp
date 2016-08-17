@@ -6,36 +6,16 @@ eventTestPhaseStart = { args ->
     System.properties['grails.test.phase'] = args
 }
 
-eventSetClasspath = { rootLoader ->
-    classpathSet = false
-    println "Set Classpath handler"
-    String buildDir = "./ast-build"
-    String astLib = "./ast-build/ast.jar"
-    ant.mkdir(dir: buildDir)
-    // Delete the *contents* of the ast-build directory only, such that ast-build can be (and stay) a symlink.
-    ant.delete {
-        ant.fileset(dir: buildDir, includes: "**/*")
-    }
-    ant.groovyc(srcdir: "./ast", destdir: buildDir)
-    ant.jar(destfile: astLib, basedir: buildDir) {
-        ant.service(type: "org.codehaus.groovy.transform.ASTTransformation") {
-            ant.provider(classname: "de.dkfz.tbi.otp.job.ast.JobTransformation")
-            ant.provider(classname: "de.dkfz.tbi.otp.job.ast.StartJobTransformation")
-        }
-    }
-    grailsSettings.compileDependencies << new File(astLib)
-    rootLoader.addURL(new File(astLib).toURI().toURL())
-
-    classpath()
-}
-
-eventCompileStart = {
+eventCompileStart = { target ->
+    createFileWithGitVersionAndBranch()
 
     // Compile the test helper classes if we are in the test environment. Related improvement request: GRAILS-7750
     if (grailsEnv == "test" || grailsEnv == "WORKFLOW_TEST") {
         projectCompiler.srcDirectories << "test/helper"
     }
+}
 
+def createFileWithGitVersionAndBranch() {
     def proc = "git rev-parse --short HEAD".execute()
     proc.waitFor()
     String revision = proc.in.text.trim()
@@ -62,7 +42,4 @@ eventCompileStart = {
     }
     ant.mkdir(dir: "grails-app/views/templates/")
     new File("grails-app/views/templates/_version.gsp").text = "${branchName} (${revision})"
-}
-
-eventCompileEnd = {
 }

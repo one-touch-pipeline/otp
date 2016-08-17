@@ -18,22 +18,22 @@ class QualityAssessmentMergedStartJob extends AbstractStartJobImpl implements Re
     @Autowired
     ProcessingOptionService optionService
 
-    final int MAX_RUNNING = 4
-
     @Scheduled(fixedDelay = 10000l)
     void execute() {
-        short minPriority = minimumProcessingPriorityForOccupyingASlot
+        doWithPersistenceInterceptor {
+            short minPriority = minimumProcessingPriorityForOccupyingASlot
 
-        if (minPriority > ProcessingPriority.MAXIMUM_PRIORITY) {
-            return
-        }
+            if (minPriority > ProcessingPriority.MAXIMUM_PRIORITY) {
+                return
+            }
 
-        QualityAssessmentMergedPass.withTransaction {
-            QualityAssessmentMergedPass qualityAssessmentMergedPass = qualityAssessmentMergedPassService.createPass(minPriority)
-            if (qualityAssessmentMergedPass) {
-                log.debug "Creating merged quality assessment process for ${qualityAssessmentMergedPass}"
-                qualityAssessmentMergedPassService.passStarted(qualityAssessmentMergedPass)
-                createProcess(qualityAssessmentMergedPass)
+            QualityAssessmentMergedPass.withTransaction {
+                QualityAssessmentMergedPass qualityAssessmentMergedPass = qualityAssessmentMergedPassService.createPass(minPriority)
+                if (qualityAssessmentMergedPass) {
+                    log.debug "Creating merged quality assessment process for ${qualityAssessmentMergedPass}"
+                    qualityAssessmentMergedPassService.passStarted(qualityAssessmentMergedPass)
+                    createProcess(qualityAssessmentMergedPass)
+                }
             }
         }
     }

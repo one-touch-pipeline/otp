@@ -11,9 +11,11 @@ class DataFileStatusStartJob extends AbstractStartJobImpl {
 
     //@Scheduled(cron="0 0 1 * * SAT")
     void execute() {
-        ConsistencyCheck consistencyCheck = new ConsistencyCheck()
-        consistencyCheck.save(flush: true)
-        createProcess(consistencyCheck)
-        log.debug "FileSystemConsistencyWorkflow: job started"
+        doWithPersistenceInterceptor {
+            ConsistencyCheck consistencyCheck = new ConsistencyCheck()
+            consistencyCheck.save(flush: true)
+            createProcess(consistencyCheck)
+            log.debug "FileSystemConsistencyWorkflow: job started"
+        }
     }
 }

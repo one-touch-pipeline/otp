@@ -46,7 +46,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         JobDefinition jobDefinition = createTestEndStateAwareJob("test", jep)
         jep.firstJob = jobDefinition
         assertNotNull(jep.save(flush: true))
-        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
+        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests")
         assertNotNull(process.save())
         ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
         assertNotNull(step.save())
@@ -61,13 +61,11 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         // there is no further Job in the Job Execution Plan. Executing should finish the Process
         assertFalse(process.finished)
         assertNull(step.jobClass)
-        assertNull(step.jobVersion)
         assertTrue(schedulerService.queue.add(step))
         schedulerService.schedule()
         assertTrue(process.finished)
         assertNotNull(step.jobClass)
-        assertEquals(de.dkfz.tbi.otp.testing.TestEndStateAwareJob.class.name, step.jobClass)
-        assertNotNull(step.jobVersion)
+        assertEquals(TestEndStateAwareJob.class.name, step.jobClass)
         assertTrue(schedulerService.queue.isEmpty())
         assertTrue(schedulerService.running.isEmpty())
     }
@@ -86,7 +84,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertNotNull(jobDefinition.save())
         assertNotNull(jep.save(flush: true))
         // create the Process
-        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
+        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests")
         assertNotNull(process.save())
         ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
         assertNotNull(step.save())
@@ -100,7 +98,6 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         // first Job should be run
         assertFalse(process.finished)
         assertNull(step.jobClass)
-        assertNull(step.jobVersion)
         assertNull(step.next)
         assertNull(step.previous)
         assertEquals(1, ProcessingStep.countByProcess(process))
@@ -109,7 +106,6 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertFalse(process.finished)
         assertNotNull(step.jobClass)
         assertEquals(de.dkfz.tbi.otp.job.jobs.TestJob.class.name, step.jobClass)
-        assertNotNull(step.jobVersion)
         assertNotNull(step.next)
         assertNull(step.previous)
         assertFalse(step.id == step.next.id)
@@ -171,7 +167,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         jobDefinition3.addToConstantParameters(new Parameter(type: constantParameterType2, value: "constant2"))
         assertNotNull(jobDefinition3.save(flush: true))
         // create the Process
-        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
+        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests")
         assertNotNull(process.save())
         ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
         assertNotNull(step.save())
@@ -230,7 +226,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         constantParameterType.parameterUsage = ParameterUsage.OUTPUT
         assertNotNull(constantParameterType.save(flush: true))
         // create Process
-        process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
+        process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests")
         assertNotNull(process.save())
         step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
         assertNotNull(step.save())
@@ -302,7 +298,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         jobDefinition3.addToConstantParameters(new Parameter(type: constantParameterType2, value: "constant2"))
         assertNotNull(jobDefinition3.save(flush: true))
         // create the Process
-        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
+        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests")
         assertNotNull(process.save())
         ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
         assertNotNull(step.save())
@@ -370,7 +366,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertNotNull(jobDefinition2.save())
         assertNotNull(jep.save())
         // create the Process
-        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
+        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests")
         assertNotNull(process.save())
         ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
         assertNotNull(step.save())
@@ -453,7 +449,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertNotNull(jobDefinition2.save())
         assertNotNull(jep.save())
         // create the Process
-        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
+        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests")
         assertNotNull(process.save())
         ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
         assertNotNull(step.save())
@@ -520,7 +516,8 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         jep.firstJob = jobDefinition
         assertNotNull(jep.save())
         assertNotNull(jep.save(flush: true))
-        StartJob job = grailsApplication.mainContext.getBean("testStartJob", jep) as StartJob
+        StartJob job = grailsApplication.mainContext.getBean("testStartJob") as StartJob
+        job.jobExecutionPlan = jep
         assertNotNull(job)
         assertEquals(0, Process.count())
         assertEquals(0, ProcessingStep.count())
@@ -558,7 +555,8 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         jep.firstJob = jobDefinition
         assertNotNull(jep.save())
         assertNotNull(jep.save(flush: true))
-        StartJob job = grailsApplication.mainContext.getBean("testStartJob", jep) as StartJob
+        StartJob job = grailsApplication.mainContext.getBean("testStartJob") as StartJob
+        job.jobExecutionPlan = jep
         assertNotNull(job)
         try {
             SpringSecurityUtils.doWithAuth("admin") {
@@ -609,7 +607,8 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         jobDefinition.addToParameterMappings(mapping2)
         assertNotNull(jobDefinition.save(flush: true))
         // get the startjob
-        StartJob job = grailsApplication.mainContext.getBean("testStartJob", jep) as StartJob
+        StartJob job = grailsApplication.mainContext.getBean("testStartJob") as StartJob
+        job.jobExecutionPlan = jep
         assertNotNull(job)
         assertEquals(0, Process.count())
         assertEquals(0, ProcessingStep.count())
@@ -673,7 +672,8 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         jobDefinition.addToParameterMappings(mapping2)
         assertNotNull(jobDefinition.save(flush: true))
         // get the startjob
-        StartJob job = grailsApplication.mainContext.getBean("testStartJob", jep) as StartJob
+        StartJob job = grailsApplication.mainContext.getBean("testStartJob") as StartJob
+        job.jobExecutionPlan = jep
         assertNotNull(job)
         assertEquals(0, Process.count())
         assertEquals(0, ProcessingStep.count())
@@ -735,7 +735,8 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         jep.firstJob = decidingJobDefinition
         assertNotNull(jep.save(flush: true))
         // get the startjob
-        StartJob job = grailsApplication.mainContext.getBean("testStartJob", jep) as StartJob
+        StartJob job = grailsApplication.mainContext.getBean("testStartJob") as StartJob
+        job.jobExecutionPlan = jep
         assertNotNull(job)
         assertEquals(0, Process.count())
         assertEquals(0, ProcessingStep.count())
@@ -787,7 +788,8 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         jep.firstJob = jobDefinition
         assertNotNull(jep.save())
         // get the startjob
-        StartJob job = grailsApplication.mainContext.getBean("testStartJob", jep) as StartJob
+        StartJob job = grailsApplication.mainContext.getBean("testStartJob") as StartJob
+        job.jobExecutionPlan = jep
         assertNotNull(job)
         assertEquals(0, Process.count())
         assertEquals(0, ProcessingStep.count())
@@ -817,7 +819,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         validator.next = jobDefinition2
         assertNotNull(validator.save())
         // Create the Process
-        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
+        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests")
         assertNotNull(process.save())
         ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
         assertNotNull(step.save())
@@ -881,7 +883,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         validator.next = jobDefinition2
         assertNotNull(validator.save())
         // Create the Process
-        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
+        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests")
         assertNotNull(process.save())
         ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
         assertNotNull(step.save())
@@ -946,7 +948,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertNotNull(jobDefinition.save())
         assertNotNull(jep.save(flush: true))
         // create the Process
-        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
+        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests")
         process.finished = true
         assertNotNull(process.save())
         ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
@@ -1070,7 +1072,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertNotNull(jobDefinition.save())
         assertNotNull(jep.save(flush: true))
         // create the Process
-        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
+        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests")
         assertNotNull(process.save())
         ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
         step.metaClass.belongsToMultiJob = { -> return false }
@@ -1107,7 +1109,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertNotNull(jobDefinition.save())
         assertNotNull(jep.save(flush: true))
         // create the Process
-        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
+        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests")
         process.finished = true
         assertNotNull(process.save())
         ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
@@ -1139,7 +1141,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertNotNull(jobDefinition.save())
         assertNotNull(jep.save(flush: true))
         // create the Process
-        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
+        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests")
         process.finished = true
         assertNotNull(process.save())
         ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
@@ -1217,7 +1219,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertNotNull(jobDefinition2.save())
         assertNotNull(jep.save(flush: true))
         // create the Process
-        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
+        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests")
         assertNotNull(process.save())
         // let first ProcessingStep succeed
         ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
@@ -1285,7 +1287,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertNotNull(jobDefinition3.save())
         assertNotNull(jep.save(flush: true))
         // create the Process
-        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
+        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests")
         assertNotNull(process.save())
         ProcessingStep firstStep = new ProcessingStep(jobDefinition: jobDefinition, process: process)
         assertNotNull(firstStep.save())
@@ -1390,7 +1392,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertNotNull(jobDefinition2.save(flush: true))
 
         // start the Process
-        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
+        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests")
         assertNotNull(process.save())
         ProcessingStep firstStep = new ProcessingStep(jobDefinition: jobDefinition1, process: process)
         firstStep.metaClass.belongsToMultiJob = { -> return false }
@@ -1439,7 +1441,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertNotNull(jobDefinition.save())
         assertNotNull(jep.save(flush: true))
         // create the Process
-        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: this.class.name, startJobVersion: "1")
+        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: this.class.name)
         process.finished = true
         assertNotNull(process.save())
         ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
@@ -1493,7 +1495,8 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
 
     final Closure testIsJobResumable_sometimesResumable = { final boolean resumable ->
         final ProcessingStep processingStep = DomainFactory.createAndSaveProcessingStep(SometimesResumableTestJob.class.name)
-        final SometimesResumableTestJob job = new SometimesResumableTestJob (processingStep, Collections.emptySet())
+        final SometimesResumableTestJob job = new SometimesResumableTestJob()
+        job.processingStep = processingStep
         job.resumable = resumable
         schedulerService.running << job
         assert schedulerService.isJobResumable(processingStep) == resumable

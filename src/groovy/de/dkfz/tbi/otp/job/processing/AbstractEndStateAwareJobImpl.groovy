@@ -10,7 +10,7 @@ abstract public class AbstractEndStateAwareJobImpl extends AbstractJobImpl imple
 
     /**
      * Can be used by an implementing Job to set the Job as failed.
-     * @see succeed
+     * @see #succeed
      * @deprecated Throw an exception with a meaningful message instead.
      */
     @Deprecated
@@ -20,7 +20,7 @@ abstract public class AbstractEndStateAwareJobImpl extends AbstractJobImpl imple
 
     /**
      * Can be used by an implementing Job to set the Job as succeeded.
-     * @see fail
+     * @see #fail
      */
     protected final void succeed() {
         this.endState = ExecutionState.SUCCESS

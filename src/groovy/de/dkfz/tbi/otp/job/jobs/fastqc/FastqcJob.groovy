@@ -2,14 +2,20 @@ package de.dkfz.tbi.otp.job.jobs.fastqc
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.infrastructure.*
+import de.dkfz.tbi.otp.job.ast.*
 import de.dkfz.tbi.otp.job.jobs.*
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsqc.*
 import de.dkfz.tbi.otp.utils.*
 import org.springframework.beans.factory.annotation.*
+import org.springframework.context.annotation.*
+import org.springframework.stereotype.*
+import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
 
+@Component
+@Scope("prototype")
+@UseJobLog
 class FastqcJob extends AbstractOtpJob implements AutoRestartableJob {
 
     @Autowired

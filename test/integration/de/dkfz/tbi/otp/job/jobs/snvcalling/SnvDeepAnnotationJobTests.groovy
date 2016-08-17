@@ -194,8 +194,8 @@ CHROMOSOME_INDICES=( {1..21} X Y)
                 )
         snvJobResult_DeepAnnotation1.save()
 
-        snvDeepAnnotationJob = applicationContext.getBean('snvDeepAnnotationJob',
-                DomainFactory.createAndSaveProcessingStep(SnvDeepAnnotationJob.toString(), snvCallingInstance2), [])
+        snvDeepAnnotationJob = applicationContext.getBean('snvDeepAnnotationJob')
+        snvDeepAnnotationJob.processingStep = DomainFactory.createAndSaveProcessingStep(SnvDeepAnnotationJob.toString(), snvCallingInstance2)
         snvDeepAnnotationJob.log = new NoOpLog()
 
         ParameterType typeRealm = new ParameterType(

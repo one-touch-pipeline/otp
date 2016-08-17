@@ -2,12 +2,18 @@ package de.dkfz.tbi.otp.job.jobs.aceseq
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.sophia.*
+import de.dkfz.tbi.otp.job.ast.*
 import de.dkfz.tbi.otp.job.jobs.*
 import de.dkfz.tbi.otp.job.jobs.roddyAlignment.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 import org.springframework.beans.factory.annotation.*
+import org.springframework.context.annotation.*
+import org.springframework.stereotype.*
 
+@Component
+@Scope("prototype")
+@UseJobLog
 class ExecuteRoddyAceseqJob extends AbstractExecutePanCanJob<AceseqInstance> implements AutoRestartableJob {
 
     @Autowired

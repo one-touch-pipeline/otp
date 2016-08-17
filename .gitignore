@@ -10,7 +10,6 @@ logs/*
 
 # OTP
 ## Main application
-ast-build
 web-app/WEB-INF/tld/c.tld
 web-app/WEB-INF/tld/fmt.tld
 grails-app/views/templates/_version.gsp
@@ -25,6 +24,10 @@ tools/*/*/.gradle/
 target
 .asscache
 .slcache
+
+# Gradle
+.gradle/
+build/
 
 # Third-party tools
 ## CodeNarc

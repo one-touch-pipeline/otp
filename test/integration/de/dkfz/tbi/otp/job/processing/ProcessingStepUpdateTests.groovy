@@ -21,7 +21,6 @@ class ProcessingStepUpdateTests {
         process.jobExecutionPlan = jobExecutionPlan
         process.started = new Date(System.currentTimeMillis())
         process.startJobClass = "testStartJob"
-        process.startJobVersion = "1"
         process.save(flush:true)
         assertTrue(process.validate())
         JobDefinition jobDefinition = new JobDefinition()
@@ -34,7 +33,6 @@ class ProcessingStepUpdateTests {
         ProcessingStep processingStep = new ProcessingStep()
         processingStep.process = process
         processingStep.jobDefinition = jobDefinition
-        processingStep.jobVersion = null
         processingStep.save(flush:true)
         assertTrue(processingStep.validate())
         // Initialize 1. update
@@ -79,7 +77,6 @@ class ProcessingStepUpdateTests {
         ProcessingStep processingStep2 = new ProcessingStep()
         processingStep2.process = process
         processingStep2.jobDefinition = jobDefinition2
-        processingStep2.jobVersion = null
         assertTrue(processingStep2.validate())
         assertNotNull(processingStep2.save(flush: true))
         // Should crash tests, updates must belong to same step

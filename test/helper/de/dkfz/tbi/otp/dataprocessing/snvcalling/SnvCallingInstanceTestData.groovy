@@ -11,7 +11,7 @@ import de.dkfz.tbi.otp.utils.HelperUtils
 import org.springframework.stereotype.Component
 import org.springframework.beans.factory.annotation.Autowired
 
-@Component()
+@Component
 class SnvCallingInstanceTestData {
 
     @Autowired

@@ -25,11 +25,10 @@ grails.project.dependency.resolution = {
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes
 
-        //git
-        compile 'org.eclipse.jgit:org.eclipse.jgit:1.2.0.201112221803-r'
-        runtime "commons-jexl:commons-jexl:1.1"
-        // jdbc
+        // JDBC
         runtime "postgresql:postgresql:9.1-901.jdbc4"
+
+        // bioinformatics tools
         // ngstools
         compile "com.google.code.gson:gson:2.2.4"
         //compile "sam:sam:1.78"
@@ -39,6 +38,7 @@ grails.project.dependency.resolution = {
 
         // general dependencies
         compile "commons-logging:commons-logging:1.2"  // LogThreadLocal.withThreadLog requires version >= 1.0.4
+                                                       // if you update commons-logging here, also update it in tools/ast/build.gradle
         compile "joda-time:joda-time:2.3"
         compile "org.jadira.usertype:usertype.jodatime:2.0.1"
 
@@ -54,6 +54,9 @@ grails.project.dependency.resolution = {
 
         // library for easy HTML editing
         compile "org.jsoup:jsoup:1.9.2"
+
+        // AST transformations
+        compile "de.dkfz.otp:otp-ast:1"
     }
 
     plugins {

@@ -634,8 +634,7 @@ $.otp.workflows = {
                 });
                 rowData[1] = $.otp.workflows.statusImageHtml(rowData[1].name);
                 if (rowData[3]) {
-                    rowData[3] = '<span title="' + rowData[3].name + '">' + rowData[3].name.substr(rowData[3].name.lastIndexOf('.') + 1) + "</span><br/>" +
-                        '<span title="' + rowData[3].version + '">' + rowData[3].version.substring(0, 7) + '</span>';
+                    rowData[3] = '<span title="' + rowData[3].name + '">' + rowData[3].name.substr(rowData[3].name.lastIndexOf('.') + 1) + "</span><br/>";
                 } else {
                     rowData[3] = "-";
                 }

@@ -1,16 +1,18 @@
 package de.dkfz.tbi.otp.job.jobs
 
-import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
-import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
-import de.dkfz.tbi.otp.job.processing.MonitoringJob
-import de.dkfz.tbi.otp.job.processing.Parameter
-import de.dkfz.tbi.otp.job.processing.ProcessingStep
-import de.dkfz.tbi.otp.job.scheduler.SchedulerService
-import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
+import de.dkfz.tbi.otp.infrastructure.*
+import de.dkfz.tbi.otp.job.ast.*
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.job.scheduler.*
+import de.dkfz.tbi.otp.utils.logging.*
+import org.springframework.context.annotation.*
+import org.springframework.stereotype.*
 
-import static de.dkfz.tbi.TestConstants.ARBITRARY_CLUSTER_JOB_ID
-import static de.dkfz.tbi.TestConstants.ARBITRARY_MESSAGE
+import static de.dkfz.tbi.TestConstants.*
 
+@Component
+@Scope("prototype")
+@UseJobLog
 class MonitoringTestJob extends AbstractEndStateAwareJobImpl implements MonitoringJob {
 
     SchedulerService schedulerService
@@ -20,7 +22,7 @@ class MonitoringTestJob extends AbstractEndStateAwareJobImpl implements Monitori
     boolean executed = false
 
     MonitoringTestJob(ProcessingStep processingStep, Collection<Parameter> inputParameters, SchedulerService schedulerService, ClusterJobIdentifier jobIdentifier, boolean fail) {
-        super(processingStep, inputParameters)
+        this.processingStep = processingStep
         this.schedulerService = schedulerService
         this.jobIdentifier = jobIdentifier
         this.fail = fail

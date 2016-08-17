@@ -33,7 +33,7 @@ class ClusterJobTests {
 
         assertNotNull(plan.save(flush: true))
 
-        Process process = new Process(finished: true, jobExecutionPlan: plan, started: new Date(), startJobClass: "foo", startJobVersion: "1")
+        Process process = new Process(finished: true, jobExecutionPlan: plan, started: new Date(), startJobClass: "foo")
 
         assertNotNull(process.save(flush: true))
 

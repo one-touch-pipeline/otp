@@ -36,11 +36,12 @@ class SchedulerTests extends AbstractIntegrationTest {
         JobDefinition jobDefinition = createTestJob("test", jep)
         jep.firstJob = jobDefinition
         assertNotNull(jep.save(flush: true))
-        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
+        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests")
         assertNotNull(process.save())
         ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
         assertNotNull(step.save())
-        Job job = grailsApplication.mainContext.getBean("testEndStateAwareJob", step, [] as Set) as Job
+        Job job = grailsApplication.mainContext.getBean("testEndStateAwareJob") as Job
+        job.processingStep = step
         job.log = new NoOpLog()
         // There is no Created ProcessingStep update - execution should fail
         shouldFail(RuntimeException) {
@@ -85,11 +86,12 @@ class SchedulerTests extends AbstractIntegrationTest {
         JobDefinition jobDefinition = createTestEndStateAwareJob("testEndStateAware", jep)
         jep.firstJob = jobDefinition
         assertNotNull(jep.save(flush: true))
-        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
+        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests")
         assertNotNull(process.save())
         ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
         assertNotNull(step.save())
-        Job endStateAwareJob = grailsApplication.mainContext.getBean("testEndStateAwareJob", step, [] as Set) as Job
+        Job endStateAwareJob = grailsApplication.mainContext.getBean("testEndStateAwareJob") as Job
+        endStateAwareJob.processingStep = step
         endStateAwareJob.log = new NoOpLog()
         // There is no Created ProcessingStep update - execution should fail
         shouldFail(RuntimeException) {
@@ -141,11 +143,12 @@ class SchedulerTests extends AbstractIntegrationTest {
         JobDefinition jobDefinition = createTestEndStateAwareJob("testEndStateAware", jep, null, "testFailureEndStateAwareJob")
         jep.firstJob = jobDefinition
         assertNotNull(jep.save(flush: true))
-        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
+        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests")
         assertNotNull(process.save())
         ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
         assertNotNull(step.save())
-        Job endStateAwareJob = grailsApplication.mainContext.getBean("testFailureEndStateAwareJob", step, [] as Set) as Job
+        Job endStateAwareJob = grailsApplication.mainContext.getBean("testFailureEndStateAwareJob") as Job
+        endStateAwareJob.processingStep = step
         endStateAwareJob.log = new NoOpLog()
         // There is no Created ProcessingStep update - execution should fail
         int executedCounter = 0
@@ -205,7 +208,8 @@ class SchedulerTests extends AbstractIntegrationTest {
         assert jep.save(flush: true)
         Process process = DomainFactory.createProcess(jobExecutionPlan: jep, startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests")
         ProcessingStep step = DomainFactory.createProcessingStep(process: process, jobDefinition: jobDefinition, jobClass: FailingTestJob.name)
-        Job job = grailsApplication.mainContext.getBean("failingTestJob", step, [] as Set) as Job
+        Job job = grailsApplication.mainContext.getBean("failingTestJob") as Job
+        job.processingStep = step
         job.log = new NoOpLog()
         DomainFactory.createProcessingStepUpdate(
             state: ExecutionState.CREATED,
@@ -242,7 +246,7 @@ class SchedulerTests extends AbstractIntegrationTest {
         // create a third parameter type for which the job does not create a parameter
         ParameterType type = new ParameterType(name: "fail", description: "Test description", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.OUTPUT)
         assertNotNull(type.save())
-        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
+        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests")
         assertNotNull(process.save())
         ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
         assertNotNull(step.save())
@@ -254,7 +258,8 @@ class SchedulerTests extends AbstractIntegrationTest {
             )
         assertNotNull(update.save(flush: true))
         // run the Job
-        Job job = grailsApplication.mainContext.getBean("testJob", step, [] as Set) as Job
+        Job job = grailsApplication.mainContext.getBean("testJob") as Job
+        job.processingStep = step
         job.log = new NoOpLog()
         scheduler.executeJob(job)
         assertEquals(4, ProcessingStepUpdate.countByProcessingStep(step))
@@ -281,7 +286,7 @@ class SchedulerTests extends AbstractIntegrationTest {
         assertNotNull(test.save())
         jep.firstJob = jobDefinition
         assertNotNull(jep.save())
-        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
+        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests")
         assertNotNull(process.save())
         ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
         assertNotNull(step.save())
@@ -292,7 +297,8 @@ class SchedulerTests extends AbstractIntegrationTest {
             processingStep: step
             )
         assertNotNull(update.save(flush: true))
-        Job job = grailsApplication.mainContext.getBean("directTestJob", step, [] as Set) as Job
+        Job job = grailsApplication.mainContext.getBean("directTestJob") as Job
+        job.processingStep = step
         job.log = new NoOpLog()
         // run the Job
         scheduler.executeJob(job)
@@ -307,7 +313,7 @@ class SchedulerTests extends AbstractIntegrationTest {
         // verify that the test works if we use a proper parameter type
         test.parameterUsage = ParameterUsage.OUTPUT
         assertNotNull(test.save())
-        process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
+        process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests")
         assertNotNull(process.save())
         step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
         assertNotNull(step.save())
@@ -318,7 +324,8 @@ class SchedulerTests extends AbstractIntegrationTest {
             processingStep: step
             )
         assertNotNull(update.save(flush: true))
-        job = grailsApplication.mainContext.getBean("directTestJob", step, [] as Set) as Job
+        job = grailsApplication.mainContext.getBean("directTestJob") as Job
+        job.processingStep = step
         job.log = new NoOpLog()
         // run the Job
         scheduler.executeJob(job)

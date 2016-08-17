@@ -20,10 +20,6 @@
                 <td><g:message code="processes.processingStep.job"/></td>
                 <td>${step.jobClass}</td>
             </tr>
-            <tr>
-                <td><g:message code="processes.processingStep.version"/></td>
-                <td>${step.jobVersion}</td>
-            </tr>
             <g:if test="${step.previous}">
             <tr>
                 <td><g:message code="processes.processingStep.previous"/></td>

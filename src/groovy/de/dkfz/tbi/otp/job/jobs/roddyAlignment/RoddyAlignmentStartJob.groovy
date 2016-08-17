@@ -13,7 +13,9 @@ abstract class RoddyAlignmentStartJob extends AbstractStartJobImpl implements Re
     @Override
     @Scheduled(fixedDelay = 60000l)
     void execute() {
-        startRoddyAlignment()
+        doWithPersistenceInterceptor {
+            startRoddyAlignment()
+        }
     }
 
     protected void startRoddyAlignment() {

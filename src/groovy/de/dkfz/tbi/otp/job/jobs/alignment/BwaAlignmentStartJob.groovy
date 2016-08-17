@@ -17,21 +17,21 @@ class BwaAlignmentStartJob extends AbstractStartJobImpl implements RestartableSt
     @Autowired
     AlignmentPassService alignmentPassService
 
-    final int MAX_RUNNING = 4
-
     @Scheduled(fixedDelay=10000l)
     void execute() {
-        short minPriority = minimumProcessingPriorityForOccupyingASlot
-        if (minPriority > ProcessingPriority.MAXIMUM_PRIORITY) {
-            return
-        }
-        AlignmentPass.withTransaction {
-            AlignmentPass alignmentPass = alignmentPassService.findAlignmentPassForProcessing(minPriority)
-            if (alignmentPass) {
-                trackingService.setStartedForSeqTracks(alignmentPass.containedSeqTracks, OtrsTicket.ProcessingStep.ALIGNMENT)
-                log.debug "Creating Alignment process for AlignmentPass ${alignmentPass}"
-                alignmentPassService.alignmentPassStarted(alignmentPass)
-                createProcess(alignmentPass)
+        doWithPersistenceInterceptor {
+            short minPriority = minimumProcessingPriorityForOccupyingASlot
+            if (minPriority > ProcessingPriority.MAXIMUM_PRIORITY) {
+                return
+            }
+            AlignmentPass.withTransaction {
+                AlignmentPass alignmentPass = alignmentPassService.findAlignmentPassForProcessing(minPriority)
+                if (alignmentPass) {
+                    trackingService.setStartedForSeqTracks(alignmentPass.containedSeqTracks, OtrsTicket.ProcessingStep.ALIGNMENT)
+                    log.debug "Creating Alignment process for AlignmentPass ${alignmentPass}"
+                    alignmentPassService.alignmentPassStarted(alignmentPass)
+                    createProcess(alignmentPass)
+                }
             }
         }
     }

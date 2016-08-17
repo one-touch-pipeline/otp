@@ -1,16 +1,18 @@
 package de.dkfz.tbi.otp.job.jobs.transferMergedBamFile
 
-import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
-import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFileService
-import de.dkfz.tbi.otp.job.jobs.WatchdogJob
-import de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys
-import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
-import de.dkfz.tbi.otp.ngsdata.ConfigService
-import de.dkfz.tbi.otp.ngsdata.Project
-import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.job.ast.*
+import de.dkfz.tbi.otp.job.jobs.*
+import de.dkfz.tbi.otp.job.jobs.utils.*
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.ngsdata.*
+import org.springframework.beans.factory.annotation.*
+import org.springframework.context.annotation.*
+import org.springframework.stereotype.*
 
-import org.springframework.beans.factory.annotation.Autowired
-
+@Component
+@Scope("prototype")
+@UseJobLog
 class TransferSingleLaneQAResultJob extends AbstractEndStateAwareJobImpl{
 
     @Autowired

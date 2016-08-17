@@ -1,9 +1,14 @@
 package de.dkfz.tbi.otp.job.jobs
 
-import de.dkfz.tbi.otp.job.processing.AbstractJobImpl
-import de.dkfz.tbi.otp.job.processing.ResumableJob
+import de.dkfz.tbi.otp.job.ast.*
+import de.dkfz.tbi.otp.job.processing.*
+import org.springframework.context.annotation.*
+import org.springframework.stereotype.*
 
+@Component
+@Scope("prototype")
 @ResumableJob
+@UseJobLog
 class ResumableTestJob extends AbstractJobImpl {
 
     @Override

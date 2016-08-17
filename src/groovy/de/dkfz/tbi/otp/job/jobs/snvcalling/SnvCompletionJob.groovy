@@ -1,11 +1,14 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
+import de.dkfz.tbi.otp.job.ast.*
 import de.dkfz.tbi.otp.job.jobs.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 import org.springframework.beans.factory.annotation.*
+import org.springframework.context.annotation.*
+import org.springframework.stereotype.*
 
 import static de.dkfz.tbi.otp.dataprocessing.AnalysisProcessingStates.*
 
@@ -16,6 +19,9 @@ import static de.dkfz.tbi.otp.dataprocessing.AnalysisProcessingStates.*
  * SnvCallingInstance to FINISHED.
  * </p>
  */
+@Component
+@Scope("prototype")
+@UseJobLog
 class SnvCompletionJob extends AbstractEndStateAwareJobImpl implements AutoRestartableJob {
     @Autowired
     ExecutionService executionService

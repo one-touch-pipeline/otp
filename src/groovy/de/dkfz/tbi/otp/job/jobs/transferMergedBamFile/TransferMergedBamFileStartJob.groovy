@@ -18,23 +18,22 @@ class TransferMergedBamFileStartJob extends AbstractStartJobImpl implements Rest
     @Autowired
     ProcessedMergedBamFileService processedMergedBamFileService
 
-    final int MAX_RUNNING = 4
-
     @Scheduled(fixedDelay = 10000l)
     void execute() {
+        doWithPersistenceInterceptor {
+            short minPriority = minimumProcessingPriorityForOccupyingASlot
+            if (minPriority > ProcessingPriority.MAXIMUM_PRIORITY) {
+                return
+            }
 
-        short minPriority = minimumProcessingPriorityForOccupyingASlot
-        if (minPriority > ProcessingPriority.MAXIMUM_PRIORITY) {
-            return
-        }
-
-        ProcessedMergedBamFile.withTransaction {
-            ProcessedMergedBamFile file = processedMergedBamFileService.mergedBamFileWithFinishedQA(minPriority)
-            if (file) {
-                log.debug 'Starting to transfer merged BAM file ' + file
-                file.updateFileOperationStatus(AbstractMergedBamFile.FileOperationStatus.INPROGRESS)
-                assert file.save(flush: true)
-                createProcess(file)
+            ProcessedMergedBamFile.withTransaction {
+                ProcessedMergedBamFile file = processedMergedBamFileService.mergedBamFileWithFinishedQA(minPriority)
+                if (file) {
+                    log.debug 'Starting to transfer merged BAM file ' + file
+                    file.updateFileOperationStatus(AbstractMergedBamFile.FileOperationStatus.INPROGRESS)
+                    assert file.save(flush: true)
+                    createProcess(file)
+                }
             }
         }
     }

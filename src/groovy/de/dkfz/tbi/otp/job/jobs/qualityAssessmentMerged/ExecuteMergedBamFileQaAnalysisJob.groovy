@@ -1,15 +1,20 @@
 package de.dkfz.tbi.otp.job.jobs.qualityAssessmentMerged
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.common.*
+import de.dkfz.tbi.otp.job.ast.*
 import de.dkfz.tbi.otp.job.jobs.utils.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import groovy.text.*
 import org.springframework.beans.factory.annotation.*
+import org.springframework.context.annotation.*
+import org.springframework.stereotype.*
 
 import static org.springframework.util.Assert.*
 
+@Component
+@Scope("prototype")
+@UseJobLog
 class ExecuteMergedBamFileQaAnalysisJob extends AbstractJobImpl {
 
     @Autowired

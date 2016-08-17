@@ -1,33 +1,34 @@
 package de.dkfz.tbi.otp.job.jobs
 
-import de.dkfz.tbi.otp.job.processing.InvalidStateException
-import de.dkfz.tbi.otp.job.processing.Job
-import de.dkfz.tbi.otp.job.processing.Parameter
-import de.dkfz.tbi.otp.job.processing.ParameterType
-import de.dkfz.tbi.otp.job.processing.ProcessingStep
+import de.dkfz.tbi.otp.job.ast.*
+import de.dkfz.tbi.otp.job.processing.*
+import org.springframework.context.annotation.*
+import org.springframework.stereotype.*
 
 /**
  * Simple test implementing the Job interface without inheriting
  * AbstractJob.
  *
  */
+@Component
+@Scope("prototype")
+@UseJobLog
 class DirectTestJob implements Job {
     private ProcessingStep step
-
-    DirectTestJob() {}
-    DirectTestJob(ProcessingStep step, Set unused) {
-        this.step = step
-    }
 
     @Override
     public void execute() throws Exception {
         // TODO Auto-generated method stub
-
     }
 
     @Override
     public Set<Parameter> getOutputParameters() throws InvalidStateException {
         return [new Parameter(value: "abcd", type: ParameterType.findByJobDefinition(step.jobDefinition))]
+    }
+
+    @Override
+    void setProcessingStep(ProcessingStep step) {
+        this.step = step
     }
 
     @Override
@@ -44,11 +45,4 @@ class DirectTestJob implements Job {
     public void end() throws InvalidStateException {
         // TODO Auto-generated method stub
     }
-
-    @Override
-    public String getVersion() {
-        // TODO Auto-generated method stub
-        return ""
-    }
-
 }

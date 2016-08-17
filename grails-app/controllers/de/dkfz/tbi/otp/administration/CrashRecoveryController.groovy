@@ -41,7 +41,7 @@ class CrashRecoveryController {
                 [id: step.process.jobExecutionPlan.id, name: step.process.jobExecutionPlan.name],
                 step.process.id,
                 [id: step.id, name: step.jobDefinition.name],
-                ["class": step.jobClass, version: step.jobVersion],
+                ["class": step.jobClass],
                 resumable,
             ]
         }

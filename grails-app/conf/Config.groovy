@@ -117,8 +117,7 @@ log4j = {
         console name: 'stdout', threshold: Environment.getCurrent() == Environment.TEST ? org.apache.log4j.Level.OFF : org.apache.log4j.Level.DEBUG
     }
 
-    error stdout:
-            [
+    error stdout: [
             'org.codehaus.groovy.grails.web.servlet',           //  controllers
             'org.codehaus.groovy.grails.web.pages',             //  GSP
             'org.codehaus.groovy.grails.web.sitemesh',          //  layouts
@@ -130,21 +129,17 @@ log4j = {
             'org.springframework',
             'org.hibernate',
             'net.sf.ehcache.hibernate',
-            ], additivity: false
+    ], additivity: false
 
-    debug stdout:
-            [
+    debug stdout: [
             'de.dkfz.tbi.otp',                                  // our own stuff
             'grails.app.controllers.de.dkfz.tbi.otp',           // controllers
             'grails.app.domain.de.dkfz.tbi.otp',
             'grails.app.services.de.dkfz.tbi.otp',
             'grails.app.taglib.de.dkfz.tbi.otp'
-            ], jobs:
-            [
-            'de.dkfz.tbi.otp.example',
+    ], jobs: [
             'de.dkfz.tbi.otp.job.jobs',
-            'de.dkfz.tbi.otp.jobs'
-            ], additivity: false
+    ], additivity: false
 }
 
 // mail settings

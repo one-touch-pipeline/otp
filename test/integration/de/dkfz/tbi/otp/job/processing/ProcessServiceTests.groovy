@@ -797,7 +797,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
     }
 
     private Process mockProcess(JobExecutionPlan plan) {
-        Process process = new Process(started: new Date(), startJobClass: "foo", startJobVersion: '1', jobExecutionPlan: plan)
+        Process process = new Process(started: new Date(), startJobClass: "foo", jobExecutionPlan: plan)
         assertNotNull(process.save(flush: true))
         return process
     }

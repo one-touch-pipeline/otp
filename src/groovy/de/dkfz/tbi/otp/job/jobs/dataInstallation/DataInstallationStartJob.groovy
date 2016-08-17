@@ -18,24 +18,26 @@ class DataInstallationStartJob extends AbstractStartJobImpl {
 
     @Scheduled(fixedDelay=5000l)
     void execute() {
-        short minPriority = minimumProcessingPriorityForOccupyingASlot
-        if (minPriority > ProcessingPriority.MAXIMUM_PRIORITY) {
-            return
-        }
+        doWithPersistenceInterceptor {
+            short minPriority = minimumProcessingPriorityForOccupyingASlot
+            if (minPriority > ProcessingPriority.MAXIMUM_PRIORITY) {
+                return
+            }
 
-        List<SeqTrack> seqTracks = seqTrackService.seqTracksReadyToInstall(minPriority)
-        if (seqTracks) {
-            for (SeqTrack seqTrack : seqTracks) {
-                if (seqTrack.processingPriority >= minimumProcessingPriorityForOccupyingASlot) {
-                    SeqTrack.withTransaction {
-                        trackingService.setStartedForSeqTracks([seqTrack], OtrsTicket.ProcessingStep.INSTALLATION)
-                        seqTrack.dataInstallationState = SeqTrack.DataProcessingState.IN_PROGRESS
-                        assert seqTrack.save(flush: true)
-                        createProcess(seqTrack)
-                        log.debug "Installing SeqTrack ${seqTrack} of run ${seqTrack.run.name}"
+            List<SeqTrack> seqTracks = seqTrackService.seqTracksReadyToInstall(minPriority)
+            if (seqTracks) {
+                for (SeqTrack seqTrack : seqTracks) {
+                    if (seqTrack.processingPriority >= minimumProcessingPriorityForOccupyingASlot) {
+                        SeqTrack.withTransaction {
+                            trackingService.setStartedForSeqTracks([seqTrack], OtrsTicket.ProcessingStep.INSTALLATION)
+                            seqTrack.dataInstallationState = SeqTrack.DataProcessingState.IN_PROGRESS
+                            assert seqTrack.save(flush: true)
+                            createProcess(seqTrack)
+                            log.debug "Installing SeqTrack ${seqTrack} of run ${seqTrack.run.name}"
+                        }
+                    } else {
+                        break
                     }
-                } else {
-                    break
                 }
             }
         }

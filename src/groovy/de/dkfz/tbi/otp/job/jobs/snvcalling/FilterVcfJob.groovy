@@ -1,13 +1,20 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFileService
-import de.dkfz.tbi.otp.job.jobs.AutoRestartableJob
-import org.springframework.beans.factory.annotation.Autowired
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
-import de.dkfz.tbi.otp.job.processing.ClusterJobSchedulerService
-import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
+import de.dkfz.tbi.otp.job.ast.*
+import de.dkfz.tbi.otp.job.jobs.*
+import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
+import org.springframework.beans.factory.annotation.*
+import org.springframework.context.annotation.*
+import org.springframework.stereotype.*
+import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
 
+
+@Component
+@Scope("prototype")
+@UseJobLog
 class FilterVcfJob extends AbstractSnvCallingJob implements AutoRestartableJob {
 
     @Autowired

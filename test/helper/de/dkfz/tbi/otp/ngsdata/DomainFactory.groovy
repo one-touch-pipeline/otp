@@ -277,7 +277,6 @@ class DomainFactory {
         return createDomainObject(Process, [
                 started: new Date(),
                 startJobClass: "startJobClass",
-                startJobVersion: "startJobVersion",
                 jobExecutionPlan: {createJobExecutionPlan()}
         ], properties)
     }
@@ -303,7 +302,6 @@ class DomainFactory {
         return createDomainObject(ProcessingStep, [
                 jobDefinition: {createJobDefinition(plan: jobExecutionPlan)},
                 jobClass: 'someClass',
-                jobVersion: '0',
                 process: {createProcess(jobExecutionPlan: jobExecutionPlan)},
         ], properties)
     }
@@ -313,7 +311,6 @@ class DomainFactory {
         return createDomainObject(RestartedProcessingStep, [
                 jobDefinition: original.jobDefinition,
                 jobClass: 'someClass',
-                jobVersion: '0',
                 process: original.process,
                 original:original
         ], properties)
@@ -1662,7 +1659,7 @@ class DomainFactory {
         assert jep.save()
         final JobDefinition jobDefinition = new JobDefinition(name: "DontCare", bean: "DontCare", plan: jep)
         assert jobDefinition.save()
-        final Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "DontCare", startJobVersion: "1")
+        final Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "DontCare")
         assert process.save()
         if (processParameterObject != null) {
             createProcessParameter(process, processParameterObject)

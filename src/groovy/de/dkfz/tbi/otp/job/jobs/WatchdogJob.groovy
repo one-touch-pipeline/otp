@@ -1,20 +1,17 @@
 package de.dkfz.tbi.otp.job.jobs
 
-import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
-import de.dkfz.tbi.otp.utils.CollectionUtils
-
-import java.util.concurrent.locks.Lock
-import java.util.concurrent.locks.ReentrantLock
-
-import javax.annotation.PostConstruct
-
-import org.springframework.beans.factory.annotation.Autowired
-
-import de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys
+import de.dkfz.tbi.otp.infrastructure.*
+import de.dkfz.tbi.otp.job.ast.*
+import de.dkfz.tbi.otp.job.jobs.utils.*
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.job.scheduler.ClusterJobMonitoringService
-import de.dkfz.tbi.otp.job.scheduler.SchedulerService
-import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.job.scheduler.*
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.*
+import org.springframework.beans.factory.annotation.*
+import org.springframework.context.annotation.*
+import org.springframework.stereotype.*
+
+import java.util.concurrent.locks.*
 
 /**
  * A {@link Job} that watches for cluster jobs to finish. It also checks whether the job has logged a message in
@@ -28,8 +25,11 @@ import de.dkfz.tbi.otp.ngsdata.Realm
  * @deprecated Do not use a separate watchdog job.
  * Instead create/use a subclass of {@link AbstractMultiJob}, so restarting the job will resubmit the cluster jobs.
  */
+@Component
+@Scope("prototype")
 @Deprecated
 @ResumableJob
+@UseJobLog
 class WatchdogJob extends AbstractEndStateAwareJobImpl implements MonitoringJob {
 
     @Autowired ClusterJobMonitoringService clusterJobMonitoringService
@@ -59,24 +59,18 @@ class WatchdogJob extends AbstractEndStateAwareJobImpl implements MonitoringJob 
 
     String realmIdFromJob
 
-    @PostConstruct
-    private void initialize() {
-        // This really should be in the constructor so fields can be marked final.
-        // But our AST transformations do weird things, such as creating constructors, apparently.
-        queuedClusterJobIds = getParameterValueOrClass("${JobParameterKeys.JOB_ID_LIST}").tokenize(',')
-        allClusterJobIds = queuedClusterJobIds.clone().asImmutable()
-        final ProcessingStep monitoredProcessingStep = this.processingStep.previous
-        monitoredProcessingStepId = monitoredProcessingStep.id
-        monitoredJobClass = monitoredProcessingStep.nonQualifiedJobClass
-        realmIdFromJob = getParameterValueOrClass("${JobParameterKeys.REALM}")
-    }
-
     private ProcessingStep getMonitoredProcessingStep() {
         return ProcessingStep.getInstance(monitoredProcessingStepId)
     }
 
     @Override
     void execute() throws Exception {
+        queuedClusterJobIds = getParameterValueOrClass(JobParameterKeys.JOB_ID_LIST).tokenize(',')
+        allClusterJobIds = queuedClusterJobIds.clone().asImmutable()
+        final ProcessingStep monitoredProcessingStep = this.processingStep.previous
+        monitoredProcessingStepId = monitoredProcessingStep.id
+        monitoredJobClass = monitoredProcessingStep.nonQualifiedJobClass
+        realmIdFromJob = getParameterValueOrClass(JobParameterKeys.REALM)
         if ([SKIP_WATCHDOG] == queuedClusterJobIds) {
             log.debug "Skip watchdog"
             succeed()

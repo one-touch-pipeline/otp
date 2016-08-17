@@ -153,7 +153,7 @@ class RunServiceTests extends AbstractIntegrationTest {
         JobDefinition jobDefinition = createTestJob("test", jep)
         jep.firstJob = jobDefinition
         assertNotNull(jep.save(flush: true))
-        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
+        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests")
         assertNotNull(process.save())
 
         // create Run
@@ -190,7 +190,7 @@ class RunServiceTests extends AbstractIntegrationTest {
         }
 
         // create second Process
-        Process process2 = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests", startJobVersion: "1")
+        Process process2 = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests")
         assertNotNull(process2.save())
         ProcessParameter param2 = new ProcessParameter(value: run.id, className: Run.class.name, process: process2)
         assertNotNull(param2.save())

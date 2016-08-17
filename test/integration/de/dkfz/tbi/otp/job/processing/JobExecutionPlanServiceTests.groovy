@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.processing
 
+import de.dkfz.tbi.otp.job.jobs.TestSingletonStartJob
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.testing.*
@@ -165,14 +166,14 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
         assertFalse(service.isProcessRunning(plan))
         assertFalse(service.isProcessRunning(plan2))
         // create a finished process
-        Process process = new Process(finished: true, jobExecutionPlan: plan, started: new Date(), startJobClass: "foo", startJobVersion: "1")
-        Process process2 = new Process(finished: true, jobExecutionPlan: plan2, started: new Date(), startJobClass: "foo", startJobVersion: "1")
+        Process process = new Process(finished: true, jobExecutionPlan: plan, started: new Date(), startJobClass: "foo")
+        Process process2 = new Process(finished: true, jobExecutionPlan: plan2, started: new Date(), startJobClass: "foo")
         assertNotNull(process.save())
         assertNotNull(process2.save())
         assertFalse(service.isProcessRunning(plan))
         assertFalse(service.isProcessRunning(plan2))
         // adding a third process which is not finished
-        Process process3 = new Process(finished: false, jobExecutionPlan: plan, started: new Date(), startJobClass: "foo", startJobVersion: "1")
+        Process process3 = new Process(finished: false, jobExecutionPlan: plan, started: new Date(), startJobClass: "foo")
         assertNotNull(process3.save())
         assertTrue(service.isProcessRunning(plan))
         assertFalse(service.isProcessRunning(plan2))
@@ -202,14 +203,14 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
         assertFalse(service.isProcessRunning(plan3))
         assertFalse(service.isProcessRunning(plan4))
         // create a finished Process for first Plan
-        Process process = new Process(finished: true, jobExecutionPlan: plan, started: new Date(), startJobClass: "foo", startJobVersion: "1")
+        Process process = new Process(finished: true, jobExecutionPlan: plan, started: new Date(), startJobClass: "foo")
         assertNotNull(process.save())
         assertFalse(service.isProcessRunning(plan))
         assertFalse(service.isProcessRunning(plan2))
         assertFalse(service.isProcessRunning(plan3))
         assertFalse(service.isProcessRunning(plan4))
         // create a not finished Process for second plan
-        Process process2 = new Process(finished: false, jobExecutionPlan: plan2, started: new Date(), startJobClass: "foo", startJobVersion: "1")
+        Process process2 = new Process(finished: false, jobExecutionPlan: plan2, started: new Date(), startJobClass: "foo")
         assertNotNull(process2.save())
         assertFalse(service.isProcessRunning(plan))
         assertTrue(service.isProcessRunning(plan2))
@@ -232,7 +233,7 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
         // there should not be a started Process
         assertNull(service.getLastExecutedProcess(plan))
         // create the process
-        Process process1 = new Process(finished: false, jobExecutionPlan: plan, started: new Date(), startJobClass: "foo", startJobVersion: "1")
+        Process process1 = new Process(finished: false, jobExecutionPlan: plan, started: new Date(), startJobClass: "foo")
         assertNotNull(process1.save())
         // there still is no started process
         assertNull(service.getLastExecutedProcess(plan))
@@ -255,7 +256,7 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
         assertNotNull(success1.save())
         assertSame(process1, service.getLastExecutedProcess(plan))
         // but adding a second process will change
-        Process process2 = new Process(finished: false, jobExecutionPlan: plan, started: new Date(), startJobClass: "foo", startJobVersion: "1")
+        Process process2 = new Process(finished: false, jobExecutionPlan: plan, started: new Date(), startJobClass: "foo")
         assertNotNull(process2.save())
         ProcessingStep step2 = new ProcessingStep(process: process2, jobDefinition: jobDefinition1)
         assertNotNull(step2.save())
@@ -287,7 +288,7 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
         def planData = service.getLatestUpdatesForPlan(plan)
         assertTrue(planData.isEmpty())
         // create the process
-        Process process1 = new Process(finished: false, jobExecutionPlan: plan, started: new Date(), startJobClass: "foo", startJobVersion: "1")
+        Process process1 = new Process(finished: false, jobExecutionPlan: plan, started: new Date(), startJobClass: "foo")
         assertNotNull(process1.save())
         // create the Processing Step
         JobDefinition jobDefinition1 = new JobDefinition(name: "test", bean: "foo", plan: plan)

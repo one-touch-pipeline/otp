@@ -2,11 +2,17 @@ package de.dkfz.tbi.otp.job.jobs.snvcalling
 
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.ProcessingStatus
+import de.dkfz.tbi.otp.job.ast.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
+import org.springframework.context.annotation.*
+import org.springframework.stereotype.*
 
 
+@Component
+@Scope("prototype")
 @ResumableJob
+@UseJobLog
 class SamplePairDiscoveryJob extends AbstractEndStateAwareJobImpl {
 
     @Override

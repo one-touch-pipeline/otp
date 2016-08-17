@@ -33,15 +33,17 @@ class SeqScanStartJob extends AbstractStartJobImpl  {
      */
     @Scheduled(fixedDelay=30000l)
     void execute() {
-        if (!hasOpenSlots()) {
-            return
+        doWithPersistenceInterceptor {
+            if (!hasOpenSlots()) {
+                return
+            }
+            SeqTrack seqTrack = SeqTrack.find(hql)
+            if (seqTrack == null) {
+                return
+            }
+            createProcess(seqTrack)
+            println "${name}: job started for seqTrack ${seqTrack}"
         }
-        SeqTrack seqTrack = SeqTrack.find(hql)
-        if (seqTrack == null) {
-            return
-        }
-        createProcess(seqTrack)
-        println "${name}: job started for seqTrack ${seqTrack}"
     }
 
     boolean hasOpenSlots() {

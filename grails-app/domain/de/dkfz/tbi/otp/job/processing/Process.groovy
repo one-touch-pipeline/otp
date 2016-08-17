@@ -32,10 +32,6 @@ public class Process implements Serializable, Commentable, Entity {
      **/
     String startJobClass
     /**
-     * The version of the StartJob class which triggered this Process.
-     **/
-    String startJobVersion
-    /**
      * The JobExecutionPlan this Process belongs to
      */
     JobExecutionPlan jobExecutionPlan
@@ -63,7 +59,6 @@ public class Process implements Serializable, Commentable, Entity {
         jobExecutionPlan(nullable: false)
         started(nullable: false)
         startJobClass(nullable: false, blank: false)
-        startJobVersion(nullable: false, blank: false)
         restarted(nullable: true, unique: true)
         comment(nullable: true)
     }

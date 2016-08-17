@@ -88,7 +88,8 @@ class AbstractMultiJobTests {
     }
 
     private AbstractMultiJob createJob(final Closure mainLogic) {
-        final AbstractMultiJob jobBean = applicationContext.getBean("testMultiJob", step, null)
+        final AbstractMultiJob jobBean = applicationContext.getBean("testMultiJob")
+        jobBean.processingStep = step
         jobBean.log = new NoOpLog()
         jobBean.metaClass.executeImpl = { final Collection<? extends ClusterJobIdentifier> finishedClusterJobs ->
             try {

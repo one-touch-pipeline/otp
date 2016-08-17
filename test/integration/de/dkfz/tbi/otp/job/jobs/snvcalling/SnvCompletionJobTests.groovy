@@ -82,8 +82,8 @@ CHROMOSOME_INDICES=( {1..21} X Y)
                 samplePair: samplePair)
         assert snvCallingInstance.save()
 
-        snvCompletionJob = applicationContext.getBean('snvCompletionJob',
-                DomainFactory.createAndSaveProcessingStep(SnvCompletionJob.toString(), snvCallingInstance), [])
+        snvCompletionJob = applicationContext.getBean('snvCompletionJob')
+        snvCompletionJob.processingStep = DomainFactory.createAndSaveProcessingStep(SnvCompletionJob.toString(), snvCallingInstance)
         snvCompletionJob.log = new NoOpLog()
     }
 

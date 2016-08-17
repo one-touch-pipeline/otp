@@ -35,8 +35,8 @@ class FastqcJobTest {
         DomainFactory.createRealmDataProcessing([name: seqTrack.project.realmName])
         DomainFactory.createRealmDataManagement([name: seqTrack.project.realmName])
 
-        fastqcJob = applicationContext.getBean('fastqcJob',
-                DomainFactory.createAndSaveProcessingStep(FastqcJob.toString(), seqTrack), [])
+        fastqcJob = applicationContext.getBean('fastqcJob')
+        fastqcJob.processingStep = DomainFactory.createAndSaveProcessingStep(FastqcJob.toString(), seqTrack)
         fastqcJob.log = new NoOpLog()
 
         ProcessingOptionService processingOptionService = new ProcessingOptionService()

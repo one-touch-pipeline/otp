@@ -72,6 +72,7 @@ public interface Job {
      * @return The ProcessingStep describing the execution of this Job.
      **/
     public ProcessingStep getProcessingStep();
+    void setProcessingStep(ProcessingStep processingStep)
     /**
      * Invoked by the Container to indicate that the Job has been started. Called when the execute method
      * has been invoked.
@@ -85,16 +86,4 @@ public interface Job {
      * @throws InvalidStateException In case the Job is not in a state where it could end.
      */
     public void end() throws InvalidStateException;
-
-    /**
-     * Returns a unique version identifier of this class version.
-     *
-     * The version is the git SHA hash of the last change. The code of this method in implementing
-     * classes gets auto-generated through an AST Transformation.
-     *
-     * Although the code gets generated a dummy implementation can be added just to make the IDE
-     * happy.
-     * @return Unique identifier of the source code version of the class.
-     **/
-    public String getVersion();
 }

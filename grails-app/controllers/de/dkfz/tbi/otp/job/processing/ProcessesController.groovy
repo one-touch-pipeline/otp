@@ -283,7 +283,7 @@ class ProcessesController {
                 data.step.id,
                 data.state,
                 data.step.jobDefinition.name,
-                data.step.jobClass ? [name: data.step.jobClass, version: data.step.jobVersion] : null,
+                data.step.jobClass ? [name: data.step.jobClass] : null,
                 data.firstUpdate,
                 data.lastUpdate,
                 data.duration,

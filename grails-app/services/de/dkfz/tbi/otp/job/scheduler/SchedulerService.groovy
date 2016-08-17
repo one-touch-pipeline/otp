@@ -233,7 +233,6 @@ class SchedulerService {
         Process process = new Process(started: new Date(),
             jobExecutionPlan: plan,
             startJobClass: startJob.class.getName(),
-            startJobVersion: startJob.getVersion()
         )
         if (!process.save()) {
             throw new SchedulerPersistencyException("Could not save the process for the JobExecutionPlan ${plan.id}")
@@ -720,11 +719,11 @@ class SchedulerService {
      * @return
      */
     private Job createJob(ProcessingStep step) {
-        Job job = grailsApplication.mainContext.getBean(step.jobDefinition.bean, step, step.input) as Job
+        Job job = grailsApplication.mainContext.getBean(step.jobDefinition.bean) as Job
+        job.processingStep = step
         step.jobClass = job.class.getName()
-        step.jobVersion = job.getVersion()
         step.save(flush: true)
-        job.log = new JobLog(step, job.__internalLog)
+        job.log = new JobLog(step, LogFactory.getLog(job.class))
         return job
     }
 

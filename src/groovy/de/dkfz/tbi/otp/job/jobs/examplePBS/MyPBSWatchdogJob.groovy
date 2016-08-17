@@ -1,26 +1,27 @@
 package de.dkfz.tbi.otp.job.jobs.examplePBS
 
-import de.dkfz.tbi.otp.job.jobs.WatchdogJob
-import de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys
-import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
-import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.infrastructure.*
+import de.dkfz.tbi.otp.job.ast.*
+import de.dkfz.tbi.otp.job.jobs.*
+import de.dkfz.tbi.otp.job.jobs.utils.*
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.job.scheduler.*
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.*
+import org.springframework.beans.factory.annotation.*
+import org.springframework.context.annotation.*
+import org.springframework.stereotype.*
 
-import java.util.concurrent.locks.Lock
-import java.util.concurrent.locks.ReentrantLock
-import org.springframework.beans.factory.annotation.Autowired
-import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
-import de.dkfz.tbi.otp.job.processing.AbstractMultiJob
-import de.dkfz.tbi.otp.job.processing.MonitoringJob
-import de.dkfz.tbi.otp.job.processing.ResumableJob
-import de.dkfz.tbi.otp.job.scheduler.ClusterJobMonitoringService
-import de.dkfz.tbi.otp.job.scheduler.SchedulerService
-import de.dkfz.tbi.otp.ngsdata.Realm
+import java.util.concurrent.locks.*
 
 /**
  * @deprecated Do not use a separate watchdog job.
  * Instead create/use a subclass of {@link AbstractMultiJob}, so restarting the job will resubmit the cluster jobs.
  */
+@Component
+@Scope("prototype")
 @Deprecated @ResumableJob
+@UseJobLog
 class MyPBSWatchdogJob extends AbstractEndStateAwareJobImpl implements MonitoringJob {
     @Autowired
     ClusterJobMonitoringService clusterJobMonitoringService

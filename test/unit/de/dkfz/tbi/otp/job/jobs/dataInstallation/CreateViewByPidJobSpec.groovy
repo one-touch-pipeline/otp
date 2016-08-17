@@ -41,7 +41,8 @@ class CreateViewByPidJobSpec extends Specification {
 
     def setup() {
         step = DomainFactory.createProcessingStep(id: PROCESSING_STEP_ID)
-        createViewByPidJob = new CreateViewByPidJob(step, [])
+        createViewByPidJob = new CreateViewByPidJob()
+        createViewByPidJob.processingStep = step
 
         createViewByPidJob.lsdfFilesService = new LsdfFilesService()
         createViewByPidJob.configService = new ConfigService()

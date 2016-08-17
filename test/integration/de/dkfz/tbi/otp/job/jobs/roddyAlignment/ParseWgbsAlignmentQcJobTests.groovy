@@ -131,7 +131,8 @@ class ParseWgbsAlignmentQcJobTests {
         DomainFactory.createQaFileOnFileSystem(mergedQaFile, MERGED_QA_VALUE)
 
         ProcessingStep step = DomainFactory.createAndSaveProcessingStep(ParseWgbsAlignmentQcJob.class.toString(), roddyBamFile)
-        parseWgbsAlignmentQcJob = context.getBean('parseWgbsAlignmentQcJob', step, null)
+        parseWgbsAlignmentQcJob = context.getBean('parseWgbsAlignmentQcJob')
+        parseWgbsAlignmentQcJob.processingStep = step
 
         return roddyBamFile
     }

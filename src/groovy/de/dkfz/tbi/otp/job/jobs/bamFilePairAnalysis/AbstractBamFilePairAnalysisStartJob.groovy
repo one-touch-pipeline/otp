@@ -20,32 +20,33 @@ abstract class AbstractBamFilePairAnalysisStartJob extends AbstractStartJobImpl 
 
     @Scheduled(fixedDelay = 60000l)
     void execute() {
+        doWithPersistenceInterceptor {
+            short minPriority = minimumProcessingPriorityForOccupyingASlot
+            if (minPriority > ProcessingPriority.MAXIMUM_PRIORITY) {
+                return
+            }
+            SamplePair.withTransaction {
+                SamplePair samplePair = findSamplePairToProcess(minPriority)
+                if (samplePair) {
 
-        short minPriority = minimumProcessingPriorityForOccupyingASlot
-        if (minPriority > ProcessingPriority.MAXIMUM_PRIORITY) {
-            return
-        }
-        SamplePair.withTransaction {
-            SamplePair samplePair = findSamplePairToProcess(minPriority)
-            if (samplePair) {
+                    ConfigPerProject config = getConfig(samplePair)
 
-                ConfigPerProject config = getConfig(samplePair)
+                    AbstractMergedBamFile sampleType1BamFile = samplePair.mergingWorkPackage1.processableBamFileInProjectFolder
+                    AbstractMergedBamFile sampleType2BamFile = samplePair.mergingWorkPackage2.processableBamFileInProjectFolder
 
-                AbstractMergedBamFile sampleType1BamFile = samplePair.mergingWorkPackage1.processableBamFileInProjectFolder
-                AbstractMergedBamFile sampleType2BamFile = samplePair.mergingWorkPackage2.processableBamFileInProjectFolder
-
-                BamFilePairAnalysis analysis = getInstanceClass().newInstance(
-                        samplePair: samplePair,
-                        instanceName: getInstanceName(config),
-                        config: config,
-                        sampleType1BamFile: sampleType1BamFile,
-                        sampleType2BamFile: sampleType2BamFile,
-                        latestDataFileCreationDate: AbstractBamFile.getLatestSequenceDataFileCreationDate(sampleType1BamFile, sampleType2BamFile),
-                )
-                analysis.save(flush: true)
-                prepareCreatingTheProcessAndTriggerTracking(analysis)
-                createProcess(analysis)
-                log.debug "Analysis started for: ${analysis.toString()}"
+                    BamFilePairAnalysis analysis = getInstanceClass().newInstance(
+                            samplePair: samplePair,
+                            instanceName: getInstanceName(config),
+                            config: config,
+                            sampleType1BamFile: sampleType1BamFile,
+                            sampleType2BamFile: sampleType2BamFile,
+                            latestDataFileCreationDate: AbstractBamFile.getLatestSequenceDataFileCreationDate(sampleType1BamFile, sampleType2BamFile),
+                    )
+                    analysis.save(flush: true)
+                    prepareCreatingTheProcessAndTriggerTracking(analysis)
+                    createProcess(analysis)
+                    log.debug "Analysis started for: ${analysis.toString()}"
+                }
             }
         }
     }

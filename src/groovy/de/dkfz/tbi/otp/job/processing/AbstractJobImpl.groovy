@@ -51,31 +51,14 @@ abstract class AbstractJobImpl implements Job {
 
     /**
      * The current execution state of the Job, will be updated
-     * by {@link start} and {@link end}. It is used to decide
+     * by {@link #start} and {@link #end}. It is used to decide
      * whether to throw an exception if e.g. the output parameters
      * are queried before the execution finished.
-     * @see start
-     * @see end
+     * @see #start
+     * @see #end
      */
     private State state = State.CREATED
 
-    /**
-     * Empty default constructor. Required by Spring.
-     */
-    protected AbstractJobImpl() {
-    }
-
-    /**
-     * Constructor used by the factory method. Each implementing sub-class gets a matching Constructor injected.
-     * @param processingStep The processing step for this Job
-     * @param inputParameters The input parameters for this Job
-     */
-    protected AbstractJobImpl(ProcessingStep processingStep, Collection<Parameter> inputParameters) {
-        processingStepId = processingStep.id
-        if (inputParameters) {
-            this.inputParameters.addAll(inputParameters)
-        }
-    }
 
     /**
      * Adds an output parameter to the list of output parameters provided
@@ -104,14 +87,6 @@ abstract class AbstractJobImpl implements Job {
             throw new ProcessingException("Not an output parameter")
         }
         outputParameters << new Parameter(type: type, value: value)
-    }
-
-    /**
-     *
-     * @return List of input parameters set to the job
-     */
-    protected Collection<Parameter> getInputParameters() {
-        return inputParameters
     }
 
     /**
@@ -155,30 +130,20 @@ abstract class AbstractJobImpl implements Job {
 
     }
 
-    /**
-     * Retrieves the value of the specified output parameter.
-     *
-     * If the return value is <code>null</code>, this could either mean that the parameter is not set or
-     * the value of the parameter is actually <code>null</code>.
-     *
-     * @param param the name of the output parameter
-     * @return the value of the output parameter, or <code>null</code> if the parameter is not set.
-     */
-    public String getOutputParameterValue(final String param) {
-        Parameter p = outputParameters?.find {
-            it.type.name == param
+    @Override
+    void setProcessingStep(ProcessingStep processingStep) {
+        switch (state) {
+            case State.CREATED:
+                processingStepId = processingStep.id
+                break
+            default:
+                throw new InvalidStateException("Cannot set processingStep from state " + state)
         }
-        p?.value
     }
 
     @Override
     public ProcessingStep getProcessingStep() {
         return ProcessingStep.getInstance(processingStepId)
-    }
-
-    @Override
-    public String getVersion() {
-        return ""
     }
 
     /**

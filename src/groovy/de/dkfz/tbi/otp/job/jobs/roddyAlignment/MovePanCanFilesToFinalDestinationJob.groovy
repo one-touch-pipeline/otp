@@ -1,10 +1,13 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.job.ast.*
+import de.dkfz.tbi.otp.job.jobs.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import org.springframework.beans.factory.annotation.*
-import de.dkfz.tbi.otp.job.jobs.AutoRestartableJob
+import org.springframework.context.annotation.*
+import org.springframework.stereotype.*
 
 /**
  *
@@ -13,6 +16,9 @@ import de.dkfz.tbi.otp.job.jobs.AutoRestartableJob
  * are linked from the working processing folder in the project folder.
  * After linking, tmp roddy files and not used files in older work directories are deleted.
  */
+@Component
+@Scope("prototype")
+@UseJobLog
 class MovePanCanFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl implements AutoRestartableJob {
 
     @Autowired

@@ -21,20 +21,9 @@ public interface StartJob {
     public JobExecutionPlan getJobExecutionPlan()
 
     /**
-     * Returns a unique version identifier of this class version.
-     *
-     * The version is the git SHA hash of the last change. The code of this method in implementing
-     * classes gets auto-generated through an AST Transformation.
-     *
-     * Although the code gets generated a dummy implementation can be added just to make the IDE
-     * happy.
-     * @return Unique identifier of the source code version of the class.
-     **/
-    public String getVersion()
-    /**
      * This method can be implemented by the StartJob for the checking.
-     * The implementing method is wrapped into a construct so that a hibernate session is bound in
-     * case that the Job extends the AbstractJobImpl.
+     * The implementing method must be wrapped so that a hibernate session is bound,
+     * e.g. by using {@link AbstractStartJobImpl#doWithPersistenceInterceptor}
      *
      * It is recommended to use the {@code @Scheduled} annotation on this method.
      */

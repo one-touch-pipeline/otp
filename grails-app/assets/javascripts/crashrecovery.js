@@ -49,7 +49,7 @@ $.otp.crashRecovery.createListView = function () {
                 id: rowData[3].id,
                 text: rowData[3].name
             });
-            rowData[4] = rowData[4]['class'] + '<br/>' + rowData[4].version;
+            rowData[4] = rowData[4]['class'];
         }
     },
         undefined,

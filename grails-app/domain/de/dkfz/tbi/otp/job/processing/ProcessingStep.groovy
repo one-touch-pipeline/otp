@@ -42,10 +42,6 @@ public class ProcessingStep implements Serializable, Entity {
      **/
     String jobClass
     /**
-     * The version of the Job class which is used for this ProcessingStep.
-     **/
-    String jobVersion
-    /**
      * The Process this ProcessingStep belongs to.
      */
     Process process
@@ -69,7 +65,6 @@ public class ProcessingStep implements Serializable, Entity {
     static constraints = {
         jobDefinition(nullable: false)
         jobClass(nullable: true, empty: false)
-        jobVersion(nullable: true, empty: false)
         process(nullable: false, validator: { Process val, ProcessingStep obj ->
             if (!val) {
                 return false

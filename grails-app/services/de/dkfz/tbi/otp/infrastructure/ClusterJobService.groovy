@@ -167,7 +167,8 @@ class ClusterJobService {
      */
     public static Long getReadsSum(ClusterJob job) {
         return normalizePropertyToClusterJobs(job) { ProcessParameterObject workflowObject ->
-            workflowObject.getContainedSeqTracks()?.sum { it.getNReads() }
+            List<Long> nReads = workflowObject.getContainedSeqTracks()*.getNReads()
+            nReads.contains(null) ? null : nReads.sum()
         }
     }
 

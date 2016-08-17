@@ -1,9 +1,15 @@
 package de.dkfz.tbi.otp.job.jobs
 
-import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
-import de.dkfz.tbi.otp.job.processing.AbstractMultiJob
+import de.dkfz.tbi.otp.infrastructure.*
+import de.dkfz.tbi.otp.job.ast.*
+import de.dkfz.tbi.otp.job.processing.*
+import org.springframework.context.annotation.*
+import org.springframework.stereotype.*
 import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
 
+@Component
+@Scope("prototype")
+@UseJobLog
 class TestMultiJob extends AbstractMultiJob {
 
     @Override

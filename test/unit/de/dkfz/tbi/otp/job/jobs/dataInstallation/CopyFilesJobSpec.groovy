@@ -43,7 +43,8 @@ class CopyFilesJobSpec extends Specification {
 
     def setup() {
         step = DomainFactory.createProcessingStep(id: PROCESSING_STEP_ID)
-        copyFilesJob = new CopyFilesJob(step, [])
+        copyFilesJob = new CopyFilesJob()
+        copyFilesJob.processingStep = step
         copyFilesJob.configService = new ConfigService()
         copyFilesJob.lsdfFilesService = new LsdfFilesService()
         copyFilesJob.checksumFileService = new ChecksumFileService()
