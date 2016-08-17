@@ -62,6 +62,10 @@ class SampleType implements Entity {
         return name.toLowerCase()
     }
 
+    String getDisplayName() {
+        return name
+    }
+
     /**
      * @return The category of this sample type or <code>null</code> if it is not configured.
      */

@@ -84,6 +84,7 @@
                                             <li id="metaDataFields"><g:link controller="metaDataFields" action="index"><g:message code="otp.menu.metaDataFields"/></g:link></li><br>
                                             <li id="softwareTool"><g:link controller="softwareTool" action="list"><g:message code="otp.menu.softwareTool"/></g:link></li><br>
                                             <li id="projectProgress"><g:link controller="projectProgress" action="progress"><g:message code="otp.menu.progress"/></g:link></li>
+                                            <li id="processingTimeStatistics"><g:link controller="processingTimeStatistics" action="index"><g:message code="otp.menu.processingTimeStatistics"/></g:link></li>
                                         </ul>
                                     </li>
                                 </ul>

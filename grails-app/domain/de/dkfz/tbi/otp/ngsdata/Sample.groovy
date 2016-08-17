@@ -21,6 +21,10 @@ class Sample implements Entity {
         "${individual.mockPid} ${sampleType.name}"
     }
 
+    String getDisplayName() {
+        return "${individual.displayName} ${sampleType.displayName}"
+    }
+
     /**
      * @return List of SampleIdentifier for this Sample.
      **/

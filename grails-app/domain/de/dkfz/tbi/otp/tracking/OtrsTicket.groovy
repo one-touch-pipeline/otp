@@ -22,6 +22,15 @@ class OtrsTicket implements Commentable, Entity {
 
     String ticketNumber
 
+    /**
+     * Timestamp of the earliest "Submission Received Notice" mail for an ILSe submission belonging to this ticket.
+     */
+    Date submissionReceivedNotice
+    /**
+     * Timestamp when the ticket gets created in OTRS.
+     */
+    Date ticketCreated
+
     Date dateCreated
 
     Date installationStarted
@@ -45,6 +54,9 @@ class OtrsTicket implements Commentable, Entity {
         ticketNumber(nullable: false, unique: true, validator: { val, obj ->
             return ticketNumberConstraint(val) ?: true
         })
+
+        submissionReceivedNotice(nullable: true)
+        ticketCreated(nullable: true)
 
         installationStarted(nullable: true)
         installationFinished(nullable: true)
