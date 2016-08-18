@@ -92,6 +92,7 @@ class ProcessedMergedBamFile extends AbstractMergedBamFile implements ProcessPar
 
             withdrawDownstreamBamFiles()
 
+            assert LogThreadLocal.threadLog : 'This method produces relevant log messages. Thread log must be set.'
             LogThreadLocal.threadLog.info "Execute WithdrawnFilesRename.groovy script afterwards"
             LogThreadLocal.threadLog.info "Withdrawing ${this}"
 

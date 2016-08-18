@@ -6,10 +6,12 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.utils.logging.*
 
 String projectName = ''
 
 // The PID is optional. It must only be set if the config is individual specific.
+// If the PID is set, alignment will automatically triggered for that PID.
 String individualPid = ''
 
 
@@ -47,7 +49,7 @@ String configFilePath = ''
 
 String panCanAlignmentDeciderBeanName = 'panCanAlignmentDecider'
 
-Project.withTransaction {
+LogThreadLocal.withThreadLog(System.out, { Project.withTransaction {
     assert projectName
     assert pluginVersionToUse
     assert configFilePath
@@ -96,4 +98,4 @@ Project.withTransaction {
 
     println "Config file loaded."
     println "Don't forget to also configure the reference genome (ConfigureReferenceGenome.groovy)."
-}
+}})

@@ -3,6 +3,8 @@ package de.dkfz.tbi.otp.dataprocessing.roddyExecution
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.utils.logging.*
+import org.codehaus.groovy.control.io.*
 import spock.lang.*
 
 class RoddyWorkflowConfigServiceIntegrationSpec extends Specification {
@@ -14,7 +16,9 @@ class RoddyWorkflowConfigServiceIntegrationSpec extends Specification {
         1 * RoddyWorkflowConfig.importProjectConfigFile(*_)
 
         when:
-        RoddyWorkflowConfigService.loadPanCanConfigAndTriggerAlignment(roddyBamFile.project, roddyBamFile.seqType, HelperUtils.uniqueString, roddyBamFile.pipeline, HelperUtils.uniqueString, HelperUtils.uniqueString, roddyBamFile.individual)
+        LogThreadLocal.withThreadLog(NullWriter.DEFAULT, {
+            RoddyWorkflowConfigService.loadPanCanConfigAndTriggerAlignment(roddyBamFile.project, roddyBamFile.seqType, HelperUtils.uniqueString, roddyBamFile.pipeline, HelperUtils.uniqueString, HelperUtils.uniqueString, roddyBamFile.individual)
+        })
 
         then:
         roddyBamFile.mergingWorkPackage.needsProcessing == true

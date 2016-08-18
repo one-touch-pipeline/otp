@@ -147,8 +147,9 @@ class SnvJobResult implements Entity {
                 it.withdraw()
             }
 
-            LogThreadLocal.threadLog?.info "Execute WithdrawnFilesRename.groovy script afterwards"
-            LogThreadLocal.threadLog?.info "Withdrawing ${this}"
+            assert LogThreadLocal.threadLog : 'This method produces relevant log messages. Thread log must be set.'
+            LogThreadLocal.threadLog.info "Execute WithdrawnFilesRename.groovy script afterwards"
+            LogThreadLocal.threadLog.info "Withdrawing ${this}"
             withdrawn = true
             assert save(flush: true)
         }
