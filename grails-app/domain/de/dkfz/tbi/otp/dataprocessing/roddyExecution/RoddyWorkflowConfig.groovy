@@ -85,7 +85,7 @@ class RoddyWorkflowConfig extends ConfigPerProject {
         }
         individual nullable: true
         pipeline validator: { pipeline ->
-            pipeline?.name != Pipeline.Name.OTP_SNV
+            pipeline?.usesRoddy()
         }
     }
 

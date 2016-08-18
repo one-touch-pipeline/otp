@@ -1,45 +1,40 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.utils.*
+import groovy.transform.*
 
 class Pipeline implements Entity {
 
-    enum Name {
-        DEFAULT_OTP("bwa&nbsp;aln"),
-        PANCAN_ALIGNMENT("bwa&nbsp;mem"),
-        OTP_SNV(""),
-        RODDY_SNV(""),
+    @TupleConstructor
+    static enum Name {
+        DEFAULT_OTP     (Type.ALIGNMENT, false, 'bwa\u00A0aln'),
+        PANCAN_ALIGNMENT(Type.ALIGNMENT, true,  'bwa\u00A0mem'),
+        OTP_SNV         (Type.SNV,       false, null),
+        RODDY_SNV       (Type.SNV,       true,  null),
 
-
-        final String html
-
-        private Name(String html) {
-            this.html = html
-        }
+        final Type type
+        final boolean usesRoddy
+        final String displayName
     }
     Name name
 
-    enum Type {
+    static enum Type {
         ALIGNMENT,
         SNV,
     }
     Type type
 
     static constraints = {
-        name unique: 'type', validator: { name, pipeline ->
-            switch (name) {
-                case [Name.DEFAULT_OTP, Name.PANCAN_ALIGNMENT]:
-                    return pipeline.type == Type.ALIGNMENT
-                case [Name.OTP_SNV, Name.RODDY_SNV]:
-                    return pipeline.type == Type.SNV
-                default:
-                    assert false : "The pipeline ${name} is not defined."
-            }
-        }
+        name unique: true
+        type validator: { Type type, Pipeline pipeline -> type == pipeline?.name?.type }
     }
 
-    public getHtml() {
-        return name.html
+    public boolean usesRoddy() {
+        return name.usesRoddy
+    }
+
+    public getDisplayName() {
+        return name.displayName
     }
 
     @Override

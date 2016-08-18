@@ -185,7 +185,7 @@ class AlignmentQualityOverviewController {
 
                 plot: it.id,
                 withdrawn: abstractMergedBamFile.withdrawn,
-                pipeline: abstractMergedBamFile.workPackage.pipeline.html,
+                pipeline: abstractMergedBamFile.workPackage.pipeline.displayName,
                 kit: [name: kit*.name.join(", ") ?: "", shortName: kit*.shortDisplayName.join(", ") ?: "-"],
             ]
 

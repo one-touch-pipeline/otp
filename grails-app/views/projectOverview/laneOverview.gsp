@@ -84,7 +84,7 @@
                         <g:each var="seqType" in="${seqTypes}">
                             <th><g:message code="projectOverview.index.registeredLanes"/></th>
                             <g:each var="workflow" in="${pipelines}">
-                                <th>${raw(workflow.html)}<br><g:message code="projectOverview.index.lanesAndCoverage"/></th>
+                                <th>${workflow.displayName}<br><g:message code="projectOverview.index.lanesAndCoverage"/></th>
                             </g:each>
                         </g:each>
                     </tr>
