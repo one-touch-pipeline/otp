@@ -276,25 +276,9 @@ abstract class QualityAssessmentAbstractWorkflowTests extends WorkflowTestCase {
         assertNotNull(run.save([flush: true]))
     }
 
-    protected void setupForLoadingWorkflow() {
-        SeqType seqType = new SeqType(
-                        name: "WHOLE_GENOME",
-                        libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED,
-                        dirName: "seq-type-dir"
-                        )
-        assertNotNull(seqType.save([flush: true]))
-
-        seqType = new SeqType(
-                        name: "EXON",
-                        libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED,
-                        dirName: "exome-seq-type-dir"
-                        )
-        assertNotNull(seqType.save([flush: true]))
-    }
-
     private void createAdditionalWholeGenomeData() {
 
-        SeqType seqType = SeqType.findByName('WHOLE_GENOME')
+        SeqType seqType = SeqType.wholeGenomePairedSeqType
         List<SeqTrack> seqTracks = []
         2.times {
             SeqTrack seqTrack = new SeqTrack(seqType: seqType)
@@ -314,7 +298,7 @@ abstract class QualityAssessmentAbstractWorkflowTests extends WorkflowTestCase {
         List<SeqTrack> seqTracks = []
         2.times {
             SeqTrack seqTrack = new ExomeSeqTrack(
-                            seqType: SeqType.findByName('EXON'),
+                            seqType: SeqType.exomePairedSeqType,
                             kitInfoReliability: InformationReliability.KNOWN,
                             libraryPreparationKit: kit
                             )

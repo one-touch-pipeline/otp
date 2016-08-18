@@ -38,8 +38,6 @@ class FastqcWorkflowTests extends WorkflowTestCase {
 
         Sample sample = Sample.build(individual: individual)
 
-        DomainFactory.createAlignableSeqTypes()
-
         Run run = DomainFactory.createRun()
 
         RunSegment runSegment = DomainFactory.createRunSegment(

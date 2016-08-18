@@ -32,6 +32,8 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile {
 
     public abstract String getBamFileName()
 
+    public abstract String getBaiFileName()
+
     static constraints = {
         numberOfMergedLanes min: 1
         md5sum nullable: true, validator: { val, obj ->

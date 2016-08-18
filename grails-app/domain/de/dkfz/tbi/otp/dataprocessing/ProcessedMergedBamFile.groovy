@@ -82,6 +82,12 @@ class ProcessedMergedBamFile extends AbstractMergedBamFile implements ProcessPar
     }
 
     @Override
+    public String getBaiFileName() {
+        String body = this.fileNameNoSuffix()
+        return "${body}.bai"
+    }
+
+    @Override
     protected File getPathForFurtherProcessingNoCheck() {
         return new File(baseDirectory, bamFileName)
     }

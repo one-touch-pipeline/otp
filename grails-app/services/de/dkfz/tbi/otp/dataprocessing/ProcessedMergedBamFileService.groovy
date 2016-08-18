@@ -93,7 +93,7 @@ class ProcessedMergedBamFileService {
         locations.put("temporalDestinationDir", destinationTempDirectory(file))
 
         locations.put("bamFile", file.getBamFileName())
-        locations.put("baiFile", fileNameForBai(file))
+        locations.put("baiFile", file.getBaiFileName())
 
         locations.put("md5BamFile", checksumFileService.md5FileName(locations["bamFile"]))
         locations.put("md5BaiFile", checksumFileService.md5FileName(locations["baiFile"]))
@@ -120,16 +120,10 @@ class ProcessedMergedBamFileService {
         return "${dir}/${filename}"
     }
 
-    public String fileNameForBai(ProcessedMergedBamFile mergedBamFile) {
-        notNull(mergedBamFile, "The parameter mergedBamFile is not allowed to be null")
-        String body = mergedBamFile.fileNameNoSuffix()
-        return "${body}.bai"
-    }
-
     public String filePathForBai(ProcessedMergedBamFile mergedBamFile) {
         notNull(mergedBamFile, "The parameter mergedBamFile is not allowed to be null")
         String dir = directory(mergedBamFile)
-        String filename = fileNameForBai(mergedBamFile)
+        String filename = mergedBamFile.baiFileName
         return "${dir}/${filename}"
     }
 
@@ -139,8 +133,8 @@ class ProcessedMergedBamFileService {
      */
     public Collection<String> additionalFileNames(final ProcessedMergedBamFile bamFile) {
         return [
-                fileNameForBai(bamFile),
-                checksumFileService.md5FileName(fileNameForBai(bamFile)),
+                bamFile.getBaiFileName(),
+                checksumFileService.md5FileName(bamFile.getBaiFileName()),
                 checksumFileService.md5FileName(bamFile.getBamFileName()),
         ]
     }

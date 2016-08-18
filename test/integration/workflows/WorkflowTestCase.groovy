@@ -118,6 +118,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         schemaDump = new File(TestCase.createEmptyTestDirectory(), "test-database-dump.sql")
         sql.execute("SCRIPT NODATA DROP TO ?", [schemaDump.absolutePath])
 
+        DomainFactory.createPanCanAlignableSeqTypes()
 
         createUserAndRoles()
         loadWorkflow()
@@ -321,6 +322,10 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
     protected File getWorkflowDirectory() {
         File workflowDirectory = new File(getRootDirectory(), getNonQualifiedClassName())
         return workflowDirectory
+    }
+
+    protected File getDataDirectory() {
+        return new File(getRootDirectory(), 'workflow-data')
     }
 
     /**

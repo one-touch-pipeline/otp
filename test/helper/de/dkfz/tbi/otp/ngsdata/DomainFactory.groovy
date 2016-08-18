@@ -555,6 +555,14 @@ class DomainFactory {
                 properties)
     }
 
+    static SampleTypePerProject createSampleTypePerProject(Map properties = [:]) {
+        return createDomainObject(SampleTypePerProject, [
+                project   : { createProject() },
+                sampleType: { createSampleType() },
+                category  : SampleType.Category.DISEASE,
+        ], properties)
+    }
+
     static SamplePair createSamplePair(MergingWorkPackage mergingWorkPackage1, MergingWorkPackage mergingWorkPackage2, Map properties = [:]) {
         SamplePair samplePair = SamplePair.createInstance([
                 mergingWorkPackage1: mergingWorkPackage1,
@@ -1267,7 +1275,17 @@ class DomainFactory {
         ], properties)
     }
 
-    static ProcessingThresholds createProcessingThresholdsForBamFile (AbstractBamFile bamFile, properties = [:]) {
+    static ProcessingThresholds createProcessingThresholds(Map properties = [:]) {
+        return createDomainObject(ProcessingThresholds, [
+                project: {createProject()},
+                seqType: {createSeqType()},
+                sampleType: {createSampleType()},
+                coverage: 30.0,
+                numberOfLanes: 3,
+        ], properties)
+    }
+
+    static ProcessingThresholds createProcessingThresholdsForBamFile(AbstractBamFile bamFile, Map properties = [:]) {
         return createDomainObject(ProcessingThresholds, [
                 project: bamFile.project,
                 seqType: bamFile.seqType,

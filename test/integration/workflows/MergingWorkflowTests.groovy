@@ -184,11 +184,6 @@ class MergingWorkflowTests extends WorkflowTestCase {
         checkFiles([singleLaneBamFile])
     }
 
-    protected void setupForLoadingWorkflow() {
-        DomainFactory.createAlignableSeqTypes()
-    }
-
-
 
     /**
      * Helper to see logs at console ( besides seeing at the reports in the end)

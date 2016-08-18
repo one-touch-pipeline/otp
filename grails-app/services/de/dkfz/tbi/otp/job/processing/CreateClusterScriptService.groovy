@@ -24,7 +24,7 @@ fi
     static String ensureFileHasExpectedSizeScript(final File file, final long expectedSize) {
         assert file.isAbsolute()
         return """
-ACTUAL_FILE_SIZE=\$(stat -c '%s' "$file")
+ACTUAL_FILE_SIZE=\$(stat -Lc '%s' "$file")
 if [ \$ACTUAL_FILE_SIZE -ne ${expectedSize} ]; then
     echo "File ${file} has size \$ACTUAL_FILE_SIZE bytes. Expected ${expectedSize} bytes."
     exit 1

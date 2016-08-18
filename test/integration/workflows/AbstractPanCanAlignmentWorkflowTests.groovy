@@ -116,8 +116,6 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
         assert group: '"otp.testing.group" is not set in your "otp.properties". Please add it with an existing secondary group.'
         executionHelperService.setGroup(realm, realm.rootPath as File, group)
 
-        DomainFactory.createPanCanAlignableSeqTypes()
-
         setUpFilesVariables()
 
         MergingWorkPackage workPackage = createWorkPackage()
@@ -148,7 +146,7 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
 
     @After
     void changeFilePermissionForRoddyFiles() {
-        GString cmd = "find \'${getBaseDirectory().absolutePath}\' -user OtherUnixUser -not -type l -print -exec chmod 2770 '{}' \\;"
+        GString cmd = "find \'${getBaseDirectory().absolutePath}\' -user OtherUnixUser -not -type l -print -exec chmod 2770 '{}' \\; | wc -l"
         ProcessOutput processOutput = executionService.executeCommandReturnProcessOutput(realm, cmd, realm.roddyUser)
         processOutput.assertExitCodeZeroAndStderrEmpty()
     }

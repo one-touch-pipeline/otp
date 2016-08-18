@@ -30,10 +30,6 @@ class ConveyBwaAlignmentWorkflowTests extends WorkflowTestCase {
 
     final static String REF_GEN_FILE_NAME_PREFIX = 'hs37d5'
 
-    protected void setupForLoadingWorkflow() {
-        DomainFactory.createAlignableSeqTypes()
-    }
-
     @Before
     void setUp() {
         File sourceFastqR1 = new File(testDataDir, "35-3B_NoIndex_L007_R1_complete_filtered.fastq.gz")

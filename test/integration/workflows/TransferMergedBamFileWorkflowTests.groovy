@@ -124,12 +124,7 @@ class TransferMergedBamFileWorkflowTests extends WorkflowTestCase {
                         )
         assertNotNull(sample.save([flush: true, failOnError: true]))
 
-        SeqType seqType = new SeqType(
-                        name: seqTypeName,
-                        libraryLayout: seqTypeLibrary,
-                        dirName: seqTypeDirName
-                        )
-        assertNotNull(seqType.save([flush: true, failOnError: true]))
+        SeqType seqType = DomainFactory.createWholeGenomeSeqType()
 
         SeqPlatform seqPlatform = new SeqPlatform(
                         seqPlatformGroup: SeqPlatformGroup.build(),

@@ -170,7 +170,7 @@ class CalculateFileChecksumMD5JobTests {
         String picardMd5FileName = checksumFileService.picardMd5FileName(processedMergedBamFile.getBamFileName())
         File picardmd5File = new File(tempDir, picardMd5FileName)
 
-        String baiFile = processedMergedBamFileService.fileNameForBai(processedMergedBamFile)
+        String baiFile = processedMergedBamFile.baiFileName
         new File(tempDir, baiFile) << "comeContent"
         File baiMd5SumFile = new File(tempDir, checksumFileService.md5FileName(baiFile))
 

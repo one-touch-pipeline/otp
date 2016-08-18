@@ -190,20 +190,6 @@ class ProcessedMergedBamFileServiceTests {
     }
 
     @Test(expected = IllegalArgumentException)
-    void testFileNameForBaiBamFileIsNull() {
-        ProcessedMergedBamFile processedMergedBamFile = null
-        processedMergedBamFileService.fileNameForBai(processedMergedBamFile)
-    }
-
-    @Test
-    void testFileNameForBai() {
-        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile()
-        String nameExp = baseFile + ".bai"
-        String nameAct = processedMergedBamFileService.fileNameForBai(processedMergedBamFile)
-        assertEquals(nameExp, nameAct)
-    }
-
-    @Test(expected = IllegalArgumentException)
     void testFilePathForMetricsBamFileIsNull() {
         ProcessedMergedBamFile processedMergedBamFile = null
         processedMergedBamFileService.filePathForMetrics(processedMergedBamFile)
