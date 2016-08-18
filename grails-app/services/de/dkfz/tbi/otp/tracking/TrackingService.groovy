@@ -6,9 +6,9 @@ import de.dkfz.tbi.otp.job.jobs.snvcalling.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.ProcessingStatus.Done
 import de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus
-import de.dkfz.tbi.otp.user.UserException
+import de.dkfz.tbi.otp.user.*
 import de.dkfz.tbi.otp.utils.*
-import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.security.access.prepost.*
 
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.Done.*
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus.*
@@ -275,7 +275,9 @@ class TrackingService {
         }
         if ([1, 2].every { sp."mergingWorkPackage${it}".completeProcessableBamFileInProjectFolder }) {
             samplePairDiscovery.setExistingSamplePairsToNeedsProcessing()
-            if (snvCallingService.samplePairForSnvProcessing(ProcessingPriority.MINIMUM_PRIORITY, sp)) {
+            if (SnvCallingService.SNV_CONFIG_CLASSES.any {
+                snvCallingService.samplePairForSnvProcessing(ProcessingPriority.MINIMUM_PRIORITY, it, sp)
+            }) {
                 return NOTHING_DONE_MIGHT_DO
             } else {
                 return NOTHING_DONE_WONT_DO

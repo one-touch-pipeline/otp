@@ -1,17 +1,13 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
-import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
-import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
-import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
-import de.dkfz.tbi.otp.dataprocessing.ProcessingThresholds
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.ProcessingStatus
 import de.dkfz.tbi.otp.ngsdata.*
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
+import org.junit.*
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 import static org.junit.Assert.*
 
 class SnvCallingServiceTests {
@@ -21,6 +17,7 @@ class SnvCallingServiceTests {
 
     SnvCallingService snvCallingService
     SnvConfig snvConfig
+    RoddyWorkflowConfig roddyConfig
     ProcessedMergedBamFile processedMergedBamFile1
     ProcessedMergedBamFile processedMergedBamFile2
     Project project
@@ -45,6 +42,11 @@ class SnvCallingServiceTests {
         seqType = samplePair.seqType
 
         snvConfig = testData.createSnvConfig()
+        roddyConfig = DomainFactory.createRoddyWorkflowConfig(
+                project: samplePair.project,
+                seqType: samplePair.seqType,
+                pipeline: DomainFactory.createRoddySnvPipelineLazy()
+        )
 
         processedMergedBamFile1 = testData.bamFileTumor
         processedMergedBamFile2 = testData.bamFileControl
@@ -58,6 +60,7 @@ class SnvCallingServiceTests {
     void tearDown() {
         samplePair = null
         snvConfig = null
+        roddyConfig = null
         processedMergedBamFile1 = null
         processedMergedBamFile2 = null
         project = null
@@ -67,21 +70,26 @@ class SnvCallingServiceTests {
 
     @Test
     void testSamplePairForSnvProcessingAllCorrect() {
-        assertEquals(samplePair, snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY))
+        assertEquals(samplePair, snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig))
+    }
+
+    @Test
+    void testSamplePairForRoddySnvProcessingAllCorrect() {
+        assertEquals(samplePair, snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig))
     }
 
     @Test
     void testSamplePairNoProcessingNeeded() {
         samplePair.processingStatus = ProcessingStatus.NO_PROCESSING_NEEDED
         assert samplePair.save(flush: true)
-        assertNull(snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY))
+        assertNull(snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig))
     }
 
     @Test
     void testSamplePairDisabled() {
         samplePair.processingStatus = ProcessingStatus.DISABLED
         assert samplePair.save(flush: true)
-        assertNull(snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY))
+        assertNull(snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig))
     }
 
     @Test
@@ -92,7 +100,7 @@ class SnvCallingServiceTests {
         snvConfig.project = otherProject
         assert snvConfig.save(flush: true)
 
-        assertNull(snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY))
+        assertNull(snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig))
     }
 
     @Test
@@ -101,7 +109,7 @@ class SnvCallingServiceTests {
         snvConfig.seqType = DomainFactory.createExomeSeqType()
         snvConfig.save(flush: true)
 
-        assertNull(snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY))
+        assertNull(snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig))
     }
 
     @Test
@@ -109,7 +117,7 @@ class SnvCallingServiceTests {
         testData.externalScript_Joining.scriptVersion = "v2"
         assert testData.externalScript_Joining.save(flush: true)
 
-        assertNull(snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY))
+        assertNull(snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig))
     }
 
 
@@ -124,7 +132,7 @@ class SnvCallingServiceTests {
                 )
         snvCallingInstance.save()
 
-        assertNull(snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY))
+        assertNull(snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig))
     }
 
     @Test
@@ -139,14 +147,14 @@ class SnvCallingServiceTests {
                 )
         snvCallingInstance.save()
 
-        assertEquals(samplePair, snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY))
+        assertEquals(samplePair, snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig))
     }
 
     @Test
     void testSamplePairForSnvProcessingHasFailed() {
         SnvCallingInstance snvCallingInstance = createAndSaveSnvCallingInstanceAndSnvJobResults()
         snvCallingService.markSnvCallingInstanceAsFailed(snvCallingInstance, [SnvCallingStep.SNV_ANNOTATION])
-        assertEquals(samplePair, snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY))
+        assertEquals(samplePair, snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig))
     }
 
     @Test
@@ -164,7 +172,7 @@ class SnvCallingServiceTests {
                 )
         snvCallingInstance.save()
 
-        assertEquals(samplePair, snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY))
+        assertEquals(samplePair, snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig))
     }
 
     @Test
@@ -201,7 +209,7 @@ class SnvCallingServiceTests {
                 )
         snvCallingInstance.save()
 
-        assertEquals(samplePair, snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY))
+        assertEquals(samplePair, snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig))
     }
 
     @Test
@@ -235,25 +243,25 @@ class SnvCallingServiceTests {
                 )
         snvCallingInstance.save()
 
-        assertEquals(samplePair, snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY))
+        assertEquals(samplePair, snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig))
     }
 
     @Test
     void testBamFile1DoesNotContainAllSeqTracks() {
-        assertEquals(samplePair, snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY))
+        assertEquals(samplePair, snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig))
 
         DomainFactory.createSeqTrackWithDataFiles(processedMergedBamFile1.mergingWorkPackage)
 
-        assertNull(snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY))
+        assertNull(snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig))
     }
 
     @Test
     void testBamFile2DoesNotContainAllSeqTracks() {
-        assertEquals(samplePair, snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY))
+        assertEquals(samplePair, snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig))
 
         DomainFactory.createSeqTrackWithDataFiles(processedMergedBamFile2.mergingWorkPackage)
 
-        assertNull(snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY))
+        assertNull(snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig))
     }
 
     @Test
@@ -265,7 +273,7 @@ class SnvCallingServiceTests {
         DomainFactory.createSamplePair(otherMwp, samplePair.mergingWorkPackage2)
         samplePair.delete(flush: true)
 
-        assertNull(snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY))
+        assertNull(snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig))
     }
 
     @Test
@@ -275,7 +283,7 @@ class SnvCallingServiceTests {
         DomainFactory.createSamplePair(samplePair.mergingWorkPackage1, otherMwp)
         samplePair.delete(flush: true)
 
-        assertNull(snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY))
+        assertNull(snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig))
     }
 
     @Test
@@ -284,7 +292,7 @@ class SnvCallingServiceTests {
         processedMergedBamFile1.fileOperationStatus = FileOperationStatus.INPROGRESS
         assert processedMergedBamFile1.save(flush: true)
 
-        assertNull(snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY))
+        assertNull(snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig))
     }
 
     @Test
@@ -293,35 +301,35 @@ class SnvCallingServiceTests {
         processedMergedBamFile2.fileOperationStatus = FileOperationStatus.INPROGRESS
         assert processedMergedBamFile2.save(flush: true)
 
-        assertNull(snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY))
+        assertNull(snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig))
     }
 
     @Test
     void testBamFile1CoverageTooLow() {
         processedMergedBamFile1.coverage = COVERAGE_TOO_LOW
         assert processedMergedBamFile1.save(flush: true)
-        assertNull(snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY))
+        assertNull(snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig))
     }
 
     @Test
     void testBamFile1NumberOfMergedLanesTooLow() {
         processedMergedBamFile1.numberOfMergedLanes = TOO_LITTLE_LANES
         assert processedMergedBamFile1.save(flush: true)
-        assertNull(snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY))
+        assertNull(snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig))
     }
 
     @Test
     void testBamFile2CoverageTooLow() {
         processedMergedBamFile2.coverage = COVERAGE_TOO_LOW
         assert processedMergedBamFile2.save(flush: true)
-        assertNull(snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY))
+        assertNull(snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig))
     }
 
     @Test
     void testBamFile2NumberOfMergedLanesTooLow() {
         processedMergedBamFile2.numberOfMergedLanes = TOO_LITTLE_LANES
         assert processedMergedBamFile2.save(flush: true)
-        assertNull(snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY))
+        assertNull(snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig))
     }
 
     @Test
@@ -332,7 +340,7 @@ class SnvCallingServiceTests {
         processedMergedBamFile1.coverage = COVERAGE_TOO_LOW
         assert processedMergedBamFile1.save(flush: true)
 
-        assertNull(snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY))
+        assertNull(snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig))
     }
 
     @Test
@@ -342,7 +350,7 @@ class SnvCallingServiceTests {
 
         processedMergedBamFile1.numberOfMergedLanes = TOO_LITTLE_LANES
         assert processedMergedBamFile1.save(flush: true)
-        assertNull(snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY))
+        assertNull(snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig))
     }
 
     @Test
@@ -355,7 +363,7 @@ class SnvCallingServiceTests {
         processingThreshold.project = otherProject
         assert processingThreshold.save(flush: true)
 
-        assertNull(snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY))
+        assertNull(snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig))
     }
 
     @Test
@@ -368,7 +376,7 @@ class SnvCallingServiceTests {
         processingThreshold.seqType = otherSeqType
         assert processingThreshold.save(flush: true)
 
-        assertNull(snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY))
+        assertNull(snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig))
     }
 
     @Test
@@ -381,7 +389,7 @@ class SnvCallingServiceTests {
         processingThreshold.sampleType = otherSampleType
         assert processingThreshold.save(flush: true)
 
-        assertNull(snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY))
+        assertNull(snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig))
     }
 
     @Test
@@ -392,7 +400,7 @@ class SnvCallingServiceTests {
         processingThreshold.coverage = null
         assert processingThreshold.save(flush: true)
 
-        assertEquals(samplePair, snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY))
+        assertEquals(samplePair, snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig))
     }
 
     @Test
@@ -403,28 +411,28 @@ class SnvCallingServiceTests {
         processingThreshold.numberOfLanes = null
         processingThreshold.save()
 
-        assertEquals(samplePair, snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY))
+        assertEquals(samplePair, snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig))
     }
 
 
     @Test
     void testBamFile1IsWithdrawn() {
-        assertEquals(samplePair, snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY))
+        assertEquals(samplePair, snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig))
 
         processedMergedBamFile1.withdrawn = true
         assert processedMergedBamFile1.save(flush: true)
 
-        assertNull(snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY))
+        assertNull(snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig))
     }
 
     @Test
     void testBamFile2IsWithdrawn() {
-        assertEquals(samplePair, snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY))
+        assertEquals(samplePair, snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig))
 
         processedMergedBamFile2.withdrawn = true
         processedMergedBamFile2.save()
 
-        assertNull(snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY))
+        assertNull(snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig))
     }
 
 
@@ -444,11 +452,11 @@ class SnvCallingServiceTests {
 
         createAnotherProcessableSamplePair()
 
-        assertEquals(samplePair, snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY))
+        assertEquals(samplePair, snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig))
 
         createAnotherProcessableSamplePair()
 
-        assertEquals(samplePair, snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY))
+        assertEquals(samplePair, snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig))
     }
 
     @Test
@@ -469,18 +477,18 @@ class SnvCallingServiceTests {
             adaptThresholdAndBamFileInProjectFolderProperty(it)
         }
 
-        assertEquals(samplePair2, snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY))
+        assertEquals(samplePair2, snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig))
 
     }
 
     @Test
     void testThatMinProcessingPriorityIsTakenIntoAccount() {
-        assertNull (snvCallingService.samplePairForSnvProcessing(ProcessingPriority.FAST_TRACK_PRIORITY))
+        assertNull (snvCallingService.samplePairForSnvProcessing(ProcessingPriority.FAST_TRACK_PRIORITY, SnvConfig))
 
         project.processingPriority = ProcessingPriority.FAST_TRACK_PRIORITY
         assert project.save(flush: true)
 
-        assertEquals(samplePair, snvCallingService.samplePairForSnvProcessing(ProcessingPriority.FAST_TRACK_PRIORITY))
+        assertEquals(samplePair, snvCallingService.samplePairForSnvProcessing(ProcessingPriority.FAST_TRACK_PRIORITY, SnvConfig))
     }
 
 

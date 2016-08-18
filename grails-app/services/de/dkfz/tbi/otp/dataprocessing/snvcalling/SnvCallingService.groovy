@@ -1,14 +1,20 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.ProcessingStatus
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 class SnvCallingService {
 
     static final List<SnvProcessingStates> processingStatesNotProcessable = [
             SnvProcessingStates.IN_PROGRESS
     ]
+    static Collection<Class<? extends ConfigPerProject>> SNV_CONFIG_CLASSES = [
+            SnvConfig,
+            RoddyWorkflowConfig,
+    ].asImmutable()
 
     /**
      * The method goes through the list of sample pairs and checks if there is a disease/control pair
@@ -24,8 +30,8 @@ class SnvCallingService {
      * - pair is not already in processing
      * - config file is available
      */
-    SamplePair samplePairForSnvProcessing(short minPriority, SamplePair sp = null) {
-
+    SamplePair samplePairForSnvProcessing(short minPriority, Class<? extends ConfigPerProject> configClass, SamplePair sp = null) {
+        assert SNV_CONFIG_CLASSES.contains(configClass)
         final String WORKPACKAGE = "workPackage"
         final String SAMPLE = "${WORKPACKAGE}.sample"
         final String SAMPLE_TYPE = "${SAMPLE}.sampleType"
@@ -50,6 +56,12 @@ class SnvCallingService {
             "       ) "
         }
 
+        String onlyOtpSnv = configClass == SnvConfig ?
+                "   AND EXISTS (from ExternalScript es " +
+                "       where es.scriptVersion = cps.externalScriptVersion " +
+                "       and es.deprecatedDate is null " +
+                "   ) " : ""
+
         String pairForSnvProcessing =
                 "FROM SamplePair sp " +
                 //check that sample pair shall be processed
@@ -59,14 +71,12 @@ class SnvCallingService {
                 'AND sp.mergingWorkPackage1.sample.individual.project.processingPriority >= :minPriority ' +
 
 
-                //check that the config file is available with at least on script with same version
-                "AND EXISTS (FROM SnvConfig cps " +
+                //check that the config file is available with at least one script with same version
+                "AND EXISTS (FROM ${configClass.name} cps " +
                 "   WHERE cps.project = sp.mergingWorkPackage1.sample.individual.project " +
+                "   AND cps.pipeline.type = :snv " +
                 "   AND cps.seqType = sp.mergingWorkPackage1.seqType " +
-                "   AND EXISTS (from ExternalScript es " +
-                "       where es.scriptVersion = cps.externalScriptVersion " +
-                "       and es.deprecatedDate is null " +
-                "   ) " +
+                onlyOtpSnv +
                 ") " +
 
                 //check that this sample pair is not in process
@@ -87,6 +97,7 @@ class SnvCallingService {
                 needsProcessing: ProcessingStatus.NEEDS_PROCESSING,
                 processingStates: processingStatesNotProcessable,
                 minPriority: minPriority,
+                snv: Pipeline.Type.SNV,
         ]
         if (sp) {
             parameters.sp = sp
