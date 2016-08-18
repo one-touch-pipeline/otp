@@ -50,7 +50,7 @@ class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
             executeCommand(_, _) >> { Realm realm2, String command ->
                 File script = temporaryFolder.newFile('script' + counter++ + '.sh')
                 script.text = command
-                return ProcessHelperService.executeCommandAndAssertExitCodeAndReturnProcessOutput("bash ${script.absolutePath}").stdout
+                return ProcessHelperService.executeAndWait("bash ${script.absolutePath}").assertExitCodeZero().stdout
             }
         }
     }
@@ -139,7 +139,7 @@ class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
 
         then:
         AssertionError ex = thrown()
-        ex.message.contains('The exit value is not 0, but 1')
+        ex.message.contains('Expected exit code to be 0, but it is 1')
     }
 
     void "test createProject valid input, when directory with wrong unix group already exists"() {

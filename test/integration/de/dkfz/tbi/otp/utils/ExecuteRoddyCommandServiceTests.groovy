@@ -348,8 +348,8 @@ class ExecuteRoddyCommandServiceTests {
                 executeCommandReturnProcessOutput: { Realm realm1, String cmd, String user ->
                     assert realm1 == realm
                     assert user == realm.roddyUser
-                    ProcessOutput out =  waitForCommand(cmd)
-                    assert out.stderrEmptyAndExitCodeZero
+                    ProcessOutput out = executeAndWait(cmd)
+                    out.assertExitCodeZeroAndStderrEmpty()
                     assert out.stdout == """
 correct directory permission
 2
@@ -402,13 +402,13 @@ stat -c %a ${roddyBamFile.workDirectory}/${roddyBamFile.bamFileName}
 
     @Test
     void testCorrectGroup_AllFine() {
-        String primaryGroup = waitForCommand("id -g -n").stdout.trim()
+        String primaryGroup = executeAndWait("id -g -n").stdout.trim()
         executeRoddyCommandService.executionService = [
                 executeCommandReturnProcessOutput: { Realm realm1, String cmd, String user ->
                     assert realm1 == realm
                     assert user == realm.roddyUser
-                    ProcessOutput out =  waitForCommand(cmd)
-                    assert out.stderrEmptyAndExitCodeZero
+                    ProcessOutput out = executeAndWait(cmd)
+                    out.assertExitCodeZeroAndStderrEmpty()
                     assert out.stdout == """
 correct group permission to ${primaryGroup}
 ./file
@@ -446,8 +446,8 @@ ${primaryGroup}
                 executeCommandReturnProcessOutput: { Realm realm1, String cmd, String user ->
                     assert realm1 == realm
                     assert user == realm.roddyUser
-                    ProcessOutput out =  waitForCommand(cmd)
-                    assert out.stderrEmptyAndExitCodeZero
+                    ProcessOutput out = executeAndWait(cmd)
+                    out.assertExitCodeZeroAndStderrEmpty()
                     assert out.stdout.startsWith("\ndelete ${user} directory content of ${roddyBamFile.workDirectory}\n")
                     checkCallback(out.stdout)
                     return out

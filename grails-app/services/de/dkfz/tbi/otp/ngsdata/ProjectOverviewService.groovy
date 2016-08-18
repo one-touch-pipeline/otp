@@ -44,7 +44,7 @@ class ProjectOverviewService {
                         RoddyWorkflowConfig workflowConfig = RoddyWorkflowConfig.getLatest(project, seqType, Pipeline.findByNameAndType(Pipeline.Name.PANCAN_ALIGNMENT, Pipeline.Type.ALIGNMENT))
                         String nameInConfigFile = workflowConfig.getNameUsedInConfig()
 
-                        ProcessOutput output = waitForCommand(
+                        ProcessOutput output = executeAndWait(
                                 executeRoddyCommandService.roddyGetRuntimeConfigCommand(workflowConfig, nameInConfigFile, seqType.roddyName)
                         )
                         if (output.exitCode != 0) {

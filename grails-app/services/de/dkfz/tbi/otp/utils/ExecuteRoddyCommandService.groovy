@@ -141,7 +141,7 @@ echo ""
 echo "correct file permission for bam/bai files"
 find -type f -user ${realm.roddyUser} -not -perm 444 \\( -name "*.bam" -or -name "*.bai" \\) -print -exec chmod 444 '{}' \\; | wc -l
 """
-        assert executionService.executeCommandReturnProcessOutput(realm, cmd, realm.roddyUser).isStderrEmptyAndExitCodeZero()
+        executionService.executeCommandReturnProcessOutput(realm, cmd, realm.roddyUser).assertExitCodeZeroAndStderrEmpty()
     }
 
     void correctGroups(RoddyBamFile roddyBamFile, Realm realm) {
@@ -156,7 +156,7 @@ echo ""
 echo "correct group permission to" \$groupname
 find -not -type l -user ${realm.roddyUser} -not -group \$groupname -print -exec chgrp \$groupname '{}' \\;
 """
-        assert executionService.executeCommandReturnProcessOutput(realm, cmd, realm.roddyUser).isStderrEmptyAndExitCodeZero()
+        executionService.executeCommandReturnProcessOutput(realm, cmd, realm.roddyUser).assertExitCodeZeroAndStderrEmpty()
     }
 
     void deleteContentOfOtherUnixUserDirectory(File basePath, Realm realm) {
@@ -179,7 +179,7 @@ do
   )
 done
 """
-        assert executionService.executeCommandReturnProcessOutput(realm, cmd, realm.roddyUser).isStderrEmptyAndExitCodeZero()
+        executionService.executeCommandReturnProcessOutput(realm, cmd, realm.roddyUser).assertExitCodeZeroAndStderrEmpty()
     }
 
     File featureTogglesConfigPath() {

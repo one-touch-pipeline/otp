@@ -147,7 +147,7 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
     void changeFilePermissionForRoddyFiles() {
         GString cmd = "find \'${getBaseDirectory().absolutePath}\' -user OtherUnixUser -not -type l -print -exec chmod 2770 '{}' \\;"
         ProcessOutput processOutput = executionService.executeCommandReturnProcessOutput(realm, cmd, realm.roddyUser)
-        assert processOutput.isStderrEmptyAndExitCodeZero()
+        processOutput.assertExitCodeZeroAndStderrEmpty()
     }
 
     void setUpFilesVariables() {
@@ -582,8 +582,7 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
 
         // content of the bam file
         LogThreadLocal.withThreadLog(System.out) {
-            ProcessOutput processOutput = executeCommandAndAssertExitCodeAndReturnProcessOutput("zcat ${bamFile.finalBamFile} 1> /dev/null")
-            assert processOutput.stderr.length() == 0: "Stderr is not null, but ${processOutput.stderr.toString()}"
+            executeAndWait("zcat ${bamFile.finalBamFile} 1> /dev/null").assertExitCodeZeroAndStderrEmpty()
             assert bamFile.finalBamFile.length() == bamFile.fileSize
         }
         // samtools may under some circumstances produce small bam files of size larger than zero that however do not contain any reads.

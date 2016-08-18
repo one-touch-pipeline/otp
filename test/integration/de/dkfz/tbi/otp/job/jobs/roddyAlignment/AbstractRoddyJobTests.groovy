@@ -118,7 +118,7 @@ Creating the following execution directory to store information about this proce
 ${workExecutionDir.absolutePath}
 newLine"""
 
-        ProcessHelperService.metaClass.static.executeCommandAndAssertExitCodeAndReturnProcessOutput = { String cmd ->
+        ProcessHelperService.metaClass.static.executeAndWait = { String cmd ->
             executeCommandCounter++
             return new ProcessHelperService.ProcessOutput(stdout: stdout, stderr: stderr, exitCode: 0)
         }
@@ -127,7 +127,7 @@ newLine"""
     }
 
     private void mockProcessOutput_noClusterJobsSubmitted() {
-        ProcessHelperService.metaClass.static.executeCommandAndAssertExitCodeAndReturnProcessOutput = { String cmd ->
+        ProcessHelperService.metaClass.static.executeAndWait = { String cmd ->
             executeCommandCounter++
             return OUTPUT_NO_CLUSTER_JOBS_SUBMITTED
         }

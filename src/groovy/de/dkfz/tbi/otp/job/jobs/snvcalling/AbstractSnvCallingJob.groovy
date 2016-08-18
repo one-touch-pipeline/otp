@@ -100,7 +100,7 @@ chmod 640 ${configFileInProjectDirectory}; \
 rm ${configFileInStagingDirectory}
 """
         ProcessHelperService.ProcessOutput out = executionService.executeCommandReturnProcessOutput(realm, command)
-        assert out.stderrEmptyAndExitCodeZero
+        out.assertExitCodeZeroAndStderrEmpty()
 
         waitUntilExists(configFileInProjectDirectory)
         assertDataManagementConfigContentsOk(instance)

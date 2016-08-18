@@ -10,21 +10,20 @@ class ProcessHelperServiceUnitTests {
     final String STDERR_TEXT = "Stderr\nText"
     final String COMMAND = "echo '${STDOUT_TEXT}'\n>&2 echo '${STDERR_TEXT}'"
     final String COMMAND_NO_ERROR = "echo '${STDOUT_TEXT}'"
-    final String INVALID_COMMAND = "--"
 
     @Test
-    void testExecuteCommand_InputCommandIsNull_ShouldFail() {
+    void testExecute_InputCommandIsNull_ShouldFail() {
         assert TestCase.shouldFail(AssertionError) {
-            ProcessHelperService.executeCommand(null)
+            ProcessHelperService.execute(null)
         }.contains("The input cmd must not be null")
     }
 
     @Test
-    void testExecuteCommand_AllFine() {
+    void testExecute_AllFine() {
         StringBuffer stdout = new StringBuffer()
         StringBuffer stderr = new StringBuffer()
 
-        Process process = ProcessHelperService.executeCommand(COMMAND)
+        Process process = ProcessHelperService.execute(COMMAND)
 
         process.waitForProcessOutput(stdout, stderr)
         assert stdout.toString().trim() == STDOUT_TEXT
@@ -32,9 +31,9 @@ class ProcessHelperServiceUnitTests {
     }
 
     @Test
-    void testWaitForCommand_Process_AllFine() {
+    void testWaitForProcess_AllFine() {
         Process process = [ 'bash', '-c', COMMAND ].execute()
-        ProcessHelperService.ProcessOutput actual = ProcessHelperService.waitForCommand(process)
+        ProcessHelperService.ProcessOutput actual = ProcessHelperService.waitForProcess(process)
 
         assert actual.stdout.trim() == STDOUT_TEXT
         assert actual.stderr.trim() == STDERR_TEXT
@@ -42,15 +41,15 @@ class ProcessHelperServiceUnitTests {
     }
 
     @Test
-    void testWaitForCommand_Process_InputIsNull_ShouldFail() {
+    void testWaitForProcess_InputIsNull_ShouldFail() {
         assert TestCase.shouldFail(AssertionError) {
-            ProcessHelperService.waitForCommand(null as Process)
+            ProcessHelperService.waitForProcess(null as Process)
         }.contains("The input process must not be null")
     }
 
     @Test
-    void testWaitForCommand_String_AllFine() {
-        ProcessHelperService.ProcessOutput actual = ProcessHelperService.waitForCommand(COMMAND)
+    void testExecuteAndWait_AllFine() {
+        ProcessHelperService.ProcessOutput actual = ProcessHelperService.executeAndWait(COMMAND)
 
         assert actual.stdout.trim() == STDOUT_TEXT
         assert actual.stderr.trim() == STDERR_TEXT
@@ -58,55 +57,10 @@ class ProcessHelperServiceUnitTests {
     }
 
     @Test
-    void testWaitForCommand_String_InputIsNull_ShouldFail() {
+    void testExecuteAndWait_InputIsNull_ShouldFail() {
         assert TestCase.shouldFail(AssertionError) {
-            ProcessHelperService.waitForCommand(null as String)
+            ProcessHelperService.executeAndWait(null as String)
         }.contains("The input cmd must not be null")
-    }
-
-    @Test
-    void testAssertProcessFinishedSuccessful_AllFine() {
-        Process process = [ 'bash', '-c', COMMAND ].execute()
-        process.waitFor()
-        ProcessHelperService.assertProcessFinishedSuccessful(process)
-    }
-
-    @Test
-    void testAssertProcessFinishedSuccessful_InputIsNull_ShouldFail() {
-        assert TestCase.shouldFail(AssertionError) {
-            ProcessHelperService.assertProcessFinishedSuccessful(null)
-        }.contains("The input process must not be null")
-    }
-
-    @Test
-    void testAssertProcessFinishedSuccessful_ProcessEndsNotNormal_ShouldFail() {
-        assert TestCase.shouldFail(AssertionError) {
-            Process process = [ 'bash', '-c', INVALID_COMMAND ].execute()
-            process.waitFor()
-            ProcessHelperService.assertProcessFinishedSuccessful(process)
-        }.contains("The exit value is not 0")
-    }
-
-    @Test
-    void testExecuteCommandAndAssertExistCodeAndReturnProcessOutput_AllFine() {
-        ProcessHelperService.ProcessOutput processOutput = ProcessHelperService.executeCommandAndAssertExitCodeAndReturnProcessOutput(COMMAND)
-
-        assert processOutput.stdout.toString().trim() == STDOUT_TEXT
-        assert processOutput.stderr.toString().trim() == STDERR_TEXT
-    }
-
-    @Test
-    void testExecuteCommandAndAssertExistCodeAndReturnProcessOutput_InputCommandIsNull_ShouldFail() {
-        assert TestCase.shouldFail(AssertionError) {
-            ProcessHelperService.executeCommandAndAssertExitCodeAndReturnProcessOutput(null)
-        }.contains("The input cmd must not be null")
-    }
-
-    @Test
-    void testExecuteCommandAndAssertExistCodeAndReturnProcessOutput_ProcessEndsNotNormal_ShouldFail() {
-        assert TestCase.shouldFail(AssertionError) {
-            ProcessHelperService.executeCommandAndAssertExitCodeAndReturnProcessOutput(INVALID_COMMAND)
-        }.contains("The exit value is not 0")
     }
 
     @Test
@@ -124,16 +78,16 @@ class ProcessHelperServiceUnitTests {
     }
 
     @Test
-    void testExecuteAndAssertExitCodeAndErrorOutAndReturnStdout_ProcessEndsNoEmtyError_ShouldFail() {
+    void testExecuteAndAssertExitCodeAndErrorOutAndReturnStdout_ProcessEndsNotEmptyError_ShouldFail() {
         assert TestCase.shouldFail(AssertionError) {
-            ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(INVALID_COMMAND)
-        }.contains("assert output.stderr.empty")
+            ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(COMMAND)
+        }.contains("Expected stderr to be empty, but it is")
     }
 
     @Test
     void testExecuteAndAssertExitCodeAndErrorOutAndReturnStdout_ProcessEndsNotNormal_ShouldFail() {
         assert TestCase.shouldFail(AssertionError) {
             ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout("exit 1")
-        }.contains("assert output.exitCode == 0")
+        }.contains("Expected exit code to be 0, but it is")
     }
 }

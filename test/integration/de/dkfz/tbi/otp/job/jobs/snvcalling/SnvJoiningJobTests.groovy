@@ -64,7 +64,7 @@ class SnvJoiningJobTests {
         boolean querySshCalled = false
         executionService.metaClass.querySsh = { String host, int port, int timeout, String username, String password, File keyFile, boolean useSshAgent, String command ->
             if (command.startsWith("mkdir -p ")) {
-                return ProcessHelperService.executeCommandAndAssertExitCodeAndReturnProcessOutput(command)
+                return ProcessHelperService.executeAndWait(command).assertExitCodeZeroAndStderrEmpty()
             } else {
                 assert !querySshCalled
                 querySshCalled = true

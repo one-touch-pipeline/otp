@@ -261,7 +261,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
                 assert command.contains(qsubParameterCommandPart)
 
             } else if (command.startsWith("mkdir -p ")) {
-                return ProcessHelperService.executeCommandAndAssertExitCodeAndReturnProcessOutput(command)
+                return ProcessHelperService.executeAndWait(command).assertExitCodeZeroAndStderrEmpty()
             } else {
                 File snvFile = new OtpPath(snvCallingInstance.snvInstancePath, SnvCallingStep.CALLING.getResultFileName(snvCallingInstance.individual, null)).absoluteDataManagementPath
                 String scriptCommandPart = "/tmp/scriptLocation/joining.sh; " +

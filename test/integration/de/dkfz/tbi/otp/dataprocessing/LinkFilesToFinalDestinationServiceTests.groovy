@@ -245,9 +245,7 @@ class LinkFilesToFinalDestinationServiceTests {
 
         List<File> linkedFiles = createLinkedFilesList()
 
-        linkFilesToFinalDestinationService.executionService.metaClass.executeCommand = { Realm realm, String command ->
-            return ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
-        }
+        TestCase.mockExecuteCommand(linkFilesToFinalDestinationService.executionService)
 
         linkedFiles.each {
             assert !it.exists()
@@ -339,9 +337,7 @@ class LinkFilesToFinalDestinationServiceTests {
     }
 
     private void testLinkNewResults_helper(List<File> linkedFiles){
-        linkFilesToFinalDestinationService.executionService.metaClass.executeCommand = { Realm realm, String command ->
-            return ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
-        }
+        TestCase.mockExecuteCommand(linkFilesToFinalDestinationService.executionService)
 
         linkedFiles.each {
             assert !it.exists()
@@ -374,9 +370,7 @@ class LinkFilesToFinalDestinationServiceTests {
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile2)
 
-        linkFilesToFinalDestinationService.executionService.metaClass.executeCommand = { Realm realm, String command ->
-            return ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
-        }
+        TestCase.mockExecuteCommand(linkFilesToFinalDestinationService.executionService)
 
         List<File> filesToDelete = [
                 roddyBamFile.workBamFile,
@@ -431,9 +425,7 @@ class LinkFilesToFinalDestinationServiceTests {
         boolean hasCalled_deleteContentOfOtherUnixUserDirectory = false
         assert roddyBamFile.workDirectory.exists()
 
-        linkFilesToFinalDestinationService.executionService.metaClass.executeCommand = { Realm realm, String command ->
-            return ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
-        }
+        TestCase.mockExecuteCommand(linkFilesToFinalDestinationService.executionService)
 
         linkFilesToFinalDestinationService.executeRoddyCommandService.metaClass.deleteContentOfOtherUnixUserDirectory = { File basePath, Realm realm ->
             hasCalled_deleteContentOfOtherUnixUserDirectory = true
