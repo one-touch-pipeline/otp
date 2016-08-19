@@ -6,7 +6,7 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.Entity
-import org.hibernate.proxy.HibernateProxyHelper
+import org.hibernate.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
@@ -76,10 +76,10 @@ class SnvCallingInstance implements ProcessParameterObject, Entity {
                 return true
             }
         }
-        config validator: { val, SnvCallingInstance obj ->
-            (SnvConfig.isAssignableFrom(HibernateProxyHelper.getClassWithoutInitializingProxy(val)) ||
-                    RoddyWorkflowConfig.isAssignableFrom(HibernateProxyHelper.getClassWithoutInitializingProxy(val))) &&
-            val?.pipeline?.type == Pipeline.Type.SNV
+        config validator: { val ->
+            (SnvConfig.isAssignableFrom(Hibernate.getClass(val)) ||
+                    RoddyWorkflowConfig.isAssignableFrom(Hibernate.getClass(val))) &&
+                    val?.pipeline?.type == Pipeline.Type.SNV
         }
     }
 
