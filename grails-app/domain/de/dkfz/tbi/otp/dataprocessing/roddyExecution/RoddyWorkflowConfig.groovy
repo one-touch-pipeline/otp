@@ -83,7 +83,9 @@ class RoddyWorkflowConfig extends ConfigPerProject {
                 !id || id == config.id
             }
         }
-        individual nullable: true
+        individual nullable: true, validator: { Individual val, RoddyWorkflowConfig obj ->
+            return val == null || val.project == obj.project
+        }
         pipeline validator: { pipeline ->
             pipeline?.usesRoddy()
         }
@@ -97,7 +99,7 @@ class RoddyWorkflowConfig extends ConfigPerProject {
         assert configFilePath : "The configFilePath is not allowed to be null"
         assert configVersion : "The configVersion is not allowed to be null"
 
-        RoddyWorkflowConfig roddyWorkflowConfig = getLatest(project, seqType, pipeline, individual)
+        RoddyWorkflowConfig roddyWorkflowConfig = getLatest(project, individual, seqType, pipeline)
 
         RoddyWorkflowConfig config = new RoddyWorkflowConfig(
                 project: project,
@@ -114,20 +116,25 @@ class RoddyWorkflowConfig extends ConfigPerProject {
     }
 
 
-    static RoddyWorkflowConfig getLatest(final Project project, final SeqType seqType, final Pipeline pipeline, Individual individual = null) {
+    protected static RoddyWorkflowConfig getLatest(final Project project, final Individual individual, final SeqType seqType, final Pipeline pipeline) {
         assert project : "The project is not allowed to be null"
         assert seqType : "The seqType is not allowed to be null"
         assert pipeline : "The pipeline is not allowed to be null"
+        assert individual == null || individual.project == project
         try {
-            return atMostOneElement(RoddyWorkflowConfig.findAllByProjectAndSeqTypeAndPipelineAndObsoleteDateAndIndividual(project, seqType, pipeline, null, individual))
+            return atMostOneElement(findAllByProjectAndSeqTypeAndPipelineAndObsoleteDateAndIndividual(project, seqType, pipeline, null, individual))
         } catch (final Throwable t) {
             throw new RuntimeException("Found more than one RoddyWorkflowConfig for Project ${project}, SeqType ${seqType}, Individual ${individual} and Pipeline ${pipeline}. ${t.message ?: ''}", t)
         }
     }
 
+    static RoddyWorkflowConfig getLatestForProject(final Project project, final SeqType seqType, final Pipeline pipeline) {
+        return getLatest(project, null, seqType, pipeline)
+    }
 
-    static RoddyWorkflowConfig getLatestForIndividual(final Project project, final SeqType seqType, final Pipeline pipeline, Individual individual) {
-        return getLatest(project, seqType, pipeline, individual) ?: getLatest(project, seqType, pipeline)
+    static RoddyWorkflowConfig getLatestForIndividual(final Individual individual, final SeqType seqType, final Pipeline pipeline) {
+        assert individual : "The individual is not allowed to be null"
+        return getLatest(individual.project, individual, seqType, pipeline) ?: getLatestForProject(individual.project, seqType, pipeline)
     }
 
     void validateConfig() {

@@ -932,7 +932,7 @@ class DomainFactory {
                 configFilePath: {"${TestCase.uniqueNonExistentPath}/${pipeline.name.name()}_${seqType.roddyName}_${pluginVersion.substring(pluginVersion.indexOf(':') + 1)}_${configVersion}.xml"},
                 pluginVersion: pluginVersion,
                 configVersion: configVersion,
-                project: {createProject()},
+                project: { properties.individual?.project ?: createProject() },
                 dateCreated: {new Date()},
                 lastUpdated: {new Date()},
         ], properties, saveAndValidate)

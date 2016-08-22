@@ -85,7 +85,7 @@ class ConfigureAlignmentController {
         assert MergeConstants.ALL_MERGE_TOOLS.containsAll(allMergeTools)
         assert ReferenceGenome.findByName(defaultReferenceGenome)
 
-        RoddyWorkflowConfig roddyWorkflowConfig = RoddyWorkflowConfig.getLatest(project, seqType, pipeline)
+        RoddyWorkflowConfig roddyWorkflowConfig = RoddyWorkflowConfig.getLatestForProject(project, seqType, pipeline)
         String configVersion = roddyWorkflowConfig?.configVersion
         if (configVersion) {
             Set<String> versions = configVersion.split("_")

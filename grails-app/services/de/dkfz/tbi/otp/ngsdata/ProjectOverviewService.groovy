@@ -41,7 +41,7 @@ class ProjectOverviewService {
                     List<ReferenceGenomeProjectSeqType> rgpst = ReferenceGenomeProjectSeqType.findAllByProjectAndDeprecatedDateIsNull(project)
                     Map<String, AlignmentInfo> result = [:]
                     rgpst*.seqType.unique().each { SeqType seqType ->
-                        RoddyWorkflowConfig workflowConfig = RoddyWorkflowConfig.getLatest(project, seqType, Pipeline.findByNameAndType(Pipeline.Name.PANCAN_ALIGNMENT, Pipeline.Type.ALIGNMENT))
+                        RoddyWorkflowConfig workflowConfig = RoddyWorkflowConfig.getLatestForProject(project, seqType, Pipeline.findByNameAndType(Pipeline.Name.PANCAN_ALIGNMENT, Pipeline.Type.ALIGNMENT))
                         String nameInConfigFile = workflowConfig.getNameUsedInConfig()
 
                         ProcessOutput output = executeAndWait(

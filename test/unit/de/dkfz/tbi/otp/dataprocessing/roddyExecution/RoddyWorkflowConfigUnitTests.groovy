@@ -161,7 +161,7 @@ public class RoddyWorkflowConfigUnitTests {
                 pipeline: roddyWorkflowConfig1.pipeline,
                 pluginVersion: roddyWorkflowConfig1.pluginVersion,
                 configVersion: roddyWorkflowConfig1.configVersion,
-                individual: DomainFactory.createIndividual(),
+                individual: DomainFactory.createIndividual(project: roddyWorkflowConfig1.project),
         ], false)
 
         assert roddyWorkflowConfig2.validate()
@@ -242,7 +242,7 @@ public class RoddyWorkflowConfigUnitTests {
                 project: roddyWorkflowConfig1.project,
                 seqType: roddyWorkflowConfig1.seqType,
                 pipeline: roddyWorkflowConfig1.pipeline,
-                individual: DomainFactory.createIndividual(),
+                individual: DomainFactory.createIndividual(project: roddyWorkflowConfig1.project),
         ], false)
 
         assert roddyWorkflowConfig2.validate()
