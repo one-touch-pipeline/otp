@@ -1,14 +1,10 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.ngsdata.SeqTypeNames
-import de.dkfz.tbi.otp.ngsdata.TestData
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
-import de.dkfz.tbi.otp.utils.HelperUtils
-import org.junit.Test
-import org.springframework.beans.factory.annotation.Autowired
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.*
+import org.junit.*
+import org.springframework.beans.factory.annotation.*
 
 public class RoddyAlignmentDeciderTest {
     @Autowired
@@ -328,61 +324,50 @@ public class RoddyAlignmentDeciderTest {
     }
 
     @Test
-    void test_ensureConfigurationIsComplete_whenRoddyWorkflowConfigIsMissing_shouldThrow() {
-        SeqTrack seqTrack = DomainFactory.createSeqTrack()
-        DomainFactory.createReferenceGenomeProjectSeqType(
-                project: seqTrack.project,
-                seqType: seqTrack.seqType,
-        )
-
-        assert shouldFail {
-            decider.ensureConfigurationIsComplete(seqTrack)
-        }.contains("RoddyWorkflowConfig is missing")
-    }
-
-
-    @Test
-    void testCanWorkflowAlign_whenEverythingIsOkay_shouldReturnTrue() {
-        TestData testData = new TestData()
-        testData.createObjects()
-
-        SeqTrack seqTrack = testData.createSeqTrack()
-        seqTrack.save(failOnError: true)
+    void testCanPipelineAlign_whenEverythingIsOkay_shouldReturnTrue() {
+        DomainFactory.createPanCanAlignableSeqTypes()
+        SeqType seqType = DomainFactory.createWholeGenomeSeqType()
+        SeqTrack seqTrack = DomainFactory.createSeqTrack(seqType: seqType)
+        DomainFactory.createRoddyWorkflowConfig(project: seqTrack.project, seqType:  seqType)
 
         assert decider.canPipelineAlign(seqTrack)
     }
 
     @Test
-    void testCanWorkflowAlign_whenWrongLibraryLayout_shouldReturnFalse() {
-        TestData testData = new TestData()
-        testData.createObjects()
-
-        SeqType seqType = SeqType.build(
-                name: SeqTypeNames.WHOLE_GENOME,
+    void testCanPipelineAlign_whenWrongLibraryLayout_shouldReturnFalse() {
+        DomainFactory.createPanCanAlignableSeqTypes()
+        SeqType seqType = DomainFactory.createSeqType(
+                name: SeqTypeNames.WHOLE_GENOME.seqTypeName,
                 libraryLayout: SeqType.LIBRARYLAYOUT_MATE_PAIR
         )
-        seqType.save(failOnError: true)
-
-        SeqTrack seqTrack = testData.createSeqTrack(seqType: seqType)
-        seqTrack.save(failOnError: true)
+        SeqTrack seqTrack = DomainFactory.createSeqTrack(seqType: seqType)
+        DomainFactory.createRoddyWorkflowConfig(project: seqTrack.project, seqType:  seqType)
 
         assert !decider.canPipelineAlign(seqTrack)
+        assert !seqTrack.logMessages
     }
 
     @Test
-    void testCanWorkflowAlign_whenWrongSeqType_shouldReturnFalse() {
-        TestData testData = new TestData()
-        testData.createObjects()
-
-        SeqType seqType = SeqType.build(
-                name: SeqTypeNames.EXOME,
+    void testCanPipelineAlign_whenWrongSeqType_shouldReturnFalse() {
+        DomainFactory.createPanCanAlignableSeqTypes()
+        SeqType seqType = DomainFactory.createSeqType(
+                name: 'INVALID_NAME',
                 libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED
         )
-        seqType.save(failOnError: true)
-
-        SeqTrack seqTrack = testData.createSeqTrack(seqType: seqType)
-        seqTrack.save(failOnError: true)
+        SeqTrack seqTrack = DomainFactory.createSeqTrack(seqType: seqType)
+        DomainFactory.createRoddyWorkflowConfig(project: seqTrack.project, seqType:  seqType)
 
         assert !decider.canPipelineAlign(seqTrack)
+        assert !seqTrack.logMessages
+    }
+
+    @Test
+    void testCanPipelineAlign_whenConfigIsMissing_shouldReturnFalse() {
+        DomainFactory.createPanCanAlignableSeqTypes()
+        SeqType seqType = DomainFactory.createWholeGenomeSeqType()
+        SeqTrack seqTrack = DomainFactory.createSeqTrack(seqType: seqType)
+
+        assert !decider.canPipelineAlign(seqTrack)
+        assert CollectionUtils.exactlyOneElement(seqTrack.logMessages).message == "RoddyWorkflowConfig is missing for ${seqTrack.project} ${seqTrack.seqType} ${Pipeline.Name.PANCAN_ALIGNMENT.name()}.".toString()
     }
 }

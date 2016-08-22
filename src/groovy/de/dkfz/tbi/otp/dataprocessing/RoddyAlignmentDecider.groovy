@@ -1,9 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.ngsdata.SeqTypeNames
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
+import de.dkfz.tbi.otp.ngsdata.*
 
 abstract class RoddyAlignmentDecider extends AbstractAlignmentDecider {
 
@@ -47,18 +45,12 @@ abstract class RoddyAlignmentDecider extends AbstractAlignmentDecider {
     }
 
     @Override
-    public void ensureConfigurationIsComplete(SeqTrack seqTrack) {
-        super.ensureConfigurationIsComplete(seqTrack)
-        if (RoddyWorkflowConfig.getLatest(seqTrack.project, seqTrack.seqType, pipeline) == null) {
-            throw new RuntimeException("RoddyWorkflowConfig is missing for ${seqTrack.project} ${seqTrack.seqType} ${pipeline}.")
-        }
-    }
-
-    @Override
     boolean canPipelineAlign(SeqTrack seqTrack) {
-        return SeqType.createCriteria()({
-            'in'("name", [SeqTypeNames.WHOLE_GENOME.seqTypeName, SeqTypeNames.EXOME.seqTypeName])
-            eq("libraryLayout", SeqType.LIBRARYLAYOUT_PAIRED)
-        })*.id.contains(seqTrack.seqType.id)
+        boolean canAlign = SeqType.getPanCanAlignableSeqTypes().contains(seqTrack.seqType)
+        if (canAlign && (RoddyWorkflowConfig.getLatest(seqTrack.project, seqTrack.seqType, pipeline) == null)) {
+            seqTrack.log("RoddyWorkflowConfig is missing for ${seqTrack.project} ${seqTrack.seqType} ${pipeline.name}.")
+            return false
+        }
+        return canAlign
     }
 }
