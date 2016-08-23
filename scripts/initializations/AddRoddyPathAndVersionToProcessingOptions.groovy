@@ -14,11 +14,3 @@ println ctx.processingOptionService.createOrUpdate(
         "/path/to/roddy/2.3.115/roddy/",
         "Path to the roddy.sh on the current cluster (***REMOVED***cluster 13.1)",
 )
-
-println ctx.processingOptionService.createOrUpdate(
-        "roddyVersion",
-        null,
-        null,
-        "autodetect",
-        "Roddy version which is used currently to process Roddy-Pipelines"
-)

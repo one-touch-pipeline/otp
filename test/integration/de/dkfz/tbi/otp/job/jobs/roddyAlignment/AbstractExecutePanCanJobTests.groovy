@@ -25,7 +25,6 @@ class AbstractExecutePanCanJobTests {
     RoddyBamFile roddyBamFile
     File configFile
     File roddyCommand
-    String roddyVersion
     File roddyBaseConfigsPath
     File roddyApplicationIni
     File chromosomeStatSizeFile
@@ -68,7 +67,6 @@ class AbstractExecutePanCanJobTests {
 
         File roddyPath = ProcessingOption.findByName("roddyPath").value as File
         roddyCommand = new File(roddyPath, 'roddy.sh')
-        roddyVersion = ProcessingOption.findByName("roddyVersion").value
         roddyBaseConfigsPath = ProcessingOption.findByName("roddyBaseConfigsPath").value as File
         roddyBaseConfigsPath.mkdirs()
         roddyApplicationIni = ProcessingOption.findByName("roddyApplicationIni").value as File

@@ -450,7 +450,6 @@ class DomainFactory {
                 md5sum: HelperUtils.randomMd5sum,
                 fileOperationStatus: FileOperationStatus.PROCESSED,
                 fileSize: 10000,
-                roddyVersion: createProcessingOption(),
                 ], bamFileProperties)
         return bamFile
     }
@@ -1177,15 +1176,6 @@ class DomainFactory {
             comment: "Path to the roddy.sh on the current cluster (***REMOVED***cluster 13.1)",
         )
         assert processingOptionPath.save(flush: true)
-
-        ProcessingOption processingOptionVersion = new ProcessingOption(
-            name: "roddyVersion",
-            type: "",
-            project: null,
-            value: "2.1.28",
-            comment: "Roddy version which is used currently to process Roddy-Pipelines"
-        )
-        assert processingOptionVersion.save(flush: true)
 
         ProcessingOption processingOptionBaseConfigsPath = new ProcessingOption(
                 name: "roddyBaseConfigsPath",

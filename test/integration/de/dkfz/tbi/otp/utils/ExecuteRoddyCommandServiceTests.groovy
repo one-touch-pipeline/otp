@@ -38,7 +38,6 @@ class ExecuteRoddyCommandServiceTests {
     File roddyBaseConfigsPath
     File applicationIniPath
     File featureTogglesConfigPath
-    String roddyVersion
 
     @Before
     void setUp() {
@@ -64,7 +63,6 @@ class ExecuteRoddyCommandServiceTests {
         applicationIniPath = new File(ProcessingOptionService.getValueOfProcessingOption("roddyApplicationIni"))
         assert CreateFileHelper.createFile(applicationIniPath)
         featureTogglesConfigPath = new File(ProcessingOptionService.getValueOfProcessingOption(ExecuteRoddyCommandService.FEATURE_TOGGLES_CONFIG_PATH))
-        roddyVersion = ProcessingOptionService.getValueOfProcessingOption("roddyVersion")
     }
 
     @After

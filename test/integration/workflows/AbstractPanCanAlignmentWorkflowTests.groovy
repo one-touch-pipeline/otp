@@ -297,7 +297,6 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
                 identifier: RoddyBamFile.nextIdentifier(workPackage),
                 seqTracks: [seqtrack] as Set,
                 config: exactlyOneElement(RoddyWorkflowConfig.findAll()),
-                roddyVersion: exactlyOneElement(ProcessingOption.findAllByName("roddyVersion")),
                 numberOfMergedLanes: 1,
                 fileOperationStatus: FileOperationStatus.PROCESSED,
                 md5sum: calculateMd5Sum(firstBamFile),
@@ -489,7 +488,6 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
     void checkBamFileState(RoddyBamFile bamFile, Map bamFileProperties) {
         MergingWorkPackage workPackage = exactlyOneElement(MergingWorkPackage.findAll())
         RoddyWorkflowConfig projectConfig = exactlyOneElement(RoddyWorkflowConfig.findAll())
-        ProcessingOption roddyVersionOption = exactlyOneElement(ProcessingOption.findAllByName("roddyVersion"))
 
         assert bamFileProperties.baseBamFile?.id == bamFile.baseBamFile?.id
         assert bamFileProperties.seqTracks.size() == bamFile.seqTracks.size()
@@ -500,7 +498,6 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
 
         assert workPackage.id == bamFile.workPackage.id
         assert projectConfig.id == bamFile.config.id
-        assert roddyVersionOption.id == bamFile.roddyVersion.id
         assert bamFileProperties.fileOperationStatus == bamFile.fileOperationStatus
         assert bamFileProperties.withdrawn == bamFile.withdrawn
 

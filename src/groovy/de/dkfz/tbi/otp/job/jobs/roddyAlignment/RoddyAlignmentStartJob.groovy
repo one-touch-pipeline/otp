@@ -132,10 +132,6 @@ abstract class RoddyAlignmentStartJob extends AbstractStartJobImpl {
         RoddyWorkflowConfig config = RoddyWorkflowConfig.getLatestForIndividual(mergingWorkPackage.individual, mergingWorkPackage.seqType, mergingWorkPackage.pipeline)
         assert config: "Could not find one RoddyWorkflowConfig for ${mergingWorkPackage.project}, ${mergingWorkPackage.seqType} and ${mergingWorkPackage.pipeline}"
 
-        ProcessingOption roddyVersion = CollectionUtils.exactlyOneElement(
-                ProcessingOption.findAllByNameAndDateObsoleted("roddyVersion", null),
-                "Could not find the ProcessingOption for 'roddyVersion'")
-
         int identifier = RoddyBamFile.nextIdentifier(mergingWorkPackage)
         RoddyBamFile roddyBamFile = new RoddyBamFile(
                 workPackage: mergingWorkPackage,
@@ -144,7 +140,6 @@ abstract class RoddyAlignmentStartJob extends AbstractStartJobImpl {
                 baseBamFile: baseBamFile,
                 seqTracks: seqTracks,
                 config: config,
-                roddyVersion: roddyVersion
         )
         // has to be set explicitly to old value due strange behavior of GORM (?)
         mergingWorkPackage.bamFileInProjectFolder = previousRoddyBamFile

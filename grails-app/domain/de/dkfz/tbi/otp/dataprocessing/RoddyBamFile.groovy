@@ -55,11 +55,6 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
      */
     int identifier
 
-    /**
-     * Roddy version which was used to produce this RoddyBamFile
-     */
-    ProcessingOption roddyVersion
-
 
     String workDirectoryName
 
