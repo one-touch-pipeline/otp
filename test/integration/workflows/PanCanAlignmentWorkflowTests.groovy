@@ -93,20 +93,17 @@ abstract class PanCanAlignmentWorkflowTests extends AbstractPanCanAlignmentWorkf
         alignLanesOnly_NoBaseBamExist_TwoLanes()
     }
 
-    @Ignore('OTP-2192')
     @Test
     void testAlignBaseBamAndNewLanes_allFine() {
         alignBaseBamAndNewLanesHelper(false)
     }
 
-    @Ignore('OTP-2192')
     @Test
     void testAlignBaseBamAndNewLanes_workflow_1_0_182_1_allFine() {
         resetProjectConfig(oldProjectConfigFile)
         alignBaseBamAndNewLanesHelper(false)
     }
 
-    @Ignore('OTP-2192')
     @Test
     void testAlignBaseBamAndNewLanes_allFine_oldStructure() {
         alignBaseBamAndNewLanesHelper(true)

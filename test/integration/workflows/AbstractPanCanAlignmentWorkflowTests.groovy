@@ -292,6 +292,29 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
         return [baseAndQaJsonFiles, executionStorageFiles].flatten()
     }
 
+    Map<File, File> createLinkMapForFirstBamFile(RoddyBamFile firstBamFile) {
+        Map<File, File> linkMapSourceLink = [:]
+
+        ['Bam', 'Bai', 'Md5sum'].each {
+            linkMapSourceLink.put(firstBamFile."work${it}File", firstBamFile."final${it}File")
+        }
+        linkMapSourceLink.put(firstBamFile.workMergedQADirectory, firstBamFile.finalMergedQADirectory)
+
+        [firstBamFile.getWorkExecutionDirectories(), firstBamFile.getFinalExecutionDirectories()].transpose().each {
+            linkMapSourceLink.put(it[0], it[1])
+        }
+
+        Map<SeqTrack, File> workSingleLaneQADirectories = firstBamFile.workSingleLaneQADirectories
+        Map<SeqTrack, File> finalSingleLaneQADirectories = firstBamFile.finalSingleLaneQADirectories
+        workSingleLaneQADirectories.each { seqTrack, singleLaneQaWorkDir ->
+            File singleLaneQcDirFinal = finalSingleLaneQADirectories.get(seqTrack)
+            linkMapSourceLink.put(singleLaneQaWorkDir, singleLaneQcDirFinal)
+        }
+
+        return linkMapSourceLink
+    }
+
+
 
     RoddyBamFile createFirstRoddyBamFile(boolean oldStructure = false) {
         assert firstBamFile.exists()
@@ -317,20 +340,27 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
         }
         assert firstBamFile.save(flush: true, failOnError: true)
 
-        linkFileUtils.createAndValidateLinks([(this.firstBamFile): firstBamFile.finalBamFile], realm)
 
-        Map<File, String> filesWithContent = createFileListForFirstBam(firstBamFile, 'final').collectEntries {
-            [(it): TEST_CONTENT]
-        }
+        Map<File, String> filesWithContent = [:]
+        Map<File, String> links = [:]
 
-        if (!oldStructure) {
+        links[this.firstBamFile] = firstBamFile.finalBamFile
+
+        if (oldStructure) {
+            filesWithContent << createFileListForFirstBam(firstBamFile, 'final').collectEntries {
+                [(it): TEST_CONTENT]
+            }
+            links[this.firstBamFile] = firstBamFile.finalBamFile
+        } else {
             filesWithContent << createFileListForFirstBam(firstBamFile, 'work').collectEntries {
                 [(it): TEST_CONTENT]
             }
-            linkFileUtils.createAndValidateLinks([(this.firstBamFile): firstBamFile.workBamFile], realm)
+            links[this.firstBamFile] = firstBamFile.workBamFile
+            links << createLinkMapForFirstBamFile(firstBamFile)
         }
 
         createFilesWithContent(filesWithContent)
+        linkFileUtils.createAndValidateLinks(links, realm)
 
         workPackage.bamFileInProjectFolder = firstBamFile
         workPackage.needsProcessing = false
@@ -562,13 +592,18 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
 
         // content of the final dir: qa
         List<File> qaDirs = bamFile.finalSingleLaneQADirectories.values() + [bamFile.finalMergedQADirectory]
+        List<File> qaSubDirs = []
         if (bamFile.baseBamFile) {
-            qaDirs.addAll(bamFile.baseBamFile.finalSingleLaneQADirectories.values())
+            if (bamFile.baseBamFile.isOldStructureUsed()) {
+                qaSubDirs.addAll(bamFile.baseBamFile.finalSingleLaneQADirectories.values())
+            } else {
+                qaDirs.addAll(bamFile.baseBamFile.finalSingleLaneQADirectories.values())
+            }
         }
         if (bamFile.seqType.isWgbs() && bamFile.hasMultipleLibraries()) {
             qaDirs.addAll(bamFile.finalLibraryQADirectories.values())
         }
-        TestCase.checkDirectoryContentHelper(bamFile.finalQADirectory, [], [], qaDirs)
+        TestCase.checkDirectoryContentHelper(bamFile.finalQADirectory, qaSubDirs, [], qaDirs)
 
         // qa only for merged and one for each read group
         int numberOfFilesInFinalQaDir = bamFile.numberOfMergedLanes + 1
