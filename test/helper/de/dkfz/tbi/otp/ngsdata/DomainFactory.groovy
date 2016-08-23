@@ -473,6 +473,32 @@ class DomainFactory {
     }
 
     /**
+     * Because RoddyMergedBamQa defines a unique constraint with 'class', the instance can only be created in integration tests.
+     */
+    public static createRoddyMergedBamQa(Map properties = [:]) {
+        return createDomainObject(RoddyMergedBamQa, defaultValuesForAbstractQualityAssessment + [
+                qualityAssessmentMergedPass: { createQualityAssessmentMergedPass(
+                        abstractMergedBamFile: createRoddyBamFile()
+                ) },
+                chromosome: RoddyQualityAssessment.ALL,
+                insertSizeCV: 0,
+                percentageMatesOnDifferentChr: 0,
+                genomeWithoutNCoverageQcBases: 0,
+        ], properties)
+    }
+
+    /**
+     * Because RoddyMergedBamQa defines a unique constraint with 'class', the instance can only be created in integration tests.
+     */
+    public static createRoddyMergedBamQa(RoddyBamFile roddyBamFile, Map properties = [:]) {
+        return createRoddyMergedBamQa([
+                qualityAssessmentMergedPass: createQualityAssessmentMergedPass(
+                        abstractMergedBamFile: roddyBamFile
+                )
+        ] + properties)
+    }
+
+    /**
      * Creates a {@link MergingWorkPackage} with the same properties as the specified one but a different
      * {@link SampleType}.
      */

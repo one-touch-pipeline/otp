@@ -27,18 +27,27 @@ class LinkFilesToFinalDestinationServiceTests {
 
     @Before
     void setUp() {
+        final int numberOfReads = DomainFactory.counter++
+
         roddyBamFile = DomainFactory.createRoddyBamFile()
         roddyBamFile.md5sum = null
         roddyBamFile.fileSize = -1
         roddyBamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING
         roddyBamFile.roddyExecutionDirectoryNames = ["exec_123456_123456789_test_test"]
         assert roddyBamFile.save(flush: true, failOnError: true)
-        realm = DomainFactory.createRealmDataManagementDKFZ()
-        realm.rootPath = temporaryFolder.newFolder()
-        assert realm.save(flush: true, failOnError: true)
-        roddyBamFile.project.realmName = realm.name
-        assert roddyBamFile.project.save(flush: true, failOnError: true)
+
+        realm = DomainFactory.createRealmDataManagement(temporaryFolder.newFolder(), [name: roddyBamFile.project.realmName])
+
         SeqTrack seqTrack = roddyBamFile.seqTracks.iterator()[0]
+        seqTrack.fastqcState = SeqTrack.DataProcessingState.FINISHED
+        assert seqTrack.save(flush: true, failOnError: true)
+
+        DataFile.findAllBySeqTrack(seqTrack).each {
+            it.nReads = numberOfReads
+            assert it.save(flush: true)
+        }
+        DomainFactory.createRoddyMergedBamQa(roddyBamFile, [pairedRead1: numberOfReads, pairedRead2: numberOfReads])
+
         DomainFactory.createRoddyProcessingOptions(temporaryFolder.newFolder())
     }
 
@@ -583,6 +592,17 @@ class LinkFilesToFinalDestinationServiceTests {
     }
 
     @Test
+    void testExecute_roddyBamFileHasMoreNumberOfReadsThanAllSeqTracksTogether_ShouldBeFine() {
+        setUp_allFine()
+        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
+        RoddyQualityAssessment qa = roddyBamFile.overallQualityAssessment
+        qa.pairedRead1--
+        assert qa.save(flush: true)
+
+        linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanup(roddyBamFile, realm)
+    }
+
+    @Test
     void testExecute_RoddyBamFileIsNotLatestBamFile_ShouldFail() {
         setUp_allFine()
         roddyBamFile.metaClass.isMostRecentBamFile = { -> false}
@@ -591,6 +611,20 @@ class LinkFilesToFinalDestinationServiceTests {
             linkFilesToFinalDestinationService.prepareRoddyBamFile(roddyBamFile)
         } ==~ /.*The BamFile .* is not the most recent one.*/
     }
+
+    @Test
+    void testExecute_roddyBamFileHasLessNumberOfReadsThenAllSeqTracksTogether_ShouldFail() {
+        setUp_allFine()
+        RoddyQualityAssessment qa = roddyBamFile.overallQualityAssessment
+        qa.pairedRead1--
+        assert qa.save(flush: true)
+
+        assert shouldFail (AssertionError) {
+            linkFilesToFinalDestinationService.prepareRoddyBamFile(roddyBamFile)
+        } ==~ /.*bam file (.*) has less number of reads than the sum of all fastqc (.*).*/
+    }
+
+
 
     @Test
     void testExecute_RoddyBamFileHasWrongState_ShouldFail() {

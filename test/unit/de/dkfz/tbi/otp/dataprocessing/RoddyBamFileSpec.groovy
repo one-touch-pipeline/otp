@@ -1,10 +1,9 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.ngsdata.*
-import grails.test.mixin.Mock
-import spock.lang.Specification
-import spock.lang.Unroll
+import grails.test.mixin.*
+import spock.lang.*
 
 @Mock([
         DataFile,
@@ -93,5 +92,64 @@ class RoddyBamFileSpec extends Specification {
         "Work"      | "library1"  | "1"            | "lib1"        || 2
         "Final"     | null        | null           | "libNA"       || 1
         "Final"     | "library1"  | "1"            | "lib1"        || 2
+    }
+
+
+    void "getNumberOfReadsFromFastQc, when all fine, returns sum of all number of readsnumber of reads of all DataFiles of all SeqTracks of the RoddyBamFile"() {
+        given:
+        long numberOfReads1 = DomainFactory.counter++
+        long numberOfReads2 = DomainFactory.counter++
+        long numberOfReads3 = DomainFactory.counter++
+        long expectedNumberOfReads = 2 * (numberOfReads1 + numberOfReads2 + numberOfReads3)
+
+        roddyBamFile.numberOfMergedLanes = 3
+        roddyBamFile.seqTracks = [
+                DomainFactory.createSeqTrackWithDataFiles(roddyBamFile.mergingWorkPackage, [fastqcState: SeqTrack.DataProcessingState.FINISHED], [nReads: numberOfReads1]),
+                DomainFactory.createSeqTrackWithDataFiles(roddyBamFile.mergingWorkPackage, [fastqcState: SeqTrack.DataProcessingState.FINISHED], [nReads: numberOfReads2]),
+                DomainFactory.createSeqTrackWithDataFiles(roddyBamFile.mergingWorkPackage, [fastqcState: SeqTrack.DataProcessingState.FINISHED], [nReads: numberOfReads3]),
+        ]
+        assert roddyBamFile.save(flush: true)
+
+
+        expect:
+        expectedNumberOfReads == roddyBamFile.getNumberOfReadsFromFastQc()
+    }
+
+
+    void "getNumberOfReadsFromFastQc, when a fastqc workflow has not finished, throws exception"() {
+        given:
+        roddyBamFile.numberOfMergedLanes = 3
+        roddyBamFile.seqTracks = [
+                DomainFactory.createSeqTrackWithDataFiles(roddyBamFile.mergingWorkPackage, [fastqcState: SeqTrack.DataProcessingState.FINISHED], [nReads: DomainFactory.counter++]),
+                DomainFactory.createSeqTrackWithDataFiles(roddyBamFile.mergingWorkPackage, [fastqcState: SeqTrack.DataProcessingState.IN_PROGRESS], [nReads: DomainFactory.counter++]),
+                DomainFactory.createSeqTrackWithDataFiles(roddyBamFile.mergingWorkPackage, [fastqcState: SeqTrack.DataProcessingState.FINISHED], [nReads: DomainFactory.counter++]),
+        ]
+        assert roddyBamFile.save(flush: true)
+
+        when:
+        roddyBamFile.getNumberOfReadsFromFastQc()
+
+        then:
+        AssertionError e = thrown()
+        e.message.contains('Not all Fastqc workflows of all seqtracks are finished')
+    }
+
+
+    void "getNumberOfReadsFromFastQc, when number of reads of a SeqTrack is null, throws exception"() {
+        given:
+        roddyBamFile.numberOfMergedLanes = 3
+        roddyBamFile.seqTracks = [
+                DomainFactory.createSeqTrackWithDataFiles(roddyBamFile.mergingWorkPackage, [fastqcState: SeqTrack.DataProcessingState.FINISHED], [nReads: DomainFactory.counter++]),
+                DomainFactory.createSeqTrackWithDataFiles(roddyBamFile.mergingWorkPackage, [fastqcState: SeqTrack.DataProcessingState.FINISHED], [nReads: null]),
+                DomainFactory.createSeqTrackWithDataFiles(roddyBamFile.mergingWorkPackage, [fastqcState: SeqTrack.DataProcessingState.FINISHED], [nReads: DomainFactory.counter++]),
+        ]
+        assert roddyBamFile.save(flush: true)
+
+        when:
+        roddyBamFile.getNumberOfReadsFromFastQc()
+
+        then:
+        AssertionError e = thrown()
+        e.message.contains('At least one seqTrack has no value for number of reads')
     }
 }

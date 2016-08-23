@@ -28,6 +28,9 @@ import static de.dkfz.tbi.otp.utils.ProcessHelperService.*
 
 abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
 
+    //The number of reads of the example fastqc files
+    static final int NUMBER_OF_READS = 1000
+
     public String getRefGenFileNamePrefix() {
         return 'hs37d5'
     }
@@ -243,7 +246,10 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
     SeqTrack createSeqTrack(String readGroupNum, String library = null) {
         MergingWorkPackage workPackage = exactlyOneElement(MergingWorkPackage.findAll())
 
-        Map seqTrackProperties = [laneId: readGroupNum]
+        Map seqTrackProperties = [
+                laneId: readGroupNum,
+                fastqcState: SeqTrack.DataProcessingState.FINISHED,
+        ]
         if (library) {
             seqTrackProperties += [libraryName: "lib${library}", normalizedLibraryName: library]
         }
@@ -251,6 +257,7 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
 
         DataFile.findAllBySeqTrack(seqTrack).eachWithIndex { DataFile dataFile, int index ->
             dataFile.vbpFileName = dataFile.fileName = "fastq_${seqTrack.individual.pid}_${seqTrack.sampleType.name}_${seqTrack.laneId}_${index + 1}.fastq.gz"
+            dataFile.nReads = NUMBER_OF_READS
             dataFile.save(flush: true)
         }
 

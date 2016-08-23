@@ -464,4 +464,27 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
 
         }
     }
+
+
+    Long getNumberOfReadsFromQa() {
+        AbstractQualityAssessment qa = getOverallQualityAssessment()
+        return qa.pairedRead1 + qa.pairedRead2
+    }
+
+    Long getNumberOfReadsFromFastQc() {
+        Set<SeqTrack> seqTracks = containedSeqTracks
+        assert seqTracks.size() == numberOfMergedLanes : "Found ${seqTracks.size()} SeqTracks, but expected ${numberOfMergedLanes}"
+
+        assert seqTracks.every { SeqTrack seqTrack ->
+            seqTrack.fastqcState == SeqTrack.DataProcessingState.FINISHED
+        } : "Not all Fastqc workflows of all seqtracks are finished"
+
+        List<Integer> numberOfReads = seqTracks.collect { SeqTrack seqTrack ->
+            seqTrack.NReads
+        }
+
+        assert !numberOfReads.contains(null) : 'At least one seqTrack has no value for number of reads'
+
+        return numberOfReads.sum()
+    }
 }
