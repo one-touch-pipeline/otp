@@ -4,7 +4,6 @@ import de.dkfz.tbi.otp.job.jobs.*
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.utils.*
-import groovy.transform.*
 import org.springframework.context.*
 import spock.lang.*
 
@@ -96,15 +95,12 @@ class RestartCheckerServiceSpec extends Specification {
         !restartCheckerService.isJobAlreadyRestarted(step)
     }
 
-    //activate after OTP-2127 is solved
-    @NotYetImplemented
     void "isWorkflowAlreadyRestarted, when workflow has already been restarted, returns true"() {
         given:
         RestartCheckerService restartCheckerService = new RestartCheckerService()
         ProcessingStep step = new ProcessingStep(
                 process: new Process(
-                        //TODO after OTP-2127 is implemented, set the 'restart' flag to true
-                        //restarted: true
+                    restarted: new Process()
                 )
         )
 

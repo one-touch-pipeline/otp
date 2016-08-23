@@ -30,7 +30,6 @@ class RestartCheckerService {
     }
 
     boolean isWorkflowAlreadyRestarted(ProcessingStep step) {
-        //TODO after OTP-2127 is implemented, remove 'return false' and return if process was restarted (step.process.restarted)
-        return false
+        return step.process.restarted
     }
 }

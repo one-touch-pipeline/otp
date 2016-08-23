@@ -49,8 +49,12 @@ public class Process implements Serializable, Commentable, Entity {
 
     boolean operatorIsAwareOfFailure = false
 
-    Comment comment
+    /**
+     * The value is set if this Process has been created in response to the failure of the referenced Process.
+     */
+    Process restarted
 
+    Comment comment
 
     static mapping = {
         finished index: 'finished_idx'
@@ -63,6 +67,7 @@ public class Process implements Serializable, Commentable, Entity {
         started(nullable: false)
         startJobClass(nullable: false, blank: false)
         startJobVersion(nullable: false, blank: false)
+        restarted(nullable: true)
         comment(nullable: true)
     }
 
