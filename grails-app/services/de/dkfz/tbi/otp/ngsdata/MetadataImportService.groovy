@@ -358,23 +358,14 @@ class MetadataImportService {
         if (barcodeCell) {
             cells.add(barcodeCell)
             barcode = barcodeCell.text ?: null
-        }
-
-        Cell filenameCell = row.getCellByColumnTitle(FASTQ_FILE.name())
-        if (filenameCell) {
-            String barcodeFromFilename = MultiplexingService.barcode(filenameCell.text)
-            if (barcodeFromFilename) {
-                if (!barcode?.contains(barcodeFromFilename)) {
-                    cells.add(filenameCell)
-                    if (!barcode) {
-                        barcode = barcodeFromFilename
-                    } else {
-                        // Yes, this is what the metadata import currently does
-                        barcode = MultiplexingService.combineLaneNumberAndBarcode(barcode, barcodeFromFilename)
-                    }
-                }
-            } else if (!barcode) {
+        } else {
+            Cell filenameCell = row.getCellByColumnTitle(FASTQ_FILE.name())
+            if (filenameCell) {
+                String barcodeFromFilename = MultiplexingService.barcode(filenameCell.text)
                 cells.add(filenameCell)
+                if (barcodeFromFilename) {
+                    barcode = barcodeFromFilename
+                }
             }
         }
 

@@ -37,15 +37,16 @@ class BarcodeFilenameValidator extends ValueTuplesValidator<MetadataValidationCo
     @Override
     void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {
         valueTuples.each { ValueTuple valueTuple ->
-            String barcode = valueTuple.getValue(BARCODE.name()) ?: ''
+            String barcode = valueTuple.getValue(BARCODE.name())
             String fileName = valueTuple.getValue(FASTQ_FILE.name())
             String fileNameBarcode = MultiplexingService.barcode(fileName)
 
-            if (barcode && fileNameBarcode && fileNameBarcode != barcode) {
-                context.addProblem(valueTuple.cells, Level.WARNING, "The barcodes in the filename '${fileName}' ('${fileNameBarcode}') and in the '${BARCODE}' column ('${barcode}') are different. OTP will use both barcodes.")
-            }
-            if (!barcode && fileNameBarcode) {
-                context.addProblem(valueTuple.cells, Level.WARNING, "There is no value in the '${BARCODE}' column, but the barcode can be parsed from the filename '${fileName}'. OTP will use the parsed barcode '${fileNameBarcode}'.")
+            if (barcode == null && fileNameBarcode) {
+                context.addProblem(valueTuple.cells, Level.WARNING, "The ${BARCODE} column is missing. OTP will use the barcode '${fileNameBarcode}' parsed from filename '${fileName}'. (For multiplexed lanes the ${BARCODE} column should be filled.)")
+            } else if (barcode == '' && fileNameBarcode) {
+                context.addProblem(valueTuple.cells, Level.WARNING, "A barcode can be parsed from the filename '${fileName}', but the ${BARCODE} cell is empty. OTP will ignore the barcode parsed from the filename.")
+            } else if (barcode && fileNameBarcode && barcode != fileNameBarcode) {
+                context.addProblem(valueTuple.cells, Level.WARNING, "The barcode parsed from the filename '${fileName}' ('${fileNameBarcode}') is different from the value in the ${BARCODE} cell ('${barcode}'). OTP will ignore the barcode parsed from the filename and use the barcode '${barcode}'.")
             }
         }
     }
