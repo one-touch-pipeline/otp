@@ -61,15 +61,21 @@ class ProcessingOptionService {
         if (option) {
             return option
         }
-        option = findStrict(name, type, null)
-        if (option) {
-            return option
+        if (project != null) {
+            option = findStrict(name, type, null)
+            if (option) {
+                return option
+            }
         }
-        option = findStrict(name, null, project)
-        if (option) {
-            return option
+        if (type != null) {
+            option = findStrict(name, null, project)
+            if (option) {
+                return option
+            }
         }
-        option = findStrict(name, null, null)
+        if (project != null && type != null) {
+            option = findStrict(name, null, null)
+        }
         return option
     }
 
