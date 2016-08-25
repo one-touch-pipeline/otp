@@ -54,26 +54,4 @@ class SamplePairUnitTests {
         assertEquals(expectedExtension, samplePairPath.relativePath)
         assertEquals(project, samplePairPath.project)
     }
-
-    @Test
-    void testGetResultFileLinkedPath() {
-        def (String path, SamplePair samplePair, Project project) = setUpForPathTests()
-        String fileCalling = "snvs_654321_raw.vcf.gz"
-        File expectedExtension = new File("${path}/${fileCalling}")
-
-        OtpPath snvCallingResultFileLinkedPath = samplePair.getResultFileLinkedPath(SnvCallingStep.CALLING)
-        assertEquals(expectedExtension, snvCallingResultFileLinkedPath.relativePath)
-        assertEquals(project, snvCallingResultFileLinkedPath.project)
-
-        String fileDeepAnnotation = "snvs_654321.vcf.gz"
-        File expectedExtensionDeepAnnotation = new File("${path}/${fileDeepAnnotation}")
-
-        OtpPath snvDeepAnnotationResultFileLinkedPath = samplePair.getResultFileLinkedPath(SnvCallingStep.SNV_DEEPANNOTATION)
-        assertEquals(expectedExtensionDeepAnnotation, snvDeepAnnotationResultFileLinkedPath.relativePath)
-        assertEquals(project, snvDeepAnnotationResultFileLinkedPath.project)
-
-        OtpPath filterResultFilesLinkedPath = samplePair.getResultFileLinkedPath(SnvCallingStep.FILTER_VCF)
-        assertEquals(new File(path), filterResultFilesLinkedPath.relativePath)
-        assertEquals(project, filterResultFilesLinkedPath.project)
-    }
 }

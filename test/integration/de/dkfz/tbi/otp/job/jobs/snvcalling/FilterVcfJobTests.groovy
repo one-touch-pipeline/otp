@@ -245,28 +245,6 @@ CHROMOSOME_INDICES=( {1..21} X Y)
     }
 
     @Test
-    void testMaybeSubmit_ConfiguredNotToRun_ResultsExist() {
-        snvCallingInstance2.config.configuration = """
-RUN_CALLING=0
-RUN_SNV_ANNOTATION=0
-RUN_SNV_DEEPANNOTATION=0
-RUN_FILTER_VCF=0
-CHROMOSOME_INDICES=( {1..21} XY)
-"""
-
-        linkFileUtils.metaClass.createAndValidateLinks = { Map<File, File> map, Realm realm ->
-            assert map ==
-                    [(new File(snvCallingInstance1.snvInstancePath.absoluteDataManagementPath, SnvCallingStep.FILTER_VCF.getResultFileName(snvCallingInstance2.individual))):
-                    new File(snvCallingInstance2.snvInstancePath.absoluteDataManagementPath, SnvCallingStep.FILTER_VCF.getResultFileName(snvCallingInstance2.individual))]
-        }
-        snvCallingInstance2.metaClass.findLatestResultForSameBamFiles = { SnvCallingStep step -> return snvJobResultFilter1 }
-        pbsService.metaClass.executeJob = { Realm realm, String text, String qsubParameters ->
-            throw new RuntimeException("This area should not be reached since the filter job shall not run")
-        }
-        assertEquals(NextAction.SUCCEED, filterVcfJob.maybeSubmit(snvCallingInstance2))
-    }
-
-    @Test
     void testMaybeSubmit_ConfiguredNotToRun_NoPreviousResultsAvailable() {
         snvCallingInstance2.config.configuration = """
 RUN_CALLING=0

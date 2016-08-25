@@ -4,7 +4,6 @@ import de.dkfz.tbi.otp.utils.Entity
 import org.springframework.validation.Errors
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 /**
  * For each individual disease/control pairs are compared in the SNV pipeline. These pairs are defined in the GUI and stored in this domain.
@@ -134,28 +133,6 @@ class SamplePair implements Entity {
 
     private OtpPath buildPath() {
         return new OtpPath(individual.getViewByPidPath(seqType), 'snv_results', seqType.libraryLayoutDirName, "${sampleType1.dirName}_${sampleType2.dirName}")
-    }
-
-    /**
-     * Returns the path of the symlink to the result file for current step of the SNV pipeline.
-     * !Attention: since there is more then one result for the filter step,
-     * and it is possible that even more results will come up, only the path to these results are returned in case of
-     * the filter step
-     *
-     * Example: ${project}/sequencing/exon_sequencing/view-by-pid/${pid}/snv_results/paired/tumor_control/snvs_${pid}_raw.vcf.gz
-     */
-    OtpPath getResultFileLinkedPath(SnvCallingStep step) {
-        if (step == SnvCallingStep.CALLING) {
-            return new OtpPath(samplePairPath, step.getResultFileName(individual, null))
-        } else if (step == SnvCallingStep.FILTER_VCF) {
-            return samplePairPath
-        } else {
-            return new OtpPath(samplePairPath, step.getResultFileName(individual))
-        }
-    }
-
-    OtpPath getIndexFileLinkedPath(SnvCallingStep step) {
-        return new OtpPath(samplePairPath, step.getIndexFileName(individual))
     }
 
     String toStringWithoutId() {

@@ -42,7 +42,7 @@ enum SnvCallingStep {
      *
      * Since the number and name of result files is not clear for the filter step no name will be returned.
      */
-    FILTER_VCF({ "" })
+    FILTER_VCF({ throw new UnsupportedOperationException('The filter step does not have exactly one result file.') })
 
     /**
      * Closure which builds the name of the result file(s) specific for each snv step.
@@ -76,22 +76,6 @@ enum SnvCallingStep {
 
     OtpPath getCheckpointFilePath(final SnvCallingInstance snvCallingInstance) {
         return new OtpPath(snvCallingInstance.snvInstancePath, checkpointFileName)
-    }
-
-    /**
-     * Returns the name of the index file, produced by each step in the SNV pipeline.
-     *
-     * For the filter step the index file name of the deep annotation step has to be used.
-     * This is needed due to historical reasons of the CO group.
-     */
-    String getIndexFileName(Individual individual) {
-        if (this == SnvCallingStep.CALLING) {
-            return "${this.getResultFileName(individual, null)}.tbi"
-        } else if (this == SnvCallingStep.FILTER_VCF) {
-            return SnvCallingStep.SNV_DEEPANNOTATION.getIndexFileName(individual)
-        } else {
-            return "${this.getResultFileName(individual)}.tbi"
-        }
     }
 
     /**

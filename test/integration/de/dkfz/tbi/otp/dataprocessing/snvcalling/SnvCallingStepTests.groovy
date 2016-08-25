@@ -102,24 +102,6 @@ class SnvCallingStepTests {
         assertEquals("snvs_${pid}_annotation.vcf.gz", SnvCallingStep.SNV_ANNOTATION.getResultFileName(individual))
 
         assertEquals("snvs_${pid}.vcf.gz", SnvCallingStep.SNV_DEEPANNOTATION.getResultFileName(individual))
-
-        assertEquals("", SnvCallingStep.FILTER_VCF.getResultFileName())
-    }
-
-    @Test
-    void testGetIndexFileName() {
-        TestData testData = new TestData()
-        testData.createObjects()
-
-        Individual individual = testData.individual
-        final String pid = '654321'
-        individual.pid = pid
-        assert individual.save(failOnError: true)
-
-        assertEquals('snvs_654321_raw.vcf.gz.tbi', SnvCallingStep.CALLING.getIndexFileName(individual))
-        assertEquals('snvs_654321_annotation.vcf.gz.tbi', SnvCallingStep.SNV_ANNOTATION.getIndexFileName(individual))
-        assertEquals('snvs_654321.vcf.gz.tbi', SnvCallingStep.SNV_DEEPANNOTATION.getIndexFileName(individual))
-        assertEquals('snvs_654321.vcf.gz.tbi', SnvCallingStep.FILTER_VCF.getIndexFileName(individual))
     }
 
     @Test
