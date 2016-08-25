@@ -101,7 +101,7 @@ class ProjectService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     public Project createProject(String name, String dirName, String realmName, String alignmentDeciderBeanName, String categoryName, String unixGroup, String projectGroup, String nameInMetadataFiles, boolean copyFiles) {
-        assert OtpPath.isValidPathComponent(unixGroup): "unixGroup contains invalid characters"
+        assert OtpPath.isValidPathComponent(unixGroup): "unixGroup '${unixGroup}' contains invalid characters"
         Project project = createProject(name, dirName, realmName, alignmentDeciderBeanName, categoryName)
         project.hasToBeCopied = copyFiles
         project.nameInMetadataFiles = nameInMetadataFiles

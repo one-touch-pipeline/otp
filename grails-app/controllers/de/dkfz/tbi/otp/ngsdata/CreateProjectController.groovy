@@ -18,7 +18,7 @@ class CreateProjectController {
                 message = "'" + errors.getRejectedValue() + "' is not a valid value for '" + errors.getField() + "'. Error code: '" + errors.code + "'"
             }
             else {
-                redirect(controller:"projectOverview", action: "specificOverview", params: [project: projectService.createProject(cmd.name, cmd.directory, 'DKFZ_13.1', 'noAlignmentDecider', cmd.unixGroup, cmd.projectGroup, cmd.projectCategory, cmd.nameInMetadataFiles, cmd.copyFiles).name])
+                redirect(controller:"projectOverview", action: "specificOverview", params: [project: projectService.createProject(cmd.name, cmd.directory, 'DKFZ_13.1', 'noAlignmentDecider', cmd.projectCategory, cmd.unixGroup, cmd.projectGroup, cmd.nameInMetadataFiles, cmd.copyFiles).name])
             }
         }
         return [
