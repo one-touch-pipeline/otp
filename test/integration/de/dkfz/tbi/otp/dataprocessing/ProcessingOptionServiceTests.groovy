@@ -26,7 +26,7 @@ class ProcessingOptionServiceTests {
     @Test
     void testFindOptionAssureSuccessed() {
         createProcessingOption()
-        String result = processingOptionService.findOptionAssure(NAME, null, null)
+        String result = ProcessingOptionService.findOptionAssure(NAME, null, null)
         assertEquals(VALUE, result)
     }
 
@@ -34,7 +34,7 @@ class ProcessingOptionServiceTests {
     void testFindOptionAssureNullName() {
         createProcessingOption()
         shouldFail(IllegalArgumentException) {
-            ProcessingOption testOption = processingOptionService.findOptionAssure(null, null, null)
+            ProcessingOption testOption = ProcessingOptionService.findOptionAssure(null, null, null)
         }
     }
 
@@ -42,7 +42,7 @@ class ProcessingOptionServiceTests {
     void testFindOptionAssureNotFound() {
         createProcessingOption()
         shouldFail(ProcessingException) {
-            ProcessingOption testOption = processingOptionService.findOptionAssure("isNotThere", null, null)
+            ProcessingOption testOption = ProcessingOptionService.findOptionAssure("isNotThere", null, null)
         }
     }
 

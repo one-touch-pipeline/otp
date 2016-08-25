@@ -1,8 +1,11 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import javax.servlet.ServletContext
-import org.codehaus.groovy.grails.commons.GrailsApplication
-import grails.util.Environment
+import de.dkfz.tbi.otp.dataprocessing.*
+import grails.util.*
+import org.codehaus.groovy.grails.commons.*
+import org.joda.time.*
+
+import javax.servlet.*
 
 /**
  * This service knows all the configuration parameters like root paths,
@@ -78,5 +81,9 @@ class ConfigService {
 
     boolean useSshAgent() {
         return grailsApplication.config.otp.pbs.ssh.useSshAgent
+    }
+
+    static DateTimeZone getDateTimeZone() {
+        return DateTimeZone.forID(ProcessingOptionService.findOptionAssure('timeZone', null, null))
     }
 }

@@ -11,7 +11,6 @@ import de.dkfz.tbi.otp.testing.*
 import de.dkfz.tbi.otp.tracking.*
 import grails.plugin.springsecurity.*
 import org.joda.time.*
-import org.joda.time.format.*
 import org.junit.*
 import org.springframework.beans.factory.annotation.*
 
@@ -37,6 +36,7 @@ public class SnvCallingStartJobTests extends GroovyScriptAwareTestCase {
         SpringSecurityUtils.doWithAuth('admin') { runScript('scripts/workflows/SnvWorkflow.groovy') }
         snvTestData = new SnvCallingInstanceTestData()
         snvTestData.createSnvObjects()
+        DomainFactory.createProcessingOption(name: 'timeZone', type: null, value: 'Europe/Berlin')
 
         SamplePair mockSamplePair
         try {
@@ -100,7 +100,7 @@ public class SnvCallingStartJobTests extends GroovyScriptAwareTestCase {
             assert snvCallingInstance.sampleType2BamFile == mockBam2
             assert snvCallingInstance.samplePair == mockSamplePair
             assert snvCallingInstance.config == config
-            assert snvCallingInstance.instanceName == DateTimeFormat.forPattern("yyyy-MM-dd_HH'h'mm").print(ARBITRARY_TIMESTAMP)
+            assert snvCallingInstance.instanceName == '1970-01-01_01h00_+0100'
 
             ProcessParameter processParameter = exactlyOneElement(ProcessParameter.findAll())
             assert processParameter.className == SnvCallingInstance.class.name

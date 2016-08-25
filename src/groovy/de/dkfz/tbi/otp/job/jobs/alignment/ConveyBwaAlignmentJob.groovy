@@ -51,7 +51,7 @@ class ConveyBwaAlignmentJob extends AbstractJobImpl {
     private String sendAlignmentScript(Realm realm, ProcessedSaiFile saiFile) {
         AlignmentPass alignmentPass = saiFile.alignmentPass
         Project project = alignmentPassService.project(alignmentPass)
-        String conveyBwaCommand = optionService.findOptionAssure("conveyBwaCommand", null, project)
+        String conveyBwaCommand = ProcessingOptionService.findOptionAssure("conveyBwaCommand", null, project)
         String dataFilePath = lsdfFilesService.getFileViewByPidPath(saiFile.dataFile)
         String saiFilePath = processedSaiFileService.getFilePath(saiFile)
         String referenceGenomePath = alignmentPassService.referenceGenomePath(alignmentPass)

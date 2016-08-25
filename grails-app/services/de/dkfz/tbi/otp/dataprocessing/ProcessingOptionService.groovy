@@ -101,7 +101,7 @@ class ProcessingOptionService {
     /**
      * @throws ProcessingException if no option has been found
      */
-    public String findOptionAssure(String name, String type, Project project) {
+    public static String findOptionAssure(String name, String type, Project project) {
         notNull(name, "option name can not be null")
         ProcessingOption option = findOptionObject(name, type, project)
         if (!option) {

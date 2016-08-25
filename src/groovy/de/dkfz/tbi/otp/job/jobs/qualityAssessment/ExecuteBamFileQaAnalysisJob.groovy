@@ -24,8 +24,6 @@ class ExecuteBamFileQaAnalysisJob extends AbstractJobImpl {
     @Autowired
     PbsService pbsService
 
-    @Autowired
-    ProcessingOptionService processingOptionService
 
     @Autowired
     ReferenceGenomeService referenceGenomeService
@@ -87,7 +85,7 @@ class ExecuteBamFileQaAnalysisJob extends AbstractJobImpl {
             binding.refGenMetaInfoFilePath = refGenMetaInfoFilePath
         }
 
-        String cmdTemplate = processingOptionService.findOptionAssure("qualityAssessment", seqTypeNaturalId, project)
+        String cmdTemplate = ProcessingOptionService.findOptionAssure("qualityAssessment", seqTypeNaturalId, project)
         SimpleTemplateEngine engine = new SimpleTemplateEngine()
         String cmd = engine.createTemplate(cmdTemplate).make(binding).toString().trim()
         cmd += "; chmod 440 ${qualityAssessmentFilePath} ${coverageDataFilePath} ${insertSizeDataFilePath}"

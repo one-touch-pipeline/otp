@@ -1,21 +1,17 @@
 package de.dkfz.tbi.otp.job.jobs.qualityAssessment
 
-
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
-import grails.buildtestdata.mixin.Build
+import grails.buildtestdata.mixin.*
 import grails.test.mixin.*
-import grails.test.mixin.support.*
-
-import org.apache.commons.logging.Log
+import org.apache.commons.logging.*
+import org.junit.*
 
 import static org.junit.Assert.*
 
-import org.junit.*
-
 @TestFor(ReferenceGenome)
-@Mock([QualityAssessmentPass, ProcessedBamFile, Realm, Project,
+@Mock([QualityAssessmentPass, ProcessedBamFile, Realm, ProcessingOption, Project,
     SeqType, ReferenceGenome, ExomeSeqTrack, SeqTrack, AlignmentPass,
     LibraryPreparationKit, BedFile])
 @Build([
@@ -67,9 +63,9 @@ class ExecuteBamFileQaAnalysisJobUnitTests {
             executeJob: { realmIn, cmd -> 'pbsID' }
             ] as PbsService
 
-        def processingOptionService = [
-            findOptionAssure: { a1, a2, a3 -> 'qualityAssessment.sh ${processedBamFilePath} ${processedBaiFilePath} ${qualityAssessmentFilePath} ${coverageDataFilePath} ${insertSizeDataFilePath} false ${allChromosomeName} 36 25 0 1 1000 10 false ${bedFilePath} ${refGenMetaInfoFilePath}'}
-            ] as ProcessingOptionService
+        ProcessingOptionService.metaClass.static.findOptionAssure = { String a, String b, Project c ->
+            return 'qualityAssessment.sh ${processedBamFilePath} ${processedBaiFilePath} ${qualityAssessmentFilePath} ${coverageDataFilePath} ${insertSizeDataFilePath} false ${allChromosomeName} 36 25 0 1 1000 10 false ${bedFilePath} ${refGenMetaInfoFilePath}'
+        }
 
         def referenceGenomeService = [
             referenceGenome: { a1, a2 -> referenceGenome},
@@ -86,7 +82,6 @@ class ExecuteBamFileQaAnalysisJobUnitTests {
                 processedBamFileQaFileService: processedBamFileQaFileService,
                 qualityAssessmentPassService: qualityAssessmentPassService,
                 processedBamFileService: processedBamFileService,
-                processingOptionService: processingOptionService,
                 referenceGenomeService: referenceGenomeService,
                 bedFileService: bedFileService,
                 pbsService: pbsService,
@@ -95,6 +90,11 @@ class ExecuteBamFileQaAnalysisJobUnitTests {
 
         ExecuteBamFileQaAnalysisJob.metaClass.getProcessParameterValue = { -> 1 as long }
         ExecuteBamFileQaAnalysisJob.metaClass.addOutputParameter = { String a1, String a2 -> }
+    }
+
+    @After
+    void cleanUp() {
+        GroovySystem.metaClassRegistry.removeMetaClass(ProcessingOptionService)
     }
 
     @Test

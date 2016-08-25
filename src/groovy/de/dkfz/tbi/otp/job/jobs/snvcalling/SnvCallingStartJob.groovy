@@ -1,23 +1,17 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
-import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.ProcessingStatus
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingService
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig
-import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.ngsdata.ConfigService
 import de.dkfz.tbi.otp.tracking.*
-import org.joda.time.DateTimeZone
-import org.joda.time.Instant
-import org.joda.time.format.DateTimeFormat
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Scope
-import org.springframework.scheduling.annotation.Scheduled
-import org.springframework.stereotype.Component
+import org.joda.time.*
+import org.joda.time.format.*
+import org.springframework.beans.factory.annotation.*
+import org.springframework.context.annotation.*
+import org.springframework.scheduling.annotation.*
+import org.springframework.stereotype.*
 
 @Component("snvStartJob")
 @Scope("singleton")
@@ -49,7 +43,7 @@ class SnvCallingStartJob extends AbstractStartJobImpl {
 
                 SnvCallingInstance snvCallingInstance = new SnvCallingInstance(
                         samplePair: samplePair,
-                        instanceName: DateTimeFormat.forPattern("yyyy-MM-dd_HH'h'mm").withZone(DateTimeZone.getDefault()).print(Instant.now()),
+                        instanceName: DateTimeFormat.forPattern("yyyy-MM-dd_HH'h'mm_Z").withZone(ConfigService.getDateTimeZone()).print(Instant.now()),
                         config: config,
                         sampleType1BamFile: sampleType1BamFile,
                         sampleType2BamFile: sampleType2BamFile,

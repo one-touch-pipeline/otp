@@ -51,10 +51,10 @@ class BwaPairingAndSortingJob extends AbstractJobImpl {
         String outFilePath = processedBamFileService.getFilePath(bamFile)
         String samtoolsSortBuffer = optionService.findOptionSafe("samtoolsSortBuffer", null, null)
         String numberOfSampeThreads = optionService.findOptionSafe("numberOfSampeThreads", null, null)
-        String bwaCommand = optionService.findOptionAssure("bwaCommand", null, project)
-        String samToolsBinary = optionService.findOptionAssure("samtoolsCommand", null, null)
+        String bwaCommand = ProcessingOptionService.findOptionAssure("bwaCommand", null, project)
+        String samToolsBinary = ProcessingOptionService.findOptionAssure("samtoolsCommand", null, null)
         String numberOfSamToolsSortThreads = optionService.findOptionSafe("numberOfSamToolsSortThreads", null, null)
-        String mbuffer = optionService.findOptionAssure("mbufferPairingSorting", null, null)
+        String mbuffer = ProcessingOptionService.findOptionAssure("mbufferPairingSorting", null, null)
 
         String sampeCmd = "${bwaCommand} sampe -P -T ${numberOfSampeThreads} ${insertSizeOpt} -r \"${groupHeader}\" ${referenceGenomePath} ${sequenceAndSaiFiles}"
         String viewCmd = "${samToolsBinary} view -uSbh - "
