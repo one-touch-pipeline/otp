@@ -43,12 +43,7 @@ class AlignmentPass implements ProcessParameterObject, Entity {
     }
 
     public String toString() {
-        return "id: ${seqTrack.id} " +
-                "pass: ${identifier} " + (latestPass ? "(latest) " : "") +
-                "lane: ${seqTrack.laneId} run: ${seqTrack.run.name} " +
-                "<br>sample: ${seqTrack.sample} " +
-                "seqType: ${seqTrack.seqType} " +
-                "<br>project: ${seqTrack.project}"
+        return "AP ${id}: pass ${identifier} " + (latestPass ? "(latest) " : "") + "on ${seqTrack}"
     }
 
     /**
