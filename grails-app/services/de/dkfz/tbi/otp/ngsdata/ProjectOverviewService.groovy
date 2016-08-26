@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.*
 import org.springframework.context.*
 import org.springframework.security.access.prepost.*
 
+import java.util.regex.*
+
 import static de.dkfz.tbi.otp.utils.ProcessHelperService.*
 
 class ProjectOverviewService {
@@ -40,7 +42,7 @@ class ProjectOverviewService {
                 case PanCanAlignmentDecider:
                     List<ReferenceGenomeProjectSeqType> rgpst = ReferenceGenomeProjectSeqType.findAllByProjectAndDeprecatedDateIsNull(project)
                     Map<String, AlignmentInfo> result = [:]
-                    rgpst*.seqType.unique().each { SeqType seqType ->
+                    rgpst*.seqType.unique().sort {it.displayName }.each { SeqType seqType ->
                         RoddyWorkflowConfig workflowConfig = RoddyWorkflowConfig.getLatestForProject(project, seqType, Pipeline.findByNameAndType(Pipeline.Name.PANCAN_ALIGNMENT, Pipeline.Type.ALIGNMENT))
                         String nameInConfigFile = workflowConfig.getNameUsedInConfig()
 
@@ -51,9 +53,13 @@ class ProjectOverviewService {
                             throw new Exception("Alignment information can't be detected. Is Roddy with support for printidlessruntimeconfig installed?")
                         }
                         Map<String, String> res = output.stdout.readLines().findAll({
-                            it.contains("=")
-                        })*.split("=").collectEntries({
-                            [(it[0]): it[1].startsWith("\"") && it[1].length() > 2 ? it[1].substring(1, it[1].length() - 1) : it[1]]
+                            it.startsWith('declare') && it.contains("=")
+                        }).collectEntries({ String line ->
+                            Matcher matcher = line =~ /(?:declare +-x +(?:-i +)?)?([^ =]*)=(.*)/
+                            matcher.matches()
+                            String key = matcher.group(1)
+                            String value = matcher.group(2)
+                            [(key): value.startsWith("\"") && value.length() > 2 ? value.substring(1, value.length() - 1) : value]
                         })
 
                         String bwaCommand, bwaOptions
@@ -64,14 +70,30 @@ class ProjectOverviewService {
                             bwaCommand = res.get("BWA_BINARY")
                             bwaOptions = res.get("BWA_MEM_OPTIONS")
                         }
+
                         String mergeCommand, mergeOptions
-                        if (res.get("useBioBamBamMarkDuplicates") == "true") {
-                            mergeCommand = res.get("MARKDUPLICATES_BINARY")
-                            mergeOptions = res.get("mergeAndRemoveDuplicates_argumentList")
-                        } else {
-                            mergeCommand = res.get("PICARD_BINARY")
-                            mergeOptions = ""
+                        String tool = res.get('markDuplicatesVariant')
+                        if (!tool) {
+                            tool = res.get("useBioBamBamMarkDuplicates") == 'true' ? MergeConstants.MERGE_TOOL_BIOBAMBAM : MergeConstants.MERGE_TOOL_PICARD
                         }
+                        switch (tool) {
+                            case MergeConstants.MERGE_TOOL_BIOBAMBAM:
+                                mergeCommand = res.get("MARKDUPLICATES_BINARY")
+                                mergeOptions = res.get("mergeAndRemoveDuplicates_argumentList")
+                                break
+                            case MergeConstants.MERGE_TOOL_PICARD:
+                                mergeCommand = res.get("PICARD_BINARY")
+                                mergeOptions = ''
+                                break
+                            case MergeConstants.MERGE_TOOL_SAMBAMBA:
+                                mergeCommand = res.get('SAMBAMBA_MARKDUP_BINARY')
+                                mergeOptions = res.get('SAMBAMBA_MARKDUP_OPTS')
+                                break
+                            default:
+                                mergeCommand = "Unknown tool: ${tool}"
+                                mergeOptions = ''
+                        }
+
                         AlignmentInfo alignmentInfo = new AlignmentInfo(
                                 bwaCommand: bwaCommand,
                                 bwaOptions: bwaOptions,
