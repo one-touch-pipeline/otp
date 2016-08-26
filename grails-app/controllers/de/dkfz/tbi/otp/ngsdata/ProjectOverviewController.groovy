@@ -69,6 +69,8 @@ class ProjectOverviewController {
     Map specificOverview() {
         List<Project> projects = projectService.getAllProjects()
         Project project = Project.findByName(params.project) ?: projects[0]
+        project.category.refresh()
+
         Map<String, ProjectOverviewService.AlignmentInfo> alignmentInfo = null
         String alignmentError = null
         try {
