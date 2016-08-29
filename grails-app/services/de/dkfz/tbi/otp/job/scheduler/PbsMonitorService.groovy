@@ -90,6 +90,16 @@ class PbsMonitorService {
             return
         }
 
+        // we create a copy of the queuedJobs as a different thread might append elements to
+        // queuedJobs which might end up in concurrency issues
+        Map<MonitoringJob, List<ClusterJobIdentifier>>  copyQueuedJobs
+        lock.lock()
+        try {
+           copyQueuedJobs = new HashMap<MonitoringJob, List<ClusterJobIdentifier>>(queuedJobs)
+        } finally {
+            lock.unlock()
+        }
+
         // get all jobs the PBS cluster knows about
         // if a cluster from a realm is not reachable, save it to a list so we don't assume that jobs on this realm are completed
         Map<ClusterJobIdentifier, ClusterJobStatus> jobStates = [:]
@@ -105,9 +115,7 @@ class PbsMonitorService {
         }
 
         Map<MonitoringJob, List<ClusterJobIdentifier>> removal = [:]
-        // we create a copy of the queuedJobs as a different thread might append elements to
-        // queuedJobs which might end up in concurrency issues
-        (new HashMap<MonitoringJob, List<ClusterJobIdentifier>>(queuedJobs)).each { MonitoringJob pbsMonitor, List<ClusterJobIdentifier> pbsInfos ->
+        copyQueuedJobs.each { MonitoringJob pbsMonitor, List<ClusterJobIdentifier> pbsInfos ->
             // for each of the queuedJobs we go over the pbsInfos and check whether the job on the
             // PBS systems is still running
             List<ClusterJobIdentifier> finishedJobs = []
