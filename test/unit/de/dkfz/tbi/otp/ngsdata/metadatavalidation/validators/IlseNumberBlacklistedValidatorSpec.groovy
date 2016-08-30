@@ -15,6 +15,20 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 ])
 class IlseNumberBlacklistedValidatorSpec extends Specification {
 
+    void 'validate, when column does not exist, succeeds'() {
+        given:
+        MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
+NoIlseColumn
+abc
+""")
+
+        when:
+        new IlseNumberBlacklistedValidator().validate(context)
+
+        then:
+        context.problems.empty
+    }
+
     void 'validate, when metadata fields contain not blacklisted ILSe number, succeeds'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
