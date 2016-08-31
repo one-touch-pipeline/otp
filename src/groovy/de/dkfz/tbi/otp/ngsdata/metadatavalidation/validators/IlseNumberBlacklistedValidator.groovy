@@ -23,6 +23,10 @@ class IlseNumberBlacklistedValidator extends SingleValueValidator<MetadataValida
     }
 
     @Override
+    void columnMissing(MetadataValidationContext context) {
+    }
+
+    @Override
     void validateValue(MetadataValidationContext context, String value, Set<Cell> cells) {
         if (value && value.isInteger()) {
             IlseSubmission ilseSubmission = CollectionUtils.atMostOneElement(IlseSubmission.findAllByIlseNumberAndWarning(value.toInteger(), true))
