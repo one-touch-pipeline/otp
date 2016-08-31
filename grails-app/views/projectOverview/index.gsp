@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <meta name="layout" content="main" />
-<title>OTP - project overview</title>
+<title>${g.message(code: "projectOverview.index.title")}</title>
     <asset:javascript src="modules/graph"/>
     <asset:javascript src="pages/projectOverview/index/datatable.js"/>
 </head>
