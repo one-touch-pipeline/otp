@@ -72,6 +72,7 @@ class AbstractRoddyJobIntegrationTests extends AbstractPanCanAlignmentWorkflowTe
 
     @Test
     void executeRoddy_roddyCallSucceeds_onePbsJobFails_RoddyJobFailedAndSuccessfullyRestarted() {
+        String DUMMY_STAT_SIZE_FILE_NAME = "dummy.tab"
 
         // prepare
 
@@ -83,8 +84,7 @@ class AbstractRoddyJobIntegrationTests extends AbstractPanCanAlignmentWorkflowTe
         MergingWorkPackage workPackage = firstBamFile.workPackage
         File statDir = referenceGenomeService.pathToChromosomeSizeFilesPerReference(workPackage.project, workPackage.referenceGenome)
         executionService.executeCommand(realm, "chmod g+w ${statDir}")
-        File statFile = new File(statDir, DomainFactory.DEFAULT_TAB_FILE_NAME)
-        statFile << HelperUtils.getUniqueString()
+        File statFile = new File(statDir, DUMMY_STAT_SIZE_FILE_NAME)
         workPackage.refresh()
         workPackage.statSizeFileName = statFile.name
         workPackage.save(flush: true, failOnError: true)

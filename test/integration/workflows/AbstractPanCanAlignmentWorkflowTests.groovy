@@ -387,24 +387,7 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
 
     void setUpRefGenomeDir(MergingWorkPackage workPackage) {
         File linkRefGenDir = new File(referenceGenomeService.filePathToDirectory(workPackage.project, workPackage.referenceGenome, false))
-        File linkStatDir = referenceGenomeService.pathToChromosomeSizeFilesPerReference(workPackage.project, workPackage.referenceGenome, false)
-        createDirectories([linkRefGenDir, linkStatDir], TEST_DATA_MODE_DIR)
-
-        File sourceStatDir = new File(refGenDir, ReferenceGenomeService.CHROMOSOME_SIZE_FILES_PREFIX)
-        assert refGenDir.exists()
-        assert sourceStatDir.exists()
-
-        // the stat dir is not linked, since one needs to create a broken stat file in this dir
-        // in one of the tests
-        executionService.executeCommand(realm, "cp ${sourceStatDir}/* ${linkStatDir}")
-
-        refGenDir.listFiles().each { sourceFile ->
-            File linkFile = new File(linkRefGenDir, sourceFile.name)
-            if (sourceFile == sourceStatDir) {
-                return
-            }
-            linkFileUtils.createAndValidateLinks([(sourceFile): linkFile], realm)
-        }
+        linkFileUtils.createAndValidateLinks([(refGenDir): linkRefGenDir], realm)
     }
 
     void checkAllAfterSuccessfulExecution_alignBaseBamAndNewLanes() {
