@@ -12,6 +12,7 @@ import com.jcraft.jsch.agentproxy.ConnectorFactory
 import com.jcraft.jsch.agentproxy.RemoteIdentityRepository
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
+import groovy.transform.Synchronized
 import org.apache.commons.logging.Log
 import de.dkfz.tbi.otp.utils.ProcessHelperService.ProcessOutput
 
@@ -25,6 +26,10 @@ class ExecutionService {
 
     @SuppressWarnings("GrailsStatelessService")
     def configService
+
+    private JSch jsch
+
+    private Map<String, Session> sessionPerUser = [:]
 
 
     /**
@@ -79,21 +84,59 @@ class ExecutionService {
             throw new ProcessingException("Neither password nor key file for remote connection specified.")
         }
         try {
-            JSch jsch = new JSch()
+            Session session = connectSshIfNeeded(host, port, timeout, username, password, keyFile, useSshAgent)
 
-            if (keyFile) {
-                jsch.addIdentity(keyFile.absolutePath)
+            ChannelExec channel = (ChannelExec)session.openChannel("exec")
+            logToJob("executed command: " + command)
+            channel.setCommand(command)
 
-                if (useSshAgent) {
-                    Connector connector = ConnectorFactory.getDefault().createConnector()
-                    if (connector != null ) {
-                        IdentityRepository repository = new RemoteIdentityRepository(connector)
-                        jsch.setIdentityRepository(repository)
+            ProcessOutput processOutput = getOutput(channel)
+
+            if (processOutput.exitCode != 0) {
+                logToJob("received exit code:\n" + processOutput.exitCode)
+            }
+            logToJob("received response:\n" + processOutput.stdout)
+            if (processOutput.stderr) {
+                logToJob("received error response:\n" + processOutput.stderr)
+            }
+            channel.disconnect()
+            return processOutput
+        } catch (Exception e) {
+            log.info(e.toString(), e)
+            throw new ProcessingException(e)
+        }
+    }
+
+    private Session connectSshIfNeeded(String host, int port, int timeout, String username, String password, File keyFile, boolean useSshAgent) {
+        Session session = sessionPerUser[username]
+        if (session == null || !session.isConnected()) {
+            session = createSessionAndJsch(host, port, timeout, username, password, keyFile, useSshAgent)
+        }
+        return session
+    }
+
+    @Synchronized
+    private Session createSessionAndJsch(String host, int port, int timeout, String username, String password, File keyFile, boolean useSshAgent) {
+        Session session = sessionPerUser[username]
+        if (session == null || !session.isConnected()) {
+            log.info("create new session for ${username}")
+            if (jsch == null) {
+                log.info("create new jsch")
+                jsch = new JSch()
+                if (keyFile) {
+                    jsch.addIdentity(keyFile.absolutePath)
+
+                    if (useSshAgent) {
+                        Connector connector = ConnectorFactory.getDefault().createConnector()
+                        if (connector != null) {
+                            IdentityRepository repository = new RemoteIdentityRepository(connector)
+                            jsch.setIdentityRepository(repository)
+                        }
                     }
                 }
             }
 
-            Session session = jsch.getSession(username, host, port)
+            session = jsch.getSession(username, host, port)
             if (!keyFile) {
                 session.setPassword(password)
             }
@@ -109,38 +152,13 @@ class ExecutionService {
             } catch (JSchException e) {
                 throw new ProcessingException("Connecting to ${host}:${port} with username ${username} failed.", e)
             }
-            ChannelExec channel = (ChannelExec)session.openChannel("exec")
-            logToJob("executed command: " + command)
-            channel.setCommand(command)
-
-            ProcessOutput processOutput = getOutput(channel)
-
-            if (processOutput.exitCode != 0) {
-                logToJob("received exit code:\n" + processOutput.exitCode)
-            }
-            logToJob("received response:\n" + processOutput.stdout)
-            if (processOutput.stderr) {
-                logToJob("received error response:\n" + processOutput.stderr)
-            }
-
-            disconnectSsh(channel)
-            return processOutput
-        } catch (Exception e) {
-            log.info(e.toString(), e)
-            throw new ProcessingException(e)
+            sessionPerUser[username] = session
         }
+        return session
     }
 
-    /**
-     * Disconnects channel and session to have a clear disconnect
-     * from the remote host
-     *
-     * @param channel The channel to be disconnected
-     */
-    private static void disconnectSsh(Channel channel) {
-        channel.session.disconnect()
-        channel.disconnect()
-    }
+
+
 
     /**
      * Retrieves the command output
