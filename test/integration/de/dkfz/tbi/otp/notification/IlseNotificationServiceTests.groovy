@@ -34,7 +34,7 @@ class IlseNotificationServiceTests {
 
     @Test
     void testCreateIlseNotificationForIlseIds_WhenIlseIdNotConsistOfNumbers_ShouldFail() {
-        List<String> ilseIds = ["abc"]
+        List<String> ilseIds = ["abcd"]
 
         TestCase.shouldFailWithMessageContaining(AssertionError, 'An ILSe ID can just consist of numbers') {
             ilseNotificationService.createIlseNotificationForIlseIds(ilseIds)
@@ -43,7 +43,7 @@ class IlseNotificationServiceTests {
 
     @Test
     void testCreateIlseNotificationForIlseIds_WhenIlseFolderDoesNotExist_ShouldFail() {
-        List<String> ilseIds = ["123"]
+        List<String> ilseIds = ["1234"]
 
         TestCase.shouldFailWithMessageContaining(AssertionError, "No Folder for ILSe ${ilseIds.first()} can be found") {
             ilseNotificationService.createIlseNotificationForIlseIds(ilseIds)
@@ -54,7 +54,7 @@ class IlseNotificationServiceTests {
     void testCreateIlseNotificationForIlseIds_WhenAllFine_ShouldReturnNotificationMessage() {
         createTestDirectory()
 
-        List<String> ilseIds = ["123"]
+        List<String> ilseIds = ["1234"]
 
         Run run = DomainFactory.createRun()
 
@@ -74,7 +74,7 @@ class IlseNotificationServiceTests {
         File runFolder = new File(dir, run.name)
         assert runFolder.mkdir()
 
-        ilseNotificationService.metaClass.getIlseFolder = { String s ->
+        lsdfFilesService.metaClass.getIlseFolder = { String s ->
             return dir
         }
 
@@ -106,7 +106,7 @@ ${samples.join('\n')}
     void testCreateIlseNotificationForIlseIds_WhenSeveralProjectsForSamples_ShouldFail() {
         createTestDirectory()
 
-        List<String> ilseIds = ["123"]
+        List<String> ilseIds = ["1234"]
 
         Run run = DomainFactory.createRun()
 
@@ -124,7 +124,7 @@ ${samples.join('\n')}
         File runFolder = new File(dir, run.name)
         assert runFolder.mkdir()
 
-        ilseNotificationService.metaClass.getIlseFolder = { String s ->
+        lsdfFilesService.metaClass.getIlseFolder = { String s ->
             return dir
         }
 

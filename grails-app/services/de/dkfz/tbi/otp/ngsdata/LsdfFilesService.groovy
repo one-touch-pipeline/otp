@@ -19,6 +19,11 @@ class LsdfFilesService {
     ExecutionService executionService
     CreateClusterScriptService createClusterScriptService
 
+    public static final String SEQ_CENTER_INBOX_PATH = 'STORAGE_ROOT/dmg/seq_center_inbox'
+
+    public static final String ILSE_NUMBER_TEMPLATE = "000000"
+
+
     static List<String> midtermStorageMountPoint = [  // the first entry shall be the canonical one
             "STORAGE_ROOT/midterm/",
             "STORAGE_ROOTSEQUENCING_INBOX/",
@@ -358,5 +363,14 @@ class LsdfFilesService {
         }
     }
 
+    /**
+     * Returns the absolute path to an ILSe Folder.
+     * Ususally stored at STORAGE_ROOTSEQUENCING_INBOX/00[first digit of ILSe]/00[ILSe]
+     */
+    public File getIlseFolder(String ilseId) {
+        assert ilseId =~ /^\d{4,6}$/
+        String ilse = ILSE_NUMBER_TEMPLATE + ilseId
+        return new File("${SEQ_CENTER_INBOX_PATH}/core/${ilse[-6..-1][0..2]}/${ilse[-6..-1]}")
+    }
 
 }

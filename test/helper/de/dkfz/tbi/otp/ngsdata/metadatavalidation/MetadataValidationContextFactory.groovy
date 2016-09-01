@@ -18,6 +18,9 @@ class MetadataValidationContextFactory {
                 properties.metadataFileMd5sum ?: HelperUtils.randomMd5sum,
                 properties.spreadsheet ?: new Spreadsheet(properties.document ?: 'I am header!\nI am data!'),
                 properties.problems ?: new Problems(),
-                properties.directoryStructure ?: [:] as DirectoryStructure)
+                properties.directoryStructure ?: [:] as DirectoryStructure,
+                properties.content ?: ''.bytes
+        )
+
     }
 }

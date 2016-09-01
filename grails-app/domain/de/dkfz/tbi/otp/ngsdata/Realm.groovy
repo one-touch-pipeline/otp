@@ -5,6 +5,8 @@ import de.dkfz.tbi.otp.utils.Entity
 
 class Realm implements Entity, Serializable {
 
+    static final String LATEST_DKFZ_REALM = 'DKFZ_13.1'
+
     /**
      * Defines the available clusters.
      * It allowed to reference to a cluster about it names.

@@ -1,10 +1,13 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.*
 import de.dkfz.tbi.otp.tracking.*
 import de.dkfz.tbi.util.spreadsheet.*
 import de.dkfz.tbi.util.spreadsheet.validation.ValueTuple
+import grails.util.*
 import groovy.transform.*
 import org.springframework.beans.factory.annotation.*
 import org.springframework.context.*
@@ -21,6 +24,10 @@ import static de.dkfz.tbi.otp.utils.StringUtils.*
  * Metadata import 2.0 (OTP-34)
  */
 class MetadataImportService {
+
+    ExecutionService executionService
+
+    LsdfFilesService lsdfFilesService
 
     static int MAX_ILSE_NUMBER_RANGE_SIZE = 20
 
@@ -85,8 +92,32 @@ class MetadataImportService {
         MetaDataFile metadataFileObject = null
         if (mayImport(context, ignoreWarnings, previousValidationMd5sum)) {
             metadataFileObject = importMetadataFile(context, align, ticketNumber)
+            copyMetaDataFileIfMidterm(context)
         }
         return new ValidateAndImportResult(context, metadataFileObject)
+    }
+
+    protected void copyMetaDataFileIfMidterm(MetadataValidationContext context) {
+        if (context.directoryStructure instanceof DataFilesOnGpcfMidTerm) {
+            File source = context.metadataFile
+            try {
+                String ilse = context.spreadsheet.dataRows[0].getCellByColumnTitle(MetaDataColumn.ILSE_NO.name())
+                File targetDirectory = lsdfFilesService.getIlseFolder(ilse)
+                File targetFile = new File(targetDirectory, source.name)
+                if (!targetFile.exists()) {
+                    Realm realm = Realm.findByNameAndEnv(Realm.LATEST_DKFZ_REALM, Environment.getCurrent().getName())
+                    assert realm
+
+                    lsdfFilesService.createDirectory(targetDirectory, realm)
+                    executionService.executeCommandReturnProcessOutput(realm, "cp ${source} ${targetDirectory}").assertExitCodeZeroAndStderrEmpty()
+                    LsdfFilesService.ensureFileIsReadableAndNotEmpty(targetFile)
+                }
+
+                assert targetFile.bytes == context.content
+            } catch (Throwable t) {
+                throw new RuntimeException("Copying of metadatafile ${source} failed", t)
+            }
+        }
     }
 
     List<ValidateAndImportResult> validateAndImportMultiple(String otrsTicketNumber, String ilseNumbers) {

@@ -10,10 +10,8 @@ class IlseNotificationService {
     ConfigService configService
     LsdfFilesService lsdfFilesService
 
-    public static final String SEQ_CENTER_INBOX_PATH = 'STORAGE_ROOT/dmg/seq_center_inbox'
     public static final String META_DATA_FILE_REGEX = /.*_fastq.tsv$/
 
-    public static final String ILSE_NUMBER_TEMPLATE = "000000"
 
     // could later be outsourced to ProcessingOptions to be able to change during run-time
     public static String NOTIFICATION_TEMPLATE = """
@@ -39,7 +37,7 @@ Samples:
         ilseIds.findAll().each { String ilseId ->
             assert ilseId =~ /\d+/ : "An ILSe ID can just consist of numbers"
 
-            File ilseFolder = getIlseFolder(ilseId)
+            File ilseFolder = lsdfFilesService.getIlseFolder(ilseId)
             assert ilseFolder.exists() : "No Folder for ILSe ${ilseId} can be found"
 
             ilseFolder.eachFile { File runFolder ->
@@ -83,14 +81,6 @@ Samples:
         return outputStringBuilder.toString()
     }
 
-    /**
-     * Returns the absolute path to an ILSe Folder.
-     * Ususally stored at STORAGE_ROOTSEQUENCING_INBOX/00[first digit of ILSe]/00[ILSe]
-     */
-    public File getIlseFolder(String ilseId) {
-        String ilse = ILSE_NUMBER_TEMPLATE + ilseId
-        return new File("${SEQ_CENTER_INBOX_PATH}/core/${ilse[-6..-1][0..2]}/${ilse[-6..-1]}")
-    }
 
     /**
      * Finds the meta data file in a run folder

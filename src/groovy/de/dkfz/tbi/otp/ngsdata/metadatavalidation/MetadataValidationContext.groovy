@@ -19,10 +19,12 @@ class MetadataValidationContext extends ValidationContext {
     final File metadataFile
     final String metadataFileMd5sum
     final DirectoryStructure directoryStructure
+    final byte[] content
 
-    private MetadataValidationContext(File metadataFile, String metadataFileMd5sum, Spreadsheet spreadsheet, Problems problems, DirectoryStructure directoryStructure) {
+    private MetadataValidationContext(File metadataFile, String metadataFileMd5sum, Spreadsheet spreadsheet, Problems problems, DirectoryStructure directoryStructure, byte[] content) {
         super(spreadsheet, problems)
         this.metadataFile = metadataFile
+        this.content = content
         this.metadataFileMd5sum = metadataFileMd5sum
         this.directoryStructure = directoryStructure
     }
@@ -31,6 +33,7 @@ class MetadataValidationContext extends ValidationContext {
         Problems problems = new Problems()
         String metadataFileMd5sum = null
         Spreadsheet spreadsheet = null
+        byte[] bytes = null
         if (!OtpPath.isValidAbsolutePath(metadataFile.path)) {
             problems.addProblem(Collections.emptySet(), Level.ERROR, "'${metadataFile}' is not a valid absolute path.")
         } else if (!metadataFile.name.endsWith('.tsv')) {
@@ -49,7 +52,7 @@ class MetadataValidationContext extends ValidationContext {
             problems.addProblem(Collections.emptySet(), Level.ERROR, "${pathForMessage(metadataFile)} is larger than ${MAX_METADATA_FILE_SIZE_IN_MIB} MiB.")
         } else {
             try {
-                byte[] bytes = metadataFile.bytes
+                bytes = metadataFile.bytes
                 metadataFileMd5sum = byteArrayToHexString(MessageDigest.getInstance('MD5').digest(bytes))
                 String document = new String(bytes, CHARSET)
                 if (document.getBytes(CHARSET) != bytes) {
@@ -70,7 +73,7 @@ class MetadataValidationContext extends ValidationContext {
                 problems.addProblem(Collections.emptySet(), Level.ERROR, e.message)
             }
         }
-        return new MetadataValidationContext(metadataFile, metadataFileMd5sum, spreadsheet, problems, directoryStructure)
+        return new MetadataValidationContext(metadataFile, metadataFileMd5sum, spreadsheet, problems, directoryStructure, bytes)
     }
 
     static String pathForMessage(File file) {

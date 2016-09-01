@@ -28,7 +28,6 @@ class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
     @Rule
     TemporaryFolder temporaryFolder
 
-    final static String REALM_NAME = 'DKFZ_13.1'
 
     def setup() {
         createUserAndRoles()
@@ -39,7 +38,7 @@ class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
         DomainFactory.createProjectCategory(name: 'category')
 
         int counter = 0
-        Realm realm = DomainFactory.createRealmDataManagement(temporaryFolder.newFolder(), [name: REALM_NAME])
+        Realm realm = DomainFactory.createRealmDataManagement(temporaryFolder.newFolder(), [name: Realm.LATEST_DKFZ_REALM])
         DomainFactory.createRealmDataProcessing(temporaryFolder.newFolder(), [name: realm.name])
         DomainFactory.createProject(name: 'testProjectAlignment', realmName: realm.name, alignmentDeciderBeanName: 'test')
         DomainFactory.createReferenceGenome(name: 'testReferenceGenome')
@@ -62,7 +61,7 @@ class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
         when:
         Project project
         SpringSecurityUtils.doWithAuth("admin") {
-            project = projectService.createProject(name, dirName, REALM_NAME, AlignmentDeciderBeanNames.NO_ALIGNMENT.bean, 'category', group, projectGroup, nameInMetadataFiles, copyFiles)
+            project = projectService.createProject(name, dirName, Realm.LATEST_DKFZ_REALM, AlignmentDeciderBeanNames.NO_ALIGNMENT.bean, 'category', group, projectGroup, nameInMetadataFiles, copyFiles)
         }
 
         then:
@@ -88,7 +87,7 @@ class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
         when:
         Project project
         SpringSecurityUtils.doWithAuth("admin") {
-            project = projectService.createProject('project', 'dir', REALM_NAME, AlignmentDeciderBeanNames.NO_ALIGNMENT.bean, 'category', group, '', null, false)
+            project = projectService.createProject('project', 'dir', Realm.LATEST_DKFZ_REALM, AlignmentDeciderBeanNames.NO_ALIGNMENT.bean, 'category', group, '', null, false)
         }
 
         then:
@@ -112,7 +111,7 @@ class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
         when:
         Project project
         SpringSecurityUtils.doWithAuth("admin") {
-            project = projectService.createProject(name, dirName, REALM_NAME, AlignmentDeciderBeanNames.NO_ALIGNMENT.bean, 'category', group, '', nameInMetadataFiles, true)
+            project = projectService.createProject(name, dirName, Realm.LATEST_DKFZ_REALM, AlignmentDeciderBeanNames.NO_ALIGNMENT.bean, 'category', group, '', nameInMetadataFiles, true)
         }
 
         then:
@@ -134,7 +133,7 @@ class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
         when:
         Project project
         SpringSecurityUtils.doWithAuth("admin") {
-            project = projectService.createProject('project', 'dir', REALM_NAME, AlignmentDeciderBeanNames.NO_ALIGNMENT.bean, 'category', 'invalidValue', '', null, false)
+            project = projectService.createProject('project', 'dir', Realm.LATEST_DKFZ_REALM, AlignmentDeciderBeanNames.NO_ALIGNMENT.bean, 'category', 'invalidValue', '', null, false)
         }
 
         then:
@@ -160,7 +159,7 @@ class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
 
         when:
         SpringSecurityUtils.doWithAuth("admin") {
-            projectService.createProject('project', 'dir', REALM_NAME, AlignmentDeciderBeanNames.NO_ALIGNMENT.bean, 'category', group, '', null, false)
+            projectService.createProject('project', 'dir', Realm.LATEST_DKFZ_REALM, AlignmentDeciderBeanNames.NO_ALIGNMENT.bean, 'category', group, '', null, false)
         }
         then:
         Files.readAttributes(projectDirectory.toPath(), PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS).group().toString() == group
@@ -210,7 +209,7 @@ class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
         when:
         Project project
         SpringSecurityUtils.doWithAuth("admin") {
-            project = projectService.createProject('project', 'dir', REALM_NAME, 'noAlignmentDecider', 'invalid category', group, '', 'project', true)
+            project = projectService.createProject('project', 'dir', Realm.LATEST_DKFZ_REALM, 'noAlignmentDecider', 'invalid category', group, '', 'project', true)
         }
 
         then:
