@@ -113,6 +113,7 @@ abstract class AbstractSnvWorkflowTests extends WorkflowTestCase {
                 category: SampleType.Category.CONTROL,
         )
 
+        DomainFactory.createProcessingOption(name: 'timeZone', type: null, value: 'Europe/Berlin')
         samplePair = DomainFactory.createSamplePair(bamFileTumor.mergingWorkPackage, bamFileControl.mergingWorkPackage)
     }
 
