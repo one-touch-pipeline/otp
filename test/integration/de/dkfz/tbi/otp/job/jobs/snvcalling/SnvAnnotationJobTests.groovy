@@ -50,6 +50,9 @@ class SnvAnnotationJobTests {
     @Autowired
     LinkFileUtils linkFileUtils
 
+    @Autowired
+    SnvCallingService snvCallingService
+
     File testDirectory
     SnvAnnotationJob snvAnnotationJob
     SnvCallingInstance snvCallingInstance
@@ -58,6 +61,7 @@ class SnvAnnotationJobTests {
     SnvJobResult snvJobResultInput
     ProcessedMergedBamFile processedMergedBamFile1
     SnvCallingInstanceTestData testData
+    ExternalScript externalScript_Annotation
 
     public static final String SOME_INSTANCE_NAME = "2014-08-25_15h32"
     public static final String OTHER_INSTANCE_NAME = "2014-09-01_15h32"
@@ -121,8 +125,18 @@ CHROMOSOME_INDICES=( {1..21} X Y)
                 )
         assert snvJobResultInput.save()
 
+        SnvJobResult snvJobResultInput2 = new SnvJobResult(
+                step: SnvCallingStep.CALLING,
+                snvCallingInstance: snvCallingInstance2,
+                externalScript: externalScript_Calling,
+                processingState: SnvProcessingStates.FINISHED,
+                chromosomeJoinExternalScript: testData.externalScript_Joining,
+                md5sum: "a841c64c5825e986c4709ac7298e9366",
+                fileSize: 1234l,
+        )
+        assert snvJobResultInput.save()
 
-        ExternalScript externalScript_Annotation = new ExternalScript(
+        externalScript_Annotation = new ExternalScript(
                 scriptIdentifier: SnvCallingStep.SNV_ANNOTATION.externalScriptIdentifier,
                 scriptVersion: 'v1',
                 filePath: "/tmp/scriptLocation/annotation.sh",
@@ -132,9 +146,10 @@ CHROMOSOME_INDICES=( {1..21} X Y)
 
         snvJobResult = new SnvJobResult(
                 step: SnvCallingStep.SNV_ANNOTATION,
-                snvCallingInstance: snvCallingInstance2,
+                snvCallingInstance: snvCallingInstance,
                 externalScript: externalScript_Annotation,
-                inputResult: snvJobResultInput
+                inputResult: snvJobResultInput,
+                processingState: SnvProcessingStates.FINISHED,
                 )
         assert snvJobResult.save()
 
@@ -151,10 +166,12 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         snvCallingInstance2 = null
         snvJobResultInput = null
         processedMergedBamFile1 = null
+        externalScript_Annotation = null
         TestCase.removeMetaClass(ExecutionService, executionService)
         TestCase.removeMetaClass(PbsService, pbsService)
         TestCase.removeMetaClass(LinkFileUtils, linkFileUtils)
         TestCase.removeMetaClass(ClusterJobLoggingService, pbsService.clusterJobLoggingService)
+        TestCase.removeMetaClass(SnvCallingService, snvCallingService)
         LsdfFilesService.metaClass = null
         WaitingFileUtils.metaClass = null
         TestCase.cleanTestDirectory()
@@ -181,7 +198,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
                     [(new File(snvCallingInstance.snvInstancePath.absoluteDataManagementPath, SnvCallingStep.SNV_ANNOTATION.getResultFileName(snvCallingInstance2.individual))):
                     new File(snvCallingInstance2.snvInstancePath.absoluteDataManagementPath, SnvCallingStep.SNV_ANNOTATION.getResultFileName(snvCallingInstance2.individual))]
         }
-        snvCallingInstance2.metaClass.findLatestResultForSameBamFiles = { SnvCallingStep step -> return snvJobResult }
+
         pbsService.metaClass.executeJob = { Realm realm, String text, String qsubParameters ->
             throw new RuntimeException("This area should not be reached since the annotation job shall not run")
         }
@@ -200,7 +217,7 @@ RUN_FILTER_VCF=1
 CHROMOSOME_INDICES=( {1..21} XY)
 """
 
-        snvAnnotationJob.metaClass.findLatestResultForSameBamFiles = { SnvCallingStep step -> return null }
+        snvCallingInstance2.metaClass.findLatestResultForSameBamFiles = { SnvCallingStep step -> return null }
         assert (
         shouldFail(RuntimeException, { snvAnnotationJob.maybeSubmit(snvCallingInstance2) })
         ==
@@ -266,6 +283,14 @@ CHROMOSOME_INDICES=( {1..21} XY)
     void testValidate() {
         SnvCallingStep annotationStep = SnvCallingStep.SNV_ANNOTATION
 
+        SnvJobResult result = new SnvJobResult(
+                step: SnvCallingStep.SNV_ANNOTATION,
+                snvCallingInstance: snvCallingInstance2,
+                externalScript: externalScript_Annotation,
+                inputResult: snvJobResultInput
+        )
+        assert result.save()
+
         File configFile = testData.createConfigFileWithContentInFileSystem(
             snvCallingInstance2.configFilePath.absoluteDataManagementPath,
             CONFIGURATION)
@@ -294,6 +319,14 @@ CHROMOSOME_INDICES=( {1..21} XY)
 
     @Test
     void testValidate_FileNotReadable() {
+        SnvJobResult result = new SnvJobResult(
+                step: SnvCallingStep.SNV_ANNOTATION,
+                snvCallingInstance: snvCallingInstance2,
+                externalScript: externalScript_Annotation,
+                inputResult: snvJobResultInput
+        )
+        assert result.save()
+
         File configFile = testData.createConfigFileWithContentInFileSystem(
             snvCallingInstance2.configFilePath.absoluteDataManagementPath,
             CONFIGURATION)

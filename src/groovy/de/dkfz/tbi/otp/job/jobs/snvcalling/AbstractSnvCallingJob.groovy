@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.job.jobs.snvcalling
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingStep
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvJobResult
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvProcessingStates
@@ -28,6 +29,8 @@ abstract class AbstractSnvCallingJob extends AbstractOtpJob {
     LsdfFilesService lsdfFilesService
     @Autowired
     LinkFileUtils linkFileUtils
+    @Autowired
+    SnvCallingService snvCallingService
 
     abstract SnvCallingStep getStep()
     abstract SnvCallingStep getPreviousStep()
@@ -222,9 +225,9 @@ rm ${configFileInStagingDirectory}
     }
 
     protected void linkPreviousResults(SnvCallingInstance instance, Realm realm) {
-        String resultFileName = step.getResultFileName(instance.individual)
-        File previousResult = new File(instance.previousFinishedInstance.snvInstancePath.absoluteDataManagementPath, resultFileName)
-        File currentResult = new File(instance.snvInstancePath.absoluteDataManagementPath, resultFileName)
+        SnvJobResult previousJobResult = snvCallingService.getLatestValidJobResultForStep(instance, step)
+        File previousResult = previousJobResult.getResultFilePath().absoluteDataManagementPath
+        File currentResult = new File(instance.snvInstancePath.absoluteDataManagementPath, previousResult.name)
         linkFileUtils.createAndValidateLinks([(previousResult): currentResult], realm)
     }
 }

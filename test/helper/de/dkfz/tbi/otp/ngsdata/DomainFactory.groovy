@@ -1048,6 +1048,16 @@ class DomainFactory {
         return new SnvCallingInstance(properties)
     }
 
+    public static SnvCallingInstance createSnvCallingInstanceBasedOnPreviousSnvCallingInstance(SnvCallingInstance snvCallingInstance, Map properties = [:]) {
+        return createSnvCallingInstance([
+                instanceName: "instance_${counter++}",
+                samplePair: snvCallingInstance.samplePair,
+                sampleType1BamFile: snvCallingInstance.sampleType1BamFile,
+                sampleType2BamFile: snvCallingInstance.sampleType2BamFile,
+                config: snvCallingInstance.config,
+        ] + properties).save(flush: true)
+    }
+
     public static ProcessingStep createAndSaveProcessingStep(ProcessParameterObject processParameterObject = null) {
         return createAndSaveProcessingStep("de.dkfz.tbi.otp.test.job.jobs.NonExistentDummyJob", processParameterObject)
     }

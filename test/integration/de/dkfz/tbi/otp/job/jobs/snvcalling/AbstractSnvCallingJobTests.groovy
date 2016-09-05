@@ -22,8 +22,7 @@ import static de.dkfz.tbi.otp.utils.CreateSNVFileHelper.createMD5SUMFile
 import static de.dkfz.tbi.otp.utils.CreateSNVFileHelper.createResultFile
 import static org.junit.Assert.assertEquals
 
-/**
- */
+
 class AbstractSnvCallingJobTests {
 
     @Autowired

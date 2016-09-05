@@ -124,4 +124,28 @@ class SnvCallingService {
         instance.updateProcessingState(SnvProcessingStates.FAILED)
     }
 
+    SnvJobResult getLatestValidJobResultForStep(SnvCallingInstance instance, SnvCallingStep step) {
+        SnvJobResult snvJobResult = SnvJobResult.createCriteria().get {
+            snvCallingInstance {
+                eq('samplePair', instance.samplePair)
+            }
+            eq('step', step)
+            eq('withdrawn', false)
+            eq('processingState', SnvProcessingStates.FINISHED)
+            order("id", "desc")
+            maxResults(1)
+        }
+
+        assert snvJobResult : "There is no valid previous result file for sample pair ${instance.samplePair} and step ${step}."
+
+        AbstractMergedBamFile firstBamFile = snvJobResult.sampleType1BamFile
+        AbstractMergedBamFile secondBamFile = snvJobResult.sampleType2BamFile
+
+        assert firstBamFile  == instance.sampleType1BamFile : "The first bam file has changed between instance ${snvJobResult.snvCallingInstance} and ${instance}."
+        assert secondBamFile == instance.sampleType2BamFile : "The second bam file has changed between instance ${snvJobResult.snvCallingInstance} and ${instance}."
+        assert !firstBamFile.withdrawn  : "The bam file ${firstBamFile} of the previous result is withdrawn."
+        assert !secondBamFile.withdrawn : "The bam file ${secondBamFile} of the previous result is withdrawn."
+
+        return snvJobResult
+    }
 }

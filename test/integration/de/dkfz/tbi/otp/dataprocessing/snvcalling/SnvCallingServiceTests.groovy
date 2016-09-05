@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
@@ -556,5 +557,113 @@ class SnvCallingServiceTests {
         setThresholds(processedMergedBamFile)
         processedMergedBamFile.workPackage.bamFileInProjectFolder = processedMergedBamFile
         assert processedMergedBamFile.workPackage.save(flush: true)
+    }
+
+
+    @Test
+    void testGetLatestValidJobResultForStep_PreviousResultsIsValid_AllFine() {
+        SnvJobResult snvJobResult = DomainFactory.createSnvJobResultWithRoddyBamFiles()
+        SnvCallingInstance instance = DomainFactory.createSnvCallingInstanceBasedOnPreviousSnvCallingInstance(snvJobResult.snvCallingInstance)
+
+        assert snvJobResult == snvCallingService.getLatestValidJobResultForStep(instance, snvJobResult.step)
+    }
+
+    @Test
+    void testGetLatestValidJobResultForStep_PreviousPreviousResultsIsInValid_AllFine() {
+        SnvJobResult snvJobResult = DomainFactory.createSnvJobResultWithRoddyBamFiles()
+        DomainFactory.createSnvJobResult(
+                step: snvJobResult.step,
+                withdrawn: true,
+                externalScript: snvJobResult.externalScript,
+                chromosomeJoinExternalScript: snvJobResult.chromosomeJoinExternalScript,
+                snvCallingInstance: DomainFactory.createSnvCallingInstanceBasedOnPreviousSnvCallingInstance(snvJobResult.snvCallingInstance),
+
+        )
+        SnvCallingInstance instance = DomainFactory.createSnvCallingInstanceBasedOnPreviousSnvCallingInstance(snvJobResult.snvCallingInstance)
+
+        assert snvJobResult == snvCallingService.getLatestValidJobResultForStep(instance, snvJobResult.step)
+    }
+
+    @Test
+    void testGetLatestValidJobResultForStep_NoPreviousInstanceExist_ShouldFail() {
+        SnvCallingInstance instance = DomainFactory.createSnvInstanceWithRoddyBamFiles()
+
+        TestCase.shouldFailWithMessageContaining(AssertionError, 'There is no valid previous result file for sample pair') {
+            snvCallingService.getLatestValidJobResultForStep(instance, SnvCallingStep.CALLING)
+        }
+    }
+
+    @Test
+    void testGetLatestValidJobResultForStep_PreviousResultIsWithdrawn_ShouldFail() {
+        SnvJobResult snvJobResult = DomainFactory.createSnvJobResultWithRoddyBamFiles([withdrawn: true])
+        SnvCallingInstance instance = DomainFactory.createSnvCallingInstanceBasedOnPreviousSnvCallingInstance(snvJobResult.snvCallingInstance)
+
+        TestCase.shouldFailWithMessageContaining(AssertionError, 'There is no valid previous result file for sample pair') {
+            snvCallingService.getLatestValidJobResultForStep(instance, SnvCallingStep.CALLING)
+        }
+    }
+
+    @Test
+    void testGetLatestValidJobResultForStep_PreviousResultIsFailed_ShouldFail() {
+        SnvJobResult snvJobResult = DomainFactory.createSnvJobResultWithRoddyBamFiles([processingState: SnvProcessingStates.IN_PROGRESS])
+        SnvCallingInstance instance = DomainFactory.createSnvCallingInstanceBasedOnPreviousSnvCallingInstance(snvJobResult.snvCallingInstance)
+
+        TestCase.shouldFailWithMessageContaining(AssertionError, 'There is no valid previous result file for sample pair') {
+            snvCallingService.getLatestValidJobResultForStep(instance, SnvCallingStep.CALLING)
+        }
+    }
+
+    @Test
+    void testGetLatestValidJobResultForStep_BamFile1Changed_ShouldFail() {
+        SnvJobResult snvJobResult = DomainFactory.createSnvJobResultWithRoddyBamFiles()
+        SnvCallingInstance instance = DomainFactory.createSnvCallingInstanceBasedOnPreviousSnvCallingInstance(snvJobResult.snvCallingInstance, [
+                sampleType1BamFile: DomainFactory.createRoddyBamFile([
+                        workPackage: snvJobResult.sampleType1BamFile.mergingWorkPackage,
+                        config: snvJobResult.sampleType1BamFile.config,
+                ])
+        ])
+
+        TestCase.shouldFailWithMessageContaining(AssertionError, 'The first bam file has changed between instance') {
+            snvCallingService.getLatestValidJobResultForStep(instance, SnvCallingStep.CALLING)
+        }
+    }
+
+    @Test
+    void testGetLatestValidJobResultForStep_BamFile2Changed_ShouldFail() {
+        SnvJobResult snvJobResult = DomainFactory.createSnvJobResultWithRoddyBamFiles()
+        SnvCallingInstance instance = DomainFactory.createSnvCallingInstanceBasedOnPreviousSnvCallingInstance(snvJobResult.snvCallingInstance, [
+                sampleType2BamFile: DomainFactory.createRoddyBamFile([
+                        workPackage: snvJobResult.sampleType2BamFile.mergingWorkPackage,
+                        config: snvJobResult.sampleType2BamFile.config,
+                ])
+        ])
+
+        TestCase.shouldFailWithMessageContaining(AssertionError, 'The second bam file has changed between instance') {
+            snvCallingService.getLatestValidJobResultForStep(instance, SnvCallingStep.CALLING)
+        }
+    }
+
+    @Test
+    void testGetLatestValidJobResultForStep_BamFile1Withdrawn_ShouldFail() {
+        SnvJobResult snvJobResult = DomainFactory.createSnvJobResultWithRoddyBamFiles()
+        SnvCallingInstance instance = DomainFactory.createSnvCallingInstanceBasedOnPreviousSnvCallingInstance(snvJobResult.snvCallingInstance)
+        snvJobResult.sampleType1BamFile.withdrawn = true
+        assert snvJobResult.sampleType1BamFile.save(flush: true)
+
+        TestCase.shouldFailWithMessageContaining(AssertionError, 'of the previous result is withdrawn') {
+            snvCallingService.getLatestValidJobResultForStep(instance, SnvCallingStep.CALLING)
+        }
+    }
+
+    @Test
+    void testGetLatestValidJobResultForStep_BamFile2Withdrawn_ShouldFail() {
+        SnvJobResult snvJobResult = DomainFactory.createSnvJobResultWithRoddyBamFiles()
+        SnvCallingInstance instance = DomainFactory.createSnvCallingInstanceBasedOnPreviousSnvCallingInstance(snvJobResult.snvCallingInstance)
+        snvJobResult.sampleType2BamFile.withdrawn = true
+        assert snvJobResult.sampleType2BamFile.save(flush: true)
+
+        TestCase.shouldFailWithMessageContaining(AssertionError, 'of the previous result is withdrawn') {
+            snvCallingService.getLatestValidJobResultForStep(instance, SnvCallingStep.CALLING)
+        }
     }
 }
