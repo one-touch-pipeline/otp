@@ -45,6 +45,18 @@ class TrackingService {
         setStarted(findAllOtrsTickets(seqTracks), step)
     }
 
+    public Set<OtrsTicket> findAllOtrsTicketsAndLockThem(Collection<SeqTrack> seqTracks) {
+        Set<OtrsTicket> otrsTickets = findAllOtrsTickets(seqTracks)
+        otrsTickets.sort { //ensure order to avoid dead locks
+            it.id
+        }.each {
+            //create write lock on object and refresh content
+            it.lock()
+            it.refresh()
+        }
+        return otrsTickets
+    }
+
     public Set<OtrsTicket> findAllOtrsTickets(Collection<SeqTrack> seqTracks) {
         Set<OtrsTicket> otrsTickets = [] as Set
         //Doesn't work as a single Query, probably a Unit test problem
@@ -72,7 +84,7 @@ class TrackingService {
 
     public void processFinished(Set<SeqTrack> seqTracks, OtrsTicket.ProcessingStep step) {
         SamplePairDiscovery samplePairDiscovery = new SamplePairDiscovery()
-        for (OtrsTicket ticket : findAllOtrsTickets(seqTracks)) {
+        for (OtrsTicket ticket : findAllOtrsTicketsAndLockThem(seqTracks)) {
             setFinishedTimestampsAndNotify(ticket, samplePairDiscovery)
         }
     }
