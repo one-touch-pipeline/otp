@@ -29,8 +29,20 @@ class StatisticController {
         }
 
         List data = statisticService.laneCountPerDay(projects)
-        render statisticService.laneCountPerDate(data) as JSON
+        render statisticService.dataPerDate(data) as JSON
     }
+
+    JSON gigaBasesPerDay(ProjectGroupCommand command) {
+        List<Project> projects = null
+        if (command.projectGroupName && command.projectGroupName != "OTP") {
+            ProjectGroup projectGroup = projectGroupService.projectGroupByName(command.projectGroupName)
+            projects = projectService.projectByProjectGroup(projectGroup)
+        }
+
+        List data = statisticService.gigaBasesPerDay(projects)
+        render statisticService.dataPerDate(data) as JSON
+    }
+
 
     JSON sampleCountPerSequenceType(ProjectGroupCommand command) {
         ProjectGroup projectGroup
@@ -182,7 +194,7 @@ class StatisticController {
     JSON laneCountPerDateByProject(ProjectCommand command) {
         Project project = projectService.getProjectByName(command.projectName)
         List data = statisticService.laneCountPerDay([project])
-        render statisticService.laneCountPerDate(data) as JSON
+        render statisticService.dataPerDate(data) as JSON
     }
 }
 

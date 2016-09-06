@@ -99,6 +99,45 @@ SELECT DISTINCT seq.seq_track_id
         return laneCountPerDay
     }
 
+    public List gigaBasesPerDay(List<Project> projectList) {
+        List<Project> projects = projectList ?: Project.findAll()
+
+        def sql = new Sql(dataSource)
+
+        String query = '''
+SELECT
+    date_part('year', seq.date_created)::int as year,
+    date_part('month', seq.date_created)::int as month,
+    date_part('day', seq.date_created)::int as day,
+    (sum(seq.n_base_pairs) / 10e9)::int as gigaBases
+FROM
+    sequences as seq
+WHERE
+    seq.seq_track_id NOT IN (
+        SELECT DISTINCT seq.seq_track_id
+        FROM sequences as seq
+        JOIN data_file as df ON seq.seq_track_id = df.seq_track_id
+        WHERE
+            df.file_withdrawn != false
+    ) AND seq.project_id IN (''' + projects*.id.join(", ") + ''')
+ GROUP BY
+    date_part('year', seq.date_created),
+    date_part('month', seq.date_created),
+    date_part('day', seq.date_created)
+ ORDER BY
+    date_part('year', seq.date_created),
+    date_part('month', seq.date_created),
+    date_part('day', seq.date_created)
+'''
+        List gigaBasesPerDay = []
+
+        sql.eachRow(query) {
+            gigaBasesPerDay << ["${it.year}-${it.month}-${it.day}" as String, it.gigaBases]
+        }
+
+        return gigaBasesPerDay
+    }
+
     public List projectCountPerSequenceType(ProjectGroup projectGroup) {
         List seq = Sequence.withCriteria {
             projections {
@@ -139,10 +178,10 @@ SELECT DISTINCT seq.seq_track_id
     }
 
     /**
-     * Convert creation date of lanes to a format to be used for scatter plots
+     * Convert creation date of data to a format to be used for scatter plots
      * @param data A list containing lists with two elements, where the first element is a date and the second element is an integer
      */
-    public Map laneCountPerDate(List data) {
+    public Map dataPerDate(List data) {
         List<Integer> values = []
 
         YearMonth firstDate = new YearMonth(data[0][0])

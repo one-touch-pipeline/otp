@@ -27,6 +27,6 @@ class InfoController {
 
     JSON laneCountPerDate() {
         List data = statisticService.laneCountPerDay(null)
-        render statisticService.laneCountPerDate(data) as JSON
+        render statisticService.dataPerDate(data) as JSON
     }
 }

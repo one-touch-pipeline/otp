@@ -17,6 +17,10 @@ $.otp.graph.overview = {
                + projectGroup, function () {
                 $.otp.graph.overview.laneCountPerDate(this, projectGroup);
             });
+        RGraph.AJAX(url + '/statistic/gigaBasesPerDay?projectGroupName='
+            + projectGroup, function () {
+            $.otp.graph.overview.gigaBasesPerDay(this, projectGroup);
+        });
         RGraph.AJAX(url + '/statistic/sampleCountPerSequenceType?projectGroupName='
                 + projectGroup, $.otp.graph.overview.sampleCountPerSequenceType);
         RGraph.AJAX(url + '/statistic/patientsCountPerSequenceType?projectGroupName='
@@ -72,6 +76,33 @@ $.otp.graph.overview = {
         scatter2.Set('chart.text.size', 8);
         scatter2.Set('chart.ticksize', 6);
         scatter2.Set('chart.title', 'Number of sequence lanes registered in ' + project);
+        scatter2.Set('chart.title.color', 'black');
+        scatter2.Set('chart.title.size', 11);
+        scatter2.Set('chart.xmax', json.daysCount);
+        scatter2.Set('chart.background.grid.autofit.numvlines', json.labels.length);
+        scatter2.Set('chart.text.angle', 45);
+        scatter2.Set('chart.gutter.bottom', 100);
+        scatter2.Set('chart.gutter.top', 110);
+        scatter2.Set('chart.gutter.left', 70);
+        scatter2.Set('chart.gutter.right', 70);
+        scatter2.Draw();
+    },
+
+    gigaBasesPerDay : function(data, project) {
+        "use strict";
+        var json = JSON.parse(data.responseText);
+        RGraph.Reset(document.getElementById('gigaBasesPerDay'));
+        var scatter2 = new RGraph.Scatter('gigaBasesPerDay', json.data);
+        scatter2.Set('chart.defaultcolor', '#1E5CA4');
+        scatter2.Set('chart.labels', json.labels);
+        scatter2.Set('chart.ylabels', true);
+        scatter2.Set('chart.tickmarks', 'circle');
+        scatter2.Set('chart.xmin', 1);
+        scatter2.Set('chart.ymin', 0);
+        scatter2.Set('chart.title.y', 40);
+        scatter2.Set('chart.text.size', 8);
+        scatter2.Set('chart.ticksize', 6);
+        scatter2.Set('chart.title', 'giga bases registered in ' + project);
         scatter2.Set('chart.title.color', 'black');
         scatter2.Set('chart.title.size', 11);
         scatter2.Set('chart.xmax', json.daysCount);
