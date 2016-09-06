@@ -55,6 +55,7 @@
             seqTrack.seqTrack instanceof ChipSeqSeqTrack ? seqTrack.seqTrack.antibodyTarget.name : null,
             seqTrack.seqTrack instanceof ChipSeqSeqTrack ? seqTrack.seqTrack.antibody : null,
             seqTrack.seqTrack.libraryPreparationKit?.name,
+            seqTrack.seqTrack.normalizedLibraryName ? "${g.message(code: "metadataImport.details.normalizedLibraryName")} ${seqTrack.seqTrack.normalizedLibraryName}" : null,
             seqTrack.seqTrack.pipelineVersion?.displayName,
           ].findAll().join(', ')}
           <ul>
