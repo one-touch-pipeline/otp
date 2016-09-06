@@ -1,8 +1,8 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
-import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddy.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.scheduler.*
@@ -15,8 +15,6 @@ import java.util.regex.*
 
 import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.*
 
-import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
-
 /**
  * class for roddy jobs that handle failed or not finished cluster jobs, analyse them and provide
  * information about their failure for {@link AbstractMaybeSubmitWaitValidateJob}
@@ -24,7 +22,7 @@ import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
 abstract class AbstractRoddyJob extends AbstractMaybeSubmitWaitValidateJob{
 
     public static final String NO_STARTED_JOBS_MESSAGE = '\nThere were no started jobs, the execution directory will be removed.\n'
-    public static final Pattern roddyExecutionStoreDirectoryPattern = Pattern.compile(/(?:^|\n)Creating\sthe\sfollowing\sexecution\sdirectory\sto\sstore\sinformation\sabout\sthis\sprocess:\s*\n\s*(\/.*\/${RoddyBamFile.RODDY_EXECUTION_DIR_PATTERN})(?:\n|$)/)
+    public static final Pattern roddyExecutionStoreDirectoryPattern = Pattern.compile(/(?:^|\n)Creating\sthe\sfollowing\sexecution\sdirectory\sto\sstore\sinformation\sabout\sthis\sprocess:\s*\n\s*(\/.*\/${RoddySnvCallingInstance.RODDY_EXECUTION_DIR_PATTERN})(?:\n|$)/)
 
     @Autowired
     ExecuteRoddyCommandService executeRoddyCommandService
@@ -41,7 +39,7 @@ abstract class AbstractRoddyJob extends AbstractMaybeSubmitWaitValidateJob{
     static final Pattern roddyOutputPattern = Pattern.compile(/^\s*(?:Running|Rerun)\sjob\s(.*_(\S+))\s=>\s(\S+)\s*$/)
 
     @Override
-    protected final NextAction maybeSubmit() throws Throwable {
+    protected final AbstractMultiJob.NextAction maybeSubmit() throws Throwable {
         Realm.withTransaction {
             final RoddyResult roddyResult = getRefreshedProcessParameterObject()
             final Realm realm = configService.getRealmDataManagement(roddyResult.project)
@@ -55,7 +53,7 @@ abstract class AbstractRoddyJob extends AbstractMaybeSubmitWaitValidateJob{
                 submittedClusterJobs.each {
                     threadLog?.info("Log file: ${getLogFilePath(it)}" )
                 }
-                return NextAction.WAIT_FOR_CLUSTER_JOBS
+                return AbstractMultiJob.NextAction.WAIT_FOR_CLUSTER_JOBS
             } else {
                 threadLog?.info 'Roddy has not submitted any cluster jobs. Running validate().'
                 try {
@@ -63,7 +61,7 @@ abstract class AbstractRoddyJob extends AbstractMaybeSubmitWaitValidateJob{
                 } catch (Throwable t) {
                     throw new RuntimeException('validate() failed after Roddy has not submitted any cluster jobs.', t)
                 }
-                return NextAction.SUCCEED
+                return AbstractMultiJob.NextAction.SUCCEED
             }
         }
     }

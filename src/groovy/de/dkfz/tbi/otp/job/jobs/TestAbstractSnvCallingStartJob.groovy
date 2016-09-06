@@ -29,4 +29,9 @@ class TestAbstractSnvCallingStartJob extends AbstractSnvCallingStartJob {
     protected Class<? extends ConfigPerProject> getConfigClass() {
         throw new UnsupportedOperationException()
     }
+
+    @Override
+    protected Class<? extends SnvCallingInstance> getInstanceClass() {
+        throw new UnsupportedOperationException()
+    }
 }

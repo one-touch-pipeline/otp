@@ -69,6 +69,7 @@ public class AbstractSnvCallingStartJobTests extends GroovyScriptAwareTestCase i
             testAbstractSnvCallingStartJob.metaClass.getConfigClass = { -> return SnvConfig}
             testAbstractSnvCallingStartJob.metaClass.getConfig = { SamplePair samplePair -> return snvConfig}
             testAbstractSnvCallingStartJob.metaClass.getInstanceName = { ConfigPerProject config -> return instanceName}
+            testAbstractSnvCallingStartJob.metaClass.getInstanceClass = { -> return SnvCallingInstance.class }
 
 
             SnvCallingInstanceTestData.createOrFindExternalScript()

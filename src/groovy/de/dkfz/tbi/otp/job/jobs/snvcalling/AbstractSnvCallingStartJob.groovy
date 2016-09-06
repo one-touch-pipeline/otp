@@ -28,7 +28,7 @@ abstract class AbstractSnvCallingStartJob extends AbstractStartJobImpl {
                 AbstractMergedBamFile sampleType1BamFile = samplePair.mergingWorkPackage1.processableBamFileInProjectFolder
                 AbstractMergedBamFile sampleType2BamFile = samplePair.mergingWorkPackage2.processableBamFileInProjectFolder
 
-                SnvCallingInstance snvCallingInstance = new SnvCallingInstance(
+                SnvCallingInstance snvCallingInstance = getInstanceClass().newInstance(
                         samplePair: samplePair,
                         instanceName: getInstanceName(config),
                         config: config,
@@ -49,4 +49,6 @@ abstract class AbstractSnvCallingStartJob extends AbstractStartJobImpl {
     protected abstract ConfigPerProject getConfig(SamplePair samplePair)
     protected abstract String getInstanceName(ConfigPerProject config)
     protected abstract Class<? extends ConfigPerProject> getConfigClass()
+
+    protected abstract Class<? extends SnvCallingInstance> getInstanceClass()
 }

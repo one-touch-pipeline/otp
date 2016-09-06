@@ -24,19 +24,14 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
     static final String QUALITY_CONTROL_JSON_FILE_NAME = "qualitycontrol.json"
     static final String QUALITY_CONTROL_TARGET_EXTRACT_JSON_FILE_NAME = "qualitycontrol_targetExtract.json"
 
-    static final String RODDY_EXECUTION_STORE_DIR = "roddyExecutionStore"
-
     static final String MERGED_DIR = "merged"
 
     static final String RUN_PREFIX = "run"
 
-    static final String RODDY_EXECUTION_DIR_PATTERN = /exec_\d{6}_\d{8,9}_.+_.+/
-
     static final String METADATATABLE_FILE = "metadataTable.tsv"
 
-    RoddyBamFile baseBamFile
 
-    List<String> roddyExecutionDirectoryNames = []
+    RoddyBamFile baseBamFile
 
     Set<SeqTrack> seqTracks
 
@@ -324,10 +319,6 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
         return new File(baseDirectory, RODDY_EXECUTION_STORE_DIR)
     }
 
-    File getWorkExecutionStoreDirectory() {
-        return new File(workDirectory, RODDY_EXECUTION_STORE_DIR)
-    }
-
     List<File> getFinalExecutionDirectories() {
         this.roddyExecutionDirectoryNames.collect {
             new File(this.finalExecutionStoreDirectory, it)
@@ -340,27 +331,6 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
         }
     }
 
-    /**
-     @returns subdirectory of {@link #getWorkExecutionStoreDirectory} corresponding to the latest roddy call
-     */
-    // Example:
-    // exec_150625_102449388_SOMEUSER_WGS
-    // exec_yyMMdd_HHmmssSSS_user_analysis
-    File getLatestWorkExecutionDirectory() {
-        if (!roddyExecutionDirectoryNames) {
-            throw new RuntimeException("No roddyExecutionDirectoryNames have been stored in the database for ${this}.")
-        }
-
-        String latestDirectoryName = roddyExecutionDirectoryNames.last()
-        assert latestDirectoryName == roddyExecutionDirectoryNames.max()
-        assert latestDirectoryName ==~ RODDY_EXECUTION_DIR_PATTERN
-
-        File latestWorkDirectory = new File(workExecutionStoreDirectory, latestDirectoryName)
-        WaitingFileUtils.waitUntilExists(latestWorkDirectory)
-        assert latestWorkDirectory.isDirectory()
-
-        return latestWorkDirectory
-    }
 
     File getFinalBamFile() {
         return new File(baseDirectory, this.bamFileName)

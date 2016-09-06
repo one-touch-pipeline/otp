@@ -35,4 +35,10 @@ class RoddySnvCallingStartJob extends AbstractSnvCallingStartJob {
     protected Class<? extends ConfigPerProject> getConfigClass() {
         return RoddyWorkflowConfig
     }
+
+    @Override
+    protected Class<? extends SnvCallingInstance> getInstanceClass() {
+        return RoddySnvCallingInstance
+    }
+
 }

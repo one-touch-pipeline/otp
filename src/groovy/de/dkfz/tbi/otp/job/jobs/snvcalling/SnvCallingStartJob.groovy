@@ -34,4 +34,9 @@ class  SnvCallingStartJob extends AbstractSnvCallingStartJob {
     protected Class<? extends ConfigPerProject> getConfigClass() {
         return SnvConfig
     }
+
+    @Override
+    protected Class<? extends SnvCallingInstance> getInstanceClass() {
+        return SnvCallingInstance
+    }
 }
