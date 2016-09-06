@@ -13,7 +13,7 @@ enum SnvCallingStep {
     /**
      * Running SamTools to call SNVs
      */
-    CALLING({ Individual individual, String chromosomeName ->
+    CALLING({ Individual individual, String chromosomeName = null ->
         if (chromosomeName != null) {
             // if the chromosome name is given, the chromosome file name is created
             assert !chromosomeName.empty

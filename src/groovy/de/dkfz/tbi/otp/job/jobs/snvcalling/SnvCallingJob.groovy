@@ -43,4 +43,9 @@ class SnvCallingJob extends AbstractSnvCallJoinJob implements AutoRestartableJob
             LsdfFilesService.ensureFileIsReadableAndNotEmpty(it)
         }
     }
+
+    @Override
+    protected void linkPreviousResults(SnvCallingInstance instance, Realm realm) {
+        // The result file will be linked in the SNV Joining job
+    }
 }

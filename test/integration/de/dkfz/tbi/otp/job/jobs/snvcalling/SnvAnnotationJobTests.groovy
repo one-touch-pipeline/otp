@@ -249,7 +249,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
             File bamFile = snvAnnotationJob.getExistingBamFilePath(snvCallingInstance2.sampleType1BamFile)
 
             String commandLinkPart = "# BEGIN ORIGINAL SCRIPT\n" +
-                    "ln -s ${inputFile.path} ${inputFileCopy.path};"
+                    "ln -sf ${inputFile.path} ${inputFileCopy.path};"
 
             String commandScriptPart = "/tmp/scriptLocation/annotation.sh"
 

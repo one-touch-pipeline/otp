@@ -75,7 +75,7 @@ class SnvAnnotationJob extends AbstractSnvCallingJob implements AutoRestartableJ
                     "'}"
             final StringBuilder script = new StringBuilder()
             if (inputFileCopy.absolutePath != inputResultFile.absolutePath) {
-                script << "ln -s ${inputResultFile.absolutePath} ${inputFileCopy.absolutePath}; "
+                script << "ln -sf ${inputResultFile.absolutePath} ${inputFileCopy.absolutePath}; "
             }
             script << "${ensureFileHasExpectedSizeScript(sampleType1BamFile, instance.sampleType1BamFile.fileSize)} "
             script << "${ensureFileDoesNotExistScript(annotationResultFile)} "

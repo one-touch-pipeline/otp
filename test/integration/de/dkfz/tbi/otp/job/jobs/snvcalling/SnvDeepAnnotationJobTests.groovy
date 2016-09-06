@@ -66,10 +66,11 @@ class SnvDeepAnnotationJobTests {
     SnvDeepAnnotationJob snvDeepAnnotationJob
     SnvCallingInstance snvCallingInstance1
     SnvCallingInstance snvCallingInstance2
-    SnvJobResult snvJobResult_Annotation
-    SnvJobResult snvJobResult_DeepAnnotation
+    SnvJobResult snvJobResult_Annotation2
+    SnvJobResult snvJobResult_DeepAnnotation1
     ProcessedMergedBamFile processedMergedBamFile1
     SnvCallingInstanceTestData testData
+    ExternalScript externalScript_DeepAnnotation
 
     public static final String SOME_INSTANCE_NAME = "2014-09-01_15h32"
     public static final String OTHER_INSTANCE_NAME = "2014-09-23_13h37"
@@ -106,6 +107,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
             sampleType1BamFile: processedMergedBamFile1,
             sampleType2BamFile: processedMergedBamFile2,
             instanceName      : SOME_INSTANCE_NAME,
+            processingState: SnvProcessingStates.FINISHED,
         ])
         assert snvCallingInstance1.save()
 
@@ -132,7 +134,27 @@ CHROMOSOME_INDICES=( {1..21} X Y)
                 )
         assert externalScript_Calling.save()
 
-        SnvJobResult snvJobResult_Calling = new SnvJobResult(
+        SnvJobResult snvJobResult_Calling1 = new SnvJobResult(
+                step: SnvCallingStep.CALLING,
+                snvCallingInstance: snvCallingInstance1,
+                externalScript: externalScript_Calling,
+                processingState: SnvProcessingStates.FINISHED,
+                chromosomeJoinExternalScript: testData.externalScript_Joining,
+                fileSize: 1234l,
+                md5sum: "a841c64c5825e986c4709ac7298e9366",
+        )
+        assert snvJobResult_Calling1.save()
+
+        SnvJobResult snvJobResult_Annotation1 = new SnvJobResult(
+                step: SnvCallingStep.SNV_ANNOTATION,
+                snvCallingInstance: snvCallingInstance1,
+                externalScript: externalScript_Annotation,
+                processingState: SnvProcessingStates.FINISHED,
+                inputResult: snvJobResult_Calling1,
+        )
+        assert snvJobResult_Annotation1.save()
+
+        SnvJobResult snvJobResult_Calling2 = new SnvJobResult(
                 step: SnvCallingStep.CALLING,
                 snvCallingInstance: snvCallingInstance2,
                 externalScript: externalScript_Calling,
@@ -141,18 +163,18 @@ CHROMOSOME_INDICES=( {1..21} X Y)
                 fileSize: 1234l,
                 md5sum: "a841c64c5825e986c4709ac7298e9366",
                 )
-        assert snvJobResult_Calling.save()
+        assert snvJobResult_Calling2.save()
 
-        snvJobResult_Annotation = new SnvJobResult(
+        snvJobResult_Annotation2 = new SnvJobResult(
                 step: SnvCallingStep.SNV_ANNOTATION,
                 snvCallingInstance: snvCallingInstance2,
                 externalScript: externalScript_Annotation,
                 processingState: SnvProcessingStates.FINISHED,
-                inputResult: snvJobResult_Calling,
+                inputResult: snvJobResult_Calling2,
                 )
-        assert snvJobResult_Annotation.save()
+        assert snvJobResult_Annotation2.save()
 
-        ExternalScript externalScript_DeepAnnotation = new ExternalScript(
+        externalScript_DeepAnnotation = new ExternalScript(
                 scriptIdentifier: SnvCallingStep.SNV_DEEPANNOTATION.externalScriptIdentifier,
                 scriptVersion: 'v1',
                 filePath: "/tmp/scriptLocation/deepAnnotation.sh",
@@ -160,13 +182,16 @@ CHROMOSOME_INDICES=( {1..21} X Y)
                 )
         externalScript_DeepAnnotation.save()
 
-        snvJobResult_DeepAnnotation = new SnvJobResult(
+        snvJobResult_DeepAnnotation1 = new SnvJobResult(
                 step: SnvCallingStep.SNV_DEEPANNOTATION,
                 snvCallingInstance: snvCallingInstance1,
                 externalScript: externalScript_DeepAnnotation,
-                inputResult: snvJobResult_Annotation,
+                inputResult: snvJobResult_Annotation1,
+                processingState: SnvProcessingStates.FINISHED,
+                fileSize: 1234l,
+                md5sum: "a841c64c5825e986c4709ac7298e9366",
                 )
-        snvJobResult_DeepAnnotation.save()
+        snvJobResult_DeepAnnotation1.save()
 
         snvDeepAnnotationJob = applicationContext.getBean('snvDeepAnnotationJob',
                 DomainFactory.createAndSaveProcessingStep(SnvDeepAnnotationJob.toString(), snvCallingInstance2), [])
@@ -191,12 +216,6 @@ CHROMOSOME_INDICES=( {1..21} X Y)
 
     @After
     void tearDown() {
-        testData = null
-        snvJobResult_Annotation = null
-        snvJobResult_DeepAnnotation = null
-        snvCallingInstance1 = null
-        snvCallingInstance2 = null
-        processedMergedBamFile1 = null
         // Reset meta classes
         removeMetaClass(ExecutionService, executionService)
         removeMetaClass(PbsService, pbsService)
@@ -230,7 +249,11 @@ RUN_FILTER_VCF=1
 CHROMOSOME_INDICES=( {1..21} X Y)
 """
 
-        snvCallingInstance2.metaClass.findLatestResultForSameBamFiles = { SnvCallingStep step -> return snvJobResult_DeepAnnotation }
+        linkFileUtils.metaClass.createAndValidateLinks = { Map<File, File> map, Realm realm ->
+            assert map ==
+                    [(new File(snvCallingInstance1.snvInstancePath.absoluteDataManagementPath, SnvCallingStep.SNV_DEEPANNOTATION.getResultFileName(snvCallingInstance2.individual))):
+                             new File(snvCallingInstance2.snvInstancePath.absoluteDataManagementPath, SnvCallingStep.SNV_DEEPANNOTATION.getResultFileName(snvCallingInstance2.individual))]
+        }
         pbsService.metaClass.executeJob = { Realm realm, String text, String qsubParameters ->
             throw new RuntimeException("This area should not be reached since the deep annotation job shall not run")
         }
@@ -247,8 +270,12 @@ RUN_FILTER_VCF=1
 CHROMOSOME_INDICES=( {1..21} X Y)
 """
 
-        snvDeepAnnotationJob.metaClass.findLatestResultForSameBamFiles = { SnvCallingStep step -> return null }
+        snvCallingInstance2.metaClass.findLatestResultForSameBamFiles = { SnvCallingStep step -> return null }
+        assert (
         shouldFail(RuntimeException, { snvDeepAnnotationJob.maybeSubmit(snvCallingInstance2) })
+        ==
+        "This SNV workflow instance is configured not to do the SNV SNV_DEEPANNOTATION and no non-withdrawn SNV SNV_DEEPANNOTATION was done before, so subsequent jobs will have no input."
+        )
     }
 
     @Test
@@ -272,7 +299,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
             File md5sumFile = createMD5SUMFile(snvCallingInstance2, SnvCallingStep.SNV_DEEPANNOTATION)
 
             String scriptCommandPart = "# BEGIN ORIGINAL SCRIPT\n" +
-                    "cp ${snvJobResult_Annotation.getResultFilePath().absoluteDataManagementPath} ${snvFile};"
+                    "cp ${snvJobResult_Annotation2.getResultFilePath().absoluteDataManagementPath} ${snvFile};"
                     "/tmp/scriptLocation/deepAnnotation.sh; " +
                     "md5sum ${snvFile} > ${md5sumFile}"
 
@@ -294,7 +321,6 @@ CHROMOSOME_INDICES=( {1..21} X Y)
 
             return new ProcessOutput("${PBS_ID}.pbs", "", 0)
         }
-        snvCallingInstance2.metaClass.findLatestResultForSameBamFiles = { SnvCallingStep snvCallingStep -> return snvJobResult_Annotation }
 
         createResultFile(snvCallingInstance2, SnvCallingStep.SNV_ANNOTATION)
 
@@ -320,10 +346,6 @@ CHROMOSOME_INDICES=( {1..21} X Y)
 
     @Test
     void testMaybeSubmit_InputFileNotReadable() {
-        SnvCallingStep step = SnvCallingStep.SNV_DEEPANNOTATION
-
-        snvCallingInstance2.metaClass.findLatestResultForSameBamFiles = { SnvCallingStep snvCallingStep -> return snvJobResult_Annotation }
-
         LsdfFilesService.metaClass.static.ensureFileIsReadableAndNotEmpty = { File file ->
             throw new AssertionError("Not readable")
         }
@@ -340,6 +362,9 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         createResultFile(snvCallingInstance1, SnvCallingStep.SNV_DEEPANNOTATION)
         createMD5SUMFile(snvCallingInstance1, SnvCallingStep.SNV_DEEPANNOTATION)
 
+        snvJobResult_DeepAnnotation1.processingState = SnvProcessingStates.IN_PROGRESS
+        assert snvJobResult_DeepAnnotation1.save(flush: true)
+
         LsdfFilesService.metaClass.static.ensureFileIsReadableAndNotEmpty = { File file -> }
 
         snvDeepAnnotationJob.metaClass.deleteResultFileIfExists = { File resultFile, Realm realm ->
@@ -355,7 +380,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
 
         assert checkpointFile.exists()
         snvDeepAnnotationJob.validate(snvCallingInstance1)
-        assert snvJobResult_DeepAnnotation.processingState == SnvProcessingStates.FINISHED
+        assert snvJobResult_DeepAnnotation1.processingState == SnvProcessingStates.FINISHED
         assert !checkpointFile.exists()
 
         assert configFile.exists()
@@ -380,7 +405,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
 
     @Test
     void testValidate_WrongConfigurationInConfigFile() {
-        File configFile = testData.createConfigFileWithContentInFileSystem(snvCallingInstance1.configFilePath.absoluteDataManagementPath, "wrong configuration")
+        testData.createConfigFileWithContentInFileSystem(snvCallingInstance1.configFilePath.absoluteDataManagementPath, "wrong configuration")
         shouldFail(AssertionError, {snvDeepAnnotationJob.validate(snvCallingInstance1)})
     }
 

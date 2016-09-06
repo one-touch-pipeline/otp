@@ -33,6 +33,8 @@ class SnvDeepAnnotationJob extends AbstractSnvCallingJob implements AutoRestarta
     @Override
     protected NextAction maybeSubmit(final SnvCallingInstance instance) throws Throwable {
         final SnvConfig config = instance.config.evaluate()
+        final Realm realm = configService.getRealmDataProcessing(instance.project)
+
         if (config.getExecuteStepFlag(step)) {
             // Get results from the previous (annotation) step
             SnvJobResult inputResult = instance.findLatestResultForSameBamFiles(previousStep)
@@ -48,7 +50,7 @@ class SnvDeepAnnotationJob extends AbstractSnvCallingJob implements AutoRestarta
 
             final File configFileInProjectDirectory = writeConfigFile(instance)
 
-            final Realm realm = configService.getRealmDataProcessing(instance.project)
+
 
             /*
              * Input which is needed for the DeepAnnotation script. It is just for Roddy intern job system handling.
@@ -86,6 +88,7 @@ class SnvDeepAnnotationJob extends AbstractSnvCallingJob implements AutoRestarta
             return NextAction.WAIT_FOR_CLUSTER_JOBS
         } else {
             checkIfResultFilesExistsOrThrowException(instance)
+            linkPreviousResults(instance, realm)
             return NextAction.SUCCEED
         }
     }

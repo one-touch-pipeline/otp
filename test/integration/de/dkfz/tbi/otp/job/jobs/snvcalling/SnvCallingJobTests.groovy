@@ -132,7 +132,9 @@ CHROMOSOME_INDICES=( {1..21} X Y)
                 config: snvConfig,
                 sampleType1BamFile: processedMergedBamFile1,
                 sampleType2BamFile: processedMergedBamFile2,
-                samplePair: samplePair)
+                samplePair: samplePair,
+                processingState: SnvProcessingStates.FINISHED,
+        )
         assert snvCallingInstance.save()
 
         snvCallingInstance2 = DomainFactory.createSnvCallingInstance(
@@ -152,6 +154,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
                 chromosomeJoinExternalScript: externalScript_Joining,
                 fileSize: 1234l,
                 md5sum: "a841c64c5825e986c4709ac7298e9366",
+                processingState: SnvProcessingStates.FINISHED,
                 )
         assert snvJobResult.save()
 
@@ -204,11 +207,10 @@ CHROMOSOME_INDICES=( {1..21} XY)
 
         linkFileUtils.metaClass.createAndValidateLinks = { Map<File, File> map, Realm realm ->
             assert map ==
-                    [(snvCallingInstance2.snvInstancePath.absoluteDataManagementPath):
-                    new File(snvCallingInstance.snvInstancePath.absoluteDataManagementPath, SnvCallingStep.CALLING.getResultFileName(snvCallingInstance2.individual, null))]
+                    [(new File(snvCallingInstance.snvInstancePath.absoluteDataManagementPath, SnvCallingStep.CALLING.getResultFileName(snvCallingInstance2.individual))):
+                    new File(snvCallingInstance2.snvInstancePath.absoluteDataManagementPath, SnvCallingStep.CALLING.getResultFileName(snvCallingInstance2.individual))]
         }
         DomainFactory.createProcessParameter(snvCallingJob.processingStep.process, snvCallingInstance2)
-        snvCallingInstance2.metaClass.findLatestResultForSameBamFiles = { SnvCallingStep step -> return snvJobResult }
         snvCallingJob.log = new NoOpLog()
         assertEquals(NextAction.SUCCEED, snvCallingJob.maybeSubmit(snvCallingInstance2))
     }
@@ -297,12 +299,15 @@ CHROMOSOME_INDICES=( {1..21} XY)
 
     @Test
     void testValidateWithSnvCallingInput() {
-        File configFile = testData.createConfigFileWithContentInFileSystem(
+        testData.createConfigFileWithContentInFileSystem(
             snvCallingInstance.configFilePath.absoluteDataManagementPath,
             CONFIGURATION)
 
         createResultFile(snvCallingInstance, SnvCallingStep.CALLING)
         createMD5SUMFile(snvCallingInstance, SnvCallingStep.CALLING)
+
+        snvJobResult.processingState = SnvProcessingStates.IN_PROGRESS
+        assert snvJobResult.save(flush: true)
 
         LsdfFilesService.metaClass.static.ensureFileIsReadableAndNotEmpty = { File file -> return true }
 

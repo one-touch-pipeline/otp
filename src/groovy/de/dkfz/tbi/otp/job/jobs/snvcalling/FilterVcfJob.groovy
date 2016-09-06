@@ -62,7 +62,7 @@ class FilterVcfJob extends AbstractSnvCallingJob implements AutoRestartableJob {
 
             final StringBuilder script = new StringBuilder()
             if (inputFileCopy.absolutePath != inputResultFile.absolutePath) {
-                script << "ln -s ${inputResultFile.absolutePath} ${inputFileCopy.absolutePath}; "
+                script << "ln -sf ${inputResultFile.absolutePath} ${inputFileCopy.absolutePath}; "
             }
             script << "${step.getExternalScript(config.externalScriptVersion).scriptFilePath}; "
             // In case the input file had to be linked to the output folder it has to be deleted afterwards.
@@ -76,7 +76,6 @@ class FilterVcfJob extends AbstractSnvCallingJob implements AutoRestartableJob {
             return NextAction.WAIT_FOR_CLUSTER_JOBS
         } else {
             checkIfResultFilesExistsOrThrowException(instance)
-            linkPreviousResults(instance, realm)
             return NextAction.SUCCEED
         }
     }

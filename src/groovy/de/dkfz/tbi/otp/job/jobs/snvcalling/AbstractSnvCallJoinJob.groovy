@@ -37,11 +37,11 @@ abstract class AbstractSnvCallJoinJob extends AbstractSnvCallingJob {
     @Override
     protected NextAction maybeSubmit(final SnvCallingInstance instance) throws Throwable {
         final SnvConfig config = instance.config.evaluate()
+        final Realm realm = configService.getRealmDataProcessing(instance.project)
+
         if (config.getExecuteStepFlag(step)) {
             ExternalScript externalScriptJoining = ExternalScript.getLatestVersionOfScript(CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER, config.externalScriptVersion)
             SnvJobResult jobResult = createAndSaveSnvJobResult(instance, step.getExternalScript(config.externalScriptVersion), externalScriptJoining)
-
-            final Realm realm = configService.getRealmDataProcessing(instance.project)
 
             final File configFileInProjectDirectory = writeConfigFile(instance)
 
@@ -63,6 +63,7 @@ abstract class AbstractSnvCallJoinJob extends AbstractSnvCallingJob {
             return NextAction.WAIT_FOR_CLUSTER_JOBS
         } else {
             checkIfResultFilesExistsOrThrowException(instance)
+            linkPreviousResults(instance, realm)
             return NextAction.SUCCEED
         }
     }

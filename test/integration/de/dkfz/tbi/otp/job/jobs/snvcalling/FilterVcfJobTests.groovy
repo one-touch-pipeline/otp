@@ -276,7 +276,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
             File inputResultFile = inputResult.resultFilePath.absoluteDataManagementPath
 
                 String scriptCommandPart = "# BEGIN ORIGINAL SCRIPT\n" +
-                        "ln -s ${inputResultFile} ${snvCallingInstance2.snvInstancePath.absoluteDataManagementPath}/${inputResultFile.name}; "
+                        "ln -sf ${inputResultFile} ${snvCallingInstance2.snvInstancePath.absoluteDataManagementPath}/${inputResultFile.name}; "
                         "/tmp/scriptLocation/filter.sh; " +
                         "rm -f ${snvCallingInstance2.snvInstancePath.absoluteDataManagementPath}" +
                         "# END ORIGINAL SCRIPT"
