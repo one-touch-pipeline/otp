@@ -257,11 +257,10 @@ class SchedulerService {
      * @param startJob The StartJob which wants to trigger the Process
      * @param input List of Parameters provided by the StartJob for this Process.
      * @param processParameter ProcessParameter provided by the StartJob for this Process.
-     * @return true if the Process got started, false otherwise (e.g. scheduler is not active)
      */
-    public boolean createProcess(StartJob startJob, List<Parameter> input, ProcessParameter processParameter = null) {
+    public void createProcess(StartJob startJob, List<Parameter> input, ProcessParameter processParameter = null) {
         if (!schedulerActive) {
-            return false
+            throw new RuntimeException("Scheduler is disabled")
         }
         JobExecutionPlan plan = JobExecutionPlan.get(startJob.getExecutionPlan().id)
         Process process = new Process(started: new Date(),
@@ -291,7 +290,6 @@ class SchedulerService {
         } finally {
             lock.unlock()
         }
-        return true
     }
 
     /**

@@ -7,6 +7,7 @@ import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.restarting.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.testing.*
+import grails.plugin.springsecurity.SpringSecurityUtils
 import org.junit.*
 
 import java.util.concurrent.*
@@ -537,6 +538,38 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertTrue(process.finished)
         assertTrue(schedulerService.queue.isEmpty())
         assertTrue(schedulerService.running.isEmpty())
+    }
+
+    @Test
+    void testCreateProcessWithDisabledScheduler() {
+        createUserAndRoles()
+        assertTrue(schedulerService.queue.isEmpty())
+        assertTrue(schedulerService.running.isEmpty())
+        // create the JobExecutionPlan with one Job Definition
+        JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0)
+        assertNotNull(jep.save())
+        // create the StartJobDefinition for the JobExecutionPlan
+        StartJobDefinition startJob = new StartJobDefinition(name: "start", bean: "testStartJob", plan: jep)
+        assertNotNull(startJob.save())
+        jep.startJob = startJob
+        assertNotNull(jep.save())
+        // create first job definition
+        JobDefinition jobDefinition = createTestEndStateAwareJob("test", jep)
+        jep.firstJob = jobDefinition
+        assertNotNull(jep.save())
+        assertNotNull(jep.save(flush: true))
+        StartJob job = grailsApplication.mainContext.getBean("testStartJob", jep) as StartJob
+        assertNotNull(job)
+        try {
+            SpringSecurityUtils.doWithAuth("admin") {
+                schedulerService.suspendScheduler()
+            }
+            TestCase.shouldFailWithMessage(RuntimeException, "Scheduler is disabled", { schedulerService.createProcess(job, []) })
+        } finally {
+            SpringSecurityUtils.doWithAuth("admin") {
+                schedulerService.resumeScheduler()
+            }
+        }
     }
 
     @Test
