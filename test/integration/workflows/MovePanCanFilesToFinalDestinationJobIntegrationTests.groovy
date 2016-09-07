@@ -1,23 +1,19 @@
 package workflows
 
-import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
-import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.job.jobs.roddyAlignment.MovePanCanFilesToFinalDestinationJob
-import de.dkfz.tbi.otp.ngsdata.ConfigService
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.Project
-import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.utils.HelperUtils
-
-import org.joda.time.Duration
-import org.junit.Before
-import org.junit.Ignore
-import org.junit.Test
-import org.springframework.beans.factory.annotation.Autowired
+import de.dkfz.tbi.otp.job.jobs.roddyAlignment.*
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.*
+import org.joda.time.*
+import org.junit.*
+import org.springframework.beans.factory.annotation.*
 
 @Ignore
 class MovePanCanFilesToFinalDestinationJobIntegrationTests extends WorkflowTestCase {
+
+    static final int READ_COUNTS = 1
 
     @Autowired
     MovePanCanFilesToFinalDestinationJob movePanCanFilesToFinalDestinationJob
@@ -27,6 +23,18 @@ class MovePanCanFilesToFinalDestinationJobIntegrationTests extends WorkflowTestC
     @Before
     void setUp() {
         roddyBamFile = DomainFactory.createRoddyBamFile()
+        DomainFactory.createRoddyMergedBamQa(roddyBamFile, [
+                pairedRead1: READ_COUNTS,
+                pairedRead2: READ_COUNTS,
+        ])
+        roddyBamFile.seqTracks.each { SeqTrack seqTrack ->
+            seqTrack.fastqcState = SeqTrack.DataProcessingState.FINISHED
+            assert seqTrack.save(flush: true)
+            DataFile.findAllBySeqTrack(seqTrack).each { DataFile dataFile ->
+                dataFile.nReads = READ_COUNTS
+                assert dataFile.save(flush: true)
+            }
+        }
     }
 
     /*
@@ -67,6 +75,6 @@ class MovePanCanFilesToFinalDestinationJobIntegrationTests extends WorkflowTestC
 
     @Override
     Duration getTimeout() {
-        Duration.standardDays(7)
+        assert false
     }
 }
