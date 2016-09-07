@@ -49,18 +49,19 @@ class ProjectOverviewService {
                         ProcessOutput output = executeAndWait(
                                 executeRoddyCommandService.roddyGetRuntimeConfigCommand(workflowConfig, nameInConfigFile, seqType.roddyName)
                         )
+
                         if (output.exitCode != 0) {
                             throw new Exception("Alignment information can't be detected. Is Roddy with support for printidlessruntimeconfig installed?")
                         }
-                        Map<String, String> res = output.stdout.readLines().findAll({
-                            it.startsWith('declare') && it.contains("=")
-                        }).collectEntries({ String line ->
+                        Map<String, String> res = [:]
+                        output.stdout.eachLine { String line ->
                             Matcher matcher = line =~ /(?:declare +-x +(?:-i +)?)?([^ =]*)=(.*)/
-                            matcher.matches()
-                            String key = matcher.group(1)
-                            String value = matcher.group(2)
-                            [(key): value.startsWith("\"") && value.length() > 2 ? value.substring(1, value.length() - 1) : value]
-                        })
+                            if (matcher.matches()) {
+                                String key = matcher.group(1)
+                                String value = matcher.group(2)
+                                res[key] = value.startsWith("\"") && value.length() > 2 ? value.substring(1, value.length() - 1) : value
+                            }
+                        }
 
                         String bwaCommand, bwaOptions
                         if (res.get("useAcceleratedHardware") == "true") {
