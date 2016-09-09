@@ -26,7 +26,7 @@ class AbstractRoddyJobIntegrationTests extends AbstractPanCanAlignmentWorkflowTe
 
         assert shouldFail(RuntimeException) {
             execute()
-        }.contains("The exit value is not 0")
+        }  =~ /The project configuration .* could not be found./
 
         // repair
 
