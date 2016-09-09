@@ -113,7 +113,7 @@ class FastqcWorkflowTests extends WorkflowTestCase {
         }
 
         expectedResult.entries().each { ZipEntry entry ->
-            assert actualFiles[entry.name] == entry.size
+            assert actualFiles[entry.name] >= entry.size - 1 && actualFiles[entry.name] <= entry.size + 1
             actualFiles.remove(entry.name)
         }
         assert actualFiles.isEmpty()
