@@ -49,6 +49,9 @@
             </td>
             </tr>
         </table>
+             <p id="withdrawn_description">
+                 <g:message code="sequence.information.withdrawn"/>
+            </p>
         </div>
         <div class="otpDataTables">
         <otp:dataTable codes="${[

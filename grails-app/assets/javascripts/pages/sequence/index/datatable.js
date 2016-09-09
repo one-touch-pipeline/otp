@@ -94,6 +94,7 @@ $.otp.sequence = {
                         fnCallback({aaData: [], iTotalRecords: 0, iTotalDisplayRecords: 0});
                     },
                     "success": function (json) {
+                        $("#withdrawn_description").hide();
                         var i, j, rowData, row, fastQC;
                         for (i = 0; i < json.aaData.length; i += 1) {
                             row = json.aaData[i];
@@ -146,6 +147,17 @@ $.otp.sequence = {
                                 row.ilseId,
                                 row.dateCreated
                             ];
+
+                            if (row.withdrawn) {
+                                $("#withdrawn_description").show();
+                                var withdrawnRow = [];
+                                rowData.forEach(function(rowEntry) {
+                                    rowEntry = rowEntry ? "<span class='withdrawn'>" + rowEntry + " </span>" : ""
+                                    withdrawnRow.push(rowEntry)
+                                });
+                                rowData = withdrawnRow;
+                            }
+
                             json.aaData[i] = rowData;
                         }
                         fnCallback(json);

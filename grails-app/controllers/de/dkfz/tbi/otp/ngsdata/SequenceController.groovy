@@ -24,7 +24,6 @@ class SequenceController {
     def dataTableSource(DataTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()
 
-
         SequenceFiltering filtering = SequenceFiltering.fromJSON(params.filtering)
 
         dataToRender.iTotalRecords = seqTrackService.countSequences(filtering)
@@ -42,6 +41,9 @@ class SequenceController {
             }
             // format date
             data.dateCreated = data.dateCreated.format("yyyy-MM-dd")
+
+            data.withdrawn = SeqTrack.get(seq.seqTrackId).isWithdrawn()
+
             dataToRender.aaData << data
         }
         // add the DataFiles to the sequences
