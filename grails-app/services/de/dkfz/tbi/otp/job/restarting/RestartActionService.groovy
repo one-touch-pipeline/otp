@@ -69,7 +69,9 @@ class RestartActionService {
         assert plan.name == startJob.getJobExecutionPlanName()
 
         if (startJob instanceof RestartableStartJob) {
-            ((RestartableStartJob) startJob).restart()
+            Process process = ((RestartableStartJob) startJob).restart(step.process)
+            process.restarted = step.process
+            assert process.save(flush: true)
             logInCommentAndJobLog(job, WORKFLOW_RESTARTED)
         } else {
             throw new RuntimeException(WORKFLOW_NOT_AUTO_RESTARTABLE)

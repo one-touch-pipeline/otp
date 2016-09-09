@@ -135,12 +135,12 @@ abstract class AbstractStartJobImpl implements StartJob, ApplicationListener<Job
         return StartJobDefinition.get(plan.startJob.id)
     }
 
-    protected void createProcess(List<Parameter> input, ProcessParameter processParameter = null) {
-        schedulerService.createProcess(this, input, processParameter)
+    protected Process createProcess(List<Parameter> input, ProcessParameter processParameter = null) {
+        return schedulerService.createProcess(this, input, processParameter)
     }
 
-    protected void createProcess(Object processParameter) {
-        createProcess([], new ProcessParameter(value: processParameter.id.toString(), className: Hibernate.getClass(processParameter).name))
+    protected Process createProcess(Object processParameter) {
+        return createProcess([], new ProcessParameter(value: processParameter.id.toString(), className: Hibernate.getClass(processParameter).name))
     }
 
     /**

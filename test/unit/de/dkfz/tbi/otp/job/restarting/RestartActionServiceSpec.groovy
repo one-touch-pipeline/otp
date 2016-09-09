@@ -110,7 +110,9 @@ class RestartActionServiceSpec extends Specification {
         RestartActionService service = new RestartActionService(
                 context: Mock(ApplicationContext) {
                     1 * getBean(_) >> GroovyMock(RestartableStartJob) {
-                        1 * restart()
+                        1 * restart(_) >> GroovyMock(Process) {
+                            1 * save(_) >> new Process()
+                        }
                         _ * getJobExecutionPlanName() >> workflowName
                     }
                 },
