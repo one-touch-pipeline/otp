@@ -10,10 +10,12 @@ package de.dkfz.tbi.util.spreadsheet
 class Spreadsheet {
 
     final Row header
+    final String delimiter
     private final Map<String, Column> columnsByTitle
     private final List<Row> dataRows
 
-    Spreadsheet(String document) {
+    Spreadsheet(String document, String delimiter = '\t') {
+        this.delimiter = delimiter
         Map<String, Column> columnsByTitle = [:]
         List<Row> dataRows = []
         int rowIndex = 0
@@ -62,7 +64,7 @@ class Row {
         this.spreadsheet = spreadsheet
         this.rowIndex = rowIndex
         int columnIndex = 0
-        List<Cell> cells = line.split('\t').collect{new Cell(this, columnIndex++, it)}
+        List<Cell> cells = line.split(spreadsheet.delimiter).collect{new Cell(this, columnIndex++, it)}
         if (spreadsheet.header) {
             // Make sure that this row has at least as many cells as the header
             while (columnIndex < spreadsheet.header.cells.size()) {

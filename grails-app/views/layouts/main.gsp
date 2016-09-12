@@ -79,6 +79,7 @@
                                             <li id="createProject"><g:link controller="createProject" action="index"><g:message code="otp.menu.createProject"/></g:link></li><br>
                                             <li id="specificOverview"><g:link controller="projectOverview" action="specificOverview"><g:message code="otp.menu.projectConfig"/></g:link></li><br>
                                             <li id="individualInsert"><g:link controller="individual" action="insert"><g:message code="otp.menu.createIndividual"/></g:link></li>
+                                            <li id="sampleInsert"><g:link controller="individual" action="insertMany"><g:message code="otp.menu.createSample"/></g:link></li>
                                             <li id="processes"><g:link controller="processes" action="list"><g:message code="otp.menu.processes"/></g:link></li>
                                             <li id="snv"><g:link controller="snv" action="index"> <g:message code="otp.menu.snv.processing"/></g:link></li><br>
                                             <li id="metaDataFields"><g:link controller="metaDataFields" action="index"><g:message code="otp.menu.metaDataFields"/></g:link></li><br>

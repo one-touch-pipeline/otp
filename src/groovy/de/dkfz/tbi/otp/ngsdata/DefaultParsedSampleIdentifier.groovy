@@ -1,13 +1,13 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import groovy.transform.TupleConstructor
+import groovy.transform.*
 
-@TupleConstructor
+@Immutable
 class DefaultParsedSampleIdentifier implements ParsedSampleIdentifier {
 
-    final String projectName
-    final String pid
-    final String sampleTypeDbName
-    final String fullSampleName
+    String projectName
+    String pid
+    String sampleTypeDbName
+    String fullSampleName
 
 }

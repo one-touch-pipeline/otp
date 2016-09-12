@@ -1,18 +1,25 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.CommentService
-import de.dkfz.tbi.otp.utils.CommentCommand
-import grails.converters.JSON
-import groovy.json.JsonSlurper
-import de.dkfz.tbi.otp.utils.DataTableCommand
-import org.springframework.validation.FieldError
+import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.util.spreadsheet.*
+import grails.converters.*
+import groovy.json.*
+import groovy.transform.*
+import org.springframework.validation.*
+import org.springframework.web.multipart.commons.*
 
 class IndividualController {
+
+    static final String PID = "PID"
+    static final String SAMPLE_TYPE = "SAMPLE_TYPE"
+    static final String SAMPLE_IDENTIFIER = "SAMPLE_IDENTIFIER"
 
     def individualService
     def igvSessionFileService
     def projectService
     CommentService commentService
+    SampleIdentifierService sampleIdentifierService
 
     def display = {
         redirect(action: "show", id: params.id)
@@ -74,22 +81,66 @@ class IndividualController {
         render dataToRender as JSON
     }
 
-    def igvStart = {
+    def insertMany(InsertManyCommand cmd) {
+        String message = ''
+        String messageType = ''
 
-        // TODO: this code is crashy and cannot be protected
-        List<SeqScan> scans = new ArrayList<SeqScan>()
-        params.each {
-            if (it.value == "on") {
-                SeqScan scan = SeqScan.get(it.key as int)
-                scans << scan
+        if (cmd.submit) {
+            String validate = cmd.validate()
+            if (validate.empty) {
+                try {
+                    String content
+                    if (!cmd.sampleFile.empty) {
+                        content = new String(cmd.sampleFile.bytes)
+                    } else {
+                        content = cmd.sampleText
+                    }
+                    String delimiter = cmd.delimiter == "space" ? ' ' : cmd.delimiter
+                    content = content.replaceAll(" *${delimiter} *", delimiter)
+
+                    Spreadsheet spreadsheet = new Spreadsheet(content, delimiter)
+                    if (!spreadsheet.getColumn(PID)) {
+                        message = "Error: The column ${PID} does not exist"
+                        messageType = 'error'
+                    } else if (!spreadsheet.getColumn(SAMPLE_TYPE)) {
+                        message = "Error: The column ${SAMPLE_TYPE} does not exist"
+                        messageType = 'error'
+                    } else if (!spreadsheet.getColumn(SAMPLE_IDENTIFIER)) {
+                        message = "Error: The column ${SAMPLE_IDENTIFIER} does not exist"
+                        messageType = 'error'
+                    } else {
+                        spreadsheet.dataRows.each { Row row ->
+                            ParsedSampleIdentifier s = new DefaultParsedSampleIdentifier(
+                                    projectName: cmd.project,
+                                    pid: row.getCellByColumnTitle(PID).text.trim(),
+                                    sampleTypeDbName: row.getCellByColumnTitle(SAMPLE_TYPE).text.trim(),
+                                    fullSampleName: row.getCellByColumnTitle(SAMPLE_IDENTIFIER).text.trim(),
+                            )
+                            sampleIdentifierService.findOrSaveSampleIdentifier(s)
+                        }
+                        message = 'Creation was successful'
+                        messageType = 'info'
+                    }
+                } catch (Throwable t) {
+                    log.error(t.message, t)
+                    message = "Error: The creation failed for ${t.message.replaceAll('\n', ' ')}"
+                    messageType = 'error'
+                }
+            } else {
+                message = "Error: The input was not valid: ${validate}"
+                messageType = 'error'
             }
         }
-        String url = igvSessionFileService.buildSessionFile(scans)
-        redirect(url: url)
-    }
 
-    def igvDownload = {
-        render "downloding ..."
+        return [
+                projects: projectService.allProjects*.name,
+                delimiters: [',', 'space', ';'],
+                message: message,
+                messageType: messageType,
+                oldProject: cmd?.project,
+                oldContent: cmd?.sampleText ?: "${PID},${SAMPLE_TYPE},${SAMPLE_IDENTIFIER}\n",
+                oldDelimiter: cmd?.delimiter
+        ]
     }
 
     def insert() {
@@ -393,5 +444,34 @@ class IndividualFiltering {
             }
         }
         return filtering
+    }
+}
+
+@ToString(includeNames=true)
+class InsertManyCommand {
+    String submit
+    String project
+    String delimiter
+    String sampleText
+    CommonsMultipartFile sampleFile
+
+    String validate() {
+        if (!submit) {
+            return ''
+        }
+        if (!project) {
+            return 'Please select a project'
+        }
+        if (!delimiter) {
+            return 'Please select a delimiter'
+        }
+        if (!sampleFile.empty) {
+            return ''
+        }
+        List<String> sampleMapping = sampleText.readLines()
+        if (sampleMapping && sampleMapping.size()>1 && sampleMapping[1].size() > 0) {
+            return ''
+        }
+        return 'Neither file nor text provided'
     }
 }
