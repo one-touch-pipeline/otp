@@ -124,7 +124,7 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
             assert k == TEST_KEY_1
             assert h == TEST_HOST_1
             assert p == TEST_PORT_1
-            return new FlowControlClient.Builder().build()
+            return new FlowControlClient(null)
         }
         FlowControlClient fcc1 = clusterJobService.getFlowControlClient(realm1)
 
@@ -142,7 +142,7 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
             assert k == TEST_KEY_2
             assert h == TEST_HOST_2
             assert p == TEST_PORT_2
-            return new FlowControlClient.Builder().build()
+            return new FlowControlClient(null)
         }
         FlowControlClient fcc2 = clusterJobService.getFlowControlClient(realm2)
 
@@ -165,7 +165,7 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
         ClusterJob job = createClusterJob()
 
         clusterJobService.metaClass.getFlowControlClient = { Realm r ->
-            FlowControlClient client =  new FlowControlClient.Builder().build()
+            FlowControlClient client =  new FlowControlClient(null)
             client.metaClass.requestJobInfos = { String i ->
                 SOAPFault soapFault = createSoapFault()
                 throw new SOAPFaultException(soapFault)
@@ -184,8 +184,7 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
 
         int callCount = 0
         clusterJobService.metaClass.getFlowControlClient = { Realm r ->
-            FlowControlClient client =  new
-                    FlowControlClient.Builder().build()
+            FlowControlClient client =  new FlowControlClient(null)
             if (callCount == 0) {
                 client.metaClass.requestJobInfos = { String i ->
                     SOAPFault soapFault = createSoapFault()
