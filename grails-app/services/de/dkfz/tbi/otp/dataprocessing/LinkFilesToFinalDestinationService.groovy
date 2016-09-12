@@ -21,11 +21,15 @@ class LinkFilesToFinalDestinationService {
 
     @Autowired
     ExecutionHelperService executionHelperService
+
     @Autowired
     CreateClusterScriptService createClusterScriptService
+
     @Autowired
     ExecutionService executionService
 
+    @Autowired
+    AbstractMergedBamFileService abstractMergedBamFileService
 
 
     public void prepareRoddyBamFile(RoddyBamFile roddyBamFile) {
@@ -64,6 +68,7 @@ class LinkFilesToFinalDestinationService {
                 roddyBamFile.fileExists = true
                 roddyBamFile.dateFromFileSystem = new Date(roddyBamFile.workBamFile.lastModified())
                 assert roddyBamFile.save(flush: true)
+                abstractMergedBamFileService.setSamplePairStatusToNeedProcessing(roddyBamFile)
             }
         } else {
             threadLog?.info "The results of ${roddyBamFile} will not be moved since it is marked as withdrawn"

@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.ngsdata.*
 import static org.springframework.util.Assert.notNull
 
@@ -22,5 +23,19 @@ class AbstractMergedBamFileService {
         String relative = MergedAlignmentDataFileService.buildRelativePath(type, sample)
 
         return "${root}/${relative}"
+    }
+
+    public void setSamplePairStatusToNeedProcessing(AbstractMergedBamFile finishedBamFile) {
+        assert finishedBamFile: "The input bam file must not be null"
+        SamplePair.createCriteria().list {
+            eq('processingStatus', SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED)
+            or {
+                eq('mergingWorkPackage1', finishedBamFile.workPackage)
+                eq('mergingWorkPackage2', finishedBamFile.workPackage)
+            }
+        }.each { SamplePair samplePair ->
+            samplePair.processingStatus = SamplePair.ProcessingStatus.NEEDS_PROCESSING
+            assert samplePair.save(flush: true)
+        }
     }
 }

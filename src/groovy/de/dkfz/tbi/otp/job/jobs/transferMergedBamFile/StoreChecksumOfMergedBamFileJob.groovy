@@ -13,6 +13,9 @@ class StoreChecksumOfMergedBamFileJob extends AbstractEndStateAwareJobImpl {
     @Autowired
     ChecksumFileService checksumFileService
 
+    @Autowired
+    AbstractMergedBamFileService abstractMergedBamFileService
+
     @Override
     public void execute() throws Exception {
         long id = Long.parseLong(getProcessParameterValue())
@@ -22,9 +25,9 @@ class StoreChecksumOfMergedBamFileJob extends AbstractEndStateAwareJobImpl {
         String md5SumFile = locations.get("destinationDirectory") + "/" + locations.get("md5BamFile")
         String md5Bam = checksumFileService.firstMD5ChecksumFromFile(md5SumFile)
         boolean successfulSave = processedMergedBamFileService.storeMD5Digest(file, md5Bam)
-        //TODO: processedMergedBamFile somehow has to be stored as MergedAlignmentDataFile or another GUI representation of the files.
-        //This can not be done now, since the db structure can not be used as it is now
         log.debug "Stored MD5 digest for merged BAM file " + locations.get("bamFile") + " (id= " + file + " ) in database"
+        abstractMergedBamFileService.setSamplePairStatusToNeedProcessing(file)
+
         if (successfulSave) {
             succeed()
         } else {

@@ -60,17 +60,6 @@ class SamplePairDiscoveryJobUnitTests {
     }
 
     @Test
-    void testSetExistingSamplePairsToNeedsProcessing() {
-        Collection<SamplePair> samplePairs = [new SamplePair()]
-        testMethodWhichCallsSetProcessingStatus(samplePairs, {
-            SamplePair.metaClass.static.findSamplePairsForSettingNeedsProcessing = {
-                return samplePairs
-            }
-            job.setExistingSamplePairsToNeedsProcessing()
-        })
-    }
-
-    @Test
     void testCreateMissingDiseaseControlSamplePairs() {
         Collection<SamplePair> missingSamplePairs = [new SamplePair()]
         testMethodWhichCallsSetProcessingStatus(missingSamplePairs, {
@@ -124,14 +113,11 @@ class SamplePairDiscoveryJobUnitTests {
     }
 
     private void testExecute(final Closure code) {
-        boolean setExistingSamplePairsToNeedsProcessingCalled = false
-        job.metaClass.setExistingSamplePairsToNeedsProcessing = { setExistingSamplePairsToNeedsProcessingCalled = true }
         boolean createMissingDiseaseControlSamplePairsCalled = false
         job.metaClass.createMissingDiseaseControlSamplePairs = { createMissingDiseaseControlSamplePairsCalled = true }
 
         code()
 
-        assert setExistingSamplePairsToNeedsProcessingCalled == true
         assert createMissingDiseaseControlSamplePairsCalled == true
     }
 }

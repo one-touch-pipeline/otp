@@ -286,7 +286,6 @@ class TrackingService {
             }
         }
         if ([1, 2].every { sp."mergingWorkPackage${it}".completeProcessableBamFileInProjectFolder }) {
-            samplePairDiscovery.setExistingSamplePairsToNeedsProcessing()
             if (SnvCallingService.SNV_CONFIG_CLASSES.any {
                 snvCallingService.samplePairForSnvProcessing(ProcessingPriority.MINIMUM_PRIORITY, it, sp)
             }) {
@@ -327,15 +326,6 @@ class TrackingService {
             if (!calledCreateMissingDiseaseControlSamplePairs) {
                 new SamplePairDiscoveryJob().createMissingDiseaseControlSamplePairs()
                 calledCreateMissingDiseaseControlSamplePairs = true
-            }
-        }
-
-        boolean calledSetExistingSamplePairsToNeedsProcessing = false
-
-        void setExistingSamplePairsToNeedsProcessing() {
-            if (!calledSetExistingSamplePairsToNeedsProcessing) {
-                new SamplePairDiscoveryJob().setExistingSamplePairsToNeedsProcessing()
-                calledSetExistingSamplePairsToNeedsProcessing = true
             }
         }
     }

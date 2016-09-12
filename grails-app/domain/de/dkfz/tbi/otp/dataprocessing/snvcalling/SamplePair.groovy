@@ -33,9 +33,7 @@ class SamplePair implements Entity {
 
         /**
          * The sample pair does not have to be processed, because there already is an {@link SnvCallingInstance} which
-         * is up-to-date. If this is no longer true,
-         * {@link SamplePair#findSamplePairsForSettingNeedsProcessing()} will find the sample
-         * pair.
+         * is up-to-date.
          */
         NO_PROCESSING_NEEDED,
 
@@ -87,8 +85,7 @@ class SamplePair implements Entity {
 
     static mapping = {
         /**
-         * sample_pair_idx1 is used by SamplePair.findSamplePairsForSettingNeedsProcessing and
-         * SnvCallingService.samplePairForSnvProcessing.
+         * sample_pair_idx1 is used by SnvCallingService.samplePairForSnvProcessing.
          * processing_status must be the first column in this index! Grails does not provide a means to specify this, so
          * this must be done via SQL.
          *
