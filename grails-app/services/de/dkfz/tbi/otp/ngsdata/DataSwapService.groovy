@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.fileSystemConsistency.*
@@ -13,6 +14,7 @@ import static org.springframework.util.Assert.*
 class DataSwapService {
 
     IndividualService individualService
+    CommentService commentService
     FastqcDataFilesService fastqcDataFilesService
     LsdfFilesService lsdfFilesService
     DataProcessingFilesService dataProcessingFilesService
@@ -487,6 +489,8 @@ chmod 440 ${newDirectFileName}
         bashScriptToMoveFiles << "# rm -rf '${processingPathToOldIndividual}'\n"
 
         individualService.createComment("Individual swap", [individual: oldIndividual, project: oldProjectName, pid: oldPid], [individual: oldIndividual, project: newProjectName, pid: newPid])
+
+        createCommentForSwappedDatafiles(dataFiles)
     }
 
     /**
@@ -639,7 +643,6 @@ chmod 440 ${newDirectFileName}
             bashScriptToMoveFiles << copyAndRemoveFastqcFile(oldFastqcFileName, newFastqcFileNames.get(i), outputStringBuilder, failOnMissingFiles)
         }
 
-
         bashScriptToMoveFiles << "# delete snv stuff\n"
         dirsToDelete.flatten()*.path.each {
             bashScriptToMoveFiles << "#rm -rf ${it}\n"
@@ -647,6 +650,8 @@ chmod 440 ${newDirectFileName}
 
         individualService.createComment("Sample swap", [individual: oldIndividual, project: oldProjectName, pid: oldPid, sampleType: oldSampleTypeName],
                 [individual: newIndividual, project: newProjectName, pid: newPid, sampleType: newSampleTypeName])
+
+        createCommentForSwappedDatafiles(dataFiles)
     }
 
     /**
@@ -1397,6 +1402,19 @@ chmod 440 ${newDirectFileName}
             outputStringBuilder << "\n\n${t}"
             t.getStackTrace().each { outputStringBuilder << "\n    ${it}" }
             println outputStringBuilder
+        }
+    }
+
+    /**
+     * Create a warning comment in case the datafile is swapped
+     */
+    void createCommentForSwappedDatafiles(List<DataFile> datafiles) {
+        datafiles.each { DataFile dataFile ->
+            if (dataFile.getComment()?.comment) {
+                commentService.saveComment(dataFile, dataFile.getComment().comment + "\nAttention: Datafile swapped!")
+            } else {
+                commentService.saveComment(dataFile, "Attention: Datafile swapped!")
+            }
         }
     }
 }

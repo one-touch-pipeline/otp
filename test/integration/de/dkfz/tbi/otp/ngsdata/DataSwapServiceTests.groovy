@@ -97,6 +97,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
             assert copyScriptContent.contains("rm -f '${dataFileLinks[i]}'")
             assert copyScriptContent.contains("mkdir -p -m 2750 '${new File(lsdfFilesService.getFileViewByPidPath(it)).getParent()}'")
             assert copyScriptContent.contains("ln -s '${lsdfFilesService.getFileFinalPath(it)}' '${lsdfFilesService.getFileViewByPidPath(it)}'")
+            assert it.getComment().comment == "Attention: Datafile swapped!"
         }
 
         assert bamFile.individual == individual
@@ -178,6 +179,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
             assert copyScriptContent.contains("rm -f '${dataFileLinks[i]}'")
             assert copyScriptContent.contains("mkdir -p -m 2750 '${new File(lsdfFilesService.getFileViewByPidPath(it)).getParent()}'")
             assert copyScriptContent.contains("ln -s '${lsdfFilesService.getFileFinalPath(it)}' '${lsdfFilesService.getFileViewByPidPath(it)}'")
+            assert it.getComment().comment == "Attention: Datafile swapped!"
         }
 
         assert bamFile.project == newProject
