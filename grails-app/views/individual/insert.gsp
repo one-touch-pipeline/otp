@@ -79,7 +79,7 @@
                                 <label for="sample"><g:message code="individual.insert.sample"/></label>
                             </td>
                             <td valign="top" class="sampleType">
-                                <g:select name="sampleType" from="${sampleTypes}" class="dropDown" noSelection="[null: '']" />
+                                <g:select name="sampleType" from="${sampleTypes}" class="dropDown" noSelection="[(null): '']" />
                             </td>
                             <td>
                             </td>

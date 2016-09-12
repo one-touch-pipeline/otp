@@ -112,7 +112,7 @@ class IndividualController {
             Individual individual = individualService.createIndividual(projectService.getProject(cmd.project), cmd, parsedSamples)
             def data = [success: true, id: individual.id]
             render data as JSON
-        } catch (Exception e) {
+        } catch (Throwable e) {
             def data = [error: e.message]
             render data as JSON
         }
@@ -331,13 +331,12 @@ class SamplesParser {
     }
 
     private boolean isValues(Map value) {
-        if (!value.type) {
-            return false
-        }
-        if (!value.identifier) {
-            return false
-        }
-        return true
+        boolean hasType = value.type
+        boolean hasIdentifier = value.identifier.any { !it.empty }
+
+        assert hasType == hasIdentifier : "Please fill in both fields: sample and sample identifier"
+
+        return hasType
     }
 }
 /**
