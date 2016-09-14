@@ -172,6 +172,24 @@ class ProjectOverviewService {
         return queryList
     }
 
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    public Map<String, Map<String, List<String>>> listSampleIdentifierByProject(Project project) {
+        return SampleIdentifier.createCriteria().list {
+            projections {
+                sample {
+                    individual {
+                        eq('project', project)
+                        property("mockFullName")
+                    }
+                    sampleType {
+                        property("name")
+                    }
+                }
+                property("name")
+            }
+        }.groupBy([{ it[0] }, { it[1] }])
+    }
+
     public List patientsAndSamplesGBCountPerProject(Project project) {
         List seq = AggregateSequences.withCriteria {
             eq("projectId", project.id)
