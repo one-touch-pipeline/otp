@@ -7,7 +7,6 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.*
 import grails.test.spock.*
 import org.codehaus.groovy.grails.support.*
-import spock.lang.*
 
 class DataInstallationStartJobSpec extends IntegrationSpec {
 
@@ -15,29 +14,28 @@ class DataInstallationStartJobSpec extends IntegrationSpec {
 
     def "execute calls setStartedForSeqTracks"() {
         given:
-        Run run = DomainFactory.createRun()
-        SeqTrack seqTrack = DomainFactory.createSeqTrack(run: run)
+        SeqTrack seqTrack = DomainFactory.createSeqTrack()
         OtrsTicket otrsTicket = DomainFactory.createOtrsTicket()
         JobExecutionPlan plan = DomainFactory.createJobExecutionPlan(enabled: true)
         DomainFactory.createDataFile(runSegment: DomainFactory.createRunSegment(otrsTicket: otrsTicket), seqTrack: seqTrack)
 
         DataInstallationStartJob dataInstallationStartJob = new DataInstallationStartJob()
-        dataInstallationStartJob.schedulerService = Stub(SchedulerService) {
-            createProcess(_,_,_) >> null
+        dataInstallationStartJob.schedulerService = Mock(SchedulerService) {
+            1 * createProcess(_, _, _) >> null
         }
         dataInstallationStartJob.optionService = new ProcessingOptionService()
 
-        dataInstallationStartJob.runProcessingService = Stub(RunProcessingService) {
-            runReadyToInstall(_) >> run
-        }
         dataInstallationStartJob.trackingService = new TrackingService()
         dataInstallationStartJob.setJobExecutionPlan(plan)
         dataInstallationStartJob.persistenceInterceptor = persistenceInterceptor
+        dataInstallationStartJob.seqTrackService = new SeqTrackService()
 
         when:
         dataInstallationStartJob.execute()
 
         then:
-        assert otrsTicket.installationStarted != null
-   }
+        otrsTicket.installationStarted != null
+        seqTrack.dataInstallationState == SeqTrack.DataProcessingState.IN_PROGRESS
+    }
+
 }

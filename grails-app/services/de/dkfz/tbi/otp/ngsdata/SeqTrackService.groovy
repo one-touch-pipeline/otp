@@ -224,20 +224,6 @@ class SeqTrackService {
         return true
     }
 
-    public void setRunReadyForFastqc(Run run) {
-        def unknown = SeqTrack.DataProcessingState.UNKNOWN
-        SeqTrack.findAllByRunAndFastqcState(run, unknown).findAll {
-            //use only seqtracks with finished Data installation workflow
-            DataFile.findAllBySeqTrack(it).every {
-                it.runSegment.filesStatus == RunSegment.FilesStatus.FILES_CORRECT
-            }
-        }.each { SeqTrack seqTrack ->
-                if (fastqcReady(seqTrack)) {
-                    seqTrack.fastqcState = SeqTrack.DataProcessingState.NOT_STARTED
-                    assert(seqTrack.save(flush: true))
-                }
-        }
-    }
 
     private boolean fastqcReady(SeqTrack track) {
         List<DataFile> files = DataFile.findAllBySeqTrack(track)
@@ -621,5 +607,20 @@ join fastqSet.seqTracks seqTracks
 where seqTracks in (:seqTrackList)
 """, ["seqTrackList": seqTracks])
 
+    }
+
+    List<SeqTrack> seqTracksReadyToInstall(short minPriority) {
+        return SeqTrack.createCriteria().list {
+            eq('dataInstallationState', SeqTrack.DataProcessingState.NOT_STARTED)
+            sample {
+                individual {
+                    project {
+                        ge('processingPriority', minPriority)
+                        order('processingPriority', 'desc')
+                    }
+                }
+            }
+            order('id')
+        }
     }
 }

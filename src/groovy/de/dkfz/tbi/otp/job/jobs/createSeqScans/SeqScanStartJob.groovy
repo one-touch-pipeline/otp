@@ -11,8 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired
 @Scope("singleton")
 class SeqScanStartJob extends AbstractStartJobImpl  {
 
-    @Autowired
-    RunProcessingService runProcessingService
 
     final int MAX_RUNNING = 1
     final String name = "seqScanWorkflow"
@@ -39,7 +37,7 @@ class SeqScanStartJob extends AbstractStartJobImpl  {
         if (!hasOpenSlots()) {
             return
         }
-        if (!runProcessingService.isMetaDataProcessingFinished()) {
+        if (!isMetaDataProcessingFinished()) {
             return
         }
         SeqTrack seqTrack = SeqTrack.find(hql)
@@ -72,5 +70,16 @@ class SeqScanStartJob extends AbstractStartJobImpl  {
     @Override
     String getJobExecutionPlanName() {
         return "createSeqScan"
+    }
+
+    boolean isMetaDataProcessingFinished() {
+        List<RunSegment> segments =
+                RunSegment.findAllByMetaDataStatusNotEqual(RunSegment.Status.COMPLETE)
+        for (RunSegment segment in segments) {
+            if (!segment.run.blacklisted) {
+                return false
+            }
+        }
+        return true
     }
 }

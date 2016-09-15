@@ -2,7 +2,6 @@ package de.dkfz.tbi.ngstools.coverage_plot_mfs
 
 import javax.validation.*
 import org.junit.*
-import de.dkfz.tbi.otp.ngsdata.FilesCompletenessService
 
 //many test are extracted from ParameterUtilsTests and QualityAssessmentStatisticsTest
 //from the qa jar

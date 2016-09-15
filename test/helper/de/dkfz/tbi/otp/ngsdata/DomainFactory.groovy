@@ -243,6 +243,14 @@ class DomainFactory {
         ], properties)
     }
 
+    public static ProcessParameter createProcessParameter(Map properties = [:]) {
+        return createDomainObject(ProcessParameter, [
+                process: { createProcessingStep().process },
+                value: "${counter++}",
+                className: "${counter++}",
+        ], properties)
+    }
+
     public static ProcessingStep createProcessingStep(Map properties = [:]) {
         JobExecutionPlan jobExecutionPlan = properties.jobDefinition?.plan ?: properties.process?.jobExecutionPlan ?: createJobExecutionPlan()
         return createDomainObject(ProcessingStep, [
@@ -883,27 +891,34 @@ class DomainFactory {
         ], properties)
     }
 
-    public static SeqTrack createSeqTrack(Map seqTrackProperties = [:]) {
-        return createDomainObject(SeqTrack, [
+    static Map seqTrackProperties() {
+        return [
                 laneId         : 'laneId_' + counter++,
-                seqType        : { createSeqType() },
                 sample         : { createSample() },
                 pipelineVersion: { createSoftwareTool() },
                 run            : { createRun() },
                 seqPlatform    : { createSeqPlatform() },
-                kitInfoReliability: seqTrackProperties.libraryPreparationKit ? InformationReliability.KNOWN : InformationReliability.UNKNOWN_UNVERIFIED,
-        ], seqTrackProperties)
+        ]
+    }
+
+    public static SeqTrack createSeqTrack(Map properties = [:]) {
+        return createDomainObject(SeqTrack, seqTrackProperties() + [
+                seqType        : { createSeqType() },
+                kitInfoReliability: properties.libraryPreparationKit ? InformationReliability.KNOWN : InformationReliability.UNKNOWN_UNVERIFIED,
+        ], properties)
     }
 
     public static ExomeSeqTrack createExomeSeqTrack(Map exomSeqTrackProperties = [:]) {
-        return createDomainObject(ExomeSeqTrack, [
-                laneId         : 'laneId_' + counter++,
+        return createDomainObject(ExomeSeqTrack, seqTrackProperties() + [
                 seqType        : { createExomeSeqType() },
-                sample         : { createSample() },
-                pipelineVersion: { createSoftwareTool() },
-                run            : { createRun() },
-                seqPlatform    : { createSeqPlatform() },
         ], exomSeqTrackProperties)
+    }
+
+    public static ChipSeqSeqTrack createChipSeqSeqTrack(Map properties = [:]) {
+        return createDomainObject(ChipSeqSeqTrack, seqTrackProperties() + [
+                seqType        : { createChipSeqType() },
+                antibodyTarget : { createAntibodyTarget() },
+        ], properties)
     }
 
     public static FastqcProcessedFile createFastqcProcessedFile(Map properties = [:]) {
@@ -1161,6 +1176,10 @@ class DomainFactory {
 
     static SeqType createWholeGenomeBisulfiteTagmentationSeqType() {
         createSeqTypeLazy(SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION, 'WGBS_TAG', 'whole_genome_bisulfite_tagmentation_sequencing', 'WGBSTAG')
+    }
+
+    static SeqType createChipSeqType() {
+        createSeqTypeLazy(SeqTypeNames.CHIP_SEQ, 'ChIP', 'chip_seq_sequencing', "CHIPSEQ")
     }
 
     static List<SeqType> createAlignableSeqTypes() {

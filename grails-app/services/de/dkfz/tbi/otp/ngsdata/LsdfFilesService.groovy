@@ -64,32 +64,6 @@ class LsdfFilesService {
         return "${dataFile.initialDirectory}/${dataFile.fileName}"
     }
 
-    /**
-     * This function returns an array of strings to final locations of this runs.
-     * Only data files belonging to a given project are considered, because
-     * projects are often processed separately.
-     *
-     * @param run to be processed
-     * @param projectName only data files belonging to a given project are used
-     * @return
-     */
-    String[] getListOfRunDirecotries(Run run, String projectName) {
-        Set<String> paths = new HashSet<String>()
-        DataFile.findAllByRun(run).each {DataFile dataFile ->
-            if (dataFile.project == null) {
-                // data files without projects eg. metadata file
-                return
-            }
-            if (dataFile.project.name.contains(projectName)) {
-                String path = getPathToRun(dataFile)
-                if (path != null) {
-                    String fullPath = path + "/run" + run.name
-                    paths << fullPath
-                }
-            }
-        }
-        return (String[])paths.toArray()
-    }
 
     /**
      * Important function.
@@ -313,6 +287,7 @@ class LsdfFilesService {
         }
         return (String[])paths.toArray()
     }
+
 
     private String getPathToRun(DataFile file, boolean fullPath = false) {
         if (!checkFinalPathDefined(file)) {

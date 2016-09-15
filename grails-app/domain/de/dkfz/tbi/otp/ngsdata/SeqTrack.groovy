@@ -85,6 +85,7 @@ class SeqTrack implements ProcessParameterObject, Entity {
 
     QualityEncoding qualityEncoding = QualityEncoding.UNKNOWN
     DataProcessingState fastqcState = DataProcessingState.UNKNOWN
+    DataProcessingState dataInstallationState = DataProcessingState.NOT_STARTED
 
 
     /**
@@ -275,6 +276,10 @@ class SeqTrack implements ProcessParameterObject, Entity {
 
     ReferenceGenomeProjectSeqType getConfiguredReferenceGenomeProjectSeqType() {
         ReferenceGenomeProjectSeqType.getConfiguredReferenceGenomeProjectSeqType(this)
+    }
+
+    List<DataFile> getDataFiles() {
+        return DataFile.findAllBySeqTrack(this)
     }
 
     public void log(String message, boolean saveInSeqTrack = true) {
