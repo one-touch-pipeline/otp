@@ -15,18 +15,18 @@ class Individual implements Commentable, Entity {
      * Identifier used in the file system. It should never change.
      * Usually its the same as {@link #mockPid}
      */
-    String pid                 // real pid from iChip
+    String pid
 
     /**
-     * Identifier used for displaying in tables/graphs.
+     * Identifier used in the user interface.
      */
-    String mockPid             // pid used in the project
+    String mockFullName
 
     /**
      * Alternative Identifier. If an individual is renamed, this column can contain the old identifier.
      * Also it can be used for visible mapping of identifier.
      */
-    String mockFullName        // mnemonic used in the project
+    String mockPid
 
     /**
      * Holds an internal identifier, which shouldn't be visible for normal users.
