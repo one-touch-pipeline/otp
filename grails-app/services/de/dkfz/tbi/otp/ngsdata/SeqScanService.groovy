@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.ngsdata
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 
+@Deprecated
 class SeqScanService {
 
     // locks for operation that are not tread safe
@@ -15,6 +16,7 @@ class SeqScanService {
      * to any SeqScan and calls a method to build a specific SeqScan
      *
      */
+    @Deprecated
     void buildSeqScans() {
         List<SeqTrack> seqTracks = SeqTrack.list()
         println "- number of new tracks: ${seqTracks.size()}"
@@ -31,6 +33,7 @@ class SeqScanService {
      *
      * @param seqTrack - new Sequencing Track
      */
+    @Deprecated
     void buildSeqScan(SeqTrack seqTrack) {
         buildSeqScanLock.lock()
         try {
@@ -113,6 +116,7 @@ class SeqScanService {
      * Its prove synchronizing multiple {@link Thread}s for the helper
      * {@link #buildSeqScanPrivate(List<SeqTrack>, AlignmentParams)}
      */
+    @Deprecated
     SeqScan buildSeqScan(List<SeqTrack> tracks, AlignmentParams alignParams) {
         buildSeqScanLock.lock()
         try {

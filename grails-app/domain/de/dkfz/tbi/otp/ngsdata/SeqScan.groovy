@@ -2,12 +2,14 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.utils.Entity
 
+@Deprecated
 class SeqScan implements Entity {
 
     int nLanes = 0
     Long nBasePairs       // calculated from seqTracks
     double coverage = 0.0     // from somewhere
 
+    @Deprecated
     enum State {DECLARED, PROCESSING, FINISHED, OBSOLETE}
     State state  = State.DECLARED
 
@@ -18,6 +20,7 @@ class SeqScan implements Entity {
     SeqType seqType
 
     // quality control
+    @Deprecated
     enum QCState {NON, PASS, BLOCK}
     QCState qcState = QCState.NON
 
@@ -42,14 +45,17 @@ class SeqScan implements Entity {
         nBasePairs (nullable: true)
     }
 
+    @Deprecated
     String toString() {
         "${sample} ${seqType}"
     }
 
+    @Deprecated
     String basePairsString() {
         return nBasePairs ? String.format("%.1f G",(nBasePairs/1e9)) : "N/A"
     }
 
+    @Deprecated
     boolean isMerged() {
         return (MergingLog.countBySeqScan(this) != 0)
     }
