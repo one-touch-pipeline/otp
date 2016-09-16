@@ -82,8 +82,8 @@ boolean checkForRunningClusterJobs = false
 
 //==================================================
 
-SeqType wholeGenomePaired = SeqType.findByNameAndLibraryLayout("WHOLE_GENOME", SeqType.LIBRARYLAYOUT_PAIRED)
-SeqType exonPaired = SeqType.findByNameAndLibraryLayout("EXON", SeqType.LIBRARYLAYOUT_PAIRED)
+SeqType exomePaired = SeqType.findByNameAndLibraryLayout("EXON", SeqType.LIBRARYLAYOUT_PAIRED)
+List<SeqType> allignableSeqtypes = SeqType.allAlignableSeqTypes
 
 MetaDataKey libPrepKitKey = MetaDataKey.findByName(MetaDataColumn.LIB_PREP_KIT.name())
 MetaDataKey enrichmentKitKey = MetaDataKey.findByName("ENRICHMENT_KIT")
@@ -264,28 +264,27 @@ def findNotWithdrawn = { List<SeqTrack> seqTracks ->
 }
 
 def findAlignable = { List<SeqTrack> seqTracks ->
-    map = seqTracks.groupBy { it.seqType }
+    Map<Boolean, List<SeqTrack>> groupAfterAlignable = seqTracks.groupBy({allignableSeqtypes.contains(it.seqType) })
 
-    List<SeqTrack> wholeGenomeSeqtracks = map[wholeGenomePaired]
-    List<SeqTrack> exonSeqtracks = map[exonPaired]
-    map.remove(wholeGenomePaired)
-    map.remove(exonPaired)
+    if (groupAfterAlignable[false]) {
+        output << "count of lanes OTP can not align: ${groupAfterAlignable[false].size()}"
+    }
 
-    output << ""
-    output << "count whole genome paired: ${wholeGenomeSeqtracks ? wholeGenomeSeqtracks.size() : 0 }"
-    wholeGenomeSeqtracks = seqTracksWithReferenceGenome(wholeGenomeSeqtracks)
+    if (groupAfterAlignable[true]) {
+        output << "count of lanes OTP of SeqTypes OTP can align: ${groupAfterAlignable[true].size()}"
+    } else {
+        output << "no lanes left of SeqTypes which OTP could align"
+        return []
+    }
 
-    output << "count exon paired: ${exonSeqtracks ? exonSeqtracks.size() : 0 }"
-    exonSeqtracks = seqTracksWithReferenceGenome(exonSeqtracks)
-    exonSeqtracks = exomeSeqTracksWithEnrichmentKit(exonSeqtracks)
-    exonSeqtracks = exomeSeqTracksWithBedFile(exonSeqtracks)
+    List<SeqTrack> seqTracksWithConfiguredReferenceGenome = seqTracksWithReferenceGenome(groupAfterAlignable[true])
 
-    output << "count other lanes: ${map ? map.values().flatten().size() : 0 }"
+    Map<Boolean, List<SeqTrack>> groupAfterExome = seqTracksWithConfiguredReferenceGenome.groupBy({exomePaired == it.seqType })
 
-    return [
-            wholeGenomeSeqtracks,
-            exonSeqtracks
-    ].flatten().findAll()
+    List<SeqTrack> seqTracksToReturn = groupAfterExome[false] ?: []
+    seqTracksToReturn.addAll(exomeSeqTracksWithBedFile(exomeSeqTracksWithEnrichmentKit(groupAfterExome[true] ?: [])))
+
+    return seqTracksToReturn
 }
 
 def showUniqueList = {String info, List objects ->
@@ -378,8 +377,8 @@ def handleStateMap = {Map map, String workflow, Closure valueToShow, Closure obj
 
 // map: MergingWorkPackages grouped by Workpackage.needsProcessing
 // valueToShow: MergingWorkPackage properties to print out
-def handleStateMapNeedsProcessing = {Map<Boolean, Collection<MergingWorkPackage>> map, Closure valueToShow ->
-    output << "\nPanCanAlignmentWorkflow: \n${INDENT}Only SeqTracks are shown which finished fastqc-WF"
+def handleStateMapNeedsProcessing = {Map<Boolean, Collection<MergingWorkPackage>> map, Closure valueToShow, String workflow ->
+    output << "\n${workflow}: \n${INDENT}Only SeqTracks are shown which finished fastqc-WF"
 
     showShouldStart(map[true], valueToShow)
 
@@ -676,7 +675,7 @@ def showSeqTracksOtp = {List<SeqTrack> seqTracksToAlign ->
     return processedMergedBamFilesFinishedTransferMergedBamFileWorkflow
 }
 
-def showSeqTracksRoddy = {List<SeqTrack> seqTracksToAlign ->
+def showSeqTracksRoddy = {List<SeqTrack> seqTracksToAlign, String workflow ->
     boolean allFinished = true
 
     if(!seqTracksToAlign) {
@@ -702,7 +701,7 @@ def showSeqTracksRoddy = {List<SeqTrack> seqTracksToAlign ->
     allFinished &= mergingWorkPackagesByNeedsProcessing.keySet() == [false] as Set
     Collection<MergingWorkPackage> mergingWorkPackagesInProcessing = handleStateMapNeedsProcessing(mergingWorkPackagesByNeedsProcessing, {
         "${it}"
-    })
+    }, workflow)
 
     if (!mergingWorkPackagesInProcessing) {
         output << "\nnot all workflows are finished"
@@ -715,7 +714,7 @@ def showSeqTracksRoddy = {List<SeqTrack> seqTracksToAlign ->
             roddyBamFiles.groupBy {it.fileOperationStatus}
 
     allFinished &= roddyBamFileByFileOperationStatus.keySet() == [AbstractMergedBamFile.FileOperationStatus.PROCESSED] as Set
-    Collection<RoddyBamFile> roddyBamFilesFinishedPanCanWorkflow = handleStateMapRoddy(roddyBamFileByFileOperationStatus, "PanCanWorkflow", {
+    Collection<RoddyBamFile> roddyBamFilesFinishedPanCanWorkflow = handleStateMapRoddy(roddyBamFileByFileOperationStatus, workflow, {
         "${it}"
     })
 
@@ -809,7 +808,9 @@ def showSeqTracks = {Collection<SeqTrack> seqTracks ->
     seqTracksFinishedAlignment += showSeqTracksOtp(seqTracksByAlignmentDeciderBeanName['defaultOtpAlignmentDecider'])
 
     //alignment Roddy
-    seqTracksFinishedAlignment += showSeqTracksRoddy(seqTracksByAlignmentDeciderBeanName['panCanAlignmentDecider'])
+    Map<Boolean, List<SeqTrack>> isWgbs = seqTracksByAlignmentDeciderBeanName['panCanAlignmentDecider'].groupBy {it.seqType.isWgbs()}
+    seqTracksFinishedAlignment += showSeqTracksRoddy(isWgbs[false], 'PanCanWorkflow')
+    seqTracksFinishedAlignment += showSeqTracksRoddy(isWgbs[true], 'WgbsAlignmentWorkflow')
 
     if (!seqTracksFinishedAlignment) {
         return
