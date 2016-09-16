@@ -412,29 +412,6 @@ class ProcessedMergedBamFileServiceTests {
     }
 
     @Test
-    void testSingleLaneQAResultsDirectories() {
-        ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile()
-        ProcessedBamFile processedBamFile = mergedBamFile.mergingSet.bamFiles.first()
-        processedBamFile.seqTrack.run.name = 'name'
-        processedBamFile.seqTrack.laneId = 'laneId'
-
-        QualityAssessmentPass qualityAssessmentPass = new QualityAssessmentPass(
-                        identifier: 1,
-                        processedBamFile: processedBamFile
-                        )
-        assertNotNull(qualityAssessmentPass.save([flush: true]))
-
-        Map<String, String> locations = processedMergedBamFileService.singleLaneQAResultsDirectories(mergedBamFile)
-        String singleLaneDirectoryNameExp = "name_laneId"
-        String singleLaneDirectoryNameAct = locations.keySet().iterator().next()
-        assertEquals(singleLaneDirectoryNameExp, singleLaneDirectoryNameAct)
-        String singleLanePathExp =  testDirectory.absolutePath + "/processing/project-dir/results_per_pid/patient/alignment//name_laneId/pass0/QualityAssessment/pass1"
-        String singleLanePathAct = locations."${singleLaneDirectoryNameAct}"
-        assertEquals(singleLanePathExp, singleLanePathAct)
-    }
-
-
-    @Test
     void testLocationsForFileCopying() {
         ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile()
         Map<String, String> locations = processedMergedBamFileService.locationsForFileCopying(mergedBamFile)

@@ -47,7 +47,6 @@ class AlignmentPassServiceUnitTests extends TestData {
         referenceGenomeFile.createNewFile()
 
         alignmentPassService = new AlignmentPassService()
-        alignmentPassService.qualityAssessmentPassService = new QualityAssessmentPassService()
         alignmentPassService.referenceGenomeService = new ReferenceGenomeService()
         alignmentPassService.referenceGenomeService.configService = new ConfigService()
         createObjects()

@@ -44,22 +44,6 @@ class AbstractQualityAssessmentServiceTests {
     }
 
     @Test
-    void test_saveCoverageToProcessedBamFile_WhenCoverageIsNull_ShouldCalculateAndSetCoverage() {
-
-        final QC_BASES_MAPPED = 160
-        final EXPECTED_COVERAGE = 2
-        final EXPECTED_COVERAGE_WITH_N = 4
-
-        def processedBamFile = createProcessedBamFile()
-        def qualityAssessmentPass = createQualityAssessmentDataForProcessedBamFile(processedBamFile, QC_BASES_MAPPED)
-
-        abstractQualityAssessmentService.saveCoverageToProcessedBamFile(qualityAssessmentPass)
-
-        assert processedBamFile.coverage == EXPECTED_COVERAGE
-        assert processedBamFile.coverageWithN == EXPECTED_COVERAGE_WITH_N
-    }
-
-    @Test
     void test_saveCoverageToProcessedMergedBamFile_WhenCoverageIsNull_ShouldCalculateAndSetCoverage() {
 
         final QC_BASES_MAPPED = 320

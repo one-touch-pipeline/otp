@@ -13,15 +13,11 @@ class QAResultStatisticsService {
 
     ProcessedMergedBamFileService processedMergedBamFileService
 
-    QualityAssessmentPassService qualityAssessmentPassService
-
     QualityAssessmentMergedPassService qualityAssessmentMergedPassService
 
     ReferenceGenomeService referenceGenomeService
 
     ChromosomeQualityAssessmentMergedService chromosomeQualityAssessmentMergedService
-
-    ChromosomeQualityAssessmentService chromosomeQualityAssessmentService
 
     ProcessedMergedBamFileQaFileService processedMergedBamFileQaFileService
 

@@ -18,7 +18,6 @@ class AlignmentPassService {
     def configService
     def processingOptionService
     ReferenceGenomeService referenceGenomeService
-    QualityAssessmentPassService qualityAssessmentPassService
 
     private static final String ALIGNABLE_ALIGNMENT_PASS_DATA_FILE_CRITERIA = "seqTrack = ap.seqTrack AND fileType.type = :fileType"
     public static final String ALIGNABLE_ALIGNMENT_PASS_HQL =
@@ -70,8 +69,6 @@ class AlignmentPassService {
     public void alignmentPassFinished(AlignmentPass alignmentPass) {
         notNull(alignmentPass, "the alignmentPass for the method alignmentPassFinished ist null")
         update(alignmentPass, AlignmentState.FINISHED)
-        ProcessedBamFile bamFile = ProcessedBamFile.findByAlignmentPass(alignmentPass)
-        qualityAssessmentPassService.notStarted(bamFile)
     }
 
     private void update(AlignmentPass alignmentPass, AlignmentState state) {

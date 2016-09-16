@@ -26,11 +26,8 @@ class ProcessedMergedBamFileService {
 
     ChecksumFileService checksumFileService
 
-    QualityAssessmentPassService qualityAssessmentPassService
-
     MergingWorkPackageService mergingWorkPackageService
 
-    ProcessedBamFileQaFileService processedBamFileQaFileService
 
     // "QualityAssessment" is part of the folder structure in the project directory.
     // The results of the QA-workflow are copied to "QualityAssessment"
@@ -332,27 +329,6 @@ class ProcessedMergedBamFileService {
         notNull(file, "the input of the method qaResultTempDestinationDirectory is null")
         return destinationTempDirectory(file) + '/' + QUALITY_ASSESSMENT_DIR
     }
-
-    /**
-     * @param mergedBamFile, the processedMergedBamFile for which the corresponding single lane qa result files are needed
-     * @return a map containing the run lane directories as keys and the source directories of the single lane qa results
-     */
-    public Map<String, String> singleLaneQAResultsDirectories (ProcessedMergedBamFile mergedBamFile) {
-        notNull(mergedBamFile, "the input of the method singleLaneQAResultsDirectories is null")
-        Map<String, String> singleLaneQAResultsDirectories = [:]
-        List<AbstractBamFile> bamFiles = abstractBamFileService.findByProcessedMergedBamFile(mergedBamFile)
-        for (bamFile in bamFiles) {
-            if (bamFile instanceof ProcessedBamFile) {
-                QualityAssessmentPass pass = qualityAssessmentPassService.latestQualityAssessmentPass(bamFile)
-                SeqTrack track = processedBamFileService.seqTrack(bamFile)
-                String sourcePath = processedBamFileQaFileService.directoryPath(pass)
-                String destinationDirectoryName = processedAlignmentFileService.getRunLaneDirectory(track)
-                singleLaneQAResultsDirectories.put(destinationDirectoryName, sourcePath)
-            }
-        }
-        return singleLaneQAResultsDirectories
-    }
-
 
     public LibraryPreparationKit libraryPreparationKit(ProcessedMergedBamFile bamFile) {
         notNull(bamFile, 'bam file must not be null')

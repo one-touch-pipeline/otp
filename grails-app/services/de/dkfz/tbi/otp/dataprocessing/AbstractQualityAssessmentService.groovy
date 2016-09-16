@@ -17,26 +17,6 @@ class AbstractQualityAssessmentService {
 
     ReferenceGenomeService referenceGenomeService
 
-    void parseQaStatistics(QualityAssessmentPass qualityAssessmentPass) {
-        String qualityAssessmentDataFilePath = processedBamFileQaFileService.qualityAssessmentDataFilePath(qualityAssessmentPass)
-        File file = new File(qualityAssessmentDataFilePath)
-        JSONObject json = JSON.parse(file.text)
-        Iterator chromosomes = json.keys()
-        AbstractQualityAssessment qualityAssessmentStatistics
-        chromosomes.each { String chromosome ->
-            if (chromosome == Chromosomes.overallChromosomesLabel()) {
-                qualityAssessmentStatistics = new OverallQualityAssessment(json.get(chromosome))
-            } else {
-                qualityAssessmentStatistics = new ChromosomeQualityAssessment(json.get(chromosome))
-                assert qualityAssessmentStatistics.chromosomeName == chromosome
-            }
-            qualityAssessmentStatistics.percentIncorrectPEorientation = safePercentCalculation(qualityAssessmentStatistics.referenceAgreementStrandConflict, qualityAssessmentStatistics.referenceAgreement)
-            qualityAssessmentStatistics.percentReadPairsMapToDiffChrom = safePercentCalculation(qualityAssessmentStatistics.endReadAberration, qualityAssessmentStatistics.totalMappedReadCounter)
-            qualityAssessmentStatistics.qualityAssessmentPass = qualityAssessmentPass
-            assertSave(qualityAssessmentStatistics)
-        }
-    }
-
     void parseQaStatistics(QualityAssessmentMergedPass qualityAssessmentPass) {
         String qualityAssessmentDataFilePath = processedMergedBamFileQaFileService.qualityAssessmentDataFilePath(qualityAssessmentPass)
         File file = new File(qualityAssessmentDataFilePath)
@@ -151,14 +131,6 @@ class AbstractQualityAssessmentService {
         roddyBamFile.coverage = mergedQa.genomeWithoutNCoverageQcBases
         roddyBamFile.coverageWithN = abstractBamFileService.calculateCoverageWithN(roddyBamFile)
         assert roddyBamFile.save(flush: true)
-    }
-
-
-    void saveCoverageToProcessedBamFile(QualityAssessmentPass qualityAssessmentPass) {
-        ProcessedBamFile processedBamFile = qualityAssessmentPass.processedBamFile
-        processedBamFile.coverage = abstractBamFileService.calculateCoverageWithoutN(processedBamFile)
-        processedBamFile.coverageWithN = abstractBamFileService.calculateCoverageWithN(processedBamFile)
-        assertSave(processedBamFile)
     }
 
     void saveCoverageToAbstractMergedBamFile(QualityAssessmentMergedPass qualityAssessmentMergedPass) {

@@ -1,8 +1,11 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import static de.dkfz.tbi.otp.ngsdata.LsdfFilesService.getPath
-import static org.springframework.util.Assert.notNull
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.logging.*
+
+import static de.dkfz.tbi.otp.ngsdata.LsdfFilesService.*
+import static org.springframework.util.Assert.*
+
 
 class ProcessedBamFileQaFileService {
 
@@ -28,48 +31,6 @@ class ProcessedBamFileQaFileService {
 
     public String passDirectoryName(QualityAssessmentPass pass) {
         return "pass${pass.identifier}"
-    }
-
-    public String qualityAssessmentDataFilePath(QualityAssessmentPass pass) {
-        String dir = directoryPath(pass)
-        String filename = qualityAssessmentDataFileName(pass.processedBamFile)
-        return "${dir}/${filename}"
-    }
-
-    public String coverageDataFilePath(QualityAssessmentPass pass) {
-        String dir = directoryPath(pass)
-        String filename = coverageDataFileName(pass.processedBamFile)
-        return "${dir}/${filename}"
-    }
-
-    public String mappedFilteredSortedCoverageDataFilePath(QualityAssessmentPass pass) {
-        String dir = directoryPath(pass)
-        String filename = sortedCoverageDataFileName(pass.processedBamFile)
-        return "${dir}/${filename}"
-    }
-
-    public String coveragePlotFilePath(QualityAssessmentPass pass) {
-        String dir = directoryPath(pass)
-        String filename = coveragePlotFileName(pass.processedBamFile)
-        return "${dir}/${filename}"
-    }
-
-    public String insertSizeDataFilePath(QualityAssessmentPass pass) {
-        String dir = directoryPath(pass)
-        String filename = insertSizeDataFileName(pass.processedBamFile)
-        return "${dir}/${filename}"
-    }
-
-    public String insertSizePlotFilePath(QualityAssessmentPass pass) {
-        String dir = directoryPath(pass)
-        String filename = insertSizePlotFileName(pass.processedBamFile)
-        return "${dir}/${filename}"
-    }
-
-    public String chromosomeMappingFilePath(QualityAssessmentPass pass) {
-        String dir = directoryPath(pass)
-        String filename = chromosomeMappingFileName(pass.processedBamFile)
-        return "${dir}/${filename}"
     }
 
     public File finalDestinationDirectory(final QualityAssessmentPass pass) {
@@ -128,30 +89,6 @@ class ProcessedBamFileQaFileService {
         ]
     }
 
-    public boolean validateQADataFiles(QualityAssessmentPass pass) {
-        boolean coverageDataFileExists = validateFile(coverageDataFilePath(pass))
-        boolean qualityAssessmentFileExists = validateFile(qualityAssessmentDataFilePath(pass))
-        boolean insertSizeDataFileExists = validateFile(insertSizeDataFilePath(pass))
-        return coverageDataFileExists && qualityAssessmentFileExists && insertSizeDataFileExists
-    }
-
-    public boolean validateCoveragePlotAndUpdateProcessedBamFileStatus(QualityAssessmentPass pass) {
-        pass.processedBamFile.hasCoveragePlot = validateFile(coveragePlotFilePath(pass))
-        assertSave(pass.processedBamFile)
-        return pass.processedBamFile.hasCoveragePlot
-    }
-
-    public boolean validateInsertSizePlotAndUpdateProcessedBamFileStatus(QualityAssessmentPass pass) {
-        pass.processedBamFile.hasInsertSizePlot = validateFile(insertSizePlotFilePath(pass))
-        assertSave(pass.processedBamFile)
-        return pass.processedBamFile.hasInsertSizePlot
-    }
-
-    private boolean validateFile(String path) {
-        File file = new File(path)
-        return file.canRead() && file.size() != 0
-    }
-
     /**
      * Checks consistency for {@link #deleteProcessingFiles(QualityAssessmentPass)}.
      *
@@ -187,13 +124,5 @@ class ProcessedBamFileQaFileService {
                 pass.project,
                 new File(directoryPath(pass)),
                 allFileNames(pass.processedBamFile))
-    }
-
-    private def assertSave(def object) {
-        object = object.save(flush: true)
-        if (!object) {
-            throw new SavingException(object.toString())
-        }
-        return object
     }
 }
