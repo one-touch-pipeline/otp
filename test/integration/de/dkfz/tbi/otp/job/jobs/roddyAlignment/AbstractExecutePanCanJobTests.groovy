@@ -151,7 +151,8 @@ workflowSpecificParameter \
 CHROM_SIZES_FILE:${chromosomeStatSizeFile},\
 workflowSpecificCValues,\
 PBS_AccountName:FASTTRACK,\
-possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}"\
+possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName},\
+possibleTumorSampleNamePrefixes:"\
 """
 
         String actualCmd = abstractExecutePanCanJob.prepareAndReturnWorkflowSpecificCommand(roddyBamFile, dataManagement)
@@ -198,7 +199,8 @@ possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}"\
 "INDEX_PREFIX:${referenceGenomeFile.path},\
 CHROM_SIZES_FILE:${chromosomeStatSizeFile},\
 workflowSpecificCValues,\
-possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}"\
+possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName},\
+possibleTumorSampleNamePrefixes:"\
 """
         assert expectedCommand == abstractExecutePanCanJob.prepareAndReturnCValues(roddyBamFile)
     }
@@ -215,7 +217,8 @@ possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}"\
 CHROM_SIZES_FILE:${chromosomeStatSizeFile},\
 workflowSpecificCValues,\
 PBS_AccountName:FASTTRACK,\
-possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}"\
+possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName},\
+possibleTumorSampleNamePrefixes:"\
 """
         assert expectedCommand == abstractExecutePanCanJob.prepareAndReturnCValues(roddyBamFile)
     }

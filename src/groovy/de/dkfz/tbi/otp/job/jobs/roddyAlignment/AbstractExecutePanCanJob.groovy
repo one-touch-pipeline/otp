@@ -57,7 +57,8 @@ abstract class AbstractExecutePanCanJob extends AbstractRoddyJob {
                 ",CHROM_SIZES_FILE:${chromosomeStatSizeFile}" +
                 prepareAndReturnWorkflowSpecificCValues(roddyBamFile) +
                 "${(roddyBamFile.processingPriority >= ProcessingPriority.FAST_TRACK_PRIORITY) ? ",PBS_AccountName:FASTTRACK" : ""}" +
-                ",possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}\""
+                ",possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}" +
+                ",possibleTumorSampleNamePrefixes:\""
     }
 
 
