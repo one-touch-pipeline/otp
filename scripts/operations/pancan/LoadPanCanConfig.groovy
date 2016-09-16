@@ -61,7 +61,7 @@ LogThreadLocal.withThreadLog(System.out, { Project.withTransaction {
 
     SeqType seqType = CollectionUtils.exactlyOneElement(SeqType.findAllByRoddyNameAndLibraryLayout(seqTypeRoddyName, libraryLayout))
 
-    assert configFilePath ==~ "$OTP_ROOT_PATH/.*/configFiles/PANCAN_ALIGNMENT/PANCAN_ALIGNMENT_${seqType.roddyName}_\\d+.\\d+.\\d+_v\\d+_\\d+.xml"
+    assert configFilePath ==~ "$OTP_ROOT_PATH/.*/configFiles/(.+/)?PANCAN_ALIGNMENT/PANCAN_ALIGNMENT_${seqType.roddyName}_\\d+.\\d+.\\d+_v\\d+_\\d+.xml"
 
     Project project = CollectionUtils.exactlyOneElement(Project.findAllByName(projectName))
 
