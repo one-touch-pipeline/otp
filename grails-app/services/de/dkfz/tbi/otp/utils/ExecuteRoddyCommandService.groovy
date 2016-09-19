@@ -135,7 +135,7 @@ find -type d -user ${realm.roddyUser} -not -perm 2750 -print -exec chmod 2750 '{
 echo ""
 echo "correct file permission for non bam/bai files"
 # The file is not changed, since it needs to be stay writable"
-find -type f -user ${realm.roddyUser} -not -perm 440 -not -name "*.bam" -not -name "*.bai" -not -name ".roddyExecCache.txt" -print -exec chmod 440 '{}' \\; | wc -l
+find -type f -user ${realm.roddyUser} -not -perm 440 -not -name "*.bam" -not -name "*.bai" -not -name ".roddyExecCache.txt" -not -name "zippedAnalysesMD5.txt" -print -exec chmod 440 '{}' \\; | wc -l
 
 echo ""
 echo "correct file permission for bam/bai files"
