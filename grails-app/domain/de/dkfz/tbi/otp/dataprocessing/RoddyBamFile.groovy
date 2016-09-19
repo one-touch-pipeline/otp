@@ -136,7 +136,7 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
     }
 
     boolean hasMultipleLibraries() {
-        this.seqTracks*.libraryName.unique().size() > 1
+        this.seqTracks*.libraryDirectoryName.unique().size() > 1
     }
 
     @Override
