@@ -44,6 +44,8 @@ class Project implements Commentable, Entity {
 
     Comment comment
 
+    String mailingListName
+
     static belongsTo = [
             projectGroup: ProjectGroup
     ]
@@ -80,6 +82,11 @@ class Project implements Commentable, Entity {
             }
         })
         comment(nullable: true)
+        mailingListName(nullable: true, validator: { val, obj ->
+            if (val) {
+                return val.startsWith("tr_")
+            }
+        })
     }
 
     String toString() {

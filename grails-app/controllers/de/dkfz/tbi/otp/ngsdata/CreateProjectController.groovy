@@ -18,7 +18,7 @@ class CreateProjectController {
                 message = "'" + errors.getRejectedValue() + "' is not a valid value for '" + errors.getField() + "'. Error code: '" + errors.code + "'"
             }
             else {
-                redirect(controller:"projectOverview", action: "specificOverview", params: [project: projectService.createProject(cmd.name, cmd.directory, Realm.LATEST_DKFZ_REALM, 'noAlignmentDecider', cmd.projectCategory, cmd.unixGroup, cmd.projectGroup, cmd.nameInMetadataFiles, cmd.copyFiles).name])
+                redirect(controller:"projectOverview", action: "specificOverview", params: [project: projectService.createProject(cmd.name, cmd.directory, Realm.LATEST_DKFZ_REALM, 'noAlignmentDecider', cmd.projectCategory, cmd.unixGroup, cmd.projectGroup, cmd.nameInMetadataFiles, cmd.copyFiles, cmd.mailingListName).name])
             }
         }
         return [
@@ -36,6 +36,7 @@ class CreateProjectControllerSubmitCommand implements Serializable {
     String directory
     String nameInMetadataFiles
     String unixGroup
+    String mailingListName
     String projectGroup
     String projectCategory
     String submit
@@ -61,6 +62,11 @@ class CreateProjectControllerSubmitCommand implements Serializable {
             }
             if (!(OtpPath.isValidPathComponent(val))) {
                 return 'Unix group contains invalid characters'
+            }
+        })
+        mailingListName(nullable: true, validator: {val, obj ->
+            if (val) {
+                return val.startsWith("tr_")
             }
         })
         nameInMetadataFiles(nullable: true, validator: {val, obj ->

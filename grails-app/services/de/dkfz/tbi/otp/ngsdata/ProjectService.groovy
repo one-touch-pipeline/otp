@@ -100,12 +100,13 @@ class ProjectService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public Project createProject(String name, String dirName, String realmName, String alignmentDeciderBeanName, String categoryName, String unixGroup, String projectGroup, String nameInMetadataFiles, boolean copyFiles) {
+    public Project createProject(String name, String dirName, String realmName, String alignmentDeciderBeanName, String categoryName, String unixGroup, String projectGroup, String nameInMetadataFiles, boolean copyFiles, String mailingListName) {
         assert OtpPath.isValidPathComponent(unixGroup): "unixGroup '${unixGroup}' contains invalid characters"
         Project project = createProject(name, dirName, realmName, alignmentDeciderBeanName, categoryName)
         project.hasToBeCopied = copyFiles
         project.nameInMetadataFiles = nameInMetadataFiles
         project.setProjectGroup(ProjectGroup.findByName(projectGroup))
+        project.mailingListName = mailingListName
         assert project.save(flush: true, failOnError: true)
 
         GroupCommand groupCommand = new GroupCommand(
@@ -145,6 +146,12 @@ class ProjectService {
         ProjectCategory categoryEntry = exactlyOneElement(ProjectCategory.findAllByName(categoryName))
         project.category = categoryEntry
         project.save(flush: true, failOnError: true)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    public void updateMailingListName(String mailingListName, Project project) {
+        project.mailingListName = mailingListName
+        project.save(flush: true)
     }
 
     /**

@@ -63,6 +63,10 @@
                     <td class="myKey"><g:message code="projectOverview.copyFiles"/></td>
                     <td id="copyFiles">${copyFiles}</td>
                 </tr>
+                <tr>
+                    <td class="myKey"><g:message code="projectOverview.mailingListName"/></td>
+                    <td id="mailingListName">${mailingListName} <input class="edit-button-left" type="button" onclick="$.otp.projectOverviewTable.updateValue('MailingListName','','${mailingListName}', '')"/></td>
+                </tr>
             </table>
         </div>
 

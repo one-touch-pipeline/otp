@@ -61,7 +61,7 @@ class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
         when:
         Project project
         SpringSecurityUtils.doWithAuth("admin") {
-            project = projectService.createProject(name, dirName, Realm.LATEST_DKFZ_REALM, AlignmentDeciderBeanNames.NO_ALIGNMENT.bean, 'category', group, projectGroup, nameInMetadataFiles, copyFiles)
+            project = projectService.createProject(name, dirName, Realm.LATEST_DKFZ_REALM, AlignmentDeciderBeanNames.NO_ALIGNMENT.bean, 'category', group, projectGroup, nameInMetadataFiles, copyFiles, mailingListName)
         }
 
         then:
@@ -71,13 +71,15 @@ class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
         project.nameInMetadataFiles == nameInMetadataFiles
         project.hasToBeCopied == copyFiles
         project.category == ProjectCategory.findByName('category')
+        project.mailingListName == mailingListName
 
         where:
-        name        | dirName   | projectGroup    | nameInMetadataFiles   | copyFiles
-        'project'   | 'dir'     | ''              | 'project'             | true
-        'project'   | 'dir'     | ''              | null                  | true
-        'project'   | 'dir'     | 'projectGroup'  | 'project'             | true
-        'project'   | 'dir'     | ''              | 'project'             | false
+        name      | dirName | projectGroup   | nameInMetadataFiles | copyFiles | mailingListName
+        'project' | 'dir'   | ''             | 'project'           | true      | "tr_projectMailingList"
+        'project' | 'dir'   | ''             | null                | true      | "tr_projectMailingList"
+        'project' | 'dir'   | 'projectGroup' | 'project'           | true      | "tr_projectMailingList"
+        'project' | 'dir'   | ''             | 'project'           | false     | "tr_projectMailingList"
+        'project' | 'dir'   | ''             | 'project'           | true      | ""
     }
 
     void "test createProject if directory is created"() {
@@ -87,7 +89,7 @@ class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
         when:
         Project project
         SpringSecurityUtils.doWithAuth("admin") {
-            project = projectService.createProject('project', 'dir', Realm.LATEST_DKFZ_REALM, AlignmentDeciderBeanNames.NO_ALIGNMENT.bean, 'category', group, '', null, false)
+            project = projectService.createProject('project', 'dir', Realm.LATEST_DKFZ_REALM, AlignmentDeciderBeanNames.NO_ALIGNMENT.bean, 'category', group, '', null, false, "tr_MailingListName")
         }
 
         then:
@@ -111,34 +113,49 @@ class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
         when:
         Project project
         SpringSecurityUtils.doWithAuth("admin") {
-            project = projectService.createProject(name, dirName, Realm.LATEST_DKFZ_REALM, AlignmentDeciderBeanNames.NO_ALIGNMENT.bean, 'category', group, '', nameInMetadataFiles, true)
+            project = projectService.createProject(name, dirName, Realm.LATEST_DKFZ_REALM, AlignmentDeciderBeanNames.NO_ALIGNMENT.bean, 'category', group, '', nameInMetadataFiles, true, "tr_MailingListName")
         }
 
         then:
-            ValidationException ex = thrown()
-            ex.message.contains(errorName) && ex.message.contains(errorLocaction)
+        ValidationException ex = thrown()
+        ex.message.contains(errorName) && ex.message.contains(errorLocaction)
 
 
         where:
-        name            | dirName    | nameInMetadataFiles  || errorName                                                                                    | errorLocaction
-        'testProject'   | 'dir'      | 'project'            || 'unique'                                                                                     | 'on field \'name\': rejected value [testProject]'
-        'testProject2'  | 'dir'      | 'project'            || 'this name is already used in another project as nameInMetadataFiles entry'                  | 'on field \'name\': rejected value [testProject2]'
-        'project'       | 'dir'      | 'testProject'        || 'this nameInMetadataFiles is already used in another project as name entry'                  | 'on field \'nameInMetadataFiles\': rejected value [testProject]'
-        'project'       | 'dir'      | 'testProject2'       || 'this nameInMetadataFiles is already used in another project as nameInMetadataFiles entry'   | 'on field \'nameInMetadataFiles\': rejected value [testProject2]'
-        'project'       | 'dir'      | ''                   || 'blank'                                                                                      | 'on field \'nameInMetadataFiles\': rejected value []'
-        'project'       | 'testDir'  | ''                   || 'unique'                                                                                     | 'on field \'dirName\': rejected value [testDir]'
+        name           | dirName   | nameInMetadataFiles || errorName | errorLocaction
+        'testProject'  | 'dir'     | 'project'           || 'unique' | 'on field \'name\': rejected value [testProject]'
+        'testProject2' | 'dir'     | 'project'           || 'this name is already used in another project as nameInMetadataFiles entry' | 'on field \'name\': rejected value [testProject2]'
+        'project'      | 'dir'     | 'testProject'       || 'this nameInMetadataFiles is already used in another project as name entry' | 'on field \'nameInMetadataFiles\': rejected value [testProject]'
+        'project'      | 'dir'     | 'testProject2'      || 'this nameInMetadataFiles is already used in another project as nameInMetadataFiles entry' | 'on field \'nameInMetadataFiles\': rejected value [testProject2]'
+        'project'      | 'dir'     | ''                  || 'blank' | 'on field \'nameInMetadataFiles\': rejected value []'
+        'project'      | 'testDir' | ''                  || 'unique' | 'on field \'dirName\': rejected value [testDir]'
     }
 
     void "test createProject invalid unix group"() {
         when:
         Project project
         SpringSecurityUtils.doWithAuth("admin") {
-            project = projectService.createProject('project', 'dir', Realm.LATEST_DKFZ_REALM, AlignmentDeciderBeanNames.NO_ALIGNMENT.bean, 'category', 'invalidValue', '', null, false)
+            project = projectService.createProject('project', 'dir', Realm.LATEST_DKFZ_REALM, AlignmentDeciderBeanNames.NO_ALIGNMENT.bean, 'category', 'invalidValue', '', null, false, "tr_MailingListName")
         }
 
         then:
         AssertionError ex = thrown()
         ex.message.contains('Expected exit code to be 0, but it is 1')
+    }
+
+    void "test createProject with invalid mailingListName"() {
+        given:
+        String group = grailsApplication.config.otp.testing.group
+
+        when:
+        Project project
+        SpringSecurityUtils.doWithAuth("admin") {
+            project = projectService.createProject('project', 'dir', Realm.LATEST_DKFZ_REALM, AlignmentDeciderBeanNames.NO_ALIGNMENT.bean, 'category', group, '', null, false, "invalidMailingListName")
+        }
+
+        then:
+        ValidationException exception = thrown()
+        exception.message.contains("mailingListName")
     }
 
     void "test createProject valid input, when directory with wrong unix group already exists"() {
@@ -159,7 +176,7 @@ class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
 
         when:
         SpringSecurityUtils.doWithAuth("admin") {
-            projectService.createProject('project', 'dir', Realm.LATEST_DKFZ_REALM, AlignmentDeciderBeanNames.NO_ALIGNMENT.bean, 'category', group, '', null, false)
+            projectService.createProject('project', 'dir', Realm.LATEST_DKFZ_REALM, AlignmentDeciderBeanNames.NO_ALIGNMENT.bean, 'category', group, '', null, false, "tr_mailingListName")
         }
         then:
         Files.readAttributes(projectDirectory.toPath(), PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS).group().toString() == group
@@ -168,7 +185,7 @@ class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
     void "test updateNameInMetadata valid input"() {
         when:
         Project project = Project.findByName("testProject")
-        SpringSecurityUtils.doWithAuth("admin"){
+        SpringSecurityUtils.doWithAuth("admin") {
             projectService.updateNameInMetadata(name, project)
         }
 
@@ -176,11 +193,11 @@ class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
         project.nameInMetadataFiles == name
 
         where:
-        name                | _
-        'testProject'       | _
-        'testProject2'      | _
-        'newTestProject'    | _
-        null                | _
+        name             | _
+        'testProject'    | _
+        'testProject2'   | _
+        'newTestProject' | _
+        null             | _
     }
 
     void "test updateNameInMetadata invalid input"() {
@@ -209,7 +226,7 @@ class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
         when:
         Project project
         SpringSecurityUtils.doWithAuth("admin") {
-            project = projectService.createProject('project', 'dir', Realm.LATEST_DKFZ_REALM, 'noAlignmentDecider', 'invalid category', group, '', 'project', true)
+            project = projectService.createProject('project', 'dir', Realm.LATEST_DKFZ_REALM, 'noAlignmentDecider', 'invalid category', group, '', 'project', true, "tr_mailingListName")
         }
 
         then:
@@ -244,6 +261,21 @@ class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
 
         then:
         project.category == projectCategory
+    }
+
+    void "test updateMailingListName valid name"() {
+        given:
+        String mailingListName = "tr_testName"
+        Project project = Project.findByName("testProject")
+
+        when:
+        assert !project.mailingListName
+        SpringSecurityUtils.doWithAuth("admin") {
+            projectService.updateMailingListName(mailingListName, project)
+        }
+
+        then:
+        project.mailingListName == mailingListName
     }
 
     void "test configureNoAlignmentDeciderProject"() {
@@ -365,7 +397,7 @@ class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
     void "test configurePanCanAlignmentDeciderProject valid input, multiple SeqTypes"() {
         setup:
         List<PanCanAlignmentConfiguration> configurations = DomainFactory.createPanCanAlignableSeqTypes().collect {
-                    createPanCanAlignmentConfiguration(seqType: it)
+            createPanCanAlignmentConfiguration(seqType: it)
         }
         int count = configurations.size()
 

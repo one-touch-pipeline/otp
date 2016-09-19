@@ -128,6 +128,7 @@ class ProjectOverviewController {
                 category: project.category.name,
                 projectGroup: project.projectGroup,
                 copyFiles: project.hasToBeCopied,
+                mailingListName: project.mailingListName,
                 projectCategories: ProjectCategory.listOrderByName(),
         ]
     }
@@ -368,6 +369,10 @@ class ProjectOverviewController {
 
     JSON updateCategory(UpdateCategoryCommand cmd) {
         checkErrorAndCallMethod(cmd, { projectService.updateCategory(cmd.category, projectService.getProjectByName(cmd.projectName)) })
+    }
+
+    JSON updateMailingListName(UpdateMailingListNameCommand cmd) {
+        checkErrorAndCallMethod(cmd, { projectService.updateMailingListName(cmd.mailingListName, projectService.getProjectByName(cmd.projectName)) })
     }
 
     JSON dataTableContactPerson(DataTableCommand cmd) {
@@ -626,5 +631,13 @@ class UpdateCategoryCommand implements Serializable {
     String projectName
     void setValue(String category) {
         this.category = category
+    }
+}
+
+class UpdateMailingListNameCommand implements Serializable {
+    String mailingListName
+    String projectName
+    void setValue(String mailingListName) {
+        this.mailingListName = mailingListName
     }
 }
