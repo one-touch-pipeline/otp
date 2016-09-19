@@ -596,8 +596,23 @@ class LinkFilesToFinalDestinationServiceTests {
         setUp_allFine()
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
         RoddyQualityAssessment qa = roddyBamFile.overallQualityAssessment
+        qa.pairedRead1++
+        assert qa.save(flush: true)
+        assert roddyBamFile.numberOfReadsFromQa > roddyBamFile.numberOfReadsFromFastQc
+
+        linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanup(roddyBamFile, realm)
+    }
+
+    @Test
+    void testExecute_wgbsRoddyBamFileHasLessNumberOfReadsThanAllSeqTracksTogether_ShouldBeFine() {
+        setUp_allFine()
+        roddyBamFile.mergingWorkPackage.seqType = DomainFactory.createWholeGenomeSeqType()
+        assert roddyBamFile.mergingWorkPackage.save(flush: true)
+        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
+        RoddyQualityAssessment qa = roddyBamFile.overallQualityAssessment
         qa.pairedRead1--
         assert qa.save(flush: true)
+        assert roddyBamFile.numberOfReadsFromQa < roddyBamFile.numberOfReadsFromFastQc
 
         linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanup(roddyBamFile, realm)
     }
@@ -618,6 +633,7 @@ class LinkFilesToFinalDestinationServiceTests {
         RoddyQualityAssessment qa = roddyBamFile.overallQualityAssessment
         qa.pairedRead1--
         assert qa.save(flush: true)
+        assert roddyBamFile.numberOfReadsFromQa < roddyBamFile.numberOfReadsFromFastQc
 
         assert shouldFail (AssertionError) {
             linkFilesToFinalDestinationService.prepareRoddyBamFile(roddyBamFile)
