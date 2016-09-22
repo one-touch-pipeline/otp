@@ -101,7 +101,7 @@ class MetadataImportService {
         if (context.directoryStructure instanceof DataFilesOnGpcfMidTerm) {
             File source = context.metadataFile
             try {
-                String ilse = context.spreadsheet.dataRows[0].getCellByColumnTitle(MetaDataColumn.ILSE_NO.name())
+                String ilse = context.spreadsheet.dataRows[0].getCellByColumnTitle(MetaDataColumn.ILSE_NO.name()).text
                 File targetDirectory = lsdfFilesService.getIlseFolder(ilse)
                 File targetFile = new File(targetDirectory, source.name)
                 if (!targetFile.exists()) {
