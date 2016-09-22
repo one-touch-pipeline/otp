@@ -44,6 +44,9 @@ class ProjectOverviewService {
                     Map<String, AlignmentInfo> result = [:]
                     rgpst*.seqType.unique().sort {it.displayName }.each { SeqType seqType ->
                         RoddyWorkflowConfig workflowConfig = RoddyWorkflowConfig.getLatestForProject(project, seqType, Pipeline.findByNameAndType(Pipeline.Name.PANCAN_ALIGNMENT, Pipeline.Type.ALIGNMENT))
+                        if (!workflowConfig) {
+                            return //pancan not configured for this seq type, skipped
+                        }
                         String nameInConfigFile = workflowConfig.getNameUsedInConfig()
 
                         ProcessOutput output = executeAndWait(
