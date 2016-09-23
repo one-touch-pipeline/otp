@@ -91,8 +91,8 @@ class UserService {
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    List<User> getAllUsers(Integer offset, Integer count) {
-        return User.list([offset: offset, max: Math.min(count, 100)])
+    List<User> getAllUsers() {
+        return User.list()
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")

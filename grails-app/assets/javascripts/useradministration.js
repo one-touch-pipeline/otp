@@ -31,7 +31,8 @@ $.otp.userAdministration.loadUserList = function () {
         // TODO: in future it might be interesting to allow filtering
         bFilter: false,
         bProcessing: true,
-        bServerSide: true,
+        bServerSide: false,
+        bSort: true,
         bJQueryUI: false,
         bPaginate: false,
         bScrollCollapse: true,
@@ -40,7 +41,7 @@ $.otp.userAdministration.loadUserList = function () {
             controller: 'userAdministration',
             action: 'dataTableSource'
         }),
-        "fnServerData": function (sSource, aoData, fnCallback) {
+        fnServerData: function (sSource, aoData, fnCallback) {
             $.ajax({
                 "dataType": 'json',
                 "type": "POST",

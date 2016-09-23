@@ -60,8 +60,9 @@ class UserAdministrationController {
         dataToRender.iTotalRecords = userService.getUserCount()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
 
-        List users = userService.getAllUsers(cmd.iDisplayStart, cmd.iDisplayLength)
-        users.each { user ->
+        List users = userService.getAllUsers()
+
+        users.each { User user ->
             dataToRender.aaData << [user.id, user.username, user.email, user.jabberId, user.enabled, user.accountExpired, user.accountLocked, user.passwordExpired]
         }
         render dataToRender as JSON
