@@ -7,6 +7,7 @@ The following code allows to show the processing state for
 * project (can take some time, depending of project)
 * all lanes in processing:
 ** all withdrawn lanes are ignored
+** lanes where datainstalation  not finished
 ** lanes where fastqc not finished and data load after 1.1.2015 included
 ** running alignments
 *** seqtracks which belong to run segments where flag 'align' is set to false are ignored
@@ -729,31 +730,6 @@ def showSeqTracksRoddy = {List<SeqTrack> seqTracksToAlign, String workflow ->
 def showSeqTracks = {Collection<SeqTrack> seqTracks ->
     boolean allFinished = true
 
-    List<DataFile> datafiles = DataFile.findAllBySeqTrackInList(seqTracks)
-    if (datafiles) {
-        output << "\nDataInstallationWorkflow: "
-        Map <Collection<RunSegment.FilesStatus>, Collection<DataFile>> dataFilesGroupedByStatus = datafiles.groupBy {
-            it.runSegment.filesStatus
-        }
-
-        allFinished &= dataFilesGroupedByStatus.keySet() == [RunSegment.FilesStatus.FILES_CORRECT] as Set
-
-        Collection<DataFile> runningDataFiles = dataFilesGroupedByStatus.findAll {key, value ->
-            RunSegment.PROCESSING_FILE_STATUSES.contains(key)
-        }.values().flatten()
-
-        showWaiting(dataFilesGroupedByStatus[RunSegment.FilesStatus.NEEDS_INSTALLATION]*.run?.unique(), {it})
-        showRunning('DataInstallationWorkflow', runningDataFiles*.run?.unique(), {it}, {it})
-        showFinished(dataFilesGroupedByStatus[RunSegment.FilesStatus.FILES_CORRECT]*.run?.unique(), {it})
-
-        seqTracks = dataFilesGroupedByStatus[RunSegment.FilesStatus.FILES_CORRECT]*.seqTrack?.unique()
-        if (!seqTracks){
-            output << "No lanes left"
-            return
-        }
-        datafiles = null
-    }
-
     //remove withdrawn
     List<SeqTrack> seqTracksNotWithdrawn = findNotWithdrawn(seqTracks)
     if (!seqTracksNotWithdrawn) {
@@ -761,9 +737,24 @@ def showSeqTracks = {Collection<SeqTrack> seqTracks ->
         return
     }
 
+
+    //data installation workflow
+    Map<SeqTrack.DataProcessingState, Collection<SeqTrack>> dataInstallationState =
+            seqTracksNotWithdrawn.groupBy {it.dataInstallationState ?: SeqTrack.DataProcessingState.FINISHED }
+
+    allFinished &= dataInstallationState.keySet() == [SeqTrack.DataProcessingState.FINISHED] as Set
+    Collection<SeqTrack> seqTracksFinishedDataInstallationWorkflow = handleStateMap(dataInstallationState, "DataInstallationWorkflow", {
+        "${it.sample}  ${it.seqType}  ${it.run}  ${it.laneId}  ${it.project}  ilse: ${it.ilseId} id: ${it.id}"
+    })
+
+    if (!seqTracksFinishedDataInstallationWorkflow) {
+        output << "\nnot all workflows are finished"
+        return
+    }
+
     //fastqc
     Map<SeqTrack.DataProcessingState, Collection<SeqTrack>> seqTracksNotWithdrawnByFastqcState =
-            seqTracksNotWithdrawn.groupBy {it.fastqcState}
+            seqTracksFinishedDataInstallationWorkflow.groupBy {it.fastqcState}
 
     allFinished &= seqTracksNotWithdrawnByFastqcState.keySet() == [SeqTrack.DataProcessingState.FINISHED] as Set
     Collection<SeqTrack> seqTracksNotWithdrawnFinishedFastqcWorkflow = handleStateMap(seqTracksNotWithdrawnByFastqcState, "FastqcWorkflow", {
@@ -949,6 +940,9 @@ if (allProcessed) {
                 datafile.fileWithdrawn = true
         ) and (
             (
+                seqTrack.dataInstallationState != '${SeqTrack.DataProcessingState.FINISHED}'
+                and  seqTrack.dataInstallationState is not null
+            ) or (
                 seqTrack.fastqcState != '${SeqTrack.DataProcessingState.FINISHED}'
                 and seqTrack.id >= ${firstIdToCheck}
             ) or (
