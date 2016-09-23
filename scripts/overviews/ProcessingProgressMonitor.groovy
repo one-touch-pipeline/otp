@@ -267,12 +267,14 @@ def findNotWithdrawn = { List<SeqTrack> seqTracks ->
 def findAlignable = { List<SeqTrack> seqTracks ->
     Map<Boolean, List<SeqTrack>> groupAfterAlignable = seqTracks.groupBy({allignableSeqtypes.contains(it.seqType) })
 
+    output << "\n\n"
+
     if (groupAfterAlignable[false]) {
         output << "count of lanes OTP can not align: ${groupAfterAlignable[false].size()}"
     }
 
     if (groupAfterAlignable[true]) {
-        output << "count of lanes OTP of SeqTypes OTP can align: ${groupAfterAlignable[true].size()}"
+        output << "count of lanes OTP can align: ${groupAfterAlignable[true].size()}"
     } else {
         output << "no lanes left of SeqTypes which OTP could align"
         return []
@@ -773,7 +775,7 @@ def showSeqTracks = {Collection<SeqTrack> seqTracks ->
         return
     }
 
-    output << "\nThere are ${seqTracksToAlign.size()} seqtracks to align"
+    output << "\n"
 
     Map<String, Collection<SeqTrack>> seqTracksByAlignmentDeciderBeanName = seqTracksToAlign.groupBy { it.project.alignmentDeciderBeanName }
 
@@ -786,10 +788,10 @@ def showSeqTracks = {Collection<SeqTrack> seqTracks ->
                 output << "${seqTracksByAlignmentDeciderBeanName['panCanAlignmentDecider'].size()} SeqTracks use the Pan-Cancer alignment"
                 break
             case 'noAlignmentDecider':
-                output << "${seqTracksByAlignmentDeciderBeanName['noAlignmentDecider'].size()} SeqTracks don't align"
+                output << "${seqTracksByAlignmentDeciderBeanName['noAlignmentDecider'].size()} SeqTracks are not configured to be aligned by OTP"
                 break
             default:
-                throw new RuntimeException("Unknown alignment decider: ${it}. Please inform a maintainer")
+                throw new RuntimeException("Unknown alignment decider: ${it}. Please inform maintainer (Stefan or Jan)")
         }
     }
 
@@ -799,9 +801,9 @@ def showSeqTracks = {Collection<SeqTrack> seqTracks ->
     seqTracksFinishedAlignment += showSeqTracksOtp(seqTracksByAlignmentDeciderBeanName['defaultOtpAlignmentDecider'])
 
     //alignment Roddy
-    Map<Boolean, List<SeqTrack>> isWgbs = seqTracksByAlignmentDeciderBeanName['panCanAlignmentDecider'].groupBy {it.seqType.isWgbs()}
-    seqTracksFinishedAlignment += showSeqTracksRoddy(isWgbs[false], 'PanCanWorkflow')
-    seqTracksFinishedAlignment += showSeqTracksRoddy(isWgbs[true], 'WgbsAlignmentWorkflow')
+    Map<Boolean, List<SeqTrack>> isWgbs = seqTracksByAlignmentDeciderBeanName['panCanAlignmentDecider']?.groupBy {it.seqType.isWgbs()}
+    seqTracksFinishedAlignment += showSeqTracksRoddy(isWgbs?.get(false), 'PanCanWorkflow')
+    seqTracksFinishedAlignment += showSeqTracksRoddy(isWgbs?.get(true), 'WgbsAlignmentWorkflow')
 
     if (!seqTracksFinishedAlignment) {
         return
