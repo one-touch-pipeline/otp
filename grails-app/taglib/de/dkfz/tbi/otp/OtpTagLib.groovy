@@ -128,6 +128,8 @@ class OtpTagLib {
                 return "/templates/editorSwitchNewFreeTextValues"
             case "sampleIdentifier":
                 return "/templates/editSampleIdentifiers"
+            case "textArea":
+                return "/templates/editorSwitchTextArea"
             default:
                 return "/templates/editorSwitch"
         }

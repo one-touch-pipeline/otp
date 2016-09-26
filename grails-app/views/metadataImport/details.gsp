@@ -10,16 +10,38 @@
 <body>
 <div class="body">
   <h2>${g.message(code: "metadataImport.details.otrsTicket")}</h2>
-  <g:message code="metadataImport.details.otrsTicketNumber" />
-  <otp:editorSwitch
-          template="urlValue"
-          roles="ROLE_OPERATOR"
-          link="${g.createLink(
-                  controller: 'metadataImport',
-                  action: 'assignOtrsTicketToRunSegment',
-                  id: runSegment.id)}"
-          url="${runSegment.otrsTicket?.url ?: "#"}"
-          value="${runSegment.otrsTicket?.ticketNumber ?: g.message(code: "metadataImport.details.ticketMissing")}"/>
+  <table style="width: auto;">
+    <tr>
+      <td>
+        <g:message code="metadataImport.details.otrsTicketNumber"/>
+      </td>
+      <td>
+        <otp:editorSwitch
+                template="urlValue"
+                roles="ROLE_OPERATOR"
+                link="${g.createLink(
+                        controller: 'metadataImport',
+                        action: 'assignOtrsTicketToRunSegment',
+                        id: runSegment.id)}"
+                url="${runSegment.otrsTicket?.url ?: "#"}"
+                value="${runSegment.otrsTicket?.ticketNumber ?: g.message(code: "metadataImport.details.ticketMissing")}"/>
+      </td>
+    </tr>
+    <g:if test="${runSegment.otrsTicket}">
+      <tr>
+        <td>
+          <g:message code="metadataImport.details.otrsTicket.seqcenter.comment"/>
+        </td>
+        <td>
+          <otp:editorSwitch
+                  roles="ROLE_OPERATOR"
+                  template="textArea"
+                  link="${g.createLink(controller: "metadataImport", action: "updateSeqCenterComment", id: runSegment.otrsTicket.id)}"
+                  value="${runSegment.otrsTicket.seqCenterComment}"/>
+        </td>
+      </tr>
+    </g:if>
+  </table>
   <h2>${g.message(code: "metadataImport.details.metadataFiles")}</h2>
   <ul>
     <g:each in="${data.metaDataFiles}" var="metaDataFile">

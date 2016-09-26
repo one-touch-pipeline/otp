@@ -83,15 +83,15 @@ class MetadataImportService {
      * @param previousValidationMd5sum May be {@code null}
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    ValidateAndImportResult validateAndImportWithAuth(File metadataFile, String directoryStructureName, boolean align, boolean ignoreWarnings, String previousValidationMd5sum, String ticketNumber) {
-        return validateAndImport(metadataFile, directoryStructureName, align, ignoreWarnings, previousValidationMd5sum, ticketNumber)
+    ValidateAndImportResult validateAndImportWithAuth(File metadataFile, String directoryStructureName, boolean align, boolean ignoreWarnings, String previousValidationMd5sum, String ticketNumber, String seqCenterComment) {
+        return validateAndImport(metadataFile, directoryStructureName, align, ignoreWarnings, previousValidationMd5sum, ticketNumber, seqCenterComment)
     }
 
-    ValidateAndImportResult validateAndImport(File metadataFile, String directoryStructureName, boolean align, boolean ignoreWarnings, String previousValidationMd5sum, String ticketNumber) {
+    ValidateAndImportResult validateAndImport(File metadataFile, String directoryStructureName, boolean align, boolean ignoreWarnings, String previousValidationMd5sum, String ticketNumber, String seqCenterComment) {
         MetadataValidationContext context = validate(metadataFile, directoryStructureName)
         MetaDataFile metadataFileObject = null
         if (mayImport(context, ignoreWarnings, previousValidationMd5sum)) {
-            metadataFileObject = importMetadataFile(context, align, ticketNumber)
+            metadataFileObject = importMetadataFile(context, align, ticketNumber, seqCenterComment)
             copyMetaDataFileIfMidterm(context)
         }
         return new ValidateAndImportResult(context, metadataFileObject)
@@ -128,7 +128,7 @@ class MetadataImportService {
 
     List<ValidateAndImportResult> validateAndImportMultiple(String otrsTicketNumber, Collection<File> metadataFiles, String directoryStructureName) {
         List<ValidateAndImportResult> results = metadataFiles.collect {
-            validateAndImport(it, directoryStructureName, true, false, null, otrsTicketNumber)
+            validateAndImport(it, directoryStructureName, true, false, null, otrsTicketNumber, null)
         }
         List<MetadataValidationContext> failedValidations = results.findAll { it.metadataFile == null }*.context
         if (failedValidations.isEmpty()) {
@@ -202,7 +202,7 @@ class MetadataImportService {
         return false
     }
 
-    protected MetaDataFile importMetadataFile(MetadataValidationContext context, boolean align, String ticketNumber) {
+    protected MetaDataFile importMetadataFile(MetadataValidationContext context, boolean align, String ticketNumber, String seqCenterComment) {
         RunSegment runSegment = new RunSegment(
                 metaDataStatus: RunSegment.Status.COMPLETE,
                 allFilesUsed: true,
@@ -211,7 +211,7 @@ class MetadataImportService {
                 initialFormat: RunSegment.DataFormat.FILES_IN_DIRECTORY,
                 currentFormat: RunSegment.DataFormat.FILES_IN_DIRECTORY,
                 mdPath: context.metadataFile.parentFile.parent,
-                otrsTicket: ticketNumber ? trackingService.createOrResetOtrsTicket(ticketNumber) : null,
+                otrsTicket: ticketNumber ? trackingService.createOrResetOtrsTicket(ticketNumber, seqCenterComment) : null,
         )
         // TODO OTP-1952: un-comment
         //assert runSegment.save()

@@ -39,22 +39,32 @@ class TrackingServiceSpec extends Specification {
 
     TrackingService trackingService = new TrackingService()
 
+    @Unroll
     def 'test createOrResetOtrsTicket, when no OtrsTicket with ticket number exists, creates one' () {
         given:
         OtrsTicket otrsTicket
         TrackingService trackingService = new TrackingService()
 
         when:
-        otrsTicket = trackingService.createOrResetOtrsTicket(TICKET_NUMBER)
+        otrsTicket = trackingService.createOrResetOtrsTicket(TICKET_NUMBER, comment)
 
         then:
         testTicket(otrsTicket)
+        otrsTicket.seqCenterComment == comment
+
+        where:
+        comment << [
+                null,
+                '',
+                'Some Cooment',
+                'Some\nMultiline\nComment'
+        ]
     }
 
     def 'test createOrResetOtrsTicket, when OtrsTicket with ticket number exists, resets it' () {
         given:
         OtrsTicket otrsTicket = DomainFactory.createOtrsTicket([
-                ticketNumber: '2000010112345678',
+                ticketNumber: TICKET_NUMBER,
                 installationFinished: new Date(),
                 fastqcFinished: new Date(),
                 alignmentFinished: new Date(),
@@ -64,18 +74,43 @@ class TrackingServiceSpec extends Specification {
         TrackingService trackingService = new TrackingService()
 
         when:
-        otrsTicket = trackingService.createOrResetOtrsTicket(TICKET_NUMBER)
+        otrsTicket = trackingService.createOrResetOtrsTicket(TICKET_NUMBER, null)
 
         then:
         testTicket(otrsTicket)
     }
+
+    @Unroll
+    def 'test createOrResetOtrsTicket, when OtrsTicket with ticket number exists, combine the seq center comment'() {
+        given:
+        OtrsTicket otrsTicket = DomainFactory.createOtrsTicket([
+                ticketNumber: TICKET_NUMBER,
+                seqCenterComment: comment1
+        ])
+        TrackingService trackingService = new TrackingService()
+
+        when:
+        otrsTicket = trackingService.createOrResetOtrsTicket(TICKET_NUMBER, comment2)
+
+        then:
+        resultComment == otrsTicket.seqCenterComment
+
+        where:
+        comment1     | comment2     || resultComment
+        null         | null         || null
+        'Something'  | null         || 'Something'
+        null         | 'Something'  || 'Something'
+        'Something'  | 'Something'  || 'Something'
+        'Something1' | 'Something2' || 'Something1\n\nSomething2'
+    }
+
 
     def 'test createOrResetOtrsTicket, when ticket number is null, throws ValidationException' () {
         given:
         TrackingService trackingService = new TrackingService()
 
         when:
-        trackingService.createOrResetOtrsTicket(null)
+        trackingService.createOrResetOtrsTicket(null, null)
 
         then:
         ValidationException ex = thrown()
@@ -87,7 +122,7 @@ class TrackingServiceSpec extends Specification {
         TrackingService trackingService = new TrackingService()
 
         when:
-        trackingService.createOrResetOtrsTicket("")
+        trackingService.createOrResetOtrsTicket("", null)
 
         then:
         ValidationException ex = thrown()

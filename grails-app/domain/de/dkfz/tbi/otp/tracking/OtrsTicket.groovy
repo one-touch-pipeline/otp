@@ -49,6 +49,8 @@ class OtrsTicket implements Commentable, Entity {
 
     Comment comment
 
+    String seqCenterComment
+
 
     static constraints = {
         ticketNumber(nullable: false, unique: true, validator: { val, obj ->
@@ -71,7 +73,14 @@ class OtrsTicket implements Commentable, Entity {
         snvFinished(nullable: true)
 
         comment(nullable: true)
+        seqCenterComment(nullable: true)
     }
+
+    static mapping = {
+        seqCenterComment type: "text"
+    }
+
+
 
     Date getFirstImportTimestamp() {
         return (Date) MetaDataFile.createCriteria().get {

@@ -20,22 +20,30 @@ class TrackingService {
 
     public static final String TICKET_NUMBER_PREFIX = "otrsTicketNumberPrefix"
 
-    public OtrsTicket createOtrsTicket(String ticketNumber) {
-        OtrsTicket otrsTicket = new OtrsTicket(ticketNumber: ticketNumber)
+    public OtrsTicket createOtrsTicket(String ticketNumber, String seqCenterComment) {
+        OtrsTicket otrsTicket = new OtrsTicket(
+                ticketNumber: ticketNumber,
+                seqCenterComment: seqCenterComment,
+        )
         assert otrsTicket.save(flush: true, failOnError: true)
         return otrsTicket
     }
 
-    public OtrsTicket createOrResetOtrsTicket(String ticketNumber) {
+    public OtrsTicket createOrResetOtrsTicket(String ticketNumber, String seqCenterComment) {
         OtrsTicket otrsTicket = CollectionUtils.atMostOneElement(OtrsTicket.findAllByTicketNumber(ticketNumber))
         if (!otrsTicket) {
-            return createOtrsTicket(ticketNumber)
+            return createOtrsTicket(ticketNumber, seqCenterComment)
         } else {
             otrsTicket.installationFinished = null
             otrsTicket.fastqcFinished = null
             otrsTicket.alignmentFinished = null
             otrsTicket.snvFinished = null
             otrsTicket.finalNotificationSent = false
+            if (!otrsTicket.seqCenterComment) {
+                otrsTicket.seqCenterComment = seqCenterComment
+            } else if (seqCenterComment && !otrsTicket.seqCenterComment.contains(seqCenterComment)) {
+                otrsTicket.seqCenterComment += '\n\n' + seqCenterComment
+            }
             assert otrsTicket.save(flush: true, failOnError: true)
             return otrsTicket
         }

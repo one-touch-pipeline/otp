@@ -93,10 +93,16 @@
                         <g:textField name="ticketNumber" size="30" value="${cmd.ticketNumber}"/>
                     </td>
                 </tr>
+                <tr>
+                    <td><g:message code="metadataImport.otrs.seqcenter.comment"/></td>
+                    <td>
+                        <g:textArea name="seqCenterComment" rows="5" style="width: 1000px" value="${cmd.seqCenterComment}"/>
+                    </td>
+                </tr>
             </sec:ifAllGranted>
             <tr>
                 <td><g:message code="metadataImport.path"/></td>
-                <td><g:textField name="path" size="130" value="${cmd.path}"/></td>
+                <td><g:textField name="path" style="width: 1000px" value="${cmd.path}"/></td>
             </tr>
             <tr>
                 <td><g:message code="metadataImport.directory"/></td>

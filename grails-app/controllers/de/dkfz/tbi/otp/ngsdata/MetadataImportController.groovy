@@ -5,9 +5,8 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
 import de.dkfz.tbi.otp.tracking.*
 import de.dkfz.tbi.otp.user.*
 import grails.converters.*
-import grails.validation.Validateable
+import grails.validation.*
 import groovy.transform.*
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.validation.*
 
 import java.util.regex.*
@@ -28,7 +27,7 @@ class MetadataImportController {
             errorMessage = "'${fieldError.getRejectedValue()}' is not a valid value for '${fieldError.getField()}'. Error code: '${fieldError.code}'"
         }
         if (cmd.submit == "Import" && !errorMessage) {
-            ValidateAndImportResult validateAndImportResult = metadataImportService.validateAndImportWithAuth(new File(cmd.path), cmd.directory, cmd.align, cmd.ignoreWarnings, cmd.md5, cmd.ticketNumber)
+            ValidateAndImportResult validateAndImportResult = metadataImportService.validateAndImportWithAuth(new File(cmd.path), cmd.directory, cmd.align, cmd.ignoreWarnings, cmd.md5, cmd.ticketNumber, cmd.seqCenterComment)
             metadataValidationContext = validateAndImportResult.context
             if (validateAndImportResult.metadataFile != null) {
                 redirect(action: "details", id: validateAndImportResult.metadataFile.runSegment.id)
@@ -157,6 +156,14 @@ class MetadataImportController {
                 command        : command,
         ]
     }
+
+    JSON updateSeqCenterComment(Long id, String value) {
+        OtrsTicket otrsTicket = OtrsTicket.get(id)
+        otrsTicket.seqCenterComment = value
+        assert otrsTicket.save(flush: true)
+        Map map = [success: true]
+        render map as JSON
+    }
 }
 
 @Validateable
@@ -197,6 +204,7 @@ class MetadataImportControllerSubmitCommand implements Serializable {
     String md5
     String submit
     String ticketNumber
+    String seqCenterComment
     boolean align = true
     boolean ignoreWarnings
 
@@ -205,6 +213,9 @@ class MetadataImportControllerSubmitCommand implements Serializable {
         directory(nullable:true)
         md5(nullable:true)
         submit(nullable:true)
+        seqCenterComment(nullable: true, validator: { val, obj ->
+            return !val || obj.ticketNumber
+        })
         ticketNumber(nullable:true, validator: { val, obj ->
             if (val == null) {
                 return true

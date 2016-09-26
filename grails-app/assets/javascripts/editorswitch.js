@@ -10,6 +10,14 @@ $(function() {
         $("p.edit-switch-label", outerContainer).hide();
     });
 
+    $("div.edit-switch-text-area p.edit-switch-text-area-label button.edit-button-left").click(function () {
+        "use strict";
+        var outerContainer = $(this).parent().parent();
+        $("p.edit-switch-text-area-editor", outerContainer).show();
+        $("p.edit-switch-text-area-label", outerContainer).hide();
+    });
+
+
     $("div.edit-switch-url p.edit-switch-url-label button.edit-button-left").click(function () {
         "use strict";
         var outerContainer = $(this).parent().parent();
@@ -77,6 +85,34 @@ $(function() {
         });
         $("p.edit-switch-editor", outerContainer).hide();
         $("p.edit-switch-label", outerContainer).show();
+    });
+
+    /*jslint unparam: true */
+    $("div.edit-switch-text-area p.edit-switch-text-area-editor button.save").click(function () {
+        "use strict";
+        var container, outerContainer;
+        container = $(this).parent();
+        outerContainer = container.parent();
+        $.ajax({
+            url: $("input:hidden[name=target]", container).val(),
+            dataType: 'json',
+            data: {value: $("textarea", container).val()},
+            success: function (data) {
+                if (data.success) {
+                    $.otp.infoMessage($L("editorswitch.notification.success"));
+                    $("p.edit-switch-text-area-label span", outerContainer).text($("textarea", container).val());
+                } else {
+                    $.otp.warningMessage(data.error);
+                    $("textarea", container).val($("p.edit-switch-text-area-label span", outerContainer).text());
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                $.otp.warningMessage($L("editorswitch.notification.error", textStatus, errorThrown));
+                $("textarea", container).val($("p.edit-switch-text-area-label span", outerContainer).text());
+            }
+        });
+        $("p.edit-switch-text-area-editor", outerContainer).hide();
+        $("p.edit-switch-text-area-label", outerContainer).show();
     });
 
     /*jslint unparam: true */
@@ -245,6 +281,14 @@ $(function() {
         $("p.edit-switch-editor", outerContainer).hide();
         $("p.edit-switch-label", outerContainer).show();
         $("input:text[name=value]", $(this).parent()).val($("p.edit-switch-label span", outerContainer).text());
+    });
+
+    $("div.edit-switch-text-area p.edit-switch-text-area-editor button.cancel").click(function () {
+        "use strict";
+        var outerContainer = $(this).parent().parent();
+        $("p.edit-switch-text-area-editor", outerContainer).hide();
+        $("p.edit-switch-text-area-label", outerContainer).show();
+        $("textarea", $(this).parent()).val($("p.edit-switch-text-area-label span", outerContainer).text());
     });
 
     $("div.edit-switch-drop-down p.edit-switch-drop-down-editor button.cancel").click(function () {
