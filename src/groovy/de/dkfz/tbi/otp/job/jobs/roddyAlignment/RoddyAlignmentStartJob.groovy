@@ -67,12 +67,8 @@ abstract class RoddyAlignmentStartJob extends AbstractStartJobImpl {
 
     static boolean isDataInstallationWFInProgress(MergingWorkPackage mergingWorkPackage) {
         assert mergingWorkPackage
-        return RunSegment.createCriteria().get {
-            ne('filesStatus', RunSegment.FilesStatus.FILES_CORRECT)
-            run {
-                'in'('id', mergingWorkPackage.findMergeableSeqTracks()*.run*.id)
-            }
-            maxResults(1)
+        mergingWorkPackage.findMergeableSeqTracks().find {
+            it.dataInstallationState != SeqTrack.DataProcessingState.FINISHED && it.dataInstallationState != null //old data has the value null, therefore this needs also to be checked
         }
     }
 

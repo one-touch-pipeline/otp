@@ -81,15 +81,22 @@ class RoddyAlignmentStartJobTest {
     }
 
     @Test
-    void testIsDataInstallationWFInProgress_WhenFilesCorrect_ShouldReturnFalse() {
-        MergingWorkPackage mwp = createMergingWorkPackageWithRunFileStatus(RunSegment.FilesStatus.FILES_CORRECT)
+    void testIsDataInstallationWFInProgress_WhenSeqTrackInStateFinished_ShouldReturnFalse() {
+        MergingWorkPackage mwp = createMergingWorkPackageWithSeqTrackInState(SeqTrack.DataProcessingState.FINISHED)
 
         assert false == RoddyAlignmentStartJob.isDataInstallationWFInProgress(mwp)
     }
 
     @Test
-    void testIsDataInstallationWFInProgress_WhenFilesNotCorrect_ShouldReturnTrue() {
-        MergingWorkPackage mwp = createMergingWorkPackageWithRunFileStatus(RunSegment.FilesStatus.FILES_MISSING)
+    void testIsDataInstallationWFInProgress_WhenSeqTrackInProgress_ShouldReturnTrue() {
+        MergingWorkPackage mwp = createMergingWorkPackageWithSeqTrackInState(SeqTrack.DataProcessingState.IN_PROGRESS)
+
+        assert RoddyAlignmentStartJob.isDataInstallationWFInProgress(mwp)
+    }
+
+    @Test
+    void testIsDataInstallationWFInProgress_WhenSeqTrackInStateNotStarted_ShouldReturnTrue() {
+        MergingWorkPackage mwp = createMergingWorkPackageWithSeqTrackInState(SeqTrack.DataProcessingState.NOT_STARTED)
 
         assert RoddyAlignmentStartJob.isDataInstallationWFInProgress(mwp)
     }
@@ -281,7 +288,7 @@ class RoddyAlignmentStartJobTest {
 
     @Test
     void testStartRoddyAlignment_WhenEverythingIsOkay_ShouldCreateProcess() {
-        MergingWorkPackage mwp = createMergingWorkPackageWithRunFileStatus(RunSegment.FilesStatus.FILES_CORRECT)
+        MergingWorkPackage mwp = createMergingWorkPackageWithSeqTrackInState(SeqTrack.DataProcessingState.FINISHED)
         DomainFactory.createRoddyProcessingOptions(TestCase.uniqueNonExistentPath)
         DomainFactory.createRoddyWorkflowConfig([pipeline: mwp.pipeline, project: mwp.project])
 
@@ -298,7 +305,7 @@ class RoddyAlignmentStartJobTest {
 
     @Test
     void executeCallsSetStartedForSeqTracks() {
-        MergingWorkPackage mwp = createMergingWorkPackageWithRunFileStatus(RunSegment.FilesStatus.FILES_CORRECT)
+        MergingWorkPackage mwp = createMergingWorkPackageWithSeqTrackInState(SeqTrack.DataProcessingState.FINISHED)
         OtrsTicket otrsTicket = DomainFactory.createOtrsTicket()
         DataFile.findAll()*.runSegment = DomainFactory.createRunSegment(otrsTicket: otrsTicket)
         DomainFactory.createRoddyProcessingOptions(TestCase.uniqueNonExistentPath)
@@ -329,11 +336,9 @@ class RoddyAlignmentStartJobTest {
         ])
     }
 
-    MergingWorkPackage createMergingWorkPackageWithRunFileStatus(RunSegment.FilesStatus filesStatus) {
+    MergingWorkPackage createMergingWorkPackageWithSeqTrackInState(SeqTrack.DataProcessingState dataInstallationState) {
         MergingWorkPackage mergingWorkPackage = createMergingWorkPackage()
-        Run run = DomainFactory.createRun()
-        DomainFactory.createSeqTrackWithDataFiles(mergingWorkPackage, [run: run])
-        DomainFactory.createRunSegment(run: run, filesStatus: filesStatus)
+        DomainFactory.createSeqTrackWithDataFiles(mergingWorkPackage, [dataInstallationState: dataInstallationState])
         return mergingWorkPackage
     }
 

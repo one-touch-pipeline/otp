@@ -85,6 +85,8 @@ class SeqTrack implements ProcessParameterObject, Entity {
 
     QualityEncoding qualityEncoding = QualityEncoding.UNKNOWN
     DataProcessingState fastqcState = DataProcessingState.UNKNOWN
+
+    //For old data the field has the value null
     DataProcessingState dataInstallationState = DataProcessingState.NOT_STARTED
 
 

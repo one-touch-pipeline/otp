@@ -247,6 +247,7 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
         Map seqTrackProperties = [
                 laneId: readGroupNum,
                 fastqcState: SeqTrack.DataProcessingState.FINISHED,
+                dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
         ]
         if (library) {
             seqTrackProperties += [libraryName: "lib${library}", normalizedLibraryName: library]
@@ -261,7 +262,7 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
 
         RunSegment.build(
                 run: seqTrack.run,
-                filesStatus: RunSegment.FilesStatus.FILES_CORRECT,
+                filesStatus: RunSegment.FilesStatus.NEEDS_INSTALLATION,
         )
 
         linkFastqFiles(seqTrack, readGroupNum)
