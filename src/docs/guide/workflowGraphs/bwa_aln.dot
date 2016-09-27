@@ -2,7 +2,7 @@ digraph workflows {
   labelloc="t";
   label="bwa aln + Picard workflow (times for WGS)\n";
 
-  DataInstallation [label="DataInstallation (per run; copying, checksumming; 2 to 3 hours)"];
+  DataInstallation [label="DataInstallation (per lane; copying/linking, checksumming)"];
   Fastqc [label="Fastqc (per lane; 2 hours)"];
   ConveyBwaAlignment [label="ConveyBwaAlignment (per lane; 4 to 7 hours total,\n1/2 to 1 hour convey, 3 to 5 hours pairing and sorting)"]
   CreateMergingSet [label="CreateMergingSet (seconds)"]
