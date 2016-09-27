@@ -260,10 +260,6 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
             dataFile.save(flush: true)
         }
 
-        RunSegment.build(
-                filesStatus: RunSegment.FilesStatus.NEEDS_INSTALLATION,
-        )
-
         linkFastqFiles(seqTrack, readGroupNum)
 
         workPackage.needsProcessing = true

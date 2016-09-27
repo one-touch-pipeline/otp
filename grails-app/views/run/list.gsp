@@ -28,7 +28,6 @@
                                 <option value="none"><g:message code="sequence.search.none"/></option>
                                 <option value="seqCenterSelection"><g:message code="run.search.seqCenter"/></option>
                                 <option value="runSearch"><g:message code="run.search.run"/></option>
-                                <option value="storageRealmSelection"><g:message code="run.search.storageRealm"/></option>
                                 <option value="dateCreatedSelection"><g:message code="run.search.dateCreated"/></option>
                                 <option value="dateExecutedSelection"><g:message code="run.search.dateExecuted"/></option>
                             </select>
@@ -36,7 +35,6 @@
                         <td class="value">
                                 <g:select class="criteria" name="seqCenterSelection" from="${seqCenters}" optionValue="name" optionKey="id" style="display: none"/>
                                 <input class="criteria" type="text" name="runSearch" style="display: none"/>
-                                <g:select class="criteria" name="storageRealmSelection" from="${storageRealm}" style="display: none"/>
                                 <span id="dateCreatedSelection" class="dateSelection" style="display: none">
                                     <g:message code="search.from.date"/>:<g:datePicker name="dateCreatedSelection_start" value="${dateCreated}" precision="day" years="${2010..Calendar.getInstance().get(Calendar.YEAR)}"/>
                                     <g:message code="search.to.date"/>:<g:datePicker name="dateCreatedSelection_end" value="${dateCreated}" precision="day" years="${2010..Calendar.getInstance().get(Calendar.YEAR)}"/>
@@ -59,7 +57,6 @@
         <div class="otpDataTables">
             <otp:dataTable codes="${['run.list.name',
                 'run.list.seqCenter',
-                'run.list.storageRealm',
                 'run.list.dateCreated',
                 'run.list.dateExecuted',
                 ] }" id="runTable"/>

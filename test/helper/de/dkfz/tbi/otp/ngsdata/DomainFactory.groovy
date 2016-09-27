@@ -744,10 +744,7 @@ class DomainFactory {
 
     public static RunSegment createRunSegment(Map runSegmentProperties = [:]) {
         return createDomainObject(RunSegment, [
-                currentFormat: RunSegment.DataFormat.FILES_IN_DIRECTORY,
-                initialFormat: RunSegment.DataFormat.FILES_IN_DIRECTORY,
-                filesStatus  : RunSegment.FilesStatus.FILES_CORRECT,
-                mdPath       : { TestCase.getUniqueNonExistentPath().path },
+                :
         ], runSegmentProperties)
     }
 

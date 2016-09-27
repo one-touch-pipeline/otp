@@ -56,9 +56,6 @@ class RunService {
                     'in'('id', filtering.seqCenter)
                 }
             }
-            if (filtering.storageRealm) {
-                'in'('storageRealm', filtering.storageRealm)
-            }
             if (filtering.dateCreated) {
                 or {
                     filtering.dateCreated.each {
@@ -113,9 +110,6 @@ class RunService {
                     seqCenter {
                         'in'('id', filtering.seqCenter)
                     }
-                }
-                if (filtering.storageRealm) {
-                    'in'('storageRealm', filtering.storageRealm)
                 }
                 if (filtering.dateCreated) {
                     or {

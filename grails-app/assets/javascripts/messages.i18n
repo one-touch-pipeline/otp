@@ -324,11 +324,9 @@ individual.update.sample.new
 run.list.title
 run.list.name
 run.list.seqCenter
-run.list.storageRealm
 run.list.dateCreated
 run.list.dateExecuted
 run.list.blacklisted
-run.list.multipleSource
 run.list.fastqcState
 
 #Run show
@@ -339,7 +337,6 @@ run.show.general.sequencingCenter
 run.show.general.sequencingTechnology
 run.show.general.dateExecuted
 run.show.general.dateCreated
-run.show.general.metaDataPath
 run.show.general.finalLocations
 run.show.processing
 run.show.processing.showDetails
@@ -348,7 +345,6 @@ run.show.filesNotUsed
 run.show.fastqc
 run.show.metaData
 #Run search
-run.search.storageRealm
 run.search.seqCenter
 run.search.run
 run.search.dateCreated
@@ -618,7 +614,6 @@ seqTrack.show.nextSeqTrack
 seqTrack.show.previousSeqTrack
 seqTrack.show.general
 seqTrack.show.details.laneId
-seqTrack.show.details.hasFinalBam
 seqTrack.show.details.hasOriginalBam
 seqTrack.show.details.nBasePairs
 seqTrack.show.details.nReads

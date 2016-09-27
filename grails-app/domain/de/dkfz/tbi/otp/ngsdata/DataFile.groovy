@@ -16,6 +16,7 @@ class DataFile implements Commentable, Entity {
      */
     String initialDirectory
 
+    /** @deprecated Use <code>seqTrack.project</code> */ @Deprecated
     Project project = null;
 
     Date dateExecuted = null       // when the file was originally produced
@@ -60,6 +61,7 @@ class DataFile implements Commentable, Entity {
 
     Comment comment
 
+    /** @deprecated Use <code>seqTrack.run</code> */ @Deprecated
     Run run
     RunSegment runSegment
     SeqTrack seqTrack

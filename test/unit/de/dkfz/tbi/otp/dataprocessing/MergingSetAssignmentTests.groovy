@@ -64,14 +64,12 @@ class MergingSetAssignmentTests {
         run.name = "testname"
         run.seqCenter = seqCenter
         run.seqPlatform = seqPlatform
-        run.storageRealm = Run.StorageRealm.DKFZ
         run.save(flush: true)
         assertTrue(run.validate())
 
         SoftwareTool softwareTool = new SoftwareTool()
         softwareTool.programName = "SOLID"
         softwareTool.programVersion = "0.4.8"
-        softwareTool.qualityCode = null
         softwareTool.type = SoftwareTool.Type.ALIGNMENT
         softwareTool.save(flush: true)
         assertTrue(softwareTool.validate())

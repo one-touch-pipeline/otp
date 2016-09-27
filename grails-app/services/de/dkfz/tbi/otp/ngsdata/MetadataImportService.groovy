@@ -204,12 +204,7 @@ class MetadataImportService {
 
     protected MetaDataFile importMetadataFile(MetadataValidationContext context, boolean align, String ticketNumber, String seqCenterComment) {
         RunSegment runSegment = new RunSegment(
-                allFilesUsed: true,
                 align: align,
-                filesStatus: RunSegment.FilesStatus.NEEDS_INSTALLATION,
-                initialFormat: RunSegment.DataFormat.FILES_IN_DIRECTORY,
-                currentFormat: RunSegment.DataFormat.FILES_IN_DIRECTORY,
-                mdPath: context.metadataFile.parentFile.parent,
                 otrsTicket: ticketNumber ? trackingService.createOrResetOtrsTicket(ticketNumber, seqCenterComment) : null,
         )
         assert runSegment.save()
@@ -219,7 +214,6 @@ class MetadataImportService {
         MetaDataFile metaDataFile = new MetaDataFile(
                 fileName: context.metadataFile.name,
                 filePath: context.metadataFile.parent,
-                used: true,
                 md5sum: context.metadataFileMd5sum,
                 runSegment: runSegment,
         )

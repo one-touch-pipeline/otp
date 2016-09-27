@@ -17,18 +17,12 @@ class Run implements ProcessParameterObject, Entity {
     String name                      // run name
 
     Date dateExecuted = null
-    Date dateCreated  = new Date()   // do we need object creation ?
+    Date dateCreated  = new Date()
 
     boolean blacklisted = false      // run is known to be invalid
-    /** @deprecated Not used */ @Deprecated
-    boolean multipleSource = false   // for runs for more than one projects
 
     SeqCenter seqCenter
     SeqPlatform seqPlatform
-
-    enum StorageRealm {DKFZ, BIOQUANT, MIXED}
-    /** @deprecated Use {@link Project#realmName} */ @Deprecated
-    StorageRealm storageRealm
 
     static belongsTo = [
         SeqCenter,
@@ -37,7 +31,6 @@ class Run implements ProcessParameterObject, Entity {
 
     static constraints = {
         name(blank: false, unique: true, validator: { OtpPath.isValidPathComponent(it) })
-        storageRealm(nullable: true)
         dateExecuted(nullable: true)
         dateCreated()
     }

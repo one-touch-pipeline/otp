@@ -5,7 +5,6 @@ import org.junit.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.State
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.Run.StorageRealm
 import de.dkfz.tbi.otp.ngsdata.SoftwareTool.Type
 
 class MergingCriteriaServiceTests {
@@ -46,7 +45,6 @@ class MergingCriteriaServiceTests {
                         name: "name",
                         seqCenter: seqCenter,
                         seqPlatform: seqPlatform,
-                        storageRealm: StorageRealm.DKFZ
                         )
         assertNotNull(run.save([flush: true, failOnError: true]))
 
@@ -80,7 +78,6 @@ class MergingCriteriaServiceTests {
         softwareTool = new SoftwareTool(
                         programName: "name",
                         programVersion: "version",
-                        qualityCode: "quality",
                         type: Type.ALIGNMENT
                         )
         assertNotNull(softwareTool.save([flush: true, failOnError: true]))

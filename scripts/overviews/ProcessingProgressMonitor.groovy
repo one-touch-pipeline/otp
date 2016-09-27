@@ -742,7 +742,7 @@ def showSeqTracks = {Collection<SeqTrack> seqTracks ->
 
     //data installation workflow
     Map<SeqTrack.DataProcessingState, Collection<SeqTrack>> dataInstallationState =
-            seqTracksNotWithdrawn.groupBy {it.dataInstallationState ?: SeqTrack.DataProcessingState.FINISHED }
+            seqTracksNotWithdrawn.groupBy {it.dataInstallationState}
 
     allFinished &= dataInstallationState.keySet() == [SeqTrack.DataProcessingState.FINISHED] as Set
     Collection<SeqTrack> seqTracksFinishedDataInstallationWorkflow = handleStateMap(dataInstallationState, "DataInstallationWorkflow", {
@@ -943,7 +943,6 @@ if (allProcessed) {
         ) and (
             (
                 seqTrack.dataInstallationState != '${SeqTrack.DataProcessingState.FINISHED}'
-                and  seqTrack.dataInstallationState is not null
             ) or (
                 seqTrack.fastqcState != '${SeqTrack.DataProcessingState.FINISHED}'
                 and seqTrack.id >= ${firstIdToCheck}

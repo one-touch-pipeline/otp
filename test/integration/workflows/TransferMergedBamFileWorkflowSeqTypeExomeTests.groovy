@@ -167,7 +167,6 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends WorkflowTestCase {
         SoftwareTool softwareTool = new SoftwareTool(
                         programName: "softwareToolName",
                         programVersion: "version",
-                        qualityCode: "quality",
                         type: SoftwareTool.Type.ALIGNMENT
                         )
         assertNotNull(softwareTool.save([flush: true, failOnError: true]))

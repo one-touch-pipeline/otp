@@ -223,24 +223,6 @@ class LsdfFilesService {
         assert dir.canRead()
     }
 
-
-    /**
-     *
-     * @param path
-     * @return
-     */
-    Date fileCreationDate(String path) {
-        if (!path) {
-            return null
-        }
-        File file = new File(path)
-        long timestamp = file.lastModified()
-        if (timestamp == 0L) {
-            return null
-        }
-        return new Date(timestamp)
-    }
-
     /**
      * Deletes the specified file. Throws an exception if the path is not absolute, if the file does not exist, if the
      * path points to something different than a file, or if the deletion fails.

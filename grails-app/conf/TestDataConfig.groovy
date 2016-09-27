@@ -71,9 +71,6 @@ testDataConfig {
         'de.dkfz.tbi.otp.ngsdata.Run' {
             name = {'runName_' + (counter++)}
         }
-        'de.dkfz.tbi.otp.ngsdata.RunSegment' {
-            mdPath = {TestCase.getUniqueNonExistentPath()}
-        }
         'de.dkfz.tbi.otp.ngsdata.SampleType' {
             name = {'sampleTypeName_' + (counter++)}
             specificReferenceGenome = SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT

@@ -3,7 +3,6 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
 import groovy.json.JsonSlurper
-import de.dkfz.tbi.otp.ngsdata.Run.StorageRealm
 import de.dkfz.tbi.otp.utils.DataTableCommand
 
 class RunController {
@@ -47,7 +46,6 @@ class RunController {
     def list = {
         Map retValue = [
             seqCenters: seqCenterService.allSeqCenters(),
-            storageRealm: StorageRealm.values()
         ]
         return retValue
     }
@@ -64,7 +62,6 @@ class RunController {
                 id: run.id,
                 name: run.name,
                 seqCenters: run.seqCenter?.toString()?.toLowerCase(),
-                storageRealm: run.storageRealm?.toString()?.toLowerCase(),
                 dateCreated: run.dateCreated?.format("yyyy-MM-dd"),
                 dateExecuted: run.dateExecuted?.format("yyyy-MM-dd"),
             ]
@@ -76,7 +73,6 @@ class RunController {
 enum RunSortColumn {
     RUN("name"),
     SEQCENTER("seqCenter"),
-    STORAGEREALM("storageRealm"),
     DATECREATED("dateCreated"),
     DATEEXECUTED("dateExecuted"),
 
@@ -93,10 +89,8 @@ enum RunSortColumn {
             case 1:
                 return RunSortColumn.SEQCENTER
             case 2:
-                return RunSortColumn.STORAGEREALM
-            case 3:
                 return RunSortColumn.DATECREATED
-            case 4:
+            case 3:
                 return RunSortColumn.DATEEXECUTED
             default:
                 return RunSortColumn.RUN
@@ -111,7 +105,6 @@ enum RunSortColumn {
 class RunFiltering {
     List<String> name = []
     List<Long> seqCenter = []
-    List<StorageRealm> storageRealm = []
     List<List<Date>> dateCreated = []
     List<List<Date>> dateExecuted = []
 
@@ -134,12 +127,6 @@ class RunFiltering {
                 case "seqCenterSelection":
                     if (it.value.isLong()) {
                         filtering.seqCenter << (it.value as Long)
-                        filtering.enabled = true
-                    }
-                    break
-                case "storageRealmSelection":
-                    if (it.value) {
-                        filtering.storageRealm << (it.value as StorageRealm)
                         filtering.enabled = true
                     }
                     break

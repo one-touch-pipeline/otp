@@ -61,7 +61,6 @@ class ExternallyProcessedMergedBamFileIntegrationTests {
         softwareTool = new SoftwareTool(
                         programName: "name",
                         programVersion: "version",
-                        qualityCode: "quality",
                         type: SoftwareTool.Type.ALIGNMENT
                         )
         assertNotNull(softwareTool.save([flush: true]))
@@ -78,7 +77,6 @@ class ExternallyProcessedMergedBamFileIntegrationTests {
                         name: "name",
                         seqCenter: seqCenter,
                         seqPlatform: seqPlatform,
-                        storageRealm: Run.StorageRealm.DKFZ
                         )
         assertNotNull(run.save([flush: true]))
 

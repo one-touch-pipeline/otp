@@ -37,9 +37,7 @@ class Sequence implements Serializable {
     // fields from SeqTrack
     String laneId
     String libraryName
-    boolean hasFinalBam
     boolean hasOriginalBam
-    boolean usingOriginalBam
     Long nBasePairs
     int insertSize
 
@@ -54,8 +52,6 @@ class Sequence implements Serializable {
     Date dateExecuted
     Date dateCreated
     boolean blacklisted
-    boolean multipleSource
-    Run.StorageRealm storageRealm
 
     // fields from SeqPlatform
     /**
@@ -129,7 +125,6 @@ class Sequence implements Serializable {
 
     static constraints = {
         // nullable constraints from Run
-        storageRealm(nullable: true)
         dateExecuted(nullable: true)
         // nullable constraints from SeqPlatform
         seqPlatformModelLabelId(nullable: true)

@@ -24,16 +24,6 @@
     <table>
         <otp:seqTrackMainPart seqTrack="${seqTrack}"/>
        <tr>
-            <td class="myKey"><g:message code="seqTrack.show.details.hasFinalBam"/></td>
-            <g:if test="${seqTrack.hasFinalBam}">
-                <td class="myValue true">
-            </g:if>
-            <g:else>
-                <td class="myValue false">
-            </g:else>
-            </td>
-       </tr>
-       <tr>
             <td class="myKey"><g:message code="seqTrack.show.details.hasOriginalBam"/></td>
             <g:if test="${seqTrack.hasOriginalBam}">
                 <td class="myValue true">

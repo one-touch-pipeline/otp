@@ -71,7 +71,6 @@ class AbstractBamFileServiceTests {
         SoftwareTool softwareTool = new SoftwareTool(
                 programName: "software-tool",
                 programVersion: "software-tool-version",
-                qualityCode: "software-tool-quality-code",
                 type: SoftwareTool.Type.BASECALLING
                 )
         assertNotNull(softwareTool.save([flush: true]))
@@ -82,7 +81,6 @@ class AbstractBamFileServiceTests {
                 name: "run",
                 seqCenter: seqCenter,
                 seqPlatform: seqPlatform,
-                storageRealm: Run.StorageRealm.DKFZ
                 )
         assertNotNull(run.save([flush: true]))
 

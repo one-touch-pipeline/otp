@@ -115,14 +115,9 @@ class LsdfFilesServiceTests {
         run.name = runName
         run.seqCenter = seqCenter
         run.seqPlatform = seqPlatform
-        run.storageRealm = Run.StorageRealm.DKFZ
         assertNotNull(run.save([flush: true]))
 
         runSegment = new RunSegment()
-        runSegment.initialFormat = RunSegment.DataFormat.FILES_IN_DIRECTORY
-        runSegment.currentFormat = RunSegment.DataFormat.FILES_IN_DIRECTORY
-        runSegment.filesStatus = RunSegment.FilesStatus.NEEDS_INSTALLATION
-        runSegment.mdPath = ftpDir
         assertNotNull(runSegment.save([flush: true]))
     }
 

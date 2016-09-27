@@ -95,14 +95,12 @@ class QAResultStatisticsServiceTests {
                         name: "runName",
                         seqCenter: seqCenter,
                         seqPlatform: seqPlatform,
-                        storageRealm: Run.StorageRealm.DKFZ
                         )
         assertNotNull(run.save([flush: true]))
 
         SoftwareTool softwareTool = new SoftwareTool(
                         programName: "softwareToolName",
                         programVersion: "version",
-                        qualityCode: "quality",
                         type: SoftwareTool.Type.ALIGNMENT
                         )
         assertNotNull(softwareTool.save([flush: true]))

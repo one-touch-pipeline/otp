@@ -2,19 +2,14 @@ package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
-import de.dkfz.tbi.otp.ngsdata.RunSegment
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.tracking.*
-import de.dkfz.tbi.otp.utils.CollectionUtils
 import org.springframework.scheduling.annotation.Scheduled
-
-import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 abstract class RoddyAlignmentStartJob extends AbstractStartJobImpl {
 
@@ -68,7 +63,7 @@ abstract class RoddyAlignmentStartJob extends AbstractStartJobImpl {
     static boolean isDataInstallationWFInProgress(MergingWorkPackage mergingWorkPackage) {
         assert mergingWorkPackage
         mergingWorkPackage.findMergeableSeqTracks().find {
-            it.dataInstallationState != SeqTrack.DataProcessingState.FINISHED && it.dataInstallationState != null //old data has the value null, therefore this needs also to be checked
+            it.dataInstallationState != SeqTrack.DataProcessingState.FINISHED
         }
     }
 

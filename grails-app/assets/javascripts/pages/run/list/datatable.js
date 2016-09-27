@@ -61,7 +61,6 @@ $.otp.run = {
                                     text: row.name
                                 }),
                                 row.seqCenters,
-                                row.storageRealm,
                                 row.dateCreated,
                                 row.dateExecuted
                             ];

@@ -4,12 +4,13 @@ SELECT
 
 st.id AS seq_track_id,
 st.seq_type_id,
-st.seq_platform_id,
+r.seq_platform_id,
 sp.seq_platform_model_label_id,
 sp.sequencing_kit_label_id,
 st.sample_id,
 st.run_id,
 st.pipeline_version_id,
+st.ilse_id,
 r.seq_center_id,
 s.sample_type_id,
 s.individual_id,
@@ -17,16 +18,12 @@ p.id AS project_id,
 
 st.quality_encoding,
 st.fastqc_state,
-st.using_original_bam,
 st.n_base_pairs,
 st.lane_id,
 st.library_name,
 st.insert_size,
 st.has_original_bam,
-st.has_final_bam,
-r.storage_realm,
 r.name,
-r.multiple_source,
 r.date_executed,
 r.date_created,
 r.blacklisted,
@@ -53,7 +50,7 @@ FROM seq_track AS st
 INNER JOIN run AS r
 ON r.id = st.run_id
 INNER JOIN seq_platform AS sp
-ON sp.id = st.seq_platform_id
+ON sp.id = r.seq_platform_id
 INNER JOIN seq_type AS seqType
 ON seqType.id = st.seq_type_id
 INNER JOIN sample AS s

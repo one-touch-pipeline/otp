@@ -11,7 +11,6 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 import de.dkfz.tbi.otp.dataprocessing.AlignmentPass
 import de.dkfz.tbi.otp.InformationReliability
-import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.getThreadLog
 
@@ -38,11 +37,7 @@ class SeqTrack implements ProcessParameterObject, Entity {
 
     String laneId
     String ilseId
-    /** @deprecated <code>false</code> for all instances */ @Deprecated
-    boolean hasFinalBam = false
     boolean hasOriginalBam = false
-    /** @deprecated <code>false</code> for all instances */ @Deprecated
-    boolean usingOriginalBam = false
     /**
      * {@code true} if the data files belonging to this {@link SeqTrack} are symlinked to the project folder.
      * {@code false} if they are copied.
@@ -86,7 +81,6 @@ class SeqTrack implements ProcessParameterObject, Entity {
     QualityEncoding qualityEncoding = QualityEncoding.UNKNOWN
     DataProcessingState fastqcState = DataProcessingState.UNKNOWN
 
-    //For old data the field has the value null
     DataProcessingState dataInstallationState = DataProcessingState.NOT_STARTED
 
 
@@ -131,8 +125,6 @@ class SeqTrack implements ProcessParameterObject, Entity {
     static constraints = {
         laneId(validator: { OtpPath.isValidPathComponent(it) })
         hasOriginalBam()
-        hasFinalBam()
-        usingOriginalBam()
         seqType()
         sample()
         pipelineVersion()

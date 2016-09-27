@@ -125,7 +125,6 @@ class TestData {
         softwareTool = new SoftwareTool()
         softwareTool.programName = "SOLID"
         softwareTool.programVersion = "0.4.8"
-        softwareTool.qualityCode = null
         softwareTool.type = SoftwareTool.Type.ALIGNMENT
         assertNotNull(softwareTool.save(flush: true))
 
@@ -279,7 +278,6 @@ class TestData {
             name: "TestRun",
             seqCenter: seqCenter,
             seqPlatform: seqPlatform,
-            storageRealm: Run.StorageRealm.DKFZ,
         ] + properties)
     }
 

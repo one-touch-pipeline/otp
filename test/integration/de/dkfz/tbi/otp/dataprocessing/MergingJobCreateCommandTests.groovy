@@ -8,7 +8,6 @@ import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
 import de.dkfz.tbi.otp.job.jobs.merging.MergingJob
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.Realm.OperationType
-import de.dkfz.tbi.otp.ngsdata.Run.StorageRealm
 import de.dkfz.tbi.otp.ngsdata.SoftwareTool.Type
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.HelperUtils
@@ -277,7 +276,6 @@ class MergingJobCreateCommandTests {
                         name: "run_${identifier}",
                         seqCenter: seqCenter,
                         seqPlatform: seqPlatform,
-                        storageRealm: StorageRealm.DKFZ
                         )
         assertNotNull(run.save([flush: true, failOnError: true]))
 
