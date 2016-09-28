@@ -65,7 +65,7 @@
     <ul>
       <g:each in="${run.seqTracks}" var="seqTrack">
         <li>
-          <g:link controller="seqTrack" action="show" id="${seqTrack.seqTrack.id}"><g:message code="metadataImport.details.lane"/>${seqTrack.seqTrack.laneId}</g:link>,
+          <g:link controller="seqTrack" action="show" id="${seqTrack.seqTrack.id}"><g:message code="metadataImport.details.lane"/> ${seqTrack.seqTrack.laneId}</g:link>,
           ${[
             seqTrack.seqTrack.ilseId ? "${g.message(code: "metadataImport.details.ilse")} ${seqTrack.seqTrack.ilseId}" : null,
             seqTrack.seqTrack.project.name,
