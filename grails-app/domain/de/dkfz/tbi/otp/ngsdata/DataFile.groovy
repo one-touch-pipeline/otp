@@ -27,7 +27,7 @@ class DataFile implements Commentable, Entity {
 
     boolean used = false           // is this file used in any seqTrack
     boolean fileExists = false     // does file exists in file system
-    boolean fileLinked = false     // is the file properly linked
+    boolean fileLinked = false     // is the file properly linked in view-by-pid
     long fileSize = 0              // size of the file
 
     /**

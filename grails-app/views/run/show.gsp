@@ -103,7 +103,7 @@
                     <td><b><g:link controller="projectOverview" action="index" params="[projectName: file.project]">${file.project}</g:link></b></td>
                     <td class="true">metadata</td>
                     <td class="${file.fileExists}">lsdf</td>
-                    <td class="${file.fileLinked}">linked</td>
+                    <td class="${file.fileLinked}">view-by-pid</td>
                     <td>${String.format("%.1f GB", file.fileSize/1e9)}</td>
                     <td>${file.dateFileSystem ? (new Date(file.dateFileSystem.getTime())).format("yyyy-MM-dd") : '&nbsp;' }</td>
                     <td>
@@ -122,7 +122,7 @@
                         <td>${alignment.key.alignmentParams.pipeline}</td>
                         <td>${alignment.key.executedBy}</td>
                         <td class="${file.fileExists}">lsdf</td>
-                        <td class="${file.fileLinked}">linked</td>
+                        <td class="${file.fileLinked}">view-by-pid</td>
                         <td>${String.format("%.1f GB", file.fileSize/1e9)}</td>
                         <td>${file.dateFileSystem ? (new Date(file.dateFileSystem.getTime())).format("yyyy-MM-dd") : '&nbsp;' }</td>
                         <td>&nbsp;</td>
