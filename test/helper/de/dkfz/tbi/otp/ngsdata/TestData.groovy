@@ -7,8 +7,6 @@ import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QaProcessingStatus
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.AlignmentPass.AlignmentState
-import de.dkfz.tbi.otp.ngsdata.RunSegment.DataFormat
-import de.dkfz.tbi.otp.ngsdata.RunSegment.FilesStatus
 
 import static org.junit.Assert.assertNotNull
 import static org.junit.Assert.assertTrue
@@ -122,8 +120,7 @@ class TestData {
         run = createRun("testname1")
         assertNotNull(run.save(flush: true))
 
-        runSegment = createRunSegment(run)
-        assertNotNull(runSegment.save(flush: true))
+        runSegment = DomainFactory.createRunSegment()
 
         softwareTool = new SoftwareTool()
         softwareTool.programName = "SOLID"
@@ -268,23 +265,6 @@ class TestData {
             project: project,
             seqType: seqType,
             referenceGenome: referenceGenome,
-        ] + properties)
-    }
-
-    @Deprecated
-    RunSegment createRunSegment(Run run) {
-        return createRunSegment(run: run)
-    }
-
-    @Deprecated
-    RunSegment createRunSegment(Map properties = [:]) {
-        return new RunSegment([
-            filesStatus: FilesStatus.FILES_CORRECT,
-            metaDataStatus: RunSegment.Status.COMPLETE,
-            run: run,
-            initialFormat: DataFormat.FILES_IN_DIRECTORY,
-            currentFormat: DataFormat.FILES_IN_DIRECTORY,
-            mdPath: "/tmp",
         ] + properties)
     }
 

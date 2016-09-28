@@ -1029,54 +1029,10 @@ chmod 440 ${newDirectFileName}
 
 
     /**
-     * Deletes the given runs.
-     * For each run it has to be checked if it can be deleted.
-     * Only when all RunSegments from this Run can be deleted, also the Run can be deleted.
-     * A RunSegment can be deleted when all dataFiles, which belong to this RunSegment, are from the project, which has to be deleted.
-     * If not the RunSegment, and therefore also the run, has to stay in the DB.
-     *
-     * The function should be called inside a transaction (DOMAIN.withTransaction{}) to roll back changes if an exception occurs or a check fails.
-     *
-     * !! Be aware that the dataFiles have to be deleted already, before calling this method ->Therefore the runs have to be collected first.
-     * !! Furthermore the seqTracks have to be deleted first.
-     */
-    void deleteRunAndRunSegmentsWithoutDataOfOtherProjects(Run run, Project project) {
-        notNull(run, "The input run of the method deleteRunAndRunSegmentsWithoutDataOfOtherProjects is null")
-        notNull(project, "The input project of the method deleteRunAndRunSegmentsWithoutDataOfOtherProjects is null")
-
-        boolean allRunSegmentsOfTheRunCanBeDeleted = true
-        List<RunSegment> runSegmentsPerRun = RunSegment.findAllByRun(run)
-
-        runSegmentsPerRun.each { RunSegment runSegment ->
-            List<MetaDataFile> metaDataFiles = MetaDataFile.findAllByRunSegment(runSegment)
-            List<DataFile> dataFilesPerRunSegment = DataFile.findAllByRunSegment(runSegment)
-
-            if (dataFilesPerRunSegment.empty) {
-                metaDataFiles*.delete()
-                runSegment.delete()
-            } else if (dataFilesPerRunSegment.find { it.project == project }) {
-                throw new RuntimeException("Although all dataFiles of this run should be deleted already it is not the case.")
-            } else {
-                allRunSegmentsOfTheRunCanBeDeleted = false
-                println "RunSegment " + runSegment.id + " can not be deleted, since it contains data from other projects."
-            }
-        }
-
-        if (allRunSegmentsOfTheRunCanBeDeleted) {
-            run.delete()
-        } else {
-            println "The run " + run + " can not be deleted completely, since it also contains RunSegments from other projects."
-        }
-    }
-
-
-    /**
      * Deletes the given run with all connected data.
      * This includes:
      * - all referenced datafiles using deleteDataFile
      * - all seqtrack using deleteSeqTrack
-     * - all metadata files
-     * - all run segments
      * - the run itself
      *
      * The function should be called inside a transaction (DOMAIN.withTransaction{}) to roll back changes if an exception occurs or a check fails.
@@ -1086,8 +1042,6 @@ chmod 440 ${newDirectFileName}
         notNull(run, "The input run of the method deleteRun is null")
         outputStringBuilder << "\n\nstart deletion of run ${run}"
         List<File> dirsToDelete = []
-
-        List<RunSegment> runSegmentsPerRun = RunSegment.findAllByRun(run)
 
         outputStringBuilder << "\n  delete data files: "
         DataFile.findAllByRun(run).each {
@@ -1099,20 +1053,6 @@ chmod 440 ${newDirectFileName}
         SeqTrack.findAllByRun(run).each {
             outputStringBuilder << "\n     try to delete: ${it}"
             dirsToDelete = deleteSeqTrack(it)
-        }
-
-
-        outputStringBuilder << "\n  delete meta data files:"
-        MetaDataFile.findAllByRunSegmentInList(runSegmentsPerRun).each {
-            outputStringBuilder << "\n     try to delete: ${it}"
-            it.delete()
-        }
-
-
-        outputStringBuilder << "\n  delete run segments:"
-        runSegmentsPerRun.each { RunSegment runSegment ->
-            outputStringBuilder << "\n     try to delete: ${runSegment}"
-            runSegment.delete()
         }
 
         outputStringBuilder << "\n  try to delete run ${run}"

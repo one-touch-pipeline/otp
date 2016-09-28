@@ -204,7 +204,6 @@ class MetadataImportService {
 
     protected MetaDataFile importMetadataFile(MetadataValidationContext context, boolean align, String ticketNumber, String seqCenterComment) {
         RunSegment runSegment = new RunSegment(
-                metaDataStatus: RunSegment.Status.COMPLETE,
                 allFilesUsed: true,
                 align: align,
                 filesStatus: RunSegment.FilesStatus.NEEDS_INSTALLATION,
@@ -213,8 +212,7 @@ class MetadataImportService {
                 mdPath: context.metadataFile.parentFile.parent,
                 otrsTicket: ticketNumber ? trackingService.createOrResetOtrsTicket(ticketNumber, seqCenterComment) : null,
         )
-        // TODO OTP-1952: un-comment
-        //assert runSegment.save()
+        assert runSegment.save()
 
         importRuns(context, runSegment, context.spreadsheet.dataRows)
 
@@ -242,11 +240,6 @@ class MetadataImportService {
                     dateExecuted: Objects.requireNonNull(
                             RunDateParserService.parseDate('yyyy-MM-dd', uniqueColumnValue(rows, RUN_DATE))),
             )
-
-            // TODO OTP-1952: delete the following 3 lines
-            assert runSegment.run == null
-            runSegment.run = run
-            assert runSegment.save()
 
             importSeqTracks(context, runSegment, run, rows)
         }

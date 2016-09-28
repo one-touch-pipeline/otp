@@ -75,15 +75,10 @@ class AlignmentPassServiceIntegrationTests extends TestData {
         assertEquals(alignmentPass, alignmentPassService.findAlignmentPassForProcessing(ProcessingPriority.NORMAL_PRIORITY))
 
         RunSegment runSegment = new RunSegment()
-        runSegment.run = run
-        runSegment.metaDataStatus = RunSegment.Status.PROCESSING
         runSegment.filesStatus = RunSegment.FilesStatus.FILES_MISSING
         runSegment.initialFormat = RunSegment.DataFormat.TAR
         runSegment.currentFormat = RunSegment.DataFormat.TAR
         runSegment.mdPath = '/tmp'
-        assertNotNull(runSegment.save(flush: true))
-        assertNull(alignmentPassService.findAlignmentPassForProcessing(ProcessingPriority.NORMAL_PRIORITY))
-        runSegment.metaDataStatus = RunSegment.Status.COMPLETE
         assertNotNull(runSegment.save(flush: true))
         assertEquals(alignmentPass, alignmentPassService.findAlignmentPassForProcessing(ProcessingPriority.NORMAL_PRIORITY))
 

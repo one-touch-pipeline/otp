@@ -34,11 +34,7 @@ class FastqcJobTest {
         testDirectory = TestCase.createEmptyTestDirectory()
 
         seqTrack = DomainFactory.createSeqTrack()
-
-        runSegment = DomainFactory.createRunSegment(
-                run: seqTrack.run,
-        )
-
+        runSegment = DomainFactory.createRunSegment()
         dataFile = DomainFactory.createDataFile([seqTrack: seqTrack, project: seqTrack.project, run: seqTrack.run, runSegment: runSegment, initialDirectory: "${testDirectory.path}/${seqTrack.run.name}"])
 
         DomainFactory.createRealmDataProcessing([name: seqTrack.project.realmName])

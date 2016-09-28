@@ -310,74 +310,6 @@ class RunServiceTests extends AbstractIntegrationTest {
 
     @Ignore
     @Test
-    void testMDFilesByInitialPathIsEmpty() {
-        assertTrue(runService.retrieveMetaDataFilesByInitialPath(null).empty)
-        Run run = mockRun("test")
-        assertTrue(runService.retrieveMetaDataFilesByInitialPath(run).empty)
-        RunSegment segment1 = mockRunSegment(run, "test")
-        assertTrue(runService.retrieveMetaDataFilesByInitialPath(run).empty)
-        RunSegment segment2 = mockRunSegment(run, "test2")
-        RunSegment segment3 = mockRunSegment(run, "test3")
-        assertTrue(runService.retrieveMetaDataFilesByInitialPath(run).empty)
-        // create a second Run and add a MetaDataFile to it
-        Run run2 = mockRun("test2")
-        RunSegment segment4 = mockRunSegment(run2, "test")
-        MetaDataFile md = mockMetaDataFile(segment4, "test")
-        assertTrue(runService.retrieveMetaDataFilesByInitialPath(run).empty)
-    }
-
-    @Ignore
-    @Test
-    void testMDFilesByInitialPath() {
-        Run run = mockRun("test")
-        RunSegment segment1 = mockRunSegment(run, "test")
-        MetaDataFile md = mockMetaDataFile(segment1, "test")
-        List<MetaDataFile> files = runService.retrieveMetaDataFilesByInitialPath(run)
-        assertFalse(files.empty)
-        assertEquals(1, files.size())
-        assertSame(md, files[0])
-        // add second file
-        MetaDataFile md2 = mockMetaDataFile(segment1, "test2")
-        files = runService.retrieveMetaDataFilesByInitialPath(run)
-        assertFalse(files.empty)
-        assertEquals(2, files.size())
-        assertSame(md, files[0])
-        assertSame(md2, files[1])
-        // add a second RunSegment
-        RunSegment segment2 = mockRunSegment(run, "test2")
-        MetaDataFile md3 = mockMetaDataFile(segment2, "test3")
-        MetaDataFile md4 = mockMetaDataFile(segment2, "test4")
-        files = runService.retrieveMetaDataFilesByInitialPath(run)
-        assertFalse(files.empty)
-        assertEquals(4, files.size())
-        assertSame(md, files[0])
-        assertSame(md2, files[1])
-        assertSame(md3, files[2])
-        assertSame(md4, files[3])
-
-        // add a second Run and attach files
-        Run run2 = mockRun("test2")
-        RunSegment segment3 = mockRunSegment(run2, "test3")
-        MetaDataFile md5 = mockMetaDataFile(segment3, "test5")
-        MetaDataFile md6 = mockMetaDataFile(segment3, "test6")
-        // should be unchanged
-        files = runService.retrieveMetaDataFilesByInitialPath(run)
-        assertFalse(files.empty)
-        assertEquals(4, files.size())
-        assertSame(md, files[0])
-        assertSame(md2, files[1])
-        assertSame(md3, files[2])
-        assertSame(md4, files[3])
-        // and for run2
-        files = runService.retrieveMetaDataFilesByInitialPath(run2)
-        assertFalse(files.empty)
-        assertEquals(2, files.size())
-        assertSame(md5, files[0])
-        assertSame(md6, files[1])
-    }
-
-    @Ignore
-    @Test
     void testRetrieveSequenceTrackInformationIsEmpty() {
         assertTrue(runService.retrieveSequenceTrackInformation(null).isEmpty())
         Run run = mockRun("test")
@@ -514,18 +446,6 @@ class RunServiceTests extends AbstractIntegrationTest {
         Run run = new Run(name: name, seqCenter: seqCenter, seqPlatform: seqPlatform)
         assertNotNull(run.save())
         return run
-    }
-
-    private RunSegment mockRunSegment(Run run, String path) {
-        RunSegment segment = new RunSegment(run: run, mdPath: "${path}.md5")
-        assertNotNull(segment.save())
-        return segment
-    }
-
-    private MetaDataFile mockMetaDataFile(RunSegment segment, String name) {
-        MetaDataFile md = new MetaDataFile(RunSegment: segment, fileName: name, filePath: name, dateCreated: new Date())
-        assertNotNull(md.save())
-        return md
     }
 
     private SeqTrack mockSeqTrack(Run run, String pid, String laneId) {

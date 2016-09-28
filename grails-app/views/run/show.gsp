@@ -46,10 +46,6 @@
             <td class="myValue">${run.dateCreated}</td>
        </tr>
        <tr>
-            <td class="myKey"><g:message code="run.show.general.metaDataPath"/></td>
-            <td class="myValue">${run.initialMDPaths()}</td>
-       </tr>
-       <tr>
             <td class="myKey"><g:message code="run.show.general.finalLocations"/></td>
             <td class="myValue">
                 <g:each var="pathWithRunName" in="${finalPaths}">

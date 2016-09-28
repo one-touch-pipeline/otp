@@ -37,9 +37,6 @@ class SeqScanStartJob extends AbstractStartJobImpl  {
         if (!hasOpenSlots()) {
             return
         }
-        if (!isMetaDataProcessingFinished()) {
-            return
-        }
         SeqTrack seqTrack = SeqTrack.find(hql)
         if (seqTrack == null) {
             return
@@ -70,16 +67,5 @@ class SeqScanStartJob extends AbstractStartJobImpl  {
     @Override
     String getJobExecutionPlanName() {
         return "createSeqScan"
-    }
-
-    boolean isMetaDataProcessingFinished() {
-        List<RunSegment> segments =
-                RunSegment.findAllByMetaDataStatusNotEqual(RunSegment.Status.COMPLETE)
-        for (RunSegment segment in segments) {
-            if (!segment.run.blacklisted) {
-                return false
-            }
-        }
-        return true
     }
 }

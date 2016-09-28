@@ -46,12 +46,6 @@ class Run implements ProcessParameterObject, Entity {
         name
     }
 
-    String initialMDPaths() {
-        String paths = ""
-        RunSegment.findAllByRun(this).each {paths += it.mdPath + " "}
-        return paths
-    }
-
     /*
      * is used in ExecutionService to create Cluster Jobs,
      * returns null if a run has more than one sequencing type,

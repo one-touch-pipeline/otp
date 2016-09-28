@@ -65,8 +65,7 @@ class ProcessedBamFileServiceTests {
                         )
         assertNotNull(run.save([flush: true, failOnError: true]))
 
-        runSegment = testData.createRunSegment(run)
-        assertNotNull(runSegment.save([flush: true, failOnError: true]))
+        runSegment = DomainFactory.createRunSegment()
 
         individual = new Individual(
                         pid: "pid",

@@ -35,7 +35,7 @@ class RunController {
             finalPaths: lsdfFilesService.getAllPathsForRun(run, true),
             keys: keys,
             processParameters: runService.retrieveProcessParameters(run),
-            metaDataFiles: runService.retrieveMetaDataFilesByInitialPath(run),
+            metaDataFiles: runService.retrieveMetaDataFiles(run),
             seqTracks: runService.retrieveSequenceTrackInformation(run),
             errorFiles: runService.dataFilesWithError(run),
             nextRun: runService.nextRun(run),

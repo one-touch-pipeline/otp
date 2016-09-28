@@ -163,7 +163,7 @@ class SeqTrackServiceUnitTests {
 
     private SeqTrack createDataForDetermineAndStoreIfFastqFilesHaveToBeLinked(int pos = 0) {
         Run run = Run.build(seqCenter: SeqCenter.build(name: "DKFZ"))
-        RunSegment runSegment = RunSegment.build(run: run)
+        RunSegment runSegment = RunSegment.build()
         SeqTrack seqTrack = SeqTrack.build(
                 run: run,
                 sample: Sample.build(

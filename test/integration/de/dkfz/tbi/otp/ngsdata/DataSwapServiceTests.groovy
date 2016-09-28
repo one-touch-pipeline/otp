@@ -540,47 +540,27 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     }
 
     @Test
-    public void testDeleteRunAndRunSegmentsWithoutDataOfOtherProjects() throws Exception {
-        Run run = Run.build()
-        Project project = Project.build()
-        RunSegment runSegment = RunSegment.build(run: run)
-
-        dataSwapService.deleteRunAndRunSegmentsWithoutDataOfOtherProjects(run, project)
-
-        assert !Run.get(run.id)
-        assert !RunSegment.get(runSegment.id)
-    }
-
-    @Test
     public void testDeleteRun() throws Exception {
         StringBuilder outputStringBuilder = new StringBuilder()
         Run run = Run.build()
-        RunSegment runSegment = RunSegment.build(run: run)
         DataFile dataFile = DomainFactory.createDataFile(run: run)
-        MetaDataFile metaDataFile = DomainFactory.createMetaDataFile(runSegment: runSegment)
 
         dataSwapService.deleteRun(run, outputStringBuilder)
 
         assert !Run.get(run.id)
-        assert !RunSegment.get(runSegment.id)
         assert !DataFile.get(dataFile.id)
-        assert !MetaDataFile.get(metaDataFile.id)
     }
 
     @Test
     public void testDeleteRunByName() throws Exception {
         StringBuilder outputStringBuilder = new StringBuilder()
         Run run = Run.build()
-        RunSegment runSegment = RunSegment.build(run: run)
         DataFile dataFile = DomainFactory.createDataFile(run: run)
-        MetaDataFile metaDataFile = DomainFactory.createMetaDataFile(runSegment: runSegment)
 
         dataSwapService.deleteRunByName(run.name, outputStringBuilder)
 
         assert !Run.get(run.id)
-        assert !RunSegment.get(runSegment.id)
         assert !DataFile.get(dataFile.id)
-        assert !MetaDataFile.get(metaDataFile.id)
     }
 
     @Test

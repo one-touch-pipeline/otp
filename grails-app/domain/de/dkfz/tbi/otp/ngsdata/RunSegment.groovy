@@ -4,10 +4,14 @@ import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.utils.Entity
 
+/**
+ * An import of one or more {@linkplain MetaDataFile}s and {@linkplain DataFile}s.
+ *
+ * <p>
+ * Named "RunSegment" for historical reasons only.
+ */
 class RunSegment implements Entity {
 
-    enum Status {NEW, BLOCKED, PROCESSING, COMPLETE}
-    Status metaDataStatus = Status.NEW
     boolean allFilesUsed = false           // all files find relations
 
 
@@ -48,12 +52,8 @@ class RunSegment implements Entity {
     /** @deprecated Use {@link MetaDataFile#filePath} */ @Deprecated
     String mdPath                    // path to meta-data
 
-    /** @deprecated OTP-1952 */ @Deprecated
-    Run run
-
     OtrsTicket otrsTicket
 
-    static belongsTo = [run : Run]
     static constraints = {
         mdPath blank: false, validator: { OtpPath.isValidAbsolutePath(it) }
         //the field can be null, since for the old data the information is not needed; only for new incoming runSegments

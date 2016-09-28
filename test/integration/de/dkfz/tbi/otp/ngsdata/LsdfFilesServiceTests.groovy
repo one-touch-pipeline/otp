@@ -119,12 +119,10 @@ class LsdfFilesServiceTests {
         assertNotNull(run.save([flush: true]))
 
         runSegment = new RunSegment()
-        runSegment.metaDataStatus = RunSegment.Status.COMPLETE
         runSegment.initialFormat = RunSegment.DataFormat.FILES_IN_DIRECTORY
         runSegment.currentFormat = RunSegment.DataFormat.FILES_IN_DIRECTORY
         runSegment.filesStatus = RunSegment.FilesStatus.NEEDS_INSTALLATION
         runSegment.mdPath = ftpDir
-        runSegment.run = run
         assertNotNull(runSegment.save([flush: true]))
     }
 

@@ -40,10 +40,6 @@ class FastqcWorkflowTests extends WorkflowTestCase {
 
         Run run = DomainFactory.createRun()
 
-        RunSegment runSegment = DomainFactory.createRunSegment(
-                run: run,
-        )
-
         seqCenter = run.seqCenter
 
         seqTrack = SeqTrack.build(
@@ -60,7 +56,6 @@ class FastqcWorkflowTests extends WorkflowTestCase {
                 vbpFileName: 'asdf.fastq.gz',
                 seqTrack: seqTrack,
                 run: run,
-                runSegment: runSegment,
                 initialDirectory: "${stagingRootPath}/${run.name}",
         )
 

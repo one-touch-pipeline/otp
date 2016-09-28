@@ -15,7 +15,6 @@ class FastqcDataFilesServiceUnitTests {
     SeqTrack seqTrack
     DataFile dataFile
     Realm realm
-    RunSegment runSegment
 
     @Before
     public void setUp() throws Exception {
@@ -29,11 +28,7 @@ class FastqcDataFilesServiceUnitTests {
         seqTrack.project.realmName = realm.name
         assert seqTrack.project.save(flush: true)
 
-        runSegment = DomainFactory.createRunSegment(
-                run: seqTrack.run,
-        )
-
-        dataFile = DomainFactory.createDataFile([seqTrack: seqTrack, project: seqTrack.project, run: seqTrack.run, runSegment: runSegment])
+        dataFile = DomainFactory.createDataFile([seqTrack: seqTrack, project: seqTrack.project, run: seqTrack.run])
     }
 
     @After
@@ -43,7 +38,6 @@ class FastqcDataFilesServiceUnitTests {
         seqTrack = null
         dataFile = null
         realm = null
-        runSegment = null
     }
 
     @Test

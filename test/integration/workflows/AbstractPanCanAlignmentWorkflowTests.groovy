@@ -261,7 +261,6 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
         }
 
         RunSegment.build(
-                run: seqTrack.run,
                 filesStatus: RunSegment.FilesStatus.NEEDS_INSTALLATION,
         )
 

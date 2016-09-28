@@ -747,7 +747,6 @@ class DomainFactory {
                 currentFormat: RunSegment.DataFormat.FILES_IN_DIRECTORY,
                 initialFormat: RunSegment.DataFormat.FILES_IN_DIRECTORY,
                 filesStatus  : RunSegment.FilesStatus.FILES_CORRECT,
-                run          : { createRun() },
                 mdPath       : { TestCase.getUniqueNonExistentPath().path },
         ], runSegmentProperties)
     }

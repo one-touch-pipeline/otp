@@ -24,7 +24,6 @@ class AlignmentPassService {
     "FROM AlignmentPass ap " +
     "WHERE alignmentState = :alignmentState " +
     "AND seqTrack.fastqcState = :finished " +
-    "AND NOT EXISTS (FROM RunSegment WHERE run = ap.seqTrack.run AND metaDataStatus <> :metaDataStatus) " +
     "AND EXISTS (FROM DataFile WHERE ${ALIGNABLE_ALIGNMENT_PASS_DATA_FILE_CRITERIA} AND fileExists = true AND fileSize > 0 AND fileWithdrawn = false) " +
     "AND NOT EXISTS (FROM DataFile WHERE ${ALIGNABLE_ALIGNMENT_PASS_DATA_FILE_CRITERIA} AND fileWithdrawn = true) " +
     "AND NOT EXISTS (FROM AlignmentPass WHERE seqTrack = ap.seqTrack AND workPackage = ap.workPackage AND identifier > ap.identifier) " +
@@ -34,7 +33,6 @@ class AlignmentPassService {
     public static final Map ALIGNABLE_ALIGNMENT_PASS_QUERY_PARAMETERS = Collections.unmodifiableMap([
         alignmentState: AlignmentState.NOT_STARTED,
         finished: SeqTrack.DataProcessingState.FINISHED,
-        metaDataStatus: RunSegment.Status.COMPLETE,
         fileType: FileType.Type.SEQUENCE,
     ])
 

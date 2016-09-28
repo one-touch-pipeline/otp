@@ -141,7 +141,7 @@ class RunService {
         }
     }
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#run, read)")
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#run.seqCenter, read)")
     Run checkPermission(Run run) {
         return run
     }
@@ -278,25 +278,10 @@ AND r.id > :runId
         return Run.get(result[0] as Long)
     }
 
-    /**
-     * Retrieves list of MetaDataFiles for the given Run by its initial run path.
-     * @param Run The run for which the MetaDataFiles should be retrieved
-     * @return List of MetaDataFile
-     **/
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or #run == null or hasPermission(#run.seqCenter.id, 'de.dkfz.tbi.otp.ngsdata.SeqCenter', read)")
-    List<MetaDataFile> retrieveMetaDataFilesByInitialPath(Run run) {
-        if (!run) {
-            return []
-        }
-        // TODO: query with a criteria
-        List<MetaDataFile> files = []
-        List<RunSegment> paths = RunSegment.findAllByRun(run)
-        paths.each {
-            MetaDataFile.findAllByRunSegment(it).each {
-                files << it
-            }
-        }
-        return files
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#run.seqCenter, read)")
+    Collection<MetaDataFile> retrieveMetaDataFiles(Run run) {
+        Collection<DataFile> dataFiles = DataFile.findAllByRun(run)
+        return dataFiles ? MetaDataFile.findAllByRunSegmentInList(dataFiles*.runSegment) : Collections.emptyList()
     }
 
     /**

@@ -96,14 +96,15 @@ class ProcessingTimeStatisticsServiceIntegrationSpec extends IntegrationSpec {
         }
 
         RunSegment runSegment = DomainFactory.createRunSegment(otrsTicket: ticket)
+        Run run = DomainFactory.createRun()
         Project projectA = DomainFactory.createProject()
         Project projectB = DomainFactory.createProject()
         Individual individualA = DomainFactory.createIndividual(project: projectA)
         Individual individualB = DomainFactory.createIndividual(project: projectB)
         Sample sampleA = DomainFactory.createSample(individual: individualA)
         Sample sampleB = DomainFactory.createSample(individual: individualB)
-        SeqTrack seqTrackA = DomainFactory.createSeqTrackWithOneDataFile([run: runSegment.run, sample: sampleA, ilseId: "1234"], [runSegment: runSegment])
-        SeqTrack seqTrackB = DomainFactory.createSeqTrackWithOneDataFile([run: runSegment.run, sample: sampleB, ilseId: "5678"], [runSegment: runSegment])
+        SeqTrack seqTrackA = DomainFactory.createSeqTrackWithOneDataFile([run: run, sample: sampleA, ilseId: "1234"], [runSegment: runSegment])
+        SeqTrack seqTrackB = DomainFactory.createSeqTrackWithOneDataFile([run: run, sample: sampleB, ilseId: "5678"], [runSegment: runSegment])
 
         expect:
         List expect = [
@@ -145,7 +146,7 @@ class ProcessingTimeStatisticsServiceIntegrationSpec extends IntegrationSpec {
     private static List createOtrsTicketWithSeqTrack(Map otrsTicketProperties = [:], Map seqTrackProperties = [:]) {
         OtrsTicket ticket = DomainFactory.createOtrsTicket(otrsTicketProperties)
         RunSegment runSegment = DomainFactory.createRunSegment(otrsTicket: ticket)
-        SeqTrack seqTrack = DomainFactory.createSeqTrackWithOneDataFile([run: runSegment.run] + seqTrackProperties, [runSegment: runSegment])
+        SeqTrack seqTrack = DomainFactory.createSeqTrackWithOneDataFile(seqTrackProperties, [runSegment: runSegment])
 
         return [ticket, seqTrack]
     }
