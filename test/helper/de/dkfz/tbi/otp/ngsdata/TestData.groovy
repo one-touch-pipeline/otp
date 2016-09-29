@@ -131,10 +131,10 @@ class TestData {
         seqTrack = createSeqTrack()
         assertNotNull(seqTrack.save(flush: true))
 
+        fileType = createFileType(FileType.Type.SEQUENCE)
+
         dataFile = createDataFile(seqTrack, runSegment)
         assertNotNull(dataFile.save(flush: true))
-
-        fileType = createFileType(FileType.Type.SEQUENCE)
 
         referenceGenome = createReferenceGenome()
         assertNotNull(referenceGenome.save(flush: true))
@@ -228,7 +228,7 @@ class TestData {
 
     @Deprecated
     DataFile createDataFile(Map properties = [:]) {
-        return new DataFile([
+        return DomainFactory.createDataFile([
             fileName: "datafile",
             initialDirectory: TestCase.getUniqueNonExistentPath().path,
             fileExists: true,

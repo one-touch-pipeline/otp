@@ -176,8 +176,12 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         DomainFactory.createSeqTrackWithOneDataFile(
                 [fastqcState: SeqTrack.DataProcessingState.FINISHED],
                 [runSegment: runSegment, fileLinked: true])
-        SeqTrack seqTrack = DomainFactory.createSeqTrackWithOneDataFile(
-                [fastqcState: SeqTrack.DataProcessingState.FINISHED],
+        SeqTrack seqTrack = DomainFactory.createSeqTrackWithOneDataFile([
+                fastqcState: SeqTrack.DataProcessingState.FINISHED,
+                run: DomainFactory.createRun(
+                         seqPlatform: DomainFactory.createSeqPlatform(
+                                 seqPlatformGroup: DomainFactory.createSeqPlatformGroup()))
+                ],
                 [runSegment: runSegment, fileLinked: true]
         )
         setBamFileInProjectFolder(DomainFactory.createRoddyBamFile(

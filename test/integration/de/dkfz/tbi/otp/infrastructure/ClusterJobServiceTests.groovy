@@ -314,39 +314,24 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testIsXten_WhenSeqTrackProcessedWithXten_ShouldReturnTrue() {
-        def(job, run) = createClusterJobWithRun()
 
         SeqPlatformModelLabel seqPlatformModelLabel = SeqPlatformModelLabel.build(name: "HiSeq X Ten")
         SeqPlatform seqPlatform = DomainFactory.createSeqPlatform([seqPlatformModelLabel: seqPlatformModelLabel])
-        DomainFactory.createSeqTrack([run: run, seqPlatform: seqPlatform])
+        def(job, run) = createClusterJobWithRun(DomainFactory.createRun(seqPlatform: seqPlatform))
+        DomainFactory.createSeqTrack(run: run)
 
         assert ClusterJobService.isXten(job)
     }
 
     @Test
     void testIsXten_WhenSeqTrackNotProcessedWithXten_ShouldReturnFalse() {
-        def(job, run) = createClusterJobWithRun()
 
         SeqPlatformModelLabel seqPlatformModelLabel = SeqPlatformModelLabel.build(name: "HiSeq2500")
         SeqPlatform seqPlatform = DomainFactory.createSeqPlatform([seqPlatformModelLabel: seqPlatformModelLabel])
-        DomainFactory.createSeqTrack([run: run, seqPlatform: seqPlatform])
+        def(job, run) = createClusterJobWithRun(DomainFactory.createRun(seqPlatform: seqPlatform))
+        DomainFactory.createSeqTrack(run: run)
 
         assertFalse(ClusterJobService.isXten(job))
-    }
-
-    @Test
-    void testIsXten_WhenSeqTracksProcessedWithMixedSeqPlatforms_ShouldReturnNull() {
-        def(job, run) = createClusterJobWithRun()
-
-        SeqPlatformModelLabel seqPlatformModelLabelXTen = SeqPlatformModelLabel.build(name: "HiSeq X Ten")
-        SeqPlatform seqPlatformXTen = DomainFactory.createSeqPlatform([seqPlatformModelLabel: seqPlatformModelLabelXTen])
-        DomainFactory.createSeqTrack([run: run, seqPlatform: seqPlatformXTen])
-
-        SeqPlatformModelLabel seqPlatformModelLabelHiSeq2500 = SeqPlatformModelLabel.build(name: "HiSeq2500")
-        SeqPlatform seqPlatformHiSeq2500 = DomainFactory.createSeqPlatform([seqPlatformModelLabel: seqPlatformModelLabelHiSeq2500])
-        DomainFactory.createSeqTrack([run: run, seqPlatform: seqPlatformHiSeq2500])
-
-        assertNull(ClusterJobService.isXten(job))
     }
 
     @Test

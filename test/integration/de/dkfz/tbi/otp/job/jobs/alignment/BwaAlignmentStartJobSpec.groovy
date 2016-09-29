@@ -15,7 +15,10 @@ class BwaAlignmentStartJobSpec extends IntegrationSpec {
 
     def "execute calls setStartedForSeqTracks"() {
         given:
-        SeqTrack seqTrack = DomainFactory.createSeqTrack(seqPlatform: DomainFactory.createSeqPlatform(seqPlatformGroup: DomainFactory.createSeqPlatformGroup()))
+        SeqTrack seqTrack = DomainFactory.createSeqTrack(
+                run: DomainFactory.createRun(
+                        seqPlatform: DomainFactory.createSeqPlatform(
+                                seqPlatformGroup: DomainFactory.createSeqPlatformGroup())))
         OtrsTicket otrsTicket = DomainFactory.createOtrsTicket()
         AlignmentPass alignmentPass = TestData.createAndSaveAlignmentPass([seqTrack: seqTrack])
         JobExecutionPlan plan = DomainFactory.createJobExecutionPlan(enabled: true)

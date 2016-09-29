@@ -198,7 +198,10 @@ class SeqTrackServiceUnitTests {
 
     @Test
     void testMayAlign_everythingIsOkay_shouldReturnTrue() {
-        SeqTrack seqTrack = DomainFactory.createSeqTrackWithOneDataFile()
+        SeqTrack seqTrack = DomainFactory.createSeqTrackWithOneDataFile(
+                run: DomainFactory.createRun(
+                        seqPlatform: DomainFactory.createSeqPlatform(
+                                seqPlatformGroup: DomainFactory.createSeqPlatformGroup())))
 
         assert SeqTrackService.mayAlign(seqTrack)
     }
@@ -256,7 +259,7 @@ class SeqTrackServiceUnitTests {
     @Test
     void testMayAlign_whenSeqPlatformGroupIsNull_shouldReturnFalse() {
         SeqTrack seqTrack = DomainFactory.createSeqTrackWithOneDataFile([
-                seqPlatform: SeqPlatform.build(seqPlatformGroup: null),
+                run: DomainFactory.createRun(seqPlatform: SeqPlatform.build(seqPlatformGroup: null)),
         ])
 
         assert !SeqTrackService.mayAlign(seqTrack)

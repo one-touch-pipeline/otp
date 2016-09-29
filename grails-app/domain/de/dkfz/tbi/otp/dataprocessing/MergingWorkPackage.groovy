@@ -51,7 +51,7 @@ class MergingWorkPackage implements Entity {
     ProcessingType processingType = ProcessingType.SYSTEM
 
     // SeqTrack properties, part of merging criteria
-    static final Collection<String> qualifiedSeqTrackPropertyNames = ['sample', 'seqType', 'seqPlatform.seqPlatformGroup', 'libraryPreparationKit'].asImmutable()
+    static final Collection<String> qualifiedSeqTrackPropertyNames = ['sample', 'seqType', 'run.seqPlatform.seqPlatformGroup', 'libraryPreparationKit'].asImmutable()
     Sample sample
     SeqType seqType
     SeqPlatformGroup seqPlatformGroup

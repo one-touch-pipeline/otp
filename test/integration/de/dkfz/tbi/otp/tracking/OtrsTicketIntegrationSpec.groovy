@@ -19,7 +19,6 @@ class OtrsTicketIntegrationSpec extends IntegrationSpec {
         OtrsTicket ticketB = DomainFactory.createOtrsTicket()
         RunSegment runSegmentB1 = DomainFactory.createRunSegment(otrsTicket: ticketB)
         SeqTrack seqTrackB1 = DomainFactory.createSeqTrackWithTwoDataFiles([:], [runSegment: runSegmentB1], [:])
-        DomainFactory.createDataFile(runSegment: runSegmentB1)
 
         OtrsTicket ticketC = DomainFactory.createOtrsTicket()
 

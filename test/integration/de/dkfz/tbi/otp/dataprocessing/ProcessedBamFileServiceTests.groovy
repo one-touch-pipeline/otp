@@ -285,9 +285,10 @@ class ProcessedBamFileServiceTests {
         )
         assertNotNull(alignmentPass.save([flush: true]))
 
-        DataFile dataFile = testData.createDataFile(seqTrack2, null)
-        dataFile.fileWithdrawn = true
-        assertNotNull(dataFile.save([flush: true]))
+        DomainFactory.createDataFile(
+                seqTrack: seqTrack2,
+                fileWithdrawn: true,
+        )
 
         assert !processedBamFileService.isAnyAlignmentPending(processedBamFile.mergingWorkPackage)
         assert !processedBamFileService.isMergingInProgress(processedBamFile.mergingWorkPackage)
@@ -601,10 +602,10 @@ class ProcessedBamFileServiceTests {
     @Test
     void testIsAnyAlignmentPending_seqTrackIsWithdrawn() {
         AlignmentPass alignmentPass = TestData.createAndSaveAlignmentPass(alignmentState: AlignmentState.IN_PROGRESS)
-        assert testData.createDataFile(
+        DomainFactory.createDataFile(
                 seqTrack: alignmentPass.seqTrack,
                 fileWithdrawn: true,
-        ).save(failOnError: true)
+        )
         assert !processedBamFileService.isAnyAlignmentPending(alignmentPass.workPackage)
     }
 

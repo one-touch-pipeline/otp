@@ -76,13 +76,13 @@ class AbstractBamFileUnitTests {
 
         final FileType sequenceFileType = FileType.build(type: FileType.Type.SEQUENCE)
 
-        final SeqTrack seqTrack1 = SeqTrack.build()
+        final SeqTrack seqTrack1 = DomainFactory.createSeqTrack()
         final DataFile dataFile11 = DomainFactory.createDataFile(
                 seqTrack: seqTrack1,
                 fileType: sequenceFileType,
         )
 
-        final SeqTrack seqTrack2 = SeqTrack.build()
+        final SeqTrack seqTrack2 = DomainFactory.createSeqTrack()
         final DataFile dataFile21 = DomainFactory.createDataFile(
                 seqTrack: seqTrack2,
                 fileType: sequenceFileType,

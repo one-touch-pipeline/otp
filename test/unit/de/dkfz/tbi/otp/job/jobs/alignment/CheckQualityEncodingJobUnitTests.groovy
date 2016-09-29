@@ -17,6 +17,7 @@ import java.util.zip.*
     ProjectCategory,
     Realm,
     Run,
+    RunSegment,
     SampleType,
     Sample,
     SeqCenter,

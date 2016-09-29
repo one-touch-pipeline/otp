@@ -209,7 +209,6 @@ class LsdfFilesServiceTests {
         seqTrack.run = run
         seqTrack.sample = sample
         seqTrack.seqType = seqType
-        seqTrack.seqPlatform = seqPlatform
         seqTrack.pipelineVersion = softwareTool
         assertNotNull(seqTrack.save([flush: true]))
         DataFile dataFile = createDataFile(seqTrack, fastqR1Filename)
@@ -255,7 +254,6 @@ class LsdfFilesServiceTests {
                 insertSize: insertSize,
                 run: run,
                 sample: sample,
-                seqPlatform: seqPlatform,
                 pipelineVersion: softwareTool
                 ] + properties
         )

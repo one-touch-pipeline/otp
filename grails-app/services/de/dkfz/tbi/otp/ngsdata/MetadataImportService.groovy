@@ -275,7 +275,6 @@ class MetadataImportService {
                     sample: (atMostOneElement(SampleIdentifier.findAllWhere(name: sampleIdString)) ?:
                             sampleIdentifierService.parseAndFindOrSaveSampleIdentifier(sampleIdString)).sample,
                     seqType: seqType,
-                    seqPlatform: run.seqPlatform,
                     pipelineVersion: SoftwareToolService.getBaseCallingTool(pipelineVersionString).softwareTool,
                     kitInfoReliability: kitInfoReliability,
                     libraryPreparationKit: libraryPreparationKit,

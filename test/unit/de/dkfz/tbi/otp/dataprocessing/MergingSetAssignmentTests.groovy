@@ -79,7 +79,6 @@ class MergingSetAssignmentTests {
         seqTrack.run = run
         seqTrack.sample = sample
         seqTrack.seqType = seqType
-        seqTrack.seqPlatform = seqPlatform
         seqTrack.pipelineVersion = softwareTool
         seqTrack.save(flush: true)
         assertTrue(seqTrack.validate())

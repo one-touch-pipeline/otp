@@ -24,6 +24,7 @@ testDataConfig {
             fileName = 'DataFileFileName_R1.gz'
             vbpFileName = 'DataFileFileName_R1.gz'
             pathName = 'path'
+            md5sum = {HelperUtils.randomMd5sum}
             fileType = {FileType.buildLazy(type: FileType.Type.SEQUENCE)}
             initialDirectory = TestCase.getUniqueNonExistentPath().path
         }

@@ -182,10 +182,8 @@ Sequences flagged as poor quality\t0\t
             ]
         }
 
-        SeqTrack seqTrack = DomainFactory.createSeqTrack()
-        DomainFactory.createDataFile([nReads: parsedNReads, seqTrack: seqTrack])
-        fastqcProcessedFile.dataFile.seqTrack = seqTrack
-        fastqcProcessedFile.dataFile.save(flush: true, failOnError: true)
+        fastqcProcessedFile = DomainFactory.createFastqcProcessedFile(
+                dataFile: DomainFactory.createDataFile(nReads: parsedNReads))
 
         fastqcUploadService.uploadFastQCFileContentsToDataBase(fastqcProcessedFile)
 

@@ -8,35 +8,28 @@ class ProjectProgressServiceTests {
 
     ProjectProgressService projectProgressService
 
-    TestData testData
-
     List<Project> projects
 
     Run run1, run2, run3
 
     @Before
     void setUp() {
-        testData = new TestData()
-        testData.createObjects()
+        run1 = createRunWithDatafile(5)
+        run2 = createRunWithDatafile(7)
+        run3 = createRunWithDatafile(8)
 
-        Project project = DomainFactory.createProject().save(flush: true)
         projects = Project.list()
-
-        run1 = createRunWithDatafile(project, 5)
-        run2 = createRunWithDatafile(project, 7)
-        run3 = createRunWithDatafile(project, 8)
     }
 
     @After
     void tearDown() {
-        testData = null
         projects = null
         run1 = run2 = run3 = null
     }
 
-    private Run createRunWithDatafile(Project project, int month) {
-        Run run = testData.createRun([ project: project, name: "Run${month}"]).save(flush: true)
-        testData.createDataFile([run: run, project: project, dateFileSystem: new Date(2000, month, 2)]).save(flush: true)
+    private Run createRunWithDatafile(int month) {
+        Run run = DomainFactory.createRun([name: "Run${month}"])
+        DomainFactory.createDataFile([run: run, dateFileSystem: new Date(2000, month, 2)])
         return run
     }
 
@@ -84,7 +77,6 @@ class ProjectProgressServiceTests {
         List<Run> runs = projectProgressService.getListOfRuns(projects, date, toDate)
         for (Run run in runs) {
             Set<String> samples = projectProgressService.getSamples(run)
-            println samples
         }
     }
 
@@ -92,6 +84,5 @@ class ProjectProgressServiceTests {
     void testProject() {
         List<String> names = Project.list()*.name
         List<Project> projects = projectProgressService.getProjectsFromNameList(names)
-        println projects
     }
 }

@@ -24,16 +24,6 @@ Run.withTransaction {
     Run run = exactlyOneElement(Run.findAllByName(runName))
     assert run.seqPlatform == currentSeqPlatform
 
-    def seqTracks = SeqTrack.findAllByRun(run)
-    seqTracks.each {
-        assert it.seqPlatform == currentSeqPlatform
-    }
-
     run.seqPlatform = newSeqPlatform
     assert run.save(flush: true)
-
-    seqTracks.each {
-        it.seqPlatform = newSeqPlatform
-        assert it.save(flush: true)
-    }
 }

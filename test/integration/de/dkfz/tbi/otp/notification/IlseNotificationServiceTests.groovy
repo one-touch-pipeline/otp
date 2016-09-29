@@ -231,13 +231,11 @@ ${samples.join('\n')}
             return "seqType"
         }
 
-        Project project = DomainFactory.createProject()
-
         Run run = DomainFactory.createRun()
 
-        DataFile dataFile = DomainFactory.createDataFile([run: run, project: project])
+        DataFile dataFile = DomainFactory.createDataFile(run: run)
 
-        assert ["project/seqType/"] == ilseNotificationService.getPathsToSeqTypesForRunAndProject(run, project)
+        assert ["project/seqType/"] == ilseNotificationService.getPathsToSeqTypesForRunAndProject(run, dataFile.project)
     }
 
     private File createTestDirectory() {

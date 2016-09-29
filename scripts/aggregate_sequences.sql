@@ -6,7 +6,7 @@ CREATE VIEW aggregate_sequences AS SELECT
 (count(st.id))::bigint AS lane_count,
 
 st.seq_type_id,
-st.seq_platform_id,
+r.seq_platform_id,
 sp.seq_platform_model_label_id,
 sp.sequencing_kit_label_id,
 st.sample_id,
@@ -38,7 +38,7 @@ FROM seq_track AS st
 INNER JOIN run AS r
 ON r.id = st.run_id
 INNER JOIN seq_platform AS sp
-ON sp.id = st.seq_platform_id
+ON sp.id = r.seq_platform_id
 INNER JOIN seq_type AS seqType
 ON seqType.id = st.seq_type_id
 INNER JOIN sample AS s
@@ -65,7 +65,7 @@ WHERE df.file_withdrawn != false
 group by
 
 st.seq_type_id,
-st.seq_platform_id,
+r.seq_platform_id,
 sp.seq_platform_model_label_id,
 sp.sequencing_kit_label_id,
 st.sample_id,
@@ -90,4 +90,4 @@ p.realm_name,
 p.name,
 p.dir_name,
 sc.name,
-sc.dir_name
+sc.dir_name;

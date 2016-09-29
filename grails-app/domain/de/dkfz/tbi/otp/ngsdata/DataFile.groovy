@@ -16,14 +16,14 @@ class DataFile implements Commentable, Entity {
      */
     String initialDirectory
 
-    /** @deprecated Use <code>seqTrack.project</code> */ @Deprecated
+    /** @deprecated OTP-2311: Redundant with seqTrack.project */ @Deprecated
     Project project = null;
 
+    /** @deprecated OTP-2311: Redundant with run.dateExecuted */ @Deprecated
     Date dateExecuted = null       // when the file was originally produced
     Date dateFileSystem = null     // when the file was created on LSDF
     Date dateCreated = null        // when the object was created in db
 
-    /** @deprecated OTP no longer imports invalid metadata */ @Deprecated
     boolean fileWithdrawn = false
 
     boolean used = false           // is this file used in any seqTrack
@@ -61,8 +61,10 @@ class DataFile implements Commentable, Entity {
 
     Comment comment
 
-    /** @deprecated Use <code>seqTrack.run</code> */ @Deprecated
+    /** @deprecated OTP-2311: Redundant with seqTrack.run */ @Deprecated
     Run run
+    /* OTP-2311: runSegment shall be the same for all DataFiles belonging to the same
+     * SeqTrack, so actually this field should be defined in the SeqTrack class. */
     RunSegment runSegment
     SeqTrack seqTrack
     MergingLog mergingLog
@@ -79,29 +81,23 @@ class DataFile implements Commentable, Entity {
 
     static constraints = {
 
-        used()
-        fileExists()
-        fileLinked()
+        fileName(validator: { OtpPath.isValidPathComponent(it) })
+        vbpFileName(validator: { OtpPath.isValidPathComponent(it) })
 
-        fileName(nullable: true, validator: { it == null || OtpPath.isValidPathComponent(it) })
-        vbpFileName(nullable: true, validator: { it == null || OtpPath.isValidPathComponent(it) })
-
-        fileType(nullable: true)
-        pathName(nullable: true, validator: { !it || OtpPath.isValidRelativePath(it) })
-        md5sum(nullable: true, matches: /^[0-9a-f]{32}$/)
+        pathName(validator: { it.isEmpty() || OtpPath.isValidRelativePath(it) })
+        md5sum(matches: /^[0-9a-f]{32}$/)
         initialDirectory(blank: false, validator: { OtpPath.isValidAbsolutePath(it) })
 
-        project(nullable: true)
+        project(nullable: true,  // Shall not be null, but legacy data exists
+                validator: { Project val, DataFile obj -> obj.seqTrack == null || val == obj.seqTrack.project })
 
-        dateExecuted(nullable: true)
+        dateExecuted(nullable: true)  // Shall not be null, but legacy data exists
         dateFileSystem(nullable: true)
-        dateCreated(nullable: true)
 
-        run(nullable: true)
-        seqTrack(nullable: true)
+        run(validator: { Run val, DataFile obj -> obj.seqTrack == null || val == obj.seqTrack.run })
+        seqTrack(nullable: true)  // Shall not be null, but legacy data exists
         mergingLog(nullable: true)
         alignmentLog(nullable: true)
-        runSegment(nullable: true)
 
         nReads(nullable: true)
         sequenceLength nullable: true, validator: { val, obj ->
@@ -114,7 +110,8 @@ class DataFile implements Commentable, Entity {
 
         comment(nullable: true)
 
-        mateNumber nullable: true, min: 1, validator: { val, obj ->
+        mateNumber nullable: true,  // Shall not be null, but legacy data exists
+            min: 1, validator: { val, obj ->
             if (val != null) {
                 Integer mateCount = LibraryLayout.values().find { it.name() == obj.seqTrack?.seqType?.libraryLayout }?.mateCount
                 if (mateCount != null && val > mateCount) {
@@ -167,7 +164,7 @@ class DataFile implements Commentable, Entity {
         int length
         try {
             length = this.sequenceLength.toInteger()
-        } catch (NumberFormatException) {
+        } catch (NumberFormatException e) {
             def sum = 0
             def count = 0
             this.sequenceLength?.split("-")?.each {

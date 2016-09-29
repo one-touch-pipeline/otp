@@ -185,7 +185,7 @@ class MergingWorkPackageUnitTests {
     void testSatisfiesCriteriaBamFile_whenValid() {
         SeqPlatformGroup seqPlatformGroup = SeqPlatformGroup.build(name: "HiSeq 2000/2500")
         SeqPlatform seqPlatform = SeqPlatform.build(seqPlatformGroup: seqPlatformGroup)
-        SeqTrack seqTrack = SeqTrack.build(seqPlatform: seqPlatform)
+        SeqTrack seqTrack = DomainFactory.createSeqTrack(run: DomainFactory.createRun(seqPlatform: seqPlatform))
 
         MergingWorkPackage workPackage = MergingWorkPackage.build(sample: seqTrack.sample, seqType: seqTrack.seqType, seqPlatformGroup: seqPlatformGroup)
         AlignmentPass alignmentPass = AlignmentPass.build(seqTrack: seqTrack, workPackage: workPackage)

@@ -9,6 +9,7 @@ import spock.lang.*
     Project,
     ProjectCategory,
     Run,
+    RunSegment,
     Sample,
     SampleType,
     SeqCenter,

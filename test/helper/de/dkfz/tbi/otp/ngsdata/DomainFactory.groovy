@@ -891,7 +891,6 @@ class DomainFactory {
                 sample         : { createSample() },
                 pipelineVersion: { createSoftwareTool() },
                 run            : { createRun() },
-                seqPlatform    : { createSeqPlatform() },
         ]
     }
 
@@ -941,14 +940,23 @@ class DomainFactory {
         ], properties)
     }
 
-    static DataFile createDataFile(Map properties = [:]) {
+    static DataFile createDataFile(Map properties = [:], boolean saveAndValidate = true) {
+        SeqTrack seqTrack
+        if (properties.containsKey('seqTrack')) {
+            seqTrack = properties.seqTrack
+        } else {
+            seqTrack = createSeqTrack(properties.containsKey('run') ? [run: properties.run] : [:])
+        }
         return createDomainObject(DataFile, [
+                seqTrack: seqTrack,
+                project: seqTrack?.project,
+                run: seqTrack?.run,
+                runSegment: { createRunSegment() },
                 fileName: "DataFileFileName_${counter}_R1.gz",
                 vbpFileName: "VbpDataFileFileName_${counter}_R1.gz",
                 pathName: "path_${counter}",
                 initialDirectory: TestCase.getUniqueNonExistentPath().path,
                 md5sum: {HelperUtils.getRandomMd5sum()},
-                project: {createProject()},
                 dateExecuted: new Date(),
                 dateFileSystem: new Date(),
                 dateCreated: new Date(),
@@ -959,7 +967,7 @@ class DomainFactory {
                 fileLinked: true,
                 fileSize: counter++,
                 mateNumber: 1,
-        ], properties)
+        ], properties, saveAndValidate)
     }
 
     static RoddyWorkflowConfig createRoddyWorkflowConfig(Map properties = [:], boolean saveAndValidate = true) {
@@ -989,7 +997,7 @@ class DomainFactory {
                 sample: mergingWorkPackage.sample,
                 seqType: mergingWorkPackage.seqType,
                 libraryPreparationKit: mergingWorkPackage.libraryPreparationKit,
-                seqPlatform: createSeqPlatform(seqPlatformGroup: mergingWorkPackage.seqPlatformGroup),
+                run: createRun(seqPlatform: createSeqPlatform(seqPlatformGroup: mergingWorkPackage.seqPlatformGroup)),
         ]
     }
 

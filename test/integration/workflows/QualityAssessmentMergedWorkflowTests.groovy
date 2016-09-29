@@ -257,7 +257,6 @@ class QualityAssessmentMergedWorkflowTests extends WorkflowTestCase {
                 name: "name",
                 seqCenter: seqCenter,
                 seqPlatform: seqPlatform,
-                storageRealm: Run.StorageRealm.DKFZ
         )
         assertNotNull(run.save([flush: true]))
     }
@@ -339,7 +338,6 @@ class QualityAssessmentMergedWorkflowTests extends WorkflowTestCase {
             seqTrack.laneId = "laneId$i"
             seqTrack.run = Run.list().first()
             seqTrack.sample = Sample.list().first()
-            seqTrack.seqPlatform = SeqPlatform.list().first()
             seqTrack.pipelineVersion = SoftwareTool.list().first()
             assertNotNull(seqTrack.save([flush: true]))
 

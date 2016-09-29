@@ -48,8 +48,6 @@ class MergingWorkflowTests extends WorkflowTestCase {
         alignmentDir = "${pidDir}/alignment//testname1_123/pass0"
         singleLaneBamFile = "${alignmentDir}/tumor_testname1_s_123_PAIRED.sorted.bam"
 
-        TestData testData = new TestData()
-
         Project project = DomainFactory.createProject(
                 name: "otp_test_project",
                 dirName: "otp_test_project",
@@ -117,11 +115,9 @@ class MergingWorkflowTests extends WorkflowTestCase {
         )
         assert seqTrack.save(flush: true)
 
-        DataFile dataFile1 = testData.createDataFile([fileName: "dataFile1"])
-        assertNotNull(dataFile1.save([flush: true, failOnError: true]))
+        DataFile dataFile1 = DomainFactory.createDataFile([fileName: "dataFile1"])
 
-        DataFile dataFile2 = testData.createDataFile([fileName: "dataFile2"])
-        assertNotNull(dataFile2.save([flush: true, failOnError: true]))
+        DataFile dataFile2 = DomainFactory.createDataFile([fileName: "dataFile2"])
 
         ReferenceGenome referenceGenome = new ReferenceGenome(
                 name: 'refGenome',
@@ -150,10 +146,10 @@ class MergingWorkflowTests extends WorkflowTestCase {
         )
         assert mergingWorkPackage.save(flush: true)
 
-        AlignmentPass alignmentPass = testData.createAlignmentPass(seqTrack: seqTrack)
+        AlignmentPass alignmentPass = new TestData().createAlignmentPass(seqTrack: seqTrack)
         assertNotNull(alignmentPass.save([flush: true, failOnError: true]))
 
-        processedBamFile = testData.createProcessedBamFile([
+        processedBamFile = TestData.createProcessedBamFile([
                         alignmentPass: alignmentPass,
                         type: BamType.SORTED,
                         fileSize: new File(inputSingleLaneAlingment).length(),

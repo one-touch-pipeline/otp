@@ -62,18 +62,13 @@ class ProcessingPriorityUnitTest {
 
     @Test
     void testGetProcessingPriority() {
-        Project project = Project.build(processingPriority: ProcessingPriority.NORMAL_PRIORITY)
         Run run = Run.build()
         DataFile datafile = DomainFactory.createDataFile(run: run)
+        datafile.project.processingPriority = ProcessingPriority.NORMAL_PRIORITY
         assert ProcessingPriority.NORMAL_PRIORITY == run.processingPriority
 
-        datafile.project = project
-        datafile.save(flush: true, failOnError: true)
-        assert ProcessingPriority.NORMAL_PRIORITY == run.processingPriority
-
-        Project projectFasttrack = Project.build(processingPriority: ProcessingPriority.FAST_TRACK_PRIORITY)
-        DataFile datafileFasttrack = DomainFactory.createDataFile(project: projectFasttrack, run: run)
-
+        DataFile datafileFasttrack = DomainFactory.createDataFile(run: run)
+        datafileFasttrack.project.processingPriority = ProcessingPriority.FAST_TRACK_PRIORITY
         assert ProcessingPriority.FAST_TRACK_PRIORITY == run.processingPriority
     }
 }

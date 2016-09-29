@@ -100,9 +100,6 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
     @Test
     void testGetMetaDataEntryByIdWithProjectNoAclAsAnonymous() {
         MetaDataEntry entry = mockEntry()
-        Project project = mockProject()
-        entry.dataFile.project = project
-        assertNotNull(entry.dataFile.save(flush: true))
 
         authenticateAnonymous()
         shouldFail(AccessDeniedException) {
@@ -120,9 +117,6 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
     @Test
     void testGetMetaDataEntryByIdWithProjectAsUser() {
         MetaDataEntry entry = mockEntry()
-        Project project = mockProject()
-        entry.dataFile.project = project
-        assertNotNull(entry.dataFile.save(flush: true))
 
         SpringSecurityUtils.doWithAuth("testuser") {
             shouldFail(AccessDeniedException) {
@@ -134,7 +128,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
 
         // now create ACL for this user on the Project
         SpringSecurityUtils.doWithAuth("admin") {
-            aclUtilService.addPermission(project, "testuser", BasePermission.READ)
+            aclUtilService.addPermission(entry.dataFile.project, "testuser", BasePermission.READ)
         }
         SpringSecurityUtils.doWithAuth("testuser") {
             // now our test user should have access
@@ -160,9 +154,6 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
     @Test
     void testGetMetaDataEntryByIdWithProjectAsOperator() {
         MetaDataEntry entry = mockEntry()
-        Project project = mockProject()
-        entry.dataFile.project = project
-        assertNotNull(entry.dataFile.save(flush: true))
 
         SpringSecurityUtils.doWithAuth("operator") {
             assertSame(entry, metaDataService.getMetaDataEntryById(entry.id))
@@ -178,9 +169,6 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
     @Test
     void testGetMetaDataEntryByIdWithProjectAsAdmin() {
         MetaDataEntry entry = mockEntry()
-        Project project = mockProject()
-        entry.dataFile.project = project
-        assertNotNull(entry.dataFile.save(flush: true))
 
         SpringSecurityUtils.doWithAuth("admin") {
             assertSame(entry, metaDataService.getMetaDataEntryById(entry.id))
@@ -247,9 +235,6 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
     @Test
     void testUpdateMetaDataEntryWithProjectAsAnonymous() {
         MetaDataEntry entry = mockEntry()
-        Project project = mockProject()
-        entry.dataFile.project = project
-        assertNotNull(entry.dataFile.save(flush: true))
         authenticateAnonymous()
         shouldFail(AccessDeniedException) {
             metaDataService.updateMetaDataEntry(entry, "test2")
@@ -263,16 +248,13 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
     @Test
     void testUpdateMetaDataEntryWithProjectAsUser() {
         MetaDataEntry entry = mockEntry()
-        Project project = mockProject()
-        entry.dataFile.project = project
-        assertNotNull(entry.dataFile.save(flush: true))
         SpringSecurityUtils.doWithAuth("testuser") {
             shouldFail(AccessDeniedException) {
                 metaDataService.updateMetaDataEntry(entry, "test2")
             }
         }
-        aclUtilService.addPermission(project, "testuser", BasePermission.READ)
-        aclUtilService.addPermission(project, "testuser", BasePermission.WRITE)
+        aclUtilService.addPermission(entry.dataFile.project, "testuser", BasePermission.READ)
+        aclUtilService.addPermission(entry.dataFile.project, "testuser", BasePermission.WRITE)
         SpringSecurityUtils.doWithAuth("testuser") {
             assertTrue(metaDataService.updateMetaDataEntry(entry, "test2"))
         }
@@ -283,7 +265,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
             }
         }
         // let's give that user read permission
-        aclUtilService.addPermission(project, "user", BasePermission.READ)
+        aclUtilService.addPermission(entry.dataFile.project, "user", BasePermission.READ)
         SpringSecurityUtils.doWithAuth("user") {
             shouldFail(AccessDeniedException) {
                 metaDataService.updateMetaDataEntry(entry, "test3")
@@ -298,9 +280,6 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
     @Test
     void testUpdateMetaDataEntryWithProjectAsOperator() {
         MetaDataEntry entry = mockEntry()
-        Project project = mockProject()
-        entry.dataFile.project = project
-        assertNotNull(entry.dataFile.save(flush: true))
         SpringSecurityUtils.doWithAuth("operator") {
             assertTrue(metaDataService.updateMetaDataEntry(entry, "test2"))
         }
@@ -313,9 +292,6 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
     @Test
     void testUpdateMetaDataEntryWithProjectAsAdmin() {
         MetaDataEntry entry = mockEntry()
-        Project project = mockProject()
-        entry.dataFile.project = project
-        assertNotNull(entry.dataFile.save(flush: true))
         SpringSecurityUtils.doWithAuth("admin") {
             assertTrue(metaDataService.updateMetaDataEntry(entry, "test2"))
         }
@@ -366,9 +342,6 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
     @Test
     void testRetrieveChangelogWithProjectNoAcl() {
         MetaDataEntry entry = mockEntry()
-        Project project = mockProject()
-        entry.dataFile.project = project
-        assertNotNull(entry.dataFile.save(flush: true))
         // admin should always be able to see the entry
         SpringSecurityUtils.doWithAuth("admin") {
             assertTrue(metaDataService.retrieveChangeLog(entry).empty)
@@ -406,13 +379,10 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
     @Test
     void testRetrieveEmptyChangelogWithAcl() {
         MetaDataEntry entry = mockEntry()
-        Project project = mockProject()
-        entry.dataFile.project = project
-        assertNotNull(entry.dataFile.save(flush: true))
         // admin should always be able to see the entry
         SpringSecurityUtils.doWithAuth("admin") {
             assertTrue(metaDataService.retrieveChangeLog(entry).empty)
-            aclUtilService.addPermission(project, "testuser", BasePermission.READ)
+            aclUtilService.addPermission(entry.dataFile.project, "testuser", BasePermission.READ)
         }
         // now the user should be able to retrieve the changelog
         SpringSecurityUtils.doWithAuth("testuser") {
@@ -437,15 +407,12 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
     @Test
     void testRetrieveChangelogWithAcl() {
         MetaDataEntry entry = mockEntry()
-        Project project = mockProject()
-        entry.dataFile.project = project
-        assertNotNull(entry.dataFile.save(flush: true))
         // grant read to user and add an update
         SpringSecurityUtils.doWithAuth("admin") {
             assertTrue(metaDataService.retrieveChangeLog(entry).empty)
             metaDataService.updateMetaDataEntry(entry, "test2")
             assertEquals(1, metaDataService.retrieveChangeLog(entry).size())
-            aclUtilService.addPermission(project, "testuser", BasePermission.READ)
+            aclUtilService.addPermission(entry.dataFile.project, "testuser", BasePermission.READ)
         }
         // now user should be able to see the changelog
         SpringSecurityUtils.doWithAuth("testuser") {
@@ -479,15 +446,5 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
         entry = entry.save(flush: true)
         assertNotNull(entry)
         return entry
-    }
-
-    /**
-     * Creates a very simple Project with minimum required fields
-     * @return
-     */
-    private Project mockProject() {
-        Project project = DomainFactory.createProject(name: "test", dirName: "test", realmName: "test")
-        assertNotNull(project.save(flush: true))
-        return project
     }
 }

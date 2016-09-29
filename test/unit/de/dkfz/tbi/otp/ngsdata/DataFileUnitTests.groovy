@@ -7,10 +7,20 @@ import org.junit.*
 
 import de.dkfz.tbi.TestCase
 
-/**
- */
-
-@Build([FileType])
+@Build([
+    FileType,
+    Individual,
+    Project,
+    ProjectCategory,
+    Run,
+    RunSegment,
+    Sample,
+    SampleType,
+    SeqPlatform,
+    SeqTrack,
+    SeqType,
+    SoftwareTool,
+])
 @TestFor(DataFile)
 class DataFileUnitTests {
 
@@ -23,39 +33,37 @@ class DataFileUnitTests {
     @Test
     void testMateNumberConstraint_Alignment() {
         FileType fileType = FileType.build([type: FileType.Type.ALIGNMENT])
-        DataFile dataFile = new DataFile(fileType: fileType, initialDirectory: TestCase.getUniqueNonExistentPath().path)
-
-        assert dataFile.validate()
+        DomainFactory.createDataFile(fileType: fileType)
     }
 
     @Test
     void testMateNumberConstraint_SequenceButNotFastq() {
         FileType fileType = FileType.build([type: FileType.Type.SEQUENCE, vbpPath: 'SomeOtherDirectory'])
-        DataFile dataFile = new DataFile(fileType: fileType, initialDirectory: TestCase.getUniqueNonExistentPath().path)
-
-        assert dataFile.validate()
+        DomainFactory.createDataFile(fileType: fileType)
     }
 
     @Test
     void testMateNumberConstraint_SequenceFastq_OK_ReadIsOne() {
         FileType fileType = FileType.build([type: FileType.Type.SEQUENCE, vbpPath: SEQUENCE_DIRECTORY])
-        DataFile dataFile = new DataFile(fileType: fileType, mateNumber: 1, initialDirectory: TestCase.getUniqueNonExistentPath().path)
-
-        assert dataFile.validate()
+        DomainFactory.createDataFile(fileType: fileType, mateNumber: 1)
     }
 
     @Test
     void testMateNumberConstraint_SequenceFastq_OK_ReadIsTwo() {
         FileType fileType = FileType.build([type: FileType.Type.SEQUENCE, vbpPath: SEQUENCE_DIRECTORY])
-        DataFile dataFile = new DataFile(fileType: fileType, mateNumber: 2, initialDirectory: TestCase.getUniqueNonExistentPath().path)
-
-        assert dataFile.validate()
+        DomainFactory.createDataFile(
+                seqTrack: DomainFactory.createSeqTrack(
+                        seqType: DomainFactory.createSeqType(libraryLayout: LibraryLayout.PAIRED.name())
+                ),
+                fileType: fileType,
+                mateNumber: 2,
+        )
     }
 
     @Test
     void testMateNumberConstraint_SequenceFastq_NoMateNumber() {
         FileType fileType = FileType.build([type: FileType.Type.SEQUENCE, vbpPath: SEQUENCE_DIRECTORY])
-        DataFile dataFile = new DataFile(fileType: fileType, mateNumber: null, initialDirectory: TestCase.getUniqueNonExistentPath().path)
+        DataFile dataFile = DomainFactory.createDataFile([fileType: fileType, mateNumber: null], false)
 
         TestCase.assertValidateError(dataFile, "mateNumber", "validator.invalid", null)
     }
@@ -63,7 +71,7 @@ class DataFileUnitTests {
     @Test
     void testMateNumberConstraint_SequenceFastq_MateNumberIsZero() {
         FileType fileType = FileType.build([type: FileType.Type.SEQUENCE, vbpPath: SEQUENCE_DIRECTORY])
-        DataFile dataFile = new DataFile(fileType: fileType, mateNumber: 0, initialDirectory: TestCase.getUniqueNonExistentPath().path)
+        DataFile dataFile = DomainFactory.createDataFile([fileType: fileType, mateNumber: 0], false)
 
         TestCase.assertAtLeastExpectedValidateError(dataFile, "mateNumber", "validator.invalid", 0)
     }
@@ -71,28 +79,24 @@ class DataFileUnitTests {
     @Test
     void testMateNumberConstraint_SequenceFastq_MateNumberIsToBig() {
         FileType fileType = FileType.build([type: FileType.Type.SEQUENCE, vbpPath: SEQUENCE_DIRECTORY])
-        DataFile dataFile = new DataFile(fileType: fileType, mateNumber: 3, initialDirectory: TestCase.getUniqueNonExistentPath().path)
+        DataFile dataFile = DomainFactory.createDataFile([fileType: fileType, mateNumber: 3], false)
 
         TestCase.assertValidateError(dataFile, "mateNumber", "validator.invalid", 3)
     }
 
     @Test
     void testSequenceLengthConstraint_WhenSequenceLengthIsANumberAsString_ShouldPassValidation() {
-        DataFile dataFile = new DataFile(sequenceLength: "123", initialDirectory: TestCase.getUniqueNonExistentPath().path)
-
-        assert dataFile.validate()
+        DomainFactory.createDataFile(sequenceLength: "123")
     }
 
     @Test
     void testSequenceLengthConstraint_WhenSequenceLengthIsARangeAsString_ShouldPassValidation() {
-        DataFile dataFile = new DataFile(sequenceLength: "123-321", initialDirectory: TestCase.getUniqueNonExistentPath().path)
-
-        assert dataFile.validate()
+        DomainFactory.createDataFile(sequenceLength: "123-321")
     }
 
     @Test
     void testSequenceLengthConstraint_WhenSequenceLengthIsSomethingElse_ShouldPassValidation() {
-        DataFile dataFile = new DataFile(sequenceLength: "!1§2%3&", initialDirectory: TestCase.getUniqueNonExistentPath().path)
+        DataFile dataFile = DomainFactory.createDataFile([sequenceLength: "!1§2%3&"], false)
 
         TestCase.shouldFail(RuntimeException) {
             dataFile.validate()

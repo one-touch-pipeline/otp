@@ -1,21 +1,14 @@
 package de.dkfz.tbi.otp.job.jobs.alignment
 
-import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.dataprocessing.AlignmentPass
-import de.dkfz.tbi.otp.dataprocessing.ProcessedSaiFile
-import de.dkfz.tbi.otp.dataprocessing.ProcessedSaiFileService
-import de.dkfz.tbi.otp.job.processing.ProcessingException
-import de.dkfz.tbi.otp.ngsdata.DataFile
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
-import de.dkfz.tbi.otp.ngsdata.TestData
-import grails.buildtestdata.mixin.Build
-import grails.test.mixin.TestMixin
-import grails.test.mixin.support.GrailsUnitTestMixin
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
+import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.ngsdata.*
+import grails.buildtestdata.mixin.*
+import grails.test.mixin.*
+import grails.test.mixin.support.*
+import groovy.lang.Sequence
+import org.junit.*
 
 @TestMixin(GrailsUnitTestMixin)
 @Build([AlignmentPass, ProcessedSaiFile, ReferenceGenome])
@@ -48,8 +41,9 @@ class BwaPairingAndSortingJobUnitTest {
         }
 
         alignmentPass = TestData.createAndSaveAlignmentPass()
-        DataFile dataFile1 = DomainFactory.createDataFile(fileName: FILE_MATE1, vbpFileName: FILE_MATE1, mateNumber: 1)
-        DataFile dataFile2 = DomainFactory.createDataFile(fileName: FILE_MATE2, vbpFileName: FILE_MATE2, mateNumber: 2)
+        SeqTrack seqTrack = DomainFactory.createSeqTrack(seqType: DomainFactory.createSeqType(libraryLayout: LibraryLayout.PAIRED.name()))
+        DataFile dataFile1 = DomainFactory.createDataFile(seqTrack: seqTrack, fileName: FILE_MATE1, vbpFileName: FILE_MATE1, mateNumber: 1)
+        DataFile dataFile2 = DomainFactory.createDataFile(seqTrack: seqTrack, fileName: FILE_MATE2, vbpFileName: FILE_MATE2, mateNumber: 2)
         processedSaiFile1 = ProcessedSaiFile.build(alignmentPass: alignmentPass, dataFile: dataFile1)
         processedSaiFile2 = ProcessedSaiFile.build(alignmentPass: alignmentPass, dataFile: dataFile2)
     }

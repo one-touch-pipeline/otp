@@ -36,8 +36,8 @@ class ConveyBwaAlignmentWorkflowTests extends WorkflowTestCase {
         File sourceFastqR2 = new File(testDataDir, "35-3B_NoIndex_L007_R2_complete_filtered.fastq.gz")
         File sourceRefGenDir = new File("${testDataDir}/reference_genomes/bwa06_1KGRef")
 
-        Run run = Run.build()
         SeqPlatform seqPlatform = SeqPlatform.build(name: "Illumina SeqDingsi")
+        Run run = DomainFactory.createRun(seqPlatform: seqPlatform)
         SoftwareTool softwareTool = SoftwareTool.build()
 
 
@@ -65,7 +65,6 @@ class ConveyBwaAlignmentWorkflowTests extends WorkflowTestCase {
                 seqType: findSeqType(),
                 laneId: "0",
                 run: run,
-                seqPlatform: seqPlatform,
                 libraryPreparationKit: workPackage.libraryPreparationKit,
                 kitInfoReliability: InformationReliability.KNOWN,
                 pipelineVersion: softwareTool,
@@ -80,6 +79,7 @@ class ConveyBwaAlignmentWorkflowTests extends WorkflowTestCase {
                 fileName: 'asdf_R1.fastq.gz',
                 vbpFileName: 'asdf_R1.fastq.gz',
                 seqTrack: seqTrack,
+                nReads: 10000,
         )
         assert dataFile.save(flush: true, failOnError: true)
 
@@ -91,6 +91,7 @@ class ConveyBwaAlignmentWorkflowTests extends WorkflowTestCase {
                 fileName: 'asdf_R2.fastq.gz',
                 vbpFileName: 'asdf_R2.fastq.gz',
                 seqTrack: seqTrack,
+                nReads: 10000,
         )
         assert dataFile.save(flush: true, failOnError: true)
 

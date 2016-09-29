@@ -7,13 +7,19 @@ import spock.lang.*
 @Mock([
     DataFile,
     FileType,
+    Individual,
     MetaDataFile,
     Project,
     ProjectCategory,
     Run,
     RunSegment,
+    Sample,
+    SampleType,
     SeqCenter,
     SeqPlatform,
+    SeqTrack,
+    SeqType,
+    SoftwareTool,
 ])
 class RunServiceSpec extends Specification {
 

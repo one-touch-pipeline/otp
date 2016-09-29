@@ -74,8 +74,6 @@ class SeqTrack implements ProcessParameterObject, Entity {
     Run run
     Sample sample
     SeqType seqType
-    /** @deprecated Use <code>run.seqPlatform</code> */ @Deprecated
-    SeqPlatform seqPlatform
     SoftwareTool pipelineVersion
 
     QualityEncoding qualityEncoding = QualityEncoding.UNKNOWN
@@ -113,7 +111,6 @@ class SeqTrack implements ProcessParameterObject, Entity {
         Run,
         Sample,
         SeqType,
-        SeqPlatform,
         LibraryPreparationKit,
 
     ]
@@ -222,6 +219,10 @@ class SeqTrack implements ProcessParameterObject, Entity {
 
     SampleType getSampleType() {
         return sample.sampleType
+    }
+
+    SeqPlatform getSeqPlatform() {
+        return run.seqPlatform
     }
 
     SeqPlatformGroup getSeqPlatformGroup() {

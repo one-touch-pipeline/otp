@@ -77,7 +77,7 @@ where
             where
                 abstractQualityAssessment.qualityAssessmentMergedPass.abstractMergedBamFile.workPackage.sample = seqTrack.sample
                 and abstractQualityAssessment.qualityAssessmentMergedPass.abstractMergedBamFile.workPackage.seqType = seqTrack.seqType
-                and abstractQualityAssessment.qualityAssessmentMergedPass.abstractMergedBamFile.workPackage.seqPlatformGroup = seqTrack.seqPlatform.seqPlatformGroup
+                and abstractQualityAssessment.qualityAssessmentMergedPass.abstractMergedBamFile.workPackage.seqPlatformGroup = seqTrack.run.seqPlatform.seqPlatformGroup
                 and dataFile.seqTrack = seqTrack
                 and abstractQualityAssessment.id in :abstractQualityAssessmentIds
         '''
