@@ -126,6 +126,7 @@ class DomainFactory {
                 processingRootPath: { new File(fakePath, 'processing').path },
                 loggingRootPath   : { new File(fakePath, 'logging').path },
                 programsRootPath  : { new File(fakePath, 'programs').path },
+                stagingRootPath   : { new File(fakePath, 'staging').path },
                 webHost           : 'test.host.invalid',
                 host              : 'test.host.invalid',
                 port              : -1,
@@ -581,7 +582,7 @@ class DomainFactory {
 
     static SamplePair createDisease(MergingWorkPackage controlMwp) {
         MergingWorkPackage diseaseMwp = createMergingWorkPackage(controlMwp)
-        SampleTypePerProject.build(project: controlMwp.project, sampleType: diseaseMwp.sampleType, category: SampleType.Category.DISEASE)
+        createSampleTypePerProject(project: controlMwp.project, sampleType: diseaseMwp.sampleType, category: SampleType.Category.DISEASE)
         SamplePair samplePair = createSamplePair(diseaseMwp, controlMwp)
         return samplePair
     }
@@ -613,17 +614,14 @@ class DomainFactory {
     public static SnvCallingInstance createSnvInstanceWithRoddyBamFiles(Map properties = [:], Map bamFile1Properties = [:], Map bamFile2Properties = [:]) {
         Pipeline pipeline = createPanCanPipeline()
 
-        MergingWorkPackage controlWorkPackage = MergingWorkPackage.build(
-                pipeline: pipeline,
-                statSizeFileName: DEFAULT_TAB_FILE_NAME,
-        )
+        MergingWorkPackage controlWorkPackage = createMergingWorkPackage(pipeline: pipeline, statSizeFileName: DEFAULT_TAB_FILE_NAME)
         SamplePair samplePair = createDisease(controlWorkPackage)
         MergingWorkPackage diseaseWorkPackage = samplePair.mergingWorkPackage1
 
         RoddyBamFile disease = createRoddyBamFile([workPackage: diseaseWorkPackage] + bamFile1Properties)
         RoddyBamFile control = createRoddyBamFile([workPackage: controlWorkPackage, config: disease.config] + bamFile2Properties)
 
-        ExternalScript externalScript = ExternalScript.buildLazy()
+        ExternalScript externalScript = DomainFactory.createExternalScript()
 
         SnvConfig snvConfig = createSnvConfig(
                 seqType: samplePair.seqType,
