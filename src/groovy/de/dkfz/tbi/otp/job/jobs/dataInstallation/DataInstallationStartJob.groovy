@@ -28,7 +28,7 @@ class DataInstallationStartJob extends AbstractStartJobImpl {
             for (SeqTrack seqTrack : seqTracks) {
                 if (seqTrack.processingPriority >= minimumProcessingPriorityForOccupyingASlot) {
                     SeqTrack.withTransaction {
-                        trackingService.setStartedForSeqTracks(seqTracks, OtrsTicket.ProcessingStep.INSTALLATION)
+                        trackingService.setStartedForSeqTracks([seqTrack], OtrsTicket.ProcessingStep.INSTALLATION)
                         seqTrack.dataInstallationState = SeqTrack.DataProcessingState.IN_PROGRESS
                         assert seqTrack.save(flush: true)
                         createProcess(seqTrack)
