@@ -40,7 +40,7 @@ class GroupService {
      */
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     List<Group> availableGroups() {
-        return Group.list()
+        return Group.list(sort: 'name')
     }
 
     /**
@@ -69,7 +69,7 @@ class GroupService {
         def groupUsers = [:]
         groups.each { Group group ->
             List users = []
-            UserRole.findAllByRole(group.role).collect { it.user }.each { User user ->
+            UserRole.findAllByRole(group.role).collect { it.user }.sort { it.username }.each { User user ->
                 users.add(user)
             }
             groupUsers.put(group, users)
