@@ -31,9 +31,9 @@ FROM OtrsTicket otrsTicket
 ${search ? """
   (EXISTS (FROM DataFile dataFile WHERE
    dataFile.runSegment.otrsTicket = otrsTicket AND (
-    dataFile.seqTrack.sample.individual.project.name LIKE :search OR
-    dataFile.seqTrack.ilseId LIKE :search OR
-    dataFile.seqTrack.run.name LIKE :search
+    lower(dataFile.seqTrack.sample.individual.project.name) LIKE :search OR
+    str(dataFile.seqTrack.ilseSubmission.ilseNumber) LIKE :search OR
+    lower(dataFile.seqTrack.run.name) LIKE :search
    )
   ) OR (otrsTicket.ticketNumber LIKE :search)
  ) AND
@@ -50,7 +50,7 @@ ${search ? """
         ]
 
         if (search) {
-            queryOptions.put('search', '%' + StringUtils.escapeForSqlLike(search) + '%')
+            queryOptions.put('search', '%' + StringUtils.escapeForSqlLike(search).toLowerCase(Locale.ENGLISH) + '%')
         }
 
         List<OtrsTicket> tickets = OtrsTicket.executeQuery(query.toString(), queryOptions)
@@ -63,7 +63,7 @@ ${search ? """
 
         List<SeqTrack> seqTracks = ticket.findAllSeqTracks() as List
 
-        List<String> ilseIds = selectDistinctAndOrderByFromSeqTrack(seqTracks, "st.ilseId")
+        List<String> ilseIds = selectDistinctAndOrderByFromSeqTrack(seqTracks, "st.ilseSubmission.ilseNumber")
         List<String> projectNames = selectDistinctAndOrderByFromSeqTrack(seqTracks, "st.sample.individual.project.name")
         List<String> sampleNames = selectDistinctAndOrderByFromSeqTrack(seqTracks, ["st.sample.individual.mockFullName", "st.sample.sampleType.name"].join(", ")).collect { "${it.first()} ${it.last()}" }
         List<String> runs = selectDistinctAndOrderByFromSeqTrack(seqTracks, "st.run.name")

@@ -6,6 +6,7 @@ import de.dkfz.tbi.otp.tracking.*
 import grails.test.spock.*
 import org.joda.time.*
 import org.springframework.beans.factory.annotation.*
+import spock.lang.*
 
 class ProcessingTimeStatisticsServiceIntegrationSpec extends IntegrationSpec {
 
@@ -37,7 +38,7 @@ class ProcessingTimeStatisticsServiceIntegrationSpec extends IntegrationSpec {
         LocalDate dateFrom = new LocalDate()
         LocalDate dateTo = new LocalDate().plusDays(1)
 
-        createOtrsTicketWithSeqTrack([dateCreated: dateFrom.toDate()], [ilseId: "1234"])
+        createOtrsTicketWithSeqTrack([dateCreated: dateFrom.toDate()])
 
         when:
         processingTimeStatisticsService.findAllOtrsTicketsByDateBetweenAndSearch(dateFrom, dateTo, "56")
@@ -51,13 +52,14 @@ class ProcessingTimeStatisticsServiceIntegrationSpec extends IntegrationSpec {
         LocalDate dateFrom = new LocalDate()
         LocalDate dateTo = new LocalDate().plusDays(1)
 
-        def (ticketA, seqTrackA) = createOtrsTicketWithSeqTrack([dateCreated: dateFrom.toDate()], [ilseId: "1234"])
-        createOtrsTicketWithSeqTrack([dateCreated: dateFrom.toDate()], [ilseId: "5678"])
+        def (ticketA, seqTrackA) = createOtrsTicketWithSeqTrack([dateCreated: dateFrom.toDate()], [ilseSubmission: DomainFactory.createIlseSubmission(ilseNumber: 1234)])
+        createOtrsTicketWithSeqTrack([dateCreated: dateFrom.toDate()], [ilseSubmission: DomainFactory.createIlseSubmission(ilseNumber: 5678)])
 
         expect:
-        [ticketA] == processingTimeStatisticsService.findAllOtrsTicketsByDateBetweenAndSearch(dateFrom, dateTo, seqTrackA.ilseId)
+        [ticketA] == processingTimeStatisticsService.findAllOtrsTicketsByDateBetweenAndSearch(dateFrom, dateTo, '234')
     }
 
+    @Ignore('Fails with H2, succeeds with PostgreSQL -> OTP-1874')
     void "findAllOtrsTicketsByDateBetweenAndSearch, when string to search in project name, return ticket with searched project name"() {
         LocalDate dateFrom = new LocalDate()
         LocalDate dateTo = new LocalDate().plusDays(1)
@@ -103,8 +105,8 @@ class ProcessingTimeStatisticsServiceIntegrationSpec extends IntegrationSpec {
         Individual individualB = DomainFactory.createIndividual(project: projectB)
         Sample sampleA = DomainFactory.createSample(individual: individualA)
         Sample sampleB = DomainFactory.createSample(individual: individualB)
-        SeqTrack seqTrackA = DomainFactory.createSeqTrackWithOneDataFile([run: run, sample: sampleA, ilseId: "1234"], [runSegment: runSegment])
-        SeqTrack seqTrackB = DomainFactory.createSeqTrackWithOneDataFile([run: run, sample: sampleB, ilseId: "5678"], [runSegment: runSegment])
+        SeqTrack seqTrackA = DomainFactory.createSeqTrackWithOneDataFile([run: run, sample: sampleA, ilseSubmission: DomainFactory.createIlseSubmission(ilseNumber: 1234)], [runSegment: runSegment])
+        SeqTrack seqTrackB = DomainFactory.createSeqTrackWithOneDataFile([run: run, sample: sampleB, ilseSubmission: DomainFactory.createIlseSubmission(ilseNumber: 5678)], [runSegment: runSegment])
 
         expect:
         List expect = [

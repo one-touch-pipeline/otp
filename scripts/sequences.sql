@@ -10,7 +10,7 @@ sp.sequencing_kit_label_id,
 st.sample_id,
 st.run_id,
 st.pipeline_version_id,
-st.ilse_id,
+ilse.ilse_number AS ilse_id,
 r.seq_center_id,
 s.sample_type_id,
 s.individual_id,
@@ -63,6 +63,8 @@ INNER JOIN project AS p
 ON i.project_id = p.id
 INNER JOIN seq_center AS sc
 ON r.seq_center_id = sc.id
+LEFT OUTER JOIN ilse_submission ilse
+ON st.ilse_submission_id = ilse.id
 LEFT OUTER JOIN seq_platform_model_label spml
 ON sp.seq_platform_model_label_id = spml.id
 LEFT OUTER JOIN sequencing_kit_label skl

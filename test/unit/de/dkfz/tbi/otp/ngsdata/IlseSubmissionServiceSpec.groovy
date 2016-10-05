@@ -18,6 +18,7 @@ class IlseSubmissionServiceSpec extends Specification {
     void "test getSortedBlacklistedIlseSubmissions single"() {
         given:
         DomainFactory.createIlseSubmission(
+                comment: DomainFactory.createComment(),
                 warning: blacklisted
         )
         IlseSubmissionService service = new IlseSubmissionService(commentService: new CommentService())
@@ -40,10 +41,12 @@ class IlseSubmissionServiceSpec extends Specification {
         given:
         DomainFactory.createIlseSubmission(
                 ilseNumber: ilse1,
+                comment: DomainFactory.createComment(),
                 warning: true
         )
         DomainFactory.createIlseSubmission(
                 ilseNumber: ilse2,
+                comment: DomainFactory.createComment(),
                 warning: blacklisted
         )
         IlseSubmissionService service = new IlseSubmissionService()

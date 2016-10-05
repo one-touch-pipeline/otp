@@ -36,7 +36,7 @@ class SeqTrack implements ProcessParameterObject, Entity {
     }
 
     String laneId
-    String ilseId
+    IlseSubmission ilseSubmission
     boolean hasOriginalBam = false
     /**
      * {@code true} if the data files belonging to this {@link SeqTrack} are symlinked to the project folder.
@@ -125,8 +125,8 @@ class SeqTrack implements ProcessParameterObject, Entity {
         seqType()
         sample()
         pipelineVersion()
-        // for old data and data which is sequenced from external core facilities this information might not be provided.
-        ilseId nullable: true, blank: false
+        // for old data and data which is sequenced by external facilities this information might not be provided.
+        ilseSubmission(nullable: true)
         nBasePairs nullable: true
 
         //libraryPreparationKit and inferred state
@@ -206,6 +206,10 @@ class SeqTrack implements ProcessParameterObject, Entity {
      */
     boolean isWithdrawn() {
         return DataFile.findBySeqTrackAndFileWithdrawn(this, true)
+    }
+
+    Integer getIlseId() {
+        return ilseSubmission?.ilseNumber
     }
 
     @Override

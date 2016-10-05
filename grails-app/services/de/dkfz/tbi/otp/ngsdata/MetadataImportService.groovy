@@ -242,6 +242,7 @@ class MetadataImportService {
     private void importSeqTracks(MetadataValidationContext context, RunSegment runSegment, Run run, Collection<Row> runRows) {
         runRows.groupBy { MultiplexingService.combineLaneNumberAndBarcode(it.getCellByColumnTitle(LANE_NO.name()).text,
                 extractBarcode(it).value) }.each { String laneId, List<Row> rows ->
+            String ilseNumber = uniqueColumnValue(rows, ILSE_NO)
             SeqType seqType = exactlyOneElement(SeqType.findAllWhere(
                     name: uniqueColumnValue(rows, SEQUENCING_TYPE) + (uniqueColumnValue(rows, TAGMENTATION_BASED_LIBRARY) ? '_TAGMENTATION' : ''),
                     libraryLayout: uniqueColumnValue(rows, LIBRARY_LAYOUT),
@@ -268,7 +269,7 @@ class MetadataImportService {
             AdapterFile adapterFile = adapterFileName ? exactlyOneElement(AdapterFile.findAllByFileName(adapterFileName)) : null
             Map properties = [
                     laneId: laneId,
-                    ilseId: uniqueColumnValue(rows, ILSE_NO) ?: null,
+                    ilseSubmission: ilseNumber ? IlseSubmission.findOrSaveWhere(ilseNumber: Integer.parseInt(ilseNumber)) : null,
                     // TODO OTP-2050: Use a different fallback value?
                     insertSize: tryParseInt(uniqueColumnValue(rows, INSERT_SIZE), 0),
                     run: run,

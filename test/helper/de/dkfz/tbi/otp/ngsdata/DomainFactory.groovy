@@ -362,7 +362,6 @@ class DomainFactory {
         return createDomainObject(IlseSubmission, [
                 ilseNumber: { counter++ % 999000 + 1000 },
                 warning: false,
-                comment: {createComment()}
                 ], properties, saveAndValidate)
     }
 

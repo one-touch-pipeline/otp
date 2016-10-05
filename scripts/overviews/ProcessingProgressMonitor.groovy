@@ -884,8 +884,10 @@ nameStringToList(individualString).each { String individualName ->
 nameStringToList(ilseIdString).each { String ilseId ->
     output << "\n\n\n==============================\nilseId = ${ilseId}\n==============================\n"
 
-    List<SeqTrack> seqTracks = SeqTrack.createCriteria().list{
-        eq('ilseId', ilseId)
+    List<SeqTrack> seqTracks = SeqTrack.createCriteria().list {
+        ilseSubmission {
+            eq('ilseNumber', Integer.parseInt(ilseId))
+        }
     }
 
     if (!seqTracks) {

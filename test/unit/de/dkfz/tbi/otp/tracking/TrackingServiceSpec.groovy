@@ -15,6 +15,7 @@ import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus
 @Mock([
     DataFile,
     FileType,
+    IlseSubmission,
     Individual,
     OtrsTicket,
     ProcessingOption,
@@ -217,13 +218,15 @@ class TrackingServiceSpec extends Specification {
         Sample sample = DomainFactory.createSample()
         SeqType seqType = DomainFactory.createSeqType()
         String sampleText = "${sample.project.name}, ${sample.individual.pid}, ${sample.sampleType.name}, ${seqType.name} ${seqType.libraryLayout}"
+        IlseSubmission ilseSubmission1 = DomainFactory.createIlseSubmission(ilseNumber: 1234)
+        IlseSubmission ilseSubmission2 = DomainFactory.createIlseSubmission(ilseNumber: 5678)
         Set<SeqTrack> seqTracks = [
-                DomainFactory.createSeqTrack(sample: sample, seqType: seqType, ilseId: '2', run: runA, laneId: '1'),
-                DomainFactory.createSeqTrack(sample: sample, seqType: seqType, ilseId: '1', run: runB, laneId: '2'),
-                DomainFactory.createSeqTrack(sample: sample, seqType: seqType, ilseId: '1', run: runA, laneId: '4'),
-                DomainFactory.createSeqTrack(sample: sample, seqType: seqType, ilseId: '1', run: runA, laneId: '3'),
-                DomainFactory.createSeqTrack(sample: sample, seqType: seqType, ilseId: null, run: runB, laneId: '8'),
-                DomainFactory.createSeqTrack(sample: sample, seqType: seqType, ilseId: null, run: runA, laneId: '8'),
+                DomainFactory.createSeqTrack(sample: sample, seqType: seqType, ilseSubmission: ilseSubmission2, run: runA, laneId: '1'),
+                DomainFactory.createSeqTrack(sample: sample, seqType: seqType, ilseSubmission: ilseSubmission1, run: runB, laneId: '2'),
+                DomainFactory.createSeqTrack(sample: sample, seqType: seqType, ilseSubmission: ilseSubmission1, run: runA, laneId: '4'),
+                DomainFactory.createSeqTrack(sample: sample, seqType: seqType, ilseSubmission: ilseSubmission1, run: runA, laneId: '3'),
+                DomainFactory.createSeqTrack(sample: sample, seqType: seqType, ilseSubmission: null, run: runB, laneId: '8'),
+                DomainFactory.createSeqTrack(sample: sample, seqType: seqType, ilseSubmission: null, run: runA, laneId: '8'),
         ] as Set
         String expectedContent = """
 Installation: ALL_DONE
@@ -234,10 +237,10 @@ SNV:          NOTHING_DONE_WONT_DO
 6 SeqTrack(s) in ticket ${ticket.ticketNumber}:
 runA, lane 8, ${sampleText}
 runB, lane 8, ${sampleText}
-ILSe 1, runA, lane 3, ${sampleText}
-ILSe 1, runA, lane 4, ${sampleText}
-ILSe 1, runB, lane 2, ${sampleText}
-ILSe 2, runA, lane 1, ${sampleText}
+ILSe 1234, runA, lane 3, ${sampleText}
+ILSe 1234, runA, lane 4, ${sampleText}
+ILSe 1234, runB, lane 2, ${sampleText}
+ILSe 5678, runA, lane 1, ${sampleText}
 """
 
         String otrsRecipient = HelperUtils.uniqueString

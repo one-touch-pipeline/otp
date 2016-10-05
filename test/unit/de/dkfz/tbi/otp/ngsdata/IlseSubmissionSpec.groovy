@@ -15,6 +15,7 @@ class IlseSubmissionSpec extends Specification {
     void "test constraints all fine"() {
         expect:
         DomainFactory.createIlseSubmission(
+                comment: DomainFactory.createComment(),
                 warning: warning
         )
 

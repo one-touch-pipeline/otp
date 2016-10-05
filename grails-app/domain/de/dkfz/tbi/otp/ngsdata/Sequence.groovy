@@ -32,7 +32,7 @@ class Sequence implements Serializable {
     long sampleTypeId
     long individualId
     long projectId
-    String ilseId
+    Integer ilseId
 
     // fields from SeqTrack
     String laneId

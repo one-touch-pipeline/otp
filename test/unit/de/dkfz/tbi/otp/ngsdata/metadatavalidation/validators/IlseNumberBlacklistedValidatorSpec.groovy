@@ -66,7 +66,7 @@ ${ilse}
 ${MetaDataColumn.ILSE_NO}
 ${ilse}
 """)
-        IlseSubmission ilseSubmission = DomainFactory.createIlseSubmission([ilseNumber: ilse, warning: true])
+        IlseSubmission ilseSubmission = DomainFactory.createIlseSubmission([ilseNumber: ilse, warning: true, comment: DomainFactory.createComment()])
 
 
         when:
