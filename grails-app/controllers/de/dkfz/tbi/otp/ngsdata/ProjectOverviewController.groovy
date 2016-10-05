@@ -129,6 +129,7 @@ class ProjectOverviewController {
                 projectGroup: project.projectGroup,
                 copyFiles: project.hasToBeCopied,
                 mailingListName: project.mailingListName,
+                description: project.description,
                 projectCategories: ProjectCategory.listOrderByName(),
         ]
     }
@@ -375,6 +376,10 @@ class ProjectOverviewController {
         checkErrorAndCallMethod(cmd, { projectService.updateMailingListName(cmd.mailingListName, projectService.getProjectByName(cmd.projectName)) })
     }
 
+    JSON updateDescription(UpdateDescriptionCommand cmd) {
+        checkErrorAndCallMethod(cmd, { projectService.updateDescription(cmd.description, projectService.getProjectByName(cmd.projectName)) })
+    }
+
     JSON dataTableContactPerson(DataTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()
         List data = ContactPerson.withCriteria
@@ -426,7 +431,6 @@ class ProjectOverviewController {
         def dataToRender = [date: project.comment.modificationDate.format('EEE, d MMM yyyy HH:mm'), author: project.comment.author]
         render dataToRender as JSON
     }
-
 
     private void checkErrorAndCallMethod(Serializable cmd, Closure method) {
         Map data
@@ -639,5 +643,13 @@ class UpdateMailingListNameCommand implements Serializable {
     String projectName
     void setValue(String mailingListName) {
         this.mailingListName = mailingListName
+    }
+}
+
+class UpdateDescriptionCommand implements Serializable {
+    String description
+    String projectName
+    void setValue(String description) {
+        this.description = description
     }
 }

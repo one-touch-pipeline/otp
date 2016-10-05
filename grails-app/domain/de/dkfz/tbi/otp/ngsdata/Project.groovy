@@ -46,6 +46,8 @@ class Project implements Commentable, Entity {
 
     String mailingListName
 
+    String description
+
     static belongsTo = [
             projectGroup: ProjectGroup
     ]
@@ -87,6 +89,7 @@ class Project implements Commentable, Entity {
                 return val.startsWith("tr_")
             }
         })
+        description(nullable: true)
     }
 
     String toString() {
@@ -96,6 +99,7 @@ class Project implements Commentable, Entity {
     static mapping = {
         projectGroup index: "project_project_group_idx"
         processingPriority index: "project_processing_priority_idx"
+        description type: "text"
     }
 
     File getProjectDirectory() {

@@ -67,6 +67,16 @@
                     <td class="myKey"><g:message code="projectOverview.mailingListName"/></td>
                     <td id="mailingListName">${mailingListName} <input class="edit-button-left" type="button" onclick="$.otp.projectOverviewTable.updateValue('MailingListName','','${mailingListName}', '')"/></td>
                 </tr>
+                <tr>
+                    <td class="myKey"><g:message code="projectOverview.description"/></td>
+                    <td>
+                        <otp:editorSwitch
+                                roles="ROLE_OPERATOR"
+                                template="textArea"
+                                link="${g.createLink(controller: 'projectOverview', action: 'updateDescription', params: [projectName: project])}"
+                                value="${description}"/>
+                    </td>
+                </tr>
             </table>
         </div>
 

@@ -154,6 +154,12 @@ class ProjectService {
         project.save(flush: true)
     }
 
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    public void updateDescription(String description, Project project) {
+        project.description = description
+        project.save(flush: true)
+    }
+
     /**
      * Discovers if a user has Projects.
      * @return <code>true</code> if the user has Project(s), false otherwise
