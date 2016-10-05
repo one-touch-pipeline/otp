@@ -16,12 +16,10 @@ LogThreadLocal.withThreadLog(System.out, {
                     ])
                 }
             }
-            'in'('seqType', ctx.seqTypeService.alignableSeqTypes())
+            'in'('seqType', SeqType.getAllAlignableSeqTypes())
         }
 
 
-        //make all used run segments alignable
-        DataFile.findAllBySeqTrackInList(seqTracks)*.runSegment.unique()*.align = true
 
         //show seqtracks
         seqTracks.each {
@@ -29,8 +27,11 @@ LogThreadLocal.withThreadLog(System.out, {
         }
         println seqTracks.size()
 
-        //trigger alignment
         /*
+        //make all used run segments alignable
+        DataFile.findAllBySeqTrackInList(seqTracks)*.runSegment.unique()*.align = true
+
+        //trigger alignment
         seqTracks.each {
             ctx.seqTrackService.decideAndPrepareForAlignment(it)
         }
