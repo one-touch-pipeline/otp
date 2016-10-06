@@ -41,6 +41,15 @@
                     <td id="projectDirectory">${directory}</td>
                 </tr>
                 <tr>
+                    <td class="myKey"><g:message code="projectOverview.analysisDirectory"/></td>
+                    <td>
+                        <otp:editorSwitch
+                            roles="ROLE_OPERATOR"
+                            link="${g.createLink(controller: 'projectOverview', action: 'updateAnalysisDirectory', params: [projectName: project])}"
+                            value="${analysisDirectory}"/>
+                    </td>
+                </tr>
+                <tr>
                     <td class="myKey"><g:message code="projectOverview.category"/></td>
                     <td>
                         <otp:editorSwitch
@@ -119,7 +128,7 @@
             </div>
             <g:if test="${alignmentInfo}">
                 <table>
-                    <tr>
+                     <tr>
                         <th>${g.message(code: 'projectOverview.alignmentInformation.tool')}</th>
                         <th>${g.message(code: 'projectOverview.alignmentInformation.version')}</th>
                         <th>${g.message(code: 'projectOverview.alignmentInformation.arguments')}</th>

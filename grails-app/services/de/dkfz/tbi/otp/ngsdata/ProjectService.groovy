@@ -136,6 +136,12 @@ class ProjectService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    public void updateAnalysisDirectory(String analysisDirectory, Project project) {
+        project.dirAnalysis = analysisDirectory
+        project.save(flush: true, failOnError: true)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     public void updateNameInMetadata(String nameInMetadata, Project project) {
         project.nameInMetadataFiles = nameInMetadata
         project.save(flush: true, failOnError: true)

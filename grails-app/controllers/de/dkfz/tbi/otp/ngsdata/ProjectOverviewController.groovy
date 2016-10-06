@@ -125,6 +125,7 @@ class ProjectOverviewController {
                 configTable: configTable,
                 snvDropDown: Project.Snv.values(),
                 directory: projectDirectory,
+                analysisDirectory: project.dirAnalysis?: '',
                 category: project.category.name,
                 projectGroup: project.projectGroup,
                 copyFiles: project.hasToBeCopied,
@@ -362,6 +363,10 @@ class ProjectOverviewController {
 
     JSON updateAspera(UpdateContactPersonAsperaCommand cmd) {
         checkErrorAndCallMethod(cmd, { contactPersonService.updateAspera(cmd.contactPersonName, cmd.newAspera) })
+    }
+
+    JSON updateAnalysisDirectory(UpdateAnalysisDirectoryCommand cmd) {
+        checkErrorAndCallMethod(cmd, { projectService.updateAnalysisDirectory(cmd.analysisDirectory, projectService.getProjectByName(cmd.projectName)) })
     }
 
     JSON updateNameInMetadataFiles(UpdateNameInMetadataCommand cmd) {
@@ -619,6 +624,22 @@ class UpdateNameInMetadataCommand implements Serializable {
         if (this.newNameInMetadata == "") {
             this.newNameInMetadata = null
         }
+    }
+}
+
+class UpdateAnalysisDirectoryCommand implements Serializable {
+    String analysisDirectory
+    String projectName
+    static constraints = {
+        analysisDirectory(nullable: true, validator: { String val ->
+            if (!OtpPath.isValidAbsolutePath(val)) {
+                return 'Is not an absolute Path'
+            }
+        })
+        projectName(blank: false)
+    }
+    void setValue(String value) {
+        this.analysisDirectory = value
     }
 }
 

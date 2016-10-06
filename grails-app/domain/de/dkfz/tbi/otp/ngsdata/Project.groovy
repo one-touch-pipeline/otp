@@ -25,6 +25,7 @@ class Project implements Commentable, Entity {
     String name
     String dirName
     String realmName
+    String dirAnalysis
 
     short processingPriority = ProcessingPriority.NORMAL_PRIORITY
     String alignmentDeciderBeanName
@@ -66,6 +67,9 @@ class Project implements Commentable, Entity {
         dirName(blank: false, unique: true, validator: { String val ->
             OtpPath.isValidRelativePath(val) &&
                     ['icgc', 'dkfzlsdf', 'lsdf', 'project'].every { !val.startsWith("${it}/") }
+        })
+        dirAnalysis(nullable: true, validator: { String val ->
+            !val || OtpPath.isValidAbsolutePath(val)
         })
         realmName(blank: false)
         projectGroup(nullable: true)
