@@ -20,6 +20,7 @@
                         <th><g:message code="dataFields.libraryPreparationKit.shortDisplayName"/></th>
                         <th><g:message code="dataFields.libraryPreparationKit.alias"/></th>
                         <th></th>
+                        <th><g:message code="dataFields.libraryPreparationKit.genomes"/></th>
                     </tr>
             </thead>
             <tbody>
@@ -43,6 +44,9 @@
                                 fields="${["Alias"]}"
                                 link="${g.createLink(controller: 'metaDataFields', action: 'createLibraryPreparationKitAlias', id: libraryPreparationKit.name)}"
                                 value=""/>
+                        </td>
+                        <td>
+                            ${libraryPreparationKit.referenceGenomesWithBedFiles}
                         </td>
                     </tr>
                 </g:each>
