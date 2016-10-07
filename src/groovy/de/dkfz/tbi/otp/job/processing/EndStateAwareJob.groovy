@@ -5,7 +5,7 @@ package de.dkfz.tbi.otp.job.processing
  *
  * Not all Jobs are able to decide whether their operation succeeded or failed. For Jobs which are
  * able to decide whether they succeeded or not this interface can be used instead of the more
- * generic groovy.de.dkfz.tbi.otp.job.processing.Job interface.
+ * generic Job interface.
  *
  * The interface can be used by the framework to directly determine whether the job succeeded.
  * This interface should only be used by short jobs. A job should not perform own error handling
@@ -14,8 +14,8 @@ package de.dkfz.tbi.otp.job.processing
  **/
 public interface EndStateAwareJob extends Job {
     /**
-     * @return The ExecutionState after the method finished as determined by the groovy.de.dkfz.tbi.otp.job.processing.Job itself.
-     * @throws InvalidStateException If the groovy.de.dkfz.tbi.otp.job.processing.Job execution has not yet finished.
+     * @return The ExecutionState after the method finished as determined by the Job itself.
+     * @throws InvalidStateException If the Job execution has not yet finished.
      **/
     public ExecutionState getEndState() throws InvalidStateException;
 }

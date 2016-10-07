@@ -3,9 +3,9 @@ package de.dkfz.tbi.otp.job.processing
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 
 /**
- * Interface for a groovy.de.dkfz.tbi.otp.job.processing.Job which triggers the processing of a JobExecutionPlan.
+ * Interface for a Job which triggers the processing of a JobExecutionPlan.
  *
- * This interface can be used by any groovy.de.dkfz.tbi.otp.job.processing.Job which decides whether a JobExecutionPlan can be executed
+ * This interface can be used by any Job which decides whether a JobExecutionPlan can be executed
  * and transferred into a Process. A common example is a watchdog for a file in a specified directory.
  * If the file exists the StartJob will trigger the execution of its JobExecutionPlan.
  *

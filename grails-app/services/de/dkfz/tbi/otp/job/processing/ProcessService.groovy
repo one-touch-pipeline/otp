@@ -59,7 +59,7 @@ class ProcessService {
     }
 
     /**
-     * Returns the number of ProcessesingSteps for the given Process.
+     * Returns the number of ProcessingSteps for the given Process.
      * @param plan The Process for which the number of ProcessingSteps should be returned
      * @return The number of ProcessingSteps for the given Process
      */
@@ -167,7 +167,7 @@ class ProcessService {
      * Overloaded method for convenience.
      * @param step
      * @return
-     * @see getState(Process)
+     * @see #getState(Process)
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#step.process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read)")
     public ExecutionState getState(ProcessingStep step) {
@@ -193,7 +193,7 @@ class ProcessService {
      * Overloaded method for convenience.
      * @param step
      * @return
-     * @see getError(Process)
+     * @see #getError(Process)
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#step.process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read)")
     public String getError(ProcessingStep step) {
@@ -296,7 +296,7 @@ class ProcessService {
      * Additionally for input and output parameters the actual value is added.
      * @param process The Process for which the information should be extracted
      * @return Process Information in a JSON ready format
-     * @see JobExecutionPlanService.planInformation
+     * @see JobExecutionPlanService#planInformation(JobExecutionPlan)
      **/
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read)")
     public PlanInformation processInformation(Process process) {

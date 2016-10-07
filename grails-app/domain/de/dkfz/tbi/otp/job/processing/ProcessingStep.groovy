@@ -6,21 +6,21 @@ import de.dkfz.tbi.otp.utils.Entity
 import grails.util.Environment
 
 /**
- * A ProcessingStep represents one execution of a groovy.de.dkfz.tbi.otp.job.processing.Job for a JobDefinition.
+ * A ProcessingStep represents one execution of a Job for a JobDefinition.
  *
- * The ProcessingStep class is mostly just a logging facility to log which {@link groovy.de.dkfz.tbi.otp.job.processing.Job} got
+ * The ProcessingStep class is mostly just a logging facility to log which {@link Job} got
  * executed with which input parameters and what output parameters are generated. As well it
- * can be used to keep track of the status updates of the running groovy.de.dkfz.tbi.otp.job.processing.Job. These are stored as
+ * can be used to keep track of the status updates of the running Job. These are stored as
  * {@link ProcessingStepUpdate}s and added to this class.
  *
  * Each ProcessingStep belongs to one {@link Process} and was generated from a {@link JobDefinition}.
  * Based on the output parameters the framework will decide which is the next JobDefinition to use
- * to generate a new groovy.de.dkfz.tbi.otp.job.processing.Job and ProcessingStep.
+ * to generate a new Job and ProcessingStep.
  *
  * @see Process
  * @see ProcessingStepUpdate
  * @see JobDefinition
- * @see de.dkfz.tbi.otp.job.processing.Job
+ * @see Job
  * @see Parameter
  **/
 public class ProcessingStep implements Serializable, Entity {
@@ -38,11 +38,11 @@ public class ProcessingStep implements Serializable, Entity {
      **/
     JobDefinition jobDefinition
     /**
-     * The name of the groovy.de.dkfz.tbi.otp.job.processing.Job class which is used for this ProcessingStep.
+     * The name of the Job class which is used for this ProcessingStep.
      **/
     String jobClass
     /**
-     * The version of the groovy.de.dkfz.tbi.otp.job.processing.Job class which is used for this ProcessingStep.
+     * The version of the Job class which is used for this ProcessingStep.
      **/
     String jobVersion
     /**

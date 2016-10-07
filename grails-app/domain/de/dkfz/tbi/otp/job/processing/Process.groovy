@@ -1,29 +1,26 @@
 package de.dkfz.tbi.otp.job.processing
 
-import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.job.plan.*
+import de.dkfz.tbi.otp.utils.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
-import de.dkfz.tbi.otp.Commentable
-import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
-import de.dkfz.tbi.otp.Comment
-
 /**
- * The Process represents one execution of a JobExecutionPlan.
+ * The Process represents one execution of a {@link JobExecutionPlan}.
  *
- * A Process is triggered by a {@link groovy.de.dkfz.tbi.otp.job.processing.StartJob} and generated from a {@link JobExecutionPlan}. It
- * groups all the {@link groovy.de.dkfz.tbi.otp.job.processing.Job}s run for the various {@link JobDefinition}s. For each run groovy.de.dkfz.tbi.otp.job.processing.Job a
+ * A Process is triggered by a {@link StartJob} and generated from a {@link JobExecutionPlan}. It
+ * groups all the {@link Job}s run for the various {@link JobDefinition}s. For each run of a {@link Job} a
  * {@link ProcessingStep} is added to this Process.
  *
  * For each JobExecutionPlan there can be many Processes representing the various executions for
  * different values (e.g. different file name).
  *
- * @see Process
  * @see ProcessingStep
  * @see JobExecutionPlan
- * @see de.dkfz.tbi.otp.job.plan.JobDefinition
- * @see de.dkfz.tbi.otp.job.processing.Job
- * @see de.dkfz.tbi.otp.job.processing.StartJob
+ * @see JobDefinition
+ * @see Job
+ * @see StartJob
  **/
 public class Process implements Serializable, Commentable, Entity {
     /**
