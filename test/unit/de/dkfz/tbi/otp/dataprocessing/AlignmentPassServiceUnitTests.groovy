@@ -50,7 +50,7 @@ class AlignmentPassServiceUnitTests extends TestData {
         alignmentPassService.referenceGenomeService = new ReferenceGenomeService()
         alignmentPassService.referenceGenomeService.configService = new ConfigService()
         createObjects()
-        alignmentPass = createAlignmentPass(identifier: 2)
+        alignmentPass = DomainFactory.createAlignmentPass(identifier: 2, seqTrack: seqTrack)
         alignmentPass.save(flush: true)
 
         realm.processingRootPath = baseDir.path

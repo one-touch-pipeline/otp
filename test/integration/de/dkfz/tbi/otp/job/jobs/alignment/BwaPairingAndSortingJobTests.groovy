@@ -103,7 +103,7 @@ class BwaPairingAndSortingJobTests {
         )
         assertNotNull(refGenome.save(flush: true))
 
-        pass = testData.createAlignmentPass(
+        pass = DomainFactory.createAlignmentPass(
             referenceGenome: refGenome,
             identifier: 0,
             seqTrack: seqTrack

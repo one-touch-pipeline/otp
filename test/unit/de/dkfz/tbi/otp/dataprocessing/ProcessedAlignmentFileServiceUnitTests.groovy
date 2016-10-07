@@ -74,7 +74,7 @@ class ProcessedAlignmentFileServiceUnitTests {
     }
 
     private AlignmentPass createTestDataForDeleteProcessingFiles(int countQaFiles = 1, int countProcessedSaiFiles = 1) {
-        AlignmentPass alignmentPass = TestData.createAndSaveAlignmentPass()
+        AlignmentPass alignmentPass = DomainFactory.createAlignmentPass()
 
         ProcessedBamFile processedBamFile = ProcessedBamFile.build([
             alignmentPass: alignmentPass
@@ -120,7 +120,7 @@ class ProcessedAlignmentFileServiceUnitTests {
     @Test
     void testDeleteProcessingFiles_NoBamFile() {
         ProcessedAlignmentFileService processedAlignmentFileService = createServiceForDeleteProcessingFiles()
-        AlignmentPass alignmentPass = TestData.createAndSaveAlignmentPass()
+        AlignmentPass alignmentPass = DomainFactory.createAlignmentPass()
         checkedLogger.addError("Found 0 ProcessedBamFiles for AlignmentPass ${alignmentPass}. That's weird. Skipping that alignment pass.")
 
         assert 0 == processedAlignmentFileService.deleteProcessingFiles(alignmentPass)
@@ -211,7 +211,7 @@ class ProcessedAlignmentFileServiceUnitTests {
     private AlignmentPass createTestDataForMayProcessingFilesBeDeleted(boolean createBamFile = true, boolean createSaiFile = false) {
         SeqTrack seqTrack = SeqTrack.build()
 
-        AlignmentPass alignmentPass = TestData.createAndSaveAlignmentPass(
+        AlignmentPass alignmentPass = DomainFactory.createAlignmentPass(
             seqTrack: seqTrack,
             alignmentState: AlignmentState.FINISHED,
         )

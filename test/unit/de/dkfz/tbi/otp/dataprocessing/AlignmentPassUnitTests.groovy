@@ -14,7 +14,7 @@ class AlignmentPassUnitTests {
     @Test
     void testIsLatestPass_1Pass() {
         //preparation
-        AlignmentPass alignmentPass = TestData.createAndSaveAlignmentPass()
+        AlignmentPass alignmentPass = DomainFactory.createAlignmentPass()
 
         //tests
         assert alignmentPass.isLatestPass()
@@ -25,8 +25,8 @@ class AlignmentPassUnitTests {
     void testIsLatestPass_2Passes() {
         //preparation
         SeqTrack seqTrack = SeqTrack.build()
-        AlignmentPass alignmentPass1 = TestData.createAndSaveAlignmentPass(seqTrack: seqTrack, identifier: 0)
-        AlignmentPass alignmentPass2 = TestData.createAndSaveAlignmentPass(seqTrack: seqTrack, identifier: 1)
+        AlignmentPass alignmentPass1 = DomainFactory.createAlignmentPass(seqTrack: seqTrack, identifier: 0)
+        AlignmentPass alignmentPass2 = DomainFactory.createAlignmentPass(seqTrack: seqTrack, identifier: 1)
 
         //tests
         assert !alignmentPass1.isLatestPass()
@@ -39,9 +39,9 @@ class AlignmentPassUnitTests {
     void testIsLatestPass_2PassesDifferentWorkPackages() {
         //preparation
         SeqTrack seqTrack = SeqTrack.build()
-        AlignmentPass alignmentPass1 = TestData.createAndSaveAlignmentPass(seqTrack: seqTrack, identifier: 0,
+        AlignmentPass alignmentPass1 = DomainFactory.createAlignmentPass(seqTrack: seqTrack, identifier: 0,
                 referenceGenome: ReferenceGenome.build())
-        AlignmentPass alignmentPass2 = TestData.createAndSaveAlignmentPass(seqTrack: seqTrack, identifier: 1,
+        AlignmentPass alignmentPass2 = DomainFactory.createAlignmentPass(seqTrack: seqTrack, identifier: 1,
                 referenceGenome: ReferenceGenome.build())
 
         //tests

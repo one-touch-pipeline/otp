@@ -123,14 +123,14 @@ testDataConfig {
             type = AbstractBamFile.BamType.SORTED
         }
         'de.dkfz.tbi.otp.dataprocessing.ProcessedBamFile' {
-            alignmentPass = {TestData.createAndSaveAlignmentPass()}
+            alignmentPass = { DomainFactory.createAlignmentPass()}
             type = AbstractBamFile.BamType.SORTED
         }
         'de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile' {
             type = AbstractBamFile.BamType.MDUP
         }
         'de.dkfz.tbi.otp.dataprocessing.ProcessedSaiFile' {
-            alignmentPass = {TestData.createAndSaveAlignmentPass()}
+            alignmentPass = { DomainFactory.createAlignmentPass()}
         }
         'de.dkfz.tbi.otp.dataprocessing.QualityAssessmentMergedPass' {
             abstractMergedBamFile = { TestData.createProcessedMergedBamFile(mergingPass: MergingPass.build()) }

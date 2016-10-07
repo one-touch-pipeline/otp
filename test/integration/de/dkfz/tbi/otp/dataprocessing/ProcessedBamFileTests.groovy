@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
+
 import static de.dkfz.tbi.otp.dataprocessing.AbstractBamFileServiceTests.*
 
 import de.dkfz.tbi.otp.ngsdata.TestData
@@ -43,7 +45,7 @@ class ProcessedBamFileTests {
 
     private ProcessedBamFile createProcessedBamFile() {
 
-        AlignmentPass alignmentPass = data.createAlignmentPass()
+        AlignmentPass alignmentPass = DomainFactory.createAlignmentPass()
         alignmentPass.save([flush: true])
 
         ProcessedBamFile processedBamFile = new ProcessedBamFile([

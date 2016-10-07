@@ -204,7 +204,7 @@ class AbstractQualityAssessmentServiceTests {
 
     private ProcessedBamFile createProcessedBamFile() {
 
-        AlignmentPass alignmentPass = data.createAlignmentPass()
+        AlignmentPass alignmentPass = DomainFactory.createAlignmentPass(seqTrack: data.seqTrack)
         alignmentPass.save([flush: true])
 
         ProcessedBamFile processedBamFile = new ProcessedBamFile([
@@ -243,7 +243,7 @@ class AbstractQualityAssessmentServiceTests {
 
     private ProcessedMergedBamFile createProcessedMergedBamFile() {
 
-        MergingWorkPackage mergingWorkPackage = data.findOrSaveMergingWorkPackage(data.seqTrack, data.referenceGenome)
+        MergingWorkPackage mergingWorkPackage = DomainFactory.findOrSaveMergingWorkPackage(data.seqTrack, data.referenceGenome)
         mergingWorkPackage.save([flush: true])
 
         MergingSet mergingSet = data.createMergingSet([mergingWorkPackage: mergingWorkPackage])

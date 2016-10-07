@@ -146,7 +146,7 @@ class QAResultStatisticsServiceTests {
         )
         assertNotNull(referenceGenome.save([flush: true]))
 
-        alignmentPass = testData.createAlignmentPass(
+        alignmentPass = DomainFactory.createAlignmentPass(
                         identifier: 1,
                         seqTrack: seqTrack,
                         referenceGenome: referenceGenome,

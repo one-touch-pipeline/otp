@@ -46,7 +46,7 @@ class AlignmentPassServiceIntegrationTests extends TestData {
         findAlignmentPassForProcessingTest(AlignmentState.IN_PROGRESS)
         findAlignmentPassForProcessingTest(AlignmentState.NOT_STARTED)
 
-        AlignmentPass alignmentPass = createAndSaveAlignmentPass(
+        AlignmentPass alignmentPass = DomainFactory.createAlignmentPass(
                 seqTrack: seqTrack,
                 alignmentState: AlignmentState.NOT_STARTED,
         )
@@ -91,7 +91,7 @@ class AlignmentPassServiceIntegrationTests extends TestData {
     void testFindAlignmentPassForProcessing_fastqcMustBeFinished() {
         createObjects()
         createDataFile(false)
-        AlignmentPass alignmentPass = createAndSaveAlignmentPass(
+        AlignmentPass alignmentPass = DomainFactory.createAlignmentPass(
                 seqTrack: seqTrack,
                 alignmentState: AlignmentState.NOT_STARTED,
         )
@@ -110,7 +110,7 @@ class AlignmentPassServiceIntegrationTests extends TestData {
         dataFile.delete()
         seqTrack.delete()
         ExomeSeqTrack exomeSeqTrack = createExomeSeqTrack(run)
-        AlignmentPass alignmentPass = createAndSaveAlignmentPass(
+        AlignmentPass alignmentPass = DomainFactory.createAlignmentPass(
                 seqTrack: exomeSeqTrack,
                 alignmentState: AlignmentState.NOT_STARTED,
         )
@@ -233,7 +233,7 @@ class AlignmentPassServiceIntegrationTests extends TestData {
             final AlignmentState state,
             final int nonWithdrawnDataFiles,
             final int withdrawnDataFiles) {
-        AlignmentPass alignmentPass = createAndSaveAlignmentPass(
+        AlignmentPass alignmentPass = DomainFactory.createAlignmentPass(
                 seqTrack: seqTrack,
                 alignmentState: state,
         )
@@ -285,7 +285,7 @@ class AlignmentPassServiceIntegrationTests extends TestData {
         dataFile.delete()
         seqTrack.delete()
         ExomeSeqTrack exomeSeqTrack = createExomeSeqTrack(run)
-        AlignmentPass alignmentPass = createAndSaveAlignmentPass(
+        AlignmentPass alignmentPass = DomainFactory.createAlignmentPass(
                 seqTrack: exomeSeqTrack,
                 alignmentState: AlignmentState.NOT_STARTED,
         )
@@ -296,7 +296,7 @@ class AlignmentPassServiceIntegrationTests extends TestData {
     }
 
     private ProcessedBamFile createProcessedBamFile(SeqTrack seqTrack, int identifier) {
-        AlignmentPass alignmentPass = createAlignmentPass(
+        AlignmentPass alignmentPass = DomainFactory.createAlignmentPass(
                 identifier: identifier,
                 seqTrack: seqTrack,
                 description: "test"
@@ -313,7 +313,7 @@ class AlignmentPassServiceIntegrationTests extends TestData {
     }
 
     private AlignmentPass createProcessableAlignmentPass() {
-        return createAlignmentPass(
+        return DomainFactory.createAlignmentPass(
                 seqTrack: createProcessableSeqTrack(),
                 alignmentState: AlignmentState.NOT_STARTED,
         )

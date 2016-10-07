@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import org.junit.Test
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -44,7 +45,7 @@ public class DefaultOtpAlignmentDeciderTest {
         MergingWorkPackage workPackage = TestData.createMergingWorkPackage(sample: seqTrack.sample, seqType: seqTrack.seqType, seqPlatformGroup: seqTrack.seqPlatformGroup)
         workPackage.save(failOnError: true)
 
-        AlignmentPass alignmentPass1 = TestData.createAndSaveAlignmentPass(seqTrack: seqTrack, workPackage: workPackage)
+        AlignmentPass alignmentPass1 = DomainFactory.createAlignmentPass(seqTrack: seqTrack, workPackage: workPackage)
 
         defaultOtpAlignmentDecider.prepareForAlignment(workPackage, seqTrack, false)
 
@@ -61,7 +62,7 @@ public class DefaultOtpAlignmentDeciderTest {
         MergingWorkPackage workPackage = TestData.createMergingWorkPackage(sample: seqTrack.sample, seqType: seqTrack.seqType, seqPlatformGroup: seqTrack.seqPlatformGroup)
         workPackage.save(failOnError: true)
 
-        AlignmentPass alignmentPass1 = TestData.createAndSaveAlignmentPass(seqTrack: seqTrack, workPackage: workPackage)
+        AlignmentPass alignmentPass1 = DomainFactory.createAlignmentPass(seqTrack: seqTrack, workPackage: workPackage)
 
         defaultOtpAlignmentDecider.prepareForAlignment(workPackage, seqTrack, true)
 

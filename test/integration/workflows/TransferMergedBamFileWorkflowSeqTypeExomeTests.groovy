@@ -217,7 +217,7 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends WorkflowTestCase {
                         )
         assertNotNull(dataFile1.save([flush: true, failOnError: true]))
 
-        AlignmentPass alignmentPass = TestData.createAndSaveAlignmentPass(
+        AlignmentPass alignmentPass = DomainFactory.createAlignmentPass(
                         referenceGenome: referenceGenome,
                         identifier: 0,
                         seqTrack: seqTrack,
@@ -285,7 +285,7 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends WorkflowTestCase {
                         )
         assertNotNull(dataFile3.save([flush: true, failOnError: true]))
 
-        AlignmentPass alignmentPass1 = TestData.createAndSaveAlignmentPass(
+        AlignmentPass alignmentPass1 = DomainFactory.createAlignmentPass(
                         referenceGenome: referenceGenome,
                         identifier: 0,
                         seqTrack: seqTrack1,
@@ -327,7 +327,7 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends WorkflowTestCase {
         setProperties(overallQualityAssessment1)
         assertNotNull(overallQualityAssessment1.save([flush: true]))
 
-        MergingWorkPackage mergingWorkPackage = TestData.findOrSaveMergingWorkPackage(seqTrack, referenceGenome)
+        MergingWorkPackage mergingWorkPackage = DomainFactory.findOrSaveMergingWorkPackage(seqTrack, referenceGenome)
         assertNotNull(mergingWorkPackage.save([flush: true, failOnError: true]))
 
         MergingSet mergingSet = new MergingSet(

@@ -58,7 +58,7 @@ class MergingCriteriaSpecificServiceTests {
         ProcessedBamFile bamFile1 = DomainFactory.createProcessedBamFile(workPackage, [status: State.INPROGRESS])
         ProcessedBamFile bamFile2 = DomainFactory.createProcessedBamFile(workPackage, [status: State.NEEDS_PROCESSING])
         ProcessedBamFile bamFile3 = TestData.createProcessedBamFile(
-                alignmentPass: TestData.createAndSaveAlignmentPass(seqTrack: bamFile2.seqTrack),
+                alignmentPass: DomainFactory.createAlignmentPass(seqTrack: bamFile2.seqTrack),
                 status: State.NEEDS_PROCESSING,
         ).save(failOnError: true)
 

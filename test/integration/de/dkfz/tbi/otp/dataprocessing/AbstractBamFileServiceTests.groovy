@@ -502,7 +502,7 @@ class AbstractBamFileServiceTests {
     }
 
     private ProcessedBamFile createAndSaveProcessedBamFileAndQAObjects(SeqTrack seqTrack, String identifier) {
-        AlignmentPass alignmentPass = testData.createAlignmentPass(
+        AlignmentPass alignmentPass = DomainFactory.createAlignmentPass(
                 referenceGenome: seqTrack.configuredReferenceGenome,
                 identifier: identifier,
                 seqTrack: seqTrack,
@@ -535,7 +535,7 @@ class AbstractBamFileServiceTests {
     }
 
     private MergingSet createMergingSetAndDependentObjects(SeqTrack seqTrack) {
-        MergingWorkPackage mergingWorkPackage = testData.findOrSaveMergingWorkPackage(
+        MergingWorkPackage mergingWorkPackage = DomainFactory.findOrSaveMergingWorkPackage(
                 seqTrack,
                 seqTrack.configuredReferenceGenome,
                 )

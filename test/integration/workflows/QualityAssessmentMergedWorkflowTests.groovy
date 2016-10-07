@@ -342,7 +342,7 @@ class QualityAssessmentMergedWorkflowTests extends WorkflowTestCase {
             assertNotNull(seqTrack.save([flush: true]))
 
             if (i == 0) {
-                MergingWorkPackage mergingWorkPackage = TestData.findOrSaveMergingWorkPackage(seqTrack, referenceGenome)
+                MergingWorkPackage mergingWorkPackage = DomainFactory.findOrSaveMergingWorkPackage(seqTrack, referenceGenome)
                 assertNotNull(mergingWorkPackage.save([flush: true]))
 
                 mergingSet = new MergingSet(
@@ -359,7 +359,7 @@ class QualityAssessmentMergedWorkflowTests extends WorkflowTestCase {
                 assertNotNull(mergingPass.save([flush: true]))
             }
 
-            AlignmentPass alignmentPass = TestData.createAndSaveAlignmentPass(
+            AlignmentPass alignmentPass = DomainFactory.createAlignmentPass(
                             referenceGenome: referenceGenome,
                             identifier: i,
                             seqTrack: seqTrack,

@@ -40,7 +40,7 @@ class BwaPairingAndSortingJobUnitTest {
             file.fileName
         }
 
-        alignmentPass = TestData.createAndSaveAlignmentPass()
+        alignmentPass = DomainFactory.createAlignmentPass()
         SeqTrack seqTrack = DomainFactory.createSeqTrack(seqType: DomainFactory.createSeqType(libraryLayout: LibraryLayout.PAIRED.name()))
         DataFile dataFile1 = DomainFactory.createDataFile(seqTrack: seqTrack, fileName: FILE_MATE1, vbpFileName: FILE_MATE1, mateNumber: 1)
         DataFile dataFile2 = DomainFactory.createDataFile(seqTrack: seqTrack, fileName: FILE_MATE2, vbpFileName: FILE_MATE2, mateNumber: 2)

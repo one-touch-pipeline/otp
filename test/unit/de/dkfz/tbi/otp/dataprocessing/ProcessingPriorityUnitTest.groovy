@@ -25,7 +25,7 @@ class ProcessingPriorityUnitTest {
 
     @Test
     void testGetProcessingPriorityForAlignmentPass() {
-        assertPriority(TestData.createAndSaveAlignmentPass())
+        assertPriority(DomainFactory.createAlignmentPass())
     }
 
     @Test

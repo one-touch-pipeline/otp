@@ -122,7 +122,7 @@ class ProcessedBamFileServiceTests {
         fastqcProcessedFile = testData.createFastqcProcessedFile([dataFile: datafile])
         assertNotNull(fastqcProcessedFile.save([flush: true, failOnError: true]))
 
-        alignmentPass = testData.createAlignmentPass(
+        alignmentPass = DomainFactory.createAlignmentPass(
                         identifier: 1,
                         seqTrack: seqTrack,
                         description: "test"
@@ -217,7 +217,7 @@ class ProcessedBamFileServiceTests {
                         )
         assertNotNull(seqTrack2.save([flush: true]))
 
-        AlignmentPass alignmentPass = testData.createAlignmentPass(
+        AlignmentPass alignmentPass = DomainFactory.createAlignmentPass(
                         identifier: 1,
                         seqTrack: seqTrack2,
                         alignmentState: AlignmentState.FINISHED,
@@ -245,7 +245,7 @@ class ProcessedBamFileServiceTests {
 
     @Test
     void testProcessedBamFileNeedsProcessingAllCorrectWithOldNotFinishedPass() {
-        AlignmentPass oldAlignmentPassToIgnore = testData.createAlignmentPass(
+        AlignmentPass oldAlignmentPassToIgnore = DomainFactory.createAlignmentPass(
                         identifier: 0,
                         seqTrack: seqTrack,
                         )
@@ -278,7 +278,7 @@ class ProcessedBamFileServiceTests {
                         )
         assertNotNull(seqTrack2.save([flush: true]))
 
-        AlignmentPass alignmentPass = testData.createAlignmentPass(
+        AlignmentPass alignmentPass = DomainFactory.createAlignmentPass(
                 identifier: AlignmentPass.nextIdentifier(seqTrack2),
                 seqTrack: seqTrack2,
                 alignmentState: AlignmentState.IN_PROGRESS,
@@ -322,7 +322,7 @@ class ProcessedBamFileServiceTests {
 
     @Test
     void testRelatedBamFileIsNotProcessable() {
-        final AlignmentPass alignmentPass2 = testData.createAlignmentPass(
+        final AlignmentPass alignmentPass2 = DomainFactory.createAlignmentPass(
                 identifier: 2,
                 seqTrack: seqTrack,
                 description: "test"
@@ -401,7 +401,7 @@ class ProcessedBamFileServiceTests {
                         )
         assertNotNull(seqTrack2.save([flush: true, failOnError: true]))
 
-        AlignmentPass alignmentPass2 = testData.createAlignmentPass(
+        AlignmentPass alignmentPass2 = DomainFactory.createAlignmentPass(
                         identifier: 1,
                         seqTrack: seqTrack2,
                         alignmentState: AlignmentState.FINISHED,
@@ -468,7 +468,7 @@ class ProcessedBamFileServiceTests {
                         )
         assertNotNull(seqTrack2.save([flush: true, failOnError: true]))
 
-        AlignmentPass alignmentPass2 = testData.createAlignmentPass(
+        AlignmentPass alignmentPass2 = DomainFactory.createAlignmentPass(
                         identifier: 1,
                         seqTrack: seqTrack2,
                         alignmentState: AlignmentState.FINISHED,
@@ -494,7 +494,7 @@ class ProcessedBamFileServiceTests {
                         )
         assertNotNull(seqTrack3.save([flush: true, failOnError: true]))
 
-        testData.createAlignmentPass(
+        DomainFactory.createAlignmentPass(
                         identifier: AlignmentPass.nextIdentifier(seqTrack3),
                         seqTrack: seqTrack3,
                         alignmentState: AlignmentState.NOT_STARTED,
@@ -508,7 +508,7 @@ class ProcessedBamFileServiceTests {
         assert !processedBamFileService.isMergeable(processedBamFile2)
         assertNull(processedBamFileService.processedBamFileNeedsProcessing())
 
-        testData.createAlignmentPass(
+        DomainFactory.createAlignmentPass(
                 identifier: AlignmentPass.nextIdentifier(seqTrack3),
                 seqTrack: seqTrack3,
                 alignmentState: AlignmentState.IN_PROGRESS,
@@ -521,7 +521,7 @@ class ProcessedBamFileServiceTests {
         assert !processedBamFileService.isMergeable(processedBamFile2)
         assertNull(processedBamFileService.processedBamFileNeedsProcessing())
 
-        testData.createAlignmentPass(
+        DomainFactory.createAlignmentPass(
                 identifier: AlignmentPass.nextIdentifier(seqTrack3),
                 seqTrack: seqTrack3,
                 alignmentState: AlignmentState.FINISHED,
@@ -577,31 +577,31 @@ class ProcessedBamFileServiceTests {
 
     @Test
     void testIsAnyAlignmentPending_alignmentNotStarted() {
-        AlignmentPass alignmentPass = TestData.createAndSaveAlignmentPass(alignmentState: AlignmentState.NOT_STARTED)
+        AlignmentPass alignmentPass = DomainFactory.createAlignmentPass(alignmentState: AlignmentState.NOT_STARTED)
         assert processedBamFileService.isAnyAlignmentPending(alignmentPass.workPackage)
     }
 
     @Test
     void testIsAnyAlignmentPending_alignmentInProgress() {
-        AlignmentPass alignmentPass = TestData.createAndSaveAlignmentPass(alignmentState: AlignmentState.IN_PROGRESS)
+        AlignmentPass alignmentPass = DomainFactory.createAlignmentPass(alignmentState: AlignmentState.IN_PROGRESS)
         assert processedBamFileService.isAnyAlignmentPending(alignmentPass.workPackage)
     }
 
     @Test
     void testIsAnyAlignmentPending_alignmentFinished() {
-        AlignmentPass alignmentPass = TestData.createAndSaveAlignmentPass(alignmentState: AlignmentState.FINISHED)
+        AlignmentPass alignmentPass = DomainFactory.createAlignmentPass(alignmentState: AlignmentState.FINISHED)
         assert !processedBamFileService.isAnyAlignmentPending(alignmentPass.workPackage)
     }
 
     @Test
     void testIsAnyAlignmentPending_alignmentUnknown() {
-        AlignmentPass alignmentPass = TestData.createAndSaveAlignmentPass(alignmentState: AlignmentState.UNKNOWN)
+        AlignmentPass alignmentPass = DomainFactory.createAlignmentPass(alignmentState: AlignmentState.UNKNOWN)
         assert processedBamFileService.isAnyAlignmentPending(alignmentPass.workPackage)
     }
 
     @Test
     void testIsAnyAlignmentPending_seqTrackIsWithdrawn() {
-        AlignmentPass alignmentPass = TestData.createAndSaveAlignmentPass(alignmentState: AlignmentState.IN_PROGRESS)
+        AlignmentPass alignmentPass = DomainFactory.createAlignmentPass(alignmentState: AlignmentState.IN_PROGRESS)
         DomainFactory.createDataFile(
                 seqTrack: alignmentPass.seqTrack,
                 fileWithdrawn: true,
@@ -622,8 +622,8 @@ class ProcessedBamFileServiceTests {
     }
 
     private Map createTwoAlignmentPasses(AlignmentState alignmentState1, AlignmentState alignmentState2) {
-        AlignmentPass pass1 = TestData.createAndSaveAlignmentPass(alignmentState: alignmentState1)
-        AlignmentPass pass2 = TestData.createAndSaveAlignmentPass(
+        AlignmentPass pass1 = DomainFactory.createAlignmentPass(alignmentState: alignmentState1)
+        AlignmentPass pass2 = DomainFactory.createAlignmentPass(
                 seqTrack: pass1.seqTrack,
                 workPackage: pass1.workPackage,
                 alignmentState: alignmentState2,

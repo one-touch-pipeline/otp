@@ -125,7 +125,7 @@ abstract class AbstractStartJobImpl implements StartJob, ApplicationListener<Job
 
     /**
      * Convenient method to access the JobExecutionPlan's StartJobDefinition.
-     * @return The StartJobDefiniton
+     * @return The StartJobDefinition
      * @throws InvalidStateException in case the JobExecutionPlan is not yet set.
      */
     protected final StartJobDefinition getStartJobDefinition() throws InvalidStateException {
@@ -135,12 +135,16 @@ abstract class AbstractStartJobImpl implements StartJob, ApplicationListener<Job
         return StartJobDefinition.get(plan.startJob.id)
     }
 
+    protected Process createProcess(Object processParameter) {
+        return createProcess([], createProcessParameter(processParameter))
+    }
+
     protected Process createProcess(List<Parameter> input, ProcessParameter processParameter = null) {
         return schedulerService.createProcess(this, input, processParameter)
     }
 
-    protected Process createProcess(Object processParameter) {
-        return createProcess([], new ProcessParameter(value: processParameter.id.toString(), className: Hibernate.getClass(processParameter).name))
+    public static createProcessParameter(Object processParameter) {
+        return new ProcessParameter(value: processParameter.id.toString(), className: Hibernate.getClass(processParameter).name)
     }
 
     /**

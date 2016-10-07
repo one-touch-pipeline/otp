@@ -83,7 +83,7 @@ class MergingSetAssignmentTests {
         seqTrack.save(flush: true)
         assertTrue(seqTrack.validate())
 
-        AlignmentPass alignmentPass = new TestData().createAlignmentPass(
+        AlignmentPass alignmentPass = DomainFactory.createAlignmentPass(
             identifier: 2,
             seqTrack: seqTrack,
         )

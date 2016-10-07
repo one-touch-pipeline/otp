@@ -65,15 +65,14 @@ class SnvCallingStartJobSpec extends Specification {
 
 
     void "test method restart"() {
+        given:
         SnvCallingInstance failedInstance = DomainFactory.createSnvInstanceWithRoddyBamFiles()
         DomainFactory.createRealmDataManagement(name: failedInstance.project.realmName)
         DomainFactory.createRealmDataProcessing(name: failedInstance.project.realmName)
-        ProcessParameter processParameter = DomainFactory.createProcessParameter([
-                value    : failedInstance.id,
-                className: failedInstance.class.name
-        ])
 
-        given:
+        Process failedProcess = DomainFactory.createProcess()
+        DomainFactory.createProcessParameter(failedProcess, failedInstance)
+
         snvCallingStartJob = Spy(TestAbstractSnvCallingStartJob) {
             1 * getInstanceClass() >> SnvCallingInstance
             1 * getInstanceName(_) >> "someInstanceName"
@@ -86,26 +85,20 @@ class SnvCallingStartJobSpec extends Specification {
         snvCallingStartJob.configService = new ConfigService()
         snvCallingStartJob.schedulerService = Mock(SchedulerService) {
             1 * createProcess(_, _, _) >> { StartJob startJob, List<Parameter> input, ProcessParameter processParameter2 ->
-                Process process2 = new Process(
-                        jobExecutionPlan: processParameter.process.jobExecutionPlan,
-                        started: new Date(),
-                        startJobClass: "startJobClass",
-                        startJobVersion: "startJobVersion",
+                Process process2 = DomainFactory.createProcess(
+                        jobExecutionPlan: failedProcess.jobExecutionPlan
                 )
-                assert process2.save(flush: true)
                 processParameter2.process = process2
                 assert processParameter2.save(flush: true)
                 return process2
             }
         }
 
-
         when:
-        Process process = snvCallingStartJob.restart(processParameter.process)
-
-        then:
+        Process process = snvCallingStartJob.restart(failedProcess)
         SnvCallingInstance restartedInstance = SnvCallingInstance.get(ProcessParameter.findByProcess(process).value)
 
+        then:
         SnvCallingInstance.list().size() == 2
         restartedInstance.config == failedInstance.config
         restartedInstance.samplePair == failedInstance.samplePair

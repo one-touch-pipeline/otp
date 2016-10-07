@@ -187,16 +187,6 @@ class TestData {
         ] + properties)
     }
 
-    static SeqPlatform findOrSaveSeqPlatform() {
-        SeqPlatform seqPlatform = SeqPlatform.findOrSaveWhere(
-            name: 'Illumina',
-            model: 'LoSeq9999',
-            seqPlatformGroup: SeqPlatformGroup.findOrSaveWhere(name: 'LoSeq9XXX'),
-        )
-        assert seqPlatform
-        return seqPlatform
-    }
-
     @Deprecated
     SeqTrack createSeqTrack(Map properties = [:]) {
         return new SeqTrack([
@@ -218,6 +208,7 @@ class TestData {
         ] + properties)
     }
 
+    @Deprecated
     DataFile createDataFile(SeqTrack seqTrack, RunSegment runSegment, FileType fileType = this.fileType) {
         return createDataFile(
                 seqTrack: seqTrack,
@@ -239,10 +230,6 @@ class TestData {
             run: run,
             fileWithdrawn: false,
         ] + properties)
-    }
-
-    static ReferenceGenome findOrSaveReferenceGenome() {
-        return ReferenceGenome.find{true} ?: createReferenceGenome().save(failOnError: true)
     }
 
     public static ReferenceGenome createReferenceGenome(Map properties = [:]) {
@@ -334,28 +321,6 @@ class TestData {
         assertNotNull(exomeSeqTrack.save(flush: true))
     }
 
-    static AlignmentPass createAndSaveAlignmentPass(Map properties = [:]) {
-        AlignmentPass alignmentPass = new TestData().createAlignmentPass(properties)
-        assert alignmentPass.save(failOnError: true)
-        return alignmentPass
-    }
-
-    AlignmentPass createAlignmentPass(Map properties = [:]) {
-        final SeqTrack seqTrack = properties.get('seqTrack') ?: seqTrack ?: SeqTrack.build()
-        final MergingWorkPackage workPackage = findOrSaveMergingWorkPackage(
-                seqTrack,
-                properties.get('referenceGenome'),
-                properties.get('pipeline')
-        )
-        final AlignmentPass alignmentPass = new AlignmentPass([
-            identifier: AlignmentPass.nextIdentifier(seqTrack),
-            seqTrack: seqTrack,
-            workPackage: workPackage,
-            alignmentState: AlignmentState.FINISHED,
-        ] + properties)
-        return alignmentPass
-    }
-
     @Deprecated
     ProcessedSaiFile createProcessedSaiFile(Map properties = [:]) {
         return new ProcessedSaiFile([
@@ -376,43 +341,13 @@ class TestData {
         ] + properties)
     }
 
-    static Pipeline findOrSavePipeline() {
-        return Pipeline.findOrCreateByNameAndType(Pipeline.Name.DEFAULT_OTP, Pipeline.Type.ALIGNMENT)
-                .save(failOnError: true, flush: true)
-    }
-
-
     static MergingWorkPackage createMergingWorkPackage(Map properties = [:]) {
         final MergingWorkPackage mergingWorkPackage = new MergingWorkPackage([
                 seqPlatformGroup: properties.get('seqPlatformGroup') ?: SeqPlatformGroup.build(),
-                referenceGenome: properties.get('referenceGenome') ?: findOrSaveReferenceGenome(),
+                referenceGenome: properties.get('referenceGenome') ?: DomainFactory.createReferenceGenome(),
                 libraryPreparationKit: properties.get('libraryPreparationKit'),
-                pipeline: properties.get('pipeline') ?: findOrSavePipeline(),
+                pipeline: properties.get('pipeline') ?: DomainFactory.createDefaultOtpPipeline(),
         ] + properties)
-        return mergingWorkPackage
-    }
-
-    static MergingWorkPackage findOrSaveMergingWorkPackage(SeqTrack seqTrack, ReferenceGenome referenceGenome = null, Pipeline pipeline = null) {
-        if (referenceGenome == null || pipeline == null) {
-            MergingWorkPackage workPackage = MergingWorkPackage.findWhere(
-                    sample: seqTrack.sample,
-                    seqType: seqTrack.seqType,
-            )
-            if (workPackage != null) {
-                assert workPackage.seqPlatformGroup == seqTrack.seqPlatform.seqPlatformGroup
-                assert workPackage.libraryPreparationKit == seqTrack.libraryPreparationKit
-                return workPackage
-            }
-        }
-
-        final MergingWorkPackage mergingWorkPackage = MergingWorkPackage.findOrSaveWhere(
-                sample: seqTrack.sample,
-                seqType: seqTrack.seqType,
-                seqPlatformGroup: seqTrack.seqPlatform.seqPlatformGroup,
-                referenceGenome: referenceGenome ?: findOrSaveReferenceGenome(),
-                libraryPreparationKit: seqTrack.libraryPreparationKit,
-                pipeline: pipeline ?: findOrSavePipeline(),
-        )
         return mergingWorkPackage
     }
 

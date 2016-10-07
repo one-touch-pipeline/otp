@@ -99,7 +99,7 @@ class ProcessedBamFileUnitTests {
             )
         assertNotNull(seqTrack.save([flush: true, failOnError: true]))
 
-        alignmentPass = testData.createAlignmentPass(
+        alignmentPass = DomainFactory.createAlignmentPass(
             identifier: 1,
             seqTrack: seqTrack,
             description: "test"
@@ -153,7 +153,7 @@ class ProcessedBamFileUnitTests {
                 )
         assertNotNull(exomeSeqType.save([flush: true, failOnError: true]))
 
-        ReferenceGenome referenceGenome = TestData.findOrSaveReferenceGenome()
+        ReferenceGenome referenceGenome = DomainFactory.createReferenceGenomeLazy()
 
         ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType = new ReferenceGenomeProjectSeqType([
             project : project,
@@ -180,7 +180,7 @@ class ProcessedBamFileUnitTests {
                 )
         assertNotNull(exomeSeqTrack.save([flush: true, failOnError: true]))
 
-        AlignmentPass exomeAlignmentPass = testData.createAlignmentPass(
+        AlignmentPass exomeAlignmentPass = DomainFactory.createAlignmentPass(
                 identifier: 1,
                 seqTrack: exomeSeqTrack,
                 description: "test"

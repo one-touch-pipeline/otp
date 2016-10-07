@@ -39,7 +39,7 @@ class ProcessedAlignmentFileServiceTests {
     private AlignmentPass createTestDataForMayProcessingFilesBeDeleted(Map secondProcessedMergedBamFileMap = [:], Map secondAlignmentPassMap = [:]) {
         SeqTrack seqTrack = SeqTrack.build()
 
-        AlignmentPass alignmentPass = TestData.createAndSaveAlignmentPass([
+        AlignmentPass alignmentPass = DomainFactory.createAlignmentPass([
             seqTrack: seqTrack,
             identifier: 1
         ])
@@ -48,7 +48,7 @@ class ProcessedAlignmentFileServiceTests {
             alignmentPass: alignmentPass,
         ])
 
-        AlignmentPass alignmentPass2 = TestData.createAndSaveAlignmentPass([
+        AlignmentPass alignmentPass2 = DomainFactory.createAlignmentPass([
             alignmentState: AlignmentState.FINISHED,
             seqTrack: seqTrack,
             identifier: 2,
@@ -183,7 +183,7 @@ class ProcessedAlignmentFileServiceTests {
         SeqTrack seqTrack = SeqTrack.build(seqTrackMap)
 
         ProcessedBamFile processedBamFile = ProcessedBamFile.build([
-            alignmentPass: TestData.createAndSaveAlignmentPass([
+            alignmentPass: DomainFactory.createAlignmentPass([
                 seqTrack: seqTrack,
                 identifier: 2,
                 alignmentState: AlignmentState.FINISHED,
@@ -191,7 +191,7 @@ class ProcessedAlignmentFileServiceTests {
         ] + bamFileMap)
 
         ProcessedBamFile processedBamFileLaterPass = ProcessedBamFile.build([
-            alignmentPass: TestData.createAndSaveAlignmentPass([
+            alignmentPass: DomainFactory.createAlignmentPass([
                 seqTrack: seqTrack,
                 identifier: 3
             ] + passOfLaterBamFileMap),
@@ -224,7 +224,7 @@ class ProcessedAlignmentFileServiceTests {
         SeqTrack seqTrack = SeqTrack.build(seqTrackMap).save(flush: true)
 
         ProcessedBamFile processedBamFile = ProcessedBamFile.build([
-            alignmentPass: TestData.createAndSaveAlignmentPass([
+            alignmentPass: DomainFactory.createAlignmentPass([
                 seqTrack: seqTrack,
                 identifier: 2,
                 alignmentState: AlignmentState.FINISHED,
@@ -889,7 +889,7 @@ class ProcessedAlignmentFileServiceTests {
     void testDeleteOldAlignmentProcessingFiles_WithSaiFile_GeneralCondition_WrongAlignmentPass() {
         Date createdBeforeDate = new Date().plus(1)
         ProcessedBamFile processedBamFile = createProcessedBamFileWithSaiFileWhichIsMerged(
-                        processedSaiFileMap: [alignmentPass: TestData.createAndSaveAlignmentPass()]
+                        processedSaiFileMap: [alignmentPass: DomainFactory.createAlignmentPass()]
                         )
         createProcessedAlignmentFileService()
 

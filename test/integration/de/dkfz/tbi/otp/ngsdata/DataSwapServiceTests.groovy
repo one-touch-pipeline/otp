@@ -471,7 +471,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
         ProcessedSaiFile processedSaiFile = ProcessedSaiFile.build(dataFile: dataFile)
 
         TestData testData = new TestData()
-        AlignmentPass alignmentPass = testData.createAlignmentPass(seqTrack: seqTrack)
+        AlignmentPass alignmentPass = DomainFactory.createAlignmentPass(seqTrack: seqTrack)
         MergingWorkPackage workPackage = alignmentPass.workPackage
         MergingSet mergingSet = MergingSet.build(mergingWorkPackage: workPackage)
         MergingPass mergingPass = MergingPass.build(mergingSet: mergingSet)

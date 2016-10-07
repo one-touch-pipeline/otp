@@ -365,6 +365,53 @@ class DomainFactory {
                 ], properties, saveAndValidate)
     }
 
+    public static AlignmentPass createAlignmentPass(Map properties = [:]) {
+        final SeqTrack seqTrack = properties.get('seqTrack') ?: createSeqTrack([:])
+        final MergingWorkPackage workPackage = findOrSaveMergingWorkPackage(
+                seqTrack,
+                properties.get('referenceGenome'),
+                properties.get('pipeline')
+        )
+        properties.remove("referenceGenome")
+        properties.remove("description")
+        final AlignmentPass alignmentPass = createDomainObject(AlignmentPass, [
+            identifier: AlignmentPass.nextIdentifier(seqTrack),
+            seqTrack: seqTrack,
+            workPackage: workPackage,
+            alignmentState: AlignmentPass.AlignmentState.FINISHED,
+        ], properties)
+        return alignmentPass
+    }
+
+    public static MergingWorkPackage findOrSaveMergingWorkPackage(SeqTrack seqTrack, ReferenceGenome referenceGenome = null, Pipeline pipeline = null) {
+        if (referenceGenome == null || pipeline == null) {
+            MergingWorkPackage workPackage = MergingWorkPackage.findWhere(
+                    sample: seqTrack.sample,
+                    seqType: seqTrack.seqType,
+            )
+            if (workPackage != null) {
+                assert workPackage.seqPlatformGroup == seqTrack.seqPlatform.seqPlatformGroup
+                assert workPackage.libraryPreparationKit == seqTrack.libraryPreparationKit
+                return workPackage
+            }
+        }
+
+        final MergingWorkPackage mergingWorkPackage = MergingWorkPackage.findOrSaveWhere(
+                sample: seqTrack.sample,
+                seqType: seqTrack.seqType,
+                seqPlatformGroup: seqTrack.seqPlatform.seqPlatformGroup,
+                referenceGenome: referenceGenome ?: createReferenceGenomeLazy(),
+                libraryPreparationKit: seqTrack.libraryPreparationKit,
+                pipeline: pipeline ?: createDefaultOtpPipeline(),
+        )
+        return mergingWorkPackage
+    }
+
+
+    public static ReferenceGenome createReferenceGenomeLazy() {
+        return ReferenceGenome.find{true} ?: createReferenceGenome()
+    }
+
     public static ProcessedMergedBamFile createProcessedMergedBamFile(MergingWorkPackage mergingWorkPackage, Map properties = [:]) {
         MergingSet mergingSet = createMergingSet(mergingWorkPackage)
         return createProcessedMergedBamFile(mergingSet, properties)
@@ -416,7 +463,7 @@ class DomainFactory {
         SeqTrack seqTrack = createSeqTrackWithDataFiles(mergingWorkPackage)
 
         final ProcessedBamFile bamFile = ProcessedBamFile.build([
-                alignmentPass: TestData.createAndSaveAlignmentPass(
+                alignmentPass: createAlignmentPass(
                         seqTrack: seqTrack,
                         workPackage: mergingWorkPackage,
                         referenceGenome: mergingWorkPackage.referenceGenome,

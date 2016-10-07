@@ -484,7 +484,7 @@ class MergingSetServiceTests {
     }
 
     private ProcessedBamFile createBamFile(final SeqTrack seqTrack = this.seqTrack) {
-        AlignmentPass alignmentPass = testData.createAlignmentPass(
+        AlignmentPass alignmentPass = DomainFactory.createAlignmentPass(
                         identifier: AlignmentPass.nextIdentifier(seqTrack),
                         seqTrack: seqTrack,
                         description: "test"

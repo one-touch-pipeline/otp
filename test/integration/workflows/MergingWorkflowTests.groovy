@@ -146,7 +146,7 @@ class MergingWorkflowTests extends WorkflowTestCase {
         )
         assert mergingWorkPackage.save(flush: true)
 
-        AlignmentPass alignmentPass = new TestData().createAlignmentPass(seqTrack: seqTrack)
+        AlignmentPass alignmentPass = DomainFactory.createAlignmentPass(seqTrack: seqTrack)
         assertNotNull(alignmentPass.save([flush: true, failOnError: true]))
 
         processedBamFile = TestData.createProcessedBamFile([

@@ -92,7 +92,7 @@ class MergingCriteriaServiceTests {
                         )
         assertNotNull(seqTrack.save([flush: true, failOnError: true]))
 
-        AlignmentPass alignmentPass = testData.createAlignmentPass(
+        AlignmentPass alignmentPass = DomainFactory.createAlignmentPass(
                         identifier: 1,
                         seqTrack: seqTrack,
                         description: "test"
@@ -157,7 +157,7 @@ class MergingCriteriaServiceTests {
                         )
         assertNotNull(seqTrack2.save([flush: true, failOnError: true]))
 
-        AlignmentPass alignmentPass2 = testData.createAlignmentPass(
+        AlignmentPass alignmentPass2 = DomainFactory.createAlignmentPass(
                         identifier: 2,
                         seqTrack: seqTrack2,
                         description: "test"
@@ -206,7 +206,7 @@ class MergingCriteriaServiceTests {
                         )
         assertNotNull(seqTrack2.save([flush: true, failOnError: true]))
 
-        AlignmentPass alignmentPass2 = testData.createAlignmentPass(
+        AlignmentPass alignmentPass2 = DomainFactory.createAlignmentPass(
                         identifier: 2,
                         seqTrack: seqTrack2,
                         )

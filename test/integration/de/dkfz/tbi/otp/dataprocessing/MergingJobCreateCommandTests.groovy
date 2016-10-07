@@ -16,6 +16,9 @@ import org.junit.*
 
 class MergingJobCreateCommandTests {
 
+    ProcessedBamFileService processedBamFileService
+    ProcessedMergedBamFileService processedMergedBamFileService
+
     @Rule
     public TemporaryFolder tempFolder = new TemporaryFolder()
 
@@ -164,7 +167,7 @@ class MergingJobCreateCommandTests {
         String createTempDirExp = "mkdir -p -m 2750 ${tempDirExp}"
         String javaOptionsExp = "JAVA_OPTIONS=-Xmx50G"
         String picardExp = "picard-1.61.sh MarkDuplicates"
-        File inputFile = new File("${basePathAlignment}/run_1_laneId_1/pass1/name_1_run_1_s_laneId_1_${LIBRARY_LAYOUT_NAME}.sorted.bam")
+        File inputFile = new File(processedBamFileService.getFilePath(processedBamFile))
         CreateFileHelper.createFile(inputFile, bamFileContent)
         String inputFilePathExp = " I=${inputFile}"
         String outputFilePathExp = "${basePathMergingOutput}/name_1_pid_1_${SEQ_TYPE_NAME}_${LIBRARY_LAYOUT_NAME}_merged.mdup.bam"
@@ -183,13 +186,13 @@ class MergingJobCreateCommandTests {
      */
     @Test
     void testCreateCommandTwoBamFiles() {
+        File inputFile1 = new File(processedBamFileService.getFilePath(processedBamFile))
         createMergingSetAssignment("2")
         String tempDirExp = "\${PBS_SCRATCH_DIR}/\${PBS_JOBID}"
         String createTempDirExp = "mkdir -p -m 2750 ${tempDirExp}"
         String javaOptionsExp = "JAVA_OPTIONS=-Xmx50G"
         String picardExp = "picard-1.61.sh MarkDuplicates"
-        File inputFile1 = new File("${basePathAlignment}/run_1_laneId_1/pass1/name_1_run_1_s_laneId_1_${LIBRARY_LAYOUT_NAME}.sorted.bam")
-        File inputFile2 = new File("${basePathAlignment}/run_2_laneId_2/pass2/name_1_run_2_s_laneId_2_${LIBRARY_LAYOUT_NAME}.sorted.bam")
+        File inputFile2 = new File(processedBamFileService.getFilePath(processedBamFile))
         CreateFileHelper.createFile(inputFile1, bamFileContent)
         CreateFileHelper.createFile(inputFile2, bamFileContent)
         String inputFilePathExp = " I=${inputFile1} I=${inputFile2}"
@@ -214,8 +217,8 @@ class MergingJobCreateCommandTests {
         String createTempDirExp = "mkdir -p -m 2750 ${tempDirExp}"
         String javaOptionsExp = "JAVA_OPTIONS=-Xmx50G"
         String picardExp = "picard-1.61.sh MarkDuplicates"
-        File inputFile1 = new File("${basePathAlignment}/run_1_laneId_1/pass1/name_1_run_1_s_laneId_1_${LIBRARY_LAYOUT_NAME}.sorted.bam")
-        File inputFile2 = new File("${basePathMerging}/name_1/${SEQ_TYPE_NAME}/${LIBRARY_LAYOUT_NAME}/DEFAULT/0/pass${pmbf.mergingPass.identifier}/name_1_pid_1_${SEQ_TYPE_NAME}_${LIBRARY_LAYOUT_NAME}_merged.mdup.bam")
+        File inputFile1 = new File(processedBamFileService.getFilePath(processedBamFile))
+        File inputFile2 = new File(processedMergedBamFileService.filePath(pmbf))
         CreateFileHelper.createFile(inputFile1, bamFileContent)
         CreateFileHelper.createFile(inputFile2, bamFileContent)
         String inputFilePathExp = " I=${inputFile1} I=${inputFile2}"
@@ -235,15 +238,15 @@ class MergingJobCreateCommandTests {
      */
     @Test
     void testCreateCommandTwoBamFileWithProcessedMergedBamFile() {
+        File inputFile1 = new File(processedBamFileService.getFilePath(processedBamFile))
         createMergingSetAssignment("2")
         final ProcessedMergedBamFile pmbf = createMergedMergingSetAssignment(mergingSet, 3).bamFile  // Any dummy merging set could be used as the argument instead of mergingSet.
         String tempDirExp = "\${PBS_SCRATCH_DIR}/\${PBS_JOBID}"
         String createTempDirExp = "mkdir -p -m 2750 ${tempDirExp}"
         String javaOptionsExp = "JAVA_OPTIONS=-Xmx50G"
         String picardExp = "picard-1.61.sh MarkDuplicates"
-        File inputFile1 = new File("${basePathAlignment}/run_1_laneId_1/pass1/name_1_run_1_s_laneId_1_${LIBRARY_LAYOUT_NAME}.sorted.bam")
-        File inputFile2 = new File("${basePathAlignment}/run_2_laneId_2/pass2/name_1_run_2_s_laneId_2_${LIBRARY_LAYOUT_NAME}.sorted.bam")
-        File inputFile3 = new File("${basePathMerging}/name_1/${SEQ_TYPE_NAME}/${LIBRARY_LAYOUT_NAME}/DEFAULT/0/pass${pmbf.mergingPass.identifier}/name_1_pid_1_${SEQ_TYPE_NAME}_${LIBRARY_LAYOUT_NAME}_merged.mdup.bam")
+        File inputFile2 = new File(processedBamFileService.getFilePath(processedBamFile))
+        File inputFile3 = new File(processedMergedBamFileService.filePath(pmbf))
         CreateFileHelper.createFile(inputFile1, bamFileContent)
         CreateFileHelper.createFile(inputFile2, bamFileContent)
         CreateFileHelper.createFile(inputFile3, bamFileContent)
@@ -289,7 +292,7 @@ class MergingJobCreateCommandTests {
                         )
         assertNotNull(seqTrack.save([flush: true, failOnError: true]))
 
-        AlignmentPass alignmentPass = testData.createAlignmentPass(
+        AlignmentPass alignmentPass = DomainFactory.createAlignmentPass(
                         identifier: identifier,
                         seqTrack: seqTrack
                         )

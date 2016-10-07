@@ -100,7 +100,7 @@ class ConveyBwaAlignmentWorkflowTests extends WorkflowTestCase {
                 dataFile: dataFile,
         ).save(flush: true, failOnError: true)
 
-        alignmentPass = TestData.createAndSaveAlignmentPass(
+        alignmentPass = DomainFactory.createAlignmentPass(
                 seqTrack: seqTrack,
                 identifier: AlignmentPass.nextIdentifier(seqTrack),
                 alignmentState: AlignmentPass.AlignmentState.NOT_STARTED,
