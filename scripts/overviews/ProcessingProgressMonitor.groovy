@@ -944,7 +944,7 @@ if (allProcessed) {
                 datafile.fileWithdrawn = true
         ) and (
             (
-                seqTrack.dataInstallationState != '${SeqTrack.DataProcessingState.FINISHED}'
+                seqTrack.dataInstallationState not in ('${SeqTrack.DataProcessingState.FINISHED}', '${SeqTrack.DataProcessingState.UNKNOWN}')
             ) or (
                 seqTrack.fastqcState != '${SeqTrack.DataProcessingState.FINISHED}'
                 and seqTrack.id >= ${firstIdToCheck}
