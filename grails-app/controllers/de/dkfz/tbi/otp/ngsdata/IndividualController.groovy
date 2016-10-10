@@ -385,7 +385,7 @@ class SamplesParser {
         boolean hasType = value.type
         boolean hasIdentifier = value.identifier.any { !it.empty }
 
-        assert hasType == hasIdentifier : "Please fill in both fields: sample and sample identifier"
+        assert hasType == hasIdentifier : "Please fill in both fields: Sample Type and Sample Identifier"
 
         return hasType
     }
