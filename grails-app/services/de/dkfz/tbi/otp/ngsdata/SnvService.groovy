@@ -1,7 +1,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
-import org.hibernate.criterion.CriteriaSpecification
+import org.hibernate.criterion.*
+import org.hibernate.sql.*
 import org.springframework.security.access.prepost.*
 
 class SnvService {
@@ -43,7 +44,7 @@ class SnvService {
                             property('displayName', 'seqType')
                             property('name', 'seqTypeName')
                         }
-                        libraryPreparationKit {
+                        libraryPreparationKit(JoinType.LEFT_OUTER_JOIN.getJoinTypeValue()) {
                             property('shortDisplayName', 'libPrepKit1')
                         }
                     }
@@ -53,7 +54,7 @@ class SnvService {
                                 property('name', 'sampleType2')
                             }
                         }
-                        libraryPreparationKit {
+                        libraryPreparationKit(JoinType.LEFT_OUTER_JOIN.getJoinTypeValue()) {
                             property('shortDisplayName', 'libPrepKit2')
                         }
                     }
