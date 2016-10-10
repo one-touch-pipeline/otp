@@ -80,18 +80,16 @@ class FastqcJob extends AbstractOtpJob implements AutoRestartableJob {
         }
 
         SeqTrack.withTransaction {
-            synchronized (seqTrackService) {
-                List<DataFile> files = seqTrackService.getSequenceFilesForSeqTrack(seqTrack)
-                for (DataFile file in files) {
-                    FastqcProcessedFile fastqc = fastqcDataFilesService.getAndUpdateFastqcProcessedFile(file)
-                    fastqcUploadService.uploadFastQCFileContentsToDataBase(fastqc)
-                    fastqcDataFilesService.updateFastqcProcessedFile(fastqc)
-                    fastqcDataFilesService.setFastqcProcessedFileUploaded(fastqc)
-                }
-                assert files*.nReads.unique().size() == 1
-                assert files*.sequenceLength.unique().size() == 1 || files*.sequenceLength.any { it.contains('-') }
-                seqTrackService.setFastqcFinished(seqTrack)
+            List<DataFile> files = seqTrackService.getSequenceFilesForSeqTrack(seqTrack)
+            for (DataFile file in files) {
+                FastqcProcessedFile fastqc = fastqcDataFilesService.getAndUpdateFastqcProcessedFile(file)
+                fastqcUploadService.uploadFastQCFileContentsToDataBase(fastqc)
+                fastqcDataFilesService.updateFastqcProcessedFile(fastqc)
+                fastqcDataFilesService.setFastqcProcessedFileUploaded(fastqc)
             }
+            assert files*.nReads.unique().size() == 1
+            assert files*.sequenceLength.unique().size() == 1 || files*.sequenceLength.any { it.contains('-') }
+            seqTrackService.setFastqcFinished(seqTrack)
             seqTrackService.fillBaseCount(seqTrack)
             setnBasesInClusterJobForFastqc(processingStep)
         }
