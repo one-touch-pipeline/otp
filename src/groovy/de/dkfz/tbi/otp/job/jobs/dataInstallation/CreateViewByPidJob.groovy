@@ -6,6 +6,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 import org.springframework.beans.factory.annotation.*
 
+@ResumableJob
 class CreateViewByPidJob extends AbstractEndStateAwareJobImpl implements AutoRestartableJob {
 
     @Autowired
