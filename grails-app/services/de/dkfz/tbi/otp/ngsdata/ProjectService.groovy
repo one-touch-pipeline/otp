@@ -8,6 +8,7 @@ import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.*
 import grails.plugin.springsecurity.*
+import groovy.transform.*
 import jdk.nashorn.internal.ir.annotations.*
 import org.springframework.security.access.prepost.*
 import org.springframework.security.acls.domain.*
@@ -100,18 +101,20 @@ class ProjectService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public Project createProject(String name, String dirName, String realmName, String alignmentDeciderBeanName, String categoryName, String unixGroup, String projectGroup, String nameInMetadataFiles, boolean copyFiles, String mailingListName) {
-        assert OtpPath.isValidPathComponent(unixGroup): "unixGroup '${unixGroup}' contains invalid characters"
-        Project project = createProject(name, dirName, realmName, alignmentDeciderBeanName, categoryName)
-        project.hasToBeCopied = copyFiles
-        project.nameInMetadataFiles = nameInMetadataFiles
-        project.setProjectGroup(ProjectGroup.findByName(projectGroup))
-        project.mailingListName = mailingListName
+    public Project createProject(ProjectParams projectParams) {
+        assert OtpPath.isValidPathComponent(projectParams.unixGroup): "unixGroup '${projectParams.unixGroup}' contains invalid characters"
+        Project project = createProject(projectParams.name, projectParams.dirName, projectParams.realmName, projectParams.alignmentDeciderBeanName, projectParams.categoryName)
+        project.dirAnalysis = projectParams.dirAnalysis
+        project.hasToBeCopied = projectParams.copyFiles
+        project.nameInMetadataFiles = projectParams.nameInMetadataFiles
+        project.setProjectGroup(ProjectGroup.findByName(projectParams.projectGroup))
+        project.mailingListName = projectParams.mailingListName
+        project.description = projectParams.description
         assert project.save(flush: true, failOnError: true)
 
         GroupCommand groupCommand = new GroupCommand(
-                name: name,
-                description: "group for ${name}",
+                name: projectParams.name,
+                description: "group for ${projectParams.name}",
                 readProject: false,
                 writeProject: false,
                 readJobSystem: false,
@@ -125,14 +128,30 @@ class ProjectService {
         File projectDirectory = project.getProjectDirectory()
         if (projectDirectory.exists()) {
             PosixFileAttributes attrs = Files.readAttributes(projectDirectory.toPath(), PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
-            if (attrs.group().toString() == unixGroup) {
+            if (attrs.group().toString() == projectParams.unixGroup) {
                 return project
             }
         }
-        executeScript(buildCreateProjectDirectory(unixGroup, projectDirectory), project)
+        executeScript(buildCreateProjectDirectory(projectParams.unixGroup, projectDirectory), project)
         WaitingFileUtils.waitUntilExists(projectDirectory)
 
         return project
+    }
+
+    @Immutable
+    public static class ProjectParams {
+        String name
+        String dirName
+        String dirAnalysis
+        String realmName
+        String alignmentDeciderBeanName
+        String categoryName
+        String unixGroup
+        String projectGroup
+        String nameInMetadataFiles
+        boolean copyFiles
+        String mailingListName
+        String description
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
@@ -371,7 +390,6 @@ echo 'OK'
     }
 }
 
-@Immutable
 class PanCanAlignmentConfiguration {
     Project project
     SeqType seqType

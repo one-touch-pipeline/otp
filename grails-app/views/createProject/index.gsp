@@ -27,6 +27,10 @@
                 <td><g:textField name="directory" size="130" value="${cmd.directory}"/></td>
             </tr>
             <tr>
+                <td class="myKey"><g:message code="createProject.directoryAnalysis"/></td>
+                <td><g:textField name="directoryAnalysis" size="130" value="${cmd.analysisDirectory}"/></td>
+            </tr>
+            <tr>
                 <td class="myKey"><g:message code="createProject.metadata.name"/></td>
                 <td><g:textField name="nameInMetadataFiles" size="130" value="${cmd.nameInMetadataFiles}"/></td>
             </tr>
@@ -49,6 +53,10 @@
             <tr>
                 <td class="myKey"><g:message code="createProject.copyFiles"/></td>
                 <td><g:checkBox name="copyFiles" checked="${cmd == null || cmd.copyFiles}" /></td>
+            </tr>
+            <tr>
+                <td class="myKey"><g:message code="createProject.description"/></td>
+                <td><g:textArea name="description" value="${cmd.description}"/></td>
             </tr>
             <tr>
                 <td></td>

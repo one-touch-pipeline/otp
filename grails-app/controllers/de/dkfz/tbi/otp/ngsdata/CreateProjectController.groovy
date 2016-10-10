@@ -18,7 +18,21 @@ class CreateProjectController {
                 message = "'" + errors.getRejectedValue() + "' is not a valid value for '" + errors.getField() + "'. Error code: '" + errors.code + "'"
             }
             else {
-                redirect(controller:"projectOverview", action: "specificOverview", params: [project: projectService.createProject(cmd.name, cmd.directory, Realm.LATEST_DKFZ_REALM, 'noAlignmentDecider', cmd.projectCategory, cmd.unixGroup, cmd.projectGroup, cmd.nameInMetadataFiles, cmd.copyFiles, cmd.mailingListName).name])
+                ProjectService.ProjectParams projectParams = new ProjectService.ProjectParams(
+                        name: cmd.name,
+                        dirName: cmd.directory,
+                        dirAnalysis: cmd.analysisDirectory,
+                        realmName: Realm.LATEST_DKFZ_REALM,
+                        alignmentDeciderBeanName: 'noAlignmentDecider',
+                        categoryName: cmd.projectCategory,
+                        unixGroup: cmd.unixGroup,
+                        projectGroup: cmd.projectGroup,
+                        nameInMetadataFiles: cmd.nameInMetadataFiles,
+                        copyFiles: cmd.copyFiles,
+                        mailingListName: cmd.mailingListName,
+                        description: cmd.description,
+                )
+                redirect(controller: "projectOverview", action: "specificOverview", params: [project: projectService.createProject(projectParams).name])
             }
         }
         return [
@@ -34,11 +48,13 @@ class CreateProjectController {
 class CreateProjectControllerSubmitCommand implements Serializable {
     String name
     String directory
+    String analysisDirectory
     String nameInMetadataFiles
     String unixGroup
     String mailingListName
     String projectGroup
     String projectCategory
+    String description
     String submit
     boolean copyFiles
 
@@ -54,6 +70,11 @@ class CreateProjectControllerSubmitCommand implements Serializable {
         directory(blank: false, validator: {val, obj ->
             if (Project.findByDirName(val)) {
                 return 'This path \'' + val + '\' is used by another project already'
+            }
+        })
+        analysisDirectory(validator: { String val ->
+            if(!(!val || OtpPath.isValidAbsolutePath(val))) {
+                return "\'${val}\' is not a valid absolute path"
             }
         })
         unixGroup(blank: false, validator: {val, obj ->

@@ -60,26 +60,43 @@ class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
 
         when:
         Project project
+        ProjectService.ProjectParams projectParams = new ProjectService.ProjectParams(
+                name: name,
+                dirName: dirName,
+                dirAnalysis: dirAnalysis,
+                realmName: Realm.LATEST_DKFZ_REALM,
+                alignmentDeciderBeanName: AlignmentDeciderBeanNames.NO_ALIGNMENT.bean,
+                categoryName: 'category',
+                unixGroup: group,
+                projectGroup: projectGroup,
+                nameInMetadataFiles: nameInMetadataFiles,
+                copyFiles: copyFiles,
+                mailingListName: mailingListName,
+                description: description,
+        )
         SpringSecurityUtils.doWithAuth("admin") {
-            project = projectService.createProject(name, dirName, Realm.LATEST_DKFZ_REALM, AlignmentDeciderBeanNames.NO_ALIGNMENT.bean, 'category', group, projectGroup, nameInMetadataFiles, copyFiles, mailingListName)
+            project = projectService.createProject(projectParams)
         }
 
         then:
         project.name == name
         project.dirName == dirName
+        project.dirAnalysis == dirAnalysis
         project.projectGroup == ProjectGroup.findByName(projectGroup)
         project.nameInMetadataFiles == nameInMetadataFiles
         project.hasToBeCopied == copyFiles
         project.category == ProjectCategory.findByName('category')
         project.mailingListName == mailingListName
+        project.description == description
 
         where:
-        name      | dirName | projectGroup   | nameInMetadataFiles | copyFiles | mailingListName
-        'project' | 'dir'   | ''             | 'project'           | true      | "tr_projectMailingList"
-        'project' | 'dir'   | ''             | null                | true      | "tr_projectMailingList"
-        'project' | 'dir'   | 'projectGroup' | 'project'           | true      | "tr_projectMailingList"
-        'project' | 'dir'   | ''             | 'project'           | false     | "tr_projectMailingList"
-        'project' | 'dir'   | ''             | 'project'           | true      | ""
+        name      | dirName | dirAnalysis | projectGroup    | nameInMetadataFiles | copyFiles | mailingListName         | description
+        'project' | 'dir'   | ''          | ''              | 'project'           | true      | "tr_projectMailingList" | 'description'
+        'project' | 'dir'   | ''          | ''              | null                | true      | "tr_projectMailingList" | ''
+        'project' | 'dir'   | ''          | 'projectGroup'  | 'project'           | true      | "tr_projectMailingList" | 'description'
+        'project' | 'dir'   | ''          | ''              | 'project'           | false     | "tr_projectMailingList" | ''
+        'project' | 'dir'   | ''          | ''              | 'project'           | true      | ""                      | 'description'
+        'project' | 'dir'   | '/dirA'     | ''              | 'project'           | true      | ""                      | 'description'
     }
 
     void "test createProject if directory is created"() {
@@ -88,8 +105,22 @@ class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
 
         when:
         Project project
+        ProjectService.ProjectParams projectParams = new ProjectService.ProjectParams(
+                name: 'project',
+                dirName: 'dir',
+                dirAnalysis: '/dirA',
+                realmName: Realm.LATEST_DKFZ_REALM,
+                alignmentDeciderBeanName: AlignmentDeciderBeanNames.NO_ALIGNMENT.bean,
+                categoryName: 'category',
+                unixGroup: group,
+                projectGroup: '',
+                nameInMetadataFiles: null,
+                copyFiles: false,
+                mailingListName: "tr_MailingListName",
+                description: '',
+        )
         SpringSecurityUtils.doWithAuth("admin") {
-            project = projectService.createProject('project', 'dir', Realm.LATEST_DKFZ_REALM, AlignmentDeciderBeanNames.NO_ALIGNMENT.bean, 'category', group, '', null, false, "tr_MailingListName")
+            project = projectService.createProject(projectParams)
         }
 
         then:
@@ -112,8 +143,22 @@ class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
 
         when:
         Project project
+        ProjectService.ProjectParams projectParams = new ProjectService.ProjectParams(
+                name: name,
+                dirName: dirName,
+                dirAnalysis: '/dirA',
+                realmName: Realm.LATEST_DKFZ_REALM,
+                alignmentDeciderBeanName: AlignmentDeciderBeanNames.NO_ALIGNMENT.bean,
+                categoryName: 'category',
+                unixGroup: group,
+                projectGroup: '',
+                nameInMetadataFiles: nameInMetadataFiles,
+                copyFiles: true,
+                mailingListName: "tr_MailingListName",
+                description: '',
+        )
         SpringSecurityUtils.doWithAuth("admin") {
-            project = projectService.createProject(name, dirName, Realm.LATEST_DKFZ_REALM, AlignmentDeciderBeanNames.NO_ALIGNMENT.bean, 'category', group, '', nameInMetadataFiles, true, "tr_MailingListName")
+            project = projectService.createProject(projectParams)
         }
 
         then:
@@ -134,8 +179,22 @@ class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
     void "test createProject invalid unix group"() {
         when:
         Project project
+        ProjectService.ProjectParams projectParams = new ProjectService.ProjectParams(
+                name: 'project',
+                dirName: 'dir',
+                dirAnalysis: '/dirA',
+                realmName: Realm.LATEST_DKFZ_REALM,
+                alignmentDeciderBeanName: AlignmentDeciderBeanNames.NO_ALIGNMENT.bean,
+                categoryName: 'category',
+                unixGroup: 'invalidValue',
+                projectGroup: '',
+                nameInMetadataFiles: null,
+                copyFiles: false,
+                mailingListName: "tr_MailingListName",
+                description: '',
+        )
         SpringSecurityUtils.doWithAuth("admin") {
-            project = projectService.createProject('project', 'dir', Realm.LATEST_DKFZ_REALM, AlignmentDeciderBeanNames.NO_ALIGNMENT.bean, 'category', 'invalidValue', '', null, false, "tr_MailingListName")
+            project = projectService.createProject(projectParams)
         }
 
         then:
@@ -149,13 +208,56 @@ class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
 
         when:
         Project project
+        ProjectService.ProjectParams projectParams = new ProjectService.ProjectParams(
+                name: 'project',
+                dirName: 'dir',
+                dirAnalysis: '/dirA',
+                realmName: Realm.LATEST_DKFZ_REALM,
+                alignmentDeciderBeanName: AlignmentDeciderBeanNames.NO_ALIGNMENT.bean,
+                categoryName: 'category',
+                unixGroup: group,
+                projectGroup: '',
+                nameInMetadataFiles: null,
+                copyFiles: false,
+                mailingListName: "invalidMailingListName",
+                description: '',
+        )
         SpringSecurityUtils.doWithAuth("admin") {
-            project = projectService.createProject('project', 'dir', Realm.LATEST_DKFZ_REALM, AlignmentDeciderBeanNames.NO_ALIGNMENT.bean, 'category', group, '', null, false, "invalidMailingListName")
+            project = projectService.createProject(projectParams)
         }
 
         then:
         ValidationException exception = thrown()
         exception.message.contains("mailingListName")
+    }
+
+    void "test createProject with invalid dirAnalysis"() {
+        given:
+        String group = grailsApplication.config.otp.testing.group
+
+        when:
+        Project project
+        ProjectService.ProjectParams projectParams = new ProjectService.ProjectParams(
+                name: 'project',
+                dirName: 'dir',
+                dirAnalysis: 'invalidDirA',
+                realmName: Realm.LATEST_DKFZ_REALM,
+                alignmentDeciderBeanName: AlignmentDeciderBeanNames.NO_ALIGNMENT.bean,
+                categoryName: 'category',
+                unixGroup: group,
+                projectGroup: '',
+                nameInMetadataFiles: null,
+                copyFiles: false,
+                mailingListName: "tr_MailingListName",
+                description: '',
+        )
+        SpringSecurityUtils.doWithAuth("admin") {
+            project = projectService.createProject(projectParams)
+        }
+
+        then:
+        ValidationException exception = thrown()
+        exception.message.contains("dirAnalysis")
     }
 
     void "test createProject valid input, when directory with wrong unix group already exists"() {
@@ -175,8 +277,22 @@ class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
         Files.readAttributes(projectDirectory.toPath(), PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS).group().toString() != group
 
         when:
+        ProjectService.ProjectParams projectParams = new ProjectService.ProjectParams(
+                name: 'project',
+                dirName: 'dir',
+                dirAnalysis: '/dirA',
+                realmName: Realm.LATEST_DKFZ_REALM,
+                alignmentDeciderBeanName: AlignmentDeciderBeanNames.NO_ALIGNMENT.bean,
+                categoryName: 'category',
+                unixGroup: group,
+                projectGroup: '',
+                nameInMetadataFiles: null,
+                copyFiles: false,
+                mailingListName: "tr_MailingListName",
+                description: '',
+        )
         SpringSecurityUtils.doWithAuth("admin") {
-            projectService.createProject('project', 'dir', Realm.LATEST_DKFZ_REALM, AlignmentDeciderBeanNames.NO_ALIGNMENT.bean, 'category', group, '', null, false, "tr_mailingListName")
+            projectService.createProject(projectParams)
         }
         then:
         Files.readAttributes(projectDirectory.toPath(), PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS).group().toString() == group
@@ -225,8 +341,22 @@ class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
 
         when:
         Project project
+        ProjectService.ProjectParams projectParams = new ProjectService.ProjectParams(
+                name: 'project',
+                dirName: 'dir',
+                dirAnalysis: '/dirA',
+                realmName: Realm.LATEST_DKFZ_REALM,
+                alignmentDeciderBeanName: AlignmentDeciderBeanNames.NO_ALIGNMENT.bean,
+                categoryName: 'invalid category',
+                unixGroup: group,
+                projectGroup: '',
+                nameInMetadataFiles: 'project',
+                copyFiles: true,
+                mailingListName: "tr_MailingListName",
+                description: '',
+        )
         SpringSecurityUtils.doWithAuth("admin") {
-            project = projectService.createProject('project', 'dir', Realm.LATEST_DKFZ_REALM, 'noAlignmentDecider', 'invalid category', group, '', 'project', true, "tr_mailingListName")
+            project = projectService.createProject(projectParams)
         }
 
         then:
@@ -276,6 +406,21 @@ class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
 
         then:
         project.mailingListName == mailingListName
+    }
+
+    void "test updateAnalysisDirectory valid name"() {
+        given:
+        String analysisDirectory = '/dirA'
+        Project project = Project.findByName("testProject")
+
+        when:
+        assert !project.dirAnalysis
+        SpringSecurityUtils.doWithAuth("admin") {
+            projectService.updateAnalysisDirectory(analysisDirectory, project)
+        }
+
+        then:
+        project.dirAnalysis == analysisDirectory
     }
 
     void "test configureNoAlignmentDeciderProject"() {
