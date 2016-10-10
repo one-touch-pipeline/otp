@@ -245,6 +245,34 @@
                 </td>
             </tbody>
         </table>
+        <div style="width: 20px; height: 40px;"></div>
+        <h3>
+            <g:message code="dataFields.title.adapter" />
+        </h3>
+        <table>
+            <thead>
+            <tr>
+                <th><g:message code="dataFields.adapter"/></th>
+            </tr>
+            </thead>
+            <tbody>
+            <g:each var="adapterFile" in="${adapterFiles}" >
+                <tr>
+                    <td>
+                        ${adapterFile.fileName}
+                    </td>
+                </tr>
+            </g:each>
+            <td colspan="1">
+                <otp:editorSwitch
+                        roles="ROLE_OPERATOR"
+                        template="newFreeTextValue"
+                        label="Adapter file:"
+                        link="${g.createLink(controller: 'metaDataFields', action: 'createAdapterFile')}"
+                        value=""/>
+            </td>
+            </tbody>
+        </table>
     </div>
 </body>
 </html>

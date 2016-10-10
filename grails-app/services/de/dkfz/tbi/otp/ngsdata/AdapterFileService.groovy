@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.utils.*
+import org.springframework.security.access.prepost.PreAuthorize
 
 class AdapterFileService {
 
@@ -9,6 +10,16 @@ class AdapterFileService {
 
     ProcessingOptionService processingOptionService
 
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    public AdapterFile createAdapterFile(String fileName){
+        assert fileName : "the input file name '${fileName}' must not be null"
+        assert !AdapterFile.findByFileNameIlike(fileName) : "The adapter file '${fileName}' is linked already"
+        AdapterFile adapterFile = new AdapterFile(
+                fileName: fileName
+        )
+        assert adapterFile.save(flush: true, failOnError: true)
+        return adapterFile
+    }
 
     AdapterFile findByFileName(String fileName) {
         assert fileName

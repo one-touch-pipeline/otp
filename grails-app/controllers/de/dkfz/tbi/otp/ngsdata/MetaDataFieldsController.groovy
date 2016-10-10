@@ -2,6 +2,8 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import grails.converters.JSON
+import grails.validation.Validateable
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.validation.FieldError
 
 class MetaDataFieldsController {
@@ -13,6 +15,7 @@ class MetaDataFieldsController {
     SeqCenterService seqCenterService
     LibraryPreparationKitSynonymService libraryPreparationKitSynonymService
     AntibodyTargetService antibodyTargetService
+    AdapterFileService adapterFileService
 
 
     def index() {
@@ -67,12 +70,19 @@ class MetaDataFieldsController {
             ]
         }.unique()
 
+        List adapterFiles = AdapterFile.list(sort: "fileName", order: "asc").collect {
+            [
+                    fileName : it.fileName,
+            ]
+        }
+
         return [
                 antiBodyTargets: antiBodyTargets,
                 libraryPreparationKits: libraryPreparationKits,
                 seqCenters     : seqCenters,
                 seqPlatforms   : seqPlatforms,
-                seqTypes       : seqTypes
+                seqTypes       : seqTypes,
+                adapterFiles   : adapterFiles,
 
         ]
     }
@@ -126,6 +136,10 @@ class MetaDataFieldsController {
         SeqType.withTransaction{
             createSeqTyp(cmd, seqType.name, seqType.dirName, seqType.alias)
         }
+    }
+
+    JSON createAdapterFile(UpdateAdapterFileCommand cmd) {
+        checkErrorAndCallMethod(cmd, { adapterFileService.createAdapterFile(cmd.fileName) })
     }
 
     private void createSeqTyp(Serializable cmd, String name, String dirName, String alias) {
@@ -369,4 +383,29 @@ class UpdateCommandLayout implements Serializable {
             anyLayout(blank: false,validator: {val, obj -> if(!val)return 'Empty'})
             id(blank: false)
         }
+}
+
+class UpdateAdapterFileCommand implements Serializable {
+    String fileName
+
+    @Autowired
+    AdapterFileService adapterFileService
+
+    static constraints = {
+        fileName(blank: false, validator: {val, obj ->
+            if (AdapterFile.findByFileNameIlike(val)) {
+                return 'The adapter file is linked already'
+            }
+            if (!OtpPath.isValidPathComponent(val)) {
+                return 'Invalid file name'
+            }
+            File file = new File(obj.adapterFileService.baseDirectory(), val)
+            if (!file.canRead()) {
+                return "The adapter file ${val} does not exists"
+            }
+        })
+    }
+    void setValue(String fileName) {
+        this.fileName = fileName?.trim()?.replaceAll(" +", " ")
+    }
 }

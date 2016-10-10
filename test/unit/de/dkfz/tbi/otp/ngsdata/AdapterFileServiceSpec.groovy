@@ -20,6 +20,23 @@ class AdapterFileServiceSpec extends Specification {
     @Rule
     TemporaryFolder temporaryFolder
 
+    void "test create adapter file using AdapterFile"(){
+        given:
+        String ADAPTER_FILE ="AdapterFile"
+
+        when:
+        service.createAdapterFile(ADAPTER_FILE)
+
+        then:
+        AdapterFile.findByFileName(ADAPTER_FILE)
+    }
+
+    void "test create adapter file using null"(){
+        when:
+        service.createAdapterFile(null)
+        then:
+        thrown(AssertionError)
+    }
 
     void "test findByFileName, when name exists, returns object"() {
         given:
@@ -66,7 +83,7 @@ class AdapterFileServiceSpec extends Specification {
 
     void "test baseDirectory, when processing option is set to valid absolute path, returns path"() {
         File expectedFile = TestCase.uniqueNonExistentPath
-        createAdapterProcessingOption(expectedFile.path)
+        DomainFactory.createProcessingOptionBaseAdapterFile(expectedFile.path)
 
         when:
         File file = service.baseDirectory()
@@ -77,7 +94,7 @@ class AdapterFileServiceSpec extends Specification {
 
     void "test baseDirectory, when processing option is not set to valid absolute path, throws exception"() {
         String invalidPath = './invalid/path'
-        createAdapterProcessingOption(invalidPath)
+        DomainFactory.createProcessingOptionBaseAdapterFile(invalidPath)
 
         when:
         service.baseDirectory()
@@ -98,7 +115,7 @@ class AdapterFileServiceSpec extends Specification {
 
     void "test fullPath, when adapter file exists in otp and not on file system and readability is tested, throws exception"() {
         given:
-        createAdapterProcessingOption()
+        DomainFactory.createProcessingOptionBaseAdapterFile()
         AdapterFile adapterFile = DomainFactory.createAdapterFile()
 
         when:
@@ -111,7 +128,7 @@ class AdapterFileServiceSpec extends Specification {
 
     void "test fullPath, when adapter file exists in otp and not on file system and readability is not tested, returns path"() {
         given:
-        ProcessingOption option = createAdapterProcessingOption()
+        ProcessingOption option = DomainFactory.createProcessingOptionBaseAdapterFile()
         AdapterFile adapterFile = DomainFactory.createAdapterFile()
 
         when:
@@ -125,7 +142,7 @@ class AdapterFileServiceSpec extends Specification {
     void "test fullPath, when adapter file exists in otp and on file system and readability is tested (#readability), returns path"() {
         given:
         File directory = temporaryFolder.newFolder()
-        createAdapterProcessingOption(directory.path)
+        DomainFactory.createProcessingOptionBaseAdapterFile(directory.path)
         AdapterFile adapterFile = DomainFactory.createAdapterFile()
         new File(directory, adapterFile.fileName) << 'something'
 
@@ -149,17 +166,6 @@ class AdapterFileServiceSpec extends Specification {
 
         then:
         AssertionError e = thrown()
-    }
-
-
-
-    private ProcessingOption createAdapterProcessingOption(String fileName = TestCase.uniqueNonExistentPath.path) {
-        return DomainFactory.createProcessingOption(
-                name: AdapterFileService.BASE_PATH_PROCESSING_OPTION_NAME,
-                type: null,
-                project: null,
-                value: fileName,
-        )
     }
 
 }

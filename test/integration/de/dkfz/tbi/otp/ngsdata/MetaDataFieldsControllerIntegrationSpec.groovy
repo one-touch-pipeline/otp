@@ -2,12 +2,17 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.testing.UserAndRoles
 import grails.plugin.springsecurity.SpringSecurityUtils
+import org.junit.Rule
+import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
 import spock.lang.Unroll
 
 class MetaDataFieldsControllerIntegrationSpec extends Specification implements UserAndRoles {
 
     MetaDataFieldsController controller = new MetaDataFieldsController()
+
+    @Rule
+    TemporaryFolder temporaryFolder
 
     def setup() {
         createUserAndRoles()
@@ -127,6 +132,45 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
 
         where:
         name << ['', 'Antibody Target', 'AntibodyTarget', 'antibodytarget', 'ANTIBODYTARGET']
+    }
+
+    void "test JSON createAdapterFile valid input"() {
+        given:
+        File baseDirectory = temporaryFolder.newFolder()
+        DomainFactory.createProcessingOptionBaseAdapterFile(baseDirectory.path)
+        new File(baseDirectory, 'AdapterFile').text = 'Some text'
+        controller.params.fileName = 'AdapterFile'
+
+        when:
+        SpringSecurityUtils.doWithAuth("operator"){
+            controller.createAdapterFile()
+        }
+
+        then:
+        controller.response.status == 200
+        controller.response.json.success
+        AdapterFile.findByFileName('AdapterFile')
+    }
+
+    @Unroll
+    void "test JSON createAdapterFile invalid input"() {
+        given:
+        File baseDirectory = temporaryFolder.newFolder()
+        DomainFactory.createProcessingOptionBaseAdapterFile(baseDirectory.path)
+        new File(baseDirectory, 'AdapterFile').text = 'Some text'
+
+        when:
+        controller.params.fileName = fileName
+        SpringSecurityUtils.doWithAuth("operator"){
+            controller.createAdapterFile()
+        }
+
+        then:
+        controller.response.status == 200
+        !controller.response.json.success
+
+        where:
+        fileName << ['', 'Adapter File', 'adapterfile', 'ADAPTERFILE']
     }
 
     void "test JSON createSeqCenter valid input"() {

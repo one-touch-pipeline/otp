@@ -330,6 +330,15 @@ class DomainFactory {
         )
     }
 
+    public static ProcessingOption createProcessingOptionBaseAdapterFile(String fileName = TestCase.uniqueNonExistentPath.path) {
+        return createProcessingOption(
+                name: AdapterFileService.BASE_PATH_PROCESSING_OPTION_NAME,
+                type: null,
+                project: null,
+                value: fileName,
+        )
+    }
+
     public static MergingPass createMergingPass(final MergingSet mergingSet) {
         return new MergingPass(
                 mergingSet: mergingSet,
