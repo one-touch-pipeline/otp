@@ -17,8 +17,12 @@ class Individual implements Commentable, Entity {
      */
     String pid
 
+    // TODO OTP-1225: Field names pid, mockPid and mockFullName are confusing and used inconsistently.
+
     /**
      * Identifier used in the user interface.
+     *
+     * Access this via {@link #getDisplayName()}
      */
     String mockFullName
 
