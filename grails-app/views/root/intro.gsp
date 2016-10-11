@@ -73,7 +73,7 @@
                 Second, all operations are executed more reliably and faster reducing the time until the sequences can be analyzed by bio-informatics groups.
                 Third, all information is located in one system with web access and search capabilities.
             </p><p>
-                OTP development started in 2012. It currently processes NGS data for projects of different consortia such as ICGC, HIPO and DKTK.
+                OTP development started in 2011. It currently processes NGS data for projects of different consortia such as ICGC, HIPO and DKTK.
             </p>
         </div>
     </div>
