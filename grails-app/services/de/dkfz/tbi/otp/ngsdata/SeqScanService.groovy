@@ -70,7 +70,9 @@ class SeqScanService {
         def seqTracksToMerge = c.list {
             and {
                 eq("sample", sample)
-                eq("seqPlatform", seqPlatform)
+                run {
+                    eq("seqPlatform", seqPlatform)
+                }
                 eq("seqType", seqType)
             }
         }
