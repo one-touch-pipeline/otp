@@ -89,7 +89,6 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
     ReferenceGenomeService referenceGenomeService
     LinkFileUtils linkFileUtils
     ProcessingOptionService processingOptionService
-    ExecuteRoddyCommandService executeRoddyCommandService
     AbstractBamFileService abstractBamFileService
 
 
@@ -214,6 +213,9 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
                 libraryPreparationKit: kit,
         )
 
+        workPackage.individual.pid = 'pid_4'  // This name is encoded in @RG of the test BAM file
+        workPackage.individual.save()
+
         workPackage.sampleType.name = "CONTROL"
         workPackage.sampleType.save(flush: true)
 
@@ -241,17 +243,14 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
         assert projectConfigFile.text.contains("${workPackage.pipeline.name}_${workPackage.seqType.roddyName}_${pluginVersion}_${DomainFactory.TEST_CONFIG_VERSION}")
     }
 
-    SeqTrack createSeqTrack(String readGroupNum, String library = null) {
+    SeqTrack createSeqTrack(String readGroupNum, Map properties = [:]) {
         MergingWorkPackage workPackage = exactlyOneElement(MergingWorkPackage.findAll())
 
         Map seqTrackProperties = [
                 laneId: readGroupNum,
                 fastqcState: SeqTrack.DataProcessingState.FINISHED,
                 dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
-        ]
-        if (library) {
-            seqTrackProperties += [libraryName: "lib${library}", normalizedLibraryName: library]
-        }
+        ] + properties
         SeqTrack seqTrack = DomainFactory.createSeqTrackWithDataFiles(workPackage, seqTrackProperties)
 
         DataFile.findAllBySeqTrack(seqTrack).eachWithIndex { DataFile dataFile, int index ->
@@ -315,7 +314,10 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
 
         MergingWorkPackage workPackage = exactlyOneElement(MergingWorkPackage.findAll())
 
-        SeqTrack seqtrack = createSeqTrack("readGroup1")
+        SeqTrack seqtrack = createSeqTrack("readGroup1", [run: DomainFactory.createRun(
+                name: 'runName_11',  // This name is encoded in @RG of the test BAM file
+                seqPlatform: DomainFactory.createSeqPlatform(seqPlatformGroup: workPackage.seqPlatformGroup),
+        )])
         RoddyBamFile firstBamFile = new RoddyBamFile(
                 workPackage: workPackage,
                 identifier: RoddyBamFile.nextIdentifier(workPackage),
@@ -724,8 +726,8 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
         // prepare
         SeqTrack firstSeqTrack, secondSeqTrack
         if (setLibrary) {
-            firstSeqTrack = createSeqTrack("readGroup1", "1")
-            secondSeqTrack = createSeqTrack("readGroup2", "5")
+            firstSeqTrack = createSeqTrack("readGroup1", [libraryName: "lib1"])
+            secondSeqTrack = createSeqTrack("readGroup2", [libraryName: "lib5"])
         } else {
             firstSeqTrack = createSeqTrack("readGroup1")
             secondSeqTrack = createSeqTrack("readGroup2")

@@ -2,14 +2,18 @@ package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
+import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 import org.springframework.beans.factory.annotation.*
 
+import java.util.regex.*
+
 import static de.dkfz.tbi.otp.ngsdata.LsdfFilesService.*
 
-
 abstract class AbstractExecutePanCanJob extends AbstractRoddyJob {
+
+    public static final Pattern READ_GROUP_PATTERN = Pattern.compile(/^@RG\s+ID:([^\s]+)\s/)
 
     @Autowired
     ReferenceGenomeService referenceGenomeService
@@ -22,6 +26,9 @@ abstract class AbstractExecutePanCanJob extends AbstractRoddyJob {
 
     @Autowired
     BedFileService bedFileService
+
+    @Autowired
+    ExecutionService executionService
 
 
     @Override
@@ -87,6 +94,8 @@ abstract class AbstractExecutePanCanJob extends AbstractRoddyJob {
             LsdfFilesService.ensureFileIsReadableAndNotEmpty(roddyBamFile."work${it}File")
         }
 
+        validateReadGroups(roddyBamFile)
+
         ['MergedQA', 'ExecutionStore'].each {
             LsdfFilesService.ensureDirIsReadableAndNotEmpty(roddyBamFile."work${it}Directory")
         }
@@ -104,6 +113,31 @@ abstract class AbstractExecutePanCanJob extends AbstractRoddyJob {
         assert roddyBamFile.save(flush: true)
     }
 
+    void validateReadGroups(RoddyBamFile bamFile) {
+
+        File bamFilePath = bamFile.workBamFile
+        Realm realm = configService.getRealmDataProcessing(bamFile.project)
+        List<String> readGroupsInBam = executionService.executeCommandReturnProcessOutput(
+                realm, "set -o pipefail; samtools view -H ${bamFilePath} | grep ^@RG\\\\s", realm.roddyUser
+        ).assertExitCodeZeroAndStderrEmpty().stdout.split('\n').collect {
+            Matcher matcher = READ_GROUP_PATTERN.matcher(it)
+            if (!matcher.find()) {
+                throw new RuntimeException("Line does not match expected @RG pattern: ${it}")
+            }
+            return matcher.group(1)
+        }.sort()
+
+        List<String> expectedReadGroups = bamFile.containedSeqTracks.collect { RoddyBamFile.getReadGroupName(it) }.sort()
+
+        if (readGroupsInBam != expectedReadGroups) {
+            throw new RuntimeException(
+"""Read groups in BAM file are not as expected.
+Read groups in ${bamFilePath}:
+${readGroupsInBam.join('\n')}
+Expected read groups:
+${expectedReadGroups.join('\n')}""")
+        }
+    }
 
     void ensureCorrectBaseBamFileIsOnFileSystem(RoddyBamFile baseBamFile) {
         if (baseBamFile) {

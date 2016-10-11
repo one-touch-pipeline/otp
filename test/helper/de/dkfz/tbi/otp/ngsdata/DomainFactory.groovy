@@ -944,6 +944,7 @@ class DomainFactory {
         return createDomainObject(SeqTrack, seqTrackProperties() + [
                 seqType        : { createSeqType() },
                 kitInfoReliability: properties.libraryPreparationKit ? InformationReliability.KNOWN : InformationReliability.UNKNOWN_UNVERIFIED,
+                normalizedLibraryName: SeqTrack.normalizeLibraryName(properties.libraryName),
         ], properties)
     }
 
@@ -1070,6 +1071,10 @@ class DomainFactory {
         }
         createSequenceDataFile(dataFileProperties + [seqTrack: seqTrack])
         return seqTrack
+    }
+
+    public static SeqTrack createSeqTrackWithTwoDataFiles(MergingWorkPackage mergingWorkPackage, Map seqTrackProperties = [:], Map dataFileProperties1 = [:], Map dataFileProperties2 = [:]) {
+        return createSeqTrackWithTwoDataFiles(getMergingProperties(mergingWorkPackage) + seqTrackProperties, dataFileProperties1, dataFileProperties2)
     }
 
     public static SeqTrack createSeqTrackWithTwoDataFiles(Map seqTrackProperties = [:], Map dataFileProperties1 = [:], Map dataFileProperties2 = [:]) {

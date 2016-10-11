@@ -1,19 +1,15 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
-import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
+import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.CreateFileHelper
-import de.dkfz.tbi.otp.utils.CreateRoddyFileHelper
-import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
-import de.dkfz.tbi.otp.utils.HelperUtils
-import org.junit.After
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.TemporaryFolder
+import de.dkfz.tbi.otp.utils.*
+import org.junit.*
+import org.junit.rules.*
 
+import static de.dkfz.tbi.otp.utils.ProcessHelperService.*
 
 class AbstractExecutePanCanJobTests {
 
@@ -45,7 +41,7 @@ class AbstractExecutePanCanJobTests {
         ])
         roddyBamFile.workPackage.metaClass.findMergeableSeqTracks = { -> SeqTrack.list() }
 
-        Realm dataProcessing = DomainFactory.createRealmDataProcessing(tmpDir.root, [name: roddyBamFile.project.realmName])
+        Realm dataProcessing = DomainFactory.createRealmDataProcessing(tmpDir.root, [name: roddyBamFile.project.realmName, roddyUser: HelperUtils.uniqueString])
         dataManagement = DomainFactory.createRealmDataManagement(tmpDir.root, [name: roddyBamFile.project.realmName])
         abstractExecutePanCanJob = [
                 prepareAndReturnWorkflowSpecificCValues: { RoddyBamFile bamFile -> ",workflowSpecificCValues" },
@@ -60,6 +56,20 @@ class AbstractExecutePanCanJobTests {
         abstractExecutePanCanJob.executeRoddyCommandService = new ExecuteRoddyCommandService()
         abstractExecutePanCanJob.bedFileService = new BedFileService()
         abstractExecutePanCanJob.configService = new ConfigService()
+
+        String readGroupHeaders = roddyBamFile.containedSeqTracks.collect {
+            "@RG     ID:${RoddyBamFile.getReadGroupName(it)}        LB:tumor_123    PL:ILLUMINA     SM:sample_tumor_123"
+        }.join('\n') + '\n'
+        abstractExecutePanCanJob.executionService = [
+                executeCommandReturnProcessOutput: { Realm realm, String command, String userName ->
+                    assert realm == dataProcessing
+                    assert userName == dataProcessing.roddyUser
+                    String expectedCommand = "set -o pipefail; samtools view -H ${roddyBamFile.workBamFile} | grep ^@RG\\\\s"
+                    assert command == expectedCommand
+                    return new ProcessOutput(stdout: readGroupHeaders, stderr: '')
+                }
+        ] as ExecutionService
+
 
         File processingRootPath = dataProcessing.processingRootPath as File
 
@@ -365,6 +375,25 @@ possibleTumorSampleNamePrefixes:"\
 
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
         abstractExecutePanCanJob.validate(roddyBamFile)
+    }
+
+
+    @Test
+    void testValidateReadGroups_WhenReadGroupsAreNotAsExpected_ThrowsException() {
+        SeqTrack seqTrack = DomainFactory.createSeqTrackWithTwoDataFiles(roddyBamFile.mergingWorkPackage)
+        roddyBamFile.seqTracks.add(seqTrack)
+        roddyBamFile.numberOfMergedLanes++
+        roddyBamFile.save()
+        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
+
+        TestCase.shouldFailWithMessageContaining(RuntimeException,
+"""Read groups in BAM file are not as expected.
+Read groups in ${roddyBamFile.workBamFile}:
+${(roddyBamFile.containedSeqTracks - seqTrack).collect { RoddyBamFile.getReadGroupName(it) }.join('\n')}
+Expected read groups:
+${roddyBamFile.containedSeqTracks.collect { RoddyBamFile.getReadGroupName(it) }.join('\n')}""", {
+            abstractExecutePanCanJob.validate(roddyBamFile)
+        })
     }
 
 
