@@ -13,12 +13,7 @@ class CreateMergingSetJob extends AbstractEndStateAwareJobImpl {
     public void execute() throws Exception {
         long bamFileId = Long.parseLong(getProcessParameterValue())
         ProcessedBamFile bamFile = ProcessedBamFile.get(bamFileId)
-        try {
-            mergingSetService.createMergingSetForBamFile(bamFile)
-            succeed()
-        } catch(Exception e) {
-            println "An Exception was thrown while creating the merging set: ${e}"
-            e.printStackTrace()
-        }
+        mergingSetService.createMergingSetForBamFile(bamFile)
+        succeed()
     }
 }
