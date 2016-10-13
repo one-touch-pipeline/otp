@@ -21,12 +21,7 @@ class ProcessedBamFile extends AbstractFileSystemBamFile implements ProcessParam
 
     @Override
     public String toString() {
-        return "id: ${id} " +
-                "pass: ${alignmentPass.identifier} " + (isMostRecentBamFile() ? "(latest) " : "") +
-                "lane: ${seqTrack.laneId} run: ${seqTrack.run.name} " +
-                "<br>sample: ${sample} " +
-                "seqType: ${seqType} " +
-                "<br>project: ${project}"
+        return "PBF ${id} of ${alignmentPass}"
     }
 
     /**
