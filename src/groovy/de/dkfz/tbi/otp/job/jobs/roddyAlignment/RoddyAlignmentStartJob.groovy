@@ -1,17 +1,14 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
-import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
-import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
-import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
-import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
+import de.dkfz.tbi.otp.job.jobs.*
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.*
-import org.springframework.scheduling.annotation.Scheduled
+import org.springframework.scheduling.annotation.*
 
-abstract class RoddyAlignmentStartJob extends AbstractStartJobImpl {
+abstract class RoddyAlignmentStartJob extends AbstractStartJobImpl implements RestartableStartJob {
 
     @Override
     @Scheduled(fixedDelay = 10000l)
@@ -34,6 +31,23 @@ abstract class RoddyAlignmentStartJob extends AbstractStartJobImpl {
                 trackingService.setStartedForSeqTracks(roddyBamFile.containedSeqTracks, OtrsTicket.ProcessingStep.ALIGNMENT)
                 createProcess(roddyBamFile)
             }
+        }
+    }
+
+    @Override
+    Process restart(Process process) {
+        assert process
+
+        RoddyBamFile failedInstance = (RoddyBamFile)process.getProcessParameterObject()
+
+        RoddyBamFile.withTransaction {
+            failedInstance.withdraw()
+            MergingWorkPackage mergingWorkPackage = failedInstance.workPackage
+            mergingWorkPackage.needsProcessing = false
+            RoddyBamFile roddyBamFile = createRoddyBamFile(mergingWorkPackage, findUsableBaseBamFile(mergingWorkPackage))
+
+            assert roddyBamFile.save()
+            return createProcess(roddyBamFile)
         }
     }
 
