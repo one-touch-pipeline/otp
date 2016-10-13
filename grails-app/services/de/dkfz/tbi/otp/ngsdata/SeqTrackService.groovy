@@ -273,7 +273,7 @@ LIMIT 1
         return SeqTrack.get(seqTrack?.id)
     }
 
-    public void setFastqcInProgress(SeqTrack seqTrack) {
+    public static void setFastqcInProgress(SeqTrack seqTrack) {
         seqTrack.fastqcState = SeqTrack.DataProcessingState.IN_PROGRESS
         assert(seqTrack.save(flush: true))
     }
