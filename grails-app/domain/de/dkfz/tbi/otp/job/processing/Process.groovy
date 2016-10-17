@@ -64,7 +64,7 @@ public class Process implements Serializable, Commentable, Entity {
         started(nullable: false)
         startJobClass(nullable: false, blank: false)
         startJobVersion(nullable: false, blank: false)
-        restarted(nullable: true)
+        restarted(nullable: true, unique: true)
         comment(nullable: true)
     }
 
