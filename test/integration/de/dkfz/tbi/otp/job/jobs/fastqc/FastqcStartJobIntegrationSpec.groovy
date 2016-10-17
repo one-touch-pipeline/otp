@@ -9,7 +9,7 @@ import grails.test.spock.*
 import org.codehaus.groovy.grails.support.*
 import spock.lang.*
 
-class FastqcStartJobSpec extends IntegrationSpec {
+class FastqcStartJobIntegrationSpec extends IntegrationSpec {
 
     PersistenceContextInterceptor persistenceInterceptor
 

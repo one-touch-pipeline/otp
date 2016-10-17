@@ -5,7 +5,7 @@ import grails.plugin.springsecurity.SpringSecurityUtils
 import spock.lang.Specification
 import spock.lang.Unroll
 
-class MetaDataFieldsControllerSpec extends Specification implements UserAndRoles {
+class MetaDataFieldsControllerIntegrationSpec extends Specification implements UserAndRoles {
 
     MetaDataFieldsController controller = new MetaDataFieldsController()
 

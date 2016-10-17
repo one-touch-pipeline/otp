@@ -5,7 +5,7 @@ import de.dkfz.tbi.otp.testing.UserAndRoles
 import grails.plugin.springsecurity.SpringSecurityUtils
 import spock.lang.Specification
 
-class CommentServiceSpec extends Specification implements UserAndRoles {
+class CommentServiceIntegrationSpec extends Specification implements UserAndRoles {
 
     CommentService commentService
 

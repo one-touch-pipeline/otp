@@ -7,7 +7,7 @@ import spock.lang.Specification
 
 
 
-class OverallQualityAssessmentMergedServiceSpec extends Specification {
+class OverallQualityAssessmentMergedServiceIntegrationSpec extends Specification {
 
 
 

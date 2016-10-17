@@ -17,7 +17,7 @@ import spock.lang.*
 import java.nio.file.*
 import java.nio.file.attribute.*
 
-class ProjectServiceSpec extends IntegrationSpec implements UserAndRoles {
+class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRoles {
 
     ProjectService projectService
 

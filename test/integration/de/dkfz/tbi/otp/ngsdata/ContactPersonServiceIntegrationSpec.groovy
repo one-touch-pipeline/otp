@@ -6,7 +6,7 @@ import spock.lang.Unroll
 import grails.buildtestdata.mixin.Build
 import grails.plugin.springsecurity.SpringSecurityUtils
 
-class ContactPersonServiceSpec extends Specification implements UserAndRoles{
+class ContactPersonServiceIntegrationSpec extends Specification implements UserAndRoles{
     ContactPersonService contactPersonService = new ContactPersonService()
 
     def setup() {

@@ -1,11 +1,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.buildtestdata.mixin.Build
-import spock.lang.Specification
-import spock.lang.Unroll
+import spock.lang.*
 
-
-class InformSampleIdentifierParserSpec extends Specification{
+class InformSampleIdentifierParserIntegrationSpec extends Specification{
     InformSampleIdentifierParser informSampleIdentifierParser = new InformSampleIdentifierParser()
 
 

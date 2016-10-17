@@ -10,7 +10,7 @@ import grails.test.spock.*
 import org.codehaus.groovy.grails.support.*
 
 
-class BwaAlignmentStartJobSpec extends IntegrationSpec {
+class BwaAlignmentStartJobIntegrationSpec extends IntegrationSpec {
 
     PersistenceContextInterceptor persistenceInterceptor
 

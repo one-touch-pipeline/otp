@@ -10,7 +10,7 @@ import java.util.regex.*
 import static de.dkfz.tbi.TestCase.*
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 
-class LibrarySampleValidatorSpec extends Specification {
+class LibrarySampleValidatorIntegrationSpec extends Specification {
 
     void 'validate, adds expected warnings,succeeds'() {
         given:

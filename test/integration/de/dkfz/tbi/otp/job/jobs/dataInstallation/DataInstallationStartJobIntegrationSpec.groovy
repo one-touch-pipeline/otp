@@ -8,7 +8,7 @@ import de.dkfz.tbi.otp.tracking.*
 import grails.test.spock.*
 import org.codehaus.groovy.grails.support.*
 
-class DataInstallationStartJobSpec extends IntegrationSpec {
+class DataInstallationStartJobIntegrationSpec extends IntegrationSpec {
 
     PersistenceContextInterceptor persistenceInterceptor
 
