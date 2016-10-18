@@ -7,6 +7,7 @@ import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.infrastructure.*
+import de.dkfz.tbi.otp.job.jobs.snvcalling.SnvCallingJob
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.Realm.Cluster
@@ -643,14 +644,14 @@ class DomainFactory {
                 project: snvCallingInstance.project,
                 seqType: snvCallingInstance.seqType,
                 externalScriptVersion: externalScript.scriptVersion,
-                pipeline: DomainFactory.createOtpSnvPipelineLazy(),
+                pipeline: createOtpSnvPipelineLazy(),
         )
     }
 
     public static SnvConfig createSnvConfig(Map properties = [:]) {
         return createDomainObject(SnvConfig, [
                 configuration: "configuration_${counter++}",
-                externalScriptVersion: { DomainFactory.createExternalScript().scriptVersion },
+                externalScriptVersion: { createExternalScript().scriptVersion },
                 seqType: { createSeqType() },
                 project: { createProject() },
                 pipeline: { createOtpSnvPipelineLazy() }
@@ -667,11 +668,8 @@ class DomainFactory {
         RoddyBamFile disease = createRoddyBamFile([workPackage: diseaseWorkPackage] + bamFile1Properties)
         RoddyBamFile control = createRoddyBamFile([workPackage: controlWorkPackage, config: disease.config] + bamFile2Properties)
 
-        ExternalScript externalScript = DomainFactory.createExternalScript()
-
         SnvConfig snvConfig = createSnvConfig(
                 seqType: samplePair.seqType,
-                externalScriptVersion: externalScript.scriptVersion
         )
 
         SnvCallingInstance snvCallingInstance = createSnvCallingInstance([
@@ -699,10 +697,10 @@ class DomainFactory {
                 map.snvCallingInstance = createSnvInstanceWithRoddyBamFiles()
             }
             if (!map.chromosomeJoinExternalScript) {
-                map.chromosomeJoinExternalScript = ExternalScript.buildLazy(
-                        scriptIdentifier: SnvCallingStep.CALLING.externalScriptIdentifier,
+                map.chromosomeJoinExternalScript = createExternalScript([
+                        scriptIdentifier: SnvCallingJob.CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER,
                         scriptVersion: map.snvCallingInstance.config.externalScriptVersion,
-                )
+                ])
             }
         } else {
             if (!map.inputResult) {
@@ -713,10 +711,10 @@ class DomainFactory {
             }
         }
         if (!map.externalScript) {
-            map.externalScript = ExternalScript.buildLazy(
+            map.externalScript = createExternalScript([
                     scriptIdentifier: map.step.externalScriptIdentifier,
                     scriptVersion: map.snvCallingInstance.config.externalScriptVersion,
-            )
+            ])
         }
 
         return createSnvJobResult(map)
@@ -1078,7 +1076,7 @@ class DomainFactory {
     }
 
     public static SeqTrack createSeqTrackWithTwoDataFiles(Map seqTrackProperties = [:], Map dataFileProperties1 = [:], Map dataFileProperties2 = [:]) {
-        FileType fileType = DomainFactory.createFileType()
+        FileType fileType = createFileType()
         Map defaultMap1 = [
                 fileName: 'DataFileFileName_R1.gz',
                 vbpFileName: 'DataFileFileName_R1.gz',
@@ -1163,11 +1161,11 @@ class DomainFactory {
         )
     }
 
-    public static ProcessingStep createProcessingStepWithUpdates(ProcessingStep processingStep = DomainFactory.createProcessingStep()) {
-        ProcessingStepUpdate last = DomainFactory.createProcessingStepUpdate(processingStep: processingStep, state: ExecutionState.CREATED)
-        last = DomainFactory.createProcessingStepUpdate(processingStep: processingStep, state: ExecutionState.STARTED, previous: last)
-        last = DomainFactory.createProcessingStepUpdate(processingStep: processingStep, state: ExecutionState.FINISHED, previous: last)
-        DomainFactory.createProcessingStepUpdate(processingStep: processingStep, state: ExecutionState.SUCCESS, previous: last)
+    public static ProcessingStep createProcessingStepWithUpdates(ProcessingStep processingStep = createProcessingStep()) {
+        ProcessingStepUpdate last = createProcessingStepUpdate(processingStep: processingStep, state: ExecutionState.CREATED)
+        last = createProcessingStepUpdate(processingStep: processingStep, state: ExecutionState.STARTED, previous: last)
+        last = createProcessingStepUpdate(processingStep: processingStep, state: ExecutionState.FINISHED, previous: last)
+        createProcessingStepUpdate(processingStep: processingStep, state: ExecutionState.SUCCESS, previous: last)
         return processingStep
     }
 
@@ -1326,7 +1324,7 @@ class DomainFactory {
         MergingSet mergingSet = createMergingSet(processedMergedBamFile.workPackage)
         MergingPass mergingPass = createMergingPass(mergingSet)
 
-        ProcessedMergedBamFile secondBamFile = DomainFactory.createProcessedMergedBamFile(mergingPass, [
+        ProcessedMergedBamFile secondBamFile = createProcessedMergedBamFile(mergingPass, [
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
                 md5sum: HelperUtils.randomMd5sum,
                 fileSize: 1000,

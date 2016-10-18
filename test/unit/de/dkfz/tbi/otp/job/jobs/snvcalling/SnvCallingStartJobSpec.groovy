@@ -9,6 +9,7 @@ import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.scheduler.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import grails.test.mixin.*
 import spock.lang.*
 
@@ -45,6 +46,7 @@ import spock.lang.*
         SeqType,
         SnvCallingInstance,
         SnvConfig,
+        SnvJobResult,
         SoftwareTool,
         SoftwareToolIdentifier,
 ])
@@ -66,12 +68,15 @@ class SnvCallingStartJobSpec extends Specification {
 
     void "test method restart"() {
         given:
-        SnvCallingInstance failedInstance = DomainFactory.createSnvInstanceWithRoddyBamFiles()
+        SnvJobResult snvJobResult = DomainFactory.createSnvJobResultWithRoddyBamFiles()
+        SnvCallingInstance failedInstance = snvJobResult.snvCallingInstance
         DomainFactory.createRealmDataManagement(name: failedInstance.project.realmName)
         DomainFactory.createRealmDataProcessing(name: failedInstance.project.realmName)
 
         Process failedProcess = DomainFactory.createProcess()
         DomainFactory.createProcessParameter(failedProcess, failedInstance)
+
+        failedProcess.metaClass.getProcessParameterObject = { -> failedInstance }
 
         snvCallingStartJob = Spy(TestAbstractSnvCallingStartJob) {
             1 * getInstanceClass() >> SnvCallingInstance
@@ -95,7 +100,10 @@ class SnvCallingStartJobSpec extends Specification {
         }
 
         when:
-        Process process = snvCallingStartJob.restart(failedProcess)
+        Process process
+        LogThreadLocal.withThreadLog(System.out) {
+            process = snvCallingStartJob.restart(failedProcess)
+        }
         SnvCallingInstance restartedInstance = SnvCallingInstance.get(ProcessParameter.findByProcess(process).value)
 
         then:
@@ -105,5 +113,8 @@ class SnvCallingStartJobSpec extends Specification {
         restartedInstance.sampleType1BamFile == failedInstance.sampleType1BamFile
         restartedInstance.sampleType2BamFile == failedInstance.sampleType2BamFile
         restartedInstance.latestDataFileCreationDate == failedInstance.latestDataFileCreationDate
+
+        failedInstance.processingState == SnvProcessingStates.FAILED
+        snvJobResult.withdrawn == true
     }
 }

@@ -60,9 +60,13 @@ abstract class AbstractSnvCallingStartJob extends AbstractStartJobImpl implement
     Process restart(Process process) {
         assert process
 
-        ProcessParameter parameter = CollectionUtils.exactlyOneElement(ProcessParameter.findAllByProcess(process))
+        SnvCallingInstance failedInstance = (SnvCallingInstance)process.getProcessParameterObject()
 
-        SnvCallingInstance failedInstance = SnvCallingInstance.get(parameter.value)
+        SnvJobResult.withTransaction {
+            SnvJobResult.findAllBySnvCallingInstance(failedInstance).each {
+                it.withdraw()
+            }
+        }
 
         tryToDeleteResultsFilesOfFailedInstance(failedInstance)
 
@@ -77,6 +81,10 @@ abstract class AbstractSnvCallingStartJob extends AbstractStartJobImpl implement
                     latestDataFileCreationDate: failedInstance.latestDataFileCreationDate,
             )
             assert newInstance.save(flush: true)
+
+            failedInstance.processingState = SnvProcessingStates.FAILED
+            assert failedInstance.save(flush: true)
+
             return createProcess(newInstance)
         }
     }
