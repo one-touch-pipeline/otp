@@ -132,8 +132,6 @@ class MetadataImportController {
             e.failedValidations.each {
                 text.append("\n${it.metadataFile}")
             }
-        } catch (Throwable t) {
-            text.append("The following error occured during automatic import:\n${t}")
         }
         return text
     }
