@@ -1,16 +1,17 @@
 import de.dkfz.tbi.otp.ngsdata.*
-
+import de.dkfz.tbi.otp.utils.*
+import org.codehaus.groovy.grails.plugins.web.taglib.*
 
 String programName = ''
 String programVersion = ''
-
 
 //****************************************
 
 assert programName : 'Please provide a program name'
 assert programVersion : 'Please provide a program version'
 
-SoftwareTool softwareTool = SoftwareTool.findAllByProgramNameAndProgramVersionAndType(programName, programVersion, "BASECALLING")
+SoftwareTool softwareTool = CollectionUtils.atMostOneElement(
+        SoftwareTool.findAllByProgramNameAndProgramVersionAndType(programName, programVersion, SoftwareTool.Type.BASECALLING))
 
 assert !softwareTool: 'The software tool already exist'
 
@@ -18,14 +19,11 @@ SoftwareTool.withTransaction {
     softwareTool = new SoftwareTool(
             programName: programName,
             programVersion: programVersion,
-            type: "BASECALLING",
+            type: SoftwareTool.Type.BASECALLING,
     )
     println softwareTool.save(flush: true)
 
-    SoftwareToolIdentifier softwareToolIdentifier = new SoftwareToolIdentifier(
-            softwareTool: softwareTool,
-            name: programVersion,
-    )
-    println softwareToolIdentifier.save(flush: true)
+    println 'Please add a SoftwareToolIdentifier on ' + ctx.getBean(ApplicationTagLib).createLink(
+            controller: 'softwareTool', action: 'list', absolute: 'true')
 }
 ''
