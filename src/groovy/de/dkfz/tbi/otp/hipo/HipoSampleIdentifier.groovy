@@ -56,7 +56,7 @@ class HipoSampleIdentifierParser implements SampleIdentifierParser {
                 /* projectNumber: */ projectNumber,
                 /* pid: */ matcher.group(1),
                 /* tissueType: */ tissueType,
-                /* sampleNumber: */ Integer.parseInt(matcher.group(6)),
+                /* sampleNumber: */ matcher.group(6),
                 /* experiment: */ matcher.group(7),
                 )
     }
@@ -87,7 +87,7 @@ class HipoSampleIdentifier implements ParsedSampleIdentifier {
      * The sample number.
      * Example: 3
      */
-    final int sampleNumber
+    final String sampleNumber
 
     /**
      * Which analyte type was applied to the sample, [DRPAC] (DNA, RNA, Protein, miRNA or ChiPSeq).
@@ -118,10 +118,17 @@ class HipoSampleIdentifier implements ParsedSampleIdentifier {
     @Override
     public String getSampleTypeDbName() {
         String dbName = tissueType.name()
-        // 'default' sample number is 1, only make explicit when not 1
-        // except project 35, which always makes it explicit, see sampleType JavaDoc
-        if (sampleNumber != 1 || projectNumber == "035") {
-            dbName += String.format('%02d', sampleNumber)
+        // In project 59 "1" and "01" have different meanings, so use
+        // the sample number exactly as given in the sample identifier.
+        if (projectNumber == '059') {
+            dbName += sampleNumber
+        } else {
+            // 'default' sample number is 1, only make explicit when not 1
+            // except project 35, which always makes it explicit, see sampleType JavaDoc
+            int sampleNumberInt = Integer.parseInt(sampleNumber)
+            if (sampleNumberInt != 1 || projectNumber == "035") {
+                dbName += String.format('%02d', sampleNumberInt)
+            }
         }
         return dbName
     }
