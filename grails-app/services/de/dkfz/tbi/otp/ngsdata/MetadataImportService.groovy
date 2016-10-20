@@ -429,7 +429,7 @@ class MetadataImportService {
     }
 
     public static String getSeqTypeNameFromMetadata(ValueTuple tuple) {
-        return tuple.getValue(SEQUENCING_TYPE.name()) + (tuple.getValue(TAGMENTATION_BASED_LIBRARY.name()) ? '_TAGMENTATION' : '')
+        return tuple.getValue(SEQUENCING_TYPE.name()) + (tuple.getValue(TAGMENTATION_BASED_LIBRARY.name()) ? SeqType.TAGMENTATION_SUFFIX : '')
     }
 
 }

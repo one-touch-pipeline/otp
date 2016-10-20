@@ -16,6 +16,8 @@ class SeqType implements Entity {
 
     final static LIBRARYLAYOUT_MATE_PAIR = LibraryLayout.MATE_PAIR.name()
 
+    public static final TAGMENTATION_SUFFIX = '_TAGMENTATION'
+
     public static final Collection<SeqTypeNames> WGBS_SEQ_TYPE_NAMES = [
             SeqTypeNames.WHOLE_GENOME_BISULFITE,
             SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION,
