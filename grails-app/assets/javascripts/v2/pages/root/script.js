@@ -4,8 +4,9 @@
 
 OTP = OTP || {};
 OTP.pages = OTP.pages || {};
+OTP.pages.root = OTP.pages.root || {};
 
-OTP.pages.intro = {
+OTP.pages.root.intro = {
     init: function () {
         "use strict";
 
@@ -13,18 +14,18 @@ OTP.pages.intro = {
 
         $.ajax({
             url: OTP.createLink({
-                controller : 'intro',
-                action : 'patientsBySeqType'
+                controller : 'root',
+                action : 'introPatientsBySeqType'
             }),
-            success: OTP.pages.intro.patientsCountPerSequenceType
+            success: OTP.pages.root.intro.patientsCountPerSequenceType
         });
 
         $.ajax({
             url: OTP.createLink({
-                controller : 'intro',
-                action : 'samplesBySeqType'
+                controller : 'root',
+                action : 'introSamplesBySeqType'
             }),
-            success: OTP.pages.intro.sampleCountPerSequenceType
+            success: OTP.pages.root.intro.sampleCountPerSequenceType
         });
     },
 

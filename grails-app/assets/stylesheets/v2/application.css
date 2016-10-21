@@ -1,4 +1,7 @@
 /*
 *= require bootstrap
-*= require otp
+*= require general-layout
+*= require header
+*= require login
+*= require footer
 */

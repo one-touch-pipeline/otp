@@ -94,6 +94,7 @@ class BackdoorFilter extends GenericFilterBean {
 @Immutable
 class Principal {
     String username
+    String displayName = "OTP Developer"
 
     @Override
     String toString() {

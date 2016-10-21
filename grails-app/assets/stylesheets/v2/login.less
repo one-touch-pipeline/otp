@@ -1,0 +1,35 @@
+@import "definitions";
+
+/*******************
+Login
+********************/
+#login-container {
+  background-color: @lightgrey;
+
+  .login-form {
+    margin: 20px 0;
+    background-color: @lightgrey;
+    padding-top: 20px;
+    padding-bottom: 15px;
+    .input-group {
+      display: table;
+      margin: 10px 0;
+    }
+
+    .login-btn {
+      float: right;
+    }
+
+    .register-btn {
+      float: right;
+      padding: 8px 10px 0 0;
+    }
+  }
+}
+
+@media (min-width: 500px) and (max-width: @screen-xs-max) {
+  #login-container {
+    margin: auto;
+    width: 455px;
+  }
+}

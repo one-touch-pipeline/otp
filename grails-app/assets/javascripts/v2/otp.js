@@ -182,4 +182,36 @@ $(function() {
         }, 500);
         return false;
     });
+
+    // project menu - prevent closing the menu or navigating when clicking on menu headers
+    $('#js-project-list').find('li.dropdown-submenu > a').on('click', function(e) {
+        e.preventDefault();
+        // The event won't be propagated up to the document node and therefore delegated events won't be fired
+        e.stopPropagation();
+    });
+
+    // project menu - search
+    $('#js-project-input').on('input', function (e) {
+        var inputAsArray = $(e.target).val().replace(/([a-z])([A-Z])/g, '$1 $2').toLowerCase().split(/[ _-]/);
+
+        $('#js-project-list').find('li').each(function () {
+            var li = $(this);
+
+            var projectName = $('a', li).text().replace(/[ _-]/, "").toLowerCase();
+
+            var projectMatches = true;
+            for (var i = 0; i < inputAsArray.length; i++) {
+                if (projectName.indexOf(inputAsArray[i]) === -1) {
+                    projectMatches = false;
+                    break;
+                }
+            }
+
+            if (projectMatches) {
+                li.removeClass("hidden");
+            } else {
+                li.addClass("hidden");
+            }
+        })
+    });
 });

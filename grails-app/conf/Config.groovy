@@ -270,6 +270,7 @@ if ((otpConfig.otp.security.ldap.enabled instanceof ConfigObject) || !Boolean.pa
     grails.plugin.springsecurity.ldap.authorities.ignorePartialResultException = true
     grails.plugin.springsecurity.ldap.authorities.retrieveGroupRoles = true
     grails.plugin.springsecurity.ldap.authorities.retrieveDatabaseRoles = true
+    grails.plugin.springsecurity.ldap.mapper.userDetailsClass = 'inetOrgPerson'
 }
 
 //configuration for jabber accounts
@@ -295,7 +296,7 @@ grails.plugin.springsecurity.controllerAnnotations.staticRules = [
     "/login/**":             ['IS_AUTHENTICATED_ANONYMOUSLY'],
     "/logout/**":            ['IS_AUTHENTICATED_ANONYMOUSLY'],
     "/info/**":              ['permitAll'],
-    "/intro/**":             ['permitAll'],
+    "/root/intro*":          ['permitAll'],
     "/":                     ['permitAll'],
     "/metadataImport/autoImport": ["permitAll"],
     "/console/**":           ['ROLE_ADMIN'],
@@ -315,12 +316,13 @@ grails.plugin.springsecurity.roleHierarchy = '''
 '''
 
 grails.plugin.springsecurity.useSwitchUserFilter = true
-/* TODO: OTP-2282 uncomment when switching to the new layout
-grails.plugin.springsecurity.auth.loginFormUrl = "/?login=required"*/
 grails.plugin.springsecurity.successHandler.defaultTargetUrl = '/home/index'
-/*grails.plugin.springsecurity.failureHandler.defaultFailureUrl = "/?login=failed"
+/* TODO: OTP-2282 uncomment when switching to the new layout and remove line above
+grails.plugin.springsecurity.auth.loginFormUrl = "/?login=required"
+grails.plugin.springsecurity.failureHandler.defaultFailureUrl = "/?login=failed"
 grails.plugin.springsecurity.adh.errorPage = null
-grails.plugin.springsecurity.apf.storeLastUsername = true*/
+grails.plugin.springsecurity.apf.storeLastUsername = true
+//*/
 
 // exclude unused plugins
 if (pluginsToExclude) {

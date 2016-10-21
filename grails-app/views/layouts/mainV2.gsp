@@ -18,30 +18,249 @@
     <g:layoutHead/>
 </head>
 <body>
+<div class="container">
+    <sec:ifLoggedIn>
+        <div class="col-xs-12 text-right">
+            <sec:ifNotSwitched>
+                ${g.message(code: "header.loggedIn", args: [sec.loggedInUserInfo(field: "displayName"), sec.username()])} •
+                <g:link controller='j_spring_security_logout'>${g.message(code: "header.logout")}</g:link>
+            </sec:ifNotSwitched>
+            <sec:ifSwitched>
+                ${g.message(code: "header.switched", args: [sec.username()])} •
+                <g:link controller='j_spring_security_exit_user'>${g.message(code: "header.switchBack", args: [sec.switchedUserOriginalUsername()])}</g:link>
+            </sec:ifSwitched>
+        </div>
+    </sec:ifLoggedIn>
+</div>
 
-    <g:layoutBody/>
+<div class="container">
+    <div class="row">
+        <div class="col-xs-10 col-xs-offset-1 col-sm-12 col-sm-offset-0">
+            <div class="alert alert-success js-alert-success hidden">
+                <button type="button" class="close" data-dismiss="alert" aria-label="close">&times;</button>
+                <div class="js-alert-message"></div>
+            </div>
+            <div class="alert alert-info js-alert-info hidden">
+                <button type="button" class="close" data-dismiss="alert" aria-label="close">&times;</button>
+                <div class="js-alert-message"></div>
+            </div>
+            <div class="alert alert-warning js-alert-warning hidden">
+                <button type="button" class="close" data-dismiss="alert" aria-label="close">&times;</button>
+                <div class="js-alert-message"></div>
+            </div>
+            <div class="alert alert-danger js-alert-danger hidden">
+                <button type="button" class="close" data-dismiss="alert" aria-label="close">&times;</button>
+                <div class="js-alert-message"></div>
+            </div>
+        </div>
+    </div>
+</div>
 
-    <div id="footer">
-        <div class="container wrapper">
+<sec:ifLoggedIn>
+    <nav class="navbar affix-top" data-spy="affix" data-offset-top="86">
+        <div class="container">
             <div class="row">
-                <div class="col-lg-12 footer-copyright">
-                    <ul>
-                        <li><a data-toggle="modal" href="#contact">Contact/Imprint</a></li>
-                        <li>
-                            OTP is operated by the <a href="http://ibios.dkfz.de/tbi/index.php/data-management" target="_blank">Data&nbsp;Management&nbsp;and&nbsp;Genomics&nbsp;IT&nbsp;group&nbsp;(DMG)</a>
-                            in the <a href="http://ibios.dkfz.de/tbi/" target="_blank">Theoretical&nbsp;Bioinformatics&nbsp;division</a>
-                            at the <a href="https://www.dkfz.de/" target="_blank">German&nbsp;Cancer&nbsp;Research&nbsp;Center&nbsp;(DKFZ)</a>
-                        </li>
-                        <li class="copyright-grey"><g:render template="/templates/version"/></li>
-                    </ul>
+                <div class="col-xs-12 col-sm-2 col-md-3 logo-col">
+                    <div class="navbar-header">
+                        <button type="button" class="navbar-toggle collapsed navbar-right" data-toggle="collapse" data-target=".navbar-collapse" aria-expanded="false">
+                            <span class="sr-only">Toggle navigation</span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </button>
+                        <div class="navbar-logo">
+                            <div class="logo-img">
+                                <g:link class="logo" uri="/">
+                                    <img class="img-responsive" src="${assetPath(src: 'v2/otp-logo.png')}" alt="OTP">
+                                </g:link>
+                            </div>
+                            <div class="logo-slogan hidden-sm ${otp.environmentName() != 'production' ? "environment" : ""}">
+                                <h1>
+                                    One<br>Touch<br>Pipeline
+                                    <g:if test="${otp.environmentName() != 'production'}">
+                                        <br><span class="environment-name">${otp.environmentName()}</span>
+                                    </g:if>
+                                </h1>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-12 col-sm-10 col-md-9">
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <div class="collapse navbar-collapse search-navbar">
+                                <form class="navbar-form navbar-left">
+                                    <div class="input-group">
+                                        <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            ${projectSelection.getDisplayName()} <span class="caret"></span>
+                                        </button>
+                                        <ul id="js-project-list" class="dropdown-menu dropdown-menu-right scrollable-menu">
+                                            <div class="project-search-field">
+                                                <input type="text" class="form-control" id="js-project-input" autocomplete="off" role="textbox" aria-label="${g.message(code:"header.projectSelection.search")}" title="${g.message(code:"header.projectSelection.search")}" placeholder="${g.message(code:"header.projectSelection.search")}">
+                                            </div>
+                                            <li><g:link controller="projectSelection" action="select" params="${[type: "ALL", redirect: request.forwardURI - request.contextPath]}">${g.message(code: "header.projectSelection.allProjects")}</g:link>
+                                            <g:each in="${availableProjectsInGroups.entrySet()}" var="subGroup">
+                                                <li class="dropdown-submenu"><a href="#">${subGroup.key}</a>
+                                                    <ul class="dropdown-menu">
+                                                        <g:each in="${subGroup.value}" var="item">
+                                                        <g:set var="i" value="${0}"/>
+                                                            <li><g:link controller="projectSelection" action="select" params="${[id: item.id, type: item.type, redirect: request.forwardURI - request.contextPath]}">${item.displayName}</g:link></li>
+                                                        </g:each>
+                                                    </ul>
+                                                </li>
+                                            </g:each>
+                                            <g:if test="${!availableProjectsWithoutGroup.isEmpty()}">
+                                                <li class="dropdown-submenu"><a href="#">${g.message(code: "header.projectSelection.other")}</a>
+                                                    <ul class="dropdown-menu">
+                                                        <g:each in="${availableProjectsWithoutGroup}" var="item">
+                                                            <li><g:link controller="projectSelection" action="select" params="${[id: item.id, type: item.type, redirect: request.forwardURI - request.contextPath]}">${item.displayName}</g:link></li>
+                                                        </g:each>
+                                                    </ul>
+                                                </li>
+                                            </g:if>
+                                            <li role="separator" class="divider"></li>
+                                            <g:each in="${availableProjectsInCategories.entrySet()}" var="subGroup">
+                                                <li class="dropdown-submenu"><a href="#">${subGroup.key}</a>
+                                                    <ul class="dropdown-menu">
+                                                        <g:each in="${subGroup.value}" var="item">
+                                                            <li><g:link controller="projectSelection" action="select" params="${[id: item.id, type: item.type, redirect: request.forwardURI - request.contextPath]}">${item.displayName}</g:link></li>
+                                                        </g:each>
+                                                    </ul>
+                                                </li>
+                                            </g:each>
+                                        </ul>
+                                    </div>
+                                </form>
+                                <form class="navbar-form navbar-left">
+                                    <div class="input-group input-group-sm">
+                                        <input type="text" class="form-control" placeholder="${g.message(code:"header.identifierSearch")}">
+                                        <span class="input-group-btn">
+                                            <button type="button" class="btn btn-default">
+                                                <i class="glyphicon glyphicon-search"><span class="sr-only">Search</span></i>
+                                            </button>
+                                        </span>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <div class="collapse navbar-collapse menu-navbar">
+                                <ul class="nav navbar-nav navbar-left">
+                                    <li><a href="#">${g.message(code: "otp.menu.sample")}</a></li>
+                                    <li><a href="#">${g.message(code: "otp.menu.run")}</a></li>
+                                    <li><a href="#">${g.message(code: "otp.menu.lane")}</a></li>
+                                    <li><a href="#">${g.message(code: "otp.menu.statistics")}</a></li>
+                                    <sec:ifAnyGranted roles="ROLE_OPERATOR">
+                                        <li class="dropdown">
+                                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Operator <span class="caret"></span></a>
+                                            <ul class="dropdown-menu">
+                                                <li><g:link controller="metadataImport">${g.message(code: "otp.menu.importAndValidation")}</g:link></li>
+                                                <li><g:link controller="sampleIdentifierOverview">${g.message(code: "otp.menu.sampleIdentifierOverview")}</g:link></li>
+                                                <li><g:link controller="metadataImport" action="blacklistedIlseNumbers">${g.message(code: "otp.menu.blacklistedIlseNumbers")}</g:link></li>
+                                                <li role="separator" class="divider"></li>
+                                                <li><g:link controller="createProject">${g.message(code: "otp.menu.createProject")}</g:link></li>
+                                                <li><g:link controller="projectOverview" action="specificOverview">${g.message(code: "otp.menu.projectConfig")}</g:link></li>
+                                                <li><g:link controller="individual" action="insert">${g.message(code: "otp.menu.createIndividual")}</g:link></li>
+                                                <li><g:link controller="individual" action="insertMany">${g.message(code: "otp.menu.createSample")}</g:link></li>
+                                                <li role="separator" class="divider"></li>
+                                                <li><g:link controller="processes" action="list">${g.message(code: "otp.menu.processes")}</g:link></li>
+                                                <li role="separator" class="divider"></li>
+                                                <li><g:link controller="snv">${g.message(code: "otp.menu.snv.processing")}</g:link></li>
+                                                <li role="separator" class="divider"></li>
+                                                <li><g:link controller="metaDataFields">${g.message(code: "otp.menu.metaDataFields")}</g:link></li>
+                                                <li><g:link controller="softwareTool" action="list">${g.message(code: "otp.menu.softwareTool")}</g:link></li>
+                                                <li role="separator" class="divider"></li>
+                                                <li><g:link controller="processingTimeStatistics">${g.message(code: "otp.menu.processingTimeStatistics")}</g:link></li>
+                                            </ul>
+                                        </li>
+                                    </sec:ifAnyGranted>
+                                    <sec:ifAnyGranted roles="ROLE_ADMIN">
+                                        <li class="dropdown">
+                                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Admin <span class="caret"></span></a>
+                                            <ul class="dropdown-menu">
+                                                <li><g:link controller="userAdministration">${g.message(code: "otp.menu.userAdministration")}</g:link></li>
+                                                <li><g:link controller="group">${g.message(code: "otp.menu.groupAdministration")}</g:link></li>
+                                                <li role="separator" class="divider"></li>
+                                                <li><g:link controller="processingOption">${g.message(code: "otp.menu.processingOptions")}</g:link></li>
+                                                <li role="separator" class="divider"></li>
+                                                <li><g:link controller="crashRecovery">${g.message(code: "otp.menu.crashRecovery")}</g:link></li>
+                                                <li><g:link controller="shutdown">${g.message(code: "otp.menu.planServerShutdown")}</g:link></li>
+                                            </ul>
+                                        </li>
+                                    </sec:ifAnyGranted>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+</sec:ifLoggedIn>
+<sec:ifNotLoggedIn>
+    <div class="container">
+        <div class="row" style="z-index: 20;">
+            <div class="col-xs-12 col-sm-4 logo">
+                <div class="logo-container">
+                    <div class="logo-img">
+                        <g:link class="logo" uri="/">
+                            <img class="img-responsive" src="${assetPath(src: 'v2/otp-logo.png')}" alt="OTP">
+                        </g:link>
+                    </div>
+                    <div class="logo-slogan">
+                        <h1>
+                            One<br>Touch<br>Pipeline
+                            <g:if test="${otp.environmentName() != 'production'}">
+                                <br><span class="environment-name">${otp.environmentName()}</span>
+                            </g:if>
+                        </h1>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12 col-sm-8">
+                <div id="login-container">
+                    <form class="login-form navbar-form navbar-right" role="form" method="POST" action="${createLink(controller: 'j_spring_security_check')}">
+                        <div class="input-group">
+                            <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+                            <input id="account" type="text" class="form-control js-account" name="j_username" value="${username}" placeholder="${g.message(code:"login.form.account")}">
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
+                            <input id="password" type="password" class="form-control" name="j_password" value="" placeholder="${g.message(code:"login.form.password")}">
+                        </div>
+                        <button type="submit" class="btn btn-primary login-btn"><g:message code="login.form.login" /></button>
+                        <a class="register-btn pull-left" data-toggle="modal" href="#register"><g:message code="login.form.request" /></a>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
+</sec:ifNotLoggedIn>
 
-    <a class="scroll-to-top js-scroll-to-top" href="#">
-        <img class="img-responsive" src="${assetPath(src: 'v2/to-top.png')}" alt="">
-    </a>
+<g:layoutBody/>
+
+<div class="container"><br></div>
+<div class="container footer">
+    <div class="row">
+        <div class="col-lg-12 footer-copyright">
+            <ul>
+                <li><a data-toggle="modal" href="#contact">Contact/Imprint</a></li>
+                <li>
+                    OTP is operated by the <a href="http://ibios.dkfz.de/tbi/index.php/data-management" target="_blank">Data&nbsp;Management&nbsp;and&nbsp;Genomics&nbsp;IT&nbsp;group&nbsp;(DMG)</a>
+                    in the <a href="http://ibios.dkfz.de/tbi/" target="_blank">Theoretical&nbsp;Bioinformatics&nbsp;division</a>
+                    at the <a href="https://www.dkfz.de/" target="_blank">German&nbsp;Cancer&nbsp;Research&nbsp;Center&nbsp;(DKFZ)</a>
+                </li>
+                <li class="copyright-grey"><g:render template="/templates/version"/></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<a class="scroll-to-top js-scroll-to-top" href="#">
+    <img class="img-responsive" src="${assetPath(src: 'v2/to-top.png')}" alt="">
+</a>
 
 <otp:modal modalId="contact" title="Contact">
     <p>OTP is operated by</p>

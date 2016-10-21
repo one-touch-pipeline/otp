@@ -113,47 +113,46 @@ li:last-child::after {
   margin: 0;
 }
 
+.btn, .form-control, .input-group-addon {
+  border-radius: 0 !important;
+}
 .btn {
   background-color: @orange;
   border-color: @darkorange;
-  border-radius: 0;
   &:hover, &:focus {
     background-color: @darkorange;
     border-color: @darkestorange;
   }
 }
+.form-control:focus {
+  color: @orange;
+  border-color: @orange;
+  outline: 0;
+  -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(253, 114, 2, .6);
+  box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(253, 114, 2, .6);
+}
 
-.environmentName {
+.environment-name {
   color: @darkorange;
 }
 
 /*******************
-Footer
+Layout
 ********************/
-#footer {
-  .wrapper {
-    padding-top: 0;
-    border-radius: 0;
-  }
-  ul {
-    margin: 5px 0;
-    padding: 0;
-  }
+
+body > .container:first-child {
+  color: @white;
+  margin-top: 5px;
 }
 
-.footer-copyright {
-  text-align: center;
-  li {
-    display: inline;
-    font-size: 11px;
-    font-weight: 900;
-    &:after {
-      content: " |";
-      font-size: 12px;
-      margin: 0 5px 0 5px;
-      color: @black;
-    }
-  }
+body > .container:nth-child(2) {
+  border-radius: 50px 0 0 0;
+  margin-top: 10px;
+  padding-top: 50px;
+}
+
+body > .container:not(:first-child), body > nav > .container {
+  background: @white;
 }
 
 /*******************
@@ -176,6 +175,20 @@ Scroll to top
 /*******************
 Responsivity
 ********************/
+
+@media (max-width: (@screen-lg-min - 1)) {
+  .container {
+    width: 100%;
+  }
+}
+
+@media (max-width: @screen-xs-max) {
+  .container {
+    padding-right: 0;
+    padding-left: 0;
+  }
+}
+
 @media (max-width: 500px) {
   .hide-on-xs {
     display: none;

@@ -8,6 +8,7 @@ import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.*
 import grails.plugin.springsecurity.*
+import grails.plugin.springsecurity.acl.*
 import groovy.transform.*
 import org.springframework.security.access.prepost.*
 import org.springframework.security.acls.domain.*
@@ -28,18 +29,11 @@ class ProjectService {
 
     static final String PHIX_INFIX = 'PhiX'
 
-    /**
-     * Dependency Injection for aclUtilService
-     */
-    def aclUtilService
-    /**
-     * Dependency Injection of Spring Security Service - needed for ACL checks
-     */
-    def springSecurityService
-
+    AclUtilService aclUtilService
+    ExecutionService executionService
     GroupService groupService
     ReferenceGenomeService referenceGenomeService
-    ExecutionService executionService
+    SpringSecurityService springSecurityService
 
     /**
      *
@@ -47,7 +41,7 @@ class ProjectService {
      */
     @PostFilter("hasRole('ROLE_OPERATOR') or hasPermission(filterObject, 'read')")
     public List<Project> getAllProjects() {
-        return Project.list(sort: "name", order: "asc")
+        return Project.list(sort: "name", order: "asc", fetch: [projectCategories: 'join', projectGroup: 'join'])
     }
 
     /**
