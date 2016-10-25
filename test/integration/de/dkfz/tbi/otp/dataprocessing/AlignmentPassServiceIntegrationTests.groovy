@@ -74,8 +74,7 @@ class AlignmentPassServiceIntegrationTests extends TestData {
         assertNotNull(fileType.save(flush: true))
         assertEquals(alignmentPass, alignmentPassService.findAlignmentPassForProcessing(ProcessingPriority.NORMAL_PRIORITY))
 
-        RunSegment runSegment = new RunSegment()
-        assertNotNull(runSegment.save(flush: true))
+        assertNotNull(DomainFactory.createRunSegment())
         assertEquals(alignmentPass, alignmentPassService.findAlignmentPassForProcessing(ProcessingPriority.NORMAL_PRIORITY))
 
         referenceGenomeProjectSeqType.delete(flush: true)

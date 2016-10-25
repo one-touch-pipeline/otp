@@ -117,8 +117,8 @@ class LsdfFilesServiceTests {
         run.seqPlatform = seqPlatform
         assertNotNull(run.save([flush: true]))
 
-        runSegment = new RunSegment()
-        assertNotNull(runSegment.save([flush: true]))
+        runSegment = DomainFactory.createRunSegment()
+        assertNotNull(runSegment)
     }
 
     DataFile createDataFile(SeqTrack seqTrack, String fastqFilename) {

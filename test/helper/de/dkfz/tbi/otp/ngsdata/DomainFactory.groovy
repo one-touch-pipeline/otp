@@ -799,7 +799,7 @@ class DomainFactory {
 
     public static RunSegment createRunSegment(Map runSegmentProperties = [:]) {
         return createDomainObject(RunSegment, [
-                :
+                importMode: RunSegment.ImportMode.AUTOMATIC
         ], runSegmentProperties)
     }
 

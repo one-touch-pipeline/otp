@@ -20,6 +20,12 @@ class RunSegment implements Entity {
 
     OtrsTicket otrsTicket
 
+    enum ImportMode{
+        MANUAL,
+        AUTOMATIC
+    }
+    ImportMode importMode
+
     static constraints = {
         //the field can be null, since for the old data the information is not needed; only for new incoming runSegments
         align(nullable: true)
