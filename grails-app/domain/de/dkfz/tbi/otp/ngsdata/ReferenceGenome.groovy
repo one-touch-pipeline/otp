@@ -67,6 +67,10 @@ class ReferenceGenome implements Entity {
      */
     String cytosinePositionsIndex
 
+    String chromosomePrefix
+
+    String chromosomeSuffix
+
     /**
      * It has to be ensured that there is only one reference genome stored per directory -> unique path
      */
@@ -80,6 +84,8 @@ class ReferenceGenome implements Entity {
         lengthRefChromosomesWithoutN shared: 'greaterThanZero'
         cytosinePositionsIndex nullable: true, blank: false,
                 validator: { !it || OtpPath.isValidPathComponent(it) }
+        chromosomePrefix nullable: true, blank: true
+        chromosomeSuffix nullable: true, blank: true
     }
 
     String toString() {
