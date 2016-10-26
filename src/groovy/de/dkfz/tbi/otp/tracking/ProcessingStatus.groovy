@@ -4,6 +4,7 @@ import groovy.transform.*
 
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.Done.*
 
+@TupleConstructor
 public class ProcessingStatus {
 
     @TupleConstructor
@@ -14,8 +15,8 @@ public class ProcessingStatus {
         PARTLY_DONE_MIGHT_DO_MORE(PARTLY, true),
         ALL_DONE(ALL, false)
 
-        Done done
-        boolean mightDoMore
+        final Done done
+        final boolean mightDoMore
     }
 
     static enum Done {
@@ -24,10 +25,31 @@ public class ProcessingStatus {
         ALL,
     }
 
-    WorkflowProcessingStatus installationProcessingStatus
-    WorkflowProcessingStatus fastqcProcessingStatus
-    WorkflowProcessingStatus alignmentProcessingStatus
-    WorkflowProcessingStatus snvProcessingStatus
+    final Collection<SeqTrackProcessingStatus> seqTrackProcessingStatuses
+
+    Collection<MergingWorkPackageProcessingStatus> getMergingWorkPackageProcessingStatuses() {
+        return ((Collection<MergingWorkPackageProcessingStatus>) seqTrackProcessingStatuses*.mergingWorkPackageProcessingStatuses.flatten()).unique()
+    }
+
+    Collection<SamplePairProcessingStatus> getSamplePairProcessingStatuses() {
+        return ((Collection<SamplePairProcessingStatus>) seqTrackProcessingStatuses*.mergingWorkPackageProcessingStatuses*.samplePairProcessingStatuses.flatten()).unique()
+    }
+
+    WorkflowProcessingStatus getInstallationProcessingStatus() {
+        return TrackingService.combineStatuses(seqTrackProcessingStatuses*.installationProcessingStatus)
+    }
+
+    WorkflowProcessingStatus getFastqcProcessingStatus() {
+        return TrackingService.combineStatuses(seqTrackProcessingStatuses*.fastqcProcessingStatus)
+    }
+
+    WorkflowProcessingStatus getAlignmentProcessingStatus() {
+        return TrackingService.combineStatuses(seqTrackProcessingStatuses*.alignmentProcessingStatus)
+    }
+
+    WorkflowProcessingStatus getSnvProcessingStatus() {
+        return TrackingService.combineStatuses(seqTrackProcessingStatuses*.snvProcessingStatus)
+    }
 
     @Override
     public String toString() {

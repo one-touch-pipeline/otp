@@ -1,15 +1,17 @@
 package de.dkfz.tbi.otp.tracking
 
-import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus
 import de.dkfz.tbi.otp.tracking.TrackingService.SamplePairDiscovery
-import de.dkfz.tbi.otp.user.UserException
+import de.dkfz.tbi.otp.user.*
 import de.dkfz.tbi.otp.utils.*
 import grails.test.spock.*
 
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus.*
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 import static org.junit.Assert.*
 
 class TrackingServiceIntegrationSpec extends IntegrationSpec {
@@ -34,15 +36,24 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         given:
         OtrsTicket ticketA = DomainFactory.createOtrsTicket()
         SeqTrack seqTrackA = DomainFactory.createSeqTrackWithOneDataFile(
-                [fastqcState: SeqTrack.DataProcessingState.IN_PROGRESS],
+                [
+                        dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
+                        fastqcState: SeqTrack.DataProcessingState.IN_PROGRESS,
+                ],
                 [runSegment: DomainFactory.createRunSegment(otrsTicket: ticketA), fileLinked: true])
 
         OtrsTicket ticketB = DomainFactory.createOtrsTicket()
         SeqTrack seqTrackB1 = DomainFactory.createSeqTrackWithOneDataFile(
-                [fastqcState: SeqTrack.DataProcessingState.FINISHED],
+                [
+                        dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
+                        fastqcState: SeqTrack.DataProcessingState.FINISHED,
+                ],
                 [runSegment: DomainFactory.createRunSegment(otrsTicket: ticketB), fileLinked: true])
         SeqTrack seqTrackB2 = DomainFactory.createSeqTrackWithOneDataFile(
-                [fastqcState: SeqTrack.DataProcessingState.IN_PROGRESS],
+                [
+                        dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
+                        fastqcState: SeqTrack.DataProcessingState.IN_PROGRESS,
+                ],
                 [runSegment: DomainFactory.createRunSegment(otrsTicket: ticketB), fileLinked: true])
 
         DomainFactory.createProcessingOptionForOtrsTicketPrefix("the prefix")
@@ -129,14 +140,17 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         OtrsTicket ticket = DomainFactory.createOtrsTicket()
         RunSegment runSegment = DomainFactory.createRunSegment(otrsTicket: ticket)
         DomainFactory.createSeqTrackWithOneDataFile(
-                [fastqcState: SeqTrack.DataProcessingState.IN_PROGRESS],
+                [
+                        dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
+                        fastqcState: SeqTrack.DataProcessingState.IN_PROGRESS,
+                ],
                 [runSegment: runSegment, fileLinked: true])
-        ProcessingStatus expectedStatus = new ProcessingStatus(
-                installationProcessingStatus: ALL_DONE,
-                fastqcProcessingStatus: NOTHING_DONE_MIGHT_DO,
-                alignmentProcessingStatus: NOTHING_DONE_WONT_DO,
-                snvProcessingStatus: NOTHING_DONE_WONT_DO,
-        )
+        ProcessingStatus expectedStatus = [
+                getInstallationProcessingStatus: { -> ALL_DONE },
+                getFastqcProcessingStatus: { -> NOTHING_DONE_MIGHT_DO },
+                getAlignmentProcessingStatus: { -> NOTHING_DONE_WONT_DO },
+                getSnvProcessingStatus: { -> NOTHING_DONE_WONT_DO },
+        ] as ProcessingStatus
 
         String prefix = "the prefix"
         DomainFactory.createProcessingOptionForOtrsTicketPrefix(prefix)
@@ -174,9 +188,13 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         OtrsTicket ticket = DomainFactory.createOtrsTicket()
         RunSegment runSegment = DomainFactory.createRunSegment(otrsTicket: ticket)
         DomainFactory.createSeqTrackWithOneDataFile(
-                [fastqcState: SeqTrack.DataProcessingState.FINISHED],
+                [
+                        dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
+                        fastqcState: SeqTrack.DataProcessingState.FINISHED,
+                ],
                 [runSegment: runSegment, fileLinked: true])
         SeqTrack seqTrack = DomainFactory.createSeqTrackWithOneDataFile([
+                dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
                 fastqcState: SeqTrack.DataProcessingState.FINISHED,
                 run: DomainFactory.createRun(
                          seqPlatform: DomainFactory.createSeqPlatform(
@@ -193,12 +211,12 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
                 ]),
                 DomainFactory.randomProcessedBamFileProperties + [seqTracks: [seqTrack] as Set],
         ))
-        ProcessingStatus expectedStatus = new ProcessingStatus(
-                installationProcessingStatus: ALL_DONE,
-                fastqcProcessingStatus: ALL_DONE,
-                alignmentProcessingStatus: PARTLY_DONE_WONT_DO_MORE,
-                snvProcessingStatus: NOTHING_DONE_WONT_DO,
-        )
+        ProcessingStatus expectedStatus = [
+                getInstallationProcessingStatus: { -> ALL_DONE },
+                getFastqcProcessingStatus: { -> ALL_DONE },
+                getAlignmentProcessingStatus: { -> PARTLY_DONE_WONT_DO_MORE },
+                getSnvProcessingStatus: { -> NOTHING_DONE_WONT_DO },
+        ] as ProcessingStatus
 
         String prefix = "the prefix"
         DomainFactory.createProcessingOptionForOtrsTicketPrefix(prefix)
@@ -227,112 +245,231 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         callCount == 1
     }
 
-    void "getAlignmentAndDownstreamProcessingStatus, No ST, returns NOTHING_DONE_WONT_DO"() {
-        expect:
-        NOTHING_DONE_WONT_DO == trackingService.getAlignmentAndDownstreamProcessingStatus([] as Set, new SamplePairDiscovery()).alignmentProcessingStatus
+    private static SeqTrackProcessingStatus createSeqTrackProcessingStatus(SeqTrack seqTrack) {
+        return new SeqTrackProcessingStatus(seqTrack, ALL_DONE, ALL_DONE, [])
     }
 
-    void "getAlignmentAndDownstreamProcessingStatus, 1 ST not alignable, returns NOTHING_DONE_WONT_DO"() {
+    private static ProcessingStatus createProcessingStatus(SeqTrackProcessingStatus... seqTrackStatuses) {
+        return new ProcessingStatus(Arrays.asList(seqTrackStatuses))
+    }
+
+    void "fillInMergingWorkPackageProcessingStatuses, no ST, does not crash"() {
+        expect:
+        trackingService.fillInMergingWorkPackageProcessingStatuses([], new SamplePairDiscovery())
+    }
+
+    void "fillInMergingWorkPackageProcessingStatuses, 1 ST not alignable, returns NOTHING_DONE_WONT_DO"() {
         given:
-        Set<SeqTrack> seqTracks = [DomainFactory.createSeqTrackWithOneDataFile([:], [fileWithdrawn: true])]
+        SeqTrackProcessingStatus seqTrackStatus = createSeqTrackProcessingStatus(DomainFactory.createSeqTrackWithOneDataFile([:], [fileWithdrawn: true]))
+        ProcessingStatus processingStatus = createProcessingStatus(seqTrackStatus)
 
-        expect:
-        NOTHING_DONE_WONT_DO == trackingService.getAlignmentAndDownstreamProcessingStatus(seqTracks, new SamplePairDiscovery()).alignmentProcessingStatus
+        when:
+        trackingService.fillInMergingWorkPackageProcessingStatuses([seqTrackStatus], new SamplePairDiscovery())
+
+        then:
+        seqTrackStatus.mergingWorkPackageProcessingStatuses.isEmpty()
+        seqTrackStatus.alignmentProcessingStatus == NOTHING_DONE_WONT_DO
+        seqTrackStatus.snvProcessingStatus == NOTHING_DONE_WONT_DO
+        processingStatus.alignmentProcessingStatus == NOTHING_DONE_WONT_DO
+        processingStatus.snvProcessingStatus == NOTHING_DONE_WONT_DO
     }
 
-    void "getAlignmentAndDownstreamProcessingStatus, 1 MWP ALL_DONE, returns ALL_DONE"() {
-        given:
-        AbstractMergedBamFile bamFile = createBamFileInProjectFolder(DomainFactory.randomProcessedBamFileProperties)
-
-        Set<SeqTrack> seqTracks = bamFile.containedSeqTracks
-
-        expect:
-        ALL_DONE == trackingService.getAlignmentAndDownstreamProcessingStatus(seqTracks, new SamplePairDiscovery()).alignmentProcessingStatus
-    }
-
-    void "getAlignmentAndDownstreamProcessingStatus, 1 MWP NOTHING_DONE_MIGHT_DO, returns NOTHING_DONE_MIGHT_DO"() {
-        given:
-        AbstractMergedBamFile bamFile = createBamFileInProjectFolder(DomainFactory.randomProcessedBamFileProperties)
-
-        Set<SeqTrack> seqTracks = [DomainFactory.createSeqTrackWithDataFiles(bamFile.mergingWorkPackage)]
-
-        expect:
-        NOTHING_DONE_MIGHT_DO == trackingService.getAlignmentAndDownstreamProcessingStatus(seqTracks, new SamplePairDiscovery()).alignmentProcessingStatus
-    }
-
-    void "getAlignmentAndDownstreamProcessingStatus, 1 ST not alignable, 1 MWP ALL_DONE, returns PARTLY_DONE_WONT_DO_MORE"() {
+    void "fillInMergingWorkPackageProcessingStatuses, 1 MWP ALL_DONE, returns ALL_DONE"() {
         given:
         AbstractMergedBamFile bamFile = createBamFileInProjectFolder(DomainFactory.randomProcessedBamFileProperties)
+        SeqTrackProcessingStatus seqTrackStatus = createSeqTrackProcessingStatus(bamFile.containedSeqTracks.first())
 
-        Set<SeqTrack> seqTracks = bamFile.containedSeqTracks + [DomainFactory.createSeqTrackWithDataFiles(bamFile.mergingWorkPackage, [:], [fileWithdrawn: true])]
+        when:
+        trackingService.fillInMergingWorkPackageProcessingStatuses([seqTrackStatus], new SamplePairDiscovery())
 
-        expect:
-        PARTLY_DONE_WONT_DO_MORE == trackingService.getAlignmentAndDownstreamProcessingStatus(seqTracks, new SamplePairDiscovery()).alignmentProcessingStatus
+        then:
+        MergingWorkPackageProcessingStatus mwpStatus = exactlyOneElement(seqTrackStatus.mergingWorkPackageProcessingStatuses)
+        mwpStatus.mergingWorkPackage == bamFile.mergingWorkPackage
+        mwpStatus.completeProcessableBamFileInProjectFolder == bamFile
+        mwpStatus.alignmentProcessingStatus == ALL_DONE
+        seqTrackStatus.alignmentProcessingStatus == ALL_DONE
+        createProcessingStatus(seqTrackStatus).alignmentProcessingStatus == ALL_DONE
     }
 
-    void "getAlignmentAndDownstreamProcessingStatus, no MWP, returns NOTHING_DONE_WONT_DO"() {
+    void "fillInMergingWorkPackageProcessingStatuses, 1 MWP NOTHING_DONE_MIGHT_DO, returns NOTHING_DONE_MIGHT_DO"() {
         given:
-        Set<SeqTrack> seqTracks = [DomainFactory.createSeqTrackWithOneDataFile()]
+        AbstractMergedBamFile bamFile = createBamFileInProjectFolder(DomainFactory.randomProcessedBamFileProperties)
+        SeqTrackProcessingStatus seqTrackStatus = createSeqTrackProcessingStatus(DomainFactory.createSeqTrackWithDataFiles(bamFile.mergingWorkPackage))
 
-        expect:
-        NOTHING_DONE_WONT_DO == trackingService.getAlignmentAndDownstreamProcessingStatus(seqTracks, new SamplePairDiscovery()).alignmentProcessingStatus
+        when:
+        trackingService.fillInMergingWorkPackageProcessingStatuses([seqTrackStatus], new SamplePairDiscovery())
+
+        then:
+        MergingWorkPackageProcessingStatus mwpStatus = exactlyOneElement(seqTrackStatus.mergingWorkPackageProcessingStatuses)
+        mwpStatus.mergingWorkPackage == bamFile.mergingWorkPackage
+        mwpStatus.completeProcessableBamFileInProjectFolder == null
+        mwpStatus.alignmentProcessingStatus == NOTHING_DONE_MIGHT_DO
+        seqTrackStatus.alignmentProcessingStatus == NOTHING_DONE_MIGHT_DO
+        createProcessingStatus(seqTrackStatus).alignmentProcessingStatus == NOTHING_DONE_MIGHT_DO
     }
 
-    void "getAlignmentAndDownstreamProcessingStatus, 1 MWP in progress, returns NOTHING_DONE_MIGHT_DO"() {
+    void "fillInMergingWorkPackageProcessingStatuses, 1 ST not alignable, rest merged, returns NOTHING_DONE_WONT_DO_MORE and ALL_DONE"() {
+        given:
+        AbstractMergedBamFile bamFile = createBamFileInProjectFolder(DomainFactory.randomProcessedBamFileProperties)
+        SeqTrackProcessingStatus seqTrack1Status = createSeqTrackProcessingStatus(DomainFactory.createSeqTrackWithDataFiles(bamFile.mergingWorkPackage, [:], [fileWithdrawn: true]))
+        SeqTrackProcessingStatus seqTrack2Status = createSeqTrackProcessingStatus(bamFile.containedSeqTracks.first())
+
+        when:
+        trackingService.fillInMergingWorkPackageProcessingStatuses([seqTrack1Status, seqTrack2Status], new SamplePairDiscovery())
+
+        then:
+        seqTrack1Status.mergingWorkPackageProcessingStatuses.isEmpty()
+        seqTrack1Status.alignmentProcessingStatus == NOTHING_DONE_WONT_DO
+
+        MergingWorkPackageProcessingStatus mwpStatus = exactlyOneElement(seqTrack2Status.mergingWorkPackageProcessingStatuses)
+        mwpStatus.mergingWorkPackage == bamFile.mergingWorkPackage
+        mwpStatus.completeProcessableBamFileInProjectFolder == bamFile
+        mwpStatus.alignmentProcessingStatus == ALL_DONE
+        seqTrack2Status.alignmentProcessingStatus == ALL_DONE
+
+        createProcessingStatus(seqTrack1Status, seqTrack2Status).alignmentProcessingStatus == PARTLY_DONE_WONT_DO_MORE
+    }
+
+    void "fillInMergingWorkPackageProcessingStatuses, no MWP, returns NOTHING_DONE_WONT_DO"() {
+        given:
+        SeqTrackProcessingStatus seqTrackStatus = createSeqTrackProcessingStatus(DomainFactory.createSeqTrackWithOneDataFile())
+        ProcessingStatus processingStatus = createProcessingStatus(seqTrackStatus)
+
+        when:
+        trackingService.fillInMergingWorkPackageProcessingStatuses([seqTrackStatus], new SamplePairDiscovery())
+
+        then:
+        seqTrackStatus.mergingWorkPackageProcessingStatuses.isEmpty()
+        seqTrackStatus.alignmentProcessingStatus == NOTHING_DONE_WONT_DO
+        seqTrackStatus.snvProcessingStatus == NOTHING_DONE_WONT_DO
+        processingStatus.alignmentProcessingStatus == NOTHING_DONE_WONT_DO
+        processingStatus.snvProcessingStatus == NOTHING_DONE_WONT_DO
+    }
+
+    void "fillInMergingWorkPackageProcessingStatuses, 1 MWP in progress, returns NOTHING_DONE_MIGHT_DO"() {
         given:
         ProcessedMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFile()
+        SeqTrackProcessingStatus seqTrackStatus = createSeqTrackProcessingStatus(bamFile.containedSeqTracks.first())
 
-        expect:
-        NOTHING_DONE_MIGHT_DO == trackingService.getAlignmentAndDownstreamProcessingStatus(bamFile.containedSeqTracks, new SamplePairDiscovery()).alignmentProcessingStatus
+        when:
+        trackingService.fillInMergingWorkPackageProcessingStatuses([seqTrackStatus], new SamplePairDiscovery())
+
+        then:
+        MergingWorkPackageProcessingStatus mwpStatus = exactlyOneElement(seqTrackStatus.mergingWorkPackageProcessingStatuses)
+        mwpStatus.mergingWorkPackage == bamFile.mergingWorkPackage
+        mwpStatus.completeProcessableBamFileInProjectFolder == null
+        mwpStatus.alignmentProcessingStatus == NOTHING_DONE_MIGHT_DO
+        seqTrackStatus.alignmentProcessingStatus == NOTHING_DONE_MIGHT_DO
+        createProcessingStatus(seqTrackStatus).alignmentProcessingStatus == NOTHING_DONE_MIGHT_DO
     }
 
-    void "getAlignmentAndDownstreamProcessingStatus, 2 MergingProperties, 1 MWP ALL_DONE, returns PARTLY_DONE_WONT_DO_MORE"() {
+    void "fillInMergingWorkPackageProcessingStatuses, 2 MergingProperties, 1 MWP ALL_DONE, returns PARTLY_DONE_WONT_DO_MORE"() {
         given:
         AbstractMergedBamFile bamFile = createBamFileInProjectFolder(DomainFactory.randomProcessedBamFileProperties)
+        SeqTrackProcessingStatus seqTrack1Status = createSeqTrackProcessingStatus(bamFile.containedSeqTracks.first())
+        SeqTrackProcessingStatus seqTrack2Status = createSeqTrackProcessingStatus(DomainFactory.createSeqTrackWithOneDataFile())
 
-        Set<SeqTrack> seqTracks = bamFile.containedSeqTracks + [DomainFactory.createSeqTrackWithOneDataFile()]
+        when:
+        trackingService.fillInMergingWorkPackageProcessingStatuses([seqTrack1Status, seqTrack2Status], new SamplePairDiscovery())
 
-        expect:
-        PARTLY_DONE_WONT_DO_MORE == trackingService.getAlignmentAndDownstreamProcessingStatus(seqTracks, new SamplePairDiscovery()).alignmentProcessingStatus
+        then:
+        MergingWorkPackageProcessingStatus mwpStatus = exactlyOneElement(seqTrack1Status.mergingWorkPackageProcessingStatuses)
+        mwpStatus.mergingWorkPackage == bamFile.mergingWorkPackage
+        mwpStatus.completeProcessableBamFileInProjectFolder == bamFile
+        mwpStatus.alignmentProcessingStatus == ALL_DONE
+        seqTrack1Status.alignmentProcessingStatus == ALL_DONE
+
+        seqTrack2Status.mergingWorkPackageProcessingStatuses.isEmpty()
+        seqTrack2Status.alignmentProcessingStatus == NOTHING_DONE_WONT_DO
+
+        createProcessingStatus(seqTrack1Status, seqTrack2Status).alignmentProcessingStatus == PARTLY_DONE_WONT_DO_MORE
     }
 
-    void "getAlignmentAndDownstreamProcessingStatus, 2 MergingProperties, 1 MWP in progress, returns NOTHING_DONE_MIGHT_DO"() {
+    void "fillInMergingWorkPackageProcessingStatuses, 2 MergingProperties, 1 MWP in progress, returns NOTHING_DONE_MIGHT_DO"() {
         given:
         ProcessedMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFile()
+        SeqTrackProcessingStatus seqTrack1Status = createSeqTrackProcessingStatus(bamFile.containedSeqTracks.first())
+        SeqTrackProcessingStatus seqTrack2Status = createSeqTrackProcessingStatus(DomainFactory.createSeqTrackWithOneDataFile())
 
-        Set<SeqTrack> seqTracks = bamFile.containedSeqTracks + [DomainFactory.createSeqTrackWithOneDataFile()]
+        when:
+        trackingService.fillInMergingWorkPackageProcessingStatuses([seqTrack1Status, seqTrack2Status], new SamplePairDiscovery())
 
-        expect:
-        NOTHING_DONE_MIGHT_DO == trackingService.getAlignmentAndDownstreamProcessingStatus(seqTracks, new SamplePairDiscovery()).alignmentProcessingStatus
+        then:
+        MergingWorkPackageProcessingStatus mwpStatus = exactlyOneElement(seqTrack1Status.mergingWorkPackageProcessingStatuses)
+        mwpStatus.mergingWorkPackage == bamFile.mergingWorkPackage
+        mwpStatus.completeProcessableBamFileInProjectFolder == null
+        mwpStatus.alignmentProcessingStatus == NOTHING_DONE_MIGHT_DO
+        seqTrack1Status.alignmentProcessingStatus == NOTHING_DONE_MIGHT_DO
+
+        seqTrack2Status.mergingWorkPackageProcessingStatuses.isEmpty()
+        seqTrack2Status.alignmentProcessingStatus == NOTHING_DONE_WONT_DO
+
+        createProcessingStatus(seqTrack1Status, seqTrack2Status).alignmentProcessingStatus == NOTHING_DONE_MIGHT_DO
     }
 
-    void "getAlignmentAndDownstreamProcessingStatus, 2 MergingProperties, 1 MWP NOTHING_DONE_MIGHT_DO, 1 MWP ALL_DONE, returns PARTLY_DONE_MIGHT_DO_MORE"() {
+    void "fillInMergingWorkPackageProcessingStatuses, 2 MergingProperties, 1 MWP NOTHING_DONE_MIGHT_DO, 1 MWP ALL_DONE, returns PARTLY_DONE_MIGHT_DO_MORE"() {
         given:
         AbstractMergedBamFile bamFile1 = createBamFileInProjectFolder(DomainFactory.randomProcessedBamFileProperties)
         AbstractMergedBamFile bamFile2 = createBamFileInProjectFolder(DomainFactory.randomProcessedBamFileProperties)
+        SeqTrackProcessingStatus seqTrack1Status = createSeqTrackProcessingStatus(bamFile1.containedSeqTracks.first())
+        SeqTrackProcessingStatus seqTrack2Status = createSeqTrackProcessingStatus(bamFile2.containedSeqTracks.first())
+        SeqTrackProcessingStatus seqTrack3Status = createSeqTrackProcessingStatus(DomainFactory.createSeqTrackWithDataFiles(bamFile1.mergingWorkPackage))
 
-        Set<SeqTrack> seqTracks = bamFile1.containedSeqTracks + bamFile2.containedSeqTracks
+        when:
+        trackingService.fillInMergingWorkPackageProcessingStatuses([seqTrack1Status, seqTrack2Status, seqTrack3Status], new SamplePairDiscovery())
 
-        DomainFactory.createSeqTrackWithDataFiles(bamFile2.mergingWorkPackage)
+        then:
+        MergingWorkPackageProcessingStatus mwp1Status = exactlyOneElement(seqTrack1Status.mergingWorkPackageProcessingStatuses)
+        mwp1Status.mergingWorkPackage == bamFile1.mergingWorkPackage
+        mwp1Status.completeProcessableBamFileInProjectFolder == null
+        mwp1Status.alignmentProcessingStatus == NOTHING_DONE_MIGHT_DO
+        seqTrack1Status.alignmentProcessingStatus == NOTHING_DONE_MIGHT_DO
 
-        expect:
-        PARTLY_DONE_MIGHT_DO_MORE == trackingService.getAlignmentAndDownstreamProcessingStatus(seqTracks, new SamplePairDiscovery()).alignmentProcessingStatus
+        MergingWorkPackageProcessingStatus mwp2Status = exactlyOneElement(seqTrack2Status.mergingWorkPackageProcessingStatuses)
+        mwp2Status.mergingWorkPackage == bamFile2.mergingWorkPackage
+        mwp2Status.completeProcessableBamFileInProjectFolder == bamFile2
+        mwp2Status.alignmentProcessingStatus == ALL_DONE
+        seqTrack2Status.alignmentProcessingStatus == ALL_DONE
+
+        exactlyOneElement(seqTrack3Status.mergingWorkPackageProcessingStatuses).is(mwp1Status)
+
+        createProcessingStatus(seqTrack1Status, seqTrack2Status).alignmentProcessingStatus == PARTLY_DONE_MIGHT_DO_MORE
     }
 
-    void "getSnvProcessingStatus, no MWP, returns NOTHING_DONE_WONT_DO"() {
-        expect:
-        NOTHING_DONE_WONT_DO == trackingService.getSnvProcessingStatus([] as Set, false, new SamplePairDiscovery()).snvProcessingStatus
+    private static MergingWorkPackageProcessingStatus createMergingWorkPackageProcessingStatus(
+            MergingWorkPackage mergingWorkPackage, WorkflowProcessingStatus processingStatus) {
+        return new MergingWorkPackageProcessingStatus(mergingWorkPackage, processingStatus, null, [])
     }
 
-    void "getSnvProcessingStatus, no SP, returns NOTHING_DONE_WONT_DO"() {
+    private static MergingWorkPackageProcessingStatus createMergingWorkPackageProcessingStatus(AbstractMergedBamFile bamFile) {
+        return new MergingWorkPackageProcessingStatus(bamFile.mergingWorkPackage, ALL_DONE, bamFile, [])
+    }
+
+    private static SeqTrackProcessingStatus createSeqTrackProcessingStatus(MergingWorkPackageProcessingStatus... mwpStatuses) {
+        // seqTrack actually must not be null, but for this test it does not matter
+        return new SeqTrackProcessingStatus(null, ALL_DONE, ALL_DONE, Arrays.asList(mwpStatuses))
+    }
+
+    void "fillInSamplePairStatuses, no MWP, does not crash"() {
+        expect:
+        trackingService.fillInSamplePairStatuses([], new SamplePairDiscovery())
+    }
+
+    void "fillInSamplePairStatuses, no SP, returns NOTHING_DONE_WONT_DO"() {
         given:
-        Set<MergingWorkPackage> mergingWorkPackages = [DomainFactory.createMergingWorkPackage()]
+        MergingWorkPackageProcessingStatus mwpStatus = createMergingWorkPackageProcessingStatus(
+                DomainFactory.createMergingWorkPackage(), NOTHING_DONE_MIGHT_DO)
 
-        expect:
-        NOTHING_DONE_WONT_DO == trackingService.getSnvProcessingStatus(mergingWorkPackages, false, new SamplePairDiscovery()).snvProcessingStatus
+        when:
+        trackingService.fillInSamplePairStatuses([mwpStatus], new SamplePairDiscovery())
+
+        then:
+        mwpStatus.samplePairProcessingStatuses.isEmpty()
+        mwpStatus.snvProcessingStatus == NOTHING_DONE_WONT_DO
+        createSeqTrackProcessingStatus(mwpStatus).snvProcessingStatus == NOTHING_DONE_WONT_DO
     }
 
-    void "getSnvProcessingStatus, 1 SCI FINISHED, bamFileInProjectFolder set, returns ALL_DONE"() {
+    void "fillInSamplePairStatuses, 1 SCI FINISHED, bamFileInProjectFolder set, returns ALL_DONE"() {
         given:
         SnvCallingInstance snvCallingInstance = DomainFactory.createSnvInstanceWithRoddyBamFiles(processingState: SnvProcessingStates.FINISHED)
 
@@ -340,13 +477,22 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
             setBamFileInProjectFolder(snvCallingInstance."sampleType${it}BamFile")
         }
 
-        Set<MergingWorkPackage> mergingWorkPackages = [snvCallingInstance.sampleType1BamFile.mergingWorkPackage]
+        MergingWorkPackageProcessingStatus mwpStatus = createMergingWorkPackageProcessingStatus(
+                snvCallingInstance.sampleType1BamFile)
 
-        expect:
-        ALL_DONE == trackingService.getSnvProcessingStatus(mergingWorkPackages, false, new SamplePairDiscovery()).snvProcessingStatus
+        when:
+        trackingService.fillInSamplePairStatuses([mwpStatus], new SamplePairDiscovery())
+
+        then:
+        SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
+        samplePairStatus.samplePair == snvCallingInstance.samplePair
+        samplePairStatus.completeProcessableSnvCallingInstanceInProjectFolder == snvCallingInstance
+        samplePairStatus.snvProcessingStatus == ALL_DONE
+        mwpStatus.snvProcessingStatus == ALL_DONE
+        createSeqTrackProcessingStatus(mwpStatus).snvProcessingStatus == ALL_DONE
     }
 
-    void "getSnvProcessingStatus, 1 SCI not FINISHED, returns NOTHING_DONE_MIGHT_DO"() {
+    void "fillInSamplePairStatuses, 1 SCI not FINISHED, returns NOTHING_DONE_MIGHT_DO"() {
         given:
         SnvCallingInstance snvCallingInstance = DomainFactory.createSnvInstanceWithRoddyBamFiles()
 
@@ -354,23 +500,41 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
             setBamFileInProjectFolder(snvCallingInstance."sampleType${it}BamFile")
         }
 
-        Set<MergingWorkPackage> mergingWorkPackages = [snvCallingInstance.sampleType1BamFile.mergingWorkPackage]
+        MergingWorkPackageProcessingStatus mwpStatus = createMergingWorkPackageProcessingStatus(
+                snvCallingInstance.sampleType1BamFile)
 
-        expect:
-        NOTHING_DONE_MIGHT_DO == trackingService.getSnvProcessingStatus(mergingWorkPackages, false, new SamplePairDiscovery()).snvProcessingStatus
+        when:
+        trackingService.fillInSamplePairStatuses([mwpStatus], new SamplePairDiscovery())
+
+        then:
+        SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
+        samplePairStatus.samplePair == snvCallingInstance.samplePair
+        samplePairStatus.completeProcessableSnvCallingInstanceInProjectFolder == null
+        samplePairStatus.snvProcessingStatus == NOTHING_DONE_MIGHT_DO
+        mwpStatus.snvProcessingStatus == NOTHING_DONE_MIGHT_DO
+        createSeqTrackProcessingStatus(mwpStatus).snvProcessingStatus == NOTHING_DONE_MIGHT_DO
     }
 
-    void "getSnvProcessingStatus, 1 SCI FINISHED, bamFileInProjectFolder unset, returns NOTHING_DONE_MIGHT_DO"() {
+    void "fillInSamplePairStatuses, 1 SCI FINISHED, bamFileInProjectFolder unset, returns NOTHING_DONE_MIGHT_DO"() {
         given:
         SnvCallingInstance snvCallingInstance = DomainFactory.createSnvInstanceWithRoddyBamFiles(processingState: SnvProcessingStates.FINISHED)
 
-        Set<MergingWorkPackage> mergingWorkPackages = [snvCallingInstance.sampleType1BamFile.mergingWorkPackage]
+        MergingWorkPackageProcessingStatus mwpStatus = createMergingWorkPackageProcessingStatus(
+                snvCallingInstance.sampleType1BamFile.mergingWorkPackage, NOTHING_DONE_MIGHT_DO)
 
-        expect:
-        NOTHING_DONE_MIGHT_DO == trackingService.getSnvProcessingStatus(mergingWorkPackages, false, new SamplePairDiscovery()).snvProcessingStatus
+        when:
+        trackingService.fillInSamplePairStatuses([mwpStatus], new SamplePairDiscovery())
+
+        then:
+        SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
+        samplePairStatus.samplePair == snvCallingInstance.samplePair
+        samplePairStatus.completeProcessableSnvCallingInstanceInProjectFolder == null
+        samplePairStatus.snvProcessingStatus == NOTHING_DONE_MIGHT_DO
+        mwpStatus.snvProcessingStatus == NOTHING_DONE_MIGHT_DO
+        createSeqTrackProcessingStatus(mwpStatus).snvProcessingStatus == NOTHING_DONE_MIGHT_DO
     }
 
-    void "getSnvProcessingStatus, no SCI, bamFileInProjectFolder set, no samplePairForSnvProcessing, returns NOTHING_DONE_WONT_DO"() {
+    void "fillInSamplePairStatuses, no SCI, bamFileInProjectFolder set, no samplePairForSnvProcessing, returns NOTHING_DONE_WONT_DO"() {
         given:
         SnvCallingInstance snvCallingInstance = DomainFactory.createSnvInstanceWithRoddyBamFiles()
 
@@ -378,15 +542,24 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
             setBamFileInProjectFolder(snvCallingInstance."sampleType${it}BamFile")
         }
 
-        Set<MergingWorkPackage> mergingWorkPackages = [snvCallingInstance.sampleType1BamFile.mergingWorkPackage]
+        MergingWorkPackageProcessingStatus mwpStatus = createMergingWorkPackageProcessingStatus(
+                snvCallingInstance.sampleType1BamFile)
 
         snvCallingInstance.delete(flush: true)
 
-        expect:
-        NOTHING_DONE_WONT_DO == trackingService.getSnvProcessingStatus(mergingWorkPackages, false, new SamplePairDiscovery()).snvProcessingStatus
+        when:
+        trackingService.fillInSamplePairStatuses([mwpStatus], new SamplePairDiscovery())
+
+        then:
+        SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
+        samplePairStatus.samplePair == snvCallingInstance.samplePair
+        samplePairStatus.completeProcessableSnvCallingInstanceInProjectFolder == null
+        samplePairStatus.snvProcessingStatus == NOTHING_DONE_WONT_DO
+        mwpStatus.snvProcessingStatus == NOTHING_DONE_WONT_DO
+        createSeqTrackProcessingStatus(mwpStatus).snvProcessingStatus == NOTHING_DONE_WONT_DO
     }
 
-    void "getSnvProcessingStatus, no SCI, bamFileInProjectFolder set, samplePairForSnvProcessing exists, returns NOTHING_DONE_MIGHT_DO"() {
+    void "fillInSamplePairStatuses, no SCI, bamFileInProjectFolder set, samplePairForSnvProcessing exists, returns NOTHING_DONE_MIGHT_DO"() {
         given:
         SnvCallingInstance snvCallingInstance = DomainFactory.createSnvInstanceWithRoddyBamFiles([:], [coverage: 2], [coverage: 2])
 
@@ -397,27 +570,45 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
             DomainFactory.createProcessingThresholdsForBamFile(snvCallingInstance."sampleType${it}BamFile", [coverage: 1, numberOfLanes: null])
         }
 
-        Set<MergingWorkPackage> mergingWorkPackages = [snvCallingInstance.sampleType1BamFile.mergingWorkPackage]
+        MergingWorkPackageProcessingStatus mwpStatus = createMergingWorkPackageProcessingStatus(
+                snvCallingInstance.sampleType1BamFile)
 
         snvCallingInstance.delete(flush: true)
 
-        expect:
-        NOTHING_DONE_MIGHT_DO == trackingService.getSnvProcessingStatus(mergingWorkPackages, false, new SamplePairDiscovery()).snvProcessingStatus
+        when:
+        trackingService.fillInSamplePairStatuses([mwpStatus], new SamplePairDiscovery())
+
+        then:
+        SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
+        samplePairStatus.samplePair == snvCallingInstance.samplePair
+        samplePairStatus.completeProcessableSnvCallingInstanceInProjectFolder == null
+        samplePairStatus.snvProcessingStatus == NOTHING_DONE_MIGHT_DO
+        mwpStatus.snvProcessingStatus == NOTHING_DONE_MIGHT_DO
+        createSeqTrackProcessingStatus(mwpStatus).snvProcessingStatus == NOTHING_DONE_MIGHT_DO
     }
 
-    void "getSnvProcessingStatus, no SCI, bamFileInProjectFolder unset, returns NOTHING_DONE_MIGHT_DO"() {
+    void "fillInSamplePairStatuses, no SCI, bamFileInProjectFolder unset, returns NOTHING_DONE_MIGHT_DO"() {
         given:
         SnvCallingInstance snvCallingInstance = DomainFactory.createSnvInstanceWithRoddyBamFiles()
 
-        Set<MergingWorkPackage> mergingWorkPackages = [snvCallingInstance.sampleType1BamFile.mergingWorkPackage]
+        MergingWorkPackageProcessingStatus mwpStatus = createMergingWorkPackageProcessingStatus(
+                snvCallingInstance.sampleType1BamFile.mergingWorkPackage, NOTHING_DONE_MIGHT_DO)
 
         snvCallingInstance.delete(flush: true)
 
-        expect:
-        NOTHING_DONE_MIGHT_DO == trackingService.getSnvProcessingStatus(mergingWorkPackages, false, new SamplePairDiscovery()).snvProcessingStatus
+        when:
+        trackingService.fillInSamplePairStatuses([mwpStatus], new SamplePairDiscovery())
+
+        then:
+        SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
+        samplePairStatus.samplePair == snvCallingInstance.samplePair
+        samplePairStatus.completeProcessableSnvCallingInstanceInProjectFolder == null
+        samplePairStatus.snvProcessingStatus == NOTHING_DONE_MIGHT_DO
+        mwpStatus.snvProcessingStatus == NOTHING_DONE_MIGHT_DO
+        createSeqTrackProcessingStatus(mwpStatus).snvProcessingStatus == NOTHING_DONE_MIGHT_DO
     }
 
-    void "getSnvProcessingStatus, 2 MWP, 1 SP ALL_DONE, returns PARTLY_DONE_WONT_DO_MORE"() {
+    void "fillInSamplePairStatuses, 2 MWP, 1 SP ALL_DONE, 1 MWP without SP, returns ALL_DONE and NOTHING_DONE_WONT_DO"() {
         given:
         SnvCallingInstance snvCallingInstance = DomainFactory.createSnvInstanceWithRoddyBamFiles(processingState: SnvProcessingStates.FINISHED)
 
@@ -425,23 +616,53 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
             setBamFileInProjectFolder(snvCallingInstance."sampleType${it}BamFile")
         }
 
-        Set<MergingWorkPackage> mergingWorkPackages = [snvCallingInstance.sampleType1BamFile.mergingWorkPackage] + [DomainFactory.createMergingWorkPackage()]
+        MergingWorkPackageProcessingStatus mwp1Status = createMergingWorkPackageProcessingStatus(
+                snvCallingInstance.sampleType1BamFile)
+        MergingWorkPackageProcessingStatus mwp2Status = createMergingWorkPackageProcessingStatus(
+                DomainFactory.createMergingWorkPackage(), NOTHING_DONE_MIGHT_DO)
 
-        expect:
-        PARTLY_DONE_WONT_DO_MORE == trackingService.getSnvProcessingStatus(mergingWorkPackages, false, new SamplePairDiscovery()).snvProcessingStatus
+        when:
+        trackingService.fillInSamplePairStatuses([mwp1Status, mwp2Status], new SamplePairDiscovery())
+
+        then:
+        SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwp1Status.samplePairProcessingStatuses)
+        samplePairStatus.samplePair == snvCallingInstance.samplePair
+        samplePairStatus.completeProcessableSnvCallingInstanceInProjectFolder == snvCallingInstance
+        samplePairStatus.snvProcessingStatus == ALL_DONE
+        mwp1Status.snvProcessingStatus == ALL_DONE
+
+        mwp2Status.samplePairProcessingStatuses.isEmpty()
+        mwp2Status.snvProcessingStatus == NOTHING_DONE_WONT_DO
+
+        createSeqTrackProcessingStatus(mwp1Status, mwp2Status).snvProcessingStatus == PARTLY_DONE_WONT_DO_MORE
     }
 
-    void "getSnvProcessingStatus, 2 MWP, 1 MWP without SP, 1 MWP MIGHT_DO_MORE, returns NOTHING_DONE_MIGHT_DO"() {
+    void "fillInSamplePairStatuses, 2 MWP, 1 MWP without SP, 1 MWP MIGHT_DO_MORE, returns NOTHING_DONE_WONT_DO and NOTHING_DONE_MIGHT_DO"() {
         given:
         SnvCallingInstance snvCallingInstance = DomainFactory.createSnvInstanceWithRoddyBamFiles(processingState: SnvProcessingStates.FINISHED)
 
-        Set<MergingWorkPackage> mergingWorkPackages = [snvCallingInstance.sampleType1BamFile.mergingWorkPackage] + DomainFactory.createMergingWorkPackage()
+        MergingWorkPackageProcessingStatus mwp1Status = createMergingWorkPackageProcessingStatus(
+                DomainFactory.createMergingWorkPackage(), NOTHING_DONE_MIGHT_DO)
+        MergingWorkPackageProcessingStatus mwp2Status = createMergingWorkPackageProcessingStatus(
+                snvCallingInstance.sampleType1BamFile)
 
-        expect:
-        NOTHING_DONE_MIGHT_DO == trackingService.getSnvProcessingStatus(mergingWorkPackages, false, new SamplePairDiscovery()).snvProcessingStatus
+        when:
+        trackingService.fillInSamplePairStatuses([mwp1Status, mwp2Status], new SamplePairDiscovery())
+
+        then:
+        mwp1Status.samplePairProcessingStatuses.isEmpty()
+        mwp1Status.snvProcessingStatus == NOTHING_DONE_WONT_DO
+
+        SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwp2Status.samplePairProcessingStatuses)
+        samplePairStatus.samplePair == snvCallingInstance.samplePair
+        samplePairStatus.completeProcessableSnvCallingInstanceInProjectFolder == null
+        samplePairStatus.snvProcessingStatus == NOTHING_DONE_MIGHT_DO
+        mwp2Status.snvProcessingStatus == NOTHING_DONE_MIGHT_DO
+
+        createSeqTrackProcessingStatus(mwp1Status, mwp2Status).snvProcessingStatus == NOTHING_DONE_MIGHT_DO
     }
 
-    void "getSnvProcessingStatus, 2 MWP, 1 SP ALL_DONE, 1 SP MIGHT_DO_MORE, returns PARTLY_DONE_MIGHT_DO_MORE"() {
+    void "fillInSamplePairStatuses, 2 MWP, 1 SP ALL_DONE, 1 SP MIGHT_DO_MORE, returns ALL_DONE and NOTHING_DONE_MIGHT_DO"() {
         given:
         SnvCallingInstance snvCallingInstance = DomainFactory.createSnvInstanceWithRoddyBamFiles(processingState: SnvProcessingStates.FINISHED)
 
@@ -451,10 +672,28 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
 
         SnvCallingInstance snvCallingInstance2 = DomainFactory.createSnvInstanceWithRoddyBamFiles(processingState: SnvProcessingStates.FINISHED)
 
-        Set<MergingWorkPackage> mergingWorkPackages = [snvCallingInstance.sampleType1BamFile.mergingWorkPackage] + [snvCallingInstance2.sampleType1BamFile.mergingWorkPackage]
+        MergingWorkPackageProcessingStatus mwp1Status =
+                createMergingWorkPackageProcessingStatus(snvCallingInstance.sampleType1BamFile)
+        MergingWorkPackageProcessingStatus mwp2Status =
+                createMergingWorkPackageProcessingStatus(snvCallingInstance2.sampleType1BamFile)
 
-        expect:
-        PARTLY_DONE_MIGHT_DO_MORE == trackingService.getSnvProcessingStatus(mergingWorkPackages, false, new SamplePairDiscovery()).snvProcessingStatus
+        when:
+        trackingService.fillInSamplePairStatuses([mwp1Status, mwp2Status], new SamplePairDiscovery())
+
+        then:
+        SamplePairProcessingStatus samplePair1Status = exactlyOneElement(mwp1Status.samplePairProcessingStatuses)
+        samplePair1Status.samplePair == snvCallingInstance.samplePair
+        samplePair1Status.completeProcessableSnvCallingInstanceInProjectFolder == snvCallingInstance
+        samplePair1Status.snvProcessingStatus == ALL_DONE
+        mwp1Status.snvProcessingStatus == ALL_DONE
+
+        SamplePairProcessingStatus samplePair2Status = exactlyOneElement(mwp2Status.samplePairProcessingStatuses)
+        samplePair2Status.samplePair == snvCallingInstance2.samplePair
+        samplePair2Status.completeProcessableSnvCallingInstanceInProjectFolder == null
+        samplePair2Status.snvProcessingStatus == NOTHING_DONE_MIGHT_DO
+        mwp2Status.snvProcessingStatus == NOTHING_DONE_MIGHT_DO
+
+        createSeqTrackProcessingStatus(mwp1Status, mwp2Status).snvProcessingStatus == PARTLY_DONE_MIGHT_DO_MORE
     }
 
     private static AbstractMergedBamFile createBamFileInProjectFolder(Map bamFileProperties = [:]) {
@@ -559,12 +798,12 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         )
 
         trackingService.metaClass.getProcessingStatus = { Set<SeqTrack> set ->
-            return new ProcessingStatus(
-                    installationProcessingStatus: ALL_DONE,
-                    fastqcProcessingStatus: ALL_DONE,
-                    alignmentProcessingStatus: PARTLY_DONE_MIGHT_DO_MORE,
-                    snvProcessingStatus: NOTHING_DONE_MIGHT_DO
-            )
+            return [
+                    getInstallationProcessingStatus: { -> ALL_DONE },
+                    getFastqcProcessingStatus: { -> ALL_DONE },
+                    getAlignmentProcessingStatus: { -> PARTLY_DONE_MIGHT_DO_MORE },
+                    getSnvProcessingStatus: { -> NOTHING_DONE_MIGHT_DO },
+            ] as ProcessingStatus
         }
 
         when:

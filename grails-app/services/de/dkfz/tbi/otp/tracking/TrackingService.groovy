@@ -201,112 +201,97 @@ class TrackingService {
         assert newOtrsTicket.save(flush: true, failOnError: true)
     }
 
-    ProcessingStatus getProcessingStatus(Set<SeqTrack> seqTracks, SamplePairDiscovery samplePairDiscovery = new SamplePairDiscovery(), ProcessingStatus status = new ProcessingStatus()) {
-        status = getInstallationProcessingStatus(seqTracks, status)
-        status = getFastqcProcessingStatus(seqTracks, status)
-        status = getAlignmentAndDownstreamProcessingStatus(seqTracks, samplePairDiscovery, status)
+    ProcessingStatus getProcessingStatus(Collection<SeqTrack> seqTracks, SamplePairDiscovery samplePairDiscovery = new SamplePairDiscovery()) {
+        ProcessingStatus status = new ProcessingStatus(seqTracks.collect {
+            new SeqTrackProcessingStatus(it,
+                    it.dataInstallationState == SeqTrack.DataProcessingState.FINISHED ? ALL_DONE : NOTHING_DONE_MIGHT_DO,
+                    it.fastqcState == SeqTrack.DataProcessingState.FINISHED ? ALL_DONE : NOTHING_DONE_MIGHT_DO, [])
+        })
+        fillInMergingWorkPackageProcessingStatuses(status.seqTrackProcessingStatuses, samplePairDiscovery)
         return status
     }
 
-    ProcessingStatus getInstallationProcessingStatus(Set<SeqTrack> seqTracks, ProcessingStatus status = new ProcessingStatus()) {
-        status.installationProcessingStatus = combineStatuses(DataFile.findAllBySeqTrackInList(seqTracks as List),
-                { DataFile it -> it.fileLinked ? ALL_DONE : NOTHING_DONE_MIGHT_DO })
-        return status
-    }
+    void fillInMergingWorkPackageProcessingStatuses(Collection<SeqTrackProcessingStatus> seqTrackProcessingStatuses, SamplePairDiscovery samplePairDiscovery) {
 
-    ProcessingStatus getFastqcProcessingStatus(Set<SeqTrack> seqTracks, ProcessingStatus status = new ProcessingStatus()) {
-        status.fastqcProcessingStatus = combineStatuses(seqTracks,
-                { SeqTrack it -> it.fastqcState == SeqTrack.DataProcessingState.FINISHED ? ALL_DONE : NOTHING_DONE_MIGHT_DO })
-        return status
-    }
+        Collection<SeqTrackProcessingStatus> alignableSeqTracks =
+                seqTrackProcessingStatuses.findAll { SeqTrackService.mayAlign(it.seqTrack, false) }
 
-    ProcessingStatus getAlignmentAndDownstreamProcessingStatus(Set<SeqTrack> seqTracks, SamplePairDiscovery samplePairDiscovery, ProcessingStatus status = new ProcessingStatus()) {
+        Collection<MergingWorkPackageProcessingStatus> allMwpStatuses = []
 
-        Collection<SeqTrack> alignableSeqTracks = seqTracks.findAll { SeqTrackService.mayAlign(it, false) }
-        if (alignableSeqTracks.isEmpty()) {
-            status.alignmentProcessingStatus = NOTHING_DONE_WONT_DO
-            status.snvProcessingStatus = NOTHING_DONE_WONT_DO
-            return status
-        }
-
-        boolean atLeastOneWontBeDone = false
-
-        if (alignableSeqTracks.size() < seqTracks.size()) {
-            atLeastOneWontBeDone = true
-        }
-
-        Map<Map, Collection<SeqTrack>> seqTracksByMergingProperties =
-                alignableSeqTracks.groupBy { MergingWorkPackage.getMergingProperties(it) }
-        Set<MergingWorkPackage> mergingWorkPackages = seqTracksByMergingProperties.keySet().sum {
-            Collection<MergingWorkPackage> mwps = MergingWorkPackage.findAllWhere(it)
-            if (mwps.isEmpty()) {
-                atLeastOneWontBeDone = true
+        Map<Map, Collection<SeqTrackProcessingStatus>> seqTracksByMergingProperties =
+                alignableSeqTracks.groupBy { MergingWorkPackage.getMergingProperties(it.seqTrack) }
+        seqTracksByMergingProperties.each { Map mergingProperties, List<SeqTrackProcessingStatus> seqTracksWithProperties ->
+            MergingWorkPackage.findAllWhere(mergingProperties).each { MergingWorkPackage mwp ->
+                AbstractMergedBamFile bamFile = mwp.completeProcessableBamFileInProjectFolder
+                MergingWorkPackageProcessingStatus mwpStatus =
+                        new MergingWorkPackageProcessingStatus(mwp, bamFile ? ALL_DONE : NOTHING_DONE_MIGHT_DO, bamFile, [])
+                allMwpStatuses.add(mwpStatus)
+                seqTracksWithProperties.each {
+                    it.mergingWorkPackageProcessingStatuses.add(mwpStatus)
+                }
             }
-            return mwps
-        } as Set
+        }
 
-        status.alignmentProcessingStatus = combineStatuses(mergingWorkPackages,
-                { MergingWorkPackage mwp -> mwp.completeProcessableBamFileInProjectFolder ? ALL_DONE : NOTHING_DONE_MIGHT_DO },
-                atLeastOneWontBeDone ? NOTHING_DONE_WONT_DO : null
-        )
-
-        getSnvProcessingStatus(mergingWorkPackages, atLeastOneWontBeDone, samplePairDiscovery, status)
-
-        return status
+        fillInSamplePairStatuses(allMwpStatuses, samplePairDiscovery)
     }
 
-    ProcessingStatus getSnvProcessingStatus(Set<MergingWorkPackage> mergingWorkPackages, boolean atLeastOneWontBeDone, SamplePairDiscovery samplePairDiscovery, ProcessingStatus status = new ProcessingStatus()) {
+    void fillInSamplePairStatuses(Collection<MergingWorkPackageProcessingStatus> mwpStatuses, SamplePairDiscovery samplePairDiscovery) {
 
-        if (mergingWorkPackages.empty) {
-            status.snvProcessingStatus = NOTHING_DONE_WONT_DO
-            return status
+        if (mwpStatuses.isEmpty()) {
+            return
         }
 
         samplePairDiscovery.createMissingDiseaseControlSamplePairs()
 
-        Collection<SamplePair> samplePairs = (Collection<SamplePair>) SamplePair.createCriteria().list {
+        Map<MergingWorkPackage, MergingWorkPackageProcessingStatus> mwpStatusByMwp =
+                mwpStatuses.collectEntries { [it.mergingWorkPackage, it] }
+
+        SamplePair.createCriteria().list {
             or {
-                'in'('mergingWorkPackage1', mergingWorkPackages)
-                'in'('mergingWorkPackage2', mergingWorkPackages)
+                'in'('mergingWorkPackage1', mwpStatusByMwp.keySet())
+                'in'('mergingWorkPackage2', mwpStatusByMwp.keySet())
+            }
+        }.each { SamplePair samplePair ->
+            SamplePairProcessingStatus samplePairStatus = getSamplePairProcessingStatus(samplePair)
+            [1, 2].each {
+                MergingWorkPackageProcessingStatus mwpStatus = mwpStatusByMwp.get(samplePair."mergingWorkPackage${it}")
+                if (mwpStatus) {
+                    mwpStatus.samplePairProcessingStatuses.add(samplePairStatus)
+                }
             }
         }
-
-        if (mergingWorkPackages.any { mwp -> !samplePairs.any { it.mergingWorkPackage1 == mwp || it.mergingWorkPackage2 == mwp }}) {
-            atLeastOneWontBeDone = true
-        }
-        status.snvProcessingStatus = combineStatuses(samplePairs,
-                { SamplePair samplePair -> getSnvProcessingStatus(samplePair, samplePairDiscovery) },
-                atLeastOneWontBeDone ? NOTHING_DONE_WONT_DO : null
-        )
-        return status
     }
 
-    WorkflowProcessingStatus getSnvProcessingStatus(SamplePair sp, SamplePairDiscovery samplePairDiscovery) {
+    SamplePairProcessingStatus getSamplePairProcessingStatus(SamplePair sp) {
         SnvCallingInstance sci = sp.findLatestSnvCallingInstance()
         if (sci) {
             if (sci.processingState == SnvProcessingStates.FINISHED && [1, 2].every {
                 AbstractMergedBamFile bamFile = sci."sampleType${it}BamFile"
                 return bamFile == bamFile.mergingWorkPackage.completeProcessableBamFileInProjectFolder
             }) {
-                return ALL_DONE
+                return new SamplePairProcessingStatus(sp, ALL_DONE, sci)
             } else if (SnvCallingService.processingStatesNotProcessable.contains(sci.processingState)) {
-                return NOTHING_DONE_MIGHT_DO
+                return new SamplePairProcessingStatus(sp, NOTHING_DONE_MIGHT_DO, null)
             }
         }
         if ([1, 2].every { sp."mergingWorkPackage${it}".completeProcessableBamFileInProjectFolder }) {
             if (SnvCallingService.SNV_CONFIG_CLASSES.any {
                 snvCallingService.samplePairForSnvProcessing(ProcessingPriority.MINIMUM_PRIORITY, it, sp)
             }) {
-                return NOTHING_DONE_MIGHT_DO
+                return new SamplePairProcessingStatus(sp, NOTHING_DONE_MIGHT_DO, null)
             } else {
-                return NOTHING_DONE_WONT_DO
+                return new SamplePairProcessingStatus(sp, NOTHING_DONE_WONT_DO, null)
             }
         } else {
-            return NOTHING_DONE_MIGHT_DO
+            return new SamplePairProcessingStatus(sp, NOTHING_DONE_MIGHT_DO, null)
         }
     }
 
-    def <O> WorkflowProcessingStatus combineStatuses(Iterable<O> objects,
+    static def <O> WorkflowProcessingStatus combineStatuses(Iterable<WorkflowProcessingStatus> statuses) {
+        return combineStatuses(statuses, Closure.IDENTITY)
+    }
+
+    static def <O> WorkflowProcessingStatus combineStatuses(Iterable<O> objects,
                                                      Closure<WorkflowProcessingStatus> getObjectStatus,
                                                      WorkflowProcessingStatus additionalStatus = null) {
         Done done = additionalStatus?.done

@@ -18,6 +18,7 @@ import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus
     IlseSubmission,
     Individual,
     OtrsTicket,
+    MergingWorkPackage,
     ProcessingOption,
     Project,
     ProjectCategory,
@@ -207,12 +208,12 @@ class TrackingServiceSpec extends Specification {
         OtrsTicket ticket = DomainFactory.createOtrsTicket()
         String prefix = "the prefix"
         DomainFactory.createProcessingOptionForOtrsTicketPrefix(prefix)
-        ProcessingStatus status = new ProcessingStatus(
-                installationProcessingStatus: ALL_DONE,
-                fastqcProcessingStatus: PARTLY_DONE_MIGHT_DO_MORE,
-                alignmentProcessingStatus: NOTHING_DONE_MIGHT_DO,
-                snvProcessingStatus: NOTHING_DONE_WONT_DO,
-        )
+        ProcessingStatus status = [
+                getInstallationProcessingStatus: { -> ALL_DONE },
+                getFastqcProcessingStatus: { -> PARTLY_DONE_MIGHT_DO_MORE },
+                getAlignmentProcessingStatus: { -> NOTHING_DONE_MIGHT_DO },
+                getSnvProcessingStatus: { -> NOTHING_DONE_WONT_DO },
+        ] as ProcessingStatus
         Run runA = DomainFactory.createRun(name: 'runA')
         Run runB = DomainFactory.createRun(name: 'runB')
         Sample sample = DomainFactory.createSample()
@@ -220,13 +221,14 @@ class TrackingServiceSpec extends Specification {
         String sampleText = "${sample.project.name}, ${sample.individual.pid}, ${sample.sampleType.name}, ${seqType.name} ${seqType.libraryLayout}"
         IlseSubmission ilseSubmission1 = DomainFactory.createIlseSubmission(ilseNumber: 1234)
         IlseSubmission ilseSubmission2 = DomainFactory.createIlseSubmission(ilseNumber: 5678)
+        Closure createInstalledSeqTrack = { Map properties -> DomainFactory.createSeqTrack([dataInstallationState: SeqTrack.DataProcessingState.FINISHED] + properties) }
         Set<SeqTrack> seqTracks = [
-                DomainFactory.createSeqTrack(sample: sample, seqType: seqType, ilseSubmission: ilseSubmission2, run: runA, laneId: '1'),
-                DomainFactory.createSeqTrack(sample: sample, seqType: seqType, ilseSubmission: ilseSubmission1, run: runB, laneId: '2'),
-                DomainFactory.createSeqTrack(sample: sample, seqType: seqType, ilseSubmission: ilseSubmission1, run: runA, laneId: '4'),
-                DomainFactory.createSeqTrack(sample: sample, seqType: seqType, ilseSubmission: ilseSubmission1, run: runA, laneId: '3'),
-                DomainFactory.createSeqTrack(sample: sample, seqType: seqType, ilseSubmission: null, run: runB, laneId: '8'),
-                DomainFactory.createSeqTrack(sample: sample, seqType: seqType, ilseSubmission: null, run: runA, laneId: '8'),
+                createInstalledSeqTrack(sample: sample, seqType: seqType, ilseSubmission: ilseSubmission2, run: runA, laneId: '1'),
+                createInstalledSeqTrack(sample: sample, seqType: seqType, ilseSubmission: ilseSubmission1, run: runB, laneId: '2'),
+                createInstalledSeqTrack(sample: sample, seqType: seqType, ilseSubmission: ilseSubmission1, run: runA, laneId: '4'),
+                createInstalledSeqTrack(sample: sample, seqType: seqType, ilseSubmission: ilseSubmission1, run: runA, laneId: '3'),
+                createInstalledSeqTrack(sample: sample, seqType: seqType, ilseSubmission: null, run: runB, laneId: '8'),
+                createInstalledSeqTrack(sample: sample, seqType: seqType, ilseSubmission: null, run: runA, laneId: '8'),
         ] as Set
         String expectedContent = """
 Installation: ALL_DONE
@@ -282,26 +284,27 @@ ILSe 5678, runA, lane 1, ${sampleText}
         trackingService.sendNotification(ticket, Collections.emptySet(), new ProcessingStatus(), true)
     }
 
-    void "getInstallationProcessingStatus returns expected status"() {
-        expect:
-        SeqTrack seqTrack = DomainFactory.createSeqTrackWithTwoDataFiles([:], [fileLinked: df1_fileLinked], [fileLinked: df2_fileLinked])
-        installationStatus == trackingService.getInstallationProcessingStatus([seqTrack] as Set).installationProcessingStatus
+    void "getProcessingStatus returns expected status"() {
+        given:
+        SeqTrack seqTrack1 = DomainFactory.createSeqTrack([dataInstallationState: st1State])
+        SeqTrack seqTrack2 = DomainFactory.createSeqTrack([dataInstallationState: st2State])
+        SeqTrack seqTrack3 = DomainFactory.createSeqTrack([fastqcState: st1State])
+        SeqTrack seqTrack4 = DomainFactory.createSeqTrack([fastqcState: st2State])
+
+        when:
+        ProcessingStatus processingStatus1 = trackingService.getProcessingStatus([seqTrack1, seqTrack2])
+        then:
+        TestCase.containSame(processingStatus1.seqTrackProcessingStatuses*.seqTrack, [seqTrack1, seqTrack2])
+        processingStatus1.installationProcessingStatus == processingStatus
+
+        when:
+        ProcessingStatus processingStatus2 = trackingService.getProcessingStatus([seqTrack3, seqTrack4])
+        then:
+        TestCase.containSame(processingStatus2.seqTrackProcessingStatuses*.seqTrack, [seqTrack3, seqTrack4])
+        processingStatus2.fastqcProcessingStatus == processingStatus
 
         where:
-        df1_fileLinked | df2_fileLinked || installationStatus
-        true           | true           || ALL_DONE
-        true           | false          || PARTLY_DONE_MIGHT_DO_MORE
-        false          | false          || NOTHING_DONE_MIGHT_DO
-    }
-
-    void "getFastqcProcessingStatus returns expected status"() {
-        expect:
-        SeqTrack seqTrack1 = DomainFactory.createSeqTrack([fastqcState: st1_fastqcState])
-        SeqTrack seqTrack2 = DomainFactory.createSeqTrack([fastqcState: st2_fastqcState])
-        fastqcStatus == trackingService.getFastqcProcessingStatus([seqTrack1, seqTrack2] as Set).fastqcProcessingStatus
-
-        where:
-        st1_fastqcState                          | st2_fastqcState                          || fastqcStatus
+        st1State                                 | st2State                                 || processingStatus
         SeqTrack.DataProcessingState.FINISHED    | SeqTrack.DataProcessingState.FINISHED    || ALL_DONE
         SeqTrack.DataProcessingState.FINISHED    | SeqTrack.DataProcessingState.IN_PROGRESS || PARTLY_DONE_MIGHT_DO_MORE
         SeqTrack.DataProcessingState.FINISHED    | SeqTrack.DataProcessingState.NOT_STARTED || PARTLY_DONE_MIGHT_DO_MORE
