@@ -1,14 +1,12 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.Comment
-import de.dkfz.tbi.otp.Commentable
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
-import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
-import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.utils.*
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
-class Project implements Commentable, Entity {
+class Project implements Commentable, Entity, AlignmentConfig {
 
     /**
      * This enum defines if SNV calling should be done for this project.

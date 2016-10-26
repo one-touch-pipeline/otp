@@ -4,6 +4,7 @@ import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.notification.*
 import de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus
 import de.dkfz.tbi.otp.tracking.TrackingService.SamplePairDiscovery
 import de.dkfz.tbi.otp.user.*
@@ -19,12 +20,14 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
     TrackingService trackingService
     MailHelperService mailHelperService
     SnvCallingService snvCallingService
+    CreateNotificationTextService createNotificationTextService
 
     void setup() {
         // Overwrite the autowired service with a new instance for each test, so mocks do not have to be cleaned up
         trackingService = new TrackingService(
                 mailHelperService: mailHelperService,
                 snvCallingService: snvCallingService,
+                createNotificationTextService: createNotificationTextService,
         )
     }
 
@@ -57,6 +60,11 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
                 [runSegment: DomainFactory.createRunSegment(otrsTicket: ticketB), fileLinked: true])
 
         DomainFactory.createProcessingOptionForOtrsTicketPrefix("the prefix")
+
+        trackingService.createNotificationTextService = Mock(CreateNotificationTextService) {
+            1 * notification(ticketA, _, _) >> 'Something'
+            1 * notification(ticketB, _, _) >> 'Something'
+        }
 
         when:
         trackingService.processFinished([seqTrackA, seqTrackB1] as Set, OtrsTicket.ProcessingStep.FASTQC)
@@ -156,16 +164,24 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         DomainFactory.createProcessingOptionForOtrsTicketPrefix(prefix)
 
         String otrsRecipient = HelperUtils.uniqueString
-        int callCount = 0
-        trackingService.mailHelperService = [
-                getOtrsRecipient: { otrsRecipient },
-                sendEmail: { String emailSubject, String content, String recipient ->
-                    callCount++
-                    assertEquals(otrsRecipient, recipient)
-                    assert content.contains(expectedStatus.toString())
-                    assertEquals("${prefix}#${ticket.ticketNumber} Processing Status Update".toString(), emailSubject)
-                }
-        ] as MailHelperService
+        String notificationText = HelperUtils.uniqueString
+
+        String expectedEmailSubjectOperator = "${prefix}#${ticket.ticketNumber} Processing Status Update"
+        String expectedEmailSubjectCustomer = "[${prefix}#${ticket.ticketNumber}] Notification for customer"
+
+        trackingService.mailHelperService = Mock(MailHelperService) {
+            getOtrsRecipient() >> otrsRecipient
+            1 * sendEmail(expectedEmailSubjectOperator, _, otrsRecipient) >> { String emailSubject, String content, String recipient ->
+                assert content.contains(expectedStatus.toString())
+            }
+            1 * sendEmail(expectedEmailSubjectCustomer, notificationText, otrsRecipient)
+            0 * _
+        }
+
+        trackingService.createNotificationTextService = Mock(CreateNotificationTextService) {
+            1 * notification(ticket, _, OtrsTicket.ProcessingStep.INSTALLATION) >> notificationText
+            0 * notification(_, _, _)
+        }
 
         when:
         trackingService.setFinishedTimestampsAndNotify(ticket, new SamplePairDiscovery())
@@ -176,7 +192,6 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         ticket.alignmentFinished == null
         ticket.snvFinished == null
         !ticket.finalNotificationSent
-        callCount == 1
     }
 
     void "setFinishedTimestampsAndNotify, when something just completed and won't do more, sends final notification"() {
@@ -222,16 +237,27 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         DomainFactory.createProcessingOptionForOtrsTicketPrefix(prefix)
 
         String otrsRecipient = HelperUtils.uniqueString
-        int callCount = 0
-        trackingService.mailHelperService = [
-            getOtrsRecipient: { otrsRecipient },
-            sendEmail: { String emailSubject, String content, String recipient ->
-                callCount++
-                assertEquals(otrsRecipient, recipient)
+        String notificationText1 = HelperUtils.uniqueString
+        String notificationText2 = HelperUtils.uniqueString
+
+        String expectedEmailSubjectOperator = "${prefix}#${ticket.ticketNumber} Final Processing Status Update"
+        String expectedEmailSubjectCustomer = "[${prefix}#${ticket.ticketNumber}] Notification for customer"
+
+        trackingService.mailHelperService = Mock(MailHelperService) {
+            getOtrsRecipient() >> otrsRecipient
+            1 * sendEmail(expectedEmailSubjectOperator, _, otrsRecipient) >> { String emailSubject, String content, String recipient ->
                 assert content.contains(expectedStatus.toString())
-                assertEquals("${prefix}#${ticket.ticketNumber} Final Processing Status Update".toString(), emailSubject)
             }
-        ] as MailHelperService
+            1 * sendEmail(expectedEmailSubjectCustomer, notificationText1, otrsRecipient)
+            1 * sendEmail(expectedEmailSubjectCustomer, notificationText2, otrsRecipient)
+            0 * _
+        }
+
+        trackingService.createNotificationTextService = Mock(CreateNotificationTextService) {
+            1 * notification(ticket, _, OtrsTicket.ProcessingStep.INSTALLATION) >> notificationText1
+            1 * notification(ticket, _, OtrsTicket.ProcessingStep.ALIGNMENT) >> notificationText2
+            0 * notification(_, _, _)
+        }
 
         when:
         trackingService.setFinishedTimestampsAndNotify(ticket, new SamplePairDiscovery())
@@ -242,8 +268,8 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         ticket.alignmentFinished == ticket.installationFinished
         ticket.snvFinished == null
         ticket.finalNotificationSent
-        callCount == 1
     }
+
 
     private static SeqTrackProcessingStatus createSeqTrackProcessingStatus(SeqTrack seqTrack) {
         return new SeqTrackProcessingStatus(seqTrack, ALL_DONE, ALL_DONE, [])

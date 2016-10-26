@@ -457,4 +457,9 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
 
         return numberOfReads.sum()
     }
+
+    @Override
+    AlignmentConfig getAlignmentConfig() {
+        return config
+    }
 }

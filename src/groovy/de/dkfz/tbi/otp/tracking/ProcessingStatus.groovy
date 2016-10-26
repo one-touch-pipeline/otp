@@ -36,19 +36,19 @@ public class ProcessingStatus {
     }
 
     WorkflowProcessingStatus getInstallationProcessingStatus() {
-        return TrackingService.combineStatuses(seqTrackProcessingStatuses*.installationProcessingStatus)
+        return TrackingService.combineStatuses(seqTrackProcessingStatuses, { it.installationProcessingStatus })
     }
 
     WorkflowProcessingStatus getFastqcProcessingStatus() {
-        return TrackingService.combineStatuses(seqTrackProcessingStatuses*.fastqcProcessingStatus)
+        return TrackingService.combineStatuses(seqTrackProcessingStatuses, { it.fastqcProcessingStatus })
     }
 
     WorkflowProcessingStatus getAlignmentProcessingStatus() {
-        return TrackingService.combineStatuses(seqTrackProcessingStatuses*.alignmentProcessingStatus)
+        return TrackingService.combineStatuses(seqTrackProcessingStatuses, { it.alignmentProcessingStatus })
     }
 
     WorkflowProcessingStatus getSnvProcessingStatus() {
-        return TrackingService.combineStatuses(seqTrackProcessingStatuses*.snvProcessingStatus)
+        return TrackingService.combineStatuses(seqTrackProcessingStatuses, { it.snvProcessingStatus })
     }
 
     @Override

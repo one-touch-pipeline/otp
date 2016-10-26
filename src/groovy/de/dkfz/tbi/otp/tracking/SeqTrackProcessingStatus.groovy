@@ -16,10 +16,10 @@ class SeqTrackProcessingStatus {
     final Collection<MergingWorkPackageProcessingStatus> mergingWorkPackageProcessingStatuses
 
     WorkflowProcessingStatus getAlignmentProcessingStatus() {
-        return TrackingService.combineStatuses(mergingWorkPackageProcessingStatuses*.alignmentProcessingStatus)
+        return TrackingService.combineStatuses(mergingWorkPackageProcessingStatuses, { it.alignmentProcessingStatus })
     }
 
     WorkflowProcessingStatus getSnvProcessingStatus() {
-        return TrackingService.combineStatuses(mergingWorkPackageProcessingStatuses*.snvProcessingStatus)
+        return TrackingService.combineStatuses(mergingWorkPackageProcessingStatuses, { it.snvProcessingStatus })
     }
 }

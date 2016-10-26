@@ -4,6 +4,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.job.jobs.snvcalling.*
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.notification.*
 import de.dkfz.tbi.otp.tracking.ProcessingStatus.Done
 import de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus
 import de.dkfz.tbi.otp.user.*
@@ -16,9 +17,14 @@ import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus
 class TrackingService {
 
     MailHelperService mailHelperService
+
     SnvCallingService snvCallingService
 
+    CreateNotificationTextService createNotificationTextService
+
+
     public static final String TICKET_NUMBER_PREFIX = "otrsTicketNumberPrefix"
+
 
     public OtrsTicket createOtrsTicket(String ticketNumber, String seqCenterComment) {
         OtrsTicket otrsTicket = new OtrsTicket(
@@ -111,13 +117,14 @@ class TrackingService {
             if (ticket."${step}Finished" == null && stepStatus.done != NOTHING && !stepStatus.mightDoMore) {
                 anythingJustCompleted = true
                 ticket."${step}Finished" = now
+                sendCustomerNotification(ticket, status, step)
             }
             if (stepStatus.mightDoMore) {
                 mightDoMore = true
             }
         }
         if (anythingJustCompleted) {
-            sendNotification(ticket, seqTracks, status, !mightDoMore)
+            sendOperatorNotification(ticket, seqTracks, status, !mightDoMore)
             if (!mightDoMore) {
                 ticket.finalNotificationSent = true
             }
@@ -125,7 +132,15 @@ class TrackingService {
         }
     }
 
-    void sendNotification(OtrsTicket ticket, Set<SeqTrack> seqTracks, ProcessingStatus status, boolean finalNotification) {
+    void sendCustomerNotification(OtrsTicket ticket, ProcessingStatus status, OtrsTicket.ProcessingStep notificationStep) {
+        if (notificationStep.sendNotification) {
+            String subject = "[${ProcessingOptionService.getValueOfProcessingOption(TICKET_NUMBER_PREFIX)}#${ticket.ticketNumber}] Notification for customer"
+            String content = createNotificationTextService.notification(ticket, status, notificationStep)
+            mailHelperService.sendEmail(subject, content, mailHelperService.otrsRecipient)
+        }
+    }
+
+    void sendOperatorNotification(OtrsTicket ticket, Set<SeqTrack> seqTracks, ProcessingStatus status, boolean finalNotification) {
         StringBuilder subject = new StringBuilder()
 
         String prefix = ProcessingOptionService.getValueOfProcessingOption(TICKET_NUMBER_PREFIX)
@@ -285,10 +300,6 @@ class TrackingService {
         } else {
             return new SamplePairProcessingStatus(sp, NOTHING_DONE_MIGHT_DO, null)
         }
-    }
-
-    static def <O> WorkflowProcessingStatus combineStatuses(Iterable<WorkflowProcessingStatus> statuses) {
-        return combineStatuses(statuses, Closure.IDENTITY)
     }
 
     static def <O> WorkflowProcessingStatus combineStatuses(Iterable<O> objects,

@@ -17,6 +17,6 @@ class MergingWorkPackageProcessingStatus {
     final Collection<SamplePairProcessingStatus> samplePairProcessingStatuses
 
     WorkflowProcessingStatus getSnvProcessingStatus() {
-        return TrackingService.combineStatuses(samplePairProcessingStatuses*.snvProcessingStatus)
+        return TrackingService.combineStatuses(samplePairProcessingStatuses, { it.snvProcessingStatus })
     }
 }

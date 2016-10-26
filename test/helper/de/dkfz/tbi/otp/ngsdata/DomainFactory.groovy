@@ -12,6 +12,7 @@ import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.Realm.Cluster
 import de.dkfz.tbi.otp.ngsdata.SampleType.SpecificReferenceGenome
+import de.dkfz.tbi.otp.notification.*
 import de.dkfz.tbi.otp.tracking.*
 import de.dkfz.tbi.otp.utils.*
 import grails.plugin.springsecurity.acl.*
@@ -321,7 +322,7 @@ class DomainFactory {
         ], properties)
     }
 
-    public static void createProcessingOptionForOtrsTicketPrefix(String prefix){
+    public static void createProcessingOptionForOtrsTicketPrefix(String prefix = "Prefix ${counter++}"){
         ProcessingOptionService option = new ProcessingOptionService()
         option.createOrUpdate(
                 TrackingService.TICKET_NUMBER_PREFIX,
@@ -514,9 +515,10 @@ class DomainFactory {
                 seqTracks: [seqTrack],
                 workPackage: workPackage,
                 identifier: RoddyBamFile.nextIdentifier(workPackage),
-                config: { createRoddyWorkflowConfig(
+                config: { createRoddyWorkflowConfigLazy(
                         pipeline: workPackage.pipeline,
                         project: workPackage.project,
+                        seqType: workPackage.seqType,
                 )},
                 md5sum: HelperUtils.randomMd5sum,
                 fileOperationStatus: FileOperationStatus.PROCESSED,
@@ -611,7 +613,7 @@ class DomainFactory {
 
     static SamplePair createSamplePair(Map properties = [:]) {
         MergingWorkPackage mergingWorkPackage1 = createMergingWorkPackage()
-        SampleTypePerProject.build(
+        createSampleTypePerProject(
                 sampleType: mergingWorkPackage1.sampleType,
                 project: mergingWorkPackage1.project,
                 category: SampleType.Category.DISEASE,
@@ -677,7 +679,7 @@ class DomainFactory {
         Pipeline pipeline = createPanCanPipeline()
 
         MergingWorkPackage controlWorkPackage = createMergingWorkPackage(pipeline: pipeline, statSizeFileName: DEFAULT_TAB_FILE_NAME)
-        SamplePair samplePair = createDisease(controlWorkPackage)
+        SamplePair samplePair = properties.samplePair ?: createDisease(controlWorkPackage)
         MergingWorkPackage diseaseWorkPackage = samplePair.mergingWorkPackage1
 
         RoddyBamFile disease = createRoddyBamFile([workPackage: diseaseWorkPackage] + bamFile1Properties)
@@ -884,6 +886,10 @@ class DomainFactory {
         ], seqTypeProperties, saveAndValidate)
     }
 
+    public static SeqType createSeqTypePaired(Map seqTypeProperties = [:], boolean saveAndValidate = true) {
+        return createSeqType([libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED] + seqTypeProperties, saveAndValidate)
+    }
+
     public static SoftwareTool createSoftwareTool(Map softwareToolProperties = [:]) {
         return createDomainObject(SoftwareTool, [
                 programName: 'softwareToolProgramName_' + (counter++),
@@ -942,6 +948,14 @@ class DomainFactory {
 
     static ReferenceGenomeProjectSeqType createReferenceGenomeProjectSeqType(Map properties = [:]) {
         return createDomainObject(ReferenceGenomeProjectSeqType, [
+                project        : { createProject() },
+                seqType        : { createSeqType() },
+                referenceGenome: { createReferenceGenome() },
+        ], properties)
+    }
+
+    static ReferenceGenomeProjectSeqType createReferenceGenomeProjectSeqTypeLazy(Map properties = [:]) {
+        return createDomainObjectLazy(ReferenceGenomeProjectSeqType, [
                 project        : { createProject() },
                 seqType        : { createSeqType() },
                 referenceGenome: { createReferenceGenome() },
@@ -1043,13 +1057,12 @@ class DomainFactory {
         ], properties, saveAndValidate)
     }
 
-    static RoddyWorkflowConfig createRoddyWorkflowConfig(Map properties = [:], boolean saveAndValidate = true) {
+    static private Map createRoddyWorkflowConfigMapHelper(Map properties = [:]) {
         Pipeline pipeline = properties.containsKey('pipeline') ? properties.pipeline : createPanCanPipeline()
         SeqType seqType =  properties.containsKey('seqType') ? properties.seqType : createWholeGenomeSeqType()
         String pluginVersion = properties.containsKey('pluginVersion') ? properties.pluginVersion : "pluginVersion:1.1.${counter++}"
         String configVersion = properties.containsKey('configVersion') ? properties.configVersion : "v1_${counter++}"
-
-        return createDomainObject(RoddyWorkflowConfig, [
+        return [
                 pipeline: pipeline,
                 seqType: seqType,
                 configFilePath: {"${TestCase.uniqueNonExistentPath}/${pipeline.name.name()}_${seqType.roddyName}_${pluginVersion.substring(pluginVersion.indexOf(':') + 1)}_${configVersion}.xml"},
@@ -1058,7 +1071,15 @@ class DomainFactory {
                 project: { properties.individual?.project ?: createProject() },
                 dateCreated: {new Date()},
                 lastUpdated: {new Date()},
-        ], properties, saveAndValidate)
+        ]
+    }
+
+    static RoddyWorkflowConfig createRoddyWorkflowConfig(Map properties = [:], boolean saveAndValidate = true) {
+        return createDomainObject(RoddyWorkflowConfig, createRoddyWorkflowConfigMapHelper(properties), properties, saveAndValidate)
+    }
+
+    static RoddyWorkflowConfig createRoddyWorkflowConfigLazy(Map properties = [:], boolean saveAndValidate = true) {
+        return createDomainObjectLazy(RoddyWorkflowConfig, createRoddyWorkflowConfigMapHelper(properties), properties, saveAndValidate)
     }
 
     public static SeqTrack createSeqTrack(MergingWorkPackage mergingWorkPackage, Map seqTrackProperties = [:]) {
@@ -1277,11 +1298,27 @@ class DomainFactory {
         ]
     }
 
+    static MetaDataKey createMetaDataKeyLazy(Map properties = [:]) {
+        return createDomainObjectLazy(MetaDataKey,[
+                name: "name_${counter++}",
+        ], properties)
+    }
+
+    static MetaDataEntry createMetaDataEntry(Map properties = [:]) {
+        return createDomainObject(MetaDataEntry,[
+                value: "value_${counter++}",
+                dataFile: { createDataFile() },
+                key: { createMetaDataKeyLazy() },
+                status: MetaDataEntry.Status.VALID,
+                source: MetaDataEntry.Source.MDFILE,
+        ], properties)
+    }
+
 
     static MetaDataEntry createMetaDataKeyAndEntry(DataFile dataFile, String key, String value) {
-        MetaDataKey metaDataKey = MetaDataKey.buildLazy(name: key)
+        MetaDataKey metaDataKey = createMetaDataKeyLazy(name: key)
 
-        return MetaDataEntry.build(
+        return createMetaDataEntry(
             value: value,
             dataFile: dataFile,
             key: metaDataKey,
@@ -1306,6 +1343,48 @@ class DomainFactory {
         return createDomainObject(OtrsTicket,[
                 ticketNumber: "20000101"+String.format("%08d", counter++),
         ], properties)
+    }
+
+    static Map<String, String> createOtpAlignmentProcessingOptions(Map properties = [:]) {
+        [
+                createProcessingOption(
+                        name: ProjectOverviewService.BWA_COMMAND,
+                        type: null,
+                        project: null,
+                        value: properties[ProjectOverviewService.BWA_COMMAND] ?: "value ${counter++}",
+                        comment: "Some comment ${counter++}",
+                ),
+                createProcessingOption(
+                        name: ProjectOverviewService.BWA_Q_PARAMETER,
+                        type: null,
+                        project: null,
+                        value: properties[ProjectOverviewService.BWA_Q_PARAMETER] ?: "value ${counter++}",
+                        comment: "Some comment ${counter++}",
+                ),
+                createProcessingOption(
+                        name: ProjectOverviewService.SAM_TOOLS_COMMAND,
+                        type: null,
+                        project: null,
+                        value: properties[ProjectOverviewService.SAM_TOOLS_COMMAND] ?: "value ${counter++}",
+                        comment: "Some comment ${counter++}",
+                ),
+                createProcessingOption(
+                        name: ProjectOverviewService.PICARD_MDUP_COMMAND,
+                        type: null,
+                        project: null,
+                        value: properties[ProjectOverviewService.PICARD_MDUP_COMMAND] ?: "value ${counter++}",
+                        comment: "Some comment ${counter++}",
+                ),
+                createProcessingOption(
+                        name: ProjectOverviewService.PICARD_MDUP_OPTIONS,
+                        type: null,
+                        project: null,
+                        value: [ProjectOverviewService.PICARD_MDUP_OPTIONS] ?: "value ${counter++}",
+                        comment: "Some comment ${counter++}",
+                )
+        ].collectEntries { ProcessingOption processingOption ->
+            [(processingOption.name): processingOption.value]
+        }
     }
 
     static void createRoddyProcessingOptions(File basePath) {
@@ -1346,6 +1425,125 @@ class DomainFactory {
         )
         assert featureTogglesConfigPath.save(flush: true)
     }
+
+
+    static void createNotificationProcessingOptions() {
+
+        createProcessingOption([
+                name   : CreateNotificationTextService.BASE_NOTIFICATION_TEMPLATE,
+                type   : null,
+                project: null,
+                value  : '''
+base notification
+stepInformation: ${stepInformation}
+seqCenterComment: ${seqCenterComment}
+''',
+                comment: '',
+        ])
+
+        createProcessingOption([
+                name   : CreateNotificationTextService.INSTALLATION_NOTIFICATION_TEMPLATE,
+                type   : null,
+                project: null,
+                value  : '''
+data installation finished
+runs: ${runs}
+paths: ${paths}
+samples: ${samples}
+links: ${links}
+''',
+                comment: '',
+        ])
+
+        createProcessingOption([
+                name   : CreateNotificationTextService.INSTALLATION_FURTHER_PROCESSING_TEMPLATE,
+                type   : null,
+                project: null,
+                value  : '''further processing''',
+                comment: '',
+        ])
+
+        createProcessingOption([
+                name   : CreateNotificationTextService.ALIGNMENT_NOTIFICATION_TEMPLATE,
+                type   : null,
+                project: null,
+                value  : '''
+alignment finished
+samples: ${samples}
+links: ${links}
+processingValues: ${processingValues}
+paths: ${paths}
+''',
+                comment: '',
+        ])
+
+
+        createProcessingOption([
+                name: CreateNotificationTextService.ALIGNMENT_FURTHER_PROCESSING_TEMPLATE,
+                type: null,
+                project: null,
+                value: '''
+run snv
+samplePairsWillProcess: ${samplePairsWillProcess}
+''',
+                comment: '',
+        ])
+
+        createProcessingOption([
+                name: CreateNotificationTextService.ALIGNMENT_NO_FURTHER_PROCESSING_TEMPLATE,
+                type: null,
+                project: null,
+                value: '''
+no snv
+samplePairsWontProcess: ${samplePairsWontProcess}
+''',
+                comment: '',
+        ])
+
+        createProcessingOption([
+                name: CreateNotificationTextService.ALIGNMENT_PROCESSING_INFORMATION_TEMPLATE,
+                type: null,
+                project: null,
+                value: '''
+alignment information
+seqType: ${seqType}
+referenceGenome: ${referenceGenome}
+alignmentProgram: ${alignmentProgram}
+alignmentParameter: ${alignmentParameter}
+mergingProgram: ${mergingProgram}
+mergingParameter: ${mergingParameter}
+samtoolsProgram: ${samtoolsProgram}
+''',
+                comment: '',
+        ])
+
+
+        createProcessingOption([
+                name: CreateNotificationTextService.SNV_NOTIFICATION_TEMPLATE,
+                type: null,
+                project: null,
+                value: '''
+snv finished
+samplePairsFinished: ${samplePairsFinished}
+otpLinks: ${otpLinks}
+directories: ${directories}
+''',
+                comment: '',
+        ])
+
+
+        createProcessingOption([
+                name: CreateNotificationTextService.SNV_NOT_PROCESSED_TEMPLATE,
+                type: null,
+                project: null,
+                value: '''
+snv not processed
+samplePairsNotProcessed: ${samplePairsNotProcessed}
+''',
+                comment: '',
+        ])
+    }
+
 
 
     static ProcessedMergedBamFile createIncrementalMergedBamFile(ProcessedMergedBamFile processedMergedBamFile) {

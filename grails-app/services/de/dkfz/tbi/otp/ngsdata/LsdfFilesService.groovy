@@ -1,16 +1,14 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
-import de.dkfz.tbi.otp.job.processing.CreateClusterScriptService
-import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.utils.*
+import org.codehaus.groovy.grails.commons.*
 
-import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.*
+import java.util.regex.*
+
 import static de.dkfz.tbi.otp.utils.WaitingFileUtils.*
-
-import java.util.regex.Pattern
-
-import org.codehaus.groovy.grails.commons.GrailsApplication
-import de.dkfz.tbi.otp.job.processing.ExecutionService
+import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.*
 
 class LsdfFilesService {
 
@@ -19,17 +17,21 @@ class LsdfFilesService {
     ExecutionService executionService
     CreateClusterScriptService createClusterScriptService
 
-    public static final String SEQ_CENTER_INBOX_PATH = 'STORAGE_ROOT/dmg/seq_center_inbox'
+    static final String MOUNTPOINT_WITH_ICGC = 'STORAGE_ROOT/'
+
+    static final String MOUNTPOINT_WITH_LSDF = 'STORAGE_ROOT/'
+
+    public static final String SEQ_CENTER_INBOX_PATH = "${MOUNTPOINT_WITH_ICGC}/dmg/seq_center_inbox"
 
     public static final String ILSE_NUMBER_TEMPLATE = "000000"
 
 
     static List<String> midtermStorageMountPoint = [  // the first entry shall be the canonical one
-            "STORAGE_ROOT/midterm/",
-            "STORAGE_ROOTSEQUENCING_INBOX/",
-            "STORAGE_ROOT/midterm/",
-            "STORAGE_ROOTSEQUENCING_INBOX/",
-            ].asImmutable()
+                                                      "${MOUNTPOINT_WITH_LSDF}/midterm/",
+                                                      "${SEQ_CENTER_INBOX_PATH}/core/",
+                                                      "${MOUNTPOINT_WITH_ICGC}/midterm/",
+                                                      "${MOUNTPOINT_WITH_LSDF}SEQUENCING_INBOX/",
+    ].asImmutable()
 
     /**
      * Similar to {@link java.nio.file.Paths#get(String, String...)} from Java 7.
@@ -330,4 +332,13 @@ class LsdfFilesService {
         return new File("${SEQ_CENTER_INBOX_PATH}/core/${ilse[-6..-1][0..2]}/${ilse[-6..-1]}")
     }
 
+    static File normalizePathForCustomers(File file) {
+        return new File(file.absolutePath.replaceFirst(
+                /^${Pattern.quote(MOUNTPOINT_WITH_ICGC)}/,
+                Matcher.quoteReplacement(MOUNTPOINT_WITH_LSDF)))
+    }
+
+    static File normalizePathForCustomers(String path) {
+        return normalizePathForCustomers(new File(path))
+    }
 }

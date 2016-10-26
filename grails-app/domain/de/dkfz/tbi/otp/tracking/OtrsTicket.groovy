@@ -1,19 +1,23 @@
 package de.dkfz.tbi.otp.tracking
 
 import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.utils.*
+import groovy.transform.*
 import org.joda.time.*
 import org.joda.time.format.*
 
 class OtrsTicket implements Commentable, Entity {
 
+    @TupleConstructor
     enum ProcessingStep {
-        INSTALLATION,
-        FASTQC,
-        ALIGNMENT,
-        SNV
+        INSTALLATION(true),
+        FASTQC(false),
+        ALIGNMENT(true),
+        SNV(true)
+
+        final boolean sendNotification
 
         public String toString() {
             return name().toLowerCase(Locale.ENGLISH)

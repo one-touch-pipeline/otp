@@ -92,6 +92,11 @@ class ProcessedMergedBamFile extends AbstractMergedBamFile implements ProcessPar
         return new File(baseDirectory, bamFileName)
     }
 
+    @Override
+    Project getAlignmentConfig() {
+        return project
+    }
+
     void withdraw() {
         withTransaction {
             super.withdrawCorrespondingSnvResults()

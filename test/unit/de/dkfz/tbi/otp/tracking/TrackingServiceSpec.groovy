@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.tracking
 import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.notification.*
 import de.dkfz.tbi.otp.utils.*
 import grails.test.mixin.*
 import grails.test.mixin.web.*
@@ -203,7 +204,7 @@ class TrackingServiceSpec extends Specification {
         date.is(otrsTicket.installationStarted)
     }
 
-    void 'sendNotification, when finalNotification is false, sends normal notification with correct subject and content'() {
+    void 'sendOperatorNotification, when finalNotification is false, sends normal notification with correct subject and content'() {
         given:
         OtrsTicket ticket = DomainFactory.createOtrsTicket()
         String prefix = "the prefix"
@@ -263,13 +264,13 @@ ILSe 5678, runA, lane 1, ${sampleText}
         }
 
         when:
-        trackingService.sendNotification(ticket, seqTracks, status, false)
+        trackingService.sendOperatorNotification(ticket, seqTracks, status, false)
 
         then:
         callCount  == 1
     }
 
-    void 'sendNotification, when finalNotification is true, sends final notification with correct subject'() {
+    void 'sendOperatorNotification, when finalNotification is true, sends final notification with correct subject'() {
         given:
         OtrsTicket ticket = DomainFactory.createOtrsTicket()
         String prefix = "the prefix"
@@ -281,8 +282,36 @@ ILSe 5678, runA, lane 1, ${sampleText}
         }
 
         expect:
-        trackingService.sendNotification(ticket, Collections.emptySet(), new ProcessingStatus(), true)
+        trackingService.sendOperatorNotification(ticket, Collections.emptySet(), new ProcessingStatus(), true)
     }
+
+    @Unroll
+    void 'sendCustomerNotification, when ProcessingStep.sendNotification is true, sends customer notification, else send nothing'() {
+        given:
+        OtrsTicket ticket = DomainFactory.createOtrsTicket()
+        String otrsRecipient = HelperUtils.uniqueString
+        int callCount = sendNotification ? 1 : 0
+        DomainFactory.createProcessingOptionForOtrsTicketPrefix()
+
+        trackingService.mailHelperService = Mock(MailHelperService) {
+            callCount * getOtrsRecipient() >> otrsRecipient
+            callCount * sendEmail(_, _, otrsRecipient)
+        }
+        trackingService.createNotificationTextService = Mock(CreateNotificationTextService) {
+            callCount * notification(_, _, _)
+        }
+
+        expect:
+        trackingService.sendCustomerNotification(ticket, new ProcessingStatus(), processingStep)
+
+        where:
+        processingStep                         | sendNotification
+        OtrsTicket.ProcessingStep.INSTALLATION | true
+        OtrsTicket.ProcessingStep.FASTQC       | false
+        OtrsTicket.ProcessingStep.ALIGNMENT    | true
+        OtrsTicket.ProcessingStep.SNV          | true
+    }
+
 
     void "getProcessingStatus returns expected status"() {
         given:

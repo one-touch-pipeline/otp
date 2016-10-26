@@ -17,6 +17,13 @@ import java.util.regex.*
 import static de.dkfz.tbi.otp.utils.ProcessHelperService.*
 
 class ProjectOverviewService {
+
+     static final String BWA_COMMAND = "conveyBwaCommand"
+     static final String BWA_Q_PARAMETER = "bwaQParameter"
+     static final String SAM_TOOLS_COMMAND = "samtoolsCommand"
+     static final String PICARD_MDUP_COMMAND = "picardMdupCommand"
+     static final String PICARD_MDUP_OPTIONS = "picardMdup"
+
     ExecutionService executionService
     ExecuteRoddyCommandService executeRoddyCommandService
     ProcessingOptionService processingOptionService
@@ -38,8 +45,116 @@ class ProjectOverviewService {
         return PROJECT_TO_HIDE_SAMPLE_IDENTIFIER.contains(project.name)
     }
 
+    AlignmentInfo getRoddyAlignmentInformation(RoddyWorkflowConfig workflowConfig) {
+        assert workflowConfig
 
-    Map<String, AlignmentInfo> getAlignmentInfo(Project project) throws Exception {
+        String nameInConfigFile = workflowConfig.getNameUsedInConfig()
+
+        ProcessOutput output = executeAndWait(
+                executeRoddyCommandService.roddyGetRuntimeConfigCommand(workflowConfig, nameInConfigFile, workflowConfig.seqType.roddyName)
+        )
+
+        if (output.exitCode != 0) {
+            log.debug("Alignment information can't be detected:\n${output}")
+            throw new RuntimeException("Alignment information can't be detected. Is Roddy with support for printidlessruntimeconfig installed?")
+        }
+
+        if (output.stderr.contains("The project configuration \"${nameInConfigFile}.config\" could not be found")) {
+            log.debug("Error during output of roddy:\n${output}")
+            throw new RuntimeException("Roddy could not find the configuration '${nameInConfigFile}'. Probably some access problem.")
+        }
+
+        Map<String, String> res = [:]
+        output.stdout.eachLine { String line ->
+            Matcher matcher = line =~ /(?:declare +-x +(?:-i +)?)?([^ =]*)=(.*)/
+            if (matcher.matches()) {
+                String key = matcher.group(1)
+                String value = matcher.group(2)
+                res[key] = value.startsWith("\"") && value.length() > 2 ? value.substring(1, value.length() - 1) : value
+            }
+        }
+
+        if (res.isEmpty()) {
+            log.debug("Could not extract any configuration value from the roddy output:\n${output}")
+            throw new RuntimeException("Could not extract any configuration value from the roddy output")
+        }
+
+        String bwaCommand, bwaOptions
+        if (res.get("useAcceleratedHardware") == "true") {
+            bwaCommand = res.get("BWA_ACCELERATED_BINARY")
+            bwaOptions = res.get("BWA_MEM_OPTIONS") + ' ' + res.get("BWA_MEM_CONVEY_ADDITIONAL_OPTIONS")
+        } else {
+            bwaCommand = res.get("BWA_BINARY")
+            bwaOptions = res.get("BWA_MEM_OPTIONS")
+        }
+
+        if (!bwaCommand) {
+            log.debug("Could not extract alignment configuration from output:\n${output}")
+            throw new RuntimeException("Could not extract alignment configuration value from the roddy output")
+        }
+
+        String mergeCommand, mergeOptions
+        String tool = res.get('markDuplicatesVariant')
+        if (!tool) {
+            tool = res.get("useBioBamBamMarkDuplicates") == 'true' ? MergeConstants.MERGE_TOOL_BIOBAMBAM : MergeConstants.MERGE_TOOL_PICARD
+        }
+        switch (tool) {
+            case MergeConstants.MERGE_TOOL_BIOBAMBAM:
+                mergeCommand = res.get("MARKDUPLICATES_BINARY")
+                mergeOptions = res.get("mergeAndRemoveDuplicates_argumentList")
+                break
+            case MergeConstants.MERGE_TOOL_PICARD:
+                mergeCommand = res.get("PICARD_BINARY")
+                mergeOptions = ''
+                break
+            case MergeConstants.MERGE_TOOL_SAMBAMBA:
+                mergeCommand = res.get('SAMBAMBA_MARKDUP_BINARY')
+                mergeOptions = res.get('SAMBAMBA_MARKDUP_OPTS')
+                break
+            default:
+                mergeCommand = "Unknown tool: ${tool}"
+                mergeOptions = ''
+        }
+
+        if (!mergeCommand) {
+            log.debug("Could not extract merging configuration from output:\n${output}")
+            throw new RuntimeException("Could not extract merging configuration value from the roddy output")
+        }
+
+        return new AlignmentInfo(
+                bwaCommand: bwaCommand,
+                bwaOptions: bwaOptions,
+                samToolsCommand: res.get("SAMTOOLS_BINARY"),
+                mergeCommand: mergeCommand,
+                mergeOptions: mergeOptions,
+        )
+    }
+
+    AlignmentInfo getDefaultOtpAlignmentInformation(Project project) {
+        assert project
+
+        return new AlignmentInfo(
+                bwaCommand: processingOptionService.findOptionSafe(BWA_COMMAND, null, project) + " aln",
+                bwaOptions: processingOptionService.findOptionSafe(BWA_Q_PARAMETER, null, project),
+                samToolsCommand: processingOptionService.findOptionSafe(SAM_TOOLS_COMMAND, null, project),
+                mergeCommand: processingOptionService.findOptionSafe(PICARD_MDUP_COMMAND, null, project),
+                mergeOptions: processingOptionService.findOptionSafe(PICARD_MDUP_OPTIONS, null, project),
+        )
+    }
+
+    AlignmentInfo getAlignmentInformationFromConfig(AlignmentConfig config) {
+        assert config
+
+        if (config instanceof RoddyWorkflowConfig) {
+            return getRoddyAlignmentInformation(config)
+        } else if (config instanceof Project) {
+            return getDefaultOtpAlignmentInformation(config)
+        } else {
+            throw new UnsupportedOperationException("${config} is neither a ${RoddyWorkflowConfig.simpleName} nor a ${Project.simpleName}.")
+        }
+    }
+
+    Map<String, AlignmentInfo> getAlignmentInformation(Project project) throws Exception {
         try {
             switch (applicationContext.getBean(project.alignmentDeciderBeanName).class) {
                 case PanCanAlignmentDecider:
@@ -50,76 +165,11 @@ class ProjectOverviewService {
                         if (!workflowConfig) {
                             return //pancan not configured for this seq type, skipped
                         }
-                        String nameInConfigFile = workflowConfig.getNameUsedInConfig()
-
-                        ProcessOutput output = executeAndWait(
-                                executeRoddyCommandService.roddyGetRuntimeConfigCommand(workflowConfig, nameInConfigFile, seqType.roddyName)
-                        )
-
-                        if (output.exitCode != 0) {
-                            throw new Exception("Alignment information can't be detected. Is Roddy with support for printidlessruntimeconfig installed?")
-                        }
-                        Map<String, String> res = [:]
-                        output.stdout.eachLine { String line ->
-                            Matcher matcher = line =~ /(?:declare +-x +(?:-i +)?)?([^ =]*)=(.*)/
-                            if (matcher.matches()) {
-                                String key = matcher.group(1)
-                                String value = matcher.group(2)
-                                res[key] = value.startsWith("\"") && value.length() > 2 ? value.substring(1, value.length() - 1) : value
-                            }
-                        }
-
-                        String bwaCommand, bwaOptions
-                        if (res.get("useAcceleratedHardware") == "true") {
-                            bwaCommand = res.get("BWA_ACCELERATED_BINARY")
-                            bwaOptions = res.get("BWA_MEM_OPTIONS") + res.get("BWA_MEM_CONVEY_ADDITIONAL_OPTIONS")
-                        } else {
-                            bwaCommand = res.get("BWA_BINARY")
-                            bwaOptions = res.get("BWA_MEM_OPTIONS")
-                        }
-
-                        String mergeCommand, mergeOptions
-                        String tool = res.get('markDuplicatesVariant')
-                        if (!tool) {
-                            tool = res.get("useBioBamBamMarkDuplicates") == 'true' ? MergeConstants.MERGE_TOOL_BIOBAMBAM : MergeConstants.MERGE_TOOL_PICARD
-                        }
-                        switch (tool) {
-                            case MergeConstants.MERGE_TOOL_BIOBAMBAM:
-                                mergeCommand = res.get("MARKDUPLICATES_BINARY")
-                                mergeOptions = res.get("mergeAndRemoveDuplicates_argumentList")
-                                break
-                            case MergeConstants.MERGE_TOOL_PICARD:
-                                mergeCommand = res.get("PICARD_BINARY")
-                                mergeOptions = ''
-                                break
-                            case MergeConstants.MERGE_TOOL_SAMBAMBA:
-                                mergeCommand = res.get('SAMBAMBA_MARKDUP_BINARY')
-                                mergeOptions = res.get('SAMBAMBA_MARKDUP_OPTS')
-                                break
-                            default:
-                                mergeCommand = "Unknown tool: ${tool}"
-                                mergeOptions = ''
-                        }
-
-                        AlignmentInfo alignmentInfo = new AlignmentInfo(
-                                bwaCommand: bwaCommand,
-                                bwaOptions: bwaOptions,
-                                samToolsCommand: res.get("SAMTOOLS_BINARY"),
-                                mergeCommand: mergeCommand,
-                                mergeOptions: mergeOptions,
-                        )
-                        result.put(seqType.displayName, alignmentInfo)
+                        result.put(seqType.displayName, getRoddyAlignmentInformation(workflowConfig))
                     }
                     return result
                 case DefaultOtpAlignmentDecider:
-                    AlignmentInfo alignmentInfo = new AlignmentInfo(
-                            bwaCommand: processingOptionService.findOptionSafe("conveyBwaCommand", null, project) + " aln",
-                            bwaOptions: processingOptionService.findOptionSafe("bwaQParameter", null, project),
-                            samToolsCommand: processingOptionService.findOptionSafe("samtoolsCommand", null, project),
-                            mergeCommand: processingOptionService.findOptionSafe("picardMdupCommand", null, project),
-                            mergeOptions: processingOptionService.findOptionSafe("picardMdup", null, project),
-                    )
-                    return [("OTP"): alignmentInfo]
+                    return [("OTP"): getDefaultOtpAlignmentInformation(project)]
                 case NoAlignmentDecider:
                     return null
                 default:
@@ -131,7 +181,7 @@ class ProjectOverviewService {
     }
 
     @Immutable
-    class AlignmentInfo {
+    static class AlignmentInfo {
         String bwaCommand
         String bwaOptions
         String samToolsCommand

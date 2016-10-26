@@ -18,7 +18,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
  * The script 'scripts/operations/pancan/LoadPanCanConfig.groovy' can be used to load a roddy config.
  *
  */
-class RoddyWorkflowConfig extends ConfigPerProject {
+class RoddyWorkflowConfig extends ConfigPerProject implements AlignmentConfig {
 
     //dot makes problems in roddy config identifiers, therefore an underscore is used
     final static String CONFIG_VERSION_PATTERN =  /^v\d+_\d+$/
