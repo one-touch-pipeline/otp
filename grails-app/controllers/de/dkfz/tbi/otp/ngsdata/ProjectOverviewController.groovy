@@ -3,6 +3,9 @@ package de.dkfz.tbi.otp.ngsdata
 import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig
+import de.dkfz.tbi.otp.security.Group
+import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.security.UserRole
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.CommentCommand
 import de.dkfz.tbi.otp.utils.DataTableCommand
@@ -112,6 +115,8 @@ class ProjectOverviewController {
                 project.dirName,
         )
 
+        List accessPersons = projectOverviewService.getAccessPersons(project)
+
         return [
                 projects: projects*.name,
                 project: project.name,
@@ -137,6 +142,7 @@ class ProjectOverviewController {
                 mailingListName: project.mailingListName,
                 description: project.description,
                 projectCategories: ProjectCategory.listOrderByName(),
+                accessPersons: accessPersons,
         ]
     }
 

@@ -1,12 +1,12 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.testing.*
+import de.dkfz.tbi.otp.utils.*
 import org.junit.*
-import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.*
 
-
-class ProjectOverviewServiceTests {
+class ProjectOverviewServiceTests implements UserAndRoles {
 
     @Autowired
     ProjectOverviewService projectOverviewService
@@ -85,6 +85,17 @@ class ProjectOverviewServiceTests {
 
         def list = projectOverviewService.sampleTypeByProject(project)
         assert CollectionUtils.containSame(list, [sampleType1.name, sampleType2.name, sampleType3.name])
+    }
+
+    @Test
+    void test_getAccessPersons_someData() {
+        Project project = DomainFactory.createProject()
+        createUserAndRoles()
+        DomainFactory.createAclObjects(project)
+
+        assert projectOverviewService.getAccessPersons(project).contains(ADMIN)
+        assert !projectOverviewService.getAccessPersons(project).contains(TESTUSER)
+        assert !projectOverviewService.getAccessPersons(project).contains("username")
     }
 
     private void ensureResultsAreCorrect(List result, ProcessedMergedBamFile processedMergedBamFile) {

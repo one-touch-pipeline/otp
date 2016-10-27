@@ -4,12 +4,14 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.utils.*
+import groovy.sql.Sql
 import groovy.transform.*
 import org.springframework.beans.factory.*
 import org.springframework.beans.factory.annotation.*
 import org.springframework.context.*
 import org.springframework.security.access.prepost.*
 
+import javax.sql.DataSource
 import java.util.regex.*
 
 import static de.dkfz.tbi.otp.utils.ProcessHelperService.*
@@ -20,6 +22,7 @@ class ProjectOverviewService {
     ProcessingOptionService processingOptionService
     @Autowired
     ApplicationContext applicationContext
+    DataSource dataSource
 
     static final Collection PROJECT_TO_HIDE_SAMPLE_IDENTIFIER = [
             "MMML",
@@ -414,6 +417,28 @@ where
             order("id", "desc")
         }
         return seq
+    }
+
+    public List getAccessPersons(Project project){
+        String query = """\
+        SELECT username
+        FROM users
+        JOIN user_role ON users.id = user_role.user_id
+        JOIN role AS r ON user_role.role_id = r.id
+        JOIN acl_sid ON r.authority = acl_sid.sid
+        JOIN acl_entry ON acl_sid.id = acl_entry.sid
+        JOIN acl_object_identity ON acl_entry.acl_object_identity = acl_object_identity.id
+        JOIN acl_class ON acl_object_identity.object_id_class = acl_class.id
+        WHERE object_id_identity = :projectId AND acl_class.class = :className AND NOT r.authority = 'GROUP_CO'
+        GROUP BY username ORDER BY username
+        """
+        List accessPersons = []
+        def sql = new Sql(dataSource)
+        sql.eachRow(query, [projectId: project.id, className: Project.name]){
+            accessPersons.add(it.username)
+        }
+        accessPersons.add("All members of CO group")
+        return accessPersons
     }
 }
 

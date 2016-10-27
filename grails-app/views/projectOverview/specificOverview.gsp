@@ -145,6 +145,17 @@
                     link="${g.createLink(controller: "projectOverview", action: "createContactPersonOrAddProject", params: [projectName: project])}"
                     value=""/>
         </p>
+        <br>
+        <div>
+            <h3><g:message code="projectOverview.accessPerson.headline" /></h3>
+            <ul>
+                <g:each in="${accessPersons}">
+                    <li>
+                        ${it}
+                    </li>
+                </g:each>
+            </ul>
+        </div>
         <div>
             <h3>${g.message(code: 'projectOverview.alignmentInformation.title')}</h3>
             <div class="show_button">

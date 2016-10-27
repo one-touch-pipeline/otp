@@ -7,13 +7,14 @@ import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.infrastructure.*
-import de.dkfz.tbi.otp.job.jobs.snvcalling.SnvCallingJob
+import de.dkfz.tbi.otp.job.jobs.snvcalling.*
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.Realm.Cluster
 import de.dkfz.tbi.otp.ngsdata.SampleType.SpecificReferenceGenome
 import de.dkfz.tbi.otp.tracking.*
 import de.dkfz.tbi.otp.utils.*
+import grails.plugin.springsecurity.acl.*
 import grails.util.*
 import org.joda.time.*
 
@@ -1457,4 +1458,8 @@ class DomainFactory {
 """
     }
 
+    public static void createAclObjects(Object domainObject, Map properties = [:]) {
+        AclObjectIdentity aclObjectIdentity = createDomainObject(AclObjectIdentity, [objectId: domainObject.id, aclClass: {createDomainObject(AclClass, [className: domainObject.class.name], [:])}], [:])
+        createDomainObject(AclEntry, [aclObjectIdentity: aclObjectIdentity, sid: {createDomainObject(AclSid, [sid: "ROLE_ADMIN"], properties)}], [:])
+    }
 }

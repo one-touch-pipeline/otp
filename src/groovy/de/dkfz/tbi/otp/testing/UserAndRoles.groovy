@@ -1,17 +1,20 @@
 package de.dkfz.tbi.otp.testing
 
-import de.dkfz.tbi.otp.security.Role
-import de.dkfz.tbi.otp.security.User
-import de.dkfz.tbi.otp.security.UserRole
-import static org.junit.Assert.assertNotNull
-import grails.plugin.springsecurity.acl.AclSid
-import grails.plugin.springsecurity.acl.AclUtilService
-import grails.plugin.springsecurity.SpringSecurityService
+import de.dkfz.tbi.otp.security.*
+import grails.plugin.springsecurity.*
+import grails.plugin.springsecurity.acl.*
+
+import static org.junit.Assert.*
 
 trait UserAndRoles {
 
     SpringSecurityService springSecurityService
     AclUtilService aclUtilService
+
+    final static String ADMIN = "admin"
+    final static String OPERATOR = "operator"
+    final static String TESTUSER = "testuser"
+    final static String USER = "user"
 
     /**
      * Creates four users and their roles:
@@ -21,7 +24,7 @@ trait UserAndRoles {
      * @li admin with password 1234 and ROLE_ADMIN and ROLE_USER
      */
     void createUserAndRoles() {
-        User user = new User(username: "testuser",
+        User user = new User(username: TESTUSER,
                 password: springSecurityService.encodePassword("secret"),
                 userRealName: "Test",
                 email: "test@test.com",
@@ -31,7 +34,7 @@ trait UserAndRoles {
                 passwordExpired: false)
         assertNotNull(user.save(flush: true))
         assertNotNull(new AclSid(sid: user.username, principal: true).save(flush: true))
-        User user2 = new User(username: "user",
+        User user2 = new User(username: USER,
                 password: springSecurityService.encodePassword("verysecret"),
                 userRealName: "Test2",
                 email: "test2@test.com",
@@ -41,7 +44,7 @@ trait UserAndRoles {
                 passwordExpired: false)
         assertNotNull(user2.save(flush: true))
         assertNotNull(new AclSid(sid: user2.username, principal: true).save(flush: true))
-        User operator = new User(username: "operator",
+        User operator = new User(username: OPERATOR,
                 password: springSecurityService.encodePassword("verysecret"),
                 userRealName: "Operator",
                 email: "test2@test.com",
@@ -51,7 +54,7 @@ trait UserAndRoles {
                 passwordExpired: false)
         assertNotNull(operator.save(flush: true))
         assertNotNull(new AclSid(sid: operator.username, principal: true).save(flush: true))
-        User admin = new User(username: "admin",
+        User admin = new User(username: ADMIN,
                 password: springSecurityService.encodePassword("1234"),
                 userRealName: "Administrator",
                 email: "admin@test.com",
