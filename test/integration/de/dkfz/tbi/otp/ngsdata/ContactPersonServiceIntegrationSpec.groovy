@@ -2,21 +2,23 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.testing.UserAndRoles
 import spock.lang.Specification
-import spock.lang.Unroll
-import grails.buildtestdata.mixin.Build
 import grails.plugin.springsecurity.SpringSecurityUtils
 
 class ContactPersonServiceIntegrationSpec extends Specification implements UserAndRoles{
     ContactPersonService contactPersonService = new ContactPersonService()
+    ProjectContactPerson projectContactPerson = new ProjectContactPerson()
 
     def setup() {
         createUserAndRoles()
         Project project01 = DomainFactory.createProject(name: "project01")
-        Project project02 = DomainFactory.createProject(name: "project02")
+        DomainFactory.createProject(name: "project02")
         DomainFactory.createProject(name: "project03")
-        ContactPerson contactPerson01 = createContactPerson("TestName", "test@dkfz.de", "", project01)
-        addProject(project02, contactPerson01)
-        createContactPerson("TestName2", "test2@dkfz.de", "", project02)
+        DomainFactory.createContactPersonRole(name: "PI")
+        DomainFactory.createContactPersonRole(name: "OTHER")
+        ContactPerson contactPerson01 = createContactPerson("TestName", "test@dkfz.de", "")
+        createContactPerson("TestName2", "test2@dkfz.de", "")
+        createContactPerson("TestName3", "test3@dkfz.de", "")
+        projectContactPerson = DomainFactory.createProjectContactPerson(project: project01, contactPerson: contactPerson01)
     }
 
     void "test createContactPerson valid input"() {
@@ -25,12 +27,12 @@ class ContactPersonServiceIntegrationSpec extends Specification implements UserA
 
         when:
         SpringSecurityUtils.doWithAuth("operator") {
-            contactPerson = contactPersonService.createContactPerson(name, email, aspera, getProject("01"))
+            contactPersonService.createContactPerson(name, email, aspera, getProject("03"), getContactPersonRole())
         }
+        contactPerson = ContactPerson.findByFullName(name)
 
         then:
-        contactPerson == ContactPerson.findByFullName(name)
-        contactPerson.projects.contains(getProject("01"))
+        ProjectContactPerson.findByContactPerson(contactPerson).getProject() == getProject("03")
 
         where:
         name        | email             | aspera
@@ -41,8 +43,8 @@ class ContactPersonServiceIntegrationSpec extends Specification implements UserA
     void "test createContactPerson invalid input"() {
         expect:
         SpringSecurityUtils.doWithAuth("operator") {
-            shouldFail(AssertionError){
-                contactPersonService.createContactPerson(name, email, "", getProject("01"))
+            shouldFail(AssertionError) {
+                contactPersonService.createContactPerson(name, email, "", getProject("01"), getContactPersonRole())
             }
         }
 
@@ -56,24 +58,23 @@ class ContactPersonServiceIntegrationSpec extends Specification implements UserA
         "newUser"   | ""
     }
 
-    void "test addProject valid input"() {
+    void "test addContactPersonToProject valid input"() {
         given:
-        ContactPerson contactPerson = ContactPerson.findByFullName("TestName")
-
+        ContactPerson contactPerson = ContactPerson.findByFullName("TestName2")
         when:
         SpringSecurityUtils.doWithAuth("operator") {
-            contactPersonService.addProject("TestName", getProject("03"))
+            contactPersonService.addContactPersonToProject("TestName2", getProject("02"), getContactPersonRole())
         }
 
         then:
-        contactPerson.projects.contains(getProject("03"))
+        ProjectContactPerson.findByContactPersonAndProject(contactPerson, getProject("02"))
     }
 
-    void "test addProject invalid input"() {
+    void "test addContactPersonToProject invalid input"() {
         expect:
         SpringSecurityUtils.doWithAuth("operator") {
-            shouldFail(AssertionError){
-                contactPersonService.addProject(name, getProject("01"))
+            shouldFail(AssertionError) {
+                contactPersonService.addContactPersonToProject(name, getProject("01"), getContactPersonRole())
             }
         }
 
@@ -87,46 +88,20 @@ class ContactPersonServiceIntegrationSpec extends Specification implements UserA
         "newUser"   | _
     }
 
-    void "test removeProjectAndDeleteContactPerson valid input"() {
+    void "test removeContactPersonFromProject valid input"() {
         given:
         ContactPerson contactPerson = ContactPerson.findByFullName("TestName")
+        ContactPersonRole contactPersonRole = ContactPersonRole.findByName("PI")
+        ProjectContactPerson projectContactPerson = DomainFactory.createProjectContactPerson(project: getProject("01"),
+                contactPersonRole: contactPersonRole, contactPerson: contactPerson)
 
         when:
         SpringSecurityUtils.doWithAuth("operator") {
-            contactPersonService.removeProjectAndDeleteContactPerson("TestName", getProject("02"))
+            contactPersonService.removeContactPersonFromProject(projectContactPerson)
         }
 
         then:
-        !contactPerson.projects.contains(getProject("02"))
-    }
-
-    void "test removeProjectAndDeleteContactPerson valid input and delete ContactPerson"() {
-
-        when:
-        SpringSecurityUtils.doWithAuth("operator") {
-            contactPersonService.removeProjectAndDeleteContactPerson("TestName2", getProject("02"))
-        }
-
-        then:
-        !ContactPerson.findByFullName("TestName2")
-    }
-
-    void "test removeProjectAndDeleteContactPerson invalid input"() {
-        expect:
-        SpringSecurityUtils.doWithAuth("operator") {
-            shouldFail(AssertionError){
-                contactPersonService.removeProjectAndDeleteContactPerson(name, getProject("01"))
-            }
-        }
-
-        where:
-        name        | _
-        and: 'empty name'
-        ""          | _
-        and: 'Unknown name'
-        "newUser"   | _
-        and: 'Not on the Project'
-        "TestName2"   | _
+        !ProjectContactPerson.findByProjectAndContactPersonAndContactPersonRole(getProject("01"), contactPerson, contactPersonRole)
     }
 
     void "test updateName valid input"() {
@@ -135,7 +110,7 @@ class ContactPersonServiceIntegrationSpec extends Specification implements UserA
 
         when:
         SpringSecurityUtils.doWithAuth("operator") {
-            contactPersonService.updateName("TestName", "newName")
+            contactPersonService.updateName(contactPerson, "newName")
         }
 
         then:
@@ -143,24 +118,28 @@ class ContactPersonServiceIntegrationSpec extends Specification implements UserA
         !ContactPerson.findByFullName("TestName")
     }
 
-    void "test updateName invalid input"() {
+    void "test updateName invalid input no name"() {
+        given:
+        ContactPerson contactPerson = ContactPerson.findByFullName("TestName")
+
         expect:
         SpringSecurityUtils.doWithAuth("operator") {
             shouldFail(AssertionError){
-                contactPersonService.updateName(oldName, newName)
+                contactPersonService.updateName(contactPerson, "")
             }
         }
+    }
 
-        where:
-        oldName     | newName
-        and: 'empty oldName'
-        ""          | "newName"
-        and: 'Unknown name'
-        "newUser"   | "newName"
-        and: 'empty newName'
-        "TestName" | ""
-        and: 'Duplicate name'
-        "TestName" | "TestName2"
+    void "test updateName invalid input duplicate name"() {
+        given:
+        ContactPerson contactPerson = ContactPerson.findByFullName("TestName")
+
+        expect:
+        SpringSecurityUtils.doWithAuth("operator") {
+            shouldFail(AssertionError){
+                contactPersonService.updateName(contactPerson, "TestName")
+            }
+        }
     }
 
     void "test updateEmail valid input"() {
@@ -169,7 +148,7 @@ class ContactPersonServiceIntegrationSpec extends Specification implements UserA
 
         when:
         SpringSecurityUtils.doWithAuth("operator") {
-            contactPersonService.updateEmail("TestName", "newUser@dkfz.de")
+            contactPersonService.updateEmail(contactPerson, "newUser@dkfz.de")
         }
 
         then:
@@ -177,10 +156,13 @@ class ContactPersonServiceIntegrationSpec extends Specification implements UserA
     }
 
     void "test updateEmail invalid input"() {
+        given:
+        ContactPerson contactPerson = ContactPerson.findByFullName("TestName")
+
         expect:
         SpringSecurityUtils.doWithAuth("operator") {
             shouldFail(AssertionError){
-                contactPersonService.updateEmail("TestName", "")
+                contactPersonService.updateEmail(contactPerson, "")
             }
         }
     }
@@ -191,29 +173,45 @@ class ContactPersonServiceIntegrationSpec extends Specification implements UserA
 
         when:
         SpringSecurityUtils.doWithAuth("operator") {
-            contactPersonService.updateAspera("TestName", "newUser")
+            contactPersonService.updateAspera(contactPerson, "newUser")
         }
 
         then:
         contactPerson.aspera == "newUser"
     }
 
-    private ContactPerson createContactPerson(String name, String email, String aspera, Project project){
+    void "test updateRole valid input"() {
+        given:
+        ContactPerson contactPerson = ContactPerson.findByFullName("TestName")
+        Project project = Project.findByName("project03")
+        ContactPersonRole contactPersonRole = ContactPersonRole.findByName("OTHER")
+        ProjectContactPerson projectContactPerson = DomainFactory.createProjectContactPerson(contactPerson : contactPerson,
+                project: project, contactPersonRole: contactPersonRole)
+
+        when:
+        SpringSecurityUtils.doWithAuth("operator") {
+            contactPersonService.updateRole(projectContactPerson, getContactPersonRole())
+        }
+
+        then:
+        projectContactPerson.contactPersonRole.name == "PI"
+    }
+
+    private static ContactPerson createContactPerson(String name, String email, String aspera) {
         ContactPerson contactPerson = new ContactPerson(
                 fullName: name,
                 email: email,
                 aspera: aspera
         )
         assert contactPerson.save(flush: true, failOnError: true)
-        project.addToContactPersons(contactPerson)
-        assert project.save(flush: true, failOnError: true)
         return contactPerson
     }
-    private void addProject(Project project, ContactPerson contactPerson) {
-        project.addToContactPersons(contactPerson)
-        assert project.save(flush: true, failOnError: true)
-    }
-    private Project getProject(String name){
+
+    private Project getProject(String name) {
         return Project.findByName("project"+name)
+    }
+
+    private static ContactPersonRole getContactPersonRole() {
+        return ContactPersonRole.findByName("PI")
     }
 }

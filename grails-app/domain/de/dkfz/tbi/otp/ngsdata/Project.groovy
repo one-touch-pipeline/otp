@@ -53,10 +53,6 @@ class Project implements Commentable, Entity {
             projectGroup: ProjectGroup
     ]
 
-    static hasMany =  [
-            contactPersons: ContactPerson
-    ]
-
     static constraints = {
         name(blank: false, unique: true, validator: {val, obj ->
             Project project = atMostOneElement(Project.findAllByNameInMetadataFiles(val))

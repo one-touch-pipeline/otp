@@ -111,32 +111,33 @@ $.otp.projectOverviewTable = {
         });
     },
 
-    deleteUser: function (contactPersonName) {
-        "use strict";
-        $.ajax({
-            type: 'GET',
-            url: $.otp.createLink({
-                controller: 'projectOverview',
-                action: 'deleteContactPersonOrRemoveProject'
-            }),
-            dataType: 'json',
-            cache: 'false',
-            data: {
-                contactPersonName: contactPersonName,
-                projectName: $('#project_select').val()
-            },
-            success: function (data) {
-                if (data.success) {
-                    $.otp.infoMessage($L("editorswitch.notification.success"));
-                    window.setTimeout('location.reload()', 500);
-                } else {
-                    $.otp.warningMessage(data.error);
+    deleteUser: function() {
+        $('.deletePerson').on('click', function (event) {
+            "use strict";
+            $.ajax({
+                type: 'GET',
+                url: $.otp.createLink({
+                    controller: 'projectOverview',
+                    action: 'deleteContactPersonOrRemoveProject'
+                }),
+                dataType: 'json',
+                cache: 'false',
+                data: {
+                    "projectContactPerson.id": $(event.target).data("id")
+                },
+                success: function (data) {
+                    if (data.success) {
+                        $.otp.infoMessage($L("editorswitch.notification.success"));
+                        $(event.target).parents("tr").remove();
+                    } else {
+                        $.otp.warningMessage(data.error);
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    $.otp.warningMessage($L("editorswitch.notification.error", textStatus, errorThrown));
                 }
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                $.otp.warningMessage($L("editorswitch.notification.error", textStatus, errorThrown));
-            }
-        });
+            });
+        })
     },
 
     updateValue: function (property, contactPersonName, value, account) {
@@ -169,43 +170,6 @@ $.otp.projectOverviewTable = {
                 }
             });
         }
-    },
-
-    specificOverview: function () {
-        "use strict";
-        $.getJSON($.otp.createLink({
-                controller: 'projectOverview',
-                action: 'contactPersons'
-            }),
-            function (data) {
-                $("input:text[name=Name]").autocomplete({
-                    source: data
-            });
-        });
-        var oTable = $.otp.projectOverviewTable.registerDataTable(
-            '#listContactPerson',
-            $.otp.createLink({
-                controller: 'projectOverview',
-                action: 'dataTableContactPerson',
-                parameters: {projectName : $('#project_select').val()}
-            }),
-            function (json) {
-                for (var i = 0; i < json.aaData.length; i += 1) {
-                    var row = json.aaData[i];
-                    var contactPersonName = row[0];
-                    var contactPersonEmail = row[1];
-                    var contactPersonAspera = row[2];
-                    row[1] ='<input class= "edit-button-left" type="button" onclick="$.otp.projectOverviewTable.updateValue(\'Name\',\'' + contactPersonName + '\',\'' + contactPersonName + '\')"/>';
-                    row[2] = contactPersonEmail;
-                    row[3] ='<input class= "edit-button-left" type="button" onclick="$.otp.projectOverviewTable.updateValue(\'Email\',\'' + contactPersonName + '\',\'' + contactPersonEmail + '\')"/>';
-                    row[4] = contactPersonAspera;
-                    row[5] = '<input class= "edit-button-left" type="button" onclick="$.otp.projectOverviewTable.updateValue(\'Aspera\',\'' + contactPersonName + '\',\'' + contactPersonAspera + '\',\' Account\')"/>';
-                    row[6] = '<input type="button" value="Delete" onclick="$.otp.projectOverviewTable.deleteUser(\'' + contactPersonName + '\')"/>';
-                }
-                return json;
-            }
-        );
-        $.otp.projectOverviewTable.updateDates();
     },
 
     referenceGenome: function () {

@@ -817,6 +817,19 @@ class DomainFactory {
         ], projectProperties)
     }
 
+    public static ProjectContactPerson createProjectContactPerson(Map projectContactPersonProperties = [:]) {
+        return createDomainObject(ProjectContactPerson, [
+                project          : { createProject() },
+                contactPersonRole: { createContactPersonRole() },
+        ], projectContactPersonProperties)
+    }
+
+    public static ContactPersonRole createContactPersonRole(Map contactPersonRoleProperties = [:]) {
+        return createDomainObject(ContactPersonRole, [
+                name: 'roleName',
+        ], contactPersonRoleProperties)
+    }
+
     public static Project createProjectWithRealms(Map projectProperties = [:]) {
         Project project = createProject(projectProperties)
         createRealmDataManagement(name: project.realmName)

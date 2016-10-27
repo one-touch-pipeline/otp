@@ -162,7 +162,6 @@ $(function() {
         });
         $("p.edit-switch-drop-down-editor", outerContainer).hide();
         $("p.edit-switch-drop-down-label", outerContainer).show();
-        window.setTimeout('location.reload()', 300); //reloads page after 0.3 seconds
     });
 
     /*jslint unparam: true */
@@ -249,7 +248,9 @@ $(function() {
                 model: $("input:text[name=Model]", container).val(),
                 kit: $("input:text[name=Kit]", container).val(),
                 email: $("input:text[name=E-Mail]", container).val(),
-                aspera: $("input:text[name='Aspera Account']", container).val()
+                aspera: $("input:text[name='Aspera Account']", container).val(),
+                role: $("select[name='Role']", container).val()
+
             },
             success: function (data) {
                 if (data.success) {

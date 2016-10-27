@@ -93,23 +93,56 @@
             <h3 class="statisticTitle">
                 <g:message code="projectOverview.contactPerson.headline" />
             </h3>
-            <otp:dataTable
-                codes="${[
-                        'projectOverview.contactPerson.name',
-                        'otp.blank',
-                        'projectOverview.contactPerson.email',
-                        'otp.blank',
-                        'projectOverview.contactPerson.aspera',
-                        'otp.blank',
-                        'otp.blank'
-                    ] }"
-                    id="listContactPerson" />
+            <table>
+                <tr>
+                    <td><g:message code="projectOverview.contactPerson.name"/></td>
+                    <td><g:message code="projectOverview.contactPerson.email"/></td>
+                    <td><g:message code="projectOverview.contactPerson.aspera"/></td>
+                    <td><g:message code="projectOverview.contactPerson.role"/></td>
+                    <td></td>
+                </tr>
+               <g:each in="${projectContactPersons}" var="projectContactPerson">
+                    <tr>
+                        <td>
+                            <otp:editorSwitch
+                                roles="ROLE_OPERATOR"
+                                link="${g.createLink(controller: 'projectOverview', action: 'updateName', params: ["contactPerson.id": projectContactPerson.contactPerson.id])}"
+                                value="${projectContactPerson.contactPerson.fullName}"
+                                values="${projectContactPersons}"/>
+                        </td>
+                        <td>
+                            <otp:editorSwitch
+                                roles="ROLE_OPERATOR"
+                                link="${g.createLink(controller: 'projectOverview', action: 'updateEmail', params: ["contactPerson.id": projectContactPerson.contactPerson.id])}"
+                                value="${projectContactPerson.contactPerson.email}"
+                                values="${projectContactPersons}"/>
+                        </td>
+                        <td>
+                            <otp:editorSwitch
+                                    roles="ROLE_OPERATOR"
+                                    link="${g.createLink(controller: 'projectOverview', action: 'updateAspera', params: ["contactPerson.id": projectContactPerson.contactPerson.id])}"
+                                    value="${projectContactPerson.contactPerson.aspera}"
+                                    values="${projectContactPersons}"/>
+                        </td>
+                        <td>
+                            <otp:editorSwitch
+                                    roles="ROLE_OPERATOR"
+                                    template="dropDown"
+                                    link="${g.createLink(controller: 'projectOverview', action: 'updateRole', params: ["projectContactPerson.id": projectContactPerson.id])}"
+                                    value="${projectContactPerson.contactPersonRole?.name ?: ''} "
+                                    values="${roleDropDown}"/>
+                        </td>
+                        <td><input type="button" class="deletePerson" value="Delete" data-id="${projectContactPerson.id}"/></td>
+                    </tr>
+               </g:each>
+            </table>
         </div>
         <p>
             <otp:editorSwitch roles="ROLE_OPERATOR"
                     template="newFreeTextValues"
                     fields="${["Name","E-Mail","Aspera Account"]}"
-                    link="${g.createLink(controller: "projectOverview", action: "createContactPersonOrAddProject", id: project)}"
+                    dropDowns="${[Role: roleDropDown]}"
+                    link="${g.createLink(controller: "projectOverview", action: "createContactPersonOrAddProject", params: [projectName: project])}"
                     value=""/>
         </p>
         <div>
@@ -216,9 +249,9 @@
     </div>
     <asset:script>
         $(function() {
-            $.otp.projectOverviewTable.specificOverview();
             $.otp.projectOverviewTable.referenceGenome();
             $.otp.initCommentBox(${id}, "#projectCommentBox");
+            $.otp.projectOverviewTable.deleteUser();
         });
     </asset:script>
 </body>

@@ -83,6 +83,9 @@ class ProjectOverviewController {
         List thresholdsTable = []
         List configTable
 
+        List<ProjectContactPerson> projectContactPersons = ProjectContactPerson.findAllByProject(project)
+        List<String> contactPersonRoles = [''] + ContactPersonRole.findAll()*.name
+
         thresholdsTable.add(buildHeadline())
         sampleTypePerProjectService.findByProject(project).each() { sampleTypePerProject ->
             List row = []
@@ -119,6 +122,8 @@ class ProjectOverviewController {
                 alignmentInfo: alignmentInfo,
                 alignmentError: alignmentError,
                 snv: project.snv,
+                projectContactPersons: projectContactPersons,
+                roleDropDown: contactPersonRoles,
                 thresholdsHeadline: thresholdsHeadline,
                 thresholdsTable: thresholdsTable,
                 configTableHeadline: configTableHeadline,
@@ -343,26 +348,34 @@ class ProjectOverviewController {
             return
         }
         if (ContactPerson.findByFullName(cmd.name)) {
-            checkErrorAndCallMethod(cmd, { contactPersonService.addProject(cmd.name, projectService.getProjectByName(cmd.projectName)) })
+            checkErrorAndCallMethod(cmd, { contactPersonService.addContactPersonToProject(cmd.name, cmd.project, cmd.contactPersonRole) })
         } else {
-            checkErrorAndCallMethod(cmd, { contactPersonService.createContactPerson(cmd.name, cmd.email, cmd.aspera, projectService.getProjectByName(cmd.projectName)) })
+            checkErrorAndCallMethod(cmd, { contactPersonService.createContactPerson(cmd.name, cmd.email, cmd.aspera, cmd.project, cmd.contactPersonRole) })
         }
     }
 
+    static ContactPersonRole getContactPersonRoleByName(String roleName) {
+        return roleName.isEmpty() ? null : CollectionUtils.exactlyOneElement(ContactPersonRole.findAllByName(roleName))
+    }
+
     JSON deleteContactPersonOrRemoveProject(UpdateDeleteContactPersonCommand cmd){
-        checkErrorAndCallMethod(cmd, { contactPersonService.removeProjectAndDeleteContactPerson(cmd.contactPersonName, projectService.getProjectByName(cmd.projectName)) })
+        checkErrorAndCallMethod(cmd, { contactPersonService.removeContactPersonFromProject(cmd.projectContactPerson) })
     }
 
     JSON updateName(UpdateContactPersonNameCommand cmd) {
-        checkErrorAndCallMethod(cmd, { contactPersonService.updateName(cmd.contactPersonName, cmd.newName) })
+        checkErrorAndCallMethod(cmd, { contactPersonService.updateName(cmd.contactPerson, cmd.newName) })
     }
 
     JSON updateEmail(UpdateContactPersonEmailCommand cmd) {
-        checkErrorAndCallMethod(cmd, { contactPersonService.updateEmail(cmd.contactPersonName, cmd.newEmail) })
+        checkErrorAndCallMethod(cmd, { contactPersonService.updateEmail(cmd.contactPerson, cmd.newEmail) })
     }
 
     JSON updateAspera(UpdateContactPersonAsperaCommand cmd) {
-        checkErrorAndCallMethod(cmd, { contactPersonService.updateAspera(cmd.contactPersonName, cmd.newAspera) })
+        checkErrorAndCallMethod(cmd, { contactPersonService.updateAspera(cmd.contactPerson, cmd.newAspera) })
+    }
+
+    JSON updateRole(UpdateContactPersonRoleCommand cmd) {
+        checkErrorAndCallMethod(cmd, { contactPersonService.updateRole(cmd.projectContactPerson, getContactPersonRoleByName(cmd.newRole)) })
     }
 
     JSON updateAnalysisDirectory(UpdateAnalysisDirectoryCommand cmd) {
@@ -383,25 +396,6 @@ class ProjectOverviewController {
 
     JSON updateDescription(UpdateDescriptionCommand cmd) {
         checkErrorAndCallMethod(cmd, { projectService.updateDescription(cmd.description, projectService.getProjectByName(cmd.projectName)) })
-    }
-
-    JSON dataTableContactPerson(DataTableCommand cmd) {
-        Map dataToRender = cmd.dataToRender()
-        List data = ContactPerson.withCriteria
-        {
-            projects {
-                eq ('name', params.projectName)
-            }
-            projections {
-                property('fullName')
-                property('email')
-                property('aspera')
-            }
-        }
-        dataToRender.iTotalRecords = data.size()
-        dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
-        dataToRender.aaData = data
-        render dataToRender as JSON
     }
 
     JSON updateDates(String projectName) {
@@ -502,11 +496,12 @@ class UpdateContactPersonCommand implements Serializable {
     String name
     String email
     String aspera
-    String projectName
+    ContactPersonRole contactPersonRole
+    Project project
     static constraints = {
         name(blank: false, validator: {val, obj ->
             ContactPerson contactPerson = ContactPerson.findByFullName(val)
-            if (contactPerson?.projects?.contains(Project.findByName(obj.projectName))) {
+            if (ProjectContactPerson.findByContactPersonAndProject(contactPerson, obj.project)) {
                 return 'Duplicate'
             } else if (contactPerson && obj.email != "" && obj.email != contactPerson.email) {
                 return 'There is already a Person with \'' + contactPerson.fullName + '\' as Name and \'' + contactPerson.email + '\' as Email in the Database'
@@ -516,10 +511,11 @@ class UpdateContactPersonCommand implements Serializable {
                 return 'Empty'
             }})
         aspera(blank: true)
-        projectName(blank: false, validator: {val, obj ->
-            if (!Project.findByName(val)) {
+        project(blank: false, validator: {val, obj ->
+            if (!ProjectContactPerson.findByProject(val)) {
                 return 'No Project'
             }})
+        contactPersonRole(nullable: true)
     }
     void setName(String name) {
         this.name = name?.trim()?.replaceAll(" +", " ")
@@ -530,37 +526,29 @@ class UpdateContactPersonCommand implements Serializable {
     void setAspera(String aspera) {
         this.aspera = aspera?.trim()?.replaceAll(" +", " ")
     }
-    void setId(String id) {
-        this.projectName = id
+    void setProjectName(String projectName) {
+        this.project = Project.findByName(projectName)
+    }
+    void setRole(String role) {
+        this.contactPersonRole = ProjectOverviewController.getContactPersonRoleByName(role)
     }
 }
 
 class UpdateDeleteContactPersonCommand implements Serializable {
-    String contactPersonName
-    String projectName
-    static constraints = {
-        contactPersonName(blank: false, validator: {val, obj ->
-            if (!ContactPerson.findByFullName(val)) {
-                return 'No ContactPerson'
-            }})
-        projectName(blank: false)
-    }
+    ProjectContactPerson projectContactPerson
 }
 
 class UpdateContactPersonNameCommand implements Serializable {
-    String contactPersonName
+    ContactPerson contactPerson
     String newName
     static constraints = {
-        contactPersonName(blank: false, validator: {val, obj ->
-            if (!ContactPerson.findByFullName(val)) {
-                return 'No ContactPerson'
-            }})
         newName(blank: false, validator: {val, obj ->
-            if (val == obj.contactPersonName) {
+            if (val == obj.contactPerson?.fullName) {
                 return 'No Change'
             } else if (ContactPerson.findByFullName(val)) {
                 return 'Duplicate'
-            }})
+            }
+        })
     }
     void setValue(String value) {
         this.newName = value?.trim()?.replaceAll(" +", " ")
@@ -568,16 +556,14 @@ class UpdateContactPersonNameCommand implements Serializable {
 }
 
 class UpdateContactPersonEmailCommand implements Serializable {
-    String contactPersonName
+    ContactPerson contactPerson
     String newEmail
     static constraints = {
-        contactPersonName(blank: false, validator: {val, obj ->
-            if (!ContactPerson.findByFullName(val)) {
-                return 'No ContactPerson'
-            }})
         newEmail(email:true, blank: false ,validator: {val, obj ->
-            if (ContactPerson.findByFullName(obj.contactPersonName).email == val) {
+            if (val == obj.contactPerson?.email) {
                 return 'No Change'
+            } else if (ContactPerson.findByEmail(val)) {
+                return 'Duplicate'
             }
         })
     }
@@ -587,20 +573,25 @@ class UpdateContactPersonEmailCommand implements Serializable {
 }
 
 class UpdateContactPersonAsperaCommand implements Serializable {
-    String contactPersonName
+    ContactPerson contactPerson
     String newAspera
     static constraints = {
-        contactPersonName(blank: false, validator: {val, obj ->
-            if (!ContactPerson.findByFullName(val)) {
-                return 'No ContactPerson'
-            }})
         newAspera(blank: true, validator: {val, obj ->
-            if (ContactPerson.findByFullName(obj.contactPersonName).aspera == val) {
+            if (val == obj.contactPerson?.aspera) {
                 return 'No Change'
-            }})
+            }
+        })
     }
     void setValue(String value) {
         this.newAspera = value?.trim()?.replaceAll(" +", " ")
+    }
+}
+
+class UpdateContactPersonRoleCommand implements Serializable {
+    ProjectContactPerson projectContactPerson
+    String newRole
+    void setValue(String value) {
+        this.newRole = value
     }
 }
 

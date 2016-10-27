@@ -8,14 +8,8 @@ class ContactPerson implements Entity {
     String email
     String aspera
 
-    static belongsTo = Project
-
-    static hasMany =  [
-            projects: Project
-    ]
-
     static constraints = {
-        fullName(blank: false, unqiue: true)
+        fullName(blank: false, unique: true)
         email(email:true)
         aspera(blank: true, nullable: true)
     }
