@@ -24,6 +24,7 @@
                             <option value="individualSearch"><g:message code="sequence.search.individual"/></option>
                             <option value="sampleTypeSelection"><g:message code="sequence.search.sample"/></option>
                             <option value="seqTypeSelection"><g:message code="sequence.search.seqType"/></option>
+                            <option value="ilseIdSearch"><g:message code="sequence.search.ilse"/></option>
                             <option value="libraryLayoutSelection"><g:message code="sequence.search.libLayout"/></option>
                             <option value="seqCenterSelection"><g:message code="sequence.search.seqCenter"/></option>
                             <option value="runSearch"><g:message code="sequence.search.run"/></option>
@@ -34,6 +35,7 @@
                         <input class="criteria" type="text" name="individualSearch" style="display: none" placeholder="min. 3 characters"/>
                         <g:select class="criteria" name="sampleTypeSelection" from="${sampleTypes}" optionValue="name" optionKey="id" style="display: none"/>
                         <g:select class="criteria" name="seqTypeSelection" from="${seqTypes}" style="display: none"/>
+                        <input class="criteria" type="text" name="ilseIdSearch" style="display: none"/>
                         <g:select class="criteria" name="libraryLayoutSelection" from="${libraryLayouts}" style="display: none"/>
                         <g:select class="criteria" name="seqCenterSelection" from="${seqCenters}" optionValue="name" optionKey="id" style="display: none"/>
                         <input class="criteria" type="text" name="runSearch" style="display: none" placeholder="min. 3 characters"/>

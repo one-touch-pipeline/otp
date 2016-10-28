@@ -163,7 +163,7 @@ class SequenceFiltering {
     List<Long> sampleType = []
     List<String> seqType = []
     List<String> libraryLayout = []
-    List<String> ilseId = []
+    List<Integer> ilseId = []
     List<Long> seqCenter = []
     List<String> run = []
 
@@ -198,6 +198,12 @@ class SequenceFiltering {
                 case "seqTypeSelection":
                     if (it.value) {
                         filtering.seqType << it.value
+                        filtering.enabled = true
+                    }
+                    break
+                case "ilseIdSearch":
+                    if (it.value) {
+                        filtering.ilseId << (it.value as Integer)
                         filtering.enabled = true
                     }
                     break
