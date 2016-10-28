@@ -27,8 +27,8 @@
                 <td><g:textField name="directory" size="130" value="${cmd.directory}"/></td>
             </tr>
             <tr>
-                <td class="myKey"><g:message code="createProject.directoryAnalysis"/></td>
-                <td><g:textField name="directoryAnalysis" size="130" value="${cmd.analysisDirectory}"/></td>
+                <td class="myKey"><g:message code="createProject.analysisDirectory"/></td>
+                <td><g:textField name="analysisDirectory" size="130" value="${cmd.analysisDirectory}"/></td>
             </tr>
             <tr>
                 <td class="myKey"><g:message code="createProject.metadata.name"/></td>
