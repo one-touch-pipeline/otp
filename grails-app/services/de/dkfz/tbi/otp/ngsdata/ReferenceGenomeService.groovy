@@ -121,6 +121,13 @@ class ReferenceGenomeService {
         return checkFileExistence(file, checkExistence)
     }
 
+    public File chromosomeLengthFile(MergingWorkPackage mergingWorkPackage, boolean checkExistence = true) {
+        assert mergingWorkPackage, "The mergingWorkPackage is not specified"
+        assert mergingWorkPackage.referenceGenome.chromosomeLengthFilePath : "No chromosome length file path is defined for ${mergingWorkPackage}"
+        File file = new File(pathToChromosomeSizeFilesPerReference(mergingWorkPackage.project, mergingWorkPackage.referenceGenome, checkExistence), mergingWorkPackage.referenceGenome.chromosomeLengthFilePath)
+        return checkFileExistence(file, checkExistence)
+    }
+
 
     private File checkFileExistence(File file, boolean checkExistence) {
         if (!checkExistence || file.canRead()) {

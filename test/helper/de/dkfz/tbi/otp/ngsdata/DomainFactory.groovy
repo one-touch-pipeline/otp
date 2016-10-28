@@ -29,6 +29,7 @@ class DomainFactory {
     @Deprecated
     static final String DEFAULT_MD5_SUM = HelperUtils.randomMd5sum
     static final String DEFAULT_TAB_FILE_NAME = 'DefaultTabFileName.tab'
+    static final String DEFAULT_CHROMOSOME_LENGTH_FILE_NAME = 'DefaultChromosomeLengthFileName.tsv'
     static final String DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY = 'exec_123456_123456789_test_test'
     static final long DEFAULT_FILE_SIZE = 123456
     static final String TEST_CONFIG_VERSION = 'v1_0'

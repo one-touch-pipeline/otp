@@ -15,13 +15,15 @@ class ReferenceGenomeServiceTests {
 
     File directory
     File statFile
+    File chromosomeLengthFile
 
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder()
 
-    private MergingWorkPackage createDataForChromosomeStatSizeFile()  {
+    private MergingWorkPackage createDataForChromosomeSizeInformationFiles()  {
         MergingWorkPackage mergingWorkPackage = MergingWorkPackage.build (
                 statSizeFileName: DomainFactory.DEFAULT_TAB_FILE_NAME,
+                referenceGenome: DomainFactory.createReferenceGenome(chromosomeLengthFilePath: DomainFactory.DEFAULT_CHROMOSOME_LENGTH_FILE_NAME),
                 pipeline: DomainFactory.createPanCanPipeline(),
         )
         Realm realm = Realm.build([
@@ -37,6 +39,7 @@ class ReferenceGenomeServiceTests {
                         mergingWorkPackage.referenceGenome.path),
                 ReferenceGenomeService.CHROMOSOME_SIZE_FILES_PREFIX)
         statFile = new File(directory, DomainFactory.DEFAULT_TAB_FILE_NAME)
+        chromosomeLengthFile = new File(directory, DomainFactory.DEFAULT_CHROMOSOME_LENGTH_FILE_NAME)
 
         return mergingWorkPackage
     }
@@ -44,7 +47,7 @@ class ReferenceGenomeServiceTests {
 
     @Test
     void testChromosomeStatSizeFile_AllFine() {
-        MergingWorkPackage mergingWorkPackage = createDataForChromosomeStatSizeFile()
+        MergingWorkPackage mergingWorkPackage = createDataForChromosomeSizeInformationFiles()
         File pathExp = statFile
         File pathAct = referenceGenomeService.chromosomeStatSizeFile(mergingWorkPackage, false)
         assertEquals(pathExp, pathAct)
@@ -52,7 +55,7 @@ class ReferenceGenomeServiceTests {
 
     @Test
     void testChromosomeStatSizeFile_WithFileCheck_AllFine() {
-        MergingWorkPackage mergingWorkPackage = createDataForChromosomeStatSizeFile()
+        MergingWorkPackage mergingWorkPackage = createDataForChromosomeSizeInformationFiles()
         File pathExp = statFile
         CreateFileHelper.createFile(pathExp)
         File pathAct = referenceGenomeService.chromosomeStatSizeFile(mergingWorkPackage, true)
@@ -68,7 +71,7 @@ class ReferenceGenomeServiceTests {
 
     @Test
     void testChromosomeStatSizeFile_NoStatSizeFileIsDefined_ShouldFail() {
-        MergingWorkPackage mergingWorkPackage = createDataForChromosomeStatSizeFile()
+        MergingWorkPackage mergingWorkPackage = createDataForChromosomeSizeInformationFiles()
         mergingWorkPackage.pipeline = DomainFactory.createDefaultOtpPipeline()
         mergingWorkPackage.statSizeFileName = null
         mergingWorkPackage.save(flush: true)
@@ -79,11 +82,43 @@ class ReferenceGenomeServiceTests {
 
     @Test
     void testChromosomeStatSizeFile_StateSizeFileDoesNotExistAndExistenceIsChecked_ShouldFail() {
-        MergingWorkPackage mergingWorkPackage = createDataForChromosomeStatSizeFile()
+        MergingWorkPackage mergingWorkPackage = createDataForChromosomeSizeInformationFiles()
         assert directory.mkdirs()
         assert TestCase.shouldFail(RuntimeException) {
             referenceGenomeService.chromosomeStatSizeFile(mergingWorkPackage, true)
         }.contains(DomainFactory.DEFAULT_TAB_FILE_NAME)
     }
 
+    @Test
+    void testChromosomeLengthFile_AllFine() {
+        MergingWorkPackage mergingWorkPackage = createDataForChromosomeSizeInformationFiles()
+        File pathExp = chromosomeLengthFile
+        File pathAct = referenceGenomeService.chromosomeLengthFile(mergingWorkPackage, false)
+        assertEquals(pathExp, pathAct)
+    }
+
+    @Test
+    void testChromosomeLengthFile_WithFileCheck_AllFine() {
+        MergingWorkPackage mergingWorkPackage = createDataForChromosomeSizeInformationFiles()
+        File pathExp = chromosomeLengthFile
+        CreateFileHelper.createFile(pathExp)
+        File pathAct = referenceGenomeService.chromosomeLengthFile(mergingWorkPackage, true)
+        assertEquals(pathExp, pathAct)
+    }
+
+    @Test
+    void testChromosomeLengthFile_MergingWorkPackageIsNull_ShouldFail() {
+        assert TestCase.shouldFail(AssertionError) {
+            referenceGenomeService.chromosomeLengthFile(null)
+        }.contains('mergingWorkPackage')
+    }
+
+    @Test
+    void testChromosomeLengthFile_ChromosomeLengthFileFileDoesNotExistAndExistenceIsChecked_ShouldFail() {
+        MergingWorkPackage mergingWorkPackage = createDataForChromosomeSizeInformationFiles()
+        assert directory.mkdirs()
+        assert TestCase.shouldFail(RuntimeException) {
+            referenceGenomeService.chromosomeLengthFile(mergingWorkPackage, true)
+        }.contains(DomainFactory.DEFAULT_CHROMOSOME_LENGTH_FILE_NAME)
+    }
 }

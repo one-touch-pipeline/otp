@@ -63,6 +63,11 @@ class ReferenceGenome implements Entity {
     long lengthRefChromosomesWithoutN
 
     /**
+     * Path of the file which contains information about the length of chromosomes
+     */
+    String chromosomeLengthFilePath
+
+    /**
      * File name of cytosine positions index
      */
     String cytosinePositionsIndex
@@ -86,6 +91,7 @@ class ReferenceGenome implements Entity {
                 validator: { !it || OtpPath.isValidPathComponent(it) }
         chromosomePrefix nullable: true, blank: true
         chromosomeSuffix nullable: true, blank: true
+        chromosomeLengthFilePath(nullable: true, validator: { !it || OtpPath.isValidPathComponent(it) })
     }
 
     String toString() {
