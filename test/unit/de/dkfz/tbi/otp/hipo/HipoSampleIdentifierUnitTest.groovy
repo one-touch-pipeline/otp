@@ -1,8 +1,8 @@
 package de.dkfz.tbi.otp.hipo
 
-import org.junit.Test
+import org.junit.*
 
-import static junit.framework.TestCase.assertEquals
+import static junit.framework.TestCase.*
 import static org.junit.Assert.*
 
 class HipoSampleIdentifierUnitTest {
@@ -188,5 +188,20 @@ class HipoSampleIdentifierUnitTest {
         HipoSampleIdentifier identifier = parser.tryParse(sampleName)
         assert null != identifier
         assert tissueTypeExp == identifier.sampleTypeDbName
+    }
+
+    @Test
+    void testTryParseHipo2Identifier(){
+        String sampleName = "K01F-BPD1-T1-D1"
+        assertNotNull(parser.tryParse(sampleName))
+
+        sampleName = "K02R-JK2T-T1-P1"
+        assertNotNull(parser.tryParse(sampleName))
+
+        sampleName = "K02B-UM886J-B1-D1"
+        assertNotNull(parser.tryParse(sampleName))
+
+        sampleName = "K02L-RBLOOX-T1-D1"
+        assertNotNull(parser.tryParse(sampleName))
     }
 }
