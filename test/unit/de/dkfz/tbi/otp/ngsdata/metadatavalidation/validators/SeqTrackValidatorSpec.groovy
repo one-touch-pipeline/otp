@@ -137,7 +137,7 @@ class SeqTrackValidatorSpec extends Specification {
         createSeqTrack('runA', 'L1')
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, seqTrackColumns, 0, 1),
-                        Level.ERROR, "For run 'runA', lane 'L1', no barcode, data is already registered in OTP."),
+                        Level.WARNING, "For run 'runA', lane 'L1', no barcode, data is already registered in OTP."),
         ]
 
         when:
@@ -170,7 +170,7 @@ class SeqTrackValidatorSpec extends Specification {
         createSeqTrack('runA', 'L1', 'ABC')
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, seqTrackColumns, 0, 1),
-                        Level.ERROR, "For run 'runA', lane 'L1', no barcode, data is already registered in OTP."),
+                        Level.WARNING, "For run 'runA', lane 'L1', no barcode, data is already registered in OTP."),
                 new Problem(cells(context, seqTrackColumns, 0, 1),
                         Level.WARNING, "At least one row for run 'runA', lane 'L1' has no barcode, but for that run and lane there already is data with a barcode registered in OTP."),
         ]
@@ -220,7 +220,7 @@ class SeqTrackValidatorSpec extends Specification {
         createSeqTrack('runA', 'L1', 'ABC')
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, seqTrackColumns, 0, 1),
-                        Level.ERROR, "For run 'runA', lane 'L1', barcode 'ABC', data is already registered in OTP."),
+                        Level.WARNING, "For run 'runA', lane 'L1', barcode 'ABC', data is already registered in OTP."),
         ]
 
         when:
@@ -249,7 +249,7 @@ class SeqTrackValidatorSpec extends Specification {
         createSeqTrack('runA', 'L1', 'ABC')
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, seqTrackColumns, 0, 1),
-                        Level.ERROR, "For run 'runA', lane 'L1', barcode 'ABC', data is already registered in OTP."),
+                        Level.WARNING, "For run 'runA', lane 'L1', barcode 'ABC', data is already registered in OTP."),
                 new Problem(cells(context, seqTrackColumns, 0, 1),
                         Level.WARNING, "At least one row for run 'runA', lane 'L1' has a barcode, but for that run and lane there already is data without a barcode registered in OTP."),
         ]
@@ -306,7 +306,7 @@ class SeqTrackValidatorSpec extends Specification {
         createSeqTrack('runA', 'L1')
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, seqTrackColumns, 0),
-                        Level.ERROR, "For run 'runA', lane 'L1', no barcode, data is already registered in OTP."),
+                        Level.WARNING, "For run 'runA', lane 'L1', no barcode, data is already registered in OTP."),
                 new Problem(cells(context, seqTrackColumns, 0, 1),
                         Level.WARNING, "For run 'runA', lane 'L1' there are rows with and without barcode."),
                 new Problem(cells(context, seqTrackColumns, 1),
@@ -326,7 +326,7 @@ class SeqTrackValidatorSpec extends Specification {
         createSeqTrack('runA', 'L1', 'ABC')
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, seqTrackColumns, 1),
-                        Level.ERROR, "For run 'runA', lane 'L1', barcode 'ABC', data is already registered in OTP."),
+                        Level.WARNING, "For run 'runA', lane 'L1', barcode 'ABC', data is already registered in OTP."),
                 new Problem(cells(context, seqTrackColumns, 0, 1),
                         Level.WARNING, "For run 'runA', lane 'L1' there are rows with and without barcode."),
                 new Problem(cells(context, seqTrackColumns, 0),
@@ -365,9 +365,9 @@ class SeqTrackValidatorSpec extends Specification {
         createSeqTrack('runA', 'L1', 'ABC')
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, seqTrackColumns, 0),
-                        Level.ERROR, "For run 'runA', lane 'L1', no barcode, data is already registered in OTP."),
+                        Level.WARNING, "For run 'runA', lane 'L1', no barcode, data is already registered in OTP."),
                 new Problem(cells(context, seqTrackColumns, 1),
-                        Level.ERROR, "For run 'runA', lane 'L1', barcode 'ABC', data is already registered in OTP."),
+                        Level.WARNING, "For run 'runA', lane 'L1', barcode 'ABC', data is already registered in OTP."),
                 new Problem(cells(context, seqTrackColumns, 0, 1),
                         Level.WARNING, "For run 'runA', lane 'L1' there are rows with and without barcode."),
                 new Problem(cells(context, seqTrackColumns, 0),
@@ -390,7 +390,7 @@ class SeqTrackValidatorSpec extends Specification {
         createSeqTrack('runA', 'L1', 'DEF')
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, seqTrackColumns, 0),
-                        Level.ERROR, "For run 'runA', lane 'L1', no barcode, data is already registered in OTP."),
+                        Level.WARNING, "For run 'runA', lane 'L1', no barcode, data is already registered in OTP."),
                 new Problem(cells(context, seqTrackColumns, 0, 1),
                         Level.WARNING, "For run 'runA', lane 'L1' there are rows with and without barcode."),
                 new Problem(cells(context, seqTrackColumns, 0),

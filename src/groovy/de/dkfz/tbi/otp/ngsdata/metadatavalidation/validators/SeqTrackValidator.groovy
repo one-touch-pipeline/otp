@@ -147,7 +147,7 @@ class SeqTrackValidator extends ColumnSetValidator<MetadataValidationContext> im
             maxResults 1
         }) {
             context.addProblem(seqTrackCells(seqTrackRows),
-                    Level.ERROR, "For ${anySeqTrackRow.seqTrackString}, data is already registered in OTP.")
+                    Level.WARNING, "For ${anySeqTrackRow.seqTrackString}, data is already registered in OTP.")
         }
 
         validateMates(context, seqTrackRows)
