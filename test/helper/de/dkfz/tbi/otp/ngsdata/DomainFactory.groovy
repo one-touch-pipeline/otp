@@ -341,6 +341,10 @@ class DomainFactory {
         )
     }
 
+    public static MergingPass createMergingPass() {
+        return createMergingPass(createMergingSet())
+    }
+
     public static MergingPass createMergingPass(final MergingSet mergingSet) {
         return new MergingPass(
                 mergingSet: mergingSet,

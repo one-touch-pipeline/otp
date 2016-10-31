@@ -1,17 +1,17 @@
 package de.dkfz.tbi.otp.job.jobs.merging
 
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Scope
-import org.springframework.scheduling.annotation.Scheduled
-import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.job.plan.*
+import de.dkfz.tbi.otp.job.jobs.*
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
+import org.springframework.beans.factory.annotation.*
+import org.springframework.context.annotation.*
+import org.springframework.scheduling.annotation.*
+import org.springframework.stereotype.*
 
 @Component("mergingStartJob")
 @Scope("singleton")
-class MergingStartJob extends AbstractStartJobImpl {
+class MergingStartJob extends AbstractStartJobImpl implements RestartableStartJob {
 
     @Autowired
     ProcessingOptionService optionService
@@ -36,6 +36,24 @@ class MergingStartJob extends AbstractStartJobImpl {
                 createProcess(mergingPass)
                 log.debug "MergingStartJob started for: ${mergingPass.toString()}"
             }
+        }
+    }
+
+    @Override
+    Process restart(Process process) {
+        assert process
+
+        MergingPass failedInstance = (MergingPass)process.getProcessParameterObject()
+
+        MergingPass.withTransaction {
+            CollectionUtils.atMostOneElement(ProcessedMergedBamFile.findAllByMergingPass(failedInstance))?.withdraw()
+            MergingPass newMergingPass = new MergingPass(
+                    mergingSet: failedInstance.mergingSet,
+                    identifier: MergingPass.nextIdentifier(failedInstance.mergingSet),
+            ).save(flush: true)
+            mergingPassService.mergingPassStarted(newMergingPass)
+
+            return createProcess(newMergingPass)
         }
     }
 
