@@ -71,7 +71,12 @@
                 </tr>
                 <tr>
                     <td class="myKey"><g:message code="projectOverview.nameInMetadata"/></td>
-                    <td id="nameInMetadata">${nameInMetadata} <input class="edit-button-left" type="button" onclick="$.otp.projectOverviewTable.updateValue('NameInMetadataFiles','','${nameInMetadata}', '')"/></td>
+                    <td>
+                        <otp:editorSwitch
+                                roles="ROLE_OPERATOR"
+                                link="${g.createLink(controller: 'projectOverview', action: 'updateNameInMetadataFiles', params: ['project.id': project.id])}"
+                                value="${nameInMetadata}"/>
+                    </td>
                 </tr>
                 <tr>
                     <td class="myKey"><g:message code="projectOverview.group"/></td>
@@ -94,7 +99,12 @@
                 </tr>
                 <tr>
                     <td class="myKey"><g:message code="projectOverview.mailingListName"/></td>
-                    <td id="mailingListName">${mailingListName} <input class="edit-button-left" type="button" onclick="$.otp.projectOverviewTable.updateValue('MailingListName','','${mailingListName}', '')"/></td>
+                    <td>
+                        <otp:editorSwitch
+                            roles="ROLE_OPERATOR"
+                            link="${g.createLink(controller: 'projectOverview', action: 'updateMailingListName', params: ['project.id': project.id])}"
+                            value="${mailingListName}"/>
+                    </td>
                 </tr>
                 <tr>
                     <td class="myKey"><g:message code="projectOverview.description"/></td>
@@ -123,16 +133,16 @@
         </div>
 
         <div class="otpDataTables">
-            <h3 class="statisticTitle">
+            <h3>
                 <g:message code="projectOverview.contactPerson.headline" />
             </h3>
             <table>
                 <tr>
-                    <td><g:message code="projectOverview.contactPerson.name"/></td>
-                    <td><g:message code="projectOverview.contactPerson.email"/></td>
-                    <td><g:message code="projectOverview.contactPerson.aspera"/></td>
-                    <td><g:message code="projectOverview.contactPerson.role"/></td>
-                    <td></td>
+                    <th><g:message code="projectOverview.contactPerson.name"/></th>
+                    <th><g:message code="projectOverview.contactPerson.email"/></th>
+                    <th><g:message code="projectOverview.contactPerson.aspera"/></th>
+                    <th><g:message code="projectOverview.contactPerson.role"/></th>
+                    <th></th>
                 </tr>
                <g:each in="${projectContactPersons}" var="projectContactPerson">
                     <tr>

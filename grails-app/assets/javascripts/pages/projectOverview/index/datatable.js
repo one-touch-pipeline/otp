@@ -140,38 +140,6 @@ $.otp.projectOverviewTable = {
         })
     },
 
-    updateValue: function (property, contactPersonName, value, account) {
-        var input = prompt("Enter new " + property + account, value);
-        var action = 'update'+property;
-        if (input != null) {
-            $.ajax({
-                type: 'GET',
-                url: $.otp.createLink({
-                    controller: 'projectOverview',
-                    action: action
-                }),
-                dataType: 'json',
-                cache: 'false',
-                data: {
-                    value: input,
-                    contactPersonName: contactPersonName,
-                    projectName: $('#project_select').val()
-                },
-                success: function (data) {
-                    if (data.success) {
-                        $.otp.infoMessage($L("editorswitch.notification.success"));
-                        window.setTimeout('location.reload()', 500);
-                    } else {
-                        $.otp.warningMessage(data.error);
-                    }
-                },
-                error: function (jqXHR, textStatus, errorThrown) {
-                    $.otp.warningMessage($L("editorswitch.notification.error", textStatus, errorThrown));
-                }
-            });
-        }
-    },
-
     referenceGenome: function () {
         "use strict";
         var oTable = $.otp.projectOverviewTable.registerDataTable(

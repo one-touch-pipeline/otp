@@ -1,22 +1,18 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.CommentService
+import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig
-import de.dkfz.tbi.otp.security.Group
-import de.dkfz.tbi.otp.security.User
-import de.dkfz.tbi.otp.security.UserRole
-import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.otp.utils.CommentCommand
-import de.dkfz.tbi.otp.utils.DataTableCommand
-import grails.converters.JSON
-import org.springframework.validation.FieldError
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
+import de.dkfz.tbi.otp.utils.*
+import grails.converters.*
+import org.springframework.validation.*
 
-import java.sql.Timestamp
-import java.text.SimpleDateFormat
+import java.sql.*
+import java.text.*
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.getOrPut
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+
 
 class ProjectOverviewController {
 
@@ -72,7 +68,7 @@ class ProjectOverviewController {
 
     Map specificOverview() {
         List<Project> projects = projectService.getAllProjects()
-        Project project = CollectionUtils.exactlyOneElement(Project.findAllByName(params.project ?: projects.first().name, [fetch: [projectCategories: 'join', projectGroup: 'join']]))
+        Project project = exactlyOneElement(Project.findAllByName(params.project ?: projects.first().name, [fetch: [projectCategories: 'join', projectGroup: 'join']]))
 
         Map<String, ProjectOverviewService.AlignmentInfo> alignmentInfo = null
         String alignmentError = null
@@ -348,7 +344,7 @@ class ProjectOverviewController {
     }
 
     static ContactPersonRole getContactPersonRoleByName(String roleName) {
-        return roleName.isEmpty() ? null : CollectionUtils.exactlyOneElement(ContactPersonRole.findAllByName(roleName))
+        return roleName.isEmpty() ? null : exactlyOneElement(ContactPersonRole.findAllByName(roleName))
     }
 
     JSON deleteContactPersonOrRemoveProject(UpdateDeleteContactPersonCommand cmd){
@@ -376,7 +372,7 @@ class ProjectOverviewController {
     }
 
     JSON updateNameInMetadataFiles(UpdateNameInMetadataCommand cmd) {
-        checkErrorAndCallMethod(cmd, { projectService.updateNameInMetadata(cmd.newNameInMetadata, projectService.getProjectByName(cmd.projectName)) })
+        checkErrorAndCallMethod(cmd, { projectService.updateNameInMetadata(cmd.newNameInMetadata, cmd.project) })
     }
 
     JSON updateCategory(UpdateCategoryCommand cmd) {
@@ -384,7 +380,7 @@ class ProjectOverviewController {
     }
 
     JSON updateMailingListName(UpdateMailingListNameCommand cmd) {
-        checkErrorAndCallMethod(cmd, { projectService.updateMailingListName(cmd.mailingListName, projectService.getProjectByName(cmd.projectName)) })
+        checkErrorAndCallMethod(cmd, { projectService.updateMailingListName(cmd.mailingListName, cmd.project) })
     }
 
     JSON updateCostCenter(UpdateCostCenterCommand cmd) {
@@ -453,7 +449,7 @@ class ProjectOverviewController {
         SeqType.getSnvPipelineSeqTypes().each {
             List row = []
             row.add(it.displayName)
-            SnvConfig snvConfig = CollectionUtils.atMostOneElement(SnvConfig.findAllByProjectAndSeqTypeAndObsoleteDate(project, it, null))
+            SnvConfig snvConfig = atMostOneElement(SnvConfig.findAllByProjectAndSeqTypeAndObsoleteDate(project, it, null))
             if (snvConfig) {
                 row.add("Yes")
                 row.add(snvConfig.externalScriptVersion)
@@ -627,18 +623,17 @@ class UpdateContactPersonRoleCommand implements Serializable {
 
 class UpdateNameInMetadataCommand implements Serializable {
     String newNameInMetadata
-    String projectName
+    Project project
     static constraints = {
         newNameInMetadata(nullable: true, validator: { val, obj ->
             Project projectByNameInMetadata = Project.findByNameInMetadataFiles(val)
-            if (val && projectByNameInMetadata && projectByNameInMetadata.name != obj.projectName) {
+            if (val && projectByNameInMetadata && projectByNameInMetadata != obj.project) {
                 return '\'' + val + '\' exists already in another project as nameInMetadataFiles entry'
             }
-            if (val != obj.projectName && Project.findByName(val)) {
+            if (val != obj.project.name && Project.findByName(val)) {
                 return '\'' + val + '\' is used in another project as project name'
             }
         })
-        projectName(blank: false)
     }
     void setValue(String value) {
         this.newNameInMetadata = value?.trim()?.replaceAll(" +", " ")
@@ -675,7 +670,7 @@ class UpdateCategoryCommand implements Serializable {
 
 class UpdateMailingListNameCommand implements Serializable {
     String mailingListName
-    String projectName
+    Project project
     void setValue(String mailingListName) {
         this.mailingListName = mailingListName
     }
