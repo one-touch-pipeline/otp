@@ -91,7 +91,7 @@ class ReferenceGenome implements Entity {
                 validator: { !it || OtpPath.isValidPathComponent(it) }
         chromosomePrefix nullable: true, blank: true
         chromosomeSuffix nullable: true, blank: true
-        chromosomeLengthFilePath(nullable: true, validator: { !it || OtpPath.isValidPathComponent(it) })
+        chromosomeLengthFilePath(nullable: true, blank: false, validator: { it == null || OtpPath.isValidPathComponent(it) })
     }
 
     String toString() {
