@@ -835,17 +835,19 @@ class SchedulerService {
             }
             last.process.finished = true
             last.process.save(flush: true)
-            JobExecutionPlan.withNewSession {
-                JobExecutionPlan plan = JobExecutionPlan.get(last.process.jobExecutionPlan.id)
-                if (!plan.finishedSuccessful) {
-                    plan.finishedSuccessful = 1
-                } else {
-                    plan.finishedSuccessful++
-                }
-                plan.save(flush: true)
-            }
+
         } finally {
             lock.unlock()
+        }
+
+        JobExecutionPlan.withNewSession {
+            JobExecutionPlan plan = JobExecutionPlan.lock(last.process.jobExecutionPlan.id)
+            if (!plan.finishedSuccessful) {
+                plan.finishedSuccessful = 1
+            } else {
+                plan.finishedSuccessful++
+            }
+            plan.save(flush: true)
         }
 
         // send notification
