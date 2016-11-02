@@ -1,15 +1,16 @@
 package de.dkfz.tbi.otp.job.jobs.transferMergedBamFile
 
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Scope
-import org.springframework.scheduling.annotation.Scheduled
-import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.job.jobs.*
 import de.dkfz.tbi.otp.job.processing.*
+import org.springframework.beans.factory.annotation.*
+import org.springframework.context.annotation.*
+import org.springframework.scheduling.annotation.*
+import org.springframework.stereotype.*
 
 @Component("transferMergedBamFileStartJob")
 @Scope("singleton")
-class TransferMergedBamFileStartJob extends AbstractStartJobImpl {
+class TransferMergedBamFileStartJob extends AbstractStartJobImpl implements RestartableStartJob {
 
     @Autowired
     ProcessingOptionService optionService
@@ -38,6 +39,17 @@ class TransferMergedBamFileStartJob extends AbstractStartJobImpl {
         }
     }
 
+    @Override
+    Process restart(Process process) {
+        assert process
+
+        ProcessedMergedBamFile failedInstance = (ProcessedMergedBamFile)process.getProcessParameterObject()
+
+        ProcessedMergedBamFile.withTransaction {
+            failedInstance.updateFileOperationStatus(AbstractMergedBamFile.FileOperationStatus.INPROGRESS)
+            return createProcess(failedInstance)
+        }
+    }
 
     @Override
     String getJobExecutionPlanName() {
