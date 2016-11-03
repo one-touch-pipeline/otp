@@ -517,10 +517,7 @@ class UpdateContactPersonCommand implements Serializable {
                 return 'Empty'
             }})
         aspera(blank: true)
-        project(blank: false, validator: {val, obj ->
-            if (!ProjectContactPerson.findByProject(val)) {
-                return 'No Project'
-            }})
+        project(nullable: false)
         contactPersonRole(nullable: true)
     }
     void setName(String name) {
