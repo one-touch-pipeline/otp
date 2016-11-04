@@ -98,13 +98,16 @@ class CopyFilesJobSpec extends Specification {
         createSeqTrack()
         copyFilesJob.pbsService = Mock(PbsService) {
             1 * executeJob(_, _) >> { Realm realm, String command ->
-                command ==~ """
+                assert command ==~ """
 mkdir -p -m 2750 .*
 cd .*
-
+if \\[ -e ".*" \\]; then
+    echo "File .* already exists."
+    rm .*
+fi
 cp .* .*
 md5sum .* > .*
-chmod 400 .* .*
+chmod 440 .* .*
 """
             }
         }
@@ -119,13 +122,16 @@ chmod 400 .* .*
         createSeqTrack(true)
         copyFilesJob.pbsService = Mock(PbsService) {
             1 * executeJob(_, _) >> { Realm realm, String command ->
-                command ==~ """
+                assert command ==~ """
 mkdir -p -m 2750 .*
 cd .*
-
+if \\[ -e ".*" \\]; then
+    echo "File .* already exists."
+    rm .*
+fi
 ln -s .* .*
 md5sum .* > .*
-chmod 400 .* .*
+chmod 440 .* .*
 """
             }
         }
@@ -142,13 +148,16 @@ chmod 400 .* .*
         CreateFileHelper.createFile(new File(copyFilesJob.lsdfFilesService.getFileFinalPath(dataFile)))
         copyFilesJob.pbsService = Mock(PbsService) {
             1 * executeJob(_, _) >> { Realm realm, String command ->
-                command ==~ """
+                assert command ==~ """
 mkdir -p -m 2750 .*
 cd .*
-rm .*
+if \\[ -e ".*" \\]; then
+    echo "File .* already exists."
+    rm .*
+fi
 ln -s .* .*
 md5sum .* > .*
-chmod 400 .* .*
+chmod 440 .* .*
 """
             }
         }

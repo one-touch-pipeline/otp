@@ -36,13 +36,15 @@ class CopyFilesJob extends AbstractOtpJob implements AutoRestartableJob {
             String md5SumFileName = checksumFileService.md5FileName(dataFile)
 
             String copyOrLinkCommand = seqTrack.linkedExternally ? "ln -s" : "cp"
-            String removeTargetFileIfExists = targetFile.exists() ? "rm ${targetFile}*" : ""
             String fastqFile = seqTrack.linkedExternally ? "" : "${targetFile}"
 
             String cmd = """
 mkdir -p -m 2750 ${targetFile.parent}
 cd ${targetFile.parent}
-${removeTargetFileIfExists}
+if [ -e "${targetFile.path}" ]; then
+    echo "File ${targetFile.path} already exists."
+    rm ${targetFile.path}*
+fi
 ${copyOrLinkCommand} ${sourceFile} ${targetFile}
 md5sum ${targetFile.name} > ${md5SumFileName}
 chmod 440 ${fastqFile} ${md5SumFileName}
