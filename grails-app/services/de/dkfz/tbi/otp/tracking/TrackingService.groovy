@@ -177,7 +177,7 @@ class TrackingService {
 
         OtrsTicket newOtrsTicket = CollectionUtils.atMostOneElement(OtrsTicket.findAllByTicketNumber(ticketNumber))
         if (!newOtrsTicket) {
-            newOtrsTicket = createOtrsTicket(ticketNumber)
+            newOtrsTicket = createOtrsTicket(ticketNumber, null)
         }
 
         if (newOtrsTicket.finalNotificationSent) {
