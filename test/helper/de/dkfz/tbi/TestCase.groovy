@@ -7,6 +7,7 @@ import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.otp.utils.ProcessHelperService
+import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.junit.*
 import org.junit.runners.model.MultipleFailureException
 import org.springframework.validation.Errors
@@ -14,6 +15,8 @@ import org.springframework.validation.FieldError
 
 import java.nio.file.Files
 import java.util.concurrent.Callable
+
+import static de.dkfz.tbi.otp.utils.ProcessHelperService.executeAndWait
 
 /**
  * A default base class for test cases. This provides some helper methods.
@@ -235,5 +238,16 @@ class TestCase {
 
     def static removeMockFileService(LsdfFilesService lsdfFilesService) {
         TestCase.removeMetaClass(LsdfFilesService, lsdfFilesService)
+    }
+
+    static String primaryGroup() {
+        return executeAndWait("id -g -n").assertExitCodeZeroAndStderrEmpty().stdout.trim()
+    }
+
+    static String testingGroup(GrailsApplication grailsApplication) {
+        String testingGroup = grailsApplication.config.otp.testing.group
+        assert testingGroup: '"otp.testing.group" is not set in your "otp.properties". Please add it with an existing secondary group.'
+        assert testingGroup != primaryGroup(): '"otp.testing.group" does not differ from your primary group'
+        return testingGroup
     }
 }

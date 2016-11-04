@@ -19,7 +19,7 @@ import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.*
  * class for roddy jobs that handle failed or not finished cluster jobs, analyse them and provide
  * information about their failure for {@link AbstractMaybeSubmitWaitValidateJob}
  */
-abstract class AbstractRoddyJob extends AbstractMaybeSubmitWaitValidateJob{
+abstract class AbstractRoddyJob<R extends RoddyResult> extends AbstractMaybeSubmitWaitValidateJob {
 
     public static final String NO_STARTED_JOBS_MESSAGE = '\nThere were no started jobs, the execution directory will be removed.\n'
     public static final Pattern roddyExecutionStoreDirectoryPattern = Pattern.compile(/(?:^|\n)Creating\sthe\sfollowing\sexecution\sdirectory\sto\sstore\sinformation\sabout\sthis\sprocess:\s*\n\s*(\/.*\/${RoddySnvCallingInstance.RODDY_EXECUTION_DIR_PATTERN})(?:\n|$)/)
@@ -67,7 +67,7 @@ abstract class AbstractRoddyJob extends AbstractMaybeSubmitWaitValidateJob{
     }
 
 
-    protected abstract String prepareAndReturnWorkflowSpecificCommand(RoddyResult roddyResult, Realm realm) throws Throwable
+    protected abstract String prepareAndReturnWorkflowSpecificCommand(R roddyResult, Realm realm) throws Throwable
 
 
     @Override
@@ -78,7 +78,7 @@ abstract class AbstractRoddyJob extends AbstractMaybeSubmitWaitValidateJob{
         }
     }
 
-    protected abstract void validate(RoddyResult roddyResultObject) throws Throwable
+    protected abstract void validate(R roddyResultObject) throws Throwable
 
     @Override
     protected File getLogFilePath(ClusterJob clusterJob) {

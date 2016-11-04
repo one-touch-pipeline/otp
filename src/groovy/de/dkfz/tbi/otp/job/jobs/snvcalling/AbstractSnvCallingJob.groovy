@@ -161,15 +161,6 @@ rm ${configFileInStagingDirectory}
         return result
     }
 
-    protected File getExistingBamFilePath(final AbstractMergedBamFile bamFile) {
-        final File file = bamFile.getPathForFurtherProcessing()
-        assert bamFile.md5sum ==~ /^[0-9a-f]{32}$/
-        assert bamFile.fileSize > 0L
-        LsdfFilesService.ensureFileIsReadableAndNotEmpty(file)
-        assert file.length() == bamFile.fileSize
-        return file
-    }
-
     /**
      * This SNV workflow instance is configured not to do the SNV calling.
      * Make sure there already is a result that subsequent jobs can use as input.

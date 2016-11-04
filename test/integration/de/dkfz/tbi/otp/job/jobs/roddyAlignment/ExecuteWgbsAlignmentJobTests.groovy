@@ -51,6 +51,9 @@ class ExecuteWgbsAlignmentJobTests {
 
         DomainFactory.createRealmDataProcessing(tmpDir.root, [name: roddyBamFile.project.realmName])
         DomainFactory.createRealmDataManagement(tmpDir.root, [name: roddyBamFile.project.realmName])
+
+        CreateFileHelper.createFile(new File(executeWgbsAlignmentJob.referenceGenomeService.fastaFilePath(roddyBamFile.project, roddyBamFile.referenceGenome, false)))
+        CreateFileHelper.createFile(executeWgbsAlignmentJob.referenceGenomeService.chromosomeStatSizeFile(roddyBamFile.mergingWorkPackage, false))
     }
 
     @After
@@ -78,8 +81,18 @@ class ExecuteWgbsAlignmentJobTests {
         List<String> chromosomeNames = ["1", "2", "3", "4", "5", "M", "X", "Y"]
         DomainFactory.createReferenceGenomeEntries(roddyBamFile.referenceGenome, chromosomeNames)
 
-        assert ",CHROMOSOME_INDICES:( ${chromosomeNames.join(' ')} ),CYTOSINE_POSITIONS_INDEX:${cpiFile.absolutePath}" ==
-                executeWgbsAlignmentJob.prepareAndReturnWorkflowSpecificCValues(roddyBamFile)
+        List<String> expectedCommand = [
+                "INDEX_PREFIX:${executeWgbsAlignmentJob.referenceGenomeService.fastaFilePath(roddyBamFile.project, roddyBamFile.referenceGenome)}",
+                "CHROM_SIZES_FILE:${executeWgbsAlignmentJob.referenceGenomeService.chromosomeStatSizeFile(roddyBamFile.mergingWorkPackage)}",
+                "possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}",
+                "possibleTumorSampleNamePrefixes:",
+                "CHROMOSOME_INDICES:( ${chromosomeNames.join(' ')} )",
+                "CYTOSINE_POSITIONS_INDEX:${cpiFile.absolutePath}",
+        ]
+
+        List<String> actualCommand = executeWgbsAlignmentJob.prepareAndReturnWorkflowSpecificCValues(roddyBamFile)
+
+        assert expectedCommand == actualCommand
     }
 
     @Test
@@ -111,8 +124,20 @@ class ExecuteWgbsAlignmentJobTests {
             seqTrack.adapterFile = adapterFile
             seqTrack.save(flush: true, failOnError: true)
         }
-        assert ",CHROMOSOME_INDICES:( ${chromosomeNames.join(' ')} ),CYTOSINE_POSITIONS_INDEX:${cpiFile.absolutePath},CLIP_INDEX:${file.absolutePath}" as String ==
-                executeWgbsAlignmentJob.prepareAndReturnWorkflowSpecificCValues(roddyBamFile)
+        List<String> expectedCommand = [
+                "INDEX_PREFIX:${executeWgbsAlignmentJob.referenceGenomeService.fastaFilePath(roddyBamFile.project, roddyBamFile.referenceGenome)}",
+                "CHROM_SIZES_FILE:${executeWgbsAlignmentJob.referenceGenomeService.chromosomeStatSizeFile(roddyBamFile.mergingWorkPackage)}",
+                "possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}",
+                "possibleTumorSampleNamePrefixes:",
+                "CHROMOSOME_INDICES:( ${chromosomeNames.join(' ')} )",
+                "CYTOSINE_POSITIONS_INDEX:${cpiFile.absolutePath}",
+                "CLIP_INDEX:${file.absolutePath}",
+        ]
+
+        List<String> actualCommand = executeWgbsAlignmentJob.prepareAndReturnWorkflowSpecificCValues(roddyBamFile)
+
+        assert expectedCommand == actualCommand
+
     }
 
     @Test

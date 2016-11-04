@@ -8,7 +8,6 @@ String workflow = "RoddySnvWorkflow"
 plan(workflow, ctx, true) {
     start("roddySnvStart", "roddySnvStartJob")
     job("executeRoddySnv", "executeRoddySnvJob")
-    job("roddySnvCompletion", "roddySnvCompletionJob")
     job("notifyProcessFinished", "notifyProcessFinishedJob") {
         constantParameter("step", OtrsTicket.ProcessingStep.SNV.name())
     }

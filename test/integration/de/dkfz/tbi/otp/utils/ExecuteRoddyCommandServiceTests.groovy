@@ -12,13 +12,13 @@ import org.junit.rules.*
 import static de.dkfz.tbi.otp.utils.ProcessHelperService.*
 
 
-/**
- */
 class ExecuteRoddyCommandServiceTests {
 
     GrailsApplication grailsApplication
 
-    ExecuteRoddyCommandService executeRoddyCommandService = new ExecuteRoddyCommandService()
+    ExecuteRoddyCommandService executeRoddyCommandService
+
+    ExecutionService executionService
 
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder()
@@ -50,10 +50,10 @@ class ExecuteRoddyCommandServiceTests {
         roddyBamFile = DomainFactory.createRoddyBamFile()
 
         realm = DomainFactory.createRealmDataManagementDKFZ([
-                name: roddyBamFile.project.realmName,
-                rootPath: "${tmpOutputDir}/root",
+                name              : roddyBamFile.project.realmName,
+                rootPath          : "${tmpOutputDir}/root",
                 processingRootPath: "${tmpOutputDir}/processing",
-                roddyUser: System.getProperty("user.name"),
+                roddyUser         : System.getProperty("user.name"),
         ])
         assert realm.save(flush: true)
 
@@ -71,9 +71,10 @@ class ExecuteRoddyCommandServiceTests {
         tmpOutputDir = null
         realm = null
         roddyBamFile = null
-        TestCase.removeMetaClass(ExecuteRoddyCommandService, executeRoddyCommandService)
         TestCase.removeMetaClass(ExecutionService, executeRoddyCommandService.executionService)
+        TestCase.removeMetaClass(ExecuteRoddyCommandService, executeRoddyCommandService)
         GroovySystem.metaClassRegistry.removeMetaClass(ProcessHelperService)
+        executeRoddyCommandService.executionService = executionService
     }
 
     @Test
@@ -99,7 +100,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testRoddyBaseCommand_AllFine() {
-        String expectedCmd =  "cd /tmp && sudo -u OtherUnixUser ${roddyPath}/roddy.sh rerun ${CONFIG_NAME}.config@${ANALYSIS_ID} "
+        String expectedCmd = "cd /tmp && sudo -u OtherUnixUser ${roddyPath}/roddy.sh rerun ${CONFIG_NAME}.config@${ANALYSIS_ID} "
         String actualCmd = executeRoddyCommandService.roddyBaseCommand(roddyPath, CONFIG_NAME, ANALYSIS_ID, ExecuteRoddyCommandService.RoddyInvocationType.EXECUTE)
         assert expectedCmd == actualCmd
     }
@@ -288,11 +289,11 @@ class ExecuteRoddyCommandServiceTests {
     @Test
     void testRoddyGetRuntimeConfigCommand_AllFine() {
         String expectedCmd = "cd /tmp && " +
-"sudo -u OtherUnixUser ${roddyCommand} printidlessruntimeconfig ${CONFIG_NAME}.config@${ANALYSIS_ID} " +
-"--useconfig=${applicationIniPath} " +
-"--usefeaturetoggleconfig=${featureTogglesConfigPath} " +
-"--usePluginVersion=${roddyBamFile.config.pluginVersion} " +
-"--configurationDirectories=${new File(roddyBamFile.config.configFilePath).parent},${roddyBaseConfigsPath} "
+                "sudo -u OtherUnixUser ${roddyCommand} printidlessruntimeconfig ${CONFIG_NAME}.config@${ANALYSIS_ID} " +
+                "--useconfig=${applicationIniPath} " +
+                "--usefeaturetoggleconfig=${featureTogglesConfigPath} " +
+                "--usePluginVersion=${roddyBamFile.config.pluginVersion} " +
+                "--configurationDirectories=${new File(roddyBamFile.config.configFilePath).parent},${roddyBaseConfigsPath} "
 
         LogThreadLocal.withThreadLog(System.out) {
             String actualCmd = executeRoddyCommandService.roddyGetRuntimeConfigCommand(roddyBamFile.config, CONFIG_NAME, ANALYSIS_ID)
@@ -305,7 +306,6 @@ class ExecuteRoddyCommandServiceTests {
     void testExecuteCommandAsRoddyUser() {
         assert 'sudo -u OtherUnixUser' == executeRoddyCommandService.executeCommandAsRoddyUser()
     }
-
 
 
     @Test
@@ -322,10 +322,10 @@ class ExecuteRoddyCommandServiceTests {
         }
     }
 
-   @Test
+    @Test
     void testCreateWorkOutputDirectory_DirectoryCreationFailed_ShouldFail() {
-       executeRoddyCommandService.executionService.metaClass.executeCommand = { Realm realm, String command -> }
-       tmpOutputDir.absoluteFile.delete()
+        executeRoddyCommandService.executionService.metaClass.executeCommand = { Realm realm, String command -> }
+        tmpOutputDir.absoluteFile.delete()
         TestCase.shouldFail(AssertionError) {
             executeRoddyCommandService.createWorkOutputDirectory(realm, tmpOutputDir)
         }
@@ -334,7 +334,7 @@ class ExecuteRoddyCommandServiceTests {
     @Test
     void testCreateWorkOutputDirectory_AllFine() {
         executeRoddyCommandService.executionService.metaClass.executeCommand = { Realm realm, String command ->
-            [ 'bash', '-c', command ].execute().waitFor()
+            ['bash', '-c', command].execute().waitFor()
         }
         executeRoddyCommandService.createWorkOutputDirectory(realm, tmpOutputDir)
     }
@@ -395,12 +395,12 @@ stat -c %a ${roddyBamFile.workDirectory}/${roddyBamFile.bamFileName}
     void testCorrectPermission_BamFileIsNull_shouldFail() {
         assert TestCase.shouldFail(AssertionError) {
             executeRoddyCommandService.correctPermissions(null, realm)
-        }.contains('RoddyBamFile')
+        }.contains('roddyResult')
     }
 
     @Test
     void testCorrectGroup_AllFine() {
-        String primaryGroup = executeAndWait("id -g -n").stdout.trim()
+        String primaryGroup = TestCase.primaryGroup()
         executeRoddyCommandService.executionService = [
                 executeCommandReturnProcessOutput: { Realm realm1, String cmd, String user ->
                     assert realm1 == realm
@@ -415,8 +415,7 @@ correct group permission to ${primaryGroup}
                 }
         ] as ExecutionService
 
-        String testingGroup = grailsApplication.config.otp.testing.group
-        assert testingGroup: '"otp.testing.group" is not set in your "otp.properties". Please add it with an existing secondary group.'
+        String testingGroup = TestCase.testingGroup(grailsApplication)
 
         CreateFileHelper.createFile(new File(roddyBamFile.workDirectory, "file"))
         assert executeAndAssertExitCodeAndErrorOutAndReturnStdout("chgrp ${testingGroup} ${roddyBamFile.workDirectory}/file").empty
@@ -435,7 +434,7 @@ ${primaryGroup}
     void testCorrectGroup_BamFileIsNull_shouldFail() {
         assert TestCase.shouldFail(AssertionError) {
             executeRoddyCommandService.correctGroups(null, realm)
-        }.contains('RoddyBamFile')
+        }.contains('roddyResult')
     }
 
 
@@ -486,5 +485,58 @@ ${primaryGroup}
         assert TestCase.shouldFail(AssertionError) {
             executeRoddyCommandService.deleteContentOfOtherUnixUserDirectory(null, realm)
         }.contains('basePath is not allowed to be null')
+    }
+
+    @Test
+    void testCorrectPermissionsAndGroups() {
+        String primaryGroup = TestCase.primaryGroup()
+        String group = TestCase.testingGroup(grailsApplication)
+
+        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
+
+        assert executeAndAssertExitCodeAndErrorOutAndReturnStdout("""\
+chmod -R 777 ${roddyBamFile.workDirectory}
+chgrp -R ${group} ${roddyBamFile.workDirectory}
+chgrp ${primaryGroup} ${roddyBamFile.baseDirectory}
+""").empty
+
+        executeRoddyCommandService.executionService.metaClass.executeCommandReturnProcessOutput = { Realm realm1, String cmd, String user ->
+            ProcessOutput out = executeAndWait(cmd)
+            out.assertExitCodeZeroAndStderrEmpty()
+            return out
+        }
+
+        executeRoddyCommandService.correctPermissionsAndGroups(roddyBamFile, realm)
+
+
+        String value = executeAndAssertExitCodeAndErrorOutAndReturnStdout("""\
+stat -c %a ${roddyBamFile.workDirectory.path}
+stat -c %a ${roddyBamFile.workMergedQADirectory.path}
+stat -c %a ${roddyBamFile.workBamFile.path}
+stat -c %a ${roddyBamFile.workBaiFile.path}
+stat -c %a ${roddyBamFile.workMergedQAJsonFile.path}
+
+stat -c %G ${roddyBamFile.workDirectory.path}
+stat -c %G ${roddyBamFile.workMergedQADirectory.path}
+stat -c %G ${roddyBamFile.workBamFile.path}
+stat -c %G ${roddyBamFile.workBaiFile.path}
+stat -c %G ${roddyBamFile.workMergedQAJsonFile.path}
+""")
+
+        String expected = """\
+2750
+2750
+444
+444
+440
+${primaryGroup}
+${primaryGroup}
+${primaryGroup}
+${primaryGroup}
+${primaryGroup}
+"""
+
+        assert expected == value
+
     }
 }

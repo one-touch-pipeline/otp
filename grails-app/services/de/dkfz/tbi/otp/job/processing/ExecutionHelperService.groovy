@@ -14,7 +14,7 @@ class ExecutionHelperService {
 
     String getGroup(File directory) {
         assert directory: 'directory may not be null'
-        ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout("stat -c '%G' ${directory}")
+        ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout("stat -c '%G' ${directory}").trim()
     }
 
     String setGroup(Realm realm, File directory, String group) {

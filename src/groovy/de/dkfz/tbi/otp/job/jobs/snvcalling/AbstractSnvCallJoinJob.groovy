@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFileService
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
@@ -15,6 +16,10 @@ abstract class AbstractSnvCallJoinJob extends AbstractSnvCallingJob {
     ConfigService configService
     @Autowired
     PbsService pbsService
+    @Autowired
+    AbstractMergedBamFileService abstractMergedBamFileService
+    @Autowired
+    SnvCallingService snvCallingService
 
     final static String CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER = "CHROMOSOME_VCF_JOIN"
 
@@ -45,8 +50,8 @@ abstract class AbstractSnvCallJoinJob extends AbstractSnvCallingJob {
 
             final File configFileInProjectDirectory = writeConfigFile(instance)
 
-            final File sampleType1BamFilePath = getExistingBamFilePath(instance.sampleType1BamFile)
-            final File sampleType2BamFilePath = getExistingBamFilePath(instance.sampleType2BamFile)
+            final File sampleType1BamFilePath = abstractMergedBamFileService.getExistingBamFilePath(instance.sampleType1BamFile)
+            final File sampleType2BamFilePath = abstractMergedBamFileService.getExistingBamFilePath(instance.sampleType2BamFile)
             final String qsubParametersGeneral =
                     "CONFIG_FILE=${configFileInProjectDirectory}," +
                     "pid=${instance.individual.pid}," +
@@ -71,14 +76,8 @@ abstract class AbstractSnvCallJoinJob extends AbstractSnvCallingJob {
     protected abstract void submit(SnvJobResult jobResult, Realm realm, Closure sendScript)
 
     protected void validateConfigFileAndInputBamFiles(final SnvCallingInstance instance) throws Throwable {
-
         assertDataManagementConfigContentsOk(instance)
-
-        try {
-            getExistingBamFilePath(instance.sampleType1BamFile)
-            getExistingBamFilePath(instance.sampleType2BamFile)
-        } catch (final AssertionError e) {
-            throw new RuntimeException('The input BAM files have changed on the file system while this job processed them.', e)
-        }
+        snvCallingService.validateInputBamFiles(instance)
     }
+
 }

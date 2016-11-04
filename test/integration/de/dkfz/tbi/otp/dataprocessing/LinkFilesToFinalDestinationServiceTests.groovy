@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
@@ -68,10 +69,7 @@ class LinkFilesToFinalDestinationServiceTests {
         linkFilesToFinalDestinationService.metaClass.deleteOldLinks = { RoddyBamFile roddyBamFile, Realm realm -> }
         linkFilesToFinalDestinationService.metaClass.linkNewResults = { RoddyBamFile roddyBamFile, Realm realm -> }
         linkFilesToFinalDestinationService.metaClass.cleanupOldResults = { RoddyBamFile roddyBamFile, Realm realm -> }
-        linkFilesToFinalDestinationService.executeRoddyCommandService.metaClass.correctGroups = { RoddyBamFile roddyBamFile, Realm realm -> }
-        linkFilesToFinalDestinationService.executionHelperService.metaClass.setPermission = { Realm realm, File directory, String group -> }
-        linkFilesToFinalDestinationService.executionHelperService.metaClass.getGroup = { File directory -> SOME_GROUP }
-        linkFilesToFinalDestinationService.executionHelperService.metaClass.setGroup = { Realm realm, File directory, String group -> }
+        linkFilesToFinalDestinationService.executeRoddyCommandService.metaClass.correctPermissionsAndGroups = { RoddyResult roddyResult, Realm realm -> }
     }
 
     @Test
@@ -682,48 +680,6 @@ class LinkFilesToFinalDestinationServiceTests {
         }
     }
 
-    @Test
-    void testExecute_FailInSetPermission_ShouldFail() {
-        setUp_allFine()
-        final String FAIL_MESSAGE = HelperUtils.uniqueString
-        linkFilesToFinalDestinationService.executionHelperService.metaClass.setPermission = { Realm realm, File directory, String group -> assert false: FAIL_MESSAGE  }
-
-        TestCase.shouldFailWithMessageContaining (AssertionError, FAIL_MESSAGE) {
-            linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanup(roddyBamFile, realm)
-        }
-    }
-    @Test
-    void testExecute_FailInGetGroup_ShouldFail() {
-        setUp_allFine()
-        final String FAIL_MESSAGE = HelperUtils.uniqueString
-        linkFilesToFinalDestinationService.executionHelperService.metaClass.getGroup = { File directory -> assert false: FAIL_MESSAGE  }
-
-        TestCase.shouldFailWithMessageContaining (AssertionError, FAIL_MESSAGE) {
-            linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanup(roddyBamFile, realm)
-        }
-    }
-
-    @Test
-    void testExecute_FailInSetGroup_ShouldFail() {
-        setUp_allFine()
-        final String FAIL_MESSAGE = HelperUtils.uniqueString
-        linkFilesToFinalDestinationService.executionHelperService.metaClass.setGroup = { Realm realm, File directory, String group -> assert false: FAIL_MESSAGE }
-
-        TestCase.shouldFailWithMessageContaining (AssertionError, FAIL_MESSAGE) {
-            linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanup(roddyBamFile, realm)
-        }
-    }
-
-    @Test
-    void testExecute_FailInCorrectGroups_ShouldFail() {
-        setUp_allFine()
-        final String FAIL_MESSAGE = HelperUtils.uniqueString
-        linkFilesToFinalDestinationService.executeRoddyCommandService.metaClass.correctGroups = { RoddyBamFile roddyBamFile, Realm realm -> assert false: FAIL_MESSAGE }
-
-        TestCase.shouldFailWithMessageContaining (AssertionError, FAIL_MESSAGE) {
-            linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanup(roddyBamFile, realm)
-        }
-    }
 
     @Test
     void testExecute_FailLinkNewResults_ShouldFail() {
@@ -754,18 +710,6 @@ class LinkFilesToFinalDestinationServiceTests {
         assert shouldFail (AssertionError) {
             linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanup(roddyBamFile, realm)
         } ==~ /The md5sum file of .* does not exist.*/
-    }
-
-    @Test
-    void testExecute_Md5sumIsNotCorrect_ShouldFail() {
-        setUp_allFine()
-        String md5sum = "0123--6789ab##ef0123456789abcdef" // arbitrary wrong md5sum
-        assert roddyBamFile.workDirectory.mkdirs()
-        roddyBamFile.workMd5sumFile.text = md5sum
-
-        assert shouldFail(ValidationException) {
-            linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanup(roddyBamFile, realm)
-        }.contains(md5sum)
     }
 
     @Test

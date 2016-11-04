@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.dataprocessing.roddyExecution
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.ngsdata.Individual
 import de.dkfz.tbi.otp.ngsdata.Project
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.utils.WaitingFileUtils
 
@@ -33,8 +34,22 @@ public trait RoddyResult {
 
     abstract File getWorkDirectory()
 
+    abstract File getBaseDirectory()
+
+    abstract ReferenceGenome getReferenceGenome()
+
+    short getProcessingPriority() {
+        return project.processingPriority
+    }
+
     File getWorkExecutionStoreDirectory() {
         return new File(workDirectory, RODDY_EXECUTION_STORE_DIR)
+    }
+
+    List<File> getWorkExecutionDirectories() {
+        roddyExecutionDirectoryNames.collect {
+            new File(workExecutionStoreDirectory, it)
+        }
     }
 
     /**

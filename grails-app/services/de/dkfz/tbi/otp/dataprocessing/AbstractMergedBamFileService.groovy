@@ -4,8 +4,6 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.ngsdata.*
 import static org.springframework.util.Assert.notNull
 
-/**
- */
 class AbstractMergedBamFileService {
 
     /**
@@ -37,5 +35,14 @@ class AbstractMergedBamFileService {
             samplePair.processingStatus = SamplePair.ProcessingStatus.NEEDS_PROCESSING
             assert samplePair.save(flush: true)
         }
+    }
+
+    File getExistingBamFilePath(final AbstractMergedBamFile bamFile) {
+        final File file = bamFile.getPathForFurtherProcessing()
+        assert bamFile.getMd5sum() ==~ /^[0-9a-f]{32}$/
+        assert bamFile.getFileSize() > 0L
+        LsdfFilesService.ensureFileIsReadableAndNotEmpty(file)
+        assert file.length() == bamFile.getFileSize()
+        return file
     }
 }

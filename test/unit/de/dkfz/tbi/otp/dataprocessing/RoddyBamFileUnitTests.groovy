@@ -32,7 +32,9 @@ class RoddyBamFileUnitTests {
 
     @Before
     void setUp() {
-        roddyBamFile = DomainFactory.createRoddyBamFile()
+        roddyBamFile = DomainFactory.createRoddyBamFile([
+                roddyExecutionDirectoryNames: [],
+        ])
         sampleType = roddyBamFile.sampleType
         individual = roddyBamFile.individual
 

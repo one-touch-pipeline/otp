@@ -1,6 +1,9 @@
 package de.dkfz.tbi.otp.utils
 
+import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingStep
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
 
@@ -55,4 +58,17 @@ class CreateRoddyFileHelper {
         createRoddyAlignmentWorkOrFinalResultFiles(roddyBamFile, "Final")
     }
 
+    static void createRoddySnvResultFiles(RoddySnvCallingInstance roddySnvCallingInstance) {
+        CreateFileHelper.createFile(new File(roddySnvCallingInstance.workExecutionStoreDirectory, 'someFile'))
+
+        roddySnvCallingInstance.workExecutionDirectories.each {
+            CreateFileHelper.createFile(new File(it, 'someFile'))
+        }
+
+        CreateFileHelper.createFile(roddySnvCallingInstance.getAllSNVdiagnosticsPlots().absoluteDataManagementPath)
+
+        [SnvCallingStep.CALLING, SnvCallingStep.SNV_DEEPANNOTATION].each {
+            CreateFileHelper.createFile(new OtpPath(roddySnvCallingInstance.snvInstancePath, it.getResultFileName(roddySnvCallingInstance.individual)).absoluteDataManagementPath)
+        }
+    }
 }

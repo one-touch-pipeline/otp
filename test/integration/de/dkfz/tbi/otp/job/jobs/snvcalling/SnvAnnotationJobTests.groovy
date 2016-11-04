@@ -173,6 +173,8 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         TestCase.removeMetaClass(LinkFileUtils, linkFileUtils)
         TestCase.removeMetaClass(ClusterJobLoggingService, pbsService.clusterJobLoggingService)
         TestCase.removeMetaClass(SnvCallingService, snvCallingService)
+        TestCase.removeMetaClass(AbstractMergedBamFileService, snvAnnotationJob.abstractMergedBamFileService)
+
         LsdfFilesService.metaClass = null
         WaitingFileUtils.metaClass = null
         TestCase.cleanTestDirectory()
@@ -233,7 +235,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
             return TestCase.uniqueNonExistentPath
         }
         snvAnnotationJob.metaClass.createAndSaveSnvJobResult = { SnvCallingInstance instance, ExternalScript externalScript, SnvJobResult inputResult -> }
-        snvAnnotationJob.metaClass.getExistingBamFilePath = {ProcessedMergedBamFile bamFile ->
+        snvAnnotationJob.abstractMergedBamFileService.metaClass.getExistingBamFilePath = {ProcessedMergedBamFile bamFile ->
             return new File(AbstractMergedBamFileService.destinationDirectory(processedMergedBamFile1), processedMergedBamFile1.getBamFileName())
         }
         snvAnnotationJob.metaClass.writeConfigFile = { SnvCallingInstance instance ->
@@ -247,7 +249,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
             File inputFile = snvCallingInstance.findLatestResultForSameBamFiles(callingStep).resultFilePath.absoluteDataManagementPath
             File inputFileCopy = new File(snvCallingInstance2.snvInstancePath.absoluteDataManagementPath, inputFile.name)
             File resultFile = new OtpPath(snvCallingInstance2.snvInstancePath, SnvCallingStep.SNV_ANNOTATION.getResultFileName(snvCallingInstance2.individual)).absoluteDataManagementPath
-            File bamFile = snvAnnotationJob.getExistingBamFilePath(snvCallingInstance2.sampleType1BamFile)
+            File bamFile = snvAnnotationJob.abstractMergedBamFileService.getExistingBamFilePath(snvCallingInstance2.sampleType1BamFile)
 
             String commandLinkPart = "# BEGIN ORIGINAL SCRIPT\n" +
                     "ln -sf ${inputFile.path} ${inputFileCopy.path};"
@@ -302,7 +304,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
         checkpointFile.createNewFile()
 
         LsdfFilesService.metaClass.static.ensureFileIsReadableAndNotEmpty = { File file -> }
-        snvAnnotationJob.metaClass.getExistingBamFilePath = {ProcessedMergedBamFile bamFile ->
+        snvAnnotationJob.abstractMergedBamFileService.metaClass.getExistingBamFilePath = {ProcessedMergedBamFile bamFile ->
             return new File(AbstractMergedBamFileService.destinationDirectory(processedMergedBamFile1), processedMergedBamFile1.getBamFileName())
         }
         executionService.metaClass.executeCommand = { Realm realm, String command -> }
@@ -333,7 +335,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
             CONFIGURATION)
 
         LsdfFilesService.metaClass.static.ensureFileIsReadableAndNotEmpty = { File file -> throw new AssertionError("Not readable") }
-        snvAnnotationJob.metaClass.getExistingBamFilePath = {ProcessedMergedBamFile bamFile ->
+        snvAnnotationJob.abstractMergedBamFileService.metaClass.getExistingBamFilePath = {ProcessedMergedBamFile bamFile ->
             return new File(AbstractMergedBamFileService.destinationDirectory(processedMergedBamFile1), processedMergedBamFileService.fileName(processedMergedBamFile1))
         }
         try {

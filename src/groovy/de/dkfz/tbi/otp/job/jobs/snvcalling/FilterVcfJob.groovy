@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFileService
 import de.dkfz.tbi.otp.job.jobs.AutoRestartableJob
 import org.springframework.beans.factory.annotation.Autowired
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
@@ -13,6 +14,8 @@ class FilterVcfJob extends AbstractSnvCallingJob implements AutoRestartableJob {
     ConfigService configService
     @Autowired
     PbsService pbsService
+    @Autowired
+    AbstractMergedBamFileService abstractMergedBamFileService
 
     @Override
     public SnvCallingStep getStep() {
@@ -55,7 +58,7 @@ class FilterVcfJob extends AbstractSnvCallingJob implements AutoRestartableJob {
                     "PID=${instance.individual.pid}," +
                     "TOOL_ID=snvFilter," +
                     "SNVFILE_PREFIX=snvs_," +
-                    "TUMOR_BAMFILE_FULLPATH_BP=${getExistingBamFilePath(instance.sampleType1BamFile)}," +
+                    "TUMOR_BAMFILE_FULLPATH_BP=${abstractMergedBamFileService.getExistingBamFilePath(instance.sampleType1BamFile)}," +
                     "FILENAME_VCF=${inputFileCopy}," +
                     "FILENAME_CHECKPOINT=${checkpointFile}" +
                     "'}"

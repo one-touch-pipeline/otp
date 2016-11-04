@@ -4,6 +4,8 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
+import de.dkfz.tbi.otp.job.processing.CreateClusterScriptService
+import de.dkfz.tbi.otp.job.processing.ExecutionHelperService
 import de.dkfz.tbi.otp.job.processing.ExecutionService
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.ngsdata.Realm
@@ -17,6 +19,8 @@ class ExecuteRoddyCommandService {
 
 
     ExecutionService executionService
+
+    ExecutionHelperService executionHelperService
 
 
     /**
@@ -122,11 +126,19 @@ class ExecuteRoddyCommandService {
         WaitingFileUtils.waitUntilExists(file)
     }
 
-    void correctPermissions(RoddyBamFile roddyBamFile, Realm realm) {
-        assert roddyBamFile : "RoddyBamFile should not be null"
+    void correctPermissionsAndGroups(RoddyResult roddyResult, Realm realm)  {
+        executionHelperService.setPermission(realm, roddyResult.workDirectory, CreateClusterScriptService.DIRECTORY_PERMISSION)
+        correctPermissions(roddyResult, realm)
+        String group = executionHelperService.getGroup(roddyResult.baseDirectory)
+        executionHelperService.setGroup(realm, roddyResult.workDirectory, group)
+        correctGroups(roddyResult, realm)
+    }
+
+    void correctPermissions(RoddyResult roddyResult, Realm realm) {
+        assert roddyResult : "roddyResult should not be null"
         String cmd = """\
 set -e
-cd "${roddyBamFile.workDirectory}"
+cd "${roddyResult.workDirectory}"
 
 echo ""
 echo "correct directory permission"
@@ -144,11 +156,11 @@ find -type f -user ${realm.roddyUser} -not -perm 444 \\( -name "*.bam" -or -name
         executionService.executeCommandReturnProcessOutput(realm, cmd, realm.roddyUser).assertExitCodeZeroAndStderrEmpty()
     }
 
-    void correctGroups(RoddyBamFile roddyBamFile, Realm realm) {
-        assert roddyBamFile : "RoddyBamFile should not be null"
+    void correctGroups(RoddyResult roddyResult, Realm realm) {
+        assert roddyResult : "roddyResult should not be null"
         String cmd = """\
 set -e
-cd "${roddyBamFile.workDirectory}"
+cd "${roddyResult.workDirectory}"
 
 #correct group
 groupname=`stat -c '%G' .`

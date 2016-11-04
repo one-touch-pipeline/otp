@@ -53,10 +53,7 @@ class LinkFilesToFinalDestinationService {
         assert realm : "realm must not be null"
         if (!roddyBamFile.withdrawn) {
             cleanupWorkDirectory(roddyBamFile, realm)
-            executionHelperService.setPermission(realm, roddyBamFile.workDirectory, CreateClusterScriptService.DIRECTORY_PERMISSION)
-            String group = executionHelperService.getGroup(roddyBamFile.baseDirectory)
-            executionHelperService.setGroup(realm, roddyBamFile.workDirectory, group.trim())
-            executeRoddyCommandService.correctGroups(roddyBamFile, realm)
+            executeRoddyCommandService.correctPermissionsAndGroups(roddyBamFile, realm)
             cleanupOldResults(roddyBamFile, realm)
             linkNewResults(roddyBamFile, realm)
 

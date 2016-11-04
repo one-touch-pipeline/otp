@@ -523,6 +523,7 @@ class DomainFactory {
                 md5sum: HelperUtils.randomMd5sum,
                 fileOperationStatus: FileOperationStatus.PROCESSED,
                 fileSize: 10000,
+                roddyExecutionDirectoryNames: [DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY],
                 ], bamFileProperties)
         return bamFile
     }
@@ -671,60 +672,54 @@ class DomainFactory {
                 externalScriptVersion: { createExternalScript().scriptVersion },
                 seqType: { createSeqType() },
                 project: { createProject() },
-                pipeline: { createOtpSnvPipelineLazy() }
+                pipeline: { createOtpSnvPipelineLazy() },
         ], properties)
     }
 
-    public static SnvCallingInstance createSnvInstanceWithRoddyBamFiles(Map properties = [:], Map bamFile1Properties = [:], Map bamFile2Properties = [:]) {
+
+    private static Map createSnvInstanceWithRoddyBamFilesMapHelper(Map properties, Map bamFile1Properties, Map bamFile2Properties) {
         Pipeline pipeline = createPanCanPipeline()
 
-        MergingWorkPackage controlWorkPackage = createMergingWorkPackage(pipeline: pipeline, statSizeFileName: DEFAULT_TAB_FILE_NAME)
+        MergingWorkPackage controlWorkPackage = createMergingWorkPackage(
+                pipeline: pipeline,
+                statSizeFileName: DEFAULT_TAB_FILE_NAME,
+                seqType: createSeqTypePaired(),
+        )
         SamplePair samplePair = properties.samplePair ?: createDisease(controlWorkPackage)
         MergingWorkPackage diseaseWorkPackage = samplePair.mergingWorkPackage1
 
         RoddyBamFile disease = createRoddyBamFile([workPackage: diseaseWorkPackage] + bamFile1Properties)
         RoddyBamFile control = createRoddyBamFile([workPackage: controlWorkPackage, config: disease.config] + bamFile2Properties)
 
-        SnvConfig snvConfig = createSnvConfig(
-                seqType: samplePair.seqType,
-        )
-
-        SnvCallingInstance snvCallingInstance = createSnvCallingInstance([
+        return [
                 instanceName: "2014-08-25_15h32",
                 samplePair: samplePair,
                 sampleType1BamFile: disease,
                 sampleType2BamFile: control,
-                config: snvConfig,
                 latestDataFileCreationDate: AbstractBamFile.getLatestSequenceDataFileCreationDate(disease, control),
-        ] + properties)
-        assert snvCallingInstance.save(flush: true)
-        return snvCallingInstance
+        ]
+    }
+
+    public static SnvCallingInstance createSnvInstanceWithRoddyBamFiles(Map properties = [:], Map bamFile1Properties = [:], Map bamFile2Properties = [:]) {
+        Map map = createSnvInstanceWithRoddyBamFilesMapHelper(properties, bamFile1Properties, bamFile2Properties)
+        SamplePair samplePair = map.samplePair
+        map.config = createSnvConfig(
+                seqType: samplePair.seqType,
+        )
+        return createDomainObject(SnvCallingInstance, map, properties)
     }
 
     public static RoddySnvCallingInstance createRoddySnvInstanceWithRoddyBamFiles(Map properties = [:], Map bamFile1Properties = [:], Map bamFile2Properties = [:]) {
-        Pipeline pipeline = createPanCanPipeline()
-
-        MergingWorkPackage controlWorkPackage = createMergingWorkPackage(pipeline: pipeline, statSizeFileName: DEFAULT_TAB_FILE_NAME)
-        SamplePair samplePair = createDisease(controlWorkPackage)
-        MergingWorkPackage diseaseWorkPackage = samplePair.mergingWorkPackage1
-
-        RoddyBamFile disease = createRoddyBamFile([workPackage: diseaseWorkPackage] + bamFile1Properties)
-        RoddyBamFile control = createRoddyBamFile([workPackage: controlWorkPackage, config: disease.config] + bamFile2Properties)
-
-        RoddyWorkflowConfig roddyWorkflowConfig = createRoddyWorkflowConfig(
-                pipeline: createRoddySnvPipelineLazy()
-        )
-
-        RoddySnvCallingInstance roddySnvCallingInstance = createRoddySnvCallingInstance([
-                instanceName: "2014-08-25_15h32",
-                samplePair: samplePair,
-                sampleType1BamFile: disease,
-                sampleType2BamFile: control,
-                config: roddyWorkflowConfig,
-                latestDataFileCreationDate: AbstractBamFile.getLatestSequenceDataFileCreationDate(disease, control),
-        ] + properties)
-        assert roddySnvCallingInstance.save(flush: true)
-        return roddySnvCallingInstance
+        Map map = createSnvInstanceWithRoddyBamFilesMapHelper(properties, bamFile1Properties, bamFile2Properties)
+        SamplePair samplePair = map.samplePair
+        map += [
+                roddyExecutionDirectoryNames: [DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY],
+                config                      : createRoddyWorkflowConfig(
+                        seqType: samplePair.seqType,
+                        pipeline: createRoddySnvPipelineLazy()
+                ),
+        ]
+        return createDomainObject(RoddySnvCallingInstance, map, properties)
     }
 
     public static SnvJobResult createSnvJobResultWithRoddyBamFiles(Map properties = [:]) {

@@ -36,6 +36,8 @@ class ExecutePanCanJobTests {
         prepareDataFilesOnFileSystem(roddyBamFile)
 
         DomainFactory.createBedFile([referenceGenome: roddyBamFile.referenceGenome, libraryPreparationKit: roddyBamFile.mergingWorkPackage.libraryPreparationKit])
+        CreateFileHelper.createFile(new File(executePanCanJob.referenceGenomeService.fastaFilePath(roddyBamFile.project, roddyBamFile.referenceGenome, false)))
+        CreateFileHelper.createFile(executePanCanJob.referenceGenomeService.chromosomeStatSizeFile(roddyBamFile.mergingWorkPackage, false))
     }
 
     @After
@@ -83,12 +85,17 @@ class ExecutePanCanJobTests {
         roddyBamFile.mergingWorkPackage.seqType = exomeSeqType
         assert roddyBamFile.mergingWorkPackage.save(flush: true)
 
-        String expectedCommand =  """\
-,fastq_list:${fastqFilesAsString(roddyBamFile)}\
-,TARGET_REGIONS_FILE:BedFilePath\
-,TARGETSIZE:1\
-"""
-        String actualCommand = executePanCanJob.prepareAndReturnWorkflowSpecificCValues(roddyBamFile)
+        List<String>  expectedCommand = [
+                "INDEX_PREFIX:${executePanCanJob.referenceGenomeService.fastaFilePath(roddyBamFile.project, roddyBamFile.referenceGenome)}",
+                "CHROM_SIZES_FILE:${executePanCanJob.referenceGenomeService.chromosomeStatSizeFile(roddyBamFile.mergingWorkPackage)}",
+                "possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}",
+                "possibleTumorSampleNamePrefixes:",
+                "TARGET_REGIONS_FILE:BedFilePath",
+                "TARGETSIZE:1",
+                "fastq_list:${fastqFilesAsString(roddyBamFile)}",
+        ]
+
+        List<String> actualCommand = executePanCanJob.prepareAndReturnWorkflowSpecificCValues(roddyBamFile)
 
         assert expectedCommand == actualCommand
     }
@@ -97,10 +104,15 @@ class ExecutePanCanJobTests {
     @Test
     void testPrepareAndReturnWorkflowSpecificCValues_WholeGenomeSeqType_NoBaseBamFile_AllFine() {
 
-        String expectedCommand = """\
-,fastq_list:${fastqFilesAsString(roddyBamFile)}\
-"""
-        String actualCommand = executePanCanJob.prepareAndReturnWorkflowSpecificCValues(roddyBamFile)
+        List<String> expectedCommand = [
+                "INDEX_PREFIX:${executePanCanJob.referenceGenomeService.fastaFilePath(roddyBamFile.project, roddyBamFile.referenceGenome)}",
+                "CHROM_SIZES_FILE:${executePanCanJob.referenceGenomeService.chromosomeStatSizeFile(roddyBamFile.mergingWorkPackage)}",
+                "possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}",
+                "possibleTumorSampleNamePrefixes:",
+                "fastq_list:${fastqFilesAsString(roddyBamFile)}",
+        ]
+
+        List<String> actualCommand = executePanCanJob.prepareAndReturnWorkflowSpecificCValues(roddyBamFile)
 
         assert expectedCommand == actualCommand
     }
@@ -121,12 +133,16 @@ class ExecutePanCanJobTests {
         RoddyBamFile roddyBamFile2 = DomainFactory.createRoddyBamFile(roddyBamFile)
         prepareDataFilesOnFileSystem(roddyBamFile2)
 
-        String expectedCommand = """\
-,fastq_list:${fastqFilesAsString(roddyBamFile2)}\
-,bam:${roddyBamFile.workBamFile.path}\
-"""
+        List<String> expectedCommand = [
+                "INDEX_PREFIX:${executePanCanJob.referenceGenomeService.fastaFilePath(roddyBamFile2.project, roddyBamFile2.referenceGenome)}",
+                "CHROM_SIZES_FILE:${executePanCanJob.referenceGenomeService.chromosomeStatSizeFile(roddyBamFile2.mergingWorkPackage)}",
+                "possibleControlSampleNamePrefixes:${roddyBamFile2.sampleType.dirName}",
+                "possibleTumorSampleNamePrefixes:",
+                "fastq_list:${fastqFilesAsString(roddyBamFile2)}",
+                "bam:${roddyBamFile.workBamFile.path}",
+        ]
 
-        String actualCommand = executePanCanJob.prepareAndReturnWorkflowSpecificCValues(roddyBamFile2)
+        List<String> actualCommand = executePanCanJob.prepareAndReturnWorkflowSpecificCValues(roddyBamFile2)
 
         assert expectedCommand == actualCommand
     }

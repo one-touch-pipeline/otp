@@ -43,8 +43,8 @@ class ExecutionHelperServiceUnitTests {
     @Test
     void "test setGroup & getGroup allFine"() {
         File tmpFile = temporaryFolder.newFile()
-        String group = grailsApplication.config.otp.testing.group
-        assert group: '"otp.testing.group" is not set in your "otp.properties". Please add it with an existing secondary group.'
+        String group = TestCase.testingGroup(grailsApplication)
+
         service.executionService = [
                 executeCommand: { Realm realm, String command ->
                     ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
@@ -53,11 +53,11 @@ class ExecutionHelperServiceUnitTests {
 
         LogThreadLocal.withThreadLog(System.out) {
             String output = service.getGroup(tmpFile)
-            assert group != output.trim()
+            assert group != output
             output = service.setGroup(new Realm(), tmpFile, group)
             assert output.isEmpty()
             output = service.getGroup(tmpFile)
-            assert group == output.trim()
+            assert group == output
         }
     }
 

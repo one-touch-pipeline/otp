@@ -25,8 +25,8 @@ class SnvJoiningJob extends AbstractSnvCallJoinJob {
                 "FILENAME_VCF_RAW=${vcfRawFile}," +
                 "VCF_FOR_SNV_FILES=\\'(${allChromosomeFilePaths})\\'"
         final String script =
-                "${ensureFileHasExpectedSizeScript(getExistingBamFilePath(instance.sampleType1BamFile), instance.sampleType1BamFile.fileSize)}" +
-                "${ensureFileHasExpectedSizeScript(getExistingBamFilePath(instance.sampleType2BamFile), instance.sampleType2BamFile.fileSize)}" +
+                "${ensureFileHasExpectedSizeScript(abstractMergedBamFileService.getExistingBamFilePath(instance.sampleType1BamFile), instance.sampleType1BamFile.fileSize)}" +
+                "${ensureFileHasExpectedSizeScript(abstractMergedBamFileService.getExistingBamFilePath(instance.sampleType2BamFile), instance.sampleType2BamFile.fileSize)}" +
                 "${ensureFileDoesNotExistScript(vcfRawFile)}" +
                 "${jobResult.chromosomeJoinExternalScript.scriptFilePath.path}; " +
                 "md5sum ${vcfRawFile} > ${vcfRawFile}.md5sum"

@@ -16,6 +16,8 @@ class SnvAnnotationJob extends AbstractSnvCallingJob implements AutoRestartableJ
     ConfigService configService
     @Autowired
     PbsService pbsService
+    @Autowired
+    AbstractMergedBamFileService abstractMergedBamFileService
 
     @Override
     SnvCallingStep getStep() {
@@ -41,7 +43,7 @@ class SnvAnnotationJob extends AbstractSnvCallingJob implements AutoRestartableJ
             // Check that all needed files are existing
             final File inputResultFile = inputResult.resultFilePath.absoluteDataManagementPath
             LsdfFilesService.ensureFileIsReadableAndNotEmpty(inputResultFile)
-            final File sampleType1BamFile = getExistingBamFilePath(instance.sampleType1BamFile)
+            final File sampleType1BamFile = abstractMergedBamFileService.getExistingBamFilePath(instance.sampleType1BamFile)
 
             // Write the config file in the project directory or if exists already checks that content is correct
             final File configFileInProjectDirectory = writeConfigFile(instance)

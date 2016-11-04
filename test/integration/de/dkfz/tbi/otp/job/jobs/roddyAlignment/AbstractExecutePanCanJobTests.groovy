@@ -35,8 +35,8 @@ class AbstractExecutePanCanJobTests {
         DomainFactory.createPanCanAlignableSeqTypes()
 
         roddyBamFile = DomainFactory.createRoddyBamFile([
-                md5sum: null,
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.DECLARED,
+                md5sum                      : null,
+                fileOperationStatus         : AbstractMergedBamFile.FileOperationStatus.DECLARED,
                 roddyExecutionDirectoryNames: [DomainFactory.DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY],
         ])
         roddyBamFile.workPackage.metaClass.findMergeableSeqTracks = { -> SeqTrack.list() }
@@ -44,9 +44,8 @@ class AbstractExecutePanCanJobTests {
         Realm dataProcessing = DomainFactory.createRealmDataProcessing(tmpDir.root, [name: roddyBamFile.project.realmName, roddyUser: HelperUtils.uniqueString])
         dataManagement = DomainFactory.createRealmDataManagement(tmpDir.root, [name: roddyBamFile.project.realmName])
         abstractExecutePanCanJob = [
-                prepareAndReturnWorkflowSpecificCValues: { RoddyBamFile bamFile -> ",workflowSpecificCValues" },
+                prepareAndReturnWorkflowSpecificCValues  : { RoddyBamFile bamFile -> ["workflowSpecificCValues"] },
                 prepareAndReturnWorkflowSpecificParameter: { RoddyBamFile bamFile -> "workflowSpecificParameter " },
-                workflowSpecificValidation: { RoddyBamFile bamFile -> }
 
         ] as AbstractExecutePanCanJob
 
@@ -56,20 +55,6 @@ class AbstractExecutePanCanJobTests {
         abstractExecutePanCanJob.executeRoddyCommandService = new ExecuteRoddyCommandService()
         abstractExecutePanCanJob.bedFileService = new BedFileService()
         abstractExecutePanCanJob.configService = new ConfigService()
-
-        String readGroupHeaders = roddyBamFile.containedSeqTracks.collect {
-            "@RG     ID:${RoddyBamFile.getReadGroupName(it)}        LB:tumor_123    PL:ILLUMINA     SM:sample_tumor_123"
-        }.join('\n') + '\n'
-        abstractExecutePanCanJob.executionService = [
-                executeCommandReturnProcessOutput: { Realm realm, String command, String userName ->
-                    assert realm == dataProcessing
-                    assert userName == dataProcessing.roddyUser
-                    String expectedCommand = "set -o pipefail; samtools view -H ${roddyBamFile.workBamFile} | grep ^@RG\\\\s"
-                    assert command == expectedCommand
-                    return new ProcessOutput(stdout: readGroupHeaders, stderr: '')
-                }
-        ] as ExecutionService
-
 
         File processingRootPath = dataProcessing.processingRootPath as File
 
@@ -114,7 +99,7 @@ class AbstractExecutePanCanJobTests {
 
 
     @Test
-    void testPrepareAndReturnWorkflowSpecificCommand_RoddyBamFileIsNull_ShouldFail() {
+    void testPrepareAndReturnWorkflowSpecificCommand_RoddyResultIsNull_ShouldFail() {
         assert TestCase.shouldFail(AssertionError) {
             abstractExecutePanCanJob.prepareAndReturnWorkflowSpecificCommand(null, dataManagement)
         }.contains("roddyResult must not be null")
@@ -147,9 +132,11 @@ class AbstractExecutePanCanJobTests {
 
         abstractExecutePanCanJob.executeRoddyCommandService.metaClass.createWorkOutputDirectory = { Realm realm, File file -> }
 
-        String expectedCmd =  """\
+        String expectedCmd = """\
 cd /tmp \
-&& sudo -u OtherUnixUser ${roddyCommand} rerun ${roddyBamFile.pipeline.name}_${roddyBamFile.seqType.roddyName}_${roddyBamFile.config.pluginVersion}_${roddyBamFile.config.configVersion}.config@WGS \
+&& sudo -u OtherUnixUser ${roddyCommand} rerun \
+${roddyBamFile.pipeline.name}_${roddyBamFile.seqType.roddyName}_\
+${roddyBamFile.config.pluginVersion}_${roddyBamFile.config.configVersion}.config@WGS \
 ${roddyBamFile.individual.pid} \
 --useconfig=${roddyApplicationIni} \
 --usefeaturetoggleconfig=${featureTogglesConfigPath} \
@@ -157,12 +144,8 @@ ${roddyBamFile.individual.pid} \
 --configurationDirectories=${new File(roddyBamFile.config.configFilePath).parent},${roddyBaseConfigsPath} \
 --useiodir=${viewByPidString()},${roddyBamFile.workDirectory} \
 workflowSpecificParameter \
---cvalues="INDEX_PREFIX:${referenceGenomeFile.path},\
-CHROM_SIZES_FILE:${chromosomeStatSizeFile},\
-workflowSpecificCValues,\
-PBS_AccountName:FASTTRACK,\
-possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName},\
-possibleTumorSampleNamePrefixes:"\
+--cvalues="workflowSpecificCValues,\
+PBS_AccountName:FASTTRACK"\
 """
 
         String actualCmd = abstractExecutePanCanJob.prepareAndReturnWorkflowSpecificCommand(roddyBamFile, dataManagement)
@@ -171,48 +154,20 @@ possibleTumorSampleNamePrefixes:"\
 
 
     @Test
-    void testPrepareAndReturnCValues_RoddyBamFileIsNull_ShouldFail() {
+    void testPrepareAndReturnCValues_RoddyResultIsNull_ShouldFail() {
         assert TestCase.shouldFail(AssertionError) {
             abstractExecutePanCanJob.prepareAndReturnCValues(null)
-        }.contains("roddyBamFile must not be null")
-    }
-
-
-    @Test
-    void testPrepareAndReturnCValues_PathToReferenceGenomeFastaFileIsNull_ShouldFail() {
-        abstractExecutePanCanJob.referenceGenomeService.metaClass.fastaFilePath = { Project project, ReferenceGenome referenceGenome ->
-            return null
-        }
-
-        assert TestCase.shouldFail(AssertionError) {
-            abstractExecutePanCanJob.prepareAndReturnCValues(roddyBamFile)
-        }.contains("Path to the reference genome file is null")
-    }
-
-
-    @Test
-    void testPrepareAndReturnCValues_PathToChromosomeStatSizeFileIsNull_ShouldFail() {
-        abstractExecutePanCanJob.referenceGenomeService.metaClass.chromosomeStatSizeFile = { MergingWorkPackage mergingWorkPackage ->
-            return null
-        }
-
-        assert TestCase.shouldFail(AssertionError) {
-            abstractExecutePanCanJob.prepareAndReturnCValues(roddyBamFile)
-        }.contains("Path to the chromosome stat size file is null")
+        }.contains("roddyResult must not be null")
     }
 
 
     @Test
     void testPrepareAndReturnCValues_NoFastTrack_setUpCorrect() {
         String expectedCommand = """\
---cvalues=\
-"INDEX_PREFIX:${referenceGenomeFile.path},\
-CHROM_SIZES_FILE:${chromosomeStatSizeFile},\
-workflowSpecificCValues,\
-possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName},\
-possibleTumorSampleNamePrefixes:"\
+--cvalues="workflowSpecificCValues"\
 """
-        assert expectedCommand == abstractExecutePanCanJob.prepareAndReturnCValues(roddyBamFile)
+        String actualCommand = abstractExecutePanCanJob.prepareAndReturnCValues(roddyBamFile)
+        assert expectedCommand == actualCommand
     }
 
 
@@ -223,231 +178,33 @@ possibleTumorSampleNamePrefixes:"\
 
         String expectedCommand = """\
 --cvalues=\
-"INDEX_PREFIX:${referenceGenomeFile.path},\
-CHROM_SIZES_FILE:${chromosomeStatSizeFile},\
-workflowSpecificCValues,\
-PBS_AccountName:FASTTRACK,\
-possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName},\
-possibleTumorSampleNamePrefixes:"\
+"workflowSpecificCValues,\
+PBS_AccountName:FASTTRACK"\
 """
         assert expectedCommand == abstractExecutePanCanJob.prepareAndReturnCValues(roddyBamFile)
     }
 
 
     @Test
-    void testValidate_RoddyBamFileIsNull_ShouldFail() {
+    void testGetChromosomeIndexParameter_RoddyResultIsNull_ShouldFail() {
         assert TestCase.shouldFail(AssertionError) {
-            abstractExecutePanCanJob.validate(null)
-        }.contains("Input roddyResultObject must not be null")
+            abstractExecutePanCanJob.getChromosomeIndexParameter(null)
+        }.contains("assert referenceGenome")
     }
 
-
     @Test
-    void testValidate_PermissionChangeFail_ShouldFail() {
-        String message = HelperUtils.uniqueString
-        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
-        abstractExecutePanCanJob.executeRoddyCommandService.metaClass.correctPermissions = { RoddyBamFile bamFile, Realm realm -> assert false, message }
-
+    void testGetChromosomeIndexParameter_NoChromosomeNamesExist_ShouldFail() {
         assert TestCase.shouldFail(AssertionError) {
-            abstractExecutePanCanJob.validate(roddyBamFile)
-        }.contains(message)
+            abstractExecutePanCanJob.getChromosomeIndexParameter(roddyBamFile.referenceGenome)
+        }.contains("No chromosome names could be found for reference genome")
     }
 
 
     @Test
-    void testValidate_BaseBamFileChanged_ShouldFail() {
-        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
+    void testGetChromosomeIndexParameter_AllFine() {
+        List<String> chromosomeNames = ["1", "2", "3", "4", "5", "M", "X", "Y"]
+        DomainFactory.createReferenceGenomeEntries(roddyBamFile.referenceGenome, chromosomeNames)
 
-        roddyBamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.PROCESSED
-        roddyBamFile.md5sum = "abcdefabcdefabcdefabcdefabcdefab"
-        assert roddyBamFile.save(flush: true)
-
-        roddyBamFile.mergingWorkPackage.bamFileInProjectFolder = roddyBamFile
-        assert roddyBamFile.mergingWorkPackage.save(flush: true)
-
-        RoddyBamFile roddyBamFile2 = DomainFactory.createRoddyBamFile(roddyBamFile)
-
-        assert TestCase.shouldFail(RuntimeException) {
-            abstractExecutePanCanJob.validate(roddyBamFile2)
-        }.contains("The input BAM file seems to have changed on the file system while this job was processing it")
-
-    }
-
-
-    @Test
-    void testValidate_BamDoesNotExist_ShouldFail() {
-        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
-        roddyBamFile.workBamFile.delete()
-        assert TestCase.shouldFail(AssertionError) {
-            abstractExecutePanCanJob.validate(roddyBamFile)
-        }.contains(roddyBamFile.workBamFile.path)
-    }
-
-
-    @Test
-    void testValidate_BaiDoesNotExist_ShouldFail() {
-        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
-        roddyBamFile.workBaiFile.delete()
-        assert TestCase.shouldFail(AssertionError) {
-            abstractExecutePanCanJob.validate(roddyBamFile)
-        }.contains(roddyBamFile.workBaiFile.path)
-    }
-
-
-    @Test
-    void testValidate_Md5sumDoesNotExist_ShouldFail() {
-        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
-        roddyBamFile.workMd5sumFile.delete()
-        assert TestCase.shouldFail(AssertionError) {
-            abstractExecutePanCanJob.validate(roddyBamFile)
-        }.contains(roddyBamFile.workMd5sumFile.path)
-    }
-
-
-    @Test
-    void testValidate_MergedQaDirDoesNotExist_ShouldFail() {
-        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
-        roddyBamFile.workQADirectory.deleteDir()
-
-        assert TestCase.shouldFail(AssertionError) {
-            abstractExecutePanCanJob.validate(roddyBamFile)
-        }.contains(roddyBamFile.workQADirectory.path)
-    }
-
-
-    @Test
-    void testValidate_MergedQaJsonFileDoesNotExist_ShouldFail() {
-        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
-        assert roddyBamFile.getWorkMergedQAJsonFile().delete()
-
-        assert CreateFileHelper.createFile(new File(roddyBamFile.workMergedQADirectory, "someFile"))
-
-        assert TestCase.shouldFail(AssertionError) {
-            abstractExecutePanCanJob.validate(roddyBamFile)
-        }.contains(roddyBamFile.getWorkMergedQAJsonFile().path)
-    }
-
-
-    @Test
-    void testValidate_SingleLaneJsonFileDoesNotExist_ShouldFail() {
-        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
-        File singleLaneQa = roddyBamFile.getWorkSingleLaneQAJsonFiles().values().iterator().next()
-        assert singleLaneQa.delete()
-        assert TestCase.shouldFail(AssertionError) {
-            abstractExecutePanCanJob.validate(roddyBamFile)
-        }.contains(singleLaneQa.path)
-    }
-
-
-    @Test
-    void testValidate_ExecutionStoreDirDoesNotExist_ShouldFail() {
-        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
-        roddyBamFile.workExecutionStoreDirectory.deleteDir()
-        assert TestCase.shouldFail(AssertionError) {
-            abstractExecutePanCanJob.validate(roddyBamFile)
-        }.contains(roddyBamFile.workExecutionStoreDirectory.path)
-    }
-
-
-    @Test
-    void testValidate_WrongFileOperationStatus_ShouldFail(){
-        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
-
-        roddyBamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.INPROGRESS
-        assert roddyBamFile.save(flush: true)
-
-        assert TestCase.shouldFail(AssertionError) {
-            abstractExecutePanCanJob.validate(roddyBamFile)
-        }.contains(AbstractMergedBamFile.FileOperationStatus.INPROGRESS.name())
-    }
-
-
-    @Test
-    void testValidate_AllFine(){
-        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
-        abstractExecutePanCanJob.validate(roddyBamFile)
-    }
-
-    @Test
-    void testValidate_WgbsData_AllFine(){
-        SeqType wgbsSeqType = DomainFactory.createWholeGenomeBisulfiteSeqType()
-        DomainFactory.changeSeqType(roddyBamFile, wgbsSeqType, "lib1")
-
-        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
-        abstractExecutePanCanJob.validate(roddyBamFile)
-    }
-
-
-    @Test
-    void testValidateReadGroups_WhenReadGroupsAreNotAsExpected_ThrowsException() {
-        SeqTrack seqTrack = DomainFactory.createSeqTrackWithTwoDataFiles(roddyBamFile.mergingWorkPackage)
-        roddyBamFile.seqTracks.add(seqTrack)
-        roddyBamFile.numberOfMergedLanes++
-        roddyBamFile.save()
-        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
-
-        TestCase.shouldFailWithMessageContaining(RuntimeException,
-"""Read groups in BAM file are not as expected.
-Read groups in ${roddyBamFile.workBamFile}:
-${(roddyBamFile.containedSeqTracks - seqTrack).collect { RoddyBamFile.getReadGroupName(it) }.join('\n')}
-Expected read groups:
-${roddyBamFile.containedSeqTracks.collect { RoddyBamFile.getReadGroupName(it) }.join('\n')}""", {
-            abstractExecutePanCanJob.validate(roddyBamFile)
-        })
-    }
-
-
-    @Test
-    void testEnsureCorrectBaseBamFileIsOnFileSystem_NoBaseBamFile_AllFine() {
-        abstractExecutePanCanJob.ensureCorrectBaseBamFileIsOnFileSystem(null)
-    }
-
-
-    @Test
-    void testEnsureCorrectBaseBamFileIsOnFileSystem_BaseBamFileExistsButNotInFileSystem_ShouldFail() {
-        roddyBamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.PROCESSED
-        roddyBamFile.md5sum = "abcdefabcdefabcdefabcdefabcdefab"
-        assert roddyBamFile.save(flush: true)
-
-        roddyBamFile.mergingWorkPackage.bamFileInProjectFolder = roddyBamFile
-        assert roddyBamFile.mergingWorkPackage.save(flush: true)
-
-        assert TestCase.shouldFail(AssertionError) {
-            abstractExecutePanCanJob.ensureCorrectBaseBamFileIsOnFileSystem(roddyBamFile)
-        }.contains(roddyBamFile.workBamFile.path)
-    }
-
-
-    @Test
-    void testEnsureCorrectBaseBamFileIsOnFileSystem_BaseBamFileExistsButFileSizeIsWrong_ShouldFail() {
-        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
-
-        roddyBamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.PROCESSED
-        roddyBamFile.md5sum = "abcdefabcdefabcdefabcdefabcdefab"
-        roddyBamFile.fileSize = 12345678
-        assert roddyBamFile.save(flush: true)
-
-        roddyBamFile.mergingWorkPackage.bamFileInProjectFolder = roddyBamFile
-        assert roddyBamFile.mergingWorkPackage.save(flush: true)
-
-        assert TestCase.shouldFail(AssertionError) {
-            abstractExecutePanCanJob.ensureCorrectBaseBamFileIsOnFileSystem(roddyBamFile)
-        }.contains(roddyBamFile.workBamFile.path)
-    }
-
-
-    @Test
-    void testEnsureCorrectBaseBamFileIsOnFileSystem_BaseBamFileExistsAndIsCorrect() {
-        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
-
-        roddyBamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.PROCESSED
-        roddyBamFile.md5sum = "abcdefabcdefabcdefabcdefabcdefab"
-        roddyBamFile.fileSize = roddyBamFile.getWorkBamFile().size()
-        assert roddyBamFile.save(flush: true)
-
-        roddyBamFile.mergingWorkPackage.bamFileInProjectFolder = roddyBamFile
-        assert roddyBamFile.mergingWorkPackage.save(flush: true)
-
-        abstractExecutePanCanJob.ensureCorrectBaseBamFileIsOnFileSystem(roddyBamFile)
+        assert "CHROMOSOME_INDICES:( ${chromosomeNames.join(' ')} )" == abstractExecutePanCanJob.getChromosomeIndexParameter(roddyBamFile.referenceGenome)
     }
 }

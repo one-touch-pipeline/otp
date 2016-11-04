@@ -111,8 +111,7 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
 
     @Before
     void setUp() {
-        String group = grailsApplication.config.otp.testing.group
-        assert group: '"otp.testing.group" is not set in your "otp.properties". Please add it with an existing secondary group.'
+        String group = TestCase.testingGroup(grailsApplication)
         executionHelperService.setGroup(realm, realm.rootPath as File, group)
 
         setUpFilesVariables()

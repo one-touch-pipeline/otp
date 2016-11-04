@@ -46,7 +46,9 @@ class AbstractRoddyJobUnitTests {
 
     @Before
     void setUp() {
-        roddyBamFile = DomainFactory.createRoddyBamFile()
+        roddyBamFile = DomainFactory.createRoddyBamFile(
+                roddyExecutionDirectoryNames: [],
+        )
         abstractRoddyJob = [processingStepId: 123456789, getProcessParameterObject: { roddyBamFile }] as AbstractRoddyJob
         clusterJobIdentifier = new ClusterJobIdentifier(DomainFactory.createRealmDataProcessing(), "pbsId", "userName")
     }

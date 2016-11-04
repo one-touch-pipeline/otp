@@ -325,13 +325,6 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
         }
     }
 
-    List<File> getWorkExecutionDirectories() {
-        this.roddyExecutionDirectoryNames.collect {
-            new File(this.workExecutionStoreDirectory, it)
-        }
-    }
-
-
     File getFinalBamFile() {
         return new File(baseDirectory, this.bamFileName)
     }

@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
 
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.job.jobs.AutoRestartableJob
 import de.dkfz.tbi.otp.ngsdata.BedFile
 import de.dkfz.tbi.otp.ngsdata.DataFile
@@ -14,10 +15,10 @@ import de.dkfz.tbi.otp.ngsdata.SeqTypeNames
 import static de.dkfz.tbi.otp.ngsdata.LsdfFilesService.ensureFileIsReadableAndNotEmpty
 
 
-class ExecutePanCanJob extends AbstractExecutePanCanJob implements AutoRestartableJob {
+class ExecutePanCanJob extends AbstractRoddyAlignmentJob implements AutoRestartableJob {
 
     @Override
-    protected String prepareAndReturnWorkflowSpecificCValues(RoddyBamFile roddyBamFile) {
+    protected List<String> prepareAndReturnWorkflowSpecificCValues(RoddyBamFile roddyBamFile) {
         assert roddyBamFile : "roddyBamFile must not be null"
 
         List<String> filesToMerge = getFilesToMerge(roddyBamFile)
@@ -25,18 +26,21 @@ class ExecutePanCanJob extends AbstractExecutePanCanJob implements AutoRestartab
         RoddyBamFile baseBamFile = roddyBamFile.baseBamFile
         ensureCorrectBaseBamFileIsOnFileSystem(baseBamFile)
 
-        String additionalCValues = ''
+        List<String> cValues = prepareAndReturnAlignmentCValues(roddyBamFile)
+
         if (roddyBamFile.seqType.name == SeqTypeNames.EXOME.seqTypeName) {
             BedFile bedFile = roddyBamFile.bedFile
             Realm dataProcessingRealm = configService.getRealmDataProcessing(roddyBamFile.project)
             File bedFilePath = bedFileService.filePath(dataProcessingRealm, bedFile) as File
-            additionalCValues += ",TARGET_REGIONS_FILE:${bedFilePath}"
-            additionalCValues += ",TARGETSIZE:${bedFile.targetSize}"
+            cValues.add("TARGET_REGIONS_FILE:${bedFilePath}")
+            cValues.add("TARGETSIZE:${bedFile.targetSize}")
+        }
+        cValues.add("fastq_list:${filesToMerge.join(";")}")
+        if (baseBamFile) {
+            cValues.add("bam:${baseBamFile.getPathForFurtherProcessing()}")
         }
 
-        return ",fastq_list:${filesToMerge.join(";")}" +
-                "${baseBamFile ? ",bam:${baseBamFile.getPathForFurtherProcessing()}" : ""}" +
-                additionalCValues
+        return cValues
     }
 
 

@@ -9,9 +9,7 @@ import org.springframework.beans.factory.annotation.*
 
 import java.util.regex.*
 
-import static de.dkfz.tbi.otp.ngsdata.LsdfFilesService.*
-
-abstract class AbstractExecutePanCanJob extends AbstractRoddyJob {
+abstract class AbstractExecutePanCanJob<R extends RoddyResult> extends AbstractRoddyJob<R> {
 
     public static final Pattern READ_GROUP_PATTERN = Pattern.compile(/^@RG\s+ID:([^\s]+)\s/)
 
@@ -32,119 +30,45 @@ abstract class AbstractExecutePanCanJob extends AbstractRoddyJob {
 
 
     @Override
-    protected String prepareAndReturnWorkflowSpecificCommand(RoddyResult roddyResult, Realm realm) throws Throwable {
-        assert roddyResult : "roddyResult must not be null"
-        assert realm : "realm must not be null"
+    protected String prepareAndReturnWorkflowSpecificCommand(R roddyResult, Realm realm) throws Throwable {
+        assert roddyResult: "roddyResult must not be null"
+        assert realm: "realm must not be null"
 
-        RoddyBamFile roddyBamFile = roddyResult as RoddyBamFile
+        String analysisIDinConfigFile = executeRoddyCommandService.getAnalysisIDinConfigFile(roddyResult)
+        String nameInConfigFile = roddyResult.config.getNameUsedInConfig()
 
-        String analysisIDinConfigFile = executeRoddyCommandService.getAnalysisIDinConfigFile(roddyBamFile)
-        String nameInConfigFile = roddyBamFile.config.getNameUsedInConfig()
+        LsdfFilesService.ensureFileIsReadableAndNotEmpty(new File(roddyResult.config.configFilePath))
 
-        LsdfFilesService.ensureFileIsReadableAndNotEmpty(new File(roddyBamFile.config.configFilePath))
-
-        return executeRoddyCommandService.defaultRoddyExecutionCommand(roddyBamFile, nameInConfigFile, analysisIDinConfigFile, realm) +
-                prepareAndReturnWorkflowSpecificParameter(roddyBamFile) +
-                prepareAndReturnCValues(roddyBamFile)
+        return executeRoddyCommandService.defaultRoddyExecutionCommand(roddyResult, nameInConfigFile, analysisIDinConfigFile, realm) +
+                prepareAndReturnWorkflowSpecificParameter(roddyResult) +
+                prepareAndReturnCValues(roddyResult)
     }
 
 
-    public String prepareAndReturnCValues(RoddyBamFile roddyBamFile) {
-        assert roddyBamFile : "roddyBamFile must not be null"
+    public String prepareAndReturnCValues(R roddyResult) {
+        assert roddyResult: "roddyResult must not be null"
 
-        File referenceGenomeFastaFile = referenceGenomeService.fastaFilePath(roddyBamFile.project, roddyBamFile.referenceGenome) as File
-        assert referenceGenomeFastaFile : "Path to the reference genome file is null"
-        LsdfFilesService.ensureFileIsReadableAndNotEmpty(referenceGenomeFastaFile)
+        List<String> cValues = prepareAndReturnWorkflowSpecificCValues(roddyResult)
+        if (roddyResult.processingPriority >= ProcessingPriority.FAST_TRACK_PRIORITY) {
+            cValues.add("PBS_AccountName:FASTTRACK")
+        }
 
-        File chromosomeStatSizeFile = referenceGenomeService.chromosomeStatSizeFile(roddyBamFile.mergingWorkPackage)
-        assert chromosomeStatSizeFile : "Path to the chromosome stat size file is null"
-        LsdfFilesService.ensureFileIsReadableAndNotEmpty(chromosomeStatSizeFile)
-
-        return "--cvalues=\"INDEX_PREFIX:${referenceGenomeFastaFile}" +
-                ",CHROM_SIZES_FILE:${chromosomeStatSizeFile}" +
-                prepareAndReturnWorkflowSpecificCValues(roddyBamFile) +
-                "${(roddyBamFile.processingPriority >= ProcessingPriority.FAST_TRACK_PRIORITY) ? ",PBS_AccountName:FASTTRACK" : ""}" +
-                ",possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}" +
-                ",possibleTumorSampleNamePrefixes:\""
+        return "--cvalues=\"${cValues.join(',')}\""
     }
 
 
-    protected abstract String prepareAndReturnWorkflowSpecificCValues(RoddyBamFile roddyBamFile)
+    public String getChromosomeIndexParameter(ReferenceGenome referenceGenome) {
+        assert referenceGenome
 
-    protected abstract String prepareAndReturnWorkflowSpecificParameter(RoddyBamFile roddyBamFile)
+        List<String> chromosomeNames = ReferenceGenomeEntry.findAllByReferenceGenomeAndClassificationInList(referenceGenome,
+                [ReferenceGenomeEntry.Classification.CHROMOSOME, ReferenceGenomeEntry.Classification.MITOCHONDRIAL])*.name
+        assert chromosomeNames: "No chromosome names could be found for reference genome ${referenceGenome}"
 
-    protected abstract void workflowSpecificValidation(RoddyBamFile roddyBamFile)
-
-
-    @Override
-    protected void validate(RoddyResult roddyResult) throws Throwable {
-        assert roddyResult : "Input roddyResultObject must not be null"
-
-        RoddyBamFile roddyBamFile = roddyResult as RoddyBamFile
-
-        executeRoddyCommandService.correctPermissions(roddyBamFile, configService.getRealmDataProcessing(roddyBamFile.project))
-
-        try {
-            ensureCorrectBaseBamFileIsOnFileSystem(roddyBamFile.baseBamFile)
-        } catch (AssertionError e) {
-            throw new RuntimeException('The input BAM file seems to have changed on the file system while this job was processing it.', e)
-        }
-
-        ['Bam', 'Bai', 'Md5sum'].each {
-            LsdfFilesService.ensureFileIsReadableAndNotEmpty(roddyBamFile."work${it}File")
-        }
-
-        validateReadGroups(roddyBamFile)
-
-        ['MergedQA', 'ExecutionStore'].each {
-            LsdfFilesService.ensureDirIsReadableAndNotEmpty(roddyBamFile."work${it}Directory")
-        }
-
-        workflowSpecificValidation(roddyBamFile)
-
-        ensureFileIsReadableAndNotEmpty(roddyBamFile.workMergedQAJsonFile)
-
-        roddyBamFile.workSingleLaneQAJsonFiles.values().each {
-            ensureFileIsReadableAndNotEmpty(it)
-        }
-
-        assert [AbstractMergedBamFile.FileOperationStatus.DECLARED, AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING].contains(roddyBamFile.fileOperationStatus)
-        roddyBamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING
-        assert roddyBamFile.save(flush: true)
+        return "CHROMOSOME_INDICES:( ${chromosomeNames.join(' ')} )"
     }
 
-    void validateReadGroups(RoddyBamFile bamFile) {
 
-        File bamFilePath = bamFile.workBamFile
-        Realm realm = configService.getRealmDataProcessing(bamFile.project)
-        List<String> readGroupsInBam = executionService.executeCommandReturnProcessOutput(
-                realm, "set -o pipefail; samtools view -H ${bamFilePath} | grep ^@RG\\\\s", realm.roddyUser
-        ).assertExitCodeZeroAndStderrEmpty().stdout.split('\n').collect {
-            Matcher matcher = READ_GROUP_PATTERN.matcher(it)
-            if (!matcher.find()) {
-                throw new RuntimeException("Line does not match expected @RG pattern: ${it}")
-            }
-            return matcher.group(1)
-        }.sort()
+    protected abstract List<String> prepareAndReturnWorkflowSpecificCValues(R roddyResult)
 
-        List<String> expectedReadGroups = bamFile.containedSeqTracks.collect { RoddyBamFile.getReadGroupName(it) }.sort()
-
-        if (readGroupsInBam != expectedReadGroups) {
-            throw new RuntimeException(
-"""Read groups in BAM file are not as expected.
-Read groups in ${bamFilePath}:
-${readGroupsInBam.join('\n')}
-Expected read groups:
-${expectedReadGroups.join('\n')}""")
-        }
-    }
-
-    void ensureCorrectBaseBamFileIsOnFileSystem(RoddyBamFile baseBamFile) {
-        if (baseBamFile) {
-            File bamFilePath = baseBamFile.getPathForFurtherProcessing()
-            assert bamFilePath.exists()
-            assert baseBamFile.fileSize == bamFilePath.length()
-        }
-    }
-
+    protected abstract String prepareAndReturnWorkflowSpecificParameter(R roddyResult)
 }

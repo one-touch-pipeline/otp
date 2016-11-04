@@ -61,21 +61,21 @@ class ReferenceGenomeService {
      * @param reference genome the reference genome for which the path and the prefix are created
      * @param project the project, which belongs to the reference genome
      */
-    public String prefixOnlyFilePath(Project project, ReferenceGenome referenceGenome) {
+    public String prefixOnlyFilePath(Project project, ReferenceGenome referenceGenome, boolean checkExistence = true) {
         notNull(project, "The project is not specified")
         notNull(referenceGenome, "The reference genome is not specified")
         String refGenomeFileNamePrefix = referenceGenome.fileNamePrefix
-        return filePathToDirectory(project, referenceGenome) + "${refGenomeFileNamePrefix}"
+        return filePathToDirectory(project, referenceGenome, checkExistence) + "${refGenomeFileNamePrefix}"
     }
 
     /**
      * returns the path to the fasta file for the given reference genome depending on project
      * @param the reference genome for which the file path is created and the belonging project
      */
-    public String fastaFilePath(Project project, ReferenceGenome referenceGenome) {
-        String referenceGenomeFastaFilePath = prefixOnlyFilePath(project, referenceGenome) + ".fa"
+    public String fastaFilePath(Project project, ReferenceGenome referenceGenome, boolean checkExistence = true) {
+        String referenceGenomeFastaFilePath = prefixOnlyFilePath(project, referenceGenome, checkExistence) + ".fa"
         File file = new File(referenceGenomeFastaFilePath)
-        return checkFileExistence(file, true)
+        return checkFileExistence(file, checkExistence)
     }
 
     /**

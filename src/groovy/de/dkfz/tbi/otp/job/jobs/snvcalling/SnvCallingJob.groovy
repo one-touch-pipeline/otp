@@ -23,8 +23,8 @@ class SnvCallingJob extends AbstractSnvCallJoinJob implements AutoRestartableJob
                     "PARM_CHR_INDEX=${chromosome}," +
                     "FILENAME_VCF_SNVS=${chromosomeResultFile}"
             final String script =
-                    ensureFileHasExpectedSizeScript(getExistingBamFilePath(instance.sampleType1BamFile), instance.sampleType1BamFile.fileSize) +
-                    ensureFileHasExpectedSizeScript(getExistingBamFilePath(instance.sampleType2BamFile), instance.sampleType2BamFile.fileSize) +
+                    ensureFileHasExpectedSizeScript(abstractMergedBamFileService.getExistingBamFilePath(instance.sampleType1BamFile), instance.sampleType1BamFile.fileSize) +
+                    ensureFileHasExpectedSizeScript(abstractMergedBamFileService.getExistingBamFilePath(instance.sampleType2BamFile), instance.sampleType2BamFile.fileSize) +
                     ensureFileDoesNotExistScript(chromosomeResultFile) +
                     jobResult.externalScript.scriptFilePath
             sendClusterScript(script, qsubParametersChromosomeSpecific)

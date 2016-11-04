@@ -1,6 +1,8 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
+import de.dkfz.tbi.otp.job.jobs.AutoRestartableJob
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.ProcessHelperService.ProcessOutput
@@ -9,7 +11,7 @@ import org.springframework.beans.factory.annotation.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 
-class ExecuteWgbsAlignmentJob extends AbstractExecutePanCanJob {
+class ExecuteWgbsAlignmentJob extends AbstractRoddyAlignmentJob implements AutoRestartableJob {
 
 
     @Autowired
@@ -25,27 +27,25 @@ class ExecuteWgbsAlignmentJob extends AbstractExecutePanCanJob {
 
 
     @Override
-    protected String prepareAndReturnWorkflowSpecificCValues(RoddyBamFile roddyBamFile) {
+    protected List<String> prepareAndReturnWorkflowSpecificCValues(RoddyBamFile roddyBamFile) {
         assert roddyBamFile : "roddyBamFile must not be null"
 
-        List<String> chromosomeNames = ReferenceGenomeEntry.findAllByReferenceGenomeAndClassificationInList(roddyBamFile.referenceGenome,
-                [ReferenceGenomeEntry.Classification.CHROMOSOME, ReferenceGenomeEntry.Classification.MITOCHONDRIAL])*.name
-        assert chromosomeNames : "No chromosome names could be found for reference genome ${roddyBamFile.referenceGenome}"
-        GString chromosomeIndices = ",CHROMOSOME_INDICES:( ${chromosomeNames.join(' ')} )"
+        List<String> cValues = prepareAndReturnAlignmentCValues(roddyBamFile)
 
-        String cytosinePositionIndex = ""
+        cValues.add(getChromosomeIndexParameter(roddyBamFile.referenceGenome))
+
         if (roddyBamFile.referenceGenome.cytosinePositionsIndex) {
-            cytosinePositionIndex = ",CYTOSINE_POSITIONS_INDEX:${referenceGenomeService.cytosinePositionIndexFilePath(roddyBamFile.project, roddyBamFile.referenceGenome).absolutePath}"
+            cValues.add("CYTOSINE_POSITIONS_INDEX:${referenceGenomeService.cytosinePositionIndexFilePath(roddyBamFile.project, roddyBamFile.referenceGenome).absolutePath}")
         } else {
             throw new RuntimeException("Cytosine position index for reference genome ${roddyBamFile.referenceGenome} is not defined.")
         }
 
         AdapterFile adapterFile = exactlyOneElement(roddyBamFile.seqTracks*.adapterFile.unique())
-        String clipIndex = (adapterFile ?
-                ",CLIP_INDEX:${adapterFileService.fullPath(adapterFile)}" :
-                ""
-        )
-        return chromosomeIndices + cytosinePositionIndex + clipIndex
+        if (adapterFile) {
+            cValues.add("CLIP_INDEX:${adapterFileService.fullPath(adapterFile)}")
+        }
+
+        return cValues
     }
 
 

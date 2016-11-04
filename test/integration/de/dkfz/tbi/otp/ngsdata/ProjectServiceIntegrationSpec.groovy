@@ -56,7 +56,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
 
     void "test createProject valid input"() {
         given:
-        String group = grailsApplication.config.otp.testing.group
+        String group = TestCase.testingGroup(grailsApplication)
 
         when:
         Project project
@@ -101,7 +101,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
 
     void "test createProject if directory is created"() {
         given:
-        String group = grailsApplication.config.otp.testing.group
+        String group = TestCase.testingGroup(grailsApplication)
 
         when:
         Project project
@@ -139,7 +139,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
 
     void "test createProject invalid input"() {
         given:
-        String group = grailsApplication.config.otp.testing.group
+        String group = TestCase.testingGroup(grailsApplication)
 
         when:
         Project project
@@ -204,7 +204,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
 
     void "test createProject with invalid mailingListName"() {
         given:
-        String group = grailsApplication.config.otp.testing.group
+        String group = TestCase.testingGroup(grailsApplication)
 
         when:
         Project project
@@ -233,7 +233,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
 
     void "test createProject with invalid dirAnalysis"() {
         given:
-        String group = grailsApplication.config.otp.testing.group
+        String group = TestCase.testingGroup(grailsApplication)
 
         when:
         Project project
@@ -262,7 +262,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
 
     void "test createProject valid input, when directory with wrong unix group already exists"() {
         given:
-        String group = grailsApplication.config.otp.testing.group
+        String group = TestCase.testingGroup(grailsApplication)
         Realm realm = CollectionUtils.exactlyOneElement(Realm.findAllByOperationType(Realm.OperationType.DATA_MANAGEMENT))
         File projectDirectory = LsdfFilesService.getPath(
                 realm.rootPath,
@@ -337,7 +337,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
 
     void "test createProject invalid project category should fail"() {
         given:
-        String group = grailsApplication.config.otp.testing.group
+        String group = TestCase.testingGroup(grailsApplication)
 
         when:
         Project project

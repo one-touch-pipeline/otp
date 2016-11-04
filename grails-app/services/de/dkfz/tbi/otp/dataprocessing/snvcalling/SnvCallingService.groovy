@@ -8,9 +8,12 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 class SnvCallingService {
 
+    AbstractMergedBamFileService abstractMergedBamFileService
+
     static final List<AnalysisProcessingStates> processingStatesNotProcessable = [
             AnalysisProcessingStates.IN_PROGRESS
     ]
+
     static Collection<Class<? extends ConfigPerProject>> SNV_CONFIG_CLASSES = [
             SnvConfig,
             RoddyWorkflowConfig,
@@ -149,5 +152,14 @@ class SnvCallingService {
         assert !secondBamFile.withdrawn : "The bam file ${secondBamFile} of the previous result is withdrawn."
 
         return snvJobResult
+    }
+
+    void validateInputBamFiles(final SnvCallingInstance instance) throws Throwable {
+        try {
+            abstractMergedBamFileService.getExistingBamFilePath(instance.sampleType1BamFile)
+            abstractMergedBamFileService.getExistingBamFilePath(instance.sampleType2BamFile)
+        } catch (final AssertionError e) {
+            throw new RuntimeException('The input BAM files have changed on the file system while this job processed them.', e)
+        }
     }
 }
