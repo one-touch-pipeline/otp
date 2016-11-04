@@ -1,5 +1,5 @@
-<div class="edit-switch-new-free-text-values" style="display:inline-block">
-    <span class="edit-switch-new-free-text-values-editor" style="display: none">
+<div class="edit-switch edit-switch-new-free-text-values" style="display:inline-block">
+    <span class="edit-switch-editor" style="display: none">
         <input type="hidden" name="target" value="${link}"/>
         <g:each var="field" in="${fields}">
             ${field}: <input type="text" name="${field}"/>
@@ -17,6 +17,6 @@
         <button class="buttons save"><g:message code="default.button.save.label"/></button>
         <button class="buttons cancel"><g:message code="default.button.cancel.label"/></button>
     </span>
-    <span class="edit-switch-new-free-text-values-label"><button class="add"><g:message code="default.new"/></button>
+    <span class="edit-switch-label"><button class="add js-edit"><g:message code="default.new"/></button>
     </span>
 </div>

@@ -4,7 +4,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <meta name="layout" content="main" />
-<title><g:message code="projectOverview.title" args="[project]"/></title>
+<title><g:message code="projectOverview.title" args="[project.name]"/></title>
     <asset:javascript src="modules/graph"/>
     <asset:javascript src="pages/projectOverview/index/datatable.js"/>
     <asset:javascript src="modules/editorSwitch"/>
@@ -24,7 +24,7 @@
         <form class="blue_label" id="projectsGroupbox">
             <span class="blue_label"><g:message code="home.projectfilter"/> :</span>
             <g:select class="criteria" id="project_select" name='project'
-                from='${projects}' value='${project}' onChange='submit();' />
+                from='${projects}' value='${project.name}' onChange='submit();' />
         </form>
         <div id="projectOverviewDates">
             <table>
@@ -45,19 +45,18 @@
                     <td>
                         <otp:editorSwitch
                             roles="ROLE_OPERATOR"
-                            link="${g.createLink(controller: 'projectOverview', action: 'updateAnalysisDirectory', params: [projectName: project])}"
+                            link="${g.createLink(controller: 'projectOverview', action: 'updateAnalysisDirectory', params: ['project.id': project.id])}"
                             value="${analysisDirectory}"/>
                     </td>
                 </tr>
                 <tr>
                     <td class="myKey"><g:message code="projectOverview.category"/></td>
                     <td>
-                        <otp:editorSwitch
+                        <otp:editorSwitchCheckboxes
                                 roles="ROLE_OPERATOR"
-                                template="dropDown"
-                                link="${g.createLink(controller: 'projectOverview', action: 'updateCategory', params: [projectName: project])}"
-                                value="${category} "
-                                values="${projectCategories}"/>
+                                link="${g.createLink(controller: 'projectOverview', action: 'updateCategory', params: ['project.id': project.id])}"
+                                availableValues="${projectCategories*.name}"
+                                selectedValues="${project.projectCategories*.name}"/>
                     </td>
                 </tr>
                 <tr>
@@ -82,7 +81,7 @@
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
                                 template="textArea"
-                                link="${g.createLink(controller: 'projectOverview', action: 'updateDescription', params: [projectName: project])}"
+                                link="${g.createLink(controller: 'projectOverview', action: 'updateDescription', params: ['project.id': project.id])}"
                                 value="${description}"/>
                     </td>
                 </tr>
@@ -142,7 +141,7 @@
                     template="newFreeTextValues"
                     fields="${["Name","E-Mail","Aspera Account"]}"
                     dropDowns="${[Role: roleDropDown]}"
-                    link="${g.createLink(controller: "projectOverview", action: "createContactPersonOrAddProject", params: [projectName: project])}"
+                    link="${g.createLink(controller: "projectOverview", action: "createContactPersonOrAddProject", params: ['project.id': project.id])}"
                     value=""/>
         </p>
         <br>
@@ -210,7 +209,7 @@
                     <td class="myValue typeDropDown">
                         <otp:editorSwitch roles="ROLE_OPERATOR"
                                             template="dropDown"
-                                            link="${g.createLink(controller: 'ProjectOverview', action: 'updateSnv', id: project)}"
+                                            link="${g.createLink(controller: 'ProjectOverview', action: 'updateSnv', params: ['project.id': project.id])}"
                                             values="${snvDropDown}"
                                             value="${snv}"/>
                     </td>
@@ -261,7 +260,7 @@
     <asset:script>
         $(function() {
             $.otp.projectOverviewTable.referenceGenome();
-            $.otp.initCommentBox(${id}, "#projectCommentBox");
+            $.otp.initCommentBox(${project.id}, "#projectCommentBox");
             $.otp.projectOverviewTable.deleteUser();
         });
     </asset:script>

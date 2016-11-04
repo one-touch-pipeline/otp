@@ -836,7 +836,6 @@ class DomainFactory {
                 dirName                 : 'projectDirName_' + (counter++),
                 realmName               : 'realmName_' + (counter++),
                 alignmentDeciderBeanName: 'DUMMY_BEAN_NAME',
-                category                : { createProjectCategory() },
         ], projectProperties)
     }
 

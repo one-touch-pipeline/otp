@@ -72,7 +72,6 @@ class ProjectOverviewController {
     Map specificOverview() {
         List<Project> projects = projectService.getAllProjects()
         Project project = Project.findByName(params.project) ?: projects[0]
-        project.category.refresh()
         project.projectGroup?.refresh()
 
         Map<String, ProjectOverviewService.AlignmentInfo> alignmentInfo = null
@@ -119,8 +118,7 @@ class ProjectOverviewController {
 
         return [
                 projects: projects*.name,
-                project: project.name,
-                id: project.id,
+                project: project,
                 comment: project.comment,
                 nameInMetadata: project.nameInMetadataFiles?: '',
                 seqTypes: SeqType.allAlignableSeqTypes,
@@ -136,7 +134,6 @@ class ProjectOverviewController {
                 snvDropDown: Project.Snv.values(),
                 directory: projectDirectory,
                 analysisDirectory: project.dirAnalysis?: '',
-                category: project.category.name,
                 projectGroup: project.projectGroup,
                 copyFiles: project.hasToBeCopied,
                 mailingListName: project.mailingListName,
@@ -385,7 +382,7 @@ class ProjectOverviewController {
     }
 
     JSON updateAnalysisDirectory(UpdateAnalysisDirectoryCommand cmd) {
-        checkErrorAndCallMethod(cmd, { projectService.updateAnalysisDirectory(cmd.analysisDirectory, projectService.getProjectByName(cmd.projectName)) })
+        checkErrorAndCallMethod(cmd, { projectService.updateAnalysisDirectory(cmd.analysisDirectory, cmd.project) })
     }
 
     JSON updateNameInMetadataFiles(UpdateNameInMetadataCommand cmd) {
@@ -393,7 +390,7 @@ class ProjectOverviewController {
     }
 
     JSON updateCategory(UpdateCategoryCommand cmd) {
-        checkErrorAndCallMethod(cmd, { projectService.updateCategory(cmd.category, projectService.getProjectByName(cmd.projectName)) })
+        checkErrorAndCallMethod(cmd, { projectService.updateCategory(cmd.value, cmd.project) })
     }
 
     JSON updateMailingListName(UpdateMailingListNameCommand cmd) {
@@ -401,7 +398,7 @@ class ProjectOverviewController {
     }
 
     JSON updateDescription(UpdateDescriptionCommand cmd) {
-        checkErrorAndCallMethod(cmd, { projectService.updateDescription(cmd.description, projectService.getProjectByName(cmd.projectName)) })
+        checkErrorAndCallMethod(cmd, { projectService.updateDescription(cmd.description, cmd.project) })
     }
 
     JSON updateDates(String projectName) {
@@ -418,7 +415,7 @@ class ProjectOverviewController {
     }
 
     JSON updateSnv(UpdateSnvCommand cmd) {
-        checkErrorAndCallMethod(cmd, { projectService.setSnv(projectService.getProjectByName(cmd.projectName), Project.Snv.valueOf(cmd.value))})
+        checkErrorAndCallMethod(cmd, { projectService.setSnv(cmd.project, Project.Snv.valueOf(cmd.value))})
     }
 
     JSON snvDropDown() {
@@ -529,9 +526,6 @@ class UpdateContactPersonCommand implements Serializable {
     void setAspera(String aspera) {
         this.aspera = aspera?.trim()?.replaceAll(" +", " ")
     }
-    void setProjectName(String projectName) {
-        this.project = Project.findByName(projectName)
-    }
     void setRole(String role) {
         this.contactPersonRole = ProjectOverviewController.getContactPersonRoleByName(role)
     }
@@ -623,14 +617,13 @@ class UpdateNameInMetadataCommand implements Serializable {
 
 class UpdateAnalysisDirectoryCommand implements Serializable {
     String analysisDirectory
-    String projectName
+    Project project
     static constraints = {
         analysisDirectory(nullable: true, validator: { String val ->
             if (!OtpPath.isValidAbsolutePath(val)) {
                 return 'Is not an absolute Path'
             }
         })
-        projectName(blank: false)
     }
     void setValue(String value) {
         this.analysisDirectory = value
@@ -638,19 +631,13 @@ class UpdateAnalysisDirectoryCommand implements Serializable {
 }
 
 class UpdateSnvCommand implements Serializable {
-    String projectName
+    Project project
     String value
-    void setId(String id) {
-        this.projectName = id
-    }
 }
 
 class UpdateCategoryCommand implements Serializable {
-    String category
-    String projectName
-    void setValue(String category) {
-        this.category = category
-    }
+    List<String> value = [].withLazyDefault {new String()}
+    Project project
 }
 
 class UpdateMailingListNameCommand implements Serializable {
@@ -663,7 +650,7 @@ class UpdateMailingListNameCommand implements Serializable {
 
 class UpdateDescriptionCommand implements Serializable {
     String description
-    String projectName
+    Project project
     void setValue(String description) {
         this.description = description
     }

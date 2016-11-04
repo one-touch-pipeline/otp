@@ -9,7 +9,6 @@ import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.*
 import grails.plugin.springsecurity.*
 import groovy.transform.*
-import jdk.nashorn.internal.ir.annotations.*
 import org.springframework.security.access.prepost.*
 import org.springframework.security.acls.domain.*
 import org.springframework.security.acls.model.*
@@ -19,6 +18,7 @@ import java.nio.file.*
 import java.nio.file.attribute.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+
 
 /**
  * Service providing methods to access information about Projects.
@@ -77,13 +77,13 @@ class ProjectService {
      * @return The created project
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public Project createProject(String name, String dirName, String realmName, String alignmentDeciderBeanName, String categoryName) {
+    public Project createProject(String name, String dirName, String realmName, String alignmentDeciderBeanName, List<String> categoryNames) {
         Project project = new Project(
                 name: name,
                 dirName: dirName,
                 realmName: realmName,
                 alignmentDeciderBeanName: alignmentDeciderBeanName,
-                category: exactlyOneElement(ProjectCategory.findAllByName(categoryName)),
+                projectCategories: categoryNames.collect { exactlyOneElement(ProjectCategory.findAllByName(it)) },
         )
         project = project.save(flush: true)
         assert(project != null)
@@ -103,7 +103,7 @@ class ProjectService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     public Project createProject(ProjectParams projectParams) {
         assert OtpPath.isValidPathComponent(projectParams.unixGroup): "unixGroup '${projectParams.unixGroup}' contains invalid characters"
-        Project project = createProject(projectParams.name, projectParams.dirName, projectParams.realmName, projectParams.alignmentDeciderBeanName, projectParams.categoryName)
+        Project project = createProject(projectParams.name, projectParams.dirName, projectParams.realmName, projectParams.alignmentDeciderBeanName, projectParams.categoryNames)
         project.dirAnalysis = projectParams.dirAnalysis
         project.hasToBeCopied = projectParams.copyFiles
         project.nameInMetadataFiles = projectParams.nameInMetadataFiles
@@ -145,7 +145,7 @@ class ProjectService {
         String dirAnalysis
         String realmName
         String alignmentDeciderBeanName
-        String categoryName
+        List<String> categoryNames
         String unixGroup
         String projectGroup
         String nameInMetadataFiles
@@ -167,9 +167,8 @@ class ProjectService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public void updateCategory(String categoryName, Project project) {
-        ProjectCategory categoryEntry = exactlyOneElement(ProjectCategory.findAllByName(categoryName))
-        project.category = categoryEntry
+    public void updateCategory(List<String> categoryNames, Project project) {
+        project.projectCategories = categoryNames.collect { exactlyOneElement(ProjectCategory.findAllByName(it)) }
         project.save(flush: true, failOnError: true)
     }
 

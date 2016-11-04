@@ -19,7 +19,6 @@ class IndividualServiceTests extends AbstractIntegrationTest {
     @Before
     void setUp() {
         createUserAndRoles()
-        DomainFactory.createProjectCategory(name: 'category')
     }
 
     @After
@@ -1302,6 +1301,11 @@ ${indOld.comment.comment}""" == indNew.comment.comment
     }
 
     private Project mockProject(String name = "test") {
-        return Project.findOrSaveWhere(name: name, dirName: name, realmName: name, alignmentDeciderBeanName: 'dummyNonExistentAlignmentDecider', category: CollectionUtils.exactlyOneElement(ProjectCategory.findAllByName('category')))
+        return Project.findOrSaveWhere(
+                name: name,
+                dirName: name,
+                realmName: name,
+                alignmentDeciderBeanName: 'dummyNonExistentAlignmentDecider',
+        )
     }
 }

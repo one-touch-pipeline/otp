@@ -33,28 +33,21 @@ class OtpTagLib {
      */
     def editorSwitch = { attrs ->
         String template = editorSwitchTemplate(attrs.template)
-        if (attrs.roles) {
-            if (SpringSecurityUtils.ifAnyGranted(attrs.roles)) {
-                out << render(template: template, model: [
-                        link: attrs.link,
-                        value: attrs.value,
-                        fields: attrs.fields,
-                        checkBoxes: attrs.checkBoxes ?: [:],
-                        dropDowns: attrs.dropDowns ?: [:],
-                        values: attrs.values,
-                        url: attrs.url,
-                        label: attrs.label,
-                ])
-            } else {
-                // read only
-                out << "<div>"
-                out << attrs.value
-                out << "</div>"
-            }
-        } else {
-            // no roles passed in, just render
-            out << render(template: template, model: [link: attrs.link, value: attrs.value])
-        }
+        String roles = attrs.remove("roles")
+        out << editorSwitchRender(roles, template, attrs)
+    }
+
+    /**
+     * @attr selectedValues REQUIRED
+     * @attr availableValues REQUIRED
+     * @attr link REQUIRED
+     * @attr roles optional
+     */
+    def editorSwitchCheckboxes = { Map attrs ->
+        String template = "/templates/editorSwitchCheckboxes"
+        String roles = attrs.remove("roles")
+        attrs.put("value", attrs.selectedValues.join(", "))
+        out << editorSwitchRender(roles, template, attrs)
     }
 
     /**
@@ -123,7 +116,7 @@ class OtpTagLib {
         out << render(template: "/templates/seqTrackMainPart", model: [seqTrack: attrs.seqTrack])
     }
 
-    private String editorSwitchTemplate(String template) {
+    private static String editorSwitchTemplate(String template) {
         switch (template) {
             case "dropDown":
                 return "/templates/editorSwitchDropDown"
@@ -141,6 +134,23 @@ class OtpTagLib {
                 return "/templates/editorSwitchTextArea"
             default:
                 return "/templates/editorSwitch"
+        }
+    }
+
+    /**
+     * @param template name of the template to use
+     * @param roles required roles as a comma-separated list
+     * @param model values used in the template
+     * @return html to show
+     */
+    private String editorSwitchRender(String roles, String template, Map model) {
+        if (!roles || (roles && SpringSecurityUtils.ifAnyGranted(roles))) {
+            model.checkBoxes = model.checkBoxes ?: [:]
+            model.dropDowns = model.dropDowns ?: [:]
+            return render(template: template, model: model)
+        } else {
+            // read only
+            return "<div>${model.value}</div>"
         }
     }
 

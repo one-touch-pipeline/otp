@@ -42,7 +42,6 @@ testDataConfig {
             name = {'projectName_' + (counter++)}
             dirName = {'projectDir_' + (counter++)}
             realmName = {HelperUtils.uniqueString}
-            category = {DomainFactory.createProjectCategory()}
 
         }
         'de.dkfz.tbi.otp.ngsdata.Realm' {

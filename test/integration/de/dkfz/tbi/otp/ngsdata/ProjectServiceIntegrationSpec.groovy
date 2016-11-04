@@ -66,7 +66,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 dirAnalysis: dirAnalysis,
                 realmName: Realm.LATEST_DKFZ_REALM,
                 alignmentDeciderBeanName: AlignmentDeciderBeanNames.NO_ALIGNMENT.bean,
-                categoryName: 'category',
+                categoryNames: category,
                 unixGroup: group,
                 projectGroup: projectGroup,
                 nameInMetadataFiles: nameInMetadataFiles,
@@ -85,18 +85,18 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         project.projectGroup == ProjectGroup.findByName(projectGroup)
         project.nameInMetadataFiles == nameInMetadataFiles
         project.hasToBeCopied == copyFiles
-        project.category == ProjectCategory.findByName('category')
+        project.projectCategories == category.collect { ProjectCategory.findByName(it) } as Set
         project.mailingListName == mailingListName
         project.description == description
 
         where:
-        name      | dirName | dirAnalysis | projectGroup    | nameInMetadataFiles | copyFiles | mailingListName         | description
-        'project' | 'dir'   | ''          | ''              | 'project'           | true      | "tr_projectMailingList" | 'description'
-        'project' | 'dir'   | ''          | ''              | null                | true      | "tr_projectMailingList" | ''
-        'project' | 'dir'   | ''          | 'projectGroup'  | 'project'           | true      | "tr_projectMailingList" | 'description'
-        'project' | 'dir'   | ''          | ''              | 'project'           | false     | "tr_projectMailingList" | ''
-        'project' | 'dir'   | ''          | ''              | 'project'           | true      | ""                      | 'description'
-        'project' | 'dir'   | '/dirA'     | ''              | 'project'           | true      | ""                      | 'description'
+        name      | dirName | dirAnalysis | projectGroup    | nameInMetadataFiles | copyFiles | mailingListName         | description   | category
+        'project' | 'dir'   | ''          | ''              | 'project'           | true      | "tr_projectMailingList" | 'description' | ["category"]
+        'project' | 'dir'   | ''          | ''              | null                | true      | "tr_projectMailingList" | ''            | ["category"]
+        'project' | 'dir'   | ''          | 'projectGroup'  | 'project'           | true      | "tr_projectMailingList" | 'description' | ["category"]
+        'project' | 'dir'   | ''          | ''              | 'project'           | false     | "tr_projectMailingList" | ''            | ["category"]
+        'project' | 'dir'   | ''          | ''              | 'project'           | true      | ""                      | 'description' | ["category"]
+        'project' | 'dir'   | '/dirA'     | ''              | 'project'           | true      | ""                      | 'description' | []
     }
 
     void "test createProject if directory is created"() {
@@ -111,7 +111,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 dirAnalysis: '/dirA',
                 realmName: Realm.LATEST_DKFZ_REALM,
                 alignmentDeciderBeanName: AlignmentDeciderBeanNames.NO_ALIGNMENT.bean,
-                categoryName: 'category',
+                categoryNames: ['category'],
                 unixGroup: group,
                 projectGroup: '',
                 nameInMetadataFiles: null,
@@ -149,7 +149,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 dirAnalysis: '/dirA',
                 realmName: Realm.LATEST_DKFZ_REALM,
                 alignmentDeciderBeanName: AlignmentDeciderBeanNames.NO_ALIGNMENT.bean,
-                categoryName: 'category',
+                categoryNames: ['category'],
                 unixGroup: group,
                 projectGroup: '',
                 nameInMetadataFiles: nameInMetadataFiles,
@@ -185,7 +185,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 dirAnalysis: '/dirA',
                 realmName: Realm.LATEST_DKFZ_REALM,
                 alignmentDeciderBeanName: AlignmentDeciderBeanNames.NO_ALIGNMENT.bean,
-                categoryName: 'category',
+                categoryNames: ['category'],
                 unixGroup: 'invalidValue',
                 projectGroup: '',
                 nameInMetadataFiles: null,
@@ -214,7 +214,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 dirAnalysis: '/dirA',
                 realmName: Realm.LATEST_DKFZ_REALM,
                 alignmentDeciderBeanName: AlignmentDeciderBeanNames.NO_ALIGNMENT.bean,
-                categoryName: 'category',
+                categoryNames: ['category'],
                 unixGroup: group,
                 projectGroup: '',
                 nameInMetadataFiles: null,
@@ -243,7 +243,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 dirAnalysis: 'invalidDirA',
                 realmName: Realm.LATEST_DKFZ_REALM,
                 alignmentDeciderBeanName: AlignmentDeciderBeanNames.NO_ALIGNMENT.bean,
-                categoryName: 'category',
+                categoryNames: ['category'],
                 unixGroup: group,
                 projectGroup: '',
                 nameInMetadataFiles: null,
@@ -283,7 +283,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 dirAnalysis: '/dirA',
                 realmName: Realm.LATEST_DKFZ_REALM,
                 alignmentDeciderBeanName: AlignmentDeciderBeanNames.NO_ALIGNMENT.bean,
-                categoryName: 'category',
+                categoryNames: ['category'],
                 unixGroup: group,
                 projectGroup: '',
                 nameInMetadataFiles: null,
@@ -347,7 +347,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 dirAnalysis: '/dirA',
                 realmName: Realm.LATEST_DKFZ_REALM,
                 alignmentDeciderBeanName: AlignmentDeciderBeanNames.NO_ALIGNMENT.bean,
-                categoryName: 'invalid category',
+                categoryNames: ['invalid category'],
                 unixGroup: group,
                 projectGroup: '',
                 nameInMetadataFiles: 'project',
@@ -370,7 +370,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
 
         when:
         SpringSecurityUtils.doWithAuth("admin") {
-            projectService.updateCategory('not available', project)
+            projectService.updateCategory(['not available'], project)
         }
 
         then:
@@ -384,13 +384,13 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         ProjectCategory projectCategory = DomainFactory.createProjectCategory(name: 'valid category')
 
         when:
-        assert project.category != projectCategory
+        assert !project.projectCategories
         SpringSecurityUtils.doWithAuth("admin") {
-            projectService.updateCategory(projectCategory.name, project)
+            projectService.updateCategory([projectCategory.name], project)
         }
 
         then:
-        project.category == projectCategory
+        project.projectCategories == [projectCategory] as Set
     }
 
     void "test updateMailingListName valid name"() {

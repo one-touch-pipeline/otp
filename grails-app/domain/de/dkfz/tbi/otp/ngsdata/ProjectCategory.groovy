@@ -6,6 +6,9 @@ class ProjectCategory implements Entity {
 
     String name
 
+    static hasMany = [
+            projects: Project
+    ]
     static belongsTo = Project
 
     static constraints = {

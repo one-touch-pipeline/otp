@@ -24,7 +24,7 @@ class CreateProjectController {
                         dirAnalysis: cmd.analysisDirectory,
                         realmName: Realm.LATEST_DKFZ_REALM,
                         alignmentDeciderBeanName: 'noAlignmentDecider',
-                        categoryName: cmd.projectCategory,
+                        categoryNames: cmd.projectCategories,
                         unixGroup: cmd.unixGroup,
                         projectGroup: cmd.projectGroup,
                         nameInMetadataFiles: cmd.nameInMetadataFiles,
@@ -53,7 +53,7 @@ class CreateProjectControllerSubmitCommand implements Serializable {
     String unixGroup
     String mailingListName
     String projectGroup
-    String projectCategory
+    List<String> projectCategories = [].withLazyDefault {new String()}
     String description
     String submit
     boolean copyFiles

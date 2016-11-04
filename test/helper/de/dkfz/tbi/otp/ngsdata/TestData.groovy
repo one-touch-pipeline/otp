@@ -87,7 +87,6 @@ class TestData {
             name : "otp_test_project",
             dirName : "otp_test_project",
             realmName : realm.name,
-            category: DomainFactory.createProjectCategory(),
         ])
         assertNotNull(project.save(flush: true))
 
