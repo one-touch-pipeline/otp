@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page import="de.dkfz.tbi.otp.ngsdata.*" contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -93,18 +93,15 @@
                         <td>${track.seqTrack.sample}</td>
                         <td>${track.seqTrack.nBaseString()}</td>
                         <td>${track.seqTrack.insertSize}</td>
-                        <g:if test="${de.dkfz.tbi.otp.ngsdata.AlignmentLog.countBySeqTrack(track.seqTrack) == 0}">
-                            <td><g:message code="seqScan.runsLanesMerging.noAlignment"/></td>
-                        </g:if>
-                        <g:else>
+                        <g:if test="${AlignmentLog.countBySeqTrack(track.seqTrack) != 0}">
                             <td>
                                 <ul>
-                                <g:each var="alignment" in="${de.dkfz.tbi.otp.ngsdata.AlignmentLog.findAllBySeqTrack(track.seqTrack)}">
+                                <g:each var="alignment" in="${AlignmentLog.findAllBySeqTrack(track.seqTrack)}">
                                     <li>${alignment.alignmentParams.pipeline}</li>
                                 </g:each>
                                 </ul>
                             </td>
-                        </g:else>
+                        </g:if>
                     </tr>
                     </g:if>
                 </g:each>
@@ -113,25 +110,27 @@
         </div>
     </g:each>
 
-    <div class="tableBlock">
-        <h2><g:message code="seqScan.mergedAlignmentFiles"/></h2>
-        <table>
-            <tbody>
-            <g:each var="log" in="${de.dkfz.tbi.otp.ngsdata.MergingLog.findAllBySeqScan(scan)}">
-                <g:each var="dataFile" in="${de.dkfz.tbi.otp.ngsdata.MergedAlignmentDataFile.findAllByMergingLog(log)}">
-                    <tr>
-                        <td><g:link controller="mergedAlignmentDataFile" action="show" id="${dataFile.id}">${dataFile.fileName}</g:link></td>
-                        <td>${dataFile.fileSizeString()}</td>
-                        <td class="dataFile.indexFileExists"><g:message code="seqScan.mergedAlignmentFiles.indexed"/></td>
-                        <td>${log.executedBy}</td>
-                        <td>${log.status}</td>
-                        <td>${log.alignmentParams}</td>
-                    </tr>
+    <g:if test="${MergingLog.findBySeqScan(scan)}">
+        <div class="tableBlock">
+            <h2><g:message code="seqScan.mergedAlignmentFiles"/></h2>
+            <table>
+                <tbody>
+                <g:each var="log" in="${MergingLog.findAllBySeqScan(scan)}">
+                    <g:each var="dataFile" in="${MergedAlignmentDataFile.findAllByMergingLog(log)}">
+                        <tr>
+                            <td><g:link controller="mergedAlignmentDataFile" action="show" id="${dataFile.id}">${dataFile.fileName}</g:link></td>
+                            <td>${dataFile.fileSizeString()}</td>
+                            <td class="dataFile.indexFileExists"><g:message code="seqScan.mergedAlignmentFiles.indexed"/></td>
+                            <td>${log.executedBy}</td>
+                            <td>${log.status}</td>
+                            <td>${log.alignmentParams}</td>
+                        </tr>
+                    </g:each>
                 </g:each>
-            </g:each>
-            </tbody>
-        </table>
-    </div>
+                </tbody>
+            </table>
+        </div>
+    </g:if>
   </div>
 </body>
 <asset:script>

@@ -561,7 +561,6 @@ seqScan.status.numberOfLanes
 seqScan.status.numberOfBasePairs
 seqScan.status.coverage
 seqScan.runsLanesMerging
-seqScan.runsLanesMerging.noAlignment
 seqScan.mergedAlignmentFiles
 seqScan.mergedAlignmentFiles.indexed
 
