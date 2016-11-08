@@ -77,14 +77,14 @@
                                             <li id="metadataImport"><g:link controller="metadataImport" action="index"><g:message code="otp.menu.importAndValidation"/></g:link></li>
                                             <li id="sampleIdentifierOverview"><g:link controller="sampleIdentifierOverview" action="index"><g:message code="otp.menu.sampleIdentifierOverview"/></g:link></li>
                                             <li id="blacklistedIlseNumbers"><g:link controller="metadataImport" action="blacklistedIlseNumbers"><g:message code="otp.menu.blacklistedIlseNumbers"/></g:link></li>
-                                            <li id="createProject"><g:link controller="createProject" action="index"><g:message code="otp.menu.createProject"/></g:link></li><br>
-                                            <li id="specificOverview"><g:link controller="projectOverview" action="specificOverview"><g:message code="otp.menu.projectConfig"/></g:link></li><br>
+                                            <li id="createProject"><g:link controller="createProject" action="index"><g:message code="otp.menu.createProject"/></g:link></li>
+                                            <li id="specificOverview"><g:link controller="projectOverview" action="specificOverview"><g:message code="otp.menu.projectConfig"/></g:link></li>
                                             <li id="individualInsert"><g:link controller="individual" action="insert"><g:message code="otp.menu.createIndividual"/></g:link></li>
                                             <li id="sampleInsert"><g:link controller="individual" action="insertMany"><g:message code="otp.menu.createSample"/></g:link></li>
                                             <li id="processes"><g:link controller="processes" action="list"><g:message code="otp.menu.processes"/></g:link></li>
-                                            <li id="snv"><g:link controller="snv" action="index"> <g:message code="otp.menu.snv.processing"/></g:link></li><br>
-                                            <li id="metaDataFields"><g:link controller="metaDataFields" action="index"><g:message code="otp.menu.metaDataFields"/></g:link></li><br>
-                                            <li id="softwareTool"><g:link controller="softwareTool" action="list"><g:message code="otp.menu.softwareTool"/></g:link></li><br>
+                                            <li id="snv"><g:link controller="snv" action="index"> <g:message code="otp.menu.snv.processing"/></g:link></li>
+                                            <li id="metaDataFields"><g:link controller="metaDataFields" action="index"><g:message code="otp.menu.metaDataFields"/></g:link></li>
+                                            <li id="softwareTool"><g:link controller="softwareTool" action="list"><g:message code="otp.menu.softwareTool"/></g:link></li>
                                             <li id="projectProgress"><g:link controller="projectProgress" action="progress"><g:message code="otp.menu.progress"/></g:link></li>
                                             <li id="processingTimeStatistics"><g:link controller="processingTimeStatistics" action="index"><g:message code="otp.menu.processingTimeStatistics"/></g:link></li>
                                         </ul>
@@ -97,12 +97,13 @@
                                 <ul>
                                     <li class="allGranted admin_nav_container" id="admin"><g:link><g:message code="otp.menu.adminSection"/> &#9661;</g:link>
                                         <ul>
-                                            <li id="userAdministration"><g:link controller="userAdministration"><g:message code="otp.menu.userAdministration"/></g:link></li><br>
-                                            <li id="group"><g:link controller="group"><g:message code="otp.menu.groupAdministration"/></g:link></li><br>
-                                            <li id="crashRecovery"><g:link controller="crashRecovery"><g:message code="otp.menu.crashRecovery"/></g:link></li><br>
-                                            <li id="processingOption"><g:link controller="processingOption"><g:message code="otp.menu.processingOptions"/></g:link></li><br>
-                                            <li id="notification"><g:link controller="notification"><g:message code="otp.menu.manageNotifications"/></g:link></li><br>
-                                            <li id="shutdown"><g:link controller="shutdown"><g:message code="otp.menu.planServerShutdown"/></g:link></li><br>
+                                            <li id="userAdministration"><g:link controller="userAdministration"><g:message code="otp.menu.userAdministration"/></g:link></li>
+                                            <li id="group"><g:link controller="group"><g:message code="otp.menu.groupAdministration"/></g:link></li>
+                                            <li id="crashRecovery"><g:link controller="crashRecovery"><g:message code="otp.menu.crashRecovery"/></g:link></li>
+                                            <li id="processingOption"><g:link controller="processingOption"><g:message code="otp.menu.processingOptions"/></g:link></li>
+                                            <li id="notification"><g:link controller="notification"><g:message code="otp.menu.manageNotifications"/></g:link></li>
+                                            <li id="jobErrorDefinition"><g:link controller="jobErrorDefinition"><g:message code="otp.menu.jobErrorDefinition"/></g:link></li>
+                                            <li id="shutdown"><g:link controller="shutdown"><g:message code="otp.menu.planServerShutdown"/></g:link></li>
                                         </ul>
                                     </li>
                                 </ul>
