@@ -83,18 +83,24 @@ class MetadataImportService {
      * @param previousValidationMd5sum May be {@code null}
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    ValidateAndImportResult validateAndImportWithAuth(File metadataFile, String directoryStructureName, boolean align, boolean ignoreWarnings, String previousValidationMd5sum, String ticketNumber, String seqCenterComment) {
-        return validateAndImport(metadataFile, directoryStructureName, align, RunSegment.ImportMode.MANUAL, ignoreWarnings, previousValidationMd5sum, ticketNumber, seqCenterComment)
+    ValidateAndImportResult validateAndImportWithAuth(File metadataFile, String directoryStructureName, boolean align, boolean ignoreWarnings, String previousValidationMd5sum, String ticketNumber, String seqCenterComment, boolean automaticNotification) {
+        return validateAndImport(metadataFile, directoryStructureName, align, RunSegment.ImportMode.MANUAL, ignoreWarnings, previousValidationMd5sum, ticketNumber, seqCenterComment, automaticNotification)
     }
 
-    ValidateAndImportResult validateAndImport(File metadataFile, String directoryStructureName, boolean align, RunSegment.ImportMode importMode, boolean ignoreWarnings, String previousValidationMd5sum, String ticketNumber, String seqCenterComment) {
+    ValidateAndImportResult validateAndImport(File metadataFile, String directoryStructureName, boolean align, RunSegment.ImportMode importMode, boolean ignoreWarnings, String previousValidationMd5sum, String ticketNumber, String seqCenterComment, boolean automaticNotification) {
         MetadataValidationContext context = validate(metadataFile, directoryStructureName)
         MetaDataFile metadataFileObject = null
         if (mayImport(context, ignoreWarnings, previousValidationMd5sum)) {
-            metadataFileObject = importMetadataFile(context, align, importMode, ticketNumber, seqCenterComment)
+            metadataFileObject = importMetadataFile(context, align, importMode, ticketNumber, seqCenterComment, automaticNotification)
             copyMetaDataFileIfMidterm(context)
         }
         return new ValidateAndImportResult(context, metadataFileObject)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void updateAutomaticNotificationFlag(OtrsTicket otrsTicket, boolean automaticNotification) {
+        otrsTicket.automaticNotification = automaticNotification
+        assert otrsTicket.save(flush: true)
     }
 
     protected void copyMetaDataFileIfMidterm(MetadataValidationContext context) {
@@ -128,7 +134,7 @@ class MetadataImportService {
 
     List<ValidateAndImportResult> validateAndImportMultiple(String otrsTicketNumber, Collection<File> metadataFiles, String directoryStructureName) {
         List<ValidateAndImportResult> results = metadataFiles.collect {
-            validateAndImport(it, directoryStructureName, true, RunSegment.ImportMode.AUTOMATIC, false, null, otrsTicketNumber, null)
+            validateAndImport(it, directoryStructureName, true, RunSegment.ImportMode.AUTOMATIC, false, null, otrsTicketNumber, null, true)
         }
         List<MetadataValidationContext> failedValidations = results.findAll { it.metadataFile == null }*.context
         if (failedValidations.isEmpty()) {
@@ -202,10 +208,10 @@ class MetadataImportService {
         return false
     }
 
-    protected MetaDataFile importMetadataFile(MetadataValidationContext context, boolean align, RunSegment.ImportMode importMode, String ticketNumber, String seqCenterComment) {
+    protected MetaDataFile importMetadataFile(MetadataValidationContext context, boolean align, RunSegment.ImportMode importMode, String ticketNumber, String seqCenterComment, boolean automaticNotification) {
         RunSegment runSegment = new RunSegment(
                 align: align,
-                otrsTicket: ticketNumber ? trackingService.createOrResetOtrsTicket(ticketNumber, seqCenterComment) : null,
+                otrsTicket: ticketNumber ? trackingService.createOrResetOtrsTicket(ticketNumber, seqCenterComment, automaticNotification) : null,
                 importMode: importMode,
         )
         assert runSegment.save()

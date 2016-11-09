@@ -27,7 +27,7 @@ class MetadataImportController {
             errorMessage = "'${fieldError.getRejectedValue()}' is not a valid value for '${fieldError.getField()}'. Error code: '${fieldError.code}'"
         }
         if (cmd.submit == "Import" && !errorMessage) {
-            ValidateAndImportResult validateAndImportResult = metadataImportService.validateAndImportWithAuth(new File(cmd.path), cmd.directory, cmd.align, cmd.ignoreWarnings, cmd.md5, cmd.ticketNumber, cmd.seqCenterComment)
+            ValidateAndImportResult validateAndImportResult = metadataImportService.validateAndImportWithAuth(new File(cmd.path), cmd.directory, cmd.align, cmd.ignoreWarnings, cmd.md5, cmd.ticketNumber, cmd.seqCenterComment, cmd.automaticNotification)
             metadataValidationContext = validateAndImportResult.context
             if (validateAndImportResult.metadataFile != null) {
                 redirect(action: "details", id: validateAndImportResult.metadataFile.runSegment.id)
@@ -162,6 +162,12 @@ class MetadataImportController {
         Map map = [success: true]
         render map as JSON
     }
+
+    JSON updateAutomaticNotificationFlag(Long id, String value) {
+        metadataImportService.updateAutomaticNotificationFlag(OtrsTicket.get(id), value.toBoolean())
+        Map map = [success: true]
+        render map as JSON
+    }
 }
 
 @Validateable
@@ -204,6 +210,7 @@ class MetadataImportControllerSubmitCommand implements Serializable {
     String ticketNumber
     String seqCenterComment
     boolean align = true
+    boolean automaticNotification = true
     boolean ignoreWarnings
 
     static constraints = {

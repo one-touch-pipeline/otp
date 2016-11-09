@@ -50,6 +50,7 @@ class OtrsTicket implements Commentable, Entity {
     Date snvFinished
 
     boolean finalNotificationSent = false
+    boolean automaticNotification = true
 
     Comment comment
 

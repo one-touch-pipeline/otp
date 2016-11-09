@@ -26,25 +26,27 @@ class TrackingService {
     public static final String TICKET_NUMBER_PREFIX = "otrsTicketNumberPrefix"
 
 
-    public OtrsTicket createOtrsTicket(String ticketNumber, String seqCenterComment) {
+    public OtrsTicket createOtrsTicket(String ticketNumber, String seqCenterComment, boolean automaticNotification) {
         OtrsTicket otrsTicket = new OtrsTicket(
                 ticketNumber: ticketNumber,
                 seqCenterComment: seqCenterComment,
+                automaticNotification: automaticNotification,
         )
         assert otrsTicket.save(flush: true, failOnError: true)
         return otrsTicket
     }
 
-    public OtrsTicket createOrResetOtrsTicket(String ticketNumber, String seqCenterComment) {
+    public OtrsTicket createOrResetOtrsTicket(String ticketNumber, String seqCenterComment, boolean automaticNotification) {
         OtrsTicket otrsTicket = CollectionUtils.atMostOneElement(OtrsTicket.findAllByTicketNumber(ticketNumber))
         if (!otrsTicket) {
-            return createOtrsTicket(ticketNumber, seqCenterComment)
+            return createOtrsTicket(ticketNumber, seqCenterComment, automaticNotification)
         } else {
             otrsTicket.installationFinished = null
             otrsTicket.fastqcFinished = null
             otrsTicket.alignmentFinished = null
             otrsTicket.snvFinished = null
             otrsTicket.finalNotificationSent = false
+            otrsTicket.automaticNotification = automaticNotification
             if (!otrsTicket.seqCenterComment) {
                 otrsTicket.seqCenterComment = seqCenterComment
             } else if (seqCenterComment && !otrsTicket.seqCenterComment.contains(seqCenterComment)) {
@@ -192,7 +194,7 @@ class TrackingService {
 
         OtrsTicket newOtrsTicket = CollectionUtils.atMostOneElement(OtrsTicket.findAllByTicketNumber(ticketNumber))
         if (!newOtrsTicket) {
-            newOtrsTicket = createOtrsTicket(ticketNumber, null)
+            newOtrsTicket = createOtrsTicket(ticketNumber, null, true)
         }
 
         if (newOtrsTicket.finalNotificationSent) {

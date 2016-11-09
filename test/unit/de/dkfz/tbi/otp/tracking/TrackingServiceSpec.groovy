@@ -49,7 +49,7 @@ class TrackingServiceSpec extends Specification {
         TrackingService trackingService = new TrackingService()
 
         when:
-        otrsTicket = trackingService.createOrResetOtrsTicket(TICKET_NUMBER, comment)
+        otrsTicket = trackingService.createOrResetOtrsTicket(TICKET_NUMBER, comment, true)
 
         then:
         testTicket(otrsTicket)
@@ -73,11 +73,12 @@ class TrackingServiceSpec extends Specification {
                 alignmentFinished: new Date(),
                 snvFinished: new Date(),
                 finalNotificationSent: true,
+                automaticNotification: true,
         ])
         TrackingService trackingService = new TrackingService()
 
         when:
-        otrsTicket = trackingService.createOrResetOtrsTicket(TICKET_NUMBER, null)
+        otrsTicket = trackingService.createOrResetOtrsTicket(TICKET_NUMBER, null, true)
 
         then:
         testTicket(otrsTicket)
@@ -93,7 +94,7 @@ class TrackingServiceSpec extends Specification {
         TrackingService trackingService = new TrackingService()
 
         when:
-        otrsTicket = trackingService.createOrResetOtrsTicket(TICKET_NUMBER, comment2)
+        otrsTicket = trackingService.createOrResetOtrsTicket(TICKET_NUMBER, comment2, true)
 
         then:
         resultComment == otrsTicket.seqCenterComment
@@ -113,7 +114,7 @@ class TrackingServiceSpec extends Specification {
         TrackingService trackingService = new TrackingService()
 
         when:
-        trackingService.createOrResetOtrsTicket(null, null)
+        trackingService.createOrResetOtrsTicket(null, null, true)
 
         then:
         ValidationException ex = thrown()
@@ -125,7 +126,7 @@ class TrackingServiceSpec extends Specification {
         TrackingService trackingService = new TrackingService()
 
         when:
-        trackingService.createOrResetOtrsTicket("", null)
+        trackingService.createOrResetOtrsTicket("", null, true)
 
         then:
         ValidationException ex = thrown()
