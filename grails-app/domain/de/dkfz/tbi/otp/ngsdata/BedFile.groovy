@@ -45,7 +45,7 @@ class BedFile implements Entity {
     ]
 
     static constraints = {
-        fileName(unique: true, blank: false, validator: { OtpPath.isValidPathComponent(it) })
+        fileName(unique: 'referenceGenome', blank: false, validator: { OtpPath.isValidPathComponent(it) })
         // alternative primary key (referenceGenome, libraryPreparationKit)
         // we will never have 2 bed files in the db for the same
         // referenceGenome and libraryPreparationKit combination

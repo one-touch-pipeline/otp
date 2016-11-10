@@ -87,6 +87,8 @@ class BedFileTests {
         assertNotNull bedFile1.save(flush: true)
         bedFile2.fileName = "fileName1"
         assertFalse bedFile2.validate()
+        bedFile2.referenceGenome = DomainFactory.createReferenceGenome()
+        assertTrue bedFile2.validate()
     }
 
     @Test
