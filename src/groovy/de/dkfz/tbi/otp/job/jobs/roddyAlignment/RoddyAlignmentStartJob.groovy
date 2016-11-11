@@ -11,7 +11,7 @@ import org.springframework.scheduling.annotation.*
 abstract class RoddyAlignmentStartJob extends AbstractStartJobImpl implements RestartableStartJob {
 
     @Override
-    @Scheduled(fixedDelay = 10000l)
+    @Scheduled(fixedDelay = 60000l)
     void execute() {
         startRoddyAlignment()
     }
