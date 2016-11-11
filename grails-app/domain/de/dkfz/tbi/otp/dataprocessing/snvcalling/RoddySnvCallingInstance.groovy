@@ -21,7 +21,7 @@ class RoddySnvCallingInstance extends SnvCallingInstance implements RoddyResult 
 
     @Override
     RoddyWorkflowConfig getConfig() {
-        return config
+        return super.config
     }
 
 }

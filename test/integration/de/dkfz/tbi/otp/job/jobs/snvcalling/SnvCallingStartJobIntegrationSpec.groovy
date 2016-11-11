@@ -1,58 +1,17 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.job.jobs.*
-import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.scheduler.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
-import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
-import grails.test.mixin.*
+import de.dkfz.tbi.otp.utils.logging.*
 import spock.lang.*
 
-@Mock([
-        DataFile,
-        ExternalScript,
-        FileType,
-        Individual,
-        JobDefinition,
-        JobExecutionPlan,
-        LibraryPreparationKit,
-        MergingWorkPackage,
-        Pipeline,
-        Process,
-        ProcessingStep,
-        ProcessParameter,
-        Project,
-        ProjectCategory,
-        Realm,
-        ReferenceGenome,
-        RoddyBamFile,
-        RoddyWorkflowConfig,
-        Run,
-        RunSegment,
-        Sample,
-        SamplePair,
-        SampleType,
-        SampleTypePerProject,
-        SeqCenter,
-        SeqPlatformGroup,
-        SeqPlatform,
-        SeqPlatformModelLabel,
-        SeqTrack,
-        SeqType,
-        SnvCallingInstance,
-        SnvConfig,
-        SnvJobResult,
-        SoftwareTool,
-        SoftwareToolIdentifier,
-])
-class SnvCallingStartJobSpec extends Specification {
+class SnvCallingStartJobIntegrationSpec extends Specification {
 
     TestAbstractSnvCallingStartJob snvCallingStartJob
+    TestAbstractSnvCallingStartJob roddySnvCallingStartJob
 
 
     void "test method restart, fail when process is null"() {
@@ -66,7 +25,7 @@ class SnvCallingStartJobSpec extends Specification {
     }
 
 
-    void "test method restart"() {
+    void "test method restart with SnvCallingInstance"() {
         given:
         SnvJobResult snvJobResult = DomainFactory.createSnvJobResultWithRoddyBamFiles()
         SnvCallingInstance failedInstance = snvJobResult.snvCallingInstance
@@ -79,7 +38,7 @@ class SnvCallingStartJobSpec extends Specification {
         failedProcess.metaClass.getProcessParameterObject = { -> failedInstance }
 
         snvCallingStartJob = Spy(TestAbstractSnvCallingStartJob) {
-            1 * getInstanceClass() >> SnvCallingInstance
+            2 * getInstanceClass() >> SnvCallingInstance
             1 * getInstanceName(_) >> "someInstanceName"
         }
         snvCallingStartJob.executionService = Mock(ExecutionService) {
@@ -116,5 +75,53 @@ class SnvCallingStartJobSpec extends Specification {
 
         failedInstance.withdrawn == true
         snvJobResult.withdrawn == true
+    }
+
+    void "test method restart with RoddySnvCallingInstance"() {
+        given:
+        RoddySnvCallingInstance failedInstance =  DomainFactory.createRoddySnvInstanceWithRoddyBamFiles()
+
+        DomainFactory.createRealmDataManagement(name: failedInstance.project.realmName)
+        DomainFactory.createRealmDataProcessing(name: failedInstance.project.realmName)
+
+        Process failedProcess = DomainFactory.createProcess()
+        DomainFactory.createProcessParameter(failedProcess, failedInstance)
+
+        failedProcess.metaClass.getProcessParameterObject = { -> failedInstance }
+
+        roddySnvCallingStartJob = Spy(TestAbstractSnvCallingStartJob) {
+            2 * getInstanceClass() >> RoddySnvCallingInstance
+            1 * getInstanceName(_) >> "someOtherInstanceName"
+        }
+        roddySnvCallingStartJob.executionService = Mock(ExecutionService) {
+            1 * executeCommandReturnProcessOutput(_, _, _) >> { Realm realm, String cmd, String user ->
+                assert cmd == "rm -rf ${failedInstance.snvInstancePath.absoluteDataManagementPath} ${failedInstance.snvInstancePath.absoluteStagingPath}"
+                assert user == realm.roddyUser
+            }
+        }
+        roddySnvCallingStartJob.configService = new ConfigService()
+        roddySnvCallingStartJob.schedulerService = Mock(SchedulerService) {
+            1 * createProcess(_, _, _) >> { StartJob startJob, List<Parameter> input, ProcessParameter processParameter2 ->
+                Process process2 = DomainFactory.createProcess(
+                        jobExecutionPlan: failedProcess.jobExecutionPlan
+                )
+                processParameter2.process = process2
+                assert processParameter2.save(flush: true)
+                return process2
+            }
+        }
+
+        when:
+        Process process
+        LogThreadLocal.withThreadLog(System.out) {
+            process = roddySnvCallingStartJob.restart(failedProcess)
+        }
+        RoddySnvCallingInstance restartedInstance = RoddySnvCallingInstance.get(ProcessParameter.findByProcess(process).value)
+
+        then:
+        RoddySnvCallingInstance.list().size() == 2
+        restartedInstance.config == failedInstance.config
+
+        failedInstance.processingState == SnvProcessingStates.FAILED
     }
 }

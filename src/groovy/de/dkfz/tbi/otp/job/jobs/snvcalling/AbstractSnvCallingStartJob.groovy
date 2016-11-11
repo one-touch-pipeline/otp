@@ -93,6 +93,9 @@ abstract class AbstractSnvCallingStartJob extends AbstractStartJobImpl implement
         final Realm realm = configService.getRealmDataManagement(instance.project)
         String deleteFiles = "rm -rf ${instance.snvInstancePath.absoluteDataManagementPath} ${instance.snvInstancePath.absoluteStagingPath}"
 
+        if (getInstanceClass() == RoddySnvCallingInstance) {
+            executionService.executeCommandReturnProcessOutput(realm, deleteFiles, realm.roddyUser)
+        }
         executionService.executeCommandReturnProcessOutput(realm, deleteFiles)
     }
 

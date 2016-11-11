@@ -701,6 +701,32 @@ class DomainFactory {
         return snvCallingInstance
     }
 
+    public static RoddySnvCallingInstance createRoddySnvInstanceWithRoddyBamFiles(Map properties = [:], Map bamFile1Properties = [:], Map bamFile2Properties = [:]) {
+        Pipeline pipeline = createPanCanPipeline()
+
+        MergingWorkPackage controlWorkPackage = createMergingWorkPackage(pipeline: pipeline, statSizeFileName: DEFAULT_TAB_FILE_NAME)
+        SamplePair samplePair = createDisease(controlWorkPackage)
+        MergingWorkPackage diseaseWorkPackage = samplePair.mergingWorkPackage1
+
+        RoddyBamFile disease = createRoddyBamFile([workPackage: diseaseWorkPackage] + bamFile1Properties)
+        RoddyBamFile control = createRoddyBamFile([workPackage: controlWorkPackage, config: disease.config] + bamFile2Properties)
+
+        RoddyWorkflowConfig roddyWorkflowConfig = createRoddyWorkflowConfig(
+                pipeline: createRoddySnvPipelineLazy()
+        )
+
+        RoddySnvCallingInstance roddySnvCallingInstance = createRoddySnvCallingInstance([
+                instanceName: "2014-08-25_15h32",
+                samplePair: samplePair,
+                sampleType1BamFile: disease,
+                sampleType2BamFile: control,
+                config: roddyWorkflowConfig,
+                latestDataFileCreationDate: AbstractBamFile.getLatestSequenceDataFileCreationDate(disease, control),
+        ] + properties)
+        assert roddySnvCallingInstance.save(flush: true)
+        return roddySnvCallingInstance
+    }
+
     public static SnvJobResult createSnvJobResultWithRoddyBamFiles(Map properties = [:]) {
         Map map = [
                 step: SnvCallingStep.CALLING,
@@ -1153,6 +1179,14 @@ class DomainFactory {
             defaultProperties.run = properties.seqTrack.run
         }
         return createDataFile(defaultProperties + properties)
+    }
+
+    public static RoddySnvCallingInstance createRoddySnvCallingInstance(Map properties) {
+        if (!properties.containsKey('latestDataFileCreationDate')) {
+            properties += [latestDataFileCreationDate: AbstractBamFile.getLatestSequenceDataFileCreationDate(
+                    properties.sampleType1BamFile, properties.sampleType2BamFile)]
+        }
+        return createDomainObject(RoddySnvCallingInstance, properties,[:])
     }
 
     public static SnvCallingInstance createSnvCallingInstance(Map properties) {
