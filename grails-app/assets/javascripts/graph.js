@@ -32,193 +32,214 @@ $.otp.graph.overview = {
     projectCountPerDate : function(data, project) {
         "use strict";
         var json = JSON.parse(data.responseText);
-        RGraph.Reset(document.getElementById('projectCountPerDate'));
-        var scatter1 = new RGraph.Scatter('projectCountPerDate', json.data);
         var count = json.count;
         if (count > 10) {
             count = 10;
         }
-        scatter1.Set('chart.ylabels.count', count);
-        scatter1.Set('chart.defaultcolor', '#1E5CA4');
-        scatter1.Set('chart.labels', json.labels);
-        scatter1.Set('chart.ymax', json.count);
-        scatter1.Set('chart.gutter.left', 70);
-        scatter1.Set('chart.tickmarks', 'circle');
-        scatter1.Set('chart.xmin', 0);
-        scatter1.Set('chart.ymin', 0);
-        scatter1.Set('chart.ticksize', 7);
-        scatter1.Set('chart.text.size', 8);
-        scatter1.Set('chart.title', 'Number of projects in ' + project);
-        scatter1.Set('chart.title.color', 'black');
-        scatter1.Set('chart.title.size', 11);
-        scatter1.Set('chart.title.y', 39);
-        scatter1.Set('chart.xmax', json.daysCount);
-        scatter1.Set('chart.background.grid.autofit.numvlines', json.labels.length);
-        scatter1.Set('chart.text.angle', 45);
-        scatter1.Set('chart.gutter.bottom', 120);
-        scatter1.Set('chart.gutter.top', 105);
-        scatter1.Set('chart.gutter.right', 70);
-        scatter1.Draw();
+        RGraph.reset(document.getElementById('projectCountPerDate'));
+        new RGraph.Scatter({
+            id: 'projectCountPerDate',
+            data: json.data,
+            options: {
+                backgroundGridAutofitNumvlines: json.labels.length,
+                defaultcolor: '#1E5CA4',
+                gutterBottom: 120,
+                gutterLeft: 70,
+                gutterRight: 70,
+                gutterTop: 105,
+                labels: json.labels,
+                textAccessible: false,
+                textAngle: 45,
+                textSize: 8,
+                tickmarks: 'circle',
+                ticksize: 7,
+                title: 'Number of projects in ' + project,
+                titleColor: 'black',
+                titleSize: 11,
+                titleY: 39,
+                xmax: json.daysCount,
+                xmin: 0,
+                ylabelsCount: count,
+                ymax: json.count,
+                ymin: 0,
+            }
+        }).draw();
     },
 
     laneCountPerDate : function(data, project) {
         "use strict";
         var json = JSON.parse(data.responseText);
-        RGraph.Reset(document.getElementById('laneCountPerDate'));
-        var scatter2 = new RGraph.Scatter('laneCountPerDate', json.data);
-        scatter2.Set('chart.defaultcolor', '#1E5CA4');
-        scatter2.Set('chart.labels', json.labels);
-        scatter2.Set('chart.ylabels', true);
-        scatter2.Set('chart.tickmarks', 'circle');
-        scatter2.Set('chart.xmin', 1);
-        scatter2.Set('chart.ymin', 0);
-        scatter2.Set('chart.title.y', 40);
-        scatter2.Set('chart.text.size', 8);
-        scatter2.Set('chart.ticksize', 6);
-        scatter2.Set('chart.title', 'Number of sequence lanes registered in ' + project);
-        scatter2.Set('chart.title.color', 'black');
-        scatter2.Set('chart.title.size', 11);
-        scatter2.Set('chart.xmax', json.daysCount);
-        scatter2.Set('chart.background.grid.autofit.numvlines', json.labels.length);
-        scatter2.Set('chart.text.angle', 45);
-        scatter2.Set('chart.gutter.bottom', 100);
-        scatter2.Set('chart.gutter.top', 110);
-        scatter2.Set('chart.gutter.left', 70);
-        scatter2.Set('chart.gutter.right', 70);
-        scatter2.Draw();
+        RGraph.reset(document.getElementById('laneCountPerDate'));
+        new RGraph.Scatter({
+            id: 'laneCountPerDate',
+            data: json.data,
+            options: {
+                backgroundGridAutofitNumvlines: json.labels.length,
+                defaultcolor: '#1E5CA4',
+                gutterBottom: 100,
+                gutterLeft: 70,
+                gutterRight: 70,
+                gutterTop: 110,
+                labels: json.labels,
+                textAccessible: false,
+                textAngle: 45,
+                textSize: 8,
+                tickmarks: 'circle',
+                ticksize: 6,
+                title: 'Number of sequence lanes registered in ' + project,
+                titleColor: 'black',
+                titleSize: 11,
+                titleY: 40,
+                xmax: json.daysCount,
+                xmin: 1,
+                ylabels: true,
+                ymin: 0,
+            }
+        }).draw();
     },
 
     gigaBasesPerDay : function(data, project) {
         "use strict";
         var json = JSON.parse(data.responseText);
-        RGraph.Reset(document.getElementById('gigaBasesPerDay'));
-        var scatter2 = new RGraph.Scatter('gigaBasesPerDay', json.data);
-        scatter2.Set('chart.defaultcolor', '#1E5CA4');
-        scatter2.Set('chart.labels', json.labels);
-        scatter2.Set('chart.ylabels', true);
-        scatter2.Set('chart.tickmarks', 'circle');
-        scatter2.Set('chart.xmin', 1);
-        scatter2.Set('chart.ymin', 0);
-        scatter2.Set('chart.title.y', 40);
-        scatter2.Set('chart.text.size', 8);
-        scatter2.Set('chart.ticksize', 6);
-        scatter2.Set('chart.title', 'giga bases registered in ' + project);
-        scatter2.Set('chart.title.color', 'black');
-        scatter2.Set('chart.title.size', 11);
-        scatter2.Set('chart.xmax', json.daysCount);
-        scatter2.Set('chart.background.grid.autofit.numvlines', json.labels.length);
-        scatter2.Set('chart.text.angle', 45);
-        scatter2.Set('chart.gutter.bottom', 100);
-        scatter2.Set('chart.gutter.top', 110);
-        scatter2.Set('chart.gutter.left', 70);
-        scatter2.Set('chart.gutter.right', 70);
-        scatter2.Draw();
+        RGraph.reset(document.getElementById('gigaBasesPerDay'));
+        new RGraph.Scatter({
+            id: 'gigaBasesPerDay',
+            data: json.data,
+            options: {
+                backgroundGridAutofitNumvlines: json.labels.length,
+                defaultcolor: '#1E5CA4',
+                gutterBottom: 100,
+                gutterLeft: 70,
+                gutterRight: 70,
+                gutterTop: 110,
+                labels: json.labels,
+                textAccessible: false,
+                textAngle: 45,
+                textSize: 8,
+                tickmarks: 'circle',
+                ticksize: 6,
+                title: 'giga bases registered in ' + project,
+                titleColor: 'black',
+                titleSize: 11,
+                titleY: 40,
+                xmax: json.daysCount,
+                xmin: 1,
+                ylabels: true,
+                ymin: 0,
+            }
+        }).draw();
     },
 
     sampleCountPerSequenceType: function() {
         "use strict";
         var json = JSON.parse(this.responseText);
-        RGraph.Reset(document.getElementById('sampleCountPerSequenceTypePie'));
-        var pie = new RGraph.Pie('sampleCountPerSequenceTypePie', json.data);
-        pie.Set('chart.labels', json.labelsPercentage);
-        pie.Set('chart.title', 'Samples processed by sequencing technologies in ' + $('#projectGroup_select').val());
-        pie.Set('chart.title.y', 37);
-        pie.Set('chart.title.x', 'center');
-        pie.Set('chart.title.size', 11);
-        pie.Set('chart.title.color', 'black');
-        pie.Set('chart.stroke', 'white');
-        pie.Set('chart.colors', [ '#858137', '#2D6122', '#373502', '#ACAB90',
-                '#7A5D07', '#5A1B02', '#863312', '#1E5CA4', '#565B7A',
-                '#9C702A' ]);
-        pie.Set('chart.strokestyle', 'white');
-        pie.Set('chart.labels.sticks', true);
-        pie.Set('chart.shadow', true);
-        pie.Set('chart.shadow.offsetx', 12);
-        pie.Set('chart.shadow.offsety', 2);
-        pie.Set('chart.shadow.blur', 4);
-        pie.Set('chart.exploded', 1);
-        pie.Set('chart.text.size', 8);
-        pie.Set('chart.radius', 80);
-        pie.Set('chart.labels.sticks.length', 15);
-        pie.Set('chart.variant', '3d');
-        pie.Set('chart.gutter.bottom', 80);
-        pie.Set('chart.gutter.top', 80);
-        pie.Set('chart.gutter.left', 60);
-        pie.Set('chart.gutter.right', 25);
-        pie.Draw();
-        RGraph.Effects.Pie.RoundRobin(pie, {
-            frames : 13
-        });
+        RGraph.reset(document.getElementById('sampleCountPerSequenceTypePie'));
+        new RGraph.Pie({
+            id: 'sampleCountPerSequenceTypePie',
+            data: json.data,
+            options: {
+                colors: [ '#858137', '#2D6122', '#373502', '#ACAB90', '#7A5D07', '#5A1B02',
+                    '#863312', '#1E5CA4', '#565B7A', '#9C702A' ],
+                exploded: 1,
+                gutterBottom: 80,
+                gutterLeft: 60,
+                gutterRight: 25,
+                gutterTop: 80,
+                labels: json.labelsPercentage,
+                labelsSticks: true,
+                labelsSticksLength: 15,
+                linewidth: 1,
+                radius: 80,
+                shadow: true,
+                shadowBlur: 4,
+                shadowOffsetx: 12,
+                shadowOffsety: 2,
+                stroke: 'white',
+                strokestyle: 'white',
+                textSize: 8,
+                title: 'Samples processed by sequencing technologies in ' + $('#projectGroup_select').val(),
+                titleColor: 'black',
+                titleSize: 11,
+                titleX: 'center',
+                titleY: 37,
+            }
+        }).roundRobin({frames: 13});
     },
 
     projectCountPerSequenceType : function() {
         "use strict";
         var json = JSON.parse(this.responseText);
-        RGraph.Reset(document.getElementById('projectCountPerSequenceTypeBar'));
-        var bar1 = new RGraph.Bar('projectCountPerSequenceTypeBar', json.data);
-        bar1.Set('chart.background.grid', false);
-        bar1.Set('chart.labels', json.labels);
-        bar1.Set('chart.title',
-                'Number of projects using sequencing technologies in ' + $('#projectGroup_select').val());
-        bar1.Set('chart.title.y', 45);
-        bar1.Set('chart.title.x', 'center');
-        bar1.Set('chart.title.size', 11);
-        bar1.Set('chart.title.color', 'black');
-        bar1.Set('chart.colors', [ '#1E5CA4' ]);
-        bar1.Set('chart.shadow', true);
-        bar1.Set('chart.shadow.blur', 10);
-        bar1.Set('chart.shadow.color', '#666');
-        bar1.Set('chart.gutter.left', 40);
-        bar1.Set('chart.gutter.right', 70);
-        bar1.Set('chart.hmargin.grouped', 1);
-        bar1.Set('chart.labels.above', true);
-        bar1.Set('chart.xlabels.offset', 9);
-        bar1.Set('chart.variant', '3d');
-        bar1.Set('chart.text.size', 7.4);
-        bar1.Set('chart.hmargin', 9);
-        bar1.Set('chart.ticksize', 7);
-        bar1.Set('chart.text.angle', 45);
-        bar1.Set('chart.labels.above.angle', null);
-        bar1.Set('chart.labels.above.size', 9);
-        bar1.Set('chart.background.grid.border', false);
-        bar1.Set('chart.gutter.bottom', 120);
-        bar1.Set('chart.gutter.top', 110);
-        bar1.Draw();
+        RGraph.reset(document.getElementById('projectCountPerSequenceTypeBar'));
+        new RGraph.Bar({
+            id: 'projectCountPerSequenceTypeBar',
+            data: json.data,
+            options: {
+                backgroundGrid: false,
+                backgroundGridBorder: false,
+                colors: ['#1E5CA4'],
+                gutterBottom: 120,
+                gutterLeft: 40,
+                gutterRight: 70,
+                gutterTop: 110,
+                hmargin: 9,
+                hmarginGrouped: 1,
+                labels: json.labels,
+                labelsAbove: true,
+                labelsAboveAngle: null,
+                labelsAboveSize: 9,
+                labelsOffsetx: 9,
+                shadow: true,
+                shadowBlur: 10,
+                shadowColor: '#666',
+                textAccessible: false,
+                textAngle: 45,
+                textSize: 7.4,
+                ticksize: 7,
+                title: 'Number of projects using sequencing technologies in ' + $('#projectGroup_select').val(),
+                titleColor: 'black',
+                titleSize: 11,
+                titleX: 'center',
+                titleY: 45,
+            }
+        }).draw();
     },
 
     patientsCountPerSequenceType : function() {
         "use strict";
         var json = JSON.parse(this.responseText);
-        RGraph.Reset(document.getElementById('patientsCountPerSequenceType'));
-        var bar0 = new RGraph.Bar('patientsCountPerSequenceType', json.data);
-        bar0.Set('chart.background.grid', false);
-        bar0.Set('chart.labels', json.labels);
-        bar0.Set('chart.title',
-                'Number of patients using sequencing technologies in ' + $('#projectGroup_select').val());
-        bar0.Set('chart.title.y', 45);
-        bar0.Set('chart.title.x', 'center');
-        bar0.Set('chart.title.size', 11);
-        bar0.Set('chart.title.color', 'black');
-        bar0.Set('chart.colors', [ '#1E5CA4' ]);
-        bar0.Set('chart.shadow', true);
-        bar0.Set('chart.shadow.blur', 10);
-        bar0.Set('chart.shadow.color', '#666');
-        bar0.Set('chart.gutter.left', 40);
-        bar0.Set('chart.gutter.right', 70);
-        bar0.Set('chart.hmargin.grouped', 1);
-        bar0.Set('chart.labels.above', true);
-        bar0.Set('chart.xlabels.offset', 9);
-        bar0.Set('chart.variant', '3d');
-        bar0.Set('chart.text.size', 7.4);
-        bar0.Set('chart.hmargin', 9);
-        bar0.Set('chart.ticksize', 7);
-        bar0.Set('chart.text.angle', 45);
-        bar0.Set('chart.labels.above.angle', null);
-        bar0.Set('chart.labels.above.size', 9);
-        bar0.Set('chart.background.grid.border', false);
-        bar0.Set('chart.gutter.bottom', 140);
-        bar0.Set('chart.gutter.top', 110);
-        bar0.Draw();
+        RGraph.reset(document.getElementById('patientsCountPerSequenceType'));
+        new RGraph.Bar({
+            id: 'patientsCountPerSequenceType',
+            data: json.data,
+            options: {
+                backgroundGrid: false,
+                backgroundGridBorder: false,
+                colors: [ '#1E5CA4' ],
+                gutterBottom: 140,
+                gutterLeft: 40,
+                gutterRight: 70,
+                gutterTop: 110,
+                hmargin: 9,
+                hmarginGrouped: 1,
+                labels: json.labels,
+                labelsAbove: true,
+                labelsAboveAngle: null,
+                labelsAboveSize: 9,
+                labelsOffsetx: 9,
+                shadow: true,
+                shadowBlur: 10,
+                shadowColor: '#666',
+                textAccessible: false,
+                textAngle: 45,
+                textSize: 7.4,
+                ticksize: 7,
+                title: 'Number of patients using sequencing technologies in ' + $('#projectGroup_select').val(),
+                titleColor: 'black',
+                titleSize: 11,
+                titleX: 'center',
+                titleY: 45,
+            }
+        }).draw();
     }
 };
 
@@ -238,66 +259,74 @@ $.otp.graph.project = {
     sampleTypeCountBySeqType : function() {
         "use strict";
         var json = JSON.parse(this.responseText);
-        RGraph.Reset(document.getElementById('sampleTypeCountBySeqType'));
-        var pie1 = new RGraph.Pie('sampleTypeCountBySeqType', json.data);
-        pie1.Set('chart.labels', json.labelsPercentage);
-        pie1.Set('chart.title', 'Samples processed by different sequencing technologies');
-        pie1.Set('chart.title.y', 18);
-        pie1.Set('chart.title.x', 'center');
-        pie1.Set('chart.title.size', 11);
-        pie1.Set('chart.title.color', 'black');
-        pie1.Set('chart.colors', [ '#858137', '#2D6122', '#373502', '#ACAB90',
-                '#7A5D07', '#5A1B02', '#863312', '#1E5CA4', '#565B7A',
-                '#9C702A' ]);
-        pie1.Set('chart.labels.sticks', true);
-        pie1.Set('chart.shadow', true);
-        pie1.Set('chart.shadow.offsetx', 2);
-        pie1.Set('chart.shadow.offsety', 2);
-        pie1.Set('chart.shadow.blur', 2);
-        pie1.Set('chart.exploded', 1);
-        pie1.Set('chart.text.size', 8);
-        pie1.Set('chart.labels.sticks.length', 0);
-        pie1.Set('chart.gutter.bottom', 130);
-        pie1.Set('chart.gutter.top', 100);
-        pie1.Set('chart.gutter.left', 200);
-        pie1.Set('chart.gutter.right', 180);
-        pie1.Draw();
-        RGraph.Effects.Pie.RoundRobin(pie1, {
-            frames : 335
-        });
+        RGraph.reset(document.getElementById('sampleTypeCountBySeqType'));
+        new RGraph.Pie({
+            id: 'sampleTypeCountBySeqType',
+            data: json.data,
+            options: {
+                colors: [ '#858137', '#2D6122', '#373502', '#ACAB90', '#7A5D07', '#5A1B02',
+                    '#863312', '#1E5CA4', '#565B7A', '#9C702A' ],
+                exploded: 1,
+                gutterBottom: 80,
+                gutterLeft: 60,
+                gutterRight: 25,
+                gutterTop: 80,
+                labels: json.labelsPercentage,
+                labelsSticks: true,
+                labelsSticksLength: 15,
+                linewidth: 1,
+                radius: 80,
+                shadow: true,
+                shadowBlur: 4,
+                shadowOffsetx: 12,
+                shadowOffsety: 2,
+                stroke: 'white',
+                strokestyle: 'white',
+                textSize: 8,
+                title: 'Samples processed by different sequencing technologies',
+                titleColor: 'black',
+                titleSize: 11,
+                titleX: 'center',
+                titleY: 18,
+            }
+        }).draw();
     },
 
     laneCountPerDateByProject : function() {
         "use strict";
         var json = JSON.parse(this.responseText);
-        RGraph.Reset(document.getElementById('laneCountPerDateByProject'));
-        var scatter3 = new RGraph.Scatter('laneCountPerDateByProject', json.data);
-        scatter3.Set('chart.defaultcolor', '#1E5CA4');
-        scatter3.Set('chart.labels', json.labels);
         var count = json.count;
         if (count > 10) {
             count = 10;
         }
-        scatter3.Set('chart.ylabels.count', count);
-        scatter3.Set('chart.ymax', json.count);
-        scatter3.Set('chart.tickmarks', 'circle');
-        scatter3.Set('chart.xmin', 0);
-        scatter3.Set('chart.ymin', 0);
-        scatter3.Set('chart.ticksize', 7);
-        scatter3.Set('chart.title',
-                'Number of sequence lanes registered for ' + $('#project_select').val());
-        scatter3.Set('chart.title.color', 'black');
-        scatter3.Set('chart.title.size', 11);
-        scatter3.Set('chart.title.y', 18);
-        scatter3.Set('chart.text.size', 8);
-        scatter3.Set('chart.xmax', json.daysCount);
-        scatter3.Set('chart.background.grid.autofit.numvlines', json.labels.length);
-        scatter3.Set('chart.text.angle', 65);
-        scatter3.Set('chart.gutter.bottom', 110);
-        scatter3.Set('chart.gutter.right', 70);
-        scatter3.Set('chart.gutter.left', 90);
-        scatter3.Set('chart.gutter.top', 100);
-        scatter3.Draw();
+        RGraph.reset(document.getElementById('laneCountPerDateByProject'));
+        new RGraph.Scatter({
+            id: 'laneCountPerDateByProject',
+            data: json.data,
+            options: {
+                backgroundGridAutofitNumvlines: json.labels.length,
+                defaultcolor: '#1E5CA4',
+                gutterBottom: 110,
+                gutterLeft: 90,
+                gutterRight: 70,
+                gutterTop: 100,
+                labels: json.labels,
+                textAccessible: false,
+                textAngle: 65,
+                textSize: 8,
+                tickmarks: 'circle',
+                ticksize: 7,
+                title: 'Number of sequence lanes registered for ' + $('#project_select').val(),
+                titleColor: 'black',
+                titleSize: 11,
+                titleY: 18,
+                xmax: json.daysCount,
+                xmin: 0,
+                ylabelsCount: count,
+                ymax: json.count,
+                ymin: 0,
+            }
+        }).draw();
     },
 
     sampleTypeCountByPatient : function() {
@@ -305,44 +334,52 @@ $.otp.graph.project = {
         var json = JSON.parse(this.responseText);
         var canvas = document.getElementById('sampleTypeCountByPatient');
         canvas.height = ((json.count * 15) + 250);
-        RGraph.Reset(canvas);
-        var hbar = new RGraph.HBar('sampleTypeCountByPatient', json.data);
-        hbar.Set('chart.background.grid', false);
-        hbar.Set('chart.labels', json.labels);
-        hbar.Set('chart.title',
-                'Patients and the number of samples (non-redundant)');
-        hbar.Set('chart.title.x', 300);
-        hbar.Set('chart.title.size', 11);
-        hbar.Set('chart.title.color', 'black');
-        hbar.Set('chart.colors', [ '#1E5CA4' ]);
-        hbar.Set('chart.shadow', true);
-        hbar.Set('chart.units.post', ' Sample(s)');
-        hbar.Set('chart.shadow.offsetx', 0);
-        hbar.Set('chart.shadow.offsety', 0);
-        hbar.Set('chart.shadow.color', '#aaa');
-        hbar.Set('chart.strokestyle', 'rgba(0,0,0,0)');
-        hbar.Set('chart.xmax', 13);
-        hbar.Set('chart.variant', '3d');
-        hbar.Set('chart.labels.above', true);
-        hbar.Set('chart.text.size', 8);
-        hbar.Set('chart.margin', 3);
-        hbar.Set('chart.noxaxis', true);
-        hbar.Set('chart.noxtickmarks', true);
-        hbar.Set('chart.xlabels', false);
-        hbar.Set('chart.labels.above.size', 9);
-        hbar.Set('chart.linewidth', 50);
-        hbar.Set('chart.text.angle', 30);
-        hbar.Set('chart.labels.above.angle', null);
-        hbar.Set('chart.gutter.bottom', 150);
-        hbar.Set('chart.gutter.left', 175);
-        hbar.Set('chart.gutter.top', 70);
-        hbar.Set('events.mousemove', function (e, HBar) {e.target.style.cursor = 'pointer';});
-        function myClick (e, bar){
-            var idx = bar[5];
-            location.href = $.otp.contextPath + '/individual/show/' + json.labels[idx];
-        }
-        hbar.Set('events.click', myClick);
-        hbar.Draw();
+
+        RGraph.reset(canvas);
+        new RGraph.HBar({
+            id: 'sampleTypeCountByPatient',
+            data: json.data,
+            options: {
+                backgroundGrid: false,
+                colors: [ '#1E5CA4' ],
+                gutterBottom: 150,
+                gutterLeft: 175,
+                gutterTop: 70,
+                labels: json.labels,
+                labelsAbove: true,
+                labelsAboveAngle: null,
+                labelsAboveSize: 9,
+                linewidth: 50,
+                margin: 3,
+                noxaxis: true,
+                noxtickmarks: true,
+                shadow: true,
+                shadowColor: '#aaa',
+                shadowOffsetx: 0,
+                shadowOffsety: 0,
+                strokestyle: 'rgba(0,0,0,0)',
+                textAngle: 30,
+                textSize: 8,
+                title: 'Patients and the number of samples (non-redundant)',
+                titleColor: 'black',
+                titleSize: 11,
+                titleX: 300,
+                unitsPost: ' Sample(s)',
+                xlabels: false,
+                xmax: 13,
+                eventsClick: function (e, shape) {
+                    var idx = shape[5];
+                    location.href =  $.otp.createLink({
+                        controller: 'individual',
+                        action: 'show',
+                        id: json.labels[idx]
+                    });
+                },
+                eventsMousemove: function (e, shape) {
+                    return true;
+                }
+            }
+        }).draw();
     }
 };
 

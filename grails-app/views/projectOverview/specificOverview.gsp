@@ -5,7 +5,6 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <meta name="layout" content="main" />
 <title><g:message code="projectOverview.title" args="[project.name]"/></title>
-    <asset:javascript src="modules/graph"/>
     <asset:javascript src="pages/projectOverview/index/datatable.js"/>
     <asset:javascript src="modules/editorSwitch"/>
 </head>

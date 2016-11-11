@@ -36,20 +36,20 @@ OTP.pages.intro = {
             data: json.data,
             options: {
                 backgroundGrid: false,
-                labels: json.labels,
                 colors: ['#025B9A'],
+                gutterBottom: 80,
+                labels: json.labels,
                 labelsAbove: true,
-                labelsOffsetx: 9,
-                strokestyle: 'white',
-                linewidth: 3,
-                textSize: 10,
-                textAccessible: false,
-                textAngle: 45,
                 labelsAboveAngle: null,
                 labelsAboveSize: 9,
-                gutterBottom: 80,
+                labelsOffsetx: 9,
+                linewidth: 3,
                 noaxes: true,
-                ylabels: false
+                strokestyle: 'white',
+                textAccessible: false,
+                textAngle: 45,
+                textSize: 10,
+                ylabels: false,
             }
         }).draw();
     },
@@ -61,16 +61,16 @@ OTP.pages.intro = {
             id: 'js-sampleCountPerSequenceTypePie',
             data: json.data,
             options: {
+                colors: ["#4A5964", "#025B9A", "#A4ACB1", "#32AE32", "#E6E6E5", "#FD7202", "#000000"],
                 labels: json.labels,
-                textAccessible: false,
+                labelsSticks: true,
+                labelsSticksLength: 15,
+                linewidth: 3,
+                radius: 80,
                 stroke: 'white',
                 strokestyle: 'white',
-                linewidth: 3,
-                labelsSticks: true,
+                textAccessible: false,
                 textSize: 10,
-                radius: 80,
-                labelsSticksLength: 15,
-                colors: ["#4A5964", "#025B9A", "#A4ACB1", "#32AE32", "#E6E6E5", "#FD7202", "#000000"]
             }
         }).draw();
     }

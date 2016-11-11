@@ -141,45 +141,54 @@ $.otp.clusterJobGeneralGraph = {
         });
     },
 
-    update: function (id, data) {
+    update: function () {
         "use strict";
-        RGraph.Clear($('#' + id).get(0));
         $.otp.clusterJobGeneralGraph.register();
     },
 
     generatePieGraphic : function (id, data) {
         "use strict";
         var json = JSON.parse(data.response);
-        RGraph.Reset($('#' + id).get(0));
-        var graph = new RGraph.Pie(id, json.data);
-        graph.Set('chart.shadow.offsetx', 5);
-        graph.Set('chart.shadow.offsety', 5);
-        graph.Set('chart.shadow.blur', 15);
-        graph.Set('chart.colors', $.otp.clusterJobGeneralGraph.getColors(json.data.length));
-        graph.Set('chart.linewidth', 2);
-        graph.Set('chart.exploded', 3);
-        graph.Set('chart.radius', 80);
-        graph.Set('key', json.labels);
-        graph.Set('key.colors', $.otp.clusterJobGeneralGraph.getColors(json.data.length));
-        graph.Set('key.rounded', false);
-        graph.Set('centerx', 120);
-        graph.Draw();
+        RGraph.reset($('#' + id).get(0));
+        new RGraph.Pie({
+            id: id,
+            data: json.data,
+            options: {
+                centerx: 120,
+                colors: $.otp.clusterJobGeneralGraph.getColors(json.data.length),
+                exploded: 3,
+                key: json.labels,
+                keyColors: $.otp.clusterJobGeneralGraph.getColors(json.data.length),
+                keyRounded: false,
+                linewidth: 1,
+                radius: 80,
+                shadowBlur: 15,
+                shadowOffsetx: 5,
+                shadowOffsety: 5,
+                textSize: 8,
+            }
+        }).draw();
     },
 
     generateLineGraphic : function (id, data) {
         "use strict";
         var json = JSON.parse(data.response);
-        RGraph.Reset($('#' + id).get(0));
-        var graph = new RGraph.Line(id, json.data);
-        graph.Set('labels', $.otp.clusterJobGeneralGraph.normalizeLabels(json.labels));
-        graph.Set('text.angle', 45);
-        graph.Set('text.size', 8);
-        graph.Set('numxticks', json.labels.length - 1);
-        graph.Set('background.grid.autofit.align', true);
-        graph.Set('chart.gutter.bottom', 100);
-        graph.Set('chart.gutter.left', 80);
-        graph.Set('key', json.keys);
-        graph.Draw();
+        RGraph.reset($('#' + id).get(0));
+        new RGraph.Line({
+            id: id,
+            data: json.data,
+            options: {
+                backgroundGridAutofitAlign: true,
+                gutterBottom: 100,
+                gutterLeft: 80,
+                key: json.keys,
+                labels: $.otp.clusterJobGeneralGraph.normalizeLabels(json.labels),
+                numxticks: json.labels.length - 1,
+                textAccessible: false,
+                textAngle: 45,
+                textSize: 8,
+            }
+        }).draw();
     },
 
     getColors : function (elementCount) {
