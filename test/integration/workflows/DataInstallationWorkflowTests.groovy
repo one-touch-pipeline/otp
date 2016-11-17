@@ -14,8 +14,6 @@ import org.junit.*
 class DataInstallationWorkflowTests extends WorkflowTestCase {
 
     LsdfFilesService lsdfFilesService
-    LinkFileUtils linkFileUtils
-
 
 
     // files to be processed by the tests

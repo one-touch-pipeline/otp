@@ -21,8 +21,14 @@ class RoddySnvCallingStartJob extends AbstractSnvCallingStartJob {
 
     @Override
     protected ConfigPerProject getConfig(SamplePair samplePair) {
-        return RoddyWorkflowConfig.getLatestForIndividual(samplePair.individual, samplePair.seqType,
-                CollectionUtils.exactlyOneElement(Pipeline.findAllByName(Pipeline.Name.RODDY_SNV)))
+        Pipeline pipeline = CollectionUtils.exactlyOneElement(Pipeline.findAllByName(Pipeline.Name.RODDY_SNV))
+        RoddyWorkflowConfig config = (RoddyWorkflowConfig)RoddyWorkflowConfig.getLatestForIndividual(
+                samplePair.individual, samplePair.seqType, pipeline)
+
+        if (config == null) {
+            throw new RuntimeException("No ${RoddyWorkflowConfig.simpleName} found for ${Pipeline.simpleName} ${pipeline}, ${Individual.simpleName} ${samplePair.individual} (${Project.simpleName} ${samplePair.project}), ${SeqType.simpleName} ${samplePair.seqType}")
+        }
+        return config
     }
 
     @Override

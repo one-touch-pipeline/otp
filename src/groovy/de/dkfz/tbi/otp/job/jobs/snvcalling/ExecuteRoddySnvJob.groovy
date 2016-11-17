@@ -5,12 +5,16 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.job.jobs.*
 import de.dkfz.tbi.otp.job.jobs.roddyAlignment.*
 import de.dkfz.tbi.otp.ngsdata.*
+import org.springframework.beans.factory.annotation.*
 
 import java.nio.file.*
 
 class ExecuteRoddySnvJob extends AbstractExecutePanCanJob<RoddySnvCallingInstance> implements AutoRestartableJob {
 
+    @Autowired
     ReferenceGenomeService referenceGenomeService
+
+    @Autowired
     SnvCallingService snvCallingService
 
     @Override
@@ -41,8 +45,8 @@ class ExecuteRoddySnvJob extends AbstractExecutePanCanJob<RoddySnvCallingInstanc
         cValues.add("CHROMOSOME_LENGTH_FILE:${referenceGenomeService.chromosomeLengthFile(bamFileControl.mergingWorkPackage).path}")
         cValues.add("CHR_SUFFIX:${referenceGenome.chromosomeSuffix}")
         cValues.add("CHR_PREFIX:${referenceGenome.chromosomePrefix}")
-        cValues.add("CHROMOSOME_INDICES:${getChromosomeIndexParameter(roddySnvCallingInstance.referenceGenome)}")
-        cValues.add("analysisMethodNameOnOutput:${resultDirectory.relativize(individualPath).toString()}")
+        cValues.add("${getChromosomeIndexParameter(roddySnvCallingInstance.referenceGenome)}")
+        cValues.add("analysisMethodNameOnOutput:${individualPath.relativize(resultDirectory).toString()}")
 
         return cValues
     }

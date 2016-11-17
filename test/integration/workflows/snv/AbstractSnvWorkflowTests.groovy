@@ -3,7 +3,6 @@ package workflows.snv
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
 import org.joda.time.*
 import org.junit.*
 import workflows.*
@@ -17,14 +16,13 @@ abstract class AbstractSnvWorkflowTests extends WorkflowTestCase {
 
     ProcessedMergedBamFileService processedMergedBamFileService
 
-    LinkFileUtils linkFileUtils
-
 
     AbstractMergedBamFile bamFileControl
     AbstractMergedBamFile bamFileTumor
     ConfigPerProject config
     Individual individual
     Project project
+    ReferenceGenome referenceGenome
     SamplePair samplePair
     SampleType sampleTypeControl
     SampleType sampleTypeTumor
@@ -32,6 +30,8 @@ abstract class AbstractSnvWorkflowTests extends WorkflowTestCase {
 
 
     abstract ConfigPerProject createConfig()
+
+    abstract ReferenceGenome createReferenceGenome()
 
 
     final Map createProcessMergedBamFileProperties() {
@@ -42,10 +42,15 @@ abstract class AbstractSnvWorkflowTests extends WorkflowTestCase {
 
 
     void setupRoddyBamFile() {
-        bamFileTumor = DomainFactory.createRoddyBamFile(createProcessMergedBamFileProperties())
+        MergingWorkPackage tumorMwp = DomainFactory.createMergingWorkPackage(
+                seqType: DomainFactory.createWholeGenomeSeqType(),
+                pipeline: DomainFactory.createPanCanPipeline(),
+                referenceGenome: createReferenceGenome()
+        )
+        bamFileTumor = DomainFactory.createRoddyBamFile([workPackage: tumorMwp] + createProcessMergedBamFileProperties())
 
         bamFileControl = DomainFactory.createRoddyBamFile(createProcessMergedBamFileProperties() + [
-                workPackage: DomainFactory.createMergingWorkPackage(bamFileTumor.mergingWorkPackage),
+                workPackage: DomainFactory.createMergingWorkPackage(tumorMwp),
                 config: bamFileTumor.config,
         ])
 
@@ -54,7 +59,12 @@ abstract class AbstractSnvWorkflowTests extends WorkflowTestCase {
 
 
     void setupProcessMergedBamFile() {
-        bamFileTumor = DomainFactory.createProcessedMergedBamFile(createProcessMergedBamFileProperties())
+        MergingWorkPackage tumorMwp = DomainFactory.createMergingWorkPackage(
+                seqType: DomainFactory.createWholeGenomeSeqType(),
+                pipeline: DomainFactory.createDefaultOtpPipeline(),
+                referenceGenome: createReferenceGenome()
+        )
+        bamFileTumor = DomainFactory.createProcessedMergedBamFile(tumorMwp, createProcessMergedBamFileProperties())
 
         bamFileControl = DomainFactory.createProcessedMergedBamFile(
                 DomainFactory.createMergingWorkPackage(bamFileTumor.mergingWorkPackage),

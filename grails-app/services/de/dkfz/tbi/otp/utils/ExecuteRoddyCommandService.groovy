@@ -166,7 +166,7 @@ cd "${roddyResult.workDirectory}"
 groupname=`stat -c '%G' .`
 echo ""
 echo "correct group permission to" \$groupname
-find -not -type l -user ${realm.roddyUser} -not -group \$groupname -print -exec chgrp \$groupname '{}' \\;
+find -not -type l -user ${realm.roddyUser} -not -group \$groupname -print -exec chgrp \$groupname '{}' \\; | wc -l
 """
         executionService.executeCommandReturnProcessOutput(realm, cmd, realm.roddyUser).assertExitCodeZeroAndStderrEmpty()
     }

@@ -94,9 +94,9 @@ class ExecuteRoddySnvJobSpec extends Specification {
         String bamFileDiseasePath = bamFileDisease.pathForFurtherProcessing.path
         String bamFileControlPath = bamFileControl.pathForFurtherProcessing.path
 
-        String analysisMethodNameOnOutput = Paths.get(roddySnvCallingInstance.snvInstancePath.absoluteDataManagementPath.path).relativize(
-                Paths.get(roddySnvCallingInstance.individual.getViewByPidPath(roddySnvCallingInstance.seqType).absoluteDataManagementPath.path)
-        ).toString()
+        String analysisMethodNameOnOutput = "snv_results/${roddySnvCallingInstance.seqType.libraryLayoutDirName}/" +
+                "${roddySnvCallingInstance.sampleType1BamFile.sampleType.dirName}_${roddySnvCallingInstance.sampleType2BamFile.sampleType.dirName}/" +
+                "${roddySnvCallingInstance.instanceName}"
 
         List<String> chromosomeNames = ["1", "2", "3", "4", "5", "M", "X", "Y"]
         DomainFactory.createReferenceGenomeEntries(roddySnvCallingInstance.referenceGenome, chromosomeNames)
@@ -110,7 +110,7 @@ class ExecuteRoddySnvJobSpec extends Specification {
                 "CHROMOSOME_LENGTH_FILE:${chromosomeLength.path}",
                 "CHR_SUFFIX:${roddySnvCallingInstance.referenceGenome.chromosomeSuffix}",
                 "CHR_PREFIX:${roddySnvCallingInstance.referenceGenome.chromosomePrefix}",
-                "CHROMOSOME_INDICES:${job.getChromosomeIndexParameter(roddySnvCallingInstance.referenceGenome)}",
+                "${job.getChromosomeIndexParameter(roddySnvCallingInstance.referenceGenome)}",
                 "analysisMethodNameOnOutput:${analysisMethodNameOnOutput}",
         ]
 

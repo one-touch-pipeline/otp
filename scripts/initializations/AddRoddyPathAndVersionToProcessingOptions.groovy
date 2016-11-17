@@ -11,6 +11,6 @@ println ctx.processingOptionService.createOrUpdate(
         "roddyPath",
         null,
         null,
-        "/path/to/roddy/release/roddy/",
+        "/path/to/roddy/devel/roddy/",
         "Path to the roddy.sh on the current cluster (***REMOVED***cluster 13.1)",
 )

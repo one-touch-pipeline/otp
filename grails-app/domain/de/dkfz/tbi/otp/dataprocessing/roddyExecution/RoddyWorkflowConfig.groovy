@@ -91,7 +91,7 @@ class RoddyWorkflowConfig extends ConfigPerProject implements AlignmentConfig {
         }
     }
 
-    static void importProjectConfigFile(Project project, SeqType seqType, String pluginVersionToUse, Pipeline pipeline, String configFilePath, String configVersion, Individual individual = null) {
+    static RoddyWorkflowConfig importProjectConfigFile(Project project, SeqType seqType, String pluginVersionToUse, Pipeline pipeline, String configFilePath, String configVersion, Individual individual = null) {
         assert project : "The project is not allowed to be null"
         assert seqType : "The seqType is not allowed to be null"
         assert pipeline : "The pipeline is not allowed to be null"
@@ -113,6 +113,8 @@ class RoddyWorkflowConfig extends ConfigPerProject implements AlignmentConfig {
         )
         config.validateConfig()
         config.createConfigPerProject()
+
+        return config
     }
 
 
@@ -122,7 +124,7 @@ class RoddyWorkflowConfig extends ConfigPerProject implements AlignmentConfig {
         assert pipeline : "The pipeline is not allowed to be null"
         assert individual == null || individual.project == project
         try {
-            return atMostOneElement(findAllByProjectAndSeqTypeAndPipelineAndObsoleteDateAndIndividual(project, seqType, pipeline, null, individual))
+            return (RoddyWorkflowConfig) atMostOneElement(findAllByProjectAndSeqTypeAndPipelineAndObsoleteDateAndIndividual(project, seqType, pipeline, null, individual))
         } catch (final Throwable t) {
             throw new RuntimeException("Found more than one RoddyWorkflowConfig for Project ${project}, SeqType ${seqType}, Individual ${individual} and Pipeline ${pipeline}. ${t.message ?: ''}", t)
         }

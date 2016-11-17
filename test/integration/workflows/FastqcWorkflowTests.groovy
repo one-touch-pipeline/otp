@@ -13,7 +13,6 @@ class FastqcWorkflowTests extends WorkflowTestCase {
     ProcessingOptionService processingOptionService
     LsdfFilesService lsdfFilesService
     FastqcDataFilesService fastqcDataFilesService
-    LinkFileUtils linkFileUtils
 
 
     File sourceFastq

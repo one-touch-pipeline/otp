@@ -17,8 +17,6 @@ import static de.dkfz.tbi.otp.ngsdata.SeqTypeNames.*
 class ConveyBwaAlignmentWorkflowTests extends WorkflowTestCase {
     ProcessingOptionService processingOptionService
     LsdfFilesService lsdfFilesService
-    LinkFileUtils linkFileUtils
-    ReferenceGenomeService referenceGenomeService
     ProcessedBamFileService processedBamFileService
     ProcessedSaiFileService processedSaiFileService
 

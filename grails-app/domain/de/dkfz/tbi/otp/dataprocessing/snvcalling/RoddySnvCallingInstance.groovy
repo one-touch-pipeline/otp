@@ -27,7 +27,7 @@ class RoddySnvCallingInstance extends SnvCallingInstance implements RoddyResult 
 
     @Override
     RoddyWorkflowConfig getConfig() {
-        return super.config
+        return super.getConfig()
     }
 
     ReferenceGenome getReferenceGenome() {

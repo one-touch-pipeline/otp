@@ -42,6 +42,11 @@ abstract class AbstractOtpSnvWorkflowTests extends AbstractSnvWorkflowTests {
     }
 
     @Override
+    ReferenceGenome createReferenceGenome() {
+        return DomainFactory.createReferenceGenome()
+    }
+
+    @Override
     List<String> getWorkflowScripts() {
         return ["scripts/workflows/SnvWorkflow.groovy"]
     }

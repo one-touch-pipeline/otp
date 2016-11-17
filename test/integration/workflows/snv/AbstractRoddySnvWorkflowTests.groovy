@@ -9,12 +9,12 @@ import de.dkfz.tbi.otp.utils.logging.*
 
 abstract class AbstractRoddySnvWorkflowTests extends AbstractSnvWorkflowTests {
 
-    static final String PLUGIN_NAME = 'COWorkflows'
-    static final String PLUGIN_VERSION = '1.0.132-3'
+    static final String PLUGIN_NAME = 'SNVCallingWorkflow'
+    static final String PLUGIN_VERSION = '1.0.166-1'
     static final String PLUGIN = "${PLUGIN_NAME}:${PLUGIN_VERSION}"
     static final String CONFIG_VERSION = 'v1_0'
     static final String ANALYSIS = 'snvCallingAnalysis'
-    static final String IMPORT = 'otpSnvCallingWorkflow-1.0'
+    static final String IMPORT = 'otpSNVCallingWorkflowWGS-1.0'
 
 
     File createXml() {
@@ -26,31 +26,15 @@ abstract class AbstractRoddySnvWorkflowTests extends AbstractSnvWorkflowTests {
         )
 
         String xml = """
-<configuration
-        configurationType='project'
-        name='${name}'
-        imports='${IMPORT}'
-        description='All parameters specific for the SNV Calling Workflow.'>
-
+<configuration configurationType='project'
+            name='${name}'
+            imports="${IMPORT}"
+            description='SNV project configuration for WGS in OTP.'>
     <subconfigurations>
-        <configuration name='config' usedresourcessize='xl'>
+        <configuration name='config' usedresourcessize='t'>
             <availableAnalyses>
-                <analysis id='${seqType.roddyName}' configuration='${ANALYSIS}' killswitches='FilenameSection'/>
+                <analysis id='${seqType.roddyName}' configuration='${ANALYSIS}'/>
             </availableAnalyses>
-            <configurationvalues>
-                <cvalue name='mpileupOutputDirectory' value='/' type="path" description="The output path must be exactly as defined on the command line in 'outputAnalysisBaseDirectory'"/>
-
-                <cvalue name='disableAutoBAMHeaderAnalysis' value='true' type="boolean"
-                        description="This variable defines if the reference genome and the chromosome file lenght are parsed from the bam files (false) or not (true).
-                        We want to provide these values via the command line which is why we want to disable this function. "/>
-
-                <!-- Software versions -->
-                <cvalue name="BCFTOOLS_BIN" value="bcftools-0.1.19" type="filename"/>
-                <cvalue name="BGZIP_BIN" value="" type="filename"/>
-                <cvalue name="TABIX_BIN" value="" type="filename"/>
-                <cvalue name="SAMTOOLS_BIN" value="samtools-0.1.19" type="filename"/>
-
-            </configurationvalues>
         </configuration>
     </subconfigurations>
 </configuration>
@@ -107,8 +91,17 @@ echo 'OK'
     }
 
     @Override
+    ReferenceGenome createReferenceGenome() {
+        return createAndSetup_Bwa06_1K_ReferenceGenome()
+    }
+
+    @Override
     List<String> getWorkflowScripts() {
-        return ["scripts/workflows/RoddySnvWorkflow.groovy"]
+        return [
+                "scripts/workflows/RoddySnvWorkflow.groovy",
+                "scripts/initializations/AddPathToConfigFilesToProcessingOptions.groovy",
+                "scripts/initializations/AddRoddyPathAndVersionToProcessingOptions.groovy",
+        ]
     }
 
     @Override

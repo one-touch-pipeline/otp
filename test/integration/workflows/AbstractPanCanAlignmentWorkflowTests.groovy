@@ -86,8 +86,6 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
 
 
     LsdfFilesService lsdfFilesService
-    ReferenceGenomeService referenceGenomeService
-    LinkFileUtils linkFileUtils
     ProcessingOptionService processingOptionService
     AbstractBamFileService abstractBamFileService
 
@@ -175,24 +173,13 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
     MergingWorkPackage createWorkPackage() {
         SeqType seqType = findSeqType()
 
-        Pipeline pipeline = Pipeline.build(
-                name: Pipeline.Name.PANCAN_ALIGNMENT,
-                type: Pipeline.Type.ALIGNMENT,
-        )
+        Pipeline pipeline = DomainFactory.createPanCanPipeline()
 
-        ReferenceGenome referenceGenome = ReferenceGenome.build(
-                fileNamePrefix: refGenFileNamePrefix,
-                cytosinePositionsIndex: cytosinePositionsIndex,
+        ReferenceGenome referenceGenome = createReferenceGenomeWithFile(
+                'bwa06_1KGRef',
+                refGenFileNamePrefix,
+                cytosinePositionsIndex,
         )
-        LsdfFilesService.ensureFileIsReadableAndNotEmpty(chromosomeNamesFile)
-        chromosomeNamesFile.eachLine { String chromosomeName ->
-            ReferenceGenomeEntry.build(
-                    referenceGenome: referenceGenome,
-                    classification: ReferenceGenomeEntry.Classification.CHROMOSOME,
-                    name: chromosomeName,
-                    alias: chromosomeName,
-            )
-        }
 
         LibraryPreparationKit kit = null
         if (!seqType.isWgbs()) {

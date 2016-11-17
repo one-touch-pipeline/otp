@@ -409,7 +409,7 @@ stat -c %a ${roddyBamFile.workDirectory}/${roddyBamFile.bamFileName}
                     out.assertExitCodeZeroAndStderrEmpty()
                     assert out.stdout == """
 correct group permission to ${primaryGroup}
-./file
+1
 """ as String
                     return out
                 }

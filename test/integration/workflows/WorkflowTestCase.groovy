@@ -48,6 +48,10 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
 
     PbsMonitorService pbsMonitorService
 
+    ReferenceGenomeService referenceGenomeService
+
+    LinkFileUtils linkFileUtils
+
     // The scheduler needs to access the created objects while the test is being executed
     boolean transactional = false
 
@@ -61,6 +65,8 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
     // permissions to be applied to the source test data
     protected final static String TEST_DATA_MODE_DIR = "2750"
     protected final static String TEST_DATA_MODE_FILE = "640"
+
+    final static String CHROMOSOME_NAMES_FILE = 'chromosome-names.txt'
 
     // The base directory for this test instance ("local root" directory).
     private File baseDirectory = null
@@ -326,6 +332,43 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
 
     protected File getDataDirectory() {
         return new File(getRootDirectory(), 'workflow-data')
+    }
+
+    protected File getReferenceGenomeDirectory() {
+        return new File(getDataDirectory(), 'reference-genomes')
+    }
+
+    public ReferenceGenome createReferenceGenomeWithFile(String referenceGenomeSpecificPath, String fileNamePrefix, String cytosinePositionsIndex = null) {
+        File sourceDir = new File(getReferenceGenomeDirectory(), referenceGenomeSpecificPath)
+        File source = new File(sourceDir, CHROMOSOME_NAMES_FILE)
+
+        ReferenceGenome referenceGenome = DomainFactory.createReferenceGenome(
+                path: referenceGenomeSpecificPath,
+                fileNamePrefix: fileNamePrefix,
+                cytosinePositionsIndex: cytosinePositionsIndex,
+                chromosomeLengthFilePath: 'hg19_chrTotalLength.tsv',
+                chromosomeSuffix: '',
+                chromosomePrefix: '',
+        )
+        LsdfFilesService.ensureFileIsReadableAndNotEmpty(source)
+
+        source.eachLine { String chromosomeName ->
+            DomainFactory.createReferenceGenomeEntry(
+                    referenceGenome: referenceGenome,
+                    classification: ReferenceGenomeEntry.Classification.CHROMOSOME,
+                    name: chromosomeName,
+                    alias: chromosomeName,
+            )
+        }
+
+        File linkRefGenDir = new File(referenceGenomeService.filePathToDirectory(realm, referenceGenome, false))
+        linkFileUtils.createAndValidateLinks([(sourceDir): linkRefGenDir], realm)
+
+        return referenceGenome
+    }
+
+    ReferenceGenome createAndSetup_Bwa06_1K_ReferenceGenome() {
+        return createReferenceGenomeWithFile('bwa06_1KGRef', 'hs37d5')
     }
 
     /**
