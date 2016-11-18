@@ -17,9 +17,9 @@ class LsdfFilesService {
     ExecutionService executionService
     CreateClusterScriptService createClusterScriptService
 
-    static final String MOUNTPOINT_WITH_ICGC = 'STORAGE_ROOT/'
+    static final String MOUNTPOINT_WITH_ICGC = 'STORAGE_ROOT'
 
-    static final String MOUNTPOINT_WITH_LSDF = 'STORAGE_ROOT/'
+    static final String MOUNTPOINT_WITH_LSDF = 'STORAGE_ROOT'
 
     public static final String SEQ_CENTER_INBOX_PATH = "${MOUNTPOINT_WITH_ICGC}/dmg/seq_center_inbox"
 
