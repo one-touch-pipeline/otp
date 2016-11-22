@@ -8,7 +8,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingThresholds
 import de.dkfz.tbi.otp.dataprocessing.ProcessingThresholdsService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvProcessingStates
+import de.dkfz.tbi.otp.dataprocessing.AnalysisProcessingStates
 import de.dkfz.tbi.otp.utils.DataTableCommand
 
 
@@ -42,7 +42,7 @@ class SamplePairController {
         dataToRender.iTotalRecords = data.size()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
         data.each { SamplePair samplePair ->
-            SnvCallingInstance snvCallingInstance = SnvCallingInstance.findBySamplePairAndProcessingState(samplePair, SnvProcessingStates.FINISHED, [sort: 'id', order: 'desc'])
+            SnvCallingInstance snvCallingInstance = SnvCallingInstance.findBySamplePairAndProcessingState(samplePair, AnalysisProcessingStates.FINISHED, [sort: 'id', order: 'desc'])
             dataToRender.aaData << [
                 sampleType1: samplePair.sampleType1.name,
                 sampleType2: samplePair.sampleType2.name,
@@ -61,7 +61,7 @@ class SamplePairController {
         dataToRender.iTotalRecords = data.size()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
         data.each { SamplePair samplePair ->
-            SnvCallingInstance snvCallingInstance = SnvCallingInstance.findBySamplePairAndProcessingState(samplePair, SnvProcessingStates.IN_PROGRESS, [sort: 'id', order: 'desc'])
+            SnvCallingInstance snvCallingInstance = SnvCallingInstance.findBySamplePairAndProcessingState(samplePair, AnalysisProcessingStates.IN_PROGRESS, [sort: 'id', order: 'desc'])
             dataToRender.aaData << [
                 sampleType1: samplePair.sampleType1.name,
                 sampleType2: samplePair.sampleType2.name,

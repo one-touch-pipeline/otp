@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
+import de.dkfz.tbi.otp.dataprocessing.AnalysisProcessingStates
 import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
 import org.junit.Before
 import org.junit.Test
@@ -53,18 +54,18 @@ class SnvCallingInstanceTests {
         assert tumor1InstanceA.findLatestResultForSameBamFiles(SnvCallingStep.SNV_ANNOTATION) == null
 
         // unfinished result should not be found
-        final SnvJobResult tumor1AnnotationResultA = testData.createAndSaveSnvJobResult(tumor1InstanceA, SnvCallingStep.SNV_ANNOTATION, tumor1CallingResultA, SnvProcessingStates.IN_PROGRESS)
+        final SnvJobResult tumor1AnnotationResultA = testData.createAndSaveSnvJobResult(tumor1InstanceA, SnvCallingStep.SNV_ANNOTATION, tumor1CallingResultA, AnalysisProcessingStates.IN_PROGRESS)
         assert tumor1InstanceA.findLatestResultForSameBamFiles(SnvCallingStep.SNV_ANNOTATION) == null
 
         // withdrawn result should not be found
-        tumor1AnnotationResultA.processingState = SnvProcessingStates.FINISHED
+        tumor1AnnotationResultA.processingState = AnalysisProcessingStates.FINISHED
         tumor1AnnotationResultA.withdrawn = true
         assert tumor1AnnotationResultA.save(failOnError: true)
         assert tumor1InstanceA.findLatestResultForSameBamFiles(SnvCallingStep.SNV_ANNOTATION) == null
 
         // result for tumor2 should be found by tumor2Instance only
         final SnvJobResult tumor2CallingResult = testData.createAndSaveSnvJobResult(tumor2Instance, SnvCallingStep.CALLING)
-        final SnvJobResult tumor2AnnotationResult = testData.createAndSaveSnvJobResult(tumor2Instance, SnvCallingStep.SNV_ANNOTATION, tumor2CallingResult, SnvProcessingStates.FINISHED)
+        final SnvJobResult tumor2AnnotationResult = testData.createAndSaveSnvJobResult(tumor2Instance, SnvCallingStep.SNV_ANNOTATION, tumor2CallingResult, AnalysisProcessingStates.FINISHED)
 
         assert tumor1InstanceA.findLatestResultForSameBamFiles(SnvCallingStep.SNV_ANNOTATION) == null
         assert tumor2Instance.findLatestResultForSameBamFiles(SnvCallingStep.SNV_ANNOTATION) == tumor2AnnotationResult
@@ -79,13 +80,13 @@ class SnvCallingInstanceTests {
         // two results for tumor1, instance B is newer
         assert tumor1InstanceA.id < tumor1InstanceB.id
         final SnvJobResult tumor1CallingResultB = testData.createAndSaveSnvJobResult(tumor1InstanceB, SnvCallingStep.CALLING)
-        final SnvJobResult tumor1AnnotationResultB = testData.createAndSaveSnvJobResult(tumor1InstanceB, SnvCallingStep.SNV_ANNOTATION, tumor1CallingResultB, SnvProcessingStates.FINISHED)
+        final SnvJobResult tumor1AnnotationResultB = testData.createAndSaveSnvJobResult(tumor1InstanceB, SnvCallingStep.SNV_ANNOTATION, tumor1CallingResultB, AnalysisProcessingStates.FINISHED)
         assert tumor1InstanceA.findLatestResultForSameBamFiles(SnvCallingStep.SNV_ANNOTATION) == tumor1AnnotationResultB
         assert tumor1InstanceB.findLatestResultForSameBamFiles(SnvCallingStep.SNV_ANNOTATION) == tumor1AnnotationResultB
         assert tumor2Instance.findLatestResultForSameBamFiles(SnvCallingStep.SNV_ANNOTATION) == tumor2AnnotationResult
 
         // result for a different step should not be found
-        testData.createAndSaveSnvJobResult(tumor1InstanceA, SnvCallingStep.SNV_DEEPANNOTATION, tumor1AnnotationResultA, SnvProcessingStates.FINISHED)
+        testData.createAndSaveSnvJobResult(tumor1InstanceA, SnvCallingStep.SNV_DEEPANNOTATION, tumor1AnnotationResultA, AnalysisProcessingStates.FINISHED)
         assert tumor1InstanceA.findLatestResultForSameBamFiles(SnvCallingStep.SNV_ANNOTATION) == tumor1AnnotationResultB
         assert tumor1InstanceB.findLatestResultForSameBamFiles(SnvCallingStep.SNV_ANNOTATION) == tumor1AnnotationResultB
         assert tumor2Instance.findLatestResultForSameBamFiles(SnvCallingStep.SNV_ANNOTATION) == tumor2AnnotationResult
@@ -106,23 +107,23 @@ class SnvCallingInstanceTests {
 
     @Test
     void test_updateProcessingState_WhenStateIsChangedToSame_ShouldSucceed() {
-        SnvCallingInstance snvCallingInstance = testData.createAndSaveSnvCallingInstance([processingState: SnvProcessingStates.IN_PROGRESS])
-        snvCallingInstance.updateProcessingState(SnvProcessingStates.IN_PROGRESS)
-        assert snvCallingInstance.processingState == SnvProcessingStates.IN_PROGRESS
+        SnvCallingInstance snvCallingInstance = testData.createAndSaveSnvCallingInstance([processingState: AnalysisProcessingStates.IN_PROGRESS])
+        snvCallingInstance.updateProcessingState(AnalysisProcessingStates.IN_PROGRESS)
+        assert snvCallingInstance.processingState == AnalysisProcessingStates.IN_PROGRESS
     }
 
     @Test
     void test_updateProcessingState_WhenStateIsChangedToDifferent_ShouldSucceed() {
-        SnvCallingInstance snvCallingInstance = testData.createAndSaveSnvCallingInstance([processingState: SnvProcessingStates.IN_PROGRESS])
-        snvCallingInstance.updateProcessingState(SnvProcessingStates.FINISHED)
-        assert snvCallingInstance.processingState == SnvProcessingStates.FINISHED
+        SnvCallingInstance snvCallingInstance = testData.createAndSaveSnvCallingInstance([processingState: AnalysisProcessingStates.IN_PROGRESS])
+        snvCallingInstance.updateProcessingState(AnalysisProcessingStates.FINISHED)
+        assert snvCallingInstance.processingState == AnalysisProcessingStates.FINISHED
     }
 
     private def createSnvCallingInstanceAndSnvJobResults(boolean oneSnvJobResultWithdrawn = false) {
         SnvCallingInstance instance = testData.createAndSaveSnvCallingInstance()
         SnvJobResult snvJobResultCalling = testData.createAndSaveSnvJobResult(instance, SnvCallingStep.CALLING)
         if (oneSnvJobResultWithdrawn) {
-            testData.createAndSaveSnvJobResult(instance, SnvCallingStep.SNV_ANNOTATION, snvJobResultCalling, SnvProcessingStates.FINISHED, true)
+            testData.createAndSaveSnvJobResult(instance, SnvCallingStep.SNV_ANNOTATION, snvJobResultCalling, AnalysisProcessingStates.FINISHED, true)
         } else {
             testData.createAndSaveSnvJobResult(instance, SnvCallingStep.SNV_ANNOTATION, snvJobResultCalling)
         }
@@ -132,21 +133,21 @@ class SnvCallingInstanceTests {
     @Test
     void testProcessingStateIsFailedAndNoSnvJobResults() {
         def instance = testData.createAndSaveSnvCallingInstance()
-        instance.processingState = SnvProcessingStates.FAILED
+        instance.withdrawn = true
         assert instance.validate()
     }
 
     @Test
     void testProcessingStateIsFailedAndNoWithdrawnSnvJobResults() {
         def instance = createSnvCallingInstanceAndSnvJobResults()
-        instance.processingState = SnvProcessingStates.FAILED
+        instance.withdrawn = true
         assert !instance.validate()
     }
 
     @Test
     void testProcessingStateIsFailedAndThereIsWithdrawnSnvJobResults() {
         def instance = createSnvCallingInstanceAndSnvJobResults(true)
-        instance.processingState = SnvProcessingStates.FAILED
+        instance.withdrawn = true
         assert instance.validate()
     }
 

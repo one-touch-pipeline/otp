@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
+import de.dkfz.tbi.otp.dataprocessing.AnalysisProcessingStates
 import de.dkfz.tbi.otp.utils.ProcessHelperService
 
 import static org.junit.Assert.*
@@ -47,7 +48,7 @@ class SnvJoiningJobTests {
         testData.createSnvObjects(testDirectory)
         testData.createSnvConfig(SnvCallingJobTests.CONFIGURATION)
         snvCallingInstance = testData.createAndSaveSnvCallingInstance()
-        jobResult = testData.createAndSaveSnvJobResult(snvCallingInstance, SnvCallingStep.CALLING, null, SnvProcessingStates.IN_PROGRESS)
+        jobResult = testData.createAndSaveSnvJobResult(snvCallingInstance, SnvCallingStep.CALLING, null, AnalysisProcessingStates.IN_PROGRESS)
 
         job = applicationContext.getBean('snvJoiningJob',
                 DomainFactory.createAndSaveProcessingStep(SnvJoiningJob.toString(), snvCallingInstance), [])
@@ -104,7 +105,7 @@ class SnvJoiningJobTests {
 
         job.validate(snvCallingInstance)
 
-        assert jobResult.processingState == SnvProcessingStates.FINISHED
+        assert jobResult.processingState == AnalysisProcessingStates.FINISHED
         assert jobResult.fileSize == resultFileSize
         assert jobResult.md5sum == md5sum
     }

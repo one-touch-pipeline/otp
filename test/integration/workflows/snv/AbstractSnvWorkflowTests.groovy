@@ -8,8 +8,6 @@ import org.joda.time.*
 import org.junit.*
 import workflows.*
 
-import static org.junit.Assert.*
-
 abstract class AbstractSnvWorkflowTests extends WorkflowTestCase {
 
     final Double COVERAGE = 30.0
@@ -175,7 +173,7 @@ abstract class AbstractSnvWorkflowTests extends WorkflowTestCase {
 
     void checkInstanceFinished() {
         SnvCallingInstance createdInstance = SnvCallingInstance.listOrderById().last()
-        assert createdInstance.processingState == SnvProcessingStates.FINISHED
+        assert createdInstance.processingState == AnalysisProcessingStates.FINISHED
         assert createdInstance.config == config
         assert createdInstance.sampleType1BamFile == bamFileTumor
         assert createdInstance.sampleType2BamFile == bamFileControl

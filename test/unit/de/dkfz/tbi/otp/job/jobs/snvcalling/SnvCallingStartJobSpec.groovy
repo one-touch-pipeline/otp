@@ -114,7 +114,7 @@ class SnvCallingStartJobSpec extends Specification {
         restartedInstance.sampleType2BamFile == failedInstance.sampleType2BamFile
         restartedInstance.latestDataFileCreationDate == failedInstance.latestDataFileCreationDate
 
-        failedInstance.processingState == SnvProcessingStates.FAILED
+        failedInstance.withdrawn == true
         snvJobResult.withdrawn == true
     }
 }

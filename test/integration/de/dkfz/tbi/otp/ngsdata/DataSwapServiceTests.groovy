@@ -826,7 +826,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
 
 
     private SnvCallingInstance deleteProcessingFilesOfProject_RBF_SNV_Setup() {
-        SnvCallingInstance snvCallingInstance = DomainFactory.createSnvInstanceWithRoddyBamFiles(processingState: SnvProcessingStates.FINISHED)
+        SnvCallingInstance snvCallingInstance = DomainFactory.createSnvInstanceWithRoddyBamFiles(processingState: AnalysisProcessingStates.FINISHED)
 
         AbstractMergedBamFile tumorBamFiles = snvCallingInstance.sampleType1BamFile
         dataBaseSetupForMergedBamFiles(tumorBamFiles)

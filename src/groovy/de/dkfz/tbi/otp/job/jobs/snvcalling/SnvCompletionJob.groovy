@@ -1,24 +1,13 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingStep
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig
-import de.dkfz.tbi.otp.job.jobs.AutoRestartableJob
-import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
-import de.dkfz.tbi.otp.utils.LinkFileUtils
-import de.dkfz.tbi.otp.utils.WaitingFileUtils
-import groovy.io.FileType
-import org.springframework.beans.factory.annotation.Autowired
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
-import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
-import de.dkfz.tbi.otp.job.processing.CreateClusterScriptService
-import de.dkfz.tbi.otp.job.processing.ExecutionService
-import de.dkfz.tbi.otp.ngsdata.ConfigService
-import de.dkfz.tbi.otp.ngsdata.Realm
-import static org.springframework.util.Assert.*
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
+import de.dkfz.tbi.otp.job.jobs.*
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.*
+import org.springframework.beans.factory.annotation.*
 
-import static de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvProcessingStates.IN_PROGRESS
-import static de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvProcessingStates.FINISHED
+import static de.dkfz.tbi.otp.dataprocessing.AnalysisProcessingStates.*
 
 /**
  * Last job of the SNV calling pipeline.

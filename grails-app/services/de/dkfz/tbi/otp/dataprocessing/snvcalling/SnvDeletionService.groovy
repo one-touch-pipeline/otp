@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.AnalysisProcessingStates
 
 public class SnvDeletionService {
 
@@ -53,7 +54,7 @@ public class SnvDeletionService {
 
     private assertThatNoSnvAreRunning(List<SnvCallingInstance> instances) {
         if (instances.find {
-            it.processingState == SnvProcessingStates.IN_PROGRESS
+            it.processingState == AnalysisProcessingStates.IN_PROGRESS && !it.withdrawn
         }) {
             throw new RuntimeException("There are some snv callings running for ${instances[0].sampleType1BamFile}")
         }

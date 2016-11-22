@@ -68,7 +68,7 @@ class SnvCallingInstanceTestData {
         return [diseaseBamFile, samplePair]
     }
 
-    SnvJobResult createAndSaveSnvJobResult(SnvCallingInstance instance, SnvCallingStep step, SnvJobResult inputResult = null, SnvProcessingStates processingState = SnvProcessingStates.FINISHED, boolean withdrawn = false) {
+    SnvJobResult createAndSaveSnvJobResult(SnvCallingInstance instance, SnvCallingStep step, SnvJobResult inputResult = null, AnalysisProcessingStates processingState = AnalysisProcessingStates.FINISHED, boolean withdrawn = false) {
         ExternalScript externalScript = atMostOneElement(ExternalScript.findAllByScriptIdentifierAndScriptVersionAndDeprecatedDateIsNull(step.externalScriptIdentifier, instance.config.externalScriptVersion))
         if (externalScript == null) {
             externalScript = createOrFindExternalScript(
@@ -102,7 +102,7 @@ class SnvCallingInstanceTestData {
 
     SnvCallingInstance createSnvCallingInstance(Map properties = [:]) {
         return DomainFactory.createSnvCallingInstance([
-            processingState: SnvProcessingStates.IN_PROGRESS,
+            processingState: AnalysisProcessingStates.IN_PROGRESS,
             sampleType1BamFile: bamFileTumor,
             sampleType2BamFile: bamFileControl,
             config: (properties.snvConfig ?: snvConfig) ?: createSnvConfig(),

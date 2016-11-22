@@ -13,7 +13,6 @@ import grails.test.spock.*
 
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
-import static org.junit.Assert.*
 
 class TrackingServiceIntegrationSpec extends IntegrationSpec {
 
@@ -497,7 +496,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
 
     void "fillInSamplePairStatuses, 1 SCI FINISHED, bamFileInProjectFolder set, returns ALL_DONE"() {
         given:
-        SnvCallingInstance snvCallingInstance = DomainFactory.createSnvInstanceWithRoddyBamFiles(processingState: SnvProcessingStates.FINISHED)
+        SnvCallingInstance snvCallingInstance = DomainFactory.createSnvInstanceWithRoddyBamFiles(processingState: AnalysisProcessingStates.FINISHED)
 
         [1, 2].each {
             setBamFileInProjectFolder(snvCallingInstance."sampleType${it}BamFile")
@@ -543,7 +542,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
 
     void "fillInSamplePairStatuses, 1 SCI FINISHED, bamFileInProjectFolder unset, returns NOTHING_DONE_MIGHT_DO"() {
         given:
-        SnvCallingInstance snvCallingInstance = DomainFactory.createSnvInstanceWithRoddyBamFiles(processingState: SnvProcessingStates.FINISHED)
+        SnvCallingInstance snvCallingInstance = DomainFactory.createSnvInstanceWithRoddyBamFiles(processingState: AnalysisProcessingStates.FINISHED)
 
         MergingWorkPackageProcessingStatus mwpStatus = createMergingWorkPackageProcessingStatus(
                 snvCallingInstance.sampleType1BamFile.mergingWorkPackage, NOTHING_DONE_MIGHT_DO)
@@ -636,7 +635,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
 
     void "fillInSamplePairStatuses, 2 MWP, 1 SP ALL_DONE, 1 MWP without SP, returns ALL_DONE and NOTHING_DONE_WONT_DO"() {
         given:
-        SnvCallingInstance snvCallingInstance = DomainFactory.createSnvInstanceWithRoddyBamFiles(processingState: SnvProcessingStates.FINISHED)
+        SnvCallingInstance snvCallingInstance = DomainFactory.createSnvInstanceWithRoddyBamFiles(processingState: AnalysisProcessingStates.FINISHED)
 
         [1, 2].each {
             setBamFileInProjectFolder(snvCallingInstance."sampleType${it}BamFile")
@@ -665,7 +664,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
 
     void "fillInSamplePairStatuses, 2 MWP, 1 MWP without SP, 1 MWP MIGHT_DO_MORE, returns NOTHING_DONE_WONT_DO and NOTHING_DONE_MIGHT_DO"() {
         given:
-        SnvCallingInstance snvCallingInstance = DomainFactory.createSnvInstanceWithRoddyBamFiles(processingState: SnvProcessingStates.FINISHED)
+        SnvCallingInstance snvCallingInstance = DomainFactory.createSnvInstanceWithRoddyBamFiles(processingState: AnalysisProcessingStates.FINISHED)
 
         MergingWorkPackageProcessingStatus mwp1Status = createMergingWorkPackageProcessingStatus(
                 DomainFactory.createMergingWorkPackage(), NOTHING_DONE_MIGHT_DO)
@@ -690,13 +689,13 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
 
     void "fillInSamplePairStatuses, 2 MWP, 1 SP ALL_DONE, 1 SP MIGHT_DO_MORE, returns ALL_DONE and NOTHING_DONE_MIGHT_DO"() {
         given:
-        SnvCallingInstance snvCallingInstance = DomainFactory.createSnvInstanceWithRoddyBamFiles(processingState: SnvProcessingStates.FINISHED)
+        SnvCallingInstance snvCallingInstance = DomainFactory.createSnvInstanceWithRoddyBamFiles(processingState: AnalysisProcessingStates.FINISHED)
 
         [1, 2].each {
             setBamFileInProjectFolder(snvCallingInstance."sampleType${it}BamFile")
         }
 
-        SnvCallingInstance snvCallingInstance2 = DomainFactory.createSnvInstanceWithRoddyBamFiles(processingState: SnvProcessingStates.FINISHED)
+        SnvCallingInstance snvCallingInstance2 = DomainFactory.createSnvInstanceWithRoddyBamFiles(processingState: AnalysisProcessingStates.FINISHED)
 
         MergingWorkPackageProcessingStatus mwp1Status =
                 createMergingWorkPackageProcessingStatus(snvCallingInstance.sampleType1BamFile)

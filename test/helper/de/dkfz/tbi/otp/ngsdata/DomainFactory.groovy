@@ -704,7 +704,7 @@ class DomainFactory {
     public static SnvJobResult createSnvJobResultWithRoddyBamFiles(Map properties = [:]) {
         Map map = [
                 step: SnvCallingStep.CALLING,
-                processingState: SnvProcessingStates.FINISHED,
+                processingState: AnalysisProcessingStates.FINISHED,
                 md5sum: HelperUtils.randomMd5sum,
                 fileSize: DEFAULT_FILE_SIZE,
         ] + properties

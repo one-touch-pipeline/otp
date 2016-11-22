@@ -1,4 +1,6 @@
-package de.dkfz.tbi.otp.dataprocessing.snvcalling
+package de.dkfz.tbi.otp.dataprocessing
+
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 
 /**
  * The different values in this ENUM represent the different processing states of {@link SnvCallingInstance} and
@@ -8,27 +10,20 @@ package de.dkfz.tbi.otp.dataprocessing.snvcalling
  *
  *
  */
-public enum SnvProcessingStates {
+
+public enum AnalysisProcessingStates {
     /**
      * At the moment a ${@link SnvCallingInstance} is created, the snv-calling workflow starts working on it.
-     * Therefore the first state is already {@link SnvProcessingStates#IN_PROGRESS}.
+     * Therefore the first state is already {@link AnalysisProcessingStates#IN_PROGRESS}.
      * Is used for {@link SnvJobResult} to indicate that the corresponding files have not been produced yet.
      */
     IN_PROGRESS,
     /**
      * When the snv-calling workflow finished successfully the state of the ${@link SnvCallingInstance} is set to
-     * {@link SnvProcessingStates#FINISHED}
+     * {@link AnalysisProcessingStates#FINISHED}
      * Is used {@link SnvJobResult} to indicate that the corresponding files have been produced.
-     * {@link SnvProcessingStates#FINISHED}, non withdrawn {@link SnvJobResult}s can be re-used even if the corresponding
-     * {@link SnvCallingInstance} has {@link SnvProcessingStates#FAILED} state.
+     * {@link AnalysisProcessingStates#FINISHED}, non withdrawn {@link SnvJobResult}s can be re-used even if the corresponding
+     * {@link SnvCallingInstance} has {@link SnvCallingInstance#withdrawn} state.
      */
     FINISHED,
-    /**
-     * {@link SnvCallingInstance} is set to this state manually by the operator if the snv-calling workflow can not be
-     * finished successfully.
-     * This state must not be applied to {@link SnvJobResult}: if the processing has failed, the corresponding
-     * {@link SnvJobResult}(s) stay(s) in {@link SnvProcessingStates#IN_PROGRESS} state and must be manually marked
-     * by the operator as withdrawn
-     */
-    FAILED,
 }

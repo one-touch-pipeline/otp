@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
+import de.dkfz.tbi.otp.dataprocessing.AnalysisProcessingStates
 import org.apache.commons.logging.impl.NoOpLog
 
 import de.dkfz.tbi.TestCase
@@ -108,7 +109,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
     @Test
     void test_execute_WhenRunAndInstanceIsNotInProgress_ShouldFail() {
         // Given:
-        snvCallingInstance.processingState = SnvProcessingStates.FAILED
+        snvCallingInstance.processingState = AnalysisProcessingStates.FINISHED
         // Mock deletion, so it does not get in the way of this test
         snvCompletionJob.metaClass.deleteStagingDirectory = { SnvCallingInstance instance -> }
         // When:
@@ -121,11 +122,11 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         // Mock deletion, so it does not get in the way of this test
         snvCompletionJob.metaClass.deleteStagingDirectory = { SnvCallingInstance instance -> }
 
-        assert snvCallingInstance.processingState == SnvProcessingStates.IN_PROGRESS
+        assert snvCallingInstance.processingState == AnalysisProcessingStates.IN_PROGRESS
         // When:
         snvCompletionJob.execute()
         // Then:
-        assert snvCallingInstance.processingState == SnvProcessingStates.FINISHED
+        assert snvCallingInstance.processingState == AnalysisProcessingStates.FINISHED
     }
 
     @Test

@@ -17,9 +17,9 @@ println snvCallingInstances.size()
 LogThreadLocal.withThreadLog(System.out, {
     SamplePair.withTransaction {
         snvCallingInstances.each {
-            if (it.processingState == SnvProcessingStates.IN_PROGRESS) {
+            if (it.processingState == AnalysisProcessingStates.IN_PROGRESS) {
                 SnvJobResult.findAllBySnvCallingInstance(it)*.withdraw()
-                it.processingState = SnvProcessingStates.FAILED
+                it.withdrawn = true
                 it.save(flush: true, failOnError: true)
             }
 

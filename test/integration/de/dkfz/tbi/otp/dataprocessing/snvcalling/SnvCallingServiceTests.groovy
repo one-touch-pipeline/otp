@@ -144,7 +144,7 @@ class SnvCallingServiceTests {
                 config: snvConfig,
                 sampleType1BamFile: processedMergedBamFile1,
                 sampleType2BamFile: processedMergedBamFile2,
-                processingState: SnvProcessingStates.FINISHED
+                processingState: AnalysisProcessingStates.FINISHED
                 )
         snvCallingInstance.save()
 
@@ -520,7 +520,7 @@ class SnvCallingServiceTests {
     void testMarkAsFailed_Correct() {
         def instance = createAndSaveSnvCallingInstanceAndSnvJobResults()
         snvCallingService.markSnvCallingInstanceAsFailed(instance, [SnvCallingStep.SNV_ANNOTATION])
-        assert instance.processingState == SnvProcessingStates.FAILED
+        assert instance.withdrawn == true
         def callingResult = SnvJobResult.findAllBySnvCallingInstanceAndStep(instance, SnvCallingStep.CALLING).first()
         def annotationResult = SnvJobResult.findAllBySnvCallingInstanceAndStep(instance, SnvCallingStep.SNV_ANNOTATION).first()
         assert callingResult.withdrawn == false
@@ -545,7 +545,7 @@ class SnvCallingServiceTests {
                 config: snvConfig,
                 sampleType1BamFile: processedMergedBamFile1,
                 sampleType2BamFile: processedMergedBamFile2,
-                processingState: SnvProcessingStates.IN_PROGRESS
+                processingState: AnalysisProcessingStates.IN_PROGRESS
         )
         snvCallingInstance.save(flush: true)
         SnvJobResult callingResult = testData.createAndSaveSnvJobResult(snvCallingInstance, SnvCallingStep.CALLING)
@@ -605,7 +605,7 @@ class SnvCallingServiceTests {
 
     @Test
     void testGetLatestValidJobResultForStep_PreviousResultIsFailed_ShouldFail() {
-        SnvJobResult snvJobResult = DomainFactory.createSnvJobResultWithRoddyBamFiles([processingState: SnvProcessingStates.IN_PROGRESS])
+        SnvJobResult snvJobResult = DomainFactory.createSnvJobResultWithRoddyBamFiles([processingState: AnalysisProcessingStates.IN_PROGRESS])
         SnvCallingInstance instance = DomainFactory.createSnvCallingInstanceBasedOnPreviousSnvCallingInstance(snvJobResult.snvCallingInstance)
 
         TestCase.shouldFailWithMessageContaining(AssertionError, 'There is no valid previous result file for sample pair') {

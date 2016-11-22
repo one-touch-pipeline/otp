@@ -133,7 +133,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
                 sampleType1BamFile: processedMergedBamFile1,
                 sampleType2BamFile: processedMergedBamFile2,
                 samplePair: samplePair,
-                processingState: SnvProcessingStates.FINISHED,
+                processingState: AnalysisProcessingStates.FINISHED,
         )
         assert snvCallingInstance.save()
 
@@ -154,7 +154,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
                 chromosomeJoinExternalScript: externalScript_Joining,
                 fileSize: 1234l,
                 md5sum: "a841c64c5825e986c4709ac7298e9366",
-                processingState: SnvProcessingStates.FINISHED,
+                processingState: AnalysisProcessingStates.FINISHED,
                 )
         assert snvJobResult.save()
 
@@ -306,12 +306,12 @@ CHROMOSOME_INDICES=( {1..21} XY)
         createResultFile(snvCallingInstance, SnvCallingStep.CALLING)
         createMD5SUMFile(snvCallingInstance, SnvCallingStep.CALLING)
 
-        snvJobResult.processingState = SnvProcessingStates.IN_PROGRESS
+        snvJobResult.processingState = AnalysisProcessingStates.IN_PROGRESS
         assert snvJobResult.save(flush: true)
 
         LsdfFilesService.metaClass.static.ensureFileIsReadableAndNotEmpty = { File file -> return true }
 
-        snvCallingJob.metaClass.changeProcessingStateOfJobResult = { SnvCallingInstance instance, SnvProcessingStates newState -> }
+        snvCallingJob.metaClass.changeProcessingStateOfJobResult = { SnvCallingInstance instance, AnalysisProcessingStates newState -> }
 
         testData.createBamFile(snvCallingInstance.sampleType1BamFile)
         testData.createBamFile(snvCallingInstance.sampleType2BamFile)

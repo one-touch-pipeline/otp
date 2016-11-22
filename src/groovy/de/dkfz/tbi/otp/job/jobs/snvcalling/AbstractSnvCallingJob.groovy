@@ -1,23 +1,16 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingService
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingStep
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvJobResult
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvProcessingStates
-import de.dkfz.tbi.otp.job.processing.AbstractOtpJob
-import de.dkfz.tbi.otp.job.processing.ExecutionService
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
+import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.ExternalScript
-import de.dkfz.tbi.otp.utils.LinkFileUtils
-import de.dkfz.tbi.otp.utils.ProcessHelperService
-import org.springframework.beans.factory.annotation.Autowired
+import de.dkfz.tbi.otp.utils.*
+import org.springframework.beans.factory.annotation.*
+
 import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
-import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
-import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 import static de.dkfz.tbi.otp.utils.WaitingFileUtils.*
-import static org.springframework.util.Assert.notNull
+import static org.springframework.util.Assert.*
 
 abstract class AbstractSnvCallingJob extends AbstractOtpJob {
 
@@ -40,7 +33,7 @@ abstract class AbstractSnvCallingJob extends AbstractOtpJob {
     protected final NextAction maybeSubmit() throws Throwable {
         SnvCallingInstance.withTransaction {
             final SnvCallingInstance instance = getProcessParameterObject()
-            assert instance.processingState == SnvProcessingStates.IN_PROGRESS
+            assert instance.processingState == AnalysisProcessingStates.IN_PROGRESS
             assert !instance.sampleType1BamFile.withdrawn
             assert !instance.sampleType2BamFile.withdrawn
             return maybeSubmit(instance)
@@ -53,7 +46,7 @@ abstract class AbstractSnvCallingJob extends AbstractOtpJob {
     protected final void validate() throws Throwable {
         SnvCallingInstance.withTransaction {
             final SnvCallingInstance instance = getProcessParameterObject()
-            assert instance.processingState == SnvProcessingStates.IN_PROGRESS
+            assert instance.processingState == AnalysisProcessingStates.IN_PROGRESS
             validate(instance)
         }
     }
@@ -118,7 +111,7 @@ rm ${configFileInStagingDirectory}
                 )
 
         if (resultInProgress) {
-            assert resultInProgress.processingState == SnvProcessingStates.IN_PROGRESS
+            assert resultInProgress.processingState == AnalysisProcessingStates.IN_PROGRESS
             assert !resultInProgress.withdrawn
             // It can not happen that another SnvCallingInstance for this sample pair starts while this one is not finished.
             assert resultInProgress.inputResult == inputResult
@@ -132,7 +125,7 @@ rm ${configFileInStagingDirectory}
                     snvCallingInstance: instance,
                     step: step,
                     inputResult: inputResult,
-                    processingState: SnvProcessingStates.IN_PROGRESS,
+                    processingState: AnalysisProcessingStates.IN_PROGRESS,
                     externalScript: externalScript,
                     chromosomeJoinExternalScript: externalScriptJoining
                     )
@@ -141,7 +134,7 @@ rm ${configFileInStagingDirectory}
         }
     }
 
-    void changeProcessingStateOfJobResult(final SnvCallingInstance instance, SnvProcessingStates newState) {
+    void changeProcessingStateOfJobResult(final SnvCallingInstance instance, AnalysisProcessingStates newState) {
         notNull(instance)
         notNull(newState)
         SnvJobResult result = getSnvJobResult(instance)
@@ -164,7 +157,7 @@ rm ${configFileInStagingDirectory}
         SnvJobResult result = exactlyOneElement(
                 SnvJobResult.findAllBySnvCallingInstanceAndStepAndWithdrawn(instance, step, false)
                 )
-        assert result.processingState == SnvProcessingStates.IN_PROGRESS
+        assert result.processingState == AnalysisProcessingStates.IN_PROGRESS
         return result
     }
 
@@ -221,7 +214,7 @@ rm ${configFileInStagingDirectory}
             throw new RuntimeException("The input result file for step ${step.name()} has changed on the file system while this job processed them.", e)
         }
         // mark the result of the snv annotation step as finished
-        changeProcessingStateOfJobResult(instance, SnvProcessingStates.FINISHED)
+        changeProcessingStateOfJobResult(instance, AnalysisProcessingStates.FINISHED)
     }
 
     protected void linkPreviousResults(SnvCallingInstance instance, Realm realm) {

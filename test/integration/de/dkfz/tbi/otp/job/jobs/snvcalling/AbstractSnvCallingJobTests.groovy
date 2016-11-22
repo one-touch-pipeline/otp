@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
+import de.dkfz.tbi.otp.dataprocessing.AnalysisProcessingStates
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
@@ -132,7 +133,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
                 step: SnvCallingStep.CALLING,
                 snvCallingInstance: snvCallingInstance,
                 externalScript: externalScript_Calling,
-                processingState: SnvProcessingStates.FINISHED,
+                processingState: AnalysisProcessingStates.FINISHED,
                 chromosomeJoinExternalScript: externalScript_Joining,
                 md5sum: "a841c64c5825e986c4709ac7298e9366",
                 fileSize: 1234l,
@@ -307,7 +308,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         SnvJobResult snvJobResult = snvJobResults.first()
         assert returnedResult == snvJobResult
         assert snvJobResult.snvCallingInstance == snvCallingInstance
-        assert snvJobResult.processingState == SnvProcessingStates.IN_PROGRESS
+        assert snvJobResult.processingState == AnalysisProcessingStates.IN_PROGRESS
         assert snvJobResult.step == step
         assert snvJobResult.externalScript == externalScript_Annotation
         assert snvJobResult.inputResult == snvCallingJobResult
@@ -318,13 +319,13 @@ CHROMOSOME_INDICES=( {1..21} X Y)
     @Test
     void testCreateAndSaveSnvJobResult_ResultInProgress() {
         assert 1 == SnvJobResult.count()
-        snvCallingJobResult.processingState = SnvProcessingStates.IN_PROGRESS
+        snvCallingJobResult.processingState = AnalysisProcessingStates.IN_PROGRESS
         assert snvCallingJobResult.save(flush: true)
         abstractSnvCallingJob.metaClass.getStep = { -> return SnvCallingStep.CALLING }
         SnvJobResult returnedResult = abstractSnvCallingJob.createAndSaveSnvJobResult(snvCallingInstance, externalScript_Calling, externalScript_Joining, null)
         assert returnedResult == snvCallingJobResult
         assert 1 == SnvJobResult.count()
-        snvCallingJobResult.processingState == SnvProcessingStates.IN_PROGRESS
+        snvCallingJobResult.processingState == AnalysisProcessingStates.IN_PROGRESS
     }
 
 
@@ -337,11 +338,11 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         List<SnvJobResult> results = SnvJobResult.findAllBySnvCallingInstanceAndStep(snvCallingInstance, step)
         assert results.size == 1
         assert results.first() == snvAnnotationJobResult
-        assert snvAnnotationJobResult.processingState == SnvProcessingStates.IN_PROGRESS
+        assert snvAnnotationJobResult.processingState == AnalysisProcessingStates.IN_PROGRESS
         snvAnnotationJobResult.md5sum = null
         assert snvAnnotationJobResult.save(flush: true)
-        abstractSnvCallingJob.changeProcessingStateOfJobResult(snvCallingInstance, SnvProcessingStates.FINISHED)
-        assert snvAnnotationJobResult.processingState == SnvProcessingStates.FINISHED
+        abstractSnvCallingJob.changeProcessingStateOfJobResult(snvCallingInstance, AnalysisProcessingStates.FINISHED)
+        assert snvAnnotationJobResult.processingState == AnalysisProcessingStates.FINISHED
         assert snvAnnotationJobResult.md5sum == null
     }
 
@@ -349,12 +350,12 @@ CHROMOSOME_INDICES=( {1..21} X Y)
     void testChangeProcessingStateOfJobResult_StepCalling_AdditionalInformationShallBeAdded() {
         createResultFile(snvCallingInstance, SnvCallingStep.CALLING)
         createMD5SUMFile(snvCallingInstance, SnvCallingStep.CALLING)
-        snvCallingJobResult.processingState = SnvProcessingStates.IN_PROGRESS
+        snvCallingJobResult.processingState = AnalysisProcessingStates.IN_PROGRESS
         snvCallingJobResult.md5sum = null
         assert snvCallingJobResult.save(flush: true)
         abstractSnvCallingJob.metaClass.getStep = { -> return SnvCallingStep.CALLING }
-        abstractSnvCallingJob.changeProcessingStateOfJobResult(snvCallingInstance, SnvProcessingStates.FINISHED)
-        assert snvCallingJobResult.processingState == SnvProcessingStates.FINISHED
+        abstractSnvCallingJob.changeProcessingStateOfJobResult(snvCallingInstance, AnalysisProcessingStates.FINISHED)
+        assert snvCallingJobResult.processingState == AnalysisProcessingStates.FINISHED
         assert snvCallingJobResult.md5sum == CreateSNVFileHelper.MD5SUM
     }
 
@@ -429,7 +430,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
                 step: step,
                 snvCallingInstance: snvCallingInstance,
                 externalScript: externalScript_Annotation,
-                processingState: SnvProcessingStates.IN_PROGRESS,
+                processingState: AnalysisProcessingStates.IN_PROGRESS,
                 chromosomeJoinExternalScript: null,
                 inputResult: snvCallingJobResult,
                 md5sum: "a841c64c5825e986c4709ac7298e9366",

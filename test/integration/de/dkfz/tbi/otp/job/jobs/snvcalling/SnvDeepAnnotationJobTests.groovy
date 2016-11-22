@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
+import de.dkfz.tbi.otp.dataprocessing.AnalysisProcessingStates
 import de.dkfz.tbi.otp.job.processing.ClusterJobLoggingService
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import org.apache.commons.logging.impl.NoOpLog
@@ -107,7 +108,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
             sampleType1BamFile: processedMergedBamFile1,
             sampleType2BamFile: processedMergedBamFile2,
             instanceName      : SOME_INSTANCE_NAME,
-            processingState: SnvProcessingStates.FINISHED,
+            processingState: AnalysisProcessingStates.FINISHED,
         ])
         assert snvCallingInstance1.save()
 
@@ -138,7 +139,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
                 step: SnvCallingStep.CALLING,
                 snvCallingInstance: snvCallingInstance1,
                 externalScript: externalScript_Calling,
-                processingState: SnvProcessingStates.FINISHED,
+                processingState: AnalysisProcessingStates.FINISHED,
                 chromosomeJoinExternalScript: testData.externalScript_Joining,
                 fileSize: 1234l,
                 md5sum: "a841c64c5825e986c4709ac7298e9366",
@@ -149,7 +150,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
                 step: SnvCallingStep.SNV_ANNOTATION,
                 snvCallingInstance: snvCallingInstance1,
                 externalScript: externalScript_Annotation,
-                processingState: SnvProcessingStates.FINISHED,
+                processingState: AnalysisProcessingStates.FINISHED,
                 inputResult: snvJobResult_Calling1,
         )
         assert snvJobResult_Annotation1.save()
@@ -158,7 +159,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
                 step: SnvCallingStep.CALLING,
                 snvCallingInstance: snvCallingInstance2,
                 externalScript: externalScript_Calling,
-                processingState: SnvProcessingStates.FINISHED,
+                processingState: AnalysisProcessingStates.FINISHED,
                 chromosomeJoinExternalScript: testData.externalScript_Joining,
                 fileSize: 1234l,
                 md5sum: "a841c64c5825e986c4709ac7298e9366",
@@ -169,7 +170,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
                 step: SnvCallingStep.SNV_ANNOTATION,
                 snvCallingInstance: snvCallingInstance2,
                 externalScript: externalScript_Annotation,
-                processingState: SnvProcessingStates.FINISHED,
+                processingState: AnalysisProcessingStates.FINISHED,
                 inputResult: snvJobResult_Calling2,
                 )
         assert snvJobResult_Annotation2.save()
@@ -187,7 +188,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
                 snvCallingInstance: snvCallingInstance1,
                 externalScript: externalScript_DeepAnnotation,
                 inputResult: snvJobResult_Annotation1,
-                processingState: SnvProcessingStates.FINISHED,
+                processingState: AnalysisProcessingStates.FINISHED,
                 fileSize: 1234l,
                 md5sum: "a841c64c5825e986c4709ac7298e9366",
                 )
@@ -362,7 +363,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         createResultFile(snvCallingInstance1, SnvCallingStep.SNV_DEEPANNOTATION)
         createMD5SUMFile(snvCallingInstance1, SnvCallingStep.SNV_DEEPANNOTATION)
 
-        snvJobResult_DeepAnnotation1.processingState = SnvProcessingStates.IN_PROGRESS
+        snvJobResult_DeepAnnotation1.processingState = AnalysisProcessingStates.IN_PROGRESS
         assert snvJobResult_DeepAnnotation1.save(flush: true)
 
         LsdfFilesService.metaClass.static.ensureFileIsReadableAndNotEmpty = { File file -> }
@@ -380,7 +381,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
 
         assert checkpointFile.exists()
         snvDeepAnnotationJob.validate(snvCallingInstance1)
-        assert snvJobResult_DeepAnnotation1.processingState == SnvProcessingStates.FINISHED
+        assert snvJobResult_DeepAnnotation1.processingState == AnalysisProcessingStates.FINISHED
         assert !checkpointFile.exists()
 
         assert configFile.exists()

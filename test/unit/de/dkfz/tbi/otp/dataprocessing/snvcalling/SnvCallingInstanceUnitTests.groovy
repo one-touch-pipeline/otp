@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.dataprocessing.AnalysisProcessingStates
 import de.dkfz.tbi.otp.dataprocessing.MergingPass
 import de.dkfz.tbi.otp.dataprocessing.MergingSetAssignment
 import de.dkfz.tbi.otp.dataprocessing.ProcessedBamFile
@@ -113,7 +114,7 @@ class SnvCallingInstanceUnitTests {
     @Test
     void testGetPreviousInstance_twoInstances_returnsOlder() {
         SnvCallingInstance instance = createSnvCallingInstance()
-        instance.processingState = SnvProcessingStates.FINISHED
+        instance.processingState = AnalysisProcessingStates.FINISHED
         instance.save(failOnError: true)
         SnvCallingInstance instance2 = createSnvCallingInstance(
                 sampleType1BamFile: instance.sampleType1BamFile,

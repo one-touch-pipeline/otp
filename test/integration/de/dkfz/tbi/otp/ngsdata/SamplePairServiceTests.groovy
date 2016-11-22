@@ -2,7 +2,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvProcessingStates
+import de.dkfz.tbi.otp.dataprocessing.AnalysisProcessingStates
 import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
 import grails.plugin.springsecurity.SpringSecurityUtils
 import org.junit.Before
@@ -68,7 +68,7 @@ class SamplePairServiceTests extends AbstractIntegrationTest {
 
     @Test
     void "test samplePairsBySnvProcessingState finished"() {
-        SnvCallingInstance snvCallingInstance1 = DomainFactory.createSnvInstanceWithRoddyBamFiles(processingState: SnvProcessingStates.FINISHED)
+        SnvCallingInstance snvCallingInstance1 = DomainFactory.createSnvInstanceWithRoddyBamFiles(processingState: AnalysisProcessingStates.FINISHED)
 
         SpringSecurityUtils.doWithAuth("admin") {
             Map map = samplePairService.samplePairsBySnvProcessingState(snvCallingInstance1.individual)
@@ -85,7 +85,7 @@ class SamplePairServiceTests extends AbstractIntegrationTest {
 
     @Test
     void "test samplePairsBySnvProcessingState inProgress"() {
-        SnvCallingInstance snvCallingInstance2 = DomainFactory.createSnvInstanceWithRoddyBamFiles(processingState: SnvProcessingStates.IN_PROGRESS)
+        SnvCallingInstance snvCallingInstance2 = DomainFactory.createSnvInstanceWithRoddyBamFiles(processingState: AnalysisProcessingStates.IN_PROGRESS)
 
         SpringSecurityUtils.doWithAuth("admin") {
             Map<String, List<SamplePair>> map = samplePairService.samplePairsBySnvProcessingState(snvCallingInstance2.individual)

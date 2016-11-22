@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
+import de.dkfz.tbi.otp.dataprocessing.AnalysisProcessingStates
 import de.dkfz.tbi.otp.job.processing.ClusterJobLoggingService
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import org.apache.commons.logging.impl.NoOpLog
@@ -102,7 +103,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
             sampleType1BamFile: processedMergedBamFile1,
             sampleType2BamFile: processedMergedBamFile2,
             instanceName: SOME_INSTANCE_NAME,
-            processingState: SnvProcessingStates.FINISHED,
+            processingState: AnalysisProcessingStates.FINISHED,
         ])
         assert snvCallingInstance1.save()
 
@@ -149,7 +150,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
                 step: SnvCallingStep.CALLING,
                 snvCallingInstance: snvCallingInstance1,
                 externalScript: externalScript_Calling,
-                processingState: SnvProcessingStates.FINISHED,
+                processingState: AnalysisProcessingStates.FINISHED,
                 chromosomeJoinExternalScript: snvCallingInstanceTestData.externalScript_Joining,
                 md5sum: "a841c64c5825e986c4709ac7298e9366",
                 fileSize: 235l,
@@ -161,7 +162,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
                 snvCallingInstance: snvCallingInstance1,
                 externalScript: externalScript_Annotation,
                 inputResult: snvJobResultCalling1,
-                processingState: SnvProcessingStates.FINISHED
+                processingState: AnalysisProcessingStates.FINISHED
                 )
         assert snvJobResultAnnotation1.save()
 
@@ -170,7 +171,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
                 snvCallingInstance: snvCallingInstance1,
                 externalScript: externalScript_DeepAnnotation,
                 inputResult: snvJobResultAnnotation1,
-                processingState: SnvProcessingStates.FINISHED,
+                processingState: AnalysisProcessingStates.FINISHED,
                 md5sum: "a841c64c5825e986c4709ac7298e9366",
                 fileSize: 235l,
                 )
@@ -181,7 +182,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
                 snvCallingInstance: snvCallingInstance1,
                 externalScript: externalScript_Filter,
                 inputResult: snvJobResultDeepAnnotation1,
-                processingState: SnvProcessingStates.FINISHED
+                processingState: AnalysisProcessingStates.FINISHED
                 )
         assert snvJobResultFilter1.save()
 

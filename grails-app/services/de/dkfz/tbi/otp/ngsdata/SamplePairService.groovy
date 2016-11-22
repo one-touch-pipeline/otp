@@ -1,10 +1,9 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import org.springframework.security.access.prepost.PreAuthorize
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
+import de.dkfz.tbi.otp.dataprocessing.AnalysisProcessingStates
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.ProcessingStatus
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvProcessingStates
+import org.springframework.security.access.prepost.*
 
 class SamplePairService {
 
@@ -40,10 +39,10 @@ class SamplePairService {
                     throw new UnsupportedOperationException("Handling processing status ${it.processingStatus} is not implemented.")
             }
             List<SnvCallingInstance> snvCallingInstances = SnvCallingInstance.findAllBySamplePair(it)
-            if (snvCallingInstances.find { it.processingState == SnvProcessingStates.FINISHED }) {
+            if (snvCallingInstances.find { it.processingState == AnalysisProcessingStates.FINISHED }) {
                 finishedSamplePairs << it
             }
-            if (snvCallingInstances.find { it.processingState == SnvProcessingStates.IN_PROGRESS }) {
+            if (snvCallingInstances.find { it.processingState == AnalysisProcessingStates.IN_PROGRESS && !it.withdrawn }) {
                 progressingSamplePairs << it
             }
         }

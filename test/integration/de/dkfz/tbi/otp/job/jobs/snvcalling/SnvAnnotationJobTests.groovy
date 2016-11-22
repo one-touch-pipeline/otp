@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
+import de.dkfz.tbi.otp.dataprocessing.AnalysisProcessingStates
 import de.dkfz.tbi.otp.job.processing.ClusterJobLoggingService
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import org.apache.commons.logging.impl.NoOpLog
@@ -95,7 +96,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
             sampleType1BamFile: processedMergedBamFile1,
             sampleType2BamFile: processedMergedBamFile2,
             instanceName: SOME_INSTANCE_NAME,
-            processingState: SnvProcessingStates.FINISHED,
+            processingState: AnalysisProcessingStates.FINISHED,
         ])
         assert snvCallingInstance.save()
 
@@ -118,7 +119,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
                 step: SnvCallingStep.CALLING,
                 snvCallingInstance: snvCallingInstance,
                 externalScript: externalScript_Calling,
-                processingState: SnvProcessingStates.FINISHED,
+                processingState: AnalysisProcessingStates.FINISHED,
                 chromosomeJoinExternalScript: testData.externalScript_Joining,
                 md5sum: "a841c64c5825e986c4709ac7298e9366",
                 fileSize: 1234l,
@@ -129,7 +130,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
                 step: SnvCallingStep.CALLING,
                 snvCallingInstance: snvCallingInstance2,
                 externalScript: externalScript_Calling,
-                processingState: SnvProcessingStates.FINISHED,
+                processingState: AnalysisProcessingStates.FINISHED,
                 chromosomeJoinExternalScript: testData.externalScript_Joining,
                 md5sum: "a841c64c5825e986c4709ac7298e9366",
                 fileSize: 1234l,
@@ -149,7 +150,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
                 snvCallingInstance: snvCallingInstance,
                 externalScript: externalScript_Annotation,
                 inputResult: snvJobResultInput,
-                processingState: SnvProcessingStates.FINISHED,
+                processingState: AnalysisProcessingStates.FINISHED,
                 )
         assert snvJobResult.save()
 

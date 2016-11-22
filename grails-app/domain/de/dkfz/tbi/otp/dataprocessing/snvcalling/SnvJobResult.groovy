@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.AnalysisProcessingStates
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.utils.ExternalScript
@@ -35,10 +36,9 @@ class SnvJobResult implements Entity {
     /**
      * The overall processing state of this vcf file.
      * At the moment, when the file is created a job is already working on it, which is why it always starts
-     * as {@link SnvProcessingStates#IN_PROGRESS}.
-     * @see SnvProcessingStates#FAILED
+     * as {@link AnalysisProcessingStates#IN_PROGRESS}.
      */
-    SnvProcessingStates processingState = SnvProcessingStates.IN_PROGRESS
+    AnalysisProcessingStates processingState = AnalysisProcessingStates.IN_PROGRESS
 
     /**
      * The script which was used to produce these results
@@ -62,9 +62,6 @@ class SnvJobResult implements Entity {
     SnvCallingInstance snvCallingInstance
 
     static constraints = {
-        processingState validator: { val, obj ->
-            return val != SnvProcessingStates.FAILED
-        }
         step unique: 'snvCallingInstance'
         withdrawn validator: { boolean withdrawn, SnvJobResult result ->
             return withdrawn ||
@@ -73,7 +70,7 @@ class SnvJobResult implements Entity {
                     !result.inputResult?.withdrawn
         }
         inputResult nullable: true, validator: { val, obj ->
-            if (val != null && val.processingState != SnvProcessingStates.FINISHED) {
+            if (val != null && val.processingState != AnalysisProcessingStates.FINISHED) {
                 return false
             }
 
@@ -104,7 +101,7 @@ class SnvJobResult implements Entity {
     }
 
     private static boolean validateFileInformation(def val, def obj, def closure) {
-        if (obj.processingState == SnvProcessingStates.FINISHED && [SnvCallingStep.CALLING, SnvCallingStep.SNV_DEEPANNOTATION].contains(obj.step)) {
+        if (obj.processingState == AnalysisProcessingStates.FINISHED && [SnvCallingStep.CALLING, SnvCallingStep.SNV_DEEPANNOTATION].contains(obj.step)) {
             return val && closure()
         } else {
             return true

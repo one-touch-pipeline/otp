@@ -24,21 +24,13 @@ Empty lines are ignored
 The script has four input areas, one for run names, one for patient names, one for ilse ids, and one for project names.
  */
 
+
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig
-import de.dkfz.tbi.otp.job.processing.ExecutionState
-import de.dkfz.tbi.otp.job.processing.ProcessParameter
-import de.dkfz.tbi.otp.job.processing.Process
-import de.dkfz.tbi.otp.job.processing.ProcessingStep
-import de.dkfz.tbi.otp.job.processing.ProcessingStepUpdate
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
+import de.dkfz.tbi.otp.infrastructure.*
+import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvProcessingStates
-import de.dkfz.tbi.otp.job.jobs.roddyAlignment.*
-import de.dkfz.tbi.otp.infrastructure.ClusterJob
-import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.otp.utils.ProcessHelperService
+import de.dkfz.tbi.otp.utils.*
 
 //name of runs
 def runString = """
@@ -476,7 +468,7 @@ def handleStateMapSnv = { List next ->
             } else if (samplePair.processingStatus == SamplePair.ProcessingStatus.NEEDS_PROCESSING) {
                 if (!SnvConfig.findByProjectAndSeqTypeAndObsoleteDateIsNull(samplePair.project, samplePair.seqType)) {
                     stateMap.noConfig << "${samplePair.project} ${samplePair.seqType}"
-                } else if (SnvCallingInstance.findBySamplePairAndProcessingStateInList(samplePair, [SnvProcessingStates.IN_PROGRESS])) {
+                } else if (SnvCallingInstance.findBySamplePairAndProcessingStateInList(samplePair, [AnalysisProcessingStates.IN_PROGRESS])) {
                     stateMap.alreadyRunning << samplePair
                 } else {
                     stateMap.waiting << samplePair
@@ -488,10 +480,10 @@ def handleStateMapSnv = { List next ->
                     order('lastUpdated', 'desc')
                     maxResults(1)
                 }
-                if (snvCallingInstance && snvCallingInstance.processingState == SnvProcessingStates.IN_PROGRESS) {
+                if (snvCallingInstance && snvCallingInstance.processingState == AnalysisProcessingStates.IN_PROGRESS) {
                     stateMap.running << snvCallingInstance
                 }
-                if (snvCallingInstance && snvCallingInstance.processingState == SnvProcessingStates.FINISHED) {
+                if (snvCallingInstance && snvCallingInstance.processingState == AnalysisProcessingStates.FINISHED) {
                     stateMap.finished << samplePair
                 }
                 if (!snvCallingInstance && samplePair.processingStatus == SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED) {
@@ -1015,7 +1007,7 @@ if (allProcessed) {
 
     //collect running SnvCallingInstances
     SnvCallingInstance.createCriteria().list{
-        eq('processingState', SnvProcessingStates.IN_PROGRESS)
+        eq('processingState', AnalysisProcessingStates.IN_PROGRESS)
         sampleType1BamFile {
             eq('withdrawn', false)
         }

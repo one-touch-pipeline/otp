@@ -58,7 +58,7 @@ class SnvDeletionServiceTests {
 
     @Test
     public void testDeleteForAbstractMergedBamFile_InstanceFinishedForControlTumor1() {
-        instance.processingState = SnvProcessingStates.FINISHED
+        instance.processingState = AnalysisProcessingStates.FINISHED
         File directoryInstance = instance.getSnvInstancePath().getAbsoluteDataManagementPath()
         File directorySamplePair = instance.samplePair.getSamplePairPath().getAbsoluteDataManagementPath()
 
@@ -72,10 +72,10 @@ class SnvDeletionServiceTests {
 
     @Test
     public void testDeleteForAbstractMergedBamFile_InstanceFinishedForControlTumor1AndControlTumor2() {
-        instance.processingState = SnvProcessingStates.FINISHED
+        instance.processingState = AnalysisProcessingStates.FINISHED
         SnvCallingInstance instance2 = testdata.createSnvCallingInstance([
             sampleType1BamFile: bamFileTumor2,
-            processingState: SnvProcessingStates.FINISHED,
+            processingState: AnalysisProcessingStates.FINISHED,
             samplePair: samplePair2,
         ])
         assert instance2.save()
@@ -97,9 +97,9 @@ class SnvDeletionServiceTests {
 
     @Test
     public void testDeleteForAbstractMergedBamFile_MultipleInstancesFinishedForControlTumor1() {
-        instance.processingState = SnvProcessingStates.FINISHED
+        instance.processingState = AnalysisProcessingStates.FINISHED
         SnvCallingInstance instance2 = testdata.createSnvCallingInstance([
-            processingState: SnvProcessingStates.FINISHED,
+            processingState: AnalysisProcessingStates.FINISHED,
             instanceName: 'instance2',
 
         ])
@@ -119,10 +119,10 @@ class SnvDeletionServiceTests {
 
     @Test
     public void testDeleteForAbstractMergedBamFile_InstanceFinishedForControlTumor1AndControlTumor2_DeleteTumor1() {
-        instance.processingState = SnvProcessingStates.FINISHED
+        instance.processingState = AnalysisProcessingStates.FINISHED
         SnvCallingInstance instance2 = testdata.createSnvCallingInstance([
             sampleType1BamFile: bamFileTumor2,
-            processingState: SnvProcessingStates.FINISHED,
+            processingState: AnalysisProcessingStates.FINISHED,
             samplePair: samplePair2,
         ])
         assert instance2.save()
@@ -140,7 +140,7 @@ class SnvDeletionServiceTests {
 
     @Test
     public void testDeleteForAbstractMergedBamFile_InstanceFinishedForControlTumor1AndControlTumor2_DeleteTumor1_tumor2InProgress() {
-        instance.processingState = SnvProcessingStates.FINISHED
+        instance.processingState = AnalysisProcessingStates.FINISHED
         SnvCallingInstance instance2 = testdata.createSnvCallingInstance([
             sampleType1BamFile: bamFileTumor2,
             samplePair: samplePair2,
@@ -164,7 +164,7 @@ class SnvDeletionServiceTests {
             it.withdrawn = true
             assert it.save(flush: true)
         }
-        instance.processingState = SnvProcessingStates.FAILED
+        instance.withdrawn = true
         File directoryInstance = instance.getSnvInstancePath().getAbsoluteDataManagementPath()
         File directorySamplePair = instance.samplePair.getSamplePairPath().getAbsoluteDataManagementPath()
 
@@ -177,14 +177,14 @@ class SnvDeletionServiceTests {
     }
 
     private SnvCallingInstance prepareForTwoBamFilesTests() {
-        instance.processingState = SnvProcessingStates.FINISHED
+        instance.processingState = AnalysisProcessingStates.FINISHED
         ProcessedMergedBamFile bamFile2 = DomainFactory.createProcessedMergedBamFile(
                 testdata.bamFileTumor.mergingWorkPackage, DomainFactory.randomProcessedBamFileProperties)
         SnvCallingInstance instance2 = testdata.createSnvCallingInstance([
             sampleType1BamFile: bamFile2,
             samplePair: testdata.samplePair,
             instanceName: 'test2',
-            processingState: SnvProcessingStates.FINISHED,
+            processingState: AnalysisProcessingStates.FINISHED,
         ])
         assert instance2.save(flush: true)
         createAllJobResults(instance2)

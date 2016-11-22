@@ -6,7 +6,6 @@ import de.dkfz.tbi.otp.job.jobs.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.*
-import de.dkfz.tbi.otp.utils.*
 import org.springframework.beans.factory.annotation.*
 import org.springframework.scheduling.annotation.*
 
@@ -82,7 +81,7 @@ abstract class AbstractSnvCallingStartJob extends AbstractStartJobImpl implement
             )
             assert newInstance.save(flush: true)
 
-            failedInstance.processingState = SnvProcessingStates.FAILED
+            failedInstance.withdrawn = true
             assert failedInstance.save(flush: true)
 
             return createProcess(newInstance)

@@ -43,6 +43,8 @@ class SnvCallingInstance implements ProcessParameterObject, Entity {
 
     Date lastUpdated
 
+    boolean withdrawn = false
+
     SamplePair samplePair
 
     static belongsTo = SamplePair
@@ -50,9 +52,9 @@ class SnvCallingInstance implements ProcessParameterObject, Entity {
     /**
      * The overall processing state of this SNV calling run.
      * Because the SNV StartJob creates an instance of a SnvCallingInstance immediately when starting it, this will always start
-     * as {@link SnvProcessingStates#IN_PROGRESS}.
+     * as {@link AnalysisProcessingStates#IN_PROGRESS}.
      */
-    SnvProcessingStates processingState = SnvProcessingStates.IN_PROGRESS
+    AnalysisProcessingStates processingState = AnalysisProcessingStates.IN_PROGRESS
 
     static constraints = {
         sampleType1BamFile validator: { AbstractMergedBamFile val, SnvCallingInstance obj ->
@@ -69,8 +71,8 @@ class SnvCallingInstance implements ProcessParameterObject, Entity {
         instanceName blank: false, unique: 'samplePair', validator: { OtpPath.isValidPathComponent(it) }
         processingState validator: {val, obj ->
             // there must be at least one withdrawn {@link SnvJobResult}
-            // if {@link this#processingState} is {@link SnvProcessingStates#FAILED}
-            if (obj.processingState == SnvProcessingStates.FAILED) {
+            // if {@link this#withdrawn} is true
+            if (obj.withdrawn == true) {
                 return !SnvJobResult.findAllBySnvCallingInstanceAndWithdrawn(obj, true).empty || SnvJobResult.findAllBySnvCallingInstance(obj).empty
             } else {
                 return true
@@ -140,7 +142,7 @@ class SnvCallingInstance implements ProcessParameterObject, Entity {
 
     /**
      * Returns the non-withdrawn, finished {@link SnvJobResult} for the specified {@link SnvCallingStep} belonging to
-     * the latest (even {@link SnvProcessingStates#FAILED}) {@link SnvCallingInstance} that has such a result and is based on the same BAM files as this instance;
+     * the latest (even {@link SnvCallingInstance#withdrawn}) {@link SnvCallingInstance} that has such a result and is based on the same BAM files as this instance;
      * <code>null</code> if no such {@link SnvCallingInstance} exists.
      */
     SnvJobResult findLatestResultForSameBamFiles(final SnvCallingStep step) {
@@ -148,7 +150,7 @@ class SnvCallingInstance implements ProcessParameterObject, Entity {
         final SnvJobResult result = atMostOneElement(SnvJobResult.createCriteria().list {
             eq 'step', step
             eq 'withdrawn', false
-            eq 'processingState', SnvProcessingStates.FINISHED
+            eq 'processingState', AnalysisProcessingStates.FINISHED
             snvCallingInstance {
                 sampleType1BamFile {
                     eq 'id', sampleType1BamFile.id
@@ -163,14 +165,14 @@ class SnvCallingInstance implements ProcessParameterObject, Entity {
         if (result != null) {
             assert result.step == step
             assert !result.withdrawn
-            assert result.processingState == SnvProcessingStates.FINISHED
+            assert result.processingState == AnalysisProcessingStates.FINISHED
             assert result.sampleType1BamFile.id == sampleType1BamFile.id
             assert result.sampleType2BamFile.id == sampleType2BamFile.id
         }
         return result
     }
 
-    void updateProcessingState(SnvProcessingStates state) {
+    void updateProcessingState(AnalysisProcessingStates state) {
         assert state : 'The argument "state" is not allowed to be null'
         if (processingState != state) {
             processingState = state
@@ -179,7 +181,7 @@ class SnvCallingInstance implements ProcessParameterObject, Entity {
     }
 
     SnvCallingInstance getPreviousFinishedInstance() {
-        return SnvCallingInstance.findBySamplePairAndProcessingStateAndIdLessThan(samplePair, SnvProcessingStates.FINISHED, this.id, [max: 1, sort: 'id', order: 'desc'])
+        return SnvCallingInstance.findBySamplePairAndProcessingStateAndIdLessThan(samplePair, AnalysisProcessingStates.FINISHED, this.id, [max: 1, sort: 'id', order: 'desc'])
     }
 
     @Override

@@ -8,8 +8,8 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 class SnvCallingService {
 
-    static final List<SnvProcessingStates> processingStatesNotProcessable = [
-            SnvProcessingStates.IN_PROGRESS
+    static final List<AnalysisProcessingStates> processingStatesNotProcessable = [
+            AnalysisProcessingStates.IN_PROGRESS
     ]
     static Collection<Class<? extends ConfigPerProject>> SNV_CONFIG_CLASSES = [
             SnvConfig,
@@ -83,6 +83,7 @@ class SnvCallingService {
                 "AND NOT EXISTS (FROM SnvCallingInstance sci " +
                 "   WHERE sci.samplePair = sp " +
                 "   AND sci.processingState IN (:processingStates) " +
+                "   AND sci.withdrawn = false " +
                 ") " +
 
                 //check that the first bam file fulfill the criteria
@@ -121,7 +122,8 @@ class SnvCallingService {
             snvJobResult.withdrawn = true
             assert snvJobResult.save([flush: true])
         }
-        instance.updateProcessingState(SnvProcessingStates.FAILED)
+        instance.withdrawn = true
+        assert instance.save(flush: true)
     }
 
     SnvJobResult getLatestValidJobResultForStep(SnvCallingInstance instance, SnvCallingStep step) {
@@ -131,7 +133,7 @@ class SnvCallingService {
             }
             eq('step', step)
             eq('withdrawn', false)
-            eq('processingState', SnvProcessingStates.FINISHED)
+            eq('processingState', AnalysisProcessingStates.FINISHED)
             order("id", "desc")
             maxResults(1)
         }

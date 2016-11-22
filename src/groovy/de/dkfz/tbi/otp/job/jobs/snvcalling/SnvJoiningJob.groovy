@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
+import de.dkfz.tbi.otp.dataprocessing.AnalysisProcessingStates
+
 import static de.dkfz.tbi.otp.job.processing.CreateClusterScriptService.*
 
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
@@ -39,6 +41,6 @@ class SnvJoiningJob extends AbstractSnvCallJoinJob {
         // check if the final vcf result file exists
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(getSnvJobResult(instance).getResultFilePath().absoluteDataManagementPath)
 
-        changeProcessingStateOfJobResult(instance, SnvProcessingStates.FINISHED)
+        changeProcessingStateOfJobResult(instance, AnalysisProcessingStates.FINISHED)
     }
 }

@@ -98,7 +98,7 @@ abstract class AbstractOtpSnvWorkflowTests extends AbstractSnvWorkflowTests {
 
     void createJobResults(SnvCallingStep startWith) {
         SnvCallingInstance instance = new SnvCallingInstance(
-                processingState: SnvProcessingStates.FINISHED,
+                processingState: AnalysisProcessingStates.FINISHED,
                 sampleType1BamFile: bamFileTumor,
                 sampleType2BamFile: bamFileControl,
                 config: config,
@@ -126,7 +126,7 @@ abstract class AbstractOtpSnvWorkflowTests extends AbstractSnvWorkflowTests {
                 snvCallingInstance: instance,
                 step: SnvCallingStep.CALLING,
                 inputResult: null,
-                processingState: SnvProcessingStates.FINISHED,
+                processingState: AnalysisProcessingStates.FINISHED,
                 withdrawn: false,
                 externalScript: callingScript,
                 chromosomeJoinExternalScript: joiningScript,
@@ -144,7 +144,7 @@ abstract class AbstractOtpSnvWorkflowTests extends AbstractSnvWorkflowTests {
                     snvCallingInstance: instance,
                     step: SnvCallingStep.SNV_ANNOTATION,
                     inputResult: jobResultCalling,
-                    processingState: SnvProcessingStates.FINISHED,
+                    processingState: AnalysisProcessingStates.FINISHED,
                     withdrawn: false,
                     externalScript: annotationScript,
                     md5sum: HelperUtils.randomMd5sum,
@@ -156,7 +156,7 @@ abstract class AbstractOtpSnvWorkflowTests extends AbstractSnvWorkflowTests {
                     snvCallingInstance: instance,
                     step: SnvCallingStep.SNV_DEEPANNOTATION,
                     inputResult: jobResultAnnotation,
-                    processingState: SnvProcessingStates.FINISHED,
+                    processingState: AnalysisProcessingStates.FINISHED,
                     withdrawn: false,
                     externalScript: deepAnnotationScript,
                     md5sum: HelperUtils.randomMd5sum,
@@ -209,7 +209,7 @@ abstract class AbstractOtpSnvWorkflowTests extends AbstractSnvWorkflowTests {
 
         SnvJobResult callingResult = createdInstance.findLatestResultForSameBamFiles(SnvCallingStep.CALLING)
         if (startedWith == SnvCallingStep.CALLING) {
-            assert callingResult.processingState == SnvProcessingStates.FINISHED
+            assert callingResult.processingState == AnalysisProcessingStates.FINISHED
             assert callingResult.inputResult == null
             assert callingResult.externalScript == callingScript
             assert callingResult.chromosomeJoinExternalScript == joiningScript
@@ -237,10 +237,10 @@ abstract class AbstractOtpSnvWorkflowTests extends AbstractSnvWorkflowTests {
         SnvJobResult deepAnnotationResult = createdInstance.findLatestResultForSameBamFiles(SnvCallingStep.SNV_DEEPANNOTATION)
         if (startedWith == SnvCallingStep.CALLING || startedWith == SnvCallingStep.SNV_ANNOTATION) {
             SnvJobResult annotationResult = createdInstance.findLatestResultForSameBamFiles(SnvCallingStep.SNV_ANNOTATION)
-            assert annotationResult.processingState == SnvProcessingStates.FINISHED
+            assert annotationResult.processingState == AnalysisProcessingStates.FINISHED
             assert annotationResult.inputResult == callingResult
             assert annotationResult.externalScript == annotationScript
-            assert deepAnnotationResult.processingState == SnvProcessingStates.FINISHED
+            assert deepAnnotationResult.processingState == AnalysisProcessingStates.FINISHED
             assert deepAnnotationResult.inputResult.id == annotationResult.id
             assert deepAnnotationResult.externalScript == deepAnnotationScript
 
@@ -250,7 +250,7 @@ abstract class AbstractOtpSnvWorkflowTests extends AbstractSnvWorkflowTests {
         }
 
         SnvJobResult filterResult = createdInstance.findLatestResultForSameBamFiles(SnvCallingStep.FILTER_VCF)
-        assert filterResult.processingState == SnvProcessingStates.FINISHED
+        assert filterResult.processingState == AnalysisProcessingStates.FINISHED
         assert filterResult.inputResult == deepAnnotationResult
         assert filterResult.externalScript == filterScript
     }
