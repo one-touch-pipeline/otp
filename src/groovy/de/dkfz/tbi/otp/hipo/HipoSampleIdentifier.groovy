@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component
 @Scope("singleton")
 class HipoSampleIdentifierParser implements SampleIdentifierParser {
 
-    private final static String REGEX =/^(([A-Z])(\d\d\w)-(?:\w\w)?\w\w\w(\w))-([${HipoTissueType.values()*.key.join("")}])(\d{1,2})-(([DRPACWY])(\d{1,2}))$/
+    private final static String REGEX =/^(([A-JL-Z])(\d\d\w)-(?:\w\w)?\w\w\w(\w))-([${HipoTissueType.values()*.key.join("")}])(\d{1,2})-(([DRPACWY])(\d{1,2}))$/
 
     /**
      * Tries to parse a HIPO sample name.

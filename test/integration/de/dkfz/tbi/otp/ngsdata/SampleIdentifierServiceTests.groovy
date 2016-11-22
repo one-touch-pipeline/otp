@@ -26,6 +26,16 @@ class SampleIdentifierServiceTests {
     }
 
     @Test
+    void 'testParseSampleIdentifier, when HIPO1 sample identifier, uses HIPO1 parser'() {
+        assert sampleIdentifierService.parseSampleIdentifier('H12A-ABCDEF-T1-D1').sampleTypeDbName == 'TUMOR'
+    }
+
+    @Test
+    void 'testParseSampleIdentifier, when HIPO2 sample identifier, uses HIPO2 parser'() {
+        assert sampleIdentifierService.parseSampleIdentifier('K12A-ABCDEF-T1-D1').sampleTypeDbName == 'TUMOR1'
+    }
+
+    @Test
     void testParseSampleIdentifier_WithDeepSampleNameAndDefaultParsers_ShouldReturnDeepSampleIdentifier() {
         assert sampleIdentifierService.parseSampleIdentifier('41_Hf01_BlAd_CD_WGBS_S_1').projectName == 'DEEP'
     }
