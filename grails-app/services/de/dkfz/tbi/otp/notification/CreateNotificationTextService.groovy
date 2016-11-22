@@ -73,6 +73,9 @@ class CreateNotificationTextService {
         }
 
         Collection<SeqTrack> seqTracks = status.seqTrackProcessingStatuses*.seqTrack
+        if (!seqTracks) {
+            throw new RuntimeException("No installation finished yet.")
+        }
         String runNames = seqTracks*.run*.name.unique().sort().join(", ")
         String directories = getSeqTypeDirectories(seqTracks)
         String otpLinks = createOtpLinks(seqTracks*.project, 'projectOverview', 'laneOverview')
@@ -99,6 +102,9 @@ class CreateNotificationTextService {
             it.alignmentProcessingStatus == ALL_DONE })
 
         Collection<SeqTrack> seqTracks = status.seqTrackProcessingStatuses*.seqTrack
+        if (!seqTracks) {
+            throw new RuntimeException("No alignment finished yet.")
+        }
         String sampleNames = seqTracks.groupBy {
             getSampleName(it)
         }.sort().collect { String sample, List<SeqTrack> seqTracksOfSample ->
@@ -174,6 +180,9 @@ class CreateNotificationTextService {
                 status.samplePairProcessingStatuses.groupBy { it.snvProcessingStatus }
 
         List<SamplePair> samplePairsFinished = map[ALL_DONE]*.samplePair
+        if (!samplePairsFinished) {
+            throw new RuntimeException("No SNV calling finished yet.")
+        }
         String directories = snvDirectory(samplePairsFinished)
         String otpLinks = createOtpLinks(samplePairsFinished*.project, 'snv', 'results', 'projectName')
         String message = createMessage(SNV_NOTIFICATION_TEMPLATE, [
