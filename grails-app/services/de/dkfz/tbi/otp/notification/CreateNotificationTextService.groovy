@@ -269,8 +269,20 @@ class CreateNotificationTextService {
         assert seqTracks
 
         return seqTracks.collect {
-            LsdfFilesService.normalizePathForCustomers(new OtpPath(it.project, mergedAlignmentDataFileService.buildRelativePath(it.seqType, it.sample)).absoluteDataManagementPath)
-        }.unique().sort()*.path.join('\n')
+            Sample fakeSample = new Sample(
+                    individual: new Individual(
+                            project: it.sample.project,
+                            pid: '_OTP_PID',
+                    ),
+                    sampleType: new SampleType() {
+                        @Override
+                        String getDirName() {
+                            return '_OTP_SAMPLE_TYPE'
+                        }
+                    },
+            )
+            LsdfFilesService.normalizePathForCustomers(new OtpPath(it.project, mergedAlignmentDataFileService.buildRelativePath(it.seqType, fakeSample)).absoluteDataManagementPath)
+        }.unique().sort()*.path.join('\n').replace('_OTP_PID', '${PID}').replace('_OTP_SAMPLE_TYPE', '${SAMPLE_TYPE}')
     }
 
     String snvDirectory(List<SamplePair> samplePairsFinished) {

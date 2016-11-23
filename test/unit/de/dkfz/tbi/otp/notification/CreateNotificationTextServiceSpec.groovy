@@ -279,16 +279,25 @@ class CreateNotificationTextServiceSpec extends Specification {
         given:
         SeqTrack seqTrack1 = DomainFactory.createSeqTrackWithTwoDataFiles()
         SeqTrack seqTrack2 = DomainFactory.createSeqTrackWithTwoDataFiles()
+        // seqTrack3 has the same path with placeholders as seqTrack1
+        SeqTrack seqTrack3 = DomainFactory.createSeqTrackWithTwoDataFiles(
+                sample: DomainFactory.createSample(
+                        individual: DomainFactory.createIndividual(
+                                project: seqTrack1.project,
+                        ),
+                ),
+                seqType: seqTrack1.seqType,
+        )
         Realm realm1 = DomainFactory.createRealmDataManagement(name: seqTrack1.project.realmName)
         Realm realm2 = DomainFactory.createRealmDataManagement(name: seqTrack2.project.realmName)
 
         when:
         String fileNameString = new CreateNotificationTextService(
                 mergedAlignmentDataFileService: new MergedAlignmentDataFileService(),
-        ).getMergingDirectories([seqTrack1, seqTrack2])
+        ).getMergingDirectories([seqTrack1, seqTrack2, seqTrack3])
         String expected = [
-                new File("${realm1.rootPath}/${seqTrack1.project.dirName}/sequencing/${seqTrack1.seqType.dirName}/view-by-pid/${seqTrack1.individual.pid}/${seqTrack1.sampleType.dirName}/${seqTrack1.seqType.libraryLayoutDirName}/merged-alignment"),
-                new File("${realm2.rootPath}/${seqTrack2.project.dirName}/sequencing/${seqTrack2.seqType.dirName}/view-by-pid/${seqTrack2.individual.pid}/${seqTrack2.sampleType.dirName}/${seqTrack2.seqType.libraryLayoutDirName}/merged-alignment"),
+                new File("${realm1.rootPath}/${seqTrack1.project.dirName}/sequencing/${seqTrack1.seqType.dirName}/view-by-pid/\${PID}/\${SAMPLE_TYPE}/${seqTrack1.seqType.libraryLayoutDirName}/merged-alignment"),
+                new File("${realm2.rootPath}/${seqTrack2.project.dirName}/sequencing/${seqTrack2.seqType.dirName}/view-by-pid/\${PID}/\${SAMPLE_TYPE}/${seqTrack2.seqType.libraryLayoutDirName}/merged-alignment"),
         ].sort().join('\n')
 
         then:
@@ -308,7 +317,7 @@ class CreateNotificationTextServiceSpec extends Specification {
         String fileNameString = new CreateNotificationTextService(
                 mergedAlignmentDataFileService: new MergedAlignmentDataFileService(),
         ).getMergingDirectories([seqTrack])
-        String expected = new File("${LsdfFilesService.MOUNTPOINT_WITH_LSDF}/${seqTrack.project.dirName}/sequencing/${seqTrack.seqType.dirName}/view-by-pid/${seqTrack.individual.pid}/${seqTrack.sampleType.dirName}/${seqTrack.seqType.libraryLayoutDirName}/merged-alignment").path
+        String expected = new File("${LsdfFilesService.MOUNTPOINT_WITH_LSDF}/${seqTrack.project.dirName}/sequencing/${seqTrack.seqType.dirName}/view-by-pid/\${PID}/\${SAMPLE_TYPE}/${seqTrack.seqType.libraryLayoutDirName}/merged-alignment").path
 
         then:
         expected == fileNameString
