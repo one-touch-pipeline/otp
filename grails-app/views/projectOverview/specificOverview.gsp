@@ -202,6 +202,16 @@
         <br>
         <div>
             <h3>${g.message(code: 'projectOverview.snv.title')}</h3>
+            <g:message code="projectOverview.pipelineInformation.configure"/>
+            <ul>
+                <g:each in="${snvSeqTypes}" var="seqType">
+                    <li>
+                        <g:link controller='configurePipeline' action='index' params='[projectName: project, seqTypeName: seqType.name, libraryLayout: seqType.libraryLayout]' class="configure">
+                            ${seqType.displayName}
+                        </g:link>
+                    </li>
+                </g:each>
+            </ul>
             <table  class="snv">
                 <tr>
                     <td><g:message code="projectOverview.snv"/></td>

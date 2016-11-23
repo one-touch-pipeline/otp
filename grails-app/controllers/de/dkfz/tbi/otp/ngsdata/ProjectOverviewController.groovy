@@ -121,6 +121,7 @@ class ProjectOverviewController {
                 comment: project.comment,
                 nameInMetadata: project.nameInMetadataFiles?: '',
                 seqTypes: SeqType.allAlignableSeqTypes,
+                snvSeqTypes: SeqType.snvPipelineSeqTypes,
                 alignmentInfo: alignmentInfo,
                 alignmentError: alignmentError,
                 snv: project.snv,

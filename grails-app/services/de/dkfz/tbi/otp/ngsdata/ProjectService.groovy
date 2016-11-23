@@ -316,27 +316,8 @@ AND ace.granting = true
                 panCanAlignmentConfiguration.configVersion,
         )
         File configDirectory = configFilePath.parentFile
-        String md5 = HelperUtils.getRandomMd5sum()
 
-        String createConfigDirectory = ''
-        if (!configDirectory.exists()) {
-            createConfigDirectory = """\
-mkdir -p -m 2750 ${configDirectory}
-"""
-        }
-
-        String script = """\
-
-${createConfigDirectory}
-
-cat <<${md5} > ${configFilePath}
-${xmlConfig}
-${md5}
-
-chmod 0440 ${configFilePath}
-
-"""
-        executeScript(script, panCanAlignmentConfiguration.project)
+        executeScript(getScriptBash(configDirectory, xmlConfig, configFilePath), panCanAlignmentConfiguration.project)
 
         RoddyWorkflowConfig.importProjectConfigFile(
                 panCanAlignmentConfiguration.project,
@@ -348,6 +329,66 @@ chmod 0440 ${configFilePath}
         )
     }
 
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void configureSnvPipelineProject(SnvPipelineConfiguration snvPipelineConfiguration) {
+        assert OtpPath.isValidPathComponent(snvPipelineConfiguration.pluginName): "pluginName '${snvPipelineConfiguration.pluginName}' is an invalid path component"
+        assert OtpPath.isValidPathComponent(snvPipelineConfiguration.pluginVersion): "pluginVersion '${snvPipelineConfiguration.pluginVersion}' is an invalid path component"
+        assert OtpPath.isValidPathComponent(snvPipelineConfiguration.baseProjectConfig): "baseProjectConfig '${snvPipelineConfiguration.baseProjectConfig}' is an invalid path component"
+        assert snvPipelineConfiguration.configVersion ==~ RoddyWorkflowConfig.CONFIG_VERSION_PATTERN: "configVersion '${snvPipelineConfiguration.configVersion}' has not expected pattern: ${RoddyWorkflowConfig.CONFIG_VERSION_PATTERN}"
+
+        Pipeline pipeline = CollectionUtils.exactlyOneElement(Pipeline.findAllByTypeAndName(
+                Pipeline.Type.SNV,
+                Pipeline.Name.RODDY_SNV,
+        ))
+
+        String xmlConfig = RoddySnvConfigTemplate.createConfigBashEscaped(snvPipelineConfiguration, Pipeline.Name.RODDY_SNV)
+
+        File projectDirectory = snvPipelineConfiguration.project.getProjectDirectory()
+        assert projectDirectory.exists()
+
+        File configFilePath = RoddyWorkflowConfig.getStandardConfigFile(
+                snvPipelineConfiguration.project,
+                pipeline.name,
+                snvPipelineConfiguration.seqType,
+                snvPipelineConfiguration.pluginVersion,
+                snvPipelineConfiguration.configVersion,
+        )
+        File configDirectory = configFilePath.parentFile
+
+        executeScript(getScriptBash(configDirectory, xmlConfig, configFilePath), snvPipelineConfiguration.project)
+
+        RoddyWorkflowConfig.importProjectConfigFile(
+                snvPipelineConfiguration.project,
+                snvPipelineConfiguration.seqType,
+                "${snvPipelineConfiguration.pluginName}:${snvPipelineConfiguration.pluginVersion}",
+                pipeline,
+                configFilePath.path,
+                snvPipelineConfiguration.configVersion,
+        )
+    }
+
+    private String getScriptBash(File configDirectory, String xmlConfig, File configFilePath) {
+        String md5 = HelperUtils.getRandomMd5sum()
+        String createConfigDirectory = ''
+
+        if (!configDirectory.exists()) {
+            createConfigDirectory = """\
+mkdir -p -m 2750 ${configDirectory}
+"""
+        }
+
+        return """\
+
+${createConfigDirectory}
+
+cat <<${md5} > ${configFilePath}
+${xmlConfig}
+${md5}
+
+chmod 0440 ${configFilePath}
+
+"""
+    }
 
 
     private String buildCreateProjectDirectory(String unixGroup, File projectDirectory) {
@@ -395,6 +436,15 @@ class PanCanAlignmentConfiguration {
     String referenceGenome
     String statSizeFileName
     String mergeTool
+    String pluginName
+    String pluginVersion
+    String baseProjectConfig
+    String configVersion
+}
+
+class SnvPipelineConfiguration {
+    Project project
+    SeqType seqType
     String pluginName
     String pluginVersion
     String baseProjectConfig

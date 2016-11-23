@@ -1346,6 +1346,13 @@ class DomainFactory {
         ]
     }
 
+    static List<SeqType> createSnvSeqTypes() {
+        [
+                createWholeGenomeSeqType(),
+                createExomeSeqType(),
+        ]
+    }
+
     static MetaDataKey createMetaDataKeyLazy(Map properties = [:]) {
         return createDomainObjectLazy(MetaDataKey,[
                 name: "name_${counter++}",

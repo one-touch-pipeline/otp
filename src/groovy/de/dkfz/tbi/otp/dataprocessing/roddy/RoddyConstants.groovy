@@ -14,4 +14,10 @@ interface RoddyConstants {
 
     static final String OPTION_KEY_ALL_MERGE_TOOLS = 'RoddyAllMergeTools'
 
+    static final String OPTION_KEY_SNV_PIPELINE_PLUGIN_NAME = 'SnvPipelinePluginName'
+
+    static final String OPTION_KEY_SNV_PIPELINE_PLUGIN_VERSION = 'SnvPipelinePluginVersion'
+
+    static final String OPTION_KEY_SNV_BASE_PROJECT_CONFIG = 'SnvBaseProjectConfig'
+
 }

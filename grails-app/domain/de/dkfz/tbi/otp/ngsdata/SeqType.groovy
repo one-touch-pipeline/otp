@@ -136,6 +136,13 @@ class SeqType implements Entity {
         ]
     }
 
+    static List<SeqType> getSnvPipelineSeqTypes() {
+        return [
+                getExomePairedSeqType(),
+                getWholeGenomePairedSeqType(),
+        ]
+    }
+
     static List<SeqType> getAllAlignableSeqTypes() {
         return [
                 getDefaultOtpAlignableSeqTypes(),

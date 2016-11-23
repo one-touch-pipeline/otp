@@ -158,15 +158,18 @@ class RoddyWorkflowConfig extends ConfigPerProject implements AlignmentConfig {
         return getNameUsedInConfig(pipeline.name, seqType, pluginVersion, configVersion)
     }
 
-    static String getNameUsedInConfig(Pipeline.Name pipelineName, SeqType seqType, String pluginVersion, String configVersion) {
+    static String getNameUsedInConfig(Pipeline.Name pipelineName, SeqType seqType, String pluginNameAndVersion, String configVersion) {
         assert pipelineName
         assert seqType
-        assert pluginVersion
+        assert pluginNameAndVersion
         assert configVersion
 
-        return "${pipelineName.name()}_${seqType.roddyName}_${pluginVersion}_${configVersion}"
+        return "${pipelineName.name()}_${seqType.roddyName}_${pluginNameAndVersion}_${configVersion}"
     }
 
+    static String getNameUsedInConfig(Pipeline.Name pipelineName, SeqType seqType, String pluginName, String pluginVersion, String configVersion) {
+        getNameUsedInConfig(pipelineName, seqType, "${pluginName}:${pluginVersion}", configVersion)
+    }
 
     static File getStandardConfigDirectory(Project project, Pipeline.Name pipelineName) {
         assert project
@@ -178,15 +181,15 @@ class RoddyWorkflowConfig extends ConfigPerProject implements AlignmentConfig {
         )
     }
 
-    static String getConfigFileName(Pipeline.Name pipelineName, SeqType seqType, String pluginVersion, String configVersion) {
+    static String getConfigFileName(Pipeline.Name pipelineName, SeqType seqType, String pluginNameAndVersion, String configVersion) {
         assert pipelineName
         assert seqType
-        assert pluginVersion
+        assert pluginNameAndVersion
         assert configVersion
 
         assert seqType.roddyName
         assert configVersion ==~ CONFIG_VERSION_PATTERN
-        return "${getNameUsedInConfig(pipelineName, seqType, pluginVersion, configVersion)}.xml"
+        return "${getNameUsedInConfig(pipelineName, seqType, pluginNameAndVersion, configVersion)}.xml"
     }
 
     static File getStandardConfigFile(Project project, Pipeline.Name pipelineName, SeqType seqType, String pluginVersion, String configVersion) {

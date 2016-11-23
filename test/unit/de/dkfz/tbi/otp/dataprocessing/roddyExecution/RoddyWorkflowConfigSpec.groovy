@@ -154,7 +154,7 @@ class RoddyWorkflowConfigSpec extends Specification {
         pipeline                       | seqType                                            | pluginVersion  | configVersion  || nullProperty
         null                           | DomainFactory.createSeqType(roddyName: RODDY_NAME) | PLUGIN_VERSION | CONFIG_VERSION || 'pipeline'
         Pipeline.Name.PANCAN_ALIGNMENT | null                                               | PLUGIN_VERSION | CONFIG_VERSION || 'seqType'
-        Pipeline.Name.PANCAN_ALIGNMENT | DomainFactory.createSeqType(roddyName: RODDY_NAME) | null           | CONFIG_VERSION || 'pluginVersion'
+        Pipeline.Name.PANCAN_ALIGNMENT | DomainFactory.createSeqType(roddyName: RODDY_NAME) | null           | CONFIG_VERSION || 'pluginNameAndVersion'
         Pipeline.Name.PANCAN_ALIGNMENT | DomainFactory.createSeqType(roddyName: RODDY_NAME) | PLUGIN_VERSION | null           || 'configVersion'
     }
 
@@ -227,7 +227,7 @@ class RoddyWorkflowConfigSpec extends Specification {
         pipeline                       | seqType                                            | pluginVersion  | configVersion  || nullProperty
         null                           | DomainFactory.createSeqType(roddyName: RODDY_NAME) | PLUGIN_VERSION | CONFIG_VERSION || 'pipeline'
         Pipeline.Name.PANCAN_ALIGNMENT | null                                               | PLUGIN_VERSION | CONFIG_VERSION || 'seqType'
-        Pipeline.Name.PANCAN_ALIGNMENT | DomainFactory.createSeqType(roddyName: RODDY_NAME) | null           | CONFIG_VERSION || 'pluginVersion'
+        Pipeline.Name.PANCAN_ALIGNMENT | DomainFactory.createSeqType(roddyName: RODDY_NAME) | null           | CONFIG_VERSION || 'pluginNameAndVersion'
         Pipeline.Name.PANCAN_ALIGNMENT | DomainFactory.createSeqType(roddyName: RODDY_NAME) | PLUGIN_VERSION | null           || 'configVersion'
     }
 
