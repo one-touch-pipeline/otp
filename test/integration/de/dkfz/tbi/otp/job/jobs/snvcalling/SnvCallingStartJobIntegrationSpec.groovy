@@ -122,6 +122,6 @@ class SnvCallingStartJobIntegrationSpec extends Specification {
         RoddySnvCallingInstance.list().size() == 2
         restartedInstance.config == failedInstance.config
 
-        failedInstance.processingState == SnvProcessingStates.FAILED
+        failedInstance.withdrawn == true
     }
 }
