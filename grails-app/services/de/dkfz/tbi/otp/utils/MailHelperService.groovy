@@ -16,17 +16,22 @@ class MailHelperService {
     }
 
     void sendNotificationEmail(String subject, String content) {
-        sendEmail(subject, content, grailsApplication.config.otp.mail.notification.to)
+        sendEmail(subject, content, (String)grailsApplication.config.otp.mail.notification.to)
     }
 
     void sendEmail(String emailSubject, String content, String recipient) {
+       sendEmail(emailSubject, content, Arrays.asList(recipient))
+    }
+
+    void sendEmail(String emailSubject, String content, List<String> recipients) {
         assert emailSubject
         assert content
-        assert recipient
-        log.info "Send email: subject: '${emailSubject}', to: '${recipient}', content: '${content}'"
+        assert recipients
+        assert recipients.every { it.contains('@') }
+        log.info "Send email: subject: '${emailSubject}', to: '${recipients}', content: '${content}'"
         mailService.sendMail {
             from grailsApplication.config.otp.mail.sender
-            to recipient
+            to recipients
             subject emailSubject
             body content
         }

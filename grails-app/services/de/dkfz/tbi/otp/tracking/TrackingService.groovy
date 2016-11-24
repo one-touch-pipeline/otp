@@ -135,10 +135,45 @@ class TrackingService {
     }
 
     void sendCustomerNotification(OtrsTicket ticket, ProcessingStatus status, OtrsTicket.ProcessingStep notificationStep) {
-        if (notificationStep.sendNotification) {
-            String subject = "[${ProcessingOptionService.getValueOfProcessingOption(TICKET_NUMBER_PREFIX)}#${ticket.ticketNumber}] Notification for customer"
+        if (notificationStep.notificationSubject != null) {
+            status.seqTrackProcessingStatuses.groupBy { it.seqTrack.project }.values().each {
+                sendCustomerNotificationForOneProject(ticket, new ProcessingStatus(it), notificationStep)
+            }
+        }
+    }
+
+    void sendCustomerNotificationForOneProject(OtrsTicket ticket, ProcessingStatus status, OtrsTicket.ProcessingStep notificationStep) {
+        if (notificationStep.notificationSubject != null) {
+
+            Collection<SeqTrack> seqTracks = status.seqTrackProcessingStatuses*.seqTrack
+            if (!seqTracks) {
+                throw new IllegalArgumentException('ProcessingStatus contains no SeqTracks')
+            }
+            Project project = CollectionUtils.exactlyOneElement(seqTracks*.project.unique())
+            Set<IlseSubmission> ilseSubmissions = seqTracks*.ilseSubmission.findAll() as Set
+
+            String mailingList = null
+            if (ticket.automaticNotification) {
+                mailingList = project.mailingListName
+            }
+
+            List<String> recipients = []
+            if (mailingList) {
+                recipients.add(mailingList)
+            }
+            recipients.add(mailHelperService.otrsRecipient)
+
+            StringBuilder subject = new StringBuilder("[${ProcessingOptionService.getValueOfProcessingOption(TICKET_NUMBER_PREFIX)}#${ticket.ticketNumber}] ")
+            if (!mailingList) {
+                subject.append('TO BE SENT: ')
+            }
+            if (ilseSubmissions) {
+                subject.append("[S#${ilseSubmissions*.ilseNumber.sort().join(',')}] ")
+            }
+            subject.append("${project.name} sequencing data ${notificationStep.notificationSubject}")
+
             String content = createNotificationTextService.notification(ticket, status, notificationStep)
-            mailHelperService.sendEmail(subject, content, mailHelperService.otrsRecipient)
+            mailHelperService.sendEmail(subject.toString(), content, recipients)
         }
     }
 

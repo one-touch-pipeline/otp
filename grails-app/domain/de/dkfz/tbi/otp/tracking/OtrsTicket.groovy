@@ -12,12 +12,17 @@ class OtrsTicket implements Commentable, Entity {
 
     @TupleConstructor
     enum ProcessingStep {
-        INSTALLATION(true),
-        FASTQC(false),
-        ALIGNMENT(true),
-        SNV(true)
+        INSTALLATION('installed'),
+        FASTQC(null),
+        ALIGNMENT('aligned'),
+        SNV('SNV-called')
 
-        final boolean sendNotification
+        /**
+         * Will be used in the subject of notification e-mails: "sequencing data ${notificationSubject}"
+         *
+         * {@code null} means that no notification shall be sent for this step
+         */
+        final String notificationSubject
 
         public String toString() {
             return name().toLowerCase(Locale.ENGLISH)

@@ -90,13 +90,13 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         project.description == description
 
         where:
-        name      | dirName | dirAnalysis | projectGroup    | nameInMetadataFiles | copyFiles | mailingListName         | description   | category
-        'project' | 'dir'   | ''          | ''              | 'project'           | true      | "tr_projectMailingList" | 'description' | ["category"]
-        'project' | 'dir'   | ''          | ''              | null                | true      | "tr_projectMailingList" | ''            | ["category"]
-        'project' | 'dir'   | ''          | 'projectGroup'  | 'project'           | true      | "tr_projectMailingList" | 'description' | ["category"]
-        'project' | 'dir'   | ''          | ''              | 'project'           | false     | "tr_projectMailingList" | ''            | ["category"]
-        'project' | 'dir'   | ''          | ''              | 'project'           | true      | ""                      | 'description' | ["category"]
-        'project' | 'dir'   | '/dirA'     | ''              | 'project'           | true      | ""                      | 'description' | []
+        name      | dirName | dirAnalysis | projectGroup    | nameInMetadataFiles | copyFiles | mailingListName          | description   | category
+        'project' | 'dir'   | ''          | ''              | 'project'           | true      | "tr_project@MailingList" | 'description' | ["category"]
+        'project' | 'dir'   | ''          | ''              | null                | true      | "tr_project@MailingList" | ''            | ["category"]
+        'project' | 'dir'   | ''          | 'projectGroup'  | 'project'           | true      | "tr_project@MailingList" | 'description' | ["category"]
+        'project' | 'dir'   | ''          | ''              | 'project'           | false     | "tr_project@MailingList" | ''            | ["category"]
+        'project' | 'dir'   | ''          | ''              | 'project'           | true      | ""                       | 'description' | ["category"]
+        'project' | 'dir'   | '/dirA'     | ''              | 'project'           | true      | ""                       | 'description' | []
     }
 
     void "test createProject if directory is created"() {
@@ -116,7 +116,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 projectGroup: '',
                 nameInMetadataFiles: null,
                 copyFiles: false,
-                mailingListName: "tr_MailingListName",
+                mailingListName: "tr_Mailing@ListName",
                 description: '',
         )
         SpringSecurityUtils.doWithAuth("admin") {
@@ -154,7 +154,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 projectGroup: '',
                 nameInMetadataFiles: nameInMetadataFiles,
                 copyFiles: true,
-                mailingListName: "tr_MailingListName",
+                mailingListName: "tr_Mailing@ListName",
                 description: '',
         )
         SpringSecurityUtils.doWithAuth("admin") {
@@ -190,7 +190,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 projectGroup: '',
                 nameInMetadataFiles: null,
                 copyFiles: false,
-                mailingListName: "tr_MailingListName",
+                mailingListName: "tr_Mailing@ListName",
                 description: '',
         )
         SpringSecurityUtils.doWithAuth("admin") {
@@ -248,7 +248,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 projectGroup: '',
                 nameInMetadataFiles: null,
                 copyFiles: false,
-                mailingListName: "tr_MailingListName",
+                mailingListName: "tr_Mailing@ListName",
                 description: '',
         )
         SpringSecurityUtils.doWithAuth("admin") {
@@ -288,7 +288,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 projectGroup: '',
                 nameInMetadataFiles: null,
                 copyFiles: false,
-                mailingListName: "tr_MailingListName",
+                mailingListName: "tr_Mailing@ListName",
                 description: '',
         )
         SpringSecurityUtils.doWithAuth("admin") {
@@ -352,7 +352,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 projectGroup: '',
                 nameInMetadataFiles: 'project',
                 copyFiles: true,
-                mailingListName: "tr_MailingListName",
+                mailingListName: "tr_Mailing@ListName",
                 description: '',
         )
         SpringSecurityUtils.doWithAuth("admin") {
@@ -395,7 +395,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
 
     void "test updateMailingListName valid name"() {
         given:
-        String mailingListName = "tr_testName"
+        String mailingListName = "tr_test@Name"
         Project project = Project.findByName("testProject")
 
         when:

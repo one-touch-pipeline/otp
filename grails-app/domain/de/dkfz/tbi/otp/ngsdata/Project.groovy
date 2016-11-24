@@ -86,7 +86,7 @@ class Project implements Commentable, Entity, AlignmentConfig {
         comment(nullable: true)
         mailingListName(nullable: true, validator: { val, obj ->
             if (val) {
-                return val.startsWith("tr_")
+                return val.startsWith("tr_") && val.contains('@')
             }
         })
         description(nullable: true)

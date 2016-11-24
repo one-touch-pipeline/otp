@@ -10,6 +10,7 @@ import de.dkfz.tbi.otp.tracking.TrackingService.SamplePairDiscovery
 import de.dkfz.tbi.otp.user.*
 import de.dkfz.tbi.otp.utils.*
 import grails.test.spock.*
+import spock.lang.*
 
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
@@ -61,8 +62,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         DomainFactory.createProcessingOptionForOtrsTicketPrefix("the prefix")
 
         trackingService.createNotificationTextService = Mock(CreateNotificationTextService) {
-            1 * notification(ticketA, _, _) >> 'Something'
-            1 * notification(ticketB, _, _) >> 'Something'
+            notification(_, _, _) >> 'Something'
         }
 
         when:
@@ -146,7 +146,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         // SNV:          finished timestamp not set, nothing done, won't do more
         OtrsTicket ticket = DomainFactory.createOtrsTicket()
         RunSegment runSegment = DomainFactory.createRunSegment(otrsTicket: ticket)
-        DomainFactory.createSeqTrackWithOneDataFile(
+        SeqTrack seqTrack = DomainFactory.createSeqTrackWithOneDataFile(
                 [
                         dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
                         fastqcState: SeqTrack.DataProcessingState.IN_PROGRESS,
@@ -166,14 +166,14 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         String notificationText = HelperUtils.uniqueString
 
         String expectedEmailSubjectOperator = "${prefix}#${ticket.ticketNumber} Processing Status Update"
-        String expectedEmailSubjectCustomer = "[${prefix}#${ticket.ticketNumber}] Notification for customer"
+        String expectedEmailSubjectCustomer = "[${prefix}#${ticket.ticketNumber}] TO BE SENT: ${seqTrack.project.name} sequencing data installed"
 
         trackingService.mailHelperService = Mock(MailHelperService) {
             getOtrsRecipient() >> otrsRecipient
             1 * sendEmail(expectedEmailSubjectOperator, _, otrsRecipient) >> { String emailSubject, String content, String recipient ->
                 assert content.contains(expectedStatus.toString())
             }
-            1 * sendEmail(expectedEmailSubjectCustomer, notificationText, otrsRecipient)
+            1 * sendEmail(expectedEmailSubjectCustomer, notificationText, [otrsRecipient])
             0 * _
         }
 
@@ -201,13 +201,14 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         // SNV:          finished timestamp not set, nothing done, won't do more
         OtrsTicket ticket = DomainFactory.createOtrsTicket()
         RunSegment runSegment = DomainFactory.createRunSegment(otrsTicket: ticket)
-        DomainFactory.createSeqTrackWithOneDataFile(
+        SeqTrack seqTrack1 = DomainFactory.createSeqTrackWithOneDataFile(
                 [
                         dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
                         fastqcState: SeqTrack.DataProcessingState.FINISHED,
                 ],
                 [runSegment: runSegment, fileLinked: true])
-        SeqTrack seqTrack = DomainFactory.createSeqTrackWithOneDataFile([
+        SeqTrack seqTrack2 = DomainFactory.createSeqTrackWithOneDataFile([
+                sample: DomainFactory.createSample(individual: DomainFactory.createIndividual(project: seqTrack1.project)),
                 dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
                 fastqcState: SeqTrack.DataProcessingState.FINISHED,
                 run: DomainFactory.createRun(
@@ -219,11 +220,11 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         setBamFileInProjectFolder(DomainFactory.createRoddyBamFile(
                 DomainFactory.createRoddyBamFile([
                         workPackage: DomainFactory.createMergingWorkPackage(
-                                MergingWorkPackage.getMergingProperties(seqTrack) +
+                                MergingWorkPackage.getMergingProperties(seqTrack2) +
                                         [pipeline: DomainFactory.createPanCanPipeline()]
                         )
                 ]),
-                DomainFactory.randomProcessedBamFileProperties + [seqTracks: [seqTrack] as Set],
+                DomainFactory.randomProcessedBamFileProperties + [seqTracks: [seqTrack2] as Set],
         ))
         ProcessingStatus expectedStatus = [
                 getInstallationProcessingStatus: { -> ALL_DONE },
@@ -240,15 +241,17 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         String notificationText2 = HelperUtils.uniqueString
 
         String expectedEmailSubjectOperator = "${prefix}#${ticket.ticketNumber} Final Processing Status Update"
-        String expectedEmailSubjectCustomer = "[${prefix}#${ticket.ticketNumber}] Notification for customer"
+        String expectedEmailSubjectCustomer = "[${prefix}#${ticket.ticketNumber}] TO BE SENT: ${seqTrack1.project.name} sequencing data "
+        String expectedEmailSubjectCustomer1 = expectedEmailSubjectCustomer + OtrsTicket.ProcessingStep.INSTALLATION.notificationSubject
+        String expectedEmailSubjectCustomer2 = expectedEmailSubjectCustomer + OtrsTicket.ProcessingStep.ALIGNMENT.notificationSubject
 
         trackingService.mailHelperService = Mock(MailHelperService) {
             getOtrsRecipient() >> otrsRecipient
             1 * sendEmail(expectedEmailSubjectOperator, _, otrsRecipient) >> { String emailSubject, String content, String recipient ->
                 assert content.contains(expectedStatus.toString())
             }
-            1 * sendEmail(expectedEmailSubjectCustomer, notificationText1, otrsRecipient)
-            1 * sendEmail(expectedEmailSubjectCustomer, notificationText2, otrsRecipient)
+            1 * sendEmail(expectedEmailSubjectCustomer1, notificationText1, [otrsRecipient])
+            1 * sendEmail(expectedEmailSubjectCustomer2, notificationText2, [otrsRecipient])
             0 * _
         }
 
@@ -267,6 +270,165 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         ticket.alignmentFinished == ticket.installationFinished
         ticket.snvFinished == null
         ticket.finalNotificationSent
+    }
+
+
+    private static final String OTRS_RECIPIENT = HelperUtils.uniqueString
+
+    @Unroll
+    void 'sendCustomerNotification sends expected notification'(boolean automaticNotification, Collection<SeqTrack> seqTracks, OtrsTicket.ProcessingStep notificationStep, List<String> recipients, String subject) {
+        given:
+        OtrsTicket ticket = DomainFactory.createOtrsTicket(automaticNotification: automaticNotification)
+        ProcessingStatus status = new ProcessingStatus(seqTracks.collect { new SeqTrackProcessingStatus(it) })
+        String prefix = HelperUtils.uniqueString
+        DomainFactory.createProcessingOptionForOtrsTicketPrefix(prefix)
+        subject = "[${prefix}#${ticket.ticketNumber}] ${subject}"
+        int callCount = recipients.isEmpty() ? 0 : 1
+        String content = HelperUtils.uniqueString
+
+        trackingService.mailHelperService = Mock(MailHelperService) {
+            getOtrsRecipient() >> OTRS_RECIPIENT
+            callCount * sendEmail(subject, content, recipients)
+            0 * sendEmail(_, _, _)
+        }
+        trackingService.createNotificationTextService = Mock(CreateNotificationTextService) {
+            callCount * notification(ticket, _, notificationStep) >> { OtrsTicket ticket1, ProcessingStatus status1, OtrsTicket.ProcessingStep processingStep ->
+                TestCase.assertContainSame(status.seqTrackProcessingStatuses, status1.seqTrackProcessingStatuses)
+                return content
+            }
+        }
+
+        expect:
+        trackingService.sendCustomerNotification(ticket, status, notificationStep)
+
+        where:
+        [automaticNotification, seqTracks, notificationStep, recipients, subject] << createSendCustomerNotificationTestData()
+    }
+
+    private static List createSendCustomerNotificationTestData() {
+
+        String project1Recipient = 'tr_list@test.test'
+        Project project1 = DomainFactory.createProject(
+                name: 'Project1',
+                mailingListName: project1Recipient,
+        )
+        Project project2 = DomainFactory.createProject(
+                name: 'Project2',
+                mailingListName: null,
+        )
+        Sample sample1 = DomainFactory.createSample(individual: DomainFactory.createIndividual(project: project1))
+        Sample sample2 = DomainFactory.createSample(individual: DomainFactory.createIndividual(project: project2))
+        IlseSubmission ilse1234 = DomainFactory.createIlseSubmission(ilseNumber: 1234)
+        IlseSubmission ilse9876 = DomainFactory.createIlseSubmission(ilseNumber: 9876)
+
+        return [
+                [  // all good, no ILSe submission
+                   true,
+                   [
+                           DomainFactory.createSeqTrack(sample: sample1),
+                   ],
+                   OtrsTicket.ProcessingStep.INSTALLATION,
+                   [project1Recipient, OTRS_RECIPIENT],
+                   'Project1 sequencing data installed',
+                ],
+                [  // automaticNotification false
+                   false,
+                   [
+                           DomainFactory.createSeqTrack(sample: sample1),
+                   ],
+                   OtrsTicket.ProcessingStep.INSTALLATION,
+                   [OTRS_RECIPIENT],
+                   'TO BE SENT: Project1 sequencing data installed',
+                ],
+                [  // all good, one ILSe submission
+                   true,
+                   [
+                           DomainFactory.createSeqTrack(sample: sample1),
+                           DomainFactory.createSeqTrack(
+                                   sample: sample1,
+                                   ilseSubmission: ilse1234,
+                           ),
+                   ],
+                   OtrsTicket.ProcessingStep.INSTALLATION,
+                   [project1Recipient, OTRS_RECIPIENT],
+                   '[S#1234] Project1 sequencing data installed',
+                ],
+                [  // no notification for step
+                   true,
+                   [
+                           DomainFactory.createSeqTrack(sample: sample1),
+                   ],
+                   OtrsTicket.ProcessingStep.FASTQC,
+                   [],
+                   null,
+                ],
+                [  // no mailing list specified, no ILSe submission
+                   true,
+                   [
+                           DomainFactory.createSeqTrack(sample: sample2),
+                   ],
+                   OtrsTicket.ProcessingStep.ALIGNMENT,
+                   [OTRS_RECIPIENT],
+                   'TO BE SENT: Project2 sequencing data aligned',
+                ],
+                [  // no mailing list specified, multiple ILSe submissions
+                   true,
+                   [
+                           DomainFactory.createSeqTrack(
+                                   sample: sample2,
+                                   ilseSubmission: ilse9876,
+                           ),
+                           DomainFactory.createSeqTrack(
+                                   sample: sample2,
+                                   ilseSubmission: ilse9876,
+                           ),
+                           DomainFactory.createSeqTrack(
+                                   sample: sample2,
+                                   ilseSubmission: ilse1234,
+                           ),
+                           DomainFactory.createSeqTrack(sample: sample2),
+                   ],
+                   OtrsTicket.ProcessingStep.SNV,
+                   [OTRS_RECIPIENT],
+                   'TO BE SENT: [S#1234,9876] Project2 sequencing data SNV-called',
+                ],
+        ]
+    }
+
+    void 'sendCustomerNotification, with multiple projects, sends multiple notifications'() {
+        given:
+        OtrsTicket ticket = DomainFactory.createOtrsTicket()
+        ProcessingStatus status = new ProcessingStatus([1, 2].collect { int index ->
+            new SeqTrackProcessingStatus(DomainFactory.createSeqTrack(
+                    sample: DomainFactory.createSample(
+                            individual: DomainFactory.createIndividual(
+                                    project: DomainFactory.createProject(
+                                            name: "Project_X${index}",
+                                            mailingListName: "tr_project${index}@test.test",
+                                    )
+                            )
+                    )
+            ))
+        })
+        String prefix = HelperUtils.uniqueString
+        DomainFactory.createProcessingOptionForOtrsTicketPrefix(prefix)
+
+        trackingService.mailHelperService = Mock(MailHelperService) {
+            getOtrsRecipient() >> OTRS_RECIPIENT
+            1 * sendEmail("[${prefix}#${ticket.ticketNumber}] Project_X1 sequencing data installed",
+                    'Project_X1', ['tr_project1@test.test', OTRS_RECIPIENT])
+            1 * sendEmail("[${prefix}#${ticket.ticketNumber}] Project_X2 sequencing data installed",
+                    'Project_X2', ['tr_project2@test.test', OTRS_RECIPIENT])
+            0 * sendEmail(_, _, _)
+        }
+        trackingService.createNotificationTextService = Mock(CreateNotificationTextService) {
+            notification(ticket, _, OtrsTicket.ProcessingStep.INSTALLATION) >> { OtrsTicket ticket1, ProcessingStatus status1, OtrsTicket.ProcessingStep processingStep ->
+                return exactlyOneElement(status1.seqTrackProcessingStatuses*.seqTrack*.project.unique()).name
+            }
+        }
+
+        expect:
+        trackingService.sendCustomerNotification(ticket, status, OtrsTicket.ProcessingStep.INSTALLATION)
     }
 
 

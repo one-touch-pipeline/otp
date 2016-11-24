@@ -29,6 +29,15 @@ class MailHelperServiceTests {
     }
 
     @Test
+    void testSendEmailWithMultipleRecipients() {
+        mailHelperService.sendEmail(
+                SUBJECT,
+                BODY,
+                [RECIPIENT, RECIPIENT],
+        )
+    }
+
+    @Test
     void testSendEmail_subjectIsNull_shouldFail() {
         assert TestCase.shouldFail(AssertionError) {
             mailHelperService.sendEmail(

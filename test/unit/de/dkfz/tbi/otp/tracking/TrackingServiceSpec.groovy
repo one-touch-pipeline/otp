@@ -3,7 +3,6 @@ package de.dkfz.tbi.otp.tracking
 import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.notification.*
 import de.dkfz.tbi.otp.utils.*
 import grails.test.mixin.*
 import grails.test.mixin.web.*
@@ -285,34 +284,6 @@ ILSe 5678, runA, lane 1, ${sampleText}
         expect:
         trackingService.sendOperatorNotification(ticket, Collections.emptySet(), new ProcessingStatus(), true)
     }
-
-    @Unroll
-    void 'sendCustomerNotification, when ProcessingStep.sendNotification is true, sends customer notification, else send nothing'() {
-        given:
-        OtrsTicket ticket = DomainFactory.createOtrsTicket()
-        String otrsRecipient = HelperUtils.uniqueString
-        int callCount = sendNotification ? 1 : 0
-        DomainFactory.createProcessingOptionForOtrsTicketPrefix()
-
-        trackingService.mailHelperService = Mock(MailHelperService) {
-            callCount * getOtrsRecipient() >> otrsRecipient
-            callCount * sendEmail(_, _, otrsRecipient)
-        }
-        trackingService.createNotificationTextService = Mock(CreateNotificationTextService) {
-            callCount * notification(_, _, _)
-        }
-
-        expect:
-        trackingService.sendCustomerNotification(ticket, new ProcessingStatus(), processingStep)
-
-        where:
-        processingStep                         | sendNotification
-        OtrsTicket.ProcessingStep.INSTALLATION | true
-        OtrsTicket.ProcessingStep.FASTQC       | false
-        OtrsTicket.ProcessingStep.ALIGNMENT    | true
-        OtrsTicket.ProcessingStep.SNV          | true
-    }
-
 
     void "getProcessingStatus returns expected status"() {
         given:
