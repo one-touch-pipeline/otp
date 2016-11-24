@@ -656,6 +656,29 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         createSeqTrackProcessingStatus(mwpStatus).snvProcessingStatus == NOTHING_DONE_WONT_DO
     }
 
+    void "fillInSamplePairStatuses, SCI withdrawn, returns NOTHING_DONE_WONT_DO"() {
+        given:
+        SnvCallingInstance snvCallingInstance = DomainFactory.createSnvInstanceWithRoddyBamFiles(processingState: AnalysisProcessingStates.FINISHED)
+
+        [1, 2].each {
+            setBamFileInProjectFolder(snvCallingInstance."sampleType${it}BamFile")
+        }
+
+        MergingWorkPackageProcessingStatus mwpStatus = createMergingWorkPackageProcessingStatus(
+                snvCallingInstance.sampleType1BamFile)
+
+        when:
+        snvCallingInstance.withdrawn = true
+        trackingService.fillInSamplePairStatuses([mwpStatus], new SamplePairDiscovery())
+
+        then:
+        assert snvCallingInstance.withdrawn
+        SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
+        samplePairStatus.completeProcessableSnvCallingInstanceInProjectFolder == null
+        mwpStatus.snvProcessingStatus == NOTHING_DONE_WONT_DO
+        createSeqTrackProcessingStatus(mwpStatus).snvProcessingStatus == NOTHING_DONE_WONT_DO
+    }
+
     void "fillInSamplePairStatuses, 1 SCI FINISHED, bamFileInProjectFolder set, returns ALL_DONE"() {
         given:
         SnvCallingInstance snvCallingInstance = DomainFactory.createSnvInstanceWithRoddyBamFiles(processingState: AnalysisProcessingStates.FINISHED)

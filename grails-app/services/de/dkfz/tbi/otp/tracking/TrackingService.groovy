@@ -316,7 +316,7 @@ class TrackingService {
 
     SamplePairProcessingStatus getSamplePairProcessingStatus(SamplePair sp) {
         SnvCallingInstance sci = sp.findLatestSnvCallingInstance()
-        if (sci) {
+        if (sci && !sci.withdrawn) {
             if (sci.processingState == AnalysisProcessingStates.FINISHED && [1, 2].every {
                 AbstractMergedBamFile bamFile = sci."sampleType${it}BamFile"
                 return bamFile == bamFile.mergingWorkPackage.completeProcessableBamFileInProjectFolder
