@@ -53,7 +53,7 @@ class SamplePairServiceTests extends AbstractIntegrationTest {
 
     @Test
     void "test samplePairsBySnvProcessingState disable"() {
-        SamplePair samplePair = DomainFactory.createSamplePair(processingStatus: SamplePair.ProcessingStatus.DISABLED)
+        SamplePair samplePair = DomainFactory.createSamplePair(snvProcessingStatus: SamplePair.ProcessingStatus.DISABLED)
         SpringSecurityUtils.doWithAuth("admin") {
             Map map = samplePairService.samplePairsBySnvProcessingState(samplePair.individual)
             def expected = [

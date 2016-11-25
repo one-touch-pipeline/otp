@@ -41,17 +41,45 @@ class SamplePairUnitTests {
         SamplePair samplePair = DomainFactory.createSamplePair(mergingWorkPackage1,
                 DomainFactory.createMergingWorkPackage(mergingWorkPackage1, sampleType2))
 
-        String path = "${project.dirName}/sequencing/whole_genome_sequencing/view-by-pid/654321/snv_results/paired/tumor_control"
-        return [path, samplePair, project]
+        String snvPath = "${project.dirName}/sequencing/whole_genome_sequencing/view-by-pid/654321/snv_results/paired/tumor_control"
+        String indelPath = "${project.dirName}/sequencing/whole_genome_sequencing/view-by-pid/654321/indel_results/paired/tumor_control"
+        return [snvPath, indelPath, samplePair, project]
     }
 
     @Test
-    void testGetSamplePairPath() {
-        def (String path, SamplePair samplePair, Project project) = setUpForPathTests()
-        File expectedExtension = new File(path)
+    void testGetSnvSamplePairPath() {
+        def (String snvPath, String indelPath, SamplePair samplePair, Project project) = setUpForPathTests()
+        File expectedExtension = new File(snvPath)
 
-        OtpPath samplePairPath = samplePair.getSamplePairPath()
+        OtpPath samplePairPath = samplePair.getSnvSamplePairPath()
         assertEquals(expectedExtension, samplePairPath.relativePath)
         assertEquals(project, samplePairPath.project)
+    }
+
+    @Test
+    void testGetIndelSamplePairPath() {
+        def (String snvPath, String indelPath, SamplePair samplePair, Project project) = setUpForPathTests()
+        File expectedExtension = new File(indelPath)
+
+        OtpPath samplePairPath = samplePair.getIndelSamplePairPath()
+        assertEquals(expectedExtension, samplePairPath.relativePath)
+        assertEquals(project, samplePairPath.project)
+    }
+
+
+    @Test
+    void testSetIndelProcessingStatus() {
+        SamplePair samplePair = setUpForPathTests()[2]
+        SamplePair.setIndelProcessingStatus([samplePair], SamplePair.ProcessingStatus.DISABLED)
+
+        assert samplePair.indelProcessingStatus == SamplePair.ProcessingStatus.DISABLED
+    }
+
+    @Test
+    void testSetSnvProcessingStatus() {
+        SamplePair samplePair = setUpForPathTests()[2]
+        SamplePair.setSnvProcessingStatus([samplePair], SamplePair.ProcessingStatus.DISABLED)
+
+        assert samplePair.snvProcessingStatus == SamplePair.ProcessingStatus.DISABLED
     }
 }

@@ -51,7 +51,7 @@ public class AbstractSnvCallingStartJobTests extends GroovyScriptAwareTestCase i
 
             // Sample pair + service-mocks to make sure it is found by the startJob
             mockSamplePair = snvTestData.samplePair
-            mockSamplePair.processingStatus = ProcessingStatus.NEEDS_PROCESSING
+            mockSamplePair.snvProcessingStatus = ProcessingStatus.NEEDS_PROCESSING
             assert mockSamplePair.save(flush: true)
             mockSamplePair.metaClass.getLatestProcessedMergedBamFileForSampleTypeIfNotWithdrawn = { SampleType sampleType ->
                 if (sampleType == sampleType1) {
@@ -102,7 +102,7 @@ public class AbstractSnvCallingStartJobTests extends GroovyScriptAwareTestCase i
             assert processParameter.value == snvCallingInstance.id.toString()
             assert processParameter.process == process
 
-            assert mockSamplePair.processingStatus == ProcessingStatus.NO_PROCESSING_NEEDED
+            assert mockSamplePair.snvProcessingStatus == ProcessingStatus.NO_PROCESSING_NEEDED
 
             assert otrsTicket.snvStarted != null
         } finally {

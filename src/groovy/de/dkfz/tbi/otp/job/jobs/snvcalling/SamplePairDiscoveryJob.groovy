@@ -58,6 +58,6 @@ class SamplePairDiscoveryJob extends AbstractEndStateAwareJobImpl {
         final Collection<SamplePair> samplePairs =
                 SamplePair.findMissingDiseaseControlSamplePairs()
         log?.info "Creating ${samplePairs.size()} new ${SamplePair.simpleName} instance(s)."
-        SamplePair.setProcessingStatus(samplePairs, ProcessingStatus.NEEDS_PROCESSING)
+        SamplePair.setSnvProcessingStatus(samplePairs, ProcessingStatus.NEEDS_PROCESSING)
     }
 }

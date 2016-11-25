@@ -28,7 +28,7 @@ class SnvCallingInstance extends BamFilePairAnalysis implements ProcessParameter
      * Example: ${project}/sequencing/exon_sequencing/view-by-pid/${pid}/snv_results/paired/tumor_control/2014-08-25_15h32
      */
     OtpPath getSnvInstancePath() {
-        return new OtpPath(samplePair.samplePairPath, instanceName)
+        return new OtpPath(samplePair.snvSamplePairPath, instanceName)
     }
 
     /**
@@ -74,10 +74,6 @@ class SnvCallingInstance extends BamFilePairAnalysis implements ProcessParameter
             assert result.sampleType2BamFile.id == sampleType2BamFile.id
         }
         return result
-    }
-
-    SnvCallingInstance getPreviousFinishedInstance() {
-        return SnvCallingInstance.findBySamplePairAndProcessingStateAndIdLessThan(samplePair, AnalysisProcessingStates.FINISHED, this.id, [max: 1, sort: 'id', order: 'desc'])
     }
 
     @Override

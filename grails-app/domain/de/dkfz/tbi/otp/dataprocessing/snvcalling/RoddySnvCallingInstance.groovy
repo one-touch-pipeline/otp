@@ -4,21 +4,12 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 
-class RoddySnvCallingInstance extends SnvCallingInstance implements RoddyResult {
+class RoddySnvCallingInstance extends SnvCallingInstance implements RoddyAnalysisResult {
 
     static hasMany = [
             roddyExecutionDirectoryNames: String,
     ]
 
-    @Override
-    Pipeline getPipeline() {
-        return config.pipeline
-    }
-
-    @Override
-    File getBaseDirectory() {
-        return getWorkDirectory().parentFile
-    }
 
     @Override
     File getWorkDirectory() {

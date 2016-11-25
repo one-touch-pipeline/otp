@@ -6,21 +6,23 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 
 /**
- * For each individual disease/control pairs are compared in the SNV pipeline. These pairs are defined in the GUI and stored in this domain.
+ * For each individual disease/control pairs are compared in the analysis pipelines. These pairs are defined in the GUI and stored in this domain.
  * The sampleTypes which have to be compared differ between the individuals, which is why it has to be specific for an individual.
  * It can happen that not only disease and control shall be compared but also disease&disease.
  * This is why the properties are not call disease and control.
  * The sample pairs can also be used for other purposes i.e. coverage combination between disease and control
- *
  */
 class SamplePair implements Entity {
+
+    final static String SNV_RESULTS_PATH_PART = 'snv_results'
+    final static String INDEL_RESULTS_PATH_PART = 'indel_results'
 
     /**
      * Creates an instance. Does <em>not</em> persist it.
      */
     static SamplePair createInstance(Map properties) {
         SamplePair samplePair = new SamplePair(properties)
-        samplePair.relativePath = samplePair.buildPath().relativePath.path
+        samplePair.relativePath = samplePair.buildPath(SNV_RESULTS_PATH_PART).relativePath.path
         return samplePair
     }
 
@@ -49,7 +51,8 @@ class SamplePair implements Entity {
 
     String relativePath
 
-    ProcessingStatus processingStatus = ProcessingStatus.NEEDS_PROCESSING
+    ProcessingStatus snvProcessingStatus = ProcessingStatus.NEEDS_PROCESSING
+    ProcessingStatus indelProcessingStatus = ProcessingStatus.NEEDS_PROCESSING
 
     /**
      * These properties are handled automatically by grails.
@@ -79,7 +82,7 @@ class SamplePair implements Entity {
             }
         }
         relativePath unique: true, validator: { String val, SamplePair obj ->
-            return OtpPath.isValidRelativePath(val) && val == obj.buildPath().relativePath.path
+            return OtpPath.isValidRelativePath(val) && val == obj.buildPath(SNV_RESULTS_PATH_PART).relativePath.path
         }
     }
 
@@ -92,9 +95,12 @@ class SamplePair implements Entity {
          * The implicit unique index on (mergingWorkPackage1, mergingWorkPackage2) is used by
          * SamplePair.findMissingDiseaseControlSamplePairs.
          */
-        mergingWorkPackage1 index: 'sample_pair_idx1'
-        mergingWorkPackage2 index: 'sample_pair_idx1'
-        processingStatus index: 'sample_pair_idx1'
+        mergingWorkPackage1 index: 'sample_pair_snv_idx1'
+        mergingWorkPackage2 index: 'sample_pair_snv_idx1'
+        snvProcessingStatus index: 'sample_pair_snv_idx1'
+        mergingWorkPackage1 index: 'sample_pair_indel_idx1'
+        mergingWorkPackage2 index: 'sample_pair_indel_idx1'
+        indelProcessingStatus index: 'sample_pair_indel_idx1'
     }
 
     Project getProject() {
@@ -122,14 +128,18 @@ class SamplePair implements Entity {
     /**
      * Example: ${project}/sequencing/exon_sequencing/view-by-pid/${pid}/snv_results/paired/tumor_control
      */
-    OtpPath getSamplePairPath() {
-        OtpPath path = buildPath()
+    OtpPath getSnvSamplePairPath() {
+        OtpPath path = buildPath(SNV_RESULTS_PATH_PART)
         assert relativePath == path.relativePath.path
         return path
     }
 
-    private OtpPath buildPath() {
-        return new OtpPath(individual.getViewByPidPath(seqType), 'snv_results', seqType.libraryLayoutDirName, "${sampleType1.dirName}_${sampleType2.dirName}")
+    OtpPath getIndelSamplePairPath() {
+        return buildPath(INDEL_RESULTS_PATH_PART)
+    }
+
+    private OtpPath buildPath(String analysisPath) {
+        return new OtpPath(individual.getViewByPidPath(seqType), analysisPath, seqType.libraryLayoutDirName, "${sampleType1.dirName}_${sampleType2.dirName}")
     }
 
     String toStringWithoutId() {
@@ -142,7 +152,15 @@ class SamplePair implements Entity {
     }
 
     SnvCallingInstance findLatestSnvCallingInstance() {
-        return SnvCallingInstance.createCriteria().get {
+        return findLatestInstance(SnvCallingInstance.class) as SnvCallingInstance
+    }
+
+    IndelCallingInstance findLatestIndelCallingInstance() {
+        return findLatestInstance(IndelCallingInstance.class) as IndelCallingInstance
+    }
+
+    private BamFilePairAnalysis findLatestInstance(Class instanceClass) {
+        return instanceClass.createCriteria().get {
             eq ('samplePair', this)
             order('id', 'desc')
             maxResults(1)
@@ -210,17 +228,26 @@ class SamplePair implements Entity {
         }
     }
 
-    /**
-     * Sets {@link #processingStatus} of all specified instances to the specified value and saves the instances.
-     */
-    static void setProcessingStatus(final Collection<SamplePair> samplePairs,
-                                    final ProcessingStatus processingStatus) {
+
+    static void setSnvProcessingStatus(final Collection<SamplePair> samplePairs,
+                                       final ProcessingStatus snvProcessingStatus) {
+        setProcessingStatus(samplePairs, snvProcessingStatus, "snvProcessingStatus")
+    }
+
+    static void setIndelProcessingStatus(final Collection<SamplePair> samplePairs,
+                                         final ProcessingStatus indelProcessingStatus) {
+        setProcessingStatus(samplePairs, indelProcessingStatus, "indelProcessingStatus")
+    }
+
+
+    private static void setProcessingStatus(final Collection<SamplePair> samplePairs,
+                                            final ProcessingStatus processingStatus, String property) {
         if (processingStatus == null) {
             throw new IllegalArgumentException()
         }
         SamplePair.withTransaction {
             samplePairs.each {
-                it.processingStatus = processingStatus
+                it."${property}" = processingStatus
                 assert it.save()
             }
         }

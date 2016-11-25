@@ -68,7 +68,7 @@ class SnvCallingService {
         String pairForSnvProcessing =
                 "FROM SamplePair sp " +
                 //check that sample pair shall be processed
-                "WHERE sp.processingStatus = :needsProcessing " +
+                "WHERE sp.snvProcessingStatus = :needsProcessing " +
                 (sp ? "AND sp = :sp " : '') +
                 //check that processing priority of the corresponding project is high enough
                 'AND sp.mergingWorkPackage1.sample.individual.project.processingPriority >= :minPriority ' +

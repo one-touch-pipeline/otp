@@ -170,6 +170,13 @@ class DomainFactory {
         ])
     }
 
+    static Pipeline createIndelPipelineLazy() {
+        return createDomainObjectLazy(Pipeline, [:], [
+                name: Pipeline.Name.RODDY_INDEL,
+                type: Pipeline.Type.INDEL,
+        ])
+    }
+
 
     static Pipeline returnOrCreateAnyPipeline() {
         return (CollectionUtils.atMostOneElement(Pipeline.list(max: 1)) ?: createPanCanPipeline())
@@ -680,7 +687,7 @@ class DomainFactory {
     private static Map createSnvInstanceWithRoddyBamFilesMapHelper(Map properties, Map bamFile1Properties, Map bamFile2Properties) {
         Pipeline pipeline = createPanCanPipeline()
 
-        MergingWorkPackage controlWorkPackage = createMergingWorkPackage(
+        MergingWorkPackage controlWorkPackage = properties.samplePair?.mergingWorkPackage2 ?: createMergingWorkPackage(
                 pipeline: pipeline,
                 statSizeFileName: DEFAULT_TAB_FILE_NAME,
                 seqType: createSeqTypePaired(),
@@ -720,6 +727,19 @@ class DomainFactory {
                 ),
         ]
         return createDomainObject(RoddySnvCallingInstance, map, properties)
+    }
+
+    public static IndelCallingInstance createIndelCallingInstanceWithRoddyBamFiles(Map properties = [:], Map bamFile1Properties = [:], Map bamFile2Properties = [:]) {
+        Map map = createSnvInstanceWithRoddyBamFilesMapHelper(properties, bamFile1Properties, bamFile2Properties)
+        SamplePair samplePair = map.samplePair
+        map += [
+                roddyExecutionDirectoryNames: [DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY],
+                config                      : createRoddyWorkflowConfig(
+                        seqType: samplePair.seqType,
+                        pipeline: createIndelPipelineLazy()
+                ),
+        ]
+        return createDomainObject(IndelCallingInstance, map, properties)
     }
 
     public static SnvJobResult createSnvJobResultWithRoddyBamFiles(Map properties = [:]) {

@@ -47,7 +47,7 @@ class SamplePairController {
                 sampleType1: samplePair.sampleType1.name,
                 sampleType2: samplePair.sampleType2.name,
                 seqType: samplePair.seqType.displayName,
-                samplePairPath: samplePair.samplePairPath.getAbsoluteDataManagementPath().getAbsolutePath(),
+                samplePairPath: samplePair.snvSamplePairPath.getAbsoluteDataManagementPath().getAbsolutePath(),
                 lastUpdated: snvCallingInstance.lastUpdated?.format("yyyy-MM-dd")
             ]
         }

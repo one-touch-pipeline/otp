@@ -81,14 +81,14 @@ class SnvCallingServiceTests {
 
     @Test
     void testSamplePairNoProcessingNeeded() {
-        samplePair.processingStatus = ProcessingStatus.NO_PROCESSING_NEEDED
+        samplePair.snvProcessingStatus = ProcessingStatus.NO_PROCESSING_NEEDED
         assert samplePair.save(flush: true)
         assertNull(snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig))
     }
 
     @Test
     void testSamplePairDisabled() {
-        samplePair.processingStatus = ProcessingStatus.DISABLED
+        samplePair.snvProcessingStatus = ProcessingStatus.DISABLED
         assert samplePair.save(flush: true)
         assertNull(snvCallingService.samplePairForSnvProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig))
     }

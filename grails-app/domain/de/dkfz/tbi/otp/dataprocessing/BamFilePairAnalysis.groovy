@@ -8,7 +8,6 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 import org.hibernate.*
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 abstract class BamFilePairAnalysis implements ProcessParameterObject, Entity {
     /**
@@ -109,6 +108,4 @@ abstract class BamFilePairAnalysis implements ProcessParameterObject, Entity {
             this.save([flush: true])
         }
     }
-
-    public abstract SnvCallingInstance getPreviousFinishedInstance()
 }

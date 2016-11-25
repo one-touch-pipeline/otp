@@ -130,9 +130,4 @@ class BamFilePairAnalysisSpec extends Specification {
 
 
 class MockBamFilePairAnalysis extends BamFilePairAnalysis {
-
-    @Override
-    SnvCallingInstance getPreviousFinishedInstance() {
-        return null
-    }
 }

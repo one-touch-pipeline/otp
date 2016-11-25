@@ -53,7 +53,7 @@ class AbstractMergedBamFileServiceTests {
         SamplePair samplePair = setSamplePairStatusToNeedProcessing_setup(ProcessingStatus.NEEDS_PROCESSING)
         AbstractMergedBamFile bamFile = AbstractMergedBamFile.findByWorkPackage(samplePair.mergingWorkPackage2)
         abstractMergedBamFileService.setSamplePairStatusToNeedProcessing(bamFile)
-        assert samplePair.processingStatus == ProcessingStatus.NEEDS_PROCESSING
+        assert samplePair.snvProcessingStatus == ProcessingStatus.NEEDS_PROCESSING
     }
 
 
@@ -62,7 +62,7 @@ class AbstractMergedBamFileServiceTests {
         SamplePair samplePair = setSamplePairStatusToNeedProcessing_setup(ProcessingStatus.NO_PROCESSING_NEEDED)
         AbstractMergedBamFile bamFile = AbstractMergedBamFile.findByWorkPackage(samplePair.mergingWorkPackage2)
         abstractMergedBamFileService.setSamplePairStatusToNeedProcessing(bamFile)
-        assert samplePair.processingStatus == ProcessingStatus.NEEDS_PROCESSING
+        assert samplePair.snvProcessingStatus == ProcessingStatus.NEEDS_PROCESSING
     }
 
     @Test
@@ -71,13 +71,13 @@ class AbstractMergedBamFileServiceTests {
         SamplePair samplePair2 = setSamplePairStatusToNeedProcessing_setup(ProcessingStatus.NEEDS_PROCESSING)
         AbstractMergedBamFile bamFile = AbstractMergedBamFile.findByWorkPackage(samplePair2.mergingWorkPackage2)
         abstractMergedBamFileService.setSamplePairStatusToNeedProcessing(bamFile)
-        assert samplePair1.processingStatus == ProcessingStatus.NO_PROCESSING_NEEDED
+        assert samplePair1.snvProcessingStatus == ProcessingStatus.NO_PROCESSING_NEEDED
     }
 
     private SamplePair setSamplePairStatusToNeedProcessing_setup(ProcessingStatus processingStatus) {
         AbstractMergedBamFile bamFile1 = DomainFactory.createRoddyBamFile()
         SamplePair samplePair = DomainFactory.createDisease(bamFile1.workPackage)
-        samplePair.processingStatus = processingStatus
+        samplePair.snvProcessingStatus = processingStatus
         assert samplePair.save(flush: true)
         return samplePair
     }

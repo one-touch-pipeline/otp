@@ -26,7 +26,7 @@ class SamplePairService {
             }
         }
         samplePairs.each {
-            switch (it.processingStatus) {
+            switch (it.snvProcessingStatus) {
                 case ProcessingStatus.NEEDS_PROCESSING:
                     notStarted << it
                     break
@@ -36,7 +36,7 @@ class SamplePairService {
                 case ProcessingStatus.NO_PROCESSING_NEEDED:
                     break
                 default:
-                    throw new UnsupportedOperationException("Handling processing status ${it.processingStatus} is not implemented.")
+                    throw new UnsupportedOperationException("Handling processing status ${it.snvProcessingStatus} is not implemented.")
             }
             List<SnvCallingInstance> snvCallingInstances = SnvCallingInstance.findAllBySamplePair(it)
             if (snvCallingInstances.find { it.processingState == AnalysisProcessingStates.FINISHED }) {

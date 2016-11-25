@@ -463,9 +463,9 @@ def handleStateMapSnv = { List next ->
 
     if(samplePairs) {
         samplePairs.unique().each { SamplePair samplePair ->
-            if (samplePair.processingStatus == SamplePair.ProcessingStatus.DISABLED) {
+            if (samplePair.snvProcessingStatus == SamplePair.ProcessingStatus.DISABLED) {
                 stateMap.disabled << samplePair
-            } else if (samplePair.processingStatus == SamplePair.ProcessingStatus.NEEDS_PROCESSING) {
+            } else if (samplePair.snvProcessingStatus == SamplePair.ProcessingStatus.NEEDS_PROCESSING) {
                 if (!SnvConfig.findByProjectAndSeqTypeAndObsoleteDateIsNull(samplePair.project, samplePair.seqType)) {
                     stateMap.noConfig << "${samplePair.project} ${samplePair.seqType}"
                 } else if (SnvCallingInstance.findBySamplePairAndProcessingStateInListAndWithdrawn(samplePair, [AnalysisProcessingStates.IN_PROGRESS], false)) {
@@ -486,7 +486,7 @@ def handleStateMapSnv = { List next ->
                 if (snvCallingInstance && snvCallingInstance.processingState == AnalysisProcessingStates.FINISHED) {
                     stateMap.finished << samplePair
                 }
-                if (!snvCallingInstance && samplePair.processingStatus == SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED) {
+                if (!snvCallingInstance && samplePair.snvProcessingStatus == SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED) {
                     stateMap.notTriggered << samplePair
                 }
             }
@@ -996,7 +996,7 @@ if (allProcessed) {
     """)
 
     //collect waiting SamplePairs
-    SamplePair.findAllByProcessingStatus(SamplePair.ProcessingStatus.NEEDS_PROCESSING).each {SamplePair samplePair ->
+    SamplePair.findAllBySnvProcessingStatus(SamplePair.ProcessingStatus.NEEDS_PROCESSING).each { SamplePair samplePair ->
         //see also: OTP-1497 and/or OTP-1673
         if (SnvConfig.findByProjectAndSeqTypeAndObsoleteDateIsNull(samplePair.project, samplePair.seqType)) {
             [samplePair.mergingWorkPackage1, samplePair.mergingWorkPackage2].each { MergingWorkPackage mergingWorkPackage ->

@@ -46,7 +46,7 @@ abstract class AbstractSnvCallingStartJob extends AbstractStartJobImpl implement
                 )
                 snvCallingInstance.save(flush: true)
                 trackingService.setStartedForSeqTracks(snvCallingInstance.getContainedSeqTracks(), OtrsTicket.ProcessingStep.SNV)
-                samplePair.processingStatus = SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED
+                samplePair.snvProcessingStatus = SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED
                 samplePair.save()
                 createProcess(snvCallingInstance)
                 log.debug "SnvCallingStartJob started for: ${snvCallingInstance.toString()}"

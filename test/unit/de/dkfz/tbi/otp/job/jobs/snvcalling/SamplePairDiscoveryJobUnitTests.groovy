@@ -73,7 +73,7 @@ class SamplePairDiscoveryJobUnitTests {
     private void testMethodWhichCallsSetProcessingStatus(final Collection expectedSamplePairs, final Closure call) {
         try {
             boolean setProcessingStatusCalled = false
-            SamplePair.metaClass.static.setProcessingStatus = {
+            SamplePair.metaClass.static.setSnvProcessingStatus = {
                 final Collection<SamplePair> samplePairs, final ProcessingStatus processingStatus ->
                     assert samplePairs.is(expectedSamplePairs)
                     assert processingStatus == ProcessingStatus.NEEDS_PROCESSING

@@ -26,13 +26,13 @@ class AbstractMergedBamFileService {
     public void setSamplePairStatusToNeedProcessing(AbstractMergedBamFile finishedBamFile) {
         assert finishedBamFile: "The input bam file must not be null"
         SamplePair.createCriteria().list {
-            eq('processingStatus', SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED)
+            eq('snvProcessingStatus', SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED)
             or {
                 eq('mergingWorkPackage1', finishedBamFile.workPackage)
                 eq('mergingWorkPackage2', finishedBamFile.workPackage)
             }
         }.each { SamplePair samplePair ->
-            samplePair.processingStatus = SamplePair.ProcessingStatus.NEEDS_PROCESSING
+            samplePair.snvProcessingStatus = SamplePair.ProcessingStatus.NEEDS_PROCESSING
             assert samplePair.save(flush: true)
         }
     }

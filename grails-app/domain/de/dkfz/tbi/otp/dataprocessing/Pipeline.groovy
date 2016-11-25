@@ -11,6 +11,7 @@ class Pipeline implements Entity {
         PANCAN_ALIGNMENT(Type.ALIGNMENT, true,  'bwa\u00A0mem'),
         OTP_SNV         (Type.SNV,       false, null),
         RODDY_SNV       (Type.SNV,       true,  null),
+        RODDY_INDEL     (Type.INDEL,     true,  null),
 
         final Type type
         final boolean usesRoddy
@@ -21,6 +22,7 @@ class Pipeline implements Entity {
     static enum Type {
         ALIGNMENT,
         SNV,
+        INDEL,
     }
     Type type
 

@@ -31,7 +31,7 @@ LogThreadLocal.withThreadLog(System.out, {
                 }
             }
 
-            it.processingStatus = SamplePair.ProcessingStatus.NEEDS_PROCESSING
+            it.snvProcessingStatus = SamplePair.ProcessingStatus.NEEDS_PROCESSING
             println it.save(flush: true, failOnError: true)
         }
     }

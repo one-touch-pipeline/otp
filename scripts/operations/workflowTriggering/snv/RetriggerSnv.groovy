@@ -23,7 +23,7 @@ LogThreadLocal.withThreadLog(System.out, {
                 it.save(flush: true, failOnError: true)
             }
 
-            it.samplePair.processingStatus = SamplePair.ProcessingStatus.NEEDS_PROCESSING
+            it.samplePair.snvProcessingStatus = SamplePair.ProcessingStatus.NEEDS_PROCESSING
             println it.samplePair.save(flush: true, failOnError: true)
         }
     }

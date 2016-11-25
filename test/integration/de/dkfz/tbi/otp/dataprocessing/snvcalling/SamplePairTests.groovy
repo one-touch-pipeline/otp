@@ -44,11 +44,11 @@ class SamplePairTests {
         )
         assert persistedSamplePair.save(flush: true)
 
-        SamplePair.setProcessingStatus([nonPersistedSamplePair, persistedSamplePair], processingStatus)
+        SamplePair.setSnvProcessingStatus([nonPersistedSamplePair, persistedSamplePair], processingStatus)
 
-        assert nonPersistedSamplePair.processingStatus == processingStatus
+        assert nonPersistedSamplePair.snvProcessingStatus == processingStatus
         assert nonPersistedSamplePair.id
-        assert persistedSamplePair.processingStatus == processingStatus
+        assert persistedSamplePair.snvProcessingStatus == processingStatus
     }
 
     @Test
@@ -96,9 +96,25 @@ class SamplePairTests {
 
     @Test
     void testFindLatestSnvCallingInstance_whenSnvCallingInstanceExists_ShouldReturnLatest() {
-        DomainFactory.createSnvInstanceWithRoddyBamFiles()
-        SnvCallingInstance latest = DomainFactory.createSnvInstanceWithRoddyBamFiles()
+        SnvCallingInstance first = DomainFactory.createSnvInstanceWithRoddyBamFiles()
+        SnvCallingInstance latest = DomainFactory.createSnvInstanceWithRoddyBamFiles([samplePair: first.samplePair, instanceName: '2015-08-25_15h32'])
 
         assert latest == latest.samplePair.findLatestSnvCallingInstance()
     }
+
+    @Test
+    void testFindLatestIndelCallingInstance_whenNoIndelCallingInstanceExists_ShouldReturnNull() {
+        SamplePair sp = DomainFactory.createSamplePair()
+
+        assert null == sp.findLatestIndelCallingInstance()
+    }
+
+    @Test
+    void testFindLatestIndelCallingInstance_whenIndelCallingInstanceExists_ShouldReturnLatest() {
+        IndelCallingInstance first = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles()
+        IndelCallingInstance latest = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles([samplePair: first.samplePair, instanceName: '2015-08-25_15h32'])
+
+        assert latest == latest.samplePair.findLatestIndelCallingInstance()
+    }
+
 }

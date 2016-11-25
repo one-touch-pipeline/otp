@@ -165,7 +165,7 @@ class CreateNotificationTextService {
         if (samplePairs[false]) {
             message += '\n' + createMessage(ALIGNMENT_NO_FURTHER_PROCESSING_TEMPLATE, [
                     samplePairsWontProcess: getSamplePairRepresentation(samplePairs[false]*.samplePair.findAll {
-                        it.processingStatus != SamplePair.ProcessingStatus.DISABLED }),
+                        it.snvProcessingStatus != SamplePair.ProcessingStatus.DISABLED }),
             ])
         }
 
@@ -192,7 +192,7 @@ class CreateNotificationTextService {
         ])
 
         List<SamplePair> samplePairsNotProcessed = map[NOTHING_DONE_WONT_DO]*.samplePair.findAll {
-            it.processingStatus != SamplePair.ProcessingStatus.DISABLED }
+            it.snvProcessingStatus != SamplePair.ProcessingStatus.DISABLED }
         if (samplePairsNotProcessed) {
             message += '\n' + createMessage(SNV_NOT_PROCESSED_TEMPLATE, [
                     samplePairsNotProcessed: getSamplePairRepresentation(samplePairsNotProcessed),
@@ -286,7 +286,7 @@ class CreateNotificationTextService {
     }
 
     String snvDirectory(List<SamplePair> samplePairsFinished) {
-        return samplePairsFinished*.getSamplePairPath()*.absoluteDataManagementPath.collect {
+        return samplePairsFinished*.getSnvSamplePairPath()*.absoluteDataManagementPath.collect {
             LsdfFilesService.normalizePathForCustomers(it)
         }.unique().sort()*.path.join('\n')
     }
