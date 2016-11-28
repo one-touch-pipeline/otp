@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page import="de.dkfz.tbi.otp.job.jobs.RestartableStartJob" contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -33,6 +33,11 @@
                 <div id="process-visualization" style="display: none"></div>
                 <button id="show-visualization"><g:message code="processes.process.showProcessVisualization"/></button>
                 <button id="hide-visualization" style="display: none"><g:message code="processes.process.hideProcessVisualization"/></button>
+                <sec:ifAllGranted roles="ROLE_ADMIN">
+                    <g:if test="${RestartableStartJob.isAssignableFrom(Class.forName(process.getStartJobClass()))}">
+                        <button id="show-restart-process"><g:message code="processes.process.restartProcess"/></button>
+                    </g:if>
+                </sec:ifAllGranted>
             </div>
         </div>
         <div id="processCommentBox" class="commentBoxContainer">

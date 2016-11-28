@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.job.processing
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.job.jobs.utils.*
 import de.dkfz.tbi.otp.job.plan.*
+import de.dkfz.tbi.otp.job.restarting.*
 import de.dkfz.tbi.otp.utils.*
 import grails.converters.*
 import grails.util.*
@@ -46,6 +47,7 @@ class ProcessesController {
     JobExecutionPlanService jobExecutionPlanService
     ProcessService processService
     CommentService commentService
+    RestartActionService restartActionService
 
     def index() {
         redirect(action: 'list')
@@ -213,6 +215,7 @@ class ProcessesController {
     def process() {
         Process process = processService.getProcess(params.id as long)
         [
+                process: process,
                 name: process.jobExecutionPlan.name,
                 id: process.id,
                 operatorIsAwareOfFailure: process.operatorIsAwareOfFailure,
@@ -276,6 +279,16 @@ class ProcessesController {
     def processVisualization() {
         Process process = processService.getProcess(params.id as long)
         render processService.processInformation(process) as JSON
+    }
+
+    def restartWithProcess() {
+        def data = [success: true]
+        try {
+            restartActionService.restartWorkflowWithProcess(params.id as long)
+        } catch (RuntimeException e) {
+            data = [success: false, error: e.message]
+        }
+        render data as JSON
     }
 
     def processingStep() {

@@ -5,11 +5,19 @@ import de.dkfz.tbi.otp.job.jobs.*
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.scheduler.*
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
+import grails.test.mixin.*
 import org.apache.commons.logging.*
 import org.springframework.context.*
 import spock.lang.*
 
+@Mock([
+        Process,
+        ProcessingStep,
+        ProcessingStepUpdate,
+        JobExecutionPlan,
+])
 class RestartActionServiceSpec extends Specification {
 
     void "handleAction, when action is null, does nothing"() {
@@ -183,6 +191,54 @@ class RestartActionServiceSpec extends Specification {
         e.message == RestartActionService.WORKFLOW_NOT_AUTO_RESTARTABLE
     }
 
+    void "restartWorkflowWithProcess, calls restart method of start job"() {
+        given:
+        String workflowName = HelperUtils.uniqueString
+        RestartActionService service = new RestartActionService(
+                context: Mock(ApplicationContext) {
+                    1 * getBean(_) >> GroovyMock(RestartableStartJob) {
+                        1 * restart(_) >> GroovyMock(Process) {
+                            1 * save(_) >> new Process()
+                        }
+                        _ * getJobExecutionPlanName() >> workflowName
+                    }
+                },
+                commentService: Mock(CommentService) {
+                    1 * saveComment(_, _) >> { Commentable commentable, String message ->
+                        assert message.contains(RestartActionService.WORKFLOW_RESTARTED)
+                    }
+                }
+        )
+        service.processService = new ProcessService()
+
+        Process process = DomainFactory.createProcess(
+                jobExecutionPlan: new JobExecutionPlan(
+                        name: workflowName,
+                        startJob: new StartJobDefinition(
+                                bean: HelperUtils.uniqueString,
+                        ),
+                ),
+        )
+        ProcessingStep processingStep = DomainFactory.createProcessingStep(
+                process: process,
+                jobDefinition: new JobDefinition(),
+        )
+        ProcessingStepUpdate processingStepUpdate = DomainFactory.createProcessingStepUpdate(
+                processingStep: processingStep,
+                date: new Date(),
+                state: ExecutionState.CREATED,
+        )
+        DomainFactory.createProcessingStepUpdate(
+                processingStep: processingStep,
+                date: new Date(),
+                state: ExecutionState.FAILURE,
+                previous: processingStepUpdate,
+        )
+
+        expect:
+        service.restartWorkflowWithProcess(process.id)
+    }
+
     void "test logInCommentAndJobLog without old message"() {
         given:
         String messageValue = HelperUtils.uniqueString
@@ -235,5 +291,43 @@ class RestartActionServiceSpec extends Specification {
 
         expect:
         service.logInCommentAndJobLog(job, messageValue)
+    }
+
+    void "logInComment without old message"() {
+        given:
+        String messageValue = HelperUtils.uniqueString
+        RestartActionService service = new RestartActionService(
+                commentService: Mock(CommentService) {
+                    1 * saveComment(_, _) >> { Commentable commentable, String message ->
+                        assert message.contains(messageValue)
+                    }
+                }
+        )
+        Process process = DomainFactory.createProcess()
+
+        expect:
+        service.logInComment(process, messageValue)
+    }
+
+    void "logInComment with old message"() {
+        given:
+        String oldMessageValue = HelperUtils.uniqueString
+        String messageValue = HelperUtils.uniqueString
+        RestartActionService service = new RestartActionService(
+                commentService: Mock(CommentService) {
+                    1 * saveComment(_, _) >> { Commentable commentable, String message ->
+                        assert message.contains(messageValue)
+                        assert message.contains(oldMessageValue)
+                    }
+                }
+        )
+        Process process = DomainFactory.createProcess(
+                comment: new Comment(
+                        comment: oldMessageValue,
+                ),
+        )
+
+        expect:
+        service.logInComment(process, messageValue)
     }
 }

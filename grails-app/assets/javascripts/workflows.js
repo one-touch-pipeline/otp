@@ -703,6 +703,13 @@ $.otp.workflows = {
             $("#show-visualization").show();
             $(this).hide();
         });
+        $("#show-restart-process").click(function () {
+            $.getJSON($.otp.createLink({
+                controller: 'processes',
+                action: 'restartWithProcess',
+                id: processId
+            }));
+        });
     },
     processingStep: {
         processingStepId: null,
