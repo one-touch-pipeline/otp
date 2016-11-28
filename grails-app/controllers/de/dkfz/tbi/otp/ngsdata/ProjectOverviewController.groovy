@@ -71,8 +71,7 @@ class ProjectOverviewController {
 
     Map specificOverview() {
         List<Project> projects = projectService.getAllProjects()
-        Project project = Project.findByName(params.project) ?: projects[0]
-        project.projectGroup?.refresh()
+        Project project = CollectionUtils.exactlyOneElement(Project.findAllByName(params.project ?: projects.first().name, [fetch: [projectCategories: 'join', projectGroup: 'join']]))
 
         Map<String, ProjectOverviewService.AlignmentInfo> alignmentInfo = null
         String alignmentError = null
