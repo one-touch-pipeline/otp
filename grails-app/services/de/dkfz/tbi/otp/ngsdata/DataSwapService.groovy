@@ -1270,6 +1270,13 @@ chmod 440 ${newDirectFileName}
                         it.exists()
                     },
             ].flatten() as Set
+
+            List<RoddyBamFile> wgbsRoddyBamFiles = roddyBamFiles.findAll { it.seqType.isWgbs() }
+            if (wgbsRoddyBamFiles) {
+                expectedContent.addAll(wgbsRoddyBamFiles*.finalMetadataTableFile)
+                expectedContent.addAll(wgbsRoddyBamFiles*.finalMethylationDirectory)
+            }
+
             Set<File> foundFiles = roddyBamFiles*.baseDirectory.unique()*.listFiles().flatten() as Set
             if (foundFiles != expectedContent) {
                 List<File> missingFiles = (expectedContent - foundFiles).sort()
