@@ -1008,6 +1008,7 @@ if (allProcessed) {
     //collect running SnvCallingInstances
     SnvCallingInstance.createCriteria().list{
         eq('processingState', AnalysisProcessingStates.IN_PROGRESS)
+        eq('withdrawn', false)
         sampleType1BamFile {
             eq('withdrawn', false)
         }
