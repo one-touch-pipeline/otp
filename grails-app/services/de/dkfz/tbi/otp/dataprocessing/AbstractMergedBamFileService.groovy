@@ -33,6 +33,7 @@ class AbstractMergedBamFileService {
             }
         }.each { SamplePair samplePair ->
             samplePair.snvProcessingStatus = SamplePair.ProcessingStatus.NEEDS_PROCESSING
+            samplePair.indelProcessingStatus = SamplePair.ProcessingStatus.NEEDS_PROCESSING
             assert samplePair.save(flush: true)
         }
     }

@@ -63,6 +63,7 @@ class AbstractMergedBamFileServiceTests {
         AbstractMergedBamFile bamFile = AbstractMergedBamFile.findByWorkPackage(samplePair.mergingWorkPackage2)
         abstractMergedBamFileService.setSamplePairStatusToNeedProcessing(bamFile)
         assert samplePair.snvProcessingStatus == ProcessingStatus.NEEDS_PROCESSING
+        assert samplePair.indelProcessingStatus == ProcessingStatus.NEEDS_PROCESSING
     }
 
     @Test
