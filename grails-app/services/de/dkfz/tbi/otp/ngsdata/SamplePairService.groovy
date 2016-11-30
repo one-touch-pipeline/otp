@@ -38,7 +38,7 @@ class SamplePairService {
                 default:
                     throw new UnsupportedOperationException("Handling processing status ${it.snvProcessingStatus} is not implemented.")
             }
-            List<SnvCallingInstance> snvCallingInstances = SnvCallingInstance.findAllBySamplePair(it)
+            List<SnvCallingInstance> snvCallingInstances = SnvCallingInstance.findAllBySamplePairAndWithdrawn(it, false)
             if (snvCallingInstances.find { it.processingState == AnalysisProcessingStates.FINISHED }) {
                 finishedSamplePairs << it
             }

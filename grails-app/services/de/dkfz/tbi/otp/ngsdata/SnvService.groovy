@@ -16,6 +16,7 @@ class SnvService {
 
     List getSnvCallingInstancesForProject(String projectName) {
         return SnvCallingInstance.withCriteria {
+            eq ('withdrawn', false)
             samplePair {
                 mergingWorkPackage1 {
                     sample {
