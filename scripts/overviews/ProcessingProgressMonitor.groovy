@@ -468,7 +468,7 @@ def handleStateMapSnv = { List next ->
             } else if (samplePair.processingStatus == SamplePair.ProcessingStatus.NEEDS_PROCESSING) {
                 if (!SnvConfig.findByProjectAndSeqTypeAndObsoleteDateIsNull(samplePair.project, samplePair.seqType)) {
                     stateMap.noConfig << "${samplePair.project} ${samplePair.seqType}"
-                } else if (SnvCallingInstance.findBySamplePairAndProcessingStateInList(samplePair, [AnalysisProcessingStates.IN_PROGRESS])) {
+                } else if (SnvCallingInstance.findBySamplePairAndProcessingStateInListAndWithdrawn(samplePair, [AnalysisProcessingStates.IN_PROGRESS], false)) {
                     stateMap.alreadyRunning << samplePair
                 } else {
                     stateMap.waiting << samplePair
@@ -480,7 +480,7 @@ def handleStateMapSnv = { List next ->
                     order('lastUpdated', 'desc')
                     maxResults(1)
                 }
-                if (snvCallingInstance && snvCallingInstance.processingState == AnalysisProcessingStates.IN_PROGRESS) {
+                if (snvCallingInstance && snvCallingInstance.processingState == AnalysisProcessingStates.IN_PROGRESS && !snvCallingInstance.withdrawn) {
                     stateMap.running << snvCallingInstance
                 }
                 if (snvCallingInstance && snvCallingInstance.processingState == AnalysisProcessingStates.FINISHED) {
