@@ -214,6 +214,7 @@ class TrackingServiceSpec extends Specification {
                 getFastqcProcessingStatus: { -> PARTLY_DONE_MIGHT_DO_MORE },
                 getAlignmentProcessingStatus: { -> NOTHING_DONE_MIGHT_DO },
                 getSnvProcessingStatus: { -> NOTHING_DONE_WONT_DO },
+                getIndelProcessingStatus: { -> NOTHING_DONE_MIGHT_DO },
         ] as ProcessingStatus
         Run runA = DomainFactory.createRun(name: 'runA')
         Run runB = DomainFactory.createRun(name: 'runB')
@@ -236,6 +237,7 @@ Installation: ALL_DONE
 FastQC:       PARTLY_DONE_MIGHT_DO_MORE
 Alignment:    NOTHING_DONE_MIGHT_DO
 SNV:          NOTHING_DONE_WONT_DO
+Indel:        NOTHING_DONE_MIGHT_DO
 
 6 SeqTrack(s) in ticket ${ticket.ticketNumber}:
 runA, lane 8, ${sampleText}

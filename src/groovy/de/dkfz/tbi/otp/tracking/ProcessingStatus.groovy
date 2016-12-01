@@ -51,6 +51,10 @@ public class ProcessingStatus {
         return TrackingService.combineStatuses(seqTrackProcessingStatuses, { it.snvProcessingStatus })
     }
 
+    WorkflowProcessingStatus getIndelProcessingStatus() {
+        return TrackingService.combineStatuses(seqTrackProcessingStatuses, { it.indelProcessingStatus })
+    }
+
     @Override
     public String toString() {
         return """
@@ -58,6 +62,7 @@ Installation: ${installationProcessingStatus}
 FastQC:       ${fastqcProcessingStatus}
 Alignment:    ${alignmentProcessingStatus}
 SNV:          ${snvProcessingStatus}
+Indel:        ${indelProcessingStatus}
 """
     }
 }

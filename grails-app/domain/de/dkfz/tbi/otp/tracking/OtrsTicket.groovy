@@ -15,7 +15,8 @@ class OtrsTicket implements Commentable, Entity {
         INSTALLATION('installed'),
         FASTQC(null),
         ALIGNMENT('aligned'),
-        SNV('SNV-called')
+        SNV('SNV-called'),
+        INDEL('indel-called'),
 
         /**
          * Will be used in the subject of notification e-mails: "sequencing data ${notificationSubject}"
@@ -54,6 +55,9 @@ class OtrsTicket implements Commentable, Entity {
     Date snvStarted
     Date snvFinished
 
+    Date indelStarted
+    Date indelFinished
+
     boolean finalNotificationSent = false
     boolean automaticNotification = true
 
@@ -81,6 +85,9 @@ class OtrsTicket implements Commentable, Entity {
 
         snvStarted(nullable: true)
         snvFinished(nullable: true)
+
+        indelStarted(nullable: true)
+        indelFinished(nullable: true)
 
         comment(nullable: true)
         seqCenterComment(nullable: true)

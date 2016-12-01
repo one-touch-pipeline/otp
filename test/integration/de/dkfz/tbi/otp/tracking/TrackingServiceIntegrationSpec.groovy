@@ -662,7 +662,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         then:
         assert snvCallingInstance.withdrawn
         SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
-        samplePairStatus.completeProcessableSnvCallingInstanceInProjectFolder == null
+        samplePairStatus.completeSnvCallingInstance == null
         mwpStatus.snvProcessingStatus == NOTHING_DONE_WONT_DO
         createSeqTrackProcessingStatus(mwpStatus).snvProcessingStatus == NOTHING_DONE_WONT_DO
     }
@@ -684,7 +684,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         then:
         SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
         samplePairStatus.samplePair == snvCallingInstance.samplePair
-        samplePairStatus.completeProcessableSnvCallingInstanceInProjectFolder == snvCallingInstance
+        samplePairStatus.completeSnvCallingInstance == snvCallingInstance
         samplePairStatus.snvProcessingStatus == ALL_DONE
         mwpStatus.snvProcessingStatus == ALL_DONE
         createSeqTrackProcessingStatus(mwpStatus).snvProcessingStatus == ALL_DONE
@@ -707,7 +707,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         then:
         SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
         samplePairStatus.samplePair == snvCallingInstance.samplePair
-        samplePairStatus.completeProcessableSnvCallingInstanceInProjectFolder == null
+        samplePairStatus.completeSnvCallingInstance == null
         samplePairStatus.snvProcessingStatus == NOTHING_DONE_MIGHT_DO
         mwpStatus.snvProcessingStatus == NOTHING_DONE_MIGHT_DO
         createSeqTrackProcessingStatus(mwpStatus).snvProcessingStatus == NOTHING_DONE_MIGHT_DO
@@ -726,7 +726,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         then:
         SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
         samplePairStatus.samplePair == snvCallingInstance.samplePair
-        samplePairStatus.completeProcessableSnvCallingInstanceInProjectFolder == null
+        samplePairStatus.completeSnvCallingInstance == null
         samplePairStatus.snvProcessingStatus == NOTHING_DONE_MIGHT_DO
         mwpStatus.snvProcessingStatus == NOTHING_DONE_MIGHT_DO
         createSeqTrackProcessingStatus(mwpStatus).snvProcessingStatus == NOTHING_DONE_MIGHT_DO
@@ -751,7 +751,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         then:
         SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
         samplePairStatus.samplePair == snvCallingInstance.samplePair
-        samplePairStatus.completeProcessableSnvCallingInstanceInProjectFolder == null
+        samplePairStatus.completeSnvCallingInstance == null
         samplePairStatus.snvProcessingStatus == NOTHING_DONE_WONT_DO
         mwpStatus.snvProcessingStatus == NOTHING_DONE_WONT_DO
         createSeqTrackProcessingStatus(mwpStatus).snvProcessingStatus == NOTHING_DONE_WONT_DO
@@ -779,7 +779,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         then:
         SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
         samplePairStatus.samplePair == snvCallingInstance.samplePair
-        samplePairStatus.completeProcessableSnvCallingInstanceInProjectFolder == null
+        samplePairStatus.completeSnvCallingInstance == null
         samplePairStatus.snvProcessingStatus == NOTHING_DONE_MIGHT_DO
         mwpStatus.snvProcessingStatus == NOTHING_DONE_MIGHT_DO
         createSeqTrackProcessingStatus(mwpStatus).snvProcessingStatus == NOTHING_DONE_MIGHT_DO
@@ -800,7 +800,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         then:
         SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
         samplePairStatus.samplePair == snvCallingInstance.samplePair
-        samplePairStatus.completeProcessableSnvCallingInstanceInProjectFolder == null
+        samplePairStatus.completeSnvCallingInstance == null
         samplePairStatus.snvProcessingStatus == NOTHING_DONE_MIGHT_DO
         mwpStatus.snvProcessingStatus == NOTHING_DONE_MIGHT_DO
         createSeqTrackProcessingStatus(mwpStatus).snvProcessingStatus == NOTHING_DONE_MIGHT_DO
@@ -825,7 +825,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         then:
         SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwp1Status.samplePairProcessingStatuses)
         samplePairStatus.samplePair == snvCallingInstance.samplePair
-        samplePairStatus.completeProcessableSnvCallingInstanceInProjectFolder == snvCallingInstance
+        samplePairStatus.completeSnvCallingInstance == snvCallingInstance
         samplePairStatus.snvProcessingStatus == ALL_DONE
         mwp1Status.snvProcessingStatus == ALL_DONE
 
@@ -853,7 +853,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
 
         SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwp2Status.samplePairProcessingStatuses)
         samplePairStatus.samplePair == snvCallingInstance.samplePair
-        samplePairStatus.completeProcessableSnvCallingInstanceInProjectFolder == null
+        samplePairStatus.completeSnvCallingInstance == null
         samplePairStatus.snvProcessingStatus == NOTHING_DONE_MIGHT_DO
         mwp2Status.snvProcessingStatus == NOTHING_DONE_MIGHT_DO
 
@@ -881,13 +881,13 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         then:
         SamplePairProcessingStatus samplePair1Status = exactlyOneElement(mwp1Status.samplePairProcessingStatuses)
         samplePair1Status.samplePair == snvCallingInstance.samplePair
-        samplePair1Status.completeProcessableSnvCallingInstanceInProjectFolder == snvCallingInstance
+        samplePair1Status.completeSnvCallingInstance == snvCallingInstance
         samplePair1Status.snvProcessingStatus == ALL_DONE
         mwp1Status.snvProcessingStatus == ALL_DONE
 
         SamplePairProcessingStatus samplePair2Status = exactlyOneElement(mwp2Status.samplePairProcessingStatuses)
         samplePair2Status.samplePair == snvCallingInstance2.samplePair
-        samplePair2Status.completeProcessableSnvCallingInstanceInProjectFolder == null
+        samplePair2Status.completeSnvCallingInstance == null
         samplePair2Status.snvProcessingStatus == NOTHING_DONE_MIGHT_DO
         mwp2Status.snvProcessingStatus == NOTHING_DONE_MIGHT_DO
 

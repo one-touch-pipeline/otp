@@ -19,4 +19,8 @@ class MergingWorkPackageProcessingStatus {
     WorkflowProcessingStatus getSnvProcessingStatus() {
         return TrackingService.combineStatuses(samplePairProcessingStatuses, { it.snvProcessingStatus })
     }
+
+    WorkflowProcessingStatus getIndelProcessingStatus() {
+        return TrackingService.combineStatuses(samplePairProcessingStatuses, { it.indelProcessingStatus })
+    }
 }

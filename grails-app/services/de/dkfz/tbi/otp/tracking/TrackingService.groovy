@@ -321,21 +321,21 @@ class TrackingService {
                 AbstractMergedBamFile bamFile = sci."sampleType${it}BamFile"
                 return bamFile == bamFile.mergingWorkPackage.completeProcessableBamFileInProjectFolder
             }) {
-                return new SamplePairProcessingStatus(sp, ALL_DONE, sci)
+                return new SamplePairProcessingStatus(sp, ALL_DONE, sci, NOTHING_DONE_WONT_DO, null)
             } else if (SnvCallingService.processingStatesNotProcessable.contains(sci.processingState)) {
-                return new SamplePairProcessingStatus(sp, NOTHING_DONE_MIGHT_DO, null)
+                return new SamplePairProcessingStatus(sp, NOTHING_DONE_MIGHT_DO, null, NOTHING_DONE_WONT_DO, null)
             }
         }
         if ([1, 2].every { sp."mergingWorkPackage${it}".completeProcessableBamFileInProjectFolder }) {
             if (SnvCallingService.SNV_CONFIG_CLASSES.any {
                 snvCallingService.samplePairForSnvProcessing(ProcessingPriority.MINIMUM_PRIORITY, it, sp)
             }) {
-                return new SamplePairProcessingStatus(sp, NOTHING_DONE_MIGHT_DO, null)
+                return new SamplePairProcessingStatus(sp, NOTHING_DONE_MIGHT_DO, null, NOTHING_DONE_WONT_DO, null)
             } else {
-                return new SamplePairProcessingStatus(sp, NOTHING_DONE_WONT_DO, null)
+                return new SamplePairProcessingStatus(sp, NOTHING_DONE_WONT_DO, null, NOTHING_DONE_WONT_DO, null)
             }
         } else {
-            return new SamplePairProcessingStatus(sp, NOTHING_DONE_MIGHT_DO, null)
+            return new SamplePairProcessingStatus(sp, NOTHING_DONE_MIGHT_DO, null, NOTHING_DONE_WONT_DO, null)
         }
     }
 

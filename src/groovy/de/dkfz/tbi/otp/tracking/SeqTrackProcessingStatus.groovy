@@ -22,4 +22,8 @@ class SeqTrackProcessingStatus {
     WorkflowProcessingStatus getSnvProcessingStatus() {
         return TrackingService.combineStatuses(mergingWorkPackageProcessingStatuses, { it.snvProcessingStatus })
     }
+
+    WorkflowProcessingStatus getIndelProcessingStatus() {
+        return TrackingService.combineStatuses(mergingWorkPackageProcessingStatuses, { it.indelProcessingStatus })
+    }
 }

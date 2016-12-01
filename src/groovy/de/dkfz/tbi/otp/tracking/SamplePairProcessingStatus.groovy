@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.tracking
 
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import groovy.transform.*
 
@@ -11,6 +12,8 @@ class SamplePairProcessingStatus {
     final SamplePair samplePair
 
     final WorkflowProcessingStatus snvProcessingStatus
+    final SnvCallingInstance completeSnvCallingInstance
 
-    final SnvCallingInstance completeProcessableSnvCallingInstanceInProjectFolder
+    final WorkflowProcessingStatus indelProcessingStatus
+    final IndelCallingInstance completeIndelCallingInstance
 }
