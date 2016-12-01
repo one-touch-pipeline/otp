@@ -63,7 +63,7 @@ public class AbstractSnvCallingStartJobTests extends GroovyScriptAwareTestCase i
                 }
             }
 
-            snvCallingService.metaClass.samplePairForSnvProcessing = { short minPriority, Class ConfigPerProject -> return mockSamplePair }
+            snvCallingService.metaClass.samplePairForProcessing = { short minPriority, Class ConfigPerProject -> return mockSamplePair }
             SnvConfig snvConfig = DomainFactory.createSnvConfig(pipeline: DomainFactory.createOtpSnvPipelineLazy());
             String instanceName = "test"
             testAbstractSnvCallingStartJob.metaClass.getConfigClass = { -> return SnvConfig}

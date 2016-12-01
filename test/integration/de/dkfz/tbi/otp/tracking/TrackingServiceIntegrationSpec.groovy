@@ -732,7 +732,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         createSeqTrackProcessingStatus(mwpStatus).snvProcessingStatus == NOTHING_DONE_MIGHT_DO
     }
 
-    void "fillInSamplePairStatuses, no SCI, bamFileInProjectFolder set, no samplePairForSnvProcessing, returns NOTHING_DONE_WONT_DO"() {
+    void "fillInSamplePairStatuses, no SCI, bamFileInProjectFolder set, no samplePairForProcessing, returns NOTHING_DONE_WONT_DO"() {
         given:
         SnvCallingInstance snvCallingInstance = DomainFactory.createSnvInstanceWithRoddyBamFiles()
 
@@ -757,7 +757,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         createSeqTrackProcessingStatus(mwpStatus).snvProcessingStatus == NOTHING_DONE_WONT_DO
     }
 
-    void "fillInSamplePairStatuses, no SCI, bamFileInProjectFolder set, samplePairForSnvProcessing exists, returns NOTHING_DONE_MIGHT_DO"() {
+    void "fillInSamplePairStatuses, no SCI, bamFileInProjectFolder set, samplePairForProcessing exists, returns NOTHING_DONE_MIGHT_DO"() {
         given:
         SnvCallingInstance snvCallingInstance = DomainFactory.createSnvInstanceWithRoddyBamFiles([:], [coverage: 2], [coverage: 2])
 

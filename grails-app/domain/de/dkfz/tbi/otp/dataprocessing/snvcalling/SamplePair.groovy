@@ -1,9 +1,9 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
-import de.dkfz.tbi.otp.utils.Entity
-import org.springframework.validation.Errors
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.*
+import org.springframework.validation.*
 
 /**
  * For each individual disease/control pairs are compared in the analysis pipelines. These pairs are defined in the GUI and stored in this domain.
@@ -88,7 +88,7 @@ class SamplePair implements Entity {
 
     static mapping = {
         /**
-         * sample_pair_idx1 is used by SnvCallingService.samplePairForSnvProcessing.
+         * sample_pair_snv_idx1 is used by SnvCallingService.samplePairForProcessing.
          * processing_status must be the first column in this index! Grails does not provide a means to specify this, so
          * this must be done via SQL.
          *

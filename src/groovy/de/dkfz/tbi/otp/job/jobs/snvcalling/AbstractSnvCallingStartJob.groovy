@@ -14,6 +14,7 @@ abstract class AbstractSnvCallingStartJob extends AbstractStartJobImpl implement
     @Autowired
     SnvCallingService snvCallingService
 
+
     @Autowired
     ConfigService configService
 
@@ -28,7 +29,7 @@ abstract class AbstractSnvCallingStartJob extends AbstractStartJobImpl implement
             return
         }
         SnvConfig.withTransaction {
-            SamplePair samplePair = snvCallingService.samplePairForSnvProcessing(minPriority, getConfigClass())
+            SamplePair samplePair = snvCallingService.samplePairForProcessing(minPriority, getConfigClass())
             if (samplePair) {
 
                 ConfigPerProject config = getConfig(samplePair)

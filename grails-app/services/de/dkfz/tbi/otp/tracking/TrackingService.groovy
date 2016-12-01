@@ -327,8 +327,8 @@ class TrackingService {
             }
         }
         if ([1, 2].every { sp."mergingWorkPackage${it}".completeProcessableBamFileInProjectFolder }) {
-            if (SnvCallingService.SNV_CONFIG_CLASSES.any {
-                snvCallingService.samplePairForSnvProcessing(ProcessingPriority.MINIMUM_PRIORITY, it, sp)
+            if (SnvCallingService.ANALYSIS_CONFIG_CLASSES.any {
+                snvCallingService.samplePairForProcessing(ProcessingPriority.MINIMUM_PRIORITY, it, sp)
             }) {
                 return new SamplePairProcessingStatus(sp, NOTHING_DONE_MIGHT_DO, null, NOTHING_DONE_WONT_DO, null)
             } else {
