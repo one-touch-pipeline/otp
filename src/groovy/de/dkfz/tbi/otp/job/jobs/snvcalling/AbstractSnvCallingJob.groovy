@@ -5,12 +5,13 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
 import org.springframework.beans.factory.annotation.*
 
-import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 import static de.dkfz.tbi.otp.utils.WaitingFileUtils.*
 import static org.springframework.util.Assert.*
+
 
 abstract class AbstractSnvCallingJob extends AbstractOtpJob {
 
@@ -211,7 +212,7 @@ rm ${configFileInStagingDirectory}
     protected void linkPreviousResults(SnvCallingInstance instance, Realm realm) {
         SnvJobResult previousJobResult = snvCallingService.getLatestValidJobResultForStep(instance, step)
         File previousResult = previousJobResult.getResultFilePath().absoluteDataManagementPath
-        File currentResult = new File(instance.snvInstancePath.absoluteDataManagementPath, previousResult.name)
+        File currentResult = new File(instance.instancePath.absoluteDataManagementPath, previousResult.name)
         linkFileUtils.createAndValidateLinks([(previousResult): currentResult], realm)
     }
 }

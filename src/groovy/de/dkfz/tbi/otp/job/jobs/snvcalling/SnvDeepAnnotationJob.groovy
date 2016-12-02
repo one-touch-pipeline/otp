@@ -60,7 +60,7 @@ class SnvDeepAnnotationJob extends AbstractSnvCallingJob implements AutoRestarta
             deleteResultFileIfExists(checkpointFile, realm)
 
             // Get path of the snv deep annotation result file
-            final File deepAnnotationResultFile = new OtpPath(instance.snvInstancePath, step.getResultFileName(instance.individual)).absoluteDataManagementPath
+            final File deepAnnotationResultFile = new OtpPath(instance.instancePath, step.getResultFileName(instance.individual)).absoluteDataManagementPath
             // In case the file exists already from an earlier -not successful- run it should be deleted first
             deleteResultFileIfExists(deepAnnotationResultFile, realm)
 
@@ -97,7 +97,7 @@ class SnvDeepAnnotationJob extends AbstractSnvCallingJob implements AutoRestarta
     protected void validate(final SnvCallingInstance instance) throws Throwable {
 
         // check if the final vcf result file exists
-        final OtpPath resultFile = new OtpPath(instance.snvInstancePath, step.getResultFileName(instance.individual))
+        final OtpPath resultFile = new OtpPath(instance.instancePath, step.getResultFileName(instance.individual))
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(resultFile.absoluteDataManagementPath)
 
         validateNonCallingJobs(instance, step)

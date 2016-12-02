@@ -838,7 +838,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
         dataBaseSetupForMergedBamFiles(controlBamFiles, false)
         createFastqFiles(controlBamFiles)
 
-        File snvFolder = snvCallingInstance.getSnvInstancePath().absoluteDataManagementPath
+        File snvFolder = snvCallingInstance.getInstancePath().absoluteDataManagementPath
         CreateFileHelper.createFile(new File(snvFolder, "test.vcf"))
 
         return snvCallingInstance
@@ -846,7 +846,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
 
 
     private void deleteProcessingFilesOfProject_RBF_SNV_Validation(SnvCallingInstance snvCallingInstance) {
-        File snvFolder = snvCallingInstance.getSnvInstancePath().absoluteDataManagementPath
+        File snvFolder = snvCallingInstance.getInstancePath().absoluteDataManagementPath
 
         File outputFile = new File(outputFolder.absoluteFile, "Delete_${snvCallingInstance.project.name}.sh")
         assert outputFile.text.contains(snvFolder.path) && outputFile.text.contains(snvFolder.parent)

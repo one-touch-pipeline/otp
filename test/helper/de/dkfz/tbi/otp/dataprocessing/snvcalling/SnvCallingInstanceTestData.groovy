@@ -135,11 +135,11 @@ class SnvCallingInstanceTestData {
     private OtpPath createInputResultFile(SnvCallingInstance instance, SnvCallingStep step) {
         OtpPath file
         if (step == SnvCallingStep.CALLING) {
-            file = new OtpPath(instance.snvInstancePath, step.getResultFileName(instance.individual, null))
+            file = new OtpPath(instance.instancePath, step.getResultFileName(instance.individual, null))
         } else if (step == SnvCallingStep.FILTER_VCF) {
-            file = new OtpPath(instance.snvInstancePath, step.getResultFileName())
+            file = new OtpPath(instance.instancePath, step.getResultFileName())
         } else {
-            file = new OtpPath(instance.snvInstancePath, step.getResultFileName(instance.individual))
+            file = new OtpPath(instance.instancePath, step.getResultFileName(instance.individual))
         }
         return file
     }

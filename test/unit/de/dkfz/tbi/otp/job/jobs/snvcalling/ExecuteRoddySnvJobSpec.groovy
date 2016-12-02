@@ -10,8 +10,6 @@ import org.junit.*
 import org.junit.rules.*
 import spock.lang.*
 
-import java.nio.file.*
-
 @Mock([
         DataFile,
         FileType,
@@ -232,10 +230,10 @@ class ExecuteRoddySnvJobSpec extends Specification {
                     it.getAllSNVdiagnosticsPlots().absoluteDataManagementPath
                 },
                 { RoddySnvCallingInstance it ->
-                    new OtpPath(it.snvInstancePath, SnvCallingStep.CALLING.getResultFileName(it.individual)).absoluteDataManagementPath
+                    new OtpPath(it.instancePath, SnvCallingStep.CALLING.getResultFileName(it.individual)).absoluteDataManagementPath
                 },
                 { RoddySnvCallingInstance it ->
-                    new OtpPath(it.snvInstancePath, SnvCallingStep.SNV_DEEPANNOTATION.getResultFileName(it.individual)).absoluteDataManagementPath
+                    new OtpPath(it.instancePath, SnvCallingStep.SNV_DEEPANNOTATION.getResultFileName(it.individual)).absoluteDataManagementPath
                 },
         ]
     }

@@ -47,7 +47,7 @@ class FilterVcfJob extends AbstractSnvCallingJob implements AutoRestartableJob {
 
             // the filter script of the CO group writes its output in the same folder where its input is,
             // so we link the input file to output folder if they are different
-            File inputFileCopy = new File(instance.snvInstancePath.absoluteDataManagementPath, inputResultFile.name)
+            File inputFileCopy = new File(instance.instancePath.absoluteDataManagementPath, inputResultFile.name)
 
             final File checkpointFile = step.getCheckpointFilePath(instance).absoluteDataManagementPath
             deleteResultFileIfExists(checkpointFile, realm)

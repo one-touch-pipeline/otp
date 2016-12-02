@@ -121,7 +121,7 @@ class SnvCallingStepTests {
         ])
         assert snvCallingInstance1.save()
 
-        OtpPath expectedParentPath = snvCallingInstance1.snvInstancePath
+        OtpPath expectedParentPath = snvCallingInstance1.instancePath
         Project expectedProject = testData.samplePair.project
 
         OtpPath actualPathCalling = SnvCallingStep.CALLING.getCheckpointFilePath(snvCallingInstance1)

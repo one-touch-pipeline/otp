@@ -75,7 +75,7 @@ enum SnvCallingStep {
     }
 
     OtpPath getCheckpointFilePath(final SnvCallingInstance snvCallingInstance) {
-        return new OtpPath(snvCallingInstance.snvInstancePath, checkpointFileName)
+        return new OtpPath(snvCallingInstance.instancePath, checkpointFileName)
     }
 
     /**

@@ -399,7 +399,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
 
     @Test(expected = AssertionError)
     void testConfirmCheckPointFileExistsAndDeleteIt_CheckpointFileWasNotDeleted_ShouldFail() {
-        File checkpointFile = new OtpPath(snvCallingInstance.snvInstancePath, step.checkpointFileName).absoluteDataManagementPath
+        File checkpointFile = new OtpPath(snvCallingInstance.instancePath, step.checkpointFileName).absoluteDataManagementPath
         checkpointFile.parentFile.mkdirs()
         checkpointFile.createNewFile()
 
@@ -413,7 +413,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
 
     @Test
     void testConfirmCheckPointFileExistsAndDeleteIt() {
-        File checkpointFile = new OtpPath(snvCallingInstance.snvInstancePath, step.checkpointFileName).absoluteDataManagementPath
+        File checkpointFile = new OtpPath(snvCallingInstance.instancePath, step.checkpointFileName).absoluteDataManagementPath
         checkpointFile.parentFile.mkdirs()
         checkpointFile.createNewFile()
 

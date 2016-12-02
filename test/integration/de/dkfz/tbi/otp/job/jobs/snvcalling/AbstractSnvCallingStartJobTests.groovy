@@ -9,6 +9,7 @@ import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.testing.*
 import de.dkfz.tbi.otp.tracking.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import grails.plugin.springsecurity.*
 import org.junit.*
 import org.springframework.beans.factory.annotation.*
@@ -62,14 +63,22 @@ public class AbstractSnvCallingStartJobTests extends GroovyScriptAwareTestCase i
                     assert false
                 }
             }
-
             snvCallingService.metaClass.samplePairForProcessing = { short minPriority, Class ConfigPerProject -> return mockSamplePair }
+
             SnvConfig snvConfig = DomainFactory.createSnvConfig(pipeline: DomainFactory.createOtpSnvPipelineLazy());
             String instanceName = "test"
             testAbstractSnvCallingStartJob.metaClass.getConfigClass = { -> return SnvConfig}
             testAbstractSnvCallingStartJob.metaClass.getConfig = { SamplePair samplePair -> return snvConfig}
             testAbstractSnvCallingStartJob.metaClass.getInstanceName = { ConfigPerProject config -> return instanceName}
             testAbstractSnvCallingStartJob.metaClass.getInstanceClass = { -> return SnvCallingInstance.class }
+            testAbstractSnvCallingStartJob.metaClass.findSamplePairToProcess = { short minPriority -> return mockSamplePair }
+            testAbstractSnvCallingStartJob.metaClass.prepareCreatingTheProcessAndTriggerTracking = { BamFilePairAnalysis analysis ->
+                OtrsTicket ticket = CollectionUtils.exactlyOneElement(OtrsTicket.findAll())
+                ticket.snvStarted = new Date()
+                assert ticket.save(flush: true)
+                mockSamplePair.snvProcessingStatus = ProcessingStatus.NO_PROCESSING_NEEDED
+                assert mockSamplePair.save(flush: true)
+            }
 
 
             SnvCallingInstanceTestData.createOrFindExternalScript()

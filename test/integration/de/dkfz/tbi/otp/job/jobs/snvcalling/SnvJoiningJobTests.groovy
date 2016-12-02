@@ -69,7 +69,7 @@ class SnvJoiningJobTests {
             } else {
                 assert !querySshCalled
                 querySshCalled = true
-                File snvFile = new OtpPath(snvCallingInstance.snvInstancePath, SnvCallingStep.CALLING.getResultFileName(snvCallingInstance.individual, null)).absoluteDataManagementPath
+                File snvFile = new OtpPath(snvCallingInstance.instancePath, SnvCallingStep.CALLING.getResultFileName(snvCallingInstance.individual, null)).absoluteDataManagementPath
                 String scriptCommandPart = "${testData.externalScript_Joining.scriptFilePath}; " +
                         "md5sum ${snvFile} > ${snvFile}.md5sum"
                 assert command.contains(scriptCommandPart)

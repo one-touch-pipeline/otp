@@ -68,7 +68,7 @@ class CreateRoddyFileHelper {
         CreateFileHelper.createFile(roddySnvCallingInstance.getAllSNVdiagnosticsPlots().absoluteDataManagementPath)
 
         [SnvCallingStep.CALLING, SnvCallingStep.SNV_DEEPANNOTATION].each {
-            CreateFileHelper.createFile(new OtpPath(roddySnvCallingInstance.snvInstancePath, it.getResultFileName(roddySnvCallingInstance.individual)).absoluteDataManagementPath)
+            CreateFileHelper.createFile(new OtpPath(roddySnvCallingInstance.instancePath, it.getResultFileName(roddySnvCallingInstance.individual)).absoluteDataManagementPath)
         }
     }
 }

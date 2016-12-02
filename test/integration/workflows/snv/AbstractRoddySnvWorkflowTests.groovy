@@ -107,7 +107,7 @@ echo 'OK'
     @Override
     void checkSpecific() {
         SnvCallingInstance createdInstance = SnvCallingInstance.listOrderById().last()
-        File instancePath = createdInstance.getSnvInstancePath().absoluteDataManagementPath
+        File instancePath = createdInstance.getInstancePath().absoluteDataManagementPath
 
         [
                 SnvCallingStep.CALLING,

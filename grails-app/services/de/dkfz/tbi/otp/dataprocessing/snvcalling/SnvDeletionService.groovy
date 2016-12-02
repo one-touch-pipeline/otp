@@ -32,7 +32,7 @@ public class SnvDeletionService {
 
 
     private File deleteInstance(SnvCallingInstance snvCallingInstance) {
-        File directory = snvCallingInstance.getSnvInstancePath().getAbsoluteDataManagementPath()
+        File directory = snvCallingInstance.getInstancePath().getAbsoluteDataManagementPath()
         List<SnvJobResult> results = SnvJobResult.findAllBySnvCallingInstance(snvCallingInstance, [sort: 'id', order: 'desc'])
         results.each {
             it.delete(flush: true)

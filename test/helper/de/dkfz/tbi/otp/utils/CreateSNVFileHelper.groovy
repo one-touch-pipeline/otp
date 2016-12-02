@@ -24,9 +24,9 @@ class CreateSNVFileHelper {
 
     static OtpPath getResultOtpPath(SnvCallingInstance instance, SnvCallingStep step, String chromosome = null) {
         if (step == SnvCallingStep.CALLING) {
-            return new OtpPath(instance.snvInstancePath, step.getResultFileName(instance.individual, chromosome))
+            return new OtpPath(instance.instancePath, step.getResultFileName(instance.individual, chromosome))
         } else {
-            return new OtpPath(instance.snvInstancePath, step.getResultFileName(instance.individual))
+            return new OtpPath(instance.instancePath, step.getResultFileName(instance.individual))
         }
     }
 }

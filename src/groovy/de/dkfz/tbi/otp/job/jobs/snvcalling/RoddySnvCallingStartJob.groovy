@@ -32,12 +32,6 @@ class RoddySnvCallingStartJob extends AbstractSnvCallingStartJob {
     }
 
     @Override
-    protected String getInstanceName(ConfigPerProject config) {
-        String date = DateTimeFormat.forPattern("yyyy-MM-dd_HH'h'mm_Z").withZone(ConfigService.getDateTimeZone()).print(Instant.now())
-        return "results_${config.pluginVersion.replaceAll(":", "-")}_${config.configVersion}_${date}"
-    }
-
-    @Override
     protected Class<? extends ConfigPerProject> getConfigClass() {
         return RoddyWorkflowConfig
     }
@@ -46,5 +40,4 @@ class RoddySnvCallingStartJob extends AbstractSnvCallingStartJob {
     protected Class<? extends SnvCallingInstance> getInstanceClass() {
         return RoddySnvCallingInstance
     }
-
 }

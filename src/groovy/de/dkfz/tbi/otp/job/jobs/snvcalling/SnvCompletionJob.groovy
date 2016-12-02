@@ -40,7 +40,7 @@ class SnvCompletionJob extends AbstractEndStateAwareJobImpl implements AutoResta
     }
 
     protected void deleteStagingDirectory(SnvCallingInstance instance) {
-        File stagingPath = instance.snvInstancePath.absoluteStagingPath
+        File stagingPath = instance.instancePath.absoluteStagingPath
         File parentPath = stagingPath.parentFile
 
         Realm realm = configService.getRealmDataProcessing(instance.project)

@@ -207,8 +207,8 @@ CHROMOSOME_INDICES=( {1..21} XY)
 
         linkFileUtils.metaClass.createAndValidateLinks = { Map<File, File> map, Realm realm ->
             assert map ==
-                    [(new File(snvCallingInstance.snvInstancePath.absoluteDataManagementPath, SnvCallingStep.CALLING.getResultFileName(snvCallingInstance2.individual))):
-                    new File(snvCallingInstance2.snvInstancePath.absoluteDataManagementPath, SnvCallingStep.CALLING.getResultFileName(snvCallingInstance2.individual))]
+                    [(new File(snvCallingInstance.instancePath.absoluteDataManagementPath, SnvCallingStep.CALLING.getResultFileName(snvCallingInstance2.individual))):
+                    new File(snvCallingInstance2.instancePath.absoluteDataManagementPath, SnvCallingStep.CALLING.getResultFileName(snvCallingInstance2.individual))]
         }
         DomainFactory.createProcessParameter(snvCallingJob.processingStep.process, snvCallingInstance2)
         snvCallingJob.log = new NoOpLog()
@@ -243,7 +243,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
         executionService.metaClass.querySsh = { String host, int port, int timeout, String username, String password, File keyFile, boolean useSshAgent, String command ->
             if (command.contains('PARM_CHR_INDEX=')) {
                 String chromosome = command.split('PARM_CHR_INDEX=')[1].split(',')[0]
-                File snvFile = new OtpPath(snvCallingInstance.snvInstancePath, SnvCallingStep.CALLING.getResultFileName(snvCallingInstance.individual, chromosome)).absoluteStagingPath
+                File snvFile = new OtpPath(snvCallingInstance.instancePath, SnvCallingStep.CALLING.getResultFileName(snvCallingInstance.individual, chromosome)).absoluteStagingPath
                 File tumorBamFile = new File(AbstractMergedBamFileService.destinationDirectory(processedMergedBamFile1), processedMergedBamFile1.getBamFileName())
                 File controlBamFile = new File(AbstractMergedBamFileService.destinationDirectory(processedMergedBamFile2), processedMergedBamFile2.getBamFileName())
 
@@ -265,7 +265,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
             } else if (command.startsWith("mkdir -p ")) {
                 return ProcessHelperService.executeAndWait(command).assertExitCodeZeroAndStderrEmpty()
             } else {
-                File snvFile = new OtpPath(snvCallingInstance.snvInstancePath, SnvCallingStep.CALLING.getResultFileName(snvCallingInstance.individual, null)).absoluteDataManagementPath
+                File snvFile = new OtpPath(snvCallingInstance.instancePath, SnvCallingStep.CALLING.getResultFileName(snvCallingInstance.individual, null)).absoluteDataManagementPath
                 String scriptCommandPart = "/tmp/scriptLocation/joining.sh; " +
                         "md5sum ${snvFile} > ${snvFile}.md5sum"
                 assert command.contains(scriptCommandPart)

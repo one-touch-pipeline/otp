@@ -465,7 +465,7 @@ class SnvJobResultUnitTests {
         Project project = DomainFactory.createProject()
 
         OtpPath path = new OtpPath(project, "testPath")
-        SnvCallingInstance.metaClass.getSnvInstancePath = { return path }
+        SnvCallingInstance.metaClass.getInstancePath = { return path }
 
         Individual individual = new Individual(
                 pid: "pid"

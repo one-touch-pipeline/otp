@@ -1,6 +1,5 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
-import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 
@@ -9,12 +8,6 @@ class RoddySnvCallingInstance extends SnvCallingInstance implements RoddyAnalysi
     static hasMany = [
             roddyExecutionDirectoryNames: String,
     ]
-
-
-    @Override
-    File getWorkDirectory() {
-        return getSnvInstancePath().absoluteDataManagementPath
-    }
 
     @Override
     RoddyWorkflowConfig getConfig() {

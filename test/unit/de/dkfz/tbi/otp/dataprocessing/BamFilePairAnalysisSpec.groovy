@@ -130,4 +130,8 @@ class BamFilePairAnalysisSpec extends Specification {
 
 
 class MockBamFilePairAnalysis extends BamFilePairAnalysis {
+    @Override
+    OtpPath getInstancePath() {
+        return new OtpPath("somePath")
+    }
 }

@@ -51,7 +51,7 @@ class SnvAnnotationJob extends AbstractSnvCallingJob implements AutoRestartableJ
 
             // The annotation script of the CO group writes a temporary file in the same folder where its input is.
             // To prevent mixing up results of old and new SnvCallingInstances we link the input file to output folder.
-            File inputFileCopy = new File(instance.snvInstancePath.absoluteDataManagementPath, inputResultFile.name)
+            File inputFileCopy = new File(instance.instancePath.absoluteDataManagementPath, inputResultFile.name)
 
             /*
              * Input which is needed for the Annotation script. It is just for Roddy intern job system handling.
@@ -61,7 +61,7 @@ class SnvAnnotationJob extends AbstractSnvCallingJob implements AutoRestartableJ
             deleteResultFileIfExists(checkpointFile, realm)
 
             // Get path of the snv annotation result file
-            final File annotationResultFile = new OtpPath(instance.snvInstancePath, step.getResultFileName(instance.individual)).absoluteDataManagementPath
+            final File annotationResultFile = new OtpPath(instance.instancePath, step.getResultFileName(instance.individual)).absoluteDataManagementPath
             // In case the file exists already from an earlier -not successful- run it should be deleted first
             deleteResultFileIfExists(annotationResultFile, realm)
 
@@ -96,7 +96,7 @@ class SnvAnnotationJob extends AbstractSnvCallingJob implements AutoRestartableJ
     protected void validate(final SnvCallingInstance instance) throws Throwable {
 
         // check if the final vcf result file exists
-        final OtpPath resultFile = new OtpPath(instance.snvInstancePath, step.getResultFileName(instance.individual))
+        final OtpPath resultFile = new OtpPath(instance.instancePath, step.getResultFileName(instance.individual))
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(resultFile.absoluteDataManagementPath)
 
         validateNonCallingJobs(instance, step)

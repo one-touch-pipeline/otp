@@ -277,9 +277,9 @@ CHROMOSOME_INDICES=( {1..21} XY)
             File inputResultFile = inputResult.resultFilePath.absoluteDataManagementPath
 
                 String scriptCommandPart = "# BEGIN ORIGINAL SCRIPT\n" +
-                        "ln -sf ${inputResultFile} ${snvCallingInstance2.snvInstancePath.absoluteDataManagementPath}/${inputResultFile.name}; "
+                        "ln -sf ${inputResultFile} ${snvCallingInstance2.instancePath.absoluteDataManagementPath}/${inputResultFile.name}; "
                         "/tmp/scriptLocation/filter.sh; " +
-                        "rm -f ${snvCallingInstance2.snvInstancePath.absoluteDataManagementPath}" +
+                        "rm -f ${snvCallingInstance2.instancePath.absoluteDataManagementPath}" +
                         "# END ORIGINAL SCRIPT"
 
                 String qsubParameterCommandPart = "-v CONFIG_FILE=" +
@@ -289,7 +289,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
                         "TOOL_ID=snvFilter," +
                         "SNVFILE_PREFIX=snvs_," +
                         "TUMOR_BAMFILE_FULLPATH_BP=${pmbf1.absolutePath}," +
-                        "FILENAME_VCF=${new OtpPath(snvCallingInstance2.snvInstancePath, SnvCallingStep.SNV_DEEPANNOTATION.getResultFileName(snvCallingInstance1.individual)).absoluteDataManagementPath}," +
+                        "FILENAME_VCF=${new OtpPath(snvCallingInstance2.instancePath, SnvCallingStep.SNV_DEEPANNOTATION.getResultFileName(snvCallingInstance1.individual)).absoluteDataManagementPath}," +
                         "FILENAME_CHECKPOINT=${SnvCallingStep.FILTER_VCF.getCheckpointFilePath(snvCallingInstance2).absoluteDataManagementPath}"
 
                 assert command.contains(scriptCommandPart)
@@ -354,7 +354,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
 
         snvCallingInstanceTestData.createInputResultFile_Production(snvCallingInstance2, SnvCallingStep.SNV_DEEPANNOTATION)
 
-        File checkpointFile = new OtpPath(snvCallingInstance2.snvInstancePath, SnvCallingStep.FILTER_VCF.checkpointFileName).absoluteDataManagementPath
+        File checkpointFile = new OtpPath(snvCallingInstance2.instancePath, SnvCallingStep.FILTER_VCF.checkpointFileName).absoluteDataManagementPath
         checkpointFile.createNewFile()
 
         executionService.metaClass.executeCommand = { Realm realm, String command -> }
@@ -398,7 +398,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
 
         WaitingFileUtils.metaClass.static.waitUntilDoesNotExist = { File file -> }
 
-        File checkpointFile = new OtpPath(snvCallingInstance1.snvInstancePath, step.checkpointFileName).absoluteDataManagementPath
+        File checkpointFile = new OtpPath(snvCallingInstance1.instancePath, step.checkpointFileName).absoluteDataManagementPath
         checkpointFile.createNewFile()
 
         shouldFail(RuntimeException, { filterVcfJob.validate(snvCallingInstance1) })

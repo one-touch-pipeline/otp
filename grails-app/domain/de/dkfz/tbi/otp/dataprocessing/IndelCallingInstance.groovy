@@ -14,18 +14,14 @@ class IndelCallingInstance extends BamFilePairAnalysis implements ProcessParamet
     /**
      * Example: ${project}/sequencing/exon_sequencing/view-by-pid/${pid}/indel_results/paired/tumor_control/2014-08-25_15h32
      */
-    OtpPath getIndelInstancePath() {
+    @Override
+    OtpPath getInstancePath() {
         return new OtpPath(samplePair.indelSamplePairPath, instanceName)
     }
 
     @Override
     public String toString() {
         return "ICI ${id}: ${instanceName} ${samplePair.toStringWithoutId()}"
-    }
-
-    @Override
-    File getWorkDirectory() {
-        return getIndelInstancePath().absoluteDataManagementPath
     }
 
     @Override

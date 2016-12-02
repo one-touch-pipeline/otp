@@ -130,11 +130,11 @@ class SnvJobResult implements Entity {
      */
     OtpPath getResultFilePath(String chromosomeName = null) {
         if (step == SnvCallingStep.CALLING) {
-            return new OtpPath(snvCallingInstance.snvInstancePath, step.getResultFileName(snvCallingInstance.individual, chromosomeName))
+            return new OtpPath(snvCallingInstance.instancePath, step.getResultFileName(snvCallingInstance.individual, chromosomeName))
         } else if (step == SnvCallingStep.FILTER_VCF) {
-            return snvCallingInstance.snvInstancePath
+            return snvCallingInstance.instancePath
         } else {
-            return new OtpPath(snvCallingInstance.snvInstancePath, step.getResultFileName(snvCallingInstance.individual))
+            return new OtpPath(snvCallingInstance.instancePath, step.getResultFileName(snvCallingInstance.individual))
         }
     }
 

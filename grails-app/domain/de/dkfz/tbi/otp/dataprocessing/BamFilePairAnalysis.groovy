@@ -26,7 +26,7 @@ abstract class BamFilePairAnalysis implements ProcessParameterObject, Entity {
     Date latestDataFileCreationDate
 
     /**
-     * Used to construct paths in {@link SnvCallingInstance#getSnvInstancePath()} and {@link SnvCallingInstance#getConfigFilePath()}.
+     * Used to construct paths in {@link SnvCallingInstance#getInstancePath()}/{@link IndelCallingInstance#getInstancePath()} and {@link SnvCallingInstance#getConfigFilePath()}.
      * For example 2014-08-25_15h32.
      */
     String instanceName
@@ -42,8 +42,8 @@ abstract class BamFilePairAnalysis implements ProcessParameterObject, Entity {
     static belongsTo = SamplePair
 
     /**
-     * The overall processing state of this SNV calling run.
-     * Because the SNV StartJob creates an instance of a SnvCallingInstance immediately when starting it, this will always start
+     * The overall processing state of this analysis run.
+     * Because the analysis StartJob creates an instance of a BamFilePairAnalysis immediately when starting it, this will always start
      * as {@link AnalysisProcessingStates#IN_PROGRESS}.
      */
     AnalysisProcessingStates processingState = AnalysisProcessingStates.IN_PROGRESS
@@ -100,6 +100,9 @@ abstract class BamFilePairAnalysis implements ProcessParameterObject, Entity {
         return sampleType1BamFile.containedSeqTracks + sampleType2BamFile.containedSeqTracks
     }
 
+    File getWorkDirectory() {
+        return getInstancePath().absoluteDataManagementPath
+    }
 
     void updateProcessingState(AnalysisProcessingStates state) {
         assert state : 'The argument "state" is not allowed to be null'
@@ -108,4 +111,6 @@ abstract class BamFilePairAnalysis implements ProcessParameterObject, Entity {
             this.save([flush: true])
         }
     }
+
+    abstract OtpPath getInstancePath()
 }

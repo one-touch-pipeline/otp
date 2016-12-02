@@ -135,7 +135,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         TestCase.mockDeleteDirectory(lsdfFilesService)
         TestCase.mockCreateDirectory(lsdfFilesService)
 
-        File stagingPath = snvCallingInstance.snvInstancePath.absoluteStagingPath
+        File stagingPath = snvCallingInstance.instancePath.absoluteStagingPath
         createFakeResultFiles(stagingPath)
         // When:
         snvCompletionJob.execute()
@@ -154,9 +154,9 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         // Given:
         TestCase.mockDeleteDirectory(lsdfFilesService)
 
-        File stagingPath = snvCallingInstance.snvInstancePath.absoluteStagingPath
+        File stagingPath = snvCallingInstance.instancePath.absoluteStagingPath
         createFakeResultFiles(stagingPath)
-        File fileNotSupposedToBeThere = new File(snvCallingInstance.snvInstancePath.absoluteStagingPath.parentFile, 'someFile.txt')
+        File fileNotSupposedToBeThere = new File(snvCallingInstance.instancePath.absoluteStagingPath.parentFile, 'someFile.txt')
         fileNotSupposedToBeThere << 'dummy content'
         // When:
         snvCompletionJob.execute()
@@ -176,9 +176,9 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         TestCase.mockDeleteDirectory(lsdfFilesService)
         TestCase.mockCreateDirectory(lsdfFilesService)
 
-        File stagingPath = snvCallingInstance.snvInstancePath.absoluteStagingPath
+        File stagingPath = snvCallingInstance.instancePath.absoluteStagingPath
         createFakeResultFiles(stagingPath)
-        File dirNotSupposedToBeThere = new File(snvCallingInstance.snvInstancePath.absoluteStagingPath.parentFile, 'someDir')
+        File dirNotSupposedToBeThere = new File(snvCallingInstance.instancePath.absoluteStagingPath.parentFile, 'someDir')
         assert dirNotSupposedToBeThere.mkdirs()
         // When:
         snvCompletionJob.execute()

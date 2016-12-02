@@ -198,8 +198,8 @@ CHROMOSOME_INDICES=( {1..21} XY)
 
         linkFileUtils.metaClass.createAndValidateLinks = { Map<File, File> map, Realm realm ->
             assert map ==
-                    [(new File(snvCallingInstance.snvInstancePath.absoluteDataManagementPath, SnvCallingStep.SNV_ANNOTATION.getResultFileName(snvCallingInstance2.individual))):
-                    new File(snvCallingInstance2.snvInstancePath.absoluteDataManagementPath, SnvCallingStep.SNV_ANNOTATION.getResultFileName(snvCallingInstance2.individual))]
+                    [(new File(snvCallingInstance.instancePath.absoluteDataManagementPath, SnvCallingStep.SNV_ANNOTATION.getResultFileName(snvCallingInstance2.individual))):
+                    new File(snvCallingInstance2.instancePath.absoluteDataManagementPath, SnvCallingStep.SNV_ANNOTATION.getResultFileName(snvCallingInstance2.individual))]
         }
 
         pbsService.metaClass.executeJob = { Realm realm, String text, String qsubParameters ->
@@ -247,8 +247,8 @@ CHROMOSOME_INDICES=( {1..21} XY)
         executionService.metaClass.querySsh = { String host, int port, int timeout, String username, String password, File keyFile, boolean useSshAgent, String command ->
             SnvCallingStep callingStep = SnvCallingStep.CALLING
             File inputFile = snvCallingInstance.findLatestResultForSameBamFiles(callingStep).resultFilePath.absoluteDataManagementPath
-            File inputFileCopy = new File(snvCallingInstance2.snvInstancePath.absoluteDataManagementPath, inputFile.name)
-            File resultFile = new OtpPath(snvCallingInstance2.snvInstancePath, SnvCallingStep.SNV_ANNOTATION.getResultFileName(snvCallingInstance2.individual)).absoluteDataManagementPath
+            File inputFileCopy = new File(snvCallingInstance2.instancePath.absoluteDataManagementPath, inputFile.name)
+            File resultFile = new OtpPath(snvCallingInstance2.instancePath, SnvCallingStep.SNV_ANNOTATION.getResultFileName(snvCallingInstance2.individual)).absoluteDataManagementPath
             File bamFile = snvAnnotationJob.abstractMergedBamFileService.getExistingBamFilePath(snvCallingInstance2.sampleType1BamFile)
 
             String commandLinkPart = "# BEGIN ORIGINAL SCRIPT\n" +
@@ -300,7 +300,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
 
         createResultFile(snvCallingInstance2, annotationStep)
 
-        File checkpointFile = new OtpPath(snvCallingInstance2.snvInstancePath, annotationStep.checkpointFileName).absoluteDataManagementPath
+        File checkpointFile = new OtpPath(snvCallingInstance2.instancePath, annotationStep.checkpointFileName).absoluteDataManagementPath
         checkpointFile.createNewFile()
 
         LsdfFilesService.metaClass.static.ensureFileIsReadableAndNotEmpty = { File file -> }

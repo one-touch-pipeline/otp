@@ -34,7 +34,7 @@ class ExecuteRoddySnvJob extends AbstractExecutePanCanJob<RoddySnvCallingInstanc
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(referenceGenomeFastaFile)
 
         Path individualPath = Paths.get(roddySnvCallingInstance.individual.getViewByPidPath(roddySnvCallingInstance.seqType).absoluteDataManagementPath.path)
-        Path resultDirectory = Paths.get(roddySnvCallingInstance.snvInstancePath.absoluteDataManagementPath.path)
+        Path resultDirectory = Paths.get(roddySnvCallingInstance.instancePath.absoluteDataManagementPath.path)
 
         List<String> cValues = []
         cValues.add("bamfile_list:${bamFileControlPath};${bamFileDiseasePath}")
@@ -73,7 +73,7 @@ class ExecuteRoddySnvJob extends AbstractExecutePanCanJob<RoddySnvCallingInstanc
         ]
 
         [SnvCallingStep.CALLING, SnvCallingStep.SNV_DEEPANNOTATION].each {
-            files.add(new OtpPath(roddySnvCallingInstance.snvInstancePath, it.getResultFileName(roddySnvCallingInstance.individual)).absoluteDataManagementPath)
+            files.add(new OtpPath(roddySnvCallingInstance.instancePath, it.getResultFileName(roddySnvCallingInstance.individual)).absoluteDataManagementPath)
         }
 
         directories.each {

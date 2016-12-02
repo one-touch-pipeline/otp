@@ -27,7 +27,8 @@ class SnvCallingInstance extends BamFilePairAnalysis implements ProcessParameter
     /**
      * Example: ${project}/sequencing/exon_sequencing/view-by-pid/${pid}/snv_results/paired/tumor_control/2014-08-25_15h32
      */
-    OtpPath getSnvInstancePath() {
+    @Override
+    OtpPath getInstancePath() {
         return new OtpPath(samplePair.snvSamplePairPath, instanceName)
     }
 
@@ -35,12 +36,12 @@ class SnvCallingInstance extends BamFilePairAnalysis implements ProcessParameter
      * Example: ${project}/sequencing/exon_sequencing/view-by-pid/${pid}/snv_results/paired/tumor_control/2014-08-25_15h32/config.txt
      */
     OtpPath getConfigFilePath() {
-        return new OtpPath(snvInstancePath, "config.txt")
+        return new OtpPath(instancePath, "config.txt")
     }
 
 
     OtpPath getAllSNVdiagnosticsPlots() {
-        return new OtpPath(snvInstancePath, "snvs_${getIndividual().pid}_allSNVdiagnosticsPlots.pdf")
+        return new OtpPath(instancePath, "snvs_${getIndividual().pid}_allSNVdiagnosticsPlots.pdf")
     }
 
 

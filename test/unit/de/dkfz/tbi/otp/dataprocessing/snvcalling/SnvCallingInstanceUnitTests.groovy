@@ -1,7 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.dataprocessing.AnalysisProcessingStates
 import de.dkfz.tbi.otp.dataprocessing.MergingPass
 import de.dkfz.tbi.otp.dataprocessing.MergingSetAssignment
 import de.dkfz.tbi.otp.dataprocessing.ProcessedBamFile
@@ -48,7 +47,7 @@ class SnvCallingInstanceUnitTests {
     @Test
     void testGetSnvInstancePath() {
         SnvCallingInstance instance = createSnvCallingInstance()
-        OtpPath snvInstancePath = instance.getSnvInstancePath()
+        OtpPath snvInstancePath = instance.getInstancePath()
 
         assertEquals(instance.project, snvInstancePath.project)
         File expectedRelativePath = new File(getSnvInstancePathHelper(instance))

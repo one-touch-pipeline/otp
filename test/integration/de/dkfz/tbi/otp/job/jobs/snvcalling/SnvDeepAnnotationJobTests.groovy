@@ -252,8 +252,8 @@ CHROMOSOME_INDICES=( {1..21} X Y)
 
         linkFileUtils.metaClass.createAndValidateLinks = { Map<File, File> map, Realm realm ->
             assert map ==
-                    [(new File(snvCallingInstance1.snvInstancePath.absoluteDataManagementPath, SnvCallingStep.SNV_DEEPANNOTATION.getResultFileName(snvCallingInstance2.individual))):
-                             new File(snvCallingInstance2.snvInstancePath.absoluteDataManagementPath, SnvCallingStep.SNV_DEEPANNOTATION.getResultFileName(snvCallingInstance2.individual))]
+                    [(new File(snvCallingInstance1.instancePath.absoluteDataManagementPath, SnvCallingStep.SNV_DEEPANNOTATION.getResultFileName(snvCallingInstance2.individual))):
+                             new File(snvCallingInstance2.instancePath.absoluteDataManagementPath, SnvCallingStep.SNV_DEEPANNOTATION.getResultFileName(snvCallingInstance2.individual))]
         }
         pbsService.metaClass.executeJob = { Realm realm, String text, String qsubParameters ->
             throw new RuntimeException("This area should not be reached since the deep annotation job shall not run")
@@ -296,7 +296,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
 
         executionService.metaClass.querySsh = { String host, int port, int timeout, String username, String password, File keyFile, boolean useSshAgent, String command ->
 
-            File snvFile = new OtpPath(snvCallingInstance2.snvInstancePath, step.getResultFileName(snvCallingInstance2.individual)).absoluteDataManagementPath
+            File snvFile = new OtpPath(snvCallingInstance2.instancePath, step.getResultFileName(snvCallingInstance2.individual)).absoluteDataManagementPath
             File md5sumFile = createMD5SUMFile(snvCallingInstance2, SnvCallingStep.SNV_DEEPANNOTATION)
 
             String scriptCommandPart = "# BEGIN ORIGINAL SCRIPT\n" +
@@ -336,8 +336,8 @@ CHROMOSOME_INDICES=( {1..21} X Y)
             assert configFile.exists()
             AbstractSnvCallingJob.assertDataManagementConfigContentsOk(snvCallingInstance2)
 
-            File annotationFile = new OtpPath(snvCallingInstance2.snvInstancePath, SnvCallingStep.SNV_ANNOTATION.getResultFileName(snvCallingInstance2.individual)).absoluteDataManagementPath
-            File deepAnnotationFile = new OtpPath(snvCallingInstance2.snvInstancePath, step.getResultFileName(snvCallingInstance2.individual)).absoluteDataManagementPath
+            File annotationFile = new OtpPath(snvCallingInstance2.instancePath, SnvCallingStep.SNV_ANNOTATION.getResultFileName(snvCallingInstance2.individual)).absoluteDataManagementPath
+            File deepAnnotationFile = new OtpPath(snvCallingInstance2.instancePath, step.getResultFileName(snvCallingInstance2.individual)).absoluteDataManagementPath
             assert annotationFile.text == deepAnnotationFile.text
         } finally {
             schedulerService.finishedJobExecutionOnCurrentThread(snvDeepAnnotationJob)
@@ -422,7 +422,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
             }
         }
 
-        File checkpointFile = new OtpPath(snvCallingInstance1.snvInstancePath, step.checkpointFileName).absoluteDataManagementPath
+        File checkpointFile = new OtpPath(snvCallingInstance1.instancePath, step.checkpointFileName).absoluteDataManagementPath
         checkpointFile.createNewFile()
 
         snvDeepAnnotationJob.metaClass.deleteResultFileIfExists = { File resultFile, Realm realm ->

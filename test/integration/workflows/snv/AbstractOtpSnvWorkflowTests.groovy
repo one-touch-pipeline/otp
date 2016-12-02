@@ -186,7 +186,7 @@ abstract class AbstractOtpSnvWorkflowTests extends AbstractSnvWorkflowTests {
         }
 
 
-        String makeDirs = createClusterScriptService.makeDirs([instance.snvInstancePath.absoluteDataManagementPath, instance.snvInstancePath.absoluteStagingPath])
+        String makeDirs = createClusterScriptService.makeDirs([instance.instancePath.absoluteDataManagementPath, instance.instancePath.absoluteStagingPath])
         assert executionService.executeCommand(realm, makeDirs).toInteger() == 0
 
         [sourceFiles, targetFiles].transpose().each { List<String> transposed ->
@@ -225,7 +225,7 @@ abstract class AbstractOtpSnvWorkflowTests extends AbstractSnvWorkflowTests {
             compareFiles(expected, actual)
 
             File roddyResultsDir = new File(getWorkflowData(), "resultFiles_${VERSION}")
-            File otpResultsDir = createdInstance.snvInstancePath.absoluteDataManagementPath
+            File otpResultsDir = createdInstance.instancePath.absoluteDataManagementPath
             roddyResultsDir.eachFileRecurse(groovy.io.FileType.FILES) { File resultFile ->
                 File otpResultFile = new File(otpResultsDir, resultFile.name)
                 if (!resultFile.name =~ /^snvCallingCheckPoint/) {

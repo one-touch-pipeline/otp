@@ -27,7 +27,7 @@ MergingWorkPackage.list().each { MergingWorkPackage mergingWorkPackage ->
         snvJobResult.each { SnvJobResult result ->
             assert result.withdrawn
             // rename folder containing results
-            renameFiles.add(result.snvCallingInstance.snvInstancePath.absoluteDataManagementPath)
+            renameFiles.add(result.snvCallingInstance.instancePath.absoluteDataManagementPath)
         }
     }
 }

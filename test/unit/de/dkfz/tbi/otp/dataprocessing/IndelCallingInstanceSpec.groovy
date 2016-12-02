@@ -42,7 +42,7 @@ class IndelCallingInstanceSpec extends Specification {
         IndelCallingInstance instance = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles()
 
         when:
-        OtpPath indelInstancePath = instance.getIndelInstancePath()
+        OtpPath indelInstancePath = instance.getInstancePath()
 
         then:
         instance.project == indelInstancePath.project

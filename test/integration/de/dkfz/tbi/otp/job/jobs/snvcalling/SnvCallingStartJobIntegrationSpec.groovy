@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
+import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.job.jobs.*
 import de.dkfz.tbi.otp.job.processing.*
@@ -38,12 +39,17 @@ class SnvCallingStartJobIntegrationSpec extends Specification {
         failedProcess.metaClass.getProcessParameterObject = { -> failedInstance }
 
         snvCallingStartJob = Spy(TestAbstractSnvCallingStartJob) {
-            2 * getInstanceClass() >> SnvCallingInstance
+            1 * getInstanceClass() >> SnvCallingInstance
             1 * getInstanceName(_) >> "someInstanceName"
+            1 * withdrawSnvJobResultsIfAvailable(_) >> { BamFilePairAnalysis bamFilePairAnalysis ->
+                SnvJobResult.findAllBySnvCallingInstance(bamFilePairAnalysis).each {
+                    it.withdraw()
+                }
+            }
         }
         snvCallingStartJob.executionService = Mock(ExecutionService) {
             1 * executeCommandReturnProcessOutput(_, _) >> { Realm realm, String cmd ->
-                assert cmd == "rm -rf ${failedInstance.snvInstancePath.absoluteDataManagementPath} ${failedInstance.snvInstancePath.absoluteStagingPath}"
+                assert cmd == "rm -rf ${failedInstance.instancePath.absoluteDataManagementPath} ${failedInstance.instancePath.absoluteStagingPath}"
             }
         }
         snvCallingStartJob.configService = new ConfigService()
@@ -90,12 +96,12 @@ class SnvCallingStartJobIntegrationSpec extends Specification {
         failedProcess.metaClass.getProcessParameterObject = { -> failedInstance }
 
         roddySnvCallingStartJob = Spy(TestAbstractSnvCallingStartJob) {
-            2 * getInstanceClass() >> RoddySnvCallingInstance
+            1 * getInstanceClass() >> RoddySnvCallingInstance
             1 * getInstanceName(_) >> "someOtherInstanceName"
         }
         roddySnvCallingStartJob.executionService = Mock(ExecutionService) {
             1 * executeCommandReturnProcessOutput(_, _, _) >> { Realm realm, String cmd, String user ->
-                assert cmd == "rm -rf ${failedInstance.snvInstancePath.absoluteDataManagementPath} ${failedInstance.snvInstancePath.absoluteStagingPath}"
+                assert cmd == "rm -rf ${failedInstance.instancePath.absoluteDataManagementPath} ${failedInstance.instancePath.absoluteStagingPath}"
                 assert user == realm.roddyUser
             }
         }
