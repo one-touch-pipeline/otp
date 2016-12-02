@@ -7,6 +7,7 @@ import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.infrastructure.*
+import de.dkfz.tbi.otp.job.JobMailService
 import de.dkfz.tbi.otp.job.jobs.snvcalling.*
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.processing.*
@@ -337,6 +338,15 @@ class DomainFactory {
                 null,
                 prefix,
                 "comment to the number prefix"
+        )
+    }
+
+    public static void createProcessingOptionForStatisticRecipient(String recipientEmail = "email${counter++}@example.example"){
+        createProcessingOption(
+                name: JobMailService.PROCESSING_OPTION_EMAIL_RECIPIENT,
+                type: JobMailService.PROCESSING_OPTION_STATISTIC_EMAIL_RECIPIENT,
+                project: null,
+                value: recipientEmail,
         )
     }
 
