@@ -64,6 +64,9 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         trackingService.createNotificationTextService = Mock(CreateNotificationTextService) {
             notification(_, _, _) >> 'Something'
         }
+        trackingService.mailHelperService = Mock(MailHelperService) {
+            getOtrsRecipient(_) >> 'a.b@c.d'
+        }
 
         when:
         trackingService.processFinished([seqTrackA, seqTrackB1] as Set, OtrsTicket.ProcessingStep.FASTQC)
@@ -212,9 +215,11 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
                 dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
                 fastqcState: SeqTrack.DataProcessingState.FINISHED,
                 run: DomainFactory.createRun(
-                         seqPlatform: DomainFactory.createSeqPlatform(
-                                 seqPlatformGroup: DomainFactory.createSeqPlatformGroup()))
-                ],
+                        seqPlatform: DomainFactory.createSeqPlatform(
+                                seqPlatformGroup: DomainFactory.createSeqPlatformGroup(),
+                        ),
+                ),
+        ],
                 [runSegment: runSegment, fileLinked: true]
         )
         setBamFileInProjectFolder(DomainFactory.createRoddyBamFile(
@@ -276,8 +281,75 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
     private static final String OTRS_RECIPIENT = HelperUtils.uniqueString
 
     @Unroll
-    void 'sendCustomerNotification sends expected notification'(boolean automaticNotification, Collection<SeqTrack> seqTracks, OtrsTicket.ProcessingStep notificationStep, List<String> recipients, String subject) {
+    void 'sendCustomerNotification sends expected notification'(int dataCase, boolean automaticNotification, OtrsTicket.ProcessingStep notificationStep, List<String> recipients, String subject) {
         given:
+        Sample sample1 = DomainFactory.createSample(
+                individual: DomainFactory.createIndividual(
+                        project: DomainFactory.createProject(
+                                name: 'Project1',
+                                mailingListName: 'tr_list@test.test',
+                        )
+                )
+        )
+        Sample sample2 = DomainFactory.createSample(
+                individual: DomainFactory.createIndividual(
+                        project: DomainFactory.createProject(
+                                name: 'Project2',
+                                mailingListName: null,
+                        )
+                )
+        )
+
+        Collection<SeqTrack> seqTracks
+        switch (dataCase) {
+            case 1:
+                seqTracks = [
+                        DomainFactory.createSeqTrack(sample: sample1),
+                ]
+                break
+            case 2:
+                seqTracks = [
+                        DomainFactory.createSeqTrack(sample: sample1),
+                ]
+                break
+            case 3:
+                seqTracks = [
+                        DomainFactory.createSeqTrack(sample: sample1),
+                        DomainFactory.createSeqTrack(
+                                sample: sample1,
+                                ilseSubmission: DomainFactory.createIlseSubmission(ilseNumber: 1234),
+                        ),
+                ]
+                break
+            case 4:
+                seqTracks = [
+                        DomainFactory.createSeqTrack(sample: sample1),
+                ]
+                break
+            case 5:
+                seqTracks = [
+                        DomainFactory.createSeqTrack(sample: sample2),
+                ]
+                break
+            case 6:
+                IlseSubmission ilse = DomainFactory.createIlseSubmission(ilseNumber: 9876)
+                seqTracks = [
+                        DomainFactory.createSeqTrack(
+                                sample: sample2,
+                                ilseSubmission: ilse,
+                        ),
+                        DomainFactory.createSeqTrack(
+                                sample: sample2,
+                                ilseSubmission: ilse,
+                        ),
+                        DomainFactory.createSeqTrack(
+                                sample: sample2,
+                                ilseSubmission: DomainFactory.createIlseSubmission(ilseNumber: 1234),
+                        ),
+                        DomainFactory.createSeqTrack(sample: sample2),
+                ]
+        }
+
         OtrsTicket ticket = DomainFactory.createOtrsTicket(automaticNotification: automaticNotification)
         ProcessingStatus status = new ProcessingStatus(seqTracks.collect { new SeqTrackProcessingStatus(it) })
         String prefix = HelperUtils.uniqueString
@@ -302,97 +374,13 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         trackingService.sendCustomerNotification(ticket, status, notificationStep)
 
         where:
-        [automaticNotification, seqTracks, notificationStep, recipients, subject] << createSendCustomerNotificationTestData()
-    }
-
-    private static List createSendCustomerNotificationTestData() {
-
-        String project1Recipient = 'tr_list@test.test'
-        Project project1 = DomainFactory.createProject(
-                name: 'Project1',
-                mailingListName: project1Recipient,
-        )
-        Project project2 = DomainFactory.createProject(
-                name: 'Project2',
-                mailingListName: null,
-        )
-        Sample sample1 = DomainFactory.createSample(individual: DomainFactory.createIndividual(project: project1))
-        Sample sample2 = DomainFactory.createSample(individual: DomainFactory.createIndividual(project: project2))
-        IlseSubmission ilse1234 = DomainFactory.createIlseSubmission(ilseNumber: 1234)
-        IlseSubmission ilse9876 = DomainFactory.createIlseSubmission(ilseNumber: 9876)
-
-        return [
-                [  // all good, no ILSe submission
-                   true,
-                   [
-                           DomainFactory.createSeqTrack(sample: sample1),
-                   ],
-                   OtrsTicket.ProcessingStep.INSTALLATION,
-                   [project1Recipient, OTRS_RECIPIENT],
-                   'Project1 sequencing data installed',
-                ],
-                [  // automaticNotification false
-                   false,
-                   [
-                           DomainFactory.createSeqTrack(sample: sample1),
-                   ],
-                   OtrsTicket.ProcessingStep.INSTALLATION,
-                   [OTRS_RECIPIENT],
-                   'TO BE SENT: Project1 sequencing data installed',
-                ],
-                [  // all good, one ILSe submission
-                   true,
-                   [
-                           DomainFactory.createSeqTrack(sample: sample1),
-                           DomainFactory.createSeqTrack(
-                                   sample: sample1,
-                                   ilseSubmission: ilse1234,
-                           ),
-                   ],
-                   OtrsTicket.ProcessingStep.INSTALLATION,
-                   [project1Recipient, OTRS_RECIPIENT],
-                   '[S#1234] Project1 sequencing data installed',
-                ],
-                [  // no notification for step
-                   true,
-                   [
-                           DomainFactory.createSeqTrack(sample: sample1),
-                   ],
-                   OtrsTicket.ProcessingStep.FASTQC,
-                   [],
-                   null,
-                ],
-                [  // no mailing list specified, no ILSe submission
-                   true,
-                   [
-                           DomainFactory.createSeqTrack(sample: sample2),
-                   ],
-                   OtrsTicket.ProcessingStep.ALIGNMENT,
-                   [OTRS_RECIPIENT],
-                   'TO BE SENT: Project2 sequencing data aligned',
-                ],
-                [  // no mailing list specified, multiple ILSe submissions
-                   true,
-                   [
-                           DomainFactory.createSeqTrack(
-                                   sample: sample2,
-                                   ilseSubmission: ilse9876,
-                           ),
-                           DomainFactory.createSeqTrack(
-                                   sample: sample2,
-                                   ilseSubmission: ilse9876,
-                           ),
-                           DomainFactory.createSeqTrack(
-                                   sample: sample2,
-                                   ilseSubmission: ilse1234,
-                           ),
-                           DomainFactory.createSeqTrack(sample: sample2),
-                   ],
-                   OtrsTicket.ProcessingStep.SNV,
-                   [OTRS_RECIPIENT],
-                   'TO BE SENT: [S#1234,9876] Project2 sequencing data SNV-called',
-                ],
-        ]
+        dataCase  | automaticNotification | notificationStep                       | recipients                            | subject
+        1         | true                  | OtrsTicket.ProcessingStep.INSTALLATION | ['tr_list@test.test', OTRS_RECIPIENT] | 'Project1 sequencing data installed'
+        2         | false                 | OtrsTicket.ProcessingStep.INSTALLATION | [OTRS_RECIPIENT]                      | 'TO BE SENT: Project1 sequencing data installed'
+        3         | true                  | OtrsTicket.ProcessingStep.INSTALLATION | ['tr_list@test.test', OTRS_RECIPIENT] | '[S#1234] Project1 sequencing data installed'
+        4         | true                  | OtrsTicket.ProcessingStep.FASTQC       | []                                    | null
+        5         | true                  | OtrsTicket.ProcessingStep.ALIGNMENT    | [OTRS_RECIPIENT]                      | 'TO BE SENT: Project2 sequencing data aligned'
+        6         | true                  | OtrsTicket.ProcessingStep.SNV          | [OTRS_RECIPIENT]                      | 'TO BE SENT: [S#1234,9876] Project2 sequencing data SNV-called'
     }
 
     void 'sendCustomerNotification, with multiple projects, sends multiple notifications'() {
