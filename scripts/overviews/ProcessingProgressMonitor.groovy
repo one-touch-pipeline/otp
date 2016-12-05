@@ -26,6 +26,7 @@ The script has four input areas, one for run names, one for patient names, one f
 
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.processing.*
@@ -82,6 +83,7 @@ MetaDataKey libPrepKitKey = MetaDataKey.findByName(MetaDataColumn.LIB_PREP_KIT.n
 MetaDataKey enrichmentKitKey = MetaDataKey.findByName("ENRICHMENT_KIT")
 MetaDataKey commentKey = MetaDataKey.findByName(MetaDataColumn.COMMENT.name())
 
+Pipeline roddySnv = CollectionUtils.exactlyOneElement(Pipeline.findAllByNameAndType(Pipeline.Name.RODDY_SNV, Pipeline.Type.SNV))
 
 List blackList_MergingSetId = ([12174511] as long[]) as List
 
@@ -466,7 +468,8 @@ def handleStateMapSnv = { List next ->
             if (samplePair.snvProcessingStatus == SamplePair.ProcessingStatus.DISABLED) {
                 stateMap.disabled << samplePair
             } else if (samplePair.snvProcessingStatus == SamplePair.ProcessingStatus.NEEDS_PROCESSING) {
-                if (!SnvConfig.findByProjectAndSeqTypeAndObsoleteDateIsNull(samplePair.project, samplePair.seqType)) {
+                if (!SnvConfig.findByProjectAndSeqTypeAndObsoleteDateIsNull(samplePair.project, samplePair.seqType) &&
+                        !RoddyWorkflowConfig.findByProjectAndSeqTypeAndPipelineAndObsoleteDateIsNull(samplePair.project, samplePair.seqType, roddySnv)) {
                     stateMap.noConfig << "${samplePair.project} ${samplePair.seqType}"
                 } else if (SnvCallingInstance.findBySamplePairAndProcessingStateInListAndWithdrawn(samplePair, [AnalysisProcessingStates.IN_PROGRESS], false)) {
                     stateMap.alreadyRunning << samplePair
@@ -998,7 +1001,8 @@ if (allProcessed) {
     //collect waiting SamplePairs
     SamplePair.findAllBySnvProcessingStatus(SamplePair.ProcessingStatus.NEEDS_PROCESSING).each { SamplePair samplePair ->
         //see also: OTP-1497 and/or OTP-1673
-        if (SnvConfig.findByProjectAndSeqTypeAndObsoleteDateIsNull(samplePair.project, samplePair.seqType)) {
+        if (SnvConfig.findByProjectAndSeqTypeAndObsoleteDateIsNull(samplePair.project, samplePair.seqType) ||
+                RoddyWorkflowConfig.findByProjectAndSeqTypeAndPipelineAndObsoleteDateIsNull(samplePair.project, samplePair.seqType, roddySnv)) {
             [samplePair.mergingWorkPackage1, samplePair.mergingWorkPackage2].each { MergingWorkPackage mergingWorkPackage ->
                 seqTracks.addAll(mergingWorkPackage.findMergeableSeqTracks())
             }
