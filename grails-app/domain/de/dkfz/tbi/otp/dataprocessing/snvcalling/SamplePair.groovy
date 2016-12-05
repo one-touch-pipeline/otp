@@ -54,6 +54,10 @@ class SamplePair implements Entity {
     ProcessingStatus snvProcessingStatus = ProcessingStatus.NEEDS_PROCESSING
     ProcessingStatus indelProcessingStatus = ProcessingStatus.NEEDS_PROCESSING
 
+    boolean isProcessingDisabled() {
+        return snvProcessingStatus == ProcessingStatus.DISABLED && indelProcessingStatus == ProcessingStatus.DISABLED
+    }
+
     /**
      * These properties are handled automatically by grails.
      */

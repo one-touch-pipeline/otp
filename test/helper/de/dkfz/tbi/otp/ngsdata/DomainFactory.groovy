@@ -1625,6 +1625,29 @@ samplePairsNotProcessed: ${samplePairsNotProcessed}
 ''',
                 comment: '',
         ])
+
+        createProcessingOption([
+                name: CreateNotificationTextService.INDEL_NOTIFICATION_TEMPLATE,
+                type: null,
+                project: null,
+                value: '''
+indel finished
+samplePairsFinished: ${samplePairsFinished}
+directories: ${directories}
+''',
+                comment: '',
+        ])
+
+        createProcessingOption([
+                name: CreateNotificationTextService.INDEL_NOT_PROCESSED_TEMPLATE,
+                type: null,
+                project: null,
+                value: '''
+indel not processed
+samplePairsNotProcessed: ${samplePairsNotProcessed}
+''',
+                comment: '',
+        ])
     }
 
 

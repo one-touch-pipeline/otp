@@ -11,6 +11,8 @@ import grails.test.mixin.support.*
 import org.codehaus.groovy.grails.web.mapping.*
 import spock.lang.*
 
+import static de.dkfz.tbi.otp.tracking.OtrsTicket.ProcessingStep.*
+
 @Mock([
         DataFile,
         FileType,
@@ -324,13 +326,13 @@ class CreateNotificationTextServiceSpec extends Specification {
     }
 
 
-    void "snvDirectory, when samplePairsFinished is null, return empty string"() {
+    void "variantCallingDirectories, when samplePairsFinished is null, return empty string"() {
         expect:
-        '' == new CreateNotificationTextService().snvDirectory(null)
+        '' == new CreateNotificationTextService().variantCallingDirectories(null, SNV)
     }
 
 
-    void "snvDirectory, when paths do not start with icgc, then the paths should not be changed"() {
+    void "variantCallingDirectories, when paths do not start with icgc, then the paths should not be changed"() {
         given:
         SamplePair samplePair1 = DomainFactory.createSamplePair()
         SamplePair samplePair2 = DomainFactory.createSamplePair()
@@ -339,18 +341,23 @@ class CreateNotificationTextServiceSpec extends Specification {
         Realm realm2 = DomainFactory.createRealmDataManagement(name: samplePair2.project.realmName)
 
         when:
-        String fileNameString = new CreateNotificationTextService().snvDirectory([samplePair1, samplePair2])
+        String fileNameString = new CreateNotificationTextService().variantCallingDirectories([samplePair1, samplePair2], analysis)
         String expected = [
-                new File("${realm1.rootPath}/${samplePair1.project.dirName}/sequencing/${samplePair1.seqType.dirName}/view-by-pid/${samplePair1.individual.pid}/snv_results/${samplePair1.seqType.libraryLayoutDirName}/${samplePair1.sampleType1.dirName}_${samplePair1.sampleType2.dirName}"),
-                new File("${realm2.rootPath}/${samplePair2.project.dirName}/sequencing/${samplePair2.seqType.dirName}/view-by-pid/${samplePair2.individual.pid}/snv_results/${samplePair2.seqType.libraryLayoutDirName}/${samplePair2.sampleType1.dirName}_${samplePair2.sampleType2.dirName}"),
+                new File("${realm1.rootPath}/${samplePair1.project.dirName}/sequencing/${samplePair1.seqType.dirName}/view-by-pid/${samplePair1.individual.pid}/${pathSegment}/${samplePair1.seqType.libraryLayoutDirName}/${samplePair1.sampleType1.dirName}_${samplePair1.sampleType2.dirName}"),
+                new File("${realm2.rootPath}/${samplePair2.project.dirName}/sequencing/${samplePair2.seqType.dirName}/view-by-pid/${samplePair2.individual.pid}/${pathSegment}/${samplePair2.seqType.libraryLayoutDirName}/${samplePair2.sampleType1.dirName}_${samplePair2.sampleType2.dirName}"),
         ].sort().join('\n')
 
         then:
         expected == fileNameString
+
+        where:
+        analysis || pathSegment
+        SNV      || "snv_results"
+        INDEL    || "indel_results"
     }
 
 
-    void "snvDirectory, when path starts with icgc, then the path should be changed to start with lsdf"() {
+    void "variantCallingDirectories, when path starts with icgc, then the path should be changed to start with lsdf"() {
         given:
         SamplePair samplePair = DomainFactory.createSamplePair()
         DomainFactory.createRealmDataManagement([
@@ -359,12 +366,17 @@ class CreateNotificationTextServiceSpec extends Specification {
         ])
 
         when:
-        String fileNameString = new CreateNotificationTextService().snvDirectory([samplePair])
-        String expected = new File("${LsdfFilesService.MOUNTPOINT_WITH_LSDF}/${samplePair.project.dirName}/sequencing/${samplePair.seqType.dirName}/view-by-pid/${samplePair.individual.pid}/snv_results/${samplePair.seqType.libraryLayoutDirName}/${samplePair.sampleType1.dirName}_${samplePair.sampleType2.dirName}").path
+        String fileNameString = new CreateNotificationTextService().variantCallingDirectories([samplePair], analysis)
+        String expected = new File("${LsdfFilesService.MOUNTPOINT_WITH_LSDF}/${samplePair.project.dirName}/sequencing/${samplePair.seqType.dirName}/view-by-pid/${samplePair.individual.pid}/${pathSegment}/${samplePair.seqType.libraryLayoutDirName}/${samplePair.sampleType1.dirName}_${samplePair.sampleType2.dirName}").path
 
         then:
         expected == fileNameString
-    }
+
+        where:
+        analysis || pathSegment
+        SNV      || "snv_results"
+        INDEL    || "indel_results"
+   }
 
 
     void "getSamplePairRepresentation, when empty sample pair list, should return empty string"() {
@@ -647,7 +659,7 @@ ${expectedSnvRunning}${expectedSnvNotRunning}"""
 
         String expectedSamplePairsFinished = createNotificationTextService.getSamplePairRepresentation(samplePairWithSnv)
         String expectedSamplePairsNotProcessed = createNotificationTextService.getSamplePairRepresentation(samplePairWithoutSnv)
-        String expectedDirectories = createNotificationTextService.snvDirectory(samplePairWithSnv)
+        String expectedDirectories = createNotificationTextService.variantCallingDirectories(samplePairWithSnv, SNV)
         String expectedLinks = samplePairWithSnv*.project.unique().collect { 'link' }.join('\n')
 
         String expected = """
@@ -677,6 +689,84 @@ samplePairsNotProcessed: ${expectedSamplePairsNotProcessed}
         false            | ProcessingStatus.WorkflowProcessingStatus.PARTLY_DONE_MIGHT_DO_MORE
     }
 
+    void "indelNotification, when ProcessingStatus is null, throw assert"() {
+        when:
+        new CreateNotificationTextService().indelNotification(null)
+
+        then:
+        AssertionError e = thrown()
+        e.message.contains('assert status')
+    }
+
+    @Unroll
+    void "indelNotification, return message"() {
+        given:
+        DomainFactory.createPanCanAlignableSeqTypes()
+        DomainFactory.createNotificationProcessingOptions()
+
+        Map data1 = createData([
+                indelProcessingStatus: ProcessingStatus.WorkflowProcessingStatus.ALL_DONE
+        ])
+        Map data2 = createData(
+                project: multipleProjects ? DomainFactory.createProjectWithRealms() : data1.seqTrack.project,
+                indelProcessingStatus: indelProcessingStatus,
+        )
+
+        ProcessingStatus processingStatus = new ProcessingStatus([
+                data1.seqTrackProcessingStatus,
+                data2.seqTrackProcessingStatus,
+        ])
+
+        int projectCount = multipleProjects && indelProcessingStatus == ProcessingStatus.WorkflowProcessingStatus.ALL_DONE ? 2 : 1
+
+        CreateNotificationTextService createNotificationTextService = new CreateNotificationTextService(
+                mergedAlignmentDataFileService: new MergedAlignmentDataFileService(),
+        )
+
+        List<SamplePair> samplePairWithIndel = [data1.samplePair]
+        List<SamplePair> samplePairWithoutIndel = []
+        switch (indelProcessingStatus) {
+            case ProcessingStatus.WorkflowProcessingStatus.ALL_DONE:
+                samplePairWithIndel.add(data2.samplePair)
+                break
+            case ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO:
+                samplePairWithoutIndel.add(data2.samplePair)
+                break
+            default:
+                //ignore samplepair
+                break
+        }
+
+        String expectedSamplePairsFinished = createNotificationTextService.getSamplePairRepresentation(samplePairWithIndel)
+        String expectedSamplePairsNotProcessed = createNotificationTextService.getSamplePairRepresentation(samplePairWithoutIndel)
+        String expectedDirectories = createNotificationTextService.variantCallingDirectories(samplePairWithIndel, INDEL)
+
+        String expected = """
+indel finished
+samplePairsFinished: ${expectedSamplePairsFinished}
+directories: ${expectedDirectories}
+"""
+        if (expectedSamplePairsNotProcessed) {
+            expected += """\n
+indel not processed
+samplePairsNotProcessed: ${expectedSamplePairsNotProcessed}
+"""
+        }
+
+        when:
+        String message = createNotificationTextService.indelNotification(processingStatus)
+
+        then:
+        expected == message
+
+        where:
+        multipleProjects | indelProcessingStatus
+        false            | ProcessingStatus.WorkflowProcessingStatus.ALL_DONE
+        true             | ProcessingStatus.WorkflowProcessingStatus.ALL_DONE
+        false            | ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO
+        false            | ProcessingStatus.WorkflowProcessingStatus.PARTLY_DONE_MIGHT_DO_MORE
+    }
+
 
     void "notification, when an argument is null, throw assert"() {
         when:
@@ -687,10 +777,10 @@ samplePairsNotProcessed: ${expectedSamplePairsNotProcessed}
         e.message.contains("assert ${text}")
 
         where:
-        ticket           | status                 | processingStep                || text
-        new OtrsTicket() | new ProcessingStatus() | null                          || 'processingStep'
-        new OtrsTicket() | null                   | OtrsTicket.ProcessingStep.SNV || 'status'
-        null             | new ProcessingStatus() | OtrsTicket.ProcessingStep.SNV || 'otrsTicket'
+        ticket           | status                 | processingStep || text
+        new OtrsTicket() | new ProcessingStatus() | null           || 'processingStep'
+        new OtrsTicket() | null                   | SNV            || 'status'
+        null             | new ProcessingStatus() | SNV            || 'otrsTicket'
     }
 
 
@@ -704,15 +794,22 @@ samplePairsNotProcessed: ${expectedSamplePairsNotProcessed}
         ProcessingStatus processingStatus = new ProcessingStatus()
 
         CreateNotificationTextService createNotificationTextService = Spy(CreateNotificationTextService) {
-            (processingStep == OtrsTicket.ProcessingStep.INSTALLATION ? 1 : 0) *
-                    installationNotification(processingStatus) >> OtrsTicket.ProcessingStep.INSTALLATION.toString()
-            (processingStep == OtrsTicket.ProcessingStep.ALIGNMENT ? 1 : 0) *
-                    alignmentNotification(processingStatus) >> OtrsTicket.ProcessingStep.ALIGNMENT.toString()
-            (processingStep == OtrsTicket.ProcessingStep.SNV ? 1 : 0) *
-                    snvNotification(processingStatus) >> OtrsTicket.ProcessingStep.SNV.toString()
+            (processingStep == INSTALLATION ? 1 : 0) *
+                    installationNotification(processingStatus) >> INSTALLATION.toString()
+            (processingStep == ALIGNMENT ? 1 : 0) *
+                    alignmentNotification(processingStatus) >> ALIGNMENT.toString()
+            (processingStep == SNV ? 1 : 0) *
+                    snvNotification(processingStatus) >> SNV.toString()
+            (processingStep == INDEL ? 1 : 0) *
+                    indelNotification(processingStatus) >> INDEL.toString()
         }
 
-        String expectedSeqCenterComment = seqCenterComment ? "\n\n${seqCenterComment}" : ''
+        String expectedSeqCenterComment = seqCenterComment ? """
+
+******************************
+Note from sequencing center:
+${seqCenterComment}
+******************************""" : ''
 
         String expected = """
 base notification
@@ -727,19 +824,21 @@ seqCenterComment: ${expectedSeqCenterComment}
         expected == message
 
         where:
-        processingStep                         | seqCenterComment
-        OtrsTicket.ProcessingStep.INSTALLATION | null
-        OtrsTicket.ProcessingStep.ALIGNMENT    | null
-        OtrsTicket.ProcessingStep.SNV          | null
-        OtrsTicket.ProcessingStep.INSTALLATION | 'Some comment'
-        OtrsTicket.ProcessingStep.ALIGNMENT    | 'Some comment'
-        OtrsTicket.ProcessingStep.SNV          | 'Some comment'
+        processingStep | seqCenterComment
+        INSTALLATION   | null
+        ALIGNMENT      | null
+        SNV            | null
+        INDEL          | null
+        INSTALLATION   | 'Some comment'
+        ALIGNMENT      | 'Some comment'
+        SNV            | 'Some comment'
+        INDEL          | 'Some comment'
     }
 
 
     void "notification, when call for ProcessingStep FASTQC, throw an exception"() {
         when:
-        new CreateNotificationTextService().notification(DomainFactory.createOtrsTicket(), new ProcessingStatus(), OtrsTicket.ProcessingStep.FASTQC)
+        new CreateNotificationTextService().notification(DomainFactory.createOtrsTicket(), new ProcessingStatus(), FASTQC)
 
         then:
         thrown(MissingMethodException)
@@ -752,6 +851,7 @@ seqCenterComment: ${expectedSeqCenterComment}
         ProcessingStatus.WorkflowProcessingStatus installationProcessingStatus = properties.installationProcessingStatus ?: ProcessingStatus.WorkflowProcessingStatus.ALL_DONE
         ProcessingStatus.WorkflowProcessingStatus alignmentProcessingStatus = properties.alignmentProcessingStatus ?: ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO
         ProcessingStatus.WorkflowProcessingStatus snvProcessingStatus = properties.snvProcessingStatus ?: ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO
+        ProcessingStatus.WorkflowProcessingStatus indelProcessingStatus = properties.indelProcessingStatus ?: ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO
         Run run = properties.run ?: DomainFactory.createRun()
         String sampleId1 = properties.sampleId1 ?: "sampleId_${DomainFactory.counter++}"
         String sampleId2 = properties.sampleId2
@@ -805,6 +905,9 @@ seqCenterComment: ${expectedSeqCenterComment}
                                         new SamplePairProcessingStatus(
                                                 samplePair,
                                                 snvProcessingStatus,
+                                                null,
+                                                indelProcessingStatus,
+                                                null,
                                         )
                                 ]
                         )

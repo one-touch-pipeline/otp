@@ -4,11 +4,13 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.*
+import de.dkfz.tbi.otp.tracking.OtrsTicket.ProcessingStep
 import groovy.text.*
 import org.codehaus.groovy.grails.web.mapping.*
 import org.springframework.beans.factory.annotation.*
 
 import static de.dkfz.tbi.otp.ngsdata.ProjectOverviewService.*
+import static de.dkfz.tbi.otp.tracking.OtrsTicket.ProcessingStep.*
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.*
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
@@ -24,6 +26,8 @@ class CreateNotificationTextService {
     static final String ALIGNMENT_PROCESSING_INFORMATION_TEMPLATE = 'AlignmentProcessingInformationTemplate'
     static final String SNV_NOTIFICATION_TEMPLATE = 'SnvNotificationTemplate'
     static final String SNV_NOT_PROCESSED_TEMPLATE = 'SnvNotProcessedTemplate'
+    static final String INDEL_NOTIFICATION_TEMPLATE = 'IndelNotificationTemplate'
+    static final String INDEL_NOT_PROCESSED_TEMPLATE = 'IndelNotProcessedTemplate'
 
 
     @Autowired
@@ -40,13 +44,13 @@ class CreateNotificationTextService {
     ProcessingOptionService processingOptionService
 
 
-    String notification(OtrsTicket otrsTicket, ProcessingStatus status, OtrsTicket.ProcessingStep processingStep) {
+    String notification(OtrsTicket otrsTicket, ProcessingStatus status, ProcessingStep processingStep) {
         assert otrsTicket
         assert status
         assert processingStep
 
         String stepInformation = "${processingStep}Notification"(status).trim()
-        String seqCenterComment = otrsTicket.seqCenterComment ? "\n\n${otrsTicket.seqCenterComment}" : ''
+        String seqCenterComment = otrsTicket.seqCenterComment ? "\n\n******************************\nNote from sequencing center:\n${otrsTicket.seqCenterComment}\n******************************" : ''
 
         return createMessage(BASE_NOTIFICATION_TEMPLATE, [
                 stepInformation : stepInformation,
@@ -156,7 +160,7 @@ class CreateNotificationTextService {
         ])
 
         Map<Boolean, List<SamplePairProcessingStatus>> samplePairs = status.samplePairProcessingStatuses.groupBy {
-            it.snvProcessingStatus != NOTHING_DONE_WONT_DO }
+            it.variantCallingProcessingStatus != NOTHING_DONE_WONT_DO }
         if (samplePairs[true]) {
             message += '\n' + createMessage(ALIGNMENT_FURTHER_PROCESSING_TEMPLATE, [
                     samplePairsWillProcess: getSamplePairRepresentation(samplePairs[true]*.samplePair),
@@ -165,7 +169,7 @@ class CreateNotificationTextService {
         if (samplePairs[false]) {
             message += '\n' + createMessage(ALIGNMENT_NO_FURTHER_PROCESSING_TEMPLATE, [
                     samplePairsWontProcess: getSamplePairRepresentation(samplePairs[false]*.samplePair.findAll {
-                        it.snvProcessingStatus != SamplePair.ProcessingStatus.DISABLED }),
+                        !it.processingDisabled }),
             ])
         }
 
@@ -174,27 +178,40 @@ class CreateNotificationTextService {
 
 
     String snvNotification(ProcessingStatus status) {
+        return variantCallingNotification(status, SNV)
+    }
+
+
+    String indelNotification(ProcessingStatus status) {
+        return variantCallingNotification(status, INDEL)
+    }
+
+
+    String variantCallingNotification(ProcessingStatus status, ProcessingStep notificationStep) {
         assert status
 
         Map<WorkflowProcessingStatus, List<SamplePairProcessingStatus>> map =
-                status.samplePairProcessingStatuses.groupBy { it.snvProcessingStatus }
+                status.samplePairProcessingStatuses.groupBy { it."${notificationStep}ProcessingStatus" }
 
         List<SamplePair> samplePairsFinished = map[ALL_DONE]*.samplePair
         if (!samplePairsFinished) {
-            throw new RuntimeException("No SNV calling finished yet.")
+            throw new RuntimeException("No ${notificationStep.displayName} finished yet.")
         }
-        String directories = snvDirectory(samplePairsFinished)
-        String otpLinks = createOtpLinks(samplePairsFinished*.project, 'snv', 'results', 'projectName')
-        String message = createMessage(SNV_NOTIFICATION_TEMPLATE, [
+        String directories = variantCallingDirectories(samplePairsFinished, notificationStep)
+        String otpLinks = ''
+        if (notificationStep == SNV) {
+            otpLinks = createOtpLinks(samplePairsFinished*.project, 'snv', 'results', 'projectName')
+        }
+        String message = createMessage((String) this."${notificationStep.name()}_NOTIFICATION_TEMPLATE", [
                 samplePairsFinished    : getSamplePairRepresentation(samplePairsFinished),
                 directories            : directories,
                 otpLinks               : otpLinks,
         ])
 
         List<SamplePair> samplePairsNotProcessed = map[NOTHING_DONE_WONT_DO]*.samplePair.findAll {
-            it.snvProcessingStatus != SamplePair.ProcessingStatus.DISABLED }
+            it."${notificationStep}ProcessingStatus" != SamplePair.ProcessingStatus.DISABLED }
         if (samplePairsNotProcessed) {
-            message += '\n' + createMessage(SNV_NOT_PROCESSED_TEMPLATE, [
+            message += '\n' + createMessage((String) this."${notificationStep.name()}_NOT_PROCESSED_TEMPLATE", [
                     samplePairsNotProcessed: getSamplePairRepresentation(samplePairsNotProcessed),
             ])
         }
@@ -285,9 +302,9 @@ class CreateNotificationTextService {
         }.unique().sort()*.path.join('\n').replace('_OTP_PID', '${PID}').replace('_OTP_SAMPLE_TYPE', '${SAMPLE_TYPE}')
     }
 
-    String snvDirectory(List<SamplePair> samplePairsFinished) {
-        return samplePairsFinished*.getSnvSamplePairPath()*.absoluteDataManagementPath.collect {
-            LsdfFilesService.normalizePathForCustomers(it)
+    String variantCallingDirectories(List<SamplePair> samplePairsFinished, ProcessingStep notificationStep) {
+        return samplePairsFinished*."${notificationStep}SamplePairPath"*.absoluteDataManagementPath.collect {
+            LsdfFilesService.normalizePathForCustomers((File) it)
         }.unique().sort()*.path.join('\n')
     }
 

@@ -12,12 +12,13 @@ class OtrsTicket implements Commentable, Entity {
 
     @TupleConstructor
     enum ProcessingStep {
-        INSTALLATION('installed'),
-        FASTQC(null),
-        ALIGNMENT('aligned'),
-        SNV('SNV-called'),
-        INDEL('indel-called'),
+        INSTALLATION('installation', 'installed'),
+        FASTQC('FastQC', null),
+        ALIGNMENT('alignment', 'aligned'),
+        SNV('SNV calling', 'SNV-called'),
+        INDEL('Indel calling', 'Indel-called'),
 
+        final String displayName
         /**
          * Will be used in the subject of notification e-mails: "sequencing data ${notificationSubject}"
          *

@@ -16,4 +16,8 @@ class SamplePairProcessingStatus {
 
     final WorkflowProcessingStatus indelProcessingStatus
     final IndelCallingInstance completeIndelCallingInstance
+
+    WorkflowProcessingStatus getVariantCallingProcessingStatus() {
+        return TrackingService.combineStatuses([snvProcessingStatus, indelProcessingStatus], Closure.IDENTITY)
+    }
 }
