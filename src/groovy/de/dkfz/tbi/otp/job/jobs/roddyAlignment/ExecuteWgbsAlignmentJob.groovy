@@ -32,7 +32,7 @@ class ExecuteWgbsAlignmentJob extends AbstractRoddyAlignmentJob implements AutoR
 
         List<String> cValues = prepareAndReturnAlignmentCValues(roddyBamFile)
 
-        cValues.add(getChromosomeIndexParameter(roddyBamFile.referenceGenome))
+        cValues.add(getChromosomeIndexParameterWithMitochondrium(roddyBamFile.referenceGenome))
 
         if (roddyBamFile.referenceGenome.cytosinePositionsIndex) {
             cValues.add("CYTOSINE_POSITIONS_INDEX:${referenceGenomeService.cytosinePositionIndexFilePath(roddyBamFile.project, roddyBamFile.referenceGenome).absolutePath}")

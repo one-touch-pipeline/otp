@@ -1,14 +1,15 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.*
 
 import java.util.regex.*
 
 import static de.dkfz.tbi.otp.ngsdata.LsdfFilesService.*
 
 abstract class AbstractRoddyAlignmentJob extends AbstractExecutePanCanJob<RoddyBamFile> {
+
 
     public List<String> prepareAndReturnAlignmentCValues(RoddyBamFile roddyBamFile) {
         assert roddyBamFile
@@ -67,10 +68,8 @@ abstract class AbstractRoddyAlignmentJob extends AbstractExecutePanCanJob<RoddyB
     void validateReadGroups(RoddyBamFile bamFile) {
 
         File bamFilePath = bamFile.workBamFile
-        Realm realm = configService.getRealmDataProcessing(bamFile.project)
-        List<String> readGroupsInBam = executionService.executeCommandReturnProcessOutput(
-                realm, "set -o pipefail; samtools view -H ${bamFilePath} | grep ^@RG\\\\s", realm.roddyUser
-        ).assertExitCodeZeroAndStderrEmpty().stdout.split('\n').collect {
+        List<String> readGroupsInBam = ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(
+                "set -o pipefail; samtools view -H ${bamFilePath} | grep ^@RG\\\\s" as String).split('\n').collect {
             Matcher matcher = READ_GROUP_PATTERN.matcher(it)
             if (!matcher.find()) {
                 throw new RuntimeException("Line does not match expected @RG pattern: ${it}")

@@ -45,7 +45,7 @@ class ExecuteRoddySnvJob extends AbstractExecutePanCanJob<RoddySnvCallingInstanc
         cValues.add("CHROMOSOME_LENGTH_FILE:${referenceGenomeService.chromosomeLengthFile(bamFileControl.mergingWorkPackage).path}")
         cValues.add("CHR_SUFFIX:${referenceGenome.chromosomeSuffix}")
         cValues.add("CHR_PREFIX:${referenceGenome.chromosomePrefix}")
-        cValues.add("${getChromosomeIndexParameter(roddySnvCallingInstance.referenceGenome)}")
+        cValues.add("${getChromosomeIndexParameterWithoutMitochondrium(roddySnvCallingInstance.referenceGenome)}")
         cValues.add("analysisMethodNameOnOutput:${individualPath.relativize(resultDirectory).toString()}")
 
         return cValues

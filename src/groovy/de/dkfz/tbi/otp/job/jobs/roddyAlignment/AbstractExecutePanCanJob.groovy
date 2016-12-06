@@ -57,7 +57,7 @@ abstract class AbstractExecutePanCanJob<R extends RoddyResult> extends AbstractR
     }
 
 
-    public String getChromosomeIndexParameter(ReferenceGenome referenceGenome) {
+    public String getChromosomeIndexParameterWithMitochondrium(ReferenceGenome referenceGenome) {
         assert referenceGenome
 
         List<String> chromosomeNames = ReferenceGenomeEntry.findAllByReferenceGenomeAndClassificationInList(referenceGenome,
@@ -66,6 +66,19 @@ abstract class AbstractExecutePanCanJob<R extends RoddyResult> extends AbstractR
 
         return "CHROMOSOME_INDICES:( ${chromosomeNames.join(' ')} )"
     }
+
+
+    public String getChromosomeIndexParameterWithoutMitochondrium(ReferenceGenome referenceGenome) {
+        assert referenceGenome
+
+        List<String> chromosomeNames = ReferenceGenomeEntry.findAllByReferenceGenomeAndClassificationInList(referenceGenome,
+                [ReferenceGenomeEntry.Classification.CHROMOSOME])*.name
+        assert chromosomeNames: "No chromosome names could be found for reference genome ${referenceGenome}"
+
+        return "CHROMOSOME_INDICES:( ${chromosomeNames.join(' ')} )"
+    }
+
+
 
 
     protected abstract List<String> prepareAndReturnWorkflowSpecificCValues(R roddyResult)

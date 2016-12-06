@@ -186,25 +186,54 @@ PBS_AccountName:FASTTRACK"\
 
 
     @Test
-    void testGetChromosomeIndexParameter_RoddyResultIsNull_ShouldFail() {
+    void testGetChromosomeIndexParameterWithMitochondrium_RoddyResultIsNull_ShouldFail() {
         assert TestCase.shouldFail(AssertionError) {
-            abstractExecutePanCanJob.getChromosomeIndexParameter(null)
+            abstractExecutePanCanJob.getChromosomeIndexParameterWithMitochondrium(null)
         }.contains("assert referenceGenome")
     }
 
     @Test
-    void testGetChromosomeIndexParameter_NoChromosomeNamesExist_ShouldFail() {
+    void testGetChromosomeIndexParameterWithMitochondrium_NoChromosomeNamesExist_ShouldFail() {
         assert TestCase.shouldFail(AssertionError) {
-            abstractExecutePanCanJob.getChromosomeIndexParameter(roddyBamFile.referenceGenome)
+            abstractExecutePanCanJob.getChromosomeIndexParameterWithMitochondrium(roddyBamFile.referenceGenome)
         }.contains("No chromosome names could be found for reference genome")
     }
 
 
     @Test
-    void testGetChromosomeIndexParameter_AllFine() {
+    void testGetChromosomeIndexParameterWithMitochondrium_AllFine() {
         List<String> chromosomeNames = ["1", "2", "3", "4", "5", "M", "X", "Y"]
         DomainFactory.createReferenceGenomeEntries(roddyBamFile.referenceGenome, chromosomeNames)
 
-        assert "CHROMOSOME_INDICES:( ${chromosomeNames.join(' ')} )" == abstractExecutePanCanJob.getChromosomeIndexParameter(roddyBamFile.referenceGenome)
+        assert "CHROMOSOME_INDICES:( ${chromosomeNames.join(' ')} )" == abstractExecutePanCanJob.getChromosomeIndexParameterWithMitochondrium(roddyBamFile.referenceGenome)
+    }
+
+    @Test
+    void testGetChromosomeIndexParameterWithoutMitochondrium_RoddyResultIsNull_ShouldFail() {
+        assert TestCase.shouldFail(AssertionError) {
+            abstractExecutePanCanJob.getChromosomeIndexParameterWithoutMitochondrium(null)
+        }.contains("assert referenceGenome")
+    }
+
+    @Test
+    void testGetChromosomeIndexParameterWithoutMitochondrium_NoChromosomeNamesExist_ShouldFail() {
+        assert TestCase.shouldFail(AssertionError) {
+            abstractExecutePanCanJob.getChromosomeIndexParameterWithoutMitochondrium(roddyBamFile.referenceGenome)
+        }.contains("No chromosome names could be found for reference genome")
+    }
+
+
+    @Test
+    void testGetChromosomeIndexParameterWithoutMitochondrium_AllFine() {
+        List<String> chromosomeNames = ["1", "2", "3", "4", "5", "X", "Y"]
+        DomainFactory.createReferenceGenomeEntries(roddyBamFile.referenceGenome, chromosomeNames)
+        DomainFactory.createReferenceGenomeEntry(
+                referenceGenome: roddyBamFile.referenceGenome,
+                classification: ReferenceGenomeEntry.Classification.MITOCHONDRIAL,
+                name: "M",
+                alias: "M"
+        )
+
+        assert "CHROMOSOME_INDICES:( ${chromosomeNames.join(' ')} )" == abstractExecutePanCanJob.getChromosomeIndexParameterWithoutMitochondrium(roddyBamFile.referenceGenome)
     }
 }

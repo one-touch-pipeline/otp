@@ -284,14 +284,14 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
 
         AbstractRoddyAlignmentJob abstractRoddyAlignmentJob = Spy(AbstractRoddyAlignmentJob) {
             getConfigService() >> new ConfigService()
-            getExecutionService() >> Mock(ExecutionService) {
-                executeCommandReturnProcessOutput(_, _, _) >> { Realm realm, String command, String userName ->
-                    String expectedCommand = "set -o pipefail; samtools view -H ${roddyBamFile.workBamFile} | grep ^@RG\\\\s"
-                    assert command == expectedCommand
-                    return new ProcessHelperService.ProcessOutput(stdout: readGroupHeaders, stderr: '')
-                }
-            }
+        }
 
+        GroovyMock(ProcessHelperService, global: true) {
+            ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(_) >> { String command ->
+                String expectedCommand = "set -o pipefail; samtools view -H ${roddyBamFile.workBamFile} | grep ^@RG\\\\s"
+                assert command == expectedCommand
+                return readGroupHeaders
+            }
         }
 
         String expectedErrorMessage = """Read groups in BAM file are not as expected.
@@ -328,15 +328,16 @@ ${roddyBamFile.containedSeqTracks.collect { RoddyBamFile.getReadGroupName(it) }.
 
         AbstractRoddyAlignmentJob abstractRoddyAlignmentJob = Spy(AbstractRoddyAlignmentJob) {
             getConfigService() >> new ConfigService()
-            getExecutionService() >> Mock(ExecutionService) {
-                executeCommandReturnProcessOutput(_, _, _) >> { Realm realm, String command, String userName ->
-                    String expectedCommand = "set -o pipefail; samtools view -H ${roddyBamFile.workBamFile} | grep ^@RG\\\\s"
-                    assert command == expectedCommand
-                    return new ProcessHelperService.ProcessOutput(stdout: readGroupHeaders, stderr: '')
-                }
-            }
-
         }
+
+        GroovyMock(ProcessHelperService, global: true) {
+            ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(_) >> { String command ->
+                String expectedCommand = "set -o pipefail; samtools view -H ${roddyBamFile.workBamFile} | grep ^@RG\\\\s"
+                assert command == expectedCommand
+                return readGroupHeaders
+            }
+        }
+
 
         when:
         abstractRoddyAlignmentJob.validateReadGroups(roddyBamFile)

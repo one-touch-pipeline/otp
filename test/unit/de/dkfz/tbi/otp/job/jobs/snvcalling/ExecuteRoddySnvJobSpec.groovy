@@ -110,7 +110,7 @@ class ExecuteRoddySnvJobSpec extends Specification {
                 "CHROMOSOME_LENGTH_FILE:${chromosomeLength.path}",
                 "CHR_SUFFIX:${roddySnvCallingInstance.referenceGenome.chromosomeSuffix}",
                 "CHR_PREFIX:${roddySnvCallingInstance.referenceGenome.chromosomePrefix}",
-                "${job.getChromosomeIndexParameter(roddySnvCallingInstance.referenceGenome)}",
+                "${job.getChromosomeIndexParameterWithoutMitochondrium(roddySnvCallingInstance.referenceGenome)}",
                 "analysisMethodNameOnOutput:${analysisMethodNameOnOutput}",
         ]
 
