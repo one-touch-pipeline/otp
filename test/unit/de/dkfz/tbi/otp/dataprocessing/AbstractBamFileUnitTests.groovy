@@ -81,22 +81,21 @@ class AbstractBamFileUnitTests {
                 seqTrack: seqTrack1,
                 fileType: sequenceFileType,
         )
-
+        sleep(1)
         final SeqTrack seqTrack2 = DomainFactory.createSeqTrack()
         final DataFile dataFile21 = DomainFactory.createDataFile(
                 seqTrack: seqTrack2,
                 fileType: sequenceFileType,
-                dateCreated: new DateTime(dataFile11.dateCreated).plusHours(1).toDate(),
         )
+        sleep(1)
         final DataFile dataFile22 = DomainFactory.createDataFile(
                 seqTrack: seqTrack2,
                 fileType: sequenceFileType,
-                dateCreated: new DateTime(dataFile11.dateCreated).plusHours(2).toDate(),
         )
+        sleep(1)
         final DataFile dataFile23 = DomainFactory.createDataFile(
                 seqTrack: seqTrack2,
                 fileType: FileType.build(type: FileType.Type.ALIGNMENT),
-                dateCreated: new DateTime(dataFile11.dateCreated).plusHours(3).toDate(),
         )
 
         assert dataFile11.dateCreated < dataFile21.dateCreated
