@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.utils
 
+import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
+import de.dkfz.tbi.otp.dataprocessing.IndelCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
@@ -69,6 +71,20 @@ class CreateRoddyFileHelper {
 
         [SnvCallingStep.CALLING, SnvCallingStep.SNV_DEEPANNOTATION].each {
             CreateFileHelper.createFile(new OtpPath(roddySnvCallingInstance.instancePath, it.getResultFileName(roddySnvCallingInstance.individual)).absoluteDataManagementPath)
+        }
+    }
+
+    static void createIndelResultFiles(IndelCallingInstance indelCallingInstance) {
+        CreateFileHelper.createFile(new File(indelCallingInstance.workExecutionStoreDirectory, 'someFile'))
+
+        indelCallingInstance.workExecutionDirectories.each {
+            CreateFileHelper.createFile(new File(it, 'someFile'))
+        }
+
+        CreateFileHelper.createFile(indelCallingInstance.getCombinedPlotPath())
+
+        indelCallingInstance.getResultFilePathsToValidate().each {
+            CreateFileHelper.createFile(it)
         }
     }
 }

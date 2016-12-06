@@ -33,4 +33,14 @@ class IndelCallingInstance extends BamFilePairAnalysis implements ProcessParamet
     RoddyWorkflowConfig getConfig() {
         return super.config
     }
+
+    List<File> getResultFilePathsToValidate() {
+        return ["indel_${this.individual.pid}.vcf.gz", "indel_${this.individual.pid}.vcf.raw.gz"].collect {
+            new File(getWorkDirectory(), it)
+        }
+    }
+
+    File getCombinedPlotPath() {
+        return new File(getWorkDirectory(), "screenshots/indel_somatic_functional_combined.pdf")
+    }
 }
