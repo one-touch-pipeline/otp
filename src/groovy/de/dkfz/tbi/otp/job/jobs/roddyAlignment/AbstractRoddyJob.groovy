@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddy.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
@@ -11,9 +12,11 @@ import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.ProcessHelperService.ProcessOutput
 import org.springframework.beans.factory.annotation.*
 
+import java.util.concurrent.*
 import java.util.regex.*
 
 import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.*
+
 
 /**
  * class for roddy jobs that handle failed or not finished cluster jobs, analyse them and provide
@@ -23,6 +26,7 @@ abstract class AbstractRoddyJob<R extends RoddyResult> extends AbstractMaybeSubm
 
     public static final String NO_STARTED_JOBS_MESSAGE = '\nThere were no started jobs, the execution directory will be removed.\n'
     public static final Pattern roddyExecutionStoreDirectoryPattern = Pattern.compile(/(?:^|\n)Creating\sthe\sfollowing\sexecution\sdirectory\sto\sstore\sinformation\sabout\sthis\sprocess:\s*\n\s*(\/.*\/${RoddySnvCallingInstance.RODDY_EXECUTION_DIR_PATTERN})(?:\n|$)/)
+    static final String MAX_RODDY_PROCESSES = "RoddyMaximumParallelExecutedProcesses"
 
     @Autowired
     ExecuteRoddyCommandService executeRoddyCommandService
@@ -38,6 +42,8 @@ abstract class AbstractRoddyJob<R extends RoddyResult> extends AbstractMaybeSubm
     // Running job r150428_104246480_stds_snvCallingMetaScript => 3504988
     static final Pattern roddyOutputPattern = Pattern.compile(/^\s*(?:Running|Rerun)\sjob\s(.*_(\S+))\s=>\s(\S+)\s*$/)
 
+    private static final Semaphore roddyMemoryUsage = new Semaphore((int)ProcessingOptionService.findOptionAsNumber(MAX_RODDY_PROCESSES, null, null, 10), true)
+
     @Override
     protected final AbstractMultiJob.NextAction maybeSubmit() throws Throwable {
         Realm.withTransaction {
@@ -45,7 +51,13 @@ abstract class AbstractRoddyJob<R extends RoddyResult> extends AbstractMaybeSubm
             final Realm realm = configService.getRealmDataManagement(roddyResult.project)
             String cmd = prepareAndReturnWorkflowSpecificCommand(roddyResult, realm)
 
-            ProcessOutput output = ProcessHelperService.executeAndWait(cmd).assertExitCodeZero()
+            roddyMemoryUsage.acquire()
+            ProcessOutput output
+            try {
+                output = ProcessHelperService.executeAndWait(cmd).assertExitCodeZero()
+            } finally {
+                roddyMemoryUsage.release()
+            }
 
             Collection<ClusterJob> submittedClusterJobs = createClusterJobObjects(roddyResult, realm, output)
             if (submittedClusterJobs) {

@@ -1,13 +1,15 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.job.processing.ProcessingException;
-import de.dkfz.tbi.otp.ngsdata.Project
-import de.dkfz.tbi.otp.utils.CollectionUtils
-import grails.plugin.springsecurity.SpringSecurityUtils
-import org.springframework.security.acls.domain.BasePermission
-import org.springframework.security.core.userdetails.UserDetails
-import org.springframework.security.access.prepost.PreAuthorize
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.*
+import grails.plugin.springsecurity.*
+import org.springframework.security.access.prepost.*
+import org.springframework.security.acls.domain.*
+import org.springframework.security.core.userdetails.*
+
 import static org.springframework.util.Assert.*
+
 
 class ProcessingOptionService {
 
@@ -93,7 +95,7 @@ class ProcessingOptionService {
         return (option) ? option.value : null
     }
 
-    public String findOptionSafe(String name, String type, Project project) {
+    public static String findOptionSafe(String name, String type, Project project) {
         ProcessingOption option = findOptionObject(name, type, project)
         return (option) ? option.value : ""
     }
@@ -114,7 +116,7 @@ class ProcessingOptionService {
      * Return numerical value of the option or default value if option value
      * can not be cast to a number.
      */
-    public long findOptionAsNumber(String name, String type, Project project, long defaultValue) {
+    public static long findOptionAsNumber(String name, String type, Project project, long defaultValue) {
         String value = findOptionSafe(name, type, project)
         if (value.isLong()) {
             return value.toLong()
