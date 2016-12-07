@@ -125,6 +125,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         sql.execute("SCRIPT NODATA DROP TO ?", [schemaDump.absolutePath])
 
         DomainFactory.createPanCanAlignableSeqTypes()
+        DomainFactory.createProcessingOptionForStatisticRecipient()
 
         createUserAndRoles()
         loadWorkflow()

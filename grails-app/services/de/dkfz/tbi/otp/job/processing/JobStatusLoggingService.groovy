@@ -91,7 +91,7 @@ class JobStatusLoggingService {
         final Map<Realm, Collection<ClusterJobIdentifier>> map = clusterJobs.groupBy( {it.realm} ).collectEntries { realm, clusterJob ->
             [(realm): clusterJob]
         }
-        assert map.values().sum { it.size() } == clusterJobs.size()
+        assert map.values().flatten().size() == clusterJobs.size()
         return failedOrNotFinishedClusterJobs(processingStep, map)
     }
 

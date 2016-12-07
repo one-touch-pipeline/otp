@@ -181,6 +181,7 @@ class Scheduler {
             grailsApplication.mainContext.publishEvent(event)
         } catch (RuntimeException e) {
             jobMailService.sendErrorNotificationIfFastTrack(ProcessingStep.getInstance(job.processingStep.id), e)
+            jobMailService.sendErrorNotification(job, e)
             // removing Job from running
             schedulerService.removeRunningJob(job)
             throw new SchedulerException("doCreateCheck failed for Job of type ${job.class}", e)
@@ -272,6 +273,7 @@ class Scheduler {
             restartHandlerService.handleRestart(job)
         } finally {
             jobMailService.sendErrorNotificationIfFastTrack(step, exceptionToBeHandled)
+            jobMailService.sendErrorNotification(job, exceptionToBeHandled)
         }
     }
 
