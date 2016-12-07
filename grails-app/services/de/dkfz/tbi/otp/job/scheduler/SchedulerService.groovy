@@ -571,7 +571,6 @@ class SchedulerService {
                 }
             } catch (Throwable t) {
                 jobMailService.sendErrorNotificationIfFastTrack(step, t)
-                jobMailService.sendErrorNotification(job, t)
                 throw t
             }
         }

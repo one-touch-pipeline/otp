@@ -109,8 +109,6 @@ class PbsService {
 set -e
 
 umask 0027
-date +%Y-%m-%d-%H-%M
-echo \$HOST
 
 # BEGIN ORIGINAL SCRIPT
 ${script}

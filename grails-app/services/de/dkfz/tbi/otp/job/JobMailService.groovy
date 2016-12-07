@@ -1,28 +1,19 @@
 package de.dkfz.tbi.otp.job
 
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.infrastructure.*
-import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
-import org.codehaus.groovy.grails.commons.*
-import org.joda.time.DateTime
-
-import java.text.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
+import de.dkfz.tbi.otp.job.processing.ProcessService
+import de.dkfz.tbi.otp.job.processing.ProcessingStep
+import de.dkfz.tbi.otp.ngsdata.Run
+import de.dkfz.tbi.otp.utils.MailHelperService
+import org.codehaus.groovy.grails.commons.GrailsApplication
 
 class JobMailService {
-
-
-    static final String PROCESSING_OPTION_EMAIL_RECIPIENT = "EmailRecipient"
-    static final String PROCESSING_OPTION_STATISTIC_EMAIL_RECIPIENT = "Statistic"
 
     MailHelperService mailHelperService
 
     ProcessService processService
 
     GrailsApplication grailsApplication
-
-    JobStatusLoggingService jobStatusLoggingService
 
 
     public void sendErrorNotificationIfFastTrack(ProcessingStep step, Throwable exceptionToBeHandled) {
@@ -56,108 +47,5 @@ link: ${link}
 """
 
         mailHelperService.sendEmail(subject, message, recipient)
-    }
-
-
-    public void sendErrorNotification(Job job, Throwable exceptionToBeHandled) {
-        assert job: 'job may not be null'
-        assert exceptionToBeHandled: 'exceptionToBeHandled may not be null'
-
-        ProcessingStep step = ProcessingStep.getInstance(job.getProcessingStep().id)
-
-        def object = step.processParameterObject
-        if (!object) {
-            return //general workflow, no processing
-        }
-
-        List<ClusterJob> clusterJobs = ClusterJob.findAllByProcessingStep(step)
-        Collection<ClusterJob> clusterJobsToCheck = jobStatusLoggingService.failedOrNotFinishedClusterJobs(step, clusterJobs)
-
-        int restartedStepCount = restartCount(step)
-
-        StringBuilder message = new StringBuilder('''OTP job failed\ndata:\n''')
-
-        Map otpWorkflow = [
-                otpWorkflowId     : step.process.id,
-                otpWorkflowStarted: dateString(step.process.started),
-                otpWorkflowName   : step.jobExecutionPlan.name,
-                otpLink           : processService.processUrl(step.process),
-                objectInformation : object.toString().replaceAll(/ ?<br> ?/, ' ').replaceAll(/\n/, ' ')
-        ]
-        message << mapToString('Workflow', otpWorkflow)
-
-        Map otpJob = [
-                otpJobId           : step.id,
-                otpJobStarted      : dateString(step.firstProcessingStepUpdate.date),
-                otpJobFailed       : dateString(new Date()),
-                restartedOtpJobId  : restartedStepCount ? ((RestartedProcessingStep) step).previous.id.toString() : '',
-                countOfJobRestarted: restartedStepCount,
-                otpErrorMessage    : exceptionToBeHandled.message?.replaceAll('\n', ' '),
-        ]
-        message << mapToString('OTP Job', otpJob)
-
-        clusterJobsToCheck.each { ClusterJob clusterJob ->
-            Map clusterProperties = [
-                    clusterId          : clusterJob.id,
-                    jobName            : clusterJob.clusterJobName,
-
-                    queue              : dateString(clusterJob.queued),
-                    start              : dateString(clusterJob.started),
-                    ended              : dateString(clusterJob.ended),
-                    runningHours       : clusterJob.started && clusterJob.ended ? clusterJob.getElapsedWalltime().standardHours : 'na',
-                    logFile            : job.getLogFilePath(clusterJob),
-
-                    clusterErrorMessage: '',
-                    errorType          : '',
-                    node               : '',
-            ]
-
-            message << mapToString('Cluster Job', clusterProperties)
-
-            Map mapForLog = otpWorkflow + otpJob + clusterProperties
-            log.info("""Error Statistic:
-Failed OTP Job Header: ${mapForLog.keySet().join(';')}
-Failed OTP Job Values: ${mapForLog.values().join(';')}""")
-        }
-
-        if (!clusterJobsToCheck) {
-            Map mapForLog = otpWorkflow + otpJob
-            log.info("""Error Statistic:
-Failed ClusterJob Header: ${mapForLog.keySet().join(';')}
-Failed ClusterJob Values: ${mapForLog.values().join(';')}""")
-        }
-
-        String recipientsString = ProcessingOptionService.findOption(
-                PROCESSING_OPTION_EMAIL_RECIPIENT,
-                PROCESSING_OPTION_STATISTIC_EMAIL_RECIPIENT,
-                object?.project,
-        )
-        if (recipientsString) {
-            List<String> recipients = recipientsString.split(' ') as List
-            String subject = "ERROR: Statistic information"
-
-            mailHelperService.sendEmail(subject, message.toString(), recipients)
-        }
-    }
-
-
-    private String dateString(DateTime date) {
-        return dateString(date?.toDate())
-    }
-
-    private String dateString(Date date) {
-        return date ? new SimpleDateFormat('yyyy-MM-dd hh:mm').format(date) : 'na'
-    }
-
-    private int restartCount(ProcessingStep step) {
-        return step instanceof RestartedProcessingStep ? restartCount(((RestartedProcessingStep) step).previous) + 1 : 0
-    }
-
-    private String mapToString(String header, Map data) {
-        return """
-
-${header}:
-${data.collect { key, value -> "  ${key}: ${value}" }.join('\n')}
-"""
     }
 }
