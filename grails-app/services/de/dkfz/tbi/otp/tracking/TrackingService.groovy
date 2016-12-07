@@ -18,6 +18,7 @@ class TrackingService {
 
     MailHelperService mailHelperService
 
+    IndelCallingService indelCallingService
     SnvCallingService snvCallingService
 
     CreateNotificationTextService createNotificationTextService
@@ -313,29 +314,41 @@ class TrackingService {
         }
     }
 
-    SamplePairProcessingStatus getSamplePairProcessingStatus(SamplePair sp) {
-        SnvCallingInstance sci = sp.findLatestSnvCallingInstance()
-        if (sci && !sci.withdrawn) {
-            if (sci.processingState == AnalysisProcessingStates.FINISHED && [1, 2].every {
-                AbstractMergedBamFile bamFile = sci."sampleType${it}BamFile"
-                return bamFile == bamFile.mergingWorkPackage.completeProcessableBamFileInProjectFolder
+    private static WorkflowProcessingStatus getAnalysisProcessingStatus(BamFilePairAnalysis analysis, SamplePair sp, BamFileAnalysisService service) {
+        WorkflowProcessingStatus status
+        if (analysis && !analysis.withdrawn && analysis.processingState == AnalysisProcessingStates.FINISHED && [1, 2].every {
+            AbstractMergedBamFile bamFile = analysis."sampleType${it}BamFile"
+            return bamFile == bamFile.mergingWorkPackage.completeProcessableBamFileInProjectFolder
+        }) {
+            status = ALL_DONE
+        } else if (analysis && !analysis.withdrawn && BamFileAnalysisService.processingStatesNotProcessable.contains(analysis.processingState)) {
+            status = NOTHING_DONE_MIGHT_DO
+        } else if ([1, 2].every { sp."mergingWorkPackage${it}".completeProcessableBamFileInProjectFolder }) {
+            if (BamFileAnalysisService.ANALYSIS_CONFIG_CLASSES.any {
+                service.samplePairForProcessing(ProcessingPriority.MINIMUM_PRIORITY, it, sp)
             }) {
-                return new SamplePairProcessingStatus(sp, ALL_DONE, sci, NOTHING_DONE_WONT_DO, null)
-            } else if (SnvCallingService.processingStatesNotProcessable.contains(sci.processingState)) {
-                return new SamplePairProcessingStatus(sp, NOTHING_DONE_MIGHT_DO, null, NOTHING_DONE_WONT_DO, null)
-            }
-        }
-        if ([1, 2].every { sp."mergingWorkPackage${it}".completeProcessableBamFileInProjectFolder }) {
-            if (SnvCallingService.ANALYSIS_CONFIG_CLASSES.any {
-                snvCallingService.samplePairForProcessing(ProcessingPriority.MINIMUM_PRIORITY, it, sp)
-            }) {
-                return new SamplePairProcessingStatus(sp, NOTHING_DONE_MIGHT_DO, null, NOTHING_DONE_WONT_DO, null)
+              status = NOTHING_DONE_MIGHT_DO
             } else {
-                return new SamplePairProcessingStatus(sp, NOTHING_DONE_WONT_DO, null, NOTHING_DONE_WONT_DO, null)
+              status = NOTHING_DONE_WONT_DO
             }
         } else {
-            return new SamplePairProcessingStatus(sp, NOTHING_DONE_MIGHT_DO, null, NOTHING_DONE_WONT_DO, null)
+            status = NOTHING_DONE_MIGHT_DO
         }
+        return status
+    }
+
+    SamplePairProcessingStatus getSamplePairProcessingStatus(SamplePair sp) {
+        SnvCallingInstance sci = sp.findLatestSnvCallingInstance()
+        IndelCallingInstance ici = sp.findLatestIndelCallingInstance()
+        WorkflowProcessingStatus snvStatus = getAnalysisProcessingStatus(sci, sp, snvCallingService)
+        WorkflowProcessingStatus indelStatus = getAnalysisProcessingStatus(ici, sp, indelCallingService)
+        return new SamplePairProcessingStatus(
+                sp,
+                snvStatus,
+                snvStatus == ALL_DONE ? sci : null,
+                indelStatus,
+                indelStatus == ALL_DONE ? ici : null,
+        )
     }
 
     static def <O> WorkflowProcessingStatus combineStatuses(Iterable<O> objects,
