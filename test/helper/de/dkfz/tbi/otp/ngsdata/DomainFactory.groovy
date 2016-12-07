@@ -1351,7 +1351,7 @@ class DomainFactory {
         createSeqTypeLazy(SeqTypeNames.CHIP_SEQ, 'ChIP', 'chip_seq_sequencing', "CHIPSEQ")
     }
 
-    static List<SeqType> createAlignableSeqTypes() {
+    static List<SeqType> createDefaultOtpAlignableSeqTypes() {
         [
                 createWholeGenomeSeqType(),
                 createExomeSeqType(),
@@ -1365,6 +1365,13 @@ class DomainFactory {
                 createWholeGenomeBisulfiteSeqType(),
                 createWholeGenomeBisulfiteTagmentationSeqType(),
         ]
+    }
+
+    static List<SeqType> createAllAlignableSeqTypes() {
+        [
+                createDefaultOtpAlignableSeqTypes(),
+                createPanCanAlignableSeqTypes(),
+        ].flatten().unique()
     }
 
     static List<SeqType> createSnvSeqTypes() {

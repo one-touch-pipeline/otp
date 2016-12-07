@@ -43,7 +43,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         DomainFactory.createProject(name: 'testProjectAlignment', realmName: realm.name, alignmentDeciderBeanName: 'test')
         DomainFactory.createReferenceGenome(name: 'testReferenceGenome')
         DomainFactory.createReferenceGenome(name: 'testReferenceGenome2')
-        DomainFactory.createPanCanAlignableSeqTypes()
+        DomainFactory.createAllAlignableSeqTypes()
         DomainFactory.createPanCanPipeline()
         DomainFactory.createRoddySnvPipelineLazy()
         projectService.executionService = Stub(ExecutionService) {

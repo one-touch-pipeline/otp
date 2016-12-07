@@ -328,17 +328,11 @@ chmod 440 ${newDirectFileName}
      * The input SeqTrack is passed to the AlignmentDecider
      */
     String startAlignmentForSeqTrack(SeqTrack seqTrack) {
-        if (seqTrack.seqType.name == SeqTypeNames.WHOLE_GENOME.seqTypeName && seqTrack.seqType.libraryLayout == SeqType.LIBRARYLAYOUT_PAIRED && seqTrack.getConfiguredReferenceGenome()) {
-            return "//lane: ${seqTrack}\nctx.seqTrackService.decideAndPrepareForAlignment(SeqTrack.get(${seqTrack.id}))\n"
-        } else if (seqTrack.seqType.name == SeqTypeNames.EXOME.seqTypeName && seqTrack.seqType.libraryLayout == SeqType.LIBRARYLAYOUT_PAIRED && seqTrack.getConfiguredReferenceGenome()) {
-            if ((seqTrack instanceof ExomeSeqTrack) && (seqTrack.libraryPreparationKit != null) &&
-                    (BedFile.findByReferenceGenomeAndLibraryPreparationKit(seqTrack.getConfiguredReferenceGenome(), seqTrack.libraryPreparationKit))) {
-                return "//lane: ${seqTrack}\nctx.seqTrackService.decideAndPrepareForAlignment(SeqTrack.get(${seqTrack.id}))\n"
-            } else {
-                return "//!!! The BED file or the library preparation kit are missing for seqTrack ${seqTrack.id}: ${seqTrack}\n"
-            }
+        if (SeqType.getAllAlignableSeqTypes().contains(seqTrack.seqType)) {
+            return "// lane: ${seqTrack}\nctx.seqTrackService.decideAndPrepareForAlignment(SeqTrack.get(${seqTrack.id}))\n"
+        } else {
+            return "// The SeqTrack ${seqTrack} has the seqType ${seqTrack.seqType.name} and will not be aligned\n"
         }
-        return "// The SeqTrack ${seqTrack} has the seqType ${seqTrack.seqType.name} and will not be aligned\n"
     }
 
 

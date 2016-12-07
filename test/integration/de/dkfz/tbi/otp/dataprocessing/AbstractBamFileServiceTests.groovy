@@ -105,7 +105,7 @@ class AbstractBamFileServiceTests {
                 )
         assertNotNull(sample.save([flush: true]))
 
-        DomainFactory.createPanCanAlignableSeqTypes()
+        DomainFactory.createAllAlignableSeqTypes()
         SeqType wholeGenomeSeqType = DomainFactory.createWholeGenomeSeqType()
         SeqType exomeSeqType = DomainFactory.createExomeSeqType()
 

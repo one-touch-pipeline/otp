@@ -24,7 +24,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         dataPath = TestCase.getUniqueNonExistentPath()
         mdPath = TestCase.getUniqueNonExistentPath()
         testData = new TestData()
-        alignableSeqType = DomainFactory.createAlignableSeqTypes().first()
+        alignableSeqType = DomainFactory.createDefaultOtpAlignableSeqTypes().first()
     }
 
     @After
@@ -175,7 +175,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
 
     private static SeqTrack setupSeqTrackProjectAndDataFile(String decider) {
         SeqTrack seqTrack = DomainFactory.createSeqTrack(
-                seqType: DomainFactory.createAlignableSeqTypes().first(),
+                seqType: DomainFactory.createDefaultOtpAlignableSeqTypes().first(),
         )
 
         SeqPlatform sp = seqTrack.seqPlatform

@@ -33,6 +33,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
 
     @Test
     void test_moveSample() {
+        DomainFactory.createAllAlignableSeqTypes()
         RoddyBamFile bamFile = DomainFactory.createRoddyBamFile([
                 roddyExecutionDirectoryNames: [DomainFactory.DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY]
         ])
@@ -106,6 +107,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
 
     @Test
     void test_moveIndividual() {
+        DomainFactory.createAllAlignableSeqTypes()
         RoddyBamFile bamFile = DomainFactory.createRoddyBamFile([
                 roddyExecutionDirectoryNames: [DomainFactory.DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY]
         ])

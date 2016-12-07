@@ -31,7 +31,7 @@ class SeqTypeServiceUnitTests {
 
     @Test
     void testAlignableSeqTypes() {
-        DomainFactory.createAlignableSeqTypes()
+        DomainFactory.createDefaultOtpAlignableSeqTypes()
 
         List<SeqType> alignableSeqTypes = SeqTypeService.alignableSeqTypes()
         assert 2 == alignableSeqTypes.size()

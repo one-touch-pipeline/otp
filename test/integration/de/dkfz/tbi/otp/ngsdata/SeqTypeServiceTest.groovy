@@ -26,7 +26,7 @@ class SeqTypeServiceTest extends AbstractIntegrationTest {
 
     @Test
     void testAlignableSeqTypesByProject_admin_none() {
-        DomainFactory.createAlignableSeqTypes()
+        DomainFactory.createDefaultOtpAlignableSeqTypes()
         SeqTrack seqTrack = SeqTrack.build()
 
         SpringSecurityUtils.doWithAuth("admin") {
@@ -38,7 +38,7 @@ class SeqTypeServiceTest extends AbstractIntegrationTest {
 
     @Test
     void testAlignableSeqTypesByProject_operator_none() {
-        DomainFactory.createAlignableSeqTypes()
+        DomainFactory.createDefaultOtpAlignableSeqTypes()
         SeqTrack seqTrack = SeqTrack.build()
 
         SpringSecurityUtils.doWithAuth("operator") {
@@ -50,7 +50,7 @@ class SeqTypeServiceTest extends AbstractIntegrationTest {
 
     @Test
     void testAlignableSeqTypesByProject_normalUserWithAccess_none() {
-        DomainFactory.createAlignableSeqTypes()
+        DomainFactory.createDefaultOtpAlignableSeqTypes()
         SeqTrack seqTrack = SeqTrack.build()
         SpringSecurityUtils.doWithAuth("admin") {
             aclUtilService.addPermission(seqTrack.project, "user", BasePermission.READ)
@@ -65,7 +65,7 @@ class SeqTypeServiceTest extends AbstractIntegrationTest {
 
     @Test
     void testAlignableSeqTypesByProject_normalUserWithoutAccess_none() {
-        DomainFactory.createAlignableSeqTypes()
+        DomainFactory.createDefaultOtpAlignableSeqTypes()
         SeqTrack seqTrack = SeqTrack.build()
 
         SpringSecurityUtils.doWithAuth("user") {
@@ -78,7 +78,7 @@ class SeqTypeServiceTest extends AbstractIntegrationTest {
 
     @Test
     void testAlignableSeqTypesByProject_operator_one() {
-        List<SeqType> alignableSeqTypes = DomainFactory.createAlignableSeqTypes()
+        List<SeqType> alignableSeqTypes = DomainFactory.createDefaultOtpAlignableSeqTypes()
         SeqTrack seqTrack = SeqTrack.build()
         SeqTrack.build(sample: seqTrack.sample)
         SeqTrack.build(sample: seqTrack.sample, seqType: alignableSeqTypes[0])
@@ -93,7 +93,7 @@ class SeqTypeServiceTest extends AbstractIntegrationTest {
 
     @Test
     void testAlignableSeqTypesByProject_operator_two() {
-        List<SeqType> alignableSeqTypes = DomainFactory.createAlignableSeqTypes()
+        List<SeqType> alignableSeqTypes = DomainFactory.createDefaultOtpAlignableSeqTypes()
         SeqTrack seqTrack = SeqTrack.build()
         SeqTrack.build(sample: seqTrack.sample)
         SeqTrack.build(sample: seqTrack.sample, seqType: alignableSeqTypes[0])
