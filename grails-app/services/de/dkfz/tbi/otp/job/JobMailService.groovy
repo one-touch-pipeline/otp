@@ -90,7 +90,7 @@ link: ${link}
                 otpJobId           : step.id,
                 otpJobStarted      : dateString(step.firstProcessingStepUpdate.date),
                 otpJobFailed       : dateString(new Date()),
-                restartedOtpJobId  : restartedStepCount ? ((RestartedProcessingStep) step).original.id.toString() : '',
+                restartedOtpJobId  : restartedStepCount ? ((RestartedProcessingStep) step).previous.id.toString() : '',
                 countOfJobRestarted: restartedStepCount,
                 otpErrorMessage    : exceptionToBeHandled.message?.replaceAll('\n', ' '),
         ]
