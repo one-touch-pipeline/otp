@@ -28,7 +28,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
     IndelCallingService indelCallingService
 
     def setup() {
-        def map = createProcessableSamplePair()
+        def map = DomainFactory.createProcessableSamplePair()
 
         samplePair1 = map.samplePair
         bamFile1_1 = map.bamFile1
@@ -209,7 +209,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
 
     void "samplePairForProcessing when other samplePair inProcess"() {
         given:
-        def map2 = createProcessableSamplePair()
+        def map2 = DomainFactory.createProcessableSamplePair()
         SamplePair samplePair2 = map2.samplePair
 
         SnvCallingInstance snvCallingInstance = DomainFactory.createSnvCallingInstance(
@@ -400,7 +400,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
 
     void "samplePairForProcessing when check if the order correct"() {
         given:
-        createProcessableSamplePair()
+        DomainFactory.createProcessableSamplePair()
 
         expect:
         samplePair1 == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig)
@@ -409,7 +409,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
 
     void "samplePairForProcessing ensure that FastTrack is processed first"() {
         given:
-        SamplePair samplePairFastTrack = createProcessableSamplePair().samplePair
+        SamplePair samplePairFastTrack = DomainFactory.createProcessableSamplePair().samplePair
         Project project = samplePairFastTrack.project
         project.processingPriority = ProcessingPriority.FAST_TRACK_PRIORITY
         assert project.save(flush: true)
@@ -464,52 +464,5 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         then:
         RuntimeException e = thrown()
         e.message.contains('The input BAM files have changed on the file system while this job processed them.')
-    }
-
-
-    private def createProcessableSamplePair(Map properties = [:], Map bamFile1Properties = [:], Map bamFile2Properties = [:]) {
-        def map = DomainFactory.createSnvInstanceWithRoddyBamFilesMapHelper(properties, [coverage: 30] + bamFile1Properties, [coverage: 30] + bamFile2Properties)
-
-        SamplePair samplePair = map.samplePair
-        AbstractMergedBamFile bamFile1 = map.sampleType1BamFile
-        AbstractMergedBamFile bamFile2 = map.sampleType2BamFile
-        bamFile1.mergingWorkPackage.bamFileInProjectFolder = bamFile1
-        bamFile2.mergingWorkPackage.bamFileInProjectFolder = bamFile2
-
-        ExternalScript script = DomainFactory.createExternalScript(
-                scriptIdentifier: "SnvCallingStep.CALLING",
-        )
-
-        SnvConfig snvConfig = DomainFactory.createSnvConfig(
-                seqType: samplePair.seqType,
-                project: samplePair.project,
-                externalScriptVersion: script.scriptVersion
-        )
-
-        ExternalScript joinScript = DomainFactory.createExternalScript(
-                scriptIdentifier: SnvCallingJob.CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER,
-                scriptVersion: snvConfig.externalScriptVersion,
-                filePath: "/tmp/scriptLocation_${DomainFactory.counter++}/joining.sh",
-        )
-
-
-        RoddyWorkflowConfig roddyConfig = DomainFactory.createRoddyWorkflowConfig(
-                seqType: samplePair.seqType,
-                project: samplePair.project,
-                pipeline: DomainFactory.createRoddySnvPipelineLazy()
-        )
-
-        DomainFactory.createProcessingThresholdsForBamFile(bamFile1, [numberOfLanes: null])
-        DomainFactory.createProcessingThresholdsForBamFile(bamFile2, [numberOfLanes: null])
-
-        return [
-                samplePair : samplePair,
-                bamFile1   : bamFile1,
-                bamFile2   : bamFile2,
-                snvConfig  : snvConfig,
-                script     : script,
-                joinScript : joinScript,
-                roddyConfig: roddyConfig
-        ]
     }
 }

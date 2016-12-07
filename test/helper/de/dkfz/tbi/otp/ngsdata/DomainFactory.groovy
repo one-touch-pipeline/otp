@@ -673,6 +673,52 @@ class DomainFactory {
         return samplePair.save(failOnError: true)
     }
 
+    static def createProcessableSamplePair(Map properties = [:], Map bamFile1Properties = [:], Map bamFile2Properties = [:]) {
+        def map = createAnalysisInstanceWithRoddyBamFilesMapHelper(properties, [coverage: 30] + bamFile1Properties, [coverage: 30] + bamFile2Properties)
+
+        SamplePair samplePair = map.samplePair
+        AbstractMergedBamFile bamFile1 = map.sampleType1BamFile
+        AbstractMergedBamFile bamFile2 = map.sampleType2BamFile
+        bamFile1.mergingWorkPackage.bamFileInProjectFolder = bamFile1
+        bamFile2.mergingWorkPackage.bamFileInProjectFolder = bamFile2
+
+        ExternalScript script = createExternalScript(
+                scriptIdentifier: "SnvCallingStep.CALLING",
+        )
+
+        SnvConfig snvConfig = createSnvConfig(
+                seqType: samplePair.seqType,
+                project: samplePair.project,
+                externalScriptVersion: script.scriptVersion
+        )
+
+        ExternalScript joinScript = createExternalScript(
+                scriptIdentifier: SnvCallingJob.CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER,
+                scriptVersion: snvConfig.externalScriptVersion,
+                filePath: "/tmp/scriptLocation_${counter++}/joining.sh",
+        )
+
+
+        RoddyWorkflowConfig roddyConfig = createRoddyWorkflowConfig(
+                seqType: samplePair.seqType,
+                project: samplePair.project,
+                pipeline: createRoddySnvPipelineLazy()
+        )
+
+        createProcessingThresholdsForBamFile(bamFile1, [numberOfLanes: null])
+        createProcessingThresholdsForBamFile(bamFile2, [numberOfLanes: null])
+
+        return [
+                samplePair : samplePair,
+                bamFile1   : bamFile1,
+                bamFile2   : bamFile2,
+                snvConfig  : snvConfig,
+                script     : script,
+                joinScript : joinScript,
+                roddyConfig: roddyConfig
+        ]
+    }
+
     static SamplePair createDisease(MergingWorkPackage controlMwp) {
         MergingWorkPackage diseaseMwp = createMergingWorkPackage(controlMwp)
         createSampleTypePerProject(project: controlMwp.project, sampleType: diseaseMwp.sampleType, category: SampleType.Category.DISEASE)
@@ -705,7 +751,7 @@ class DomainFactory {
     }
 
 
-    private static Map createSnvInstanceWithRoddyBamFilesMapHelper(Map properties, Map bamFile1Properties, Map bamFile2Properties) {
+    private static Map createAnalysisInstanceWithRoddyBamFilesMapHelper(Map properties, Map bamFile1Properties, Map bamFile2Properties) {
         Pipeline pipeline = createPanCanPipeline()
 
         MergingWorkPackage controlWorkPackage = properties.samplePair?.mergingWorkPackage2 ?: createMergingWorkPackage(
@@ -729,7 +775,7 @@ class DomainFactory {
     }
 
     public static SnvCallingInstance createSnvInstanceWithRoddyBamFiles(Map properties = [:], Map bamFile1Properties = [:], Map bamFile2Properties = [:]) {
-        Map map = createSnvInstanceWithRoddyBamFilesMapHelper(properties, bamFile1Properties, bamFile2Properties)
+        Map map = createAnalysisInstanceWithRoddyBamFilesMapHelper(properties, bamFile1Properties, bamFile2Properties)
         SamplePair samplePair = map.samplePair
         map.config = createSnvConfig(
                 seqType: samplePair.seqType,
@@ -738,7 +784,7 @@ class DomainFactory {
     }
 
     public static RoddySnvCallingInstance createRoddySnvInstanceWithRoddyBamFiles(Map properties = [:], Map bamFile1Properties = [:], Map bamFile2Properties = [:]) {
-        Map map = createSnvInstanceWithRoddyBamFilesMapHelper(properties, bamFile1Properties, bamFile2Properties)
+        Map map = createAnalysisInstanceWithRoddyBamFilesMapHelper(properties, bamFile1Properties, bamFile2Properties)
         SamplePair samplePair = map.samplePair
         map += [
                 roddyExecutionDirectoryNames: [DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY],
@@ -751,7 +797,7 @@ class DomainFactory {
     }
 
     public static IndelCallingInstance createIndelCallingInstanceWithRoddyBamFiles(Map properties = [:], Map bamFile1Properties = [:], Map bamFile2Properties = [:]) {
-        Map map = createSnvInstanceWithRoddyBamFilesMapHelper(properties, bamFile1Properties, bamFile2Properties)
+        Map map = createAnalysisInstanceWithRoddyBamFilesMapHelper(properties, bamFile1Properties, bamFile2Properties)
         SamplePair samplePair = map.samplePair
         map += [
                 roddyExecutionDirectoryNames: [DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY],
