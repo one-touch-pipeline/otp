@@ -122,8 +122,12 @@ class ExecuteRoddyCommandService {
     public void createWorkOutputDirectory(Realm realm, File file) {
         assert realm : "Realm must not be null"
         assert file : "File must not be null"
-        executionService.executeCommand(realm, "umask 027; mkdir -m 2750 -p ${file.parent} && mkdir -m 2770 -p ${file} && chgrp localGroup ${file};")
-        WaitingFileUtils.waitUntilExists(file)
+        if (file.exists()) {
+            executionService.executeCommand(realm, "umask 027; chgrp localGroup ${file} && chmod 2770 ${file}")
+        } else {
+            executionService.executeCommand(realm, "umask 027; mkdir -m 2750 -p ${file.parent} && mkdir -m 2770 -p ${file} && chgrp localGroup ${file};")
+            WaitingFileUtils.waitUntilExists(file)
+        }
     }
 
     void correctPermissionsAndGroups(RoddyResult roddyResult, Realm realm)  {

@@ -336,9 +336,49 @@ class ExecuteRoddyCommandServiceTests {
         executeRoddyCommandService.executionService.metaClass.executeCommand = { Realm realm, String command ->
             ['bash', '-c', command].execute().waitFor()
         }
+        assert tmpOutputDir.delete()
+
+        //when:
         executeRoddyCommandService.createWorkOutputDirectory(realm, tmpOutputDir)
+
+        //then
+        assert tmpOutputDir.exists()
+
+        String permissionAndGroup = executeAndAssertExitCodeAndErrorOutAndReturnStdout("""\
+stat -c %a ${tmpOutputDir}
+stat -c %G ${tmpOutputDir}
+""")
+        String expected = """\
+2?770
+localGroup
+"""
+
+        assert permissionAndGroup ==~ expected
     }
 
+
+    @Test
+    void testCreateWorkOutputDirectory_DirectoryAlreadyExist_AllFine() {
+        executeRoddyCommandService.executionService.metaClass.executeCommand = { Realm realm, String command ->
+            ['bash', '-c', command].execute().waitFor()
+        }
+        assert tmpOutputDir.exists()
+
+        //when:
+        executeRoddyCommandService.createWorkOutputDirectory(realm, tmpOutputDir)
+
+        //then:
+        String permissionAndGroup = executeAndAssertExitCodeAndErrorOutAndReturnStdout("""\
+stat -c %a ${tmpOutputDir}
+stat -c %G ${tmpOutputDir}
+""")
+        String expected = """\
+2?770
+localGroup
+"""
+
+        assert permissionAndGroup ==~ expected
+    }
 
     @Test
     void testCorrectPermission_AllOkay() {
