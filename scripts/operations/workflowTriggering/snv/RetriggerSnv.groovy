@@ -1,5 +1,6 @@
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
-import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
+import de.dkfz.tbi.otp.utils.logging.*
 
 println "\n\n retrigger snv: "
 def snvCallingInstances = SnvCallingInstance.withCriteria {
