@@ -128,6 +128,14 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         property << ["project", "seqType"]
     }
 
+    void "samplePairForProcessing when config is obsolete"() {
+        given:
+        snvConfig1.obsoleteDate = new Date()
+        assert snvConfig1.save(flush: true)
+
+        expect:
+        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig)
+    }
 
     void "samplePairForProcessing when no external script exists"() {
         given:

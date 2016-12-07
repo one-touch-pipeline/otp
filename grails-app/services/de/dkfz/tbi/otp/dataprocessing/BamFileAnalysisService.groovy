@@ -80,6 +80,7 @@ abstract class BamFileAnalysisService {
                 "   WHERE cps.project = sp.mergingWorkPackage1.sample.individual.project " +
                 "   AND cps.pipeline.type = :analysis " +
                 "   AND cps.seqType = sp.mergingWorkPackage1.seqType " +
+                "   AND cps.obsoleteDate is null " +
                 onlyOtpSnv +
                 ") " +
 
