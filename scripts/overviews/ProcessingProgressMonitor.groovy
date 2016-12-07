@@ -326,7 +326,9 @@ def showWaiting = {List objects, Closure valueToShow = {it as String} ->
 
 def showRunning = {String workflow, List objects, Closure valueToShow = {it as String}, Closure objectToCheck = {it} ->
     showList('running', objects, valueToShow)
-    checkProcessesForObjects(workflow, objects, valueToShow, objectToCheck)
+    if (objects) {
+        checkProcessesForObjects(workflow, objects, valueToShow, objectToCheck)
+    }
 }
 
 def showFinished = {List objects, Closure valueToShow = {it as String} ->
@@ -495,7 +497,6 @@ def handleStateMapSnv = { List next ->
             }
         }
     }
-
     showUniqueList('For the following project seqtype combination no config is defined', stateMap.noConfig)
     showList('disabled', stateMap.disabled)
     showList('notTriggered', stateMap.notTriggered)
@@ -545,7 +546,12 @@ def handleStateMapSnv = { List next ->
         }
         "${it} ${ret ? " (${ret.join(', ')})" : ''}"
     })
-    showRunning("SnvWorkflow", stateMap.running)
+
+    Map<Boolean, List<SnvCallingInstance>> snvCallingInstancePerType = stateMap.running ? stateMap.running.groupBy {
+        it instanceof RoddySnvCallingInstance
+    } : [:]
+    showRunning("SnvWorkflow", snvCallingInstancePerType[false])
+    showRunning("RoddySnvWorkflow", snvCallingInstancePerType[true])
     showFinished(stateMap.finished)
 
     return stateMap.finished
