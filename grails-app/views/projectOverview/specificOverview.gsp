@@ -161,7 +161,7 @@
                 <ul>
                     <g:each in="${seqTypes}" var="seqType">
                         <li>
-                            <g:link controller='ConfigureAlignment' action='index' params='[projectName: project, seqTypeName: seqType.name, libraryLayout: seqType.libraryLayout]' class="configure">
+                            <g:link controller='configurePipeline' action='alignment' params='["project.id": project.id, "seqType.id": seqType.id]' class="configure">
                                 ${seqType.displayName}
                             </g:link>
                         </li>
@@ -232,11 +232,11 @@
         </div>
         <div>
             <h3>${g.message(code: 'projectOverview.snv.title')}</h3>
-            <g:message code="projectOverview.pipelineInformation.configure"/>
+            <g:message code="projectOverview.snv.configure"/>
             <ul>
                 <g:each in="${snvSeqTypes}" var="seqType">
                     <li>
-                        <g:link controller='configurePipeline' action='index' params='[projectName: project, seqTypeName: seqType.name, libraryLayout: seqType.libraryLayout]' class="configure">
+                        <g:link controller='configurePipeline' action='snv' params='["project.id": project.id, "seqType.id": seqType.id]' class="configure">
                             ${seqType.displayName}
                         </g:link>
                     </li>
@@ -274,6 +274,19 @@
                 </g:each>
             </table>
             <br>
+        </div>
+        <div>
+            <h3>${g.message(code: 'projectOverview.indel.title')}</h3>
+            <g:message code="projectOverview.indel.configure"/>
+            <ul>
+                <g:each in="${indelSeqTypes}" var="seqType">
+                    <li>
+                        <g:link controller='configurePipeline' action='indel' params='["project.id": project.id, "seqType.id": seqType.id]' class="configure">
+                            ${seqType.displayName}
+                        </g:link>
+                    </li>
+                </g:each>
+            </ul>
         </div>
     </div>
     <asset:script>

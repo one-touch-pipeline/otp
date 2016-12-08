@@ -330,7 +330,7 @@ AND ace.granting = true
         assert OtpPath.isValidPathComponent(snvPipelineConfiguration.baseProjectConfig): "baseProjectConfig '${snvPipelineConfiguration.baseProjectConfig}' is an invalid path component"
         assert snvPipelineConfiguration.configVersion ==~ RoddyWorkflowConfig.CONFIG_VERSION_PATTERN: "configVersion '${snvPipelineConfiguration.configVersion}' has not expected pattern: ${RoddyWorkflowConfig.CONFIG_VERSION_PATTERN}"
 
-        Pipeline pipeline = CollectionUtils.exactlyOneElement(Pipeline.findAllByTypeAndName(
+        Pipeline pipeline = exactlyOneElement(Pipeline.findAllByTypeAndName(
                 Pipeline.Type.SNV,
                 Pipeline.Name.RODDY_SNV,
         ))
@@ -358,6 +358,44 @@ AND ace.granting = true
                 pipeline,
                 configFilePath.path,
                 snvPipelineConfiguration.configVersion,
+        )
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void configureIndelPipelineProject(IndelPipelineConfiguration indelPipelineConfiguration) {
+        assert OtpPath.isValidPathComponent(indelPipelineConfiguration.pluginName): "pluginName '${indelPipelineConfiguration.pluginName}' is an invalid path component"
+        assert OtpPath.isValidPathComponent(indelPipelineConfiguration.pluginVersion): "pluginVersion '${indelPipelineConfiguration.pluginVersion}' is an invalid path component"
+        assert OtpPath.isValidPathComponent(indelPipelineConfiguration.baseProjectConfig): "baseProjectConfig '${indelPipelineConfiguration.baseProjectConfig}' is an invalid path component"
+        assert indelPipelineConfiguration.configVersion ==~ RoddyWorkflowConfig.CONFIG_VERSION_PATTERN: "configVersion '${indelPipelineConfiguration.configVersion}' has not expected pattern: ${RoddyWorkflowConfig.CONFIG_VERSION_PATTERN}"
+
+        Pipeline pipeline = exactlyOneElement(Pipeline.findAllByTypeAndName(
+                Pipeline.Type.INDEL,
+                Pipeline.Name.RODDY_INDEL,
+        ))
+
+        String xmlConfig = RoddyIndelConfigTemplate.createConfigBashEscaped(indelPipelineConfiguration, Pipeline.Name.RODDY_INDEL)
+
+        File projectDirectory = indelPipelineConfiguration.project.getProjectDirectory()
+        assert projectDirectory.exists()
+
+        File configFilePath = RoddyWorkflowConfig.getStandardConfigFile(
+                indelPipelineConfiguration.project,
+                pipeline.name,
+                indelPipelineConfiguration.seqType,
+                indelPipelineConfiguration.pluginVersion,
+                indelPipelineConfiguration.configVersion,
+        )
+        File configDirectory = configFilePath.parentFile
+
+        executeScript(getScriptBash(configDirectory, xmlConfig, configFilePath), indelPipelineConfiguration.project)
+
+        RoddyWorkflowConfig.importProjectConfigFile(
+                indelPipelineConfiguration.project,
+                indelPipelineConfiguration.seqType,
+                "${indelPipelineConfiguration.pluginName}:${indelPipelineConfiguration.pluginVersion}",
+                pipeline,
+                configFilePath.path,
+                indelPipelineConfiguration.configVersion,
         )
     }
 
@@ -424,23 +462,23 @@ echo 'OK'
     }
 }
 
-class PanCanAlignmentConfiguration {
+class RoddyConfiguration {
     Project project
     SeqType seqType
-    String referenceGenome
-    String statSizeFileName
-    String mergeTool
     String pluginName
     String pluginVersion
     String baseProjectConfig
     String configVersion
 }
 
-class SnvPipelineConfiguration {
-    Project project
-    SeqType seqType
-    String pluginName
-    String pluginVersion
-    String baseProjectConfig
-    String configVersion
+class PanCanAlignmentConfiguration extends RoddyConfiguration {
+    String referenceGenome
+    String statSizeFileName
+    String mergeTool
+}
+
+class SnvPipelineConfiguration extends RoddyConfiguration {
+}
+
+class IndelPipelineConfiguration extends RoddyConfiguration {
 }

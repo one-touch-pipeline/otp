@@ -14,7 +14,7 @@ $.otp.configureAlignment = {
         $.ajax({
             type: 'GET',
             url: $.otp.createLink({
-                controller: 'configureAlignment',
+                controller: 'configurePipeline',
                 action: 'getStatSizeFileNames'
             }),
             dataType: 'json',

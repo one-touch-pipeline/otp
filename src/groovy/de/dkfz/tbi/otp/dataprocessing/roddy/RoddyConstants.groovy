@@ -20,4 +20,9 @@ interface RoddyConstants {
 
     static final String OPTION_KEY_SNV_BASE_PROJECT_CONFIG = 'SnvBaseProjectConfig'
 
+    static final String OPTION_KEY_INDEL_PIPELINE_PLUGIN_NAME = 'IndelPipelinePluginName'
+
+    static final String OPTION_KEY_INDEL_PIPELINE_PLUGIN_VERSION = 'IndelPipelinePluginVersion'
+
+    static final String OPTION_KEY_INDEL_BASE_PROJECT_CONFIG = 'IndelBaseProjectConfig'
 }

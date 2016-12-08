@@ -3,12 +3,12 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="layout" content="main"/>
-<title><g:message code="configureAlignment.title" args="[projectName, seqType.displayName]"/></title>
-<asset:javascript src="pages/configureAlignment/index/configureAlignment.js"/>
+    <title><g:message code="configurePipeline.alignment.title" args="[project.name, seqType.displayName]"/></title>
+    <asset:javascript src="pages/configurePipeline/alignment/configureAlignment.js"/>
 </head>
 <body>
     <div class="body">
-        <h1><g:message code="configureAlignment.title" args="[projectName, seqType.displayName]"/></h1>
+        <h1><g:message code="configurePipeline.alignment.title" args="[project.name, seqType.displayName]"/></h1>
         <g:if test="${hasErrors}">
             <div class="errors"> <li>${message}</li></div>
         </g:if>
@@ -18,61 +18,61 @@
         <g:else>
             <div class="empty"><br></div>
         </g:else>
-        <g:message code="configureAlignment.info"/>
-        <g:form controller="ConfigureAlignment" action="index" params='[projectName: projectName, seqTypeName: seqType.name, libraryLayout: seqType.libraryLayout]'>
+        <g:message code="configurePipeline.alignment.info"/>
+        <g:form controller="configurePipeline" action="alignment" params='["project.id": project.id, "seqType.id": seqType.id]'>
             <table class="alignmentTable">
                 <tr>
                     <th></th>
                     <th></th>
-                    <th><g:message code="configureAlignment.header.defaultValue"/></th>
-                    <th><g:message code="configureAlignment.header.info"/></th>
+                    <th><g:message code="configurePipeline.header.defaultValue"/></th>
+                    <th><g:message code="configurePipeline.header.info"/></th>
                 </tr>
-                <tr class="default">
-                    <td class="myKey"><g:message code="configureAlignment.genome"/></td>
+                <tr>
+                    <td class="myKey"><g:message code="configurePipeline.alignment.genome"/></td>
                     <td><g:select class="genome" name="referenceGenome" from="${referenceGenomes}" value="${referenceGenome}"/></td>
                     <td>${defaultReferenceGenome}</td>
-                    <td><g:message code="configureAlignment.genome.info"/></td>
+                    <td><g:message code="configurePipeline.alignment.genome.info"/></td>
                 </tr>
-                <tr class="pancan">
-                    <td class="myKey"><g:message code="configureAlignment.statSizeFileName"/></td>
+                <tr>
+                    <td class="myKey"><g:message code="configurePipeline.alignment.statSizeFileName"/></td>
                     <td><select id="statSizeFileNames" name="statSizeFileName" value=""${statSizeFileName}/></td>
                     <td>&nbsp;</td>
-                    <td><g:message code="configureAlignment.statSizeFileName.info"/></td>
+                    <td><g:message code="configurePipeline.alignment.statSizeFileName.info"/></td>
                 </tr>
-                <tr class="pancan">
-                    <td class="myKey"><g:message code="configureAlignment.mergeTool"/></td>
+                <tr>
+                    <td class="myKey"><g:message code="configurePipeline.alignment.mergeTool"/></td>
                     <td><g:select name="mergeTool" from="${mergeTools}" value="${mergeTool}"/></td>
                     <td>${defaultMergeTool}</td>
-                    <td><g:message code="configureAlignment.mergeTool.info"/></td>
+                    <td><g:message code="configurePipeline.alignment.mergeTool.info"/></td>
                 </tr>
-                <tr class="pancan">
+                <tr>
                     <td colspan="4">&nbsp;</td>
                 </tr>
-                <tr class="pancan">
-                    <td class="myKey"><g:message code="configureAlignment.plugin.name"/></td>
+                <tr>
+                    <td class="myKey"><g:message code="configurePipeline.plugin.name"/></td>
                     <td><g:textField name="pluginName" value="${pluginName}"/></td>
                     <td>${defaultPluginName}</td>
                     <td>&nbsp;</td>
                 </tr>
-                <tr class="pancan">
-                    <td class="myKey"><g:message code="configureAlignment.plugin.version"/></td>
+                <tr>
+                    <td class="myKey"><g:message code="configurePipeline.plugin.version"/></td>
                     <td><g:textField name="pluginVersion" value="${pluginVersion}"/></td>
                     <td>${defaultPluginVersion}</td>
                     <td>&nbsp;</td>
                 </tr>
-                <tr class="pancan">
-                    <td class="myKey"><g:message code="configureAlignment.base.project"/></td>
+                <tr>
+                    <td class="myKey"><g:message code="configurePipeline.base.project"/></td>
                     <td><g:textField name="baseProjectConfig" value="${baseProjectConfig}"/></td>
                     <td>${defaultBaseProjectConfig}</td>
                     <td>&nbsp;</td>
                 </tr>
-                <tr class="pancan">
-                    <td class="myKey"><g:message code="configureAlignment.config"/></td>
+                <tr>
+                    <td class="myKey"><g:message code="configurePipeline.config"/></td>
                     <td><g:textField name="config" value="${config}"/></td>
                     <td>-</td>
-                    <td><g:message code="configureAlignment.config.info"/></td>
+                    <td><g:message code="configurePipeline.config.info"/></td>
                 </tr>
-                <tr class="pancan">
+                <tr>
                     <td colspan="4">&nbsp;</td>
                 </tr>
                 <tr>
@@ -82,7 +82,7 @@
             </table>
         </g:form>
         <g:if test="${lastRoddyConfig}">
-            <g:message code="configureAlignment.last.config"/>
+            <g:message code="configurePipeline.last.config"/>
             <code style="white-space: pre-wrap">
                 ${lastRoddyConfig}
             </code>

@@ -3,11 +3,11 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="layout" content="main"/>
-<title><g:message code="configurePipeline.title" args="[projectName, seqType.displayName]"/></title>
+    <title><g:message code="configurePipeline.indel.title" args="[project.name, seqType.displayName]"/></title>
 </head>
 <body>
     <div class="body">
-        <h1><g:message code="configurePipeline.title" args="[projectName, seqType.displayName]"/></h1>
+        <h1><g:message code="configurePipeline.indel.title" args="[project.name, seqType.displayName]"/></h1>
         <g:if test="${hasErrors}">
             <div class="errors"> <li>${message}</li></div>
         </g:if>
@@ -18,7 +18,7 @@
             <div class="empty"><br></div>
         </g:else>
         <g:message code="configurePipeline.info"/>
-        <g:form controller="configurePipeline" action="index" params='[projectName: projectName, seqTypeName: seqType.name, libraryLayout: seqType.libraryLayout]'>
+        <g:form controller="configurePipeline" action="indel" params='["project.id": project.id, "seqType.id": seqType.id]'>
             <table class="pipelineTable">
                 <tr>
                     <th></th>
@@ -26,31 +26,31 @@
                     <th><g:message code="configurePipeline.header.defaultValue"/></th>
                     <th><g:message code="configurePipeline.header.info"/></th>
                 </tr>
-                <tr class="snv">
+                <tr>
                     <td class="myKey"><g:message code="configurePipeline.plugin.name"/></td>
                     <td><g:textField name="pluginName" value="${pluginName}"/></td>
                     <td>${defaultPluginName}</td>
                     <td>&nbsp;</td>
                 </tr>
-                <tr class="snv">
+                <tr>
                     <td class="myKey"><g:message code="configurePipeline.plugin.version"/></td>
                     <td><g:textField name="pluginVersion" value="${pluginVersion}"/></td>
                     <td>${defaultPluginVersion}</td>
                     <td>&nbsp;</td>
                 </tr>
-                <tr class="snv">
+                <tr>
                     <td class="myKey"><g:message code="configurePipeline.base.project"/></td>
                     <td><g:textField name="baseProjectConfig" value="${baseProjectConfig}"/></td>
                     <td>${defaultBaseProjectConfig}</td>
                     <td>&nbsp;</td>
                 </tr>
-                <tr class="snv">
+                <tr>
                     <td class="myKey"><g:message code="configurePipeline.config"/></td>
                     <td><g:textField name="config" value="${config}"/></td>
                     <td>-</td>
                     <td><g:message code="configurePipeline.config.info"/></td>
                 </tr>
-                <tr class="snv">
+                <tr>
                     <td colspan="4">&nbsp;</td>
                 </tr>
                 <tr>
