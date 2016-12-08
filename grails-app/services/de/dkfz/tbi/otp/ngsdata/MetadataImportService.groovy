@@ -299,6 +299,11 @@ class MetadataImportService {
             SeqTrack seqTrack = (seqTypeName?.factory ?: SeqTrack.FACTORY).call(properties)
             assert seqTrack.save()
 
+            if (adapterFile) {
+                seqTrack.project.hasToBeCopied = true
+                assert seqTrack.project.save(flush: true)
+            }
+
             importDataFiles(context, runSegment, seqTrack, rows)
 
             boolean willBeAligned = seqTrackService.decideAndPrepareForAlignment(seqTrack)

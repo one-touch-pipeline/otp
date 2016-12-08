@@ -7,17 +7,20 @@ import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 import grails.test.mixin.*
+import org.apache.coyote.Adapter
 import org.junit.*
 import org.junit.rules.*
 import spock.lang.*
 
 @Mock([
+        AdapterFile,
         DataFile,
         FileType,
         Individual,
         LibraryPreparationKit,
         MergingWorkPackage,
         Pipeline,
+        ProcessingOption,
         Project,
         ProjectCategory,
         Sample,
@@ -58,19 +61,14 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
         e.message.contains("assert roddyBamFile")
     }
 
-
+    @Unroll
     void "prepareAndReturnAlignmentCValues, when all fine, return list of cvalues"() {
         given:
         AbstractRoddyAlignmentJob job = Spy(AbstractRoddyAlignmentJob)
         File referenceGenomeFilePath = CreateFileHelper.createFile(temporaryFolder.newFile())
         File chromosomeStatSizeFilePath = CreateFileHelper.createFile(temporaryFolder.newFile())
 
-        RoddyBamFile roddyBamFile = Mock(RoddyBamFile) {
-            getProject() >> new Project()
-            getMergingWorkPackage() >> new MergingWorkPackage()
-            getSampleType() >> new SampleType(name: 'SAMPLETYPE')
-            getReferenceGenome() >> new ReferenceGenome()
-        }
+        RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
 
         job.referenceGenomeService = Mock(ReferenceGenomeService) {
             1 * fastaFilePath(_, _) >> referenceGenomeFilePath
@@ -80,15 +78,33 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
         List<String> expected = [
                 "INDEX_PREFIX:${referenceGenomeFilePath.path}",
                 "CHROM_SIZES_FILE:${chromosomeStatSizeFilePath.path}",
-                "possibleControlSampleNamePrefixes:sampletype",
+                "possibleControlSampleNamePrefixes:${roddyBamFile.getSampleType().dirName}",
                 "possibleTumorSampleNamePrefixes:",
         ]
+
+        if (adapter == "YES" ) {
+            File adapterFilePath = CreateFileHelper.createFile(temporaryFolder.newFile())
+            AdapterFile adapterFile = DomainFactory.createAdapterFile()
+            roddyBamFile.seqTracks.each {
+                it.adapterFile = adapterFile
+                it.save(flush: true)
+            }
+
+            job.adapterFileService = Mock(AdapterFileService) {
+                1* fullPath(_) >> adapterFilePath
+            }
+
+            expected.add("CLIP_INDEX:${adapterFilePath}")
+        }
 
         when:
         List<String> value = job.prepareAndReturnAlignmentCValues(roddyBamFile)
 
         then:
         expected == value
+
+        where:
+        adapter << ["YES", "NO"]
     }
 
 

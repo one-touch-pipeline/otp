@@ -3,6 +3,7 @@ package workflows
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.jobs.roddyAlignment.*
 import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import org.junit.*
 import org.springframework.beans.factory.annotation.*
 
@@ -144,5 +145,16 @@ abstract class PanCanAlignmentWorkflowTests extends AbstractPanCanAlignmentWorkf
         checkFirstBamFileState(bamFiles[1], true, [identifier: 1])
         assertBamFileFileSystemPropertiesSet(bamFiles[1])
         checkFileSystemState(bamFiles[1])
+    }
+
+    @Test
+    void testAlignLanesOnly_NoBaseBamExist_OneLane_WithAdapterTrimming_allFine() {
+
+        // prepare
+        SeqTrack seqTrack = createSeqTrack("readGroup1")
+
+        setUpAdapterFile([seqTrack])
+
+        executeAndVerify_AlignLanesOnly_AllFine()
     }
 }

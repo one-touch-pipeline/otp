@@ -520,7 +520,7 @@ class DomainFactory {
         return bamFile
     }
 
-    public static createRoddyBamFile(Map bamFileProperties = [:]) {
+    public static RoddyBamFile createRoddyBamFile(Map bamFileProperties = [:]) {
         MergingWorkPackage workPackage = bamFileProperties.workPackage
         if (!workPackage) {
             SeqType seqType = createWholeGenomeSeqType()

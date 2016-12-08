@@ -110,37 +110,6 @@ class ExecuteWgbsAlignmentJobTests {
 
 
     @Test
-    void testPrepareAndReturnWorkflowSpecificCValues_adapterFile() {
-        List<String> chromosomeNames = ["1", "2", "3", "4", "5", "M", "X", "Y"]
-        DomainFactory.createReferenceGenomeEntries(roddyBamFile.referenceGenome, chromosomeNames)
-
-        String adapterName = "test_adapter"
-        File file = new File(tmpDir.root, adapterName)
-        file.createNewFile()
-        DomainFactory.createProcessingOption(name: AdapterFileService.BASE_PATH_PROCESSING_OPTION_NAME, value: tmpDir.root)
-
-        AdapterFile adapterFile = DomainFactory.createAdapterFile(fileName: adapterName)
-        roddyBamFile.seqTracks.each { SeqTrack seqTrack ->
-            seqTrack.adapterFile = adapterFile
-            seqTrack.save(flush: true, failOnError: true)
-        }
-        List<String> expectedCommand = [
-                "INDEX_PREFIX:${executeWgbsAlignmentJob.referenceGenomeService.fastaFilePath(roddyBamFile.project, roddyBamFile.referenceGenome)}",
-                "CHROM_SIZES_FILE:${executeWgbsAlignmentJob.referenceGenomeService.chromosomeStatSizeFile(roddyBamFile.mergingWorkPackage)}",
-                "possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}",
-                "possibleTumorSampleNamePrefixes:",
-                "CHROMOSOME_INDICES:( ${chromosomeNames.join(' ')} )",
-                "CYTOSINE_POSITIONS_INDEX:${cpiFile.absolutePath}",
-                "CLIP_INDEX:${file.absolutePath}",
-        ]
-
-        List<String> actualCommand = executeWgbsAlignmentJob.prepareAndReturnWorkflowSpecificCValues(roddyBamFile)
-
-        assert expectedCommand == actualCommand
-
-    }
-
-    @Test
     void testPrepareAndReturnWorkflowSpecificParameter_InputBamIsNull_ShouldFail() {
         assert TestCase.shouldFail(AssertionError) {
             executeWgbsAlignmentJob.prepareAndReturnWorkflowSpecificParameter(null)

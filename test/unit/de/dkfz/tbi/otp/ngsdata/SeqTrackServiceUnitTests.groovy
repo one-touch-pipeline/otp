@@ -8,12 +8,13 @@ import org.junit.*
 
 @Mock([SeqTypeService])
 @Build([
-    DataFile,
-    RunSegment,
-    SeqCenter,
-    SeqPlatformGroup,
-    SeqTrack,
-    LogMessage,
+        AdapterFile,
+        DataFile,
+        RunSegment,
+        SeqCenter,
+        SeqPlatformGroup,
+        SeqTrack,
+        LogMessage,
 ])
 class SeqTrackServiceUnitTests {
 
@@ -32,7 +33,7 @@ class SeqTrackServiceUnitTests {
 
     @Test
     void testDetermineAndStoreIfFastqFilesHaveToBeLinked_SeqTrackIsNull_ShouldFail() {
-        shouldFail(AssertionError) {seqTrackService.determineAndStoreIfFastqFilesHaveToBeLinked(null, true)}
+        shouldFail(AssertionError) { seqTrackService.determineAndStoreIfFastqFilesHaveToBeLinked(null, true) }
     }
 
     @Test
@@ -43,6 +44,21 @@ class SeqTrackServiceUnitTests {
             seqTrackService.determineAndStoreIfFastqFilesHaveToBeLinked(seqTrack, true)
 
             assert seqTrack.linkedExternally == true
+        }
+    }
+
+    @Test
+    void testDetermineAndStoreIfFastqFilesHaveToBeLinked_WithAdapterTrimming_HasToBeCopied() {
+        withTestMidtermStorageMountPoint {
+            AdapterFile adapterFile = DomainFactory.createAdapterFile()
+            SeqTrack seqTrack = createDataForDetermineAndStoreIfFastqFilesHaveToBeLinked()
+            seqTrack.adapterFile = adapterFile
+            assert seqTrack.save(flush: true)
+            assert seqTrack.project.hasToBeCopied == false
+
+            seqTrackService.determineAndStoreIfFastqFilesHaveToBeLinked(seqTrack, true)
+
+            assert seqTrack.linkedExternally == false
         }
     }
 
@@ -132,7 +148,7 @@ class SeqTrackServiceUnitTests {
 
     @Test
     void testAreFilesLocatedOnMidTermStorage_SeqTrackIsNull_ShouldFail() {
-        shouldFail(AssertionError) {seqTrackService.areFilesLocatedOnMidTermStorage(null)}
+        shouldFail(AssertionError) { seqTrackService.areFilesLocatedOnMidTermStorage(null) }
 
     }
 
@@ -189,7 +205,9 @@ class SeqTrackServiceUnitTests {
     private withTestMidtermStorageMountPoint(Closure code) {
         def originalMidtermStorageMountPoint = LsdfFilesService.midtermStorageMountPoint
         try {
-            LsdfFilesService.midtermStorageMountPoint = [1, 2].collect{TestCase.getUniqueNonExistentPath().path}.asImmutable()
+            LsdfFilesService.midtermStorageMountPoint = [1, 2].collect {
+                TestCase.getUniqueNonExistentPath().path
+            }.asImmutable()
             code()
         } finally {
             LsdfFilesService.midtermStorageMountPoint = originalMidtermStorageMountPoint
@@ -270,7 +288,7 @@ class SeqTrackServiceUnitTests {
         String sequenceLength = null
         Long nReads = 12345689
         SeqTrack seqTrack = createTestSeqTrack(sequenceLength, nReads)
-        shouldFail(AssertionError) {seqTrackService.fillBaseCount(seqTrack)}
+        shouldFail(AssertionError) { seqTrackService.fillBaseCount(seqTrack) }
     }
 
     @Test
@@ -278,7 +296,7 @@ class SeqTrackServiceUnitTests {
         String sequenceLength = "101"
         Long nReads = null
         SeqTrack seqTrack = createTestSeqTrack(sequenceLength, nReads)
-        shouldFail(AssertionError) {seqTrackService.fillBaseCount(seqTrack)}
+        shouldFail(AssertionError) { seqTrackService.fillBaseCount(seqTrack) }
     }
 
 
@@ -308,7 +326,7 @@ class SeqTrackServiceUnitTests {
     @Test
     void testFillBaseCount_sequenceLengthIsIntegerRange() {
         String sequenceLength = "90-100"
-        int meanSequenceLength = sequenceLength.split('-').sum {it.toInteger()}/2
+        int meanSequenceLength = sequenceLength.split('-').sum { it.toInteger() } / 2
         Long nReads = 12345689
         Long expectedBasePairs = meanSequenceLength * nReads
         SeqTrack seqTrack = createTestSeqTrack(sequenceLength, nReads)
@@ -317,6 +335,6 @@ class SeqTrackServiceUnitTests {
     }
 
     private SeqTrack createTestSeqTrack(String sequenceLength, Long nReads) {
-        return DomainFactory.createSeqTrackWithOneDataFile([:], [nReads:nReads, sequenceLength:sequenceLength])
+        return DomainFactory.createSeqTrackWithOneDataFile([:], [nReads: nReads, sequenceLength: sequenceLength])
     }
 }

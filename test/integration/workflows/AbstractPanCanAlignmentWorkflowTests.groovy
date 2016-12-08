@@ -84,6 +84,8 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
     // test project config with non-existing plugin
     File roddyFailsProjectConfig
 
+    File adapterFile
+
 
     LsdfFilesService lsdfFilesService
     ProcessingOptionService processingOptionService
@@ -166,6 +168,7 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
         oldProjectConfigFile = new File(baseTestDataDir, "project-config/configPerSeqType/projectTestAlignment-newroddy-${findSeqType().roddyName.toLowerCase()}-1.0.182-1.xml")
         conveyProjectConfigFile = new File(baseTestDataDir, 'project-config/conveyProjectTestAlignment.xml')
         roddyFailsProjectConfig = new File(baseTestDataDir, 'project-config/roddy-fails-project-config.xml')
+        adapterFile = new File(baseTestDataDir, 'adapters/TruSeq3-PE.fa')
     }
 
     abstract SeqType findSeqType()
@@ -372,6 +375,19 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
     void setUpRefGenomeDir(MergingWorkPackage workPackage) {
         File linkRefGenDir = new File(referenceGenomeService.filePathToDirectory(workPackage.project, workPackage.referenceGenome, false))
         linkFileUtils.createAndValidateLinks([(refGenDir): linkRefGenDir], realm)
+    }
+
+    void setUpAdapterFile(List<SeqTrack> seqTracks) {
+        SpringSecurityUtils.doWithAuth("operator") {
+            processingOptionService.createOrUpdate("ADAPTER_BASE_PATH", null, null, adapterFile.absoluteFile.parent, "Path where the adapter file is located")
+        }
+
+        AdapterFile adapter = DomainFactory.createAdapterFile(fileName: adapterFile.name)
+
+        seqTracks.each {
+            it.adapterFile = adapter
+            it.save(flush: true)
+        }
     }
 
     void checkAllAfterSuccessfulExecution_alignBaseBamAndNewLanes() {

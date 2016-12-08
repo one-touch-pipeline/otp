@@ -626,21 +626,6 @@ class LinkFilesToFinalDestinationServiceTests {
     }
 
     @Test
-    void testExecute_roddyBamFileHasLessNumberOfReadsThenAllSeqTracksTogether_ShouldFail() {
-        setUp_allFine()
-        RoddyQualityAssessment qa = roddyBamFile.overallQualityAssessment
-        qa.pairedRead1--
-        assert qa.save(flush: true)
-        assert roddyBamFile.numberOfReadsFromQa < roddyBamFile.numberOfReadsFromFastQc
-
-        assert shouldFail (AssertionError) {
-            linkFilesToFinalDestinationService.prepareRoddyBamFile(roddyBamFile)
-        } ==~ /.*bam file (.*) has less number of reads than the sum of all fastqc (.*).*/
-    }
-
-
-
-    @Test
     void testExecute_RoddyBamFileHasWrongState_ShouldFail() {
         setUp_allFine()
         roddyBamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.DECLARED
