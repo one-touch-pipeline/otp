@@ -123,7 +123,7 @@ class ExecuteRoddyCommandService {
         assert realm : "Realm must not be null"
         assert file : "File must not be null"
         if (file.exists()) {
-            executionService.executeCommand(realm, "umask 027; chgrp localGroup ${file} && chmod 2770 ${file}")
+            executionService.executeCommand(realm, "umask 027; chgrp localGroup ${file} ; chmod 2770 ${file}")
         } else {
             executionService.executeCommand(realm, "umask 027; mkdir -m 2750 -p ${file.parent} && mkdir -m 2770 -p ${file} && chgrp localGroup ${file};")
             WaitingFileUtils.waitUntilExists(file)
