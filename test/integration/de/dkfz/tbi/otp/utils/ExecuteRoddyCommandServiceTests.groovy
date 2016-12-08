@@ -348,9 +348,10 @@ class ExecuteRoddyCommandServiceTests {
 stat -c %a ${tmpOutputDir}
 stat -c %G ${tmpOutputDir}
 """)
+        //make the 2 optional, since it does not work for all developer, allow group jenkins, since user jenkins is not part of jenkins
         String expected = """\
 2?770
-localGroup
+(localGroup|jenkins)
 """
 
         assert permissionAndGroup ==~ expected
@@ -372,9 +373,10 @@ localGroup
 stat -c %a ${tmpOutputDir}
 stat -c %G ${tmpOutputDir}
 """)
+        //make the 2 optional, since it does not work for all developer, allow group jenkins, since user jenkins is not part of jenkins
         String expected = """\
 2?770
-localGroup
+(localGroup|jenkins)
 """
 
         assert permissionAndGroup ==~ expected
