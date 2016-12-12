@@ -82,6 +82,5 @@ class ExecuteRoddyIndelJob extends AbstractExecutePanCanJob<IndelCallingInstance
         indelCallingService.validateInputBamFiles(indelCallingInstance)
 
         indelCallingInstance.updateProcessingState(AnalysisProcessingStates.FINISHED)
-
     }
 }
