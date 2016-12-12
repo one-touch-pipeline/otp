@@ -100,7 +100,9 @@ link: ${link}
         ]
         message << mapToString('OTP Job', otpJob)
 
-        clusterJobsToCheck.each { ClusterJob clusterJob ->
+        clusterJobsToCheck.sort { ClusterJob clusterJob ->
+            return clusterJob.id
+        }.each { ClusterJob clusterJob ->
             Map clusterProperties = [
                     clusterId          : clusterJob.id,
                     jobName            : clusterJob.clusterJobName,
