@@ -6,6 +6,10 @@ import org.springframework.context.ApplicationContext
 
 class SampleIdentifierService {
 
+
+    static final String XENOGRAFT = "XENOGRAFT"
+
+
     @Autowired
     ApplicationContext applicationContext
 
@@ -62,9 +66,22 @@ class SampleIdentifierService {
     Sample findOrSaveSample(ParsedSampleIdentifier identifier) {
         return Sample.findOrSaveWhere(
                 individual: findOrSaveIndividual(identifier),
-                sampleType: SampleType.findOrSaveWhere(name: identifier.sampleTypeDbName),
+                sampleType: SampleType.findWhere(name: identifier.sampleTypeDbName) ?: createSampleTypeXenograftDepending(identifier.sampleTypeDbName),
         )
     }
+
+
+    SampleType createSampleTypeXenograftDepending(String sampleTypeName) {
+        boolean xenograft = sampleTypeName.toUpperCase(Locale.ENGLISH).startsWith(XENOGRAFT)
+        SampleType.SpecificReferenceGenome  specificReferenceGenome = xenograft ?  SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC : SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        SampleType sampleType = new SampleType(
+                name: sampleTypeName,
+                specificReferenceGenome: specificReferenceGenome,
+        )
+        assert sampleType.save(flush: true)
+        return sampleType
+    }
+
 
     Individual findOrSaveIndividual(ParsedSampleIdentifier identifier) {
         Individual result = atMostOneElement(Individual.findAllByPid(identifier.pid))

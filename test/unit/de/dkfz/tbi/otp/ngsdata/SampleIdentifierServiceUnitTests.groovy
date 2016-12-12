@@ -77,6 +77,22 @@ class SampleIdentifierServiceUnitTests {
         }.contains("already exists, but belongs to project")
     }
 
+
+    @Test
+    void testCreateSampleTypeXenograftDepending_SampleIsNoXenograft_ShouldReturnSampleUsingProjectDefaultReferenceGenome() {
+        SampleType sampleType = service.createSampleTypeXenograftDepending(HelperUtils.uniqueString)
+
+        assert sampleType.specificReferenceGenome == SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+    }
+
+    @Test
+    void testCreateSampleTypeXenograftDepending_SampleIsXenograft_ShouldReturnSampleUsingSampleTypeSpecificReferenceGenome() {
+        SampleType sampleType = service.createSampleTypeXenograftDepending(SampleIdentifierService.XENOGRAFT + HelperUtils.uniqueString)
+
+        assert sampleType.specificReferenceGenome == SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC
+    }
+
+
     private void testFindOrSaveSample_ShouldReturnIt(ParsedSampleIdentifier identifier) {
         Sample result = service.findOrSaveSample(identifier)
 
