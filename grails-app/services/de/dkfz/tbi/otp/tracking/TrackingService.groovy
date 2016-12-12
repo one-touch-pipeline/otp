@@ -63,14 +63,12 @@ class TrackingService {
 
     public Set<OtrsTicket> findAllOtrsTicketsAndLockThem(Collection<SeqTrack> seqTracks) {
         Set<OtrsTicket> otrsTickets = findAllOtrsTickets(seqTracks)
-        otrsTickets.sort { //ensure order to avoid dead locks
+        return otrsTickets.sort { //ensure order to avoid dead locks
             it.id
-        }.each {
-            //create write lock on object and refresh content
-            it.lock()
-            it.refresh()
+        }.collect {
+            //reload with write lock
+            OtrsTicket.lock(it.id)
         }
-        return otrsTickets
     }
 
     public Set<OtrsTicket> findAllOtrsTickets(Collection<SeqTrack> seqTracks) {
