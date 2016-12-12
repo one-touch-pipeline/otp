@@ -94,7 +94,7 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
                 1* fullPath(_) >> adapterFilePath
             }
 
-            expected.add("CLIP_INDEX:${adapterFilePath}")
+            expected.addAll("CLIP_INDEX:${adapterFilePath}", "useAdaptorTrimming:true")
         }
 
         when:

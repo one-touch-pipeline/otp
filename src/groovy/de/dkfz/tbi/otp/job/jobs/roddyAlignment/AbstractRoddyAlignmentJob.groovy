@@ -35,6 +35,7 @@ abstract class AbstractRoddyAlignmentJob extends AbstractExecutePanCanJob<RoddyB
         AdapterFile adapterFile = atMostOneElement(roddyBamFile.seqTracks*.adapterFile?.unique() ?: [])
         if (adapterFile) {
             cValues.add("CLIP_INDEX:${adapterFileService.fullPath(adapterFile)}")
+            cValues.add("useAdaptorTrimming:true")
         }
         return cValues
     }
