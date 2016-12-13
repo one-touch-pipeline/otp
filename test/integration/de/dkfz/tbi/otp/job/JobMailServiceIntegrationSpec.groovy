@@ -65,10 +65,10 @@ class JobMailServiceIntegrationSpec extends Specification {
                         assert content.contains('\nOTP Job:\n')
                         assert (failedCount > 0) == content.contains('\nCluster Job:\n')
                         completedClusterJobs.each {
-                            assert !content.contains("clusterId: ${it.id}")
+                            assert !content.contains("clusterId: ${it.clusterJobId}")
                         }
                         failedClusterJobs.each {
-                            assert content.contains("clusterId: ${it.id}")
+                            assert content.contains("clusterId: ${it.clusterJobId}")
                         }
                     }
                     0 * _

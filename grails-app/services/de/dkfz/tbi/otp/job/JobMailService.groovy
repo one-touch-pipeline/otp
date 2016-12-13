@@ -104,7 +104,7 @@ link: ${link}
             return clusterJob.id
         }.each { ClusterJob clusterJob ->
             Map clusterProperties = [
-                    clusterId          : clusterJob.id,
+                    clusterId          : clusterJob.clusterJobId,
                     jobName            : clusterJob.clusterJobName,
 
                     queue              : dateString(clusterJob.queued),
@@ -122,15 +122,15 @@ link: ${link}
 
             Map mapForLog = otpWorkflow + otpJob + clusterProperties
             log.info("""Error Statistic:
-Failed OTP Job Header: ${mapForLog.keySet().join(';')}
-Failed OTP Job Values: ${mapForLog.values().join(';')}""")
+Failed ClusterJob Job Header: ${mapForLog.keySet().join(';')}
+Failed ClusterJob Job Values: ${mapForLog.values().join(';')}""")
         }
 
         if (!clusterJobsToCheck) {
             Map mapForLog = otpWorkflow + otpJob
             log.info("""Error Statistic:
-Failed ClusterJob Header: ${mapForLog.keySet().join(';')}
-Failed ClusterJob Values: ${mapForLog.values().join(';')}""")
+Failed OTP Header: ${mapForLog.keySet().join(';')}
+Failed OTP Values: ${mapForLog.values().join(';')}""")
         }
 
         String recipientsString = ProcessingOptionService.findOption(
