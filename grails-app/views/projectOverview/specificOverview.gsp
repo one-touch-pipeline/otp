@@ -242,7 +242,7 @@
                     </li>
                 </g:each>
             </ul>
-            <table  class="snv">
+            <table class="snv">
                 <tr>
                     <td><g:message code="projectOverview.snv"/></td>
                     <td class="myValue typeDropDown">

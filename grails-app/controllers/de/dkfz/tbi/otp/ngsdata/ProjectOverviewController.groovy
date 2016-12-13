@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig
 import de.dkfz.tbi.otp.security.Group
 import de.dkfz.tbi.otp.security.User
@@ -437,7 +438,7 @@ class ProjectOverviewController {
     private List buildTableForConfig(Project project) {
         List table = []
         table.add(["", "Config uploaded", "Version"])
-        seqTypeService.alignableSeqTypes().each {
+        SeqType.getSnvPipelineSeqTypes().each {
             List row = []
             row.add(it.displayName)
             SnvConfig snvConfig = CollectionUtils.atMostOneElement(SnvConfig.findAllByProjectAndSeqTypeAndObsoleteDate(project, it, null))
@@ -445,8 +446,15 @@ class ProjectOverviewController {
                 row.add("Yes")
                 row.add(snvConfig.externalScriptVersion)
             } else {
-                row.add("No")
-                row.add("")
+                RoddyWorkflowConfig roddyWorkflowConfig = CollectionUtils.atMostOneElement(RoddyWorkflowConfig.findAllByProjectAndSeqTypeAndObsoleteDateAndPipeline(project, it, null, Pipeline.findByName(Pipeline.Name.RODDY_SNV)))
+
+                if (roddyWorkflowConfig) {
+                    row.add("Yes")
+                    row.add(roddyWorkflowConfig.pluginVersion)
+                } else {
+                    row.add("No")
+                    row.add("")
+                }
             }
             table.add(row)
         }
