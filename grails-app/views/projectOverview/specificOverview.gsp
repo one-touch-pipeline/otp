@@ -201,6 +201,36 @@
         </div>
         <br>
         <div>
+            <h3>${g.message(code: 'projectOverview.analysis.title')}</h3>
+            <ul>
+                <li>
+                    <g:link controller='configureAnalysis' params='["project.id": project.id]' class="configure">
+                        ${g.message(code: 'projectOverview.analysis.link')}
+                    </g:link>
+                </li>
+            </ul>
+            <g:if test="${thresholdsTable}">
+                <table>
+                    <g:each var="row" in="${thresholdsTable}" status="i">
+                        <g:if test="${i == 0}">
+                            <tr>
+                                <g:each var="cell" in="${row}">
+                                    <th>${cell}</th>
+                                </g:each>
+                            </tr>
+                        </g:if>
+                        <g:else>
+                            <tr>
+                                <g:each var="cell" in="${row}">
+                                    <td class="tableEntry">${cell}</td>
+                                </g:each>
+                            </tr>
+                        </g:else>
+                    </g:each>
+                </table>
+            </g:if>
+        </div>
+        <div>
             <h3>${g.message(code: 'projectOverview.snv.title')}</h3>
             <g:message code="projectOverview.pipelineInformation.configure"/>
             <ul>
@@ -244,26 +274,6 @@
                 </g:each>
             </table>
             <br>
-            <g:if test="${snv==Snv.YES}">
-                <table>
-                    <tr>
-                        <g:each var="cell" in="${thresholdsHeadline}">
-                            <th>
-                               ${cell}
-                             </th>
-                        </g:each>
-                    </tr>
-                    <g:each var="rows" in="${thresholdsTable}">
-                        <tr>
-                            <g:each var="cell" in="${rows}">
-                                <td class="tableEntry">
-                                    ${cell}
-                                </td>
-                            </g:each>
-                        </tr>
-                    </g:each>
-                </table>
-            </g:if>
         </div>
     </div>
     <asset:script>

@@ -81,27 +81,12 @@ class ProjectOverviewController {
             alignmentError = e.message
             log.error(e.message, e)
         }
-        List thresholdsTable = []
         List configTable
 
         List<ProjectContactPerson> projectContactPersons = ProjectContactPerson.findAllByProject(project)
         List<String> contactPersonRoles = [''] + ContactPersonRole.findAll()*.name
 
-        thresholdsTable.add(buildHeadline())
-        sampleTypePerProjectService.findByProject(project).each() { sampleTypePerProject ->
-            List row = []
-            row.add(sampleTypePerProject.sampleType.name)
-            row.add(sampleTypePerProject.category)
-            seqTypeService.alignableSeqTypes().each {
-                ProcessingThresholds processingThresholds = processingThresholdsService.findByProjectAndSampleTypeAndSeqType(project, sampleTypePerProject.sampleType, it)
-                row.add(processingThresholds?.numberOfLanes)
-                row.add(processingThresholds?.coverage)
-            }
-            thresholdsTable.add(row)
-        }
-        thresholdsTable = removeEmptyColumns(thresholdsTable)
-        List thresholdsHeadline = getHeadline(thresholdsTable)
-        thresholdsTable.remove(thresholdsHeadline)
+        List<List> thresholdsTable = createThresholdTable(project)
 
         configTable = buildTableForConfig(project)
         List configTableHeadline = getHeadline(configTable)
@@ -127,7 +112,6 @@ class ProjectOverviewController {
                 snv: project.snv,
                 projectContactPersons: projectContactPersons,
                 roleDropDown: contactPersonRoles,
-                thresholdsHeadline: thresholdsHeadline,
                 thresholdsTable: thresholdsTable,
                 configTableHeadline: configTableHeadline,
                 configTable: configTable,
@@ -468,18 +452,38 @@ class ProjectOverviewController {
         return table.transpose()
     }
 
-    private List buildHeadline() {
-        List headline = []
-        headline.add("Sample Type")
-        headline.add("Category")
-        seqTypeService.alignableSeqTypes().each {
-            headline.add("Number of Lanes ("+ it.displayName + " " + it.libraryLayout + ")")
-            headline.add("Coverage ("+ it.displayName + " " + it.libraryLayout + ")")
+    private List<List<String>> createThresholdTable(Project project) {
+        List<List<String>> thresholdsTable = []
+        List<SeqType> seqTypes = SeqType.getAllAnalysableSeqTypes()
+
+        List row = []
+        row.add(message(code: "projectOverview.analysis.sampleType"))
+        row.add(message(code: "projectOverview.analysis.category"))
+        seqTypes.each {
+            row.add(message(code: "projectOverview.analysis.minLanes", args:[it.displayName, it.libraryLayout]))
+            row.add(message(code: "projectOverview.analysis.coverage", args:[it.displayName, it.libraryLayout]))
         }
-        return headline
+        thresholdsTable.add(row)
+
+        sampleTypePerProjectService.findByProject(project).each() { sampleTypePerProject ->
+            row = []
+            row.add(sampleTypePerProject.sampleType.name)
+            row.add(sampleTypePerProject.category)
+            seqTypes.each {
+                ProcessingThresholds processingThresholds = processingThresholdsService.findByProjectAndSampleTypeAndSeqType(project, sampleTypePerProject.sampleType, it)
+                row.add(processingThresholds?.numberOfLanes)
+                row.add(processingThresholds?.coverage)
+            }
+            thresholdsTable.add(row)
+        }
+        if (thresholdsTable.size() == 1) {
+            return []
+        }
+        thresholdsTable = removeEmptyColumns(thresholdsTable)
+        return thresholdsTable
     }
 
-    private List removeEmptyColumns(List list) {
+    private static List removeEmptyColumns(List list) {
         list = list.transpose()
         list.removeAll {
             it.findAll {it == null}.size() == (it.size() - 1)
