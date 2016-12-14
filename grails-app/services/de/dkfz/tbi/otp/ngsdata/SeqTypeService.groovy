@@ -24,7 +24,7 @@ class SeqTypeService {
         return SeqTrack.createCriteria().listDistinct {
             projections {
                 groupProperty('seqType')
-                'in'('seqType', alignableSeqTypes())
+                'in'('seqType', SeqType.getAllAlignableSeqTypes())
                 sample {
                     individual {
                         eq("project", project)

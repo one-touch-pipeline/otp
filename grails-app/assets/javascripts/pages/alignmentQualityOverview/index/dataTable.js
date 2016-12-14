@@ -59,7 +59,7 @@ $.otp.alignmentQualityOverviewTable = {
                                 row.sampleType,
                             ];
 
-                            if (seqType === 'WGS') {
+                            if (seqType === 'WGS' || seqType === 'WGBS' || seqType === 'WGBS_TAG') {
                                 coverage = [
                                         row.coverageWithoutN,
                                         row.coverageX,
