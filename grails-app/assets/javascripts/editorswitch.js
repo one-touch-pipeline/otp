@@ -247,10 +247,8 @@ $(function() {
                 kit: $("input:text[name=Kit]", container).val(),
                 email: $("input:text[name=E-Mail]", container).val(),
                 aspera: $("input:text[name='Aspera Account']", container).val(),
-                role: $("select[name='Role']", container).val(),
-                typeSelect: $("select[name='Type']", container).val(),
-                actionSelect: $("select[name='Action']", container).val(),
-                errorExpression: $("input:text[name='Error Expression']", container).val()
+                role: $("select[name='Role']", container).val()
+
             },
             success: function (data) {
                 if (data.success) {

@@ -29,6 +29,13 @@ class JobErrorDefinition implements Entity {
     }
 
    static constraints = {
+       checkFurtherJobErrors(validator: { val, obj ->
+            if( ((boolean)val) == (obj.action == Action.CHECK_FURTHER)){
+                return true
+            } else {
+                return "action is ${obj.action} but CheckFurtherJobErrors is ${val}"
+            }
+        })
        errorExpression(validator: { val, obj ->
            try {
                Pattern.compile(val)
