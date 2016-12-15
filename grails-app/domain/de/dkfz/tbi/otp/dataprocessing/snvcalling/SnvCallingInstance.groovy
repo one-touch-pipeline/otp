@@ -22,6 +22,9 @@ class SnvCallingInstance extends BamFilePairAnalysis implements ProcessParameter
                 return true
             }
         }
+        config validator: { val, obj ->
+            val instanceof SnvConfig
+        }
     }
 
     /**

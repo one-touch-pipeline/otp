@@ -9,6 +9,12 @@ class RoddySnvCallingInstance extends SnvCallingInstance implements RoddyAnalysi
             roddyExecutionDirectoryNames: String,
     ]
 
+    static constraints = {
+        config validator: { val, obj ->
+            val instanceof RoddyWorkflowConfig
+        }
+    }
+
     @Override
     RoddyWorkflowConfig getConfig() {
         return super.getConfig()

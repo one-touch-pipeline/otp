@@ -777,7 +777,7 @@ class DomainFactory {
     public static SnvCallingInstance createSnvInstanceWithRoddyBamFiles(Map properties = [:], Map bamFile1Properties = [:], Map bamFile2Properties = [:]) {
         Map map = createAnalysisInstanceWithRoddyBamFilesMapHelper(properties, bamFile1Properties, bamFile2Properties)
         SamplePair samplePair = map.samplePair
-        map.config = createSnvConfig(
+        map.config = properties.config ?: createSnvConfig(
                 seqType: samplePair.seqType,
         )
         return createDomainObject(SnvCallingInstance, map, properties)
