@@ -1,4 +1,4 @@
-package workflows.snv
+package workflows.analysis.pair.snv
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*

@@ -1,4 +1,4 @@
-package workflows.snv
+package workflows.analysis.pair.snv
 
 import org.junit.*
 
