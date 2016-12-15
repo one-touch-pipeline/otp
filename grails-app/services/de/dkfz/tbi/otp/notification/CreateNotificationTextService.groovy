@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.notification
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.*
@@ -136,11 +137,14 @@ class CreateNotificationTextService {
             }
             projectBamFiles.groupBy { it.seqType }.sort { it.key.displayName }.
                     each { SeqType seqType, List<AbstractMergedBamFile> seqTypeBamFiles ->
-                seqTypeBamFiles.groupBy { it.alignmentConfig }.
-                        each { AlignmentConfig config, List<AbstractMergedBamFile> configBamFiles ->
+                Map<AlignmentConfig, List<AbstractMergedBamFile>> bamFilePerConfig = seqTypeBamFiles.groupBy { it.alignmentConfig }
+                boolean multipleConfigs = bamFilePerConfig.size() > 1 && project.alignmentDeciderBeanName == "panCanAlignmentDecider"
+                bamFilePerConfig.each { AlignmentConfig config, List<AbstractMergedBamFile> configBamFiles ->
                     AlignmentInfo alignmentInfo = alignmentInfoByConfig.get(config)
+                    String individuals = multipleConfigs ? (config.individual ?: "default") : ""
                     builder << createMessage(ALIGNMENT_PROCESSING_INFORMATION_TEMPLATE, [
                             seqType           : seqType.displayName,
+                            individuals       : individuals,
                             referenceGenome   : configBamFiles*.referenceGenome.unique().join(', '),
                             alignmentProgram  : alignmentInfo.bwaCommand,
                             alignmentParameter: alignmentInfo.bwaOptions,

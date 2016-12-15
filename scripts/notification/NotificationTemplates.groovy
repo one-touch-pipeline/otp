@@ -100,7 +100,7 @@ println processingOptionService.createOrUpdate(
         CreateNotificationTextService.ALIGNMENT_PROCESSING_INFORMATION_TEMPLATE,
         null,
         null,
-'''${seqType}
+'''${seqType} ${individuals ? "("+individuals+")" : ""}
     Reference genome: ${referenceGenome}
     Alignment program: ${alignmentProgram} ${alignmentParameter}
     Merging/duplication marking program: ${mergingProgram} ${mergingParameter}
