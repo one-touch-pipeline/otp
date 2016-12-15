@@ -4,21 +4,36 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 Project project = exactlyOneElement(Project.findAllByName(''))
 Collection<SeqType> seqTypes = [
-        //exactlyOneElement(SeqType.findAllByNameAndLibraryLayout('WHOLE_GENOME', 'PAIRED')),
-        //exactlyOneElement(SeqType.findAllByNameAndLibraryLayout('EXON', 'PAIRED')),
+        //exactlyOneElement(SeqType.getWholeGenomePairedSeqType()),
+        //exactlyOneElement(SeqType.getExomePairedSeqType()),
+        //exactlyOneElement(SeqType.getWholeGenomeBisulfitePairedSeqType()),
+        //exactlyOneElement(SeqType.getWholeGenomeBisulfiteTagmentationPairedSeqType()),
 ]
 Collection<SampleType> sampleTypes = [
         //null,
         //exactlyOneElement(SampleType.findAllByName('')),
+        //exactlyOneElement(SampleType.findAllByName('XENOGRAFT')),
 ]
 //sampleTypes.addAll(SampleType.createCriteria().list { like 'name', 'XENOGRAFT%' })
+
 /**
  * name of reference genome. Currently the following values are possible:
  * - hg19: human reference genome hg19
  * - hs37d5: human reference genome hs37d5
- * - hs37d5+mouse:  human-mouse reference genome from CO
+ * - hs37d5+mouse: human-mouse reference genome from CO
  * - GRCm38mm10: mouse reference genome
- * - hs37d5_GRCm38mm:  human (hs37d5) - mouse (GRCm38mm) reference genome
+ * - hs37d5_GRCm38mm: human (hs37d5) - mouse (GRCm38mm) reference genome
+ *
+ * with phix:
+ * - 1KGRef_PhiX: human reference genome hs37d5 with phix
+ * - GRCm38mm10_PhiX: mouse reference genome with Phix
+ * - hs37d5_GRCm38mm_PhiX:  human (hs37d5) - mouse (GRCm38mm) reference genome
+ *
+ * WGBS reference genomes:
+ * - methylCtools_GRCm38mm10_PhiX_Lambda: wgbs reference genome for GRCm38mm10
+ * - methylCtools_hs37d5_PhiX_Lambda: wgbs reference genome for hs37d5
+ * - methylCtools_mm10_UCSC_PhiX_Lambda: wgbs reference genome for ?
+ * - methylCtools_hs37d5_GRCm38mm10_PhiX_Lambda: wgbs reference genome for human (hs37d5) - mouse (GRCm38mm)
  *
  * For a full list, execute "de.dkfz.tbi.otp.ngsdata.ReferenceGenome.list()*.name" on a groovy web console
  */
@@ -27,20 +42,49 @@ String refGenName = ''
 /**
  * Must be set for projects which are aligned with the PanCan alignment workflow, otherwise must be null.
  * possible Values, depends on reference genome:
+ *
  * - hg19:
  *   - hg19_1-22_X_Y_M.fa.chrLenOnlyACGT.tab
+ *
  * - hs37d5:
  *   - hs37d5.fa.chrLenOnlyACGT_realChromosomes.tab
  *   - hs37d5.fa.chrLenOnlyACGT.tab
+ *
  * - hs37d5+mouse:
  *   - hg19_GRCh37_mm10.fa.chrLenOnlyACGT_realChromosomes.tab
  *   - hg19_GRCh37_mm10.fa.chrLenOnlyACGT.tab
+ *
  * - GRCm38mm10:
  *   - GRCm38mm10.fa.chrLenOnlyACGT_realChromosomes.tab
  *   - GRCm38mm10.fa.chrLenOnlyACGT.tab
+ *
  * - hs37d5_GRCm38mm:
  *   - hs37d5_GRCm38mm.fa.chrLenOnlyACGT_realChromosomes.tab
  *   - hs37d5_GRCm38mm.fa.chrLenOnlyACGT.tab
+ *
+ * - 1KGRef_PhiX:
+ *   - hs37d5_PhiX.fa.chrLenOnlyACGT_realChromosomes.tab
+ *   - hs37d5_PhiX.fa.chrLenOnlyACGT.tab
+ *
+ * - methylCtools_GRCm38mm10_PhiX_Lambda:
+ *   - GRCm38mm10_PhiX_Lambda.fa.chrLenOnlyACGT.tab
+ *
+ * - methylCtools_hs37d5_PhiX_Lambda:
+ *   - hs37d5_PhiX_Lambda.fa.chrLenOnlyACGT.tab
+ *
+ * - methylCtools_mm10_UCSC_PhiX_Lambda:
+ *   - mm10_PhiX_Lambda.fa.chrLenOnlyACGT.tab
+ *
+ * - GRCm38mm10_PhiX:
+ *   - GRCm38mm10.fa.chrLenOnlyACGT.tab
+ *   - GRCm38mm10.fa.chrLenOnlyACGT_realChromosomes.tab
+ *
+ * - hs37d5_GRCm38mm_PhiX:
+ *   - hs37d5_GRCm38mm.fa.chrLenOnlyACGT_realChromosomes.tab
+ *   - hs37d5_GRCm38mm.fa.chrLenOnlyACGT.tab
+ *
+ * - methylCtools_hs37d5_GRCm38mm10_PhiX_Lambda:
+ *   - hs37d5_GRCm38mm10_PhiX.chrLenOnlyACGT.tab
  *
  * Usually the realChromosome files are to prefer.
  * The list could be create with the script "statSizeFileList"
