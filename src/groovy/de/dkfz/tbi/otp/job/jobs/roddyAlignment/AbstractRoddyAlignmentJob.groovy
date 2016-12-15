@@ -37,6 +37,15 @@ abstract class AbstractRoddyAlignmentJob extends AbstractExecutePanCanJob<RoddyB
             cValues.add("CLIP_INDEX:${adapterFileService.fullPath(adapterFile)}")
             cValues.add("useAdaptorTrimming:true")
         }
+
+        if (roddyBamFile.project.fingerPrinting && roddyBamFile.referenceGenome.fingerPrintingFileName) {
+            File fingerPrintingFile = referenceGenomeService.fingerPrintingFile(roddyBamFile.project, roddyBamFile.referenceGenome)
+            cValues.add("runFingerprinting:true")
+            cValues.add("fingerprintingSitesFile:${fingerPrintingFile.path}")
+        } else {
+            cValues.add("runFingerprinting:false")
+        }
+
         return cValues
     }
 

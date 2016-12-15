@@ -30,6 +30,7 @@ class CreateProjectController {
                         projectGroup: cmd.projectGroup,
                         nameInMetadataFiles: cmd.nameInMetadataFiles,
                         copyFiles: cmd.copyFiles,
+                        fingerPrinting: cmd.fingerPrinting,
                         mailingListName: cmd.mailingListName,
                         description: cmd.description,
                         processingPriority: cmd.priority,
@@ -61,6 +62,7 @@ class CreateProjectControllerSubmitCommand implements Serializable {
     String submit
     short priority
     boolean copyFiles
+    boolean fingerPrinting = true
 
     static constraints = {
         name(blank: false, validator: {val, obj ->

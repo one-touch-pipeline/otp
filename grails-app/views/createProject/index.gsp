@@ -63,6 +63,10 @@
                 <td><g:checkBox name="copyFiles" checked="${cmd == null || cmd.copyFiles}" /></td>
             </tr>
             <tr>
+                <td class="myKey"><g:message code="createProject.fingerPrinting"/></td>
+                <td><g:checkBox name="fingerPrinting" checked="${cmd == null ? true : cmd.fingerPrinting}" /></td>
+            </tr>
+            <tr>
                 <td class="myKey"><g:message code="createProject.description"/></td>
                 <td><g:textArea name="description" value="${cmd.description}"/></td>
             </tr>

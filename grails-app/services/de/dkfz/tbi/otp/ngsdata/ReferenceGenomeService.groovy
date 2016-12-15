@@ -13,6 +13,7 @@ class ReferenceGenomeService {
     ConfigService configService
 
     public final static String CHROMOSOME_SIZE_FILES_PREFIX = "stats"
+    public final static String FINGER_PRINTING_FILE_FOLDER_NAME = "fingerPrinting"
 
     /**
      * load the {@link ReferenceGenome} with the given id from the database and returns it.
@@ -66,6 +67,12 @@ class ReferenceGenomeService {
         notNull(referenceGenome, "The reference genome is not specified")
         String refGenomeFileNamePrefix = referenceGenome.fileNamePrefix
         return filePathToDirectory(project, referenceGenome, checkExistence) + "${refGenomeFileNamePrefix}"
+    }
+
+    public File fingerPrintingFile(Project project, ReferenceGenome referenceGenome, boolean checkExistence = true) {
+        File referenceGenomeBasePath = new File(prefixOnlyFilePath(project, referenceGenome, checkExistence))
+        File fingerPrintingFile = new File(referenceGenomeBasePath, "${FINGER_PRINTING_FILE_FOLDER_NAME}/${referenceGenome.fingerPrintingFileName}")
+        return checkFileExistence(fingerPrintingFile, checkExistence)
     }
 
     /**

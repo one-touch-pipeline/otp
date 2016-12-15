@@ -76,6 +76,8 @@ class ReferenceGenome implements Entity {
 
     String chromosomeSuffix
 
+    String fingerPrintingFileName
+
     /**
      * It has to be ensured that there is only one reference genome stored per directory -> unique path
      */
@@ -92,6 +94,7 @@ class ReferenceGenome implements Entity {
         chromosomePrefix nullable: true, blank: true
         chromosomeSuffix nullable: true, blank: true
         chromosomeLengthFilePath(nullable: true, blank: false, validator: { it == null || OtpPath.isValidPathComponent(it) })
+        fingerPrintingFileName nullable: true
     }
 
     String toString() {

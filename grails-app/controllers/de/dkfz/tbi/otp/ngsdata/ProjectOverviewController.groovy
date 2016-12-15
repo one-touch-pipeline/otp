@@ -122,6 +122,7 @@ class ProjectOverviewController {
                 analysisDirectory: project.dirAnalysis?: '',
                 projectGroup: project.projectGroup,
                 copyFiles: project.hasToBeCopied,
+                fingerPrinting: project.fingerPrinting,
                 mailingListName: project.mailingListName,
                 description: project.description,
                 projectCategories: ProjectCategory.listOrderByName(),
@@ -511,6 +512,14 @@ class ProjectOverviewController {
             return list.first()
         }
         return []
+    }
+
+    JSON updateFingerPrinting(Long id, String value) {
+        assert id
+        Project project = Project.get(id)
+        projectService.updateFingerPrinting(project, value.toBoolean())
+        Map map = [success: true]
+        render map as JSON
     }
 }
 

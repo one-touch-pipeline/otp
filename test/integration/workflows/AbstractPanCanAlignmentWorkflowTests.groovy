@@ -86,6 +86,8 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
 
     File adapterFile
 
+    File fingerPrintingFile
+
 
     LsdfFilesService lsdfFilesService
     ProcessingOptionService processingOptionService
@@ -162,6 +164,7 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
         conveyProjectConfigFile = new File(baseTestDataDir, 'project-config/conveyProjectTestAlignment.xml')
         roddyFailsProjectConfig = new File(baseTestDataDir, 'project-config/roddy-fails-project-config.xml')
         adapterFile = new File(baseTestDataDir, 'adapters/TruSeq3-PE.fa')
+        fingerPrintingFile = new File(baseTestDataDir, 'fingerPrinting/snp138Common.n1000.vh20140318.bed')
     }
 
     abstract SeqType findSeqType()
@@ -381,6 +384,12 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
             it.adapterFile = adapter
             it.save(flush: true)
         }
+    }
+
+    void setUpFingerPrintingFile(SeqTrack seqTrack) {
+        ReferenceGenome referenceGenome = CollectionUtils.exactlyOneElement(ReferenceGenome.list())
+        referenceGenome.fingerPrintingFileName = "snp138Common.n1000.vh20140318.bed"
+        assert referenceGenome.save(flush: true)
     }
 
     void checkAllAfterSuccessfulExecution_alignBaseBamAndNewLanes() {

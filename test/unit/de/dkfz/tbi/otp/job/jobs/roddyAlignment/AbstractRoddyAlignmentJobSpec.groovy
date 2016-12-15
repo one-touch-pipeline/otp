@@ -97,6 +97,8 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
             expected.addAll("CLIP_INDEX:${adapterFilePath}", "useAdaptorTrimming:true")
         }
 
+        expected.add("runFingerprinting:false",)
+
         when:
         List<String> value = job.prepareAndReturnAlignmentCValues(roddyBamFile)
 

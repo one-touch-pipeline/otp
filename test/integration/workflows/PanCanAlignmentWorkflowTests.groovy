@@ -3,6 +3,7 @@ package workflows
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.jobs.roddyAlignment.*
 import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import org.junit.*
 import org.springframework.beans.factory.annotation.*
@@ -76,6 +77,17 @@ abstract class PanCanAlignmentWorkflowTests extends AbstractPanCanAlignmentWorkf
         resetProjectConfig(conveyProjectConfigFile)
 
         fastTrackSetup()
+
+        executeAndVerify_AlignLanesOnly_AllFine()
+    }
+
+
+    @Test
+    void testAlignLanesOnly_NoBaseBamExist_OneLane_WithFingerPrinting_allFine() {
+
+        // prepare
+        SeqTrack seqTrack = createSeqTrack("readGroup1")
+        setUpFingerPrintingFile(seqTrack)
 
         executeAndVerify_AlignLanesOnly_AllFine()
     }

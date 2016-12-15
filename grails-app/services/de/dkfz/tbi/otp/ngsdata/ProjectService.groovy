@@ -102,6 +102,7 @@ class ProjectService {
         project.dirAnalysis = projectParams.dirAnalysis
         project.processingPriority = projectParams.processingPriority
         project.hasToBeCopied = projectParams.copyFiles
+        project.fingerPrinting = projectParams.fingerPrinting
         project.nameInMetadataFiles = projectParams.nameInMetadataFiles
         project.setProjectGroup(ProjectGroup.findByName(projectParams.projectGroup))
         project.mailingListName = projectParams.mailingListName
@@ -147,6 +148,7 @@ class ProjectService {
         String projectGroup
         String nameInMetadataFiles
         boolean copyFiles
+        boolean fingerPrinting
         String mailingListName
         String description
         short processingPriority
@@ -469,6 +471,12 @@ echo 'OK'
         Set<ReferenceGenomeProjectSeqType> referenceGenomeProjectSeqTypes = ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndDeprecatedDateIsNull(project, seqType)
         referenceGenomeProjectSeqTypes*.deprecatedDate = new Date()
         referenceGenomeProjectSeqTypes*.save(flush: true, failOnError: true)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void updateFingerPrinting(Project project, boolean value) {
+        project.fingerPrinting = value
+        assert project.save(flush: true)
     }
 }
 

@@ -40,6 +40,8 @@ class Project implements Commentable, Entity, AlignmentConfig {
      */
     boolean hasToBeCopied = false
 
+    boolean fingerPrinting = true
+
     static hasMany = [
             projectCategories: ProjectCategory,
     ]

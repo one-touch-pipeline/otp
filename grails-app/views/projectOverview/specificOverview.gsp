@@ -82,6 +82,17 @@
                     <td id="copyFiles">${copyFiles}</td>
                 </tr>
                 <tr>
+                    <td class="myKey"><g:message code="projectOverview.fingerPrinting"/></td>
+                    <td id="fingerPrinting">
+                        <otp:editorSwitch
+                                roles="ROLE_OPERATOR"
+                                template="dropDown"
+                                link="${g.createLink(controller: "projectOverview", action: "updateFingerPrinting", id: project.id)}"
+                                values="${["true","false"]}"
+                                value="${fingerPrinting}"/>
+                    </td>
+                </tr>
+                <tr>
                     <td class="myKey"><g:message code="projectOverview.mailingListName"/></td>
                     <td id="mailingListName">${mailingListName} <input class="edit-button-left" type="button" onclick="$.otp.projectOverviewTable.updateValue('MailingListName','','${mailingListName}', '')"/></td>
                 </tr>
