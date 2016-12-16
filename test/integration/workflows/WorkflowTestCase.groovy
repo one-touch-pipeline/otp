@@ -232,6 +232,10 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
 
 
     private void cleanupDirectories() {
+        String cmd = "find \'${getBaseDirectory().absolutePath}\' -user OtherUnixUser -not -type l -print -exec chmod 2770 '{}' \\; | wc -l"
+        ProcessOutput processOutput = executionService.executeCommandReturnProcessOutput(realm, cmd, realm.roddyUser)
+        processOutput.assertExitCodeZeroAndStderrEmpty()
+
         if(!KEEP_TEMP_FOLDER) {
             String cleanUpCommand = createClusterScriptService.removeDirs([getBaseDirectory()], CreateClusterScriptService.RemoveOption.RECURSIVE_FORCE)
             ProcessOutput out = executionService.executeCommandReturnProcessOutput(realm, cleanUpCommand)
