@@ -67,6 +67,7 @@ class TrackingService {
             it.id
         }.collect {
             //reload with write lock
+            it.refresh()
             OtrsTicket.lock(it.id)
         }
     }
