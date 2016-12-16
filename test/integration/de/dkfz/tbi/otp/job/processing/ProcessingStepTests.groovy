@@ -1,7 +1,9 @@
 package de.dkfz.tbi.otp.job.processing
 
 import de.dkfz.tbi.otp.job.jobs.merging.MergingJob
+import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import org.junit.Test
 
 class ProcessingStepTests  {
@@ -36,5 +38,53 @@ class ProcessingStepTests  {
         ProcessingStep step = DomainFactory.createAndSaveProcessingStep()
 
         assert step == ProcessingStep.findTopMostProcessingStep(step)
+    }
+
+
+    @Test
+    void testPbsJobDescription() {
+        JobExecutionPlan jobExecutionPlan = DomainFactory.createJobExecutionPlan(
+                name: "testWorkFlow"
+        )
+        Process process = DomainFactory.createProcess(
+                jobExecutionPlan: jobExecutionPlan
+        )
+        ProcessingStep step = DomainFactory.createProcessingStep(
+                jobClass: "foo",
+                process: process,
+        )
+        String expected = "otp_test_testWorkFlow_${step.id}_foo"
+
+        assert expected == step.getPbsJobDescription()
+    }
+
+    @Test
+    void testPbsJobDescriptionWithIndividual() {
+        JobExecutionPlan jobExecutionPlan = DomainFactory.createJobExecutionPlan(
+                name: "testWorkFlow"
+        )
+        Process process = DomainFactory.createProcess(
+                jobExecutionPlan: jobExecutionPlan
+        )
+        ProcessingStep step = DomainFactory.createProcessingStep(
+                jobClass: "foo",
+                process: process,
+        )
+        SeqTrack seqTrack = DomainFactory.createSeqTrack([
+                sample: DomainFactory.createSample([
+                        individual: DomainFactory.createIndividual([
+                                pid: 'pid',
+                        ])
+                ]),
+        ])
+
+        DomainFactory.createProcessParameter([
+                process: process,
+                value: seqTrack.id.toString(),
+                className: seqTrack.getClass().getName(),
+        ])
+        String expected = "otp_test_pid_testWorkFlow_${step.id}_foo"
+
+        assert expected == step.getPbsJobDescription()
     }
 }

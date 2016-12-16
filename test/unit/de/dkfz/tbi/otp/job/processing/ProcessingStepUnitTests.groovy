@@ -116,22 +116,6 @@ class ProcessingStepUnitTests {
     }
 
     @Test
-    void testPbsJobDescription() {
-        JobExecutionPlan jobExecutionPlan = JobExecutionPlan.build(
-                name: "testWorkFlow"
-        )
-        Process process = Process.build(
-                jobExecutionPlan: jobExecutionPlan
-        )
-        ProcessingStep step = ProcessingStep.build(
-                id: 9999999,
-                jobClass: "foo",
-                process: process,
-        )
-        assertEquals(step.getPbsJobDescription(), "otp_test_testWorkFlow_9999999_foo")
-    }
-
-    @Test
     void testPbsJobDescriptionNull() {
         shouldFail() {
             null.getPbsJobDescription()
