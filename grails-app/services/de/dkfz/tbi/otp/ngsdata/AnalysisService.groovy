@@ -1,28 +1,36 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import org.hibernate.criterion.*
 import org.hibernate.sql.*
-import org.springframework.security.access.prepost.*
 
-class SnvService {
+class AnalysisService {
 
     ProjectService projectService
 
-    @PostAuthorize("hasRole('ROLE_OPERATOR') or (returnObject == null) or hasPermission(returnObject.project, read)")
-    SnvCallingInstance getSnvCallingInstance(long id) {
-        return SnvCallingInstance.get(id)
-    }
+    List getCallingInstancesForProject(Class<BamFilePairAnalysis> callingInstance, String projectName) {
+        String callingInstanceType
 
-    List getSnvCallingInstancesForProject(String projectName) {
-        return SnvCallingInstance.withCriteria {
-            eq ('withdrawn', false)
+        switch (callingInstance) {
+            case SnvCallingInstance:
+                callingInstanceType = "snv"
+                break
+            case IndelCallingInstance:
+                callingInstanceType = "indel"
+                break
+            default:
+                throw new RuntimeException("${callingInstance.name} is not a valid calling instance")
+        }
+
+        return callingInstance.withCriteria {
+            eq('withdrawn', false)
             samplePair {
                 mergingWorkPackage1 {
                     sample {
                         individual {
                             project {
-                                eq ('name', projectService.getProjectByName(projectName).name)
+                                eq('name', projectService.getProjectByName(projectName).name)
                             }
                         }
                     }
@@ -60,10 +68,29 @@ class SnvService {
                         }
                     }
                 }
-                property('processingState', 'snvProcessingState')
-                property('id', 'snvInstanceId')
-                property('instanceName', 'snvInstanceName')
+                property('processingState', "${callingInstanceType}ProcessingState")
+                property('id', "${callingInstanceType}InstanceId")
+                property('instanceName', "${callingInstanceType}InstanceName")
             }
+        }
+    }
+
+    File checkFile(BamFilePairAnalysis callingInstance) {
+        if (!callingInstance) {
+            return null
+        }
+        if (callingInstance instanceof SnvCallingInstance) {
+            if (!callingInstance.getAllSNVdiagnosticsPlots().absoluteDataManagementPath.exists()) {
+                return null
+            }
+            return callingInstance.getAllSNVdiagnosticsPlots().absoluteDataManagementPath
+        } else if (callingInstance instanceof IndelCallingInstance) {
+            if (!callingInstance.getCombinedPlotPath().exists()) {
+                return null
+            }
+            return callingInstance.getCombinedPlotPath()
+        } else {
+            throw new RuntimeException("${callingInstance.class.name} is not a valid calling instance")
         }
     }
 }

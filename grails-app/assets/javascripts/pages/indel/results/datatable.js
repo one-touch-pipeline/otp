@@ -1,11 +1,11 @@
 /*jslint browser: true */
 /*global $ */
 
-$.otp.snvResultsTable = {
+$.otp.indelResultsTable = {
 
     registerDataTable: function (successUpdate) {
         "use strict";
-        var oTable = $('#snvResultsTable').dataTable({
+        var oTable = $('#indelResultsTable').dataTable({
             sDom: '<i> T rt<"clear">',
             oTableTools : $.otp.tableTools,
             bFilter: true,
@@ -15,8 +15,8 @@ $.otp.snvResultsTable = {
             bJQueryUI: false,
             bAutoWidth: false,
             sAjaxSource: $.otp.createLink({
-                controller: 'snv',
-                action: 'dataTableSnvResults'
+                controller: 'indel',
+                action: 'dataTableIndelResults'
             }),
             bScrollCollapse: true,
             sScrollY: 600,
@@ -50,7 +50,7 @@ $.otp.snvResultsTable = {
 
     register: function () {
         "use strict";
-        var oTable = $.otp.snvResultsTable.registerDataTable(
+        var oTable = $.otp.indelResultsTable.registerDataTable(
             function (json) {
                 var i, rowData, row;
                 for (i = 0; i < json.aaData.length; i += 1) {
@@ -59,21 +59,21 @@ $.otp.snvResultsTable = {
                         $.otp.createLinkMarkup({
                             controller: 'individual',
                             action: 'show',
-                            id: row.individualId,
+                            parameters: {'indelCallingInstance.id': row.individualId},
                             text: row.individualPid,
                         }),
                         row.sampleType1 + " \u2013 " + row.sampleType2,
                         row.seqType,
                         row.libPrepKits,
-                        row.snvInstanceName,
-                        row.snvProcessingState.name,
+                        row.indelInstanceName,
+                        row.indelProcessingState.name,
                     ];
-                    if (row.snvInstanceId) {
+                    if (row.indelInstanceId) {
                         rowData.push(
                             $.otp.createLinkMarkup({
-                                controller: 'snv',
+                                controller: 'indel',
                                 action: 'plots',
-                                parameters: {'snvCallingInstance.id': row.snvInstanceId},
+                                parameters: {'indelCallingInstance.id': row.indelInstanceId},
                                 text: 'Plots'
                             })
                         );

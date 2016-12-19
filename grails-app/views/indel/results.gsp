@@ -3,8 +3,8 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="layout" content="main" />
-    <title><g:message code="otp.menu.snv.results" /></title>
-    <asset:javascript src="pages/snv/results/datatable.js"/>
+    <title><g:message code="otp.menu.indel.results" /></title>
+    <asset:javascript src="pages/indel/results/datatable.js"/>
 </head>
 <body>
     <div class="body">
@@ -26,13 +26,13 @@
                         'analysis.progress',
                         'analysis.plots',
                     ] }"
-                    id="snvResultsTable" />
+                    id="indelResultsTable" />
             </div>
         </div>
     </div>
     <asset:script>
         $(function() {
-            $.otp.snvResultsTable.register();
+            $.otp.indelResultsTable.register();
         });
     </asset:script>
 </body>

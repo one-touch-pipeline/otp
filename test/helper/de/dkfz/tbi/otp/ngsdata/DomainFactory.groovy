@@ -796,6 +796,14 @@ class DomainFactory {
         return createDomainObject(RoddySnvCallingInstance, map, properties)
     }
 
+    public static IndelCallingInstance createIndelCallingInstance(Map properties) {
+        if (!properties.containsKey('latestDataFileCreationDate')) {
+            properties += [latestDataFileCreationDate: AbstractBamFile.getLatestSequenceDataFileCreationDate(
+                    properties.sampleType1BamFile, properties.sampleType2BamFile)]
+        }
+        return new IndelCallingInstance(properties)
+    }
+
     public static IndelCallingInstance createIndelCallingInstanceWithRoddyBamFiles(Map properties = [:], Map bamFile1Properties = [:], Map bamFile2Properties = [:]) {
         Map map = createAnalysisInstanceWithRoddyBamFilesMapHelper(properties, bamFile1Properties, bamFile2Properties)
         SamplePair samplePair = map.samplePair

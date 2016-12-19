@@ -3,7 +3,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="layout" content="main" />
-    <title><g:message code="snv.plots.title" args="[pid]" /></title>
+    <title><g:message code="indel.plots.title" args="[pid]" /></title>
 </head>
 <body>
     <g:if test="${error}">
@@ -12,12 +12,12 @@
     </g:if>
     <g:else>
         <div class="body_pdf">
-            <object data="${g.createLink(controller: "snv",
+            <object data="${g.createLink(controller: "indel",
                 action: "renderPDF",
-                params: ["snvCallingInstance.id": id])}" type="application/pdf"  height="650" width="1250">
-                <a href="${g.createLink(controller: "snv",
+                params: ["indelCallingInstance.id": id])}" type="application/pdf"  height="650" width="1250">
+                <a href="${g.createLink(controller: "indel",
                     action: "renderPDF",
-                    params: ["snvCallingInstance.id": id])}">View Plots as PDF</a>
+                    params: ["indelCallingInstance.id": id])}"><g:message code="indel.plots.view"/></a>
             </object>
         </div>
     </g:else>

@@ -68,7 +68,16 @@
                                 </li>
                             </ul>
                         </li>
-                        <li class="menuContainerLCss"><g:link controller="snv" action="results"><g:message code="otp.menu.snv.results"/></g:link></li>
+                        <li class="navigation menuContainerLCss" id="analysisResults">
+                            <ul>
+                                <li class="analysis_results_nav_container" id="analysisResults"><g:link ><g:message code="otp.menu.analysis.results"/> &#9661;</g:link>
+                                    <ul>
+                                        <li id="SnvResults"><g:link controller="snv" action="results"><g:message code="otp.menu.snv.results"/></g:link></li>
+                                        <li id="IndelResults"><g:link controller="indel" action="results"><g:message code="otp.menu.indel.results"/></g:link></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
                         <sec:ifAnyGranted roles="ROLE_OPERATOR">
                             <li class="navigation menuContainerLCss" id="operator">
                                 <ul>
