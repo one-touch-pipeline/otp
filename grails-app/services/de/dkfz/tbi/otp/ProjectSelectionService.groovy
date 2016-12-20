@@ -40,12 +40,7 @@ class ProjectSelectionService {
     public setSelectedProject(List<Project> projects, String displayName) {
         GrailsHttpSession session = WebUtils.retrieveGrailsWebRequest().getSession()
         ProjectSelection projectSelection = new ProjectSelection(projects: projects, displayName: displayName)
-
-        if (!projectSelection) {
-            throw new RuntimeException()
-        } else {
-            session.setAttribute(PROJECT_SELECTION_KEY, projectSelection)
-        }
+        session.setAttribute(PROJECT_SELECTION_KEY, projectSelection)
     }
 }
 

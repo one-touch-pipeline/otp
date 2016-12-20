@@ -1,5 +1,6 @@
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.ngsdata.*
+import grails.plugin.springsecurity.*
 import org.codehaus.groovy.grails.context.support.*
 import org.springframework.context.i18n.*
 
@@ -8,11 +9,12 @@ class ProjectSelectionFilters {
     PluginAwareResourceBundleMessageSource messageSource
     ProjectService projectService
     ProjectSelectionService projectSelectionService
+    SpringSecurityService springSecurityService
 
     def filters = {
-        projectSelectionFilter(controller: '*', action: '*') {
+        projectSelectionFilter(controller: '*', controllerExclude: 'errors', action: '*') {
             after = { Map model ->
-                if (model != null) {
+                if (model != null && springSecurityService.isLoggedIn()) {
                     model.projectSelection = projectSelectionService.getSelectedProject()
 
                     List<Project> allProjects = projectService.getAllProjects()
