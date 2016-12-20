@@ -126,6 +126,7 @@ class ProjectOverviewController {
                 description: project.description,
                 projectCategories: ProjectCategory.listOrderByName(),
                 accessPersons: accessPersons,
+                unixGroup: project.unixGroup,
         ]
     }
 

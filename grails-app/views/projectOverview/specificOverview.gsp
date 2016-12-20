@@ -84,6 +84,10 @@
                                 value="${description}"/>
                     </td>
                 </tr>
+                <tr>
+                    <td class="myKey"><g:message code="projectOverview.unixGroup"/></td>
+                    <td id="unixGroup">${unixGroup}</td>
+                </tr>
             </table>
         </div>
 

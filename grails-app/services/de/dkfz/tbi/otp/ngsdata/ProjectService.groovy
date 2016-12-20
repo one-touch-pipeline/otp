@@ -104,6 +104,7 @@ class ProjectService {
         project.setProjectGroup(ProjectGroup.findByName(projectParams.projectGroup))
         project.mailingListName = projectParams.mailingListName
         project.description = projectParams.description
+        project.unixGroup = projectParams.unixGroup
         assert project.save(flush: true, failOnError: true)
 
         GroupCommand groupCommand = new GroupCommand(
