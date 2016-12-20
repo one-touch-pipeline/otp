@@ -49,6 +49,17 @@
                     </td>
                 </tr>
                 <tr>
+                    <td class="myKey"><g:message code="projectOverview.processingPriority"/></td>
+                    <td>
+                        <otp:editorSwitch
+                                roles="ROLE_OPERATOR"
+                                template="dropDown"
+                                link="${g.createLink(controller: "projectOverview", action: "updateProcessingPriority", params: ['project.id': project.id])}"
+                                values="${processingPriorities}"
+                                value="${(project.processingPriority == 0) ? "NORMAL" : "FAST_TRACK"}"/>
+                    </td>
+                </tr>
+                <tr>
                     <td class="myKey"><g:message code="projectOverview.category"/></td>
                     <td>
                         <otp:editorSwitchCheckboxes

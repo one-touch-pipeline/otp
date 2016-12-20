@@ -28,6 +28,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 class ProjectService {
 
     static final String PHIX_INFIX = 'PhiX'
+    static final List<String> processingPriorities = ["NORMAL","FAST_TRACK"]
 
     AclUtilService aclUtilService
     ExecutionService executionService
@@ -99,6 +100,7 @@ class ProjectService {
         assert OtpPath.isValidPathComponent(projectParams.unixGroup): "unixGroup '${projectParams.unixGroup}' contains invalid characters"
         Project project = createProject(projectParams.name, projectParams.dirName, projectParams.realmName, projectParams.alignmentDeciderBeanName, projectParams.categoryNames)
         project.dirAnalysis = projectParams.dirAnalysis
+        project.processingPriority = projectParams.processingPriority
         project.hasToBeCopied = projectParams.copyFiles
         project.nameInMetadataFiles = projectParams.nameInMetadataFiles
         project.setProjectGroup(ProjectGroup.findByName(projectParams.projectGroup))
@@ -147,6 +149,7 @@ class ProjectService {
         boolean copyFiles
         String mailingListName
         String description
+        short processingPriority
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
@@ -176,6 +179,12 @@ class ProjectService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     public void updateDescription(String description, Project project) {
         project.description = description
+        project.save(flush: true)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    public void updateProcessingPriority(short processingPriority, Project project) {
+        project.processingPriority = processingPriority
         project.save(flush: true)
     }
 

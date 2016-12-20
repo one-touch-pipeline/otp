@@ -31,6 +31,10 @@
                 <td><g:textField name="analysisDirectory" size="130" value="${cmd.analysisDirectory}"/></td>
             </tr>
             <tr>
+                <td class="myKey"><g:message code="createProject.processingPriority"/></td>
+                <td><g:select class="criteria" id="priority" name='processingPriority' from='${processingPriorities}' value="${cmd.priority}"/></td>
+            </tr>
+            <tr>
                 <td class="myKey"><g:message code="createProject.metadata.name"/></td>
                 <td><g:textField name="nameInMetadataFiles" size="130" value="${cmd.nameInMetadataFiles}"/></td>
             </tr>

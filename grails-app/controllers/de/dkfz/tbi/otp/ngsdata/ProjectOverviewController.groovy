@@ -127,6 +127,7 @@ class ProjectOverviewController {
                 projectCategories: ProjectCategory.listOrderByName(),
                 accessPersons: accessPersons,
                 unixGroup: project.unixGroup,
+                processingPriorities: ProjectService.processingPriorities,
         ]
     }
 
@@ -386,6 +387,10 @@ class ProjectOverviewController {
 
     JSON updateDescription(UpdateDescriptionCommand cmd) {
         checkErrorAndCallMethod(cmd, { projectService.updateDescription(cmd.description, cmd.project) })
+    }
+
+    JSON updateProcessingPriority(UpdateProcessingPriorityCommand cmd) {
+        checkErrorAndCallMethod(cmd, { projectService.updateProcessingPriority(cmd.processingPriority, cmd.project) })
     }
 
     JSON updateDates(String projectName) {
@@ -667,5 +672,20 @@ class UpdateDescriptionCommand implements Serializable {
     Project project
     void setValue(String description) {
         this.description = description
+    }
+}
+
+class UpdateProcessingPriorityCommand implements Serializable {
+    Project project
+    short processingPriority
+    void setValue(String value) {
+        switch (value) {
+            case "NORMAL":
+                this.processingPriority = ProcessingPriority.NORMAL_PRIORITY
+                break
+            case "FAST_TRACK":
+                this.processingPriority = ProcessingPriority.FAST_TRACK_PRIORITY
+                break
+        }
     }
 }

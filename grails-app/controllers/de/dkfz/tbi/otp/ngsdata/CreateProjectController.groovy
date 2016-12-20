@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
 import org.springframework.validation.FieldError
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 
@@ -9,7 +10,7 @@ class CreateProjectController {
     ProjectGroupService projectGroupService
 
     def index(CreateProjectControllerSubmitCommand cmd) {
-        String message;
+        String message
         boolean hasErrors
         if (cmd.submit == "Submit") {
             hasErrors = cmd.hasErrors()
@@ -31,12 +32,14 @@ class CreateProjectController {
                         copyFiles: cmd.copyFiles,
                         mailingListName: cmd.mailingListName,
                         description: cmd.description,
+                        processingPriority: cmd.priority,
                 )
                 redirect(controller: "projectOverview", action: "specificOverview", params: [project: projectService.createProject(projectParams).name])
             }
         }
         return [
             projectGroups: ["No Group"] + projectGroupService.availableProjectGroups()*.name,
+            processingPriorities: ProjectService.processingPriorities,
             projectCategories: ProjectCategory.listOrderByName(),
             message: message,
             cmd: cmd,
@@ -56,6 +59,7 @@ class CreateProjectControllerSubmitCommand implements Serializable {
     List<String> projectCategories = [].withLazyDefault {new String()}
     String description
     String submit
+    short priority
     boolean copyFiles
 
     static constraints = {
@@ -116,6 +120,17 @@ class CreateProjectControllerSubmitCommand implements Serializable {
         this.nameInMetadataFiles = nameInMetadataFiles?.trim()?.replaceAll(" +", " ")
         if (this.nameInMetadataFiles == "") {
             this.nameInMetadataFiles = null
+        }
+    }
+
+    void setProcessingPriority(String processingPriority) {
+        switch (processingPriority) {
+            case "NORMAL":
+                this.priority = ProcessingPriority.NORMAL_PRIORITY
+                break
+            case "FAST_TRACK":
+                this.priority = ProcessingPriority.FAST_TRACK_PRIORITY
+                break
         }
     }
 }
