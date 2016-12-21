@@ -78,7 +78,7 @@ class ProjectOverviewController {
         String alignmentError = null
         try {
             alignmentInfo = projectOverviewService.getAlignmentInformation(project)
-        } catch (Exception e) {
+        } catch (Throwable e) {
             alignmentError = e.message
             log.error(e.message, e)
         }
