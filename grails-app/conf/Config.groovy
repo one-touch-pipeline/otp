@@ -126,30 +126,37 @@ log4j = {
         def jobAppender = new de.dkfz.tbi.otp.utils.logging.JobAppender(logDirectory: jobLogDir, layout : jobHtmlLayout)
         appender name: "jobs", jobAppender
 
-        console name: "stdout", threshold: Environment.getCurrent() == Environment.TEST ? org.apache.log4j.Level.OFF : org.apache.log4j.Level.DEBUG
+        console name: 'stdout', threshold: Environment.getCurrent() == Environment.TEST ? org.apache.log4j.Level.OFF : org.apache.log4j.Level.DEBUG
     }
 
-    error  'org.codehaus.groovy.grails.web.servlet',  //  controllers
-            'org.codehaus.groovy.grails.web.pages', //  GSP
-            'org.codehaus.groovy.grails.web.sitemesh', //  layouts
-            'org.codehaus.groovy.grails.web.mapping.filter', // URL mapping
-            'org.codehaus.groovy.grails.web.mapping', // URL mapping
-            'org.codehaus.groovy.grails.commons', // core / classloading
-            'org.codehaus.groovy.grails.plugins', // plugins
-            'org.codehaus.groovy.grails.orm.hibernate', // hibernate integration
+    error stdout:
+            [
+            'org.codehaus.groovy.grails.web.servlet',           //  controllers
+            'org.codehaus.groovy.grails.web.pages',             //  GSP
+            'org.codehaus.groovy.grails.web.sitemesh',          //  layouts
+            'org.codehaus.groovy.grails.web.mapping.filter',    // URL mapping
+            'org.codehaus.groovy.grails.web.mapping',           // URL mapping
+            'org.codehaus.groovy.grails.commons',               // core / classloading
+            'org.codehaus.groovy.grails.plugins',               // plugins
+            'org.codehaus.groovy.grails.orm.hibernate',         // hibernate integration
             'org.springframework',
             'org.hibernate',
-            'net.sf.ehcache.hibernate'
+            'net.sf.ehcache.hibernate',
+            ], additivity: false
 
-    debug stdout: ['de.dkfz.tbi.otp', // our own stuff
-        'grails.app.controllers.de.dkfz.tbi.otp', // controllers
-        'grails.app.domain.de.dkfz.tbi.otp',
-        'grails.app.services.de.dkfz.tbi.otp',
-        'grails.app.taglib.de.dkfz.tbi.otp'
-    ],
-    jobs: ['de.dkfz.tbi.otp.example',
-        'de.dkfz.tbi.otp.job.jobs',
-        'de.dkfz.tbi.otp.jobs']
+    debug stdout:
+            [
+            'de.dkfz.tbi.otp',                                  // our own stuff
+            'grails.app.controllers.de.dkfz.tbi.otp',           // controllers
+            'grails.app.domain.de.dkfz.tbi.otp',
+            'grails.app.services.de.dkfz.tbi.otp',
+            'grails.app.taglib.de.dkfz.tbi.otp'
+            ], jobs:
+            [
+            'de.dkfz.tbi.otp.example',
+            'de.dkfz.tbi.otp.job.jobs',
+            'de.dkfz.tbi.otp.jobs'
+            ], additivity: false
 }
 
 // mail settings
