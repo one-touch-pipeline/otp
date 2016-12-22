@@ -113,7 +113,7 @@
                                 <th><g:message code="individual.show.sequencingScans.platform"/></th>
                                 <th><g:message code="individual.show.sequencingScans.status"/></th>
                                 <th><g:message code="individual.show.sequencingScans.center"/></th>
-                                <th><g:message code="individual.show.sequencingScans.numberOfLanes"/></th>
+                                <th title="<g:message code="projectOverview.mouseOver.lane"/>"><g:message code="individual.show.sequencingScans.numberOfLanes"/></th>
                                 <th><g:message code="individual.show.sequencingScans.numberOfBases"/></th>
                                 <th><g:message code="individual.show.sequencingScans.insertSize"/></th>
                             </tr>
