@@ -111,8 +111,8 @@ class SamplePairTests {
 
     @Test
     void testFindLatestIndelCallingInstance_whenIndelCallingInstanceExists_ShouldReturnLatest() {
-        IndelCallingInstance first = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles()
-        IndelCallingInstance latest = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles([samplePair: first.samplePair, instanceName: '2015-08-25_15h32'])
+        IndelCallingInstance first = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles([instanceName: 'instance1'])
+        IndelCallingInstance latest = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles([samplePair: first.samplePair, instanceName: 'instance2'])
 
         assert latest == latest.samplePair.findLatestIndelCallingInstance()
     }

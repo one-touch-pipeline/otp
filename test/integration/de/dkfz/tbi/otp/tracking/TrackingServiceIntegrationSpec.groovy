@@ -1014,12 +1014,6 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         given:
         IndelCallingInstance indelCallingInstance = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles([:], [coverage: 2], [coverage: 2])
 
-        DomainFactory.createRoddyWorkflowConfig(
-                seqType: indelCallingInstance.seqType,
-                project: indelCallingInstance.project,
-                pipeline: DomainFactory.createIndelPipelineLazy()
-        )
-
         [1, 2].each {
             setBamFileInProjectFolder(indelCallingInstance."sampleType${it}BamFile")
             DomainFactory.createProcessingThresholdsForBamFile(indelCallingInstance."sampleType${it}BamFile", [coverage: 1, numberOfLanes: null])

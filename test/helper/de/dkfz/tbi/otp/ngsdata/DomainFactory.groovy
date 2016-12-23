@@ -715,6 +715,16 @@ class DomainFactory {
         return createSamplePair(mergingWorkPackage1, properties)
     }
 
+    static SamplePair createSamplePairPanCan(Map properties = [:]) {
+        properties.mergingWorkPackage1 = properties.mergingWorkPackage1 ?:
+                properties.mergingWorkPackage2 ? createMergingWorkPackage(properties.mergingWorkPackage2) :
+                        createMergingWorkPackage([
+                                pipeline: createPanCanPipeline(),
+                        ])
+        return createSamplePair(properties)
+    }
+
+
     static SamplePair createSamplePair(MergingWorkPackage mergingWorkPackage1, Map properties = [:]) {
         return createSamplePair(
                 mergingWorkPackage1,
@@ -744,7 +754,7 @@ class DomainFactory {
         ])
     }
 
-    static SampleTypePerProject createSampleTypePerProjectForBamFile(AbstractMergedBamFile bamFile, SampleType.Category category=  SampleType.Category.DISEASE) {
+    static SampleTypePerProject createSampleTypePerProjectForBamFile(AbstractMergedBamFile bamFile, SampleType.Category category =  SampleType.Category.DISEASE) {
         return createSampleTypePerProjectForMergingWorkPackage(bamFile.mergingWorkPackage, category)
     }
 
@@ -861,6 +871,7 @@ class DomainFactory {
         Map map = createAnalysisInstanceWithRoddyBamFilesMapHelper(properties, bamFile1Properties, bamFile2Properties)
         SamplePair samplePair = map.samplePair
         map.config = properties.config ?: createSnvConfig(
+                project: samplePair.project,
                 seqType: samplePair.seqType,
         )
         return createDomainObject(SnvCallingInstance, map, properties)
@@ -893,7 +904,8 @@ class DomainFactory {
         SamplePair samplePair = map.samplePair
         map += [
                 roddyExecutionDirectoryNames: [DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY],
-                config                      : createRoddyWorkflowConfig(
+                config                      : createRoddyWorkflowConfigLazy(
+                        project: samplePair.project,
                         seqType: samplePair.seqType,
                         pipeline: createIndelPipelineLazy()
                 ),
