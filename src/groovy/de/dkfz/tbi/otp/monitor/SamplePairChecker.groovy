@@ -76,6 +76,9 @@ class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
 
 
     List<AbstractMergedBamFile> bamFilesWithoutCategory(List<AbstractMergedBamFile> bamFiles) {
+        if (!bamFiles) {
+            return []
+        }
         return AbstractMergedBamFile.executeQuery("""
                 select
                     bamFile
@@ -98,6 +101,9 @@ class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
     }
 
     List<AbstractMergedBamFile> bamFilesWithIgnoredCategory(List<AbstractMergedBamFile> bamFiles) {
+        if (!bamFiles) {
+            return []
+        }
         return AbstractMergedBamFile.executeQuery("""
                 select
                     bamFile
@@ -116,6 +122,9 @@ class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
     }
 
     List<AbstractMergedBamFile> bamFilesWithoutThreshold(List<AbstractMergedBamFile> bamFiles) {
+        if (!bamFiles) {
+            return []
+        }
         return AbstractMergedBamFile.executeQuery("""
                 select
                     bamFile
@@ -139,6 +148,9 @@ class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
     }
 
     List<AbstractMergedBamFile> bamFilesWithoutSamplePair(List<AbstractMergedBamFile> bamFiles) {
+        if (!bamFiles) {
+            return []
+        }
         return AbstractMergedBamFile.executeQuery("""
                 select
                     bamFile
@@ -161,6 +173,9 @@ class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
     }
 
     List<SamplePair> samplePairsForBamFiles(List<AbstractMergedBamFile> bamFiles) {
+        if (!bamFiles) {
+            return []
+        }
         List<MergingWorkPackage> mergingWorkPackages = bamFiles*.mergingWorkPackage
         return SamplePair.createCriteria().list {
             or {
@@ -171,6 +186,9 @@ class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
     }
 
     List<SamplePair> samplePairWithMissingBamFile(List<SamplePair> allSamplePairs) {
+        if (!allSamplePairs) {
+            return []
+        }
         return SamplePair.executeQuery("""
                 select
                     samplePair
@@ -203,6 +221,9 @@ class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
 
 
     List<BlockedSamplePair> blockedSamplePairs(List<SamplePair> allSamplePairs) {
+        if (!allSamplePairs) {
+            return []
+        }
         def connectDomains = { String number ->
             return """(
                         bamFile${number}.workPackage = samplePair.mergingWorkPackage${number}

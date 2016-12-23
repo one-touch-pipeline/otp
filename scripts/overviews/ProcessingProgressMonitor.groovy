@@ -13,8 +13,9 @@ The following code allows to show the processing state for
 *** seqtracks which belong to run segments where flag 'align' is set to false are ignored
 *** running OTP alignments
 *** running pan can alignments
-** sample pairs (snv) waiting for snv calling (ignore pairs without snv config)
-** snv calling instance which are in processing
+** running variant calling (snv, indel)
+** waiting variant calling (snv, indel) (only if config available)
+
 
 entries are trimmed (spaces before after are removed)
 Names prefixed with # are ignored (handled as comment)
@@ -26,12 +27,9 @@ The script has four input areas, one for run names, one for patient names, one f
 
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
-import de.dkfz.tbi.otp.infrastructure.*
-import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.monitor.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
 
 //name of runs
 def runString = """
@@ -69,28 +67,22 @@ boolean allProcessed = false
 //flag if for all workflows the finished entries should be shown
 boolean showFinishedEntries = false
 
-//Flag to check for cluster jobs still running although OTP thinks they are failed.
-//The flag works only for MultiJobs
-//since every cluster job id is checked, it can take some time
-boolean checkForRunningClusterJobs = false
-
 //==================================================
 
-SeqType exomePaired = SeqType.findByNameAndLibraryLayout("EXON", SeqType.LIBRARYLAYOUT_PAIRED)
+MonitorOutputCollector output = new MonitorOutputCollector(showFinishedEntries)
+
+SeqType exomePaired = SeqType.exomePairedSeqType
 List<SeqType> allignableSeqtypes = SeqType.allAlignableSeqTypes
 
 MetaDataKey libPrepKitKey = MetaDataKey.findByName(MetaDataColumn.LIB_PREP_KIT.name())
 MetaDataKey enrichmentKitKey = MetaDataKey.findByName("ENRICHMENT_KIT")
 MetaDataKey commentKey = MetaDataKey.findByName(MetaDataColumn.COMMENT.name())
 
-Pipeline roddySnv = CollectionUtils.exactlyOneElement(Pipeline.findAllByNameAndType(Pipeline.Name.RODDY_SNV, Pipeline.Type.SNV))
-
 List blackList_MergingSetId = ([12174511] as long[]) as List
 
-String INDENT = "    "
+String INDENT = MonitorOutputCollector.INDENT
 
 
-List<String> output = []
 List<String> outputSeqTrack = []
 
 def nameStringToList = {String nameString ->
@@ -103,90 +95,6 @@ def nameStringToList = {String nameString ->
     }
     return list
 }
-
-def prefix = { String text, String prefix ->
-    "${prefix}${text.replace('\n', "\n${prefix}")}"
-}
-
-def objectsToString = { List objects, Closure valueToShow ->
-    return objects.collect { valueToShow(it) }.sort { it }.join('\n')
-}
-
-
-def checkProcessesForObject = { String workflow, List noProcess, List processWithError, Object object, Closure valueToShow, Closure objectToCheck ->
-    Object checkedObject = objectToCheck(object)
-    boolean hasError = false
-
-    def processes = ProcessParameter.findAllByValue(checkedObject.id, [sort: "id"])*.process.findAll {
-        it.jobExecutionPlan.name == workflow
-    }
-    if (processes.size() == 1) {
-        //normal case, no output needed
-    } else if (processes.size() == 0) {
-        output << "${INDENT}Attention: no process was created for the object ${valueToShow(object)} (${object.id})"
-        output << "${INDENT}Please inform a maintainer"
-        noProcess << object.id
-        return true
-    } else if (processes.size() > 1) {
-        output << "${INDENT}Attention: There were ${processes.size()} processes created for the object ${valueToShow(object)} (${object.id}). That can make problems."
-    }
-    Process lastProcess = processes.sort {it.id}.last()
-    ProcessingStep ps = ProcessingStep.findByProcessAndNextIsNull(lastProcess)
-    ProcessingStepUpdate update = ps.latestProcessingStepUpdate
-    def state = update?.state
-    if (state == ExecutionState.FAILURE || update == null) {
-        if (checkForRunningClusterJobs) {
-            List<ClusterJob> clusterJobs = ClusterJob.findAllByProcessingStepAndEndedIsNullAndValidated(ps, false)
-            if (clusterJobs) {
-                Realm realm = ctx.configService.getRealmDataProcessing(object.project)
-                String command = "qstat ${clusterJobs*.clusterJobId.join('; qstat ')}"
-                ProcessHelperService.ProcessOutput out = ctx.executionService.executeCommandReturnProcessOutput(realm, command)
-                if (out.stdout) {
-                    output << "${INDENT}Some cluster jobs are still running but OTP thinks they have failed:"
-                    output << "${INDENT}${INDENT}${object}"
-                    output << "${INDENT}${INDENT}${clusterJobs*.clusterJobId}"
-                    return false
-                }
-            }
-        }
-        hasError = true
-        output << "${INDENT}An error occur for the object: ${valueToShow(object)}"
-        output << "${INDENT}${INDENT}object class/id: ${object.class} / ${object.id}"
-        output << "${INDENT}${INDENT}the OTP link: https://otp.dkfz.de/otp/processes/process/${lastProcess.id}"
-        output << "${INDENT}${INDENT}the error: ${ps.latestProcessingStepUpdate?.error?.errorMessage?.replaceAll('\n', "\n${INDENT}${INDENT}${INDENT}${INDENT}${INDENT}")}"
-        if (ps.process.comment) {
-            output << "${INDENT}${INDENT}the comment (${ps.process.comment.modificationDate.format("yyyy-MM-dd")}): ${ps.process.comment.comment.replaceAll('\n', "\n${INDENT}${INDENT}${INDENT}${INDENT}${INDENT}")}"
-        }
-        if (update == null) {
-            output << "${INDENT}${INDENT}no update available: Please inform a maintainer\n"
-        }
-        processWithError << object.id
-    }
-    return hasError
-}
-
-def checkProcessesForObjects = {String workflow, Collection<Object> objects, Closure valueToShow, Closure objectToCheck ->
-    int errorCount = 0
-    List noProcess = []
-    List processWithError = []
-    objects.sort{valueToShow(it)}.each {
-        if (checkProcessesForObject(workflow, noProcess, processWithError, it, valueToShow, objectToCheck)) {
-            errorCount++
-        }
-    }
-    if (errorCount) {
-        output << "\n${INDENT} Count of errors: ${errorCount}"
-    }
-    if (noProcess) {
-        output << "\n${INDENT}objects without process: ${noProcess}"
-    }
-    if (processWithError) {
-        output << "\n${INDENT}objects with error: ${processWithError}"
-    }
-
-    output << "\n\n"
-}
-
 
 
 def seqTracksWithReferenceGenome = {List<SeqTrack> seqTracks ->
@@ -210,7 +118,7 @@ def exomeSeqTracksWithEnrichmentKit = {List<SeqTrack> seqTracks->
     Map map = seqTracks.groupBy { !it.libraryPreparationKit }
     if (map[true]) {
         output << "${INDENT}${map[true].size()} lanes removed, because no library preparationKit kit is set."
-        output << prefix(objectsToString(map[true], {
+        output << output.prefix(output.objectsToStrings(map[true], {
             DataFile dataFile = DataFile.findBySeqTrack(it)
             MetaDataEntry libPreKitEntry = MetaDataEntry.findByDataFileAndKey(dataFile, libPrepKitKey)
             MetaDataEntry enrichmentKitEntry = MetaDataEntry.findByDataFileAndKey(dataFile, enrichmentKitKey)
@@ -227,7 +135,7 @@ def exomeSeqTracksWithEnrichmentKit = {List<SeqTrack> seqTracks->
                 }
             }
             "${it}  ${!it.libraryPreparationKit ? "lib kit: ${libPreKitEntry?.value}, enrichment kit: ${enrichmentKitEntry?.value}, comment: ${commentEntry}":''}"
-        }), "${INDENT}${INDENT}")
+        }).join('\n'), "${INDENT}${INDENT}")
     }
     return map[false] ?: []
 }
@@ -243,7 +151,7 @@ def exomeSeqTracksWithBedFile = {List<SeqTrack> seqTracks->
     }
     if (map[true]) {
         output << "${INDENT}${map[true].size()} lanes removed, because no bedfile is definied for: ${map[true].collect{"${it.project.name} ${it.seqType.name}"}.unique().sort {it}.join(', ')}"
-        output << prefix(objectsToString(map[true], {it}), "${INDENT}${INDENT}")
+        output << output.prefix(output.objectsToStrings(map[true]).join('\n'), "${INDENT}${INDENT}")
     }
     return map[false] ?: []
 }
@@ -284,63 +192,6 @@ def findAlignable = { List<SeqTrack> seqTracks ->
     return seqTracksToReturn
 }
 
-def showUniqueList = {String info, List objects ->
-    if (!objects) {
-        return
-    }
-    output << prefix("""\
-${info} (${objects.size}):
-${prefix(objects.collect { it.toString() }.sort().groupBy{it}.collect {key, value -> "${key}  ${value.size() == 1 ? '': "(count: ${value.size()})"}"}.sort().join('\n'), INDENT)}
-""", INDENT)
-}
-
-def showList = {String info, List objects, Closure valueToShow = {it as String} ->
-    if (!objects) {
-        return
-    }
-    output << prefix("""\
-${info} (${objects.size}):
-${prefix(objectsToString(objects, valueToShow), INDENT)}
-""", INDENT)
-}
-
-
-def showNotTriggered = {String workflow, List objects, Closure valueToShow = {it as String} ->
-    if (!objects) {
-        return
-    }
-    output << prefix("""\
-!!! not started (${objects.size}):
-****************************************
-ATTENTION: The following ${objects.size()} lanes are not triggered for ${workflow}, but they should:
-${prefix(objectsToString(objects, valueToShow), INDENT)}
-Please inform a maintainer
-****************************************
-The ids are: ${objects*.id.sort()}
-""", INDENT)
-}
-
-def showWaiting = {List objects, Closure valueToShow = {it as String} ->
-    showList('waiting', objects, valueToShow)
-}
-
-def showRunning = {String workflow, List objects, Closure valueToShow = {it as String}, Closure objectToCheck = {it} ->
-    showList('running', objects, valueToShow)
-    if (objects) {
-        checkProcessesForObjects(workflow, objects, valueToShow, objectToCheck)
-    }
-}
-
-def showFinished = {List objects, Closure valueToShow = {it as String} ->
-    if (!showFinishedEntries) {
-        return
-    }
-    showList('finished', objects, valueToShow)
-}
-
-def showShouldStart = {List objects, Closure valueToShow = {it as String} ->
-    showList('needs processing', objects, valueToShow)
-}
 
 def handleStateMap = {Map map, String workflow, Closure valueToShow, Closure objectToCheck = {it} ->
     output << "\n${workflow}: "
@@ -351,16 +202,16 @@ def handleStateMap = {Map map, String workflow, Closure valueToShow, Closure obj
         def values = map[key]
         switch (key.ordinal()) {
             case 0:
-                showNotTriggered(workflow, values, valueToShow)
+                output.showNotTriggered(workflow, values, valueToShow)
                 break
             case 1:
-                showWaiting(values, valueToShow)
+                output.showWaiting(values, valueToShow)
                 break
             case 2:
-                showRunning(workflow, values, valueToShow, objectToCheck)
+                output.showRunning(workflow, values, valueToShow, objectToCheck)
                 break
             case 3:
-                showFinished(values, valueToShow)
+                output.showFinished(values, valueToShow)
                 ret = map[key]
                 break
             default:
@@ -379,7 +230,7 @@ def handleStateMap = {Map map, String workflow, Closure valueToShow, Closure obj
 def handleStateMapNeedsProcessing = {Map<Boolean, Collection<MergingWorkPackage>> map, Closure valueToShow, String workflow ->
     output << "\n${workflow}: \n${INDENT}Only SeqTracks are shown which finished fastqc-WF"
 
-    showShouldStart(map[true], valueToShow)
+    output.showShouldStart(map[true], valueToShow)
 
     return map[false]
 }
@@ -397,21 +248,19 @@ def handleStateMapRoddy = {Map<AbstractMergedBamFile.FileOperationStatus, Collec
         def values = map[key]
         switch (key) {
             case AbstractMergedBamFile.FileOperationStatus.DECLARED :
-                showList('running (declared)', values, valueToShow)
-                checkProcessesForObjects(workflow, values, valueToShow, objectToCheck)
+                output.showList('running (declared)', values, valueToShow)
+                output.addInfoAboutProcessErrors(workflow, values, valueToShow, objectToCheck)
                 break
             case AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING:
-                showList('running (needs_processing)', values, valueToShow)
-                checkProcessesForObjects(workflow, values, valueToShow, objectToCheck)
+                output.showList('running (needs_processing)', values, valueToShow)
+                output.addInfoAboutProcessErrors(workflow, values, valueToShow, objectToCheck)
                 break
             case AbstractMergedBamFile.FileOperationStatus.INPROGRESS:
-                showList('running (in_progress)', values, valueToShow)
-                checkProcessesForObjects(workflow, values, valueToShow, objectToCheck)
+                output.showList('running (in_progress)', values, valueToShow)
+                output.addInfoAboutProcessErrors(workflow, values, valueToShow, objectToCheck)
                 break
             case AbstractMergedBamFile.FileOperationStatus.PROCESSED:
-                if(showFinishedEntries) {
-                    showList('processed', values, valueToShow)
-                }
+                output.showFinished(values, valueToShow)
                 ret = map[key]
                 break
             default:
@@ -419,142 +268,6 @@ def handleStateMapRoddy = {Map<AbstractMergedBamFile.FileOperationStatus, Collec
         }
     }
     return ret
-}
-
-def handleStateMapSnv = { List next ->
-    output << "\nsnvWorkflow"
-
-    Map stateMap = [
-            'disabled': [],
-            'noConfig': [],
-            'alreadyRunning': [],
-            'running': [],
-            'finished': [],
-            'waiting': [],
-            'notTriggered': [],
-    ]
-
-    List samplePairs = []
-    List unknownDiseaseStatus = []
-    List ignoredDiseaseStatus = []
-    List unknownThreshold = []
-    List noPairFound = []
-
-    next.each { AbstractMergedBamFile ambf ->
-        List samplePairsForBamFile = SamplePair.createCriteria().list {
-            or {
-                eq('mergingWorkPackage1', ambf.mergingWorkPackage)
-                eq('mergingWorkPackage2', ambf.mergingWorkPackage)
-            }
-        }
-        if (!SampleTypePerProject.findByProjectAndSampleType(ambf.project, ambf.sampleType)) {
-            unknownDiseaseStatus << "${ambf.project} ${ambf.sampleType.name}"
-        } else if (SampleTypePerProject.findByProjectAndSampleType(ambf.project, ambf.sampleType).category == SampleType.Category.IGNORED) {
-            ignoredDiseaseStatus << "${ambf.project} ${ambf.sampleType.name}"
-        } else if (!ProcessingThresholds.findByProjectAndSampleTypeAndSeqType(ambf.project, ambf.sampleType, ambf.seqType)) {
-            unknownThreshold << "${ambf.project} ${ambf.sampleType.name} ${ambf.seqType}"
-        } else  if (samplePairsForBamFile) {
-            samplePairs += samplePairsForBamFile
-        } else {
-            noPairFound << "${ambf.project} ${ambf.individual} ${ambf.sampleType.name} ${ambf.seqType}"
-        }
-    }
-
-    showUniqueList('For the following project sample type combination the sample type was not classified as disease or control', unknownDiseaseStatus)
-    showUniqueList('For the following project sample type combination the sample type category is set to IGNORED', ignoredDiseaseStatus)
-    showUniqueList('For the following project sample type seqType combination no threshold is defined', unknownThreshold)
-    showUniqueList('For the following AMBF no SamplePair could be found', noPairFound)
-
-    if(samplePairs) {
-        samplePairs.unique().each { SamplePair samplePair ->
-            if (samplePair.snvProcessingStatus == SamplePair.ProcessingStatus.DISABLED) {
-                stateMap.disabled << samplePair
-            } else if (samplePair.snvProcessingStatus == SamplePair.ProcessingStatus.NEEDS_PROCESSING) {
-                if (!SnvConfig.findByProjectAndSeqTypeAndObsoleteDateIsNull(samplePair.project, samplePair.seqType) &&
-                        !RoddyWorkflowConfig.findByProjectAndSeqTypeAndPipelineAndObsoleteDateIsNull(samplePair.project, samplePair.seqType, roddySnv)) {
-                    stateMap.noConfig << "${samplePair.project} ${samplePair.seqType}"
-                } else if (SnvCallingInstance.findBySamplePairAndProcessingStateInListAndWithdrawn(samplePair, [AnalysisProcessingStates.IN_PROGRESS], false)) {
-                    stateMap.alreadyRunning << samplePair
-                } else {
-                    stateMap.waiting << samplePair
-                }
-            } else {
-                // get latest SnvCallingInstance for this SamplePair
-                SnvCallingInstance snvCallingInstance = SnvCallingInstance.createCriteria().get {
-                    eq('samplePair', samplePair)
-                    order('lastUpdated', 'desc')
-                    maxResults(1)
-                }
-                if (snvCallingInstance && snvCallingInstance.processingState == AnalysisProcessingStates.IN_PROGRESS && !snvCallingInstance.withdrawn) {
-                    stateMap.running << snvCallingInstance
-                }
-                if (snvCallingInstance && snvCallingInstance.processingState == AnalysisProcessingStates.FINISHED) {
-                    stateMap.finished << samplePair
-                }
-                if (!snvCallingInstance && samplePair.snvProcessingStatus == SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED) {
-                    stateMap.notTriggered << samplePair
-                }
-            }
-        }
-    }
-    showUniqueList('For the following project seqtype combination no config is defined', stateMap.noConfig)
-    showList('disabled', stateMap.disabled)
-    showList('notTriggered', stateMap.notTriggered)
-    showList('old instance running', stateMap.alreadyRunning)
-    showWaiting(stateMap.waiting, {
-        List<String> ret = []
-        [
-                disease: it.mergingWorkPackage1,
-                control: it.mergingWorkPackage2,
-        ].each { String key, MergingWorkPackage mergingWorkPackage ->
-            AbstractMergedBamFile bamFile = AbstractMergedBamFile.findByWorkPackage(mergingWorkPackage, [sort: 'id', order: 'desc'])
-            if (bamFile == null) {
-                ret << "${key} bam file does not exist"
-            } else if (bamFile.withdrawn) {
-                ret << "${key} bam file is withdrawn"
-            } else if (bamFile.md5sum == null) {
-                ret << "${key} bam file is in processing"
-            } else {
-                Set<SeqTrack> containedSeqTracks = bamFile.getContainedSeqTracks()
-                Set<SeqTrack> availableSeqTracks = bamFile.workPackage.findMergeableSeqTracks()
-                if (!CollectionUtils.containSame(containedSeqTracks*.id, availableSeqTracks*.id)) {
-                    Set<SeqTrack> missingSeqTracks = availableSeqTracks.findAll {
-                        containedSeqTracks*.id.contains(it.id)
-                    }
-                    Set<SeqTrack> additionalSeqTrack = containedSeqTracks.findAll {
-                        availableSeqTracks*.id.contains(it.id)
-                    }
-                    if (missingSeqTracks) {
-                        ret << "${key} bam file misses following seqtracks: ${missingSeqTracks.collect {"<${it.run} ${it.laneId}>"}.join('; ')}"
-                    }
-                    if (additionalSeqTrack) {
-                        ret << "${key} bam file contains unexpected  seqtracks: ${additionalSeqTrack.collect {"<${it.run} ${it.laneId}>"}.join('; ')}"
-                    }
-                }
-                ProcessingThresholds processingThresholds = ProcessingThresholds.findByProjectAndSeqTypeAndSampleType(bamFile.project, bamFile.seqType, bamFile.sampleType)
-                if (!processingThresholds) {
-                    ret << "No thresholds could be found for ${key}"
-                } else {
-                    if (!processingThresholds.isAboveLaneThreshold(bamFile)) {
-                        ret << "${key} bam file has too few lanes (${bamFile.numberOfMergedLanes} of ${processingThresholds.numberOfLanes})"
-                    }
-                    if (!processingThresholds.isAboveCoverageThreshold(bamFile)) {
-                        ret << "${key} bam file has insufficient coverage (${bamFile.coverage.round(2)} of ${processingThresholds.coverage})"
-                    }
-                }
-            }
-        }
-        "${it} ${ret ? " (${ret.join(', ')})" : ''}"
-    })
-
-    Map<Boolean, List<SnvCallingInstance>> snvCallingInstancePerType = stateMap.running ? stateMap.running.groupBy {
-        it instanceof RoddySnvCallingInstance
-    } : [:]
-    showRunning("SnvWorkflow", snvCallingInstancePerType[false])
-    showRunning("RoddySnvWorkflow", snvCallingInstancePerType[true])
-    showFinished(stateMap.finished)
-
-    return stateMap.finished
 }
 
 def showSeqTracksOtp = {List<SeqTrack> seqTracksToAlign ->
@@ -820,25 +533,16 @@ def showSeqTracks = {Collection<SeqTrack> seqTracks ->
         output << "\nnot all workflows are finished till alignment"
     }
 
-
-
-    //snv
-    Collection<SeqTrack> seqTracksFinishedSnv = handleStateMapSnv(seqTracksFinishedAlignment)
-
-    if (!seqTracksFinishedSnv) {
-        output << "\nnot all workflows are finished"
-        return
-    }
+    //variant calling
+    List<SamplePair> finishedSamplePair = new VariantCallingPipelinesChecker().handle(seqTracksFinishedAlignment, output)
 
     //end
-    output << "\nFinshed snv sample pairs (${seqTracksFinishedSnv.size()}): "
-    seqTracksFinishedSnv.collect {
+    output << "\nFinshed variant calling sample pairs (${finishedSamplePair.size()}): "
+
+    finishedSamplePair.collect {
         "${INDENT}${INDENT}${it} ${it.project}"
     }.sort { it }.each { output << it }
 
-    if (!allFinished) {
-        output << "\nnot all workflows are finished inclusive snv"
-    }
 }
 
 
@@ -1005,18 +709,38 @@ if (allProcessed) {
     """)
 
     //collect waiting SamplePairs
-    SamplePair.findAllBySnvProcessingStatus(SamplePair.ProcessingStatus.NEEDS_PROCESSING).each { SamplePair samplePair ->
-        //see also: OTP-1497 and/or OTP-1673
-        if (SnvConfig.findByProjectAndSeqTypeAndObsoleteDateIsNull(samplePair.project, samplePair.seqType) ||
-                RoddyWorkflowConfig.findByProjectAndSeqTypeAndPipelineAndObsoleteDateIsNull(samplePair.project, samplePair.seqType, roddySnv)) {
-            [samplePair.mergingWorkPackage1, samplePair.mergingWorkPackage2].each { MergingWorkPackage mergingWorkPackage ->
-                seqTracks.addAll(mergingWorkPackage.findMergeableSeqTracks())
-            }
+
+    def needsProcessing = { String property, Pipeline.Type type ->
+        return """
+            (
+                samplePair.${property} = '${SamplePair.ProcessingStatus.NEEDS_PROCESSING}'
+                and exists (
+                    select
+                        config
+                    from
+                        ConfigPerProject config
+                    where
+                        config.project = samplePair.mergingWorkPackage1.sample.individual.project
+                        and config.seqType = samplePair.mergingWorkPackage1.seqType
+                        and config.pipeline.type = '${type}'
+                        and config.obsoleteDate is null
+                )
+            )"""
+    }
+
+    SamplePair.executeQuery("""
+        select samplePair
+        from SamplePair samplePair
+        where ${needsProcessing('snvProcessingStatus', Pipeline.Type.SNV)}
+            or ${needsProcessing('indelProcessingStatus', Pipeline.Type.INDEL)}
+    """).each { SamplePair samplePair ->
+        [samplePair.mergingWorkPackage1, samplePair.mergingWorkPackage2].each { MergingWorkPackage mergingWorkPackage ->
+            seqTracks.addAll(mergingWorkPackage.findMergeableSeqTracks())
         }
     }
 
-    //collect running SnvCallingInstances
-    SnvCallingInstance.createCriteria().list{
+    //collect running VariantCallingInstances
+    BamFilePairAnalysis.createCriteria().list {
         eq('processingState', AnalysisProcessingStates.IN_PROGRESS)
         eq('withdrawn', false)
         sampleType1BamFile {
@@ -1025,10 +749,8 @@ if (allProcessed) {
         sampleType2BamFile {
             eq('withdrawn', false)
         }
-    }.each { SnvCallingInstance snvCallingInstance ->
-        [snvCallingInstance.sampleType1BamFile, snvCallingInstance.sampleType2BamFile].each {AbstractMergedBamFile abstractMergedBamFile ->
-            seqTracks.addAll(abstractMergedBamFile.containedSeqTracks)
-        }
+    }.each { BamFilePairAnalysis bamFilePairAnalysis ->
+        seqTracks.addAll(bamFilePairAnalysis.containedSeqTracks)
     }
 
 
@@ -1054,8 +776,8 @@ if (allProcessed) {
     output << INDENT + seqTracks*.sample*.individual*.project*.name.unique().sort().join("\n${INDENT}")
 }
 
-println output.join("\n").replace("<br>", " ")
-println "\n\n"
+output << '\n\n'
+println output.getOutput().replace("<br>", " ")
 //println outputSeqTrack.join("\n")
 
 println ""

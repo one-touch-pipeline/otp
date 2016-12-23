@@ -63,6 +63,9 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
     }
 
     List<String> samplePairWithoutCorrespondingConfigForPipelineAndSeqTypeAndProject(List<SamplePair> samplePairs) {
+        if (!samplePairs) {
+            return []
+        }
         return SamplePair.executeQuery("""
                     select
                         samplePair.mergingWorkPackage1.sample.individual.project.name,
@@ -91,6 +94,9 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
     }
 
     List<BamFilePairAnalysis> analysisAlreadyRunningForSamplePairAndPipeline(List<SamplePair> samplePairs) {
+        if (!samplePairs) {
+            return []
+        }
         return SamplePair.executeQuery("""
                     select
                         analysis
@@ -108,6 +114,9 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
     }
 
     List<SamplePair> samplePairsWithConfigAndWithoutRunningAnalysis(List<SamplePair> samplePairs) {
+        if (!samplePairs) {
+            return []
+        }
         return SamplePair.executeQuery("""
                     select
                         samplePair
@@ -143,6 +152,9 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
     }
 
     List<SamplePair> samplePairsWithoutAnalysis(List<SamplePair> samplePairs) {
+        if (!samplePairs) {
+            return []
+        }
         return SamplePair.executeQuery("""
                     select
                         samplePair
@@ -166,6 +178,9 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
     }
 
     List<BamFilePairAnalysis> lastAnalysisForSamplePair(List<SamplePair> samplePairs) {
+        if (!samplePairs) {
+            return []
+        }
         return SamplePair.executeQuery("""
                     select
                         analysis
