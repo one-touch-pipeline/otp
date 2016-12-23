@@ -54,7 +54,7 @@ class AbstractMergedBamFileTests {
     void testValidateAndSetBamFileInProjectFolder_WhenBamFileFileOperationStatusNotInProgress_ShouldFail() {
         ProcessedMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFile([
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.DECLARED,
-        ]).save(flush: true)
+        ])
 
         TestCase.shouldFail(AssertionError) {
             bamFile.validateAndSetBamFileInProjectFolder()
@@ -66,7 +66,7 @@ class AbstractMergedBamFileTests {
         ProcessedMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFile([
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.INPROGRESS,
                 withdrawn: true,
-        ]).save(flush: true)
+        ])
 
         TestCase.shouldFail(AssertionError) {
             bamFile.validateAndSetBamFileInProjectFolder()
@@ -79,11 +79,11 @@ class AbstractMergedBamFileTests {
 
         ProcessedMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFile(mergingWorkPackage, [
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.INPROGRESS,
-        ]).save(flush: true)
+        ])
 
         DomainFactory.createProcessedMergedBamFile(mergingWorkPackage, [
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.INPROGRESS,
-        ]).save(flush: true)
+        ])
 
         TestCase.shouldFail(AssertionError) {
             bamFile.validateAndSetBamFileInProjectFolder()
@@ -96,19 +96,19 @@ class AbstractMergedBamFileTests {
 
         DomainFactory.createProcessedMergedBamFile(mergingWorkPackage, [
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.DECLARED,
-        ]).save(flush: true)
+        ])
 
         DomainFactory.createProcessedMergedBamFile(mergingWorkPackage, [
                 withdrawn: true,
-        ]).save(flush: true)
+        ])
 
         DomainFactory.createProcessedMergedBamFile([
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.INPROGRESS,
-        ]).save(flush: true)
+        ])
 
         ProcessedMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFile(mergingWorkPackage, [
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.INPROGRESS,
-        ]).save(flush: true)
+        ])
 
         bamFile.validateAndSetBamFileInProjectFolder()
 

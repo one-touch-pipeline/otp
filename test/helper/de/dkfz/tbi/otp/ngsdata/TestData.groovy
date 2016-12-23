@@ -365,7 +365,7 @@ class TestData {
     }
 
     static ProcessedMergedBamFile createProcessedMergedBamFile(Map properties = [:]) {
-        return DomainFactory.createProcessedMergedBamFile(properties.mergingPass, [
+        return DomainFactory.createProcessedMergedBamFileWithoutProcessedBamFile(properties.mergingPass, [
             workPackage: properties.mergingPass.mergingWorkPackage,
             fileOperationStatus: FileOperationStatus.PROCESSED,
             md5sum: "12345678901234567890123456789012",

@@ -265,7 +265,6 @@ class AbstractQualityAssessmentServiceTests {
                 qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
                 status                 : AbstractBamFile.State.PROCESSED,
         ])
-        assert processedMergedBamFile.save([flush: true])
 
         return processedMergedBamFile
     }

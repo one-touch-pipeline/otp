@@ -463,12 +463,11 @@ class AbstractBamFileServiceTests {
         )
         assertNotNull(mergingPass1.save([flush: true]))
 
-        ProcessedMergedBamFile processedMergedBamFile = DomainFactory.createProcessedMergedBamFile(mergingPass1, [
+        ProcessedMergedBamFile processedMergedBamFile = DomainFactory.createProcessedMergedBamFileWithoutProcessedBamFile(mergingPass1, [
                     fileExists: true,
                     numberOfMergedLanes: 1,
                     type: BamType.MDUP,
                 ])
-        assertNotNull(processedMergedBamFile.save([flush: true]))
         return processedMergedBamFile
     }
 
@@ -480,10 +479,9 @@ class AbstractBamFileServiceTests {
         assertNotNull(mergingPass.save([flush: true]))
 
         // Do not create as QC'ed in order to test assertions if no QC data exists. Tests explicitly change it if needed.
-        ProcessedMergedBamFile processedMergedBamFile = DomainFactory.createProcessedMergedBamFile(mergingPass, [
+        ProcessedMergedBamFile processedMergedBamFile = DomainFactory.createProcessedMergedBamFileWithoutProcessedBamFile(mergingPass, [
             status       : State.NEEDS_PROCESSING,
         ])
-        assert processedMergedBamFile.save([flush: true])
 
         QualityAssessmentMergedPass qualityAssessmentMergedPass = new QualityAssessmentMergedPass([
             abstractMergedBamFile: processedMergedBamFile,

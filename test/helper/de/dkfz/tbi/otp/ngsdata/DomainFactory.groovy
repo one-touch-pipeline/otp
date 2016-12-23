@@ -7,7 +7,7 @@ import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.infrastructure.*
-import de.dkfz.tbi.otp.job.JobMailService
+import de.dkfz.tbi.otp.job.*
 import de.dkfz.tbi.otp.job.jobs.snvcalling.*
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.processing.*
@@ -184,13 +184,24 @@ class DomainFactory {
     }
 
     public static MergingSet createMergingSet(Map properties = [:]) {
-        return createMergingSet(createMergingWorkPackage(pipeline: createDefaultOtpPipeline()), properties)
+        MergingWorkPackage mergingWorkPackage = properties.mergingWorkPackage ?: createMergingWorkPackage([:])
+        return createDomainObject(MergingSet, [
+                mergingWorkPackage: mergingWorkPackage,
+                identifier: MergingSet.nextIdentifier(mergingWorkPackage),
+        ], properties)
     }
 
     public static MergingSet createMergingSet(final MergingWorkPackage mergingWorkPackage, Map properties = [:]) {
         return createDomainObject(MergingSet, [
                 mergingWorkPackage: mergingWorkPackage,
                 identifier: MergingSet.nextIdentifier(mergingWorkPackage),
+        ], properties)
+    }
+
+    public static MergingSetAssignment createMergingSetAssignment(Map properties = [:]) {
+        return createDomainObject(MergingSetAssignment, [
+                mergingSet: { createMergingSet() },
+                bamFile   : { createProcessedBamFile() },
         ], properties)
     }
 
@@ -258,7 +269,7 @@ class DomainFactory {
 
     public static ProcessParameter createProcessParameter(Map properties = [:]) {
         return createDomainObject(ProcessParameter, [
-                process: { createProcessingStep().process },
+                process: { createProcessingStepUpdate().process },
                 value: "${counter++}",
                 className: "${counter++}",
         ], properties)
@@ -286,11 +297,16 @@ class DomainFactory {
     }
 
     public static ProcessingStepUpdate createProcessingStepUpdate(Map properties = [:]) {
+        if (!properties.containsKey('processingStep') && properties.containsKey('state') && properties.state != ExecutionState.CREATED) {
+            properties.processingStep = createProcessingStepUpdate().processingStep
+        }
         return createDomainObject(ProcessingStepUpdate, [
-                processingStep: {createProcessingStep()},
-                state: ExecutionState.CREATED,
-                previous: {properties.step ? properties.step.latestProcessingStepUpdate : null },
-                date: new Date(),
+                processingStep: { createProcessingStep() },
+                state         : {
+                    properties.processingStep?.latestProcessingStepUpdate ? ExecutionState.STARTED : ExecutionState.CREATED
+                },
+                previous      : { properties.processingStep?.latestProcessingStepUpdate },
+                date          : new Date(),
         ], properties)
     }
 
@@ -370,15 +386,19 @@ class DomainFactory {
         )
     }
 
-    public static MergingPass createMergingPass() {
-        return createMergingPass(createMergingSet())
+    public static MergingPass createMergingPass(Map properties = [:]) {
+        MergingSet mergingSet = properties.mergingSet ?: createMergingSet()
+        return createDomainObject(MergingPass, [
+                mergingSet: mergingSet,
+                identifier: MergingPass.nextIdentifier(mergingSet),
+        ], properties)
     }
 
     public static MergingPass createMergingPass(final MergingSet mergingSet) {
-        return new MergingPass(
+        return createDomainObject(MergingPass, [
                 mergingSet: mergingSet,
                 identifier: MergingPass.nextIdentifier(mergingSet),
-        ).save(flush: true)
+        ], [:])
     }
 
     public static Map getRandomProcessedBamFileProperties() {
@@ -457,38 +477,61 @@ class DomainFactory {
         return ReferenceGenome.find{true} ?: createReferenceGenome()
     }
 
-    public static ProcessedMergedBamFile createProcessedMergedBamFile(MergingWorkPackage mergingWorkPackage, Map properties = [:]) {
+    public static ProcessedMergedBamFile createProcessedMergedBamFileWithoutProcessedBamFile(MergingWorkPackage mergingWorkPackage, Map properties = [:], boolean saveAndValidate = true) {
         MergingSet mergingSet = createMergingSet(mergingWorkPackage)
-        return createProcessedMergedBamFile(mergingSet, properties)
+        return createProcessedMergedBamFileWithoutProcessedBamFile(mergingSet, properties, saveAndValidate)
     }
 
-    public static ProcessedMergedBamFile createProcessedMergedBamFile(Map properties = [:]) {
-        return createProcessedMergedBamFile(MergingSet.build(), properties)
+    public static ProcessedMergedBamFile createProcessedMergedBamFile(MergingWorkPackage mergingWorkPackage, Map properties = [:], boolean saveAndValidate = true) {
+        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFileWithoutProcessedBamFile(mergingWorkPackage, properties, saveAndValidate)
+        assignNewProcessedBamFile(processedMergedBamFile)
+        return processedMergedBamFile
     }
 
-    public static ProcessedMergedBamFile createProcessedMergedBamFile(MergingSet mergingSet, Map properties = [:]) {
-        assignNewProcessedBamFile(mergingSet)
-        ProcessedMergedBamFile bamFile = ProcessedMergedBamFile.build([
-                mergingPass: MergingPass.build(
+    public static ProcessedMergedBamFile createProcessedMergedBamFileWithoutProcessedBamFile(Map properties = [:], boolean saveAndValidate = true) {
+        MergingPass mergingPass = properties.mergingPass ?: properties.workPackage ?
+                createMergingPass(createMergingSet([mergingWorkPackage: properties.workPackage])) :
+                createMergingPass()
+        ProcessedMergedBamFile processedMergedBamFile = createDomainObject(ProcessedMergedBamFile, [
+                mergingPass        : mergingPass,
+                workPackage        : mergingPass.mergingWorkPackage,
+                type               : AbstractBamFile.BamType.MDUP,
+                numberOfMergedLanes: 1,
+        ], properties, saveAndValidate)
+        return processedMergedBamFile
+    }
+
+    public static ProcessedMergedBamFile createProcessedMergedBamFile(Map properties = [:], boolean saveAndValidate = true) {
+        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFileWithoutProcessedBamFile(properties, saveAndValidate)
+        assignNewProcessedBamFile(processedMergedBamFile)
+        return processedMergedBamFile
+    }
+
+    public static ProcessedMergedBamFile createProcessedMergedBamFileWithoutProcessedBamFile(MergingSet mergingSet, Map properties = [:], boolean saveAndValidate = true) {
+        return createProcessedMergedBamFileWithoutProcessedBamFile(properties + [
+                mergingPass: createMergingPass([
                         mergingSet: mergingSet,
                         identifier: MergingPass.nextIdentifier(mergingSet),
-                ),
-                numberOfMergedLanes: 1,
-                workPackage: mergingSet.mergingWorkPackage,
-        ] + properties)
-        return bamFile
+                ]),
+        ], saveAndValidate)
     }
 
-    public static ProcessedMergedBamFile createProcessedMergedBamFile(MergingPass mergingPass, Map properties = [:]) {
-        ProcessedMergedBamFile bamFile = new ProcessedMergedBamFile([
-                mergingPass: mergingPass,
-                workPackage: mergingPass.mergingWorkPackage,
-                type: AbstractBamFile.BamType.SORTED,
-                numberOfMergedLanes: 1,
-        ] + properties)
-        // has to be set explicitly to null due strange behavior of GORM (?)
-        bamFile.mergingPass.mergingWorkPackage.bamFileInProjectFolder = null
-        return bamFile
+    public static ProcessedMergedBamFile createProcessedMergedBamFile(MergingSet mergingSet, Map properties = [:], boolean saveAndValidate = true) {
+        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFileWithoutProcessedBamFile(mergingSet, properties, saveAndValidate)
+        assignNewProcessedBamFile(processedMergedBamFile)
+        return processedMergedBamFile
+    }
+
+    public static ProcessedMergedBamFile createProcessedMergedBamFileWithoutProcessedBamFile(MergingPass mergingPass, Map properties = [:], boolean saveAndValidate = true) {
+        return createProcessedMergedBamFileWithoutProcessedBamFile([
+                mergingPass: mergingPass
+        ] + properties, saveAndValidate)
+    }
+
+    public static ProcessedMergedBamFile createProcessedMergedBamFile(MergingPass mergingPass, Map properties = [:], boolean saveAndValidate = true) {
+        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFileWithoutProcessedBamFile(mergingPass, properties, saveAndValidate)
+        assignNewProcessedBamFile(processedMergedBamFile)
+        return processedMergedBamFile
     }
 
     public static ProcessedBamFile assignNewProcessedBamFile(final ProcessedMergedBamFile processedMergedBamFile) {
@@ -499,20 +542,40 @@ class DomainFactory {
 
     public static ProcessedBamFile assignNewProcessedBamFile(final MergingSet mergingSet) {
         final ProcessedBamFile bamFile = createProcessedBamFile(mergingSet.mergingWorkPackage)
-        MergingSetAssignment.build(mergingSet: mergingSet, bamFile: bamFile)
+        createMergingSetAssignment([
+                mergingSet: mergingSet,
+                bamFile: bamFile
+        ])
         return bamFile
     }
 
-    public static ProcessedBamFile createProcessedBamFile(final MergingWorkPackage mergingWorkPackage, Map properties = [:]) {
+    public static ProcessedBamFile createProcessedBamFile(Map properties = [:], boolean saveAndValidate = true) {
+        return createDomainObject(ProcessedBamFile, [
+                alignmentPass     : { createAlignmentPass() },
+                md5sum            : { HelperUtils.randomMd5sum },
+                fileExists        : true,
+                dateFromFileSystem: { new Date() },
+                fileSize          : { counter++ },
+                type              : AbstractBamFile.BamType.SORTED,
+                hasIndexFile      : true,
+                hasCoveragePlot   : true,
+                hasInsertSizePlot : true,
+                withdrawn         : false,
+                coverage          : { counter++ },
+                coverageWithN     : { counter++ },
+                status            : AbstractBamFile.State.DECLARED,
+        ], properties, saveAndValidate)
+    }
 
+    public static ProcessedBamFile createProcessedBamFile(final MergingWorkPackage mergingWorkPackage, Map properties = [:]) {
         SeqTrack seqTrack = createSeqTrackWithDataFiles(mergingWorkPackage)
 
-        final ProcessedBamFile bamFile = ProcessedBamFile.build([
-                alignmentPass: createAlignmentPass(
+        final ProcessedBamFile bamFile = createProcessedBamFile([
+                alignmentPass: createAlignmentPass([
                         seqTrack: seqTrack,
                         workPackage: mergingWorkPackage,
                         referenceGenome: mergingWorkPackage.referenceGenome,
-                ),
+                ]),
                 qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
                 status: AbstractBamFile.State.PROCESSED,
         ] + properties)
@@ -641,8 +704,10 @@ class DomainFactory {
     }
 
     static SamplePair createSamplePair(Map properties = [:]) {
-        MergingWorkPackage mergingWorkPackage1 = createMergingWorkPackage()
-        createSampleTypePerProject(
+        MergingWorkPackage mergingWorkPackage1 = properties.mergingWorkPackage1 ?:
+                properties.mergingWorkPackage2 ? createMergingWorkPackage(properties.mergingWorkPackage2) :
+                createMergingWorkPackage()
+        createSampleTypePerProjectLazy(
                 sampleType: mergingWorkPackage1.sampleType,
                 project: mergingWorkPackage1.project,
                 category: SampleType.Category.DISEASE,
@@ -657,12 +722,30 @@ class DomainFactory {
                 properties)
     }
 
+    private static final Map sampleTypeMap = [
+            project   : { createProject() },
+            sampleType: { createSampleType() },
+            category  : SampleType.Category.DISEASE,
+    ].asImmutable()
+
     static SampleTypePerProject createSampleTypePerProject(Map properties = [:]) {
-        return createDomainObject(SampleTypePerProject, [
-                project   : { createProject() },
-                sampleType: { createSampleType() },
-                category  : SampleType.Category.DISEASE,
-        ], properties)
+        return createDomainObject(SampleTypePerProject, sampleTypeMap, properties)
+    }
+
+    static SampleTypePerProject createSampleTypePerProjectLazy(Map properties = [:]) {
+        return createDomainObjectLazy(SampleTypePerProject, sampleTypeMap, properties)
+    }
+
+    static SampleTypePerProject createSampleTypePerProjectForMergingWorkPackage(MergingWorkPackage mergingWorkPackage, SampleType.Category category = SampleType.Category.DISEASE) {
+        return createSampleTypePerProject([
+                project   : mergingWorkPackage.project,
+                sampleType: mergingWorkPackage.sampleType,
+                category  : category,
+        ])
+    }
+
+    static SampleTypePerProject createSampleTypePerProjectForBamFile(AbstractMergedBamFile bamFile, SampleType.Category category=  SampleType.Category.DISEASE) {
+        return createSampleTypePerProjectForMergingWorkPackage(bamFile.mergingWorkPackage, category)
     }
 
     static SamplePair createSamplePair(MergingWorkPackage mergingWorkPackage1, MergingWorkPackage mergingWorkPackage2, Map properties = [:]) {
@@ -766,7 +849,7 @@ class DomainFactory {
         RoddyBamFile control = createRoddyBamFile([workPackage: controlWorkPackage, config: disease.config] + bamFile2Properties)
 
         return [
-                instanceName: "2014-08-25_15h32",
+                instanceName: "instance-${counter++}",
                 samplePair: samplePair,
                 sampleType1BamFile: disease,
                 sampleType2BamFile: control,
@@ -788,10 +871,11 @@ class DomainFactory {
         SamplePair samplePair = map.samplePair
         map += [
                 roddyExecutionDirectoryNames: [DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY],
-                config                      : createRoddyWorkflowConfig(
+                config                      : createRoddyWorkflowConfigLazy([
+                        project: samplePair.project,
                         seqType: samplePair.seqType,
                         pipeline: createRoddySnvPipelineLazy()
-                ),
+                ]),
         ]
         return createDomainObject(RoddySnvCallingInstance, map, properties)
     }
@@ -1760,14 +1844,16 @@ samplePairsNotProcessed: ${samplePairsNotProcessed}
         ], properties)
     }
 
+    static ProcessingThresholds createProcessingThresholdsForMergingWorkPackage(MergingWorkPackage mergingWorkPackage, Map properties = [:]) {
+        return createProcessingThresholds([
+                project: mergingWorkPackage.project,
+                seqType: mergingWorkPackage.seqType,
+                sampleType: mergingWorkPackage.sampleType,
+        ] + properties)
+    }
+
     static ProcessingThresholds createProcessingThresholdsForBamFile(AbstractBamFile bamFile, Map properties = [:]) {
-        return createDomainObject(ProcessingThresholds, [
-                project: bamFile.project,
-                seqType: bamFile.seqType,
-                sampleType: bamFile.sampleType,
-                coverage: 30.0,
-                numberOfLanes: 3
-        ], properties)
+        createProcessingThresholdsForMergingWorkPackage(bamFile.mergingWorkPackage, properties)
     }
 
     static void changeSeqType(RoddyBamFile bamFile, SeqType seqType, String libraryName = null) {

@@ -96,6 +96,10 @@ public class ProcessingStepUpdate implements Serializable, Entity {
         })
     }
 
+    Process getProcess() {
+        return processingStep.process
+    }
+
     ProcessParameterObject getProcessParameterObject() {
         return processingStep.processParameterObject
     }

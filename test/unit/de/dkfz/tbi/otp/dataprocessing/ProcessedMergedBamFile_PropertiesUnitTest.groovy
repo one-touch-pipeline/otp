@@ -1,10 +1,12 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.ngsdata.*
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
+import grails.test.mixin.*
+import org.junit.*
 
+@Mock([
+        ProcessedMergedBamFile
+])
 class ProcessedMergedBamFile_PropertiesUnitTest {
 
     static final short PROCESSING_PRIORITY = 1
@@ -26,10 +28,10 @@ class ProcessedMergedBamFile_PropertiesUnitTest {
         sample = new Sample(sampleType: sampleType, individual: individual)
         referenceGenome = new ReferenceGenome()
         seqType = new SeqType()
-        workPackage = new MergingWorkPackage(sample: sample, referenceGenome: referenceGenome, seqType: seqType)
+        workPackage = new MergingWorkPackage(sample: sample, referenceGenome: referenceGenome, seqType: seqType, pipeline: new Pipeline())
         MergingSet mergingSet = new MergingSet(mergingWorkPackage: workPackage)
         MergingPass mergingPass = new MergingPass(mergingSet: mergingSet)
-        bamFile = DomainFactory.createProcessedMergedBamFile(mergingPass)
+        bamFile = DomainFactory.createProcessedMergedBamFileWithoutProcessedBamFile(mergingPass, [:], false)
     }
 
     @After

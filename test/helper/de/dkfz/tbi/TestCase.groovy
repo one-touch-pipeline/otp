@@ -108,9 +108,11 @@ class TestCase {
         if (!CollectionUtils.containSame(c1, c2)) {
             Set c1Set = c1.toSet()
             Set c2Set = c2.toSet()
+            Set c3Set = c1.toSet()
             c1Set.removeAll(c2)
             c2Set.removeAll(c1)
-            throw new AssertionError("\nIn c1, but not in c2:\n${c1Set*.toString().sort().join('\n')}\nIn c2, but not in c1:\n${c2Set*.toString().sort().join('\n')}")
+            c3Set.removeAll(c1Set)
+            throw new AssertionError("\nIn c1, but not in c2:\n${c1Set*.toString().sort().join('\n')}\nIn c2, but not in c1:\n${c2Set*.toString().sort().join('\n')}\nin both:\n${c3Set*.toString().sort().join('\n')}\n")
         }
         return true
     }

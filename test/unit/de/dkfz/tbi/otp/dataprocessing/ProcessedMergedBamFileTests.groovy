@@ -1,15 +1,36 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.TestCase
-import grails.buildtestdata.mixin.Build
+import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.ngsdata.*
 import grails.test.mixin.*
 import org.junit.*
-import de.dkfz.tbi.otp.ngsdata.*
-
 
 @TestFor(ProcessedMergedBamFile)
-@Build([
-    MergingPass,
+@Mock([
+        AlignmentPass,
+        DataFile,
+        Individual,
+        FileType,
+        LibraryPreparationKit,
+        MergingPass,
+        MergingSet,
+        MergingWorkPackage,
+        MergingSetAssignment,
+        Pipeline,
+        Project,
+        ProcessedBamFile,
+        ProcessedMergedBamFile,
+        ReferenceGenome,
+        Run,
+        RunSegment,
+        Sample,
+        SampleType,
+        SeqCenter,
+        SeqPlatform,
+        SeqPlatformGroup,
+        SeqTrack,
+        SeqType,
+        SoftwareTool,
 ])
 class ProcessedMergedBamFileTests {
 
@@ -19,32 +40,9 @@ class ProcessedMergedBamFileTests {
 
     @Before
     void setUp() {
-        Project project = DomainFactory.createProject(
-                name: "project",
-                dirName: "dirName",
-                realmName: "DKFZ")
-        project.save(flush: true)
-
-        Individual individual = new Individual(
-                pid: "pid",
-                mockPid: "mockPid",
-                mockFullName: "mockFullName",
-                type: Individual.Type.REAL,
-                project: project)
-        individual.save(flush: true)
-
-        SampleType sampleType = new SampleType(
-                name: "sample-type")
-        sampleType.save(flush: true)
-
-        Sample sample = new Sample(
-                individual: individual,
-                sampleType: sampleType)
-        sample.save(flush: true)
-
-        this.workPackage = new TestData().createMergingWorkPackage(
-                sample: sample,
-                seqType: new SeqType())
+        this.workPackage = DomainFactory.createMergingWorkPackage(
+                seqType: DomainFactory.createSeqType()
+        )
         this.workPackage.save(flush: true)
 
         this.mergingSet = new MergingSet(
@@ -91,10 +89,10 @@ class ProcessedMergedBamFileTests {
 
     @Test
     void testMergingWorkPackageConstraint_NoWorkpackage_ShouldFail() {
-        ProcessedMergedBamFile processedMergedBamFile = DomainFactory.createProcessedMergedBamFile(mergingPass, [
-                type: AbstractBamFile.BamType.MDUP,
+        ProcessedMergedBamFile processedMergedBamFile = DomainFactory.createProcessedMergedBamFileWithoutProcessedBamFile(mergingPass, [
+                type       : AbstractBamFile.BamType.MDUP,
                 workPackage: null,
-        ])
+        ], false)
         TestCase.assertValidateError(processedMergedBamFile, "workPackage", "nullable", null)
     }
 

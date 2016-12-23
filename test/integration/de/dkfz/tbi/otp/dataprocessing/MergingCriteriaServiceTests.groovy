@@ -194,7 +194,6 @@ class MergingCriteriaServiceTests {
                         type: AbstractBamFile.BamType.MDUP,
                         status: State.PROCESSED,
                         ])
-        assertNotNull(mergedBamFile.save([flush: true, failOnError: true]))
 
         SeqTrack seqTrack2 = new SeqTrack(
                         laneId: "laneId",

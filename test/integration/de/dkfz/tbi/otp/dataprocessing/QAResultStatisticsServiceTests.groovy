@@ -1,15 +1,14 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import static org.junit.Assert.*
-
-import org.junit.*
-
-import de.dkfz.tbi.otp.InformationReliability
+import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QaProcessingStatus
-import de.dkfz.tbi.otp.filehandling.FileNames
+import de.dkfz.tbi.otp.filehandling.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
+import org.junit.*
+
+import static org.junit.Assert.*
 
 /**
  * Integration tests for the {@link QAResultStatisticsService}.
@@ -209,15 +208,13 @@ class QAResultStatisticsServiceTests {
                         )
         assertNotNull(mergingPass.save([flush: true]))
 
-        processedMergedBamFile = DomainFactory.createProcessedMergedBamFile(mergingPass, [
-                        identifier: 20,
+        processedMergedBamFile = DomainFactory.createProcessedMergedBamFileWithoutProcessedBamFile(mergingPass, [
                         fileExists: true,
                         type: BamType.MDUP,
                         qualityAssessmentStatus: QaProcessingStatus.FINISHED,
                         md5sum: null,
                         status: AbstractBamFile.State.PROCESSED,
                         ])
-        assertNotNull(processedMergedBamFile.save([flush: true]))
 
         QualityAssessmentMergedPass qualityAssessmentMergedPass = new QualityAssessmentMergedPass(
                         identifier: 1,

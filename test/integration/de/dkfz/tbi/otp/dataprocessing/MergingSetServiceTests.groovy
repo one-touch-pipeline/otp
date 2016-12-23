@@ -364,11 +364,10 @@ class MergingSetServiceTests {
                         )
         assertNotNull(mergingPass.save([flush: true, failOnError: true]))
 
-        ProcessedMergedBamFile processedMergedBamFile = DomainFactory.createProcessedMergedBamFile(mergingPass, [
+        ProcessedMergedBamFile processedMergedBamFile = DomainFactory.createProcessedMergedBamFileWithoutProcessedBamFile(mergingPass, [
                         type: AbstractBamFile.BamType.MDUP,
                         status: State.PROCESSED,
                         ])
-        assertNotNull(processedMergedBamFile.save([flush: true, failOnError: true]))
 
         bamFile.status = State.PROCESSED
         assertNotNull(bamFile.save([flush: true, failOnError: true]))
@@ -403,11 +402,10 @@ class MergingSetServiceTests {
                         )
         assertNotNull(mergingPass.save([flush: true, failOnError: true]))
 
-        ProcessedMergedBamFile processedMergedBamFile = DomainFactory.createProcessedMergedBamFile(mergingPass, [
+        ProcessedMergedBamFile processedMergedBamFile = DomainFactory.createProcessedMergedBamFileWithoutProcessedBamFile(mergingPass, [
                         type: AbstractBamFile.BamType.MDUP,
                         status: State.INPROGRESS,
                         ])
-        assertNotNull(processedMergedBamFile.save([flush: true, failOnError: true]))
 
         bamFile.status = State.PROCESSED
         assertNotNull(bamFile.save([flush: true, failOnError: true]))
