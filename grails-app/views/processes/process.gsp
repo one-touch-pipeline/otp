@@ -9,11 +9,22 @@
 <body>
     <div class="body">
         <div id="processInfoBox">
-            <otp:autoRefresh/>
-            <h1><g:message code="processes.process.title.listOfProcessingSteps" args="${ [id] }"/>  <g:link action="plan" id="${planId}"><g:message code="processes.process.title.workflow" args="${ [name] }"/></g:link></h1>
-            <g:if test="${hasError}">
+            <h1><g:message code="processes.process.title.listOfProcessingSteps" args="${ [id] }"/>  <g:link action="plan" id="${planId}"><g:message code="processes.process.title.workflow" args="${ [name] }"/></g:link><br>
+            <g:if test="${process.restarted}">
+                <g:message code="processes.process.title.restartedProcessFrom"/>  <g:link action="process" id="${process.restarted.id}"><g:message code="processes.process.title.restartedProcessLink" args="${ [process.restarted.id] }"/></g:link>
+            </g:if>
+            <g:if test="${restartedProcess}">
+                <g:message code="processes.process.title.restartedProcess"/>  <g:link action="process" id="${restartedProcess.id}"><g:message code="processes.process.title.restartedProcessLink" args="${ [restartedProcess.id] }"/></g:link>
+            </g:if>
+            </h1>
+            <g:if test="${hasError && !restartedProcess}">
                 <g:form name="operatorIsAwareOfFailureForm" controller="processes" action="updateOperatorIsAwareOfFailure">
                     <g:message code="processes.process.operatorIsAwareOfFailure" /> <g:checkBox name="operatorIsAwareOfFailure" value="${operatorIsAwareOfFailure}" onChange="submit();"/>
+                    <sec:ifAllGranted roles="ROLE_ADMIN">
+                        <g:if test="${showRestartButton}">
+                            <button id="show-restart-process"><g:message code="processes.process.restartProcess"/></button>
+                        </g:if>
+                    </sec:ifAllGranted>
                     <g:hiddenField name="process.id" value="${id}"/>
                 </g:form>
             </g:if>
@@ -33,11 +44,6 @@
                 <div id="process-visualization" style="display: none"></div>
                 <button id="show-visualization"><g:message code="processes.process.showProcessVisualization"/></button>
                 <button id="hide-visualization" style="display: none"><g:message code="processes.process.hideProcessVisualization"/></button>
-                <sec:ifAllGranted roles="ROLE_ADMIN">
-                    <g:if test="${RestartableStartJob.isAssignableFrom(Class.forName(process.getStartJobClass()))}">
-                        <button id="show-restart-process"><g:message code="processes.process.restartProcess"/></button>
-                    </g:if>
-                </sec:ifAllGranted>
             </div>
         </div>
         <div id="processCommentBox" class="commentBoxContainer">

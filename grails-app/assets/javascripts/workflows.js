@@ -510,7 +510,7 @@ $.otp.workflows = {
                     rowData[6] = $.otp.createLinkMarkup({
                         controller: 'processes',
                         action: 'processingStep',
-                        id: rowData[6].id,
+                        id: stepId,
                         title: rowData[6].error,
                         text: rowData[6].state.name
                     });
@@ -680,7 +680,7 @@ $.otp.workflows = {
             { "bSortable": false, "aTargets": [8] }
         ],
             undefined,
-            140);
+            270);
         $("#show-visualization").click(function () {
             $("#process-visualization").show();
             $("#hide-visualization").show();

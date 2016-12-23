@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.job.processing
 
 import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.job.jobs.*
 import de.dkfz.tbi.otp.job.jobs.utils.*
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.restarting.*
@@ -181,8 +182,13 @@ class ProcessesController {
         processes.each { Process process, ProcessingStepUpdate latest ->
             Map parameterData = processParameterData(process)
             def actions = []
-            if (latest.state == ExecutionState.FAILURE) {
-                actions << "restart"
+            ExecutionState latestState = latest.state
+            if (latestState == ExecutionState.FAILURE) {
+                if (Process.findByRestarted(process)) {
+                    latestState = ExecutionState.RESTARTED
+                } else {
+                    actions << "restart"
+                }
             }
             dataToRender.aaData << [
                 process.id,
@@ -191,7 +197,7 @@ class ProcessesController {
                 process.started,
                 latest.date,
                 latest.processingStep.jobDefinition.name,
-                [state: latest.state, error: latest.error ? latest.error.errorMessage : null, id: latest.processingStep.id],
+                [state: latestState, error: latest.error ? latest.error.errorMessage : null, id: latest.processingStep.id],
                 process.comment?.comment?.encodeAsHTML(),
                 [actions: actions]
             ]
@@ -222,8 +228,19 @@ class ProcessesController {
                 hasError: processService.getError(process),
                 planId: process.jobExecutionPlan.id,
                 parameter: processParameterData(process),
-                comment: process.comment
+                comment: process.comment,
+                restartedProcess: getRestartedProcess(process),
+                showRestartButton: showRestartButton(process),
         ]
+    }
+
+    boolean showRestartButton(Process process) {
+        return (RestartableStartJob.isAssignableFrom(Class.forName(process.getStartJobClass())) &&
+                !Process.findByRestarted(process))
+    }
+
+    Process getRestartedProcess(Process process) {
+        return Process.findByRestarted(process)
     }
 
     def updateOperatorIsAwareOfFailure(OperatorIsAwareOfFailureSubmitCommand cmd) {
@@ -258,7 +275,7 @@ class ProcessesController {
         futures.each { future ->
             def data = future.get()
             def actions = []
-            if (data.state == ExecutionState.FAILURE) {
+            if (data.state == ExecutionState.FAILURE && !Process.findByRestarted(process.restarted)) {
                 actions << "restart"
             }
             dataToRender.aaData << [
