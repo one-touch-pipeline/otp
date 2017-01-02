@@ -76,9 +76,10 @@ println processingOptionService.createOrUpdate(
         CreateNotificationTextService.ALIGNMENT_FURTHER_PROCESSING_TEMPLATE,
         null,
         null,
-'''The following sample pairs will be SNV-called by OTP:
+        '''For the following sample pairs variants will be called by OTP:
 ${samplePairsWillProcess}
-As soon as the SNV calling is finished, OTP will send you another notification e-mail.
+OTP executes the following variant calling pipeline(s): ${variantCallingPipelines}
+As soon as a variant calling is finished, OTP will send you another notification e-mail.
 ''',
         '',
 )
@@ -100,7 +101,7 @@ println processingOptionService.createOrUpdate(
         CreateNotificationTextService.ALIGNMENT_PROCESSING_INFORMATION_TEMPLATE,
         null,
         null,
-'''${seqType} ${individuals ? "("+individuals+")" : ""}
+        '''${seqType} ${individuals ? "("+individuals+")" : ""}
     Reference genome: ${referenceGenome}
     Alignment program: ${alignmentProgram} ${alignmentParameter}
     Merging/duplication marking program: ${mergingProgram} ${mergingParameter}
@@ -135,6 +136,9 @@ println processingOptionService.createOrUpdate(
         null,
 '''The Indel calling for following sample pairs is finished:
 ${samplePairsFinished}
+
+For the Indel calling you can find links to the plots here:
+${otpLinks}
 
 The result files are available in the directories:
 ${directories}

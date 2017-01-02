@@ -10,6 +10,7 @@ String ticketNumber = ''
 //OtrsTicket.ProcessingStep processingStep = OtrsTicket.ProcessingStep.INSTALLATION
 //OtrsTicket.ProcessingStep processingStep = OtrsTicket.ProcessingStep.ALIGNMENT
 //OtrsTicket.ProcessingStep processingStep = OtrsTicket.ProcessingStep.SNV
+//OtrsTicket.ProcessingStep processingStep = OtrsTicket.ProcessingStep.INDEL
 
 
 

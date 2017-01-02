@@ -376,7 +376,7 @@ class CreateNotificationTextServiceSpec extends Specification {
         analysis || pathSegment
         SNV      || "snv_results"
         INDEL    || "indel_results"
-   }
+    }
 
 
     void "getSamplePairRepresentation, when empty sample pair list, should return empty string"() {
@@ -425,16 +425,20 @@ class CreateNotificationTextServiceSpec extends Specification {
         DomainFactory.createPanCanAlignableSeqTypes()
         DomainFactory.createNotificationProcessingOptions()
 
-        Map data1 = createData([sampleId1: 'sampleId1'])
-        Map data2 = createData(
-                sampleId1: 'sampleId2a',
-                sampleId2: 'sampleId2b',
-                project: multipleProjects ? DomainFactory.createProjectWithRealms() : data1.seqTrack.project,
-                seqType: multipleSeqTypes ? DomainFactory.createSeqTypePaired() : data1.seqTrack.seqType,
-                run: multipleRuns ? DomainFactory.createRun() : data1.seqTrack.run,
+        Map data1 = createData([
+                sampleId1: 'sampleId1',
+                pid      : 'patient_1',
+        ])
+        Map data2 = createData([
+                sampleId1                   : 'sampleId2a',
+                sampleId2                   : 'sampleId2b',
+                pid                         : 'patient_2',
+                project                     : multipleProjects ? DomainFactory.createProjectWithRealms() : data1.seqTrack.project,
+                seqType                     : multipleSeqTypes ? DomainFactory.createSeqTypePaired() : data1.seqTrack.seqType,
+                run                         : multipleRuns ? DomainFactory.createRun() : data1.seqTrack.run,
                 installationProcessingStatus: installationProcessingStatus,
-                alignmentProcessingStatus: align ? ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_MIGHT_DO : ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO,
-        )
+                alignmentProcessingStatus   : align ? ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_MIGHT_DO : ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO,
+        ])
 
         ProcessingStatus processingStatus = new ProcessingStatus([
                 data1.seqTrackProcessingStatus,
@@ -519,6 +523,7 @@ ${expectedAlign}"""
                 run: data1.seqTrack.run,
                 alignmentProcessingStatus: secondSampleAligned ? ProcessingStatus.WorkflowProcessingStatus.ALL_DONE : ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO,
                 snvProcessingStatus: snv ? ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_MIGHT_DO : ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO,
+                indelProcessingStatus: indel ? ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_MIGHT_DO : ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO,
         )
 
         ProcessingStatus processingStatus = new ProcessingStatus([
@@ -541,16 +546,23 @@ ${expectedAlign}"""
         )
 
         List<SeqTrack> seqTracks = [data1.seqTrack]
-        List<SamplePair> samplePairWithoutSnv = [data1.samplePair]
-        List<SamplePair> samplePairWithSnv = []
+        List<SamplePair> samplePairWithoutVariantCalling = [data1.samplePair]
+        List<SamplePair> samplePairWithVariantCalling = []
         String expectedSamples = "${createNotificationTextService.getSampleName(data1.seqTrack)} (${data1.sampleId1})"
+        List<String> variantCallingPipelines = []
         if (secondSampleAligned) {
             seqTracks.add(data2.seqTrack)
             expectedSamples += "\n${createNotificationTextService.getSampleName(data2.seqTrack)} (${data2.sampleId1}, ${data2.sampleId2})"
-            if (snv) {
-                samplePairWithSnv.add(data2.samplePair)
+            if (indel | snv) {
+                samplePairWithVariantCalling.add(data2.samplePair)
+                if (indel) {
+                    variantCallingPipelines << 'Indel'
+                }
+                if (snv) {
+                    variantCallingPipelines << 'SNV'
+                }
             } else {
-                samplePairWithoutSnv.add(data2.samplePair)
+                samplePairWithoutVariantCalling.add(data2.samplePair)
             }
         }
 
@@ -572,14 +584,15 @@ ${expectedAlign}"""
         }
         String expectedPaths = createNotificationTextService.getMergingDirectories(seqTracks)
         String expectedAlignment = alignments.join('\n').trim()
-        String expectedSnvRunning = samplePairWithSnv ? """\n
-run snv
-samplePairsWillProcess: ${createNotificationTextService.getSamplePairRepresentation(samplePairWithSnv)}
+        String expectedVariantCallingRunning = samplePairWithVariantCalling ? """\n
+run variant calling
+variantCallingPipelines: ${variantCallingPipelines.join(', ')}
+samplePairsWillProcess: ${createNotificationTextService.getSamplePairRepresentation(samplePairWithVariantCalling)}
 """ : ''
 
-        String expectedSnvNotRunning = """\n
-no snv
-samplePairsWontProcess: ${createNotificationTextService.getSamplePairRepresentation(samplePairWithoutSnv)}
+        String expectedVariantCallingNotRunning = """\n
+no variant calling
+samplePairsWontProcess: ${createNotificationTextService.getSamplePairRepresentation(samplePairWithoutVariantCalling)}
 """
 
         String expected = """
@@ -588,7 +601,7 @@ samples: ${expectedSamples}
 links: ${expectedLinks}
 processingValues: ${expectedAlignment}
 paths: ${expectedPaths}
-${expectedSnvRunning}${expectedSnvNotRunning}"""
+${expectedVariantCallingRunning}${expectedVariantCallingNotRunning}"""
 
         when:
         String message = createNotificationTextService.alignmentNotification(processingStatus)
@@ -597,12 +610,14 @@ ${expectedSnvRunning}${expectedSnvNotRunning}"""
         expected == message
 
         where:
-        multipleSeqTypes | multipleProjects | secondSampleAligned | snv
-        false            | false            | true                | false
-        true             | false            | true                | false
-        false            | true             | true                | false
-        false            | false            | false               | false
-        false            | false            | true                | true
+        multipleSeqTypes | multipleProjects | secondSampleAligned | snv   | indel
+        false            | false            | true                | false | false
+        true             | false            | true                | false | false
+        false            | true             | true                | false | false
+        false            | false            | false               | false | false
+        false            | false            | true                | true  | false
+        false            | false            | true                | false | true
+        false            | false            | true                | true  | true
     }
 
 
@@ -720,6 +735,9 @@ samplePairsNotProcessed: ${expectedSamplePairsNotProcessed}
         int projectCount = multipleProjects && indelProcessingStatus == ProcessingStatus.WorkflowProcessingStatus.ALL_DONE ? 2 : 1
 
         CreateNotificationTextService createNotificationTextService = new CreateNotificationTextService(
+                linkGenerator: Mock(LinkGenerator) {
+                    projectCount * link(_) >> 'link'
+                },
                 mergedAlignmentDataFileService: new MergedAlignmentDataFileService(),
         )
 
@@ -740,10 +758,12 @@ samplePairsNotProcessed: ${expectedSamplePairsNotProcessed}
         String expectedSamplePairsFinished = createNotificationTextService.getSamplePairRepresentation(samplePairWithIndel)
         String expectedSamplePairsNotProcessed = createNotificationTextService.getSamplePairRepresentation(samplePairWithoutIndel)
         String expectedDirectories = createNotificationTextService.variantCallingDirectories(samplePairWithIndel, INDEL)
+        String expectedLinks = samplePairWithIndel*.project.unique().collect { 'link' }.join('\n')
 
         String expected = """
 indel finished
 samplePairsFinished: ${expectedSamplePairsFinished}
+otpLinks: ${expectedLinks}
 directories: ${expectedDirectories}
 """
         if (expectedSamplePairsNotProcessed) {
@@ -847,6 +867,7 @@ seqCenterComment: ${expectedSeqCenterComment}
 
     private static Map createData(Map properties = [:]) {
         Project project = properties.project ?: DomainFactory.createProjectWithRealms()
+        String pid = properties.pid ?: "pid_${DomainFactory.counter++}"
         SeqType seqType = properties.seqType ?: DomainFactory.createSeqTypePaired()
         ProcessingStatus.WorkflowProcessingStatus installationProcessingStatus = properties.installationProcessingStatus ?: ProcessingStatus.WorkflowProcessingStatus.ALL_DONE
         ProcessingStatus.WorkflowProcessingStatus alignmentProcessingStatus = properties.alignmentProcessingStatus ?: ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO
@@ -860,7 +881,9 @@ seqCenterComment: ${expectedSeqCenterComment}
                 seqType: seqType,
                 sample : DomainFactory.createSample([
                         individual: DomainFactory.createIndividual([
-                                project: project
+                                project     : project,
+                                pid         : pid,
+                                mockFullName: pid,
                         ])
                 ]),
                 run    : run,

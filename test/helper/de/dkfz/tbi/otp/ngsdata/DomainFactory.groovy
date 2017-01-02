@@ -1627,7 +1627,8 @@ paths: ${paths}
                 type: null,
                 project: null,
                 value: '''
-run snv
+run variant calling
+variantCallingPipelines: ${variantCallingPipelines}
 samplePairsWillProcess: ${samplePairsWillProcess}
 ''',
                 comment: '',
@@ -1638,7 +1639,7 @@ samplePairsWillProcess: ${samplePairsWillProcess}
                 type: null,
                 project: null,
                 value: '''
-no snv
+no variant calling
 samplePairsWontProcess: ${samplePairsWontProcess}
 ''',
                 comment: '',
@@ -1694,6 +1695,7 @@ samplePairsNotProcessed: ${samplePairsNotProcessed}
                 value: '''
 indel finished
 samplePairsFinished: ${samplePairsFinished}
+otpLinks: ${otpLinks}
 directories: ${directories}
 ''',
                 comment: '',

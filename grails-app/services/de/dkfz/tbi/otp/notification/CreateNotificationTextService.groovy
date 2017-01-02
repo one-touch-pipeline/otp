@@ -166,8 +166,10 @@ class CreateNotificationTextService {
         Map<Boolean, List<SamplePairProcessingStatus>> samplePairs = status.samplePairProcessingStatuses.groupBy {
             it.variantCallingProcessingStatus != NOTHING_DONE_WONT_DO }
         if (samplePairs[true]) {
+            String variantCallingPipelines = samplePairs[true]*.variantCallingWorkflowNames().flatten().unique().sort().join(', ')
             message += '\n' + createMessage(ALIGNMENT_FURTHER_PROCESSING_TEMPLATE, [
                     samplePairsWillProcess: getSamplePairRepresentation(samplePairs[true]*.samplePair),
+                    variantCallingPipelines: variantCallingPipelines,
             ])
         }
         if (samplePairs[false]) {
@@ -203,8 +205,16 @@ class CreateNotificationTextService {
         }
         String directories = variantCallingDirectories(samplePairsFinished, notificationStep)
         String otpLinks = ''
-        if (notificationStep == SNV) {
+        switch (notificationStep) {
+            case SNV:
             otpLinks = createOtpLinks(samplePairsFinished*.project, 'snv', 'results', 'projectName')
+                break;
+            case INDEL:
+                otpLinks = createOtpLinks(samplePairsFinished*.project, 'indel', 'results', 'projectName')
+                break
+            default:
+                //no links
+                break
         }
         String message = createMessage((String) this."${notificationStep.name()}_NOTIFICATION_TEMPLATE", [
                 samplePairsFinished    : getSamplePairRepresentation(samplePairsFinished),
