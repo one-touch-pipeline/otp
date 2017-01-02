@@ -4,9 +4,10 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.tracking.*
 import de.dkfz.tbi.otp.utils.*
 import org.codehaus.groovy.grails.commons.*
-import org.joda.time.DateTime
+import org.joda.time.*
 
 import java.text.*
 
@@ -23,6 +24,8 @@ class JobMailService {
     GrailsApplication grailsApplication
 
     JobStatusLoggingService jobStatusLoggingService
+
+    TrackingService trackingService
 
 
     public void sendErrorNotificationIfFastTrack(ProcessingStep step, Throwable exceptionToBeHandled) {
@@ -69,6 +72,11 @@ link: ${link}
         if (!object) {
             return //general workflow, no processing
         }
+        Collection<SeqTrack> seqTracks = object.containedSeqTracks
+        String ilseNumbers = seqTracks*.ilseSubmission*.ilseNumber.unique().sort().join(', ')
+        Collection<OtrsTicket> openTickets = trackingService.findAllOtrsTickets(seqTracks).findAll { OtrsTicket otrsTicket ->
+            !otrsTicket.finalNotificationSent
+        }
 
         List<ClusterJob> clusterJobs = ClusterJob.findAllByProcessingStep(step)
         List<ClusterJobIdentifier> clusterJobIdentifiers = ClusterJobIdentifier.asClusterJobIdentifierList(clusterJobs)
@@ -78,15 +86,21 @@ link: ${link}
         }
 
         int restartedStepCount = restartCount(step)
+        Process firstWorkflow = firstWorkflowJobId(step.process)
 
         StringBuilder message = new StringBuilder('''OTP job failed\ndata:\n''')
 
         Map otpWorkflow = [
-                otpWorkflowId     : step.process.id,
-                otpWorkflowStarted: dateString(step.process.started),
-                otpWorkflowName   : step.jobExecutionPlan.name,
-                otpLink           : processService.processUrl(step.process),
-                objectInformation : object.toString().replaceAll(/ ?<br> ?/, ' ').replaceAll(/\n/, ' ')
+                otpWorkflowId         : step.process.id,
+                otpWorkflowStarted    : dateString(step.process.started),
+                otpWorkflowName       : step.jobExecutionPlan.name,
+                otpLink               : processService.processUrl(step.process),
+                restartedWorkflowJobId: Process.findByRestarted(step.process)?.id,
+                originWorkflowJobId   : firstWorkflow.id,
+                originWorkflowStart   : dateString(firstWorkflow.started),
+                objectInformation     : object.toString().replaceAll(/ ?<br> ?/, ' ').replaceAll(/\n/, ' '),
+                ilseNumbers           : ilseNumbers,
+                openTickets           : openTickets.join(', '),
         ]
         message << mapToString('Workflow', otpWorkflow)
 
@@ -96,9 +110,9 @@ link: ${link}
                 otpJobFailed       : dateString(new Date()),
                 restartedOtpJobId  : restartedStepCount ? ((RestartedProcessingStep) step).original.id.toString() : '',
                 countOfJobRestarted: restartedStepCount,
-                otpErrorMessage    : exceptionToBeHandled.message?.replaceAll('\n', ' '),
         ]
         message << mapToString('OTP Job', otpJob)
+        message << "  otpErrorMessage: ${exceptionToBeHandled.message}"
 
         clusterJobsToCheck.sort { ClusterJob clusterJob ->
             return clusterJob.id
@@ -127,7 +141,7 @@ Failed ClusterJob Job Values: ${mapForLog.values().join(';')}""")
         }
 
         if (!clusterJobsToCheck) {
-            Map mapForLog = otpWorkflow + otpJob
+            Map mapForLog = otpWorkflow + otpJob + [otpErrorMessage: exceptionToBeHandled.message?.replaceAll('\n', ' ')]
             log.info("""Error Statistic:
 Failed OTP Header: ${mapForLog.keySet().join(';')}
 Failed OTP Values: ${mapForLog.values().join(';')}""")
@@ -165,5 +179,14 @@ Failed OTP Values: ${mapForLog.values().join(';')}""")
 ${header}:
 ${data.collect { key, value -> "  ${key}: ${value}" }.join('\n')}
 """
+    }
+
+    private Process firstWorkflowJobId(Process process) {
+        Process previous = Process.findByRestarted(process)
+        if (previous) {
+            return firstWorkflowJobId(previous)
+        } else {
+            return process
+        }
     }
 }

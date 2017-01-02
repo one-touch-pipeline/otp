@@ -4,6 +4,7 @@ import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.tracking.*
 import de.dkfz.tbi.otp.utils.*
 import org.apache.commons.logging.impl.*
 import org.junit.*
@@ -77,6 +78,7 @@ class JobMailServiceIntegrationSpec extends Specification {
                     processUrl(_) >> 'url'
                 },
                 jobStatusLoggingService: jobStatusLoggingService,
+                trackingService        : new TrackingService(),
                 log                    : new NoOpLog()
         ])
 
