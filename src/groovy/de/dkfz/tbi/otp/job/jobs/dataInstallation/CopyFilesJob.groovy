@@ -36,7 +36,9 @@ class CopyFilesJob extends AbstractOtpJob implements AutoRestartableJob {
             String md5SumFileName = checksumFileService.md5FileName(dataFile)
 
             String copyOrLinkCommand = seqTrack.linkedExternally ? "ln -s" : "cp"
-            String fastqFile = seqTrack.linkedExternally ? "" : "${targetFile}"
+            String calculateMd5 = seqTrack.linkedExternally ? "" : "md5sum ${targetFile.name} > ${md5SumFileName}"
+            String changeMode = seqTrack.linkedExternally ? "" : "chmod 440 ${targetFile} ${md5SumFileName}"
+
 
             String cmd = """
 mkdir -p -m 2750 ${targetFile.parent}
@@ -46,8 +48,8 @@ if [ -e "${targetFile.path}" ]; then
     rm ${targetFile.path}*
 fi
 ${copyOrLinkCommand} ${sourceFile} ${targetFile}
-md5sum ${targetFile.name} > ${md5SumFileName}
-chmod 440 ${fastqFile} ${md5SumFileName}
+${calculateMd5}
+${changeMode}
 """
             pbsService.executeJob(realm, cmd)
         }
@@ -63,7 +65,9 @@ chmod 440 ${fastqFile} ${md5SumFileName}
             File targetFile = new File(lsdfFilesService.getFileFinalPath(dataFile))
             try {
                 lsdfFilesService.ensureFileIsReadableAndNotEmpty(targetFile)
-                assert checksumFileService.compareMd5(dataFile)
+                if (!seqTrack.linkedExternally) {
+                    assert checksumFileService.compareMd5(dataFile)
+                }
 
                 dataFile.fileSize = targetFile.size()
                 dataFile.dateFileSystem = new Date(targetFile.lastModified())

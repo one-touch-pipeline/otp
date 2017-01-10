@@ -6,11 +6,6 @@ class ChecksumFileService {
 
     def lsdfFilesService
 
-    public String dirToMd5File(DataFile file) {
-        String path = lsdfFilesService.getFileFinalPath(file)
-        return path.substring(0, path.lastIndexOf("/") + 1)
-    }
-
     public String pathToMd5File(DataFile file) {
         String path = lsdfFilesService.getFileFinalPath(file)
         return "${path}.md5sum"
@@ -32,11 +27,6 @@ class ChecksumFileService {
      */
     public String picardMd5FileName(String fileName) {
         return "${fileName}.md5"
-    }
-
-    public boolean md5sumFileExists(DataFile file) {
-        String path = pathToMd5File(file)
-        return lsdfFilesService.fileExists(path)
     }
 
     public boolean compareMd5(DataFile file) {
