@@ -4,7 +4,7 @@ import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.tracking.*
 import org.springframework.beans.factory.annotation.*
 
-class NotifyProcessFinishedJob extends AbstractEndStateAwareJobImpl {
+class NotifyProcessFinishedJob extends AbstractEndStateAwareJobImpl implements AutoRestartableJob {
 
     @Autowired
     TrackingService trackingService
