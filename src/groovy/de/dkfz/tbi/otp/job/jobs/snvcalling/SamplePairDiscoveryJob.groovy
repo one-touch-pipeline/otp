@@ -1,40 +1,30 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.ProcessingStatus
-import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
-import de.dkfz.tbi.otp.job.processing.ResumableJob
-import de.dkfz.tbi.otp.ngsdata.Project
-import de.dkfz.tbi.otp.ngsdata.SampleTypePerProject
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.ngsdata.*
+
 
 @ResumableJob
 class SamplePairDiscoveryJob extends AbstractEndStateAwareJobImpl {
 
     @Override
     void execute() throws Exception {
-
-        final boolean sampleTypesNeedCategorization = logUncategorizedSampleTypes()
-
+        logUncategorizedSampleTypes()
         createMissingDiseaseControlSamplePairs()
-
-        if (sampleTypesNeedCategorization) {
-            throw new RuntimeException('Some sample types are not categorized. See the job log for details.')
-        } else {
-            succeed()
-        }
+        succeed()
     }
 
     /**
      * @return Whether there are sample types which need categorization
      */
-    boolean logUncategorizedSampleTypes() {
+    void logUncategorizedSampleTypes() {
         final String uncategorizedSampleTypes = findUncategorizedSampleTypes()
         if (uncategorizedSampleTypes != null) {
             log.warn "The following sample types need to be categorized:\n${uncategorizedSampleTypes}"
-            return true
         } else {
             log.info 'Did not find any sample type which needs categorization. :-)'
-            return false
         }
     }
 

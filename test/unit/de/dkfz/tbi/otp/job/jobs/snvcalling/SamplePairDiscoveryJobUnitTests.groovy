@@ -1,16 +1,13 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
-import org.apache.commons.logging.impl.NoOpLog
-import org.joda.time.LocalDate
-import org.junit.Before
-import org.junit.Test
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.ProcessingStatus
-import de.dkfz.tbi.otp.job.processing.ExecutionState
-import de.dkfz.tbi.otp.ngsdata.Project
-import de.dkfz.tbi.otp.ngsdata.SampleType
-import de.dkfz.tbi.otp.ngsdata.SampleTypePerProject
-import grails.buildtestdata.mixin.Build
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.ngsdata.*
+import grails.buildtestdata.mixin.*
+import org.apache.commons.logging.impl.*
+import org.junit.*
+
 
 @Build([SamplePair])
 class SamplePairDiscoveryJobUnitTests {
@@ -53,7 +50,6 @@ class SamplePairDiscoveryJobUnitTests {
                     "  ${tumor.name}\n"
 
             assert SamplePairDiscoveryJob.findUncategorizedSampleTypes().toString() == expected
-            assert job.logUncategorizedSampleTypes()
         } finally {
             SampleTypePerProject.metaClass = null
         }
@@ -92,7 +88,7 @@ class SamplePairDiscoveryJobUnitTests {
         testExecute {
             job.metaClass.logUncategorizedSampleTypes = { logUncategorizedSampleTypesCalled = true; return true }
 
-            assert shouldFail { job.execute() } == 'Some sample types are not categorized. See the job log for details.'
+            job.execute()
         }
         assert logUncategorizedSampleTypesCalled == true
     }
