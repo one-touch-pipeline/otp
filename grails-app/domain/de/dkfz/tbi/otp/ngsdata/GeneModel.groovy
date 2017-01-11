@@ -1,9 +1,10 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.utils.*
 
 
-class GeneModel {
+class GeneModel implements Entity {
     ReferenceGenome referenceGenome
     String basePath
     String fileName

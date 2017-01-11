@@ -1,6 +1,9 @@
 package de.dkfz.tbi.otp.ngsdata
 
-class ToolName {
+import de.dkfz.tbi.otp.utils.*
+
+
+class ToolName implements Entity {
 
     String name
 
