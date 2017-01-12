@@ -1,0 +1,336 @@
+package de.dkfz.tbi.otp.monitor
+
+import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.*
+import spock.lang.*
+
+class SamplePairCheckerIntegrationSpec extends Specification {
+
+
+    void "bamFilesWithoutCategory, when some bam files has a category and some not, return only bam files without category"() {
+        given:
+        SamplePairChecker samplePairChecker = new SamplePairChecker()
+
+        ProcessedMergedBamFile bamFile1 = DomainFactory.createProcessedMergedBamFile()
+        ProcessedMergedBamFile bamFile2 = DomainFactory.createProcessedMergedBamFile()
+        ProcessedMergedBamFile bamFile3 = DomainFactory.createProcessedMergedBamFile()
+        ProcessedMergedBamFile bamFile4 = DomainFactory.createProcessedMergedBamFile()
+        ProcessedMergedBamFile bamFile5 = DomainFactory.createProcessedMergedBamFile()
+        List<ProcessedMergedBamFile> bamFiles = [bamFile1, bamFile2, bamFile3, bamFile4, bamFile5]
+
+        DomainFactory.createSampleTypePerProjectForBamFile(bamFile1)
+        DomainFactory.createSampleTypePerProjectForBamFile(bamFile2)
+
+        List<AbstractMergedBamFile> expected = [bamFile3, bamFile4, bamFile5]
+
+        when:
+        List returnValue = samplePairChecker.bamFilesWithoutCategory(bamFiles)
+
+        then:
+        TestCase.assertContainSame(expected, returnValue)
+    }
+
+
+    void "bamFilesWithIgnoredCategory, when some bam files has the category ignored and some not, return only bam files with category ignored"() {
+        given:
+        SamplePairChecker samplePairChecker = new SamplePairChecker()
+
+        ProcessedMergedBamFile bamFile1 = DomainFactory.createProcessedMergedBamFile()
+        ProcessedMergedBamFile bamFile2 = DomainFactory.createProcessedMergedBamFile()
+        ProcessedMergedBamFile bamFile3 = DomainFactory.createProcessedMergedBamFile()
+        ProcessedMergedBamFile bamFile4 = DomainFactory.createProcessedMergedBamFile()
+        ProcessedMergedBamFile bamFile5 = DomainFactory.createProcessedMergedBamFile()
+        List<ProcessedMergedBamFile> bamFiles = [bamFile1, bamFile2, bamFile3, bamFile4, bamFile5]
+
+        DomainFactory.createSampleTypePerProjectForBamFile(bamFile1)
+        DomainFactory.createSampleTypePerProjectForBamFile(bamFile2)
+        DomainFactory.createSampleTypePerProjectForBamFile(bamFile3, SampleType.Category.IGNORED)
+        DomainFactory.createSampleTypePerProjectForBamFile(bamFile4, SampleType.Category.CONTROL)
+        DomainFactory.createSampleTypePerProjectForBamFile(bamFile5, SampleType.Category.IGNORED)
+
+        List<AbstractMergedBamFile> expected = [bamFile3, bamFile5]
+
+        when:
+        List returnValue = samplePairChecker.bamFilesWithIgnoredCategory(bamFiles)
+
+        then:
+        TestCase.assertContainSame(expected, returnValue)
+    }
+
+
+    void "bamFilesWithoutThreshold, when some bam files has a threshold  and some not, return only bam files without threshold"() {
+        given:
+        SamplePairChecker samplePairChecker = new SamplePairChecker()
+
+        ProcessedMergedBamFile bamFile1 = DomainFactory.createProcessedMergedBamFile()
+        ProcessedMergedBamFile bamFile2 = DomainFactory.createProcessedMergedBamFile()
+        ProcessedMergedBamFile bamFile3 = DomainFactory.createProcessedMergedBamFile()
+        ProcessedMergedBamFile bamFile4 = DomainFactory.createProcessedMergedBamFile()
+        ProcessedMergedBamFile bamFile5 = DomainFactory.createProcessedMergedBamFile()
+        List<ProcessedMergedBamFile> bamFiles = [bamFile1, bamFile2, bamFile3, bamFile4, bamFile5]
+
+        DomainFactory.createProcessingThresholdsForBamFile(bamFile1)
+        DomainFactory.createProcessingThresholdsForBamFile(bamFile2)
+
+        List<AbstractMergedBamFile> expected = [bamFile3, bamFile4, bamFile5]
+
+        when:
+        List returnValue = samplePairChecker.bamFilesWithoutThreshold(bamFiles)
+
+        then:
+        TestCase.assertContainSame(expected, returnValue)
+    }
+
+
+    void "bamFilesWithoutSamplePair, when some bam files has a sample pair and some not, return only bam files without sample pair"() {
+        given:
+        SamplePairChecker samplePairChecker = new SamplePairChecker()
+
+        ProcessedMergedBamFile bamFile1 = DomainFactory.createProcessedMergedBamFile()
+        ProcessedMergedBamFile bamFile2 = DomainFactory.createProcessedMergedBamFile()
+        ProcessedMergedBamFile bamFile3 = DomainFactory.createProcessedMergedBamFile()
+        ProcessedMergedBamFile bamFile4 = DomainFactory.createProcessedMergedBamFile()
+        ProcessedMergedBamFile bamFile5 = DomainFactory.createProcessedMergedBamFile()
+        List<ProcessedMergedBamFile> bamFiles = [bamFile1, bamFile2, bamFile3, bamFile4, bamFile5]
+
+        DomainFactory.createSamplePair(mergingWorkPackage1: bamFile1.mergingWorkPackage)
+        DomainFactory.createSamplePair(mergingWorkPackage2: bamFile2.mergingWorkPackage)
+
+
+        List<AbstractMergedBamFile> expected = [bamFile3, bamFile4, bamFile5]
+
+        when:
+        List returnValue = samplePairChecker.bamFilesWithoutSamplePair(bamFiles)
+
+        then:
+        TestCase.assertContainSame(expected, returnValue)
+    }
+
+
+    void "samplePairsForBamFiles, when some bam files has a samplePair and some not, return sample pair for the given bam files"() {
+        given:
+        SamplePairChecker samplePairChecker = new SamplePairChecker()
+
+        ProcessedMergedBamFile bamFile1 = DomainFactory.createProcessedMergedBamFile()
+        ProcessedMergedBamFile bamFile2 = DomainFactory.createProcessedMergedBamFile()
+        ProcessedMergedBamFile bamFile3 = DomainFactory.createProcessedMergedBamFile()
+        ProcessedMergedBamFile bamFile4 = DomainFactory.createProcessedMergedBamFile()
+        ProcessedMergedBamFile bamFile5 = DomainFactory.createProcessedMergedBamFile()
+        List<ProcessedMergedBamFile> bamFiles = [bamFile1, bamFile2, bamFile3, bamFile4, bamFile5]
+
+        SamplePair samplePair1 = DomainFactory.createSamplePair(mergingWorkPackage1: bamFile1.mergingWorkPackage)
+        SamplePair samplePair2 = DomainFactory.createSamplePair(mergingWorkPackage2: bamFile2.mergingWorkPackage)
+
+
+        List<SamplePair> expected = [samplePair1, samplePair2]
+
+        when:
+        List returnValue = samplePairChecker.samplePairsForBamFiles(bamFiles)
+
+        then:
+        TestCase.assertContainSame(expected, returnValue)
+    }
+
+
+    void "samplePairWithMissingBamFile, when not all sample pairs has both bam file objects, return bam files without both bam files"() {
+        given:
+        SamplePairChecker samplePairChecker = new SamplePairChecker()
+
+        SamplePair samplePair1 = DomainFactory.createSamplePair()
+        SamplePair samplePair2 = DomainFactory.createSamplePair()
+        SamplePair samplePair3 = DomainFactory.createSamplePair()
+        SamplePair samplePair4 = DomainFactory.createSamplePair()
+        List<SamplePair> samplePairs = [samplePair1, samplePair2, samplePair3, samplePair4]
+
+        DomainFactory.createProcessedMergedBamFile([workPackage: samplePair1.mergingWorkPackage1])
+        DomainFactory.createProcessedMergedBamFile([workPackage: samplePair1.mergingWorkPackage2])
+        DomainFactory.createProcessedMergedBamFile([workPackage: samplePair2.mergingWorkPackage1])
+        DomainFactory.createProcessedMergedBamFile([workPackage: samplePair3.mergingWorkPackage2])
+
+        List<SamplePair> expected = [samplePair2, samplePair3, samplePair4]
+
+        when:
+        List returnValue = samplePairChecker.samplePairWithMissingBamFile(samplePairs)
+
+        then:
+        TestCase.assertContainSame(expected, returnValue)
+    }
+
+
+    @Unroll
+    void "blockedSamplePairs, when case '#testcase', result contains expected values"() {
+        given:
+        SamplePairChecker samplePairChecker = new SamplePairChecker()
+
+        SamplePair samplePair = DomainFactory.createSamplePair()
+        DomainFactory.createProcessedMergedBamFile([
+                workPackage        : samplePair.mergingWorkPackage1,
+                numberOfMergedLanes: numberOfMergedLanes1,
+                coverage           : coverage1,
+                withdrawn          : withdrawn1,
+                fileOperationStatus: inProcessing1 ? AbstractMergedBamFile.FileOperationStatus.INPROGRESS : AbstractMergedBamFile.FileOperationStatus.PROCESSED,
+                md5sum             : inProcessing1 ? null : HelperUtils.randomMd5sum,
+                fileSize           : inProcessing1 ? 0 : DomainFactory.counter++,
+        ])
+        DomainFactory.createProcessedMergedBamFile([
+                workPackage        : samplePair.mergingWorkPackage2,
+                numberOfMergedLanes: numberOfMergedLanes2,
+                coverage           : coverage2,
+                withdrawn          : withdrawn2,
+                fileOperationStatus: inProcessing2 ? AbstractMergedBamFile.FileOperationStatus.INPROGRESS : AbstractMergedBamFile.FileOperationStatus.PROCESSED,
+                md5sum             : inProcessing2 ? null : HelperUtils.randomMd5sum,
+                fileSize           : inProcessing2 ? 0 : DomainFactory.counter++,
+        ])
+
+        DomainFactory.createSampleTypePerProjectForMergingWorkPackage(samplePair.mergingWorkPackage2, SampleType.Category.CONTROL)
+        DomainFactory.createProcessingThresholdsForMergingWorkPackage(samplePair.mergingWorkPackage1, [coverage: 30.0, numberOfLanes: 3])
+        DomainFactory.createProcessingThresholdsForMergingWorkPackage(samplePair.mergingWorkPackage2, [coverage: 30.0, numberOfLanes: 3])
+
+        when:
+        List<SamplePairChecker.BlockedSamplePair> result = samplePairChecker.blockedSamplePairs([samplePair])
+
+        then:
+        (text == null) == result.empty
+        if (text) {
+            String message = result[0].toString()
+            assert message.contains(text)
+        }
+
+        where:
+        testcase                     | withdrawn1 | inProcessing1 | numberOfMergedLanes1 | coverage1 | withdrawn2 | inProcessing2 | numberOfMergedLanes2 | coverage2 || text
+        'thresholds reached'         | false      | false         | 4                    | 40        | false      | false         | 4                    | 40        || null
+        'disease withdrawn'          | true       | false         | 4                    | 40        | false      | false         | 4                    | 40        || "disease ${SamplePairChecker.BLOCKED_BAM_IS_WITHDRAWN}"
+        'disease is in processing'   | false      | true          | 4                    | 40        | false      | false         | 4                    | 40        || "disease ${SamplePairChecker.BLOCKED_BAM_IS_IN_PROCESSING}"
+        'disease lane count to less' | false      | false         | 1                    | 40        | false      | false         | 4                    | 40        || "disease ${SamplePairChecker.BLOCKED_TO_FEW_LANES}"
+        'disease coverage to less'   | false      | false         | 4                    | 20        | false      | false         | 4                    | 40        || "disease ${SamplePairChecker.BLOCKED_TO_FEW_COVERAGE}"
+        'control withdrawn'          | false      | false         | 4                    | 40        | true       | false         | 4                    | 40        || "control ${SamplePairChecker.BLOCKED_BAM_IS_WITHDRAWN}"
+        'control is in processing'   | false      | false         | 4                    | 40        | false      | true          | 4                    | 40        || "control ${SamplePairChecker.BLOCKED_BAM_IS_IN_PROCESSING}"
+        'control lane count to less' | false      | false         | 4                    | 40        | false      | false         | 1                    | 40        || "control ${SamplePairChecker.BLOCKED_TO_FEW_LANES}"
+        'control coverage to less'   | false      | false         | 4                    | 40        | false      | false         | 4                    | 20        || "control ${SamplePairChecker.BLOCKED_TO_FEW_COVERAGE}"
+    }
+
+
+    void "handle, if no bam files given, do nothing"() {
+        given:
+        MonitorOutputCollector output = Mock(MonitorOutputCollector)
+        SamplePairChecker samplePairChecker = new SamplePairChecker()
+
+        when:
+        List<SamplePair> result = samplePairChecker.handle([], output)
+
+        then:
+        [] == result
+        0 * output._
+
+    }
+
+
+    void "handle, if bam files given, then return non waiting sample pairs and create output for the others"() {
+        given:
+        MonitorOutputCollector output = Mock(MonitorOutputCollector)
+        SamplePairChecker samplePairChecker = Spy(SamplePairChecker)
+
+        AbstractBamFile unknownDiseaseStatus = DomainFactory.createProcessedMergedBamFile()
+        DomainFactory.createProcessingThresholdsForBamFile(unknownDiseaseStatus)
+
+        AbstractBamFile ignoredDiseaseStatus = DomainFactory.createProcessedMergedBamFile()
+        DomainFactory.createSampleTypePerProjectForBamFile(ignoredDiseaseStatus, SampleType.Category.IGNORED)
+        DomainFactory.createProcessingThresholdsForBamFile(ignoredDiseaseStatus)
+
+        AbstractBamFile unknownThreshold = DomainFactory.createProcessedMergedBamFile()
+        DomainFactory.createSampleTypePerProjectForBamFile(unknownThreshold, SampleType.Category.DISEASE)
+
+        AbstractBamFile noSamplePairFound = DomainFactory.createProcessedMergedBamFile()
+        DomainFactory.createSampleTypePerProjectForBamFile(noSamplePairFound, SampleType.Category.DISEASE)
+        DomainFactory.createProcessingThresholdsForBamFile(noSamplePairFound)
+
+        AbstractBamFile missingDiseaseBamFile = DomainFactory.createProcessedMergedBamFile()
+        DomainFactory.createSampleTypePerProjectForBamFile(missingDiseaseBamFile, SampleType.Category.CONTROL)
+        DomainFactory.createProcessingThresholdsForBamFile(missingDiseaseBamFile)
+        SamplePair missingDiseaseSamplePair = DomainFactory.createSamplePair([mergingWorkPackage2: missingDiseaseBamFile.mergingWorkPackage])
+
+        AbstractBamFile missingControlBamFile = DomainFactory.createProcessedMergedBamFile()
+        DomainFactory.createSampleTypePerProjectForBamFile(missingControlBamFile, SampleType.Category.DISEASE)
+        DomainFactory.createProcessingThresholdsForBamFile(missingControlBamFile)
+        SamplePair missingControlSamplePair = DomainFactory.createSamplePair([mergingWorkPackage1: missingControlBamFile.mergingWorkPackage])
+
+        SamplePair thresholdSamplePair = DomainFactory.createSamplePair()
+        AbstractBamFile thresholdDiseaseBamFile = DomainFactory.createProcessedMergedBamFile(thresholdSamplePair.mergingWorkPackage1, [coverage: 10])
+        DomainFactory.createProcessingThresholdsForBamFile(thresholdDiseaseBamFile, [coverage: 50])
+        AbstractBamFile thresholdControlFile = DomainFactory.createProcessedMergedBamFile(thresholdSamplePair.mergingWorkPackage2, [coverage: 10])
+        DomainFactory.createProcessingThresholdsForBamFile(thresholdControlFile, [coverage: 50])
+        DomainFactory.createSampleTypePerProjectForBamFile(thresholdControlFile)
+
+        SamplePair fineSamplePair = DomainFactory.createSamplePair()
+        AbstractBamFile diseaseBamFile = DomainFactory.createProcessedMergedBamFile(fineSamplePair.mergingWorkPackage1, [
+                coverage           : 30,
+                numberOfMergedLanes: 2,
+                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
+                md5sum             : HelperUtils.randomMd5sum,
+                fileSize           : DomainFactory.counter++,
+        ])
+        AbstractBamFile controlBamFile = DomainFactory.createProcessedMergedBamFile(fineSamplePair.mergingWorkPackage2, [
+                coverage           : 30,
+                numberOfMergedLanes: 2,
+                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
+                md5sum             : HelperUtils.randomMd5sum,
+                fileSize           : DomainFactory.counter++,
+        ])
+
+        DomainFactory.createSampleTypePerProjectForBamFile(controlBamFile)
+
+        DomainFactory.createProcessingThresholdsForBamFile(diseaseBamFile, [coverage: 10, numberOfLanes: 1])
+        DomainFactory.createProcessingThresholdsForBamFile(controlBamFile, [coverage: 10, numberOfLanes: 1])
+
+        List<AbstractMergedBamFile> bamFiles = [
+                unknownDiseaseStatus,
+                ignoredDiseaseStatus,
+                unknownThreshold,
+                noSamplePairFound,
+                missingDiseaseBamFile,
+                missingControlBamFile,
+                thresholdDiseaseBamFile,
+                diseaseBamFile,
+        ]
+        List<SamplePair> samplePairs = [fineSamplePair]
+
+        when:
+        List<SamplePair> result = samplePairChecker.handle(bamFiles, output)
+
+        then:
+        1 * output.showWorkflow(_)
+
+        samplePairs == result
+
+        then:
+        1 * samplePairChecker.bamFilesWithoutCategory(_)
+        1 * output.showUniqueList(SamplePairChecker.HEADER_UNKNOWN_DISEASE_STATUS, [unknownDiseaseStatus], _)
+
+        then:
+        1 * samplePairChecker.bamFilesWithIgnoredCategory(_)
+        1 * output.showUniqueList(SamplePairChecker.HEADER_DISEASE_STATE_IGNORED, [ignoredDiseaseStatus], _)
+
+        then:
+        1 * samplePairChecker.bamFilesWithoutThreshold(_)
+        1 * output.showUniqueList(SamplePairChecker.HEADER_UNKNOWN_THRESHOLD, [unknownThreshold], _)
+
+        then:
+        1 * samplePairChecker.bamFilesWithoutSamplePair(_)
+        1 * output.showUniqueList(SamplePairChecker.HEADER_NO_SAMPLE_PAIR, [noSamplePairFound])
+
+        then:
+        1 * samplePairChecker.samplePairWithMissingBamFile(_)
+        1 * output.showList(SamplePairChecker.HEADER_SAMPLE_PAIR_WITHOUT_DISEASE_BAM_FILE, [missingDiseaseSamplePair])
+        1 * output.showList(SamplePairChecker.HEADER_SAMPLE_PAIR_WITHOUT_CONTROL_BAM_FILE, [missingControlSamplePair])
+
+        then:
+        1 * samplePairChecker.blockedSamplePairs(_)
+        1 * output.showList(SamplePairChecker.HEADER_BLOCKED_SAMPLE_PAIRS, _) >> { String header, List<SamplePairChecker.BlockedSamplePair> blocked ->
+            assert !blocked.empty
+            assert blocked[0].samplePair == thresholdSamplePair
+        }
+    }
+}
