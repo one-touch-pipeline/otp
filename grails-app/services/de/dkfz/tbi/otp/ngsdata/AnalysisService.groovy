@@ -70,7 +70,7 @@ class AnalysisService {
                 }
                 property('processingState', "${callingInstanceType}ProcessingState")
                 property('id', "${callingInstanceType}InstanceId")
-                property('instanceName', "${callingInstanceType}InstanceName")
+                property('dateCreated', "dateCreated")
             }
         }
     }

@@ -65,7 +65,7 @@ $.otp.indelResultsTable = {
                         row.sampleType1 + " \u2013 " + row.sampleType2,
                         row.seqType,
                         row.libPrepKits,
-                        row.indelInstanceName,
+                        row.dateCreated,
                         row.indelProcessingState.name,
                     ];
                     if (row.indelInstanceId) {

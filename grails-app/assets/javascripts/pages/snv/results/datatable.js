@@ -65,7 +65,7 @@ $.otp.snvResultsTable = {
                         row.sampleType1 + " \u2013 " + row.sampleType2,
                         row.seqType,
                         row.libPrepKits,
-                        row.snvInstanceName,
+                        row.dateCreated,
                         row.snvProcessingState.name,
                     ];
                     if (row.snvInstanceId) {

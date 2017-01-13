@@ -4,6 +4,8 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.utils.*
 import grails.converters.*
 
+import java.text.SimpleDateFormat
+
 class IndelController {
 
     ProjectService projectService
@@ -57,6 +59,7 @@ class IndelController {
 
     JSON dataTableIndelResults(DataTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()
+        SimpleDateFormat sdf = new SimpleDateFormat('yyyy-MM-dd hh:mm')
         List results = analysisService.getCallingInstancesForProject(IndelCallingInstance, params.project)
         List data = results.collect { Map properties ->
             Collection<String> libPrepKitShortNames
@@ -70,6 +73,7 @@ class IndelController {
             properties.libPrepKits = libPrepKitShortNames.unique().collect { it ?: 'unknown' }.join(", <br>")
             properties.remove('libPrepKit1')
             properties.remove('libPrepKit2')
+            properties.dateCreated = sdf.format(properties.dateCreated)
             if (properties.indelProcessingState != AnalysisProcessingStates.FINISHED) {
                 properties.remove('indelInstanceId')
             }

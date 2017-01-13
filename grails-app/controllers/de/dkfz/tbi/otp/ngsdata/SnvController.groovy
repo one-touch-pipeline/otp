@@ -5,6 +5,8 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.utils.*
 import grails.converters.*
 
+import java.text.SimpleDateFormat
+
 
 class SnvController {
 
@@ -59,6 +61,7 @@ class SnvController {
 
     JSON dataTableSnvResults(DataTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()
+        SimpleDateFormat sdf = new SimpleDateFormat('yyyy-MM-dd hh:mm')
         List results = analysisService.getCallingInstancesForProject(SnvCallingInstance, params.project)
         List data = results.collect { Map properties ->
             Collection<String> libPrepKitShortNames
@@ -72,6 +75,7 @@ class SnvController {
             properties.libPrepKits = libPrepKitShortNames.unique().collect { it ?: 'unknown' }.join(", <br>")
             properties.remove('libPrepKit1')
             properties.remove('libPrepKit2')
+            properties.dateCreated = sdf.format(properties.dateCreated)
             if (properties.snvProcessingState != AnalysisProcessingStates.FINISHED) {
                 properties.remove('snvInstanceId')
             }
