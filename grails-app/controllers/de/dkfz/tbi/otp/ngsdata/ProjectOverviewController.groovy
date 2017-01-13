@@ -128,6 +128,7 @@ class ProjectOverviewController {
                 projectCategories: ProjectCategory.listOrderByName(),
                 accessPersons: accessPersons,
                 unixGroup: project.unixGroup,
+                costCenter: project.costCenter,
                 processingPriorities: ProjectService.processingPriorities,
         ]
     }
@@ -384,6 +385,10 @@ class ProjectOverviewController {
 
     JSON updateMailingListName(UpdateMailingListNameCommand cmd) {
         checkErrorAndCallMethod(cmd, { projectService.updateMailingListName(cmd.mailingListName, projectService.getProjectByName(cmd.projectName)) })
+    }
+
+    JSON updateCostCenter(UpdateCostCenterCommand cmd) {
+        checkErrorAndCallMethod(cmd, { projectService.updateCostCenterName(cmd.costCenter, cmd.project) })
     }
 
     JSON updateDescription(UpdateDescriptionCommand cmd) {
@@ -673,6 +678,14 @@ class UpdateMailingListNameCommand implements Serializable {
     String projectName
     void setValue(String mailingListName) {
         this.mailingListName = mailingListName
+    }
+}
+
+class UpdateCostCenterCommand implements Serializable {
+    String costCenter
+    Project project
+    void setValue(String costCenter) {
+        this.costCenter = costCenter
     }
 }
 

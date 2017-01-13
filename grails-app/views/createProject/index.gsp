@@ -47,6 +47,10 @@
                 <td><g:textField name="mailingListName" size="130" value="${cmd.mailingListName}"/></td>
             </tr>
             <tr>
+                <td class="myKey"><g:message code="createProject.costCenter"/></td>
+                <td><g:textField name="costCenter" size="130" value="${cmd.costCenter}"/></td>
+            </tr>
+            <tr>
                 <td class="myKey"><g:message code="createProject.projectGroup"/></td>
                 <td><g:select class="criteria" id="group" name='projectGroup' from='${projectGroups}' value="${cmd.projectGroup}"/></td>
             </tr>

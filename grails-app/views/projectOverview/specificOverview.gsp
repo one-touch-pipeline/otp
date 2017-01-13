@@ -110,6 +110,15 @@
                     <td class="myKey"><g:message code="projectOverview.unixGroup"/></td>
                     <td id="unixGroup">${unixGroup}</td>
                 </tr>
+                <tr>
+                    <td class="myKey"><g:message code="projectOverview.costCenter"/></td>
+                    <td>
+                        <otp:editorSwitch
+                                roles="ROLE_OPERATOR"
+                                link="${g.createLink(controller: 'projectOverview', action: 'updateCostCenter', params: ['project.id': project.id])}"
+                                value="${costCenter}"/>
+                    </td>
+                </tr>
             </table>
         </div>
 

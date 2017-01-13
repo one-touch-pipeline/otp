@@ -108,6 +108,7 @@ class ProjectService {
         project.mailingListName = projectParams.mailingListName
         project.description = projectParams.description
         project.unixGroup = projectParams.unixGroup
+        project.costCenter = projectParams.costCenter
         assert project.save(flush: true, failOnError: true)
 
         GroupCommand groupCommand = new GroupCommand(
@@ -150,6 +151,7 @@ class ProjectService {
         boolean copyFiles
         boolean fingerPrinting
         String mailingListName
+        String costCenter
         String description
         short processingPriority
     }
@@ -175,6 +177,12 @@ class ProjectService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     public void updateMailingListName(String mailingListName, Project project) {
         project.mailingListName = mailingListName
+        project.save(flush: true)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    public void updateCostCenterName(String costCenter, Project project) {
+        project.costCenter = costCenter
         project.save(flush: true)
     }
 

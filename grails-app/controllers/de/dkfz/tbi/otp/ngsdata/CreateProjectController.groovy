@@ -32,6 +32,7 @@ class CreateProjectController {
                         copyFiles: cmd.copyFiles,
                         fingerPrinting: cmd.fingerPrinting,
                         mailingListName: cmd.mailingListName,
+                        costCenter: cmd.costCenter,
                         description: cmd.description,
                         processingPriority: cmd.priority,
                 )
@@ -56,6 +57,7 @@ class CreateProjectControllerSubmitCommand implements Serializable {
     String nameInMetadataFiles
     String unixGroup
     String mailingListName
+    String costCenter
     String projectGroup
     List<String> projectCategories = [].withLazyDefault {new String()}
     String description
@@ -96,6 +98,7 @@ class CreateProjectControllerSubmitCommand implements Serializable {
                 return val.startsWith("tr_")
             }
         })
+        costCenter(nullable: true)
         nameInMetadataFiles(nullable: true, validator: {val, obj ->
             if (val && Project.findByNameInMetadataFiles(val)) {
                 return '\'' + val + '\' exists already in another project as nameInMetadataFiles entry'
