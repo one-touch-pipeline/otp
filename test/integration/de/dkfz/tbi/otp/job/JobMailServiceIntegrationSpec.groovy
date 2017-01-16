@@ -27,8 +27,6 @@ class JobMailServiceIntegrationSpec extends Specification {
         DomainFactory.createProcessingOptionForStatisticRecipient()
         ProcessingStep step = DomainFactory.createProcessingStepUpdate().processingStep
 
-        File logFile = new File(jobStatusLoggingService.logFileLocation(realm, step))
-        assert logFile.parentFile.mkdirs()
 
         List<ClusterJob> completedClusterJobs = []
         completedCount.times {
@@ -38,6 +36,8 @@ class JobMailServiceIntegrationSpec extends Specification {
                     exitStatus    : ClusterJob.Status.COMPLETED
             ])
             completedClusterJobs << clusterJob
+            File logFile = new File(jobStatusLoggingService.constructLogFileLocation(realm, step, clusterJob.clusterJobId))
+            logFile.parentFile.mkdirs()
             logFile << jobStatusLoggingService.constructMessage(step, clusterJob.clusterJobId) << '\n'
         }
 

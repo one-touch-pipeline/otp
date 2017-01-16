@@ -21,7 +21,7 @@ class JobStatusLoggingServiceUnitTests {
 
     final static String LOGGING_ROOT_PATH = '/fakeRootPath'
     final static String EXPECTED_BASE_PATH = '/fakeRootPath/log/status'
-    final static String EXPECTED_LOGFILE_PATH = "/fakeRootPath/log/status/joblog_${ARBITRARY_PROCESS_ID}_${ARBITRARY_REALM_ID}.log"
+    final static String EXPECTED_LOGFILE_PATH = "/fakeRootPath/log/status/joblog_${ARBITRARY_PROCESS_ID}_${ARBITRARY_PBS_ID}_${ARBITRARY_REALM_ID}.log"
 
     final static Long ARBITRARY_ID = 23
     final static Long ARBITRARY_REALM_ID = 987
@@ -48,12 +48,12 @@ class JobStatusLoggingServiceUnitTests {
 
     @Test
     void testLogFileLocationWhenRealmIsNull() {
-        shouldFail IllegalArgumentException, { service.logFileLocation(null, new ProcessingStep()) }
+        shouldFail IllegalArgumentException, { service.constructLogFileLocation(null, new ProcessingStep()) }
     }
 
     @Test
     void testLogFileLocationWhenProcessingStepIsNull() {
-        shouldFail IllegalArgumentException, { service.logFileLocation(new Realm(), null) }
+        shouldFail IllegalArgumentException, { service.constructLogFileLocation(new Realm(), null) }
     }
 
     @Test
@@ -65,10 +65,18 @@ class JobStatusLoggingServiceUnitTests {
     }
 
     @Test
-    void testLogFileLocation() {
+    void testLogFileLocationWhenPbsIdIsNotPassed() {
         Realm realm = Realm.build([id: ARBITRARY_REALM_ID, loggingRootPath: LOGGING_ROOT_PATH])
         ProcessingStep processingStep = createFakeProcessingStep()
-        def actual = service.logFileLocation(realm, processingStep)
+        def actual = service.constructLogFileLocation(realm, processingStep)
+        assert "${EXPECTED_BASE_PATH}/joblog_${ARBITRARY_PROCESS_ID}_${service.SHELL_SNIPPET_GET_NUMERIC_PBS_ID}_${ARBITRARY_REALM_ID}.log" == actual
+    }
+
+    @Test
+    void testLogFileLocationWhenPbsIdIsPassed() {
+        Realm realm = Realm.build([id: ARBITRARY_REALM_ID, loggingRootPath: LOGGING_ROOT_PATH])
+        ProcessingStep processingStep = createFakeProcessingStep()
+        def actual = service.constructLogFileLocation(realm, processingStep, ARBITRARY_PBS_ID)
         assert EXPECTED_LOGFILE_PATH == actual
     }
 

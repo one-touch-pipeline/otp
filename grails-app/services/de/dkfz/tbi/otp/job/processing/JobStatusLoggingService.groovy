@@ -37,11 +37,20 @@ class JobStatusLoggingService {
      *
      * @param realm the realm the job runs in
      * @param processingStep the processing step of the job
+     * @param pbsId an optional PBS job id. If <code>null</code>, shell code to retrieve the numeric part of the
+     *          PBS job id is returned.
+     *          (Read: pass the job ID except if the returned string is used in a cluster job shell script)
      * @return the location of the status log file
      */
-    String logFileLocation(Realm realm, ProcessingStep processingStep) {
+    String constructLogFileLocation(Realm realm, ProcessingStep processingStep, String pbsId = null) {
         String baseDir = logFileBaseDir(realm, processingStep)
-        return "${baseDir}/joblog_${processingStep.process.id}_${realm.id}${LOGFILE_EXTENSION}"
+        String fileName = [
+                "joblog",
+                processingStep.process.id,
+                pbsId ?: SHELL_SNIPPET_GET_NUMERIC_PBS_ID,
+                realm.id,
+        ].join("_")
+        return "${baseDir}/${fileName}${LOGFILE_EXTENSION}"
     }
 
     /**
@@ -57,7 +66,7 @@ class JobStatusLoggingService {
      * The message is <strong>not</strong> terminated by a newline character.
      *
      * @param processingStep the {@link ProcessingStep} to construct the message from
-     * @param pbdId an optional PBS job id. If <code>null</code>, shell code to retrieve the numeric part of the
+     * @param pbsId an optional PBS job id. If <code>null</code>, shell code to retrieve the numeric part of the
      *          PBS job id is returned. (Read: To get a message usable for logging, do not provide it.)
      * @return a logging message
      */
@@ -118,15 +127,15 @@ class JobStatusLoggingService {
         clusterJobMap.each { Realm realm, Collection<ClusterJobIdentifier> clusterJobs ->
             notNull realm
             notNull clusterJobs
-            final File logFile = new File(logFileLocation(realm, processingStep))
-            final String logFileText
-            try {
-                logFileText = logFile.text
-            } catch (final FileNotFoundException e) {
-                threadLog?.debug "Cluster job status log file ${logFile} not found."
-                logFileText = ''
-            }
             clusterJobs.each {
+                final File logFile = new File(constructLogFileLocation(realm, processingStep, it.clusterJobId))
+                final String logFileText
+                try {
+                    logFileText = logFile.text
+                } catch (final FileNotFoundException e) {
+                    threadLog?.debug "Cluster job status log file ${logFile} not found."
+                    logFileText = ''
+                }
                 notNull it
                 final String expectedLogMessage = constructMessage(processingStep, it.clusterJobId)
                 if (!(logFileText =~ /(?:^|\s)${Pattern.quote(expectedLogMessage)}(?:$|\s)/)) {

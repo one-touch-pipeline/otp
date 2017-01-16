@@ -94,7 +94,7 @@ class PbsService {
         String pbsOptions = pbsOptionMergingService.mergePbsOptions(processingStep, realm, qsubParameters, fastTrackParameter)
 
         String pbsJobDescription = processingStep.getPbsJobDescription()
-        String logFile = jobStatusLoggingService.logFileLocation(realm, processingStep)
+        String logFile = jobStatusLoggingService.constructLogFileLocation(realm, processingStep)
         String logMessage = jobStatusLoggingService.constructMessage(processingStep)
         File clusterLogDirectory = clusterJobLoggingService.createAndGetLogDirectory(realm, processingStep)
 
@@ -116,9 +116,9 @@ echo \$HOST
 ${script}
 # END ORIGINAL SCRIPT
 
-touch '${logFile}'
-chmod 0640 ${logFile}
-flock -x '${logFile}' -c "echo \\"${logMessage}\\" >> '${logFile}'"
+touch "${logFile}"
+chmod 0640 "${logFile}"
+echo "${logMessage}" >> "${logFile}"
 """
 
         String command = "echo '${scriptText}' | qsub " + pbsOptions

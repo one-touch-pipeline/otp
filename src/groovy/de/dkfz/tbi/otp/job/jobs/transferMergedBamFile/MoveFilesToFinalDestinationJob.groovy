@@ -53,8 +53,8 @@ class MoveFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl {
     private String scriptText(String dest, String temporalDestinationDir, String temporalQADestinationDir, String qaDestinationDirectory) {
         String text = """
 mkdir -p -m 2750 ${dest}${processedMergedBamFileService.QUALITY_ASSESSMENT_DIR}
-flock -x ${dest} -c \"mv -f ${temporalDestinationDir}/*.bam ${temporalDestinationDir}/*.bai ${temporalDestinationDir}/*.md5sum ${temporalDestinationDir}/${FileNames.FASTQ_FILES_IN_MERGEDBAMFILE} ${dest}\"
-flock -x ${dest} -c \"mv -f ${temporalQADestinationDir}/* ${qaDestinationDirectory}/\"
+mv -f ${temporalDestinationDir}/*.bam ${temporalDestinationDir}/*.bai ${temporalDestinationDir}/*.md5sum ${temporalDestinationDir}/${FileNames.FASTQ_FILES_IN_MERGEDBAMFILE} ${dest}
+mv -f ${temporalQADestinationDir}/* ${qaDestinationDirectory}
 rm -rf ${temporalDestinationDir}
 """
         // Work-around for OTP-1018: Add read permissions to BAM and BAI files to work around a bug
