@@ -1,7 +1,8 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
+import de.dkfz.tbi.otp.utils.logging.*
+import org.hibernate.Hibernate
 
 /**
  * Represents a merged bam file stored on the file system
@@ -17,8 +18,7 @@ class ExternallyProcessedMergedBamFile extends AbstractMergedBamFile {
     /** source of the file, eg. workflow or import name; used to construct the path of the file */
     String source
     String fileName
-
-    ExternallyProcessedMergedBamFile externallyProcessedMergedBamFile
+    String importedFrom
 
     @Override
     public String toString() {
@@ -37,21 +37,16 @@ class ExternallyProcessedMergedBamFile extends AbstractMergedBamFile {
         return fileName
     }
 
-// To implement...
     @Override
     public String getBaiFileName() {
-        return "${baiFileName}.bai"
+        return "${bamFileName}.bai"
     }
 
     @Override
     void withdraw() {
         withTransaction {
-            //get later bam files
-            ExternallyProcessedMergedBamFile.findAllByExternallyProcessedMergedBamFile(this).each {  // better static?
-                it.withdraw()
-            }
 
-            assert LogThreadLocal.threadLog : 'This method produces relevant log messages. Thread log must be set.'
+            assert LogThreadLocal.threadLog: 'This method produces relevant log messages. Thread log must be set.'
             LogThreadLocal.threadLog.info "Execute WithdrawnFilesRename.groovy script afterwards"
             LogThreadLocal.threadLog.info "Withdrawing ${this}"
             withdrawn = true
@@ -60,13 +55,18 @@ class ExternallyProcessedMergedBamFile extends AbstractMergedBamFile {
     }
 
     @Override
-    protected File getPathForFurtherProcessingNoCheck() {
-        return new File(baseDirectory, this.bamFileName)
+    ExternalMergingWorkPackage getMergingWorkPackage() {
+        return ExternalMergingWorkPackage.get(workPackage.id)
     }
-//***************
+
+    @Override
+    protected File getPathForFurtherProcessingNoCheck() {
+        return getFilePath().absoluteDataManagementPath
+    }
+
     @Override
     Set<SeqTrack> getContainedSeqTracks() {
-        return fastqSet.seqTracks
+        return []
     }
 
     @Override
@@ -74,6 +74,10 @@ class ExternallyProcessedMergedBamFile extends AbstractMergedBamFile {
         throw new MissingPropertyException('Quality assessment is not implemented for externally imported BAM files')
     }
 
+    @Override
+    public AlignmentConfig getAlignmentConfig() {
+        throw new MissingPropertyException('AlignmentConfig is not implemented for externally imported BAM files')
+    }
 
     public OtpPath getFilePath() {
         return new OtpPath(nonOtpFolder,
@@ -86,32 +90,15 @@ class ExternallyProcessedMergedBamFile extends AbstractMergedBamFile {
     }
 
     static constraints = {
-        referenceGenome nullable: false
+        importedFrom nullable: true, blank: false, validator: { it == null || OtpPath.isValidAbsolutePath(it) }
+        fastqSet nullable: true
         source blank: false, validator: { OtpPath.isValidPathComponent(it) }
         fileName blank: false, validator: { OtpPath.isValidPathComponent(it) }
-        workPackage unique: true, validator: { workPackage, epmb ->
-            workPackage.pipeline.name == Pipeline.Name.EXTERNALLY_PROCESSED &&
-                    epmb.containedSeqTracks.every { workPackage.satisfiesCriteria(it) }
-        }
-        withdrawn validator: { withdrawn, epmb ->
-            if (withdrawn) {
-                return true
-            } else {
-                withNewSession {
-                    return !epmb.containedSeqTracks.any { it.withdrawn }
-                }
-            }
-        }
-        numberOfMergedLanes validator: { numberOfMergedLanes, epmb ->
-            numberOfMergedLanes == epmb.containedSeqTracks.size()
+        workPackage validator: { val ->
+            val.pipeline.name == Pipeline.Name.EXTERNALLY_PROCESSED &&
+                    ExternalMergingWorkPackage.isAssignableFrom(Hibernate.getClass(val))
         }
     }
-
-    @Override
-    public ReferenceGenome getReferenceGenome() {
-        return workPackage.referenceGenome
-    }
-
 
     static mapping = {
         fastqSet index: "abstract_bam_file_fastq_set_idx"

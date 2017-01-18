@@ -1,9 +1,11 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CreateJobStateLogFileHelper
 import grails.buildtestdata.mixin.Build
+import grails.test.mixin.Mock
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -14,7 +16,30 @@ import static de.dkfz.tbi.TestCase.shouldFail
 import static de.dkfz.tbi.otp.dataprocessing.RoddyBamFile.RODDY_EXECUTION_STORE_DIR
 import static de.dkfz.tbi.otp.dataprocessing.RoddyBamFile.QUALITY_CONTROL_JSON_FILE_NAME
 
-@Build([RoddyBamFile, Run, SeqCenter, SeqPlatform, SoftwareTool])
+@Mock([
+        SoftwareTool,
+        MergingWorkPackage,
+        LibraryPreparationKit,
+        SeqPlatform,
+        SeqPlatformGroup,
+        SeqCenter,
+        SeqType,
+        SeqTrack,
+        RoddyBamFile,
+        SampleType,
+        Pipeline,
+        ProjectCategory,
+        Project,
+        Individual,
+        Sample,
+        ReferenceGenome,
+        ReferenceGenomeProjectSeqType,
+        RunSegment,
+        FileType,
+        DataFile,
+        RoddyWorkflowConfig,
+        Run,
+])
 class RoddyBamFileUnitTests {
 
     public static final String RODDY_EXECUTION_DIR_NAME = "exec_000000_000000000_a_a"

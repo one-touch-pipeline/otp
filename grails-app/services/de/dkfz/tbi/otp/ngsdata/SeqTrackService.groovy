@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.dataprocessing.ExternalMergingWorkPackage
+
 import javax.sql.DataSource
 import grails.plugin.springsecurity.SpringSecurityUtils
 import groovy.sql.GroovyRowResult
@@ -593,21 +595,20 @@ AND i.id > :seqTrackId
         }
     }
 
-
-
     List<ExternallyProcessedMergedBamFile> returnExternallyProcessedMergedBamFiles(List<SeqTrack> seqTracks) {
         notNull(seqTracks, "The input of returnExternallyProcessedMergedBamFiles is null")
-        assert !seqTracks.empty : "The input list of returnExternallyProcessedMergedBamFiles is empty"
+        assert !seqTracks.empty: "The input list of returnExternallyProcessedMergedBamFiles is empty"
 
-        return ExternallyProcessedMergedBamFile.executeQuery(
-"""
-select bamFile
-from ExternallyProcessedMergedBamFile bamFile
-join bamFile.fastqSet fastqSet
-join fastqSet.seqTracks seqTracks
-where seqTracks in (:seqTrackList)
-""", ["seqTrackList": seqTracks])
-
+        return seqTracks.collect { val ->
+            CollectionUtils.atMostOneElement(
+                    ExternallyProcessedMergedBamFile.createCriteria().list {
+                        workPackage {
+                            eq('sample', val.sample)
+                            eq('seqType', val.seqType)
+                        }
+                    }
+            )
+        }.unique().findAll()
     }
 
     List<SeqTrack> seqTracksReadyToInstall(short minPriority) {
