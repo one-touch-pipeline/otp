@@ -45,7 +45,6 @@ class PanCanWgbsAlignmentWorkflowTests extends AbstractPanCanAlignmentWorkflowTe
         baseTestDataDir = new File(rootDirectory, 'WgbsAlignmentSetupFiles')
         refGenDir = new File(baseTestDataDir, 'reference-genomes/bwa06_methylCtools_hs37d5_PhiX_Lambda')
         chromosomeNamesFile = new File(baseTestDataDir, 'reference-genomes/chromosome-names.txt')
-        projectConfigFile = new File(baseTestDataDir, 'project-config/wgbs.xml')
     }
 
     @Override
@@ -54,6 +53,7 @@ class PanCanWgbsAlignmentWorkflowTests extends AbstractPanCanAlignmentWorkflowTe
                 "scripts/workflows/WgbsAlignmentWorkflow.groovy",
                 "scripts/initializations/AddPathToConfigFilesToProcessingOptions.groovy",
                 "scripts/initializations/AddRoddyPathAndVersionToProcessingOptions.groovy",
+                "scripts/initializations/RoddyConstants.groovy",
         ]
     }
 

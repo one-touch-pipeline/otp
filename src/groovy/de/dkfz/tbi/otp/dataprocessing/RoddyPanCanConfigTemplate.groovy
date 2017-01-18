@@ -9,16 +9,8 @@ class RoddyPanCanConfigTemplate {
 
     @TupleConstructor
     static enum SeqTypeOptions {
-        WES('exomeAnalysis', '''
-                <!-- BWA Binary -->
-                <cvalue name="BWA_BINARY" value="${bwaBinary_bwa078}" type="filename"
-                        description="The BWA version"/>
-'''),
-        WGS('qcAnalysis', '''
-                <!-- BWA Binary -->
-                <cvalue name="BWA_BINARY" value="${bwaBinary_bwa078}" type="filename"
-                        description="The BWA version"/>
-'''),
+        WES('exomeAnalysis', ''),
+        WGS('qcAnalysis', ''),
         WGBS('bisulfiteCoreAnalysis', '''
                 <!-- BWA Binary -->
                 <cvalue name="BWA_BINARY" value="bwa-0.7.8-bisulfite" type="filename"
@@ -51,6 +43,25 @@ class RoddyPanCanConfigTemplate {
 
     static String createConfig(PanCanAlignmentConfiguration panCanAlignmentConfiguration) {
         SeqTypeOptions template = SeqTypeOptions.findByRoddyName(panCanAlignmentConfiguration.seqType.roddyName)
+        String additional = ''
+
+        if (!panCanAlignmentConfiguration.seqType.isWgbs()) {
+            additional = """
+                <!-- BWA Binary -->
+                <cvalue name="BWA_BINARY" value="${panCanAlignmentConfiguration.bwaMemPath}" type="filename"
+                        description=""/>
+                """
+        } else {
+            additional = template.additionalProperties
+        }
+
+        if (panCanAlignmentConfiguration.mergeTool == MergeConstants.MERGE_TOOL_SAMBAMBA) {
+            additional += """
+                <!-- Merging and Markdup version of sambamba -->
+                <cvalue name="SAMBAMBA_MARKDUP_BINARY" value="${panCanAlignmentConfiguration.sambambaPath}" type="string"
+                description="The sambamba version used only for duplication marking and merging."/>
+                """
+        }
 
         return """
 <configuration
@@ -61,7 +72,7 @@ class RoddyPanCanConfigTemplate {
         imports='${panCanAlignmentConfiguration.baseProjectConfig}'>
 
     <subconfigurations>
-        <configuration name='config' usedresourcessize='xl'>
+        <configuration name='config' usedresourcessize='${panCanAlignmentConfiguration.resources}'>
             <availableAnalyses>
                 <analysis id='${panCanAlignmentConfiguration.seqType.roddyName}' configuration='${template.analysis}' killswitches='FilenameSection'/>
             </availableAnalyses>
@@ -75,7 +86,7 @@ class RoddyPanCanConfigTemplate {
                 <cvalue name='markDuplicatesVariant' value='${panCanAlignmentConfiguration.mergeTool}' type='string'
                     description='Allowed values: biobambam, picard, sambamba. Default: empty. If set, this option takes precedence over the older useBioBamBamMarkDuplicates option.'/>
 
-${template.additionalProperties}
+${additional}
 
             </configurationvalues>
         </configuration>

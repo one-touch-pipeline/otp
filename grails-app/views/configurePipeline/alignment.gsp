@@ -39,11 +39,25 @@
                     <td>&nbsp;</td>
                     <td><g:message code="configurePipeline.alignment.statSizeFileName.info"/></td>
                 </tr>
+                <g:if test="${!isWgbs}">
+                    <tr>
+                        <td class="myKey"><g:message code="configurePipeline.alignment.bwaVersion"/></td>
+                        <td><g:select name="bwaMemVersion" from="${bwaMemVersions}" value="${bwaMemVersion}"/></td>
+                        <td>${defaultBwaMemVersion}</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                </g:if>
                 <tr>
                     <td class="myKey"><g:message code="configurePipeline.alignment.mergeTool"/></td>
                     <td><g:select name="mergeTool" from="${mergeTools}" value="${mergeTool}"/></td>
                     <td>${defaultMergeTool}</td>
                     <td><g:message code="configurePipeline.alignment.mergeTool.info"/></td>
+                </tr>
+                <tr>
+                    <td class="myKey"><g:message code="configurePipeline.alignment.sambambaVersion"/></td>
+                    <td><g:select name="sambambaVersion" from="${sambambaVersions}" value="${sambambaVersion}"/></td>
+                    <td>${defaultSambambaVersion}</td>
+                    <td><g:message code="configurePipeline.alignment.sambambaVersion.info"/></td>
                 </tr>
                 <tr>
                     <td colspan="4">&nbsp;</td>

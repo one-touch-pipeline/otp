@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.roddy.RoddyConstants
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.testing.*
@@ -54,6 +55,27 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 return ProcessHelperService.executeAndWait("bash ${script.absolutePath}").assertExitCodeZero().stdout
             }
         }
+
+        DomainFactory.createProcessingOption([
+                name: RoddyConstants.OPTION_KEY_BWA_VERSION_AVAILABLE,
+                type: null,
+                value: "bwa-mem",
+        ])
+        DomainFactory.createProcessingOption([
+                name: RoddyConstants.OPTION_KEY_BWA_PATHS,
+                type: "bwa-mem",
+                value: temporaryFolder.newFile(),
+        ])
+        DomainFactory.createProcessingOption([
+                name: RoddyConstants.OPTION_KEY_SAMBAMBA_VERSION_AVAILABLE,
+                type: null,
+                value: "sambamba",
+        ])
+        DomainFactory.createProcessingOption([
+                name: RoddyConstants.OPTION_KEY_SAMBAMBA_PATHS,
+                type: "sambamba",
+                value: temporaryFolder.newFile(),
+        ])
     }
 
     void "test createProject valid input"() {
@@ -669,6 +691,37 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         exception.message ==~ /The statSizeFile '.*${configuration.statSizeFileName}' could not be found in .*/
     }
 
+    void "test configurePanCanAlignmentDeciderProject invalid alignment version input"() {
+        setup:
+        PanCanAlignmentConfiguration configuration = createPanCanAlignmentConfiguration(
+                bwaMemVersion:  'invalidBwa_memVersion',
+        )
+
+        when:
+        SpringSecurityUtils.doWithAuth("admin") {
+            projectService.configurePanCanAlignmentDeciderProject(configuration)
+        }
+
+        then:
+        AssertionError exception = thrown()
+        exception.message ==~ /Invalid bwa_mem version: 'invalidBwa_memVersion',.*/
+    }
+
+    void "test configurePanCanAlignmentDeciderProject alignment version path does not exist"() {
+        setup:
+        PanCanAlignmentConfiguration configuration = createPanCanAlignmentConfiguration()
+        assert new File(ProcessingOption.findByName(RoddyConstants.OPTION_KEY_BWA_PATHS).value).delete()
+
+        when:
+        SpringSecurityUtils.doWithAuth("admin") {
+            projectService.configurePanCanAlignmentDeciderProject(configuration)
+        }
+
+        then:
+        AssertionError exception = thrown()
+        exception.message ==~ /.* does not exist.*/
+    }
+
 
     void "test configurePanCanAlignmentDeciderProject invalid mergeTool input"() {
         setup:
@@ -685,6 +738,43 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         AssertionError exception = thrown()
         exception.message ==~ /Invalid merge tool: 'invalidMergeTool',.*/
     }
+
+
+    void "test configurePanCanAlignmentDeciderProject invalid sambamba version input"() {
+        setup:
+        PanCanAlignmentConfiguration configuration = createPanCanAlignmentConfiguration(
+                mergeTool: MergeConstants.MERGE_TOOL_SAMBAMBA,
+                sambambaVersion: 'invalidSambambaVersion',
+        )
+
+        when:
+        SpringSecurityUtils.doWithAuth("admin") {
+            projectService.configurePanCanAlignmentDeciderProject(configuration)
+        }
+
+        then:
+        AssertionError exception = thrown()
+        exception.message ==~ /Invalid sambamba version: 'invalidSambambaVersion',.*/
+    }
+
+
+    void "test configurePanCanAlignmentDeciderProject sambamba version path does not exist"() {
+        setup:
+        PanCanAlignmentConfiguration configuration = createPanCanAlignmentConfiguration(
+                mergeTool: MergeConstants.MERGE_TOOL_SAMBAMBA,
+        )
+        assert new File(ProcessingOption.findByName(RoddyConstants.OPTION_KEY_SAMBAMBA_PATHS).value).delete()
+
+        when:
+        SpringSecurityUtils.doWithAuth("admin") {
+            projectService.configurePanCanAlignmentDeciderProject(configuration)
+        }
+
+        then:
+        AssertionError exception = thrown()
+        exception.message ==~ /.* does not exist.*/
+    }
+
 
     @Unroll
     void "test configurePanCanAlignmentDeciderProject phix reference genome require sambamba for merge"() {
@@ -1080,6 +1170,8 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 seqType          : SeqType.wholeGenomePairedSeqType,
                 referenceGenome  : "testReferenceGenome",
                 statSizeFileName : 'testStatSizeFileName.tab',
+                bwaMemVersion    : "bwa-mem",
+                sambambaVersion  : "sambamba",
                 mergeTool        : MergeConstants.MERGE_TOOL_PICARD,
                 pluginName       : 'plugin',
                 pluginVersion    : '1.2.3',

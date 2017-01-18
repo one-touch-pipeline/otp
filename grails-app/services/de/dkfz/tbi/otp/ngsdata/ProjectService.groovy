@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.administration.*
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.roddy.RoddyConstants
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.security.*
@@ -295,6 +296,27 @@ AND ace.granting = true
         assert OtpPath.isValidPathComponent(panCanAlignmentConfiguration.baseProjectConfig): "baseProjectConfig '${panCanAlignmentConfiguration.baseProjectConfig}' is an invalid path component"
         assert panCanAlignmentConfiguration.configVersion ==~ RoddyWorkflowConfig.CONFIG_VERSION_PATTERN: "configVersion '${panCanAlignmentConfiguration.configVersion}' has not expected pattern: ${RoddyWorkflowConfig.CONFIG_VERSION_PATTERN}"
 
+        if (!panCanAlignmentConfiguration.seqType.isWgbs()) {
+            List<String> allBwaMemVersions = ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_BWA_VERSION_AVAILABLE, null, null).split(',')*.trim()
+            assert panCanAlignmentConfiguration.bwaMemVersion in allBwaMemVersions: "Invalid bwa_mem version: '${panCanAlignmentConfiguration.bwaMemVersion}', possible values: ${allBwaMemVersions}"
+
+            String bwaMemPath = ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_BWA_PATHS, panCanAlignmentConfiguration.bwaMemVersion, null)
+            assert OtpPath.isValidAbsolutePath(bwaMemPath): "path '${bwaMemPath}' is an invalid absolute path"
+            assert new File(bwaMemPath).exists(): "${bwaMemPath} does not exist"
+
+            panCanAlignmentConfiguration.bwaMemPath = bwaMemPath
+        }
+        if (panCanAlignmentConfiguration.mergeTool == MergeConstants.MERGE_TOOL_SAMBAMBA) {
+            List<String> allSambambaVersions = ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_SAMBAMBA_VERSION_AVAILABLE, null, null).split(',')*.trim()
+            assert panCanAlignmentConfiguration.sambambaVersion in allSambambaVersions: "Invalid sambamba version: '${panCanAlignmentConfiguration.sambambaVersion}', possible values: ${allSambambaVersions}"
+
+            String sambambaPath = ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_SAMBAMBA_PATHS, panCanAlignmentConfiguration.sambambaVersion, null)
+            assert OtpPath.isValidAbsolutePath(sambambaPath): "path '${sambambaPath}' is an invalid absolute path"
+            assert new File(sambambaPath).exists(): "${sambambaPath} does not exist"
+
+            panCanAlignmentConfiguration.sambambaPath = sambambaPath
+        }
+
         //Reference genomes with PHIX_INFIX only works with sambamba
         if (referenceGenome.name.contains(PHIX_INFIX)) {
             assert panCanAlignmentConfiguration.mergeTool == MergeConstants.MERGE_TOOL_SAMBAMBA : "Only sambamba supported for reference genome with Phix"
@@ -501,6 +523,11 @@ class PanCanAlignmentConfiguration extends RoddyConfiguration {
     String referenceGenome
     String statSizeFileName
     String mergeTool
+    String bwaMemVersion
+    String sambambaVersion
+    String bwaMemPath
+    String sambambaPath
+    String resources = "xl"
 }
 
 class SnvPipelineConfiguration extends RoddyConfiguration {

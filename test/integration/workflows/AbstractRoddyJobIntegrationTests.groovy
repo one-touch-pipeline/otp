@@ -1,6 +1,7 @@
 package workflows
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 import org.junit.*
@@ -13,60 +14,34 @@ import static de.dkfz.tbi.TestCase.*
 @Ignore
 class AbstractRoddyJobIntegrationTests extends AbstractPanCanAlignmentWorkflowTests {
 
-    @Test
-    void executeRoddy_roddyCallFails_noPbsJobsSent_RoddyJobFailedAndSuccessfullyRestarted() {
-
-        // prepare
-
-        createFirstRoddyBamFile()
-        createSeqTrack("readGroup2")
-        resetProjectConfig(roddyFailsProjectConfig)
-
-        // run
-
-        assert shouldFail(RuntimeException) {
-            execute()
-        }  =~ /The project configuration .* could not be found./
-
-        // repair
-
-        resetProjectConfig(projectConfigFile)
-
-        // run
-
-        restartWorkflowFromFailedStep()
-
-        // check
-
-        checkAllAfterSuccessfulExecution_alignBaseBamAndNewLanes()
-    }
 
     @Test
     void executeRoddy_roddyCallSucceeds_noPbsJobsSent_RoddyJobFailedAndSuccessfullyRestarted() {
 
         // prepare
-
         createFirstRoddyBamFile()
         createSeqTrack("readGroup2")
+
+        RoddyWorkflowConfig config = CollectionUtils.exactlyOneElement(RoddyWorkflowConfig.findAll())
+        String pluginVersion = config.pluginVersion
+
         // setting not existing plugin must make roddy exit without sending any PBS jobs
-        setPluginVersion(HelperUtils.getUniqueString())
+        config.pluginVersion = HelperUtils.getUniqueString()
+        config.save(flush: true)
 
         // run
-
         assert shouldFail(RuntimeException) {
             execute()
         } =~ /The project configuration .* could not be found./
 
         // repair
-
-        setPluginVersion(getPluginVersion(projectConfigFile))
+        config.pluginVersion = pluginVersion
+        config.save(flush: true)
 
         // run
-
         restartWorkflowFromFailedStep()
 
         // check
-
         checkAllAfterSuccessfulExecution_alignBaseBamAndNewLanes()
     }
 

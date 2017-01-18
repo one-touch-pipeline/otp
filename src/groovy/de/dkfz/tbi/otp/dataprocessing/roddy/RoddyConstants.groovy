@@ -25,4 +25,17 @@ interface RoddyConstants {
     static final String OPTION_KEY_INDEL_PIPELINE_PLUGIN_VERSION = 'IndelPipelinePluginVersion'
 
     static final String OPTION_KEY_INDEL_BASE_PROJECT_CONFIG = 'IndelBaseProjectConfig'
+
+    static final String OPTION_KEY_BWA_VERSION_DEFAULT = "BwaVersionDefault"
+
+    static final String OPTION_KEY_BWA_VERSION_AVAILABLE = "BwaVersionAvailable"
+
+    static final String OPTION_KEY_BWA_PATHS = "BwaPaths"
+
+    static final String OPTION_KEY_SAMBAMBA_VERSION_DEFAULT = "SambambaVersionDefault"
+
+    static final String OPTION_KEY_SAMBAMBA_VERSION_AVAILABLE = "SambambaVersionAvailable"
+
+    static final String OPTION_KEY_SAMBAMBA_PATHS = "SambambaPaths"
+
 }

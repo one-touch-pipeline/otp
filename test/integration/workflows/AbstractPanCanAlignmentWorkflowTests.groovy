@@ -3,6 +3,7 @@ package workflows
 import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
+import de.dkfz.tbi.otp.dataprocessing.roddy.RoddyConstants
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
@@ -34,6 +35,7 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
     public String getRefGenFileNamePrefix() {
         return 'hs37d5'
     }
+
     protected String getChromosomeStatFileName() {
         return 'hs37d5.fa.chrLenOnlyACGT_realChromosomes.tab'
     }
@@ -72,26 +74,20 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
     // for reference genome in {@link #refGenDir}
     File chromosomeNamesFile
 
-    // test project config (binary aligner)
-    File projectConfigFile
-
-    // test project config (binary aligner) for old plugin
-    File oldProjectConfigFile
-
-    // test project config (convey aligner)
-    File conveyProjectConfigFile
-
-    // test project config with non-existing plugin
-    File roddyFailsProjectConfig
-
     File adapterFile
 
     File fingerPrintingFile
 
 
     LsdfFilesService lsdfFilesService
+
     ProcessingOptionService processingOptionService
+
     AbstractBamFileService abstractBamFileService
+
+    ProjectService projectService
+
+    ConfigService configService
 
 
     @Rule
@@ -102,13 +98,14 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
     List<String> getWorkflowScripts() {
         return ["scripts/workflows/PanCanWorkflow.groovy",
                 "scripts/initializations/AddPathToConfigFilesToProcessingOptions.groovy",
-                "scripts/initializations/AddRoddyPathAndVersionToProcessingOptions.groovy"
+                "scripts/initializations/AddRoddyPathAndVersionToProcessingOptions.groovy",
+                "scripts/initializations/RoddyConstants.groovy",
         ]
     }
 
     @Override
     Duration getTimeout() {
-        return Duration.standardHours(3)
+        return Duration.standardHours(60)
     }
 
     @Before
@@ -159,10 +156,6 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
         firstBamFile = new File(baseTestDataDir, 'first-bam-file/first-bam-file_merged.mdup.bam')
         refGenDir = new File(baseTestDataDir, 'reference-genomes/bwa06_1KGRef')
         chromosomeNamesFile = new File(baseTestDataDir, 'reference-genomes/chromosome-names.txt')
-        projectConfigFile = new File(baseTestDataDir, "project-config/configPerSeqType/projectTestAlignment-newroddy-${findSeqType().roddyName.toLowerCase()}.xml")
-        oldProjectConfigFile = new File(baseTestDataDir, "project-config/configPerSeqType/projectTestAlignment-newroddy-${findSeqType().roddyName.toLowerCase()}-1.0.182-1.xml")
-        conveyProjectConfigFile = new File(baseTestDataDir, 'project-config/conveyProjectTestAlignment.xml')
-        roddyFailsProjectConfig = new File(baseTestDataDir, 'project-config/roddy-fails-project-config.xml')
         adapterFile = new File(baseTestDataDir, 'adapters/TruSeq3-PE.fa')
         fingerPrintingFile = new File(baseTestDataDir, 'fingerPrinting/snp138Common.n1000.vh20140318.bed')
     }
@@ -210,30 +203,34 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
         return workPackage
     }
 
-    void createProjectConfig(MergingWorkPackage workPackage) {
-        assert projectConfigFile.exists()
+    void createProjectConfig(MergingWorkPackage workPackage, Map options = [:]) {
 
-        String pluginVersion = getPluginVersion(projectConfigFile)
+        lsdfFilesService.createDirectory(new File(configService.getProjectSequencePath(workPackage.project)), realm)
 
-        DomainFactory.createRoddyWorkflowConfig(
-                configFilePath: projectConfigFile.absolutePath,
-                pipeline: workPackage.pipeline,
-                pluginVersion: pluginVersion,
-                configVersion: DomainFactory.TEST_CONFIG_VERSION,
-                project: workPackage.project,
-                seqType: workPackage.seqType,
-                obsoleteDate: null
-        )
-        //ensure that expected identifier is available
-        assert projectConfigFile.text.contains("${workPackage.pipeline.name}_${workPackage.seqType.roddyName}_${pluginVersion}_${DomainFactory.TEST_CONFIG_VERSION}")
+         SpringSecurityUtils.doWithAuth("operator") {
+            projectService.configurePanCanAlignmentDeciderProject(new PanCanAlignmentConfiguration([
+                    project          : workPackage.project,
+                    seqType          : workPackage.seqType,
+                    pluginName       : ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_RODDY_ALIGNMENT_PLUGIN_NAME, null, null),
+                    pluginVersion    : ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_RODDY_ALIGNMENT_PLUGIN_VERSION, null, null),
+                    baseProjectConfig: ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_BASE_PROJECT_CONFIG, workPackage.seqType.roddyName, null),
+                    configVersion    : "v1_0",
+                    referenceGenome  : workPackage.referenceGenome,
+                    statSizeFileName : workPackage.statSizeFileName,
+                    mergeTool        : ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_DEFAULT_MERGE_TOOL, workPackage.seqType.roddyName, null),
+                    bwaMemVersion   : ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_BWA_VERSION_DEFAULT, null, null),
+                    sambambaVersion  : ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_SAMBAMBA_VERSION_DEFAULT, null, null),
+                    resources         : "t"
+            ] + options))
+        }
     }
 
     SeqTrack createSeqTrack(String readGroupNum, Map properties = [:]) {
         MergingWorkPackage workPackage = exactlyOneElement(MergingWorkPackage.findAll())
 
         Map seqTrackProperties = [
-                laneId: readGroupNum,
-                fastqcState: SeqTrack.DataProcessingState.FINISHED,
+                laneId               : readGroupNum,
+                fastqcState          : SeqTrack.DataProcessingState.FINISHED,
                 dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
         ] + properties
         SeqTrack seqTrack = DomainFactory.createSeqTrackWithDataFiles(workPackage, seqTrackProperties)
@@ -252,7 +249,6 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
     }
 
 
-
     List<File> createFileListForFirstBam(RoddyBamFile firstBamFile, String finalOrWork) {
         Map<SeqTrack, File> singleLaneQa = firstBamFile."${finalOrWork}SingleLaneQAJsonFiles"
         List<File> baseAndQaJsonFiles = [
@@ -263,7 +259,7 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
         ].flatten()
 
         File roddyExecutionDirectory = new File(firstBamFile."${finalOrWork}ExecutionStoreDirectory", firstBamFile.roddyExecutionDirectoryNames.first())
-        List<File> executionStorageFiles =  filesInRoddyExecutionDir.collect {
+        List<File> executionStorageFiles = filesInRoddyExecutionDir.collect {
             new File(roddyExecutionDirectory, it)
         }
 
@@ -293,7 +289,6 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
     }
 
 
-
     RoddyBamFile createFirstRoddyBamFile(boolean oldStructure = false) {
         assert firstBamFile.exists()
 
@@ -307,7 +302,7 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
                 workPackage: workPackage,
                 identifier: RoddyBamFile.nextIdentifier(workPackage),
                 seqTracks: [seqtrack] as Set,
-                config: exactlyOneElement(RoddyWorkflowConfig.findAll()),
+                config: exactlyOneElement(RoddyWorkflowConfig.findAllByObsoleteDateIsNull()),
                 numberOfMergedLanes: 1,
                 fileOperationStatus: FileOperationStatus.PROCESSED,
                 md5sum: calculateMd5Sum(firstBamFile),
@@ -507,7 +502,7 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
 
     void checkBamFileState(RoddyBamFile bamFile, Map bamFileProperties) {
         MergingWorkPackage workPackage = exactlyOneElement(MergingWorkPackage.findAll())
-        RoddyWorkflowConfig projectConfig = exactlyOneElement(RoddyWorkflowConfig.findAll())
+        RoddyWorkflowConfig projectConfig = exactlyOneElement(RoddyWorkflowConfig.findAllByObsoleteDateIsNull())
 
         assert bamFileProperties.baseBamFile?.id == bamFile.baseBamFile?.id
         assert bamFileProperties.seqTracks.size() == bamFile.seqTracks.size()
@@ -640,7 +635,7 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
             rootFiles.add(bamFile.workMetadataTableFile)
             if (bamFile.hasMultipleLibraries()) {
                 rootDirs += bamFile.workLibraryMethylationDirectories.values() +
-                    bamFile.workLibraryQADirectories.values()
+                        bamFile.workLibraryQADirectories.values()
             }
         }
         TestCase.checkDirectoryContentHelper(bamFile.workDirectory, rootDirs, rootFiles)
@@ -673,7 +668,6 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
     }
 
 
-
     void checkInputIsNotDeleted() {
         List<DataFile> fastqFiles = DataFile.findAll()
         fastqFiles.each { DataFile dataFile ->
@@ -682,26 +676,6 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
         }
     }
 
-    String getPluginVersion(File projectConfig) {
-        def configuration = new XmlParser().parseText(projectConfig.text)
-        String nameValue = configuration.@name
-        return nameValue.replaceAll("${Pipeline.Name.PANCAN_ALIGNMENT}_", "").replaceAll("${findSeqType().roddyName}_", "").replaceAll("_${DomainFactory.TEST_CONFIG_VERSION}", "")
-    }
-
-    void setPluginVersion(String pluginVersion) {
-        RoddyWorkflowConfig config = CollectionUtils.exactlyOneElement(RoddyWorkflowConfig.findAll())
-        config.pluginVersion = pluginVersion
-        config.save(flush: true, failOnError: true)
-    }
-
-    void resetProjectConfig(File sourceProjectConfig) {
-        assert sourceProjectConfig.exists()
-
-        RoddyWorkflowConfig config = exactlyOneElement(RoddyWorkflowConfig.findAll())
-        config.configFilePath = sourceProjectConfig.absolutePath
-        config.save(flush: true, failOnError: true)
-        setPluginVersion(getPluginVersion(sourceProjectConfig))
-    }
 
     void executeAndVerify_AlignLanesOnly_AllFine() {
         // run

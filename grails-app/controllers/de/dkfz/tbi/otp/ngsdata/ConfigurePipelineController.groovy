@@ -29,6 +29,8 @@ class ConfigurePipelineController {
                     pluginVersion    : cmd.pluginVersion,
                     baseProjectConfig: cmd.baseProjectConfig,
                     configVersion    : cmd.config,
+                    bwaMemVersion    : cmd.bwaMemVersion,
+                    sambambaVersion  : cmd.sambambaVersion,
             ])
             projectService.configurePanCanAlignmentDeciderProject(panCanAlignmentConfiguration)
             redirect(controller: "projectOverview", action: "specificOverview", params: [project: cmd.project.name])
@@ -40,7 +42,14 @@ class ConfigurePipelineController {
         String defaultReferenceGenome = ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_DEFAULT_REFERENCE_GENOME, cmd.seqType.roddyName, null)
         String defaultMergeTool = ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_DEFAULT_MERGE_TOOL, cmd.seqType.roddyName, null)
         List<String> allMergeTools = ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_ALL_MERGE_TOOLS, cmd.seqType.roddyName, null).split(',')*.trim()
+        List<String> allSambambaVersions = ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_SAMBAMBA_VERSION_AVAILABLE, null, null).split(',')*.trim()
+        String defaultSambambaVersion = ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_SAMBAMBA_VERSION_DEFAULT, null, null)
+        List<String> allBwaMemVersions = ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_BWA_VERSION_AVAILABLE, null, null).split(',')*.trim()
+        String defaultBwaMemVersion = ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_BWA_VERSION_DEFAULT, null, null)
 
+
+        assert allSambambaVersions.contains(defaultSambambaVersion)
+        assert allBwaMemVersions.contains(defaultBwaMemVersion)
         assert MergeConstants.ALL_MERGE_TOOLS.contains(defaultMergeTool)
         assert MergeConstants.ALL_MERGE_TOOLS.containsAll(allMergeTools)
         assert ReferenceGenome.findByName(defaultReferenceGenome)
@@ -61,6 +70,16 @@ class ConfigurePipelineController {
                 mergeTool               : defaultMergeTool,
                 mergeTools              : allMergeTools,
                 defaultMergeTool        : defaultMergeTool,
+
+                isWgbs                  : cmd.seqType.isWgbs(),
+
+                bwaMemVersion           : defaultBwaMemVersion,
+                bwaMemVersions          : allBwaMemVersions,
+                defaultBwaMemVersion    : defaultBwaMemVersion,
+
+                sambambaVersion         : defaultSambambaVersion,
+                sambambaVersions        : allSambambaVersions,
+                defaultSambambaVersion  : defaultSambambaVersion,
 
                 pluginName              : defaultPluginName,
                 defaultPluginName       : defaultPluginName,
@@ -239,6 +258,8 @@ class ConfigureAlignmentPipelineSubmitCommand extends ConfigurePipelineSubmitCom
     String referenceGenome
     String statSizeFileName
     String mergeTool
+    String bwaMemVersion
+    String sambambaVersion
 
     static constraints = {
         statSizeFileName(nullable: true, validator: { val, obj ->
@@ -248,6 +269,12 @@ class ConfigureAlignmentPipelineSubmitCommand extends ConfigurePipelineSubmitCom
             if (!(val ==~ ReferenceGenomeProjectSeqType.TAB_FILE_PATTERN)) {
                 return 'Invalid file name pattern'
             }
+        })
+        bwaMemVersion(nullable: true, validator: { val, obj ->
+            obj.seqType.isWgbs() ? true : val != null
+        })
+        sambambaVersion(nullable: true, validator: { val, obj ->
+            obj.mergeTool != MergeConstants.MERGE_TOOL_SAMBAMBA ? true : val != null
         })
     }
 }
