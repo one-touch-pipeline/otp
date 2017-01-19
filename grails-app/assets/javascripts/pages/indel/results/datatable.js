@@ -59,7 +59,7 @@ $.otp.indelResultsTable = {
                         $.otp.createLinkMarkup({
                             controller: 'individual',
                             action: 'show',
-                            parameters: {'indelCallingInstance.id': row.individualId},
+                            id: row.individualId,
                             text: row.individualPid,
                         }),
                         row.sampleType1 + " \u2013 " + row.sampleType2,
