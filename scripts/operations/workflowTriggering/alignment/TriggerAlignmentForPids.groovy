@@ -9,9 +9,20 @@ LogThreadLocal.withThreadLog(System.out, {
     SeqTrack.withTransaction {
 
         Collection<SeqTrack> seqTracks = SeqTrack.withCriteria {
-            sample {
-                individual {
-                    'in'('mockPid', [
+            or {
+                sample {
+                    individual {
+                        'in'('mockPid', [
+                                '',
+                                // pids of patient
+
+                        ])
+                    }
+                }
+                ilseSubmission {
+                    'in'('ilseNumber', [
+                            -1,
+                            // Ilse numbers
 
                     ])
                 }
@@ -23,7 +34,7 @@ LogThreadLocal.withThreadLog(System.out, {
 
         //show seqtracks
         seqTracks.each {
-            println "${it.id}    ${it.project.name}    ${it.individual.mockPid}     ${it.sampleType.name}    ${it.seqType}    ${it.laneId}    ${it.run.name}"
+            println "${it.id}    ${it.project.name}    ${it.individual.mockPid}     ${it.sampleType.name}    ${it.seqType}    ${it.laneId}    ${it.run.name}    ${it.ilseId}"
         }
         println seqTracks.size()
 
