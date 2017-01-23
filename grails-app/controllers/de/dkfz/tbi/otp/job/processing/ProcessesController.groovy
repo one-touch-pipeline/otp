@@ -275,7 +275,7 @@ class ProcessesController {
         futures.each { future ->
             def data = future.get()
             def actions = []
-            if (data.state == ExecutionState.FAILURE && !Process.findByRestarted(process.restarted)) {
+            if (data.state == ExecutionState.FAILURE && !Process.findByRestarted(process)) {
                 actions << "restart"
             }
             dataToRender.aaData << [
