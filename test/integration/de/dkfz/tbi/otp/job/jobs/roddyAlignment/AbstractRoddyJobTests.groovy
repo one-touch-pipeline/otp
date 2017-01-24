@@ -126,6 +126,22 @@ newLine"""
         return workExecutionDir
     }
 
+    private File setUpWorkDirAndMockProcessOutputWithOutOfMemoryError() {
+        File workExecutionDir = setRootPathAndCreateWorkExecutionStoreDirectory()
+
+        stderr = """newLine
+Creating the following execution directory to java.lang.OutOfMemoryError store information about this process:
+${workExecutionDir.absolutePath}
+newLine"""
+
+        ProcessHelperService.metaClass.static.executeAndWait = { String cmd ->
+            executeCommandCounter++
+            return new ProcessHelperService.ProcessOutput(stdout: "", stderr: stderr, exitCode: 0)
+        }
+
+        return workExecutionDir
+    }
+
     private void mockProcessOutput_noClusterJobsSubmitted() {
         ProcessHelperService.metaClass.static.executeAndWait = { String cmd ->
             executeCommandCounter++
@@ -195,6 +211,18 @@ newLine"""
         }
         LogThreadLocal.withThreadLog(System.out) {
             assert AbstractMultiJob.NextAction.WAIT_FOR_CLUSTER_JOBS == roddyJob.execute(null)
+        }
+    }
+
+    @Test
+    void testMaybeSubmit_withOutOfMemoryError() {
+        setUpWorkDirAndMockProcessOutputWithOutOfMemoryError()
+        LogThreadLocal.withThreadLog(System.out) {
+            final shouldFail = new GroovyTestCase().&shouldFail
+            String error = shouldFail RuntimeException, {
+                roddyJob.maybeSubmit()
+            }
+            assert error == "Out of memory error is found in Roddy"
         }
     }
 

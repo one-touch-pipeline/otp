@@ -59,6 +59,10 @@ abstract class AbstractRoddyJob<R extends RoddyResult> extends AbstractMaybeSubm
                 roddyMemoryUsage.release()
             }
 
+            if (output.stderr.contains("java.lang.OutOfMemoryError")) {
+                throw new RuntimeException('Out of memory error is found in Roddy')
+            }
+
             Collection<ClusterJob> submittedClusterJobs = createClusterJobObjects(roddyResult, realm, output)
             if (submittedClusterJobs) {
                 saveRoddyExecutionStoreDirectory(roddyResult, output.stderr)
