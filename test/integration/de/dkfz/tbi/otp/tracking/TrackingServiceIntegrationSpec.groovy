@@ -37,6 +37,45 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         TestCase.removeMetaClass(TrackingService, trackingService)
     }
 
+    def 'test findAllOtrsTickets' () {
+        given:
+        TrackingService trackingService = new TrackingService()
+        OtrsTicket otrsTicket01 = DomainFactory.createOtrsTicket()
+        OtrsTicket otrsTicket02 = DomainFactory.createOtrsTicket()
+        OtrsTicket otrsTicket03 = DomainFactory.createOtrsTicket()
+        SeqTrack seqTrack01 = DomainFactory.createSeqTrack()
+        SeqTrack seqTrack02 = DomainFactory.createSeqTrack()
+        SeqTrack seqTrack03 = DomainFactory.createSeqTrack()
+        SeqTrack seqTrack04 = DomainFactory.createSeqTrack()
+        SeqTrack seqTrack05 = DomainFactory.createSeqTrack()
+        SeqTrack seqTrack06 = DomainFactory.createSeqTrack()
+        DomainFactory.createDataFile(runSegment: DomainFactory.createRunSegment(otrsTicket: otrsTicket01), seqTrack: seqTrack01)
+        DomainFactory.createDataFile(runSegment: DomainFactory.createRunSegment(otrsTicket: otrsTicket02), seqTrack: seqTrack02)
+        DomainFactory.createDataFile(runSegment: DomainFactory.createRunSegment(otrsTicket: otrsTicket03), seqTrack: seqTrack03)
+        DomainFactory.createDataFile(runSegment: DomainFactory.createRunSegment(otrsTicket: otrsTicket01), seqTrack: seqTrack05)
+        DomainFactory.createDataFile(runSegment: DomainFactory.createRunSegment(), seqTrack: seqTrack06)
+
+        when:
+        Set<OtrsTicket> otrsTickets01 = trackingService.findAllOtrsTickets([seqTrack01, seqTrack02, seqTrack05])
+        then:
+        TestCase.assertContainSame(otrsTickets01, [otrsTicket01, otrsTicket02])
+
+        when:
+        Set<OtrsTicket> otrsTickets02 = trackingService.findAllOtrsTickets([seqTrack03])
+        then:
+        TestCase.assertContainSame(otrsTickets02, [otrsTicket03])
+
+        when:
+        Set<OtrsTicket> otrsTickets03 = trackingService.findAllOtrsTickets([seqTrack04])
+        then:
+        TestCase.assertContainSame(otrsTickets03, [])
+
+        when:
+        Set<OtrsTicket> otrsTickets04 = trackingService.findAllOtrsTickets([seqTrack06])
+        then:
+        TestCase.assertContainSame(otrsTickets04, [])
+    }
+
     void 'processFinished calls setFinishedTimestampsAndNotify for the tickets of the passed SeqTracks'() {
         given:
         OtrsTicket ticketA = DomainFactory.createOtrsTicket()

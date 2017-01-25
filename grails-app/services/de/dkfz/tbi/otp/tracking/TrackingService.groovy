@@ -9,6 +9,7 @@ import de.dkfz.tbi.otp.tracking.ProcessingStatus.Done
 import de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus
 import de.dkfz.tbi.otp.user.*
 import de.dkfz.tbi.otp.utils.*
+import org.hibernate.*
 import org.springframework.security.access.prepost.*
 
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.Done.*
@@ -62,31 +63,22 @@ class TrackingService {
         setStarted(findAllOtrsTickets(seqTracks), step)
     }
 
-    public Set<OtrsTicket> findAllOtrsTicketsAndLockThem(Collection<SeqTrack> seqTracks) {
-        Set<OtrsTicket> otrsTickets = findAllOtrsTickets(seqTracks)
-        return otrsTickets.sort { //ensure order to avoid dead locks
-            it.id
-        }.collect {
-            //reload with write lock
-            it.refresh()
-            OtrsTicket.lock(it.id)
-        }
-    }
-
     public Set<OtrsTicket> findAllOtrsTickets(Collection<SeqTrack> seqTracks) {
-        Set<OtrsTicket> otrsTickets = [] as Set
-        //Doesn't work as a single Query, probably a Unit test problem
-        DataFile.withCriteria {
-            'in' ('seqTrack', seqTracks)
-            projections {
-                distinct('runSegment')
-            }
-        }.each {
-            if (it?.otrsTicket) {
-                otrsTickets.add(it.otrsTicket)
-            }
+        OtrsTicket.withSession { Session session ->
+            session.buildLockRequest(new LockOptions(LockMode.PESSIMISTIC_WRITE)) //set pessimistic lock for session
+            return OtrsTicket.executeQuery("""
+                select distinct
+                    otrsTicket
+                from
+                    DataFile datafile
+                    join datafile.runSegment.otrsTicket otrsTicket
+                where
+                    datafile.seqTrack in (:seqTracks)
+                    and otrsTicket is not null
+            """, [
+                    seqTracks: seqTracks
+            ]) as Set
         }
-        return otrsTickets
     }
 
     public void setStarted(Collection<OtrsTicket> otrsTickets, OtrsTicket.ProcessingStep step) {
@@ -100,7 +92,7 @@ class TrackingService {
 
     public void processFinished(Set<SeqTrack> seqTracks, OtrsTicket.ProcessingStep step) {
         SamplePairDiscovery samplePairDiscovery = new SamplePairDiscovery()
-        for (OtrsTicket ticket : findAllOtrsTicketsAndLockThem(seqTracks)) {
+        for (OtrsTicket ticket : findAllOtrsTickets(seqTracks)) {
             setFinishedTimestampsAndNotify(ticket, samplePairDiscovery)
         }
     }
