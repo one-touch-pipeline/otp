@@ -57,7 +57,7 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
             displayRunning(analysisStateMap[AnalysisProcessingStates.IN_PROGRESS], output)
 
             output.showFinished(analysisStateMap[AnalysisProcessingStates.FINISHED])
-            return analysisStateMap[AnalysisProcessingStates.FINISHED]
+            return analysisStateMap[AnalysisProcessingStates.FINISHED] ?: []
         }
         return []
     }
