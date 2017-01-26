@@ -171,15 +171,4 @@ abstract class PanCanAlignmentWorkflowTests extends AbstractPanCanAlignmentWorkf
         assertBamFileFileSystemPropertiesSet(bamFiles[1])
         checkFileSystemState(bamFiles[1])
     }
-
-    @Test
-    void testAlignLanesOnly_NoBaseBamExist_OneLane_WithAdapterTrimming_allFine() {
-
-        // prepare
-        SeqTrack seqTrack = createSeqTrack("readGroup1")
-
-        setUpAdapterFile([seqTrack])
-
-        executeAndVerify_AlignLanesOnly_AllFine()
-    }
 }

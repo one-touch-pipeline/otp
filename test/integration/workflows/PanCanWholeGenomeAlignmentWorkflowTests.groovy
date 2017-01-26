@@ -13,4 +13,16 @@ class PanCanWholeGenomeAlignmentWorkflowTests extends PanCanAlignmentWorkflowTes
                 libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED,
         ))
     }
+
+
+    @Test
+    void testAlignLanesOnly_NoBaseBamExist_OneLane_WithAdapterTrimming_allFine() {
+
+        // prepare
+        SeqTrack seqTrack = createSeqTrack("readGroup1")
+
+        setUpAdapterFile([seqTrack])
+
+        executeAndVerify_AlignLanesOnly_AllFine()
+    }
 }
