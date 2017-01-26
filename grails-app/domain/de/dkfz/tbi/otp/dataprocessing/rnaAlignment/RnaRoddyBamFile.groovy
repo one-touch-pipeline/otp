@@ -1,4 +1,6 @@
-package de.dkfz.tbi.otp.dataprocessing
+package de.dkfz.tbi.otp.dataprocessing.rnaAlignment
+
+import de.dkfz.tbi.otp.dataprocessing.*
 
 class RnaRoddyBamFile extends RoddyBamFile {
 
