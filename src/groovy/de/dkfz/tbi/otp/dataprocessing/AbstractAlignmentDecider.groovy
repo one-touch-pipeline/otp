@@ -19,11 +19,11 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
     @Autowired
     MailHelperService mailHelperService
 
-    Pipeline getPipeline() {
-        Pipeline pipeline = atMostOneElement(Pipeline.findAllByNameAndType(pipelineName(), Pipeline.Type.ALIGNMENT))
+    Pipeline getPipeline(SeqTrack seqTrack) {
+        Pipeline pipeline = atMostOneElement(Pipeline.findAllByNameAndType(pipelineName(seqTrack), Pipeline.Type.ALIGNMENT))
         if(!pipeline) {
             pipeline = new Pipeline(
-                    name: pipelineName(),
+                    name: pipelineName(seqTrack),
                     type: Pipeline.Type.ALIGNMENT
             ).save(failOnError: true)
         }
@@ -49,7 +49,7 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
                 seqTrack,
                 referenceGenomeProjectSeqType.referenceGenome,
                 referenceGenomeProjectSeqType.statSizeFileName,
-                pipeline,
+                getPipeline(seqTrack),
         )
 
         workPackages.each {
@@ -118,5 +118,5 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
 
     abstract void prepareForAlignment(MergingWorkPackage workPackage, SeqTrack seqTrack, boolean forceRealign)
 
-    abstract Pipeline.Name pipelineName()
+    abstract Pipeline.Name pipelineName(SeqTrack seqTrack)
 }

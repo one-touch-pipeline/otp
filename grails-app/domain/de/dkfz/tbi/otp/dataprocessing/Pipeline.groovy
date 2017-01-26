@@ -13,6 +13,7 @@ class Pipeline implements Entity {
         OTP_SNV         (Type.SNV,       false, null),
         RODDY_SNV       (Type.SNV,       true,  null),
         RODDY_INDEL     (Type.INDEL,     true,  null),
+        RODDY_RNA_ALIGNMENT (Type.ALIGNMENT, true, 'STAR'),
 
         final Type type
         final boolean usesRoddy

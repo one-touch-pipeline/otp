@@ -91,6 +91,10 @@ class SeqType implements Entity {
         return WGBS_SEQ_TYPE_NAMES.contains(seqTypeName)
     }
 
+    boolean isRna() {
+        return name == "RNA"
+    }
+
     String toString() {
         "${displayName} ${libraryLayout}"
     }

@@ -8,15 +8,31 @@ import org.springframework.beans.factory.annotation.*
 
 public class RoddyAlignmentDeciderTest {
     @Autowired
-    RoddyAlignmentDecider decider
+    PanCanAlignmentDecider decider
 
     @Test
-    void testGetPipeline() {
-        Pipeline pipeline = decider.getPipeline()
+    void testGetPipelineNotWGBS() {
+        SeqTrack seqTrack = DomainFactory.createSeqTrack()
+        Pipeline pipeline = decider.getPipeline(seqTrack)
         assert pipeline.name == Pipeline.Name.PANCAN_ALIGNMENT
         assert pipeline.type == Pipeline.Type.ALIGNMENT
     }
 
+    @Test
+    void testGetPipelineWGBS() {
+        SeqTrack seqTrack = DomainFactory.createSeqTrack([seqType: DomainFactory.createWholeGenomeBisulfiteSeqType()])
+        Pipeline pipeline = decider.getPipeline(seqTrack)
+        assert pipeline.name == Pipeline.Name.PANCAN_ALIGNMENT
+        assert pipeline.type == Pipeline.Type.ALIGNMENT
+    }
+
+    @Test
+    void testGetPipelineRNA() {
+        SeqTrack seqTrack = DomainFactory.createSeqTrack([seqType: DomainFactory.createRnaSeqType()])
+        Pipeline pipeline = decider.getPipeline(seqTrack)
+        assert pipeline.name == Pipeline.Name.RODDY_RNA_ALIGNMENT
+        assert pipeline.type == Pipeline.Type.ALIGNMENT
+    }
 
     private createAndRunPrepare(boolean bamFileContainsSeqTrack, boolean withdrawn, FileOperationStatus fileOperationStatus, boolean forceAlign) {
         RoddyBamFile bamFile = DomainFactory.createRoddyBamFile([
@@ -159,7 +175,7 @@ public class RoddyAlignmentDeciderTest {
     void testPrepareForAlignment_noBamFileFound_shouldSetNeedsProcessing() {
         SeqTrack seqTrack = SeqTrack.build()
 
-        Pipeline pipeline = decider.getPipeline()
+        Pipeline pipeline = decider.getPipeline(seqTrack)
 
         MergingWorkPackage workPackage = TestData.createMergingWorkPackage(
                 sample: seqTrack.sample,
@@ -303,7 +319,7 @@ public class RoddyAlignmentDeciderTest {
         DomainFactory.createRoddyWorkflowConfig(
                 project: seqTrack.project,
                 seqType: seqTrack.seqType,
-                pipeline: decider.pipeline,
+                pipeline: decider.getPipeline(seqTrack),
         )
 
         decider.ensureConfigurationIsComplete(seqTrack)
@@ -315,7 +331,7 @@ public class RoddyAlignmentDeciderTest {
         DomainFactory.createRoddyWorkflowConfig(
                 project: seqTrack.project,
                 seqType: seqTrack.seqType,
-                pipeline: decider.pipeline,
+                pipeline: decider.getPipeline(seqTrack),
         )
 
         assert shouldFail {

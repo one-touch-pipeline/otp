@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
@@ -8,8 +9,12 @@ import org.springframework.stereotype.Component
 class PanCanAlignmentDecider extends RoddyAlignmentDecider {
 
     @Override
-    Pipeline.Name pipelineName() {
-        return Pipeline.Name.PANCAN_ALIGNMENT
+    Pipeline.Name pipelineName(SeqTrack seqTrack) {
+        if (seqTrack.seqType.isRna()) {
+            return Pipeline.Name.RODDY_RNA_ALIGNMENT
+        } else {
+            return Pipeline.Name.PANCAN_ALIGNMENT
+        }
     }
 
     @Override

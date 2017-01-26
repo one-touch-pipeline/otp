@@ -1517,6 +1517,10 @@ class DomainFactory {
         createSeqTypeLazy(SeqTypeNames.CHIP_SEQ, 'ChIP', 'chip_seq_sequencing', "CHIPSEQ")
     }
 
+    static SeqType createRnaSeqType() {
+        createSeqTypeLazy(SeqTypeNames.RNA, 'RNA', 'rna_sequencing', "RNA")
+    }
+
     static List<SeqType> createDefaultOtpAlignableSeqTypes() {
         [
                 createWholeGenomeSeqType(),

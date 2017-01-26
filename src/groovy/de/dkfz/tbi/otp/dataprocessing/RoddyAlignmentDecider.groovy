@@ -47,8 +47,8 @@ abstract class RoddyAlignmentDecider extends AbstractAlignmentDecider {
     @Override
     boolean canPipelineAlign(SeqTrack seqTrack) {
         boolean canAlign = SeqType.getPanCanAlignableSeqTypes().contains(seqTrack.seqType)
-        if (canAlign && (RoddyWorkflowConfig.getLatestForProject(seqTrack.project, seqTrack.seqType, pipeline) == null)) {
-            seqTrack.log("RoddyWorkflowConfig is missing for ${seqTrack.project} ${seqTrack.seqType} ${pipeline.name}.")
+        if (canAlign && (RoddyWorkflowConfig.getLatestForProject(seqTrack.project, seqTrack.seqType, getPipeline(seqTrack)) == null)) {
+            seqTrack.log("RoddyWorkflowConfig is missing for ${seqTrack.project} ${seqTrack.seqType} ${getPipeline(seqTrack).name}.")
             return false
         }
         return canAlign

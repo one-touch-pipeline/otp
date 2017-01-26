@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component
 class DefaultOtpAlignmentDecider extends AbstractAlignmentDecider {
 
     @Override
-    Pipeline.Name pipelineName() {
+    Pipeline.Name pipelineName(SeqTrack seqTrack) {
         return Pipeline.Name.DEFAULT_OTP
     }
 
