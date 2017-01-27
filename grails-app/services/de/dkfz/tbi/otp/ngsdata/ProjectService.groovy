@@ -36,6 +36,7 @@ class ProjectService {
     GroupService groupService
     ReferenceGenomeService referenceGenomeService
     SpringSecurityService springSecurityService
+    ExecutionHelperService executionHelperService
 
     /**
      *
@@ -63,6 +64,11 @@ class ProjectService {
 
     public List<Project> projectByProjectGroup(ProjectGroup projectGroup) {
         return Project.findAllByProjectGroup(projectGroup, [sort: "name", order: "asc"])
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    public List<Project> getAllProjectsWithCofigFile(SeqType seqType, Pipeline pipeline) {
+        return RoddyWorkflowConfig.findAllBySeqTypeAndPipelineAndObsoleteDateIsNullAndIndividualIsNull(seqType, pipeline)*.project.unique().sort({it.name.toUpperCase()})
     }
 
     /**
@@ -366,6 +372,43 @@ AND ace.granting = true
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void copyPanCanAlignmentXml(Project basedProject, SeqType seqType, Project project) {
+        ReferenceGenomeProjectSeqType refSeqType = exactlyOneElement(ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(basedProject, seqType))
+
+        ReferenceGenomeProjectSeqType refSeqType1 = new ReferenceGenomeProjectSeqType()
+        refSeqType1.project = project
+        refSeqType1.seqType = refSeqType.seqType
+        refSeqType1.referenceGenome = refSeqType.referenceGenome
+        refSeqType1.sampleType = refSeqType.sampleType
+        refSeqType1.statSizeFileName = refSeqType.statSizeFileName
+        refSeqType1.save(flush: true)
+
+        File projectDirectory = project.getProjectDirectory()
+        assert projectDirectory.exists()
+
+        Pipeline pipeline = CollectionUtils.exactlyOneElement(Pipeline.findAllByTypeAndName(
+                Pipeline.Type.ALIGNMENT,
+                Pipeline.Name.PANCAN_ALIGNMENT,
+        ))
+
+        RoddyWorkflowConfig roddyWorkflowConfigBasedProject = RoddyWorkflowConfig.getLatestForProject(basedProject, seqType, pipeline)
+        File configFilePathBasedProject = new File (roddyWorkflowConfigBasedProject.configFilePath)
+        File configDirectory = RoddyWorkflowConfig.getStandardConfigDirectory(project, roddyWorkflowConfigBasedProject.pipeline.name)
+
+        executeScript(getCopyBashScript(configDirectory, configFilePathBasedProject, executionHelperService.getGroup(projectDirectory)), project)
+
+        File configFilePath = new File(configDirectory, configFilePathBasedProject.name)
+        RoddyWorkflowConfig.importProjectConfigFile(
+                project,
+                roddyWorkflowConfigBasedProject.seqType,
+                roddyWorkflowConfigBasedProject.pluginVersion,
+                roddyWorkflowConfigBasedProject.pipeline,
+                configFilePath.path,
+                roddyWorkflowConfigBasedProject.configVersion,
+        )
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void configureSnvPipelineProject(SnvPipelineConfiguration snvPipelineConfiguration) {
         assert OtpPath.isValidPathComponent(snvPipelineConfiguration.pluginName): "pluginName '${snvPipelineConfiguration.pluginName}' is an invalid path component"
         assert OtpPath.isValidPathComponent(snvPipelineConfiguration.pluginVersion): "pluginVersion '${snvPipelineConfiguration.pluginVersion}' is an invalid path component"
@@ -464,6 +507,25 @@ chmod 0440 ${configFilePath}
 """
     }
 
+    private String getCopyBashScript(File configDirectory, File configFilePathBasedProject, String unixGroup) {
+        String createConfigDirectory = ''
+
+        if (!configDirectory.exists()) {
+            createConfigDirectory = """\
+mkdir -p -m 2750 ${configDirectory}
+"""
+        }
+
+        return """\
+
+${createConfigDirectory}
+
+cp -a ${configFilePathBasedProject} ${configDirectory}/
+
+chgrp ${unixGroup} ${configDirectory}/*
+
+"""
+    }
 
     private String buildCreateProjectDirectory(String unixGroup, File projectDirectory) {
         return """\

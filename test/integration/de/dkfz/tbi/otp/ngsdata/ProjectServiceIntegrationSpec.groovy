@@ -10,6 +10,7 @@ import de.dkfz.tbi.otp.utils.*
 import grails.plugin.springsecurity.*
 import grails.test.spock.*
 import grails.validation.*
+import org.apache.commons.io.*
 import org.codehaus.groovy.grails.commons.*
 import org.junit.*
 import org.junit.rules.*
@@ -865,6 +866,60 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 "${configuration.pluginName}:${configuration.pluginVersion}"
         ).size() == 1
         ReferenceGenomeProjectSeqType.findAllByDeprecatedDateIsNull().size() == 1
+    }
+
+    void "test copyPanCanAlignmentXml valid input"() {
+        setup:
+        SeqType seqType = DomainFactory.createExomeSeqType()
+        Project project = Project.findByName("testProjectAlignment")
+
+        Realm realm = ConfigService.getRealm(project, Realm.OperationType.DATA_MANAGEMENT)
+        DomainFactory.createRealmDataProcessing(temporaryFolder.newFolder(), [name: realm.name])
+        Project basedProject = DomainFactory.createProject(name: 'basedTestProjectAlignment', realmName: realm.name, alignmentDeciderBeanName: 'basedTest')
+
+        File tempFile = temporaryFolder.newFile("PANCAN_ALIGNMENT_WES_1.1.51_v1_0.xml")
+        CreateFileHelper.createRoddyWorkflowConfig(tempFile, "PANCAN_ALIGNMENT_WES_pluginVersion:1.1.51_v1_0")
+
+        Pipeline pipeline = CollectionUtils.exactlyOneElement(Pipeline.findAllByTypeAndName(
+                Pipeline.Type.ALIGNMENT,
+                Pipeline.Name.PANCAN_ALIGNMENT,
+        ))
+
+        DomainFactory.createRoddyWorkflowConfig(
+                project: basedProject,
+                seqType: seqType,
+                pipeline: pipeline,
+                configFilePath: tempFile,
+                pluginVersion: 'pluginVersion:1.1.51',
+                configVersion: 'v1_0',
+        )
+
+        DomainFactory.createReferenceGenomeProjectSeqType(
+                project: basedProject,
+                seqType: seqType,
+        )
+
+        File projectDirectory = basedProject.getProjectDirectory()
+        assert projectDirectory.exists() || projectDirectory.mkdirs()
+
+        File projectDirectory1 = project.getProjectDirectory()
+        assert projectDirectory1.exists() || projectDirectory1.mkdirs()
+
+        when:
+        SpringSecurityUtils.doWithAuth("admin") {
+            projectService.copyPanCanAlignmentXml(basedProject, seqType, project)
+        }
+
+        then:
+        List<RoddyWorkflowConfig> roddyWorkflowConfigs = RoddyWorkflowConfig.findAllByProjectAndSeqTypeAndPipelineInListAndPluginVersionAndObsoleteDateIsNull(
+                project,
+                seqType,
+                Pipeline.findAllByTypeAndName(Pipeline.Type.ALIGNMENT, Pipeline.Name.PANCAN_ALIGNMENT),
+                "pluginVersion:1.1.51"
+        )
+        roddyWorkflowConfigs.size() == 1
+        File roddyWorkflowConfig = new File(roddyWorkflowConfigs.configFilePath.first())
+        roddyWorkflowConfig.exists()
     }
 
     void "test configureDefaultOtpAlignmentDecider to configureNoAlignmentDeciderProject"() {

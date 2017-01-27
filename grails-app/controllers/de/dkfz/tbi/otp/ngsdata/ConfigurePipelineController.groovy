@@ -17,6 +17,8 @@ class ConfigurePipelineController {
                 Pipeline.Name.PANCAN_ALIGNMENT,
         ))
 
+        List<Project> projects = projectService.getAllProjectsWithCofigFile(cmd.seqType, pipeline)
+
         Map result = checkErrorsIfSubmitted(cmd, pipeline)
         if (!result) {
             PanCanAlignmentConfiguration panCanAlignmentConfiguration = new PanCanAlignmentConfiguration([
@@ -33,6 +35,11 @@ class ConfigurePipelineController {
                     sambambaVersion  : cmd.sambambaVersion,
             ])
             projectService.configurePanCanAlignmentDeciderProject(panCanAlignmentConfiguration)
+            redirect(controller: "projectOverview", action: "specificOverview", params: [project: cmd.project.name])
+        }
+
+        if (cmd.copy) {
+            projectService.copyPanCanAlignmentXml(cmd.basedProject, cmd.seqType, cmd.project)
             redirect(controller: "projectOverview", action: "specificOverview", params: [project: cmd.project.name])
         }
 
@@ -62,6 +69,8 @@ class ConfigurePipelineController {
         assert cmd.project.getProjectDirectory().exists()
 
         result << [
+                projects                : projects,
+
                 referenceGenome         : referenceGenome,
                 referenceGenomes        : referenceGenomes,
                 defaultReferenceGenome  : defaultReferenceGenome,
@@ -91,7 +100,7 @@ class ConfigurePipelineController {
                 defaultBaseProjectConfig: defaultBaseProjectConfig,
         ]
 
-        if (cmd.submit) {
+        if (cmd.submit || cmd.copy) {
             result << [
                     referenceGenome  : cmd.referenceGenome,
                     statSizeFileName : cmd.statSizeFileName,
@@ -255,13 +264,18 @@ class ConfigurePipelineController {
 }
 
 class ConfigureAlignmentPipelineSubmitCommand extends ConfigurePipelineSubmitCommand implements Serializable {
+    Project basedProject
+
     String referenceGenome
     String statSizeFileName
     String mergeTool
     String bwaMemVersion
     String sambambaVersion
+    String copy
 
     static constraints = {
+        basedProject(nullable: true)
+        copy(nullable: true)
         statSizeFileName(nullable: true, validator: { val, obj ->
             if (!val) {
                 return 'Invalid statSizeFileName'
