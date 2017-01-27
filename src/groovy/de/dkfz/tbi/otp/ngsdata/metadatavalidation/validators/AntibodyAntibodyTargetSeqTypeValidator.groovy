@@ -1,18 +1,11 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
-import de.dkfz.tbi.otp.ngsdata.MetadataImportService
-import de.dkfz.tbi.otp.ngsdata.SeqTypeNames
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContext
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidator
-import de.dkfz.tbi.util.spreadsheet.validation.Level
-import de.dkfz.tbi.util.spreadsheet.validation.ValueTuple
-import de.dkfz.tbi.util.spreadsheet.validation.ValueTuplesValidator
-import org.springframework.stereotype.Component
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
+import de.dkfz.tbi.util.spreadsheet.validation.*
+import org.springframework.stereotype.*
 
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.ANTIBODY
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.ANTIBODY_TARGET
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SEQUENCING_TYPE
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.TAGMENTATION_BASED_LIBRARY
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 
 @Component
 class AntibodyAntibodyTargetSeqTypeValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {

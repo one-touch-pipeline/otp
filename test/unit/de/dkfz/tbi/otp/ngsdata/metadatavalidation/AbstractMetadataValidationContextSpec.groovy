@@ -1,39 +1,35 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation
 
 import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.util.spreadsheet.validation.*
 import org.junit.*
 import org.junit.rules.*
 import spock.lang.*
 
-import java.nio.file.*
+import java.nio.file.Files
 
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
-class MetadataValidationContextSpec extends Specification {
-
-    DirectoryStructure directoryStructure = [:] as DirectoryStructure
+class AbstractMetadataValidationContextSpec extends Specification {
 
     @Shared
     @ClassRule
     TemporaryFolder temporaryFolder
 
     @Unroll
-    void 'createFromFile, when file cannot be opened, adds an error'() {
+    void 'readAndCheckFile, when file cannot be opened, adds an error'() {
         when:
-        MetadataValidationContext context = MetadataValidationContext.createFromFile(file, directoryStructure)
+        Map infoMetadata = AbstractMetadataValidationContext.readAndCheckFile(file)
 
         then:
-        Problem problem = exactlyOneElement(context.problems)
+        Problem problem = exactlyOneElement(infoMetadata.problems.getProblems())
         problem.affectedCells.isEmpty()
         problem.level == Level.ERROR
         problem.message.contains(problemMessage)
-        context.directoryStructure == directoryStructure
-        context.metadataFile == file
-        context.metadataFileMd5sum == null
-        context.spreadsheet == null
+        infoMetadata.metadataFileMd5sum == null
+        infoMetadata.spreadsheet == null
 
         where:
         file                                                                        || problemMessage
@@ -47,23 +43,22 @@ class MetadataValidationContextSpec extends Specification {
     }
 
     @Unroll
-    void 'createFromFile, when there is a parsing problem, adds a warning'() {
+    void 'readAndCheckFile, when there is a parsing problem, adds a warning'() {
         given:
         File file = temporaryFolder.newFile("${HelperUtils.uniqueString}.tsv")
         file.bytes = bytes
 
         when:
-        MetadataValidationContext context = MetadataValidationContext.createFromFile(file, directoryStructure)
+        Map infoMetadata = AbstractMetadataValidationContext.readAndCheckFile(file)
 
         then:
-        Problem problem = exactlyOneElement(context.problems)
+        println infoMetadata.problems.getProblems()
+        Problem problem = exactlyOneElement(infoMetadata.problems.getProblems())
         problem.affectedCells.isEmpty()
         problem.level == Level.WARNING
         problem.message.contains(problemMessage)
-        context.directoryStructure == directoryStructure
-        context.metadataFile == file
-        context.metadataFileMd5sum == md5sum
-        context.spreadsheet.dataRows[0].cells[0].text ==~ firstCellRegex
+        infoMetadata.metadataFileMd5sum == md5sum
+        infoMetadata.spreadsheet.dataRows[0].cells[0].text ==~ firstCellRegex
 
         where:
         bytes || md5sum | firstCellRegex | problemMessage
@@ -71,94 +66,63 @@ class MetadataValidationContextSpec extends Specification {
         'x\na"b'.getBytes(MetadataValidationContext.CHARSET) || '01a73fb20c4582eb9668dc39431c4748' | '^a.{0,2}b$' | 'contains one or more quotation marks'
     }
 
-    void 'createFromFile, when there are multiple columns with the same title, adds an error'() {
+    void 'readAndCheckFile, when there are multiple columns with the same title, adds an error'() {
         given:
         File file = CreateFileHelper.createFile(temporaryFolder.newFile("${HelperUtils.uniqueString}.tsv"), 'a\tb\ta')
 
         when:
-        MetadataValidationContext context = MetadataValidationContext.createFromFile(file, directoryStructure)
+        Map infoMetadata = AbstractMetadataValidationContext.readAndCheckFile(file)
 
         then:
-        Problem problem = exactlyOneElement(context.problems)
+        Problem problem = exactlyOneElement(infoMetadata.problems.getProblems())
         problem.affectedCells.isEmpty()
         problem.level == Level.ERROR
         problem.message.contains("Duplicate column 'a'")
-        context.directoryStructure == directoryStructure
-        context.metadataFile == file
-        context.metadataFileMd5sum == '51cfcea2dc88d9baff201d447d2316df'
-        context.spreadsheet == null
+        infoMetadata.metadataFileMd5sum == '51cfcea2dc88d9baff201d447d2316df'
+        infoMetadata.spreadsheet == null
     }
 
-    void 'createFromFile, when file can be parsed successfully, does not add problems'() {
+    void 'readAndCheckFile, when file can be parsed successfully, does not add problems'() {
         given:
         File file = temporaryFolder.newFile("${HelperUtils.uniqueString}.tsv")
         file.bytes = 'x\nM\u00e4use'.getBytes(MetadataValidationContext.CHARSET)
 
         when:
-        MetadataValidationContext context = MetadataValidationContext.createFromFile(file, directoryStructure)
+        Map infoMetadata = AbstractMetadataValidationContext.readAndCheckFile(file)
 
         then:
-        context.problems.isEmpty()
-        context.directoryStructure == directoryStructure
-        context.metadataFile == file
-        context.metadataFileMd5sum == '2628f03624261e75bba6960ff9d15291'
-        context.spreadsheet.dataRows[0].cells[0].text == 'M\u00e4use'
+        infoMetadata.problems.getProblems().isEmpty()
+        infoMetadata.metadataFileMd5sum == '2628f03624261e75bba6960ff9d15291'
+        infoMetadata.spreadsheet.dataRows[0].cells[0].text == 'M\u00e4use'
     }
 
-    void 'createFromFile, when file contains undetermined entries, ignores them'() {
-        given:
-        File file = temporaryFolder.newFile("${HelperUtils.uniqueString}.tsv")
-        file.bytes = ("c ${FASTQ_FILE} ${SAMPLE_ID} ${BARCODE}\n" +
-                "0 Undetermined_1.fastq.gz x x\n" +
-                "1 Undetermined_1.fastq.gz x Undetermined\n" +
-                "2 Undetermined_1.fastq.gz Undetermined_1 x\n" +
-                "3 Undetermined_1.fastq.gz Undetermined_1 Undetermined\n" +
-                "4 x x x\n" +
-                "5 x x Undetermined\n" +
-                "6 x Undetermined_1 x\n" +
-                "7 x Undetermined_1 Undetermined\n" +
-                "").replaceAll(' ', '\t').getBytes(MetadataValidationContext.CHARSET)
-
-        when:
-        MetadataValidationContext context = MetadataValidationContext.createFromFile(file, directoryStructure)
-
-        then:
-        context.spreadsheet.dataRows.size() == 6
-        context.spreadsheet.dataRows[0].cells[0].text == '0'
-        context.spreadsheet.dataRows[1].cells[0].text == '1'
-        context.spreadsheet.dataRows[2].cells[0].text == '4'
-        context.spreadsheet.dataRows[3].cells[0].text == '5'
-        context.spreadsheet.dataRows[4].cells[0].text == '6'
-        context.spreadsheet.dataRows[5].cells[0].text == '7'
-    }
-
-    void 'createFromFile removes tabs and newlines at end of file'() {
+    void 'readAndCheckFile, removes tabs and newlines at end of file'() {
         given:
         File file = temporaryFolder.newFile("${HelperUtils.uniqueString}.tsv")
         file.bytes = 'a\nb\t\r\n\t\t\r\n'.getBytes(MetadataValidationContext.CHARSET)
 
         when:
-        MetadataValidationContext context = MetadataValidationContext.createFromFile(file, directoryStructure)
+        Map infoMetadata = AbstractMetadataValidationContext.readAndCheckFile(file)
 
         then:
-        context.spreadsheet.dataRows.size() == 1
-        context.spreadsheet.dataRows[0].cells.size() == 1
+        infoMetadata.spreadsheet.dataRows.size() == 1
+        infoMetadata.spreadsheet.dataRows[0].cells.size() == 1
     }
 
-    void 'createFromFile, when file contains only one line, adds error'() {
+    void 'readAndCheckFile, when file contains only one line, adds error'() {
         given:
         File file = temporaryFolder.newFile("${HelperUtils.uniqueString}.tsv")
         file.bytes = 'a\n\n'.getBytes(MetadataValidationContext.CHARSET)
 
         when:
-        MetadataValidationContext context = MetadataValidationContext.createFromFile(file, directoryStructure)
+        Map infoMetadata = AbstractMetadataValidationContext.readAndCheckFile(file)
 
         then:
-        Problem problem = exactlyOneElement(context.problems)
+        Problem problem = exactlyOneElement(infoMetadata.problems.getProblems())
         problem.affectedCells.isEmpty()
         problem.level == Level.ERROR
         problem.message.contains('contains less than two lines')
-        context.spreadsheet == null
+        infoMetadata.spreadsheet == null
     }
 
     void 'pathForMessage, when path does not point to a symlink, returns the path'() {

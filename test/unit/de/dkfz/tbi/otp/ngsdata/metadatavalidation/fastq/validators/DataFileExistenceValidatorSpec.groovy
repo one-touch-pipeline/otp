@@ -1,6 +1,5 @@
-package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
+package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.util.spreadsheet.*
 import de.dkfz.tbi.util.spreadsheet.validation.*
@@ -12,7 +11,7 @@ import java.util.regex.*
 
 import static de.dkfz.tbi.TestCase.*
 import static de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory.*
-
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
 class DataFileExistenceValidatorSpec extends Specification {
 
     @Rule

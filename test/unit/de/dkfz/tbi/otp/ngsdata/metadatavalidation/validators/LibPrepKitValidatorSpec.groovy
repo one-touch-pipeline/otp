@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
 import de.dkfz.tbi.util.spreadsheet.validation.*
 import grails.test.mixin.*
 import spock.lang.*

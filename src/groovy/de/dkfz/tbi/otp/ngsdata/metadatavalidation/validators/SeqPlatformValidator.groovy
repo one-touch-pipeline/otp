@@ -1,12 +1,11 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
-
-import org.springframework.stereotype.Component
-
-import de.dkfz.tbi.otp.ngsdata.SeqPlatformService
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
 import de.dkfz.tbi.util.spreadsheet.validation.*
+import org.springframework.stereotype.*
+
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 
 @Component
 class SeqPlatformValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {

@@ -1,7 +1,8 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.DirectoryStructure
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.util.spreadsheet.validation.*
 import org.springframework.stereotype.*
 

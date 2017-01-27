@@ -1,4 +1,4 @@
-package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
+package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
@@ -6,9 +6,10 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.*
 import de.dkfz.tbi.util.spreadsheet.validation.*
 import spock.lang.*
 
-import static de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators.OnlyOneRunValidatorSpec.Ilse.*
+import static de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators.OnlyOneRunValidatorSpec.Ilse.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
-
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures.*
 
 class OnlyOneRunValidatorSpec extends Specification {
 

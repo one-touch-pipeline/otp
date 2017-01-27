@@ -1,13 +1,14 @@
-package de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures
+package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures
+
+import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
+import de.dkfz.tbi.util.spreadsheet.*
+import de.dkfz.tbi.util.spreadsheet.validation.*
+import spock.lang.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
-
-import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
-import de.dkfz.tbi.util.spreadsheet.Cell
-import de.dkfz.tbi.util.spreadsheet.validation.*
-import spock.lang.Specification
 
 class DataFilesInSameDirectorySpec extends Specification {
 

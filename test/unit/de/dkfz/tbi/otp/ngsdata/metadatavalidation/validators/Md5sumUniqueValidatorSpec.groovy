@@ -7,6 +7,7 @@ import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.util.spreadsheet.validation.*
 import grails.test.mixin.*
 import spock.lang.*
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
 
 @Mock([
         DataFile,

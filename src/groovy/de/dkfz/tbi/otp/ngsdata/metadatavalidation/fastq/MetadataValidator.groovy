@@ -1,8 +1,7 @@
-package de.dkfz.tbi.otp.ngsdata.metadatavalidation
+package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq
 
-import org.springframework.stereotype.Component
-
-import de.dkfz.tbi.util.spreadsheet.validation.Validator
+import de.dkfz.tbi.util.spreadsheet.validation.*
+import org.springframework.stereotype.*
 
 /**
  * Validators implementing this interfaces and annotated with {@link Component} will automatically be used for

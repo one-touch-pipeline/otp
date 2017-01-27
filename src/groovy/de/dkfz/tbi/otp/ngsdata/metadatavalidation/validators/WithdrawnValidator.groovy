@@ -1,12 +1,11 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
 import de.dkfz.tbi.util.spreadsheet.*
 import de.dkfz.tbi.util.spreadsheet.validation.*
 import org.springframework.stereotype.*
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
-
 
 @Component
 class WithdrawnValidator extends SingleValueValidator<MetadataValidationContext> implements MetadataValidator {

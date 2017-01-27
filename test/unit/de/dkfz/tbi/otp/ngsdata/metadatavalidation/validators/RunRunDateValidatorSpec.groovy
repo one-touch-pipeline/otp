@@ -1,20 +1,15 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.Run
-import de.dkfz.tbi.otp.ngsdata.SeqCenter
-import de.dkfz.tbi.otp.ngsdata.SeqPlatform
-import de.dkfz.tbi.otp.ngsdata.SeqPlatformGroup
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContext
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
-import de.dkfz.tbi.util.spreadsheet.validation.Level
-import de.dkfz.tbi.util.spreadsheet.validation.Problem
-import grails.test.mixin.Mock
-import org.joda.time.format.ISODateTimeFormat
-import spock.lang.Specification
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.RUN_DATE
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.RUN_ID
-import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
+import de.dkfz.tbi.util.spreadsheet.validation.*
+import grails.test.mixin.*
+import org.joda.time.format.*
+import spock.lang.*
+
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 @Mock([
         Run,

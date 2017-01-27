@@ -9,6 +9,7 @@ import java.util.regex.*
 
 import static de.dkfz.tbi.TestCase.*
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
 
 class LibrarySampleValidatorIntegrationSpec extends Specification {
 

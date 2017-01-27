@@ -1,13 +1,11 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
-import java.util.regex.*
-
-import org.springframework.stereotype.Component
-
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
-import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.util.spreadsheet.Cell
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
+import de.dkfz.tbi.util.spreadsheet.*
 import de.dkfz.tbi.util.spreadsheet.validation.*
+import org.springframework.stereotype.*
+
+import java.util.regex.*
 
 @Component
 class UnusualCharactersValidator extends AllCellsValidator<MetadataValidationContext> implements MetadataValidator {

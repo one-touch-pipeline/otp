@@ -1,11 +1,10 @@
-package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
+package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.*
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures.*
 import de.dkfz.tbi.util.spreadsheet.*
 import de.dkfz.tbi.util.spreadsheet.validation.*
-
 
 class OnlyOneRunValidator implements MetadataValidator {
 

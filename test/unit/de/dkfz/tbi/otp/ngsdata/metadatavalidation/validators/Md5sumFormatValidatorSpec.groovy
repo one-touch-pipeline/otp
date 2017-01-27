@@ -1,11 +1,12 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
-
-import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
 import de.dkfz.tbi.util.spreadsheet.validation.*
-import spock.lang.Specification
+import spock.lang.*
+
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 class Md5sumFormatValidatorSpec extends Specification {
 

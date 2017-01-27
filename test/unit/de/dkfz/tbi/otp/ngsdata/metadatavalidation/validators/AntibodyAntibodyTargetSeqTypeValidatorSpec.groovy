@@ -1,16 +1,12 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContext
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
-import de.dkfz.tbi.util.spreadsheet.validation.Level
-import de.dkfz.tbi.util.spreadsheet.validation.Problem
-import spock.lang.Specification
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
+import de.dkfz.tbi.util.spreadsheet.validation.*
+import spock.lang.*
 
-import static de.dkfz.tbi.TestCase.assertContainSame
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.ANTIBODY
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.ANTIBODY_TARGET
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SEQUENCING_TYPE
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.TAGMENTATION_BASED_LIBRARY
+import static de.dkfz.tbi.TestCase.*
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
 
 class AntibodyAntibodyTargetSeqTypeValidatorSpec extends Specification {
 

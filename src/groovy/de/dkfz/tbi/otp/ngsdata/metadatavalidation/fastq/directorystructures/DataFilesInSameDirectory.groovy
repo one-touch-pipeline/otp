@@ -1,12 +1,11 @@
-package de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures
+package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures
+
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
+import de.dkfz.tbi.util.spreadsheet.validation.*
+import org.springframework.stereotype.*
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
-
-import org.springframework.stereotype.Component
-
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
-import de.dkfz.tbi.util.spreadsheet.validation.*
 
 @Component
 class DataFilesInSameDirectory implements DirectoryStructure {

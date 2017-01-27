@@ -1,16 +1,13 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
-import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContext
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
-import de.dkfz.tbi.util.spreadsheet.validation.Problem
-import spock.lang.Specification
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
+import de.dkfz.tbi.util.spreadsheet.validation.*
+import spock.lang.*
 
-import static de.dkfz.tbi.TestCase.assertContainSame
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.BARCODE
-import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
-
+import static de.dkfz.tbi.TestCase.*
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 
 class BarcodeFilenameValidatorSpec extends Specification {
 

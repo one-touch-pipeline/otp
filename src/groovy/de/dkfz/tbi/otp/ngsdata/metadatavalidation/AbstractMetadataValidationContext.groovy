@@ -8,28 +8,25 @@ import java.nio.charset.*
 import java.nio.file.*
 import java.security.*
 
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 import static de.dkfz.tbi.otp.utils.HelperUtils.*
 
-class MetadataValidationContext extends ValidationContext {
+abstract class AbstractMetadataValidationContext extends ValidationContext {
 
     static final Charset CHARSET = Charset.forName('UTF-8')
     static long MAX_METADATA_FILE_SIZE_IN_MIB = 1
 
     final File metadataFile
     final String metadataFileMd5sum
-    final DirectoryStructure directoryStructure
     final byte[] content
 
-    private MetadataValidationContext(File metadataFile, String metadataFileMd5sum, Spreadsheet spreadsheet, Problems problems, DirectoryStructure directoryStructure, byte[] content) {
+    protected AbstractMetadataValidationContext(File metadataFile, String metadataFileMd5sum, Spreadsheet spreadsheet, Problems problems, byte[] content) {
         super(spreadsheet, problems)
         this.metadataFile = metadataFile
         this.content = content
         this.metadataFileMd5sum = metadataFileMd5sum
-        this.directoryStructure = directoryStructure
     }
 
-    static MetadataValidationContext createFromFile(File metadataFile, DirectoryStructure directoryStructure) {
+    static Map readAndCheckFile(File metadataFile, Closure<Boolean> dataRowFilter = {true}) {
         Problems problems = new Problems()
         String metadataFileMd5sum = null
         Spreadsheet spreadsheet = null
@@ -61,10 +58,7 @@ class MetadataValidationContext extends ValidationContext {
                 if (document.contains('"')) {
                     problems.addProblem(Collections.emptySet(), Level.WARNING, "The content of ${pathForMessage(metadataFile)} contains one or more quotation marks. OTP might not parse the file as expected.")
                 }
-                spreadsheet = new FilteredSpreadsheet(document.replaceFirst(/[\t\r\n]+$/, ''), { Row row ->
-                    !row.getCellByColumnTitle(FASTQ_FILE.name())?.text?.startsWith('Undetermined') ||
-                    !row.getCellByColumnTitle(SAMPLE_ID.name())?.text?.startsWith('Undetermined')
-                })
+                spreadsheet = new FilteredSpreadsheet(document.replaceFirst(/[\t\r\n]+$/, ''), dataRowFilter)
                 if (spreadsheet.dataRows.size() < 1) {
                     spreadsheet = null
                     problems.addProblem(Collections.emptySet(), Level.ERROR, "${pathForMessage(metadataFile)} contains less than two lines.")
@@ -73,7 +67,12 @@ class MetadataValidationContext extends ValidationContext {
                 problems.addProblem(Collections.emptySet(), Level.ERROR, e.message)
             }
         }
-        return new MetadataValidationContext(metadataFile, metadataFileMd5sum, spreadsheet, problems, directoryStructure, bytes)
+        return [
+                metadataFileMd5sum: metadataFileMd5sum,
+                spreadsheet       : spreadsheet,
+                bytes             : bytes,
+                problems          : problems
+        ]
     }
 
     static String pathForMessage(File file) {

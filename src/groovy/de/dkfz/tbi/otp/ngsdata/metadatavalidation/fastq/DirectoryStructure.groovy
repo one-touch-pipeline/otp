@@ -1,4 +1,4 @@
-package de.dkfz.tbi.otp.ngsdata.metadatavalidation
+package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq
 
 import de.dkfz.tbi.util.spreadsheet.*
 import de.dkfz.tbi.util.spreadsheet.validation.*

@@ -4,7 +4,7 @@ import static de.dkfz.tbi.otp.ngsdata.MetadataImportService.*
 
 import org.springframework.beans.factory.annotation.Autowired
 
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DataFilesInSameDirectory
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators.Md5sumFormatValidator
 import grails.test.spock.IntegrationSpec
 

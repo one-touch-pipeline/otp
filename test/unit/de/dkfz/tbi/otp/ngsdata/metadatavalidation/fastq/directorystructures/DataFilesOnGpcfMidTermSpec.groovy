@@ -1,4 +1,4 @@
-package de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures
+package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures
 
 import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
@@ -8,7 +8,7 @@ import spock.lang.*
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
-
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
 
 class DataFilesOnGpcfMidTermSpec extends Specification {
 
