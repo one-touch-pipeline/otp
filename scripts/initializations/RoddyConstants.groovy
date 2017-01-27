@@ -36,7 +36,7 @@ println processingOptionService.createOrUpdate(
         RoddyConstants.OPTION_KEY_BASE_PROJECT_CONFIG,
         SeqType.exomePairedSeqType.roddyName,
         null,
-        "otpAlignmentAndQCWorkflowsWES-1.0",
+        "otpAlignmentAndQCWorkflowsWES-1.1",
         "The base project file for WES alignment"
 )
 
@@ -72,7 +72,7 @@ println processingOptionService.createOrUpdate(
         RoddyConstants.OPTION_KEY_BASE_PROJECT_CONFIG,
         SeqType.wholeGenomePairedSeqType.roddyName,
         null,
-        "otpAlignmentAndQCWorkflowsWGS-1.0",
+        "otpAlignmentAndQCWorkflowsWGS-1.1",
         "The base project file for WGS alignment"
 )
 
@@ -108,7 +108,7 @@ wgbs.each { SeqType seqType ->
             RoddyConstants.OPTION_KEY_BASE_PROJECT_CONFIG,
             seqType.roddyName,
             null,
-            "otpAlignmentAndQCWorkflowsWGBS-1.0",
+            "otpAlignmentAndQCWorkflowsWGBS-1.1",
             "The base project file for alignment"
     )
 
