@@ -36,7 +36,7 @@ class FilenameValidator extends SingleValueValidator<MetadataValidationContext> 
         } catch (FileTypeUndefinedException e) {
             context.addProblem(cells, Level.ERROR, "Filename '${filename}' contains neither '_fastq' nor '.fastq'.")
         }
-        if (!OtpPath.isValidPathComponent(filename)) {
+        if (!(OtpPath.isValidPathComponent(filename) || OtpPath.isValidAbsolutePath(filename))) {
             context.addProblem(cells, Level.ERROR, "Filename '${filename}' contains invalid characters.")
         }
     }

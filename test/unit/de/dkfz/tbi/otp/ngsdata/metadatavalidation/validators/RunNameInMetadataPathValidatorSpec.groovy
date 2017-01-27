@@ -48,4 +48,30 @@ class RunNameInMetadataPathValidatorSpec extends Specification {
         true                 | true                     | false                     || false
         true                 | true                     | true                      || false
     }
+
+
+    @Unroll
+    def "validate, when directory structure is DataFilesWithAbsolutePath, then run name does not need to be in path"() {
+        given:
+        MetadataValidationContext context = MetadataValidationContextFactory.createContext(
+                "${MetaDataColumn.RUN_ID}\n${runEntry1}\n${runEntry2}",
+                [
+                        metadataFile: new File("whatever"),
+                        directoryStructure: new DataFilesWithAbsolutePath(),
+                ],
+        )
+
+        when:
+        new RunNameInMetadataPathValidator().validate(context)
+
+        then:
+        context.problems.isEmpty()
+
+        where:
+        runEntry1 | runEntry2
+        'run1' | 'run2'
+        'run1' | 'run1'
+    }
+
+
 }

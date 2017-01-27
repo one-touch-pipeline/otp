@@ -25,7 +25,8 @@ class FilenameValidatorSpec extends Specification {
                         "test.fastq.gz\n" +
                         "test_fastq.gzz\n" +
                         "test_fast.gz\n" +
-                        "öäü_fastq.gz\n")
+                        "öäü_fastq.gz\n" +
+                        "/tmp/test_fastq.gz\n")
         Collection<Problem> expectedProblems = [
                 new Problem(context.spreadsheet.dataRows[2].cells as Set, Level.ERROR,
                         "Filename 'test_fastq.gzz' does not end with '.gz'."),
