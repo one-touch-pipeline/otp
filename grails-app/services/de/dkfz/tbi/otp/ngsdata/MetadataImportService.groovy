@@ -1,12 +1,13 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.*
 import de.dkfz.tbi.otp.tracking.*
 import de.dkfz.tbi.util.spreadsheet.*
-import de.dkfz.tbi.util.spreadsheet.validation.ValueTuple
+import de.dkfz.tbi.util.spreadsheet.validation.*
 import grails.util.*
 import groovy.transform.*
 import org.springframework.beans.factory.annotation.*
@@ -225,6 +226,9 @@ class MetadataImportService {
                 runSegment: runSegment,
         )
         assert metaDataFile.save()
+
+        List<SamplePair> samplePairs = SamplePair.findMissingDiseaseControlSamplePairs()
+        samplePairs*.save()
 
         return metaDataFile
     }
