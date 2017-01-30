@@ -7,7 +7,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.*
 import de.dkfz.tbi.otp.tracking.*
 import de.dkfz.tbi.util.spreadsheet.*
-import de.dkfz.tbi.util.spreadsheet.validation.*
+import de.dkfz.tbi.util.spreadsheet.validation.ValueTuple
 import grails.util.*
 import groovy.transform.*
 import org.springframework.beans.factory.annotation.*
