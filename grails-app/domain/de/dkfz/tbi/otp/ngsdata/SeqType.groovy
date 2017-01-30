@@ -23,6 +23,10 @@ class SeqType implements Entity {
             SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION,
     ].asImmutable()
 
+    public static final Collection<SeqTypeNames> SEQTYPES_MUST_BE_COPIED = WGBS_SEQ_TYPE_NAMES + [
+            SeqTypeNames.RNA
+    ].asImmutable()
+
     /**
      * One of {@link SeqTypeNames#seqTypeName}.
      * Used in file system paths, for example by ProcessedMergedBamFileService.fileNameNoSuffix(ProcessedMergedBamFile).
@@ -93,6 +97,10 @@ class SeqType implements Entity {
 
     boolean isRna() {
         return name == "RNA"
+    }
+
+    boolean seqTypeAllowsLinking() {
+        return !SEQTYPES_MUST_BE_COPIED.contains(seqTypeName)
     }
 
     String toString() {

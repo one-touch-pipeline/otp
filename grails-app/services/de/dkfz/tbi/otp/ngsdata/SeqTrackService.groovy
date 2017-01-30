@@ -576,11 +576,11 @@ AND i.id > :seqTrackId
         boolean fromCore = seqTrack.run.seqCenter.id == core.id
         boolean onMidterm = areFilesLocatedOnMidTermStorage(seqTrack)
         boolean projectAllowsLinking = !seqTrack.project.hasToBeCopied
-        boolean wgbsSeqType = seqTrack.seqType.isWgbs()
+        boolean seqTypeAllowsLinking = seqTrack.seqType.seqTypeAllowsLinking()
         boolean adapterTrimming = seqTrack.adapterFile
-        boolean link = willBeAligned && fromCore && onMidterm && projectAllowsLinking && !wgbsSeqType && !adapterTrimming
+        boolean link = willBeAligned && fromCore && onMidterm && projectAllowsLinking && seqTypeAllowsLinking && !adapterTrimming
         seqTrack.log("Fastq files{0} will be ${link ? "linked" : "copied"}, because " +
-                "willBeAligned=${willBeAligned}, fromCore=${fromCore}, onMidterm=${onMidterm}, projectAllowsLinking=${projectAllowsLinking}, isWgbs=${wgbsSeqType}, needs adapter trimming=${adapterTrimming}")
+                "willBeAligned=${willBeAligned}, fromCore=${fromCore}, onMidterm=${onMidterm}, projectAllowsLinking=${projectAllowsLinking}, seqTypeAllowsLinking=${seqTypeAllowsLinking}, needs adapter trimming=${adapterTrimming}")
         if (link) {
             seqTrack.linkedExternally = true
             assert seqTrack.save(flush: true)

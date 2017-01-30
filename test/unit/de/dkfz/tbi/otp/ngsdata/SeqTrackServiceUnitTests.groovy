@@ -145,6 +145,19 @@ class SeqTrackServiceUnitTests {
         }
     }
 
+    @Test
+    void testDetermineAndStoreIfFastqFilesHaveToBeLinked_RnaData_MustBeCopied() {
+        withTestMidtermStorageMountPoint {
+            SeqTrack seqTrack = createDataForDetermineAndStoreIfFastqFilesHaveToBeLinked()
+
+            SeqType rnaSeqType = DomainFactory.createRnaSeqType()
+            seqTrack.seqType = rnaSeqType
+
+            seqTrackService.determineAndStoreIfFastqFilesHaveToBeLinked(seqTrack, true)
+
+            assert seqTrack.linkedExternally == false
+        }
+    }
 
     @Test
     void testAreFilesLocatedOnMidTermStorage_SeqTrackIsNull_ShouldFail() {
