@@ -166,7 +166,7 @@ Failed OTP Values: ${mapForLog.values().join(';')}""")
     }
 
     private String dateString(Date date) {
-        return date ? new SimpleDateFormat('yyyy-MM-dd hh:mm').format(date) : 'na'
+        return date ? new SimpleDateFormat('yyyy-MM-dd HH:mm').format(date) : 'na'
     }
 
     int restartCount(ProcessingStep step) {
