@@ -1,18 +1,16 @@
 package de.dkfz.tbi.otp.job.processing
 
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.job.plan.*
+import de.dkfz.tbi.otp.job.scheduler.*
 import de.dkfz.tbi.otp.tracking.*
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
-import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
-import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
-import de.dkfz.tbi.otp.job.plan.StartJobDefinition
-import de.dkfz.tbi.otp.job.scheduler.SchedulerService
-import grails.util.Environment
+import grails.util.*
+import org.codehaus.groovy.grails.support.*
+import org.hibernate.*
+import org.springframework.beans.factory.*
+import org.springframework.beans.factory.annotation.*
+import org.springframework.context.*
 
-import org.codehaus.groovy.grails.support.PersistenceContextInterceptor
-import org.hibernate.Hibernate
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.ApplicationListener
 
 /**
  * Abstract base class for {@link StartJob}s.
@@ -21,7 +19,7 @@ import org.springframework.context.ApplicationListener
  * container to use a StartJob.
  * @see StartJob
  */
-abstract class AbstractStartJobImpl implements StartJob, ApplicationListener<JobExecutionPlanChangedEvent> {
+abstract class AbstractStartJobImpl implements StartJob, ApplicationListener<JobExecutionPlanChangedEvent>, BeanNameAware  {
 
     static final String TOTAL_SLOTS_OPTION_NAME = 'numberOfJobs'
     static final String SLOTS_RESERVED_FOR_FAST_TRACK_OPTION_NAME = 'numberOfJobsReservedForFastTrack'
@@ -42,19 +40,16 @@ abstract class AbstractStartJobImpl implements StartJob, ApplicationListener<Job
     PersistenceContextInterceptor persistenceInterceptor
 
     private JobExecutionPlan plan
-    /**
-     * Whether the JobExecutionPlan needs to be refreshed when it is
-     * accessed. This happens when receiving a JobExecutionPlanChangedEvent
-     * for the JobExecutionPlan belonging to this StartJob.
-     */
-    private boolean planNeedsRefresh = false
+    private String beanName
 
     protected AbstractStartJobImpl() {}
     protected AbstractStartJobImpl(JobExecutionPlan plan) {
         this.plan = plan
     }
 
-    abstract String getJobExecutionPlanName()
+    void setBeanName(String beanName) {
+        this.beanName = beanName
+    }
 
     /**
      * Sets the JobExecutionPlan of this StartJob if not already set.
@@ -70,7 +65,7 @@ abstract class AbstractStartJobImpl implements StartJob, ApplicationListener<Job
 
     /**
      * This method initializes the job execution plan if it is not set.
-     * If looks for the start job definition based on the name of the current start job class,
+     * If looks for the start job definition based on the bean name of the current start job class,
      * then for the job execution plan by that job definition.
      */
     private initializeJobExecutionPlan() {
@@ -78,13 +73,15 @@ abstract class AbstractStartJobImpl implements StartJob, ApplicationListener<Job
             return
         }
         if (plan == null && Environment.current != Environment.TEST) {
-            final String name = jobExecutionPlanName
-            if (name == null) {
-                return
-            }
+            final String beanName = this.beanName //necessary for criteria
             final Collection<JobExecutionPlan> plans
             try {
-                plans = JobExecutionPlan.findAllByNameAndObsoleted(name, false)
+                plans = JobExecutionPlan.createCriteria().list {
+                    eq('obsoleted', false)
+                    startJob {
+                        eq('bean', beanName)
+                    }
+                }
             } catch (MissingMethodException ignored) {
                 //This happens if this method is called before Grails created dynamic finders
                 //in the domain classes. It doesn't matter because this method will be called later again.
@@ -93,22 +90,15 @@ abstract class AbstractStartJobImpl implements StartJob, ApplicationListener<Job
             final int planCount = plans.size()
             if (planCount == 1) {
                 plan = plans.first()
-            } else if (planCount == 0) {
-                log.info "No non-obsolete JobExecutionPlan found for name ${name}."
-            } else {
-                throw new RuntimeException("${planCount} non-obsoleted JobExecutionPlans found for name ${name}. Expected 1.")
+            } else if (planCount > 0) {
+                throw new RuntimeException("${planCount} non-obsoleted JobExecutionPlans found for ${beanName}. Expected 1.")
             }
         }
     }
 
     @Override
-    // TODO: OTP-1012
-    public JobExecutionPlan getExecutionPlan() {
+    public JobExecutionPlan getJobExecutionPlan() {
         initializeJobExecutionPlan()
-        if (planNeedsRefresh) {
-            plan = JobExecutionPlan.get(plan.id)
-            planNeedsRefresh = false
-        }
         return plan
     }
 
@@ -118,9 +108,8 @@ abstract class AbstractStartJobImpl implements StartJob, ApplicationListener<Job
     }
 
     void onApplicationEvent(JobExecutionPlanChangedEvent event) {
-        if (getExecutionPlan() && event.planId == this.plan.id) {
-            planNeedsRefresh = true
-        }
+        // If the plan has been changed, clear the cache.
+        plan = null
     }
 
     /**
@@ -165,7 +154,7 @@ abstract class AbstractStartJobImpl implements StartJob, ApplicationListener<Job
      * <p>
      * Takes into account:
      * <ul>
-     *     <li>Whether the {@link JobExecutionPlan} (returned from {@link #getExecutionPlan()}) is obsolete or disabled.</li>
+     *     <li>Whether the {@link JobExecutionPlan} (returned from {@link #getJobExecutionPlan()}) is obsolete or disabled.</li>
      *     <li>The number of {@link Process}es which are already running for the {@link JobExecutionPlan}.</li>
      *     <li>The maximum number of parallel {@link Process}es for the {@link JobExecutionPlan} (as configured in the
      *         {@link ProcessingOption} with the name specified by {@link #TOTAL_SLOTS_OPTION_NAME}).</li>
@@ -174,7 +163,7 @@ abstract class AbstractStartJobImpl implements StartJob, ApplicationListener<Job
      * </ul>
      */
     protected short getMinimumProcessingPriorityForOccupyingASlot() {
-        final JobExecutionPlan plan = getExecutionPlan()
+        final JobExecutionPlan plan = getJobExecutionPlan()
         if (!plan || plan.obsoleted || !plan.enabled) {
             return ProcessingPriority.SUPREMUM_PRIORITY
         }

@@ -17,9 +17,4 @@ class SamplePairDiscoveryStartJob extends AbstractStartJobImpl {
             createProcess([])
         }
     }
-
-    @Override
-    String getJobExecutionPlanName() {
-        return 'SamplePairDiscoveryWorkflow'
-    }
 }

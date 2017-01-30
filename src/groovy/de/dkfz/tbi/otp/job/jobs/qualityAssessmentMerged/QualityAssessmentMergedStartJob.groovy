@@ -54,9 +54,4 @@ class QualityAssessmentMergedStartJob extends AbstractStartJobImpl implements Re
             return createProcess(newQualityAssessmentMergedPass)
         }
     }
-
-    @Override
-    String getJobExecutionPlanName() {
-        return "QualityAssessmentMergedWorkflow"
-    }
 }

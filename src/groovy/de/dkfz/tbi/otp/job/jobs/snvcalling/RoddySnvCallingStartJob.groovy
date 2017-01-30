@@ -5,19 +5,12 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
-import org.joda.time.*
-import org.joda.time.format.*
 import org.springframework.context.annotation.*
 import org.springframework.stereotype.*
 
 @Component("roddySnvStartJob")
 @Scope("singleton")
 class RoddySnvCallingStartJob extends AbstractSnvCallingStartJob {
-
-    @Override
-    String getJobExecutionPlanName() {
-        return "RoddySnvWorkflow"
-    }
 
     @Override
     protected ConfigPerProject getConfig(SamplePair samplePair) {

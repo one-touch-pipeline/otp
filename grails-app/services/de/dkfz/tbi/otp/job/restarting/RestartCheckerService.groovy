@@ -18,10 +18,6 @@ class RestartCheckerService {
     boolean canWorkflowBeRestarted(ProcessingStep step) {
         JobExecutionPlan plan = step.process.jobExecutionPlan
         StartJob startJob = context.getBean(plan.startJob.bean)
-
-        //This check is here because of OTP-1012
-        assert plan.name == startJob.getJobExecutionPlanName()
-
         return startJob instanceof RestartableStartJob
     }
 

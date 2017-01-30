@@ -11,11 +11,6 @@ import org.springframework.stereotype.*
 class WgbsAlignmentStartJob extends RoddyAlignmentStartJob {
 
     @Override
-    String getJobExecutionPlanName() {
-        return 'WgbsAlignmentWorkflow'
-    }
-
-    @Override
     List<SeqType> getSeqTypes() {
         return SeqType.findAllByNameInListAndLibraryLayout(SeqType.WGBS_SEQ_TYPE_NAMES*.seqTypeName, SeqType.LIBRARYLAYOUT_PAIRED)
     }

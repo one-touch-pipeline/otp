@@ -263,7 +263,7 @@ class SchedulerService {
         if (!schedulerActive) {
             throw new RuntimeException("Scheduler is disabled")
         }
-        JobExecutionPlan plan = JobExecutionPlan.get(startJob.getExecutionPlan().id)
+        JobExecutionPlan plan = JobExecutionPlan.get(startJob.getJobExecutionPlan().id)
         Process process = new Process(started: new Date(),
             jobExecutionPlan: plan,
             startJobClass: startJob.class.getName(),

@@ -56,9 +56,4 @@ class MergingStartJob extends AbstractStartJobImpl implements RestartableStartJo
             return createProcess(newMergingPass)
         }
     }
-
-    @Override
-    String getJobExecutionPlanName() {
-        return "MergingWorkflow"
-    }
 }

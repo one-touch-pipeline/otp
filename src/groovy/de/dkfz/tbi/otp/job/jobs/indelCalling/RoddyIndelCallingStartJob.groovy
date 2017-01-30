@@ -19,11 +19,6 @@ class RoddyIndelCallingStartJob extends AbstractBamFilePairAnalysisStartJob {
     IndelCallingService indelCallingService
 
     @Override
-    String getJobExecutionPlanName() {
-        return "IndelWorkflow"
-    }
-
-    @Override
     protected ConfigPerProject getConfig(SamplePair samplePair) {
         Pipeline pipeline = CollectionUtils.exactlyOneElement(Pipeline.findAllByName(Pipeline.Name.RODDY_INDEL))
         RoddyWorkflowConfig config = (RoddyWorkflowConfig)RoddyWorkflowConfig.getLatestForIndividual(

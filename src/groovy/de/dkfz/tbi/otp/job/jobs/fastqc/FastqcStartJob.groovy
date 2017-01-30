@@ -51,9 +51,4 @@ class FastqcStartJob extends AbstractStartJobImpl implements RestartableStartJob
             return createProcess(seqTrack)
         }
     }
-
-    @Override
-    String getJobExecutionPlanName() {
-        return "FastqcWorkflow"
-    }
 }

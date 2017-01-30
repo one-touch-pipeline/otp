@@ -50,9 +50,4 @@ class TransferMergedBamFileStartJob extends AbstractStartJobImpl implements Rest
             return createProcess(failedInstance)
         }
     }
-
-    @Override
-    String getJobExecutionPlanName() {
-        return "transferMergedBamFileWorkflow"
-    }
 }

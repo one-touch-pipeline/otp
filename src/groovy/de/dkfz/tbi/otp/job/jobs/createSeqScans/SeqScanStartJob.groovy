@@ -5,7 +5,6 @@ import de.dkfz.tbi.otp.ngsdata.*
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
-import org.springframework.beans.factory.annotation.Autowired
 
 @Component("seqScanStartJob")
 @Scope("singleton")
@@ -46,7 +45,7 @@ class SeqScanStartJob extends AbstractStartJobImpl  {
     }
 
     boolean hasOpenSlots() {
-        if (!getExecutionPlan() || !getExecutionPlan().enabled) {
+        if (!getJobExecutionPlan() || !getJobExecutionPlan().enabled) {
             return false
         }
         int numberOfRunning = numberOfRunningProcesses()
@@ -61,11 +60,6 @@ class SeqScanStartJob extends AbstractStartJobImpl  {
      * @return
      */
     private int numberOfRunningProcesses() {
-        return Process.countByFinishedAndJobExecutionPlan(false, getExecutionPlan())
-    }
-
-    @Override
-    String getJobExecutionPlanName() {
-        return "createSeqScan"
+        return Process.countByFinishedAndJobExecutionPlan(false, getJobExecutionPlan())
     }
 }

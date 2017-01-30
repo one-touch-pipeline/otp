@@ -13,11 +13,6 @@ import org.springframework.stereotype.*
 class  SnvCallingStartJob extends AbstractSnvCallingStartJob {
 
     @Override
-    String getJobExecutionPlanName() {
-        return "SnvWorkflow"
-    }
-
-    @Override
     protected ConfigPerProject getConfig(SamplePair samplePair) {
         return SnvConfig.getLatest(
                 samplePair.project,

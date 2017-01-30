@@ -9,11 +9,6 @@ import org.springframework.stereotype.Component
 class PanCanStartJob extends RoddyAlignmentStartJob {
 
     @Override
-    String getJobExecutionPlanName() {
-        return 'PanCanWorkflow'
-    }
-
-    @Override
     List<SeqType> getSeqTypes() {
         return [SeqType.getExomePairedSeqType(), SeqType.getWholeGenomePairedSeqType()]
     }

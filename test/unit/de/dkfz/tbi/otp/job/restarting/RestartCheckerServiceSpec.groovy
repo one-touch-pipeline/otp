@@ -31,9 +31,7 @@ class RestartCheckerServiceSpec extends Specification {
         String planName = HelperUtils.uniqueString
         RestartCheckerService restartCheckerService = new RestartCheckerService(
                 context: Mock(ApplicationContext) {
-                    getBean(_) >> GroovyMock(RestartableStartJob) {
-                        _ * getJobExecutionPlanName() >> planName
-                    }
+                    getBean(_) >> Mock(RestartableStartJob)
                 }
         )
         ProcessingStep step = new ProcessingStep(
@@ -56,9 +54,7 @@ class RestartCheckerServiceSpec extends Specification {
         String planName = HelperUtils.uniqueString
         RestartCheckerService restartCheckerService = new RestartCheckerService(
                 context: Mock(ApplicationContext) {
-                    getBean(_) >> GroovyMock(StartJob) {
-                        _ * getJobExecutionPlanName() >> planName
-                    }
+                    getBean(_) >> Mock(StartJob)
                 }
         )
         ProcessingStep step = new ProcessingStep(

@@ -20,7 +20,7 @@ class TestStartJob2 extends AbstractStartJobImpl {
     int slotsReservedForFastTrack
 
     @Override
-    JobExecutionPlan getExecutionPlan() {
+    JobExecutionPlan getJobExecutionPlan() {
         return jep
     }
 
@@ -40,11 +40,6 @@ class TestStartJob2 extends AbstractStartJobImpl {
 
     @Override
     void execute() {
-        throw new UnsupportedOperationException()
-    }
-
-    @Override
-    String getJobExecutionPlanName() {
         throw new UnsupportedOperationException()
     }
 }

@@ -394,13 +394,13 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
         assertNotNull(job)
         // everything should be disabled now
         assertFalse(plan.enabled)
-        assertFalse(job.executionPlan.enabled)
+        assertFalse(job.jobExecutionPlan.enabled)
         // let's enable the Plan
         SpringSecurityUtils.doWithAuth("admin") {
             jobExecutionPlanService.enablePlan(plan)
         }
         assertTrue(plan.enabled)
-        assertTrue(job.executionPlan.enabled)
+        assertTrue(job.jobExecutionPlan.enabled)
     }
 
     @Test
@@ -439,13 +439,13 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
         assertNotNull(job)
         // everything should be enabled now
         assertTrue(plan.enabled)
-        assertTrue(job.executionPlan.enabled)
+        assertTrue(job.jobExecutionPlan.enabled)
         // let's disable the Plan
         SpringSecurityUtils.doWithAuth("admin") {
             jobExecutionPlanService.disablePlan(plan)
         }
         assertFalse(plan.enabled)
-        assertFalse(job.getExecutionPlan().enabled)
+        assertFalse(job.getJobExecutionPlan().enabled)
     }
 
     @Test

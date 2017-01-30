@@ -26,17 +26,12 @@ class TestPBSStartJob extends AbstractStartJobImpl  {
     }
 
     private boolean hasFreeSlot() {
-        JobExecutionPlan jep = getExecutionPlan()
+        JobExecutionPlan jep = getJobExecutionPlan()
         if (!jep || !jep.enabled) {
             return false
         }
         int n = Process.countByFinishedAndJobExecutionPlan(false, jep)
         long maxRunning = optionService.findOptionAsNumber("numberOfJobs", "TestPBSWorkflow", null, MAX_RUNNING)
         return (n < maxRunning)
-    }
-
-    @Override
-    String getJobExecutionPlanName() {
-        return null
     }
 }

@@ -94,10 +94,6 @@ class RestartActionService {
     StartJob getStartJob(Process process) {
         JobExecutionPlan plan = process.jobExecutionPlan
         StartJob startJob = context.getBean(plan.startJob.bean)
-
-        //This check is here because of OTP-1012
-        assert plan.name == startJob.getJobExecutionPlanName()
-
         return startJob
     }
 

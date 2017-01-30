@@ -64,6 +64,7 @@ class MovePanCanFilesToFinalDestinationJobIntegrationTests extends WorkflowTestC
             assert roddyBamFile.mergingWorkPackage.bamFileInProjectFolder == roddyBamFile
         } finally {
             TestCase.removeMetaClass(ConfigService, movePanCanFilesToFinalDestinationJob.configService)
+            TestCase.removeMetaClass(LinkFilesToFinalDestinationService, movePanCanFilesToFinalDestinationJob.linkFilesToFinalDestinationService)
             TestCase.removeMetaClass(MovePanCanFilesToFinalDestinationJob, movePanCanFilesToFinalDestinationJob)
         }
     }

@@ -36,17 +36,12 @@ class CreateMergingSetStartJob extends AbstractStartJobImpl {
     }
 
     private boolean hasFreeSlot() {
-        JobExecutionPlan jep = getExecutionPlan()
+        JobExecutionPlan jep = getJobExecutionPlan()
         if (!jep || !jep.enabled) {
             return false
         }
         int n = Process.countByFinishedAndJobExecutionPlan(false, jep)
         long maxRunning = optionService.findOptionAsNumber("numberOfJobs", "CreateMergingSetWorkflow", null, MAX_RUNNING)
         return (n < maxRunning)
-    }
-
-    @Override
-    String getJobExecutionPlanName() {
-        return "createMergingSetWorkflow"
     }
 }

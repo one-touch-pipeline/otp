@@ -1,12 +1,8 @@
 package workflows
 
-import de.dkfz.tbi.otp.ngsdata.DataFile
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.ngsdata.SeqTypeNames
-import org.junit.Ignore
-import org.junit.Test
+import de.dkfz.tbi.otp.ngsdata.*
+import org.junit.*
+
 
 /*
  * The idea of the test is that with the old jobExecutionPlan the test would fail since the outputParameter "Realm"

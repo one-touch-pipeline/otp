@@ -18,7 +18,7 @@ class ExampleStartJob extends AbstractStartJobImpl {
         if (performed) {
             return
         }
-        if (!getExecutionPlan() || !getExecutionPlan().enabled) {
+        if (!getJobExecutionPlan() || !getJobExecutionPlan().enabled) {
             return
         }
         println("Example Start Job called")
@@ -39,18 +39,14 @@ class ExampleStartJob extends AbstractStartJobImpl {
         }).each {
             if (isNewProcessAllowed()) {
                 schedulerService.createProcess(this, [
-                    new Parameter(type: ParameterType.findByNameAndJobDefinition("file", getExecutionPlan().startJob), value: it.absolutePath)
+                    new Parameter(type: ParameterType.findByNameAndJobDefinition("file", getJobExecutionPlan().startJob), value: it.absolutePath)
                     ])
                 println it.name
             } else {
-                println("No new processes are allowed by limit (${getExecutionPlan().numberOfAllowedProcesses}) set in JobExecutionPlan ${getExecutionPlan().name}")
+                println("No new processes are allowed by limit (${getJobExecutionPlan().numberOfAllowedProcesses}) set in JobExecutionPlan ${getJobExecutionPlan().name}")
             }
         }
         performed = true
     }
 
-    @Override
-    String getJobExecutionPlanName() {
-        return null
-    }
 }

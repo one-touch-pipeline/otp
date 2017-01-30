@@ -25,7 +25,7 @@ class TestSingletonStartJob implements StartJob, ApplicationListener<JobExecutio
     private boolean planNeedsRefresh = false
 
     @Override
-    public JobExecutionPlan getExecutionPlan() {
+    public JobExecutionPlan getJobExecutionPlan() {
         if (planNeedsRefresh) {
             plan = JobExecutionPlan.get(plan.id)
             planNeedsRefresh = false

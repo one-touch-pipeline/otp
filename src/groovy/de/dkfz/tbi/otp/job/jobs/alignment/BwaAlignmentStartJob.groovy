@@ -53,9 +53,4 @@ class BwaAlignmentStartJob extends AbstractStartJobImpl implements RestartableSt
             return createProcess(newInstance)
         }
     }
-
-    @Override
-    String getJobExecutionPlanName() {
-        return "ConveyBwaAlignmentWorkflow"
-    }
 }

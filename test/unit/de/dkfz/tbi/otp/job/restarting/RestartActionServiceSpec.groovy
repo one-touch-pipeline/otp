@@ -117,11 +117,10 @@ class RestartActionServiceSpec extends Specification {
         String workflowName = HelperUtils.uniqueString
         RestartActionService service = new RestartActionService(
                 context: Mock(ApplicationContext) {
-                    1 * getBean(_) >> GroovyMock(RestartableStartJob) {
+                    1 * getBean(_) >> Mock(RestartableStartJob) {
                         1 * restart(_) >> GroovyMock(Process) {
                             1 * save(_) >> new Process()
                         }
-                        _ * getJobExecutionPlanName() >> workflowName
                     }
                 },
                 commentService: Mock(CommentService) {
@@ -161,7 +160,6 @@ class RestartActionServiceSpec extends Specification {
                 context: Mock(ApplicationContext) {
                     1 * getBean(_) >> GroovyMock(StartJob) {
                         0 * restart()
-                        _ * getJobExecutionPlanName() >> workflowName
                     }
                 },
         )
@@ -196,11 +194,10 @@ class RestartActionServiceSpec extends Specification {
         String workflowName = HelperUtils.uniqueString
         RestartActionService service = new RestartActionService(
                 context: Mock(ApplicationContext) {
-                    1 * getBean(_) >> GroovyMock(RestartableStartJob) {
+                    1 * getBean(_) >> Mock(RestartableStartJob) {
                         1 * restart(_) >> GroovyMock(Process) {
                             1 * save(_) >> new Process()
                         }
-                        _ * getJobExecutionPlanName() >> workflowName
                     }
                 },
                 commentService: Mock(CommentService) {

@@ -4,7 +4,6 @@ import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
 import de.dkfz.tbi.otp.fileSystemConsistency.ConsistencyCheck
 import org.springframework.stereotype.Component
 import org.springframework.context.annotation.Scope
-import org.springframework.scheduling.annotation.Scheduled
 
 @Component("dataFileStatusStartJob")
 @Scope("singleton")
@@ -16,10 +15,5 @@ class DataFileStatusStartJob extends AbstractStartJobImpl {
         consistencyCheck.save(flush: true)
         createProcess(consistencyCheck)
         log.debug "FileSystemConsistencyWorkflow: job started"
-    }
-
-    @Override
-    String getJobExecutionPlanName() {
-        return "FileSystemConsistencyWorkflow"
     }
 }

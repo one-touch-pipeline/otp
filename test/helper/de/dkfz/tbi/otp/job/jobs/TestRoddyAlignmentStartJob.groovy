@@ -13,13 +13,8 @@ class TestRoddyAlignmentStartJob extends RoddyAlignmentStartJob {
     JobExecutionPlan jep
 
     @Override
-    JobExecutionPlan getExecutionPlan() {
+    JobExecutionPlan getJobExecutionPlan() {
         return jep
-    }
-
-    @Override
-    String getJobExecutionPlanName() {
-        throw new UnsupportedOperationException()
     }
 
     @Override
@@ -31,5 +26,4 @@ class TestRoddyAlignmentStartJob extends RoddyAlignmentStartJob {
     String getVersion() {
         return 'version'
     }
-
 }
