@@ -196,22 +196,4 @@ abstract class AbstractStartJobImpl implements StartJob, ApplicationListener<Job
             throw new NumberFormatException("Illegal value of ${optionName} for ${plan.name}: \"${optionValue}\"")
         }
     }
-
-   // TODO: OTP-1189: Probably remove this method.
-   /**
-    * Returns if it is allowed to create a new process.
-    *
-    * {@code true} is returned if it is allowed to create a new {@link Process}
-    * for the given {@link JobExecutionPlan} {@code false} otherwise.
-    * @return boolean indicating if it is allowed to create new {@link Process}
-    *
-    * @deprecated Use {@link #getMinimumProcessingPriorityForOccupyingASlot()} instead.
-    */
-   @Deprecated
-   protected boolean isNewProcessAllowed() {
-       if (plan.numberOfAllowedProcesses <= -1) {
-           return true
-       }
-       return Process.countByJobExecutionPlanAndFinished(plan, false) < plan.numberOfAllowedProcesses
-   }
 }

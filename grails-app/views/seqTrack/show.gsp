@@ -80,7 +80,6 @@
                 <td><g:message code="seqTrack.show.jobExecutionPlan.obsoleted"/></td>
                 <td><g:message code="seqTrack.show.jobExecutionPlan.enabled"/></td>
                 <td><g:message code="seqTrack.show.jobExecutionPlan.finishedSuccessful"/></td>
-                <td><g:message code="seqTrack.show.jobExecutionPlan.numberOfAllowedProcesses"/></td>
             </tr>
         </thead>
         <tbody>
@@ -103,7 +102,6 @@
                 </g:else>
                 </td>
                 <td>${jobExecutionPlan.finishedSuccessful}</td>
-                <td>${jobExecutionPlan.numberOfAllowedProcesses}</td>
             </tr>
         </g:each>
         </tbody>

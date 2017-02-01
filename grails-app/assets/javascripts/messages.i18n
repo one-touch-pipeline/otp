@@ -632,7 +632,6 @@ seqTrack.show.jobExecutionPlan.planVersion
 seqTrack.show.jobExecutionPlan.obsoleted
 seqTrack.show.jobExecutionPlan.enabled
 seqTrack.show.jobExecutionPlan.finishedSuccessful
-seqTrack.show.jobExecutionPlan.numberOfAllowedProcesses
 
 # Alignment quality overview
 alignment.quality.project
