@@ -20,11 +20,13 @@
                         <th><g:message code="dataFields.libraryPreparationKit.shortDisplayName"/></th>
                         <th><g:message code="dataFields.libraryPreparationKit.alias"/></th>
                         <th></th>
+                        <th><g:message code="dataFields.libraryPreparationKit.adapterFile"/></th>
+                        <th><g:message code="dataFields.libraryPreparationKit.adapterSequence"/></th>
                         <th><g:message code="dataFields.libraryPreparationKit.genomes"/></th>
                     </tr>
             </thead>
             <tbody>
-                    <g:each var="libraryPreparationKit" in="${libraryPreparationKits}" >
+                <g:each var="libraryPreparationKit" in="${libraryPreparationKits}" >
                     <tr>
                         <td>
                             ${libraryPreparationKit.name}
@@ -35,7 +37,6 @@
                         </td>
                         <td>
                             ${libraryPreparationKit.alias}
-
                         </td>
                         <td align="right">
                             <otp:editorSwitchNewValues
@@ -45,6 +46,31 @@
                                 link="${g.createLink(controller: 'metaDataFields', action: 'createLibraryPreparationKitAlias', id: libraryPreparationKit.name)}"
                             />
                         </td>
+                        <td>
+                            <g:if test="${libraryPreparationKit.adapterFile}">
+                                ${libraryPreparationKit.adapterFile}
+                            </g:if>
+                            <g:else>
+                                <otp:editorSwitchNewValues
+                                        roles="ROLE_OPERATOR"
+                                        labels="${["Adapter File"]}"
+                                        textFields="${["adapterFile"]}"
+                                        link="${g.createLink(controller: 'metaDataFields', action: 'addAdapterFileToLibraryPreparationKit', params: ["libraryPreparationKit.id": libraryPreparationKit.id])}"
+                                />
+                            </g:else>
+                        </td>
+                        <td>
+                            <g:if test="${libraryPreparationKit.adapterSequence}">
+                                ${libraryPreparationKit.adapterSequence}
+                            </g:if>
+                            <g:else>
+                                <otp:editorSwitchNewValues
+                                        roles="ROLE_OPERATOR"
+                                        labels="${["Adapter Sequence"]}"
+                                        textFields="${["adapterSequence"]}"
+                                        link="${g.createLink(controller: 'metaDataFields', action: 'addAdapterSequenceToLibraryPreparationKit', params: ["libraryPreparationKit.id": libraryPreparationKit.id])}"
+                                />
+                            </g:else>
                         </td>
                         <td>
                             ${libraryPreparationKit.referenceGenomesWithBedFiles}
@@ -54,8 +80,8 @@
                 <td colspan="3">
                     <otp:editorSwitchNewValues
                         roles="ROLE_OPERATOR"
-                        labels="${["Name", "Short Display Name"]}"
-                        textFields="${["name", "shortDisplayName"]}"
+                        labels="${["Name", "Short Display Name", "Adapter File", "Adapter Sequence"]}"
+                        textFields="${["name", "shortDisplayName", "adapterFile", "adapterSequence"]}"
                         link="${g.createLink(controller: 'metaDataFields', action: 'createLibraryPreparationKit')}"
                     />
                 </td>

@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.utils.Entity
 
 /**
@@ -22,9 +23,19 @@ class LibraryPreparationKit implements Entity {
 
     String shortDisplayName
 
+    String adapterFile
+
+    String adapterSequence
+
     static constraints = {
         name(unique: true, blank: false)
         shortDisplayName(unique: true, blank: false)
+        adapterFile nullable: true, blank: false, validator: { val ->
+            if (val && !OtpPath.isValidAbsolutePath(val)) {
+                return 'Not a valid file name'
+            }
+        }
+        adapterSequence nullable: true, blank: false
     }
 
     public String toString() {

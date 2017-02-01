@@ -1,10 +1,10 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
-import grails.converters.JSON
-import grails.validation.Validateable
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.validation.FieldError
+import de.dkfz.tbi.otp.dataprocessing.*
+import grails.converters.*
+import org.springframework.beans.factory.annotation.*
+import org.springframework.validation.*
+
 
 class MetaDataFieldsController {
     LibraryPreparationKitService libraryPreparationKitService
@@ -22,8 +22,11 @@ class MetaDataFieldsController {
 
         List libraryPreparationKits = LibraryPreparationKit.list(sort: "name", order: "asc").collect {
             [
+                    id: it.id,
                     name : it.name,
                     shortDisplayName : it.shortDisplayName,
+                    adapterFile: it.adapterFile,
+                    adapterSequence: it.adapterSequence,
                     alias: LibraryPreparationKitSynonym.findAllByLibraryPreparationKit(it, [sort: "name", order: "asc"])*.name.join(' | '),
                     referenceGenomesWithBedFiles: BedFile.findAllByLibraryPreparationKit(it, [sort: "referenceGenome.name", order: "asc"])*.referenceGenome*.name.join(' | '),
             ]
@@ -87,35 +90,43 @@ class MetaDataFieldsController {
         ]
     }
 
-    JSON createLibraryPreparationKit(UpdateCommandLibraryPreparationKit cmd) {
-        checkErrorAndCallMethod(cmd, { libraryPreparationKitService.createLibraryPreparationKit(cmd.name, cmd.shortDisplayName) })
+    JSON createLibraryPreparationKit(CreateLibraryPreparationKitCommand cmd) {
+        checkErrorAndCallMethod(cmd, { libraryPreparationKitService.createLibraryPreparationKit(cmd.name, cmd.shortDisplayName, cmd.adapterFile, cmd.adapterSequence) })
     }
 
-    JSON createLibraryPreparationKitAlias(UpdateCommandLibraryPreparationKitAlias cmd) {
+    JSON addAdapterFileToLibraryPreparationKit(AddAdapterFileToLibraryPreparationKitCommand cmd) {
+        checkErrorAndCallMethod(cmd, { libraryPreparationKitService.addAdapterFileToLibraryPreparationKit(cmd.libraryPreparationKit, cmd.adapterFile) })
+    }
+
+    JSON addAdapterSequenceToLibraryPreparationKit(AddAdapterSequenceToLibraryPreparationKitCommand cmd) {
+        checkErrorAndCallMethod(cmd, { libraryPreparationKitService.addAdapterSequenceToLibraryPreparationKit(cmd.libraryPreparationKit, cmd.adapterSequence) })
+    }
+
+    JSON createLibraryPreparationKitAlias(CreateLibraryPreparationKitAliasCommand cmd) {
         checkErrorAndCallMethod(cmd, { libraryPreparationKitSynonymService.createLibraryPreparationKitSynonym(cmd.alias, cmd.id) })
     }
 
-    JSON createAntibodyTarget(UpdateCommandAntibodyTarget cmd) {
+    JSON createAntibodyTarget(CreateAntibodyTargetCommand cmd) {
         checkErrorAndCallMethod(cmd, { antibodyTargetService.createAntibodyTarget(cmd.name) })
     }
 
-    JSON createSeqCenter(UpdateCommandSeqCenter cmd) {
+    JSON createSeqCenter(CreateSeqCenterCommand cmd) {
         checkErrorAndCallMethod(cmd, { seqCenterService.createSeqCenter(cmd.name, cmd.dirName) })
     }
 
-    JSON createSeqPlatform(UpdateCommandSeqPlatform cmd) {
+    JSON createSeqPlatform(CreateSeqPlatformCommand cmd) {
         checkErrorAndCallMethod(cmd, { seqPlatformService.createNewSeqPlatform(cmd.platform, cmd.group, cmd.model, cmd.kit) })
     }
 
-    JSON createModelAlias(UpdateCommandModelAlias cmd) {
+    JSON createModelAlias(CreateModelAliasCommand cmd) {
         checkErrorAndCallMethod(cmd, { seqPlatformModelLabelService.addNewAliasToSeqPlatformModelLabel(cmd.id, cmd.alias) })
     }
 
-    JSON createSequencingKitAlias(UpdateCommandSequencingKitAlias cmd) {
+    JSON createSequencingKitAlias(CreateSequencingKitAliasCommand cmd) {
         checkErrorAndCallMethod(cmd, { sequencingKitLabelService.addNewAliasToSequencingKitLabel(cmd.id, cmd.alias) })
     }
 
-    JSON createSeqType(UpdateCommandSeqType cmd) {
+    JSON createSeqType(CreateSeqTypeCommand cmd) {
         if (cmd.hasErrors()) {
             Map data = getErrorData(cmd.errors.getFieldError())
             render data as JSON
@@ -126,7 +137,7 @@ class MetaDataFieldsController {
         }
     }
 
-    JSON createLayout(UpdateCommandLayout cmd) {
+    JSON createLayout(CreateLayoutCommand cmd) {
         if (cmd.hasErrors()) {
             Map data = getErrorData(cmd.errors.getFieldError())
             render data as JSON
@@ -138,7 +149,7 @@ class MetaDataFieldsController {
         }
     }
 
-    JSON createAdapterFile(UpdateAdapterFileCommand cmd) {
+    JSON createAdapterFile(CreateAdapterFileCommand cmd) {
         checkErrorAndCallMethod(cmd, { adapterFileService.createAdapterFile(cmd.fileName) })
     }
 
@@ -170,18 +181,27 @@ class MetaDataFieldsController {
     }
 }
 
-class UpdateCommandLibraryPreparationKit implements Serializable {
+class CreateLibraryPreparationKitCommand implements Serializable {
         String name
         String shortDisplayName
+        String adapterFile
+        String adapterSequence
         static constraints = {
             name(blank: false, validator: {val, obj ->
-                if(LibraryPreparationKit.findByName(val) || LibraryPreparationKitSynonym.findByName(val)) {
+                if (LibraryPreparationKit.findByName(val) || LibraryPreparationKitSynonym.findByName(val)) {
                     return 'Duplicate'
-                }})
+                }
+            })
             shortDisplayName(blank: false, validator: {val, obj ->
-                if(LibraryPreparationKit.findByShortDisplayName(val)) {
+                if (LibraryPreparationKit.findByShortDisplayName(val)) {
                     return 'Duplicate'
-                }})
+                }
+            })
+            adapterFile validator: {val, obj ->
+                if (val && !OtpPath.isValidAbsolutePath(val)) {
+                    return 'Not a valid file name'
+                }
+            }
         }
         void setName(String name) {
             this.name = name?.trim()?.replaceAll(" +", " ") //trims and removes additional white spaces
@@ -191,7 +211,32 @@ class UpdateCommandLibraryPreparationKit implements Serializable {
         }
 }
 
-class UpdateCommandLibraryPreparationKitAlias implements Serializable {
+class AddAdapterFileToLibraryPreparationKitCommand implements Serializable {
+    String adapterFile
+    LibraryPreparationKit libraryPreparationKit
+    static constraints = {
+        adapterFile blank: false, nullable: false, validator: { val, obj ->
+            if (!OtpPath.isValidAbsolutePath(val)) {
+                return 'Not a valid file name'
+            }
+        }
+        libraryPreparationKit nullable: false
+    }
+    void setAdapterFile(String adapterFile) {
+        this.adapterFile = adapterFile?.trim()?.replaceAll(" +", " ")
+    }
+}
+
+class AddAdapterSequenceToLibraryPreparationKitCommand implements Serializable {
+    String adapterSequence
+    LibraryPreparationKit libraryPreparationKit
+    static constraints = {
+        adapterSequence blank: false, nullable: false
+        libraryPreparationKit nullable: false
+    }
+}
+
+class CreateLibraryPreparationKitAliasCommand implements Serializable {
     String alias
     String id
     static constraints = {
@@ -206,7 +251,7 @@ class UpdateCommandLibraryPreparationKitAlias implements Serializable {
     }
 }
 
-class UpdateCommandAntibodyTarget implements Serializable {
+class CreateAntibodyTargetCommand implements Serializable {
         String name
         static constraints = {
             name(blank: false, validator: {val, obj ->
@@ -223,7 +268,7 @@ class UpdateCommandAntibodyTarget implements Serializable {
         }
 }
 
-class UpdateCommandSeqCenter implements Serializable {
+class CreateSeqCenterCommand implements Serializable {
         String name
         String dirName
         static constraints = {
@@ -244,7 +289,7 @@ class UpdateCommandSeqCenter implements Serializable {
         }
 }
 
-class UpdateCommandSeqPlatform implements Serializable {
+class CreateSeqPlatformCommand implements Serializable {
         String platform
         String group
         String model
@@ -283,7 +328,7 @@ class UpdateCommandSeqPlatform implements Serializable {
         }
 }
 
-class UpdateCommandModelAlias implements Serializable {
+class CreateModelAliasCommand implements Serializable {
     String alias
     String id
     static constraints = {
@@ -299,7 +344,7 @@ class UpdateCommandModelAlias implements Serializable {
 
 }
 
-class UpdateCommandSequencingKitAlias implements Serializable {
+class CreateSequencingKitAliasCommand implements Serializable {
     String alias
     String id
     static constraints = {
@@ -314,7 +359,7 @@ class UpdateCommandSequencingKitAlias implements Serializable {
     }
 }
 
-class UpdateCommandSeqType implements Serializable {
+class CreateSeqTypeCommand implements Serializable {
         boolean single
         boolean paired
         boolean mate_pair
@@ -355,7 +400,7 @@ class UpdateCommandSeqType implements Serializable {
         }
 }
 
-class UpdateCommandLayout implements Serializable {
+class CreateLayoutCommand implements Serializable {
         boolean single
         boolean paired
         boolean mate_pair
@@ -382,7 +427,7 @@ class UpdateCommandLayout implements Serializable {
         }
 }
 
-class UpdateAdapterFileCommand implements Serializable {
+class CreateAdapterFileCommand implements Serializable {
     String fileName
 
     @Autowired

@@ -22,6 +22,8 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
         when:
         controller.params.name = 'LibraryPreparationKit'
         controller.params.shortDisplayName = 'LPK'
+        controller.params.adapterFile = '/asdf'
+        controller.params.adapterSequence = 'GATC'
         SpringSecurityUtils.doWithAuth("operator"){
             controller.createLibraryPreparationKit()
         }

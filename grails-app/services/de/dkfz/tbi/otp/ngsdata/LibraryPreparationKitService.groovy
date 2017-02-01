@@ -21,14 +21,16 @@ class LibraryPreparationKitService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public LibraryPreparationKit createLibraryPreparationKit(String name, String shortDisplayName){
-        assert name  : "the input name '${name}' must not be null"
-        assert shortDisplayName  : "the input shortdisplayname '${shortDisplayName}' must not be null"
+    public LibraryPreparationKit createLibraryPreparationKit(String name, String shortDisplayName, String adapterFile, String adapterSequence) {
+        assert name : "name must not be null"
+        assert shortDisplayName : "shortDisplayName must not be null"
         assert !hasLibraryPreparationKitByNameOrAlias(name) : "The LibraryPreparationKit '${name}' exists already"
         assert !LibraryPreparationKit.findByShortDisplayName(shortDisplayName) : "The shortdisplayname '${shortDisplayName}' exists already"
         LibraryPreparationKit libraryPreparationKit = new LibraryPreparationKit(
                 name: name,
-                shortDisplayName: shortDisplayName
+                shortDisplayName: shortDisplayName,
+                adapterFile: adapterFile ?: null,
+                adapterSequence: adapterSequence ?: null,
         )
         assert libraryPreparationKit.save(flush: true, failOnError: true)
         return libraryPreparationKit
@@ -37,5 +39,23 @@ class LibraryPreparationKitService {
     public static boolean hasLibraryPreparationKitByNameOrAlias(String nameOrAlias) {
         assert nameOrAlias: "the input nameoralias '${nameOrAlias}' is null"
         return LibraryPreparationKit.findByName(nameOrAlias) || LibraryPreparationKitSynonym.findByName(nameOrAlias)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    public LibraryPreparationKit addAdapterFileToLibraryPreparationKit(LibraryPreparationKit libraryPreparationKit, String adapterFile) {
+        assert libraryPreparationKit : "libraryPreparationKit must not be null"
+        assert adapterFile : "adapterFile must not be null"
+        libraryPreparationKit.adapterFile = adapterFile
+        assert libraryPreparationKit.save(flush: true, failOnError: true)
+        return libraryPreparationKit
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    public LibraryPreparationKit addAdapterSequenceToLibraryPreparationKit(LibraryPreparationKit libraryPreparationKit, String adapterSequence) {
+        assert libraryPreparationKit : "libraryPreparationKit must not be null"
+        assert adapterSequence : "adapterSequence must not be null"
+        libraryPreparationKit.adapterSequence = adapterSequence
+        assert libraryPreparationKit.save(flush: true, failOnError: true)
+        return libraryPreparationKit
     }
 }
