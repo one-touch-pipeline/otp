@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-class RnaQualityAssessment extends AbstractQualityAssessment {
+class RnaQualityAssessment extends RoddyQualityAssessment {
 
     double threePNorm
 
@@ -106,6 +106,10 @@ class RnaQualityAssessment extends AbstractQualityAssessment {
 
     static constraints = {
         referenceLength(nullable: true)
+        chromosome(nullable: true)
+        insertSizeCV(nullable: true)
+        percentageMatesOnDifferentChr(nullable: true)
+        genomeWithoutNCoverageQcBases(nullable: true)
     }
 
 }

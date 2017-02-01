@@ -1,11 +1,11 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
 import de.dkfz.tbi.otp.ngsdata.*
 import grails.converters.*
 import org.codehaus.groovy.grails.web.json.*
 
 import static de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification.*
-
 
 class AbstractQualityAssessmentService {
 
@@ -109,6 +109,15 @@ class AbstractQualityAssessmentService {
             qa.qualityAssessmentMergedPass = roddyBamFile.findOrSaveQaPass()
             assert qa.save(flush: true)
         }
+    }
+
+    void parseRnaRoddyBamFileQaStatistics(RnaRoddyBamFile rnaRoddyBamFile) {
+        File qaFile = rnaRoddyBamFile.getWorkMergedQAJsonFile()
+        Map<String, Map> chromosomeInformation = parseRoddyQaStatistics(rnaRoddyBamFile, qaFile, null)
+        assert chromosomeInformation.keySet().size() == 1 && chromosomeInformation.keySet().contains(RnaQualityAssessment.ALL)
+        RnaQualityAssessment rnaQualityAssessment = new RnaQualityAssessment((chromosomeInformation.get(RnaQualityAssessment.ALL)))
+        rnaQualityAssessment.qualityAssessmentMergedPass = rnaRoddyBamFile.findOrSaveQaPass()
+        assert rnaQualityAssessment.save(flush: true)
     }
 
     void parseRoddyLibraryQaStatistics(RoddyBamFile roddyBamFile) {
