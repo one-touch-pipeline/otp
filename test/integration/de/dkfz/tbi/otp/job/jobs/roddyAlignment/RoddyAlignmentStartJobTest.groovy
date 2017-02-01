@@ -220,7 +220,7 @@ class RoddyAlignmentStartJobTest {
         Collection<SeqTrack> seqTracks = mwp.findMergeableSeqTracks()
         DomainFactory.createRoddyProcessingOptions(TestCase.uniqueNonExistentPath)
 
-        RoddyBamFile rbf = RoddyAlignmentStartJob.createRoddyBamFile(mwp, null)
+        RoddyBamFile rbf = testRoddyAlignmentStartJob.createRoddyBamFile(mwp, null)
 
         assertRoddyBamFileConsistencyWithMwp(rbf, mwp)
         assert null == rbf.baseBamFile
@@ -246,7 +246,7 @@ class RoddyAlignmentStartJobTest {
 
         DomainFactory.createRoddyProcessingOptions(TestCase.uniqueNonExistentPath)
 
-        RoddyBamFile rbf = RoddyAlignmentStartJob.createRoddyBamFile(mwp, baseBamFile)
+        RoddyBamFile rbf = testRoddyAlignmentStartJob.createRoddyBamFile(mwp, baseBamFile)
 
         assertRoddyBamFileConsistencyWithMwp(rbf, mwp)
         assert baseBamFile == rbf.baseBamFile
@@ -267,7 +267,7 @@ class RoddyAlignmentStartJobTest {
         assert 0 == RoddyWorkflowConfig.list().size()
 
         assert TestCase.shouldFail (AssertionError) {
-            RoddyBamFile rbf = RoddyAlignmentStartJob.createRoddyBamFile(mwp, null)
+            RoddyBamFile rbf = testRoddyAlignmentStartJob.createRoddyBamFile(mwp, null)
         }.contains('RoddyWorkflowConfig')
     }
 

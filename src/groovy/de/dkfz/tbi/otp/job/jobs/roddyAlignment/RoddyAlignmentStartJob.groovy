@@ -123,7 +123,7 @@ abstract class RoddyAlignmentStartJob extends AbstractStartJobImpl implements Re
         }
     }
 
-    static RoddyBamFile createRoddyBamFile(MergingWorkPackage mergingWorkPackage, RoddyBamFile baseBamFile) {
+    RoddyBamFile createRoddyBamFile(MergingWorkPackage mergingWorkPackage, RoddyBamFile baseBamFile) {
         assert mergingWorkPackage
         RoddyBamFile previousRoddyBamFile = mergingWorkPackage.bamFileInProjectFolder
         List<Long> mergableSeqtracks =  mergingWorkPackage.findMergeableSeqTracks()*.id
@@ -134,7 +134,7 @@ abstract class RoddyAlignmentStartJob extends AbstractStartJobImpl implements Re
         assert config: "Could not find one RoddyWorkflowConfig for ${mergingWorkPackage.project}, ${mergingWorkPackage.seqType} and ${mergingWorkPackage.pipeline}"
 
         int identifier = RoddyBamFile.nextIdentifier(mergingWorkPackage)
-        RoddyBamFile roddyBamFile = new RoddyBamFile(
+        RoddyBamFile roddyBamFile = getInstanceClass().newInstance(
                 workPackage: mergingWorkPackage,
                 identifier: identifier,
                 workDirectoryName: "${RoddyBamFile.WORK_DIR_PREFIX}_${identifier}",
@@ -148,6 +148,10 @@ abstract class RoddyAlignmentStartJob extends AbstractStartJobImpl implements Re
         assert roddyBamFile.save(flush: true, failOnError: true)
         assert !roddyBamFile.isOldStructureUsed()
         return roddyBamFile
+    }
+
+    protected Class<? extends RoddyBamFile> getInstanceClass() {
+        return RoddyBamFile
     }
 }
 

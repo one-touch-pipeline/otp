@@ -132,6 +132,12 @@ class SeqType implements Entity {
         )
     }
 
+    static SeqType getRnaPairedSeqType() {
+        return CollectionUtils.exactlyOneElement(
+                findAllByNameAndLibraryLayout(SeqTypeNames.RNA.seqTypeName, LIBRARYLAYOUT_PAIRED)
+        )
+    }
+
     static List<SeqType> getDefaultOtpAlignableSeqTypes() {
         return [
                 getExomePairedSeqType(),
