@@ -9,7 +9,6 @@ import de.dkfz.tbi.otp.tracking.ProcessingStatus.Done
 import de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus
 import de.dkfz.tbi.otp.user.*
 import de.dkfz.tbi.otp.utils.*
-import org.hibernate.*
 import org.springframework.security.access.prepost.*
 
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.Done.*
@@ -64,21 +63,19 @@ class TrackingService {
     }
 
     public Set<OtrsTicket> findAllOtrsTickets(Collection<SeqTrack> seqTracks) {
-        OtrsTicket.withSession { Session session ->
-            session.buildLockRequest(new LockOptions(LockMode.PESSIMISTIC_WRITE)) //set pessimistic lock for session
-            return OtrsTicket.executeQuery("""
-                select distinct
-                    otrsTicket
-                from
-                    DataFile datafile
-                    join datafile.runSegment.otrsTicket otrsTicket
-                where
-                    datafile.seqTrack in (:seqTracks)
-                    and otrsTicket is not null
-            """, [
-                    seqTracks: seqTracks
-            ]) as Set
+        //set pessimistic lock does not work together with projection, therefore 2 queries used
+        List<Long> otrsIds = DataFile.createCriteria().listDistinct {
+            'in'('seqTrack', seqTracks)
+            runSegment {
+                isNotNull('otrsTicket')
+                otrsTicket {
+                    projections {
+                        property('id')
+                    }
+                }
+            }
         }
+        return OtrsTicket.findAllByIdInList(otrsIds, [lock: true]) as Set
     }
 
     public void setStarted(Collection<OtrsTicket> otrsTickets, OtrsTicket.ProcessingStep step) {
