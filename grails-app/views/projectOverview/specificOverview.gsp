@@ -181,12 +181,13 @@
             </table>
         </div>
         <p>
-            <otp:editorSwitch roles="ROLE_OPERATOR"
-                    template="newFreeTextValues"
-                    fields="${["Name","E-Mail","Aspera Account"]}"
-                    dropDowns="${[Role: roleDropDown]}"
+            <otp:editorSwitchNewValues
+                    roles="ROLE_OPERATOR"
+                    labels="${["Name", "E-Mail", "Aspera Account", "Role"]}"
+                    textFields="${["name", "email", "aspera"]}"
+                    dropDowns="${[role: roleDropDown]}"
                     link="${g.createLink(controller: "projectOverview", action: "createContactPersonOrAddProject", params: ['project.id': project.id])}"
-                    value=""/>
+            />
         </p>
         <br>
         <div>

@@ -1,18 +1,21 @@
 <div class="edit-switch edit-switch-new-free-text-values" style="display:inline-block">
     <span class="edit-switch-editor" style="display: none">
         <input type="hidden" name="target" value="${link}"/>
-        <g:each var="field" in="${fields}">
-            ${field}: <input type="text" name="${field}"/>
+        <g:set var="i" value="${0}"/>
+        <g:each var="field" in="${textFields}">
+            <label>${labels[i++]}:
+                <input type="text" name="${field}"/>
+            </label>
         </g:each>
         <g:each var="checkBox" in="${checkBoxes}">
-            <g:if test="${!checkBox.getValue()}">
-                ${checkBox.getKey()}:
-                <input type="checkbox" name="${checkBox.getKey()}"/>
-            </g:if>
+            <label>${labels[i++]}:
+                <g:checkBox name="${checkBox.getKey()}" checked="${checkBox.getValue()}"/>
+            </label>
         </g:each>
-        <g:each var="dDown" in="${dropDowns}">
-            ${dDown.getKey()}:
-            <g:select name="${dDown.getKey()}" from="${dDown.getValue()}"/>
+        <g:each var="dropDown" in="${dropDowns}">
+            <label>${labels[i++]}:
+                <g:select name="${dropDown.getKey()}" from="${dropDown.getValue()}"/>
+            </label>
         </g:each>
         <button class="buttons save"><g:message code="default.button.save.label"/></button>
         <button class="buttons cancel"><g:message code="default.button.cancel.label"/></button>

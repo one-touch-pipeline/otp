@@ -223,35 +223,22 @@ $(function() {
     /*jslint unparam: true */
     $("div.edit-switch-new-free-text-values span.edit-switch-editor button.save").click(function () {
         "use strict";
-        var container, outerContainer, field;
+        var container, outerContainer, data = {};
         container = $(this).parent();
         outerContainer = container.parent();
+        $("input:text", container).each(function() {
+            data[this.name] = $(this).val();
+        });
+        $("input:checked", container).each(function() {
+            data[this.name] = $(this).is(":checked");
+        });
+        $("select", container).each(function() {
+            data[this.name] = $(this).val();
+        });
         $.ajax({
             url: $("input:hidden[name=target]", container).val(),
             dataType: 'json',
-            data: {
-                alias: $("input:text[name=Alias]", container).val(),
-                name: $("input:text[name=Name]", container).val(),
-                shortDisplayName: $("input:text[name='Short Display Name']", container).val(),
-                dirName: $("input:text[name=Directory]", container).val(),
-                type: $("input:text[name=Type]", container).val(),
-                single: $("input:checked[name=SINGLE]", container).is( ":checked" ),
-                paired: $("input:checked[name=PAIRED]", container).is( ":checked" ),
-                mate_pair: $("input:checked[name=MATE_PAIR]", container).is( ":checked" ),
-                anyLayout: ($("input:checked[name=SINGLE]", container).is( ":checked" )||
-                                  $("input:checked[name=PAIRED]", container).is( ":checked" )||
-                                  $("input:checked[name=MATE_PAIR]", container).is( ":checked" )),
-                platform: $("input:text[name=Platform]", container).val(),
-                group: $("input:text[name=Group]", container).val(),
-                model: $("input:text[name=Model]", container).val(),
-                kit: $("input:text[name=Kit]", container).val(),
-                email: $("input:text[name=E-Mail]", container).val(),
-                aspera: $("input:text[name='Aspera Account']", container).val(),
-                role: $("select[name='Role']", container).val(),
-                typeSelect: $("select[name='Type']", container).val(),
-                actionSelect: $("select[name='Action']", container).val(),
-                errorExpression: $("input:text[name='Error Expression']", container).val()
-            },
+            data: data,
             success: function (data) {
                 if (data.success) {
                     $.otp.infoMessage($L("editorswitch.notification.success"));

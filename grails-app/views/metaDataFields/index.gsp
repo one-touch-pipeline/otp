@@ -38,12 +38,13 @@
 
                         </td>
                         <td align="right">
-                            <otp:editorSwitch
+                            <otp:editorSwitchNewValues
                                 roles="ROLE_OPERATOR"
-                                template="newFreeTextValues"
-                                fields="${["Alias"]}"
+                                labels="${["Alias"]}"
+                                textFields="${["alias"]}"
                                 link="${g.createLink(controller: 'metaDataFields', action: 'createLibraryPreparationKitAlias', id: libraryPreparationKit.name)}"
-                                value=""/>
+                            />
+                        </td>
                         </td>
                         <td>
                             ${libraryPreparationKit.referenceGenomesWithBedFiles}
@@ -51,12 +52,12 @@
                     </tr>
                 </g:each>
                 <td colspan="3">
-                    <otp:editorSwitch
+                    <otp:editorSwitchNewValues
                         roles="ROLE_OPERATOR"
-                        fields="${["Name", "Short Display Name"]}"
-                        template="newFreeTextValues"
+                        labels="${["Name", "Short Display Name"]}"
+                        textFields="${["name", "shortDisplayName"]}"
                         link="${g.createLink(controller: 'metaDataFields', action: 'createLibraryPreparationKit')}"
-                        value=""/>
+                    />
                 </td>
             </tbody>
         </table>
@@ -79,12 +80,12 @@
                     </tr>
                 </g:each>
                 <td colspan="1">
-                    <otp:editorSwitch
+                    <otp:editorSwitchNewValues
                         roles="ROLE_OPERATOR"
-                        template="newFreeTextValues"
-                        fields="${["Name"]}"
+                        labels="${["Name"]}"
+                        textFields="${["name"]}"
                         link="${g.createLink(controller: 'metaDataFields', action: 'createAntibodyTarget')}"
-                        value=""/>
+                    />
                 </td>
             </tbody>
         </table>
@@ -111,12 +112,12 @@
                     </tr>
                 </g:each>
                 <td colspan="2">
-                    <otp:editorSwitch
+                    <otp:editorSwitchNewValues
                         roles="ROLE_OPERATOR"
-                        template="newFreeTextValues"
-                        fields="${["Name", "Directory"]}"
+                        labels="${["Name", "Directory"]}"
+                        textFields="${["name", "dirName"]}"
                         link="${g.createLink(controller: 'metaDataFields', action: 'createSeqCenter')}"
-                        value=""/>
+                    />
                 </td>
             </tbody>
         </table>
@@ -154,12 +155,12 @@
                         </td>
                         <td>
                         <g:if  test="${seqPlatform.hasModel}">
-                            <otp:editorSwitch
+                            <otp:editorSwitchNewValues
                                 roles="ROLE_OPERATOR"
-                                template="newFreeTextValues"
-                                fields="${["Alias"]}"
+                                labels="${["Alias"]}"
+                                textFields="${["alias"]}"
                                 link="${g.createLink(controller: 'metaDataFields', action: 'createModelAlias', id: seqPlatform.model)}"
-                                value=""/>
+                            />
                         </g:if>
                         </td>
                         <td>
@@ -170,23 +171,23 @@
                         </td>
                         <td>
                         <g:if  test="${seqPlatform.hasSeqKit}">
-                            <otp:editorSwitch
+                            <otp:editorSwitchNewValues
                                 roles="ROLE_OPERATOR"
-                                template="newFreeTextValues"
-                                fields="${["Alias"]}"
+                                labels="${["Alias"]}"
+                                textFields="${["alias"]}"
                                 link="${g.createLink(controller: 'metaDataFields', action: 'createSequencingKitAlias', id: seqPlatform.seqKit)}"
-                                value=""/>
+                            />
                         </g:if>
                         </td>
                     </tr>
                 </g:each>
                 <td colspan="8">
-                    <otp:editorSwitch
+                    <otp:editorSwitchNewValues
                         roles="ROLE_OPERATOR"
-                        template="newFreeTextValues"
-                        fields="${["Group", "Platform", "Model", "Kit"]}"
+                        labels="${["Group", "Platform", "Model", "Kit"]}"
+                        textFields="${["group", "platform", "model", "kit"]}"
                         link="${g.createLink(controller: 'metaDataFields', action: 'createSeqPlatform')}"
-                        value=""/>
+                    />
                 </td>
             </tbody>
         </table>
@@ -217,14 +218,13 @@
                             ${seqType.libraryLayouts}
                         </td>
                         <td>
-                            <g:if  test="${!(seqType.layouts.SINGLE&&seqType.layouts.PAIRED&&seqType.layouts.MATE_PAIR)}">
-                            <otp:editorSwitch
+                            <g:if test="${!(seqType.layouts.SINGLE && seqType.layouts.PAIRED && seqType.layouts.MATE_PAIR)}">
+                            <otp:editorSwitchNewValues
                                 roles="ROLE_OPERATOR"
-                                template="newFreeTextValues"
-                                check="true"
-                                checkBoxes="${seqType.layouts}"
+                                labels="${seqType.layouts.findAll {!it.value}.collect {it.key}}"
+                                checkBoxes="${seqType.layouts.findAll {!it.value}.collectEntries { [it.key.toLowerCase(), it.value] }}"
                                 link="${g.createLink(controller: 'metaDataFields', action: 'createLayout', id: seqType.name)}"
-                                value=""/>
+                            />
                             </g:if>
 
                         </td>
@@ -234,14 +234,13 @@
                     </tr>
                 </g:each>
                 <td colspan="4">
-                    <otp:editorSwitch
+                    <otp:editorSwitchNewValues
                         roles="ROLE_OPERATOR"
-                        template="newFreeTextValues"
-                        fields="${["Type","Directory","Alias"]}"
-                        check="true"
-                        checkBoxes="${[SINGLE: false,PAIRED: false,MATE_PAIR: false]}"
+                        labels="${["Type", "Directory", "Alias", "SINGLE", "PAIRED", "MATE_PAIR"]}"
+                        textFields="${["type", "dirName", "alias"]}"
+                        checkBoxes="${[single: false, paired: true, mate_pair: false]}"
                         link="${g.createLink(controller: 'metaDataFields', action: 'createSeqType')}"
-                        value=""/>
+                    />
                 </td>
             </tbody>
         </table>

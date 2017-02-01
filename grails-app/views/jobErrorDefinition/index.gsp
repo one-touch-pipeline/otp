@@ -32,13 +32,13 @@
                 <td>${firstContent.key.action}
                     <g:if test="${firstContent.key.action == JobErrorDefinition.Action.CHECK_FURTHER}">
                         <br>
-                        <otp:editorSwitch
+                        <otp:editorSwitchNewValues
                                 roles="ROLE_ADMIN"
-                                template="newFreeTextValues"
-                                dropDowns="${[Type: typeDropDown, Action: actionDropDown]}"
-                                fields="${["Error Expression"]}"
+                                labels="${["Error Expression", "Type", "Action"]}"
+                                textFields="${["errorExpression"]}"
+                                dropDowns="${[typeSelect: typeDropDown, actionSelect: actionDropDown]}"
                                 link="${g.createLink(controller: "jobErrorDefinition", action: "addJobErrorDefinition", params: ["basedJobErrorDefinition.id": firstContent.key.id, "level": "second level"])}"
-                                value=""/>
+                        />
                     </g:if>
                 </td>
                 <td><g:each var="jobs" in="${firstContent.key.jobDefinitions}">
@@ -65,13 +65,13 @@
                         <td>${secondContent.key.action}
                             <g:if test="${secondContent.key.action == JobErrorDefinition.Action.CHECK_FURTHER}">
                                 <br>
-                                <otp:editorSwitch
+                                <otp:editorSwitchNewValues
                                         roles="ROLE_ADMIN"
-                                        template="newFreeTextValues"
-                                        dropDowns="${[Type: typeDropDown, Action: actionDropDown]}"
-                                        fields="${["Error Expression"]}"
+                                        labels="${["Error Expression", "Type", "Action"]}"
+                                        textFields="${["errorExpression"]}"
+                                        dropDowns="${[typeSelect: typeDropDown, actionSelect: actionDropDown]}"
                                         link="${g.createLink(controller: "jobErrorDefinition", action: "addJobErrorDefinition", params: ["basedJobErrorDefinition.id": secondContent.key.id, "level": "third level"])}"
-                                        value=""/>
+                                />
                             </g:if>
                         </td>
                         <td><g:each var="jobs" in="${secondContent.key.jobDefinitions.sort{it.name}}">
@@ -121,13 +121,13 @@
     </g:each>
 
     <g:message code="job.error.definition.firstLevel"/>
-    <otp:editorSwitch
+    <otp:editorSwitchNewValues
             roles="ROLE_ADMIN"
-            template="newFreeTextValues"
-            dropDowns="${[Action: actionDropDown]}"
-            fields="${["Error Expression"]}"
+            labels="${["Error Expression", "Action"]}"
+            textFields="${["errorExpression"]}"
+            dropDowns="${[actionSelect: actionDropDown]}"
             link="${g.createLink(controller: "jobErrorDefinition", action: "addNewJobErrorDefinition")}"
-            value=""/>
+    />
 </div>
 </body>
 <asset:script>

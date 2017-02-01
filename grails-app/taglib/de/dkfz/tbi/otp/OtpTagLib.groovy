@@ -51,6 +51,21 @@ class OtpTagLib {
     }
 
     /**
+     * @attr labels REQUIRED
+     * @attr textFields optional
+     * @attr checkBoxes optional
+     * @attr dropDowns optional
+     * @attr link REQUIRED
+     * @attr roles optional
+     */
+    def editorSwitchNewValues = { Map attrs ->
+        String template = "/templates/editorSwitchNewFreeTextValues"
+        String roles = attrs.remove("roles")
+        out << editorSwitchRender(roles, template, attrs)
+    }
+
+
+    /**
      * Renders a button to open the ChangeLog for the ChangeLog data retrieved from provided JSON URL.
      * When the button is clicked an AJAX call is performed to the specified controller action and the
      * retrieved data is rendered in a table presented in a dialog.
@@ -126,8 +141,6 @@ class OtpTagLib {
                 return "/templates/editorSwitchNewValue"
             case "newFreeTextValue":
                 return "/templates/editorSwitchNewFreeTextValue"
-            case "newFreeTextValues":
-                return "/templates/editorSwitchNewFreeTextValues"
             case "sampleIdentifier":
                 return "/templates/editSampleIdentifiers"
             case "textArea":

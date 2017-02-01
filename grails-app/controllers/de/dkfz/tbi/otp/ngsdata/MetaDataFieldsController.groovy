@@ -318,16 +318,13 @@ class UpdateCommandSeqType implements Serializable {
         boolean single
         boolean paired
         boolean mate_pair
-        boolean anyLayout
+        boolean anyLayout = true
         String type
         String dirName
         String alias
         static constraints = {
-            single(blank: false)
-            paired(blank: false)
-            mate_pair(blank: false)
             anyLayout(blank: false,validator: {val, obj ->
-                if(!val) {
+                if (!(obj.single || obj.paired || obj.mate_pair)) {
                     return 'Empty'
                 }})
             type(blank: false, validator: {val, obj ->
@@ -362,25 +359,25 @@ class UpdateCommandLayout implements Serializable {
         boolean single
         boolean paired
         boolean mate_pair
-        boolean anyLayout
+        boolean anyLayout = true
         String id
         static constraints = {
-            single(blank: false, validator: {val, obj ->
+            single(validator: {val, obj ->
                 if (val && SeqType.findByNameAndLibraryLayout(obj.id, SeqType.LIBRARYLAYOUT_SINGLE)) {
                     return 'Duplicate'
                 }
             })
-            paired(blank: false, validator: {val, obj ->
+            paired(validator: {val, obj ->
                 if (val && SeqType.findByNameAndLibraryLayout(obj.id, SeqType.LIBRARYLAYOUT_PAIRED)) {
                     return 'Duplicate'
                 }
             })
-            mate_pair(blank: false, validator: {val, obj ->
+            mate_pair(validator: {val, obj ->
                 if (val && SeqType.findByNameAndLibraryLayout(obj.id, SeqType.LIBRARYLAYOUT_MATE_PAIR)) {
                     return 'Duplicate'
                 }
             })
-            anyLayout(blank: false,validator: {val, obj -> if(!val)return 'Empty'})
+            anyLayout(blank: false,validator: {val, obj -> if (!(obj.single || obj.paired || obj.mate_pair)) { return 'Empty' } })
             id(blank: false)
         }
 }
