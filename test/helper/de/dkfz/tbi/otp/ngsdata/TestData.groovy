@@ -6,6 +6,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QaProcessingStatus
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
+import de.dkfz.tbi.otp.dataprocessing.AlignmentPass.AlignmentState
 
 import static org.junit.Assert.assertNotNull
 import static org.junit.Assert.assertTrue
@@ -341,7 +342,7 @@ class TestData {
 
     static MergingWorkPackage createMergingWorkPackage(Map properties = [:]) {
         final MergingWorkPackage mergingWorkPackage = new MergingWorkPackage([
-                seqPlatformGroup: properties.get('seqPlatformGroup') ?: DomainFactory.createSeqPlatformGroup(),
+                seqPlatformGroup: properties.get('seqPlatformGroup') ?: SeqPlatformGroup.build(),
                 referenceGenome: properties.get('referenceGenome') ?: DomainFactory.createReferenceGenome(),
                 libraryPreparationKit: properties.get('libraryPreparationKit'),
                 pipeline: properties.get('pipeline') ?: DomainFactory.createDefaultOtpPipeline(),

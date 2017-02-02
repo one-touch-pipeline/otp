@@ -79,7 +79,7 @@ abstract class AbstractBamFile implements Entity {
     State status = State.DECLARED
 
 
-    public abstract AbstractMergingWorkPackage getMergingWorkPackage()
+    public abstract MergingWorkPackage getMergingWorkPackage()
     public abstract Set<SeqTrack> getContainedSeqTracks()
     public abstract AbstractQualityAssessment getOverallQualityAssessment()
 

@@ -127,7 +127,6 @@ testDataConfig {
         }
         'de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile' {
             type = AbstractBamFile.BamType.MDUP
-            numberOfMergedLanes = 1
         }
         'de.dkfz.tbi.otp.dataprocessing.ProcessedSaiFile' {
             alignmentPass = { DomainFactory.createAlignmentPass()}

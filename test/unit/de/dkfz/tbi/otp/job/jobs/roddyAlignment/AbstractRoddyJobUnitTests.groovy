@@ -1,27 +1,16 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
+import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
-import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.dataprocessing.roddy.JobStateLogFile
-import de.dkfz.tbi.otp.infrastructure.ClusterJob
-import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.ngsdata.Run
-import de.dkfz.tbi.otp.ngsdata.SeqCenter
-import de.dkfz.tbi.otp.ngsdata.SeqPlatform
-import de.dkfz.tbi.otp.ngsdata.SeqPlatformGroup
-import de.dkfz.tbi.otp.ngsdata.SoftwareTool
-import de.dkfz.tbi.otp.utils.CreateJobStateLogFileHelper
-import grails.buildtestdata.mixin.Build
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.TemporaryFolder
+import de.dkfz.tbi.otp.dataprocessing.roddy.*
+import de.dkfz.tbi.otp.infrastructure.*
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.*
+import grails.buildtestdata.mixin.*
+import org.junit.*
+import org.junit.rules.*
 
-import static de.dkfz.tbi.TestCase.shouldFail
+import static de.dkfz.tbi.TestCase.*
 
 
 @Build([
@@ -33,7 +22,6 @@ import static de.dkfz.tbi.TestCase.shouldFail
         SeqPlatform,
         SeqPlatformGroup,
         SoftwareTool,
-        MergingWorkPackage,
 ])
 class AbstractRoddyJobUnitTests {
 

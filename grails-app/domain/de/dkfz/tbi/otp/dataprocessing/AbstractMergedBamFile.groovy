@@ -1,14 +1,12 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
-import org.hibernate.*
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvJobResult
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import static org.springframework.util.Assert.notNull
 
 /**
- * Represents a single generation of one merged BAM file (whereas a {@link AbstractMergingWorkPackage} represents all
+ * Represents a single generation of one merged BAM file (whereas a {@link MergingWorkPackage} represents all
  * generations).
  */
 abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile {
@@ -19,9 +17,9 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile {
     Integer numberOfMergedLanes
 
     /**
-     * bam file satisfies criteria from this {@link AbstractMergingWorkPackage}
+     * bam file satisfies criteria from this {@link MergingWorkPackage}
      */
-    AbstractMergingWorkPackage workPackage
+    MergingWorkPackage workPackage
 
     /**
      * This property contains the transfer state of an AbstractMergedBamFile to the project folder.
@@ -39,13 +37,7 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile {
     public abstract AlignmentConfig getAlignmentConfig()
 
     static constraints = {
-        numberOfMergedLanes validator: { val, obj ->
-            if (Hibernate.getClass(obj) == ExternallyProcessedMergedBamFile) {
-                val == 0
-            } else {
-                val >= 1
-            }
-        }
+        numberOfMergedLanes min: 1
         md5sum nullable: true, validator: { val, obj ->
             return (!val || (val && obj.fileOperationStatus == FileOperationStatus.PROCESSED && obj.fileSize > 0))
         }
@@ -56,7 +48,6 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile {
 
     static mapping = {
         numberOfMergedLanes index: "abstract_merged_bam_file_number_of_merged_lanes_idx"
-        workPackage lazy: false
         workPackage index: "abstract_merged_bam_file_work_package_idx"
     }
 
@@ -90,8 +81,9 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile {
         this.fileOperationStatus = status
     }
 
-    public ReferenceGenome getReferenceGenome() {
-        return workPackage.referenceGenome
+    @Override
+    MergingWorkPackage getMergingWorkPackage() {
+        return workPackage
     }
 
     public void validateAndSetBamFileInProjectFolder() {

@@ -178,13 +178,6 @@ class DomainFactory {
         ])
     }
 
-    static Pipeline createExternallyProcessedPipelineLazy() {
-        return createDomainObjectLazy(Pipeline, [:], [
-                name: Pipeline.Name.EXTERNALLY_PROCESSED,
-                type: Pipeline.Type.ALIGNMENT,
-        ])
-    }
-
 
     static Pipeline returnOrCreateAnyPipeline() {
         return (CollectionUtils.atMostOneElement(Pipeline.list(max: 1)) ?: createPanCanPipeline())
@@ -1227,23 +1220,14 @@ class DomainFactory {
 
     public static MergingWorkPackage createMergingWorkPackage(Map properties = [:]) {
         return createDomainObject(MergingWorkPackage, [
-                libraryPreparationKit: { properties.seqType?.isWgbs() ? null : createLibraryPreparationKit() },
+                libraryPreparationKit: { properties.get('seqType')?.isWgbs() ? null : createLibraryPreparationKit() },
                 sample:                { createSample() },
                 seqType:               { createSeqType() },
                 seqPlatformGroup:      { createSeqPlatformGroup() },
                 referenceGenome:       { createReferenceGenome() },
-                statSizeFileName:      { properties.pipeline?.name == Pipeline.Name.PANCAN_ALIGNMENT ?
+                statSizeFileName:      { properties.get('pipeline')?.name == Pipeline.Name.PANCAN_ALIGNMENT ?
                                             "statSizeFileName_${counter++}.tab" : null },
                 pipeline:              { createDefaultOtpPipeline() },
-        ], properties)
-    }
-
-    public static ExternalMergingWorkPackage createExternalMergingWorkPackage(Map properties = [:]) {
-        return createDomainObject(ExternalMergingWorkPackage, [
-                sample:               { createSample() },
-                seqType:              { createSeqType() },
-                referenceGenome:      { createReferenceGenome() },
-                pipeline:             { createExternallyProcessedPipelineLazy() },
         ], properties)
     }
 
@@ -1861,9 +1845,8 @@ samplePairsNotProcessed: ${samplePairsNotProcessed}
                 fileName: 'runName_' + (counter++),
                 source  : "SOURCE",
                 fastqSet: { createFastqSet() },
-                type: AbstractBamFile.BamType.MDUP,
-                workPackage: { createExternalMergingWorkPackage() },
-                numberOfMergedLanes: 0,
+                referenceGenome: { createReferenceGenome() },
+                type: AbstractBamFile.BamType.MDUP
         ], properties)
     }
 

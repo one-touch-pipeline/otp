@@ -1,13 +1,31 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
+import de.dkfz.tbi.otp.utils.Entity
 
 /**
  * Represents all generations of one merged BAM file (whereas an {@link AbstractMergedBamFile} represents a single
  * generation). It specifies the concrete criteria for the {@link SeqTrack}s that are merged into the BAM file, and
  * processing parameters used for alignment and merging.
  */
-class MergingWorkPackage extends AbstractMergingWorkPackage {
+class MergingWorkPackage implements Entity {
+
+    /**
+     * The BAM file which moving to the final destination has been initiated for most recently.
+     *
+     * Note that if {@link AbstractMergedBamFile#fileOperationStatus} is {@link FileOperationStatus#INPROGRESS}, moving
+     * is still in progress or has failed, so the file system is in an unclear state.
+     * Also note that the referenced BAM file might be withdrawn.
+     * If you want to use the referenced BAM file as input for further processing, use
+     * {@link #getProcessableBamFileInProjectFolder()}).
+     */
+    /*
+     * Due some strange behavior of GORM (?), this has to be set on null explicitly where objects of
+     * {@link de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile} or its subclasses are built or created.
+     * See {@link de.dkfz.tbi.otp.ngsdata.DomainFactory#createProcessedMergedBamFile}
+     */
+    AbstractMergedBamFile bamFileInProjectFolder
 
     /**
      * Identifies the way how this {@link MergingWorkPackage} is maintained (updated):
@@ -34,21 +52,31 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
 
     // SeqTrack properties, part of merging criteria
     static final Collection<String> qualifiedSeqTrackPropertyNames = ['sample', 'seqType', 'run.seqPlatform.seqPlatformGroup', 'libraryPreparationKit'].asImmutable()
+    Sample sample
+    SeqType seqType
     SeqPlatformGroup seqPlatformGroup
     LibraryPreparationKit libraryPreparationKit
 
     // Processing parameters, part of merging criteria
     static final Collection<String> processingParameterNames = ['referenceGenome', 'statSizeFileName', 'pipeline'].asImmutable()
+    ReferenceGenome referenceGenome
     String statSizeFileName
+    Pipeline pipeline
+
+    //TODO: OTP-1401
+    boolean imported
 
     boolean needsProcessing
 
+    static belongsTo = Sample
+
     static constraints = {
+        // TODO OTP-1401: In the future there may be more than one MWP for one sample and seqType.
+        // As soon a you loosen this constraint, un-ignore:
+        // - AlignmentPassUnitTests.testIsLatestPass_2PassesDifferentWorkPackages
+        sample unique: ['seqType', 'imported']
         needsProcessing(validator: {val, obj -> !val || obj.pipeline.name == Pipeline.Name.PANCAN_ALIGNMENT})
-        pipeline(validator: { pipeline ->
-            pipeline.type == Pipeline.Type.ALIGNMENT &&
-            pipeline.name != Pipeline.Name.EXTERNALLY_PROCESSED
-        })
+        pipeline(validator: { pipeline -> pipeline.type == Pipeline.Type.ALIGNMENT})
         libraryPreparationKit nullable: true, validator: {val, obj ->
             SeqTypeNames seqTypeName = obj.seqType?.seqTypeName
             if (seqTypeName == SeqTypeNames.EXOME) {
@@ -70,9 +98,31 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
                 assert false: "Pipeline name is unknown: ${obj.pipeline?.name}"
             }
         }
+        bamFileInProjectFolder nullable: true, validator: { AbstractMergedBamFile val, MergingWorkPackage obj ->
+            if(val) {
+                val.workPackage.id == obj.id && [AbstractMergedBamFile.FileOperationStatus.INPROGRESS, AbstractMergedBamFile.FileOperationStatus.PROCESSED].contains(val.fileOperationStatus)
+            } else {
+                return true
+            }
+        }
+        imported validator: { imported, mwp ->
+            imported == (mwp.pipeline.name == Pipeline.Name.EXTERNALLY_PROCESSED)
+        }
     }
 
     static final Collection<String> seqTrackPropertyNames = qualifiedSeqTrackPropertyNames.collect{nonQualifiedPropertyName(it)}.asImmutable()
+
+    Project getProject() {
+        return sample.project
+    }
+
+    Individual getIndividual() {
+        return sample.individual
+    }
+
+    SampleType getSampleType() {
+        return sample.sampleType
+    }
 
     Collection<SeqTrack> findMergeableSeqTracks() {
         Map properties = [:]
@@ -120,6 +170,24 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
         return property.substring(property.lastIndexOf('.') + 1)
     }
 
+    /**
+     * Returns the BAM file which is currently in the project folder, or <code>null</code> if there is no BAM file or it
+     * is withdrawn or it is unknown which one currently is there.
+     *
+     * If you use the returned BAM file as input for further processing, ensure that the file on the file system is
+     * consistent with the database object by comparing the file size on the file system to
+     * {@link AbstractFileSystemBamFile#fileSize}. Perform this check a second time <em>after</em> reading from the file
+     * to ensure that the file has not been overwritten between the first check and starting to read the file.
+     */
+    AbstractMergedBamFile getProcessableBamFileInProjectFolder() {
+        if (bamFileInProjectFolder && !bamFileInProjectFolder.withdrawn &&
+                bamFileInProjectFolder.fileOperationStatus == FileOperationStatus.PROCESSED) {
+            return bamFileInProjectFolder
+        } else {
+            return null
+        }
+    }
+
     AbstractMergedBamFile getCompleteProcessableBamFileInProjectFolder() {
         AbstractMergedBamFile bamFile = getProcessableBamFileInProjectFolder()
         if (bamFile && bamFile.containedSeqTracks == findMergeableSeqTracks().toSet()) {
@@ -130,7 +198,11 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
     }
 
     static mapping = {
+        sample index: "merging_work_package_sample_idx"
+        seqType index: "merging_work_package_seq_type_idx"
+        referenceGenome index: "merging_work_package_reference_genome_idx"
         needsProcessing index: "merging_work_package_needs_processing_idx"  // partial index: WHERE needs_processing = true
+        bamFileInProjectFolder index: "merging_work_package_bam_file_in_project_folder_idx"
     }
 
     String toStringWithoutIdAndPipeline() {

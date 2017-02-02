@@ -5,7 +5,6 @@ import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.ngsdata.*
 import grails.buildtestdata.mixin.Build
 import grails.test.mixin.TestFor
-import grails.test.mixin.gorm.Domain
 import org.junit.*
 import org.junit.rules.ErrorCollector
 
@@ -92,7 +91,7 @@ class MergingWorkPackageUnitTests {
 
     @Test
     void testGetMergingProperties_WithLibraryPreperationKit() {
-        LibraryPreparationKit libraryPreparationKit = DomainFactory.createLibraryPreparationKit()
+        LibraryPreparationKit libraryPreparationKit = LibraryPreparationKit.build()
         SeqTrack seqTrack = SeqTrack.build(
                 libraryPreparationKit: libraryPreparationKit,
                 kitInfoReliability: InformationReliability.KNOWN
@@ -119,7 +118,7 @@ class MergingWorkPackageUnitTests {
     @Test
     void testSatisfiesCriteriaSeqTrack_whenCorrect_WithLibraryPreparationKit() {
         SeqTrack seqTrack = SeqTrack.build(
-                libraryPreparationKit: DomainFactory.createLibraryPreparationKit(),
+                libraryPreparationKit: LibraryPreparationKit.build(),
                 kitInfoReliability: InformationReliability.KNOWN,
         )
 
@@ -154,7 +153,7 @@ class MergingWorkPackageUnitTests {
     @Test
     void testSatisfiesCriteriaSeqTrack_whenOnlySeqTrackHasLibraryPrepationKit() {
         SeqTrack seqTrack = SeqTrack.build(
-                libraryPreparationKit: DomainFactory.createLibraryPreparationKit(),
+                libraryPreparationKit: LibraryPreparationKit.build(),
                 kitInfoReliability: InformationReliability.KNOWN,
         )
 
@@ -166,18 +165,18 @@ class MergingWorkPackageUnitTests {
     void testSatisfiesCriteriaSeqTrack_whenOnlyMergingWorkPackageHasLibraryPrepationKit() {
         SeqTrack seqTrack = SeqTrack.build()
 
-        MergingWorkPackage workPackage = MergingWorkPackage.build(sample: seqTrack.sample, seqType: seqTrack.seqType, seqPlatformGroup: seqTrack.seqPlatformGroup, libraryPreparationKit: DomainFactory.createLibraryPreparationKit())
+        MergingWorkPackage workPackage = MergingWorkPackage.build(sample: seqTrack.sample, seqType: seqTrack.seqType, seqPlatformGroup: seqTrack.seqPlatformGroup, libraryPreparationKit: LibraryPreparationKit.build())
         assert !workPackage.satisfiesCriteria(seqTrack)
     }
 
     @Test
     void testSatisfiesCriteriaSeqTrack_whenIncorrectLibraryPrepationKit() {
         SeqTrack seqTrack = SeqTrack.build(
-                libraryPreparationKit: DomainFactory.createLibraryPreparationKit(),
+                libraryPreparationKit: LibraryPreparationKit.build(),
                 kitInfoReliability: InformationReliability.KNOWN,
         )
 
-        MergingWorkPackage workPackage = MergingWorkPackage.build(sample: seqTrack.sample, seqType: seqTrack.seqType, seqPlatformGroup: seqTrack.seqPlatformGroup, libraryPreparationKit: DomainFactory.createLibraryPreparationKit())
+        MergingWorkPackage workPackage = MergingWorkPackage.build(sample: seqTrack.sample, seqType: seqTrack.seqType, seqPlatformGroup: seqTrack.seqPlatformGroup, libraryPreparationKit: LibraryPreparationKit.build())
         assert !workPackage.satisfiesCriteria(seqTrack)
     }
 
@@ -298,7 +297,7 @@ class MergingWorkPackageUnitTests {
     @Test
     void test_constraint_libraryPreparationKit_WhenNeitherExomeNorWgbsAndWithLibraryPreparationKit_ShouldBeValid() {
         MergingWorkPackage mergingWorkPackage = MergingWorkPackage.buildWithoutSave([
-                libraryPreparationKit: DomainFactory.createLibraryPreparationKit(),
+                libraryPreparationKit: LibraryPreparationKit.build(),
                 seqType: SeqType.build(),
         ])
         assert mergingWorkPackage.validate()
@@ -307,7 +306,7 @@ class MergingWorkPackageUnitTests {
     @Test
     void test_constraint_libraryPreparationKit_WhenExomeAndWithLibraryPreparationKit_ShouldBeValid() {
         MergingWorkPackage mergingWorkPackage = MergingWorkPackage.buildWithoutSave([
-                libraryPreparationKit: DomainFactory.createLibraryPreparationKit(),
+                libraryPreparationKit: LibraryPreparationKit.build(),
                 seqType: DomainFactory.createExomeSeqType(),
         ])
         assert mergingWorkPackage.validate()
@@ -325,7 +324,7 @@ class MergingWorkPackageUnitTests {
     @Test
     void test_constraint_libraryPreparationKit_WhenWgbsAndWithLibraryPreparationKit_ShouldFail() {
         MergingWorkPackage mergingWorkPackage = MergingWorkPackage.buildWithoutSave([
-                libraryPreparationKit: DomainFactory.createLibraryPreparationKit(),
+                libraryPreparationKit: LibraryPreparationKit.build(),
                 seqType: DomainFactory.createSeqType(name: SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName),
         ])
         TestCase.assertValidateError(mergingWorkPackage, 'libraryPreparationKit', 'validator.invalid', mergingWorkPackage.libraryPreparationKit)

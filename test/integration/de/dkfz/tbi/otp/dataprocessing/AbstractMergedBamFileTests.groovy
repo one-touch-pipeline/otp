@@ -20,7 +20,7 @@ class AbstractMergedBamFileTests {
     void testConstraints_numberOfMergedLanesIsZero_validationShouldFail() {
         ProcessedMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFile()
         bamFile.numberOfMergedLanes = 0
-        TestCase.assertValidateError(bamFile, "numberOfMergedLanes", "validator.invalid", 0)
+        TestCase.assertValidateError(bamFile, "numberOfMergedLanes", "min.notmet", 0)
     }
 
 

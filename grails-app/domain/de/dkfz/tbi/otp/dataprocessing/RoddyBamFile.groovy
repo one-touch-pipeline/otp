@@ -1,11 +1,13 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
-import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
+import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
-import de.dkfz.tbi.otp.utils.logging.*
-import org.hibernate.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.WaitingFileUtils
+import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
+import de.dkfz.tbi.otp.utils.StringUtils
 
 /**
  * This bam file is produced by some Roddy alignment workflow.
@@ -59,16 +61,11 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
             }
         }
         baseBamFile nullable: true
-        workPackage validator: { val, obj ->
-            val?.pipeline?.name == Pipeline.Name.PANCAN_ALIGNMENT &&
-                    MergingWorkPackage.isAssignableFrom(Hibernate.getClass(val))
-        }
+        workPackage validator: { val, obj -> val?.pipeline?.name == Pipeline.Name.PANCAN_ALIGNMENT }
         config validator: { val, obj -> val?.pipeline?.id == obj.workPackage?.pipeline?.id }
         identifier unique: 'workPackage'
         roddyExecutionDirectoryNames nullable: true
-        workDirectoryName nullable: true, unique: 'workPackage', validator: {
-            it == null || OtpPath.isValidPathComponent(it)
-        } //needs to be nullable for objects created before link structure was used
+        workDirectoryName nullable: true, unique: 'workPackage', validator: { it == null || OtpPath.isValidPathComponent(it) } //needs to be nullable for objects created before link structure was used
     }
 
     static mapping = {
@@ -122,11 +119,6 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
 
     Pipeline getPipeline() {
         return workPackage.pipeline
-    }
-
-    @Override
-    MergingWorkPackage getMergingWorkPackage() {
-        return MergingWorkPackage.get(workPackage?.id)
     }
 
     @Override

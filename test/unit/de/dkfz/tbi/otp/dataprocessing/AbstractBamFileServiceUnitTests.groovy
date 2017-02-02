@@ -49,7 +49,7 @@ class AbstractBamFileServiceUnitTests {
         ] + mergingSetAssignmentMap)
         ProcessedMergedBamFile processedMergedBamFile = ProcessedMergedBamFile.build([
             qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
-            mergingPass: DomainFactory.createMergingPass([
+            mergingPass: MergingPass.build([
                 mergingSet: mergingSet
             ]),
             workPackage: mergingSet.mergingWorkPackage,

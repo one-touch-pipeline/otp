@@ -142,19 +142,23 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testReturnExternallyProcessedMergedBamFiles_NoExternalBamFileAttached_AllFine() {
-        SeqTrack seqTrack = DomainFactory.createSeqTrack()
+        SeqTrack seqTrack = SeqTrack.build()
         assert seqTrackService.returnExternallyProcessedMergedBamFiles([seqTrack]).isEmpty()
     }
 
     @Test
     void testReturnExternallyProcessedMergedBamFiles_ExternalBamFileAttached_AllFine() {
-        SeqTrack seqTrack = DomainFactory.createSeqTrack()
-        ExternalMergingWorkPackage externalMergingWorkPackage = DomainFactory.createExternalMergingWorkPackage(
+        SeqTrack seqTrack = SeqTrack.build()
+        MergingWorkPackage mergingWorkPackage = MergingWorkPackage.build(
+                pipeline: Pipeline.build(name: Pipeline.Name.EXTERNALLY_PROCESSED),
+                imported: true,
                 seqType: seqTrack.seqType,
-                sample:  seqTrack.sample,
+                sample: seqTrack.sample,
+                seqPlatformGroup: seqTrack.seqPlatformGroup,
         )
-        ExternallyProcessedMergedBamFile bamFile = DomainFactory.createExternallyProcessedMergedBamFile(
-                workPackage: externalMergingWorkPackage,
+        ExternallyProcessedMergedBamFile bamFile = ExternallyProcessedMergedBamFile.build(
+                workPackage: mergingWorkPackage,
+                fastqSet: FastqSet.build(seqTracks: [seqTrack]),
                 type: AbstractBamFile.BamType.RMDUP,
         ).save(flush: true)
         assert [bamFile] == seqTrackService.returnExternallyProcessedMergedBamFiles([seqTrack])

@@ -1,9 +1,8 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.logging.*
-import org.hibernate.*
+import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 /**
  * Represents a merged bam file stored on the file system
@@ -22,8 +21,7 @@ class ProcessedMergedBamFile extends AbstractMergedBamFile implements ProcessPar
         mergingPass nullable: false, unique: true
         workPackage validator: { val, obj ->
             val.id == obj.mergingSet.mergingWorkPackage.id &&
-                    val?.pipeline?.name == Pipeline.Name.DEFAULT_OTP &&
-                    MergingWorkPackage.isAssignableFrom(Hibernate.getClass(val))
+            val?.pipeline?.name == Pipeline.Name.DEFAULT_OTP
         }
     }
 
@@ -52,11 +50,6 @@ class ProcessedMergedBamFile extends AbstractMergedBamFile implements ProcessPar
     }
 
     static mapping = { mergingPass index: "abstract_bam_file_merging_pass_idx" }
-
-    @Override
-    MergingWorkPackage getMergingWorkPackage() {
-        return MergingWorkPackage.get(workPackage.id)
-    }
 
     @Override
     Set<SeqTrack> getContainedSeqTracks() {
