@@ -8,14 +8,14 @@ import java.util.regex.*
 @Component
 class Hipo2SampleIdentifierParser implements SampleIdentifierParser {
 
-    static String REGEX = /^(?<pid>(?<project>K[0-9]{2}[A-Z])-[A-Z0-9]{6})-(?<tissueType>[${HipoTissueType.values()*.key.join('')}])(?<tissueNumber>[0-9])-(?<analyte>[DRPAWYL][0-9]|[0-9][CGH][0-9]{2})$/
+    static String REGEX = /^(?<pid>(?<project>K[0-9]{2}[A-Z])-[A-Z0-9]{6})-(?<tissueType>[${HipoTissueType.values()*.key.join('')}])(?<tissueNumber>[0-9])-(?<analyte>[DRPAWYLTME][0-9]|[0-9][CGH][0-9]{2})$/
 
     public DefaultParsedSampleIdentifier tryParse(String sampleIdentifier) {
         Matcher matcher = sampleIdentifier =~ REGEX
         if (matcher.matches()) {
             String sampleTypeDbName = "${HipoTissueType.fromKey(matcher.group('tissueType'))}${matcher.group('tissueNumber')}"
             String analyte = matcher.group('analyte')
-            if (!'DRPAWY'.toCharArray().contains(analyte.charAt(0))) {
+            if (!'DRPAWYEMT'.toCharArray().contains(analyte.charAt(0))) {
                 sampleTypeDbName += "-${analyte}"
             }
             return new DefaultParsedSampleIdentifier(

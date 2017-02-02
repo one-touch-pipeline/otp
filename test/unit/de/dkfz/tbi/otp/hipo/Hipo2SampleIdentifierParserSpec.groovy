@@ -34,6 +34,9 @@ class Hipo2SampleIdentifierParserSpec extends Specification {
         'K12A-123ABC-T3-A1'   || 'TUMOR3'
         'K12A-123ABC-T3-W1'   || 'TUMOR3'
         'K12A-123ABC-T3-Y1'   || 'TUMOR3'
+        'K12A-123ABC-T3-E1'   || 'TUMOR3'
+        'K12A-123ABC-T3-T1'   || 'TUMOR3'
+        'K12A-123ABC-T3-M1'   || 'TUMOR3'
 
         'K12A-123ABC-T3-L0'   || 'TUMOR3-L0'
         'K12A-123ABC-T3-L1'   || 'TUMOR3-L1'
