@@ -183,9 +183,6 @@ class SamplePair implements Entity {
      *     <li>mergingWorkPackage1 and mergingWorkPackage2 differ only in their sampleType.</li>
      *     <li>mergingWorkPackage1.sampleType has category {@link SampleType.Category#DISEASE} and
      *         mergingWorkPackage2.sampleType has category {@link SampleType.Category#CONTROL}.</li>
-     *     <li>neither mergingWorkPackage1.pipeline nor mergingWorkPackage2.pipeline have as name {@link Pipeline.Name#EXTERNALLY_PROCESSED}.
-     *         This is only to avoid the creation of SamplePair instances violating the unique constraint
-     *         on relativePath as long as OTP-1657 in not resolved.</li>
      *     <li>No SamplePair exists for that combination.</li>
      * </ul>
      * The results are returned as SamplePair instances, <em>which have not been persisted yet</em>.
@@ -213,8 +210,6 @@ class SamplePair implements Entity {
               stpp2.sampleType = sampleType_2 AND
               stpp1.category = :disease AND
               stpp2.category = :control AND
-              mwp1.pipeline.name != :externally_processed AND
-              mwp2.pipeline.name != :externally_processed AND
               (mwp1.libraryPreparationKit = mwp2.libraryPreparationKit OR
               mwp1.libraryPreparationKit IS NULL AND mwp2.libraryPreparationKit IS NULL OR
               mwp1.seqType.name in (:mwpLibPrepKitsMayMismatchSeqTypeNames)) AND
@@ -227,7 +222,6 @@ class SamplePair implements Entity {
             """, [
                 disease: SampleType.Category.DISEASE,
                 control: SampleType.Category.CONTROL,
-                externally_processed: Pipeline.Name.EXTERNALLY_PROCESSED,
                 mwpLibPrepKitsMayMismatchSeqTypeNames: (SeqType.WGBS_SEQ_TYPE_NAMES + SeqTypeNames.WHOLE_GENOME)*.seqTypeName,
             ], [readOnly: true])
         return queryResults.collect {

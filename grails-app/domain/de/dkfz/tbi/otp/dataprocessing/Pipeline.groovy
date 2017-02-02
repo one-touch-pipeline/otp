@@ -9,7 +9,6 @@ class Pipeline implements Entity {
     static enum Name {
         DEFAULT_OTP     (Type.ALIGNMENT, false, 'bwa\u00A0aln'),
         PANCAN_ALIGNMENT(Type.ALIGNMENT, true,  'bwa\u00A0mem'),
-        EXTERNALLY_PROCESSED(Type.ALIGNMENT, false, 'external'),
         OTP_SNV         (Type.SNV,       false, null),
         RODDY_SNV       (Type.SNV,       true,  null),
         RODDY_INDEL     (Type.INDEL,     true,  null),
