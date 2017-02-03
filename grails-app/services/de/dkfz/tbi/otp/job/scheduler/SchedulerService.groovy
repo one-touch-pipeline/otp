@@ -790,6 +790,8 @@ class SchedulerService {
 
         JobExecutionPlan.withNewSession {
             JobExecutionPlan plan = JobExecutionPlan.lock(last.process.jobExecutionPlan.id)
+            plan.refresh()
+
             if (!plan.finishedSuccessful) {
                 plan.finishedSuccessful = 1
             } else {
