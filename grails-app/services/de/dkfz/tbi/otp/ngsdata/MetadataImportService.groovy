@@ -104,6 +104,12 @@ class MetadataImportService {
         assert otrsTicket.save(flush: true)
     }
 
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void updateFinalNotificationFlag(OtrsTicket otrsTicket, boolean finalNotificationSent) {
+        otrsTicket.finalNotificationSent = finalNotificationSent
+        assert otrsTicket.save(flush: true)
+    }
+
     protected void copyMetaDataFileIfMidterm(MetadataValidationContext context) {
         if (context.directoryStructure instanceof DataFilesOnGpcfMidTerm) {
             File source = context.metadataFile

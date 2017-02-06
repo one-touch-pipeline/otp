@@ -43,6 +43,19 @@
             </tr>
             <tr>
                 <td>
+                    <g:message code="metadataImport.otrs.finalNotificationFlag"/>:
+                </td>
+                <td>
+                    <otp:editorSwitch
+                            roles="ROLE_OPERATOR"
+                            template="dropDown"
+                            link="${g.createLink(controller: "metadataImport", action: "updateFinalNotificationFlag", id: runSegment.otrsTicket.id)}"
+                            values="${["true","false"]}"
+                            value="${runSegment.otrsTicket.finalNotificationSent}"/>
+                </td>
+            </tr>
+            <tr>
+                <td>
                     <g:message code="metadataImport.details.otrsTicket.seqcenter.comment"/>
                 </td>
                 <td>

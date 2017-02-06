@@ -168,6 +168,12 @@ class MetadataImportController {
         Map map = [success: true]
         render map as JSON
     }
+
+    JSON updateFinalNotificationFlag(Long id, String value) {
+        metadataImportService.updateFinalNotificationFlag(OtrsTicket.get(id), value.toBoolean())
+        Map map = [success: true]
+        render map as JSON
+    }
 }
 
 @Validateable
