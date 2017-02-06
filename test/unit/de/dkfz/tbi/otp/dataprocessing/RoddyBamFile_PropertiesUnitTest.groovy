@@ -1,11 +1,33 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.ngsdata.*
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
+import grails.test.mixin.*
+import org.junit.*
 
+@Mock([
+        SoftwareTool,
+        MergingWorkPackage,
+        LibraryPreparationKit,
+        SeqPlatform,
+        SeqPlatformGroup,
+        SeqCenter,
+        SeqType,
+        SeqTrack,
+        RoddyBamFile,
+        SampleType,
+        Pipeline,
+        ProjectCategory,
+        Project,
+        Individual,
+        Sample,
+        ReferenceGenome,
+        RunSegment,
+        FileType,
+        DataFile,
+        RoddyWorkflowConfig,
+        Run,
+])
 class RoddyBamFile_PropertiesUnitTest {
 
     static final short PROCESSING_PRIORITY = 1
@@ -17,18 +39,25 @@ class RoddyBamFile_PropertiesUnitTest {
     Project project
     ReferenceGenome referenceGenome
     MergingWorkPackage workPackage
+    Pipeline pipeline
     RoddyBamFile bamFile
 
     @Before
     void setUp() {
-        sampleType = new SampleType()
-        project = new Project(processingPriority: PROCESSING_PRIORITY)
-        individual = new Individual(project: project)
-        sample = new Sample(sampleType: sampleType, individual: individual)
-        referenceGenome = new ReferenceGenome()
-        seqType = new SeqType()
-        workPackage = new MergingWorkPackage(sample: sample, referenceGenome: referenceGenome, seqType: seqType)
-        bamFile = new RoddyBamFile(workPackage: workPackage)
+        sampleType = DomainFactory.createSampleType()
+        project = DomainFactory.createProject(processingPriority: PROCESSING_PRIORITY)
+        individual = DomainFactory.createIndividual(project: project)
+        sample = DomainFactory.createSample(sampleType: sampleType, individual: individual)
+        referenceGenome = DomainFactory.createReferenceGenome()
+        seqType = DomainFactory.createSeqType()
+        pipeline = DomainFactory.createPanCanPipeline()
+        workPackage = DomainFactory.createMergingWorkPackage(
+                sample:          sample,
+                referenceGenome: referenceGenome,
+                seqType:         seqType,
+                pipeline:        pipeline,
+        )
+        bamFile = DomainFactory.createRoddyBamFile(workPackage: workPackage)
     }
 
     @After
@@ -41,6 +70,7 @@ class RoddyBamFile_PropertiesUnitTest {
         referenceGenome = null
         workPackage = null
         bamFile = null
+        pipeline = null
     }
 
     @Test

@@ -1,11 +1,35 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.ngsdata.*
-import grails.test.mixin.*
-import org.junit.*
+
+import grails.test.mixin.Mock
+import org.junit.After
+import org.junit.Before
+import org.junit.Test
 
 @Mock([
-        ProcessedMergedBamFile
+        LibraryPreparationKit,
+        MergingWorkPackage,
+        MergingPass,
+        MergingSet,
+        SeqPlatform,
+        SeqPlatformGroup,
+        SeqCenter,
+        SeqType,
+        SeqTrack,
+        SampleType,
+        Pipeline,
+        ProjectCategory,
+        Project,
+        ProcessedMergedBamFile,
+        Individual,
+        Sample,
+        SoftwareTool,
+        ReferenceGenome,
+        RunSegment,
+        FileType,
+        DataFile,
+        Run,
 ])
 class ProcessedMergedBamFile_PropertiesUnitTest {
 
@@ -22,15 +46,15 @@ class ProcessedMergedBamFile_PropertiesUnitTest {
 
     @Before
     void setUp() {
-        sampleType = new SampleType()
-        project = new Project(processingPriority: PROCESSING_PRIORITY)
-        individual = new Individual(project: project)
-        sample = new Sample(sampleType: sampleType, individual: individual)
-        referenceGenome = new ReferenceGenome()
-        seqType = new SeqType()
-        workPackage = new MergingWorkPackage(sample: sample, referenceGenome: referenceGenome, seqType: seqType, pipeline: new Pipeline())
-        MergingSet mergingSet = new MergingSet(mergingWorkPackage: workPackage)
-        MergingPass mergingPass = new MergingPass(mergingSet: mergingSet)
+        sampleType = DomainFactory.createSampleType()
+        project = DomainFactory.createProject(processingPriority: PROCESSING_PRIORITY)
+        individual = DomainFactory.createIndividual(project: project)
+        sample = DomainFactory.createSample(sampleType: sampleType, individual: individual)
+        referenceGenome = DomainFactory.createReferenceGenome()
+        seqType = DomainFactory.createSeqType()
+        workPackage = DomainFactory.createMergingWorkPackage(sample: sample, referenceGenome: referenceGenome, seqType: seqType)
+        MergingSet mergingSet = DomainFactory.createMergingSet(mergingWorkPackage: workPackage)
+        MergingPass mergingPass = DomainFactory.createMergingPass(mergingSet: mergingSet)
         bamFile = DomainFactory.createProcessedMergedBamFileWithoutProcessedBamFile(mergingPass, [:], false)
     }
 

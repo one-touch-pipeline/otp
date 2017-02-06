@@ -38,9 +38,9 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
                 roddyExecutionDirectoryNames: [DomainFactory.DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY]
         ])
         String script = "TEST-MOVE_SAMPLE"
-        Individual individual = Individual.build(project: bamFile.project)
-        Realm realm = Realm.build(name: bamFile.project.realmName, operationType: DATA_MANAGEMENT, rootPath: temporaryFolder.newFolder("mgmt"))
-        Realm.build(name: bamFile.project.realmName, operationType: DATA_PROCESSING, rootPath: temporaryFolder.newFolder("proc"))
+        Individual individual = DomainFactory.createIndividual(project: bamFile.project)
+        Realm realm = DomainFactory.createRealmDataManagement(name: bamFile.project.realmName, rootPath: temporaryFolder.newFolder("mgmt"))
+        DomainFactory.createRealmDataProcessing(name: bamFile.project.realmName, rootPath: temporaryFolder.newFolder("proc"))
         SeqTrack seqTrack = bamFile.seqTracks.iterator().next()
         List<String> dataFileLinks = []
         DataFile.findAllBySeqTrack(seqTrack).each {
@@ -101,7 +101,6 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
             assert it.getComment().comment == "Attention: Datafile swapped!"
         }
 
-        assert bamFile.individual == individual
     }
 
 
@@ -183,8 +182,6 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
             assert copyScriptContent.contains("ln -s '${lsdfFilesService.getFileFinalPath(it)}' '${lsdfFilesService.getFileViewByPidPath(it)}'")
             assert it.getComment().comment == "Attention: Datafile swapped!"
         }
-
-        assert bamFile.project == newProject
     }
 
 
@@ -430,7 +427,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
         ProcessedBamFile processedBamFile = DomainFactory.createProcessedBamFile(mergingWorkPackage).save(flush: true)
         MergingPass mergingPass = MergingPass.build(mergingSet: mergingSet)
         MergingSetAssignment mergingSetAssignment = MergingSetAssignment.build(bamFile: processedBamFile, mergingSet: mergingSet)
-        ProcessedMergedBamFile bamFile = ProcessedMergedBamFile.build(workPackage: mergingWorkPackage, mergingPass: mergingPass)
+        ProcessedMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFileWithoutProcessedBamFile(workPackage: mergingWorkPackage, mergingPass: mergingPass)
 
         dataSwapService.deleteMergingRelatedConnectionsOfBamFile(processedBamFile)
 
@@ -567,9 +564,13 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
 
     @Test
     public void testThrowExceptionInCaseOfExternalMergedBamFileIsAttached() throws Exception {
-        SeqTrack seqTrack = SeqTrack.build()
-        FastqSet fastqSet = FastqSet.build(seqTracks: [seqTrack])
-        ExternallyProcessedMergedBamFile.build(fastqSet: fastqSet, type: AbstractBamFile.BamType.RMDUP).save(flush: true)
+        SeqTrack seqTrack = DomainFactory.createSeqTrack()
+        DomainFactory.createExternallyProcessedMergedBamFile(
+                workPackage: DomainFactory.createExternalMergingWorkPackage(
+                        sample: seqTrack.sample,
+                        seqType: seqTrack.seqType,
+                )
+        ).save(flush: true)
 
         final shouldFail = new GroovyTestCase().&shouldFail
         shouldFail AssertionError, {
@@ -683,10 +684,8 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
         return seqTrack
     }
 
-
     private Project deleteProcessingFilesOfProject_NoProcessedData_SetupWithFiles() {
         SeqTrack seqTrack = deleteProcessingFilesOfProject_NoProcessedData_Setup()
-
         createFastqFiles([seqTrack])
 
         return seqTrack.project
@@ -720,11 +719,10 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     }
 
     private void dataBaseSetupForMergedBamFiles(AbstractMergedBamFile bamFile, boolean addRealms = true) {
-        MergingWorkPackage mergingWorkPackage = bamFile.mergingWorkPackage
+        AbstractMergingWorkPackage mergingWorkPackage = bamFile.mergingWorkPackage
         mergingWorkPackage.bamFileInProjectFolder = bamFile
         assert mergingWorkPackage.save(flush: true)
         Project project = bamFile.project
-
         if (addRealms) {
             DomainFactory.createRealmDataProcessing(name: project.realmName, processingRootPath: outputFolder.path)
             DomainFactory.createRealmDataManagement(name: project.realmName, rootPath: outputFolder.path)
@@ -750,13 +748,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     }
 
 
-    private void deleteProcessingFilesOfProject_PMBF_Validation(ProcessedMergedBamFile bamFile) {
-        File processingBamFile = new File(dataProcessingFilesService.getOutputDirectory(bamFile.individual, DataProcessingFilesService.OutputDirectories.MERGING))
-        File finalBamFile = new File(AbstractMergedBamFileService.destinationDirectory(bamFile))
-
-        File outputFile = new File(outputFolder.absoluteFile, "Delete_${bamFile.project.name}.sh")
-        assert outputFile.text.contains(processingBamFile.path) && outputFile.text.contains(finalBamFile.path)
-
+    private void deleteProcessingFilesOfProject_PMBF_Validation() {
         assert AbstractBamFile.list().empty
         assert MergingWorkPackage.list().empty
         assert AlignmentPass.list().empty
@@ -768,9 +760,15 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     public void testDeleteProcessingFilesOfProject_PMBF() {
         ProcessedMergedBamFile bamFile = deleteProcessingFilesOfProject_PMBF_Setup()
 
+        File processingBamFile = new File(dataProcessingFilesService.getOutputDirectory(bamFile.individual, DataProcessingFilesService.OutputDirectories.MERGING))
+        File finalBamFile = new File(AbstractMergedBamFileService.destinationDirectory(bamFile))
+        File outputFile = new File(outputFolder.absoluteFile, "Delete_${bamFile.project.name}.sh")
+
         dataSwapService.deleteProcessingFilesOfProject(bamFile.project.name, outputFolder.path, true)
 
-        deleteProcessingFilesOfProject_PMBF_Validation(bamFile)
+        assert outputFile.text.contains(processingBamFile.path) && outputFile.text.contains(finalBamFile.path)
+
+        deleteProcessingFilesOfProject_PMBF_Validation()
     }
 
 
@@ -778,9 +776,15 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     public void testDeleteProcessingFilesOfProject_PMBF_notVerified() {
         ProcessedMergedBamFile bamFile = deleteProcessingFilesOfProject_PMBF_Setup()
 
+        File processingBamFile = new File(dataProcessingFilesService.getOutputDirectory(bamFile.individual, DataProcessingFilesService.OutputDirectories.MERGING))
+        File finalBamFile = new File(AbstractMergedBamFileService.destinationDirectory(bamFile))
+        File outputFile = new File(outputFolder.absoluteFile, "Delete_${bamFile.project.name}.sh")
+
         dataSwapService.deleteProcessingFilesOfProject(bamFile.project.name, outputFolder.path)
 
-        deleteProcessingFilesOfProject_PMBF_Validation(bamFile)
+        assert outputFile.text.contains(processingBamFile.path) && outputFile.text.contains(finalBamFile.path)
+
+        deleteProcessingFilesOfProject_PMBF_Validation()
     }
 
     private RoddyBamFile deleteProcessingFilesOfProject_RBF_Setup() {
@@ -796,12 +800,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     }
 
 
-    private void deleteProcessingFilesOfProject_RBF_Validation(RoddyBamFile bamFile) {
-        File finalBamFile = new File(AbstractMergedBamFileService.destinationDirectory(bamFile))
-
-        File outputFile = new File(outputFolder.absoluteFile, "Delete_${bamFile.project.name}.sh")
-        assert outputFile.text.contains(finalBamFile.path)
-
+    private void deleteProcessingFilesOfProject_RBF_Validation() {
         assert AbstractBamFile.list().empty
         assert MergingWorkPackage.list().empty
     }
@@ -811,9 +810,14 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     public void testDeleteProcessingFilesOfProject_RBF() {
         RoddyBamFile bamFile = deleteProcessingFilesOfProject_RBF_Setup()
 
+        File finalBamFile = new File(AbstractMergedBamFileService.destinationDirectory(bamFile))
+        File outputFile = new File(outputFolder.absoluteFile, "Delete_${bamFile.project.name}.sh")
+
         dataSwapService.deleteProcessingFilesOfProject(bamFile.project.name, outputFolder.path, true)
 
-        deleteProcessingFilesOfProject_RBF_Validation(bamFile)
+        assert outputFile.text.contains(finalBamFile.path)
+
+        deleteProcessingFilesOfProject_RBF_Validation()
     }
 
 
@@ -821,9 +825,14 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     public void testDeleteProcessingFilesOfProject_RBF_notVerified() {
         RoddyBamFile bamFile = deleteProcessingFilesOfProject_RBF_Setup()
 
+        File finalBamFile = new File(AbstractMergedBamFileService.destinationDirectory(bamFile))
+        File outputFile = new File(outputFolder.absoluteFile, "Delete_${bamFile.project.name}.sh")
+
         dataSwapService.deleteProcessingFilesOfProject(bamFile.project.name, outputFolder.path)
 
-        deleteProcessingFilesOfProject_RBF_Validation(bamFile)
+        assert outputFile.text.contains(finalBamFile.path)
+
+        deleteProcessingFilesOfProject_RBF_Validation()
     }
 
 
@@ -879,12 +888,20 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
 
     private ExternallyProcessedMergedBamFile deleteProcessingFilesOfProject_ExternalBamFilesAttached_Setup() {
         Project project = deleteProcessingFilesOfProject_NoProcessedData_SetupWithFiles()
-        ReferenceGenome referenceGenome = DomainFactory.createReferenceGenome()
-        FastqSet fastqSet = DomainFactory.createFastqSet(seqTracks: [SeqTrack.list().find {
-            it.project.id == project.id
-        }])
+        SeqTrack seqTrack = SeqTrack.createCriteria().get {
+            sample {
+                individual {
+                    eq('project', project)
+                }
+            }
+        }
 
-        ExternallyProcessedMergedBamFile bamFile = DomainFactory.createExternallyProcessedMergedBamFile(referenceGenome: referenceGenome, fastqSet: fastqSet)
+        ExternallyProcessedMergedBamFile bamFile = DomainFactory.createExternallyProcessedMergedBamFile(
+                workPackage: DomainFactory.createExternalMergingWorkPackage(
+                        sample: seqTrack.sample,
+                        seqType: seqTrack.seqType,
+                )
+        )
         CreateFileHelper.createFile(bamFile.getNonOtpFolder().absoluteDataManagementPath)
 
         return bamFile

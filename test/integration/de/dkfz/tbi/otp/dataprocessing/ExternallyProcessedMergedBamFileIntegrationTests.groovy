@@ -1,23 +1,36 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.ngsdata.*
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
+
+import static org.junit.Assert.*
 
 class ExternallyProcessedMergedBamFileIntegrationTests {
 
     ExternallyProcessedMergedBamFile bamFile
+    Project project
+    Individual individual
+    SampleType sampleType
+    Sample sample
+    SeqType seqType
+    SeqPlatform seqPlatform
+    SeqCenter seqCenter
+    Run run
+    ReferenceGenome referenceGenome
+    ExternalMergingWorkPackage externalMergingWorkPackage
 
     @Before
     void setUp() {
-        Project project = DomainFactory.createProject(
+        project = DomainFactory.createProject(
                         name: "project",
                         dirName: "project-dir",
                         realmName: 'DKFZ',
                         )
         assertNotNull(project.save([flush: true]))
 
-        Individual individual = new Individual(
+        individual = DomainFactory.createIndividual(
                         pid: "patient",
                         mockPid: "mockPid",
                         mockFullName: "mockFullName",
@@ -26,18 +39,18 @@ class ExternallyProcessedMergedBamFileIntegrationTests {
                         )
         assertNotNull(individual.save([flush: true]))
 
-        SampleType sampleType = new SampleType(
+        sampleType = DomainFactory.createSampleType(
                         name: "sample-type"
                         )
         assertNotNull(sampleType.save([flush: true]))
 
-        Sample sample = new Sample(
+        sample = DomainFactory.createSample(
                         individual: individual,
                         sampleType: sampleType
                         )
         assertNotNull(sample.save([flush: true]))
 
-        SeqType seqType = new SeqType(
+        seqType = DomainFactory.createSeqType(
                         name: "seq-type",
                         libraryLayout: "library",
                         dirName: "seq-type-dir"
@@ -45,63 +58,24 @@ class ExternallyProcessedMergedBamFileIntegrationTests {
         assertNotNull(seqType.save([flush: true]))
         seqType.refresh()
 
-        SoftwareTool softwareTool = new SoftwareTool(
-                        programName: "name",
-                        programVersion: "version",
-                        type: SoftwareTool.Type.ALIGNMENT
-                        )
-        assertNotNull(softwareTool.save([flush: true]))
-
-        SeqPlatform seqPlatform = SeqPlatform.build()
-
-        SeqCenter seqCenter = new SeqCenter(
-                        name: "name",
-                        dirName: "dirName"
-                        )
-        assertNotNull(seqCenter.save([flush: true]))
-
-        Run run = new Run(
-                        name: "name",
-                        seqCenter: seqCenter,
-                        seqPlatform: seqPlatform,
-                        )
-        assertNotNull(run.save([flush: true]))
-
-        Realm realm1 = Realm.build(
-                name: 'DKFZ',
-                cluster: Realm.Cluster.DKFZ,
-                env: 'test',
-                operationType: Realm.OperationType.DATA_MANAGEMENT,
-        )
-
-        ReferenceGenome referenceGenome = ReferenceGenome.build(
+        referenceGenome = DomainFactory.createReferenceGenome(
                 name: "REF_GEN"
         )
 
-        MergingWorkPackage mergingWorkPackage = MergingWorkPackage.build(
-                pipeline: Pipeline.build(name: Pipeline.Name.EXTERNALLY_PROCESSED),
-                imported: true,
-                seqPlatformGroup: seqPlatform.seqPlatformGroup,
+        externalMergingWorkPackage = DomainFactory.createExternalMergingWorkPackage(
+                pipeline: DomainFactory.createExternallyProcessedPipelineLazy(),
                 sample: sample,
                 seqType: seqType,
                 referenceGenome: referenceGenome
         )
 
-        SeqTrack seqTrack = DomainFactory.createSeqTrackWithDataFiles(mergingWorkPackage)
-
-        FastqSet fastqSet = FastqSet.build(
-                seqTracks: [seqTrack]
-        )
-
-        bamFile = ExternallyProcessedMergedBamFile.build(
+        bamFile = DomainFactory.createExternallyProcessedMergedBamFile(
                 type: AbstractBamFile.BamType.SORTED,
-                fastqSet: fastqSet,
                 fileName: "FILE_NAME",
                 source: "SOURCE",
-                workPackage: mergingWorkPackage
+                workPackage: externalMergingWorkPackage
         )
 
-        //assert !bamFile.containedSeqTracks.any { it.withdrawn }
     }
 
     @Test

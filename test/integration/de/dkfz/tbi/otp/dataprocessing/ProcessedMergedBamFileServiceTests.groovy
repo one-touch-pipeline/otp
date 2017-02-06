@@ -522,15 +522,19 @@ class ProcessedMergedBamFileServiceTests {
 
     @Test
     void testGetInferredKitBamFileIsExomeButAllHaveKits() {
-        LibraryPreparationKit libraryPreparationKit = LibraryPreparationKit.build()
-        MergingWorkPackage mergingWorkPackage = MergingWorkPackage.build(seqType: SeqType.build(name: SeqTypeNames.EXOME.seqTypeName), libraryPreparationKit: libraryPreparationKit)
+        LibraryPreparationKit libraryPreparationKit = DomainFactory.createLibraryPreparationKit()
+        SeqType seqType = DomainFactory.createExomeSeqType()
+        MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage(
+                seqType: seqType,
+                libraryPreparationKit: libraryPreparationKit
+        )
         ProcessedMergedBamFile processedMergedBamFile = DomainFactory.createProcessedMergedBamFile(mergingWorkPackage)
         DomainFactory.assignNewProcessedBamFile(processedMergedBamFile)
-        List<SeqTrack> seqtracks = processedMergedBamFile.mergingSet.containedSeqTracks as List
-        seqtracks[0].libraryPreparationKit = libraryPreparationKit
-        seqtracks[1].libraryPreparationKit = libraryPreparationKit
-        seqtracks[0].kitInfoReliability = InformationReliability.KNOWN
-        seqtracks[1].kitInfoReliability = InformationReliability.KNOWN
+        List<SeqTrack> seqTracks = processedMergedBamFile.mergingSet.containedSeqTracks as List
+        seqTracks[0].libraryPreparationKit = libraryPreparationKit
+        seqTracks[1].libraryPreparationKit = libraryPreparationKit
+        seqTracks[0].kitInfoReliability = InformationReliability.KNOWN
+        seqTracks[1].kitInfoReliability = InformationReliability.KNOWN
         assertNull(processedMergedBamFileService.getInferredKit(processedMergedBamFile))
     }
 

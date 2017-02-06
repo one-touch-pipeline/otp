@@ -71,7 +71,7 @@ class RoddyBamFileSpec extends Specification {
     @Unroll
     void "test getFinalLibraryQAJsonFiles MultipleSeqTrack libraryName is #libraryName"() {
         given:
-        SeqTrack seqTrack = DomainFactory.createSeqTrackWithDataFiles(roddyBamFile.workPackage, [
+        SeqTrack seqTrack = DomainFactory.createSeqTrackWithDataFiles(roddyBamFile.workPackage as MergingWorkPackage, [
                 libraryName          : libraryName,
                 normalizedLibraryName: normalizedName
         ])
