@@ -1,11 +1,12 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.ngsdata.*
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import grails.buildtestdata.mixin.Build
 
+@Build([SeqPlatformGroup, Pipeline])
 class ExternallyProcessedMergedBamFile_PropertiesUnitTest {
 
     static final short PROCESSING_PRIORITY = 1
@@ -28,7 +29,8 @@ class ExternallyProcessedMergedBamFile_PropertiesUnitTest {
         seqType = new SeqType()
         SeqTrack seqTrack = new SeqTrack(sample: sample, seqType: seqType)
         FastqSet fastqSet = new FastqSet(seqTracks: [seqTrack])
-        bamFile = new ExternallyProcessedMergedBamFile(referenceGenome: referenceGenome, fastqSet: fastqSet)
+        MergingWorkPackage mergingWorkPackage = TestData.createMergingWorkPackage(referenceGenome: referenceGenome, sample: sample, seqType: seqType)
+        bamFile = new ExternallyProcessedMergedBamFile(workPackage: mergingWorkPackage, fastqSet: fastqSet)
     }
 
     @After
@@ -40,11 +42,6 @@ class ExternallyProcessedMergedBamFile_PropertiesUnitTest {
         project = null
         referenceGenome = null
         bamFile = null
-    }
-
-    @Test
-    void testGetMergingWorkPackage() {
-        TestCase.shouldFail(UnsupportedOperationException) { bamFile.mergingWorkPackage }
     }
 
     @Test

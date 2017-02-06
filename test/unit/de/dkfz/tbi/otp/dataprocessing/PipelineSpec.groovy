@@ -19,16 +19,17 @@ class PipelineSpec extends Specification {
         valid == pipeline.validate()
 
         where:
-        name                           | type                    || valid
-        Pipeline.Name.OTP_SNV          | Pipeline.Type.SNV       || true
-        Pipeline.Name.OTP_SNV          | Pipeline.Type.ALIGNMENT || false
-        Pipeline.Name.RODDY_SNV        | Pipeline.Type.SNV       || true
-        Pipeline.Name.RODDY_SNV        | Pipeline.Type.ALIGNMENT || false
-        Pipeline.Name.PANCAN_ALIGNMENT | Pipeline.Type.SNV       || false
-        Pipeline.Name.PANCAN_ALIGNMENT | Pipeline.Type.ALIGNMENT || true
-        Pipeline.Name.DEFAULT_OTP      | Pipeline.Type.SNV       || false
-        Pipeline.Name.DEFAULT_OTP      | Pipeline.Type.ALIGNMENT || true
-
+        name                               | type                    || valid
+        Pipeline.Name.OTP_SNV              | Pipeline.Type.SNV       || true
+        Pipeline.Name.OTP_SNV              | Pipeline.Type.ALIGNMENT || false
+        Pipeline.Name.RODDY_SNV            | Pipeline.Type.SNV       || true
+        Pipeline.Name.RODDY_SNV            | Pipeline.Type.ALIGNMENT || false
+        Pipeline.Name.PANCAN_ALIGNMENT     | Pipeline.Type.SNV       || false
+        Pipeline.Name.PANCAN_ALIGNMENT     | Pipeline.Type.ALIGNMENT || true
+        Pipeline.Name.DEFAULT_OTP          | Pipeline.Type.SNV       || false
+        Pipeline.Name.DEFAULT_OTP          | Pipeline.Type.ALIGNMENT || true
+        Pipeline.Name.EXTERNALLY_PROCESSED | Pipeline.Type.ALIGNMENT || true
+        Pipeline.Name.EXTERNALLY_PROCESSED | Pipeline.Type.SNV       || false
 
     }
 }
