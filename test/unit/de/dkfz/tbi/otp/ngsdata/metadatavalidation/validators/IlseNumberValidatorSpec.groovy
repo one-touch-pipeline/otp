@@ -1,17 +1,18 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
-import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContext
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
-import de.dkfz.tbi.otp.utils.HelperUtils
-import de.dkfz.tbi.util.spreadsheet.validation.Problem
-import spock.lang.Specification
+import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
+import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.util.spreadsheet.validation.*
+import grails.test.mixin.*
+import spock.lang.*
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
-
+@Mock([
+    IlseSubmission
+])
 class IlseNumberValidatorSpec extends Specification {
 
     void 'validate, when metadata fields contain valid ILSe number, succeeds'() {
@@ -98,6 +99,29 @@ class IlseNumberValidatorSpec extends Specification {
         then:
         Collection<Problem> expectedProblems = [
                 new Problem(context.spreadsheet.dataRows[0].cells + context.spreadsheet.dataRows[1].cells as Set, Level.ERROR, "The ILSe number 'ilseNu' is not an integer."),
+        ]
+        containSame(context.problems, expectedProblems)
+    }
+
+    void 'validate, when ILSe number already exist, adds warnings'() {
+        given:
+        int ILSE_NO = 5464
+        DomainFactory.createIlseSubmission(
+                ilseNumber: ILSE_NO,
+        )
+        MetadataValidationContext context = MetadataValidationContextFactory.createContext(
+                "${MetaDataColumn.ILSE_NO}\n" +
+                        "${ILSE_NO}\n" +
+                        "${ILSE_NO}\n",
+                ["metadataFile": new File("${TestCase.uniqueNonExistentPath}/${ILSE_NO}/run${HelperUtils.uniqueString}, metadata_fastq.tsv")]
+        )
+
+        when:
+        new IlseNumberValidator().validate(context)
+
+        then:
+        Collection<Problem> expectedProblems = [
+                new Problem(context.spreadsheet.dataRows[0].cells + context.spreadsheet.dataRows[1].cells as Set, Level.WARNING, "The ILSe number '${ILSE_NO}' already exist.")
         ]
         containSame(context.problems, expectedProblems)
     }

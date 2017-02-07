@@ -1,21 +1,23 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContext
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidator
-import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.util.spreadsheet.validation.Level
-import de.dkfz.tbi.util.spreadsheet.validation.ValueTuple
-import de.dkfz.tbi.util.spreadsheet.validation.ValueTuplesValidator
-import org.springframework.stereotype.Component
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
+import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.util.spreadsheet.validation.*
+import org.springframework.stereotype.*
 
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.ILSE_NO
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 
 @Component
 class IlseNumberValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
 
     @Override
     Collection<String> getDescriptions() {
-        return ["The ILSe number is valid.", "All rows have the same value in the column '${ILSE_NO.name()}'.", "The ILSe number appears in the path of the metadata file."]
+        return ["The ILSe number is valid.",
+                "All rows have the same value in the column '${ILSE_NO.name()}'.",
+                "The ILSe number appears in the path of the metadata file.",
+                "The ILSe is not registered yet in OTP.",
+        ]
     }
 
     @Override
@@ -42,6 +44,8 @@ class IlseNumberValidator extends ValueTuplesValidator<MetadataValidationContext
                         context.addProblem(tuple.cells, Level.ERROR, "The ILSe number '${ilseNo}' is not an integer.")
                     } else if ((ilseNo as int) < 1000 || (ilseNo as int) > 999999) {
                         context.addProblem(tuple.cells, Level.WARNING, "The ILSe number '${ilseNo}' is out of range [1000..999999].")
+                    } else if (IlseSubmission.findByIlseNumber(ilseNo as int)) {
+                        context.addProblem(tuple.cells, Level.WARNING, "The ILSe number '${ilseNo}' already exist.")
                     }
                     if (!context.metadataFile.path.contains(ilseNo)) {
                         context.addProblem(tuple.cells, Level.WARNING, "The metadata file path '${context.metadataFile.path}' does not contain the ILSe number '${ilseNo}'.")
