@@ -916,7 +916,6 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
         assert ExternallyProcessedMergedBamFile.list().contains(bamFile)
     }
 
-
     @Test
     public void testDeleteProcessingFilesOfProject_ExternalBamFilesAttached() {
         ExternallyProcessedMergedBamFile bamFile = deleteProcessingFilesOfProject_ExternalBamFilesAttached_Setup()
@@ -926,7 +925,6 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
         })
     }
 
-
     @Test
     public void testDeleteProcessingFilesOfProject_ExternalBamFilesAttached_Verified() {
         ExternallyProcessedMergedBamFile bamFile = deleteProcessingFilesOfProject_ExternalBamFilesAttached_Setup()
@@ -935,7 +933,6 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
 
         deleteProcessingFilesOfProject_ExternalBamFilesAttached_Verified_Validation(bamFile)
     }
-
 
     @Test
     public void testDeleteProcessingFilesOfProject_ExternalBamFilesAttached_nonMergedSeqTrackExists_Verified() {

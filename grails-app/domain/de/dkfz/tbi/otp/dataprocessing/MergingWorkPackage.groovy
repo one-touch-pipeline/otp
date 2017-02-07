@@ -44,6 +44,10 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
     boolean needsProcessing
 
     static constraints = {
+        // TODO OTP-1401: In the future there may be more than one MWP for one sample and seqType.
+        // As soon as you loosen this constraint, un-ignore:
+        // - AlignmentPassUnitTests.testIsLatestPass_2PassesDifferentWorkPackages
+        sample unique: 'seqType'
         needsProcessing(validator: {val, obj -> !val || obj.pipeline.name == Pipeline.Name.PANCAN_ALIGNMENT})
         pipeline(validator: { pipeline ->
             pipeline.type == Pipeline.Type.ALIGNMENT &&

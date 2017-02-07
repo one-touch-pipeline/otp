@@ -29,10 +29,6 @@ abstract class AbstractMergingWorkPackage implements Entity {
     static belongsTo = Sample
 
     static constraints = {
-        // TODO OTP-1401: In the future there may be more than one MWP for one sample and seqType.
-        // As soon as you loosen this constraint, un-ignore:
-        // - AlignmentPassUnitTests.testIsLatestPass_2PassesDifferentWorkPackages
-        sample unique: 'seqType'
         bamFileInProjectFolder nullable: true, validator: { val, obj ->
             if (val) {
                 val.workPackage == obj && [AbstractMergedBamFile.FileOperationStatus.INPROGRESS, AbstractMergedBamFile.FileOperationStatus.PROCESSED].contains(val.fileOperationStatus)
@@ -74,7 +70,6 @@ abstract class AbstractMergingWorkPackage implements Entity {
 
     static mapping = {
         'class' index: "abstract_merging_work_package_class_idx"
-        sample index: "abstract_merging_work_package_sample_idx"
         seqType index: "abstract_merging_work_package_seq_type_idx"
         referenceGenome index: "abstract_merging_work_package_reference_genome_idx"
         bamFileInProjectFolder index: "abstract_merging_work_package_bam_file_in_project_folder_idx"

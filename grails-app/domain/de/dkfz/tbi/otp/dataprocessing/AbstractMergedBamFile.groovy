@@ -39,9 +39,9 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile {
     public abstract AlignmentConfig getAlignmentConfig()
 
     static constraints = {
-        numberOfMergedLanes validator: { val, obj ->
+        numberOfMergedLanes nullable: true, validator: { val, obj ->
             if (Hibernate.getClass(obj) == ExternallyProcessedMergedBamFile) {
-                val == 0
+                val == null
             } else {
                 val >= 1
             }

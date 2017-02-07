@@ -1863,7 +1863,7 @@ samplePairsNotProcessed: ${samplePairsNotProcessed}
                 fastqSet: { createFastqSet() },
                 type: AbstractBamFile.BamType.MDUP,
                 workPackage: { createExternalMergingWorkPackage() },
-                numberOfMergedLanes: 0,
+                numberOfMergedLanes: null,
         ], properties)
     }
 
