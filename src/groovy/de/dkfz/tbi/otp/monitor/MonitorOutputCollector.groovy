@@ -152,8 +152,8 @@ ${prefix(objectsToStrings(objects, valueToShow).join('\n'))}
             output << prefix("An error occur for the object: ${valueToShow(object)}")
             List errorOutput = []
             errorOutput << """\
-object class/id: ${object.class} / ${object.id}"
-the OTP link: https://otp.dkfz.de/otp/processes/process/${lastProcess.id}"
+object class/id: ${object.class} / ${object.id}
+the OTP link: https://otp.dkfz.de/otp/processes/process/${lastProcess.id}
 the error: ${ps.latestProcessingStepUpdate?.error?.errorMessage?.replaceAll('\n', "\n${INDENT3}")}"""
 
             Comment comment = ps.process.comment
