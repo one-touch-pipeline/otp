@@ -19,9 +19,9 @@
             <thead>
             <tr>
                 <th width="10%"><g:message code="job.error.definition.table.type"/></th>
-                <th width="13%"><g:message code="job.error.definition.table.action"/></th>
-                <th width="13%"><g:message code="job.error.definition.table.jobs"/></th>
-                <th width="64%"><g:message code="job.error.definition.table.errorExpression"/></th>
+                <th width="12%"><g:message code="job.error.definition.table.action"/></th>
+                <th width="35%"><g:message code="job.error.definition.table.jobs"/></th>
+                <th width="43%"><g:message code="job.error.definition.table.errorExpression"/></th>
             </tr>
             </thead>
             <tbody>
@@ -41,14 +41,15 @@
                         />
                     </g:if>
                 </td>
-                <td><g:each var="jobs" in="${firstContent.key.jobDefinitions}">
-                    ${jobs.name}<br/>
+                <td><g:each var="jobs" in="${firstContent.key.jobDefinitions.collect {"${it.name} - ${it.plan.name} ${it.plan.obsoleted ? ' - obsoleted' : ''}"}.sort()}">
+                    ${jobs}<br/>
                     </g:each>
-                    <otp:editorSwitch
+                    <otp:editorSwitchNewValues
                             roles="ROLE_ADMIN"
-                            template="newFreeTextValue"
+                            labels="${["Job"]}"
+                            dropDowns="${[jobDefinitionString: allJobDefinition]}"
                             link="${g.createLink(controller: 'jobErrorDefinition', action: 'addNewJob', params: ["jobErrorDefinition.id": firstContent.key.id])}"
-                            value=""/>
+                    />
                 </td>
                 <td><otp:editorSwitch
                         roles="ROLE_ADMIN"
@@ -74,14 +75,15 @@
                                 />
                             </g:if>
                         </td>
-                        <td><g:each var="jobs" in="${secondContent.key.jobDefinitions.sort{it.name}}">
-                            <div>${jobs.name}<br/></div>
+                        <td><g:each var="jobs" in="${secondContent.key.jobDefinitions.collect {"${it.name} - ${it.plan.name} ${it.plan.obsoleted ? ' - obsoleted' : ''}"}.sort()}">
+                            <div>${jobs}<br/></div>
                             </g:each>
-                            <otp:editorSwitch
+                            <otp:editorSwitchNewValues
                                     roles="ROLE_ADMIN"
-                                    template="newFreeTextValue"
-                                    link="${g.createLink(controller: 'jobErrorDefinition', action: 'addNewJob', params: ["jobErrorDefinition.id": secondContent.key.id])}"
-                                    value=""/>
+                                    labels="${["Job"]}"
+                                    dropDowns="${[jobDefinitionString: allJobDefinition]}"
+                                    link="${g.createLink(controller: 'jobErrorDefinition', action: 'addNewJob', params: ["jobErrorDefinition.id": firstContent.key.id])}"
+                            />
                         </td>
                         <td><otp:editorSwitch
                                 roles="ROLE_ADMIN"
@@ -97,14 +99,15 @@
                             <tr style="text-indent:25px;">
                                 <td>${thirdContent.key.type}</td>
                                 <td>${thirdContent.key.action}</td>
-                                <td><g:each var="jobs" in="${secondContent.key.jobDefinitions.sort{it.name}}">
-                                    <div>${jobs.name}<br/></div>
+                                <td><g:each var="jobs" in="${secondContent.key.jobDefinitions.collect {"${it.name} - ${it.plan.name} ${it.plan.obsoleted ? ' - obsoleted' : ''}"}.sort()}">
+                                    <div>${jobs}<br/></div>
                                     </g:each>
-                                    <otp:editorSwitch
+                                    <otp:editorSwitchNewValues
                                             roles="ROLE_ADMIN"
-                                            template="newFreeTextValue"
-                                            link="${g.createLink(controller: 'jobErrorDefinition', action: 'addNewJob', params: ["jobErrorDefinition.id": secondContent.key.id])}"
-                                            value=""/>
+                                            labels="${["Job"]}"
+                                            dropDowns="${[jobDefinitionString: allJobDefinition]}"
+                                            link="${g.createLink(controller: 'jobErrorDefinition', action: 'addNewJob', params: ["jobErrorDefinition.id": firstContent.key.id])}"
+                                    />
                                 </td>
                                 <td><otp:editorSwitch
                                         roles="ROLE_ADMIN"

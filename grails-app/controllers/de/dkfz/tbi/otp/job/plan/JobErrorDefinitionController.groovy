@@ -12,10 +12,11 @@ class JobErrorDefinitionController {
         JobDefinition jobDefinition = JobDefinition.findByName(params.job) ?: null
         [
                 jobErrorDefinition: jobErrorDefinitions.findAll { ((JobErrorDefinition)it.key).jobDefinitions*.name.contains(jobDefinition?.name) } ?: jobErrorDefinitions,
-                jobDefinitions: ["No filter"] + jobDefinitions*.name,
+                jobDefinitions: ["No filter"] + jobDefinitions*.name.unique().sort(),
                 jobDefinition: jobDefinition?.name,
                 typeDropDown: JobErrorDefinition.Type,
                 actionDropDown: JobErrorDefinition.Action,
+                allJobDefinition: getAllJobDefinitions(),
         ]
     }
 
@@ -45,6 +46,18 @@ class JobErrorDefinitionController {
         }
         render data as JSON
     }
+
+    private List getAllJobDefinitions() {
+        List allJobDefinition = JobDefinition.findAll()
+        List jobNames = []
+
+        allJobDefinition.each {
+            if (!it.plan.obsoleted && it.getClass() != StartJobDefinition) {
+                jobNames.add("${it.name} - ${it.plan.name}")
+            }
+        }
+        return jobNames.sort()
+    }
 }
 
 class UpdateNewJobErrorDefinitionCommand implements Serializable {
@@ -73,7 +86,10 @@ class UpdateAddNewJobCommand implements Serializable {
     JobErrorDefinition jobErrorDefinition
     JobDefinition jobDefinition
 
-    void setValue(String value) {
-        this.jobDefinition = JobDefinition.findByName(value)
+    void setJobDefinitionString(String jobDefinitionString) {
+        String jobDefinitionName = jobDefinitionString.substring(0, jobDefinitionString.indexOf('-')-1)
+        String jobExecutionPlanName = jobDefinitionString.substring(jobDefinitionString.indexOf('-')+2)
+
+        this.jobDefinition = JobDefinition.findByNameAndPlan(jobDefinitionName, JobExecutionPlan.findByNameAndObsoleted(jobExecutionPlanName, false))
     }
 }
