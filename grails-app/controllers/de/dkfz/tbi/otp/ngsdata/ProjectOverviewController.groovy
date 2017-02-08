@@ -78,16 +78,19 @@ class ProjectOverviewController {
             alignmentError = e.message
             log.error(e.message, e)
         }
-        List configTable
 
         List<ProjectContactPerson> projectContactPersons = ProjectContactPerson.findAllByProject(project)
         List<String> contactPersonRoles = [''] + ContactPersonRole.findAll()*.name
 
         List<List> thresholdsTable = createThresholdTable(project)
 
-        configTable = buildTableForConfig(project)
-        List configTableHeadline = getHeadline(configTable)
-        configTable.remove(configTableHeadline)
+        List configSnvTable = buildTableForSnvConfig(project)
+        List configSnvTableHeadline = getHeadline(configSnvTable)
+        configSnvTable.remove(configSnvTableHeadline)
+
+        List configIndelTable = buildTableForIndelConfig(project)
+        List configIndelTableHeadline = getHeadline(configIndelTable)
+        configIndelTable.remove(configIndelTableHeadline)
 
         Realm realm = ConfigService.getRealm(project, Realm.OperationType.DATA_MANAGEMENT)
         File projectDirectory = LsdfFilesService.getPath(
@@ -111,8 +114,10 @@ class ProjectOverviewController {
                 projectContactPersons: projectContactPersons,
                 roleDropDown: contactPersonRoles,
                 thresholdsTable: thresholdsTable,
-                configTableHeadline: configTableHeadline,
-                configTable: configTable,
+                configSnvTableHeadline: configSnvTableHeadline,
+                configSnvTable: configSnvTable,
+                configIndelTableHeadline: configIndelTableHeadline,
+                configIndelTable: configIndelTable,
                 snvDropDown: Project.Snv.values(),
                 directory: projectDirectory,
                 analysisDirectory: project.dirAnalysis?: '',
@@ -443,7 +448,7 @@ class ProjectOverviewController {
         return [success: false, error: "'" + errors.getRejectedValue() + "' is not a valid value for '" + errors.getField() + "'. Error code: '" + errors.code + "'"]
     }
 
-    private List buildTableForConfig(Project project) {
+    private List buildTableForSnvConfig(Project project) {
         List table = []
         table.add(["", "Config uploaded", "Version"])
         SeqType.getSnvPipelineSeqTypes().each {
@@ -454,19 +459,35 @@ class ProjectOverviewController {
                 row.add("Yes")
                 row.add(snvConfig.externalScriptVersion)
             } else {
-                RoddyWorkflowConfig roddyWorkflowConfig = CollectionUtils.atMostOneElement(RoddyWorkflowConfig.findAllByProjectAndSeqTypeAndObsoleteDateAndPipeline(project, it, null, Pipeline.findByName(Pipeline.Name.RODDY_SNV)))
-
-                if (roddyWorkflowConfig) {
-                    row.add("Yes")
-                    row.add(roddyWorkflowConfig.pluginVersion)
-                } else {
-                    row.add("No")
-                    row.add("")
-                }
+                row = getRoddyWorkflowConfig(row, project, it, Pipeline.findByName(Pipeline.Name.RODDY_SNV))
             }
             table.add(row)
         }
         return table.transpose()
+    }
+
+    private List buildTableForIndelConfig(Project project) {
+        List table = []
+        table.add(["", "Config uploaded", "Version"])
+        SeqType.getIndelPipelineSeqTypes().each {
+            List row = []
+            row.add(it.displayName)
+            row = getRoddyWorkflowConfig(row, project, it, Pipeline.findByName(Pipeline.Name.RODDY_INDEL))
+            table.add(row)
+        }
+        return table.transpose()
+    }
+
+    private List getRoddyWorkflowConfig(List row, Project project, SeqType seqType, Pipeline pipeline) {
+        RoddyWorkflowConfig roddyWorkflowConfig = CollectionUtils.atMostOneElement(RoddyWorkflowConfig.findAllByProjectAndSeqTypeAndObsoleteDateAndPipeline(project, seqType, null, pipeline))
+        if (roddyWorkflowConfig) {
+            row.add("Yes")
+            row.add(roddyWorkflowConfig.pluginVersion)
+        } else {
+            row.add("No")
+            row.add("")
+        }
+        return row
     }
 
     private List<List<String>> createThresholdTable(Project project) {

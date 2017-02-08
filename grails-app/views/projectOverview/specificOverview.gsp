@@ -303,13 +303,13 @@
             <br>
             <table>
                 <tr>
-                    <g:each var="cell" in="${configTableHeadline}">
+                    <g:each var="cell" in="${configSnvTableHeadline}">
                         <th>
                            ${cell}
                          </th>
                     </g:each>
                 </tr>
-                <g:each var="rows" in="${configTable}">
+                <g:each var="rows" in="${configSnvTable}">
                     <tr>
                         <g:each var="cell" in="${rows}">
                             <td class="tableEntry">
@@ -333,6 +333,25 @@
                     </li>
                 </g:each>
             </ul>
+            <table>
+                <tr>
+                    <g:each var="cell" in="${configIndelTableHeadline}">
+                        <th>
+                            ${cell}
+                        </th>
+                    </g:each>
+                </tr>
+                <g:each var="rows" in="${configIndelTable}">
+                    <tr>
+                        <g:each var="cell" in="${rows}">
+                            <td class="tableEntry">
+                                ${cell}
+                            </td>
+                        </g:each>
+                    </tr>
+                </g:each>
+            </table>
+            <br>
         </div>
     </div>
     <asset:script>
