@@ -217,7 +217,12 @@ class ProjectOverviewController {
                     findPipelines().each { Pipeline pipeline ->
                         String cell = ""
                         bamFilesPerWorkflow?.get(pipeline.id).each {
-                            String subCell = "${it.numberOfMergedLanes} | ${it.coverage ? String.format(Locale.ENGLISH, '%.2f', it.coverage) : "unknown"}"
+                            String subCell
+                            if (pipeline.name == Pipeline.Name.RODDY_RNA_ALIGNMENT) {
+                                subCell = "${it.numberOfMergedLanes} | ${informationOfSample.laneCountRegistered[seqType.id]}"
+                            } else {
+                                subCell = "${it.numberOfMergedLanes} | ${it.coverage ? String.format(Locale.ENGLISH, '%.2f', it.coverage) : "unknown"}"
+                            }
                             if (it.withdrawn) {
                                 anythingWithdrawn = true
                                 subCell = "<span class='withdrawn'>" + subCell + "</span>"

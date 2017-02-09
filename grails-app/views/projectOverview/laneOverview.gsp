@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8"%>
+<%@ page import="de.dkfz.tbi.otp.ngsdata.SeqTypeNames" contentType="text/html;charset=UTF-8"%>
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -83,9 +83,15 @@
                         </g:if>
                         <g:each var="seqType" in="${seqTypes}">
                             <th title="<g:message code="projectOverview.mouseOver.lane"/>"><g:message code="projectOverview.index.registeredLanes"/></th>
-                            <g:each var="workflow" in="${pipelines}">
-                                <th>${workflow.displayName}<br><g:message code="projectOverview.index.lanesAndCoverage"/></th>
-                            </g:each>
+                            <g:if test="${seqType.name == SeqTypeNames.RNA.seqTypeName}">
+                                <g:each var="workflow" in="${pipelines}">
+                                    <th>${workflow.displayName}<br><g:message code="projectOverview.index.alignedAndAllLanes"/></th>
+                                </g:each>
+                            </g:if><g:else>
+                                <g:each var="workflow" in="${pipelines}">
+                                    <th>${workflow.displayName}<br><g:message code="projectOverview.index.lanesAndCoverage"/></th>
+                                </g:each>
+                            </g:else>
                         </g:each>
                     </tr>
                 </thead>
