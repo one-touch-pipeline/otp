@@ -35,7 +35,7 @@ where
                 and (
                     abstractQualityAssessment.class = :overallQualityAssessmentMergedClass
                     or (
-                        abstractQualityAssessment.class = :roddyMergedBamQaClass
+                        abstractQualityAssessment.class in (:roddyMergedBamQaClass)
                         and abstractQualityAssessment.chromosome = :allChromosomes
                     )
                 )
@@ -46,7 +46,7 @@ where
             fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
             qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
             overallQualityAssessmentMergedClass: OverallQualityAssessmentMerged.getName(),
-            roddyMergedBamQaClass: RoddyMergedBamQa.getName(),
+            roddyMergedBamQaClass: [RoddyMergedBamQa.getName(), RnaQualityAssessment.getName()],
             allChromosomes: RoddyQualityAssessment.ALL,
         ]
 

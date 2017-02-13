@@ -26,6 +26,8 @@ class PipelineSpec extends Specification {
         Pipeline.Name.RODDY_SNV            | Pipeline.Type.ALIGNMENT || false
         Pipeline.Name.PANCAN_ALIGNMENT     | Pipeline.Type.SNV       || false
         Pipeline.Name.PANCAN_ALIGNMENT     | Pipeline.Type.ALIGNMENT || true
+        Pipeline.Name.RODDY_RNA_ALIGNMENT  | Pipeline.Type.SNV       || false
+        Pipeline.Name.RODDY_RNA_ALIGNMENT  | Pipeline.Type.ALIGNMENT || true
         Pipeline.Name.DEFAULT_OTP          | Pipeline.Type.SNV       || false
         Pipeline.Name.DEFAULT_OTP          | Pipeline.Type.ALIGNMENT || true
         Pipeline.Name.EXTERNALLY_PROCESSED | Pipeline.Type.ALIGNMENT || true

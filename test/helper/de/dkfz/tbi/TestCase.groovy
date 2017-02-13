@@ -31,7 +31,7 @@ class TestCase {
     static {
         String tmpdir = System.getProperty('java.io.tmpdir')
         assert tmpdir
-        TEST_DIRECTORY = new File(new File(tmpdir, 'otp-test'), HelperUtils.uniqueString)
+        TEST_DIRECTORY = new File(tmpdir, HelperUtils.uniqueString)
         assert TEST_DIRECTORY.isAbsolute()
     }
     private static boolean cleanTestDirectoryShutdownHookInstalled = false

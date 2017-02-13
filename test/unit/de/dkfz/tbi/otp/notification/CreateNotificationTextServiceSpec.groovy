@@ -548,11 +548,11 @@ ${expectedAlign}"""
         List<SeqTrack> seqTracks = [data1.seqTrack]
         List<SamplePair> samplePairWithoutVariantCalling = [data1.samplePair]
         List<SamplePair> samplePairWithVariantCalling = []
-        String expectedSamples = "${createNotificationTextService.getSampleName(data1.seqTrack)} (${data1.sampleId1})"
+        List<String> expectedSamples = ["${createNotificationTextService.getSampleName(data1.seqTrack)} (${data1.sampleId1})"]
         List<String> variantCallingPipelines = []
         if (secondSampleAligned) {
             seqTracks.add(data2.seqTrack)
-            expectedSamples += "\n${createNotificationTextService.getSampleName(data2.seqTrack)} (${data2.sampleId1}, ${data2.sampleId2})"
+            expectedSamples << "${createNotificationTextService.getSampleName(data2.seqTrack)} (${data2.sampleId1}, ${data2.sampleId2})"
             if (indel | snv) {
                 samplePairWithVariantCalling.add(data2.samplePair)
                 if (indel) {
@@ -597,7 +597,7 @@ samplePairsWontProcess: ${createNotificationTextService.getSamplePairRepresentat
 
         String expected = """
 alignment finished
-samples: ${expectedSamples}
+samples: ${expectedSamples.sort().join('\n')}
 links: ${expectedLinks}
 processingValues: ${expectedAlignment}
 paths: ${expectedPaths}

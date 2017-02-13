@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import org.springframework.beans.factory.annotation.Autowired
+
 import static org.junit.Assert.*
 
 import org.junit.rules.TemporaryFolder
@@ -23,6 +25,8 @@ class MergingJobCreateCommandTests {
     public TemporaryFolder tempFolder = new TemporaryFolder()
 
     TestData testData = new TestData()
+
+    @Autowired
     MergingJob mergingJob
     ProcessedMergedBamFile processedMergedBamFile
     MergingSet mergingSet

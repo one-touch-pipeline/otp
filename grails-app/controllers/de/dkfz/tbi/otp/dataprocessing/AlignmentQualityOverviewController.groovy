@@ -27,42 +27,70 @@ class AlignmentQualityOverviewController {
     }
 
 
-
     private static final List<String> chromosomes = [Chromosomes.CHR_X.alias, Chromosomes.CHR_Y.alias, CHR_X_HG19, CHR_Y_HG19].asImmutable()
 
     private static final List<String> HEADER_WHOLE_GENOME = [
-        'alignment.quality.individual',
-        'alignment.quality.sampleType',
-        'alignment.quality.coverageWithoutN',
-        'alignment.quality.coverageX',
-        'alignment.quality.coverageY',
-        'alignment.quality.kit',
-        'alignment.quality.mappedReads',
-        'alignment.quality.duplicates',
-        'alignment.quality.properlyPaired',
-        'alignment.quality.singletons',
-        'alignment.quality.medianPE_insertsize',
-        'alignment.quality.diffChr',
-        'alignment.quality.workflow',
-        'alignment.quality.date',
+            'alignment.quality.individual',
+            'alignment.quality.sampleType',
+            'alignment.quality.coverageWithoutN',
+            'alignment.quality.coverageX',
+            'alignment.quality.coverageY',
+            'alignment.quality.kit',
+            'alignment.quality.mappedReads',
+            'alignment.quality.duplicates',
+            'alignment.quality.properlyPaired',
+            'alignment.quality.singletons',
+            'alignment.quality.medianPE_insertsize',
+            'alignment.quality.diffChr',
+            'alignment.quality.workflow',
+            'alignment.quality.date',
+    ].asImmutable()
+
+    private static final List<String> HEADER_RNA = [
+            'alignment.quality.individual',
+            'alignment.quality.sampleType',
+            'alignment.quality.kit',
+            'alignment.quality.3pnorm',
+            'alignment.quality.5pnorm',
+            'alignment.quality.chimericPairs',
+            'alignment.quality.duplicationRateOfMapped',
+            'alignment.quality.end1Sense',
+            'alignment.quality.end2Sense',
+            'alignment.quality.estimatedLibrarySize',
+            'alignment.quality.exonicRate',
+            'alignment.quality.expressionProfilingEfficiency',
+            'alignment.quality.genesDetected',
+            'alignment.quality.intergenicRate',
+            'alignment.quality.intragenicRate',
+            'alignment.quality.intronicRate',
+            'alignment.quality.mapped',
+            'alignment.quality.mappedUnique',
+            'alignment.quality.mappedUniqueRateOfTotal',
+            'alignment.quality.mappingRate',
+            'alignment.quality.meanCV',
+            'alignment.quality.uniqueRateOfMapped',
+            'alignment.quality.rRNARate',
+            'alignment.quality.totalReadCounter',
+            'alignment.quality.duplicates',
+            'alignment.quality.workflow',
+            'alignment.quality.date',
     ].asImmutable()
 
     private static final List<String> HEADER_EXOME = [
-        'alignment.quality.individual',
-        'alignment.quality.sampleType',
-        'alignment.quality.onTargetRatio',
-        'alignment.quality.targetCoverage',
-        'alignment.quality.kit',
-        'alignment.quality.mappedReads',
-        'alignment.quality.duplicates',
-        'alignment.quality.properlyPaired',
-        'alignment.quality.singletons',
-        'alignment.quality.medianPE_insertsize',
-        'alignment.quality.diffChr',
-        'alignment.quality.workflow',
-        'alignment.quality.date',
+            'alignment.quality.individual',
+            'alignment.quality.sampleType',
+            'alignment.quality.onTargetRatio',
+            'alignment.quality.targetCoverage',
+            'alignment.quality.kit',
+            'alignment.quality.mappedReads',
+            'alignment.quality.duplicates',
+            'alignment.quality.properlyPaired',
+            'alignment.quality.singletons',
+            'alignment.quality.medianPE_insertsize',
+            'alignment.quality.diffChr',
+            'alignment.quality.workflow',
+            'alignment.quality.date',
     ].asImmutable()
-
 
 
     OverallQualityAssessmentMergedService overallQualityAssessmentMergedService
@@ -78,17 +106,19 @@ class AlignmentQualityOverviewController {
     ProjectService projectService
 
 
-
     Map index() {
         List<String> projects = projectService.getAllProjects()*.name
         String projectName = params.project ?: projects[0]
+
         Project project = projectService.getProjectByName(projectName)
 
         List<String> seqTypes = seqTypeService.alignableSeqTypesByProject(project)*.displayName
+
         String seqTypeName = (params.seqType && seqTypes.contains(params.seqType)) ? params.seqType : seqTypes[0]
+
         SeqType seqType = SeqType.findWhere(
                 displayName: seqTypeName
-                )
+        )
 
         List<String> header = null
         switch (seqType?.name) {
@@ -103,19 +133,21 @@ class AlignmentQualityOverviewController {
             case SeqTypeNames.EXOME.seqTypeName:
                 header = HEADER_EXOME
                 break
+            case SeqTypeNames.RNA.seqTypeName:
+                header = HEADER_RNA
+                break
             default:
                 throw new RuntimeException("How should ${seqTypeName} be handled")
         }
 
         return [
-            projects: projects,
-            project: projectName,
-            seqTypes: seqTypes,
-            seqType: seqTypeName,
-            header: header,
+                projects: projects,
+                project : projectName,
+                seqTypes: seqTypes,
+                seqType : seqTypeName,
+                header  : header,
         ]
     }
-
 
 
     JSON dataTableSource(DataTableCommand cmd) {
@@ -135,24 +167,28 @@ class AlignmentQualityOverviewController {
         SeqType seqType = SeqType.findWhere(
                 displayName: seqTypeName,
                 'libraryLayout': SeqType.LIBRARYLAYOUT_PAIRED
-                )
+        )
 
 
         List<AbstractQualityAssessment> dataOverall = overallQualityAssessmentMergedService.findAllByProjectAndSeqType(project, seqType)
         List<AbstractQualityAssessment> dataChromosomeXY = chromosomeQualityAssessmentMergedService.qualityAssessmentMergedForSpecificChromosomes(chromosomes, dataOverall*.qualityAssessmentMergedPass)
-        Map<Long, Map<String, List<AbstractQualityAssessment>>> chromosomeMapXY = dataChromosomeXY.groupBy ([{it.qualityAssessmentMergedPass.id}, {it.chromosomeName}])
+        Map<Long, Map<String, List<AbstractQualityAssessment>>> chromosomeMapXY = dataChromosomeXY.groupBy([{
+                                                                                                                it.qualityAssessmentMergedPass.id
+                                                                                                            }, {
+                                                                                                                it.chromosomeName
+                                                                                                            }])
 
         List sequenceLengths = overallQualityAssessmentMergedService.findSequenceLengthForQualityAssessmentMerged(dataOverall)
         // TODO: has to be adapted when issue OTP-1670 is solved
-        Map sequenceLengthsMap = sequenceLengths.groupBy{it[0]}
+        Map sequenceLengthsMap = sequenceLengths.groupBy { it[0] }
 
         Map<Long, Map<String, List<ReferenceGenomeEntry>>> chromosomeLengthForChromosome =
                 overallQualityAssessmentMergedService.findChromosomeLengthForQualityAssessmentMerged(chromosomes, dataOverall).
-                        groupBy({it.referenceGenome.id}, {it.alias})
+                        groupBy({ it.referenceGenome.id }, { it.alias })
 
         dataToRender.iTotalRecords = dataOverall.size()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
-        dataToRender.aaData = dataOverall.collect { AbstractQualityAssessment it->
+        dataToRender.aaData = dataOverall.collect { AbstractQualityAssessment it ->
 
             QualityAssessmentMergedPass qualityAssessmentMergedPass = it.qualityAssessmentMergedPass
             AbstractMergedBamFile abstractMergedBamFile = qualityAssessmentMergedPass.abstractMergedBamFile
@@ -160,36 +196,39 @@ class AlignmentQualityOverviewController {
             double duplicates = it.duplicates / it.totalReadCounter * 100.0 //%duplicates (picard)
             double properlyPaired = it.properlyPaired / it.pairedInSequencing * 100.0
             String readLengthString = sequenceLengthsMap[it.id][0][1]
-            double readLength = readLengthString.contains('-') ? (readLengthString.split('-').sum { it as double } / 2) : readLengthString as double
+            double readLength = readLengthString.contains('-') ? (readLengthString.split('-').sum {
+                it as double
+            } / 2) : readLengthString as double
             double diffChr = it.withMateMappedToDifferentChr / it.totalReadCounter * 100.0 // % diff chrom
 
             Map map = [
-                mockPid: abstractMergedBamFile.individual.mockPid,
-                sampleType: abstractMergedBamFile.sampleType.name,
-                mappedReads: FormatHelper.formatToTwoDecimalsNullSave(it.totalMappedReadCounter / (it.totalReadCounter as Double) * 100.0), //%mapped reads (flagstat)
-                duplicates: FormatHelper.formatToTwoDecimalsNullSave(duplicates), //%duplicates (picard)
-                diffChr: FormatHelper.formatToTwoDecimalsNullSave(diffChr),
-                properlyPaired: FormatHelper.formatToTwoDecimalsNullSave(properlyPaired), //%properly_paired (flagstat)
-                singletons: FormatHelper.formatToTwoDecimalsNullSave(it.singletons / it.totalReadCounter * 100.0), //%singletons (flagstat)
-                medianPE_insertsize: FormatHelper.formatToTwoDecimalsNullSave(it.insertSizeMedian), //Median PE_insertsize
-                dateFromFileSystem:abstractMergedBamFile.dateFromFileSystem?.format("yyyy-MM-dd"),
-                //warning for duplicates
-                duplicateWarning: warningLevelForDuplicates(duplicates).styleClass,
+                    mockPid               : abstractMergedBamFile.individual.mockPid,
+                    sampleType            : abstractMergedBamFile.sampleType.name,
+                    mappedReads           : FormatHelper.formatToTwoDecimalsNullSave(it.totalMappedReadCounter / (it.totalReadCounter as Double) * 100.0), //%mapped reads (flagstat)
+                    duplicates            : FormatHelper.formatToTwoDecimalsNullSave(duplicates), //%duplicates (picard)
+                    diffChr               : FormatHelper.formatToTwoDecimalsNullSave(diffChr),
+                    properlyPaired        : FormatHelper.formatToTwoDecimalsNullSave(properlyPaired), //%properly_paired (flagstat)
+                    singletons            : FormatHelper.formatToTwoDecimalsNullSave(it.singletons / it.totalReadCounter * 100.0), //%singletons (flagstat)
+                    medianPE_insertsize   : FormatHelper.formatToTwoDecimalsNullSave(it.insertSizeMedian), //Median PE_insertsize
+                    dateFromFileSystem    : abstractMergedBamFile.dateFromFileSystem?.format("yyyy-MM-dd"),
+                    //warning for duplicates
+                    duplicateWarning      : warningLevelForDuplicates(duplicates).styleClass,
 
                     //warning for Median PE_insertsize
-                medianWarning: warningLevelForMedian(it.insertSizeMedian, readLength).styleClass,
+                    medianWarning         : warningLevelForMedian(it.insertSizeMedian, readLength).styleClass,
 
                     //warning for properlyPpaired
-                properlyPpairedWarning: warningLevelForProperlyPaired(properlyPaired).styleClass,
+                    properlyPpairedWarning: warningLevelForProperlyPaired(properlyPaired).styleClass,
 
                     //warning for diff chrom
-                diffChrWarning: warningLevelForDiffChrom(diffChr).styleClass,
+                    diffChrWarning        : warningLevelForDiffChrom(diffChr).styleClass,
 
-                plot: it.id,
-                withdrawn: abstractMergedBamFile.withdrawn,
-                pipeline: abstractMergedBamFile.workPackage.pipeline.displayName,
-                kit: [name: kit*.name.join(", ") ?: "", shortName: kit*.shortDisplayName.join(", ") ?: "-"],
+                    plot                  : it.id,
+                    withdrawn             : abstractMergedBamFile.withdrawn,
+                    pipeline              : abstractMergedBamFile.workPackage.pipeline.displayName,
+                    kit                   : [name: kit*.name.join(", ") ?: "", shortName: kit*.shortDisplayName.join(", ") ?: "-"],
             ]
+
 
             switch (seqType.name) {
                 case SeqTypeNames.WHOLE_GENOME.seqTypeName:
@@ -210,21 +249,50 @@ class AlignmentQualityOverviewController {
                     }
 
                     map << [
-                        coverageWithoutN: FormatHelper.formatToTwoDecimalsNullSave(abstractMergedBamFile.coverage), //Coverage w/o N
-                        coverageX: FormatHelper.formatToTwoDecimalsNullSave(coverageX), //ChrX Coverage w/o N
-                        coverageY: FormatHelper.formatToTwoDecimalsNullSave(coverageY), //ChrY Coverage w/o N
+                            coverageWithoutN: FormatHelper.formatToTwoDecimalsNullSave(abstractMergedBamFile.coverage), //Coverage w/o N
+                            coverageX       : FormatHelper.formatToTwoDecimalsNullSave(coverageX), //ChrX Coverage w/o N
+                            coverageY       : FormatHelper.formatToTwoDecimalsNullSave(coverageY), //ChrY Coverage w/o N
                     ]
                     break
+
                 case SeqTypeNames.EXOME.seqTypeName:
                     double onTargetRate = it.onTargetMappedBases / it.allBasesMapped * 100.0
                     map << [
-                        onTargetRate: FormatHelper.formatToTwoDecimalsNullSave(onTargetRate),//on target ratio
-                        targetCoverage: FormatHelper.formatToTwoDecimalsNullSave(abstractMergedBamFile.coverage), //coverage
+                            onTargetRate       : FormatHelper.formatToTwoDecimalsNullSave(onTargetRate),//on target ratio
+                            targetCoverage     : FormatHelper.formatToTwoDecimalsNullSave(abstractMergedBamFile.coverage), //coverage
 
-                        //warning for onTargetRate
-                        onTargetRateWarning: warningLevelForOnTargetRate(onTargetRate).styleClass,
+                            //warning for onTargetRate
+                            onTargetRateWarning: warningLevelForOnTargetRate(onTargetRate).styleClass,
                     ]
                     break
+
+                case SeqTypeNames.RNA.seqTypeName:
+                    map<<[
+                            threePNorm : FormatHelper.formatToTwoDecimalsNullSave(it.threePNorm),
+                            fivePNorm : FormatHelper.formatToTwoDecimalsNullSave(it.fivePNorm),
+                            chimericPairs : FormatHelper.formatToTwoDecimalsNullSave(it.chimericPairs),
+                            duplicatesRate : FormatHelper.formatToTwoDecimalsNullSave(it.duplicatesRate),
+                            end1Sense : FormatHelper.formatToTwoDecimalsNullSave(it.end1Sense),
+                            end2Sense : FormatHelper.formatToTwoDecimalsNullSave(it.end2Sense),
+                            estimatedLibrarySize : FormatHelper.formatToTwoDecimalsNullSave(it.estimatedLibrarySize),
+                            exonicRate : FormatHelper.formatToTwoDecimalsNullSave(it.exonicRate),
+                            expressionProfilingEfficiency : FormatHelper.formatToTwoDecimalsNullSave(it.expressionProfilingEfficiency),
+                            genesDetected : FormatHelper.formatToTwoDecimalsNullSave(it.genesDetected),
+                            intergenicRate : FormatHelper.formatToTwoDecimalsNullSave(it.intergenicRate),
+                            intragenicRate : FormatHelper.formatToTwoDecimalsNullSave(it.intragenicRate),
+                            intronicRate : FormatHelper.formatToTwoDecimalsNullSave(it.intronicRate),
+                            mapped : FormatHelper.formatToTwoDecimalsNullSave(it.mapped),
+                            mappedUnique : FormatHelper.formatToTwoDecimalsNullSave(it.mappedUnique),
+                            mappedUniqueRateOfTotal : FormatHelper.formatToTwoDecimalsNullSave(it.mappedUniqueRateOfTotal),
+                            mappingRate : FormatHelper.formatToTwoDecimalsNullSave(it.mappingRate),
+                            meanCV : FormatHelper.formatToTwoDecimalsNullSave(it.meanCV),
+                            uniqueRateofMapped : FormatHelper.formatToTwoDecimalsNullSave(it.uniqueRateofMapped),
+                            rRNARate : FormatHelper.formatToTwoDecimalsNullSave(it.rRNARate),
+                            totalReadCounter : FormatHelper.formatToTwoDecimalsNullSave(it.totalReadCounter),
+                            duplicates : FormatHelper.formatToTwoDecimalsNullSave(it.duplicates),
+                    ]
+                    break
+
                 default:
                     throw new RuntimeException("How should ${seqTypeName} be handled")
             }
@@ -235,7 +303,8 @@ class AlignmentQualityOverviewController {
         render dataToRender as JSON
     }
 
-    private static AbstractQualityAssessment getQualityAssessmentForFirstMatchingChromosomeName(Map<String, List<AbstractQualityAssessment>> qualityAssessmentMergedPassGroupedByChromosome, List<String> chromosomeNames) {
+    private static AbstractQualityAssessment getQualityAssessmentForFirstMatchingChromosomeName(Map<String,
+            List<AbstractQualityAssessment>> qualityAssessmentMergedPassGroupedByChromosome, List<String> chromosomeNames) {
         return exactlyOneElement(chromosomeNames.findResult { qualityAssessmentMergedPassGroupedByChromosome.get(it) })
     }
 
@@ -260,14 +329,15 @@ class AlignmentQualityOverviewController {
     }
 
     private static WarningLevel warningLevelForMedian(Double median, double readLength) {
-        if(median < 2.2 * readLength){
+        if (median < 2.2 * readLength) {
             return WarningLevel.WarningLevel2
-        } else if(median < 2.5 * readLength) {
+        } else if (median < 2.5 * readLength) {
             return WarningLevel.WarningLevel1
         } else {
             return WarningLevel.NO
         }
     }
+
     private static WarningLevel warningLevelForOnTargetRate(Double onTargetRate) {
         if (onTargetRate < 60) {
             return WarningLevel.WarningLevel2
@@ -277,6 +347,7 @@ class AlignmentQualityOverviewController {
             return WarningLevel.NO
         }
     }
+
     private static WarningLevel warningLevelForDiffChrom(Double diffChrom) {
         if (diffChrom > 3) {
             return WarningLevel.WarningLevel2

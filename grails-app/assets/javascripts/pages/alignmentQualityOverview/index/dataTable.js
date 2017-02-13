@@ -70,7 +70,35 @@ $.otp.alignmentQualityOverviewTable = {
                                         "<span class='" + row.onTargetRateWarning+"'>" + row.onTargetRate + " </span>",
                                         row.targetCoverage,
                                 ];
+                            }else if (seqType === 'RNA') {
+                                coverage = [
+                                    row.threePNorm,
+                                    row.fivePNorm,
+                                    row.chimericPairs,
+                                    row.duplicatesRate,
+                                    row.end1Sense,
+                                    row.end2Sense,
+                                    row.estimatedLibrarySize,
+                                    row.exonicRate,
+                                    row.expressionProfilingEfficiency,
+                                    row.genesDetected,
+                                    row.intergenicRate,
+                                    row.intragenicRate,
+                                    row.intronicRate,
+                                    row.mapped,
+                                    row.mappedUnique,
+                                    row.mappedUniqueRateOfTotal,
+                                    row.mappingRate,
+                                    row.meanCV,
+                                    row.uniqueRateofMapped,
+                                    row.rRNARate,
+                                    row.totalReadCounter,
+                                    row.duplicates
+                                ]
                             }
+
+
+
 
                             general = [
                                 "<span title='" + row.kit.name + "'>" + row.kit.shortName + "</span>",

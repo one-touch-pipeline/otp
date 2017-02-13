@@ -144,46 +144,45 @@ class DomainFactory {
         ], realmProperties)
     }
 
-    static Pipeline createPanCanPipeline() {
+    /**
+     * creates a Pipeline, Name and Type have to be given e.g. Pipeline.Name.PANCAN_ALIGNMENT Pipeline.Type.ALIGNMENT
+     * @param ENUM name of the Pipeline
+     * @param ENUM type of the Pipeline
+     * @return returns a created Pipeline due to given Params
+     */
+    static Pipeline createPipeline(Pipeline.Name name, Pipeline.Type type) {
         return createDomainObjectLazy(Pipeline, [:], [
-                name: Pipeline.Name.PANCAN_ALIGNMENT,
-                type: Pipeline.Type.ALIGNMENT,
+                name: name,
+                type: type,
         ])
+    }
+
+    static Pipeline createPanCanPipeline() {
+        createPipeline(Pipeline.Name.PANCAN_ALIGNMENT, Pipeline.Type.ALIGNMENT)
+    }
+
+    static Pipeline createRoddyRnaPipeline() {
+        createPipeline(Pipeline.Name.RODDY_RNA_ALIGNMENT, Pipeline.Type.ALIGNMENT)
     }
 
     static Pipeline createDefaultOtpPipeline() {
-        return createDomainObjectLazy(Pipeline, [:], [
-                name: Pipeline.Name.DEFAULT_OTP,
-                type: Pipeline.Type.ALIGNMENT,
-        ])
+        createPipeline( Pipeline.Name.DEFAULT_OTP, Pipeline.Type.ALIGNMENT)
     }
 
     static Pipeline createOtpSnvPipelineLazy() {
-        return createDomainObjectLazy(Pipeline, [:], [
-                name: Pipeline.Name.OTP_SNV,
-                type: Pipeline.Type.SNV,
-        ])
+        createPipeline( Pipeline.Name.OTP_SNV, Pipeline.Type.SNV)
     }
 
     static Pipeline createRoddySnvPipelineLazy() {
-        return createDomainObjectLazy(Pipeline, [:], [
-                name: Pipeline.Name.RODDY_SNV,
-                type: Pipeline.Type.SNV,
-        ])
+        createPipeline( Pipeline.Name.RODDY_SNV, Pipeline.Type.SNV)
     }
 
     static Pipeline createIndelPipelineLazy() {
-        return createDomainObjectLazy(Pipeline, [:], [
-                name: Pipeline.Name.RODDY_INDEL,
-                type: Pipeline.Type.INDEL,
-        ])
+        createPipeline( Pipeline.Name.RODDY_INDEL, Pipeline.Type.INDEL)
     }
 
     static Pipeline createExternallyProcessedPipelineLazy() {
-        return createDomainObjectLazy(Pipeline, [:], [
-                name: Pipeline.Name.EXTERNALLY_PROCESSED,
-                type: Pipeline.Type.ALIGNMENT,
-        ])
+        createPipeline( Pipeline.Name.EXTERNALLY_PROCESSED, Pipeline.Type.ALIGNMENT)
     }
 
 
@@ -347,10 +346,10 @@ class DomainFactory {
 
     public static ProcessingOption createProcessingOption(Map properties = [:]) {
         return createDomainObject(ProcessingOption, [
-                 name: "processingOptionName_${counter++}",
-                 type: "processingOptionType_${counter++}",
-                 value:  "processingOptionValue_${counter++}",
-                 comment: "processingOptionComment_${counter++}",
+                name: "processingOptionName_${counter++}",
+                type: "processingOptionType_${counter++}",
+                value:  "processingOptionValue_${counter++}",
+                comment: "processingOptionComment_${counter++}",
         ], properties)
     }
 
@@ -435,7 +434,7 @@ class DomainFactory {
         return createDomainObject(IlseSubmission, [
                 ilseNumber: { counter++ % 999000 + 1000 },
                 warning: false,
-                ], properties, saveAndValidate)
+        ], properties, saveAndValidate)
     }
 
     public static AlignmentPass createAlignmentPass(Map properties = [:]) {
@@ -448,10 +447,10 @@ class DomainFactory {
         properties.remove("referenceGenome")
         properties.remove("description")
         final AlignmentPass alignmentPass = createDomainObject(AlignmentPass, [
-            identifier: AlignmentPass.nextIdentifier(seqTrack),
-            seqTrack: seqTrack,
-            workPackage: workPackage,
-            alignmentState: AlignmentPass.AlignmentState.FINISHED,
+                identifier: AlignmentPass.nextIdentifier(seqTrack),
+                seqTrack: seqTrack,
+                workPackage: workPackage,
+                alignmentState: AlignmentPass.AlignmentState.FINISHED,
         ], properties)
         return alignmentPass
     }
@@ -595,7 +594,7 @@ class DomainFactory {
         MergingWorkPackage workPackage = bamFileProperties.workPackage
         if (!workPackage) {
             SeqType seqType = (clazz == RnaRoddyBamFile) ? createRnaSeqType() : createWholeGenomeSeqType()
-            Pipeline pipeline = createPanCanPipeline()
+            Pipeline pipeline = (clazz == RnaRoddyBamFile) ? createRoddyRnaPipeline() : createPanCanPipeline()
             workPackage = createMergingWorkPackage(
                     pipeline: pipeline,
                     seqType: seqType,
@@ -623,7 +622,7 @@ class DomainFactory {
                 fileOperationStatus: FileOperationStatus.PROCESSED,
                 fileSize: 10000,
                 roddyExecutionDirectoryNames: [DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY],
-                ], bamFileProperties)
+        ], bamFileProperties)
         return bamFile
     }
 
@@ -639,7 +638,7 @@ class DomainFactory {
                 md5sum: HelperUtils.randomMd5sum,
                 fileOperationStatus: FileOperationStatus.PROCESSED,
                 fileSize: 10000,
-                ] + bamFileProperties
+        ] + bamFileProperties
         )
         bamFile.save(flush: true)
         return bamFile
@@ -714,7 +713,7 @@ class DomainFactory {
     static SamplePair createSamplePair(Map properties = [:]) {
         MergingWorkPackage mergingWorkPackage1 = properties.mergingWorkPackage1 ?:
                 properties.mergingWorkPackage2 ? createMergingWorkPackage(properties.mergingWorkPackage2) :
-                createMergingWorkPackage()
+                        createMergingWorkPackage()
         createSampleTypePerProjectLazy(
                 sampleType: mergingWorkPackage1.sampleType,
                 project: mergingWorkPackage1.project,
@@ -969,10 +968,10 @@ class DomainFactory {
 
     public static ExternalScript createExternalScript(Map properties = [:]) {
         return createDomainObject(ExternalScript, [
-            scriptIdentifier: "scriptIdentifier_${counter++}",
-            scriptVersion: "scriptVersion_${counter++}",
-            filePath: TestCase.uniqueNonExistentPath,
-            author: "author_${counter++}",
+                scriptIdentifier: "scriptIdentifier_${counter++}",
+                scriptVersion: "scriptVersion_${counter++}",
+                filePath: TestCase.uniqueNonExistentPath,
+                author: "author_${counter++}",
         ], properties)
     }
 
@@ -1234,7 +1233,7 @@ class DomainFactory {
                 seqPlatformGroup:      { createSeqPlatformGroup() },
                 referenceGenome:       { createReferenceGenome() },
                 statSizeFileName:      { properties.pipeline?.name == Pipeline.Name.PANCAN_ALIGNMENT ?
-                                            "statSizeFileName_${counter++}.tab" : null },
+                        "statSizeFileName_${counter++}.tab" : null },
                 pipeline:              { createDefaultOtpPipeline() },
         ], properties)
     }
@@ -1535,6 +1534,7 @@ class DomainFactory {
                 createExomeSeqType(),
                 createWholeGenomeBisulfiteSeqType(),
                 createWholeGenomeBisulfiteTagmentationSeqType(),
+                createRnaSeqType(),
         ]
     }
 
@@ -1580,12 +1580,12 @@ class DomainFactory {
         MetaDataKey metaDataKey = createMetaDataKeyLazy(name: key)
 
         return createMetaDataEntry(
-            value: value,
-            dataFile: dataFile,
-            key: metaDataKey,
-            status: MetaDataEntry.Status.VALID,
-            source: MetaDataEntry.Source.MDFILE,
-            )
+                value: value,
+                dataFile: dataFile,
+                key: metaDataKey,
+                status: MetaDataEntry.Status.VALID,
+                source: MetaDataEntry.Source.MDFILE,
+        )
     }
 
     static MetaDataEntry createMetaDataKeyAndEntry(DataFile dataFile, MetaDataColumn key, String value) {
@@ -1651,11 +1651,11 @@ class DomainFactory {
     static void createRoddyProcessingOptions(File basePath) {
 
         ProcessingOption processingOptionPath = new ProcessingOption(
-            name: "roddyPath",
-            type: "",
-            project: null,
-            value: "${basePath}/roddy/",
-            comment: "Path to the roddy.sh on the current cluster (***REMOVED***cluster 13.1)",
+                name: "roddyPath",
+                type: "",
+                project: null,
+                value: "${basePath}/roddy/",
+                comment: "Path to the roddy.sh on the current cluster (***REMOVED***cluster 13.1)",
         )
         assert processingOptionPath.save(flush: true)
 

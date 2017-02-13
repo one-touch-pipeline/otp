@@ -138,6 +138,7 @@ class SeqType implements Entity {
         )
     }
 
+
     static List<SeqType> getDefaultOtpAlignableSeqTypes() {
         return [
                 getExomePairedSeqType(),
@@ -151,6 +152,7 @@ class SeqType implements Entity {
                 getWholeGenomePairedSeqType(),
                 getWholeGenomeBisulfitePairedSeqType(),
                 getWholeGenomeBisulfiteTagmentationPairedSeqType(),
+                getRnaPairedSeqType(),
         ]
     }
 

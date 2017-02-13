@@ -4,6 +4,7 @@ import de.dkfz.tbi.otp.testing.*
 import grails.plugin.springsecurity.*
 import grails.plugin.springsecurity.acl.*
 import org.junit.*
+import org.junit.rules.TemporaryFolder
 import org.springframework.security.access.*
 import org.springframework.security.acls.domain.*
 
@@ -13,15 +14,16 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
     MetaDataService metaDataService
     AclUtilService aclUtilService
 
-    File baseDir = new File("/tmp/otp/metadataservice")
+    @Rule
+    public TemporaryFolder temporaryFolder = new TemporaryFolder()
+
+    File baseDir
 
     @Before
     void setUp() {
+        baseDir = temporaryFolder.newFolder()
         // Setup logic here
         createUserAndRoles()
-        if (!baseDir.exists()) {
-            assertTrue(baseDir.mkdirs())
-        }
     }
 
     @After

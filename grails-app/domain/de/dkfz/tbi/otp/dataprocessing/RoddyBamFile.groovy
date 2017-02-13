@@ -59,10 +59,12 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
             }
         }
         baseBamFile nullable: true
+
         workPackage validator: { val, obj ->
-            val?.pipeline?.name == Pipeline.Name.PANCAN_ALIGNMENT &&
+            [Pipeline.Name.PANCAN_ALIGNMENT, Pipeline.Name.RODDY_RNA_ALIGNMENT].contains(val?.pipeline?.name) &&
                     MergingWorkPackage.isAssignableFrom(Hibernate.getClass(val))
         }
+
         config validator: { val, obj -> val?.pipeline?.id == obj.workPackage?.pipeline?.id }
         identifier unique: 'workPackage'
         roddyExecutionDirectoryNames nullable: true

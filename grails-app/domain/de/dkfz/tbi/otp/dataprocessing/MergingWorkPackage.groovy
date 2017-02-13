@@ -48,11 +48,13 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
         // As soon as you loosen this constraint, un-ignore:
         // - AlignmentPassUnitTests.testIsLatestPass_2PassesDifferentWorkPackages
         sample unique: 'seqType'
-        needsProcessing(validator: {val, obj -> !val || obj.pipeline.name == Pipeline.Name.PANCAN_ALIGNMENT})
+
+        needsProcessing(validator: {val, obj -> !val || [Pipeline.Name.PANCAN_ALIGNMENT, Pipeline.Name.RODDY_RNA_ALIGNMENT].contains(obj?.pipeline?.name)})
         pipeline(validator: { pipeline ->
             pipeline.type == Pipeline.Type.ALIGNMENT &&
             pipeline.name != Pipeline.Name.EXTERNALLY_PROCESSED
         })
+
         libraryPreparationKit nullable: true, validator: {val, obj ->
             SeqTypeNames seqTypeName = obj.seqType?.seqTypeName
             if (seqTypeName == SeqTypeNames.EXOME) {
@@ -63,6 +65,7 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
                 return true
             }
         }
+
         statSizeFileName nullable: true, blank: false, matches: ReferenceGenomeProjectSeqType.TAB_FILE_PATTERN, validator : { val, obj ->
             if (obj.pipeline?.name == Pipeline.Name.PANCAN_ALIGNMENT) {
                 val != null && OtpPath.isValidPathComponent(val)
@@ -70,6 +73,8 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
                 val == null
             } else if (obj.pipeline?.name == Pipeline.Name.EXTERNALLY_PROCESSED) {
                 val == null
+            } else if (obj.pipeline?.name == Pipeline.Name.RODDY_RNA_ALIGNMENT) {
+               return val == null
             } else {
                 assert false: "Pipeline name is unknown: ${obj.pipeline?.name}"
             }
