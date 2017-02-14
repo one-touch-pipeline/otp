@@ -93,6 +93,7 @@ SAMBAMBA_MARKDUP_BINARY=sambamba
 SAMBAMBA_MARKDUP_OPTS=sambambaOpt
 
 SAMTOOLS_BINARY=samTool
+
 """, '', 0)
         }
 
@@ -108,13 +109,55 @@ SAMTOOLS_BINARY=samTool
         'samTool' == alignmentInfo.samToolsCommand
 
         where:
-        useConvey | mergeTool                           || alignCommand || alignOpt           || mergeCommand || mergeOpt
-        false     | MergeConstants.MERGE_TOOL_BIOBAMBAM || 'nonConvey'  || 'alnOpt'           || 'bioBamBam'  || 'bioBamBamOpt'
-        false     | MergeConstants.MERGE_TOOL_PICARD    || 'nonConvey'  || 'alnOpt'           || 'picard'     || ''
-        false     | MergeConstants.MERGE_TOOL_SAMBAMBA  || 'nonConvey'  || 'alnOpt'           || 'sambamba'   || 'sambambaOpt'
-        true      | MergeConstants.MERGE_TOOL_BIOBAMBAM || 'convey'     || 'alnOpt conveyOpt' || 'bioBamBam'  || 'bioBamBamOpt'
+        useConvey | mergeTool                               || alignCommand || alignOpt           || mergeCommand || mergeOpt
+        false     | MergeConstants.MERGE_TOOL_BIOBAMBAM     || 'nonConvey'  || 'alnOpt'           || 'bioBamBam'  || 'bioBamBamOpt'
+        false     | MergeConstants.MERGE_TOOL_PICARD        || 'nonConvey'  || 'alnOpt'           || 'picard'     || ''
+        false     | MergeConstants.MERGE_TOOL_SAMBAMBA      || 'nonConvey'  || 'alnOpt'           || 'sambamba'   || 'sambambaOpt'
+        true      | MergeConstants.MERGE_TOOL_BIOBAMBAM     || 'convey'     || 'alnOpt conveyOpt' || 'bioBamBam'  || 'bioBamBamOpt'
+
     }
 
+
+    void "getRoddyAlignmentInformation, when rna, return alignment info with the correct data"() {
+        given:
+        RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig(
+                seqType: DomainFactory.createRnaSeqType()
+        )
+        ProjectOverviewService service = new ProjectOverviewService([
+                processingOptionService   : new ProcessingOptionService(),
+                executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
+                    1 * roddyGetRuntimeConfigCommand(roddyWorkflowConfig, _, roddyWorkflowConfig.seqType.roddyName) >> ''
+                    0 * roddyGetRuntimeConfigCommand(_, _, _)
+                },
+        ])
+
+        GroovyMock(ProcessHelperService, global: true)
+        1 * ProcessHelperService.executeAndWait(_) >> {
+            new ProcessHelperService.ProcessOutput("""
+SAMTOOLS_BINARY=samTool
+SAMBAMBA_BINARY=SAMBAMBA_BINARY
+STAR_BINARY=STAR_BINARY
+
+${['2PASS', 'OUT', 'CHIMERIC', 'INTRONS'].collect { name ->
+    "STAR_PARAMS_${name}=${name}"
+}.join('\n')
+}
+""", '', 0)
+
+        }
+
+        when:
+        ProjectOverviewService.AlignmentInfo alignmentInfo = service.getRoddyAlignmentInformation(roddyWorkflowConfig)
+
+        then:
+        'STAR_BINARY'  == alignmentInfo.bwaCommand
+        ['2PASS', 'OUT', 'CHIMERIC', 'INTRONS'].collect { name ->
+            "${name}"
+        }.join(' ') == alignmentInfo.bwaOptions
+        'SAMBAMBA_BINARY' == alignmentInfo.mergeCommand
+        ''  == alignmentInfo.mergeOptions
+        'samTool' == alignmentInfo.samToolsCommand
+    }
 
     @Unroll
     void "getRoddyAlignmentInformation, when roddy fail for #name, throw Exception"() {

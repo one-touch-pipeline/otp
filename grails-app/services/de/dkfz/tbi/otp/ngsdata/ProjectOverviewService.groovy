@@ -24,6 +24,8 @@ class ProjectOverviewService {
      static final String PICARD_MDUP_COMMAND = "picardMdupCommand"
      static final String PICARD_MDUP_OPTIONS = "picardMdup"
 
+
+
     ExecutionService executionService
     ExecuteRoddyCommandService executeRoddyCommandService
     ProcessingOptionService processingOptionService
@@ -48,6 +50,17 @@ class ProjectOverviewService {
     AlignmentInfo getRoddyAlignmentInformation(RoddyWorkflowConfig workflowConfig) {
         assert workflowConfig
 
+        ProcessOutput output= getRoddyProcessOutput(workflowConfig)
+
+        return generateAlignmentInfo(output, workflowConfig.seqType)
+    }
+
+    /**
+     * get the output check it and returns result if successful
+     * @param workflowConfig
+     */
+    ProcessOutput getRoddyProcessOutput(RoddyWorkflowConfig workflowConfig) {
+
         String nameInConfigFile = workflowConfig.getNameUsedInConfig()
 
         ProcessOutput output = executeAndWait(
@@ -64,6 +77,140 @@ class ProjectOverviewService {
             throw new RuntimeException("Roddy could not find the configuration '${nameInConfigFile}'. Probably some access problem.")
         }
 
+        return output
+
+    }
+
+    /**
+     * Generate Alignment Info by calling necessary Methods
+     * for res, bwa and merge Map and creating a new ALignment Info
+     * on the basic of this Maps
+     * @param output ProcessOutput of Roddy File
+     * @param seqType
+     * @return new Alignment info
+     */
+    AlignmentInfo generateAlignmentInfo( ProcessOutput output, SeqType seqType){
+
+        Map<String, String> res = extractConfigRoddyOutput(output)
+
+        Map bwa = createAlignmentCommandOptionsMap(res, output, seqType)
+
+        Map merge = createMergeCommandOptionsMap(res, output, seqType)
+
+        return new AlignmentInfo(
+                bwaCommand: bwa.command,
+                bwaOptions: bwa.options,
+                samToolsCommand: res.get("SAMTOOLS_BINARY"),
+                mergeCommand: merge.command,
+                mergeOptions: merge.options,
+        )
+
+    }
+
+    /**
+     * Generates Merge Map that holds Command and Options
+     * for the required MergeTool
+     * @param res Map with roddy config output values
+     * @param seqType
+     * @return Map that holds command and options for the Merging
+     */
+    Map createMergeCommandOptionsMap(Map<String, String> res, ProcessOutput output, SeqType seqType) {
+        Map merge = [:]
+
+        // Default empty
+        merge.options = ''
+
+        String tool = getMergingTool(res, seqType)
+        switch (tool) {
+            case MergeConstants.MERGE_TOOL_BIOBAMBAM:
+                merge.command = res.get("MARKDUPLICATES_BINARY")
+                merge.options = res.get("mergeAndRemoveDuplicates_argumentList")
+                break
+            case MergeConstants.MERGE_TOOL_PICARD:
+                merge.command = res.get("PICARD_BINARY")
+                break
+            case MergeConstants.MERGE_TOOL_SAMBAMBA:
+                merge.command = res.get('SAMBAMBA_MARKDUP_BINARY')
+                merge.options = res.get('SAMBAMBA_MARKDUP_OPTS')
+                break
+            case MergeConstants.MERGE_TOOL_SAMBAMBA_RNA:
+                merge.command = res.get('SAMBAMBA_BINARY')
+                break
+            default:
+                merge.command = "Unknown tool: ${tool}"
+        }
+
+        if (!merge.command) {
+            log.debug("Could not extract merging configuration from output:\n${output}")
+            throw new RuntimeException("Could not extract merging configuration value from the roddy output")
+        }
+
+        return merge
+
+    }
+
+    /**
+     * Generates and returns String that holds what Merging have to be done
+     * @return String with the generated tool
+     */
+    String getMergingTool(Map<String, String> res, SeqType seqType) {
+        String tool = res.get('markDuplicatesVariant')
+
+        if (seqType.isRna()) {
+
+            tool = MergeConstants.MERGE_TOOL_SAMBAMBA_RNA
+
+        } else if (!tool) {
+
+            tool = res.get("useBioBamBamMarkDuplicates") == 'true' ? MergeConstants.MERGE_TOOL_BIOBAMBAM : MergeConstants.MERGE_TOOL_PICARD
+
+        }
+
+        return tool
+    }
+
+    /**
+     * Creates a Map bwa with command and options for the alignment
+     * @return Map that holds command and options for the alignment
+     */
+    Map createAlignmentCommandOptionsMap(Map<String, String> res, ProcessOutput output, SeqType seqType) {
+        Map bwa = [:]
+
+        if (seqType.isRna()) {
+
+            bwa.command = res.get("STAR_BINARY")
+            bwa.options = ['2PASS', 'OUT', 'CHIMERIC', 'INTRONS'].collect { name ->
+                res.get("STAR_PARAMS_${name}".toString())
+            }.join(' ')
+
+        } else if (res.get("useAcceleratedHardware") == "true") {
+
+            bwa.command = res.get("BWA_ACCELERATED_BINARY")
+            bwa.options = res.get("BWA_MEM_OPTIONS") + ' ' + res.get("BWA_MEM_CONVEY_ADDITIONAL_OPTIONS")
+
+        } else {
+
+            bwa.command = res.get("BWA_BINARY")
+            bwa.options = res.get("BWA_MEM_OPTIONS")
+
+        }
+
+        if (!bwa.command) {
+
+            log.debug("Could not extract alignment configuration from output:\n${output}")
+            throw new RuntimeException("Could not extract alignment configuration value from the roddy output")
+
+        }
+
+        return bwa
+    }
+
+    /**
+     * Extracts Configurations from the roddy Output into the Map res
+     * @param output of Roddy
+     * @return Map with Roddy config value output
+     */
+    Map<String, String> extractConfigRoddyOutput(ProcessOutput output) {
         Map<String, String> res = [:]
         output.stdout.eachLine { String line ->
             Matcher matcher = line =~ /(?:declare +-x +(?:-i +)?)?([^ =]*)=(.*)/
@@ -79,56 +226,9 @@ class ProjectOverviewService {
             throw new RuntimeException("Could not extract any configuration value from the roddy output")
         }
 
-        String bwaCommand, bwaOptions
-        if (res.get("useAcceleratedHardware") == "true") {
-            bwaCommand = res.get("BWA_ACCELERATED_BINARY")
-            bwaOptions = res.get("BWA_MEM_OPTIONS") + ' ' + res.get("BWA_MEM_CONVEY_ADDITIONAL_OPTIONS")
-        } else {
-            bwaCommand = res.get("BWA_BINARY")
-            bwaOptions = res.get("BWA_MEM_OPTIONS")
-        }
-
-        if (!bwaCommand) {
-            log.debug("Could not extract alignment configuration from output:\n${output}")
-            throw new RuntimeException("Could not extract alignment configuration value from the roddy output")
-        }
-
-        String mergeCommand, mergeOptions
-        String tool = res.get('markDuplicatesVariant')
-        if (!tool) {
-            tool = res.get("useBioBamBamMarkDuplicates") == 'true' ? MergeConstants.MERGE_TOOL_BIOBAMBAM : MergeConstants.MERGE_TOOL_PICARD
-        }
-        switch (tool) {
-            case MergeConstants.MERGE_TOOL_BIOBAMBAM:
-                mergeCommand = res.get("MARKDUPLICATES_BINARY")
-                mergeOptions = res.get("mergeAndRemoveDuplicates_argumentList")
-                break
-            case MergeConstants.MERGE_TOOL_PICARD:
-                mergeCommand = res.get("PICARD_BINARY")
-                mergeOptions = ''
-                break
-            case MergeConstants.MERGE_TOOL_SAMBAMBA:
-                mergeCommand = res.get('SAMBAMBA_MARKDUP_BINARY')
-                mergeOptions = res.get('SAMBAMBA_MARKDUP_OPTS')
-                break
-            default:
-                mergeCommand = "Unknown tool: ${tool}"
-                mergeOptions = ''
-        }
-
-        if (!mergeCommand) {
-            log.debug("Could not extract merging configuration from output:\n${output}")
-            throw new RuntimeException("Could not extract merging configuration value from the roddy output")
-        }
-
-        return new AlignmentInfo(
-                bwaCommand: bwaCommand,
-                bwaOptions: bwaOptions,
-                samToolsCommand: res.get("SAMTOOLS_BINARY"),
-                mergeCommand: mergeCommand,
-                mergeOptions: mergeOptions,
-        )
+        return res
     }
+
 
     AlignmentInfo getDefaultOtpAlignmentInformation(Project project) {
         assert project

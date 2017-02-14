@@ -8,6 +8,8 @@ interface MergeConstants {
 
     static final String MERGE_TOOL_SAMBAMBA = "sambamba"
 
+    static final String MERGE_TOOL_SAMBAMBA_RNA = "sambamba_rna"
+
     static final List<String> ALL_MERGE_TOOLS = [
             MERGE_TOOL_PICARD,
             MERGE_TOOL_BIOBAMBAM,
