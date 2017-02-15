@@ -611,11 +611,11 @@ class DomainFactory {
                     statSizeFileName: workPackage.statSizeFileName,
             )
         }
-        SeqTrack seqTrack = createSeqTrackWithDataFiles(workPackage)
+        Collection<SeqTrack> seqTracks = bamFileProperties.seqTracks ?: [createSeqTrackWithDataFiles(workPackage)]
         T bamFile = createDomainObject(clazz, [
-                numberOfMergedLanes: 1,
+                numberOfMergedLanes: seqTracks.size(),
                 workDirectoryName: "${RoddyBamFile.WORK_DIR_PREFIX}_${counter++}",
-                seqTracks: [seqTrack],
+                seqTracks: seqTracks as Set,
                 workPackage: workPackage,
                 identifier: RoddyBamFile.nextIdentifier(workPackage),
                 config: { createRoddyWorkflowConfigLazy(
@@ -624,12 +624,18 @@ class DomainFactory {
                         seqType: workPackage.seqType,
                         adapterTrimmingNeeded: workPackage.seqType.isRna() || workPackage.seqType.isWgbs(),
                 )},
-                md5sum: HelperUtils.randomMd5sum,
+                md5sum: {
+                    (!bamFileProperties.containsKey('fileOperationStatus') || bamFileProperties.fileOperationStatus == FileOperationStatus.PROCESSED) ? HelperUtils.randomMd5sum : null
+                },
                 fileOperationStatus: FileOperationStatus.PROCESSED,
                 fileSize: 10000,
                 roddyExecutionDirectoryNames: [DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY],
         ], bamFileProperties)
         return bamFile
+    }
+
+    public static RnaRoddyBamFile createRnaRoddyBamFile(Map bamFileProperties = [:]) {
+        createRoddyBamFile(bamFileProperties, RnaRoddyBamFile)
     }
 
     public static createRoddyBamFile(RoddyBamFile baseBamFile, Map bamFileProperties = [:]) {
@@ -1365,6 +1371,7 @@ class DomainFactory {
                 project: { properties.individual?.project ?: createProject() },
                 dateCreated: {new Date()},
                 lastUpdated: {new Date()},
+                adapterTrimmingNeeded: {seqType.isWgbs() || seqType.isRna()},
         ]
     }
 

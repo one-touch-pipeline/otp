@@ -91,12 +91,16 @@ class SeqType implements Entity {
         return seqTypeName?.seqTrackClass ?: SeqTrack
     }
 
+    boolean isExome() {
+        return name == SeqTypeNames.EXOME.seqTypeName
+    }
+
     boolean isWgbs() {
         return WGBS_SEQ_TYPE_NAMES.contains(seqTypeName)
     }
 
     boolean isRna() {
-        return name == "RNA"
+        return name == SeqTypeNames.RNA.seqTypeName
     }
 
     boolean seqTypeAllowsLinking() {
@@ -193,6 +197,13 @@ class SeqType implements Entity {
         return [
                 getDefaultOtpAlignableSeqTypes(),
                 getRoddyAlignableSeqTypes(),
+        ].flatten().unique()
+    }
+
+    static List<SeqType> getSeqTypesIgnoringLibraryPreparationKitForMerging() {
+        return [
+                getWholeGenomeBisulfitePairedSeqType(),
+                getWholeGenomeBisulfiteTagmentationPairedSeqType(),
         ].flatten().unique()
     }
 }

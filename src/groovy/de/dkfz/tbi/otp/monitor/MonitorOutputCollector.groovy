@@ -93,7 +93,13 @@ ${prefix(objectsToStrings(objects, valueToShow).join('\n'))}
     void showRunning(String workflow, List objects,
                      Closure valueToShow = { it as String },
                      Closure objectToCheck = { it }) {
-        showList(HEADER_RUNNING, objects, valueToShow)
+        showRunningWithHeader(HEADER_RUNNING, workflow, objects, valueToShow, objectToCheck)
+    }
+
+    void showRunningWithHeader(String header, String workflow, List objects,
+                     Closure valueToShow = { it as String },
+                     Closure objectToCheck = { it }) {
+        showList(header, objects, valueToShow)
         addInfoAboutProcessErrors(workflow, objects, valueToShow, objectToCheck)
     }
 

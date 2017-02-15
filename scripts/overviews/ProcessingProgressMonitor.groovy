@@ -29,6 +29,7 @@ The script has four input areas, one for run names, one for patient names, one f
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.monitor.*
+import de.dkfz.tbi.otp.monitor.alignment.*
 import de.dkfz.tbi.otp.ngsdata.*
 
 //name of runs
@@ -225,50 +226,6 @@ def handleStateMap = {Map map, String workflow, Closure valueToShow, Closure obj
     return ret
 }
 
-// map: MergingWorkPackages grouped by Workpackage.needsProcessing
-// valueToShow: MergingWorkPackage properties to print out
-def handleStateMapNeedsProcessing = {Map<Boolean, Collection<MergingWorkPackage>> map, Closure valueToShow, String workflow ->
-    output << "\n${workflow}: \n${INDENT}Only SeqTracks are shown which finished fastqc-WF"
-
-    output.showShouldStart(map[true], valueToShow)
-
-    return map[false]
-}
-
-// map: RoddyBamFiles grouped by AbstractMergedBamFile.FileOperationStatus
-// workflow: the workflow name
-// valueToShow: RoddyBamFile properties to print out
-// objectToCheck: defines which objects should be checked to have processes
-def handleStateMapRoddy = {Map<AbstractMergedBamFile.FileOperationStatus, Collection<RoddyBamFile>> map, String workflow,
-                           Closure valueToShow, Closure objectToCheck = {it} ->
-    def ret
-    def keys = map.keySet().sort{it}
-
-    keys.each { key->
-        def values = map[key]
-        switch (key) {
-            case AbstractMergedBamFile.FileOperationStatus.DECLARED :
-                output.showList('running (declared)', values, valueToShow)
-                output.addInfoAboutProcessErrors(workflow, values, valueToShow, objectToCheck)
-                break
-            case AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING:
-                output.showList('running (needs_processing)', values, valueToShow)
-                output.addInfoAboutProcessErrors(workflow, values, valueToShow, objectToCheck)
-                break
-            case AbstractMergedBamFile.FileOperationStatus.INPROGRESS:
-                output.showList('running (in_progress)', values, valueToShow)
-                output.addInfoAboutProcessErrors(workflow, values, valueToShow, objectToCheck)
-                break
-            case AbstractMergedBamFile.FileOperationStatus.PROCESSED:
-                output.showFinished(values, valueToShow)
-                ret = map[key]
-                break
-            default:
-                new RuntimeException("Not handled value: ${key}. Please inform a maintainer")
-        }
-    }
-    return ret
-}
 
 def showSeqTracksOtp = {List<SeqTrack> seqTracksToAlign ->
     boolean allFinished = true
@@ -392,57 +349,6 @@ def showSeqTracksOtp = {List<SeqTrack> seqTracksToAlign ->
     return processedMergedBamFilesFinishedTransferMergedBamFileWorkflow
 }
 
-def showSeqTracksRoddy = {List<SeqTrack> seqTracksToAlign, String workflow ->
-    boolean allFinished = true
-
-    if(!seqTracksToAlign) {
-        return []
-    }
-
-    List<MergingWorkPackage> mergingWorkPackages = MergingWorkPackage.createCriteria().list {
-        and {
-            sample {
-                'in' ('id', seqTracksToAlign*.sample*.id)
-            }
-            seqType{
-                'in' ('id', seqTracksToAlign*.seqType*.id)
-            }
-        }
-    }
-
-    mergingWorkPackages = mergingWorkPackages.findAll { it.findMergeableSeqTracks()*.id.intersect(seqTracksToAlign*.id) }
-
-    Map<Boolean, Collection<MergingWorkPackage>> mergingWorkPackagesByNeedsProcessing =
-            mergingWorkPackages.groupBy {it.needsProcessing}
-
-    allFinished &= mergingWorkPackagesByNeedsProcessing.keySet() == [false] as Set
-    Collection<MergingWorkPackage> mergingWorkPackagesInProcessing = handleStateMapNeedsProcessing(mergingWorkPackagesByNeedsProcessing, {
-        "${it}"
-    }, workflow)
-
-    if (!mergingWorkPackagesInProcessing) {
-        output << "\nnot all workflows are finished"
-        return []
-    }
-
-    List<RoddyBamFile> roddyBamFiles = RoddyBamFile.findAllByWorkPackageInList(mergingWorkPackages).findAll { it.isMostRecentBamFile() && !it.withdrawn }
-
-    Map<AbstractMergedBamFile.FileOperationStatus, Collection<RoddyBamFile>> roddyBamFileByFileOperationStatus =
-            roddyBamFiles.groupBy {it.fileOperationStatus}
-
-    allFinished &= roddyBamFileByFileOperationStatus.keySet() == [AbstractMergedBamFile.FileOperationStatus.PROCESSED] as Set
-    Collection<RoddyBamFile> roddyBamFilesFinishedPanCanWorkflow = handleStateMapRoddy(roddyBamFileByFileOperationStatus, workflow, {
-        "${it}"
-    })
-
-    if (!roddyBamFilesFinishedPanCanWorkflow) {
-        output << "\nnot all workflows are finished"
-        return []
-    }
-
-    return roddyBamFilesFinishedPanCanWorkflow
-}
-
 def showSeqTracks = {Collection<SeqTrack> seqTracks ->
     boolean allFinished = true
 
@@ -515,9 +421,7 @@ def showSeqTracks = {Collection<SeqTrack> seqTracks ->
     seqTracksFinishedAlignment += showSeqTracksOtp(seqTracksByAlignmentDeciderBeanName['defaultOtpAlignmentDecider'])
 
     //alignment Roddy
-    Map<Boolean, List<SeqTrack>> isWgbs = seqTracksByAlignmentDeciderBeanName['panCanAlignmentDecider']?.groupBy {it.seqType.isWgbs()}
-    seqTracksFinishedAlignment += showSeqTracksRoddy(isWgbs?.get(false), 'PanCanWorkflow')
-    seqTracksFinishedAlignment += showSeqTracksRoddy(isWgbs?.get(true), 'WgbsAlignmentWorkflow')
+    seqTracksFinishedAlignment += new AllRoddyAlignmentsChecker().handle(seqTracksByAlignmentDeciderBeanName['panCanAlignmentDecider'], output)
 
     if (!seqTracksFinishedAlignment) {
         return
