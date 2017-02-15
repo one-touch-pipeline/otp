@@ -4,6 +4,7 @@ import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
+import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.infrastructure.*
@@ -590,10 +591,10 @@ class DomainFactory {
         return bamFile
     }
 
-    public static RoddyBamFile createRoddyBamFile(Map bamFileProperties = [:]) {
+    public static <T> T createRoddyBamFile(Map bamFileProperties = [:], Class<T> clazz = RoddyBamFile) {
         MergingWorkPackage workPackage = bamFileProperties.workPackage
         if (!workPackage) {
-            SeqType seqType = createWholeGenomeSeqType()
+            SeqType seqType = (clazz == RnaRoddyBamFile) ? createRnaSeqType() : createWholeGenomeSeqType()
             Pipeline pipeline = createPanCanPipeline()
             workPackage = createMergingWorkPackage(
                     pipeline: pipeline,
@@ -607,7 +608,7 @@ class DomainFactory {
             )
         }
         SeqTrack seqTrack = createSeqTrackWithDataFiles(workPackage)
-        RoddyBamFile bamFile = createDomainObject(RoddyBamFile, [
+        T bamFile = createDomainObject(clazz, [
                 numberOfMergedLanes: 1,
                 workDirectoryName: "${RoddyBamFile.WORK_DIR_PREFIX}_${counter++}",
                 seqTracks: [seqTrack],

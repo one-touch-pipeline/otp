@@ -199,6 +199,27 @@ class TestCase {
         assert expectedEntries == foundEntries
     }
 
+    static void withMockedExecutionService(ExecutionService executionService, Closure code) {
+        assert executionService != null
+        assert code != null
+        try {
+            mockExecuteCommandReturnProcessOutput(executionService)
+            code()
+        } finally {
+            removeMetaClass(ExecutionService, executionService)
+        }
+    }
+
+    private static void mockExecuteCommandReturnProcessOutput(ExecutionService executionService) {
+        executionService.metaClass.executeCommandReturnProcessOutput = { Realm realm, String command, String userName = null ->
+            return executeAndWait(command).assertExitCodeZeroAndStderrEmpty()
+        }
+    }
+
+    /**
+     * @deprecated Use {@link #withMockedExecutionService(ExecutionService, Closure)} instead.
+     */
+    @Deprecated
     static void withMockedExecuteCommand(ExecutionService executionService, Closure code) {
         assert executionService != null
         assert code != null
@@ -210,14 +231,14 @@ class TestCase {
         }
     }
 
-    static void mockExecuteCommand(ExecutionService executionService) {
+    private static void mockExecuteCommand(ExecutionService executionService) {
         executionService.metaClass.executeCommand = { Realm realm, String command ->
             return ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
         }
     }
 
     /**
-     * @deprecated Use {@link #withMockedExecuteCommand(ExecutionService, Closure)} instead.
+     * @deprecated Use {@link #withMockedExecutionService(ExecutionService, Closure)} instead.
      */
     @Deprecated
     def static mockCreateDirectory(LsdfFilesService lsdfFilesService) {
@@ -227,7 +248,7 @@ class TestCase {
     }
 
     /**
-     * @deprecated Use {@link #withMockedExecuteCommand(ExecutionService, Closure)} instead.
+     * @deprecated Use {@link #withMockedExecutionService(ExecutionService, Closure)} instead.
      */
     @Deprecated
     def static mockDeleteDirectory(Object lsdfFilesService) {

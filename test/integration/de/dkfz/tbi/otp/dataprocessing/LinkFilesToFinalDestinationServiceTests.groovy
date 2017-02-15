@@ -252,13 +252,13 @@ class LinkFilesToFinalDestinationServiceTests {
 
         List<File> linkedFiles = createLinkedFilesList()
 
-        TestCase.mockExecuteCommand(linkFilesToFinalDestinationService.executionService)
-
         linkedFiles.each {
             assert !it.exists()
         }
 
-        linkFilesToFinalDestinationService.linkNewResults(roddyBamFile, realm)
+        TestCase.withMockedExecutionService(linkFilesToFinalDestinationService.executionService, {
+            linkFilesToFinalDestinationService.linkNewResults(roddyBamFile, realm)
+        })
 
         linkedFiles.each {
             assert it.exists()
@@ -344,13 +344,13 @@ class LinkFilesToFinalDestinationServiceTests {
     }
 
     private void testLinkNewResults_helper(List<File> linkedFiles){
-        TestCase.mockExecuteCommand(linkFilesToFinalDestinationService.executionService)
-
         linkedFiles.each {
             assert !it.exists()
         }
 
-        linkFilesToFinalDestinationService.linkNewResults(roddyBamFile, realm)
+        TestCase.withMockedExecutionService(linkFilesToFinalDestinationService.executionService, {
+            linkFilesToFinalDestinationService.linkNewResults(roddyBamFile, realm)
+        })
 
         linkedFiles.each {
             assert it.exists()
@@ -377,8 +377,6 @@ class LinkFilesToFinalDestinationServiceTests {
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile2)
 
-        TestCase.mockExecuteCommand(linkFilesToFinalDestinationService.executionService)
-
         List<File> filesToDelete = [
                 roddyBamFile.workBamFile,
                 roddyBamFile.workBaiFile,
@@ -393,7 +391,9 @@ class LinkFilesToFinalDestinationServiceTests {
             assert it.exists()
         }
 
-        linkFilesToFinalDestinationService.cleanupOldResults(roddyBamFile2, realm)
+        TestCase.withMockedExecutionService(linkFilesToFinalDestinationService.executionService, {
+            linkFilesToFinalDestinationService.cleanupOldResults(roddyBamFile2, realm)
+        })
 
         filesToDelete.each {
             assert !it.exists()
@@ -432,8 +432,6 @@ class LinkFilesToFinalDestinationServiceTests {
         boolean hasCalled_deleteContentOfOtherUnixUserDirectory = false
         assert roddyBamFile.workDirectory.exists()
 
-        TestCase.mockExecuteCommand(linkFilesToFinalDestinationService.executionService)
-
         linkFilesToFinalDestinationService.executeRoddyCommandService.metaClass.deleteContentOfOtherUnixUserDirectory = { File basePath, Realm realm ->
             hasCalled_deleteContentOfOtherUnixUserDirectory = true
             assert basePath.exists()
@@ -441,7 +439,9 @@ class LinkFilesToFinalDestinationServiceTests {
             assert basePath.deleteDir()
         }
 
-        linkFilesToFinalDestinationService.cleanupOldResults(roddyBamFile2, realm)
+        TestCase.withMockedExecutionService(linkFilesToFinalDestinationService.executionService, {
+            linkFilesToFinalDestinationService.cleanupOldResults(roddyBamFile2, realm)
+        })
 
         assert hasCalled_deleteContentOfOtherUnixUserDirectory
         assert !roddyBamFile.workDirectory.exists()

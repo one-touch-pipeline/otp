@@ -48,6 +48,9 @@ class CreateRoddyFileHelper {
                 assert new File(methylationLibraryDir, "results").mkdirs()
             }
         }
+        if (roddyBamFile.seqType.isRna()) {
+            new File(roddyBamFile.workDirectory, "additionalArbitraryFile") << "content"
+        }
     }
 
     static void createRoddyAlignmentWorkResultFiles(RoddyBamFile roddyBamFile) {

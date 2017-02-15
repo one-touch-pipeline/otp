@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
@@ -53,21 +54,24 @@ class LinkFilesToFinalDestinationService {
             executeRoddyCommandService.correctPermissionsAndGroups(roddyBamFile, realm)
             cleanupOldResults(roddyBamFile, realm)
             linkNewResults(roddyBamFile, realm)
-
-            File md5sumFile = roddyBamFile.workMd5sumFile
-            assert md5sumFile.exists(): "The md5sum file of ${roddyBamFile} does not exist"
-            assert md5sumFile.text: "The md5sum file of ${roddyBamFile} is empty"
-            RoddyBamFile.withTransaction {
-                roddyBamFile.fileOperationStatus = PROCESSED
-                roddyBamFile.fileSize = roddyBamFile.workBamFile.size()
-                roddyBamFile.md5sum = md5sumFile.text.replaceAll("\n", "").toLowerCase(Locale.ENGLISH)
-                roddyBamFile.fileExists = true
-                roddyBamFile.dateFromFileSystem = new Date(roddyBamFile.workBamFile.lastModified())
-                assert roddyBamFile.save(flush: true)
-                abstractMergedBamFileService.setSamplePairStatusToNeedProcessing(roddyBamFile)
-            }
+            setBamFileValues(roddyBamFile)
         } else {
             threadLog?.info "The results of ${roddyBamFile} will not be moved since it is marked as withdrawn"
+        }
+    }
+
+    void setBamFileValues(RoddyBamFile roddyBamFile) {
+        File md5sumFile = roddyBamFile.workMd5sumFile
+        assert md5sumFile.exists(): "The md5sum file of ${roddyBamFile} does not exist"
+        assert md5sumFile.text: "The md5sum file of ${roddyBamFile} is empty"
+        RoddyBamFile.withTransaction {
+            roddyBamFile.fileOperationStatus = PROCESSED
+            roddyBamFile.fileSize = roddyBamFile.workBamFile.size()
+            roddyBamFile.md5sum = md5sumFile.text.replaceAll("\n", "").toLowerCase(Locale.ENGLISH)
+            roddyBamFile.fileExists = true
+            roddyBamFile.dateFromFileSystem = new Date(roddyBamFile.workBamFile.lastModified())
+            assert roddyBamFile.save(flush: true)
+            abstractMergedBamFileService.setSamplePairStatusToNeedProcessing(roddyBamFile)
         }
     }
 
@@ -121,6 +125,12 @@ class LinkFilesToFinalDestinationService {
         linkFileUtils.createAndValidateLinks(linkMapSourceLink, realm)
     }
 
+    void linkNewRnaResults(RnaRoddyBamFile roddyBamFile, Realm realm) {
+        File baseDirectory = roddyBamFile.getBaseDirectory()
+        roddyBamFile.workDirectory.listFiles().each { File source ->
+            linkFileUtils.createAndValidateLinks([(source): new File(baseDirectory, source.name)], realm)
+        }
+    }
 
     void cleanupWorkDirectory(RoddyBamFile roddyBamFile, Realm realm) {
         assert roddyBamFile : "Input roddyBamFile must not be null"
@@ -194,5 +204,15 @@ class LinkFilesToFinalDestinationService {
 
             lsdfFilesService.deleteFilesRecursive(realm, filesToDelete)
         }
+    }
+
+    void cleanupOldRnaResults(RnaRoddyBamFile roddyBamFile, Realm realm) {
+        List<RoddyBamFile> roddyBamFiles = RoddyBamFile.findAllByWorkPackageAndIdNotEqual(roddyBamFile.mergingWorkPackage, roddyBamFile.id)
+        List<File> workDirs = roddyBamFiles*.workDirectory
+        if (workDirs) {
+            lsdfFilesService.deleteFilesRecursive(realm, workDirs)
+        }
+        String cmd = "find ${roddyBamFile.getBaseDirectory()} -maxdepth 1 -lname '.merging*/*' -delete;"
+        executionService.executeCommandReturnProcessOutput(realm, cmd)
     }
 }
