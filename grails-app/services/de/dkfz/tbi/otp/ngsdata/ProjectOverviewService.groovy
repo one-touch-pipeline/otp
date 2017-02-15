@@ -446,6 +446,7 @@ where
         workPackage.sample.individual.project = :project
         and workPackage.bamFileInProjectFolder = abstractMergedBamFile
         and fileOperationStatus = :fileOperationStatus
+        and abstractMergedBamFile.class != ${ExternallyProcessedMergedBamFile.class.name}
 """, [project: project, fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED])
     }
 
