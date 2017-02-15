@@ -10,12 +10,10 @@ List<String> pidsToDelete = [
 
 
 def bamFiles = ExternallyProcessedMergedBamFile.createCriteria().listDistinct {
-    fastqSet {
-        seqTracks {
-            sample {
-                individual {
-                    'in' ('pid', pidsToDelete)
-                }
+    workPackage {
+        sample {
+            individual {
+                'in'('pid', pidsToDelete)
             }
         }
     }
@@ -25,9 +23,9 @@ assert CollectionUtils.containSame(bamFiles*.individual*.pid.unique(), pidsToDel
 
 ExternallyProcessedMergedBamFile.withTransaction {
     bamFiles.each {
-        FastqSet set = it.fastqSet
+        ExternalMergingWorkPackage workPackage = it.workPackage
         it.delete()
-        set.delete()
+        workPackage.delete()
         println "${it} deleted"
     }
     it.flush()

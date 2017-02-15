@@ -108,8 +108,6 @@ testDataConfig {
             mergingWorkPackage = { MergingWorkPackage.build(pipeline: DomainFactory.createDefaultOtpPipeline()) }
         }
         'de.dkfz.tbi.otp.dataprocessing.MergingSetAssignment' {
-            //Ensure to use this subclass of AbstractBamFile
-            //Otherwise the plugin tries to create an ExternallyProcessedMergedBamFile, but it fails to create the FastqSet
             bamFile = {ProcessedBamFile.build()}
         }
         'de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage' {

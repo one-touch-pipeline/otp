@@ -11,10 +11,6 @@ import org.hibernate.Hibernate
  */
 class ExternallyProcessedMergedBamFile extends AbstractMergedBamFile {
 
-    static belongsTo = [
-        fastqSet: FastqSet
-    ]
-
     /** source of the file, eg. workflow or import name; used to construct the path of the file */
     String source
     String fileName
@@ -91,16 +87,11 @@ class ExternallyProcessedMergedBamFile extends AbstractMergedBamFile {
 
     static constraints = {
         importedFrom nullable: true, blank: false, validator: { it == null || OtpPath.isValidAbsolutePath(it) }
-        fastqSet nullable: true
         source blank: false, validator: { OtpPath.isValidPathComponent(it) }
         fileName blank: false, validator: { OtpPath.isValidPathComponent(it) }
         workPackage validator: { val ->
             val.pipeline.name == Pipeline.Name.EXTERNALLY_PROCESSED &&
                     ExternalMergingWorkPackage.isAssignableFrom(Hibernate.getClass(val))
         }
-    }
-
-    static mapping = {
-        fastqSet index: "abstract_bam_file_fastq_set_idx"
     }
 }

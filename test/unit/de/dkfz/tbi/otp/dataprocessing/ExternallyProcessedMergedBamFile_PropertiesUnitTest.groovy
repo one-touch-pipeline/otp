@@ -27,10 +27,8 @@ class ExternallyProcessedMergedBamFile_PropertiesUnitTest {
         sample = new Sample(sampleType: sampleType, individual: individual)
         referenceGenome = new ReferenceGenome()
         seqType = new SeqType()
-        SeqTrack seqTrack = new SeqTrack(sample: sample, seqType: seqType)
-        FastqSet fastqSet = new FastqSet(seqTracks: [seqTrack])
         ExternalMergingWorkPackage externalMergingWorkPackage = DomainFactory.createExternalMergingWorkPackage(referenceGenome: referenceGenome, sample: sample, seqType: seqType)
-        bamFile = new ExternallyProcessedMergedBamFile(workPackage: externalMergingWorkPackage, fastqSet: fastqSet)
+        bamFile = new ExternallyProcessedMergedBamFile(workPackage: externalMergingWorkPackage)
     }
 
     @After
