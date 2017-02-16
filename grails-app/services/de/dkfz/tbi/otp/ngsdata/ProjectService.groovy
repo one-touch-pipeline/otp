@@ -4,6 +4,7 @@ import de.dkfz.tbi.otp.administration.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddy.RoddyConstants
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.utils.*
@@ -438,7 +439,7 @@ AND ace.granting = true
 
         executeScript(getScriptBash(configDirectory, xmlConfig, configFilePath), snvPipelineConfiguration.project)
 
-        RoddyWorkflowConfig.importProjectConfigFile(
+        RoddyWorkflowConfig roddyWorkflowConfig = RoddyWorkflowConfig.importProjectConfigFile(
                 snvPipelineConfiguration.project,
                 snvPipelineConfiguration.seqType,
                 "${snvPipelineConfiguration.pluginName}:${snvPipelineConfiguration.pluginVersion}",
@@ -446,6 +447,17 @@ AND ace.granting = true
                 configFilePath.path,
                 snvPipelineConfiguration.configVersion,
         )
+        SnvConfig snvConfig = CollectionUtils.atMostOneElement(SnvConfig.findAllWhere([
+                project: snvPipelineConfiguration.project,
+                seqType: snvPipelineConfiguration.seqType,
+                obsoleteDate: null,
+        ]))
+        if (snvConfig) {
+            snvConfig.obsoleteDate = new Date()
+            snvConfig.save(flush: true)
+            roddyWorkflowConfig.previousConfig = snvConfig
+            roddyWorkflowConfig.save(flush: true)
+        }
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")

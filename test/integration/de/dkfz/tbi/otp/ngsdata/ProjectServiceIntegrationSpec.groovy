@@ -4,6 +4,7 @@ import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddy.RoddyConstants
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.testing.*
 import de.dkfz.tbi.otp.utils.*
@@ -984,6 +985,44 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         )
         roddyWorkflowConfigs.size() == 2
         roddyWorkflowConfigs.findAll({ it.obsoleteDate == null }).size() == 1
+    }
+
+    void "test configureSnvPipelineProject valid input, old otp snv config exist"() {
+        setup:
+        SnvConfig configuration = DomainFactory.createSnvConfig([
+                project          : Project.findByName("testProjectAlignment"),
+                seqType          : SeqType.exomePairedSeqType,
+        ])
+        Realm realm = ConfigService.getRealm(configuration.project, Realm.OperationType.DATA_MANAGEMENT)
+        File projectDirectory = LsdfFilesService.getPath(
+                realm.rootPath,
+                configuration.project.dirName,
+        )
+        assert projectDirectory.exists() || projectDirectory.mkdirs()
+
+
+        SnvPipelineConfiguration configuration2 = createSnvPipelineConfiguration([
+                configVersion   : 'v1_1'
+        ])
+
+        when:
+        SpringSecurityUtils.doWithAuth("admin") {
+            projectService.configureSnvPipelineProject(configuration2)
+        }
+
+        then:
+        Set<RoddyWorkflowConfig> roddyWorkflowConfigs = RoddyWorkflowConfig.findAllByProjectAndPipelineInListAndPluginVersion(
+                configuration.project,
+                Pipeline.findAllByTypeAndName(Pipeline.Type.SNV, Pipeline.Name.RODDY_SNV),
+                "${configuration2.pluginName}:${configuration2.pluginVersion}"
+        )
+        roddyWorkflowConfigs.size() == 1
+        roddyWorkflowConfigs[0].obsoleteDate == null
+
+        SnvConfig snvConfig = CollectionUtils.exactlyOneElement(SnvConfig.list())
+        snvConfig.obsoleteDate != null
+
+        roddyWorkflowConfigs[0].previousConfig == snvConfig
     }
 
     void "test configureSnvPipelineProject valid input, multiple SeqTypes"() {
