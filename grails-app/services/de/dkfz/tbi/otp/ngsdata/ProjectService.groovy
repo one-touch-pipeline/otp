@@ -406,6 +406,8 @@ AND ace.granting = true
                 configFilePath.path,
                 roddyWorkflowConfigBasedProject.configVersion,
         )
+        project.alignmentDeciderBeanName = AlignmentDeciderBeanNames.PAN_CAN_ALIGNMENT.bean
+        project.save(flush: true)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")

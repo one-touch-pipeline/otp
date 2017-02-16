@@ -920,6 +920,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         roddyWorkflowConfigs.size() == 1
         File roddyWorkflowConfig = new File(roddyWorkflowConfigs.configFilePath.first())
         roddyWorkflowConfig.exists()
+        project.alignmentDeciderBeanName == AlignmentDeciderBeanNames.PAN_CAN_ALIGNMENT.bean
     }
 
     void "test configureDefaultOtpAlignmentDecider to configureNoAlignmentDeciderProject"() {
