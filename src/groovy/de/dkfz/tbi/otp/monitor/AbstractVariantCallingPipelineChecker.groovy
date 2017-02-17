@@ -233,10 +233,10 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
                 Set<SeqTrack> availableSeqTracks = bamFile.workPackage.findMergeableSeqTracks()
                 if (!CollectionUtils.containSame(containedSeqTracks*.id, availableSeqTracks*.id)) {
                     Set<SeqTrack> missingSeqTracks = availableSeqTracks.findAll {
-                        containedSeqTracks*.id.contains(it.id)
+                        !containedSeqTracks*.id.contains(it.id)
                     }
                     Set<SeqTrack> additionalSeqTrack = containedSeqTracks.findAll {
-                        availableSeqTracks*.id.contains(it.id)
+                        !availableSeqTracks*.id.contains(it.id)
                     }
                     if (missingSeqTracks) {
                         ret << "${key} ${PROBLEMS_MISSING_SEQ_TRACKS}: ${missingSeqTracks.collect { "<${it.run} ${it.laneId}>" }.join('; ')}"
