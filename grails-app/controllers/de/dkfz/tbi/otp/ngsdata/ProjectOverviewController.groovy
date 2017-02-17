@@ -105,7 +105,7 @@ class ProjectOverviewController {
                 project: project,
                 comment: project.comment,
                 nameInMetadata: project.nameInMetadataFiles?: '',
-                seqTypes: SeqType.panCanAlignableSeqTypes,
+                seqTypes: SeqType.roddyAlignableSeqTypes,
                 snvSeqTypes: SeqType.snvPipelineSeqTypes,
                 indelSeqTypes: SeqType.indelPipelineSeqTypes,
                 alignmentInfo: alignmentInfo,

@@ -6,11 +6,17 @@ import de.dkfz.tbi.otp.utils.*
 
 class ToolName implements Entity {
 
+    enum Type {
+        RNA,
+    }
+
     String name
+    Type type
     String path
 
     static constraints = {
         name unique: true
+        type nullable: false
         path nullable: false, blank: false, unique: true, validator: { String val ->
             OtpPath.isValidPathComponent(val)
         }

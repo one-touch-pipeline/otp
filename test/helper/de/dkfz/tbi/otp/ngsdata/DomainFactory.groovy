@@ -165,6 +165,10 @@ class DomainFactory {
         createPipeline(Pipeline.Name.RODDY_RNA_ALIGNMENT, Pipeline.Type.ALIGNMENT)
     }
 
+    static Pipeline createRnaPipeline() {
+        createPipeline(Pipeline.Name.RODDY_RNA_ALIGNMENT, Pipeline.Type.ALIGNMENT)
+    }
+
     static Pipeline createDefaultOtpPipeline() {
         createPipeline( Pipeline.Name.DEFAULT_OTP, Pipeline.Type.ALIGNMENT)
     }
@@ -1168,6 +1172,7 @@ class DomainFactory {
     static ToolName createToolName(Map properties = [:]) {
         return createDomainObject(ToolName, [
                 name: "GENOME_STAR_INDEX_${counter++}",
+                type: ToolName.Type.RNA,
                 path: "path_${counter++}",
         ], properties)
     }
@@ -1553,14 +1558,20 @@ class DomainFactory {
                 createExomeSeqType(),
                 createWholeGenomeBisulfiteSeqType(),
                 createWholeGenomeBisulfiteTagmentationSeqType(),
-                createRnaSeqType(),
         ]
+    }
+
+    static List<SeqType> createRoddyAlignableSeqTypes() {
+        [
+                createPanCanAlignableSeqTypes(),
+                createRnaSeqType(),
+        ].flatten()
     }
 
     static List<SeqType> createAllAlignableSeqTypes() {
         [
                 createDefaultOtpAlignableSeqTypes(),
-                createPanCanAlignableSeqTypes(),
+                createRoddyAlignableSeqTypes(),
         ].flatten().unique()
     }
 

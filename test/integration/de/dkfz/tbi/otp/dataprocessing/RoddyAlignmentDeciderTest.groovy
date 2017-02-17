@@ -341,7 +341,7 @@ public class RoddyAlignmentDeciderTest {
 
     @Test
     void testCanPipelineAlign_whenEverythingIsOkay_shouldReturnTrue() {
-        DomainFactory.createPanCanAlignableSeqTypes()
+        DomainFactory.createRoddyAlignableSeqTypes()
         SeqType seqType = DomainFactory.createWholeGenomeSeqType()
         SeqTrack seqTrack = DomainFactory.createSeqTrack(seqType: seqType)
         DomainFactory.createRoddyWorkflowConfig(project: seqTrack.project, seqType:  seqType)
@@ -351,7 +351,7 @@ public class RoddyAlignmentDeciderTest {
 
     @Test
     void testCanPipelineAlign_whenWrongLibraryLayout_shouldReturnFalse() {
-        DomainFactory.createPanCanAlignableSeqTypes()
+        DomainFactory.createRoddyAlignableSeqTypes()
         SeqType seqType = DomainFactory.createSeqType(
                 name: SeqTypeNames.WHOLE_GENOME.seqTypeName,
                 libraryLayout: SeqType.LIBRARYLAYOUT_MATE_PAIR
@@ -365,7 +365,7 @@ public class RoddyAlignmentDeciderTest {
 
     @Test
     void testCanPipelineAlign_whenWrongSeqType_shouldReturnFalse() {
-        DomainFactory.createPanCanAlignableSeqTypes()
+        DomainFactory.createRoddyAlignableSeqTypes()
         SeqType seqType = DomainFactory.createSeqType(
                 name: 'INVALID_NAME',
                 libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED
@@ -379,7 +379,7 @@ public class RoddyAlignmentDeciderTest {
 
     @Test
     void testCanPipelineAlign_whenConfigIsMissing_shouldReturnFalse() {
-        DomainFactory.createPanCanAlignableSeqTypes()
+        DomainFactory.createRoddyAlignableSeqTypes()
         SeqType seqType = DomainFactory.createWholeGenomeSeqType()
         SeqTrack seqTrack = DomainFactory.createSeqTrack(seqType: seqType)
 

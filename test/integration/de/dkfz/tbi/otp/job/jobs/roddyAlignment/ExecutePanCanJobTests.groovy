@@ -25,7 +25,7 @@ class ExecutePanCanJobTests {
 
     @Before
     void setUp() {
-        DomainFactory.createPanCanAlignableSeqTypes()
+        DomainFactory.createRoddyAlignableSeqTypes()
 
         roddyBamFile = DomainFactory.createRoddyBamFile([
                 md5sum: null,

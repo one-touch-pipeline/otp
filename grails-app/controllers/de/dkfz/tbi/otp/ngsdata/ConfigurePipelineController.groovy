@@ -110,10 +110,95 @@ class ConfigurePipelineController {
         return result
     }
 
+    def rnaAlignment(ConfigureRnaAlignmentPipelineSubmitCommand cmd) {
+        Pipeline pipeline = CollectionUtils.exactlyOneElement(Pipeline.findAllByTypeAndName(
+                Pipeline.Type.ALIGNMENT,
+                Pipeline.Name.RODDY_RNA_ALIGNMENT,
+        ))
+
+        List<Project> projects = projectService.getAllProjectsWithCofigFile(cmd.seqType, pipeline)
+
+        Map result = checkErrorsIfSubmitted(cmd, pipeline)
+        if (!result) {
+            RnaAlignmentConfiguration rnaAlignmentConfiguration = new RnaAlignmentConfiguration([
+                    project              : cmd.project,
+                    seqType              : cmd.seqType,
+                    referenceGenome      : cmd.referenceGenome,
+                    pluginName           : cmd.pluginName,
+                    pluginVersion        : cmd.pluginVersion,
+                    configVersion        : cmd.config,
+                    geneModels           : cmd.geneModels,
+                    referenceGenomeIndex : cmd.referenceGenomeIndex,
+            ])
+            projectService.configureRnaAlignmentDeciderProject(rnaAlignmentConfiguration)
+            redirect(controller: "projectOverview", action: "specificOverview", params: [project: cmd.project.name])
+        }
+
+        String defaultPluginName = ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_RODDY_ALIGNMENT_PLUGIN_NAME, cmd.seqType.roddyName, null)
+        String defaultPluginVersion = ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_RODDY_ALIGNMENT_PLUGIN_VERSION, cmd.seqType.roddyName, null)
+        String defaultBaseProjectConfig = ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_BASE_PROJECT_CONFIG, cmd.seqType.roddyName, null)
+        String defaultReferenceGenome = ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_DEFAULT_REFERENCE_GENOME, cmd.seqType.roddyName, null)
+
+        assert ReferenceGenome.findByName(defaultReferenceGenome)
+
+        result << getValues(cmd.project, cmd.seqType, pipeline)
+
+        String referenceGenome = ReferenceGenomeProjectSeqType.findByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(cmd.project, cmd.seqType)?.referenceGenome?.name ?: defaultReferenceGenome
+        List<String> referenceGenomes = ReferenceGenome.list(sort: "name", order: "asc")*.name
+
+        assert cmd.project.getProjectDirectory().exists()
+
+        result << [
+                projects                : projects,
+                toolNames               : ToolName.findAllByType(ToolName.Type.RNA)*.name,
+
+                referenceGenome         : referenceGenome,
+                referenceGenomes        : referenceGenomes,
+                defaultReferenceGenome  : defaultReferenceGenome,
+                indexToolVersion        : null,
+                geneModel               : null,
+
+                pluginName              : defaultPluginName,
+                defaultPluginName       : defaultPluginName,
+
+                pluginVersion           : defaultPluginVersion,
+                defaultPluginVersion    : defaultPluginVersion,
+
+                baseProjectConfig       : defaultBaseProjectConfig,
+                defaultBaseProjectConfig: defaultBaseProjectConfig,
+        ]
+
+        if (cmd.submit) {
+            result << [
+                    referenceGenome  : cmd.referenceGenome,
+                    ]
+        }
+        return result
+    }
+
     JSON getStatSizeFileNames(String referenceGenome) {
         Map data = [
                 data: ReferenceGenome.findByName(referenceGenome)?.getStatSizeFileNames()*.name
         ]
+        render data as JSON
+    }
+
+    JSON getGeneModels(String referenceGenome) {
+        Map data = [
+                data: GeneModel.findAllByReferenceGenome(ReferenceGenome.findByName(referenceGenome))
+        ]
+        render data as JSON
+    }
+
+    JSON getToolVersions(String referenceGenome) {
+        List<ToolName> toolNames = ToolName.findAllByType(ToolName.Type.RNA)
+        ReferenceGenome refGenome = ReferenceGenome.findByName(referenceGenome)
+        Map data = [:]
+        toolNames.each {
+            data << [
+                    (it.name): ReferenceGenomeIndex.findAllByReferenceGenomeAndToolName(refGenome, it)
+            ]
+        }
         render data as JSON
     }
 
@@ -290,6 +375,34 @@ class ConfigureAlignmentPipelineSubmitCommand extends ConfigurePipelineSubmitCom
         sambambaVersion(nullable: true, validator: { val, obj ->
             obj.mergeTool != MergeConstants.MERGE_TOOL_SAMBAMBA ? true : val != null
         })
+    }
+}
+
+class ConfigureRnaAlignmentPipelineSubmitCommand extends ConfigurePipelineSubmitCommand implements Serializable {
+    String referenceGenome
+
+    List<GeneModel> geneModels = []
+    List<ReferenceGenomeIndex> referenceGenomeIndex = []
+
+    void setGeneModelValues(List geneModelValues) {
+        if (geneModelValues) {
+            geneModelValues.each {
+                if (it) {
+                    geneModels.add(GeneModel.findById(it as long))
+                }
+            }
+        }
+    }
+
+    void setToolVersionValue(List toolVersionValue) {
+        if (toolVersionValue) {
+            toolVersionValue.each {
+                println it
+                if (it) {
+                    referenceGenomeIndex.add(ReferenceGenomeIndex.findById(it as long))
+                }
+            }
+        }
     }
 }
 

@@ -99,7 +99,7 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
         return ["scripts/workflows/PanCanWorkflow.groovy",
                 "scripts/initializations/AddPathToConfigFilesToProcessingOptions.groovy",
                 "scripts/initializations/AddRoddyPathAndVersionToProcessingOptions.groovy",
-                "scripts/initializations/RoddyConstants.groovy",
+                "scripts/initializations/RoddyProcessingOptions.groovy",
         ]
     }
 

@@ -1,12 +1,11 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.utils.CollectionUtils
 import org.springframework.security.access.prepost.PreAuthorize
 
 class SeqTypeService {
 
     @Deprecated
-    /** @deprecated Use {@link SeqType#getAllAlignableSeqTypes()}, {@link SeqType#getDefaultOtpAlignableSeqTypes()} or {@link SeqType#getPanCanAlignableSeqTypes()} instead. */
+    /** @deprecated Use {@link SeqType#getAllAlignableSeqTypes()}, {@link SeqType#getDefaultOtpAlignableSeqTypes()} or {@link SeqType#getRoddyAlignableSeqTypes()} instead. */
     static List<SeqType> alignableSeqTypes() {
         final List<String> alignableSeqTypeNames = [
             SeqTypeNames.EXOME,

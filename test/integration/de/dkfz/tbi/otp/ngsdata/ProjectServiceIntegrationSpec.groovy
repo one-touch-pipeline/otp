@@ -11,7 +11,6 @@ import de.dkfz.tbi.otp.utils.*
 import grails.plugin.springsecurity.*
 import grails.test.spock.*
 import grails.validation.*
-import org.apache.commons.io.*
 import org.codehaus.groovy.grails.commons.*
 import org.junit.*
 import org.junit.rules.*
@@ -48,6 +47,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         DomainFactory.createReferenceGenome(name: 'testReferenceGenome2')
         DomainFactory.createAllAlignableSeqTypes()
         DomainFactory.createPanCanPipeline()
+        DomainFactory.createRnaPipeline()
         DomainFactory.createRoddySnvPipelineLazy()
         DomainFactory.createIndelPipelineLazy()
         projectService.executionService = Stub(ExecutionService) {
@@ -591,10 +591,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
 
     void "test configurePanCanAlignmentDeciderProject valid input, multiple SeqTypes"() {
         setup:
-        //TODO temporary remove rna seq type, will be fixed in OTP-2434
-        List<SeqType> seqTypes = DomainFactory.createPanCanAlignableSeqTypes()
-        seqTypes.remove(SeqType.rnaPairedSeqType)
-        List<PanCanAlignmentConfiguration> configurations = seqTypes.collect {
+        List<PanCanAlignmentConfiguration> configurations = DomainFactory.createPanCanAlignableSeqTypes().collect {
             createPanCanAlignmentConfiguration(seqType: it)
         }
         int count = configurations.size()
@@ -851,6 +848,29 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         then:
         configuration.project.alignmentDeciderBeanName == AlignmentDeciderBeanNames.NO_ALIGNMENT.bean
         ReferenceGenomeProjectSeqType.findAllByDeprecatedDateIsNull().size() == 0
+    }
+
+    void "test configureRnaAlignmentDeciderProject valid input"() {
+        setup:
+        RnaAlignmentConfiguration configuration = createRnaAlignmentConfiguration()
+
+        when:
+        SpringSecurityUtils.doWithAuth("admin") {
+            projectService.configureRnaAlignmentDeciderProject(configuration)
+        }
+
+        then:
+        List<RoddyWorkflowConfig> roddyWorkflowConfigs = RoddyWorkflowConfig.findAllByProjectAndSeqTypeAndPipelineInListAndPluginVersionAndObsoleteDateIsNull(
+                configuration.project,
+                configuration.seqType,
+                Pipeline.findAllByTypeAndName(Pipeline.Type.ALIGNMENT, Pipeline.Name.RODDY_RNA_ALIGNMENT),
+                "${configuration.pluginName}:${configuration.pluginVersion}"
+        )
+        roddyWorkflowConfigs.size() == 1
+        File roddyWorkflowConfig = new File(roddyWorkflowConfigs.configFilePath.first())
+        roddyWorkflowConfig.exists()
+        PosixFileAttributes attributes = Files.readAttributes(roddyWorkflowConfig.toPath(), PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
+        TestCase.assertContainSame(attributes.permissions(), [PosixFilePermission.OWNER_READ, PosixFilePermission.GROUP_READ])
     }
 
     void "test configureDefaultOtpAlignmentDecider to configurePanCanAlignmentDeciderProject"() {
@@ -1322,6 +1342,29 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         assert projectDirectory.exists() || projectDirectory.mkdirs()
 
         makeStatFile(configuration.project, ReferenceGenome.findByName(configuration.referenceGenome), configuration.statSizeFileName)
+        return configuration
+    }
+
+    private RnaAlignmentConfiguration createRnaAlignmentConfiguration(Map properties = [:]) {
+        RnaAlignmentConfiguration configuration = new RnaAlignmentConfiguration([
+                project             : Project.findByName("testProjectAlignment"),
+                seqType             : SeqType.rnaPairedSeqType,
+                referenceGenome     : "testReferenceGenome",
+                pluginName          : 'plugin',
+                pluginVersion       : '1.2.3',
+                baseProjectConfig   : 'baseConfig',
+                configVersion       : 'v1_0',
+                referenceGenomeIndex: [DomainFactory.createReferenceGenomeIndex(), DomainFactory.createReferenceGenomeIndex()],
+                geneModels          : [DomainFactory.createGeneModel(), DomainFactory.createGeneModel()],
+
+        ] + properties)
+        Realm realm = ConfigService.getRealm(configuration.project, Realm.OperationType.DATA_MANAGEMENT)
+        File projectDirectory = LsdfFilesService.getPath(
+                realm.rootPath,
+                configuration.project.dirName,
+        )
+        assert projectDirectory.exists() || projectDirectory.mkdirs()
+
         return configuration
     }
 

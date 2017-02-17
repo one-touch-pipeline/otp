@@ -139,6 +139,40 @@ wgbs.each { SeqType seqType ->
 
 
 
+//RNA
+println processingOptionService.createOrUpdate(
+        RoddyConstants.OPTION_KEY_RODDY_ALIGNMENT_PLUGIN_NAME,
+        SeqType.rnaPairedSeqType.roddyName,
+        null,
+        "RNAseqWorkflow",
+        "Name of the alignment plugin, used with RNA"
+)
+//TODO
+println processingOptionService.createOrUpdate(
+        RoddyConstants.OPTION_KEY_RODDY_ALIGNMENT_PLUGIN_VERSION,
+        SeqType.rnaPairedSeqType.roddyName,
+        null,
+        "???",
+        "The version of the rna roddy alignment plugin"
+)
+
+println processingOptionService.createOrUpdate(
+        RoddyConstants.OPTION_KEY_BASE_PROJECT_CONFIG,
+        SeqType.rnaPairedSeqType.roddyName,
+        null,
+        "otpRnaAlignment-1.0",
+        "The base project file for WGS alignment"
+)
+
+println processingOptionService.createOrUpdate(
+        RoddyConstants.OPTION_KEY_DEFAULT_REFERENCE_GENOME,
+        SeqType.rnaPairedSeqType.roddyName,
+        null,
+        "1KGRef_PhiX",
+        "Default reference genome for WGS"
+)
+
+
 processingOptionService.createOrUpdate(
         RoddyConstants.OPTION_KEY_BWA_VERSION_AVAILABLE,
         null,

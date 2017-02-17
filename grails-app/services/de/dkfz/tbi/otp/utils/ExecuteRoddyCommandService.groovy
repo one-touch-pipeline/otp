@@ -1,7 +1,6 @@
 package de.dkfz.tbi.otp.utils
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
-import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.job.processing.CreateClusterScriptService
@@ -10,7 +9,6 @@ import de.dkfz.tbi.otp.job.processing.ExecutionService
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 import groovy.transform.TupleConstructor
 
 class ExecuteRoddyCommandService {
@@ -109,7 +107,7 @@ class ExecuteRoddyCommandService {
         assert roddyResult : "The input roddyResult must not be null"
         assert roddyResult.seqType : "There is not seqType available for ${roddyResult}"
 
-        if (SeqType.panCanAlignableSeqTypes.contains(roddyResult.seqType)) {
+        if (SeqType.roddyAlignableSeqTypes.contains(roddyResult.seqType)) {
             String roddyName = roddyResult.seqType.roddyName
             assert roddyName : "roddyName is not specified for ${roddyResult.seqType}"
             return roddyName

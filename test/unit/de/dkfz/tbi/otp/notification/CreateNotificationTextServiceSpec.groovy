@@ -422,7 +422,7 @@ class CreateNotificationTextServiceSpec extends Specification {
     @Unroll
     void "installationNotification, return message"() {
         given:
-        DomainFactory.createPanCanAlignableSeqTypes()
+        DomainFactory.createRoddyAlignableSeqTypes()
         DomainFactory.createNotificationProcessingOptions()
 
         Map data1 = createData([
@@ -508,7 +508,7 @@ ${expectedAlign}"""
     @Unroll
     void "alignmentNotification, return message"() {
         given:
-        DomainFactory.createPanCanAlignableSeqTypes()
+        DomainFactory.createRoddyAlignableSeqTypes()
         DomainFactory.createNotificationProcessingOptions()
 
         Map data1 = createData([
@@ -633,7 +633,7 @@ ${expectedVariantCallingRunning}${expectedVariantCallingNotRunning}"""
     @Unroll
     void "snvNotification, return message"() {
         given:
-        DomainFactory.createPanCanAlignableSeqTypes()
+        DomainFactory.createRoddyAlignableSeqTypes()
         DomainFactory.createNotificationProcessingOptions()
 
         Map data1 = createData([
@@ -716,7 +716,7 @@ samplePairsNotProcessed: ${expectedSamplePairsNotProcessed}
     @Unroll
     void "indelNotification, return message"() {
         given:
-        DomainFactory.createPanCanAlignableSeqTypes()
+        DomainFactory.createRoddyAlignableSeqTypes()
         DomainFactory.createNotificationProcessingOptions()
 
         Map data1 = createData([

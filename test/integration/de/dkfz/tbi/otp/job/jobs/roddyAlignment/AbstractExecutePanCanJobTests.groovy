@@ -3,13 +3,10 @@ package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
-import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 import org.junit.*
 import org.junit.rules.*
-
-import static de.dkfz.tbi.otp.utils.ProcessHelperService.*
 
 class AbstractExecutePanCanJobTests {
 
@@ -32,7 +29,7 @@ class AbstractExecutePanCanJobTests {
 
     @Before
     void setUp() {
-        DomainFactory.createPanCanAlignableSeqTypes()
+        DomainFactory.createRoddyAlignableSeqTypes()
 
         roddyBamFile = DomainFactory.createRoddyBamFile([
                 md5sum                      : null,

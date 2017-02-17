@@ -38,6 +38,8 @@ class ProjectService {
     ReferenceGenomeService referenceGenomeService
     SpringSecurityService springSecurityService
     ExecutionHelperService executionHelperService
+    ReferenceGenomeIndexService referenceGenomeIndexService
+    GeneModelService geneModelService
 
     /**
      *
@@ -286,13 +288,7 @@ AND ace.granting = true
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void configurePanCanAlignmentDeciderProject(PanCanAlignmentConfiguration panCanAlignmentConfiguration) {
-        if (panCanAlignmentConfiguration.project.alignmentDeciderBeanName == AlignmentDeciderBeanNames.OTP_ALIGNMENT.bean) {
-            setReferenceGenomeProjectSeqTypeDeprecated(panCanAlignmentConfiguration.project)
-        } else {
-            setReferenceGenomeProjectSeqTypeDeprecated(panCanAlignmentConfiguration.project, panCanAlignmentConfiguration.seqType)
-        }
-        panCanAlignmentConfiguration.project.alignmentDeciderBeanName = AlignmentDeciderBeanNames.PAN_CAN_ALIGNMENT.bean
-        panCanAlignmentConfiguration.project.save(flush: true, failOnError: true)
+        deprecatedReferenceGenomeProjectSeqTypeAndSetDecider(panCanAlignmentConfiguration)
 
         ReferenceGenome referenceGenome = exactlyOneElement(ReferenceGenome.findAllByName(panCanAlignmentConfiguration.referenceGenome))
 
@@ -338,37 +334,76 @@ AND ace.granting = true
                 Pipeline.Name.PANCAN_ALIGNMENT,
         ))
 
-        ReferenceGenomeProjectSeqType refSeqType = new ReferenceGenomeProjectSeqType()
-        refSeqType.project = panCanAlignmentConfiguration.project
-        refSeqType.seqType = panCanAlignmentConfiguration.seqType
-        refSeqType.referenceGenome = referenceGenome
-        refSeqType.sampleType = null
+        ReferenceGenomeProjectSeqType refSeqType = createReferenceGenomeProjectSeqType(panCanAlignmentConfiguration, referenceGenome)
         refSeqType.statSizeFileName = panCanAlignmentConfiguration.statSizeFileName
         refSeqType.save(flush: true, failOnError: true)
 
-        String xmlConfig = RoddyPanCanConfigTemplate.createConfigBashEscaped(panCanAlignmentConfiguration)
+        alignmentHelper(panCanAlignmentConfiguration, pipeline, RoddyPanCanConfigTemplate.createConfigBashEscaped(panCanAlignmentConfiguration))
+    }
 
-        File projectDirectory = panCanAlignmentConfiguration.project.getProjectDirectory()
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void configureRnaAlignmentDeciderProject(RnaAlignmentConfiguration rnaAlignmentConfiguration) {
+        deprecatedReferenceGenomeProjectSeqTypeAndSetDecider(rnaAlignmentConfiguration)
+
+        ReferenceGenome referenceGenome = exactlyOneElement(ReferenceGenome.findAllByName(rnaAlignmentConfiguration.referenceGenome))
+
+        assert OtpPath.isValidPathComponent(rnaAlignmentConfiguration.pluginName): "pluginName '${rnaAlignmentConfiguration.pluginName}' is an invalid path component"
+        assert OtpPath.isValidPathComponent(rnaAlignmentConfiguration.pluginVersion): "pluginVersion '${rnaAlignmentConfiguration.pluginVersion}' is an invalid path component"
+        assert OtpPath.isValidPathComponent(rnaAlignmentConfiguration.baseProjectConfig): "baseProjectConfig '${rnaAlignmentConfiguration.baseProjectConfig}' is an invalid path component"
+        assert rnaAlignmentConfiguration.configVersion ==~ RoddyWorkflowConfig.CONFIG_VERSION_PATTERN: "configVersion '${rnaAlignmentConfiguration.configVersion}' has not expected pattern: ${RoddyWorkflowConfig.CONFIG_VERSION_PATTERN}"
+
+        Pipeline pipeline = CollectionUtils.exactlyOneElement(Pipeline.findAllByTypeAndName(
+                Pipeline.Type.ALIGNMENT,
+                Pipeline.Name.RODDY_RNA_ALIGNMENT,
+        ))
+
+        ReferenceGenomeProjectSeqType refSeqType = createReferenceGenomeProjectSeqType(rnaAlignmentConfiguration, referenceGenome)
+        refSeqType.save(flush: true, failOnError: true)
+
+        alignmentHelper(rnaAlignmentConfiguration, pipeline, RoddyRnaConfigTemplate.createConfigBashEscaped(rnaAlignmentConfiguration, pipeline.name, referenceGenomeIndexService, geneModelService))
+    }
+
+    private void deprecatedReferenceGenomeProjectSeqTypeAndSetDecider(RoddyConfiguration config) {
+        if (config.project.alignmentDeciderBeanName == AlignmentDeciderBeanNames.OTP_ALIGNMENT.bean) {
+            setReferenceGenomeProjectSeqTypeDeprecated(config.project)
+        } else {
+            setReferenceGenomeProjectSeqTypeDeprecated(config.project, config.seqType)
+        }
+        config.project.alignmentDeciderBeanName = AlignmentDeciderBeanNames.PAN_CAN_ALIGNMENT.bean
+        config.project.save(flush: true, failOnError: true)
+    }
+
+    private ReferenceGenomeProjectSeqType createReferenceGenomeProjectSeqType(RoddyConfiguration config, ReferenceGenome referenceGenome) {
+        return new ReferenceGenomeProjectSeqType(
+                project: config.project,
+                seqType: config.seqType,
+                referenceGenome: referenceGenome,
+                sampleType: null,
+        )
+    }
+
+    private void alignmentHelper(RoddyConfiguration alignmentConfiguration, Pipeline pipeline, String xmlConfig) {
+        File projectDirectory = alignmentConfiguration.project.getProjectDirectory()
         assert projectDirectory.exists()
 
         File configFilePath = RoddyWorkflowConfig.getStandardConfigFile(
-                panCanAlignmentConfiguration.project,
+                alignmentConfiguration.project,
                 pipeline.name,
-                panCanAlignmentConfiguration.seqType,
-                panCanAlignmentConfiguration.pluginVersion,
-                panCanAlignmentConfiguration.configVersion,
+                alignmentConfiguration.seqType,
+                alignmentConfiguration.pluginVersion,
+                alignmentConfiguration.configVersion,
         )
         File configDirectory = configFilePath.parentFile
 
-        executeScript(getScriptBash(configDirectory, xmlConfig, configFilePath), panCanAlignmentConfiguration.project)
+        executeScript(getScriptBash(configDirectory, xmlConfig, configFilePath), alignmentConfiguration.project)
 
         RoddyWorkflowConfig.importProjectConfigFile(
-                panCanAlignmentConfiguration.project,
-                panCanAlignmentConfiguration.seqType,
-                "${panCanAlignmentConfiguration.pluginName}:${panCanAlignmentConfiguration.pluginVersion}",
+                alignmentConfiguration.project,
+                alignmentConfiguration.seqType,
+                "${alignmentConfiguration.pluginName}:${alignmentConfiguration.pluginVersion}",
                 pipeline,
                 configFilePath.path,
-                panCanAlignmentConfiguration.configVersion,
+                alignmentConfiguration.configVersion,
         )
     }
 
@@ -606,6 +641,13 @@ class PanCanAlignmentConfiguration extends RoddyConfiguration {
     String bwaMemPath
     String sambambaPath
     String resources = "xl"
+}
+
+class RnaAlignmentConfiguration extends RoddyConfiguration {
+    String referenceGenome
+    String resources = "xl"
+    List<GeneModel> geneModels
+    List<ReferenceGenomeIndex> referenceGenomeIndex
 }
 
 class SnvPipelineConfiguration extends RoddyConfiguration {

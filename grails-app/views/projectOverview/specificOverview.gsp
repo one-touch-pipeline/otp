@@ -207,9 +207,16 @@
                 <ul>
                     <g:each in="${seqTypes}" var="seqType">
                         <li>
-                            <g:link controller='configurePipeline' action='alignment' params='["project.id": project.id, "seqType.id": seqType.id]' class="configure">
-                                ${seqType.displayName}
-                            </g:link>
+                            <g:if test="${seqType.displayName == "RNA"}">
+                                <g:link controller='configurePipeline' action='rnaAlignment' params='["project.id": project.id, "seqType.id": seqType.id]' class="configure">
+                                    ${seqType.displayName}
+                                </g:link>
+                            </g:if>
+                            <g:else>
+                                <g:link controller='configurePipeline' action='alignment' params='["project.id": project.id, "seqType.id": seqType.id]' class="configure">
+                                    ${seqType.displayName}
+                                </g:link>
+                            </g:else>
                         </li>
                     </g:each>
                 </ul>
