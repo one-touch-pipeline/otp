@@ -1,0 +1,48 @@
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
+
+/*
+ *  This scripts inserts a new ReferenceGenome object
+ *  as well as StatSizeFileName and ReferenceGenomeEntry objects obtained from the fasta file
+ *  which lies in ${otp.processing.root.path}/reference_genomes/${path}/
+ *  A python helper script 'scripts/ReferenceGenome/getReferenceGenomeInfo.py' which extracts
+ *  information from the fasta file was used to generate the fastaEntries content.
+*/
+
+
+String name = "methylCtools_mm9_PhiX_Lambda"
+String path = "bwa06_methylCtools_mm9_PhiX_Lambda"
+String fileNamePrefix = "mm9_PhiX174.conv"
+String cytosinePositionsIndex = "mm9_PhiX174.CGCH.pos.gz"
+List<String> statSizeFileNames = [
+        "mm9_PhiX174.chrLenOnlyACGT.tab",
+]
+
+List<FastaEntry> fastaEntries = [
+        new FastaEntry("chr1", "1", 197195432, 191477555, Classification.CHROMOSOME),
+        new FastaEntry("chr2", "2", 181748087, 178392724, Classification.CHROMOSOME),
+        new FastaEntry("chr3", "3", 159599783, 156393914, Classification.CHROMOSOME),
+        new FastaEntry("chr4", "4", 155630120, 151886944, Classification.CHROMOSOME),
+        new FastaEntry("chr5", "5", 152537259, 147721185, Classification.CHROMOSOME),
+        new FastaEntry("chr6", "6", 149517037, 146317036, Classification.CHROMOSOME),
+        new FastaEntry("chr7", "7", 152524553, 141878519, Classification.CHROMOSOME),
+        new FastaEntry("chr8", "8", 131738871, 124796771, Classification.CHROMOSOME),
+        new FastaEntry("chr9", "9", 124076172, 120720957, Classification.CHROMOSOME),
+        new FastaEntry("chr10", "10", 129993255, 126848050, Classification.CHROMOSOME),
+        new FastaEntry("chr11", "11", 121843856, 118743556, Classification.CHROMOSOME),
+        new FastaEntry("chr12", "12", 121257530, 117460921, Classification.CHROMOSOME),
+        new FastaEntry("chr13", "13", 120284312, 116371180, Classification.CHROMOSOME),
+        new FastaEntry("chr14", "14", 125194864, 121635411, Classification.CHROMOSOME),
+        new FastaEntry("chr15", "15", 103494974, 100439974, Classification.CHROMOSOME),
+        new FastaEntry("chr16", "16", 98319150, 95005133, Classification.CHROMOSOME),
+        new FastaEntry("chr17", "17", 95272651, 91898517, Classification.CHROMOSOME),
+        new FastaEntry("chr18", "18", 90772031, 87600101, Classification.CHROMOSOME),
+        new FastaEntry("chr19", "19", 61342430, 58142230, Classification.CHROMOSOME),
+        new FastaEntry("chrX", "X", 166650296, 162081539, Classification.CHROMOSOME),
+        new FastaEntry("chrY", "Y", 15902555, 2702555, Classification.CHROMOSOME),
+        new FastaEntry("phiX174", "phiX174", 5386, 5386, Classification.UNDEFINED),
+]
+
+ReferenceGenomeService referenceGenomeService = ctx.referenceGenomeService
+referenceGenomeService.loadReferenceGenome(name, path, fileNamePrefix, cytosinePositionsIndex,
+        fastaEntries, statSizeFileNames)

@@ -149,6 +149,7 @@ class ReferenceGenomeService {
      * and {@link StatSizeFileName}s.
      *
      * @param fastaEntries use 'scripts/ReferenceGenome/getReferenceGenomeInfo.py' to create the values for this parameter
+     * @param cytosinePositionsIndex only for methylCtools processed reference genomes
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     public void loadReferenceGenome(String name, String path, String fileNamePrefix, String cytosinePositionsIndex,
