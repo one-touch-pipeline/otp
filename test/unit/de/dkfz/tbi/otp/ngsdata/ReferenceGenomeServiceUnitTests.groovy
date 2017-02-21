@@ -61,6 +61,7 @@ class ReferenceGenomeServiceUnitTests {
         referenceGenome.path = "referenceGenome"
         referenceGenome.fileNamePrefix = "prefixName"
         referenceGenome.cytosinePositionsIndex = "cytosine_idx.pos.gz"
+        referenceGenome.fingerPrintingFileName = 'fingerPrinting.bed'
         referenceGenome.length = ARBITRARY_REFERENCE_GENOME_LENGTH
         referenceGenome.lengthWithoutN = ARBITRARY_REFERENCE_GENOME_LENGTH
         referenceGenome.lengthRefChromosomes = ARBITRARY_REFERENCE_GENOME_LENGTH
@@ -199,6 +200,19 @@ class ReferenceGenomeServiceUnitTests {
     void testFilePathProjectIsNull() {
         project = null
         String pathAct = referenceGenomeService.fastaFilePath(project, referenceGenome)
+    }
+
+    @Test
+    void testFingerPrintingFile() {
+        File pathExp = new File(directory, "fingerPrinting/fingerPrinting.bed")
+        File pathAct = referenceGenomeService.fingerPrintingFile(project, referenceGenome, false) as File
+        assertEquals(pathExp, pathAct)
+    }
+
+    @Test(expected = IllegalArgumentException)
+    void testFingerPrintingFileReferenceGenomeIsNull() {
+        referenceGenome = null
+        referenceGenomeService.fingerPrintingFile(project, referenceGenome, false)
     }
 
     @Test

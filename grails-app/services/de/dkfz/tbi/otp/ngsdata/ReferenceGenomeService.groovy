@@ -70,7 +70,7 @@ class ReferenceGenomeService {
     }
 
     public File fingerPrintingFile(Project project, ReferenceGenome referenceGenome, boolean checkExistence = true) {
-        File referenceGenomeBasePath = new File(prefixOnlyFilePath(project, referenceGenome, checkExistence))
+        File referenceGenomeBasePath = new File(filePathToDirectory(project, referenceGenome, checkExistence))
         File fingerPrintingFile = new File(referenceGenomeBasePath, "${FINGER_PRINTING_FILE_FOLDER_NAME}/${referenceGenome.fingerPrintingFileName}")
         return checkFileExistence(fingerPrintingFile, checkExistence)
     }
