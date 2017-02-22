@@ -71,6 +71,8 @@ class TrackingServiceSpec extends Specification {
                 fastqcFinished: new Date(),
                 alignmentFinished: new Date(),
                 snvFinished: new Date(),
+                indelFinished: new Date(),
+                aceseqFinished: new Date(),
                 finalNotificationSent: true,
                 automaticNotification: true,
         ])
@@ -149,6 +151,8 @@ class TrackingServiceSpec extends Specification {
         OtrsTicket.ProcessingStep.FASTQC        | _
         OtrsTicket.ProcessingStep.ALIGNMENT     | _
         OtrsTicket.ProcessingStep.SNV           | _
+        OtrsTicket.ProcessingStep.INDEL         | _
+        OtrsTicket.ProcessingStep.ACESEQ        | _
     }
 
     def 'test setStarted, twice' () {
@@ -176,6 +180,7 @@ class TrackingServiceSpec extends Specification {
                 getAlignmentProcessingStatus: { -> NOTHING_DONE_MIGHT_DO },
                 getSnvProcessingStatus: { -> NOTHING_DONE_WONT_DO },
                 getIndelProcessingStatus: { -> NOTHING_DONE_MIGHT_DO },
+                getAceseqProcessingStatus: { -> NOTHING_DONE_MIGHT_DO}
         ] as ProcessingStatus
         Run runA = DomainFactory.createRun(name: 'runA')
         Run runB = DomainFactory.createRun(name: 'runB')
@@ -199,6 +204,7 @@ FastQC:       PARTLY_DONE_MIGHT_DO_MORE
 Alignment:    NOTHING_DONE_MIGHT_DO
 SNV:          NOTHING_DONE_WONT_DO
 Indel:        NOTHING_DONE_MIGHT_DO
+ACEseq:       NOTHING_DONE_MIGHT_DO
 
 6 SeqTrack(s) in ticket ${ticket.ticketNumber}:
 runA, lane 8, ${sampleText}
@@ -287,6 +293,8 @@ ILSe 5678, runA, lane 1, ${sampleText}
         assert otrsTicket.fastqcFinished == null
         assert otrsTicket.alignmentFinished == null
         assert otrsTicket.snvFinished == null
+        assert otrsTicket.indelFinished == null
+        assert otrsTicket.aceseqFinished == null
         assert !otrsTicket.finalNotificationSent
         return true
     }

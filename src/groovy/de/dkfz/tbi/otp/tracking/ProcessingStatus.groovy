@@ -55,6 +55,12 @@ public class ProcessingStatus {
         return TrackingService.combineStatuses(seqTrackProcessingStatuses, { it.indelProcessingStatus })
     }
 
+    WorkflowProcessingStatus getAceseqProcessingStatus() {
+        return  TrackingService.combineStatuses(seqTrackProcessingStatuses, { it.aceseqProcessingStatus })
+    }
+
+
+
     @Override
     public String toString() {
         return """
@@ -63,6 +69,7 @@ FastQC:       ${fastqcProcessingStatus}
 Alignment:    ${alignmentProcessingStatus}
 SNV:          ${snvProcessingStatus}
 Indel:        ${indelProcessingStatus}
+ACEseq:       ${aceseqProcessingStatus}
 """
     }
 }

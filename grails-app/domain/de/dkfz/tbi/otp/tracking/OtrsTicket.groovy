@@ -17,6 +17,7 @@ class OtrsTicket implements Commentable, Entity {
         ALIGNMENT('alignment', 'aligned'),
         SNV('SNV calling', 'SNV-called'),
         INDEL('Indel calling', 'Indel-called'),
+        ACESEQ('CNV calling', 'CNV-called')
 
         final String displayName
         /**
@@ -59,6 +60,9 @@ class OtrsTicket implements Commentable, Entity {
     Date indelStarted
     Date indelFinished
 
+    Date aceseqStarted
+    Date aceseqFinished
+
     boolean finalNotificationSent = false
     boolean automaticNotification = true
 
@@ -89,6 +93,9 @@ class OtrsTicket implements Commentable, Entity {
 
         indelStarted(nullable: true)
         indelFinished(nullable: true)
+
+        aceseqStarted(nullable: true)
+        aceseqFinished(nullable: true)
 
         comment(nullable: true)
         seqCenterComment(nullable: true)
