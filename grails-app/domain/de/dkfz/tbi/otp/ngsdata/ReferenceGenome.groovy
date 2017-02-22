@@ -68,6 +68,11 @@ class ReferenceGenome implements Entity {
     String chromosomeLengthFilePath
 
     /**
+     * File which contains the GC content. Is also located in the stats directory per reference genome
+     */
+    String gcContentFile
+
+    /**
      * File name of cytosine positions index
      */
     String cytosinePositionsIndex
@@ -77,6 +82,31 @@ class ReferenceGenome implements Entity {
     String chromosomeSuffix
 
     String fingerPrintingFileName
+
+
+    /*
+     * The following two files belong to ENCODE (https://genome.ucsc.edu/ENCODE/) and will therefore be stored under the ENCODE folder in each reference genome
+     */
+    String mappabilityFile
+
+    String replicationTimeFile
+
+    /*
+     * The following six files belong to IMPUTE (https://mathgen.stats.ox.ac.uk/impute/impute_v2.html) and will therefore be stored under the IMPUTE folder in each reference genome
+     */
+
+    String geneticMapFile
+
+    String knownHaplotypesFile
+
+    String knownHaplotypesLegendFile
+
+    String geneticMapFileX
+
+    String knownHaplotypesFileX
+
+    String knownHaplotypesLegendFileX
+
 
     /**
      * It has to be ensured that there is only one reference genome stored per directory -> unique path
@@ -95,6 +125,15 @@ class ReferenceGenome implements Entity {
         chromosomeSuffix nullable: true, blank: true
         chromosomeLengthFilePath(nullable: true, blank: false, validator: { it == null || OtpPath.isValidPathComponent(it) })
         fingerPrintingFileName nullable: true
+        mappabilityFile (nullable: true, validator: { it == null || OtpPath.isValidPathComponent(it) })
+        replicationTimeFile (nullable: true, validator: { it == null || OtpPath.isValidPathComponent(it) })
+        gcContentFile (nullable: true, validator: { it == null || OtpPath.isValidPathComponent(it) })
+        geneticMapFile (nullable: true, validator: { it == null || OtpPath.isValidRelativePath(it) })
+        knownHaplotypesFile (nullable: true, validator: { it == null || OtpPath.isValidRelativePath(it) })
+        knownHaplotypesLegendFile (nullable: true, validator: { it == null || OtpPath.isValidRelativePath(it) })
+        geneticMapFileX (nullable: true, validator: { it == null || OtpPath.isValidRelativePath(it) })
+        knownHaplotypesFileX (nullable: true, validator: { it == null || OtpPath.isValidRelativePath(it) })
+        knownHaplotypesLegendFileX (nullable: true, validator: { it == null || OtpPath.isValidRelativePath(it) })
     }
 
     String toString() {
