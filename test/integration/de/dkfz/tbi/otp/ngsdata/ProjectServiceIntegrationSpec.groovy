@@ -869,8 +869,45 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         ReferenceGenomeProjectSeqType.findAllByDeprecatedDateIsNull().size() == 1
     }
 
-    void "test copyPanCanAlignmentXml valid input"() {
+    void "test copyPanCanAlignmentXml valid input, no reference genome configured already"() {
         setup:
+        List<Project, SeqType, Project> setupOutput = createValidInputForCopyPanCanAlignmentXml()
+        Project basedProject = setupOutput[0]
+        SeqType seqType = setupOutput[1]
+        Project project = setupOutput[2]
+
+        when:
+        SpringSecurityUtils.doWithAuth("admin") {
+            projectService.copyPanCanAlignmentXml(basedProject, seqType, project)
+        }
+
+        then:
+        validateCopyPanCanAlignmentXml(project, seqType)
+    }
+
+    void "test copyPanCanAlignmentXml valid input, reference genome configured already"() {
+        setup:
+        List setupOutput = createValidInputForCopyPanCanAlignmentXml()
+        Project basedProject = setupOutput[0]
+        SeqType seqType = setupOutput[1]
+        Project project = setupOutput[2]
+        ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType = DomainFactory.createReferenceGenomeProjectSeqType(
+                project: project,
+                seqType: seqType
+        )
+
+        when:
+        SpringSecurityUtils.doWithAuth("admin") {
+            projectService.copyPanCanAlignmentXml(basedProject, seqType, project)
+        }
+
+        then:
+        validateCopyPanCanAlignmentXml(project, seqType)
+        assert referenceGenomeProjectSeqType.deprecatedDate
+    }
+
+
+    private List createValidInputForCopyPanCanAlignmentXml() {
         SeqType seqType = DomainFactory.createExomeSeqType()
         Project project = Project.findByName("testProjectAlignment")
 
@@ -906,23 +943,23 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         File projectDirectory1 = project.getProjectDirectory()
         assert projectDirectory1.exists() || projectDirectory1.mkdirs()
 
-        when:
-        SpringSecurityUtils.doWithAuth("admin") {
-            projectService.copyPanCanAlignmentXml(basedProject, seqType, project)
-        }
+        return [basedProject, seqType, project]
+    }
 
-        then:
+    private void validateCopyPanCanAlignmentXml(Project project, SeqType seqType) {
         List<RoddyWorkflowConfig> roddyWorkflowConfigs = RoddyWorkflowConfig.findAllByProjectAndSeqTypeAndPipelineInListAndPluginVersionAndObsoleteDateIsNull(
                 project,
                 seqType,
                 Pipeline.findAllByTypeAndName(Pipeline.Type.ALIGNMENT, Pipeline.Name.PANCAN_ALIGNMENT),
                 "pluginVersion:1.1.51"
         )
-        roddyWorkflowConfigs.size() == 1
+        assert roddyWorkflowConfigs.size() == 1
         File roddyWorkflowConfig = new File(roddyWorkflowConfigs.configFilePath.first())
-        roddyWorkflowConfig.exists()
-        project.alignmentDeciderBeanName == AlignmentDeciderBeanNames.PAN_CAN_ALIGNMENT.bean
+        assert roddyWorkflowConfig.exists()
+        assert project.alignmentDeciderBeanName == AlignmentDeciderBeanNames.PAN_CAN_ALIGNMENT.bean
     }
+
+
 
     void "test configureDefaultOtpAlignmentDecider to configureNoAlignmentDeciderProject"() {
         setup:

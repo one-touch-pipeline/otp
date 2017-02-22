@@ -376,6 +376,8 @@ AND ace.granting = true
     void copyPanCanAlignmentXml(Project basedProject, SeqType seqType, Project project) {
         ReferenceGenomeProjectSeqType refSeqType = exactlyOneElement(ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(basedProject, seqType))
 
+        setReferenceGenomeProjectSeqTypeDeprecated(project, seqType)
+
         ReferenceGenomeProjectSeqType refSeqType1 = new ReferenceGenomeProjectSeqType()
         refSeqType1.project = project
         refSeqType1.seqType = refSeqType.seqType
