@@ -636,9 +636,9 @@ class DomainFactory {
     }
 
     public static createRoddyBamFile(RoddyBamFile baseBamFile, Map bamFileProperties = [:]) {
-        RoddyBamFile bamFile = RoddyBamFile.build([
+        RoddyBamFile bamFile = createDomainObject(RoddyBamFile, [
                 baseBamFile: baseBamFile,
-                config: bamFileProperties.config ?: createRoddyWorkflowConfig(pipeline: baseBamFile.config.pipeline),
+                config: baseBamFile.config,
                 workPackage: baseBamFile.workPackage,
                 identifier: baseBamFile.identifier + 1,
                 numberOfMergedLanes: baseBamFile.numberOfMergedLanes + 1,
@@ -647,9 +647,7 @@ class DomainFactory {
                 md5sum: HelperUtils.randomMd5sum,
                 fileOperationStatus: FileOperationStatus.PROCESSED,
                 fileSize: 10000,
-        ] + bamFileProperties
-        )
-        bamFile.save(flush: true)
+        ], bamFileProperties)
         return bamFile
     }
 
@@ -833,20 +831,6 @@ class DomainFactory {
         createSampleTypePerProject(project: controlMwp.project, sampleType: diseaseMwp.sampleType, category: SampleType.Category.DISEASE)
         SamplePair samplePair = createSamplePair(diseaseMwp, controlMwp)
         return samplePair
-    }
-
-    public static SnvConfig createSnvConfigForSnvCallingInstance(SnvCallingInstance snvCallingInstance) {
-        ExternalScript externalScript = ExternalScript.buildLazy (
-                scriptVersion: "v1",
-                deprecatedDate: null,
-        )
-
-        SnvConfig.buildLazy (
-                project: snvCallingInstance.project,
-                seqType: snvCallingInstance.seqType,
-                externalScriptVersion: externalScript.scriptVersion,
-                pipeline: createOtpSnvPipelineLazy(),
-        )
     }
 
     public static SnvConfig createSnvConfig(Map properties = [:]) {

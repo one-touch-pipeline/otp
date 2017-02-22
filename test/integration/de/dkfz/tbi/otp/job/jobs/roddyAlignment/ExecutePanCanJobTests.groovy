@@ -153,7 +153,7 @@ class ExecutePanCanJobTests {
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
 
         roddyBamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.PROCESSED
-        roddyBamFile.md5sum = "abcdefabcdefabcdefabcdefabcdefab"
+        roddyBamFile.md5sum = HelperUtils.randomMd5sum
         roddyBamFile.fileSize = roddyBamFile.getWorkBaiFile().size()
         assert roddyBamFile.save(flush: true)
 

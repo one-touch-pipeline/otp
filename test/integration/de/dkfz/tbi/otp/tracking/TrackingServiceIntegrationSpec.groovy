@@ -804,7 +804,6 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         given:
         SnvCallingInstance snvCallingInstance = DomainFactory.createSnvInstanceWithRoddyBamFiles([:], [coverage: 2], [coverage: 2])
 
-        DomainFactory.createSnvConfigForSnvCallingInstance(snvCallingInstance)
 
         [1, 2].each {
             setBamFileInProjectFolder(snvCallingInstance."sampleType${it}BamFile")
