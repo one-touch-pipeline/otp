@@ -71,7 +71,7 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
 
         job.referenceGenomeService = Mock(ReferenceGenomeService) {
-            1 * fastaFilePath(_, _) >> referenceGenomeFilePath
+            1 * fastaFilePath(_) >> referenceGenomeFilePath
             1 * chromosomeStatSizeFile(_) >> chromosomeStatSizeFilePath
         }
 

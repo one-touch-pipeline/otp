@@ -1,7 +1,8 @@
 import de.dkfz.tbi.otp.ngsdata.*
-import grails.util.Environment
 import static org.springframework.util.Assert.*
 import de.dkfz.tbi.ngstools.bedUtils.*
+
+BedFileService bedFileService = ctx.bedFileService
 
 /**
  * This script loads bed files and useful meta information of the
@@ -69,10 +70,6 @@ List<Input> bedFilesToLoad = [
 ]
 
 
-String env = Environment.getCurrent().getName()
-Realm realm = Realm.findByNameAndOperationTypeAndEnv("DKFZ", Realm.OperationType.DATA_PROCESSING, env)
-notNull(realm, "realm may not be null")
-
 BedFile.withTransaction {
     bedFilesToLoad.each { Input input ->
         BedFile existingBedFile = BedFile.findByFileName(input.bedName)
@@ -88,7 +85,7 @@ BedFile.withTransaction {
                 fileName: input.bedName,
                 referenceGenome: referenceGenome,
                 libraryPreparationKit: kit)
-        notNull bedFilePath = ctx.bedFileService.filePath(realm, bedFileDom)
+        notNull bedFilePath = bedFileService.filePath(bedFileDom)
         // retrieve referenceGenomeEntryNames for a specific referenceGenome
         List<ReferenceGenomeEntry> referenceGenomeEntries = ReferenceGenomeEntry.findAllByReferenceGenome(referenceGenome)
         notEmpty referenceGenomeEntries

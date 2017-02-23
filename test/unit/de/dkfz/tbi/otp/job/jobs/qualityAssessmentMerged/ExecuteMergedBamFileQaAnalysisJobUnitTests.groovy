@@ -72,11 +72,11 @@ class ExecuteMergedBamFileQaAnalysisJobUnitTests {
 
         def referenceGenomeService = [
             referenceGenome: { a1, a2 -> referenceGenome},
-            referenceGenomeMetaInformationPath: { a1, a2 -> 'referenceGenomeMetaInformationPath' }
+            referenceGenomeMetaInformationPath: { a1 -> new File('/referenceGenomeMetaInformationPath') }
             ] as ReferenceGenomeService
 
         def bedFileService = [
-            filePath: { a1, a2 -> 'bedFilePath' }
+            filePath: { a1 -> 'bedFilePath' }
             ] as BedFileService
 
         Log log = { println it } as Log
@@ -113,7 +113,7 @@ class ExecuteMergedBamFileQaAnalysisJobUnitTests {
         assertNotNull(bedfile.save([flush: true, validate: false]))
 
         job.pbsService = [executeJob: { realm, cmd ->
-                String expCommand = "qualityAssessment.sh processedBamFileFilePath baiFilePath qualityAssessmentDataFilePath coverageDataFilePath insertSizeDataFilePath false ${Chromosomes.overallChromosomesLabel()} 36 25 0 1 1000 10 false bedFilePath referenceGenomeMetaInformationPath; chmod 440 qualityAssessmentDataFilePath coverageDataFilePath insertSizeDataFilePath"
+                String expCommand = "qualityAssessment.sh processedBamFileFilePath baiFilePath qualityAssessmentDataFilePath coverageDataFilePath insertSizeDataFilePath false ${Chromosomes.overallChromosomesLabel()} 36 25 0 1 1000 10 false bedFilePath /referenceGenomeMetaInformationPath; chmod 440 qualityAssessmentDataFilePath coverageDataFilePath insertSizeDataFilePath"
                 assertEquals(expCommand, cmd)
                 return 'pbsID'
             }] as PbsService

@@ -17,6 +17,7 @@ import spock.lang.*
         LibraryPreparationKit,
         MergingWorkPackage,
         Pipeline,
+        ProcessingOption,
         Project,
         ProjectCategory,
         Sample,
@@ -68,7 +69,7 @@ class ExecuteRoddySnvJobSpec extends Specification {
                     1 * validateInputBamFiles(_) >> {}
                 },
                 referenceGenomeService: Mock(ReferenceGenomeService) {
-                    1 * fastaFilePath(_, _) >> fasta
+                    1 * fastaFilePath(_) >> fasta
                     1 * chromosomeLengthFile(_) >> chromosomeLength
                     0 * _
                 },

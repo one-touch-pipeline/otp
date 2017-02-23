@@ -30,8 +30,7 @@ class ExecutePanCanJob extends AbstractRoddyAlignmentJob implements AutoRestarta
 
         if (roddyBamFile.seqType.name == SeqTypeNames.EXOME.seqTypeName) {
             BedFile bedFile = roddyBamFile.bedFile
-            Realm dataProcessingRealm = configService.getRealmDataProcessing(roddyBamFile.project)
-            File bedFilePath = bedFileService.filePath(dataProcessingRealm, bedFile) as File
+            File bedFilePath = bedFileService.filePath(bedFile) as File
             cValues.add("TARGET_REGIONS_FILE:${bedFilePath}")
             cValues.add("TARGETSIZE:${bedFile.targetSize}")
         }

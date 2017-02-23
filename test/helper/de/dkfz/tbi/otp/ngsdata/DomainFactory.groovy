@@ -393,6 +393,15 @@ class DomainFactory {
         )
     }
 
+    public static ProcessingOption createProcessingOptionBasePathReferenceGenome(String fileName = TestCase.uniqueNonExistentPath.path) {
+        return createProcessingOption(
+                name: ReferenceGenomeService.REFERENCE_GENOME_BASE_PATH,
+                type: null,
+                project: null,
+                value: fileName,
+        )
+    }
+
     public static MergingPass createMergingPass(Map properties = [:]) {
         MergingSet mergingSet = properties.mergingSet ?: createMergingSet()
         return createDomainObject(MergingPass, [
@@ -1163,6 +1172,32 @@ class DomainFactory {
         }
     }
 
+    static ReferenceGenomeIndex createReferenceGenomeIndex(Map properties = [:]) {
+        return createDomainObject(ReferenceGenomeIndex, [
+                referenceGenome: { createReferenceGenome() },
+                toolName: { createToolName() },
+                path: "path_${counter++}",
+                indexToolVersion: "indexToolVersion_${counter++}",
+        ], properties)
+    }
+
+    static ToolName createToolName(Map properties = [:]) {
+        return createDomainObject(ToolName, [
+                name: "GENOME_STAR_INDEX_${counter++}",
+                path: "path_${counter++}",
+        ], properties)
+    }
+
+    static GeneModel createGeneModel(Map properties = [:]) {
+        return createDomainObject(GeneModel, [
+                referenceGenome: { createReferenceGenome() },
+                path: "path_${counter++}",
+                fileName: "fileName.gtf",
+                excludeFileName: "excludeFileName.gtf",
+                dexSeqFileName: "dexSeqFileName.gtf",
+                gcFileName: "gcFileName.gtf",
+        ], properties)
+    }
 
     static ReferenceGenomeProjectSeqType createReferenceGenomeProjectSeqType(Map properties = [:]) {
         return createDomainObject(ReferenceGenomeProjectSeqType, [

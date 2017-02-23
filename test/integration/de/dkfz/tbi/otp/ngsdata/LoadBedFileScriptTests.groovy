@@ -90,8 +90,11 @@ class LoadBedFileScriptTests extends GroovyScriptAwareTestCase {
             processingRootPath: baseFolder.path,
         ]).save(flush : true)
 
+        File referenceGenomeDirectory = new File(baseFolder, REFERENCE_GENOME_PATH)
+        DomainFactory.createProcessingOptionBasePathReferenceGenome(referenceGenomeDirectory.path)
+
         bedFilesToLoad.each { Input input ->
-            File directory = new File(baseFolder, "${REFERENCE_GENOME_PATH}/${input.refGenName}/${TARGET_REGIONS_PATH}")
+            File directory = new File(referenceGenomeDirectory, "${input.refGenName}/${TARGET_REGIONS_PATH}")
             directory.mkdirs()
             directories << directory
             File bedFile = new File("${directory.getAbsolutePath()}/${input.bedName}")
@@ -157,13 +160,6 @@ class LoadBedFileScriptTests extends GroovyScriptAwareTestCase {
         assertNotNull bedFile
         assertEquals (10 + 10 + 10, bedFile.targetSize)
         assertEquals (10 + 15, bedFile.mergedTargetSize)
-    }
-
-    @Test(expected = IllegalArgumentException)
-    void testNoRealmExists() {
-        realm.name = "DOES_NOT_EXIST"
-        assertNotNull realm.save(flush: true)
-        runScript(SCRIPT_PATH)
     }
 
     @Test(expected = IllegalArgumentException)

@@ -24,6 +24,7 @@ import org.junit.Test
     DataFile,
     FileType,
     ProcessedBamFile,
+    ProcessingOption,
     Realm,
     ReferenceGenomeProjectSeqType,
     Run,
@@ -46,9 +47,11 @@ class AlignmentPassServiceUnitTests extends TestData {
         referenceGenomeFile = new File("${referenceGenomeDir}/prefixName.fa")
         referenceGenomeFile.createNewFile()
 
+        DomainFactory.createProcessingOptionBasePathReferenceGenome(referenceGenomeDir.parent)
         alignmentPassService = new AlignmentPassService()
         alignmentPassService.referenceGenomeService = new ReferenceGenomeService()
         alignmentPassService.referenceGenomeService.configService = new ConfigService()
+        alignmentPassService.referenceGenomeService.processingOptionService = new ProcessingOptionService()
         createObjects()
         alignmentPass = DomainFactory.createAlignmentPass(identifier: 2, seqTrack: seqTrack)
         alignmentPass.save(flush: true)

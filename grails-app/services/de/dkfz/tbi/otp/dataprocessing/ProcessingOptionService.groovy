@@ -14,10 +14,6 @@ import static org.springframework.util.Assert.*
 class ProcessingOptionService {
 
     /**
-     * Dependency injection of Project service
-     */
-    def projectService
-    /**
      * Dependency Injection of Spring Security Service - needed for ACL checks
      */
     def springSecurityService
@@ -133,13 +129,11 @@ class ProcessingOptionService {
     }
 
     /**
-     * Retrieves the ProcessingOption if a user has access to at least one Project.
-     * @return List of matching ProcessingOption
+     * Retrieves all ProcessingOptions.
+     * @return List of ProcessingOptions
      */
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public List<ProcessingOption> listProcessingOptions() {
-        if (!projectService.projectsAvailable()) {
-            return []
-        }
         return ProcessingOption.getAll()
     }
 

@@ -35,8 +35,10 @@ class ExecuteWgbsAlignmentJobTests {
 
         roddyBamFile.referenceGenome.cytosinePositionsIndex = "cytosine_idx.pos.gz"
         roddyBamFile.referenceGenome.save(flush: true, failOnError: true)
+        File referenceGenomeDirectory = new File("${tmpDir.root}/processing/reference_genomes")
+        DomainFactory.createProcessingOptionBasePathReferenceGenome(referenceGenomeDirectory.path)
         cpiFile = CreateFileHelper.createFile(
-                new File("${tmpDir.root}/processing/reference_genomes/${roddyBamFile.referenceGenome.path}",
+                new File("${referenceGenomeDirectory}/${roddyBamFile.referenceGenome.path}",
                         roddyBamFile.referenceGenome.cytosinePositionsIndex)
         )
 
@@ -52,7 +54,7 @@ class ExecuteWgbsAlignmentJobTests {
         DomainFactory.createRealmDataProcessing(tmpDir.root, [name: roddyBamFile.project.realmName])
         DomainFactory.createRealmDataManagement(tmpDir.root, [name: roddyBamFile.project.realmName])
 
-        CreateFileHelper.createFile(new File(executeWgbsAlignmentJob.referenceGenomeService.fastaFilePath(roddyBamFile.project, roddyBamFile.referenceGenome, false)))
+        CreateFileHelper.createFile(executeWgbsAlignmentJob.referenceGenomeService.fastaFilePath(roddyBamFile.referenceGenome, false))
         CreateFileHelper.createFile(executeWgbsAlignmentJob.referenceGenomeService.chromosomeStatSizeFile(roddyBamFile.mergingWorkPackage, false))
     }
 
@@ -82,8 +84,8 @@ class ExecuteWgbsAlignmentJobTests {
         DomainFactory.createReferenceGenomeEntries(roddyBamFile.referenceGenome, chromosomeNames)
 
         List<String> expectedCommand = [
-                "INDEX_PREFIX:${executeWgbsAlignmentJob.referenceGenomeService.fastaFilePath(roddyBamFile.project, roddyBamFile.referenceGenome)}",
-                "CHROM_SIZES_FILE:${executeWgbsAlignmentJob.referenceGenomeService.chromosomeStatSizeFile(roddyBamFile.mergingWorkPackage)}",
+                "INDEX_PREFIX:${executeWgbsAlignmentJob.referenceGenomeService.fastaFilePath(roddyBamFile.referenceGenome).absolutePath}",
+                "CHROM_SIZES_FILE:${executeWgbsAlignmentJob.referenceGenomeService.chromosomeStatSizeFile(roddyBamFile.mergingWorkPackage).absolutePath}",
                 "possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}",
                 "possibleTumorSampleNamePrefixes:",
                 "runFingerprinting:false",

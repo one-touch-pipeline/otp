@@ -200,6 +200,8 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
                 new File(realm.loggingRootPath, JobStatusLoggingService.STATUS_LOGGING_BASE_DIR),
                 new File(realm.stagingRootPath),
         ])
+
+        DomainFactory.createProcessingOptionBasePathReferenceGenome(new File(processingRootPath, "reference_genomes").absolutePath)
     }
 
     public void createDirectories(List<File> files) {
@@ -366,8 +368,10 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
             )
         }
 
-        File linkRefGenDir = new File(referenceGenomeService.filePathToDirectory(realm, referenceGenome, false))
-        linkFileUtils.createAndValidateLinks([(sourceDir): linkRefGenDir], realm)
+        linkFileUtils.createAndValidateLinks(
+                [(sourceDir): referenceGenomeService.referenceGenomeDirectory(referenceGenome, false)],
+                realm
+        )
 
         return referenceGenome
     }

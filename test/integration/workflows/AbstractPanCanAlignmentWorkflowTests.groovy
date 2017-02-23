@@ -364,7 +364,7 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
     }
 
     void setUpRefGenomeDir(MergingWorkPackage workPackage) {
-        File linkRefGenDir = new File(referenceGenomeService.filePathToDirectory(workPackage.project, workPackage.referenceGenome, false))
+        File linkRefGenDir = referenceGenomeService.referenceGenomeDirectory(workPackage.referenceGenome, false)
         linkFileUtils.createAndValidateLinks([(refGenDir): linkRefGenDir], realm)
     }
 

@@ -78,6 +78,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 type: "sambamba",
                 value: temporaryFolder.newFile(),
         ])
+        DomainFactory.createProcessingOptionBasePathReferenceGenome(new File(realm.rootPath, "reference_genome").path)
     }
 
     void "test createProject valid input"() {
@@ -1292,7 +1293,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
     }
 
     private File makeStatFile(Project project, ReferenceGenome referenceGenome, String statFileName) {
-        File statDirectory = referenceGenomeService.pathToChromosomeSizeFilesPerReference(project, referenceGenome, false)
+        File statDirectory = referenceGenomeService.pathToChromosomeSizeFilesPerReference(referenceGenome, false)
         assert statDirectory.exists() || statDirectory.mkdirs()
         File statFile = new File(statDirectory, statFileName)
         statFile.text = "someText"

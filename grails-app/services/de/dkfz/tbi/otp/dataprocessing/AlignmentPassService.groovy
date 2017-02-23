@@ -92,9 +92,9 @@ class AlignmentPassService {
     public String referenceGenomePath(AlignmentPass alignmentPass) {
         ReferenceGenome referenceGenome = alignmentPass.referenceGenome
         assert referenceGenome
-        String path = referenceGenomeService.fastaFilePath(alignmentPass.project, referenceGenome)
+        String path = referenceGenomeService.fastaFilePath(referenceGenome).absolutePath
         if (!path) {
-            throw new ProcessingException("Undefined path to reference genome for project ${project.name}")
+            throw new ProcessingException("Undefined path to reference genome")
         }
         return path
     }

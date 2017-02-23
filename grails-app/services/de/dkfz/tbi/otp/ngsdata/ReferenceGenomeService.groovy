@@ -11,9 +11,11 @@ import static org.springframework.util.Assert.*
 class ReferenceGenomeService {
 
     ConfigService configService
+    ProcessingOptionService processingOptionService
 
     public final static String CHROMOSOME_SIZE_FILES_PREFIX = "stats"
     public final static String FINGER_PRINTING_FILE_FOLDER_NAME = "fingerPrinting"
+    public static final String REFERENCE_GENOME_BASE_PATH = "REFERENCE_GENOME_BASE_PATH"
 
     /**
      * load the {@link ReferenceGenome} with the given id from the database and returns it.
@@ -25,64 +27,30 @@ class ReferenceGenomeService {
         return ReferenceGenome.get(id)
     }
 
-
-
     /**
-     * returns path to the directory storing files for the given reference genome depending on project
-     * @param reference genome the reference genome for which the directory path is created
-     * @param project the project, which belongs to the reference genome
+     * @param referenceGenome the reference genome for which the directory path is created
+     * @return path to a directory storing files for the given reference genome
      */
-    public String filePathToDirectory(Project project, ReferenceGenome referenceGenome, boolean checkExistence = true) {
-        notNull(project, "The project is not specified")
-        notNull(referenceGenome, "The reference genome is not specified")
-        Realm realm = configService.getRealmDataProcessing(project)
-        assert realm : "Realm not found for project ${project}"
-        filePathToDirectory(realm, referenceGenome, checkExistence)
+    public File referenceGenomeDirectory(ReferenceGenome referenceGenome, boolean checkExistence = true) {
+        notNull referenceGenome, "The reference genome is not specified"
+        String path = processingOptionService.getValueOfProcessingOption(REFERENCE_GENOME_BASE_PATH)
+        assert OtpPath.isValidAbsolutePath(path)
+        return checkFileExistence(new File(path, referenceGenome.path), checkExistence)
     }
 
-    /**
-     * @param realm - directory path is created relatively to this {@link Realm.OperationType#DATA_PROCESSING} realm
-     * @param referenceGenome - the reference genome for which the directory path is created
-     * @return path to a directory storing files for the given reference genome on the given realm
-     */
-    public String filePathToDirectory(Realm realm, ReferenceGenome referenceGenome, boolean checkExistence = true) {
-        notNull(realm, "realm is not specified")
-        notNull(referenceGenome, "The reference genome is not specified")
-        isTrue(realm.operationType == Realm.OperationType.DATA_PROCESSING)
-        String realmSpecificPath = realm.processingRootPath
-        final String allReferenceGenomes = "reference_genomes"
-        String referenceGenomeSpecificPath = referenceGenome.path
-        String directoryPath = "${realmSpecificPath}/${allReferenceGenomes}/${referenceGenomeSpecificPath}/"
-        File file = new File(directoryPath)
-        return "${checkFileExistence(file, checkExistence)}/"
-    }
-
-    /**
-     * returns path to the directory storing given reference genome files followed by the common file name prefix depending on the project
-     * @param reference genome the reference genome for which the path and the prefix are created
-     * @param project the project, which belongs to the reference genome
-     */
-    public String prefixOnlyFilePath(Project project, ReferenceGenome referenceGenome, boolean checkExistence = true) {
-        notNull(project, "The project is not specified")
-        notNull(referenceGenome, "The reference genome is not specified")
-        String refGenomeFileNamePrefix = referenceGenome.fileNamePrefix
-        return filePathToDirectory(project, referenceGenome, checkExistence) + "${refGenomeFileNamePrefix}"
-    }
-
-    public File fingerPrintingFile(Project project, ReferenceGenome referenceGenome, boolean checkExistence = true) {
-        File referenceGenomeBasePath = new File(filePathToDirectory(project, referenceGenome, checkExistence))
+    public File fingerPrintingFile(ReferenceGenome referenceGenome, boolean checkExistence = true) {
+        File referenceGenomeBasePath = referenceGenomeDirectory(referenceGenome, checkExistence)
         File fingerPrintingFile = new File(referenceGenomeBasePath, "${FINGER_PRINTING_FILE_FOLDER_NAME}/${referenceGenome.fingerPrintingFileName}")
         return checkFileExistence(fingerPrintingFile, checkExistence)
     }
 
     /**
-     * returns the path to the fasta file for the given reference genome depending on project
-     * @param the reference genome for which the file path is created and the belonging project
+     * returns the path to the fasta file for the given reference genome
+     * @param the reference genome for which the file path is created
      */
-    public String fastaFilePath(Project project, ReferenceGenome referenceGenome, boolean checkExistence = true) {
-        String referenceGenomeFastaFilePath = prefixOnlyFilePath(project, referenceGenome, checkExistence) + ".fa"
-        File file = new File(referenceGenomeFastaFilePath)
-        return checkFileExistence(file, checkExistence)
+    public File fastaFilePath(ReferenceGenome referenceGenome, boolean checkExistence = true) {
+        return checkFileExistence(new File(referenceGenomeDirectory(referenceGenome, checkExistence),
+                "${referenceGenome.fileNamePrefix}.fa"), checkExistence)
     }
 
     /**
@@ -99,39 +67,37 @@ class ReferenceGenomeService {
      * returns the path to the cytosine position index file for the given reference genome depending on project
      * @param the reference genome for which the file path is created and the belonging project
      */
-    public File cytosinePositionIndexFilePath(Project project, ReferenceGenome referenceGenome) {
+    public File cytosinePositionIndexFilePath(ReferenceGenome referenceGenome) {
         assert referenceGenome.cytosinePositionsIndex : "cytosinePositionsIndex is not set"
-        File file = new File(filePathToDirectory(project, referenceGenome), referenceGenome.cytosinePositionsIndex)
+        File file = new File(referenceGenomeDirectory(referenceGenome), referenceGenome.cytosinePositionsIndex)
         return checkFileExistence(file, true)
     }
 
     /**
      * returns the path to the file containing the reference genome meta information (names, length values)
      */
-    public String referenceGenomeMetaInformationPath(Realm realm, ReferenceGenome referenceGenome) {
-        notNull(realm, "The input realm of the method referenceGenomeMetaInformationPath is null")
+    public File referenceGenomeMetaInformationPath(ReferenceGenome referenceGenome) {
         notNull(referenceGenome, "The input referenceGenome of the method referenceGenomeMetaInformationPath is null")
-        return filePathToDirectory(realm, referenceGenome) + "metaInformation.txt"
+        return new File(referenceGenomeDirectory(referenceGenome), "metaInformation.txt")
     }
 
-    public File pathToChromosomeSizeFilesPerReference(Project project, ReferenceGenome referenceGenome, boolean checkExistence = true) {
-        notNull(project, "The project is not specified")
+    public File pathToChromosomeSizeFilesPerReference(ReferenceGenome referenceGenome, boolean checkExistence = true) {
         notNull(referenceGenome, "The reference genome is not specified")
-        File file = new File(filePathToDirectory(project, referenceGenome, checkExistence), CHROMOSOME_SIZE_FILES_PREFIX)
+        File file = new File(referenceGenomeDirectory(referenceGenome, checkExistence), CHROMOSOME_SIZE_FILES_PREFIX)
         return checkFileExistence(file, checkExistence)
     }
 
     public File chromosomeStatSizeFile(MergingWorkPackage mergingWorkPackage, boolean checkExistence = true) {
         assert mergingWorkPackage, "The mergingWorkPackage is not specified"
         assert mergingWorkPackage.statSizeFileName : "No stat file size name is defined for ${mergingWorkPackage}"
-        File file = new File(pathToChromosomeSizeFilesPerReference(mergingWorkPackage.project, mergingWorkPackage.referenceGenome, checkExistence), mergingWorkPackage.statSizeFileName)
+        File file = new File(pathToChromosomeSizeFilesPerReference(mergingWorkPackage.referenceGenome, checkExistence), mergingWorkPackage.statSizeFileName)
         return checkFileExistence(file, checkExistence)
     }
 
     public File chromosomeLengthFile(MergingWorkPackage mergingWorkPackage, boolean checkExistence = true) {
         assert mergingWorkPackage, "The mergingWorkPackage is not specified"
         assert mergingWorkPackage.referenceGenome.chromosomeLengthFilePath : "No chromosome length file path is defined for ${mergingWorkPackage}"
-        File file = new File(pathToChromosomeSizeFilesPerReference(mergingWorkPackage.project, mergingWorkPackage.referenceGenome, checkExistence), mergingWorkPackage.referenceGenome.chromosomeLengthFilePath)
+        File file = new File(pathToChromosomeSizeFilesPerReference(mergingWorkPackage.referenceGenome, checkExistence), mergingWorkPackage.referenceGenome.chromosomeLengthFilePath)
         return checkFileExistence(file, checkExistence)
     }
 

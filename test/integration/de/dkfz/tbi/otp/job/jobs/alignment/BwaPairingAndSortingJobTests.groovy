@@ -245,6 +245,7 @@ class BwaPairingAndSortingJobTests {
 
         File dirs = new File(tmpDir.root, "reference_genomes/hg19_1_24")
         dirs.mkdirs()
+        DomainFactory.createProcessingOptionBasePathReferenceGenome(dirs.parent)
         File refGenPath = new File(dirs, "preffix_hg19_1_24.fa")
         refGenPath.createNewFile()
     }

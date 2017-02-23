@@ -57,7 +57,7 @@ class AbstractRoddyJobIntegrationTests extends AbstractPanCanAlignmentWorkflowTe
         // create invalid stat file and register it in the database
         // this will make one of pbs jobs fail
         MergingWorkPackage workPackage = firstBamFile.workPackage
-        File statDir = referenceGenomeService.pathToChromosomeSizeFilesPerReference(workPackage.project, workPackage.referenceGenome)
+        File statDir = referenceGenomeService.pathToChromosomeSizeFilesPerReference(workPackage.referenceGenome)
         executionService.executeCommand(realm, "chmod g+w ${statDir}")
         File statFile = new File(statDir, DUMMY_STAT_SIZE_FILE_NAME)
         workPackage.refresh()

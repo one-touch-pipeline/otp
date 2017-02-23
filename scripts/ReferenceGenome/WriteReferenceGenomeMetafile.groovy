@@ -1,5 +1,3 @@
-import grails.util.Environment
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeService
@@ -23,13 +21,8 @@ String referenceGenomeName = "methylCtools_mm9_PhiX_Lambda" // e.g. "hs37d5" or 
 ReferenceGenome referenceGenome = ReferenceGenome.findByName(referenceGenomeName)
 notNull referenceGenome
 
-// create the Realm to build the path to the reference genome
-String env = Environment.getCurrent().getName()
-Realm realm = Realm.findByNameAndOperationTypeAndEnv(Realm.LATEST_DKFZ_REALM, Realm.OperationType.DATA_PROCESSING, env)
-notNull realm
-
 // prepare to store the meta information
-String referenceMetaDataPath = referenceGenomeService.referenceGenomeMetaInformationPath(realm, referenceGenome)
+String referenceMetaDataPath = referenceGenomeService.referenceGenomeMetaInformationPath(referenceGenome).absolutePath
 File referenceMetaData = new File(referenceMetaDataPath)
 referenceMetaData.createNewFile()
 isTrue referenceMetaData.canWrite()

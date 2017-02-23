@@ -32,10 +32,10 @@ class ReferenceGenomeServiceTests {
                 processingRootPath: temporaryFolder.newFolder().path
         ])
 
+        File referenceGenomeDirectory = new File(realm.processingRootPath, 'reference_genomes')
+        DomainFactory.createProcessingOptionBasePathReferenceGenome(referenceGenomeDirectory.path)
         directory = new File(
-                new File(
-                        new File(
-                                realm.processingRootPath, 'reference_genomes'),
+                new File(referenceGenomeDirectory,
                         mergingWorkPackage.referenceGenome.path),
                 ReferenceGenomeService.CHROMOSOME_SIZE_FILES_PREFIX)
         statFile = new File(directory, DomainFactory.DEFAULT_TAB_FILE_NAME)

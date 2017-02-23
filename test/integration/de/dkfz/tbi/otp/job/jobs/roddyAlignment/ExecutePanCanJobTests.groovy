@@ -32,11 +32,12 @@ class ExecutePanCanJobTests {
         ])
         DomainFactory.createRealmDataProcessing(tmpDir.root, [name: roddyBamFile.project.realmName])
         DomainFactory.createRealmDataManagement(tmpDir.root, [name: roddyBamFile.project.realmName])
+        DomainFactory.createProcessingOptionBasePathReferenceGenome(new File(tmpDir.root, "reference_genomes").path)
 
         prepareDataFilesOnFileSystem(roddyBamFile)
 
         DomainFactory.createBedFile([referenceGenome: roddyBamFile.referenceGenome, libraryPreparationKit: roddyBamFile.mergingWorkPackage.libraryPreparationKit])
-        CreateFileHelper.createFile(new File(executePanCanJob.referenceGenomeService.fastaFilePath(roddyBamFile.project, roddyBamFile.referenceGenome, false)))
+        CreateFileHelper.createFile(executePanCanJob.referenceGenomeService.fastaFilePath(roddyBamFile.referenceGenome, false))
         CreateFileHelper.createFile(executePanCanJob.referenceGenomeService.chromosomeStatSizeFile(roddyBamFile.mergingWorkPackage, false))
     }
 
@@ -77,7 +78,7 @@ class ExecutePanCanJobTests {
 
     @Test
     void testPrepareAndReturnWorkflowSpecificCValues_ExomeSeqType_AllFine() {
-        executePanCanJob.bedFileService.metaClass.filePath = { Realm realm, BedFile bedFile ->
+        executePanCanJob.bedFileService.metaClass.filePath = { BedFile bedFile ->
             return "BedFilePath"
         }
 
@@ -86,8 +87,8 @@ class ExecutePanCanJobTests {
         assert roddyBamFile.mergingWorkPackage.save(flush: true)
 
         List<String>  expectedCommand = [
-                "INDEX_PREFIX:${executePanCanJob.referenceGenomeService.fastaFilePath(roddyBamFile.project, roddyBamFile.referenceGenome)}",
-                "CHROM_SIZES_FILE:${executePanCanJob.referenceGenomeService.chromosomeStatSizeFile(roddyBamFile.mergingWorkPackage)}",
+                "INDEX_PREFIX:${executePanCanJob.referenceGenomeService.fastaFilePath(roddyBamFile.referenceGenome).absolutePath}",
+                "CHROM_SIZES_FILE:${executePanCanJob.referenceGenomeService.chromosomeStatSizeFile(roddyBamFile.mergingWorkPackage).absolutePath}",
                 "possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}",
                 "possibleTumorSampleNamePrefixes:",
                 "runFingerprinting:false",
@@ -107,12 +108,12 @@ class ExecutePanCanJobTests {
         referenceGenome.fingerPrintingFileName = "fingerprintingFile"
         assert referenceGenome.save(flush: true)
 
-        File fingerPrintingFile = executePanCanJob.referenceGenomeService.fingerPrintingFile(roddyBamFile.project, roddyBamFile.referenceGenome, false)
+        File fingerPrintingFile = executePanCanJob.referenceGenomeService.fingerPrintingFile(roddyBamFile.referenceGenome, false)
         CreateFileHelper.createFile(fingerPrintingFile)
 
         List<String> expectedCommand = [
-                "INDEX_PREFIX:${executePanCanJob.referenceGenomeService.fastaFilePath(roddyBamFile.project, roddyBamFile.referenceGenome)}",
-                "CHROM_SIZES_FILE:${executePanCanJob.referenceGenomeService.chromosomeStatSizeFile(roddyBamFile.mergingWorkPackage)}",
+                "INDEX_PREFIX:${executePanCanJob.referenceGenomeService.fastaFilePath(roddyBamFile.referenceGenome).absolutePath}",
+                "CHROM_SIZES_FILE:${executePanCanJob.referenceGenomeService.chromosomeStatSizeFile(roddyBamFile.mergingWorkPackage).absolutePath}",
                 "possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}",
                 "possibleTumorSampleNamePrefixes:",
                 "runFingerprinting:true",
@@ -129,8 +130,8 @@ class ExecutePanCanJobTests {
     void testPrepareAndReturnWorkflowSpecificCValues_WholeGenomeSeqType_NoBaseBamFile_AllFine() {
 
         List<String> expectedCommand = [
-                "INDEX_PREFIX:${executePanCanJob.referenceGenomeService.fastaFilePath(roddyBamFile.project, roddyBamFile.referenceGenome)}",
-                "CHROM_SIZES_FILE:${executePanCanJob.referenceGenomeService.chromosomeStatSizeFile(roddyBamFile.mergingWorkPackage)}",
+                "INDEX_PREFIX:${executePanCanJob.referenceGenomeService.fastaFilePath(roddyBamFile.referenceGenome).absolutePath}",
+                "CHROM_SIZES_FILE:${executePanCanJob.referenceGenomeService.chromosomeStatSizeFile(roddyBamFile.mergingWorkPackage).absolutePath}",
                 "possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}",
                 "possibleTumorSampleNamePrefixes:",
                 "runFingerprinting:false",
@@ -159,8 +160,8 @@ class ExecutePanCanJobTests {
         prepareDataFilesOnFileSystem(roddyBamFile2)
 
         List<String> expectedCommand = [
-                "INDEX_PREFIX:${executePanCanJob.referenceGenomeService.fastaFilePath(roddyBamFile2.project, roddyBamFile2.referenceGenome)}",
-                "CHROM_SIZES_FILE:${executePanCanJob.referenceGenomeService.chromosomeStatSizeFile(roddyBamFile2.mergingWorkPackage)}",
+                "INDEX_PREFIX:${executePanCanJob.referenceGenomeService.fastaFilePath(roddyBamFile2.referenceGenome).absolutePath}",
+                "CHROM_SIZES_FILE:${executePanCanJob.referenceGenomeService.chromosomeStatSizeFile(roddyBamFile2.mergingWorkPackage).absolutePath}",
                 "possibleControlSampleNamePrefixes:${roddyBamFile2.sampleType.dirName}",
                 "possibleTumorSampleNamePrefixes:",
                 "runFingerprinting:false",

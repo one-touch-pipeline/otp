@@ -8,13 +8,14 @@ class ReferenceGenomeIndex implements Entity {
 
     ToolName toolName
     ReferenceGenome referenceGenome
-    String filePath
+    // depending on the tool, path may be a file or a directory
+    String path
     String indexToolVersion
 
     static constraints = {
-        filePath unique: true, validator: { String val ->
-            OtpPath.isValidAbsolutePath(val)
+        path unique: ['toolName', 'referenceGenome'], blank: false, validator: { String val ->
+            OtpPath.isValidRelativePath(val)
         }
-        indexToolVersion blank: false
+        indexToolVersion unique: ['toolName', 'referenceGenome'], blank: false
     }
 }

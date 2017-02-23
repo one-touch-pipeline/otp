@@ -29,7 +29,7 @@ class ExecuteWgbsAlignmentJob extends AbstractRoddyAlignmentJob implements AutoR
         cValues.add(getChromosomeIndexParameterWithMitochondrium(roddyBamFile.referenceGenome))
 
         if (roddyBamFile.referenceGenome.cytosinePositionsIndex) {
-            cValues.add("CYTOSINE_POSITIONS_INDEX:${referenceGenomeService.cytosinePositionIndexFilePath(roddyBamFile.project, roddyBamFile.referenceGenome).absolutePath}")
+            cValues.add("CYTOSINE_POSITIONS_INDEX:${referenceGenomeService.cytosinePositionIndexFilePath(roddyBamFile.referenceGenome).absolutePath}")
         } else {
             throw new RuntimeException("Cytosine position index for reference genome ${roddyBamFile.referenceGenome} is not defined.")
         }

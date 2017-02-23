@@ -6,7 +6,7 @@ import de.dkfz.tbi.otp.utils.*
 
 class GeneModel implements Entity {
     ReferenceGenome referenceGenome
-    String basePath
+    String path
     String fileName
     String excludeFileName
     String dexSeqFileName
@@ -17,19 +17,19 @@ class GeneModel implements Entity {
     Date lastUpdated
 
     static constraints = {
-        basePath unique: true, validator: { String val ->
+        path unique: 'referenceGenome', blank: false, validator: { String val ->
             OtpPath.isValidRelativePath(val)
         }
-        fileName validator: { String val ->
+        fileName blank: false, validator: { String val ->
             OtpPath.isValidPathComponent(val)
         }
-        excludeFileName validator: { String val ->
+        excludeFileName blank: false, validator: { String val ->
             OtpPath.isValidPathComponent(val)
         }
-        dexSeqFileName validator: { String val ->
+        dexSeqFileName blank: false, validator: { String val ->
             OtpPath.isValidPathComponent(val)
         }
-        gcFileName validator: { String val ->
+        gcFileName blank: false, validator: { String val ->
             OtpPath.isValidPathComponent(val)
         }
     }

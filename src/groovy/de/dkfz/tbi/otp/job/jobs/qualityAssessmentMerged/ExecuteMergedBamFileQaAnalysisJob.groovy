@@ -81,8 +81,8 @@ class ExecuteMergedBamFileQaAnalysisJob extends AbstractJobImpl {
             if (!bedFile) {
                 throw new ProcessingException("Could not find a bed file for ${referenceGenome} and ${libraryPreparationKit}")
             }
-            String bedFilePath = bedFileService.filePath(realm, bedFile)
-            String refGenMetaInfoFilePath = referenceGenomeService.referenceGenomeMetaInformationPath(realm, referenceGenome)
+            String bedFilePath = bedFileService.filePath(bedFile)
+            String refGenMetaInfoFilePath = referenceGenomeService.referenceGenomeMetaInformationPath(referenceGenome).absolutePath
             binding.bedFilePath = bedFilePath
             binding.refGenMetaInfoFilePath = refGenMetaInfoFilePath
         }

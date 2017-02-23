@@ -329,7 +329,7 @@ AND ace.granting = true
             assert panCanAlignmentConfiguration.mergeTool == MergeConstants.MERGE_TOOL_SAMBAMBA : "Only sambamba supported for reference genome with Phix"
         }
 
-        File statDir = referenceGenomeService.pathToChromosomeSizeFilesPerReference(panCanAlignmentConfiguration.project, referenceGenome)
+        File statDir = referenceGenomeService.pathToChromosomeSizeFilesPerReference(referenceGenome)
         File statSizeFile = new File(statDir, panCanAlignmentConfiguration.statSizeFileName)
         assert statSizeFile.exists(): "The statSizeFile '${panCanAlignmentConfiguration.statSizeFileName}' could not be found in ${statDir}"
 

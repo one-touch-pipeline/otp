@@ -19,7 +19,7 @@ abstract class AbstractRoddyAlignmentJob extends AbstractExecutePanCanJob<RoddyB
         assert roddyBamFile
 
         List<String> cValues = []
-        File referenceGenomeFastaFile = referenceGenomeService.fastaFilePath(roddyBamFile.project, roddyBamFile.referenceGenome) as File
+        File referenceGenomeFastaFile = referenceGenomeService.fastaFilePath(roddyBamFile.referenceGenome)
         assert referenceGenomeFastaFile: "Path to the reference genome file is null"
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(referenceGenomeFastaFile)
         cValues.add("INDEX_PREFIX:${referenceGenomeFastaFile}")
@@ -39,7 +39,7 @@ abstract class AbstractRoddyAlignmentJob extends AbstractExecutePanCanJob<RoddyB
         }
 
         if (roddyBamFile.project.fingerPrinting && roddyBamFile.referenceGenome.fingerPrintingFileName) {
-            File fingerPrintingFile = referenceGenomeService.fingerPrintingFile(roddyBamFile.project, roddyBamFile.referenceGenome)
+            File fingerPrintingFile = referenceGenomeService.fingerPrintingFile(roddyBamFile.referenceGenome)
             cValues.add("runFingerprinting:true")
             cValues.add("fingerprintingSitesFile:${fingerPrintingFile.path}")
         } else {

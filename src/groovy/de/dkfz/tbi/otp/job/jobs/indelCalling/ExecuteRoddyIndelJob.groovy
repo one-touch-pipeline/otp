@@ -28,7 +28,7 @@ class ExecuteRoddyIndelJob extends AbstractExecutePanCanJob<IndelCallingInstance
         File bamFileControlPath = bamFileControl.pathForFurtherProcessing
 
         ReferenceGenome referenceGenome = indelCallingInstance.referenceGenome
-        File referenceGenomeFastaFile = referenceGenomeService.fastaFilePath(indelCallingInstance.project, referenceGenome) as File
+        File referenceGenomeFastaFile = referenceGenomeService.fastaFilePath(referenceGenome)
         assert referenceGenomeFastaFile: "Path to the reference genome file is null"
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(referenceGenomeFastaFile)
 

@@ -51,6 +51,7 @@ class AbstractExecutePanCanJobTests {
 
         abstractExecutePanCanJob.referenceGenomeService = new ReferenceGenomeService()
         abstractExecutePanCanJob.referenceGenomeService.configService = new ConfigService()
+        abstractExecutePanCanJob.referenceGenomeService.processingOptionService = new ProcessingOptionService()
         abstractExecutePanCanJob.lsdfFilesService = new LsdfFilesService()
         abstractExecutePanCanJob.executeRoddyCommandService = new ExecuteRoddyCommandService()
         abstractExecutePanCanJob.bedFileService = new BedFileService()
@@ -70,6 +71,7 @@ class AbstractExecutePanCanJobTests {
 
         File referenceGenomeDir = new File("${processingRootPath}/reference_genomes/${roddyBamFile.referenceGenome.path}")
         assert referenceGenomeDir.mkdirs()
+        DomainFactory.createProcessingOptionBasePathReferenceGenome(referenceGenomeDir.parent)
         referenceGenomeFile = new File(referenceGenomeDir, "${roddyBamFile.referenceGenome.fileNamePrefix}.fa")
         CreateFileHelper.createFile(referenceGenomeFile)
 

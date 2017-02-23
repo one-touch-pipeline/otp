@@ -112,7 +112,7 @@ class ConveyBwaAlignmentWorkflowTests extends WorkflowTestCase {
         linkFileUtils.createAndValidateLinks([(new File(lsdfFilesService.getFileFinalPath(dataFile))): new File(lsdfFilesService.getFileViewByPidPath(dataFile))], realm)
         linkFileUtils.createAndValidateLinks([(new File(lsdfFilesService.getFileFinalPath(dataFile2))): new File(lsdfFilesService.getFileViewByPidPath(dataFile2))], realm)
 
-        linkFileUtils.createAndValidateLinks([(sourceRefGenDir): new File(referenceGenomeService.filePathToDirectory(project, workPackage.referenceGenome, false))], realm)
+        linkFileUtils.createAndValidateLinks([(sourceRefGenDir): referenceGenomeService.referenceGenomeDirectory(workPackage.referenceGenome, false)], realm)
 
 
         SpringSecurityUtils.doWithAuth("admin") {
