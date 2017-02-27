@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
 
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.job.jobs.AutoRestartableJob
 import de.dkfz.tbi.otp.ngsdata.BedFile
@@ -76,6 +77,10 @@ class ExecutePanCanJob extends AbstractRoddyAlignmentJob implements AutoRestarta
     protected void workflowSpecificValidation(RoddyBamFile roddyBamFile) {
         if (roddyBamFile.seqType.seqTypeName == SeqTypeNames.EXOME) {
             ensureFileIsReadableAndNotEmpty(roddyBamFile.workMergedQATargetExtractJsonFile)
+        }
+        if (roddyBamFile.seqType.isRna()) {
+            RnaRoddyBamFile rnaRoddyBamFile = roddyBamFile as RnaRoddyBamFile
+            ensureFileIsReadableAndNotEmpty(rnaRoddyBamFile.correspondingWorkChimericBamFile)
         }
     }
 }

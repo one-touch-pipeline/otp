@@ -1,13 +1,12 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
-import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 import grails.test.mixin.*
-import org.apache.coyote.Adapter
 import org.junit.*
 import org.junit.rules.*
 import spock.lang.*
@@ -37,6 +36,7 @@ import spock.lang.*
         ReferenceGenome,
         ReferenceGenomeProjectSeqType,
         Realm,
+        RnaRoddyBamFile,
         RoddyBamFile,
         RoddyWorkflowConfig,
         Run,
@@ -276,6 +276,37 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
         ])
         DomainFactory.createRealmDataManagement(temporaryFolder.newFolder(), [name: roddyBamFile.project.realmName])
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
+
+        when:
+        abstractRoddyAlignmentJob.validate(roddyBamFile)
+
+        then:
+        noExceptionThrown()
+    }
+
+
+    void "validate, when all fine and seqtype is RNA, return without exception"() {
+        given:
+        AbstractRoddyAlignmentJob abstractRoddyAlignmentJob = Spy(AbstractRoddyAlignmentJob) {
+            getExecuteRoddyCommandService() >> Mock(ExecuteRoddyCommandService) {
+                1 * correctPermissions(_, _) >> {}
+            }
+            getConfigService() >> new ConfigService()
+            1 * ensureCorrectBaseBamFileIsOnFileSystem(_) >> {}
+            1 * validateReadGroups(_) >> {}
+            1 * workflowSpecificValidation(_) >> {}
+
+        }
+
+        RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile([
+                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.DECLARED,
+                md5sum             : null,
+        ], RnaRoddyBamFile)
+        DomainFactory.createRealmDataManagement(temporaryFolder.newFolder(), [name: roddyBamFile.project.realmName])
+        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
+        roddyBamFile.workSingleLaneQAJsonFiles.values().each { File file ->
+            file.delete()
+        }
 
         when:
         abstractRoddyAlignmentJob.validate(roddyBamFile)

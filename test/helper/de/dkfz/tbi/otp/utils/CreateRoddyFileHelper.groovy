@@ -1,13 +1,9 @@
 package de.dkfz.tbi.otp.utils
 
-import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
-import de.dkfz.tbi.otp.dataprocessing.IndelCallingInstance
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
-import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingStep
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
+import de.dkfz.tbi.otp.ngsdata.*
 
 class CreateRoddyFileHelper {
 
@@ -50,6 +46,7 @@ class CreateRoddyFileHelper {
         }
         if (roddyBamFile.seqType.isRna()) {
             new File(roddyBamFile.workDirectory, "additionalArbitraryFile") << "content"
+            (roddyBamFile as RnaRoddyBamFile).correspondingWorkChimericBamFile << "content"
         }
     }
 

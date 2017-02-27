@@ -24,10 +24,12 @@ abstract class AbstractRoddyAlignmentJob extends AbstractExecutePanCanJob<RoddyB
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(referenceGenomeFastaFile)
         cValues.add("INDEX_PREFIX:${referenceGenomeFastaFile}")
 
-        File chromosomeStatSizeFile = referenceGenomeService.chromosomeStatSizeFile(roddyBamFile.mergingWorkPackage)
-        assert chromosomeStatSizeFile: "Path to the chromosome stat size file is null"
-        LsdfFilesService.ensureFileIsReadableAndNotEmpty(chromosomeStatSizeFile)
-        cValues.add("CHROM_SIZES_FILE:${chromosomeStatSizeFile}")
+        if (!roddyBamFile.seqType.isRna()) {
+            File chromosomeStatSizeFile = referenceGenomeService.chromosomeStatSizeFile(roddyBamFile.mergingWorkPackage)
+            assert chromosomeStatSizeFile: "Path to the chromosome stat size file is null"
+            LsdfFilesService.ensureFileIsReadableAndNotEmpty(chromosomeStatSizeFile)
+            cValues.add("CHROM_SIZES_FILE:${chromosomeStatSizeFile}")
+        }
 
         cValues.add("possibleControlSampleNamePrefixes:${roddyBamFile.getSampleType().dirName}")
         cValues.add("possibleTumorSampleNamePrefixes:")
@@ -76,8 +78,10 @@ abstract class AbstractRoddyAlignmentJob extends AbstractExecutePanCanJob<RoddyB
 
         ensureFileIsReadableAndNotEmpty(roddyBamFile.workMergedQAJsonFile)
 
-        roddyBamFile.workSingleLaneQAJsonFiles.values().each {
-            ensureFileIsReadableAndNotEmpty(it)
+        if (!roddyBamFile.seqType.isRna()) {
+            roddyBamFile.workSingleLaneQAJsonFiles.values().each {
+                ensureFileIsReadableAndNotEmpty(it)
+            }
         }
 
         assert [AbstractMergedBamFile.FileOperationStatus.DECLARED, AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING].contains(roddyBamFile.fileOperationStatus)

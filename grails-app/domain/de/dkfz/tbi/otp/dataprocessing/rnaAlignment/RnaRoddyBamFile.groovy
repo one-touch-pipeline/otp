@@ -4,6 +4,8 @@ import de.dkfz.tbi.otp.dataprocessing.*
 
 class RnaRoddyBamFile extends RoddyBamFile {
 
+    static final CHIMERIC_BAM_SUFFIX = "chimeric_merged.mdup.bam"
+
     @Override
     File getWorkMergedQADirectory() {
         return workQADirectory
@@ -12,5 +14,9 @@ class RnaRoddyBamFile extends RoddyBamFile {
     @Override
     File getFinalMergedQADirectory() {
         return finalQADirectory
+    }
+
+    File getCorrespondingWorkChimericBamFile() {
+        return new File(workDirectory, "${sampleType.dirName}_${individual.pid}.${CHIMERIC_BAM_SUFFIX}")
     }
 }

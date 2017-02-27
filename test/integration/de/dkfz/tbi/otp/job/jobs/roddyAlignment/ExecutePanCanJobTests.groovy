@@ -2,12 +2,12 @@ package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
 import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 import org.junit.*
 import org.junit.rules.*
 import org.springframework.beans.factory.annotation.*
-
 
 class ExecutePanCanJobTests {
 
@@ -17,6 +17,8 @@ class ExecutePanCanJobTests {
     LsdfFilesService lsdfFilesService
 
     RoddyBamFile roddyBamFile
+    Realm dataProcessingRealm
+    Realm dataManagementRealm
 
     @Rule
     public TemporaryFolder tmpDir = new TemporaryFolder()
@@ -30,8 +32,10 @@ class ExecutePanCanJobTests {
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.DECLARED,
                 roddyExecutionDirectoryNames: [DomainFactory.DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY],
         ])
-        DomainFactory.createRealmDataProcessing(tmpDir.root, [name: roddyBamFile.project.realmName])
-        DomainFactory.createRealmDataManagement(tmpDir.root, [name: roddyBamFile.project.realmName])
+
+        dataProcessingRealm = DomainFactory.createRealmDataProcessing(tmpDir.root, [name: roddyBamFile.project.realmName])
+        dataManagementRealm = DomainFactory.createRealmDataManagement(tmpDir.root, [name: roddyBamFile.project.realmName])
+
         DomainFactory.createProcessingOptionBasePathReferenceGenome(new File(tmpDir.root, "reference_genomes").path)
 
         prepareDataFilesOnFileSystem(roddyBamFile)
@@ -259,6 +263,28 @@ class ExecutePanCanJobTests {
         assert CreateFileHelper.createFile(roddyBamFile.getWorkMergedQATargetExtractJsonFile())
 
         executePanCanJob.workflowSpecificValidation(roddyBamFile)
+    }
+
+
+    @Test
+    void testWorkflowSpecificValidation_RnaBamFile_AllFine() {
+        RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile([:], RnaRoddyBamFile)
+        roddyBamFile.project.realmName = dataManagementRealm.name
+        assert roddyBamFile.project.save(flush: true)
+
+        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
+        executePanCanJob.workflowSpecificValidation(roddyBamFile)
+    }
+
+    @Test
+    void testWorkflowSpecificValidation_RnaBamFile_ChimericFileDoesNotExist() {
+        RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile([:], RnaRoddyBamFile)
+        roddyBamFile.project.realmName = dataManagementRealm.name
+        assert roddyBamFile.project.save(flush: true)
+
+        assert TestCase.shouldFail(AssertionError) {
+            executePanCanJob.workflowSpecificValidation(roddyBamFile)
+        }.contains(roddyBamFile.correspondingWorkChimericBamFile.path)
     }
 
 
