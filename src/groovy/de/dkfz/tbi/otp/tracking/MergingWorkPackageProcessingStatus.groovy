@@ -25,6 +25,6 @@ class MergingWorkPackageProcessingStatus {
     }
 
     WorkflowProcessingStatus getAceseqProcessingStatus() {
-        return TrackingService.combineStatuses(samplePairProcessingStatuses, { it.aceseqProcessingStatus })
+        return  ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO
     }
 }
