@@ -31,6 +31,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
                 snvCallingService: snvCallingService,
                 createNotificationTextService: createNotificationTextService,
         )
+        DomainFactory.createAllAnalysableSeqTypes()
     }
 
     void cleanup() {

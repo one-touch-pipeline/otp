@@ -1,19 +1,16 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
-import grails.test.mixin.gorm.Domain
-
-import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
-
-import org.junit.Before
-import org.junit.Test
-
-import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
+import org.junit.*
+
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 class SamplePairFindMissingDiseaseControlSamplePairsTests {
 
     SeqType wholeGenome
     SeqType exome
+    SeqType rna
 
     Project project
     SampleType diseaseSampleType
@@ -30,6 +27,7 @@ class SamplePairFindMissingDiseaseControlSamplePairsTests {
     void before() {
         wholeGenome = SeqType.build(name: SeqTypeNames.WHOLE_GENOME.seqTypeName, libraryLayout: 'PAIRED')
         exome = SeqType.build(name: SeqTypeNames.EXOME.seqTypeName, libraryLayout: 'PAIRED')
+        rna = DomainFactory.createRnaSeqType()
         LibraryPreparationKit libraryPreparationKit = LibraryPreparationKit.build()
 
         project = Project.build()
@@ -65,6 +63,16 @@ class SamplePairFindMissingDiseaseControlSamplePairsTests {
         assertFindsNothing()
 
         assertFindsOne(diseaseMwp, DomainFactory.createMergingWorkPackage(diseaseMwp, controlSample))
+    }
+
+    @Test
+    void testNotAnalysableSeqType() {
+        diseaseMwp.seqType = rna
+        assert diseaseMwp.save(flush: true)
+        controlMwp.seqType = rna
+        assert controlMwp.save(flush: true)
+
+        assertFindsNothing()
     }
 
     @Test

@@ -207,6 +207,7 @@ class SamplePair implements Entity {
               ${(mergingWorkPackageEqualProperties + ['sample.individual']).collect{
                   "(mwp1.${it} = mwp2.${it} OR mwp1.${it} IS NULL AND mwp2.${it} IS NULL)"
               }.join(' AND\n')} AND
+              mwp1.seqType IN :analysableSeqTypes AND
               stpp1.project = project_1 AND
               stpp2.project = project_1 AND
               stpp1.sampleType = sampleType_1 AND
@@ -226,6 +227,7 @@ class SamplePair implements Entity {
                 disease: SampleType.Category.DISEASE,
                 control: SampleType.Category.CONTROL,
                 mwpLibPrepKitsMayMismatchSeqTypeNames: (SeqType.WGBS_SEQ_TYPE_NAMES + SeqTypeNames.WHOLE_GENOME)*.seqTypeName,
+                analysableSeqTypes: SeqType.getAllAnalysableSeqTypes(),
             ], [readOnly: true])
         return queryResults.collect {
             return createInstance(

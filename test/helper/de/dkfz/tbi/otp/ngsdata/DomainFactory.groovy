@@ -1580,6 +1580,13 @@ class DomainFactory {
         ].flatten().unique()
     }
 
+    static List<SeqType> createAllAnalysableSeqTypes() {
+        [
+                createSnvSeqTypes(),
+                createIndelSeqTypes(),
+        ].flatten().unique()
+    }
+
     static List<SeqType> createSnvSeqTypes() {
         [
                 createWholeGenomeSeqType(),
