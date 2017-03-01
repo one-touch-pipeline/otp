@@ -22,16 +22,20 @@ class RoddyQualityAssessment extends AbstractQualityAssessment {
 
     Double percentageMatesOnDifferentChr
 
-    double genomeWithoutNCoverageQcBases
+    Double genomeWithoutNCoverageQcBases
 
     static def nullIfAndOnlyIfPerChromosomeQc = { val, RoddyQualityAssessment obj ->
-        return (val == null) == (obj.chromosome != ALL)
+        if (obj.chromosome == ALL && val == null) {
+            return "value must be set for all chromosomes, but is null"
+        } else if (obj.chromosome != ALL && val != null) {
+            return "value must be null for single chromosome ${obj.chromosome}, but is ${val}"
+        }
     }
 
     static constraints = {
         qualityAssessmentMergedPass(validator: { it.abstractMergedBamFile instanceof RoddyBamFile })
 
-        chromosome(blank: false)
+        chromosome blank: false
 
         insertSizeCV(nullable: true, validator: nullIfAndOnlyIfPerChromosomeQc)
         percentageMatesOnDifferentChr(nullable: true, validator: nullIfAndOnlyIfPerChromosomeQc)
@@ -50,6 +54,8 @@ class RoddyQualityAssessment extends AbstractQualityAssessment {
         singletons(validator: nullIfAndOnlyIfPerChromosomeQc)
         insertSizeMedian(validator: nullIfAndOnlyIfPerChromosomeQc)
         insertSizeSD(validator: nullIfAndOnlyIfPerChromosomeQc)
+        // not available for RNA
+        genomeWithoutNCoverageQcBases nullable: true, validator: { it != null }
     }
 
     static mapping = {

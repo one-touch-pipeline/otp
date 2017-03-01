@@ -80,7 +80,11 @@ class AbstractQualityAssessmentService {
             }
             chromosomeInformation.put(chromosome, chromosomeValues)
         }
-        assertListContainsAllChromosomeNamesInReferenceGenome(allChromosomeNames, roddyBamFile.referenceGenome)
+        if (!(roddyBamFile instanceof RnaRoddyBamFile)) {
+            assertListContainsAllChromosomeNamesInReferenceGenome(allChromosomeNames, roddyBamFile.referenceGenome)
+        } else {
+            assert chromosomeInformation.keySet().size() == 1 && chromosomeInformation.keySet().contains(RnaQualityAssessment.ALL)
+        }
         return chromosomeInformation
     }
 
@@ -114,8 +118,8 @@ class AbstractQualityAssessmentService {
     void parseRnaRoddyBamFileQaStatistics(RnaRoddyBamFile rnaRoddyBamFile) {
         File qaFile = rnaRoddyBamFile.getWorkMergedQAJsonFile()
         Map<String, Map> chromosomeInformation = parseRoddyQaStatistics(rnaRoddyBamFile, qaFile, null)
-        assert chromosomeInformation.keySet().size() == 1 && chromosomeInformation.keySet().contains(RnaQualityAssessment.ALL)
         RnaQualityAssessment rnaQualityAssessment = new RnaQualityAssessment((chromosomeInformation.get(RnaQualityAssessment.ALL)))
+        rnaQualityAssessment.chromosome = RnaQualityAssessment.ALL
         rnaQualityAssessment.qualityAssessmentMergedPass = rnaRoddyBamFile.findOrSaveQaPass()
         assert rnaQualityAssessment.save(flush: true)
     }

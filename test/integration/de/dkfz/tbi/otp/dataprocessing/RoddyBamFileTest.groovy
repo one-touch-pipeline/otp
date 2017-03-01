@@ -238,6 +238,8 @@ class RoddyBamFileTest {
         RoddyMergedBamQa.build(
                 qualityAssessmentMergedPass: qaPass,
                 chromosome: '12',
+                referenceLength: 1,
+                genomeWithoutNCoverageQcBases: 1,
         )
         RoddyMergedBamQa mergedQa = RoddyMergedBamQa.build(
                 ARBITRARY_QA_VALUES + [
@@ -245,6 +247,7 @@ class RoddyBamFileTest {
                 chromosome: RoddyQualityAssessment.ALL,
                 insertSizeCV: 123,
                 percentageMatesOnDifferentChr: 0.123,
+                genomeWithoutNCoverageQcBases: 1,
         ])
         assert mergedQa == bamFile.overallQualityAssessment
     }

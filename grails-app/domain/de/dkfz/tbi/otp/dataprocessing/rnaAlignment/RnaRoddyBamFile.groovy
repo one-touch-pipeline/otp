@@ -17,6 +17,6 @@ class RnaRoddyBamFile extends RoddyBamFile {
     }
 
     File getCorrespondingWorkChimericBamFile() {
-        return new File(workDirectory, "${sampleType.dirName}_${individual.pid}.${CHIMERIC_BAM_SUFFIX}")
+        return new File(workDirectory, "${sampleType.dirName}_${individual.pid}_${CHIMERIC_BAM_SUFFIX}")
     }
 }

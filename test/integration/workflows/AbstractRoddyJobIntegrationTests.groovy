@@ -12,7 +12,7 @@ import static de.dkfz.tbi.TestCase.*
  * tests for AbstractRoddyJob using PanCanAlignmentWorkflow
  */
 @Ignore
-class AbstractRoddyJobIntegrationTests extends AbstractPanCanAlignmentWorkflowTests {
+class AbstractRoddyJobIntegrationTests extends AbstractRoddyAlignmentWorkflowTests {
 
 
     @Test

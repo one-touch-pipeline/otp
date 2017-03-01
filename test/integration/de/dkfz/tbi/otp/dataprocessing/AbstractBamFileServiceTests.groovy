@@ -50,6 +50,7 @@ class AbstractBamFileServiceTests {
             singletons: ARBITRARY_UNUSED_VALUE,
             insertSizeMedian: ARBITRARY_UNUSED_VALUE,
             insertSizeSD: ARBITRARY_UNUSED_VALUE,
+            referenceLength: ARBITRARY_UNUSED_VALUE,
     ].asImmutable()
 
     @Before

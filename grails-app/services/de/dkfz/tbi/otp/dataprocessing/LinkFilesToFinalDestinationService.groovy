@@ -127,7 +127,7 @@ class LinkFilesToFinalDestinationService {
 
     void linkNewRnaResults(RnaRoddyBamFile roddyBamFile, Realm realm) {
         File baseDirectory = roddyBamFile.getBaseDirectory()
-        roddyBamFile.workDirectory.listFiles().each { File source ->
+        roddyBamFile.workDirectory.listFiles().findAll { !it.name.startsWith(".") }.each { File source ->
             linkFileUtils.createAndValidateLinks([(source): new File(baseDirectory, source.name)], realm)
         }
     }

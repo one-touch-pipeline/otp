@@ -31,5 +31,6 @@ class LinkRnaAlignmentFilesToFinalDestinationJob extends AbstractEndStateAwareJo
         executeRoddyCommandService.correctPermissionsAndGroups(roddyBamFile, realm)
         linkFilesToFinalDestinationService.linkNewRnaResults(roddyBamFile, realm)
         linkFilesToFinalDestinationService.setBamFileValues(roddyBamFile)
+        succeed()
     }
 }

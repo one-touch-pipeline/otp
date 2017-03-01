@@ -28,13 +28,17 @@ import static de.dkfz.tbi.otp.utils.ProcessHelperService.*
 // it is assumed then that OtherUnixUser is also in localGroup group to be able to read
 // tmp test data and write into roddyOutput dir created by workflow.
 
-abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
+abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
 
     //The number of reads of the example fastqc files
     static final int NUMBER_OF_READS = 1000
 
     public String getRefGenFileNamePrefix() {
         return 'hs37d5'
+    }
+
+    protected String getReferenceGenomeSpecificPath() {
+        'bwa06_1KGRef'
     }
 
     protected String getChromosomeStatFileName() {
@@ -160,13 +164,17 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
 
     abstract SeqType findSeqType()
 
+    Pipeline findPipeline() {
+        DomainFactory.createPanCanPipeline()
+    }
+
     MergingWorkPackage createWorkPackage() {
         SeqType seqType = findSeqType()
 
-        Pipeline pipeline = DomainFactory.createPanCanPipeline()
+        Pipeline pipeline = findPipeline()
 
         ReferenceGenome referenceGenome = createReferenceGenomeWithFile(
-                'bwa06_1KGRef',
+                referenceGenomeSpecificPath,
                 refGenFileNamePrefix,
                 cytosinePositionsIndex,
         )
@@ -369,7 +377,7 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
         linkFileUtils.createAndValidateLinks([(refGenDir): linkRefGenDir], realm)
     }
 
-    void setUpFingerPrintingFile(SeqTrack seqTrack) {
+    static void setUpFingerPrintingFile() {
         ReferenceGenome referenceGenome = CollectionUtils.exactlyOneElement(ReferenceGenome.list())
         referenceGenome.fingerPrintingFileName = "snp138Common.n1000.vh20140318.bed"
         assert referenceGenome.save(flush: true)
@@ -517,35 +525,37 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
     void checkFileSystemState(RoddyBamFile bamFile, Integer numberOfWorkflowRestarts = 0) {
 
         //content of the final dir: root
-        List<File> rootDirs = [
-                bamFile.finalQADirectory,
-                bamFile.finalExecutionStoreDirectory,
-                bamFile.workDirectory,
-        ]
+        if (!bamFile.seqType.isRna()) {
+            List<File> rootDirs = [
+                    bamFile.finalQADirectory,
+                    bamFile.finalExecutionStoreDirectory,
+                    bamFile.workDirectory,
+            ]
 
-        List<File> rootLinks = [
-                bamFile.finalBamFile,
-                bamFile.finalBaiFile,
-                bamFile.finalMd5sumFile,
-                bamFile.finalMergedQADirectory,
-        ]
-        if (bamFile.seqType.isWgbs()) {
-            rootDirs += [
-                    bamFile.finalMethylationDirectory,
+            List<File> rootLinks = [
+                    bamFile.finalBamFile,
+                    bamFile.finalBaiFile,
+                    bamFile.finalMd5sumFile,
+                    bamFile.finalMergedQADirectory,
             ]
-            rootLinks += [
-                    bamFile.finalMetadataTableFile,
-                    bamFile.finalMergedMethylationDirectory,
-            ]
-            if (bamFile.hasMultipleLibraries()) {
-                rootLinks += bamFile.finalLibraryMethylationDirectories.values() +
-                        bamFile.finalLibraryQADirectories.values()
+            if (bamFile.seqType.isWgbs()) {
+                rootDirs += [
+                        bamFile.finalMethylationDirectory,
+                ]
+                rootLinks += [
+                        bamFile.finalMetadataTableFile,
+                        bamFile.finalMergedMethylationDirectory,
+                ]
+                if (bamFile.hasMultipleLibraries()) {
+                    rootLinks += bamFile.finalLibraryMethylationDirectories.values() +
+                            bamFile.finalLibraryQADirectories.values()
+                }
             }
+            if (bamFile.baseBamFile && !bamFile.baseBamFile.isOldStructureUsed()) {
+                rootDirs << bamFile.baseBamFile.workDirectory
+            }
+            TestCase.checkDirectoryContentHelper(bamFile.baseDirectory, rootDirs, [], rootLinks)
         }
-        if (bamFile.baseBamFile && !bamFile.baseBamFile.isOldStructureUsed()) {
-            rootDirs << bamFile.baseBamFile.workDirectory
-        }
-        TestCase.checkDirectoryContentHelper(bamFile.baseDirectory, rootDirs, [], rootLinks)
 
         //check work directories
         checkWorkDirFileSystemState(bamFile)
@@ -557,26 +567,30 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
         assert bamFile.md5sum == bamFile.finalMd5sumFile.text.replaceAll("\n", "")
 
         // content of the final dir: qa
-        List<File> qaDirs = bamFile.finalSingleLaneQADirectories.values() + [bamFile.finalMergedQADirectory]
-        List<File> qaSubDirs = []
-        if (bamFile.baseBamFile) {
-            if (bamFile.baseBamFile.isOldStructureUsed()) {
-                qaSubDirs.addAll(bamFile.baseBamFile.finalSingleLaneQADirectories.values())
-            } else {
-                qaDirs.addAll(bamFile.baseBamFile.finalSingleLaneQADirectories.values())
+        if (!bamFile.seqType.isRna()) {
+            List<File> qaDirs = bamFile.finalSingleLaneQADirectories.values() + [bamFile.finalMergedQADirectory]
+            List<File> qaSubDirs = []
+            if (bamFile.baseBamFile) {
+                if (bamFile.baseBamFile.isOldStructureUsed()) {
+                    qaSubDirs.addAll(bamFile.baseBamFile.finalSingleLaneQADirectories.values())
+                } else {
+                    qaDirs.addAll(bamFile.baseBamFile.finalSingleLaneQADirectories.values())
+                }
             }
+            if (bamFile.seqType.isWgbs() && bamFile.hasMultipleLibraries()) {
+                qaDirs.addAll(bamFile.finalLibraryQADirectories.values())
+            }
+            TestCase.checkDirectoryContentHelper(bamFile.finalQADirectory, qaSubDirs, [], qaDirs)
         }
-        if (bamFile.seqType.isWgbs() && bamFile.hasMultipleLibraries()) {
-            qaDirs.addAll(bamFile.finalLibraryQADirectories.values())
-        }
-        TestCase.checkDirectoryContentHelper(bamFile.finalQADirectory, qaSubDirs, [], qaDirs)
 
         // qa only for merged and one for each read group
-        int numberOfFilesInFinalQaDir = bamFile.numberOfMergedLanes + 1
-        if (bamFile.seqType.isWgbs() && bamFile.hasMultipleLibraries()) {
-            numberOfFilesInFinalQaDir += bamFile.seqTracks*.libraryDirectoryName.unique().size()
+        if (!bamFile.seqType.isRna()) {
+            int numberOfFilesInFinalQaDir = bamFile.numberOfMergedLanes + 1
+            if (bamFile.seqType.isWgbs() && bamFile.hasMultipleLibraries()) {
+                numberOfFilesInFinalQaDir += bamFile.seqTracks*.libraryDirectoryName.unique().size()
+            }
+            assert numberOfFilesInFinalQaDir == bamFile.finalQADirectory.list().length
         }
-        assert numberOfFilesInFinalQaDir == bamFile.finalQADirectory.list().length
 
         // all roddyExecutionDirs have been linked
         List<File> expectedRoddyExecutionDirs = bamFile.finalExecutionDirectories
@@ -598,47 +612,50 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
 
     void checkWorkDirFileSystemState(RoddyBamFile bamFile, boolean isBaseBamFile = false) {
         // content of the work dir: root
-        List<File> rootDirs = [
-                bamFile.workQADirectory,
-                bamFile.workExecutionStoreDirectory,
-                bamFile.workMergedQADirectory,
-        ]
-        List<File> rootFiles
-        if (isBaseBamFile) {
-            rootFiles = [
-                    bamFile.workMd5sumFile,
+        if (!bamFile.seqType.isRna()) {
+            List<File> rootDirs = [
+                    bamFile.workQADirectory,
+                    bamFile.workExecutionStoreDirectory,
+                    bamFile.workMergedQADirectory,
             ]
-        } else {
-            rootFiles = [
-                    bamFile.workBamFile,
-                    bamFile.workBaiFile,
-                    bamFile.workMd5sumFile,
-            ]
-        }
-        if (bamFile.seqType.isWgbs()) {
-            rootDirs += [
-                    bamFile.workMethylationDirectory,
-                    bamFile.workMergedMethylationDirectory,
-            ]
-            rootFiles.add(bamFile.workMetadataTableFile)
-            if (bamFile.hasMultipleLibraries()) {
-                rootDirs += bamFile.workLibraryMethylationDirectories.values() +
-                        bamFile.workLibraryQADirectories.values()
+            List<File> rootFiles
+            if (isBaseBamFile) {
+                rootFiles = [
+                        bamFile.workMd5sumFile,
+                ]
+            } else {
+                rootFiles = [
+                        bamFile.workBamFile,
+                        bamFile.workBaiFile,
+                        bamFile.workMd5sumFile,
+                ]
             }
+            if (bamFile.seqType.isWgbs()) {
+                rootDirs += [
+                        bamFile.workMethylationDirectory,
+                        bamFile.workMergedMethylationDirectory,
+                ]
+                rootFiles.add(bamFile.workMetadataTableFile)
+                if (bamFile.hasMultipleLibraries()) {
+                    rootDirs += bamFile.workLibraryMethylationDirectories.values() +
+                            bamFile.workLibraryQADirectories.values()
+                }
+            }
+            TestCase.checkDirectoryContentHelper(bamFile.workDirectory, rootDirs, rootFiles)
         }
-        TestCase.checkDirectoryContentHelper(bamFile.workDirectory, rootDirs, rootFiles)
 
         // content of the work dir: qa
-        List<File> qaDirs = bamFile.workSingleLaneQADirectories.values() as List
-        List<File> qaJson = bamFile.workSingleLaneQAJsonFiles.values() as List
-        qaDirs << bamFile.workMergedQADirectory
-        if (bamFile.seqType.isWgbs() && bamFile.hasMultipleLibraries()) {
-            qaDirs.addAll(bamFile.workLibraryQADirectories.values())
-            qaJson.addAll(bamFile.workLibraryQAJsonFiles.values())
+        List<File> qaJson = [bamFile.workMergedQAJsonFile]
+        if (!bamFile.seqType.isRna()) {
+            List<File> qaDirs = [bamFile.workMergedQADirectory]
+            qaDirs.addAll(bamFile.workSingleLaneQADirectories.values())
+            qaJson.addAll(bamFile.workSingleLaneQAJsonFiles.values())
+            if (bamFile.seqType.isWgbs() && bamFile.hasMultipleLibraries()) {
+                qaDirs.addAll(bamFile.workLibraryQADirectories.values())
+                qaJson.addAll(bamFile.workLibraryQAJsonFiles.values())
+            }
+            TestCase.checkDirectoryContentHelper(bamFile.workQADirectory, qaDirs)
         }
-
-        qaJson << bamFile.workMergedQAJsonFile
-        TestCase.checkDirectoryContentHelper(bamFile.workQADirectory, qaDirs)
         qaJson.each {
             assert it.exists() && it.isFile() && it.canRead() && it.size() > 0
             JSON.parse(it.text) // throws ConverterException when the JSON content is not valid

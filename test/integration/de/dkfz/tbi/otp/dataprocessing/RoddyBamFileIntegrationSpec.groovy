@@ -12,6 +12,7 @@ class RoddyBamFileIntegrationSpec extends Specification {
         RoddyMergedBamQa qa = DomainFactory.createRoddyMergedBamQa([
                 pairedRead1: pairedRead,
                 pairedRead2: pairedRead,
+                referenceLength: 0,
         ])
         RoddyBamFile roddyBamFile = qa.roddyBamFile
 

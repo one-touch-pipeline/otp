@@ -105,11 +105,12 @@ class RnaQualityAssessment extends RoddyQualityAssessment {
     double singletonsPercentage
 
     static constraints = {
-        referenceLength(nullable: true)
-        chromosome(nullable: true)
-        insertSizeCV(nullable: true)
-        percentageMatesOnDifferentChr(nullable: true)
-        genomeWithoutNCoverageQcBases(nullable: true)
+        genomeWithoutNCoverageQcBases validator: { it == null }
+        insertSizeCV validator: { it == null }
+        insertSizeMedian validator: { it == null }
+        pairedRead1 validator: { it == null }
+        pairedRead2 validator: { it == null }
+        percentageMatesOnDifferentChr validator: { it == null }
+        referenceLength validator: { it == null }
     }
-
 }

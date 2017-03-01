@@ -11,7 +11,7 @@ class AbstractQualityAssessment implements Entity {
     /**
      * length of the chromosome/genome of the reference
      */
-    long referenceLength
+    Long referenceLength
 
     /**
      * length of alignment >= minAlignedRecordLength
@@ -39,7 +39,7 @@ class AbstractQualityAssessment implements Entity {
      */
     Long qcFailedReads
     /**
-     * duplicateFlag = true, (flagtstat value duplicates)
+     * duplicateFlag = true, (flagstat value duplicates)
      */
     Long duplicates
     /**
@@ -90,6 +90,8 @@ class AbstractQualityAssessment implements Entity {
     Double insertSizeSD
 
     static constraints = {
+        // not available for RNA
+        referenceLength nullable: true, validator: { it != null }
         // This value is not available for exome QC of RoddyBamFiles
         qcBasesMapped(nullable: true)
 

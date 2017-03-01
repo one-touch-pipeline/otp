@@ -341,8 +341,8 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
         AbstractBamFile abstractBamFile = ProcessedBamFile.build()
 
         QualityAssessmentPass qualityAssessmentPass = QualityAssessmentPass.build(processedBamFile: abstractBamFile)
-        ChromosomeQualityAssessment chromosomeQualityAssessment = ChromosomeQualityAssessment.build(qualityAssessmentPass: qualityAssessmentPass)
-        OverallQualityAssessment overallQualityAssessment = OverallQualityAssessment.build(qualityAssessmentPass: qualityAssessmentPass)
+        ChromosomeQualityAssessment chromosomeQualityAssessment = ChromosomeQualityAssessment.build(qualityAssessmentPass: qualityAssessmentPass, referenceLength: 0)
+        OverallQualityAssessment overallQualityAssessment = OverallQualityAssessment.build(qualityAssessmentPass: qualityAssessmentPass, referenceLength: 0)
 
         dataSwapService.deleteQualityAssessmentInfoForAbstractBamFile(abstractBamFile)
 
@@ -356,8 +356,8 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
         AbstractBamFile abstractBamFile = DomainFactory.createProcessedMergedBamFile()
 
         QualityAssessmentMergedPass qualityAssessmentPass = QualityAssessmentMergedPass.build(abstractMergedBamFile: abstractBamFile)
-        ChromosomeQualityAssessmentMerged chromosomeQualityAssessment = ChromosomeQualityAssessmentMerged.build(qualityAssessmentMergedPass: qualityAssessmentPass)
-        OverallQualityAssessmentMerged overallQualityAssessment = OverallQualityAssessmentMerged.build(qualityAssessmentMergedPass: qualityAssessmentPass)
+        ChromosomeQualityAssessmentMerged chromosomeQualityAssessment = ChromosomeQualityAssessmentMerged.build(qualityAssessmentMergedPass: qualityAssessmentPass, referenceLength: 0)
+        OverallQualityAssessmentMerged overallQualityAssessment = OverallQualityAssessmentMerged.build(qualityAssessmentMergedPass: qualityAssessmentPass, referenceLength: 0)
         PicardMarkDuplicatesMetrics picardMarkDuplicatesMetrics = PicardMarkDuplicatesMetrics.build(abstractBamFile: abstractBamFile)
 
         dataSwapService.deleteQualityAssessmentInfoForAbstractBamFile(abstractBamFile)
@@ -373,9 +373,9 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
         AbstractBamFile abstractBamFile = DomainFactory.createRoddyBamFile()
 
         QualityAssessmentMergedPass qualityAssessmentPass = QualityAssessmentMergedPass.build(abstractMergedBamFile: abstractBamFile)
-        RoddyQualityAssessment roddyQualityAssessment = RoddyQualityAssessment.build(qualityAssessmentMergedPass: qualityAssessmentPass)
-        RoddyMergedBamQa roddyMergedBamQa = RoddyMergedBamQa.build(qualityAssessmentMergedPass: qualityAssessmentPass)
-        RoddySingleLaneQa roddySingleLaneQa = RoddySingleLaneQa.build(seqTrack: abstractBamFile.seqTracks.iterator().next(), qualityAssessmentMergedPass: qualityAssessmentPass)
+        RoddyQualityAssessment roddyQualityAssessment = RoddyQualityAssessment.build(qualityAssessmentMergedPass: qualityAssessmentPass, genomeWithoutNCoverageQcBases:0, referenceLength: 0)
+        RoddyMergedBamQa roddyMergedBamQa = RoddyMergedBamQa.build(qualityAssessmentMergedPass: qualityAssessmentPass, genomeWithoutNCoverageQcBases:0, referenceLength: 0)
+        RoddySingleLaneQa roddySingleLaneQa = RoddySingleLaneQa.build(seqTrack: abstractBamFile.seqTracks.iterator().next(), qualityAssessmentMergedPass: qualityAssessmentPass, genomeWithoutNCoverageQcBases:0, referenceLength: 0)
 
         dataSwapService.deleteQualityAssessmentInfoForAbstractBamFile(abstractBamFile)
 

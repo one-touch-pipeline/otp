@@ -1,15 +1,13 @@
 package de.dkfz.tbi.otp.job.jobs.rnaAlignment
 
-import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
-import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
 import de.dkfz.tbi.otp.job.jobs.roddyAlignment.*
 import de.dkfz.tbi.otp.ngsdata.*
-import org.hibernate.cache.ehcache.internal.strategy.ReadWriteEhcacheNaturalIdRegionAccessStrategy
 import org.springframework.context.annotation.*
 import org.springframework.stereotype.*
 
-@Component('RnaAlignmentStartJob')
+@Component('rnaAlignmentStartJob')
 @Scope('singleton')
 class RnaAlignmentStartJob extends RoddyAlignmentStartJob {
     @Override

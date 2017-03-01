@@ -244,6 +244,7 @@ class DomainFactory {
             singletons: 0,
             insertSizeMedian: 0,
             insertSizeSD: 0,
+            referenceLength: 1,
     ].asImmutable()
 
     public static OverallQualityAssessmentMerged createOverallQualityAssessmentMerged(Map properties = [:]) {
@@ -676,7 +677,8 @@ class DomainFactory {
         return createRoddyMergedBamQa([
                 qualityAssessmentMergedPass: createQualityAssessmentMergedPass(
                         abstractMergedBamFile: roddyBamFile
-                )
+                ),
+                referenceLength: 1,
         ] + properties)
     }
 

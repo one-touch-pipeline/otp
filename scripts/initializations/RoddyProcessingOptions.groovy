@@ -1,6 +1,6 @@
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.roddy.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.dataprocessing.roddy.RoddyConstants
 
 ProcessingOptionService processingOptionService = ctx.getBean("processingOptionService")
 
@@ -147,12 +147,12 @@ println processingOptionService.createOrUpdate(
         "RNAseqWorkflow",
         "Name of the alignment plugin, used with RNA"
 )
-//TODO
+
 println processingOptionService.createOrUpdate(
         RoddyConstants.OPTION_KEY_RODDY_ALIGNMENT_PLUGIN_VERSION,
         SeqType.rnaPairedSeqType.roddyName,
         null,
-        "???",
+        "1.0.8",
         "The version of the rna roddy alignment plugin"
 )
 

@@ -254,7 +254,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         int counter = 0
         if (!ThreadUtils.waitFor({
             if (lastPrintln < System.currentTimeMillis() - 60000L) {
-                println "waiting (${counter++}) ... "
+                println "waiting (${counter++} min) ... "
                 lastPrintln = System.currentTimeMillis()
             }
             return areAllProcessesFinished(numberOfProcesses)

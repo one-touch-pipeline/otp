@@ -1,12 +1,9 @@
 package workflows
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.roddy.RoddyConstants
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.job.jobs.roddyAlignment.*
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.*
 import org.junit.*
 import org.springframework.beans.factory.annotation.*
 
@@ -15,7 +12,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 /**
  * test for PanCanAlignment workflow
  */
-abstract class PanCanAlignmentWorkflowTests extends AbstractPanCanAlignmentWorkflowTests {
+abstract class PanCanAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkflowTests {
 
     @Autowired
     PanCanStartJob panCanStartJob
@@ -99,7 +96,7 @@ abstract class PanCanAlignmentWorkflowTests extends AbstractPanCanAlignmentWorkf
 
         // prepare
         SeqTrack seqTrack = createSeqTrack("readGroup1")
-        setUpFingerPrintingFile(seqTrack)
+        setUpFingerPrintingFile()
 
         executeAndVerify_AlignLanesOnly_AllFine()
     }
