@@ -365,6 +365,8 @@ ${roddyBamFile.containedSeqTracks.collect { RoddyBamFile.getReadGroupName(it) }.
         RuntimeException e = thrown()
         e.message.contains(expectedErrorMessage)
 
+        cleanup:
+        GroovySystem.metaClassRegistry.removeMetaClass(ProcessHelperService)
     }
 
 
@@ -401,6 +403,9 @@ ${roddyBamFile.containedSeqTracks.collect { RoddyBamFile.getReadGroupName(it) }.
 
         then:
         noExceptionThrown()
+
+        cleanup:
+        GroovySystem.metaClassRegistry.removeMetaClass(ProcessHelperService)
     }
 
 

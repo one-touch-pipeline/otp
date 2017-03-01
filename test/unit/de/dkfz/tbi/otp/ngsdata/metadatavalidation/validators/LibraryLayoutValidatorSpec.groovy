@@ -47,6 +47,6 @@ class LibraryLayoutValidatorSpec extends Specification {
         Problem problem = exactlyOneElement(context.problems)
         problem.level == Level.ERROR
         containSame(problem.affectedCells*.cellAddress, ['A2', 'A4'])
-        problem.message.contains("Library layout 'LibraryLayout1' is not registered in the OTP database.")
+        problem.message.contains("Library layout 'LibraryLayout1' is not registered in OTP.")
     }
 }

@@ -108,13 +108,15 @@ SAMTOOLS_BINARY=samTool
         mergeOpt == alignmentInfo.mergeOptions
         'samTool' == alignmentInfo.samToolsCommand
 
+        cleanup:
+        GroovySystem.metaClassRegistry.removeMetaClass(ProcessHelperService)
+
         where:
         useConvey | mergeTool                               || alignCommand || alignOpt           || mergeCommand || mergeOpt
         false     | MergeConstants.MERGE_TOOL_BIOBAMBAM     || 'nonConvey'  || 'alnOpt'           || 'bioBamBam'  || 'bioBamBamOpt'
         false     | MergeConstants.MERGE_TOOL_PICARD        || 'nonConvey'  || 'alnOpt'           || 'picard'     || ''
         false     | MergeConstants.MERGE_TOOL_SAMBAMBA      || 'nonConvey'  || 'alnOpt'           || 'sambamba'   || 'sambambaOpt'
         true      | MergeConstants.MERGE_TOOL_BIOBAMBAM     || 'convey'     || 'alnOpt conveyOpt' || 'bioBamBam'  || 'bioBamBamOpt'
-
     }
 
 
@@ -157,6 +159,9 @@ ${['2PASS', 'OUT', 'CHIMERIC', 'INTRONS'].collect { name ->
         'SAMBAMBA_BINARY' == alignmentInfo.mergeCommand
         ''  == alignmentInfo.mergeOptions
         'samTool' == alignmentInfo.samToolsCommand
+
+        cleanup:
+        GroovySystem.metaClassRegistry.removeMetaClass(ProcessHelperService)
     }
 
     @Unroll
@@ -184,6 +189,9 @@ ${['2PASS', 'OUT', 'CHIMERIC', 'INTRONS'].collect { name ->
         then:
         Exception e = thrown()
         e.message.contains(expectedError)
+
+        cleanup:
+        GroovySystem.metaClassRegistry.removeMetaClass(ProcessHelperService)
 
         where:
         name                  | stdout                                          | stderr                                                                      | exitcode || expectedErrorTemplate

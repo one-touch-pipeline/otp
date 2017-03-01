@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
 import de.dkfz.tbi.util.spreadsheet.validation.*
 import grails.test.mixin.*
@@ -11,6 +12,30 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 @Mock(SeqType)
 class SeqTypeLibraryLayoutValidatorSpec extends Specification {
+
+    void 'validate, when context is BamMetadataValidationContext, gets expected columns'() {
+
+        given:
+        BamMetadataValidationContext context = BamMetadataValidationContextFactory.createContext()
+
+        when:
+        List<String> columns = new SeqTypeLibraryLayoutValidator().getColumnTitles(context)
+
+        then:
+        columns == [BamMetadataColumn.SEQUENCING_TYPE.name(), BamMetadataColumn.LIBRARY_LAYOUT.name()]
+    }
+
+    void 'validate, when context is MetadataValidationContext, gets expected columns'() {
+
+        given:
+        MetadataValidationContext context = MetadataValidationContextFactory.createContext()
+
+        when:
+        List<String> columns = new SeqTypeLibraryLayoutValidator().getColumnTitles(context)
+
+        then:
+        columns == [MetaDataColumn.SEQUENCING_TYPE.name(), MetaDataColumn.LIBRARY_LAYOUT.name(), MetaDataColumn.TAGMENTATION_BASED_LIBRARY.name()]
+    }
 
     void 'validate, when column(s) is/are missing, adds error(s)'() {
 
@@ -32,7 +57,6 @@ value1\tvalue2
         "seqtype\t${MetaDataColumn.LIBRARY_LAYOUT.name()}" || ["Mandatory column 'SEQUENCING_TYPE' is missing."]
         "seqtype\tlayout" || ["Mandatory column 'SEQUENCING_TYPE' is missing.", "Mandatory column 'LIBRARY_LAYOUT' is missing."]
     }
-
 
     void 'validate, when combinations are in database, adds no problem'() {
 

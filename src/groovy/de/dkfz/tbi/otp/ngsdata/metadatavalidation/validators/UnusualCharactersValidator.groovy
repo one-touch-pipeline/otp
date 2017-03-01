@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
 import de.dkfz.tbi.util.spreadsheet.*
 import de.dkfz.tbi.util.spreadsheet.validation.*
@@ -8,7 +10,7 @@ import org.springframework.stereotype.*
 import java.util.regex.*
 
 @Component
-class UnusualCharactersValidator extends AllCellsValidator<MetadataValidationContext> implements MetadataValidator {
+class UnusualCharactersValidator extends AllCellsValidator<AbstractMetadataValidationContext> implements MetadataValidator, BamMetadataValidator {
 
     static final Pattern NORMAL_CHARACTERS =
             Pattern.compile('[^0-9A-Za-z' + Pattern.quote(' !"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~') + ']')
@@ -19,7 +21,7 @@ class UnusualCharactersValidator extends AllCellsValidator<MetadataValidationCon
     }
 
     @Override
-    void validateValue(MetadataValidationContext context, String value, Set<Cell> cells) {
+    void validateValue(AbstractMetadataValidationContext context, String value, Set<Cell> cells) {
         Matcher matcher = NORMAL_CHARACTERS.matcher(value)
         Set<Character> unusualCharacters = [] as Set<Character>
         while (matcher.find()) {

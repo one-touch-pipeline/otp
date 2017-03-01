@@ -1,14 +1,16 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
 import de.dkfz.tbi.util.spreadsheet.*
 import de.dkfz.tbi.util.spreadsheet.validation.*
 import org.springframework.stereotype.*
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
 
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
+import de.dkfz.tbi.otp.ngsdata.*
 
 @Component
-class Md5sumFormatValidator extends SingleValueValidator<MetadataValidationContext> implements MetadataValidator {
+class Md5sumFormatValidator extends SingleValueValidator<AbstractMetadataValidationContext> implements MetadataValidator, BamMetadataValidator {
 
     @Override
     Collection<String> getDescriptions() {
@@ -16,12 +18,30 @@ class Md5sumFormatValidator extends SingleValueValidator<MetadataValidationConte
     }
 
     @Override
-    String getColumnTitle(MetadataValidationContext context) {
-        return MD5.name()
+    String getColumnTitle(AbstractMetadataValidationContext context) {
+        return MetaDataColumn.MD5.name()
     }
 
     @Override
-    void validateValue(MetadataValidationContext context, String value, Set<Cell> cells) {
+    void columnMissing(AbstractMetadataValidationContext context) {
+        if (context instanceof BamMetadataValidationContext) {
+            optionalColumnMissing(context, BamMetadataColumn.MD5.name())
+        }
+    }
+
+    @Override
+    void validateValue(AbstractMetadataValidationContext context, String value, Set<Cell> cells) {
+        if (context instanceof BamMetadataValidationContext) {
+            if (!value.empty) {
+                checkMd5Sum(context, value, cells)
+            }
+        } else {
+            checkMd5Sum(context, value, cells)
+        }
+
+    }
+
+    static void checkMd5Sum(AbstractMetadataValidationContext context, String value, Set<Cell> cells) {
         if (!(value ==~ /^[0-9a-fA-F]{32}$/)) {
             context.addProblem(cells, Level.ERROR, "Not a well-formatted MD5 sum: '${value}'")
         }
