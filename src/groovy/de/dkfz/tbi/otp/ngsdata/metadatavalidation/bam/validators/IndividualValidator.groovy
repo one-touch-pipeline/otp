@@ -21,7 +21,7 @@ class IndividualValidator extends SingleValueValidator<BamMetadataValidationCont
 
     @Override
     void validateValue(BamMetadataValidationContext context, String individual, Set<Cell> cells) {
-        if (!(Individual.findByPid(individual) || Individual.findByMockFullName(individual) || Individual.findByMockPid(individual))) {
+        if (!Individual.findByPidOrMockPidOrMockFullName(individual, individual, individual)) {
             context.addProblem(cells, Level.ERROR, "The individual '${individual}' is not registered in OTP.")
         }
     }

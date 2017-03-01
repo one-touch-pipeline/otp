@@ -1891,7 +1891,6 @@ samplePairsNotProcessed: ${samplePairsNotProcessed}
     static ExternallyProcessedMergedBamFile createExternallyProcessedMergedBamFile(Map properties = [:]) {
         return createDomainObject(ExternallyProcessedMergedBamFile, [
                 fileName: 'runName_' + (counter++),
-                source  : "SOURCE",
                 type: AbstractBamFile.BamType.MDUP,
                 workPackage: { createExternalMergingWorkPackage() },
                 numberOfMergedLanes: null,

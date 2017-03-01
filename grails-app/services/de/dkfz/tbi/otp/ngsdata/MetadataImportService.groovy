@@ -3,8 +3,9 @@ package de.dkfz.tbi.otp.ngsdata
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures.DataFilesOnGpcfMidTerm
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures.*
 import de.dkfz.tbi.otp.tracking.*
 import de.dkfz.tbi.util.spreadsheet.*
 import de.dkfz.tbi.util.spreadsheet.validation.ValueTuple
@@ -201,7 +202,7 @@ class MetadataImportService {
         return applicationContext.getBean(directoryStructureBeanName, DirectoryStructure)
     }
 
-    protected static boolean mayImport(MetadataValidationContext context, boolean ignoreWarnings, String previousValidationMd5sum) {
+    public static boolean mayImport(AbstractMetadataValidationContext context, boolean ignoreWarnings, String previousValidationMd5sum) {
         Level maxLevel = context.maximumProblemLevel
         if (maxLevel.intValue() < Level.WARNING.intValue()) {
             return true

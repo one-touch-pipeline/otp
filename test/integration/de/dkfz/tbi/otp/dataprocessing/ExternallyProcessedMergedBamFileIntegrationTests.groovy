@@ -71,7 +71,6 @@ class ExternallyProcessedMergedBamFileIntegrationTests {
         bamFile = DomainFactory.createExternallyProcessedMergedBamFile(
                 type: AbstractBamFile.BamType.SORTED,
                 fileName: "FILE_NAME",
-                source: "SOURCE",
                 workPackage: externalMergingWorkPackage
         )
 
@@ -81,6 +80,6 @@ class ExternallyProcessedMergedBamFileIntegrationTests {
     void testGetFilePath() {
         OtpPath otpPath = bamFile.getFilePath()
         assert otpPath.project == bamFile.project
-        assert otpPath.relativePath == new File("project-dir/sequencing/seq-type-dir/view-by-pid/patient/sample-type/library/merged-alignment/nonOTP/SOURCE_REF_GEN/FILE_NAME")
+        assert otpPath.relativePath == new File("project-dir/sequencing/seq-type-dir/view-by-pid/patient/sample-type/library/merged-alignment/nonOTP/analysisImport_REF_GEN/FILE_NAME")
     }
 }

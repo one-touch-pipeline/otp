@@ -21,6 +21,8 @@ class ImportProcess implements Entity {
 
     boolean triggerIndel
 
+    boolean triggerAceseq
+
     Set<ExternallyProcessedMergedBamFile> externallyProcessedMergedBamFiles
 
     static hasMany = [

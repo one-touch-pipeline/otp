@@ -84,6 +84,7 @@
                                     <li class="allGranted operator_nav_container" id="operator"><g:link><g:message code="otp.menu.operatorSection"/> &#9661;</g:link>
                                         <ul>
                                             <li id="metadataImport"><g:link controller="metadataImport" action="index"><g:message code="otp.menu.importAndValidation"/></g:link></li>
+                                            <li id="bamMetadataImport"><g:link controller="bamMetadataImport" action="index"><g:message code="otp.menu.bamMetadataImport"/></g:link></li>
                                             <li id="sampleIdentifierOverview"><g:link controller="sampleIdentifierOverview" action="index"><g:message code="otp.menu.sampleIdentifierOverview"/></g:link></li>
                                             <li id="blacklistedIlseNumbers"><g:link controller="metadataImport" action="blacklistedIlseNumbers"><g:message code="otp.menu.blacklistedIlseNumbers"/></g:link></li>
                                             <li id="createProject"><g:link controller="createProject" action="index"><g:message code="otp.menu.createProject"/></g:link></li>

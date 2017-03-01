@@ -11,9 +11,9 @@ import org.hibernate.Hibernate
  */
 class ExternallyProcessedMergedBamFile extends AbstractMergedBamFile {
 
-    /** source of the file, eg. workflow or import name; used to construct the path of the file */
-    String source
     String fileName
+
+    /** source directory of the imported bam file */
     String importedFrom
 
     @Override
@@ -77,7 +77,7 @@ class ExternallyProcessedMergedBamFile extends AbstractMergedBamFile {
 
     public OtpPath getFilePath() {
         return new OtpPath(nonOtpFolder,
-                "${source}_${referenceGenome}", fileName)
+                "analysisImport_${referenceGenome}", fileName)
     }
 
     public OtpPath getNonOtpFolder() {
@@ -86,8 +86,8 @@ class ExternallyProcessedMergedBamFile extends AbstractMergedBamFile {
     }
 
     static constraints = {
+        type validator: { true }
         importedFrom nullable: true, blank: false, validator: { it == null || OtpPath.isValidAbsolutePath(it) }
-        source blank: false, validator: { OtpPath.isValidPathComponent(it) }
         fileName blank: false, validator: { OtpPath.isValidPathComponent(it) }
         workPackage validator: { val ->
             val.pipeline.name == Pipeline.Name.EXTERNALLY_PROCESSED &&
