@@ -74,6 +74,7 @@ class ExecuteRoddySnvJobSpec extends Specification {
                     0 * _
                 },
         ])
+        job.chromosomeIdentifierSortingService = new ChromosomeIdentifierSortingService()
 
         RoddySnvCallingInstance roddySnvCallingInstance = DomainFactory.createRoddySnvInstanceWithRoddyBamFiles()
         DomainFactory.createRealmDataManagement(temporaryFolder.newFolder(), [name: roddySnvCallingInstance.project.realmName])
@@ -97,7 +98,7 @@ class ExecuteRoddySnvJobSpec extends Specification {
                 "${roddySnvCallingInstance.sampleType1BamFile.sampleType.dirName}_${roddySnvCallingInstance.sampleType2BamFile.sampleType.dirName}/" +
                 "${roddySnvCallingInstance.instanceName}"
 
-        List<String> chromosomeNames = ["1", "2", "3", "4", "5", "M", "X", "Y"]
+        List<String> chromosomeNames = ["1", "2", "3", "4", "5", "X", "Y", "M"]
         DomainFactory.createReferenceGenomeEntries(roddySnvCallingInstance.referenceGenome, chromosomeNames)
 
         List<String> expectedList = [

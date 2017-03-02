@@ -80,7 +80,7 @@ class ExecuteWgbsAlignmentJobTests {
 
     @Test
     void testPrepareAndReturnWorkflowSpecificCValues_cytosinePositionIndexFilePath() {
-        List<String> chromosomeNames = ["1", "2", "3", "4", "5", "M", "X", "Y"]
+        List<String> chromosomeNames = ["1", "2", "3", "4", "5", "X", "Y", "M"]
         DomainFactory.createReferenceGenomeEntries(roddyBamFile.referenceGenome, chromosomeNames)
 
         List<String> expectedCommand = [
@@ -103,7 +103,7 @@ class ExecuteWgbsAlignmentJobTests {
         roddyBamFile.referenceGenome.cytosinePositionsIndex = null
         roddyBamFile.referenceGenome.save(flush: true)
 
-        List<String> chromosomeNames = ["1", "2", "3", "4", "5", "M", "X", "Y"]
+        List<String> chromosomeNames = ["1", "2", "3", "4", "5", "X", "Y", "M"]
         DomainFactory.createReferenceGenomeEntries(roddyBamFile.referenceGenome, chromosomeNames)
 
         assert TestCase.shouldFail(RuntimeException) {

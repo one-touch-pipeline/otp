@@ -56,6 +56,7 @@ class AbstractExecutePanCanJobTests {
         abstractExecutePanCanJob.executeRoddyCommandService = new ExecuteRoddyCommandService()
         abstractExecutePanCanJob.bedFileService = new BedFileService()
         abstractExecutePanCanJob.configService = new ConfigService()
+        abstractExecutePanCanJob.chromosomeIdentifierSortingService = new ChromosomeIdentifierSortingService()
 
         File processingRootPath = dataProcessing.processingRootPath as File
 
@@ -204,10 +205,11 @@ PBS_AccountName:FASTTRACK"\
 
     @Test
     void testGetChromosomeIndexParameterWithMitochondrium_AllFine() {
-        List<String> chromosomeNames = ["1", "2", "3", "4", "5", "M", "X", "Y"]
+        List<String> chromosomeNames = ["1", "4", "3", "X", "5", "M", "2", "Y", "21"]
+        List<String> chromosomeNamesExpected = ["1", "2", "3", "4", "5", "21", "X", "Y", "M"]
         DomainFactory.createReferenceGenomeEntries(roddyBamFile.referenceGenome, chromosomeNames)
 
-        assert "CHROMOSOME_INDICES:( ${chromosomeNames.join(' ')} )" == abstractExecutePanCanJob.getChromosomeIndexParameterWithMitochondrium(roddyBamFile.referenceGenome)
+        assert "CHROMOSOME_INDICES:( ${chromosomeNamesExpected.join(' ')} )" == abstractExecutePanCanJob.getChromosomeIndexParameterWithMitochondrium(roddyBamFile.referenceGenome)
     }
 
     @Test
@@ -227,7 +229,8 @@ PBS_AccountName:FASTTRACK"\
 
     @Test
     void testGetChromosomeIndexParameterWithoutMitochondrium_AllFine() {
-        List<String> chromosomeNames = ["1", "2", "3", "4", "5", "X", "Y"]
+        List<String> chromosomeNames = ["1", "4", "3", "X", "5", "2", "Y", "21"]
+        List<String> chromosomeNamesExpected = ["1", "2", "3", "4", "5", "21", "X", "Y"]
         DomainFactory.createReferenceGenomeEntries(roddyBamFile.referenceGenome, chromosomeNames)
         DomainFactory.createReferenceGenomeEntry(
                 referenceGenome: roddyBamFile.referenceGenome,
@@ -236,6 +239,6 @@ PBS_AccountName:FASTTRACK"\
                 alias: "M"
         )
 
-        assert "CHROMOSOME_INDICES:( ${chromosomeNames.join(' ')} )" == abstractExecutePanCanJob.getChromosomeIndexParameterWithoutMitochondrium(roddyBamFile.referenceGenome)
+        assert "CHROMOSOME_INDICES:( ${chromosomeNamesExpected.join(' ')} )" == abstractExecutePanCanJob.getChromosomeIndexParameterWithoutMitochondrium(roddyBamFile.referenceGenome)
     }
 }

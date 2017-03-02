@@ -28,6 +28,9 @@ abstract class AbstractExecutePanCanJob<R extends RoddyResult> extends AbstractR
     @Autowired
     ExecutionService executionService
 
+    @Autowired
+    ChromosomeIdentifierSortingService chromosomeIdentifierSortingService
+
 
     @Override
     protected String prepareAndReturnWorkflowSpecificCommand(R roddyResult, Realm realm) throws Throwable {
@@ -64,7 +67,9 @@ abstract class AbstractExecutePanCanJob<R extends RoddyResult> extends AbstractR
                 [ReferenceGenomeEntry.Classification.CHROMOSOME, ReferenceGenomeEntry.Classification.MITOCHONDRIAL])*.name
         assert chromosomeNames: "No chromosome names could be found for reference genome ${referenceGenome}"
 
-        return "CHROMOSOME_INDICES:( ${chromosomeNames.join(' ')} )"
+        List<String> sortedList = chromosomeIdentifierSortingService.sortIdentifiers(chromosomeNames)
+
+        return "CHROMOSOME_INDICES:( ${sortedList.join(' ')} )"
     }
 
 
@@ -75,7 +80,9 @@ abstract class AbstractExecutePanCanJob<R extends RoddyResult> extends AbstractR
                 [ReferenceGenomeEntry.Classification.CHROMOSOME])*.name
         assert chromosomeNames: "No chromosome names could be found for reference genome ${referenceGenome}"
 
-        return "CHROMOSOME_INDICES:( ${chromosomeNames.join(' ')} )"
+        List<String> sortedList = chromosomeIdentifierSortingService.sortIdentifiers(chromosomeNames)
+
+        return "CHROMOSOME_INDICES:( ${sortedList.join(' ')} )"
     }
 
 
