@@ -1,4 +1,4 @@
-package de.dkfz.tbi.otp.job.jobs.roddyAlignment
+package de.dkfz.tbi.otp.job.jobs.rnaAlignment
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
