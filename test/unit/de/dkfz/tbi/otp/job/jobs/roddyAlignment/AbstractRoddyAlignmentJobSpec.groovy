@@ -34,8 +34,10 @@ import spock.lang.*
         SnvConfig,
         SoftwareTool,
         ReferenceGenome,
+        ReferenceGenomeEntry,
         ReferenceGenomeProjectSeqType,
         Realm,
+        ReferenceGenomeEntry,
         RnaRoddyBamFile,
         RoddyBamFile,
         RoddyWorkflowConfig,
@@ -70,16 +72,22 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
 
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
 
+        List<String> chromosomeNames = ["1", "2", "3", "4", "5", "X", "Y", "M"]
+        DomainFactory.createReferenceGenomeEntries(roddyBamFile.referenceGenome, chromosomeNames)
+
         job.referenceGenomeService = Mock(ReferenceGenomeService) {
             1 * fastaFilePath(_) >> referenceGenomeFilePath
             1 * chromosomeStatSizeFile(_) >> chromosomeStatSizeFilePath
         }
+
+        job.chromosomeIdentifierSortingService = new ChromosomeIdentifierSortingService()
 
         List<String> expected = [
                 "INDEX_PREFIX:${referenceGenomeFilePath.path}",
                 "CHROM_SIZES_FILE:${chromosomeStatSizeFilePath.path}",
                 "possibleControlSampleNamePrefixes:${roddyBamFile.getSampleType().dirName}",
                 "possibleTumorSampleNamePrefixes:",
+                "CHROMOSOME_INDICES:( 1 2 3 4 5 X Y M )",
         ]
 
         if (adapter == "YES" ) {

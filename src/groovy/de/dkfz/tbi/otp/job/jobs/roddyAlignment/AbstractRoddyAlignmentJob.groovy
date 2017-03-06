@@ -33,6 +33,7 @@ abstract class AbstractRoddyAlignmentJob extends AbstractExecutePanCanJob<RoddyB
 
         cValues.add("possibleControlSampleNamePrefixes:${roddyBamFile.getSampleType().dirName}")
         cValues.add("possibleTumorSampleNamePrefixes:")
+        cValues.add(getChromosomeIndexParameterWithMitochondrium(roddyBamFile.referenceGenome))
 
         AdapterFile adapterFile = atMostOneElement(roddyBamFile.seqTracks*.adapterFile?.unique() ?: [])
         if (adapterFile) {
