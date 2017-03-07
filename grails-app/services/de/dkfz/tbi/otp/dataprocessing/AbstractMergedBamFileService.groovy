@@ -1,8 +1,9 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.ngsdata.*
-import static org.springframework.util.Assert.notNull
+
+import static org.springframework.util.Assert.*
 
 class AbstractMergedBamFileService {
 
@@ -26,14 +27,20 @@ class AbstractMergedBamFileService {
     public void setSamplePairStatusToNeedProcessing(AbstractMergedBamFile finishedBamFile) {
         assert finishedBamFile: "The input bam file must not be null"
         SamplePair.createCriteria().list {
-            eq('snvProcessingStatus', SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED)
             or {
                 eq('mergingWorkPackage1', finishedBamFile.workPackage)
                 eq('mergingWorkPackage2', finishedBamFile.workPackage)
             }
         }.each { SamplePair samplePair ->
-            samplePair.snvProcessingStatus = SamplePair.ProcessingStatus.NEEDS_PROCESSING
-            samplePair.indelProcessingStatus = SamplePair.ProcessingStatus.NEEDS_PROCESSING
+            if (samplePair.snvProcessingStatus == SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED) {
+                samplePair.snvProcessingStatus = SamplePair.ProcessingStatus.NEEDS_PROCESSING
+            }
+            if (samplePair.indelProcessingStatus == SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED) {
+                samplePair.indelProcessingStatus = SamplePair.ProcessingStatus.NEEDS_PROCESSING
+            }
+            if (samplePair.aceseqProcessingStatus == SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED && samplePair.mergingWorkPackage1.seqType.name == SeqTypeNames.WHOLE_GENOME.seqTypeName) {
+                samplePair.aceseqProcessingStatus = SamplePair.ProcessingStatus.NEEDS_PROCESSING
+            }
             assert samplePair.save(flush: true)
         }
     }

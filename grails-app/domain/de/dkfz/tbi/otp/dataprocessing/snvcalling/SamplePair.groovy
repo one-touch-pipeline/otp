@@ -57,7 +57,9 @@ class SamplePair implements Entity {
     ProcessingStatus aceseqProcessingStatus = ProcessingStatus.NEEDS_PROCESSING
 
     boolean isProcessingDisabled() {
-        return snvProcessingStatus == ProcessingStatus.DISABLED && indelProcessingStatus == ProcessingStatus.DISABLED && aceseqProcessingStatus == ProcessingStatus.DISABLED
+        return  snvProcessingStatus    == ProcessingStatus.DISABLED &&
+                indelProcessingStatus  == ProcessingStatus.DISABLED &&
+                aceseqProcessingStatus == ProcessingStatus.DISABLED
     }
 
     /**
@@ -263,6 +265,11 @@ class SamplePair implements Entity {
     static void setIndelProcessingStatus(final Collection<SamplePair> samplePairs,
                                          final ProcessingStatus indelProcessingStatus) {
         setProcessingStatus(samplePairs, indelProcessingStatus, "indelProcessingStatus")
+    }
+
+    static void setAceseqProcessingStatus(final Collection<SamplePair> samplePairs,
+                                         final ProcessingStatus aceseqProcessingStatus) {
+        setProcessingStatus(samplePairs, aceseqProcessingStatus, "aceseqProcessingStatus")
     }
 
 
