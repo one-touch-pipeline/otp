@@ -175,7 +175,7 @@ class SamplePair implements Entity {
      * The names of the properties of {@link #mergingWorkPackage1} and {@link #mergingWorkPackage2} which must be equal.
      */
     static final Collection<String> mergingWorkPackageEqualProperties =
-            (MergingWorkPackage.seqTrackPropertyNames - ['sample', 'libraryPreparationKit'] + MergingWorkPackage.processingParameterNames).asImmutable()
+            (MergingWorkPackage.seqTrackPropertyNames - ['sample', 'libraryPreparationKit'] + MergingWorkPackage.processingParameterNames  - ['referenceGenome']).asImmutable()
 
     /**
      * Finds distinct combinations of [mergingWorkPackage1, mergingWorkPackage2] with these criteria:
