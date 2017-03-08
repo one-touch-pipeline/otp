@@ -29,7 +29,7 @@ abstract class AbstractRoddySnvWorkflowTests extends AbstractSnvWorkflowTests {
 <configuration configurationType='project'
             name='${name}'
             imports="${IMPORT}"
-            description='SNV project configuration for WGS in OTP.'>
+            description='SNV project configuration for ${seqType.roddyName} in OTP.'>
     <subconfigurations>
         <configuration name='config' usedresourcessize='t'>
             <availableAnalyses>

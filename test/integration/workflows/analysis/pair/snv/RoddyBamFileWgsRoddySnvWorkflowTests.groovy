@@ -3,7 +3,7 @@ package workflows.analysis.pair.snv
 import org.junit.*
 
 @Ignore
-class RoddyBamFileOtpSnvWorkflowTests extends AbstractOtpSnvWorkflowTests {
+class RoddyBamFileWgsRoddySnvWorkflowTests extends AbstractRoddySnvWorkflowTests {
 
     @Before
     void prepare() {

@@ -40,12 +40,25 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
     }
 
 
-    void setupRoddyBamFile() {
+    void setupRoddyWgsBamFile() {
         MergingWorkPackage tumorMwp = DomainFactory.createMergingWorkPackage(
                 seqType: DomainFactory.createWholeGenomeSeqType(),
                 pipeline: DomainFactory.createPanCanPipeline(),
                 referenceGenome: createReferenceGenome()
         )
+        setupRoddyBamFile(tumorMwp)
+    }
+
+    void setupRoddyWesBamFile() {
+        MergingWorkPackage tumorMwp = DomainFactory.createMergingWorkPackage(
+                seqType: DomainFactory.createExomeSeqType(),
+                pipeline: DomainFactory.createPanCanPipeline(),
+                referenceGenome: createReferenceGenome()
+        )
+        setupRoddyBamFile(tumorMwp)
+    }
+
+    private void setupRoddyBamFile(MergingWorkPackage tumorMwp) {
         bamFileTumor = DomainFactory.createRoddyBamFile([workPackage: tumorMwp] + createProcessMergedBamFileProperties())
 
         bamFileControl = DomainFactory.createRoddyBamFile(createProcessMergedBamFileProperties() + [
@@ -53,32 +66,45 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
                 config: bamFileTumor.config,
         ])
 
-        commonBamFileSetup()
+        commonBamFileSetup(tumorMwp.seqType)
     }
 
 
-    void setupProcessMergedBamFile() {
+    void setupProcessMergedWgsBamFile() {
         MergingWorkPackage tumorMwp = DomainFactory.createMergingWorkPackage(
                 seqType: DomainFactory.createWholeGenomeSeqType(),
                 pipeline: DomainFactory.createDefaultOtpPipeline(),
                 referenceGenome: createReferenceGenome()
         )
+        setupProcessMergedBamFile(tumorMwp)
+    }
+
+    void setupProcessMergedWesBamFile() {
+        MergingWorkPackage tumorMwp = DomainFactory.createMergingWorkPackage(
+                seqType: DomainFactory.createExomeSeqType(),
+                pipeline: DomainFactory.createDefaultOtpPipeline(),
+                referenceGenome: createReferenceGenome()
+        )
+        setupProcessMergedBamFile(tumorMwp)
+    }
+
+    private void setupProcessMergedBamFile(MergingWorkPackage tumorMwp) {
         bamFileTumor = DomainFactory.createProcessedMergedBamFile(tumorMwp, createProcessMergedBamFileProperties())
 
         bamFileControl = DomainFactory.createProcessedMergedBamFile(
                 DomainFactory.createMergingWorkPackage(bamFileTumor.mergingWorkPackage),
                 createProcessMergedBamFileProperties())
 
-        commonBamFileSetup()
+        commonBamFileSetup(tumorMwp.seqType)
     }
 
 
-    private void commonBamFileSetup() {
+    private void commonBamFileSetup(SeqType seqType) {
         individual = bamFileTumor.individual
         project = individual.project
         sampleTypeControl = bamFileControl.sampleType
         sampleTypeTumor = bamFileTumor.sampleType
-        seqType = bamFileTumor.seqType
+        this.seqType = bamFileTumor.seqType
 
         project.realmName = realm.name
         assert project.save(flush: true)
@@ -94,7 +120,12 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
 
         createAnalysisSpecificSetup()
         createThresholds()
-        setupBamFilesInFileSystem()
+        File inputDirectory = new File(getDataDirectory(), 'processedMergedBamFiles')
+        if (seqType.name == SeqTypeNames.EXOME.seqTypeName) {
+            setupWesBamFilesInFileSystem(inputDirectory)
+        } else {
+            setupWgsBamFilesInFileSystem(inputDirectory)
+        }
     }
 
 
@@ -134,14 +165,27 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
         )
     }
 
+    void setupWesBamFilesInFileSystem(File inputDirectory) {
+        File exomeDirectory = new File(inputDirectory, 'exome')
 
-    void setupBamFilesInFileSystem() {
-        File inputDirectory = new File(getDataDirectory(), 'processedMergedBamFiles')
+        File inputDiseaseBamFile = new File(exomeDirectory, 'PLASMA_SOMEPID_EXON_PAIRED_merged.mdup.bam')
+        File inputDiseaseBaiFile = new File(exomeDirectory, 'PLASMA_SOMEPID_EXON_PAIRED_merged.mdup.bai')
+        File inputControlBamFile = new File(exomeDirectory, 'BLOOD_SOMEPID_EXON_PAIRED_merged.mdup.bam')
+        File inputControlBaiFile  = new File(exomeDirectory, 'BLOOD_SOMEPID_EXON_PAIRED_merged.mdup.bai')
+
+        setupBamFilesInFileSystem(inputDiseaseBamFile, inputDiseaseBaiFile, inputControlBamFile, inputControlBaiFile)
+    }
+
+    void setupWgsBamFilesInFileSystem(File inputDirectory) {
         File inputDiseaseBamFile = new File(inputDirectory, 'tumor_SOMEPID_merged.mdup.bam')
         File inputDiseaseBaiFile = new File(inputDirectory, 'tumor_SOMEPID_merged.mdup.bam.bai')
         File inputControlBamFile = new File(inputDirectory, 'control_SOMEPID_merged.mdup.bam')
         File inputControlBaiFile = new File(inputDirectory, 'control_SOMEPID_merged.mdup.bam.bai')
 
+        setupBamFilesInFileSystem(inputDiseaseBamFile, inputDiseaseBaiFile, inputControlBamFile, inputControlBaiFile)
+    }
+
+    void setupBamFilesInFileSystem(File inputDiseaseBamFile, File inputDiseaseBaiFile, File inputControlBamFile, File inputControlBaiFile) {
         File diseaseBamFile = bamFileTumor.pathForFurtherProcessing
         File diseaseBaiFile = new File(diseaseBamFile.parentFile, bamFileTumor.baiFileName)
         File controlBamFile = bamFileControl.pathForFurtherProcessing

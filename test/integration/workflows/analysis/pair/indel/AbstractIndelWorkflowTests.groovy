@@ -1,14 +1,13 @@
-package workflows.analysis.pair
+package workflows.analysis.pair.indel
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.*
-import org.junit.*
+import workflows.analysis.pair.*
 
-@Ignore
-class IndelWorkflowTests extends AbstractBamFilePairAnalysisWorkflowTests {
+abstract class AbstractIndelWorkflowTests extends AbstractBamFilePairAnalysisWorkflowTests{
 
     static final String PLUGIN_NAME = 'IndelCallingWorkflow'
     static final String PLUGIN_VERSION = '1.0.167'
@@ -16,25 +15,6 @@ class IndelWorkflowTests extends AbstractBamFilePairAnalysisWorkflowTests {
     static final String CONFIG_VERSION = 'v1_0'
     static final String ANALYSIS = 'indelCallingAnalysis'
     static final String IMPORT = 'otpIndelCallingWorkflow-1.0'
-
-
-    @Test
-    void testWholeWorkflowWithRoddyBamFile() {
-        setupRoddyBamFile()
-        createConfig()
-
-        execute()
-        check()
-    }
-
-    @Test
-    void testWholeWorkflowWithProcessedMergedBamFile() {
-        setupProcessMergedBamFile()
-        createConfig()
-
-        execute()
-        check()
-    }
 
     File createXml() {
         String name = RoddyWorkflowConfig.getNameUsedInConfig(
@@ -48,7 +28,7 @@ class IndelWorkflowTests extends AbstractBamFilePairAnalysisWorkflowTests {
 <configuration configurationType='project'
             name='${name}'
             imports="${IMPORT}"
-            description='Indel project configuration for WGS in OTP.'>
+            description='Indel project configuration for ${seqType.roddyName} in OTP.'>
     <subconfigurations>
         <configuration name='config' usedresourcessize='t'>
             <availableAnalyses>
@@ -93,7 +73,6 @@ echo 'OK'
 
         return configFilePath
     }
-
 
     @Override
     ConfigPerProject createConfig() {
