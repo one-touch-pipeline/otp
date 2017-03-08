@@ -16,6 +16,7 @@ class SamplePair implements Entity {
 
     final static String SNV_RESULTS_PATH_PART = 'snv_results'
     final static String INDEL_RESULTS_PATH_PART = 'indel_results'
+    final static String ACESEQ_RESULTS_PATH_PART = 'cnv_results'
 
     /**
      * Creates an instance. Does <em>not</em> persist it.
@@ -53,9 +54,10 @@ class SamplePair implements Entity {
 
     ProcessingStatus snvProcessingStatus = ProcessingStatus.NEEDS_PROCESSING
     ProcessingStatus indelProcessingStatus = ProcessingStatus.NEEDS_PROCESSING
+    ProcessingStatus aceseqProcessingStatus = ProcessingStatus.NEEDS_PROCESSING
 
     boolean isProcessingDisabled() {
-        return snvProcessingStatus == ProcessingStatus.DISABLED && indelProcessingStatus == ProcessingStatus.DISABLED
+        return snvProcessingStatus == ProcessingStatus.DISABLED && indelProcessingStatus == ProcessingStatus.DISABLED && aceseqProcessingStatus == ProcessingStatus.DISABLED
     }
 
     /**
@@ -105,6 +107,9 @@ class SamplePair implements Entity {
         mergingWorkPackage1 index: 'sample_pair_indel_idx1'
         mergingWorkPackage2 index: 'sample_pair_indel_idx1'
         indelProcessingStatus index: 'sample_pair_indel_idx1'
+        mergingWorkPackage1 index: 'sample_pair_aceseq_idx1'
+        mergingWorkPackage2 index: 'sample_pair_aceseq_idx1'
+        aceseqProcessingStatus index: 'sample_pair_aceseq_idx1'
     }
 
     Project getProject() {
@@ -141,6 +146,9 @@ class SamplePair implements Entity {
     OtpPath getIndelSamplePairPath() {
         return buildPath(INDEL_RESULTS_PATH_PART)
     }
+    OtpPath getAceseqSamplePairPath() {
+        return buildPath(ACESEQ_RESULTS_PATH_PART)
+    }
 
     private OtpPath buildPath(String analysisPath) {
         return new OtpPath(individual.getViewByPidPath(seqType), analysisPath, seqType.libraryLayoutDirName, "${sampleType1.dirName}_${sampleType2.dirName}")
@@ -162,6 +170,11 @@ class SamplePair implements Entity {
     IndelCallingInstance findLatestIndelCallingInstance() {
         return findLatestInstance(IndelCallingInstance.class) as IndelCallingInstance
     }
+
+    AceseqInstance findLatestAceseqInstance() {
+        return findLatestInstance(AceseqInstance.class) as AceseqInstance
+    }
+
 
     private BamFilePairAnalysis findLatestInstance(Class instanceClass) {
         return instanceClass.createCriteria().get {

@@ -3,7 +3,6 @@ package de.dkfz.tbi.otp.dataprocessing.snvcalling
 import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
-import de.dkfz.tbi.otp.job.jobs.snvcalling.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 import grails.test.spock.*
@@ -26,6 +25,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
 
     SnvCallingService snvCallingService
     IndelCallingService indelCallingService
+    AceseqService aceseqService
 
     def setup() {
         def map = DomainFactory.createProcessableSamplePair()
@@ -56,18 +56,23 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
     }
 
     @Unroll
-    void "samplePairForProcessing for IndelCalling returns samplePair"() {
+    void "samplePairForProcessing for Instance returns samplePair"() {
         given:
-        samplePair1.indelProcessingStatus = ProcessingStatus.NEEDS_PROCESSING
+        samplePair1."${processingStatus}"= ProcessingStatus.NEEDS_PROCESSING
         assert samplePair1.save(flush: true)
         DomainFactory.createRoddyWorkflowConfig(
                 seqType: samplePair1.seqType,
                 project: samplePair1.project,
-                pipeline: DomainFactory.createIndelPipelineLazy()
+                pipeline: pipeline
         )
 
         expect:
-        samplePair1 == indelCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
+        samplePair1 == service.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
+
+        where:
+        processingStatus         | pipeline                                | service
+        "indelProcessingStatus"  | DomainFactory.createIndelPipelineLazy() |this.indelCallingService
+        "aceseqProcessingStatus" | DomainFactory.createAceseqPipelineLazy()|this.aceseqService
     }
 
     void "samplePairForProcessing when #status is NEEDS_PROCESSING but the #service is requested"() {

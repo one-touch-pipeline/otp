@@ -29,6 +29,8 @@ class CreateNotificationTextService {
     static final String SNV_NOT_PROCESSED_TEMPLATE = 'SnvNotProcessedTemplate'
     static final String INDEL_NOTIFICATION_TEMPLATE = 'IndelNotificationTemplate'
     static final String INDEL_NOT_PROCESSED_TEMPLATE = 'IndelNotProcessedTemplate'
+    static final String ACESEQ_NOTIFICATION_TEMPLATE = 'AceseqNotificationTemplate'
+    static final String ACESEQ_NOT_PROCESSED_TEMPLATE = 'AceseqNotProcessedTemplate'
 
 
     @Autowired
@@ -192,12 +194,17 @@ class CreateNotificationTextService {
         return variantCallingNotification(status, INDEL)
     }
 
+    String aceseqNotification(ProcessingStatus status) {
+        return variantCallingNotification(status, ACESEQ)
+    }
+
 
     String variantCallingNotification(ProcessingStatus status, ProcessingStep notificationStep) {
         assert status
 
         Map<WorkflowProcessingStatus, List<SamplePairProcessingStatus>> map =
                 status.samplePairProcessingStatuses.groupBy { it."${notificationStep}ProcessingStatus" }
+
 
         List<SamplePair> samplePairsFinished = map[ALL_DONE]*.samplePair
         if (!samplePairsFinished) {
@@ -208,9 +215,12 @@ class CreateNotificationTextService {
         switch (notificationStep) {
             case SNV:
             otpLinks = createOtpLinks(samplePairsFinished*.project, 'snv', 'results', 'projectName')
-                break;
+                break
             case INDEL:
                 otpLinks = createOtpLinks(samplePairsFinished*.project, 'indel', 'results', 'projectName')
+                break
+            case ACESEQ:
+                otpLinks = createOtpLinks(samplePairsFinished*.project, 'aceseq', 'results', 'projectName')
                 break
             default:
                 //no links

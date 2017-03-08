@@ -187,6 +187,10 @@ class DomainFactory {
         createPipeline( Pipeline.Name.RODDY_INDEL, Pipeline.Type.INDEL)
     }
 
+    static Pipeline createAceseqPipelineLazy() {
+        createPipeline( Pipeline.Name.RODDY_ACESEQ, Pipeline.Type.ACESEQ)
+    }
+
     static Pipeline createExternallyProcessedPipelineLazy() {
         createPipeline( Pipeline.Name.EXTERNALLY_PROCESSED, Pipeline.Type.ALIGNMENT)
     }
@@ -917,6 +921,39 @@ class DomainFactory {
                 ),
         ]
         return createDomainObject(IndelCallingInstance, map, properties)
+    }
+
+    public static AceseqInstance createAceseqInstanceWithRoddyBamFiles(Map properties = [:], Map bamFile1Properties = [:], Map bamFile2Properties = [:]) {
+        Map map = createAnalysisInstanceWithRoddyBamFilesMapHelper(properties, bamFile1Properties, bamFile2Properties)
+        SamplePair samplePair = map.samplePair
+        map += [
+                roddyExecutionDirectoryNames: [DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY],
+                config                      : createRoddyWorkflowConfigLazy(
+                        project: samplePair.project,
+                        seqType: samplePair.seqType,
+                        pipeline: createAceseqPipelineLazy()
+                ),
+        ]
+        return createDomainObject(AceseqInstance, map, properties)
+    }
+
+    public static AceseqQc createAceseqQcWithExistingAceseqInstance(AceseqInstance aceseqInstance){
+        createAceseqQc([:], [:], [:], aceseqInstance)
+    }
+
+    public static AceseqQc createAceseqQc( Map properties = [:], Map bamFile1Properties = [:], Map bamFile2Properties = [:], AceseqInstance aceseqInstance=null) {
+        aceseqInstance= aceseqInstance?:createAceseqInstanceWithRoddyBamFiles(properties, bamFile1Properties, bamFile2Properties)
+        return createDomainObject(AceseqQc, [
+                aceseqInstance: aceseqInstance,
+                number: 1,
+                normalContamination: 1,
+                ploidyFactor: '1.0',
+                ploidy:1,
+                goodnessOfFit:1,
+                purity:'2.0',
+                gender:'M',
+                solutionPossible: 1,
+        ],properties)
     }
 
     public static SnvJobResult createSnvJobResultWithRoddyBamFiles(Map properties = [:]) {
@@ -1875,6 +1912,30 @@ directories: ${directories}
                 project: null,
                 value: '''
 indel not processed
+samplePairsNotProcessed: ${samplePairsNotProcessed}
+''',
+                comment: '',
+        ])
+
+        createProcessingOption([
+                name: CreateNotificationTextService.ACESEQ_NOTIFICATION_TEMPLATE,
+                type: null,
+                project: null,
+                value: '''
+aceseq finished
+samplePairsFinished: ${samplePairsFinished}
+otpLinks: ${otpLinks}
+directories: ${directories}
+''',
+                comment: '',
+        ])
+
+        createProcessingOption([
+                name: CreateNotificationTextService.ACESEQ_NOT_PROCESSED_TEMPLATE,
+                type: null,
+                project: null,
+                value: '''
+aceseq not processed
 samplePairsNotProcessed: ${samplePairsNotProcessed}
 ''',
                 comment: '',

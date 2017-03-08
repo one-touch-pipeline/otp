@@ -46,8 +46,66 @@ import static de.dkfz.tbi.otp.tracking.OtrsTicket.ProcessingStep.*
         SoftwareTool,
         SoftwareToolIdentifier,
 ])
+//TODO refactor classes SNV INDEL ACESEQSpec abstract from BamFilePairAnalyses abstract
 @TestMixin(GrailsUnitTestMixin)
 class CreateNotificationTextServiceSpec extends Specification {
+
+    static List listPairAnalyses = [
+            [
+                    type                  : "indel",
+                    processingStep        : INDEL,
+                    customProcessingStatus: 'indelProcessingStatus',
+                    notification          : "indelNotification",
+
+            ], [
+                    type                  : "snv",
+                    processingStep        : SNV,
+                    customProcessingStatus: "snvProcessingStatus",
+                    notification          : "snvNotification",
+            ], [
+                    type                  : "aceseq",
+                    processingStep        : ACESEQ,
+                    customProcessingStatus: "aceseqProcessingStatus",
+                    notification          : "aceseqNotification",
+            ],
+    ]
+
+    static List processingStatusMultipleProjects = [
+            [
+                    multipleProjects: false,
+                    processingStatus: ProcessingStatus.WorkflowProcessingStatus.ALL_DONE,
+            ],
+            [
+                    multipleProjects: true,
+                    processingStatus: ProcessingStatus.WorkflowProcessingStatus.ALL_DONE,
+            ],
+            [
+                    multipleProjects: false,
+                    processingStatus: ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO,
+            ],
+            [
+                    multipleProjects: false,
+                    processingStatus: ProcessingStatus.WorkflowProcessingStatus.PARTLY_DONE_MIGHT_DO_MORE,
+            ],
+
+    ]
+
+    static List pairAnalysisContentsPermutation
+
+    /**
+     * Permutation of the listPairAnalyses and the processingStatusMultipleProjects
+     * to have any combination in a List of Maps for later Testing
+     */
+    void setupSpec() {
+        List result = []
+        listPairAnalyses.each { var1 ->
+            processingStatusMultipleProjects.each { var2 ->
+                Map tmp = var1 + var2
+                result.add(tmp)
+            }
+        }
+        pairAnalysisContentsPermutation = result.asImmutable()
+    }
 
 
     void "createMessage, when template is null, throw assert"() {
@@ -354,6 +412,7 @@ class CreateNotificationTextServiceSpec extends Specification {
         analysis || pathSegment
         SNV      || "snv_results"
         INDEL    || "indel_results"
+        ACESEQ   || "cnv_results"
     }
 
 
@@ -369,13 +428,14 @@ class CreateNotificationTextServiceSpec extends Specification {
         String fileNameString = new CreateNotificationTextService().variantCallingDirectories([samplePair], analysis)
         String expected = new File("${LsdfFilesService.MOUNTPOINT_WITH_LSDF}/${samplePair.project.dirName}/sequencing/${samplePair.seqType.dirName}/view-by-pid/${samplePair.individual.pid}/${pathSegment}/${samplePair.seqType.libraryLayoutDirName}/${samplePair.sampleType1.dirName}_${samplePair.sampleType2.dirName}").path
 
-        then:
+         then:
         expected == fileNameString
 
         where:
         analysis || pathSegment
         SNV      || "snv_results"
         INDEL    || "indel_results"
+        ACESEQ   || "cnv_results"
     }
 
 
@@ -493,7 +553,6 @@ ${expectedAlign}"""
         false        | false            | false            | ProcessingStatus.WorkflowProcessingStatus.ALL_DONE                 | true
     }
 
-
     void "alignmentNotification, when seqTracks is null, throw assert"() {
         when:
         new CreateNotificationTextService().alignmentNotification(null)
@@ -503,7 +562,6 @@ ${expectedAlign}"""
         e.message.contains('assert status')
 
     }
-
 
     @Unroll
     void "alignmentNotification, return message"() {
@@ -524,6 +582,7 @@ ${expectedAlign}"""
                 alignmentProcessingStatus: secondSampleAligned ? ProcessingStatus.WorkflowProcessingStatus.ALL_DONE : ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO,
                 snvProcessingStatus: snv ? ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_MIGHT_DO : ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO,
                 indelProcessingStatus: indel ? ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_MIGHT_DO : ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO,
+                aceseqProcessingStatus: aceseq ? ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_MIGHT_DO : ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO,
         )
 
         ProcessingStatus processingStatus = new ProcessingStatus([
@@ -553,8 +612,12 @@ ${expectedAlign}"""
         if (secondSampleAligned) {
             seqTracks.add(data2.seqTrack)
             expectedSamples << "${createNotificationTextService.getSampleName(data2.seqTrack)} (${data2.sampleId1}, ${data2.sampleId2})"
-            if (indel | snv) {
+            if (indel | snv | aceseq) {
                 samplePairWithVariantCalling.add(data2.samplePair)
+                //The If cases have to be ordered alphabetic
+                if(aceseq){
+                    variantCallingPipelines << 'CNV(from ACEseq)'
+                }
                 if (indel) {
                     variantCallingPipelines << 'Indel'
                 }
@@ -610,38 +673,45 @@ ${expectedVariantCallingRunning}${expectedVariantCallingNotRunning}"""
         expected == message
 
         where:
-        multipleSeqTypes | multipleProjects | secondSampleAligned | snv   | indel
-        false            | false            | true                | false | false
-        true             | false            | true                | false | false
-        false            | true             | true                | false | false
-        false            | false            | false               | false | false
-        false            | false            | true                | true  | false
-        false            | false            | true                | false | true
-        false            | false            | true                | true  | true
+        multipleSeqTypes | multipleProjects | secondSampleAligned | snv   | indel  | aceseq
+        false            | false            | true                | false | false  | false
+        true             | false            | true                | false | false  | false
+        false            | true             | true                | false | false  | false
+        false            | false            | false               | false | false  | false
+        false            | false            | true                | true  | false  | false
+        false            | false            | true                | false | true   | false
+        false            | false            | true                | true  | true   | false
+        false            | false            | true                | false | false  | true
+        false            | false            | true                | true  | true   | true
+
     }
 
-
-    void "snvNotification, when ProcessingStatus is null, throw assert"() {
+    @Unroll( "#pairAnalysisList.type, when ProcessingStatus is null, throw assert")
+        void "instanceNotification, when ProcessingStatus is null, throw assert"() {
         when:
-        new CreateNotificationTextService().snvNotification(null)
+        new CreateNotificationTextService()."${pairAnalysisList.notification}"(null)
 
         then:
         AssertionError e = thrown()
         e.message.contains('assert status')
+
+        where:
+        pairAnalysisList<<listPairAnalyses
     }
 
-    @Unroll
-    void "snvNotification, return message"() {
+    @Unroll("#pairAnalysisContentsPermutationList.type, return message")
+    void "instanceNotification, return message"() {
         given:
         DomainFactory.createRoddyAlignableSeqTypes()
         DomainFactory.createNotificationProcessingOptions()
 
         Map data1 = createData([
-                snvProcessingStatus: ProcessingStatus.WorkflowProcessingStatus.ALL_DONE
+                (pairAnalysisContentsPermutationList.customProcessingStatus): ProcessingStatus.WorkflowProcessingStatus.ALL_DONE
         ])
+
         Map data2 = createData(
-                project: multipleProjects ? DomainFactory.createProjectWithRealms() : data1.seqTrack.project,
-                snvProcessingStatus: snvProcessingStatus,
+                project: pairAnalysisContentsPermutationList.multipleProjects ? DomainFactory.createProjectWithRealms() : data1.seqTrack.project,
+                (pairAnalysisContentsPermutationList.customProcessingStatus): pairAnalysisContentsPermutationList.processingStatus,
         )
 
         ProcessingStatus processingStatus = new ProcessingStatus([
@@ -649,7 +719,7 @@ ${expectedVariantCallingRunning}${expectedVariantCallingNotRunning}"""
                 data2.seqTrackProcessingStatus,
         ])
 
-        int projectCount = multipleProjects && snvProcessingStatus == ProcessingStatus.WorkflowProcessingStatus.ALL_DONE ? 2 : 1
+        int projectCount = pairAnalysisContentsPermutationList.multipleProjects && pairAnalysisContentsPermutationList.processingStatus == ProcessingStatus.WorkflowProcessingStatus.ALL_DONE ? 2 : 1
 
         CreateNotificationTextService createNotificationTextService = new CreateNotificationTextService(
                 linkGenerator: Mock(LinkGenerator) {
@@ -658,135 +728,51 @@ ${expectedVariantCallingRunning}${expectedVariantCallingNotRunning}"""
                 mergedAlignmentDataFileService: new MergedAlignmentDataFileService(),
         )
 
-        List<SamplePair> samplePairWithSnv = [data1.samplePair]
-        List<SamplePair> samplePairWithoutSnv = []
-        switch (snvProcessingStatus) {
+        List<SamplePair> samplePairWithAnalysis = [data1.samplePair]
+        List<SamplePair> samplePairWithoutAnalysis = []
+
+
+        switch (pairAnalysisContentsPermutationList.processingStatus) {
             case ProcessingStatus.WorkflowProcessingStatus.ALL_DONE:
-                samplePairWithSnv.add(data2.samplePair)
+                samplePairWithAnalysis.add(data2.samplePair)
                 break
             case ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO:
-                samplePairWithoutSnv.add(data2.samplePair)
+                samplePairWithoutAnalysis.add(data2.samplePair)
                 break
             default:
                 //ignore samplepair
                 break
         }
 
-        String expectedSamplePairsFinished = createNotificationTextService.getSamplePairRepresentation(samplePairWithSnv)
-        String expectedSamplePairsNotProcessed = createNotificationTextService.getSamplePairRepresentation(samplePairWithoutSnv)
-        String expectedDirectories = createNotificationTextService.variantCallingDirectories(samplePairWithSnv, SNV)
-        String expectedLinks = samplePairWithSnv*.project.unique().collect { 'link' }.join('\n')
+        String expectedSamplePairsFinished = createNotificationTextService.getSamplePairRepresentation(samplePairWithAnalysis)
+        String expectedSamplePairsNotProcessed = createNotificationTextService.getSamplePairRepresentation(samplePairWithoutAnalysis)
+        String expectedDirectories = createNotificationTextService.variantCallingDirectories(samplePairWithAnalysis,
+                (OtrsTicket.ProcessingStep) pairAnalysisContentsPermutationList.processingStep)
+        String expectedLinks = samplePairWithAnalysis*.project.unique().collect { 'link' }.join('\n')
 
         String expected = """
-snv finished
+${pairAnalysisContentsPermutationList.type} finished
 samplePairsFinished: ${expectedSamplePairsFinished}
 otpLinks: ${expectedLinks}
 directories: ${expectedDirectories}
 """
         if (expectedSamplePairsNotProcessed) {
             expected += """\n
-snv not processed
+${pairAnalysisContentsPermutationList.type} not processed
 samplePairsNotProcessed: ${expectedSamplePairsNotProcessed}
 """
         }
 
         when:
-        String message = createNotificationTextService.snvNotification(processingStatus)
+        String message = createNotificationTextService."${pairAnalysisContentsPermutationList.notification}"(processingStatus)
 
         then:
         expected == message
 
         where:
-        multipleProjects | snvProcessingStatus
-        false            | ProcessingStatus.WorkflowProcessingStatus.ALL_DONE
-        true             | ProcessingStatus.WorkflowProcessingStatus.ALL_DONE
-        false            | ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO
-        false            | ProcessingStatus.WorkflowProcessingStatus.PARTLY_DONE_MIGHT_DO_MORE
+        pairAnalysisContentsPermutationList<<pairAnalysisContentsPermutation
+
     }
-
-    void "indelNotification, when ProcessingStatus is null, throw assert"() {
-        when:
-        new CreateNotificationTextService().indelNotification(null)
-
-        then:
-        AssertionError e = thrown()
-        e.message.contains('assert status')
-    }
-
-    @Unroll
-    void "indelNotification, return message"() {
-        given:
-        DomainFactory.createRoddyAlignableSeqTypes()
-        DomainFactory.createNotificationProcessingOptions()
-
-        Map data1 = createData([
-                indelProcessingStatus: ProcessingStatus.WorkflowProcessingStatus.ALL_DONE
-        ])
-        Map data2 = createData(
-                project: multipleProjects ? DomainFactory.createProjectWithRealms() : data1.seqTrack.project,
-                indelProcessingStatus: indelProcessingStatus,
-        )
-
-        ProcessingStatus processingStatus = new ProcessingStatus([
-                data1.seqTrackProcessingStatus,
-                data2.seqTrackProcessingStatus,
-        ])
-
-        int projectCount = multipleProjects && indelProcessingStatus == ProcessingStatus.WorkflowProcessingStatus.ALL_DONE ? 2 : 1
-
-        CreateNotificationTextService createNotificationTextService = new CreateNotificationTextService(
-                linkGenerator: Mock(LinkGenerator) {
-                    projectCount * link(_) >> 'link'
-                },
-                mergedAlignmentDataFileService: new MergedAlignmentDataFileService(),
-        )
-
-        List<SamplePair> samplePairWithIndel = [data1.samplePair]
-        List<SamplePair> samplePairWithoutIndel = []
-        switch (indelProcessingStatus) {
-            case ProcessingStatus.WorkflowProcessingStatus.ALL_DONE:
-                samplePairWithIndel.add(data2.samplePair)
-                break
-            case ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO:
-                samplePairWithoutIndel.add(data2.samplePair)
-                break
-            default:
-                //ignore samplepair
-                break
-        }
-
-        String expectedSamplePairsFinished = createNotificationTextService.getSamplePairRepresentation(samplePairWithIndel)
-        String expectedSamplePairsNotProcessed = createNotificationTextService.getSamplePairRepresentation(samplePairWithoutIndel)
-        String expectedDirectories = createNotificationTextService.variantCallingDirectories(samplePairWithIndel, INDEL)
-        String expectedLinks = samplePairWithIndel*.project.unique().collect { 'link' }.join('\n')
-
-        String expected = """
-indel finished
-samplePairsFinished: ${expectedSamplePairsFinished}
-otpLinks: ${expectedLinks}
-directories: ${expectedDirectories}
-"""
-        if (expectedSamplePairsNotProcessed) {
-            expected += """\n
-indel not processed
-samplePairsNotProcessed: ${expectedSamplePairsNotProcessed}
-"""
-        }
-
-        when:
-        String message = createNotificationTextService.indelNotification(processingStatus)
-
-        then:
-        expected == message
-
-        where:
-        multipleProjects | indelProcessingStatus
-        false            | ProcessingStatus.WorkflowProcessingStatus.ALL_DONE
-        true             | ProcessingStatus.WorkflowProcessingStatus.ALL_DONE
-        false            | ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO
-        false            | ProcessingStatus.WorkflowProcessingStatus.PARTLY_DONE_MIGHT_DO_MORE
-    }
-
 
     void "notification, when an argument is null, throw assert"() {
         when:
@@ -802,7 +788,6 @@ samplePairsNotProcessed: ${expectedSamplePairsNotProcessed}
         new OtrsTicket() | null                   | SNV            || 'status'
         null             | new ProcessingStatus() | SNV            || 'otrsTicket'
     }
-
 
     @Unroll
     void "notification, return message"() {
@@ -822,6 +807,8 @@ samplePairsNotProcessed: ${expectedSamplePairsNotProcessed}
                     snvNotification(processingStatus) >> SNV.toString()
             (processingStep == INDEL ? 1 : 0) *
                     indelNotification(processingStatus) >> INDEL.toString()
+            (processingStep == ACESEQ ? 1 : 0) *
+                    aceseqNotification(processingStatus) >> ACESEQ.toString()
         }
 
         String expectedSeqCenterComment = seqCenterComment ? """
@@ -853,8 +840,8 @@ seqCenterComment: ${expectedSeqCenterComment}
         ALIGNMENT      | 'Some comment'
         SNV            | 'Some comment'
         INDEL          | 'Some comment'
+        ACESEQ         | 'Some comment'
     }
-
 
     void "notification, when call for ProcessingStep FASTQC, throw an exception"() {
         when:
@@ -864,7 +851,6 @@ seqCenterComment: ${expectedSeqCenterComment}
         thrown(MissingMethodException)
     }
 
-
     private static Map createData(Map properties = [:]) {
         Project project = properties.project ?: DomainFactory.createProjectWithRealms()
         String pid = properties.pid ?: "pid_${DomainFactory.counter++}"
@@ -873,6 +859,7 @@ seqCenterComment: ${expectedSeqCenterComment}
         ProcessingStatus.WorkflowProcessingStatus alignmentProcessingStatus = properties.alignmentProcessingStatus ?: ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO
         ProcessingStatus.WorkflowProcessingStatus snvProcessingStatus = properties.snvProcessingStatus ?: ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO
         ProcessingStatus.WorkflowProcessingStatus indelProcessingStatus = properties.indelProcessingStatus ?: ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO
+        ProcessingStatus.WorkflowProcessingStatus aceseqProcessingStatus = properties.aceseqProcessingStatus ?: ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO
         Run run = properties.run ?: DomainFactory.createRun()
         String sampleId1 = properties.sampleId1 ?: "sampleId_${DomainFactory.counter++}"
         String sampleId2 = properties.sampleId2
@@ -930,6 +917,8 @@ seqCenterComment: ${expectedSeqCenterComment}
                                                 snvProcessingStatus,
                                                 null,
                                                 indelProcessingStatus,
+                                                null,
+                                                aceseqProcessingStatus,
                                                 null,
                                         )
                                 ]

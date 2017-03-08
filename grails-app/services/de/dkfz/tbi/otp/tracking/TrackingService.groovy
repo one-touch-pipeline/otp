@@ -20,6 +20,7 @@ class TrackingService {
 
     IndelCallingService indelCallingService
     SnvCallingService snvCallingService
+    AceseqService aceseqService
 
     CreateNotificationTextService createNotificationTextService
 
@@ -331,14 +332,18 @@ class TrackingService {
     SamplePairProcessingStatus getSamplePairProcessingStatus(SamplePair sp) {
         SnvCallingInstance sci = sp.findLatestSnvCallingInstance()
         IndelCallingInstance ici = sp.findLatestIndelCallingInstance()
+        AceseqInstance ai = sp.findLatestAceseqInstance()
         WorkflowProcessingStatus snvStatus = getAnalysisProcessingStatus(sci, sp, snvCallingService)
         WorkflowProcessingStatus indelStatus = getAnalysisProcessingStatus(ici, sp, indelCallingService)
+        WorkflowProcessingStatus aceseqStatus = getAnalysisProcessingStatus(ai, sp, aceseqService)
         return new SamplePairProcessingStatus(
                 sp,
                 snvStatus,
                 snvStatus == ALL_DONE ? sci : null,
                 indelStatus,
                 indelStatus == ALL_DONE ? ici : null,
+                aceseqStatus,
+                aceseqStatus == ALL_DONE ? ai : null,
         )
     }
 

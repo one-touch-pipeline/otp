@@ -21,7 +21,27 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
     MailHelperService mailHelperService
     IndelCallingService indelCallingService
     SnvCallingService snvCallingService
+    AceseqService aceseqService
     CreateNotificationTextService createNotificationTextService
+
+    static List listPairAnalyses = [
+            [
+                    analysisType           : "ICI",
+                    createRoddyBamFile     : "createIndelCallingInstanceWithRoddyBamFiles",
+                    completeCallingInstance: "completeIndelCallingInstance",
+                    processingStatus       : "indelProcessingStatus"
+            ], [
+                    analysisType           : "SCI",
+                    createRoddyBamFile     : "createSnvInstanceWithRoddyBamFiles",
+                    completeCallingInstance: "completeSnvCallingInstance",
+                    processingStatus       : "snvProcessingStatus"
+            ], [
+                    analysisType           : "AI",
+                    createRoddyBamFile     : "createAceseqInstanceWithRoddyBamFiles",
+                    completeCallingInstance: "completeAceseqCallingInstance",
+                    processingStatus       : "aceseqProcessingStatus"
+            ],
+    ]
 
     void setup() {
         // Overwrite the autowired service with a new instance for each test, so mocks do not have to be cleaned up
@@ -29,6 +49,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
                 mailHelperService: mailHelperService,
                 indelCallingService: indelCallingService,
                 snvCallingService: snvCallingService,
+                aceseqService: aceseqService,
                 createNotificationTextService: createNotificationTextService,
         )
         DomainFactory.createAllAnalysableSeqTypes()
@@ -684,180 +705,210 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         mwpStatus.samplePairProcessingStatuses.isEmpty()
         mwpStatus.snvProcessingStatus == NOTHING_DONE_WONT_DO
         mwpStatus.indelProcessingStatus == NOTHING_DONE_WONT_DO
+        mwpStatus.aceseqProcessingStatus== NOTHING_DONE_WONT_DO
         createSeqTrackProcessingStatus(mwpStatus).snvProcessingStatus == NOTHING_DONE_WONT_DO
     }
 
-    void "fillInSamplePairStatuses, SCI withdrawn, returns NOTHING_DONE_WONT_DO"() {
+    @Unroll("fillInSamplePairStatuses, #pairAnalyses.analysisType withdrawn, returns NOTHING_DONE_WONT_DO")
+    void "fillInSamplePairStatuses, analysisInstance withdrawn, returns NOTHING_DONE_WONT_DO"() {
         given:
-        SnvCallingInstance snvCallingInstance = DomainFactory.createSnvInstanceWithRoddyBamFiles(processingState: AnalysisProcessingStates.FINISHED)
+        BamFilePairAnalysis analysisInstance = DomainFactory."${pairAnalyses.createRoddyBamFile}"(processingState: AnalysisProcessingStates.FINISHED)
 
         [1, 2].each {
-            setBamFileInProjectFolder(snvCallingInstance."sampleType${it}BamFile")
+            setBamFileInProjectFolder(analysisInstance."sampleType${it}BamFile")
         }
 
         MergingWorkPackageProcessingStatus mwpStatus = createMergingWorkPackageProcessingStatus(
-                snvCallingInstance.sampleType1BamFile)
+                analysisInstance.sampleType1BamFile)
 
         when:
-        snvCallingInstance.withdrawn = true
+        analysisInstance.withdrawn = true
         trackingService.fillInSamplePairStatuses([mwpStatus], new SamplePairDiscovery())
 
         then:
-        assert snvCallingInstance.withdrawn
+        assert analysisInstance.withdrawn
         SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
-        samplePairStatus.completeSnvCallingInstance == null
-        mwpStatus.snvProcessingStatus == NOTHING_DONE_WONT_DO
-        createSeqTrackProcessingStatus(mwpStatus).snvProcessingStatus == NOTHING_DONE_WONT_DO
-    }
+        samplePairStatus."${pairAnalyses.completeCallingInstance}" == null
+        mwpStatus."${pairAnalyses.processingStatus}" == NOTHING_DONE_WONT_DO
+        createSeqTrackProcessingStatus(mwpStatus)."${pairAnalyses.processingStatus}" == NOTHING_DONE_WONT_DO
 
-    void "fillInSamplePairStatuses, 1 SCI FINISHED, bamFileInProjectFolder set, returns ALL_DONE"() {
+        where:
+        pairAnalyses << listPairAnalyses
+    }
+    @Unroll("fillInSamplePairStatuses, no #pairAnalysis.analysisType, bamFileInProjectFolder set, no samplePairForProcessing, returns NOTHING_DONE_WONT_DO")
+    void "fillInSamplePairStatuses, no analysisInstance, bamFileInProjectFolder set, no samplePairForProcessing, returns NOTHING_DONE_WONT_DO"() {
         given:
-        SnvCallingInstance snvCallingInstance = DomainFactory.createSnvInstanceWithRoddyBamFiles(processingState: AnalysisProcessingStates.FINISHED)
+        BamFilePairAnalysis analysisInstance = DomainFactory."${pairAnalyses.createRoddyBamFile}"()
 
         [1, 2].each {
-            setBamFileInProjectFolder(snvCallingInstance."sampleType${it}BamFile")
+            setBamFileInProjectFolder(analysisInstance."sampleType${it}BamFile")
         }
 
         MergingWorkPackageProcessingStatus mwpStatus = createMergingWorkPackageProcessingStatus(
-                snvCallingInstance.sampleType1BamFile)
+                analysisInstance.sampleType1BamFile)
+
+        analysisInstance.delete(flush: true)
 
         when:
         trackingService.fillInSamplePairStatuses([mwpStatus], new SamplePairDiscovery())
 
         then:
         SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
-        samplePairStatus.samplePair == snvCallingInstance.samplePair
-        samplePairStatus.completeSnvCallingInstance == snvCallingInstance
-        samplePairStatus.snvProcessingStatus == ALL_DONE
-        mwpStatus.snvProcessingStatus == ALL_DONE
-        createSeqTrackProcessingStatus(mwpStatus).snvProcessingStatus == ALL_DONE
+        samplePairStatus.samplePair == analysisInstance.samplePair
+        samplePairStatus."${pairAnalyses.completeCallingInstance}" == null
+        samplePairStatus."${pairAnalyses.processingStatus}" == NOTHING_DONE_WONT_DO
+        mwpStatus."${pairAnalyses.processingStatus}" == NOTHING_DONE_WONT_DO
+        createSeqTrackProcessingStatus(mwpStatus)."${pairAnalyses.processingStatus}" == NOTHING_DONE_WONT_DO
+
+        where:
+        pairAnalyses << listPairAnalyses
     }
 
-    void "fillInSamplePairStatuses, 1 SCI not FINISHED, returns NOTHING_DONE_MIGHT_DO"() {
+    @Unroll("fillInSamplePairStatuses, no #pairAnalysis.analysisType, bamFileInProjectFolder set, samplePairForProcessing exists, returns NOTHING_DONE_MIGHT_DO")
+    void "fillInSamplePairStatuses, no analysisInstance, bamFileInProjectFolder set, samplePairForProcessing exists, returns NOTHING_DONE_MIGHT_DO"() {
         given:
-        SnvCallingInstance snvCallingInstance = DomainFactory.createSnvInstanceWithRoddyBamFiles()
+        BamFilePairAnalysis analysisInstance = DomainFactory."${pairAnalyses.createRoddyBamFile}"([:], [coverage: 2], [coverage: 2])
 
         [1, 2].each {
-            setBamFileInProjectFolder(snvCallingInstance."sampleType${it}BamFile")
+            setBamFileInProjectFolder(analysisInstance."sampleType${it}BamFile")
+            DomainFactory.createProcessingThresholdsForBamFile(analysisInstance."sampleType${it}BamFile", [coverage: 1, numberOfLanes: null])
         }
 
         MergingWorkPackageProcessingStatus mwpStatus = createMergingWorkPackageProcessingStatus(
-                snvCallingInstance.sampleType1BamFile)
+                analysisInstance.sampleType1BamFile)
+
+        analysisInstance.delete(flush: true)
 
         when:
         trackingService.fillInSamplePairStatuses([mwpStatus], new SamplePairDiscovery())
 
         then:
         SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
-        samplePairStatus.samplePair == snvCallingInstance.samplePair
-        samplePairStatus.completeSnvCallingInstance == null
-        samplePairStatus.snvProcessingStatus == NOTHING_DONE_MIGHT_DO
-        mwpStatus.snvProcessingStatus == NOTHING_DONE_MIGHT_DO
-        createSeqTrackProcessingStatus(mwpStatus).snvProcessingStatus == NOTHING_DONE_MIGHT_DO
+        samplePairStatus.samplePair == analysisInstance.samplePair
+        samplePairStatus."${pairAnalyses.completeCallingInstance}" == null
+        samplePairStatus."${pairAnalyses.processingStatus}" == NOTHING_DONE_MIGHT_DO
+        mwpStatus."${pairAnalyses.processingStatus}" == NOTHING_DONE_MIGHT_DO
+        createSeqTrackProcessingStatus(mwpStatus)."${pairAnalyses.processingStatus}" == NOTHING_DONE_MIGHT_DO
+
+        where:
+        pairAnalyses << listPairAnalyses
     }
 
-    void "fillInSamplePairStatuses, 1 SCI FINISHED, bamFileInProjectFolder unset, returns NOTHING_DONE_MIGHT_DO"() {
+    @Unroll("fillInSamplePairStatuses, no #pairAnalysis.analysisType, bamFileInProjectFolder unset, returns NOTHING_DONE_MIGHT_DO")
+    void "fillInSamplePairStatuses, no analysisInstance, bamFileInProjectFolder unset, returns NOTHING_DONE_MIGHT_DO"() {
         given:
-        SnvCallingInstance snvCallingInstance = DomainFactory.createSnvInstanceWithRoddyBamFiles(processingState: AnalysisProcessingStates.FINISHED)
+        BamFilePairAnalysis analysisInstance = DomainFactory."${pairAnalyses.createRoddyBamFile}"()
 
         MergingWorkPackageProcessingStatus mwpStatus = createMergingWorkPackageProcessingStatus(
-                snvCallingInstance.sampleType1BamFile.mergingWorkPackage, NOTHING_DONE_MIGHT_DO)
+                analysisInstance.sampleType1BamFile.mergingWorkPackage, NOTHING_DONE_MIGHT_DO)
+
+        analysisInstance.delete(flush: true)
 
         when:
         trackingService.fillInSamplePairStatuses([mwpStatus], new SamplePairDiscovery())
 
         then:
         SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
-        samplePairStatus.samplePair == snvCallingInstance.samplePair
-        samplePairStatus.completeSnvCallingInstance == null
-        samplePairStatus.snvProcessingStatus == NOTHING_DONE_MIGHT_DO
-        mwpStatus.snvProcessingStatus == NOTHING_DONE_MIGHT_DO
-        createSeqTrackProcessingStatus(mwpStatus).snvProcessingStatus == NOTHING_DONE_MIGHT_DO
+        samplePairStatus.samplePair == analysisInstance.samplePair
+        samplePairStatus."${pairAnalyses.completeCallingInstance}" == null
+        samplePairStatus."${pairAnalyses.processingStatus}"  == NOTHING_DONE_MIGHT_DO
+        mwpStatus."${pairAnalyses.processingStatus}"  == NOTHING_DONE_MIGHT_DO
+        createSeqTrackProcessingStatus(mwpStatus)."${pairAnalyses.processingStatus}"  == NOTHING_DONE_MIGHT_DO
+
+        where:
+        pairAnalyses << listPairAnalyses
     }
 
-    void "fillInSamplePairStatuses, no SCI, bamFileInProjectFolder set, no samplePairForProcessing, returns NOTHING_DONE_WONT_DO"() {
+    @Unroll("fillInSamplePairStatuses, 1 #pairAnalysis.analysisType FINISHED, bamFileInProjectFolder set, returns ALL_DONE")
+    void "fillInSamplePairStatuses, 1 analysisInstance FINISHED, bamFileInProjectFolder set, returns ALL_DONE"() {
         given:
-        SnvCallingInstance snvCallingInstance = DomainFactory.createSnvInstanceWithRoddyBamFiles()
+        BamFilePairAnalysis analysisInstance = DomainFactory."${pairAnalyses.createRoddyBamFile}"(processingState: AnalysisProcessingStates.FINISHED)
 
         [1, 2].each {
-            setBamFileInProjectFolder(snvCallingInstance."sampleType${it}BamFile")
+            setBamFileInProjectFolder(analysisInstance."sampleType${it}BamFile")
         }
 
         MergingWorkPackageProcessingStatus mwpStatus = createMergingWorkPackageProcessingStatus(
-                snvCallingInstance.sampleType1BamFile)
-
-        snvCallingInstance.delete(flush: true)
+                analysisInstance.sampleType1BamFile)
 
         when:
         trackingService.fillInSamplePairStatuses([mwpStatus], new SamplePairDiscovery())
 
         then:
         SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
-        samplePairStatus.samplePair == snvCallingInstance.samplePair
-        samplePairStatus.completeSnvCallingInstance == null
-        samplePairStatus.snvProcessingStatus == NOTHING_DONE_WONT_DO
-        mwpStatus.snvProcessingStatus == NOTHING_DONE_WONT_DO
-        createSeqTrackProcessingStatus(mwpStatus).snvProcessingStatus == NOTHING_DONE_WONT_DO
+        samplePairStatus.samplePair == analysisInstance.samplePair
+        samplePairStatus."${pairAnalyses.completeCallingInstance}" == analysisInstance
+        samplePairStatus."${pairAnalyses.processingStatus}" == ALL_DONE
+        mwpStatus."${pairAnalyses.processingStatus}" == ALL_DONE
+        createSeqTrackProcessingStatus(mwpStatus)."${pairAnalyses.processingStatus}" == ALL_DONE
+
+        where:
+        pairAnalyses << listPairAnalyses
     }
 
-    void "fillInSamplePairStatuses, no SCI, bamFileInProjectFolder set, samplePairForProcessing exists, returns NOTHING_DONE_MIGHT_DO"() {
+    @Unroll("fillInSamplePairStatuses, 1 #pairAnalysis.analysisType FINISHED, bamFileInProjectFolder unset, returns NOTHING_DONE_MIGHT_DO")
+    void "fillInSamplePairStatuses, 1 analysisInstance FINISHED, bamFileInProjectFolder unset, returns NOTHING_DONE_MIGHT_DO"() {
         given:
-        SnvCallingInstance snvCallingInstance = DomainFactory.createSnvInstanceWithRoddyBamFiles([:], [coverage: 2], [coverage: 2])
+        BamFilePairAnalysis analysisInstance = DomainFactory."${pairAnalyses.createRoddyBamFile}"(processingState: AnalysisProcessingStates.FINISHED)
 
+        MergingWorkPackageProcessingStatus mwpStatus = createMergingWorkPackageProcessingStatus(
+                analysisInstance.sampleType1BamFile.mergingWorkPackage, NOTHING_DONE_MIGHT_DO)
+
+        when:
+        trackingService.fillInSamplePairStatuses([mwpStatus], new SamplePairDiscovery())
+
+        then:
+        SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
+        samplePairStatus.samplePair == analysisInstance.samplePair
+        samplePairStatus."${pairAnalyses.completeCallingInstance}" == null
+        samplePairStatus."${pairAnalyses.processingStatus}" == NOTHING_DONE_MIGHT_DO
+        mwpStatus."${pairAnalyses.processingStatus}" == NOTHING_DONE_MIGHT_DO
+        createSeqTrackProcessingStatus(mwpStatus)."${pairAnalyses.processingStatus}" == NOTHING_DONE_MIGHT_DO
+
+        where:
+        pairAnalyses << listPairAnalyses
+    }
+
+
+    @Unroll( "fillInSamplePairStatuses, 1 #pairAnalysis.analysisType not FINISHED, returns NOTHING_DONE_MIGHT_DO")
+    void "fillInSamplePairStatuses, 1 analysisInstance not FINISHED, returns NOTHING_DONE_MIGHT_DO"() {
+        given:
+        BamFilePairAnalysis analysisInstance = DomainFactory."${pairAnalyses.createRoddyBamFile}"()
 
         [1, 2].each {
-            setBamFileInProjectFolder(snvCallingInstance."sampleType${it}BamFile")
-            DomainFactory.createProcessingThresholdsForBamFile(snvCallingInstance."sampleType${it}BamFile", [coverage: 1, numberOfLanes: null])
+            setBamFileInProjectFolder(analysisInstance."sampleType${it}BamFile")
         }
 
         MergingWorkPackageProcessingStatus mwpStatus = createMergingWorkPackageProcessingStatus(
-                snvCallingInstance.sampleType1BamFile)
-
-        snvCallingInstance.delete(flush: true)
+                analysisInstance.sampleType1BamFile)
 
         when:
         trackingService.fillInSamplePairStatuses([mwpStatus], new SamplePairDiscovery())
 
         then:
         SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
-        samplePairStatus.samplePair == snvCallingInstance.samplePair
-        samplePairStatus.completeSnvCallingInstance == null
-        samplePairStatus.snvProcessingStatus == NOTHING_DONE_MIGHT_DO
-        mwpStatus.snvProcessingStatus == NOTHING_DONE_MIGHT_DO
-        createSeqTrackProcessingStatus(mwpStatus).snvProcessingStatus == NOTHING_DONE_MIGHT_DO
+        samplePairStatus.samplePair == analysisInstance.samplePair
+        samplePairStatus."${pairAnalyses.completeCallingInstance}" == null
+        samplePairStatus."${pairAnalyses.processingStatus}" == NOTHING_DONE_MIGHT_DO
+        mwpStatus."${pairAnalyses.processingStatus}" == NOTHING_DONE_MIGHT_DO
+        createSeqTrackProcessingStatus(mwpStatus)."${pairAnalyses.processingStatus}" == NOTHING_DONE_MIGHT_DO
+
+        where:
+        pairAnalyses << listPairAnalyses
     }
 
-    void "fillInSamplePairStatuses, no SCI, bamFileInProjectFolder unset, returns NOTHING_DONE_MIGHT_DO"() {
+
+    @Unroll("fillInSamplePairStatuses, with #pairAnalysis.analysisType 2 MWP, 1 SP ALL_DONE, 1 MWP without SP, returns ALL_DONE and NOTHING_DONE_WONT_DO")
+    void "fillInSamplePairStatuses, with analysisInstance 2 MWP, 1 SP ALL_DONE, 1 MWP without SP, returns ALL_DONE and NOTHING_DONE_WONT_DO"(){
         given:
-        SnvCallingInstance snvCallingInstance = DomainFactory.createSnvInstanceWithRoddyBamFiles()
-
-        MergingWorkPackageProcessingStatus mwpStatus = createMergingWorkPackageProcessingStatus(
-                snvCallingInstance.sampleType1BamFile.mergingWorkPackage, NOTHING_DONE_MIGHT_DO)
-
-        snvCallingInstance.delete(flush: true)
-
-        when:
-        trackingService.fillInSamplePairStatuses([mwpStatus], new SamplePairDiscovery())
-
-        then:
-        SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
-        samplePairStatus.samplePair == snvCallingInstance.samplePair
-        samplePairStatus.completeSnvCallingInstance == null
-        samplePairStatus.snvProcessingStatus == NOTHING_DONE_MIGHT_DO
-        mwpStatus.snvProcessingStatus == NOTHING_DONE_MIGHT_DO
-        createSeqTrackProcessingStatus(mwpStatus).snvProcessingStatus == NOTHING_DONE_MIGHT_DO
-    }
-
-    void "fillInSamplePairStatuses, with SNV 2 MWP, 1 SP ALL_DONE, 1 MWP without SP, returns ALL_DONE and NOTHING_DONE_WONT_DO"() {
-        given:
-        SnvCallingInstance snvCallingInstance = DomainFactory.createSnvInstanceWithRoddyBamFiles(processingState: AnalysisProcessingStates.FINISHED)
+        BamFilePairAnalysis analysisInstance = DomainFactory."${pairAnalyses.createRoddyBamFile}"(processingState: AnalysisProcessingStates.FINISHED)
 
         [1, 2].each {
-            setBamFileInProjectFolder(snvCallingInstance."sampleType${it}BamFile")
+            setBamFileInProjectFolder(analysisInstance."sampleType${it}BamFile")
         }
 
         MergingWorkPackageProcessingStatus mwp1Status = createMergingWorkPackageProcessingStatus(
-                snvCallingInstance.sampleType1BamFile)
+                analysisInstance.sampleType1BamFile)
         MergingWorkPackageProcessingStatus mwp2Status = createMergingWorkPackageProcessingStatus(
                 DomainFactory.createMergingWorkPackage(), NOTHING_DONE_MIGHT_DO)
 
@@ -866,322 +917,86 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
 
         then:
         SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwp1Status.samplePairProcessingStatuses)
-        samplePairStatus.samplePair == snvCallingInstance.samplePair
-        samplePairStatus.completeSnvCallingInstance == snvCallingInstance
-        samplePairStatus.snvProcessingStatus == ALL_DONE
-        mwp1Status.snvProcessingStatus == ALL_DONE
+        samplePairStatus.samplePair == analysisInstance.samplePair
+        samplePairStatus."${pairAnalyses.completeCallingInstance}" == analysisInstance
+        samplePairStatus."${pairAnalyses.processingStatus}" == ALL_DONE
+        mwp1Status."${pairAnalyses.processingStatus}" == ALL_DONE
 
         mwp2Status.samplePairProcessingStatuses.isEmpty()
-        mwp2Status.snvProcessingStatus == NOTHING_DONE_WONT_DO
+        mwp2Status."${pairAnalyses.processingStatus}" == NOTHING_DONE_WONT_DO
 
-        createSeqTrackProcessingStatus(mwp1Status, mwp2Status).snvProcessingStatus == PARTLY_DONE_WONT_DO_MORE
+        createSeqTrackProcessingStatus(mwp1Status, mwp2Status)."${pairAnalyses.processingStatus}" == PARTLY_DONE_WONT_DO_MORE
+
+        where:
+        pairAnalyses << listPairAnalyses
     }
 
-    void "fillInSamplePairStatuses, with SNV 2 MWP, 1 MWP without SP, 1 MWP MIGHT_DO_MORE, returns NOTHING_DONE_WONT_DO and NOTHING_DONE_MIGHT_DO"() {
+    @Unroll("fillInSamplePairStatuses, with #pairAnalysis.analysisType 2 MWP, 1 MWP without SP, 1 MWP MIGHT_DO_MORE, returns NOTHING_DONE_WONT_DO and NOTHING_DONE_MIGHT_DO")
+    void "fillInSamplePairStatuses, with analysisInstance 2 MWP, 1 MWP without SP, 1 MWP MIGHT_DO_MORE, returns NOTHING_DONE_WONT_DO and NOTHING_DONE_MIGHT_DO"(){
         given:
-        SnvCallingInstance snvCallingInstance = DomainFactory.createSnvInstanceWithRoddyBamFiles(processingState: AnalysisProcessingStates.FINISHED)
+        BamFilePairAnalysis analysisInstance = DomainFactory."${pairAnalyses.createRoddyBamFile}"(processingState: AnalysisProcessingStates.FINISHED)
 
         MergingWorkPackageProcessingStatus mwp1Status = createMergingWorkPackageProcessingStatus(
                 DomainFactory.createMergingWorkPackage(), NOTHING_DONE_MIGHT_DO)
         MergingWorkPackageProcessingStatus mwp2Status = createMergingWorkPackageProcessingStatus(
-                snvCallingInstance.sampleType1BamFile)
+                analysisInstance.sampleType1BamFile)
 
         when:
         trackingService.fillInSamplePairStatuses([mwp1Status, mwp2Status], new SamplePairDiscovery())
 
         then:
         mwp1Status.samplePairProcessingStatuses.isEmpty()
-        mwp1Status.snvProcessingStatus == NOTHING_DONE_WONT_DO
+        mwp1Status."${pairAnalyses.processingStatus}" == NOTHING_DONE_WONT_DO
 
         SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwp2Status.samplePairProcessingStatuses)
-        samplePairStatus.samplePair == snvCallingInstance.samplePair
-        samplePairStatus.completeSnvCallingInstance == null
-        samplePairStatus.snvProcessingStatus == NOTHING_DONE_MIGHT_DO
-        mwp2Status.snvProcessingStatus == NOTHING_DONE_MIGHT_DO
+        samplePairStatus.samplePair == analysisInstance.samplePair
+        samplePairStatus."${pairAnalyses.completeCallingInstance}" == null
+        samplePairStatus."${pairAnalyses.processingStatus}" == NOTHING_DONE_MIGHT_DO
+        mwp2Status."${pairAnalyses.processingStatus}" == NOTHING_DONE_MIGHT_DO
 
-        createSeqTrackProcessingStatus(mwp1Status, mwp2Status).snvProcessingStatus == NOTHING_DONE_MIGHT_DO
+        createSeqTrackProcessingStatus(mwp1Status, mwp2Status)."${pairAnalyses.processingStatus}" == NOTHING_DONE_MIGHT_DO
+
+        where:
+        pairAnalyses << listPairAnalyses
     }
 
-    void "fillInSamplePairStatuses, with SNV 2 MWP, 1 SP ALL_DONE, 1 SP MIGHT_DO_MORE, returns ALL_DONE and NOTHING_DONE_MIGHT_DO"() {
+    @Unroll("fillInSamplePairStatuses, with #pairAnalysis.analysisType 2 MWP, 1 SP ALL_DONE, 1 SP MIGHT_DO_MORE, returns ALL_DONE and NOTHING_DONE_MIGHT_DO")
+    void "fillInSamplePairStatuses, with analysisInstance 2 MWP, 1 SP ALL_DONE, 1 SP MIGHT_DO_MORE, returns ALL_DONE and NOTHING_DONE_MIGHT_DO"(){
+
         given:
-        SnvCallingInstance snvCallingInstance = DomainFactory.createSnvInstanceWithRoddyBamFiles(processingState: AnalysisProcessingStates.FINISHED)
+        BamFilePairAnalysis analysisInstance = DomainFactory."${pairAnalyses.createRoddyBamFile}"(processingState: AnalysisProcessingStates.FINISHED)
 
         [1, 2].each {
-            setBamFileInProjectFolder(snvCallingInstance."sampleType${it}BamFile")
+            setBamFileInProjectFolder(analysisInstance."sampleType${it}BamFile")
         }
 
-        SnvCallingInstance snvCallingInstance2 = DomainFactory.createSnvInstanceWithRoddyBamFiles(processingState: AnalysisProcessingStates.FINISHED)
+        BamFilePairAnalysis analysisInstance2 = DomainFactory."${pairAnalyses.createRoddyBamFile}"(processingState: AnalysisProcessingStates.FINISHED)
 
         MergingWorkPackageProcessingStatus mwp1Status =
-                createMergingWorkPackageProcessingStatus(snvCallingInstance.sampleType1BamFile)
+                createMergingWorkPackageProcessingStatus(analysisInstance.sampleType1BamFile)
         MergingWorkPackageProcessingStatus mwp2Status =
-                createMergingWorkPackageProcessingStatus(snvCallingInstance2.sampleType1BamFile)
+                createMergingWorkPackageProcessingStatus(analysisInstance2.sampleType1BamFile)
 
         when:
         trackingService.fillInSamplePairStatuses([mwp1Status, mwp2Status], new SamplePairDiscovery())
 
         then:
         SamplePairProcessingStatus samplePair1Status = exactlyOneElement(mwp1Status.samplePairProcessingStatuses)
-        samplePair1Status.samplePair == snvCallingInstance.samplePair
-        samplePair1Status.completeSnvCallingInstance == snvCallingInstance
-        samplePair1Status.snvProcessingStatus == ALL_DONE
-        mwp1Status.snvProcessingStatus == ALL_DONE
+        samplePair1Status.samplePair == analysisInstance.samplePair
+        samplePair1Status."${pairAnalyses.completeCallingInstance}" == analysisInstance
+        samplePair1Status."${pairAnalyses.processingStatus}" == ALL_DONE
+        mwp1Status."${pairAnalyses.processingStatus}"  == ALL_DONE
 
         SamplePairProcessingStatus samplePair2Status = exactlyOneElement(mwp2Status.samplePairProcessingStatuses)
-        samplePair2Status.samplePair == snvCallingInstance2.samplePair
-        samplePair2Status.completeSnvCallingInstance == null
-        samplePair2Status.snvProcessingStatus == NOTHING_DONE_MIGHT_DO
-        mwp2Status.snvProcessingStatus == NOTHING_DONE_MIGHT_DO
+        samplePair2Status.samplePair == analysisInstance2.samplePair
+        samplePair2Status."${pairAnalyses.completeCallingInstance}"  == null
+        samplePair2Status."${pairAnalyses.processingStatus}"  == NOTHING_DONE_MIGHT_DO
+        mwp2Status."${pairAnalyses.processingStatus}"  == NOTHING_DONE_MIGHT_DO
 
-        createSeqTrackProcessingStatus(mwp1Status, mwp2Status).snvProcessingStatus == PARTLY_DONE_MIGHT_DO_MORE
-    }
+        createSeqTrackProcessingStatus(mwp1Status, mwp2Status)."${pairAnalyses.processingStatus}"  == PARTLY_DONE_MIGHT_DO_MORE
 
-    void "fillInSamplePairStatuses, ICI withdrawn, returns NOTHING_DONE_WONT_DO"() {
-        given:
-        IndelCallingInstance indelCallingInstance = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles(processingState: AnalysisProcessingStates.FINISHED)
-
-        [1, 2].each {
-            setBamFileInProjectFolder(indelCallingInstance."sampleType${it}BamFile")
-        }
-
-        MergingWorkPackageProcessingStatus mwpStatus = createMergingWorkPackageProcessingStatus(
-                indelCallingInstance.sampleType1BamFile)
-
-        when:
-        indelCallingInstance.withdrawn = true
-        trackingService.fillInSamplePairStatuses([mwpStatus], new SamplePairDiscovery())
-
-        then:
-        assert indelCallingInstance.withdrawn
-        SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
-        samplePairStatus.completeIndelCallingInstance == null
-        mwpStatus.indelProcessingStatus == NOTHING_DONE_WONT_DO
-        createSeqTrackProcessingStatus(mwpStatus).indelProcessingStatus == NOTHING_DONE_WONT_DO
-    }
-
-    void "fillInSamplePairStatuses, 1 ICI FINISHED, bamFileInProjectFolder set, returns ALL_DONE"() {
-        given:
-        IndelCallingInstance indelCallingInstance = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles(processingState: AnalysisProcessingStates.FINISHED)
-
-        [1, 2].each {
-            setBamFileInProjectFolder(indelCallingInstance."sampleType${it}BamFile")
-        }
-
-        MergingWorkPackageProcessingStatus mwpStatus = createMergingWorkPackageProcessingStatus(
-                indelCallingInstance.sampleType1BamFile)
-
-        when:
-        trackingService.fillInSamplePairStatuses([mwpStatus], new SamplePairDiscovery())
-
-        then:
-        SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
-        samplePairStatus.samplePair == indelCallingInstance.samplePair
-        samplePairStatus.completeIndelCallingInstance == indelCallingInstance
-        samplePairStatus.indelProcessingStatus == ALL_DONE
-        mwpStatus.indelProcessingStatus == ALL_DONE
-        createSeqTrackProcessingStatus(mwpStatus).indelProcessingStatus == ALL_DONE
-    }
-
-    void "fillInSamplePairStatuses, 1 ICI not FINISHED, returns NOTHING_DONE_MIGHT_DO"() {
-        given:
-        IndelCallingInstance indelCallingInstance = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles()
-
-        [1, 2].each {
-            setBamFileInProjectFolder(indelCallingInstance."sampleType${it}BamFile")
-        }
-
-        MergingWorkPackageProcessingStatus mwpStatus = createMergingWorkPackageProcessingStatus(
-                indelCallingInstance.sampleType1BamFile)
-
-        when:
-        trackingService.fillInSamplePairStatuses([mwpStatus], new SamplePairDiscovery())
-
-        then:
-        SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
-        samplePairStatus.samplePair == indelCallingInstance.samplePair
-        samplePairStatus.completeIndelCallingInstance == null
-        samplePairStatus.indelProcessingStatus == NOTHING_DONE_MIGHT_DO
-        mwpStatus.indelProcessingStatus == NOTHING_DONE_MIGHT_DO
-        createSeqTrackProcessingStatus(mwpStatus).indelProcessingStatus == NOTHING_DONE_MIGHT_DO
-    }
-
-    void "fillInSamplePairStatuses, 1 ICI FINISHED, bamFileInProjectFolder unset, returns NOTHING_DONE_MIGHT_DO"() {
-        given:
-        IndelCallingInstance indelCallingInstance = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles(processingState: AnalysisProcessingStates.FINISHED)
-
-        MergingWorkPackageProcessingStatus mwpStatus = createMergingWorkPackageProcessingStatus(
-                indelCallingInstance.sampleType1BamFile.mergingWorkPackage, NOTHING_DONE_MIGHT_DO)
-
-        when:
-        trackingService.fillInSamplePairStatuses([mwpStatus], new SamplePairDiscovery())
-
-        then:
-        SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
-        samplePairStatus.samplePair == indelCallingInstance.samplePair
-        samplePairStatus.completeIndelCallingInstance == null
-        samplePairStatus.indelProcessingStatus == NOTHING_DONE_MIGHT_DO
-        mwpStatus.indelProcessingStatus == NOTHING_DONE_MIGHT_DO
-        createSeqTrackProcessingStatus(mwpStatus).indelProcessingStatus == NOTHING_DONE_MIGHT_DO
-    }
-
-    void "fillInSamplePairStatuses, no ICI, bamFileInProjectFolder set, no samplePairForProcessing, returns NOTHING_DONE_WONT_DO"() {
-        given:
-        IndelCallingInstance indelCallingInstance = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles()
-
-        [1, 2].each {
-            setBamFileInProjectFolder(indelCallingInstance."sampleType${it}BamFile")
-        }
-
-        MergingWorkPackageProcessingStatus mwpStatus = createMergingWorkPackageProcessingStatus(
-                indelCallingInstance.sampleType1BamFile)
-
-        indelCallingInstance.delete(flush: true)
-
-        when:
-        trackingService.fillInSamplePairStatuses([mwpStatus], new SamplePairDiscovery())
-
-        then:
-        SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
-        samplePairStatus.samplePair == indelCallingInstance.samplePair
-        samplePairStatus.completeIndelCallingInstance == null
-        samplePairStatus.indelProcessingStatus == NOTHING_DONE_WONT_DO
-        mwpStatus.indelProcessingStatus == NOTHING_DONE_WONT_DO
-        createSeqTrackProcessingStatus(mwpStatus).indelProcessingStatus == NOTHING_DONE_WONT_DO
-    }
-
-    void "fillInSamplePairStatuses, no ICI, bamFileInProjectFolder set, samplePairForProcessing exists, returns NOTHING_DONE_MIGHT_DO"() {
-        given:
-        IndelCallingInstance indelCallingInstance = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles([:], [coverage: 2], [coverage: 2])
-
-        [1, 2].each {
-            setBamFileInProjectFolder(indelCallingInstance."sampleType${it}BamFile")
-            DomainFactory.createProcessingThresholdsForBamFile(indelCallingInstance."sampleType${it}BamFile", [coverage: 1, numberOfLanes: null])
-        }
-
-        MergingWorkPackageProcessingStatus mwpStatus = createMergingWorkPackageProcessingStatus(
-                indelCallingInstance.sampleType1BamFile)
-
-        indelCallingInstance.delete(flush: true)
-
-        when:
-        trackingService.fillInSamplePairStatuses([mwpStatus], new SamplePairDiscovery())
-
-        then:
-        SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
-        samplePairStatus.samplePair == indelCallingInstance.samplePair
-        samplePairStatus.completeIndelCallingInstance == null
-        samplePairStatus.indelProcessingStatus == NOTHING_DONE_MIGHT_DO
-        mwpStatus.indelProcessingStatus == NOTHING_DONE_MIGHT_DO
-        createSeqTrackProcessingStatus(mwpStatus).indelProcessingStatus == NOTHING_DONE_MIGHT_DO
-    }
-
-    void "fillInSamplePairStatuses, no ICI, bamFileInProjectFolder unset, returns NOTHING_DONE_MIGHT_DO"() {
-        given:
-        IndelCallingInstance indelCallingInstance = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles()
-
-        MergingWorkPackageProcessingStatus mwpStatus = createMergingWorkPackageProcessingStatus(
-                indelCallingInstance.sampleType1BamFile.mergingWorkPackage, NOTHING_DONE_MIGHT_DO)
-
-        indelCallingInstance.delete(flush: true)
-
-        when:
-        trackingService.fillInSamplePairStatuses([mwpStatus], new SamplePairDiscovery())
-
-        then:
-        SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
-        samplePairStatus.samplePair == indelCallingInstance.samplePair
-        samplePairStatus.completeIndelCallingInstance == null
-        samplePairStatus.indelProcessingStatus == NOTHING_DONE_MIGHT_DO
-        mwpStatus.indelProcessingStatus == NOTHING_DONE_MIGHT_DO
-        createSeqTrackProcessingStatus(mwpStatus).indelProcessingStatus == NOTHING_DONE_MIGHT_DO
-    }
-
-    void "fillInSamplePairStatuses, with Indel 2 MWP, 1 SP ALL_DONE, 1 MWP without SP, returns ALL_DONE and NOTHING_DONE_WONT_DO"() {
-        given:
-        IndelCallingInstance indelCallingInstance = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles(processingState: AnalysisProcessingStates.FINISHED)
-
-        [1, 2].each {
-            setBamFileInProjectFolder(indelCallingInstance."sampleType${it}BamFile")
-        }
-
-        MergingWorkPackageProcessingStatus mwp1Status = createMergingWorkPackageProcessingStatus(
-                indelCallingInstance.sampleType1BamFile)
-        MergingWorkPackageProcessingStatus mwp2Status = createMergingWorkPackageProcessingStatus(
-                DomainFactory.createMergingWorkPackage(), NOTHING_DONE_MIGHT_DO)
-
-        when:
-        trackingService.fillInSamplePairStatuses([mwp1Status, mwp2Status], new SamplePairDiscovery())
-
-        then:
-        SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwp1Status.samplePairProcessingStatuses)
-        samplePairStatus.samplePair == indelCallingInstance.samplePair
-        samplePairStatus.completeIndelCallingInstance == indelCallingInstance
-        samplePairStatus.indelProcessingStatus == ALL_DONE
-        mwp1Status.indelProcessingStatus == ALL_DONE
-
-        mwp2Status.samplePairProcessingStatuses.isEmpty()
-        mwp2Status.indelProcessingStatus == NOTHING_DONE_WONT_DO
-
-        createSeqTrackProcessingStatus(mwp1Status, mwp2Status).indelProcessingStatus == PARTLY_DONE_WONT_DO_MORE
-    }
-
-    void "fillInSamplePairStatuses, with Indel 2 MWP, 1 MWP without SP, 1 MWP MIGHT_DO_MORE, returns NOTHING_DONE_WONT_DO and NOTHING_DONE_MIGHT_DO"() {
-        given:
-        IndelCallingInstance indelCallingInstance = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles(processingState: AnalysisProcessingStates.FINISHED)
-
-        MergingWorkPackageProcessingStatus mwp1Status = createMergingWorkPackageProcessingStatus(
-                DomainFactory.createMergingWorkPackage(), NOTHING_DONE_MIGHT_DO)
-        MergingWorkPackageProcessingStatus mwp2Status = createMergingWorkPackageProcessingStatus(
-                indelCallingInstance.sampleType1BamFile)
-
-        when:
-        trackingService.fillInSamplePairStatuses([mwp1Status, mwp2Status], new SamplePairDiscovery())
-
-        then:
-        mwp1Status.samplePairProcessingStatuses.isEmpty()
-        mwp1Status.indelProcessingStatus == NOTHING_DONE_WONT_DO
-
-        SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwp2Status.samplePairProcessingStatuses)
-        samplePairStatus.samplePair == indelCallingInstance.samplePair
-        samplePairStatus.completeIndelCallingInstance == null
-        samplePairStatus.indelProcessingStatus == NOTHING_DONE_MIGHT_DO
-        mwp2Status.indelProcessingStatus == NOTHING_DONE_MIGHT_DO
-
-        createSeqTrackProcessingStatus(mwp1Status, mwp2Status).indelProcessingStatus == NOTHING_DONE_MIGHT_DO
-    }
-
-    void "fillInSamplePairStatuses, with Indel 2 MWP, 1 SP ALL_DONE, 1 SP MIGHT_DO_MORE, returns ALL_DONE and NOTHING_DONE_MIGHT_DO"() {
-        given:
-        IndelCallingInstance indelCallingInstance = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles(processingState: AnalysisProcessingStates.FINISHED)
-
-        [1, 2].each {
-            setBamFileInProjectFolder(indelCallingInstance."sampleType${it}BamFile")
-        }
-
-        IndelCallingInstance indelCallingInstance2 = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles(processingState: AnalysisProcessingStates.FINISHED)
-
-        MergingWorkPackageProcessingStatus mwp1Status =
-                createMergingWorkPackageProcessingStatus(indelCallingInstance.sampleType1BamFile)
-        MergingWorkPackageProcessingStatus mwp2Status =
-                createMergingWorkPackageProcessingStatus(indelCallingInstance2.sampleType1BamFile)
-
-        when:
-        trackingService.fillInSamplePairStatuses([mwp1Status, mwp2Status], new SamplePairDiscovery())
-
-        then:
-        SamplePairProcessingStatus samplePair1Status = exactlyOneElement(mwp1Status.samplePairProcessingStatuses)
-        samplePair1Status.samplePair == indelCallingInstance.samplePair
-        samplePair1Status.completeIndelCallingInstance == indelCallingInstance
-        samplePair1Status.indelProcessingStatus == ALL_DONE
-        mwp1Status.indelProcessingStatus == ALL_DONE
-
-        SamplePairProcessingStatus samplePair2Status = exactlyOneElement(mwp2Status.samplePairProcessingStatuses)
-        samplePair2Status.samplePair == indelCallingInstance2.samplePair
-        samplePair2Status.completeIndelCallingInstance == null
-        samplePair2Status.indelProcessingStatus == NOTHING_DONE_MIGHT_DO
-        mwp2Status.indelProcessingStatus == NOTHING_DONE_MIGHT_DO
-
-        createSeqTrackProcessingStatus(mwp1Status, mwp2Status).indelProcessingStatus == PARTLY_DONE_MIGHT_DO_MORE
+        where:
+        pairAnalyses << listPairAnalyses
     }
 
     private static AbstractMergedBamFile createBamFileInProjectFolder(Map bamFileProperties = [:]) {
