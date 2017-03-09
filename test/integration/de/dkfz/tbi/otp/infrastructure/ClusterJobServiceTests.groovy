@@ -52,12 +52,9 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
 
     SeqType seqType
 
-    TestData testData = new TestData()
-
     @Before
     void setUp() {
-        seqType = TestData.createSeqType()
-        assert seqType.save([flush: true])
+        seqType = DomainFactory.createSeqType()
     }
 
     @After
@@ -840,8 +837,9 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
 
     @Test
     void test_findJobClassSpecificSeqTypesByDateBetween_WhenSeveralSeqTypesAreFound_ShouldReturnUniqueListWithSeqTypesByJobClass() {
-        SeqType seqType2 = TestData.createSeqType([dirName: 'testDir'])
-        seqType2.save([flush: true, failOnError: true])
+        SeqType seqType2 = DomainFactory.createSeqType(
+                dirName: 'testDir',
+        )
 
         createClusterJob([queued: SDATE_DATETIME,
                           started: SDATE_DATETIME,

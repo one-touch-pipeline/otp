@@ -1,10 +1,9 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.test.mixin.TestFor
-import org.junit.Test
+import de.dkfz.tbi.*
+import grails.test.mixin.*
+import org.junit.*
 
-/**
- */
 @TestFor(SeqType)
 class SeqTypeUnitTests {
 
@@ -73,4 +72,32 @@ class SeqTypeUnitTests {
         assert seqType == SeqType.exomePairedSeqType
     }
 
+    @Test
+    void testCreateSeqTypesWithUniqueNameAndLibraryLayoutCombination_AllFine() {
+        assert DomainFactory.createSeqType(
+                name: "seqTypeName1",
+                libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED,
+        )
+        assert DomainFactory.createSeqType(
+                name: "seqTypeName1",
+                libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE,
+        )
+        assert DomainFactory.createSeqType(
+                name: "seqTypeName2",
+                libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED,
+        )
+    }
+
+    @Test
+    void testCreateSeqTypesWithNonUniqueNameAndLibraryLayoutCombination_ShouldFail() {
+        assert DomainFactory.createSeqType(
+                name: "seqTypeName1",
+                libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED,
+        )
+        SeqType seqType = DomainFactory.createSeqType([
+                    name: "seqTypeName1",
+                    libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED,
+            ], false)
+        TestCase.assertValidateError(seqType, "libraryLayout", "unique", LibraryLayout.PAIRED.name())
+    }
 }

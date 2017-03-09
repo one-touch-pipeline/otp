@@ -1,17 +1,13 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import grails.buildtestdata.mixin.Build
-import grails.test.mixin.*
-
-import org.junit.*
-
-import de.dkfz.tbi.TestConstants
+import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.CheckedLogger
-import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
-
-
+import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.utils.logging.*
+import grails.buildtestdata.mixin.*
+import grails.test.mixin.*
+import org.junit.*
 
 @TestFor(ProcessedMergedBamFileService)
 @Build([
@@ -25,8 +21,6 @@ class ProcessedMergedBamFileServiceUnitTests {
     private final static String SOME_MD5SUM_VALUE = "12345678901234567890123456789012"
 
     private final static long SOME_FILE_LENGTH = 10  //Content should only be positive
-
-    TestData testData = new TestData()
 
     @After
     void tearDown() {
@@ -107,8 +101,10 @@ class ProcessedMergedBamFileServiceUnitTests {
     private Map createKitAndSingleLaneBamFiles(String seqTypeName, Class seqTypeClass, ProcessedMergedBamFile processegMergedBamFile) {
         assert seqTypeClass == SeqTrack || seqTypeClass == ExomeSeqTrack
         List bamFiles = []
-        SeqType seqType = testData.createSeqType([name: seqTypeName, dirName: "tmp"])
-        assert seqType.save()
+        SeqType seqType = DomainFactory.createSeqType(
+                name: seqTypeName,
+                dirName: "tmp",
+        )
         Sample sample = createSampleAndDBConnections()
         mergingPassAndDBConnections(processegMergedBamFile, sample, seqType)
         LibraryPreparationKit kit = new LibraryPreparationKit(name: 'kit1')
@@ -135,25 +131,27 @@ class ProcessedMergedBamFileServiceUnitTests {
 
 
     private Sample createSampleAndDBConnections() {
-        Project project = DomainFactory.createProject()
-        assert project.save()
-        Individual individual = testData.createIndividual([project: project])
-        assert individual.save()
-        SampleType sampleType = testData.createSampleType()
-        assert sampleType.save()
-        Sample sample = testData.createSample([individual: individual, sampleType: sampleType])
-        assert sample.save()
-        return sample
+        return DomainFactory.createSample(
+                individual: DomainFactory.createIndividual(
+                                project: DomainFactory.createProject(),
+                            ),
+                sampleType: DomainFactory.createSampleType(),
+        )
     }
 
 
     private void mergingPassAndDBConnections(ProcessedMergedBamFile processedMergedBamFile, Sample sample, SeqType seqType) {
-        MergingWorkPackage mergingWorkPackage = testData.createMergingWorkPackage([sample: sample, seqType: seqType, libraryPreparationKit: LibraryPreparationKit.buildLazy(name: 'libraryPreparationKit')])
-        assert mergingWorkPackage.save()
-        MergingSet mergingSet = testData.createMergingSet([mergingWorkPackage: mergingWorkPackage])
-        assert mergingSet.save()
-        MergingPass mergingPass = testData.createMergingPass([mergingSet: mergingSet])
-        assert mergingPass.save()
+        MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage(
+                sample: sample,
+                seqType: seqType,
+                libraryPreparationKit: DomainFactory.createLibraryPreparationKit(name: 'libraryPreparationKit'),
+        )
+        MergingSet mergingSet = DomainFactory.createMergingSet(
+                mergingWorkPackage: mergingWorkPackage,
+        )
+        MergingPass mergingPass = DomainFactory.createMergingPass(
+                mergingSet: mergingSet,
+        )
 
         processedMergedBamFile.mergingPass = mergingPass
         processedMergedBamFile.fileExists = true

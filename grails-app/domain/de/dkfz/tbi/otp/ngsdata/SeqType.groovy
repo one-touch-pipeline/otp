@@ -49,7 +49,7 @@ class SeqType implements Entity {
 
     static constraints = {
         name(blank: false)
-        libraryLayout(blank: false, validator: { OtpPath.isValidPathComponent(it) })  // TODO: OTP-1123: unique constraint for (name, libraryLayout)
+        libraryLayout(blank: false, unique: 'name', validator: { OtpPath.isValidPathComponent(it) })
         dirName(blank: false, unique: 'libraryLayout', validator: { OtpPath.isValidPathComponent(it) })  // TODO: OTP-1124: unique constraint for (dirName, libraryLayoutDirName)
         alias(nullable: true, blank: false)
         //For unknown reason the object creation fail, if it is not set as nullable

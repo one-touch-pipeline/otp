@@ -1,48 +1,61 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
-import org.junit.Test
-
-import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
-import grails.buildtestdata.mixin.Build
-import grails.test.mixin.*
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
+import grails.test.mixin.*
+import org.junit.*
 
-
-@TestFor(SamplePair)
-@Build([
+@Mock([
+        Individual,
+        LibraryPreparationKit,
         MergingWorkPackage,
+        Pipeline,
+        Project,
         Realm,
+        ReferenceGenome,
+        Sample,
+        SamplePair,
+        SampleType,
         SampleTypePerProject,
+        SeqPlatformGroup,
+        SeqType,
 ])
 class SamplePairUnitTests {
 
     List setUpForPathTests() {
-        TestData testData = new TestData()
         Realm realm = DomainFactory.createRealmDataManagement()
-        Project project = DomainFactory.createProject([realmName: realm.name])
-        project.save(flush: true)
-        Individual individual = testData.createIndividual([project: project])
-        individual.save(flush: true)
-        SeqType seqType = testData.createSeqType()
-        seqType.save(flush: true)
-        SampleType sampleType1 = testData.createSampleType([name: "TUMOR"])
-        sampleType1.save(flush: true)
-        SampleType sampleType2 = testData.createSampleType([name: "CONTROL"])
-        sampleType2.save(flush: true)
-        SampleTypePerProject.build(project: project, sampleType: sampleType1, category: SampleType.Category.DISEASE)
-        MergingWorkPackage mergingWorkPackage1 = MergingWorkPackage.build(
-                sample: Sample.build(
+        Project project = DomainFactory.createProject(
+                realmName: realm.name,
+        )
+        Individual individual = DomainFactory.createIndividual(
+                project: project,
+        )
+        SeqType seqType = DomainFactory.createSeqType(
+                libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED
+        )
+        SampleType sampleType1 = DomainFactory.createSampleType(
+                name: "TUMOR",
+        )
+        SampleType sampleType2 = DomainFactory.createSampleType(
+                name: "CONTROL",
+        )
+        DomainFactory.createSampleTypePerProject(
+                project: project,
+                sampleType: sampleType1,
+                category: SampleType.Category.DISEASE,
+        )
+        MergingWorkPackage mergingWorkPackage1 = DomainFactory.createMergingWorkPackage(
+                seqType: seqType,
+                sample: DomainFactory.createSample(
                         individual: individual,
                         sampleType: sampleType1,
                 ),
-                seqType: seqType,
         )
         SamplePair samplePair = DomainFactory.createSamplePair(mergingWorkPackage1,
                 DomainFactory.createMergingWorkPackage(mergingWorkPackage1, sampleType2))
 
-        String snvPath = "${project.dirName}/sequencing/whole_genome_sequencing/view-by-pid/654321/snv_results/paired/tumor_control"
-        String indelPath = "${project.dirName}/sequencing/whole_genome_sequencing/view-by-pid/654321/indel_results/paired/tumor_control"
+        String snvPath = "${project.dirName}/sequencing/${seqType.dirName}/view-by-pid/${individual.pid}/snv_results/${seqType.libraryLayoutDirName}/tumor_control"
+        String indelPath = "${project.dirName}/sequencing/${seqType.dirName}/view-by-pid/${individual.pid}/indel_results/${seqType.libraryLayoutDirName}/tumor_control"
         return [snvPath, indelPath, samplePair, project]
     }
 

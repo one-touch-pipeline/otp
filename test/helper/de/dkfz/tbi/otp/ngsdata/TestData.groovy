@@ -176,15 +176,6 @@ class TestData {
         ] + properties)
     }
 
-
-    static SeqType createSeqType(Map properties = [:]) {
-        return new SeqType([
-            name : "WHOLE_GENOME",
-            libraryLayout : SeqType.LIBRARYLAYOUT_PAIRED,
-            dirName : "whole_genome_sequencing",
-        ] + properties)
-    }
-
     @Deprecated
     SeqTrack createSeqTrack(Map properties = [:]) {
         return new SeqTrack([
