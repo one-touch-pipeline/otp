@@ -25,11 +25,9 @@ class RoddyWorkflowConfigSpec extends Specification {
     void "test constraint, when value for constraint #constraint on #property is invalid, then validate should return false"() {
         given:
         RoddyWorkflowConfig config = DomainFactory.createRoddyWorkflowConfig()
-
-        when:
         config[property] = value
 
-        then:
+        expect:
         TestCase.assertValidateError(config, property, constraint, value)
 
         where:
@@ -45,22 +43,18 @@ class RoddyWorkflowConfigSpec extends Specification {
     void "test constraint, when seqType is null for new object, then validate should return false"() {
         given:
         RoddyWorkflowConfig config = DomainFactory.createRoddyWorkflowConfig([:], false)
-
-        when:
         config.seqType = null
 
-        then:
+        expect:
         TestCase.assertValidateError(config, 'seqType', 'validator.invalid', null)
     }
 
     void "test constraint, when seqType is null for existing object, then validate should return true"() {
         given:
         RoddyWorkflowConfig config = DomainFactory.createRoddyWorkflowConfig()
-
-        when:
         config.seqType = null
 
-        then:
+        expect:
         assert config.validate()
     }
 
@@ -68,11 +62,9 @@ class RoddyWorkflowConfigSpec extends Specification {
         given:
         RoddyWorkflowConfig config1 = DomainFactory.createRoddyWorkflowConfig()
         RoddyWorkflowConfig config2 = DomainFactory.createRoddyWorkflowConfig()
-
-        when:
         config2.configFilePath = config1.configFilePath
 
-        then:
+        expect:
         TestCase.assertValidateError(config2, 'configFilePath', 'unique', config2.configFilePath)
     }
 
@@ -80,16 +72,64 @@ class RoddyWorkflowConfigSpec extends Specification {
         given:
         RoddyWorkflowConfig config1 = DomainFactory.createRoddyWorkflowConfig(obsoleteDate: new Date())
         RoddyWorkflowConfig config2 = DomainFactory.createRoddyWorkflowConfig()
-
-        when:
         config2.project = config1.project
         config2.seqType = config1.seqType
         config2.pipeline = config1.pipeline
         config2.pluginVersion = config1.pluginVersion
         config2.configVersion = config1.configVersion
 
-        then:
+        expect:
         TestCase.assertValidateError(config2, 'configVersion', 'validator.invalid', config2.configVersion)
+    }
+
+    void "test constraint, adapterTrimming not set with WGBS or RNA, fails"() {
+        given:
+        RoddyWorkflowConfig config = DomainFactory.createRoddyWorkflowConfig()
+        config.adapterTrimmingNeeded = false
+        config.seqType = DomainFactory.createSeqTypeLazy(seqTypeName, "asdf", "asdf", "asdf")
+
+        expect:
+        TestCase.assertValidateError(config, 'adapterTrimmingNeeded', 'adapterTrimmingNeeded must be set for WGBS and RNA alignment', config.adapterTrimmingNeeded)
+
+        where:
+        seqTypeName << [SeqTypeNames.RNA, SeqTypeNames.WHOLE_GENOME_BISULFITE, SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION]
+    }
+
+    void "test constraint, adapterTrimming set for Indel or SNV, fails"() {
+        given:
+        RoddyWorkflowConfig config = DomainFactory.createRoddyWorkflowConfig()
+        config.adapterTrimmingNeeded = true
+        config.pipeline = DomainFactory.createPipeline(name, type)
+
+        expect:
+        TestCase.assertValidateError(config, 'adapterTrimmingNeeded', 'adapterTrimmingNeeded must not be set for non-alignment pipelines', config.adapterTrimmingNeeded)
+
+        where:
+        type                | name
+        Pipeline.Type.SNV   | Pipeline.Name.RODDY_SNV
+        Pipeline.Type.INDEL | Pipeline.Name.RODDY_INDEL
+    }
+
+    void "test constraint, adapterTrimming set correctly, succeeds"() {
+        given:
+        RoddyWorkflowConfig config = DomainFactory.createRoddyWorkflowConfig(
+                [seqType: DomainFactory.createSeqTypeLazy(seqTypeName, "asdf", "asdf")],
+                false,
+        )
+        config.adapterTrimmingNeeded = adapterTrimming
+
+        expect:
+        config.validate()
+
+        where:
+        seqTypeName                                      | adapterTrimming
+        SeqTypeNames.RNA                                 | true
+        SeqTypeNames.WHOLE_GENOME_BISULFITE              | true
+        SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION | true
+        SeqTypeNames.WHOLE_GENOME                        | true
+        SeqTypeNames.WHOLE_GENOME                        | false
+        SeqTypeNames.EXOME                               | true
+        SeqTypeNames.EXOME                               | false
     }
 
     void "test getStandardConfigDirectory all fine should return correct path for project"() {

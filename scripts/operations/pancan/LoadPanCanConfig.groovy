@@ -45,9 +45,11 @@ String libraryLayout = 'PAIRED'
 String configFilePath = ''
 
 
+boolean adapterTrimmingNeeded = false
+
 //-----------------------
 
-String panCanAlignmentDeciderBeanName = 'panCanAlignmentDecider'
+String panCanAlignmentDeciderBeanName = AlignmentDeciderBeanNames.PAN_CAN_ALIGNMENT.bean
 
 LogThreadLocal.withThreadLog(System.out, { Project.withTransaction {
     assert projectName
@@ -78,6 +80,7 @@ LogThreadLocal.withThreadLog(System.out, { Project.withTransaction {
                 pipeline,
                 configFilePath,
                 configVersion,
+                adapterTrimmingNeeded,
         )
     } else {
         Individual individual = CollectionUtils.exactlyOneElement(Individual.findAllByPid(individualPid))
@@ -88,6 +91,7 @@ LogThreadLocal.withThreadLog(System.out, { Project.withTransaction {
                 pipeline,
                 configFilePath,
                 configVersion,
+                adapterTrimmingNeeded,
                 individual,
         )
     }

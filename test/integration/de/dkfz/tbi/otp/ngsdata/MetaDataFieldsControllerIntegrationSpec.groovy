@@ -136,45 +136,6 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
         name << ['', 'Antibody Target', 'AntibodyTarget', 'antibodytarget', 'ANTIBODYTARGET']
     }
 
-    void "test JSON createAdapterFile valid input"() {
-        given:
-        File baseDirectory = temporaryFolder.newFolder()
-        DomainFactory.createProcessingOptionBaseAdapterFile(baseDirectory.path)
-        new File(baseDirectory, 'AdapterFile').text = 'Some text'
-        controller.params.fileName = 'AdapterFile'
-
-        when:
-        SpringSecurityUtils.doWithAuth("operator"){
-            controller.createAdapterFile()
-        }
-
-        then:
-        controller.response.status == 200
-        controller.response.json.success
-        AdapterFile.findByFileName('AdapterFile')
-    }
-
-    @Unroll
-    void "test JSON createAdapterFile invalid input"() {
-        given:
-        File baseDirectory = temporaryFolder.newFolder()
-        DomainFactory.createProcessingOptionBaseAdapterFile(baseDirectory.path)
-        new File(baseDirectory, 'AdapterFile').text = 'Some text'
-
-        when:
-        controller.params.fileName = fileName
-        SpringSecurityUtils.doWithAuth("operator"){
-            controller.createAdapterFile()
-        }
-
-        then:
-        controller.response.status == 200
-        !controller.response.json.success
-
-        where:
-        fileName << ['', 'Adapter File', 'adapterfile', 'ADAPTERFILE']
-    }
-
     void "test JSON createSeqCenter valid input"() {
         when:
         controller.params.name = 'SEQCENTER'

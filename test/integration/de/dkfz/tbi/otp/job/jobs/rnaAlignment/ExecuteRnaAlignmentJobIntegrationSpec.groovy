@@ -26,7 +26,7 @@ class ExecuteRnaAlignmentJobIntegrationSpec extends IntegrationSpec {
 
         then:
         AssertionError e = thrown()
-        e.message.contains("There is not exactly one adapter available for BAM file")
+        e.message.contains("There is not exactly one adapter sequence available for BAM file")
     }
 
     void "test prepareAndReturnWorkflowSpecificCValues exactly one adapter sequence available"() {

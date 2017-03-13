@@ -17,7 +17,7 @@ class RoddyWorkflowConfigServiceIntegrationSpec extends Specification {
 
         when:
         LogThreadLocal.withThreadLog(NullWriter.DEFAULT, {
-            RoddyWorkflowConfigService.loadPanCanConfigAndTriggerAlignment(roddyBamFile.project, roddyBamFile.seqType, HelperUtils.uniqueString, roddyBamFile.pipeline, HelperUtils.uniqueString, HelperUtils.uniqueString, roddyBamFile.individual)
+            RoddyWorkflowConfigService.loadPanCanConfigAndTriggerAlignment(roddyBamFile.project, roddyBamFile.seqType, HelperUtils.uniqueString, roddyBamFile.pipeline, HelperUtils.uniqueString, HelperUtils.uniqueString, false, roddyBamFile.individual)
         })
 
         then:
@@ -31,7 +31,7 @@ class RoddyWorkflowConfigServiceIntegrationSpec extends Specification {
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
 
         when:
-        RoddyWorkflowConfigService.loadPanCanConfigAndTriggerAlignment(roddyBamFile.project, roddyBamFile.seqType, HelperUtils.uniqueString, roddyBamFile.pipeline, HelperUtils.uniqueString, HelperUtils.uniqueString, null)
+        RoddyWorkflowConfigService.loadPanCanConfigAndTriggerAlignment(roddyBamFile.project, roddyBamFile.seqType, HelperUtils.uniqueString, roddyBamFile.pipeline, HelperUtils.uniqueString, HelperUtils.uniqueString, false, null)
 
         then:
         AssertionError e = thrown()
@@ -46,7 +46,7 @@ class RoddyWorkflowConfigServiceIntegrationSpec extends Specification {
         1 * RoddyWorkflowConfig.importProjectConfigFile(*_) >> { throw new Exception("importProjectConfigFile failed") }
 
         when:
-        RoddyWorkflowConfigService.loadPanCanConfigAndTriggerAlignment(roddyBamFile.project, roddyBamFile.seqType, HelperUtils.uniqueString, roddyBamFile.pipeline, HelperUtils.uniqueString, HelperUtils.uniqueString, roddyBamFile.individual)
+        RoddyWorkflowConfigService.loadPanCanConfigAndTriggerAlignment(roddyBamFile.project, roddyBamFile.seqType, HelperUtils.uniqueString, roddyBamFile.pipeline, HelperUtils.uniqueString, HelperUtils.uniqueString, false, roddyBamFile.individual)
 
         then:
         Exception e = thrown()
@@ -63,7 +63,7 @@ class RoddyWorkflowConfigServiceIntegrationSpec extends Specification {
         1 * RoddyWorkflowConfig.importProjectConfigFile(*_)
 
         when:
-        RoddyWorkflowConfigService.loadPanCanConfigAndTriggerAlignment(roddyBamFile.project, DomainFactory.createSeqType(), HelperUtils.uniqueString, roddyBamFile.pipeline, HelperUtils.uniqueString, HelperUtils.uniqueString, roddyBamFile.individual)
+        RoddyWorkflowConfigService.loadPanCanConfigAndTriggerAlignment(roddyBamFile.project, DomainFactory.createSeqType(), HelperUtils.uniqueString, roddyBamFile.pipeline, HelperUtils.uniqueString, HelperUtils.uniqueString, false, roddyBamFile.individual)
 
         then:
         AssertionError e = thrown()

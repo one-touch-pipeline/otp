@@ -33,6 +33,7 @@ class ConfigurePipelineController {
                     configVersion    : cmd.config,
                     bwaMemVersion    : cmd.bwaMemVersion,
                     sambambaVersion  : cmd.sambambaVersion,
+                    adapterTrimmingNeeded: cmd.adapterTrimmingNeeded,
             ])
             projectService.configurePanCanAlignmentDeciderProject(panCanAlignmentConfiguration)
             redirect(controller: "projectOverview", action: "specificOverview", params: [project: cmd.project.name])
@@ -358,6 +359,7 @@ class ConfigureAlignmentPipelineSubmitCommand extends ConfigurePipelineSubmitCom
     String bwaMemVersion
     String sambambaVersion
     String copy
+    boolean adapterTrimmingNeeded
 
     static constraints = {
         basedProject(nullable: true)

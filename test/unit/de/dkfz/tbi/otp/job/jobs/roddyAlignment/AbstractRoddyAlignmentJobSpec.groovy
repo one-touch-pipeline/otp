@@ -12,7 +12,6 @@ import org.junit.rules.*
 import spock.lang.*
 
 @Mock([
-        AdapterFile,
         DataFile,
         FileType,
         Individual,
@@ -82,19 +81,15 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
                 "possibleTumorSampleNamePrefixes:",
         ]
 
-        if (adapter == "YES" ) {
+        if (adapterTrimming) {
             File adapterFilePath = CreateFileHelper.createFile(temporaryFolder.newFile())
-            AdapterFile adapterFile = DomainFactory.createAdapterFile()
-            roddyBamFile.seqTracks.each {
-                it.adapterFile = adapterFile
-                it.save(flush: true)
-            }
+            roddyBamFile.config.adapterTrimmingNeeded = true
+            roddyBamFile.config.save(flush: true)
 
-            job.adapterFileService = Mock(AdapterFileService) {
-                1* fullPath(_) >> adapterFilePath
-            }
+            roddyBamFile.containedSeqTracks*.libraryPreparationKit*.adapterFile = adapterFilePath.absolutePath
+            roddyBamFile.containedSeqTracks*.libraryPreparationKit*.save(flush: true)
 
-            expected.addAll("CLIP_INDEX:${adapterFilePath}", "useAdaptorTrimming:true")
+            expected.addAll("CLIP_INDEX:${adapterFilePath.absolutePath}", "useAdaptorTrimming:true")
         }
 
         expected.add("runFingerprinting:false",)
@@ -103,10 +98,10 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
         List<String> value = job.prepareAndReturnAlignmentCValues(roddyBamFile)
 
         then:
-        expected == value
+        CollectionUtils.containSame(expected, value)
 
         where:
-        adapter << ["YES", "NO"]
+        adapterTrimming << [true, false]
     }
 
 

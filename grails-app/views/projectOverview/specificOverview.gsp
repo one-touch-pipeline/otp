@@ -249,6 +249,7 @@
                     'projectOverview.index.referenceGenome.sampleTypeName',
                     'projectOverview.index.referenceGenome',
                     'projectOverview.index.statSizeFile',
+                    'projectOverview.index.adapterTrimming',
                 ] }"
                 id="listReferenceGenome" />
         </div>

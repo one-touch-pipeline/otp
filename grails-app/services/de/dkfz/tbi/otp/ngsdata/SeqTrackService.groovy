@@ -1,26 +1,21 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.dataprocessing.ExternalMergingWorkPackage
+import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.utils.*
+import grails.plugin.springsecurity.*
+import groovy.sql.*
+import org.springframework.beans.factory.annotation.*
+import org.springframework.context.*
+import org.springframework.security.access.prepost.*
+import org.springframework.security.acls.domain.*
+import org.springframework.security.core.userdetails.*
 
-import javax.sql.DataSource
-import grails.plugin.springsecurity.SpringSecurityUtils
-import groovy.sql.GroovyRowResult
-import groovy.sql.Sql
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.ApplicationContext
-import org.springframework.security.access.prepost.PostAuthorize
-import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.security.core.userdetails.UserDetails
+import javax.sql.*
 
-import de.dkfz.tbi.otp.InformationReliability
-import de.dkfz.tbi.otp.dataprocessing.AbstractAlignmentDecider
-import de.dkfz.tbi.otp.dataprocessing.AlignmentDecider
-import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedMergedBamFile
-import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
-import de.dkfz.tbi.otp.job.processing.ProcessingException
-import de.dkfz.tbi.otp.utils.CollectionUtils
-
-import static org.springframework.util.Assert.notNull
+import static org.springframework.util.Assert.*
 
 
 class SeqTrackService {
@@ -577,10 +572,12 @@ AND i.id > :seqTrackId
         boolean onMidterm = areFilesLocatedOnMidTermStorage(seqTrack)
         boolean projectAllowsLinking = !seqTrack.project.hasToBeCopied
         boolean seqTypeAllowsLinking = seqTrack.seqType.seqTypeAllowsLinking()
-        boolean adapterTrimming = seqTrack.adapterFile
+        boolean adapterTrimming = RoddyWorkflowConfig.getLatestForIndividual(seqTrack.individual, seqTrack.seqType,
+                Pipeline.findByName(seqTrack.seqType.isRna() ? Pipeline.Name.RODDY_RNA_ALIGNMENT : Pipeline.Name.PANCAN_ALIGNMENT))?.adapterTrimmingNeeded ?: false
         boolean link = willBeAligned && fromCore && onMidterm && projectAllowsLinking && seqTypeAllowsLinking && !adapterTrimming
         seqTrack.log("Fastq files{0} will be ${link ? "linked" : "copied"}, because " +
-                "willBeAligned=${willBeAligned}, fromCore=${fromCore}, onMidterm=${onMidterm}, projectAllowsLinking=${projectAllowsLinking}, seqTypeAllowsLinking=${seqTypeAllowsLinking}, needs adapter trimming=${adapterTrimming}")
+                "willBeAligned=${willBeAligned}, fromCore=${fromCore}, onMidterm=${onMidterm}, projectAllowsLinking=${projectAllowsLinking}, " +
+                "seqTypeAllowsLinking=${seqTypeAllowsLinking}, needs adapter trimming=${adapterTrimming}")
         if (link) {
             seqTrack.linkedExternally = true
             assert seqTrack.save(flush: true)

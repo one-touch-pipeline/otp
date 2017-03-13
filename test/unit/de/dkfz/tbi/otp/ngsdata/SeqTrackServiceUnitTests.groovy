@@ -2,14 +2,17 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import grails.buildtestdata.mixin.*
 import grails.test.mixin.*
 import org.junit.*
 
 @Mock([SeqTypeService])
 @Build([
-        AdapterFile,
         DataFile,
+        Pipeline,
+        RoddyWorkflowConfig,
         RunSegment,
         SeqCenter,
         SeqPlatformGroup,
@@ -24,6 +27,8 @@ class SeqTrackServiceUnitTests {
     @Before
     void setUp() throws Exception {
         seqTrackService = new SeqTrackService()
+
+        DomainFactory.createPanCanPipeline()
     }
 
     @After
@@ -50,11 +55,8 @@ class SeqTrackServiceUnitTests {
     @Test
     void testDetermineAndStoreIfFastqFilesHaveToBeLinked_WithAdapterTrimming_HasToBeCopied() {
         withTestMidtermStorageMountPoint {
-            AdapterFile adapterFile = DomainFactory.createAdapterFile()
             SeqTrack seqTrack = createDataForDetermineAndStoreIfFastqFilesHaveToBeLinked()
-            seqTrack.adapterFile = adapterFile
-            assert seqTrack.save(flush: true)
-            assert seqTrack.project.hasToBeCopied == false
+            DomainFactory.createRoddyWorkflowConfig([seqType: seqTrack.seqType, individual: seqTrack.individual, adapterTrimmingNeeded: true])
 
             seqTrackService.determineAndStoreIfFastqFilesHaveToBeLinked(seqTrack, true)
 
@@ -88,7 +90,7 @@ class SeqTrackServiceUnitTests {
     void testDetermineAndStoreIfFastqFilesHaveToBeLinked_DataNotFromCore() {
         withTestMidtermStorageMountPoint {
             SeqTrack seqTrack = createDataForDetermineAndStoreIfFastqFilesHaveToBeLinked()
-            seqTrack.run.seqCenter = SeqCenter.build(name: "NotCore")
+            seqTrack.run.seqCenter = DomainFactory.createSeqCenter([name: "NotCore"])
 
             seqTrackService.determineAndStoreIfFastqFilesHaveToBeLinked(seqTrack, true)
 
@@ -147,6 +149,7 @@ class SeqTrackServiceUnitTests {
 
     @Test
     void testDetermineAndStoreIfFastqFilesHaveToBeLinked_RnaData_MustBeCopied() {
+        DomainFactory.createRnaPipeline()
         withTestMidtermStorageMountPoint {
             SeqTrack seqTrack = createDataForDetermineAndStoreIfFastqFilesHaveToBeLinked()
 
@@ -191,25 +194,24 @@ class SeqTrackServiceUnitTests {
     }
 
     private SeqTrack createDataForDetermineAndStoreIfFastqFilesHaveToBeLinked(int pos = 0) {
-        Run run = Run.build(seqCenter: SeqCenter.build(name: "DKFZ"))
-        RunSegment runSegment = RunSegment.build()
-        SeqTrack seqTrack = SeqTrack.build(
+        Run run = DomainFactory.createRun(seqCenter: DomainFactory.createSeqCenter(name: "DKFZ"))
+        RunSegment runSegment = DomainFactory.createRunSegment()
+        SeqTrack seqTrack = DomainFactory.createSeqTrack(
                 run: run,
-                sample: Sample.build(
-                        individual: Individual.build(
-                                project: Project.build(hasToBeCopied: false)
+                sample: DomainFactory.createSample(
+                        individual: DomainFactory.createIndividual(
+                                project: DomainFactory.createProject(hasToBeCopied: false)
                         )
                 )
         )
-
         DomainFactory.createDataFile(seqTrack: seqTrack, run: run, runSegment: runSegment, initialDirectory: LsdfFilesService.midtermStorageMountPoint[pos])
         DomainFactory.createDataFile(seqTrack: seqTrack, run: run, runSegment: runSegment, initialDirectory: LsdfFilesService.midtermStorageMountPoint[pos])
         return seqTrack
     }
 
     private SeqTrack createDataForAreFilesLocatedOnMidTermStorage(int pos = 0) {
-        RunSegment runSegment = RunSegment.build()
-        SeqTrack seqTrack = SeqTrack.build()
+        RunSegment runSegment = DomainFactory.createRunSegment()
+        SeqTrack seqTrack = DomainFactory.createSeqTrack()
         DomainFactory.createDataFile(seqTrack: seqTrack, runSegment: runSegment, initialDirectory: LsdfFilesService.midtermStorageMountPoint[pos])
         DomainFactory.createDataFile(seqTrack: seqTrack, runSegment: runSegment, initialDirectory: LsdfFilesService.midtermStorageMountPoint[pos])
         return seqTrack
@@ -248,7 +250,7 @@ class SeqTrackServiceUnitTests {
 
     @Test
     void testMayAlign_whenNoDataFile_shouldReturnFalse() {
-        SeqTrack seqTrack = SeqTrack.build()
+        SeqTrack seqTrack = DomainFactory.createSeqTrack()
 
         assert !SeqTrackService.mayAlign(seqTrack)
     }
@@ -256,7 +258,7 @@ class SeqTrackServiceUnitTests {
     @Test
     void testMayAlign_whenWrongFileType_shouldReturnFalse() {
         SeqTrack seqTrack = DomainFactory.createSeqTrackWithOneDataFile([:], [
-                fileType: FileType.build(type: FileType.Type.SOURCE),
+                fileType: DomainFactory.createFileType(type: FileType.Type.SOURCE),
         ])
 
         assert !SeqTrackService.mayAlign(seqTrack)
@@ -264,8 +266,8 @@ class SeqTrackServiceUnitTests {
 
     @Test
     void testMayAlign_whenRunSegmentMustNotAlign_shouldReturnFalse() {
-        SeqTrack seqTrack = SeqTrack.build()
-        RunSegment runSegment = RunSegment.build(
+        SeqTrack seqTrack = DomainFactory.createSeqTrack()
+        RunSegment runSegment = DomainFactory.createRunSegment(
                 align: false,
         )
         DomainFactory.createDataFile(
@@ -278,7 +280,7 @@ class SeqTrackServiceUnitTests {
 
     @Test
     void testMayAlign_whenExomeKitReliabilityIsUnknownVerified_shouldReturnFalse() {
-        SeqTrack seqTrack = ExomeSeqTrack.build(
+        SeqTrack seqTrack = DomainFactory.createExomeSeqTrack(
                 libraryPreparationKit: null,
                 kitInfoReliability: InformationReliability.UNKNOWN_VERIFIED,
         )
@@ -290,7 +292,7 @@ class SeqTrackServiceUnitTests {
     @Test
     void testMayAlign_whenSeqPlatformGroupIsNull_shouldReturnFalse() {
         SeqTrack seqTrack = DomainFactory.createSeqTrackWithOneDataFile([
-                run: DomainFactory.createRun(seqPlatform: SeqPlatform.build(seqPlatformGroup: null)),
+                run: DomainFactory.createRun(seqPlatform: DomainFactory.createSeqPlatform(seqPlatformGroup: null)),
         ])
 
         assert !SeqTrackService.mayAlign(seqTrack)

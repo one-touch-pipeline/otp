@@ -5,11 +5,11 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 class RoddyWorkflowConfigService {
 
-    static void loadPanCanConfigAndTriggerAlignment(Project project, SeqType seqType, String pluginVersionToUse, Pipeline pipeline, String configFilePath, String configVersion, Individual individual) {
+    static void loadPanCanConfigAndTriggerAlignment(Project project, SeqType seqType, String pluginVersionToUse, Pipeline pipeline, String configFilePath, String configVersion, boolean adapterTrimmingNeeded, Individual individual) {
         assert individual : "The individual is not allowed to be null"
 
         RoddyBamFile.withTransaction {
-            RoddyWorkflowConfig.importProjectConfigFile( project, seqType, pluginVersionToUse, pipeline, configFilePath, configVersion, individual)
+            RoddyWorkflowConfig.importProjectConfigFile(project, seqType, pluginVersionToUse, pipeline, configFilePath, configVersion, adapterTrimmingNeeded, individual)
 
             List<MergingWorkPackage> mergingWorkPackages = MergingWorkPackage.createCriteria().list {
                 eq('seqType', seqType)

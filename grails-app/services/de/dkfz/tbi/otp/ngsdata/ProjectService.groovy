@@ -308,6 +308,8 @@ AND ace.granting = true
             assert new File(bwaMemPath).exists(): "${bwaMemPath} does not exist"
 
             panCanAlignmentConfiguration.bwaMemPath = bwaMemPath
+        } else {
+            panCanAlignmentConfiguration.adapterTrimmingNeeded = true
         }
         if (panCanAlignmentConfiguration.mergeTool == MergeConstants.MERGE_TOOL_SAMBAMBA) {
             List<String> allSambambaVersions = ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_SAMBAMBA_VERSION_AVAILABLE, null, null).split(',')*.trim()
@@ -338,7 +340,7 @@ AND ace.granting = true
         refSeqType.statSizeFileName = panCanAlignmentConfiguration.statSizeFileName
         refSeqType.save(flush: true, failOnError: true)
 
-        alignmentHelper(panCanAlignmentConfiguration, pipeline, RoddyPanCanConfigTemplate.createConfig(panCanAlignmentConfiguration))
+        alignmentHelper(panCanAlignmentConfiguration, pipeline, RoddyPanCanConfigTemplate.createConfig(panCanAlignmentConfiguration), panCanAlignmentConfiguration.adapterTrimmingNeeded)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
@@ -360,7 +362,7 @@ AND ace.granting = true
         ReferenceGenomeProjectSeqType refSeqType = createReferenceGenomeProjectSeqType(rnaAlignmentConfiguration, referenceGenome)
         refSeqType.save(flush: true, failOnError: true)
 
-        alignmentHelper(rnaAlignmentConfiguration, pipeline, RoddyRnaConfigTemplate.createConfig(rnaAlignmentConfiguration, pipeline.name, referenceGenomeIndexService, geneModelService))
+        alignmentHelper(rnaAlignmentConfiguration, pipeline, RoddyRnaConfigTemplate.createConfig(rnaAlignmentConfiguration, pipeline.name, referenceGenomeIndexService, geneModelService), true)
     }
 
     private void deprecatedReferenceGenomeProjectSeqTypeAndSetDecider(RoddyConfiguration config) {
@@ -382,7 +384,7 @@ AND ace.granting = true
         )
     }
 
-    private void alignmentHelper(RoddyConfiguration alignmentConfiguration, Pipeline pipeline, String xmlConfig) {
+    private void alignmentHelper(RoddyConfiguration alignmentConfiguration, Pipeline pipeline, String xmlConfig, boolean adapterTrimmingNeeded) {
         File projectDirectory = alignmentConfiguration.project.getProjectDirectory()
         assert projectDirectory.exists()
 
@@ -404,6 +406,7 @@ AND ace.granting = true
                 pipeline,
                 configFilePath.path,
                 alignmentConfiguration.configVersion,
+                adapterTrimmingNeeded,
         )
     }
 
@@ -443,6 +446,7 @@ AND ace.granting = true
                 roddyWorkflowConfigBasedProject.pipeline,
                 configFilePath.path,
                 roddyWorkflowConfigBasedProject.configVersion,
+                roddyWorkflowConfigBasedProject.adapterTrimmingNeeded,
         )
         project.alignmentDeciderBeanName = AlignmentDeciderBeanNames.PAN_CAN_ALIGNMENT.bean
         project.save(flush: true)
@@ -638,6 +642,7 @@ class PanCanAlignmentConfiguration extends RoddyConfiguration {
     String bwaMemPath
     String sambambaPath
     String resources = "xl"
+    boolean adapterTrimmingNeeded
 }
 
 class RnaAlignmentConfiguration extends RoddyConfiguration {

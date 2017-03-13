@@ -2,7 +2,6 @@ package de.dkfz.tbi.otp.dataprocessing.roddyExecution
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
 
 import java.util.regex.*
 
@@ -46,6 +45,8 @@ class RoddyWorkflowConfig extends ConfigPerProject implements AlignmentConfig {
      */
     Individual individual
 
+    boolean adapterTrimmingNeeded = false
+
     static constraints = {
         configFilePath unique: true, validator: { OtpPath.isValidAbsolutePath(it) }
         seqType nullable: true, //needs to be nullable because of old data, should never be null for new data
@@ -57,7 +58,7 @@ class RoddyWorkflowConfig extends ConfigPerProject implements AlignmentConfig {
             if (!obsolete) {
                 // This validator asserts that the config is unique for the given properties.
                 // Unique constraint can't be used since individual is optional and can be null.
-                Long id = CollectionUtils.atMostOneElement(RoddyWorkflowConfig.findAllWhere(
+                Long id = atMostOneElement(RoddyWorkflowConfig.findAllWhere(
                         project: config.project,
                         seqType: config.seqType,
                         pipeline: config.pipeline,
@@ -72,7 +73,7 @@ class RoddyWorkflowConfig extends ConfigPerProject implements AlignmentConfig {
             if (version) {
                 // This validator asserts that the config is unique for the given properties.
                 // Unique constraint can't be used since individual is optional and can be null.
-                Long id = CollectionUtils.atMostOneElement(RoddyWorkflowConfig.findAllWhere(
+                Long id = atMostOneElement(RoddyWorkflowConfig.findAllWhere(
                         project: config.project,
                         seqType: config.seqType,
                         pipeline: config.pipeline,
@@ -89,9 +90,18 @@ class RoddyWorkflowConfig extends ConfigPerProject implements AlignmentConfig {
         pipeline validator: { pipeline ->
             pipeline?.usesRoddy()
         }
+        adapterTrimmingNeeded validator: { adapterTrimmingNeeded, config ->
+            if (config.pipeline?.type == Pipeline.Type.ALIGNMENT && (config.seqType?.isRna() || config.seqType?.isWgbs()) && !adapterTrimmingNeeded) {
+                return "adapterTrimmingNeeded must be set for WGBS and RNA alignment"
+            }
+            if (config.pipeline?.type != Pipeline.Type.ALIGNMENT && adapterTrimmingNeeded) {
+                return "adapterTrimmingNeeded must not be set for non-alignment pipelines"
+            }
+            return true
+        }
     }
 
-    static RoddyWorkflowConfig importProjectConfigFile(Project project, SeqType seqType, String pluginVersionToUse, Pipeline pipeline, String configFilePath, String configVersion, Individual individual = null) {
+    static RoddyWorkflowConfig importProjectConfigFile(Project project, SeqType seqType, String pluginVersionToUse, Pipeline pipeline, String configFilePath, String configVersion, boolean adapterTrimmingNeeded = false, Individual individual = null) {
         assert project : "The project is not allowed to be null"
         assert seqType : "The seqType is not allowed to be null"
         assert pipeline : "The pipeline is not allowed to be null"
@@ -110,6 +120,7 @@ class RoddyWorkflowConfig extends ConfigPerProject implements AlignmentConfig {
                 previousConfig: roddyWorkflowConfig,
                 configVersion: configVersion,
                 individual: individual,
+                adapterTrimmingNeeded: adapterTrimmingNeeded,
         )
         config.validateConfig()
         config.createConfigPerProject()

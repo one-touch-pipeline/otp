@@ -19,7 +19,9 @@ class LibPrepKitSeqTypeValidatorSpec extends Specification {
     static final String VALID_METADATA =
             "${MetaDataColumn.LIB_PREP_KIT}\t${MetaDataColumn.SEQUENCING_TYPE}\t${MetaDataColumn.TAGMENTATION_BASED_LIBRARY}\n" +
                     "lib_prep_kit\t${SeqTypeNames.EXOME.seqTypeName}\t\n" +
-                    "${InformationReliability.UNKNOWN_VERIFIED.rawValue}\t${SeqTypeNames.EXOME.seqTypeName}\t\n"
+                    "${InformationReliability.UNKNOWN_VERIFIED.rawValue}\t${SeqTypeNames.EXOME.seqTypeName}\t\n" +
+                    "lib_prep_kit\t${SeqTypeNames.RNA.seqTypeName}\t\n" +
+                    "${InformationReliability.UNKNOWN_VERIFIED.rawValue}\t${SeqTypeNames.RNA.seqTypeName}\t\n"
 
     void setup() {
         DomainFactory.createLibraryPreparationKit(name: 'lib_prep_kit')
@@ -27,7 +29,7 @@ class LibPrepKitSeqTypeValidatorSpec extends Specification {
     }
 
 
-    void 'validate, when sequencing type is Exome and LibPrepKit is valid'() {
+    void 'validate, when sequencing type is exome or RNA and LibPrepKit is valid'() {
 
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
@@ -41,22 +43,27 @@ class LibPrepKitSeqTypeValidatorSpec extends Specification {
         context.problems.empty
     }
 
-    void 'validate, when sequencing type is Exome and LibPrepKit is empty, adds error'() {
+    void 'validate, when sequencing type is exome or RNA and LibPrepKit is empty, adds error'() {
 
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 VALID_METADATA +
-                        "\t${SeqTypeNames.EXOME.seqTypeName}\t\n"
+                        "\t${SeqTypeNames.EXOME.seqTypeName}\t\n" +
+                        "\t${SeqTypeNames.RNA.seqTypeName}\t\n"
         )
 
         when:
         new LibPrepKitSeqTypeValidator().validate(context)
 
         then:
-        Problem problem = exactlyOneElement(context.problems)
-        problem.level == Level.ERROR
-        containSame(problem.affectedCells*.cellAddress, ['A4', 'B4', 'C4',])
-        problem.message.contains("If the sequencing type is '${SeqTypeNames.EXOME.seqTypeName}', the library preparation kit must be given.")
+        context.problems.size() == 2
+        Collection<Problem> expectedProblems = [
+                new Problem((context.spreadsheet.dataRows[4].cells) as Set, Level.ERROR,
+                        "If the sequencing type is '${SeqTypeNames.EXOME.seqTypeName}' or '${SeqTypeNames.RNA.seqTypeName}', the library preparation kit must be given."),
+                new Problem((context.spreadsheet.dataRows[5].cells) as Set, Level.ERROR,
+                        "If the sequencing type is '${SeqTypeNames.EXOME.seqTypeName}' or '${SeqTypeNames.RNA.seqTypeName}', the library preparation kit must be given."),
+        ]
+        containSame(context.problems, expectedProblems)
     }
 
     void 'validate, when sequencing type is not exome'() {
@@ -92,7 +99,7 @@ CHIPSEQ
         context.problems.empty
     }
 
-    void 'validate, when sequencing type is exome and no libPrepKit column exist, adds one error'() {
+    void 'validate, when sequencing type is exome or RNA and no libPrepKit column exist, adds one error'() {
 
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
@@ -103,16 +110,21 @@ ${SeqTypeNames.EXOME.seqTypeName}
 WGS
 WGBS
 ${SeqTypeNames.EXOME.seqTypeName}
+${SeqTypeNames.RNA.seqTypeName}
 """)
 
         when:
         new LibPrepKitSeqTypeValidator().validate(context)
 
         then:
-        Problem problem = exactlyOneElement(context.problems)
-        problem.level == Level.ERROR
-        containSame(problem.affectedCells*.cellAddress, ['A4', 'A7'])
-        problem.message.contains("If the sequencing type is 'EXON', the library preparation kit must be given.")
+        context.problems.size() == 2
+        Collection<Problem> expectedProblems = [
+                new Problem((context.spreadsheet.dataRows[2].cells + context.spreadsheet.dataRows[5].cells) as Set, Level.ERROR,
+                        "If the sequencing type is '${SeqTypeNames.EXOME.seqTypeName}' or '${SeqTypeNames.RNA.seqTypeName}', the library preparation kit must be given."),
+                new Problem((context.spreadsheet.dataRows[6].cells) as Set, Level.ERROR,
+                        "If the sequencing type is '${SeqTypeNames.EXOME.seqTypeName}' or '${SeqTypeNames.RNA.seqTypeName}', the library preparation kit must be given."),
+        ]
+        containSame(context.problems, expectedProblems)
     }
 
     void 'validate, when sequencing type column missing, succeeds without problems'() {

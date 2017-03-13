@@ -134,7 +134,7 @@ class RoddyWorkflowConfigTests {
         assert RoddyWorkflowConfig.list().size() == 0
         configFile = new File(configDir, "${individual.pid}/${TEST_RODDY_CONFIG_FILE_NAME}")
         CreateFileHelper.createRoddyWorkflowConfig(configFile, TEST_RODDY_CONFIG_LABEL_IN_FILE)
-        RoddyWorkflowConfig.importProjectConfigFile(project, seqType, TEST_RODDY_PLUGIN_VERSION, pipeline, configFile.path, DomainFactory.TEST_CONFIG_VERSION, individual)
+        RoddyWorkflowConfig.importProjectConfigFile(project, seqType, TEST_RODDY_PLUGIN_VERSION, pipeline, configFile.path, DomainFactory.TEST_CONFIG_VERSION, false, individual)
         RoddyWorkflowConfig roddyWorkflowConfig = CollectionUtils.exactlyOneElement(RoddyWorkflowConfig.list())
         assert roddyWorkflowConfig.individual == individual
     }

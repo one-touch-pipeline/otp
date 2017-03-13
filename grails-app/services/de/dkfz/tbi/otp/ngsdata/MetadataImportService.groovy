@@ -283,8 +283,6 @@ class MetadataImportService {
             }
             String libraryName = uniqueColumnValue(rows, CUSTOMER_LIBRARY) ?: ""
             String normalizedLibraryName = SeqTrack.normalizeLibraryName(libraryName)
-            String adapterFileName = uniqueColumnValue(rows, ADAPTER_FILE)
-            AdapterFile adapterFile = adapterFileName ? exactlyOneElement(AdapterFile.findAllByFileName(adapterFileName)) : null
             Map properties = [
                     laneId: laneId,
                     ilseSubmission: ilseNumber ? IlseSubmission.findOrSaveWhere(ilseNumber: Integer.parseInt(ilseNumber)) : null,
@@ -299,7 +297,6 @@ class MetadataImportService {
                     libraryPreparationKit: libraryPreparationKit,
                     libraryName: libraryName,
                     normalizedLibraryName: normalizedLibraryName,
-                    adapterFile: adapterFile,
             ]
             if (seqTypeName == SeqTypeNames.CHIP_SEQ) {
                 properties['antibodyTarget'] = exactlyOneElement(AntibodyTarget.findAllByNameIlike(
@@ -309,11 +306,6 @@ class MetadataImportService {
 
             SeqTrack seqTrack = (seqTypeName?.factory ?: SeqTrack.FACTORY).call(properties)
             assert seqTrack.save()
-
-            if (adapterFile) {
-                seqTrack.project.hasToBeCopied = true
-                assert seqTrack.project.save(flush: true)
-            }
 
             importDataFiles(context, runSegment, seqTrack, rows)
 

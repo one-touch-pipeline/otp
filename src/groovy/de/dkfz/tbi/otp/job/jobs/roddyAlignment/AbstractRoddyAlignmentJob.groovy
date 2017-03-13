@@ -3,7 +3,6 @@ package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
-import org.springframework.beans.factory.annotation.*
 
 import java.util.regex.*
 
@@ -11,9 +10,6 @@ import static de.dkfz.tbi.otp.ngsdata.LsdfFilesService.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 abstract class AbstractRoddyAlignmentJob extends AbstractExecutePanCanJob<RoddyBamFile> {
-
-    @Autowired
-    AdapterFileService adapterFileService
 
     public List<String> prepareAndReturnAlignmentCValues(RoddyBamFile roddyBamFile) {
         assert roddyBamFile
@@ -34,10 +30,11 @@ abstract class AbstractRoddyAlignmentJob extends AbstractExecutePanCanJob<RoddyB
         cValues.add("possibleControlSampleNamePrefixes:${roddyBamFile.getSampleType().dirName}")
         cValues.add("possibleTumorSampleNamePrefixes:")
 
-        AdapterFile adapterFile = atMostOneElement(roddyBamFile.seqTracks*.adapterFile?.unique() ?: [])
-        if (adapterFile) {
-            cValues.add("CLIP_INDEX:${adapterFileService.fullPath(adapterFile)}")
+        if (!roddyBamFile.seqType.isRna() && roddyBamFile.config.adapterTrimmingNeeded) {
             cValues.add("useAdaptorTrimming:true")
+            String adapterFile = exactlyOneElement(roddyBamFile.containedSeqTracks*.libraryPreparationKit*.adapterFile.unique(), "There is not exactly one adapter available for BAM file ${roddyBamFile}")
+            assert adapterFile : "There is exactly one adapter available for BAM file ${roddyBamFile}, but it is null"
+            cValues.add("CLIP_INDEX:${adapterFile}")
         }
 
         if (roddyBamFile.project.fingerPrinting && roddyBamFile.referenceGenome.fingerPrintingFileName) {

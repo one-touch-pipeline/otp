@@ -1,5 +1,7 @@
 package workflows
 
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 import org.junit.*
@@ -21,7 +23,9 @@ class PanCanWholeGenomeAlignmentWorkflowTests extends PanCanAlignmentWorkflowTes
         // prepare
         SeqTrack seqTrack = createSeqTrack("readGroup1")
 
-        setUpAdapterFile([seqTrack])
+        RoddyWorkflowConfig config = RoddyWorkflowConfig.getLatestForProject(seqTrack.project, seqTrack.seqType, Pipeline.findByName(Pipeline.Name.PANCAN_ALIGNMENT))
+        config.adapterTrimmingNeeded = true
+        assert config.save(flush: true)
 
         executeAndVerify_AlignLanesOnly_AllFine()
     }

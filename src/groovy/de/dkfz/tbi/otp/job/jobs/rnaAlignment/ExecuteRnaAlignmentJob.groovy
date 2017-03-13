@@ -16,10 +16,11 @@ class ExecuteRnaAlignmentJob extends ExecutePanCanJob {
 
         cValues.add("fastq_list:${filesToMerge.join(";")}")
 
-        String adapterSequences = CollectionUtils.exactlyOneElement(roddyBamFile.containedSeqTracks*.libraryPreparationKit*.adapterSequence.unique().findAll(),
-                "There is not exactly one adapter available for BAM file ${roddyBamFile}")
+        String adapterSequence = CollectionUtils.exactlyOneElement(roddyBamFile.containedSeqTracks*.libraryPreparationKit*.adapterSequence.unique().findAll(),
+                "There is not exactly one adapter sequence available for BAM file ${roddyBamFile}")
+        assert adapterSequence : "There is exactly one adapter sequence available for BAM file ${roddyBamFile}, but it is null"
 
-        cValues.add("ADAPTER_SEQ:${adapterSequences}")
+        cValues.add("ADAPTER_SEQ:${adapterSequence}")
         // the following two variables need to be provided since Roddy does not use the normal path definition for RNA
         cValues.add("ALIGNMENT_DIR:${roddyBamFile.workDirectory}")
         cValues.add("outputBaseDirectory:${roddyBamFile.workDirectory}")

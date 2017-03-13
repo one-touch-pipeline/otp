@@ -7,7 +7,6 @@ import de.dkfz.tbi.otp.utils.Entity
  * To be more flexible the configuration shall be stored in the database instead of in the code.
  * This domain stores the configuration project specific.
  * If the configuration changes, the old database entry is set to obsolete and the new entry refers to the old entry.
- *
  */
 abstract class ConfigPerProject implements Entity {
 

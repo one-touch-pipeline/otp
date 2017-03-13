@@ -1,6 +1,7 @@
 package workflows
 
 import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.roddy.RoddyConstants
@@ -73,8 +74,6 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
     // file with name of chromosomes {@link ReferenceGenomeEntry#Classification#CHROMOSOME}
     // for reference genome in {@link #refGenDir}
     File chromosomeNamesFile
-
-    File adapterFile
 
     File fingerPrintingFile
 
@@ -156,7 +155,6 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
         firstBamFile = new File(baseTestDataDir, 'first-bam-file/first-bam-file_merged.mdup.bam')
         refGenDir = new File(baseTestDataDir, 'reference-genomes/bwa06_1KGRef')
         chromosomeNamesFile = new File(baseTestDataDir, 'reference-genomes/chromosome-names.txt')
-        adapterFile = new File(baseTestDataDir, 'adapters/TruSeq3-PE.fa')
         fingerPrintingFile = new File(baseTestDataDir, 'fingerPrinting/snp138Common.n1000.vh20140318.bed')
     }
 
@@ -173,14 +171,12 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
                 cytosinePositionsIndex,
         )
 
-        LibraryPreparationKit kit = null
-        if (!seqType.isWgbs()) {
-            kit = new LibraryPreparationKit(
-                    name: "~* xX liBrArYprEPaRaTioNkiT Xx *~",
-                    shortDisplayName: "~* xX lPk Xx *~",
-            )
-            assert kit.save(flush: true, failOnError: true)
-        }
+        LibraryPreparationKit kit = new LibraryPreparationKit(
+                name: "~* xX liBrArYprEPaRaTioNkiT Xx *~",
+                shortDisplayName: "~* xX lPk Xx *~",
+                adapterFile: new File(getDataDirectory(), 'adapters/TruSeq3-PE.fa').absolutePath,
+                adapterSequence: "AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT",
+        ).save(flush: true, failOnError: true)
 
         MergingWorkPackage workPackage = MergingWorkPackage.build(
                 pipeline: pipeline,
@@ -188,7 +184,7 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
                 referenceGenome: referenceGenome,
                 needsProcessing: false,
                 statSizeFileName: getChromosomeStatFileName(),
-                libraryPreparationKit: kit,
+                libraryPreparationKit: !seqType.isWgbs() ? kit : null,
         )
 
         workPackage.individual.pid = 'pid_4'  // This name is encoded in @RG of the test BAM file
@@ -234,6 +230,11 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
                 dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
         ] + properties
         SeqTrack seqTrack = DomainFactory.createSeqTrackWithDataFiles(workPackage, seqTrackProperties)
+        if (findSeqType().isWgbs()) {
+            seqTrack.libraryPreparationKit = exactlyOneElement(LibraryPreparationKit.findAll())
+            seqTrack.kitInfoReliability = InformationReliability.KNOWN
+            seqTrack.save(flush: true)
+        }
 
         DataFile.findAllBySeqTrack(seqTrack).eachWithIndex { DataFile dataFile, int index ->
             dataFile.vbpFileName = dataFile.fileName = "fastq_${seqTrack.individual.pid}_${seqTrack.sampleType.name}_${seqTrack.laneId}_${index + 1}.fastq.gz"
@@ -366,19 +367,6 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
     void setUpRefGenomeDir(MergingWorkPackage workPackage) {
         File linkRefGenDir = referenceGenomeService.referenceGenomeDirectory(workPackage.referenceGenome, false)
         linkFileUtils.createAndValidateLinks([(refGenDir): linkRefGenDir], realm)
-    }
-
-    void setUpAdapterFile(List<SeqTrack> seqTracks) {
-        SpringSecurityUtils.doWithAuth("operator") {
-            processingOptionService.createOrUpdate("ADAPTER_BASE_PATH", null, null, adapterFile.absoluteFile.parent, "Path where the adapter file is located")
-        }
-
-        AdapterFile adapter = DomainFactory.createAdapterFile(fileName: adapterFile.name)
-
-        seqTracks.each {
-            it.adapterFile = adapter
-            it.save(flush: true)
-        }
     }
 
     void setUpFingerPrintingFile(SeqTrack seqTrack) {

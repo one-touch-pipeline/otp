@@ -93,6 +93,14 @@
                     <td>-</td>
                     <td><g:message code="configurePipeline.config.info"/></td>
                 </tr>
+                <g:if test="${!isWgbs}">
+                    <tr>
+                        <td class="myKey"><g:message code="configurePipeline.adapterTrimmingNeeded"/></td>
+                        <td><g:checkBox name="adapterTrimmingNeeded" checked="false"/></td>
+                        <td>-</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                </g:if>
                 <tr>
                     <td colspan="4">&nbsp;</td>
                 </tr>

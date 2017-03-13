@@ -48,7 +48,7 @@
                         </td>
                         <td>
                             <g:if test="${libraryPreparationKit.adapterFile}">
-                                ${libraryPreparationKit.adapterFile}
+                                <span title="${libraryPreparationKit.adapterFile}">${new File(libraryPreparationKit.adapterFile).name}</span>
                             </g:if>
                             <g:else>
                                 <otp:editorSwitchNewValues
@@ -61,7 +61,7 @@
                         </td>
                         <td>
                             <g:if test="${libraryPreparationKit.adapterSequence}">
-                                ${libraryPreparationKit.adapterSequence}
+                                <asset:image src="ok.png" title="${libraryPreparationKit.adapterSequence}" />
                             </g:if>
                             <g:else>
                                 <otp:editorSwitchNewValues
@@ -268,34 +268,6 @@
                         link="${g.createLink(controller: 'metaDataFields', action: 'createSeqType')}"
                     />
                 </td>
-            </tbody>
-        </table>
-        <div style="width: 20px; height: 40px;"></div>
-        <h3>
-            <g:message code="dataFields.title.adapter" />
-        </h3>
-        <table>
-            <thead>
-            <tr>
-                <th><g:message code="dataFields.adapter"/></th>
-            </tr>
-            </thead>
-            <tbody>
-            <g:each var="adapterFile" in="${adapterFiles}" >
-                <tr>
-                    <td>
-                        ${adapterFile.fileName}
-                    </td>
-                </tr>
-            </g:each>
-            <td colspan="1">
-                <otp:editorSwitch
-                        roles="ROLE_OPERATOR"
-                        template="newFreeTextValue"
-                        label="Adapter file:"
-                        link="${g.createLink(controller: 'metaDataFields', action: 'createAdapterFile')}"
-                        value=""/>
-            </td>
             </tbody>
         </table>
     </div>

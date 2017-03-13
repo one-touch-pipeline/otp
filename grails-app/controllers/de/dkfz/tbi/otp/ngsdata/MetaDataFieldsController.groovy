@@ -15,7 +15,6 @@ class MetaDataFieldsController {
     SeqCenterService seqCenterService
     LibraryPreparationKitSynonymService libraryPreparationKitSynonymService
     AntibodyTargetService antibodyTargetService
-    AdapterFileService adapterFileService
 
 
     def index() {
@@ -73,20 +72,12 @@ class MetaDataFieldsController {
             ]
         }.unique()
 
-        List adapterFiles = AdapterFile.list(sort: "fileName", order: "asc").collect {
-            [
-                    fileName : it.fileName,
-            ]
-        }
-
         return [
                 antiBodyTargets: antiBodyTargets,
                 libraryPreparationKits: libraryPreparationKits,
                 seqCenters     : seqCenters,
                 seqPlatforms   : seqPlatforms,
                 seqTypes       : seqTypes,
-                adapterFiles   : adapterFiles,
-
         ]
     }
 
@@ -147,10 +138,6 @@ class MetaDataFieldsController {
         SeqType.withTransaction{
             createSeqTyp(cmd, seqType.name, seqType.dirName, seqType.alias)
         }
-    }
-
-    JSON createAdapterFile(CreateAdapterFileCommand cmd) {
-        checkErrorAndCallMethod(cmd, { adapterFileService.createAdapterFile(cmd.fileName) })
     }
 
     private void createSeqTyp(Serializable cmd, String name, String dirName, String alias) {
@@ -425,29 +412,4 @@ class CreateLayoutCommand implements Serializable {
             anyLayout(blank: false,validator: {val, obj -> if (!(obj.single || obj.paired || obj.mate_pair)) { return 'Empty' } })
             id(blank: false)
         }
-}
-
-class CreateAdapterFileCommand implements Serializable {
-    String fileName
-
-    @Autowired
-    AdapterFileService adapterFileService
-
-    static constraints = {
-        fileName(blank: false, validator: {val, obj ->
-            if (AdapterFile.findByFileNameIlike(val)) {
-                return 'The adapter file is linked already'
-            }
-            if (!OtpPath.isValidPathComponent(val)) {
-                return 'Invalid file name'
-            }
-            File file = new File(obj.adapterFileService.baseDirectory(), val)
-            if (!file.canRead()) {
-                return "The adapter file ${val} does not exists"
-            }
-        })
-    }
-    void setValue(String fileName) {
-        this.fileName = fileName?.trim()?.replaceAll(" +", " ")
-    }
 }

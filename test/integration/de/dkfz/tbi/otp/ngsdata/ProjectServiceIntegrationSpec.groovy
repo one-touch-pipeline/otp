@@ -1263,6 +1263,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 pluginVersion    : '1.2.3',
                 baseProjectConfig: 'baseConfig',
                 configVersion    : 'v1_0',
+                adapterTrimmingNeeded: true,
         ] + properties)
         Realm realm = ConfigService.getRealm(configuration.project, Realm.OperationType.DATA_MANAGEMENT)
         File projectDirectory = LsdfFilesService.getPath(

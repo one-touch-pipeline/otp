@@ -394,14 +394,6 @@ class DomainFactory {
         )
     }
 
-    public static ProcessingOption createProcessingOptionBaseAdapterFile(String fileName = TestCase.uniqueNonExistentPath.path) {
-        return createProcessingOption(
-                name: AdapterFileService.BASE_PATH_PROCESSING_OPTION_NAME,
-                type: null,
-                project: null,
-                value: fileName,
-        )
-    }
 
     public static ProcessingOption createProcessingOptionBasePathReferenceGenome(String fileName = TestCase.uniqueNonExistentPath.path) {
         return createProcessingOption(
@@ -433,12 +425,6 @@ class DomainFactory {
                 md5sum             : HelperUtils.randomMd5sum,
                 fileOperationStatus: FileOperationStatus.PROCESSED,
         ]
-    }
-
-    public static AdapterFile createAdapterFile(Map properties = [:]) {
-        return createDomainObject(AdapterFile, [
-                fileName: "fileName_${counter++}",
-        ], properties)
     }
 
     public static createComment(Map properties = [:]) {
@@ -636,6 +622,7 @@ class DomainFactory {
                         pipeline: workPackage.pipeline,
                         project: workPackage.project,
                         seqType: workPackage.seqType,
+                        adapterTrimmingNeeded: workPackage.seqType.isRna() || workPackage.seqType.isWgbs(),
                 )},
                 md5sum: HelperUtils.randomMd5sum,
                 fileOperationStatus: FileOperationStatus.PROCESSED,
@@ -1576,7 +1563,7 @@ class DomainFactory {
         ] + myProps)
     }
 
-    static SeqType createSeqTypeLazy(SeqTypeNames seqTypeNames, String alias, String dirName, String roddyName = '', String libraryLayout = SeqType.LIBRARYLAYOUT_PAIRED) {
+    static SeqType createSeqTypeLazy(SeqTypeNames seqTypeNames, String alias, String dirName, String roddyName = null, String libraryLayout = SeqType.LIBRARYLAYOUT_PAIRED) {
         createDomainObjectLazy(SeqType, [:], [
                 name: seqTypeNames.seqTypeName,
                 alias: alias,

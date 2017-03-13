@@ -123,7 +123,8 @@ SAMTOOLS_BINARY=samTool
     void "getRoddyAlignmentInformation, when rna, return alignment info with the correct data"() {
         given:
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig(
-                seqType: DomainFactory.createRnaSeqType()
+                seqType: DomainFactory.createRnaSeqType(),
+                adapterTrimmingNeeded: true,
         )
         ProjectOverviewService service = new ProjectOverviewService([
                 processingOptionService   : new ProcessingOptionService(),
