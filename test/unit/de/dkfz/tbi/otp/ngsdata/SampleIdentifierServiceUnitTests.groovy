@@ -92,6 +92,20 @@ class SampleIdentifierServiceUnitTests {
         assert sampleType.specificReferenceGenome == SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC
     }
 
+    @Test
+    void testCreateSampleTypeXenograftDepending_SampleIsPatientDerivedCulture_ShouldReturnSampleUsingSampleTypeSpecificReferenceGenome() {
+        SampleType sampleType = service.createSampleTypeXenograftDepending(SampleIdentifierService.CULTURE + HelperUtils.uniqueString)
+
+        assert sampleType.specificReferenceGenome == SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC
+    }
+
+    @Test
+    void testCreateSampleTypeXenograftDepending_SampleIsOrganoid_ShouldReturnSampleUsingSampleTypeSpecificReferenceGenome() {
+        SampleType sampleType = service.createSampleTypeXenograftDepending(SampleIdentifierService.ORGANOID + HelperUtils.uniqueString)
+
+        assert sampleType.specificReferenceGenome == SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC
+    }
+
 
     private void testFindOrSaveSample_ShouldReturnIt(ParsedSampleIdentifier identifier) {
         Sample result = service.findOrSaveSample(identifier)

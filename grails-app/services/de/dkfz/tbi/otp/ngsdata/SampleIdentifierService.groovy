@@ -8,6 +8,8 @@ class SampleIdentifierService {
 
 
     static final String XENOGRAFT = "XENOGRAFT"
+    static final String CULTURE = "PATIENT_DERIVED_CULTURE"
+    static final String ORGANOID = "ORGANOID"
 
 
     @Autowired
@@ -72,7 +74,9 @@ class SampleIdentifierService {
 
 
     SampleType createSampleTypeXenograftDepending(String sampleTypeName) {
-        boolean xenograft = sampleTypeName.toUpperCase(Locale.ENGLISH).startsWith(XENOGRAFT)
+        boolean xenograft = sampleTypeName.toUpperCase(Locale.ENGLISH).startsWith(XENOGRAFT) ||
+                sampleTypeName.toUpperCase(Locale.ENGLISH).startsWith(CULTURE) ||
+                sampleTypeName.toUpperCase(Locale.ENGLISH).startsWith(ORGANOID)
         SampleType.SpecificReferenceGenome  specificReferenceGenome = xenograft ?  SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC : SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
         SampleType sampleType = new SampleType(
                 name: sampleTypeName,
