@@ -74,7 +74,6 @@ static Map<String, String> getMetadata(DataFile dataFile) {
     put(ILSE_NO, seqTrack.ilseSubmission?.ilseNumber?.toString())
     put(PROJECT, seqTrack.project.name)
     put(CUSTOMER_LIBRARY, seqTrack.libraryName)
-    put(ADAPTER_FILE, seqTrack.adapterFile?.fileName)
 
     if (seqTrack instanceof ChipSeqSeqTrack) {
         put(ANTIBODY_TARGET, ((ChipSeqSeqTrack) seqTrack).antibodyTarget.name)

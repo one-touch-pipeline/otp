@@ -103,8 +103,6 @@ class SeqTrack implements ProcessParameterObject, Entity {
     String libraryName
     String normalizedLibraryName
 
-    AdapterFile adapterFile
-
     List<LogMessage> logMessages = []
 
     static belongsTo = [
@@ -144,7 +142,6 @@ class SeqTrack implements ProcessParameterObject, Entity {
         normalizedLibraryName(nullable: true, validator: {String val, SeqTrack obj ->
             (val == null) ? (obj.libraryName == null) : (val == normalizeLibraryName(obj.libraryName))
         })
-        adapterFile(nullable: true)
     }
 
 
