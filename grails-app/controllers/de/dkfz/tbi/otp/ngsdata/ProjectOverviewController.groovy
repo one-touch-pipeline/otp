@@ -84,13 +84,9 @@ class ProjectOverviewController {
 
         List<List> thresholdsTable = createThresholdTable(project)
 
-        List configSnvTable = buildTableForSnvConfig(project)
-        List configSnvTableHeadline = getHeadline(configSnvTable)
-        configSnvTable.remove(configSnvTableHeadline)
-
-        List configIndelTable = buildTableForIndelConfig(project)
-        List configIndelTableHeadline = getHeadline(configIndelTable)
-        configIndelTable.remove(configIndelTableHeadline)
+        List snvConfigTable = createAnalysisConfigTable(project,  SeqType.getSnvPipelineSeqTypes(), Pipeline.findByName(Pipeline.Name.RODDY_SNV))
+        List indelConfigTable = createAnalysisConfigTable(project, SeqType.getIndelPipelineSeqTypes(), Pipeline.findByName(Pipeline.Name.RODDY_INDEL))
+        List aceseqConfigTable = createAnalysisConfigTable(project, SeqType.getAceseqPipelineSeqTypes(), Pipeline.findByName(Pipeline.Name.RODDY_ACESEQ))
 
         String checkAceseqReferenceGenomeOutput
         ReferenceGenome referenceGenome = checkReferenceGenome(project, SeqType.wholeGenomePairedSeqType)
@@ -126,10 +122,9 @@ class ProjectOverviewController {
                 projectContactPersons: projectContactPersons,
                 roleDropDown: contactPersonRoles,
                 thresholdsTable: thresholdsTable,
-                configSnvTableHeadline: configSnvTableHeadline,
-                configSnvTable: configSnvTable,
-                configIndelTableHeadline: configIndelTableHeadline,
-                configIndelTable: configIndelTable,
+                snvConfigTable: snvConfigTable,
+                indelConfigTable: indelConfigTable,
+                aceseqConfigTable: aceseqConfigTable,
                 snvDropDown: Project.Snv.values(),
                 directory: projectDirectory,
                 analysisDirectory: project.dirAnalysis?: '',
@@ -469,46 +464,27 @@ class ProjectOverviewController {
         return [success: false, error: "'" + errors.getRejectedValue() + "' is not a valid value for '" + errors.getField() + "'. Error code: '" + errors.code + "'"]
     }
 
-    private List buildTableForSnvConfig(Project project) {
-        List table = []
-        table.add(["", "Config uploaded", "Version"])
-        SeqType.getSnvPipelineSeqTypes().each {
-            List row = []
-            row.add(it.displayName)
-            SnvConfig snvConfig = atMostOneElement(SnvConfig.findAllByProjectAndSeqTypeAndObsoleteDate(project, it, null))
-            if (snvConfig) {
+    private static List<List<String>> createAnalysisConfigTable(Project project, List<SeqType> seqTypes, Pipeline pipeline) {
+        List<List<String>> table = []
+        table.add(["", "Config created", "Version"])
+        seqTypes.each { SeqType seqType ->
+            List<String> row = []
+            row.add(seqType.displayName)
+            SnvConfig snvConfig
+            RoddyWorkflowConfig roddyWorkflowConfig
+            if (pipeline.type == Pipeline.Type.SNV && (snvConfig = atMostOneElement(SnvConfig.findAllByProjectAndSeqTypeAndObsoleteDateIsNull(project, seqType)))) {
                 row.add("Yes")
                 row.add(snvConfig.externalScriptVersion)
+            } else if ((roddyWorkflowConfig = atMostOneElement(RoddyWorkflowConfig.findAllByProjectAndSeqTypeAndPipelineAndObsoleteDateIsNull(project, seqType, pipeline)))) {
+                row.add("Yes")
+                row.add(roddyWorkflowConfig.pluginVersion)
             } else {
-                row = getRoddyWorkflowConfig(row, project, it, Pipeline.findByName(Pipeline.Name.RODDY_SNV))
+                row.add("No")
+                row.add("-")
             }
             table.add(row)
         }
         return table.transpose()
-    }
-
-    private List buildTableForIndelConfig(Project project) {
-        List table = []
-        table.add(["", "Config uploaded", "Version"])
-        SeqType.getIndelPipelineSeqTypes().each {
-            List row = []
-            row.add(it.displayName)
-            row = getRoddyWorkflowConfig(row, project, it, Pipeline.findByName(Pipeline.Name.RODDY_INDEL))
-            table.add(row)
-        }
-        return table.transpose()
-    }
-
-    private List getRoddyWorkflowConfig(List row, Project project, SeqType seqType, Pipeline pipeline) {
-        RoddyWorkflowConfig roddyWorkflowConfig = CollectionUtils.atMostOneElement(RoddyWorkflowConfig.findAllByProjectAndSeqTypeAndObsoleteDateAndPipeline(project, seqType, null, pipeline))
-        if (roddyWorkflowConfig) {
-            row.add("Yes")
-            row.add(roddyWorkflowConfig.pluginVersion)
-        } else {
-            row.add("No")
-            row.add("")
-        }
-        return row
     }
 
     private List<List<String>> createThresholdTable(Project project) {
@@ -548,13 +524,6 @@ class ProjectOverviewController {
             it.findAll {it == null}.size() == (it.size() - 1)
         }
         return list.transpose()
-    }
-
-    private List getHeadline(List list) {
-        if (list) {
-            return list.first()
-        }
-        return []
     }
 
     JSON updateFingerPrinting(Long id, String value) {

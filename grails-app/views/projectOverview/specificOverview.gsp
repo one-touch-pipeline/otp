@@ -266,20 +266,16 @@
             <g:if test="${thresholdsTable}">
                 <table>
                     <g:each var="row" in="${thresholdsTable}" status="i">
-                        <g:if test="${i == 0}">
-                            <tr>
-                                <g:each var="cell" in="${row}">
+                        <tr>
+                            <g:each var="cell" in="${row}">
+                                <g:if test="${i == 0}">
                                     <th>${cell}</th>
-                                </g:each>
-                            </tr>
-                        </g:if>
-                        <g:else>
-                            <tr>
-                                <g:each var="cell" in="${row}">
+                                </g:if>
+                                <g:else>
                                     <td class="tableEntry">${cell}</td>
-                                </g:each>
-                            </tr>
-                        </g:else>
+                                </g:else>
+                            </g:each>
+                        </tr>
                     </g:each>
                 </table>
             </g:if>
@@ -310,19 +306,15 @@
             </table>
             <br>
             <table>
-                <tr>
-                    <g:each var="cell" in="${configSnvTableHeadline}">
-                        <th>
-                           ${cell}
-                         </th>
-                    </g:each>
-                </tr>
-                <g:each var="rows" in="${configSnvTable}">
+                <g:each var="row" in="${snvConfigTable}" status="i">
                     <tr>
-                        <g:each var="cell" in="${rows}">
-                            <td class="tableEntry">
-                                ${cell}
-                            </td>
+                        <g:each var="cell" in="${row}">
+                            <g:if test="${i == 0}">
+                                <th>${cell}</th>
+                            </g:if>
+                            <g:else>
+                                <td class="tableEntry">${cell}</td>
+                            </g:else>
                         </g:each>
                     </tr>
                 </g:each>
@@ -342,19 +334,15 @@
                 </g:each>
             </ul>
             <table>
-                <tr>
-                    <g:each var="cell" in="${configIndelTableHeadline}">
-                        <th>
-                            ${cell}
-                        </th>
-                    </g:each>
-                </tr>
-                <g:each var="rows" in="${configIndelTable}">
+                <g:each var="row" in="${indelConfigTable}" status="i">
                     <tr>
-                        <g:each var="cell" in="${rows}">
-                            <td class="tableEntry">
-                                ${cell}
-                            </td>
+                        <g:each var="cell" in="${row}">
+                            <g:if test="${i == 0}">
+                                <th>${cell}</th>
+                            </g:if>
+                            <g:else>
+                                <td class="tableEntry">${cell}</td>
+                            </g:else>
                         </g:each>
                     </tr>
                 </g:each>
@@ -378,6 +366,20 @@
                     </g:else>
                 </li>
             </ul>
+            <table>
+                <g:each var="row" in="${aceseqConfigTable}" status="i">
+                    <tr>
+                        <g:each var="cell" in="${row}">
+                            <g:if test="${i == 0}">
+                                <th>${cell}</th>
+                            </g:if>
+                            <g:else>
+                                <td class="tableEntry">${cell}</td>
+                            </g:else>
+                        </g:each>
+                    </tr>
+                </g:each>
+            </table>
             <br>
         </div>
     </div>
