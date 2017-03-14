@@ -20,8 +20,6 @@ class ExecuteRnaAlignmentJobIntegrationSpec extends IntegrationSpec {
     void "test prepareAndReturnWorkflowSpecificCValues no adapter sequence available"() {
         given:
         RnaRoddyBamFile roddyBamFile = setUpForPrepareAndReturnWorkflowSpecificCValues()
-        List<String> chromosomeNames = ["1", "2", "3", "4", "5", "X", "Y", "M"]
-        DomainFactory.createReferenceGenomeEntries(roddyBamFile.referenceGenome, chromosomeNames)
 
         when:
         executeRnaAlignmentJob.prepareAndReturnWorkflowSpecificCValues(roddyBamFile)
@@ -34,8 +32,6 @@ class ExecuteRnaAlignmentJobIntegrationSpec extends IntegrationSpec {
     void "test prepareAndReturnWorkflowSpecificCValues exactly one adapter sequence available"() {
         given:
         RnaRoddyBamFile roddyBamFile = setUpForPrepareAndReturnWorkflowSpecificCValues()
-        List<String> chromosomeNames = ["1", "2", "3", "4", "5", "X", "Y", "M"]
-        DomainFactory.createReferenceGenomeEntries(roddyBamFile.referenceGenome, chromosomeNames)
         roddyBamFile.containedSeqTracks.each {
             LibraryPreparationKit libraryPreparationKit = it.libraryPreparationKit
             libraryPreparationKit.adapterSequence = ADAPTER_SEQUENCE1
@@ -64,7 +60,6 @@ class ExecuteRnaAlignmentJobIntegrationSpec extends IntegrationSpec {
         executeRnaAlignmentJob.referenceGenomeService = new ReferenceGenomeService()
         executeRnaAlignmentJob.referenceGenomeService.configService = executeRnaAlignmentJob.lsdfFilesService.configService
         executeRnaAlignmentJob.referenceGenomeService.processingOptionService = new ProcessingOptionService()
-        executeRnaAlignmentJob.chromosomeIdentifierSortingService = new ChromosomeIdentifierSortingService()
 
         DomainFactory.createProcessingOptionBasePathReferenceGenome(tmpDir.root.absolutePath)
         RnaRoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile([:], RnaRoddyBamFile)

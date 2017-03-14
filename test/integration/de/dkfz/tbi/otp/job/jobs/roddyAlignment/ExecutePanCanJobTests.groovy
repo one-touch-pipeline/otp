@@ -36,9 +36,6 @@ class ExecutePanCanJobTests {
         dataProcessingRealm = DomainFactory.createRealmDataProcessing(tmpDir.root, [name: roddyBamFile.project.realmName])
         dataManagementRealm = DomainFactory.createRealmDataManagement(tmpDir.root, [name: roddyBamFile.project.realmName])
 
-        List<String> chromosomeNames = ["1", "2", "3", "4", "5", "X", "Y", "M"]
-        DomainFactory.createReferenceGenomeEntries(roddyBamFile.referenceGenome, chromosomeNames)
-
         DomainFactory.createProcessingOptionBasePathReferenceGenome(new File(tmpDir.root, "reference_genomes").path)
 
         prepareDataFilesOnFileSystem(roddyBamFile)
@@ -98,7 +95,6 @@ class ExecutePanCanJobTests {
                 "CHROM_SIZES_FILE:${executePanCanJob.referenceGenomeService.chromosomeStatSizeFile(roddyBamFile.mergingWorkPackage).absolutePath}",
                 "possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}",
                 "possibleTumorSampleNamePrefixes:",
-                "CHROMOSOME_INDICES:( 1 2 3 4 5 X Y M )",
                 "runFingerprinting:false",
                 "TARGET_REGIONS_FILE:BedFilePath",
                 "TARGETSIZE:1",
@@ -124,7 +120,6 @@ class ExecutePanCanJobTests {
                 "CHROM_SIZES_FILE:${executePanCanJob.referenceGenomeService.chromosomeStatSizeFile(roddyBamFile.mergingWorkPackage).absolutePath}",
                 "possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}",
                 "possibleTumorSampleNamePrefixes:",
-                "CHROMOSOME_INDICES:( 1 2 3 4 5 X Y M )",
                 "runFingerprinting:true",
                 "fingerprintingSitesFile:${fingerPrintingFile}",
                 "fastq_list:${fastqFilesAsString(roddyBamFile)}",
@@ -137,12 +132,12 @@ class ExecutePanCanJobTests {
 
     @Test
     void testPrepareAndReturnWorkflowSpecificCValues_WholeGenomeSeqType_NoBaseBamFile_AllFine() {
+
         List<String> expectedCommand = [
                 "INDEX_PREFIX:${executePanCanJob.referenceGenomeService.fastaFilePath(roddyBamFile.referenceGenome).absolutePath}",
                 "CHROM_SIZES_FILE:${executePanCanJob.referenceGenomeService.chromosomeStatSizeFile(roddyBamFile.mergingWorkPackage).absolutePath}",
                 "possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}",
                 "possibleTumorSampleNamePrefixes:",
-                "CHROMOSOME_INDICES:( 1 2 3 4 5 X Y M )",
                 "runFingerprinting:false",
                 "fastq_list:${fastqFilesAsString(roddyBamFile)}",
         ]
@@ -173,7 +168,6 @@ class ExecutePanCanJobTests {
                 "CHROM_SIZES_FILE:${executePanCanJob.referenceGenomeService.chromosomeStatSizeFile(roddyBamFile2.mergingWorkPackage).absolutePath}",
                 "possibleControlSampleNamePrefixes:${roddyBamFile2.sampleType.dirName}",
                 "possibleTumorSampleNamePrefixes:",
-                "CHROMOSOME_INDICES:( 1 2 3 4 5 X Y M )",
                 "runFingerprinting:false",
                 "fastq_list:${fastqFilesAsString(roddyBamFile2)}",
                 "bam:${roddyBamFile.workBamFile.path}",

@@ -88,8 +88,8 @@ class ExecuteWgbsAlignmentJobTests {
                 "CHROM_SIZES_FILE:${executeWgbsAlignmentJob.referenceGenomeService.chromosomeStatSizeFile(roddyBamFile.mergingWorkPackage).absolutePath}",
                 "possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}",
                 "possibleTumorSampleNamePrefixes:",
-                "CHROMOSOME_INDICES:( ${chromosomeNames.join(' ')} )",
                 "runFingerprinting:false",
+                "CHROMOSOME_INDICES:( ${chromosomeNames.join(' ')} )",
                 "CYTOSINE_POSITIONS_INDEX:${cpiFile.absolutePath}",
         ]
 
