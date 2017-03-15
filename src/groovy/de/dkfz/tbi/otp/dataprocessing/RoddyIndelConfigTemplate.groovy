@@ -5,7 +5,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 class RoddyIndelConfigTemplate {
 
-    static String createConfig(IndelPipelineConfiguration indelPipelineConfiguration, Pipeline.Name pipelineName) {
+    static String createConfig(RoddyConfiguration indelPipelineConfiguration, Pipeline.Name pipelineName) {
         return """
 <configuration configurationType='project'
                name='${RoddyWorkflowConfig.getNameUsedInConfig(pipelineName, indelPipelineConfiguration.seqType, indelPipelineConfiguration.pluginName, indelPipelineConfiguration.pluginVersion, indelPipelineConfiguration.configVersion)}'
@@ -20,9 +20,5 @@ class RoddyIndelConfigTemplate {
     </subconfigurations>
 </configuration>
 """
-    }
-
-    static String createConfigBashEscaped(IndelPipelineConfiguration indelPipelineConfiguration, Pipeline.Name pipelineName) {
-        createConfig(indelPipelineConfiguration, pipelineName).replaceAll(/\$/, /\\\$/)
     }
 }

@@ -125,15 +125,15 @@ class ReferenceGenome implements Entity {
         chromosomeSuffix nullable: true, blank: true
         chromosomeLengthFilePath(nullable: true, blank: false, validator: { it == null || OtpPath.isValidPathComponent(it) })
         fingerPrintingFileName nullable: true
-        mappabilityFile (nullable: true, validator: { it == null || OtpPath.isValidPathComponent(it) })
-        replicationTimeFile (nullable: true, validator: { it == null || OtpPath.isValidPathComponent(it) })
+        mappabilityFile (nullable: true, validator: { it == null || OtpPath.isValidAbsolutePath(it) })
+        replicationTimeFile (nullable: true, validator: { it == null || OtpPath.isValidAbsolutePath(it) })
         gcContentFile (nullable: true, validator: { it == null || OtpPath.isValidPathComponent(it) })
-        geneticMapFile (nullable: true, validator: { it == null || OtpPath.isValidRelativePath(it) })
-        knownHaplotypesFile (nullable: true, validator: { it == null || OtpPath.isValidRelativePath(it) })
-        knownHaplotypesLegendFile (nullable: true, validator: { it == null || OtpPath.isValidRelativePath(it) })
-        geneticMapFileX (nullable: true, validator: { it == null || OtpPath.isValidRelativePath(it) })
-        knownHaplotypesFileX (nullable: true, validator: { it == null || OtpPath.isValidRelativePath(it) })
-        knownHaplotypesLegendFileX (nullable: true, validator: { it == null || OtpPath.isValidRelativePath(it) })
+        geneticMapFile (nullable: true, validator: { it == null || OtpPath.isValidAbsolutePath(it) })
+        knownHaplotypesFile (nullable: true, validator: { it == null || OtpPath.isValidAbsolutePath(it) })
+        knownHaplotypesLegendFile (nullable: true, validator: { it == null || OtpPath.isValidAbsolutePath(it) })
+        geneticMapFileX (nullable: true, validator: { it == null || OtpPath.isValidAbsolutePath(it) })
+        knownHaplotypesFileX (nullable: true, validator: { it == null || OtpPath.isValidAbsolutePath(it) })
+        knownHaplotypesLegendFileX (nullable: true, validator: { it == null || OtpPath.isValidAbsolutePath(it) })
     }
 
     String toString() {

@@ -1179,6 +1179,20 @@ class DomainFactory {
         ], properties)
     }
 
+    static ReferenceGenome createAceseqReferenceGenome() {
+        return createReferenceGenome(
+                gcContentFile: "gcContentFile.file",
+                geneticMapFile: "/geneticMapFile.file",
+                geneticMapFileX: "/geneticMapFileX.file",
+                knownHaplotypesFile: "/knownHaplotypesFile.file",
+                knownHaplotypesFileX: "/knownHaplotypesFileX.file",
+                knownHaplotypesLegendFile: "/knownHaplotypesLegendFile.file",
+                knownHaplotypesLegendFileX: "/knownHaplotypesLegendFileX.file",
+                mappabilityFile: "/mappabilityFile.file",
+                replicationTimeFile: "/replicationTimeFile.file",
+        )
+    }
+
     static ReferenceGenomeEntry createReferenceGenomeEntry(Map properties = [:]) {
         return createDomainObject(ReferenceGenomeEntry, [
                 referenceGenome: { createReferenceGenome() },
@@ -1630,6 +1644,7 @@ class DomainFactory {
         [
                 createSnvSeqTypes(),
                 createIndelSeqTypes(),
+                createAceseqSeqTypes(),
         ].flatten().unique()
     }
 
@@ -1644,6 +1659,12 @@ class DomainFactory {
         [
                 createWholeGenomeSeqType(),
                 createExomeSeqType(),
+        ]
+    }
+
+    static List<SeqType> createAceseqSeqTypes() {
+        [
+                createWholeGenomeSeqType(),
         ]
     }
 

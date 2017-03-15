@@ -175,10 +175,17 @@ class SeqType implements Entity {
         ]
     }
 
+    static List<SeqType> getAceseqPipelineSeqTypes() {
+        return [
+                getWholeGenomePairedSeqType(),
+        ]
+    }
+
     static List<SeqType> getAllAnalysableSeqTypes() {
         return [
                 getSnvPipelineSeqTypes(),
                 getIndelPipelineSeqTypes(),
+                getAceseqPipelineSeqTypes(),
         ].flatten().unique()
     }
 

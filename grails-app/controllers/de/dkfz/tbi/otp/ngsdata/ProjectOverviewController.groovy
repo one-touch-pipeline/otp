@@ -92,6 +92,17 @@ class ProjectOverviewController {
         List configIndelTableHeadline = getHeadline(configIndelTable)
         configIndelTable.remove(configIndelTableHeadline)
 
+        String checkAceseqReferenceGenomeOutput
+        ReferenceGenome referenceGenome = checkReferenceGenome(project, SeqType.wholeGenomePairedSeqType)
+        if (!referenceGenome) {
+            checkAceseqReferenceGenomeOutput = "Please configure a reference genome"
+        } else if (!checkAceseqReferenceGenome(referenceGenome)) {
+            checkAceseqReferenceGenomeOutput = "The reference genome is not configured for CNV (from ACEseq)"
+        } else {
+            checkAceseqReferenceGenomeOutput = null
+        }
+
+
         Realm realm = ConfigService.getRealm(project, Realm.OperationType.DATA_MANAGEMENT)
         File projectDirectory = LsdfFilesService.getPath(
                 realm.rootPath,
@@ -108,6 +119,7 @@ class ProjectOverviewController {
                 seqTypes: SeqType.roddyAlignableSeqTypes,
                 snvSeqTypes: SeqType.snvPipelineSeqTypes,
                 indelSeqTypes: SeqType.indelPipelineSeqTypes,
+                aceseqSeqType: SeqType.aceseqPipelineSeqTypes,
                 alignmentInfo: alignmentInfo,
                 alignmentError: alignmentError,
                 snv: project.snv,
@@ -131,6 +143,7 @@ class ProjectOverviewController {
                 unixGroup: project.unixGroup,
                 costCenter: project.costCenter,
                 processingPriorities: ProjectService.processingPriorities,
+                checkReferenceGenomeOutput: checkAceseqReferenceGenomeOutput,
         ]
     }
 
@@ -547,6 +560,23 @@ class ProjectOverviewController {
         projectService.updateFingerPrinting(project, value.toBoolean())
         Map map = [success: true]
         render map as JSON
+    }
+
+    private ReferenceGenome checkReferenceGenome(Project project, SeqType seqType) {
+        ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType = atMostOneElement(ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(project, seqType))
+        return referenceGenomeProjectSeqType?.referenceGenome
+    }
+
+    private boolean checkAceseqReferenceGenome(ReferenceGenome referenceGenome) {
+        return  referenceGenome.knownHaplotypesLegendFileX &&
+                referenceGenome.knownHaplotypesLegendFile &&
+                referenceGenome.knownHaplotypesFileX &&
+                referenceGenome.knownHaplotypesFile &&
+                referenceGenome.geneticMapFileX &&
+                referenceGenome.geneticMapFile &&
+                referenceGenome.gcContentFile &&
+                referenceGenome.mappabilityFile &&
+                referenceGenome.replicationTimeFile
     }
 }
 

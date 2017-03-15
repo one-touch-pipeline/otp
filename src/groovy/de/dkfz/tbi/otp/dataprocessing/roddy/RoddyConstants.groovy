@@ -26,6 +26,12 @@ interface RoddyConstants {
 
     static final String OPTION_KEY_INDEL_BASE_PROJECT_CONFIG = 'IndelBaseProjectConfig'
 
+    static final String OPTION_KEY_ACESEQ_PIPELINE_PLUGIN_NAME = 'AceseqPipelinePluginName'
+
+    static final String OPTION_KEY_ACESEQ_PIPELINE_PLUGIN_VERSION = 'AceseqPipelinePluginVersion'
+
+    static final String OPTION_KEY_ACESEQ_BASE_PROJECT_CONFIG = 'AceseqBaseProjectConfig'
+
     static final String OPTION_KEY_BWA_VERSION_DEFAULT = "BwaVersionDefault"
 
     static final String OPTION_KEY_BWA_VERSION_AVAILABLE = "BwaVersionAvailable"

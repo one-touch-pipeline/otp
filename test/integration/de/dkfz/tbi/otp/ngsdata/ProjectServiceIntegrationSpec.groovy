@@ -2,9 +2,9 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.roddy.RoddyConstants
+import de.dkfz.tbi.otp.dataprocessing.roddy.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.testing.*
 import de.dkfz.tbi.otp.utils.*
@@ -50,6 +50,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         DomainFactory.createRnaPipeline()
         DomainFactory.createRoddySnvPipelineLazy()
         DomainFactory.createIndelPipelineLazy()
+        DomainFactory.createAceseqPipelineLazy()
         projectService.executionService = Stub(ExecutionService) {
             executeCommand(_, _) >> { Realm realm2, String command ->
                 File script = temporaryFolder.newFile('script' + counter++ + '.sh')
@@ -1002,20 +1003,29 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         ReferenceGenomeProjectSeqType.findAllByDeprecatedDateIsNull().size() == 0
     }
 
-    void "test configureSnvPipelineProject valid input"() {
+    @Unroll
+    void "test configure #analysisName pipelineProject valid input"() {
         setup:
-        SnvPipelineConfiguration configuration = createSnvPipelineConfiguration()
+        RoddyConfiguration configuration = "createRoddy${analysisName}Configuration"()
+        if (analysisName == "Aceseq") {
+            ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType = DomainFactory.createReferenceGenomeProjectSeqType(
+                    project: configuration.project,
+                    seqType: configuration.seqType,
+                    referenceGenome: DomainFactory.createAceseqReferenceGenome()
+            )
+            referenceGenomeService.pathToChromosomeSizeFilesPerReference(referenceGenomeProjectSeqType.referenceGenome, false).mkdirs()
+        }
 
         when:
         SpringSecurityUtils.doWithAuth("admin") {
-            projectService.configureSnvPipelineProject(configuration)
+            projectService."configure${analysisName}PipelineProject"(configuration)
         }
 
         then:
         List<RoddyWorkflowConfig> roddyWorkflowConfigs = RoddyWorkflowConfig.findAllByProjectAndSeqTypeAndPipelineInListAndPluginVersionAndObsoleteDateIsNull(
                 configuration.project,
                 configuration.seqType,
-                Pipeline.findAllByTypeAndName(Pipeline.Type.SNV, Pipeline.Name.RODDY_SNV),
+                Pipeline.findAllByTypeAndName(Pipeline.Type."${analysisName.toUpperCase()}", Pipeline.Name."RODDY_${analysisName.toUpperCase()}"),
                 "${configuration.pluginName}:${configuration.pluginVersion}"
         )
         roddyWorkflowConfigs.size() == 1
@@ -1023,29 +1033,52 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         roddyWorkflowConfig.exists()
         PosixFileAttributes attributes = Files.readAttributes(roddyWorkflowConfig.toPath(), PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
         TestCase.assertContainSame(attributes.permissions(), [PosixFilePermission.OWNER_READ, PosixFilePermission.GROUP_READ])
+
+        where:
+        analysisName << [
+                "Aceseq",
+                "Indel",
+                "Snv",
+        ]
     }
 
-    void "test configureSnvPipelineProject valid input, twice"() {
+    @Unroll
+    void "test configure #analysisName pipelineProject valid input, twice"() {
         setup:
-        SnvPipelineConfiguration configuration = createSnvPipelineConfiguration()
-        SnvPipelineConfiguration configuration2 = createSnvPipelineConfiguration([
+        RoddyConfiguration configuration = "createRoddy${analysisName}Configuration"()
+        RoddyConfiguration configuration2 = "createRoddy${analysisName}Configuration"([
                 configVersion   : 'v1_1'
         ])
+        if (analysisName == "Aceseq") {
+            ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType = DomainFactory.createReferenceGenomeProjectSeqType(
+                    project: configuration.project,
+                    seqType: configuration.seqType,
+                    referenceGenome: DomainFactory.createAceseqReferenceGenome()
+            )
+            referenceGenomeService.pathToChromosomeSizeFilesPerReference(referenceGenomeProjectSeqType.referenceGenome, false).mkdirs()
+        }
 
         when:
         SpringSecurityUtils.doWithAuth("admin") {
-            projectService.configureSnvPipelineProject(configuration)
-            projectService.configureSnvPipelineProject(configuration2)
+            projectService."configure${analysisName}PipelineProject"(configuration)
+            projectService."configure${analysisName}PipelineProject"(configuration2)
         }
 
         then:
         Set<RoddyWorkflowConfig> roddyWorkflowConfigs = RoddyWorkflowConfig.findAllByProjectAndPipelineInListAndPluginVersion(
                 configuration.project,
-                Pipeline.findAllByTypeAndName(Pipeline.Type.SNV, Pipeline.Name.RODDY_SNV),
+                Pipeline.findAllByTypeAndName(Pipeline.Type."${analysisName.toUpperCase()}", Pipeline.Name."RODDY_${analysisName.toUpperCase()}"),
                 "${configuration2.pluginName}:${configuration2.pluginVersion}"
         )
         roddyWorkflowConfigs.size() == 2
         roddyWorkflowConfigs.findAll({ it.obsoleteDate == null }).size() == 1
+
+        where:
+        analysisName << [
+                "Aceseq",
+                "Indel",
+                "Snv",
+        ]
     }
 
     void "test configureSnvPipelineProject valid input, old otp snv config exist"() {
@@ -1062,7 +1095,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         assert projectDirectory.exists() || projectDirectory.mkdirs()
 
 
-        SnvPipelineConfiguration configuration2 = createSnvPipelineConfiguration([
+        RoddyConfiguration configuration2 = createRoddySnvConfiguration([
                 configVersion   : 'v1_1'
         ])
 
@@ -1086,68 +1119,113 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         roddyWorkflowConfigs[0].previousConfig == snvConfig
     }
 
-    void "test configureSnvPipelineProject valid input, multiple SeqTypes"() {
+    @Unroll
+    void "test configure #analysisName pipelineProject valid input, multiple SeqTypes"() {
         setup:
-        List<SnvPipelineConfiguration> configurations = DomainFactory.createSnvSeqTypes().collect {
-            createSnvPipelineConfiguration(seqType: it)
+        List<RoddyConfiguration> configurations = DomainFactory."create${analysisName}SeqTypes"().collect {
+            "createRoddy${analysisName}Configuration"(seqType: it)
         }
-        int count = configurations.size()
 
         when:
         SpringSecurityUtils.doWithAuth("admin") {
             configurations.each {
-                projectService.configureSnvPipelineProject(it)
+                projectService."configure${analysisName}PipelineProject"(it)
             }
         }
 
         then:
         Set<RoddyWorkflowConfig> roddyWorkflowConfigs = RoddyWorkflowConfig.list()
-        roddyWorkflowConfigs.size() == count
-        roddyWorkflowConfigs.findAll({ it.obsoleteDate == null }).size() == count
+        roddyWorkflowConfigs.size() == configurations.size()
+        roddyWorkflowConfigs.findAll({ it.obsoleteDate == null }).size() == configurations.size()
+
+        where:
+        analysisName << [
+                "Indel",
+                "Snv",
+        ]
     }
 
-    void "test configureSnvPipelineProject invalid pluginName input"() {
+    @Unroll
+    void "test configure #analysisName PipelineProject invalid pluginName input"() {
         setup:
-        SnvPipelineConfiguration configuration = createSnvPipelineConfiguration(
+        RoddyConfiguration configuration = "createRoddy${analysisName}Configuration"(
                 pluginName: 'invalid/name'
         )
 
         when:
         SpringSecurityUtils.doWithAuth("admin") {
-            projectService.configureSnvPipelineProject(configuration)
+            projectService."configure${analysisName}PipelineProject"(configuration)
         }
 
         then:
         AssertionError exception = thrown()
         exception.message ==~ /pluginName '.*' is an invalid path component\..*/
+
+        where:
+        analysisName << [
+                "Aceseq",
+                "Indel",
+                "Snv",
+        ]
     }
 
-    void "test configureSnvPipelineProject invalid pluginVersion input"() {
+    @Unroll
+    void "test configure #analysisName pipelineProject invalid pluginVersion input"() {
         setup:
-        SnvPipelineConfiguration configuration = createSnvPipelineConfiguration(
+        RoddyConfiguration configuration = "createRoddy${analysisName}Configuration"(
                 pluginVersion: 'invalid/version'
         )
 
         when:
         SpringSecurityUtils.doWithAuth("admin") {
-            projectService.configureSnvPipelineProject(configuration)
+            projectService."configure${analysisName}PipelineProject"(configuration)
         }
 
         then:
         AssertionError exception = thrown()
         exception.message ==~ /pluginVersion '.*' is an invalid path component\..*/
+
+        where:
+        analysisName << [
+                "Aceseq",
+                "Indel",
+                "Snv",
+        ]
+    }
+
+    void "test configure #analysisName pipelineProject invalid configVersion input"() {
+        setup:
+        RoddyConfiguration configuration = "createRoddy${analysisName}Configuration"(
+                configVersion: 'invalid/Version',
+        )
+
+        when:
+        SpringSecurityUtils.doWithAuth("admin") {
+            projectService."configure${analysisName}PipelineProject"(configuration)
+        }
+
+        then:
+        AssertionError exception = thrown()
+        exception.message ==~ /configVersion 'invalid\/Version' has not expected pattern.*/
+
+        where:
+        analysisName << [
+                "Aceseq",
+                "Indel",
+                "Snv",
+        ]
     }
 
     @Unroll
-    void "test configureSnvPipelineProject invalid baseProjectConfig input"() {
+    void "test configure #analysisName PipelineProject invalid baseProjectConfig input"() {
         setup:
-        SnvPipelineConfiguration configuration = createSnvPipelineConfiguration(
+        RoddyConfiguration configuration = "createRoddy${analysisName}Configuration"(
                 baseProjectConfig: baseProjectConfig
         )
 
         when:
         SpringSecurityUtils.doWithAuth("admin") {
-            projectService.configureSnvPipelineProject(configuration)
+            projectService."configure${analysisName}PipelineProject"(configuration)
         }
 
         then:
@@ -1155,161 +1233,13 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         exception.message ==~ message
 
         where:
-        baseProjectConfig || message
-        ''                || /baseProjectConfig '.*' is an invalid path component\..*/
-        "invalid/path"    || /baseProjectConfig '.*' is an invalid path component\..*/
-    }
-
-    void "test configureSnvPipelineProject invalid configVersion input"() {
-        setup:
-        SnvPipelineConfiguration configuration = createSnvPipelineConfiguration(
-                configVersion: 'invalid/Version',
-        )
-
-        when:
-        SpringSecurityUtils.doWithAuth("admin") {
-            projectService.configureSnvPipelineProject(configuration)
-        }
-
-        then:
-        AssertionError exception = thrown()
-        exception.message ==~ /configVersion 'invalid\/Version' has not expected pattern.*/
-    }
-
-    void "test configureIndelPipelineProject valid input"() {
-        setup:
-        IndelPipelineConfiguration configuration = createIndelPipelineConfiguration()
-
-        when:
-        SpringSecurityUtils.doWithAuth("admin") {
-            projectService.configureIndelPipelineProject(configuration)
-        }
-
-        then:
-        List<RoddyWorkflowConfig> roddyWorkflowConfigs = RoddyWorkflowConfig.findAllByProjectAndSeqTypeAndPipelineInListAndPluginVersionAndObsoleteDateIsNull(
-                configuration.project,
-                configuration.seqType,
-                Pipeline.findAllByTypeAndName(Pipeline.Type.INDEL, Pipeline.Name.RODDY_INDEL),
-                "${configuration.pluginName}:${configuration.pluginVersion}"
-        )
-        roddyWorkflowConfigs.size() == 1
-        File roddyWorkflowConfig = new File(roddyWorkflowConfigs.configFilePath.first())
-        roddyWorkflowConfig.exists()
-        PosixFileAttributes attributes = Files.readAttributes(roddyWorkflowConfig.toPath(), PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
-        TestCase.assertContainSame(attributes.permissions(), [PosixFilePermission.OWNER_READ, PosixFilePermission.GROUP_READ])
-    }
-
-    void "test configureIndelPipelineProject valid input, twice"() {
-        setup:
-        IndelPipelineConfiguration configuration = createIndelPipelineConfiguration()
-        IndelPipelineConfiguration configuration2 = createIndelPipelineConfiguration([
-                configVersion   : 'v1_1'
-        ])
-
-        when:
-        SpringSecurityUtils.doWithAuth("admin") {
-            projectService.configureIndelPipelineProject(configuration)
-            projectService.configureIndelPipelineProject(configuration2)
-        }
-
-        then:
-        Set<RoddyWorkflowConfig> roddyWorkflowConfigs = RoddyWorkflowConfig.findAllByProjectAndPipelineInListAndPluginVersion(
-                configuration.project,
-                Pipeline.findAllByTypeAndName(Pipeline.Type.INDEL, Pipeline.Name.RODDY_INDEL),
-                "${configuration2.pluginName}:${configuration2.pluginVersion}"
-        )
-        roddyWorkflowConfigs.size() == 2
-        roddyWorkflowConfigs.findAll({ it.obsoleteDate == null }).size() == 1
-    }
-
-    void "test configureIndelPipelineProject valid input, multiple SeqTypes"() {
-        setup:
-        List<IndelPipelineConfiguration> configurations = DomainFactory.createIndelSeqTypes().collect {
-            createIndelPipelineConfiguration(seqType: it)
-        }
-        int count = configurations.size()
-
-        when:
-        SpringSecurityUtils.doWithAuth("admin") {
-            configurations.each {
-                projectService.configureIndelPipelineProject(it)
-            }
-        }
-
-        then:
-        Set<RoddyWorkflowConfig> roddyWorkflowConfigs = RoddyWorkflowConfig.list()
-        roddyWorkflowConfigs.size() == count
-        roddyWorkflowConfigs.findAll({ it.obsoleteDate == null }).size() == count
-    }
-
-    void "test configureIndelPipelineProject invalid pluginName input"() {
-        setup:
-        IndelPipelineConfiguration configuration = createIndelPipelineConfiguration(
-                pluginName: 'invalid/name'
-        )
-
-        when:
-        SpringSecurityUtils.doWithAuth("admin") {
-            projectService.configureIndelPipelineProject(configuration)
-        }
-
-        then:
-        AssertionError exception = thrown()
-        exception.message ==~ /pluginName '.*' is an invalid path component\..*/
-    }
-
-    void "test configureIndelPipelineProject invalid pluginVersion input"() {
-        setup:
-        IndelPipelineConfiguration configuration = createIndelPipelineConfiguration(
-                pluginVersion: 'invalid/version'
-        )
-
-        when:
-        SpringSecurityUtils.doWithAuth("admin") {
-            projectService.configureIndelPipelineProject(configuration)
-        }
-
-        then:
-        AssertionError exception = thrown()
-        exception.message ==~ /pluginVersion '.*' is an invalid path component\..*/
-    }
-
-    @Unroll
-    void "test configureIndelPipelineProject invalid baseProjectConfig input"() {
-        setup:
-        IndelPipelineConfiguration configuration = createIndelPipelineConfiguration(
-                baseProjectConfig: baseProjectConfig
-        )
-
-        when:
-        SpringSecurityUtils.doWithAuth("admin") {
-            projectService.configureIndelPipelineProject(configuration)
-        }
-
-        then:
-        AssertionError exception = thrown()
-        exception.message ==~ message
-
-        where:
-        baseProjectConfig || message
-        ''                || /baseProjectConfig '.*' is an invalid path component\..*/
-        "invalid/path"    || /baseProjectConfig '.*' is an invalid path component\..*/
-    }
-
-    void "test configureIndelPipelineProject invalid configVersion input"() {
-        setup:
-        IndelPipelineConfiguration configuration = createIndelPipelineConfiguration(
-                configVersion: 'invalid/Version',
-        )
-
-        when:
-        SpringSecurityUtils.doWithAuth("admin") {
-            projectService.configureIndelPipelineProject(configuration)
-        }
-
-        then:
-        AssertionError exception = thrown()
-        exception.message ==~ /configVersion 'invalid\/Version' has not expected pattern.*/
+        analysisName | baseProjectConfig || message
+        "Aceseq"     | ''                || /baseProjectConfig '.*' is an invalid path component\..*/
+        "Aceseq"     | "invalid/path"    || /baseProjectConfig '.*' is an invalid path component\..*/
+        "Indel"      | ''                || /baseProjectConfig '.*' is an invalid path component\..*/
+        "Indel"      | "invalid/path"    || /baseProjectConfig '.*' is an invalid path component\..*/
+        "Snv"        | ''                || /baseProjectConfig '.*' is an invalid path component\..*/
+        "Snv"        | "invalid/path"    || /baseProjectConfig '.*' is an invalid path component\..*/
     }
 
     private File makeStatFile(Project project, ReferenceGenome referenceGenome, String statFileName) {
@@ -1368,8 +1298,8 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         return configuration
     }
 
-    private SnvPipelineConfiguration createSnvPipelineConfiguration(Map properties = [:]) {
-        SnvPipelineConfiguration configuration = new SnvPipelineConfiguration([
+    private RoddyConfiguration createRoddySnvConfiguration(Map properties = [:]) {
+        RoddyConfiguration configuration = new RoddyConfiguration([
                 project          : Project.findByName("testProjectAlignment"),
                 seqType          : SeqType.exomePairedSeqType,
                 pluginName       : 'SNVCallingWorkflow',
@@ -1377,17 +1307,12 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 baseProjectConfig: 'otpSNVCallingWorkflowWES-1.0',
                 configVersion    : 'v1_0',
         ] + properties)
-        Realm realm = ConfigService.getRealm(configuration.project, Realm.OperationType.DATA_MANAGEMENT)
-        File projectDirectory = LsdfFilesService.getPath(
-                realm.rootPath,
-                configuration.project.dirName,
-        )
-        assert projectDirectory.exists() || projectDirectory.mkdirs()
+        checkProjectDirectory(configuration)
         return configuration
     }
 
-    private IndelPipelineConfiguration createIndelPipelineConfiguration(Map properties = [:]) {
-        IndelPipelineConfiguration configuration = new IndelPipelineConfiguration([
+    private RoddyConfiguration createRoddyIndelConfiguration(Map properties = [:]) {
+        RoddyConfiguration configuration = new RoddyConfiguration([
                 project          : Project.findByName("testProjectAlignment"),
                 seqType          : SeqType.exomePairedSeqType,
                 pluginName       : 'IndelCallingWorkflow',
@@ -1395,12 +1320,29 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 baseProjectConfig: 'otpIndelCallingWorkflowWES-1.0',
                 configVersion    : 'v1_0',
         ] + properties)
+        checkProjectDirectory(configuration)
+        return configuration
+    }
+
+    private RoddyConfiguration createRoddyAceseqConfiguration(Map properties = [:]) {
+        RoddyConfiguration configuration = new RoddyConfiguration([
+                project          : Project.findByName("testProjectAlignment"),
+                seqType          : SeqType.wholeGenomePairedSeqType,
+                pluginName       : 'ACEseqWorkflow',
+                pluginVersion    : '1.2.6',
+                baseProjectConfig: 'otpACEseq-1.0',
+                configVersion    : 'v1_0',
+        ] + properties)
+        checkProjectDirectory(configuration)
+        return configuration
+    }
+
+    private checkProjectDirectory(RoddyConfiguration configuration) {
         Realm realm = ConfigService.getRealm(configuration.project, Realm.OperationType.DATA_MANAGEMENT)
         File projectDirectory = LsdfFilesService.getPath(
                 realm.rootPath,
                 configuration.project.dirName,
         )
         assert projectDirectory.exists() || projectDirectory.mkdirs()
-        return configuration
     }
 }

@@ -338,7 +338,7 @@ AND ace.granting = true
         refSeqType.statSizeFileName = panCanAlignmentConfiguration.statSizeFileName
         refSeqType.save(flush: true, failOnError: true)
 
-        alignmentHelper(panCanAlignmentConfiguration, pipeline, RoddyPanCanConfigTemplate.createConfigBashEscaped(panCanAlignmentConfiguration))
+        alignmentHelper(panCanAlignmentConfiguration, pipeline, RoddyPanCanConfigTemplate.createConfig(panCanAlignmentConfiguration))
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
@@ -360,7 +360,7 @@ AND ace.granting = true
         ReferenceGenomeProjectSeqType refSeqType = createReferenceGenomeProjectSeqType(rnaAlignmentConfiguration, referenceGenome)
         refSeqType.save(flush: true, failOnError: true)
 
-        alignmentHelper(rnaAlignmentConfiguration, pipeline, RoddyRnaConfigTemplate.createConfigBashEscaped(rnaAlignmentConfiguration, pipeline.name, referenceGenomeIndexService, geneModelService))
+        alignmentHelper(rnaAlignmentConfiguration, pipeline, RoddyRnaConfigTemplate.createConfig(rnaAlignmentConfiguration, pipeline.name, referenceGenomeIndexService, geneModelService))
     }
 
     private void deprecatedReferenceGenomeProjectSeqTypeAndSetDecider(RoddyConfiguration config) {
@@ -449,41 +449,14 @@ AND ace.granting = true
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void configureSnvPipelineProject(SnvPipelineConfiguration snvPipelineConfiguration) {
-        assert OtpPath.isValidPathComponent(snvPipelineConfiguration.pluginName): "pluginName '${snvPipelineConfiguration.pluginName}' is an invalid path component"
-        assert OtpPath.isValidPathComponent(snvPipelineConfiguration.pluginVersion): "pluginVersion '${snvPipelineConfiguration.pluginVersion}' is an invalid path component"
-        assert OtpPath.isValidPathComponent(snvPipelineConfiguration.baseProjectConfig): "baseProjectConfig '${snvPipelineConfiguration.baseProjectConfig}' is an invalid path component"
-        assert snvPipelineConfiguration.configVersion ==~ RoddyWorkflowConfig.CONFIG_VERSION_PATTERN: "configVersion '${snvPipelineConfiguration.configVersion}' has not expected pattern: ${RoddyWorkflowConfig.CONFIG_VERSION_PATTERN}"
-
+    void configureSnvPipelineProject(RoddyConfiguration snvPipelineConfiguration) {
         Pipeline pipeline = exactlyOneElement(Pipeline.findAllByTypeAndName(
                 Pipeline.Type.SNV,
                 Pipeline.Name.RODDY_SNV,
         ))
 
-        String xmlConfig = RoddySnvConfigTemplate.createConfigBashEscaped(snvPipelineConfiguration, Pipeline.Name.RODDY_SNV)
+        RoddyWorkflowConfig roddyWorkflowConfig = configurePipelineProject(snvPipelineConfiguration, pipeline, RoddySnvConfigTemplate)
 
-        File projectDirectory = snvPipelineConfiguration.project.getProjectDirectory()
-        assert projectDirectory.exists()
-
-        File configFilePath = RoddyWorkflowConfig.getStandardConfigFile(
-                snvPipelineConfiguration.project,
-                pipeline.name,
-                snvPipelineConfiguration.seqType,
-                snvPipelineConfiguration.pluginVersion,
-                snvPipelineConfiguration.configVersion,
-        )
-        File configDirectory = configFilePath.parentFile
-
-        executeScript(getScriptBash(configDirectory, xmlConfig, configFilePath), snvPipelineConfiguration.project)
-
-        RoddyWorkflowConfig roddyWorkflowConfig = RoddyWorkflowConfig.importProjectConfigFile(
-                snvPipelineConfiguration.project,
-                snvPipelineConfiguration.seqType,
-                "${snvPipelineConfiguration.pluginName}:${snvPipelineConfiguration.pluginVersion}",
-                pipeline,
-                configFilePath.path,
-                snvPipelineConfiguration.configVersion,
-        )
         SnvConfig snvConfig = CollectionUtils.atMostOneElement(SnvConfig.findAllWhere([
                 project: snvPipelineConfiguration.project,
                 seqType: snvPipelineConfiguration.seqType,
@@ -498,40 +471,64 @@ AND ace.granting = true
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void configureIndelPipelineProject(IndelPipelineConfiguration indelPipelineConfiguration) {
-        assert OtpPath.isValidPathComponent(indelPipelineConfiguration.pluginName): "pluginName '${indelPipelineConfiguration.pluginName}' is an invalid path component"
-        assert OtpPath.isValidPathComponent(indelPipelineConfiguration.pluginVersion): "pluginVersion '${indelPipelineConfiguration.pluginVersion}' is an invalid path component"
-        assert OtpPath.isValidPathComponent(indelPipelineConfiguration.baseProjectConfig): "baseProjectConfig '${indelPipelineConfiguration.baseProjectConfig}' is an invalid path component"
-        assert indelPipelineConfiguration.configVersion ==~ RoddyWorkflowConfig.CONFIG_VERSION_PATTERN: "configVersion '${indelPipelineConfiguration.configVersion}' has not expected pattern: ${RoddyWorkflowConfig.CONFIG_VERSION_PATTERN}"
-
+    void configureIndelPipelineProject(RoddyConfiguration indelPipelineConfiguration) {
         Pipeline pipeline = exactlyOneElement(Pipeline.findAllByTypeAndName(
                 Pipeline.Type.INDEL,
                 Pipeline.Name.RODDY_INDEL,
         ))
 
-        String xmlConfig = RoddyIndelConfigTemplate.createConfigBashEscaped(indelPipelineConfiguration, Pipeline.Name.RODDY_INDEL)
+        configurePipelineProject(indelPipelineConfiguration, pipeline, RoddyIndelConfigTemplate)
+    }
 
-        File projectDirectory = indelPipelineConfiguration.project.getProjectDirectory()
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void configureAceseqPipelineProject(RoddyConfiguration aceseqPipelineConfiguration) {
+        Pipeline pipeline = exactlyOneElement(Pipeline.findAllByTypeAndName(
+                Pipeline.Type.ACESEQ,
+                Pipeline.Name.RODDY_ACESEQ,
+        ))
+
+        configurePipelineProject(aceseqPipelineConfiguration, pipeline, RoddyAceseqConfigTemplate)
+    }
+
+    private RoddyWorkflowConfig configurePipelineProject(RoddyConfiguration configuration, Pipeline pipeline, Class roddyConfigTemplate) {
+        assert OtpPath.isValidPathComponent(configuration.pluginName): "pluginName '${configuration.pluginName}' is an invalid path component"
+        assert OtpPath.isValidPathComponent(configuration.pluginVersion): "pluginVersion '${configuration.pluginVersion}' is an invalid path component"
+        assert OtpPath.isValidPathComponent(configuration.baseProjectConfig): "baseProjectConfig '${configuration.baseProjectConfig}' is an invalid path component"
+        assert configuration.configVersion ==~ RoddyWorkflowConfig.CONFIG_VERSION_PATTERN: "configVersion '${configuration.configVersion}' has not expected pattern: ${RoddyWorkflowConfig.CONFIG_VERSION_PATTERN}"
+
+        String xmlConfig
+        if (pipeline.name == Pipeline.Name.RODDY_ACESEQ) {
+            xmlConfig = roddyConfigTemplate.createConfig(
+                    configuration,
+                    pipeline.name,
+                    exactlyOneElement(ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(configuration.project, configuration.seqType)).referenceGenome,
+                    referenceGenomeService
+            )
+        } else {
+            xmlConfig = roddyConfigTemplate.createConfig(configuration, pipeline.name)
+        }
+
+        File projectDirectory = configuration.project.getProjectDirectory()
         assert projectDirectory.exists()
 
         File configFilePath = RoddyWorkflowConfig.getStandardConfigFile(
-                indelPipelineConfiguration.project,
+                configuration.project,
                 pipeline.name,
-                indelPipelineConfiguration.seqType,
-                indelPipelineConfiguration.pluginVersion,
-                indelPipelineConfiguration.configVersion,
+                configuration.seqType,
+                configuration.pluginVersion,
+                configuration.configVersion,
         )
         File configDirectory = configFilePath.parentFile
 
-        executeScript(getScriptBash(configDirectory, xmlConfig, configFilePath), indelPipelineConfiguration.project)
+        executeScript(getScriptBash(configDirectory, xmlConfig, configFilePath), configuration.project)
 
-        RoddyWorkflowConfig.importProjectConfigFile(
-                indelPipelineConfiguration.project,
-                indelPipelineConfiguration.seqType,
-                "${indelPipelineConfiguration.pluginName}:${indelPipelineConfiguration.pluginVersion}",
+        return RoddyWorkflowConfig.importProjectConfigFile(
+                configuration.project,
+                configuration.seqType,
+                "${configuration.pluginName}:${configuration.pluginVersion}",
                 pipeline,
                 configFilePath.path,
-                indelPipelineConfiguration.configVersion,
+                configuration.configVersion,
         )
     }
 
@@ -550,7 +547,7 @@ mkdir -p -m 2750 ${configDirectory}
 ${createConfigDirectory}
 
 cat <<${md5} > ${configFilePath}
-${xmlConfig}
+${xmlConfig.replaceAll(/\$/, /\\\$/)}
 ${md5}
 
 chmod 0440 ${configFilePath}
@@ -648,10 +645,4 @@ class RnaAlignmentConfiguration extends RoddyConfiguration {
     String resources = "xl"
     List<GeneModel> geneModels
     List<ReferenceGenomeIndex> referenceGenomeIndex
-}
-
-class SnvPipelineConfiguration extends RoddyConfiguration {
-}
-
-class IndelPipelineConfiguration extends RoddyConfiguration {
 }

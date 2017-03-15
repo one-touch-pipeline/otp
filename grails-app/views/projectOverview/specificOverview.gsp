@@ -360,6 +360,25 @@
             </table>
             <br>
         </div>
+        <div>
+            <h3>${g.message(code: 'projectOverview.aceseq.title')}</h3>
+            <g:message code="projectOverview.aceseq.configure"/>
+            <ul>
+                <li>
+                    <g:if test="${!checkReferenceGenomeOutput}">
+                        <g:each in="${aceseqSeqType}" var="seqType">
+                            <g:link controller='configurePipeline' action='aceseq' params='["project.id": project.id, "seqType.id": aceseqSeqType.id]' class="configure">
+                                ${seqType.displayName}
+                            </g:link>
+                        </g:each>
+                    </g:if>
+                    <g:else>
+                        ${checkReferenceGenomeOutput}
+                    </g:else>
+                </li>
+            </ul>
+            <br>
+        </div>
     </div>
     <asset:script>
         $(function() {

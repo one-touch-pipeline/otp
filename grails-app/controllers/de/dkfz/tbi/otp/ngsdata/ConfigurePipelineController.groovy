@@ -202,55 +202,50 @@ class ConfigurePipelineController {
         render data as JSON
     }
 
-    def snv(ConfigureSnvPipelineSubmitCommand cmd) {
+    def snv(ConfigurePipelineSubmitCommand cmd) {
         Pipeline pipeline = CollectionUtils.exactlyOneElement(Pipeline.findAllByTypeAndName(
                 Pipeline.Type.SNV,
                 Pipeline.Name.RODDY_SNV,
         ))
 
-        Map result = checkErrorsIfSubmitted(cmd, pipeline)
-        if (!result) {
-            SnvPipelineConfiguration snvPipelineConfiguration = new SnvPipelineConfiguration([
-                    project          : cmd.project,
-                    seqType          : cmd.seqType,
-                    pluginName       : cmd.pluginName,
-                    pluginVersion    : cmd.pluginVersion,
-                    baseProjectConfig: cmd.baseProjectConfig,
-                    configVersion    : cmd.config,
-            ])
-            projectService.configureSnvPipelineProject(snvPipelineConfiguration)
-            redirect(controller: "projectOverview", action: "specificOverview", params: [project: cmd.project.name])
-        }
-
         String defaultPluginName = ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_SNV_PIPELINE_PLUGIN_NAME, cmd.seqType.roddyName, null)
         String defaultPluginVersion = ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_SNV_PIPELINE_PLUGIN_VERSION, cmd.seqType.roddyName, null)
         String defaultBaseProjectConfig = ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_SNV_BASE_PROJECT_CONFIG, cmd.seqType.roddyName, null)
 
-        result << getValues(cmd.project, cmd.seqType, pipeline)
-
-        result << [
-                pluginName              : defaultPluginName,
-                defaultPluginName       : defaultPluginName,
-
-                pluginVersion           : defaultPluginVersion,
-                defaultPluginVersion    : defaultPluginVersion,
-
-                baseProjectConfig       : defaultBaseProjectConfig,
-                defaultBaseProjectConfig: defaultBaseProjectConfig,
-        ]
-        return result
+        return createAnalysisConfig(cmd, pipeline, defaultPluginName, defaultPluginVersion, defaultBaseProjectConfig)
     }
 
 
-    def indel(ConfigureIndelPipelineSubmitCommand cmd) {
+    def indel(ConfigurePipelineSubmitCommand cmd) {
         Pipeline pipeline = CollectionUtils.exactlyOneElement(Pipeline.findAllByTypeAndName(
                 Pipeline.Type.INDEL,
                 Pipeline.Name.RODDY_INDEL,
         ))
 
+        String defaultPluginName = ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_INDEL_PIPELINE_PLUGIN_NAME, cmd.seqType.roddyName, null)
+        String defaultPluginVersion = ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_INDEL_PIPELINE_PLUGIN_VERSION, cmd.seqType.roddyName, null)
+        String defaultBaseProjectConfig = ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_INDEL_BASE_PROJECT_CONFIG, cmd.seqType.roddyName, null)
+
+        return createAnalysisConfig(cmd, pipeline, defaultPluginName, defaultPluginVersion, defaultBaseProjectConfig)
+    }
+
+    def aceseq(ConfigurePipelineSubmitCommand cmd) {
+        Pipeline pipeline = CollectionUtils.exactlyOneElement(Pipeline.findAllByTypeAndName(
+                Pipeline.Type.ACESEQ,
+                Pipeline.Name.RODDY_ACESEQ,
+        ))
+
+        String defaultPluginName = ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_ACESEQ_PIPELINE_PLUGIN_NAME, cmd.seqType.roddyName, null)
+        String defaultPluginVersion = ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_ACESEQ_PIPELINE_PLUGIN_VERSION, cmd.seqType.roddyName, null)
+        String defaultBaseProjectConfig = ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_ACESEQ_BASE_PROJECT_CONFIG, cmd.seqType.roddyName, null)
+
+        return createAnalysisConfig(cmd, pipeline, defaultPluginName, defaultPluginVersion, defaultBaseProjectConfig)
+    }
+
+    private Map createAnalysisConfig(ConfigurePipelineSubmitCommand cmd, Pipeline pipeline, String defaultPluginName, String defaultPluginVersion, String defaultBaseProjectConfig) {
         Map result = checkErrorsIfSubmitted(cmd, pipeline)
         if (!result) {
-            IndelPipelineConfiguration indelPipelineConfiguration = new IndelPipelineConfiguration([
+            RoddyConfiguration configuration = new RoddyConfiguration ([
                     project          : cmd.project,
                     seqType          : cmd.seqType,
                     pluginName       : cmd.pluginName,
@@ -259,18 +254,24 @@ class ConfigurePipelineController {
                     configVersion    : cmd.config,
             ])
 
-            projectService.configureIndelPipelineProject(indelPipelineConfiguration)
+            switch (pipeline.name) {
+                case Pipeline.Name.RODDY_ACESEQ:
+                    projectService.configureAceseqPipelineProject(configuration)
+                    break
+                case Pipeline.Name.RODDY_INDEL:
+                    projectService.configureIndelPipelineProject(configuration)
+                    break
+                case Pipeline.Name.RODDY_SNV:
+                    projectService.configureSnvPipelineProject(configuration)
+                    break
+            }
+
             redirect(controller: "projectOverview", action: "specificOverview", params: [project: cmd.project.name])
         }
-
-        String defaultPluginName = ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_INDEL_PIPELINE_PLUGIN_NAME, cmd.seqType.roddyName, null)
-        String defaultPluginVersion = ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_INDEL_PIPELINE_PLUGIN_VERSION, cmd.seqType.roddyName, null)
-        String defaultBaseProjectConfig = ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_INDEL_BASE_PROJECT_CONFIG, cmd.seqType.roddyName, null)
 
         result << getValues(cmd.project, cmd.seqType, pipeline)
 
         result << [
-
                 pluginName              : defaultPluginName,
                 defaultPluginName       : defaultPluginName,
 
@@ -404,12 +405,6 @@ class ConfigureRnaAlignmentPipelineSubmitCommand extends ConfigurePipelineSubmit
             }
         }
     }
-}
-
-class ConfigureIndelPipelineSubmitCommand extends ConfigurePipelineSubmitCommand {
-}
-
-class ConfigureSnvPipelineSubmitCommand extends ConfigurePipelineSubmitCommand {
 }
 
 class ConfigurePipelineSubmitCommand implements Serializable {

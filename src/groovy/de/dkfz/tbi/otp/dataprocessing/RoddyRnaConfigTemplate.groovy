@@ -5,7 +5,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 class RoddyRnaConfigTemplate {
 
-    static String createConfig(RnaAlignmentConfiguration rnaAlignmentConfiguration, Pipeline.Name pipelineName, String configurationValues) {
+    static String createConfig(RnaAlignmentConfiguration rnaAlignmentConfiguration, Pipeline.Name pipelineName, ReferenceGenomeIndexService referenceGenomeIndexService, GeneModelService geneModelService) {
         return """
 <configuration configurationType='project'
                name='${RoddyWorkflowConfig.getNameUsedInConfig(pipelineName, rnaAlignmentConfiguration.seqType, rnaAlignmentConfiguration.pluginName, rnaAlignmentConfiguration.pluginVersion, rnaAlignmentConfiguration.configVersion)}'
@@ -17,7 +17,7 @@ class RoddyRnaConfigTemplate {
                 <analysis id='${rnaAlignmentConfiguration.seqType.roddyName}' configuration='RNAseqAnalysis'/>
             </availableAnalyses>
             <configurationvalues>
-                ${configurationValues}
+                ${getConfigurationValues(rnaAlignmentConfiguration, referenceGenomeIndexService, geneModelService)}
             </configurationvalues>
         </configuration>
     </subconfigurations>
@@ -49,9 +49,5 @@ class RoddyRnaConfigTemplate {
         }
 
         return configurationValues.join("\n                ")
-    }
-
-    static String createConfigBashEscaped(RnaAlignmentConfiguration rnaPipelineConfiguration, Pipeline.Name pipelineName, ReferenceGenomeIndexService referenceGenomeIndexService, GeneModelService geneModelService) {
-        createConfig(rnaPipelineConfiguration, pipelineName, getConfigurationValues(rnaPipelineConfiguration, referenceGenomeIndexService, geneModelService)).replaceAll(/\$/, /\\\$/)
     }
 }
