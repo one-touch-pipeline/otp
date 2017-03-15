@@ -2,7 +2,7 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.logging.*
-import org.hibernate.Hibernate
+import org.hibernate.*
 
 /**
  * Represents a merged bam file stored on the file system
@@ -13,7 +13,9 @@ class ExternallyProcessedMergedBamFile extends AbstractMergedBamFile {
 
     String fileName
 
-    /** source directory of the imported bam file */
+    /**
+     * Absolute path of the imported file.
+     */
     String importedFrom
 
     @Override
@@ -92,6 +94,12 @@ class ExternallyProcessedMergedBamFile extends AbstractMergedBamFile {
         workPackage validator: { val ->
             val.pipeline.name == Pipeline.Name.EXTERNALLY_PROCESSED &&
                     ExternalMergingWorkPackage.isAssignableFrom(Hibernate.getClass(val))
+        }
+        md5sum nullable: true, validator: { val, obj ->
+            return true
+        }
+        fileOperationStatus validator: { val, obj ->
+            return (val == FileOperationStatus.PROCESSED) ? (obj.md5sum != null) : true
         }
     }
 }

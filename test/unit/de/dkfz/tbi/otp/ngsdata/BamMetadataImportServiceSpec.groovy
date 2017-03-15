@@ -141,7 +141,7 @@ class BamMetadataImportServiceSpec extends Specification {
                     it.seqType.libraryLayout == "SINGLE" &&
                     it.seqType.name == "seqType1" &&
                     it.sampleType.name == "sampleType1" &&
-                    it.importedFrom == bamFilesDir.absolutePath &&
+                    it.importedFrom == pseudoBamFile1.absolutePath &&
                     it.fileName == "control_123456_merged.mdup.bam"
             )
         } && results.importProcess.externallyProcessedMergedBamFiles.find {
@@ -152,7 +152,7 @@ class BamMetadataImportServiceSpec extends Specification {
                     it.seqType.libraryLayout == "SINGLE" &&
                     it.seqType.name == "seqType2" &&
                     it.sampleType.name == "sampleType2" &&
-                    it.importedFrom == bamFilesDir.absolutePath &&
+                    it.importedFrom == pseudoBamFile2.absolutePath &&
                     it.fileName == "tumor_456789_merged.mdup.bam"
             )
         }

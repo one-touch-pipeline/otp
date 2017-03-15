@@ -46,6 +46,7 @@ class BamMetadataImportService {
                 String libraryLayout = uniqueColumnValue(row, BamMetadataColumn.LIBRARY_LAYOUT)
                 String _project = uniqueColumnValue(row, BamMetadataColumn.PROJECT)
                 String coverage = uniqueColumnValue(row, BamMetadataColumn.COVERAGE)
+                String md5sum = uniqueColumnValue(row, BamMetadataColumn.MD5)
 
                 Sample sample = Sample.createCriteria().get {
                     individual {
@@ -74,10 +75,11 @@ class BamMetadataImportService {
                 assert emwp.save(flush:true)
 
                 ExternallyProcessedMergedBamFile epmbf = new ExternallyProcessedMergedBamFile(
-                        workPackage  : emwp,
-                        importedFrom : getParentFile(bamFilePath),
-                        fileName     : getNameFromPath(bamFilePath),
-                        coverage     : coverage ? Double.parseDouble(coverage) : null
+                        workPackage         : emwp,
+                        importedFrom        : bamFilePath,
+                        fileName            : getNameFromPath(bamFilePath),
+                        coverage            : coverage ? Double.parseDouble(coverage) : null,
+                        md5sum              : md5sum ?: null
                 )
                 assert epmbf.save(flush:true)
                 importProcess.externallyProcessedMergedBamFiles.add(epmbf)
@@ -100,15 +102,11 @@ class BamMetadataImportService {
         ]
     }
 
-    private static getNameFromPath(String path) {
+    private static String getNameFromPath(String path) {
         return new File(path).name
     }
 
-    private static getParentFile(String path) {
-        return new File(path).getParentFile()
-    }
-
-    private static uniqueColumnValue(Row row, BamMetadataColumn column) {
+    private static String uniqueColumnValue(Row row, BamMetadataColumn column) {
         return row.getCell(row.spreadsheet.getColumn(column.name()))?.text
     }
 }

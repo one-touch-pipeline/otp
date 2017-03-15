@@ -2014,10 +2014,10 @@ samplePairsNotProcessed: ${samplePairsNotProcessed}
 
     static ExternallyProcessedMergedBamFile createExternallyProcessedMergedBamFile(Map properties = [:]) {
         return createDomainObject(ExternallyProcessedMergedBamFile, [
-                fileName: 'runName_' + (counter++),
-                type: AbstractBamFile.BamType.MDUP,
+                fileName: "runName_${counter++}",
                 workPackage: { createExternalMergingWorkPackage() },
                 numberOfMergedLanes: null,
+                importedFrom: "/importFrom_${counter++}"
         ], properties)
     }
 

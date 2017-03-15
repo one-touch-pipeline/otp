@@ -1,11 +1,15 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.*
+
+import static org.springframework.util.Assert.*
 
 /**
  * Represents the state of the import process of the externally processed merged BAM files
  */
-class ImportProcess implements Entity {
+class ImportProcess implements Entity, ProcessParameterObject {
 
     enum State {
         NOT_STARTED,
@@ -43,5 +47,31 @@ class ImportProcess implements Entity {
             }
             return true
         }
+    }
+
+    public void updateState(State state) {
+        notNull(state, "the input state for the method updateState is null")
+        this.state = state
+        assert this.save(flush:true)
+    }
+
+    @Override
+    SeqType getSeqType() {
+        return null
+    }
+
+    @Override
+    Individual getIndividual() {
+        return null
+    }
+
+    @Override
+    Set<SeqTrack> getContainedSeqTracks() {
+        return []
+    }
+
+    @Override
+    short getProcessingPriority() {
+        return 0
     }
 }
