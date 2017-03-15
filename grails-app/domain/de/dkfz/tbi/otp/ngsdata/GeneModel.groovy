@@ -26,11 +26,11 @@ class GeneModel implements Entity {
         excludeFileName blank: false, validator: { String val ->
             OtpPath.isValidPathComponent(val)
         }
-        dexSeqFileName blank: false, validator: { String val ->
-            OtpPath.isValidPathComponent(val)
+        dexSeqFileName nullable: true, validator: { String val ->
+            !val || OtpPath.isValidPathComponent(val)
         }
-        gcFileName blank: false, validator: { String val ->
-            OtpPath.isValidPathComponent(val)
+        gcFileName nullable: true, validator: { String val ->
+            !val || OtpPath.isValidPathComponent(val)
         }
     }
 

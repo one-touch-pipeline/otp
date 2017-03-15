@@ -25,7 +25,7 @@ class GeneModelServiceSpec extends Specification {
 
     void "test getFile"() {
         expect:
-        service.getFile(geneModel) == new File("/referenceGenomes/1KGRef/genecode/geneModel/fileName.gtf")
+        service.getFile(geneModel) == new File("/referenceGenomes/1KGRef/gencode/geneModel/fileName.gtf")
     }
 
     void "test getFile fails with null"() {
@@ -38,7 +38,7 @@ class GeneModelServiceSpec extends Specification {
 
     void "test getExcludeFile"() {
         expect:
-        service.getExcludeFile(geneModel) == new File("/referenceGenomes/1KGRef/genecode/geneModel/excludeFileName.gtf")
+        service.getExcludeFile(geneModel) == new File("/referenceGenomes/1KGRef/gencode/geneModel/excludeFileName.gtf")
     }
 
     void "test getExcludeFile fails with null"() {
@@ -51,7 +51,7 @@ class GeneModelServiceSpec extends Specification {
 
     void "test getDexSeqFile"() {
         expect:
-        service.getDexSeqFile(geneModel) == new File("/referenceGenomes/1KGRef/genecode/geneModel/dexSeqFileName.gtf")
+        service.getDexSeqFile(geneModel) == new File("/referenceGenomes/1KGRef/gencode/geneModel/dexSeqFileName.gtf")
     }
 
     void "test getDexSeqFile fails with null"() {
@@ -64,7 +64,7 @@ class GeneModelServiceSpec extends Specification {
 
     void "test getGcFile"() {
         expect:
-        service.getGcFile(geneModel) == new File("/referenceGenomes/1KGRef/genecode/geneModel/gcFileName.gtf")
+        service.getGcFile(geneModel) == new File("/referenceGenomes/1KGRef/gencode/geneModel/gcFileName.gtf")
     }
 
     void "test getGcFile fails with null"() {

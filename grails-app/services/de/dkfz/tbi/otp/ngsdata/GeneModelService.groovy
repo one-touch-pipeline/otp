@@ -4,7 +4,7 @@ package de.dkfz.tbi.otp.ngsdata
 class GeneModelService {
     ReferenceGenomeService referenceGenomeService
 
-    public static final String GENE_MODEL_PATH_COMPONENT = "genecode"
+    public static final String GENE_MODEL_PATH_COMPONENT = "gencode"
 
     File getFile(GeneModel geneModel) {
         new File(getBasePath(geneModel), geneModel.fileName)
