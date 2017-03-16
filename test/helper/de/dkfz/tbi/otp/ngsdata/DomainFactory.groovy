@@ -21,6 +21,8 @@ import grails.plugin.springsecurity.acl.*
 import grails.util.*
 import org.joda.time.*
 
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+
 class DomainFactory {
 
     private DomainFactory() {
@@ -71,7 +73,7 @@ class DomainFactory {
         if(parameterProperties) {
             domainObject = domainClass.findWhere(parameterProperties)
         } else {
-            domainObject = domainClass.list(limit: 1)?.first()
+            domainObject = atMostOneElement(domainClass.list(limit: 1))
         }
         if(!domainObject) {
             domainObject = createDomainObject(domainClass, defaultProperties, parameterProperties, saveAndValidate)
@@ -191,7 +193,7 @@ class DomainFactory {
 
 
     static Pipeline returnOrCreateAnyPipeline() {
-        return (CollectionUtils.atMostOneElement(Pipeline.list(max: 1)) ?: createPanCanPipeline())
+        return (atMostOneElement(Pipeline.list(max: 1)) ?: createPanCanPipeline())
     }
 
     public static MergingSet createMergingSet(Map properties = [:]) {
@@ -1430,6 +1432,18 @@ class DomainFactory {
                 sampleType2BamFile: snvCallingInstance.sampleType2BamFile,
                 config: snvCallingInstance.config,
         ] + properties).save(flush: true)
+    }
+
+    public static createIndelInstanceWithSameSamplePair(BamFilePairAnalysis instance) {
+        IndelCallingInstance indelInstance =  createIndelCallingInstance([
+                processingState: AnalysisProcessingStates.FINISHED,
+                sampleType1BamFile: instance.sampleType1BamFile,
+                sampleType2BamFile: instance.sampleType2BamFile,
+                config: createRoddyWorkflowConfigLazy(pipeline: createIndelPipelineLazy()),
+                instanceName: "2017-03-17_10h12",
+                samplePair: instance.samplePair,
+        ])
+        return indelInstance.save(failOnError: true)
     }
 
     public static ProcessingStep createAndSaveProcessingStep(ProcessParameterObject processParameterObject = null) {
