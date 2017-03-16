@@ -73,6 +73,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
                     new StringBuilder(),
                     false,
                     scriptFolder.absolutePath,
+                    false,
             )
         }
 

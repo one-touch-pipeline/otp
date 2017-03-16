@@ -22,7 +22,7 @@ class DataSwapService {
     ProcessedMergedBamFileService processedMergedBamFileService
     ConfigService configService
     SeqTrackService seqTrackService
-    SnvDeletionService snvDeletionService
+    AnalysisDeletionService analysisDeletionService
     DataSource dataSource
 
     static final String MISSING_FILES_TEXT = "The following files are expected, but not found:"
@@ -502,7 +502,10 @@ chmod 440 ${newDirectFileName}
      * @param newSampleTypeName the name of the existing  sample type the sample should be belong to.
      * @param dataFileMap A map of old file name and new file name. The map have to contain the file name of all datafiles of the individual
      */
-    void moveSample(String oldProjectName, String newProjectName, String oldPid, String newPid, String oldSampleTypeName, String newSampleTypeName, Map<String, String> dataFileMap, String bashScriptName, StringBuilder outputStringBuilder, boolean failOnMissingFiles, String scriptOutputDirectory) throws IOException{
+    void moveSample(String oldProjectName, String newProjectName, String oldPid, String newPid, String oldSampleTypeName,
+                    String newSampleTypeName, Map<String, String> dataFileMap, String bashScriptName,
+                    StringBuilder outputStringBuilder, boolean failOnMissingFiles, String scriptOutputDirectory,
+                    boolean linkedFilesVerified = false) throws IOException{
         outputStringBuilder << "\n\nmove ${oldPid} ${oldSampleTypeName} of ${oldProjectName} to ${newPid} ${newSampleTypeName} of ${newProjectName} "
         outputStringBuilder << "\n  swap datafile: "
         dataFileMap.each { a, b ->
@@ -548,7 +551,9 @@ chmod 440 ${newDirectFileName}
         List<SeqTrack> seqTrackList = getAndShowSeqTracksForSample(sample, outputStringBuilder)
 
         throwExceptionInCaseOfExternalMergedBamFileIsAttached(seqTrackList)
-        throwExceptionInCaseOfSeqTracksAreOnlyLinked(seqTrackList)
+        if (!linkedFilesVerified) {
+            throwExceptionInCaseOfSeqTracksAreOnlyLinked(seqTrackList)
+        }
 
         if (AlignmentPass.findBySeqTrackInList(seqTrackList)) {
             outputStringBuilder << "\n -->     found alignments for seqtracks (${AlignmentPass.findBySeqTrackInList(seqTrackList)*.seqTrack.unique()}): "
@@ -569,10 +574,10 @@ chmod 440 ${newDirectFileName}
         File bashScriptToMoveFiles = createFileSafely("${scriptOutputDirectory}", "${bashScriptName}.sh")
         bashScriptToMoveFiles << bashHeader
 
-        createBashScriptRoddy(seqTrackList, dirsToDelete, scriptOutputDirectory, outputStringBuilder, bashScriptName, bashScriptToMoveFiles)
+        createBashScriptRoddy(seqTrackList, dirsToDelete, scriptOutputDirectory, outputStringBuilder, bashScriptName, bashScriptToMoveFiles, !linkedFilesVerified)
 
         seqTrackList.each { SeqTrack seqTrack ->
-            dirsToDelete << deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack)
+            dirsToDelete << deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack, !linkedFilesVerified)
             groovyConsoleScriptToRestartAlignments << startAlignmentForSeqTrack(seqTrack)
         }
 
@@ -870,7 +875,7 @@ chmod 440 ${newDirectFileName}
             processedMergedBamFiles.each { ProcessedMergedBamFile processedMergedBamFile ->
                 deleteQualityAssessmentInfoForAbstractBamFile(processedMergedBamFile)
                 MergingSetAssignment.findAllByBamFile(processedMergedBamFile)*.delete(flush: true)
-                dirsToDelete << snvDeletionService.deleteForAbstractMergedBamFile(processedMergedBamFile)
+                dirsToDelete << analysisDeletionService.deleteForAbstractMergedBamFile(processedMergedBamFile)
                 processedMergedBamFile.delete(flush: true)
             }
 
@@ -955,7 +960,7 @@ chmod 440 ${newDirectFileName}
             alignmentPass.delete(flush: true)
             // The MerginWorkPackage can only be deleted if all corresponding MergingSets and AlignmentPasses are removed already
             if (!MergingSet.findByMergingWorkPackage(mergingWorkPackage) && !AlignmentPass.findByWorkPackage(mergingWorkPackage)) {
-                snvDeletionService.deleteSamplePairsWithoutSnvCallingInstances(SamplePair.findAllByMergingWorkPackage1OrMergingWorkPackage2(mergingWorkPackage, mergingWorkPackage))
+                analysisDeletionService.deleteSamplePairsWithoutAnalysisInstances(SamplePair.findAllByMergingWorkPackage1OrMergingWorkPackage2(mergingWorkPackage, mergingWorkPackage))
                 mergingWorkPackage.delete(flush: true)
             }
         }
@@ -972,11 +977,11 @@ chmod 440 ${newDirectFileName}
             mergingWorkPackage.bamFileInProjectFolder = null
             mergingWorkPackage.save(flush: true)
             deleteQualityAssessmentInfoForAbstractBamFile(bamFile)
-            dirsToDelete << snvDeletionService.deleteForAbstractMergedBamFile(bamFile)
+            dirsToDelete << analysisDeletionService.deleteForAbstractMergedBamFile(bamFile)
             bamFile.delete(flush: true)
             // The MerginWorkPackage can only be deleted if all corresponding RoddyBamFiles are removed already
             if (!RoddyBamFile.findByWorkPackage(mergingWorkPackage)) {
-                snvDeletionService.deleteSamplePairsWithoutSnvCallingInstances(SamplePair.findAllByMergingWorkPackage1OrMergingWorkPackage2(mergingWorkPackage, mergingWorkPackage))
+                analysisDeletionService.deleteSamplePairsWithoutAnalysisInstances(SamplePair.findAllByMergingWorkPackage1OrMergingWorkPackage2(mergingWorkPackage, mergingWorkPackage))
                 mergingWorkPackage.delete(flush: true)
             }
         }
