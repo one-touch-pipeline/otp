@@ -1783,6 +1783,35 @@ class DomainFactory {
         assert featureTogglesConfigPath.save(flush: true)
     }
 
+    static IndelQualityControl createIndelQualityControl(Map properties = [:]) {
+        return createDomainObject(IndelQualityControl, [
+                indelCallingInstance: { createIndelCallingInstance() },
+                file: "file",
+                numIndels: counter++,
+                numIns: counter++,
+                numDels: counter++,
+                numSize1_3: counter++,
+                numSize4_10: counter++,
+                numSize11plus: counter++,
+                numInsSize1_3: counter++,
+                numInsSize4_10: counter++,
+                numInsSize11plus: counter++,
+                numDelsSize1_3: counter++,
+                numDelsSize4_10: counter++,
+                numDelsSize11plus: counter++,
+                percentIns: counter++ as double,
+                percentDels: counter++ as double,
+                percentSize1_3: counter++ as double,
+                percentSize4_10: counter++ as double,
+                percentSize11plus: counter++ as double,
+                percentInsSize1_3: counter++ as double,
+                percentInsSize4_10: counter++ as double,
+                percentInsSize11plus: counter++ as double,
+                percentDelsSize1_3: counter++ as double,
+                percentDelsSize4_10: counter++ as double,
+                percentDelsSize11plus: counter++ as double,
+        ], properties)
+    }
 
     static void createNotificationProcessingOptions() {
 
