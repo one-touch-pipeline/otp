@@ -7,6 +7,6 @@ class ProcessedMergedBamFileRoddySnvWorkflowTests extends AbstractRoddySnvWorkfl
 
     @Before
     void prepare() {
-        setupProcessMergedBamFile()
+        setupProcessMergedWgsBamFile()
     }
 }

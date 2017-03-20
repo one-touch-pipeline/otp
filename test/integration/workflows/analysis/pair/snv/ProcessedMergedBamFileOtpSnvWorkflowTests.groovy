@@ -7,6 +7,6 @@ class ProcessedMergedBamFileOtpSnvWorkflowTests extends AbstractOtpSnvWorkflowTe
 
     @Before
     void prepare() {
-        setupProcessMergedBamFile()
+        setupProcessMergedWgsBamFile()
     }
 }
