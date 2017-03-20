@@ -2,7 +2,7 @@ package operations.startWorkflow
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
-import de.dkfz.tbi.otp.job.jobs.snvcalling.*
+import de.dkfz.tbi.otp.job.jobs.indelCalling.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 
@@ -30,29 +30,29 @@ List<SamplePair> samplePairs = """
 }
 
 
-RoddySnvCallingStartJob roddySnvCallingStartJob = ctx.roddySnvStartJob
+RoddyIndelCallingStartJob roddyIndelCallingStartJob = ctx.roddyIndelStartJob
 
 
 SamplePair.withTransaction {
     samplePairs.each { SamplePair samplePair ->
         println "trigger: '${it}'"
 
-        ConfigPerProject config = roddySnvCallingStartJob.getConfig(samplePair)
+        ConfigPerProject config = roddyIndelCallingStartJob.getConfig(samplePair)
 
         AbstractMergedBamFile sampleType1BamFile = samplePair.mergingWorkPackage1.processableBamFileInProjectFolder
         AbstractMergedBamFile sampleType2BamFile = samplePair.mergingWorkPackage2.processableBamFileInProjectFolder
 
-        BamFilePairAnalysis analysis = new RoddySnvCallingInstance(
+        BamFilePairAnalysis analysis = new IndelCallingInstance(
                 samplePair: samplePair,
-                instanceName: roddySnvCallingStartJob.getInstanceName(config),
+                instanceName: roddyIndelCallingStartJob.getInstanceName(config),
                 config: config,
                 sampleType1BamFile: sampleType1BamFile,
                 sampleType2BamFile: sampleType2BamFile,
                 latestDataFileCreationDate: AbstractBamFile.getLatestSequenceDataFileCreationDate(sampleType1BamFile, sampleType2BamFile),
         )
         analysis.save(flush: true)
-        roddySnvCallingStartJob.prepareCreatingTheProcessAndTriggerTracking(analysis)
-        roddySnvCallingStartJob.createProcess(analysis)
+        roddyIndelCallingStartJob.prepareCreatingTheProcessAndTriggerTracking(analysis)
+        roddyIndelCallingStartJob.createProcess(analysis)
         log.debug "Analysis started for: ${analysis.toString()}"
     }
 }
