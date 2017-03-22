@@ -236,11 +236,11 @@ class MergingSetServiceTests {
     void testNextMergingSet() {
         MergingSet next = mergingSetService.mergingSetInStateNeedsProcessing(ProcessingPriority.NORMAL_PRIORITY)
         assertNull(next)
-        MergingSet mergingSet = MergingSet.build(status: MergingSet.State.NEEDS_PROCESSING)
+        MergingSet mergingSet = DomainFactory.createMergingSet(status: MergingSet.State.NEEDS_PROCESSING)
         next = mergingSetService.mergingSetInStateNeedsProcessing(ProcessingPriority.NORMAL_PRIORITY)
         assertEquals(mergingSet, next)
-        MergingSet mergingSet2 = MergingSet.build(status: MergingSet.State.NEEDS_PROCESSING)
-        MergingSet mergingSet3 = MergingSet.build(status: MergingSet.State.NEEDS_PROCESSING)
+        MergingSet mergingSet2 = DomainFactory.createMergingSet(status: MergingSet.State.NEEDS_PROCESSING)
+        MergingSet mergingSet3 = DomainFactory.createMergingSet(status: MergingSet.State.NEEDS_PROCESSING)
         next = mergingSetService.mergingSetInStateNeedsProcessing(ProcessingPriority.NORMAL_PRIORITY)
         assertNotNull(next)
         assertTrue(next.equals(mergingSet) || next.equals(mergingSet2) || next.equals(mergingSet3) )
@@ -252,7 +252,7 @@ class MergingSetServiceTests {
         mergingSet3.save([flush: true, failOnError: true])
         next = mergingSetService.mergingSetInStateNeedsProcessing(ProcessingPriority.NORMAL_PRIORITY)
         assertNull(next)
-        MergingSet mergingSet4 = MergingSet.build(status: MergingSet.State.NEEDS_PROCESSING)
+        MergingSet mergingSet4 = DomainFactory.createMergingSet(status: MergingSet.State.NEEDS_PROCESSING)
         next = mergingSetService.mergingSetInStateNeedsProcessing(ProcessingPriority.NORMAL_PRIORITY)
         assertNotNull(next)
         assertTrue(next.equals(mergingSet4))
@@ -260,9 +260,9 @@ class MergingSetServiceTests {
 
     @Test
     void testNextMergingSet_FastTrackFirst() {
-        MergingSet.build(status: MergingSet.State.NEEDS_PROCESSING)
+        DomainFactory.createMergingSet(status: MergingSet.State.NEEDS_PROCESSING)
 
-        MergingSet mergingSetFastTrack = MergingSet.build(status: MergingSet.State.NEEDS_PROCESSING)
+        MergingSet mergingSetFastTrack = DomainFactory.createMergingSet(status: MergingSet.State.NEEDS_PROCESSING)
         mergingSetFastTrack.project.processingPriority = ProcessingPriority.FAST_TRACK_PRIORITY
         assert mergingSetFastTrack.project.save(flush: true)
 
@@ -271,11 +271,11 @@ class MergingSetServiceTests {
 
     @Test
     void testNextMergingSet_SlotsReservedForFastTrack() {
-        MergingSet.build(status: MergingSet.State.NEEDS_PROCESSING)
+        DomainFactory.createMergingSet(status: MergingSet.State.NEEDS_PROCESSING)
 
         assertNull(mergingSetService.mergingSetInStateNeedsProcessing(ProcessingPriority.FAST_TRACK_PRIORITY))
 
-        MergingSet mergingSetFastTrack = MergingSet.build(status: MergingSet.State.NEEDS_PROCESSING)
+        MergingSet mergingSetFastTrack = DomainFactory.createMergingSet(status: MergingSet.State.NEEDS_PROCESSING)
         mergingSetFastTrack.project.processingPriority = ProcessingPriority.FAST_TRACK_PRIORITY
         assert mergingSetFastTrack.project.save(flush: true)
 

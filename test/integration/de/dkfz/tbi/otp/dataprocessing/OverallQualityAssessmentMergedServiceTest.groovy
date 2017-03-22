@@ -25,7 +25,7 @@ class OverallQualityAssessmentMergedServiceTest extends AbstractIntegrationTest 
     void setUp() {
         createUserAndRoles()
 
-        overallQualityAssessmentMerged = OverallQualityAssessmentMerged.build()
+        overallQualityAssessmentMerged = DomainFactory.createOverallQualityAssessmentMerged()
         AbstractBamFile abstractBamFile = overallQualityAssessmentMerged.processedMergedBamFile
         abstractBamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.PROCESSED
         abstractBamFile.md5sum = "12345678901234567890123456789012"
@@ -187,6 +187,8 @@ class OverallQualityAssessmentMergedServiceTest extends AbstractIntegrationTest 
 
     @Test
     void testFindSequenceLengthForQualityAssessmentMerged() {
+        // in the setup random datafiles are already created. for this test the content of the datafiles must be known, therefore the original datafiles are deleted
+        DataFile.list()*.delete(flush: true)
         prepareFindSequenceLengthForOverallQualityAssessmentMerged()
         List expected = [
             [
@@ -223,8 +225,10 @@ class OverallQualityAssessmentMergedServiceTest extends AbstractIntegrationTest 
     }
 
     @Test
-    void testFindSequenceLengthForQualityAssessmentMerged_noFastqcAvailable() {
+    void testFindSequenceLengthForQualityAssessmentMerged_noDataFileAvailable() {
         List expected = []
+        // in the setup random datafiles are already created. for this test no datafiles must exist
+        DataFile.list()*.delete(flush: true)
 
         List result = overallQualityAssessmentMergedService.findSequenceLengthForQualityAssessmentMerged([
             overallQualityAssessmentMerged

@@ -572,7 +572,7 @@ class ProcessedBamFileServiceTests {
 
     @Test
     void testIsAnyAlignmentPending_noAlignmentPlanned() {
-        assert !processedBamFileService.isAnyAlignmentPending(MergingWorkPackage.build())
+        assert !processedBamFileService.isAnyAlignmentPending(DomainFactory.createMergingWorkPackage())
     }
 
     @Test

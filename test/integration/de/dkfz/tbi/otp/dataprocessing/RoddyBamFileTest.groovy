@@ -1,15 +1,12 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import static de.dkfz.tbi.otp.dataprocessing.AbstractBamFileServiceTests.*
+import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.logging.*
+import org.junit.*
 
-import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvJobResult
-import de.dkfz.tbi.otp.ngsdata.DataFile
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
-import org.junit.Test
+import static de.dkfz.tbi.otp.dataprocessing.AbstractBamFileServiceTests.*
 
 class RoddyBamFileTest {
 
@@ -83,7 +80,7 @@ class RoddyBamFileTest {
     @Test
     void testIsConsistentAndContainsNoWithdrawnData_baseBamFileHasDifferentWorkPackageFromBamFile_shouldReturnErrorMessage() {
         RoddyBamFile bamFile = createRoddyBamFileWithBaseBamFile()
-        bamFile.baseBamFile.workPackage = MergingWorkPackage.build()
+        bamFile.baseBamFile.workPackage = DomainFactory.createMergingWorkPackage()
         assert ["the base bam file does not satisfy work package criteria"] == bamFile.isConsistentAndContainsNoWithdrawnData()
     }
 
@@ -174,7 +171,7 @@ class RoddyBamFileTest {
 
     @Test
     void testMaxIdentifier_noRoddyBamFileExistsForWorkPackage() {
-        MergingWorkPackage workPackage = MergingWorkPackage.build()
+        MergingWorkPackage workPackage = DomainFactory.createMergingWorkPackage()
         assert null == RoddyBamFile.maxIdentifier(workPackage)
     }
 

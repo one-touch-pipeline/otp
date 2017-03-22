@@ -11,6 +11,7 @@ import org.junit.rules.ErrorCollector
 
 @TestFor(MergingWorkPackage)
 @Build([
+    ExternalMergingWorkPackage,
     ReferenceGenome,
     Sample,
     SeqPlatformGroup,
@@ -339,4 +340,28 @@ class MergingWorkPackageUnitTests {
         ])
         assert mergingWorkPackage.validate()
     }
+
+    @Test
+    void test_constraint_ExternalMergingWorkPackageExistsAlready_NewMergingWorkPackageHasToBaSaved() {
+        ExternalMergingWorkPackage externalMergingWorkPackage = DomainFactory.createExternalMergingWorkPackage()
+        MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage([
+                sample: externalMergingWorkPackage.sample,
+                seqType: externalMergingWorkPackage.seqType,
+        ])
+    }
+
+    @Test
+    void test_constraint_MergingWorkPackageExistsAlready_NewMergingWorkPackageHasToBaSaved() {
+        MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage()
+        MergingWorkPackage mergingWorkPackage1 = new MergingWorkPackage(
+                sample: mergingWorkPackage.sample,
+                seqType: mergingWorkPackage.seqType,
+                referenceGenome: mergingWorkPackage.referenceGenome,
+                seqPlatformGroup: mergingWorkPackage.seqPlatformGroup,
+                pipeline: mergingWorkPackage.pipeline,
+        )
+
+        TestCase.assertValidateError(mergingWorkPackage1, 'sample', 'The mergingWorkPackage must be unique for one sample and seqType', mergingWorkPackage.sample)
+    }
+
 }

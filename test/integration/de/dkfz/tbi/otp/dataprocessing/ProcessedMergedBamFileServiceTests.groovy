@@ -164,7 +164,7 @@ class ProcessedMergedBamFileServiceTests {
 
     @Test
     void testCreateMergedBamFile() {
-        MergingPass mergingPass = MergingPass.build()
+        MergingPass mergingPass = DomainFactory.createMergingPass()
         DomainFactory.assignNewProcessedBamFile(mergingPass.mergingSet)
         ProcessedMergedBamFile processedMergedBamFile = processedMergedBamFileService.createMergedBamFile(mergingPass)
         assertNotNull(processedMergedBamFile)
@@ -506,7 +506,10 @@ class ProcessedMergedBamFileServiceTests {
     @Test
     void testGetInferredKitBamFileIsExomeButHasTwoDifferentKits() {
         LibraryPreparationKit libraryPreparationKit = LibraryPreparationKit.build()
-        MergingWorkPackage mergingWorkPackage = MergingWorkPackage.build(seqType: SeqType.build(name: SeqTypeNames.EXOME.seqTypeName), libraryPreparationKit: libraryPreparationKit)
+        MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage([
+                seqType: DomainFactory.createExomeSeqType(),
+                libraryPreparationKit: libraryPreparationKit
+        ])
         ProcessedMergedBamFile processedMergedBamFile = DomainFactory.createProcessedMergedBamFile(mergingWorkPackage)
         DomainFactory.assignNewProcessedBamFile(processedMergedBamFile)
         List<SeqTrack> seqtracks = processedMergedBamFile.mergingSet.containedSeqTracks as List
@@ -542,7 +545,10 @@ class ProcessedMergedBamFileServiceTests {
     @Test
     void testGetInferredKitBamFileIsExomeAndOneKitInferred() {
         LibraryPreparationKit libraryPreparationKit = LibraryPreparationKit.build()
-        MergingWorkPackage mergingWorkPackage = MergingWorkPackage.build(seqType: SeqType.build(name: SeqTypeNames.EXOME.seqTypeName), libraryPreparationKit: libraryPreparationKit)
+        MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage([
+                seqType: DomainFactory.createSeqType(name: SeqTypeNames.EXOME.seqTypeName),
+                libraryPreparationKit: libraryPreparationKit
+                ])
         ProcessedMergedBamFile processedMergedBamFile = DomainFactory.createProcessedMergedBamFile(mergingWorkPackage)
         DomainFactory.assignNewProcessedBamFile(processedMergedBamFile)
         List<SeqTrack> seqtracks = processedMergedBamFile.mergingSet.containedSeqTracks as List

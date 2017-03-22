@@ -1,7 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import grails.test.spock.IntegrationSpec
-
+import de.dkfz.tbi.otp.ngsdata.*
+import grails.test.spock.*
 
 class ChromosomeQualityAssessmentMergedServiceIntegrationSpec extends IntegrationSpec {
 
@@ -23,8 +23,8 @@ class ChromosomeQualityAssessmentMergedServiceIntegrationSpec extends Integratio
             Chromosomes.CHR_Y.getAlias()
         ]
 
-        QualityAssessmentMergedPass qualityAssessmentMergedPass1 = QualityAssessmentMergedPass.build()
-        QualityAssessmentMergedPass qualityAssessmentMergedPass2 = QualityAssessmentMergedPass.build()
+        QualityAssessmentMergedPass qualityAssessmentMergedPass1 = DomainFactory.createQualityAssessmentMergedPass()
+        QualityAssessmentMergedPass qualityAssessmentMergedPass2 = DomainFactory.createQualityAssessmentMergedPass()
         qualityAssessmentMergedPasses = [
                 qualityAssessmentMergedPass1,
                 qualityAssessmentMergedPass2

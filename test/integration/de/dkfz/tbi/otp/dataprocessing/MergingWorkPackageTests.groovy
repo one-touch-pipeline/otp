@@ -10,14 +10,14 @@ class MergingWorkPackageTests {
 
     @Test
     void testFindMergeableSeqTracksNoLibraryPreparationKit() {
-        MergingWorkPackage workPackage = MergingWorkPackage.build(libraryPreparationKit: null)
+        MergingWorkPackage workPackage = DomainFactory.createMergingWorkPackage(libraryPreparationKit: null)
 
         createDataAndAssertResult(workPackage)
     }
 
     @Test
     void testFindMergeableSeqTracksWithLibraryPreparationKit() {
-        MergingWorkPackage workPackage = MergingWorkPackage.build(libraryPreparationKit: LibraryPreparationKit.build())
+        MergingWorkPackage workPackage = DomainFactory.createMergingWorkPackage(libraryPreparationKit: LibraryPreparationKit.build())
         SeqTrack incorrectLibraryPreparationKit = DomainFactory.createSeqTrackWithDataFiles(workPackage)
         incorrectLibraryPreparationKit.libraryPreparationKit = LibraryPreparationKit.build()
         incorrectLibraryPreparationKit.kitInfoReliability = InformationReliability.KNOWN
