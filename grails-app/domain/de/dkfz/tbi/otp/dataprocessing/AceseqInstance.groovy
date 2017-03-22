@@ -43,6 +43,10 @@ class AceseqInstance extends BamFilePairAnalysis implements ProcessParameterObje
         return super.config
     }
 
+    File getQcJsonFile() {
+        return new File(instancePath.absoluteDataManagementPath, "${individual.pid}_cnv_parameter.json")
+    }
+
     File getGcCorrected() {
         return new File(getInstancePlotPath(), "${this.individual.pid}_gc_corrected.png")
     }

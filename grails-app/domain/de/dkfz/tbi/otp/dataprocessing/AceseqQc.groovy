@@ -22,5 +22,9 @@ class AceseqQc implements Entity{
 
     int solutionPossible
 
-   static belongsTo = [aceseqInstance: AceseqInstance]
+    static belongsTo = [aceseqInstance: AceseqInstance]
+
+    static constraints = {
+        number unique: 'aceseqInstance'
+    }
 }

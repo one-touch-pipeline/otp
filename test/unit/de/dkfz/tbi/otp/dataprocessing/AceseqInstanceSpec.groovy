@@ -153,5 +153,6 @@ class AceseqInstanceSpec extends Specification {
         "getTcnDistancesCombinedStar" | "_tcn_distances_combined_star.png"
         "getPlotAll"                  | "_plot_XX_ALL.png"
         "getPlotExtra"                | "_plot_1.0extra_2.0_XX.png"
+        "getQcJsonFile"               | "_cnv_parameter.json"
     }
 }

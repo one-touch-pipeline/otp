@@ -2062,6 +2062,32 @@ samplePairsNotProcessed: ${samplePairsNotProcessed}
 """
     }
 
+    static void createAceseqQaFileOnFileSystem(File qaFile) {
+        qaFile.parentFile.mkdirs()
+        qaFile << """\
+{
+    "1":{
+        "gender":"male",
+        "solutionPossible":"3",
+        "normalContamination":"0.5",
+        "goodnessOfFit":"0.904231625835189",
+        "ploidyFactor":"2.27",
+        "ploidy":"2",
+        "purity":"2.0"
+    },
+    "2":{
+        "gender":"female",
+        "solutionPossible":"4",
+        "normalContamination":"0.7",
+        "goodnessOfFit":"0.12345",
+        "ploidyFactor":"1.27",
+        "ploidy":"5",
+        "purity":"3.0"
+    }
+}
+""" }
+
+
     public static void createAclObjects(Object domainObject, Map properties = [:]) {
         AclObjectIdentity aclObjectIdentity = createDomainObject(AclObjectIdentity, [objectId: domainObject.id, aclClass: {createDomainObject(AclClass, [className: domainObject.class.name], [:])}], [:])
         createDomainObject(AclEntry, [aclObjectIdentity: aclObjectIdentity, sid: {createDomainObject(AclSid, [sid: "ROLE_ADMIN"], properties)}], [:])
