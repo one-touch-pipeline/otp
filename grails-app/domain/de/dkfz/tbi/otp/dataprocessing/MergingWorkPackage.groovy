@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.*
 
 /**
  * Represents all generations of one merged BAM file (whereas an {@link AbstractMergedBamFile} represents a single
@@ -47,7 +48,13 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
         // TODO OTP-1401: In the future there may be more than one MWP for one sample and seqType.
         // As soon as you loosen this constraint, un-ignore:
         // - AlignmentPassUnitTests.testIsLatestPass_2PassesDifferentWorkPackages
-        sample unique: 'seqType'
+        sample(validator: {val, obj ->
+            MergingWorkPackage mergingWorkPackage = CollectionUtils.atMostOneElement(MergingWorkPackage.findAllBySampleAndSeqType(val, obj.seqType),
+                    "More than one MWP exists for sample ${val} and seqType ${obj.seqType}")
+            if (mergingWorkPackage && mergingWorkPackage.id != obj.id) {
+                return "The mergingWorkPackage must be unique for one sample and seqType"
+            }
+        })
 
         needsProcessing(validator: {val, obj -> !val || [Pipeline.Name.PANCAN_ALIGNMENT, Pipeline.Name.RODDY_RNA_ALIGNMENT].contains(obj?.pipeline?.name)})
         pipeline(validator: { pipeline ->

@@ -21,13 +21,13 @@ class ReferenceGenomeServiceTests {
     public TemporaryFolder temporaryFolder = new TemporaryFolder()
 
     private MergingWorkPackage createDataForChromosomeSizeInformationFiles()  {
-        MergingWorkPackage mergingWorkPackage = MergingWorkPackage.build (
+        MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage([
                 statSizeFileName: DomainFactory.DEFAULT_TAB_FILE_NAME,
                 referenceGenome: DomainFactory.createReferenceGenome(chromosomeLengthFilePath: DomainFactory.DEFAULT_CHROMOSOME_LENGTH_FILE_NAME),
                 pipeline: DomainFactory.createPanCanPipeline(),
-        )
-        Realm realm = Realm.build([
-                operationType: Realm.OperationType.DATA_PROCESSING,
+        ])
+
+        Realm realm = DomainFactory.createRealmDataProcessing([
                 name: mergingWorkPackage.project.realmName,
                 processingRootPath: temporaryFolder.newFolder().path
         ])

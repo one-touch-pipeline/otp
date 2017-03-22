@@ -170,7 +170,7 @@ class RoddyAlignmentStartJobTest {
 
     @Test
     void testFindUsableBaseBamFile_WhenMergingWorkPackageHasNoBamFile_ShouldReturnNull() {
-        assert null == testRoddyAlignmentStartJob.findUsableBaseBamFile(MergingWorkPackage.build())
+        assert null == testRoddyAlignmentStartJob.findUsableBaseBamFile(DomainFactory.createMergingWorkPackage())
     }
 
     @Test

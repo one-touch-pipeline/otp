@@ -240,15 +240,18 @@ class MergingPassServiceTests {
 
 
     private createDataForMayProcessingFilesBeDeleted() {
-        MergingSet mergingSet = MergingSet.build(status: MergingSet.State.PROCESSED)
-        MergingPass mergingPass1 = MergingPass.build([mergingSet: mergingSet])
-        ProcessedMergedBamFile processedMergedBamFile1 = ProcessedMergedBamFile.build(mergingPass: mergingPass1, workPackage: mergingPass1.mergingWorkPackage)
-        QualityAssessmentMergedPass qualityAssessmentMergedPass1 = QualityAssessmentMergedPass.build(abstractMergedBamFile: processedMergedBamFile1)
-        MergingPass mergingPass2 = MergingPass.build([
+        MergingSet mergingSet = DomainFactory.createMergingSet(status: MergingSet.State.PROCESSED)
+        MergingPass mergingPass1 = DomainFactory.createMergingPass([mergingSet: mergingSet])
+        ProcessedMergedBamFile processedMergedBamFile1 = DomainFactory.createProcessedMergedBamFile([
+                mergingPass: mergingPass1,
+                workPackage: mergingPass1.mergingWorkPackage
+        ])
+        QualityAssessmentMergedPass qualityAssessmentMergedPass1 = DomainFactory.createQualityAssessmentMergedPass(abstractMergedBamFile: processedMergedBamFile1)
+        MergingPass mergingPass2 = DomainFactory.createMergingPass([
             mergingSet: mergingSet,
             identifier: 1,
             ])
-        ProcessedMergedBamFile processedMergedBamFile2 = ProcessedMergedBamFile.build([
+        ProcessedMergedBamFile processedMergedBamFile2 = DomainFactory.createProcessedMergedBamFile([
             mergingPass: mergingPass2,
             qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
             withdrawn: false,
@@ -371,12 +374,12 @@ class MergingPassServiceTests {
     }
 
     private static List<ProcessedMergedBamFile> createProcessedMergedBamFileWithLaterProcessedPass(Map mapLaterBamFile = [:], Map mapPassOfLaterBamFile = [:], Map mapMergingSet = [:]) {
-        MergingSet mergingSet = MergingSet.build([
+        MergingSet mergingSet = DomainFactory.createMergingSet([
             status: MergingSet.State.PROCESSED
         ] + mapMergingSet)
 
         ProcessedMergedBamFile processedMergedBamFile = ProcessedMergedBamFile.build([
-            mergingPass: MergingPass.build([
+            mergingPass: DomainFactory.createMergingPass([
                 mergingSet: mergingSet,
                 identifier: 2
             ]),
@@ -384,7 +387,7 @@ class MergingPassServiceTests {
         ])
 
         ProcessedMergedBamFile processedMergedBamFileLaterPass = ProcessedMergedBamFile.build([
-            mergingPass: MergingPass.build([
+            mergingPass: DomainFactory.createMergingPass([
                 mergingSet: mergingSet,
                 identifier: 3
             ] + mapPassOfLaterBamFile),
@@ -396,12 +399,12 @@ class MergingPassServiceTests {
     }
 
     private static List<ProcessedMergedBamFile> createProcessedMergedBamFileWithFurtherMerged(Map bamFileMap = [:], Map passMap = [:], Map mergingSetMap = [:], Map furtherMergedBamFileMap = [:], Map furtherMergedPassMap = [:], Map furtherMergedSetMap = [:], Map mergingSetAssignmentMap = [:] ) {
-        MergingSet mergingSet = MergingSet.build([
+        MergingSet mergingSet = DomainFactory.createMergingSet([
             status: MergingSet.State.PROCESSED
         ] + mergingSetMap)
 
         ProcessedMergedBamFile processedMergedBamFile = ProcessedMergedBamFile.build([
-            mergingPass: MergingPass.build([
+            mergingPass: DomainFactory.createMergingPass([
                 mergingSet: mergingSet,
             ] + passMap),
             qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
@@ -409,7 +412,7 @@ class MergingPassServiceTests {
             workPackage: mergingSet.mergingWorkPackage,
         ] + bamFileMap)
 
-        MergingSet furtherMergedSet = MergingSet.build([
+        MergingSet furtherMergedSet = DomainFactory.createMergingSet([
             mergingWorkPackage: processedMergedBamFile.mergingWorkPackage,
             identifier: MergingSet.nextIdentifier(processedMergedBamFile.mergingWorkPackage),
             status: MergingSet.State.PROCESSED
@@ -421,7 +424,7 @@ class MergingPassServiceTests {
         ] + mergingSetAssignmentMap)
 
         ProcessedMergedBamFile furtherMergedBamFile = ProcessedMergedBamFile.build([
-            mergingPass: MergingPass.build([
+            mergingPass: DomainFactory.createMergingPass([
                 mergingSet: furtherMergedSet,
             ] + furtherMergedPassMap),
             qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
@@ -512,7 +515,7 @@ class MergingPassServiceTests {
     @Test
     public void testDeleteOldMergingProcessingFiles_ConditionLaterPass_OtherMergingSet() {
         Date createdBeforeDate = new Date().plus(1)
-        MergingSet mergingSet = MergingSet.build()
+        MergingSet mergingSet = DomainFactory.createMergingSet()
         List<ProcessedMergedBamFile> processedMergedBamFiles = createProcessedMergedBamFileWithLaterProcessedPass([workPackage: mergingSet.mergingWorkPackage], [mergingSet:mergingSet])
         createMergingPassService()
 
@@ -686,7 +689,7 @@ class MergingPassServiceTests {
     @Test
     public void testDeleteOldMergingProcessingFiles_ConditionFurtherMerged_FurtherBamFileIsHasOtherMergingSet() {
         Date createdBeforeDate = new Date().plus(1)
-        MergingSet mergingSet = MergingSet.build()
+        MergingSet mergingSet = DomainFactory.createMergingSet()
         List<ProcessedMergedBamFile> processedMergedBamFiles = createProcessedMergedBamFileWithFurtherMerged(
                         [:], [:], [:],
                         [workPackage: mergingSet.mergingWorkPackage], [mergingSet: mergingSet]

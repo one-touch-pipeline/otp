@@ -423,7 +423,9 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
 
     @Test
     public void testDeleteMergingRelatedConnectionsOfBamFile() throws Exception {
-        MergingWorkPackage mergingWorkPackage = MergingWorkPackage.build(pipeline: Pipeline.build(name: Pipeline.Name.DEFAULT_OTP))
+        MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage([
+                pipeline: DomainFactory.createDefaultOtpPipeline()
+        ])
         MergingSet mergingSet = MergingSet.build(mergingWorkPackage: mergingWorkPackage)
         ProcessedBamFile processedBamFile = DomainFactory.createProcessedBamFile(mergingWorkPackage).save(flush: true)
         MergingPass mergingPass = MergingPass.build(mergingSet: mergingSet)

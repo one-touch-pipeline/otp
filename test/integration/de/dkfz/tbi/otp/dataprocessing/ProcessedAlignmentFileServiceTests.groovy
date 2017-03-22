@@ -554,7 +554,7 @@ class ProcessedAlignmentFileServiceTests {
     @Test
     void testDeleteOldMergingProcessingFiles_ConditionMerged_ProcessedMergedBamFileHasWrongMergingPass() {
         Date createdBeforeDate = new Date().plus(1)
-        MergingPass mergingPass = MergingPass.build()
+        MergingPass mergingPass = DomainFactory.createMergingPass()
         ProcessedBamFile processedBamFile = createProcessedBamFileWhichIsMerged(
                         mergingBamFileMap: [mergingPass: mergingPass, workPackage: mergingPass.mergingWorkPackage]
                         )
@@ -566,7 +566,7 @@ class ProcessedAlignmentFileServiceTests {
     @Test
     void testDeleteOldMergingProcessingFiles_ConditionMerged_ProcessedMergedBamFileHasWrongMergingSet() {
         Date createdBeforeDate = new Date().plus(1)
-        MergingSet mergingSet = MergingSet.build()
+        MergingSet mergingSet = DomainFactory.createMergingSet()
         ProcessedBamFile processedBamFile = createProcessedBamFileWhichIsMerged(
                         mergingPassMap: [mergingSet: mergingSet],
                         mergingBamFileMap: [workPackage: mergingSet.mergingWorkPackage],
@@ -861,7 +861,7 @@ class ProcessedAlignmentFileServiceTests {
     @Test
     void testDeleteOldAlignmentProcessingFiles_WithSaiFile_ConditionMerged_ProcessedMergedBamFileHasWrongMergingPass() {
         Date createdBeforeDate = new Date().plus(1)
-        MergingPass mergingPass = MergingPass.build()
+        MergingPass mergingPass = DomainFactory.createMergingPass()
         ProcessedBamFile processedBamFile = createProcessedBamFileWithSaiFileWhichIsMerged(
                         mergingBamFileMap: [mergingPass: mergingPass, workPackage: mergingPass.mergingWorkPackage],
                         )
@@ -873,7 +873,7 @@ class ProcessedAlignmentFileServiceTests {
     @Test
     void testDeleteOldAlignmentProcessingFiles_WithSaiFile_ConditionMerged_ProcessedMergedBamFileHasWrongMergingSet() {
         Date createdBeforeDate = new Date().plus(1)
-        MergingSet mergingSet = MergingSet.build()
+        MergingSet mergingSet = DomainFactory.createMergingSet()
         ProcessedBamFile processedBamFile = createProcessedBamFileWithSaiFileWhichIsMerged(
                         mergingPassMap: [mergingSet: mergingSet],
                         mergingBamFileMap: [workPackage: mergingSet.mergingWorkPackage],
