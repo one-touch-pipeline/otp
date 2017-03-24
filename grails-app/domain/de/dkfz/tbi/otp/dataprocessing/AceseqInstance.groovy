@@ -1,10 +1,9 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyAnalysisResult
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
-import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
-import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.*
 
 class AceseqInstance extends BamFilePairAnalysis implements ProcessParameterObject, Entity, RoddyAnalysisResult {
 
@@ -86,5 +85,17 @@ class AceseqInstance extends BamFilePairAnalysis implements ProcessParameterObje
         List<File> resultList = new FileNameByRegexFinder().getFileNames(getInstancePath().absoluteDataManagementPath.toString(),
                 ("${this.individual.pid}_plot_").replace('.', '\\.')+ '.+_ALL\\.png').collect{new File(it)}
         return resultList
+    }
+
+    List<File> getAllFiles() {
+        return [
+                getGcCorrected(),
+                getQcGcCorrected(),
+                getWgCoverage(),
+                getTcnDistancesCombinedStar(),
+                getPlotExtra(),
+                getPlotAll(),
+                getQcJsonFile(),
+        ].flatten()
     }
 }

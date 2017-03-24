@@ -332,6 +332,9 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         return baseDirectory
     }
 
+    /**
+     * The general directory for all runs of this workflow test
+     */
     protected File getWorkflowDirectory() {
         File workflowDirectory = new File(getRootDirectory(), getNonQualifiedClassName())
         return workflowDirectory

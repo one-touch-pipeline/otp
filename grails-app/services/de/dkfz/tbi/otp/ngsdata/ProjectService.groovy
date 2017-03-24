@@ -453,7 +453,7 @@ AND ace.granting = true
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void configureSnvPipelineProject(RoddyConfiguration snvPipelineConfiguration) {
+    RoddyWorkflowConfig configureSnvPipelineProject(RoddyConfiguration snvPipelineConfiguration) {
         Pipeline pipeline = exactlyOneElement(Pipeline.findAllByTypeAndName(
                 Pipeline.Type.SNV,
                 Pipeline.Name.RODDY_SNV,
@@ -472,26 +472,27 @@ AND ace.granting = true
             roddyWorkflowConfig.previousConfig = snvConfig
             roddyWorkflowConfig.save(flush: true)
         }
+        return roddyWorkflowConfig
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void configureIndelPipelineProject(RoddyConfiguration indelPipelineConfiguration) {
+    RoddyWorkflowConfig configureIndelPipelineProject(RoddyConfiguration indelPipelineConfiguration) {
         Pipeline pipeline = exactlyOneElement(Pipeline.findAllByTypeAndName(
                 Pipeline.Type.INDEL,
                 Pipeline.Name.RODDY_INDEL,
         ))
 
-        configurePipelineProject(indelPipelineConfiguration, pipeline, RoddyIndelConfigTemplate)
+        return configurePipelineProject(indelPipelineConfiguration, pipeline, RoddyIndelConfigTemplate)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void configureAceseqPipelineProject(RoddyConfiguration aceseqPipelineConfiguration) {
+    RoddyWorkflowConfig configureAceseqPipelineProject(RoddyConfiguration aceseqPipelineConfiguration) {
         Pipeline pipeline = exactlyOneElement(Pipeline.findAllByTypeAndName(
                 Pipeline.Type.ACESEQ,
                 Pipeline.Name.RODDY_ACESEQ,
         ))
 
-        configurePipelineProject(aceseqPipelineConfiguration, pipeline, RoddyAceseqConfigTemplate)
+        return configurePipelineProject(aceseqPipelineConfiguration, pipeline, RoddyAceseqConfigTemplate)
     }
 
     private RoddyWorkflowConfig configurePipelineProject(RoddyConfiguration configuration, Pipeline pipeline, Class roddyConfigTemplate) {

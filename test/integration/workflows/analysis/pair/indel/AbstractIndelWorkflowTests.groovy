@@ -7,7 +7,7 @@ import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.*
 import workflows.analysis.pair.*
 
-abstract class AbstractIndelWorkflowTests extends AbstractBamFilePairAnalysisWorkflowTests{
+abstract class AbstractIndelWorkflowTests extends AbstractRoddyBamFilePairAnalysisWorkflowTests<IndelCallingInstance> {
 
     static final String PLUGIN_NAME = 'IndelCallingWorkflow'
     static final String PLUGIN_VERSION = '1.0.167'
@@ -88,10 +88,6 @@ echo 'OK'
         )
     }
 
-    @Override
-    ReferenceGenome createReferenceGenome() {
-        return createAndSetup_Bwa06_1K_ReferenceGenome()
-    }
 
     @Override
     List<String> getWorkflowScripts() {
@@ -102,20 +98,13 @@ echo 'OK'
         ]
     }
 
-    void check() {
-        IndelCallingInstance createdInstance = IndelCallingInstance.listOrderById().last()
-        assert createdInstance.processingState == AnalysisProcessingStates.FINISHED
-        assert createdInstance.config == config
-        assert createdInstance.sampleType1BamFile == bamFileTumor
-        assert createdInstance.sampleType2BamFile == bamFileControl
-
-        [
-                createdInstance.getResultFilePathsToValidate(),
-                createdInstance.getCombinedPlotPath(),
-        ].flatten().each {
-            LsdfFilesService.ensureFileIsReadableAndNotEmpty(it)
-        }
+    List<File> filesToCheck(IndelCallingInstance indelCallingInstance) {
+        return [
+                indelCallingInstance.getResultFilePathsToValidate(),
+                indelCallingInstance.getCombinedPlotPath(),
+        ].flatten()
     }
+
 
     @Override
     File getWorkflowData() {

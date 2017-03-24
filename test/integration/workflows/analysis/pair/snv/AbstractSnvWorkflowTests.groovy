@@ -3,7 +3,7 @@ package workflows.analysis.pair.snv
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import org.junit.*
-import workflows.analysis.pair.AbstractBamFilePairAnalysisWorkflowTests
+import workflows.analysis.pair.*
 
 abstract class AbstractSnvWorkflowTests extends AbstractBamFilePairAnalysisWorkflowTests {
 

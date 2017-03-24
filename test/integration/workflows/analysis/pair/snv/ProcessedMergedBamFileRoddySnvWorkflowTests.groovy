@@ -1,12 +1,13 @@
 package workflows.analysis.pair.snv
 
 import org.junit.*
+import workflows.analysis.pair.bamfiles.*
 
 @Ignore
-class ProcessedMergedBamFileRoddySnvWorkflowTests extends AbstractRoddySnvWorkflowTests {
+class ProcessedMergedBamFileRoddySnvWorkflowTests extends AbstractRoddySnvWorkflowTests implements SeqTypeAndInputWgsBamFiles {
 
     @Before
     void prepare() {
-        setupProcessMergedWgsBamFile()
+        setupProcessMergedBamFile()
     }
 }
