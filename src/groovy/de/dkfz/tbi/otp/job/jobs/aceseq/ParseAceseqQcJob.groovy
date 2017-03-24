@@ -22,6 +22,9 @@ class ParseAceseqQcJob extends AbstractEndStateAwareJobImpl implements AutoResta
                 qc.aceseqInstance = aceseqInstance
                 assert qc.save(flush: true)
             }
+            aceseqInstance.processingState = AnalysisProcessingStates.FINISHED
+            assert aceseqInstance.save(flush: true)
+            succeed()
         }
     }
 }

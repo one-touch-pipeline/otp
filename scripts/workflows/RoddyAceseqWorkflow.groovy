@@ -6,7 +6,7 @@ import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
 String workflowName = "ACEseqWorkflow"
 
 plan(workflowName, ctx, true) {
-    start("roddyAceseqStart", "roddyAceseqStartJob")
+    start("roddyAceseqStart", "aceseqStartJob")
     job("executeRoddyAceseq", "executeRoddyAceseqJob")
     job("parseAceseqQc", "parseAceseqQcJob")
     job("notifyProcessFinished", "notifyProcessFinishedJob") {

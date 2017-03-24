@@ -80,5 +80,7 @@ class ParseAceseqQcJobSpec extends Specification {
         qc2.purity == "3.0"
         qc2.gender == "female"
         qc2.solutionPossible == 4
+
+        instance.processingState == AnalysisProcessingStates.FINISHED
     }
 }
