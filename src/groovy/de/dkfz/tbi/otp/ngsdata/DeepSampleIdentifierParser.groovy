@@ -28,7 +28,7 @@ class DeepSampleIdentifierParser implements SampleIdentifierParser{
         String donorNr = "([0-9]([0-9]|[ab]))"
         String cellLines = "(HepaRG|HepG2|MCF10A)"
         String cellLineBroadInst = "(3T3L1)"
-        String organ = "(Bl|Co|Il|In|LP|Li|SF|WE|WS|WM|Br|Bm|NN)"
+        String organ = "(Bl|Co|Il|In|LP|Li|SF|Sk|Sp|WE|WS|WM|Br|Bm|NN)"
         String cellType = "(Ad|Al|As|CM|Ec|EM|Fi|He|HG|HR|Ku|Ma|Mc|Mo|Mu|NP|PM|TA|Th|Ti|TM4|TM8|TN|TN8|TR|T8)"
         String disease = "(CD|Ci|Ct|C[0-9]|CC|Db[0-9]|D[1-9]|Oa|OC|OS|PH|PS|RA|RD|SC|Si|SL|SO|SP[1-9]|St|TE|TO|T[1-9]|UC|Sh|CS)"
         String diseaseSuffix = "([0-9])"
