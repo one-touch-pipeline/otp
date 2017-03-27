@@ -317,7 +317,7 @@ class TrackingService {
             status = NOTHING_DONE_MIGHT_DO
         } else if ([1, 2].every { sp."mergingWorkPackage${it}".completeProcessableBamFileInProjectFolder }) {
             if (BamFileAnalysisService.ANALYSIS_CONFIG_CLASSES.any {
-                service.samplePairForProcessing(ProcessingPriority.MINIMUM_PRIORITY, it, sp)
+                service.samplePairForProcessing(ProcessingPriority.MINIMUM_PRIORITY, it, [sp.seqType], sp)
             }) {
               status = NOTHING_DONE_MIGHT_DO
             } else {

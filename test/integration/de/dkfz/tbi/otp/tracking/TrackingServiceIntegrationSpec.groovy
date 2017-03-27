@@ -24,7 +24,9 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
     AceseqService aceseqService
     CreateNotificationTextService createNotificationTextService
 
-    static List listPairAnalyses = [
+    ProcessingOption processingOption
+
+    static List listPairAnalysis = [
             [
                     analysisType           : "ICI",
                     createRoddyBamFile     : "createIndelCallingInstanceWithRoddyBamFiles",
@@ -53,6 +55,12 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
                 createNotificationTextService: createNotificationTextService,
         )
         DomainFactory.createAllAnalysableSeqTypes()
+        processingOption = DomainFactory.createProcessingOption([
+                name: AceseqService.PROCESSING_OPTION_REFERENCE_KEY,
+                type: null,
+                project: null,
+                value: 'test',
+        ])
     }
 
     void cleanup() {
@@ -709,10 +717,10 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         createSeqTrackProcessingStatus(mwpStatus).snvProcessingStatus == NOTHING_DONE_WONT_DO
     }
 
-    @Unroll("fillInSamplePairStatuses, #pairAnalyses.analysisType withdrawn, returns NOTHING_DONE_WONT_DO")
+    @Unroll("fillInSamplePairStatuses, #pairAnalysis.analysisType withdrawn, returns NOTHING_DONE_WONT_DO")
     void "fillInSamplePairStatuses, analysisInstance withdrawn, returns NOTHING_DONE_WONT_DO"() {
         given:
-        BamFilePairAnalysis analysisInstance = DomainFactory."${pairAnalyses.createRoddyBamFile}"(processingState: AnalysisProcessingStates.FINISHED)
+        BamFilePairAnalysis analysisInstance = DomainFactory."${pairAnalysis.createRoddyBamFile}"(processingState: AnalysisProcessingStates.FINISHED)
 
         [1, 2].each {
             setBamFileInProjectFolder(analysisInstance."sampleType${it}BamFile")
@@ -728,17 +736,17 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         then:
         assert analysisInstance.withdrawn
         SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
-        samplePairStatus."${pairAnalyses.completeCallingInstance}" == null
-        mwpStatus."${pairAnalyses.processingStatus}" == NOTHING_DONE_WONT_DO
-        createSeqTrackProcessingStatus(mwpStatus)."${pairAnalyses.processingStatus}" == NOTHING_DONE_WONT_DO
+        samplePairStatus."${pairAnalysis.completeCallingInstance}" == null
+        mwpStatus."${pairAnalysis.processingStatus}" == NOTHING_DONE_WONT_DO
+        createSeqTrackProcessingStatus(mwpStatus)."${pairAnalysis.processingStatus}" == NOTHING_DONE_WONT_DO
 
         where:
-        pairAnalyses << listPairAnalyses
+        pairAnalysis << listPairAnalysis
     }
     @Unroll("fillInSamplePairStatuses, no #pairAnalysis.analysisType, bamFileInProjectFolder set, no samplePairForProcessing, returns NOTHING_DONE_WONT_DO")
     void "fillInSamplePairStatuses, no analysisInstance, bamFileInProjectFolder set, no samplePairForProcessing, returns NOTHING_DONE_WONT_DO"() {
         given:
-        BamFilePairAnalysis analysisInstance = DomainFactory."${pairAnalyses.createRoddyBamFile}"()
+        BamFilePairAnalysis analysisInstance = DomainFactory."${pairAnalysis.createRoddyBamFile}"()
 
         [1, 2].each {
             setBamFileInProjectFolder(analysisInstance."sampleType${it}BamFile")
@@ -755,20 +763,19 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         then:
         SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
         samplePairStatus.samplePair == analysisInstance.samplePair
-        samplePairStatus."${pairAnalyses.completeCallingInstance}" == null
-        samplePairStatus."${pairAnalyses.processingStatus}" == NOTHING_DONE_WONT_DO
-        mwpStatus."${pairAnalyses.processingStatus}" == NOTHING_DONE_WONT_DO
-        createSeqTrackProcessingStatus(mwpStatus)."${pairAnalyses.processingStatus}" == NOTHING_DONE_WONT_DO
+        samplePairStatus."${pairAnalysis.completeCallingInstance}" == null
+        samplePairStatus."${pairAnalysis.processingStatus}" == NOTHING_DONE_WONT_DO
+        mwpStatus."${pairAnalysis.processingStatus}" == NOTHING_DONE_WONT_DO
+        createSeqTrackProcessingStatus(mwpStatus)."${pairAnalysis.processingStatus}" == NOTHING_DONE_WONT_DO
 
         where:
-        pairAnalyses << listPairAnalyses
+        pairAnalysis << listPairAnalysis
     }
 
     @Unroll("fillInSamplePairStatuses, no #pairAnalysis.analysisType, bamFileInProjectFolder set, samplePairForProcessing exists, returns NOTHING_DONE_MIGHT_DO")
     void "fillInSamplePairStatuses, no analysisInstance, bamFileInProjectFolder set, samplePairForProcessing exists, returns NOTHING_DONE_MIGHT_DO"() {
         given:
-        BamFilePairAnalysis analysisInstance = DomainFactory."${pairAnalyses.createRoddyBamFile}"([:], [coverage: 2], [coverage: 2])
-
+        BamFilePairAnalysis analysisInstance = DomainFactory."${pairAnalysis.createRoddyBamFile}"([:], [coverage: 2], [coverage: 2])
         [1, 2].each {
             setBamFileInProjectFolder(analysisInstance."sampleType${it}BamFile")
             DomainFactory.createProcessingThresholdsForBamFile(analysisInstance."sampleType${it}BamFile", [coverage: 1, numberOfLanes: null])
@@ -777,27 +784,31 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         MergingWorkPackageProcessingStatus mwpStatus = createMergingWorkPackageProcessingStatus(
                 analysisInstance.sampleType1BamFile)
 
+        processingOption.value = analysisInstance.samplePair.mergingWorkPackage1.referenceGenome.name
+        processingOption.save(flush: true)
+
         analysisInstance.delete(flush: true)
 
         when:
         trackingService.fillInSamplePairStatuses([mwpStatus], new SamplePairDiscovery())
 
         then:
+
         SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
         samplePairStatus.samplePair == analysisInstance.samplePair
-        samplePairStatus."${pairAnalyses.completeCallingInstance}" == null
-        samplePairStatus."${pairAnalyses.processingStatus}" == NOTHING_DONE_MIGHT_DO
-        mwpStatus."${pairAnalyses.processingStatus}" == NOTHING_DONE_MIGHT_DO
-        createSeqTrackProcessingStatus(mwpStatus)."${pairAnalyses.processingStatus}" == NOTHING_DONE_MIGHT_DO
+        samplePairStatus."${pairAnalysis.completeCallingInstance}" == null
+        samplePairStatus."${pairAnalysis.processingStatus}" == NOTHING_DONE_MIGHT_DO
+        mwpStatus."${pairAnalysis.processingStatus}" == NOTHING_DONE_MIGHT_DO
+        createSeqTrackProcessingStatus(mwpStatus)."${pairAnalysis.processingStatus}" == NOTHING_DONE_MIGHT_DO
 
         where:
-        pairAnalyses << listPairAnalyses
+        pairAnalysis << listPairAnalysis
     }
 
     @Unroll("fillInSamplePairStatuses, no #pairAnalysis.analysisType, bamFileInProjectFolder unset, returns NOTHING_DONE_MIGHT_DO")
     void "fillInSamplePairStatuses, no analysisInstance, bamFileInProjectFolder unset, returns NOTHING_DONE_MIGHT_DO"() {
         given:
-        BamFilePairAnalysis analysisInstance = DomainFactory."${pairAnalyses.createRoddyBamFile}"()
+        BamFilePairAnalysis analysisInstance = DomainFactory."${pairAnalysis.createRoddyBamFile}"()
 
         MergingWorkPackageProcessingStatus mwpStatus = createMergingWorkPackageProcessingStatus(
                 analysisInstance.sampleType1BamFile.mergingWorkPackage, NOTHING_DONE_MIGHT_DO)
@@ -810,19 +821,19 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         then:
         SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
         samplePairStatus.samplePair == analysisInstance.samplePair
-        samplePairStatus."${pairAnalyses.completeCallingInstance}" == null
-        samplePairStatus."${pairAnalyses.processingStatus}"  == NOTHING_DONE_MIGHT_DO
-        mwpStatus."${pairAnalyses.processingStatus}"  == NOTHING_DONE_MIGHT_DO
-        createSeqTrackProcessingStatus(mwpStatus)."${pairAnalyses.processingStatus}"  == NOTHING_DONE_MIGHT_DO
+        samplePairStatus."${pairAnalysis.completeCallingInstance}" == null
+        samplePairStatus."${pairAnalysis.processingStatus}"  == NOTHING_DONE_MIGHT_DO
+        mwpStatus."${pairAnalysis.processingStatus}"  == NOTHING_DONE_MIGHT_DO
+        createSeqTrackProcessingStatus(mwpStatus)."${pairAnalysis.processingStatus}"  == NOTHING_DONE_MIGHT_DO
 
         where:
-        pairAnalyses << listPairAnalyses
+        pairAnalysis << listPairAnalysis
     }
 
     @Unroll("fillInSamplePairStatuses, 1 #pairAnalysis.analysisType FINISHED, bamFileInProjectFolder set, returns ALL_DONE")
     void "fillInSamplePairStatuses, 1 analysisInstance FINISHED, bamFileInProjectFolder set, returns ALL_DONE"() {
         given:
-        BamFilePairAnalysis analysisInstance = DomainFactory."${pairAnalyses.createRoddyBamFile}"(processingState: AnalysisProcessingStates.FINISHED)
+        BamFilePairAnalysis analysisInstance = DomainFactory."${pairAnalysis.createRoddyBamFile}"(processingState: AnalysisProcessingStates.FINISHED)
 
         [1, 2].each {
             setBamFileInProjectFolder(analysisInstance."sampleType${it}BamFile")
@@ -837,19 +848,19 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         then:
         SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
         samplePairStatus.samplePair == analysisInstance.samplePair
-        samplePairStatus."${pairAnalyses.completeCallingInstance}" == analysisInstance
-        samplePairStatus."${pairAnalyses.processingStatus}" == ALL_DONE
-        mwpStatus."${pairAnalyses.processingStatus}" == ALL_DONE
-        createSeqTrackProcessingStatus(mwpStatus)."${pairAnalyses.processingStatus}" == ALL_DONE
+        samplePairStatus."${pairAnalysis.completeCallingInstance}" == analysisInstance
+        samplePairStatus."${pairAnalysis.processingStatus}" == ALL_DONE
+        mwpStatus."${pairAnalysis.processingStatus}" == ALL_DONE
+        createSeqTrackProcessingStatus(mwpStatus)."${pairAnalysis.processingStatus}" == ALL_DONE
 
         where:
-        pairAnalyses << listPairAnalyses
+        pairAnalysis << listPairAnalysis
     }
 
     @Unroll("fillInSamplePairStatuses, 1 #pairAnalysis.analysisType FINISHED, bamFileInProjectFolder unset, returns NOTHING_DONE_MIGHT_DO")
     void "fillInSamplePairStatuses, 1 analysisInstance FINISHED, bamFileInProjectFolder unset, returns NOTHING_DONE_MIGHT_DO"() {
         given:
-        BamFilePairAnalysis analysisInstance = DomainFactory."${pairAnalyses.createRoddyBamFile}"(processingState: AnalysisProcessingStates.FINISHED)
+        BamFilePairAnalysis analysisInstance = DomainFactory."${pairAnalysis.createRoddyBamFile}"(processingState: AnalysisProcessingStates.FINISHED)
 
         MergingWorkPackageProcessingStatus mwpStatus = createMergingWorkPackageProcessingStatus(
                 analysisInstance.sampleType1BamFile.mergingWorkPackage, NOTHING_DONE_MIGHT_DO)
@@ -860,20 +871,20 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         then:
         SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
         samplePairStatus.samplePair == analysisInstance.samplePair
-        samplePairStatus."${pairAnalyses.completeCallingInstance}" == null
-        samplePairStatus."${pairAnalyses.processingStatus}" == NOTHING_DONE_MIGHT_DO
-        mwpStatus."${pairAnalyses.processingStatus}" == NOTHING_DONE_MIGHT_DO
-        createSeqTrackProcessingStatus(mwpStatus)."${pairAnalyses.processingStatus}" == NOTHING_DONE_MIGHT_DO
+        samplePairStatus."${pairAnalysis.completeCallingInstance}" == null
+        samplePairStatus."${pairAnalysis.processingStatus}" == NOTHING_DONE_MIGHT_DO
+        mwpStatus."${pairAnalysis.processingStatus}" == NOTHING_DONE_MIGHT_DO
+        createSeqTrackProcessingStatus(mwpStatus)."${pairAnalysis.processingStatus}" == NOTHING_DONE_MIGHT_DO
 
         where:
-        pairAnalyses << listPairAnalyses
+        pairAnalysis << listPairAnalysis
     }
 
 
     @Unroll( "fillInSamplePairStatuses, 1 #pairAnalysis.analysisType not FINISHED, returns NOTHING_DONE_MIGHT_DO")
     void "fillInSamplePairStatuses, 1 analysisInstance not FINISHED, returns NOTHING_DONE_MIGHT_DO"() {
         given:
-        BamFilePairAnalysis analysisInstance = DomainFactory."${pairAnalyses.createRoddyBamFile}"()
+        BamFilePairAnalysis analysisInstance = DomainFactory."${pairAnalysis.createRoddyBamFile}"()
 
         [1, 2].each {
             setBamFileInProjectFolder(analysisInstance."sampleType${it}BamFile")
@@ -888,20 +899,20 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         then:
         SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
         samplePairStatus.samplePair == analysisInstance.samplePair
-        samplePairStatus."${pairAnalyses.completeCallingInstance}" == null
-        samplePairStatus."${pairAnalyses.processingStatus}" == NOTHING_DONE_MIGHT_DO
-        mwpStatus."${pairAnalyses.processingStatus}" == NOTHING_DONE_MIGHT_DO
-        createSeqTrackProcessingStatus(mwpStatus)."${pairAnalyses.processingStatus}" == NOTHING_DONE_MIGHT_DO
+        samplePairStatus."${pairAnalysis.completeCallingInstance}" == null
+        samplePairStatus."${pairAnalysis.processingStatus}" == NOTHING_DONE_MIGHT_DO
+        mwpStatus."${pairAnalysis.processingStatus}" == NOTHING_DONE_MIGHT_DO
+        createSeqTrackProcessingStatus(mwpStatus)."${pairAnalysis.processingStatus}" == NOTHING_DONE_MIGHT_DO
 
         where:
-        pairAnalyses << listPairAnalyses
+        pairAnalysis << listPairAnalysis
     }
 
 
     @Unroll("fillInSamplePairStatuses, with #pairAnalysis.analysisType 2 MWP, 1 SP ALL_DONE, 1 MWP without SP, returns ALL_DONE and NOTHING_DONE_WONT_DO")
     void "fillInSamplePairStatuses, with analysisInstance 2 MWP, 1 SP ALL_DONE, 1 MWP without SP, returns ALL_DONE and NOTHING_DONE_WONT_DO"(){
         given:
-        BamFilePairAnalysis analysisInstance = DomainFactory."${pairAnalyses.createRoddyBamFile}"(processingState: AnalysisProcessingStates.FINISHED)
+        BamFilePairAnalysis analysisInstance = DomainFactory."${pairAnalysis.createRoddyBamFile}"(processingState: AnalysisProcessingStates.FINISHED)
 
         [1, 2].each {
             setBamFileInProjectFolder(analysisInstance."sampleType${it}BamFile")
@@ -918,23 +929,23 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         then:
         SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwp1Status.samplePairProcessingStatuses)
         samplePairStatus.samplePair == analysisInstance.samplePair
-        samplePairStatus."${pairAnalyses.completeCallingInstance}" == analysisInstance
-        samplePairStatus."${pairAnalyses.processingStatus}" == ALL_DONE
-        mwp1Status."${pairAnalyses.processingStatus}" == ALL_DONE
+        samplePairStatus."${pairAnalysis.completeCallingInstance}" == analysisInstance
+        samplePairStatus."${pairAnalysis.processingStatus}" == ALL_DONE
+        mwp1Status."${pairAnalysis.processingStatus}" == ALL_DONE
 
         mwp2Status.samplePairProcessingStatuses.isEmpty()
-        mwp2Status."${pairAnalyses.processingStatus}" == NOTHING_DONE_WONT_DO
+        mwp2Status."${pairAnalysis.processingStatus}" == NOTHING_DONE_WONT_DO
 
-        createSeqTrackProcessingStatus(mwp1Status, mwp2Status)."${pairAnalyses.processingStatus}" == PARTLY_DONE_WONT_DO_MORE
+        createSeqTrackProcessingStatus(mwp1Status, mwp2Status)."${pairAnalysis.processingStatus}" == PARTLY_DONE_WONT_DO_MORE
 
         where:
-        pairAnalyses << listPairAnalyses
+        pairAnalysis << listPairAnalysis
     }
 
     @Unroll("fillInSamplePairStatuses, with #pairAnalysis.analysisType 2 MWP, 1 MWP without SP, 1 MWP MIGHT_DO_MORE, returns NOTHING_DONE_WONT_DO and NOTHING_DONE_MIGHT_DO")
     void "fillInSamplePairStatuses, with analysisInstance 2 MWP, 1 MWP without SP, 1 MWP MIGHT_DO_MORE, returns NOTHING_DONE_WONT_DO and NOTHING_DONE_MIGHT_DO"(){
         given:
-        BamFilePairAnalysis analysisInstance = DomainFactory."${pairAnalyses.createRoddyBamFile}"(processingState: AnalysisProcessingStates.FINISHED)
+        BamFilePairAnalysis analysisInstance = DomainFactory."${pairAnalysis.createRoddyBamFile}"(processingState: AnalysisProcessingStates.FINISHED)
 
         MergingWorkPackageProcessingStatus mwp1Status = createMergingWorkPackageProcessingStatus(
                 DomainFactory.createMergingWorkPackage(), NOTHING_DONE_MIGHT_DO)
@@ -946,31 +957,31 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
 
         then:
         mwp1Status.samplePairProcessingStatuses.isEmpty()
-        mwp1Status."${pairAnalyses.processingStatus}" == NOTHING_DONE_WONT_DO
+        mwp1Status."${pairAnalysis.processingStatus}" == NOTHING_DONE_WONT_DO
 
         SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwp2Status.samplePairProcessingStatuses)
         samplePairStatus.samplePair == analysisInstance.samplePair
-        samplePairStatus."${pairAnalyses.completeCallingInstance}" == null
-        samplePairStatus."${pairAnalyses.processingStatus}" == NOTHING_DONE_MIGHT_DO
-        mwp2Status."${pairAnalyses.processingStatus}" == NOTHING_DONE_MIGHT_DO
+        samplePairStatus."${pairAnalysis.completeCallingInstance}" == null
+        samplePairStatus."${pairAnalysis.processingStatus}" == NOTHING_DONE_MIGHT_DO
+        mwp2Status."${pairAnalysis.processingStatus}" == NOTHING_DONE_MIGHT_DO
 
-        createSeqTrackProcessingStatus(mwp1Status, mwp2Status)."${pairAnalyses.processingStatus}" == NOTHING_DONE_MIGHT_DO
+        createSeqTrackProcessingStatus(mwp1Status, mwp2Status)."${pairAnalysis.processingStatus}" == NOTHING_DONE_MIGHT_DO
 
         where:
-        pairAnalyses << listPairAnalyses
+        pairAnalysis << listPairAnalysis
     }
 
     @Unroll("fillInSamplePairStatuses, with #pairAnalysis.analysisType 2 MWP, 1 SP ALL_DONE, 1 SP MIGHT_DO_MORE, returns ALL_DONE and NOTHING_DONE_MIGHT_DO")
     void "fillInSamplePairStatuses, with analysisInstance 2 MWP, 1 SP ALL_DONE, 1 SP MIGHT_DO_MORE, returns ALL_DONE and NOTHING_DONE_MIGHT_DO"(){
 
         given:
-        BamFilePairAnalysis analysisInstance = DomainFactory."${pairAnalyses.createRoddyBamFile}"(processingState: AnalysisProcessingStates.FINISHED)
+        BamFilePairAnalysis analysisInstance = DomainFactory."${pairAnalysis.createRoddyBamFile}"(processingState: AnalysisProcessingStates.FINISHED)
 
         [1, 2].each {
             setBamFileInProjectFolder(analysisInstance."sampleType${it}BamFile")
         }
 
-        BamFilePairAnalysis analysisInstance2 = DomainFactory."${pairAnalyses.createRoddyBamFile}"(processingState: AnalysisProcessingStates.FINISHED)
+        BamFilePairAnalysis analysisInstance2 = DomainFactory."${pairAnalysis.createRoddyBamFile}"(processingState: AnalysisProcessingStates.FINISHED)
 
         MergingWorkPackageProcessingStatus mwp1Status =
                 createMergingWorkPackageProcessingStatus(analysisInstance.sampleType1BamFile)
@@ -983,20 +994,20 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         then:
         SamplePairProcessingStatus samplePair1Status = exactlyOneElement(mwp1Status.samplePairProcessingStatuses)
         samplePair1Status.samplePair == analysisInstance.samplePair
-        samplePair1Status."${pairAnalyses.completeCallingInstance}" == analysisInstance
-        samplePair1Status."${pairAnalyses.processingStatus}" == ALL_DONE
-        mwp1Status."${pairAnalyses.processingStatus}"  == ALL_DONE
+        samplePair1Status."${pairAnalysis.completeCallingInstance}" == analysisInstance
+        samplePair1Status."${pairAnalysis.processingStatus}" == ALL_DONE
+        mwp1Status."${pairAnalysis.processingStatus}"  == ALL_DONE
 
         SamplePairProcessingStatus samplePair2Status = exactlyOneElement(mwp2Status.samplePairProcessingStatuses)
         samplePair2Status.samplePair == analysisInstance2.samplePair
-        samplePair2Status."${pairAnalyses.completeCallingInstance}"  == null
-        samplePair2Status."${pairAnalyses.processingStatus}"  == NOTHING_DONE_MIGHT_DO
-        mwp2Status."${pairAnalyses.processingStatus}"  == NOTHING_DONE_MIGHT_DO
+        samplePair2Status."${pairAnalysis.completeCallingInstance}"  == null
+        samplePair2Status."${pairAnalysis.processingStatus}"  == NOTHING_DONE_MIGHT_DO
+        mwp2Status."${pairAnalysis.processingStatus}"  == NOTHING_DONE_MIGHT_DO
 
-        createSeqTrackProcessingStatus(mwp1Status, mwp2Status)."${pairAnalyses.processingStatus}"  == PARTLY_DONE_MIGHT_DO_MORE
+        createSeqTrackProcessingStatus(mwp1Status, mwp2Status)."${pairAnalysis.processingStatus}"  == PARTLY_DONE_MIGHT_DO_MORE
 
         where:
-        pairAnalyses << listPairAnalyses
+        pairAnalysis << listPairAnalysis
     }
 
     private static AbstractMergedBamFile createBamFileInProjectFolder(Map bamFileProperties = [:]) {

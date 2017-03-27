@@ -693,7 +693,10 @@ class DomainFactory {
                 libraryPreparationKit: base.libraryPreparationKit,
         )
         assert sample.save(failOnError: true)
-        return createMergingWorkPackage(base, sample)
+        return createMergingWorkPackage(base, [
+                sample:  sample,
+                referenceGenome: base.referenceGenome,
+        ])
     }
 
     /**
@@ -847,7 +850,7 @@ class DomainFactory {
         MergingWorkPackage controlWorkPackage = properties.samplePair?.mergingWorkPackage2 ?: createMergingWorkPackage(
                 pipeline: pipeline,
                 statSizeFileName: DEFAULT_TAB_FILE_NAME,
-                seqType: createSeqTypePaired(),
+                seqType: createWholeGenomeSeqType(),
         )
         SamplePair samplePair = properties.samplePair ?: createDisease(controlWorkPackage)
         MergingWorkPackage diseaseWorkPackage = samplePair.mergingWorkPackage1

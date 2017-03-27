@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.dataprocessing
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.ProcessingStatus
+import de.dkfz.tbi.otp.ngsdata.SeqType
 
 abstract class BamFileAnalysisService {
 
@@ -32,6 +33,10 @@ abstract class BamFileAnalysisService {
      * - config file is available
      */
     SamplePair samplePairForProcessing(short minPriority, Class<? extends ConfigPerProject> configClass, SamplePair sp = null) {
+        samplePairForProcessing(minPriority, configClass, [SeqType.wholeGenomePairedSeqType, SeqType.exomePairedSeqType],sp)
+    }
+
+    SamplePair samplePairForProcessing(short minPriority, Class<? extends ConfigPerProject> configClass, List<SeqType> seqTypes, SamplePair sp = null) {
         assert ANALYSIS_CONFIG_CLASSES.contains(configClass)
         final String WORKPACKAGE = "workPackage"
         final String SAMPLE = "${WORKPACKAGE}.sample"
@@ -73,6 +78,8 @@ abstract class BamFileAnalysisService {
                 (sp ? "AND sp = :sp " : '') +
                 //check that processing priority of the corresponding project is high enough
                 'AND sp.mergingWorkPackage1.sample.individual.project.processingPriority >= :minPriority ' +
+                'AND sp.mergingWorkPackage1.seqType in (:seqTypes) ' +
+                checkReferenceGenome() +
 
 
                 //check that the config file is available with at least one script with same version
@@ -104,10 +111,12 @@ abstract class BamFileAnalysisService {
                 processingStates: processingStatesNotProcessable,
                 minPriority: minPriority,
                 analysis: getAnalysisType(),
+                seqTypes: seqTypes,
         ]
         if (sp) {
             parameters.sp = sp
         }
+        parameters.putAll(checkReferenceGenomeMap())
 
         List<SamplePair> samplePairs = SamplePair.findAll(pairForSnvProcessing, parameters)
 
@@ -130,8 +139,16 @@ abstract class BamFileAnalysisService {
         }
     }
 
+    protected String checkReferenceGenome(){
+        return ''
+    }
+
+    protected Map<String, Object> checkReferenceGenomeMap(){
+        return [:]
+    }
 
     abstract protected String getProcessingStateCheck()
     abstract protected Class<BamFilePairAnalysis> getAnalysisClass()
     abstract protected Pipeline.Type getAnalysisType()
+
 }

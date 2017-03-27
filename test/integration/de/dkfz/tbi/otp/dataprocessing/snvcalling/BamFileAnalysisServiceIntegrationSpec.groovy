@@ -37,6 +37,8 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         script1 = map.script
         joinScript = map.joinScript
         roddyConfig1 = map.roddyConfig
+
+        DomainFactory.createIndelSeqTypes()
     }
 
 
@@ -63,16 +65,44 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         DomainFactory.createRoddyWorkflowConfig(
                 seqType: samplePair1.seqType,
                 project: samplePair1.project,
-                pipeline: pipeline
+                pipeline: pipeline()
         )
+        DomainFactory.createProcessingOption([
+                name: AceseqService.PROCESSING_OPTION_REFERENCE_KEY,
+                type: null,
+                project: null,
+                value: samplePair1.mergingWorkPackage1.referenceGenome.name,
+        ])
 
         expect:
         samplePair1 == service.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
 
         where:
-        processingStatus         | pipeline                                | service
-        "indelProcessingStatus"  | DomainFactory.createIndelPipelineLazy() |this.indelCallingService
-        "aceseqProcessingStatus" | DomainFactory.createAceseqPipelineLazy()|this.aceseqService
+        processingStatus         | pipeline                                     | service
+        "indelProcessingStatus"  | { DomainFactory.createIndelPipelineLazy() }  | this.indelCallingService
+        "aceseqProcessingStatus" | { DomainFactory.createAceseqPipelineLazy() } | this.aceseqService
+    }
+
+    @Unroll
+    void "samplePairForProcessing for ACEseq wrong referenceGenome"() {
+        given:
+        samplePair1.aceseqProcessingStatus= ProcessingStatus.NEEDS_PROCESSING
+        assert samplePair1.save(flush: true)
+        DomainFactory.createRoddyWorkflowConfig(
+                seqType: samplePair1.seqType,
+                project: samplePair1.project,
+                pipeline:  DomainFactory.createAceseqPipelineLazy()
+        )
+        DomainFactory.createProcessingOption([
+                name: AceseqService.PROCESSING_OPTION_REFERENCE_KEY,
+                type: null,
+                project: null,
+                value: 'foobar'
+        ])
+
+        expect:
+        null == this.aceseqService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
+
     }
 
     void "samplePairForProcessing when #status is NEEDS_PROCESSING but the #service is requested"() {

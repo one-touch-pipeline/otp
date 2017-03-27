@@ -13,6 +13,9 @@ class RoddyIndelCallingStartJobIntegrationSpec extends IntegrationSpec {
     @Autowired
     RoddyIndelCallingStartJob roddyIndelCallingStartJob
 
+    void setup() {
+        DomainFactory.createIndelSeqTypes()
+    }
 
     void "getConfig when config is null, throw an exception"() {
         given:
