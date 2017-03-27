@@ -172,7 +172,11 @@ class SamplePair implements Entity {
     }
 
     AceseqInstance findLatestAceseqInstance() {
-        return findLatestInstance(AceseqInstance.class) as AceseqInstance
+        BamFilePairAnalysis criteria = findLatestInstance(AceseqInstance.class)
+        if (!criteria?.withdrawn) {
+                return criteria
+        }
+        return null
     }
 
 
