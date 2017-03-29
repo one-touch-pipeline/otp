@@ -44,6 +44,7 @@ class ConfigureAnalysisController {
                 }
             }
         }
+        redirect(controller: "projectOverview", action: "specificOverview", params: [project: project.name])
     }
 
     private Map fetchData(Project project) {
