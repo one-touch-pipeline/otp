@@ -647,8 +647,9 @@ class PanCanAlignmentConfiguration extends RoddyConfiguration {
 }
 
 class RnaAlignmentConfiguration extends RoddyConfiguration {
+    boolean mouseData
     String referenceGenome
     String resources = "xl"
-    List<GeneModel> geneModels
+    GeneModel geneModel
     List<ReferenceGenomeIndex> referenceGenomeIndex
 }

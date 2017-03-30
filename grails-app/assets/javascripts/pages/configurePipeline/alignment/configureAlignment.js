@@ -6,11 +6,12 @@ $.otp.configureAlignment = {
         "use strict";
         $("div.addGeneModel button").click(this.addGeneModel);
         $.otp.configureAlignment.setStatSizeFileNames();
+        $('.dropDown').empty();
         $.otp.configureAlignment.setGeneModels();
         $.otp.configureAlignment.setToolVersion();
         $('#referenceGenome').change(function () {
             $.otp.configureAlignment.setStatSizeFileNames();
-            $('.geneModelSelect').not('.hidden').empty();
+            $('.dropDown').empty();
             $.otp.configureAlignment.setGeneModels();
             $.otp.configureAlignment.setToolVersion();
         });
@@ -59,10 +60,10 @@ $.otp.configureAlignment = {
             success: function (data) {
                 if (data.data) {
                     $.each(data.data, function(i, p) {
-                        $('.geneModelSelect').not('.hidden').last().append($('<option></option>').val(p.id).html(p.fileName));
+                        $('.geneModelSelect').append($('<option></option>').val(p.id).html(p.fileName));
                     });
                 } else {
-                    $('.geneModelSelect').not('.hidden').append($('<option></option>'));
+                    $('.geneModelSelect').append($('<option></option>'));
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {
@@ -84,11 +85,16 @@ $.otp.configureAlignment = {
                 referenceGenome: $('#referenceGenome').val()
             },
             success: function (data) {
-                $.each(data, function(index, value) {
-                    $('.toolVersionSelect_' + index).empty();
+                $.each(data.data, function(index, value) {
+                    var search = (index.indexOf("GENOME_STAR_INDEX") != -1) ? "GENOME_STAR_INDEX" : index;
                     if (value) {
                         $.each(value, function (i, p) {
-                            $('.toolVersionSelect_' + index).append($('<option></option>').val(p.id).html(p.indexToolVersion));
+                            var outputValue = index.toLowerCase().replace("genome_", "").replace("_index", "") + " - " + p.indexToolVersion;
+                            if (outputValue == data.defaultGenomeStarIndex) {
+                                $('.toolVersionSelect_' + search).append($('<option></option>').val(p.id).html(outputValue).selected());
+                            } else {
+                                $('.toolVersionSelect_' + search).append($('<option></option>').val(p.id).html(outputValue));
+                            }
                         });
                     } else {
                         $('.toolVersionSelect_' + index).append($('<option></option>'));

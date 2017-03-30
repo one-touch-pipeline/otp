@@ -40,7 +40,11 @@
                     <td>
                         <g:select name="toolVersionValue" from="${indexToolVersion}" class="dropDown toolVersionSelect_${it}"/>
                     </td>
-                    <td>&nbsp;</td>
+                    <g:if test="${it == "GENOME_STAR_INDEX"}">
+                        <td>${defaultGenomeStarIndex}</td>
+                    </g:if><g:else>
+                        <td>&nbsp;</td>
+                    </g:else>
                     <td>&nbsp;</td>
                 </tr>
             </g:each>
@@ -50,22 +54,19 @@
                     <g:message code="configurePipeline.rnaAlignment.geneModel"/>
                 </td>
                 <td valign="top" class="geneModel">
-                    <g:select name="geneModelValues" from="${geneModel}" class="dropDown geneModelSelect" noSelection="[(null): '']" /><br>
-                    <g:select name="geneModelValues" from="${geneModel}" class="dropDown geneModelSelect hidden" noSelection="[(null): '']" />
-                </td>
-                <td>&nbsp;</td>
-                <td>&nbsp;</td>
-            </tr>
-            <tr class="newGeneModel">
-                <td>&nbsp;</td>
-                <td>
-                    <div class="addGeneModel"><button class="buttons"><g:message code="configurePipeline.rnaAlignment.newGeneModel"/></button></div>
+                    <g:select name="geneModel.id" from="${geneModel}" class="dropDown geneModelSelect" noSelection="[(null): '']" /><br>
                 </td>
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>
             </tr>
             <tr>
                 <td colspan="4">&nbsp;</td>
+            </tr>
+            <tr>
+                <td valign="top" class="myKey"><g:message code="configurePipeline.mouse.data"/></td>
+                <td><g:checkBox name="mouseData"/></td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
             </tr>
             <tr>
                 <td class="myKey"><g:message code="configurePipeline.plugin.name"/></td>

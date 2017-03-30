@@ -123,13 +123,15 @@ class ConfigurePipelineController {
         if (!result) {
             RnaAlignmentConfiguration rnaAlignmentConfiguration = new RnaAlignmentConfiguration([
                     project              : cmd.project,
+                    baseProjectConfig    : cmd.baseProjectConfig,
                     seqType              : cmd.seqType,
                     referenceGenome      : cmd.referenceGenome,
                     pluginName           : cmd.pluginName,
                     pluginVersion        : cmd.pluginVersion,
                     configVersion        : cmd.config,
-                    geneModels           : cmd.geneModels,
+                    geneModel            : cmd.geneModel,
                     referenceGenomeIndex : cmd.referenceGenomeIndex,
+                    mouseData            : cmd.mouseData,
             ])
             projectService.configureRnaAlignmentDeciderProject(rnaAlignmentConfiguration)
             redirect(controller: "projectOverview", action: "specificOverview", params: [project: cmd.project.name])
@@ -139,23 +141,27 @@ class ConfigurePipelineController {
         String defaultPluginVersion = ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_RODDY_ALIGNMENT_PLUGIN_VERSION, cmd.seqType.roddyName, null)
         String defaultBaseProjectConfig = ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_BASE_PROJECT_CONFIG, cmd.seqType.roddyName, null)
         String defaultReferenceGenome = ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_DEFAULT_REFERENCE_GENOME, cmd.seqType.roddyName, null)
+        String defaultGenomeStarIndex = ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_DEFAULT_GENOME_STAR_INDEX, cmd.seqType.roddyName, null)
 
         assert ReferenceGenome.findByName(defaultReferenceGenome)
 
         result << getValues(cmd.project, cmd.seqType, pipeline)
 
         String referenceGenome = ReferenceGenomeProjectSeqType.findByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(cmd.project, cmd.seqType)?.referenceGenome?.name ?: defaultReferenceGenome
-        List<String> referenceGenomes = ReferenceGenome.list(sort: "name", order: "asc")*.name
+        List<String> referenceGenomes = ReferenceGenome.list(sort: "name", order: "asc").findAll {
+            ReferenceGenomeIndex.findByReferenceGenome(it) && GeneModel.findByReferenceGenome(it)
+        }*.name
 
         assert cmd.project.getProjectDirectory().exists()
 
         result << [
                 projects                : projects,
-                toolNames               : ToolName.findAllByType(ToolName.Type.RNA)*.name,
+                toolNames               : getToolNames(),
 
                 referenceGenome         : referenceGenome,
                 referenceGenomes        : referenceGenomes,
                 defaultReferenceGenome  : defaultReferenceGenome,
+                defaultGenomeStarIndex  : defaultGenomeStarIndex,
                 indexToolVersion        : null,
                 geneModel               : null,
 
@@ -195,11 +201,14 @@ class ConfigurePipelineController {
         List<ToolName> toolNames = ToolName.findAllByType(ToolName.Type.RNA)
         ReferenceGenome refGenome = ReferenceGenome.findByName(referenceGenome)
         Map data = [:]
+        Map toolNamesData = [:]
         toolNames.each {
-            data << [
+            toolNamesData << [
                     (it.name): ReferenceGenomeIndex.findAllByReferenceGenomeAndToolName(refGenome, it)
             ]
         }
+        data << ["defaultGenomeStarIndex" : ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_DEFAULT_GENOME_STAR_INDEX, SeqType.rnaPairedSeqType.roddyName, null)]
+        data << ["data" : toolNamesData]
         render data as JSON
     }
 
@@ -348,6 +357,12 @@ class ConfigurePipelineController {
                 lastRoddyConfig         : lastRoddyConfig,
         ]
     }
+
+    private List getToolNames() {
+        List<String> toolNames = ToolName.findAllByTypeAndNameNotIlike(ToolName.Type.RNA, "GENOME_STAR_INDEX%")*.name
+        toolNames.add(RoddyRnaConfigTemplate.GENOME_STAR_INDEX)
+        return toolNames.sort()
+    }
 }
 
 class ConfigureAlignmentPipelineSubmitCommand extends ConfigurePipelineSubmitCommand implements Serializable {
@@ -383,19 +398,10 @@ class ConfigureAlignmentPipelineSubmitCommand extends ConfigurePipelineSubmitCom
 
 class ConfigureRnaAlignmentPipelineSubmitCommand extends ConfigurePipelineSubmitCommand implements Serializable {
     String referenceGenome
+    boolean mouseData
 
-    List<GeneModel> geneModels = []
+    GeneModel geneModel
     List<ReferenceGenomeIndex> referenceGenomeIndex = []
-
-    void setGeneModelValues(List geneModelValues) {
-        if (geneModelValues) {
-            geneModelValues.each {
-                if (it) {
-                    geneModels.add(GeneModel.findById(it as long))
-                }
-            }
-        }
-    }
 
     void setToolVersionValue(List toolVersionValue) {
         if (toolVersionValue) {

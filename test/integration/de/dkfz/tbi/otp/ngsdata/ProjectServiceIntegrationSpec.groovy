@@ -853,7 +853,9 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
 
     void "test configureRnaAlignmentDeciderProject valid input"() {
         setup:
-        RnaAlignmentConfiguration configuration = createRnaAlignmentConfiguration()
+        RnaAlignmentConfiguration configuration = createRnaAlignmentConfiguration(
+                mouseData: mouseData
+        )
 
         when:
         SpringSecurityUtils.doWithAuth("admin") {
@@ -872,6 +874,9 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         roddyWorkflowConfig.exists()
         PosixFileAttributes attributes = Files.readAttributes(roddyWorkflowConfig.toPath(), PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
         TestCase.assertContainSame(attributes.permissions(), [PosixFilePermission.OWNER_READ, PosixFilePermission.GROUP_READ])
+
+        where:
+        mouseData << [false, true]
     }
 
     void "test configureDefaultOtpAlignmentDecider to configurePanCanAlignmentDeciderProject"() {
@@ -1285,8 +1290,15 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 pluginVersion       : '1.2.3',
                 baseProjectConfig   : 'baseConfig',
                 configVersion       : 'v1_0',
-                referenceGenomeIndex: [DomainFactory.createReferenceGenomeIndex(), DomainFactory.createReferenceGenomeIndex()],
-                geneModels          : [DomainFactory.createGeneModel(), DomainFactory.createGeneModel()],
+                referenceGenomeIndex: [
+                        DomainFactory.createReferenceGenomeIndex(toolName: DomainFactory.createToolName(name: "${RoddyRnaConfigTemplate.GENOME_STAR_INDEX}_200")),
+                        DomainFactory.createReferenceGenomeIndex(toolName: DomainFactory.createToolName(name: RoddyRnaConfigTemplate.GENOME_KALLISTO_INDEX)),
+                        DomainFactory.createReferenceGenomeIndex(toolName: DomainFactory.createToolName(name: RoddyRnaConfigTemplate.GENOME_GATK)),
+                        DomainFactory.createReferenceGenomeIndex(toolName: DomainFactory.createToolName(name: RoddyRnaConfigTemplate.ARRIBA_KNOWN_FUSIONS)),
+                        DomainFactory.createReferenceGenomeIndex(toolName: DomainFactory.createToolName(name: RoddyRnaConfigTemplate.ARRIBA_BLACKLIST)),
+                ],
+                geneModel          : DomainFactory.createGeneModel(),
+                mouseData : true,
 
         ] + properties)
         Realm realm = ConfigService.getRealm(configuration.project, Realm.OperationType.DATA_MANAGEMENT)

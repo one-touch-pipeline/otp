@@ -44,4 +44,6 @@ interface RoddyConstants {
 
     static final String OPTION_KEY_SAMBAMBA_PATHS = "SambambaPaths"
 
+    static final String OPTION_KEY_DEFAULT_GENOME_STAR_INDEX = "GenomeStarIndex"
+
 }

@@ -172,6 +172,14 @@ println processingOptionService.createOrUpdate(
         "Default reference genome for WGS"
 )
 
+println processingOptionService.createOrUpdate(
+        RoddyConstants.OPTION_KEY_DEFAULT_GENOME_STAR_INDEX,
+        SeqType.rnaPairedSeqType.roddyName,
+        null,
+        "star_200 - 2.5.2b",
+        "Default genome star index"
+)
+
 
 processingOptionService.createOrUpdate(
         RoddyConstants.OPTION_KEY_BWA_VERSION_AVAILABLE,
