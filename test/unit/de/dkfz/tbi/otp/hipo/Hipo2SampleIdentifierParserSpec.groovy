@@ -53,6 +53,24 @@ class Hipo2SampleIdentifierParserSpec extends Specification {
     }
 
     @Unroll
+    void 'tryParse, when identifier is #identifier and project is hipo_K26K, parses correctly'() {
+        when:
+        ParsedSampleIdentifier parsed = parser.tryParse(identifier)
+
+        then:
+        parsed.projectName == 'hipo_K26K'
+        parsed.pid == 'K26K-123456'
+        parsed.sampleTypeDbName == sampleTypeDbName
+        parsed.fullSampleName == identifier
+
+        where:
+        identifier            || sampleTypeDbName
+        'K26K-123456-M1-D1'   || 'METASTASIS1'
+        'K26K-123456-M01-D1'  || 'METASTASIS01'
+        'K26K-123456-M10-D1'  || 'METASTASIS10'
+    }
+
+    @Unroll
     void 'tryParse, when identifier is #identifier, returns null'() {
 
         expect:
