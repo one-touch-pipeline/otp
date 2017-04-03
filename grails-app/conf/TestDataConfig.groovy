@@ -72,7 +72,7 @@ testDataConfig {
             name = {'runName_' + (counter++)}
         }
         'de.dkfz.tbi.otp.ngsdata.SampleType' {
-            name = {'sampleTypeName_' + (counter++)}
+            name = {'sampleTypeName-' + (counter++)}
             specificReferenceGenome = SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
         }
         'de.dkfz.tbi.otp.ngsdata.SeqCenter' {

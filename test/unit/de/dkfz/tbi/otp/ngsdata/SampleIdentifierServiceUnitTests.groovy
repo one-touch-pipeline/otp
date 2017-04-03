@@ -232,6 +232,40 @@ class SampleIdentifierServiceUnitTests {
         assert result.name == someString
         assert containSame(SampleIdentifier.list(), [result])
     }
+
+    @Test
+    void testfindOrSaveSampleIdentifierUnderscoreReplace(){
+        Project project = DomainFactory.createProject()
+        ParsedSampleIdentifier identifier = makeParsedSampleIdentifier(project.name, HelperUtils.uniqueString, "sampleTypeName_3")
+        SampleIdentifier result = service.findOrSaveSampleIdentifier(identifier)
+        assert result.sampleType.name=="sampleTypeName-3"
+    }
+
+    @Test
+    void testfindOrSaveSampleUnderscoreReplace(){
+        Sample sample = DomainFactory.createSample()
+        ParsedSampleIdentifier identifier = makeParsedSampleIdentifier(sample.project.name, sample.individual.pid, "sampleTypeName_3")
+        Sample result = service.findOrSaveSample(identifier)
+        assert result.sampleType.name=="sampleTypeName-3"
+    }
+
+    @Test
+    void testfindOrSaveSampleWithUnderscore(){
+        Sample sample = DomainFactory.createSample()
+        new SampleType(name: 'sampleTypeName_3').save(validate: false)
+        ParsedSampleIdentifier identifier = makeParsedSampleIdentifier(sample.project.name, sample.individual.pid, "sampleTypeName_3")
+        Sample result = service.findOrSaveSample(identifier)
+        assert result.sampleType.name=="sampleTypeName_3"
+    }
+
+    @Test
+    void testfindOrSaveSampleIdentifierWithUnderscore(){
+        Project project = DomainFactory.createProject()
+        new SampleType(name: 'sampleTypeName_3').save(validate: false)
+        ParsedSampleIdentifier identifier = makeParsedSampleIdentifier(project.name, HelperUtils.uniqueString, "sampleTypeName_3")
+        SampleIdentifier result = service.findOrSaveSampleIdentifier(identifier)
+        assert result.sampleType.name=="sampleTypeName_3"
+    }
 }
 
 class TestParser_CanParse implements SampleIdentifierParser {

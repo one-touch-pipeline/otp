@@ -1200,7 +1200,7 @@ class DomainFactory {
 
     public static SampleType createSampleType(Map sampleTypeProperties = [:]) {
         return createDomainObject(SampleType, [
-                name: 'sampleTypeName_' + (counter++),
+                name: 'sampleTypeName-' + (counter++),
                 specificReferenceGenome: SpecificReferenceGenome.USE_PROJECT_DEFAULT,
         ], sampleTypeProperties)
     }

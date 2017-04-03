@@ -41,7 +41,7 @@ class MergingSetServiceTests {
         assertNotNull(individual.save([flush: true, failOnError: true]))
 
         SampleType sampleType = new SampleType(
-                        name: "name_1"
+                        name: "name-1"
                         )
         assertNotNull(sampleType.save([flush: true, failOnError: true]))
 

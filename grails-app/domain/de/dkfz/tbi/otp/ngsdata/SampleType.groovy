@@ -54,7 +54,7 @@ class SampleType implements Entity {
     SpecificReferenceGenome specificReferenceGenome = SpecificReferenceGenome.UNKNOWN
 
     static constraints = {
-        name(unique: true, validator: { OtpPath.isValidPathComponent(it) })
+        name(unique: true, validator: { OtpPath.isValidPathComponent(it) && !it.contains('_') })
         // TODO: OTP-1122: unique constraint for dirName
     }
 

@@ -198,7 +198,7 @@ class MergingPassServiceTests {
         assertNotNull(individual.save([flush: true, failOnError: true]))
 
         SampleType sampleType = new SampleType(
-                        name: "name_" + uniqueId
+                        name: "name-" + uniqueId
                         )
         assertNotNull(sampleType.save([flush: true, failOnError: true]))
 

@@ -8,7 +8,7 @@ class SampleIdentifierService {
 
 
     static final String XENOGRAFT = "XENOGRAFT"
-    static final String CULTURE = "PATIENT_DERIVED_CULTURE"
+    static final String CULTURE = "PATIENT-DERIVED-CULTURE"
     static final String ORGANOID = "ORGANOID"
 
 
@@ -51,7 +51,7 @@ class SampleIdentifierService {
         if (result) {
             if (result.project.name != identifier.projectName ||
                     result.individual.pid != identifier.pid ||
-                    result.sampleType.name != identifier.sampleTypeDbName) {
+                    (result.sampleType.name != identifier.sampleTypeDbName && result.sampleType.name != identifier.sampleTypeDbName.replace('_', '-'))) {
                 throw new RuntimeException("A sample identifier ${identifier.fullSampleName} already exists, " +
                         "but belongs to sample ${result.sample} which does not match the expected properties")
             }
@@ -66,9 +66,10 @@ class SampleIdentifierService {
     }
 
     Sample findOrSaveSample(ParsedSampleIdentifier identifier) {
+        String sampleTypeWithoutUnderscore=identifier.sampleTypeDbName.replace('_', '-')
         return Sample.findOrSaveWhere(
                 individual: findOrSaveIndividual(identifier),
-                sampleType: SampleType.findWhere(name: identifier.sampleTypeDbName) ?: createSampleTypeXenograftDepending(identifier.sampleTypeDbName),
+                sampleType: SampleType.findWhere(name: identifier.sampleTypeDbName) ?: SampleType.findWhere(name: sampleTypeWithoutUnderscore)?: createSampleTypeXenograftDepending(sampleTypeWithoutUnderscore),
         )
     }
 
