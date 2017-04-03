@@ -5,6 +5,7 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
 import de.dkfz.tbi.util.spreadsheet.validation.*
+import org.springframework.beans.factory.annotation.*
 import org.springframework.stereotype.*
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
@@ -14,7 +15,9 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 @Component
 class LibPrepKitAdapterValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator{
 
+    @Autowired
     LibraryPreparationKitService libraryPreparationKitService
+    @Autowired
     SampleIdentifierService sampleIdentifierService
 
     @Override
