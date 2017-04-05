@@ -17,23 +17,9 @@ class RoddySnvCallingPipelineCheckerIntegrationSpec extends AbstractSnvCallingPi
     }
 
 
-    void "displayRunning, check that running is called with expected parameters"() {
-        given:
-        MonitorOutputCollector output = Mock(MonitorOutputCollector)
-        AbstractVariantCallingPipelineChecker pipelineChecker = createVariantCallingPipelineChecker()
-
-        SamplePair samplePair = DomainFactory.createSamplePairPanCan([
-                (pipelineChecker.getProcessingStateMember()): SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED,
-        ])
-        BamFilePairAnalysis runningAnalysis = createAnalysis([
-                samplePair: samplePair,
-        ])
-
-        when:
-        pipelineChecker.displayRunning([runningAnalysis], output)
-
-        then:
+    protected void createExpectedCall(String workFlowName, MonitorOutputCollector output, BamFilePairAnalysis runningAnalysis) {
         1 * output.showRunning('SnvWorkflow', null)
         1 * output.showRunning('RoddySnvWorkflow', [runningAnalysis])
+        0 * output.showRunning(_, _)
     }
 }

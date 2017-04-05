@@ -236,7 +236,33 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
 
         then:
         0 * output._
+    }
 
+
+    void "displayRunning, check that running is called with expected parameters"() {
+        given:
+        MonitorOutputCollector output = Mock(MonitorOutputCollector)
+        AbstractVariantCallingPipelineChecker pipelineChecker = createVariantCallingPipelineChecker()
+
+        SamplePair samplePair = DomainFactory.createSamplePairPanCan([
+                (pipelineChecker.getProcessingStateMember()): SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED,
+        ])
+        BamFilePairAnalysis runningAnalysis = createAnalysis([
+                samplePair: samplePair,
+        ])
+
+        createExpectedCall(pipelineChecker.getWorkflowName(), output, runningAnalysis)
+
+        when:
+        pipelineChecker.displayRunning([runningAnalysis], output)
+
+        then:
+        true
+    }
+
+    protected void createExpectedCall(String workFlowName, MonitorOutputCollector output, BamFilePairAnalysis runningAnalysis) {
+        1 * output.showRunning(workFlowName, [runningAnalysis])
+        0 * output.showRunning(_, _)
     }
 
 

@@ -25,9 +25,11 @@ class VariantCallingPipelinesCheckerSpec extends Specification {
         MonitorOutputCollector output = Mock(MonitorOutputCollector)
         VariantCallingPipelinesChecker checker = new VariantCallingPipelinesChecker()
 
+        and: 'sample pair with all analysis'
         SamplePair finishedSamplePair = DomainFactory.createSamplePairPanCan([
                 snvProcessingStatus  : SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED,
                 indelProcessingStatus: SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED,
+                aceseqProcessingStatus: SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED,
         ])
         DomainFactory.createSampleTypePerProjectForMergingWorkPackage(finishedSamplePair.mergingWorkPackage2, SampleType.Category.CONTROL)
         BamFilePairAnalysis snvFinished = DomainFactory.createRoddySnvInstanceWithRoddyBamFiles([
@@ -38,7 +40,12 @@ class VariantCallingPipelinesCheckerSpec extends Specification {
                 samplePair     : finishedSamplePair,
                 processingState: AnalysisProcessingStates.FINISHED,
         ])
+        BamFilePairAnalysis aceseqFinished = DomainFactory.createAceseqInstanceWithRoddyBamFiles([
+                samplePair     : finishedSamplePair,
+                processingState: AnalysisProcessingStates.FINISHED,
+        ])
 
+        and: 'sample pair with only snv'
         BamFilePairAnalysis onlySnvFinished = DomainFactory.createRoddySnvInstanceWithRoddyBamFiles([
                 processingState: AnalysisProcessingStates.FINISHED,
                 samplePair     : DomainFactory.createSamplePairPanCan([
@@ -47,6 +54,7 @@ class VariantCallingPipelinesCheckerSpec extends Specification {
         ])
         DomainFactory.createSampleTypePerProjectForBamFile(onlySnvFinished.sampleType2BamFile, SampleType.Category.CONTROL)
 
+        and: 'sample pair with only indel'
         BamFilePairAnalysis onlyIndelFinished = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles([
                 processingState: AnalysisProcessingStates.FINISHED,
                 samplePair     : DomainFactory.createSamplePairPanCan([
@@ -55,18 +63,26 @@ class VariantCallingPipelinesCheckerSpec extends Specification {
         ])
         DomainFactory.createSampleTypePerProjectForBamFile(onlyIndelFinished.sampleType2BamFile, SampleType.Category.CONTROL)
 
-        List<AbstractMergedBamFile> bamFiles = [
-                snvFinished.sampleType1BamFile,
-                snvFinished.sampleType2BamFile,
-                indelFinished.sampleType1BamFile,
-                indelFinished.sampleType2BamFile,
-                onlySnvFinished.sampleType1BamFile,
-                onlySnvFinished.sampleType2BamFile,
-                onlyIndelFinished.sampleType1BamFile,
-                onlyIndelFinished.sampleType2BamFile,
-        ]
+        and: 'sample pair with only aceseq'
+        BamFilePairAnalysis onlyAceseqFinished = DomainFactory.createAceseqInstanceWithRoddyBamFiles([
+                processingState: AnalysisProcessingStates.FINISHED,
+                samplePair     : DomainFactory.createSamplePairPanCan([
+                        aceseqProcessingStatus: SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED,
+                ])
+        ])
+        DomainFactory.createSampleTypePerProjectForBamFile(onlyAceseqFinished.sampleType2BamFile, SampleType.Category.CONTROL)
 
-        bamFiles.each {
+        and: 'all bam files with processing threshold'
+        List<AbstractMergedBamFile> bamFiles = [
+                snvFinished,
+                indelFinished,
+                aceseqFinished,
+                onlySnvFinished,
+                onlyIndelFinished,
+                onlyAceseqFinished,
+        ].collect {
+            [it.sampleType1BamFile, it.sampleType2BamFile]
+        }.flatten().each {
             DomainFactory.createProcessingThresholdsForBamFile(it, [coverage: null, numberOfLanes: 1])
         }
 
@@ -85,6 +101,8 @@ class VariantCallingPipelinesCheckerSpec extends Specification {
         then:
         1 * output.showWorkflow('SnvWorkflow')
         1 * output.showWorkflow('IndelWorkflow')
+        1 * output.showWorkflow('ACEseqWorkflow')
+        0 * output.showWorkflow(_)
     }
 
 }
