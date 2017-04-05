@@ -6,6 +6,7 @@
 <meta name="layout" content="main" />
 <title><g:message code="projectOverview.title" args="[project.name]"/></title>
     <asset:javascript src="pages/projectOverview/index/datatable.js"/>
+    <asset:javascript src="pages/projectOverview/index/init_description.js"/>
     <asset:javascript src="modules/editorSwitch"/>
 </head>
 <body>
@@ -106,9 +107,9 @@
                             value="${mailingListName}"/>
                     </td>
                 </tr>
-                <tr>
-                    <td class="myKey"><g:message code="projectOverview.description"/></td>
-                    <td>
+                <tr id="descriptionRow">
+                    <td  class="myKey" id="descriptionHeader" style="padding-top: 1em; vertical-align: 1em"><g:message code="projectOverview.description"/> ↓</td>
+                    <td id="descriptionContent" style="height: 3em; overflow: hidden;">
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
                                 template="textArea"
@@ -386,8 +387,11 @@
     <asset:script>
         $(function() {
             $.otp.projectOverviewTable.referenceGenome();
+            $.otp.initialiseSpecificOverview.toggleDescription();
             $.otp.initCommentBox(${project.id}, "#projectCommentBox");
             $.otp.projectOverviewTable.deleteUser();
+            $("#descriptionContent").children().css('height', '3em');
+            $("#descriptionContent").find(':button').css('display', 'block');
         });
     </asset:script>
 </body>
