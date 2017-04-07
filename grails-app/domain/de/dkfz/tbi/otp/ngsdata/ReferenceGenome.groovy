@@ -3,6 +3,8 @@ package de.dkfz.tbi.otp.ngsdata
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.utils.Entity
 
+import java.util.regex.Pattern
+
 /**
  * Represents a reference genome.
  *
@@ -128,12 +130,23 @@ class ReferenceGenome implements Entity {
         mappabilityFile (nullable: true, validator: { it == null || OtpPath.isValidAbsolutePath(it) })
         replicationTimeFile (nullable: true, validator: { it == null || OtpPath.isValidAbsolutePath(it) })
         gcContentFile (nullable: true, validator: { it == null || OtpPath.isValidPathComponent(it) })
-        geneticMapFile (nullable: true, validator: { it == null || OtpPath.isValidAbsolutePath(it) })
-        knownHaplotypesFile (nullable: true, validator: { it == null || OtpPath.isValidAbsolutePath(it) })
-        knownHaplotypesLegendFile (nullable: true, validator: { it == null || OtpPath.isValidAbsolutePath(it) })
+        geneticMapFile (nullable: true, validator: { it == null || isValidAbsolutePathContainingVariable(it) })
+        knownHaplotypesFile (nullable: true, validator: { it == null || isValidAbsolutePathContainingVariable(it) })
+        knownHaplotypesLegendFile (nullable: true, validator: { it == null || isValidAbsolutePathContainingVariable(it) })
         geneticMapFileX (nullable: true, validator: { it == null || OtpPath.isValidAbsolutePath(it) })
         knownHaplotypesFileX (nullable: true, validator: { it == null || OtpPath.isValidAbsolutePath(it) })
         knownHaplotypesLegendFileX (nullable: true, validator: { it == null || OtpPath.isValidAbsolutePath(it) })
+    }
+
+    static mapping = {
+        mappabilityFile type: 'text'
+        replicationTimeFile type: 'text'
+        geneticMapFile type: 'text'
+        knownHaplotypesFile type: 'text'
+        knownHaplotypesLegendFile type: 'text'
+        geneticMapFileX type: 'text'
+        knownHaplotypesFileX type: 'text'
+        knownHaplotypesLegendFileX type: 'text'
     }
 
     String toString() {
@@ -142,5 +155,10 @@ class ReferenceGenome implements Entity {
 
     List<StatSizeFileName> getStatSizeFileNames() {
         return StatSizeFileName.findAllByReferenceGenome(this, [sort: "name", order: "asc"])
+    }
+
+    static boolean isValidAbsolutePathContainingVariable(String string) {
+        String pathComponentRegex = /[a-zA-Z0-9_\-\+\.\$\{\}]+/
+        return Pattern.compile(/^(?:\/${pathComponentRegex})+$/).matcher(string).matches() && !OtpPath.ILLEGAL_IN_NORMALIZED_PATH.matcher(string).find()
     }
 }

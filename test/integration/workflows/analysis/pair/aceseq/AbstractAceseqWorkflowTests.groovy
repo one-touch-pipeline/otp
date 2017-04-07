@@ -50,16 +50,15 @@ abstract class AbstractAceseqWorkflowTests extends AbstractRoddyBamFilePairAnaly
 
         referenceGenome.gcContentFile = 'hg19_GRch37_100genomes_gc_content_10kb.txt'
 
-        //TODO: OTP-2510: fill with correct values after OTP-2510
-        File referenceGenomePath = getBaseDirectory()
-        referenceGenome.geneticMapFile = CreateFileHelper.createFile(new File(referenceGenomePath, 'geneticMapFile.file')).absolutePath
-        referenceGenome.geneticMapFileX = CreateFileHelper.createFile(new File(referenceGenomePath, 'geneticMapFileX.file')).absolutePath
-        referenceGenome.knownHaplotypesFile = CreateFileHelper.createFile(new File(referenceGenomePath, 'knownHaplotypesFile.file')).absolutePath
-        referenceGenome.knownHaplotypesFileX = CreateFileHelper.createFile(new File(referenceGenomePath, 'knownHaplotypesFileX.file')).absolutePath
-        referenceGenome.knownHaplotypesLegendFile = CreateFileHelper.createFile(new File(referenceGenomePath, 'knownHaplotypesLegendFile.file')).absolutePath
-        referenceGenome.knownHaplotypesLegendFileX = CreateFileHelper.createFile(new File(referenceGenomePath, 'knownHaplotypesLegendFileX.file')).absolutePath
-        referenceGenome.mappabilityFile = CreateFileHelper.createFile(new File(referenceGenomePath, 'mappabilityFile.file')).absolutePath
-        referenceGenome.replicationTimeFile = CreateFileHelper.createFile(new File(referenceGenomePath, 'replicationTimeFile.file')).absolutePath
+        File referenceGenomePath = new File (referenceGenomeService.referenceGenomeDirectory(referenceGenome, false), 'databases')
+        referenceGenome.geneticMapFile = new File(referenceGenomePath, 'IMPUTE/ALL.integrated_phase1_SHAPEIT_16-06-14.nomono/genetic_map_chr${CHR_NAME}_combined_b37.txt').absolutePath
+        referenceGenome.geneticMapFileX = new File(referenceGenomePath, 'IMPUTE/ALL_1000G_phase1integrated_v3_impute/genetic_map_chrX_nonPAR_combined_b37.txt').absolutePath
+        referenceGenome.knownHaplotypesFile = new File(referenceGenomePath, 'IMPUTE/ALL.integrated_phase1_SHAPEIT_16-06-14.nomono/ALL.chr${CHR_NAME}.integrated_phase1_v3.20101123.snps_indels_svs.genotypes.nomono.haplotypes.gz').absolutePath
+        referenceGenome.knownHaplotypesFileX = new File(referenceGenomePath, 'IMPUTE/ALL_1000G_phase1integrated_v3_impute/ALL_1000G_phase1integrated_v3_chrX_nonPAR_impute.hap.gz').absolutePath
+        referenceGenome.knownHaplotypesLegendFile = new File(referenceGenomePath, 'IMPUTE/ALL.integrated_phase1_SHAPEIT_16-06-14.nomono/ALL.chr${CHR_NAME}.integrated_phase1_v3.20101123.snps_indels_svs.genotypes.nomono.legend.gz').absolutePath
+        referenceGenome.knownHaplotypesLegendFileX = new File(referenceGenomePath, 'IMPUTE/ALL_1000G_phase1integrated_v3_impute/ALL_1000G_phase1integrated_v3_chrX_nonPAR_impute.legend.gz').absolutePath
+        referenceGenome.mappabilityFile = new File(referenceGenomePath, 'UCSC/wgEncodeCrgMapabilityAlign100mer_chr.bedGraph.gz').absolutePath
+        referenceGenome.replicationTimeFile = new File(referenceGenomePath, 'ENCODE/ReplicationTime_10cellines_mean_10KB.Rda').absolutePath
         referenceGenome.save(flush: true)
 
         SpringSecurityUtils.doWithAuth("operator") {
