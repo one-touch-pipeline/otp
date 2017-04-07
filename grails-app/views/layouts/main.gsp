@@ -74,6 +74,7 @@
                                     <ul>
                                         <li id="SnvResults"><g:link controller="snv" action="results"><g:message code="otp.menu.snv.results"/></g:link></li>
                                         <li id="IndelResults"><g:link controller="indel" action="results"><g:message code="otp.menu.indel.results"/></g:link></li>
+                                        <li id="AceseqResults"><g:link controller="aceseq" action="results"><g:message code="otp.menu.cnv.results"/></g:link></li>
                                     </ul>
                                 </li>
                             </ul>

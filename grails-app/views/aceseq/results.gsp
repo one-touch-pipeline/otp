@@ -3,7 +3,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="layout" content="main" />
-    <title><g:message code="otp.menu.indel.results" /></title>
+    <title><g:message code="otp.menu.cnv.results" /></title>
     <asset:javascript src="pages/analysis/results/datatable.js"/>
 </head>
 <body>
@@ -14,7 +14,7 @@
             <g:hiddenField name="type" value="PROJECT"/>
             <g:hiddenField name="redirect" value="${request.forwardURI - request.contextPath}"/>
             <g:select class="criteria" id="project" name='id'
-                      from='${projects}' value='${project.id}' optionKey='id' optionValue='name' onChange='submit();' />
+                from='${projects}' value='${project.id}' optionKey='id' optionValue='name' onChange='submit();' />
         </form>
         <br><br><br>
         <div class="table">
@@ -23,8 +23,12 @@
                     codes="${[
                         'projectOverview.index.PID',
                         'analysis.sampleTypes',
-                        'analysis.seqType',
-                        'analysis.libPrepKits',
+                        'aceseq.normalContamination',
+                        'aceseq.ploidy',
+                        'aceseq.ploidyFactor',
+                        'aceseq.goodnessOfFit',
+                        'aceseq.gender',
+                        'aceseq.solutionPossible',
                         'analysis.processingDate',
                         'analysis.progress',
                         'analysis.plots',
@@ -35,7 +39,7 @@
     </div>
     <asset:script>
         $(function() {
-            $.otp.resultsTable.registerIndel();
+            $.otp.resultsTable.registerAceseq();
         });
     </asset:script>
 </body>

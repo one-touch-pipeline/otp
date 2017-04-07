@@ -4,14 +4,17 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="layout" content="main" />
     <title><g:message code="otp.menu.snv.results" /></title>
-    <asset:javascript src="pages/snv/results/datatable.js"/>
+    <asset:javascript src="pages/analysis/results/datatable.js"/>
 </head>
 <body>
     <div class="body">
-        <form class="blue_label" id="projectsGroupbox">
+        <form class="blue_label" id="projectsGroupbox" action="${g.createLink(controller: 'projectSelection', action: 'select')}">
             <span class="blue_label"><g:message code="home.projectfilter"/> :</span>
-            <g:select class="criteria" id="projectName" name='projectName'
-                from='${projects}' value='${project}' onChange='submit();' />
+            <g:hiddenField name="displayName" value=""/>
+            <g:hiddenField name="type" value="PROJECT"/>
+            <g:hiddenField name="redirect" value="${request.forwardURI - request.contextPath}"/>
+            <g:select class="criteria" id="project" name='id'
+                      from='${projects}' value='${project.id}' optionKey='id' optionValue='name' onChange='submit();' />
         </form>
         <br><br><br>
         <div class="table">
@@ -26,13 +29,13 @@
                         'analysis.progress',
                         'analysis.plots',
                     ] }"
-                    id="snvResultsTable" />
+                    id="resultsTable" />
             </div>
         </div>
     </div>
     <asset:script>
         $(function() {
-            $.otp.snvResultsTable.register();
+            $.otp.resultsTable.registerSnv();
         });
     </asset:script>
 </body>

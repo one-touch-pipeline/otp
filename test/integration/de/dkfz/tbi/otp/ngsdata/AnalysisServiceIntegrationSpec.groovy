@@ -1,27 +1,29 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.testing.*
 import grails.plugin.springsecurity.*
 import grails.test.spock.*
-import spock.lang.Unroll
+import spock.lang.*
 
 class AnalysisServiceIntegrationSpec extends IntegrationSpec implements UserAndRoles {
 
     AnalysisService analysisService = new AnalysisService()
 
+    void setup() {
+        createUserAndRoles()
+    }
+
+
     @Unroll
     void "getCallingInstancesForProject with SnvCallingInstance"(){
         given:
-        createUserAndRoles()
-
         SnvCallingInstance snvCallingInstance = DomainFactory.createSnvInstanceWithRoddyBamFiles()
 
         when:
         List callingInstances
-        SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             callingInstances = analysisService.getCallingInstancesForProject(SnvCallingInstance, snvCallingInstance.samplePair.project.name)
         }
 
@@ -32,13 +34,11 @@ class AnalysisServiceIntegrationSpec extends IntegrationSpec implements UserAndR
     @Unroll
     void "getCallingInstancesForProject with IndelCallingInstance"(){
         given:
-        createUserAndRoles()
-
         IndelCallingInstance indelCallingInstance = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles()
 
         when:
         List callingInstances
-        SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             callingInstances = analysisService.getCallingInstancesForProject(IndelCallingInstance, indelCallingInstance.samplePair.project.name)
         }
 
@@ -47,8 +47,14 @@ class AnalysisServiceIntegrationSpec extends IntegrationSpec implements UserAndR
     }
 
     void "checkFile with no callingInstance"() {
-        expect:
-        analysisService.checkFile(null) == null
+        when:
+        File result
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            result = analysisService.checkFile(null)
+        }
+
+        then:
+        result == null
     }
 
     void "checkFile with callingInstance and no File"(){
@@ -81,8 +87,12 @@ class AnalysisServiceIntegrationSpec extends IntegrationSpec implements UserAndR
         )
 
         when:
-        File file1 = analysisService.checkFile(snvCallingInstance)
-        File file2 = analysisService.checkFile(indelCallingInstance)
+        File file1
+        File file2
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            file1 = analysisService.checkFile(snvCallingInstance)
+            file2 = analysisService.checkFile(indelCallingInstance)
+        }
 
         then:
         !file1

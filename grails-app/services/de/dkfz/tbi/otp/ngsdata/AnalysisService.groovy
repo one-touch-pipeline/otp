@@ -4,6 +4,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import org.hibernate.criterion.*
 import org.hibernate.sql.*
+import org.springframework.security.access.prepost.*
 
 class AnalysisService {
 
@@ -18,6 +19,9 @@ class AnalysisService {
                 break
             case IndelCallingInstance:
                 callingInstanceType = "indel"
+                break
+            case AceseqInstance:
+                callingInstanceType = "aceseq"
                 break
             default:
                 throw new RuntimeException("${callingInstance.name} is not a valid calling instance")
@@ -75,6 +79,7 @@ class AnalysisService {
         }
     }
 
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#callingInstance.project, read)")
     File checkFile(BamFilePairAnalysis callingInstance) {
         if (!callingInstance) {
             return null
@@ -89,6 +94,11 @@ class AnalysisService {
                 return null
             }
             return callingInstance.getCombinedPlotPath()
+        } else if (callingInstance instanceof AceseqInstance) {
+            if (!callingInstance.getInstancePlotPath().exists()) {
+                return null
+            }
+            return callingInstance.getInstancePlotPath()
         } else {
             throw new RuntimeException("${callingInstance.class.name} is not a valid calling instance")
         }

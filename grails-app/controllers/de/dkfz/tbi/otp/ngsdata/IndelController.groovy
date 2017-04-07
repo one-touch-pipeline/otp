@@ -1,27 +1,31 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.utils.*
 import grails.converters.*
 
-import java.text.SimpleDateFormat
+import java.text.*
 
 class IndelController {
 
     ProjectService projectService
     AnalysisService analysisService
+    ProjectSelectionService projectSelectionService
 
     Map results() {
-        String projectName = params.projectName
-        List<String> projects = projectService.getAllProjects()*.name
-        if (!projectName) {
-            projectName = projects.first()
+        List<Project> projects = projectService.getAllProjects()
+        ProjectSelection selection = projectSelectionService.getSelectedProject()
+
+        Project project
+        if (selection.projects.size() == 1) {
+            project = selection.projects.first()
+        } else {
+            project = projects.first()
         }
-        Project project = projectService.getProjectByName(projectName)
 
         return [
                 projects: projects,
-                project: project.name,
+                project: project,
         ]
     }
 
@@ -57,10 +61,10 @@ class IndelController {
         }
     }
 
-    JSON dataTableIndelResults(DataTableCommand cmd) {
+    JSON dataTableResults(ResultTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()
         SimpleDateFormat sdf = new SimpleDateFormat('yyyy-MM-dd hh:mm')
-        List results = analysisService.getCallingInstancesForProject(IndelCallingInstance, params.project)
+        List results = analysisService.getCallingInstancesForProject(IndelCallingInstance, cmd.project.name)
         List data = results.collect { Map properties ->
             Collection<String> libPrepKitShortNames
             if (SeqTypeNames.fromSeqTypeName(properties.seqTypeName)?.isWgbs()) {
