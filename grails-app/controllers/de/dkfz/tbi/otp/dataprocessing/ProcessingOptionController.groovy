@@ -1,8 +1,9 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.ngsdata.Project
-import de.dkfz.tbi.otp.utils.DataTableCommand
-import grails.converters.JSON
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.*
+import grails.converters.*
+import org.springframework.validation.*
 
 class ProcessingOptionController {
 
@@ -28,27 +29,33 @@ class ProcessingOptionController {
     def index() {
     }
 
-    def insert() {
+    def insert(ProcessingOptionCommand cmd) {
+        String message
+        boolean hasErrors
         List<String> projects = ["no project"]
         projectService.getAllProjects().each { Project project ->
             projects.add(project.name)
         }
-        [projects: projects]
-    }
-
-    def save(ProcessingOptionCommand cmd) {
-        if (cmd.hasErrors()) {
-            render cmd.errors as JSON
-            return
+        if (cmd.submit == "Save") {
+            hasErrors = cmd.hasErrors()
+            if (hasErrors) {
+                FieldError errors = cmd.errors.getFieldError()
+                message = "'" + errors.getRejectedValue() + "' is not a valid value for '" + errors.getField() + "'. Error code: '" + errors.code + "'"
+            } else {
+                try {
+                    processingOptionService.createOrUpdate(cmd.name, cmd.type != "" ? cmd.type : null, projectService.getProjectByName(cmd.project), cmd.value, cmd.comment)
+                    message = "Saved successfully"
+                } catch (Exception e) {
+                    message = e.message
+                }
+            }
         }
-        try {
-            ProcessingOption processingOption = processingOptionService.createOrUpdate(cmd.name, cmd.type, projectService.getProjectByName(cmd.project), cmd.value, cmd.comment)
-            def data = [success: true, id: processingOption.id]
-            render data as JSON
-        } catch (Exception e) {
-            def data = [error: e.message]
-            render data as JSON
-        }
+        return [
+                projects: projects,
+                message: message,
+                cmd: cmd,
+                hasErrors: hasErrors,
+        ]
     }
 }
 
@@ -59,10 +66,10 @@ class ProcessingOptionCommand {
     String value
     String comment
     String project
+    String submit
 
     static constraints = {
         name(blank: false)
-        type(blank: false)
         value(blank: false)
         comment(blank: false)
         project(validator: { val, obj ->

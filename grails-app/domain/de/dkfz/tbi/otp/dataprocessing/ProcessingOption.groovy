@@ -25,7 +25,8 @@ class ProcessingOption implements Entity {
     }
 
     static constraints = {
-        type(nullable: true)
+        name(blank: false)
+        type(nullable: true, blank: false)
         project(nullable: true)
         dateObsoleted(nullable: true)
     }

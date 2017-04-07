@@ -1760,7 +1760,7 @@ class DomainFactory {
 
         ProcessingOption processingOptionPath = new ProcessingOption(
                 name: "roddyPath",
-                type: "",
+                type: null,
                 project: null,
                 value: "${basePath}/roddy/",
                 comment: "Path to the roddy.sh on the current cluster (***REMOVED***cluster 13.1)",
@@ -1769,7 +1769,7 @@ class DomainFactory {
 
         ProcessingOption processingOptionBaseConfigsPath = new ProcessingOption(
                 name: "roddyBaseConfigsPath",
-                type: "",
+                type: null,
                 project: null,
                 value: "${basePath}/roddyBaseConfigs/",
                 comment: "Path to the baseConfig-files which are needed to execute Roddy",
@@ -1778,7 +1778,7 @@ class DomainFactory {
 
         ProcessingOption processingOptionApplicationIni = new ProcessingOption(
                 name: "roddyApplicationIni",
-                type: "",
+                type: null,
                 project: null,
                 value: "${basePath}/roddyBaseConfigs/applicationProperties.ini",
                 comment: "Path to the application.ini which is needed to execute Roddy"
