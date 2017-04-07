@@ -95,7 +95,7 @@ class IndividualController {
                     } else {
                         content = cmd.sampleText
                     }
-                    String delimiter = cmd.delimiter == "space" ? ' ' : cmd.delimiter
+                    String delimiter = cmd.delimiter == "space" ? ' ' : cmd.delimiter == "tab" ? '\t' : cmd.delimiter
                     content = content.replaceAll(" *${delimiter} *", delimiter)
 
                     Spreadsheet spreadsheet = new Spreadsheet(content, delimiter)
@@ -134,7 +134,7 @@ class IndividualController {
 
         return [
                 projects: projectService.allProjects*.name,
-                delimiters: [',', 'space', ';'],
+                delimiters: [',', 'space', ';', 'tab'],
                 message: message,
                 messageType: messageType,
                 oldProject: cmd?.project,
