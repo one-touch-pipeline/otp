@@ -18,6 +18,7 @@
             <div class="empty"><br></div>
         </g:else>
         <g:message code="configurePipeline.info"/>
+        <div><g:message code="configurePipeline.note.human"/></div>
         <g:form controller="configurePipeline" action="snv" params='["project.id": project.id, "seqType.id": seqType.id]'>
             <table class="pipelineTable">
                 <tr>
