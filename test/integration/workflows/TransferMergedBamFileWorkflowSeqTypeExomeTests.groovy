@@ -62,7 +62,7 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends WorkflowTestCase {
         fileNameMergedBamFileQA1 = "${filePathMergedBamFileQA1}/plot.jpg"
         filePathMergedBamFileQA2 = "${mergingMiddleDir}/1/pass0/QualityAssessment/pass0/"
         fileNameMergedBamFileQA2 = "${filePathMergedBamFileQA2}/plot.jpg"
-        destinationDirMergedBamFile = "${rootPath}/project1/sequencing/exome_sequencing/view-by-pid/pid_1/control/paired/merged-alignment"
+        destinationDirMergedBamFile = "${rootPath}/project1/sequencing/exon_sequencing/view-by-pid/pid_1/control/paired/merged-alignment"
         destinationFileNameMergedBamFile = "${destinationDirMergedBamFile}/control_pid_1_EXON_PAIRED_merged.mdup.bam"
         destinationDirQaResults = "${destinationDirMergedBamFile}/QualityAssessment/"
         qaResultOverviewFile = "${destinationDirQaResults}/${FileNames.QA_RESULT_OVERVIEW}"
@@ -80,10 +80,6 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends WorkflowTestCase {
         // Project
         String projectName = "project"
         String projectDirName = "project1"
-        // SeqType
-        String seqTypeDirName = "exome_sequencing"
-        String seqTypeName = SeqTypeNames.EXOME.seqTypeName
-        String seqTypeLibrary = SeqType.LIBRARYLAYOUT_PAIRED
         // SeqCenter
         String seqCenterName = "DKFZ"
         String seqCenterDirName = "core"
@@ -119,12 +115,7 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends WorkflowTestCase {
                         )
         assertNotNull(sample.save([flush: true, failOnError: true]))
 
-        SeqType seqType = new SeqType(
-                        name: seqTypeName,
-                        libraryLayout: seqTypeLibrary,
-                        dirName: seqTypeDirName
-                        )
-        assertNotNull(seqType.save([flush: true, failOnError: true]))
+        SeqType seqType = DomainFactory.createExomeSeqType()
 
         ReferenceGenome referenceGenome = new ReferenceGenome(
                         name: "hs37d5",
