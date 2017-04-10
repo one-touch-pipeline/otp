@@ -20,6 +20,9 @@ class CopyFilesJob extends AbstractOtpJob implements AutoRestartableJob {
     @Autowired
     PbsService pbsService
 
+    @Autowired
+    ExecutionService executionService
+
 
     @Override
     protected final AbstractMultiJob.NextAction maybeSubmit() throws Throwable {
@@ -30,17 +33,31 @@ class CopyFilesJob extends AbstractOtpJob implements AutoRestartableJob {
 
         checkInitialSequenceFiles(seqTrack)
 
+        AbstractMultiJob.NextAction returnValue
+
         seqTrack.dataFiles.each { DataFile dataFile ->
             File sourceFile = new File(lsdfFilesService.getFileInitialPath(dataFile))
             File targetFile = new File(lsdfFilesService.getFileFinalPath(dataFile))
             String md5SumFileName = checksumFileService.md5FileName(dataFile)
 
-            String copyOrLinkCommand = seqTrack.linkedExternally ? "ln -s" : "cp"
-            String calculateMd5 = seqTrack.linkedExternally ? "" : "md5sum ${targetFile.name} > ${md5SumFileName}"
-            String changeMode = seqTrack.linkedExternally ? "" : "chmod 440 ${targetFile} ${md5SumFileName}"
+            if (seqTrack.linkedExternally) {
+                String cmd = getScript(sourceFile, targetFile,"ln -s")
+                executionService.executeCommand(realm, cmd)
+                returnValue = AbstractMultiJob.NextAction.SUCCEED
+            } else {
+                String cmd = getScript(sourceFile, targetFile,"cp", "md5sum ${targetFile.name} > ${md5SumFileName}", "chmod 440 ${targetFile} ${md5SumFileName}")
+                pbsService.executeJob(realm, cmd)
+                returnValue = AbstractMultiJob.NextAction.WAIT_FOR_CLUSTER_JOBS
+            }
+        }
+        if (returnValue == AbstractMultiJob.NextAction.SUCCEED) {
+            validate()
+        }
+        return returnValue
+    }
 
-
-            String cmd = """
+    private String getScript(File sourceFile, File targetFile, String copyOrLinkCommand, String calculateMd5 = "", String changeMode = "") {
+        return """
 mkdir -p -m 2750 ${targetFile.parent}
 cd ${targetFile.parent}
 if [ -e "${targetFile.path}" ]; then
@@ -51,11 +68,7 @@ ${copyOrLinkCommand} ${sourceFile} ${targetFile}
 ${calculateMd5}
 ${changeMode}
 """
-            pbsService.executeJob(realm, cmd)
-        }
-        return AbstractMultiJob.NextAction.WAIT_FOR_CLUSTER_JOBS
     }
-
 
     @Override
     protected final void validate() throws Throwable {

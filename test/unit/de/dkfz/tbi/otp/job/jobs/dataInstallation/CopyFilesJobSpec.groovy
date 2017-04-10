@@ -119,9 +119,9 @@ chmod 440 .* .*
 
     void "test maybe submit when file has to be linked and not exists already"() {
         given:
-        createSeqTrack(true)
-        copyFilesJob.pbsService = Mock(PbsService) {
-            1 * executeJob(_, _) >> { Realm realm, String command ->
+        SeqTrack seqTrack = createSeqTrack(true)
+        copyFilesJob.executionService = Mock(ExecutionService) {
+            1 * executeCommand(_, _) >> { Realm realm, String command ->
                 assert command ==~ """
 mkdir -p -m 2750 .*
 cd .*
@@ -133,11 +133,13 @@ ln -s .* .*
 
 
 """
+                DataFile dataFile = CollectionUtils.exactlyOneElement(seqTrack.dataFiles)
+                CreateFileHelper.createFile(new File(copyFilesJob.lsdfFilesService.getFileFinalPath(dataFile)))
             }
         }
 
         expect:
-        AbstractMultiJob.NextAction.WAIT_FOR_CLUSTER_JOBS == copyFilesJob.maybeSubmit()
+        AbstractMultiJob.NextAction.SUCCEED == copyFilesJob.maybeSubmit()
     }
 
 
@@ -146,8 +148,8 @@ ln -s .* .*
         SeqTrack seqTrack = createSeqTrack(true)
         DataFile dataFile = CollectionUtils.exactlyOneElement(seqTrack.dataFiles)
         CreateFileHelper.createFile(new File(copyFilesJob.lsdfFilesService.getFileFinalPath(dataFile)))
-        copyFilesJob.pbsService = Mock(PbsService) {
-            1 * executeJob(_, _) >> { Realm realm, String command ->
+        copyFilesJob.executionService = Mock(ExecutionService) {
+            1 * executeCommand(_, _) >> { Realm realm, String command ->
                 assert command ==~ """
 mkdir -p -m 2750 .*
 cd .*
@@ -163,7 +165,7 @@ ln -s .* .*
         }
 
         expect:
-        AbstractMultiJob.NextAction.WAIT_FOR_CLUSTER_JOBS == copyFilesJob.maybeSubmit()
+        AbstractMultiJob.NextAction.SUCCEED == copyFilesJob.maybeSubmit()
     }
 
 
