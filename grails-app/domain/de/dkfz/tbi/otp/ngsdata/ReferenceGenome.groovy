@@ -127,26 +127,15 @@ class ReferenceGenome implements Entity {
         chromosomeSuffix nullable: true, blank: true
         chromosomeLengthFilePath(nullable: true, blank: false, validator: { it == null || OtpPath.isValidPathComponent(it) })
         fingerPrintingFileName nullable: true
-        mappabilityFile (nullable: true, validator: { it == null || OtpPath.isValidAbsolutePath(it) })
-        replicationTimeFile (nullable: true, validator: { it == null || OtpPath.isValidAbsolutePath(it) })
         gcContentFile (nullable: true, validator: { it == null || OtpPath.isValidPathComponent(it) })
-        geneticMapFile (nullable: true, validator: { it == null || isValidAbsolutePathContainingVariable(it) })
-        knownHaplotypesFile (nullable: true, validator: { it == null || isValidAbsolutePathContainingVariable(it) })
-        knownHaplotypesLegendFile (nullable: true, validator: { it == null || isValidAbsolutePathContainingVariable(it) })
-        geneticMapFileX (nullable: true, validator: { it == null || OtpPath.isValidAbsolutePath(it) })
-        knownHaplotypesFileX (nullable: true, validator: { it == null || OtpPath.isValidAbsolutePath(it) })
-        knownHaplotypesLegendFileX (nullable: true, validator: { it == null || OtpPath.isValidAbsolutePath(it) })
-    }
-
-    static mapping = {
-        mappabilityFile type: 'text'
-        replicationTimeFile type: 'text'
-        geneticMapFile type: 'text'
-        knownHaplotypesFile type: 'text'
-        knownHaplotypesLegendFile type: 'text'
-        geneticMapFileX type: 'text'
-        knownHaplotypesFileX type: 'text'
-        knownHaplotypesLegendFileX type: 'text'
+        mappabilityFile (nullable: true, maxSize: 500, validator: { it == null || OtpPath.isValidAbsolutePath(it) })
+        replicationTimeFile (nullable: true, maxSize: 500, validator: { it == null || OtpPath.isValidAbsolutePath(it) })
+        geneticMapFile (nullable: true, maxSize: 500, validator: { it == null || isValidAbsolutePathContainingVariable(it) })
+        knownHaplotypesFile (nullable: true, maxSize: 500, validator: { it == null || isValidAbsolutePathContainingVariable(it) })
+        knownHaplotypesLegendFile (nullable: true, maxSize: 500, validator: { it == null || isValidAbsolutePathContainingVariable(it) })
+        geneticMapFileX (nullable: true, maxSize: 500, validator: { it == null || OtpPath.isValidAbsolutePath(it) })
+        knownHaplotypesFileX (nullable: true, maxSize: 500, validator: { it == null || OtpPath.isValidAbsolutePath(it) })
+        knownHaplotypesLegendFileX (nullable: true, maxSize: 500, validator: { it == null || OtpPath.isValidAbsolutePath(it) })
     }
 
     String toString() {
