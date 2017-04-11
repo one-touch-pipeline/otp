@@ -4,10 +4,11 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 Project project = exactlyOneElement(Project.findAllByName(''))
 Collection<SeqType> seqTypes = [
-        //exactlyOneElement(SeqType.getWholeGenomePairedSeqType()),
-        //exactlyOneElement(SeqType.getExomePairedSeqType()),
-        //exactlyOneElement(SeqType.getWholeGenomeBisulfitePairedSeqType()),
-        //exactlyOneElement(SeqType.getWholeGenomeBisulfiteTagmentationPairedSeqType()),
+        //SeqType.getWholeGenomePairedSeqType(),
+        //SeqType.getExomePairedSeqType(),
+        //SeqType.getWholeGenomeBisulfitePairedSeqType(),
+        //SeqType.getWholeGenomeBisulfiteTagmentationPairedSeqType(),
+        //SeqType.getRnaPairedSeqType(),
 ]
 Collection<SampleType> sampleTypes = [
         //null,
