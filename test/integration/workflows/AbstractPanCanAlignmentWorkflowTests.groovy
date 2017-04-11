@@ -178,7 +178,7 @@ abstract class AbstractPanCanAlignmentWorkflowTests extends WorkflowTestCase {
                 adapterSequence: "AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT",
         ).save(flush: true, failOnError: true)
 
-        MergingWorkPackage workPackage = MergingWorkPackage.build(
+        MergingWorkPackage workPackage = DomainFactory.createMergingWorkPackage(
                 pipeline: pipeline,
                 seqType: seqType,
                 referenceGenome: referenceGenome,
