@@ -21,7 +21,7 @@ class IndelCallingInstance extends BamFilePairAnalysis implements ProcessParamet
 
     @Override
     public String toString() {
-        return "ICI ${id}: ${instanceName} ${samplePair.toStringWithoutId()}"
+        return "ICI ${id}${withdrawn ? ' (withdrawn)': ''}: ${instanceName} ${samplePair.toStringWithoutId()}"
     }
 
     @Override

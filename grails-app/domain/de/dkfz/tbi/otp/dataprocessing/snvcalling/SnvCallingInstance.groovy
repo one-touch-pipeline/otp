@@ -82,6 +82,6 @@ class SnvCallingInstance extends BamFilePairAnalysis implements ProcessParameter
 
     @Override
     public String toString() {
-        return "SCI ${id}: ${instanceName} ${samplePair.toStringWithoutId()}"
+        return "SCI ${id} ${withdrawn ? ' (withdrawn)': ''}: ${instanceName} ${samplePair.toStringWithoutId()}"
     }
 }

@@ -200,22 +200,27 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
         AbstractVariantCallingPipelineChecker pipelineChecker = createVariantCallingPipelineChecker()
 
         SamplePair samplePair = DomainFactory.createSamplePair()
-        BamFilePairAnalysis analysis1 = createAnalysis()
-        BamFilePairAnalysis analysis2a = createAnalysis()
-        BamFilePairAnalysis analysis2b = createAnalysis([samplePair: analysis2a.samplePair])
-        BamFilePairAnalysis analysis3 = createAnalysisForCrosschecking()
+        BamFilePairAnalysis oneAnalysisForSamplePair = createAnalysis()
+        BamFilePairAnalysis firstAnalysisSamplePairWithTwoAnalysis = createAnalysis()
+        BamFilePairAnalysis secondAnalysisSamplePairWithTwoAnalysis = createAnalysis([samplePair: firstAnalysisSamplePairWithTwoAnalysis.samplePair])
+        BamFilePairAnalysis crossCheckingAnalysis = createAnalysisForCrosschecking()
+        BamFilePairAnalysis withdrawnAnalysis = createAnalysis()
+        withdrawnAnalysis.withdrawn = true //because of constraint in SnvCallingInstance it can not be given in the parameter map
+        withdrawnAnalysis.save(flush: true)
 
         List<SamplePair> samplePairs = [
                 samplePair,
-                analysis1.samplePair,
-                analysis2a.samplePair,
-                analysis2b.samplePair,
-                analysis3.samplePair,
+                oneAnalysisForSamplePair.samplePair,
+                firstAnalysisSamplePairWithTwoAnalysis.samplePair,
+                secondAnalysisSamplePairWithTwoAnalysis.samplePair,
+                crossCheckingAnalysis.samplePair,
+                withdrawnAnalysis.samplePair,
         ]
 
         List<BamFilePairAnalysis> expected = [
-                analysis1,
-                analysis2b,
+                oneAnalysisForSamplePair,
+                secondAnalysisSamplePairWithTwoAnalysis,
+                withdrawnAnalysis,
         ]
 
         when:
@@ -303,6 +308,16 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
                 (processingStateMember): SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED,
         ])
 
+        //sample pair with no processing needed and withdrawn analysis
+        SamplePair samplePairWithWithdrawnRunningAnalysis = DomainFactory.createSamplePairPanCan([
+                (processingStateMember): SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED,
+        ])
+        BamFilePairAnalysis runningWithdrawnAnalysis = createAnalysis([
+                samplePair: samplePairWithWithdrawnRunningAnalysis,
+        ])
+        runningWithdrawnAnalysis.withdrawn = true
+        runningWithdrawnAnalysis.save(flush: true)
+
         //sample pair with no processing needed and analysis running
         SamplePair samplePairWithRunningAnalysis = DomainFactory.createSamplePairPanCan([
                 (processingStateMember): SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED,
@@ -310,6 +325,17 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
         BamFilePairAnalysis runningAnalysis = createAnalysis([
                 samplePair: samplePairWithRunningAnalysis,
         ])
+
+        //sample pair with no processing needed and withrawn analysis finished
+        SamplePair samplePairWithFinishedWithdrawnAnalysis = DomainFactory.createSamplePairPanCan([
+                (processingStateMember): SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED,
+        ])
+        BamFilePairAnalysis finishedWithdrawnAnalysis = createAnalysis([
+                samplePair     : samplePairWithFinishedWithdrawnAnalysis,
+                processingState: AnalysisProcessingStates.FINISHED,
+        ])
+        finishedWithdrawnAnalysis.withdrawn = true
+        finishedWithdrawnAnalysis.save(flush: true)
 
         //sample pair with no processing needed and analysis finished
         SamplePair samplePairWithFinishedAnalysis = DomainFactory.createSamplePairPanCan([
@@ -326,7 +352,9 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
                 samplePairWithOldRunningInstance,
                 samplePairWaitingForStart,
                 samplePairNotTriggered,
+                samplePairWithWithdrawnRunningAnalysis,
                 samplePairWithRunningAnalysis,
+                samplePairWithFinishedWithdrawnAnalysis,
                 samplePairWithFinishedAnalysis,
         ]
         List<SamplePair> finishedSamplePairs = [
@@ -351,7 +379,7 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
 
         then:
         1 * pipelineChecker.analysisAlreadyRunningForSamplePairAndPipeline(_)
-        1 * output.showList(AbstractVariantCallingPipelineChecker.HEADER_OLD_INSTANCE_RUNNING, [oldRunningInstance])
+        1 * output.showRunningWithHeader(AbstractVariantCallingPipelineChecker.HEADER_OLD_INSTANCE_RUNNING, _, [oldRunningInstance])
 
         then:
         1 * pipelineChecker.samplePairsWithConfigAndWithoutRunningAnalysis(_)
@@ -363,8 +391,14 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
 
         then:
         1 * pipelineChecker.lastAnalysisForSamplePair(_)
+        1 * output.showList(AbstractVariantCallingPipelineChecker.HEADER_WITHDRAWN_ANALYSIS_RUNNING, [runningWithdrawnAnalysis])
+
+        then:
         1 * pipelineChecker.displayRunning([runningAnalysis], output)
         (1.._) * output.showRunning(_, _)
+
+        then:
+        1 * output.showList(AbstractVariantCallingPipelineChecker.HEADER_WITHDRAWN_ANALYSIS_FINISHED, [finishedWithdrawnAnalysis])
 
         then:
         1 * output.showFinished([finishedAnalysis])

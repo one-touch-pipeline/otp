@@ -11,6 +11,9 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
     static final String HEADER_DISABLED_SAMPLE_PAIR = 'The following samplePairs are disabled for processing'
     static final String HEADER_NO_CONFIG = 'For the following project seqtype combination no config is defined'
     static final String HEADER_OLD_INSTANCE_RUNNING = 'old instance running'
+    static final String HEADER_WITHDRAWN_ANALYSIS_RUNNING = 'The following Analysis are withdrawn and running'
+    static final String HEADER_WITHDRAWN_ANALYSIS_FINISHED = 'The following Analysis are withdrawn and finished'
+
 
     static final String PROBLEMS_NO_BAM_FILE = "bam file does not exist"
     static final String PROBLEMS_MISSING_SEQ_TRACKS = "bam file misses the following seqtracks"
@@ -37,7 +40,7 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
             output.showUniqueList(HEADER_NO_CONFIG, noConfig)
 
             List<BamFilePairAnalysis> alreadyRunning = analysisAlreadyRunningForSamplePairAndPipeline(needsProcessing)
-            output.showList(HEADER_OLD_INSTANCE_RUNNING, alreadyRunning)
+            output.showRunningWithHeader(HEADER_OLD_INSTANCE_RUNNING, getWorkflowName(), alreadyRunning)
 
             List<SamplePair> waiting = samplePairsWithConfigAndWithoutRunningAnalysis(needsProcessing)
             output.showWaiting(waiting, displayWaitingWithInfos)
@@ -50,14 +53,20 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
 
             List<BamFilePairAnalysis> analysis = lastAnalysisForSamplePair(noProcessingNeeded)
 
-            Map analysisStateMap = analysis.groupBy {
+            Map<AnalysisProcessingStates,Map<Boolean, BamFilePairAnalysis>> analysisStateMap = analysis.groupBy([{BamFilePairAnalysis it ->
                 it.processingState
-            }
+            }, { BamFilePairAnalysis it ->
+                it.isWithdrawn()
+            }])
 
-            displayRunning(analysisStateMap[AnalysisProcessingStates.IN_PROGRESS], output)
+            output.showList(HEADER_WITHDRAWN_ANALYSIS_RUNNING, analysisStateMap[AnalysisProcessingStates.IN_PROGRESS]?.get(true))
 
-            output.showFinished(analysisStateMap[AnalysisProcessingStates.FINISHED])
-            return analysisStateMap[AnalysisProcessingStates.FINISHED] ?: []
+            displayRunning(analysisStateMap[AnalysisProcessingStates.IN_PROGRESS]?.get(false), output)
+
+            output.showList(HEADER_WITHDRAWN_ANALYSIS_FINISHED, analysisStateMap[AnalysisProcessingStates.FINISHED]?.get(true))
+
+            output.showFinished(analysisStateMap[AnalysisProcessingStates.FINISHED]?.get(false))
+            return analysisStateMap[AnalysisProcessingStates.FINISHED]?.get(false) ?: []
         }
         return []
     }
@@ -198,7 +207,6 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
                             group by
                                 analysis.samplePair.id
                         )
-                        and analysis.withdrawn = false
                         and analysis.config.pipeline.type = :pipelineType
                 """, [
                 samplePairs : samplePairs,
