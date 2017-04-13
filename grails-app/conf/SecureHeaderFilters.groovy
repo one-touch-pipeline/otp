@@ -7,8 +7,16 @@ class SecureHeaderFilters {
     def filters = {
         addHeaders(uri: '/**') {
             after = {
-                response.setHeader("Content-Security-Policy",
-                        "default-src https: 'self'; script-src https: 'unsafe-inline' 'self'; style-src https: 'unsafe-inline' 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; plugin-types application/pdf application/x-shockwave-flash;")
+                response.setHeader("Content-Security-Policy", [
+                        "default-src https: 'self'",
+                        "script-src https: 'unsafe-inline' 'self'",
+                        "style-src https: 'unsafe-inline' 'self'",
+                        "img-src https: data: 'self'",
+                        "base-uri 'self'",
+                        "form-action 'self'",
+                        "frame-ancestors 'none'",
+                        "plugin-types application/pdf application/x-shockwave-flash",
+                ].join("; "))
                 response.setHeader("Referrer-Policy", "strict-origin-when-cross-origin")
                 response.setHeader("X-Content-Type-Options", "nosniff")
                 response.setHeader("X-Frame-Options", "DENY")
