@@ -953,6 +953,25 @@ class DomainFactory {
         return createDomainObject(SophiaInstance, map, properties)
     }
 
+    public static AceseqInstance createAceseqInstance(Map properties) {
+        if (!properties.containsKey('latestDataFileCreationDate')) {
+            properties += [latestDataFileCreationDate: AbstractBamFile.getLatestSequenceDataFileCreationDate(
+                    properties.sampleType1BamFile, properties.sampleType2BamFile)]
+        }
+        return createDomainObject(AceseqInstance, [:], properties)
+    }
+
+    public static AceseqInstance createAceseqInstanceWithSameSamplePair(BamFilePairAnalysis instance) {
+        return createAceseqInstance([
+                processingState: AnalysisProcessingStates.FINISHED,
+                sampleType1BamFile: instance.sampleType1BamFile,
+                sampleType2BamFile: instance.sampleType2BamFile,
+                config: createRoddyWorkflowConfigLazy(pipeline: createAceseqPipelineLazy()),
+                instanceName: "2017-03-17_10h44",
+                samplePair: instance.samplePair,
+        ])
+    }
+
     public static AceseqQc createAceseqQcWithExistingAceseqInstance(AceseqInstance aceseqInstance){
         createAceseqQc([:], [:], [:], aceseqInstance)
     }

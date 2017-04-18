@@ -404,7 +404,7 @@ chmod 440 ${newDirectFileName}
             notNull(SampleType.findByName(sampleTypeMap.get(sample.sampleType.name)), "${sampleTypeMap.get(sample.sampleType.name)} not found in database")
         }
 
-        isTrue(oldIndividual.project == oldProject, "old individual ${oldPid} should be in project {oldProjectName}, but was in ${oldIndividual.project}")
+        isTrue(oldIndividual.project == oldProject, "old individual ${oldPid} should be in project ${oldProjectName}, but was in ${oldIndividual.project}")
 
         List<SeqTrack> seqTracks = SeqTrack.findAllBySampleInList(samples)
         outputStringBuilder << "\n  seqtracks (${seqTracks.size()}): "
@@ -428,11 +428,13 @@ chmod 440 ${newDirectFileName}
         File bashScriptToMoveFiles = createFileSafely("${scriptOutputDirectory}", "${bashScriptName}.sh")
         bashScriptToMoveFiles << bashHeader
 
-
-        createBashScriptRoddy(seqTracks, dirsToDelete, scriptOutputDirectory, outputStringBuilder, bashScriptName, bashScriptToMoveFiles)
+        File bashScriptToMoveFilesAsOtherUser = createFileSafely("${scriptOutputDirectory}", "${bashScriptName}-otherUser.sh")
+        createBashScriptRoddy(seqTracks, dirsToDelete, outputStringBuilder, bashScriptToMoveFiles, bashScriptToMoveFilesAsOtherUser)
 
         seqTracks.each { SeqTrack seqTrack ->
-            dirsToDelete << deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack)
+            Map dirs = deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack)
+            dirsToDelete << dirs.get("dirsToDelete")
+            bashScriptToMoveFilesAsOtherUser << "#rm -rf ${dirs.get("dirsToDeleteWithOtherUser").join("\n#rm -rf ")}\n"
             groovyConsoleScriptToRestartAlignments << startAlignmentForSeqTrack(seqTrack)
         }
 
@@ -473,7 +475,7 @@ chmod 440 ${newDirectFileName}
             bashScriptToMoveFiles << copyAndRemoveFastqcFile(oldFastqcFileName, newFastqcFileNames.get(i), outputStringBuilder, failOnMissingFiles)
         }
 
-        bashScriptToMoveFiles << "# delete snv stuff\n"
+        bashScriptToMoveFiles << "# delete analysis stuff\n"
         dirsToDelete.flatten()*.path.each {
             bashScriptToMoveFiles << "#rm -rf ${it}\n"
         }
@@ -574,10 +576,13 @@ chmod 440 ${newDirectFileName}
         File bashScriptToMoveFiles = createFileSafely("${scriptOutputDirectory}", "${bashScriptName}.sh")
         bashScriptToMoveFiles << bashHeader
 
-        createBashScriptRoddy(seqTrackList, dirsToDelete, scriptOutputDirectory, outputStringBuilder, bashScriptName, bashScriptToMoveFiles, !linkedFilesVerified)
+        File bashScriptToMoveFilesAsOtherUser = createFileSafely("${scriptOutputDirectory}", "${bashScriptName}-otherUser.sh")
+        createBashScriptRoddy(seqTrackList, dirsToDelete, outputStringBuilder, bashScriptToMoveFiles, bashScriptToMoveFilesAsOtherUser, !linkedFilesVerified)
 
         seqTrackList.each { SeqTrack seqTrack ->
-            dirsToDelete << deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack, !linkedFilesVerified)
+            Map dirs = deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack, !linkedFilesVerified)
+            dirsToDelete << dirs.get("dirsToDelete")
+            bashScriptToMoveFilesAsOtherUser << "#rm -rf ${dirs.get("dirsToDeleteWithOtherUser").join("\n#rm -rf ")}\n"
             groovyConsoleScriptToRestartAlignments << startAlignmentForSeqTrack(seqTrack)
         }
 
@@ -716,7 +721,7 @@ chmod 440 ${newDirectFileName}
         outputStringBuilder << "\n  dataFiles (${dataFiles.size()}):"
         dataFiles.each { outputStringBuilder << "\n    - ${it}" }
         notEmpty(dataFiles, " no datafiles found for ${sample}")
-        isTrue(dataFiles.size() == dataFileList.size(), "size of dataFiles (${dataFiles.size()} and dataFileList (${dataFileList.size()} not match")
+        isTrue(dataFiles.size() == dataFileList.size(), "size of dataFiles (${dataFiles.size()}) and dataFileList (${dataFileList.size()}) not match")
         dataFiles.each {
             isTrue(dataFileList.contains(it.fileName), "${it.fileName} missed in list")
         }
@@ -875,7 +880,7 @@ chmod 440 ${newDirectFileName}
             processedMergedBamFiles.each { ProcessedMergedBamFile processedMergedBamFile ->
                 deleteQualityAssessmentInfoForAbstractBamFile(processedMergedBamFile)
                 MergingSetAssignment.findAllByBamFile(processedMergedBamFile)*.delete(flush: true)
-                dirsToDelete << analysisDeletionService.deleteForAbstractMergedBamFile(processedMergedBamFile)
+                dirsToDelete << analysisDeletionService.deleteSamplePairsWithoutAnalysisInstances(SamplePair.findAllByMergingWorkPackage1OrMergingWorkPackage2(mergingWorkPackage, mergingWorkPackage))
                 processedMergedBamFile.delete(flush: true)
             }
 
@@ -932,9 +937,10 @@ chmod 440 ${newDirectFileName}
      * !! Be aware that the run information, alignmentLog information, mergingLog information and the seqTrack are not deleted.
      * !! If it is not needed to delete this information, this method can be used without pre-work.
      */
-    List<File> deleteAllProcessingInformationAndResultOfOneSeqTrack(SeqTrack seqTrack, boolean enableChecks = true) {
+    Map<String, List<File>> deleteAllProcessingInformationAndResultOfOneSeqTrack(SeqTrack seqTrack, boolean enableChecks = true) {
         notNull(seqTrack, "The input seqTrack of the method deleteAllProcessingInformationAndResultOfOneSeqTrack is null")
         List<File> dirsToDelete = []
+        List<File> dirsToDeleteWithOtherUser = []
 
         if (enableChecks) {
             throwExceptionInCaseOfSeqTracksAreOnlyLinked([seqTrack])
@@ -972,20 +978,26 @@ chmod 440 ${newDirectFileName}
                 eq("id", seqTrack.id)
             }
         }
+
+        BamFilePairAnalysis.findAllBySampleType1BamFileInListOrSampleType2BamFileInList(bamFiles, bamFiles).each {
+            dirsToDeleteWithOtherUser << AnalysisDeletionService.deleteInstance(it)
+        }
+
         bamFiles.each { RoddyBamFile bamFile ->
             mergingWorkPackage = bamFile.mergingWorkPackage
             mergingWorkPackage.bamFileInProjectFolder = null
             mergingWorkPackage.save(flush: true)
             deleteQualityAssessmentInfoForAbstractBamFile(bamFile)
-            dirsToDelete << analysisDeletionService.deleteForAbstractMergedBamFile(bamFile)
+            dirsToDelete << analysisDeletionService.deleteSamplePairsWithoutAnalysisInstances(SamplePair.findAllByMergingWorkPackage1OrMergingWorkPackage2(mergingWorkPackage, mergingWorkPackage))
             bamFile.delete(flush: true)
             // The MerginWorkPackage can only be deleted if all corresponding RoddyBamFiles are removed already
             if (!RoddyBamFile.findByWorkPackage(mergingWorkPackage)) {
-                analysisDeletionService.deleteSamplePairsWithoutAnalysisInstances(SamplePair.findAllByMergingWorkPackage1OrMergingWorkPackage2(mergingWorkPackage, mergingWorkPackage))
+                dirsToDelete << analysisDeletionService.deleteSamplePairsWithoutAnalysisInstances(SamplePair.findAllByMergingWorkPackage1OrMergingWorkPackage2(mergingWorkPackage, mergingWorkPackage))
                 mergingWorkPackage.delete(flush: true)
             }
         }
-        return dirsToDelete
+        return ["dirsToDelete": dirsToDelete,
+                "dirsToDeleteWithOtherUser": dirsToDeleteWithOtherUser]
     }
 
 
@@ -1017,7 +1029,7 @@ chmod 440 ${newDirectFileName}
         throwExceptionInCaseOfExternalMergedBamFileIsAttached([seqTrack])
         throwExceptionInCaseOfSeqTracksAreOnlyLinked([seqTrack])
 
-        dirsToDelete << deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack)
+        dirsToDelete << deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack).get("dirsToDelete")
         deleteConnectionFromSeqTrackRepresentingABamFile(seqTrack)
         DataFile.findAllBySeqTrack(seqTrack).each { deleteDataFile(it) }
         MergingAssignment.findAllBySeqTrack(seqTrack)*.delete()
@@ -1202,7 +1214,7 @@ chmod 440 ${newDirectFileName}
                     }
                 }
             }
-            deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack, false).flatten().each {
+            deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack, false).get("dirsToDelete").flatten().each {
                 if (it) {
                     dirsToDelete.add(it.path)
                 }
@@ -1228,7 +1240,7 @@ chmod 440 ${newDirectFileName}
      * create a bash script to delete files from roddy,
      * the script must be executed as other user
      */
-    private void createBashScriptRoddy(List<SeqTrack> seqTrackList, List<File> dirsToDelete, String scriptOutputDirectory, StringBuilder outputStringBuilder, String bashScriptName, File bashScriptToMoveFiles, boolean enableChecks = true) {
+    private void createBashScriptRoddy(List<SeqTrack> seqTrackList, List<File> dirsToDelete, StringBuilder outputStringBuilder, File bashScriptToMoveFiles, File bashScriptToMoveFilesAsOtherUser, boolean enableChecks = true) {
         List<RoddyBamFile> roddyBamFiles = RoddyBamFile.createCriteria().list {
             seqTracks {
                 inList("id", seqTrackList*.id)
@@ -1236,7 +1248,6 @@ chmod 440 ${newDirectFileName}
         }
 
         if (roddyBamFiles) {
-            File bashScriptToMoveFilesAsOtherUser = createFileSafely("${scriptOutputDirectory}", "${bashScriptName}-otherUser.sh")
             bashScriptToMoveFilesAsOtherUser << bashHeader
 
             bashScriptToMoveFilesAsOtherUser << "\n\n\n ################ delete otherUser files ################ \n"
@@ -1255,6 +1266,16 @@ chmod 440 ${newDirectFileName}
                             "#rm -rf ${roddyBamFile.getWorkSingleLaneQADirectories().values()*.absolutePath.join("\n#rm -rf ")}\n"
                 }
             }
+
+            List<BamFilePairAnalysis> analysisInstances = BamFilePairAnalysis.findAllBySampleType1BamFileInListOrSampleType2BamFileInList(roddyBamFiles, roddyBamFiles)
+            if (analysisInstances) {
+                bashScriptToMoveFilesAsOtherUser << "# delete analysis stuff\n"
+                AnalysisDeletionService.assertThatNoWorkflowsAreRunning(analysisInstances)
+                analysisInstances.each {
+                    bashScriptToMoveFilesAsOtherUser << "#rm -rf ${AnalysisDeletionService.deleteInstance(it)}/*\n"
+                }
+            }
+
             Set<File> expectedContent = [
                     roddyBamFiles*.finalBamFile,
                     roddyBamFiles*.finalBaiFile,
@@ -1294,7 +1315,7 @@ chmod 440 ${newDirectFileName}
             bashScriptToMoveFiles << "#rm -rf ${roddyBamFiles[0].baseDirectory}\n"
 
             seqTrackList.each { SeqTrack seqTrack ->
-                dirsToDelete << deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack, enableChecks)
+                dirsToDelete << deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack, enableChecks).get("dirsToDelete")
             }
         }
     }

@@ -858,7 +858,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
 
 
     private void deleteProcessingFilesOfProject_RBF_SNV_Validation(SnvCallingInstance snvCallingInstance) {
-        File snvFolder = snvCallingInstance.getInstancePath().absoluteDataManagementPath
+        File snvFolder = snvCallingInstance.samplePair.getSnvSamplePairPath().getAbsoluteDataManagementPath()
 
         File outputFile = new File(outputFolder.absoluteFile, "Delete_${snvCallingInstance.project.name}.sh")
         assert outputFile.text.contains(snvFolder.path) && outputFile.text.contains(snvFolder.parent)
