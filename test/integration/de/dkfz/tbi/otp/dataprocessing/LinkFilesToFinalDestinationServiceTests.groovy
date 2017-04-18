@@ -616,6 +616,33 @@ class LinkFilesToFinalDestinationServiceTests {
     }
 
     @Test
+    void testExecute_adapterTrimmingRoddyBamFileHasLessNumberOfReadsThenAllSeqTracksTogether_ShouldBeFine() {
+        setUp_allFine()
+        roddyBamFile.config.adapterTrimmingNeeded = true
+        assert roddyBamFile.config.save(flush: true)
+        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
+        RoddyQualityAssessment qa = roddyBamFile.overallQualityAssessment
+        qa.pairedRead1--
+        assert qa.save(flush: true)
+        assert roddyBamFile.numberOfReadsFromQa < roddyBamFile.numberOfReadsFromFastQc
+
+        linkFilesToFinalDestinationService.prepareRoddyBamFile(roddyBamFile)
+    }
+
+    @Test
+    void testExecute_roddyBamFileHasLessNumberOfReadsThenAllSeqTracksTogether_ShouldFail() {
+        setUp_allFine()
+        RoddyQualityAssessment qa = roddyBamFile.overallQualityAssessment
+        qa.pairedRead1--
+        assert qa.save(flush: true)
+        assert roddyBamFile.numberOfReadsFromQa < roddyBamFile.numberOfReadsFromFastQc
+
+        assert shouldFail (AssertionError) {
+            linkFilesToFinalDestinationService.prepareRoddyBamFile(roddyBamFile)
+        } ==~ /.*bam file (.*) has less number of reads than the sum of all fastqc (.*).*/
+    }
+
+    @Test
     void testExecute_RoddyBamFileIsNotLatestBamFile_ShouldFail() {
         setUp_allFine()
         roddyBamFile.metaClass.isMostRecentBamFile = { -> false}

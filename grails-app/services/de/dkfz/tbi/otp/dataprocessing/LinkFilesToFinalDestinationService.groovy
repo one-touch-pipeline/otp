@@ -38,6 +38,9 @@ class LinkFilesToFinalDestinationService {
         if (!roddyBamFile.withdrawn) {
             RoddyBamFile.withTransaction {
                 assert roddyBamFile.isMostRecentBamFile(): "The BamFile ${roddyBamFile} is not the most recent one. This must not happen!"
+                if (!roddyBamFile.config.adapterTrimmingNeeded) {
+                    assert roddyBamFile.numberOfReadsFromQa >= roddyBamFile.numberOfReadsFromFastQc: "bam file (${roddyBamFile.numberOfReadsFromQa}) has less number of reads than the sum of all fastqc (${roddyBamFile.numberOfReadsFromFastQc})"
+                }
                 assert [NEEDS_PROCESSING, INPROGRESS].contains(roddyBamFile.fileOperationStatus)
                 roddyBamFile.fileOperationStatus = INPROGRESS
                 assert roddyBamFile.save(flush: true)
