@@ -130,9 +130,12 @@ class LinkFilesToFinalDestinationService {
 
     void linkNewRnaResults(RnaRoddyBamFile roddyBamFile, Realm realm) {
         File baseDirectory = roddyBamFile.getBaseDirectory()
-        roddyBamFile.workDirectory.listFiles().findAll { !it.name.startsWith(".") }.each { File source ->
-            linkFileUtils.createAndValidateLinks([(source): new File(baseDirectory, source.name)], realm)
+        Map links = roddyBamFile.workDirectory.listFiles().findAll {
+            !it.name.startsWith(".")
+        }.collectEntries { File source ->
+            [(source): new File(baseDirectory, source.name)]
         }
+        linkFileUtils.createAndValidateLinks(links, realm)
     }
 
     void cleanupWorkDirectory(RoddyBamFile roddyBamFile, Realm realm) {
@@ -213,6 +216,9 @@ class LinkFilesToFinalDestinationService {
         List<RoddyBamFile> roddyBamFiles = RoddyBamFile.findAllByWorkPackageAndIdNotEqual(roddyBamFile.mergingWorkPackage, roddyBamFile.id)
         List<File> workDirs = roddyBamFiles*.workDirectory
         if (workDirs) {
+            workDirs.findAll { it.exists() }.each {
+                executeRoddyCommandService.deleteContentOfOtherUnixUserDirectory(it, realm)
+            }
             lsdfFilesService.deleteFilesRecursive(realm, workDirs)
         }
         String cmd = "find ${roddyBamFile.getBaseDirectory()} -maxdepth 1 -lname '.merging*/*' -delete;"

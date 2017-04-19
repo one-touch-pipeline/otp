@@ -61,6 +61,9 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends IntegrationSpec 
     void "test cleanupOldRnaResults"() {
         given:
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
+        service.executeRoddyCommandService = Mock(ExecuteRoddyCommandService) {
+            1 * deleteContentOfOtherUnixUserDirectory(_,_)
+        }
 
         RnaRoddyBamFile roddyBamFile2 = DomainFactory.createRoddyBamFile([workPackage: roddyBamFile.workPackage, config: roddyBamFile.config], RnaRoddyBamFile)
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile2)

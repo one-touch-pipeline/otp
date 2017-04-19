@@ -250,7 +250,7 @@ class RnaAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkflowTests {
 
     @Override
     Duration getTimeout() {
-        Duration.standardHours(2)
+        Duration.standardHours(5)
     }
 
     @Override
