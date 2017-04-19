@@ -1,21 +1,15 @@
 package de.dkfz.tbi.otp.job.processing
 
-
-import com.jcraft.jsch.Channel
-import com.jcraft.jsch.ChannelExec
-import com.jcraft.jsch.JSch
-import com.jcraft.jsch.JSchException
-import com.jcraft.jsch.Session
-import com.jcraft.jsch.IdentityRepository
-import com.jcraft.jsch.agentproxy.Connector
-import com.jcraft.jsch.agentproxy.ConnectorFactory
-import com.jcraft.jsch.agentproxy.RemoteIdentityRepository
-import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
-import groovy.transform.Synchronized
-import org.apache.commons.logging.Log
+import com.jcraft.jsch.*
+import com.jcraft.jsch.agentproxy.*
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.ProcessHelperService.ProcessOutput
+import de.dkfz.tbi.otp.utils.logging.*
+import groovy.transform.*
+import org.apache.commons.logging.*
 
+import java.util.concurrent.*
 
 /**
  * @short Helper class providing functionality for remote execution of jobs.
@@ -24,6 +18,8 @@ import de.dkfz.tbi.otp.utils.ProcessHelperService.ProcessOutput
  */
 class ExecutionService {
 
+    static final String MAX_SSH_CALLS = "MaximumParallelSshCalls"
+
     @SuppressWarnings("GrailsStatelessService")
     def configService
 
@@ -31,6 +27,7 @@ class ExecutionService {
 
     private Map<String, Session> sessionPerUser = [:]
 
+    private static Semaphore maxSshCalls
 
     /**
      * Executes a command on a specified host and logs stdout and stderr
@@ -83,6 +80,10 @@ class ExecutionService {
         if (!password && !keyFile) {
             throw new ProcessingException("Neither password nor key file for remote connection specified.")
         }
+        if (!maxSshCalls) {
+            maxSshCalls = new Semaphore((int)ProcessingOptionService.findOptionAsNumber(MAX_SSH_CALLS, null, null, 30), true)
+        }
+        maxSshCalls.acquire()
         try {
             Session session = connectSshIfNeeded(host, port, timeout, username, password, keyFile, useSshAgent)
 
@@ -104,6 +105,8 @@ class ExecutionService {
         } catch (Exception e) {
             log.info(e.toString(), e)
             throw new ProcessingException(e)
+        } finally {
+            maxSshCalls.release()
         }
     }
 
