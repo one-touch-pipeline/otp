@@ -66,10 +66,8 @@ class ProjectOverviewController {
         return [:]
     }
 
-    Map specificOverview() {
-        List<Project> projects = projectService.getAllProjects()
-        Project project = exactlyOneElement(Project.findAllByName(params.project ?: projects.first().name, [fetch: [projectCategories: 'join', projectGroup: 'join']]))
-
+    JSON getAlignmentInfo() {
+        Project project = exactlyOneElement(Project.findAllByName(params.project, [fetch: [projectCategories: 'join', projectGroup: 'join']]))
         Map<String, ProjectOverviewService.AlignmentInfo> alignmentInfo = null
         String alignmentError = null
         try {
@@ -78,6 +76,15 @@ class ProjectOverviewController {
             alignmentError = e.message
             log.error(e.message, e)
         }
+
+        Map map = [alignmentInfo: alignmentInfo, alignmentError: alignmentError]
+        render map as JSON
+    }
+
+    Map specificOverview() {
+        List<Project> projects = projectService.getAllProjects()
+        Project project = exactlyOneElement(Project.findAllByName(params.project ?: projects.first().name, [fetch: [projectCategories: 'join', projectGroup: 'join']]))
+
 
         List<ProjectContactPerson> projectContactPersons = ProjectContactPerson.findAllByProject(project)
         List<String> contactPersonRoles = [''] + ContactPersonRole.findAll()*.name
@@ -116,8 +123,6 @@ class ProjectOverviewController {
                 snvSeqTypes: SeqType.snvPipelineSeqTypes,
                 indelSeqTypes: SeqType.indelPipelineSeqTypes,
                 aceseqSeqType: SeqType.aceseqPipelineSeqTypes,
-                alignmentInfo: alignmentInfo,
-                alignmentError: alignmentError,
                 snv: project.snv,
                 projectContactPersons: projectContactPersons,
                 roleDropDown: contactPersonRoles,

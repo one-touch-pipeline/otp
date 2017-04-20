@@ -696,6 +696,12 @@ projectOverview.title.centersOverviewTable
 projectOverview.numberOfPatient
 projectOverview.table.ReferenceGenome.title
 
+projectOverview.alignmentInformation.aligning
+projectOverview.alignmentInformation.merging
+projectOverview.alignmentInformation.samtools
+projectOverview.alignmentInformation.noAlign
+
+
 #Home
 home.pageTitle
 home.pageTitle.graph

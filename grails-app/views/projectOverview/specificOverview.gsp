@@ -222,24 +222,16 @@
                     </g:each>
                 </ul>
             </div>
-            <g:if test="${alignmentInfo}">
-                <table>
+            <div id="alignment_info">
+                <table style="visibility: hidden" id="alignment_info_table">
                      <tr>
                         <th>${g.message(code: 'projectOverview.alignmentInformation.tool')}</th>
                         <th>${g.message(code: 'projectOverview.alignmentInformation.version')}</th>
                         <th>${g.message(code: 'projectOverview.alignmentInformation.arguments')}</th>
                     </tr>
-                    <g:each in="${alignmentInfo}" var="info">
-                        <tr><td colspan="3"><strong>${info.key}</strong></td></tr>
-                        <tr><td>${g.message(code: 'projectOverview.alignmentInformation.aligning')}</td><td>${info.value.bwaCommand}</td><td>${info.value.bwaOptions}</td></tr>
-                        <tr><td>${g.message(code: 'projectOverview.alignmentInformation.merging')}</td><td>${info.value.mergeCommand}</td><td>${info.value.mergeOptions}</td></tr>
-                        <tr><td>${g.message(code: 'projectOverview.alignmentInformation.samtools')}</td><td>${info.value.samToolsCommand}</td><td></td></tr>
-                    </g:each>
+
                 </table>
-            </g:if>
-            <g:else>
-                ${alignmentError ?: g.message(code: 'projectOverview.alignmentInformation.noAlign')}
-            </g:else>
+            </div>
         </div>
         <br>
         <div class="otpDataTables">
@@ -387,6 +379,7 @@
     <asset:script>
         $(function() {
             $.otp.projectOverviewTable.referenceGenome();
+            $.otp.projectOverviewTable.asynchronCallAlignmentInfo();
             $.otp.initialiseSpecificOverview.toggleDescription();
             $.otp.initCommentBox(${project.id}, "#projectCommentBox");
             $.otp.projectOverviewTable.deleteUser();

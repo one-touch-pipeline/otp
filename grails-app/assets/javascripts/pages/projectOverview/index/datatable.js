@@ -2,19 +2,19 @@
 /*global $ */
 
 $.otp.projectOverviewTable = {
-        /*
-         * The function return only the passed value.
-         * It can be used for not modified output.
-         */
-         returnParameterUnchanged: function (json) {
-                return json;
-         },
+    /*
+     * The function return only the passed value.
+     * It can be used for not modified output.
+     */
+    returnParameterUnchanged: function (json) {
+        return json;
+    },
 
     registerDataTable: function (selector, url, successUpdate) {
         "use strict";
         var oTable = $(selector).dataTable({
             sDom: '<i> T rt<"clear">',
-            oTableTools : $.otp.tableTools,
+            oTableTools: $.otp.tableTools,
             bFilter: true,
             bProcessing: true,
             bServerSide: false,
@@ -55,10 +55,10 @@ $.otp.projectOverviewTable = {
     updatePatientCount: function () {
         "use strict";
         $.getJSON($.otp.createLink({
-            controller : 'projectOverview',
-            action : 'individualCountByProject'
+            controller: 'projectOverview',
+            action: 'individualCountByProject'
         }), {
-            projectName : $('#project_select').val()
+            projectName: $('#project_select').val()
         }, function (data) {
             var message, i;
             if (data.individualCount >= 0) {
@@ -83,10 +83,10 @@ $.otp.projectOverviewTable = {
     updateDates: function () {
         "use strict";
         $.getJSON($.otp.createLink({
-            controller : 'projectOverview',
-            action : 'updateDates'
+            controller: 'projectOverview',
+            action: 'updateDates'
         }), {
-            projectName : $('#project_select').val()
+            projectName: $('#project_select').val()
         }, function (data) {
             var message, i;
             if (data) {
@@ -111,7 +111,7 @@ $.otp.projectOverviewTable = {
         });
     },
 
-    deleteUser: function() {
+    deleteUser: function () {
         $('.deletePerson').on('click', function (event) {
             "use strict";
             $.ajax({
@@ -145,8 +145,8 @@ $.otp.projectOverviewTable = {
         var oTable = $.otp.projectOverviewTable.registerDataTable(
             "#listReferenceGenome",
             $.otp.createLink({
-                controller : 'projectOverview',
-                action : 'dataTableSourceReferenceGenome'
+                controller: 'projectOverview',
+                action: 'dataTableSourceReferenceGenome'
             }),
             $.otp.projectOverviewTable.returnParameterUnchanged
         );
@@ -169,13 +169,13 @@ $.otp.projectOverviewTable = {
                 for (var i = 0; i < json.aaData.length; i += 1) {
                     var row = json.aaData[i];
                     row[0] = $.otp.createLinkMarkup({
-                            controller: 'individual',
-                            action: 'show',
-                            text: row[0],
-                            parameters: {
-                                mockPid: row[0]
-                            }
-                        });
+                        controller: 'individual',
+                        action: 'show',
+                        text: row[0],
+                        parameters: {
+                            mockPid: row[0]
+                        }
+                    });
                 }
                 return json;
             }
@@ -191,16 +191,16 @@ $.otp.projectOverviewTable = {
         var oTable4 = $.otp.projectOverviewTable.registerDataTable(
             '#sampleTypeNameCountBySample',
             $.otp.createLink({
-                controller : 'projectOverview',
-                action : 'dataTableSourceSampleTypeNameCountBySample'
+                controller: 'projectOverview',
+                action: 'dataTableSourceSampleTypeNameCountBySample'
             }),
             $.otp.projectOverviewTable.returnParameterUnchanged
         );
         var oTable5 = $.otp.projectOverviewTable.registerDataTable(
             "#centerNameRunId",
             $.otp.createLink({
-                controller : 'projectOverview',
-                action : 'dataTableSourceCenterNameRunId'
+                controller: 'projectOverview',
+                action: 'dataTableSourceCenterNameRunId'
             }),
             $.otp.projectOverviewTable.returnParameterUnchanged
         );
@@ -227,14 +227,82 @@ $.otp.projectOverviewTable = {
     updateAlignmentInformation: function () {
         "use strict";
         $.getJSON($.otp.createLink({
-            controller : 'projectOverview',
-            action : 'checkForAlignment'
+            controller: 'projectOverview',
+            action: 'checkForAlignment'
         }), {
-            projectName : $('#project_select').val()
+            projectName: $('#project_select').val()
         }, function (data) {
             $('#projectOverview_alignmentInformation').text(data.alignmentMessage);
         }).error(function (jqXHR) {
             $.otp.warningMessage(jqXHR.statusText + jqXHR.status);
         });
+    },
+
+    /**
+     * Asynchronous calls the getAlignmentInfo from the  ProjectOverviewController.
+     * While loading displays a Loading text until the data arrived.
+     */
+    asynchronCallAlignmentInfo: function () {
+        "use strict";
+        $.ajax({
+            url: $.otp.createLink({
+                controller: 'projectOverview',
+                action: 'getAlignmentInfo',
+                parameters: {project: $('#project_select').val()}
+            }),
+            dataType: 'json',
+            success: function (data) {
+                $.otp.projectOverviewTable.initialiseAlignmentInfo(data);
+            },
+            beforeSend: function () {
+                $.otp.projectOverviewTable.displayLoading();
+            }
+        });
+    },
+
+    /**
+     * If the loading of the Data is successfull, the Loading animation will be removed.
+     * If the loaded Data is empty no Alginment is displayed. If not,
+     * the AlginmentInfo table is displayed.
+     * @param data holds the data that have been loaded
+     */
+    initialiseAlignmentInfo: function (data) {
+        $('#loadingDots').remove();
+        if (data.alignmentInfo != null) {
+            $('#alignment_info_table').css('visibility', 'visible');
+            $.otp.projectOverviewTable.createAlignmentTable(data);
+        } else {
+            $('#alignment_info').html($L("projectOverview.alignmentInformation.noAlign"));
+        }
+    },
+
+    /**
+     * Adds a loading animation to the top of the alignment Info.
+     */
+    displayLoading: function () {
+        $('#alignment_info').css(
+            'display', 'inline',
+            'vertical-alignment', 'top'
+        ).prepend('<div class="loadingDots" id="loadingDots">Loading</div>');
+    },
+
+    /**
+     * Adds rows and columns including content to the Table
+     * which is taken from the achieved data.
+     * @param data holds the data that have been loaded
+     */
+    createAlignmentTable: function (data) {
+        var aligning = $L("projectOverview.alignmentInformation.aligning");
+        var merging = $L("projectOverview.alignmentInformation.merging");
+        var samtools = $L("projectOverview.alignmentInformation.samtools");
+
+        $.each(data.alignmentInfo, function (key, value) {
+            $('#alignment_info_table tr:last').after(
+                '<tr><td colspan="3"><strong>' + key + '</strong></td></tr>' +
+                '<tr><td style=\' padding: 5px;\'>' + aligning + '<td>' + value.bwaCommand + '</td><td>' + value.bwaOptions + '</td></tr>' +
+                '<tr><td style=\' padding: 5px;\'>' + merging + '</td><td>' + value.mergeCommand + '</td><td>' + value.mergeOptions + '</td></tr>' +
+                '<tr><td style=\' padding: 5px;\'>' + samtools + '</td><td>' + value.samToolsCommand + '</td><td></td></tr>');
+        });
     }
+
 };
