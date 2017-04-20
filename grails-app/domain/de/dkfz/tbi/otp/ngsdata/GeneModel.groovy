@@ -5,6 +5,13 @@ import de.dkfz.tbi.otp.utils.*
 
 
 class GeneModel implements Entity {
+
+    static final String GENE_MODELS = "GENE_MODELS"
+    static final String GENE_MODELS_EXCLUDE = "GENE_MODELS_EXCLUDE"
+    static final String GENE_MODELS_DEXSEQ = "GENE_MODELS_DEXSEQ"
+    static final String GENE_MODELS_GC = "GENE_MODELS_GC"
+
+
     ReferenceGenome referenceGenome
     String path
     String fileName

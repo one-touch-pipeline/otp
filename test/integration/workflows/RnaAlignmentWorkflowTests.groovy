@@ -41,8 +41,10 @@ class RnaAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkflowTests {
     @Test
     void testAlignLanesOnly_withoutArribaProcessing_NoBaseBamExist_OneLane_allFine() {
         createProjectConfigRna(exactlyOneElement(MergingWorkPackage.findAll()), [
-                mouseData: true,
                 configVersion: "v2_0",
+        ], [
+                mouseData: true,
+
         ])
         createSeqTrack("readGroup1")
 
@@ -120,7 +122,7 @@ class RnaAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkflowTests {
     @Override
     void createProjectConfig(MergingWorkPackage workPackage, Map options = [:]) {}
 
-    void createProjectConfigRna(MergingWorkPackage workPackage, Map options = [:]) {
+    void createProjectConfigRna(MergingWorkPackage workPackage, Map configOptions = [:], Map referenceGenomeConfig = [:]) {
 
         lsdfFilesService.createDirectory(new File(configService.getProjectSequencePath(workPackage.project)), realm)
 
@@ -144,17 +146,17 @@ class RnaAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkflowTests {
                 type: ToolName.Type.RNA,
         )
         ToolName toolNameKallisto = DomainFactory.createToolName(
-                name: "GENOME_KALLISTO_INDEX",
+                name: ProjectService.GENOME_KALLISTO_INDEX,
                 path: "kallisto",
                 type: ToolName.Type.RNA,
         )
         ToolName toolNameArribaFusions = DomainFactory.createToolName(
-                name: "ARRIBA_KNOWN_FUSIONS",
+                name: ProjectService.ARRIBA_KNOWN_FUSIONS,
                 path: "arriba-fusion",
                 type: ToolName.Type.RNA,
         )
         ToolName toolNameArribaBlacklist = DomainFactory.createToolName(
-                name: "ARRIBA_BLACKLIST",
+                name: ProjectService.ARRIBA_BLACKLIST,
                 path: "arriba-blacklist",
                 type: ToolName.Type.RNA,
         )
@@ -186,15 +188,19 @@ class RnaAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkflowTests {
         )
 
         SpringSecurityUtils.doWithAuth("operator") {
-            projectService.configureRnaAlignmentDeciderProject(new RnaAlignmentConfiguration([
+            projectService.configureRnaAlignmentConfig(new RoddyConfiguration([
                     project          : workPackage.project,
                     seqType          : workPackage.seqType,
                     pluginName       : ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_RODDY_ALIGNMENT_PLUGIN_NAME, workPackage.seqType.roddyName, null),
                     pluginVersion    : ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_RODDY_ALIGNMENT_PLUGIN_VERSION, workPackage.seqType.roddyName, null),
                     baseProjectConfig: ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_BASE_PROJECT_CONFIG, workPackage.seqType.roddyName, null),
                     configVersion    : "v1_0",
-                    referenceGenome  : workPackage.referenceGenome,
                     resources        : "t",
+            ] + configOptions))
+            projectService.configureRnaAlignmentReferenceGenome(new RnaAlignmentReferenceGenomeConfiguration([
+                    project          : workPackage.project,
+                    seqType          : workPackage.seqType,
+                    referenceGenome  : workPackage.referenceGenome,
                     geneModel        : geneModel,
                     referenceGenomeIndex: [
                             referenceGenomeIndexGatk,
@@ -203,8 +209,15 @@ class RnaAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkflowTests {
                             referenceGenomeIndexArribaFusions,
                             referenceGenomeIndexArribaBlacklist,
                     ],
-            ] + options))
+            ] + referenceGenomeConfig))
+
+            workPackage.alignmentProperties = ReferenceGenomeProjectSeqType.getConfiguredReferenceGenomeProjectSeqType(workPackage.project, workPackage.seqType, workPackage.sampleType).alignmentProperties.collect {
+                new MergingWorkPackageAlignmentProperty(name: it.name, value: it.value, mergingWorkPackage: workPackage)
+            }
+            workPackage.save(flush: true)
         }
+        assert ReferenceGenomeProjectSeqTypeAlignmentProperty.list().size() >= 1
+        assert MergingWorkPackageAlignmentProperty.list().size() >= 1
     }
 
 

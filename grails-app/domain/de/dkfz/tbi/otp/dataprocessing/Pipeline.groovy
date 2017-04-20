@@ -36,6 +36,13 @@ class Pipeline implements Entity {
                     return null
             }
         }
+
+        Pipeline getPipeline() {
+            CollectionUtils.exactlyOneElement(Pipeline.findAllByTypeAndName(
+                    type,
+                    this,
+            ))
+        }
     }
     Name name
 

@@ -2,9 +2,9 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.administration.*
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.roddy.RoddyConstants
+import de.dkfz.tbi.otp.dataprocessing.roddy.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.utils.*
@@ -22,7 +22,6 @@ import java.nio.file.attribute.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
-
 /**
  * Service providing methods to access information about Projects.
  *
@@ -30,7 +29,17 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 class ProjectService {
 
     static final String PHIX_INFIX = 'PhiX'
-    static final List<String> processingPriorities = ["NORMAL","FAST_TRACK"]
+    static final List<String> processingPriorities = ["NORMAL", "FAST_TRACK"]
+
+    //constants for rna configurations
+    static final String ARRIBA_KNOWN_FUSIONS = "ARRIBA_KNOWN_FUSIONS"
+    static final String ARRIBA_BLACKLIST = "ARRIBA_BLACKLIST"
+    static final String GENOME_GATK = "GENOME_GATK"
+    static final String GENOME_KALLISTO_INDEX = "GENOME_KALLISTO_INDEX"
+    static final String GENOME_STAR_INDEX = "GENOME_STAR_INDEX"
+    static final String RUN_ARRIBA = "RUN_ARRIBA"
+    static final String RUN_FEATURE_COUNTS_DEXSEQ = "RUN_FEATURE_COUNTS_DEXSEQ"
+
 
     AclUtilService aclUtilService
     ExecutionService executionService
@@ -70,8 +79,10 @@ class ProjectService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public List<Project> getAllProjectsWithCofigFile(SeqType seqType, Pipeline pipeline) {
-        return RoddyWorkflowConfig.findAllBySeqTypeAndPipelineAndObsoleteDateIsNullAndIndividualIsNull(seqType, pipeline)*.project.unique().sort({it.name.toUpperCase()})
+    public List<Project> getAllProjectsWithConfigFile(SeqType seqType, Pipeline pipeline) {
+        return RoddyWorkflowConfig.findAllBySeqTypeAndPipelineAndObsoleteDateIsNullAndIndividualIsNull(seqType, pipeline)*.project.unique().sort({
+            it.name.toUpperCase()
+        })
     }
 
     /**
@@ -91,7 +102,7 @@ class ProjectService {
                 projectCategories: categoryNames.collect { exactlyOneElement(ProjectCategory.findAllByName(it)) },
         )
         project = project.save(flush: true)
-        assert(project != null)
+        assert (project != null)
         // add to groups
         Group.list().each { Group group ->
             if (group.readProject) {
@@ -238,11 +249,11 @@ AND ace.mask IN (:permissions)
 AND ace.granting = true
 '''
         Map params = [
-            permissions: [
-                BasePermission.READ.getMask(),
-                BasePermission.ADMINISTRATION.getMask()
-            ],
-            roles: roles
+                permissions: [
+                        BasePermission.READ.getMask(),
+                        BasePermission.ADMINISTRATION.getMask()
+                ],
+                roles      : roles
         ]
         List result = Project.executeQuery(query, params)
         if (!result) {
@@ -253,6 +264,7 @@ AND ace.granting = true
         }
         return false
     }
+
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void setSnv(Project project, Project.Snv snv) {
         assert project: "the input project must not be null"
@@ -276,7 +288,7 @@ AND ace.granting = true
         ReferenceGenome referenceGenome = exactlyOneElement(ReferenceGenome.findAllByName(referenceGenomeName))
         SeqType seqType_wgp = SeqType.getWholeGenomePairedSeqType()
         SeqType seqType_exome = SeqType.getExomePairedSeqType()
-        [seqType_wgp, seqType_exome].each {seqType ->
+        [seqType_wgp, seqType_exome].each { seqType ->
             ReferenceGenomeProjectSeqType refSeqType = new ReferenceGenomeProjectSeqType()
             refSeqType.project = project
             refSeqType.seqType = seqType
@@ -324,7 +336,7 @@ AND ace.granting = true
 
         //Reference genomes with PHIX_INFIX only works with sambamba
         if (referenceGenome.name.contains(PHIX_INFIX)) {
-            assert panCanAlignmentConfiguration.mergeTool == MergeConstants.MERGE_TOOL_SAMBAMBA : "Only sambamba supported for reference genome with Phix"
+            assert panCanAlignmentConfiguration.mergeTool == MergeConstants.MERGE_TOOL_SAMBAMBA: "Only sambamba supported for reference genome with Phix"
         }
 
         File statDir = referenceGenomeService.pathToChromosomeSizeFilesPerReference(referenceGenome)
@@ -344,11 +356,7 @@ AND ace.granting = true
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void configureRnaAlignmentDeciderProject(RnaAlignmentConfiguration rnaAlignmentConfiguration) {
-        deprecatedReferenceGenomeProjectSeqTypeAndSetDecider(rnaAlignmentConfiguration)
-
-        ReferenceGenome referenceGenome = exactlyOneElement(ReferenceGenome.findAllByName(rnaAlignmentConfiguration.referenceGenome))
-
+    void configureRnaAlignmentConfig(RoddyConfiguration rnaAlignmentConfiguration) {
         assert OtpPath.isValidPathComponent(rnaAlignmentConfiguration.pluginName): "pluginName '${rnaAlignmentConfiguration.pluginName}' is an invalid path component"
         assert OtpPath.isValidPathComponent(rnaAlignmentConfiguration.pluginVersion): "pluginVersion '${rnaAlignmentConfiguration.pluginVersion}' is an invalid path component"
         assert OtpPath.isValidPathComponent(rnaAlignmentConfiguration.baseProjectConfig): "baseProjectConfig '${rnaAlignmentConfiguration.baseProjectConfig}' is an invalid path component"
@@ -359,13 +367,68 @@ AND ace.granting = true
                 Pipeline.Name.RODDY_RNA_ALIGNMENT,
         ))
 
-        ReferenceGenomeProjectSeqType refSeqType = createReferenceGenomeProjectSeqType(rnaAlignmentConfiguration, referenceGenome)
-        refSeqType.save(flush: true, failOnError: true)
-
-        alignmentHelper(rnaAlignmentConfiguration, pipeline, RoddyRnaConfigTemplate.createConfig(rnaAlignmentConfiguration, pipeline.name, referenceGenomeIndexService, geneModelService), true)
+        alignmentHelper(rnaAlignmentConfiguration, pipeline, RoddyRnaConfigTemplate.createConfig(rnaAlignmentConfiguration, pipeline.name), true)
     }
 
-    private void deprecatedReferenceGenomeProjectSeqTypeAndSetDecider(RoddyConfiguration config) {
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void alignmentConfigInvalid(Project project, SeqType seqType, Pipeline pipeline) {
+        RoddyWorkflowConfig roddyWorkflowConfig = RoddyWorkflowConfig.getLatestForProject(project, seqType, pipeline)
+        if (roddyWorkflowConfig) {
+            roddyWorkflowConfig.makeObsolete()
+        }
+    }
+
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void configureRnaAlignmentReferenceGenome(RnaAlignmentReferenceGenomeConfiguration rnaAlignmentConfiguration) {
+        if (rnaAlignmentConfiguration.sampleTypes) {
+            setReferenceGenomeProjectSeqTypeSampleTypeDeprecated(rnaAlignmentConfiguration.project, rnaAlignmentConfiguration.seqType, rnaAlignmentConfiguration.sampleTypes)
+        } else {
+            deprecatedReferenceGenomeProjectSeqTypeAndSetDecider(rnaAlignmentConfiguration)
+        }
+
+        Map alignmentProperties = [:]
+
+        ReferenceGenome referenceGenome = exactlyOneElement(ReferenceGenome.findAllByName(rnaAlignmentConfiguration.referenceGenome))
+        boolean mouseData = rnaAlignmentConfiguration.mouseData
+        GeneModel geneModel = rnaAlignmentConfiguration.geneModel
+
+        if (mouseData) {
+            alignmentProperties[RUN_ARRIBA] = 'false'
+            alignmentProperties[RUN_FEATURE_COUNTS_DEXSEQ] = 'false'
+        }
+        rnaAlignmentConfiguration.referenceGenomeIndex.each {
+            if (!(mouseData && [ARRIBA_KNOWN_FUSIONS, ARRIBA_BLACKLIST].contains(it.toolName.name))) {
+                alignmentProperties[it.toolName.name.contains(GENOME_STAR_INDEX) ? GENOME_STAR_INDEX : it.toolName.name] = referenceGenomeIndexService.getFile(it).absolutePath
+            }
+        }
+        alignmentProperties[GeneModel.GENE_MODELS] = geneModelService.getFile(geneModel).absolutePath
+        if (!mouseData) {
+            alignmentProperties[GeneModel.GENE_MODELS_DEXSEQ] = geneModelService.getDexSeqFile(geneModel).absolutePath
+        }
+        if (geneModel.excludeFileName) {
+            alignmentProperties[GeneModel.GENE_MODELS_EXCLUDE] = geneModelService.getExcludeFile(geneModel).absolutePath
+        }
+        if (geneModel.gcFileName) {
+            alignmentProperties[GeneModel.GENE_MODELS_GC] = geneModelService.getGcFile(geneModel).absolutePath
+        }
+
+        List<SampleType> sampleTypes = rnaAlignmentConfiguration.sampleTypes ?: [null]
+        sampleTypes.each {
+            ReferenceGenomeProjectSeqType refSeqType = new ReferenceGenomeProjectSeqType(
+                    project: rnaAlignmentConfiguration.project,
+                    seqType: rnaAlignmentConfiguration.seqType,
+                    sampleType: it,
+                    referenceGenome: referenceGenome,
+            )
+            refSeqType.alignmentProperties = alignmentProperties.collect { String key, String value ->
+                new ReferenceGenomeProjectSeqTypeAlignmentProperty(name: key, value: value, referenceGenomeProjectSeqType: refSeqType)
+            } as Set
+            refSeqType.save(flush: true, failOnError: true)
+        }
+    }
+
+    private void deprecatedReferenceGenomeProjectSeqTypeAndSetDecider(ProjectSeqTypeReferenceGenomeConfiguration config) {
         if (config.project.alignmentDeciderBeanName == AlignmentDeciderBeanNames.OTP_ALIGNMENT.bean) {
             setReferenceGenomeProjectSeqTypeDeprecated(config.project)
         } else {
@@ -433,7 +496,7 @@ AND ace.granting = true
         ))
 
         RoddyWorkflowConfig roddyWorkflowConfigBasedProject = RoddyWorkflowConfig.getLatestForProject(basedProject, seqType, pipeline)
-        File configFilePathBasedProject = new File (roddyWorkflowConfigBasedProject.configFilePath)
+        File configFilePathBasedProject = new File(roddyWorkflowConfigBasedProject.configFilePath)
         File configDirectory = RoddyWorkflowConfig.getStandardConfigDirectory(project, roddyWorkflowConfigBasedProject.pipeline.name)
 
         executeScript(getCopyBashScript(configDirectory, configFilePathBasedProject, executionHelperService.getGroup(projectDirectory)), project)
@@ -462,8 +525,8 @@ AND ace.granting = true
         RoddyWorkflowConfig roddyWorkflowConfig = configurePipelineProject(snvPipelineConfiguration, pipeline, RoddySnvConfigTemplate)
 
         SnvConfig snvConfig = CollectionUtils.atMostOneElement(SnvConfig.findAllWhere([
-                project: snvPipelineConfiguration.project,
-                seqType: snvPipelineConfiguration.seqType,
+                project     : snvPipelineConfiguration.project,
+                seqType     : snvPipelineConfiguration.seqType,
                 obsoleteDate: null,
         ]))
         if (snvConfig) {
@@ -618,6 +681,13 @@ echo 'OK'
         referenceGenomeProjectSeqTypes*.save(flush: true, failOnError: true)
     }
 
+    private void setReferenceGenomeProjectSeqTypeSampleTypeDeprecated(Project project, SeqType seqType, List<SampleType> sampleTypes) {
+        Set<ReferenceGenomeProjectSeqType> referenceGenomeProjectSeqTypes = ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeInListAndDeprecatedDateIsNull(project, seqType, sampleTypes)
+        referenceGenomeProjectSeqTypes*.deprecatedDate = new Date()
+        referenceGenomeProjectSeqTypes*.save(flush: true, failOnError: true)
+    }
+
+
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void updateFingerPrinting(Project project, boolean value) {
         project.fingerPrinting = value
@@ -625,31 +695,36 @@ echo 'OK'
     }
 }
 
-class RoddyConfiguration {
+trait ProjectSeqTypeConfiguration {
     Project project
     SeqType seqType
+}
+
+trait ProjectSeqTypeReferenceGenomeConfiguration extends ProjectSeqTypeConfiguration {
+    String referenceGenome
+}
+
+class RoddyConfiguration implements ProjectSeqTypeConfiguration {
     String pluginName
     String pluginVersion
     String baseProjectConfig
     String configVersion
+    String resources = "xl"
 }
 
-class PanCanAlignmentConfiguration extends RoddyConfiguration {
-    String referenceGenome
+class PanCanAlignmentConfiguration extends RoddyConfiguration implements ProjectSeqTypeReferenceGenomeConfiguration {
     String statSizeFileName
     String mergeTool
     String bwaMemVersion
     String sambambaVersion
     String bwaMemPath
     String sambambaPath
-    String resources = "xl"
     boolean adapterTrimmingNeeded
 }
 
-class RnaAlignmentConfiguration extends RoddyConfiguration {
+class RnaAlignmentReferenceGenomeConfiguration implements ProjectSeqTypeReferenceGenomeConfiguration {
     boolean mouseData
-    String referenceGenome
-    String resources = "xl"
     GeneModel geneModel
     List<ReferenceGenomeIndex> referenceGenomeIndex
+    List<SampleType> sampleTypes
 }

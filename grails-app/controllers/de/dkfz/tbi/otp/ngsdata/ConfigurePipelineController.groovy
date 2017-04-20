@@ -5,6 +5,7 @@ import de.dkfz.tbi.otp.dataprocessing.roddy.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.utils.*
 import grails.converters.*
+import groovy.transform.*
 import org.springframework.validation.*
 
 class ConfigurePipelineController {
@@ -12,27 +13,24 @@ class ConfigurePipelineController {
     ProjectService projectService
 
     def alignment(ConfigureAlignmentPipelineSubmitCommand cmd) {
-        Pipeline pipeline = CollectionUtils.exactlyOneElement(Pipeline.findAllByTypeAndName(
-                Pipeline.Type.ALIGNMENT,
-                Pipeline.Name.PANCAN_ALIGNMENT,
-        ))
+        Pipeline pipeline = Pipeline.Name.PANCAN_ALIGNMENT.pipeline
 
-        List<Project> projects = projectService.getAllProjectsWithCofigFile(cmd.seqType, pipeline)
+        List<Project> projects = projectService.getAllProjectsWithConfigFile(cmd.seqType, pipeline)
 
         Map result = checkErrorsIfSubmitted(cmd, pipeline)
         if (!result) {
             PanCanAlignmentConfiguration panCanAlignmentConfiguration = new PanCanAlignmentConfiguration([
-                    project          : cmd.project,
-                    seqType          : cmd.seqType,
-                    referenceGenome  : cmd.referenceGenome,
-                    statSizeFileName : cmd.statSizeFileName,
-                    mergeTool        : cmd.mergeTool,
-                    pluginName       : cmd.pluginName,
-                    pluginVersion    : cmd.pluginVersion,
-                    baseProjectConfig: cmd.baseProjectConfig,
-                    configVersion    : cmd.config,
-                    bwaMemVersion    : cmd.bwaMemVersion,
-                    sambambaVersion  : cmd.sambambaVersion,
+                    project              : cmd.project,
+                    seqType              : cmd.seqType,
+                    referenceGenome      : cmd.referenceGenome,
+                    statSizeFileName     : cmd.statSizeFileName,
+                    mergeTool            : cmd.mergeTool,
+                    pluginName           : cmd.pluginName,
+                    pluginVersion        : cmd.pluginVersion,
+                    baseProjectConfig    : cmd.baseProjectConfig,
+                    configVersion        : cmd.config,
+                    bwaMemVersion        : cmd.bwaMemVersion,
+                    sambambaVersion      : cmd.sambambaVersion,
                     adapterTrimmingNeeded: cmd.adapterTrimmingNeeded,
             ])
             projectService.configurePanCanAlignmentDeciderProject(panCanAlignmentConfiguration)
@@ -103,39 +101,20 @@ class ConfigurePipelineController {
 
         if (cmd.submit || cmd.copy) {
             result << [
-                    referenceGenome  : cmd.referenceGenome,
-                    statSizeFileName : cmd.statSizeFileName,
-                    mergeTool        : cmd.mergeTool,
+                    referenceGenome : cmd.referenceGenome,
+                    statSizeFileName: cmd.statSizeFileName,
+                    mergeTool       : cmd.mergeTool,
             ]
         }
         return result
     }
 
-    def rnaAlignment(ConfigureRnaAlignmentPipelineSubmitCommand cmd) {
-        Pipeline pipeline = CollectionUtils.exactlyOneElement(Pipeline.findAllByTypeAndName(
-                Pipeline.Type.ALIGNMENT,
-                Pipeline.Name.RODDY_RNA_ALIGNMENT,
-        ))
+    def rnaAlignment(BaseConfigurePipelineSubmitCommand cmd) {
+        Pipeline pipeline = Pipeline.Name.RODDY_RNA_ALIGNMENT.pipeline
 
-        List<Project> projects = projectService.getAllProjectsWithCofigFile(cmd.seqType, pipeline)
+        List<Project> projects = projectService.getAllProjectsWithConfigFile(cmd.seqType, pipeline)
 
-        Map result = checkErrorsIfSubmitted(cmd, pipeline)
-        if (!result) {
-            RnaAlignmentConfiguration rnaAlignmentConfiguration = new RnaAlignmentConfiguration([
-                    project              : cmd.project,
-                    baseProjectConfig    : cmd.baseProjectConfig,
-                    seqType              : cmd.seqType,
-                    referenceGenome      : cmd.referenceGenome,
-                    pluginName           : cmd.pluginName,
-                    pluginVersion        : cmd.pluginVersion,
-                    configVersion        : cmd.config,
-                    geneModel            : cmd.geneModel,
-                    referenceGenomeIndex : cmd.referenceGenomeIndex,
-                    mouseData            : cmd.mouseData,
-            ])
-            projectService.configureRnaAlignmentDeciderProject(rnaAlignmentConfiguration)
-            redirect(controller: "projectOverview", action: "specificOverview", params: [project: cmd.project.name])
-        }
+        Map result = [:]
 
         String defaultPluginName = ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_RODDY_ALIGNMENT_PLUGIN_NAME, cmd.seqType.roddyName, null)
         String defaultPluginVersion = ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_RODDY_ALIGNMENT_PLUGIN_VERSION, cmd.seqType.roddyName, null)
@@ -145,12 +124,35 @@ class ConfigurePipelineController {
 
         assert ReferenceGenome.findByName(defaultReferenceGenome)
 
-        result << getValues(cmd.project, cmd.seqType, pipeline)
-
         String referenceGenome = ReferenceGenomeProjectSeqType.findByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(cmd.project, cmd.seqType)?.referenceGenome?.name ?: defaultReferenceGenome
         List<String> referenceGenomes = ReferenceGenome.list(sort: "name", order: "asc").findAll {
             ReferenceGenomeIndex.findByReferenceGenome(it) && GeneModel.findByReferenceGenome(it)
         }*.name
+
+        List<SampleType> configuredSampleTypes = ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeIsNotNullAndDeprecatedDateIsNull(cmd.project, cmd.seqType)*.sampleType.unique().sort {
+            it.name
+        }
+        List<SampleType> additionalUsedSampleTypes = (SeqTrack.createCriteria().list {
+            projections {
+                sample {
+                    property('sampleType')
+                }
+            }
+            sample {
+                sampleType {
+                    eq('specificReferenceGenome', SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC)
+                }
+                individual {
+                    eq('project', cmd.project)
+                }
+            }
+            eq('seqType', cmd.seqType)
+        }.unique() - configuredSampleTypes).sort {
+            it.name
+        }
+        List<SampleType> additionalPossibleSampleTypes = (SampleType.findAllBySpecificReferenceGenome(SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC) - configuredSampleTypes - additionalUsedSampleTypes).sort {
+            it.name
+        }
 
         assert cmd.project.getProjectDirectory().exists()
 
@@ -173,14 +175,91 @@ class ConfigurePipelineController {
 
                 baseProjectConfig       : defaultBaseProjectConfig,
                 defaultBaseProjectConfig: defaultBaseProjectConfig,
-        ]
 
-        if (cmd.submit) {
-            result << [
-                    referenceGenome  : cmd.referenceGenome,
-                    ]
-        }
+                possibleSampleTypes     : [
+                        [
+                                name  : 'configurePipeline.sample.type.configured',
+                                values: configuredSampleTypes,
+                                info  : 'configurePipeline.sample.type.configured.info',
+                        ],
+                        [
+                                name  : 'configurePipeline.sample.type.used.in.project',
+                                values: additionalUsedSampleTypes,
+                                info  : 'configurePipeline.sample.type.used.in.project.info',
+                        ],
+                        [
+                                name  : 'configurePipeline.sample.type.possible',
+                                values: additionalPossibleSampleTypes,
+                                info  : 'configurePipeline.sample.type.possible.info',
+                        ],
+                ],
+        ]
+        result << params
+        result << getValues(cmd.project, cmd.seqType, pipeline)
+
         return result
+    }
+
+    def rnaAlignmentConfig(ConfigurePipelineSubmitCommand cmd) {
+        Map result = checkErrorsIfSubmitted(cmd, Pipeline.Name.RODDY_RNA_ALIGNMENT.pipeline)
+        if (!result) {
+            RoddyConfiguration rnaAlignmentConfiguration = new RoddyConfiguration([
+                    project          : cmd.project,
+                    baseProjectConfig: cmd.baseProjectConfig,
+                    seqType          : cmd.seqType,
+                    pluginName       : cmd.pluginName,
+                    pluginVersion    : cmd.pluginVersion,
+                    configVersion    : cmd.config,
+            ])
+            projectService.configureRnaAlignmentConfig(rnaAlignmentConfiguration)
+            result << [message: 'The config settings were saved successfully']
+        }
+
+        forward(action: "rnaAlignment", params: result)
+    }
+
+    def rnaAlignmentConfigInvalid(BaseConfigurePipelineSubmitCommand cmd) {
+        boolean hasErrors = cmd.hasErrors()
+        Map result = [hasErrors: hasErrors]
+
+        if (hasErrors) {
+            FieldError errors = cmd.errors.getFieldError()
+            result << [message: "'${errors.getRejectedValue()}' is not a valid value for '${errors.getField()}'. Error code: '${errors.code}'"]
+
+        } else {
+            projectService.alignmentConfigInvalid(cmd.project, cmd.seqType, Pipeline.Name.RODDY_RNA_ALIGNMENT.pipeline)
+            result << [message: 'Marking the config settings as invalid was successful.']
+        }
+
+        forward(action: "rnaAlignment", params: result)
+    }
+
+    def rnaAlignmentReferenceGenome(ConfigureRnaAlignmentSubmitCommand cmd) {
+        boolean hasErrors = cmd.hasErrors()
+        Map result = [hasErrors: hasErrors]
+
+        if (hasErrors) {
+            FieldError errors = cmd.errors.getFieldError()
+            log.error(errors)
+            result << [message: "'${errors.getRejectedValue()}' is not a valid value for '${errors.getField()}'. Error code: '${errors.code}'"]
+
+        } else {
+            RnaAlignmentReferenceGenomeConfiguration rnaConfiguration = new RnaAlignmentReferenceGenomeConfiguration([
+                    project             : cmd.project,
+                    seqType             : cmd.seqType,
+                    referenceGenome     : cmd.referenceGenome,
+                    geneModel           : cmd.geneModel,
+                    referenceGenomeIndex: cmd.referenceGenomeIndex,
+                    mouseData           : cmd.mouseData,
+                    sampleTypes         : cmd.sampleTypeIds.collect {
+                        return CollectionUtils.exactlyOneElement(SampleType.findAllById(it))
+                    }
+            ])
+            projectService.configureRnaAlignmentReferenceGenome(rnaConfiguration)
+            result << [message: 'The reference genome settings were saved successfully']
+        }
+
+        forward(action: "rnaAlignment", params: result)
     }
 
     JSON getStatSizeFileNames(String referenceGenome) {
@@ -207,16 +286,13 @@ class ConfigurePipelineController {
                     (it.name): ReferenceGenomeIndex.findAllByReferenceGenomeAndToolName(refGenome, it)
             ]
         }
-        data << ["defaultGenomeStarIndex" : ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_DEFAULT_GENOME_STAR_INDEX, SeqType.rnaPairedSeqType.roddyName, null)]
-        data << ["data" : toolNamesData]
+        data << ["defaultGenomeStarIndex": ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_DEFAULT_GENOME_STAR_INDEX, SeqType.rnaPairedSeqType.roddyName, null)]
+        data << ["data": toolNamesData]
         render data as JSON
     }
 
     def snv(ConfigurePipelineSubmitCommand cmd) {
-        Pipeline pipeline = CollectionUtils.exactlyOneElement(Pipeline.findAllByTypeAndName(
-                Pipeline.Type.SNV,
-                Pipeline.Name.RODDY_SNV,
-        ))
+        Pipeline pipeline = Pipeline.Name.RODDY_SNV.pipeline
 
         String defaultPluginName = ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_SNV_PIPELINE_PLUGIN_NAME, cmd.seqType.roddyName, null)
         String defaultPluginVersion = ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_SNV_PIPELINE_PLUGIN_VERSION, cmd.seqType.roddyName, null)
@@ -227,10 +303,7 @@ class ConfigurePipelineController {
 
 
     def indel(ConfigurePipelineSubmitCommand cmd) {
-        Pipeline pipeline = CollectionUtils.exactlyOneElement(Pipeline.findAllByTypeAndName(
-                Pipeline.Type.INDEL,
-                Pipeline.Name.RODDY_INDEL,
-        ))
+        Pipeline pipeline = Pipeline.Name.RODDY_INDEL.pipeline
 
         String defaultPluginName = ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_INDEL_PIPELINE_PLUGIN_NAME, cmd.seqType.roddyName, null)
         String defaultPluginVersion = ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_INDEL_PIPELINE_PLUGIN_VERSION, cmd.seqType.roddyName, null)
@@ -240,10 +313,7 @@ class ConfigurePipelineController {
     }
 
     def aceseq(ConfigurePipelineSubmitCommand cmd) {
-        Pipeline pipeline = CollectionUtils.exactlyOneElement(Pipeline.findAllByTypeAndName(
-                Pipeline.Type.ACESEQ,
-                Pipeline.Name.RODDY_ACESEQ,
-        ))
+        Pipeline pipeline = Pipeline.Name.RODDY_ACESEQ.pipeline
 
         String defaultPluginName = ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_ACESEQ_PIPELINE_PLUGIN_NAME, cmd.seqType.roddyName, null)
         String defaultPluginVersion = ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_ACESEQ_PIPELINE_PLUGIN_VERSION, cmd.seqType.roddyName, null)
@@ -255,7 +325,7 @@ class ConfigurePipelineController {
     private Map createAnalysisConfig(ConfigurePipelineSubmitCommand cmd, Pipeline pipeline, String defaultPluginName, String defaultPluginVersion, String defaultBaseProjectConfig) {
         Map result = checkErrorsIfSubmitted(cmd, pipeline)
         if (!result) {
-            RoddyConfiguration configuration = new RoddyConfiguration ([
+            RoddyConfiguration configuration = new RoddyConfiguration([
                     project          : cmd.project,
                     seqType          : cmd.seqType,
                     pluginName       : cmd.pluginName,
@@ -322,23 +392,23 @@ class ConfigurePipelineController {
                 return [:] // == success
             }
             return [
-                    message                 : message,
-                    hasErrors               : hasErrors,
-                    pluginName              : cmd.pluginName,
-                    pluginVersion           : cmd.pluginVersion,
-                    baseProjectConfig       : cmd.baseProjectConfig,
-                    config                  : cmd.config,
+                    message          : message,
+                    hasErrors        : hasErrors,
+                    pluginName       : cmd.pluginName,
+                    pluginVersion    : cmd.pluginVersion,
+                    baseProjectConfig: cmd.baseProjectConfig,
+                    config           : cmd.config,
             ]
         }
         return [
-                message                 : message,
-                hasErrors               : hasErrors,
+                message  : message,
+                hasErrors: hasErrors,
         ]
     }
 
     private static Map getValues(Project project, SeqType seqType, Pipeline pipeline) {
-        RoddyWorkflowConfig roddyWorkflowConfig = RoddyWorkflowConfig.getLatestForProject(project, seqType, pipeline)
-        String configVersion = roddyWorkflowConfig?.configVersion
+        String configVersion = CollectionUtils.atMostOneElement(
+                RoddyWorkflowConfig.findAllByProjectAndSeqTypeAndPipelineAndIndividualIsNull(project, seqType, pipeline, [sort: 'id', order: 'desc', max: 1]))?.configVersion
         if (configVersion) {
             Set<String> versions = configVersion.split("_")
             final int MAIN_CONFIG_VERSION_INDEX = 0
@@ -348,23 +418,25 @@ class ConfigurePipelineController {
             configVersion = "v1_0"
         }
 
-        String lastRoddyConfig = (roddyWorkflowConfig?.configFilePath as File)?.text
+        String lastRoddyConfig = (RoddyWorkflowConfig.getLatestForProject(project, seqType, pipeline)?.configFilePath as File)?.text
         assert project.getProjectDirectory().exists()
         return [
-                project                 : project,
-                seqType                 : seqType,
-                config                  : configVersion,
-                lastRoddyConfig         : lastRoddyConfig,
+                project        : project,
+                seqType        : seqType,
+                config         : configVersion,
+                lastRoddyConfig: lastRoddyConfig,
         ]
     }
 
+
     private List getToolNames() {
         List<String> toolNames = ToolName.findAllByTypeAndNameNotIlike(ToolName.Type.RNA, "GENOME_STAR_INDEX%")*.name
-        toolNames.add(RoddyRnaConfigTemplate.GENOME_STAR_INDEX)
+        toolNames.add(ProjectService.GENOME_STAR_INDEX)
         return toolNames.sort()
     }
 }
 
+@ToString(includeNames = true, includeSuper = true)
 class ConfigureAlignmentPipelineSubmitCommand extends ConfigurePipelineSubmitCommand implements Serializable {
     Project basedProject
 
@@ -396,17 +468,26 @@ class ConfigureAlignmentPipelineSubmitCommand extends ConfigurePipelineSubmitCom
     }
 }
 
-class ConfigureRnaAlignmentPipelineSubmitCommand extends ConfigurePipelineSubmitCommand implements Serializable {
+@ToString(includeNames = true, includeSuper = true)
+class ConfigureRnaAlignmentSubmitCommand extends BaseConfigurePipelineSubmitCommand {
     String referenceGenome
     boolean mouseData
 
     GeneModel geneModel
     List<ReferenceGenomeIndex> referenceGenomeIndex = []
 
+    List<String> sampleTypeIds = []
+
+    static constraints = {
+        referenceGenome(nullable: false)
+        geneModel(nullable: false)
+        referenceGenomeIndex(nullable: false)
+    }
+
+    //used by gui to set referenceGenomeIndex
     void setToolVersionValue(List toolVersionValue) {
         if (toolVersionValue) {
             toolVersionValue.each {
-                println it
                 if (it) {
                     referenceGenomeIndex.add(ReferenceGenomeIndex.findById(it as long))
                 }
@@ -415,10 +496,9 @@ class ConfigureRnaAlignmentPipelineSubmitCommand extends ConfigurePipelineSubmit
     }
 }
 
-class ConfigurePipelineSubmitCommand implements Serializable {
-    Project project
-    SeqType seqType
 
+@ToString(includeNames = true, includeSuper = true)
+class ConfigurePipelineSubmitCommand extends BaseConfigurePipelineSubmitCommand {
     String pluginName
     String pluginVersion
     String baseProjectConfig
@@ -426,8 +506,6 @@ class ConfigurePipelineSubmitCommand implements Serializable {
     String submit
 
     static constraints = {
-        project(nullable: false)
-        seqType(nullable: false)
         pluginName(nullable: true, validator: { val, obj ->
             if (!val) {
                 return 'Empty'
@@ -461,5 +539,17 @@ class ConfigurePipelineSubmitCommand implements Serializable {
 
     void setConfig(String config) {
         this.config = config?.trim()?.replaceAll(" +", " ")
+    }
+}
+
+
+@ToString(includeNames = true)
+class BaseConfigurePipelineSubmitCommand implements Serializable {
+    Project project
+    SeqType seqType
+
+    static constraints = {
+        project(nullable: false)
+        seqType(nullable: false)
     }
 }

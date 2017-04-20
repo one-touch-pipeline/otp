@@ -851,32 +851,71 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         ReferenceGenomeProjectSeqType.findAllByDeprecatedDateIsNull().size() == 0
     }
 
-    void "test configureRnaAlignmentDeciderProject valid input"() {
+    void "test configureRnaAlignmentConfig valid input"() {
         setup:
-        RnaAlignmentConfiguration configuration = createRnaAlignmentConfiguration(
+        RoddyConfiguration configuration = new RoddyConfiguration(
+                project          : Project.findByName("testProjectAlignment"),
+                seqType          : SeqType.wholeGenomePairedSeqType,
+                pluginName       : 'plugin',
+                pluginVersion    : '1.2.3',
+                baseProjectConfig: 'baseConfig',
+                configVersion    : 'v1_0',
+        )
+        Realm realm = ConfigService.getRealm(configuration.project, Realm.OperationType.DATA_MANAGEMENT)
+        File projectDirectory = LsdfFilesService.getPath(
+                realm.rootPath,
+                configuration.project.dirName,
+        )
+        assert projectDirectory.mkdirs()
+
+        when:
+        SpringSecurityUtils.doWithAuth("admin") {
+            projectService.configureRnaAlignmentConfig(configuration)
+        }
+
+        then:
+        RoddyWorkflowConfig roddyWorkflowConfig = CollectionUtils.exactlyOneElement(RoddyWorkflowConfig.findAllByProjectAndSeqTypeAndPipelineAndPluginVersionAndObsoleteDateIsNull(
+                configuration.project,
+                configuration.seqType,
+                Pipeline.Name.RODDY_RNA_ALIGNMENT.pipeline,
+                "${configuration.pluginName}:${configuration.pluginVersion}"
+        ))
+        File roddyWorkflowConfigFile = new File(roddyWorkflowConfig.configFilePath)
+        roddyWorkflowConfigFile.exists()
+        PosixFileAttributes attributes = Files.readAttributes(roddyWorkflowConfigFile.toPath(), PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
+        TestCase.assertContainSame(attributes.permissions(), [PosixFilePermission.OWNER_READ, PosixFilePermission.GROUP_READ])
+    }
+
+    @Unroll
+    void "test configureRnaAlignmentReferenceGenome valid input (mouseData = #mouseData)"() {
+        setup:
+        RnaAlignmentReferenceGenomeConfiguration configuration = createRnaAlignmentConfiguration(
                 mouseData: mouseData
         )
 
         when:
         SpringSecurityUtils.doWithAuth("admin") {
-            projectService.configureRnaAlignmentDeciderProject(configuration)
+            projectService.configureRnaAlignmentReferenceGenome(configuration)
         }
 
         then:
-        List<RoddyWorkflowConfig> roddyWorkflowConfigs = RoddyWorkflowConfig.findAllByProjectAndSeqTypeAndPipelineInListAndPluginVersionAndObsoleteDateIsNull(
-                configuration.project,
-                configuration.seqType,
-                Pipeline.findAllByTypeAndName(Pipeline.Type.ALIGNMENT, Pipeline.Name.RODDY_RNA_ALIGNMENT),
-                "${configuration.pluginName}:${configuration.pluginVersion}"
+        ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType = CollectionUtils.exactlyOneElement(
+                ReferenceGenomeProjectSeqType.list()
         )
-        roddyWorkflowConfigs.size() == 1
-        File roddyWorkflowConfig = new File(roddyWorkflowConfigs.configFilePath.first())
-        roddyWorkflowConfig.exists()
-        PosixFileAttributes attributes = Files.readAttributes(roddyWorkflowConfig.toPath(), PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
-        TestCase.assertContainSame(attributes.permissions(), [PosixFilePermission.OWNER_READ, PosixFilePermission.GROUP_READ])
+        configuration.project == referenceGenomeProjectSeqType.project
+        configuration.seqType == referenceGenomeProjectSeqType.seqType
+        null == referenceGenomeProjectSeqType.sampleType
+        configuration.referenceGenome == referenceGenomeProjectSeqType.referenceGenome.name
+        TestCase.assertContainSame(entries, referenceGenomeProjectSeqType.alignmentProperties*.name)
 
         where:
-        mouseData << [false, true]
+        mouseData || entries
+        false     || [ProjectService.ARRIBA_KNOWN_FUSIONS, ProjectService.ARRIBA_BLACKLIST, ProjectService.GENOME_STAR_INDEX,
+                      ProjectService.GENOME_GATK, ProjectService.GENOME_KALLISTO_INDEX,
+                      GeneModel.GENE_MODELS, GeneModel.GENE_MODELS_DEXSEQ, GeneModel.GENE_MODELS_EXCLUDE, GeneModel.GENE_MODELS_GC]
+        true      || [ProjectService.RUN_ARRIBA, ProjectService.RUN_FEATURE_COUNTS_DEXSEQ, ProjectService.GENOME_STAR_INDEX,
+                      ProjectService.GENOME_GATK, ProjectService.GENOME_KALLISTO_INDEX,
+                      GeneModel.GENE_MODELS, GeneModel.GENE_MODELS_EXCLUDE, GeneModel.GENE_MODELS_GC]
     }
 
     void "test configureDefaultOtpAlignmentDecider to configurePanCanAlignmentDeciderProject"() {
@@ -1281,25 +1320,20 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         return configuration
     }
 
-    private RnaAlignmentConfiguration createRnaAlignmentConfiguration(Map properties = [:]) {
-        RnaAlignmentConfiguration configuration = new RnaAlignmentConfiguration([
+    private RnaAlignmentReferenceGenomeConfiguration createRnaAlignmentConfiguration(Map properties = [:]) {
+        RnaAlignmentReferenceGenomeConfiguration configuration = new RnaAlignmentReferenceGenomeConfiguration([
                 project             : Project.findByName("testProjectAlignment"),
                 seqType             : SeqType.rnaPairedSeqType,
                 referenceGenome     : "testReferenceGenome",
-                pluginName          : 'plugin',
-                pluginVersion       : '1.2.3',
-                baseProjectConfig   : 'baseConfig',
-                configVersion       : 'v1_0',
                 referenceGenomeIndex: [
-                        DomainFactory.createReferenceGenomeIndex(toolName: DomainFactory.createToolName(name: "${RoddyRnaConfigTemplate.GENOME_STAR_INDEX}_200")),
-                        DomainFactory.createReferenceGenomeIndex(toolName: DomainFactory.createToolName(name: RoddyRnaConfigTemplate.GENOME_KALLISTO_INDEX)),
-                        DomainFactory.createReferenceGenomeIndex(toolName: DomainFactory.createToolName(name: RoddyRnaConfigTemplate.GENOME_GATK)),
-                        DomainFactory.createReferenceGenomeIndex(toolName: DomainFactory.createToolName(name: RoddyRnaConfigTemplate.ARRIBA_KNOWN_FUSIONS)),
-                        DomainFactory.createReferenceGenomeIndex(toolName: DomainFactory.createToolName(name: RoddyRnaConfigTemplate.ARRIBA_BLACKLIST)),
+                        DomainFactory.createReferenceGenomeIndex(toolName: DomainFactory.createToolName(name: "${ProjectService.GENOME_STAR_INDEX}_200")),
+                        DomainFactory.createReferenceGenomeIndex(toolName: DomainFactory.createToolName(name: ProjectService.GENOME_KALLISTO_INDEX)),
+                        DomainFactory.createReferenceGenomeIndex(toolName: DomainFactory.createToolName(name: ProjectService.GENOME_GATK)),
+                        DomainFactory.createReferenceGenomeIndex(toolName: DomainFactory.createToolName(name: ProjectService.ARRIBA_KNOWN_FUSIONS)),
+                        DomainFactory.createReferenceGenomeIndex(toolName: DomainFactory.createToolName(name: ProjectService.ARRIBA_BLACKLIST)),
                 ],
                 geneModel          : DomainFactory.createGeneModel(),
-                mouseData : true,
-
+                mouseData          : true,
         ] + properties)
         Realm realm = ConfigService.getRealm(configuration.project, Realm.OperationType.DATA_MANAGEMENT)
         File projectDirectory = LsdfFilesService.getPath(

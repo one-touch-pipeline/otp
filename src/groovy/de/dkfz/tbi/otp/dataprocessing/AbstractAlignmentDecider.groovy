@@ -1,7 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeProjectSeqType
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeProjectSeqTypeAlignmentProperty
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqTrackService
 import de.dkfz.tbi.otp.ngsdata.SeqTypeService
@@ -47,8 +47,7 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
         ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType = seqTrack.configuredReferenceGenomeProjectSeqType
         Collection<MergingWorkPackage> workPackages = findOrSaveWorkPackages(
                 seqTrack,
-                referenceGenomeProjectSeqType.referenceGenome,
-                referenceGenomeProjectSeqType.statSizeFileName,
+                referenceGenomeProjectSeqType,
                 getPipeline(seqTrack),
         )
 
@@ -69,16 +68,15 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
     }
 
     Collection<MergingWorkPackage> findOrSaveWorkPackages(SeqTrack seqTrack,
-                                                          ReferenceGenome referenceGenome,
-                                                          String statSizeFileName,
+                                                          ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType,
                                                           Pipeline pipeline) {
 
         // TODO OTP-1401: In the future there may be more than one MWP for the sample and seqType.
         MergingWorkPackage workPackage = atMostOneElement(
                 MergingWorkPackage.findAllWhere(sample: seqTrack.sample, seqType: seqTrack.seqType))
         if (workPackage != null) {
-            assert workPackage.referenceGenome.id == referenceGenome.id
-            assert workPackage.statSizeFileName == statSizeFileName
+            assert workPackage.referenceGenome.id == referenceGenomeProjectSeqType.referenceGenome.id
+            assert workPackage.statSizeFileName == referenceGenomeProjectSeqType.statSizeFileName
             assert workPackage.pipeline.id == pipeline.id
             if (!workPackage.satisfiesCriteria(seqTrack)) {
                 logNotAligning(seqTrack, "it does not satisfy the criteria of the existing MergingWorkPackage ${workPackage}.")
@@ -98,9 +96,12 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
         } else {
             workPackage = new MergingWorkPackage(
                     MergingWorkPackage.getMergingProperties(seqTrack) + [
-                    referenceGenome: referenceGenome,
-                    statSizeFileName: statSizeFileName,
+                    referenceGenome: referenceGenomeProjectSeqType.referenceGenome,
+                    statSizeFileName: referenceGenomeProjectSeqType.statSizeFileName,
                     pipeline: pipeline,
+                    alignmentProperties: referenceGenomeProjectSeqType.alignmentProperties?.collect { ReferenceGenomeProjectSeqTypeAlignmentProperty alignmentProperty ->
+                        new MergingWorkPackageAlignmentProperty(name: alignmentProperty.name, value: alignmentProperty.value)
+                    },
             ]).save(failOnError: true)
             assert workPackage
         }

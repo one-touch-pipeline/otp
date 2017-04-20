@@ -49,6 +49,12 @@ class ReferenceGenomeProjectSeqType implements Entity {
 
     ReferenceGenome referenceGenome
 
+    Set<ReferenceGenomeProjectSeqTypeAlignmentProperty> alignmentProperties
+
+    static hasMany = [
+            alignmentProperties: ReferenceGenomeProjectSeqTypeAlignmentProperty
+    ]
+
     static constraints = {
         // there must be no 2 current (not deprecated) reference genomes
         // defined for the same combination of project and seqType and sampleType
@@ -79,8 +85,8 @@ class ReferenceGenomeProjectSeqType implements Entity {
         seqType index: "reference_genome_project_seq_type_seq_type_idx"
         sampleType index: "reference_genome_project_seq_type_sample_type_idx"
         referenceGenome index: "reference_genome_project_seq_type_reference_genome_idx"
+        alignmentProperties cascade: "all-delete-orphan"
     }
-
 
 
     static ReferenceGenomeProjectSeqType getConfiguredReferenceGenomeProjectSeqType(SeqTrack seqTrack) {

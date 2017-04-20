@@ -27,6 +27,10 @@ abstract class AbstractRoddyAlignmentJob extends AbstractExecutePanCanJob<RoddyB
             cValues.add("CHROM_SIZES_FILE:${chromosomeStatSizeFile}")
         }
 
+        roddyBamFile.mergingWorkPackage.alignmentProperties.each { MergingWorkPackageAlignmentProperty alignmentProperty ->
+            cValues.add("${alignmentProperty.name}:${alignmentProperty.value}")
+        }
+
         cValues.add("possibleControlSampleNamePrefixes:${roddyBamFile.getSampleType().dirName}")
         cValues.add("possibleTumorSampleNamePrefixes:")
 

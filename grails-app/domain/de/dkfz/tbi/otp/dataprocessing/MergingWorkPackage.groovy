@@ -42,7 +42,14 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
     static final Collection<String> processingParameterNames = ['referenceGenome', 'statSizeFileName', 'pipeline'].asImmutable()
     String statSizeFileName
 
+    //reference genome depending options
+    Set<MergingWorkPackageAlignmentProperty> alignmentProperties
+
     boolean needsProcessing
+
+    static hasMany = [
+            alignmentProperties: MergingWorkPackageAlignmentProperty
+    ]
 
     static constraints = {
         // TODO OTP-1401: In the future there may be more than one MWP for one sample and seqType.
@@ -147,6 +154,7 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
 
     static mapping = {
         needsProcessing index: "merging_work_package_needs_processing_idx"  // partial index: WHERE needs_processing = true
+        alignmentProperties cascade: "all-delete-orphan"
     }
 
     String toStringWithoutIdAndPipeline() {
