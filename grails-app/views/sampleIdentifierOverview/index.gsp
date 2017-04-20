@@ -9,11 +9,7 @@
 <body>
     <div class="body">
         <div style="height: 20px;"></div>
-        <form class="blue_label" id="projectsGroupbox">
-            <span class="blue_label"><g:message code="home.projectfilter"/> :</span>
-            <g:select class="criteria" id="project_select" name='project_select'
-                      from='${projects}' value='${project}'></g:select>
-        </form>
+        <g:render template="/templates/projectSelection" model="['project': project, 'projects': projects]" />
         <div style="width: 20px; height: 60px;"></div>
             <div class="otpDataTables">
                 <otp:dataTable codes="${[

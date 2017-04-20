@@ -25,7 +25,7 @@ $.otp.alignmentQualityOverviewTable = {
             fnServerData : function (sSource, aoData, fnCallback) {
                 aoData.push({
                     name : "project",
-                    value : $('#project').val()
+                    value : $('#project').find('option:selected').text()
                 });
                 aoData.push({
                     name : "seqType",

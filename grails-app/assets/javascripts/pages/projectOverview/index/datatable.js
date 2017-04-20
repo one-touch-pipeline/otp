@@ -29,7 +29,7 @@ $.otp.projectOverviewTable = {
             fnServerData: function (sSource, aoData, fnCallback) {
                 aoData.push({
                     name: "project",
-                    value: $('#project_select').val()
+                    value: $('#project').find('option:selected').text()
                 });
                 $.ajax({
                     "dataType": 'json',
@@ -42,7 +42,7 @@ $.otp.projectOverviewTable = {
                         oTable.fnSettings().oFeatures.bServerSide = false;
                     },
                     "success": function (json) {
-                        json = successUpdate(json)
+                        json = successUpdate(json);
                         fnCallback(json);
                         oTable.fnSettings().oFeatures.bServerSide = false;
                     }
@@ -58,7 +58,7 @@ $.otp.projectOverviewTable = {
             controller: 'projectOverview',
             action: 'individualCountByProject'
         }), {
-            projectName: $('#project_select').val()
+            projectName : $('#project').find('option:selected').text()
         }, function (data) {
             var message, i;
             if (data.individualCount >= 0) {
@@ -119,7 +119,7 @@ $.otp.projectOverviewTable = {
             }),
             $.otp.projectOverviewTable.returnParameterUnchanged
         );
-        $('#project_select').change(function () {
+        $('#project').change(function () {
             var oSettings = oTable.fnSettings();
             oSettings.oFeatures.bServerSide = true;
             oTable.fnDraw();
@@ -174,7 +174,7 @@ $.otp.projectOverviewTable = {
             $.otp.projectOverviewTable.returnParameterUnchanged
         );
         $.otp.projectOverviewTable.updatePatientCount();
-        $('#project_select').change(function () {
+        $('#project').change(function () {
             var oSettings1 = oTable1.fnSettings();
             oSettings1.oFeatures.bServerSide = true;
             oTable1.fnDraw();
@@ -199,7 +199,7 @@ $.otp.projectOverviewTable = {
             controller: 'projectOverview',
             action: 'checkForAlignment'
         }), {
-            projectName: $('#project_select').val()
+            projectName : $('#project').find('option:selected').text()
         }, function (data) {
             $('#projectOverview_alignmentInformation').text(data.alignmentMessage);
         }).error(function (jqXHR) {
@@ -217,7 +217,7 @@ $.otp.projectOverviewTable = {
             url: $.otp.createLink({
                 controller: 'projectOverview',
                 action: 'getAlignmentInfo',
-                parameters: {project: $('#project_select').val()}
+                parameters: {project: $('#project').find('option:selected').text()}
             }),
             dataType: 'json',
             success: function (data) {

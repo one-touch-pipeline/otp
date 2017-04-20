@@ -21,11 +21,7 @@
             <div id="commentDateLabel">${comment?.modificationDate?.format('EEE, d MMM yyyy HH:mm')}</div>
             <div id="commentAuthorLabel">${comment?.author}</div>
         </div>
-        <form class="blue_label" id="projectsGroupbox">
-            <span class="blue_label"><g:message code="home.projectfilter"/> :</span>
-            <g:select class="criteria" id="project_select" name='project'
-                from='${projects}' value='${project.name}' onChange='submit();' />
-        </form>
+        <g:render template="/templates/projectSelection" model="['project': project, 'projects': projects]" />
         <div id="projectOverviewDates">
             <table>
                 <tr>

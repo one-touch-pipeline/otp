@@ -9,14 +9,12 @@
 
 <body>
     <div class="body">
-        <form class="blue_label" id="projectsGroupbox">
-            <span class="blue_label"><g:message code="alignment.quality.project"/> :</span>
-            <g:select class="criteria" id="project" name='project'
-                from='${projects}' value='${project}' onChange='submit();'/>
+        <g:render template="/templates/projectSelection" model="['project': project, 'projects': projects]" />
+        <div class="blue_label" id="projectsGroupbox">
             <span class="blue_label"><g:message code="alignment.quality.seqType"/> :</span>
             <g:if test="${seqTypes.size()>1}">
-                <g:select class="criteria" id="seqType" name='seqType'
-                from='${seqTypes}' value='${seqType}' onChange='submit();'/>
+                <form style="display: inline"><g:select class="criteria" id="seqType" name='seqType'
+                from='${seqTypes}' value='${seqType}' onChange='submit();'/></form>
             </g:if>
             <g:else>
                 <span class="blue_label">
@@ -24,7 +22,7 @@
                 </span>
                 <input type='hidden' id='seqType' name='seqType' value='${seqType}'/>
             </g:else>
-        </form>
+        </div>
         <br><br><br>
         <div id="withdrawn_description">
             Withdrawn data is colored gray

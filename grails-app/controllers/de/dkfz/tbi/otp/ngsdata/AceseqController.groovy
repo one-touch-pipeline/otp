@@ -1,7 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.ProjectSelection
-import de.dkfz.tbi.otp.ProjectSelectionService
+import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.utils.*
 import grails.converters.*
@@ -15,6 +14,15 @@ class AceseqController {
     ProjectSelectionService projectSelectionService
 
     Map results() {
+        if (params.projectName) {
+            Project project
+            if ((project =  projectService.getProjectByName(params.projectName))) {
+                projectSelectionService.setSelectedProject([project], project.name)
+                redirect(controller: controllerName, action: actionName)
+                return
+            }
+        }
+
         List<Project> projects = projectService.getAllProjects()
         ProjectSelection selection = projectSelectionService.getSelectedProject()
 

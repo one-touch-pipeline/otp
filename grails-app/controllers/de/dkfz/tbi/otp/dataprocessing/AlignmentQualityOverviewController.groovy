@@ -1,11 +1,11 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.DataTableCommand
-import de.dkfz.tbi.otp.utils.FormatHelper
-import grails.converters.JSON
+import de.dkfz.tbi.otp.utils.*
+import grails.converters.*
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 
 class AlignmentQualityOverviewController {
@@ -103,13 +103,18 @@ class AlignmentQualityOverviewController {
     SeqTypeService seqTypeService
 
     ProjectService projectService
-
+    ProjectSelectionService projectSelectionService
 
     Map index() {
-        List<String> projects = projectService.getAllProjects()*.name
-        String projectName = params.project ?: projects[0]
+        List<Project> projects = projectService.getAllProjects()
+        ProjectSelection selection = projectSelectionService.getSelectedProject()
 
-        Project project = projectService.getProjectByName(projectName)
+        Project project
+        if (selection.projects.size() == 1) {
+            project = selection.projects.first()
+        } else {
+            project = projects.first()
+        }
 
         List<String> seqTypes = seqTypeService.alignableSeqTypesByProject(project)*.displayName
 
@@ -141,7 +146,7 @@ class AlignmentQualityOverviewController {
 
         return [
                 projects: projects,
-                project : projectName,
+                project : project,
                 seqTypes: seqTypes,
                 seqType : seqTypeName,
                 header  : header,

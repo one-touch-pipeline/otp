@@ -13,6 +13,15 @@ class IndelController {
     ProjectSelectionService projectSelectionService
 
     Map results() {
+        if (params.projectName) {
+            Project project
+            if ((project =  projectService.getProjectByName(params.projectName))) {
+                projectSelectionService.setSelectedProject([project], project.name)
+                redirect(controller: controllerName, action: actionName)
+                return
+            }
+        }
+
         List<Project> projects = projectService.getAllProjects()
         ProjectSelection selection = projectSelectionService.getSelectedProject()
 

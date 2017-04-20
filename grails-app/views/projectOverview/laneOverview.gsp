@@ -9,17 +9,9 @@
 <body>
     <div class="body">
         <div class= "searchCriteriaTableSequences">
-            <table id="searchCriteriaTable2">
+            <g:render template="/templates/projectSelection" model="['project': project, 'projects': projects]" />
+            <table id="searchCriteriaTable2" style="display: inline-block">
                 <tr>
-                    <td>
-                        <span class="blue_label"><g:message code="home.projectfilter"/> :</span>
-                    </td>
-                    <td>
-                        <form>
-                            <g:select class="criteria" id="project" name='project'
-                            from='${projects}' value='${project}' onChange='submit();'></g:select>
-                        </form>
-                    </td>
                     <td>
                         <span class="blue_label"><g:message code="projectOverview.filter.sampletype"/> :</span>
                     </td>

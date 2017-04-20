@@ -25,7 +25,7 @@ $.otp.projectOverviewTable = {
             fnServerData : function (sSource, aoData, fnCallback) {
                 aoData.push({
                     name : "project",
-                    value : $('#project').val()
+                    value : $('#project').find('option:selected').text()
                 });
                 $.ajax({
                     "dataType" : 'json',
@@ -44,23 +44,27 @@ $.otp.projectOverviewTable = {
                         for (var i = 0; i < json.aaData.length; i += 1) {
                             var row = json.aaData[i];
                             var mockPid = row[0];
-                                row[0] = $.otp.createLinkMarkup({
+                            row[0] = $.otp.createLinkMarkup({
+                                controller: 'individual',
+                                action: 'show',
+                                text: row[0],
+                                parameters: {
+                                    mockPid: mockPid
+                                }
+                            });
+                            var projectName = $('#project').find('option:selected').text();
+                            if (projectName !== "MMML" &&
+                                projectName !== "MMML_XP" &&
+                                projectName !== "MMML_RARE_LYMPHOMA_XP" &&
+                                projectName !== "MMML_RARE_LYMPHOMA_EXOMES") {
+                                row[2] = $.otp.createLinkMarkup({
                                     controller: 'individual',
                                     action: 'show',
-                                    text: row[0],
+                                    text: row[2],
                                     parameters: {
                                         mockPid: mockPid
                                     }
                                 });
-                            if ($('#project').val() != "MMML" && $('#project').val() != "MMML_XP" && $('#project').val() != "MMML_RARE_LYMPHOMA_XP" && $('#project').val() != "MMML_RARE_LYMPHOMA_EXOMES") {
-                                row[2] = $.otp.createLinkMarkup({
-                                        controller: 'individual',
-                                        action: 'show',
-                                        text: row[2],
-                                        parameters: {
-                                            mockPid: mockPid
-                                        }
-                                    });
                             }
                         }
                         fnCallback(json);
@@ -125,7 +129,7 @@ $.otp.projectOverviewTable = {
             var emptyRows = true;
 
             rows.each(function(r) {
-                if (this.innerHTML != '')
+                if (this.innerHTML !== '')
                     emptyRows = false;
             });
 

@@ -12,11 +12,7 @@
         <h3 class="statisticTitle">
             <g:message code="projectOverview.pageTitle" />
         </h3>
-        <form class="blue_label" id="projectsGroupbox">
-            <span class="blue_label"><g:message code="home.projectfilter"/> :</span>
-            <g:select class="criteria" id="project_select" name='project_select'
-                from='${projects}' value='${project}'></g:select>
-        </form>
+        <g:render template="/templates/projectSelection" model="['project': project, 'projects': projects]" />
         <h4 class="statisticTitle">
             <g:message code="projectOverview.numberOfPatient"/>: <span id="patient-count"></span>
         </h4>

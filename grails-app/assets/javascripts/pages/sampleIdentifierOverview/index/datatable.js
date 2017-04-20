@@ -19,7 +19,7 @@ $.otp.sampleIdentifierOverviewTable = {
             fnServerData: function (sSource, aoData, fnCallback) {
                 aoData.push({
                     name: "project",
-                    value: $('#project_select').val()
+                    value: $('#project').find('option:selected').text()
                 });
                 $.ajax({
                     "dataType": 'json',

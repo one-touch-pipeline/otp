@@ -246,14 +246,28 @@ $.otp.graph.overview = {
 $.otp.graph.project = {
     init : function() {
         "use strict";
-        var url = $.otp.contextPath;
-        var project = $('#project_select').val();
-        RGraph.AJAX(url + '/statistic/sampleTypeCountBySeqType?projectName='
-                + project, $.otp.graph.project.sampleTypeCountBySeqType);
-        RGraph.AJAX(url + '/statistic/sampleTypeCountByPatient?projectName='
-                + project, $.otp.graph.project.sampleTypeCountByPatient);
-        RGraph.AJAX(url + '/statistic/laneCountPerDateByProject?projectName='
-                + project, $.otp.graph.project.laneCountPerDateByProject);
+        var project = $('#project').find('option:selected').text();
+        RGraph.AJAX(
+            $.otp.createLink({
+                controller: 'statistic',
+                action: 'sampleTypeCountBySeqType',
+                parameters: {projectName: project}
+            }), $.otp.graph.project.sampleTypeCountBySeqType
+        );
+        RGraph.AJAX(
+            $.otp.createLink({
+                controller: 'statistic',
+                action: 'sampleTypeCountByPatient',
+                parameters: {projectName: project}
+            }), $.otp.graph.project.sampleTypeCountByPatient
+        );
+        RGraph.AJAX(
+            $.otp.createLink({
+                controller: 'statistic',
+                action: 'laneCountPerDateByProject',
+                parameters: {projectName: project}
+            }), $.otp.graph.project.laneCountPerDateByProject
+        );
     },
 
     sampleTypeCountBySeqType : function() {

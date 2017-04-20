@@ -16,8 +16,6 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 class ProjectOverviewController {
 
-    public final String SAMPLE_IDENTIFIER = "sample-identifier"
-
     ProjectService projectService
 
     ProjectOverviewService projectOverviewService
@@ -29,24 +27,41 @@ class ProjectOverviewController {
     SampleTypePerProjectService sampleTypePerProjectService
 
     ProcessingThresholdsService processingThresholdsService
-
-    SeqTypeService seqTypeService
-
     CommentService commentService
+    ProjectSelectionService projectSelectionService
+
 
     Map index() {
-        String projectName = params.projectName
-        return [projects: projectService.getAllProjects()*.name, project: projectName]
+        List<Project> projects = projectService.getAllProjects()
+        ProjectSelection selection = projectSelectionService.getSelectedProject()
+
+        Project project
+        if (selection.projects.size() == 1) {
+            project = selection.projects.first()
+        } else {
+            project = projects.first()
+        }
+
+        return [
+                projects: projects,
+                project: project,
+        ]
     }
 
     /**
      * the basic data for the page projectOverview/laneOverview. The table content are retrieved asynchrony from {@link #dataTableSourceLaneOverview} via JavaScript.
      */
     Map laneOverview() {
-        List<String> projects = projectService.getAllProjects()*.name
-        String projectName = params.project ?: projects[0]
+        List<Project> projects = projectService.getAllProjects()
+        ProjectSelection selection = projectSelectionService.getSelectedProject()
 
-        Project project = projectService.getProjectByName(projectName)
+        Project project
+        if (selection.projects.size() == 1) {
+            project = selection.projects.first()
+        } else {
+            project = projects.first()
+        }
+
         List<SeqType> seqTypes  = projectOverviewService.seqTypeByProject(project)
         List<String> sampleTypes  = projectOverviewService.sampleTypeByProject(project)
         String sampleTypeName = (params.sampleType && sampleTypes.contains(params.sampleType)) ? params.sampleType : sampleTypes[0]
@@ -54,7 +69,7 @@ class ProjectOverviewController {
         return [
             projects: projects,
             hideSampleIdentifier: ProjectOverviewService.hideSampleIdentifier(project),
-            project: projectName,
+            project: project,
             seqTypes: seqTypes,
             sampleTypes: sampleTypes,
             sampleType: sampleTypeName,
@@ -83,7 +98,16 @@ class ProjectOverviewController {
 
     Map specificOverview() {
         List<Project> projects = projectService.getAllProjects()
-        Project project = exactlyOneElement(Project.findAllByName(params.project ?: projects.first().name, [fetch: [projectCategories: 'join', projectGroup: 'join']]))
+        ProjectSelection selection = projectSelectionService.getSelectedProject()
+
+        Project project
+        if (selection.projects.size() == 1) {
+            project = selection.projects.first()
+        } else {
+            project = projects.first()
+        }
+
+        project = exactlyOneElement(Project.findAllByName(project.name, [fetch: [projectCategories: 'join', projectGroup: 'join']]))
 
         Map<String, String> dates = getDates(project)
 
@@ -109,7 +133,7 @@ class ProjectOverviewController {
         List accessPersons = projectOverviewService.getAccessPersons(project)
 
         return [
-                projects: projects*.name,
+                projects: projects,
                 project: project,
                 creationDate: dates.creationDate,
                 lastReceivedDate: dates.lastReceivedDate,
