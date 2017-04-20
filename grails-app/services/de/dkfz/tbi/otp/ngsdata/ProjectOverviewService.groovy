@@ -261,7 +261,7 @@ class ProjectOverviewService {
                     List<ReferenceGenomeProjectSeqType> rgpst = ReferenceGenomeProjectSeqType.findAllByProjectAndDeprecatedDateIsNull(project)
                     Map<String, AlignmentInfo> result = [:]
                     rgpst*.seqType.unique().sort {it.displayName }.each { SeqType seqType ->
-                        RoddyWorkflowConfig workflowConfig = RoddyWorkflowConfig.getLatestForProject(project, seqType, Pipeline.findByNameAndType(Pipeline.Name.PANCAN_ALIGNMENT, Pipeline.Type.ALIGNMENT))
+                        RoddyWorkflowConfig workflowConfig = RoddyWorkflowConfig.getLatestForProject(project, seqType, Pipeline.findByNameAndType(Pipeline.Name.forSeqType(seqType), Pipeline.Type.ALIGNMENT))
                         if (!workflowConfig) {
                             return //pancan not configured for this seq type, skipped
                         }

@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 import groovy.transform.*
 
@@ -19,6 +20,21 @@ class Pipeline implements Entity {
         final Type type
         final boolean usesRoddy
         final String displayName
+
+        static Name forSeqType(SeqType seqType) {
+            assert seqType
+            switch (SeqTypeNames.fromSeqTypeName(seqType.name)) {
+                case SeqTypeNames.EXOME:
+                case SeqTypeNames.WHOLE_GENOME:
+                case SeqTypeNames.WHOLE_GENOME_BISULFITE:
+                case SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION:
+                    return Name.PANCAN_ALIGNMENT
+                case SeqTypeNames.RNA:
+                    return Name.RODDY_RNA_ALIGNMENT
+                default:
+                    return null
+            }
+        }
     }
     Name name
 
