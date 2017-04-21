@@ -125,6 +125,23 @@ class ImportExternallyMergedBamJobSpec extends Specification {
     void "test maybe submit, when files have to be copied and a checkpoint file exists already"() {
         given:
         ImportProcess importProcess = new ImportProcess(
+                externallyProcessedMergedBamFiles: [epmbfWithMd5sum]
+        ).save()
+
+        createHelperObjects(importProcess)
+        File targetBamFile = epmbfWithMd5sum.getFilePath().absoluteDataManagementPath
+        CreateFileHelper.createFile(new File(targetBamFile.parent, ".${targetBamFile.name}.checkpoint"))
+        CreateFileHelper.createFile(new File("${epmbfWithMd5sum.importedFrom}"))
+        CreateFileHelper.createFile(new File("${epmbfWithMd5sum.getFilePath().absoluteDataManagementPath}"))
+
+        expect:
+        AbstractMultiJob.NextAction.SUCCEED == importExternallyMergedBamJob.maybeSubmit()
+
+    }
+
+    void "test maybe submit, when files have to be copied and a checkpoint file exists already, fails"() {
+        given:
+        ImportProcess importProcess = new ImportProcess(
                 externallyProcessedMergedBamFiles: [epmbfWithoutMd5sum]
         ).save()
 
@@ -136,7 +153,7 @@ class ImportExternallyMergedBamJobSpec extends Specification {
         importExternallyMergedBamJob.maybeSubmit()
 
         then:
-        !epmbfWithoutMd5sum.getFilePath().absoluteDataManagementPath.exists()
+        thrown(ProcessingException)
     }
 
     void "test validate when everything is valid and bam file already has a md5sum"() {

@@ -81,6 +81,7 @@ class BamMetadataImportService {
                         coverage            : coverage ? Double.parseDouble(coverage) : null,
                         md5sum              : md5sum ?: null
                 )
+                emwp.bamFileInProjectFolder = null
                 assert epmbf.save(flush:true)
                 importProcess.externallyProcessedMergedBamFiles.add(epmbf)
             }

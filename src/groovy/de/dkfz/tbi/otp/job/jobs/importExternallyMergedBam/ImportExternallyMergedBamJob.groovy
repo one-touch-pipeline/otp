@@ -23,6 +23,7 @@ class ImportExternallyMergedBamJob extends AbstractOtpJob {
     @Override
     protected final AbstractMultiJob.NextAction maybeSubmit() throws Throwable {
         final ImportProcess importProcess = getProcessParameterObject()
+        AbstractMultiJob.NextAction action = AbstractMultiJob.NextAction.SUCCEED
 
         importProcess.externallyProcessedMergedBamFiles.each {
             Realm realm = configService.getRealmDataManagement(it.project)
@@ -34,6 +35,7 @@ class ImportExternallyMergedBamJob extends AbstractOtpJob {
             File targetBai = new File("${targetBam}.bai")
 
             if (!checkpoint.exists()) {
+                action = AbstractMultiJob.NextAction.WAIT_FOR_CLUSTER_JOBS
                 String md5sumBam
                 if (it.md5sum) {
                     md5sumBam = "echo ${it.md5sum}  ${targetBam.name} > ${targetBam}.md5sum"
@@ -69,7 +71,10 @@ touch ${checkpoint}
                 pbsService.executeJob(realm, cmd)
             }
         }
-        return NextAction.WAIT_FOR_CLUSTER_JOBS
+        if (action == AbstractMultiJob.NextAction.SUCCEED) {
+            validate()
+        }
+        return action
     }
 
     @Override

@@ -74,9 +74,9 @@ link: ${link}
         }
         Collection<SeqTrack> seqTracks = object.containedSeqTracks
         String ilseNumbers = seqTracks*.ilseSubmission*.ilseNumber.unique().sort().join(', ')
-        Collection<OtrsTicket> openTickets = trackingService.findAllOtrsTickets(seqTracks).findAll { OtrsTicket otrsTicket ->
+        Collection<OtrsTicket> openTickets = seqTracks ? trackingService.findAllOtrsTickets(seqTracks).findAll { OtrsTicket otrsTicket ->
             !otrsTicket.finalNotificationSent
-        }
+        } : []
 
         List<ClusterJob> clusterJobs = ClusterJob.findAllByProcessingStep(step)
         List<ClusterJobIdentifier> clusterJobIdentifiers = ClusterJobIdentifier.asClusterJobIdentifierList(clusterJobs)
