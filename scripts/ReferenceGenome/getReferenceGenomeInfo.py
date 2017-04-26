@@ -30,9 +30,25 @@ if len(sys.argv) == 2:
 print("Reading fasta file from " + sys.argv[1])
 
 existing_aliases = []
+previous_record_w = None
 
 handle = open(sys.argv[1], "rU")
 for record in SeqIO.parse(handle, "fasta"):
+    # if a record is duplicated with the suffixes _W and _C appended respectively, combine them without the suffix
+    # this assumes that the duplicated entries occur consecutively, with _W first
+    if record.id.endswith("_W"):
+        previous_record_w = record
+        continue
+    if previous_record_w:
+        if record.id.endswith("_C") \
+                and record.id[:-2] == previous_record_w.id[:-2] \
+                and len(record.seq) == len(previous_record_w.seq) \
+                and len(str(record.seq).replace("N", "")) == len(str(previous_record_w.seq).replace("N", "")):
+            record.id = record.id[:-2]
+            previous_record_w = None
+        else:
+            raise Exception("Unexpected duplicated entries with _W and _C?")
+
     # alias and classification
     alias = record.id
     classification = "UNDEFINED"
@@ -45,7 +61,7 @@ for record in SeqIO.parse(handle, "fasta"):
         if "M" not in existing_aliases:
             alias = "M"
         classification = "MITOCHONDRIAL"
-    elif re.match(r"^(chr)?[A-Z]{2}\d{6}\.\d$", record.id):
+    elif re.match(r"^(chr)?(\d{1,2}|X|Y|Un)?_?[A-Z]{2}\d{6}.\d(_random)?$", record.id):
         classification = "CONTIG"
     existing_aliases.append(alias)
     # length including N
