@@ -16,6 +16,7 @@ class SamplePair implements Entity {
 
     final static String SNV_RESULTS_PATH_PART = 'snv_results'
     final static String INDEL_RESULTS_PATH_PART = 'indel_results'
+    final static String SOPHIA_RESULTS_PATH_PART = 'sv_results'
     final static String ACESEQ_RESULTS_PATH_PART = 'cnv_results'
 
     /**
@@ -54,11 +55,13 @@ class SamplePair implements Entity {
 
     ProcessingStatus snvProcessingStatus = ProcessingStatus.NEEDS_PROCESSING
     ProcessingStatus indelProcessingStatus = ProcessingStatus.NEEDS_PROCESSING
+    ProcessingStatus sophiaProcessingStatus = ProcessingStatus.NEEDS_PROCESSING
     ProcessingStatus aceseqProcessingStatus = ProcessingStatus.NEEDS_PROCESSING
 
     boolean isProcessingDisabled() {
         return  snvProcessingStatus    == ProcessingStatus.DISABLED &&
                 indelProcessingStatus  == ProcessingStatus.DISABLED &&
+                sophiaProcessingStatus == ProcessingStatus.DISABLED &&
                 aceseqProcessingStatus == ProcessingStatus.DISABLED
     }
 
@@ -109,6 +112,9 @@ class SamplePair implements Entity {
         mergingWorkPackage1 index: 'sample_pair_indel_idx1'
         mergingWorkPackage2 index: 'sample_pair_indel_idx1'
         indelProcessingStatus index: 'sample_pair_indel_idx1'
+        mergingWorkPackage1 index: 'sample_pair_sophia_idx1'
+        mergingWorkPackage2 index: 'sample_pair_sophia_idx1'
+        sophiaProcessingStatus index: 'sample_pair_sophia_idx1'
         mergingWorkPackage1 index: 'sample_pair_aceseq_idx1'
         mergingWorkPackage2 index: 'sample_pair_aceseq_idx1'
         aceseqProcessingStatus index: 'sample_pair_aceseq_idx1'
@@ -148,6 +154,11 @@ class SamplePair implements Entity {
     OtpPath getIndelSamplePairPath() {
         return buildPath(INDEL_RESULTS_PATH_PART)
     }
+
+    OtpPath getSophiaSamplePairPath() {
+        return buildPath(SOPHIA_RESULTS_PATH_PART)
+    }
+
     OtpPath getAceseqSamplePairPath() {
         return buildPath(ACESEQ_RESULTS_PATH_PART)
     }
@@ -173,21 +184,25 @@ class SamplePair implements Entity {
         return findLatestInstance(IndelCallingInstance.class) as IndelCallingInstance
     }
 
+    SophiaInstance findLatestSophiaInstance() {
+        return findLatestInstance(SophiaInstance.class) as SophiaInstance
+    }
+
     AceseqInstance findLatestAceseqInstance() {
-        BamFilePairAnalysis criteria = findLatestInstance(AceseqInstance.class)
-        if (!criteria?.withdrawn) {
-                return criteria
-        }
-        return null
+        return findLatestInstance(AceseqInstance.class) as AceseqInstance
     }
 
 
     private BamFilePairAnalysis findLatestInstance(Class instanceClass) {
-        return instanceClass.createCriteria().get {
+        BamFilePairAnalysis criteria = instanceClass.createCriteria().get {
             eq ('samplePair', this)
             order('id', 'desc')
             maxResults(1)
         }
+        if (!criteria?.withdrawn) {
+            return criteria
+        }
+        return null
     }
 
     /**

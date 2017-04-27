@@ -191,6 +191,10 @@ class DomainFactory {
         createPipeline( Pipeline.Name.RODDY_ACESEQ, Pipeline.Type.ACESEQ)
     }
 
+    static Pipeline createSophiaPipelineLazy() {
+        createPipeline( Pipeline.Name.RODDY_SOPHIA, Pipeline.Type.SOPHIA)
+    }
+
     static Pipeline createExternallyProcessedPipelineLazy() {
         createPipeline( Pipeline.Name.EXTERNALLY_PROCESSED, Pipeline.Type.ALIGNMENT)
     }
@@ -933,6 +937,20 @@ class DomainFactory {
                 ),
         ]
         return createDomainObject(AceseqInstance, map, properties)
+    }
+
+    public static SophiaInstance createSophiaInstanceWithRoddyBamFiles(Map properties = [:], Map bamFile1Properties = [:], Map bamFile2Properties = [:]) {
+        Map map = createAnalysisInstanceWithRoddyBamFilesMapHelper(properties, bamFile1Properties, bamFile2Properties)
+        SamplePair samplePair = map.samplePair
+        map += [
+                roddyExecutionDirectoryNames: [DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY],
+                config                      : createRoddyWorkflowConfigLazy(
+                        project: samplePair.project,
+                        seqType: samplePair.seqType,
+                        pipeline: createSophiaPipelineLazy()
+                ),
+        ]
+        return createDomainObject(SophiaInstance, map, properties)
     }
 
     public static AceseqQc createAceseqQcWithExistingAceseqInstance(AceseqInstance aceseqInstance){

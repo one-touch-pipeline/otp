@@ -117,4 +117,19 @@ class SamplePairTests {
         assert latest == latest.samplePair.findLatestIndelCallingInstance()
     }
 
+    @Test
+    void testFindLatestSophiaInstance_whenSophiaInstanceExists_ShouldReturnNull() {
+        SamplePair sp = DomainFactory.createSamplePair()
+
+        assert null == sp.findLatestSophiaInstance()
+    }
+
+    @Test
+    void testFindLatestSophiaCallingInstance_whenSophiaInstancesExists_ShouldReturnLatest() {
+        SophiaInstance first = DomainFactory.createSophiaInstanceWithRoddyBamFiles([instanceName: 'instance1'])
+        SophiaInstance latest = DomainFactory.createSophiaInstanceWithRoddyBamFiles([samplePair: first.samplePair, instanceName: 'instance2'])
+
+        assert latest == latest.samplePair.findLatestSophiaInstance()
+    }
+
 }
