@@ -15,6 +15,7 @@ class Pipeline implements Entity {
         RODDY_SNV           (Type.SNV,       true,  null),
         RODDY_INDEL         (Type.INDEL,     true,  null),
         RODDY_RNA_ALIGNMENT (Type.ALIGNMENT, true, 'STAR'),
+        RODDY_SOPHIA        (Type.SOPHIA, true, null),
         RODDY_ACESEQ        (Type.ACESEQ, true, null),
 
         final Type type
@@ -42,6 +43,7 @@ class Pipeline implements Entity {
         ALIGNMENT,
         SNV,
         INDEL,
+        SOPHIA,
         ACESEQ,
     }
     Type type
