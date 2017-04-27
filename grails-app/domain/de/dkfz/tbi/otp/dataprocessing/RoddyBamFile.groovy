@@ -28,6 +28,10 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
 
     static final String METADATATABLE_FILE = "metadataTable.tsv"
 
+    static final String INSERT_SIZE_FILE_SUFFIX = 'insertsize_plot.png_qcValues.txt'
+    static final String INSERT_SIZE_FILE_DIRECTORY = 'insertsize_distribution'
+
+
 
     RoddyBamFile baseBamFile
 
@@ -365,6 +369,14 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
 
     File getWorkMetadataTableFile() {
         return new File(workDirectory, METADATATABLE_FILE)
+    }
+
+    File getFinalInsertSizeDirectory() {
+        return new File(finalMergedQADirectory, INSERT_SIZE_FILE_DIRECTORY)
+    }
+
+    File getFinalInsertSizeFile() {
+        return new File(finalInsertSizeDirectory, "${this.sampleType.dirName}_${this.individual.pid}_${INSERT_SIZE_FILE_SUFFIX}")
     }
 
     /**

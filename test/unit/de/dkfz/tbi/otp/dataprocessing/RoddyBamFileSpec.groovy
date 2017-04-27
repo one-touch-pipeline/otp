@@ -153,4 +153,21 @@ class RoddyBamFileSpec extends Specification {
         AssertionError e = thrown()
         e.message.contains('At least one seqTrack has no value for number of reads')
     }
+
+
+    void "test getFinalInsertSizeDirectory method"() {
+        given:
+        File expectedPath = new File("${roddyBamFile.baseDirectory}/${roddyBamFile.QUALITY_CONTROL_DIR}/${roddyBamFile.MERGED_DIR}/${roddyBamFile.INSERT_SIZE_FILE_DIRECTORY}")
+
+        expect:
+        expectedPath == roddyBamFile.getFinalInsertSizeDirectory()
+    }
+
+    void "test getFinalInsertSizeFile method"() {
+        given:
+        File expectedPath = new File("${roddyBamFile.baseDirectory}/${roddyBamFile.QUALITY_CONTROL_DIR}/${roddyBamFile.MERGED_DIR}/${roddyBamFile.INSERT_SIZE_FILE_DIRECTORY}/${roddyBamFile.sampleType.dirName}_${roddyBamFile.individual.pid}_${roddyBamFile.INSERT_SIZE_FILE_SUFFIX}")
+
+        expect:
+        expectedPath == roddyBamFile.getFinalInsertSizeFile()
+    }
 }
