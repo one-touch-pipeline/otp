@@ -838,6 +838,60 @@ class DomainFactory {
         ]
     }
 
+    static SamplePair createSamplePairWithProcessedMergedBamFiles() {
+        MergingWorkPackage tumorMwp = DomainFactory.createMergingWorkPackage(
+                seqType: createWholeGenomeSeqType(),
+                pipeline: DomainFactory.createDefaultOtpPipeline(),
+                referenceGenome: createReferenceGenome(name: 'hs37d5')
+        )
+        ProcessedMergedBamFile bamFileTumor = DomainFactory.createProcessedMergedBamFile(tumorMwp, getRandomProcessedBamFileProperties() + [coverage: 30.0])
+
+        ProcessedMergedBamFile bamFileControl = DomainFactory.createProcessedMergedBamFile(
+                DomainFactory.createMergingWorkPackage(bamFileTumor.mergingWorkPackage),
+                getRandomProcessedBamFileProperties() + [coverage: 30.0])
+
+        bamFileTumor.mergingWorkPackage.bamFileInProjectFolder = bamFileTumor
+        assert bamFileTumor.mergingWorkPackage.save(flush: true)
+
+        bamFileControl.mergingWorkPackage.bamFileInProjectFolder = bamFileControl
+        assert bamFileControl.mergingWorkPackage.save(flush: true)
+
+        createSampleTypePerProject(
+                project: bamFileTumor.project,
+                sampleType: bamFileTumor.sampleType,
+                category: SampleType.Category.DISEASE,
+        )
+
+        createSampleTypePerProject(
+                project: bamFileControl.project,
+                sampleType: bamFileControl.sampleType,
+                category: SampleType.Category.CONTROL,
+        )
+
+        SamplePair samplePair = DomainFactory.createSamplePair(bamFileTumor.mergingWorkPackage, bamFileControl.mergingWorkPackage)
+
+        createRoddyWorkflowConfig(
+                seqType: samplePair.seqType,
+                project: samplePair.project,
+                pipeline: createSophiaPipelineLazy()
+        )
+
+        createProcessingThresholdsForBamFile(bamFileTumor, [numberOfLanes: null])
+        createProcessingThresholdsForBamFile(bamFileControl, [numberOfLanes: null])
+
+        createProcessingOption(
+                name: SophiaService.PROCESSING_OPTION_REFERENCE_KEY,
+                type: null,
+                project: null,
+                value: 'hs37d5, hs37d5_PhiX, hs37d5_GRCm38mm_PhiX, hs37d5+mouse, hs37d5_GRCm38mm',
+                comment: "Name of reference genomes for sophia",
+        )
+
+
+        return samplePair
+
+    }
+
     static SamplePair createDisease(MergingWorkPackage controlMwp) {
         MergingWorkPackage diseaseMwp = createMergingWorkPackage(controlMwp)
         createSampleTypePerProject(project: controlMwp.project, sampleType: diseaseMwp.sampleType, category: SampleType.Category.DISEASE)

@@ -52,6 +52,7 @@ abstract class BamFileAnalysisService {
             "       AND ambf${number}.${WORKPACKAGE} = sp.mergingWorkPackage${number} " +
             //check that transfer workflow is finished
             "       AND ambf${number}.md5sum IS NOT NULL " +
+                    pipelineSpecificBamFileChecks(number) +
             //check that coverage is high enough & number of lanes are enough
             "       AND EXISTS ( FROM ProcessingThresholds pt "+
             "           WHERE pt.project = ambf${number}.${INDIVIDUAL}.project " +
@@ -91,6 +92,7 @@ abstract class BamFileAnalysisService {
                 onlyOtpSnv +
                 ") " +
 
+
                 //check that this sample pair is not in process
                 "AND NOT EXISTS (FROM ${getAnalysisClass().name} sci " +
                 "   WHERE sci.samplePair = sp " +
@@ -119,7 +121,6 @@ abstract class BamFileAnalysisService {
         parameters.putAll(checkReferenceGenomeMap())
 
         List<SamplePair> samplePairs = SamplePair.findAll(pairForSnvProcessing, parameters)
-
         if (samplePairs) {
             return samplePairs.find {
                 it.mergingWorkPackage1.completeProcessableBamFileInProjectFolder &&
@@ -143,7 +144,15 @@ abstract class BamFileAnalysisService {
         return ''
     }
 
+    protected String pipelineSpecificBamFileChecks(String number) {
+        return ''
+    }
+
     protected Map<String, Object> checkReferenceGenomeMap(){
+        return [:]
+    }
+
+    protected Map<String, Object> pipelineSpecificBamFileChecksMap(){
         return [:]
     }
 

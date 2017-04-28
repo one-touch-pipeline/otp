@@ -26,6 +26,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
     SnvCallingService snvCallingService
     IndelCallingService indelCallingService
     AceseqService aceseqService
+    SophiaService sophiaService
 
     def setup() {
         def map = DomainFactory.createProcessableSamplePair()
@@ -60,7 +61,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
     @Unroll
     void "samplePairForProcessing for Instance returns samplePair"() {
         given:
-        samplePair1."${processingStatus}"= ProcessingStatus.NEEDS_PROCESSING
+        samplePair1."${processingStatus}" = ProcessingStatus.NEEDS_PROCESSING
         assert samplePair1.save(flush: true)
         DomainFactory.createRoddyWorkflowConfig(
                 seqType: samplePair1.seqType,
@@ -73,6 +74,12 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
                 project: null,
                 value: samplePair1.mergingWorkPackage1.referenceGenome.name,
         ])
+        DomainFactory.createProcessingOption([
+                name: SophiaService.PROCESSING_OPTION_REFERENCE_KEY,
+                type: null,
+                project: null,
+                value: samplePair1.mergingWorkPackage1.referenceGenome.name,
+        ])
 
         expect:
         samplePair1 == service.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
@@ -80,28 +87,34 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         where:
         processingStatus         | pipeline                                     | service
         "indelProcessingStatus"  | { DomainFactory.createIndelPipelineLazy() }  | this.indelCallingService
+        "sophiaProcessingStatus" | { DomainFactory.createSophiaPipelineLazy() } | this.sophiaService
         "aceseqProcessingStatus" | { DomainFactory.createAceseqPipelineLazy() } | this.aceseqService
     }
 
     @Unroll
-    void "samplePairForProcessing for ACEseq wrong referenceGenome"() {
+    void "samplePairForProcessing, wrong referenceGenome"() {
         given:
-        samplePair1.aceseqProcessingStatus= ProcessingStatus.NEEDS_PROCESSING
+        samplePair1."${processingStatus}" = ProcessingStatus.NEEDS_PROCESSING
         assert samplePair1.save(flush: true)
         DomainFactory.createRoddyWorkflowConfig(
                 seqType: samplePair1.seqType,
                 project: samplePair1.project,
-                pipeline:  DomainFactory.createAceseqPipelineLazy()
+                pipeline:  pipeline()
         )
         DomainFactory.createProcessingOption([
-                name: AceseqService.PROCESSING_OPTION_REFERENCE_KEY,
+                name: service.PROCESSING_OPTION_REFERENCE_KEY,
                 type: null,
                 project: null,
                 value: 'foobar'
         ])
 
         expect:
-        null == this.aceseqService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
+        null == service.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
+
+        where:
+        processingStatus         | pipeline                                     | service
+        "sophiaProcessingStatus" | { DomainFactory.createSophiaPipelineLazy() } | this.sophiaService
+        "aceseqProcessingStatus" | { DomainFactory.createAceseqPipelineLazy() } | this.aceseqService
 
     }
 
@@ -458,6 +471,21 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         expect:
         null == snvCallingService.samplePairForProcessing(ProcessingPriority.FAST_TRACK_PRIORITY, SnvConfig)
     }
+
+
+    void "samplePairForProcessing, for Sophia pipeline, only PMBF available, should not return any bam file"() {
+        given:
+
+        RoddyBamFile.list().each {
+            it.withdrawn = true
+            assert it.save(flush: true)
+        }
+        DomainFactory.createSamplePairWithProcessedMergedBamFiles()
+
+        expect:
+        !sophiaService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
+    }
+
 
 
     void "validateInputBamFiles, when all okay, return without exception"() {
