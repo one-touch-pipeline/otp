@@ -87,4 +87,21 @@ class CreateRoddyFileHelper {
             CreateFileHelper.createFile(it)
         }
     }
+
+    static createSophiaResultFiles(SophiaInstance sophiaInstance) {
+        CreateFileHelper.createFile(new File(sophiaInstance.workExecutionStoreDirectory, 'someFile'))
+        sophiaInstance.workExecutionDirectories.each {
+            CreateFileHelper.createFile(new File(it, 'someFile'))
+        }
+
+        CreateFileHelper.createFile(sophiaInstance.finalAceseqInputFile)
+    }
+
+    static void createInsertSizeFiles(SophiaInstance sophiaInstance) {
+        RoddyBamFile tumorBam = sophiaInstance.sampleType1BamFile
+        RoddyBamFile controlBam = sophiaInstance.sampleType2BamFile
+
+        CreateFileHelper.createFile(tumorBam.getFinalInsertSizeFile())
+        CreateFileHelper.createFile(controlBam.getFinalInsertSizeFile())
+    }
 }

@@ -477,4 +477,8 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
     AlignmentConfig getAlignmentConfig() {
         return config
     }
+
+    int getMaximalReadLength() {
+        return getSeqTracks()*.dataFiles.flatten().max { it.meanSequenceLength }.meanSequenceLength
+    }
 }

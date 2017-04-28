@@ -1539,8 +1539,9 @@ class DomainFactory {
 
     public static DataFile createSequenceDataFile(final Map properties = [:]) {
         Map defaultProperties = [
-                dateCreated: new Date(),  // In unit tests Grails (sometimes) does not automagically set dateCreated.
+                dateCreated: new Date(),  // In unit tests Grails (sometimes) does not automatically set dateCreated.
                 used       : true,
+                sequenceLength: 100,
         ]
         if (properties.seqTrack) {
             defaultProperties.project = properties.seqTrack.project

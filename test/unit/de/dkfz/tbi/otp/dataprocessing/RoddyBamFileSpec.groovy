@@ -170,4 +170,51 @@ class RoddyBamFileSpec extends Specification {
         expect:
         expectedPath == roddyBamFile.getFinalInsertSizeFile()
     }
+
+    void "test getMaximalReadLength method, when sequenceLength is not set, should fail"() {
+        given:
+        roddyBamFile.seqTracks*.dataFiles.flatten().each {
+            it.sequenceLength = null
+            assert it.save(flush: true)
+        }
+
+        when:
+        roddyBamFile.getMaximalReadLength()
+
+        then:
+        RuntimeException e = thrown()
+        e.message.contains("No meanSequenceLength could be extracted since sequenceLength of")
+    }
+
+    void "test getMaximalReadLength method, only one value available for sequenceLength, should return this value"() {
+        when:
+        roddyBamFile.seqTracks*.dataFiles.flatten().each { DataFile dataFile ->
+            dataFile.sequenceLength = 100
+            assert dataFile.save(flush: true)
+        }
+
+        then:
+        100 == roddyBamFile.getMaximalReadLength()
+    }
+
+    void "test getMaximalReadLength method, two values available for sequenceLength, should return higher value"() {
+        when:
+        roddyBamFile.seqTracks*.dataFiles.flatten().each { DataFile dataFile ->
+            dataFile.sequenceLength = 100
+            assert dataFile.save(flush: true)
+        }
+
+        SeqTrack seqTrack = DomainFactory.createSeqTrack(
+                sample: roddyBamFile.sample,
+                seqType: roddyBamFile.seqType,
+                pipelineVersion: roddyBamFile.seqTracks.first().pipelineVersion
+        )
+        DomainFactory.createSequenceDataFile([seqTrack: seqTrack, sequenceLength: 80])
+
+        roddyBamFile.seqTracks.add(seqTrack)
+
+
+        then:
+        100 == roddyBamFile.getMaximalReadLength()
+    }
 }

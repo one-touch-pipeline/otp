@@ -162,6 +162,9 @@ class DataFile implements Commentable, Entity {
 
     int getMeanSequenceLength() {
         int length
+        if (!this.sequenceLength) {
+            throw new RuntimeException("No meanSequenceLength could be extracted since sequenceLength of ${this} is null")
+        }
         try {
             length = this.sequenceLength.toInteger()
         } catch (NumberFormatException e) {
