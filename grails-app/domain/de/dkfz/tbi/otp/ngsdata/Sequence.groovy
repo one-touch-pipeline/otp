@@ -19,7 +19,7 @@ package de.dkfz.tbi.otp.ngsdata
  * </ul>
  */
 class Sequence implements Serializable {
-    // ids
+    /** IDs (primary keys) */
     long seqTrackId
     long seqTypeId
     long seqPlatformId
@@ -32,70 +32,60 @@ class Sequence implements Serializable {
     long sampleTypeId
     long individualId
     long projectId
-    Integer ilseId
 
-    // fields from SeqTrack
+
+    /** fields from {@link SeqTrack} */
     String laneId
     String libraryName
     boolean hasOriginalBam
     Long nBasePairs
     int insertSize
-
     SeqTrack.QualityEncoding qualityEncoding
     SeqTrack.DataProcessingState fastqcState
+    SeqTrack.Problem problem
 
-    // fields from Run
-    /**
-     * Run name
-     */
+    /** fields from {@link IlseSubmission} */
+    /** actually ilseNumber */
+    Integer ilseId
+
+    /** fields from {@link Run} */
+    /** actually run name */
     String name
     Date dateExecuted
     Date dateCreated
     boolean blacklisted
 
-    // fields from SeqPlatform
-    /**
-     * e.g. solid, illumina
-     */
+    /** fields from {@link SeqPlatform} */
     String seqPlatformName
 
-    // fields from SeqPlatformModelLabel
+    /** fields from {@link SeqPlatformModelLabel} */
     String seqPlatformModelLabelName
 
-    // fields from SequencingKitLabel
+    /** fields from {@link SequencingKitLabel} */
     String sequencingKitLabelName
 
-    // fields from SeqType
+    /** fields from {@link SeqType} */
     String seqTypeName
     String seqTypeAlias
     String seqTypeDisplayName
     String libraryLayout
     String dirName
 
-    // fields from SampleType
+    /** fields from {@link SampleType} */
     String sampleTypeName
 
-    // fields from Individual
-    /**
-     * real pid from iChip
-     */
+    /** fields from {@link Individual} */
     String pid
-    /**
-     * pid used in the project
-     */
     String mockPid
-    /**
-     * mnemonic used in the project
-     */
     String mockFullName
     Individual.Type type
 
-    // fields from Project
+    /** fields from {@link Project} */
     String projectName
     String projectDirName
     String realmName
 
-    // fields from SeqCenter
+    /** fields from {@link SeqCenter} */
     String seqCenterName
     String seqCenterDirName
 
@@ -137,6 +127,7 @@ class Sequence implements Serializable {
         seqTypeAlias(nullable: true)
         seqTypeDisplayName(nullable: true)
         nBasePairs(nullable: true)
+        problem nullable: true
     }
 
     String getLibraryLayoutDirName() {

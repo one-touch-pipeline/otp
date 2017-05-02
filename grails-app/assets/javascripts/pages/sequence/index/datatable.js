@@ -145,6 +145,8 @@ $.otp.sequence = {
                                 row.libraryName,
                                 fastQC,
                                 row.ilseId,
+                               row.problem ?
+                                   "<span title='" + row.problemDescription + "'>" + row.problem.name + "</span>" : "",
                                 row.dateCreated
                             ];
 
@@ -173,6 +175,13 @@ $.otp.sequence = {
                     fastqc.attr("title", fastqc.text());
                     fastqc.addClass("false");
                     fastqc.text("");
+                }
+                var contamination = $("td:eq(11)", nRow);
+                if (contamination.text() === "") {
+                    contamination.attr("title", "No known problems");
+                    contamination.addClass("VALID");
+                } else {
+                    contamination.addClass("warning");
                 }
             }
         });

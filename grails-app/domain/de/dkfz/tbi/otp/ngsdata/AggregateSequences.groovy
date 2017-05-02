@@ -3,7 +3,7 @@ package de.dkfz.tbi.otp.ngsdata
  * This domain class represents a database view called "aggregate_sequences".
  */
 class AggregateSequences implements Serializable {
-    // ids
+    /** IDs (primary keys) */
     long seqTypeId
     long seqPlatformId
     Long seqPlatformModelLabelId
@@ -14,54 +14,43 @@ class AggregateSequences implements Serializable {
     long individualId
     long projectId
 
-    // fields from SeqTrack
+
+    /** aggregated fields from {@link SeqTrack} */
     long laneCount
     Long sum_N_BasePairs
     Long sum_N_BasePairsGb
 
-    // fields from SeqPlatform
-    /**
-     * e.g. solid, illumina
-     */
+    /** fields from {@link SeqPlatform} */
     String seqPlatformName
 
-    // fields from SeqPlatformModelLabel
+    /** fields from {@link SeqPlatformModelLabel} */
     String seqPlatformModelLabelName
 
-    // fields from SequencingKitLabel
+    /** fields from {@link SequencingKitLabel} */
     String sequencingKitLabelName
 
-    // fields from SeqType
+    /** fields from {@link SeqType} */
     String seqTypeName
     String seqTypeAlias
     String seqTypeDisplayName
     String libraryLayout
     String dirName
 
-    // fields from SampleType
+    /** fields from {@link SampleType} */
     String sampleTypeName
 
-    // fields from Individual
-    /**
-     * real pid from iChip
-     */
+    /** fields from {@link Individual} */
     String pid
-    /**
-     * pid used in the project
-     */
     String mockPid
-    /**
-     * mnemonic used in the project
-     */
     String mockFullName
     Individual.Type type
 
-    // fields from Project
+    /** fields from {@link Project} */
     String projectName
     String projectDirName
     String realmName
 
-    // fields from SeqCenter
+    /** fields from {@link SeqCenter} */
     String seqCenterName
     String seqCenterDirName
 

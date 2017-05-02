@@ -1,15 +1,15 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.converters.JSON
-import groovy.json.JsonSlurper
-import de.dkfz.tbi.otp.utils.DataTableCommand
+import de.dkfz.tbi.otp.ngsqc.*
+import de.dkfz.tbi.otp.utils.*
+import grails.converters.*
+import groovy.json.*
 
 
 class SequenceController {
-    def seqTrackService
-    def projectService
-    def servletContext
-    def fastqcResultsService
+    SeqTrackService seqTrackService
+    ProjectService projectService
+    FastqcResultsService fastqcResultsService
 
     def index() {
         List<SeqType> seqTypes = SeqType.list(sort: "name", order: "asc")
@@ -43,6 +43,8 @@ class SequenceController {
             data.dateCreated = data.dateCreated.format("yyyy-MM-dd")
 
             data.withdrawn = SeqTrack.get(seq.seqTrackId).isWithdrawn()
+
+            data.problemDescription = seq.problem?.description
 
             dataToRender.aaData << data
         }
@@ -78,6 +80,7 @@ class SequenceController {
                     row.laneId,
                     row.libraryName,
                     row.ilseId,
+                    row.problem?.name() ?: "",
                     row.dateCreated?.format("yyyy-MM-dd"),
             ].join(",")
         }.join("\n")
@@ -92,6 +95,7 @@ class SequenceController {
             'Lane',
             'Library',
             'ILSe',
+            'Known issues',
             'Run Date'
         ].join(',')
         def content = "${contentHeader}\n${contentBody}\n"

@@ -1,18 +1,16 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.LogMessage
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
-import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
-import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.utils.*
+import groovy.transform.*
 
-import java.text.MessageFormat
+import java.text.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.*
 
-import de.dkfz.tbi.otp.dataprocessing.AlignmentPass
-import de.dkfz.tbi.otp.InformationReliability
-
-import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.getThreadLog
 
 /*
  * In the GUI and e-mails sent by OTP this shall be called "Lane", even if it is only part of a multiplexed physical
@@ -33,6 +31,13 @@ class SeqTrack implements ProcessParameterObject, Entity {
         UNKNOWN,
         PHRED,
         ILLUMINA
+    }
+
+    @TupleConstructor
+    enum Problem {
+        RNA_SPIKE_IN("Contamination occurred because of RNA spike in")
+
+        final String description
     }
 
     String laneId
@@ -80,6 +85,9 @@ class SeqTrack implements ProcessParameterObject, Entity {
     DataProcessingState fastqcState = DataProcessingState.UNKNOWN
 
     DataProcessingState dataInstallationState = DataProcessingState.NOT_STARTED
+
+    /** Information about problems that occurred when sequencing this SeqTrack */
+    Problem problem
 
 
     /**
@@ -142,6 +150,7 @@ class SeqTrack implements ProcessParameterObject, Entity {
         normalizedLibraryName(nullable: true, validator: {String val, SeqTrack obj ->
             (val == null) ? (obj.libraryName == null) : (val == normalizeLibraryName(obj.libraryName))
         })
+        problem nullable: true
     }
 
 

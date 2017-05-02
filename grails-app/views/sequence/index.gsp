@@ -68,6 +68,7 @@
                     'sequence.list.headers.library',
                     'sequence.list.headers.fastqc',
                     'sequence.list.headers.ilseId',
+                    'sequence.list.headers.warning',
                     'sequence.list.headers.date'
             ]}" id="sequenceTable"/>
         </div>

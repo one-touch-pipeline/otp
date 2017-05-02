@@ -1,3 +1,7 @@
+BEGIN;
+
+DROP VIEW IF EXISTS aggregate_sequences;
+
 
 CREATE VIEW aggregate_sequences AS SELECT
 
@@ -91,3 +95,5 @@ p.name,
 p.dir_name,
 sc.name,
 sc.dir_name;
+
+COMMIT;
