@@ -61,17 +61,19 @@ $.otp.alignmentQualityOverviewTable = {
 
                             if (seqType === 'WGS' || seqType === 'WGBS' || seqType === 'WGBS_TAG') {
                                 coverage = [
-                                        row.coverageWithoutN,
-                                        row.coverageX,
-                                        row.coverageY,
+                                    row.coverageWithoutN,
+                                    row.coverageX,
+                                    row.coverageY,
                                 ];
                             } else if (seqType === 'EXOME') {
                                 coverage = [
-                                        "<span class='" + row.onTargetRateWarning+"'>" + row.onTargetRate + " </span>",
-                                        row.targetCoverage,
+                                    "<span class='" + row.onTargetRateWarning + "'>" + row.onTargetRate + " </span>",
+                                    row.targetCoverage,
                                 ];
-                            }else if (seqType === 'RNA') {
+                            } else if (seqType === 'RNA') {
                                 coverage = [
+                                    row.totalReadCounter,
+                                    row.duplicates,
                                     row.threePNorm,
                                     row.fivePNorm,
                                     row.chimericPairs,
@@ -92,25 +94,27 @@ $.otp.alignmentQualityOverviewTable = {
                                     row.meanCV,
                                     row.uniqueRateofMapped,
                                     row.rRNARate,
-                                    row.totalReadCounter,
-                                    row.duplicates
                                 ]
                             }
 
-
-
-
-                            general = [
-                                "<span title='" + row.kit.name + "'>" + row.kit.shortName + "</span>",
-                                row.mappedReads,
-                                "<span class='" + row.duplicateWarning + "'>" + row.duplicates + " </span>",
-                                "<span class='" + row.properlyPpairedWarning + "'>" + row.properlyPaired + " </span>",
-                                row.singletons,
-                                "<span class='" + row.medianWarning + "'>" + row.medianPE_insertsize + " </span>",
-                                "<span class='" + row.diffChrWarning + "'>" + row.diffChr + " </span>",
-                                row.pipeline,
-                                row.dateFromFileSystem,
-                            ];
+                            if (seqType === 'RNA') {
+                                general = [
+                                    "<span title='" + row.kit.name + "'>" + row.kit.shortName + "</span>",
+                                    row.dateFromFileSystem,
+                                ];
+                            } else {
+                                general = [
+                                    "<span title='" + row.kit.name + "'>" + row.kit.shortName + "</span>",
+                                    row.mappedReads,
+                                    "<span class='" + row.duplicateWarning + "'>" + row.duplicates + " </span>",
+                                    "<span class='" + row.properlyPpairedWarning + "'>" + row.properlyPaired + " </span>",
+                                    row.singletons,
+                                    "<span class='" + row.medianWarning + "'>" + row.medianPE_insertsize + " </span>",
+                                    "<span class='" + row.diffChrWarning + "'>" + row.diffChr + " </span>",
+                                    row.pipeline,
+                                    row.dateFromFileSystem,
+                                ];
+                            }
                             var rowdata = identifier.concat(coverage, general);
 
                             if (row.withdrawn) {

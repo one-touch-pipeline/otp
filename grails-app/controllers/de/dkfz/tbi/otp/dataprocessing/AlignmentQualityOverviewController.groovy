@@ -49,7 +49,8 @@ class AlignmentQualityOverviewController {
     private static final List<String> HEADER_RNA = [
             'alignment.quality.individual',
             'alignment.quality.sampleType',
-            'alignment.quality.kit',
+            'alignment.quality.totalReadCounter',
+            'alignment.quality.duplicates',
             'alignment.quality.3pnorm',
             'alignment.quality.5pnorm',
             'alignment.quality.chimericPairs',
@@ -70,9 +71,7 @@ class AlignmentQualityOverviewController {
             'alignment.quality.meanCV',
             'alignment.quality.uniqueRateOfMapped',
             'alignment.quality.rRNARate',
-            'alignment.quality.totalReadCounter',
-            'alignment.quality.duplicates',
-            'alignment.quality.workflow',
+            'alignment.quality.kit',
             'alignment.quality.date',
     ].asImmutable()
 
@@ -270,26 +269,25 @@ class AlignmentQualityOverviewController {
                     map<<[
                             threePNorm : FormatHelper.formatToTwoDecimalsNullSave(it.threePNorm),
                             fivePNorm : FormatHelper.formatToTwoDecimalsNullSave(it.fivePNorm),
-                            chimericPairs : FormatHelper.formatToTwoDecimalsNullSave(it.chimericPairs),
+                            chimericPairs : it.chimericPairs,
                             duplicatesRate : FormatHelper.formatToTwoDecimalsNullSave(it.duplicatesRate),
                             end1Sense : FormatHelper.formatToTwoDecimalsNullSave(it.end1Sense),
                             end2Sense : FormatHelper.formatToTwoDecimalsNullSave(it.end2Sense),
-                            estimatedLibrarySize : FormatHelper.formatToTwoDecimalsNullSave(it.estimatedLibrarySize),
+                            estimatedLibrarySize : it.estimatedLibrarySize,
                             exonicRate : FormatHelper.formatToTwoDecimalsNullSave(it.exonicRate),
                             expressionProfilingEfficiency : FormatHelper.formatToTwoDecimalsNullSave(it.expressionProfilingEfficiency),
-                            genesDetected : FormatHelper.formatToTwoDecimalsNullSave(it.genesDetected),
+                            genesDetected : it.genesDetected,
                             intergenicRate : FormatHelper.formatToTwoDecimalsNullSave(it.intergenicRate),
                             intragenicRate : FormatHelper.formatToTwoDecimalsNullSave(it.intragenicRate),
                             intronicRate : FormatHelper.formatToTwoDecimalsNullSave(it.intronicRate),
-                            mapped : FormatHelper.formatToTwoDecimalsNullSave(it.mapped),
-                            mappedUnique : FormatHelper.formatToTwoDecimalsNullSave(it.mappedUnique),
+                            mapped : it.mapped,
+                            mappedUnique : it.mappedUnique,
                             mappedUniqueRateOfTotal : FormatHelper.formatToTwoDecimalsNullSave(it.mappedUniqueRateOfTotal),
                             mappingRate : FormatHelper.formatToTwoDecimalsNullSave(it.mappingRate),
                             meanCV : FormatHelper.formatToTwoDecimalsNullSave(it.meanCV),
                             uniqueRateofMapped : FormatHelper.formatToTwoDecimalsNullSave(it.uniqueRateofMapped),
                             rRNARate : FormatHelper.formatToTwoDecimalsNullSave(it.rRNARate),
-                            totalReadCounter : FormatHelper.formatToTwoDecimalsNullSave(it.totalReadCounter),
-                            duplicates : FormatHelper.formatToTwoDecimalsNullSave(it.duplicates),
+                            totalReadCounter : it.totalReadCounter,
                     ]
                     break
 
