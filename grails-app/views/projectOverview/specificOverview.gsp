@@ -30,11 +30,11 @@
             <table>
                 <tr>
                     <td class="myKey"><g:message code="projectOverview.creationDate"/></td>
-                    <td id="creation-date"></td>
+                    <td id="creation-date">${creationDate}</td>
                 </tr>
                 <tr>
                     <td class="myKey"><g:message code="projectOverview.lastDate"/></td>
-                    <td id="last-received-date"></td>
+                    <td id="last-received-date">${lastReceivedDate}</td>
                 </tr>
                 <tr>
                     <td class="myKey"><g:message code="projectOverview.directory"/></td>

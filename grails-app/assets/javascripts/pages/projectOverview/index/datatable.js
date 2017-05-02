@@ -80,37 +80,6 @@ $.otp.projectOverviewTable = {
         });
     },
 
-    updateDates: function () {
-        "use strict";
-        $.getJSON($.otp.createLink({
-            controller: 'projectOverview',
-            action: 'updateDates'
-        }), {
-            projectName: $('#project_select').val()
-        }, function (data) {
-            var message, i;
-            if (data) {
-                $('#creation-date').html(data.creationDate);
-                $('#last-received-date').html(data.lastReceivedDate);
-            } else if (data.error) {
-                $.otp.warningMessage(data.error);
-                $('#creation-date').html("");
-                $('#last-received-date').html("");
-            } else if (data.errors) {
-                $('#creation-date').html("");
-                $('#last-received-date').html("");
-                message = "<ul>";
-                for (i = 0; i < data.errors.length; i += 1) {
-                    message += "<li>" + data.errors[i].message + "</li>";
-                }
-                message += "</ul>";
-                $.otp.warningMessage(message);
-            }
-        }).error(function (jqXHR) {
-            $.otp.warningMessage(jqXHR.statusText + jqXHR.status);
-        });
-    },
-
     deleteUser: function () {
         $('.deletePerson').on('click', function (event) {
             "use strict";

@@ -85,6 +85,7 @@ class ProjectOverviewController {
         List<Project> projects = projectService.getAllProjects()
         Project project = exactlyOneElement(Project.findAllByName(params.project ?: projects.first().name, [fetch: [projectCategories: 'join', projectGroup: 'join']]))
 
+        Map<String, String> dates = getDates(project)
 
         List<ProjectContactPerson> projectContactPersons = ProjectContactPerson.findAllByProject(project)
         List<String> contactPersonRoles = [''] + ContactPersonRole.findAll()*.name
@@ -117,6 +118,8 @@ class ProjectOverviewController {
         return [
                 projects: projects*.name,
                 project: project,
+                creationDate: dates.creationDate,
+                lastReceivedDate: dates.lastReceivedDate,
                 comment: project.comment,
                 nameInMetadata: project.nameInMetadataFiles?: '',
                 seqTypes: SeqType.roddyAlignableSeqTypes,
@@ -421,17 +424,16 @@ class ProjectOverviewController {
         checkErrorAndCallMethod(cmd, { projectService.updateProcessingPriority(cmd.processingPriority, cmd.project) })
     }
 
-    JSON updateDates(String projectName) {
+    Map<String, String> getDates(Project project) {
         Timestamp[] timestamps = Sequence.createCriteria().get {
-            eq("projectName", projectName)
+            eq("projectId", project.id)
             projections {
                 min("dateCreated")
                 max("dateCreated")
             }
         }
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-        Map dataToRender = [creationDate: timestamps[0] ? simpleDateFormat.format(timestamps[0]) : null, lastReceivedDate: timestamps[0] ? simpleDateFormat.format(timestamps[1]) : null]
-        render dataToRender as JSON
+        return [creationDate: timestamps[0] ? simpleDateFormat.format(timestamps[0]) : null, lastReceivedDate: timestamps[0] ? simpleDateFormat.format(timestamps[1]) : null]
     }
 
     JSON updateSnv(UpdateSnvCommand cmd) {
