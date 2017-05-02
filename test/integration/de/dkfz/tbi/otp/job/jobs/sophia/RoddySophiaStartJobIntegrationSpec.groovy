@@ -108,15 +108,14 @@ class RoddySophiaStartJobIntegrationSpec extends IntegrationSpec{
             it.otrsTicket = otrsTicket
             it.save(flush: true)
         }
-        //assert otrsTicket.sophiaStarted == null
+        assert otrsTicket.sophiaStarted == null
         assert sophiaInstance.samplePair.sophiaProcessingStatus != SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED
 
         when:
         roddySophiaStartJob.prepareCreatingTheProcessAndTriggerTracking(sophiaInstance)
 
         then:
-        //TODO:TODO: OTP-2541
-        //assert otrsTicket.sophiaStarted != null
+        assert otrsTicket.sophiaStarted != null
         assert sophiaInstance.samplePair.sophiaProcessingStatus == SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED
     }
 }

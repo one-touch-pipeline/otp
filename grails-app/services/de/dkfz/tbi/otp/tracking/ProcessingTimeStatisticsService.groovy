@@ -81,7 +81,7 @@ ${search ? """
         ]
 
         String previousProcessingStep
-        (OtrsTicket.ProcessingStep.values() - [OtrsTicket.ProcessingStep.INDEL, OtrsTicket.ProcessingStep.ACESEQ]).each {
+        (OtrsTicket.ProcessingStep.values() - [OtrsTicket.ProcessingStep.INDEL, OtrsTicket.ProcessingStep.ACESEQ, OtrsTicket.ProcessingStep.SOPHIA]).each {
             if (previousProcessingStep) {
                 data << getFormattedPeriod(ticket."${previousProcessingStep}Finished", ticket."${it}Started")
             } else {

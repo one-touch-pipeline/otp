@@ -2081,6 +2081,30 @@ samplePairsNotProcessed: ${samplePairsNotProcessed}
 ''',
                 comment: '',
         ])
+
+        createProcessingOption([
+                name: CreateNotificationTextService.SOPHIA_NOTIFICATION_TEMPLATE,
+                type: null,
+                project: null,
+                value: '''
+sophia finished
+samplePairsFinished: ${samplePairsFinished}
+otpLinks: ${otpLinks}
+directories: ${directories}
+''',
+                comment: '',
+        ])
+
+        createProcessingOption([
+                name: CreateNotificationTextService.SOPHIA_NOT_PROCESSED_TEMPLATE,
+                type: null,
+                project: null,
+                value: '''
+sophia not processed
+samplePairsNotProcessed: ${samplePairsNotProcessed}
+''',
+                comment: '',
+        ])
     }
 
 

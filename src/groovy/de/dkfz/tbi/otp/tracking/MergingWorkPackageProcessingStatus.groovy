@@ -24,6 +24,10 @@ class MergingWorkPackageProcessingStatus {
         return TrackingService.combineStatuses(samplePairProcessingStatuses, { it.indelProcessingStatus })
     }
 
+    WorkflowProcessingStatus getSophiaProcessingStatus() {
+        return TrackingService.combineStatuses(samplePairProcessingStatuses, { it.sophiaProcessingStatus })
+    }
+
     WorkflowProcessingStatus getAceseqProcessingStatus() {
         return TrackingService.combineStatuses(samplePairProcessingStatuses, { it.aceseqProcessingStatus })
     }

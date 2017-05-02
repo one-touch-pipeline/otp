@@ -48,8 +48,7 @@ class RoddySophiaStartJob extends AbstractBamFilePairAnalysisStartJob {
     @Override
     protected void prepareCreatingTheProcessAndTriggerTracking(BamFilePairAnalysis bamFilePairAnalysis) {
         assert bamFilePairAnalysis : "bamFilePairAnalysis must not be null"
-        //TODO: OTP-2541
-        //trackingService.setStartedForSeqTracks(bamFilePairAnalysis.getContainedSeqTracks(), OtrsTicket.ProcessingStep.SOPHIA)
+        trackingService.setStartedForSeqTracks(bamFilePairAnalysis.getContainedSeqTracks(), OtrsTicket.ProcessingStep.SOPHIA)
         bamFilePairAnalysis.samplePair.sophiaProcessingStatus = SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED
         bamFilePairAnalysis.samplePair.save()
     }

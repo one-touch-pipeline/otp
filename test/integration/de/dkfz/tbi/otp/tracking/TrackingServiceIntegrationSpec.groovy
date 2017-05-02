@@ -21,10 +21,12 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
     MailHelperService mailHelperService
     IndelCallingService indelCallingService
     SnvCallingService snvCallingService
+    SophiaService sophiaService
     AceseqService aceseqService
     CreateNotificationTextService createNotificationTextService
 
     ProcessingOption processingOption
+    ProcessingOption processingOption2
 
     static List listPairAnalysis = [
             [
@@ -38,9 +40,14 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
                     completeCallingInstance: "completeSnvCallingInstance",
                     processingStatus       : "snvProcessingStatus"
             ], [
+                    analysisType           : "SI",
+                    createRoddyBamFile     : "createSophiaInstanceWithRoddyBamFiles",
+                    completeCallingInstance: "completeSophiaInstance",
+                    processingStatus       : "sophiaProcessingStatus"
+            ], [
                     analysisType           : "AI",
                     createRoddyBamFile     : "createAceseqInstanceWithRoddyBamFiles",
-                    completeCallingInstance: "completeAceseqCallingInstance",
+                    completeCallingInstance: "completeAceseqInstance",
                     processingStatus       : "aceseqProcessingStatus"
             ],
     ]
@@ -51,12 +58,19 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
                 mailHelperService: mailHelperService,
                 indelCallingService: indelCallingService,
                 snvCallingService: snvCallingService,
+                sophiaService: sophiaService,
                 aceseqService: aceseqService,
                 createNotificationTextService: createNotificationTextService,
         )
         DomainFactory.createAllAnalysableSeqTypes()
         processingOption = DomainFactory.createProcessingOption([
                 name: AceseqService.PROCESSING_OPTION_REFERENCE_KEY,
+                type: null,
+                project: null,
+                value: 'test',
+        ])
+        processingOption2 = DomainFactory.createProcessingOption([
+                name: SophiaService.PROCESSING_OPTION_REFERENCE_KEY,
                 type: null,
                 project: null,
                 value: 'test',
@@ -713,6 +727,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         mwpStatus.samplePairProcessingStatuses.isEmpty()
         mwpStatus.snvProcessingStatus == NOTHING_DONE_WONT_DO
         mwpStatus.indelProcessingStatus == NOTHING_DONE_WONT_DO
+        mwpStatus.sophiaProcessingStatus == NOTHING_DONE_WONT_DO
         mwpStatus.aceseqProcessingStatus== NOTHING_DONE_WONT_DO
         createSeqTrackProcessingStatus(mwpStatus).snvProcessingStatus == NOTHING_DONE_WONT_DO
     }
@@ -786,6 +801,11 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
 
         processingOption.value = analysisInstance.samplePair.mergingWorkPackage1.referenceGenome.name
         processingOption.save(flush: true)
+
+        processingOption2.value = analysisInstance.samplePair.mergingWorkPackage1.referenceGenome.name
+        processingOption2.save(flush: true)
+
+
 
         analysisInstance.delete(flush: true)
 

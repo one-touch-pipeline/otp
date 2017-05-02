@@ -55,6 +55,10 @@ public class ProcessingStatus {
         return TrackingService.combineStatuses(seqTrackProcessingStatuses, { it.indelProcessingStatus })
     }
 
+    WorkflowProcessingStatus getSophiaProcessingStatus() {
+        return TrackingService.combineStatuses(seqTrackProcessingStatuses, { it.sophiaProcessingStatus })
+    }
+
     WorkflowProcessingStatus getAceseqProcessingStatus() {
         return  TrackingService.combineStatuses(seqTrackProcessingStatuses, { it.aceseqProcessingStatus })
     }
@@ -69,6 +73,7 @@ FastQC:       ${fastqcProcessingStatus}
 Alignment:    ${alignmentProcessingStatus}
 SNV:          ${snvProcessingStatus}
 Indel:        ${indelProcessingStatus}
+SOPHIA:       ${sophiaProcessingStatus}
 ACEseq:       ${aceseqProcessingStatus}
 """
     }

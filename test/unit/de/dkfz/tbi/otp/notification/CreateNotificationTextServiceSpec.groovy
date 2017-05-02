@@ -63,6 +63,11 @@ class CreateNotificationTextServiceSpec extends Specification {
                     customProcessingStatus: "snvProcessingStatus",
                     notification          : "snvNotification",
             ], [
+                    type                  : "sophia",
+                    processingStep        : SOPHIA,
+                    customProcessingStatus: "sophiaProcessingStatus",
+                    notification          : "sophiaNotification",
+            ],[
                     type                  : "aceseq",
                     processingStep        : ACESEQ,
                     customProcessingStatus: "aceseqProcessingStatus",
@@ -412,6 +417,7 @@ class CreateNotificationTextServiceSpec extends Specification {
         analysis || pathSegment
         SNV      || "snv_results"
         INDEL    || "indel_results"
+        SOPHIA   || "sv_results"
         ACESEQ   || "cnv_results"
     }
 
@@ -435,6 +441,7 @@ class CreateNotificationTextServiceSpec extends Specification {
         analysis || pathSegment
         SNV      || "snv_results"
         INDEL    || "indel_results"
+        SOPHIA   || "sv_results"
         ACESEQ   || "cnv_results"
     }
 
@@ -582,6 +589,7 @@ ${expectedAlign}"""
                 alignmentProcessingStatus: secondSampleAligned ? ProcessingStatus.WorkflowProcessingStatus.ALL_DONE : ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO,
                 snvProcessingStatus: snv ? ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_MIGHT_DO : ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO,
                 indelProcessingStatus: indel ? ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_MIGHT_DO : ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO,
+                sophiaProcessingStatus: sophia ? ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_MIGHT_DO : ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO,
                 aceseqProcessingStatus: aceseq ? ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_MIGHT_DO : ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO,
         )
 
@@ -612,17 +620,20 @@ ${expectedAlign}"""
         if (secondSampleAligned) {
             seqTracks.add(data2.seqTrack)
             expectedSamples << "${createNotificationTextService.getSampleName(data2.seqTrack)} (${data2.sampleId1}, ${data2.sampleId2})"
-            if (indel | snv | aceseq) {
+            if (indel | snv | sophia | aceseq) {
                 samplePairWithVariantCalling.add(data2.samplePair)
                 //The If cases have to be ordered alphabetic
-                if(aceseq){
-                    variantCallingPipelines << 'CNV(from ACEseq)'
+                if (aceseq) {
+                    variantCallingPipelines << 'CNV (from ACEseq)'
                 }
                 if (indel) {
                     variantCallingPipelines << 'Indel'
                 }
                 if (snv) {
                     variantCallingPipelines << 'SNV'
+                }
+                if (sophia) {
+                    variantCallingPipelines << 'SV (from SOPHIA)'
                 }
             } else {
                 samplePairWithoutVariantCalling.add(data2.samplePair)
@@ -673,16 +684,18 @@ ${expectedVariantCallingRunning}${expectedVariantCallingNotRunning}"""
         expected == message
 
         where:
-        multipleSeqTypes | multipleProjects | secondSampleAligned | snv   | indel  | aceseq
-        false            | false            | true                | false | false  | false
-        true             | false            | true                | false | false  | false
-        false            | true             | true                | false | false  | false
-        false            | false            | false               | false | false  | false
-        false            | false            | true                | true  | false  | false
-        false            | false            | true                | false | true   | false
-        false            | false            | true                | true  | true   | false
-        false            | false            | true                | false | false  | true
-        false            | false            | true                | true  | true   | true
+        multipleSeqTypes | multipleProjects | secondSampleAligned | snv   | indel  | sophia |aceseq
+        false            | false            | true                | false | false  | false  | false
+        true             | false            | true                | false | false  | false  | false
+        false            | true             | true                | false | false  | false  | false
+        false            | false            | false               | false | false  | false  | false
+        false            | false            | true                | true  | false  | false  | false
+        false            | false            | true                | false | true   | false  | false
+        false            | false            | true                | true  | true   | false  | false
+        false            | false            | true                | false | true   | true   | false
+        false            | false            | true                | true  | true   | true   | true
+        false            | false            | true                | false | false  | true   | true
+        false            | false            | true                | true  | true   | true   | true
 
     }
 
@@ -807,6 +820,8 @@ samplePairsNotProcessed: ${expectedSamplePairsNotProcessed}
                     snvNotification(processingStatus) >> SNV.toString()
             (processingStep == INDEL ? 1 : 0) *
                     indelNotification(processingStatus) >> INDEL.toString()
+            (processingStep == SOPHIA ? 1 : 0) *
+                    sophiaNotification(processingStatus) >> SOPHIA.toString()
             (processingStep == ACESEQ ? 1 : 0) *
                     aceseqNotification(processingStatus) >> ACESEQ.toString()
         }
@@ -840,6 +855,7 @@ seqCenterComment: ${expectedSeqCenterComment}
         ALIGNMENT      | 'Some comment'
         SNV            | 'Some comment'
         INDEL          | 'Some comment'
+        SOPHIA         | 'Some comment'
         ACESEQ         | 'Some comment'
     }
 
@@ -859,6 +875,7 @@ seqCenterComment: ${expectedSeqCenterComment}
         ProcessingStatus.WorkflowProcessingStatus alignmentProcessingStatus = properties.alignmentProcessingStatus ?: ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO
         ProcessingStatus.WorkflowProcessingStatus snvProcessingStatus = properties.snvProcessingStatus ?: ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO
         ProcessingStatus.WorkflowProcessingStatus indelProcessingStatus = properties.indelProcessingStatus ?: ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO
+        ProcessingStatus.WorkflowProcessingStatus sophiaProcessingStatus = properties.sophiaProcessingStatus ?: ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO
         ProcessingStatus.WorkflowProcessingStatus aceseqProcessingStatus = properties.aceseqProcessingStatus ?: ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO
         Run run = properties.run ?: DomainFactory.createRun()
         String sampleId1 = properties.sampleId1 ?: "sampleId_${DomainFactory.counter++}"
@@ -917,6 +934,8 @@ seqCenterComment: ${expectedSeqCenterComment}
                                                 snvProcessingStatus,
                                                 null,
                                                 indelProcessingStatus,
+                                                null,
+                                                sophiaProcessingStatus,
                                                 null,
                                                 aceseqProcessingStatus,
                                                 null,

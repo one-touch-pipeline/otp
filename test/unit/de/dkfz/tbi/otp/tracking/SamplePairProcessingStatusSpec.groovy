@@ -10,8 +10,8 @@ class SamplePairProcessingStatusSpec extends Specification {
     @Unroll
     void "getVariantCallingProcessingStatus"() {
         given:
-        SamplePairProcessingStatus status = new SamplePairProcessingStatus(null, values.snv, null, values.indel, null, values.aceseq, null)
-        def result = TrackingService.combineStatuses([values.snv, values.indel, values.aceseq], Closure.IDENTITY)
+        SamplePairProcessingStatus status = new SamplePairProcessingStatus(null, values.snv, null, values.indel, null, values.sophia, null, values.aceseq, null)
+        def result = TrackingService.combineStatuses([values.snv, values.indel, values.sophia, values.aceseq], Closure.IDENTITY)
 
         expect:
         result == status.getVariantCallingProcessingStatus()
@@ -25,11 +25,14 @@ class SamplePairProcessingStatusSpec extends Specification {
             list.each { snv ->
                 list.each { indel ->
                     list.each { aceseq ->
-                        ret << [
-                                snv   : snv,
-                                indel : indel,
-                                aceseq: aceseq,
-                        ]
+                        list.each { sophia ->
+                            ret << [
+                                    snv   : snv,
+                                    indel : indel,
+                                    sophia: sophia,
+                                    aceseq: aceseq,
+                            ]
+                        }
                     }
                 }
             }

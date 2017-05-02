@@ -17,6 +17,7 @@ class OtrsTicket implements Commentable, Entity {
         ALIGNMENT('alignment', 'aligned'),
         SNV('SNV calling', 'SNV-called'),
         INDEL('Indel calling', 'Indel-called'),
+        SOPHIA("SV calling", "SV-called"),
         ACESEQ('CNV calling', 'CNV-called')
 
         final String displayName
@@ -60,6 +61,9 @@ class OtrsTicket implements Commentable, Entity {
     Date indelStarted
     Date indelFinished
 
+    Date sophiaStarted
+    Date sophiaFinished
+
     Date aceseqStarted
     Date aceseqFinished
 
@@ -93,6 +97,9 @@ class OtrsTicket implements Commentable, Entity {
 
         indelStarted(nullable: true)
         indelFinished(nullable: true)
+
+        sophiaStarted(nullable: true)
+        sophiaFinished(nullable: true)
 
         aceseqStarted(nullable: true)
         aceseqFinished(nullable: true)

@@ -20,6 +20,7 @@ class TrackingService {
 
     IndelCallingService indelCallingService
     SnvCallingService snvCallingService
+    SophiaService sophiaService
     AceseqService aceseqService
 
     CreateNotificationTextService createNotificationTextService
@@ -48,6 +49,7 @@ class TrackingService {
             otrsTicket.alignmentFinished = null
             otrsTicket.snvFinished = null
             otrsTicket.indelFinished = null
+            otrsTicket.sophiaFinished = null
             otrsTicket.aceseqFinished = null
             otrsTicket.finalNotificationSent = false
             otrsTicket.automaticNotification = automaticNotification
@@ -333,8 +335,10 @@ class TrackingService {
         SnvCallingInstance sci = sp.findLatestSnvCallingInstance()
         IndelCallingInstance ici = sp.findLatestIndelCallingInstance()
         AceseqInstance ai = sp.findLatestAceseqInstance()
+        SophiaInstance si = sp.findLatestSophiaInstance()
         WorkflowProcessingStatus snvStatus = getAnalysisProcessingStatus(sci, sp, snvCallingService)
         WorkflowProcessingStatus indelStatus = getAnalysisProcessingStatus(ici, sp, indelCallingService)
+        WorkflowProcessingStatus sophiaStatus = getAnalysisProcessingStatus(si, sp, sophiaService)
         WorkflowProcessingStatus aceseqStatus = getAnalysisProcessingStatus(ai, sp, aceseqService)
         return new SamplePairProcessingStatus(
                 sp,
@@ -342,6 +346,8 @@ class TrackingService {
                 snvStatus == ALL_DONE ? sci : null,
                 indelStatus,
                 indelStatus == ALL_DONE ? ici : null,
+                sophiaStatus,
+                sophiaStatus == ALL_DONE ? si: null,
                 aceseqStatus,
                 aceseqStatus == ALL_DONE ? ai : null,
         )

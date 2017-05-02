@@ -18,18 +18,22 @@ class SamplePairProcessingStatus {
     final WorkflowProcessingStatus indelProcessingStatus
     final IndelCallingInstance completeIndelCallingInstance
 
+    final WorkflowProcessingStatus sophiaProcessingStatus
+    final SophiaInstance completeSophiaInstance
+
     final WorkflowProcessingStatus aceseqProcessingStatus
-    final AceseqInstance completeAceseqCallingInstance
+    final AceseqInstance completeAceseqInstance
 
     WorkflowProcessingStatus getVariantCallingProcessingStatus() {
-        return TrackingService.combineStatuses([snvProcessingStatus, indelProcessingStatus, aceseqProcessingStatus], Closure.IDENTITY)
+        return TrackingService.combineStatuses([snvProcessingStatus, indelProcessingStatus, sophiaProcessingStatus, aceseqProcessingStatus], Closure.IDENTITY)
     }
 
     List<String> variantCallingWorkflowNames() {
         return [
                 SNV: snvProcessingStatus,
                 Indel: indelProcessingStatus,
-                'CNV(from ACEseq)': aceseqProcessingStatus,
+                'SV (from SOPHIA)': sophiaProcessingStatus,
+                'CNV (from ACEseq)': aceseqProcessingStatus,
         ].findAll { it ->
             it.value != WorkflowProcessingStatus.NOTHING_DONE_WONT_DO
         }.keySet().toList()

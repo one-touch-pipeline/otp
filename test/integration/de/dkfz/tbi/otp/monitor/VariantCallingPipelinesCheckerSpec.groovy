@@ -29,6 +29,7 @@ class VariantCallingPipelinesCheckerSpec extends Specification {
         SamplePair finishedSamplePair = DomainFactory.createSamplePairPanCan([
                 snvProcessingStatus  : SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED,
                 indelProcessingStatus: SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED,
+                sophiaProcessingStatus: SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED,
                 aceseqProcessingStatus: SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED,
         ])
         DomainFactory.createSampleTypePerProjectForMergingWorkPackage(finishedSamplePair.mergingWorkPackage2, SampleType.Category.CONTROL)
@@ -37,6 +38,10 @@ class VariantCallingPipelinesCheckerSpec extends Specification {
                 processingState: AnalysisProcessingStates.FINISHED,
         ])
         BamFilePairAnalysis indelFinished = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles([
+                samplePair     : finishedSamplePair,
+                processingState: AnalysisProcessingStates.FINISHED,
+        ])
+        BamFilePairAnalysis sophiaFinished = DomainFactory.createSophiaInstanceWithRoddyBamFiles([
                 samplePair     : finishedSamplePair,
                 processingState: AnalysisProcessingStates.FINISHED,
         ])
@@ -63,6 +68,15 @@ class VariantCallingPipelinesCheckerSpec extends Specification {
         ])
         DomainFactory.createSampleTypePerProjectForBamFile(onlyIndelFinished.sampleType2BamFile, SampleType.Category.CONTROL)
 
+        and: 'sample pair with only sophia'
+        BamFilePairAnalysis onlySophiaFinished = DomainFactory.createSophiaInstanceWithRoddyBamFiles([
+                processingState: AnalysisProcessingStates.FINISHED,
+                samplePair     : DomainFactory.createSamplePairPanCan([
+                        sophiaProcessingStatus: SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED,
+                ])
+        ])
+        DomainFactory.createSampleTypePerProjectForBamFile(onlySophiaFinished.sampleType2BamFile, SampleType.Category.CONTROL)
+
         and: 'sample pair with only aceseq'
         BamFilePairAnalysis onlyAceseqFinished = DomainFactory.createAceseqInstanceWithRoddyBamFiles([
                 processingState: AnalysisProcessingStates.FINISHED,
@@ -76,9 +90,11 @@ class VariantCallingPipelinesCheckerSpec extends Specification {
         List<AbstractMergedBamFile> bamFiles = [
                 snvFinished,
                 indelFinished,
+                sophiaFinished,
                 aceseqFinished,
                 onlySnvFinished,
                 onlyIndelFinished,
+                onlySophiaFinished,
                 onlyAceseqFinished,
         ].collect {
             [it.sampleType1BamFile, it.sampleType2BamFile]
@@ -101,6 +117,7 @@ class VariantCallingPipelinesCheckerSpec extends Specification {
         then:
         1 * output.showWorkflow('SnvWorkflow')
         1 * output.showWorkflow('IndelWorkflow')
+        1 * output.showWorkflow('SophiaWorkflow')
         1 * output.showWorkflow('ACEseqWorkflow')
         0 * output.showWorkflow(_)
     }

@@ -637,6 +637,8 @@ if (allProcessed) {
         from SamplePair samplePair
         where ${needsProcessing('snvProcessingStatus', Pipeline.Type.SNV)}
             or ${needsProcessing('indelProcessingStatus', Pipeline.Type.INDEL)}
+            or ${needsProcessing('sophiaProcessingStatus', Pipeline.Type.SOPHIA)}
+            or ${needsProcessing('aceseqProcessingStatus', Pipeline.Type.ACESEQ)}
     """).each { SamplePair samplePair ->
         [samplePair.mergingWorkPackage1, samplePair.mergingWorkPackage2].each { MergingWorkPackage mergingWorkPackage ->
             seqTracks.addAll(mergingWorkPackage.findMergeableSeqTracks())

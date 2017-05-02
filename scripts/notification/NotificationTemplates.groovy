@@ -167,6 +167,24 @@ You can find the config file used for the processing in the same directory as th
 )
 
 println processingOptionService.createOrUpdate(
+        CreateNotificationTextService.SOPHIA_NOTIFICATION_TEMPLATE,
+        null,
+        null,
+        '''The SV calling from SOPHIA for following sample pairs is finished:
+${samplePairsFinished}
+
+For the SV calling from SOPHIA you can find links to the plots here:
+${otpLinks}
+
+The result files are available in the directories:
+${directories}
+
+You can find the config file used for the processing in the same directory as the results.
+''',
+        '',
+)
+
+println processingOptionService.createOrUpdate(
         CreateNotificationTextService.SNV_NOT_PROCESSED_TEMPLATE,
         null,
         null,
@@ -194,6 +212,17 @@ println processingOptionService.createOrUpdate(
         null,
         null,
         '''The following sample pairs have not been CNV-called, most likely because they have not reached a threshold yet:
+${samplePairsNotProcessed}
+If you want these sample pairs to be processed nevertheless, please contact the DMG service team.
+''',
+        '',
+)
+
+println processingOptionService.createOrUpdate(
+        CreateNotificationTextService.SOPHIA_NOT_PROCESSED_TEMPLATE,
+        null,
+        null,
+        '''The following sample pairs have not been SV-called, most likely because they have not reached a threshold yet:
 ${samplePairsNotProcessed}
 If you want these sample pairs to be processed nevertheless, please contact the DMG service team.
 ''',

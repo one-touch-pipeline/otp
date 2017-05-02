@@ -29,6 +29,8 @@ class CreateNotificationTextService {
     static final String SNV_NOT_PROCESSED_TEMPLATE = 'SnvNotProcessedTemplate'
     static final String INDEL_NOTIFICATION_TEMPLATE = 'IndelNotificationTemplate'
     static final String INDEL_NOT_PROCESSED_TEMPLATE = 'IndelNotProcessedTemplate'
+    static final String SOPHIA_NOTIFICATION_TEMPLATE = 'SophiaNotificationTemplate'
+    static final String SOPHIA_NOT_PROCESSED_TEMPLATE = 'SophiaNotProcessedTemplate'
     static final String ACESEQ_NOTIFICATION_TEMPLATE = 'AceseqNotificationTemplate'
     static final String ACESEQ_NOT_PROCESSED_TEMPLATE = 'AceseqNotProcessedTemplate'
 
@@ -194,6 +196,10 @@ class CreateNotificationTextService {
         return variantCallingNotification(status, INDEL)
     }
 
+    String sophiaNotification(ProcessingStatus status) {
+        return variantCallingNotification(status, SOPHIA)
+    }
+
     String aceseqNotification(ProcessingStatus status) {
         return variantCallingNotification(status, ACESEQ)
     }
@@ -218,6 +224,9 @@ class CreateNotificationTextService {
                 break
             case INDEL:
                 otpLinks = createOtpLinks(samplePairsFinished*.project, 'indel', 'results', 'projectName')
+                break
+            case SOPHIA:
+                otpLinks = createOtpLinks(samplePairsFinished*.project, 'sophia', 'results', 'projectName')
                 break
             case ACESEQ:
                 otpLinks = createOtpLinks(samplePairsFinished*.project, 'aceseq', 'results', 'projectName')
