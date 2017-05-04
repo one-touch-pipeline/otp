@@ -1,0 +1,51 @@
+#!/bin/sh
+
+set -e
+
+PROXYURL="http://$PROXY_HOST:$PROXY_PORT"
+
+#run as root
+USERNAME=$1
+if [ -z $USERNAME ]; then
+    echo "Usage: $0 USERNAME" 2>&1
+    exit 1
+else
+    export USERNAME
+fi
+
+#Setup grails and docker directory
+mkdir /data/$USERNAME
+chown $USERNAME /data/$USERNAME
+
+
+#docker
+
+#move docker data to a new location
+mkdir /data/docker
+rm -rf /var/lib/docker
+ln -s /data/docker /var/lib/docker
+
+#Configuring Docker for DKFZ network
+DOCKER_ETC=/etc/systemd/system/docker.service.d/http-proxy.conf
+
+cat > "$DOCKER_ETC" <<EOD
+[Service]
+Environment="HTTP_PROXY=${PROXYURL}" "HTTPS_PROXY=${PROXYURL}"
+EOD
+systemctl daemon-reload
+
+
+#stop postgres if it running
+systemctl stop postgresql.service
+
+
+#install RBTools
+zypper in python-pip
+pip install --proxy=${PROXYURL} -U RBTools
+
+
+#workflow integration testing setup
+echo "Add $USERNAME to the sudoer file."
+
+#remove tmp from old users
+rm -r /tmp/otp*
