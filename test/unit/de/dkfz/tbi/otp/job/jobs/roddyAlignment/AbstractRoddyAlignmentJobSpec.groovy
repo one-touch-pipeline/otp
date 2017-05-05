@@ -340,9 +340,9 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
 
         String expectedErrorMessage = """Read groups in BAM file are not as expected.
 Read groups in ${roddyBamFile.workBamFile}:
-${(roddyBamFile.containedSeqTracks - seqTrack).collect { RoddyBamFile.getReadGroupName(it) }.join('\n')}
+${(roddyBamFile.containedSeqTracks - seqTrack).collect { RoddyBamFile.getReadGroupName(it) }.sort().join('\n')}
 Expected read groups:
-${roddyBamFile.containedSeqTracks.collect { RoddyBamFile.getReadGroupName(it) }.join('\n')}"""
+${roddyBamFile.containedSeqTracks.collect { RoddyBamFile.getReadGroupName(it) }.sort().join('\n')}"""
 
         when:
         abstractRoddyAlignmentJob.validateReadGroups(roddyBamFile)
