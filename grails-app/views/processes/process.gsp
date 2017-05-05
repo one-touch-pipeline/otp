@@ -18,15 +18,23 @@
             </g:if>
             </h1>
             <g:if test="${hasError && !restartedProcess}">
-                <g:form name="operatorIsAwareOfFailureForm" controller="processes" action="updateOperatorIsAwareOfFailure">
-                    <g:message code="processes.process.operatorIsAwareOfFailure" /> <g:checkBox name="operatorIsAwareOfFailure" value="${operatorIsAwareOfFailure}" onChange="submit();"/>
-                    <sec:ifAllGranted roles="ROLE_ADMIN">
-                        <g:if test="${showRestartButton}">
-                            <button id="show-restart-process"><g:message code="processes.process.restartProcess"/></button>
-                        </g:if>
-                    </sec:ifAllGranted>
-                    <g:hiddenField name="process.id" value="${id}"/>
-                </g:form>
+                <table>
+                    <tr>
+                        <td>
+                            <g:form name="operatorIsAwareOfFailureForm" controller="processes" action="updateOperatorIsAwareOfFailure">
+                                <g:message code="processes.process.operatorIsAwareOfFailure"/> <g:checkBox name="operatorIsAwareOfFailure" value="${operatorIsAwareOfFailure}" onChange="submit();"/>
+                                <g:hiddenField name="process.id" value="${id}"/>
+                            </g:form>
+                        </td>
+                        <td>
+                            <g:if test="${showRestartButton}">
+                                <sec:ifAllGranted roles="ROLE_ADMIN">
+                                    <button id="show-restart-process"><g:message code="processes.process.restartProcess"/></button>
+                                </sec:ifAllGranted>
+                            </g:if>
+                        </td>
+                    </tr>
+                </table>
             </g:if>
             <g:if test="${parameter}">
                 <p><g:message code="processes.process.operatesOn"/>
