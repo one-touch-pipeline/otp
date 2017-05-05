@@ -393,7 +393,7 @@ class QualityAssessmentMergedWorkflowTests extends WorkflowTestCase {
 
     @Override
     List<String> getWorkflowScripts() {
-        return ['scripts/qa/QualityAssessmentMergedWorfklow.groovy', 'scripts/qa/InjectQualityAssessmentMergedWorkflowOptions.groovy']
+        return ['scripts/workflows/QualityAssessmentMergedWorkflow.groovy']
     }
 
     @Override
