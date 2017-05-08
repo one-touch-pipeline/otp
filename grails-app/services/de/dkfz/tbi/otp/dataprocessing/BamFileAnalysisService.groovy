@@ -61,6 +61,12 @@ abstract class BamFileAnalysisService {
             "           AND (pt.coverage is null OR pt.coverage <= ambf${number}.coverage) " +
             "           AND (pt.numberOfLanes is null OR pt.numberOfLanes <= ambf${number}.numberOfMergedLanes) " +
             "           ) " +
+            //check that the file is in the workpackage
+            "       AND ambf${number}.${WORKPACKAGE}.bamFileInProjectFolder = ambf${number} " +
+            //check that the file file operation status ist processed
+            "       AND ambf${number}.fileOperationStatus = '${AbstractMergedBamFile.FileOperationStatus.PROCESSED}' " +
+            //check that the id is the last for that MergingWorkPackage
+            "       AND ambf${number} = (select max(bamFile.id) from AbstractMergedBamFile bamFile where bamFile.workPackage = ambf${number}.workPackage)" +
             "       ) "
         }
 
@@ -120,15 +126,7 @@ abstract class BamFileAnalysisService {
         }
         parameters.putAll(checkReferenceGenomeMap())
 
-        List<SamplePair> samplePairs = SamplePair.findAll(pairForSnvProcessing, parameters)
-        if (samplePairs) {
-            return samplePairs.find {
-                it.mergingWorkPackage1.completeProcessableBamFileInProjectFolder &&
-                it.mergingWorkPackage2.completeProcessableBamFileInProjectFolder
-            }
-        } else {
-            return null
-        }
+        return SamplePair.find(pairForSnvProcessing, parameters)
     }
 
     void validateInputBamFiles(final BamFilePairAnalysis analysis) throws Throwable {

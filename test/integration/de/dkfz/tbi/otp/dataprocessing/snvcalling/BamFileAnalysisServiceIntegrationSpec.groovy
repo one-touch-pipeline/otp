@@ -285,7 +285,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         }
 
         expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig)
+        samplePair1 == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig)
 
         where:
         number << [1, 2]
