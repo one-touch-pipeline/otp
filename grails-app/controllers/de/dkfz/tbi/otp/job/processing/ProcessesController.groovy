@@ -6,6 +6,7 @@ import de.dkfz.tbi.otp.job.jobs.utils.*
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.restarting.*
 import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.utils.logging.*
 import grails.converters.*
 import grails.util.*
 import groovyx.gpars.*
@@ -300,11 +301,15 @@ class ProcessesController {
 
     def restartWithProcess() {
         def data = [success: true]
-        try {
-            restartActionService.restartWorkflowWithProcess(params.id as long)
-        } catch (RuntimeException e) {
-            data = [success: false, error: e.message]
+        StringBuilder stringBuilder = new StringBuilder()
+        LogThreadLocal.withThreadLog(stringBuilder) {
+            try {
+                restartActionService.restartWorkflowWithProcess(params.id as long)
+            } catch (RuntimeException e) {
+                data = [success: false, error: e.message]
+            }
         }
+        log.debug("Output of restartActionService.restartWorkflowWithProcess: ${stringBuilder}")
         render data as JSON
     }
 
