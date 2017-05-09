@@ -26,6 +26,12 @@ interface RoddyConstants {
 
     static final String OPTION_KEY_INDEL_BASE_PROJECT_CONFIG = 'IndelBaseProjectConfig'
 
+    static final String OPTION_KEY_SOPHIA_PIPELINE_PLUGIN_NAME = 'SophiaPipelinePluginName'
+
+    static final String OPTION_KEY_SOPHIA_PIPELINE_PLUGIN_VERSION = 'SophiaPipelinePluginVersion'
+
+    static final String OPTION_KEY_SOPHIA_BASE_PROJECT_CONFIG = 'SophiaBaseProjectConfig'
+
     static final String OPTION_KEY_ACESEQ_PIPELINE_PLUGIN_NAME = 'AceseqPipelinePluginName'
 
     static final String OPTION_KEY_ACESEQ_PIPELINE_PLUGIN_VERSION = 'AceseqPipelinePluginVersion'

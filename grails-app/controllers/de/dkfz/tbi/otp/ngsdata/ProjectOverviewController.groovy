@@ -94,18 +94,11 @@ class ProjectOverviewController {
 
         List snvConfigTable = createAnalysisConfigTable(project,  SeqType.getSnvPipelineSeqTypes(), Pipeline.findByName(Pipeline.Name.RODDY_SNV))
         List indelConfigTable = createAnalysisConfigTable(project, SeqType.getIndelPipelineSeqTypes(), Pipeline.findByName(Pipeline.Name.RODDY_INDEL))
+        List sophiaConfigTable = createAnalysisConfigTable(project, SeqType.getSophiaPipelineSeqTypes(), Pipeline.findByName(Pipeline.Name.RODDY_SOPHIA))
         List aceseqConfigTable = createAnalysisConfigTable(project, SeqType.getAceseqPipelineSeqTypes(), Pipeline.findByName(Pipeline.Name.RODDY_ACESEQ))
 
-        String checkAceseqReferenceGenomeOutput
-        ReferenceGenome referenceGenome = checkReferenceGenome(project, SeqType.wholeGenomePairedSeqType)
-        if (!referenceGenome) {
-            checkAceseqReferenceGenomeOutput = "Please configure a reference genome"
-        } else if (!checkAceseqReferenceGenome(referenceGenome)) {
-            checkAceseqReferenceGenomeOutput = "The reference genome is not configured for CNV (from ACEseq)"
-        } else {
-            checkAceseqReferenceGenomeOutput = null
-        }
-
+        String checkSophiaReferenceGenome = projectService.checkReferenceGenomeForSophia(project).getError()
+        String checkAceseqReferenceGenome = projectService.checkReferenceGenomeForAceseq(project).getError()
 
         Realm realm = ConfigService.getRealm(project, Realm.OperationType.DATA_MANAGEMENT)
         File projectDirectory = LsdfFilesService.getPath(
@@ -125,6 +118,7 @@ class ProjectOverviewController {
                 seqTypes: SeqType.roddyAlignableSeqTypes,
                 snvSeqTypes: SeqType.snvPipelineSeqTypes,
                 indelSeqTypes: SeqType.indelPipelineSeqTypes,
+                sophiaSeqType: SeqType.sophiaPipelineSeqTypes,
                 aceseqSeqType: SeqType.aceseqPipelineSeqTypes,
                 snv: project.snv,
                 projectContactPersons: projectContactPersons,
@@ -132,6 +126,7 @@ class ProjectOverviewController {
                 thresholdsTable: thresholdsTable,
                 snvConfigTable: snvConfigTable,
                 indelConfigTable: indelConfigTable,
+                sophiaConfigTable: sophiaConfigTable,
                 aceseqConfigTable: aceseqConfigTable,
                 snvDropDown: Project.Snv.values(),
                 directory: projectDirectory,
@@ -146,7 +141,8 @@ class ProjectOverviewController {
                 unixGroup: project.unixGroup,
                 costCenter: project.costCenter,
                 processingPriorities: ProjectService.processingPriorities,
-                checkReferenceGenomeOutput: checkAceseqReferenceGenomeOutput,
+                checkSophiaReferenceGenome: checkSophiaReferenceGenome,
+                checkAceseqReferenceGenome: checkAceseqReferenceGenome,
         ]
     }
 
@@ -539,23 +535,6 @@ class ProjectOverviewController {
         projectService.updateFingerPrinting(project, value.toBoolean())
         Map map = [success: true]
         render map as JSON
-    }
-
-    private ReferenceGenome checkReferenceGenome(Project project, SeqType seqType) {
-        ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType = atMostOneElement(ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(project, seqType))
-        return referenceGenomeProjectSeqType?.referenceGenome
-    }
-
-    private boolean checkAceseqReferenceGenome(ReferenceGenome referenceGenome) {
-        return  referenceGenome.knownHaplotypesLegendFileX &&
-                referenceGenome.knownHaplotypesLegendFile &&
-                referenceGenome.knownHaplotypesFileX &&
-                referenceGenome.knownHaplotypesFile &&
-                referenceGenome.geneticMapFileX &&
-                referenceGenome.geneticMapFile &&
-                referenceGenome.gcContentFile &&
-                referenceGenome.mappabilityFile &&
-                referenceGenome.replicationTimeFile
     }
 }
 

@@ -312,6 +312,16 @@ class ConfigurePipelineController {
         return createAnalysisConfig(cmd, pipeline, defaultPluginName, defaultPluginVersion, defaultBaseProjectConfig)
     }
 
+    def sophia(ConfigurePipelineSubmitCommand cmd) {
+        Pipeline pipeline = Pipeline.Name.RODDY_SOPHIA.pipeline
+
+        String defaultPluginName = ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_SOPHIA_PIPELINE_PLUGIN_NAME, cmd.seqType.roddyName, null)
+        String defaultPluginVersion = ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_SOPHIA_PIPELINE_PLUGIN_VERSION, cmd.seqType.roddyName, null)
+        String defaultBaseProjectConfig = ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_SOPHIA_BASE_PROJECT_CONFIG, cmd.seqType.roddyName, null)
+
+        return createAnalysisConfig(cmd, pipeline, defaultPluginName, defaultPluginVersion, defaultBaseProjectConfig)
+    }
+
     def aceseq(ConfigurePipelineSubmitCommand cmd) {
         Pipeline pipeline = Pipeline.Name.RODDY_ACESEQ.pipeline
 
@@ -343,6 +353,9 @@ class ConfigurePipelineController {
                     break
                 case Pipeline.Name.RODDY_SNV:
                     projectService.configureSnvPipelineProject(configuration)
+                    break
+                case Pipeline.Name.RODDY_SOPHIA:
+                    projectService.configureSophiaPipelineProject(configuration)
                     break
             }
 

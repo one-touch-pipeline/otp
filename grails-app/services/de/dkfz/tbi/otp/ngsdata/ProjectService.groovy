@@ -49,6 +49,8 @@ class ProjectService {
     ExecutionHelperService executionHelperService
     ReferenceGenomeIndexService referenceGenomeIndexService
     GeneModelService geneModelService
+    SophiaService sophiaService
+    AceseqService aceseqService
 
     /**
      *
@@ -517,12 +519,7 @@ AND ace.granting = true
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     RoddyWorkflowConfig configureSnvPipelineProject(RoddyConfiguration snvPipelineConfiguration) {
-        Pipeline pipeline = exactlyOneElement(Pipeline.findAllByTypeAndName(
-                Pipeline.Type.SNV,
-                Pipeline.Name.RODDY_SNV,
-        ))
-
-        RoddyWorkflowConfig roddyWorkflowConfig = configurePipelineProject(snvPipelineConfiguration, pipeline, RoddySnvConfigTemplate)
+        RoddyWorkflowConfig roddyWorkflowConfig = configurePipelineProject(snvPipelineConfiguration, Pipeline.Name.RODDY_SNV.pipeline, RoddySnvConfigTemplate)
 
         SnvConfig snvConfig = CollectionUtils.atMostOneElement(SnvConfig.findAllWhere([
                 project     : snvPipelineConfiguration.project,
@@ -540,22 +537,17 @@ AND ace.granting = true
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     RoddyWorkflowConfig configureIndelPipelineProject(RoddyConfiguration indelPipelineConfiguration) {
-        Pipeline pipeline = exactlyOneElement(Pipeline.findAllByTypeAndName(
-                Pipeline.Type.INDEL,
-                Pipeline.Name.RODDY_INDEL,
-        ))
+        return configurePipelineProject(indelPipelineConfiguration, Pipeline.Name.RODDY_INDEL.pipeline, RoddyIndelConfigTemplate)
+    }
 
-        return configurePipelineProject(indelPipelineConfiguration, pipeline, RoddyIndelConfigTemplate)
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    RoddyWorkflowConfig configureSophiaPipelineProject(RoddyConfiguration sophiaPipelineConfiguration) {
+        return configurePipelineProject(sophiaPipelineConfiguration, Pipeline.Name.RODDY_SOPHIA.pipeline, RoddySophiaConfigTemplate)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     RoddyWorkflowConfig configureAceseqPipelineProject(RoddyConfiguration aceseqPipelineConfiguration) {
-        Pipeline pipeline = exactlyOneElement(Pipeline.findAllByTypeAndName(
-                Pipeline.Type.ACESEQ,
-                Pipeline.Name.RODDY_ACESEQ,
-        ))
-
-        return configurePipelineProject(aceseqPipelineConfiguration, pipeline, RoddyAceseqConfigTemplate)
+        return configurePipelineProject(aceseqPipelineConfiguration, Pipeline.Name.RODDY_ACESEQ.pipeline, RoddyAceseqConfigTemplate)
     }
 
     private RoddyWorkflowConfig configurePipelineProject(RoddyConfiguration configuration, Pipeline pipeline, Class roddyConfigTemplate) {
@@ -566,12 +558,18 @@ AND ace.granting = true
 
         String xmlConfig
         if (pipeline.name == Pipeline.Name.RODDY_ACESEQ) {
-            xmlConfig = roddyConfigTemplate.createConfig(
-                    configuration,
-                    pipeline.name,
-                    exactlyOneElement(ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(configuration.project, configuration.seqType)).referenceGenome,
-                    referenceGenomeService
-            )
+            checkReferenceGenomeForAceseq(configuration.project).onSuccess { ReferenceGenome referenceGenome ->
+                xmlConfig = roddyConfigTemplate.createConfig(
+                        configuration,
+                        pipeline.name,
+                        referenceGenome,
+                        referenceGenomeService
+                )
+            }
+        } else if (pipeline.name == Pipeline.Name.RODDY_SOPHIA) {
+            checkReferenceGenomeForSophia(configuration.project).onSuccess {
+                xmlConfig = roddyConfigTemplate.createConfig(configuration, pipeline.name)
+            }
         } else {
             xmlConfig = roddyConfigTemplate.createConfig(configuration, pipeline.name)
         }
@@ -598,6 +596,40 @@ AND ace.granting = true
                 configFilePath.path,
                 configuration.configVersion,
         )
+    }
+
+    Result<ReferenceGenome, String> checkReferenceGenomeForAceseq(Project project) {
+        return Result.ofNullable(project, "project must not be null")
+                .map { Project p ->
+                    ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(
+                        project, SeqType.wholeGenomePairedSeqType)
+                }
+                .ensure({ List<ReferenceGenomeProjectSeqType> rgpsts -> rgpsts.size() == 1 }, "No reference genome set.")
+                .map { List<ReferenceGenomeProjectSeqType> rgpsts -> rgpsts.first().referenceGenome }
+                .ensure({ ReferenceGenome referenceGenome -> referenceGenome in aceseqService.checkReferenceGenomeMap()['referenceGenomes'] }, "Reference genome is not compatible with ACESeq.")
+                .ensure({ ReferenceGenome referenceGenome ->
+                    referenceGenome.knownHaplotypesLegendFileX &&
+                    referenceGenome.knownHaplotypesLegendFile &&
+                    referenceGenome.knownHaplotypesFileX &&
+                    referenceGenome.knownHaplotypesFile &&
+                    referenceGenome.geneticMapFileX &&
+                    referenceGenome.geneticMapFile &&
+                    referenceGenome.gcContentFile &&
+                    referenceGenome.mappabilityFile &&
+                    referenceGenome.replicationTimeFile
+                }, "The selected reference genome is not configured for CNV (from ACEseq) (files are missing).")
+    }
+
+
+    Result<ReferenceGenome, String> checkReferenceGenomeForSophia(Project project) {
+        return Result.ofNullable(project, "project must not be null")
+                .map { Project p ->
+                    ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(
+                        project, SeqType.wholeGenomePairedSeqType)
+                }
+                .ensure({ List<ReferenceGenomeProjectSeqType> rgpsts -> rgpsts.size() == 1 }, "No reference genome set.")
+                .map { List<ReferenceGenomeProjectSeqType> rgpsts -> rgpsts.first().referenceGenome }
+                .ensure({ ReferenceGenome referenceGenome -> referenceGenome in sophiaService.checkReferenceGenomeMap()['referenceGenomes'] }, "Reference genome is not compatible with SOPHIA.")
     }
 
     private String getScriptBash(File configDirectory, String xmlConfig, File configFilePath) {

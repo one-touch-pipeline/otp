@@ -146,7 +146,7 @@ abstract class BamFileAnalysisService {
         return ''
     }
 
-    protected Map<String, Object> checkReferenceGenomeMap(){
+    public Map<String, Object> checkReferenceGenomeMap(){
         return [:]
     }
 

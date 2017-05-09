@@ -34,7 +34,7 @@ class SophiaService extends BamFileAnalysisService {
     }
 
     @Override
-    protected Map<String, Object> checkReferenceGenomeMap() {
+    public Map<String, Object> checkReferenceGenomeMap() {
         String referenceNamesString = processingOptionService.findOptionAssure(PROCESSING_OPTION_REFERENCE_KEY, null, null)
         List<String> referenceGenomeNames = referenceNamesString.split(',')*.trim()
         return [referenceGenomes: ReferenceGenome.findAllByNameInList(referenceGenomeNames)]

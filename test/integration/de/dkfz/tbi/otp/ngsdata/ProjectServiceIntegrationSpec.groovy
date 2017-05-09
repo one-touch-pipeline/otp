@@ -26,6 +26,8 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
     ReferenceGenomeService referenceGenomeService
 
     GrailsApplication grailsApplication
+    ProcessingOptionService processingOptionService
+
 
     @Rule
     public TemporaryFolder temporaryFolder
@@ -50,6 +52,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         DomainFactory.createRnaPipeline()
         DomainFactory.createRoddySnvPipelineLazy()
         DomainFactory.createIndelPipelineLazy()
+        DomainFactory.createSophiaPipelineLazy()
         DomainFactory.createAceseqPipelineLazy()
         projectService.executionService = Stub(ExecutionService) {
             executeCommand(_, _) >> { Realm realm2, String command ->
@@ -1051,17 +1054,26 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
     void "test configure #analysisName pipelineProject valid input"() {
         setup:
         RoddyConfiguration configuration = "createRoddy${analysisName}Configuration"()
-        if (analysisName == "Aceseq") {
+        if (analysisName in ["Sophia", "Aceseq"]) {
             ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType = DomainFactory.createReferenceGenomeProjectSeqType(
                     project: configuration.project,
                     seqType: configuration.seqType,
                     referenceGenome: DomainFactory.createAceseqReferenceGenome()
             )
             referenceGenomeService.pathToChromosomeSizeFilesPerReference(referenceGenomeProjectSeqType.referenceGenome, false).mkdirs()
+            SpringSecurityUtils.doWithAuth(ADMIN, {
+                processingOptionService.createOrUpdate(
+                        service.PROCESSING_OPTION_REFERENCE_KEY as String,
+                        null,
+                        null,
+                        referenceGenomeProjectSeqType.referenceGenome.name,
+                        ""
+                )
+            })
         }
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService."configure${analysisName}PipelineProject"(configuration)
         }
 
@@ -1079,11 +1091,11 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         TestCase.assertContainSame(attributes.permissions(), [PosixFilePermission.OWNER_READ, PosixFilePermission.GROUP_READ])
 
         where:
-        analysisName << [
-                "Aceseq",
-                "Indel",
-                "Snv",
-        ]
+        analysisName | service
+        "Aceseq"     | AceseqService
+        "Indel"      | null
+        "Snv"        | null
+        "Sophia"     | SophiaService
     }
 
     @Unroll
@@ -1093,17 +1105,26 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         RoddyConfiguration configuration2 = "createRoddy${analysisName}Configuration"([
                 configVersion   : 'v1_1'
         ])
-        if (analysisName == "Aceseq") {
+        if (analysisName in ["Sophia", "Aceseq"]) {
             ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType = DomainFactory.createReferenceGenomeProjectSeqType(
                     project: configuration.project,
                     seqType: configuration.seqType,
                     referenceGenome: DomainFactory.createAceseqReferenceGenome()
             )
             referenceGenomeService.pathToChromosomeSizeFilesPerReference(referenceGenomeProjectSeqType.referenceGenome, false).mkdirs()
+            SpringSecurityUtils.doWithAuth(ADMIN, {
+                processingOptionService.createOrUpdate(
+                        service.PROCESSING_OPTION_REFERENCE_KEY as String,
+                        null,
+                        null,
+                        referenceGenomeProjectSeqType.referenceGenome.name,
+                        ""
+                )
+            })
         }
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService."configure${analysisName}PipelineProject"(configuration)
             projectService."configure${analysisName}PipelineProject"(configuration2)
         }
@@ -1118,11 +1139,11 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         roddyWorkflowConfigs.findAll({ it.obsoleteDate == null }).size() == 1
 
         where:
-        analysisName << [
-                "Aceseq",
-                "Indel",
-                "Snv",
-        ]
+        analysisName | service
+        "Aceseq"     | AceseqService
+        "Indel"      | null
+        "Snv"        | null
+        "Sophia"     | SophiaService
     }
 
     void "test configureSnvPipelineProject valid input, old otp snv config exist"() {
@@ -1365,6 +1386,19 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 pluginName       : 'IndelCallingWorkflow',
                 pluginVersion    : '1.0.166-1',
                 baseProjectConfig: 'otpIndelCallingWorkflowWES-1.0',
+                configVersion    : 'v1_0',
+        ] + properties)
+        checkProjectDirectory(configuration)
+        return configuration
+    }
+
+    private RoddyConfiguration createRoddySophiaConfiguration(Map properties = [:]) {
+        RoddyConfiguration configuration = new RoddyConfiguration([
+                project          : Project.findByName("testProjectAlignment"),
+                seqType          : SeqType.wholeGenomePairedSeqType,
+                pluginName       : 'SophiaWorkflow',
+                pluginVersion    : '1.0.14',
+                baseProjectConfig: 'otpSophia-1.0',
                 configVersion    : 'v1_0',
         ] + properties)
         checkProjectDirectory(configuration)

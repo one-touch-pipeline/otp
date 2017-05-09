@@ -179,6 +179,12 @@ class SeqType implements Entity {
         ]
     }
 
+    static List<SeqType> getSophiaPipelineSeqTypes() {
+        return [
+                getWholeGenomePairedSeqType(),
+        ]
+    }
+
     static List<SeqType> getAceseqPipelineSeqTypes() {
         return [
                 getWholeGenomePairedSeqType(),
@@ -189,6 +195,7 @@ class SeqType implements Entity {
         return [
                 getSnvPipelineSeqTypes(),
                 getIndelPipelineSeqTypes(),
+                getSophiaPipelineSeqTypes(),
                 getAceseqPipelineSeqTypes(),
         ].flatten().unique()
     }

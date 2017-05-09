@@ -343,19 +343,52 @@
             <br>
         </div>
         <div>
-            <h3>${g.message(code: 'projectOverview.aceseq.title')}</h3>
-            <g:message code="projectOverview.aceseq.configure"/>
+            <h3>${g.message(code: 'projectOverview.sophia.title')}</h3>
+            <g:message code="projectOverview.sophia.configure"/>
             <ul>
                 <li>
-                    <g:if test="${!checkReferenceGenomeOutput}">
-                        <g:each in="${aceseqSeqType}" var="seqType">
-                            <g:link controller='configurePipeline' action='aceseq' params='["project.id": project.id, "seqType.id": aceseqSeqType.id]' class="configure">
+                    <g:if test="${!checkSophiaReferenceGenome}">
+                        <g:each in="${sophiaSeqType}" var="seqType">
+                            <g:link controller='configurePipeline' action='sophia' params='["project.id": project.id, "seqType.id": seqType.id]' class="configure">
                                 ${seqType.displayName}
                             </g:link>
                         </g:each>
                     </g:if>
                     <g:else>
-                        ${checkReferenceGenomeOutput}
+                        ${checkSophiaReferenceGenome}
+                    </g:else>
+                </li>
+            </ul>
+            <table>
+                <g:each var="row" in="${sophiaConfigTable}" status="i">
+                    <tr>
+                        <g:each var="cell" in="${row}">
+                            <g:if test="${i == 0}">
+                                <th>${cell}</th>
+                            </g:if>
+                            <g:else>
+                                <td class="tableEntry">${cell}</td>
+                            </g:else>
+                        </g:each>
+                    </tr>
+                </g:each>
+            </table>
+            <br>
+        </div>
+        <div>
+            <h3>${g.message(code: 'projectOverview.aceseq.title')}</h3>
+            <g:message code="projectOverview.aceseq.configure"/>
+            <ul>
+                <li>
+                    <g:if test="${!checkAceseqReferenceGenome}">
+                        <g:each in="${aceseqSeqType}" var="seqType">
+                            <g:link controller='configurePipeline' action='aceseq' params='["project.id": project.id, "seqType.id": seqType.id]' class="configure">
+                                ${seqType.displayName}
+                            </g:link>
+                        </g:each>
+                    </g:if>
+                    <g:else>
+                        ${checkAceseqReferenceGenome}
                     </g:else>
                 </li>
             </ul>

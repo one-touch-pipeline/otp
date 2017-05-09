@@ -1735,6 +1735,7 @@ class DomainFactory {
         [
                 createSnvSeqTypes(),
                 createIndelSeqTypes(),
+                createSophiaSeqTypes(),
                 createAceseqSeqTypes(),
         ].flatten().unique()
     }
@@ -1750,6 +1751,12 @@ class DomainFactory {
         [
                 createWholeGenomeSeqType(),
                 createExomeSeqType(),
+        ]
+    }
+
+    static List<SeqType> createSophiaSeqTypes() {
+        [
+                createWholeGenomeSeqType(),
         ]
     }
 
