@@ -8,8 +8,8 @@ import de.dkfz.tbi.otp.utils.*
 abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<SamplePair> {
 
 
-    static final String HEADER_DISABLED_SAMPLE_PAIR = 'The following samplePairs are disabled for processing'
     static final String HEADER_NO_CONFIG = 'For the following project seqtype combination no config is defined'
+    static final String HEADER_DISABLED_SAMPLE_PAIR = 'The following samplePairs are disabled for processing'
     static final String HEADER_OLD_INSTANCE_RUNNING = 'old instance running'
     static final String HEADER_WITHDRAWN_ANALYSIS_RUNNING = 'The following Analysis are withdrawn and running'
     static final String HEADER_WITHDRAWN_ANALYSIS_FINISHED = 'The following Analysis are withdrawn and finished'
@@ -28,7 +28,13 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
 
         output.showWorkflow(getWorkflowName())
 
-        Map processingStateMap = samplePairs.groupBy {
+
+        List<SamplePair> noConfig = samplePairWithoutCorrespondingConfigForPipelineAndSeqTypeAndProject(samplePairs)
+        output.showUniqueList(HEADER_NO_CONFIG, noConfig, {SamplePair samplePair -> "${samplePair.project} ${samplePair.seqType.name} ${samplePair.seqType.libraryLayout}"})
+
+        List<SamplePair> samplePairsWithConfig = samplePairs - noConfig
+
+        Map processingStateMap = samplePairsWithConfig.groupBy {
             it[getProcessingStateMember()]
         }
 
@@ -36,13 +42,11 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
 
         List needsProcessing = processingStateMap[SamplePair.ProcessingStatus.NEEDS_PROCESSING]
         if (needsProcessing) {
-            List<String> noConfig = samplePairWithoutCorrespondingConfigForPipelineAndSeqTypeAndProject(needsProcessing)
-            output.showUniqueList(HEADER_NO_CONFIG, noConfig)
 
             List<BamFilePairAnalysis> alreadyRunning = analysisAlreadyRunningForSamplePairAndPipeline(needsProcessing)
             output.showRunningWithHeader(HEADER_OLD_INSTANCE_RUNNING, getWorkflowName(), alreadyRunning)
 
-            List<SamplePair> waiting = samplePairsWithConfigAndWithoutRunningAnalysis(needsProcessing)
+            List<SamplePair> waiting = needsProcessing - alreadyRunning*.samplePair
             output.showWaiting(waiting, displayWaitingWithInfos)
         }
 
@@ -71,14 +75,13 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
         return []
     }
 
-    List<String> samplePairWithoutCorrespondingConfigForPipelineAndSeqTypeAndProject(List<SamplePair> samplePairs) {
+    List<SamplePair> samplePairWithoutCorrespondingConfigForPipelineAndSeqTypeAndProject(List<SamplePair> samplePairs) {
         if (!samplePairs) {
             return []
         }
         return SamplePair.executeQuery("""
                     select
-                        samplePair.mergingWorkPackage1.sample.individual.project.name,
-                        samplePair.mergingWorkPackage1.seqType.name
+                        samplePair
                     from
                         SamplePair samplePair
                     where
@@ -97,9 +100,7 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
                 """, [
                 samplePairs : samplePairs,
                 pipelineType: getPipelineType(),
-        ]).collect {
-            it.join(' ')
-        }
+        ])
     }
 
     List<BamFilePairAnalysis> analysisAlreadyRunningForSamplePairAndPipeline(List<SamplePair> samplePairs) {
@@ -116,44 +117,6 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
                         and analysis.processingState = '${AnalysisProcessingStates.IN_PROGRESS}'
                         and analysis.withdrawn = false
                         and analysis.config.pipeline.type = :pipelineType
-                """, [
-                samplePairs : samplePairs,
-                pipelineType: getPipelineType(),
-        ])
-    }
-
-    List<SamplePair> samplePairsWithConfigAndWithoutRunningAnalysis(List<SamplePair> samplePairs) {
-        if (!samplePairs) {
-            return []
-        }
-        return SamplePair.executeQuery("""
-                    select
-                        samplePair
-                    from
-                        SamplePair samplePair
-                    where
-                        samplePair in (:samplePairs)
-                        and exists (
-                            select
-                                config
-                            from
-                                ConfigPerProject config
-                            where
-                                config.project = samplePair.mergingWorkPackage1.sample.individual.project
-                                and config.seqType = samplePair.mergingWorkPackage1.seqType
-                                and config.pipeline.type = :pipelineType
-                                and config.obsoleteDate is null
-                        ) and not exists (
-                            select
-                                analysis
-                            from
-                                ${getBamFilePairAnalysisClass().simpleName} analysis
-                            where
-                                analysis.samplePair = samplePair
-                                and analysis.processingState = '${AnalysisProcessingStates.IN_PROGRESS}'
-                                and analysis.withdrawn = false
-                                and analysis.config.pipeline.type = :pipelineType
-                        )
                 """, [
                 samplePairs : samplePairs,
                 pipelineType: getPipelineType(),

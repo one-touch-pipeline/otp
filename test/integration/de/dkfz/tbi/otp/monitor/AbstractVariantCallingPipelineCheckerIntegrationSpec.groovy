@@ -84,9 +84,7 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
                 samplePair4,
                 samplePair6,
                 samplePair7,
-        ].collect {
-            "${it.project.name} ${it.seqType.name}".toString()
-        }
+        ]
 
         when:
         List returnValue = pipelineChecker.samplePairWithoutCorrespondingConfigForPipelineAndSeqTypeAndProject(samplePairs)
@@ -127,40 +125,6 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
 
         when:
         List returnValue = pipelineChecker.analysisAlreadyRunningForSamplePairAndPipeline(samplePairs)
-
-        then:
-        TestCase.assertContainSame(expected, returnValue)
-    }
-
-
-    void "samplePairsWithConfigAndWithoutRunningAnalysis, when some sample pairs have running analysis and some not, return the running analysis"() {
-        given:
-        AbstractVariantCallingPipelineChecker pipelineChecker = createVariantCallingPipelineChecker()
-
-        SamplePair samplePair1 = DomainFactory.createSamplePair()
-
-        SamplePair samplePair2 = DomainFactory.createSamplePair()
-        createConfig(samplePair2)
-
-        BamFilePairAnalysis analysis1 = createAnalysis([processingState: AnalysisProcessingStates.IN_PROGRESS])
-        BamFilePairAnalysis analysis2 = createAnalysis([processingState: AnalysisProcessingStates.FINISHED])
-        BamFilePairAnalysis analysis3 = createAnalysisForCrosschecking([processingState: AnalysisProcessingStates.FINISHED])
-
-        List<SamplePair> samplePairs = [
-                samplePair1,
-                samplePair2,
-                analysis1.samplePair,
-                analysis2.samplePair,
-                analysis3.samplePair,
-        ]
-
-        List<SamplePair> expected = [
-                samplePair2,
-                analysis2.samplePair
-        ]
-
-        when:
-        List returnValue = pipelineChecker.samplePairsWithConfigAndWithoutRunningAnalysis(samplePairs)
 
         then:
         TestCase.assertContainSame(expected, returnValue)
@@ -278,16 +242,14 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
 
         String processingStateMember = pipelineChecker.getProcessingStateMember()
 
+        //sample pair with needs processing but no config
+        SamplePair samplePairWithoutConfig = DomainFactory.createSamplePairPanCan()
+
         //disabled sample pair
         SamplePair samplePairDisabled = DomainFactory.createSamplePairPanCan([
                 (processingStateMember): SamplePair.ProcessingStatus.DISABLED,
         ])
-
-        //sample pair with needs processing but no config
-        SamplePair samplePairWithoutConfig = DomainFactory.createSamplePairPanCan([
-                (processingStateMember): SamplePair.ProcessingStatus.NEEDS_PROCESSING,
-        ])
-        String noConfig = "${samplePairWithoutConfig.project.name} ${samplePairWithoutConfig.seqType.name}"
+        createConfig(samplePairDisabled)
 
         //sample pair with needs processing and no config and running instance
         SamplePair samplePairWithOldRunningInstance = DomainFactory.createSamplePairPanCan([
@@ -307,6 +269,7 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
         SamplePair samplePairNotTriggered = DomainFactory.createSamplePairPanCan([
                 (processingStateMember): SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED,
         ])
+        createConfig(samplePairNotTriggered)
 
         //sample pair with no processing needed and withdrawn analysis
         SamplePair samplePairWithWithdrawnRunningAnalysis = DomainFactory.createSamplePairPanCan([
@@ -371,18 +334,17 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
         finishedSamplePairs == result
 
         then:
-        1 * output.showList(AbstractVariantCallingPipelineChecker.HEADER_DISABLED_SAMPLE_PAIR, [samplePairDisabled])
+        1 * pipelineChecker.samplePairWithoutCorrespondingConfigForPipelineAndSeqTypeAndProject(_)
+        1 * output.showUniqueList(AbstractVariantCallingPipelineChecker.HEADER_NO_CONFIG, [samplePairWithoutConfig], _)
 
         then:
-        1 * pipelineChecker.samplePairWithoutCorrespondingConfigForPipelineAndSeqTypeAndProject(_)
-        1 * output.showUniqueList(AbstractVariantCallingPipelineChecker.HEADER_NO_CONFIG, [noConfig])
+        1 * output.showList(AbstractVariantCallingPipelineChecker.HEADER_DISABLED_SAMPLE_PAIR, [samplePairDisabled])
 
         then:
         1 * pipelineChecker.analysisAlreadyRunningForSamplePairAndPipeline(_)
         1 * output.showRunningWithHeader(AbstractVariantCallingPipelineChecker.HEADER_OLD_INSTANCE_RUNNING, _, [oldRunningInstance])
 
         then:
-        1 * pipelineChecker.samplePairsWithConfigAndWithoutRunningAnalysis(_)
         1 * output.showWaiting([samplePairWaitingForStart], _)
 
         then:

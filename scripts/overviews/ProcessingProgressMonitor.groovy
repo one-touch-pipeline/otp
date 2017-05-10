@@ -7,17 +7,17 @@ The following code allows to show the processing state for
 * project (can take some time, depending of project)
 * all lanes in processing:
 ** all withdrawn lanes are ignored
-** lanes where datainstalation  not finished
-** lanes where fastqc not finished and data load after 1.1.2015 included
-** running alignments
+** waiting and running data installation workflow
+** waiting and running fastqc workflows for data loaded after 1.1.2015
+** waiting/running alignments
 *** seqtracks which belong to run segments where flag 'align' is set to false are ignored
-*** running OTP alignments
-*** running pan can alignments
-** running variant calling (snv, indel)
-** waiting variant calling (snv, indel) (only if config available)
+*** running OTP alignments (WGS, WES)
+*** running roddy alignments (WGS, WES, WGBS, RNA) (if not withdrawn)
+** running variant calling (snv, indel, ...) (if not withdrawn)
+** waiting variant calling (snv, indel, ...) (only if config available)
 
 
-entries are trimmed (spaces before after are removed)
+Entries are trimmed (spaces before after are removed)
 Names prefixed with # are ignored (handled as comment)
 Empty lines are ignored
 
