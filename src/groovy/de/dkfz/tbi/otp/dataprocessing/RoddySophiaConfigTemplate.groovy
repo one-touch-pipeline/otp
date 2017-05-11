@@ -13,7 +13,7 @@ class RoddySophiaConfigTemplate {
                imports="${sophiaPipelineConfiguration.baseProjectConfig}">
 
     <subconfigurations>
-        <configuration name='config' usedresourcessize='xl'>
+        <configuration name='config' usedresourcessize='${sophiaPipelineConfiguration.resources}'>
             <availableAnalyses>
                 <analysis id='${sophiaPipelineConfiguration.seqType.roddyName}' configuration='sophiaAnalysis'/>
             </availableAnalyses>

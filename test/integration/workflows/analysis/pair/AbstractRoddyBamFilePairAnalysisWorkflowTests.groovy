@@ -13,13 +13,6 @@ abstract class AbstractRoddyBamFilePairAnalysisWorkflowTests<Instance extends Ba
         executeTest()
     }
 
-    @Test
-    void testWholeWorkflowWithProcessedMergedBamFile() {
-        setupProcessMergedBamFile()
-
-        executeTest()
-    }
-
 
     @Override
     ReferenceGenome createReferenceGenome() {

@@ -7,7 +7,7 @@ import de.dkfz.tbi.otp.utils.*
 
 class SophiaInstance extends BamFilePairAnalysis implements ProcessParameterObject, Entity, RoddyAnalysisResult {
 
-    final static String SOPHIA_OUTPUT_FILE_SUFFIX = "filtered_somatic_minEventScore3.bedpe"
+    final static String SOPHIA_OUTPUT_FILE_SUFFIX = "filtered_somatic_minEventScore3.tsv"
 
     static hasMany = [
             roddyExecutionDirectoryNames: String

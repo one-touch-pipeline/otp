@@ -12,7 +12,7 @@ class RoddyAceseqConfigTemplate {
                description='Project configuration for ${aceseqPipelineConfiguration.seqType.roddyName} in OTP.'
                imports="${aceseqPipelineConfiguration.baseProjectConfig}">
     <subconfigurations>
-        <configuration name='config' usedresourcessize='xl'>
+        <configuration name='config' usedresourcessize='${aceseqPipelineConfiguration.resources}'>
             <availableAnalyses>
                 <analysis id='${aceseqPipelineConfiguration.seqType.roddyName}' configuration='copyNumberEstimationAnalysis'/>
             </availableAnalyses>

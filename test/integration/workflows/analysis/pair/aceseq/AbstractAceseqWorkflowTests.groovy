@@ -3,7 +3,6 @@ package workflows.analysis.pair.aceseq
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddy.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
 import grails.plugin.springsecurity.*
 import workflows.analysis.pair.*
 
@@ -39,6 +38,7 @@ abstract class AbstractAceseqWorkflowTests extends AbstractRoddyBamFilePairAnaly
                             pluginVersion    : ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_ACESEQ_PIPELINE_PLUGIN_VERSION, null, null),
                             baseProjectConfig: ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_ACESEQ_BASE_PROJECT_CONFIG, seqType.roddyName, null),
                             configVersion    : 'v1_0',
+                            resources        : 't',
                     ])
             )
         }
@@ -75,7 +75,7 @@ abstract class AbstractAceseqWorkflowTests extends AbstractRoddyBamFilePairAnaly
     }
 
 
-    void createSophieInput() {
+    void createSophiaInput() {
         //TODO: adapt next line for using sophia input file
         File sophiaInputFile = new File(project.getProjectDirectory(), 'testpid.DELLY.somaticFilter.highConf.bedpe.txt')
         String cmd = "touch ${sophiaInputFile.absolutePath} && chmod 664 ${sophiaInputFile.absolutePath} && echo OK"
@@ -84,7 +84,7 @@ abstract class AbstractAceseqWorkflowTests extends AbstractRoddyBamFilePairAnaly
 
 
     void executeTest() {
-        createSophieInput()
+        createSophiaInput()
 
         super.executeTest()
     }

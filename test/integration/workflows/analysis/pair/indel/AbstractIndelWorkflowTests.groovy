@@ -5,6 +5,7 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.*
+import org.junit.Test
 import workflows.analysis.pair.*
 
 abstract class AbstractIndelWorkflowTests extends AbstractRoddyBamFilePairAnalysisWorkflowTests<IndelCallingInstance> {
@@ -15,6 +16,15 @@ abstract class AbstractIndelWorkflowTests extends AbstractRoddyBamFilePairAnalys
     static final String CONFIG_VERSION = 'v1_0'
     static final String ANALYSIS = 'indelCallingAnalysis'
     static final String IMPORT = 'otpIndelCallingWorkflow-1.0'
+
+
+    @Test
+    void testWholeWorkflowWithProcessedMergedBamFile() {
+        setupProcessMergedBamFile()
+
+        executeTest()
+    }
+
 
     File createXml() {
         String name = RoddyWorkflowConfig.getNameUsedInConfig(
