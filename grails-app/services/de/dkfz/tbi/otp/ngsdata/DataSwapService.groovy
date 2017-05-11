@@ -658,18 +658,52 @@ chmod 440 ${newDirectFileName}
         createCommentForSwappedDatafiles(dataFiles)
     }
 
-    /**
-     * Once all connections to an individual are deleted or moved and the individual is 'empty' it can be deleted.
-     * The mutations, resultDataFiles and StudySamples are empty anyway. Just for completeness I remove them.
-     * TODO: test this method
-     */
-    void deleteIndividual(String pid) {
-        Individual individual = Individual.findByPid(pid)
-        notNull(individual, "There was no individual found for the pid " + pid)
-        deleteMutationsAndResultDataFilesOfOneIndividual(individual)
-        StudySample.findAllByIndividual(individual)*.delete()
 
-        individual.delete()
+    List<String> deleteIndividual(String pid, boolean check = true) {
+        Individual individual = CollectionUtils.exactlyOneElement(Individual.findAllByPid(pid), "No individual could be found for PID ${pid}")
+        StringBuilder stringBuilder = new StringBuilder()
+        StringBuilder stringBuilderOtherUser = new StringBuilder()
+
+        Mutation.findAllByIndividual(individual)*.delete()
+        assert !Mutation.findAllByIndividual(individual)
+
+        StudySample.findAllByIndividual(individual)*.delete()
+        assert !StudySample.findAllByIndividual(individual)
+
+        List<Sample> samples = Sample.findAllByIndividual(individual)
+
+        List<SeqType> seqTypes = []
+
+        samples.each { Sample sample ->
+            List<SeqTrack> seqTracks = SeqTrack.findAllBySample(sample)
+
+            seqTracks.each { SeqTrack seqTrack ->
+                seqTrack.dataFiles.each {DataFile dataFile ->
+                    stringBuilder << "rm -rf ${new File(lsdfFilesService.getFileFinalPath(dataFile)).absolutePath}\n"
+                }
+                Map<String, List<File>> seqTrackDirsToDelete = deleteSeqTrack(seqTrack, check)
+
+                seqTrackDirsToDelete.get("dirsToDelete").flatten().findAll().each {
+                    stringBuilder << "rm -rf ${it.absolutePath}\n"
+                }
+                seqTrackDirsToDelete.get("dirsToDeleteWithOtherUser").flatten().findAll().each {
+                    stringBuilderOtherUser << "rm -rf ${it.absolutePath}\n"
+                }
+                seqTypes.add(seqTrack.seqType)
+            }
+
+            SeqScan.findAllBySample(sample)*.delete(flush: true)
+            SampleIdentifier.findAllBySample(sample)*.delete(flush: true)
+            sample.delete(flush: true)
+        }
+
+        seqTypes.unique().each { SeqType seqType ->
+            stringBuilder << "rm -rf ${individual.getViewByPidPath(seqType).absoluteDataManagementPath}\n"
+        }
+
+        individual.delete(flush: true)
+
+        return [stringBuilder.toString(), stringBuilderOtherUser.toString()]
     }
 
     /**
@@ -1022,14 +1056,15 @@ chmod 440 ${newDirectFileName}
      * There is always more than one seqTrack which belongs to one Run, which is why the run is not deleted.
      * !! If it is not needed to delete this information, this method can be used without pre-work.
      */
-    List<File> deleteSeqTrack(SeqTrack seqTrack) {
+    Map<String, List<File>> deleteSeqTrack(SeqTrack seqTrack, boolean check = true) {
         notNull(seqTrack, "The input seqTrack of the method deleteSeqTrack is null")
-        List<File> dirsToDelete = []
 
-        throwExceptionInCaseOfExternalMergedBamFileIsAttached([seqTrack])
-        throwExceptionInCaseOfSeqTracksAreOnlyLinked([seqTrack])
+        if (check) {
+            throwExceptionInCaseOfExternalMergedBamFileIsAttached([seqTrack])
+            throwExceptionInCaseOfSeqTracksAreOnlyLinked([seqTrack])
+        }
 
-        dirsToDelete << deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack).get("dirsToDelete")
+        Map<String, List<File>> dirsToDelete = deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack)
         deleteConnectionFromSeqTrackRepresentingABamFile(seqTrack)
         DataFile.findAllBySeqTrack(seqTrack).each { deleteDataFile(it) }
         MergingAssignment.findAllBySeqTrack(seqTrack)*.delete()
@@ -1063,7 +1098,7 @@ chmod 440 ${newDirectFileName}
         outputStringBuilder << "\n  delete seqTracks:"
         SeqTrack.findAllByRun(run).each {
             outputStringBuilder << "\n     try to delete: ${it}"
-            dirsToDelete = deleteSeqTrack(it)
+            dirsToDelete = deleteSeqTrack(it).get("dirsToDelete")
         }
 
         outputStringBuilder << "\n  try to delete run ${run}"

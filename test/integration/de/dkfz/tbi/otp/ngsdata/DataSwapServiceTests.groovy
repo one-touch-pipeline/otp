@@ -957,4 +957,36 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
                 roddyBamFile.workSingleLaneQADirectories.values(),
         ].flatten()*.absolutePath
     }
+
+    @Test
+    public void testDeleteIndividual_SnvWasExecuted() {
+        testDeleteIndividualMethod(DomainFactory.createSnvInstanceWithRoddyBamFiles())
+    }
+
+    @Test
+    public void testDeleteIndividual_IndelWasExecuted() {
+        testDeleteIndividualMethod(DomainFactory.createIndelCallingInstanceWithRoddyBamFiles())
+    }
+
+    private void testDeleteIndividualMethod(BamFilePairAnalysis instance) {
+        List<File> filesToDelete = []
+
+        DomainFactory.createRealmDataManagement(name: instance.project.realmName)
+
+        String pid = instance.individual.pid
+        instance.sampleType1BamFile.containedSeqTracks.each { SeqTrack seqTrack ->
+            filesToDelete << seqTrack.dataFiles.collect { new File(lsdfFilesService.getFileFinalPath(it)) }
+        }
+        filesToDelete << instance.instancePath.absoluteDataManagementPath
+        filesToDelete << instance.individual.getViewByPidPath(instance.seqType).absoluteDataManagementPath
+
+        List<String> allFilesToDeleteCmd = dataSwapService.deleteIndividual(pid)
+        String allFilesToDeleteCmdConcatenated = allFilesToDeleteCmd[0] + allFilesToDeleteCmd[1]
+
+        assert !Individual.findByPid(pid)
+
+        filesToDelete.flatten().each { File file ->
+            assert allFilesToDeleteCmdConcatenated.contains(file.absolutePath)
+        }
+    }
 }
