@@ -805,7 +805,11 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         processingOption2.value = analysisInstance.samplePair.mergingWorkPackage1.referenceGenome.name
         processingOption2.save(flush: true)
 
-
+        if (pairAnalysis.analysisType == "AI") {
+            analysisInstance.samplePair.sophiaProcessingStatus = SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED
+            analysisInstance.samplePair.save(flush: true)
+            DomainFactory.createSophiaInstance(analysisInstance.samplePair)
+        }
 
         analysisInstance.delete(flush: true)
 
@@ -813,7 +817,6 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         trackingService.fillInSamplePairStatuses([mwpStatus], new SamplePairDiscovery())
 
         then:
-
         SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
         samplePairStatus.samplePair == analysisInstance.samplePair
         samplePairStatus."${pairAnalysis.completeCallingInstance}" == null
@@ -823,6 +826,37 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
 
         where:
         pairAnalysis << listPairAnalysis
+    }
+
+    void "fillInSamplePairStatuses, no AI, bamFileInProjectFolder set, samplePairForProcessing exists, but Sophia is not finished yet, returns NOTHING_DONE_WONT_DO"() {
+        given:
+        BamFilePairAnalysis analysisInstance = DomainFactory.createAceseqInstanceWithRoddyBamFiles([:], [coverage: 2], [coverage: 2])
+        [1, 2].each {
+            setBamFileInProjectFolder(analysisInstance."sampleType${it}BamFile")
+            DomainFactory.createProcessingThresholdsForBamFile(analysisInstance."sampleType${it}BamFile", [coverage: 1, numberOfLanes: null])
+        }
+
+        MergingWorkPackageProcessingStatus mwpStatus = createMergingWorkPackageProcessingStatus(
+                analysisInstance.sampleType1BamFile)
+
+        processingOption.value = analysisInstance.samplePair.mergingWorkPackage1.referenceGenome.name
+        processingOption.save(flush: true)
+
+        processingOption2.value = analysisInstance.samplePair.mergingWorkPackage1.referenceGenome.name
+        processingOption2.save(flush: true)
+
+        analysisInstance.delete(flush: true)
+
+        when:
+        trackingService.fillInSamplePairStatuses([mwpStatus], new SamplePairDiscovery())
+
+        then:
+        SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
+        samplePairStatus.samplePair == analysisInstance.samplePair
+        samplePairStatus.completeAceseqInstance == null
+        samplePairStatus.aceseqProcessingStatus == NOTHING_DONE_WONT_DO
+        mwpStatus.aceseqProcessingStatus == NOTHING_DONE_WONT_DO
+        createSeqTrackProcessingStatus(mwpStatus).aceseqProcessingStatus == NOTHING_DONE_WONT_DO
     }
 
     @Unroll("fillInSamplePairStatuses, no #pairAnalysis.analysisType, bamFileInProjectFolder unset, returns NOTHING_DONE_MIGHT_DO")

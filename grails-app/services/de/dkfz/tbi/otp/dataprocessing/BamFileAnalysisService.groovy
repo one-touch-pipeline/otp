@@ -77,7 +77,7 @@ abstract class BamFileAnalysisService {
                 "   ) " : ""
 
 
-        String pairForSnvProcessing =
+        String samplePairForProcessing =
                 "FROM SamplePair sp " +
                 //check that sample pair shall be processed
                 "WHERE " + getProcessingStateCheck() +
@@ -126,7 +126,7 @@ abstract class BamFileAnalysisService {
         }
         parameters.putAll(checkReferenceGenomeMap())
 
-        return SamplePair.find(pairForSnvProcessing, parameters)
+        return SamplePair.find(samplePairForProcessing, parameters)
     }
 
     void validateInputBamFiles(final BamFilePairAnalysis analysis) throws Throwable {

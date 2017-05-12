@@ -1,18 +1,15 @@
 package de.dkfz.tbi.otp.job.jobs.aceseq
 
-import de.dkfz.tbi.otp.dataprocessing.AceseqInstance
-import de.dkfz.tbi.otp.dataprocessing.AceseqService
-import de.dkfz.tbi.otp.dataprocessing.ConfigPerProject
-import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.RunSegment
-import de.dkfz.tbi.otp.tracking.OtrsTicket
-import grails.test.spock.IntegrationSpec
-import org.springframework.beans.factory.annotation.Autowired
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.tracking.*
+import grails.test.spock.*
+import org.springframework.beans.factory.annotation.*
 
-class RoddyAceseqStartJobIntegrationSpec extends IntegrationSpec{
+
+class RoddyAceseqStartJobIntegrationSpec extends IntegrationSpec {
 
     @Autowired
     RoddyAceseqStartJob roddyAceseqStartJob
@@ -47,10 +44,8 @@ class RoddyAceseqStartJobIntegrationSpec extends IntegrationSpec{
 
     }
 
-
-    void "findSamplePairToProcess, all fine"() {
-        given:
-        def map = DomainFactory.createProcessableSamplePair()
+    private static SamplePair setupSamplePair() {
+        Map map = DomainFactory.createProcessableSamplePair()
         SamplePair samplePair = map.samplePair
         DomainFactory.createRoddyWorkflowConfig(
                 seqType: samplePair.seqType,
@@ -63,9 +58,42 @@ class RoddyAceseqStartJobIntegrationSpec extends IntegrationSpec{
                 project: null,
                 value: samplePair.mergingWorkPackage1.referenceGenome.name,
         ])
+        return samplePair
+    }
+
+    void "findSamplePairToProcess, Sophia finished"() {
+        given:
+        SamplePair samplePair = setupSamplePair()
+        samplePair.sophiaProcessingStatus = SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED
+        samplePair.save(flush: true)
+        DomainFactory.createSophiaInstance(samplePair)
 
         expect:
         samplePair == roddyAceseqStartJob.findSamplePairToProcess(ProcessingPriority.NORMAL_PRIORITY)
+    }
+
+    void "findSamplePairToProcess, Sophia not started"() {
+        given:
+        SamplePair samplePair = setupSamplePair()
+        samplePair.sophiaProcessingStatus = SamplePair.ProcessingStatus.NEEDS_PROCESSING
+        samplePair.save(flush: true)
+
+        expect:
+        null == roddyAceseqStartJob.findSamplePairToProcess(ProcessingPriority.NORMAL_PRIORITY)
+    }
+
+    void "findSamplePairToProcess, one Sophia finished and one running"() {
+        given:
+        SamplePair samplePair = setupSamplePair()
+        samplePair.sophiaProcessingStatus = SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED
+        samplePair.save(flush: true)
+        DomainFactory.createSophiaInstance(samplePair)
+        SophiaInstance si = DomainFactory.createSophiaInstance(samplePair)
+        si.processingState = AnalysisProcessingStates.IN_PROGRESS
+        si.save(flush: true)
+
+        expect:
+        null == roddyAceseqStartJob.findSamplePairToProcess(ProcessingPriority.NORMAL_PRIORITY)
     }
 
 

@@ -62,6 +62,10 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
     void "samplePairForProcessing for Instance returns samplePair"() {
         given:
         samplePair1."${processingStatus}" = ProcessingStatus.NEEDS_PROCESSING
+        if (processingStatus == "aceseqProcessingStatus") {
+            samplePair1.sophiaProcessingStatus = ProcessingStatus.NO_PROCESSING_NEEDED
+            DomainFactory.createSophiaInstance(samplePair1)
+        }
         assert samplePair1.save(flush: true)
         DomainFactory.createRoddyWorkflowConfig(
                 seqType: samplePair1.seqType,

@@ -11,7 +11,16 @@ class AceseqService extends BamFileAnalysisService {
 
     @Override
     protected String getProcessingStateCheck() {
-        return "sp.aceseqProcessingStatus = :needsProcessing "
+        return "sp.aceseqProcessingStatus = :needsProcessing AND " +
+                "sp.sophiaProcessingStatus = 'NO_PROCESSING_NEEDED' AND " +
+                "EXISTS (FROM SophiaInstance si " +
+                "  WHERE si.samplePair = sp AND " +
+                "  si.processingState = 'FINISHED'" +
+                ") AND " +
+                "NOT EXISTS (FROM SophiaInstance si " +
+                "  WHERE si.samplePair = sp AND " +
+                "  si.processingState = 'IN_PROGRESS'" +
+                ") "
     }
 
     @Override
