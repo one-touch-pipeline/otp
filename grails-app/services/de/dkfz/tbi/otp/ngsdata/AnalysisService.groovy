@@ -23,6 +23,9 @@ class AnalysisService {
             case AceseqInstance:
                 callingInstanceType = "aceseq"
                 break
+            case SophiaInstance:
+                callingInstanceType = "sophia"
+                break
             default:
                 throw new RuntimeException("${callingInstance.name} is not a valid calling instance")
         }

@@ -15,35 +15,26 @@ class AnalysisServiceIntegrationSpec extends IntegrationSpec implements UserAndR
         createUserAndRoles()
     }
 
-
     @Unroll
-    void "getCallingInstancesForProject with SnvCallingInstance"(){
+    void "getCallingInstancesForProject with #analysis Instance"(){
         given:
-        SnvCallingInstance snvCallingInstance = DomainFactory.createSnvInstanceWithRoddyBamFiles()
+        BamFilePairAnalysis analysisInstance = DomainFactory."create${analysis}InstanceWithRoddyBamFiles"()
 
         when:
         List callingInstances
         SpringSecurityUtils.doWithAuth(OPERATOR) {
-            callingInstances = analysisService.getCallingInstancesForProject(SnvCallingInstance, snvCallingInstance.samplePair.project.name)
+            callingInstances = analysisService.getCallingInstancesForProject(instance, analysisInstance.samplePair.project.name)
         }
 
         then:
         callingInstances.size() == 1
-    }
 
-    @Unroll
-    void "getCallingInstancesForProject with IndelCallingInstance"(){
-        given:
-        IndelCallingInstance indelCallingInstance = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles()
-
-        when:
-        List callingInstances
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            callingInstances = analysisService.getCallingInstancesForProject(IndelCallingInstance, indelCallingInstance.samplePair.project.name)
-        }
-
-        then:
-        callingInstances.size() == 1
+        where:
+        analysis       | instance
+        "Snv"          | SnvCallingInstance
+        "IndelCalling" | IndelCallingInstance
+        "Aceseq"       | AceseqInstance
+        "Sophia"       | SophiaInstance
     }
 
     void "checkFile with no callingInstance"() {

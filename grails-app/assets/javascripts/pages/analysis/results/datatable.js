@@ -131,6 +131,30 @@ $.otp.resultsTable = {
         );
     },
 
+    registerSophia: function () {
+        "use strict";
+        $.otp.resultsTable.registerDataTable(
+            $('#resultsTable'),
+            $.otp.createLink({
+                controller: 'sophia',
+                action: 'dataTableResults'
+            }),
+            function (row) {
+                return [
+                    $.otp.createLinkMarkup({
+                        controller: 'individual',
+                        action: 'show',
+                        id: row.individualId,
+                        text: row.individualPid,
+                    }),
+                    row.sampleType1 + " \u2013 " + row.sampleType2,
+                    row.dateCreated,
+                    row.sophiaProcessingState.name,
+                ];
+            }
+        );
+    },
+
     registerSnv: function () {
         "use strict";
         $.otp.resultsTable.registerDataTable(
