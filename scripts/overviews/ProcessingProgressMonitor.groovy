@@ -14,7 +14,10 @@ The following code allows to show the processing state for
 *** running OTP alignments (WGS, WES)
 *** running roddy alignments (WGS, WES, WGBS, RNA) (if not withdrawn)
 ** running variant calling (snv, indel, ...) (if not withdrawn)
-** waiting variant calling (snv, indel, ...) (only if config available)
+** waiting variant calling (snv, indel, ...) if
+*** a config is available
+*** the last bam file is not withdrawn
+*** the last bam file is in processing or has reached the threshold
 
 
 Entries are trimmed (spaces before after are removed)
@@ -632,13 +635,44 @@ if (allProcessed) {
             )"""
     }
 
+    def bamFileInProgressingOrThresouldReached = { String number ->
+        return """
+            and exists (
+                from
+                    AbstractMergedBamFile bamFile
+                    join bamFile.workPackage mwp
+                where
+                    mwp = samplePair.mergingWorkPackage${number}
+                    and bamFile.withdrawn = false
+                    and bamFile.id = (select max( maxBamFile.id) from AbstractMergedBamFile maxBamFile where maxBamFile.workPackage = bamFile.workPackage)
+                    and (
+                        bamFile.fileOperationStatus <> '${AbstractMergedBamFile.FileOperationStatus.PROCESSED}'
+                        or exists (
+                            from
+                                ProcessingThresholds pt
+                            where
+                                pt.project = mwp.sample.individual.project
+                                and pt.seqType = mwp.seqType
+                                and pt.sampleType = mwp.sample.sampleType
+                                and (pt.coverage is null OR pt.coverage <= bamFile.coverage)
+                                and (pt.numberOfLanes is null OR pt.numberOfLanes <= bamFile.numberOfMergedLanes)
+                        )
+                    )
+            )
+        """
+    }
+
     SamplePair.executeQuery("""
         select samplePair
         from SamplePair samplePair
-        where ${needsProcessing('snvProcessingStatus', Pipeline.Type.SNV)}
+        where (
+            ${needsProcessing('snvProcessingStatus', Pipeline.Type.SNV)}
             or ${needsProcessing('indelProcessingStatus', Pipeline.Type.INDEL)}
             or ${needsProcessing('sophiaProcessingStatus', Pipeline.Type.SOPHIA)}
             or ${needsProcessing('aceseqProcessingStatus', Pipeline.Type.ACESEQ)}
+        )
+        ${bamFileInProgressingOrThresouldReached('1')}
+        ${bamFileInProgressingOrThresouldReached('2')}
     """).each { SamplePair samplePair ->
         [samplePair.mergingWorkPackage1, samplePair.mergingWorkPackage2].each { MergingWorkPackage mergingWorkPackage ->
             seqTracks.addAll(mergingWorkPackage.findMergeableSeqTracks())

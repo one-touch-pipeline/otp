@@ -45,6 +45,12 @@ class ProcessingThresholds implements Entity {
         }
     }
 
+    static mapping = {
+        project  index: "processing_thresholds_project_seq_type_sample_type_idx"
+        seqType  index: "processing_thresholds_project_seq_type_sample_type_idx"
+        sampleType  index: "processing_thresholds_project_seq_type_sample_type_idx"
+    }
+
     boolean isAboveLaneThreshold(AbstractMergedBamFile bamFile) {
         assert bamFile : 'bam file may not be null'
         assert bamFile.numberOfMergedLanes : 'property numberOfMergedLanes of the bam has to be set'
