@@ -92,6 +92,8 @@ class ProjectConfigController {
                 accessPersons: accessPersons,
                 unixGroup: project.unixGroup,
                 costCenter: project.costCenter,
+                tumorEntities: TumorEntity.list().sort(),
+                tumorEntity: project.tumorEntity,
                 processingPriorities: ProjectService.processingPriorities,
                 checkSophiaReferenceGenome: checkSophiaReferenceGenome,
                 checkAceseqReferenceGenome: checkAceseqReferenceGenome,
@@ -151,11 +153,11 @@ class ProjectConfigController {
     }
 
     JSON updateAnalysisDirectory(UpdateAnalysisDirectoryCommand cmd) {
-        checkErrorAndCallMethod(cmd, { projectService.updateAnalysisDirectory(cmd.analysisDirectory, cmd.project) })
+        checkErrorAndCallMethod(cmd, { projectService.updateProjectField(cmd.analysisDirectory, "analysisDirectory", cmd.project) })
     }
 
     JSON updateNameInMetadataFiles(UpdateNameInMetadataCommand cmd) {
-        checkErrorAndCallMethod(cmd, { projectService.updateNameInMetadata(cmd.newNameInMetadata, cmd.project) })
+        checkErrorAndCallMethod(cmd, { projectService.updateProjectField(cmd.newNameInMetadata, "nameInMetadataFiles", cmd.project) })
     }
 
     JSON updateCategory(UpdateCategoryCommand cmd) {
@@ -163,19 +165,23 @@ class ProjectConfigController {
     }
 
     JSON updateMailingListName(UpdateMailingListNameCommand cmd) {
-        checkErrorAndCallMethod(cmd, { projectService.updateMailingListName(cmd.mailingListName, cmd.project) })
+        checkErrorAndCallMethod(cmd, { projectService.updateProjectField(cmd.mailingListName, "mailingListName", cmd.project) })
     }
 
     JSON updateCostCenter(UpdateCostCenterCommand cmd) {
-        checkErrorAndCallMethod(cmd, { projectService.updateCostCenterName(cmd.costCenter, cmd.project) })
+        checkErrorAndCallMethod(cmd, { projectService.updateProjectField(cmd.costCenter, "costCenter", cmd.project) })
     }
 
     JSON updateDescription(UpdateDescriptionCommand cmd) {
-        checkErrorAndCallMethod(cmd, { projectService.updateDescription(cmd.description, cmd.project) })
+        checkErrorAndCallMethod(cmd, { projectService.updateProjectField(cmd.description, "description", cmd.project) })
     }
 
     JSON updateProcessingPriority(UpdateProcessingPriorityCommand cmd) {
-        checkErrorAndCallMethod(cmd, { projectService.updateProcessingPriority(cmd.processingPriority, cmd.project) })
+        checkErrorAndCallMethod(cmd, { projectService.updateProjectField(cmd.processingPriority, "processingPriority", cmd.project) })
+    }
+
+    JSON updateTumorEntity(UpdateTumorEntityCommand cmd) {
+        checkErrorAndCallMethod(cmd, { projectService.updateProjectField(cmd.tumorEntity, "tumorEntity", cmd.project) })
     }
 
     JSON updateSnv(UpdateSnvCommand cmd) {
@@ -492,5 +498,14 @@ class UpdateProcessingPriorityCommand implements Serializable {
                 this.processingPriority = ProcessingPriority.FAST_TRACK_PRIORITY
                 break
         }
+    }
+}
+
+class UpdateTumorEntityCommand implements Serializable {
+    TumorEntity tumorEntity
+    Project project
+
+    void setValue(String tumorEntityName) {
+        tumorEntity = TumorEntity.findByName(tumorEntityName)
     }
 }

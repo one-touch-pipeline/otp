@@ -35,12 +35,14 @@ class CreateProjectController {
                         costCenter: cmd.costCenter,
                         description: cmd.description,
                         processingPriority: cmd.priority,
+                        tumorEntity: cmd.tumorEntity,
                 )
                 redirect(controller: "projectOverview", action: "specificOverview", params: [project: projectService.createProject(projectParams).name])
             }
         }
         return [
             projectGroups: ["No Group"] + projectGroupService.availableProjectGroups()*.name,
+            tumorEntities: ["No tumor entity"] + TumorEntity.list().sort()*.name,
             processingPriorities: ProjectService.processingPriorities,
             projectCategories: ProjectCategory.listOrderByName(),
             message: message,
@@ -59,6 +61,7 @@ class CreateProjectControllerSubmitCommand implements Serializable {
     String mailingListName
     String costCenter
     String projectGroup
+    TumorEntity tumorEntity
     List<String> projectCategories = [].withLazyDefault {new String()}
     String description
     String submit
@@ -107,6 +110,7 @@ class CreateProjectControllerSubmitCommand implements Serializable {
                 return '\'' + val + '\' is used in another project as project name'
             }
         })
+        tumorEntity(nullable: true)
     }
 
     void setName(String name) {
@@ -136,6 +140,12 @@ class CreateProjectControllerSubmitCommand implements Serializable {
             case "FAST_TRACK":
                 this.priority = ProcessingPriority.FAST_TRACK_PRIORITY
                 break
+        }
+    }
+
+    void setTumorEntityName(String tumorEntityName) {
+        if (tumorEntityName != "No tumor entity") {
+            tumorEntity = TumorEntity.findByName(tumorEntityName)
         }
     }
 }

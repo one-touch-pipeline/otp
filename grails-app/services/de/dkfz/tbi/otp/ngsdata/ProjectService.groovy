@@ -11,7 +11,6 @@ import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.*
 import grails.plugin.springsecurity.*
 import grails.plugin.springsecurity.acl.*
-import groovy.transform.*
 import org.springframework.security.access.prepost.*
 import org.springframework.security.acls.domain.*
 import org.springframework.security.acls.model.*
@@ -132,6 +131,7 @@ class ProjectService {
         project.description = projectParams.description
         project.unixGroup = projectParams.unixGroup
         project.costCenter = projectParams.costCenter
+        project.tumorEntity = projectParams.tumorEntity
         assert project.save(flush: true, failOnError: true)
 
         GroupCommand groupCommand = new GroupCommand(
@@ -149,7 +149,7 @@ class ProjectService {
 
         File projectDirectory = project.getProjectDirectory()
         if (projectDirectory.exists()) {
-            PosixFileAttributes attrs = Files.readAttributes(projectDirectory.toPath(), PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
+            PosixFileAttributes attrs = Files.readAttributes(projectDirectory.toPath(), PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS)
             if (attrs.group().toString() == projectParams.unixGroup) {
                 return project
             }
@@ -160,7 +160,6 @@ class ProjectService {
         return project
     }
 
-    @Immutable
     public static class ProjectParams {
         String name
         String dirName
@@ -177,47 +176,21 @@ class ProjectService {
         String costCenter
         String description
         short processingPriority
-    }
-
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public void updateAnalysisDirectory(String analysisDirectory, Project project) {
-        project.dirAnalysis = analysisDirectory
-        project.save(flush: true, failOnError: true)
-    }
-
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public void updateNameInMetadata(String nameInMetadata, Project project) {
-        project.nameInMetadataFiles = nameInMetadata
-        project.save(flush: true, failOnError: true)
+        TumorEntity tumorEntity
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     public void updateCategory(List<String> categoryNames, Project project) {
-        project.projectCategories = categoryNames.collect { exactlyOneElement(ProjectCategory.findAllByName(it)) }
-        project.save(flush: true, failOnError: true)
+        updateProjectField(
+                categoryNames.collect { exactlyOneElement(ProjectCategory.findAllByName(it)) },
+                "projectCategories",
+                project
+        )
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public void updateMailingListName(String mailingListName, Project project) {
-        project.mailingListName = mailingListName
-        project.save(flush: true)
-    }
-
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public void updateCostCenterName(String costCenter, Project project) {
-        project.costCenter = costCenter
-        project.save(flush: true)
-    }
-
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public void updateDescription(String description, Project project) {
-        project.description = description
-        project.save(flush: true)
-    }
-
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public void updateProcessingPriority(short processingPriority, Project project) {
-        project.processingPriority = processingPriority
+    public <T> void updateProjectField (T fieldValue, String fieldName, Project project) {
+        project."${fieldName}" = fieldValue
         project.save(flush: true)
     }
 

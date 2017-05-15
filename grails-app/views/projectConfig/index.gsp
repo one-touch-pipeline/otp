@@ -131,6 +131,17 @@
                                 value="${costCenter}"/>
                     </td>
                 </tr>
+                <tr>
+                    <td class="myKey"><g:message code="projectOverview.tumorEntity"/></td>
+                    <td>
+                        <otp:editorSwitch
+                                roles="ROLE_OPERATOR"
+                                template="dropDown"
+                                link="${g.createLink(controller: "projectConfig", action: "updateTumorEntity", params: ['project.id': project.id])}"
+                                values="${tumorEntities}"
+                                value="${tumorEntity}"/>
+                    </td>
+                </tr>
             </table>
         </div>
 

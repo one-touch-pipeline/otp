@@ -58,6 +58,8 @@ class Project implements Commentable, Entity, AlignmentConfig {
 
     String costCenter
 
+    TumorEntity tumorEntity
+
     static belongsTo = [
             ProjectGroup,
     ]
@@ -101,6 +103,7 @@ class Project implements Commentable, Entity, AlignmentConfig {
         description(nullable: true)
         unixGroup(nullable: true)
         costCenter(nullable: true)
+        tumorEntity(nullable: true)
     }
 
     String toString() {

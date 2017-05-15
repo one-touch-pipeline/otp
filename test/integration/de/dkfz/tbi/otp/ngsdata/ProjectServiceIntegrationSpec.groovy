@@ -341,7 +341,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         when:
         Project project = Project.findByName("testProject")
         SpringSecurityUtils.doWithAuth("admin") {
-            projectService.updateNameInMetadata(name, project)
+            projectService.updateProjectField(name, "nameInMetadataFiles", project)
         }
 
         then:
@@ -359,7 +359,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         when:
         Project project = Project.findByName("testProject3")
         SpringSecurityUtils.doWithAuth("admin") {
-            projectService.updateNameInMetadata(name, project)
+            projectService.updateProjectField(name, "nameInMetadataFiles", project)
         }
 
         then:
@@ -441,7 +441,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         when:
         assert !project.mailingListName
         SpringSecurityUtils.doWithAuth("admin") {
-            projectService.updateMailingListName(mailingListName, project)
+            projectService.updateProjectField(mailingListName, "mailingListName", project)
         }
 
         then:
@@ -456,7 +456,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         when:
         assert !project.dirAnalysis
         SpringSecurityUtils.doWithAuth("admin") {
-            projectService.updateAnalysisDirectory(analysisDirectory, project)
+            projectService.updateProjectField(analysisDirectory, "dirAnalysis", project)
         }
 
         then:
@@ -470,11 +470,26 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         when:
         assert !project.processingPriority
         SpringSecurityUtils.doWithAuth("admin") {
-            projectService.updateProcessingPriority(ProcessingPriority.FAST_TRACK_PRIORITY, project)
+            projectService.updateProjectField(ProcessingPriority.FAST_TRACK_PRIORITY, "processingPriority", project)
         }
 
         then:
         project.processingPriority == ProcessingPriority.FAST_TRACK_PRIORITY
+    }
+
+    void "test updateTumor valid name"() {
+        given:
+        Project project = Project.findByName("testProject")
+        TumorEntity tumorEntity = DomainFactory.createTumorEntity()
+
+        when:
+        assert !project.processingPriority
+        SpringSecurityUtils.doWithAuth("admin") {
+            projectService.updateProjectField(tumorEntity, "tumorEntity", project)
+        }
+
+        then:
+        project.tumorEntity == tumorEntity
     }
 
     void "test configureNoAlignmentDeciderProject"() {

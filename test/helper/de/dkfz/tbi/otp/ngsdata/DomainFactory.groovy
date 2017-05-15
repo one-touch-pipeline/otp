@@ -1839,6 +1839,12 @@ class DomainFactory {
         ], properties)
     }
 
+    static TumorEntity createTumorEntity(Map properties = [:]) {
+        return createDomainObject(TumorEntity, [
+                name: "AML/ALL",
+        ], properties)
+    }
+
     static Map<String, String> createOtpAlignmentProcessingOptions(Map properties = [:]) {
         [
                 createProcessingOption(
