@@ -1,6 +1,5 @@
 $.otp.initialiseSpecificOverview = {
 
-
     /**
      * Boolean shows if descriptionContent is collapsed or not
      */
@@ -18,21 +17,14 @@ $.otp.initialiseSpecificOverview = {
      * either buttons or edit textareas called.
      */
     toggleDescription: function () {
-
         $("#descriptionRow").click(function (e) {
-
             if ($.otp.initialiseSpecificOverview.validateToggle(e)) {
-
                 if ($.otp.initialiseSpecificOverview.descriptionCollapsed == false) {
-
                     $.otp.initialiseSpecificOverview.collapseDescription();
-
                 } else {
-
                     $.otp.initialiseSpecificOverview.expandDescription();
                 }
             }
-
         });
     },
 
@@ -55,8 +47,6 @@ $.otp.initialiseSpecificOverview = {
         $("#descriptionHeader").html('Description ↓');
     },
 
-
-
     /**
      * Validates if the edit Button or the editing textarea is clicked,
      * so no collapse will be initiated.
@@ -73,9 +63,7 @@ $.otp.initialiseSpecificOverview = {
             $.otp.initialiseSpecificOverview.expandDescription();
             return false;
         }
-
     },
-
 
     /**
      * Toggle the boolean that tells if the textarea is clickable at the moment

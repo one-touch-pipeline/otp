@@ -163,7 +163,7 @@ class OtpTagLib {
             return render(template: template, model: model)
         } else {
             // read only
-            return "<div>${model.value}</div>"
+            return "<div><span class='wordBreak' style='white-space: pre-wrap'>${model.value != null ? model.value : ""}</span></div>"
         }
     }
 

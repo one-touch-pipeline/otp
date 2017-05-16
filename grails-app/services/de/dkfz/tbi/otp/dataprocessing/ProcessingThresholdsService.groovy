@@ -1,8 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-
-import org.springframework.security.access.prepost.PreAuthorize
 import de.dkfz.tbi.otp.ngsdata.*
+import org.springframework.security.access.prepost.*
 
 class ProcessingThresholdsService {
 
@@ -34,7 +33,7 @@ class ProcessingThresholdsService {
         return processingThresholds
     }
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'read')")
     ProcessingThresholds findByProjectAndSampleTypeAndSeqType(Project project, SampleType sampleType, SeqType seqType) {
         return ProcessingThresholds.findByProjectAndSampleTypeAndSeqType(project, sampleType, seqType)
     }

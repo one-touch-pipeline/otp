@@ -5,19 +5,24 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <meta name="layout" content="main" />
 <title><g:message code="projectOverview.title" args="[project.name]"/></title>
-    <asset:javascript src="pages/projectOverview/index/datatable.js"/>
-    <asset:javascript src="pages/projectOverview/index/init_description.js"/>
+    <asset:javascript src="pages/projectConfig/index/init_description.js"/>
+    <asset:javascript src="pages/projectConfig/index/functions.js"/>
     <asset:javascript src="modules/editorSwitch"/>
 </head>
 <body>
     <div class="body">
         <div id="projectCommentBox" class="commentBoxContainer">
             <div id="commentLabel">Comment:</div>
-            <textarea id="commentBox">${comment?.comment}</textarea>
-            <div id="commentButtonArea">
-                <button id="saveComment" disabled>&nbsp;&nbsp;&nbsp;<g:message code="commentBox.save" /></button>
-                <button id="cancelComment" disabled><g:message code="commentBox.cancel" /></button>
-            </div>
+            <sec:ifNotGranted roles="ROLE_OPERATOR">
+                <textarea id="commentBox" readonly>${comment?.comment}</textarea>
+            </sec:ifNotGranted>
+            <sec:ifAllGranted roles="ROLE_OPERATOR">
+                <textarea id="commentBox">${comment?.comment}</textarea>
+                <div id="commentButtonArea">
+                    <button id="saveComment" disabled>&nbsp;&nbsp;&nbsp;<g:message code="commentBox.save" /></button>
+                    <button id="cancelComment" disabled><g:message code="commentBox.cancel" /></button>
+                </div>
+            </sec:ifAllGranted>
             <div id="commentDateLabel">${comment?.modificationDate?.format('EEE, d MMM yyyy HH:mm')}</div>
             <div id="commentAuthorLabel">${comment?.author}</div>
         </div>
@@ -41,7 +46,7 @@
                     <td>
                         <otp:editorSwitch
                             roles="ROLE_OPERATOR"
-                            link="${g.createLink(controller: 'projectOverview', action: 'updateAnalysisDirectory', params: ['project.id': project.id])}"
+                            link="${g.createLink(controller: 'projectConfig', action: 'updateAnalysisDirectory', params: ['project.id': project.id])}"
                             value="${analysisDirectory}"/>
                     </td>
                 </tr>
@@ -51,7 +56,7 @@
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
                                 template="dropDown"
-                                link="${g.createLink(controller: "projectOverview", action: "updateProcessingPriority", params: ['project.id': project.id])}"
+                                link="${g.createLink(controller: 'projectConfig', action: "updateProcessingPriority", params: ['project.id': project.id])}"
                                 values="${processingPriorities}"
                                 value="${(project.processingPriority == 0) ? "NORMAL" : "FAST_TRACK"}"/>
                     </td>
@@ -61,7 +66,7 @@
                     <td>
                         <otp:editorSwitchCheckboxes
                                 roles="ROLE_OPERATOR"
-                                link="${g.createLink(controller: 'projectOverview', action: 'updateCategory', params: ['project.id': project.id])}"
+                                link="${g.createLink(controller: 'projectConfig', action: 'updateCategory', params: ['project.id': project.id])}"
                                 availableValues="${projectCategories*.name}"
                                 selectedValues="${project.projectCategories*.name}"/>
                     </td>
@@ -71,7 +76,7 @@
                     <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
-                                link="${g.createLink(controller: 'projectOverview', action: 'updateNameInMetadataFiles', params: ['project.id': project.id])}"
+                                link="${g.createLink(controller: 'projectConfig', action: 'updateNameInMetadataFiles', params: ['project.id': project.id])}"
                                 value="${nameInMetadata}"/>
                     </td>
                 </tr>
@@ -89,7 +94,7 @@
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
                                 template="dropDown"
-                                link="${g.createLink(controller: "projectOverview", action: "updateFingerPrinting", id: project.id)}"
+                                link="${g.createLink(controller: 'projectConfig', action: "updateFingerPrinting", id: project.id)}"
                                 values="${["true","false"]}"
                                 value="${fingerPrinting}"/>
                     </td>
@@ -99,7 +104,7 @@
                     <td>
                         <otp:editorSwitch
                             roles="ROLE_OPERATOR"
-                            link="${g.createLink(controller: 'projectOverview', action: 'updateMailingListName', params: ['project.id': project.id])}"
+                            link="${g.createLink(controller: 'projectConfig', action: 'updateMailingListName', params: ['project.id': project.id])}"
                             value="${mailingListName}"/>
                     </td>
                 </tr>
@@ -109,7 +114,7 @@
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
                                 template="textArea"
-                                link="${g.createLink(controller: 'projectOverview', action: 'updateDescription', params: ['project.id': project.id])}"
+                                link="${g.createLink(controller: 'projectConfig', action: 'updateDescription', params: ['project.id': project.id])}"
                                 value="${description}"/>
                     </td>
                 </tr>
@@ -122,7 +127,7 @@
                     <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
-                                link="${g.createLink(controller: 'projectOverview', action: 'updateCostCenter', params: ['project.id': project.id])}"
+                                link="${g.createLink(controller: 'projectConfig', action: 'updateCostCenter', params: ['project.id': project.id])}"
                                 value="${costCenter}"/>
                     </td>
                 </tr>
@@ -139,28 +144,30 @@
                     <th><g:message code="projectOverview.contactPerson.email"/></th>
                     <th><g:message code="projectOverview.contactPerson.aspera"/></th>
                     <th><g:message code="projectOverview.contactPerson.role"/></th>
-                    <th></th>
+                    <sec:ifAllGranted roles="ROLE_OPERATOR">
+                        <th></th>
+                    </sec:ifAllGranted>
                 </tr>
                <g:each in="${projectContactPersons}" var="projectContactPerson">
                     <tr>
                         <td>
                             <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
-                                link="${g.createLink(controller: 'projectOverview', action: 'updateName', params: ["contactPerson.id": projectContactPerson.contactPerson.id])}"
+                                link="${g.createLink(controller: 'projectConfig', action: 'updateName', params: ["contactPerson.id": projectContactPerson.contactPerson.id])}"
                                 value="${projectContactPerson.contactPerson.fullName}"
                                 values="${projectContactPersons}"/>
                         </td>
                         <td>
                             <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
-                                link="${g.createLink(controller: 'projectOverview', action: 'updateEmail', params: ["contactPerson.id": projectContactPerson.contactPerson.id])}"
+                                link="${g.createLink(controller: 'projectConfig', action: 'updateEmail', params: ["contactPerson.id": projectContactPerson.contactPerson.id])}"
                                 value="${projectContactPerson.contactPerson.email}"
                                 values="${projectContactPersons}"/>
                         </td>
                         <td>
                             <otp:editorSwitch
                                     roles="ROLE_OPERATOR"
-                                    link="${g.createLink(controller: 'projectOverview', action: 'updateAspera', params: ["contactPerson.id": projectContactPerson.contactPerson.id])}"
+                                    link="${g.createLink(controller: 'projectConfig', action: 'updateAspera', params: ["contactPerson.id": projectContactPerson.contactPerson.id])}"
                                     value="${projectContactPerson.contactPerson.aspera}"
                                     values="${projectContactPersons}"/>
                         </td>
@@ -168,11 +175,15 @@
                             <otp:editorSwitch
                                     roles="ROLE_OPERATOR"
                                     template="dropDown"
-                                    link="${g.createLink(controller: 'projectOverview', action: 'updateRole', params: ["projectContactPerson.id": projectContactPerson.id])}"
+                                    link="${g.createLink(controller: 'projectConfig', action: 'updateRole', params: ["projectContactPerson.id": projectContactPerson.id])}"
                                     value="${projectContactPerson.contactPersonRole?.name ?: ''} "
                                     values="${roleDropDown}"/>
                         </td>
-                        <td><input type="button" class="deletePerson" value="Delete" data-id="${projectContactPerson.id}"/></td>
+                        <sec:ifAllGranted roles="ROLE_OPERATOR">
+                            <td>
+                                <input type="button" class="deletePerson" value="Delete" data-id="${projectContactPerson.id}"/>
+                            </td>
+                        </sec:ifAllGranted>
                     </tr>
                </g:each>
             </table>
@@ -183,41 +194,46 @@
                     labels="${["Name", "E-Mail", "Aspera Account", "Role"]}"
                     textFields="${["name", "email", "aspera"]}"
                     dropDowns="${[role: roleDropDown]}"
-                    link="${g.createLink(controller: "projectOverview", action: "createContactPersonOrAddProject", params: ['project.id': project.id])}"
+                    link="${g.createLink(controller: 'projectConfig', action: "createContactPersonOrAddProject", params: ['project.id': project.id])}"
             />
         </p>
-        <br>
-        <div>
-            <h3><g:message code="projectOverview.accessPerson.headline" /></h3>
-            <ul>
-                <g:each in="${accessPersons}">
-                    <li>
-                        ${it}
-                    </li>
-                </g:each>
-            </ul>
-        </div>
-        <div>
-            <h3>${g.message(code: 'projectOverview.alignmentInformation.title')}</h3>
-            <div class="show_button">
-                <g:message code="projectOverview.alignmentInformation.configure"/>
-                <ul>
-                    <g:each in="${seqTypes}" var="seqType">
+        <sec:ifAllGranted roles="ROLE_OPERATOR">
+            <br>
+            <div>
+                <h3><g:message code="projectOverview.accessPerson.headline" /></h3>
+                <a id="toggleLink" href="javascript:void(0)" onclick="$.otp.projectConfig.toggle('controlElement', 'toggleLink')">Show list</a>
+                <ul id="controlElement" style="display: none">
+                    <g:each in="${accessPersons}">
                         <li>
-                            <g:if test="${seqType.displayName == "RNA"}">
-                                <g:link controller='configurePipeline' action='rnaAlignment' params='["project.id": project.id, "seqType.id": seqType.id]' class="configure">
-                                    ${seqType.displayName}
-                                </g:link>
-                            </g:if>
-                            <g:else>
-                                <g:link controller='configurePipeline' action='alignment' params='["project.id": project.id, "seqType.id": seqType.id]' class="configure">
-                                    ${seqType.displayName}
-                                </g:link>
-                            </g:else>
+                            ${it}
                         </li>
                     </g:each>
                 </ul>
             </div>
+        </sec:ifAllGranted>
+        <div>
+            <h3>${g.message(code: 'projectOverview.alignmentInformation.title')}</h3>
+            <sec:ifAllGranted roles="ROLE_OPERATOR">
+                <div class="show_button">
+                    <g:message code="projectOverview.alignmentInformation.configure"/>
+                    <ul>
+                        <g:each in="${seqTypes}" var="seqType">
+                            <li>
+                                <g:if test="${seqType.displayName == "RNA"}">
+                                    <g:link controller='configurePipeline' action='rnaAlignment' params='["project.id": project.id, "seqType.id": seqType.id]' class="configure">
+                                        ${seqType.displayName}
+                                    </g:link>
+                                </g:if>
+                                <g:else>
+                                    <g:link controller='configurePipeline' action='alignment' params='["project.id": project.id, "seqType.id": seqType.id]' class="configure">
+                                        ${seqType.displayName}
+                                    </g:link>
+                                </g:else>
+                            </li>
+                        </g:each>
+                    </ul>
+                </div>
+            </sec:ifAllGranted>
             <div id="alignment_info">
                 <table style="visibility: hidden" id="alignment_info_table">
                      <tr>
@@ -245,13 +261,15 @@
         <br>
         <div>
             <h3>${g.message(code: 'projectOverview.analysis.title')}</h3>
-            <ul>
-                <li>
-                    <g:link controller='configureAnalysis' params='["project.id": project.id]' class="configure">
-                        ${g.message(code: 'projectOverview.analysis.link')}
-                    </g:link>
-                </li>
-            </ul>
+            <sec:ifAllGranted roles="ROLE_OPERATOR">
+                <ul>
+                    <li>
+                        <g:link controller='configureAnalysis' params='["project.id": project.id]' class="configure">
+                            ${g.message(code: 'projectOverview.analysis.link')}
+                        </g:link>
+                    </li>
+                </ul>
+            </sec:ifAllGranted>
             <g:if test="${thresholdsTable}">
                 <table>
                     <g:each var="row" in="${thresholdsTable}" status="i">
@@ -271,29 +289,31 @@
         </div>
         <div>
             <h3>${g.message(code: 'projectOverview.snv.title')}</h3>
-            <g:message code="projectOverview.snv.configure"/>
-            <ul>
-                <g:each in="${snvSeqTypes}" var="seqType">
-                    <li>
-                        <g:link controller='configurePipeline' action='snv' params='["project.id": project.id, "seqType.id": seqType.id]' class="configure">
-                            ${seqType.displayName}
-                        </g:link>
-                    </li>
-                </g:each>
-            </ul>
-            <table class="snv">
-                <tr>
-                    <td><g:message code="projectOverview.snv"/></td>
-                    <td class="myValue typeDropDown">
-                        <otp:editorSwitch roles="ROLE_OPERATOR"
-                                            template="dropDown"
-                                            link="${g.createLink(controller: 'ProjectOverview', action: 'updateSnv', params: ['project.id': project.id])}"
-                                            values="${snvDropDown}"
-                                            value="${snv}"/>
-                    </td>
-                </tr>
-            </table>
-            <br>
+            <sec:ifAllGranted roles="ROLE_OPERATOR">
+                <g:message code="projectOverview.snv.configure"/>
+                <ul>
+                    <g:each in="${snvSeqTypes}" var="seqType">
+                        <li>
+                            <g:link controller='configurePipeline' action='snv' params='["project.id": project.id, "seqType.id": seqType.id]' class="configure">
+                                ${seqType.displayName}
+                            </g:link>
+                        </li>
+                    </g:each>
+                </ul>
+                <table class="snv">
+                    <tr>
+                        <td><g:message code="projectOverview.snv"/></td>
+                        <td class="myValue typeDropDown">
+                            <otp:editorSwitch roles="ROLE_OPERATOR"
+                                              template="dropDown"
+                                              link="${g.createLink(controller: 'projectConfig', action: 'updateSnv', params: ['project.id': project.id])}"
+                                              values="${snvDropDown}"
+                                              value="${snv}"/>
+                        </td>
+                    </tr>
+                </table>
+                <br>
+            </sec:ifAllGranted>
             <table>
                 <g:each var="row" in="${snvConfigTable}" status="i">
                     <tr>
@@ -312,16 +332,18 @@
         </div>
         <div>
             <h3>${g.message(code: 'projectOverview.indel.title')}</h3>
-            <g:message code="projectOverview.indel.configure"/>
-            <ul>
-                <g:each in="${indelSeqTypes}" var="seqType">
-                    <li>
-                        <g:link controller='configurePipeline' action='indel' params='["project.id": project.id, "seqType.id": seqType.id]' class="configure">
-                            ${seqType.displayName}
-                        </g:link>
-                    </li>
-                </g:each>
-            </ul>
+            <sec:ifAllGranted roles="ROLE_OPERATOR">
+                <g:message code="projectOverview.indel.configure"/>
+                <ul>
+                    <g:each in="${indelSeqTypes}" var="seqType">
+                        <li>
+                            <g:link controller='configurePipeline' action='indel' params='["project.id": project.id, "seqType.id": seqType.id]' class="configure">
+                                ${seqType.displayName}
+                            </g:link>
+                        </li>
+                    </g:each>
+                </ul>
+            </sec:ifAllGranted>
             <table>
                 <g:each var="row" in="${indelConfigTable}" status="i">
                     <tr>
@@ -340,21 +362,23 @@
         </div>
         <div>
             <h3>${g.message(code: 'projectOverview.sophia.title')}</h3>
-            <g:message code="projectOverview.sophia.configure"/>
-            <ul>
-                <li>
-                    <g:if test="${!checkSophiaReferenceGenome}">
-                        <g:each in="${sophiaSeqType}" var="seqType">
-                            <g:link controller='configurePipeline' action='sophia' params='["project.id": project.id, "seqType.id": seqType.id]' class="configure">
-                                ${seqType.displayName}
-                            </g:link>
-                        </g:each>
-                    </g:if>
-                    <g:else>
-                        ${checkSophiaReferenceGenome}
-                    </g:else>
-                </li>
-            </ul>
+            <sec:ifAllGranted roles="ROLE_OPERATOR">
+                <g:message code="projectOverview.sophia.configure"/>
+                <ul>
+                    <li>
+                        <g:if test="${!checkSophiaReferenceGenome}">
+                            <g:each in="${sophiaSeqType}" var="seqType">
+                                <g:link controller='configurePipeline' action='sophia' params='["project.id": project.id, "seqType.id": seqType.id]' class="configure">
+                                    ${seqType.displayName}
+                                </g:link>
+                            </g:each>
+                        </g:if>
+                        <g:else>
+                            ${checkSophiaReferenceGenome}
+                        </g:else>
+                    </li>
+                </ul>
+            </sec:ifAllGranted>
             <table>
                 <g:each var="row" in="${sophiaConfigTable}" status="i">
                     <tr>
@@ -373,21 +397,23 @@
         </div>
         <div>
             <h3>${g.message(code: 'projectOverview.aceseq.title')}</h3>
-            <g:message code="projectOverview.aceseq.configure"/>
-            <ul>
-                <li>
-                    <g:if test="${!checkAceseqReferenceGenome}">
-                        <g:each in="${aceseqSeqType}" var="seqType">
-                            <g:link controller='configurePipeline' action='aceseq' params='["project.id": project.id, "seqType.id": seqType.id]' class="configure">
-                                ${seqType.displayName}
-                            </g:link>
-                        </g:each>
-                    </g:if>
-                    <g:else>
-                        ${checkAceseqReferenceGenome}
-                    </g:else>
-                </li>
-            </ul>
+            <sec:ifAllGranted roles="ROLE_OPERATOR">
+                <g:message code="projectOverview.aceseq.configure"/>
+                <ul>
+                    <li>
+                        <g:if test="${!checkAceseqReferenceGenome}">
+                            <g:each in="${aceseqSeqType}" var="seqType">
+                                <g:link controller='configurePipeline' action='aceseq' params='["project.id": project.id, "seqType.id": seqType.id]' class="configure">
+                                    ${seqType.displayName}
+                                </g:link>
+                            </g:each>
+                        </g:if>
+                        <g:else>
+                            ${checkAceseqReferenceGenome}
+                        </g:else>
+                    </li>
+                </ul>
+            </sec:ifAllGranted>
             <table>
                 <g:each var="row" in="${aceseqConfigTable}" status="i">
                     <tr>
@@ -407,11 +433,11 @@
     </div>
     <asset:script>
         $(function() {
-            $.otp.projectOverviewTable.referenceGenome();
-            $.otp.projectOverviewTable.asynchronCallAlignmentInfo();
+            $.otp.projectConfig.referenceGenome();
+            $.otp.projectConfig.asynchronousCallAlignmentInfo();
+            $.otp.projectConfig.deleteUser();
             $.otp.initialiseSpecificOverview.toggleDescription();
             $.otp.initCommentBox(${project.id}, "#projectCommentBox");
-            $.otp.projectOverviewTable.deleteUser();
             $("#descriptionContent").children().css('height', '3em');
             $("#descriptionContent").find(':button').css('display', 'block');
         });

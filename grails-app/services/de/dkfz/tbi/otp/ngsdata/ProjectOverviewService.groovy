@@ -580,7 +580,7 @@ where
         JOIN acl_entry ON acl_sid.id = acl_entry.sid
         JOIN acl_object_identity ON acl_entry.acl_object_identity = acl_object_identity.id
         JOIN acl_class ON acl_object_identity.object_id_class = acl_class.id
-        WHERE object_id_identity = :projectId AND acl_class.class = :className AND NOT r.authority = 'GROUP_CO'
+        WHERE object_id_identity = :projectId AND acl_class.class = :className
         GROUP BY username ORDER BY username
         """
         List accessPersons = []
@@ -588,7 +588,6 @@ where
         sql.eachRow(query, [projectId: project.id, className: Project.name]){
             accessPersons.add(it.username)
         }
-        accessPersons.add("All members of CO group")
         return accessPersons
     }
 }

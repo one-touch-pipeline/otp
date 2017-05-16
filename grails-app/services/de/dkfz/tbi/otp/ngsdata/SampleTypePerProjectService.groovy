@@ -1,13 +1,13 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.security.access.prepost.*
 
 class SampleTypePerProjectService {
 
     /**
      * @return SampleTypePerProject for a given Project
      */
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'read')")
     public List<SampleTypePerProject> findByProject(Project project) {
         return SampleTypePerProject.findAllByProject(project)
     }
