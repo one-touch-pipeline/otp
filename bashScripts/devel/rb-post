@@ -9,7 +9,7 @@ then
 fi
 rbt_request=$(rbt post -g $RB_OPTS --branch "`git merge-base --fork-point origin/master`" | egrep '^http://***REMOVED***reviewboard\.dkfz\.de/reviews/r/[0-9]+/$')
 echo $rbt_request
-if [$rbt_request == "" || $RB_OPTS == ""]
+if [ "$rbt_request" == "" -o "$RB_OPTS" == "" ]
 then
     echo ""
     exit 1
