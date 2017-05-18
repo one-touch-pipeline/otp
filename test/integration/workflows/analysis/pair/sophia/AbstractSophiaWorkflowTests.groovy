@@ -4,6 +4,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddy.*
 import de.dkfz.tbi.otp.dataprocessing.sophia.*
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import grails.plugin.springsecurity.*
 import org.joda.time.*
 import workflows.analysis.pair.*
@@ -97,12 +98,12 @@ abstract class AbstractSophiaWorkflowTests extends AbstractRoddyBamFilePairAnaly
 
     @Override
     List<File> filesToCheck(SophiaInstance sophiaInstance) {
-        return [sophiaInstance.getFinalAceseqInputFile()]
+        return [sophiaInstance.getFinalAceseqInputFile(), sophiaInstance.getQcJsonFile()]
     }
 
     @Override
     void checkAnalysisSpecific(SophiaInstance sophiaInstance) {
-
+        CollectionUtils.exactlyOneElement(SophiaQc.findAllBySophiaInstance(sophiaInstance))
     }
 
     @Override

@@ -2278,6 +2278,22 @@ samplePairsNotProcessed: ${samplePairsNotProcessed}
 """ }
 
 
+    static void createSophiaQcFileOnFileSystem(File qcFile) {
+        qcFile.parentFile.mkdirs()
+        qcFile << """\
+{
+  "all": {
+    "controlMassiveInvPrefilteringLevel": 0,
+    "tumorMassiveInvFiteringLevel": 0,
+    "rnaContaminatedGenesMoreThanTwoIntron": "PRKRA;ACTG2;TYRO3;COL18A1;",
+    "rnaContaminatedGenesCount": 4,
+    "rnaDecontaminationApplied": false
+  }
+}
+"""
+    }
+
+
     public static void createAclObjects(Object domainObject, Map properties = [:]) {
         AclObjectIdentity aclObjectIdentity = createDomainObject(AclObjectIdentity, [objectId: domainObject.id, aclClass: {createDomainObject(AclClass, [className: domainObject.class.name], [:])}], [:])
         createDomainObject(AclEntry, [aclObjectIdentity: aclObjectIdentity, sid: {createDomainObject(AclSid, [sid: "ROLE_ADMIN"], properties)}], [:])

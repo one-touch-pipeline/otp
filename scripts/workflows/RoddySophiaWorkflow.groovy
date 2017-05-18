@@ -8,6 +8,7 @@ String workflowName = "SophiaWorkflow"
 plan(workflowName, ctx, true) {
     start("roddySophiaStart", "roddySophiaStartJob")
     job("executeRoddySophia", "executeRoddySophiaJob")
+    job("parseSophiaQc", "parseSophiaQcJob")
     job("notifyProcessFinished", "notifyProcessFinishedJob") {
         constantParameter("step", OtrsTicket.ProcessingStep.SOPHIA.name())
     }
