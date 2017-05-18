@@ -2,9 +2,10 @@ package workflows.analysis.pair.sophia
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddy.*
+import de.dkfz.tbi.otp.dataprocessing.sophia.*
 import de.dkfz.tbi.otp.ngsdata.*
 import grails.plugin.springsecurity.*
-import org.joda.time.Duration
+import org.joda.time.*
 import workflows.analysis.pair.*
 
 abstract class AbstractSophiaWorkflowTests extends AbstractRoddyBamFilePairAnalysisWorkflowTests<SophiaInstance> {

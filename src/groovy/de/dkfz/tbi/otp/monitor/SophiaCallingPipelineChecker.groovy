@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.monitor
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.sophia.*
 
 class SophiaCallingPipelineChecker extends AbstractVariantCallingPipelineChecker {
 

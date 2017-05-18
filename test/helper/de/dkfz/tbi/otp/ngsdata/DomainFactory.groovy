@@ -7,6 +7,7 @@ import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
+import de.dkfz.tbi.otp.dataprocessing.sophia.*
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.*
 import de.dkfz.tbi.otp.job.jobs.snvcalling.*
@@ -1017,6 +1018,19 @@ class DomainFactory {
                 instanceName: "instance-${counter++}",
                 config: createRoddyWorkflowConfig([pipeline: createSophiaPipelineLazy()]),
         ], [:])
+    }
+
+    public static SophiaQc createSophiaQc(Map properties) {
+        return createDomainObject(SophiaQc, [
+
+                sophiaInstance: { createSophiaInstanceWithRoddyBamFiles() },
+                controlMassiveInvPrefilteringLevel: 1,
+                tumorMassiveInvFiteringLevel: 1,
+                rnaContaminatedGenesMoreThanTwoIntron: "arbitraryGeneName",
+                rnaContaminatedGenesCount: 1,
+                rnaDecontaminationApplied: true,
+
+        ], properties)
     }
 
     public static AceseqInstance createAceseqInstance(Map properties) {

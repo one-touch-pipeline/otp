@@ -1,5 +1,6 @@
-package de.dkfz.tbi.otp.dataprocessing
+package de.dkfz.tbi.otp.dataprocessing.sophia
 
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.ngsdata.*
@@ -8,7 +9,6 @@ import grails.test.mixin.*
 import org.junit.*
 import org.junit.rules.*
 import spock.lang.*
-
 
 @Mock([
         DataFile,
@@ -36,7 +36,8 @@ import spock.lang.*
         SeqPlatformGroup,
         SeqTrack,
         SeqType,
-        SoftwareTool
+        SoftwareTool,
+        SophiaInstance,
 ])
 class SophiaInstanceSpec extends Specification {
     @Rule
