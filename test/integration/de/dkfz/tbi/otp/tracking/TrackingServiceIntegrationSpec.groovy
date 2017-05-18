@@ -362,6 +362,79 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         ticket.finalNotificationSent
     }
 
+    void "setFinishedTimestampsAndNotify, when alignment is finished but installation is not, don't send notification"() {
+        given:
+        // Installation: finished timestamp not set, all done,     won't do more
+        // FastQC:       finished timestamp not set, all done,     won't do more
+        // Alignment:    finished timestamp not set, partly done,  won't do more
+        // SNV:          finished timestamp not set, nothing done, won't do more
+        OtrsTicket ticket = DomainFactory.createOtrsTicket()
+        RunSegment runSegment = DomainFactory.createRunSegment(otrsTicket: ticket)
+        SeqTrack seqTrack1 = DomainFactory.createSeqTrackWithOneDataFile(
+                [
+                        dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
+                        fastqcState: SeqTrack.DataProcessingState.FINISHED,
+                ],
+                [runSegment: runSegment, fileLinked: true])
+        SeqTrack seqTrack2 = DomainFactory.createSeqTrackWithOneDataFile([
+                sample: DomainFactory.createSample(individual: DomainFactory.createIndividual(project: seqTrack1.project)),
+                dataInstallationState: SeqTrack.DataProcessingState.IN_PROGRESS,
+                fastqcState: SeqTrack.DataProcessingState.NOT_STARTED,
+                run: DomainFactory.createRun(
+                        seqPlatform: DomainFactory.createSeqPlatform(
+                                seqPlatformGroup: DomainFactory.createSeqPlatformGroup(),
+                        ),
+                ),
+        ],
+                [runSegment: runSegment, fileLinked: true]
+        )
+        setBamFileInProjectFolder(DomainFactory.createRoddyBamFile(
+                DomainFactory.createRoddyBamFile([
+                        workPackage: DomainFactory.createMergingWorkPackage(
+                                MergingWorkPackage.getMergingProperties(seqTrack2) +
+                                        [pipeline: DomainFactory.createPanCanPipeline()]
+                        )
+                ]),
+                DomainFactory.randomProcessedBamFileProperties + [seqTracks: [seqTrack2] as Set],
+        ))
+        ProcessingStatus expectedStatus = [
+                getInstallationProcessingStatus: { -> ALL_DONE },
+                getFastqcProcessingStatus: { -> ALL_DONE },
+                getAlignmentProcessingStatus: { -> PARTLY_DONE_WONT_DO_MORE },
+                getSnvProcessingStatus: { -> NOTHING_DONE_WONT_DO },
+        ] as ProcessingStatus
+
+        String prefix = "the prefix"
+        DomainFactory.createProcessingOptionForOtrsTicketPrefix(prefix)
+
+        String otrsRecipient = HelperUtils.uniqueString
+        String notificationText1 = HelperUtils.uniqueString
+        String notificationText2 = HelperUtils.uniqueString
+
+        String expectedEmailSubjectOperator = "${prefix}#${ticket.ticketNumber} Final Processing Status Update"
+        String expectedEmailSubjectCustomer = "[${prefix}#${ticket.ticketNumber}] TO BE SENT: ${seqTrack1.project.name} sequencing data "
+        String expectedEmailSubjectCustomer1 = expectedEmailSubjectCustomer + OtrsTicket.ProcessingStep.INSTALLATION.notificationSubject
+        String expectedEmailSubjectCustomer2 = expectedEmailSubjectCustomer + OtrsTicket.ProcessingStep.ALIGNMENT.notificationSubject
+
+        trackingService.mailHelperService = Mock(MailHelperService) {
+            getOtrsRecipient() >> otrsRecipient
+            0 * _
+        }
+
+        trackingService.createNotificationTextService = Mock(CreateNotificationTextService) {
+            0 * notification(_, _, _)
+        }
+
+        when:
+        trackingService.setFinishedTimestampsAndNotify(ticket, new SamplePairDiscovery())
+
+        then:
+        ticket.installationFinished == null
+        ticket.alignmentFinished == null
+        ticket.fastqcFinished == null
+        ticket.snvFinished == null
+        !ticket.finalNotificationSent
+    }
 
     private static final String OTRS_RECIPIENT = HelperUtils.uniqueString
 

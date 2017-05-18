@@ -111,7 +111,8 @@ class TrackingService {
         boolean mightDoMore = false
         for (OtrsTicket.ProcessingStep step : OtrsTicket.ProcessingStep.values()) {
             WorkflowProcessingStatus stepStatus = status."${step}ProcessingStatus"
-            if (ticket."${step}Finished" == null && stepStatus.done != NOTHING && !stepStatus.mightDoMore) {
+            boolean previousStepFinished = step.dependsOn ? (ticket."${step.dependsOn}Finished" != null) : true
+            if (ticket."${step}Finished" == null && stepStatus.done != NOTHING && !stepStatus.mightDoMore && previousStepFinished) {
                 anythingJustCompleted = true
                 ticket."${step}Finished" = now
                 sendCustomerNotification(ticket, status, step)

@@ -12,14 +12,13 @@ class OtrsTicket implements Commentable, Entity {
 
     @TupleConstructor
     enum ProcessingStep {
-        INSTALLATION('installation', 'installed'),
-        FASTQC('FastQC', null),
-        ALIGNMENT('alignment', 'aligned'),
-        SNV('SNV calling', 'SNV-called'),
-        INDEL('Indel calling', 'Indel-called'),
-        SOPHIA("SV calling", "SV-called"),
-        ACESEQ('CNV calling', 'CNV-called')
-
+        INSTALLATION('installation', 'installed', null),
+        FASTQC('FastQC', null, INSTALLATION),
+        ALIGNMENT('alignment', 'aligned', INSTALLATION),
+        SNV('SNV calling', 'SNV-called', ALIGNMENT),
+        INDEL('Indel calling', 'Indel-called', ALIGNMENT),
+        SOPHIA('SV calling', 'SV-called', ALIGNMENT),
+        ACESEQ('CNV calling', 'CNV-called', SOPHIA)
         final String displayName
         /**
          * Will be used in the subject of notification e-mails: "sequencing data ${notificationSubject}"
@@ -27,6 +26,8 @@ class OtrsTicket implements Commentable, Entity {
          * {@code null} means that no notification shall be sent for this step
          */
         final String notificationSubject
+
+        final ProcessingStep dependsOn
 
         public String toString() {
             return name().toLowerCase(Locale.ENGLISH)
