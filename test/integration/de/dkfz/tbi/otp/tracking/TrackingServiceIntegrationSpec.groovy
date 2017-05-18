@@ -154,7 +154,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         }
 
         when:
-        trackingService.processFinished([seqTrackA, seqTrackB1] as Set, OtrsTicket.ProcessingStep.FASTQC)
+        trackingService.processFinished([seqTrackA, seqTrackB1] as Set)
 
         then:
         ticketA.installationFinished != null

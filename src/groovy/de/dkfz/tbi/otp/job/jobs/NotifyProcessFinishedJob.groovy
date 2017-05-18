@@ -11,8 +11,7 @@ class NotifyProcessFinishedJob extends AbstractEndStateAwareJobImpl implements A
 
     @Override
     public void execute() throws Exception {
-        String step = getParameterValueOrClass("step")
-        trackingService.processFinished(processParameterObject.containedSeqTracks, OtrsTicket.ProcessingStep.valueOf(step))
+        trackingService.processFinished(processParameterObject.containedSeqTracks)
         succeed()
     }
 }

@@ -1,9 +1,7 @@
-import de.dkfz.tbi.otp.job.jobs.dataInstallation.CopyFilesJob
-import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
-import de.dkfz.tbi.otp.tracking.OtrsTicket
+import de.dkfz.tbi.otp.job.jobs.dataInstallation.*
+import de.dkfz.tbi.otp.job.processing.*
 
-import static de.dkfz.tbi.otp.job.processing.PbsOptionMergingService.PBS_PREFIX
-
+import static de.dkfz.tbi.otp.job.processing.PbsOptionMergingService.*
 import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
 
 String workflow = 'DataInstallationWorkflow'
@@ -12,9 +10,7 @@ plan(workflow) {
     start("start", "dataInstallationStartJob")
     job("copyFilesToFinalLocation", "copyFilesJob")
     job("createViewByPid", "createViewByPidJob")
-    job("notifyProcessFinished", "notifyProcessFinishedJob") {
-        constantParameter("step", OtrsTicket.ProcessingStep.INSTALLATION.name())
-    }
+    job("notifyProcessFinished", "notifyProcessFinishedJob")
 }
 
 

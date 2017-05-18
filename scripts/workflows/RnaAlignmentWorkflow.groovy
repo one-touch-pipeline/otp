@@ -1,5 +1,4 @@
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.tracking.*
 
 import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
 
@@ -10,9 +9,7 @@ plan(workflowName, ctx, true) {
     job("executeRnaAlignment", "executeRnaAlignmentJob")
     job("parseRnaAlignmentQc", "parseRnaAlignmentQcJob")
     job("linkRnaAlignmentFilesToFinalDestination", "linkRnaAlignmentFilesToFinalDestinationJob")
-    job("notifyProcessFinished", "notifyProcessFinishedJob") {
-        constantParameter("step", OtrsTicket.ProcessingStep.ALIGNMENT.name())
-    }
+    job("notifyProcessFinished", "notifyProcessFinishedJob")
 }
 
 println ctx.processingOptionService.createOrUpdate(AbstractStartJobImpl.TOTAL_SLOTS_OPTION_NAME, workflowName, null, '5', '')

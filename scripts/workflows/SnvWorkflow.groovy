@@ -1,11 +1,9 @@
-import static de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl.SLOTS_RESERVED_FOR_FAST_TRACK_OPTION_NAME
-import static de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl.TOTAL_SLOTS_OPTION_NAME
-import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
-import static de.dkfz.tbi.otp.job.processing.PbsOptionMergingService.PBS_PREFIX
-import de.dkfz.tbi.otp.tracking.OtrsTicket
-
 import de.dkfz.tbi.otp.job.jobs.snvcalling.*
-import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.*
+
+import static de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl.*
+import static de.dkfz.tbi.otp.job.processing.PbsOptionMergingService.*
+import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
 
 String workflowName = "SnvWorkflow"
 
@@ -17,9 +15,7 @@ plan(workflowName) {
     job("snvDeepAnnotation", "snvDeepAnnotationJob")
     job("filterVcf", "filterVcfJob")
     job("snvCompletion", "snvCompletionJob")
-    job("notifyProcessFinished", "notifyProcessFinishedJob") {
-        constantParameter("step", OtrsTicket.ProcessingStep.SNV.name())
-    }
+    job("notifyProcessFinished", "notifyProcessFinishedJob")
 }
 
 String exome = SeqType.exomePairedSeqType.processingOptionName

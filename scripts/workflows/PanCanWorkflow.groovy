@@ -1,7 +1,6 @@
-import de.dkfz.tbi.otp.tracking.OtrsTicket
+import de.dkfz.tbi.otp.job.processing.*
 
 import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
-import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl;
 
 String workflow = "PanCanWorkflow"
 
@@ -10,9 +9,7 @@ plan(workflow, ctx, true) {
     job("executePanCan", "executePanCanJob")
     job("parsePanCanQc", "parsePanCanQcJob")
     job("movePanCanFilesToFinalDestination", "movePanCanFilesToFinalDestinationJob")
-    job("notifyProcessFinished", "notifyProcessFinishedJob") {
-        constantParameter("step", OtrsTicket.ProcessingStep.ALIGNMENT.name())
-    }
+    job("notifyProcessFinished", "notifyProcessFinishedJob")
 }
 
 println ctx.processingOptionService.createOrUpdate(AbstractStartJobImpl.TOTAL_SLOTS_OPTION_NAME, workflow, null, '5', '')

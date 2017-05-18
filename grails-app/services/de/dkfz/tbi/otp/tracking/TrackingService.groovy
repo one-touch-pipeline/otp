@@ -93,7 +93,7 @@ class TrackingService {
         }
     }
 
-    public void processFinished(Set<SeqTrack> seqTracks, OtrsTicket.ProcessingStep step) {
+    public void processFinished(Set<SeqTrack> seqTracks) {
         SamplePairDiscovery samplePairDiscovery = new SamplePairDiscovery()
         for (OtrsTicket ticket : findAllOtrsTickets(seqTracks)) {
             setFinishedTimestampsAndNotify(ticket, samplePairDiscovery)
