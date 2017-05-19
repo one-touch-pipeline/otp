@@ -14,17 +14,17 @@
             <div class="otpDataTables">
                 <otp:dataTable
                     codes="${[
-                        'projectOverview.index.PID',
-                        'analysis.sampleTypes',
-                        'aceseq.normalContamination',
-                        'aceseq.ploidy',
-                        'aceseq.ploidyFactor',
-                        'aceseq.goodnessOfFit',
-                        'aceseq.gender',
-                        'aceseq.solutionPossible',
-                        'analysis.processingDate',
-                        'analysis.progress',
-                        'analysis.plots',
+                            'projectOverview.index.PID',
+                            'analysis.sampleTypes',
+                            'aceseq.tcc',
+                            'aceseq.ploidy',
+                            'aceseq.ploidyFactor',
+                            'aceseq.goodnessOfFit',
+                            'aceseq.gender',
+                            'aceseq.solutionPossible',
+                            'analysis.processingDate',
+                            'analysis.progress',
+                            'analysis.plots',
                     ] }"
                     id="resultsTable" />
             </div>

@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.dataprocessing.sophia
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
@@ -46,6 +47,10 @@ class SophiaInstance extends BamFilePairAnalysis implements ProcessParameterObje
     }
 
     File getQcJsonFile() {
-       return new File(getInstancePath().absoluteDataManagementPath, QUALITY_CONTROL_JSON_FILE_NAME)
+        return new File(getInstancePath().absoluteDataManagementPath, QUALITY_CONTROL_JSON_FILE_NAME)
+    }
+
+    static SophiaInstance getLatestValidSophiaInstanceForSamplePair(SamplePair samplePair) {
+        return SophiaInstance.findBySamplePairAndWithdrawnAndProcessingState(samplePair, false, AnalysisProcessingStates.FINISHED, [max:1, sort: "id", order: "desc"])
     }
 }

@@ -56,7 +56,7 @@ abstract class AbstractExecutePanCanJob<R extends RoddyResult> extends AbstractR
             cValues.add("PBS_AccountName:FASTTRACK")
         }
 
-        return "--cvalues=\"${cValues.join(',')}\""
+        return "--cvalues=\"${cValues.join(',').replace('$', '\\$')}\""
     }
 
 

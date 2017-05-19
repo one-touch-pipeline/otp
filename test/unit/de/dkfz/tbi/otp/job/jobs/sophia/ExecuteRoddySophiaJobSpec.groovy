@@ -143,7 +143,7 @@ class ExecuteRoddySophiaJobSpec extends Specification {
     }
 
 
-    void "validate, when indelCallingInstance is null, throw assert"() {
+    void "validate, when sophiaInstance is null, throw assert"() {
         when:
         new ExecuteRoddySophiaJob().validate(null)
 

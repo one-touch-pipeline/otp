@@ -535,8 +535,6 @@ AND ace.granting = true
                 xmlConfig = roddyConfigTemplate.createConfig(
                         configuration,
                         pipeline.name,
-                        referenceGenome,
-                        referenceGenomeService
                 )
             }
         } else if (pipeline.name == Pipeline.Name.RODDY_SOPHIA) {

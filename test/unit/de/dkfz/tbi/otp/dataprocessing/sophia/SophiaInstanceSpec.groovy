@@ -57,6 +57,8 @@ class SophiaInstanceSpec extends Specification {
         this.instance = DomainFactory.createSophiaInstanceWithRoddyBamFiles()
         instance.project.realmName = realm.name
         instance.project.save(flush: true)
+        instance.processingState = AnalysisProcessingStates.FINISHED
+        assert instance.save(flush: true)
 
         instancePath = new File(
                 temporaryFile, "${instance.project.dirName}/sequencing/${instance.seqType.dirName}/view-by-pid/" +
@@ -83,5 +85,68 @@ class SophiaInstanceSpec extends Specification {
 
         expect:
         instance.getFinalAceseqInputFile() == expectedPath
+    }
+
+
+    void "getLatestValidSophiaInstanceForSamplePair, test if one instance exists, return instance"() {
+        expect:
+        instance == SophiaInstance.getLatestValidSophiaInstanceForSamplePair(instance.samplePair)
+    }
+
+    void "getLatestValidSophiaInstanceForSamplePair, test if no instance exists, return null"() {
+        given:
+        SamplePair samplePair = instance.samplePair
+        instance.delete()
+
+        expect:
+        null == SophiaInstance.getLatestValidSophiaInstanceForSamplePair(samplePair)
+    }
+
+    void "getLatestValidSophiaInstanceForSamplePair, test if two instances exists, return latest instance"() {
+        given:
+        SamplePair samplePair = instance.samplePair
+
+        samplePair.mergingWorkPackage1.bamFileInProjectFolder = instance.sampleType1BamFile
+        assert samplePair.mergingWorkPackage1.save(flush: true)
+        samplePair.mergingWorkPackage2.bamFileInProjectFolder = instance.sampleType2BamFile
+        assert samplePair.mergingWorkPackage2.save(flush: true)
+        SophiaInstance instance2 = DomainFactory.createSophiaInstance(samplePair)
+        instance2.processingState = AnalysisProcessingStates.FINISHED
+        assert instance2.save(flush: true)
+
+        expect:
+        instance2 == SophiaInstance.getLatestValidSophiaInstanceForSamplePair(samplePair)
+    }
+
+    void "getLatestValidSophiaInstanceForSamplePair, test if two instances exists but the latest is withdrawn, return first instance"() {
+        given:
+        SamplePair samplePair = instance.samplePair
+
+        samplePair.mergingWorkPackage1.bamFileInProjectFolder = instance.sampleType1BamFile
+        assert samplePair.mergingWorkPackage1.save(flush: true)
+        samplePair.mergingWorkPackage2.bamFileInProjectFolder = instance.sampleType2BamFile
+        assert samplePair.mergingWorkPackage2.save(flush: true)
+        SophiaInstance instance2 = DomainFactory.createSophiaInstance(samplePair)
+        instance2.withdrawn = true
+        assert instance2.save(flush: true)
+
+        expect:
+        instance == SophiaInstance.getLatestValidSophiaInstanceForSamplePair(samplePair)
+    }
+
+    void "getLatestValidSophiaInstanceForSamplePair, test if two instances exists but the latest not finished yet, return first instance"() {
+        given:
+        SamplePair samplePair = instance.samplePair
+
+        samplePair.mergingWorkPackage1.bamFileInProjectFolder = instance.sampleType1BamFile
+        assert samplePair.mergingWorkPackage1.save(flush: true)
+        samplePair.mergingWorkPackage2.bamFileInProjectFolder = instance.sampleType2BamFile
+        assert samplePair.mergingWorkPackage2.save(flush: true)
+        SophiaInstance instance2 = DomainFactory.createSophiaInstance(samplePair)
+        instance2.processingState = AnalysisProcessingStates.IN_PROGRESS
+        assert instance2.save(flush: true)
+
+        expect:
+        instance == SophiaInstance.getLatestValidSophiaInstanceForSamplePair(samplePair)
     }
 }

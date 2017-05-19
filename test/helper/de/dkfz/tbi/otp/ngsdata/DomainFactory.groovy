@@ -1062,11 +1062,10 @@ class DomainFactory {
         return createDomainObject(AceseqQc, [
                 aceseqInstance: aceseqInstance,
                 number: 1,
-                normalContamination: 1,
+                tcc: 1,
                 ploidyFactor: '1.0',
                 ploidy:1,
                 goodnessOfFit:1,
-                purity:'2.0',
                 gender:'M',
                 solutionPossible: 1,
         ],properties)
@@ -2266,20 +2265,18 @@ samplePairsNotProcessed: ${samplePairsNotProcessed}
     "1":{
         "gender":"male",
         "solutionPossible":"3",
-        "normalContamination":"0.5",
+        "tcc":"0.5",
         "goodnessOfFit":"0.904231625835189",
         "ploidyFactor":"2.27",
         "ploidy":"2",
-        "purity":"2.0"
     },
     "2":{
         "gender":"female",
         "solutionPossible":"4",
-        "normalContamination":"0.7",
+        "tcc":"0.7",
         "goodnessOfFit":"0.12345",
         "ploidyFactor":"1.27",
         "ploidy":"5",
-        "purity":"3.0"
     }
 }
 """ }

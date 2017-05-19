@@ -105,4 +105,15 @@ class CreateRoddyFileHelper {
         CreateFileHelper.createFile(tumorBam.getFinalInsertSizeFile())
         CreateFileHelper.createFile(controlBam.getFinalInsertSizeFile())
     }
+
+    static void createAceseqResultFiles(AceseqInstance aceseqInstance) {
+        CreateFileHelper.createFile(new File(aceseqInstance.workExecutionStoreDirectory, 'someFile'))
+        aceseqInstance.workExecutionDirectories.each {
+            CreateFileHelper.createFile(new File(it, 'someFile'))
+        }
+        aceseqInstance.getAllFiles().each { File plot ->
+            CreateFileHelper.createFile(plot)
+        }
+
+    }
 }

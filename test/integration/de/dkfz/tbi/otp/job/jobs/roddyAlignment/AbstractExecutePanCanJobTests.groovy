@@ -24,6 +24,8 @@ class AbstractExecutePanCanJobTests {
     File featureTogglesConfigPath
     File referenceGenomeFile
 
+    String workflowSpecificCValues = "workflowSpecificCValues"
+
     @Rule
     public TemporaryFolder tmpDir = new TemporaryFolder()
 
@@ -41,7 +43,7 @@ class AbstractExecutePanCanJobTests {
         Realm dataProcessing = DomainFactory.createRealmDataProcessing(tmpDir.root, [name: roddyBamFile.project.realmName, roddyUser: HelperUtils.uniqueString])
         dataManagement = DomainFactory.createRealmDataManagement(tmpDir.root, [name: roddyBamFile.project.realmName])
         abstractExecutePanCanJob = [
-                prepareAndReturnWorkflowSpecificCValues  : { RoddyBamFile bamFile -> ["workflowSpecificCValues"] },
+                prepareAndReturnWorkflowSpecificCValues  : { RoddyBamFile bamFile -> ["${workflowSpecificCValues}"] },
                 prepareAndReturnWorkflowSpecificParameter: { RoddyBamFile bamFile -> "workflowSpecificParameter " },
 
         ] as AbstractExecutePanCanJob
@@ -144,7 +146,7 @@ ${roddyBamFile.individual.pid} \
 --configurationDirectories=${new File(roddyBamFile.config.configFilePath).parent},${roddyBaseConfigsPath} \
 --useiodir=${viewByPidString()},${roddyBamFile.workDirectory} \
 workflowSpecificParameter \
---cvalues="workflowSpecificCValues,\
+--cvalues="$workflowSpecificCValues,\
 PBS_AccountName:FASTTRACK"\
 """
 
@@ -164,7 +166,7 @@ PBS_AccountName:FASTTRACK"\
     @Test
     void testPrepareAndReturnCValues_NoFastTrack_setUpCorrect() {
         String expectedCommand = """\
---cvalues="workflowSpecificCValues"\
+--cvalues="$workflowSpecificCValues"\
 """
         String actualCommand = abstractExecutePanCanJob.prepareAndReturnCValues(roddyBamFile)
         assert expectedCommand == actualCommand
@@ -178,7 +180,7 @@ PBS_AccountName:FASTTRACK"\
 
         String expectedCommand = """\
 --cvalues=\
-"workflowSpecificCValues,\
+"$workflowSpecificCValues,\
 PBS_AccountName:FASTTRACK"\
 """
         assert expectedCommand == abstractExecutePanCanJob.prepareAndReturnCValues(roddyBamFile)

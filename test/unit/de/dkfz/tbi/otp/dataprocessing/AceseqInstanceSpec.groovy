@@ -94,7 +94,7 @@ class AceseqInstanceSpec extends Specification {
     void "test getPlot with #plot, tests if Path is in a valid form"() {
 
         expect:
-        instance.getPlot(plot) == new File(instancePath, "plots/${instance.individual.pid}_${name}")
+        instance.getPlot(plot) == new File(instancePath, "plots/${plot == WG_COVERAGE ? 'control_' : ''}${instance.individual.pid}_${name}")
 
         where:
         plot            | name
@@ -125,7 +125,7 @@ class AceseqInstanceSpec extends Specification {
 
         AceseqQc qcInstance = DomainFactory.createAceseqQcWithExistingAceseqInstance(instance)
         qcInstance.ploidyFactor = '1.0'
-        qcInstance.purity = '2.0'
+        qcInstance.tcc = 2.0
         qcInstance.save(flush: true)
 
         expect:
@@ -139,6 +139,6 @@ class AceseqInstanceSpec extends Specification {
 
     void "test getQcJsonFile"() {
         expect:
-        instance.getQcJsonFile() == new File(instancePath, "${instance.individual.pid}_cnv_parameter.json")
+        instance.getQcJsonFile() == new File(instancePath, "cnv_${instance.individual.pid}_parameter.json")
     }
 }

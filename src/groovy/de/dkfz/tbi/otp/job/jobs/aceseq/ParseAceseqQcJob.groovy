@@ -3,9 +3,9 @@ package de.dkfz.tbi.otp.job.jobs.aceseq
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.jobs.*
 import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.ngsdata.*
 import grails.converters.*
 import org.codehaus.groovy.grails.web.json.*
-
 
 class ParseAceseqQcJob extends AbstractEndStateAwareJobImpl implements AutoRestartableJob {
 
@@ -22,6 +22,12 @@ class ParseAceseqQcJob extends AbstractEndStateAwareJobImpl implements AutoResta
                 qc.aceseqInstance = aceseqInstance
                 assert qc.save(flush: true)
             }
+
+            List<File> files = aceseqInstance.getAllFiles()
+            files.each {
+                LsdfFilesService.ensureFileIsReadableAndNotEmpty(it)
+            }
+
             aceseqInstance.processingState = AnalysisProcessingStates.FINISHED
             assert aceseqInstance.save(flush: true)
             succeed()

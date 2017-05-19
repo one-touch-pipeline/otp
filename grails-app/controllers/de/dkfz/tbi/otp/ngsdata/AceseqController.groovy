@@ -47,7 +47,7 @@ class AceseqController {
         List data = results.collect { Map properties ->
             AceseqQc qc = AceseqQc.findByAceseqInstanceAndNumber(AceseqInstance.get(properties.instanceId as long), 1)
             properties.putAll([
-                    normalContamination: qc?.normalContamination,
+                    tcc: qc?.tcc,
                     ploidy: qc?.ploidy,
                     ploidyFactor: qc?.ploidyFactor,
                     goodnessOfFit: qc?.goodnessOfFit,

@@ -8,15 +8,14 @@ class AceseqQc implements Entity{
 
     int number
 
-    double normalContamination
+    //tumor cell content
+    double tcc
 
     String ploidyFactor
 
     double ploidy
 
     double goodnessOfFit
-
-    String purity
 
     String gender
 

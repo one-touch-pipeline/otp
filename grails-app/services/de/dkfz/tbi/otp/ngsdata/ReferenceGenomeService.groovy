@@ -101,6 +101,13 @@ class ReferenceGenomeService {
         return checkFileExistence(file, checkExistence)
     }
 
+    public File gcContentFile(MergingWorkPackage mergingWorkPackage, boolean checkExistence = true) {
+        assert mergingWorkPackage, "The mergingWorkPackage is not specified"
+        assert mergingWorkPackage.referenceGenome.gcContentFile : "No gc content file path is defined for ${mergingWorkPackage}"
+        File file = new File(pathToChromosomeSizeFilesPerReference(mergingWorkPackage.referenceGenome, checkExistence), mergingWorkPackage.referenceGenome.gcContentFile)
+        return checkFileExistence(file, checkExistence)
+    }
+
 
     private File checkFileExistence(File file, boolean checkExistence) {
         if (!checkExistence || file.canRead()) {
@@ -169,6 +176,28 @@ class ReferenceGenomeService {
                     name: fileName,
                     referenceGenome: referenceGenome
             ).save(flush: true, failOnError: true)
+        }
+    }
+
+    void checkReferenceGenomeFilesAvailability(MergingWorkPackage mergingWorkPackage) {
+        [
+                new File(mergingWorkPackage.referenceGenome.mappabilityFile),
+                new File(mergingWorkPackage.referenceGenome.replicationTimeFile),
+                gcContentFile(mergingWorkPackage),
+                new File(mergingWorkPackage.referenceGenome.geneticMapFileX),
+                new File(mergingWorkPackage.referenceGenome.knownHaplotypesFileX),
+                new File(mergingWorkPackage.referenceGenome.knownHaplotypesLegendFileX)
+
+        ].each {
+            LsdfFilesService.ensureFileIsReadableAndNotEmpty(it)
+        }
+
+        [
+                new File(mergingWorkPackage.referenceGenome.geneticMapFile).parentFile,
+                new File(mergingWorkPackage.referenceGenome.knownHaplotypesFile).parentFile,
+                new File(mergingWorkPackage.referenceGenome.knownHaplotypesLegendFile).parentFile,
+        ].each {
+            LsdfFilesService.ensureDirIsReadableAndNotEmpty(it)
         }
     }
 }

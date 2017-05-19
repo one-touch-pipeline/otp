@@ -2,8 +2,11 @@ package workflows.analysis.pair.aceseq
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddy.*
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
+import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.ngsdata.*
 import grails.plugin.springsecurity.*
+import org.joda.time.Duration
 import workflows.analysis.pair.*
 
 abstract class AbstractAceseqWorkflowTests extends AbstractRoddyBamFilePairAnalysisWorkflowTests<AceseqInstance> {
@@ -76,10 +79,16 @@ abstract class AbstractAceseqWorkflowTests extends AbstractRoddyBamFilePairAnaly
 
 
     void createSophiaInput() {
-        //TODO: adapt next line for using sophia input file
-        File sophiaInputFile = new File(project.getProjectDirectory(), 'testpid.DELLY.somaticFilter.highConf.bedpe.txt')
-        String cmd = "touch ${sophiaInputFile.absolutePath} && chmod 664 ${sophiaInputFile.absolutePath} && echo OK"
-        assert executionService.executeCommandReturnProcessOutput(realm, cmd).assertExitCodeZeroAndStderrEmpty().stdout.trim() == 'OK'
+        File sourceSophiaInputFile = new File(workflowData, "svs_stds_filtered_somatic_minEventScore3.tsv")
+
+        SophiaInstance sophiaInstance = DomainFactory.createSophiaInstance(samplePair)
+        File sophiaInputFile = sophiaInstance.finalAceseqInputFile
+        samplePair.sophiaProcessingStatus = SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED
+        assert samplePair.save(flush: true)
+
+        linkFileUtils.createAndValidateLinks([
+                (sourceSophiaInputFile): sophiaInputFile,
+        ], realm)
     }
 
 
@@ -112,5 +121,10 @@ abstract class AbstractAceseqWorkflowTests extends AbstractRoddyBamFilePairAnaly
     @Override
     File getWorkflowData() {
         new File(getDataDirectory(), 'aceseq')
+    }
+
+    @Override
+    Duration getTimeout() {
+        Duration.standardHours(24)
     }
 }

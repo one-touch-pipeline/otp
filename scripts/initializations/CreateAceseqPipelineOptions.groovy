@@ -13,7 +13,7 @@ processingOptionService.createOrUpdate(
         de.dkfz.tbi.otp.dataprocessing.roddy.RoddyConstants.OPTION_KEY_ACESEQ_PIPELINE_PLUGIN_VERSION,
         null,
         null,
-        '1.2.6',
+        '1.2.8-1',
         'The version of the AceSeq pipeline plugin'
 )
 processingOptionService.createOrUpdate(

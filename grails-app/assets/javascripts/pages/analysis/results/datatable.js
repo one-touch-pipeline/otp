@@ -71,7 +71,7 @@ $.otp.resultsTable = {
                         text: row.individualPid,
                     }),
                     row.sampleType1 + " \u2013 " + row.sampleType2,
-                    row.normalContamination,
+                    row.tcc,
                     row.ploidy,
                     row.ploidyFactor,
                     row.goodnessOfFit,

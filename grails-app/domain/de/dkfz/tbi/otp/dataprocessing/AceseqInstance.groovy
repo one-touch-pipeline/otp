@@ -42,7 +42,7 @@ class AceseqInstance extends BamFilePairAnalysis implements ProcessParameterObje
     }
 
     File getQcJsonFile() {
-        return new File(getWorkDirectory(), "${individual.pid}_cnv_parameter.json")
+        return new File(getWorkDirectory(), "cnv_${individual.pid}_parameter.json")
     }
 
     enum AceseqPlot {
@@ -57,7 +57,7 @@ class AceseqInstance extends BamFilePairAnalysis implements ProcessParameterObje
             case AceseqPlot.GC_CORRECTED: return new File(getInstancePlotPath(), "${this.individual.pid}_gc_corrected.png")
             case AceseqPlot.QC_GC_CORRECTED: return new File(getInstancePlotPath(), "${this.individual.pid}_qc_rep_corrected.png")
             case AceseqPlot.TCN_DISTANCE_COMBINED_STAR: return new File(getWorkDirectory(), "${this.individual.pid}_tcn_distances_combined_star.png")
-            case AceseqPlot.WG_COVERAGE: return new File(getInstancePlotPath(), "${this.individual.pid}_wholeGenome_coverage.png")
+            case AceseqPlot.WG_COVERAGE: return new File(getInstancePlotPath(), "control_${this.individual.pid}_wholeGenome_coverage.png")
             default: throw new Exception()
         }
     }
@@ -78,7 +78,7 @@ class AceseqInstance extends BamFilePairAnalysis implements ProcessParameterObje
                 AceseqQc aceseqQc = AceseqQc.findByNumberAndAceseqInstance(1, this)
                 assert aceseqQc
                 //If variables contain dots replace them if not they will be used by Regex
-                pattern = "${this.individual.pid}_plot_${aceseqQc.ploidyFactor}extra_${aceseqQc.purity}_"
+                pattern = "${this.individual.pid}_plot_${aceseqQc.ploidyFactor}extra_${aceseqQc.tcc}_"
                         .replace('.', '\\.') + '.+\\.png'
                 break
             case AceseqPlots.ALL:
