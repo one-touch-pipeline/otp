@@ -96,7 +96,7 @@ class LinkFilesToFinalDestinationService {
 
         if (roddyBamFile.seqType.isWgbs()) {
             linkMapSourceLink.put(roddyBamFile.workMergedMethylationDirectory, roddyBamFile.finalMergedMethylationDirectory)
-            if (roddyBamFile.getContainedSeqTracks()*.normalizedLibraryName.unique().size() > 1) {
+            if (roddyBamFile.getContainedSeqTracks()*.getLibraryDirectoryName().unique().size() > 1) {
                 [roddyBamFile.workLibraryQADirectories.values().asList().sort(), roddyBamFile.finalLibraryQADirectories.values().asList().sort()].transpose().each {
                     linkMapSourceLink.put(it[0], it[1])
                 }

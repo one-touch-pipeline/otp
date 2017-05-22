@@ -7,7 +7,7 @@ class ParseWgbsAlignmentQcJob extends AbstractParseAlignmentQcJob {
     public void parseStatistics(RoddyBamFile roddyBamFile) {
         abstractQualityAssessmentService.parseRoddySingleLaneQaStatistics(roddyBamFile)
         abstractQualityAssessmentService.parseRoddyMergedBamQaStatistics(roddyBamFile)
-        if (roddyBamFile.getContainedSeqTracks()*.normalizedLibraryName.unique().size() > 1) {
+        if (roddyBamFile.getContainedSeqTracks()*.getLibraryDirectoryName().unique().size() > 1) {
             abstractQualityAssessmentService.parseRoddyLibraryQaStatistics(roddyBamFile)
         }
     }

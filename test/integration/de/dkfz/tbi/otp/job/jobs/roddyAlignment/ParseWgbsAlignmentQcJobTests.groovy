@@ -45,6 +45,37 @@ class ParseWgbsAlignmentQcJobTests {
         validateCommonExecutionResults(roddyBamFile)
     }
 
+    @Test
+    void testExecute_HandleLibraryNameNullAndEmptyStringCorrect() {
+        RoddyBamFile roddyBamFile = testExecuteSetup()
+        SeqTrack seqTrack = exactlyOneElement(roddyBamFile.seqTracks)
+        seqTrack.libraryName = ""
+        seqTrack.normalizedLibraryName = ""
+        assert seqTrack.save(flush: true)
+
+        MergingWorkPackage workPackage = roddyBamFile.mergingWorkPackage
+
+        SeqTrack seqTrack2 = DomainFactory.createSeqTrackWithDataFiles(workPackage, [
+                libraryName: null,
+                normalizedLibraryName: null,
+        ])
+        assert seqTrack2.save(flush: true)
+
+        roddyBamFile.seqTracks.add(seqTrack2)
+        roddyBamFile.numberOfMergedLanes = 2
+        assert roddyBamFile.save(flush: true)
+
+        roddyBamFile.workSingleLaneQAJsonFiles.values().each {
+            DomainFactory.createQaFileOnFileSystem(it, SINGLE_LANE_QA_VALUE)
+        }
+
+        parseWgbsAlignmentQcJob.execute()
+
+        TestCase.assertContainSame(["8", "all", "7", "8", "all", "7"] as Set, RoddySingleLaneQa.list()*.chromosome as Set)
+        assert RoddyLibraryQa.list().isEmpty()
+
+        validateCommonExecutionResults(roddyBamFile)
+    }
 
     @Test
     void testExecute_TwoLibrariesInMergedBamFile() {
