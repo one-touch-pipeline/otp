@@ -481,7 +481,7 @@ class RoddyBamFileUnitTests {
 
     private void updateDataFileNames(SeqTrack seqTrack) {
         List<DataFile> dataFiles = DataFile.findAllBySeqTrack(seqTrack)
-        dataFiles[0].fileName = FIRST_DATAFILE_NAME
-        dataFiles[1].fileName = SECOND_DATAFILE_NAME
+        dataFiles[0].vbpFileName = FIRST_DATAFILE_NAME
+        dataFiles[1].vbpFileName = SECOND_DATAFILE_NAME
     }
 }

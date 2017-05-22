@@ -431,8 +431,8 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
         List<DataFile> dataFiles = DataFile.findAllBySeqTrack(seqTrack)
         assert dataFiles.size() == 2
         //if the names of datafile1 and datafile2 of one seqtrack are the same something strange happened -> should fail
-        assert !dataFiles[0].fileName.equals(dataFiles[1].fileName)
-        String commonFastQFilePrefix = getLongestCommonPrefixBeforeLastUnderscore(dataFiles[0].fileName, dataFiles[1].fileName)
+        assert !dataFiles[0].vbpFileName.equals(dataFiles[1].vbpFileName)
+        String commonFastQFilePrefix = getLongestCommonPrefixBeforeLastUnderscore(dataFiles[0].vbpFileName, dataFiles[1].vbpFileName)
         return "${RUN_PREFIX}${run.name}_${commonFastQFilePrefix}"
     }
 
