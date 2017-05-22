@@ -112,5 +112,13 @@ class RnaQualityAssessment extends RoddyQualityAssessment {
         pairedRead2 validator: { it == null }
         percentageMatesOnDifferentChr validator: { it == null }
         referenceLength validator: { it == null }
+        cumulGapLength nullable: true
+        fivePNorm nullable: true
+        gapPercentage nullable: true
+        meanCV nullable: true
+        meanPerBaseCov nullable: true
+        noCovered5P nullable: true
+        numGaps nullable: true
+        threePNorm nullable: true
     }
 }
