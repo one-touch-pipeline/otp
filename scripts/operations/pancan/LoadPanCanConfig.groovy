@@ -30,6 +30,7 @@ String configVersion = 'v1_0'
  * * WES
  * * WGBS
  * * WGBSTAG
+ * * RNA
  */
 String seqTypeRoddyName = ''
 
@@ -63,14 +64,12 @@ LogThreadLocal.withThreadLog(System.out, { Project.withTransaction {
 
     SeqType seqType = CollectionUtils.exactlyOneElement(SeqType.findAllByRoddyNameAndLibraryLayout(seqTypeRoddyName, libraryLayout))
 
-    assert configFilePath ==~ "$OTP_ROOT_PATH/.*/configFiles/(.+/)?PANCAN_ALIGNMENT/PANCAN_ALIGNMENT_${seqType.roddyName}_\\d+.\\d+.\\d+_v\\d+_\\d+.xml"
+    Pipeline pipeline = Pipeline.Name.forSeqType(seqType).pipeline
+
+    String individualPidPath = individualPid ? "${individualPid}/" : ''
+    assert configFilePath ==~ "$OTP_ROOT_PATH/.*/configFiles/${pipeline.name.name()}/${individualPidPath}${pipeline.name.name()}_${seqType.roddyName}_\\d+.\\d+.\\d+_v\\d+_\\d+.xml"
 
     Project project = CollectionUtils.exactlyOneElement(Project.findAllByName(projectName))
-
-    Pipeline pipeline = CollectionUtils.exactlyOneElement(Pipeline.findAllByTypeAndName(
-            Pipeline.Type.ALIGNMENT,
-            Pipeline.Name.PANCAN_ALIGNMENT,
-    ))
 
     if (!individualPid) {
         RoddyWorkflowConfig.importProjectConfigFile(
