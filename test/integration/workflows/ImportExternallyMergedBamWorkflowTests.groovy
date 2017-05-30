@@ -15,6 +15,7 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase {
 
     @Before
     void setUp() {
+
         String bamFileName01 = "bamFile01.bam"
         String bamFileName02 = "bamFile02.bam"
         String bamFilePath01 = "${ftpDir}/${bamFileName01}"
@@ -25,12 +26,23 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase {
         String baiFilePath01 = "${ftpDir}/${baiFileName01}"
         String baiFilePath02 = "${ftpDir}/${baiFileName02}"
 
-        createDirectoriesString([ftpDir])
+        String furtherFileName = "furtherFile.txt"
+        String furtherFolderName = "quality"
+        File furtherFolder = new File(ftpDir, furtherFolderName)
+        File furtherFile = new File(furtherFolder, furtherFileName)
 
-        CreateFileHelper.createFile(new File(bamFilePath01))
-        CreateFileHelper.createFile(new File(bamFilePath02))
-        CreateFileHelper.createFile(new File(baiFilePath01))
-        CreateFileHelper.createFile(new File(baiFilePath02))
+        createDirectories([
+                new File(ftpDir),
+                furtherFolder
+        ])
+
+        createFilesWithContent([
+                (new File(bamFilePath01)): 'bam1',
+                (new File(bamFilePath02)): 'bam2',
+                (new File(baiFilePath01)): 'bai1',
+                (new File(baiFilePath02)): 'bai2',
+                (furtherFile): 'something other',
+        ])
 
         Project project = DomainFactory.createProject(realmName: realm.name)
         createDirectories([project.projectDirectory])
@@ -38,7 +50,8 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase {
         ExternallyProcessedMergedBamFile epmbf01 = DomainFactory.createExternallyProcessedMergedBamFile(
                 importedFrom : bamFilePath01,
                 fileName     : bamFileName01,
-                fileSize     : new File(bamFilePath01).size()
+                fileSize     : new File(bamFilePath01).size(),
+                furtherFiles: [furtherFolderName]
         )
         epmbf01.individual.project = project
         assert epmbf01.individual.save(flush: true)
@@ -46,7 +59,8 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase {
         ExternallyProcessedMergedBamFile epmbf02 = DomainFactory.createExternallyProcessedMergedBamFile(
                 importedFrom : bamFilePath02,
                 fileName     : bamFileName02,
-                fileSize     : new File(bamFilePath02).size()
+                fileSize     : new File(bamFilePath02).size(),
+                furtherFiles: [furtherFolderName]
         )
         epmbf02.individual.project = project
         assert epmbf02.individual.save(flush: true)

@@ -7,6 +7,7 @@ import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 import grails.test.mixin.*
+import org.apache.commons.logging.impl.NoOpLog
 import org.junit.*
 import org.junit.rules.*
 import spock.lang.*
@@ -40,12 +41,20 @@ class ImportExternallyMergedBamJobSpec extends Specification {
     ExternallyProcessedMergedBamFile epmbfWithMd5sum
     ExternallyProcessedMergedBamFile epmbfWithoutMd5sum
 
+    File mainDirectory
+    File subDirectory
+    File file
+
     @Rule
     TemporaryFolder temporaryFolder
 
     def setup() {
         String bamFileNameWithMd5sum = "epmbfWithMd5sum.bam"
         String bamFileNameWithoutMd5sum = "epmbfWithoutMd5sum.bam"
+        mainDirectory = temporaryFolder.newFolder()
+        subDirectory = new File(mainDirectory.path, "subDirectory")
+        assert subDirectory.mkdirs()
+        file = new File(subDirectory, "something.txt")
 
         step = DomainFactory.createProcessingStep(id: PROCESSING_STEP_ID)
 
@@ -53,15 +62,17 @@ class ImportExternallyMergedBamJobSpec extends Specification {
 
         epmbfWithMd5sum = DomainFactory.createExternallyProcessedMergedBamFile(
                 fileName            : bamFileNameWithMd5sum,
-                importedFrom        : "${temporaryFolder.newFolder().path}/${bamFileNameWithMd5sum}",
-                md5sum              : DomainFactory.DEFAULT_MD5_SUM
+                importedFrom        : "${mainDirectory.path}/${bamFileNameWithMd5sum}",
+                md5sum              : DomainFactory.DEFAULT_MD5_SUM,
+                furtherFiles        : ["subDirectory"]
         )
         epmbfWithMd5sum.individual.project = project
         assert epmbfWithMd5sum.individual.save(flush: true)
 
         epmbfWithoutMd5sum = DomainFactory.createExternallyProcessedMergedBamFile(
                 fileName     : bamFileNameWithoutMd5sum,
-                importedFrom : "${temporaryFolder.newFolder().path}/${bamFileNameWithoutMd5sum}",
+                importedFrom : "${mainDirectory.path}/${bamFileNameWithoutMd5sum}",
+                furtherFiles        : ["subDirectory"]
         )
         epmbfWithoutMd5sum.individual.project = project
         assert epmbfWithoutMd5sum.individual.save(flush: true)
@@ -231,12 +242,13 @@ class ImportExternallyMergedBamJobSpec extends Specification {
     private void createHelperObjects(ImportProcess importProcess) {
         importExternallyMergedBamJob = [
                 getProcessParameterObject : { -> importProcess },
-                getProcessingStep         : { -> step }
+                getProcessingStep         : { -> step },
         ] as ImportExternallyMergedBamJob
 
         importExternallyMergedBamJob.configService = new ConfigService()
         importExternallyMergedBamJob.checksumFileService = new ChecksumFileService()
         importExternallyMergedBamJob.executionHelperService = new ExecutionHelperService()
+        importExternallyMergedBamJob.metaClass.log = new NoOpLog()
 
         CreateFileHelper.createFile(new File("${importProcess.externallyProcessedMergedBamFiles[0].importedFrom}"))
 
@@ -265,6 +277,9 @@ mkdir -p -m 2750 .*
 cp .* .*
 cp .* .*
 
+mkdir -p -m 2750 .*
+cp -R .* .*
+
 cd .*
 ${hasOrNotMd5SumCmd}
 md5sum -c .*
@@ -272,8 +287,12 @@ md5sum -c .*
 md5sum .* > .*
 md5sum -c .*
 
-chgrp .* .*
-chmod 644 .*
+md5sum `find .* -type f  ` > .*
+md5sum -c .*
+
+chgrp -R .* .* .*
+chmod 644 .* `find .* -type f  `
+chmod 750  `find .* -type d `
 
 touch .*
 """

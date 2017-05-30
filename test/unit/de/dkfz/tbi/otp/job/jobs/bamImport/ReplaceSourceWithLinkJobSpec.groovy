@@ -49,10 +49,16 @@ class ReplaceSourceWithLinkJobSpec extends Specification {
         File importedFile = new File(temporaryFolder.newFolder().absolutePath, bamFileName)
         step = DomainFactory.createProcessingStep(id: PROCESSING_STEP_ID)
 
+        File mainDirectory = temporaryFolder.newFolder()
+        File subDirectory = new File(mainDirectory.path, "subDirectory")
+        assert subDirectory.mkdirs()
+        File file = new File(subDirectory, "something.txt")
+
         ExternallyProcessedMergedBamFile epmbf = DomainFactory.createExternallyProcessedMergedBamFile(
                 fileName            : bamFileName,
                 importedFrom        : importedFile,
-                md5sum              : DomainFactory.DEFAULT_MD5_SUM
+                md5sum              : DomainFactory.DEFAULT_MD5_SUM,
+                furtherFiles        : ["subDirectory"]
         )
 
         importProcess = new ImportProcess(
@@ -76,6 +82,9 @@ rm -f .*
 rm -f .*
 
 ln -sf .* .*
+ln -sf .* .*
+
+rm -rf .*
 ln -sf .* .*
 
 echo OK

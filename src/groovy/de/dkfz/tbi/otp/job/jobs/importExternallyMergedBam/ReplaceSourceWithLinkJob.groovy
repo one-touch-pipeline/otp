@@ -28,6 +28,13 @@ class ReplaceSourceWithLinkJob extends AbstractEndStateAwareJobImpl {
                 File targetBamFile = it.getFilePath().absoluteDataManagementPath
                 File targetBaiFile = new File("${it.getFilePath().absoluteDataManagementPath}.bai")
 
+                String furtherFilesCopy = it.furtherFiles.collect { String relativePath ->
+                    File sourceFurtherFile = new File(sourceBamFile.parent, relativePath)
+                    File targetFurtherFile = new File(targetBamFile.parent, relativePath)
+                    return "rm -rf ${sourceFurtherFile.absolutePath}\n" +
+                            "ln -sf ${targetFurtherFile.absolutePath} ${sourceFurtherFile.absolutePath}"
+                }.join("\n")
+
                 String cmd = """
 #!/bin/bash
 
@@ -38,6 +45,8 @@ rm -f ${sourceBaiFile.absolutePath}
 
 ln -sf ${targetBamFile.absolutePath} ${sourceBamFile.absolutePath}
 ln -sf ${targetBaiFile.absolutePath} ${sourceBaiFile.absolutePath}
+
+${furtherFilesCopy}
 
 echo OK
 """

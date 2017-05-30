@@ -23,8 +23,8 @@ class BamMetadataImportService {
         return applicationContext.getBeansOfType(BamMetadataValidator).values().sort { it.getClass().name }
     }
 
-    BamMetadataValidationContext validate(File metadataFile) {
-        BamMetadataValidationContext context = BamMetadataValidationContext.createFromFile(metadataFile)
+    BamMetadataValidationContext validate(File metadataFile, List<String> furtherFiles) {
+        BamMetadataValidationContext context = BamMetadataValidationContext.createFromFile(metadataFile, furtherFiles)
         if (context.spreadsheet) {
             bamMetadataValidators*.validate(context)
         }
@@ -32,10 +32,11 @@ class BamMetadataImportService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    Map validateAndImport(File metadataFile, boolean ignoreWarnings, String previousValidationMd5sum, boolean replaceWithLink, boolean triggerSnv, boolean triggerIndel, boolean triggerAceseq) {
+    Map validateAndImport(File metadataFile, boolean ignoreWarnings, String previousValidationMd5sum, boolean replaceWithLink,
+                          boolean triggerSnv, boolean triggerIndel, boolean triggerAceseq, List<String> furtherFiles) {
         Project outputProject
         ImportProcess importProcess = new ImportProcess(externallyProcessedMergedBamFiles: [])
-        BamMetadataValidationContext context = validate(metadataFile)
+        BamMetadataValidationContext context = validate(metadataFile, furtherFiles)
         if (MetadataImportService.mayImport(context, ignoreWarnings, previousValidationMd5sum)) {
             context.spreadsheet.dataRows.each { Row row ->
                 String referenceGenome = uniqueColumnValue(row, BamMetadataColumn.REFERENCE_GENOME)
@@ -79,8 +80,18 @@ class BamMetadataImportService {
                         importedFrom        : bamFilePath,
                         fileName            : getNameFromPath(bamFilePath),
                         coverage            : coverage ? Double.parseDouble(coverage) : null,
-                        md5sum              : md5sum ?: null
-                )
+                        md5sum              : md5sum ?: null,
+                        furtherFiles        : [] as Set
+                ).save()
+
+                File bamFileParent = new File(epmbf.importedFrom).parentFile
+
+                furtherFiles.findAll().findAll { String path ->
+                    new File (bamFileParent, path).exists()
+                }.each {
+                        epmbf.furtherFiles.add(it)
+                }
+
                 emwp.bamFileInProjectFolder = null
                 assert epmbf.save(flush:true)
                 importProcess.externallyProcessedMergedBamFiles.add(epmbf)
@@ -107,7 +118,7 @@ class BamMetadataImportService {
         return new File(path).name
     }
 
-    private static String uniqueColumnValue(Row row, BamMetadataColumn column) {
+    static String uniqueColumnValue(Row row, BamMetadataColumn column) {
         return row.getCell(row.spreadsheet.getColumn(column.name()))?.text
     }
 }

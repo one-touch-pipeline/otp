@@ -57,6 +57,10 @@ class BamMetadataImportServiceSpec extends Specification {
         File testDirectory = TestCase.createEmptyTestDirectory()
         File metadataFile = new File(testDirectory, 'bamMetadata.tsv')
         metadataFile.bytes = 'Header\nI am metadata!'.getBytes(BamMetadataValidationContext.CHARSET)
+        File qualityDirectory = new File(testDirectory,"quality")
+        assert qualityDirectory.mkdirs()
+        File qualityControlFile = new File(qualityDirectory, "file.qc")
+        List<String> furtherFiles = ["/quality"]
 
         BamMetadataImportService service = new BamMetadataImportService()
         service.applicationContext = Mock(ApplicationContext) {
@@ -77,7 +81,7 @@ class BamMetadataImportServiceSpec extends Specification {
         }
 
         when:
-        BamMetadataValidationContext context = service.validate(metadataFile)
+        BamMetadataValidationContext context = service.validate(metadataFile, furtherFiles)
 
         then:
         containSame(context.problems*.message, ['message1', 'message2', 'message3'])
@@ -112,6 +116,9 @@ class BamMetadataImportServiceSpec extends Specification {
         File bamFilesDir = temporaryFolder.newFolder("path-to-bam-files")
         File pseudoBamFile1 = new File(bamFilesDir, "control_123456_merged.mdup.bam")
         File pseudoBamFile2 = new File(bamFilesDir, "tumor_456789_merged.mdup.bam")
+        File qualityDirectory = temporaryFolder.newFolder("quality")
+        File qualityControlFile = new File(qualityDirectory, "file.qc")
+        List<String> furtherFiles = ["/quality"]
 
         File metadataFile = temporaryFolder.newFile("bamMetadata.tsv")
         metadataFile.bytes = (
@@ -128,7 +135,7 @@ class BamMetadataImportServiceSpec extends Specification {
         }
 
         when:
-        Map results = service.validateAndImport(metadataFile, true, context.metadataFileMd5sum, false, false, false, false)
+        Map results = service.validateAndImport(metadataFile, true, context.metadataFileMd5sum, false, false, false, false, furtherFiles)
 
         then:
         results.context.metadataFile == metadataFile

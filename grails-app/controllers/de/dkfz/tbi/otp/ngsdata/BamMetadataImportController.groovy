@@ -1,7 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.*
-import org.springframework.validation.FieldError
+import org.springframework.validation.*
 
 class BamMetadataImportController {
 
@@ -15,13 +15,15 @@ class BamMetadataImportController {
             errorMessage = "'${fieldError.getRejectedValue()}' is not a valid value for '${fieldError.getField()}'. Error code: '${fieldError.code}'"
         }
         if (cmd.submit == "Import" && !errorMessage) {
-            Map results = bamMetadataImportService.validateAndImport(new File(cmd.path), cmd.ignoreWarnings, cmd.md5, cmd.replaceWithLink, cmd.triggerSnv, cmd.triggerIndel, cmd.triggerAceseq)
+
+            Map results = bamMetadataImportService.validateAndImport(new File(cmd.path), cmd.ignoreWarnings, cmd.md5,
+                    cmd.replaceWithLink, cmd.triggerSnv, cmd.triggerIndel, cmd.triggerAceseq, cmd.furtherFilePaths)
             bamMetadataValidationContext = results.context
             if (results.project != null) {
                 redirect(controller: "projectOverview", action: "laneOverview", params: [project: results.project.name])
             }
         } else if (cmd.submit != null) {
-            bamMetadataValidationContext = bamMetadataImportService.validate(new File(cmd.path))
+            bamMetadataValidationContext = bamMetadataImportService.validate(new File(cmd.path), cmd.furtherFilePaths)
         }
 
         return [
@@ -37,6 +39,7 @@ class BamMetadataControllerSubmitCommand implements Serializable {
     String path
     String submit
     String md5
+    List<String> furtherFilePaths
     boolean replaceWithLink
     boolean triggerSnv
     boolean triggerIndel
@@ -46,7 +49,8 @@ class BamMetadataControllerSubmitCommand implements Serializable {
     static constraints = {
         path nullable: true
         submit nullable: true
-        md5 nullable:true
+        md5 nullable: true
+        furtherFilePaths nullable: true
     }
 
     void setPath(String path) {

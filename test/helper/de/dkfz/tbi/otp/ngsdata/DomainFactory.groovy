@@ -2176,7 +2176,8 @@ samplePairsNotProcessed: ${samplePairsNotProcessed}
                 fileName: "runName_${counter++}",
                 workPackage: { createExternalMergingWorkPackage() },
                 numberOfMergedLanes: null,
-                importedFrom: "/importFrom_${counter++}"
+                importedFrom: "/importFrom_${counter++}",
+                furtherFiles: [],
         ], properties)
     }
 

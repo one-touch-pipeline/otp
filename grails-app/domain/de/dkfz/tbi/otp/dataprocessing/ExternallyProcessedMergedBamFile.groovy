@@ -18,6 +18,10 @@ class ExternallyProcessedMergedBamFile extends AbstractMergedBamFile {
      */
     String importedFrom
 
+    static hasMany = [
+            furtherFiles: String,
+    ]
+
     @Override
     public String toString() {
         return "id: ${id} (external) " +
@@ -101,5 +105,6 @@ class ExternallyProcessedMergedBamFile extends AbstractMergedBamFile {
         fileOperationStatus validator: { val, obj ->
             return (val == FileOperationStatus.PROCESSED) ? (obj.md5sum != null) : true
         }
+        furtherFiles nullable: true
     }
 }

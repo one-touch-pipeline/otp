@@ -25,23 +25,34 @@ class ImportExternallyMergedBamJob extends AbstractOtpJob {
         final ImportProcess importProcess = getProcessParameterObject()
         AbstractMultiJob.NextAction action = AbstractMultiJob.NextAction.SUCCEED
 
-        importProcess.externallyProcessedMergedBamFiles.each {
-            Realm realm = configService.getRealmDataManagement(it.project)
-            File sourceBam = new File(it.importedFrom)
-            File targetBam = it.getFilePath().absoluteDataManagementPath
+        importProcess.externallyProcessedMergedBamFiles.each {ExternallyProcessedMergedBamFile epmbf ->
+            Realm realm = configService.getRealmDataManagement(epmbf.project)
+            File sourceBam = new File(epmbf.importedFrom)
+            File targetBam = epmbf.getFilePath().absoluteDataManagementPath
 
             File checkpoint = new File(targetBam.parent, ".${targetBam.name}.checkpoint")
             File sourceBai = new File("${sourceBam}.bai")
             File targetBai = new File("${targetBam}.bai")
 
-            if (!checkpoint.exists()) {
+            if (checkpoint.exists()) {
+                log.debug("Checkpoint found, skip copying")
+            } else {
                 action = AbstractMultiJob.NextAction.WAIT_FOR_CLUSTER_JOBS
                 String md5sumBam
-                if (it.md5sum) {
-                    md5sumBam = "echo ${it.md5sum}  ${targetBam.name} > ${targetBam}.md5sum"
+                if (epmbf.md5sum) {
+                    md5sumBam = "echo ${epmbf.md5sum}  ${targetBam.name} > ${targetBam}.md5sum"
                 } else {
                     md5sumBam = "md5sum ${sourceBam} > ${targetBam}.md5sum"
                 }
+
+                String furtherFilesCopy = epmbf.furtherFiles.collect { String relativePath ->
+                    File sourceFurtherFile = new File(sourceBam.parent, relativePath)
+                    File targetFurtherFile = new File(targetBam.parent, relativePath)
+                    return "mkdir -p -m 2750 ${sourceFurtherFile.isDirectory() ? targetFurtherFile : targetFurtherFile.parent}\n" +
+                            "cp -R ${sourceFurtherFile} ${targetFurtherFile}"
+                }.join("\n")
+
+                String furtherFiles = epmbf.furtherFiles.collect{new File(targetBam.parent, it)}.join(' ')
 
                 String cmd = """
 #!/bin/bash
@@ -55,6 +66,8 @@ mkdir -p -m 2750 ${targetBam.parent}
 cp ${sourceBam} ${targetBam}
 cp ${sourceBai} ${targetBai}
 
+${furtherFilesCopy}
+
 cd ${targetBam.parent}
 ${md5sumBam}
 md5sum -c ${targetBam}.md5sum
@@ -62,8 +75,12 @@ md5sum -c ${targetBam}.md5sum
 md5sum ${sourceBai} > ${targetBai}.md5sum
 md5sum -c ${targetBai}.md5sum
 
-chgrp ${executionHelperService.getGroup(it.project.projectDirectory)} ${targetBam}*
-chmod 644 ${targetBam}*
+md5sum `find ${furtherFiles} -type f  ` > ${targetBam.parent}/md5sum.md5sum
+md5sum -c ${targetBam.parent}/md5sum.md5sum
+
+chgrp -R ${executionHelperService.getGroup(epmbf.project.projectDirectory)} ${targetBam}* ${furtherFiles}
+chmod 644 ${targetBam}* `find ${furtherFiles} -type f  `
+chmod 750  `find ${furtherFiles} -type d `
 
 touch ${checkpoint}
 """

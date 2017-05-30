@@ -10,6 +10,8 @@
             <g:message code="bamMetadataImport.titleOperator"/>
         </sec:ifAllGranted>
     </title>
+    <asset:javascript src="modules/defaultPageDependencies.js"/>
+    <asset:javascript src="pages/bamMetadataImport/index/addFurtherFile.js"/>
 </head>
 <body>
 <g:if test="${context}">
@@ -93,6 +95,14 @@
             <tr>
                 <td><label><g:message code="bamMetadataImport.replaceWithLink"/></label></td>
                 <td><g:checkBox name="replaceWithLink" checked="${cmd.replaceWithLink}"/></td>
+            </tr>
+            <tr>
+                <td><label><g:message code="bamMetadataImport.furtherFile"/></label></td>
+                <td class="input-fields-wrap">
+                    <input type="text" style="width:600px" name="furtherFilePaths"><button class="add-field-button">+</button>
+                    <label style="color: red">It must be located next to the bam file!</label>
+                </td>
+            </tr>
             <tr>
                 <td><label><g:message code="bamMetadataImport.triggerSnv"/></label></td>
                 <td><g:checkBox name="triggerSnv" checked="${cmd.triggerSnv}"/><i> Not implemented yet</i></td>
@@ -126,5 +136,11 @@
         </g:each>
     </ul>
 </div>
+<asset:script>
+    $(function() {
+        $.otp.bamMetadataImport.addValues();
+        $.otp.bamMetadataImport.returnValues([${raw(cmd.furtherFilePaths.collect{"'$it'"}.join(', '))}]);
+    });
+</asset:script>
 </body>
 </html>
