@@ -46,81 +46,81 @@
             <div class="menuContainer menuContainerL">
                 <ul>
                     <sec:ifLoggedIn>
-                        <li class="menuContainerLCss" id="laneOverview"><g:link controller="projectOverview" action="laneOverview"><g:message code="otp.menu.overview"/></g:link></li>
-                        <li class="menuContainerLCss" id="individual"><g:link controller="individual" action="list"><g:message code="otp.menu.individuals"/></g:link></li>
-                        <li class="menuContainerLCss" id="sequence"><g:link controller="sequence" action="index"><g:message code="otp.menu.sequences"/></g:link></li>
-                        <li class="menuContainerLCss" id="run"><g:link controller="run" action="list"><g:message code="otp.menu.runs"/></g:link></li>
-                        <li class="navigation menuContainerLCss" id="project">
+                        <li class="menuContainerLCss"><g:link controller="projectOverview" action="laneOverview"><g:message code="otp.menu.overview"/></g:link></li>
+                        <li class="menuContainerLCss"><g:link controller="individual" action="list"><g:message code="otp.menu.individuals"/></g:link></li>
+                        <li class="menuContainerLCss"><g:link controller="sequence" action="index"><g:message code="otp.menu.sequences"/></g:link></li>
+                        <li class="menuContainerLCss"><g:link controller="run" action="list"><g:message code="otp.menu.runs"/></g:link></li>
+                        <li class="navigation menuContainerLCss project">
                             <ul>
-                                <li class="overview_nav_container nav_container" id="project"><g:link class="menuLinkContainer"><g:message code="otp.menu.project"/> &#9661;</g:link>
+                                <li class="overview_nav_container nav_container"><g:link class="menuLinkContainer"><g:message code="otp.menu.project"/> &#9661;</g:link>
                                     <ul>
-                                        <li id="index"><g:link controller="projectOverview" action="index"><g:message code="otp.menu.projectSpecificStatistics"/></g:link></li><br>
-                                        <li id="projectConfig"><g:link controller="projectConfig" action="index"><g:message code="otp.menu.projectConfig"/></g:link></li>
+                                        <li><g:link controller="projectOverview" action="index"><g:message code="otp.menu.projectSpecificStatistics"/></g:link></li><br>
+                                        <li><g:link controller="projectConfig" action="index"><g:message code="otp.menu.projectConfig"/></g:link></li>
                                         <sec:ifAllGranted roles="ROLE_MMML_MAPPING">
-                                            <li class="allGranted" id="mmmlIdentifierMapping"><g:link controller="projectOverview" action="mmmlIdentifierMapping"><g:message code="otp.menu.mmmlIdentifierMapping"/></g:link></li><br>
+                                            <li class="allGranted"><g:link controller="projectOverview" action="mmmlIdentifierMapping"><g:message code="otp.menu.mmmlIdentifierMapping"/></g:link></li><br>
                                         </sec:ifAllGranted>
                                     </ul>
                                 </li>
                             </ul>
                         </li>
-                        <li class="navigation menuContainerLCss" id="analysisResults">
+                        <li class="navigation menuContainerLCss results">
                             <ul>
-                                <li class="analysis_results_nav_container nav_container" id="analysisResults"><g:link class="menuLinkContainer"><g:message code="otp.menu.results"/> &#9661;</g:link>
+                                <li class="analysis_results_nav_container nav_container"><g:link class="menuLinkContainer"><g:message code="otp.menu.results"/> &#9661;</g:link>
                                     <ul>
-                                        <li id="alignmentQC"><g:link controller="alignmentQualityOverview" action="index"><g:message code="otp.menu.alignmentQuality"/></g:link></li><br>
-                                        <li id="SnvResults"><g:link controller="snv" action="results"><g:message code="otp.menu.snv.results"/></g:link></li>
-                                        <li id="IndelResults"><g:link controller="indel" action="results"><g:message code="otp.menu.indel.results"/></g:link></li>
-                                        <li id="AceseqResults"><g:link controller="aceseq" action="results"><g:message code="otp.menu.cnv.results"/></g:link></li>
-                                        <li id="SophiaResults"><g:link controller="sophia" action="results"><g:message code="otp.menu.sophia.results"/></g:link></li>
+                                        <li><g:link controller="alignmentQualityOverview" action="index"><g:message code="otp.menu.alignmentQuality"/></g:link></li><br>
+                                        <li><g:link controller="snv" action="results"><g:message code="otp.menu.snv.results"/></g:link></li>
+                                        <li><g:link controller="indel" action="results"><g:message code="otp.menu.indel.results"/></g:link></li>
+                                        <li><g:link controller="aceseq" action="results"><g:message code="otp.menu.cnv.results"/></g:link></li>
+                                        <li><g:link controller="sophia" action="results"><g:message code="otp.menu.sophia.results"/></g:link></li>
                                     </ul>
                                 </li>
                             </ul>
                         </li>
                         <sec:ifAnyGranted roles="ROLE_OPERATOR">
-                            <li class="navigation menuContainerLCss" id="overview">
+                            <li class="navigation menuContainerLCss statistic">
                                 <ul>
-                                    <li class="allGranted overview_nav_container nav_container" id="overview"><g:link class="menuLinkContainer"><g:message code="otp.menu.statistics"/> &#9661;</g:link>
+                                    <li class="allGranted overview_nav_container nav_container"><g:link class="menuLinkContainer"><g:message code="otp.menu.statistics"/> &#9661;</g:link>
                                         <ul>
-                                            <li id="overviewMB"><g:link controller="overviewMB" action="index"><g:message code="otp.menu.generalStatistics"/></g:link></li><br>
-                                            <li id="clusterJobGeneral"><g:link controller="clusterJobGeneral" action="index"><g:message code="otp.menu.jobstats.general"/></g:link></li><br>
-                                            <li id="clusterJobJobTypeSpecific"><g:link controller="clusterJobJobTypeSpecific" action="index"><g:message code="otp.menu.jobstats.jobTypeSpecific"/></g:link></li><br>
-                                            <li id="processingTimeStatistics"><g:link controller="processingTimeStatistics" action="index"><g:message code="otp.menu.processingTimeStatistics"/></g:link></li>
+                                            <li><g:link controller="overviewMB" action="index"><g:message code="otp.menu.generalStatistics"/></g:link></li><br>
+                                            <li><g:link controller="clusterJobGeneral" action="index"><g:message code="otp.menu.jobstats.general"/></g:link></li><br>
+                                            <li><g:link controller="clusterJobJobTypeSpecific" action="index"><g:message code="otp.menu.jobstats.jobTypeSpecific"/></g:link></li><br>
+                                            <li><g:link controller="processingTimeStatistics" action="index"><g:message code="otp.menu.processingTimeStatistics"/></g:link></li>
                                         </ul>
                                     </li>
                                 </ul>
                             </li>
-                            <li class="navigation menuContainerLCss" id="operator">
+                            <li class="navigation menuContainerLCss operator">
                                 <ul>
-                                    <li class="allGranted operator_nav_container nav_container" id="operator"><g:link class="menuLinkContainer"><g:message code="otp.menu.operatorSection"/> &#9661;</g:link>
+                                    <li class="allGranted operator_nav_container nav_container"><g:link class="menuLinkContainer"><g:message code="otp.menu.operatorSection"/> &#9661;</g:link>
                                         <ul>
-                                            <li id="metadataImport"><g:link controller="metadataImport" action="index"><g:message code="otp.menu.importAndValidation"/></g:link></li>
-                                            <li id="bamMetadataImport"><g:link controller="bamMetadataImport" action="index"><g:message code="otp.menu.bamMetadataImport"/></g:link></li>
-                                            <li id="sampleIdentifierOverview"><g:link controller="sampleIdentifierOverview" action="index"><g:message code="otp.menu.sampleIdentifierOverview"/></g:link></li>
-                                            <li id="blacklistedIlseNumbers"><g:link controller="metadataImport" action="blacklistedIlseNumbers"><g:message code="otp.menu.blacklistedIlseNumbers"/></g:link></li>
-                                            <li id="createProject"><g:link controller="createProject" action="index"><g:message code="otp.menu.createProject"/></g:link></li>
-                                            <li id="individualInsert"><g:link controller="individual" action="insert"><g:message code="otp.menu.createIndividual"/></g:link></li>
-                                            <li id="sampleInsert"><g:link controller="individual" action="insertMany"><g:message code="otp.menu.createSample"/></g:link></li>
-                                            <li id="processes"><g:link controller="processes" action="list"><g:message code="otp.menu.processes"/></g:link></li>
-                                            <li id="metaDataFields"><g:link controller="metaDataFields" action="index"><g:message code="otp.menu.metaDataFields"/></g:link></li>
-                                            <li id="softwareTool"><g:link controller="softwareTool" action="list"><g:message code="otp.menu.softwareTool"/></g:link></li>
-                                            <li id="projectProgress"><g:link controller="projectProgress" action="progress"><g:message code="otp.menu.progress"/></g:link></li>
+                                            <li><g:link controller="metadataImport" action="index"><g:message code="otp.menu.importAndValidation"/></g:link></li>
+                                            <li><g:link controller="bamMetadataImport" action="index"><g:message code="otp.menu.bamMetadataImport"/></g:link></li>
+                                            <li><g:link controller="sampleIdentifierOverview" action="index"><g:message code="otp.menu.sampleIdentifierOverview"/></g:link></li>
+                                            <li><g:link controller="metadataImport" action="blacklistedIlseNumbers"><g:message code="otp.menu.blacklistedIlseNumbers"/></g:link></li>
+                                            <li><g:link controller="createProject" action="index"><g:message code="otp.menu.createProject"/></g:link></li>
+                                            <li><g:link controller="individual" action="insert"><g:message code="otp.menu.createIndividual"/></g:link></li>
+                                            <li><g:link controller="individual" action="insertMany"><g:message code="otp.menu.createSample"/></g:link></li>
+                                            <li><g:link controller="processes" action="list"><g:message code="otp.menu.processes"/></g:link></li>
+                                            <li><g:link controller="metaDataFields" action="index"><g:message code="otp.menu.metaDataFields"/></g:link></li>
+                                            <li><g:link controller="softwareTool" action="list"><g:message code="otp.menu.softwareTool"/></g:link></li>
+                                            <li><g:link controller="projectProgress" action="progress"><g:message code="otp.menu.progress"/></g:link></li>
                                         </ul>
                                     </li>
                                 </ul>
                             </li>
                         </sec:ifAnyGranted>
                         <sec:ifAnyGranted roles="ROLE_ADMIN">
-                            <li class="navigation menuContainerLCss" id="admin">
+                            <li class="navigation menuContainerLCss admin">
                                 <ul>
-                                    <li class="allGranted admin_nav_container nav_container" id="admin"><g:link class="menuLinkContainer"><g:message code="otp.menu.adminSection"/> &#9661;</g:link>
+                                    <li class="allGranted admin_nav_container nav_container"><g:link class="menuLinkContainer"><g:message code="otp.menu.adminSection"/> &#9661;</g:link>
                                         <ul>
-                                            <li id="userAdministration"><g:link controller="userAdministration"><g:message code="otp.menu.userAdministration"/></g:link></li>
-                                            <li id="group"><g:link controller="group"><g:message code="otp.menu.groupAdministration"/></g:link></li>
-                                            <li id="crashRecovery"><g:link controller="crashRecovery"><g:message code="otp.menu.crashRecovery"/></g:link></li>
-                                            <li id="processingOption"><g:link controller="processingOption"><g:message code="otp.menu.processingOptions"/></g:link></li>
-                                            <li id="notification"><g:link controller="notification"><g:message code="otp.menu.manageNotifications"/></g:link></li>
-                                            <li id="jobErrorDefinition"><g:link controller="jobErrorDefinition"><g:message code="otp.menu.jobErrorDefinition"/></g:link></li>
-                                            <li id="shutdown"><g:link controller="shutdown"><g:message code="otp.menu.planServerShutdown"/></g:link></li>
+                                            <li><g:link controller="userAdministration"><g:message code="otp.menu.userAdministration"/></g:link></li>
+                                            <li><g:link controller="group"><g:message code="otp.menu.groupAdministration"/></g:link></li>
+                                            <li><g:link controller="crashRecovery"><g:message code="otp.menu.crashRecovery"/></g:link></li>
+                                            <li><g:link controller="processingOption"><g:message code="otp.menu.processingOptions"/></g:link></li>
+                                            <li><g:link controller="notification"><g:message code="otp.menu.manageNotifications"/></g:link></li>
+                                            <li><g:link controller="jobErrorDefinition"><g:message code="otp.menu.jobErrorDefinition"/></g:link></li>
+                                            <li><g:link controller="shutdown"><g:message code="otp.menu.planServerShutdown"/></g:link></li>
                                         </ul>
                                     </li>
                                 </ul>
@@ -136,8 +136,8 @@
             <div class="menuContainer menuContainerR">
                 <ul>
                     <sec:ifLoggedIn>
-                        <li id="logout"><g:link controller="logout" action="index"><g:message code="otp.menu.logout"/></g:link></li>
-                        <li id="home"><g:link controller="home" action="index"><g:message code="otp.menu.home"/></g:link></li>
+                        <li><g:link controller="logout" action="index"><g:message code="otp.menu.logout"/></g:link></li>
+                        <li><g:link controller="home" action="index"><g:message code="otp.menu.home"/></g:link></li>
                     </sec:ifLoggedIn>
                 </ul>
             </div>

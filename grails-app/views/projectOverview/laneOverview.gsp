@@ -49,10 +49,11 @@
                     </td>
                 </tr>
             </table>
-            <p id="withdrawn_description">
-                Withdrawn data is colored gray.
-                <div></div>
-            </p>
+            <div>
+                <p id="withdrawn_description">
+                    Withdrawn data is colored gray.
+                </p>
+            </div>
         </div>
         <div class="otpDataTables">
             <table id="laneOverviewId"  data-ignore-filter-columns="${hideSampleIdentifier ? 2 : 3}" data-workflow-size="${pipelines.size()}">
