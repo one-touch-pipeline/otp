@@ -79,7 +79,7 @@ class SnvController {
             Collection<String> libPrepKitShortNames
             if (SeqTypeNames.fromSeqTypeName(properties.seqTypeName)?.isWgbs()) {
                 assert properties.libPrepKit1 == null && properties.libPrepKit2 == null
-                libPrepKitShortNames = SnvCallingInstance.get(properties.snvInstanceId).containedSeqTracks*.
+                libPrepKitShortNames = SnvCallingInstance.get(properties.instanceId).containedSeqTracks*.
                         libraryPreparationKit*.shortDisplayName
             } else {
                 libPrepKitShortNames = [(String) properties.libPrepKit1, (String) properties.libPrepKit2]
@@ -88,8 +88,8 @@ class SnvController {
             properties.remove('libPrepKit1')
             properties.remove('libPrepKit2')
             properties.dateCreated = sdf.format(properties.dateCreated)
-            if (properties.snvProcessingState != AnalysisProcessingStates.FINISHED) {
-                properties.remove('snvInstanceId')
+            if (properties.processingState != AnalysisProcessingStates.FINISHED) {
+                properties.remove('instanceId')
             }
             return properties
         }

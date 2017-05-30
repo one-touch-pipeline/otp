@@ -16,8 +16,14 @@
                     codes="${[
                             'projectOverview.index.PID',
                             'analysis.sampleTypes',
+                            'sophia.controlMassiveInvPrefilteringLevel',
+                            'sophia.tumorMassiveInvFilteringLevel',
+                            'sophia.rnaContaminatedGenesCount',
+                            'sophia.rnaDecontaminationApplied',
                             'analysis.processingDate',
                             'analysis.progress',
+                            'analysis.plots',
+                            'sophia.rnaContaminatedGenesMoreThanTwoIntron',
                     ] }"
                     id="resultsTable" />
         </div>

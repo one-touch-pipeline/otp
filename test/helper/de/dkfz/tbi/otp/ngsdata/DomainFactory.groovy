@@ -1025,7 +1025,7 @@ class DomainFactory {
 
                 sophiaInstance: { createSophiaInstanceWithRoddyBamFiles() },
                 controlMassiveInvPrefilteringLevel: 1,
-                tumorMassiveInvFiteringLevel: 1,
+                tumorMassiveInvFilteringLevel: 1,
                 rnaContaminatedGenesMoreThanTwoIntron: "arbitraryGeneName",
                 rnaContaminatedGenesCount: 1,
                 rnaDecontaminationApplied: true,
@@ -2290,7 +2290,7 @@ samplePairsNotProcessed: ${samplePairsNotProcessed}
 {
   "all": {
     "controlMassiveInvPrefilteringLevel": 0,
-    "tumorMassiveInvFiteringLevel": 0,
+    "tumorMassiveInvFilteringLevel": 0,
     "rnaContaminatedGenesMoreThanTwoIntron": "PRKRA;ACTG2;TYRO3;COL18A1;",
     "rnaContaminatedGenesCount": 4,
     "rnaDecontaminationApplied": false

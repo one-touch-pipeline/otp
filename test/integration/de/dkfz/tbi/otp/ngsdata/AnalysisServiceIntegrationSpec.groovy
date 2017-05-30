@@ -49,45 +49,30 @@ class AnalysisServiceIntegrationSpec extends IntegrationSpec implements UserAndR
         result == null
     }
 
-    void "checkFile with callingInstance and no File"(){
+    @Unroll
+    void "checkFile with #instance and no File"(){
         given:
-        SnvConfig snvConfig = DomainFactory.createSnvConfig()
-        ProcessedMergedBamFile processedMergedBamFile1 = DomainFactory.createProcessedMergedBamFile()
-        ProcessedMergedBamFile processedMergedBamFile2 = DomainFactory.createProcessedMergedBamFile()
-        SamplePair samplePair = DomainFactory.createSamplePair()
-
+        BamFilePairAnalysis analysisInstance = DomainFactory."create${analysis}InstanceWithRoddyBamFiles"(
+        )
         DomainFactory.createRealm(
-                name: samplePair.project.realmName,
+                name: analysisInstance.samplePair.project.realmName,
                 operationType: Realm.OperationType.DATA_MANAGEMENT,
         )
 
-        SnvCallingInstance snvCallingInstance = DomainFactory.createSnvCallingInstance(
-                instanceName: "INSTANCE_NAME",
-                config: snvConfig,
-                sampleType1BamFile: processedMergedBamFile1,
-                sampleType2BamFile: processedMergedBamFile2,
-                samplePair: samplePair,
-                processingState: AnalysisProcessingStates.FINISHED,
-        )
-        IndelCallingInstance indelCallingInstance = DomainFactory.createIndelCallingInstance(
-                instanceName: "INSTANCE_NAME",
-                config: snvConfig,
-                sampleType1BamFile: processedMergedBamFile1,
-                sampleType2BamFile: processedMergedBamFile2,
-                samplePair: samplePair,
-                processingState: AnalysisProcessingStates.FINISHED,
-        )
-
         when:
-        File file1
-        File file2
+        File file
         SpringSecurityUtils.doWithAuth(OPERATOR) {
-            file1 = analysisService.checkFile(snvCallingInstance)
-            file2 = analysisService.checkFile(indelCallingInstance)
+            file = analysisService.checkFile(analysisInstance)
         }
 
         then:
-        !file1
-        !file2
+        !file
+
+        where:
+        analysis       | instance
+        "Snv"          | SnvCallingInstance
+        "IndelCalling" | IndelCallingInstance
+        "Aceseq"       | AceseqInstance
+        "Sophia"       | SophiaInstance
     }
 }

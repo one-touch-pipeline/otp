@@ -23,7 +23,7 @@ class AceseqInstance extends BamFilePairAnalysis implements ProcessParameterObje
      * Example:  $OTP_ROOT_PATH/${project}/sequencing/$whole_genome_sequencing/view-by-pid/$PID/cnv_results/paired/tumor_control/2014-08-25_15h32/plots
      */
     File getInstancePlotPath() {
-        return new File(instancePath.absoluteDataManagementPath, "plots")
+        return new File(getWorkDirectory(), "plots")
     }
 
     @Override
@@ -42,7 +42,7 @@ class AceseqInstance extends BamFilePairAnalysis implements ProcessParameterObje
     }
 
     File getQcJsonFile() {
-        return new File(instancePath.absoluteDataManagementPath, "${individual.pid}_cnv_parameter.json")
+        return new File(getWorkDirectory(), "${individual.pid}_cnv_parameter.json")
     }
 
     enum AceseqPlot {
@@ -56,7 +56,7 @@ class AceseqInstance extends BamFilePairAnalysis implements ProcessParameterObje
         switch (plot) {
             case AceseqPlot.GC_CORRECTED: return new File(getInstancePlotPath(), "${this.individual.pid}_gc_corrected.png")
             case AceseqPlot.QC_GC_CORRECTED: return new File(getInstancePlotPath(), "${this.individual.pid}_qc_rep_corrected.png")
-            case AceseqPlot.TCN_DISTANCE_COMBINED_STAR: return new File(getInstancePath().absoluteDataManagementPath, "${this.individual.pid}_tcn_distances_combined_star.png")
+            case AceseqPlot.TCN_DISTANCE_COMBINED_STAR: return new File(getWorkDirectory(), "${this.individual.pid}_tcn_distances_combined_star.png")
             case AceseqPlot.WG_COVERAGE: return new File(getInstancePlotPath(), "${this.individual.pid}_wholeGenome_coverage.png")
             default: throw new Exception()
         }
@@ -87,7 +87,7 @@ class AceseqInstance extends BamFilePairAnalysis implements ProcessParameterObje
                 break
             default: throw new Exception()
         }
-        return new FileNameByRegexFinder().getFileNames(getInstancePath().absoluteDataManagementPath.toString(), pattern)
+        return new FileNameByRegexFinder().getFileNames(getWorkDirectory().toString(), pattern)
                 .collect { new File(it) }.sort()
     }
 

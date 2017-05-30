@@ -44,20 +44,20 @@ class AceseqController {
         SimpleDateFormat sdf = new SimpleDateFormat('yyyy-MM-dd hh:mm')
         List results = analysisService.getCallingInstancesForProject(AceseqInstance, cmd.project.name)
         List data = results.collect { Map properties ->
-            def qc = AceseqQc.findByAceseqInstanceAndNumber(AceseqInstance.get(properties.aceseqInstanceId as long), 1)
+            AceseqQc qc = AceseqQc.findByAceseqInstanceAndNumber(AceseqInstance.get(properties.instanceId as long), 1)
             properties.putAll([
-                    normalContamination: qc.normalContamination,
-                    ploidy: qc.ploidy,
-                    ploidyFactor: qc.ploidyFactor,
-                    goodnessOfFit: qc.goodnessOfFit,
-                    gender: qc.gender,
-                    solutionPossible: qc.solutionPossible,
+                    normalContamination: qc?.normalContamination,
+                    ploidy: qc?.ploidy,
+                    ploidyFactor: qc?.ploidyFactor,
+                    goodnessOfFit: qc?.goodnessOfFit,
+                    gender: qc?.gender,
+                    solutionPossible: qc?.solutionPossible,
             ])
             properties.remove('libPrepKit1')
             properties.remove('libPrepKit2')
             properties.dateCreated = sdf.format(properties.dateCreated)
-            if (properties.aceseqProcessingState != AnalysisProcessingStates.FINISHED) {
-                properties.remove('aceseqInstanceId')
+            if (properties.processingState != AnalysisProcessingStates.FINISHED) {
+                properties.remove('instanceId')
             }
             return properties
         }

@@ -16,7 +16,8 @@ $.otp.resultsTable = {
             bAutoWidth: false,
             sAjaxSource: source,
             bScrollCollapse: true,
-            sScrollY: 600,
+            sScrollY: 'auto',
+            sScrollX: 'auto',
             bPaginate: false,
             bDeferRender: true,
             fnServerData: function (sSource, aoData, fnCallback) {
@@ -43,6 +44,11 @@ $.otp.resultsTable = {
                         oTable.fnSettings().oFeatures.bServerSide = false;
                     }
                 });
+            },
+            fnInitComplete: function () {
+                new $.fn.dataTable.FixedColumns( this, {
+                    "leftColumns": 2
+                } );
             }
         });
         return oTable;
@@ -73,14 +79,14 @@ $.otp.resultsTable = {
                     row.solutionPossible,
 
                     row.dateCreated,
-                    row.aceseqProcessingState.name,
+                    row.processingState.name,
                 ];
-                if (row.aceseqInstanceId) {
+                if (row.instanceId) {
                     result.push(
                         $.otp.createLinkMarkup({
                             controller: 'aceseq',
                             action: 'plots',
-                            parameters: {'aceseqInstance.id': row.aceseqInstanceId},
+                            parameters: {'aceseqInstance.id': row.instanceId},
                             text: 'Plots'
                         })
                     );
@@ -112,14 +118,14 @@ $.otp.resultsTable = {
                     row.seqType,
                     row.libPrepKits,
                     row.dateCreated,
-                    row.indelProcessingState.name,
+                    row.processingState.name,
                 ];
-                if (row.indelInstanceId) {
+                if (row.instanceId) {
                     result.push(
                         $.otp.createLinkMarkup({
                             controller: 'indel',
                             action: 'plots',
-                            parameters: {'indelCallingInstance.id': row.indelInstanceId},
+                            parameters: {'indelCallingInstance.id': row.instanceId},
                             text: 'Plots'
                         })
                     );
@@ -140,7 +146,7 @@ $.otp.resultsTable = {
                 action: 'dataTableResults'
             }),
             function (row) {
-                return [
+                var result =  [
                     $.otp.createLinkMarkup({
                         controller: 'individual',
                         action: 'show',
@@ -148,9 +154,30 @@ $.otp.resultsTable = {
                         text: row.individualPid,
                     }),
                     row.sampleType1 + " \u2013 " + row.sampleType2,
+
+                    row.controlMassiveInvPrefilteringLevel,
+                    row.tumorMassiveInvFilteringLevel,
+                    row.rnaContaminatedGenesCount,
+                    row.rnaDecontaminationApplied,
+
                     row.dateCreated,
-                    row.sophiaProcessingState.name,
+                    row.processingState.name,
                 ];
+                if (row.instanceId) {
+                    result.push(
+                        $.otp.createLinkMarkup({
+                            controller: 'sophia',
+                            action: 'plots',
+                            parameters: {'sophiaInstance.id': row.instanceId},
+                            text: 'Plots'
+                        })
+                    );
+                } else {
+                    result.push("")
+                }
+                result.push(row.rnaContaminatedGenesMoreThanTwoIntron);
+                return result;
+
             }
         );
     },
@@ -175,14 +202,14 @@ $.otp.resultsTable = {
                     row.seqType,
                     row.libPrepKits,
                     row.dateCreated,
-                    row.snvProcessingState.name,
+                    row.processingState.name,
                 ];
-                if (row.snvInstanceId) {
+                if (row.instanceId) {
                     result.push(
                         $.otp.createLinkMarkup({
                             controller: 'snv',
                             action: 'plots',
-                            parameters: {'snvCallingInstance.id': row.snvInstanceId},
+                            parameters: {'snvCallingInstance.id': row.instanceId},
                             text: 'Plots'
                         })
                     );

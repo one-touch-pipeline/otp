@@ -43,8 +43,8 @@ class SnvCallingInstance extends BamFilePairAnalysis implements ProcessParameter
     }
 
 
-    OtpPath getAllSNVdiagnosticsPlots() {
-        return new OtpPath(instancePath, "snvs_${getIndividual().pid}_allSNVdiagnosticsPlots.pdf")
+    File getCombinedPlotPath() {
+        return new File(getWorkDirectory(), "snvs_${getIndividual().pid}_allSNVdiagnosticsPlots.pdf")
     }
 
 

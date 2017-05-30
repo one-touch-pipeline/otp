@@ -38,7 +38,11 @@ class SophiaInstance extends BamFilePairAnalysis implements ProcessParameterObje
     }
 
     File getFinalAceseqInputFile() {
-        return new File(getInstancePath().absoluteDataManagementPath, "svs_${individual.pid}_${SOPHIA_OUTPUT_FILE_SUFFIX}")
+        return new File(getWorkDirectory(), "svs_${individual.pid}_${SOPHIA_OUTPUT_FILE_SUFFIX}")
+    }
+
+    File getCombinedPlotPath() {
+        return new File(getWorkDirectory(), "svs_${individual.pid}_${samplePair.sampleType1.name.toLowerCase()}-${samplePair.sampleType2.name.toLowerCase()}_filtered.tsv_score_3_scaled_merged.pdf")
     }
 
     File getQcJsonFile() {

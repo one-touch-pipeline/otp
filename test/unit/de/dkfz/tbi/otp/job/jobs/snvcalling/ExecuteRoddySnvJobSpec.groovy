@@ -229,7 +229,7 @@ class ExecuteRoddySnvJobSpec extends Specification {
                     it.workExecutionDirectories.first()
                 },
                 { RoddySnvCallingInstance it ->
-                    it.getAllSNVdiagnosticsPlots().absoluteDataManagementPath
+                    it.getCombinedPlotPath()
                 },
                 { RoddySnvCallingInstance it ->
                     new OtpPath(it.instancePath, SnvCallingStep.CALLING.getResultFileName(it.individual)).absoluteDataManagementPath

@@ -64,7 +64,7 @@ class ParseSophiaQcJobSpec extends Specification {
         SophiaQc.findAllBySophiaInstance(instance).size() == 1
         SophiaQc qc = SophiaQc.findAllBySophiaInstance(instance).first()
         qc.controlMassiveInvPrefilteringLevel == 0
-        qc.tumorMassiveInvFiteringLevel == 0
+        qc.tumorMassiveInvFilteringLevel == 0
         qc.rnaContaminatedGenesMoreThanTwoIntron == "PRKRA;ACTG2;TYRO3;COL18A1;"
         qc.rnaContaminatedGenesCount == 4
         qc.rnaDecontaminationApplied == false

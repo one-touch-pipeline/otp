@@ -78,7 +78,7 @@ class IndelController {
             Collection<String> libPrepKitShortNames
             if (SeqTypeNames.fromSeqTypeName(properties.seqTypeName)?.isWgbs()) {
                 assert properties.libPrepKit1 == null && properties.libPrepKit2 == null
-                libPrepKitShortNames = IndelCallingInstance.get(properties.indelInstanceId).containedSeqTracks*.
+                libPrepKitShortNames = IndelCallingInstance.get(properties.instanceId).containedSeqTracks*.
                         libraryPreparationKit*.shortDisplayName
             } else {
                 libPrepKitShortNames = [(String) properties.libPrepKit1, (String) properties.libPrepKit2]
@@ -87,8 +87,8 @@ class IndelController {
             properties.remove('libPrepKit1')
             properties.remove('libPrepKit2')
             properties.dateCreated = sdf.format(properties.dateCreated)
-            if (properties.indelProcessingState != AnalysisProcessingStates.FINISHED) {
-                properties.remove('indelInstanceId')
+            if (properties.processingState != AnalysisProcessingStates.FINISHED) {
+                properties.remove('instanceId')
             }
             return properties
         }

@@ -7,10 +7,14 @@ class SophiaQc implements Entity {
     SophiaInstance sophiaInstance
 
     int controlMassiveInvPrefilteringLevel
-    int tumorMassiveInvFiteringLevel
+    int tumorMassiveInvFilteringLevel
     String rnaContaminatedGenesMoreThanTwoIntron
     int rnaContaminatedGenesCount
     boolean rnaDecontaminationApplied
 
     static belongsTo = [sophiaInstance: SophiaInstance]
+
+    static constraints = {
+        sophiaInstance unique: true
+    }
 }

@@ -44,9 +44,19 @@ class SophiaController {
         SimpleDateFormat sdf = new SimpleDateFormat('yyyy-MM-dd hh:mm')
         List results = analysisService.getCallingInstancesForProject(SophiaInstance, cmd.project.name)
         List data = results.collect { Map properties ->
+            SophiaQc qc = SophiaQc.findBySophiaInstance(SophiaInstance.get(properties.instanceId as long))
+            properties.putAll([
+                    controlMassiveInvPrefilteringLevel: qc?.controlMassiveInvPrefilteringLevel,
+                    tumorMassiveInvFilteringLevel: qc?.tumorMassiveInvFilteringLevel,
+                    rnaContaminatedGenesMoreThanTwoIntron: qc?.rnaContaminatedGenesMoreThanTwoIntron,
+                    rnaContaminatedGenesCount: qc?.rnaContaminatedGenesCount,
+                    rnaDecontaminationApplied: qc?.rnaDecontaminationApplied,
+            ])
+            properties.remove('libPrepKit1')
+            properties.remove('libPrepKit2')
             properties.dateCreated = sdf.format(properties.dateCreated)
-            if (properties.sophiaProcessingState != AnalysisProcessingStates.FINISHED) {
-                properties.remove('sophiaInstanceId')
+            if (properties.processingState != AnalysisProcessingStates.FINISHED) {
+                properties.remove('instanceId')
             }
             return properties
         }
@@ -56,5 +66,45 @@ class SophiaController {
         dataToRender.aaData = data
 
         render dataToRender as JSON
+    }
+
+    Map plots(RenderSophiaFileCommand cmd) {
+        if (cmd.hasErrors()) {
+            render status: 404
+            return
+        }
+        if (analysisService.checkFile(cmd.sophiaInstance)) {
+            return [
+                    id: cmd.sophiaInstance.id,
+                    pid: cmd.sophiaInstance.individual.pid,
+                    error: null
+            ]
+        }
+        return [
+                error: "File not found",
+                pid: "no File",
+        ]
+    }
+
+    def renderPDF(RenderSophiaFileCommand cmd) {
+        if (cmd.hasErrors()) {
+            response.sendError(404)
+            return
+        }
+        File stream = analysisService.checkFile(cmd.sophiaInstance)
+        if (stream) {
+            render file: stream , contentType: "application/pdf"
+        } else {
+            render status: 404
+            return
+        }
+    }
+}
+
+class RenderSophiaFileCommand {
+    SophiaInstance sophiaInstance
+
+    static constraints = {
+        sophiaInstance nullable: false
     }
 }

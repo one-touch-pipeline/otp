@@ -12,25 +12,6 @@ class AnalysisService {
     ProjectService projectService
 
     List getCallingInstancesForProject(Class<BamFilePairAnalysis> callingInstance, String projectName) {
-        String callingInstanceType
-
-        switch (callingInstance) {
-            case SnvCallingInstance:
-                callingInstanceType = "snv"
-                break
-            case IndelCallingInstance:
-                callingInstanceType = "indel"
-                break
-            case AceseqInstance:
-                callingInstanceType = "aceseq"
-                break
-            case SophiaInstance:
-                callingInstanceType = "sophia"
-                break
-            default:
-                throw new RuntimeException("${callingInstance.name} is not a valid calling instance")
-        }
-
         return callingInstance.withCriteria {
             eq('withdrawn', false)
             samplePair {
@@ -76,8 +57,8 @@ class AnalysisService {
                         }
                     }
                 }
-                property('processingState', "${callingInstanceType}ProcessingState")
-                property('id', "${callingInstanceType}InstanceId")
+                property('processingState', "processingState")
+                property('id', "instanceId")
                 property('dateCreated', "dateCreated")
             }
         }
@@ -88,12 +69,9 @@ class AnalysisService {
         if (!callingInstance) {
             return null
         }
-        if (callingInstance instanceof SnvCallingInstance) {
-            if (!callingInstance.getAllSNVdiagnosticsPlots().absoluteDataManagementPath.exists()) {
-                return null
-            }
-            return callingInstance.getAllSNVdiagnosticsPlots().absoluteDataManagementPath
-        } else if (callingInstance instanceof IndelCallingInstance) {
+        if (callingInstance instanceof SnvCallingInstance ||
+                callingInstance instanceof IndelCallingInstance ||
+                callingInstance instanceof SophiaInstance) {
             if (!callingInstance.getCombinedPlotPath().exists()) {
                 return null
             }
