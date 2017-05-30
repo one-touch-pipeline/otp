@@ -7,7 +7,7 @@
     <script type="text/javascript">
         var _paq = _paq || [];
         (function () {
-            _paq.push(['setTrackerUrl', ${PIWIK_URL} + 'piwik.php']);
+            _paq.push(['setTrackerUrl', '${PIWIK_URL}piwik.php']);
             _paq.push(['setSiteId', ${SITE_ID}]);
             _paq.push(['setCustomVariable', 1, 'Role', '${grails.plugin.springsecurity.SpringSecurityUtils.ifAllGranted("ROLE_ADMIN") ? "Admin" : "User"}', 'page']);
             _paq.push(['enableLinkTracking']);
@@ -16,7 +16,7 @@
             g.type = 'text/javascript';
             g.async = true;
             g.defer = true;
-            g.src = ${PIWIK_URL} + 'piwik.js';
+            g.src = '${PIWIK_URL}piwik.js';
             s.parentNode.insertBefore(g, s);
         })();
     </script>
