@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.utils.*
 import grails.converters.*
@@ -10,6 +11,7 @@ class ConfigureAnalysisController {
     IndividualService individualService
     ProcessingThresholdsService processingThresholdsService
     ProjectService projectService
+    ProjectSelectionService projectSelectionService
     SampleTypePerProjectService sampleTypePerProjectService
     SampleTypeService sampleTypeService
 
@@ -44,7 +46,8 @@ class ConfigureAnalysisController {
                 }
             }
         }
-        redirect(controller: "projectOverview", action: "specificOverview", params: [project: project.name])
+        projectSelectionService.setSelectedProject([project], project.name)
+        redirect(controller: "projectConfig")
     }
 
     private Map fetchData(Project project) {

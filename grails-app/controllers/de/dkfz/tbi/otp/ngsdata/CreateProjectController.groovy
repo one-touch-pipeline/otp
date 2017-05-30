@@ -1,13 +1,15 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
-import org.springframework.validation.FieldError
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
+import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.dataprocessing.*
+import org.springframework.validation.*
+
 
 class CreateProjectController {
 
     ProjectService projectService
     ProjectGroupService projectGroupService
+    ProjectSelectionService projectSelectionService
 
     def index(CreateProjectControllerSubmitCommand cmd) {
         String message
@@ -37,7 +39,9 @@ class CreateProjectController {
                         processingPriority: cmd.priority,
                         tumorEntity: cmd.tumorEntity,
                 )
-                redirect(controller: "projectOverview", action: "specificOverview", params: [project: projectService.createProject(projectParams).name])
+                Project project = projectService.createProject(projectParams)
+                projectSelectionService.setSelectedProject([project], project.name)
+                redirect(controller: "projectConfig")
             }
         }
         return [

@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddy.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
@@ -11,6 +12,7 @@ import org.springframework.validation.*
 class ConfigurePipelineController {
 
     ProjectService projectService
+    ProjectSelectionService projectSelectionService
 
     def alignment(ConfigureAlignmentPipelineSubmitCommand cmd) {
         Pipeline pipeline = Pipeline.Name.PANCAN_ALIGNMENT.pipeline
@@ -34,12 +36,12 @@ class ConfigurePipelineController {
                     adapterTrimmingNeeded: cmd.adapterTrimmingNeeded,
             ])
             projectService.configurePanCanAlignmentDeciderProject(panCanAlignmentConfiguration)
-            redirect(controller: "projectOverview", action: "specificOverview", params: [project: cmd.project.name])
+            redirect(controller: "projectConfig")
         }
 
         if (cmd.copy) {
             projectService.copyPanCanAlignmentXml(cmd.basedProject, cmd.seqType, cmd.project)
-            redirect(controller: "projectOverview", action: "specificOverview", params: [project: cmd.project.name])
+            redirect(controller: "projectConfig")
         }
 
         String defaultPluginName = ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_RODDY_ALIGNMENT_PLUGIN_NAME, cmd.seqType.roddyName, null)
@@ -358,8 +360,7 @@ class ConfigurePipelineController {
                     projectService.configureSophiaPipelineProject(configuration)
                     break
             }
-
-            redirect(controller: "projectOverview", action: "specificOverview", params: [project: cmd.project.name])
+            redirect(controller: "projectConfig")
         }
 
         result << getValues(cmd.project, cmd.seqType, pipeline)

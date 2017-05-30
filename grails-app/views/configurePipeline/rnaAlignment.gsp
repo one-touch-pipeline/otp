@@ -162,7 +162,7 @@
     </g:if>
 
     <br>
-    <g:form controller="projectOverview" action="specificOverview" params='[project: project.name]'>
+    <g:form controller="projectConfig">
         <g:submitButton name="back" value="Back to Overview"/>
     </g:form>
 </div>

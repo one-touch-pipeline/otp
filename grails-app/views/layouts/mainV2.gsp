@@ -161,7 +161,7 @@
                                                 <li><g:link controller="metadataImport" action="blacklistedIlseNumbers">${g.message(code: "otp.menu.blacklistedIlseNumbers")}</g:link></li>
                                                 <li role="separator" class="divider"></li>
                                                 <li><g:link controller="createProject">${g.message(code: "otp.menu.createProject")}</g:link></li>
-                                                <li><g:link controller="projectOverview" action="specificOverview">${g.message(code: "otp.menu.projectConfig")}</g:link></li>
+                                                <li><g:link controller="projectConfig">${g.message(code: "otp.menu.projectConfig")}</g:link></li>
                                                 <li><g:link controller="individual" action="insert">${g.message(code: "otp.menu.createIndividual")}</g:link></li>
                                                 <li><g:link controller="individual" action="insertMany">${g.message(code: "otp.menu.createSample")}</g:link></li>
                                                 <li role="separator" class="divider"></li>
