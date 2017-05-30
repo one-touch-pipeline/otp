@@ -178,6 +178,16 @@ class ExecuteWgbsAlignmentJobTests {
         testPrepareAndReturnWorkflowSpecificParameter()
     }
 
+    @Test
+    void testPrepareAndReturnWorkflowSpecificParameter_NoLibraryStoredInSeqTrackAndFileAlreadyExist() {
+        File metaDataTableFile = roddyBamFile.workMetadataTableFile
+        assert metaDataTableFile.parentFile.mkdirs()
+        metaDataTableFile.text = 'DUMMY TEXT'
+
+        testPrepareAndReturnWorkflowSpecificParameter()
+
+        assert metaDataTableFile.text != 'DUMMY TEXT'
+    }
 
     void testPrepareAndReturnWorkflowSpecificParameter(String libraryName = null) {
         roddyBamFile.seqTracks.each { SeqTrack seqTrack ->
@@ -187,7 +197,7 @@ class ExecuteWgbsAlignmentJobTests {
         }
 
         File metaDataTableFile = roddyBamFile.workMetadataTableFile
-        assert metaDataTableFile.parentFile.mkdirs()
+        assert metaDataTableFile.parentFile.exists() || metaDataTableFile.parentFile.mkdirs()
 
         String expectedCommand = "--usemetadatatable=${roddyBamFile.workMetadataTableFile.path} "
         assert expectedCommand == executeWgbsAlignmentJob.prepareAndReturnWorkflowSpecificParameter(roddyBamFile)

@@ -63,9 +63,17 @@ class ExecuteWgbsAlignmentJob extends AbstractRoddyAlignmentJob implements AutoR
         }.join("\n")
 
         String cmd = """
+set -e
+
+if [ -e "${metadataFile.path}" ]; then
+    echo "File ${metadataFile.path} already exists, deleting it."
+    rm ${metadataFile.path}*
+fi
+
 cat <<EOD > ${metadataFile.path}
 ${builder.toString()}
 EOD
+
 chmod 0444 ${metadataFile.path}
 """
 
