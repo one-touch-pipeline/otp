@@ -99,11 +99,11 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
                     referenceGenome: referenceGenomeProjectSeqType.referenceGenome,
                     statSizeFileName: referenceGenomeProjectSeqType.statSizeFileName,
                     pipeline: pipeline,
-                    alignmentProperties: referenceGenomeProjectSeqType.alignmentProperties?.collect { ReferenceGenomeProjectSeqTypeAlignmentProperty alignmentProperty ->
-                        new MergingWorkPackageAlignmentProperty(name: alignmentProperty.name, value: alignmentProperty.value)
-                    },
-            ]).save(failOnError: true)
-            assert workPackage
+            ])
+            workPackage.alignmentProperties = referenceGenomeProjectSeqType.alignmentProperties?.collect { ReferenceGenomeProjectSeqTypeAlignmentProperty alignmentProperty ->
+                new MergingWorkPackageAlignmentProperty(name: alignmentProperty.name, value: alignmentProperty.value, mergingWorkPackage: workPackage)
+            } as Set
+            assert workPackage.save(flush: true)
         }
 
         return [workPackage]
