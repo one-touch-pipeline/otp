@@ -117,6 +117,7 @@ enum SequenceSortColumn {
     LIBRARY("libraryName"),
     FASTQC("fastqcState"),
     ILSEID("ilseId"),
+    KNOWN_ISSUES("problem"),
     DATE("dateCreated")
 
     private final String columnName
@@ -150,6 +151,8 @@ enum SequenceSortColumn {
             case 10:
                 return SequenceSortColumn.ILSEID
             case 11:
+                return SequenceSortColumn.KNOWN_ISSUES
+            case 12:
                 return SequenceSortColumn.DATE
             default:
                 return SequenceSortColumn.PROJECT
