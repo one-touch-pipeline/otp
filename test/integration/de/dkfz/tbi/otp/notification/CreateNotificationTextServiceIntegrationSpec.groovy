@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.notification
 import de.dkfz.tbi.otp.ngsdata.*
 import grails.test.spock.*
 import org.codehaus.groovy.grails.commons.*
+import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 import org.springframework.beans.factory.annotation.*
 
 class CreateNotificationTextServiceIntegrationSpec extends IntegrationSpec {
@@ -16,6 +17,8 @@ class CreateNotificationTextServiceIntegrationSpec extends IntegrationSpec {
     @Autowired
     GrailsApplication grailsApplication
 
+    @Autowired
+    LinkGenerator linkGenerator
 
     void "createOtpLinks, when input invalid, should throw assert"() {
         when:
@@ -43,9 +46,9 @@ class CreateNotificationTextServiceIntegrationSpec extends IntegrationSpec {
         ]
 
         String expected = [
-                "${grailsApplication.config.grails.serverURL}/${CONTROLLER}/${ACTION}?project=project2",
-                "${grailsApplication.config.grails.serverURL}/${CONTROLLER}/${ACTION}?project=project3",
-                "${grailsApplication.config.grails.serverURL}/${CONTROLLER}/${ACTION}?project=project5",
+                "${linkGenerator.getServerBaseURL()}/${CONTROLLER}/${ACTION}?project=project2",
+                "${linkGenerator.getServerBaseURL()}/${CONTROLLER}/${ACTION}?project=project3",
+                "${linkGenerator.getServerBaseURL()}/${CONTROLLER}/${ACTION}?project=project5",
         ].join('\n')
 
         expect:
@@ -61,9 +64,9 @@ class CreateNotificationTextServiceIntegrationSpec extends IntegrationSpec {
         ]
 
         String expected = [
-                "${grailsApplication.config.grails.serverURL}/${CONTROLLER}/${ACTION}?projectName=project2",
-                "${grailsApplication.config.grails.serverURL}/${CONTROLLER}/${ACTION}?projectName=project3",
-                "${grailsApplication.config.grails.serverURL}/${CONTROLLER}/${ACTION}?projectName=project5",
+                "${linkGenerator.getServerBaseURL()}/${CONTROLLER}/${ACTION}?projectName=project2",
+                "${linkGenerator.getServerBaseURL()}/${CONTROLLER}/${ACTION}?projectName=project3",
+                "${linkGenerator.getServerBaseURL()}/${CONTROLLER}/${ACTION}?projectName=project5",
         ].join('\n')
 
         expect:

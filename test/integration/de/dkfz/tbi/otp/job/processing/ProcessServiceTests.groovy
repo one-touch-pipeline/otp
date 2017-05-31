@@ -1,5 +1,8 @@
 package de.dkfz.tbi.otp.job.processing
 
+import org.codehaus.groovy.grails.web.mapping.LinkGenerator
+import org.springframework.beans.factory.annotation.Autowired
+
 import static org.junit.Assert.*
 
 import org.apache.commons.io.FileUtils
@@ -21,6 +24,8 @@ class ProcessServiceTests extends AbstractIntegrationTest {
     AclUtilService aclUtilService
     ErrorLogService errorLogService
     GrailsApplication grailsApplication
+    @Autowired
+    LinkGenerator linkGenerator
 
     @Before
     void setUp() {
@@ -775,7 +780,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testProcessUrl_shouldBeFine() {
-        String serverUrl = grailsApplication.config.grails.serverURL
+        String serverUrl = linkGenerator.getServerBaseURL()
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
 
