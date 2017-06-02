@@ -76,6 +76,7 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
 
         List<String> expected = [
                 "INDEX_PREFIX:${referenceGenomeFilePath.path}",
+                "GENOME_FA:${referenceGenomeFilePath.path}",
                 "CHROM_SIZES_FILE:${chromosomeStatSizeFilePath.path}",
                 "possibleControlSampleNamePrefixes:${roddyBamFile.getSampleType().dirName}",
                 "possibleTumorSampleNamePrefixes:",

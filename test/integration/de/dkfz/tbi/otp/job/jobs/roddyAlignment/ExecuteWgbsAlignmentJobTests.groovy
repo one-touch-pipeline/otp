@@ -85,6 +85,7 @@ class ExecuteWgbsAlignmentJobTests {
 
         List<String> expectedCommand = [
                 "INDEX_PREFIX:${executeWgbsAlignmentJob.referenceGenomeService.fastaFilePath(roddyBamFile.referenceGenome).absolutePath}",
+                "GENOME_FA:${executeWgbsAlignmentJob.referenceGenomeService.fastaFilePath(roddyBamFile.referenceGenome).absolutePath}",
                 "CHROM_SIZES_FILE:${executeWgbsAlignmentJob.referenceGenomeService.chromosomeStatSizeFile(roddyBamFile.mergingWorkPackage).absolutePath}",
                 "possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}",
                 "possibleTumorSampleNamePrefixes:",

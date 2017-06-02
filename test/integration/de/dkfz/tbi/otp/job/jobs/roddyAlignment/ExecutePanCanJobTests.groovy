@@ -92,6 +92,7 @@ class ExecutePanCanJobTests {
 
         List<String>  expectedCommand = [
                 "INDEX_PREFIX:${executePanCanJob.referenceGenomeService.fastaFilePath(roddyBamFile.referenceGenome).absolutePath}",
+                "GENOME_FA:${executePanCanJob.referenceGenomeService.fastaFilePath(roddyBamFile.referenceGenome).absolutePath}",
                 "CHROM_SIZES_FILE:${executePanCanJob.referenceGenomeService.chromosomeStatSizeFile(roddyBamFile.mergingWorkPackage).absolutePath}",
                 "possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}",
                 "possibleTumorSampleNamePrefixes:",
@@ -117,6 +118,7 @@ class ExecutePanCanJobTests {
 
         List<String> expectedCommand = [
                 "INDEX_PREFIX:${executePanCanJob.referenceGenomeService.fastaFilePath(roddyBamFile.referenceGenome).absolutePath}",
+                "GENOME_FA:${executePanCanJob.referenceGenomeService.fastaFilePath(roddyBamFile.referenceGenome).absolutePath}",
                 "CHROM_SIZES_FILE:${executePanCanJob.referenceGenomeService.chromosomeStatSizeFile(roddyBamFile.mergingWorkPackage).absolutePath}",
                 "possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}",
                 "possibleTumorSampleNamePrefixes:",
@@ -135,6 +137,7 @@ class ExecutePanCanJobTests {
 
         List<String> expectedCommand = [
                 "INDEX_PREFIX:${executePanCanJob.referenceGenomeService.fastaFilePath(roddyBamFile.referenceGenome).absolutePath}",
+                "GENOME_FA:${executePanCanJob.referenceGenomeService.fastaFilePath(roddyBamFile.referenceGenome).absolutePath}",
                 "CHROM_SIZES_FILE:${executePanCanJob.referenceGenomeService.chromosomeStatSizeFile(roddyBamFile.mergingWorkPackage).absolutePath}",
                 "possibleControlSampleNamePrefixes:${roddyBamFile.sampleType.dirName}",
                 "possibleTumorSampleNamePrefixes:",
@@ -165,6 +168,7 @@ class ExecutePanCanJobTests {
 
         List<String> expectedCommand = [
                 "INDEX_PREFIX:${executePanCanJob.referenceGenomeService.fastaFilePath(roddyBamFile2.referenceGenome).absolutePath}",
+                "GENOME_FA:${executePanCanJob.referenceGenomeService.fastaFilePath(roddyBamFile.referenceGenome).absolutePath}",
                 "CHROM_SIZES_FILE:${executePanCanJob.referenceGenomeService.chromosomeStatSizeFile(roddyBamFile2.mergingWorkPackage).absolutePath}",
                 "possibleControlSampleNamePrefixes:${roddyBamFile2.sampleType.dirName}",
                 "possibleTumorSampleNamePrefixes:",
