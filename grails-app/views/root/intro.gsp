@@ -64,19 +64,10 @@
         <div class="col-xs-12 main">
             <h2><g:message code="intro.about.title" /></h2>
             <hr>
-            <p>
-                OTP is an automation platform for managing next generation sequencing (NGS) data.
-                The application provides support in all steps of this process including data transfer from temporary to final storage,
-                execution of data quality monitoring programs and alignment of reads to the reference genome using a BWA based pipeline.
-            </p><p>
-                The application provides three major benefits to stakeholders: first, the automation process reduces the man-power required for data management.
-                Second, all operations are executed more reliably and faster reducing the time until the sequences can be analyzed by bio-informatics groups.
-                Third, all information is located in one system with web access and search capabilities.
-            </p><p>
-                OTP development started in 2011. It currently processes NGS data for projects of different consortia such as ICGC, HIPO and DKTK.
-            </p>
+            <p class="keep-whitespace">${aboutOtp}</p>
         </div>
     </div>
+<g:if test="${showPartners}">
     <div class="row">
         <div class="col-xs-12">
             <h2><g:message code="intro.partners.title" /></h2>
@@ -148,6 +139,7 @@
             </div>
         </div>
     </div>
+</g:if>
     <div class="row footer-nav">
         <div class="copyright-claim pull-right">
             <ul>
@@ -160,7 +152,7 @@
     </div>
 </div>
 <otp:modal modalId="register" title="${g.message(code: "login.requestAccess.title")}">
-    <p>${g.message(code: "login.requestAccess.description")}</p>
+    <p>${g.message(code: "login.requestAccess.description")} <a href="mailto:${contactDataSupportEmail}">${contactDataSupportEmail}</a>.</p>
 </otp:modal>
 <asset:script type="text/javascript">
     $(function() {

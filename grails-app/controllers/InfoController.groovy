@@ -1,3 +1,4 @@
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.ngsdata.ProjectService
 import de.dkfz.tbi.otp.ngsdata.StatisticService
 import grails.converters.JSON
@@ -10,7 +11,10 @@ class InfoController {
     StatisticService statisticService
     ProjectService projectService
 
-    def about() { }
+    def about() {
+        String aboutOtp = ProcessingOptionService.findOptionSafe(ProcessingOptionService.GUI_ABOUT_OTP, null, null)
+        [aboutOtp: aboutOtp,]
+    }
 
     def numbers() { }
 

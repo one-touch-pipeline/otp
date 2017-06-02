@@ -6,6 +6,6 @@
 
 <body>
     <h2><g:message code="info.about.title" /></h2>
-    <g:message code="info.about.text" />
+    <p class="keep-whitespace">${aboutOtp}</p>
 </body>
 </html>

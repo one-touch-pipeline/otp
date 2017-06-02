@@ -6,7 +6,7 @@
         <button class="buttons cancel"><g:message code="default.button.cancel.label"/></button>
     </p>
     <p class="edit-switch-label">
-        <span class="wordBreak" style="white-space: pre-wrap">${value}</span>
+        <span class="wordBreak keep-whitespace">${value}</span>
         <button class="edit-button-left js-edit">&nbsp;</button>
     </p>
 </div>

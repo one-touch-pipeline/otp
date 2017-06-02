@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp
 
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import grails.converters.*
 import grails.orm.*
@@ -33,12 +34,17 @@ class RootController {
                 break
         }
 
+        boolean showPartners = ProcessingOptionService.findOptionSafe(ProcessingOptionService.GUI_SHOW_PARTNERS, null, null) == "true"
+        String aboutOtp = ProcessingOptionService.findOptionSafe(ProcessingOptionService.GUI_ABOUT_OTP, null, null)
+
         return [
                 projects: Project.count,
                 lanes: SeqTrack.count,
                 username: session.getAttribute(SpringSecurityUtils.SPRING_SECURITY_LAST_USERNAME_KEY),
                 message: messageText,
                 type: type,
+                showPartners: showPartners,
+                aboutOtp: aboutOtp,
         ]
     }
 

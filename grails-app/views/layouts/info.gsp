@@ -1,3 +1,4 @@
+<%@ page import="de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService" %>
 <g:applyLayout name="main">
 <head>
 <title><g:layoutTitle default="OTP"/></title>
@@ -24,11 +25,13 @@
                 <div class="infoMenuButtonText"><g:message code="info.contact.link" /></div>
             </div>
         </a>
-        <a href="${g.createLink(action: "partners")}">
-            <div class="infoMenuButton ${(actionName == "partners") ? "infoMenuButtonActive" : ""}">
-                <div class="infoMenuButtonText"><g:message code="info.partners.link" /></div>
-            </div>
-        </a>
+        <g:if test="${ProcessingOptionService.findOptionSafe(ProcessingOptionService.GUI_SHOW_PARTNERS, null, null) == "true"}">
+            <a href="${g.createLink(action: "partners")}">
+                <div class="infoMenuButton ${(actionName == "partners") ? "infoMenuButtonActive" : ""}">
+                    <div class="infoMenuButtonText"><g:message code="info.partners.link" /></div>
+                </div>
+            </a>
+        </g:if>
     </div>
 
     <sec:ifNotLoggedIn>

@@ -244,12 +244,10 @@
     <div class="row">
         <div class="col-lg-12 footer-copyright">
             <ul>
-                <li><a data-toggle="modal" href="#contact">Contact/Imprint</a></li>
-                <li>
-                    OTP is operated by the <a href="http://ibios.dkfz.de/tbi/index.php/data-management" target="_blank">Data&nbsp;Management&nbsp;and&nbsp;Genomics&nbsp;IT&nbsp;group&nbsp;(DMG)</a>
-                    in the <a href="http://ibios.dkfz.de/tbi/" target="_blank">Theoretical&nbsp;Bioinformatics&nbsp;division</a>
-                    at the <a href="https://www.dkfz.de/" target="_blank">German&nbsp;Cancer&nbsp;Research&nbsp;Center&nbsp;(DKFZ)</a>
-                </li>
+                <li><a data-toggle="modal" href="#contact">${g.message(code: "info.contact.title")}</a></li>
+                <li>&copy;2011-2017 <a href="https://www.dkfz.de" target="_blank">DKFZ</a> -
+                    <a href="http://ibios.dkfz.de/tbi/" target="_blank">eilslabs</a></li>
+                <li><a href="http://ibios.dkfz.de/tbi/index.php/data-management/software/otp" target="_blank">About OTP</a></li>
                 <li class="copyright-grey"><g:render template="/templates/version"/></li>
             </ul>
         </div>
@@ -260,15 +258,15 @@
     <img class="img-responsive" src="${assetPath(src: 'v2/to-top.png')}" alt="">
 </a>
 
-<otp:modal modalId="contact" title="Contact">
-    <p>OTP is operated by</p>
-    <p>German Cancer Research Center (DKFZ)<br>Division of Theoretical Bioinformatics<br>Data Management and Genomics IT (DMG)</p>
-    <h2>Support</h2>
-    <p><a href="mailto:${contactDataSupportEmail}">${contactDataSupportEmail}</a></p>
-    <h2>Person in charge</h2>
-    <p>Jürgen Eils (j.eils@dkfz.de)</p>
-    <h2>Postal address</h2>
-    <p>Deutsches Krebsforschungszentrum<br>Im Neuenheimer Feld 280<br>69120 Heidelberg<br>Germany</p>
+<otp:modal modalId="contact" title="${g.message(code: "info.contact.title")}">
+    <p>${g.message(code: "info.contact.operatedBy")}</p>
+    <p class="keep-whitespace">${contactDataOperatedBy}</p>
+    <h2>${g.message(code: "info.contact.support")}</h2>
+    <p class="keep-whitespace"><a href="mailto:${contactDataSupportEmail}">${contactDataSupportEmail}</a></p>
+    <h2>${g.message(code: "info.contact.personInCharge")}</h2>
+    <p class="keep-whitespace">${contactDataPersonInCharge}</p>
+    <h2>${g.message(code: "info.contact.postalAddress")}</h2>
+    <p class="keep-whitespace">${contactDataPostalAddress}</p>
 </otp:modal>
 
     <asset:deferredScripts/>

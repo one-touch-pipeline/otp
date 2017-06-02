@@ -13,6 +13,13 @@ import static org.springframework.util.Assert.*
 
 class ProcessingOptionService {
 
+    public static String GUI_CONTACT_DATA_OPERATED_BY = "GUI_CONTACT_DATA_OPERATED_BY"
+    public static String GUI_CONTACT_DATA_SUPPORT_EMAIL = "GUI_CONTACT_DATA_SUPPORT_EMAIL"
+    public static String GUI_CONTACT_DATA_PERSON_IN_CHARGE = "GUI_CONTACT_DATA_PERSON_IN_CHARGE"
+    public static String GUI_CONTACT_DATA_POSTAL_ADDRESS = "GUI_CONTACT_DATA_POSTAL_ADDRESS"
+    public static String GUI_SHOW_PARTNERS = "GUI_SHOW_PARTNERS"
+    public static String GUI_ABOUT_OTP = "GUI_ABOUT_OTP"
+
     /**
      * Dependency Injection of Spring Security Service - needed for ACL checks
      */
