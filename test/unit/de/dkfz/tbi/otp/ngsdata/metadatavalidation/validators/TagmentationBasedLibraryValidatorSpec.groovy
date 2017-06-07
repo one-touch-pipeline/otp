@@ -20,13 +20,15 @@ class TagmentationBasedLibraryValidatorSpec extends Specification {
                         "TRUE\n" +
                         "true\n" +
                         "false\n" +
+                        "FALSE\n" +
+                        "test\n" +
                         "\n")
         Collection<Problem> expectedProblems = [
 
                 new Problem(context.spreadsheet.dataRows[1].cells as Set, Level.ERROR,
-                        "The tagmentation based library column value should be '1' or an empty string instead of '0'"),
-                new Problem(context.spreadsheet.dataRows[5].cells as Set, Level.ERROR,
-                        "The tagmentation based library column value should be '1' or an empty string instead of 'false'"),
+                        "The tagmentation based library column value should be '1', 'true', 'false' or an empty string instead of '0'"),
+                new Problem(context.spreadsheet.dataRows[7].cells as Set, Level.ERROR,
+                        "The tagmentation based library column value should be '1', 'true', 'false' or an empty string instead of 'test'"),
         ]
 
         when:
