@@ -106,6 +106,16 @@ class AlignmentQualityOverviewController {
     ProjectSelectionService projectSelectionService
 
     Map index() {
+        String projectName = params.project
+        if (projectName) {
+            Project project
+            if ((project =  projectService.getProjectByName(projectName))) {
+                projectSelectionService.setSelectedProject([project], project.name)
+                redirect(controller: controllerName, action: actionName)
+                return
+            }
+        }
+
         List<Project> projects = projectService.getAllProjects()
         ProjectSelection selection = projectSelectionService.getSelectedProject()
 

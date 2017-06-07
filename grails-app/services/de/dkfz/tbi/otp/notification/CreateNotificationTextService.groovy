@@ -220,16 +220,16 @@ class CreateNotificationTextService {
         String otpLinks = ''
         switch (notificationStep) {
             case SNV:
-            otpLinks = createOtpLinks(samplePairsFinished*.project, 'snv', 'results', 'projectName')
+            otpLinks = createOtpLinks(samplePairsFinished*.project, 'snv', 'results')
                 break
             case INDEL:
-                otpLinks = createOtpLinks(samplePairsFinished*.project, 'indel', 'results', 'projectName')
+                otpLinks = createOtpLinks(samplePairsFinished*.project, 'indel', 'results')
                 break
             case SOPHIA:
-                otpLinks = createOtpLinks(samplePairsFinished*.project, 'sophia', 'results', 'projectName')
+                otpLinks = createOtpLinks(samplePairsFinished*.project, 'sophia', 'results')
                 break
             case ACESEQ:
-                otpLinks = createOtpLinks(samplePairsFinished*.project, 'aceseq', 'results', 'projectName')
+                otpLinks = createOtpLinks(samplePairsFinished*.project, 'aceseq', 'results')
                 break
             default:
                 //no links
@@ -261,7 +261,7 @@ class CreateNotificationTextService {
     }
 
 
-    String createOtpLinks(List<Project> projects, String controller, String action, String parameterProjectName = 'project') {
+    String createOtpLinks(List<Project> projects, String controller, String action) {
         assert projects
         assert controller
         assert action
@@ -272,7 +272,7 @@ class CreateNotificationTextService {
                     action    : action,
                     absolute  : true,
                     params    : [
-                            (parameterProjectName): it
+                            'project': it
                     ]
             ])
         }.join('\n')

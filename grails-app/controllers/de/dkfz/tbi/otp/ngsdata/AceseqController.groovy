@@ -14,9 +14,10 @@ class AceseqController {
     ProjectSelectionService projectSelectionService
 
     Map results() {
-        if (params.projectName) {
+        String projectName = params.project ?: params.projectName
+        if (projectName) {
             Project project
-            if ((project =  projectService.getProjectByName(params.projectName))) {
+            if ((project =  projectService.getProjectByName(projectName))) {
                 projectSelectionService.setSelectedProject([project], project.name)
                 redirect(controller: controllerName, action: actionName)
                 return

@@ -54,23 +54,4 @@ class CreateNotificationTextServiceIntegrationSpec extends IntegrationSpec {
         expect:
         expected == createNotificationTextService.createOtpLinks(projects, CONTROLLER, ACTION)
     }
-
-    void "createOtpLinks, when input valid and custom project parameter name, return sorted URLs of the projects"() {
-        given:
-        List<Project> projects = [
-                DomainFactory.createProject(name: 'project3'),
-                DomainFactory.createProject(name: 'project5'),
-                DomainFactory.createProject(name: 'project2'),
-        ]
-
-        String expected = [
-                "${linkGenerator.getServerBaseURL()}/${CONTROLLER}/${ACTION}?projectName=project2",
-                "${linkGenerator.getServerBaseURL()}/${CONTROLLER}/${ACTION}?projectName=project3",
-                "${linkGenerator.getServerBaseURL()}/${CONTROLLER}/${ACTION}?projectName=project5",
-        ].join('\n')
-
-        expect:
-        expected == createNotificationTextService.createOtpLinks(projects, CONTROLLER, ACTION, 'projectName')
-    }
-
 }
