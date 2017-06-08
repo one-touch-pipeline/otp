@@ -177,16 +177,16 @@ class PbsOptionMergingServiceIntegrationTests {
                 pbsOptionMergingService.mergePbsOptions(processingStep, realm, additional1, additional2))
     }
 
-    private Realm createRealm(String pbsOptions = "{}", Realm.Cluster cluster = Realm.Cluster.DKFZ) {
+    private Realm createRealm(String defaultJobSubmissionOptions = "{}", Realm.Cluster cluster = Realm.Cluster.DKFZ) {
         Realm realm = DomainFactory.createRealmDataManagement([
             cluster: cluster,
-            pbsOptions: pbsOptions,
+            defaultJobSubmissionOptions: defaultJobSubmissionOptions,
         ])
         assertNotNull(realm.save(flush: true))
         return realm
     }
 
-    private ProcessingOption createProcessingOption(String jobKey, String pbsOptions = "{}", Realm.Cluster cluster = Realm.Cluster.DKFZ) {
+    private ProcessingOption createProcessingOption(String jobKey, String jobSubmissionOptions = "{}", Realm.Cluster cluster = Realm.Cluster.DKFZ) {
         String name = PbsOptionMergingService.PBS_PREFIX + jobKey
 
         //check, if already a option with this name exist and if yes, delete it
@@ -198,7 +198,7 @@ class PbsOptionMergingServiceIntegrationTests {
         ProcessingOption processingOption = new ProcessingOption(
                 name: name,
                 type: cluster.toString(),
-                value: pbsOptions,
+                value: jobSubmissionOptions,
                 comment: 'comment'
                 )
         assertNotNull(processingOption.save(flush: true))

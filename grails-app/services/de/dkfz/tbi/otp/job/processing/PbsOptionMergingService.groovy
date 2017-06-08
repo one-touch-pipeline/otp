@@ -41,7 +41,7 @@ class PbsOptionMergingService {
         String optionNameWithoutSeqType = "${PBS_PREFIX}${processingStep.nonQualifiedJobClass}"
 
         // default options for the realm
-        Map options = jsonStringToMap(realm.pbsOptions)
+        Map options = jsonStringToMap(realm.defaultJobSubmissionOptions)
 
         // options for the job class
         options = mergeMapWithJsonString(options, processingOptionService.findOption(optionNameWithoutSeqType, cluster, project))

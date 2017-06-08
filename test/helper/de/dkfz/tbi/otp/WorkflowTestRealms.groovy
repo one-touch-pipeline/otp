@@ -11,12 +11,13 @@ class WorkflowTestRealms {
     public static final Map REALM_DEFAULTS_DKFZ_CLUSTER = [
             name: LABEL_DKFZ,
             cluster: Realm.Cluster.DKFZ,
+            jobScheduler: Realm.JobScheduler.PBS,
             host: 'headnode',
             port: DEFAULT_PORT,
             unixUser: 'otptest',
             roddyUser: 'OtherUnixUser',
             timeout: 0,
-            pbsOptions: '{"-l": {nodes: "1", walltime: "30:00"}}',
+            defaultJobSubmissionOptions: '{"-l": {nodes: "1", walltime: "30:00"}}',
     ]
 
     /**

@@ -137,12 +137,13 @@ class DomainFactory {
                 programsRootPath  : { new File(fakePath, 'programs').path },
                 stagingRootPath   : { new File(fakePath, 'staging').path },
                 webHost           : 'test.host.invalid',
+                jobScheduler      : Realm.JobScheduler.PBS,
                 host              : 'test.host.invalid',
                 port              : -1,
                 unixUser          : '!fakeuser',
                 roddyUser         : '!fakeroddyuser',
                 timeout           : -1,
-                pbsOptions        : '{}',
+                defaultJobSubmissionOptions : '{}',
                 cluster           : Cluster.DKFZ,
         ], realmProperties)
     }

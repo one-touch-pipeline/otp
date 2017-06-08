@@ -60,7 +60,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
     protected static final boolean KEEP_TEMP_FOLDER = false
 
     // fast queue, here we come!
-    static final String pbsOptions = '{"-l": {nodes: "1", walltime: "20:00", mem: "5g"}, "-j": "oe"}'
+    static final String jobSubmissionOptions = '{"-l": {nodes: "1", walltime: "20:00", mem: "5g"}, "-j": "oe"}'
 
     // permissions to be applied to the source test data
     protected final static String TEST_DATA_MODE_DIR = "2750"
@@ -186,7 +186,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
                 loggingRootPath: loggingRootPath,
                 stagingRootPath: stagingRootPath,
                 unixUser: getAccountName(),
-                pbsOptions: pbsOptions,
+                defaultJobSubmissionOptions: jobSubmissionOptions,
         ]
 
         assert WorkflowTestRealms.createRealmDataManagementDKFZ(realmParams).save(flush: true)
@@ -442,7 +442,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         }
 
         ProcessingOption.findAllByNameLike("${PbsOptionMergingService.PBS_PREFIX}%").each {
-            it.value = pbsOptions
+            it.value = jobSubmissionOptions
             it.save(failOnError: true, flush: true)
         }
     }

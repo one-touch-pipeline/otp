@@ -1,30 +1,21 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.job.processing.PbsOptionMergingService
-import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.utils.*
+
 
 class Realm implements Entity, Serializable {
 
     static final String LATEST_DKFZ_REALM = 'DKFZ_13.1'
 
-    /**
-     * Defines the available clusters.
-     * It allowed to reference to a cluster about it names.
-     * The following properties of the realm are depend on the used cluster:
-     * <ul>
-     * <li>{@link #host}</li>
-     * <li>{@link #port}</li>
-     * <li>{@link #unixUser}</li>
-     * <li>{@link #timeout}</li>
-     * <li>{@link #pbsOptions}</li>
-     * </ul>
-     *
-     *
-     */
     public enum Cluster {
         DKFZ,
         BIOQUANT
     }
+
+    public enum JobScheduler {
+        PBS,
+    }
+
 
     String name                        // name of the realm
     String env                         // environment from grails
@@ -40,7 +31,7 @@ class Realm implements Entity, Serializable {
      * <li>{@link #port}</li>
      * <li>{@link #unixUser}</li>
      * <li>{@link #timeout}</li>
-     * <li>{@link #pbsOptions}</li>
+     * <li>{@link #defaultJobSubmissionOptions}</li>
      * </ul>
      * Therefore these properties should have the same value for the same cluster name.
      */
@@ -52,12 +43,15 @@ class Realm implements Entity, Serializable {
     String loggingRootPath             // mount path of the file system with logging data (needs to be read-write)
     String stagingRootPath             // path where OTP is able to write
     String webHost                     // web address
-    String host                        // PBS head address
-    int port
+
+    JobScheduler jobScheduler
+    String host                         // job submission host name
+    int port                            // job submission host port
     String unixUser
     String roddyUser
     int timeout
-    String pbsOptions                  // realm dependent options of the PBS system
+    String defaultJobSubmissionOptions  // default options for job submission
+
 
     /**
      * {@link de.dkfz.tbi.flowcontrol.ws.client.FlowControlClient.Builder#clientKeys}
@@ -80,10 +74,6 @@ class Realm implements Entity, Serializable {
         flowControlHost blank:true, nullable:true
         flowControlPort nullable:true
         roddyUser blank: false, nullable: true
-        pbsOptions validator: {
-            PbsOptionMergingService.jsonStringToMap(it)  // will throw an exception if invalid
-            return true
-        }
     }
 
     @Override
