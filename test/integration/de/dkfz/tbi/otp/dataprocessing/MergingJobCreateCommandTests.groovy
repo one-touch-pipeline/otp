@@ -32,6 +32,7 @@ class MergingJobCreateCommandTests {
     SeqPlatform seqPlatform
     SeqType seqType
     MergingPass mergingPass
+    Realm realm
 
     String basePath
     String basePathAlignment
@@ -45,7 +46,7 @@ class MergingJobCreateCommandTests {
 
     @Before
     void setUp() {
-        Realm realm = Realm.build(
+        realm = Realm.build(
                 operationType: OperationType.DATA_PROCESSING,
                 processingRootPath: tempFolder.root.path,
         )
@@ -158,7 +159,7 @@ class MergingJobCreateCommandTests {
 
     @Test(expected = NullPointerException)
     void testCreateCommandProcessedMergedBamFileIsNull() {
-        mergingJob.createCommand(null)
+        mergingJob.createCommand(null, null)
     }
 
     @Test
@@ -177,7 +178,7 @@ class MergingJobCreateCommandTests {
         String picardOptionsExp = "VALIDATION_STRINGENCY=SILENT REMOVE_DUPLICATES=FALSE ASSUME_SORTED=TRUE MAX_RECORDS_IN_RAM=12500000 CREATE_INDEX=TRUE"
         String chmodExp = "chmod 440 ${outputFilePathExp} ${metricsPathExp} ${baiFilePath}"
         String createCommandOutputExp = "${createTempDirExp}; ${javaOptionsExp}; ${picardExp} ${picardFilesExp} ${picardOptionsExp}; ${chmodExp}"
-        String createCommandOutputAct = mergingJob.createCommand(processedMergedBamFile)
+        String createCommandOutputAct = mergingJob.createCommand(processedMergedBamFile, realm)
         assertEquals(createCommandOutputExp, createCommandOutputAct)
     }
 
@@ -203,7 +204,7 @@ class MergingJobCreateCommandTests {
         String picardOptionsExp = "VALIDATION_STRINGENCY=SILENT REMOVE_DUPLICATES=FALSE ASSUME_SORTED=TRUE MAX_RECORDS_IN_RAM=12500000 CREATE_INDEX=TRUE"
         String chmodExp = "chmod 440 ${outputFilePathExp} ${metricsPathExp} ${baiFilePath}"
         String createCommandOutputExp = "${createTempDirExp}; ${javaOptionsExp}; ${picardExp} ${picardFilesExp} ${picardOptionsExp}; ${chmodExp}"
-        String createCommandOutputAct = mergingJob.createCommand(processedMergedBamFile)
+        String createCommandOutputAct = mergingJob.createCommand(processedMergedBamFile, realm)
         assertEquals(createCommandOutputExp, createCommandOutputAct)
     }
 
@@ -229,7 +230,7 @@ class MergingJobCreateCommandTests {
         String picardOptionsExp = "VALIDATION_STRINGENCY=SILENT REMOVE_DUPLICATES=FALSE ASSUME_SORTED=TRUE MAX_RECORDS_IN_RAM=12500000 CREATE_INDEX=TRUE"
         String chmodExp = "chmod 440 ${outputFilePathExp} ${metricsPathExp} ${baiFilePath}"
         String createCommandOutputExp = "${createTempDirExp}; ${javaOptionsExp}; ${picardExp} ${picardFilesExp} ${picardOptionsExp}; ${chmodExp}"
-        String createCommandOutputAct = mergingJob.createCommand(processedMergedBamFile)
+        String createCommandOutputAct = mergingJob.createCommand(processedMergedBamFile, realm)
         assertEquals(createCommandOutputExp, createCommandOutputAct)
     }
 
@@ -258,7 +259,7 @@ class MergingJobCreateCommandTests {
         String picardOptionsExp = "VALIDATION_STRINGENCY=SILENT REMOVE_DUPLICATES=FALSE ASSUME_SORTED=TRUE MAX_RECORDS_IN_RAM=12500000 CREATE_INDEX=TRUE"
         String chmodExp = "chmod 440 ${outputFilePathExp} ${metricsPathExp} ${baiFilePath}"
         String createCommandOutputExp = "${createTempDirExp}; ${javaOptionsExp}; ${picardExp} ${picardFilesExp} ${picardOptionsExp}; ${chmodExp}"
-        String createCommandOutputAct = mergingJob.createCommand(processedMergedBamFile)
+        String createCommandOutputAct = mergingJob.createCommand(processedMergedBamFile, realm)
         assertEquals(createCommandOutputExp, createCommandOutputAct)
     }
 

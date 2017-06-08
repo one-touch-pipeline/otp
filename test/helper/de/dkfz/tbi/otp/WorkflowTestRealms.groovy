@@ -1,7 +1,11 @@
 package de.dkfz.tbi.otp
 
+import de.dkfz.tbi.otp.job.processing.JobSubmissionOption
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Realm
+import groovy.json.JsonOutput
+
+import java.time.Duration
 
 class WorkflowTestRealms {
 
@@ -17,7 +21,9 @@ class WorkflowTestRealms {
             unixUser: 'otptest',
             roddyUser: 'OtherUnixUser',
             timeout: 0,
-            defaultJobSubmissionOptions: '{"-l": {nodes: "1", walltime: "30:00"}}',
+            defaultJobSubmissionOptions: JsonOutput.toJson([
+                    (JobSubmissionOption.WALLTIME): Duration.ofMinutes(30).toString(),
+            ])
     ]
 
     /**

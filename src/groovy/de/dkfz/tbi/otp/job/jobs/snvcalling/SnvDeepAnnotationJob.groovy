@@ -69,21 +69,21 @@ class SnvDeepAnnotationJob extends AbstractSnvCallingJob implements AutoRestarta
              * Therefore the snv annotation file has to be copied so that it has the correct naming.
              * It was decided not to override the snv annotation file to be on the safe side.
              */
-            final String qsubParameters="{ '-v': '"+
-                    "CONFIG_FILE=${configFileInProjectDirectory}," +
-                    "pid=${instance.individual.pid}," +
-                    "PID=${instance.individual.pid}," +
-                    "TOOL_ID=snvDeepAnnotation," +
-                    "PIPENAME=SNV_DEEPANNOTATION," +
-                    "FILENAME_VCF=${deepAnnotationResultFile}," +
-                    "FILENAME_VCF_SNVS=${deepAnnotationResultFile}," +
-                    "FILENAME_CHECKPOINT=${checkpointFile}," +
-                    "'}"
+            final Map<String, String> environmentVariables = [
+                    CONFIG_FILE: configFileInProjectDirectory.absolutePath,
+                    pid: instance.individual.pid,
+                    PID: instance.individual.pid,
+                    TOOL_ID: "snvDeepAnnotation",
+                    PIPENAME: "SNV_DEEPANNOTATION",
+                    FILENAME_VCF: deepAnnotationResultFile.absolutePath,
+                    FILENAME_VCF_SNVS: deepAnnotationResultFile.absolutePath,
+                    FILENAME_CHECKPOINT: checkpointFile.absolutePath,
+            ]
             final String script = "cp ${inputResultFile} ${deepAnnotationResultFile}; " +
                     "${step.getExternalScript(config.externalScriptVersion).scriptFilePath}; " +
                     "md5sum ${deepAnnotationResultFile} > ${deepAnnotationResultFile}.md5sum"
 
-            pbsService.executeJob(realm, script, qsubParameters)
+            pbsService.executeJob(realm, script, environmentVariables)
 
             return NextAction.WAIT_FOR_CLUSTER_JOBS
         } else {

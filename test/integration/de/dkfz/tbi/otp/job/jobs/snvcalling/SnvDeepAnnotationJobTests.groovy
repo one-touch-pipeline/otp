@@ -312,11 +312,13 @@ CHROMOSOME_INDICES=( {1..21} X Y)
                     "PIPENAME=SNV_DEEPANNOTATION," +
                     "FILENAME_VCF=${snvFile}," +
                     "FILENAME_VCF_SNVS=${snvFile}," +
-                    "FILENAME_CHECKPOINT=${step.getCheckpointFilePath(snvCallingInstance2).absoluteDataManagementPath},"
+                    "FILENAME_CHECKPOINT=${step.getCheckpointFilePath(snvCallingInstance2).absoluteDataManagementPath}"
 
 
-            assert command.contains(scriptCommandPart)
-            assert command.contains(qsubParameterCommandPart)
+            if (!command.startsWith("qrls")) {
+                assert command.contains(scriptCommandPart)
+                assert command.contains(qsubParameterCommandPart)
+            }
 
             createResultFile(snvCallingInstance2, SnvCallingStep.SNV_DEEPANNOTATION)
 

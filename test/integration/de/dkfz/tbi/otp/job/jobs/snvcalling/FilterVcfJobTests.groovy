@@ -292,8 +292,10 @@ CHROMOSOME_INDICES=( {1..21} XY)
                         "FILENAME_VCF=${new OtpPath(snvCallingInstance2.instancePath, SnvCallingStep.SNV_DEEPANNOTATION.getResultFileName(snvCallingInstance1.individual)).absoluteDataManagementPath}," +
                         "FILENAME_CHECKPOINT=${SnvCallingStep.FILTER_VCF.getCheckpointFilePath(snvCallingInstance2).absoluteDataManagementPath}"
 
+            if (!command.startsWith("qrls")) {
                 assert command.contains(scriptCommandPart)
                 assert command.contains(qsubParameterCommandPart)
+            }
 
             return new ProcessOutput("${PBS_ID}.pbs", "", 0)
         }

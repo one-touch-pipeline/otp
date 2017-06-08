@@ -66,7 +66,7 @@ class SnvJoiningJobTests {
         executionService.metaClass.querySsh = { String host, int port, int timeout, String username, String password, File keyFile, boolean useSshAgent, String command ->
             if (command.startsWith("mkdir -p ")) {
                 return ProcessHelperService.executeAndWait(command).assertExitCodeZeroAndStderrEmpty()
-            } else {
+            } else if (!command.startsWith("qrls")) {
                 assert !querySshCalled
                 querySshCalled = true
                 File snvFile = new OtpPath(snvCallingInstance.instancePath, SnvCallingStep.CALLING.getResultFileName(snvCallingInstance.individual, null)).absoluteDataManagementPath
@@ -75,6 +75,7 @@ class SnvJoiningJobTests {
                 assert command.contains(scriptCommandPart)
                 return new ProcessOutput("123.pbs", "", 0)
             }
+            return new ProcessOutput("", "", 0)
         }
 
         testData.createBamFile(snvCallingInstance.sampleType1BamFile)

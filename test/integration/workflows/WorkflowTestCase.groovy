@@ -15,17 +15,18 @@ import grails.plugin.springsecurity.*
 import grails.test.mixin.*
 import grails.test.mixin.integration.*
 import grails.util.*
+import groovy.json.*
 import groovy.sql.*
 import groovy.util.logging.*
 import org.hibernate.*
-import org.joda.time.*
 import org.joda.time.format.*
 import org.junit.*
 
 import javax.sql.*
+import java.time.*
 import java.util.concurrent.*
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 import static de.dkfz.tbi.otp.utils.ProcessHelperService.*
 
 /**
@@ -61,7 +62,10 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
     protected static final boolean KEEP_TEMP_FOLDER = false
 
     // fast queue, here we come!
-    static final String jobSubmissionOptions = '{"-l": {nodes: "1", walltime: "20:00", mem: "5g"}, "-j": "oe"}'
+    static final String jobSubmissionOptions = JsonOutput.toJson([
+            (JobSubmissionOption.WALLTIME): Duration.ofMinutes(20).toString(),
+            (JobSubmissionOption.MEMORY)  : "5g",
+    ])
 
     // permissions to be applied to the source test data
     protected final static String TEST_DATA_MODE_DIR = "2750"
@@ -99,7 +103,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
      * A timeout for the workflow execution,
      * if the workflow doesn't finish within the given duration the execute() method fails.
      */
-    abstract Duration getTimeout()
+    abstract org.joda.time.Duration getTimeout()
 
     /**
      * This method can be overridden if a workflow script needs some additional setup
@@ -252,7 +256,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
     }
 
 
-    private waitUntilWorkflowFinishes(Duration timeout, int numberOfProcesses = 1) {
+    private waitUntilWorkflowFinishes(org.joda.time.Duration timeout, int numberOfProcesses = 1) {
         println "Started to wait (until workflow is finished or timeout)"
         long lastPrintln = 0L
         int counter = 0

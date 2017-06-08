@@ -57,8 +57,9 @@ testDataConfig {
             port = 22
             unixUser = '!fakeuser'
             timeout = 60
-            defaultJobSubmissionOptions = '{}'
+            defaultJobSubmissionOptions = ''
             cluster = Realm.Cluster.DKFZ
+            jobScheduler = Realm.JobScheduler.PBS
         }
         'de.dkfz.tbi.otp.ngsdata.ReferenceGenome' {
             name = {'referenceGenomeName_' + (counter++)}

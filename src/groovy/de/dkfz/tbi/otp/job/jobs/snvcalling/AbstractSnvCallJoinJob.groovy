@@ -52,17 +52,17 @@ abstract class AbstractSnvCallJoinJob extends AbstractSnvCallingJob {
 
             final File sampleType1BamFilePath = abstractMergedBamFileService.getExistingBamFilePath(instance.sampleType1BamFile)
             final File sampleType2BamFilePath = abstractMergedBamFileService.getExistingBamFilePath(instance.sampleType2BamFile)
-            final String qsubParametersGeneral =
-                    "CONFIG_FILE=${configFileInProjectDirectory}," +
-                    "pid=${instance.individual.pid}," +
-                    "PID=${instance.individual.pid}," +
-                    "TUMOR_BAMFILE_FULLPATH_BP=${sampleType1BamFilePath}," +
-                    "CONTROL_BAMFILE_FULLPATH_BP=${sampleType2BamFilePath}"
+            final Map<String, String> generalEnvironmentVariables = [
+                    CONFIG_FILE: configFileInProjectDirectory.absolutePath,
+                    pid: instance.individual.pid,
+                    PID: instance.individual.pid,
+                    TUMOR_BAMFILE_FULLPATH_BP: sampleType1BamFilePath.absolutePath,
+                    CONTROL_BAMFILE_FULLPATH_BP: sampleType2BamFilePath.absolutePath,
+            ]
 
-            submit(jobResult, realm, { String clusterScript, String specificQsubParameters ->
-                pbsService.executeJob(realm, clusterScript, "{" +
-                        "'-v': '${qsubParametersGeneral},${specificQsubParameters}'" +
-                        "}")
+            submit(jobResult, realm, { String clusterScript, Map specificEnvironmentVariables ->
+                generalEnvironmentVariables.putAll(specificEnvironmentVariables)
+                pbsService.executeJob(realm, clusterScript, generalEnvironmentVariables)
             })
 
             return NextAction.WAIT_FOR_CLUSTER_JOBS

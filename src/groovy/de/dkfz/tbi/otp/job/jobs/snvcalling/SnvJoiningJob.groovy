@@ -20,17 +20,18 @@ class SnvJoiningJob extends AbstractSnvCallJoinJob {
         deleteResultFileIfExists(vcfRawFile, realm)
         String allChromosomeFilePaths = getChromosomeResultFiles(jobResult).values().join(" ")
 
-        final String qsubParametersToMergeVcfs =
-                "TOOL_ID=snvVcfJoin," +
-                "FILENAME_VCF_RAW=${vcfRawFile}," +
-                "VCF_FOR_SNV_FILES=\\'(${allChromosomeFilePaths})\\'"
+        final Map<String, String> vcfMergingSpecificEnvironmentVariables = [
+                TOOL_ID: "snvVcfJoin",
+                FILENAME_VCF_RAW: vcfRawFile.absolutePath,
+                VCF_FOR_SNV_FILES: "'(${allChromosomeFilePaths})'",
+        ]
         final String script =
                 "${ensureFileHasExpectedSizeScript(abstractMergedBamFileService.getExistingBamFilePath(instance.sampleType1BamFile), instance.sampleType1BamFile.fileSize)}" +
                 "${ensureFileHasExpectedSizeScript(abstractMergedBamFileService.getExistingBamFilePath(instance.sampleType2BamFile), instance.sampleType2BamFile.fileSize)}" +
                 "${ensureFileDoesNotExistScript(vcfRawFile)}" +
                 "${jobResult.chromosomeJoinExternalScript.scriptFilePath.path}; " +
                 "md5sum ${vcfRawFile} > ${vcfRawFile}.md5sum"
-        sendClusterScript(script, qsubParametersToMergeVcfs)
+        sendClusterScript(script, vcfMergingSpecificEnvironmentVariables)
     }
 
     @Override

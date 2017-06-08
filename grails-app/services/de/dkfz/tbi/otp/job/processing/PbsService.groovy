@@ -1,26 +1,30 @@
 package de.dkfz.tbi.otp.job.processing
 
-import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
-import de.dkfz.tbi.otp.infrastructure.ClusterJob
-import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
-import de.dkfz.tbi.otp.infrastructure.ClusterJobService
-import de.dkfz.tbi.otp.job.scheduler.SchedulerService
-import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.utils.HelperUtils
+import de.dkfz.roddy.config.*
+import de.dkfz.roddy.execution.jobs.*
+import de.dkfz.roddy.execution.jobs.cluster.*
+import de.dkfz.roddy.execution.jobs.cluster.pbs.*
+import de.dkfz.roddy.tools.*
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.infrastructure.*
+import de.dkfz.tbi.otp.job.scheduler.*
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.ProcessHelperService.ProcessOutput
-import groovy.transform.TupleConstructor
+import groovy.transform.*
 
-import java.util.regex.Matcher
+import java.time.*
+import java.util.regex.*
 
-import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.getThreadLog
-import static org.springframework.util.Assert.notNull
+import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.*
+import static org.springframework.util.Assert.*
 
 
 /**
- * This class contains methods to communicate with the PBS system.
+ * This class contains methods to communicate with the cluster job scheduler.
  *
- * It executes PBS commands on the cluster head node using {@link ExecutionService}.
+ * It executes job submission/monitoring commands on the cluster head node using
+ * the <a href="https://github.com/eilslabs/BatchEuphoria">BatchEuphoria</a> library and {@link ExecutionService}.
  */
 class PbsService {
 
@@ -32,6 +36,7 @@ class PbsService {
 
     ClusterJobLoggingService clusterJobLoggingService
 
+    private Map<Realm, ClusterJobManager> managerPerRealm = [:]
 
     private static final String JOB_LIST_PATTERN = /^(\d+)\.(?:\S+\s+){9}(\w)\s+\S+\s*$/
 
@@ -65,14 +70,15 @@ class PbsService {
 
 
     /**
-     * Executes a job on a specified host.
+     * Executes a job on a cluster specified by the realm.
      *
-     * @param realm The realm which identifies the host
-     * @param script The script to be run on the PBS system
-     * @param qsubParameters The parameters which are needed for some qsub commands and can not be included in the script parameter, must be in JSON format
-     * @return what the server sends back
+     * @param realm The realm which identifies the submission host of the cluster
+     * @param script The script to be run on the cluster
+     * @param environmentVariables environment variables to set for the job
+     * @param jobSubmissionOptions additional options for the job
+     * @return the cluster job ID
      */
-    public String executeJob(Realm realm, String script, String qsubParameters = "") {
+    public String executeJob(Realm realm, String script, Map<String, String> environmentVariables = [:], Map<JobSubmissionOption, String> jobSubmissionOptions = [:]) {
         if (!script) {
             throw new ProcessingException("No job script specified.")
         }
@@ -82,29 +88,24 @@ class PbsService {
         ProcessParameterObject domainObject = processingStep.processParameterObject
 
         SeqType seqType = domainObject?.seqType
-        short processingPriority = domainObject?.processingPriority ?: ProcessingPriority.NORMAL_PRIORITY
 
+        Map<JobSubmissionOption, String> options = pbsOptionMergingService.readOptionsFromDatabase(processingStep, realm)
+        options.putAll(jobSubmissionOptions)
 
         // check if the project has FASTTRACK priority
-        String fastTrackParameter
+        short processingPriority = domainObject?.processingPriority ?: ProcessingPriority.NORMAL_PRIORITY
         if (processingPriority >= ProcessingPriority.FAST_TRACK_PRIORITY) {
-            fastTrackParameter = '{"-A": "FASTTRACK"}'
+            options.putAll([
+                    (JobSubmissionOption.ACCOUNT): "FASTTRACK",
+            ])
         }
 
-        String pbsOptions = pbsOptionMergingService.mergePbsOptions(processingStep, realm, qsubParameters, fastTrackParameter)
-
-        String pbsJobDescription = processingStep.getPbsJobDescription()
+        String jobName = processingStep.getClusterJobName()
         String logFile = jobStatusLoggingService.constructLogFileLocation(realm, processingStep)
-        String logMessage = jobStatusLoggingService.constructMessage(processingStep)
+        String logMessage = jobStatusLoggingService.constructMessage(realm, processingStep)
         File clusterLogDirectory = clusterJobLoggingService.createAndGetLogDirectory(realm, processingStep)
 
         String scriptText = """
-#PBS -S /bin/bash
-#PBS -N ${pbsJobDescription}
-#PBS -j oe
-#PBS -o ${clusterLogDirectory}
-#PBS -W umask=027
-
 # OTP: Fail on first non-zero exit code
 set -e
 
@@ -121,32 +122,45 @@ chmod 0640 "${logFile}"
 echo "${logMessage}" >> "${logFile}"
 """
 
-        String command = "echo '${scriptText}' | qsub " + pbsOptions
-        ProcessOutput output = executionService.executeCommandReturnProcessOutput(realm, command)
-        String pbsId = extractPbsId(output.stdout)
+        BatchEuphoriaJobManager jobManager = getJobManager(realm)
 
-        ClusterJob clusterJob = clusterJobService.createClusterJob(realm, pbsId, realm.unixUser, processingStep, seqType, pbsJobDescription)
+        ResourceSet resourceSet = new ResourceSet(
+                null,
+                options.get(JobSubmissionOption.MEMORY) ? new BufferValue(options.get(JobSubmissionOption.MEMORY)) : null,
+                options.get(JobSubmissionOption.CORES) as Integer,
+                options.get(JobSubmissionOption.NODES) as Integer,
+                (Duration)(options.get(JobSubmissionOption.WALLTIME) ? Duration.parse(options.get(JobSubmissionOption.WALLTIME)) : null),
+                options.get(JobSubmissionOption.STORAGE) ? new BufferValue(options.get(JobSubmissionOption.STORAGE)) : null,
+                options.get(JobSubmissionOption.QUEUE),
+                options.get(JobSubmissionOption.NODE_FEATURE),
+        )
+
+        BEJob job = new BEJob(
+                jobName,
+                null,
+                scriptText,
+                null,
+                resourceSet,
+                null,
+                environmentVariables,
+                null,
+                null,
+                jobManager,
+        )
+        job.setLoggingDirectory(clusterLogDirectory)
+        job.customUserAccount = options.get(JobSubmissionOption.ACCOUNT) as String
+
+        BEJobResult jobResult = jobManager.runJob(job)
+        if (!jobResult.wasExecuted) {
+            throw new RuntimeException("An error occurred when submitting the job")
+        }
+        jobManager.startHeldJobs([job])
+
+        ClusterJob clusterJob = clusterJobService.createClusterJob(realm, job.jobID, realm.unixUser, processingStep, seqType, jobName)
         threadLog?.info("Log file: ${AbstractOtpJob.getDefaultLogFilePath(clusterJob).path}")
 
-        return pbsId
+        return job.jobID
     }
-
-
-    /**
-     * Extracts the PBS ID from a given string
-     *
-     * @param pbsOutput standard output from qsub
-     * @return PBS ID as a string
-     * @throw RuntimeException if pbsOutput doesn't contain exactly one PBS ID
-     */
-    protected static String extractPbsId(String pbsOutput) {
-        Matcher pbsId = pbsOutput =~ /^(\d+)\.[^\n]+\n?$/
-        if (!pbsId) {
-            throw new RuntimeException("Could not extract exactly one pbs id from '${pbsOutput}'")
-        }
-        return pbsId.group(1)
-    }
-
 
     /**
      * Returns a map of jobs PBS knows about
@@ -194,4 +208,49 @@ echo "${logMessage}" >> "${logFile}"
             throw new IllegalStateException("qstat output doesn't match expected output: '${out}'")
         }
     }
+
+    /**
+     * Get name of environment variable which contains the cluster job ID in a running job
+     * @return variable returned in the format ${VARIABLE} so it can be used directly in a shell script
+     */
+    public static String getJobIdEnvironmentVariable(Realm realm) {
+        if (realm.jobScheduler == Realm.JobScheduler.PBS) {
+             return PBSJobManager.PBS_JOBID
+        } else {
+            throw new Exception("Unsupported cluster job scheduler")
+        }
+    }
+
+    private BatchEuphoriaJobManager getJobManager(Realm realm) {
+        BatchEuphoriaJobManager manager = managerPerRealm[realm]
+
+        if (manager == null) {
+            JobManagerCreationParameters jobManagerParameters = new JobManagerCreationParametersBuilder()
+                    .setCreateDaemon(false)
+                    .setUserIdForJobQueries(realm.unixUser)
+                    .setTrackUserJobsOnly(true)
+                    .setTrackOnlyStartedJobs(false)
+                    .setUserMask("027")
+                    .build()
+
+            if (realm.jobScheduler == Realm.JobScheduler.PBS) {
+                manager = new PBSJobManager(new BEExecutionServiceAdapter(executionService, realm), jobManagerParameters)
+            } else {
+                throw new Exception("Unsupported cluster job scheduler")
+            }
+            managerPerRealm[realm] = manager
+        }
+        return manager
+    }
+}
+
+enum JobSubmissionOption {
+    ACCOUNT,
+    CORES,
+    MEMORY,
+    NODE_FEATURE,
+    NODES,
+    QUEUE,
+    STORAGE,
+    WALLTIME,
 }

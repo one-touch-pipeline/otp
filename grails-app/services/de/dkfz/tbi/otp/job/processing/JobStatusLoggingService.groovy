@@ -17,7 +17,9 @@ class JobStatusLoggingService {
     final static LOGFILE_EXTENSION = '.log'
     final static STATUS_LOGGING_BASE_DIR = 'log/status'
 
-    final static SHELL_SNIPPET_GET_NUMERIC_PBS_ID = '$(echo $PBS_JOBID | cut -d. -f1)'
+    private static String shellSnippetForClusterJobId(Realm realm) {
+        return "\$(echo ${PbsService.getJobIdEnvironmentVariable(realm)} | cut -d. -f1)"
+    }
 
     /**
      * Get the base directory of the status log file of a workflow.
@@ -37,17 +39,17 @@ class JobStatusLoggingService {
      *
      * @param realm the realm the job runs in
      * @param processingStep the processing step of the job
-     * @param pbsId an optional PBS job id. If <code>null</code>, shell code to retrieve the numeric part of the
-     *          PBS job id is returned.
+     * @param clusterJobId an optional cluster job ID. If <code>null</code>, shell code to retrieve the numeric part
+     *          of the cluster job id is returned.
      *          (Read: pass the job ID except if the returned string is used in a cluster job shell script)
      * @return the location of the status log file
      */
-    String constructLogFileLocation(Realm realm, ProcessingStep processingStep, String pbsId = null) {
+    String constructLogFileLocation(Realm realm, ProcessingStep processingStep, String clusterJobId = null) {
         String baseDir = logFileBaseDir(realm, processingStep)
         String fileName = [
                 "joblog",
                 processingStep.process.id,
-                pbsId ?: SHELL_SNIPPET_GET_NUMERIC_PBS_ID,
+                clusterJobId ?: shellSnippetForClusterJobId(realm),
                 realm.id,
         ].join("_")
         return "${baseDir}/${fileName}${LOGFILE_EXTENSION}"
@@ -66,17 +68,17 @@ class JobStatusLoggingService {
      * The message is <strong>not</strong> terminated by a newline character.
      *
      * @param processingStep the {@link ProcessingStep} to construct the message from
-     * @param pbsId an optional PBS job id. If <code>null</code>, shell code to retrieve the numeric part of the
-     *          PBS job id is returned. (Read: To get a message usable for logging, do not provide it.)
+     * @param clusterJobId an optional cluster job id. If <code>null</code>, shell code to retrieve the numeric part
+     *          of the cluster job id is returned. (Read: To get a message usable for logging, do not provide it.)
      * @return a logging message
      */
-    String constructMessage(ProcessingStep processingStep, String pbsId = null) {
+    String constructMessage(Realm realm, ProcessingStep processingStep, String clusterJobId = null) {
         notNull processingStep, 'No processing step specified.'
         String message = [
             processingStep.jobDefinition.plan.name,
             processingStep.getNonQualifiedJobClass(),
             processingStep.id,
-            pbsId ?: SHELL_SNIPPET_GET_NUMERIC_PBS_ID,
+            clusterJobId ?: shellSnippetForClusterJobId(realm),
         ].join(',')
         return "${message}" as String
     }
@@ -137,7 +139,7 @@ class JobStatusLoggingService {
                     logFileText = ''
                 }
                 notNull it
-                final String expectedLogMessage = constructMessage(processingStep, it.clusterJobId)
+                final String expectedLogMessage = constructMessage(realm, processingStep, it.clusterJobId)
                 if (!(logFileText =~ /(?:^|\s)${Pattern.quote(expectedLogMessage)}(?:$|\s)/)) {
                     threadLog?.debug "Did not find \"${expectedLogMessage}\" in ${logFile}."
                     failedOrNotFinishedClusterJobs.add(new ClusterJobIdentifier(it))

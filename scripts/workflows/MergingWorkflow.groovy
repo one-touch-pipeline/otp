@@ -1,8 +1,8 @@
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.job.jobs.merging.*
 import de.dkfz.tbi.otp.ngsdata.*
 
-import static de.dkfz.tbi.otp.job.processing.PbsOptionMergingService.*
 import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
 
 String workflowName = "MergingWorkflow"
@@ -23,22 +23,24 @@ plan(workflowName) {
     job("mergingComplete", "mergingCompleteJob")
 }
 
+ProcessingOptionService processingOptionService = ctx.processingOptionService
+
 //special pbs options for merging workflow
-println ctx.processingOptionService.createOrUpdate(
+println processingOptionService.createOrUpdate(
         OptionName.CLUSTER_SUBMISSIONS_OPTION,
         "${MergingJob.simpleName}",
         null,
-        '{"-l": {nodes: "1:ppn=6", walltime: "100:00:00", mem: "25g"}}'
+        '{"WALLTIME":"PT100H","MEMORY":"25g","CORES":"6"}',
 )
-println ctx.processingOptionService.createOrUpdate(
+println processingOptionService.createOrUpdate(
         OptionName.CLUSTER_SUBMISSIONS_OPTION,
         "${MergingJob.simpleName}_${SeqType.exomePairedSeqType.processingOptionName}",
         null,
-        '{"-l": {mem: "15g"}}'
+        '{"MEMORY":"15g"}',
 )
 
 //picard option for mark duplicates
-println ctx.processingOptionService.createOrUpdate(
+println processingOptionService.createOrUpdate(
         OptionName.PIPELINE_OTP_ALIGNMENT_PICARD_MDUP,
         null,
         null,
@@ -48,7 +50,7 @@ println ctx.processingOptionService.createOrUpdate(
 
 
 // picard program for merging job
-ctx.processingOptionService.createOrUpdate(
+processingOptionService.createOrUpdate(
         OptionName.COMMAND_PICARD_MDUP,
         null,
         null,
@@ -57,7 +59,7 @@ ctx.processingOptionService.createOrUpdate(
 
 
 // number of all merging workflows which can be executed in parallel
-println ctx.processingOptionService.createOrUpdate(OptionName.MAXIMUM_NUMBER_OF_JOBS, workflowName, null, '60')
+println processingOptionService.createOrUpdate(OptionName.MAXIMUM_NUMBER_OF_JOBS, workflowName, null, '60')
 // number of slots which are reserved only for FastTrack Workflows
-println ctx.processingOptionService.createOrUpdate(OptionName.MAXIMUM_NUMBER_OF_JOBS_RESERVED_FOR_FAST_TRACK, workflowName, null, '30')
+println processingOptionService.createOrUpdate(OptionName.MAXIMUM_NUMBER_OF_JOBS_RESERVED_FOR_FAST_TRACK, workflowName, null, '30')
 

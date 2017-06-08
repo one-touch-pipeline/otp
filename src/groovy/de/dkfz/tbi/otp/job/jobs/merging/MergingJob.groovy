@@ -35,7 +35,7 @@ class MergingJob extends AbstractJobImpl {
         ProcessedMergedBamFile.withTransaction {
             ProcessedMergedBamFile processedMergedBamFile = processedMergedBamFileService.createMergedBamFile(mergingPass)
             Realm realm = mergingPassService.realmForDataProcessing(mergingPass)
-            String cmd = createCommand(processedMergedBamFile)
+            String cmd = createCommand(processedMergedBamFile, realm)
             String pbsId = pbsService.executeJob(realm, cmd)
 
             addOutputParameter("__pbsIds", pbsId)
@@ -43,9 +43,9 @@ class MergingJob extends AbstractJobImpl {
         }
     }
 
-    private String createCommand(ProcessedMergedBamFile processedMergedBamFile) {
+    private String createCommand(ProcessedMergedBamFile processedMergedBamFile, Realm realm) {
         Project project = mergingPassService.project(processedMergedBamFile.mergingPass)
-        String tempDir = "\${PBS_SCRATCH_DIR}/\${PBS_JOBID}"
+        String tempDir = "\${PBS_SCRATCH_DIR}/${PbsService.getJobIdEnvironmentVariable(realm)}"
         String createTempDir = "mkdir -p -m 2750 ${tempDir}"
         String javaOptions = optionService.findOptionSafe(OptionName.PIPELINE_OTP_ALIGNMENT_PICARD_JAVA_SETTINGS, null, project)
         String picard = ProcessingOptionService.findOptionAssure(OptionName.COMMAND_PICARD_MDUP, null, project)

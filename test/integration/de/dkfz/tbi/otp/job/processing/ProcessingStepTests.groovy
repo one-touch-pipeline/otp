@@ -55,7 +55,7 @@ class ProcessingStepTests  {
         )
         String expected = "otp_test_testWorkFlow_${step.id}_foo"
 
-        assert expected == step.getPbsJobDescription()
+        assert expected == step.getClusterJobName()
     }
 
     @Test
@@ -85,6 +85,6 @@ class ProcessingStepTests  {
         ])
         String expected = "otp_test_pid_testWorkFlow_${step.id}_foo"
 
-        assert expected == step.getPbsJobDescription()
+        assert expected == step.getClusterJobName()
     }
 }

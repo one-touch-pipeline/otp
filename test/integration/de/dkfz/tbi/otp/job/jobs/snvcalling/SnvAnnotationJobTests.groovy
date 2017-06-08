@@ -264,12 +264,15 @@ CHROMOSOME_INDICES=( {1..21} XY)
                     "TOOL_ID=snvAnnotation," +
                     "FILENAME_VCF_IN=${inputFileCopy}," +
                     "FILENAME_VCF_OUT=${resultFile}," +
-                    "FILENAME_CHECKPOINT=${callingStep.getCheckpointFilePath(snvCallingInstance2).absoluteDataManagementPath},"
+                    "FILENAME_CHECKPOINT=${callingStep.getCheckpointFilePath(snvCallingInstance2).absoluteDataManagementPath}"
 
-            assert command.contains(commandLinkPart)
-            assert command.contains(commandScriptPart)
-            assert command.contains(commandParameterPart)
-            return new ProcessOutput("${PBS_ID}.pbs", "", 0)
+            if (!command.startsWith("qrls")) {
+                assert command.contains(commandLinkPart)
+                assert command.contains(commandScriptPart)
+                assert command.contains(commandParameterPart)
+                return new ProcessOutput("${PBS_ID}.pbs", "", 0)
+            }
+            return new ProcessOutput("", "", 0)
         }
         snvCallingInstance.metaClass.findLatestResultForSameBamFiles = { SnvCallingStep step -> return snvJobResultInput }
         LsdfFilesService.metaClass.static.ensureFileIsReadableAndNotEmpty = { File file -> return true }

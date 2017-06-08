@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 import org.apache.commons.validator.routines.*
@@ -108,7 +109,7 @@ class ProcessingOption implements Entity {
         NOTIFICATION_TEMPLATE_ADDITION("", null, Type.MULTI_LINE_TEXT),
 
         //clusterSubmissionOption
-        CLUSTER_SUBMISSIONS_OPTION("", null, Type.PBS_OPTION),
+        CLUSTER_SUBMISSIONS_OPTION("", null, Type.CLUSTER_JOB_SUBMISSION_OPTION),
 
         //validator
         VALIDATOR_SAMPLE_IDENTIFIER_REGEX("regular expression for the DEEP sample id", null, Type.SINGLE_LINE_TEXT),
@@ -167,7 +168,7 @@ class ProcessingOption implements Entity {
         PLUGIN({it ==~ /^\d+\.\d+\.\d+(\-\d+)?$/}),
         BOOLEAN({it ==~ /true|false/}),
         FLOAT({it ==~ /^[\+\-]?\d+\.?\d*$/}),
-        PBS_OPTION({/*TODO after OTP-2447*/true}),
+        CLUSTER_JOB_SUBMISSION_OPTION({ PbsOptionMergingService.validateJsonString(it) }),
 
         private Closure validator
 

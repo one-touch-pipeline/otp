@@ -264,7 +264,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
 
             } else if (command.startsWith("mkdir -p ")) {
                 return ProcessHelperService.executeAndWait(command).assertExitCodeZeroAndStderrEmpty()
-            } else {
+            } else if (!command.startsWith("qrls")) {
                 File snvFile = new OtpPath(snvCallingInstance.instancePath, SnvCallingStep.CALLING.getResultFileName(snvCallingInstance.individual, null)).absoluteDataManagementPath
                 String scriptCommandPart = "/tmp/scriptLocation/joining.sh; " +
                         "md5sum ${snvFile} > ${snvFile}.md5sum"

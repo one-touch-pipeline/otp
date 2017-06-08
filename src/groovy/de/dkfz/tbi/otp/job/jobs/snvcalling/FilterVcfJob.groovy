@@ -52,16 +52,16 @@ class FilterVcfJob extends AbstractSnvCallingJob implements AutoRestartableJob {
             final File checkpointFile = step.getCheckpointFilePath(instance).absoluteDataManagementPath
             deleteResultFileIfExists(checkpointFile, realm)
 
-            final String qsubParameters="{ '-v': '"+
-                    "CONFIG_FILE=${configFileInProjectDirectory}," +
-                    "pid=${instance.individual.pid}," +
-                    "PID=${instance.individual.pid}," +
-                    "TOOL_ID=snvFilter," +
-                    "SNVFILE_PREFIX=snvs_," +
-                    "TUMOR_BAMFILE_FULLPATH_BP=${abstractMergedBamFileService.getExistingBamFilePath(instance.sampleType1BamFile)}," +
-                    "FILENAME_VCF=${inputFileCopy}," +
-                    "FILENAME_CHECKPOINT=${checkpointFile}" +
-                    "'}"
+            final Map<String, String> environmentVariables = [
+                    CONFIG_FILE: configFileInProjectDirectory.absolutePath,
+                    pid: instance.individual.pid,
+                    PID: instance.individual.pid,
+                    TOOL_ID: "snvFilter",
+                    SNVFILE_PREFIX: "snvs_",
+                    TUMOR_BAMFILE_FULLPATH_BP: abstractMergedBamFileService.getExistingBamFilePath(instance.sampleType1BamFile).absolutePath,
+                    FILENAME_VCF: inputFileCopy.absolutePath,
+                    FILENAME_CHECKPOINT: checkpointFile.absolutePath,
+            ]
 
             final StringBuilder script = new StringBuilder()
             if (inputFileCopy.absolutePath != inputResultFile.absolutePath) {
@@ -74,7 +74,7 @@ class FilterVcfJob extends AbstractSnvCallingJob implements AutoRestartableJob {
                 script << "rm -f ${inputFileCopy.absolutePath}"
             }
 
-            pbsService.executeJob(realm, script.toString(), qsubParameters)
+            pbsService.executeJob(realm, script.toString(), environmentVariables)
 
             return NextAction.WAIT_FOR_CLUSTER_JOBS
         } else {

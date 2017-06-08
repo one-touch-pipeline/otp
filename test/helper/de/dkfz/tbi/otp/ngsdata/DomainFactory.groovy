@@ -142,7 +142,7 @@ class DomainFactory {
                 unixUser          : '!fakeuser',
                 roddyUser         : '!fakeroddyuser',
                 timeout           : -1,
-                defaultJobSubmissionOptions : '{}',
+                defaultJobSubmissionOptions: '',
                 cluster           : Cluster.DKFZ,
         ], realmProperties)
     }

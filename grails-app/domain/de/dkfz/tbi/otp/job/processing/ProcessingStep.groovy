@@ -201,7 +201,7 @@ public class ProcessingStep implements Serializable, Entity {
         return instance
     }
 
-    public String getPbsJobDescription() {
+    public String getClusterJobName() {
         String env
         switch (Environment.current) {
             case Environment.PRODUCTION:

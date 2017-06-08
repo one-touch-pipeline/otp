@@ -120,19 +120,9 @@ class ConveyBwaAlignmentWorkflowTests extends WorkflowTestCase {
 
             processingOptionService.createOrUpdate(
                     ProcessingOption.OptionName.CLUSTER_SUBMISSIONS_OPTION,
-                    "${ConveyBwaAlignmentJob.simpleName}_DKFZ",
+                    "${ConveyBwaAlignmentJob.simpleName}",
                     null,
-                    '''{
-                        "-l": {
-                            "walltime": "20:00",
-                            "nodes": "1:ppn=12",
-                            "mem": "126g"
-                            },
-                        "-q": "convey",
-                        "-m": "a",
-                        "-S": "/bin/bash",
-                        "-j": "oe"
-                        }'''
+                    '{"QUEUE":"convey","WALLTIME":"PT20M","MEMORY":"126g","CORES":"12"}',
             )
         }
     }

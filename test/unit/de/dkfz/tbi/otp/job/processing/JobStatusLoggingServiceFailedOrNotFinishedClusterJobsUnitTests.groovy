@@ -121,10 +121,10 @@ class JobStatusLoggingServiceFailedOrNotFinishedClusterJobsUnitTests extends Tes
                 failedJobOnRealmWithSameLogDirAs1,
         ]
 
-        new File(service.constructLogFileLocation(realm1, processingStep, successfulJobOnRealm1.clusterJobId)).text = service.constructMessage(processingStep, successfulJobOnRealm1.clusterJobId) + "\n"
-        new File(service.constructLogFileLocation(realm2, processingStep, successfulJobOnRealm2.clusterJobId)).text = "\n" + service.constructMessage(processingStep, successfulJobOnRealm2.clusterJobId)
+        new File(service.constructLogFileLocation(realm1, processingStep, successfulJobOnRealm1.clusterJobId)).text = service.constructMessage(realm1, processingStep, successfulJobOnRealm1.clusterJobId) + "\n"
+        new File(service.constructLogFileLocation(realm2, processingStep, successfulJobOnRealm2.clusterJobId)).text = "\n" + service.constructMessage(realm2, processingStep, successfulJobOnRealm2.clusterJobId)
         new File(service.constructLogFileLocation(realmWithEmptyLogFile, processingStep, jobOnRealmWithEmptyLogFile.clusterJobId)).text = ''
-        new File(service.constructLogFileLocation(realmWithSameLogDirAs1, processingStep, successfulJobOnRealmWithSameLogDirAs1.clusterJobId)).text = service.constructMessage(processingStep, successfulJobOnRealmWithSameLogDirAs1.clusterJobId)
+        new File(service.constructLogFileLocation(realmWithSameLogDirAs1, processingStep, successfulJobOnRealmWithSameLogDirAs1.clusterJobId)).text = service.constructMessage(realmWithSameLogDirAs1, processingStep, successfulJobOnRealmWithSameLogDirAs1.clusterJobId)
     }
 
     @After

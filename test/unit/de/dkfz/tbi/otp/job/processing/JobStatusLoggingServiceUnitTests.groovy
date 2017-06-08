@@ -21,7 +21,7 @@ class JobStatusLoggingServiceUnitTests {
 
     final static String LOGGING_ROOT_PATH = '/fakeRootPath'
     final static String EXPECTED_BASE_PATH = '/fakeRootPath/log/status'
-    final static String EXPECTED_LOGFILE_PATH = "/fakeRootPath/log/status/joblog_${ARBITRARY_PROCESS_ID}_${ARBITRARY_PBS_ID}_${ARBITRARY_REALM_ID}.log"
+    static String EXPECTED_LOGFILE_PATH
 
     final static Long ARBITRARY_ID = 23
     final static Long ARBITRARY_REALM_ID = 987
@@ -34,6 +34,16 @@ class JobStatusLoggingServiceUnitTests {
                 process      : DomainFactory.createProcess([id: ARBITRARY_PROCESS_ID]),
                 jobClass     : 'this.is.a.DummyJob',
         ])
+    }
+
+    Realm realm
+
+    void setUp() {
+        realm = DomainFactory.createRealm(
+                operationType: Realm.OperationType.DATA_MANAGEMENT,
+                loggingRootPath: LOGGING_ROOT_PATH,
+        )
+        EXPECTED_LOGFILE_PATH = "/fakeRootPath/log/status/joblog_${ARBITRARY_PROCESS_ID}_${ARBITRARY_PBS_ID}_${realm.id}.log"
     }
 
     @Test
@@ -58,7 +68,6 @@ class JobStatusLoggingServiceUnitTests {
 
     @Test
     void testLogFileBaseDir() {
-        Realm realm = Realm.build([id: ARBITRARY_REALM_ID, loggingRootPath: LOGGING_ROOT_PATH])
         ProcessingStep processingStep = createFakeProcessingStep()
         def actual = service.logFileBaseDir(realm, processingStep)
         assert EXPECTED_BASE_PATH == actual
@@ -66,15 +75,13 @@ class JobStatusLoggingServiceUnitTests {
 
     @Test
     void testLogFileLocationWhenPbsIdIsNotPassed() {
-        Realm realm = Realm.build([id: ARBITRARY_REALM_ID, loggingRootPath: LOGGING_ROOT_PATH])
         ProcessingStep processingStep = createFakeProcessingStep()
         def actual = service.constructLogFileLocation(realm, processingStep)
-        assert "${EXPECTED_BASE_PATH}/joblog_${ARBITRARY_PROCESS_ID}_${service.SHELL_SNIPPET_GET_NUMERIC_PBS_ID}_${ARBITRARY_REALM_ID}.log" == actual
+        assert "${EXPECTED_BASE_PATH}/joblog_${ARBITRARY_PROCESS_ID}_\$(echo \${PBS_JOBID} | cut -d. -f1)_${realm.id}.log" == actual
     }
 
     @Test
     void testLogFileLocationWhenPbsIdIsPassed() {
-        Realm realm = Realm.build([id: ARBITRARY_REALM_ID, loggingRootPath: LOGGING_ROOT_PATH])
         ProcessingStep processingStep = createFakeProcessingStep()
         def actual = service.constructLogFileLocation(realm, processingStep, ARBITRARY_PBS_ID)
         assert EXPECTED_LOGFILE_PATH == actual
@@ -82,20 +89,20 @@ class JobStatusLoggingServiceUnitTests {
 
     @Test
     void testConstructMessageWhenProcessingStepIsNull() {
-        shouldFail IllegalArgumentException, { service.constructMessage(null) }
+        shouldFail IllegalArgumentException, { service.constructMessage(realm, null) }
     }
 
     @Test
     void testConstructMessageWhenPbsIdIsNotPassed() {
         ProcessingStep processingStep = createFakeProcessingStep()
-        def actual = service.constructMessage(processingStep)
-        assert "${processingStep.jobExecutionPlan.name},DummyJob,${ARBITRARY_ID},${service.SHELL_SNIPPET_GET_NUMERIC_PBS_ID}" == actual
+        def actual = service.constructMessage(realm, processingStep)
+        assert "${processingStep.jobExecutionPlan.name},DummyJob,${ARBITRARY_ID},\$(echo \${PBS_JOBID} | cut -d. -f1)" == actual
     }
 
     @Test
     void testConstructMessageWhenPbsIdIsPassed() {
         ProcessingStep processingStep = createFakeProcessingStep()
-        def actual = service.constructMessage(processingStep, ARBITRARY_PBS_ID)
+        def actual = service.constructMessage(null, processingStep, ARBITRARY_PBS_ID)
         assert "${processingStep.jobExecutionPlan.name},DummyJob,${ARBITRARY_ID},${ARBITRARY_PBS_ID}" == actual
     }
 }

@@ -46,6 +46,11 @@ grails.project.dependency.resolution = {
         // dependencies for the flowControl API
         compile "fcClient:fcClient:0.1"
 
+        // library for interacting with cluster job schedulers
+        compile ("de.dkfz.roddy:BatchEuphoria:0.0.01-46-g1029f22") {
+            excludes "logstash-logback-encoder", "sshj", "commons-io"
+        }
+
         // ssh and ssh-agent proxy library
         runtime "com.jcraft:jsch:0.1.53"
         runtime "com.jcraft:jsch.agentproxy.jsch:0.0.9"

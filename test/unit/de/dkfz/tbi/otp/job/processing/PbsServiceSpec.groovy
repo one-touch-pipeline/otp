@@ -159,42 +159,6 @@ ${jobId}.clust_head.ine  OtherUnixUser    fast     r160224_18005293    --      1
     }
 
 
-    void "test extractPbsId, succeeds"(String input, String result) {
-        given:
-        PbsService service = new PbsService()
-
-        expect:
-        result == service.extractPbsId(input)
-
-        where:
-        input                                      | result
-        "4943549.headnode.long-domain" | "4943549"
-        "49435.headnode.long-domain\n" | "49435"
-        "1.headnode.long-domain"       | "1"
-    }
-
-
-    void "test extractPbsId, fails"(String input) {
-        given:
-        PbsService service = new PbsService()
-
-        when:
-        service.extractPbsId(input)
-
-        then:
-        def e = thrown(RuntimeException)
-        e.message == "Could not extract exactly one pbs id from '${input}'"
-
-        where:
-        input                               | _
-        "4943549.headnode.long-domain\n4943542.headnode.long-domain" | _
-        "asdf"                              | _
-        "123\n123"                          | _
-        ""                                  | _
-        ".headnode.long-domain" | _
-    }
-
-
     void "test executeJob, succeeds"() {
         given:
         PbsService service = new PbsService()
@@ -227,10 +191,10 @@ ${jobId}.clust_head.ine  OtherUnixUser    fast     r160224_18005293    --      1
         DomainFactory.createProcessingStepUpdate(processingStep: clusterJob.processingStep)
 
         when:
-        String result = service.executeJob(realm, "run the job", "")
+        String result = service.executeJob(realm, "run the job")
 
         then:
-        1 * service.executionService.executeCommandReturnProcessOutput(realm, _ as String) >> out
+        2 * service.executionService.executeCommandReturnProcessOutput(realm, _ as String) >> out
         1 * service.clusterJobService.createClusterJob(realm, clusterJobId, realm.unixUser, step, seqType, _ as String) >> clusterJob
         1 * service.clusterJobLoggingService.createAndGetLogDirectory(_, _) >> {TestCase.uniqueNonExistentPath}
         result == clusterJobId

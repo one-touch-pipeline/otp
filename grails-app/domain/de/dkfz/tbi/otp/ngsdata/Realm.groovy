@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.utils.*
 
 
@@ -74,6 +75,9 @@ class Realm implements Entity, Serializable {
         flowControlHost blank:true, nullable:true
         flowControlPort nullable:true
         roddyUser blank: false, nullable: true
+        defaultJobSubmissionOptions validator: {
+            PbsOptionMergingService.validateJsonString(it)
+        }
     }
 
     @Override

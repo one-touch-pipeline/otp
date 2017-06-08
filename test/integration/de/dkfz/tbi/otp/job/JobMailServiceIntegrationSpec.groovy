@@ -42,7 +42,7 @@ class JobMailServiceIntegrationSpec extends Specification {
             completedClusterJobs << clusterJob
             File logFile = new File(jobStatusLoggingService.constructLogFileLocation(realm, step, clusterJob.clusterJobId))
             logFile.parentFile.mkdirs()
-            logFile << jobStatusLoggingService.constructMessage(step, clusterJob.clusterJobId) << '\n'
+            logFile << jobStatusLoggingService.constructMessage(realm, step, clusterJob.clusterJobId) << '\n'
         }
 
         List<ClusterJob> failedClusterJobs = []

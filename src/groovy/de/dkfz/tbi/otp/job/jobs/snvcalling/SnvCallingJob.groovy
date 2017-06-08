@@ -18,16 +18,17 @@ class SnvCallingJob extends AbstractSnvCallJoinJob implements AutoRestartableJob
         getChromosomeResultFiles(jobResult).each { String chromosome, File chromosomeResultFile ->
             // In case the file exists already from an earlier -not successful- run it should be deleted first
             deleteResultFileIfExists(chromosomeResultFile, realm)
-            final String qsubParametersChromosomeSpecific =
-                    "TOOL_ID=snvCalling," +
-                    "PARM_CHR_INDEX=${chromosome}," +
-                    "FILENAME_VCF_SNVS=${chromosomeResultFile}"
+            final Map<String, String> chromosomeSpecificEnvironmentVariables = [
+                    TOOL_ID: "snvCalling",
+                    PARM_CHR_INDEX: chromosome,
+                    FILENAME_VCF_SNVS: chromosomeResultFile.absolutePath,
+            ]
             final String script =
                     ensureFileHasExpectedSizeScript(abstractMergedBamFileService.getExistingBamFilePath(instance.sampleType1BamFile), instance.sampleType1BamFile.fileSize) +
                     ensureFileHasExpectedSizeScript(abstractMergedBamFileService.getExistingBamFilePath(instance.sampleType2BamFile), instance.sampleType2BamFile.fileSize) +
                     ensureFileDoesNotExistScript(chromosomeResultFile) +
                     jobResult.externalScript.scriptFilePath
-            sendClusterScript(script, qsubParametersChromosomeSpecific)
+            sendClusterScript(script, chromosomeSpecificEnvironmentVariables)
         }
     }
 

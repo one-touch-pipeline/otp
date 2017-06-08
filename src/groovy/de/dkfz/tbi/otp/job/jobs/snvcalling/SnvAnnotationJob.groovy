@@ -65,16 +65,16 @@ class SnvAnnotationJob extends AbstractSnvCallingJob implements AutoRestartableJ
             // In case the file exists already from an earlier -not successful- run it should be deleted first
             deleteResultFileIfExists(annotationResultFile, realm)
 
-            final String qsubParameters="{ '-v': '"+
-                    "CONFIG_FILE=${configFileInProjectDirectory}," +
-                    "pid=${instance.individual.pid}," +
-                    "PID=${instance.individual.pid}," +
-                    "TUMOR_BAMFILE_FULLPATH_BP=${sampleType1BamFile}," +
-                    "TOOL_ID=snvAnnotation," +
-                    "FILENAME_VCF_IN=${inputFileCopy}," +
-                    "FILENAME_VCF_OUT=${annotationResultFile}," +
-                    "FILENAME_CHECKPOINT=${checkpointFile}" +
-                    "'}"
+            final Map<String, String> environmentVariables = [
+                    CONFIG_FILE: configFileInProjectDirectory.absolutePath,
+                    pid: instance.individual.pid,
+                    PID: instance.individual.pid,
+                    TUMOR_BAMFILE_FULLPATH_BP: sampleType1BamFile.absolutePath,
+                    TOOL_ID: "snvAnnotation",
+                    FILENAME_VCF_IN: inputFileCopy.absolutePath,
+                    FILENAME_VCF_OUT: annotationResultFile.absolutePath,
+                    FILENAME_CHECKPOINT: checkpointFile.absolutePath,
+            ]
             final StringBuilder script = new StringBuilder()
             if (inputFileCopy.absolutePath != inputResultFile.absolutePath) {
                 script << "ln -sf ${inputResultFile.absolutePath} ${inputFileCopy.absolutePath}; "
@@ -82,7 +82,7 @@ class SnvAnnotationJob extends AbstractSnvCallingJob implements AutoRestartableJ
             script << "${ensureFileHasExpectedSizeScript(sampleType1BamFile, instance.sampleType1BamFile.fileSize)} "
             script << "${ensureFileDoesNotExistScript(annotationResultFile)} "
             script << "${step.getExternalScript(config.externalScriptVersion).scriptFilePath} "
-            pbsService.executeJob(realm, script.toString(), qsubParameters)
+            pbsService.executeJob(realm, script.toString(), environmentVariables)
 
             return NextAction.WAIT_FOR_CLUSTER_JOBS
         } else {

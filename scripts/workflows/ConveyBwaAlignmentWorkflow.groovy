@@ -45,8 +45,10 @@ plan(WORKFLOW_NAME, ctx, true) {
     job("bwaAlignmentComplete", "bwaAlignmentCompleteJob")
 }
 
+ProcessingOptionService processingOptionService = ctx.processingOptionService
+
 // create Convey bwa number of cores option for conveyBwaAlignmentJob
-ctx.processingOptionService.createOrUpdate(
+processingOptionService.createOrUpdate(
     OptionName.PIPELINE_OTP_ALIGNMENT_CONVEY_BWA_NUMBER_OF_CORES,
     null,
     null,
@@ -54,7 +56,7 @@ ctx.processingOptionService.createOrUpdate(
 )
 
 // create Convey bwa program option for conveyBwaAlignmentJob
-ctx.processingOptionService.createOrUpdate(
+processingOptionService.createOrUpdate(
     OptionName.COMMAND_CONVEY_BWA,
     null,
     null,
@@ -62,7 +64,7 @@ ctx.processingOptionService.createOrUpdate(
 )
 
 // create Convey bwa program quality encoding option for PHRED
-ctx.processingOptionService.createOrUpdate(
+processingOptionService.createOrUpdate(
     OptionName.PIPELINE_OTP_ALIGNMENT_CONVEY_BWA_QUALITY_ENCODING,
     'PHRED',
     null,
@@ -70,7 +72,7 @@ ctx.processingOptionService.createOrUpdate(
 )
 
 // create Convey bwa program quality encoding option for ILLUMINA
-ctx.processingOptionService.createOrUpdate(
+processingOptionService.createOrUpdate(
     OptionName.PIPELINE_OTP_ALIGNMENT_CONVEY_BWA_QUALITY_ENCODING,
     'ILLUMINA',
     null,
@@ -78,14 +80,14 @@ ctx.processingOptionService.createOrUpdate(
 )
 
 // update bwa program option for bwaAlignmentJob
-ctx.processingOptionService.createOrUpdate(
+processingOptionService.createOrUpdate(
     OptionName.COMMAND_CONVEY_BWA,
     null,
     null,
     'bwa-0.6.2-tpx'
 )
 
-ctx.processingOptionService.createOrUpdate(
+processingOptionService.createOrUpdate(
     OptionName.COMMAND_SAMTOOLS,
     null,
     null,
@@ -93,76 +95,70 @@ ctx.processingOptionService.createOrUpdate(
 )
 
 // Create PBS options for bwaPairingAndSortingJob
-ctx.processingOptionService.createOrUpdate(
+processingOptionService.createOrUpdate(
     OptionName.CLUSTER_SUBMISSIONS_OPTION,
     "${BwaPairingAndSortingJob.simpleName}",
     null,
-    '''{
-      "-l": {
-        "walltime": "50:00:00",
-        "nodes": "1:ppn=6",
-        "mem": "45g"
-      }
-    }'''
+    '{"WALLTIME":"PT50H","MEMORY":"45g","CORES":"6"}',
 )
 
 // Create PBS options for bwaAlignmentJob
-ctx.processingOptionService.createOrUpdate(
+processingOptionService.createOrUpdate(
         OptionName.CLUSTER_SUBMISSIONS_OPTION,
         "${ConveyBwaAlignmentJob.simpleName}",
         null,
-        '{"-l": {"walltime": "48:00:00", "nodes": "1:ppn=12", "mem": "126g"}, "-q": "convey", "-m": "a", "-S": "/bin/bash"}'
+        '{"QUEUE":"convey","WALLTIME":"PT48H","MEMORY":"126g","CORES":"12"}',
 )
 
-ctx.processingOptionService.createOrUpdate(
+processingOptionService.createOrUpdate(
         OptionName.CLUSTER_SUBMISSIONS_OPTION,
         "${ConveyBwaAlignmentJob.simpleName}_${SeqType.exomePairedSeqType.processingOptionName}",
         null,
-        '{"-l": { "walltime": "2:00:00"}}'
+        '{"WALLTIME":"PT2H"}',
 )
 
-ctx.processingOptionService.createOrUpdate(
+processingOptionService.createOrUpdate(
     OptionName.PIPELINE_OTP_ALIGNMENT_NUMBER_OF_SAMPE_THREADS,
     null,
     null,
     '-t 8'
 )
 
-ctx.processingOptionService.createOrUpdate(
+processingOptionService.createOrUpdate(
     OptionName.PIPELINE_OTP_ALIGNMENT_NUMBER_OF_SAMTOOLS_SORT_THREADS,
     null,
     null,
     '-@ 8'
 )
 
-ctx.processingOptionService.createOrUpdate(
+processingOptionService.createOrUpdate(
     OptionName.PIPELINE_OTP_ALIGNMENT_MBUFFER_PAIRING_SORTING,
     null,
     null,
     '-m 2G'
 )
 
-ctx.processingOptionService.createOrUpdate(
+processingOptionService.createOrUpdate(
     OptionName.PIPELINE_OTP_ALIGNMENT_SAMTOOLS_SORT_BUFFER,
     null,
     null,
     '-m 2000000000'
 )
 
-ctx.processingOptionService.createOrUpdate(
+processingOptionService.createOrUpdate(
     OptionName.PIPELINE_OTP_ALIGNMENT_BWA_QUEUE_PARAMETER,
     null,
     null,
     '-q 20'
 )
 
-ctx.processingOptionService.createOrUpdate(
+processingOptionService.createOrUpdate(
     OptionName.MAXIMUM_NUMBER_OF_JOBS,
     WORKFLOW_NAME,
     null,
     '100'
 )
-ctx.processingOptionService.createOrUpdate(
+processingOptionService.createOrUpdate(
     OptionName.MAXIMUM_NUMBER_OF_JOBS_RESERVED_FOR_FAST_TRACK,
     WORKFLOW_NAME,
     null,

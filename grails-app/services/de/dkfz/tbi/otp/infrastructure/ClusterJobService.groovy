@@ -62,7 +62,7 @@ class ClusterJobService {
      */
     public ClusterJob createClusterJob(Realm realm, String clusterJobId, String userName,
                                        ProcessingStep processingStep, SeqType seqType = null,
-                                       String clusterJobName = processingStep.getPbsJobDescription(),
+                                       String clusterJobName = processingStep.getClusterJobName(),
                                        String jobClass = processingStep.nonQualifiedJobClass) {
         ClusterJob job = new ClusterJob(
                                     processingStep: processingStep,
