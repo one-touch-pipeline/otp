@@ -10,6 +10,6 @@ class PanCanStartJob extends RoddyAlignmentStartJob {
 
     @Override
     List<SeqType> getSeqTypes() {
-        return [SeqType.getExomePairedSeqType(), SeqType.getWholeGenomePairedSeqType()]
+        return [SeqType.getExomePairedSeqType(), SeqType.getWholeGenomePairedSeqType(), SeqType.getChipSeqPairedSeqType()]
     }
 }

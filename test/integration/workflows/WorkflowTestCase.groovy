@@ -198,7 +198,6 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         assert WorkflowTestRealms.createRealmDataManagementDKFZ(realmParams).save(flush: true)
         realm = WorkflowTestRealms.createRealmDataProcessingDKFZ(realmParams).save(flush: true)
         assert realm
-
         assert !getBaseDirectory().exists()
         createDirectories([
                 getBaseDirectory(),
@@ -206,8 +205,8 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
                 new File(realm.loggingRootPath, JobStatusLoggingService.STATUS_LOGGING_BASE_DIR),
                 new File(realm.stagingRootPath),
         ])
-
         DomainFactory.createProcessingOptionBasePathReferenceGenome(new File(processingRootPath, "reference_genomes").absolutePath)
+
     }
 
     public void createDirectories(List<File> files) {

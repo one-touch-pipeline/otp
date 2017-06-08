@@ -91,8 +91,8 @@ class RoddyWorkflowConfig extends ConfigPerProject implements AlignmentConfig {
             pipeline?.usesRoddy()
         }
         adapterTrimmingNeeded validator: { adapterTrimmingNeeded, config ->
-            if (config.pipeline?.type == Pipeline.Type.ALIGNMENT && (config.seqType?.isRna() || config.seqType?.isWgbs()) && !adapterTrimmingNeeded) {
-                return "adapterTrimmingNeeded must be set for WGBS and RNA alignment"
+            if (config.pipeline?.type == Pipeline.Type.ALIGNMENT && (config.seqType?.isRna() || config.seqType?.isWgbs() || config.seqType?.isChipSeq()) && !adapterTrimmingNeeded) {
+                return "adapterTrimmingNeeded must be set for WGBS, ChipSeq and RNA alignment"
             }
             if (config.pipeline?.type != Pipeline.Type.ALIGNMENT && adapterTrimmingNeeded) {
                 return "adapterTrimmingNeeded must not be set for non-alignment pipelines"

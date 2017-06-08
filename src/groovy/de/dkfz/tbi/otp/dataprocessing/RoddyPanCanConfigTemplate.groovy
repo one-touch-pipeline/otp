@@ -10,6 +10,7 @@ class RoddyPanCanConfigTemplate {
     static enum SeqTypeOptions {
         WES('exomeAnalysis', ''),
         WGS('qcAnalysis', ''),
+        CHIPSEQ('qcAnalysis', ''),
         WGBS('bisulfiteCoreAnalysis', '''
                 <!-- BWA Binary -->
                 <cvalue name="BWA_BINARY" value="bwa-0.7.8-bisulfite" type="filename"

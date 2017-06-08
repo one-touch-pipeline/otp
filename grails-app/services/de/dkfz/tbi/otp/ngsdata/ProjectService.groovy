@@ -298,6 +298,9 @@ AND ace.granting = true
         } else {
             panCanAlignmentConfiguration.adapterTrimmingNeeded = true
         }
+        if (panCanAlignmentConfiguration.seqType.isChipSeq()) {
+            panCanAlignmentConfiguration.adapterTrimmingNeeded = true
+        }
         if (panCanAlignmentConfiguration.mergeTool == MergeConstants.MERGE_TOOL_SAMBAMBA) {
             List<String> allSambambaVersions = ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_SAMBAMBA_VERSION_AVAILABLE, null, null).split(',')*.trim()
             assert panCanAlignmentConfiguration.sambambaVersion in allSambambaVersions: "Invalid sambamba version: '${panCanAlignmentConfiguration.sambambaVersion}', possible values: ${allSambambaVersions}"

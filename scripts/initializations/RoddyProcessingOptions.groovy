@@ -240,3 +240,37 @@ processingOptionService.createOrUpdate(
         '/path/to/programs/bwa/bwa-0.7.15/bin/bwa',
         'Path to bwa_mem 0.7.15'
 )
+
+//ChipSeq
+
+processingOptionService.createOrUpdate(
+        RoddyConstants.OPTION_KEY_BASE_PROJECT_CONFIG,
+        SeqType.chipSeqPairedSeqType.roddyName,
+        null,
+        "otpAlignmentAndQCWorkflowsChipSeq-1.0",
+        "The base project file for ChipSeq alignment"
+)
+
+processingOptionService.createOrUpdate(
+        RoddyConstants.OPTION_KEY_DEFAULT_REFERENCE_GENOME,
+        SeqType.chipSeqPairedSeqType.roddyName,
+        null,
+        "1KGRef_PhiX",
+        "Default reference genome for ChipSeq"
+)
+
+processingOptionService.createOrUpdate(
+        RoddyConstants.OPTION_KEY_DEFAULT_MERGE_TOOL,
+        SeqType.chipSeqPairedSeqType.roddyName,
+        null,
+        "sambamba",
+        "Default merge tool for ChipSeq"
+)
+
+processingOptionService.createOrUpdate(
+        RoddyConstants.OPTION_KEY_ALL_MERGE_TOOLS,
+        SeqType.chipSeqPairedSeqType.roddyName,
+        null,
+        "sambamba",
+        "All merge tools for ChipSeq"
+)

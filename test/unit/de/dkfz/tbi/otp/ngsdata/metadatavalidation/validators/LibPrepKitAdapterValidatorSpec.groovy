@@ -47,7 +47,6 @@ class LibPrepKitAdapterValidatorSpec extends Specification {
         ] as SampleIdentifierService
 
         DomainFactory.createRoddyAlignableSeqTypes()
-        DomainFactory.createSeqTypeLazy(SeqTypeNames.CHIP_SEQ, "CHIP", "chip_dir")
         DomainFactory.createPanCanPipeline()
         DomainFactory.createRnaPipeline()
 

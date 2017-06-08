@@ -82,6 +82,7 @@ class ConfigurePipelineController {
                 defaultMergeTool        : defaultMergeTool,
 
                 isWgbs                  : cmd.seqType.isWgbs(),
+                isChipSeq               : cmd.seqType.isChipSeq(),
 
                 bwaMemVersion           : defaultBwaMemVersion,
                 bwaMemVersions          : allBwaMemVersions,

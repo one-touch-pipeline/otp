@@ -222,9 +222,9 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
                     referenceGenome  : workPackage.referenceGenome,
                     statSizeFileName : workPackage.statSizeFileName,
                     mergeTool        : ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_DEFAULT_MERGE_TOOL, workPackage.seqType.roddyName, null),
-                    bwaMemVersion   : ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_BWA_VERSION_DEFAULT, null, null),
+                    bwaMemVersion    : ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_BWA_VERSION_DEFAULT, null, null),
                     sambambaVersion  : ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_SAMBAMBA_VERSION_DEFAULT, null, null),
-                    resources         : "t"
+                    resources        : "${workPackage.seqType.isChipSeq() ? 'xl' : 't'}",
             ] + options))
         }
     }
@@ -238,7 +238,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
                 dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
         ] + properties
         SeqTrack seqTrack = DomainFactory.createSeqTrackWithDataFiles(workPackage, seqTrackProperties)
-        if (findSeqType().isWgbs()) {
+        if (findSeqType().isWgbs() || findSeqType().isChipSeq()) {
             seqTrack.libraryPreparationKit = exactlyOneElement(LibraryPreparationKit.findAll())
             seqTrack.kitInfoReliability = InformationReliability.KNOWN
             seqTrack.save(flush: true)
@@ -392,12 +392,12 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
     }
 
     void checkQC(RoddyBamFile bamFile) {
-
         QualityAssessmentMergedPass qaPass = QualityAssessmentMergedPass.findWhere(
                 abstractMergedBamFile: bamFile,
                 identifier: 0,
         )
         assert qaPass
+
 
         bamFile.seqTracks.each {
             List<RoddySingleLaneQa> qa = RoddySingleLaneQa.findAllBySeqTrack(it)
@@ -414,15 +414,12 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
                 assert RoddySingleLaneQa.findByChromosomeAndSeqTrack(chromosome, seqTrack)
             }
         }
-
-        RoddyMergedBamQa mergedQa = RoddyMergedBamQa.findByQualityAssessmentMergedPass(qaPass)
+        RoddyMergedBamQa mergedQa = RoddyMergedBamQa.findByQualityAssessmentMergedPassAndChromosome(qaPass, RoddyQualityAssessment.ALL)
         assert mergedQa
-
         JSONObject json = JSON.parse(bamFile.getFinalMergedQAJsonFile().text)
         json.keys().each { String chromosome ->
             assert RoddyMergedBamQa.findByChromosomeAndQualityAssessmentMergedPass(chromosome, qaPass)
         }
-
         assert bamFile.coverage == mergedQa.genomeWithoutNCoverageQcBases
         assert bamFile.coverageWithN == abstractBamFileService.calculateCoverageWithN(bamFile)
 

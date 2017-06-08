@@ -629,7 +629,7 @@ class DomainFactory {
                         pipeline: workPackage.pipeline,
                         project: workPackage.project,
                         seqType: workPackage.seqType,
-                        adapterTrimmingNeeded: workPackage.seqType.isRna() || workPackage.seqType.isWgbs(),
+                        adapterTrimmingNeeded: workPackage.seqType.isRna() || workPackage.seqType.isWgbs() || workPackage.seqType.isChipSeq(),
                 )},
                 md5sum: {
                     (!bamFileProperties.containsKey('fileOperationStatus') || bamFileProperties.fileOperationStatus == FileOperationStatus.PROCESSED) ? HelperUtils.randomMd5sum : null
@@ -1493,7 +1493,7 @@ class DomainFactory {
                 project: { properties.individual?.project ?: createProject() },
                 dateCreated: {new Date()},
                 lastUpdated: {new Date()},
-                adapterTrimmingNeeded: {seqType.isWgbs() || seqType.isRna()},
+                adapterTrimmingNeeded: {seqType.isWgbs() || seqType.isRna() || seqType.isChipSeq()},
         ]
     }
 
@@ -1743,6 +1743,7 @@ class DomainFactory {
                 createExomeSeqType(),
                 createWholeGenomeBisulfiteSeqType(),
                 createWholeGenomeBisulfiteTagmentationSeqType(),
+                createChipSeqType(),
         ]
     }
 

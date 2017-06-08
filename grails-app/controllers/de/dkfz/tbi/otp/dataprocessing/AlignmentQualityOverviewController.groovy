@@ -142,6 +142,7 @@ class AlignmentQualityOverviewController {
             case SeqTypeNames.WHOLE_GENOME.seqTypeName:
             case SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName:
             case SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName:
+            case SeqTypeNames.CHIP_SEQ.seqTypeName:
                 header = HEADER_WHOLE_GENOME
                 break
             case SeqTypeNames.EXOME.seqTypeName:
@@ -248,6 +249,7 @@ class AlignmentQualityOverviewController {
                 case SeqTypeNames.WHOLE_GENOME.seqTypeName:
                 case SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName:
                 case SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName:
+                case SeqTypeNames.CHIP_SEQ.seqTypeName:
                     Double coverageX
                     Double coverageY
                     if (chromosomeLengthForChromosome[it.referenceGenome.id]) {

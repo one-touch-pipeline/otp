@@ -39,6 +39,7 @@ class PanCanAlignmentCheckerIntegrationSpec extends AbstractRoddyAlignmentChecke
         List<SeqType> seqTypes = [
                 DomainFactory.createWholeGenomeSeqType(),
                 DomainFactory.createExomeSeqType(),
+                DomainFactory.createChipSeqType(),
         ]
 
         expect:

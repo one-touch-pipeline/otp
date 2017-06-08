@@ -47,7 +47,7 @@ class LibPrepKitSeqTypeValidatorSpec extends Specification {
         context.problems.empty
     }
 
-    void 'validate, when sequencing type is exome or RNA and LibPrepKit is empty, adds error'() {
+    void 'validate, when sequencing type is exome, RNA or ChipSeq and LibPrepKit is empty, adds error'() {
 
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
@@ -55,27 +55,36 @@ class LibPrepKitSeqTypeValidatorSpec extends Specification {
                         "\t${SeqTypeNames.EXOME.seqTypeName}\t\n" +
                         "\t${SeqTypeNames.RNA.seqTypeName}\t\n" +
                         "\t${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\t\n" +
-                        "\t${SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName}\t\n"
+                        "\t${SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName}\t\n" +
+                        "\t${SeqTypeNames.CHIP_SEQ.seqTypeName}\t\n"
         )
 
         when:
         new LibPrepKitSeqTypeValidator().validate(context)
 
         then:
-        context.problems.size() == 4
+        context.problems.size() == 5
         Collection<Problem> expectedProblems = [
                 new Problem((context.spreadsheet.dataRows[8].cells) as Set, Level.ERROR,
                         "If the sequencing type is '${SeqTypeNames.EXOME.seqTypeName}' or '${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}' " +
-                                "or '${SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName}' or '${SeqTypeNames.RNA.seqTypeName}', the library preparation kit must be given."),
+                                "or '${SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName}' or '${SeqTypeNames.RNA.seqTypeName}' or '${SeqTypeNames.CHIP_SEQ.seqTypeName}'" +
+                                ", the library preparation kit must be given."),
                 new Problem((context.spreadsheet.dataRows[9].cells) as Set, Level.ERROR,
                         "If the sequencing type is '${SeqTypeNames.EXOME.seqTypeName}' or '${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}' " +
-                                "or '${SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName}' or '${SeqTypeNames.RNA.seqTypeName}', the library preparation kit must be given."),
+                                "or '${SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName}' or '${SeqTypeNames.RNA.seqTypeName}' or '${SeqTypeNames.CHIP_SEQ.seqTypeName}'" +
+                                ", the library preparation kit must be given."),
                 new Problem((context.spreadsheet.dataRows[10].cells) as Set, Level.ERROR,
                         "If the sequencing type is '${SeqTypeNames.EXOME.seqTypeName}' or '${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}' " +
-                                "or '${SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName}' or '${SeqTypeNames.RNA.seqTypeName}', the library preparation kit must be given."),
+                                "or '${SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName}' or '${SeqTypeNames.RNA.seqTypeName}' or '${SeqTypeNames.CHIP_SEQ.seqTypeName}'" +
+                                ", the library preparation kit must be given."),
                 new Problem((context.spreadsheet.dataRows[11].cells) as Set, Level.ERROR,
                         "If the sequencing type is '${SeqTypeNames.EXOME.seqTypeName}' or '${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}' " +
-                                "or '${SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName}' or '${SeqTypeNames.RNA.seqTypeName}', the library preparation kit must be given."),
+                                "or '${SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName}' or '${SeqTypeNames.RNA.seqTypeName}' or '${SeqTypeNames.CHIP_SEQ.seqTypeName}'" +
+                                ", the library preparation kit must be given."),
+                new Problem((context.spreadsheet.dataRows[12].cells) as Set, Level.ERROR,
+                        "If the sequencing type is '${SeqTypeNames.EXOME.seqTypeName}' or '${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}' " +
+                                "or '${SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName}' or '${SeqTypeNames.RNA.seqTypeName}' or '${SeqTypeNames.CHIP_SEQ.seqTypeName}'" +
+                                ", the library preparation kit must be given."),
         ]
         containSame(context.problems, expectedProblems)
     }
@@ -113,7 +122,7 @@ CHIPSEQ
         context.problems.empty
     }
 
-    void 'validate, when sequencing type is exome or RNA and no libPrepKit column exist, adds one error'() {
+    void 'validate, when sequencing type is exome, RNA or ChipSeq and no libPrepKit column exist, adds one error'() {
 
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
@@ -125,20 +134,23 @@ WGS
 ${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}
 ${SeqTypeNames.EXOME.seqTypeName}
 ${SeqTypeNames.RNA.seqTypeName}
+${SeqTypeNames.CHIP_SEQ.seqTypeName}
 """)
 
         when:
         new LibPrepKitSeqTypeValidator().validate(context)
 
         then:
-        context.problems.size() == 3
+        context.problems.size() == 4
         Collection<Problem> expectedProblems = [
                 new Problem((context.spreadsheet.dataRows[1].cells + context.spreadsheet.dataRows[4].cells) as Set, Level.ERROR,
-                        "If the sequencing type is '${SeqTypeNames.EXOME.seqTypeName}' or '${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}' or '${SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName}' or '${SeqTypeNames.RNA.seqTypeName}', the library preparation kit must be given."),
+                        "If the sequencing type is '${SeqTypeNames.EXOME.seqTypeName}' or '${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}' or '${SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName}' or '${SeqTypeNames.RNA.seqTypeName}' or '${SeqTypeNames.CHIP_SEQ.seqTypeName}', the library preparation kit must be given."),
                         new Problem((context.spreadsheet.dataRows[2].cells + context.spreadsheet.dataRows[5].cells) as Set, Level.ERROR,
-                        "If the sequencing type is '${SeqTypeNames.EXOME.seqTypeName}' or '${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}' or '${SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName}' or '${SeqTypeNames.RNA.seqTypeName}', the library preparation kit must be given."),
+                        "If the sequencing type is '${SeqTypeNames.EXOME.seqTypeName}' or '${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}' or '${SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName}' or '${SeqTypeNames.RNA.seqTypeName}' or '${SeqTypeNames.CHIP_SEQ.seqTypeName}', the library preparation kit must be given."),
                 new Problem((context.spreadsheet.dataRows[6].cells) as Set, Level.ERROR,
-                        "If the sequencing type is '${SeqTypeNames.EXOME.seqTypeName}' or '${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}' or '${SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName}' or '${SeqTypeNames.RNA.seqTypeName}', the library preparation kit must be given."),
+                        "If the sequencing type is '${SeqTypeNames.EXOME.seqTypeName}' or '${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}' or '${SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName}' or '${SeqTypeNames.RNA.seqTypeName}' or '${SeqTypeNames.CHIP_SEQ.seqTypeName}', the library preparation kit must be given."),
+                new Problem((context.spreadsheet.dataRows[7].cells) as Set, Level.ERROR,
+                        "If the sequencing type is '${SeqTypeNames.EXOME.seqTypeName}' or '${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}' or '${SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName}' or '${SeqTypeNames.RNA.seqTypeName}' or '${SeqTypeNames.CHIP_SEQ.seqTypeName}', the library preparation kit must be given."),
         ]
         containSame(context.problems, expectedProblems)
     }

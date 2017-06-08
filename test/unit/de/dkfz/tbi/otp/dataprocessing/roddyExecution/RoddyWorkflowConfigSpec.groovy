@@ -89,7 +89,7 @@ class RoddyWorkflowConfigSpec extends Specification {
         config.seqType = DomainFactory.createSeqTypeLazy(seqTypeName, "asdf", "asdf", "asdf")
 
         expect:
-        TestCase.assertValidateError(config, 'adapterTrimmingNeeded', 'adapterTrimmingNeeded must be set for WGBS and RNA alignment', config.adapterTrimmingNeeded)
+        TestCase.assertValidateError(config, 'adapterTrimmingNeeded', 'adapterTrimmingNeeded must be set for WGBS, ChipSeq and RNA alignment', config.adapterTrimmingNeeded)
 
         where:
         seqTypeName << [SeqTypeNames.RNA, SeqTypeNames.WHOLE_GENOME_BISULFITE, SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION]

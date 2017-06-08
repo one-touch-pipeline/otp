@@ -33,10 +33,12 @@ class LibPrepKitSeqTypeValidator extends ValueTuplesValidator<MetadataValidation
     void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {
         valueTuples.each { ValueTuple valueTuple ->
             String seqType = MetadataImportService.getSeqTypeNameFromMetadata(valueTuple)
-            if ((seqType in [SeqTypeNames.EXOME, SeqTypeNames.RNA, SeqTypeNames.WHOLE_GENOME_BISULFITE, SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION]*.seqTypeName) &&
+            if ((seqType in [SeqTypeNames.EXOME, SeqTypeNames.RNA, SeqTypeNames.WHOLE_GENOME_BISULFITE, SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION,
+                             SeqTypeNames.CHIP_SEQ]*.seqTypeName) &&
                     (!valueTuple.getValue(LIB_PREP_KIT.name()))) {
                 context.addProblem(valueTuple.cells, Level.ERROR, "If the sequencing type is '${SeqTypeNames.EXOME.seqTypeName}' or '${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}' " +
-                        "or '${SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName}' or '${SeqTypeNames.RNA.seqTypeName}', the library preparation kit must be given.")
+                        "or '${SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName}' or '${SeqTypeNames.RNA.seqTypeName}' or '${SeqTypeNames.CHIP_SEQ.seqTypeName}'" +
+                        ", the library preparation kit must be given.")
             }
         }
     }

@@ -24,7 +24,8 @@ class SeqType implements Entity {
     ].asImmutable()
 
     public static final Collection<SeqTypeNames> SEQTYPES_MUST_BE_COPIED = WGBS_SEQ_TYPE_NAMES + [
-            SeqTypeNames.RNA
+            SeqTypeNames.RNA,
+            SeqTypeNames.CHIP_SEQ,
     ].asImmutable()
 
     /**
@@ -103,6 +104,10 @@ class SeqType implements Entity {
         return name == SeqTypeNames.RNA.seqTypeName
     }
 
+    boolean isChipSeq() {
+        return name == SeqTypeNames.CHIP_SEQ.seqTypeName
+    }
+
     boolean seqTypeAllowsLinking() {
         return !SEQTYPES_MUST_BE_COPIED.contains(seqTypeName)
     }
@@ -142,6 +147,12 @@ class SeqType implements Entity {
         )
     }
 
+    static SeqType getChipSeqPairedSeqType() {
+        return CollectionUtils.exactlyOneElement(
+                findAllByNameAndLibraryLayout(SeqTypeNames.CHIP_SEQ.seqTypeName, LIBRARYLAYOUT_PAIRED)
+        )
+    }
+
     static List<SeqType> getDefaultOtpAlignableSeqTypes() {
         return [
                 getExomePairedSeqType(),
@@ -155,6 +166,7 @@ class SeqType implements Entity {
                 getWholeGenomePairedSeqType(),
                 getWholeGenomeBisulfitePairedSeqType(),
                 getWholeGenomeBisulfiteTagmentationPairedSeqType(),
+                getChipSeqPairedSeqType(),
         ]
     }
 

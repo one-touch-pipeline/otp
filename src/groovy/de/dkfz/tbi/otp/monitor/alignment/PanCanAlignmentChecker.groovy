@@ -22,7 +22,7 @@ class PanCanAlignmentChecker extends AbstractRoddyAlignmentChecker {
     }
 
     List<SeqType> getSeqTypes() {
-        return [SeqType.wholeGenomePairedSeqType, SeqType.exomePairedSeqType]
+        return [SeqType.wholeGenomePairedSeqType, SeqType.exomePairedSeqType, SeqType.chipSeqPairedSeqType]
     }
 
     @Override

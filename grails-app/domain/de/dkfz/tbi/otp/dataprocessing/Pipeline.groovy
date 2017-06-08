@@ -29,6 +29,7 @@ class Pipeline implements Entity {
                 case SeqTypeNames.WHOLE_GENOME:
                 case SeqTypeNames.WHOLE_GENOME_BISULFITE:
                 case SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION:
+                case SeqTypeNames.CHIP_SEQ:
                     return Name.PANCAN_ALIGNMENT
                 case SeqTypeNames.RNA:
                     return Name.RODDY_RNA_ALIGNMENT

@@ -10,12 +10,16 @@
 <body>
     <div class="body">
         <h1><g:message code="configurePipeline.alignment.title" args="[project.name, seqType.displayName]"/></h1>
-        <g:form controller="configurePipeline" action="alignment" params='["project.id": project.id, "seqType.id": seqType.id]'>
-            <span class="blue_label"><g:message code="configurePipeline.alignment.copy"/></span>
-            <g:select class="criteria" id="project_select" name='basedProject.id'
-                from='${projects}' optionKey='id' optionValue='name' value='${projects.first().name}'/>
-            <g:submitButton name="copy" value="Copy"/>
-        </g:form>
+        <g:if test="${projects}">
+            <g:form controller="configurePipeline" action="alignment"
+                    params='["project.id": project.id, "seqType.id": seqType.id]'>
+                <span class="blue_label"><g:message code="configurePipeline.alignment.copy"/></span>
+
+                <g:select class="criteria" id="project_select" name='basedProject.id'
+                          from='${projects}' optionKey='id' optionValue='name'/>
+                <g:submitButton name="copy" value="Copy"/>
+            </g:form>
+        </g:if>
         <g:if test="${hasErrors}">
             <div class="errors"> <li>${message}</li></div>
         </g:if>
@@ -93,7 +97,7 @@
                     <td>-</td>
                     <td><g:message code="configurePipeline.config.info"/></td>
                 </tr>
-                <g:if test="${!isWgbs}">
+                <g:if test="${!isWgbs && !isChipSeq}">
                     <tr>
                         <td class="myKey"><g:message code="configurePipeline.adapterTrimmingNeeded"/></td>
                         <td><g:checkBox name="adapterTrimmingNeeded" checked="false"/></td>

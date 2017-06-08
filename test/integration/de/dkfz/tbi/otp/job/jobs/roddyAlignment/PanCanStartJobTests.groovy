@@ -15,6 +15,7 @@ class PanCanStartJobTests {
         List<SeqType> expected = [
                 DomainFactory.createWholeGenomeSeqType(),
                 DomainFactory.createExomeSeqType(),
+                DomainFactory.createChipSeqType(),
         ]
 
         TestCase.assertContainSame(expected, panCanStartJob.seqTypes)
