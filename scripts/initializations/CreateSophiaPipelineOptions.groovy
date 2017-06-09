@@ -15,7 +15,7 @@ processingOptionService.createOrUpdate(
         RoddyConstants.OPTION_KEY_SOPHIA_PIPELINE_PLUGIN_VERSION,
         null,
         null,
-        '1.0.15',
+        '1.0.16',
         'The version of the Sophia pipeline plugin'
 )
 processingOptionService.createOrUpdate(
