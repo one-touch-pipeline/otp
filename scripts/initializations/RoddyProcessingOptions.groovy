@@ -152,7 +152,7 @@ println processingOptionService.createOrUpdate(
         RoddyConstants.OPTION_KEY_RODDY_ALIGNMENT_PLUGIN_VERSION,
         SeqType.rnaPairedSeqType.roddyName,
         null,
-        "1.0.8",
+        "1.0.10",
         "The version of the rna roddy alignment plugin"
 )
 
@@ -160,7 +160,7 @@ println processingOptionService.createOrUpdate(
         RoddyConstants.OPTION_KEY_BASE_PROJECT_CONFIG,
         SeqType.rnaPairedSeqType.roddyName,
         null,
-        "otpRnaAlignment-1.0",
+        "otpRnaAlignment-1.1",
         "The base project file for WGS alignment"
 )
 
