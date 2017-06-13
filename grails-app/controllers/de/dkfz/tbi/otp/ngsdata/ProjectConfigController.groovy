@@ -350,7 +350,7 @@ class UpdateContactPersonCommand implements Serializable {
         this.aspera = aspera?.trim()?.replaceAll(" +", " ")
     }
     void setRole(String role) {
-        this.contactPersonRole = ProjectOverviewController.getContactPersonRoleByName(role)
+        this.contactPersonRole = ProjectConfigController.getContactPersonRoleByName(role)
     }
 }
 
