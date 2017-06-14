@@ -126,6 +126,12 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
 
         DomainFactory.createAllAlignableSeqTypes()
         DomainFactory.createProcessingOptionForStatisticRecipient()
+        DomainFactory.createProcessingOption([
+                name: ExecuteRoddyCommandService.OTP_USER_LINUX_GROUP,
+                value: TestCase.testingGroup(grailsApplication),
+                comment: "linux group of the otp user",
+        ]
+        )
 
         createUserAndRoles()
         loadWorkflow()

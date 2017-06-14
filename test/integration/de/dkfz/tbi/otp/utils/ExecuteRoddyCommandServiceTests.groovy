@@ -43,6 +43,13 @@ class ExecuteRoddyCommandServiceTests {
     void setUp() {
         DomainFactory.createRoddyProcessingOptions(temporaryFolder.newFolder())
 
+        DomainFactory.createProcessingOption([
+                name: ExecuteRoddyCommandService.OTP_USER_LINUX_GROUP,
+                value: TestCase.testingGroup(grailsApplication),
+                comment: "linux group of the otp user",
+                ]
+        )
+
         roddyPath = new File(ProcessingOptionService.getValueOfProcessingOption("roddyPath"))
         roddyCommand = new File(roddyPath, 'roddy.sh')
         tmpOutputDir = temporaryFolder.newFolder("temporaryOutputDir")
@@ -351,7 +358,7 @@ stat -c %G ${tmpOutputDir}
         //make the 2 optional, since it does not work for all developer, allow group jenkins, since user jenkins is not part of jenkins
         String expected = """\
 2?770
-(localGroup|jenkins)
+(${ProcessingOptionService.getValueOfProcessingOption(ExecuteRoddyCommandService.OTP_USER_LINUX_GROUP)}|jenkins)
 """
 
         assert permissionAndGroup ==~ expected
@@ -376,7 +383,7 @@ stat -c %G ${tmpOutputDir}
         //make the 2 optional, since it does not work for all developer, allow group jenkins, since user jenkins is not part of jenkins
         String expected = """\
 2?770
-(localGroup|jenkins)
+(${ProcessingOptionService.getValueOfProcessingOption(ExecuteRoddyCommandService.OTP_USER_LINUX_GROUP)}|jenkins)
 """
 
         assert permissionAndGroup ==~ expected

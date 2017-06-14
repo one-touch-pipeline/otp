@@ -14,6 +14,7 @@ import groovy.transform.TupleConstructor
 class ExecuteRoddyCommandService {
 
     static final String FEATURE_TOGGLES_CONFIG_PATH = "OtherUnixUserFeatureTogglesConfigPath"
+    static final String OTP_USER_LINUX_GROUP = "otpUserLinuxGroup"
 
 
     ExecutionService executionService
@@ -121,9 +122,9 @@ class ExecuteRoddyCommandService {
         assert realm : "Realm must not be null"
         assert file : "File must not be null"
         if (file.exists()) {
-            executionService.executeCommand(realm, "umask 027; chgrp localGroup ${file} ; chmod 2770 ${file}")
+            executionService.executeCommand(realm, "umask 027; chgrp ${ProcessingOptionService.getValueOfProcessingOption(OTP_USER_LINUX_GROUP)} ${file} ; chmod 2770 ${file}")
         } else {
-            executionService.executeCommand(realm, "umask 027; mkdir -m 2750 -p ${file.parent} && mkdir -m 2770 -p ${file} && chgrp localGroup ${file};")
+            executionService.executeCommand(realm, "umask 027; mkdir -m 2750 -p ${file.parent} && mkdir -m 2770 -p ${file} && chgrp ${ProcessingOptionService.getValueOfProcessingOption(OTP_USER_LINUX_GROUP)} ${file};")
             WaitingFileUtils.waitUntilExists(file)
         }
     }
