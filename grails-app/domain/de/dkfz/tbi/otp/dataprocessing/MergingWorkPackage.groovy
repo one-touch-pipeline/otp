@@ -47,8 +47,11 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
 
     boolean needsProcessing
 
+    Set<SeqTrack> seqTracks
+
     static hasMany = [
-            alignmentProperties: MergingWorkPackageAlignmentProperty
+            alignmentProperties: MergingWorkPackageAlignmentProperty,
+            seqTracks: SeqTrack
     ]
 
     static constraints = {
