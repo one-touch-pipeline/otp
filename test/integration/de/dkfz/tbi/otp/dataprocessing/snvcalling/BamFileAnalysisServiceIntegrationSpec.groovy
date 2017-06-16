@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
 import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
@@ -73,13 +74,13 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
                 pipeline: pipeline()
         )
         DomainFactory.createProcessingOption([
-                name: AceseqService.PROCESSING_OPTION_REFERENCE_KEY,
+                name: ProcessingOption.OptionName.PIPELINE_ACESEQ_REFERENCE_GENOME,
                 type: null,
                 project: null,
                 value: samplePair1.mergingWorkPackage1.referenceGenome.name,
         ])
         DomainFactory.createProcessingOption([
-                name: SophiaService.PROCESSING_OPTION_REFERENCE_KEY,
+                name: ProcessingOption.OptionName.PIPELINE_SOPHIA_REFERENCE_GENOME,
                 type: null,
                 project: null,
                 value: samplePair1.mergingWorkPackage1.referenceGenome.name,
@@ -106,7 +107,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
                 pipeline:  pipeline()
         )
         DomainFactory.createProcessingOption([
-                name: service.PROCESSING_OPTION_REFERENCE_KEY,
+                name: optionName,
                 type: null,
                 project: null,
                 value: 'foobar'
@@ -116,9 +117,9 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         null == service.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
 
         where:
-        processingStatus         | pipeline                                     | service
-        "sophiaProcessingStatus" | { DomainFactory.createSophiaPipelineLazy() } | this.sophiaService
-        "aceseqProcessingStatus" | { DomainFactory.createAceseqPipelineLazy() } | this.aceseqService
+        processingStatus         | pipeline                                     | service            | optionName
+        "sophiaProcessingStatus" | { DomainFactory.createSophiaPipelineLazy() } | this.sophiaService | ProcessingOption.OptionName.PIPELINE_SOPHIA_REFERENCE_GENOME
+        "aceseqProcessingStatus" | { DomainFactory.createAceseqPipelineLazy() } | this.aceseqService | ProcessingOption.OptionName.PIPELINE_ACESEQ_REFERENCE_GENOME
 
     }
 
@@ -529,7 +530,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         samplePair1.sophiaProcessingStatus = ProcessingStatus.NO_PROCESSING_NEEDED
         samplePair1.save(flush: true)
         DomainFactory.createProcessingOption([
-                name   : AceseqService.PROCESSING_OPTION_REFERENCE_KEY,
+                name   : OptionName.PIPELINE_ACESEQ_REFERENCE_GENOME,
                 type   : null,
                 project: null,
                 value  : samplePair1.mergingWorkPackage1.referenceGenome.name,

@@ -1,15 +1,13 @@
 package de.dkfz.tbi.otp.job.processing
 
-import de.dkfz.tbi.otp.ngsdata.Project
-import de.dkfz.tbi.otp.ngsdata.SeqType
-import grails.converters.JSON
-
-import org.codehaus.groovy.grails.web.converters.exceptions.ConverterException
-import org.codehaus.groovy.grails.web.json.JSONObject
-import org.springframework.util.Assert
-
+import com.google.common.base.CaseFormat
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
+import de.dkfz.tbi.otp.ngsdata.*
+import grails.converters.*
+import org.codehaus.groovy.grails.web.converters.exceptions.*
+import org.codehaus.groovy.grails.web.json.*
+import org.springframework.util.*
 
 /**
  * A service to merge realm and job-cluster specific PBS options. The PBS option needs to be provided as a JSON string
@@ -28,7 +26,7 @@ import de.dkfz.tbi.otp.ngsdata.Realm
  */
 class PbsOptionMergingService {
 
-    static final String PBS_PREFIX = "PBS_"
+    static final String PBS_PREFIX = "CLUSTER_SUBMISSIONS_OPTION"
 
     ProcessingOptionService processingOptionService
 
@@ -38,18 +36,18 @@ class PbsOptionMergingService {
         assert parameterObject
         Project project = parameterObject.project
         SeqType seqType = parameterObject.seqType
-        String optionNameWithoutSeqType = "${PBS_PREFIX}${processingStep.nonQualifiedJobClass}"
+        OptionName optionName = OptionName."${PBS_PREFIX}_${CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, processingStep.nonQualifiedJobClass)}"
 
         // default options for the realm
         Map options = jsonStringToMap(realm.defaultJobSubmissionOptions)
 
         // options for the job class
-        options = mergeMapWithJsonString(options, processingOptionService.findOption(optionNameWithoutSeqType, cluster, project))
+        options = mergeMapWithJsonString(options, processingOptionService.findOption(optionName, cluster, project))
         if (seqType) {
             assert seqType.processingOptionName
             // options for the job class and SeqType
             options = mergeMapWithJsonString(options, processingOptionService.findOption(
-                    "${optionNameWithoutSeqType}_${seqType.processingOptionName}", cluster, project))
+                    optionName, seqType.alias, project))
         }
 
         // additional options

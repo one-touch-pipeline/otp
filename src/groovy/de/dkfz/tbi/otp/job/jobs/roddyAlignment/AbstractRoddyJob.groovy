@@ -17,7 +17,6 @@ import java.util.regex.*
 
 import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.*
 
-
 /**
  * class for roddy jobs that handle failed or not finished cluster jobs, analyse them and provide
  * information about their failure for {@link AbstractMaybeSubmitWaitValidateJob}
@@ -26,7 +25,6 @@ abstract class AbstractRoddyJob<R extends RoddyResult> extends AbstractMaybeSubm
 
     public static final String NO_STARTED_JOBS_MESSAGE = '\nThere were no started jobs, the execution directory will be removed.\n'
     public static final Pattern roddyExecutionStoreDirectoryPattern = Pattern.compile(/(?:^|\n)Creating\sthe\sfollowing\sexecution\sdirectory\sto\sstore\sinformation\sabout\sthis\sprocess:\s*\n\s*(\/.*\/${RoddySnvCallingInstance.RODDY_EXECUTION_DIR_PATTERN})(?:\n|$)/)
-    static final String MAX_RODDY_PROCESSES = "RoddyMaximumParallelExecutedProcesses"
 
     @Autowired
     ExecuteRoddyCommandService executeRoddyCommandService
@@ -42,7 +40,7 @@ abstract class AbstractRoddyJob<R extends RoddyResult> extends AbstractMaybeSubm
     // Running job r150428_104246480_stds_snvCallingMetaScript => 3504988
     static final Pattern roddyOutputPattern = Pattern.compile(/^\s*(?:Running|Rerun)\sjob\s(.*_(\S+))\s=>\s(\S+)\s*$/)
 
-    private static final Semaphore roddyMemoryUsage = new Semaphore((int)ProcessingOptionService.findOptionAsNumber(MAX_RODDY_PROCESSES, null, null, 10), true)
+    private static final Semaphore roddyMemoryUsage = new Semaphore((int)ProcessingOptionService.findOptionAsNumber(ProcessingOption.OptionName.MAXIMUM_EXECUTED_RODDY_PROCESSES, null, null, 10), true)
 
     @Override
     protected final AbstractMultiJob.NextAction maybeSubmit() throws Throwable {

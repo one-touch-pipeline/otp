@@ -2,7 +2,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.roddy.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.job.processing.*
@@ -63,22 +63,22 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         }
 
         DomainFactory.createProcessingOption([
-                name: RoddyConstants.OPTION_KEY_BWA_VERSION_AVAILABLE,
+                name: OptionName.PIPELINE_RODDY_ALIGNMENT_BWA_VERSION_AVAILABLE,
                 type: null,
                 value: "bwa-mem",
         ])
         DomainFactory.createProcessingOption([
-                name: RoddyConstants.OPTION_KEY_BWA_PATHS,
+                name: ProcessingOption.OptionName.PIPELINE_RODDY_ALIGNMENT_BWA_PATHS,
                 type: "bwa-mem",
                 value: temporaryFolder.newFile(),
         ])
         DomainFactory.createProcessingOption([
-                name: RoddyConstants.OPTION_KEY_SAMBAMBA_VERSION_AVAILABLE,
+                name: OptionName.PIPELINE_RODDY_ALIGNMENT_SAMBAMBA_VERSION_AVAILABLE,
                 type: null,
                 value: "sambamba",
         ])
         DomainFactory.createProcessingOption([
-                name: RoddyConstants.OPTION_KEY_SAMBAMBA_PATHS,
+                name: ProcessingOption.OptionName.PIPELINE_RODDY_ALIGNMENT_SAMBAMBA_PATHS,
                 type: "sambamba",
                 value: temporaryFolder.newFile(),
         ])
@@ -732,7 +732,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
     void "test configurePanCanAlignmentDeciderProject alignment version path does not exist"() {
         setup:
         PanCanAlignmentConfiguration configuration = createPanCanAlignmentConfiguration()
-        assert new File(ProcessingOption.findByName(RoddyConstants.OPTION_KEY_BWA_PATHS).value).delete()
+        assert new File(ProcessingOption.findByName(OptionName.PIPELINE_RODDY_ALIGNMENT_BWA_PATHS).value).delete()
 
         when:
         SpringSecurityUtils.doWithAuth("admin") {
@@ -785,7 +785,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         PanCanAlignmentConfiguration configuration = createPanCanAlignmentConfiguration(
                 mergeTool: MergeConstants.MERGE_TOOL_SAMBAMBA,
         )
-        assert new File(ProcessingOption.findByName(RoddyConstants.OPTION_KEY_SAMBAMBA_PATHS).value).delete()
+        assert new File(ProcessingOption.findByName(ProcessingOption.OptionName.PIPELINE_RODDY_ALIGNMENT_SAMBAMBA_PATHS).value).delete()
 
         when:
         SpringSecurityUtils.doWithAuth("admin") {
@@ -1078,11 +1078,10 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
             referenceGenomeService.pathToChromosomeSizeFilesPerReference(referenceGenomeProjectSeqType.referenceGenome, false).mkdirs()
             SpringSecurityUtils.doWithAuth(ADMIN, {
                 processingOptionService.createOrUpdate(
-                        service.PROCESSING_OPTION_REFERENCE_KEY as String,
+                        genomeOption,
                         null,
                         null,
-                        referenceGenomeProjectSeqType.referenceGenome.name,
-                        ""
+                        referenceGenomeProjectSeqType.referenceGenome.name
                 )
             })
         }
@@ -1106,11 +1105,11 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         TestCase.assertContainSame(attributes.permissions(), [PosixFilePermission.OWNER_READ, PosixFilePermission.GROUP_READ])
 
         where:
-        analysisName | service
-        "Aceseq"     | AceseqService
-        "Indel"      | null
-        "Snv"        | null
-        "Sophia"     | SophiaService
+        analysisName | service       | genomeOption
+        "Aceseq"     | AceseqService | OptionName.PIPELINE_ACESEQ_REFERENCE_GENOME
+        "Indel"      | null          | null
+        "Snv"        | null          | null
+        "Sophia"     | SophiaService | ProcessingOption.OptionName.PIPELINE_SOPHIA_REFERENCE_GENOME
     }
 
     @Unroll
@@ -1129,11 +1128,10 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
             referenceGenomeService.pathToChromosomeSizeFilesPerReference(referenceGenomeProjectSeqType.referenceGenome, false).mkdirs()
             SpringSecurityUtils.doWithAuth(ADMIN, {
                 processingOptionService.createOrUpdate(
-                        service.PROCESSING_OPTION_REFERENCE_KEY as String,
+                        genomeOption,
                         null,
                         null,
-                        referenceGenomeProjectSeqType.referenceGenome.name,
-                        ""
+                        referenceGenomeProjectSeqType.referenceGenome.name
                 )
             })
         }
@@ -1154,11 +1152,11 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         roddyWorkflowConfigs.findAll({ it.obsoleteDate == null }).size() == 1
 
         where:
-        analysisName | service
-        "Aceseq"     | AceseqService
-        "Indel"      | null
-        "Snv"        | null
-        "Sophia"     | SophiaService
+        analysisName | service       | genomeOption
+        "Aceseq"     | AceseqService | OptionName.PIPELINE_ACESEQ_REFERENCE_GENOME
+        "Indel"      | null          | null
+        "Snv"        | null          | null
+        "Sophia"     | SophiaService | ProcessingOption.OptionName.PIPELINE_SOPHIA_REFERENCE_GENOME
     }
 
     void "test configureSnvPipelineProject valid input, old otp snv config exist"() {

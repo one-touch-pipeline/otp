@@ -1,15 +1,13 @@
 package de.dkfz.tbi.otp.job.processing
 
-import de.dkfz.tbi.otp.utils.HelperUtils
-import grails.plugin.springsecurity.SpringSecurityUtils
-import org.junit.Test
-import org.springframework.beans.factory.annotation.Autowired
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
-import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
-import de.dkfz.tbi.otp.job.jobs.TestStartJob2
-import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
-import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
-import de.dkfz.tbi.otp.testing.TestStartJob
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
+import de.dkfz.tbi.otp.job.jobs.*
+import de.dkfz.tbi.otp.job.plan.*
+import de.dkfz.tbi.otp.testing.*
+import grails.plugin.springsecurity.*
+import org.junit.*
+import org.springframework.beans.factory.annotation.*
 
 class AbstractStartJobImplTests extends AbstractIntegrationTest {
 
@@ -27,29 +25,29 @@ class AbstractStartJobImplTests extends AbstractIntegrationTest {
 
     @Test
     void testGetConfiguredSlotCount_notConfigured() {
-        final String optionName = HelperUtils.uniqueString
+        final ProcessingOption.OptionName optionName = OptionName.PIPELINE_RODDY_SNV_PLUGIN_NAME
         final JobExecutionPlan plan = JobExecutionPlan.build()
         assert testStartJob.getConfiguredSlotCount(plan, optionName, SLOT_COUNT_1) == SLOT_COUNT_1
     }
 
     @Test
     void testGetConfiguredSlotCount_properlyConfigured() {
-        final String optionName = "option${HelperUtils.uniqueString}"
+        final OptionName optionName = OptionName.PIPELINE_RODDY_SNV_PLUGIN_NAME
         final JobExecutionPlan plan = JobExecutionPlan.build()
         createUserAndRoles()
         SpringSecurityUtils.doWithAuth('operator') {
-            processingOptionService.createOrUpdate(optionName, plan.name, null, Integer.toString(SLOT_COUNT_2), '')
+            processingOptionService.createOrUpdate(optionName, plan.name, null, Integer.toString(SLOT_COUNT_2))
         }
         assert testStartJob.getConfiguredSlotCount(plan, optionName, SLOT_COUNT_1) == SLOT_COUNT_2
     }
 
     @Test
     void testGetConfiguredSlotCount_notANumber() {
-        final String optionName = "option${HelperUtils.uniqueString}"
+        final OptionName optionName = OptionName.PIPELINE_RODDY_SNV_PLUGIN_NAME
         final JobExecutionPlan plan = JobExecutionPlan.build()
         createUserAndRoles()
         SpringSecurityUtils.doWithAuth('operator') {
-            processingOptionService.createOrUpdate(optionName, plan.name, null, 'twelve', '')
+            processingOptionService.createOrUpdate(optionName, plan.name, null, 'twelve')
         }
         shouldFail NumberFormatException, {
             testStartJob.getConfiguredSlotCount(plan, optionName, SLOT_COUNT_1)
@@ -58,11 +56,11 @@ class AbstractStartJobImplTests extends AbstractIntegrationTest {
 
     @Test
     void testGetConfiguredSlotCount_negative() {
-        final String optionName = "option${HelperUtils.uniqueString}"
+        final OptionName optionName = OptionName.PIPELINE_RODDY_SNV_PLUGIN_NAME
         final JobExecutionPlan plan = JobExecutionPlan.build()
         createUserAndRoles()
         SpringSecurityUtils.doWithAuth('operator') {
-            processingOptionService.createOrUpdate(optionName, plan.name, null, '-1', '')
+            processingOptionService.createOrUpdate(optionName, plan.name, null, '-1')
         }
         shouldFail NumberFormatException, {
             testStartJob.getConfiguredSlotCount(plan, optionName, SLOT_COUNT_1)

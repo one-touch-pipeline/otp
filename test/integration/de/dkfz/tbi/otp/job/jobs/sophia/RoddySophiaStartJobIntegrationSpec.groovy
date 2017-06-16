@@ -55,7 +55,7 @@ class RoddySophiaStartJobIntegrationSpec extends IntegrationSpec{
                 pipeline: DomainFactory.createSophiaPipelineLazy()
         )
         DomainFactory.createProcessingOption([
-                name: SophiaService.PROCESSING_OPTION_REFERENCE_KEY,
+                name: ProcessingOption.OptionName.PIPELINE_SOPHIA_REFERENCE_GENOME,
                 type: null,
                 project: null,
                 value: samplePair.mergingWorkPackage1.referenceGenome.name,
@@ -80,7 +80,7 @@ class RoddySophiaStartJobIntegrationSpec extends IntegrationSpec{
                 pipeline: DomainFactory.createSophiaPipelineLazy()
         )
         DomainFactory.createProcessingOption([
-                name: SophiaService.PROCESSING_OPTION_REFERENCE_KEY,
+                name: ProcessingOption.OptionName.PIPELINE_SOPHIA_REFERENCE_GENOME,
                 type: null,
                 project: null,
                 value: samplePair.mergingWorkPackage1.referenceGenome.name,

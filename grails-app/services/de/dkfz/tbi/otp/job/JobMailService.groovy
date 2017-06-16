@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.job
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
@@ -12,10 +13,6 @@ import org.joda.time.*
 import java.text.*
 
 class JobMailService {
-
-
-    static final String PROCESSING_OPTION_EMAIL_RECIPIENT = "EmailRecipient"
-    static final String PROCESSING_OPTION_STATISTIC_EMAIL_RECIPIENT = "Statistic"
 
     MailHelperService mailHelperService
 
@@ -123,8 +120,8 @@ Failed OTP Values: ${mapForLog.values().join(';')}""")
         }
 
         String recipientsString = ProcessingOptionService.findOption(
-                PROCESSING_OPTION_EMAIL_RECIPIENT,
-                PROCESSING_OPTION_STATISTIC_EMAIL_RECIPIENT,
+                OptionName.EMAIL_RECIPIENT_ERRORS,
+                null,
                 object?.project,
         )
         if (recipientsString) {

@@ -6,7 +6,7 @@ ProcessingOptionService processingOptionService = ctx.processingOptionService
 
 
 println processingOptionService.createOrUpdate(
-        CreateNotificationTextService.BASE_NOTIFICATION_TEMPLATE,
+        OptionName.notificationTemplateBase,
         null,
         null,
         '''
@@ -25,7 +25,7 @@ OTP
 
 
 println processingOptionService.createOrUpdate(
-        CreateNotificationTextService.INSTALLATION_NOTIFICATION_TEMPLATE,
+        OptionName.notificationTemplateInstallation,
         null,
         null,
 '''The FASTQ files of run(s) ${runs} have been installed.
@@ -43,7 +43,7 @@ ${links}
 
 
 println processingOptionService.createOrUpdate(
-        CreateNotificationTextService.INSTALLATION_FURTHER_PROCESSING_TEMPLATE,
+        OptionName.notificationTemplateInstallationFurtherProcessing,
         null,
         null,
 '''The samples marked with [A] will be aligned by OTP. As soon as the alignment is finished, OTP will send you another notification e-mail.
@@ -53,7 +53,7 @@ println processingOptionService.createOrUpdate(
 
 
 println processingOptionService.createOrUpdate(
-        CreateNotificationTextService.ALIGNMENT_NOTIFICATION_TEMPLATE,
+        OptionName.notificationTemplateAlignment,
         null,
         null,
 '''The FASTQ files of the following samples have been aligned and merged:
@@ -73,7 +73,7 @@ ${paths}
 
 
 println processingOptionService.createOrUpdate(
-        CreateNotificationTextService.ALIGNMENT_FURTHER_PROCESSING_TEMPLATE,
+        OptionName.notificationTemplateAlignmentFurtherProcessing,
         null,
         null,
         '''For the following sample pairs variants will be called by OTP:
@@ -86,7 +86,7 @@ As soon as a variant calling is finished, OTP will send you another notification
 
 
 println processingOptionService.createOrUpdate(
-        CreateNotificationTextService.ALIGNMENT_NO_FURTHER_PROCESSING_TEMPLATE,
+        OptionName.notificationTemplateAlignmentNoFurtherProcessing,
         null,
         null,
 '''The following sample pairs will not been variant-called, most likely because they have not reached a threshold yet:
@@ -98,7 +98,7 @@ If you want these sample pairs to be processed nevertheless, please contact the 
 
 
 println processingOptionService.createOrUpdate(
-        CreateNotificationTextService.ALIGNMENT_PROCESSING_INFORMATION_TEMPLATE,
+        OptionName.notificationTemplateAlignmentProcessing,
         null,
         null,
         '''${seqType} ${individuals ? "("+individuals+")" : ""}
@@ -112,7 +112,7 @@ println processingOptionService.createOrUpdate(
 
 
 println processingOptionService.createOrUpdate(
-        CreateNotificationTextService.SNV_NOTIFICATION_TEMPLATE,
+        OptionName.notificationTemplateSNVProcessed,
         null,
         null,
 '''The SNV calling for following sample pairs is finished:
@@ -131,7 +131,7 @@ You can find the config file used for the processing in the same directory as th
 
 
 println processingOptionService.createOrUpdate(
-        CreateNotificationTextService.INDEL_NOTIFICATION_TEMPLATE,
+        OptionName.notificationTemplateINDELProcessed,
         null,
         null,
 '''The Indel calling for following sample pairs is finished:
@@ -149,7 +149,7 @@ You can find the config file used for the processing in the same directory as th
 )
 
 println processingOptionService.createOrUpdate(
-        CreateNotificationTextService.ACESEQ_NOTIFICATION_TEMPLATE,
+        OptionName.notificationTemplateACESEQProcessed,
         null,
         null,
         '''The CNV calling from AceSEQ for following sample pairs is finished:
@@ -167,7 +167,7 @@ You can find the config file used for the processing in the same directory as th
 )
 
 println processingOptionService.createOrUpdate(
-        CreateNotificationTextService.SOPHIA_NOTIFICATION_TEMPLATE,
+        OptionName.notificationTemplateSOPHIAProcessed,
         null,
         null,
         '''The SV calling from SOPHIA for following sample pairs is finished:
@@ -185,7 +185,7 @@ You can find the config file used for the processing in the same directory as th
 )
 
 println processingOptionService.createOrUpdate(
-        CreateNotificationTextService.SNV_NOT_PROCESSED_TEMPLATE,
+        OptionName.notificationTemplateSNVNotProcessed,
         null,
         null,
 '''The following sample pairs have not been SNV-called, most likely because they have not reached a threshold yet:
@@ -197,7 +197,7 @@ If you want these sample pairs to be processed nevertheless, please contact the 
 
 
 println processingOptionService.createOrUpdate(
-        CreateNotificationTextService.INDEL_NOT_PROCESSED_TEMPLATE,
+        OptionName.notificationTemplateINDELNotProcessed,
         null,
         null,
 '''The following sample pairs have not been Indel-called, most likely because they have not reached a threshold yet:
@@ -208,7 +208,7 @@ If you want these sample pairs to be processed nevertheless, please contact the 
 )
 
 println processingOptionService.createOrUpdate(
-        CreateNotificationTextService.ACESEQ_NOT_PROCESSED_TEMPLATE,
+        OptionName.notificationTemplateACESEQNotProcessed,
         null,
         null,
         '''The following sample pairs have not been CNV-called, most likely because they have not reached a threshold yet:
@@ -219,7 +219,7 @@ If you want these sample pairs to be processed nevertheless, please contact the 
 )
 
 println processingOptionService.createOrUpdate(
-        CreateNotificationTextService.SOPHIA_NOT_PROCESSED_TEMPLATE,
+        OptionName.notificationTemplateSOPHIANotProcessed,
         null,
         null,
         '''The following sample pairs have not been SV-called, most likely because they have not reached a threshold yet:

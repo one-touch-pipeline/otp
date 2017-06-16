@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
@@ -9,7 +10,6 @@ import org.springframework.security.acls.domain.*
 import org.springframework.security.core.userdetails.*
 
 import static org.springframework.util.Assert.*
-
 
 class ProcessingOptionService {
 
@@ -26,10 +26,10 @@ class ProcessingOptionService {
     def springSecurityService
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public ProcessingOption createOrUpdate(String name, String type, Project project, String value, String comment) {
+    public ProcessingOption createOrUpdate(OptionName name, String type, Project project, String value) {
         ProcessingOption option = findStrict(name, type, project)
         if (option) {
-            if (option.value == value && option.comment == comment) {
+            if (option.value == value) {
                 return option
             }
             obsoleteOption(option)
@@ -39,7 +39,6 @@ class ProcessingOptionService {
             type: type,
             project: project,
             value: value,
-            comment: comment
         )
         assert(option.save(flush: true))
         return option
@@ -61,7 +60,7 @@ class ProcessingOptionService {
      * @param project project to which processing object belongs
      * @return ProcessingOption object
      */
-    public static ProcessingOption findOptionObject(String name, String type, Project project) {
+    public static ProcessingOption findOptionObject(OptionName name, String type, Project project) {
         ProcessingOption option = findStrict(name, type, project)
         if (option) {
             return option
@@ -84,7 +83,7 @@ class ProcessingOptionService {
         return option
     }
 
-    private static ProcessingOption findStrict(String name, String type, Project project) {
+    private static ProcessingOption findStrict(OptionName name, String type, Project project) {
         return ProcessingOption.findWhere(
             name: name,
             type: type,
@@ -93,12 +92,12 @@ class ProcessingOptionService {
         )
     }
 
-    public static String findOption(String name, String type, Project project) {
+    public static String findOption(OptionName name, String type, Project project) {
         ProcessingOption option = findOptionObject(name, type, project)
         return (option) ? option.value : null
     }
 
-    public static String findOptionSafe(String name, String type, Project project) {
+    public static String findOptionSafe(OptionName name, String type, Project project) {
         ProcessingOption option = findOptionObject(name, type, project)
         return (option) ? option.value : ""
     }
@@ -106,7 +105,7 @@ class ProcessingOptionService {
     /**
      * @throws ProcessingException if no option has been found
      */
-    public static String findOptionAssure(String name, String type, Project project) {
+    public static String findOptionAssure(OptionName name, String type, Project project) {
         notNull(name, "option name can not be null")
         ProcessingOption option = findOptionObject(name, type, project)
         if (!option) {
@@ -119,7 +118,7 @@ class ProcessingOptionService {
      * Return numerical value of the option or default value if option value
      * can not be cast to a number.
      */
-    public static long findOptionAsNumber(String name, String type, Project project, long defaultValue) {
+    public static long findOptionAsNumber(OptionName name, String type, Project project, long defaultValue) {
         String value = findOptionSafe(name, type, project)
         if (value.isLong()) {
             return value.toLong()
@@ -131,7 +130,7 @@ class ProcessingOptionService {
      * Returns the ProcessingOption which belongs to the input parameter name.
      * If there is more than one or none ProcessingOption found by the query an Error is thrown.
      */
-    static String getValueOfProcessingOption(String name) {
+    static String getValueOfProcessingOption(OptionName name) {
         return CollectionUtils.exactlyOneElement(ProcessingOption.findAllByNameAndDateObsoleted(name, null)).value
     }
 

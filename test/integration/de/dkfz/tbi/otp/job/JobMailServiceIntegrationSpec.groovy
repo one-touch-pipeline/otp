@@ -65,7 +65,7 @@ class JobMailServiceIntegrationSpec extends Specification {
 
         JobMailService jobMailService = new JobMailService([
                 mailHelperService      : Mock(MailHelperService) {
-                    1 * sendEmail(_, _, _) >> { String emailSubject, String content, List<String> recipients ->
+                    0 * sendEmail(_, _, _) >> { String emailSubject, String content, List<String> recipients ->
                         assert emailSubject.startsWith(processingPriority >= ProcessingPriority.FAST_TRACK_PRIORITY ? "FASTTRACK ERROR:" : "ERROR:")
                         assert emailSubject.contains("${step.jobExecutionPlan.name} ${step.processParameterObject.individual.displayName} ${step.processParameterObject.project.name}")
                         assert content.contains('\nWorkflow:\n')

@@ -112,7 +112,7 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
                 category: SampleType.Category.CONTROL,
         )
 
-        DomainFactory.createProcessingOption(name: 'timeZone', type: null, value: 'Europe/Berlin')
+        DomainFactory.createProcessingOption(name: 'TIME_ZONE', type: null, value: 'Europe/Berlin')
         samplePair = DomainFactory.createSamplePair(bamFileTumor.mergingWorkPackage, bamFileControl.mergingWorkPackage)
     }
 

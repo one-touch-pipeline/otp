@@ -1,9 +1,10 @@
 package de.dkfz.tbi.otp.job.jobs.alignment
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.job.processing.*
-import org.springframework.beans.factory.annotation.Autowired
+import de.dkfz.tbi.otp.ngsdata.*
+import org.springframework.beans.factory.annotation.*
 
 class BwaPairingAndSortingJob extends AbstractJobImpl {
 
@@ -49,12 +50,12 @@ class BwaPairingAndSortingJob extends AbstractJobImpl {
         String referenceGenomePath = alignmentPassService.referenceGenomePath(alignmentPass)
         String outFilePathNoSuffix = processedBamFileService.getFilePathNoSuffix(bamFile)
         String outFilePath = processedBamFileService.getFilePath(bamFile)
-        String samtoolsSortBuffer = optionService.findOptionSafe("samtoolsSortBuffer", null, null)
-        String numberOfSampeThreads = optionService.findOptionSafe("numberOfSampeThreads", null, null)
-        String bwaCommand = ProcessingOptionService.findOptionAssure("bwaCommand", null, project)
-        String samToolsBinary = ProcessingOptionService.findOptionAssure("samtoolsCommand", null, null)
-        String numberOfSamToolsSortThreads = optionService.findOptionSafe("numberOfSamToolsSortThreads", null, null)
-        String mbuffer = ProcessingOptionService.findOptionAssure("mbufferPairingSorting", null, null)
+        String samtoolsSortBuffer = optionService.findOptionSafe(OptionName.PIPELINE_OTP_ALIGNMENT_SAMTOOLS_SORT_BUFFER, null, null)
+        String numberOfSampeThreads = optionService.findOptionSafe(ProcessingOption.OptionName.PIPELINE_OTP_ALIGNMENT_NUMBER_OF_SAMPE_THREADS, null, null)
+        String bwaCommand = ProcessingOptionService.findOptionAssure(ProcessingOption.OptionName.COMMAND_CONVEY_BWA, null, project)
+        String samToolsBinary = ProcessingOptionService.findOptionAssure(OptionName.COMMAND_SAMTOOLS, null, null)
+        String numberOfSamToolsSortThreads = optionService.findOptionSafe(ProcessingOption.OptionName.PIPELINE_OTP_ALIGNMENT_NUMBER_OF_SAMTOOLS_SORT_THREADS, null, null)
+        String mbuffer = ProcessingOptionService.findOptionAssure(ProcessingOption.OptionName.PIPELINE_OTP_ALIGNMENT_MBUFFER_PAIRING_SORTING, null, null)
 
         String sampeCmd = "${bwaCommand} sampe -P -T ${numberOfSampeThreads} ${insertSizeOpt} -r \"${groupHeader}\" ${referenceGenomePath} ${sequenceAndSaiFiles}"
         String viewCmd = "${samToolsBinary} view -uSbh - "
@@ -81,7 +82,7 @@ class BwaPairingAndSortingJob extends AbstractJobImpl {
 
     private String insertSizeOption(SeqTrack seqTrack) {
         return optionService.findOptionSafe(
-                "insertSizeCutoff",
+                ProcessingOption.OptionName.PIPELINE_OTP_ALIGNMENT_INSERT_SIZE_CUT_OFF,
                 seqTrack.seqType.libraryLayout,
                 seqTrack.sample.individual.project
         )

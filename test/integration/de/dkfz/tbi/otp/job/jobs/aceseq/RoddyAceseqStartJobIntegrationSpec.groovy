@@ -53,7 +53,7 @@ class RoddyAceseqStartJobIntegrationSpec extends IntegrationSpec {
                 pipeline: DomainFactory.createAceseqPipelineLazy()
         )
         DomainFactory.createProcessingOption([
-                name: AceseqService.PROCESSING_OPTION_REFERENCE_KEY,
+                name: ProcessingOption.OptionName.PIPELINE_ACESEQ_REFERENCE_GENOME,
                 type: null,
                 project: null,
                 value: samplePair.mergingWorkPackage1.referenceGenome.name,

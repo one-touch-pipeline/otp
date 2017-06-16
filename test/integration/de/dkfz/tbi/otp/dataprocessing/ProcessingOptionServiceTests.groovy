@@ -1,15 +1,15 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import static org.junit.Assert.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import org.junit.*
-import de.dkfz.tbi.otp.job.processing.ProcessingException
 
+import static org.junit.Assert.*
 
 // it looks like domain.findWhere() is not supported by DomainClassUnitTestMixin
 // => make the test as integration
 class ProcessingOptionServiceTests {
 
-    final String NAME = "test"
+    final OptionName NAME = OptionName.PIPELINE_RODDY_SNV_PLUGIN_NAME
     final String VALUE = "testValue"
 
     ProcessingOptionService processingOptionService
@@ -35,14 +35,6 @@ class ProcessingOptionServiceTests {
         createProcessingOption()
         shouldFail(IllegalArgumentException) {
             ProcessingOption testOption = ProcessingOptionService.findOptionAssure(null, null, null)
-        }
-    }
-
-    @Test
-    void testFindOptionAssureNotFound() {
-        createProcessingOption()
-        shouldFail(ProcessingException) {
-            ProcessingOption testOption = ProcessingOptionService.findOptionAssure("isNotThere", null, null)
         }
     }
 

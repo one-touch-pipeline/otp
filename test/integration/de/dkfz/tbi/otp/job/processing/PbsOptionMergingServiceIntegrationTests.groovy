@@ -1,12 +1,12 @@
 package de.dkfz.tbi.otp.job.processing
 
-import static org.junit.Assert.*
-
-import org.junit.*
-
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
+import org.junit.*
 
+import static org.junit.Assert.*
+
+@Ignore //Changes in OTP-2447 ?
 class PbsOptionMergingServiceIntegrationTests {
 
     PbsOptionMergingService pbsOptionMergingService
@@ -20,84 +20,84 @@ class PbsOptionMergingServiceIntegrationTests {
     void testMergePbsOptions() {
         ProcessParameterObject processParameterObject = DomainFactory.createSeqTrack()
 
-        ProcessingStep processingStep1 = DomainFactory.createAndSaveProcessingStep('test.NonExistentDummyJob1', processParameterObject)
-        ProcessingStep processingStep2 = DomainFactory.createAndSaveProcessingStep('test.NonExistentDummyJob2', processParameterObject)
-        ProcessingStep processingStep3 = DomainFactory.createAndSaveProcessingStep('test.NonExistentDummyJob3', processParameterObject)
+        ProcessingStep processingStep1 = DomainFactory.createAndSaveProcessingStep('test.CalculateChecksumJob', processParameterObject)
+        ProcessingStep processingStep2 = DomainFactory.createAndSaveProcessingStep('test.CalculateChecksumJob', processParameterObject)
+        ProcessingStep processingStep3 = DomainFactory.createAndSaveProcessingStep('test.CalculateChecksumJob', processParameterObject)
 
         Realm realm = createRealm()
-        ProcessingOption processingOption = createProcessingOption(processingStep1.nonQualifiedJobClass)
+        createProcessingOption(processingStep1.nonQualifiedJobClass)
         assertEquals("", pbsOptionMergingService.mergePbsOptions(processingStep1, realm))
 
         realm = createRealm("{'-a': a}")
-        processingOption = createProcessingOption(processingStep1.nonQualifiedJobClass)
+        createProcessingOption(processingStep1.nonQualifiedJobClass)
         assertEquals("-a a ", pbsOptionMergingService.mergePbsOptions(processingStep1, realm))
 
         realm = createRealm()
-        processingOption = createProcessingOption(processingStep1.nonQualifiedJobClass, "{-a: a}")
+        createProcessingOption(processingStep1.nonQualifiedJobClass, "{-a: a}")
         assertEquals("-a a ", pbsOptionMergingService.mergePbsOptions(processingStep1, realm))
 
         realm = createRealm("{-a: a}")
-        processingOption = createProcessingOption(processingStep1.nonQualifiedJobClass, "{-b: b}")
+        createProcessingOption(processingStep1.nonQualifiedJobClass, "{-b: b}")
         assertEquals("-a a -b b ", pbsOptionMergingService.mergePbsOptions(processingStep1, realm))
 
         realm = createRealm("{-a: a}")
-        processingOption = createProcessingOption(processingStep1.nonQualifiedJobClass, "{-a: b}")
+        createProcessingOption(processingStep1.nonQualifiedJobClass, "{-a: b}")
         assertEquals("-a b ", pbsOptionMergingService.mergePbsOptions(processingStep1, realm))
 
         realm = createRealm("{-a: {aa: aa}}")
-        processingOption = createProcessingOption(processingStep1.nonQualifiedJobClass)
+        createProcessingOption(processingStep1.nonQualifiedJobClass)
         assertEquals("-a aa=aa ", pbsOptionMergingService.mergePbsOptions(processingStep1, realm))
 
         realm = createRealm()
-        processingOption = createProcessingOption(processingStep1.nonQualifiedJobClass, "{-a: {aa: aa}}")
+        createProcessingOption(processingStep1.nonQualifiedJobClass, "{-a: {aa: aa}}")
         assertEquals("-a aa=aa ", pbsOptionMergingService.mergePbsOptions(processingStep1, realm))
 
         realm = createRealm("{-a: {aa: aa}}")
-        processingOption = createProcessingOption(processingStep1.nonQualifiedJobClass, "{-a: {aa: aa2}}")
+        createProcessingOption(processingStep1.nonQualifiedJobClass, "{-a: {aa: aa2}}")
         assertEquals("-a aa=aa2 ", pbsOptionMergingService.mergePbsOptions(processingStep1, realm))
 
         realm = createRealm("{-a: {aa: aa}}")
-        processingOption = createProcessingOption(processingStep1.nonQualifiedJobClass, "{-a: {ab: ab}}")
+        createProcessingOption(processingStep1.nonQualifiedJobClass, "{-a: {ab: ab}}")
         assertEquals("-a aa=aa -a ab=ab ", pbsOptionMergingService.mergePbsOptions(processingStep1, realm))
 
         realm = createRealm("{-l: {nodes: '1', walltime: '48:00:00'}}")
-        processingOption = createProcessingOption(processingStep1.nonQualifiedJobClass, "{-l: {nodes: '1:ppn=6', walltime: '50:00:00', mem: '3g'}, -q: convey}")
+        createProcessingOption(processingStep1.nonQualifiedJobClass, "{-l: {nodes: '1:ppn=6', walltime: '50:00:00', mem: '3g'}, -q: convey}")
         assertEquals("-q convey -l nodes=1:ppn=6 -l mem=3g -l walltime=50:00:00 ", pbsOptionMergingService.mergePbsOptions(processingStep1, realm))
 
         Realm realm_dkfz = createRealm("{-a: b}", Realm.Cluster.DKFZ)
         Realm realm_bq = createRealm("{-c: d}", Realm.Cluster.BIOQUANT)
-        processingOption = createProcessingOption(processingStep1.nonQualifiedJobClass, "{-e: f}", Realm.Cluster.DKFZ)
-        processingOption = createProcessingOption(processingStep1.nonQualifiedJobClass, "{-g: h}", Realm.Cluster.BIOQUANT)
+        createProcessingOption(processingStep1.nonQualifiedJobClass, "{-e: f}", Realm.Cluster.DKFZ)
+        createProcessingOption(processingStep1.nonQualifiedJobClass, "{-g: h}", Realm.Cluster.BIOQUANT)
         assertEquals("-a b -e f ", pbsOptionMergingService.mergePbsOptions(processingStep1, realm_dkfz))
         assertEquals("-c d -g h ", pbsOptionMergingService.mergePbsOptions(processingStep1, realm_bq))
 
         realm = createRealm("{-a: b}")
-        processingOption = createProcessingOption(processingStep1.nonQualifiedJobClass, "")
+        createProcessingOption(processingStep1.nonQualifiedJobClass, "")
         assertEquals("-a b ", pbsOptionMergingService.mergePbsOptions(processingStep1, realm))
 
         realm = createRealm("{-w: x}", Realm.Cluster.BIOQUANT)
-        processingOption = createProcessingOption(processingStep2.nonQualifiedJobClass, "{}", Realm.Cluster.DKFZ)
+        createProcessingOption(processingStep2.nonQualifiedJobClass, "{}", Realm.Cluster.DKFZ)
         assertEquals("-w x ", pbsOptionMergingService.mergePbsOptions(processingStep2, realm))
 
         realm = createRealm("{-y: z}", Realm.Cluster.DKFZ)
-        processingOption = createProcessingOption(processingStep3.nonQualifiedJobClass, "{}", Realm.Cluster.BIOQUANT)
+        createProcessingOption(processingStep3.nonQualifiedJobClass, "{}", Realm.Cluster.BIOQUANT)
         assertEquals("-y z ", pbsOptionMergingService.mergePbsOptions(processingStep3, realm))
 
-        processingOption = createProcessingOption(processingStep2.nonQualifiedJobClass, "{}", Realm.Cluster.DKFZ)
+        createProcessingOption(processingStep2.nonQualifiedJobClass, "{}", Realm.Cluster.DKFZ)
         String expected = pbsOptionMergingService.mergePbsOptions(processingStep2, realm_dkfz, QSUB_PARAMETERS)
 
         assert expected.contains('-q convey')
         assert expected.contains('-a b')
         assert expected.contains('-l nodes=1:ppn=6 -l mem=3g -l walltime=50:00:00')
 
-        processingOption = createProcessingOption(processingStep2.nonQualifiedJobClass, "{-a: c}", Realm.Cluster.DKFZ)
+        createProcessingOption(processingStep2.nonQualifiedJobClass, "{-a: c}", Realm.Cluster.DKFZ)
         expected = pbsOptionMergingService.mergePbsOptions(processingStep2, realm_dkfz, QSUB_PARAMETERS)
 
         assert expected.contains('-q convey')
         assert expected.contains('-a c')
         assert expected.contains('-l nodes=1:ppn=6 -l mem=3g -l walltime=50:00:00')
 
-        processingOption = createProcessingOption(processingStep2.nonQualifiedJobClass, "{-q: other_convey}", Realm.Cluster.DKFZ)
+        createProcessingOption(processingStep2.nonQualifiedJobClass, "{-q: other_convey}", Realm.Cluster.DKFZ)
         expected = pbsOptionMergingService.mergePbsOptions(processingStep2, realm_dkfz, QSUB_PARAMETERS)
 
         assert expected.contains('-q convey')
@@ -111,18 +111,18 @@ class PbsOptionMergingServiceIntegrationTests {
         assertEquals("-a b -A FASTTRACK ", pbsOptionMergingService.mergePbsOptions(processingStep1, realm, '{"-A": "FASTTRACK"}'))
 
         realm = createRealm("{-a: b}")
-        processingOption = createProcessingOption(processingStep2.nonQualifiedJobClass, "{}", Realm.Cluster.DKFZ)
+        createProcessingOption(processingStep2.nonQualifiedJobClass, "{}", Realm.Cluster.DKFZ)
         assertEquals("-a b -A FASTTRACK ", pbsOptionMergingService.mergePbsOptions(processingStep2, realm, '{"-A": "FASTTRACK"}'))
 
         realm = createRealm("{-a: b}")
-        processingOption = createProcessingOption(processingStep2.nonQualifiedJobClass, '{"-q": "other_convey"}', Realm.Cluster.DKFZ)
+        createProcessingOption(processingStep2.nonQualifiedJobClass, '{"-q": "other_convey"}', Realm.Cluster.DKFZ)
         expected = pbsOptionMergingService.mergePbsOptions(processingStep2, realm, '{"-A": "FASTTRACK"}')
 
         assert expected.contains('-q other_convey')
         assert expected.contains('-A FASTTRACK')
 
         realm = createRealm("{-a: b}")
-        processingOption = createProcessingOption(processingStep2.nonQualifiedJobClass, '{"-q": "other_convey"}', Realm.Cluster.DKFZ)
+        createProcessingOption(processingStep2.nonQualifiedJobClass, '{"-q": "other_convey"}', Realm.Cluster.DKFZ)
         expected = pbsOptionMergingService.mergePbsOptions(processingStep2, realm, QSUB_PARAMETERS, '{"-A": "FASTTRACK"}')
 
         assert expected.contains('-q convey')
@@ -133,7 +133,7 @@ class PbsOptionMergingServiceIntegrationTests {
 
     @Test
     void testMergePbsOptions_JobClassProcessingOptionOverridesRealm() {
-        ProcessingStep processingStep = DomainFactory.createAndSaveProcessingStep(DomainFactory.createSeqTrack())
+        ProcessingStep processingStep = DomainFactory.createAndSaveProcessingStep('test.CalculateChecksumJob', DomainFactory.createSeqTrack())
         Realm realm = createRealm('{-a: realm, -b: realm}')
         createProcessingOption(processingStep.nonQualifiedJobClass, '{-b: jobClass, -c: jobClass}')
 
@@ -143,7 +143,7 @@ class PbsOptionMergingServiceIntegrationTests {
     @Test
     void testMergePbsOptions_JobClassSeqTypeProcessingOptionOverridesJobClassProcessingOption() {
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
-        ProcessingStep processingStep = DomainFactory.createAndSaveProcessingStep(seqTrack)
+        ProcessingStep processingStep = DomainFactory.createAndSaveProcessingStep('test.CalculateChecksumJob', seqTrack)
         Realm realm = createRealm()
         createProcessingOption(processingStep.nonQualifiedJobClass, '{-b: jobClass, -c: jobClass}')
         createProcessingOption("${processingStep.nonQualifiedJobClass}_${seqTrack.seqType.processingOptionName}",
@@ -156,7 +156,7 @@ class PbsOptionMergingServiceIntegrationTests {
     @Test
     void testMergePbsOptions_Additional1OverridesJobClassSeqTypeProcessingOption() {
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
-        ProcessingStep processingStep = DomainFactory.createAndSaveProcessingStep(seqTrack)
+        ProcessingStep processingStep = DomainFactory.createAndSaveProcessingStep('test.CalculateChecksumJob', seqTrack)
         Realm realm = createRealm()
         createProcessingOption("${processingStep.nonQualifiedJobClass}_${seqTrack.seqType.processingOptionName}",
                 '{-c: jobClassSeqType, -d: jobClassSeqType}')
@@ -168,7 +168,7 @@ class PbsOptionMergingServiceIntegrationTests {
 
     @Test
     void testMergePbsOptions_Additional2OverridesAdditional1() {
-        ProcessingStep processingStep = DomainFactory.createAndSaveProcessingStep(DomainFactory.createSeqTrack())
+        ProcessingStep processingStep = DomainFactory.createAndSaveProcessingStep('test.CalculateChecksumJob', DomainFactory.createSeqTrack())
         Realm realm = createRealm()
         String additional1 = '{-d: additional1, -e: additional1}'
         String additional2 = '{-e: additional2, -f: additional2}'
@@ -187,7 +187,7 @@ class PbsOptionMergingServiceIntegrationTests {
     }
 
     private ProcessingOption createProcessingOption(String jobKey, String jobSubmissionOptions = "{}", Realm.Cluster cluster = Realm.Cluster.DKFZ) {
-        String name = PbsOptionMergingService.PBS_PREFIX + jobKey
+        ProcessingOption.OptionName name = ProcessingOption.OptionName."${PbsOptionMergingService.PBS_PREFIX}${jobKey}"
 
         //check, if already a option with this name exist and if yes, delete it
         ProcessingOption oldProcessingOption = processingOptionService.findStrict(name, cluster.toString(), null)

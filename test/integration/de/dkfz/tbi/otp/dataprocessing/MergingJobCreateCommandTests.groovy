@@ -1,20 +1,17 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import org.springframework.beans.factory.annotation.Autowired
-
-import static org.junit.Assert.*
-
-import org.junit.rules.TemporaryFolder
-
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
-import de.dkfz.tbi.otp.job.jobs.merging.MergingJob
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
+import de.dkfz.tbi.otp.job.jobs.merging.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.Realm.OperationType
 import de.dkfz.tbi.otp.ngsdata.SoftwareTool.Type
-import de.dkfz.tbi.otp.utils.CreateFileHelper
-import de.dkfz.tbi.otp.utils.HelperUtils
+import de.dkfz.tbi.otp.utils.*
 import org.junit.*
+import org.junit.rules.*
+import org.springframework.beans.factory.annotation.*
 
+import static org.junit.Assert.*
 
 class MergingJobCreateCommandTests {
 
@@ -120,7 +117,7 @@ class MergingJobCreateCommandTests {
         MergingSetAssignment mergingSetAssignment = createMergingSetAssignment("1")
 
         ProcessingOption processingOption = new ProcessingOption(
-                        name: "picardJavaSetting",
+                        name: OptionName.PIPELINE_OTP_ALIGNMENT_PICARD_JAVA_SETTINGS,
                         type: null,
                         value: "JAVA_OPTIONS=-Xmx50G",
                         project: null,
@@ -129,7 +126,7 @@ class MergingJobCreateCommandTests {
         assertNotNull(processingOption.save([flush: true, failOnError: true]))
 
         ProcessingOption processingOption1 = new ProcessingOption(
-                        name: "picardMdup",
+                        name: OptionName.PIPELINE_OTP_ALIGNMENT_PICARD_MDUP,
                         type: null,
                         value: "VALIDATION_STRINGENCY=SILENT REMOVE_DUPLICATES=FALSE ASSUME_SORTED=TRUE MAX_RECORDS_IN_RAM=12500000 CREATE_INDEX=TRUE",
                         project: null,
@@ -138,7 +135,7 @@ class MergingJobCreateCommandTests {
         assertNotNull(processingOption1.save([flush: true, failOnError: true]))
 
         ProcessingOption processingOption2 =new ProcessingOption(
-                name: "picardMdupCommand",
+                name: OptionName.COMMAND_PICARD_MDUP,
                 type: null,
                 value: "picard-1.61.sh MarkDuplicates",
                 project: null,

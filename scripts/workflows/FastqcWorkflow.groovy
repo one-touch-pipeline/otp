@@ -1,4 +1,4 @@
-import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 
 import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
 
@@ -15,25 +15,22 @@ plan(workflow) {
 
 
 ctx.processingOptionService.createOrUpdate(
-        "fastqcCommand",
+        OptionName.COMMAND_FASTQC,
         null,
         null,
-        "fastqc-0.10.1 --java /path/to/programs/jdk/jdk1.6.0_45/bin/java",
-        "command for fastqc with java"
+        "fastqc-0.10.1 --java /path/to/programs/jdk/jdk1.6.0_45/bin/java"
 )
 
 ctx.processingOptionService.createOrUpdate(
-        AbstractStartJobImpl.TOTAL_SLOTS_OPTION_NAME,
+        OptionName.MAXIMUM_NUMBER_OF_JOBS,
         workflow,
         null,
-        '100',
-        ''
+        '100'
 )
 
 ctx.processingOptionService.createOrUpdate(
-        AbstractStartJobImpl.SLOTS_RESERVED_FOR_FAST_TRACK_OPTION_NAME,
+        OptionName.MAXIMUM_NUMBER_OF_JOBS_RESERVED_FOR_FAST_TRACK,
         workflow,
         null,
-        '50',
-        ''
+        '50'
 )

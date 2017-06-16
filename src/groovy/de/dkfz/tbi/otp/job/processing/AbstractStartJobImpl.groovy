@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.job.processing
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.scheduler.*
 import de.dkfz.tbi.otp.tracking.*
@@ -20,9 +21,6 @@ import org.springframework.context.*
  * @see StartJob
  */
 abstract class AbstractStartJobImpl implements StartJob, ApplicationListener<JobExecutionPlanChangedEvent>, BeanNameAware  {
-
-    static final String TOTAL_SLOTS_OPTION_NAME = 'numberOfJobs'
-    static final String SLOTS_RESERVED_FOR_FAST_TRACK_OPTION_NAME = 'numberOfJobsReservedForFastTrack'
 
     @Autowired
     ProcessingOptionService optionService
@@ -157,9 +155,9 @@ abstract class AbstractStartJobImpl implements StartJob, ApplicationListener<Job
      *     <li>Whether the {@link JobExecutionPlan} (returned from {@link #getJobExecutionPlan()}) is obsolete or disabled.</li>
      *     <li>The number of {@link Process}es which are already running for the {@link JobExecutionPlan}.</li>
      *     <li>The maximum number of parallel {@link Process}es for the {@link JobExecutionPlan} (as configured in the
-     *         {@link ProcessingOption} with the name specified by {@link #TOTAL_SLOTS_OPTION_NAME}).</li>
+     *         {@link ProcessingOption} with the name specified by {@link OptionName#MAXIMUM_NUMBER_OF_JOBS}).</li>
      *     <li>The maximum number of slots reserved for fast track (as configured in the {@link ProcessingOption} with
-     *         the name specified by {@link #SLOTS_RESERVED_FOR_FAST_TRACK_OPTION_NAME}).</li>
+     *         the name specified by {@link OptionName#MAXIMUM_NUMBER_OF_JOBS_RESERVED_FOR_FAST_TRACK}).</li>
      * </ul>
      */
     protected short getMinimumProcessingPriorityForOccupyingASlot() {
@@ -168,11 +166,11 @@ abstract class AbstractStartJobImpl implements StartJob, ApplicationListener<Job
             return ProcessingPriority.SUPREMUM_PRIORITY
         }
         final int occupiedSlots = Process.countByFinishedAndJobExecutionPlan(false, plan)
-        final int totalSlots = getConfiguredSlotCount(plan, TOTAL_SLOTS_OPTION_NAME, 1)
+        final int totalSlots = getConfiguredSlotCount(plan, OptionName.MAXIMUM_NUMBER_OF_JOBS, 1)
         if (occupiedSlots >= totalSlots) {
             return ProcessingPriority.SUPREMUM_PRIORITY
         }
-        final int slotsReservedForFastTrack = getConfiguredSlotCount(plan, SLOTS_RESERVED_FOR_FAST_TRACK_OPTION_NAME, 0)
+        final int slotsReservedForFastTrack = getConfiguredSlotCount(plan, OptionName.MAXIMUM_NUMBER_OF_JOBS_RESERVED_FOR_FAST_TRACK, 0)
         if (occupiedSlots < totalSlots - slotsReservedForFastTrack) {
             return ProcessingPriority.NORMAL_PRIORITY
         } else {
@@ -180,7 +178,7 @@ abstract class AbstractStartJobImpl implements StartJob, ApplicationListener<Job
         }
     }
 
-    protected int getConfiguredSlotCount(final JobExecutionPlan plan, final String optionName, final int defaultValue) {
+    protected int getConfiguredSlotCount(final JobExecutionPlan plan, final OptionName optionName, final int defaultValue) {
         final String optionValue = optionService.findOption(optionName, plan.name, null)
         if (optionValue == null) {
             log.warn "${optionName} is not configured for ${plan.name}. Defaulting to ${defaultValue}."

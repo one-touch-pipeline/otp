@@ -1,10 +1,9 @@
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.job.jobs.qualityAssessmentMerged.*
-import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 
 import static de.dkfz.tbi.otp.job.processing.PbsOptionMergingService.*
 import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
-
 
 String workflowName = "QualityAssessmentMergedWorkflow"
 
@@ -54,10 +53,10 @@ plan(workflowName) {
 }
 
 // number of all MergedQA workflows which can be executed in parallel
-println ctx.processingOptionService.createOrUpdate(AbstractStartJobImpl.TOTAL_SLOTS_OPTION_NAME, workflowName, null, '60', '')
+println ctx.processingOptionService.createOrUpdate(OptionName.MAXIMUM_NUMBER_OF_JOBS, workflowName, null, '60')
 
 // number of slots which are reserved only for FastTrack Workflows
-println ctx.processingOptionService.createOrUpdate(AbstractStartJobImpl.SLOTS_RESERVED_FOR_FAST_TRACK_OPTION_NAME, workflowName, null, '30', '')
+println ctx.processingOptionService.createOrUpdate(OptionName.MAXIMUM_NUMBER_OF_JOBS_RESERVED_FOR_FAST_TRACK, workflowName, null, '30')
 
 
 
@@ -76,37 +75,33 @@ boolean testMode = false
 String cmd = "qualityAssessment.sh \${processedBamFilePath} \${processedBaiFilePath} \${qualityAssessmentFilePath} \${coverageDataFilePath} \${insertSizeDataFilePath} ${overrideOutput} \${allChromosomeName} ${minAlignedRecordLength} ${minMeanBaseQuality} ${mappingQuality} ${coverageMappingQualityThreshold} ${windowsSize} ${insertSizeCountHistogramBin} ${testMode}"
 SeqType seqType = SeqType.findByNameAndLibraryLayout(SeqTypeNames.WHOLE_GENOME.seqTypeName, SeqType.LIBRARYLAYOUT_PAIRED)
 ctx.processingOptionService.createOrUpdate(
-    "qualityMergedAssessment",
+    OptionName.PIPELINE_OTP_ALIGNMENT_QUALITY_MERGED_ASSESSMENT,
     seqType.naturalId,
     null, // defaults to all projects
-    cmd,
-    "Quality assessment Command and parameters template for whole genome"
+    cmd
 )
 
 // pbs options for qa.jar for exome
 cmd = "qualityAssessment.sh \${processedBamFilePath} \${processedBaiFilePath} \${qualityAssessmentFilePath} \${coverageDataFilePath} \${insertSizeDataFilePath} ${overrideOutput} \${allChromosomeName} ${minAlignedRecordLength} ${minMeanBaseQuality} ${mappingQuality} ${coverageMappingQualityThreshold} ${windowsSize} ${insertSizeCountHistogramBin} ${testMode} \${bedFilePath} \${refGenMetaInfoFilePath}"
 seqType = SeqType.findByNameAndLibraryLayout(SeqTypeNames.EXOME.seqTypeName, SeqType.LIBRARYLAYOUT_PAIRED)
 ctx.processingOptionService.createOrUpdate(
-    "qualityMergedAssessment",
+    OptionName.PIPELINE_OTP_ALIGNMENT_QUALITY_MERGED_ASSESSMENT,
     seqType.naturalId,
     null, // defaults to all projects
-    cmd,
-    "Quality assessment Command and parameters template for exome"
+    cmd
 )
 
 
 println ctx.processingOptionService.createOrUpdate(
-    PBS_PREFIX + ExecuteMergedBamFileQaAnalysisJob.class.simpleName,
+    OptionName."${PBS_PREFIX}${ExecuteMergedBamFileQaAnalysisJob.class.simpleName}",
     "DKFZ",
     null,
-    '{"-l": {walltime: "100:00:00", mem: "15g"}}',
-    "time for merged QA"
+    '{"-l": {walltime: "100:00:00", mem: "15g"}}'
 )
 
 println ctx.processingOptionService.createOrUpdate(
-    "${PBS_PREFIX}${ExecuteMergedMappingFilteringSortingToCoverageTableJob.simpleName}",
+    OptionName."${PBS_PREFIX}${ExecuteMergedMappingFilteringSortingToCoverageTableJob.simpleName}",
     Realm.Cluster.DKFZ.toString(),
     null,
-    '{"-l": {nodes: "1:ppn=6", mem: "15g"}}',
-    ''
+    '{"-l": {nodes: "1:ppn=6", mem: "15g"}}'
 )

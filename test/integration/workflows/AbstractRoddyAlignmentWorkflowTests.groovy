@@ -3,8 +3,8 @@ package workflows
 import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
-import de.dkfz.tbi.otp.dataprocessing.roddy.RoddyConstants
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
@@ -18,7 +18,6 @@ import org.junit.rules.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 import static de.dkfz.tbi.otp.utils.ProcessHelperService.*
-
 
 // TODO: change owner of input files to otptest
 
@@ -215,15 +214,15 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
             projectService.configurePanCanAlignmentDeciderProject(new PanCanAlignmentConfiguration([
                     project          : workPackage.project,
                     seqType          : workPackage.seqType,
-                    pluginName       : ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_RODDY_ALIGNMENT_PLUGIN_NAME, null, null),
-                    pluginVersion    : ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_RODDY_ALIGNMENT_PLUGIN_VERSION, null, null),
-                    baseProjectConfig: ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_BASE_PROJECT_CONFIG, workPackage.seqType.roddyName, null),
+                    pluginName       : ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_ALIGNMENT_PLUGIN_NAME, null, null),
+                    pluginVersion    : ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_ALIGNMENT_PLUGIN_VERSION, null, null),
+                    baseProjectConfig: ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_ALIGNMENT_BASE_PROJECT_CONFIG, workPackage.seqType.roddyName, null),
                     configVersion    : "v1_0",
                     referenceGenome  : workPackage.referenceGenome,
                     statSizeFileName : workPackage.statSizeFileName,
-                    mergeTool        : ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_DEFAULT_MERGE_TOOL, workPackage.seqType.roddyName, null),
-                    bwaMemVersion    : ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_BWA_VERSION_DEFAULT, null, null),
-                    sambambaVersion  : ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_SAMBAMBA_VERSION_DEFAULT, null, null),
+                    mergeTool        : ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_MERGE_TOOL, workPackage.seqType.roddyName, null),
+                    bwaMemVersion   : ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_ALIGNMENT_BWA_VERSION_DEFAULT, null, null),
+                    sambambaVersion  : ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_ALIGNMENT_SAMBAMBA_VERSION_DEFAULT, null, null),
                     resources        : "${workPackage.seqType.isChipSeq() ? 'xl' : 't'}",
             ] + options))
         }

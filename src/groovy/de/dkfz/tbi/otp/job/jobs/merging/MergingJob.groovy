@@ -1,9 +1,11 @@
 package de.dkfz.tbi.otp.job.jobs.merging
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.job.processing.*
-import org.springframework.beans.factory.annotation.Autowired
+import de.dkfz.tbi.otp.ngsdata.*
+import org.springframework.beans.factory.annotation.*
+
 import static org.springframework.util.Assert.*
 
 class MergingJob extends AbstractJobImpl {
@@ -45,14 +47,14 @@ class MergingJob extends AbstractJobImpl {
         Project project = mergingPassService.project(processedMergedBamFile.mergingPass)
         String tempDir = "\${PBS_SCRATCH_DIR}/\${PBS_JOBID}"
         String createTempDir = "mkdir -p -m 2750 ${tempDir}"
-        String javaOptions = optionService.findOptionSafe("picardJavaSetting", null, project)
-        String picard = ProcessingOptionService.findOptionAssure("picardMdupCommand", null, project)
+        String javaOptions = optionService.findOptionSafe(OptionName.PIPELINE_OTP_ALIGNMENT_PICARD_JAVA_SETTINGS, null, project)
+        String picard = ProcessingOptionService.findOptionAssure(OptionName.COMMAND_PICARD_MDUP, null, project)
         String inputFilePath = createInputFileString(processedMergedBamFile)
         String outputFilePath = processedMergedBamFileService.filePath(processedMergedBamFile)
         String metricsPath = processedMergedBamFileService.filePathForMetrics(processedMergedBamFile)
         String baiFilePath = processedMergedBamFileService.filePathForBai(processedMergedBamFile)
         String picardFiles = "${inputFilePath} OUTPUT=${outputFilePath} METRICS_FILE=${metricsPath} TMP_DIR=${tempDir}"
-        String picardOptions = optionService.findOptionSafe("picardMdup", null, project)
+        String picardOptions = optionService.findOptionSafe(OptionName.PIPELINE_OTP_ALIGNMENT_PICARD_MDUP, null, project)
         String chmod = "chmod 440 ${outputFilePath} ${metricsPath} ${baiFilePath}"
         return "${createTempDir}; ${javaOptions}; ${picard} ${picardFiles} ${picardOptions}; ${chmod}"
     }

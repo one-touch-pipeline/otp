@@ -5,8 +5,6 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 class SophiaService extends BamFileAnalysisService {
 
-    static final String PROCESSING_OPTION_REFERENCE_KEY = 'sophia reference genome'
-
     ProcessingOptionService processingOptionService
 
     @Override
@@ -36,7 +34,7 @@ class SophiaService extends BamFileAnalysisService {
 
     @Override
     public Map<String, Object> checkReferenceGenomeMap() {
-        String referenceNamesString = processingOptionService.findOptionAssure(PROCESSING_OPTION_REFERENCE_KEY, null, null)
+        String referenceNamesString = processingOptionService.findOptionAssure(ProcessingOption.OptionName.PIPELINE_SOPHIA_REFERENCE_GENOME, null, null)
         List<String> referenceGenomeNames = referenceNamesString.split(',')*.trim()
         return [referenceGenomes: ReferenceGenome.findAllByNameInList(referenceGenomeNames)]
     }

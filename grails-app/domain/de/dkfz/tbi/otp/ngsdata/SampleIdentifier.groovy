@@ -1,11 +1,10 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
-import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
+import de.dkfz.tbi.otp.utils.*
 
 class SampleIdentifier implements Entity {
-
-    static final REGEX_OPTION_NAME = 'sampleIdentifierRegex'
 
     String name
     Sample sample
@@ -22,7 +21,7 @@ class SampleIdentifier implements Entity {
                 // Using a new session prevents Hibernate from trying to auto-flush this object, which would fail
                 // because it is still in validation.
                 withNewSession { session ->
-                    regexFromProcessingOption = ProcessingOptionService.findOption(REGEX_OPTION_NAME, null, obj.sample?.project)
+                    regexFromProcessingOption = ProcessingOptionService.findOption(OptionName.VALIDATOR_SAMPLE_IDENTIFIER_REGEX, null, obj.sample?.project)
                 }
                 if (!(val ==~ (regexFromProcessingOption ?: '.+'))) {
                     return false

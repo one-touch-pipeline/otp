@@ -1,16 +1,15 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.InformationReliability
+import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.MailHelperService
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.ApplicationContext
+import de.dkfz.tbi.otp.utils.*
+import org.junit.*
+import org.springframework.beans.factory.annotation.*
+import org.springframework.context.*
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 public class AbstractAlignmentDeciderTest {
 
@@ -24,6 +23,12 @@ public class AbstractAlignmentDeciderTest {
     @Before
     void setUp() {
         decider = newDecider()
+        DomainFactory.createProcessingOption(
+                name: OptionName.EMAIL_RECIPIENT_NOTIFICATION,
+                type: null,
+                project: null,
+                value: "a.b@c.d",
+        )
     }
 
     @After

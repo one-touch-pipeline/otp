@@ -1,17 +1,12 @@
 package de.dkfz.tbi.otp.infrastructure
 
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
-import de.dkfz.tbi.otp.job.plan.JobDefinition
-import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
-import de.dkfz.tbi.otp.job.processing.Process
-import de.dkfz.tbi.otp.job.processing.ProcessingStep
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.Realm
-import org.joda.time.DateTime
-import org.joda.time.Duration
-import org.junit.Before
-import org.junit.Test
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
+import de.dkfz.tbi.otp.job.plan.*
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.ngsdata.*
+import org.joda.time.*
+import org.junit.*
 
 import static org.junit.Assert.*
 
@@ -54,7 +49,7 @@ class ClusterJobTests {
 
         assertNotNull(realm.save(flush: true))
 
-        ProcessingOption option = new ProcessingOption([name: "basesPerBytesFastQ", type: null, project: null, value: "1.0", comment: "some comment"])
+        ProcessingOption option = new ProcessingOption([name: OptionName.STATISTICS_BASES_PER_BYTES_FASTQ, type: null, project: null, value: "1.0", comment: "some comment"])
 
         assertNotNull(option.save(flush: true))
     }
@@ -138,7 +133,7 @@ class ClusterJobTests {
     @Test
     public void testBeforeValidate_WhenNBasesIsNullAndFileSizeGiven_ShouldFillNBases() {
         Long fileSize = 100L
-        Float basesPerBytesFastQFactor = (ProcessingOptionService.findOptionObject('basesPerBytesFastQ', null, null).value as float)
+        Float basesPerBytesFastQFactor = (ProcessingOptionService.findOptionObject(ProcessingOption.OptionName.STATISTICS_BASES_PER_BYTES_FASTQ, null, null).value as float)
         ClusterJob clusterJob = new ClusterJob(
                 processingStep: step,
                 realm: realm,
@@ -178,7 +173,7 @@ class ClusterJobTests {
     @Test
     public void testBeforeValidate_WhenClusterJobExistsAndNBasesIsNullAndFileSizeGiven_ShouldFillNBases() {
         Long fileSize = 100L
-        Float basesPerBytesFastQFactor = (ProcessingOptionService.findOptionObject('basesPerBytesFastQ', null, null).value as float)
+        Float basesPerBytesFastQFactor = (ProcessingOptionService.findOptionObject(OptionName.STATISTICS_BASES_PER_BYTES_FASTQ, null, null).value as float)
         ClusterJob clusterJob = new ClusterJob(
                 processingStep: step,
                 realm: realm,

@@ -1,30 +1,21 @@
 package de.dkfz.tbi.otp.notification
 
-import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
-import de.dkfz.tbi.otp.job.processing.Process
-import de.dkfz.tbi.otp.job.processing.ProcessParameter
-import de.dkfz.tbi.otp.job.processing.ProcessingStep
-import de.dkfz.tbi.otp.security.Role
-import de.dkfz.tbi.otp.security.User
-import de.dkfz.tbi.otp.security.UserRole
-import groovy.text.SimpleTemplateEngine
-import grails.plugin.mail.MailService
-import java.util.concurrent.Callable
-import java.util.concurrent.ExecutorService
-import org.codehaus.groovy.grails.commons.GrailsApplication
-import grails.plugin.springsecurity.acl.AclSid
-import grails.plugin.springsecurity.acl.AclUtilService
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Scope
-import org.springframework.context.ApplicationEvent
-import org.springframework.context.ApplicationListener
-import org.springframework.security.acls.domain.BasePermission
-import org.springframework.security.acls.domain.GrantedAuthoritySid
-import org.springframework.security.acls.domain.PrincipalSid
-import org.springframework.security.acls.model.Acl
-import org.springframework.security.acls.model.NotFoundException
-import org.springframework.security.acls.model.Sid
-import org.springframework.stereotype.Component
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.job.plan.*
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.security.*
+import grails.plugin.mail.*
+import grails.plugin.springsecurity.acl.*
+import groovy.text.*
+import org.codehaus.groovy.grails.commons.*
+import org.springframework.beans.factory.annotation.*
+import org.springframework.context.*
+import org.springframework.context.annotation.*
+import org.springframework.security.acls.domain.*
+import org.springframework.security.acls.model.*
+import org.springframework.stereotype.*
+
+import java.util.concurrent.*
 
 /**
  * The NotificationListener is an {@link ApplicationLister} for {@link NotificationEvent}s.
@@ -194,7 +185,7 @@ class NotificationListener implements ApplicationListener {
         }
         mailService.sendMail {
             to user.email
-            from grailsApplication.config.otp.mail.sender
+            from ProcessingOptionService.findOption(ProcessingOption.OptionName.EMAIL_SENDER, null, null)
             subject subjectText
             body bodyText
         }

@@ -1,8 +1,9 @@
 package de.dkfz.tbi.otp.utils
 
-import org.codehaus.groovy.grails.commons.GrailsApplication
-import org.springframework.beans.factory.annotation.Autowired
-import grails.plugin.mail.MailService
+import de.dkfz.tbi.otp.dataprocessing.*
+import grails.plugin.mail.*
+import org.codehaus.groovy.grails.commons.*
+import org.springframework.beans.factory.annotation.*
 
 class MailHelperService {
 
@@ -12,11 +13,11 @@ class MailHelperService {
     MailService mailService
 
     String getOtrsRecipient() {
-        return grailsApplication.config.otp.mail.notification.fasttrack.to
+        return ProcessingOptionService.findOption(ProcessingOption.OptionName.EMAIL_RECIPIENT_FAST_TRACK, null, null)
     }
 
     void sendNotificationEmail(String subject, String content) {
-        sendEmail(subject, content, (String)grailsApplication.config.otp.mail.notification.to)
+        sendEmail(subject, content, ProcessingOptionService.findOption(ProcessingOption.OptionName.EMAIL_RECIPIENT_NOTIFICATION, null, null))
     }
 
     void sendEmail(String emailSubject, String content, String recipient) {
@@ -30,7 +31,7 @@ class MailHelperService {
         assert recipients.every { it.contains('@') }
         log.info "Send email: subject: '${emailSubject}', to: '${recipients}', content: '${content}'"
         mailService.sendMail {
-            from grailsApplication.config.otp.mail.sender
+            from ProcessingOptionService.findOption(ProcessingOption.OptionName.EMAIL_SENDER, null, null)
             to recipients
             subject emailSubject
             body content

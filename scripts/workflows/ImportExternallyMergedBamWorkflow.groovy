@@ -1,7 +1,6 @@
-import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 
 import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
-
 
 String workflow = 'ImportExternallyMergedBamWorkflow'
 
@@ -13,17 +12,15 @@ plan(workflow) {
 }
 
 ctx.processingOptionService.createOrUpdate(
-        AbstractStartJobImpl.TOTAL_SLOTS_OPTION_NAME,
+        OptionName.MAXIMUM_NUMBER_OF_JOBS,
         workflow,
         null,
-        '2',
-        ''
+        '2'
 )
 
 ctx.processingOptionService.createOrUpdate(
-        AbstractStartJobImpl.SLOTS_RESERVED_FOR_FAST_TRACK_OPTION_NAME,
+        OptionName.MAXIMUM_NUMBER_OF_JOBS_RESERVED_FOR_FAST_TRACK,
         workflow,
         null,
-        '0',
-        ''
+        '0'
 )

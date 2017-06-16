@@ -1,15 +1,15 @@
-<%@ page import="de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService" %>
+<%@ page import="grails.plugin.springsecurity.SpringSecurityUtils; de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName; de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService" %>
 
-<g:set var="PIWIK_URL" value="${ProcessingOptionService.findOption("PIWIK_URL", null, null)}"/>
-<g:set var="SITE_ID" value="${(ProcessingOptionService.findOption("SITE_ID", null, null)) as Integer}"/>
+<g:set var="PIWIK_URL" value="${ProcessingOptionService.findOption(OptionName.GUI_TRACKING_PIWIK_URL, null, null)}"/>
+<g:set var="SITE_ID" value="${(ProcessingOptionService.findOption(OptionName.GUI_TRACKING_SITE_ID, null, null)) as Integer}"/>
 
-<g:if test="${(ProcessingOptionService.findOption("TRACKING", null, null))?.toBoolean()}">
+<g:if test="${(ProcessingOptionService.findOption(OptionName.GUI_TRACKING_ENABLED, null, null))?.toBoolean()}">
     <script type="text/javascript">
         var _paq = _paq || [];
         (function () {
             _paq.push(['setTrackerUrl', '${PIWIK_URL}piwik.php']);
             _paq.push(['setSiteId', ${SITE_ID}]);
-            _paq.push(['setCustomVariable', 1, 'Role', '${grails.plugin.springsecurity.SpringSecurityUtils.ifAllGranted("ROLE_ADMIN") ? "Admin" : "User"}', 'page']);
+            _paq.push(['setCustomVariable', 1, 'Role', '${SpringSecurityUtils.ifAllGranted("ROLE_ADMIN") ? "Admin" : "User"}', 'page']);
             _paq.push(['enableLinkTracking']);
             _paq.push(['trackPageView']);
             var d = document, g = d.createElement('script'), s = d.getElementsByTagName('script')[0];

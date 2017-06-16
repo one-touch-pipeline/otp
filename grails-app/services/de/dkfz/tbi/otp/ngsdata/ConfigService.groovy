@@ -84,6 +84,6 @@ class ConfigService {
     }
 
     static DateTimeZone getDateTimeZone() {
-        return DateTimeZone.forID(ProcessingOptionService.findOptionAssure('timeZone', null, null))
+        return DateTimeZone.forID(ProcessingOptionService.findOptionAssure(ProcessingOption.OptionName.TIME_ZONE, null, null))
     }
 }

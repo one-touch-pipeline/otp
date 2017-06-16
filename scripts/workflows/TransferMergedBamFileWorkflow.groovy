@@ -1,4 +1,5 @@
-import static de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
+
 import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
 
 String workflowName = "transferMergedBamFileWorkflow"
@@ -93,7 +94,7 @@ plan(workflowName) {
 }
 
 // number of all TransferMergedBamFile workflows which can be executed in parallel
-println ctx.processingOptionService.createOrUpdate(TOTAL_SLOTS_OPTION_NAME, workflowName, null, '60', '')
+println ctx.processingOptionService.createOrUpdate(OptionName.MAXIMUM_NUMBER_OF_JOBS, workflowName, null, '60')
 
 // number of slots which are reserved only for FastTrack Workflows
-println ctx.processingOptionService.createOrUpdate(SLOTS_RESERVED_FOR_FAST_TRACK_OPTION_NAME, workflowName, null, '30', '')
+println ctx.processingOptionService.createOrUpdate(OptionName.MAXIMUM_NUMBER_OF_JOBS_RESERVED_FOR_FAST_TRACK, workflowName, null, '30')

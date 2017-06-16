@@ -1,25 +1,25 @@
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.roddy.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 
 
 ProcessingOptionService processingOptionService = ctx.processingOptionService
 
 processingOptionService.createOrUpdate(
-        RoddyConstants.OPTION_KEY_SOPHIA_PIPELINE_PLUGIN_NAME,
+        OptionName.PIPELINE_SOPHIA_PLUGIN_NAME,
         null,
         null,
         'SophiaWorkflow',
         'Name of the Sophia pipeline plugin'
 )
 processingOptionService.createOrUpdate(
-        RoddyConstants.OPTION_KEY_SOPHIA_PIPELINE_PLUGIN_VERSION,
+        OptionName.PIPELINE_SOPHIA_PLUGIN_VERSIONS,
         null,
         null,
         '1.0.16',
         'The version of the Sophia pipeline plugin'
 )
 processingOptionService.createOrUpdate(
-        RoddyConstants.OPTION_KEY_SOPHIA_BASE_PROJECT_CONFIG,
+        OptionName.PIPELINE_SOPHIA_BASE_PROJECT_CONFIG,
         null,
         null,
         'otpSophia-1.0',

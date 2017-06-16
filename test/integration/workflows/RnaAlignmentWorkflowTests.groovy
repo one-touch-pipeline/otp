@@ -2,7 +2,6 @@ package workflows
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
-import de.dkfz.tbi.otp.dataprocessing.roddy.*
 import de.dkfz.tbi.otp.ngsdata.*
 import grails.converters.*
 import grails.plugin.springsecurity.*
@@ -12,7 +11,6 @@ import org.junit.*
 import java.nio.file.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
-
 
 @Ignore
 class RnaAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkflowTests {
@@ -191,9 +189,9 @@ class RnaAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkflowTests {
             projectService.configureRnaAlignmentConfig(new RoddyConfiguration([
                     project          : workPackage.project,
                     seqType          : workPackage.seqType,
-                    pluginName       : ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_RODDY_ALIGNMENT_PLUGIN_NAME, workPackage.seqType.roddyName, null),
-                    pluginVersion    : ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_RODDY_ALIGNMENT_PLUGIN_VERSION, workPackage.seqType.roddyName, null),
-                    baseProjectConfig: ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_BASE_PROJECT_CONFIG, workPackage.seqType.roddyName, null),
+                    pluginName       : ProcessingOptionService.findOption(ProcessingOption.OptionName.PIPELINE_RODDY_ALIGNMENT_PLUGIN_NAME, workPackage.seqType.roddyName, null),
+                    pluginVersion    : ProcessingOptionService.findOption(ProcessingOption.OptionName.PIPELINE_RODDY_ALIGNMENT_PLUGIN_VERSION, workPackage.seqType.roddyName, null),
+                    baseProjectConfig: ProcessingOptionService.findOption(ProcessingOption.OptionName.PIPELINE_RODDY_ALIGNMENT_BASE_PROJECT_CONFIG, workPackage.seqType.roddyName, null),
                     configVersion    : "v1_0",
                     resources        : "t",
             ] + configOptions))

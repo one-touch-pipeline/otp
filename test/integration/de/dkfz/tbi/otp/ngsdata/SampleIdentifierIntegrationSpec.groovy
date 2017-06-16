@@ -1,8 +1,9 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
-import grails.test.spock.IntegrationSpec
+import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
+import grails.test.spock.*
 
 class SampleIdentifierIntegrationSpec extends IntegrationSpec {
 
@@ -19,7 +20,7 @@ class SampleIdentifierIntegrationSpec extends IntegrationSpec {
 
     private void createRegex(final Project project) {
         assert new ProcessingOption(
-                name: SampleIdentifier.REGEX_OPTION_NAME,
+                name: OptionName.VALIDATOR_SAMPLE_IDENTIFIER_REGEX,
                 project: project,
                 value: '[a-z]{4}',
                 comment: '',

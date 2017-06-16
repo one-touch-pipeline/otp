@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.tracking
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.dataprocessing.sophia.*
 import de.dkfz.tbi.otp.job.jobs.snvcalling.*
@@ -25,10 +26,6 @@ class TrackingService {
     AceseqService aceseqService
 
     CreateNotificationTextService createNotificationTextService
-
-
-    public static final String TICKET_NUMBER_PREFIX = "otrsTicketNumberPrefix"
-
 
     public OtrsTicket createOtrsTicket(String ticketNumber, String seqCenterComment, boolean automaticNotification) {
         OtrsTicket otrsTicket = new OtrsTicket(
@@ -159,7 +156,7 @@ class TrackingService {
             }
             recipients.add(mailHelperService.otrsRecipient)
 
-            StringBuilder subject = new StringBuilder("[${ProcessingOptionService.getValueOfProcessingOption(TICKET_NUMBER_PREFIX)}#${ticket.ticketNumber}] ")
+            StringBuilder subject = new StringBuilder("[${ProcessingOptionService.getValueOfProcessingOption(OptionName.TICKET_SYSTEM_NUMBER_PREFIX)}#${ticket.ticketNumber}] ")
             if (!mailingList) {
                 subject.append('TO BE SENT: ')
             }
@@ -176,7 +173,7 @@ class TrackingService {
     void sendOperatorNotification(OtrsTicket ticket, Set<SeqTrack> seqTracks, ProcessingStatus status, boolean finalNotification) {
         StringBuilder subject = new StringBuilder()
 
-        String prefix = ProcessingOptionService.getValueOfProcessingOption(TICKET_NUMBER_PREFIX)
+        String prefix = ProcessingOptionService.getValueOfProcessingOption(OptionName.TICKET_SYSTEM_NUMBER_PREFIX)
         subject.append("$prefix#").append(ticket.ticketNumber)
         if (finalNotification) {
             subject.append(' Final')

@@ -1,7 +1,7 @@
 package de.dkfz.tbi.otp.notification
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.*
@@ -17,23 +17,6 @@ import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 class CreateNotificationTextService {
-
-    static final String BASE_NOTIFICATION_TEMPLATE = 'BaseNotificationTemplate'
-    static final String INSTALLATION_NOTIFICATION_TEMPLATE = 'InstallationNotificationTemplate'
-    static final String INSTALLATION_FURTHER_PROCESSING_TEMPLATE = 'InstallationFurtherProcessingTemplate'
-    static final String ALIGNMENT_NOTIFICATION_TEMPLATE = 'AlignmentNotificationTemplate'
-    static final String ALIGNMENT_FURTHER_PROCESSING_TEMPLATE = 'AlignmentFurtherProcessingTemplate'
-    static final String ALIGNMENT_NO_FURTHER_PROCESSING_TEMPLATE = 'AlignmentNoFurtherProcessingTemplate'
-    static final String ALIGNMENT_PROCESSING_INFORMATION_TEMPLATE = 'AlignmentProcessingInformationTemplate'
-    static final String SNV_NOTIFICATION_TEMPLATE = 'SnvNotificationTemplate'
-    static final String SNV_NOT_PROCESSED_TEMPLATE = 'SnvNotProcessedTemplate'
-    static final String INDEL_NOTIFICATION_TEMPLATE = 'IndelNotificationTemplate'
-    static final String INDEL_NOT_PROCESSED_TEMPLATE = 'IndelNotProcessedTemplate'
-    static final String SOPHIA_NOTIFICATION_TEMPLATE = 'SophiaNotificationTemplate'
-    static final String SOPHIA_NOT_PROCESSED_TEMPLATE = 'SophiaNotProcessedTemplate'
-    static final String ACESEQ_NOTIFICATION_TEMPLATE = 'AceseqNotificationTemplate'
-    static final String ACESEQ_NOT_PROCESSED_TEMPLATE = 'AceseqNotProcessedTemplate'
-
 
     @Autowired
     LinkGenerator linkGenerator
@@ -57,7 +40,7 @@ class CreateNotificationTextService {
         String stepInformation = "${processingStep}Notification"(status).trim()
         String seqCenterComment = otrsTicket.seqCenterComment ? "\n\n******************************\nNote from sequencing center:\n${otrsTicket.seqCenterComment}\n******************************" : ''
 
-        return createMessage(BASE_NOTIFICATION_TEMPLATE, [
+        return createMessage(OptionName.NOTIFICATION_TEMPLATE_BASE, [
                 stepInformation : stepInformation,
                 seqCenterComment: seqCenterComment,
         ])
@@ -89,7 +72,7 @@ class CreateNotificationTextService {
         String directories = getSeqTypeDirectories(seqTracks)
         String otpLinks = createOtpLinks(seqTracks*.project, 'projectOverview', 'laneOverview')
 
-        String message = createMessage(INSTALLATION_NOTIFICATION_TEMPLATE, [
+        String message = createMessage(OptionName.NOTIFICATION_TEMPLATE_INSTALLATION, [
                 runs    : runNames,
                 paths   : directories,
                 samples : samples.join('\n'),
@@ -97,7 +80,7 @@ class CreateNotificationTextService {
         ])
 
         if (status.alignmentProcessingStatus != NOTHING_DONE_WONT_DO) {
-            message += '\n' + createMessage(INSTALLATION_FURTHER_PROCESSING_TEMPLATE, [:]).toString()
+            message += '\n' + createMessage(OptionName.NOTIFICATION_TEMPLATE_INSTALLATION_FURTHER_PROCESSING, [:]).toString()
         }
 
         return message
@@ -146,7 +129,7 @@ class CreateNotificationTextService {
                 bamFilePerConfig.each { AlignmentConfig config, List<AbstractMergedBamFile> configBamFiles ->
                     AlignmentInfo alignmentInfo = alignmentInfoByConfig.get(config)
                     String individuals = multipleConfigs ? (config.individual ?: "default") : ""
-                    builder << createMessage(ALIGNMENT_PROCESSING_INFORMATION_TEMPLATE, [
+                    builder << createMessage(OptionName.NOTIFICATION_TEMPLATE_ALIGNMENT_PROCESSING, [
                             seqType           : seqType.displayName,
                             individuals       : individuals,
                             referenceGenome   : configBamFiles*.referenceGenome.unique().join(', '),
@@ -160,7 +143,7 @@ class CreateNotificationTextService {
             }
         }
 
-        String message = createMessage(ALIGNMENT_NOTIFICATION_TEMPLATE, [
+        String message = createMessage(OptionName.NOTIFICATION_TEMPLATE_ALIGNMENT, [
                 samples         : sampleNames,
                 links           : links,
                 processingValues: builder.toString().trim(),
@@ -171,13 +154,13 @@ class CreateNotificationTextService {
             it.variantCallingProcessingStatus != NOTHING_DONE_WONT_DO }
         if (samplePairs[true]) {
             String variantCallingPipelines = samplePairs[true]*.variantCallingWorkflowNames().flatten().unique().sort().join(', ')
-            message += '\n' + createMessage(ALIGNMENT_FURTHER_PROCESSING_TEMPLATE, [
+            message += '\n' + createMessage(OptionName.NOTIFICATION_TEMPLATE_ALIGNMENT_FURTHER_PROCESSING, [
                     samplePairsWillProcess: getSamplePairRepresentation(samplePairs[true]*.samplePair),
                     variantCallingPipelines: variantCallingPipelines,
             ])
         }
         if (samplePairs[false]) {
-            message += '\n' + createMessage(ALIGNMENT_NO_FURTHER_PROCESSING_TEMPLATE, [
+            message += '\n' + createMessage(OptionName.NOTIFICATION_TEMPLATE_ALIGNMENT_NO_FURTHER_PROCESSING, [
                     samplePairsWontProcess: getSamplePairRepresentation(samplePairs[false]*.samplePair.findAll {
                         !it.processingDisabled }),
             ])
@@ -235,7 +218,7 @@ class CreateNotificationTextService {
                 //no links
                 break
         }
-        String message = createMessage((String) this."${notificationStep.name()}_NOTIFICATION_TEMPLATE", [
+        String message = createMessage((OptionName) OptionName."NOTIFICATION_TEMPLATE_${notificationStep.name().toUpperCase()}_PROCESSED", [
                 samplePairsFinished    : getSamplePairRepresentation(samplePairsFinished),
                 directories            : directories,
                 otpLinks               : otpLinks,
@@ -244,7 +227,7 @@ class CreateNotificationTextService {
         List<SamplePair> samplePairsNotProcessed = map[NOTHING_DONE_WONT_DO]*.samplePair.findAll {
             it."${notificationStep}ProcessingStatus" != SamplePair.ProcessingStatus.DISABLED }
         if (samplePairsNotProcessed) {
-            message += '\n' + createMessage((String) this."${notificationStep.name()}_NOT_PROCESSED_TEMPLATE", [
+            message += '\n' + createMessage((OptionName) OptionName."NOTIFICATION_TEMPLATE_${notificationStep.name().toUpperCase()}_NOT_PROCESSED", [
                     samplePairsNotProcessed: getSamplePairRepresentation(samplePairsNotProcessed),
             ])
         }
@@ -253,7 +236,7 @@ class CreateNotificationTextService {
     }
 
 
-    String createMessage(String templateName, Map properties) {
+    String createMessage(OptionName templateName, Map properties) {
         assert templateName
 
         String template = ProcessingOptionService.findOptionAssure(templateName, null, null)

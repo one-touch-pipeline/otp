@@ -3,6 +3,7 @@ package workflows
 import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.scheduler.*
@@ -127,7 +128,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         DomainFactory.createAllAlignableSeqTypes()
         DomainFactory.createProcessingOptionForStatisticRecipient()
         DomainFactory.createProcessingOption([
-                name: ExecuteRoddyCommandService.OTP_USER_LINUX_GROUP,
+                name: OptionName.OTP_USER_LINUX_GROUP,
                 value: TestCase.testingGroup(grailsApplication),
                 comment: "linux group of the otp user",
         ]
@@ -446,7 +447,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
             }
         }
 
-        ProcessingOption.findAllByNameLike("${PbsOptionMergingService.PBS_PREFIX}%").each {
+        ProcessingOption.findAll().findAll() { it.name.toString().startsWith("${PbsOptionMergingService.PBS_PREFIX}") }.each {
             it.value = jobSubmissionOptions
             it.save(failOnError: true, flush: true)
         }

@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 import groovy.transform.*
 import org.springframework.security.access.prepost.*
@@ -15,7 +16,6 @@ class ReferenceGenomeService {
 
     public final static String CHROMOSOME_SIZE_FILES_PREFIX = "stats"
     public final static String FINGER_PRINTING_FILE_FOLDER_NAME = "fingerPrinting"
-    public static final String REFERENCE_GENOME_BASE_PATH = "REFERENCE_GENOME_BASE_PATH"
 
     /**
      * load the {@link ReferenceGenome} with the given id from the database and returns it.
@@ -33,7 +33,7 @@ class ReferenceGenomeService {
      */
     public File referenceGenomeDirectory(ReferenceGenome referenceGenome, boolean checkExistence = true) {
         notNull referenceGenome, "The reference genome is not specified"
-        String path = processingOptionService.getValueOfProcessingOption(REFERENCE_GENOME_BASE_PATH)
+        String path = processingOptionService.getValueOfProcessingOption(OptionName.BASE_PATH_REFERENCE_GENOME)
         assert OtpPath.isValidAbsolutePath(path)
         return checkFileExistence(new File(path, referenceGenome.path), checkExistence)
     }

@@ -1,21 +1,13 @@
 package de.dkfz.tbi.otp.utils
 
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
-import de.dkfz.tbi.otp.job.processing.CreateClusterScriptService
-import de.dkfz.tbi.otp.job.processing.ExecutionHelperService
-import de.dkfz.tbi.otp.job.processing.ExecutionService
-import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
-import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.ngsdata.SeqType
-import groovy.transform.TupleConstructor
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.ngsdata.*
+import groovy.transform.*
 
 class ExecuteRoddyCommandService {
-
-    static final String FEATURE_TOGGLES_CONFIG_PATH = "OtherUnixUserFeatureTogglesConfigPath"
-    static final String OTP_USER_LINUX_GROUP = "otpUserLinuxGroup"
-
 
     ExecutionService executionService
 
@@ -63,8 +55,8 @@ class ExecuteRoddyCommandService {
 
 
     String commonRoddy(RoddyWorkflowConfig config) {
-        File roddyBaseConfigsPath = ProcessingOptionService.getValueOfProcessingOption("roddyBaseConfigsPath") as File
-        File applicationIniPath = ProcessingOptionService.getValueOfProcessingOption("roddyApplicationIni") as File
+        File roddyBaseConfigsPath = ProcessingOptionService.getValueOfProcessingOption(OptionName.RODDY_BASE_CONFIGS_PATH) as File
+        File applicationIniPath = ProcessingOptionService.getValueOfProcessingOption(OptionName.RODDY_APPLICATION_INI) as File
 
         //ensure that needed input files are available on the file system
         LsdfFilesService.ensureDirIsReadableAndNotEmpty(roddyBaseConfigsPath)
@@ -83,7 +75,7 @@ class ExecuteRoddyCommandService {
 
 
     String roddyBaseCommand(String configName, String analysisId, RoddyInvocationType type) {
-        File roddyPath = ProcessingOptionService.getValueOfProcessingOption("roddyPath") as File
+        File roddyPath = ProcessingOptionService.getValueOfProcessingOption(OptionName.RODDY_PATH) as File
         return roddyBaseCommand(roddyPath, configName, analysisId, type)
     }
 
@@ -122,9 +114,9 @@ class ExecuteRoddyCommandService {
         assert realm : "Realm must not be null"
         assert file : "File must not be null"
         if (file.exists()) {
-            executionService.executeCommand(realm, "umask 027; chgrp ${ProcessingOptionService.getValueOfProcessingOption(OTP_USER_LINUX_GROUP)} ${file} ; chmod 2770 ${file}")
+            executionService.executeCommand(realm, "umask 027; chgrp ${ProcessingOptionService.getValueOfProcessingOption(OptionName.OTP_USER_LINUX_GROUP)} ${file} ; chmod 2770 ${file}")
         } else {
-            executionService.executeCommand(realm, "umask 027; mkdir -m 2750 -p ${file.parent} && mkdir -m 2770 -p ${file} && chgrp ${ProcessingOptionService.getValueOfProcessingOption(OTP_USER_LINUX_GROUP)} ${file};")
+            executionService.executeCommand(realm, "umask 027; mkdir -m 2750 -p ${file.parent} && mkdir -m 2770 -p ${file} && chgrp ${ProcessingOptionService.getValueOfProcessingOption(OptionName.OTP_USER_LINUX_GROUP)} ${file};")
             WaitingFileUtils.waitUntilExists(file)
         }
     }
@@ -198,7 +190,7 @@ done
     }
 
     File featureTogglesConfigPath() {
-        return new File(ProcessingOptionService.getValueOfProcessingOption(FEATURE_TOGGLES_CONFIG_PATH))
+        return new File(ProcessingOptionService.getValueOfProcessingOption(OptionName.RODDY_FEATURE_TOGGLES_CONFIG_PATH))
     }
 
     @TupleConstructor

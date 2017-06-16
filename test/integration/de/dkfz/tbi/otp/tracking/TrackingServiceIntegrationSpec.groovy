@@ -64,13 +64,13 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         )
         DomainFactory.createAllAnalysableSeqTypes()
         processingOption = DomainFactory.createProcessingOption([
-                name: AceseqService.PROCESSING_OPTION_REFERENCE_KEY,
+                name: ProcessingOption.OptionName.PIPELINE_ACESEQ_REFERENCE_GENOME,
                 type: null,
                 project: null,
                 value: 'test',
         ])
         processingOption2 = DomainFactory.createProcessingOption([
-                name: SophiaService.PROCESSING_OPTION_REFERENCE_KEY,
+                name: ProcessingOption.OptionName.PIPELINE_SOPHIA_REFERENCE_GENOME,
                 type: null,
                 project: null,
                 value: 'test',

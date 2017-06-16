@@ -1,5 +1,5 @@
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.job.jobs.dataInstallation.*
-import de.dkfz.tbi.otp.job.processing.*
 
 import static de.dkfz.tbi.otp.job.processing.PbsOptionMergingService.*
 import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
@@ -18,22 +18,19 @@ println ctx.processingOptionService.createOrUpdate(
   "${PBS_PREFIX}${CopyFilesJob.simpleName}",
   null,
   null,
-  '{"-l": { walltime: "12:00:00"}}',
-  "set the walltime for the CopyFilesJob to 2h to get in the faster queue"
+  '{"-l": { walltime: "12:00:00"}}'
 )
 
 ctx.processingOptionService.createOrUpdate(
-        AbstractStartJobImpl.TOTAL_SLOTS_OPTION_NAME,
+        OptionName.MAXIMUM_NUMBER_OF_JOBS,
         workflow,
         null,
-        '50',
-        ''
+        '50'
 )
 
 ctx.processingOptionService.createOrUpdate(
-        AbstractStartJobImpl.SLOTS_RESERVED_FOR_FAST_TRACK_OPTION_NAME,
+        OptionName.MAXIMUM_NUMBER_OF_JOBS_RESERVED_FOR_FAST_TRACK,
         workflow,
         null,
-        '25',
-        ''
+        '25'
 )

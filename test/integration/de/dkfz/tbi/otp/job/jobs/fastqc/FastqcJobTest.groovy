@@ -1,20 +1,15 @@
 package de.dkfz.tbi.otp.job.jobs.fastqc
 
-import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsqc.FastqcUploadService
-import de.dkfz.tbi.otp.utils.CreateFileHelper
-import de.dkfz.tbi.otp.utils.ProcessHelperService
-import de.dkfz.tbi.otp.utils.WaitingFileUtils
-import org.apache.commons.logging.impl.NoOpLog
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
-
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.ApplicationContext
+import de.dkfz.tbi.otp.ngsqc.*
+import de.dkfz.tbi.otp.utils.*
+import org.apache.commons.logging.impl.*
+import org.junit.*
+import org.springframework.beans.factory.annotation.*
+import org.springframework.context.*
 
 class FastqcJobTest {
 
@@ -45,7 +40,7 @@ class FastqcJobTest {
         fastqcJob.log = new NoOpLog()
 
         ProcessingOptionService processingOptionService = new ProcessingOptionService()
-        processingOptionService.createOrUpdate("fastqcCommand", null, null, "fastqc-0.10.1", "command for fastqc")
+        processingOptionService.createOrUpdate(ProcessingOption.OptionName.COMMAND_FASTQC, null, null, "fastqc-0.10.1")
 
         WaitingFileUtils.metaClass.static.waitUntilExists = { File file -> true }
         ProcessHelperService.metaClass.static.executeAndAssertExitCodeAndErrorOutAndReturnStdout = { String cmd ->

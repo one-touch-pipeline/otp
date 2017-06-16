@@ -1,22 +1,15 @@
 package de.dkfz.tbi.otp.infrastructure
 
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
-import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.gorm.mapper.*
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.Realm.Cluster
+import de.dkfz.tbi.otp.utils.*
+import org.joda.time.*
+import org.joda.time.format.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
-
-import de.dkfz.tbi.otp.gorm.mapper.PersistentDateTimeAsMillis
-import de.dkfz.tbi.otp.gorm.mapper.PersistentDurationAsMillis
-import de.dkfz.tbi.otp.job.processing.AbstractMultiJob
-import de.dkfz.tbi.otp.job.processing.Job
-import de.dkfz.tbi.otp.job.processing.ProcessingStep
-import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.ngsdata.Realm.Cluster
-import de.dkfz.tbi.otp.ngsdata.SeqType
-import org.joda.time.DateTime
-import org.joda.time.Duration
-import org.joda.time.Period
-import org.joda.time.format.PeriodFormat
 
 /**
  * A ClusterJob represents a single submitted or finished job on the cluster.
@@ -194,7 +187,7 @@ class ClusterJob implements Entity {
      */
     def beforeValidate() {
         if (fileSize && !nBases) {
-            basesPerBytesFastq = ProcessingOptionService.findOptionObject('basesPerBytesFastQ', null, null).value as float
+            basesPerBytesFastq = ProcessingOptionService.findOptionObject(ProcessingOption.OptionName.STATISTICS_BASES_PER_BYTES_FASTQ, null, null).value as float
             nBases = fileSize * basesPerBytesFastq
         }
     }

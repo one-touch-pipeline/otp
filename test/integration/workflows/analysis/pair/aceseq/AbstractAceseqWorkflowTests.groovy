@@ -1,16 +1,14 @@
 package workflows.analysis.pair.aceseq
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.roddy.*
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
-import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
+import de.dkfz.tbi.otp.dataprocessing.sophia.*
 import de.dkfz.tbi.otp.ngsdata.*
 import grails.plugin.springsecurity.*
-import org.joda.time.Duration
+import org.joda.time.*
 import workflows.analysis.pair.*
 
 abstract class AbstractAceseqWorkflowTests extends AbstractRoddyBamFilePairAnalysisWorkflowTests<AceseqInstance> {
-
 
     ConfigService configService
 
@@ -37,9 +35,9 @@ abstract class AbstractAceseqWorkflowTests extends AbstractRoddyBamFilePairAnaly
                     new RoddyConfiguration([
                             project          : project,
                             seqType          : seqType,
-                            pluginName       : ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_ACESEQ_PIPELINE_PLUGIN_NAME, null, null),
-                            pluginVersion    : ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_ACESEQ_PIPELINE_PLUGIN_VERSION, null, null),
-                            baseProjectConfig: ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_ACESEQ_BASE_PROJECT_CONFIG, seqType.roddyName, null),
+                            pluginName       : ProcessingOptionService.findOption(ProcessingOption.OptionName.PIPELINE_ACESEQ_PLUGIN_NAME, null, null),
+                            pluginVersion    : ProcessingOptionService.findOption(ProcessingOption.OptionName.PIPELINE_ACESEQ_PLUGIN_VERSION, null, null),
+                            baseProjectConfig: ProcessingOptionService.findOption(ProcessingOption.OptionName.PIPELINE_ACESEQ_BASE_PROJECT_CONFIG, seqType.roddyName, null),
                             configVersion    : 'v1_0',
                             resources        : 't',
                     ])
@@ -66,7 +64,7 @@ abstract class AbstractAceseqWorkflowTests extends AbstractRoddyBamFilePairAnaly
 
         SpringSecurityUtils.doWithAuth("operator") {
             processingOptionService.createOrUpdate(
-                    AceseqService.PROCESSING_OPTION_REFERENCE_KEY,
+                    ProcessingOption.OptionName.PIPELINE_ACESEQ_REFERENCE_GENOME,
                     null,
                     null,
                     referenceGenome.name,

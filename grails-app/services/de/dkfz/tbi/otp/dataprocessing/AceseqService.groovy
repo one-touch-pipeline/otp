@@ -1,11 +1,9 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
-
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
+import de.dkfz.tbi.otp.ngsdata.*
 
 class AceseqService extends BamFileAnalysisService {
-
-    static final String PROCESSING_OPTION_REFERENCE_KEY = 'aceseq reference genome'
 
     ProcessingOptionService processingOptionService
 
@@ -42,7 +40,7 @@ class AceseqService extends BamFileAnalysisService {
 
     @Override
     public Map<String, Object> checkReferenceGenomeMap() {
-        String referenceNamesString = processingOptionService.findOptionAssure(PROCESSING_OPTION_REFERENCE_KEY, null, null)
+        String referenceNamesString = processingOptionService.findOptionAssure(OptionName.PIPELINE_ACESEQ_REFERENCE_GENOME, null, null)
         List<String> referenceGenomeNames = referenceNamesString.split(',')*.trim()
         return [referenceGenomes: ReferenceGenome.findAllByNameInList(referenceGenomeNames)]
     }

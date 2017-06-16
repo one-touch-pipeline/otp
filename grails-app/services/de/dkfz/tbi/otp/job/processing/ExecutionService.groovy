@@ -18,8 +18,6 @@ import java.util.concurrent.*
  */
 class ExecutionService {
 
-    static final String MAX_SSH_CALLS = "MaximumParallelSshCalls"
-
     @SuppressWarnings("GrailsStatelessService")
     def configService
 
@@ -81,7 +79,7 @@ class ExecutionService {
             throw new ProcessingException("Neither password nor key file for remote connection specified.")
         }
         if (!maxSshCalls) {
-            maxSshCalls = new Semaphore((int)ProcessingOptionService.findOptionAsNumber(MAX_SSH_CALLS, null, null, 30), true)
+            maxSshCalls = new Semaphore((int)ProcessingOptionService.findOptionAsNumber(ProcessingOption.OptionName.MAXIMUM_PARALLEL_SSH_CALLS, null, null, 30), true)
         }
         maxSshCalls.acquire()
         try {

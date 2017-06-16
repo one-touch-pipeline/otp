@@ -2,7 +2,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.administration.*
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.roddy.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.job.processing.*
@@ -287,10 +287,10 @@ AND ace.granting = true
         assert panCanAlignmentConfiguration.configVersion ==~ RoddyWorkflowConfig.CONFIG_VERSION_PATTERN: "configVersion '${panCanAlignmentConfiguration.configVersion}' has not expected pattern: ${RoddyWorkflowConfig.CONFIG_VERSION_PATTERN}"
 
         if (!panCanAlignmentConfiguration.seqType.isWgbs()) {
-            List<String> allBwaMemVersions = ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_BWA_VERSION_AVAILABLE, null, null).split(',')*.trim()
+            List<String> allBwaMemVersions = ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_ALIGNMENT_BWA_VERSION_AVAILABLE, null, null).split(',')*.trim()
             assert panCanAlignmentConfiguration.bwaMemVersion in allBwaMemVersions: "Invalid bwa_mem version: '${panCanAlignmentConfiguration.bwaMemVersion}', possible values: ${allBwaMemVersions}"
 
-            String bwaMemPath = ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_BWA_PATHS, panCanAlignmentConfiguration.bwaMemVersion, null)
+            String bwaMemPath = ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_ALIGNMENT_BWA_PATHS, panCanAlignmentConfiguration.bwaMemVersion, null)
             assert OtpPath.isValidAbsolutePath(bwaMemPath): "path '${bwaMemPath}' is an invalid absolute path"
             assert new File(bwaMemPath).exists(): "${bwaMemPath} does not exist"
 
@@ -302,10 +302,10 @@ AND ace.granting = true
             panCanAlignmentConfiguration.adapterTrimmingNeeded = true
         }
         if (panCanAlignmentConfiguration.mergeTool == MergeConstants.MERGE_TOOL_SAMBAMBA) {
-            List<String> allSambambaVersions = ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_SAMBAMBA_VERSION_AVAILABLE, null, null).split(',')*.trim()
+            List<String> allSambambaVersions = ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_ALIGNMENT_SAMBAMBA_VERSION_AVAILABLE, null, null).split(',')*.trim()
             assert panCanAlignmentConfiguration.sambambaVersion in allSambambaVersions: "Invalid sambamba version: '${panCanAlignmentConfiguration.sambambaVersion}', possible values: ${allSambambaVersions}"
 
-            String sambambaPath = ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_SAMBAMBA_PATHS, panCanAlignmentConfiguration.sambambaVersion, null)
+            String sambambaPath = ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_ALIGNMENT_SAMBAMBA_PATHS, panCanAlignmentConfiguration.sambambaVersion, null)
             assert OtpPath.isValidAbsolutePath(sambambaPath): "path '${sambambaPath}' is an invalid absolute path"
             assert new File(sambambaPath).exists(): "${sambambaPath} does not exist"
 

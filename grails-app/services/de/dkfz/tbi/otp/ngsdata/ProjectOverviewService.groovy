@@ -1,30 +1,23 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.utils.*
-import groovy.sql.Sql
+import groovy.sql.*
 import groovy.transform.*
 import org.springframework.beans.factory.*
 import org.springframework.beans.factory.annotation.*
 import org.springframework.context.*
 import org.springframework.security.access.prepost.*
 
-import javax.sql.DataSource
+import javax.sql.*
 import java.util.regex.*
 
 import static de.dkfz.tbi.otp.utils.ProcessHelperService.*
 
 class ProjectOverviewService {
-
-     static final String BWA_COMMAND = "conveyBwaCommand"
-     static final String BWA_Q_PARAMETER = "bwaQParameter"
-     static final String SAM_TOOLS_COMMAND = "samtoolsCommand"
-     static final String PICARD_MDUP_COMMAND = "picardMdupCommand"
-     static final String PICARD_MDUP_OPTIONS = "picardMdup"
-
-
 
     ExecutionService executionService
     ExecuteRoddyCommandService executeRoddyCommandService
@@ -234,11 +227,11 @@ class ProjectOverviewService {
         assert project
 
         return new AlignmentInfo(
-                bwaCommand: processingOptionService.findOptionSafe(BWA_COMMAND, null, project) + " aln",
-                bwaOptions: processingOptionService.findOptionSafe(BWA_Q_PARAMETER, null, project),
-                samToolsCommand: processingOptionService.findOptionSafe(SAM_TOOLS_COMMAND, null, project),
-                mergeCommand: processingOptionService.findOptionSafe(PICARD_MDUP_COMMAND, null, project),
-                mergeOptions: processingOptionService.findOptionSafe(PICARD_MDUP_OPTIONS, null, project),
+                bwaCommand: processingOptionService.findOptionSafe(OptionName.COMMAND_CONVEY_BWA, null, project) + " aln",
+                bwaOptions: processingOptionService.findOptionSafe(OptionName.PIPELINE_OTP_ALIGNMENT_BWA_QUEUE_PARAMETER, null, project),
+                samToolsCommand: processingOptionService.findOptionSafe(OptionName.COMMAND_SAMTOOLS, null, project),
+                mergeCommand: processingOptionService.findOptionSafe(OptionName.COMMAND_PICARD_MDUP, null, project),
+                mergeOptions: processingOptionService.findOptionSafe(OptionName.PIPELINE_OTP_ALIGNMENT_PICARD_MDUP, null, project),
         )
     }
 

@@ -1,9 +1,11 @@
 package de.dkfz.tbi.otp.utils
 
-import grails.plugin.mail.MailService
-import de.dkfz.tbi.TestCase
-import org.junit.After
-import org.junit.Test
+import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
+import de.dkfz.tbi.otp.ngsdata.*
+import grails.plugin.mail.*
+import org.junit.*
 
 class MailHelperServiceTests {
 
@@ -12,6 +14,8 @@ class MailHelperServiceTests {
     static final String RECIPIENT = 'a.b@c.d'
 
     MailHelperService mailHelperService
+
+    ProcessingOptionService processingOptionService
 
     @After
     void tearDown() {
@@ -72,20 +76,18 @@ class MailHelperServiceTests {
 
     @Test
     void testSendNotificationEmail() {
-        String oldRecipient = mailHelperService.grailsApplication.config.otp.mail.notification.to
-        try {
-            mailHelperService.grailsApplication.config.otp.mail.notification.to = RECIPIENT
-
-            mailHelperService.metaClass.sendEmail = { String subject, String content, String recipient ->
-                assert SUBJECT == subject
-                assert BODY == content
-                assert RECIPIENT == recipient
-            }
-
-            mailHelperService.sendNotificationEmail(SUBJECT, BODY)
-        } finally {
-            mailHelperService.grailsApplication.config.otp.mail.notification.to = oldRecipient
+        DomainFactory.createProcessingOption(
+                name: OptionName.EMAIL_RECIPIENT_NOTIFICATION,
+                type: null,
+                project: null,
+                value: RECIPIENT,
+        )
+        mailHelperService.metaClass.sendEmail = { String subject, String content, String recipient ->
+            assert SUBJECT == subject
+            assert BODY == content
+            assert RECIPIENT == recipient
         }
-    }
 
+        mailHelperService.sendNotificationEmail(SUBJECT, BODY)
+    }
 }

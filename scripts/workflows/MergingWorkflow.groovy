@@ -1,11 +1,11 @@
-import static de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl.getSLOTS_RESERVED_FOR_FAST_TRACK_OPTION_NAME
-import static de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl.getTOTAL_SLOTS_OPTION_NAME
-import static de.dkfz.tbi.otp.job.processing.PbsOptionMergingService.PBS_PREFIX
-import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
-
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.job.jobs.merging.*
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.Realm.Cluster
-import de.dkfz.tbi.otp.ngsdata.SeqType
+
+import static de.dkfz.tbi.otp.job.processing.PbsOptionMergingService.*
+import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
 
 String workflowName = "MergingWorkflow"
 
@@ -27,43 +27,39 @@ plan(workflowName) {
 
 //special pbs options for merging workflow
 println ctx.processingOptionService.createOrUpdate(
-  "${PBS_PREFIX}${MergingJob.simpleName}",
+  OptionName."${PBS_PREFIX}${MergingJob.simpleName}",
   "DKFZ",
   null,
-  '{"-l": {nodes: "1:ppn=6", walltime: "100:00:00", mem: "25g"}}',
-  "merging job depending cluster option for dkfz"
+  '{"-l": {nodes: "1:ppn=6", walltime: "100:00:00", mem: "25g"}}'
 )
 println ctx.processingOptionService.createOrUpdate(
-    "${PBS_PREFIX}${MergingJob.simpleName}_${SeqType.exomePairedSeqType.processingOptionName}",
-    Cluster.DKFZ.toString(),
+    OptionName."${PBS_PREFIX}${MergingJob.simpleName}",
+    ${SeqType.exomePairedSeqType.processingOptionName},
     null,
-    '{"-l": {mem: "15g"}}',
-    ''
+    '{"-l": {mem: "15g"}}'
 )
 
 //picard option for mark duplicates
 println ctx.processingOptionService.createOrUpdate(
-  "picardMdup",
+  OptionName.PIPELINE_OTP_ALIGNMENT_PICARD_MDUP,
   null,
   null,
-  'VALIDATION_STRINGENCY=SILENT REMOVE_DUPLICATES=FALSE ASSUME_SORTED=TRUE MAX_RECORDS_IN_RAM=12500000 CREATE_INDEX=TRUE CREATE_MD5_FILE=TRUE',
-  "picard option used in duplicates marking"
+  'VALIDATION_STRINGENCY=SILENT REMOVE_DUPLICATES=FALSE ASSUME_SORTED=TRUE MAX_RECORDS_IN_RAM=12500000 CREATE_INDEX=TRUE CREATE_MD5_FILE=TRUE'
 )
 
 
 
 // picard program for merging job
 ctx.processingOptionService.createOrUpdate(
-        'picardMdupCommand',
+        OptionName.COMMAND_PICARD_MDUP,
         null,
         null,
-        'picard-1.61.sh MarkDuplicates',
-        'command for versioned picard'
+        'picard-1.61.sh MarkDuplicates'
 )
 
 
 // number of all merging workflows which can be executed in parallel
-println ctx.processingOptionService.createOrUpdate(TOTAL_SLOTS_OPTION_NAME, workflowName, null, '60', '')
+println ctx.processingOptionService.createOrUpdate(OptionName.MAXIMUM_NUMBER_OF_JOBS, workflowName, null, '60')
 // number of slots which are reserved only for FastTrack Workflows
-println ctx.processingOptionService.createOrUpdate(SLOTS_RESERVED_FOR_FAST_TRACK_OPTION_NAME, workflowName, null, '30', '')
+println ctx.processingOptionService.createOrUpdate(OptionName.MAXIMUM_NUMBER_OF_JOBS_RESERVED_FOR_FAST_TRACK, workflowName, null, '30')
 

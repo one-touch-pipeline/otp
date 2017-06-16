@@ -125,7 +125,7 @@ class CreateNotificationTextServiceSpec extends Specification {
 
     void "createMessage, when template is not found, throw ProcessingException"() {
         when:
-        new CreateNotificationTextService().createMessage('unknownTemplate', [:])
+        new CreateNotificationTextService().createMessage(ProcessingOption.OptionName.NOTIFICATION_TEMPLATE_BASE, [:])
 
         then:
         ProcessingException e = thrown()
@@ -135,7 +135,7 @@ class CreateNotificationTextServiceSpec extends Specification {
 
     void "createMessage, when template exist, return notification text"() {
         given:
-        String templateName = 'SomeTemplateName'
+        ProcessingOption.OptionName templateName = ProcessingOption.OptionName.NOTIFICATION_TEMPLATE_BASE
         String templateText = 'Some text ${placeholder} some text'
         String placeHolder = 'information'
 

@@ -4,18 +4,17 @@ import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.dataprocessing.sophia.*
 import de.dkfz.tbi.otp.infrastructure.*
-import de.dkfz.tbi.otp.job.*
 import de.dkfz.tbi.otp.job.jobs.snvcalling.*
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.Realm.Cluster
 import de.dkfz.tbi.otp.ngsdata.SampleType.SpecificReferenceGenome
-import de.dkfz.tbi.otp.notification.*
 import de.dkfz.tbi.otp.tracking.*
 import de.dkfz.tbi.otp.utils.*
 import grails.plugin.springsecurity.acl.*
@@ -363,10 +362,9 @@ class DomainFactory {
 
     public static ProcessingOption createProcessingOption(Map properties = [:]) {
         return createDomainObject(ProcessingOption, [
-                name: "processingOptionName_${counter++}",
+                name: OptionName.PIPELINE_RODDY_SNV_PLUGIN_NAME,
                 type: "processingOptionType_${counter++}",
                 value:  "processingOptionValue_${counter++}",
-                comment: "processingOptionComment_${counter++}",
         ], properties)
     }
 
@@ -384,18 +382,17 @@ class DomainFactory {
     public static void createProcessingOptionForOtrsTicketPrefix(String prefix = "Prefix ${counter++}"){
         ProcessingOptionService option = new ProcessingOptionService()
         option.createOrUpdate(
-                TrackingService.TICKET_NUMBER_PREFIX,
+                OptionName.TICKET_SYSTEM_NUMBER_PREFIX,
                 null,
                 null,
-                prefix,
-                "comment to the number prefix"
+                prefix
         )
     }
 
     public static void createProcessingOptionForStatisticRecipient(String recipientEmail = "email${counter++}@example.example"){
         createProcessingOption(
-                name: JobMailService.PROCESSING_OPTION_EMAIL_RECIPIENT,
-                type: JobMailService.PROCESSING_OPTION_STATISTIC_EMAIL_RECIPIENT,
+                name: OptionName.EMAIL_RECIPIENT_NOTIFICATION,
+                type: null,
                 project: null,
                 value: recipientEmail,
         )
@@ -404,7 +401,7 @@ class DomainFactory {
 
     public static ProcessingOption createProcessingOptionBasePathReferenceGenome(String fileName = TestCase.uniqueNonExistentPath.path) {
         return createProcessingOption(
-                name: ReferenceGenomeService.REFERENCE_GENOME_BASE_PATH,
+                name: OptionName.BASE_PATH_REFERENCE_GENOME,
                 type: null,
                 project: null,
                 value: fileName,
@@ -882,11 +879,10 @@ class DomainFactory {
         createProcessingThresholdsForBamFile(bamFileControl, [numberOfLanes: null])
 
         createProcessingOption(
-                name: SophiaService.PROCESSING_OPTION_REFERENCE_KEY,
+                name: OptionName.PIPELINE_SOPHIA_REFERENCE_GENOME,
                 type: null,
                 project: null,
                 value: 'hs37d5, hs37d5_PhiX, hs37d5_GRCm38mm_PhiX, hs37d5+mouse, hs37d5_GRCm38mm',
-                comment: "Name of reference genomes for sophia",
         )
 
 
@@ -1867,39 +1863,34 @@ class DomainFactory {
     static Map<String, String> createOtpAlignmentProcessingOptions(Map properties = [:]) {
         [
                 createProcessingOption(
-                        name: ProjectOverviewService.BWA_COMMAND,
+                        name: OptionName.COMMAND_CONVEY_BWA,
                         type: null,
                         project: null,
-                        value: properties[ProjectOverviewService.BWA_COMMAND] ?: "value ${counter++}",
-                        comment: "Some comment ${counter++}",
+                        value: properties[OptionName.COMMAND_CONVEY_BWA] ?: "value ${counter++}",
                 ),
                 createProcessingOption(
-                        name: ProjectOverviewService.BWA_Q_PARAMETER,
+                        name: OptionName.PIPELINE_OTP_ALIGNMENT_BWA_QUEUE_PARAMETER,
                         type: null,
                         project: null,
-                        value: properties[ProjectOverviewService.BWA_Q_PARAMETER] ?: "value ${counter++}",
-                        comment: "Some comment ${counter++}",
+                        value: properties[OptionName.PIPELINE_OTP_ALIGNMENT_BWA_QUEUE_PARAMETER] ?: "value ${counter++}",
                 ),
                 createProcessingOption(
-                        name: ProjectOverviewService.SAM_TOOLS_COMMAND,
+                        name: OptionName.COMMAND_SAMTOOLS,
                         type: null,
                         project: null,
-                        value: properties[ProjectOverviewService.SAM_TOOLS_COMMAND] ?: "value ${counter++}",
-                        comment: "Some comment ${counter++}",
+                        value: properties[OptionName.COMMAND_SAMTOOLS] ?: "value ${counter++}",
                 ),
                 createProcessingOption(
-                        name: ProjectOverviewService.PICARD_MDUP_COMMAND,
+                        name: OptionName.COMMAND_PICARD_MDUP,
                         type: null,
                         project: null,
-                        value: properties[ProjectOverviewService.PICARD_MDUP_COMMAND] ?: "value ${counter++}",
-                        comment: "Some comment ${counter++}",
+                        value: properties[OptionName.COMMAND_PICARD_MDUP] ?: "value ${counter++}",
                 ),
                 createProcessingOption(
-                        name: ProjectOverviewService.PICARD_MDUP_OPTIONS,
+                        name: OptionName.PIPELINE_OTP_ALIGNMENT_PICARD_MDUP,
                         type: null,
                         project: null,
-                        value: [ProjectOverviewService.PICARD_MDUP_OPTIONS] ?: "value ${counter++}",
-                        comment: "Some comment ${counter++}",
+                        value: [OptionName.PIPELINE_OTP_ALIGNMENT_PICARD_MDUP] ?: "value ${counter++}",
                 )
         ].collectEntries { ProcessingOption processingOption ->
             [(processingOption.name): processingOption.value]
@@ -1909,38 +1900,34 @@ class DomainFactory {
     static void createRoddyProcessingOptions(File basePath) {
 
         ProcessingOption processingOptionPath = new ProcessingOption(
-                name: "roddyPath",
+                name: OptionName.RODDY_PATH,
                 type: null,
                 project: null,
                 value: "${basePath}/roddy/",
-                comment: "Path to the roddy.sh on the current cluster (***REMOVED***cluster 13.1)",
         )
         assert processingOptionPath.save(flush: true)
 
         ProcessingOption processingOptionBaseConfigsPath = new ProcessingOption(
-                name: "roddyBaseConfigsPath",
+                name: OptionName.RODDY_BASE_CONFIGS_PATH,
                 type: null,
                 project: null,
                 value: "${basePath}/roddyBaseConfigs/",
-                comment: "Path to the baseConfig-files which are needed to execute Roddy",
         )
         assert processingOptionBaseConfigsPath.save(flush: true)
 
         ProcessingOption processingOptionApplicationIni = new ProcessingOption(
-                name: "roddyApplicationIni",
+                name: OptionName.RODDY_APPLICATION_INI,
                 type: null,
                 project: null,
                 value: "${basePath}/roddyBaseConfigs/applicationProperties.ini",
-                comment: "Path to the application.ini which is needed to execute Roddy"
         )
         assert processingOptionApplicationIni.save(flush: true)
 
         ProcessingOption featureTogglesConfigPath = new ProcessingOption(
-                name: ExecuteRoddyCommandService.FEATURE_TOGGLES_CONFIG_PATH,
+                name: OptionName.RODDY_FEATURE_TOGGLES_CONFIG_PATH,
                 type: null,
                 project: null,
                 value: "${basePath}/roddyBaseConfigs/featureToggles.ini",
-                comment: "Path to featureToggles.ini which contains feature toggles for Roddy",
         )
         assert featureTogglesConfigPath.save(flush: true)
     }
@@ -1978,7 +1965,7 @@ class DomainFactory {
     static void createNotificationProcessingOptions() {
 
         createProcessingOption([
-                name   : CreateNotificationTextService.BASE_NOTIFICATION_TEMPLATE,
+                name   : OptionName.NOTIFICATION_TEMPLATE_BASE,
                 type   : null,
                 project: null,
                 value  : '''
@@ -1986,11 +1973,10 @@ base notification
 stepInformation: ${stepInformation}
 seqCenterComment: ${seqCenterComment}
 ''',
-                comment: '',
         ])
 
         createProcessingOption([
-                name   : CreateNotificationTextService.INSTALLATION_NOTIFICATION_TEMPLATE,
+                name   : OptionName.NOTIFICATION_TEMPLATE_INSTALLATION,
                 type   : null,
                 project: null,
                 value  : '''
@@ -2000,19 +1986,17 @@ paths: ${paths}
 samples: ${samples}
 links: ${links}
 ''',
-                comment: '',
         ])
 
         createProcessingOption([
-                name   : CreateNotificationTextService.INSTALLATION_FURTHER_PROCESSING_TEMPLATE,
+                name   : OptionName.NOTIFICATION_TEMPLATE_INSTALLATION_FURTHER_PROCESSING,
                 type   : null,
                 project: null,
                 value  : '''further processing''',
-                comment: '',
         ])
 
         createProcessingOption([
-                name   : CreateNotificationTextService.ALIGNMENT_NOTIFICATION_TEMPLATE,
+                name   : OptionName.NOTIFICATION_TEMPLATE_ALIGNMENT,
                 type   : null,
                 project: null,
                 value  : '''
@@ -2022,12 +2006,11 @@ links: ${links}
 processingValues: ${processingValues}
 paths: ${paths}
 ''',
-                comment: '',
         ])
 
 
         createProcessingOption([
-                name: CreateNotificationTextService.ALIGNMENT_FURTHER_PROCESSING_TEMPLATE,
+                name: OptionName.NOTIFICATION_TEMPLATE_ALIGNMENT_FURTHER_PROCESSING,
                 type: null,
                 project: null,
                 value: '''
@@ -2035,22 +2018,20 @@ run variant calling
 variantCallingPipelines: ${variantCallingPipelines}
 samplePairsWillProcess: ${samplePairsWillProcess}
 ''',
-                comment: '',
         ])
 
         createProcessingOption([
-                name: CreateNotificationTextService.ALIGNMENT_NO_FURTHER_PROCESSING_TEMPLATE,
+                name: OptionName.NOTIFICATION_TEMPLATE_ALIGNMENT_NO_FURTHER_PROCESSING,
                 type: null,
                 project: null,
                 value: '''
 no variant calling
 samplePairsWontProcess: ${samplePairsWontProcess}
 ''',
-                comment: '',
         ])
 
         createProcessingOption([
-                name: CreateNotificationTextService.ALIGNMENT_PROCESSING_INFORMATION_TEMPLATE,
+                name: OptionName.NOTIFICATION_TEMPLATE_ALIGNMENT_PROCESSING,
                 type: null,
                 project: null,
                 value: '''
@@ -2063,12 +2044,11 @@ mergingProgram: ${mergingProgram}
 mergingParameter: ${mergingParameter}
 samtoolsProgram: ${samtoolsProgram}
 ''',
-                comment: '',
         ])
 
 
         createProcessingOption([
-                name: CreateNotificationTextService.SNV_NOTIFICATION_TEMPLATE,
+                name: OptionName.NOTIFICATION_TEMPLATE_SNV_PROCESSED,
                 type: null,
                 project: null,
                 value: '''
@@ -2077,23 +2057,21 @@ samplePairsFinished: ${samplePairsFinished}
 otpLinks: ${otpLinks}
 directories: ${directories}
 ''',
-                comment: '',
         ])
 
 
         createProcessingOption([
-                name: CreateNotificationTextService.SNV_NOT_PROCESSED_TEMPLATE,
+                name: OptionName.NOTIFICATION_TEMPLATE_SNV_NOT_PROCESSED,
                 type: null,
                 project: null,
                 value: '''
 snv not processed
 samplePairsNotProcessed: ${samplePairsNotProcessed}
 ''',
-                comment: '',
         ])
 
         createProcessingOption([
-                name: CreateNotificationTextService.INDEL_NOTIFICATION_TEMPLATE,
+                name: OptionName.NOTIFICATION_TEMPLATE_INDEL_PROCESSED,
                 type: null,
                 project: null,
                 value: '''
@@ -2102,22 +2080,20 @@ samplePairsFinished: ${samplePairsFinished}
 otpLinks: ${otpLinks}
 directories: ${directories}
 ''',
-                comment: '',
         ])
 
         createProcessingOption([
-                name: CreateNotificationTextService.INDEL_NOT_PROCESSED_TEMPLATE,
+                name: OptionName.NOTIFICATION_TEMPLATE_INDEL_NOT_PROCESSED,
                 type: null,
                 project: null,
                 value: '''
 indel not processed
 samplePairsNotProcessed: ${samplePairsNotProcessed}
 ''',
-                comment: '',
         ])
 
         createProcessingOption([
-                name: CreateNotificationTextService.ACESEQ_NOTIFICATION_TEMPLATE,
+                name: OptionName.NOTIFICATION_TEMPLATE_ACESEQ_PROCESSED,
                 type: null,
                 project: null,
                 value: '''
@@ -2126,22 +2102,20 @@ samplePairsFinished: ${samplePairsFinished}
 otpLinks: ${otpLinks}
 directories: ${directories}
 ''',
-                comment: '',
         ])
 
         createProcessingOption([
-                name: CreateNotificationTextService.ACESEQ_NOT_PROCESSED_TEMPLATE,
+                name: OptionName.NOTIFICATION_TEMPLATE_ACESEQ_NOT_PROCESSED,
                 type: null,
                 project: null,
                 value: '''
 aceseq not processed
 samplePairsNotProcessed: ${samplePairsNotProcessed}
 ''',
-                comment: '',
         ])
 
         createProcessingOption([
-                name: CreateNotificationTextService.SOPHIA_NOTIFICATION_TEMPLATE,
+                name: OptionName.NOTIFICATION_TEMPLATE_SOPHIA_PROCESSED,
                 type: null,
                 project: null,
                 value: '''
@@ -2150,18 +2124,16 @@ samplePairsFinished: ${samplePairsFinished}
 otpLinks: ${otpLinks}
 directories: ${directories}
 ''',
-                comment: '',
         ])
 
         createProcessingOption([
-                name: CreateNotificationTextService.SOPHIA_NOT_PROCESSED_TEMPLATE,
+                name: OptionName.NOTIFICATION_TEMPLATE_SOPHIA_NOT_PROCESSED,
                 type: null,
                 project: null,
                 value: '''
 sophia not processed
 samplePairsNotProcessed: ${samplePairsNotProcessed}
 ''',
-                comment: '',
         ])
     }
 

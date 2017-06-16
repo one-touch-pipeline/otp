@@ -20,7 +20,7 @@ public class RoddySnvCallingStartJobTests {
     void test_ConfigClass_Config_Instance() {
         snvTestData = new SnvCallingInstanceTestData()
         snvTestData.createSnvObjects()
-        DomainFactory.createProcessingOption(name: 'timeZone', type: null, value: 'Europe/Berlin')
+        DomainFactory.createProcessingOption(name: 'TIME_ZONE', type: null, value: 'Europe/Berlin')
 
         try {
             SamplePair samplePair = snvTestData.samplePair

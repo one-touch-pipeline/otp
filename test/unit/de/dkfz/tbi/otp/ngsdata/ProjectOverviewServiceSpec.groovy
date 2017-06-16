@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.utils.*
 import grails.test.mixin.*
@@ -42,11 +43,11 @@ class ProjectOverviewServiceSpec extends Specification {
 
         then:
         alignmentInfo
-        map[ProjectOverviewService.BWA_COMMAND] + ' aln' == alignmentInfo.bwaCommand
-        map[ProjectOverviewService.BWA_Q_PARAMETER] == alignmentInfo.bwaOptions
-        map[ProjectOverviewService.SAM_TOOLS_COMMAND] == alignmentInfo.samToolsCommand
-        map[ProjectOverviewService.PICARD_MDUP_COMMAND] == alignmentInfo.mergeCommand
-        map[ProjectOverviewService.PICARD_MDUP_OPTIONS] == alignmentInfo.mergeOptions
+        map[OptionName.COMMAND_CONVEY_BWA] + ' aln' == alignmentInfo.bwaCommand
+        map[OptionName.PIPELINE_OTP_ALIGNMENT_BWA_QUEUE_PARAMETER] == alignmentInfo.bwaOptions
+        map[OptionName.COMMAND_SAMTOOLS] == alignmentInfo.samToolsCommand
+        map[ProcessingOption.OptionName.COMMAND_PICARD_MDUP] == alignmentInfo.mergeCommand
+        map[OptionName.PIPELINE_OTP_ALIGNMENT_PICARD_MDUP] == alignmentInfo.mergeOptions
     }
 
 

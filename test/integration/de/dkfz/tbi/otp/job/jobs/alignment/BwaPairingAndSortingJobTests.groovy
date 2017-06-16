@@ -1,9 +1,11 @@
 package de.dkfz.tbi.otp.job.jobs.alignment
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.ngsdata.*
 import org.junit.*
 import org.junit.rules.*
+import org.springframework.beans.factory.annotation.*
 
 import static org.junit.Assert.*
 
@@ -11,11 +13,11 @@ class BwaPairingAndSortingJobTests {
 
     final static Long ARBITRARY_REFERENCE_GENOME_LENGTH = 100
 
+    @Autowired
     BwaPairingAndSortingJob bwaPairingAndSortingJob
     AlignmentPassService alignmentPassService
     ProcessedBamFileService processedBamFileService
 
-    private TestData testData = new TestData()
     private AlignmentPass pass
     private ProcessedBamFile bamFile
 
@@ -111,7 +113,7 @@ class BwaPairingAndSortingJobTests {
         assertNotNull(pass.save([flush: true, failOnError: true]))
 
         ProcessingOption option = new ProcessingOption(
-            name: 'bwaCommand',
+            name: OptionName.COMMAND_CONVEY_BWA,
             type: null,
             project: null,
             value: 'bwa-0.6.2-tpx',
@@ -120,7 +122,7 @@ class BwaPairingAndSortingJobTests {
         assertNotNull(option.save(flush: true))
 
         option = new ProcessingOption(
-            name: 'samtoolsCommand',
+            name: ProcessingOption.OptionName.COMMAND_SAMTOOLS,
             type: null,
             project: null,
             value: 'samtools-0.1.19',
@@ -129,7 +131,7 @@ class BwaPairingAndSortingJobTests {
         assertNotNull(option.save(flush: true))
 
         option = new ProcessingOption(
-            name: 'numberOfSampeThreads',
+            name: OptionName.PIPELINE_OTP_ALIGNMENT_NUMBER_OF_SAMPE_THREADS,
             type: null,
             project: null,
             value: '-t 8',
@@ -138,7 +140,7 @@ class BwaPairingAndSortingJobTests {
         assertNotNull(option.save(flush: true))
 
         option = new ProcessingOption(
-            name: 'numberOfSamToolsSortThreads',
+            name: OptionName.PIPELINE_OTP_ALIGNMENT_NUMBER_OF_SAMTOOLS_SORT_THREADS,
             type: null,
             project: null,
             value: '-@ 8',
@@ -147,7 +149,7 @@ class BwaPairingAndSortingJobTests {
         assertNotNull(option.save(flush: true))
 
         option = new ProcessingOption(
-            name: 'mbufferPairingSorting',
+            name: OptionName.PIPELINE_OTP_ALIGNMENT_MBUFFER_PAIRING_SORTING,
             type: null,
             project: null,
             value: '-m 2G',
@@ -156,7 +158,7 @@ class BwaPairingAndSortingJobTests {
         assertNotNull(option.save(flush: true))
 
         option = new ProcessingOption(
-            name: 'insertSizeCutoff',
+            name: OptionName.PIPELINE_OTP_ALIGNMENT_INSERT_SIZE_CUT_OFF,
             type: seqType.libraryLayout,
             project: project,
             value: '-a 1000',
@@ -165,7 +167,7 @@ class BwaPairingAndSortingJobTests {
         assertNotNull(option.save(flush: true))
 
         option = new ProcessingOption(
-            name: 'samtoolsSortBuffer',
+            name: OptionName.PIPELINE_OTP_ALIGNMENT_SAMTOOLS_SORT_BUFFER,
             type: null,
             project: null,
             value: '-m 30000000000',

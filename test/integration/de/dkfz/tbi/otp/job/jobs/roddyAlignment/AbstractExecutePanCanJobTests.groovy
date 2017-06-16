@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
 import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
@@ -61,13 +62,13 @@ class AbstractExecutePanCanJobTests {
 
         DomainFactory.createRoddyProcessingOptions(tmpDir.newFolder())
 
-        File roddyPath = ProcessingOption.findByName("roddyPath").value as File
+        File roddyPath = ProcessingOption.findByName(ProcessingOption.OptionName.RODDY_PATH).value as File
         roddyCommand = new File(roddyPath, 'roddy.sh')
-        roddyBaseConfigsPath = ProcessingOption.findByName("roddyBaseConfigsPath").value as File
+        roddyBaseConfigsPath = ProcessingOption.findByName(ProcessingOption.OptionName.RODDY_BASE_CONFIGS_PATH).value as File
         roddyBaseConfigsPath.mkdirs()
-        roddyApplicationIni = ProcessingOption.findByName("roddyApplicationIni").value as File
+        roddyApplicationIni = ProcessingOption.findByName(OptionName.RODDY_APPLICATION_INI).value as File
         roddyApplicationIni.text = "Some Text"
-        featureTogglesConfigPath = ProcessingOption.findByName(ExecuteRoddyCommandService.FEATURE_TOGGLES_CONFIG_PATH).value as File
+        featureTogglesConfigPath = ProcessingOption.findByName(OptionName.RODDY_FEATURE_TOGGLES_CONFIG_PATH).value as File
 
         File referenceGenomeDir = new File("${processingRootPath}/reference_genomes/${roddyBamFile.referenceGenome.path}")
         assert referenceGenomeDir.mkdirs()

@@ -1,10 +1,9 @@
 package workflows.analysis.pair.sophia
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.roddy.*
 import de.dkfz.tbi.otp.dataprocessing.sophia.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.*
 import grails.plugin.springsecurity.*
 import org.joda.time.*
 import workflows.analysis.pair.*
@@ -37,9 +36,9 @@ abstract class AbstractSophiaWorkflowTests extends AbstractRoddyBamFilePairAnaly
                     new RoddyConfiguration([
                             project          : project,
                             seqType          : seqType,
-                            pluginName       : ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_SOPHIA_PIPELINE_PLUGIN_NAME, null, null),
-                            pluginVersion    : ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_SOPHIA_PIPELINE_PLUGIN_VERSION, null, null),
-                            baseProjectConfig: ProcessingOptionService.findOption(RoddyConstants.OPTION_KEY_SOPHIA_BASE_PROJECT_CONFIG, seqType.roddyName, null),
+                            pluginName       : ProcessingOptionService.findOption(Names.pipelineSophiaPluginName, null, null),
+                            pluginVersion    : ProcessingOptionService.findOption(Names.pipelineSophiaPluginVersions, null, null),
+                            baseProjectConfig: ProcessingOptionService.findOption(Names.pipelineSophiaBaseProjectConfig, seqType.roddyName, null),
                             configVersion    : 'v1_0',
                             resources        : 't',
                     ])
@@ -53,7 +52,7 @@ abstract class AbstractSophiaWorkflowTests extends AbstractRoddyBamFilePairAnaly
 
         SpringSecurityUtils.doWithAuth("operator") {
             processingOptionService.createOrUpdate(
-                    SophiaService.PROCESSING_OPTION_REFERENCE_KEY,
+                    Names.pipelineSophiaReferenceGenome,
                     null,
                     null,
                     referenceGenome.name,

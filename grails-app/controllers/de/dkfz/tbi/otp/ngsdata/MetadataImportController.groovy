@@ -1,7 +1,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
 import de.dkfz.tbi.otp.tracking.*
 import de.dkfz.tbi.otp.user.*
 import grails.converters.*
@@ -235,7 +236,7 @@ class MetadataImportControllerSubmitCommand implements Serializable {
         })
     }
     void setTicketNumber(String ticketNumber) {
-        String prefix = ProcessingOptionService.getValueOfProcessingOption(TrackingService.TICKET_NUMBER_PREFIX)
+        String prefix = ProcessingOptionService.getValueOfProcessingOption(OptionName.TICKET_SYSTEM_NUMBER_PREFIX)
         Matcher matcher = ticketNumber =~ /^\s*(((${Pattern.quote(prefix)})?#)?(?<number>(\d{16})))?\s*$/
         if (matcher.matches()) {
             this.ticketNumber = matcher.group('number') ?: null
