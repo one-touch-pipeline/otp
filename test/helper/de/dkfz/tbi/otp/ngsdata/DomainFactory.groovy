@@ -2305,4 +2305,12 @@ samplePairsNotProcessed: ${samplePairsNotProcessed}
         AclObjectIdentity aclObjectIdentity = createDomainObject(AclObjectIdentity, [objectId: domainObject.id, aclClass: {createDomainObject(AclClass, [className: domainObject.class.name], [:])}], [:])
         createDomainObject(AclEntry, [aclObjectIdentity: aclObjectIdentity, sid: {createDomainObject(AclSid, [sid: "ROLE_ADMIN"], properties)}], [:])
     }
+
+
+    public static MergingCriteria createMergingCriteria(Map properties = [:]) {
+        return createDomainObject(MergingCriteria, [
+                project: { createProject() },
+                seqType: { createSeqType() },
+        ], properties )
+    }
 }
