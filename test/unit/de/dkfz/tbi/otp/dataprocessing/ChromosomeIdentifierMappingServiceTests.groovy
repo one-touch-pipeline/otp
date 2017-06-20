@@ -42,7 +42,7 @@ class ChromosomeIdentifierMappingServiceTests {
         seqType.dirName = "whole_genome_sequencing"
         seqType.save(flush: true)
 
-        referenceGenome = new ReferenceGenome(
+        referenceGenome = DomainFactory.createReferenceGenome([
                         name: "hg19_1_24",
                         path: "referenceGenome",
                         fileNamePrefix: "prefixName",
@@ -50,8 +50,7 @@ class ChromosomeIdentifierMappingServiceTests {
                         lengthWithoutN: ARBITRARY_REFERENCE_GENOME_LENGTH,
                         lengthRefChromosomes: ARBITRARY_REFERENCE_GENOME_LENGTH,
                         lengthRefChromosomesWithoutN: ARBITRARY_REFERENCE_GENOME_LENGTH,
-                        )
-        referenceGenome.save(flush: true, failOnError: true)
+                        ])
 
         ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType = new ReferenceGenomeProjectSeqType(
                         project: project,

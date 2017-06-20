@@ -123,8 +123,8 @@ class ReferenceGenome implements Entity {
         lengthRefChromosomesWithoutN shared: 'greaterThanZero'
         cytosinePositionsIndex nullable: true, blank: false,
                 validator: { !it || OtpPath.isValidPathComponent(it) }
-        chromosomePrefix nullable: true, blank: true
-        chromosomeSuffix nullable: true, blank: true
+        chromosomePrefix blank: true
+        chromosomeSuffix blank: true
         chromosomeLengthFilePath(nullable: true, blank: false, validator: { it == null || OtpPath.isValidPathComponent(it) })
         fingerPrintingFileName nullable: true
         gcContentFile (nullable: true, validator: { it == null || OtpPath.isValidPathComponent(it) })

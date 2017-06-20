@@ -17,7 +17,7 @@ class BedFileTests {
 
     @Before
     void setUp() {
-        refGen = new ReferenceGenome(
+        refGen = DomainFactory.createReferenceGenome([
                 name: "refGen",
                 path: "filePath",
                 fileNamePrefix: "prefix",
@@ -25,8 +25,9 @@ class BedFileTests {
                 lengthWithoutN: ARBITRARY_REFERENCE_GENOME_LENGTH,
                 lengthRefChromosomes: ARBITRARY_REFERENCE_GENOME_LENGTH,
                 lengthRefChromosomesWithoutN: ARBITRARY_REFERENCE_GENOME_LENGTH,
-                )
-        assertNotNull refGen.save(flush: true)
+                chromosomeSuffix: "",
+                chromosomePrefix: "",
+                ])
         kit1 = new LibraryPreparationKit(
                 name: "kitName1",
                 shortDisplayName: "name1",

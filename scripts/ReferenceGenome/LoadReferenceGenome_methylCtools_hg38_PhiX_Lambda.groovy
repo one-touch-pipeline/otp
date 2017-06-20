@@ -13,6 +13,8 @@ String name = "methylCtools_hg38_PhiX_Lambda"
 String path = "bwa06_methylCtools_hg38_PhiX_Lambda"
 String fileNamePrefix = "GCA_000001405.15_GRCh38_no_alt_analysis_set_adapted_naming_phix_L.conv"
 String cytosinePositionsIndex = "GCA_000001405.15_GRCh38_no_alt_analysis_set_adapted_naming_phix_L.pos.gz"
+String chromosomePrefix = "chr"
+String chromosomeSuffix = "chr"
 List<String> statSizeFileNames = [
         "GCA_000001405.15_GRCh38_no_alt_analysis_set_adapted_naming_phix_L.chrLenOnlyACGT.tab",
 ]
@@ -218,5 +220,5 @@ List<FastaEntry> fastaEntries = [
 ]
 
 ReferenceGenomeService referenceGenomeService = ctx.referenceGenomeService
-referenceGenomeService.loadReferenceGenome(name, path, fileNamePrefix, cytosinePositionsIndex,
+referenceGenomeService.loadReferenceGenome(name, path, fileNamePrefix, cytosinePositionsIndex, chromosomePrefix, chromosomeSuffix,
         fastaEntries, statSizeFileNames)

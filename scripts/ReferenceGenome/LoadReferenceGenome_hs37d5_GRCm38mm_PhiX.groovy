@@ -13,6 +13,8 @@ String name = "hs37d5_GRCm38mm_PhiX"
 String path = "bwa06_hs37d5_GRCm38mm_PhiX"
 String fileNamePrefix = "hs37d5_GRCm38mm10_PhiX"
 String cytosinePositionsIndex = null
+String chromosomePrefix = ""
+String chromosomeSuffix = ""
 List<String> statSizeFileNames = [
         "hs37d5_GRCm38mm.fa.chrLenOnlyACGT_realChromosomes.tab",
         "hs37d5_GRCm38mm.fa.chrLenOnlyACGT.tab",
@@ -175,5 +177,5 @@ List<FastaEntry> fastaEntries = [
 ]
 
 ReferenceGenomeService referenceGenomeService = ctx.referenceGenomeService
-referenceGenomeService.loadReferenceGenome(name, path, fileNamePrefix, cytosinePositionsIndex,
+referenceGenomeService.loadReferenceGenome(name, path, fileNamePrefix, cytosinePositionsIndex, chromosomePrefix, chromosomeSuffix,
         fastaEntries, statSizeFileNames)

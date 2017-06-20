@@ -1,12 +1,10 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 import grails.test.mixin.*
 import grails.test.mixin.support.*
 import org.junit.*
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeService
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 
 @TestFor(ChromosomeIdentifierFilteringService)
 @TestMixin(GrailsUnitTestMixin)
@@ -25,7 +23,7 @@ class ChromosomeIdentifierFilteringServiceTests {
         chromosomeIdentifierFilteringService = new ChromosomeIdentifierFilteringService()
         chromosomeIdentifierFilteringService.referenceGenomeService = new ReferenceGenomeService()
 
-        referenceGenome = new ReferenceGenome(
+        referenceGenome = DomainFactory.createReferenceGenome([
                         name: "hg19_1_24",
                         path: "referenceGenome",
                         fileNamePrefix: "prefixName",
@@ -33,8 +31,7 @@ class ChromosomeIdentifierFilteringServiceTests {
                         lengthWithoutN: ARBITRARY_REFERENCE_GENOME_LENGTH,
                         lengthRefChromosomes: ARBITRARY_REFERENCE_GENOME_LENGTH,
                         lengthRefChromosomesWithoutN: ARBITRARY_REFERENCE_GENOME_LENGTH,
-                        )
-        referenceGenome.save(flush: true, failOnError: true)
+                        ])
 
         referenceGenomeEntry = new ReferenceGenomeEntry(
                         name: "chr1",

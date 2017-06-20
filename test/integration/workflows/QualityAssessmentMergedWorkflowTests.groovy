@@ -118,12 +118,11 @@ class QualityAssessmentMergedWorkflowTests extends WorkflowTestCase {
         standardChromosomes.remove("M")
         assert standardChromosomes.size() == 24
 
-        ReferenceGenome refGen = testData.createReferenceGenome(
+        ReferenceGenome refGen = DomainFactory.createReferenceGenome(
                 name: "hg19",
                 path: "bwa06_hg19_chr",
                 fileNamePrefix: "hg19_1-22_X_Y_M",
         )
-        refGen.save(failOnError: true)
 
         // list which holds information about all entries in the ref. genome fasta file
         Map<String, Integer> fastaEntriesColumn = ["name":0, "alias":1, "length":2, "lengthWithoutN":3, "classification":4]

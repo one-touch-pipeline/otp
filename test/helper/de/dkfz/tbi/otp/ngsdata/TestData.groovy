@@ -222,15 +222,17 @@ class TestData {
     }
 
     public static ReferenceGenome createReferenceGenome(Map properties = [:]) {
-        return new ReferenceGenome([
-            name :"hg19_1_24",
-            path: "referenceGenome",
-            fileNamePrefix: "prefixName",
-            length: ARBITRARY_LENGTH_FOR_REFERENCE_GENOME,
-            lengthWithoutN: ARBITRARY_LENGTH_FOR_REFERENCE_GENOME,
-            lengthRefChromosomes: ARBITRARY_LENGTH_FOR_REFERENCE_GENOME,
-            lengthRefChromosomesWithoutN: ARBITRARY_LENGTH_FOR_REFERENCE_GENOME,
-        ] + properties)
+        return DomainFactory.createReferenceGenome([
+                name :"hg19_1_24",
+                path: "referenceGenome",
+                fileNamePrefix: "prefixName",
+                length: ARBITRARY_LENGTH_FOR_REFERENCE_GENOME,
+                lengthWithoutN: ARBITRARY_LENGTH_FOR_REFERENCE_GENOME,
+                lengthRefChromosomes: ARBITRARY_LENGTH_FOR_REFERENCE_GENOME,
+                lengthRefChromosomesWithoutN: ARBITRARY_LENGTH_FOR_REFERENCE_GENOME,
+                chromosomeSuffix: "",
+                chromosomePrefix: "",
+        ] + properties, false)
     }
 
 

@@ -115,6 +115,8 @@ class LoadBedFileScriptTests extends GroovyScriptAwareTestCase {
                 referenceGenome.lengthWithoutN = ARBITRARY_REFERENCE_GENOME_LENGTH
                 referenceGenome.lengthRefChromosomes = ARBITRARY_REFERENCE_GENOME_LENGTH
                 referenceGenome.lengthRefChromosomesWithoutN = ARBITRARY_REFERENCE_GENOME_LENGTH
+                referenceGenome.chromosomePrefix = ""
+                referenceGenome.chromosomeSuffix = ""
                 referenceGenome.save(flush: true)
 
                 ReferenceGenomeEntry entry = new ReferenceGenomeEntry(

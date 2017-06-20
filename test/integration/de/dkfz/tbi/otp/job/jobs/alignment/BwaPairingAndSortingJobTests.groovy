@@ -92,7 +92,7 @@ class BwaPairingAndSortingJobTests {
             )
         assertNotNull(seqTrack.save([flush: true, failOnError: true]))
 
-        ReferenceGenome refGenome = new ReferenceGenome(
+        ReferenceGenome refGenome = DomainFactory.createReferenceGenome(
             name: "hg19_1_24",
             path: "hg19_1_24",
             fileNamePrefix: "preffix_hg19_1_24",
@@ -100,8 +100,8 @@ class BwaPairingAndSortingJobTests {
             lengthWithoutN: ARBITRARY_REFERENCE_GENOME_LENGTH,
             lengthRefChromosomes: ARBITRARY_REFERENCE_GENOME_LENGTH,
             lengthRefChromosomesWithoutN: ARBITRARY_REFERENCE_GENOME_LENGTH,
+
         )
-        assertNotNull(refGenome.save(flush: true))
 
         pass = DomainFactory.createAlignmentPass(
             referenceGenome: refGenome,

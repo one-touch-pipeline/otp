@@ -134,7 +134,7 @@ class QAResultStatisticsServiceTests {
                         )
         assertNotNull(exomeSeqTrack.save([flush: true]))
 
-        referenceGenome = new ReferenceGenome(
+        referenceGenome = DomainFactory.createReferenceGenome([
                 name: "referenceGenome",
                 path: "pathToReferenceGenome",
                 fileNamePrefix: "referenceGenomePrefix",
@@ -142,8 +142,8 @@ class QAResultStatisticsServiceTests {
                 lengthWithoutN: 2910000,
                 lengthRefChromosomes: 800,
                 lengthRefChromosomesWithoutN: 750
-        )
-        assertNotNull(referenceGenome.save([flush: true]))
+        ])
+
 
         alignmentPass = DomainFactory.createAlignmentPass(
                         identifier: 1,

@@ -1282,7 +1282,7 @@ class DomainFactory {
         ], properties)
     }
 
-    static ReferenceGenome createReferenceGenome(Map properties = [:]) {
+    static ReferenceGenome createReferenceGenome(Map properties = [:], boolean saveAndValidate = true) {
         return createDomainObject(ReferenceGenome, [
                 name                        : "name${counter++}",
                 path                        : HelperUtils.uniqueString,
@@ -1291,7 +1291,10 @@ class DomainFactory {
                 lengthWithoutN              : 1,
                 lengthRefChromosomes        : 1,
                 lengthRefChromosomesWithoutN: 1,
-        ], properties)
+                chromosomePrefix            : "",
+                chromosomeSuffix            : "",
+
+        ], properties, saveAndValidate)
     }
 
     static ReferenceGenome createAceseqReferenceGenome() {

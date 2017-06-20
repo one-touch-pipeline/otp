@@ -125,7 +125,7 @@ class ReferenceGenomeService {
      * @param cytosinePositionsIndex only for methylCtools processed reference genomes
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public void loadReferenceGenome(String name, String path, String fileNamePrefix, String cytosinePositionsIndex,
+    public void loadReferenceGenome(String name, String path, String fileNamePrefix, String cytosinePositionsIndex, String chromosomePrefix, String chromosomeSuffix,
                                     List<FastaEntry> fastaEntries, List<String> statSizeFileNames) {
         // get list of all standard chromosomes (1…22, X, Y)
         List<String> standardChromosomes = Chromosomes.allLabels()
@@ -157,7 +157,10 @@ class ReferenceGenomeService {
                 lengthWithoutN: lengthWithoutN,
                 lengthRefChromosomes: lengthRefChromosomes,
                 lengthRefChromosomesWithoutN: lengthRefChromosomesWithoutN,
-        ).save(flush: true, failOnError: true)
+        )
+        referenceGenome.chromosomePrefix = chromosomePrefix
+        referenceGenome.chromosomeSuffix = chromosomeSuffix
+        referenceGenome.save(flush: true, failOnError: true)
 
 
         fastaEntries.each { entry ->

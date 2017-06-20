@@ -110,7 +110,7 @@ class AbstractBamFileServiceTests {
         SeqType wholeGenomeSeqType = DomainFactory.createWholeGenomeSeqType()
         SeqType exomeSeqType = DomainFactory.createExomeSeqType()
 
-        ReferenceGenome referenceGenome = new ReferenceGenome([
+        ReferenceGenome referenceGenome = DomainFactory.createReferenceGenome([
             name                        : 'Arbitrary Reference Genome Name',
             path                        : 'nonexistent',
             fileNamePrefix              : 'somePrefix',
@@ -119,7 +119,7 @@ class AbstractBamFileServiceTests {
             lengthRefChromosomes        : ARBITRARY_UNUSED_VALUE,
             lengthRefChromosomesWithoutN: ARBITRARY_UNUSED_VALUE,
         ])
-        assert referenceGenome.save([flush: true])
+
 
         referenceGenomeProjectSeqType = new ReferenceGenomeProjectSeqType([
             project        : project,

@@ -18,7 +18,7 @@ class ReferenceGenomeEntryTests {
 
     @Test
     void testConstraints() {
-        ReferenceGenome referenceGenome = new ReferenceGenome(
+        ReferenceGenome referenceGenome = DomainFactory.createReferenceGenome([
                         name: "refGen",
                         path: "filePath",
                         fileNamePrefix: "prefix",
@@ -26,8 +26,7 @@ class ReferenceGenomeEntryTests {
                         lengthWithoutN: ARBITRARY_REFERENCE_GENOME_LENGTH,
                         lengthRefChromosomes: ARBITRARY_REFERENCE_GENOME_LENGTH,
                         lengthRefChromosomesWithoutN: ARBITRARY_REFERENCE_GENOME_LENGTH,
-                        )
-        referenceGenome.save(flush: true)
+                        ])
 
         ReferenceGenomeEntry referenceGenomeEntry = new ReferenceGenomeEntry(
                         name: "chr1",

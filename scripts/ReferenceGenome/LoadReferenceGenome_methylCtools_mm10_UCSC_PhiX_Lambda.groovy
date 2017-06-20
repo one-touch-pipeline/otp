@@ -13,6 +13,8 @@ String name = "methylCtools_mm10_UCSC_PhiX_Lambda"
 String path = "bwa06_methylCtools_mm10_UCSC_PhiX_Lambda"
 String fileNamePrefix = "mm10_PhiX_Lambda.conv"
 String cytosinePositionsIndex = "mm10_PhiX_Lambda.pos.gz"
+String chromosomePrefix = "chr"
+String chromosomeSuffix = "chr"
 List<String> statSizeFileNames = [
         "mm10_PhiX_Lambda.fa.chrLenOnlyACGT.tab",
 ]
@@ -45,5 +47,5 @@ List<FastaEntry> fastaEntries = [
 ]
 
 ReferenceGenomeService referenceGenomeService = ctx.referenceGenomeService
-referenceGenomeService.loadReferenceGenome(name, path, fileNamePrefix, cytosinePositionsIndex,
+referenceGenomeService.loadReferenceGenome(name, path, fileNamePrefix, cytosinePositionsIndex, chromosomePrefix, chromosomeSuffix,
         fastaEntries, statSizeFileNames)

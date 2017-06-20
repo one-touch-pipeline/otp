@@ -56,17 +56,13 @@ class ReferenceGenomeServiceUnitTests {
         project.dirName = HelperUtils.uniqueString
         project.save(flush: true)
 
-        referenceGenome = new ReferenceGenome()
-        referenceGenome.name = "hg19_1_24"
-        referenceGenome.path = "referenceGenome"
-        referenceGenome.fileNamePrefix = "prefixName"
-        referenceGenome.cytosinePositionsIndex = "cytosine_idx.pos.gz"
-        referenceGenome.fingerPrintingFileName = 'fingerPrinting.bed'
-        referenceGenome.length = ARBITRARY_REFERENCE_GENOME_LENGTH
-        referenceGenome.lengthWithoutN = ARBITRARY_REFERENCE_GENOME_LENGTH
-        referenceGenome.lengthRefChromosomes = ARBITRARY_REFERENCE_GENOME_LENGTH
-        referenceGenome.lengthRefChromosomesWithoutN = ARBITRARY_REFERENCE_GENOME_LENGTH
-        referenceGenome.save(flush: true)
+        referenceGenome = DomainFactory.createReferenceGenome(
+                name: "hg19_1_24",
+                path: "referenceGenome",
+                fileNamePrefix: "prefixName",
+                cytosinePositionsIndex: "cytosine_idx.pos.gz",
+                fingerPrintingFileName: 'fingerPrinting.bed',
+        )
 
         referenceGenomeEntry = new ReferenceGenomeEntry(
                         name: "chr1",
@@ -235,6 +231,8 @@ class ReferenceGenomeServiceUnitTests {
         String fileNamePrefix = "my_reference_gnome"
         String cytosinePositionsIndex = null
         String statSizeFileName = "my_reference_gnome.fa.chrLenOnlyACGT.tab"
+        String chromosomePrefix = ''
+        String chromosomeSuffix = ''
 
         String fastaName = "chr21"
         String fastaAlias = "21"
@@ -246,7 +244,7 @@ class ReferenceGenomeServiceUnitTests {
                 new FastaEntry(fastaName, fastaAlias, fastaLength, fastaLengthWithoutN, fastaClassification),
         ]
 
-        referenceGenomeService.loadReferenceGenome(name, path, fileNamePrefix, cytosinePositionsIndex,
+        referenceGenomeService.loadReferenceGenome(name, path, fileNamePrefix, cytosinePositionsIndex, chromosomePrefix, chromosomeSuffix,
                 fastaEntries, [statSizeFileName])
 
         ReferenceGenome referenceGenome = CollectionUtils.exactlyOneElement(ReferenceGenome.findAllByName(name))
