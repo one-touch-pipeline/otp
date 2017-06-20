@@ -152,7 +152,7 @@ println processingOptionService.createOrUpdate(
         RoddyConstants.OPTION_KEY_RODDY_ALIGNMENT_PLUGIN_VERSION,
         SeqType.rnaPairedSeqType.roddyName,
         null,
-        "1.0.11",
+        "1.0.12",
         "The version of the rna roddy alignment plugin"
 )
 
