@@ -1009,7 +1009,7 @@ class DomainFactory {
         return createDomainObject(SophiaInstance, map, properties)
     }
 
-    public static SophiaInstance createSophiaInstance(SamplePair samplePair) {
+    public static SophiaInstance createSophiaInstance(SamplePair samplePair, Map properties = [:]) {
         return createDomainObject(SophiaInstance, [
                 samplePair: samplePair,
                 processingState: AnalysisProcessingStates.FINISHED,
@@ -1018,7 +1018,7 @@ class DomainFactory {
                 latestDataFileCreationDate: AbstractBamFile.getLatestSequenceDataFileCreationDate(samplePair.mergingWorkPackage1.bamFileInProjectFolder, samplePair.mergingWorkPackage2.bamFileInProjectFolder),
                 instanceName: "instance-${counter++}",
                 config: createRoddyWorkflowConfig([pipeline: createSophiaPipelineLazy()]),
-        ], [:])
+        ], properties)
     }
 
     public static SophiaQc createSophiaQc(Map properties) {

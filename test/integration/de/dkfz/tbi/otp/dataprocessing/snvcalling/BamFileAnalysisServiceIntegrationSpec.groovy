@@ -59,7 +59,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
     }
 
     @Unroll
-    void "samplePairForProcessing for Instance returns samplePair"() {
+    void "samplePairForProcessing for Instance #processingStatus returns samplePair"() {
         given:
         samplePair1."${processingStatus}" = ProcessingStatus.NEEDS_PROCESSING
         if (processingStatus == "aceseqProcessingStatus") {
@@ -490,6 +490,70 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         !sophiaService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
     }
 
+
+    void "samplePairForProcessing, for Aceseq pipeline, when sophia has not run, should not return SamplePair"() {
+        given:
+        prepareSophiaForAceseqBase()
+
+        expect:
+        null == aceseqService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
+    }
+
+    void "samplePairForProcessing, for Aceseq pipeline, when last sophia instance is running and not withdrawn and an older finish exist, should not return SamplePair"() {
+        given:
+        prepareSophiaForAceseq([processingState: AnalysisProcessingStates.FINISHED, withdrawn: false], [processingState: AnalysisProcessingStates.IN_PROGRESS, withdrawn: false])
+
+        expect:
+        null == aceseqService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
+    }
+
+    void "samplePairForProcessing, for Aceseq pipeline, when last sophia instance is running and withdrawn and an older finish exist, should return SamplePair"() {
+        given:
+        prepareSophiaForAceseq([processingState: AnalysisProcessingStates.FINISHED, withdrawn: false], [processingState: AnalysisProcessingStates.IN_PROGRESS, withdrawn: true])
+
+        expect:
+        samplePair1 == aceseqService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
+    }
+
+
+
+    void "samplePairForProcessing, for Aceseq pipeline, when all sophia instances are withdrawn, should not return SamplePair"() {
+        given:
+        prepareSophiaForAceseq([processingState: AnalysisProcessingStates.FINISHED, withdrawn: true], [processingState: AnalysisProcessingStates.FINISHED, withdrawn: true])
+
+        expect:
+        null == aceseqService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
+    }
+
+    private void prepareSophiaForAceseqBase() {
+        samplePair1.sophiaProcessingStatus = ProcessingStatus.NO_PROCESSING_NEEDED
+        samplePair1.save(flush: true)
+        DomainFactory.createProcessingOption([
+                name   : AceseqService.PROCESSING_OPTION_REFERENCE_KEY,
+                type   : null,
+                project: null,
+                value  : samplePair1.mergingWorkPackage1.referenceGenome.name,
+        ])
+        DomainFactory.createRoddyWorkflowConfig(
+                seqType: samplePair1.seqType,
+                project: samplePair1.project,
+                pipeline: DomainFactory.createAceseqPipelineLazy(),
+        )
+    }
+
+    private void prepareSophiaForAceseq(Map propertiesSophia1, Map propertiesSophia2) {
+        prepareSophiaForAceseqBase()
+
+        Map defaultMap = [
+                processingState: AnalysisProcessingStates.FINISHED,
+                withdrawn: false,
+                sampleType1BamFile: bamFile1_1,
+                sampleType2BamFile: bamFile2_1,
+        ]
+
+        DomainFactory.createSophiaInstance(samplePair1, defaultMap + propertiesSophia1)
+        DomainFactory.createSophiaInstance(samplePair1, defaultMap + propertiesSophia2)
+    }
 
 
     void "validateInputBamFiles, when all okay, return without exception"() {

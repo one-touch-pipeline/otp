@@ -15,11 +15,13 @@ class AceseqService extends BamFileAnalysisService {
                 "sp.sophiaProcessingStatus = 'NO_PROCESSING_NEEDED' AND " +
                 "EXISTS (FROM SophiaInstance si " +
                 "  WHERE si.samplePair = sp AND " +
-                "  si.processingState = 'FINISHED'" +
+                "  si.processingState = 'FINISHED' AND " +
+                "  si.withdrawn = false " +
                 ") AND " +
                 "NOT EXISTS (FROM SophiaInstance si " +
                 "  WHERE si.samplePair = sp AND " +
-                "  si.processingState = 'IN_PROGRESS'" +
+                "  si.processingState = 'IN_PROGRESS' AND " +
+                "  si.withdrawn = false " +
                 ") "
     }
 
