@@ -2,4 +2,4 @@
 
 set -e
 
-rbt post -u -o
+rbt post -u
