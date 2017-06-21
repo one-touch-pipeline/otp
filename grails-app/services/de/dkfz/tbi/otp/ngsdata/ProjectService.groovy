@@ -33,7 +33,7 @@ class ProjectService {
     //constants for rna configurations
     static final String ARRIBA_KNOWN_FUSIONS = "ARRIBA_KNOWN_FUSIONS"
     static final String ARRIBA_BLACKLIST = "ARRIBA_BLACKLIST"
-    static final String GENOME_GATK = "GENOME_GATK"
+    static final String GENOME_GATK_INDEX = "GENOME_GATK_INDEX"
     static final String GENOME_KALLISTO_INDEX = "GENOME_KALLISTO_INDEX"
     static final String GENOME_STAR_INDEX = "GENOME_STAR_INDEX"
     static final String RUN_ARRIBA = "RUN_ARRIBA"

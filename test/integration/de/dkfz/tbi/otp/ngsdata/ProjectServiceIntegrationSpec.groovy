@@ -929,10 +929,10 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         where:
         mouseData || entries
         false     || [ProjectService.ARRIBA_KNOWN_FUSIONS, ProjectService.ARRIBA_BLACKLIST, ProjectService.GENOME_STAR_INDEX,
-                      ProjectService.GENOME_GATK, ProjectService.GENOME_KALLISTO_INDEX,
+                      ProjectService.GENOME_GATK_INDEX, ProjectService.GENOME_KALLISTO_INDEX,
                       GeneModel.GENE_MODELS, GeneModel.GENE_MODELS_DEXSEQ, GeneModel.GENE_MODELS_EXCLUDE, GeneModel.GENE_MODELS_GC]
         true      || [ProjectService.RUN_ARRIBA, ProjectService.RUN_FEATURE_COUNTS_DEXSEQ, ProjectService.GENOME_STAR_INDEX,
-                      ProjectService.GENOME_GATK, ProjectService.GENOME_KALLISTO_INDEX,
+                      ProjectService.GENOME_GATK_INDEX, ProjectService.GENOME_KALLISTO_INDEX,
                       GeneModel.GENE_MODELS, GeneModel.GENE_MODELS_EXCLUDE, GeneModel.GENE_MODELS_GC]
     }
 
@@ -1364,7 +1364,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 referenceGenomeIndex: [
                         DomainFactory.createReferenceGenomeIndex(toolName: DomainFactory.createToolName(name: "${ProjectService.GENOME_STAR_INDEX}_200")),
                         DomainFactory.createReferenceGenomeIndex(toolName: DomainFactory.createToolName(name: ProjectService.GENOME_KALLISTO_INDEX)),
-                        DomainFactory.createReferenceGenomeIndex(toolName: DomainFactory.createToolName(name: ProjectService.GENOME_GATK)),
+                        DomainFactory.createReferenceGenomeIndex(toolName: DomainFactory.createToolName(name: ProjectService.GENOME_GATK_INDEX)),
                         DomainFactory.createReferenceGenomeIndex(toolName: DomainFactory.createToolName(name: ProjectService.ARRIBA_KNOWN_FUSIONS)),
                         DomainFactory.createReferenceGenomeIndex(toolName: DomainFactory.createToolName(name: ProjectService.ARRIBA_BLACKLIST)),
                 ],
