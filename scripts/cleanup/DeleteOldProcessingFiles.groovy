@@ -24,7 +24,7 @@ try {
             if (maxRemainingRuntime > Duration.ZERO) {
                 freedBytes += ctx.mergingPassService.deleteOldMergingProcessingFiles(minCreationInstant.toDate(), maxRemainingRuntime.millis)
             }
-            threadLog.info "${freedBytes} bytes have been freed in total."
+            LogThreadLocal.threadLog.info "${freedBytes} bytes have been freed in total."
         })
         assert !out.checkError()
     } catch (final Throwable e) {
