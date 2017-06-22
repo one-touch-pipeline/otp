@@ -25,7 +25,8 @@ class LibraryPreparationKit implements Entity {
 
     String adapterFile
 
-    String adapterSequence
+    // used for RNA workflow
+    String reverseComplementAdapterSequence
 
     static constraints = {
         name(unique: true, blank: false)
@@ -35,7 +36,7 @@ class LibraryPreparationKit implements Entity {
                 return 'Not a valid file name'
             }
         }
-        adapterSequence nullable: true, blank: false
+        reverseComplementAdapterSequence nullable: true, blank: false
     }
 
     public String toString() {

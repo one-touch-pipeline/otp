@@ -188,7 +188,7 @@ $(function() {
         });
         $("p.edit-switch-editor", outerContainer).hide();
         $("p.edit-switch-label", outerContainer).show();
-        window.setTimeout('location.reload()', 300); //reloads page after 0.3 seconds
+        window.setTimeout(function() { location.reload() }, 300); //reloads page after 0.3 seconds
     });
 
     /*jslint unparam: true */
@@ -217,7 +217,7 @@ $(function() {
         });
         $("p.edit-switch-editor", outerContainer).hide();
         $("p.edit-switch-label", outerContainer).show();
-        window.setTimeout('location.reload()', 300); //reloads page after 0.3 seconds
+        window.setTimeout(function() { location.reload() }, 300); //reloads page after 0.3 seconds
     });
 
     /*jslint unparam: true */
@@ -242,7 +242,7 @@ $(function() {
             success: function (data) {
                 if (data.success) {
                     $.otp.infoMessage($L("editorswitch.notification.success"));
-                    window.setTimeout('location.reload()', 500);
+                    window.setTimeout(function() { location.reload() }, 300);
                 } else {
                     $.otp.warningMessage(data.error);
                     }

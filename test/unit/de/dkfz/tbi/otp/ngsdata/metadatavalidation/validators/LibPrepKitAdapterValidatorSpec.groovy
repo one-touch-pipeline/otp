@@ -51,7 +51,7 @@ class LibPrepKitAdapterValidatorSpec extends Specification {
         DomainFactory.createRnaPipeline()
 
         LibraryPreparationKit kitWithoutAdapterFileAndSequence = DomainFactory.createLibraryPreparationKit(name: 'lib_prep_kit_without_adapter_file_and_sequence')
-        LibraryPreparationKit kitWithoutAdapterFile = DomainFactory.createLibraryPreparationKit(name: 'lib_prep_kit_without_adapter_file', adapterSequence: "ACGTC")
+        LibraryPreparationKit kitWithoutAdapterFile = DomainFactory.createLibraryPreparationKit(name: 'lib_prep_kit_without_adapter_file', reverseComplementAdapterSequence: "ACGTC")
         LibraryPreparationKit kitWithoutAdapterSequence = DomainFactory.createLibraryPreparationKit(name: 'lib_prep_kit_without_adapter_sequence', adapterFile: "/asdf")
 
         SampleIdentifier normalIdentifier = DomainFactory.createSampleIdentifier()
@@ -139,7 +139,7 @@ class LibPrepKitAdapterValidatorSpec extends Specification {
                 new Problem((context.spreadsheet.dataRows[3].cells) as Set, Level.WARNING,
                         "Adapter trimming is requested but adapter file for library preparation kit '${kitWithoutAdapterFile}' is missing."),
                 new Problem((context.spreadsheet.dataRows[4].cells) as Set, Level.WARNING,
-                        "Adapter trimming is requested but adapter sequence for library preparation kit '${kitWithoutAdapterSequence}' is missing."),
+                        "Adapter trimming is requested but reverse complement adapter sequence for library preparation kit '${kitWithoutAdapterSequence}' is missing."),
                 new Problem((context.spreadsheet.dataRows[5].cells) as Set, Level.WARNING,
                         "Adapter trimming is requested but adapter file for library preparation kit '${kitWithoutAdapterFile}' is missing."),
         ]

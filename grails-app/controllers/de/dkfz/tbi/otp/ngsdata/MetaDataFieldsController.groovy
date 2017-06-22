@@ -2,7 +2,6 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import grails.converters.*
-import org.springframework.beans.factory.annotation.*
 import org.springframework.validation.*
 
 
@@ -25,7 +24,7 @@ class MetaDataFieldsController {
                     name : it.name,
                     shortDisplayName : it.shortDisplayName,
                     adapterFile: it.adapterFile,
-                    adapterSequence: it.adapterSequence,
+                    reverseComplementAdapterSequence: it.reverseComplementAdapterSequence,
                     alias: LibraryPreparationKitSynonym.findAllByLibraryPreparationKit(it, [sort: "name", order: "asc"])*.name.join(' | '),
                     referenceGenomesWithBedFiles: BedFile.findAllByLibraryPreparationKit(it, [sort: "referenceGenome.name", order: "asc"])*.referenceGenome*.name.join(' | '),
             ]
@@ -82,7 +81,7 @@ class MetaDataFieldsController {
     }
 
     JSON createLibraryPreparationKit(CreateLibraryPreparationKitCommand cmd) {
-        checkErrorAndCallMethod(cmd, { libraryPreparationKitService.createLibraryPreparationKit(cmd.name, cmd.shortDisplayName, cmd.adapterFile, cmd.adapterSequence) })
+        checkErrorAndCallMethod(cmd, { libraryPreparationKitService.createLibraryPreparationKit(cmd.name, cmd.shortDisplayName, cmd.adapterFile, cmd.reverseComplementAdapterSequence) })
     }
 
     JSON addAdapterFileToLibraryPreparationKit(AddAdapterFileToLibraryPreparationKitCommand cmd) {
@@ -90,7 +89,7 @@ class MetaDataFieldsController {
     }
 
     JSON addAdapterSequenceToLibraryPreparationKit(AddAdapterSequenceToLibraryPreparationKitCommand cmd) {
-        checkErrorAndCallMethod(cmd, { libraryPreparationKitService.addAdapterSequenceToLibraryPreparationKit(cmd.libraryPreparationKit, cmd.adapterSequence) })
+        checkErrorAndCallMethod(cmd, { libraryPreparationKitService.addAdapterSequenceToLibraryPreparationKit(cmd.libraryPreparationKit, cmd.reverseComplementAdapterSequence) })
     }
 
     JSON createLibraryPreparationKitAlias(CreateLibraryPreparationKitAliasCommand cmd) {
@@ -172,7 +171,7 @@ class CreateLibraryPreparationKitCommand implements Serializable {
         String name
         String shortDisplayName
         String adapterFile
-        String adapterSequence
+        String reverseComplementAdapterSequence
         static constraints = {
             name(blank: false, validator: {val, obj ->
                 if (LibraryPreparationKit.findByName(val) || LibraryPreparationKitSynonym.findByName(val)) {
@@ -215,10 +214,10 @@ class AddAdapterFileToLibraryPreparationKitCommand implements Serializable {
 }
 
 class AddAdapterSequenceToLibraryPreparationKitCommand implements Serializable {
-    String adapterSequence
+    String reverseComplementAdapterSequence
     LibraryPreparationKit libraryPreparationKit
     static constraints = {
-        adapterSequence blank: false, nullable: false
+        reverseComplementAdapterSequence blank: false, nullable: false
         libraryPreparationKit nullable: false
     }
 }

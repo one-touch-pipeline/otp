@@ -183,7 +183,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
                 name: "~* xX liBrArYprEPaRaTioNkiT Xx *~",
                 shortDisplayName: "~* xX lPk Xx *~",
                 adapterFile: new File(getDataDirectory(), 'adapters/TruSeq3-PE.fa').absolutePath,
-                adapterSequence: "AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT",
+                reverseComplementAdapterSequence: "AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT",
         ).save(flush: true, failOnError: true)
 
         MergingWorkPackage workPackage = DomainFactory.createMergingWorkPackage(

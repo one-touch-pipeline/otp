@@ -21,7 +21,7 @@ class LibraryPreparationKitService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public LibraryPreparationKit createLibraryPreparationKit(String name, String shortDisplayName, String adapterFile, String adapterSequence) {
+    public LibraryPreparationKit createLibraryPreparationKit(String name, String shortDisplayName, String adapterFile, String reverseComplementAdapterSequence) {
         assert name : "name must not be null"
         assert shortDisplayName : "shortDisplayName must not be null"
         assert !hasLibraryPreparationKitByNameOrAlias(name) : "The LibraryPreparationKit '${name}' exists already"
@@ -30,7 +30,7 @@ class LibraryPreparationKitService {
                 name: name,
                 shortDisplayName: shortDisplayName,
                 adapterFile: adapterFile ?: null,
-                adapterSequence: adapterSequence ?: null,
+                reverseComplementAdapterSequence: reverseComplementAdapterSequence ?: null,
         )
         assert libraryPreparationKit.save(flush: true, failOnError: true)
         return libraryPreparationKit
@@ -51,10 +51,10 @@ class LibraryPreparationKitService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public LibraryPreparationKit addAdapterSequenceToLibraryPreparationKit(LibraryPreparationKit libraryPreparationKit, String adapterSequence) {
+    public LibraryPreparationKit addAdapterSequenceToLibraryPreparationKit(LibraryPreparationKit libraryPreparationKit, String reverseComplementAdapterSequence) {
         assert libraryPreparationKit : "libraryPreparationKit must not be null"
-        assert adapterSequence : "adapterSequence must not be null"
-        libraryPreparationKit.adapterSequence = adapterSequence
+        assert reverseComplementAdapterSequence : "reverseComplementAdapterSequence must not be null"
+        libraryPreparationKit.reverseComplementAdapterSequence = reverseComplementAdapterSequence
         assert libraryPreparationKit.save(flush: true, failOnError: true)
         return libraryPreparationKit
     }

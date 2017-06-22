@@ -23,7 +23,7 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
         controller.params.name = 'LibraryPreparationKit'
         controller.params.shortDisplayName = 'LPK'
         controller.params.adapterFile = '/asdf'
-        controller.params.adapterSequence = 'GATC'
+        controller.params.reverseComplementAdapterSequence = 'GATC'
         SpringSecurityUtils.doWithAuth("operator"){
             controller.createLibraryPreparationKit()
         }

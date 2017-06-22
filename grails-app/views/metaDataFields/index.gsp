@@ -21,7 +21,7 @@
                         <th><g:message code="dataFields.libraryPreparationKit.alias"/></th>
                         <th></th>
                         <th><g:message code="dataFields.libraryPreparationKit.adapterFile"/></th>
-                        <th><g:message code="dataFields.libraryPreparationKit.adapterSequence"/></th>
+                        <th><g:message code="dataFields.libraryPreparationKit.reverseComplementAdapterSequence"/></th>
                         <th><g:message code="dataFields.libraryPreparationKit.genomes"/></th>
                     </tr>
             </thead>
@@ -60,14 +60,14 @@
                             </g:else>
                         </td>
                         <td>
-                            <g:if test="${libraryPreparationKit.adapterSequence}">
-                                <asset:image src="ok.png" title="${libraryPreparationKit.adapterSequence}" />
+                            <g:if test="${libraryPreparationKit.reverseComplementAdapterSequence}">
+                                <asset:image src="ok.png" title="${libraryPreparationKit.reverseComplementAdapterSequence}" />
                             </g:if>
                             <g:else>
                                 <otp:editorSwitchNewValues
                                         roles="ROLE_OPERATOR"
-                                        labels="${["Adapter Sequence"]}"
-                                        textFields="${["adapterSequence"]}"
+                                        labels="${["Reverse Complement Adapter Sequence"]}"
+                                        textFields="${["reverseComplementAdapterSequence"]}"
                                         link="${g.createLink(controller: 'metaDataFields', action: 'addAdapterSequenceToLibraryPreparationKit', params: ["libraryPreparationKit.id": libraryPreparationKit.id])}"
                                 />
                             </g:else>
@@ -81,7 +81,7 @@
                     <otp:editorSwitchNewValues
                         roles="ROLE_OPERATOR"
                         labels="${["Name", "Short Display Name", "Adapter File", "Adapter Sequence"]}"
-                        textFields="${["name", "shortDisplayName", "adapterFile", "adapterSequence"]}"
+                        textFields="${["name", "shortDisplayName", "adapterFile", "reverseComplementAdapterSequence"]}"
                         link="${g.createLink(controller: 'metaDataFields', action: 'createLibraryPreparationKit')}"
                     />
                 </td>

@@ -74,8 +74,8 @@ class LibPrepKitAdapterValidator extends ValueTuplesValidator<MetadataValidation
                 if (!seqType.isRna() && !kit.adapterFile) {
                     context.addProblem(valueTuple.cells, Level.WARNING, "Adapter trimming is requested but adapter file for library preparation kit '${kit}' is missing.")
                 }
-                if (seqType.isRna() && !kit.adapterSequence) {
-                    context.addProblem(valueTuple.cells, Level.WARNING, "Adapter trimming is requested but adapter sequence for library preparation kit '${kit}' is missing.")
+                if (seqType.isRna() && !kit.reverseComplementAdapterSequence) {
+                    context.addProblem(valueTuple.cells, Level.WARNING, "Adapter trimming is requested but reverse complement adapter sequence for library preparation kit '${kit}' is missing.")
                 }
             }
         }

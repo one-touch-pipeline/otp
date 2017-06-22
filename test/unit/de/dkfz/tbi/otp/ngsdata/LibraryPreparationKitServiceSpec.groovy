@@ -30,7 +30,7 @@ class LibraryPreparationKitServiceSpec extends Specification {
         service.createLibraryPreparationKit(name, shortDisplayName, adapterFile, adapterSequence)
 
         then:
-        exactlyOneElement(LibraryPreparationKit.findAllByNameAndShortDisplayNameAndAdapterFileAndAdapterSequence(DIFFERENT_LIBRARY_PREPARATION_KIT_NAME, DIFFERENT_SHORT_DISPLAY_NAME, ADAPTER_FILE, ADAPTER_SEQUENCE))
+        exactlyOneElement(LibraryPreparationKit.findAllByNameAndShortDisplayNameAndAdapterFileAndReverseComplementAdapterSequence(DIFFERENT_LIBRARY_PREPARATION_KIT_NAME, DIFFERENT_SHORT_DISPLAY_NAME, ADAPTER_FILE, ADAPTER_SEQUENCE))
 
         where:
         name                         | shortDisplayName   | adapterFile  | adapterSequence
@@ -146,7 +146,7 @@ class LibraryPreparationKitServiceSpec extends Specification {
         service.addAdapterSequenceToLibraryPreparationKit(kit, ADAPTER_SEQUENCE)
 
         then:
-        kit.adapterSequence == ADAPTER_SEQUENCE
+        kit.reverseComplementAdapterSequence == ADAPTER_SEQUENCE
     }
 
     void "test addAdapterSequenceToLibraryPreparationKit fails"() {

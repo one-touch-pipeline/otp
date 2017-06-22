@@ -119,7 +119,7 @@ $(function() {
                     $("input:text[name=value]", container).val($("p.edit-switch-label span", outerContainer).text());
                 }
             });
-            window.setTimeout('location.reload()', 300); //reloads page after 0.3 seconds
+            window.setTimeout(function() { location.reload() }, 300); //reloads page after 0.3 seconds
         },
         cancel: function (outerContainer) {
             "use strict";

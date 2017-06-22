@@ -26,7 +26,7 @@ class ExecuteRnaAlignmentJobIntegrationSpec extends IntegrationSpec {
 
         then:
         AssertionError e = thrown()
-        e.message.contains("There is not exactly one adapter sequence available for BAM file")
+        e.message.contains("There is not exactly one reverse complement adapter sequence available for BAM file")
     }
 
     void "test prepareAndReturnWorkflowSpecificCValues exactly one adapter sequence available"() {
@@ -34,7 +34,7 @@ class ExecuteRnaAlignmentJobIntegrationSpec extends IntegrationSpec {
         RnaRoddyBamFile roddyBamFile = setUpForPrepareAndReturnWorkflowSpecificCValues()
         roddyBamFile.containedSeqTracks.each {
             LibraryPreparationKit libraryPreparationKit = it.libraryPreparationKit
-            libraryPreparationKit.adapterSequence = ADAPTER_SEQUENCE1
+            libraryPreparationKit.reverseComplementAdapterSequence = ADAPTER_SEQUENCE1
             assert libraryPreparationKit.save(flush: true)
         }
 
@@ -47,7 +47,7 @@ class ExecuteRnaAlignmentJobIntegrationSpec extends IntegrationSpec {
         cValues.contains("possibleControlSampleNamePrefixes:$roddyBamFile.sampleType.dirName")
         cValues.contains("possibleTumorSampleNamePrefixes:")
         cValues.contains("fastq_list:${executeRnaAlignmentJob.getFilesToMerge(roddyBamFile).join(';')}")
-        cValues.contains("ADAPTER_SEQ:${roddyBamFile.seqTracks.first().libraryPreparationKit.adapterSequence}")
+        cValues.contains("ADAPTER_SEQ:${roddyBamFile.seqTracks.first().libraryPreparationKit.reverseComplementAdapterSequence}")
         cValues.contains("outputBaseDirectory:${roddyBamFile.workDirectory}")
         cValues.contains("ALIGNMENT_DIR:${roddyBamFile.workDirectory}")
     }
