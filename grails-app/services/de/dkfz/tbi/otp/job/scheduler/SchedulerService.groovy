@@ -1,54 +1,24 @@
 package de.dkfz.tbi.otp.job.scheduler
 
-import de.dkfz.tbi.otp.job.JobMailService
-import de.dkfz.tbi.otp.job.processing.ProcessService
-import de.dkfz.tbi.otp.job.processing.ResumableJob
+import de.dkfz.tbi.otp.job.*
+import de.dkfz.tbi.otp.job.plan.*
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.notification.*
+import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.utils.logging.*
+import org.apache.commons.logging.*
+import org.apache.log4j.*
+import org.codehaus.groovy.grails.support.*
+import org.springframework.beans.factory.annotation.*
+import org.springframework.context.*
+import org.springframework.scheduling.annotation.*
+import org.springframework.security.access.prepost.*
+
+import java.util.concurrent.*
+import java.util.concurrent.locks.*
 
 import static org.springframework.util.Assert.*
 
-import de.dkfz.tbi.otp.job.plan.DecidingJobDefinition
-import de.dkfz.tbi.otp.job.plan.DecisionMapping
-import de.dkfz.tbi.otp.job.plan.JobDefinition
-import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
-import de.dkfz.tbi.otp.job.processing.DecisionJob
-import de.dkfz.tbi.otp.job.processing.DecisionProcessingStep
-import de.dkfz.tbi.otp.job.processing.EndStateAwareJob
-import de.dkfz.tbi.otp.job.processing.ExecutionState
-import de.dkfz.tbi.otp.job.processing.IncorrectProcessingException
-import de.dkfz.tbi.otp.job.processing.Job
-import de.dkfz.tbi.otp.job.processing.JobExcecutionException
-import de.dkfz.tbi.otp.job.processing.Parameter
-import de.dkfz.tbi.otp.job.processing.ParameterMapping
-import de.dkfz.tbi.otp.job.processing.ParameterType
-import de.dkfz.tbi.otp.job.processing.ParameterUsage
-import de.dkfz.tbi.otp.job.processing.Process
-import de.dkfz.tbi.otp.job.processing.ProcessParameter
-import de.dkfz.tbi.otp.job.processing.ProcessingError
-import de.dkfz.tbi.otp.job.processing.ProcessingException
-import de.dkfz.tbi.otp.job.processing.ProcessingStep
-import de.dkfz.tbi.otp.job.processing.ProcessingStepUpdate
-import de.dkfz.tbi.otp.job.processing.RestartedProcessingStep
-import de.dkfz.tbi.otp.job.processing.SometimesResumableJob
-import de.dkfz.tbi.otp.job.processing.StartJob
-import de.dkfz.tbi.otp.job.processing.ValidatingJob
-import de.dkfz.tbi.otp.notification.NotificationEvent
-import de.dkfz.tbi.otp.notification.NotificationType
-import de.dkfz.tbi.otp.utils.ExceptionUtils
-import de.dkfz.tbi.otp.utils.logging.JobAppender
-import de.dkfz.tbi.otp.utils.logging.JobLog
-import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
-
-import java.util.concurrent.Callable
-import java.util.concurrent.locks.Lock
-import java.util.concurrent.locks.ReentrantLock
-
-import org.apache.commons.logging.Log
-import org.apache.log4j.Logger
-import org.codehaus.groovy.grails.support.PersistenceContextInterceptor
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.ApplicationContext
-import org.springframework.scheduling.annotation.Scheduled
-import org.springframework.security.access.prepost.PreAuthorize
 
 class SchedulerService {
     static transactional = false
@@ -789,15 +759,14 @@ class SchedulerService {
         }
 
         JobExecutionPlan.withNewSession {
-            JobExecutionPlan plan = JobExecutionPlan.lock(last.process.jobExecutionPlan.id)
-            plan.refresh()
-
-            if (!plan.finishedSuccessful) {
-                plan.finishedSuccessful = 1
-            } else {
-                plan.finishedSuccessful++
-            }
-            plan.save(flush: true)
+            // uses HQL because of HibernateOptimisticLockingFailureException
+            JobExecutionPlan.executeUpdate("""
+                UPDATE JobExecutionPlan jep
+                SET jep.version = jep.version + 1,
+                    jep.finishedSuccessful = jep.finishedSuccessful + 1
+                WHERE jep.id = :id
+                """, [id: last.process.jobExecutionPlan.id]
+            )
         }
 
         // send notification
