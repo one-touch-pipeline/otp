@@ -52,8 +52,17 @@ class ProcessingTimeStatisticsServiceIntegrationSpec extends IntegrationSpec {
         LocalDate dateFrom = new LocalDate()
         LocalDate dateTo = new LocalDate().plusDays(1)
 
-        def (ticketA, seqTrackA) = createOtrsTicketWithSeqTrack([dateCreated: dateFrom.toDate()], [ilseSubmission: DomainFactory.createIlseSubmission(ilseNumber: 1234)])
-        createOtrsTicketWithSeqTrack([dateCreated: dateFrom.toDate()], [ilseSubmission: DomainFactory.createIlseSubmission(ilseNumber: 5678)])
+        // values that are searched for are set explicitly, otherwise they could contain the search term depending on the order tests are executed
+        def (ticketA, seqTrackA) = createOtrsTicketWithSeqTrack([dateCreated: dateFrom.toDate(), ticketNumber: "2016122411111111",], [ilseSubmission: DomainFactory.createIlseSubmission(ilseNumber: 1234)])
+        seqTrackA.sample.individual.project.name = "proj_1"
+        seqTrackA.sample.individual.project.save(flush: true)
+        seqTrackA.run.name = "run_1"
+        seqTrackA.run.save(flush: true)
+        def (ticketB, seqTrackB) = createOtrsTicketWithSeqTrack([dateCreated: dateFrom.toDate(), ticketNumber: "2016122422222222",], [ilseSubmission: DomainFactory.createIlseSubmission(ilseNumber: 5678)])
+        seqTrackB.sample.individual.project.name = "proj_2"
+        seqTrackB.sample.individual.project.save(flush: true)
+        seqTrackB.run.name = "run_2"
+        seqTrackB.run.save(flush: true)
 
         expect:
         [ticketA] == processingTimeStatisticsService.findAllOtrsTicketsByDateBetweenAndSearch(dateFrom, dateTo, '234')
