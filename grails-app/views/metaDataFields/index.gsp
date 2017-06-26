@@ -21,7 +21,7 @@
                         <th><g:message code="dataFields.libraryPreparationKit.alias"/></th>
                         <th></th>
                         <th><g:message code="dataFields.libraryPreparationKit.adapterFile"/></th>
-                        <th><g:message code="dataFields.libraryPreparationKit.reverseComplementAdapterSequence"/></th>
+                        <th><g:message code="dataFields.libraryPreparationKit.reverseComplementAdapterSequenceShort"/></th>
                         <th><g:message code="dataFields.libraryPreparationKit.genomes"/></th>
                     </tr>
             </thead>
@@ -41,7 +41,7 @@
                         <td align="right">
                             <otp:editorSwitchNewValues
                                 roles="ROLE_OPERATOR"
-                                labels="${["Alias"]}"
+                                labels="${[g.message(code: "dataFields.libraryPreparationKit.alias")]}"
                                 textFields="${["alias"]}"
                                 link="${g.createLink(controller: 'metaDataFields', action: 'createLibraryPreparationKitAlias', id: libraryPreparationKit.name)}"
                             />
@@ -53,7 +53,7 @@
                             <g:else>
                                 <otp:editorSwitchNewValues
                                         roles="ROLE_OPERATOR"
-                                        labels="${["Adapter File"]}"
+                                        labels="${[g.message(code: "dataFields.libraryPreparationKit.adapterFile")]}"
                                         textFields="${["adapterFile"]}"
                                         link="${g.createLink(controller: 'metaDataFields', action: 'addAdapterFileToLibraryPreparationKit', params: ["libraryPreparationKit.id": libraryPreparationKit.id])}"
                                 />
@@ -66,7 +66,7 @@
                             <g:else>
                                 <otp:editorSwitchNewValues
                                         roles="ROLE_OPERATOR"
-                                        labels="${["Reverse Complement Adapter Sequence"]}"
+                                        labels="${[g.message(code: "dataFields.libraryPreparationKit.reverseComplementAdapterSequence")]}"
                                         textFields="${["reverseComplementAdapterSequence"]}"
                                         link="${g.createLink(controller: 'metaDataFields', action: 'addAdapterSequenceToLibraryPreparationKit', params: ["libraryPreparationKit.id": libraryPreparationKit.id])}"
                                 />
@@ -80,7 +80,12 @@
                 <td colspan="3">
                     <otp:editorSwitchNewValues
                         roles="ROLE_OPERATOR"
-                        labels="${["Name", "Short Display Name", "Adapter File", "Adapter Sequence"]}"
+                        labels="${[
+                                g.message(code: "dataFields.libraryPreparationKit"),
+                                g.message(code: "dataFields.libraryPreparationKit.shortDisplayName"),
+                                g.message(code: "dataFields.libraryPreparationKit.adapterFile"),
+                                g.message(code: "dataFields.libraryPreparationKit.reverseComplementAdapterSequence"),
+                        ]}"
                         textFields="${["name", "shortDisplayName", "adapterFile", "reverseComplementAdapterSequence"]}"
                         link="${g.createLink(controller: 'metaDataFields', action: 'createLibraryPreparationKit')}"
                     />
