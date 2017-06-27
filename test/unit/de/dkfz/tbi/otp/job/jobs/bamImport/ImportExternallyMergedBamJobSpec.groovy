@@ -87,7 +87,7 @@ class ImportExternallyMergedBamJobSpec extends Specification {
 
         createHelperObjects(importProcess)
         CreateFileHelper.createFile(new File("${epmbfWithMd5sum.getFilePath().absoluteDataManagementPath}"))
-        importExternallyMergedBamJob.pbsService = Mock(PbsService) {
+        importExternallyMergedBamJob.clusterJobSchedulerService = Mock(ClusterJobSchedulerService) {
             1 * executeJob(_, _) >> { Realm realm, String command ->
                 assert command ==~ getScript("echo .*  .* > .*")
             }
@@ -104,7 +104,7 @@ class ImportExternallyMergedBamJobSpec extends Specification {
         ).save()
         createHelperObjects(importProcess)
         CreateFileHelper.createFile(new File("${epmbfWithoutMd5sum.getFilePath().absoluteDataManagementPath}"))
-        importExternallyMergedBamJob.pbsService = Mock(PbsService) {
+        importExternallyMergedBamJob.clusterJobSchedulerService = Mock(ClusterJobSchedulerService) {
             1 * executeJob(_, _) >> { Realm realm, String command ->
                 assert command ==~ getScript("md5sum .* > .*")
             }
@@ -123,7 +123,7 @@ class ImportExternallyMergedBamJobSpec extends Specification {
         createHelperObjects(importProcess)
         CreateFileHelper.createFile(new File("${epmbfWithoutMd5sum.importedFrom}"))
         CreateFileHelper.createFile(new File("${epmbfWithoutMd5sum.getFilePath().absoluteDataManagementPath}"))
-        importExternallyMergedBamJob.pbsService = Mock(PbsService) {
+        importExternallyMergedBamJob.clusterJobSchedulerService = Mock(ClusterJobSchedulerService) {
             1 * executeJob(_, _) >> { Realm realm, String command ->
                 assert command ==~ getScript("md5sum .* > .*")
             }

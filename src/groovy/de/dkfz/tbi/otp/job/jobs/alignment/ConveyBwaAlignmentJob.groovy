@@ -2,14 +2,15 @@ package de.dkfz.tbi.otp.job.jobs.alignment
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.job.jobs.utils.*
 import de.dkfz.tbi.otp.job.processing.*
-import org.springframework.beans.factory.annotation.Autowired
+import de.dkfz.tbi.otp.ngsdata.*
+import org.springframework.beans.factory.annotation.*
 
 class ConveyBwaAlignmentJob extends AbstractJobImpl {
 
     @Autowired
-    PbsService pbsService
+    ClusterJobSchedulerService clusterJobSchedulerService
 
     @Autowired
     SeqTrackService seqTrackService
@@ -33,7 +34,7 @@ class ConveyBwaAlignmentJob extends AbstractJobImpl {
     public void execute() throws Exception {
         long alignmentPassId = Long.parseLong(getProcessParameterValue())
         Realm realm = null
-        List<String> pbsIds = []
+        List<String> jobIds = []
         AlignmentPass.withTransaction {
             AlignmentPass alignmentPass = AlignmentPass.get(alignmentPassId)
             SeqTrack seqTrack = alignmentPass.seqTrack
@@ -42,11 +43,11 @@ class ConveyBwaAlignmentJob extends AbstractJobImpl {
                 assert file.fileExists && file.fileSize > 0L
                 realm = configService.getRealmDataProcessing(file.project)
                 ProcessedSaiFile saiFile = processedSaiFileService.createSaiFile(alignmentPass, file)
-                pbsIds << sendAlignmentScript(realm, saiFile)
+                jobIds << sendAlignmentScript(realm, saiFile)
             }
         }
-        addOutputParameter("__pbsIds", pbsIds.join(","))
-        addOutputParameter("__pbsRealm", realm.id.toString())
+        addOutputParameter(JobParameterKeys.JOB_ID_LIST, jobIds.join(","))
+        addOutputParameter(JobParameterKeys.REALM, realm.id.toString())
     }
 
     private String sendAlignmentScript(Realm realm, ProcessedSaiFile saiFile) {
@@ -64,7 +65,7 @@ class ConveyBwaAlignmentJob extends AbstractJobImpl {
         String bwaErrorCheckingCmd = BwaErrorHelper.failureCheckScript(saiFilePath, bwaLogFilePath)
         String chmodCmd = "chmod 440 ${saiFilePath} ${bwaLogFilePath}"
         String cmd = "${bwaCmd}; ${bwaErrorCheckingCmd}; ${chmodCmd}"
-        return pbsService.executeJob(realm, cmd)
+        return clusterJobSchedulerService.executeJob(realm, cmd)
     }
 
     private String qualityEncoding(AlignmentPass alignmentPass) {

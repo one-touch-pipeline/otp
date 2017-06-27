@@ -1,6 +1,7 @@
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.job.jobs.merging.*
+import de.dkfz.tbi.otp.job.jobs.utils.*
 import de.dkfz.tbi.otp.ngsdata.*
 
 import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
@@ -11,12 +12,12 @@ plan(workflowName) {
     start("start", "mergingStartJob")
     job("createOutputDirectory", "mergingCreateOutputDirectoryJob")
     job("merging", "mergingJob") {
-        outputParameter("__pbsIds")
-        outputParameter("__pbsRealm")
+        outputParameter(JobParameterKeys.JOB_ID_LIST)
+        outputParameter(JobParameterKeys.REALM)
     }
     job("mergingWatchdog", "myPBSWatchdogJob") {
-        inputParameter("__pbsIds", "merging", "__pbsIds")
-        inputParameter("__pbsRealm", "merging", "__pbsRealm")
+        inputParameter(JobParameterKeys.JOB_ID_LIST, "merging", JobParameterKeys.JOB_ID_LIST)
+        inputParameter(JobParameterKeys.REALM, "merging", JobParameterKeys.REALM)
     }
     job("mergingValidation", "mergingValidationJob")
     job("metricsParsing", "metricsParsingJob")
@@ -25,7 +26,7 @@ plan(workflowName) {
 
 ProcessingOptionService processingOptionService = ctx.processingOptionService
 
-//special pbs options for merging workflow
+// options for merging workflow
 println processingOptionService.createOrUpdate(
         OptionName.CLUSTER_SUBMISSIONS_OPTION,
         "${MergingJob.simpleName}",

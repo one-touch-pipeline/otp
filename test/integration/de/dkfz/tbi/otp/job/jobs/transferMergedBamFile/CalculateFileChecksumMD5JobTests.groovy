@@ -3,7 +3,8 @@ package de.dkfz.tbi.otp.job.jobs.transferMergedBamFile
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
-import de.dkfz.tbi.otp.job.processing.PbsService
+import de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys
+import de.dkfz.tbi.otp.job.processing.ClusterJobSchedulerService
 import de.dkfz.tbi.otp.ngsdata.ChecksumFileService
 import de.dkfz.tbi.otp.ngsdata.ConfigService
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
@@ -55,10 +56,10 @@ class CalculateFileChecksumMD5JobTests {
         calculateFileChecksumMD5Job.metaClass.getProcessParameterValue = { -> "${processedMergedBamFile.id}" }
 
         calculateFileChecksumMD5Job.metaClass.addOutputParameter = { String parameterName, String ids ->
-            assert (parameterName == calculateFileChecksumMD5Job.JOB || parameterName == calculateFileChecksumMD5Job.REALM)
+            assert (parameterName == JobParameterKeys.JOB_ID_LIST || parameterName == JobParameterKeys.REALM)
         }
 
-        calculateFileChecksumMD5Job.pbsService.metaClass.executeJob = { Realm realm, String command ->
+        calculateFileChecksumMD5Job.clusterJobSchedulerService.metaClass.executeJob = { Realm realm, String command ->
             ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
         }
 
@@ -67,7 +68,7 @@ class CalculateFileChecksumMD5JobTests {
 
     @After
     void tearDown() {
-        TestCase.removeMetaClass(PbsService, calculateFileChecksumMD5Job.pbsService)
+        TestCase.removeMetaClass(ClusterJobSchedulerService, calculateFileChecksumMD5Job.clusterJobSchedulerService)
         TestCase.removeMetaClass(CalculateFileChecksumMD5Job, calculateFileChecksumMD5Job)
     }
 

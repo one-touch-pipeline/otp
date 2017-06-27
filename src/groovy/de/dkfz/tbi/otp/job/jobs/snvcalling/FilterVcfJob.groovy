@@ -4,7 +4,7 @@ import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFileService
 import de.dkfz.tbi.otp.job.jobs.AutoRestartableJob
 import org.springframework.beans.factory.annotation.Autowired
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
-import de.dkfz.tbi.otp.job.processing.PbsService
+import de.dkfz.tbi.otp.job.processing.ClusterJobSchedulerService
 import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
 import de.dkfz.tbi.otp.ngsdata.*
 
@@ -13,7 +13,7 @@ class FilterVcfJob extends AbstractSnvCallingJob implements AutoRestartableJob {
     @Autowired
     ConfigService configService
     @Autowired
-    PbsService pbsService
+    ClusterJobSchedulerService clusterJobSchedulerService
     @Autowired
     AbstractMergedBamFileService abstractMergedBamFileService
 
@@ -74,7 +74,7 @@ class FilterVcfJob extends AbstractSnvCallingJob implements AutoRestartableJob {
                 script << "rm -f ${inputFileCopy.absolutePath}"
             }
 
-            pbsService.executeJob(realm, script.toString(), environmentVariables)
+            clusterJobSchedulerService.executeJob(realm, script.toString(), environmentVariables)
 
             return NextAction.WAIT_FOR_CLUSTER_JOBS
         } else {

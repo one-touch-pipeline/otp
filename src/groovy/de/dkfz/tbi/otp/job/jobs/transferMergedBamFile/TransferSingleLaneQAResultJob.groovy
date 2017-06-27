@@ -28,7 +28,7 @@ class TransferSingleLaneQAResultJob extends AbstractEndStateAwareJobImpl{
         Project project = processedMergedBamFileService.project(mergedBamFile)
 
         Realm realm = configService.getRealmDataProcessing(project)
-        addOutputParameter(JobParameterKeys.PBS_ID_LIST, WatchdogJob.SKIP_WATCHDOG)
+        addOutputParameter(JobParameterKeys.JOB_ID_LIST, WatchdogJob.SKIP_WATCHDOG)
         addOutputParameter(JobParameterKeys.REALM, realm.id.toString())
         succeed()
     }

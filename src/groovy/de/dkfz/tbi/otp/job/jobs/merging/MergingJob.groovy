@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.job.jobs.merging
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
+import de.dkfz.tbi.otp.job.jobs.utils.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import org.springframework.beans.factory.annotation.*
@@ -11,7 +12,7 @@ import static org.springframework.util.Assert.*
 class MergingJob extends AbstractJobImpl {
 
     @Autowired
-    PbsService pbsService
+    ClusterJobSchedulerService clusterJobSchedulerService
 
     @Autowired
     MergingPassService mergingPassService
@@ -36,16 +37,16 @@ class MergingJob extends AbstractJobImpl {
             ProcessedMergedBamFile processedMergedBamFile = processedMergedBamFileService.createMergedBamFile(mergingPass)
             Realm realm = mergingPassService.realmForDataProcessing(mergingPass)
             String cmd = createCommand(processedMergedBamFile, realm)
-            String pbsId = pbsService.executeJob(realm, cmd)
+            String jobId = clusterJobSchedulerService.executeJob(realm, cmd)
 
-            addOutputParameter("__pbsIds", pbsId)
-            addOutputParameter("__pbsRealm", realm.id.toString())
+            addOutputParameter(JobParameterKeys.JOB_ID_LIST, jobId)
+            addOutputParameter(JobParameterKeys.REALM, realm.id.toString())
         }
     }
 
     private String createCommand(ProcessedMergedBamFile processedMergedBamFile, Realm realm) {
         Project project = mergingPassService.project(processedMergedBamFile.mergingPass)
-        String tempDir = "\${PBS_SCRATCH_DIR}/${PbsService.getJobIdEnvironmentVariable(realm)}"
+        String tempDir = "\${PBS_SCRATCH_DIR}/${ClusterJobSchedulerService.getJobIdEnvironmentVariable(realm)}"
         String createTempDir = "mkdir -p -m 2750 ${tempDir}"
         String javaOptions = optionService.findOptionSafe(OptionName.PIPELINE_OTP_ALIGNMENT_PICARD_JAVA_SETTINGS, null, project)
         String picard = ProcessingOptionService.findOptionAssure(OptionName.COMMAND_PICARD_MDUP, null, project)

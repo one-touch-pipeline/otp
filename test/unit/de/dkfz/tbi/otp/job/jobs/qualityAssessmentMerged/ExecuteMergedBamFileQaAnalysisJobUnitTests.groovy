@@ -68,9 +68,9 @@ class ExecuteMergedBamFileQaAnalysisJobUnitTests {
             libraryPreparationKit: {libraryPreparationKit}
             ] as ProcessedMergedBamFileService
 
-        def pbsService = [
+        def clusterJobSchedulerService = [
             executeJob: { realmIn, cmd -> 'pbsID' }
-            ] as PbsService
+            ] as ClusterJobSchedulerService
 
         ProcessingOptionService.metaClass.static.findOptionAssure = { OptionName a, String b, Project c ->
             'qualityAssessment.sh ${processedBamFilePath} ${processedBaiFilePath} ${qualityAssessmentFilePath} ${coverageDataFilePath} ${insertSizeDataFilePath} false ${allChromosomeName} 36 25 0 1 1000 10 false ${bedFilePath} ${refGenMetaInfoFilePath}'
@@ -93,7 +93,7 @@ class ExecuteMergedBamFileQaAnalysisJobUnitTests {
                 processedMergedBamFileService: processedMergedBamFileService,
                 referenceGenomeService: referenceGenomeService,
                 bedFileService: bedFileService,
-                pbsService: pbsService,
+                clusterJobSchedulerService: clusterJobSchedulerService,
                 log: log
                 )
 
@@ -118,11 +118,11 @@ class ExecuteMergedBamFileQaAnalysisJobUnitTests {
             )
         assertNotNull(bedfile.save([flush: true, validate: false]))
 
-        job.pbsService = [executeJob: { realm, cmd ->
+        job.clusterJobSchedulerService = [executeJob: { realm, cmd ->
                 String expCommand = "qualityAssessment.sh processedBamFileFilePath baiFilePath qualityAssessmentDataFilePath coverageDataFilePath insertSizeDataFilePath false ${Chromosomes.overallChromosomesLabel()} 36 25 0 1 1000 10 false bedFilePath /referenceGenomeMetaInformationPath; chmod 440 qualityAssessmentDataFilePath coverageDataFilePath insertSizeDataFilePath"
                 assertEquals(expCommand, cmd)
                 return 'pbsID'
-            }] as PbsService
+            }] as ClusterJobSchedulerService
 
         job.execute()
     }
@@ -133,9 +133,9 @@ class ExecuteMergedBamFileQaAnalysisJobUnitTests {
         seqType.name = SeqTypeNames.EXOME.seqTypeName
         seqType.libraryLayout = 'PAIRED'
 
-        job.pbsService = [executeJob: { realm, cmd ->
+        job.clusterJobSchedulerService = [executeJob: { realm, cmd ->
             assert false //this method should not be executed
-        }] as PbsService
+        }] as ClusterJobSchedulerService
 
         assert "Could not find a bed file for ${referenceGenome} and LibraryPreparationKit" == shouldFail(ProcessingException) {
             job.execute()
@@ -148,11 +148,11 @@ class ExecuteMergedBamFileQaAnalysisJobUnitTests {
         seqType.name = SeqTypeNames.WHOLE_GENOME.seqTypeName
         seqType.libraryLayout = 'PAIRED'
 
-        job.pbsService = [executeJob: { realm, cmd ->
+        job.clusterJobSchedulerService = [executeJob: { realm, cmd ->
                 String expCommand = "qualityAssessment.sh processedBamFileFilePath baiFilePath qualityAssessmentDataFilePath coverageDataFilePath insertSizeDataFilePath false ${Chromosomes.overallChromosomesLabel()} 36 25 0 1 1000 10 false; chmod 440 qualityAssessmentDataFilePath coverageDataFilePath insertSizeDataFilePath"
                 assertEquals(expCommand, cmd)
                 return 'pbsID'
-            }] as PbsService
+            }] as ClusterJobSchedulerService
 
         job.execute()
     }

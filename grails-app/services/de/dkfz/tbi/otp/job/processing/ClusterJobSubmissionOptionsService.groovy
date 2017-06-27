@@ -8,7 +8,7 @@ import org.codehaus.groovy.grails.web.converters.exceptions.*
 import org.codehaus.groovy.grails.web.json.*
 
 
-class PbsOptionMergingService {
+class ClusterJobSubmissionOptionsService {
 
     ProcessingOptionService processingOptionService
 

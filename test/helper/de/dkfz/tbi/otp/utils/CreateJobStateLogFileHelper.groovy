@@ -42,7 +42,7 @@ class CreateJobStateLogFileHelper {
 
     public static LogFileEntry createJobStateLogFileEntry(Map properties = [:]) {
         return new LogFileEntry([
-                pbsId: "testPbsId",
+                clusterJobId: "testPbsId",
                 host: "testHost",
                 statusCode: "0",
                 timeStamp: 0L,

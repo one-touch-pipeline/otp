@@ -169,7 +169,7 @@ class ProcessingOption implements Entity {
         PLUGIN({it ==~ /^\d+\.\d+\.\d+(\-\d+)?$/}),
         BOOLEAN({it ==~ /true|false/}),
         FLOAT({it ==~ /^[\+\-]?\d+\.?\d*$/}),
-        CLUSTER_JOB_SUBMISSION_OPTION({ PbsOptionMergingService.validateJsonString(it) }),
+        CLUSTER_JOB_SUBMISSION_OPTION({ ClusterJobSubmissionOptionsService.validateJsonString(it) }),
 
         private Closure validator
 

@@ -12,7 +12,7 @@ import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
 import de.dkfz.tbi.otp.job.processing.AbstractMultiJob
 import de.dkfz.tbi.otp.job.processing.MonitoringJob
 import de.dkfz.tbi.otp.job.processing.ResumableJob
-import de.dkfz.tbi.otp.job.scheduler.PbsMonitorService
+import de.dkfz.tbi.otp.job.scheduler.ClusterJobMonitoringService
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.Realm
 
@@ -23,7 +23,7 @@ import de.dkfz.tbi.otp.ngsdata.Realm
 @Deprecated @ResumableJob
 class MyPBSWatchdogJob extends AbstractEndStateAwareJobImpl implements MonitoringJob {
     @Autowired
-    PbsMonitorService pbsMonitorService
+    ClusterJobMonitoringService clusterJobMonitoringService
 
     @Autowired
     SchedulerService schedulerService
@@ -35,7 +35,7 @@ class MyPBSWatchdogJob extends AbstractEndStateAwareJobImpl implements Monitorin
 
     public void execute() throws Exception {
         List<Realm> realms = []
-        String jobIds = getParameterValueOrClass(JobParameterKeys.PBS_ID_LIST)
+        String jobIds = getParameterValueOrClass(JobParameterKeys.JOB_ID_LIST)
         String realmIds = getParameterValueOrClass(JobParameterKeys.REALM)
 
         queuedJobIds = parseInputString(jobIds)
@@ -48,12 +48,12 @@ class MyPBSWatchdogJob extends AbstractEndStateAwareJobImpl implements Monitorin
             realms = parseInputString(realmIds).collect( { CollectionUtils.exactlyOneElement(Realm.findAllById(Long.parseLong(it))) } )
             if (realms.size() == 1) {
                 Realm realm = CollectionUtils.exactlyOneElement(realms)
-                pbsMonitorService.monitor(queuedJobIds.collect { new ClusterJobIdentifier(realm, it, realm.unixUser) }, this)
+                clusterJobMonitoringService.monitor(queuedJobIds.collect { new ClusterJobIdentifier(realm, it, realm.unixUser) }, this)
             } else {
-                Collection<ClusterJobIdentifier> pbsJobInfos = [realms, queuedJobIds].transpose().collect {
+                Collection<ClusterJobIdentifier> jobIdentifiers = [realms, queuedJobIds].transpose().collect {
                     new ClusterJobIdentifier(it[0], it[1], it[0].unixUser)
                 }
-                pbsMonitorService.monitor(pbsJobInfos, this)
+                clusterJobMonitoringService.monitor(jobIdentifiers, this)
             }
         }
     }
@@ -75,7 +75,6 @@ class MyPBSWatchdogJob extends AbstractEndStateAwareJobImpl implements Monitorin
     }
 
     private List<String> parseInputString(String jobIds) {
-        List<String> pbsIds = jobIds.tokenize(",")
-        return pbsIds
+        return jobIds.tokenize(",")
     }
 }

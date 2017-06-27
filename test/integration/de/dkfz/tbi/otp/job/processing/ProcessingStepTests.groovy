@@ -42,7 +42,7 @@ class ProcessingStepTests  {
 
 
     @Test
-    void testPbsJobDescription() {
+    void testClusterJobName() {
         JobExecutionPlan jobExecutionPlan = DomainFactory.createJobExecutionPlan(
                 name: "testWorkFlow"
         )
@@ -59,7 +59,7 @@ class ProcessingStepTests  {
     }
 
     @Test
-    void testPbsJobDescriptionWithIndividual() {
+    void testClusterJobNameWithIndividual() {
         JobExecutionPlan jobExecutionPlan = DomainFactory.createJobExecutionPlan(
                 name: "testWorkFlow"
         )

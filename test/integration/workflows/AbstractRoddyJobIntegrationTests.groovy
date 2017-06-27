@@ -16,7 +16,7 @@ class AbstractRoddyJobIntegrationTests extends AbstractRoddyAlignmentWorkflowTes
 
 
     @Test
-    void executeRoddy_roddyCallSucceeds_noPbsJobsSent_RoddyJobFailedAndSuccessfullyRestarted() {
+    void executeRoddy_roddyCallSucceeds_noClusterJobsSent_RoddyJobFailedAndSuccessfullyRestarted() {
 
         // prepare
         createFirstRoddyBamFile()
@@ -25,7 +25,7 @@ class AbstractRoddyJobIntegrationTests extends AbstractRoddyAlignmentWorkflowTes
         RoddyWorkflowConfig config = CollectionUtils.exactlyOneElement(RoddyWorkflowConfig.findAll())
         String pluginVersion = config.pluginVersion
 
-        // setting not existing plugin must make roddy exit without sending any PBS jobs
+        // setting not existing plugin must make roddy exit without sending any cluster jobs
         config.pluginVersion = HelperUtils.getUniqueString()
         config.save(flush: true)
 
@@ -46,7 +46,7 @@ class AbstractRoddyJobIntegrationTests extends AbstractRoddyAlignmentWorkflowTes
     }
 
     @Test
-    void executeRoddy_roddyCallSucceeds_onePbsJobFails_RoddyJobFailedAndSuccessfullyRestarted() {
+    void executeRoddy_roddyCallSucceeds_oneClusterJobFails_RoddyJobFailedAndSuccessfullyRestarted() {
         String DUMMY_STAT_SIZE_FILE_NAME = "dummy.tab"
 
         // prepare
@@ -55,7 +55,7 @@ class AbstractRoddyJobIntegrationTests extends AbstractRoddyAlignmentWorkflowTes
         createSeqTrack("readGroup2")
 
         // create invalid stat file and register it in the database
-        // this will make one of pbs jobs fail
+        // this will make one of the cluster jobs fail
         MergingWorkPackage workPackage = firstBamFile.workPackage
         File statDir = referenceGenomeService.pathToChromosomeSizeFilesPerReference(workPackage.referenceGenome)
         executionService.executeCommand(realm, "chmod g+w ${statDir}")
@@ -82,7 +82,7 @@ class AbstractRoddyJobIntegrationTests extends AbstractRoddyAlignmentWorkflowTes
 
         // check
 
-        checkAllAfterRoddyPbsJobsRestartAndSuccessfulExecution_alignBaseBamAndNewLanes()
+        checkAllAfterRoddyClusterJobsRestartAndSuccessfulExecution_alignBaseBamAndNewLanes()
     }
 
     @Override

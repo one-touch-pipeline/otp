@@ -1,4 +1,5 @@
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
+import de.dkfz.tbi.otp.job.jobs.utils.*
 
 import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
 
@@ -9,83 +10,83 @@ plan(workflowName) {
     start("start", "transferMergedBamFileStartJob")
 
     job("calculateFileChecksumMD5", "calculateFileChecksumMD5Job") {
-        outputParameter("__pbsIds")
-        outputParameter("__pbsRealm")
+        outputParameter(JobParameterKeys.JOB_ID_LIST)
+        outputParameter(JobParameterKeys.REALM)
     }
 
     job("calculateFileChecksumMD5Watchdog", "watchdogJob") {
-        inputParameter("__pbsIds", "calculateFileChecksumMD5", "__pbsIds")
-        inputParameter("__pbsRealm", "calculateFileChecksumMD5", "__pbsRealm")
+        inputParameter(JobParameterKeys.JOB_ID_LIST, "calculateFileChecksumMD5", JobParameterKeys.JOB_ID_LIST)
+        inputParameter(JobParameterKeys.REALM, "calculateFileChecksumMD5", JobParameterKeys.REALM)
     }
 
     job("transferMergedBamFile", "transferMergedBamFileJob") {
-        outputParameter("__pbsIds")
-        outputParameter("__pbsRealm")
+        outputParameter(JobParameterKeys.JOB_ID_LIST)
+        outputParameter(JobParameterKeys.REALM)
     }
 
     job("transferMergedBamFileWatchdog", "watchdogJob") {
-        inputParameter("__pbsIds", "transferMergedBamFile", "__pbsIds")
-        inputParameter("__pbsRealm", "transferMergedBamFile", "__pbsRealm")
+        inputParameter(JobParameterKeys.JOB_ID_LIST, "transferMergedBamFile", JobParameterKeys.JOB_ID_LIST)
+        inputParameter(JobParameterKeys.REALM, "transferMergedBamFile", JobParameterKeys.REALM)
     }
 
     job("checkMergedBamFileChecksumMD5", "checkMergedBamFileChecksumMD5Job") {
-        outputParameter("__pbsIds")
-        outputParameter("__pbsRealm")
+        outputParameter(JobParameterKeys.JOB_ID_LIST)
+        outputParameter(JobParameterKeys.REALM)
     }
 
     job("checkMergedBamFileChecksumMD5Watchdog", "watchdogJob") {
-        inputParameter("__pbsIds", "checkMergedBamFileChecksumMD5", "__pbsIds")
-        inputParameter("__pbsRealm", "checkMergedBamFileChecksumMD5", "__pbsRealm")
+        inputParameter(JobParameterKeys.JOB_ID_LIST, "checkMergedBamFileChecksumMD5", JobParameterKeys.JOB_ID_LIST)
+        inputParameter(JobParameterKeys.REALM, "checkMergedBamFileChecksumMD5", JobParameterKeys.REALM)
     }
 
     job("transferMergedQAResult", "transferMergedQAResultJob") {
-        outputParameter("__pbsIds")
-        outputParameter("__pbsRealm")
+        outputParameter(JobParameterKeys.JOB_ID_LIST)
+        outputParameter(JobParameterKeys.REALM)
     }
 
     job("transferMergedQAResultWatchdog", "watchdogJob") {
-        inputParameter("__pbsIds", "transferMergedQAResult", "__pbsIds")
-        inputParameter("__pbsRealm", "transferMergedQAResult", "__pbsRealm")
+        inputParameter(JobParameterKeys.JOB_ID_LIST, "transferMergedQAResult", JobParameterKeys.JOB_ID_LIST)
+        inputParameter(JobParameterKeys.REALM, "transferMergedQAResult", JobParameterKeys.REALM)
     }
 
     job("transferSingleLaneQAResult", "transferSingleLaneQAResultJob") {
-        outputParameter("__pbsIds")
-        outputParameter("__pbsRealm")
+        outputParameter(JobParameterKeys.JOB_ID_LIST)
+        outputParameter(JobParameterKeys.REALM)
     }
 
     job("transferSingleLangeQAResultWatchdog", "watchdogJob") {
-        inputParameter("__pbsIds", "transferSingleLaneQAResult", "__pbsIds")
-        inputParameter("__pbsRealm", "transferSingleLaneQAResult", "__pbsRealm")
+        inputParameter(JobParameterKeys.JOB_ID_LIST, "transferSingleLaneQAResult", JobParameterKeys.JOB_ID_LIST)
+        inputParameter(JobParameterKeys.REALM, "transferSingleLaneQAResult", JobParameterKeys.REALM)
     }
 
     job("checkQaResultsChecksumMD5", "checkQaResultsChecksumMD5Job") {
-        outputParameter("__pbsIds")
-        outputParameter("__pbsRealm")
+        outputParameter(JobParameterKeys.JOB_ID_LIST)
+        outputParameter(JobParameterKeys.REALM)
     }
 
     job("checkQaResultsChecksumMD5Watchdog", "watchdogJob") {
-        inputParameter("__pbsIds", "checkQaResultsChecksumMD5", "__pbsIds")
-        inputParameter("__pbsRealm", "checkQaResultsChecksumMD5", "__pbsRealm")
+        inputParameter(JobParameterKeys.JOB_ID_LIST, "checkQaResultsChecksumMD5", JobParameterKeys.JOB_ID_LIST)
+        inputParameter(JobParameterKeys.REALM, "checkQaResultsChecksumMD5", JobParameterKeys.REALM)
     }
 
     job("createQAResultStatisticsFile", "createQAResultStatisticsFileJob") {
-        outputParameter("__pbsIds")
-        outputParameter("__pbsRealm")
+        outputParameter(JobParameterKeys.JOB_ID_LIST)
+        outputParameter(JobParameterKeys.REALM)
     }
 
     job("createQAResultStatisticsFileWatchdog", "watchdogJob") {
-        inputParameter("__pbsIds", "createQAResultStatisticsFile", "__pbsIds")
-        inputParameter("__pbsRealm", "createQAResultStatisticsFile", "__pbsRealm")
+        inputParameter(JobParameterKeys.JOB_ID_LIST, "createQAResultStatisticsFile", JobParameterKeys.JOB_ID_LIST)
+        inputParameter(JobParameterKeys.REALM, "createQAResultStatisticsFile", JobParameterKeys.REALM)
     }
 
     job("moveFilesToFinalDestination", "moveFilesToFinalDestinationJob") {
-        outputParameter("__pbsIds")
-        outputParameter("__pbsRealm")
+        outputParameter(JobParameterKeys.JOB_ID_LIST)
+        outputParameter(JobParameterKeys.REALM)
     }
 
     job("moveFilesToFinalDestinationWatchdog", "watchdogJob") {
-        inputParameter("__pbsIds", "moveFilesToFinalDestination", "__pbsIds")
-        inputParameter("__pbsRealm", "moveFilesToFinalDestination", "__pbsRealm")
+        inputParameter(JobParameterKeys.JOB_ID_LIST, "moveFilesToFinalDestination", JobParameterKeys.JOB_ID_LIST)
+        inputParameter(JobParameterKeys.REALM, "moveFilesToFinalDestination", JobParameterKeys.REALM)
     }
 
     job("storeChecksumOfMergedBamFile", "storeChecksumOfMergedBamFileJob")

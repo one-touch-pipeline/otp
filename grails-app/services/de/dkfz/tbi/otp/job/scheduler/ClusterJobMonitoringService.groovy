@@ -15,7 +15,7 @@ import java.util.concurrent.locks.*
  * notifies the MonitoringJobs which registered one job whenever the job
  * finished.
  */
-class PbsMonitorService {
+class ClusterJobMonitoringService {
     enum Status {
         COMPLETED, NOT_COMPLETED
     }
@@ -24,7 +24,7 @@ class PbsMonitorService {
     static transactional = false
 
     ClusterJobService clusterJobService
-    PbsService pbsService
+    ClusterJobSchedulerService clusterJobSchedulerService
     Scheduler scheduler
 
     /**
@@ -105,7 +105,7 @@ class PbsMonitorService {
 
         copyQueuedJobs.values().flatten().unique { a, b -> a.realmId == b.realmId && a.userName == b.userName ? 0 : 1 }.each { ClusterJobIdentifier job ->
             try {
-                jobStates.putAll(pbsService.retrieveKnownJobsWithState(job.realm, job.userName))
+                jobStates.putAll(clusterJobSchedulerService.retrieveKnownJobsWithState(job.realm, job.userName))
             } catch (Throwable e) {
                 log.error("Retrieving job states for ${job.realm} user ${job.userName} failed:", e)
                 failedClusterQueries.add(new RealmAndUser(job.realm, job.userName))
@@ -129,7 +129,7 @@ class PbsMonitorService {
                 if (completed) {
                     log.info("${jobIdentifier.clusterJobId} finished on Realm ${jobIdentifier.realm}")
                     try {
-                        pbsService.retrieveAndSaveJobStatistics(jobIdentifier)
+                        clusterJobSchedulerService.retrieveAndSaveJobStatistics(jobIdentifier)
                     } catch (Throwable e) {
                         log.warn("Failed to fill in runtime statistics for ${jobIdentifier}", e)
                     }

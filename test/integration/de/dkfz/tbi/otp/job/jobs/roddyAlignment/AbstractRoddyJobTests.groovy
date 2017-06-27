@@ -243,13 +243,13 @@ newLine"""
         ClusterJob clusterJob = clusterJobService.createClusterJob(realm, "0000", realm.roddyUser, processingStep)
         assert clusterJob
 
-        final ClusterJobIdentifier pbsJobInfo = new ClusterJobIdentifier(realm, clusterJob.clusterJobId, realm.roddyUser)
+        final ClusterJobIdentifier jobIdentifier = new ClusterJobIdentifier(realm, clusterJob.clusterJobId, realm.roddyUser)
 
         roddyJob.metaClass.maybeSubmit = {
             throw new RuntimeException("should not come here")
         }
 
-        assert AbstractMultiJob.NextAction.SUCCEED == roddyJob.execute([pbsJobInfo])
+        assert AbstractMultiJob.NextAction.SUCCEED == roddyJob.execute([jobIdentifier])
         assert executeCommandCounter == 0
         assert validateCounter == 1
     }

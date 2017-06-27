@@ -20,7 +20,7 @@ public class JobStateLogFile {
     private static final String JOB_STATE_LOGFILE_REGEX = /^(.+?)\.(.+?):(.+?):(.+?):(.*)$/
 
     /**
-     * represents content of the file; entries of the files are grouped by PBS job id
+     * represents content of the file; entries of the files are grouped by cluster job id
      */
     private final Map<String, List<LogFileEntry>> logFileEntries
 
@@ -61,22 +61,22 @@ public class JobStateLogFile {
             def matcher = line =~ JOB_STATE_LOGFILE_REGEX
             if (matcher) {
                 LogFileEntry logFileEntry = new LogFileEntry(
-                        pbsId: matcher[0][1],
+                        clusterJobId: matcher[0][1],
                         host: matcher[0][2],
                         statusCode: matcher[0][3],
                         timeStamp: Long.parseLong(matcher[0][4]),
                         jobClass: matcher[0][5]
                 )
 
-                List<LogFileEntry> logFileEntries = entries[logFileEntry.pbsId]
+                List<LogFileEntry> logFileEntries = entries[logFileEntry.clusterJobId]
                 if (logFileEntries) {
                     if (logFileEntry.timeStamp < logFileEntries.last().timeStamp) {
-                        throw new RuntimeException("Later JobStateLogFile entry with pbsID: ${logFileEntry.pbsId} " +
+                        throw new RuntimeException("Later JobStateLogFile entry with cluster job ID: ${logFileEntry.clusterJobId} " +
                                 "has timestamp which is less than one for previous entries.")
                     }
                 } else {
                     logFileEntries = []
-                    entries.put(logFileEntry.pbsId, logFileEntries)
+                    entries.put(logFileEntry.clusterJobId, logFileEntries)
                 }
                 logFileEntries << logFileEntry
             } else {
@@ -86,16 +86,16 @@ public class JobStateLogFile {
         return entries
     }
 
-    public boolean containsPbsId(String pbsId) {
-        return logFileEntries.containsKey(pbsId)
+    public boolean containsClusterJobId(String clusterJobId) {
+        return logFileEntries.containsKey(clusterJobId)
     }
 
-    public boolean isClusterJobFinishedSuccessfully(String pbsId) {
-        return getPropertyFromLatestLogFileEntry(pbsId, "statusCode") == "0"
+    public boolean isClusterJobFinishedSuccessfully(String clusterJobId) {
+        return getPropertyFromLatestLogFileEntry(clusterJobId, "statusCode") == "0"
     }
 
-    public String getPropertyFromLatestLogFileEntry(String pbsId, String property) {
-        return logFileEntries.get(pbsId)?.last()?."${property}"
+    public String getPropertyFromLatestLogFileEntry(String clusterJobId, String property) {
+        return logFileEntries.get(clusterJobId)?.last()?."${property}"
     }
 
     public boolean isEmpty() {
@@ -109,14 +109,14 @@ public class JobStateLogFile {
     @Immutable
     @EqualsAndHashCode
     public static class LogFileEntry {
-        String pbsId
+        String clusterJobId
         String host
         String statusCode
         long timeStamp
         String jobClass
 
         public String toString() {
-            return "${pbsId}.${host}:${statusCode}:${timeStamp}:${jobClass}"
+            return "${clusterJobId}.${host}:${statusCode}:${timeStamp}:${jobClass}"
         }
     }
 }

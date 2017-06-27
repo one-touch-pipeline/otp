@@ -1,14 +1,14 @@
 package de.dkfz.tbi.otp.job.jobs.qualityAssessmentMerged
 
-import static org.springframework.util.Assert.*
-import org.springframework.beans.factory.annotation.Autowired
-
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.common.*
+import de.dkfz.tbi.otp.job.jobs.utils.*
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.ngsdata.*
+import groovy.text.*
+import org.springframework.beans.factory.annotation.*
 
-import groovy.text.SimpleTemplateEngine
+import static org.springframework.util.Assert.*
 
 class ExecuteMergedBamFileQaAnalysisJob extends AbstractJobImpl {
 
@@ -22,7 +22,7 @@ class ExecuteMergedBamFileQaAnalysisJob extends AbstractJobImpl {
     ProcessedMergedBamFileService processedMergedBamFileService
 
     @Autowired
-    PbsService pbsService
+    ClusterJobSchedulerService clusterJobSchedulerService
 
     @Autowired
     ReferenceGenomeService referenceGenomeService
@@ -91,8 +91,8 @@ class ExecuteMergedBamFileQaAnalysisJob extends AbstractJobImpl {
         SimpleTemplateEngine engine = new SimpleTemplateEngine()
         String cmd = engine.createTemplate(cmdTemplate).make(binding).toString().trim()
         cmd += "; chmod 440 ${qualityAssessmentFilePath} ${coverageDataFilePath} ${insertSizeDataFilePath}"
-        String pbsID = pbsService.executeJob(realm, cmd)
-        addOutputParameter("__pbsIds", pbsID)
-        addOutputParameter("__pbsRealm", realm.id.toString())
+        String jobId = clusterJobSchedulerService.executeJob(realm, cmd)
+        addOutputParameter(JobParameterKeys.JOB_ID_LIST, jobId)
+        addOutputParameter(JobParameterKeys.REALM, realm.id.toString())
     }
 }

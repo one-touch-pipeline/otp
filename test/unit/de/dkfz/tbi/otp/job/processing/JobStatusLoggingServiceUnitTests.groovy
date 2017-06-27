@@ -74,14 +74,14 @@ class JobStatusLoggingServiceUnitTests {
     }
 
     @Test
-    void testLogFileLocationWhenPbsIdIsNotPassed() {
+    void testLogFileLocationWhenClusterJobIdIsNotPassed() {
         ProcessingStep processingStep = createFakeProcessingStep()
         def actual = service.constructLogFileLocation(realm, processingStep)
         assert "${EXPECTED_BASE_PATH}/joblog_${ARBITRARY_PROCESS_ID}_\$(echo \${PBS_JOBID} | cut -d. -f1)_${realm.id}.log" == actual
     }
 
     @Test
-    void testLogFileLocationWhenPbsIdIsPassed() {
+    void testLogFileLocationWhenClusterJobIdIsPassed() {
         ProcessingStep processingStep = createFakeProcessingStep()
         def actual = service.constructLogFileLocation(realm, processingStep, ARBITRARY_PBS_ID)
         assert EXPECTED_LOGFILE_PATH == actual
@@ -93,14 +93,14 @@ class JobStatusLoggingServiceUnitTests {
     }
 
     @Test
-    void testConstructMessageWhenPbsIdIsNotPassed() {
+    void testConstructMessageWhenClusterJobIdIsNotPassed() {
         ProcessingStep processingStep = createFakeProcessingStep()
         def actual = service.constructMessage(realm, processingStep)
         assert "${processingStep.jobExecutionPlan.name},DummyJob,${ARBITRARY_ID},\$(echo \${PBS_JOBID} | cut -d. -f1)" == actual
     }
 
     @Test
-    void testConstructMessageWhenPbsIdIsPassed() {
+    void testConstructMessageWhenClusterJobIdIsPassed() {
         ProcessingStep processingStep = createFakeProcessingStep()
         def actual = service.constructMessage(null, processingStep, ARBITRARY_PBS_ID)
         assert "${processingStep.jobExecutionPlan.name},DummyJob,${ARBITRARY_ID},${ARBITRARY_PBS_ID}" == actual

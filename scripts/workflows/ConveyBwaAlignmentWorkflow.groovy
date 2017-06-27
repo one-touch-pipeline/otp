@@ -1,6 +1,7 @@
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.job.jobs.alignment.*
+import de.dkfz.tbi.otp.job.jobs.utils.*
 import de.dkfz.tbi.otp.ngsdata.*
 
 import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
@@ -12,33 +13,33 @@ plan(WORKFLOW_NAME, ctx, true) {
     job("createOutputDirectories", "createAlignmentOutputDirectoryJob")
     job("checkQualityEncoding", "checkQualityEncodingJob")
     job("conveyBwaAlignment", "conveyBwaAlignmentJob") {
-        outputParameter("__pbsIds")
-        outputParameter("__pbsRealm")
+        outputParameter(JobParameterKeys.JOB_ID_LIST)
+        outputParameter(JobParameterKeys.REALM)
     }
     job("conveyBwaAlignmentWatchdog", "myPBSWatchdogJob") {
-        inputParameter("__pbsIds", "conveyBwaAlignment", "__pbsIds")
-        inputParameter("__pbsRealm", "conveyBwaAlignment", "__pbsRealm")
+        inputParameter(JobParameterKeys.JOB_ID_LIST, "conveyBwaAlignment", JobParameterKeys.JOB_ID_LIST)
+        inputParameter(JobParameterKeys.REALM, "conveyBwaAlignment", JobParameterKeys.REALM)
     }
     job("bwaAlignmentValidation", "bwaAlignmentValidationJob")
     job("bwaPairingAndSorting", "bwaPairingAndSortingJob") {
-        outputParameter("__pbsIds")
-        outputParameter("__pbsRealm")
+        outputParameter(JobParameterKeys.JOB_ID_LIST)
+        outputParameter(JobParameterKeys.REALM)
     }
     job("bwaPairingAndSortingWatchdog", "myPBSWatchdogJob") {
-        inputParameter("__pbsIds", "bwaPairingAndSorting", "__pbsIds")
-        inputParameter("__pbsRealm", "bwaPairingAndSorting", "__pbsRealm")
+        inputParameter(JobParameterKeys.JOB_ID_LIST, "bwaPairingAndSorting", JobParameterKeys.JOB_ID_LIST)
+        inputParameter(JobParameterKeys.REALM, "bwaPairingAndSorting", JobParameterKeys.REALM)
     }
     job("bwaPairingValidation", "bamFileValidationJob") {
         constantParameter("BamType", "SORTED")
     }
     job("sortedBamIndexing", "bamFileIndexingJob") {
         constantParameter("BamType", "SORTED")
-        outputParameter("__pbsIds")
-        outputParameter("__pbsRealm")
+        outputParameter(JobParameterKeys.JOB_ID_LIST)
+        outputParameter(JobParameterKeys.REALM)
     }
     job("sortedBamIndexingWatchdog", "myPBSWatchdogJob") {
-        inputParameter("__pbsIds", "sortedBamIndexing", "__pbsIds")
-        inputParameter("__pbsRealm", "sortedBamIndexing", "__pbsRealm")
+        inputParameter(JobParameterKeys.JOB_ID_LIST, "sortedBamIndexing", JobParameterKeys.JOB_ID_LIST)
+        inputParameter(JobParameterKeys.REALM, "sortedBamIndexing", JobParameterKeys.REALM)
     }
     job("sortedBamIndexingValidation", "bamFileIndexValidationJob") {
         constantParameter("BamType", "SORTED")
@@ -95,7 +96,7 @@ processingOptionService.createOrUpdate(
     'samtools-0.1.19'
 )
 
-// Create PBS options for bwaPairingAndSortingJob
+// options for bwaPairingAndSortingJob
 processingOptionService.createOrUpdate(
     OptionName.CLUSTER_SUBMISSIONS_OPTION,
     "${BwaPairingAndSortingJob.simpleName}",
@@ -103,7 +104,7 @@ processingOptionService.createOrUpdate(
     '{"WALLTIME":"PT50H","MEMORY":"45g","CORES":"6"}',
 )
 
-// Create PBS options for bwaAlignmentJob
+// options for bwaAlignmentJob
 processingOptionService.createOrUpdate(
         OptionName.CLUSTER_SUBMISSIONS_OPTION,
         "${ConveyBwaAlignmentJob.simpleName}",

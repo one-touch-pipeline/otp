@@ -1,21 +1,19 @@
 package de.dkfz.tbi.otp.job.jobs.transferMergedBamFile
 
-import org.springframework.beans.factory.annotation.Autowired
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.job.jobs.utils.*
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.job.scheduler.ProcessStatusService
+import de.dkfz.tbi.otp.job.scheduler.*
 import de.dkfz.tbi.otp.ngsdata.*
+import org.springframework.beans.factory.annotation.*
 
 class TransferMergedQAResultJob extends AbstractEndStateAwareJobImpl{
-
-    final String JOB = "__pbsIds"
-    final String REALM = "__pbsRealm"
 
     @Autowired
     ChecksumFileService checksumFileService
 
     @Autowired
-    PbsService pbsService
+    ClusterJobSchedulerService clusterJobSchedulerService
 
     @Autowired
     ConfigService configService
@@ -40,11 +38,11 @@ class TransferMergedQAResultJob extends AbstractEndStateAwareJobImpl{
 
         String cmd = scriptText(bamFile)
         Realm realm = configService.getRealmDataProcessing(project)
-        String jobId = pbsService.executeJob(realm, cmd)
-        log.debug "Job ${jobId} submitted to PBS"
+        String jobId = clusterJobSchedulerService.executeJob(realm, cmd)
+        log.debug "Job ${jobId} submitted to cluster job scheduler"
 
-        addOutputParameter(JOB, jobId)
-        addOutputParameter(REALM, realm.id.toString())
+        addOutputParameter(JobParameterKeys.JOB_ID_LIST, jobId)
+        addOutputParameter(JobParameterKeys.REALM, realm.id.toString())
         succeed()
     }
 

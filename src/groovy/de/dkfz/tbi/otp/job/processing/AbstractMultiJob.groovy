@@ -1,11 +1,10 @@
 package de.dkfz.tbi.otp.job.processing
 
-
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
-import de.dkfz.tbi.otp.job.scheduler.PbsMonitorService
+import de.dkfz.tbi.otp.job.scheduler.ClusterJobMonitoringService
 import de.dkfz.tbi.otp.job.scheduler.Scheduler
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 
@@ -28,7 +27,7 @@ public abstract class AbstractMultiJob extends AbstractEndStateAwareJobImpl impl
     }
 
     @Autowired
-    PbsMonitorService pbsMonitorService
+    ClusterJobMonitoringService clusterJobMonitoringService
     @Autowired
     Scheduler scheduler
     @Autowired
@@ -67,7 +66,7 @@ public abstract class AbstractMultiJob extends AbstractEndStateAwareJobImpl impl
     private void startMonitoring() {
         synchronized (lockForJobCollections) {
             log.info "Waiting for ${monitoredClusterJobs.size()} cluster jobs to finish: ${monitoredClusterJobs}"
-            pbsMonitorService.monitor(monitoredClusterJobs.collect {
+            clusterJobMonitoringService.monitor(monitoredClusterJobs.collect {
                 new ClusterJobIdentifier(it.realm, it.clusterJobId, it.userName)
             }, this)
         }

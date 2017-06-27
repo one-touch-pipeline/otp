@@ -3,11 +3,11 @@ package de.dkfz.tbi.otp.job.processing
 import spock.lang.*
 
 
-class PbsOptionMergingServiceSpec extends Specification {
+class ClusterJobSubmissionOptionsServiceSpec extends Specification {
 
     void "test jsonStringToMap"() {
         expect:
-        expected == PbsOptionMergingService.convertJsonStringToMap(jsonString)
+        expected == ClusterJobSubmissionOptionsService.convertJsonStringToMap(jsonString)
 
         where:
         jsonString                           | expected
@@ -19,7 +19,7 @@ class PbsOptionMergingServiceSpec extends Specification {
 
     void "test validateOptionString, valid string"() {
         expect:
-        PbsOptionMergingService.validateJsonString(jsonString)
+        ClusterJobSubmissionOptionsService.validateJsonString(jsonString)
 
         where:
         jsonString                           | _
@@ -31,7 +31,7 @@ class PbsOptionMergingServiceSpec extends Specification {
 
     void "test validateOptionString, invalid string"() {
         expect:
-        !PbsOptionMergingService.validateJsonString(jsonString)
+        !ClusterJobSubmissionOptionsService.validateJsonString(jsonString)
 
         where:
         jsonString                           | _

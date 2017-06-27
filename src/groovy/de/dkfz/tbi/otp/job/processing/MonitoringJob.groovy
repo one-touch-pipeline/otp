@@ -1,15 +1,15 @@
 package de.dkfz.tbi.otp.job.processing
 
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
-import de.dkfz.tbi.otp.job.scheduler.PbsMonitorService
+import de.dkfz.tbi.otp.job.scheduler.ClusterJobMonitoringService
 import de.dkfz.tbi.otp.job.scheduler.Scheduler
 
 /**
  * Interface for {@link Job}s which are long running. An example is to
- * keep track of jobs running on a PBS system. The interface is needed
- * in communication with the {@link PbsMonitorService} as this service
+ * keep track of jobs running on a cluster. The interface is needed
+ * in communication with the {@link ClusterJobMonitoringService} as this service
  * invokes methods on this interface to notify the Job about state changes
- * of the tracked job on the PBS.
+ * of the tracked job on the cluster.
  *
  * A Job implementing this interface behaves different in the Scheduler.
  * When the execute() method finishes the end check is NOT performed.
@@ -19,7 +19,7 @@ import de.dkfz.tbi.otp.job.scheduler.Scheduler
 interface MonitoringJob extends EndStateAwareJob {
 
     /**
-     * Callback to inform that the tracked PBS job finished on the Realm.
+     * Callback to inform that the tracked cluster job finished on the Realm.
      *
      * <p>
      * An implementing class should use this method to have custom code

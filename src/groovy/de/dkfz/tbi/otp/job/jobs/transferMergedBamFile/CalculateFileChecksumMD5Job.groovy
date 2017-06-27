@@ -1,22 +1,19 @@
 package de.dkfz.tbi.otp.job.jobs.transferMergedBamFile
 
-
-import org.springframework.beans.factory.annotation.Autowired
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
+import de.dkfz.tbi.otp.job.jobs.utils.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
+import org.springframework.beans.factory.annotation.*
 
 class CalculateFileChecksumMD5Job extends AbstractJobImpl {
-
-    final String JOB = "__pbsIds"
-    final String REALM = "__pbsRealm"
 
     @Autowired
     ChecksumFileService checksumFileService
 
     @Autowired
-    PbsService pbsService
+    ClusterJobSchedulerService clusterJobSchedulerService
 
     @Autowired
     ConfigService configService
@@ -42,10 +39,10 @@ class CalculateFileChecksumMD5Job extends AbstractJobImpl {
         Realm realm = configService.getRealmDataProcessing(project)
         String projectDir = configService.getProjectRootPath(project) + "/" + project.dirName
         String cmd = scriptText(bamFile, locations, projectDir)
-        String jobId = pbsService.executeJob(realm, cmd)
-        log.debug "Job " + jobId + " submitted to PBS"
-        addOutputParameter(JOB, jobId)
-        addOutputParameter(REALM, realm.id.toString())
+        String jobId = clusterJobSchedulerService.executeJob(realm, cmd)
+        log.debug "Job ${jobId} submitted to cluster job scheduler"
+        addOutputParameter(JobParameterKeys.JOB_ID_LIST, jobId)
+        addOutputParameter(JobParameterKeys.REALM, realm.id.toString())
     }
 
     private String scriptText(ProcessedMergedBamFile file, Map<String, String> locations, String projectDir) {

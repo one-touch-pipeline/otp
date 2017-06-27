@@ -20,7 +20,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFileService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.job.processing.ExecutionService
-import de.dkfz.tbi.otp.job.processing.PbsService
+import de.dkfz.tbi.otp.job.processing.ClusterJobSchedulerService
 import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.*
@@ -37,7 +37,7 @@ class SnvAnnotationJobTests {
     ExecutionService executionService
 
     @Autowired
-    PbsService pbsService
+    ClusterJobSchedulerService clusterJobSchedulerService
 
     @Autowired
     SchedulerService schedulerService
@@ -169,9 +169,9 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         processedMergedBamFile1 = null
         externalScript_Annotation = null
         TestCase.removeMetaClass(ExecutionService, executionService)
-        TestCase.removeMetaClass(PbsService, pbsService)
+        TestCase.removeMetaClass(ClusterJobSchedulerService, clusterJobSchedulerService)
         TestCase.removeMetaClass(LinkFileUtils, linkFileUtils)
-        TestCase.removeMetaClass(ClusterJobLoggingService, pbsService.clusterJobLoggingService)
+        TestCase.removeMetaClass(ClusterJobLoggingService, clusterJobSchedulerService.clusterJobLoggingService)
         TestCase.removeMetaClass(SnvCallingService, snvCallingService)
         TestCase.removeMetaClass(AbstractMergedBamFileService, snvAnnotationJob.abstractMergedBamFileService)
 
@@ -202,7 +202,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
                     new File(snvCallingInstance2.instancePath.absoluteDataManagementPath, SnvCallingStep.SNV_ANNOTATION.getResultFileName(snvCallingInstance2.individual))]
         }
 
-        pbsService.metaClass.executeJob = { Realm realm, String text, String qsubParameters ->
+        clusterJobSchedulerService.metaClass.executeJob = { Realm realm, String text, String qsubParameters ->
             throw new RuntimeException("This area should not be reached since the annotation job shall not run")
         }
         snvAnnotationJob.log = new NoOpLog()
@@ -231,7 +231,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
     @Test
     void testMaybeSubmit() {
         TestCase.mockCreateDirectory(lsdfFilesService)
-        pbsService.clusterJobLoggingService.metaClass.createAndGetLogDirectory = { Realm realm, ProcessingStep processingStep ->
+        clusterJobSchedulerService.clusterJobLoggingService.metaClass.createAndGetLogDirectory = { Realm realm, ProcessingStep processingStep ->
             return TestCase.uniqueNonExistentPath
         }
         snvAnnotationJob.metaClass.createAndSaveSnvJobResult = { SnvCallingInstance instance, ExternalScript externalScript, SnvJobResult inputResult -> }

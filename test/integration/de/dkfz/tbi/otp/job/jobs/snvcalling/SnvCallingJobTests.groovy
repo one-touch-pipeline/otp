@@ -9,7 +9,7 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
 import de.dkfz.tbi.otp.job.processing.CreateClusterScriptService
 import de.dkfz.tbi.otp.job.processing.ExecutionService
-import de.dkfz.tbi.otp.job.processing.PbsService
+import de.dkfz.tbi.otp.job.processing.ClusterJobSchedulerService
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.ExternalScript
@@ -43,7 +43,7 @@ class SnvCallingJobTests {
     ExecutionService executionService
 
     @Autowired
-    PbsService pbsService
+    ClusterJobSchedulerService clusterJobSchedulerService
 
     @Autowired
     SchedulerService schedulerService
@@ -180,7 +180,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         processedMergedBamFile2 = null
         removeMetaClass(CreateClusterScriptService, createClusterScriptService)
         removeMetaClass(ExecutionService, executionService)
-        removeMetaClass(PbsService, pbsService)
+        removeMetaClass(ClusterJobSchedulerService, clusterJobSchedulerService)
         removeMetaClass(SnvCallingJob, snvCallingJob)
         removeMetaClass(LinkFileUtils, linkFileUtils)
         removeMetaClass(LsdfFilesService, lsdfFilesService)
@@ -227,7 +227,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
 
         DomainFactory.createProcessParameter(snvCallingJob.processingStep.process, snvCallingInstance)
         snvCallingInstance.metaClass.findLatestResultForSameBamFiles = { SnvCallingStep step -> return null }
-        pbsService.metaClass.executeJob = { Realm realm, String text, String qsubParameters ->
+        clusterJobSchedulerService.metaClass.executeJob = { Realm realm, String text, String qsubParameters ->
             throw new RuntimeException("This area should not be reached since the calling job shall not run")
         }
         shouldFail(RuntimeException, { snvCallingJob.maybeSubmit(snvCallingInstance) })

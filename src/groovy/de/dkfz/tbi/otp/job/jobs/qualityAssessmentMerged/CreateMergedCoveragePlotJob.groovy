@@ -1,15 +1,15 @@
 package de.dkfz.tbi.otp.job.jobs.qualityAssessmentMerged
 
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.job.processing.PbsService
-import de.dkfz.tbi.otp.job.processing.AbstractJobImpl
-import org.springframework.beans.factory.annotation.Autowired
+import de.dkfz.tbi.otp.job.jobs.utils.*
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.ngsdata.*
+import org.springframework.beans.factory.annotation.*
 
 class CreateMergedCoveragePlotJob extends AbstractJobImpl {
 
     @Autowired
-    PbsService pbsService
+    ClusterJobSchedulerService clusterJobSchedulerService
 
     @Autowired
     QualityAssessmentMergedPassService qualityAssessmentMergedPassService
@@ -25,8 +25,8 @@ class CreateMergedCoveragePlotJob extends AbstractJobImpl {
         String plotFilePath = processedMergedBamFileQaFileService.coveragePlotFilePath(pass)
         String cmd = "coveragePlot.sh ${mappedFilteredSortedCoverageDataFilePath} ${plotFilePath}; chmod 440 ${plotFilePath}"
         Realm realm = qualityAssessmentMergedPassService.realmForDataProcessing(pass)
-        String pbsID = pbsService.executeJob(realm, cmd)
-        addOutputParameter("__pbsIds", pbsID)
-        addOutputParameter("__pbsRealm", realm.id.toString())
+        String jobId = clusterJobSchedulerService.executeJob(realm, cmd)
+        addOutputParameter(JobParameterKeys.JOB_ID_LIST, jobId)
+        addOutputParameter(JobParameterKeys.REALM, realm.id.toString())
     }
 }

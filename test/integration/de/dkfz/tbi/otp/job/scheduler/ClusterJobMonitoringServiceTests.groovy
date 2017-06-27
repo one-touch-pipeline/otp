@@ -15,9 +15,9 @@ import static de.dkfz.tbi.TestConstants.*
 import static de.dkfz.tbi.otp.job.scheduler.SchedulerTests.*
 import static de.dkfz.tbi.otp.ngsdata.DomainFactory.*
 
-class PbsMonitorServiceTests extends AbstractIntegrationTest {
+class ClusterJobMonitoringServiceTests extends AbstractIntegrationTest {
 
-    PbsMonitorService pbsMonitorService
+    ClusterJobMonitoringService clusterJobMonitoringService
     RestartCheckerService restartCheckerService
     Scheduler scheduler
     SchedulerService schedulerService
@@ -45,14 +45,14 @@ class PbsMonitorServiceTests extends AbstractIntegrationTest {
 
     private MonitoringJob notifyJobAboutFinishedClusterJob(final boolean fail) {
         Realm realm = new Realm()
-        final ClusterJobIdentifier pbsJobInfo = new ClusterJobIdentifier(realm, ARBITRARY_CLUSTER_JOB_ID, "user name")
-        final Job testJob = new MonitoringTestJob(createAndSaveProcessingStep(), null, schedulerService, pbsJobInfo, fail)
+        final ClusterJobIdentifier jobIdentifier = new ClusterJobIdentifier(realm, ARBITRARY_CLUSTER_JOB_ID, "user name")
+        final Job testJob = new MonitoringTestJob(createAndSaveProcessingStep(), null, schedulerService, jobIdentifier, fail)
 
         testJob.log = new NoOpLog()
         scheduler.executeJob(testJob)
         assert schedulerService.jobExecutedByCurrentThread == null
         assert LogThreadLocal.threadLog == null
-        pbsMonitorService.notifyJobAboutFinishedClusterJob(testJob, pbsJobInfo)
+        clusterJobMonitoringService.notifyJobAboutFinishedClusterJob(testJob, jobIdentifier)
         assert schedulerService.jobExecutedByCurrentThread == null
         assert LogThreadLocal.threadLog == null
         assert testJob.executed

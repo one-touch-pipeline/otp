@@ -431,7 +431,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
         }
     }
 
-    void checkAllAfterRoddyPbsJobsRestartAndSuccessfulExecution_alignBaseBamAndNewLanes() {
+    void checkAllAfterRoddyClusterJobsRestartAndSuccessfulExecution_alignBaseBamAndNewLanes() {
         checkDataBaseState_alignBaseBamAndNewLanes()
         RoddyBamFile latestBamFile = RoddyBamFile.findByIdentifier(1L)
         checkFileSystemState(latestBamFile, 1)

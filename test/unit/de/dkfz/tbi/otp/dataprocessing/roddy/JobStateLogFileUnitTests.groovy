@@ -35,7 +35,7 @@ class JobStateLogFileUnitTests {
 
     @Before
     void setUp() {
-        clusterJobIdentifier = new ClusterJobIdentifier(DomainFactory.createRealmDataProcessing(), "pbsId", "userName")
+        clusterJobIdentifier = new ClusterJobIdentifier(DomainFactory.createRealmDataProcessing(), "clusterJobId", "userName")
     }
 
     @After
@@ -69,9 +69,9 @@ class JobStateLogFileUnitTests {
     }
 
     @Test
-    void testParseJobStateLogFile_WhenEntriesMatch_ShouldReturnMapWithPbsIdAndCorrespondingLogFileEntry() {
-        JobStateLogFile.LogFileEntry logFileEntry = CreateJobStateLogFileHelper.createJobStateLogFileEntry([pbsId: "pbsId1"])
-        JobStateLogFile.LogFileEntry logFileEntry2 = CreateJobStateLogFileHelper.createJobStateLogFileEntry([pbsId: "pbsId2"])
+    void testParseJobStateLogFile_WhenEntriesMatch_ShouldReturnMapWithClusterJobIdAndCorrespondingLogFileEntry() {
+        JobStateLogFile.LogFileEntry logFileEntry = CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: "pbsId1"])
+        JobStateLogFile.LogFileEntry logFileEntry2 = CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: "pbsId2"])
 
         String content = """${logFileEntry.toString()}
 ${logFileEntry2.toString()}"""
@@ -80,23 +80,23 @@ ${logFileEntry2.toString()}"""
 
         JobStateLogFile jobStateLogFile = JobStateLogFile.getInstance(tmpDir.root)
 
-        assert jobStateLogFile.logFileEntries.get(logFileEntry.pbsId).first().pbsId == logFileEntry.pbsId
-        assert jobStateLogFile.logFileEntries.get(logFileEntry.pbsId).first().host == logFileEntry.host
-        assert jobStateLogFile.logFileEntries.get(logFileEntry.pbsId).first().statusCode == logFileEntry.statusCode
-        assert jobStateLogFile.logFileEntries.get(logFileEntry.pbsId).first().timeStamp == logFileEntry.timeStamp
-        assert jobStateLogFile.logFileEntries.get(logFileEntry.pbsId).first().jobClass == logFileEntry.jobClass
+        assert jobStateLogFile.logFileEntries.get(logFileEntry.clusterJobId).first().clusterJobId == logFileEntry.clusterJobId
+        assert jobStateLogFile.logFileEntries.get(logFileEntry.clusterJobId).first().host == logFileEntry.host
+        assert jobStateLogFile.logFileEntries.get(logFileEntry.clusterJobId).first().statusCode == logFileEntry.statusCode
+        assert jobStateLogFile.logFileEntries.get(logFileEntry.clusterJobId).first().timeStamp == logFileEntry.timeStamp
+        assert jobStateLogFile.logFileEntries.get(logFileEntry.clusterJobId).first().jobClass == logFileEntry.jobClass
 
-        assert jobStateLogFile.logFileEntries.get(logFileEntry2.pbsId).first().pbsId == logFileEntry2.pbsId
-        assert jobStateLogFile.logFileEntries.get(logFileEntry2.pbsId).first().host == logFileEntry2.host
-        assert jobStateLogFile.logFileEntries.get(logFileEntry2.pbsId).first().statusCode == logFileEntry2.statusCode
-        assert jobStateLogFile.logFileEntries.get(logFileEntry2.pbsId).first().timeStamp == logFileEntry2.timeStamp
-        assert jobStateLogFile.logFileEntries.get(logFileEntry2.pbsId).first().jobClass == logFileEntry2.jobClass
+        assert jobStateLogFile.logFileEntries.get(logFileEntry2.clusterJobId).first().clusterJobId == logFileEntry2.clusterJobId
+        assert jobStateLogFile.logFileEntries.get(logFileEntry2.clusterJobId).first().host == logFileEntry2.host
+        assert jobStateLogFile.logFileEntries.get(logFileEntry2.clusterJobId).first().statusCode == logFileEntry2.statusCode
+        assert jobStateLogFile.logFileEntries.get(logFileEntry2.clusterJobId).first().timeStamp == logFileEntry2.timeStamp
+        assert jobStateLogFile.logFileEntries.get(logFileEntry2.clusterJobId).first().jobClass == logFileEntry2.jobClass
     }
 
     @Test
     void testParseJobStateLogFile_WhenEntriesDoNotMatch_ShouldThrowException() {
-        JobStateLogFile.LogFileEntry logFileEntry = CreateJobStateLogFileHelper.createJobStateLogFileEntry([pbsId: "pbsId1"])
-        JobStateLogFile.LogFileEntry logFileEntry2 = CreateJobStateLogFileHelper.createJobStateLogFileEntry([pbsId: "pbsId2"])
+        JobStateLogFile.LogFileEntry logFileEntry = CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: "pbsId1"])
+        JobStateLogFile.LogFileEntry logFileEntry2 = CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: "pbsId2"])
 
         String modifiedLogFileEntry = logFileEntry2.toString().replace(":", "/")
 
@@ -120,39 +120,39 @@ ${logFileEntry2.toString()}"""
 
         CreateFileHelper.createFile(tmpDir.newFile(JOB_STATE_LOG_FILE_NAME), content)
 
-        shouldFailWithMessage(RuntimeException, "Later JobStateLogFile entry with pbsID: testPbsId " +
+        shouldFailWithMessage(RuntimeException, "Later JobStateLogFile entry with cluster job ID: testPbsId " +
                 "has timestamp which is less than one for previous entries.") {
             JobStateLogFile.getInstance(tmpDir.root)
         }
     }
 
     @Test
-    void testContainsPbsId_WhenJobStateLogFileContainsPbsId_ShouldReturnTrue() {
+    void testContainsClusterJobId_WhenJobStateLogFileContainsclusterJobId_ShouldReturnTrue() {
         JobStateLogFile JobStateLogFile = CreateJobStateLogFileHelper.createJobStateLogFile(
                 tmpDir.root, [
-                    CreateJobStateLogFileHelper.createJobStateLogFileEntry([pbsId: clusterJobIdentifier.clusterJobId])
+                    CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: clusterJobIdentifier.clusterJobId])
                 ]
         )
 
-        assertTrue(JobStateLogFile.containsPbsId(clusterJobIdentifier.clusterJobId))
+        assertTrue(JobStateLogFile.containsClusterJobId(clusterJobIdentifier.clusterJobId))
     }
 
     @Test
-    void testContainsPbsId_WhenJobStateLogFileDoesNotContainPbsId_ShouldReturnFalse() {
+    void testContainsClusterJobId_WhenJobStateLogFileDoesNotContainClusterJobId_ShouldReturnFalse() {
         JobStateLogFile JobStateLogFile = CreateJobStateLogFileHelper.createJobStateLogFile(
                 tmpDir.root, [
-                    CreateJobStateLogFileHelper.createJobStateLogFileEntry([pbsId: clusterJobIdentifier.clusterJobId])
+                    CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: clusterJobIdentifier.clusterJobId])
                 ]
         )
 
-        assertFalse(JobStateLogFile.containsPbsId("UNKNOWN"))
+        assertFalse(JobStateLogFile.containsClusterJobId("UNKNOWN"))
     }
 
     @Test
     void testIsClusterJobFinishedSuccessfully_WhenStatusCodeIsNull_ReturnTrue() {
         JobStateLogFile JobStateLogFile = CreateJobStateLogFileHelper.createJobStateLogFile(
                 tmpDir.root, [
-                    CreateJobStateLogFileHelper.createJobStateLogFileEntry([pbsId: clusterJobIdentifier.clusterJobId])
+                    CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: clusterJobIdentifier.clusterJobId])
                 ]
         )
 
@@ -163,7 +163,7 @@ ${logFileEntry2.toString()}"""
     void testIsClusterJobFinishedSuccessfully_WhenStatusCodeIsNotNull_ReturnFalse() {
         JobStateLogFile JobStateLogFile = CreateJobStateLogFileHelper.createJobStateLogFile(
                 tmpDir.root, [
-                    CreateJobStateLogFileHelper.createJobStateLogFileEntry([pbsId: clusterJobIdentifier.clusterJobId, statusCode: STATUS_CODE_FAILED])
+                    CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: clusterJobIdentifier.clusterJobId, statusCode: STATUS_CODE_FAILED])
                 ]
         )
 
@@ -171,10 +171,10 @@ ${logFileEntry2.toString()}"""
     }
 
     @Test
-    void testGetPropertyFromLatestLogFileEntry_WhenPbsIdNotFound_ShouldReturnNull() {
+    void testGetPropertyFromLatestLogFileEntry_WhenClusterJobIdNotFound_ShouldReturnNull() {
         JobStateLogFile JobStateLogFile = CreateJobStateLogFileHelper.createJobStateLogFile(
                 tmpDir.root, [
-                    CreateJobStateLogFileHelper.createJobStateLogFileEntry([pbsId: clusterJobIdentifier.clusterJobId])
+                    CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: clusterJobIdentifier.clusterJobId])
                 ]
         )
 
@@ -182,11 +182,11 @@ ${logFileEntry2.toString()}"""
     }
 
     @Test
-    void testGetPropertyFromLatestLogFileEntry_WhenSeveralLogFileEntriesWithSamePbsId_ShouldReturnLatest() {
+    void testGetPropertyFromLatestLogFileEntry_WhenSeveralLogFileEntriesWithSameClusterJobId_ShouldReturnLatest() {
         JobStateLogFile JobStateLogFile = CreateJobStateLogFileHelper.createJobStateLogFile(
                 tmpDir.root, [
-                    CreateJobStateLogFileHelper.createJobStateLogFileEntry([pbsId: clusterJobIdentifier.clusterJobId, statusCode: "10"]),
-                    CreateJobStateLogFileHelper.createJobStateLogFileEntry([pbsId: clusterJobIdentifier.clusterJobId, statusCode: STATUS_CODE_FINISHED, timeStamp: 10L])
+                    CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: clusterJobIdentifier.clusterJobId, statusCode: "10"]),
+                    CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: clusterJobIdentifier.clusterJobId, statusCode: STATUS_CODE_FINISHED, timeStamp: 10L])
                 ]
         )
 
@@ -204,7 +204,7 @@ ${logFileEntry2.toString()}"""
     void testIsEmpty_WhenFileIsNotEmpty_ShouldReturnFalse() {
         JobStateLogFile jobStateLogFile = CreateJobStateLogFileHelper.createJobStateLogFile(
                 tmpDir.root, [
-                    CreateJobStateLogFileHelper.createJobStateLogFileEntry([pbsId: clusterJobIdentifier.clusterJobId])
+                    CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: clusterJobIdentifier.clusterJobId])
                 ]
         )
 

@@ -23,9 +23,9 @@ import static org.springframework.util.Assert.*
  * It executes job submission/monitoring commands on the cluster head node using
  * the <a href="https://github.com/eilslabs/BatchEuphoria">BatchEuphoria</a> library and {@link ExecutionService}.
  */
-class PbsService {
+class ClusterJobSchedulerService {
 
-    PbsOptionMergingService pbsOptionMergingService
+    ClusterJobSubmissionOptionsService clusterJobSubmissionOptionsService
     JobStatusLoggingService jobStatusLoggingService
     SchedulerService schedulerService
     ClusterJobService clusterJobService
@@ -55,7 +55,7 @@ class PbsService {
 
         SeqType seqType = domainObject?.seqType
 
-        Map<JobSubmissionOption, String> options = pbsOptionMergingService.readOptionsFromDatabase(processingStep, realm)
+        Map<JobSubmissionOption, String> options = clusterJobSubmissionOptionsService.readOptionsFromDatabase(processingStep, realm)
         options.putAll(jobSubmissionOptions)
 
         // check if the project has FASTTRACK priority
@@ -133,7 +133,7 @@ echo "${logMessage}" >> "${logFile}"
      * @param userName The name of the user whose jobs should be checked
      * @return A map containing job identifiers and their status
      */
-    public Map<ClusterJobIdentifier, PbsMonitorService.Status> retrieveKnownJobsWithState(Realm realm, String userName) throws Exception {
+    public Map<ClusterJobIdentifier, ClusterJobMonitoringService.Status> retrieveKnownJobsWithState(Realm realm, String userName) throws Exception {
         assert realm: "No realm specified."
         assert userName: "No user name specified."
 
@@ -143,7 +143,7 @@ echo "${logMessage}" >> "${logFile}"
         return jobStates.collectEntries { String jobId, JobState state ->
             [
                     new ClusterJobIdentifier(realm, jobId, userName),
-                    (state in finished || state in failed) ? PbsMonitorService.Status.COMPLETED : PbsMonitorService.Status.NOT_COMPLETED
+                    (state in finished || state in failed) ? ClusterJobMonitoringService.Status.COMPLETED : ClusterJobMonitoringService.Status.NOT_COMPLETED
             ]
         }
     }

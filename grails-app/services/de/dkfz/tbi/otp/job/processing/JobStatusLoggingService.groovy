@@ -9,7 +9,7 @@ import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.ngsdata.Realm
 
 /**
- * A service to construct paths and messages for logging the status of PBS cluster jobs.
+ * A service to construct paths and messages for logging the status of cluster jobs.
  *
  */
 class JobStatusLoggingService {
@@ -18,7 +18,7 @@ class JobStatusLoggingService {
     final static STATUS_LOGGING_BASE_DIR = 'log/status'
 
     private static String shellSnippetForClusterJobId(Realm realm) {
-        return "\$(echo ${PbsService.getJobIdEnvironmentVariable(realm)} | cut -d. -f1)"
+        return "\$(echo ${ClusterJobSchedulerService.getJobIdEnvironmentVariable(realm)} | cut -d. -f1)"
     }
 
     /**
@@ -62,7 +62,7 @@ class JobStatusLoggingService {
      * <li>the workflow name,</li>
      * <li>the (non-qualified) class name of the job,</li>
      * <li>the ID of the processing step, and</li>
-     * <li>the PBS job ID.</li>
+     * <li>the cluster job ID.</li>
      * </ul>
      * The field of previous or next steps is empty if the processing step does not have previous or next steps.
      * The message is <strong>not</strong> terminated by a newline character.

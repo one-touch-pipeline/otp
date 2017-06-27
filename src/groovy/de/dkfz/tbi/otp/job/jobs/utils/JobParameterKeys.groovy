@@ -15,7 +15,7 @@ class JobParameterKeys {
      * between jobs.
      */
     @Deprecated
-    static final String PBS_ID_LIST = '__pbsIds'
+    static final String JOB_ID_LIST = '__pbsIds'
     /**
      * @deprecated Create/use a subclass of {@link AbstractMultiJob}, then cluster job IDs no longer have to be passed
      * between jobs.

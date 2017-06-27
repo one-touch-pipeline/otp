@@ -49,7 +49,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
     DataSource dataSource
     SchedulerService schedulerService
 
-    PbsMonitorService pbsMonitorService
+    ClusterJobMonitoringService clusterJobMonitoringService
 
     ReferenceGenomeService referenceGenomeService
 
@@ -139,7 +139,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         // manually set up scheduled tasks
         // this is done here so they will be stopped when each test is finished,
         // otherwise there would be problems with the database being deleted
-        scheduler.scheduleWithFixedDelay({ Holders.applicationContext.getBean(SchedulerService).pbsMonitorCheck() } as Runnable, 0, 10, TimeUnit.SECONDS)
+        scheduler.scheduleWithFixedDelay({ Holders.applicationContext.getBean(SchedulerService).clusterJobCheck() } as Runnable, 0, 10, TimeUnit.SECONDS)
 
         scheduler.scheduleWithFixedDelay({ Holders.applicationContext.getBean(SchedulerService).schedule() } as Runnable, 0, 100, TimeUnit.MILLISECONDS)
     }
@@ -154,7 +154,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
 
         schedulerService.running.clear()
         schedulerService.queue.clear()
-        pbsMonitorService.queuedJobs.clear()
+        clusterJobMonitoringService.queuedJobs.clear()
 
         if (sql) {
             sql.execute("DROP ALL OBJECTS")

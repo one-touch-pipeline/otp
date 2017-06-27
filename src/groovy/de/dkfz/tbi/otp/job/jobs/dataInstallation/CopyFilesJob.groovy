@@ -18,7 +18,7 @@ class CopyFilesJob extends AbstractOtpJob implements AutoRestartableJob {
     ChecksumFileService checksumFileService
 
     @Autowired
-    PbsService pbsService
+    ClusterJobSchedulerService clusterJobSchedulerService
 
     @Autowired
     ExecutionService executionService
@@ -46,7 +46,7 @@ class CopyFilesJob extends AbstractOtpJob implements AutoRestartableJob {
                 returnValue = AbstractMultiJob.NextAction.SUCCEED
             } else {
                 String cmd = getScript(sourceFile, targetFile,"cp", "md5sum ${targetFile.name} > ${md5SumFileName}", "chmod 440 ${targetFile} ${md5SumFileName}")
-                pbsService.executeJob(realm, cmd)
+                clusterJobSchedulerService.executeJob(realm, cmd)
                 returnValue = AbstractMultiJob.NextAction.WAIT_FOR_CLUSTER_JOBS
             }
         }

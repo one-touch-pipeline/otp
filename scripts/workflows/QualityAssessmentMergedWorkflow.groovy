@@ -1,6 +1,7 @@
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.job.jobs.qualityAssessmentMerged.*
+import de.dkfz.tbi.otp.job.jobs.utils.*
 import de.dkfz.tbi.otp.ngsdata.*
 
 import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
@@ -11,42 +12,42 @@ plan(workflowName) {
     start("start", "qualityAssessmentMergedStartJob")
     job("createMergedQaOutputDirectory", "createMergedQaOutputDirectoryJob")
     job("executeMergedBamFileQaAnalysis", "executeMergedBamFileQaAnalysisJob") {
-        outputParameter("__pbsIds")
-        outputParameter("__pbsRealm")
+        outputParameter(JobParameterKeys.JOB_ID_LIST)
+        outputParameter(JobParameterKeys.REALM)
     }
     job("executeMergedBamFileQaAnalysisWatchdog", "myPBSWatchdogJob") {
-        inputParameter("__pbsIds", "executeMergedBamFileQaAnalysis", "__pbsIds")
-        inputParameter("__pbsRealm", "executeMergedBamFileQaAnalysis", "__pbsRealm")
+        inputParameter(JobParameterKeys.JOB_ID_LIST, "executeMergedBamFileQaAnalysis", JobParameterKeys.JOB_ID_LIST)
+        inputParameter(JobParameterKeys.REALM, "executeMergedBamFileQaAnalysis", JobParameterKeys.REALM)
     }
     job("mergedQaOutputFileValidation", "mergedQaOutputFileValidationJob")
     job("parseMergedQaStatistics", "parseMergedQaStatisticsJob")
     job("createMergedChromosomeMappingFileJob", "createMergedChromosomeMappingFileJob")
     job("executeMergedMappingFilteringSortingToCoverageTable", "executeMergedMappingFilteringSortingToCoverageTableJob") {
-        outputParameter("__pbsIds")
-        outputParameter("__pbsRealm")
+        outputParameter(JobParameterKeys.JOB_ID_LIST)
+        outputParameter(JobParameterKeys.REALM)
     }
     job("executeMergedMappingFilteringSortingToCoverageTableWatchdog", "myPBSWatchdogJob") {
-        inputParameter("__pbsIds", "executeMergedMappingFilteringSortingToCoverageTable", "__pbsIds")
-        inputParameter("__pbsRealm", "executeMergedMappingFilteringSortingToCoverageTable", "__pbsRealm")
+        inputParameter(JobParameterKeys.JOB_ID_LIST, "executeMergedMappingFilteringSortingToCoverageTable", JobParameterKeys.JOB_ID_LIST)
+        inputParameter(JobParameterKeys.REALM, "executeMergedMappingFilteringSortingToCoverageTable", JobParameterKeys.REALM)
     }
     job("mergedMappingFilteringSortingOutputFileValidation", "mergedMappingFilteringSortingOutputFileValidationJob")
 
     job("createMergedCoveragePlot", "createMergedCoveragePlotJob") {
-        outputParameter("__pbsIds")
-        outputParameter("__pbsRealm")
+        outputParameter(JobParameterKeys.JOB_ID_LIST)
+        outputParameter(JobParameterKeys.REALM)
     }
     job("createMergedCoveragePlotWatchdog", "myPBSWatchdogJob") {
-        inputParameter("__pbsIds", "createMergedCoveragePlot", "__pbsIds")
-        inputParameter("__pbsRealm", "createMergedCoveragePlot", "__pbsRealm")
+        inputParameter(JobParameterKeys.JOB_ID_LIST, "createMergedCoveragePlot", JobParameterKeys.JOB_ID_LIST)
+        inputParameter(JobParameterKeys.REALM, "createMergedCoveragePlot", JobParameterKeys.REALM)
     }
     job("mergedCoveragePlotValidation", "mergedCoveragePlotValidationJob")
     job("createMergedInsertSizePlot", "createMergedInsertSizePlotJob") {
-        outputParameter("__pbsIds")
-        outputParameter("__pbsRealm")
+        outputParameter(JobParameterKeys.JOB_ID_LIST)
+        outputParameter(JobParameterKeys.REALM)
     }
     job("createMergedInsertSizePlotWatchdog", "myPBSWatchdogJob") {
-        inputParameter("__pbsIds", "createMergedInsertSizePlot", "__pbsIds")
-        inputParameter("__pbsRealm", "createMergedInsertSizePlot", "__pbsRealm")
+        inputParameter(JobParameterKeys.JOB_ID_LIST, "createMergedInsertSizePlot", JobParameterKeys.JOB_ID_LIST)
+        inputParameter(JobParameterKeys.REALM, "createMergedInsertSizePlot", JobParameterKeys.REALM)
     }
     job("mergedInsertSizePlotValidation", "mergedInsertSizePlotValidationJob")
     job("assignMergedQaFlag", "assignMergedQaFlagJob")
@@ -73,7 +74,7 @@ int windowsSize = 1000
 int insertSizeCountHistogramBin = 10
 boolean testMode = false
 
-// pbs options for qa.jar for whole genome
+// options for qa.jar for whole genome
 String cmd = "qualityAssessment.sh \${processedBamFilePath} \${processedBaiFilePath} \${qualityAssessmentFilePath} \${coverageDataFilePath} \${insertSizeDataFilePath} ${overrideOutput} \${allChromosomeName} ${minAlignedRecordLength} ${minMeanBaseQuality} ${mappingQuality} ${coverageMappingQualityThreshold} ${windowsSize} ${insertSizeCountHistogramBin} ${testMode}"
 SeqType seqType = SeqType.findByNameAndLibraryLayout(SeqTypeNames.WHOLE_GENOME.seqTypeName, SeqType.LIBRARYLAYOUT_PAIRED)
 processingOptionService.createOrUpdate(
@@ -83,7 +84,7 @@ processingOptionService.createOrUpdate(
     cmd
 )
 
-// pbs options for qa.jar for exome
+// options for qa.jar for exome
 cmd = "qualityAssessment.sh \${processedBamFilePath} \${processedBaiFilePath} \${qualityAssessmentFilePath} \${coverageDataFilePath} \${insertSizeDataFilePath} ${overrideOutput} \${allChromosomeName} ${minAlignedRecordLength} ${minMeanBaseQuality} ${mappingQuality} ${coverageMappingQualityThreshold} ${windowsSize} ${insertSizeCountHistogramBin} ${testMode} \${bedFilePath} \${refGenMetaInfoFilePath}"
 seqType = SeqType.findByNameAndLibraryLayout(SeqTypeNames.EXOME.seqTypeName, SeqType.LIBRARYLAYOUT_PAIRED)
 processingOptionService.createOrUpdate(

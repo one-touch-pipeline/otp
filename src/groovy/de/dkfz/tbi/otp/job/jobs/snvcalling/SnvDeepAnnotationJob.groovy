@@ -7,7 +7,7 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingStep
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvJobResult
-import de.dkfz.tbi.otp.job.processing.PbsService
+import de.dkfz.tbi.otp.job.processing.ClusterJobSchedulerService
 import de.dkfz.tbi.otp.ngsdata.ConfigService
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.ngsdata.Realm
@@ -18,7 +18,7 @@ class SnvDeepAnnotationJob extends AbstractSnvCallingJob implements AutoRestarta
     @Autowired
     ConfigService configService
     @Autowired
-    PbsService pbsService
+    ClusterJobSchedulerService clusterJobSchedulerService
 
 
     @Override
@@ -83,7 +83,7 @@ class SnvDeepAnnotationJob extends AbstractSnvCallingJob implements AutoRestarta
                     "${step.getExternalScript(config.externalScriptVersion).scriptFilePath}; " +
                     "md5sum ${deepAnnotationResultFile} > ${deepAnnotationResultFile}.md5sum"
 
-            pbsService.executeJob(realm, script, environmentVariables)
+            clusterJobSchedulerService.executeJob(realm, script, environmentVariables)
 
             return NextAction.WAIT_FOR_CLUSTER_JOBS
         } else {

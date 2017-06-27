@@ -28,7 +28,7 @@ class AbstractMultiJobTests {
 
     @Autowired
     ApplicationContext applicationContext
-    PbsMonitorService pbsMonitorService
+    ClusterJobMonitoringService clusterJobMonitoringService
     RestartCheckerService restartCheckerService
     Scheduler scheduler
 
@@ -52,7 +52,7 @@ class AbstractMultiJobTests {
     void before() {
         assert realm1.save(flush: true)
         assert realm2.save(flush: true)
-        pbsMonitorService.queuedJobs = [:]
+        clusterJobMonitoringService.queuedJobs = [:]
         restartCheckerService.metaClass.canWorkflowBeRestarted = { ProcessingStep step -> false }
     }
 
@@ -138,9 +138,9 @@ class AbstractMultiJobTests {
         assert job.state == AbstractJobImpl.State.STARTED
         assert step.latestProcessingStepUpdate.state == ExecutionState.STARTED
         assert job.resumable
-        monitoredJobs = pbsMonitorService.queuedJobs[job]
+        monitoredJobs = clusterJobMonitoringService.queuedJobs[job]
         TestCase.assertContainSame(monitoredJobs, clusterJobs1)
-        pbsMonitorService.queuedJobs = [:]
+        clusterJobMonitoringService.queuedJobs = [:]
 
         if (withResuming) {
             job.planSuspend()
@@ -148,12 +148,12 @@ class AbstractMultiJobTests {
             job.cancelSuspend()
         }
 
-        pbsMonitorService.notifyJobAboutFinishedClusterJob(job, clusterJob2)
+        clusterJobMonitoringService.notifyJobAboutFinishedClusterJob(job, clusterJob2)
         assert atomicPhase.get() == 1
         assert job.state == AbstractJobImpl.State.STARTED
         assert step.latestProcessingStepUpdate.state == ExecutionState.STARTED
         assert job.resumable
-        assert pbsMonitorService.queuedJobs.isEmpty()
+        assert clusterJobMonitoringService.queuedJobs.isEmpty()
 
         if (withResuming) {
             job.planSuspend()
@@ -161,15 +161,15 @@ class AbstractMultiJobTests {
             new TestThread(suspendCancelled, job).start()
         }
 
-        pbsMonitorService.notifyJobAboutFinishedClusterJob(job, clusterJob1)
+        clusterJobMonitoringService.notifyJobAboutFinishedClusterJob(job, clusterJob1)
         assert semaphore.tryAcquire(500, TimeUnit.MILLISECONDS)
         assert atomicPhase.get() == 2
         assert job.state == AbstractJobImpl.State.STARTED
         assert step.latestProcessingStepUpdate.state == ExecutionState.STARTED
         assert job.resumable
-        monitoredJobs = pbsMonitorService.queuedJobs[job]
+        monitoredJobs = clusterJobMonitoringService.queuedJobs[job]
         TestCase.assertContainSame(monitoredJobs, clusterJobs2)
-        pbsMonitorService.queuedJobs = [:]
+        clusterJobMonitoringService.queuedJobs = [:]
 
         if (withResuming) {
             job.planSuspend()
@@ -186,17 +186,17 @@ class AbstractMultiJobTests {
             assert job.state == AbstractJobImpl.State.STARTED
             assert step.latestProcessingStepUpdate.state == ExecutionState.STARTED
             assert job.resumable
-            monitoredJobs = pbsMonitorService.queuedJobs[job]
+            monitoredJobs = clusterJobMonitoringService.queuedJobs[job]
             TestCase.assertContainSame(monitoredJobs, clusterJobs2)
-            pbsMonitorService.queuedJobs = [:]
+            clusterJobMonitoringService.queuedJobs = [:]
         }
 
-        pbsMonitorService.notifyJobAboutFinishedClusterJob(job, clusterJob3)
+        clusterJobMonitoringService.notifyJobAboutFinishedClusterJob(job, clusterJob3)
         assert semaphore.tryAcquire(500, TimeUnit.MILLISECONDS)
         assert atomicPhase.get() == 3
         assert job.state == AbstractJobImpl.State.FINISHED
         assert step.latestProcessingStepUpdate.state == ExecutionState.SUCCESS
-        assert pbsMonitorService.queuedJobs.isEmpty()
+        assert clusterJobMonitoringService.queuedJobs.isEmpty()
         if (withResuming) {
             assertEquals(ExecutionState.SUCCESS, job.endState)
             List<ProcessingStepUpdate> updates = ProcessingStepUpdate.findAllByProcessingStep(step).sort { it.id }
@@ -248,12 +248,12 @@ class AbstractMultiJobTests {
         assert job.state == AbstractJobImpl.State.STARTED
         assert step.latestProcessingStepUpdate.state == ExecutionState.STARTED
 
-        pbsMonitorService.notifyJobAboutFinishedClusterJob(job, clusterJob1)
+        clusterJobMonitoringService.notifyJobAboutFinishedClusterJob(job, clusterJob1)
         assert atomicPhase.get() == 1
         assert job.state == AbstractJobImpl.State.STARTED
         assert step.latestProcessingStepUpdate.state == ExecutionState.STARTED
 
-        pbsMonitorService.notifyJobAboutFinishedClusterJob(job, clusterJob2)
+        clusterJobMonitoringService.notifyJobAboutFinishedClusterJob(job, clusterJob2)
         assert semaphore.tryAcquire(500, TimeUnit.MILLISECONDS)
         assert atomicPhase.get() == 2
 

@@ -12,15 +12,15 @@ import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.job.scheduler.PbsMonitorService
+import de.dkfz.tbi.otp.job.scheduler.ClusterJobMonitoringService
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.Realm
 
 /**
- * A {@link Job} that watches for PBS jobs to finish. It also checks whether the PBS job has logged a message in
+ * A {@link Job} that watches for cluster jobs to finish. It also checks whether the job has logged a message in
  * the job status log file and fails if at least one job was not successful.
  *
- * It requires the input job parameters for PBS IDs and realms to be set.
+ * It requires the input job parameters for cluster job IDs and realms to be set.
  *
  * @see JobParameterKeys
  *
@@ -32,7 +32,7 @@ import de.dkfz.tbi.otp.ngsdata.Realm
 @ResumableJob
 class WatchdogJob extends AbstractEndStateAwareJobImpl implements MonitoringJob {
 
-    @Autowired PbsMonitorService pbsMonitorService
+    @Autowired ClusterJobMonitoringService clusterJobMonitoringService
     @Autowired SchedulerService schedulerService
 
     /**
@@ -63,7 +63,7 @@ class WatchdogJob extends AbstractEndStateAwareJobImpl implements MonitoringJob 
     private void initialize() {
         // This really should be in the constructor so fields can be marked final.
         // But our AST transformations do weird things, such as creating constructors, apparently.
-        queuedClusterJobIds = getParameterValueOrClass("${JobParameterKeys.PBS_ID_LIST}").tokenize(',')
+        queuedClusterJobIds = getParameterValueOrClass("${JobParameterKeys.JOB_ID_LIST}").tokenize(',')
         allClusterJobIds = queuedClusterJobIds.clone().asImmutable()
         final ProcessingStep monitoredProcessingStep = this.processingStep.previous
         monitoredProcessingStepId = monitoredProcessingStep.id
@@ -83,7 +83,7 @@ class WatchdogJob extends AbstractEndStateAwareJobImpl implements MonitoringJob 
             schedulerService.doEndCheck(this)
         } else {
             Realm realm = CollectionUtils.exactlyOneElement(Realm.findAllById(Long.parseLong(realmIdFromJob)))
-            pbsMonitorService.monitor(queuedClusterJobIds.collect { new ClusterJobIdentifier(realm, it, realm.unixUser) }, this)
+            clusterJobMonitoringService.monitor(queuedClusterJobIds.collect { new ClusterJobIdentifier(realm, it, realm.unixUser) }, this)
         }
     }
 
@@ -93,7 +93,7 @@ class WatchdogJob extends AbstractEndStateAwareJobImpl implements MonitoringJob 
         lock.lock()
         try {
             queuedClusterJobIds.remove(finishedClusterJob.clusterJobId)
-            log.debug "PBS job ${finishedClusterJob.clusterJobId} finished"
+            log.debug "Cluster job ${finishedClusterJob.clusterJobId} finished"
             allFinished = queuedClusterJobIds.empty
         } finally {
             lock.unlock()
@@ -106,12 +106,12 @@ class WatchdogJob extends AbstractEndStateAwareJobImpl implements MonitoringJob 
 
                 // Output and finish
                 if (failedClusterJobs.empty) {
-                    log.debug 'All PBS jobs of ' + monitoredJobClass + ' were logged, calling succeed()'
+                    log.debug 'All cluster jobs of ' + monitoredJobClass + ' were logged, calling succeed()'
                     succeed()
                 }
                 else {
-                    log.error 'Some PBS jobs of ' + monitoredJobClass + ' seem to have failed: ' + failedClusterJobs.collect { it.clusterJobId }
-                    throw new ProcessingException("${monitoredProcessingStep} failed. PBS IDs with problems: ${failedClusterJobs.collect { it.clusterJobId }}")
+                    log.error 'Some cluster jobs of ' + monitoredJobClass + ' seem to have failed: ' + failedClusterJobs.collect { it.clusterJobId }
+                    throw new ProcessingException("${monitoredProcessingStep} failed. Job IDs with problems: ${failedClusterJobs.collect { it.clusterJobId }}")
                 }
                 schedulerService.doEndCheck(this)
             }

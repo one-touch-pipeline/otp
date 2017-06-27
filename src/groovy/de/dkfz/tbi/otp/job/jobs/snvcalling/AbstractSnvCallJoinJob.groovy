@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
-import de.dkfz.tbi.otp.job.processing.PbsService
+import de.dkfz.tbi.otp.job.processing.ClusterJobSchedulerService
 import de.dkfz.tbi.otp.ngsdata.ConfigService
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.ExternalScript
@@ -15,7 +15,7 @@ abstract class AbstractSnvCallJoinJob extends AbstractSnvCallingJob {
     @Autowired
     ConfigService configService
     @Autowired
-    PbsService pbsService
+    ClusterJobSchedulerService clusterJobSchedulerService
     @Autowired
     AbstractMergedBamFileService abstractMergedBamFileService
     @Autowired
@@ -62,7 +62,7 @@ abstract class AbstractSnvCallJoinJob extends AbstractSnvCallingJob {
 
             submit(jobResult, realm, { String clusterScript, Map specificEnvironmentVariables ->
                 generalEnvironmentVariables.putAll(specificEnvironmentVariables)
-                pbsService.executeJob(realm, clusterScript, generalEnvironmentVariables)
+                clusterJobSchedulerService.executeJob(realm, clusterScript, generalEnvironmentVariables)
             })
 
             return NextAction.WAIT_FOR_CLUSTER_JOBS

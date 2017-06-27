@@ -107,7 +107,7 @@ abstract class AbstractRoddyJob<R extends RoddyResult> extends AbstractMaybeSubm
         RoddyResult roddyResult = getRefreshedProcessParameterObject()
         assert roddyResult
 
-        // Roddy has started at least one pbs-job, hence the jobStateLogFile must exist.
+        // Roddy has started at least one cluster job, hence the jobStateLogFile must exist.
         File latestExecutionDirectory = roddyResult.latestWorkExecutionDirectory
         JobStateLogFile jobStateLogFile = JobStateLogFile.getInstance(latestExecutionDirectory)
 
@@ -120,7 +120,7 @@ abstract class AbstractRoddyJob<R extends RoddyResult> extends AbstractMaybeSubm
         Map<ClusterJobIdentifier, String> failedOrNotFinishedClusterJobs = [:]
 
         finishedClusterJobs.each {
-            if (!jobStateLogFile.containsPbsId(it.clusterJobId)) {
+            if (!jobStateLogFile.containsClusterJobId(it.clusterJobId)) {
                 failedOrNotFinishedClusterJobs.put(it, "JobStateLogFile contains no information for this cluster job.")
             } else if (!jobStateLogFile.isClusterJobFinishedSuccessfully(it.clusterJobId)) {
                 failedOrNotFinishedClusterJobs.put(it, "Status code: ${jobStateLogFile.getPropertyFromLatestLogFileEntry(it.clusterJobId, "statusCode")}")
@@ -146,13 +146,13 @@ abstract class AbstractRoddyJob<R extends RoddyResult> extends AbstractMaybeSubm
             if (m.matches()) {
                 String jobName = m.group(1)
                 String jobClass = m.group(2)
-                String pbsId = m.group(3)
+                String jobId = m.group(3)
 
-                if (!pbsId.matches(/[1-9]\d*/)) {
-                    throw new RuntimeException("'${pbsId}' is not a valid PBS ID.")
+                if (!jobId.matches(/[1-9]\d*/)) {
+                    throw new RuntimeException("'${jobId}' is not a valid job ID.")
                 }
 
-                submittedClusterJobs.add(clusterJobService.createClusterJob(realm, pbsId, realm.roddyUser, processingStep, seqType, jobName, jobClass))
+                submittedClusterJobs.add(clusterJobService.createClusterJob(realm, jobId, realm.roddyUser, processingStep, seqType, jobName, jobClass))
             }
         }
         assert submittedClusterJobs.empty == roddyOutput.stderr.contains(NO_STARTED_JOBS_MESSAGE)

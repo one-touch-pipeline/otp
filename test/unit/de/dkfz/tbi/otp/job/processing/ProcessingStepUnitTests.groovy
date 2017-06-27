@@ -114,11 +114,4 @@ class ProcessingStepUnitTests {
         process.jobExecutionPlan = plan1
         assertTrue(step.validate())
     }
-
-    @Test
-    void testPbsJobDescriptionNull() {
-        shouldFail() {
-            null.getPbsJobDescription()
-        }
-    }
 }

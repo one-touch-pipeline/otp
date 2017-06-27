@@ -96,7 +96,7 @@ class CopyFilesJobSpec extends Specification {
     void "test maybe submit when file has to be copied and not exists already"() {
         given:
         createSeqTrack()
-        copyFilesJob.pbsService = Mock(PbsService) {
+        copyFilesJob.clusterJobSchedulerService = Mock(ClusterJobSchedulerService) {
             1 * executeJob(_, _) >> { Realm realm, String command ->
                 assert command ==~ """
 mkdir -p -m 2750 .*

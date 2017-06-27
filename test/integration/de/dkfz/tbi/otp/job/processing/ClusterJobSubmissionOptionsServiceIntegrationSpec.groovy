@@ -5,11 +5,11 @@ import de.dkfz.tbi.otp.ngsdata.*
 import grails.test.spock.*
 
 
-class PbsOptionMergingServiceIntegrationSpec extends IntegrationSpec {
+class ClusterJobSubmissionOptionsServiceIntegrationSpec extends IntegrationSpec {
 
     void "test readOptionsFromDatabase"() {
         given:
-        PbsOptionMergingService service = new PbsOptionMergingService()
+        ClusterJobSubmissionOptionsService service = new ClusterJobSubmissionOptionsService()
         service.processingOptionService = new ProcessingOptionService()
 
         Realm realm = DomainFactory.createRealm(

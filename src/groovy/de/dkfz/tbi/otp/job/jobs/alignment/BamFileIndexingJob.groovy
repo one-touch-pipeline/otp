@@ -1,11 +1,11 @@
 package de.dkfz.tbi.otp.job.jobs.alignment
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.job.jobs.WatchdogJob
-import de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.job.jobs.*
+import de.dkfz.tbi.otp.job.jobs.utils.*
 import de.dkfz.tbi.otp.job.processing.*
-import org.springframework.beans.factory.annotation.Autowired
+import de.dkfz.tbi.otp.ngsdata.*
+import org.springframework.beans.factory.annotation.*
 
 class BamFileIndexingJob extends AbstractJobImpl {
 
@@ -24,7 +24,7 @@ class BamFileIndexingJob extends AbstractJobImpl {
          * The original version of this job executed a job on the cluster which was checked by the watchdog afterwards.
          * TODO: Remove this entire job after OTP-505 or during OTP-1165
          */
-        addOutputParameter(JobParameterKeys.PBS_ID_LIST, WatchdogJob.SKIP_WATCHDOG)
+        addOutputParameter(JobParameterKeys.JOB_ID_LIST, WatchdogJob.SKIP_WATCHDOG)
         addOutputParameter(JobParameterKeys.REALM, realm.id.toString())
     }
 

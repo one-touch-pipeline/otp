@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.job.jobs.alignment
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
+import de.dkfz.tbi.otp.job.jobs.utils.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import org.springframework.beans.factory.annotation.*
@@ -21,7 +22,7 @@ class BwaPairingAndSortingJob extends AbstractJobImpl {
     LsdfFilesService lsdfFilesService
 
     @Autowired
-    PbsService pbsService
+    ClusterJobSchedulerService clusterJobSchedulerService
 
     @Autowired
     AlignmentPassService alignmentPassService
@@ -36,9 +37,9 @@ class BwaPairingAndSortingJob extends AbstractJobImpl {
         ProcessedBamFile bamFile = processedBamFileService.createSortedBamFile(alignmentPass)
         Realm realm = alignmentPassService.realmForDataProcessing(alignmentPass)
         String cmd = createCommand(alignmentPass)
-        String pbsId = pbsService.executeJob(realm, cmd)
-        addOutputParameter("__pbsIds", pbsId)
-        addOutputParameter("__pbsRealm", realm.id.toString())
+        String jobId = clusterJobSchedulerService.executeJob(realm, cmd)
+        addOutputParameter(JobParameterKeys.JOB_ID_LIST, jobId)
+        addOutputParameter(JobParameterKeys.REALM, realm.id.toString())
     }
 
     private String createCommand(AlignmentPass alignmentPass) {

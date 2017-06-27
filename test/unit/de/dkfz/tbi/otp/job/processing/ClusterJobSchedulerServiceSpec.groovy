@@ -21,11 +21,11 @@ import spock.lang.*
         Realm,
         SeqType,
 ])
-class PbsServiceSpec extends Specification {
+class ClusterJobSchedulerServiceSpec extends Specification {
 
     void "retrieveKnownJobsWithState, when qstat fails, throws exception"(String stderr, int exitCode) {
         given:
-        PbsService service = new PbsService()
+        ClusterJobSchedulerService service = new ClusterJobSchedulerService()
         Realm realm = DomainFactory.createRealmDataProcessing()
         service.executionService = [
                 executeCommandReturnProcessOutput: { realm1, command, userName -> new ProcessOutput(
@@ -50,7 +50,7 @@ class PbsServiceSpec extends Specification {
 
     void "retrieveKnownJobsWithState, when qstat output is empty, returns empty map"() {
         given:
-        PbsService service = new PbsService()
+        ClusterJobSchedulerService service = new ClusterJobSchedulerService()
         Realm realm = DomainFactory.createRealmDataProcessing()
         service.executionService = [
                 executeCommandReturnProcessOutput: { realm1, command, userName -> new ProcessOutput(
@@ -61,16 +61,16 @@ class PbsServiceSpec extends Specification {
         ] as ExecutionService
 
         when:
-        Map<ClusterJobIdentifier, PbsMonitorService.Status> result = service.retrieveKnownJobsWithState(realm, realm.unixUser)
+        Map<ClusterJobIdentifier, ClusterJobMonitoringService.Status> result = service.retrieveKnownJobsWithState(realm, realm.unixUser)
 
         then:
         result.isEmpty()
     }
 
     @Unroll
-    void "retrieveKnownJobsWithState, when status #pbsStatus appears in qstat, returns correct status #status"(String pbsStatus, PbsMonitorService.Status status) {
+    void "retrieveKnownJobsWithState, when status #pbsStatus appears in qstat, returns correct status #status"(String pbsStatus, ClusterJobMonitoringService.Status status) {
         given:
-        PbsService service = new PbsService()
+        ClusterJobSchedulerService service = new ClusterJobSchedulerService()
         Realm realm = DomainFactory.createRealmDataProcessing()
         String jobId = "5075615"
         service.executionService = [
@@ -82,7 +82,7 @@ class PbsServiceSpec extends Specification {
         ] as ExecutionService
 
         when:
-        Map<ClusterJobIdentifier, PbsMonitorService.Status> result = service.retrieveKnownJobsWithState(realm, realm.unixUser)
+        Map<ClusterJobIdentifier, ClusterJobMonitoringService.Status> result = service.retrieveKnownJobsWithState(realm, realm.unixUser)
 
         then:
         def job = new ClusterJobIdentifier(realm, jobId, realm.unixUser)
@@ -91,14 +91,14 @@ class PbsServiceSpec extends Specification {
 
         where:
         pbsStatus | status
-        "C"       | PbsMonitorService.Status.COMPLETED
-        "E"       | PbsMonitorService.Status.COMPLETED
-        "H"       | PbsMonitorService.Status.NOT_COMPLETED
-        "Q"       | PbsMonitorService.Status.NOT_COMPLETED
-        "R"       | PbsMonitorService.Status.NOT_COMPLETED
-        "T"       | PbsMonitorService.Status.NOT_COMPLETED
-        "W"       | PbsMonitorService.Status.NOT_COMPLETED
-        "S"       | PbsMonitorService.Status.NOT_COMPLETED
+        "C"       | ClusterJobMonitoringService.Status.COMPLETED
+        "E"       | ClusterJobMonitoringService.Status.COMPLETED
+        "H"       | ClusterJobMonitoringService.Status.NOT_COMPLETED
+        "Q"       | ClusterJobMonitoringService.Status.NOT_COMPLETED
+        "R"       | ClusterJobMonitoringService.Status.NOT_COMPLETED
+        "T"       | ClusterJobMonitoringService.Status.NOT_COMPLETED
+        "W"       | ClusterJobMonitoringService.Status.NOT_COMPLETED
+        "S"       | ClusterJobMonitoringService.Status.NOT_COMPLETED
     }
 
 
@@ -116,7 +116,7 @@ ${jobId}.clust_head.ine  OtherUnixUser    fast     r160224_18005293    --      1
 
     void "test executeJob, succeeds"() {
         given:
-        PbsService service = new PbsService()
+        ClusterJobSchedulerService service = new ClusterJobSchedulerService()
         SeqType seqType = DomainFactory.createSeqType()
         Realm realm = DomainFactory.createRealmDataProcessing()
         String clusterJobId = "123"
@@ -135,7 +135,7 @@ ${jobId}.clust_head.ine  OtherUnixUser    fast     r160224_18005293    --      1
             getJobExecutedByCurrentThread() >> job
         }
 
-        service.pbsOptionMergingService = Stub(PbsOptionMergingService)
+        service.clusterJobSubmissionOptionsService = Stub(ClusterJobSubmissionOptionsService)
         service.jobStatusLoggingService = Stub(JobStatusLoggingService)
         service.executionService = Mock(ExecutionService)
         service.clusterJobService = Mock(ClusterJobService)

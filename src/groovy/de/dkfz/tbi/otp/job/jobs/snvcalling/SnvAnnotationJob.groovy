@@ -15,7 +15,7 @@ class SnvAnnotationJob extends AbstractSnvCallingJob implements AutoRestartableJ
     @Autowired
     ConfigService configService
     @Autowired
-    PbsService pbsService
+    ClusterJobSchedulerService clusterJobSchedulerService
     @Autowired
     AbstractMergedBamFileService abstractMergedBamFileService
 
@@ -82,7 +82,7 @@ class SnvAnnotationJob extends AbstractSnvCallingJob implements AutoRestartableJ
             script << "${ensureFileHasExpectedSizeScript(sampleType1BamFile, instance.sampleType1BamFile.fileSize)} "
             script << "${ensureFileDoesNotExistScript(annotationResultFile)} "
             script << "${step.getExternalScript(config.externalScriptVersion).scriptFilePath} "
-            pbsService.executeJob(realm, script.toString(), environmentVariables)
+            clusterJobSchedulerService.executeJob(realm, script.toString(), environmentVariables)
 
             return NextAction.WAIT_FOR_CLUSTER_JOBS
         } else {

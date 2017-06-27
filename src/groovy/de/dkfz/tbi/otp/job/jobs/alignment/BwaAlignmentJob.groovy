@@ -2,9 +2,10 @@ package de.dkfz.tbi.otp.job.jobs.alignment
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.job.jobs.utils.*
 import de.dkfz.tbi.otp.job.processing.*
-import org.springframework.beans.factory.annotation.Autowired
+import de.dkfz.tbi.otp.ngsdata.*
+import org.springframework.beans.factory.annotation.*
 
 /*
  * the very first version of bwaAlignment created by Sylwester running with binary bwa.
@@ -13,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired
 class BwaAlignmentJob extends AbstractJobImpl {
 
     @Autowired
-    PbsService pbsService
+    ClusterJobSchedulerService clusterJobSchedulerService
 
     @Autowired
     SeqTrackService seqTrackService
@@ -38,17 +39,17 @@ class BwaAlignmentJob extends AbstractJobImpl {
         long alignmentPassId = Long.parseLong(getProcessParameterValue())
         AlignmentPass alignmentPass = AlignmentPass.get(alignmentPassId)
         Realm realm = null
-        List<String> pbsIds = []
+        List<String> jobIds = []
         SeqTrack seqTrack = alignmentPass.seqTrack
         List<DataFile> files = seqTrackService.getSequenceFilesForSeqTrack(seqTrack)
         for (DataFile file in files) {
             assert file.fileExists && file.fileSize > 0L
             realm = configService.getRealmDataProcessing(file.project)
             ProcessedSaiFile saiFile = processedSaiFileService.createSaiFile(alignmentPass, file)
-            pbsIds << sendAlignmentScript(realm, saiFile)
+            jobIds << sendAlignmentScript(realm, saiFile)
         }
-        addOutputParameter("__pbsIds", pbsIds.join(","))
-        addOutputParameter("__pbsRealm", realm.id.toString())
+        addOutputParameter(JobParameterKeys.JOB_ID_LIST, jobIds.join(","))
+        addOutputParameter(JobParameterKeys.REALM, realm.id.toString())
     }
 
     private String sendAlignmentScript(Realm realm, ProcessedSaiFile saiFile) {
@@ -64,7 +65,7 @@ class BwaAlignmentJob extends AbstractJobImpl {
         String bwaCmd = "${bwaCommand} aln ${nCores} ${qaSwitch} ${qParameter} -f ${saiFilePath} ${referenceGenomePath} ${dataFilePath}"
         String chmodCmd = "chmod 440 ${saiFilePath}"
         String cmd = "${bwaCmd} ; ${chmodCmd}"
-        return pbsService.executeJob(realm, cmd)
+        return clusterJobSchedulerService.executeJob(realm, cmd)
     }
 
     private String bwaCommand(AlignmentPass alignmentPass) {

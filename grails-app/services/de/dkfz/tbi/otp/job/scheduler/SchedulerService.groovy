@@ -285,20 +285,20 @@ class SchedulerService {
     }
 
     /**
-     * Scheduled method to check the PBS for finished jobs.
+     * Scheduled method to check the cluster for finished jobs.
      * Execution is wrapped in a persistence interceptor.
      *
      * Do not invoke this method manually.
      */
     @Scheduled(fixedDelay=180000l)
-    public void pbsMonitorCheck() {
+    public void clusterJobCheck() {
         if (!schedulerActive) {
             return
         }
-        // method to proxy the invocation of PbsMonitorService::check() to workaround strange behavior of Spring
+        // method to proxy the invocation of ClusterJobMonitoringService::check() to workaround strange behavior of Spring
         persistenceInterceptor.init()
         try {
-            applicationContext.pbsMonitorService.check()
+            applicationContext.clusterJobMonitoringService.check()
         } finally {
             persistenceInterceptor.flush()
             persistenceInterceptor.destroy()

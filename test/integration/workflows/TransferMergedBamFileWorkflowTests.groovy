@@ -581,7 +581,7 @@ class TransferMergedBamFileWorkflowTests extends WorkflowTestCase {
                 assert processedMergedBamFile.save(failOnError: true)
                 return processedMergedBamFile.id as String
             }
-            moveFilesToFinalDestinationJob.pbsService.metaClass.executeJob = { Realm realm, String text ->
+            moveFilesToFinalDestinationJob.clusterJobSchedulerService.metaClass.executeJob = { Realm realm, String text ->
                 throw new RuntimeException(exceptionMessage)
             }
             assert processedMergedBamFile.mergingWorkPackage.bamFileInProjectFolder == null
@@ -590,7 +590,7 @@ class TransferMergedBamFileWorkflowTests extends WorkflowTestCase {
             } == exceptionMessage
             assert processedMergedBamFile.mergingWorkPackage.bamFileInProjectFolder == processedMergedBamFile
         } finally {
-            TestCase.removeMetaClass(PbsService, moveFilesToFinalDestinationJob.pbsService)
+            TestCase.removeMetaClass(ClusterJobSchedulerService, moveFilesToFinalDestinationJob.clusterJobSchedulerService)
             TestCase.removeMetaClass(MoveFilesToFinalDestinationJob, moveFilesToFinalDestinationJob)
         }
     }

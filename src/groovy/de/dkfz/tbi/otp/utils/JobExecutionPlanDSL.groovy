@@ -1,18 +1,11 @@
 package de.dkfz.tbi.otp.utils
 
-import org.springframework.security.acls.domain.BasePermission
-import org.springframework.security.acls.domain.GrantedAuthoritySid
-import org.springframework.security.acls.model.Sid
-
-import de.dkfz.tbi.otp.job.plan.JobDefinition
-import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
-import de.dkfz.tbi.otp.job.plan.StartJobDefinition
-import de.dkfz.tbi.otp.job.plan.ValidatingJobDefinition
-import de.dkfz.tbi.otp.job.processing.Parameter
-import de.dkfz.tbi.otp.job.processing.ParameterMapping
-import de.dkfz.tbi.otp.job.processing.ParameterType
-import de.dkfz.tbi.otp.job.processing.ParameterUsage
-import de.dkfz.tbi.otp.security.Group
+import de.dkfz.tbi.otp.job.jobs.utils.*
+import de.dkfz.tbi.otp.job.plan.*
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.security.*
+import org.springframework.security.acls.domain.*
+import org.springframework.security.acls.model.*
 
 class Helper {
     JobDefinition firstJob = null
@@ -104,15 +97,15 @@ class JobExecutionPlanDSL {
     }
 
     private static def watchdogClosure = { JobDefinition jobDefinition, JobExecutionPlan jep, Helper helper, String watchdogBean ->
-        ParameterType type = new ParameterType(name: "__pbsIds", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.OUTPUT)
+        ParameterType type = new ParameterType(name: JobParameterKeys.JOB_ID_LIST, jobDefinition: jobDefinition, parameterUsage: ParameterUsage.OUTPUT)
         assert(type.save())
-        ParameterType realmOutputType = new ParameterType(name: "__pbsRealm", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.OUTPUT, className: "de.dkfz.tbi.otp.ngsdata.Realm")
+        ParameterType realmOutputType = new ParameterType(name: JobParameterKeys.REALM, jobDefinition: jobDefinition, parameterUsage: ParameterUsage.OUTPUT, className: "de.dkfz.tbi.otp.ngsdata.Realm")
         assert(realmOutputType.save())
         JobDefinition watchdogJobDefinition = new JobDefinition(name: "__WatchdogFor__" + jobDefinition.name, bean: watchdogBean, plan: jep, previous: jobDefinition)
         assert(watchdogJobDefinition.save())
-        ParameterType inputType = new ParameterType(name: "__pbsIds", jobDefinition: watchdogJobDefinition, parameterUsage: ParameterUsage.INPUT)
+        ParameterType inputType = new ParameterType(name: JobParameterKeys.JOB_ID_LIST, jobDefinition: watchdogJobDefinition, parameterUsage: ParameterUsage.INPUT)
         assert(inputType.save())
-        ParameterType realmInputType = new ParameterType(name: "__pbsRealm", jobDefinition: watchdogJobDefinition, parameterUsage: ParameterUsage.INPUT, className: "de.dkfz.tbi.otp.ngsdata.Realm")
+        ParameterType realmInputType = new ParameterType(name: JobParameterKeys.REALM, jobDefinition: watchdogJobDefinition, parameterUsage: ParameterUsage.INPUT, className: "de.dkfz.tbi.otp.ngsdata.Realm")
         assert(realmInputType.save())
         ParameterMapping mapping = new ParameterMapping(from: type, to: inputType, job: watchdogJobDefinition)
         assert(mapping.save())
@@ -155,7 +148,7 @@ class JobExecutionPlanDSL {
 
     private static def pbsJobClosure = { JobExecutionPlan jep, Helper helper, String jobName, String bean, String realmId, closure = null ->
         JobExecutionPlanDSL.jobClosure(jep, helper, jobName, bean, closure)
-        ParameterType realmInputType = new ParameterType(name: "__pbsRealm", jobDefinition: helper.previous,  parameterUsage: ParameterUsage.INPUT, className: "de.dkfz.tbi.otp.ngsdata.Realm")
+        ParameterType realmInputType = new ParameterType(name: JobParameterKeys.REALM, jobDefinition: helper.previous,  parameterUsage: ParameterUsage.INPUT, className: "de.dkfz.tbi.otp.ngsdata.Realm")
         assert(realmInputType.save())
         Parameter parameter = new Parameter(type: realmInputType, value: realmId)
         assert(parameter.save())

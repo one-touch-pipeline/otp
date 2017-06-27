@@ -11,9 +11,6 @@ class ReplaceSourceWithLinkJob extends AbstractEndStateAwareJobImpl {
     ConfigService configService
 
     @Autowired
-    PbsService pbsService
-
-    @Autowired
     ExecutionService executionService
 
 

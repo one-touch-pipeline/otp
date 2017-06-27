@@ -16,7 +16,7 @@ class FastqcJob extends AbstractOtpJob implements AutoRestartableJob {
     FastqcDataFilesService fastqcDataFilesService
 
     @Autowired
-    PbsService pbsService
+    ClusterJobSchedulerService clusterJobSchedulerService
 
     @Autowired
     LsdfFilesService lsdfFilesService
@@ -106,7 +106,7 @@ class FastqcJob extends AbstractOtpJob implements AutoRestartableJob {
             String rawSeq = lsdfFilesService.getFileFinalPath(dataFile)
             String fastqcCommand = ProcessingOptionService.findOption(ProcessingOption.OptionName.COMMAND_FASTQC, null, null)
             String command = "${fastqcCommand} ${rawSeq} --noextract --nogroup -o ${outDir};chmod -R 440 ${outDir}/*.zip"
-            pbsService.executeJob(realm, command)
+            clusterJobSchedulerService.executeJob(realm, command)
             createFastqcProcessedFileIfNotExisting(dataFile)
         }
     }

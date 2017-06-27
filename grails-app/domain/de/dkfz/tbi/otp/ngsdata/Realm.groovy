@@ -59,7 +59,7 @@ class Realm implements Entity, Serializable {
         stagingRootPath blank:true, nullable:true
         roddyUser blank: false, nullable: true
         defaultJobSubmissionOptions validator: {
-            PbsOptionMergingService.validateJsonString(it)
+            ClusterJobSubmissionOptionsService.validateJsonString(it)
         }
     }
 

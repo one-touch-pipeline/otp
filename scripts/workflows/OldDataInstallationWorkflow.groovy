@@ -1,3 +1,5 @@
+import de.dkfz.tbi.otp.job.jobs.utils.*
+
 import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
 
 // This JobExecutionPlan-DSL shall only be used to test if it is possible to update the JobExecutionPlan
@@ -7,25 +9,25 @@ plan("DataInstallationWorkflow") {
     //job("checkInitialDataNotCompressed", "checkInitialDataNotCompressedJob")
     job("checkInputFiles", "checkInputFilesJob")
     //job("compressSequenceFiles", "compressSequenceFilesJob") {
-    //    outputParameter("pbsIds")
+    //    outputParameter(JobParameterKeys.JOB_ID_LIST)
     //}
     //job("compressSequenceFilesWatchdog", "myPbsWatchdog") {
-    //    inputParameter("pbsIds", "compressSequenceFiles", "pbsIDs")
+    //    inputParameter(JobParameterKeys.JOB_ID_LIST, "compressSequenceFiles", JobParameterKeys.JOB_ID_LIST)
     //}
     job("createOutputDirectory", "createOutputDirectoryJob")
     job("copyFilesToFinalLocation", "copyFilesJob") {
-        outputParameter("__pbsIds")
+        outputParameter(JobParameterKeys.JOB_ID_LIST)
     }
     job("copyFilesToFinalLocationWatchdog", "myPBSWatchdogJob") {
-        inputParameter("__pbsIds", "copyFilesToFinalLocation", "__pbsIds")
+        inputParameter(JobParameterKeys.JOB_ID_LIST, "copyFilesToFinalLocation", JobParameterKeys.JOB_ID_LIST)
     }
     // TODO: milestone
     job("checkFinalLocation", "checkFinalLocationJob")
     job("calculateChecksum", "calculateChecksumJob") {
-        outputParameter("__pbsIds")
+        outputParameter(JobParameterKeys.JOB_ID_LIST)
     }
     job("calculateChecksumWatchdog", "myPBSWatchdogJob") {
-        inputParameter("__pbsIds", "calculateChecksum", "__pbsIds")
+        inputParameter(JobParameterKeys.JOB_ID_LIST, "calculateChecksum", JobParameterKeys.JOB_ID_LIST)
     }
     job("compareChecksum", "compareChecksumJob")
     job("createViewByPid", "createViewByPidJob")

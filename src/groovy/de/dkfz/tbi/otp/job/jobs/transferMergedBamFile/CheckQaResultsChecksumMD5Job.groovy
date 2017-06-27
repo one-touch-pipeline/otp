@@ -1,15 +1,12 @@
 package de.dkfz.tbi.otp.job.jobs.transferMergedBamFile
 
-import org.springframework.beans.factory.annotation.Autowired
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
-import de.dkfz.tbi.otp.job.processing.PbsService
+import de.dkfz.tbi.otp.job.jobs.utils.*
+import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
+import org.springframework.beans.factory.annotation.*
 
 class CheckQaResultsChecksumMD5Job extends AbstractEndStateAwareJobImpl {
-
-    final String JOB = "__pbsIds"
-    final String REALM = "__pbsRealm"
 
     @Autowired
     ProcessedMergedBamFileService processedMergedBamFileService
@@ -18,7 +15,7 @@ class CheckQaResultsChecksumMD5Job extends AbstractEndStateAwareJobImpl {
     ConfigService configService
 
     @Autowired
-    PbsService pbsService
+    ClusterJobSchedulerService clusterJobSchedulerService
 
     @Autowired
     ChecksumFileService checksumFileService
@@ -36,11 +33,11 @@ class CheckQaResultsChecksumMD5Job extends AbstractEndStateAwareJobImpl {
         Project project = processedMergedBamFileService.project(file)
         String cmd = scriptText(temporalqaDestinationDir)
         Realm realm = configService.getRealmDataManagement(project)
-        String jobId = pbsService.executeJob(realm, cmd)
-        log.debug "Job ${jobId} submitted to PBS"
+        String jobId = clusterJobSchedulerService.executeJob(realm, cmd)
+        log.debug "Job ${jobId} submitted to cluster job scheduler"
 
-        addOutputParameter(JOB, jobId)
-        addOutputParameter(REALM, realm.id.toString())
+        addOutputParameter(JobParameterKeys.JOB_ID_LIST, jobId)
+        addOutputParameter(JobParameterKeys.REALM, realm.id.toString())
         succeed()
     }
 

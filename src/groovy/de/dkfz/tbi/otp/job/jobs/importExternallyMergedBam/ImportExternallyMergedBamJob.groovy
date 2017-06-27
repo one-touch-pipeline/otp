@@ -11,7 +11,7 @@ class ImportExternallyMergedBamJob extends AbstractOtpJob {
     ChecksumFileService checksumFileService
 
     @Autowired
-    PbsService pbsService
+    ClusterJobSchedulerService clusterJobSchedulerService
 
     @Autowired
     ConfigService configService
@@ -85,7 +85,7 @@ chmod 750  `find ${furtherFiles} -type d `
 touch ${checkpoint}
 """
 
-                pbsService.executeJob(realm, cmd)
+                clusterJobSchedulerService.executeJob(realm, cmd)
             }
         }
         if (action == AbstractMultiJob.NextAction.SUCCEED) {

@@ -11,7 +11,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
 import de.dkfz.tbi.otp.job.processing.ExecutionService
-import de.dkfz.tbi.otp.job.processing.PbsService
+import de.dkfz.tbi.otp.job.processing.ClusterJobSchedulerService
 import de.dkfz.tbi.otp.job.processing.ParameterType
 import de.dkfz.tbi.otp.job.processing.ParameterUsage
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
@@ -42,7 +42,7 @@ class FilterVcfJobTests {
     ExecutionService executionService
 
     @Autowired
-    PbsService pbsService
+    ClusterJobSchedulerService clusterJobSchedulerService
 
     @Autowired
     SchedulerService schedulerService
@@ -229,9 +229,9 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         WaitingFileUtils.metaClass = null
         assert testDirectory.deleteDir()
         removeMetaClass(ExecutionService, executionService)
-        removeMetaClass(PbsService, pbsService)
+        removeMetaClass(ClusterJobSchedulerService, clusterJobSchedulerService)
         removeMetaClass(LinkFileUtils, linkFileUtils)
-        removeMetaClass(ClusterJobLoggingService, pbsService.clusterJobLoggingService)
+        removeMetaClass(ClusterJobLoggingService, clusterJobSchedulerService.clusterJobLoggingService)
     }
 
 
@@ -265,7 +265,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
             return true
         }
 
-        pbsService.clusterJobLoggingService.metaClass.createAndGetLogDirectory = { Realm realm, ProcessingStep processingStep ->
+        clusterJobSchedulerService.clusterJobLoggingService.metaClass.createAndGetLogDirectory = { Realm realm, ProcessingStep processingStep ->
             return TestCase.uniqueNonExistentPath
         }
 

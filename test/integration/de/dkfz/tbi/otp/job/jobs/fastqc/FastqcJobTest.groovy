@@ -61,7 +61,7 @@ class FastqcJobTest {
     @After
     void tearDown() {
 
-        TestCase.removeMetaClass(ExecutionHelperService, fastqcJob.pbsService)
+        TestCase.removeMetaClass(ClusterJobSchedulerService, fastqcJob.clusterJobSchedulerService)
         TestCase.removeMetaClass(ExecutionService, fastqcJob.executionService)
         TestCase.removeMetaClass(LsdfFilesService, fastqcJob.lsdfFilesService)
         TestCase.removeMetaClass(FastqcUploadService, fastqcJob.fastqcUploadService)
@@ -76,7 +76,7 @@ class FastqcJobTest {
 
     @Test
     void testMaybeSubmit_FastQcResultsNotAvailable_executesFastQcCommand() {
-        fastqcJob.pbsService.metaClass.executeJob = { Realm inputRealm, String inputCommand ->
+        fastqcJob.clusterJobSchedulerService.metaClass.executeJob = { Realm inputRealm, String inputCommand ->
             assert inputCommand.contains("fastqc-0.10.1")
             return 'pbsJobId'
         }
@@ -101,7 +101,7 @@ class FastqcJobTest {
         dataFile.sequenceLength = sequenceLength
         assert dataFile.save(flush: true)
 
-        fastqcJob.pbsService.metaClass.executeJob = { Realm inputRealm, String inputCommand ->
+        fastqcJob.clusterJobSchedulerService.metaClass.executeJob = { Realm inputRealm, String inputCommand ->
             assert false : "this method should not be reached"
         }
 

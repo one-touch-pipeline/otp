@@ -13,7 +13,7 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
 import de.dkfz.tbi.otp.job.processing.CreateClusterScriptService
 import de.dkfz.tbi.otp.job.processing.ExecutionService
-import de.dkfz.tbi.otp.job.processing.PbsService
+import de.dkfz.tbi.otp.job.processing.ClusterJobSchedulerService
 import de.dkfz.tbi.otp.job.processing.ParameterType
 import de.dkfz.tbi.otp.job.processing.ParameterUsage
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
@@ -46,7 +46,7 @@ class SnvDeepAnnotationJobTests {
     ExecutionService executionService
 
     @Autowired
-    PbsService pbsService
+    ClusterJobSchedulerService clusterJobSchedulerService
 
     @Autowired
     SchedulerService schedulerService
@@ -219,10 +219,10 @@ CHROMOSOME_INDICES=( {1..21} X Y)
     void tearDown() {
         // Reset meta classes
         removeMetaClass(ExecutionService, executionService)
-        removeMetaClass(PbsService, pbsService)
+        removeMetaClass(ClusterJobSchedulerService, clusterJobSchedulerService)
         removeMetaClass(CreateClusterScriptService, createClusterScriptService)
         removeMetaClass(LinkFileUtils, linkFileUtils)
-        removeMetaClass(ClusterJobLoggingService, pbsService.clusterJobLoggingService)
+        removeMetaClass(ClusterJobLoggingService, clusterJobSchedulerService.clusterJobLoggingService)
 
         LsdfFilesService.metaClass = null
         WaitingFileUtils.metaClass = null
@@ -255,7 +255,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
                     [(new File(snvCallingInstance1.instancePath.absoluteDataManagementPath, SnvCallingStep.SNV_DEEPANNOTATION.getResultFileName(snvCallingInstance2.individual))):
                              new File(snvCallingInstance2.instancePath.absoluteDataManagementPath, SnvCallingStep.SNV_DEEPANNOTATION.getResultFileName(snvCallingInstance2.individual))]
         }
-        pbsService.metaClass.executeJob = { Realm realm, String text, String qsubParameters ->
+        clusterJobSchedulerService.metaClass.executeJob = { Realm realm, String text, String qsubParameters ->
             throw new RuntimeException("This area should not be reached since the deep annotation job shall not run")
         }
         assertEquals(NextAction.SUCCEED, snvDeepAnnotationJob.maybeSubmit(snvCallingInstance2))
@@ -284,7 +284,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         TestCase.mockCreateDirectory(lsdfFilesService)
         SnvCallingStep step = SnvCallingStep.SNV_DEEPANNOTATION
 
-        pbsService.clusterJobLoggingService.metaClass.createAndGetLogDirectory = { Realm realm, ProcessingStep processingStep ->
+        clusterJobSchedulerService.clusterJobLoggingService.metaClass.createAndGetLogDirectory = { Realm realm, ProcessingStep processingStep ->
             return TestCase.uniqueNonExistentPath
         }
         snvDeepAnnotationJob.metaClass.createAndSaveSnvJobResult = { SnvCallingInstance instance, ExternalScript externalScript, SnvJobResult inputResult -> }
