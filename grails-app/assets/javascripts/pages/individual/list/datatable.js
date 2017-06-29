@@ -16,8 +16,8 @@ $.otp.individual = {
         var searchCriteria = $.otp.dataTableFilter.register($("#searchCriteriaTable"), $("#individualTable"), true);
 
         $("#individualTable").dataTable({
-            sDom: '<i> T rt<"clear">',
-            oTableTools : $.otp.tableTools,
+            sDom: '<i> B rt<"clear">',
+            buttons: $.otp.tableButtons,
             bFilter: true,
             bProcessing: true,
             bServerSide: true,

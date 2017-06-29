@@ -9,8 +9,8 @@ $.otp.samplePair = {
     registerSamplePairForSnvProcessingSNV : function (selector, url, successUpdate) {
         "use strict";
         var oTableSamplePairForSnvProcessingSNV = $(selector).dataTable({
-            sDom: '<i> T rt<"clear">',
-            oTableTools : $.otp.tableTools,
+            sDom: '<i> B rt<"clear">',
+            buttons: $.otp.tableButtons,
             bFilter : true,
             bProcessing : true,
             bServerSide : false,

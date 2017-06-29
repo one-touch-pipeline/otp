@@ -5,8 +5,8 @@ $.otp.alignmentQualityOverviewTable = {
     register : function () {
         "use strict";
         var table = $("#overviewTableProcessedMergedBMF").dataTable({
-            sDom: '<i> T rt<"clear">',
-            oTableTools : $.otp.tableTools,
+            sDom: '<i> B rt<"clear">',
+            buttons: $.otp.tableButtons,
             bFilter : true,
             bProcessing : true,
             bServerSide : false,

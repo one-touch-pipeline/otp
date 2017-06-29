@@ -5,8 +5,8 @@ $.otp.projectOverviewTable = {
     registerMMMLMappingId : function () {
         "use strict";
         var oTableMMMLMapping = $("#overviewTableMMMLMappingId").dataTable({
-            sDom: '<i> T rt<"clear">',
-            oTableTools : $.otp.tableTools,
+            sDom: '<i> B rt<"clear">',
+            buttons: $.otp.tableButtons,
             bFilter : true,
             bProcessing : true,
             bServerSide : false,

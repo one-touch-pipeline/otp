@@ -9,8 +9,8 @@ $.otp.projectProgressTable = {
                 maxDate: $('#endDate').val()
         });
         var oTableProgress = $("#progressId").dataTable({
-            sDom: '<i> T rt<"clear">',
-            oTableTools : $.otp.tableTools,
+            sDom: '<i> B rt<"clear">',
+            buttons: $.otp.tableButtons,
             bFilter : true,
             bProcessing : true,
             bServerSide : false,

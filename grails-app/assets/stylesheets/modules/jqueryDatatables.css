@@ -4,5 +4,5 @@
 *= require ../dataTable/dataTables.fixedColumns.css
 *= require ../dataTable/dataTables.fixedHeader.css
 *= require ../dataTable/dataTables.scroller.css
-*= require ../dataTable/dataTables.tableTools.css
+*= require ../dataTable/buttons.dataTables.css
 */

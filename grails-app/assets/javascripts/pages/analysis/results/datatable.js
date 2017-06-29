@@ -6,8 +6,8 @@ $.otp.resultsTable = {
     registerDataTable: function (tableElement, source, convertRowData) {
         "use strict";
         var oTable = tableElement.dataTable({
-            sDom: '<i> T rt<"clear">',
-            oTableTools : $.otp.tableTools,
+            sDom: '<i> B rt<"clear">',
+            buttons: $.otp.tableButtons,
             bFilter: true,
             bProcessing: true,
             bServerSide: false,

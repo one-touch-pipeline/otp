@@ -3,8 +3,8 @@ $.otp.sampleIdentifierOverviewTable = {
     registerDataTable: function (selector, url) {
         "use strict";
         var oTable = $(selector).dataTable({
-            sDom: '<i> T rt<"clear">',
-            oTableTools : $.otp.tableTools,
+            sDom: '<i> B rt<"clear">',
+            buttons: $.otp.tableButtons,
             bFilter: true,
             bProcessing: true,
             bServerSide: false,

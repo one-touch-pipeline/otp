@@ -6,27 +6,6 @@
 $.otp = {
     contextPath: $("head meta[name=contextPath]").attr("content"),
 
-    tableTools_button_options: [
-        {
-            "sExtends": "csv",
-            "bFooter": false,
-            "bSelectedOnly": true,
-            "oSelectorOpts": {
-                "filter": "applied",
-                "order": "current"
-            }
-        },
-        {
-            "sExtends": "pdf",
-            "bFooter": false,
-            "bSelectedOnly": true,
-            "oSelectorOpts": {
-                "filter": "applied",
-                "order": "current"
-            }
-        }
-    ],
-
     /**
      * Helper method to extend the given link by a further component.
      * Ensures that there is exactly one slash between the link and the further
@@ -557,7 +536,10 @@ $.otp.saveComment = function (id, comment, controller, action) {
     });
 };
 
-$.otp.tableTools = {
-    sSwfPath: $.otp.contextPath + "/assets/swf/copy_csv_xls_pdf.swf",
-    aButtons: $.otp.tableTools_button_options
-};
+$.otp.tableButtons = [
+    {
+        extend: 'csvHtml5',
+        text: 'Donwload CSV',
+        footer: false
+    }
+];

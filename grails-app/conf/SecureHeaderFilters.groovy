@@ -15,7 +15,7 @@ class SecureHeaderFilters {
                         "base-uri 'self'",
                         "form-action 'self'",
                         "frame-ancestors 'none'",
-                        "plugin-types application/pdf application/x-shockwave-flash",
+                        "plugin-types application/pdf",
                 ].join("; "))
                 response.setHeader("Referrer-Policy", "strict-origin-when-cross-origin")
                 response.setHeader("X-Content-Type-Options", "nosniff")
