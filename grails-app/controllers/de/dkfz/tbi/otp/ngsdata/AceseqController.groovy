@@ -47,10 +47,10 @@ class AceseqController {
         List data = results.collect { Map properties ->
             AceseqQc qc = AceseqQc.findByAceseqInstanceAndNumber(AceseqInstance.get(properties.instanceId as long), 1)
             properties.putAll([
-                    tcc: qc?.tcc,
-                    ploidy: qc?.ploidy,
+                    tcc: FormatHelper.formatToTwoDecimalsNullSave(qc?.tcc),
+                    ploidy: FormatHelper.formatToTwoDecimalsNullSave(qc?.ploidy),
                     ploidyFactor: qc?.ploidyFactor,
-                    goodnessOfFit: qc?.goodnessOfFit,
+                    goodnessOfFit: FormatHelper.formatToTwoDecimalsNullSave(qc?.goodnessOfFit),
                     gender: qc?.gender,
                     solutionPossible: qc?.solutionPossible,
             ])
