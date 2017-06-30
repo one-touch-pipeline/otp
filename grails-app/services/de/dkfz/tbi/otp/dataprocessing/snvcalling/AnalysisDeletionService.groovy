@@ -1,7 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
 import de.dkfz.tbi.otp.dataprocessing.*
-
+import de.dkfz.tbi.otp.dataprocessing.sophia.*
 
 public class AnalysisDeletionService {
 
@@ -13,6 +13,21 @@ public class AnalysisDeletionService {
         if (analysisInstance instanceof SnvCallingInstance) {
             List<SnvJobResult> results = SnvJobResult.findAllBySnvCallingInstance(analysisInstance, [sort: 'id', order: 'desc'])
             results.each {
+                it.delete(flush: true)
+            }
+        } else if (analysisInstance instanceof IndelCallingInstance) {
+            List<IndelQualityControl> indelQualityControl = IndelQualityControl.findAllByIndelCallingInstance(analysisInstance, [sort: 'id', order: 'desc'])
+            indelQualityControl.each {
+                it.delete(flush: true)
+            }
+        } else if (analysisInstance instanceof SophiaInstance) {
+            List<SophiaQc> sophiaQc = SophiaQc.findAllBySophiaInstance(analysisInstance, [sort: 'id', order: 'desc'])
+            sophiaQc.each {
+                it.delete(flush: true)
+            }
+        } else if (analysisInstance instanceof AceseqInstance) {
+            List<AceseqQc> aceseqQc = AceseqQc.findAllByAceseqInstance(analysisInstance, [sort: 'id', order: 'desc'])
+            aceseqQc.each {
                 it.delete(flush: true)
             }
         }
