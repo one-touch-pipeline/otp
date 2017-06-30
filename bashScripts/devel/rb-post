@@ -7,7 +7,7 @@ if [ "${OTP_NUMBER:0:4}" == "OTP-" ]
 then
     RB_OPTS="--bugs-closed $OTP_NUMBER"
 fi
-rbt_request=$(rbt post -g $RB_OPTS --branch "`git merge-base --fork-point origin/master`" | egrep '^http://***REMOVED***reviewboard\.dkfz\.de/reviews/r/[0-9]+/$')
+rbt_request=$(rbt post --disable-ssl-verification -g $RB_OPTS --branch "`git merge-base --fork-point origin/master`" | egrep '^https://***REMOVED***reviewboard\.dkfz\.de/reviews/r/[0-9]+/$')
 echo $rbt_request
 if [ "$rbt_request" == "" -o "$RB_OPTS" == "" ]
 then

@@ -63,7 +63,7 @@ generate_link_post_data() {
         "summary":"$COMMIT_MESSAGE",
         "title":"Review Request:",
         "icon": {
-            "url16x16":"http://***REMOVED***reviewboard.dkfz.de/reviews/static/rb/images/logo.cc81d3ae01b2.png",
+            "url16x16":"https://***REMOVED***reviewboard.dkfz.de/reviews/static/rb/images/favicon.3161c840d49e.ico",
             "title":"Review Board"
         }
     }
@@ -106,7 +106,7 @@ HTTP_CODE=$(curl -s -w '%{http_code}' \
 -X POST --data "$(generate_update_post_data)" \
 "$JIRA_ISSUE_API_LINK/transitions?expand=transitions.fields")
 
-if [ $HTTP_CODE == 201 ]
+if [ $HTTP_CODE == 204 ]
 then
     echo "Successful updated"
 else
@@ -129,7 +129,7 @@ EOF
     -X POST --data "$(generate_update_post_data)" \
     "$JIRA_ISSUE_API_LINK/transitions?expand=transitions.fields")
 
-    if [ $HTTP_CODE == 201 ]
+    if [ $HTTP_CODE == 204 ]
     then
         echo "Successful updated"
     else
