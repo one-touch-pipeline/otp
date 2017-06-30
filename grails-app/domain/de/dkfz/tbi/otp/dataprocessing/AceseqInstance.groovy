@@ -5,6 +5,8 @@ import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 
+import java.text.*
+
 class AceseqInstance extends BamFilePairAnalysis implements ProcessParameterObject, Entity, RoddyAnalysisResult {
 
     static hasMany = [
@@ -78,7 +80,9 @@ class AceseqInstance extends BamFilePairAnalysis implements ProcessParameterObje
                 AceseqQc aceseqQc = AceseqQc.findByNumberAndAceseqInstance(1, this)
                 assert aceseqQc
                 //If variables contain dots replace them if not they will be used by Regex
-                pattern = "${this.individual.pid}_plot_${aceseqQc.ploidyFactor}extra_${aceseqQc.tcc}_"
+                DecimalFormat decimalFormat = (DecimalFormat)NumberFormat.getInstance(Locale.ENGLISH)
+                decimalFormat.applyPattern("0.##")
+                pattern = "${this.individual.pid}_plot_${aceseqQc.ploidyFactor}extra_${decimalFormat.format(aceseqQc.tcc)}_"
                         .replace('.', '\\.') + '.+\\.png'
                 break
             case AceseqPlots.ALL:

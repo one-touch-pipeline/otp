@@ -3,7 +3,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="layout" content="main" />
-    <title><g:message code="aceseq.plots.title" args="[pid]" /></title>
+    <title><g:message code="aceseq.plots.title" args="[aceseqInstance.individual.pid]" /></title>
 </head>
 <body>
     <g:if test="${error}">
@@ -11,19 +11,25 @@
         <p><g:message code="${error}"/></p>
     </g:if>
     <g:else>
-        <h1><g:message code="aceseq.plots.title" args="[pid]" /></h1>
-        <div>
+        <h1><g:message code="aceseq.plots.title" args="[aceseqInstance.individual.pid]" /></h1>
+        <div class="body">
             <g:each in="${plot}" var="p">
+                <g:set var="url" value="${g.createLink(controller: "aceseq", action: "plotImage",
+                        params: ["aceseqInstance.id": aceseqInstance.id, aceseqPlot: p])}" />
                 <div>
-                    <img src="${g.createLink(controller: "aceseq", action: "plotImage",
-                            params: ["aceseqInstance.id": aceseqInstance.id, aceseqPlot: p])}"/>
+                    <a target="_blank" href="${url}">
+                        <img class="img-plots" src="${url}"/>
+                   </a>
                 </div>
             </g:each>
             <g:each in="${plotNumber}" var="p">
-                <g:each in="${0..p.value}" var="i">
+                <g:each in="${p.value}" var="i">
+                    <g:set var="url" value="${g.createLink(controller: "aceseq", action: "plotImages",
+                            params: ["aceseqInstance.id": aceseqInstance.id, aceseqPlots: p.key, index: i])}" />
                     <div>
-                        <img src="${g.createLink(controller: "cnv", action: "plotImages",
-                                params: ["aceseqInstance.id": aceseqInstance.id, aceseqPlots: p.key, index: i])}"/>
+                        <a target="_blank" href="${url}">
+                            <img class="img-plots" src="${url}"/>
+                        </a>
                     </div>
                 </g:each>
             </g:each>

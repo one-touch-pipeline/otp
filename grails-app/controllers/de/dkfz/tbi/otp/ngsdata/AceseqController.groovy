@@ -79,7 +79,8 @@ class AceseqController {
         analysisService.checkFile(cmd.aceseqInstance)
 
         Map<AceseqInstance.AceseqPlots, Integer> plotNumber = AceseqInstance.AceseqPlots.values().collectEntries() { AceseqInstance.AceseqPlots it ->
-            [(it): cmd.aceseqInstance.getPlots(it).size()]
+            int count = cmd.aceseqInstance.getPlots(it).size()
+            [(it): count ? (0..count-1) : []]
         }
 
         return [
@@ -114,7 +115,7 @@ class AceseqController {
         }
         analysisService.checkFile(cmd.aceseqInstance)
 
-        List<File> files = cmd.aceseqInstance.getPlots(cmd.aceseqPlot)
+        List<File> files = cmd.aceseqInstance.getPlots(cmd.aceseqPlots)
         render file: files[cmd.index] , contentType: "image/png"
         return [
                 error: "File not found",
@@ -134,6 +135,6 @@ class AceseqPlotCommand extends AceseqInstanceCommand {
     AceseqInstance.AceseqPlot aceseqPlot
 }
 class AceseqPlotsCommand extends AceseqInstanceCommand {
-    AceseqInstance.AceseqPlots aceseqPlot
+    AceseqInstance.AceseqPlots aceseqPlots
     int index
 }

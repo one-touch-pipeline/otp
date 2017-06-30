@@ -125,16 +125,19 @@ class AceseqInstanceSpec extends Specification {
 
         AceseqQc qcInstance = DomainFactory.createAceseqQcWithExistingAceseqInstance(instance)
         qcInstance.ploidyFactor = '1.0'
-        qcInstance.tcc = 2.0
+        qcInstance.tcc = tcc
         qcInstance.save(flush: true)
 
         expect:
         instance.getPlots(plots) == [expectedPath]
 
         where:
-        plots | name
-        ALL   | "plot_XX_ALL.png"
-        EXTRA | "plot_1.0extra_2.0_XX.png"
+        plots | name                        | tcc
+        ALL   | "plot_XX_ALL.png"           | 2.0
+        EXTRA | "plot_1.0extra_2_XX.png"    | 2.0
+        EXTRA | "plot_1.0extra_0.1_XX.png"  | 0.1
+        EXTRA | "plot_1.0extra_0.42_XX.png" | 0.42
+        EXTRA | "plot_1.0extra_0_XX.png"    | 0
     }
 
     void "test getQcJsonFile"() {
