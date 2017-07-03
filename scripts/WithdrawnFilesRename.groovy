@@ -2,8 +2,6 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvJobResult
 
 
-AbstractMergedBamFileService abstractMergedBamFileService = ctx.abstractMergedBamFileService
-
 /**
  * rename existing withdrawn result files in the project folder
  *
@@ -20,7 +18,7 @@ List<File> renameFiles = []
 MergingWorkPackage.list().each { MergingWorkPackage mergingWorkPackage ->
     AbstractMergedBamFile bamFile = mergingWorkPackage.bamFileInProjectFolder
     if (bamFile && bamFile.withdrawn) {
-        final File file = new File(abstractMergedBamFileService.destinationDirectory(bamFile), bamFile.bamFileName)
+        final File file = new File(bamFile.baseDirectory, bamFile.bamFileName)
         renameFiles.add(file)
 
         List<SnvJobResult> snvJobResult = findSnvJobResultForBamFile(bamFile)

@@ -33,16 +33,15 @@ import spock.lang.*
 ])
 class RnaRoddyBamFileSpec extends Specification {
 
-    final String TEST_DIR = TestCase.getUniqueNonExistentPath()
-
     void "test method getCorrespondingWorkChimericBamFile"() {
         given:
         RnaRoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile([:], RnaRoddyBamFile)
         DomainFactory.createRealmDataManagement([name: roddyBamFile.project.realmName])
         DomainFactory.createRealmDataProcessing([name: roddyBamFile.project.realmName])
+        String testDir = "${roddyBamFile.individual.getViewByPidPath(roddyBamFile.seqType).absoluteDataManagementPath.path}/${roddyBamFile.sampleType.dirName}/${roddyBamFile.seqType.libraryLayoutDirName}/merged-alignment"
         AbstractMergedBamFileService.metaClass.static.destinationDirectory = { AbstractMergedBamFile bamFile -> return TEST_DIR }
 
         expect:
-        "${TEST_DIR}/${roddyBamFile.workDirectoryName}/${roddyBamFile.sampleType.dirName}_${roddyBamFile.individual.pid}_${RnaRoddyBamFile.CHIMERIC_BAM_SUFFIX}" == roddyBamFile.correspondingWorkChimericBamFile.path
+        "${testDir}/${roddyBamFile.workDirectoryName}/${roddyBamFile.sampleType.dirName}_${roddyBamFile.individual.pid}_${RnaRoddyBamFile.CHIMERIC_BAM_SUFFIX}" == roddyBamFile.correspondingWorkChimericBamFile.path
     }
 }

@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.ngsdata.AntibodyTarget
+import de.dkfz.tbi.otp.ngsdata.ChipSeqSeqTrack
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeProjectSeqType
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeProjectSeqTypeAlignmentProperty
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
@@ -71,9 +73,14 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
                                                           ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType,
                                                           Pipeline pipeline) {
 
+        AntibodyTarget antibodyTarget = seqTrack instanceof ChipSeqSeqTrack ? seqTrack.antibodyTarget : null
         // TODO OTP-1401: In the future there may be more than one MWP for the sample and seqType.
         MergingWorkPackage workPackage = atMostOneElement(
-                MergingWorkPackage.findAllWhere(sample: seqTrack.sample, seqType: seqTrack.seqType))
+                MergingWorkPackage.findAllWhere(
+                        sample: seqTrack.sample,
+                        seqType: seqTrack.seqType,
+                        antibodyTarget: antibodyTarget,
+                ))
         if (workPackage != null) {
             assert workPackage.referenceGenome.id == referenceGenomeProjectSeqType.referenceGenome.id
             assert workPackage.statSizeFileName == referenceGenomeProjectSeqType.statSizeFileName

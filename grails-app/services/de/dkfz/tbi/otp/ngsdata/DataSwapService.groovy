@@ -616,7 +616,7 @@ chmod 440 ${newDirectFileName}
                 it.mergingPass.isLatestPass() && it.mergingSet.isLatestSet()
             }
             latestProcessedMergedBamFiles.each { ProcessedMergedBamFile latestProcessedMergedBamFile ->
-                String oldProjectPathToMergedFiles = AbstractMergedBamFileService.destinationDirectory(latestProcessedMergedBamFile)
+                String oldProjectPathToMergedFiles = latestProcessedMergedBamFile.baseDirectory.absolutePath
                 bashScriptToMoveFiles << "#rm -rf ${oldProjectPathToMergedFiles}\n"
             }
 
@@ -1238,7 +1238,7 @@ chmod 440 ${newDirectFileName}
 
             AbstractBamFile latestBamFile = MergingWorkPackage.findBySampleAndSeqType(seqTrack.sample, seqTrack.seqType)?.bamFileInProjectFolder
             if (latestBamFile) {
-                File mergingDir = new File(AbstractMergedBamFileService.destinationDirectory(latestBamFile))
+                File mergingDir = latestBamFile.baseDirectory
                 if (mergingDir.exists()) {
                     List<ExternallyProcessedMergedBamFile> files = seqTrackService.returnExternallyProcessedMergedBamFiles([seqTrack])
                     files.each {

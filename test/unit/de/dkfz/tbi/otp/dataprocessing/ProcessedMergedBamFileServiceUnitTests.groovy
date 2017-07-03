@@ -166,6 +166,7 @@ class ProcessedMergedBamFileServiceUnitTests {
             fileOperationStatus: FileOperationStatus.PROCESSED,
             fileSize: 10000
         ])
+        DomainFactory.createRealmDataManagement([name: processedMergedBamFile.project.realmName])
 
         ProcessedMergedBamFileService processedMergedBamFileService = new ProcessedMergedBamFileService()
 
@@ -235,7 +236,6 @@ class ProcessedMergedBamFileServiceUnitTests {
 
     @Test
     void testCheckConsistencyForProcessingFilesDeletion() {
-        Realm.build()
         ProcessedMergedBamFile processedMergedBamFile
         ProcessedMergedBamFileService processedMergedBamFileService
         (processedMergedBamFile, processedMergedBamFileService) = createDataForDeleteChecking(true, true)
@@ -305,7 +305,6 @@ class ProcessedMergedBamFileServiceUnitTests {
 
     @Test
     void testCheckConsistencyForProcessingFilesDeletion_FinalDestinationNotConsistent() {
-        Realm.build()
         ProcessedMergedBamFile processedMergedBamFile
         ProcessedMergedBamFileService processedMergedBamFileService
         (processedMergedBamFile, processedMergedBamFileService) = createDataForDeleteChecking(true, false)
@@ -316,7 +315,6 @@ class ProcessedMergedBamFileServiceUnitTests {
 
     @Test
     void testDeleteProcessingFiles() {
-        Realm.build()
         ProcessedMergedBamFile processedMergedBamFile
         ProcessedMergedBamFileService processedMergedBamFileService
         (processedMergedBamFile, processedMergedBamFileService) = createDataForDeleteChecking(true, true)

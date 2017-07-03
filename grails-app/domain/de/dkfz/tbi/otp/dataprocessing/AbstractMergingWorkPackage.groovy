@@ -9,6 +9,7 @@ abstract class AbstractMergingWorkPackage implements Entity {
     SeqType seqType
     ReferenceGenome referenceGenome
     Pipeline pipeline
+    AntibodyTarget antibodyTarget
 
     /**
      * The BAM file which moving to the final destination has been initiated for most recently.
@@ -32,6 +33,21 @@ abstract class AbstractMergingWorkPackage implements Entity {
         bamFileInProjectFolder nullable: true, validator: { val, obj ->
             if (val) {
                 val.workPackage == obj && [AbstractMergedBamFile.FileOperationStatus.INPROGRESS, AbstractMergedBamFile.FileOperationStatus.PROCESSED].contains(val.fileOperationStatus)
+            } else {
+                return true
+            }
+        }
+        antibodyTarget nullable: true, validator: { AntibodyTarget val, AbstractMergingWorkPackage obj ->
+            if (obj.seqType) {
+                if (obj.seqType.isChipSeq()) {
+                    if (val == null) {
+                        return 'For ChipSeq the antibody target have to be set'
+                    }
+                } else {
+                    if (val != null) {
+                        return 'For non ChipSeq the antibody target may not be set'
+                    }
+                }
             } else {
                 return true
             }

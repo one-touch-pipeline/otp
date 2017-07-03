@@ -131,7 +131,15 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile {
     }
 
     File getBaseDirectory() {
-        return new File(AbstractMergedBamFileService.destinationDirectory(this))
+        String antiBodyTarget = seqType.isChipSeq() ? "-${((MergingWorkPackage)mergingWorkPackage).antibodyTarget.name}" : ''
+        OtpPath viewByPid = individual.getViewByPidPath(seqType)
+        OtpPath path = new OtpPath(
+                viewByPid,
+                "${sample.sampleType.dirName}${antiBodyTarget}".toString(),
+                seqType.libraryLayoutDirName,
+                'merged-alignment'
+        )
+        return path.absoluteDataManagementPath
     }
 
     File getPathForFurtherProcessing() {

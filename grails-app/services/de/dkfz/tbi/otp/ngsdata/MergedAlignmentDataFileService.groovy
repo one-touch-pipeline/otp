@@ -29,7 +29,12 @@ class MergedAlignmentDataFileService {
         return files
     }
 
+    /**
+     * @deprecated can not handle chipseq correctly , bamfile.baseDirectory instead
+     */
+    @Deprecated
     static String buildRelativePath(SeqType type, Sample sample) {
+        assert !type.isChipSeq()
         // this method is also used in the ProcessedMergedBamFileService,
         // if this method is changed make sure that the path in the ProcessedMergedBamFileService is still correct
         String sampleType = sample.sampleType.dirName

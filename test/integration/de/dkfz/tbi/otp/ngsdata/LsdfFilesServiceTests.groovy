@@ -222,13 +222,11 @@ class LsdfFilesServiceTests {
      */
     @Test
     void testGetFileViewByPidRelativeDirectoryChipSeqUsingSeqTrack() {
-        final String SEQ_TYPE = SeqTypeNames.CHIP_SEQ.seqTypeName
-        final String SEQ_TYPE_SEQUENCING_DIR = "chip_seq_sequencing"
-        SeqType seqType = createSeqType(SEQ_TYPE, SEQ_TYPE_SEQUENCING_DIR)
 
-        SeqTrack seqTrack = createSeqTrack(seqType: seqType)
+        SeqTrack seqTrack = createSeqTrack()
+        seqTrack.seqType = DomainFactory.createChipSeqType()
         DataFile dataFile = createDataFile(seqTrack, fastqR1Filename)
-        String correctPath = "${SEQ_TYPE_SEQUENCING_DIR}/${VIEW_BY_PID_PATH}/${individualPid}/${sampleTypeName.toLowerCase()}/${seqType.libraryLayout.toLowerCase()}/run${runName}/${VBP_PATH}/"
+        String correctPath = "${seqTrack.seqType.dirName}/${VIEW_BY_PID_PATH}/${individualPid}/${sampleTypeName.toLowerCase()}/${seqTrack.seqType.libraryLayout.toLowerCase()}/run${runName}/${VBP_PATH}/"
         String path = lsdfFilesService.getFileViewByPidRelativeDirectory(dataFile)
         assertEquals(new File(correctPath).path, new File(path).path)
     }
@@ -247,7 +245,7 @@ class LsdfFilesServiceTests {
         assert expectedPath == actualPath
     }
 
-    private SeqTrack createSeqTrack(Map properties = []) {
+    private SeqTrack createSeqTrack(Map properties = [:]) {
         return DomainFactory.createSeqTrack([
                 laneId: laneNo,
                 nBasePairs: baseCount,

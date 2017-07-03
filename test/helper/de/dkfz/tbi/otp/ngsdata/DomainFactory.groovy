@@ -1384,31 +1384,37 @@ class DomainFactory {
         ], properties)
     }
 
-    static Map seqTrackProperties() {
+    static Map seqTrackProperties(Map properties = [:]) {
         return [
                 laneId         : 'laneId_' + counter++,
                 sample         : { createSample() },
                 pipelineVersion: { createSoftwareTool() },
                 run            : { createRun() },
+                kitInfoReliability: properties.libraryPreparationKit ? InformationReliability.KNOWN : InformationReliability.UNKNOWN_UNVERIFIED,
+                normalizedLibraryName: SeqTrack.normalizeLibraryName(properties.libraryName),
         ]
     }
 
     public static SeqTrack createSeqTrack(Map properties = [:]) {
-        return createDomainObject(SeqTrack, seqTrackProperties() + [
+        if (properties.seqType?.isChipSeq()) {
+            return createChipSeqSeqTrack(properties)
+        }
+        if (properties.seqType?.isExome()) {
+            return createExomeSeqTrack(properties)
+        }
+        return createDomainObject(SeqTrack, seqTrackProperties(properties) + [
                 seqType        : { createSeqType() },
-                kitInfoReliability: properties.libraryPreparationKit ? InformationReliability.KNOWN : InformationReliability.UNKNOWN_UNVERIFIED,
-                normalizedLibraryName: SeqTrack.normalizeLibraryName(properties.libraryName),
         ], properties)
     }
 
-    public static ExomeSeqTrack createExomeSeqTrack(Map exomSeqTrackProperties = [:]) {
-        return createDomainObject(ExomeSeqTrack, seqTrackProperties() + [
+    public static ExomeSeqTrack createExomeSeqTrack(Map properties = [:]) {
+        return createDomainObject(ExomeSeqTrack, seqTrackProperties(properties) + [
                 seqType        : { createExomeSeqType() },
-        ], exomSeqTrackProperties)
+        ], properties)
     }
 
     public static ChipSeqSeqTrack createChipSeqSeqTrack(Map properties = [:]) {
-        return createDomainObject(ChipSeqSeqTrack, seqTrackProperties() + [
+        return createDomainObject(ChipSeqSeqTrack, seqTrackProperties(properties) + [
                 seqType        : { createChipSeqType() },
                 antibodyTarget : { createAntibodyTarget() },
         ], properties)
@@ -1420,7 +1426,7 @@ class DomainFactory {
         ], properties)
     }
 
-    public static MergingWorkPackage createMergingWorkPackage(Map properties = [:]) {
+    public static MergingWorkPackage createMergingWorkPackage(Map properties = [:], boolean saveAndValidate = true) {
         return createDomainObject(MergingWorkPackage, [
                 libraryPreparationKit: { properties.seqType?.isWgbs() ? null : createLibraryPreparationKit() },
                 sample:                { createSample() },
@@ -1430,7 +1436,8 @@ class DomainFactory {
                 statSizeFileName:      { properties.pipeline?.name == Pipeline.Name.PANCAN_ALIGNMENT ?
                         "statSizeFileName_${counter++}.tab" : null },
                 pipeline:              { createDefaultOtpPipeline() },
-        ], properties)
+                antibodyTarget:        { properties.seqType?.isChipSeq() ? createAntibodyTarget() : null },
+        ], properties, saveAndValidate)
     }
 
     public static ExternalMergingWorkPackage createExternalMergingWorkPackage(Map properties = [:]) {
@@ -1510,12 +1517,18 @@ class DomainFactory {
     }
 
     public static Map getMergingProperties(MergingWorkPackage mergingWorkPackage) {
-        return [
+        Map properties = [
                 sample: mergingWorkPackage.sample,
                 seqType: mergingWorkPackage.seqType,
                 libraryPreparationKit: mergingWorkPackage.libraryPreparationKit,
                 run: createRun(seqPlatform: createSeqPlatform(seqPlatformGroup: mergingWorkPackage.seqPlatformGroup)),
         ]
+        if (mergingWorkPackage.seqType.isChipSeq()) {
+            properties += [
+                    antibodyTarget: mergingWorkPackage.antibodyTarget,
+            ]
+        }
+        return properties
     }
 
     public static SeqTrack createSeqTrackWithDataFiles(MergingWorkPackage mergingWorkPackage, Map seqTrackProperties = [:], Map dataFileProperties = [:]) {
@@ -1536,6 +1549,8 @@ class DomainFactory {
         SeqTrack seqTrack
         if (seqTrackProperties.seqType?.name == SeqTypeNames.EXOME.seqTypeName) {
             seqTrack = createExomeSeqTrack(seqTrackProperties)
+        } else if (seqTrackProperties.seqType?.name == SeqTypeNames.CHIP_SEQ.seqTypeName) {
+            seqTrack = createChipSeqSeqTrack(seqTrackProperties)
         } else {
             seqTrack = createSeqTrack(seqTrackProperties)
         }

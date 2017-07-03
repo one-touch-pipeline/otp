@@ -110,6 +110,27 @@ class MergingWorkPackageUnitTests {
     }
 
     @Test
+    void testGetMergingProperties_WithAntibodyTarget() {
+        LibraryPreparationKit libraryPreparationKit = DomainFactory.createLibraryPreparationKit()
+        AntibodyTarget antibodyTarget = DomainFactory.createAntibodyTarget()
+        SeqTrack seqTrack = DomainFactory.createChipSeqSeqTrack(
+                libraryPreparationKit: libraryPreparationKit,
+                kitInfoReliability: InformationReliability.KNOWN,
+                antibodyTarget: antibodyTarget,
+        )
+
+        def result = MergingWorkPackage.getMergingProperties(seqTrack)
+        def expectedResult = [
+                sample: seqTrack.sample,
+                seqType: seqTrack.seqType,
+                seqPlatformGroup: seqTrack.seqPlatformGroup,
+                libraryPreparationKit: libraryPreparationKit,
+                antibodyTarget: antibodyTarget,
+        ]
+        assert result == expectedResult
+    }
+
+    @Test
     void testSatisfiesCriteriaSeqTrack_whenCorrect_NoLibraryPreparationKit() {
         SeqTrack seqTrack = SeqTrack.build(libraryPreparationKit: null)
 
@@ -361,7 +382,7 @@ class MergingWorkPackageUnitTests {
                 pipeline: mergingWorkPackage.pipeline,
         )
 
-        TestCase.assertValidateError(mergingWorkPackage1, 'sample', 'The mergingWorkPackage must be unique for one sample and seqType', mergingWorkPackage.sample)
+        TestCase.assertValidateError(mergingWorkPackage1, 'sample', 'The mergingWorkPackage must be unique for one sample and seqType and antibodyTarget', mergingWorkPackage.sample)
     }
 
 }

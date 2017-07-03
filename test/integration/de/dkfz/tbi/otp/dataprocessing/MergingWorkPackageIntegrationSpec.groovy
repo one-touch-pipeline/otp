@@ -3,8 +3,9 @@ package de.dkfz.tbi.otp.dataprocessing
 import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.ngsdata.*
 import grails.test.spock.*
+import spock.lang.*
 
-import static de.dkfz.tbi.otp.ngsdata.DomainFactory.getRandomProcessedBamFileProperties
+import static de.dkfz.tbi.otp.ngsdata.DomainFactory.*
 
 class MergingWorkPackageIntegrationSpec extends IntegrationSpec {
 
@@ -33,6 +34,90 @@ class MergingWorkPackageIntegrationSpec extends IntegrationSpec {
         workPackage.satisfiesCriteria(libPrepKitSet)
         TestCase.assertContainSame([libPrepKitNull, libPrepKitSet], workPackage.findMergeableSeqTracks())
     }
+
+
+    @Unroll
+    void "constraint for sample, when seqType is not chip seq and  #text, then validate should not create errors"() {
+        given:
+        MergingWorkPackage workPackage = DomainFactory.createMergingWorkPackage()
+
+        when:
+        MergingWorkPackage workPackage2 = DomainFactory.createMergingWorkPackage([
+                seqType: sameSeqType ? workPackage.seqType : DomainFactory.createSeqType(),
+                sample : sameSample ? workPackage.sample : DomainFactory.createSample(),
+        ], false)
+        workPackage2.validate()
+
+        then:
+        workPackage2.errors.errorCount == 0
+
+        where:
+        sameSeqType | sameSample
+        false       | false
+        false       | true
+        true        | false
+
+        text = "seqtype is ${sameSeqType ? '' : 'not '}same and sample is ${sameSample ? '' : 'not '}same"
+    }
+
+    void "constraint for sample, when seqType is not chip seq and  seqtype and sample are same, then validate should create an errors"() {
+        given:
+        MergingWorkPackage workPackage = DomainFactory.createMergingWorkPackage()
+
+        when:
+        MergingWorkPackage workPackage2 = DomainFactory.createMergingWorkPackage([
+                seqType: workPackage.seqType,
+                sample : workPackage.sample,
+        ], false)
+
+        then:
+        TestCase.assertValidateError(workPackage2, 'sample', 'The mergingWorkPackage must be unique for one sample and seqType and antibodyTarget', workPackage.sample)
+    }
+
+    @Unroll
+    void "constraint for sample, when seqType is chip seq and  #text, then validate should not create errors"() {
+        given:
+        MergingWorkPackage workPackage = DomainFactory.createMergingWorkPackage(
+                seqType: DomainFactory.createChipSeqType()
+        )
+
+        when:
+        MergingWorkPackage workPackage2 = DomainFactory.createMergingWorkPackage([
+                seqType       : workPackage.seqType,
+                sample        : sameSample ? workPackage.sample : DomainFactory.createSample(),
+                antibodyTarget: sameAntibody ? workPackage.antibodyTarget : DomainFactory.createAntibodyTarget()
+        ], false)
+        workPackage2.validate()
+
+        then:
+        workPackage2.errors.errorCount == 0
+
+        where:
+        sameSample | sameAntibody
+        false      | false
+        false      | true
+        true       | false
+
+        text = "sample is ${sameSample ? '' : 'not '}same and antibody target is ${sameAntibody ? '' : 'not '}same"
+    }
+
+    void "constraint for sample, when seqType is chip seq and  sample and antibody target are same, then validate should create an errors"() {
+        given:
+        MergingWorkPackage workPackage = DomainFactory.createMergingWorkPackage(
+                seqType: DomainFactory.createChipSeqType()
+        )
+
+        when:
+        MergingWorkPackage workPackage2 = DomainFactory.createMergingWorkPackage([
+                seqType       : workPackage.seqType,
+                sample        : workPackage.sample,
+                antibodyTarget: workPackage.antibodyTarget,
+        ], false)
+
+        then:
+        TestCase.assertValidateError(workPackage2, 'sample', 'The mergingWorkPackage must be unique for one sample and seqType and antibodyTarget', workPackage.sample)
+    }
+
 
     void 'getCompleteProcessableBamFileInProjectFolder, when bamFileInProjectFolder set, not withdrawn, FileOperationStatus PROCESSED, seqTracks match, returns bamFile'() {
         given:

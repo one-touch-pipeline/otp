@@ -494,7 +494,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
     }
 
     void checkBamFileState(RoddyBamFile bamFile, Map bamFileProperties) {
-        MergingWorkPackage workPackage = exactlyOneElement(MergingWorkPackage.findAll())
+        MergingWorkPackage workPackage = bamFileProperties.mergingWorkPackage ?: exactlyOneElement(MergingWorkPackage.findAll())
         RoddyWorkflowConfig projectConfig = exactlyOneElement(RoddyWorkflowConfig.findAllByObsoleteDateIsNull())
 
         assert bamFileProperties.baseBamFile?.id == bamFile.baseBamFile?.id

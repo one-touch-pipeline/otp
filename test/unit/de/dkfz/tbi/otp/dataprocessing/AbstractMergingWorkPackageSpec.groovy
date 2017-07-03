@@ -7,6 +7,7 @@ import spock.lang.*
 
 @Mock([
         AbstractMergingWorkPackage,
+        AntibodyTarget,
         Individual,
         LibraryPreparationKit,MergingSet,
         MergingWorkPackage,
@@ -113,5 +114,61 @@ class AbstractMergingWorkPackageSpec extends Specification {
 
         then:
         noExceptionThrown()
+    }
+
+
+
+    void "constraint for antibodyTarget, when seqType is not chip seq and antibodyTarget is not set, then validate should not create errors"() {
+        when:
+        AbstractMergingWorkPackage workPackage = createTestAbstractMergingWorkPackage([
+                seqType       : DomainFactory.createSeqType(),
+                antibodyTarget: null,
+        ])
+        workPackage.validate()
+
+        then:
+        workPackage.errors.errorCount == 0
+    }
+
+    void "constraint for antibodyTarget, when seqType is chip seq and antibodyTarget is set, then validate should not create errors"() {
+        when:
+        AbstractMergingWorkPackage workPackage = createTestAbstractMergingWorkPackage([
+                seqType       : DomainFactory.createChipSeqType(),
+                antibodyTarget: DomainFactory.createAntibodyTarget(),
+        ])
+        workPackage.validate()
+
+        then:
+        workPackage.errors.errorCount == 0
+    }
+
+    void "constraint for antibodyTarget, when seqType is chip seq and antibodyTarget is not set, then validate should create errors"() {
+        when:
+        AbstractMergingWorkPackage workPackage = createTestAbstractMergingWorkPackage([
+                seqType       : DomainFactory.createChipSeqType(),
+                antibodyTarget: null,
+        ])
+
+        then:
+        TestCase.assertValidateError(workPackage, 'antibodyTarget', 'For ChipSeq the antibody target have to be set', workPackage.antibodyTarget)
+    }
+
+    void "constraint for antibodyTarget, when seqType is not chip seq and antibodyTarget is set, then validate should create errors"() {
+        when:
+        AbstractMergingWorkPackage workPackage = createTestAbstractMergingWorkPackage([
+                seqType       : DomainFactory.createSeqType(),
+                antibodyTarget: DomainFactory.createAntibodyTarget(),
+        ])
+
+        then:
+        TestCase.assertValidateError(workPackage, 'antibodyTarget', 'For non ChipSeq the antibody target may not be set', workPackage.antibodyTarget)
+    }
+
+    TestAbstractMergingWorkPackage createTestAbstractMergingWorkPackage(Map properties) {
+        new TestAbstractMergingWorkPackage([
+                sample:                new Sample(),
+                referenceGenome:       new ReferenceGenome(),
+                pipeline:              DomainFactory.createDefaultOtpPipeline(),
+        ] + properties)
     }
 }
