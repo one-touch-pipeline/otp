@@ -119,7 +119,7 @@ class MergingWorkflowTests extends WorkflowTestCase {
 
         DataFile dataFile2 = DomainFactory.createDataFile([fileName: "dataFile2"])
 
-        ReferenceGenome referenceGenome = new ReferenceGenome(
+        ReferenceGenome referenceGenome = DomainFactory.createReferenceGenome(
                 name: 'refGenome',
                 path: 'reference_genome',
                 fileNamePrefix: 'chr',
@@ -128,7 +128,6 @@ class MergingWorkflowTests extends WorkflowTestCase {
                 lengthRefChromosomes: 100,
                 lengthRefChromosomesWithoutN: 100,
         )
-        assert referenceGenome.save(flush: true)
 
         Pipeline pipeline = new Pipeline(
                 name: DEFAULT_OTP,

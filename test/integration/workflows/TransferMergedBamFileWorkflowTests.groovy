@@ -182,7 +182,7 @@ class TransferMergedBamFileWorkflowTests extends WorkflowTestCase {
                         )
         assertNotNull(dataFile2.save([flush: true, failOnError: true]))
 
-        ReferenceGenome referenceGenome = new ReferenceGenome(
+        ReferenceGenome referenceGenome = DomainFactory.createReferenceGenome(
                         name: "hs37d5",
                         path: "bwa06_1KGRef",
                         fileNamePrefix: "hs37d5",
@@ -191,7 +191,6 @@ class TransferMergedBamFileWorkflowTests extends WorkflowTestCase {
                         lengthRefChromosomes: 3095677412,
                         lengthRefChromosomesWithoutN: 2858658097
                         )
-        assertNotNull(referenceGenome.save([flush: true, failOnError: true]))
 
         AlignmentPass alignmentPass = DomainFactory.createAlignmentPass(
                         referenceGenome: referenceGenome,

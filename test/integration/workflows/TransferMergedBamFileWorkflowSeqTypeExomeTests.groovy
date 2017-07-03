@@ -117,7 +117,7 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends WorkflowTestCase {
 
         SeqType seqType = DomainFactory.createExomeSeqType()
 
-        ReferenceGenome referenceGenome = new ReferenceGenome(
+        ReferenceGenome referenceGenome = DomainFactory.createReferenceGenome(
                         name: "hs37d5",
                         path: "bwa06_1KGRef",
                         fileNamePrefix: "hs37d5",
@@ -126,7 +126,6 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends WorkflowTestCase {
                         lengthRefChromosomes: 3095677412,
                         lengthRefChromosomesWithoutN: 2858658097
                         )
-        assertNotNull(referenceGenome.save([flush: true, failOnError: true]))
 
         ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType = new ReferenceGenomeProjectSeqType(
                         project: project,
