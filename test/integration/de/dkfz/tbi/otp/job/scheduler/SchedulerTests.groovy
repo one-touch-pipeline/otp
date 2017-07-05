@@ -149,7 +149,7 @@ class SchedulerTests extends AbstractIntegrationTest {
         endStateAwareJob.log = new NoOpLog()
         // There is no Created ProcessingStep update - execution should fail
         int executedCounter = 0
-        scheduler.jobMailService.metaClass.sendErrorNotificationIfFastTrack = { ProcessingStep step2, String message ->
+        scheduler.jobMailService.metaClass.sendErrorNotification = { Job job2, String message ->
             executedCounter++
         }
         shouldFail(RuntimeException) {
@@ -212,7 +212,7 @@ class SchedulerTests extends AbstractIntegrationTest {
             processingStep: step
             )
         boolean notified = false
-        scheduler.jobMailService.metaClass.sendErrorNotificationIfFastTrack = { ProcessingStep step2, Throwable exceptionToBeHandled ->
+        scheduler.jobMailService.metaClass.sendErrorNotification = { Job job2, Throwable exceptionToBeHandled ->
             if (notified) {
                 assert false: 'called twiced'
             } else {

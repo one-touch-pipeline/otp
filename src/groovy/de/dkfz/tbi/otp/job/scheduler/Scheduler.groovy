@@ -180,7 +180,6 @@ class Scheduler {
             NotificationEvent event = new NotificationEvent(this, step, NotificationType.PROCESS_STEP_STARTED)
             grailsApplication.mainContext.publishEvent(event)
         } catch (RuntimeException e) {
-            jobMailService.sendErrorNotificationIfFastTrack(ProcessingStep.getInstance(job.processingStep.id), e)
             jobMailService.sendErrorNotification(job, e)
             // removing Job from running
             schedulerService.removeRunningJob(job)
@@ -272,7 +271,6 @@ class Scheduler {
             log.debug("doErrorHandling performed for ${job.class} with ProcessingStep ${step.id}")
             restartHandlerService.handleRestart(job)
         } finally {
-            jobMailService.sendErrorNotificationIfFastTrack(step, exceptionToBeHandled)
             jobMailService.sendErrorNotification(job, exceptionToBeHandled)
         }
     }

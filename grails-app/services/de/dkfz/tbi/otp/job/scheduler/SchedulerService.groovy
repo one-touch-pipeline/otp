@@ -412,7 +412,7 @@ class SchedulerService {
                 EndStateAwareJob endStateAwareJob = job as EndStateAwareJob
                 final ExecutionState endState = endStateAwareJob.getEndState()
                 if (endState == ExecutionState.FAILURE) {
-                    jobMailService.sendErrorNotificationIfFastTrack(step, "Something went wrong in endStateAwareJob")
+                    jobMailService.sendErrorNotification(job, "Something went wrong in endStateAwareJob")
                 }
                 if (endState != ExecutionState.SUCCESS && endState != ExecutionState.FAILURE) {
                     throw new RuntimeException("Job ${job} has endState ${endState}, but only SUCCESS and FAILURE are allowed.")
@@ -487,7 +487,6 @@ class SchedulerService {
                     }
                 }
             } catch (Throwable t) {
-                jobMailService.sendErrorNotificationIfFastTrack(step, t)
                 jobMailService.sendErrorNotification(job, t)
                 throw t
             }

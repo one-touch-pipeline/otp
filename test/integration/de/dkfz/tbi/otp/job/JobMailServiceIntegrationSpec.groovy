@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.job
 
 import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
@@ -22,6 +23,9 @@ class JobMailServiceIntegrationSpec extends Specification {
         JobStatusLoggingService jobStatusLoggingService = new JobStatusLoggingService()
 
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
+        seqTrack.project.processingPriority = processingPriority
+        seqTrack.save(flush: true)
+
         Realm realm = DomainFactory.createRealmDataProcessing(temporaryFolder.newFolder(), [name: seqTrack.project.realmName])
 
         DomainFactory.createProcessingOptionForStatisticRecipient()
@@ -62,6 +66,8 @@ class JobMailServiceIntegrationSpec extends Specification {
         JobMailService jobMailService = new JobMailService([
                 mailHelperService      : Mock(MailHelperService) {
                     1 * sendEmail(_, _, _) >> { String emailSubject, String content, List<String> recipients ->
+                        assert emailSubject.startsWith(processingPriority >= ProcessingPriority.FAST_TRACK_PRIORITY ? "FASTTRACK ERROR:" : "ERROR:")
+                        assert emailSubject.contains("${step.jobExecutionPlan.name} ${step.processParameterObject.individual.displayName} ${step.processParameterObject.project.name}")
                         assert content.contains('\nWorkflow:\n')
                         assert content.contains('\nOTP Job:\n')
                         assert (failedCount > 0) == content.contains('\nCluster Job:\n')
@@ -83,17 +89,19 @@ class JobMailServiceIntegrationSpec extends Specification {
         ])
 
         when:
-        jobMailService.sendErrorNotification(job, new RuntimeException())
+        jobMailService.sendErrorNotification(job, new RuntimeException("RuntimeException"))
 
         then:
         noExceptionThrown()
 
         where:
-        completedCount | failedCount
-        0              | 0
-        5              | 0
-        0              | 5
-        2              | 3
+        completedCount | failedCount | processingPriority
+        0              | 0           | ProcessingPriority.NORMAL_PRIORITY
+        5              | 0           | ProcessingPriority.NORMAL_PRIORITY
+        0              | 5           | ProcessingPriority.NORMAL_PRIORITY
+        2              | 3           | ProcessingPriority.NORMAL_PRIORITY
+        0              | 0           | ProcessingPriority.FAST_TRACK_PRIORITY
+        5              | 0           | ProcessingPriority.FAST_TRACK_PRIORITY
     }
 
 

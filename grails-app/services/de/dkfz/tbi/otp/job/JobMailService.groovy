@@ -28,49 +28,24 @@ class JobMailService {
     TrackingService trackingService
 
 
-    public void sendErrorNotificationIfFastTrack(ProcessingStep step, Throwable exceptionToBeHandled) {
-        assert step: 'step may not be null'
-        assert exceptionToBeHandled: 'exceptionToBeHandled may not be null'
-        sendErrorNotificationIfFastTrack(step, exceptionToBeHandled.toString())
-    }
-
-    public void sendErrorNotificationIfFastTrack(ProcessingStep step, String errorMessage) {
-        assert step: 'step may not be null'
-        assert errorMessage: 'message may not be null'
-
-        def object = step.processParameterObject
-        if (!object || object.processingPriority < ProcessingPriority.FAST_TRACK_PRIORITY) {
-            return
-        }
-
-        String jobExecutionPlanName = step.jobExecutionPlan.name
-        String objectInformation = object.toString()
-        String link = processService.processUrl(step.process)
-        String recipient = grailsApplication.config.otp.mail.notification.fasttrack.to
-        assert recipient
-
-        String subject = "FASTTRACK ERROR: ${jobExecutionPlanName} ${object instanceof Run ? object.name : object.project?.name}"
-        String message = """\
-FastTrack failed:
-workflow: ${jobExecutionPlanName}
-object: ${objectInformation}
-error: ${errorMessage}
-link: ${link}
-"""
-
-        mailHelperService.sendEmail(subject, message, recipient)
-    }
-
-
     public void sendErrorNotification(Job job, Throwable exceptionToBeHandled) {
         assert job: 'job may not be null'
         assert exceptionToBeHandled: 'exceptionToBeHandled may not be null'
+        sendErrorNotification(job, exceptionToBeHandled.message)
+    }
+
+    public void sendErrorNotification(Job job, String errorMessage) {
+        assert job: 'job may not be null'
+        assert errorMessage: 'message may not be null'
 
         ProcessingStep step = ProcessingStep.getInstance(job.getProcessingStep().id)
 
         def object = step.processParameterObject
+        String subjectPrefix = ""
         if (!object) {
             return //general workflow, no processing
+        } else if (object.processingPriority >= ProcessingPriority.FAST_TRACK_PRIORITY) {
+            subjectPrefix = "FASTTRACK "
         }
         Collection<SeqTrack> seqTracks = object.containedSeqTracks
         String ilseNumbers = seqTracks*.ilseSubmission*.ilseNumber.unique().sort().join(', ')
@@ -112,7 +87,7 @@ link: ${link}
                 countOfJobRestarted: restartedStepCount,
         ]
         message << mapToString('OTP Job', otpJob)
-        message << "  otpErrorMessage: ${exceptionToBeHandled.message}"
+        message << "  otpErrorMessage: ${errorMessage}"
 
         clusterJobsToCheck.sort { ClusterJob clusterJob ->
             return clusterJob.id
@@ -141,7 +116,7 @@ Failed ClusterJob Job Values: ${mapForLog.values().join(';')}""")
         }
 
         if (!clusterJobsToCheck) {
-            Map mapForLog = otpWorkflow + otpJob + [otpErrorMessage: exceptionToBeHandled.message?.replaceAll('\n', ' ')]
+            Map mapForLog = otpWorkflow + otpJob + [otpErrorMessage: errorMessage?.replaceAll('\n', ' ')]
             log.info("""Error Statistic:
 Failed OTP Header: ${mapForLog.keySet().join(';')}
 Failed OTP Values: ${mapForLog.values().join(';')}""")
@@ -154,7 +129,7 @@ Failed OTP Values: ${mapForLog.values().join(';')}""")
         )
         if (recipientsString) {
             List<String> recipients = recipientsString.split(' ') as List
-            String subject = "ERROR: Statistic information"
+            String subject = "${subjectPrefix}ERROR: ${otpWorkflow.otpWorkflowName} ${object.individual?.displayName} ${object.project?.name}"
 
             mailHelperService.sendEmail(subject, message.toString(), recipients)
         }
