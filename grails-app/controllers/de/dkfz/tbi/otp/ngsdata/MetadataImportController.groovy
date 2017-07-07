@@ -21,27 +21,49 @@ class MetadataImportController {
     IlseSubmissionService ilseSubmissionService
 
     def index(MetadataImportControllerSubmitCommand cmd) {
-        MetadataValidationContext metadataValidationContext
+        boolean isValidated = false
+        int problems = 0
+        List<MetadataValidationContext> metadataValidationContexts = []
+        List<MetaDataFile> metaDataFiles = []
         String errorMessage
         if (cmd.hasErrors()) {
             FieldError fieldError = cmd.errors.getFieldError()
             errorMessage = "'${fieldError.getRejectedValue()}' is not a valid value for '${fieldError.getField()}'. Error code: '${fieldError.code}'"
         }
         if (cmd.submit == "Import" && !errorMessage) {
-            ValidateAndImportResult validateAndImportResult = metadataImportService.validateAndImportWithAuth(new File(cmd.path), cmd.directory, cmd.align, cmd.ignoreWarnings, cmd.md5, cmd.ticketNumber, cmd.seqCenterComment, cmd.automaticNotification)
-            metadataValidationContext = validateAndImportResult.context
-            if (validateAndImportResult.metadataFile != null) {
-                redirect(action: "details", id: validateAndImportResult.metadataFile.runSegment.id)
+            cmd.paths.eachWithIndex { path, idx ->
+                ValidateAndImportResult validateAndImportResult = metadataImportService.validateAndImportWithAuth(new File(path), cmd.directory, cmd.align, cmd.ignoreWarnings, cmd.md5.get(idx), cmd.ticketNumber, cmd.seqCenterComment, cmd.automaticNotification)
+                metadataValidationContexts.add(validateAndImportResult.context)
+                if (validateAndImportResult.metadataFile != null) {
+                    metaDataFiles.add(validateAndImportResult.metadataFile)
+                }
+            }
+            if (metaDataFiles) {
+                if (metaDataFiles.size() == 1) {
+                    redirect(action: "details", id: metaDataFiles.first().runSegment.id)
+                } else {
+                    redirect(action: "multiDetails", params: [metaDataFiles: metaDataFiles.id])
+                }
+
             }
         } else if (cmd.submit != null) {
-            metadataValidationContext = metadataImportService.validateWithAuth(new File(cmd.path), cmd.directory)
+            cmd.paths.each { path ->
+                MetadataValidationContext mvc = metadataImportService.validateWithAuth(new File(path), cmd.directory)
+                metadataValidationContexts.add(mvc)
+                if (mvc.maximumProblemLevel.intValue() > problems) {
+                    problems = mvc.maximumProblemLevel.intValue()
+                }
+            }
+            isValidated = true
         }
         return [
-            directoryStructures: metadataImportService.getSupportedDirectoryStructures(),
-            cmd                : cmd,
-            errorMessage       : errorMessage,
-            context            : metadataValidationContext,
-            implementedValidations: metadataImportService.getImplementedValidations()
+            directoryStructures   : metadataImportService.getSupportedDirectoryStructures(),
+            cmd                   : cmd,
+            errorMessage          : errorMessage,
+            contexts              : metadataValidationContexts,
+            implementedValidations: metadataImportService.getImplementedValidations(),
+            isValidated           : isValidated,
+            problems              : problems
         ]
     }
 
@@ -50,6 +72,15 @@ class MetadataImportController {
         [
                 data: getMetadataDetails(runSegment),
                 runSegment: runSegment,
+        ]
+    }
+
+    def multiDetails() {
+        List<MetaDataFile> metaDataFiles = params.metaDataFiles.collect {
+            MetaDataFile.get(it)
+        }
+        [
+                metaDataFiles: metaDataFiles,
         ]
     }
 
@@ -210,9 +241,9 @@ class SeqTrackWithDataFiles {
 }
 
 class MetadataImportControllerSubmitCommand implements Serializable {
-    String path
+    List<String> paths
     String directory
-    String md5
+    List<String> md5
     String submit
     String ticketNumber
     String seqCenterComment
@@ -221,7 +252,7 @@ class MetadataImportControllerSubmitCommand implements Serializable {
     boolean ignoreWarnings
 
     static constraints = {
-        path(nullable:true)
+        paths(nullable:true)
         directory(nullable:true)
         md5(nullable:true)
         submit(nullable:true)

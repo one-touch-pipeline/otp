@@ -1,2 +1,2 @@
 //= require jquery
-//= require ../pages/metadataImport/index/metadataImport.js
+//= require ../pages/metadataImport/index/metadataImportDataTable.js

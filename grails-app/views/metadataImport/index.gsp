@@ -10,9 +10,12 @@
             <g:message code="metadataImport.titleOperator"/>
         </sec:ifAllGranted>
     </title>
+    <asset:javascript src="modules/defaultPageDependencies.js"/>
+    <asset:javascript src="pages/metadataImport/index/metaDataImport.js"/>
 </head>
 <body>
-    <g:if test="${context}">
+<g:if test="${contexts}">
+    <g:each var="context" in="${contexts}">
         <div id= "border" class="borderMetadataImport${Level.normalize(context.getMaximumProblemLevel()).name}">
             <g:if test="${context.problems.isEmpty()}">
                 No problems found :)
@@ -32,54 +35,55 @@
                 <g:if test="${context.spreadsheet}">
                     <table>
                         <thead>
-                            <tr>
-                                <th></th>
-                                <g:each var="cell" in="${context.spreadsheet.header.cells}" >
-                                    <th>
-                                        ${cell.columnAddress}
-                                    </th>
-                                </g:each>
-                            </tr>
-                            <tr>
+                        <tr>
+                            <th></th>
+                            <g:each var="cell" in="${context.spreadsheet.header.cells}" >
                                 <th>
-                                    ${context.spreadsheet.header.cells.first().rowAddress}
+                                    ${cell.columnAddress}
                                 </th>
-                                <g:each var="cell" in="${context.spreadsheet.header.cells}" >
-                                    <g:set var="cellProblems" value ="${context.getProblems(cell)}"/>
-                                    <th
+                            </g:each>
+                        </tr>
+                        <tr>
+                            <th>
+                                ${context.spreadsheet.header.cells.first().rowAddress}
+                            </th>
+                            <g:each var="cell" in="${context.spreadsheet.header.cells}" >
+                                <g:set var="cellProblems" value ="${context.getProblems(cell)}"/>
+                                <th
                                         class="${Level.normalize(Problems.getMaximumProblemLevel(cellProblems)).name}"
                                         title="${cellProblems*.getLevelAndMessage().join('\n\n')}"
+                                >
+                                    <span class="anchor" id="${cell.cellAddress}"></span>
+                                    ${cell.text}
+                                </th>
+                            </g:each>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <g:each var="row" in="${context.spreadsheet.dataRows}" >
+                            <tr>
+                                <th>
+                                    ${row.cells.first().rowAddress}
+                                </th>
+                                <g:each var="cell" in="${row.cells}" >
+                                    <g:set var="cellProblems" value ="${context.getProblems(cell)}"/>
+                                    <td
+                                            class="${Level.normalize(Problems.getMaximumProblemLevel(cellProblems)).name}"
+                                            title="${cellProblems*.getLevelAndMessage().join('\n\n')}"
                                     >
                                         <span class="anchor" id="${cell.cellAddress}"></span>
                                         ${cell.text}
-                                    </th>
+                                    </td>
                                 </g:each>
                             </tr>
-                        </thead>
-                        <tbody>
-                            <g:each var="row" in="${context.spreadsheet.dataRows}" >
-                                <tr>
-                                    <th>
-                                        ${row.cells.first().rowAddress}
-                                    </th>
-                                    <g:each var="cell" in="${row.cells}" >
-                                        <g:set var="cellProblems" value ="${context.getProblems(cell)}"/>
-                                        <td
-                                            class="${Level.normalize(Problems.getMaximumProblemLevel(cellProblems)).name}"
-                                            title="${cellProblems*.getLevelAndMessage().join('\n\n')}"
-                                        >
-                                        <span class="anchor" id="${cell.cellAddress}"></span>
-                                            ${cell.text}
-                                        </td>
-                                    </g:each>
-                                </tr>
-                            </g:each>
+                        </g:each>
                         </tbody>
                     </table>
                 </g:if>
             </div>
         </div>
-    </g:if>
+    </g:each>
+</g:if>
     <g:if test="${errorMessage}">
         <div class="errorMessage"><g:message code="${errorMessage}"/></div>
     </g:if>
@@ -103,7 +107,10 @@
             </sec:ifAllGranted>
             <tr>
                 <td><g:message code="metadataImport.path"/></td>
-                <td><g:textField name="path" style="width: 1000px" value="${cmd.path}"/></td>
+                <td class="input-fields-wrap">
+                    <g:textField name="paths" style="width: 1000px" value="${cmd.paths?.first()}"/>
+                    <button class="add-field-button">+</button>
+                </td>
             </tr>
             <tr>
                 <td><g:message code="metadataImport.directory"/></td>
@@ -123,16 +130,20 @@
             </tr>
         </table>
         <g:submitButton name="submit" value="Validate"/>
+        <g:each var="context" in="${contexts}">
+            <g:hiddenField name="md5" value="${context?.metadataFileMd5sum}"/>
+        </g:each>
         <sec:ifAllGranted roles="ROLE_OPERATOR">
-            <g:submitButton name="submit" value="Import"/>
-            <g:if test="${context?.getMaximumProblemLevel() == Level.WARNING}">
+            <g:if test="${isValidated && !(problems > Level.WARNING.intValue())}">
+                <g:submitButton name="submit" value="Import"/>
+            </g:if>
+            <g:if test="${problems == Level.WARNING.intValue()}">
                 <label>
                     <g:checkBox name="ignoreWarnings"/>
-                    Ignore Warnings
+                    <g:message code="metadataImport.ignore"/>
                 </label>
             </g:if>
         </sec:ifAllGranted>
-        <g:hiddenField name="md5" value="${context?.metadataFileMd5sum}"/>
     </g:form>
     <h3><g:message code="metadataImport.implementedValidations"/></h3>
         <ul>
@@ -141,5 +152,11 @@
             </g:each>
         </ul>
     </div>
+<asset:script>
+    $(function() {
+        $.otp.metaDataImport.buttonAction();
+        $.otp.metaDataImport.fillFields([${raw(cmd.paths.collect{"'$it'"}.join(','))}]);
+    });
+</asset:script>
 </body>
 </html>

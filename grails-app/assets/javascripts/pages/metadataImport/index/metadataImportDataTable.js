@@ -61,13 +61,24 @@ $(function() {
                 .find('tbody').remove();
 
             var setPositionAndSize = function () {
-                $('.sticky-col').css({
-                    left: $('.fixed-scrollbar-container').position().left,
-                    top: $('.fixed-scrollbar-container').position().top,
-                });
-                $('.sticky-intersect').css({
-                    left: $('.fixed-scrollbar-container').position().left,
-                });
+                var stickyCols = $('.sticky-col');
+                var stickyIntersects = $('.sticky-intersect');
+                var i;
+
+                for (i = 0; i < stickyCols.length; i++) {
+                    var stickyCol = $(stickyCols[i]);
+                    stickyCol.css({
+                        left: stickyCol.parent().find('.fixed-scrollbar-container').position().left,
+                        top: stickyCol.parent().find('.fixed-scrollbar-container').position().top
+                    });
+                }
+
+                for (i = 0; i < stickyIntersects.length; i++) {
+                    var stickyIntersect = $(stickyIntersects[i]);
+                    stickyIntersect.css({
+                        left: stickyIntersect.parent().find('.fixed-scrollbar-container').position().left
+                    });
+                }
 
                 $t
                 .find('thead th').each(function (i) {
