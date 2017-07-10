@@ -304,7 +304,7 @@ class QualityAssessmentMergedWorkflowTests extends WorkflowTestCase {
 
     private void createDirectoryForReferenceGenome() {
         String referenceGenomesDir = "${getRootDirectory()}/files/reference_genomes"
-        String softLinkToReferenceGenomesDir = "${processingRootPath}/reference_genomes"
+        String softLinkToReferenceGenomesDir = "${realm.processingRootPath}/reference_genomes"
         String cmdBuildSoftLinkToReferenceGenomes = "ln -s ${referenceGenomesDir} ${softLinkToReferenceGenomesDir}"
         executionService.executeCommand(realm, "${cmdBuildSoftLinkToReferenceGenomes}")
         WaitingFileUtils.waitUntilExists(new File(softLinkToReferenceGenomesDir))

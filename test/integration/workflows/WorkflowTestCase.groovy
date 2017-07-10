@@ -57,10 +57,6 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
     // The scheduler needs to access the created objects while the test is being executed
     boolean transactional = false
 
-    // set this to true if you are working on the tests and want to keep the workflow results
-    // don't forget to delete them manually
-    protected static final boolean KEEP_TEMP_FOLDER = false
-
     // fast queue, here we come!
     static final String jobSubmissionOptions = JsonOutput.toJson([
             (JobSubmissionOption.WALLTIME): Duration.ofMinutes(20).toString(),
@@ -77,11 +73,6 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
     private File baseDirectory = null
 
 
-    String rootPath
-    String processingRootPath
-    String loggingRootPath
-    String stagingRootPath
-    String programsRootPath
     String testDataDir
     String ftpDir
 
@@ -181,35 +172,39 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         File rootDirectory = getRootDirectory()
         assert rootDirectory.list()?.size() : "${rootDirectory} seems not to be mounted"
 
-        rootPath = "${getBaseDirectory()}/root_path"
-        processingRootPath = "${getBaseDirectory()}/processing_root_path"
-        loggingRootPath = "${getBaseDirectory()}/logging_root_path"
-        stagingRootPath = "${getBaseDirectory()}/staging_root_path"
-        programsRootPath = "/"
         testDataDir = "${getRootDirectory()}/files"
         ftpDir = "${getBaseDirectory()}/ftp"
 
         Map realmParams = [
-                rootPath: rootPath,
-                processingRootPath: processingRootPath,
-                programsRootPath: programsRootPath,
-                loggingRootPath: loggingRootPath,
-                stagingRootPath: stagingRootPath,
+                programsRootPath: "/",
                 unixUser: getAccountName(),
                 defaultJobSubmissionOptions: jobSubmissionOptions,
         ]
 
-        assert WorkflowTestRealms.createRealmDataManagementDKFZ(realmParams).save(flush: true)
+        Realm realmManagement = WorkflowTestRealms.createRealmDataManagementDKFZ(realmParams).save(flush: true)
         realm = WorkflowTestRealms.createRealmDataProcessingDKFZ(realmParams).save(flush: true)
+
+        println "Base directory:${getBaseDirectory()}"
+
+        realm.rootPath = "${getBaseDirectory()}/root_path"
+        realm.processingRootPath = "${getBaseDirectory()}/processing_root_path"
+        realm.loggingRootPath = "${getBaseDirectory()}/logging_root_path"
+        realm.stagingRootPath = "${getBaseDirectory()}/staging_root_path"
+        assert realm.save(flush: true)
+
+        realmManagement.rootPath = "${getBaseDirectory()}/root_path"
+        realmManagement.processingRootPath = "${getBaseDirectory()}/processing_root_path"
+        realmManagement.loggingRootPath = "${getBaseDirectory()}/logging_root_path"
+        realmManagement.stagingRootPath = "${getBaseDirectory()}/staging_root_path"
+        assert realmManagement.save(flush: true)
+
         assert realm
-        assert !getBaseDirectory().exists()
         createDirectories([
-                getBaseDirectory(),
                 new File(realm.rootPath),
                 new File(realm.loggingRootPath, JobStatusLoggingService.STATUS_LOGGING_BASE_DIR),
                 new File(realm.stagingRootPath),
         ])
-        DomainFactory.createProcessingOptionBasePathReferenceGenome(new File(processingRootPath, "reference_genomes").absolutePath)
+        DomainFactory.createProcessingOptionBasePathReferenceGenome(new File(realm.processingRootPath, "reference_genomes").absolutePath)
 
     }
 
@@ -247,13 +242,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         ProcessOutput processOutput = executionService.executeCommandReturnProcessOutput(realm, cmd, realm.roddyUser)
         processOutput.assertExitCodeZeroAndStderrEmpty()
 
-        if(!KEEP_TEMP_FOLDER) {
-            String cleanUpCommand = createClusterScriptService.removeDirs([getBaseDirectory()], CreateClusterScriptService.RemoveOption.RECURSIVE_FORCE)
-            ProcessOutput out = executionService.executeCommandReturnProcessOutput(realm, cleanUpCommand)
-            assert out.exitCode == 0 : "Deletion failed: '${out.stderr}', exit code: ${out.exitCode}"
-        } else {
-            println "Base directory: ${getBaseDirectory()}"
-        }
+        println "Base directory: ${getBaseDirectory()}"
     }
 
 
@@ -334,9 +323,13 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
     protected File getBaseDirectory() {
         // Create the directory like a "singleton", since randomness is involved
         if (!baseDirectory) {
-            File workflowDirectory = getWorkflowDirectory()
-            // FIXME: This should be replaced when we updated to JDK7, finally: OTP-1502
-            baseDirectory = uniqueDirectory(workflowDirectory)
+            String mkDirs = """\
+TEMP_DIR=`mktemp -d -p ${new File(getRootDirectory(), "tmp").absolutePath} ${getNonQualifiedClassName()}-${System.getProperty('user.name')}-${HelperUtils.formatter.print(new DateTime())}-XXXXXXXXXXXXXXXX`
+chmod g+rwx \$TEMP_DIR
+echo \$TEMP_DIR
+"""
+            baseDirectory = new File(executionService.executeCommandReturnProcessOutput(realm, mkDirs)
+                    .assertExitCodeZeroAndStderrEmpty().stdout.trim())
         }
         return baseDirectory
     }
@@ -420,19 +413,6 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
      */
     protected File getRootDirectory() {
         return new File(grailsApplication.config.otp.testing.workflows.rootdir)
-    }
-
-    /**
-     * Construct a unique directory under the given under root directory.
-     *
-     * This may have security implications and should be replaced by createTempDir() from JDK 7.
-     *
-     * @param root the root directory under which the unique directory is constructed.
-     * @return the unique directory
-     */
-    private File uniqueDirectory(File root) {
-        assert root : 'No root directory provided. Unable to construct a unique directory.'
-        return new File(root, "tmp-${System.getProperty('user.name')}-${HelperUtils.getUniqueString()}")
     }
 
     /**

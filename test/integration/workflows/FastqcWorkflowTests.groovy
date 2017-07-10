@@ -8,6 +8,7 @@ import org.joda.time.*
 import org.junit.*
 
 import java.util.zip.*
+
 @Ignore
 class FastqcWorkflowTests extends WorkflowTestCase {
     ProcessingOptionService processingOptionService
@@ -55,7 +56,7 @@ class FastqcWorkflowTests extends WorkflowTestCase {
                 vbpFileName: 'asdf.fastq.gz',
                 seqTrack: seqTrack,
                 run: run,
-                initialDirectory: "${stagingRootPath}/${run.name}",
+                initialDirectory: "${realm.stagingRootPath}/${run.name}",
         )
 
         linkFileUtils.createAndValidateLinks([(sourceFastq): new File(lsdfFilesService.getFileFinalPath(dataFile))], realm)
