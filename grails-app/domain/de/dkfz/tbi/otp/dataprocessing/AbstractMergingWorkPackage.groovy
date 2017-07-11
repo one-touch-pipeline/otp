@@ -89,5 +89,6 @@ abstract class AbstractMergingWorkPackage implements Entity {
         seqType index: "abstract_merging_work_package_seq_type_idx"
         referenceGenome index: "abstract_merging_work_package_reference_genome_idx"
         bamFileInProjectFolder index: "abstract_merging_work_package_bam_file_in_project_folder_idx"
+        antibodyTarget index: 'abstract_merging_work_package_antibody_target_idx'
     }
 }
