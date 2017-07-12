@@ -725,7 +725,7 @@ class DomainFactory {
      * Creates a {@link MergingWorkPackage} with the same properties except for the specified ones.
      */
     static MergingWorkPackage createMergingWorkPackage(MergingWorkPackage base, Map properties) {
-        MergingWorkPackage mwp = new MergingWorkPackage((MergingWorkPackage.seqTrackPropertyNames +
+        MergingWorkPackage mwp = new MergingWorkPackage((MergingWorkPackage.seqTrackPropertyNames(base.seqType) +
                 MergingWorkPackage.processingParameterNames).collectEntries{[it, base."${it}"]} + properties)
         assert mwp.save(failOnError: true)
         return mwp

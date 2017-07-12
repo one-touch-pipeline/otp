@@ -210,7 +210,7 @@ class SamplePair implements Entity {
      * The names of the properties of {@link #mergingWorkPackage1} and {@link #mergingWorkPackage2} which must be equal.
      */
     static final Collection<String> mergingWorkPackageEqualProperties =
-            (MergingWorkPackage.seqTrackPropertyNames - ['sample', 'libraryPreparationKit'] + MergingWorkPackage.processingParameterNames  - ['referenceGenome', 'statSizeFileName']).asImmutable()
+            (['sample.individual', 'seqType', 'seqPlatformGroup'] + MergingWorkPackage.processingParameterNames  - ['referenceGenome', 'statSizeFileName']).asImmutable()
 
     /**
      * Finds distinct combinations of [mergingWorkPackage1, mergingWorkPackage2] with these criteria:
@@ -239,7 +239,7 @@ class SamplePair implements Entity {
               SampleTypePerProject stpp1,
               SampleTypePerProject stpp2
             WHERE
-              ${(mergingWorkPackageEqualProperties + ['sample.individual']).collect{
+              ${mergingWorkPackageEqualProperties.collect{
                   "(mwp1.${it} = mwp2.${it} OR mwp1.${it} IS NULL AND mwp2.${it} IS NULL)"
               }.join(' AND\n')} AND
               mwp1.seqType IN :analysableSeqTypes AND

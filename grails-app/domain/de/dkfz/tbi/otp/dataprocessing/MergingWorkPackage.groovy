@@ -34,12 +34,27 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
     ProcessingType processingType = ProcessingType.SYSTEM
 
     // SeqTrack properties, part of merging criteria
-    static final Collection<String> qualifiedSeqTrackPropertyNames = ['sample', 'seqType', 'run.seqPlatform.seqPlatformGroup', 'libraryPreparationKit'].asImmutable()
+    static Collection<String> qualifiedSeqTrackPropertyNames(SeqType seqType) {
+        List<String> propertyNames = ['sample', 'seqType', 'run.seqPlatform.seqPlatformGroup']
+        if (!seqType.isWgbs()) {
+            propertyNames += 'libraryPreparationKit'
+        }
+        if (seqType.isChipSeq()) {
+            propertyNames += 'antibodyTarget'
+        }
+        return propertyNames.asImmutable()
+    }
+
+    static Collection<String> seqTrackPropertyNames(SeqType seqType) {
+        qualifiedSeqTrackPropertyNames(seqType).collect{nonQualifiedPropertyName(it)}.asImmutable()
+    }
+
+
     SeqPlatformGroup seqPlatformGroup
     LibraryPreparationKit libraryPreparationKit
 
     // Processing parameters, part of merging criteria
-    static final Collection<String> processingParameterNames = ['referenceGenome', 'statSizeFileName', 'pipeline'].asImmutable()
+    static final Collection<String> processingParameterNames = ['referenceGenome', 'statSizeFileName', 'pipeline', 'antibodyTarget'].asImmutable()
     String statSizeFileName
 
     //reference genome depending options
@@ -98,15 +113,11 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
         }
     }
 
-    static final Collection<String> seqTrackPropertyNames = qualifiedSeqTrackPropertyNames.collect{nonQualifiedPropertyName(it)}.asImmutable()
 
     Collection<SeqTrack> findMergeableSeqTracks() {
         Map properties = [:]
-        String mergeableSeqTracksQuery = 'FROM SeqTrack WHERE ' + qualifiedSeqTrackPropertyNames.collect { String qualifiedPropertyName ->
+        String mergeableSeqTracksQuery = 'FROM SeqTrack WHERE ' + qualifiedSeqTrackPropertyNames(seqType).collect { String qualifiedPropertyName ->
             String nonQualifiedPropertyName = nonQualifiedPropertyName(qualifiedPropertyName)
-            if (nonQualifiedPropertyName == 'libraryPreparationKit' && seqType.isWgbs()) {
-                return null
-            }
             def value = this."${nonQualifiedPropertyName}"
             if (value) {
                 properties."${nonQualifiedPropertyName}" = value
@@ -123,13 +134,7 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
     }
 
     static Map getMergingProperties(SeqTrack seqTrack) {
-        Collection<String> propertyNames = seqTrackPropertyNames
-        if (seqTrack.seqType.isWgbs()) {
-            propertyNames -= 'libraryPreparationKit'
-        }
-        if (seqTrack.seqType.isChipSeq()) {
-            propertyNames += 'antibodyTarget'
-        }
+        Collection<String> propertyNames = seqTrackPropertyNames(seqTrack.seqType)
         Map properties = [:]
         propertyNames.each {
             properties."${it}" = seqTrack."${it}"
