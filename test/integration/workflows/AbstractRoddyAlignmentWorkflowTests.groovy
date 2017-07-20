@@ -139,7 +139,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
         setPermissionsRecursive(baseDirectory, TEST_DATA_MODE_DIR, TEST_DATA_MODE_FILE)
 
         SpringSecurityUtils.doWithAuth("operator") {
-            processingOptionService.createOrUpdate("basesPerBytesFastQ", null, null, "2.339", "Bases Per Byte for FastQ file used to calculate count of bases before FastQC-WG is finished")
+            processingOptionService.createOrUpdate(OptionName.STATISTICS_BASES_PER_BYTES_FASTQ, null, null, "2.339")
         }
     }
 

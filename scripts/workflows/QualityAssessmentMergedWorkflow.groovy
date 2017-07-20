@@ -93,15 +93,15 @@ ctx.processingOptionService.createOrUpdate(
 
 
 println ctx.processingOptionService.createOrUpdate(
-    OptionName."${PBS_PREFIX}${ExecuteMergedBamFileQaAnalysisJob.class.simpleName}",
-    "DKFZ",
-    null,
-    '{"-l": {walltime: "100:00:00", mem: "15g"}}'
+        OptionName.CLUSTER_SUBMISSIONS_OPTION,
+        "${ExecuteMergedBamFileQaAnalysisJob.class.simpleName}",
+        null,
+        '{"-l": {walltime: "100:00:00", mem: "15g"}}'
 )
 
 println ctx.processingOptionService.createOrUpdate(
-    OptionName."${PBS_PREFIX}${ExecuteMergedMappingFilteringSortingToCoverageTableJob.simpleName}",
-    Realm.Cluster.DKFZ.toString(),
-    null,
-    '{"-l": {nodes: "1:ppn=6", mem: "15g"}}'
+        OptionName.CLUSTER_SUBMISSIONS_OPTION,
+        "${ExecuteMergedMappingFilteringSortingToCoverageTableJob.simpleName}",
+        null,
+        '{"-l": {nodes: "1:ppn=6", mem: "15g"}}'
 )

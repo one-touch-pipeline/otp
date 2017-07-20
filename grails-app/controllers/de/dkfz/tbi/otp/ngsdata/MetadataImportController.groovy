@@ -112,7 +112,7 @@ class MetadataImportController {
     }
 
     StringBuilder doAutoImport(String otrsTicketNumber, String ilseNumbers) {
-        if (processingOptionService.findOption('autoImportEnabled', null, null) != '1') {
+        if (!(processingOptionService.findOption(OptionName.TICKET_SYSTEM_AUTO_IMPORT_ENABLED, null, null) as Boolean)) {
             throw new IllegalStateException('Automatic import is currently disabled. Set processing option autoImportEnabled to 1 to enable it.')
         }
         StringBuilder text = new StringBuilder()

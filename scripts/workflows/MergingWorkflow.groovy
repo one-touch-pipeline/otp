@@ -1,8 +1,6 @@
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.job.jobs.merging.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.Realm.Cluster
 
 import static de.dkfz.tbi.otp.job.processing.PbsOptionMergingService.*
 import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
@@ -27,24 +25,24 @@ plan(workflowName) {
 
 //special pbs options for merging workflow
 println ctx.processingOptionService.createOrUpdate(
-  OptionName."${PBS_PREFIX}${MergingJob.simpleName}",
-  "DKFZ",
-  null,
-  '{"-l": {nodes: "1:ppn=6", walltime: "100:00:00", mem: "25g"}}'
+        OptionName.CLUSTER_SUBMISSIONS_OPTION,
+        "${MergingJob.simpleName}",
+        null,
+        '{"-l": {nodes: "1:ppn=6", walltime: "100:00:00", mem: "25g"}}'
 )
 println ctx.processingOptionService.createOrUpdate(
-    OptionName."${PBS_PREFIX}${MergingJob.simpleName}",
-    ${SeqType.exomePairedSeqType.processingOptionName},
-    null,
-    '{"-l": {mem: "15g"}}'
+        OptionName.CLUSTER_SUBMISSIONS_OPTION,
+        "${MergingJob.simpleName}_${SeqType.exomePairedSeqType.processingOptionName}",
+        null,
+        '{"-l": {mem: "15g"}}'
 )
 
 //picard option for mark duplicates
 println ctx.processingOptionService.createOrUpdate(
-  OptionName.PIPELINE_OTP_ALIGNMENT_PICARD_MDUP,
-  null,
-  null,
-  'VALIDATION_STRINGENCY=SILENT REMOVE_DUPLICATES=FALSE ASSUME_SORTED=TRUE MAX_RECORDS_IN_RAM=12500000 CREATE_INDEX=TRUE CREATE_MD5_FILE=TRUE'
+        OptionName.PIPELINE_OTP_ALIGNMENT_PICARD_MDUP,
+        null,
+        null,
+        'VALIDATION_STRINGENCY=SILENT REMOVE_DUPLICATES=FALSE ASSUME_SORTED=TRUE MAX_RECORDS_IN_RAM=12500000 CREATE_INDEX=TRUE CREATE_MD5_FILE=TRUE'
 )
 
 

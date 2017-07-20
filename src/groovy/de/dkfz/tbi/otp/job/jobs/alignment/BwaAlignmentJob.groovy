@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.job.jobs.alignment
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.job.processing.*
 import org.springframework.beans.factory.annotation.Autowired
@@ -57,8 +58,8 @@ class BwaAlignmentJob extends AbstractJobImpl {
         String saiFilePath = processedSaiFileService.getFilePath(saiFile)
         String referenceGenomePath = alignmentPassService.referenceGenomePath(alignmentPass)
         String qaSwitch = qualityEncoding(alignmentPass)
-        String nCores = optionService.findOptionSafe("bwaNumberOfCores", null, null)
-        String qParameter = optionService.findOptionSafe("bwaQParameter", alignmentPassService.seqType(alignmentPass), alignmentPassService.project(alignmentPass))
+        String nCores = optionService.findOptionSafe(OptionName.PIPELINE_OTP_ALIGNMENT_BWA_NUMBER_OF_CORES, null, null)
+        String qParameter = optionService.findOptionSafe(OptionName.PIPELINE_OTP_ALIGNMENT_BWA_QUEUE_PARAMETER, alignmentPassService.seqType(alignmentPass).name, alignmentPassService.project(alignmentPass))
         // TODO: add option for clipping
         String bwaCmd = "${bwaCommand} aln ${nCores} ${qaSwitch} ${qParameter} -f ${saiFilePath} ${referenceGenomePath} ${dataFilePath}"
         String chmodCmd = "chmod 440 ${saiFilePath}"
@@ -68,7 +69,7 @@ class BwaAlignmentJob extends AbstractJobImpl {
 
     private String bwaCommand(AlignmentPass alignmentPass) {
         Project project = alignmentPassService.project(alignmentPass)
-        String cmd = optionService.findOption("bwaCommand", null, project)
+        String cmd = optionService.findOption(OptionName.COMMAND_CONVEY_BWA, null, project)
         if (!cmd) {
             throw new ProcessingException("BWA command undefined for project ${project}")
         }
@@ -77,6 +78,6 @@ class BwaAlignmentJob extends AbstractJobImpl {
 
     private String qualityEncoding(AlignmentPass alignmentPass) {
         String type = alignmentPass.seqTrack.qualityEncoding.toString()
-        return optionService.findOptionSafe("bwaQualityEncoding", type , null )
+        return optionService.findOptionSafe(OptionName.PIPELINE_OTP_ALIGNMENT_CONVEY_BWA_QUALITY_ENCODING, type , null )
     }
 }

@@ -1,3 +1,5 @@
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+
 /**
  *
  * Script to add
@@ -8,9 +10,8 @@
 
 
 println ctx.processingOptionService.createOrUpdate(
-        "roddyPath",
+        ProcessingOption.OptionName.RODDY_PATH,
         null,
         null,
-        "/path/to/roddy/release/roddy/",
-        "Path to the roddy.sh on the current cluster (***REMOVED***cluster 13.1)",
+        "/path/to/roddy/release/roddy/"
 )

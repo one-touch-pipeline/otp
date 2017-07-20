@@ -130,7 +130,6 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         DomainFactory.createProcessingOption([
                 name: OptionName.OTP_USER_LINUX_GROUP,
                 value: TestCase.testingGroup(grailsApplication),
-                comment: "linux group of the otp user",
         ]
         )
 
@@ -447,7 +446,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
             }
         }
 
-        ProcessingOption.findAll().findAll() { it.name.toString().startsWith("${PbsOptionMergingService.PBS_PREFIX}") }.each {
+        ProcessingOption.findAllByName(OptionName.CLUSTER_SUBMISSIONS_OPTION).each {
             it.value = jobSubmissionOptions
             it.save(failOnError: true, flush: true)
         }

@@ -116,11 +116,11 @@ class ConveyBwaAlignmentWorkflowTests extends WorkflowTestCase {
 
 
         SpringSecurityUtils.doWithAuth("admin") {
-            processingOptionService.createOrUpdate('basesPerBytesFastQ', null, null, "1", "description")
+            processingOptionService.createOrUpdate(ProcessingOption.OptionName.STATISTICS_BASES_PER_BYTES_FASTQ, null, null, "1")
 
             processingOptionService.createOrUpdate(
-                    "${PBS_PREFIX}${ConveyBwaAlignmentJob.simpleName}",
-                    'DKFZ',
+                    ProcessingOption.OptionName.CLUSTER_SUBMISSIONS_OPTION,
+                    "${ConveyBwaAlignmentJob.simpleName}_DKFZ",
                     null,
                     '''{
                         "-l": {
@@ -132,8 +132,7 @@ class ConveyBwaAlignmentWorkflowTests extends WorkflowTestCase {
                         "-m": "a",
                         "-S": "/bin/bash",
                         "-j": "oe"
-                        }''',
-                    'Convey option for cluster'
+                        }'''
             )
         }
     }

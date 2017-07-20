@@ -21,87 +21,82 @@ plan(workflowName) {
 
 String exome = SeqType.exomePairedSeqType.processingOptionName
 
-
-String toUpperSnakeCase(String s) {
-    CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, s)
-}
-
 println ctx.processingOptionService.createOrUpdate(
-    OptionName."${PbsOptionMergingService.PBS_PREFIX}_${toUpperSnakeCase(SnvCallingJob.simpleName)}",
-    "DKFZ",
-    null,
-    '{"-l": {nodes: "1:ppn=1", walltime: "24:00:00", mem: "400m"}}'
+        OptionName.CLUSTER_SUBMISSIONS_OPTION,
+        "${SnvCallingJob.simpleName}",
+        null,
+        '{"-l": {nodes: "1:ppn=1", walltime: "24:00:00", mem: "400m"}}'
 )
 
 println ctx.processingOptionService.createOrUpdate(
-    OptionName."${PbsOptionMergingService.PBS_PREFIX}_${toUpperSnakeCase(SnvCallingJob.simpleName)}",
-    "${exome}",
-    null,
-    '{"-l": {walltime: "08:00:00"}}'
+        OptionName.CLUSTER_SUBMISSIONS_OPTION,
+        "${SnvCallingJob.simpleName}_${exome}",
+        null,
+        '{"-l": {walltime: "08:00:00"}}'
 )
 
 
 
 println ctx.processingOptionService.createOrUpdate(
-    OptionName."${PbsOptionMergingService.PBS_PREFIX}_${toUpperSnakeCase(SnvJoiningJob.simpleName)}",
-    "DKFZ",
-    null,
-    '{"-l": {nodes: "1:ppn=1", walltime: "24:00:00", mem: "400m"}}'
+        OptionName.CLUSTER_SUBMISSIONS_OPTION,
+        "${SnvJoiningJob.simpleName}",
+        null,
+        '{"-l": {nodes: "1:ppn=1", walltime: "24:00:00", mem: "400m"}}'
 )
 
 println ctx.processingOptionService.createOrUpdate(
-    OptionName."${PbsOptionMergingService.PBS_PREFIX}_${toUpperSnakeCase(SnvJoiningJob.simpleName)}",
-    "${exome}",
-    null,
-    '{"-l": {walltime: "08:00:00"}}'
-)
-
-
-
-println ctx.processingOptionService.createOrUpdate(
-    OptionName."${PbsOptionMergingService.PBS_PREFIX}_${toUpperSnakeCase(SnvAnnotationJob.simpleName)}",
-    "DKFZ",
-    null,
-    '{"-l": {nodes: "1:ppn=1", walltime: "96:00:00", mem: "3g"}}'
-)
-
-println ctx.processingOptionService.createOrUpdate(
-    OptionName."${PbsOptionMergingService.PBS_PREFIX}_${toUpperSnakeCase(SnvAnnotationJob.simpleName)}",
-    "${exome}",
-    null,
-    '{"-l": {walltime: "24:00:00"}}'
+        OptionName.CLUSTER_SUBMISSIONS_OPTION,
+        "${SnvJoiningJob.simpleName}_${exome}",
+        null,
+        '{"-l": {walltime: "08:00:00"}}'
 )
 
 
 
 println ctx.processingOptionService.createOrUpdate(
-    OptionName."${PbsOptionMergingService.PBS_PREFIX}_${toUpperSnakeCase(SnvDeepAnnotationJob.simpleName)}",
-    "DKFZ",
-    null,
-    '{"-l": {nodes: "1:ppn=4", walltime: "04:00:00", mem: "400m"}}'
+        OptionName.CLUSTER_SUBMISSIONS_OPTION,
+        "${SnvAnnotationJob.simpleName}",
+        null,
+        '{"-l": {nodes: "1:ppn=1", walltime: "96:00:00", mem: "3g"}}'
 )
 
 println ctx.processingOptionService.createOrUpdate(
-    OptionName."${PbsOptionMergingService.PBS_PREFIX}_${toUpperSnakeCase(SnvDeepAnnotationJob.simpleName)}",
-    "${exome}",
-    null,
-    '{"-l": {nodes: "1:ppn=3", walltime: "02:00:00"}}'
+        OptionName.CLUSTER_SUBMISSIONS_OPTION,
+        "${SnvAnnotationJob.simpleName}_${exome}",
+        null,
+        '{"-l": {walltime: "24:00:00"}}'
 )
 
 
 
 println ctx.processingOptionService.createOrUpdate(
-    OptionName."${PbsOptionMergingService.PBS_PREFIX}_${toUpperSnakeCase(FilterVcfJob.simpleName)}",
-    "DKFZ",
-    null,
-    '{"-l": {nodes: "1:ppn=1", walltime: "04:00:00", mem: "3g"}}'
+        OptionName.CLUSTER_SUBMISSIONS_OPTION,
+        "${SnvDeepAnnotationJob.simpleName}",
+        null,
+        '{"-l": {nodes: "1:ppn=4", walltime: "04:00:00", mem: "400m"}}'
 )
 
 println ctx.processingOptionService.createOrUpdate(
-    OptionName."${PbsOptionMergingService.PBS_PREFIX}_${toUpperSnakeCase(FilterVcfJob.simpleName)}",
-    "${exome}",
-    null,
-    '{"-l": {walltime: "02:00:00", mem: "1g"}}'
+        OptionName.CLUSTER_SUBMISSIONS_OPTION,
+        "${SnvDeepAnnotationJob.simpleName}_${exome}",
+        null,
+        '{"-l": {nodes: "1:ppn=3", walltime: "02:00:00"}}'
+)
+
+
+
+println ctx.processingOptionService.createOrUpdate(
+        OptionName.CLUSTER_SUBMISSIONS_OPTION,
+        "${FilterVcfJob.simpleName}",
+        null,
+        '{"-l": {nodes: "1:ppn=1", walltime: "04:00:00", mem: "3g"}}'
+)
+
+println ctx.processingOptionService.createOrUpdate(
+        OptionName.CLUSTER_SUBMISSIONS_OPTION,
+        "${FilterVcfJob.simpleName}_${exome}",
+        null,
+        '{"-l": {walltime: "02:00:00", mem: "1g"}}'
 )
 
 

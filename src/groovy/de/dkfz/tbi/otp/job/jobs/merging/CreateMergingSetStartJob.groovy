@@ -41,7 +41,7 @@ class CreateMergingSetStartJob extends AbstractStartJobImpl {
             return false
         }
         int n = Process.countByFinishedAndJobExecutionPlan(false, jep)
-        long maxRunning = optionService.findOptionAsNumber("numberOfJobs", "CreateMergingSetWorkflow", null, MAX_RUNNING)
+        long maxRunning = optionService.findOptionAsNumber(ProcessingOption.OptionName.MAXIMUM_NUMBER_OF_JOBS, "CreateMergingSetWorkflow", null, MAX_RUNNING)
         return (n < maxRunning)
     }
 }

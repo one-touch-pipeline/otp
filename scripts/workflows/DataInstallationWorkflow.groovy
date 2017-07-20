@@ -15,10 +15,10 @@ plan(workflow) {
 
 
 println ctx.processingOptionService.createOrUpdate(
-  "${PBS_PREFIX}${CopyFilesJob.simpleName}",
-  null,
-  null,
-  '{"-l": { walltime: "12:00:00"}}'
+        OptionName.CLUSTER_SUBMISSIONS_OPTION,
+        CopyFilesJob.simpleName,
+        null,
+        '{"-l": { walltime: "12:00:00"}}'
 )
 
 ctx.processingOptionService.createOrUpdate(

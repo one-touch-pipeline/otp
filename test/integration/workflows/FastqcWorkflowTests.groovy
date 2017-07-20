@@ -61,7 +61,7 @@ class FastqcWorkflowTests extends WorkflowTestCase {
         linkFileUtils.createAndValidateLinks([(sourceFastq): new File(lsdfFilesService.getFileFinalPath(dataFile))], realm)
 
         SpringSecurityUtils.doWithAuth("admin") {
-            processingOptionService.createOrUpdate('basesPerBytesFastQ', null, null, "1", "description")
+            processingOptionService.createOrUpdate(ProcessingOption.OptionName.STATISTICS_BASES_PER_BYTES_FASTQ, null, null, "1")
         }
     }
 

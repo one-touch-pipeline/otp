@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.job.jobs.qualityAssessmentMerged
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import grails.buildtestdata.mixin.*
@@ -11,9 +12,14 @@ import org.junit.*
 import static org.junit.Assert.*
 
 @TestFor(ReferenceGenome)
-@Mock([QualityAssessmentMergedPass, Realm,
-    ExomeSeqTrack,
-    LibraryPreparationKit, BedFile])
+@Mock([
+        QualityAssessmentMergedPass,
+        Realm,
+        ExomeSeqTrack,
+        LibraryPreparationKit,
+        BedFile,
+        ProcessingOption,
+])
 @Build([
     AlignmentPass,
     MergingPass,
@@ -66,7 +72,7 @@ class ExecuteMergedBamFileQaAnalysisJobUnitTests {
             executeJob: { realmIn, cmd -> 'pbsID' }
             ] as PbsService
 
-        ProcessingOptionService.metaClass.static.findOptionAssure = { String a, String b, Project c ->
+        ProcessingOptionService.metaClass.static.findOptionAssure = { OptionName a, String b, Project c ->
             'qualityAssessment.sh ${processedBamFilePath} ${processedBaiFilePath} ${qualityAssessmentFilePath} ${coverageDataFilePath} ${insertSizeDataFilePath} false ${allChromosomeName} 36 25 0 1 1000 10 false ${bedFilePath} ${refGenMetaInfoFilePath}'
         }
 

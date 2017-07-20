@@ -187,19 +187,18 @@ class PbsOptionMergingServiceIntegrationTests {
     }
 
     private ProcessingOption createProcessingOption(String jobKey, String jobSubmissionOptions = "{}", Realm.Cluster cluster = Realm.Cluster.DKFZ) {
-        ProcessingOption.OptionName name = ProcessingOption.OptionName."${PbsOptionMergingService.PBS_PREFIX}${jobKey}"
+        ProcessingOption.OptionName name = ProcessingOption.OptionName.CLUSTER_SUBMISSIONS_OPTION
 
         //check, if already a option with this name exist and if yes, delete it
-        ProcessingOption oldProcessingOption = processingOptionService.findStrict(name, cluster.toString(), null)
+        ProcessingOption oldProcessingOption = processingOptionService.findStrict(name, "${jobKey}_${cluster.toString()}", null)
         if (oldProcessingOption!= null) {
             oldProcessingOption.delete(flush: true)
         }
 
         ProcessingOption processingOption = new ProcessingOption(
                 name: name,
-                type: cluster.toString(),
+                type: "${jobKey}_${cluster.toString()}",
                 value: jobSubmissionOptions,
-                comment: 'comment'
                 )
         assertNotNull(processingOption.save(flush: true))
         return processingOption

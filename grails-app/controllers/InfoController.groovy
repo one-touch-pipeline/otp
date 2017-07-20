@@ -1,7 +1,7 @@
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
-import de.dkfz.tbi.otp.ngsdata.ProjectService
-import de.dkfz.tbi.otp.ngsdata.StatisticService
-import grails.converters.JSON
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
+import de.dkfz.tbi.otp.ngsdata.*
+import grails.converters.*
 
 /*
  * show information about OTP
@@ -12,7 +12,7 @@ class InfoController {
     ProjectService projectService
 
     def about() {
-        String aboutOtp = ProcessingOptionService.findOptionSafe(ProcessingOptionService.GUI_ABOUT_OTP, null, null)
+        String aboutOtp = ProcessingOptionService.findOptionSafe(OptionName.GUI_ABOUT_OTP, null, null)
         [aboutOtp: aboutOtp,]
     }
 

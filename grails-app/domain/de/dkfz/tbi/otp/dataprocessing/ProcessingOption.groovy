@@ -84,7 +84,6 @@ class ProcessingOption implements Entity {
         TICKET_SYSTEM_AUTO_IMPORT_ENABLED("Enabled auto import from the ticket system", null, Type.BOOLEAN),
 
         //email
-        EMAIL_RECIPIENT_FAST_TRACK("", null, Type.MAIL),
         EMAIL_RECIPIENT_NOTIFICATION("", null, Type.MAIL),
         EMAIL_RECIPIENT_ERRORS("", null, Type.MAIL),
         EMAIL_SENDER("", null, Type.MAIL),
@@ -107,19 +106,7 @@ class ProcessingOption implements Entity {
         NOTIFICATION_TEMPLATE_ALIGNMENT_NO_FURTHER_PROCESSING("", null, Type.MULTI_LINE_TEXT),
 
         //clusterSubmissionOption
-        CLUSTER_SUBMISSIONS_OPTION_CALCULATE_CHECKSUM_JOB("set the walltime for the CalculateChecksumJob to get in the faster queue", null, Type.PBS_OPTION),
-        CLUSTER_SUBMISSIONS_OPTION_MERGING_JOB("merging job depending cluster option for dkfz", null, Type.PBS_OPTION),
-        CLUSTER_SUBMISSIONS_OPTION_EXECUTE_MERGED_BAM_FILE_QA_ANALYSIS_JOB("time for merged QA", null, Type.PBS_OPTION),
-        CLUSTER_SUBMISSIONS_OPTION_EXECUTE_MERGED_MAPPING_FILTERING_SORTING_TO_COVERAGE_TABLE_JOB("", null, Type.PBS_OPTION),
-        CLUSTER_SUBMISSIONS_OPTION_SNV_JOINING_JOB("", null, Type.PBS_OPTION),
-        CLUSTER_SUBMISSIONS_OPTION_SNV_DEEP_ANNOTATION_JOB("suggestion of the CO group (Ivo) for the snv deep annotation job", null, Type.PBS_OPTION),
-        CLUSTER_SUBMISSIONS_OPTION_FILTER_VCF_JOB("suggestion of the CO group (Ivo) for the snv filter job", null, Type.PBS_OPTION),
-        CLUSTER_SUBMISSIONS_OPTION_CONVEY_BWA_ALIGNMENT_JOB("Convey option for cluster", null, Type.PBS_OPTION),
-        CLUSTER_SUBMISSIONS_OPTION_SNV_CALLING_JOB("suggestion of the CO group (Ivo) for the snv calling job", null, Type.PBS_OPTION),
-        CLUSTER_SUBMISSIONS_OPTION_SNV_ANNOTATION_JOB("suggestion of the CO group (Ivo) for the snv annotation job", null, Type.PBS_OPTION),
-        CLUSTER_SUBMISSIONS_OPTION_BWA_PAIRING_AND_SORTING_JOB("BWA Pairing And Sorting Job option for cluster", null, Type.PBS_OPTION),
-        CLUSTER_SUBMISSIONS_OPTION_COPY_FILES_JOB("set the walltime for the CopyFilesJob to get in the faster queue", null, Type.PBS_OPTION),
-        CLUSTER_SUBMISSIONS_OPTION_IMPORT_EXTERNALLY_MERGED_BAM_JOB("", null, Type.PBS_OPTION),
+        CLUSTER_SUBMISSIONS_OPTION("", null, Type.PBS_OPTION),
 
         //validator
         VALIDATOR_SAMPLE_IDENTIFIER_REGEX("regular expression for the DEEP sample id", null, Type.SINGLE_LINE_TEXT),
@@ -135,6 +122,7 @@ class ProcessingOption implements Entity {
         GUI_CONTACT_DATA_SUPPORT_EMAIL("", null, Type.MAIL),
         GUI_CONTACT_DATA_PERSON_IN_CHARGE("", null, Type.SINGLE_LINE_TEXT),
         GUI_CONTACT_DATA_POSTAL_ADDRESS("", null, Type.SINGLE_LINE_TEXT),
+        GUI_CONTACT_DATA_OPERATED_BY("", null, Type.SINGLE_LINE_TEXT),
         GUI_SHOW_PARTNERS("", null, Type.BOOLEAN),
         GUI_ABOUT_OTP("", null, Type.MULTI_LINE_TEXT)
 

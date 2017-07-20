@@ -162,7 +162,7 @@ class OtrsTicket implements Commentable, Entity {
     }
 
     String getUrl() {
-        return "${ProcessingOptionService.getValueOfProcessingOption("otrsServerUrl")}/index.pl?Action=AgentTicketZoom;TicketNumber=${ticketNumber}"
+        return "${ProcessingOptionService.getValueOfProcessingOption(ProcessingOption.OptionName.TICKET_SYSTEM_URL)}/index.pl?Action=AgentTicketZoom;TicketNumber=${ticketNumber}"
     }
 
     String toString() {

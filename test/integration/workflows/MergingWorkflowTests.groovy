@@ -199,11 +199,10 @@ class MergingWorkflowTests extends WorkflowTestCase {
 
         SpringSecurityUtils.doWithAuth("admin") {
             processingOptionService.createOrUpdate(
-                    "picardJavaSetting",
+                    ProcessingOption.OptionName.PIPELINE_OTP_ALIGNMENT_PICARD_JAVA_SETTINGS,
                     null,
                     null,
-                    'export JAVA_OPTIONS=-Xmx8G',
-                    "Java options for Picard"
+                    'export JAVA_OPTIONS=-Xmx8G'
             )
         }
 

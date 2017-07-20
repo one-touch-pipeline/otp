@@ -26,28 +26,26 @@ import org.springframework.util.*
  */
 class PbsOptionMergingService {
 
-    static final String PBS_PREFIX = "CLUSTER_SUBMISSIONS_OPTION"
-
     ProcessingOptionService processingOptionService
 
     public String mergePbsOptions(ProcessingStep processingStep, Realm realm, String... additionalJsonOptions) {
-        String cluster = realm.cluster
         ProcessParameterObject parameterObject = processingStep.processParameterObject
         assert parameterObject
         Project project = parameterObject.project
         SeqType seqType = parameterObject.seqType
-        OptionName optionName = OptionName."${PBS_PREFIX}_${CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, processingStep.nonQualifiedJobClass)}"
+        String jobClass = processingStep.nonQualifiedJobClass
+        OptionName optionName = OptionName.CLUSTER_SUBMISSIONS_OPTION
 
         // default options for the realm
         Map options = jsonStringToMap(realm.defaultJobSubmissionOptions)
 
         // options for the job class
-        options = mergeMapWithJsonString(options, processingOptionService.findOption(optionName, cluster, project))
+        options = mergeMapWithJsonString(options, processingOptionService.findOption(optionName, "${jobClass}", project))
         if (seqType) {
             assert seqType.processingOptionName
             // options for the job class and SeqType
             options = mergeMapWithJsonString(options, processingOptionService.findOption(
-                    optionName, seqType.alias, project))
+                    optionName, "${jobClass}_${seqType.processingOptionName}", project))
         }
 
         // additional options

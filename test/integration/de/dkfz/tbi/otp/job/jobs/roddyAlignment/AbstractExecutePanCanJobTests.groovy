@@ -62,9 +62,9 @@ class AbstractExecutePanCanJobTests {
 
         DomainFactory.createRoddyProcessingOptions(tmpDir.newFolder())
 
-        File roddyPath = ProcessingOption.findByName(ProcessingOption.OptionName.RODDY_PATH).value as File
+        File roddyPath = ProcessingOption.findByName(OptionName.RODDY_PATH).value as File
         roddyCommand = new File(roddyPath, 'roddy.sh')
-        roddyBaseConfigsPath = ProcessingOption.findByName(ProcessingOption.OptionName.RODDY_BASE_CONFIGS_PATH).value as File
+        roddyBaseConfigsPath = ProcessingOption.findByName(OptionName.RODDY_BASE_CONFIGS_PATH).value as File
         roddyBaseConfigsPath.mkdirs()
         roddyApplicationIni = ProcessingOption.findByName(OptionName.RODDY_APPLICATION_INI).value as File
         roddyApplicationIni.text = "Some Text"

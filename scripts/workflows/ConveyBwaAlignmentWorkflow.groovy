@@ -1,9 +1,7 @@
-import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.job.jobs.alignment.*
 import de.dkfz.tbi.otp.ngsdata.*
 
-import static de.dkfz.tbi.otp.job.processing.PbsOptionMergingService.*
 import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
 
 final String WORKFLOW_NAME = 'ConveyBwaAlignmentWorkflow'
@@ -49,7 +47,7 @@ plan(WORKFLOW_NAME, ctx, true) {
 
 // create Convey bwa number of cores option for conveyBwaAlignmentJob
 ctx.processingOptionService.createOrUpdate(
-    OptionName.PIPELINE_OTP_ALIGNMENT_BWA_NUMBER_OF_CORES,
+    OptionName.PIPELINE_OTP_ALIGNMENT_CONVEY_BWA_NUMBER_OF_CORES,
     null,
     null,
     '-t 12'
@@ -96,8 +94,8 @@ ctx.processingOptionService.createOrUpdate(
 
 // Create PBS options for bwaPairingAndSortingJob
 ctx.processingOptionService.createOrUpdate(
-    "${PBS_PREFIX}${BwaPairingAndSortingJob.simpleName}",
-    'DKFZ',
+    OptionName.CLUSTER_SUBMISSIONS_OPTION,
+    "${BwaPairingAndSortingJob.simpleName}",
     null,
     '''{
       "-l": {
@@ -110,62 +108,62 @@ ctx.processingOptionService.createOrUpdate(
 
 // Create PBS options for bwaAlignmentJob
 ctx.processingOptionService.createOrUpdate(
-        "${PBS_PREFIX}${ConveyBwaAlignmentJob.simpleName}",
-        'DKFZ',
+        OptionName.CLUSTER_SUBMISSIONS_OPTION,
+        "${ConveyBwaAlignmentJob.simpleName}",
         null,
         '{"-l": {"walltime": "48:00:00", "nodes": "1:ppn=12", "mem": "126g"}, "-q": "convey", "-m": "a", "-S": "/bin/bash"}'
 )
 
 ctx.processingOptionService.createOrUpdate(
-        "${PBS_PREFIX}${ConveyBwaAlignmentJob.simpleName}_${SeqType.exomePairedSeqType.processingOptionName}",
-        'DKFZ',
+        OptionName.CLUSTER_SUBMISSIONS_OPTION,
+        "${ConveyBwaAlignmentJob.simpleName}_${SeqType.exomePairedSeqType.processingOptionName}",
         null,
         '{"-l": { "walltime": "2:00:00"}}'
 )
 
 ctx.processingOptionService.createOrUpdate(
-    'numberOfSampeThreads',
+    OptionName.PIPELINE_OTP_ALIGNMENT_NUMBER_OF_SAMPE_THREADS,
     null,
     null,
     '-t 8'
 )
 
 ctx.processingOptionService.createOrUpdate(
-    'numberOfSamToolsSortThreads',
+    OptionName.PIPELINE_OTP_ALIGNMENT_NUMBER_OF_SAMTOOLS_SORT_THREADS,
     null,
     null,
     '-@ 8'
 )
 
 ctx.processingOptionService.createOrUpdate(
-    'mbufferPairingSorting',
+    OptionName.PIPELINE_OTP_ALIGNMENT_MBUFFER_PAIRING_SORTING,
     null,
     null,
     '-m 2G'
 )
 
 ctx.processingOptionService.createOrUpdate(
-    'samtoolsSortBuffer',
+    OptionName.PIPELINE_OTP_ALIGNMENT_SAMTOOLS_SORT_BUFFER,
     null,
     null,
     '-m 2000000000'
 )
 
 ctx.processingOptionService.createOrUpdate(
-    'bwaQParameter',
+    OptionName.PIPELINE_OTP_ALIGNMENT_BWA_QUEUE_PARAMETER,
     null,
     null,
     '-q 20'
 )
 
 ctx.processingOptionService.createOrUpdate(
-    ProcessingOption.Names.maximumNumberOfJobs,
+    OptionName.MAXIMUM_NUMBER_OF_JOBS,
     WORKFLOW_NAME,
     null,
     '100'
 )
 ctx.processingOptionService.createOrUpdate(
-    Names.maximumNumberOfJobsReservedForFastTrack,
+    OptionName.MAXIMUM_NUMBER_OF_JOBS_RESERVED_FOR_FAST_TRACK,
     WORKFLOW_NAME,
     null,
     '50'

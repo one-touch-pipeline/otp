@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.ngsdata.*
 import grails.converters.*
 import grails.orm.*
@@ -34,8 +35,8 @@ class RootController {
                 break
         }
 
-        boolean showPartners = ProcessingOptionService.findOptionSafe(ProcessingOptionService.GUI_SHOW_PARTNERS, null, null) == "true"
-        String aboutOtp = ProcessingOptionService.findOptionSafe(ProcessingOptionService.GUI_ABOUT_OTP, null, null)
+        boolean showPartners = ProcessingOptionService.findOptionSafe(OptionName.GUI_SHOW_PARTNERS, null, null) == "true"
+        String aboutOtp = ProcessingOptionService.findOptionSafe(OptionName.GUI_ABOUT_OTP, null, null)
 
         return [
                 projects: Project.count,

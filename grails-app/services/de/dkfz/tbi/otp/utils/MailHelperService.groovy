@@ -13,7 +13,7 @@ class MailHelperService {
     MailService mailService
 
     String getOtrsRecipient() {
-        return ProcessingOptionService.findOption(ProcessingOption.OptionName.EMAIL_RECIPIENT_FAST_TRACK, null, null)
+        return ProcessingOptionService.findOption(ProcessingOption.OptionName.EMAIL_RECIPIENT_ERRORS, null, null)
     }
 
     void sendNotificationEmail(String subject, String content) {
