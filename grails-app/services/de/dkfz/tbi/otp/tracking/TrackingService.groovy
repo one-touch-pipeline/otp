@@ -1,7 +1,6 @@
 package de.dkfz.tbi.otp.tracking
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.dataprocessing.sophia.*
 import de.dkfz.tbi.otp.job.jobs.snvcalling.*
@@ -13,6 +12,7 @@ import de.dkfz.tbi.otp.user.*
 import de.dkfz.tbi.otp.utils.*
 import org.springframework.security.access.prepost.*
 
+import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.Done.*
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus.*
 
@@ -154,9 +154,9 @@ class TrackingService {
             if (mailingList) {
                 recipients.add(mailingList)
             }
-            recipients.add(mailHelperService.otrsRecipient)
+            recipients.add(ProcessingOptionService.getValueOfProcessingOption(EMAIL_RECIPIENT_NOTIFICATION))
 
-            StringBuilder subject = new StringBuilder("[${ProcessingOptionService.getValueOfProcessingOption(OptionName.TICKET_SYSTEM_NUMBER_PREFIX)}#${ticket.ticketNumber}] ")
+            StringBuilder subject = new StringBuilder("[${ProcessingOptionService.getValueOfProcessingOption(TICKET_SYSTEM_NUMBER_PREFIX)}#${ticket.ticketNumber}] ")
             if (!mailingList) {
                 subject.append('TO BE SENT: ')
             }
@@ -173,7 +173,7 @@ class TrackingService {
     void sendOperatorNotification(OtrsTicket ticket, Set<SeqTrack> seqTracks, ProcessingStatus status, boolean finalNotification) {
         StringBuilder subject = new StringBuilder()
 
-        String prefix = ProcessingOptionService.getValueOfProcessingOption(OptionName.TICKET_SYSTEM_NUMBER_PREFIX)
+        String prefix = ProcessingOptionService.getValueOfProcessingOption(TICKET_SYSTEM_NUMBER_PREFIX)
         subject.append("$prefix#").append(ticket.ticketNumber)
         if (finalNotification) {
             subject.append(' Final')
@@ -188,7 +188,7 @@ class TrackingService {
             content.append('\n')
         }
 
-        mailHelperService.sendEmail(subject.toString(), content.toString(), mailHelperService.otrsRecipient)
+        mailHelperService.sendEmail(subject.toString(), content.toString(), ProcessingOptionService.getValueOfProcessingOption(EMAIL_RECIPIENT_NOTIFICATION))
     }
 
     void appendSeqTrackString(StringBuilder sb, SeqTrack seqTrack) {

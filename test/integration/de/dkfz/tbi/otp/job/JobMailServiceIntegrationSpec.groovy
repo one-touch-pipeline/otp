@@ -28,7 +28,7 @@ class JobMailServiceIntegrationSpec extends Specification {
 
         Realm realm = DomainFactory.createRealmDataProcessing(temporaryFolder.newFolder(), [name: seqTrack.project.realmName])
 
-        DomainFactory.createProcessingOptionForStatisticRecipient()
+        DomainFactory.createProcessingOptionForNotificationRecipient()
         ProcessingStep step = DomainFactory.createProcessingStepUpdate().processingStep
 
 

@@ -1,17 +1,13 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.ngsdata.AntibodyTarget
-import de.dkfz.tbi.otp.ngsdata.ChipSeqSeqTrack
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeProjectSeqType
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeProjectSeqTypeAlignmentProperty
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.ngsdata.SeqTrackService
-import de.dkfz.tbi.otp.ngsdata.SeqTypeService
-import de.dkfz.tbi.otp.utils.MailHelperService
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.ApplicationContext
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.tracking.*
+import de.dkfz.tbi.otp.utils.*
+import org.springframework.beans.factory.annotation.*
+import org.springframework.context.*
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
+import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 abstract class AbstractAlignmentDecider implements AlignmentDecider {
 
@@ -20,6 +16,9 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
 
     @Autowired
     MailHelperService mailHelperService
+
+    @Autowired
+    TrackingService trackingService
 
     Pipeline getPipeline(SeqTrack seqTrack) {
         Pipeline pipeline = atMostOneElement(Pipeline.findAllByNameAndType(pipelineName(seqTrack), Pipeline.Type.ALIGNMENT))
@@ -97,7 +96,16 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
                     }
                 }
                 body << "\n\nThis e-mail was generated automatically by OTP."
-                mailHelperService.sendNotificationEmail("Will not be aligned: ${seqTrack.ilseId ? "ILSe ${seqTrack.ilseId} " : ""} ${seqTrack.run.name} ${seqTrack.project} ${seqTrack.sample}", body.join('\n'))
+                OtrsTicket ticket = atMostOneElement(trackingService.findAllOtrsTickets([seqTrack]))
+                String ticketSubject = ticket ?
+                        "${ProcessingOptionService.getValueOfProcessingOption(TICKET_SYSTEM_NUMBER_PREFIX)}#${ticket.ticketNumber} " :
+                        ""
+                mailHelperService.sendEmail(
+                        "${ticketSubject}Will not be aligned: ${seqTrack.ilseId ? "ILSe ${seqTrack.ilseId} " : ""} " +
+                                "${seqTrack.run.name} ${seqTrack.project} ${seqTrack.sample}",
+                        body.join('\n'),
+                        ProcessingOptionService.getValueOfProcessingOption(EMAIL_RECIPIENT_NOTIFICATION),
+                )
                 return Collections.emptyList()
             }
         } else {

@@ -149,9 +149,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         trackingService.createNotificationTextService = Mock(CreateNotificationTextService) {
             notification(_, _, _) >> 'Something'
         }
-        trackingService.mailHelperService = Mock(MailHelperService) {
-            getOtrsRecipient(_) >> 'a.b@c.d'
-        }
+        DomainFactory.createProcessingOptionForNotificationRecipient()
 
         when:
         trackingService.processFinished([seqTrackA, seqTrackB1] as Set)
@@ -252,12 +250,12 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
 
         String otrsRecipient = HelperUtils.uniqueString
         String notificationText = HelperUtils.uniqueString
+        DomainFactory.createProcessingOptionForNotificationRecipient(otrsRecipient)
 
         String expectedEmailSubjectOperator = "${prefix}#${ticket.ticketNumber} Processing Status Update"
         String expectedEmailSubjectCustomer = "[${prefix}#${ticket.ticketNumber}] TO BE SENT: ${seqTrack.project.name} sequencing data installed"
 
         trackingService.mailHelperService = Mock(MailHelperService) {
-            getOtrsRecipient() >> otrsRecipient
             1 * sendEmail(expectedEmailSubjectOperator, _, otrsRecipient) >> { String emailSubject, String content, String recipient ->
                 assert content.contains(expectedStatus.toString())
             }
@@ -329,6 +327,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         String otrsRecipient = HelperUtils.uniqueString
         String notificationText1 = HelperUtils.uniqueString
         String notificationText2 = HelperUtils.uniqueString
+        DomainFactory.createProcessingOptionForNotificationRecipient(otrsRecipient)
 
         String expectedEmailSubjectOperator = "${prefix}#${ticket.ticketNumber} Final Processing Status Update"
         String expectedEmailSubjectCustomer = "[${prefix}#${ticket.ticketNumber}] TO BE SENT: ${seqTrack1.project.name} sequencing data "
@@ -336,7 +335,6 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         String expectedEmailSubjectCustomer2 = expectedEmailSubjectCustomer + OtrsTicket.ProcessingStep.ALIGNMENT.notificationSubject
 
         trackingService.mailHelperService = Mock(MailHelperService) {
-            getOtrsRecipient() >> otrsRecipient
             1 * sendEmail(expectedEmailSubjectOperator, _, otrsRecipient) >> { String emailSubject, String content, String recipient ->
                 assert content.contains(expectedStatus.toString())
             }
@@ -410,6 +408,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         String otrsRecipient = HelperUtils.uniqueString
         String notificationText1 = HelperUtils.uniqueString
         String notificationText2 = HelperUtils.uniqueString
+        DomainFactory.createProcessingOptionForNotificationRecipient(otrsRecipient)
 
         String expectedEmailSubjectOperator = "${prefix}#${ticket.ticketNumber} Final Processing Status Update"
         String expectedEmailSubjectCustomer = "[${prefix}#${ticket.ticketNumber}] TO BE SENT: ${seqTrack1.project.name} sequencing data "
@@ -417,7 +416,6 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         String expectedEmailSubjectCustomer2 = expectedEmailSubjectCustomer + OtrsTicket.ProcessingStep.ALIGNMENT.notificationSubject
 
         trackingService.mailHelperService = Mock(MailHelperService) {
-            getOtrsRecipient() >> otrsRecipient
             0 * _
         }
 
@@ -515,9 +513,9 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         subject = "[${prefix}#${ticket.ticketNumber}] ${subject}"
         int callCount = recipients.isEmpty() ? 0 : 1
         String content = HelperUtils.uniqueString
+        DomainFactory.createProcessingOptionForNotificationRecipient(OTRS_RECIPIENT)
 
         trackingService.mailHelperService = Mock(MailHelperService) {
-            getOtrsRecipient() >> OTRS_RECIPIENT
             callCount * sendEmail(subject, content, recipients)
             0 * sendEmail(_, _, _)
         }
@@ -558,9 +556,9 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         })
         String prefix = HelperUtils.uniqueString
         DomainFactory.createProcessingOptionForOtrsTicketPrefix(prefix)
+        DomainFactory.createProcessingOptionForNotificationRecipient(OTRS_RECIPIENT)
 
         trackingService.mailHelperService = Mock(MailHelperService) {
-            getOtrsRecipient() >> OTRS_RECIPIENT
             1 * sendEmail("[${prefix}#${ticket.ticketNumber}] Project_X1 sequencing data installed",
                     'Project_X1', ['tr_project1@test.test', OTRS_RECIPIENT])
             1 * sendEmail("[${prefix}#${ticket.ticketNumber}] Project_X2 sequencing data installed",

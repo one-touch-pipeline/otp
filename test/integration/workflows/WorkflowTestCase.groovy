@@ -126,12 +126,11 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         sql.execute("SCRIPT NODATA DROP TO ?", [schemaDump.absolutePath])
 
         DomainFactory.createAllAlignableSeqTypes()
-        DomainFactory.createProcessingOptionForStatisticRecipient()
+        DomainFactory.createProcessingOptionForNotificationRecipient()
         DomainFactory.createProcessingOption([
                 name: OptionName.OTP_USER_LINUX_GROUP,
                 value: TestCase.testingGroup(grailsApplication),
-        ]
-        )
+        ])
 
         createUserAndRoles()
         loadWorkflow()

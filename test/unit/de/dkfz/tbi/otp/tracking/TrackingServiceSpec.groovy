@@ -217,19 +217,15 @@ ILSe 1234, runB, lane 2, ${sampleText}
 ILSe 5678, runA, lane 1, ${sampleText}
 """
 
-        String otrsRecipient = HelperUtils.uniqueString
+        String notificationRecipient = HelperUtils.uniqueString
+        DomainFactory.createProcessingOptionForNotificationRecipient(notificationRecipient)
         int callCount = 0
         trackingService.mailHelperService = new MailHelperService() {
-            @Override
-            String getOtrsRecipient() {
-                return otrsRecipient
-            }
-
             @Override
             void sendEmail(String emailSubject, String content, String recipient) {
                 callCount++
                 assertEquals("${prefix}#${ticket.ticketNumber} Processing Status Update".toString(), emailSubject)
-                assertEquals(otrsRecipient, recipient)
+                assertEquals(notificationRecipient, recipient)
                 assertEquals(expectedContent, content)
             }
         }
@@ -246,10 +242,10 @@ ILSe 5678, runA, lane 1, ${sampleText}
         OtrsTicket ticket = DomainFactory.createOtrsTicket()
         String prefix = "the prefix"
         DomainFactory.createProcessingOptionForOtrsTicketPrefix(prefix)
-        String otrsRecipient = HelperUtils.uniqueString
+        String recipient = HelperUtils.uniqueString
+        DomainFactory.createProcessingOptionForNotificationRecipient(recipient)
         trackingService.mailHelperService = Mock(MailHelperService) {
-            getOtrsRecipient() >> otrsRecipient
-            1 * sendEmail("${prefix}#${ticket.ticketNumber} Final Processing Status Update", _, otrsRecipient)
+            1 * sendEmail("${prefix}#${ticket.ticketNumber} Final Processing Status Update", _, recipient)
         }
 
         expect:

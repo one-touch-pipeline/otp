@@ -73,21 +73,4 @@ class MailHelperServiceTests {
             )
         }.contains('assert recipient')
     }
-
-    @Test
-    void testSendNotificationEmail() {
-        DomainFactory.createProcessingOption(
-                name: OptionName.EMAIL_RECIPIENT_NOTIFICATION,
-                type: null,
-                project: null,
-                value: RECIPIENT,
-        )
-        mailHelperService.metaClass.sendEmail = { String subject, String content, String recipient ->
-            assert SUBJECT == subject
-            assert BODY == content
-            assert RECIPIENT == recipient
-        }
-
-        mailHelperService.sendNotificationEmail(SUBJECT, BODY)
-    }
 }

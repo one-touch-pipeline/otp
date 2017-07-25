@@ -389,7 +389,7 @@ class DomainFactory {
         )
     }
 
-    public static void createProcessingOptionForStatisticRecipient(String recipientEmail = "email${counter++}@example.example"){
+    public static void createProcessingOptionForNotificationRecipient(String recipientEmail = "email${counter++}@example.example"){
         createProcessingOption(
                 name: OptionName.EMAIL_RECIPIENT_NOTIFICATION,
                 type: null,

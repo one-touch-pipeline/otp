@@ -12,14 +12,6 @@ class MailHelperService {
 
     MailService mailService
 
-    String getOtrsRecipient() {
-        return ProcessingOptionService.findOption(ProcessingOption.OptionName.EMAIL_RECIPIENT_ERRORS, null, null)
-    }
-
-    void sendNotificationEmail(String subject, String content) {
-        sendEmail(subject, content, ProcessingOptionService.findOption(ProcessingOption.OptionName.EMAIL_RECIPIENT_NOTIFICATION, null, null))
-    }
-
     void sendEmail(String emailSubject, String content, String recipient) {
        sendEmail(emailSubject, content, Arrays.asList(recipient))
     }
