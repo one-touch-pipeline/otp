@@ -802,62 +802,7 @@ samplePairsNotProcessed: ${expectedSamplePairsNotProcessed}
         null             | new ProcessingStatus() | SNV            || 'otrsTicket'
     }
 
-    @Unroll
-    void "notification, return message"() {
-        given:
-        DomainFactory.createNotificationProcessingOptions()
-        OtrsTicket ticket = DomainFactory.createOtrsTicket(
-                seqCenterComment: seqCenterComment,
-        )
-        ProcessingStatus processingStatus = new ProcessingStatus()
 
-        CreateNotificationTextService createNotificationTextService = Spy(CreateNotificationTextService) {
-            (processingStep == INSTALLATION ? 1 : 0) *
-                    installationNotification(processingStatus) >> INSTALLATION.toString()
-            (processingStep == ALIGNMENT ? 1 : 0) *
-                    alignmentNotification(processingStatus) >> ALIGNMENT.toString()
-            (processingStep == SNV ? 1 : 0) *
-                    snvNotification(processingStatus) >> SNV.toString()
-            (processingStep == INDEL ? 1 : 0) *
-                    indelNotification(processingStatus) >> INDEL.toString()
-            (processingStep == SOPHIA ? 1 : 0) *
-                    sophiaNotification(processingStatus) >> SOPHIA.toString()
-            (processingStep == ACESEQ ? 1 : 0) *
-                    aceseqNotification(processingStatus) >> ACESEQ.toString()
-        }
-
-        String expectedSeqCenterComment = seqCenterComment ? """
-
-******************************
-Note from sequencing center:
-${seqCenterComment}
-******************************""" : ''
-
-        String expected = """
-base notification
-stepInformation: ${processingStep.toString()}
-seqCenterComment: ${expectedSeqCenterComment}
-"""
-
-        when:
-        String message = createNotificationTextService.notification(ticket, processingStatus, processingStep)
-
-        then:
-        expected == message
-
-        where:
-        processingStep | seqCenterComment
-        INSTALLATION   | null
-        ALIGNMENT      | null
-        SNV            | null
-        INDEL          | null
-        INSTALLATION   | 'Some comment'
-        ALIGNMENT      | 'Some comment'
-        SNV            | 'Some comment'
-        INDEL          | 'Some comment'
-        SOPHIA         | 'Some comment'
-        ACESEQ         | 'Some comment'
-    }
 
     void "notification, when call for ProcessingStep FASTQC, throw an exception"() {
         when:

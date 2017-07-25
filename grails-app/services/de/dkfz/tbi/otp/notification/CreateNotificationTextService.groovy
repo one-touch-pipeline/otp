@@ -38,7 +38,25 @@ class CreateNotificationTextService {
         assert processingStep
 
         String stepInformation = "${processingStep}Notification"(status).trim()
-        String seqCenterComment = otrsTicket.seqCenterComment ? "\n\n******************************\nNote from sequencing center:\n${otrsTicket.seqCenterComment}\n******************************" : ''
+
+        String otrsTicketSeqCenterComment = otrsTicket.seqCenterComment ?: ""
+        String generalSeqCenterComment = ProcessingOptionService.findOptionSafe(
+                OptionName.NOTIFICATION_TEMPLATE_SEQ_CENTER_NOTE,
+                exactlyOneElement(otrsTicket.findAllSeqTracks()*.seqCenter.unique()).name,
+                null
+        ) ?: ""
+        String seqCenterComment = ""
+
+        if (otrsTicketSeqCenterComment || generalSeqCenterComment) {
+            String prefix = "\n\n******************************\nNote from sequencing center:\n"
+            String suffix = "\n******************************"
+            if (otrsTicketSeqCenterComment.replaceAll("[\r\n ]+", ' ').trim().contains(generalSeqCenterComment.replaceAll("[\r\n ]+", ' ').trim())) {
+                seqCenterComment = otrsTicketSeqCenterComment
+            } else {
+                seqCenterComment = "${otrsTicketSeqCenterComment}${otrsTicketSeqCenterComment ? "\n" : ""}${generalSeqCenterComment}"
+            }
+            seqCenterComment = "${prefix}${seqCenterComment}${suffix}"
+        }
 
         return createMessage(OptionName.NOTIFICATION_TEMPLATE_BASE, [
                 stepInformation : stepInformation,
