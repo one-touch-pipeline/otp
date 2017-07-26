@@ -15,7 +15,7 @@ class Hipo2SampleIdentifierParserSpec extends Specification {
 
         then:
         parsed.projectName == 'hipo_K12A'
-        parsed.pid == 'K12A-123ABC'
+        parsed.pid == identifier.split("-")[0,1].join("-")
         parsed.sampleTypeDbName == sampleTypeDbName
         parsed.fullSampleName == identifier
 
@@ -50,6 +50,9 @@ class Hipo2SampleIdentifierParserSpec extends Specification {
 
         'K12A-123ABC-T3-1G20' || 'TUMOR3-1G20'
         'K12A-123ABC-T3-1H20' || 'TUMOR3-1H20'
+
+        'K12A-123A-N0-D1'     || 'CONTROL0'
+        'K12A-123A-T0-D1'     || 'TUMOR0'
     }
 
     @Unroll
