@@ -1,6 +1,7 @@
 package workflows.analysis.pair.aceseq
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.dataprocessing.sophia.*
 import de.dkfz.tbi.otp.ngsdata.*
@@ -35,9 +36,9 @@ abstract class AbstractAceseqWorkflowTests extends AbstractRoddyBamFilePairAnaly
                     new RoddyConfiguration([
                             project          : project,
                             seqType          : seqType,
-                            pluginName       : ProcessingOptionService.findOption(ProcessingOption.OptionName.PIPELINE_ACESEQ_PLUGIN_NAME, null, null),
-                            pluginVersion    : ProcessingOptionService.findOption(ProcessingOption.OptionName.PIPELINE_ACESEQ_PLUGIN_VERSION, null, null),
-                            baseProjectConfig: ProcessingOptionService.findOption(ProcessingOption.OptionName.PIPELINE_ACESEQ_BASE_PROJECT_CONFIG, seqType.roddyName, null),
+                            pluginName       : ProcessingOptionService.findOption(OptionName.PIPELINE_ACESEQ_PLUGIN_NAME, null, null),
+                            pluginVersion    : ProcessingOptionService.findOption(OptionName.PIPELINE_ACESEQ_PLUGIN_VERSION, null, null),
+                            baseProjectConfig: ProcessingOptionService.findOption(OptionName.PIPELINE_ACESEQ_BASE_PROJECT_CONFIG, seqType.roddyName, null),
                             configVersion    : 'v1_0',
                             resources        : 't',
                     ])
@@ -67,8 +68,7 @@ abstract class AbstractAceseqWorkflowTests extends AbstractRoddyBamFilePairAnaly
                     ProcessingOption.OptionName.PIPELINE_ACESEQ_REFERENCE_GENOME,
                     null,
                     null,
-                    referenceGenome.name,
-                    "Name of reference genomes for aceseq",
+                    referenceGenome.name
             )
         }
 

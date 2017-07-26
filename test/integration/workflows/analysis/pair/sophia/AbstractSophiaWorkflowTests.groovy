@@ -36,9 +36,9 @@ abstract class AbstractSophiaWorkflowTests extends AbstractRoddyBamFilePairAnaly
                     new RoddyConfiguration([
                             project          : project,
                             seqType          : seqType,
-                            pluginName       : ProcessingOptionService.findOption(Names.pipelineSophiaPluginName, null, null),
-                            pluginVersion    : ProcessingOptionService.findOption(Names.pipelineSophiaPluginVersions, null, null),
-                            baseProjectConfig: ProcessingOptionService.findOption(Names.pipelineSophiaBaseProjectConfig, seqType.roddyName, null),
+                            pluginName       : ProcessingOptionService.findOption(ProcessingOption.OptionName.PIPELINE_SOPHIA_PLUGIN_NAME, null, null),
+                            pluginVersion    : ProcessingOptionService.findOption(ProcessingOption.OptionName.PIPELINE_SOPHIA_PLUGIN_VERSIONS, null, null),
+                            baseProjectConfig: ProcessingOptionService.findOption(ProcessingOption.OptionName.PIPELINE_SOPHIA_BASE_PROJECT_CONFIG, seqType.roddyName, null),
                             configVersion    : 'v1_0',
                             resources        : 't',
                     ])
@@ -52,11 +52,10 @@ abstract class AbstractSophiaWorkflowTests extends AbstractRoddyBamFilePairAnaly
 
         SpringSecurityUtils.doWithAuth("operator") {
             processingOptionService.createOrUpdate(
-                    Names.pipelineSophiaReferenceGenome,
+                    ProcessingOption.OptionName.PIPELINE_SOPHIA_REFERENCE_GENOME,
                     null,
                     null,
-                    referenceGenome.name,
-                    "Name of reference genomes for sophia",
+                    referenceGenome.name
             )
         }
 
