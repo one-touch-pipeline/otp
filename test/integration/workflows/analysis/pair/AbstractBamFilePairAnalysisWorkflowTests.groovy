@@ -166,6 +166,6 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
 
     @Override
     Duration getTimeout() {
-        Duration.standardMinutes(30)
+        Duration.standardMinutes(90)
     }
 }
