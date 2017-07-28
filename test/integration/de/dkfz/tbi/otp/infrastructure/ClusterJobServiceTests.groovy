@@ -97,7 +97,6 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
         assertEquals(8, job.requestedCores)
         assertEquals(2048L, job.requestedMemory)
         assertEquals(new Duration(4000000L), job.requestedWalltime)
-        assertNull(job.multiplexing)
         assertNull(job.xten)
         assertNull(job.nBases)
         assertNull(job.nReads)
@@ -329,34 +328,6 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
         DomainFactory.createSeqTrack(run: run)
 
         assertFalse(ClusterJobService.isXten(job))
-    }
-
-    @Test
-    void testIsMultiplexing_WhenDataFileIsMultiplexing_ShouldReturnTrue() {
-        def(job, run) = createClusterJobWithRun()
-
-        DomainFactory.createSeqTrackWithOneDataFile([run: run], [fileName: "example_ACACAC_fileR1_1.fastq.gz"])
-
-        assert ClusterJobService.isMultiplexing(job)
-    }
-
-    @Test
-    void testIsMultiplexing_WhenDataFileIsNotMultiplexing_ShouldReturnTrue() {
-        def(job, run) = createClusterJobWithRun()
-
-        DomainFactory.createSeqTrackWithOneDataFile([run: run], [fileName: "example.fastq.gz"])
-
-        assertFalse(ClusterJobService.isMultiplexing(job))
-    }
-
-    @Test
-    void testIsMultiplexing_WhenDataFilesMixedTypes_ShouldReturnNull() {
-        def(job, run) = createClusterJobWithRun()
-
-        SeqTrack seqTrack = DomainFactory.createSeqTrackWithOneDataFile([run: run], [fileName: "example_ACACAC_fileR1_1.fastq.gz"])
-        DomainFactory.createSequenceDataFile(seqTrack: seqTrack, fileName: "example.fastqz.gz")
-
-        assertNull(ClusterJobService.isMultiplexing(job))
     }
 
     @Test
@@ -1218,7 +1189,6 @@ class ClusterJobServiceTests extends AbstractIntegrationTest {
                 jobClass: 'testClass',
                 clusterJobId: "testId_${uniqueIdCounter++}",
                 seqType: seqType,
-                multiplexing: false,
                 xten: false
         ] + myProps
 

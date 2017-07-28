@@ -1,29 +1,19 @@
 package de.dkfz.tbi.otp.infrastructure
 
-import de.dkfz.tbi.flowcontrol.ws.api.pbs.JobInfo
-import de.dkfz.tbi.flowcontrol.ws.api.response.JobInfos
-import de.dkfz.tbi.flowcontrol.ws.client.ClientKeys
-import de.dkfz.tbi.flowcontrol.ws.client.FlowControlClient
+import de.dkfz.tbi.flowcontrol.ws.api.pbs.*
+import de.dkfz.tbi.flowcontrol.ws.api.response.*
+import de.dkfz.tbi.flowcontrol.ws.client.*
 import de.dkfz.tbi.otp.infrastructure.ClusterJob.Status
-import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
-import de.dkfz.tbi.otp.job.processing.ProcessingStep
-import de.dkfz.tbi.otp.ngsdata.DataFile
-import de.dkfz.tbi.otp.ngsdata.MultiplexingService
-import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.ngsdata.SeqPlatformModelLabel
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.ngsdata.SeqType
-import groovy.sql.Sql
-import org.joda.time.DateTime
-import org.joda.time.Duration
-import org.joda.time.LocalDate
-import org.joda.time.Period
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.ngsdata.*
+import groovy.sql.*
+import org.joda.time.*
 
-import javax.sql.DataSource
-import javax.xml.ws.soap.SOAPFaultException
+import javax.sql.*
+import javax.xml.ws.soap.*
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
-import static java.util.concurrent.TimeUnit.HOURS
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+import static java.util.concurrent.TimeUnit.*
 
 class ClusterJobService {
 
@@ -102,7 +92,6 @@ class ClusterJobService {
             job.requestedMemory = info.getMemoryRequestedKB()
             job.requestedCores = info.getCores()
         }
-        job.multiplexing = isMultiplexing(job)
         job.xten = isXten(job)
         job.nBases = getBasesSum(job)
         job.nReads = getReadsSum(job)
@@ -192,20 +181,6 @@ class ClusterJobService {
         List<SeqPlatformModelLabel> seqPlatformModelLabels = workflowObject.getContainedSeqTracks().toList()*.seqPlatform.seqPlatformModelLabel
         if(seqPlatformModelLabels*.id.unique().size() == 1 && seqPlatformModelLabels.first() != null) {
             return seqPlatformModelLabels.first().name == "HiSeq X Ten"
-        }
-        return null
-    }
-
-    /**
-     * returns true if a job belongs to data that is multiplexing data
-     * WARNING: This method incorrectly returns false in some cases (OTP-1973)
-     */
-    public static Boolean isMultiplexing(ClusterJob job) {
-        ProcessParameterObject workflowObject = findProcessParameterObjectByClusterJob(job)
-        List<DataFile> files = DataFile.findAllBySeqTrackInList(workflowObject.getContainedSeqTracks().toList())
-        List<Boolean> hasBarcode = files.collect { MultiplexingService.barcode(it.fileName) != null }.unique()
-        if (hasBarcode.size() == 1) {
-            return hasBarcode.first()
         }
         return null
     }

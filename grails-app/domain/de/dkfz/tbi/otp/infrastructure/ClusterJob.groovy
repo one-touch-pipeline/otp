@@ -82,11 +82,6 @@ class ClusterJob implements Entity {
      */
     Float basesPerBytesFastq
     /**
-     * multiplexing was used for processing
-     * WARNING: This field has been filled with incorrect values (OTP-1973)
-     */
-    Boolean multiplexing
-    /**
      * processed with HiSeq X Ten machine
      */
     Boolean xten
@@ -149,7 +144,6 @@ class ClusterJob implements Entity {
         nReads(nullable: true)
         fileSize(nullable: true)
         basesPerBytesFastq(nullable: true)
-        multiplexing(nullable: true)
         xten(nullable: true)
         exitStatus(nullable: true)                              // gets filled after initialization, must be nullable
         exitCode(nullable: true)                                // gets filled after initialization, must be nullable
