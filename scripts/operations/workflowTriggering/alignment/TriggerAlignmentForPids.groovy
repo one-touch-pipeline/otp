@@ -1,6 +1,8 @@
 /**
- * script to trigger alignments for a patient.
- * set the align flag for all runsegments used by seqtracks of the given individuals.
+ * script to trigger alignments for a patient or a project or a ilse.
+ * It is Possible to restrict the selection to specific SeqTypes
+ *
+ * The align flag of all used runsegments of the seqtracks are set to true.
  */
 
 import de.dkfz.tbi.otp.ngsdata.*
@@ -32,7 +34,14 @@ LogThreadLocal.withThreadLog(System.out, {
                     ])
                 }
             }
-            'in'('seqType', SeqType.getAllAlignableSeqTypes())
+            'in'('seqType', [
+                    SeqType.wholeGenomePairedSeqType,
+                    SeqType.exomePairedSeqType,
+                    SeqType.wholeGenomeBisulfitePairedSeqType,
+                    SeqType.wholeGenomeBisulfiteTagmentationPairedSeqType,
+                    SeqType.rnaPairedSeqType,
+                    SeqType.chipSeqPairedSeqType,
+            ])
         }
 
         //show seqtracks
