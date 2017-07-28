@@ -18,13 +18,6 @@ class AbstractBamFileUnitTests {
     }
 
     @Test
-    void testQualityControlIsNotNull() {
-        AbstractBamFile bamFile = new MockAbstractBamFile(type: AbstractBamFile.BamType.SORTED)
-        bamFile.qualityControl =  null
-        Assert.assertFalse(bamFile.validate())
-    }
-
-    @Test
     void testhasMetricsFileTrueBamTypeSorted() {
         AbstractBamFile bamFile = new MockAbstractBamFile(
                 type: AbstractBamFile.BamType.SORTED,

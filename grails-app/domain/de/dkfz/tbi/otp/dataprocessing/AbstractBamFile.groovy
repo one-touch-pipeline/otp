@@ -44,10 +44,6 @@ abstract class AbstractBamFile implements Entity {
         FINISHED
     }
 
-    enum QualityControl {
-        NOT_DONE, PASSED, FAILED
-    }
-
     BamType type = null
     boolean hasIndexFile = false
     boolean hasCoveragePlot = false
@@ -71,7 +67,6 @@ abstract class AbstractBamFile implements Entity {
     Date deletionDate
 
     QaProcessingStatus qualityAssessmentStatus = QaProcessingStatus.UNKNOWN
-    QualityControl qualityControl = QualityControl.NOT_DONE
 
     /**
      * Whether this has been assigned to a merging set.
