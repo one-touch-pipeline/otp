@@ -58,9 +58,16 @@ class CreateNotificationTextService {
             seqCenterComment = "${prefix}${seqCenterComment}${suffix}"
         }
 
+        String addition = ProcessingOptionService.findOptionSafe(
+                OptionName.NOTIFICATION_TEMPLATE_ADDITION,
+                processingStep.notificationSubject,
+                null
+        ) ?: ""
+
         return createMessage(OptionName.NOTIFICATION_TEMPLATE_BASE, [
                 stepInformation : stepInformation,
                 seqCenterComment: seqCenterComment,
+                addition        : addition,
         ])
     }
 

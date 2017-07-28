@@ -1,12 +1,12 @@
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.notification.*
-
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
+import de.dkfz.tbi.otp.tracking.*
 
 ProcessingOptionService processingOptionService = ctx.processingOptionService
 
 
 println processingOptionService.createOrUpdate(
-        OptionName.notificationTemplateBase,
+        OptionName.NOTIFICATION_TEMPLATE_BASE,
         null,
         null,
         '''
@@ -15,17 +15,17 @@ Dear user,
 ${stepInformation}${seqCenterComment}
 
 If you want to get access to OTP, please contact the DMG service team.
+${addition}
 
 Best regards,
 OTP
 
-''',
-        '',
+'''
 )
 
 
 println processingOptionService.createOrUpdate(
-        OptionName.notificationTemplateInstallation,
+        OptionName.NOTIFICATION_TEMPLATE_INSTALLATION,
         null,
         null,
 '''The FASTQ files of run(s) ${runs} have been installed.
@@ -37,23 +37,21 @@ ${samples}
 
 An overview of all processed samples is shown on
 ${links}
-''',
-        '',
+'''
 )
 
 
 println processingOptionService.createOrUpdate(
-        OptionName.notificationTemplateInstallationFurtherProcessing,
+        OptionName.NOTIFICATION_TEMPLATE_INSTALLATION_FURTHER_PROCESSING,
         null,
         null,
 '''The samples marked with [A] will be aligned by OTP. As soon as the alignment is finished, OTP will send you another notification e-mail.
-''',
-        '',
+'''
 )
 
 
 println processingOptionService.createOrUpdate(
-        OptionName.notificationTemplateAlignment,
+        OptionName.NOTIFICATION_TEMPLATE_ALIGNMENT,
         null,
         null,
 '''The FASTQ files of the following samples have been aligned and merged:
@@ -67,38 +65,35 @@ ${processingValues}
 
 You can find the merged BAM files in the "view-by-pid" folder:
 ${paths}
-''',
-        '',
+'''
 )
 
 
 println processingOptionService.createOrUpdate(
-        OptionName.notificationTemplateAlignmentFurtherProcessing,
+        OptionName.NOTIFICATION_TEMPLATE_ALIGNMENT_FURTHER_PROCESSING,
         null,
         null,
         '''For the following sample pairs variants will be called by OTP:
 ${samplePairsWillProcess}
 OTP executes the following variant calling pipeline(s): ${variantCallingPipelines}
 As soon as a variant calling is finished, OTP will send you another notification e-mail.
-''',
-        '',
+'''
 )
 
 
 println processingOptionService.createOrUpdate(
-        OptionName.notificationTemplateAlignmentNoFurtherProcessing,
+        OptionName.NOTIFICATION_TEMPLATE_ALIGNMENT_NO_FURTHER_PROCESSING,
         null,
         null,
 '''The following sample pairs will not been variant-called, most likely because they have not reached a threshold yet:
 ${samplePairsWontProcess}
 If you want these sample pairs to be processed nevertheless, please contact the DMG service team.
-''',
-        '',
+'''
 )
 
 
 println processingOptionService.createOrUpdate(
-        OptionName.notificationTemplateAlignmentProcessing,
+        OptionName.NOTIFICATION_TEMPLATE_ALIGNMENT_PROCESSING,
         null,
         null,
         '''${seqType} ${individuals ? "("+individuals+")" : ""}
@@ -106,13 +101,12 @@ println processingOptionService.createOrUpdate(
     Alignment program: ${alignmentProgram} ${alignmentParameter}
     Merging/duplication marking program: ${mergingProgram} ${mergingParameter}
     SAMtools program: ${samtoolsProgram}
-''',
-        '',
+'''
 )
 
 
 println processingOptionService.createOrUpdate(
-        OptionName.notificationTemplateSNVProcessed,
+        OptionName.NOTIFICATION_TEMPLATE_SNV_PROCESSED,
         null,
         null,
 '''The SNV calling for following sample pairs is finished:
@@ -125,13 +119,12 @@ The result files are available in the directories:
 ${directories}
 
 You can find the config file used for the processing in the same directory as the results.
-''',
-        '',
+'''
 )
 
 
 println processingOptionService.createOrUpdate(
-        OptionName.notificationTemplateINDELProcessed,
+        OptionName.NOTIFICATION_TEMPLATE_INDEL_PROCESSED,
         null,
         null,
 '''The Indel calling for following sample pairs is finished:
@@ -144,12 +137,11 @@ The result files are available in the directories:
 ${directories}
 
 You can find the config file used for the processing in the same directory as the results.
-''',
-        '',
+'''
 )
 
 println processingOptionService.createOrUpdate(
-        OptionName.notificationTemplateACESEQProcessed,
+        OptionName.NOTIFICATION_TEMPLATE_ACESEQ_PROCESSED,
         null,
         null,
         '''The CNV calling from AceSEQ for following sample pairs is finished:
@@ -162,12 +154,11 @@ The result files are available in the directories:
 ${directories}
 
 You can find the config file used for the processing in the same directory as the results.
-''',
-        '',
+'''
 )
 
 println processingOptionService.createOrUpdate(
-        OptionName.notificationTemplateSOPHIAProcessed,
+        OptionName.NOTIFICATION_TEMPLATE_SOPHIA_PROCESSED,
         null,
         null,
         '''The SV calling from SOPHIA for following sample pairs is finished:
@@ -180,51 +171,55 @@ The result files are available in the directories:
 ${directories}
 
 You can find the config file used for the processing in the same directory as the results.
-''',
-        '',
+'''
 )
 
 println processingOptionService.createOrUpdate(
-        OptionName.notificationTemplateSNVNotProcessed,
+        OptionName.NOTIFICATION_TEMPLATE_SNV_NOT_PROCESSED,
         null,
         null,
 '''The following sample pairs have not been SNV-called, most likely because they have not reached a threshold yet:
 ${samplePairsNotProcessed}
 If you want these sample pairs to be processed nevertheless, please contact the DMG service team.
-''',
-        '',
+'''
 )
 
 
 println processingOptionService.createOrUpdate(
-        OptionName.notificationTemplateINDELNotProcessed,
+        OptionName.NOTIFICATION_TEMPLATE_INDEL_NOT_PROCESSED,
         null,
         null,
 '''The following sample pairs have not been Indel-called, most likely because they have not reached a threshold yet:
 ${samplePairsNotProcessed}
 If you want these sample pairs to be processed nevertheless, please contact the DMG service team.
-''',
-        '',
+'''
 )
 
 println processingOptionService.createOrUpdate(
-        OptionName.notificationTemplateACESEQNotProcessed,
+        OptionName.NOTIFICATION_TEMPLATE_ACESEQ_NOT_PROCESSED,
         null,
         null,
         '''The following sample pairs have not been CNV-called, most likely because they have not reached a threshold yet:
 ${samplePairsNotProcessed}
 If you want these sample pairs to be processed nevertheless, please contact the DMG service team.
-''',
-        '',
+'''
 )
 
 println processingOptionService.createOrUpdate(
-        OptionName.notificationTemplateSOPHIANotProcessed,
+        OptionName.NOTIFICATION_TEMPLATE_SOPHIA_NOT_PROCESSED,
         null,
         null,
         '''The following sample pairs have not been SV-called, most likely because they have not reached a threshold yet:
 ${samplePairsNotProcessed}
 If you want these sample pairs to be processed nevertheless, please contact the DMG service team.
-''',
-        '',
+'''
+)
+
+println processingOptionService.createOrUpdate(
+        OptionName.NOTIFICATION_TEMPLATE_ADDITION,
+        OtrsTicket.ProcessingStep.SOPHIA.notificationSubject,
+        null,
+        '''
+SV calling is done by SOPHIA, an unpublished algorithm developed by Umut Toprak, Division of Theoretical Bioinformatics. For questions regarding the output and its interpretation please contact u.toprak@dkfz.de
+'''
 )

@@ -11,6 +11,8 @@ String ticketNumber = ''
 //OtrsTicket.ProcessingStep processingStep = OtrsTicket.ProcessingStep.ALIGNMENT
 //OtrsTicket.ProcessingStep processingStep = OtrsTicket.ProcessingStep.SNV
 //OtrsTicket.ProcessingStep processingStep = OtrsTicket.ProcessingStep.INDEL
+//OtrsTicket.ProcessingStep processingStep = OtrsTicket.ProcessingStep.ACESEQ
+//OtrsTicket.ProcessingStep processingStep = OtrsTicket.ProcessingStep.SOPHIA
 
 
 
