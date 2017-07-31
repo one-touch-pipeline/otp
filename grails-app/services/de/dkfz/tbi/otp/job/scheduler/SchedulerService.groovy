@@ -758,14 +758,15 @@ class SchedulerService {
         }
 
         JobExecutionPlan.withNewSession {
-            // uses HQL because of HibernateOptimisticLockingFailureException
-            JobExecutionPlan.executeUpdate("""
-                UPDATE JobExecutionPlan jep
-                SET jep.version = jep.version + 1,
-                    jep.finishedSuccessful = jep.finishedSuccessful + 1
-                WHERE jep.id = :id
-                """, [id: last.process.jobExecutionPlan.id]
-            )
+            JobExecutionPlan plan = JobExecutionPlan.lock(last.process.jobExecutionPlan.id)
+            plan.refresh()
+
+            if (!plan.finishedSuccessful) {
+                plan.finishedSuccessful = 1
+            } else {
+                plan.finishedSuccessful++
+            }
+            plan.save(flush: true)
         }
 
         // send notification
