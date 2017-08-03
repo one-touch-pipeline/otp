@@ -53,27 +53,10 @@ class Realm implements Entity, Serializable {
     int timeout
     String defaultJobSubmissionOptions  // default options for job submission
 
-
-    /**
-     * {@link de.dkfz.tbi.flowcontrol.ws.client.FlowControlClient.Builder#clientKeys}
-     */
-    String flowControlKey
-    /**
-     * {@link de.dkfz.tbi.flowcontrol.ws.client.FlowControlClient.Builder#hostName}
-     */
-    String flowControlHost
-    /**
-     * {@link de.dkfz.tbi.flowcontrol.ws.client.FlowControlClient.Builder#portNumber}
-     */
-    Integer flowControlPort
-
     static constraints = {
         // TODO OTP-1067: Add validation on the paths
         loggingRootPath blank:false, nullable:false
         stagingRootPath blank:true, nullable:true
-        flowControlKey blank:true, nullable:true, maxSize: 3072
-        flowControlHost blank:true, nullable:true
-        flowControlPort nullable:true
         roddyUser blank: false, nullable: true
         defaultJobSubmissionOptions validator: {
             PbsOptionMergingService.validateJsonString(it)

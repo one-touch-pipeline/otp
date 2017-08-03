@@ -135,6 +135,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
                 name: OptionName.OTP_USER_LINUX_GROUP,
                 value: TestCase.testingGroup(grailsApplication),
         ])
+        DomainFactory.createProcessingOption(name: OptionName.TIME_ZONE, type: null, value: "Europe/Berlin")
 
         createUserAndRoles()
         loadWorkflow()

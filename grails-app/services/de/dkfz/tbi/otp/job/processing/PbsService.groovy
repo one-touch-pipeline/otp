@@ -9,12 +9,9 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.scheduler.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
-import de.dkfz.tbi.otp.utils.ProcessHelperService.ProcessOutput
 import groovy.transform.*
 
 import java.time.*
-import java.util.regex.*
 
 import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.*
 import static org.springframework.util.Assert.*
@@ -36,38 +33,7 @@ class PbsService {
 
     ClusterJobLoggingService clusterJobLoggingService
 
-    private Map<Realm, ClusterJobManager> managerPerRealm = [:]
-
-    private static final String JOB_LIST_PATTERN = /^(\d+)\.(?:\S+\s+){9}(\w)\s+\S+\s*$/
-
-    /**
-     * Possible states for a PBS cluster job
-     *
-     * @see <a href="http://docs.adaptivecomputing.com/torque/6-0-1/help.htm#topics/torque/commands/qstat.htm">TORQUE Commands Overview</a>
-     */
-    @TupleConstructor
-    enum ClusterJobStatus {
-        COMPLETED("C"),
-        EXITED("E"),
-        HELD("H"),
-        QUEUED("Q"),
-        RUNNING("R"),
-        BEING_MOVED("T"),
-        WAITING("W"),
-        SUSPENDED("S")
-
-        final String code
-
-        public static ClusterJobStatus getStatusByCode(String code) {
-            for (ClusterJobStatus status : values()) {
-                if (status.code == code) {
-                    return status
-                }
-            }
-            throw new IllegalArgumentException()
-        }
-    }
-
+    private Map<RealmAndUser, ClusterJobManager> managerPerRealm = [:]
 
     /**
      * Executes a job on a cluster specified by the realm.
@@ -122,10 +88,9 @@ chmod 0640 "${logFile}"
 echo "${logMessage}" >> "${logFile}"
 """
 
-        BatchEuphoriaJobManager jobManager = getJobManager(realm)
+        BatchEuphoriaJobManager jobManager = getJobManager(realm, realm.unixUser)
 
         ResourceSet resourceSet = new ResourceSet(
-                null,
                 options.get(JobSubmissionOption.MEMORY) ? new BufferValue(options.get(JobSubmissionOption.MEMORY)) : null,
                 options.get(JobSubmissionOption.CORES) as Integer,
                 options.get(JobSubmissionOption.NODES) as Integer,
@@ -141,10 +106,7 @@ echo "${logMessage}" >> "${logFile}"
                 scriptText,
                 null,
                 resourceSet,
-                null,
                 environmentVariables,
-                null,
-                null,
                 jobManager,
         )
         job.setLoggingDirectory(clusterLogDirectory)
@@ -156,58 +118,70 @@ echo "${logMessage}" >> "${logFile}"
         }
         jobManager.startHeldJobs([job])
 
-        ClusterJob clusterJob = clusterJobService.createClusterJob(realm, job.jobID, realm.unixUser, processingStep, seqType, jobName)
+        ClusterJob clusterJob = clusterJobService.createClusterJob(
+                realm, job.jobID.shortID, realm.unixUser, processingStep, seqType, jobName
+        )
         threadLog?.info("Log file: ${AbstractOtpJob.getDefaultLogFilePath(clusterJob).path}")
 
         return job.jobID
     }
 
     /**
-     * Returns a map of jobs PBS knows about
+     * Returns a map of jobs the cluster job scheduler knows about
      *
      * @param realm The realm to connect to
      * @param userName The name of the user whose jobs should be checked
      * @return A map containing job identifiers and their status
      */
-    public Map<ClusterJobIdentifier, ClusterJobStatus> retrieveKnownJobsWithState(Realm realm, String userName) throws Exception {
-        assert realm : "No realm specified."
-        assert userName : "No user name specified."
-        Map<ClusterJobIdentifier, ClusterJobStatus> jobStates = [:]
-        String endString = HelperUtils.getRandomMd5sum()
-        // print a string at the end so we know we get the whole output
-        ProcessOutput out = executionService.executeCommandReturnProcessOutput(realm,
-                "qstat -u ${userName} && echo ${endString}", userName)
-        if(out.exitCode != 0 || out.stderr != "") {
-            throw new IllegalStateException("qstat returned error, exit code: '${out.exitCode}', stderr: '${out.stderr}'")
+    public Map<ClusterJobIdentifier, PbsMonitorService.Status> retrieveKnownJobsWithState(Realm realm, String userName) throws Exception {
+        assert realm: "No realm specified."
+        assert userName: "No user name specified."
+
+        BatchEuphoriaJobManager jobManager = getJobManager(realm, userName)
+        Map<String, JobState> jobStates = jobManager.queryJobStatusAll(true)
+
+        return jobStates.collectEntries { String jobId, JobState state ->
+            [
+                    new ClusterJobIdentifier(realm, jobId, userName),
+                    (state in finished || state in failed) ? PbsMonitorService.Status.COMPLETED : PbsMonitorService.Status.NOT_COMPLETED
+            ]
         }
-        validateQstatResult(out.stdout, endString)
-        out.stdout.eachLine { String line ->
-            Matcher matcher = line =~ JOB_LIST_PATTERN
-            if (matcher) {
-                jobStates.put(new ClusterJobIdentifier(realm, matcher.group(1), userName),
-                        ClusterJobStatus.getStatusByCode(matcher.group(2)))
-            }
-        }
-        return jobStates
     }
 
-    protected static void validateQstatResult(String out, String endString) {
-        List<String> lines = out.readLines()
+    public void retrieveAndSaveJobStatistics(ClusterJobIdentifier jobIdentifier) {
+        BatchEuphoriaJobManager jobManager = getJobManager(jobIdentifier.realm, jobIdentifier.userName)
+        Map<String, GenericJobInfo> jobInfos = jobManager.queryExtendedJobStateById([jobIdentifier.clusterJobId], true)
+        GenericJobInfo jobInfo = jobInfos.get(jobIdentifier.clusterJobId)
 
-        if(!((lines.size() == 1 && lines[0] == endString) || (
-                lines[0] == "" &&
-                lines[1] =~ /^.*:\s*$/ &&
-                lines[2] =~ /^\s+Req'd\s+Req'd\s+Elap\s*$/ &&
-                lines[3] =~ /^Job ID\s+Username\s+Queue\s+Jobname\s+SessID\s+NDS\s+TSK\s+Memory\s+Time\s+S\s+Time\s*$/ &&
-                lines[4] =~ /^(-+\s+){10}-+\s*$/ &&
-                lines.subList(5, lines.size() - 1).every { String line ->
-                    line =~ JOB_LIST_PATTERN
-                } &&
-                lines[lines.size() - 1] == endString
-        ))) {
-            throw new IllegalStateException("qstat output doesn't match expected output: '${out}'")
+        ClusterJob.Status status = null
+        if (jobInfo.jobState && jobInfo.exitCode) {
+            status = jobInfo.jobState in finished && jobInfo.exitCode != 0 ? ClusterJob.Status.COMPLETED : ClusterJob.Status.FAILED
         }
+
+        clusterJobService.completeClusterJob(jobIdentifier, status, jobInfo)
     }
+
+    private final List<JobState> failed = [
+            JobState.FAILED,
+            JobState.ABORTED,
+            JobState.STARTED, //roddy internal
+            JobState.DUMMY,   //roddy internal
+    ].asImmutable()
+
+    // a job is considered complete if it either has status "completed" or it is not known anymore
+    private final List<JobState> finished = [
+            JobState.COMPLETED_SUCCESSFUL,
+            JobState.COMPLETED_UNKNOWN,
+            JobState.UNKNOWN,
+    ].asImmutable()
+
+    private final List<JobState> notFinished = [
+            JobState.HOLD,
+            JobState.QUEUED,
+            JobState.UNSTARTED, // not submitted yet
+            JobState.RUNNING,
+            JobState.SUSPENDED,
+    ].asImmutable()
 
     /**
      * Get name of environment variable which contains the cluster job ID in a running job
@@ -215,30 +189,31 @@ echo "${logMessage}" >> "${logFile}"
      */
     public static String getJobIdEnvironmentVariable(Realm realm) {
         if (realm.jobScheduler == Realm.JobScheduler.PBS) {
-             return PBSJobManager.PBS_JOBID
+            return PBSJobManager.PBS_JOBID
         } else {
             throw new Exception("Unsupported cluster job scheduler")
         }
     }
 
-    private BatchEuphoriaJobManager getJobManager(Realm realm) {
-        BatchEuphoriaJobManager manager = managerPerRealm[realm]
+    private BatchEuphoriaJobManager getJobManager(Realm realm, String user) {
+        BatchEuphoriaJobManager manager = managerPerRealm[new RealmAndUser(realm, user)]
 
         if (manager == null) {
             JobManagerCreationParameters jobManagerParameters = new JobManagerCreationParametersBuilder()
                     .setCreateDaemon(false)
-                    .setUserIdForJobQueries(realm.unixUser)
+                    .setUserIdForJobQueries(user)
                     .setTrackUserJobsOnly(true)
                     .setTrackOnlyStartedJobs(false)
                     .setUserMask("027")
                     .build()
+            jobManagerParameters.strictMode = true
 
             if (realm.jobScheduler == Realm.JobScheduler.PBS) {
-                manager = new PBSJobManager(new BEExecutionServiceAdapter(executionService, realm), jobManagerParameters)
+                manager = new PBSJobManager(new BEExecutionServiceAdapter(executionService, realm, user), jobManagerParameters)
             } else {
                 throw new Exception("Unsupported cluster job scheduler")
             }
-            managerPerRealm[realm] = manager
+            managerPerRealm[new RealmAndUser(realm, user)] = manager
         }
         return manager
     }
@@ -253,4 +228,23 @@ enum JobSubmissionOption {
     QUEUE,
     STORAGE,
     WALLTIME,
+}
+
+@EqualsAndHashCode(includes = ["userName", "realmId"])
+public class RealmAndUser {
+
+    final Realm realm
+
+    final String userName
+
+    def getRealmId() {
+        realm.id
+    }
+
+    public RealmAndUser(final Realm realm, final String userName) {
+        assert realm : "Realm not specified"
+        assert userName : "User name not specified"
+        this.realm = realm
+        this.userName = userName
+    }
 }

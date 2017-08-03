@@ -11,26 +11,28 @@ class BEExecutionServiceAdapter implements BEExecutionService {
 
     private final ExecutionService executionService
     private final Realm realm
+    private final String user
 
-    BEExecutionServiceAdapter(ExecutionService executionService, Realm realm) {
+    BEExecutionServiceAdapter(ExecutionService executionService, Realm realm, String user) {
         this.executionService = executionService
         this.realm = realm
+        this.user = user
     }
 
     @Override
-    ExecutionResult execute(String s) {
-        ProcessHelperService.ProcessOutput p = executionService.executeCommandReturnProcessOutput(realm, s)
+    ExecutionResult execute(String command) {
+        ProcessHelperService.ProcessOutput p = executionService.executeCommandReturnProcessOutput(realm, command, user)
         new ExecutionResult((p.exitCode == 0), p.exitCode, p.stdout.split("\n") as List, null)
     }
 
     @Override
-    ExecutionResult execute(String s, boolean b) {
-        return execute(s)
+    ExecutionResult execute(String command, boolean b) {
+        return execute(command)
     }
 
     @Override
-    ExecutionResult execute(String s, boolean b, OutputStream outputStream) {
-        return execute(s)
+    ExecutionResult execute(String command, boolean b, OutputStream outputStream) {
+        return execute(command)
     }
 
     @Override
@@ -46,11 +48,6 @@ class BEExecutionServiceAdapter implements BEExecutionService {
     @Override
     boolean isAvailable() {
         return true
-    }
-
-    @Override
-    String handleServiceBasedJobExitStatus(Command command, ExecutionResult executionResult, OutputStream outputStream) {
-        return ""
     }
 
     @Override

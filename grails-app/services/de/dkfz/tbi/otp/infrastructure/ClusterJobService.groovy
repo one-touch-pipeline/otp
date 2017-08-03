@@ -1,16 +1,13 @@
 package de.dkfz.tbi.otp.infrastructure
 
-import de.dkfz.tbi.flowcontrol.ws.api.pbs.*
-import de.dkfz.tbi.flowcontrol.ws.api.response.*
-import de.dkfz.tbi.flowcontrol.ws.client.*
-import de.dkfz.tbi.otp.infrastructure.ClusterJob.Status
+import de.dkfz.roddy.execution.jobs.*
+import de.dkfz.roddy.tools.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import groovy.sql.*
 import org.joda.time.*
 
 import javax.sql.*
-import javax.xml.ws.soap.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 import static java.util.concurrent.TimeUnit.*
@@ -19,7 +16,6 @@ class ClusterJobService {
 
     DataSource dataSource
 
-    private static Map<Object, FlowControlClient> clientCache = [:]
     public static final String FORMAT_STRING = "yyyy-MM-dd HH:mm:ss"
     public static final Long HOURS_TO_MILLIS = HOURS.toMillis(1)
     // we assume that jobs with an elapsed walltime under 10ms "obviously failed"
@@ -63,35 +59,51 @@ class ClusterJobService {
                                     jobClass: jobClass,
                                     seqType: seqType,
                                     queued: new DateTime(),
-                                ).save(flush: true)
+        ).save(flush: true)
         assert job != null
         return job
     }
 
     /**
-     * completes the specific cluster job object of the given jobID
-     * with the missing attributes via flowcontrol API
+     * Stores values for statistics after the job has finished
      */
-    public void completeClusterJob(ClusterJobIdentifier jobIdentifier) {
+    public void completeClusterJob(
+            ClusterJobIdentifier jobIdentifier,
+            ClusterJob.Status status,
+            GenericJobInfo jobInfo
+    ) {
         ClusterJob job
         if (jobIdentifier.realm != null) {
             job = ClusterJob.findByClusterJobIdentifier(jobIdentifier)
         } else {
             job = exactlyOneElement(ClusterJob.findAllByClusterJobId(jobIdentifier.clusterJobId))
         }
-        JobInfo info = getClusterJobInformation(job)
-        if (info) {
-            job.exitStatus = Status.valueOf(info.getState() as String)
-            job.exitCode = info.getExitcode()
-            job.started = new DateTime(info.getStarted())
-            job.ended = new DateTime(info.getEnded())
-            job.usedCores = null
-            job.cpuTime = new Duration(info.getCputimeMS())
-            job.usedMemory = info.getMemoryUsedKB()
-            job.requestedWalltime = new Duration(info.getWalltimeRequestedMS())
-            job.requestedMemory = info.getMemoryRequestedKB()
-            job.requestedCores = info.getCores()
+
+        job.exitStatus = status
+        job.exitCode = jobInfo.exitCode
+
+        if (job.queued && jobInfo.submitTime) {
+            job.queued = convertFromJava8LocalDateTimeToJodaDateTime(jobInfo.submitTime)
         }
+        job.eligible = convertFromJava8LocalDateTimeToJodaDateTime(jobInfo.eligibleTime)
+        job.started = convertFromJava8LocalDateTimeToJodaDateTime(jobInfo.startTime)
+        job.ended = convertFromJava8LocalDateTimeToJodaDateTime(jobInfo.endTime)
+        job.systemSuspendStateDuration = convertFromJava8DurationToJodaDuration(jobInfo.timeSystemSuspState)
+        job.userSuspendStateDuration = convertFromJava8DurationToJodaDuration(jobInfo.timeUserSuspState)
+
+        job.cpuTime = convertFromJava8DurationToJodaDuration(jobInfo.cpuTime)
+        job.usedCores = jobInfo.usedResources?.cores
+        job.usedMemory = jobInfo.usedResources?.mem?.toLong(BufferUnit.k)
+        job.requestedCores = jobInfo.askedResources?.cores
+        job.requestedWalltime = convertFromJava8DurationToJodaDuration(jobInfo?.askedResources?.walltimeAsDuration)
+        job.requestedMemory = jobInfo.askedResources?.mem?.toLong(BufferUnit.k)
+        job.usedSwap = jobInfo.swap?.toLong(BufferUnit.k)
+
+        job.node = jobInfo.executionHosts
+        job.accountName = jobInfo.account
+        job.startCount = jobInfo.startCount
+        job.dependencies = jobInfo.parentJobIDs ? jobInfo.parentJobIDs.collect { ClusterJob.get(it as Long) } : []
+
         job.xten = isXten(job)
         job.nBases = getBasesSum(job)
         job.nReads = getReadsSum(job)
@@ -101,72 +113,19 @@ class ClusterJobService {
         handleObviouslyFailedClusterJob(job)
     }
 
-    /**
-    * returns all information stored on the cluster
-    * for the given job through its jobID
-    *
-    * returns null if the connection properties are not defined for the {@link Realm} of the given {@link ClusterJobIdentifier}
-    *
-    * @return JobInfo object
-    */
-    public JobInfo getClusterJobInformation(ClusterJob clusterJob) {
-        JobInfo info
-        try {
-            info = getClusterJobInfo(clusterJob)
-        } catch (SOAPFaultException e) {
-            def cacheKey = Collections.unmodifiableList([clusterJob.realm.flowControlHost, clusterJob.realm.flowControlPort, clusterJob.realm.flowControlKey])
-            synchronized (clientCache) {
-                clientCache.remove(cacheKey)
-            }
-            info = getClusterJobInfo(clusterJob)
-        }
-        return info
+    private static DateTime convertFromJava8LocalDateTimeToJodaDateTime(java.time.LocalDateTime localDateTime) {
+        return localDateTime ?
+                new DateTime(localDateTime.year, localDateTime.monthValue, localDateTime.dayOfMonth, localDateTime.hour,
+                        localDateTime.minute, localDateTime.second, ConfigService.dateTimeZone)
+                : null
     }
 
-    private JobInfo getClusterJobInfo(ClusterJob clusterJob) {
-        FlowControlClient client = getFlowControlClient(clusterJob.realm)
-        if (client == null) {
-            return null
-        }
-        JobInfos infos = client.requestJobInfos(clusterJob.clusterJobId)
-        JobInfo info = infos.getJobInfo(clusterJob.clusterJobId)
-        if (info == null) {
-            throw new RuntimeException("FlowControl returned no information for ${clusterJob}.")
-        }
-        return info
+    private static Duration convertFromJava8DurationToJodaDuration(java.time.Duration duration) {
+        return duration ? Duration.millis(duration.toMillis()) : null
     }
 
     /**
-     * returns null if the connection properties are not defined for the given {@link Realm}
-     *
-     * @return FlowControlClient object
-     */
-    public FlowControlClient getFlowControlClient(Realm realm) {
-        if (!realm.flowControlHost && !realm.flowControlPort && !realm.flowControlKey) {
-            return null
-        }
-        def cacheKey = Collections.unmodifiableList([realm.flowControlHost, realm.flowControlPort, realm.flowControlKey])
-        FlowControlClient client
-        synchronized (clientCache) {
-            client = clientCache.get(cacheKey)
-            if (client == null) {
-                client = createFlowControlClient(realm.flowControlKey, realm.flowControlHost, realm.flowControlPort)
-                clientCache.put(cacheKey, client)
-            }
-        }
-        return client
-    }
-
-    /**
-     * builds a FlowControlClient object
-     * @return FlowControlClient object
-     */
-    public FlowControlClient createFlowControlClient(String key, String host, int port) {
-        return new FlowControlClient.Builder(new ClientKeys(key)).port(port).host(host).build()
-    }
-
-    /**
-     * returns the specific workflow object to a cluster job, e.g. Run, AligmentPass
+     * returns the specific workflow object to a cluster job, e.g. Run, AlignmentPass
      * @return Object or null
      */
     public static ProcessParameterObject findProcessParameterObjectByClusterJob(ClusterJob job) {
@@ -243,7 +202,7 @@ class ClusterJobService {
      * this can result to misleading statistics
      */
     public void handleObviouslyFailedClusterJob(ClusterJob job) {
-        if (job.getElapsedWalltime() <= DURATION_JOB_OBVIOUSLY_FAILED) {
+        if (job.elapsedWalltime && job.elapsedWalltime <= DURATION_JOB_OBVIOUSLY_FAILED) {
             job.exitStatus = ClusterJob.Status.FAILED
             job.save(flush: true, failOnError: true)
         }

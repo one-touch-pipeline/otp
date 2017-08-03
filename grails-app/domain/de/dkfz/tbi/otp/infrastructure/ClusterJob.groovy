@@ -17,14 +17,12 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
  * ClusterJob objects get created after sending job requests to the cluster.
  * Information that are known at this point like "clusterJobName" or "queued" get
  * instantly filled.
- * Other information can be accessed through the flowcontrol-API and get filled
- * in the PbsMonitorService as soon as the cluster job is finished.
+ * Other information are stored as soon as the cluster job is finished. Depending on
+ * the used cluster job scheduler, not all values may be be available.
  *
  * all timestamps using joda-time, e.g. DateTime queued, get saved as UTC-timezone
  **/
 class ClusterJob implements Entity {
-
-    public static final String JOB_INFO_NOT_SET_MESSAGE = "Job info is not set (yet)."
 
     ProcessingStep processingStep
     static belongsTo = [processingStep: ProcessingStep]
@@ -61,23 +59,23 @@ class ClusterJob implements Entity {
      */
     SeqType seqType
     /**
-     * number of bases of all {@link de.dkfz.tbi.otp.ngsdata.SeqTrack} that belong to this job
+     * number of bases of all {@link SeqTrack} that belong to this job
      */
     Long nBases
     /**
-     * number of reads of all {@link de.dkfz.tbi.otp.ngsdata.SeqTrack} that belong to this job
+     * number of reads of all {@link SeqTrack} that belong to this job
      */
     Long nReads
     /**
-     * file size of all {@link de.dkfz.tbi.otp.ngsdata.DataFile} that belong to this job
+     * file size of all {@link DataFile} that belong to this job
      */
     Long fileSize
     /**
      * the bases per bytes factor that is used to calculate the file size in bases,
      * in case bases are not known at this time (all jobs before FastQC-WF)
      * the factor can change from time to time and is currently calculated by hand
-     * the latest value, as well as obsolate values are stored
-     * in the {@link de.dkfz.tbi.otp.dataprocessing.ProcessingOption} with name basesPerBytesFastQ
+     * the latest value, as well as obsolete values are stored
+     * in the {@link ProcessingOption} with name {@link ProcessingOption.OptionName#STATISTICS_BASES_PER_BYTES_FASTQ}
      * this value represents the factor that was used when this job was completed
      */
     Float basesPerBytesFastq
@@ -97,6 +95,8 @@ class ClusterJob implements Entity {
      * date, job was submitted
      */
     DateTime queued
+    /** date, job became eligible to run */
+    DateTime eligible
     /**
      * date, job started
      */
@@ -131,6 +131,24 @@ class ClusterJob implements Entity {
      * actually used memory to process the job in KiB
      */
     Long usedMemory
+    /** swap space used */
+    Integer usedSwap
+    /** cluster node the job was executed on */
+    String node
+    /** the account that was requested when submitting the job (not the user account of the user submitting the job) */
+    String accountName
+    /** duration the job was in suspended state, caused by the system */
+    Duration systemSuspendStateDuration
+    /** duration the job was in suspended state, caused by the user */
+    Duration userSuspendStateDuration
+    /** how often the job was started */
+    Integer startCount
+
+    Set<ClusterJob> dependencies
+    static hasMany = [
+            dependencies: ClusterJob
+    ]
+
 
     static constraints = {
         validated(nullable:false)
@@ -139,32 +157,44 @@ class ClusterJob implements Entity {
         userName blank: false
         clusterJobName(blank: false, nullable: false, validator: { clusterJobName, clusterJob -> clusterJobName.endsWith("_${clusterJob.jobClass}") } )
         jobClass(blank: false, nullable: false)
-        seqType(nullable: true)                                 // gets filled after initialization, must be nullable
+        seqType(nullable: true)
         nBases(nullable: true)
         nReads(nullable: true)
         fileSize(nullable: true)
         basesPerBytesFastq(nullable: true)
         xten(nullable: true)
-        exitStatus(nullable: true)                              // gets filled after initialization, must be nullable
-        exitCode(nullable: true)                                // gets filled after initialization, must be nullable
         queued(nullable: false)
-        started(nullable: true)                                 // gets filled after initialization, must be nullable
-        ended(nullable: true)                                   // gets filled after initialization, must be nullable
-        requestedWalltime(nullable: true, min: new Duration(1)) // gets filled after initialization, must be nullable
-        requestedCores(nullable: true, min: 1)                  // gets filled after initialization, must be nullable
-        usedCores(nullable:true)                                // gets filled after initialization, must be nullable
-        cpuTime(nullable: true)                                 // gets filled after initialization, must be nullable
-        requestedMemory(nullable: true, min: 1L)                // gets filled after initialization, must be nullable
-        usedMemory(nullable: true)                              // gets filled after initialization, must be nullable
+        // the following values must be nullable because they get filled after the job is finished
+        // and may not be available from every cluster job scheduler
+        exitStatus(nullable: true)
+        exitCode(nullable: true)
+        eligible nullable: true
+        started(nullable: true)
+        ended(nullable: true)
+        requestedWalltime(nullable: true, min: new Duration(1))
+        requestedCores(nullable: true, min: 1)
+        usedCores(nullable:true, min: 1)
+        cpuTime(nullable: true)
+        requestedMemory(nullable: true, min: 1L)
+        usedMemory(nullable: true)
+        node nullable: true, blank: false
+        usedSwap nullable: true
+        accountName nullable: true, blank: false
+        systemSuspendStateDuration nullable: true
+        userSuspendStateDuration nullable: true
+        startCount nullable: true, min: 1
     }
 
     static mapping = {
         processingStep index: "cluster_job_processing_step_idx"
         queued type: PersistentDateTimeAsMillis
+        eligible type: PersistentDateTimeAsMillis
         started type: PersistentDateTimeAsMillis
         ended type: PersistentDateTimeAsMillis
         requestedWalltime type: PersistentDurationAsMillis
         cpuTime type: PersistentDurationAsMillis
+        systemSuspendStateDuration type: PersistentDurationAsMillis
+        userSuspendStateDuration type: PersistentDurationAsMillis
 
         clusterJobId index: "cluster_job_cluster_job_id_idx"
         clusterJobName index: "cluster_job_cluster_job_name_idx"
@@ -194,33 +224,33 @@ class ClusterJob implements Entity {
      * describes how efficient the memory was used
      * {@link #usedMemory} divided by {@link #requestedMemory}
      */
-    public double getMemoryEfficiency () {
+    public Double getMemoryEfficiency () {
         if (usedMemory != null && requestedMemory != null) {
              return usedMemory * 1.0 / requestedMemory
         } else {
-            throw new IllegalStateException(JOB_INFO_NOT_SET_MESSAGE)
+            return null
         }
     }
 
     /**
      * cpu time per core
      */
-    public double getCpuTimePerCore () {
+    public Double getCpuTimePerCore () {
         if (cpuTime != null && usedCores != null) {
             return cpuTime.millis / usedCores
         } else {
-            throw new IllegalStateException(JOB_INFO_NOT_SET_MESSAGE)
+            return null
         }
     }
 
     /**
      * average cpu cores utilized
      */
-    public double getCpuAvgUtilised () {
-        if (cpuTime != null) {
-            (cpuTime.millis * 1.0) / getElapsedWalltime().millis
+    public Double getCpuAvgUtilised () {
+        if (cpuTime != null && elapsedWalltime != null) {
+            (cpuTime.millis * 1.0) / elapsedWalltime.millis
         } else {
-            throw new IllegalStateException(JOB_INFO_NOT_SET_MESSAGE)
+            return null
         }
     }
 
@@ -231,7 +261,7 @@ class ClusterJob implements Entity {
         if (ended != null && started != null) {
             return new Duration(started, ended)
         } else {
-            throw new IllegalStateException(JOB_INFO_NOT_SET_MESSAGE)
+            return null
         }
     }
 
@@ -239,10 +269,10 @@ class ClusterJob implements Entity {
      * difference of requested and elapsed walltime
      */
     public Duration getWalltimeDiff () {
-        if (requestedWalltime != null) {
+        if (requestedWalltime != null && elapsedWalltime != null) {
             return requestedWalltime.minus(elapsedWalltime)
         } else {
-            throw new IllegalStateException(JOB_INFO_NOT_SET_MESSAGE)
+            return null
         }
     }
 

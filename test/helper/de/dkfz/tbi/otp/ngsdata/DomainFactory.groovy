@@ -1682,11 +1682,11 @@ class DomainFactory {
     }
 
     public static ProcessParameter createProcessParameter(final Process process, final String className, final String value) {
-        return new ProcessParameter(
+        return createDomainObject(ProcessParameter, [
                 process: process,
                 className: className,
                 value: value,
-        )
+        ], [:])
     }
 
     public static ClusterJob createClusterJob(

@@ -41,11 +41,9 @@ grails.project.dependency.resolution = {
         compile "commons-logging:commons-logging:1.2"  // LogThreadLocal.withThreadLog requires version >= 1.0.4
         compile "joda-time:joda-time:2.3"
         compile "org.jadira.usertype:usertype.jodatime:2.0.1"
-        // dependencies for the flowControl API
-        compile "fcClient:fcClient:0.1"
 
         // library for interacting with cluster job schedulers
-        compile ("de.dkfz.roddy:BatchEuphoria:0.0.01-46-g1029f22") {
+        compile ("de.dkfz.roddy:BatchEuphoria:Roddy_2.4.0-43-g15d4082") {
             excludes "logstash-logback-encoder", "sshj", "commons-io"
         }
 

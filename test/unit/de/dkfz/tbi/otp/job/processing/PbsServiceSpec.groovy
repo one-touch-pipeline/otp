@@ -1,21 +1,14 @@
 package de.dkfz.tbi.otp.job.processing
 
-import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
-import de.dkfz.tbi.otp.infrastructure.ClusterJob
-import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
-import de.dkfz.tbi.otp.infrastructure.ClusterJobService
-import de.dkfz.tbi.otp.job.plan.JobDefinition
-import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
-import de.dkfz.tbi.otp.job.processing.PbsService.ClusterJobStatus
-import de.dkfz.tbi.otp.job.scheduler.SchedulerService
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.utils.HelperUtils
+import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.infrastructure.*
+import de.dkfz.tbi.otp.job.plan.*
+import de.dkfz.tbi.otp.job.scheduler.*
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.ProcessHelperService.ProcessOutput
-import grails.test.mixin.Mock
-import spock.lang.Specification
+import grails.test.mixin.*
+import spock.lang.*
 
 
 @Mock([
@@ -30,7 +23,7 @@ import spock.lang.Specification
 ])
 class PbsServiceSpec extends Specification {
 
-    void "knownJobsWithState, when qstat fails, throws exception"(String stderr, int exitCode) {
+    void "retrieveKnownJobsWithState, when qstat fails, throws exception"(String stderr, int exitCode) {
         given:
         PbsService service = new PbsService()
         Realm realm = DomainFactory.createRealmDataProcessing()
@@ -46,17 +39,16 @@ class PbsServiceSpec extends Specification {
         service.retrieveKnownJobsWithState(realm, realm.unixUser)
 
         then:
-        thrown(IllegalStateException)
+        thrown(Exception)
 
         where:
         stderr  | exitCode
-        "ERROR" | 0
         ""      | 1
         "ERROR" | 1
     }
 
 
-    void "knownJobsWithState, when qstat output is empty, returns empty map"() {
+    void "retrieveKnownJobsWithState, when qstat output is empty, returns empty map"() {
         given:
         PbsService service = new PbsService()
         Realm realm = DomainFactory.createRealmDataProcessing()
@@ -69,28 +61,28 @@ class PbsServiceSpec extends Specification {
         ] as ExecutionService
 
         when:
-        Map<ClusterJobIdentifier, ClusterJobStatus> result = service.retrieveKnownJobsWithState(realm, realm.unixUser)
+        Map<ClusterJobIdentifier, PbsMonitorService.Status> result = service.retrieveKnownJobsWithState(realm, realm.unixUser)
 
         then:
         result.isEmpty()
     }
 
-
-    void "knownJobsWithState, when job appears in qstat output, returns correct status"(ClusterJobStatus status) {
+    @Unroll
+    void "retrieveKnownJobsWithState, when status #pbsStatus appears in qstat, returns correct status #status"(String pbsStatus, PbsMonitorService.Status status) {
         given:
         PbsService service = new PbsService()
         Realm realm = DomainFactory.createRealmDataProcessing()
         String jobId = "5075615"
         service.executionService = [
                 executeCommandReturnProcessOutput: { realm1, String command, userName -> new ProcessOutput(
-                        stdout: qstatOutput(jobId, status) + command.tokenize().last(),
+                        stdout: qstatOutput(jobId, pbsStatus),
                         stderr: "",
                         exitCode: 0,
                 ) },
         ] as ExecutionService
 
         when:
-        Map<ClusterJobIdentifier, ClusterJobStatus> result = service.retrieveKnownJobsWithState(realm, realm.unixUser)
+        Map<ClusterJobIdentifier, PbsMonitorService.Status> result = service.retrieveKnownJobsWithState(realm, realm.unixUser)
 
         then:
         def job = new ClusterJobIdentifier(realm, jobId, realm.unixUser)
@@ -98,64 +90,27 @@ class PbsServiceSpec extends Specification {
         result.get(job) == status
 
         where:
-        status                       | _
-        ClusterJobStatus.COMPLETED   | _
-        ClusterJobStatus.EXITED      | _
-        ClusterJobStatus.HELD        | _
-        ClusterJobStatus.QUEUED      | _
-        ClusterJobStatus.RUNNING     | _
-        ClusterJobStatus.BEING_MOVED | _
-        ClusterJobStatus.WAITING     | _
-        ClusterJobStatus.SUSPENDED   | _
+        pbsStatus | status
+        "C"       | PbsMonitorService.Status.COMPLETED
+        "E"       | PbsMonitorService.Status.COMPLETED
+        "H"       | PbsMonitorService.Status.NOT_COMPLETED
+        "Q"       | PbsMonitorService.Status.NOT_COMPLETED
+        "R"       | PbsMonitorService.Status.NOT_COMPLETED
+        "T"       | PbsMonitorService.Status.NOT_COMPLETED
+        "W"       | PbsMonitorService.Status.NOT_COMPLETED
+        "S"       | PbsMonitorService.Status.NOT_COMPLETED
     }
 
 
-    private String qstatOutput(String jobId, ClusterJobStatus status) {
+    private static String qstatOutput(String jobId, String status) {
         return """\
 
 clust_head.long-domain:
                                                                                   Req'd       Req'd       Elap
 Job ID                  Username    Queue    Jobname          SessID  NDS   TSK   Memory      Time    S   Time
 ----------------------- ----------- -------- ---------------- ------ ----- ------ --------- --------- - ---------
-${jobId}.clust_head.ine  OtherUnixUser    fast     r160224_18005293    --      1      1     750mb  00:10:00 ${status.code}       --
+${jobId}.clust_head.ine  OtherUnixUser    fast     r160224_18005293    --      1      1     750mb  00:10:00 ${status}       --
 """
-    }
-
-    void "test validateQstatResult, no jobs returned, succeeds"() {
-        when:
-        String end = HelperUtils.getUniqueString()
-        PbsService.validateQstatResult(end, end)
-
-        then:
-        notThrown(IllegalStateException)
-    }
-
-
-    void "test validateQstatResult, one job returned, succeeds"() {
-        when:
-        String end = HelperUtils.getUniqueString()
-        PbsService.validateQstatResult(qstatOutput("5075615", ClusterJobStatus.COMPLETED) + end, end)
-
-        then:
-        notThrown(IllegalStateException)
-    }
-
-
-    void "test validateQstatResult, missing end string"() {
-        when:
-        PbsService.validateQstatResult(qstatOutput("5075615", ClusterJobStatus.COMPLETED), HelperUtils.getUniqueString())
-
-        then:
-        thrown(IllegalStateException)
-    }
-
-    void "test validateQstatResult, invalid format"() {
-        when:
-        String end = HelperUtils.getUniqueString()
-        PbsService.validateQstatResult("Invalid QStat output." + end, end)
-
-        then:
-        thrown(IllegalStateException)
     }
 
 
@@ -194,7 +149,7 @@ ${jobId}.clust_head.ine  OtherUnixUser    fast     r160224_18005293    --      1
         String result = service.executeJob(realm, "run the job")
 
         then:
-        2 * service.executionService.executeCommandReturnProcessOutput(realm, _ as String) >> out
+        2 * service.executionService.executeCommandReturnProcessOutput(realm, _ as String, _ as String) >> out
         1 * service.clusterJobService.createClusterJob(realm, clusterJobId, realm.unixUser, step, seqType, _ as String) >> clusterJob
         1 * service.clusterJobLoggingService.createAndGetLogDirectory(_, _) >> {TestCase.uniqueNonExistentPath}
         result == clusterJobId
