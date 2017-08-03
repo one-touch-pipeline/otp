@@ -22,7 +22,7 @@
                 <tr>
                     <td class="myKey"><g:message code="processingOption.insert.name"/></td>
                     <td valign="top" class="value">
-                        <input type="text" id="name" name="name"/>
+                        <g:select name="optionName" from="${optionNames}" id="optionName" />
                     </td>
                 </tr>
                 <tr>
@@ -41,12 +41,6 @@
                     <td class="myKey"><g:message code="processingOption.insert.project"/></td>
                     <td valign="top" class="value">
                         <g:select name="project" from="${projects}" id="project" />
-                    </td>
-                </tr>
-                <tr>
-                    <td class="myKey"><g:message code="processingOption.insert.comment"/></td>
-                    <td valign="top" class="value">
-                        <input type="text" id="comment" name="comment"/>
                     </td>
                 </tr>
             </table>

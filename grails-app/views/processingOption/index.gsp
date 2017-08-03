@@ -20,8 +20,6 @@
                     <th><g:message code="processingOption.list.headers.value"/></th>
                     <th><g:message code="processingOption.list.headers.project"/></th>
                     <th><g:message code="processingOption.list.headers.dateCreated"/></th>
-                    <th><g:message code="processingOption.list.headers.dateObsoleted"/></th>
-                    <th><g:message code="processingOption.list.headers.comment"/></th>
                 </tr>
             </thead>
             <tbody></tbody>
@@ -32,8 +30,6 @@
                     <th><g:message code="processingOption.list.headers.value"/></th>
                     <th><g:message code="processingOption.list.headers.project"/></th>
                     <th><g:message code="processingOption.list.headers.dateCreated"/></th>
-                    <th><g:message code="processingOption.list.headers.dateObsoleted"/></th>
-                    <th><g:message code="processingOption.list.headers.comment"/></th>
                 </tr>
             </tfoot>
         </table>

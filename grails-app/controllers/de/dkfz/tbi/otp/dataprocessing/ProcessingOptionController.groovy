@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 import grails.converters.*
@@ -19,9 +20,9 @@ class ProcessingOptionController {
 
         processingOptions.each { processingOption ->
             dataToRender.aaData << [
-                    option: processingOption,
+                    option : processingOption,
                     project: processingOption.project.toString()
-                ]
+            ]
         }
         render dataToRender as JSON
     }
@@ -43,7 +44,7 @@ class ProcessingOptionController {
                 message = "'" + errors.getRejectedValue() + "' is not a valid value for '" + errors.getField() + "'. Error code: '" + errors.code + "'"
             } else {
                 try {
-                    processingOptionService.createOrUpdate(cmd.name, cmd.type != "" ? cmd.type : null, projectService.getProjectByName(cmd.project), cmd.value, cmd.comment)
+                    processingOptionService.createOrUpdate(cmd.optionName, cmd.type != "" ? cmd.type : null, projectService.getProjectByName(cmd.project), cmd.value)
                     message = "Saved successfully"
                 } catch (Exception e) {
                     message = e.message
@@ -52,6 +53,7 @@ class ProcessingOptionController {
         }
         return [
                 projects: projects,
+                optionNames: OptionName.findAll().sort{ it.toString() },
                 message: message,
                 cmd: cmd,
                 hasErrors: hasErrors,
@@ -61,17 +63,14 @@ class ProcessingOptionController {
 
 class ProcessingOptionCommand {
     def projectService
-    String name
+    OptionName optionName
     String type
     String value
-    String comment
     String project
     String submit
 
     static constraints = {
-        name(blank: false)
         value(blank: false)
-        comment(blank: false)
         project(validator: { val, obj ->
             if (val == "no project") {
                 return true

@@ -17,12 +17,20 @@ $.otp.option = {
         event.preventDefault();
         window.location = 'insert';
     },
+    htmlEscape: function (value) {
+        return value
+            .replace(/&/g, '&amp;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+    },
     register: function () {
         "use strict";
         $("#optionTable").dataTable({
             bFilter: false,
             bProcessing: true,
-            bServerSide: true,
+            bServerSide: false,
             bSort: true,
             bJQueryUI: false,
             bAutoWidth: false,
@@ -49,13 +57,11 @@ $.otp.option = {
                             row = json.aaData[i];
                             option = row.option;
                             rowData = [
-                                option.name,
+                                option.name.name.toLowerCase(),
                                 option.type,
-                                '<a href="#" title="' + option.value + '">' + $.otp.option.formatValue(option.value) + '</a>',
+                                '<span title="' + $.otp.option.htmlEscape(option.value) + '">' + $.otp.option.formatValue(option.value) + '</span>',
                                 row.project,
-                                option.dateCreated,
-                                option.dateObsoleted,
-                                option.comment
+                                option.dateCreated
                             ];
                             json.aaData[i] = rowData;
                         }

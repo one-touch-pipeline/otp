@@ -133,7 +133,7 @@ class ProcessingOptionService {
      */
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public List<ProcessingOption> listProcessingOptions() {
-        return ProcessingOption.getAll()
+        return ProcessingOption.findAllByDateObsoletedIsNull()
     }
 
     /**
