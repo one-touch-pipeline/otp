@@ -59,7 +59,6 @@ class UserService {
     @PreAuthorize("hasRole('ROLE_ADMIN') or authentication.name==#user.username")
     void editUser(User user) throws UserInvalidException {
         User origUser = User.findByUsername(user.username)
-        origUser.jabberId = user.jabberId
         origUser.email = user.email
         if (!origUser.validate()) {
             throw new UserInvalidException(user.username)
@@ -104,7 +103,6 @@ class UserService {
     User createUser(CreateUserCommand command) throws RegistrationException {
         User user = new User(username: command.username,
                              email: command.email,
-                             jabberId: command.jabber,
                              enabled: true,
                              accountExpired: false,
                              accountLocked: false,

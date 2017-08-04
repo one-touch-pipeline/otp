@@ -1,32 +1,18 @@
 package de.dkfz.tbi.otp.job.scheduler
 
-import de.dkfz.tbi.otp.job.JobMailService
-import de.dkfz.tbi.otp.job.processing.ProcessService
-import de.dkfz.tbi.otp.job.restarting.RestartHandlerService
+import de.dkfz.tbi.otp.job.*
+import de.dkfz.tbi.otp.job.plan.*
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.job.restarting.*
+import de.dkfz.tbi.otp.utils.*
+import org.apache.commons.logging.*
+import org.codehaus.groovy.grails.commons.*
+import org.springframework.beans.factory.annotation.*
+import org.springframework.stereotype.*
+
+import java.util.concurrent.*
 
 import static org.springframework.util.Assert.*
-
-import java.util.concurrent.ExecutorService
-
-import org.apache.commons.logging.Log
-import org.apache.commons.logging.LogFactory
-import org.codehaus.groovy.grails.commons.GrailsApplication
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.stereotype.Component
-
-import de.dkfz.tbi.otp.job.plan.ValidatingJobDefinition
-import de.dkfz.tbi.otp.job.processing.ExecutionState
-import de.dkfz.tbi.otp.job.processing.Job
-import de.dkfz.tbi.otp.job.processing.MonitoringJob
-import de.dkfz.tbi.otp.job.processing.ProcessingError
-import de.dkfz.tbi.otp.job.processing.ProcessingException
-import de.dkfz.tbi.otp.job.processing.ProcessingStep
-import de.dkfz.tbi.otp.job.processing.ProcessingStepUpdate
-import de.dkfz.tbi.otp.job.processing.ValidatingJob
-import de.dkfz.tbi.otp.notification.NotificationEvent
-import de.dkfz.tbi.otp.notification.NotificationType
-import de.dkfz.tbi.otp.utils.ExceptionUtils
-
 
 /**
  * Class handling the scheduling of Jobs.
@@ -176,9 +162,6 @@ class Scheduler {
             }
             log.debug("doCreateCheck performed for ${job} with ProcessingStep ${job.processingStep.id}")
             job.start()
-            // send notification
-            NotificationEvent event = new NotificationEvent(this, step, NotificationType.PROCESS_STEP_STARTED)
-            grailsApplication.mainContext.publishEvent(event)
         } catch (RuntimeException e) {
             jobMailService.sendErrorNotification(job, e)
             // removing Job from running

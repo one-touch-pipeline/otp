@@ -17,13 +17,11 @@ class User implements TimeStamped, Entity {
     boolean accountExpired
     boolean accountLocked
     boolean passwordExpired
-    String jabberId
     String email
 
     static constraints = {
         username blank: false, unique: true
         password blank: false
-        jabberId nullable: true
         email    nullable: true, email: true
     }
 
@@ -57,7 +55,7 @@ class User implements TimeStamped, Entity {
      * @return User without any security relevant information.
      */
     User sanitizedUser() {
-        return new User(id: this.id, username: this.username, jabberId: this.jabberId, email: this.email)
+        return new User(id: this.id, username: this.username, email: this.email)
     }
 
     /**
@@ -65,6 +63,6 @@ class User implements TimeStamped, Entity {
      * @return Map with information about User without any security relevant information.
      */
     Map sanitizedUserMap() {
-        return [id: this.id, username: this.username, jabberId: this.jabberId, email: this.email]
+        return [id: this.id, username: this.username, email: this.email]
     }
 }

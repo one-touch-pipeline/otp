@@ -28,8 +28,6 @@ grails.project.dependency.resolution = {
         //git
         compile 'org.eclipse.jgit:org.eclipse.jgit:1.2.0.201112221803-r'
         runtime "commons-jexl:commons-jexl:1.1"
-        // XMPP
-        compile "jivesoftware:smack:3.1.0"
         // jdbc
         runtime "postgresql:postgresql:9.1-901.jdbc4"
         // ngstools

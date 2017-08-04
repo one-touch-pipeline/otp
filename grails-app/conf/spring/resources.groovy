@@ -25,14 +25,6 @@ beans = {
             task.'annotation-driven'(executor: "taskExecutor", scheduler: "taskScheduler")
         }
     }
-    if (grailsApplication.config.otp.jabber.enabled) {
-        jabberService(de.dkfz.tbi.otp.notification.JabberService) {
-            grailsApplication = ref("grailsApplication")
-            service = grailsApplication.config.otp.jabber.service
-            username = grailsApplication.config.otp.jabber.username
-            password = grailsApplication.config.otp.jabber.password
-        }
-    }
 
     // http://stackoverflow.com/questions/10013288/another-unnamed-cachemanager-already-exists-in-the-same-vm-ehcache-2-5
     aclCacheManager(EhCacheManagerFactoryBean) {

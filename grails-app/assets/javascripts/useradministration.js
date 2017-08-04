@@ -62,11 +62,11 @@ $.otp.userAdministration.loadUserList = function () {
                             id: id,
                             text: id
                         });
-                        rowData[4] = createUserChangeMarkup(id, 'enable', rowData[4]);
-                        rowData[5] = createUserChangeMarkup(id, 'expireAccount', rowData[5]);
-                        rowData[6] = createUserChangeMarkup(id, 'lockAccount', rowData[6]);
-                        rowData[7] = createUserChangeMarkup(id, 'expirePassword', rowData[7]);
-                        rowData[8] = '<input type="hidden" value="' + rowData[1] + '"/><button>Switch to ' + rowData[1] + '</button>';
+                        rowData[3] = createUserChangeMarkup(id, 'enable', rowData[3]);
+                        rowData[4] = createUserChangeMarkup(id, 'expireAccount', rowData[4]);
+                        rowData[5] = createUserChangeMarkup(id, 'lockAccount', rowData[5]);
+                        rowData[6] = createUserChangeMarkup(id, 'expirePassword', rowData[6]);
+                        rowData[7] = '<input type="hidden" value="' + rowData[1] + '"/><button>Switch to ' + rowData[1] + '</button>';
                     }
                     fnCallback(json);
                 }
@@ -297,16 +297,12 @@ $.otp.userAdministration.editUser = {
             cache: 'false',
             data: {
                 username: $("#edit-user-username").val(),
-                jabber: $("#edit-user-jabber").val(),
                 email: $("#edit-user-email").val()
             },
             success: function (data) {
                 if (data.error) {
                     if (data.username) {
                         $.otp.warningMessage($L(data.username));
-                    }
-                    if (data.jabber) {
-                        $.otp.warningMessage($L(data.jabber));
                     }
                     if (data.email) {
                         $.otp.warningMessage($L(data.email));
@@ -366,9 +362,6 @@ $.otp.userAdministration.create = {
                 },
                 email: {
                     required: true,
-                    email: true
-                },
-                jabber: {
                     email: true
                 }
             },

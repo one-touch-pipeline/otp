@@ -114,7 +114,6 @@ otp.menu.userAdministration
 otp.menu.groupAdministration
 otp.menu.crashRecovery
 otp.menu.planServerShutdown
-otp.menu.manageNotifications
 otp.menu.processingOptions
 otp.menu.softwareTool
 otp.menu.switchUser
@@ -148,7 +147,6 @@ user.administration.list.id
 user.administration.list.username
 user.administration.list.realname
 user.administration.list.email
-user.administration.list.jabber
 user.administration.list.enabled
 user.administration.list.accountExpired
 user.administration.list.accountLocked
@@ -172,7 +170,6 @@ user.administration.ui.heading.user
 user.administration.ui.username
 user.administration.ui.realname
 user.administration.ui.email
-user.administration.ui.jabber
 user.administration.ui.heading.roles
 user.administration.ui.heading.grous
 user.administration.cancel
@@ -180,40 +177,12 @@ user.administration.save
 user.administration.userRealName.blank
 user.administration.email.blank
 user.administration.email.invalid
-user.administration.jabber.invalid
 user.administration.ui.heading.register
 user.administration.register
 user.administration.nextUser
 user.administration.previousUser
 user.administration.backToOverview
 user.administration.createUser
-
-# Notification Administion
-notification.administration.title
-notification.administration.list.header
-notification.administration.list.headers.enabled
-notification.administration.list.headers.type
-notification.administration.list.headers.medium
-notification.administration.list.headers.trigger
-notification.administration.list.headers.subject
-notification.administration.list.headers.message
-notification.administration.template.title
-notification.administration.template.help
-notification.administration.trigger.title
-notification.administration.trigger.workflow
-notification.administration.trigger.processingStep
-notification.administration.type.processStarted
-notification.administration.type.processSucceeded
-notification.administration.type.processFailed
-notification.administration.type.jobStarted
-notification.administration.type.jobEnded
-notification.administration.type.jobFailed
-notification.administration.medium.email
-notification.administration.medium.jabber
-notification.administration.update.success
-notification.administration.update.notFound
-notification.administration.template.collapse
-notification.administration.error.save
 
 # Group administration
 group.create.ui.dialog.title

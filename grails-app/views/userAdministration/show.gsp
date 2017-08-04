@@ -72,10 +72,6 @@
                         <td><label for="edit-user-email"><g:message code="user.administration.ui.email"/>:</label></td>
                         <td><span><input type="text" id="edit-user-email" name="email" value="${user.email}"/></span></td>
                     </tr>
-                    <tr>
-                        <td><label for="edit-user-jabber"><g:message code="user.administration.ui.jabber"/>:</label></td>
-                        <td><span><input type="text" id="edit-user-jabber" name="jabber" value="${user.jabberId}"/></span></td>
-                    </tr>
                     </tbody>
                 </table>
                 <div class="buttons">

@@ -63,7 +63,7 @@ class UserAdministrationController {
         List users = userService.getAllUsers()
 
         users.each { User user ->
-            dataToRender.aaData << [user.id, user.username, user.email, user.jabberId, user.enabled, user.accountExpired, user.accountLocked, user.passwordExpired]
+            dataToRender.aaData << [user.id, user.username, user.email, user.enabled, user.accountExpired, user.accountLocked, user.passwordExpired]
         }
         render dataToRender as JSON
     }
@@ -218,7 +218,6 @@ class UserAdministrationController {
             data.put("error", true)
             data.put("username", resolveErrorMessage(cmd, "username", "Username"))
             data.put("email", resolveErrorMessage(cmd, "email", "Email"))
-            data.put("jabber", resolveErrorMessage(cmd, "jabber", "Jabber"))
         } else {
             userService.editUser(cmd.toUser())
             data.put("success", true)
@@ -331,16 +330,14 @@ class AddRemoveRoleCommand {
 class RegistrationCommand {
     String username
     String email
-    String jabber
 
     static constraints = {
         username(nullable: false, blank: false)
         email(nullable: false, email: true, blank: false)
-        jabber(nullable: true, blank: true, email: true)
     }
 
     User toUser() {
-        return new User(username: this.username, email: this.email, jabberId: this.jabber)
+        return new User(username: this.username, email: this.email)
     }
 }
 
@@ -351,12 +348,10 @@ class EditUserCommand implements Serializable {
     private static final long serialVersionUID = 1L
     String username
     String email
-    String jabber
 
     static constraints = {
         username(nullable: false, blank: false)
         email(nullable: false, blank: false, email: true)
-        jabber(nullable: true, blank: true, email: true)
     }
 
     /**
@@ -364,7 +359,7 @@ class EditUserCommand implements Serializable {
      * @return The command object as a User
      */
     User toUser() {
-        return new User(username: this.username, email: this.email, jabberId: this.jabber)
+        return new User(username: this.username, email: this.email)
     }
 }
 

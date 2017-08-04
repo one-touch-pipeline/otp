@@ -19,7 +19,6 @@
                     'user.administration.list.id',
                     'user.administration.list.username',
                     'user.administration.list.email',
-                    'user.administration.list.jabber',
                     'user.administration.list.enabled',
                     'user.administration.list.accountExpired',
                     'user.administration.list.accountLocked',

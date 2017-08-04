@@ -3,7 +3,6 @@ package de.dkfz.tbi.otp.job.scheduler
 import de.dkfz.tbi.otp.job.*
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.notification.*
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.*
 import org.apache.commons.logging.*
@@ -18,7 +17,6 @@ import java.util.concurrent.*
 import java.util.concurrent.locks.*
 
 import static org.springframework.util.Assert.*
-
 
 class SchedulerService {
     static transactional = false
@@ -251,8 +249,6 @@ class SchedulerService {
         if (!process.save(flush: true)) {
             throw new SchedulerPersistencyException("Could not save the process for the JobExecutionPlan ${plan.id}")
         }
-        NotificationEvent event = new NotificationEvent(this, process, NotificationType.PROCESS_STARTED)
-        grailsApplication.mainContext.publishEvent(event)
         lock.lock()
         try {
             queue.add(step)
@@ -513,11 +509,6 @@ class SchedulerService {
             log.fatal("Could not set Process to finished")
             throw new ProcessingException("Could not set Process to finished")
         }
-        // send notification
-        NotificationEvent event = new NotificationEvent(this, [process: process, error: error], NotificationType.PROCESS_FAILED)
-        grailsApplication.mainContext.publishEvent(event)
-        NotificationEvent event2 = new NotificationEvent(this, [processingStep: step, error: error], NotificationType.PROCESS_STEP_FAILED)
-        grailsApplication.mainContext.publishEvent(event2)
     }
 
     /**
@@ -768,10 +759,6 @@ class SchedulerService {
             }
             plan.save(flush: true)
         }
-
-        // send notification
-        NotificationEvent event = new NotificationEvent(this, last.process, NotificationType.PROCESS_SUCCEEDED)
-        grailsApplication.mainContext.publishEvent(event)
     }
 
     // TODO: comment me

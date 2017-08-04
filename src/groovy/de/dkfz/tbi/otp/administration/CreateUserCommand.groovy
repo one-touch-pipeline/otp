@@ -13,7 +13,6 @@ class CreateUserCommand implements Serializable {
 
     String username
     String email
-    String jabber
     List<Long> role
     List<Long> group
 
@@ -22,7 +21,6 @@ class CreateUserCommand implements Serializable {
             return User.findByUsername(value) == null
         })
         email(email: true)
-        jabber(email: true, nullable: true, blank: true)
         role(nullable: true, validator: { value ->
             boolean valid = true
             value.each { id ->

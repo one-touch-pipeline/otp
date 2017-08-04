@@ -24,11 +24,6 @@
                     <td><input type="text" name="email" id="create_user_email"/></td>
                     <td>&nbsp;</td>
                 </tr>
-                <tr>
-                    <td><label for="create_user_jabber"><g:message code="user.administration.ui.jabber"/></label></td>
-                    <td><input type="text" name="jabber" id="create_user_jabber"/></td>
-                    <td>&nbsp;</td>
-                </tr>
             </tbody>
         </table>
         <div id="roles_container">
