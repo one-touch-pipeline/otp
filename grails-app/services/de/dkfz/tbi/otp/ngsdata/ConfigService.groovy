@@ -51,23 +51,6 @@ class ConfigService {
         return "${base}/${proj.dirName}/sequencing/"
     }
 
-    String igvPath() {
-        return "http://www.broadinstitute.org/igv/projects/current/igv.php?sessionURL="
-    }
-
-    String igvSessionFileServer() {
-        String dir = igvSessionFiles()
-        return "${grailsApplication.config.grails.serverURL}/static/$dir/"
-    }
-
-    String igvSessionFileDirectory() {
-        return servletContext.getRealPath(igvSessionFiles())
-    }
-
-    private String igvSessionFiles() {
-        return "igvSessionFiles"
-    }
-
     String getPbsPassword() {
         return grailsApplication.config.otp.pbs.ssh.password
     }

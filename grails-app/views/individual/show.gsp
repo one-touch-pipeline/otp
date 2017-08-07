@@ -140,20 +140,6 @@
                 </div>
             </g:each>
             <h1><g:link controller="samplePair" action="index" params="[mockPid: ind.mockPid]"><g:message code="individual.snv.detail"/></g:link></h1>
-             <g:if test="${ind.mutations}">
-                <h1><g:message code="individual.show.analysisResults"/></h1>
-                <div class="tableBlock">
-                    <g:each var="mutation" in="${ind.mutations}">
-                        ${mutation.gene},
-                    </g:each>
-                </div>
-            </g:if>
-            <!-- Start IGV feature does not work. See OTP-1203.
-            <h1><g:message code="individual.show.dataAccess"/></h1>
-            <div class="buttons show_button">
-                <g:actionSubmit class="button" value="${message(code:'individual.show.sequencingScans.startIgv')}" action="igvStart"/>
-            </div>
-            -->
         </g:form>
     </div>
 </body>

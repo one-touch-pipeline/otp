@@ -397,31 +397,6 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     }
 
     @Test
-    public void testDeleteStudiesOfOneProject() throws Exception {
-        Project project = Project.build()
-        Study study = Study.build(project: project)
-        StudySample studySample = StudySample.build(study: study)
-
-        dataSwapService.deleteStudiesOfOneProject(project)
-
-        assert !Study.get(study.id)
-        assert !StudySample.get(studySample.id)
-    }
-
-    @Test
-    public void testDeleteMutationsAndResultDataFilesOfOneIndividual() throws Exception {
-        Individual individual = Individual.build()
-        ResultsDataFile resultsDataFile = ResultsDataFile.build()
-        Mutation mutation = Mutation.build(individual: individual, resultsDataFile: resultsDataFile)
-
-        dataSwapService.deleteMutationsAndResultDataFilesOfOneIndividual(individual)
-
-        assert !ResultsDataFile.get(resultsDataFile.id)
-        assert !Mutation.get(mutation.id)
-    }
-
-
-    @Test
     public void testDeleteMergingRelatedConnectionsOfBamFile() throws Exception {
         MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage([
                 pipeline: DomainFactory.createDefaultOtpPipeline()

@@ -297,8 +297,6 @@ individual.show.sequencingScans.coverage
 individual.show.sequencingScans.numberOfBases
 individual.show.sequencingScans.insertSize
 individual.show.sequencingScans.merging
-individual.show.sequencingScans.igv
-individual.show.sequencingScans.startIgv
 individual.show.sequencingScans.details
 individual.show.analysisResults
 individual.show.dataAccess

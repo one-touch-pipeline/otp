@@ -16,7 +16,6 @@ class IndividualController {
     static final String SAMPLE_IDENTIFIER = "SAMPLE_IDENTIFIER"
 
     def individualService
-    def igvSessionFileService
     def projectService
     CommentService commentService
     SampleIdentifierService sampleIdentifierService
@@ -45,7 +44,6 @@ class IndividualController {
             ind: ind,
             previous: individualService.previousIndividual(ind),
             next: individualService.nextIndividual(ind),
-            igvMap: igvSessionFileService.createMapOfIgvEnabledScans(ind.seqScans),
             comment: ind.comment,
             typeDropDown: Individual.Type.values(),
             sampleTypeDropDown: individualService.getSampleTypeNames()

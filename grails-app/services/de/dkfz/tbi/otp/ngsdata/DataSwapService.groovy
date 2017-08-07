@@ -664,12 +664,6 @@ chmod 440 ${newDirectFileName}
         StringBuilder stringBuilder = new StringBuilder()
         StringBuilder stringBuilderOtherUser = new StringBuilder()
 
-        Mutation.findAllByIndividual(individual)*.delete()
-        assert !Mutation.findAllByIndividual(individual)
-
-        StudySample.findAllByIndividual(individual)*.delete()
-        assert !StudySample.findAllByIndividual(individual)
-
         List<Sample> samples = Sample.findAllByIndividual(individual)
 
         List<SeqType> seqTypes = []
@@ -855,37 +849,6 @@ chmod 440 ${newDirectFileName}
 
         PicardMarkDuplicatesMetrics.findAllByAbstractBamFile(abstractBamFile)*.delete()
     }
-
-
-    /**
-     * Deletes all studies and corresponding study samples which belong to this project
-     *
-     * The function should be called inside a transaction (DOMAIN.withTransaction{}) to roll back changes if an exception occurs or a check fails.
-     */
-    void deleteStudiesOfOneProject(Project project) {
-        notNull(project, "The input project is null")
-
-        List<Study> studies = Study.findAllByProject(project)
-        if(!studies.empty) {
-            StudySample.findAllByStudyInList(studies)*.delete()
-        }
-        studies*.delete()
-    }
-
-
-    /**
-     * Deletes all mutations and corresponding result data files
-     *
-     * The function should be called inside a transaction (DOMAIN.withTransaction{}) to roll back changes if an exception occurs or a check fails.
-     */
-    void deleteMutationsAndResultDataFilesOfOneIndividual(Individual individual) {
-        notNull(individual, "The input individual is null")
-        List<Mutation> mutations = Mutation.findAllByIndividual(individual)
-        List<ResultsDataFile> resultDataFiles = mutations*.resultsDataFile
-        mutations*.delete()
-        resultDataFiles*.delete()
-    }
-
 
     /**
      * Delete merging related database entries, based on the mergingSetAssignments

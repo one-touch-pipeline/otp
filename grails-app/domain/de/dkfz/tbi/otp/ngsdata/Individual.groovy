@@ -112,13 +112,6 @@ order by type.name asc, type.libraryLayout
     }
 
     /**
-     * @return List of Mutation for this Individual
-     **/
-    List<Mutation> getMutations() {
-        return Mutation.findAllByIndividual(this)
-    }
-
-    /**
      * returns the folder viewByPid without the pid
      * Example: ${project}/sequencing/exon_sequencing/view-by-pid
      */
