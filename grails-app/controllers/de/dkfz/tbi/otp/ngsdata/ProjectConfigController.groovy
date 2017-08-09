@@ -153,7 +153,7 @@ class ProjectConfigController {
     }
 
     JSON updateAnalysisDirectory(UpdateAnalysisDirectoryCommand cmd) {
-        checkErrorAndCallMethod(cmd, { projectService.updateProjectField(cmd.analysisDirectory, "analysisDirectory", cmd.project) })
+        checkErrorAndCallMethod(cmd, { projectService.updateProjectField(cmd.analysisDirectory, "dirAnalysis", cmd.project) })
     }
 
     JSON updateNameInMetadataFiles(UpdateNameInMetadataCommand cmd) {
