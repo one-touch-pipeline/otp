@@ -113,7 +113,7 @@ class BwaPairingAndSortingJobTests {
         assertNotNull(pass.save([flush: true, failOnError: true]))
 
         ProcessingOption option = new ProcessingOption(
-            name: OptionName.COMMAND_CONVEY_BWA,
+            name: OptionName.COMMAND_BWA,
             type: null,
             project: null,
             value: 'bwa-0.6.2-tpx',

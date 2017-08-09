@@ -1,6 +1,5 @@
 package workflows
 
-import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.jobs.alignment.*
 import de.dkfz.tbi.otp.ngsdata.*
@@ -9,9 +8,6 @@ import de.dkfz.tbi.otp.utils.logging.*
 import grails.plugin.springsecurity.*
 import org.joda.time.*
 import org.junit.*
-
-import static de.dkfz.tbi.otp.job.processing.PbsOptionMergingService.*
-import static de.dkfz.tbi.otp.ngsdata.SeqTypeNames.*
 
 @Ignore
 class ConveyBwaAlignmentWorkflowTests extends WorkflowTestCase {
@@ -34,85 +30,69 @@ class ConveyBwaAlignmentWorkflowTests extends WorkflowTestCase {
         File sourceFastqR2 = new File(testDataDir, "35-3B_NoIndex_L007_R2_complete_filtered.fastq.gz")
         File sourceRefGenDir = new File("${testDataDir}/reference_genomes/bwa06_1KGRef")
 
-        SeqPlatform seqPlatform = SeqPlatform.build(name: "Illumina SeqDingsi")
-        Run run = DomainFactory.createRun(seqPlatform: seqPlatform)
-        SoftwareTool softwareTool = SoftwareTool.build()
+        SeqPlatform seqPlatform = DomainFactory.createSeqPlatform([
+                name: "Illumina SeqDingsi"
+        ])
 
+        MergingWorkPackage workPackage = DomainFactory.createMergingWorkPackage([
+                pipeline        : DomainFactory.createDefaultOtpPipeline(),
+                seqType         : DomainFactory.createWholeGenomeSeqType(),
+                seqPlatformGroup: seqPlatform.seqPlatformGroup,
+                referenceGenome : DomainFactory.createReferenceGenome([
+                        fileNamePrefix: REF_GEN_FILE_NAME_PREFIX,
+                ]),
+                needsProcessing : false,
+        ])
 
-        Project project = Project.build(
-                realmName: realm.name,
-        )
-        assert(project.save(flush: true))
+        workPackage.project.realmName = realm.name
+        workPackage.project.save(flush: true)
 
-        Individual.build(
-                project: project,
-                type: Individual.Type.REAL,
-        )
-
-        MergingWorkPackage workPackage = createWorkPackage(seqPlatform.seqPlatformGroup)
-
-        new ReferenceGenomeProjectSeqType(
-                project: project,
-                seqType: findSeqType(),
-                referenceGenome: workPackage.referenceGenome,
-        ).save(flush:true)
-
-        seqTrack = new SeqTrack(
-                sample: workPackage.sample,
+        seqTrack = DomainFactory.createSeqTrackWithTwoDataFiles(workPackage, [
                 fastqcState: SeqTrack.DataProcessingState.FINISHED,
-                seqType: findSeqType(),
-                laneId: "0",
-                run: run,
-                libraryPreparationKit: workPackage.libraryPreparationKit,
-                kitInfoReliability: InformationReliability.KNOWN,
-                pipelineVersion: softwareTool,
-        )
-        assert seqTrack.save(flush: true, failOnError: true)
-
-        dataFile = DomainFactory.createSequenceDataFile(
-                mateNumber: 1,
-                fileExists: true,
-                fileSize: 1,
+                run: DomainFactory.createRun([
+                    seqPlatform: seqPlatform
+                ]),
+        ], [
+                fileExists   : true,
+                fileSize     : 1,
                 fileWithdrawn: false,
-                fileName: 'asdf_R1.fastq.gz',
-                vbpFileName: 'asdf_R1.fastq.gz',
-                seqTrack: seqTrack,
-                nReads: 10000,
-        )
-        assert dataFile.save(flush: true, failOnError: true)
-
-        dataFile2 = DomainFactory.createSequenceDataFile(
-                mateNumber: 2,
-                fileExists: true,
-                fileSize: 1,
+                nReads       : 10000,
+        ], [
+                fileExists   : true,
+                fileSize     : 1,
                 fileWithdrawn: false,
-                fileName: 'asdf_R2.fastq.gz',
-                vbpFileName: 'asdf_R2.fastq.gz',
-                seqTrack: seqTrack,
-                nReads: 10000,
-        )
-        assert dataFile.save(flush: true, failOnError: true)
+                nReads       : 10000,
+        ])
 
-        FastqcProcessedFile fastqcProcessedFile = new FastqcProcessedFile(
-                contentUploaded: true,
-                dataFile: dataFile,
-        ).save(flush: true, failOnError: true)
+        seqTrack.dataFiles.each {
+            DomainFactory.createFastqcProcessedFile(
+                    contentUploaded: true,
+                    dataFile: it,
+            )
+        }
+        (dataFile, dataFile2) = seqTrack.dataFiles.sort {
+            it.mateNumber
+        }
 
         alignmentPass = DomainFactory.createAlignmentPass(
                 seqTrack: seqTrack,
-                identifier: AlignmentPass.nextIdentifier(seqTrack),
                 alignmentState: AlignmentPass.AlignmentState.NOT_STARTED,
                 referenceGenome: workPackage.referenceGenome,
         )
 
+        DomainFactory.createReferenceGenomeProjectSeqType(
+                project: workPackage.project,
+                seqType: workPackage.seqType,
+                referenceGenome: workPackage.referenceGenome,
+        )
 
-        linkFileUtils.createAndValidateLinks([(sourceFastqR1): new File(lsdfFilesService.getFileFinalPath(dataFile))], realm)
-        linkFileUtils.createAndValidateLinks([(sourceFastqR2): new File(lsdfFilesService.getFileFinalPath(dataFile2))], realm)
-
-        linkFileUtils.createAndValidateLinks([(new File(lsdfFilesService.getFileFinalPath(dataFile))): new File(lsdfFilesService.getFileViewByPidPath(dataFile))], realm)
-        linkFileUtils.createAndValidateLinks([(new File(lsdfFilesService.getFileFinalPath(dataFile2))): new File(lsdfFilesService.getFileViewByPidPath(dataFile2))], realm)
-
-        linkFileUtils.createAndValidateLinks([(sourceRefGenDir): referenceGenomeService.referenceGenomeDirectory(workPackage.referenceGenome, false)], realm)
+        linkFileUtils.createAndValidateLinks([
+                (sourceFastqR1)                                         : new File(lsdfFilesService.getFileFinalPath(dataFile)),
+                (sourceFastqR2)                                         : new File(lsdfFilesService.getFileFinalPath(dataFile2)),
+                (new File(lsdfFilesService.getFileFinalPath(dataFile))) : new File(lsdfFilesService.getFileViewByPidPath(dataFile)),
+                (new File(lsdfFilesService.getFileFinalPath(dataFile2))): new File(lsdfFilesService.getFileViewByPidPath(dataFile2)),
+                (sourceRefGenDir)                                       : referenceGenomeService.referenceGenomeDirectory(workPackage.referenceGenome, false),
+        ], realm)
 
 
         SpringSecurityUtils.doWithAuth("admin") {
@@ -127,48 +107,6 @@ class ConveyBwaAlignmentWorkflowTests extends WorkflowTestCase {
         }
     }
 
-    static SeqType findSeqType() {
-        return CollectionUtils.exactlyOneElement(SeqType.findAllWhere(
-                name: WHOLE_GENOME.seqTypeName,
-                libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED,
-        ))
-    }
-
-    MergingWorkPackage createWorkPackage(SeqPlatformGroup seqPlatformGroup) {
-        SeqType seqType = findSeqType()
-
-        Pipeline pipeline = Pipeline.build(
-                name: Pipeline.Name.DEFAULT_OTP,
-                type: Pipeline.Type.ALIGNMENT,
-        )
-
-        ReferenceGenome referenceGenome = ReferenceGenome.build(
-                fileNamePrefix: REF_GEN_FILE_NAME_PREFIX,
-        )
-
-        LibraryPreparationKit kit = new LibraryPreparationKit(
-                name: "~* xX liBrArYprEPaRaTioNkiT Xx *~",
-                shortDisplayName: "~* lPk *~",
-        )
-        assert kit.save(flush: true, failOnError: true)
-
-        MergingWorkPackage workPackage = MergingWorkPackage.build(
-                pipeline: pipeline,
-                seqType: seqType,
-                referenceGenome: referenceGenome,
-                needsProcessing: false,
-                libraryPreparationKit: kit,
-                seqPlatformGroup: seqPlatformGroup,
-        )
-
-        workPackage.sampleType.name = "CONTROL"
-        workPackage.sampleType.save(flush: true)
-
-        workPackage.project.realmName = realm.name
-        workPackage.project.save(flush: true)
-
-        return workPackage
-    }
 
     @Test
     void testWorkflow() {

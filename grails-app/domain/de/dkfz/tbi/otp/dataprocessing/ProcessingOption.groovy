@@ -65,7 +65,8 @@ class ProcessingOption implements Entity {
         RODDY_FEATURE_TOGGLES_CONFIG_PATH("Path to featureToggles.ini which contains feature toggles for Roddy", null, Type.PATH),
 
         //commands
-        COMMAND_CONVEY_BWA("BWA convey command for alignment", "cnybwa-0.6.2", Type.SINGLE_WORD_TEXT),
+        COMMAND_CONVEY_BWA("BWA convey command for alignment", "", Type.SINGLE_WORD_TEXT),
+        COMMAND_BWA("BWA command for pairing and sorting", "", Type.SINGLE_WORD_TEXT),
         COMMAND_SAMTOOLS("samtools (Tools for alignments in the SAM format)", "samtools-0.1.19", Type.SINGLE_WORD_TEXT),
         COMMAND_FASTQC("command for fastqc with java", "fastqc-0.10.1 --java /path/to/programs/jdk/jdk1.6.0_45/bin/java", Type.SINGLE_LINE_TEXT),
         COMMAND_PICARD_MDUP("command for versioned picard", "picard-1.61.sh MarkDuplicates", Type.SINGLE_LINE_TEXT),

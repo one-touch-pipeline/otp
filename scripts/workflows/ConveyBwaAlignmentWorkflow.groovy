@@ -1,4 +1,5 @@
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.job.jobs.alignment.*
 import de.dkfz.tbi.otp.ngsdata.*
 
@@ -81,7 +82,7 @@ processingOptionService.createOrUpdate(
 
 // update bwa program option for bwaAlignmentJob
 processingOptionService.createOrUpdate(
-    OptionName.COMMAND_CONVEY_BWA,
+    OptionName.COMMAND_BWA,
     null,
     null,
     'bwa-0.6.2-tpx'

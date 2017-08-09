@@ -52,7 +52,7 @@ class BwaPairingAndSortingJob extends AbstractJobImpl {
         String outFilePath = processedBamFileService.getFilePath(bamFile)
         String samtoolsSortBuffer = optionService.findOptionSafe(OptionName.PIPELINE_OTP_ALIGNMENT_SAMTOOLS_SORT_BUFFER, null, null)
         String numberOfSampeThreads = optionService.findOptionSafe(ProcessingOption.OptionName.PIPELINE_OTP_ALIGNMENT_NUMBER_OF_SAMPE_THREADS, null, null)
-        String bwaCommand = ProcessingOptionService.findOptionAssure(ProcessingOption.OptionName.COMMAND_CONVEY_BWA, null, project)
+        String bwaCommand = ProcessingOptionService.findOptionAssure(ProcessingOption.OptionName.COMMAND_BWA, null, project)
         String samToolsBinary = ProcessingOptionService.findOptionAssure(OptionName.COMMAND_SAMTOOLS, null, null)
         String numberOfSamToolsSortThreads = optionService.findOptionSafe(ProcessingOption.OptionName.PIPELINE_OTP_ALIGNMENT_NUMBER_OF_SAMTOOLS_SORT_THREADS, null, null)
         String mbuffer = ProcessingOptionService.findOptionAssure(ProcessingOption.OptionName.PIPELINE_OTP_ALIGNMENT_MBUFFER_PAIRING_SORTING, null, null)
