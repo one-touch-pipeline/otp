@@ -35,6 +35,9 @@ class AbstractMergedBamFileService {
             if (samplePair.aceseqProcessingStatus == SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED && samplePair.mergingWorkPackage1.seqType.name == SeqTypeNames.WHOLE_GENOME.seqTypeName) {
                 samplePair.aceseqProcessingStatus = SamplePair.ProcessingStatus.NEEDS_PROCESSING
             }
+            if (samplePair.sophiaProcessingStatus == SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED && samplePair.mergingWorkPackage1.seqType.name == SeqTypeNames.WHOLE_GENOME.seqTypeName) {
+                samplePair.sophiaProcessingStatus = SamplePair.ProcessingStatus.NEEDS_PROCESSING
+            }
             assert samplePair.save(flush: true)
         }
     }

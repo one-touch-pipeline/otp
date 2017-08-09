@@ -72,6 +72,7 @@ class AbstractMergedBamFileServiceIntegrationSpec extends Specification {
                 "aceseq",
                 "indel",
                 "snv",
+                "sophia",
         ]
     }
 
@@ -92,6 +93,7 @@ class AbstractMergedBamFileServiceIntegrationSpec extends Specification {
                 "aceseq",
                 "indel",
                 "snv",
+                "sophia",
         ]
     }
 
