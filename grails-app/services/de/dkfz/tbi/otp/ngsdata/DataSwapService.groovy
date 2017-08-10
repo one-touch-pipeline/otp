@@ -855,9 +855,10 @@ chmod 440 ${newDirectFileName}
      *
      * The function should be called inside a transaction (DOMAIN.withTransaction{}) to roll back changes if an exception occurs or a check fails.
      */
-    List<File> deleteMergingRelatedConnectionsOfBamFile(ProcessedBamFile processedBamFile) {
+    Map<String, List<File>> deleteMergingRelatedConnectionsOfBamFile(ProcessedBamFile processedBamFile) {
         notNull(processedBamFile, "The input processedBamFile is null in method deleteMergingRelatedConnectionsOfBamFile")
         List<File> dirsToDelete = []
+        List<File> dirsToDeleteWithOtherUser = []
 
         List<MergingSetAssignment> mergingSetAssignments = MergingSetAssignment.findAllByBamFile(processedBamFile)
         List<MergingSet> mergingSets = mergingSetAssignments*.mergingSet
@@ -874,9 +875,14 @@ chmod 440 ${newDirectFileName}
 
             mergingSetAssignments*.delete(flush: true)
 
+            BamFilePairAnalysis.findAllBySampleType1BamFileInListOrSampleType2BamFileInList(processedMergedBamFiles, processedMergedBamFiles).each {
+                dirsToDeleteWithOtherUser << AnalysisDeletionService.deleteInstance(it)
+            }
+
             processedMergedBamFiles.each { ProcessedMergedBamFile processedMergedBamFile ->
                 deleteQualityAssessmentInfoForAbstractBamFile(processedMergedBamFile)
                 MergingSetAssignment.findAllByBamFile(processedMergedBamFile)*.delete(flush: true)
+
                 dirsToDelete << analysisDeletionService.deleteSamplePairsWithoutAnalysisInstances(SamplePair.findAllByMergingWorkPackage1OrMergingWorkPackage2(mergingWorkPackage, mergingWorkPackage))
                 processedMergedBamFile.delete(flush: true)
             }
@@ -894,7 +900,8 @@ chmod 440 ${newDirectFileName}
                 mergingWorkPackage.delete(flush: true)
             }
         }
-        return dirsToDelete
+        return ["dirsToDelete": dirsToDelete,
+                "dirsToDeleteWithOtherUser": dirsToDeleteWithOtherUser]
     }
 
 
@@ -946,7 +953,7 @@ chmod 440 ${newDirectFileName}
 
         List<DataFile> dataFiles = DataFile.findAllBySeqTrack(seqTrack)
 
-        List<ProcessedSaiFile> processedSaiFiles = ProcessedSaiFile.findAllByDataFileInList(dataFiles)*.delete(flush: true)
+        ProcessedSaiFile.findAllByDataFileInList(dataFiles)*.delete(flush: true)
 
         // for ProcessedMergedBamFiles
         AlignmentPass.findAllBySeqTrack(seqTrack).each { AlignmentPass alignmentPass ->
@@ -956,7 +963,9 @@ chmod 440 ${newDirectFileName}
             ProcessedBamFile.findAllByAlignmentPass(alignmentPass).each { ProcessedBamFile processedBamFile ->
 
                 deleteQualityAssessmentInfoForAbstractBamFile(processedBamFile)
-                dirsToDelete << deleteMergingRelatedConnectionsOfBamFile(processedBamFile)
+                Map<String, List<File>> processingDirsToDelete = deleteMergingRelatedConnectionsOfBamFile(processedBamFile)
+                dirsToDelete << processingDirsToDelete["dirsToDelete"]
+                dirsToDeleteWithOtherUser << processingDirsToDelete["dirsToDeleteWithOtherUser"]
 
                 processedBamFile.delete(flush: true)
             }

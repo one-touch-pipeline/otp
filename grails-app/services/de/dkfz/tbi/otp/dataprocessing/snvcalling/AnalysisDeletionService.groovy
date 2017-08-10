@@ -52,6 +52,9 @@ public class AnalysisDeletionService {
             if (!AceseqInstance.findBySamplePair(samplePair)) {
                 directoriesToDelete << samplePair.getAceseqSamplePairPath().getAbsoluteDataManagementPath()
             }
+            if (!SophiaInstance.findBySamplePair(samplePair)) {
+                directoriesToDelete << samplePair.getSophiaSamplePairPath().getAbsoluteDataManagementPath()
+            }
             if (!BamFilePairAnalysis.findBySamplePair(samplePair)) {
                 samplePair.delete(flush: true)
             }
