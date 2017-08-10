@@ -6,6 +6,7 @@ import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
 import spock.lang.Unroll
+import spock.lang.Ignore
 
 class MetaDataFieldsControllerIntegrationSpec extends Specification implements UserAndRoles {
 
@@ -178,6 +179,7 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
     }
 
     @Unroll
+    @Ignore("OTP-2607")
     void "test JSON createSeqPlatform valid input"() {
         given:
         SeqPlatformGroup seqPlatformGroup = new SeqPlatformGroup(name: "SeqPlatformGroup")
@@ -215,7 +217,8 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
     }
 
     @Unroll
-    void "test JSON createSeqPlatform valid input with preexisting SeqPlatform"() {
+    @Ignore("OTP-2607")
+   void "test JSON createSeqPlatform valid input with preexisting SeqPlatform"() {
         given:
         SeqPlatformGroup seqPlatformGroup = new SeqPlatformGroup(name: "SeqPlatformGroup")
         seqPlatformGroup.save(flush: true)

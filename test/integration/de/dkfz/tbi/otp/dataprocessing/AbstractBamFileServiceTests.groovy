@@ -76,7 +76,7 @@ class AbstractBamFileServiceTests {
                 )
         assertNotNull(softwareTool.save([flush: true]))
 
-        SeqPlatform seqPlatform = SeqPlatform.build()
+        SeqPlatform seqPlatform = DomainFactory.createSeqPlatform()
 
         Run run = new Run(
                 name: "run",

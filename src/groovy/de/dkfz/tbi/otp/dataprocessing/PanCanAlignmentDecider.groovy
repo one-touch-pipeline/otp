@@ -16,9 +16,4 @@ class PanCanAlignmentDecider extends RoddyAlignmentDecider {
             return Pipeline.Name.PANCAN_ALIGNMENT
         }
     }
-
-    @Override
-    String alignmentMessage() {
-        return "will be aligned with the PanCan pipeline"
-    }
 }

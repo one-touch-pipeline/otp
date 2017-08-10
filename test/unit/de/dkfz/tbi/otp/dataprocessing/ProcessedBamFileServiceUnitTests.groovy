@@ -11,6 +11,7 @@ import org.junit.Test
 @TestFor(ProcessedBamFileService)
 @Build([
     ProcessedBamFile,
+    ProjectSeqType,
     ReferenceGenome,
 ])
 class ProcessedBamFileServiceUnitTests {

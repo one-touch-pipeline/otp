@@ -23,9 +23,4 @@ interface AlignmentDecider {
      * method triggered an alignment for it.
      */
     Collection<MergingWorkPackage> decideAndPrepareForAlignment(SeqTrack seqTrack, boolean forceRealign)
-    /**
-     * Message that tells if or which alignment is used
-     * Used to display alignment information in project-specific statistics
-     */
-    String alignmentMessage()
 }

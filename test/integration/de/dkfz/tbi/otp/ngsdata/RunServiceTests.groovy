@@ -440,7 +440,7 @@ class RunServiceTests extends AbstractIntegrationTest {
     }
 
     private Run mockRun(String name) {
-        SeqPlatform seqPlatform = SeqPlatform.build()
+        SeqPlatform seqPlatform = DomainFactory.createSeqPlatform()
         SeqCenter seqCenter = SeqCenter.findOrCreateByNameAndDirName("test", "directory")
         assertNotNull(seqCenter.save())
         Run run = new Run(name: name, seqCenter: seqCenter, seqPlatform: seqPlatform)

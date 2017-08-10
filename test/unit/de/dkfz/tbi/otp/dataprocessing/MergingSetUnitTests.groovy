@@ -8,7 +8,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 
 @TestFor(MergingSet)
-@Build([DataFile, FileType, MergingSet, MergingSetAssignment, ProcessedBamFile])
+@Build([DataFile, FileType, MergingSet, MergingSetAssignment, ProcessedBamFile, ProjectSeqType])
 class MergingSetUnitTests {
 
     MergingWorkPackage workPackage = null
@@ -94,9 +94,9 @@ class MergingSetUnitTests {
     @Test
     void testGetContainedSeqTracks() {
 
-        final SeqTrack seqTrack1 = SeqTrack.build()
-        final SeqTrack seqTrack2 = SeqTrack.build()
-        final SeqTrack seqTrack3 = SeqTrack.build()
+        final SeqTrack seqTrack1 = DomainFactory.createSeqTrack()
+        final SeqTrack seqTrack2 = DomainFactory.createSeqTrack()
+        final SeqTrack seqTrack3 = DomainFactory.createSeqTrack()
 
         final Set<SeqTrack> seqTracks1 = [seqTrack1, seqTrack2].toSet()
         final Set<SeqTrack> seqTracks2 = [seqTrack3].toSet()
@@ -118,7 +118,7 @@ class MergingSetUnitTests {
     @Test
     void testGetContainedSeqTracks_containedTwice() {
 
-        final Set<SeqTrack> seqTracks = [SeqTrack.build()].toSet()
+        final Set<SeqTrack> seqTracks = [DomainFactory.createSeqTrack()].toSet()
 
         final MergingSet mergingSet = MergingSet.build()
 

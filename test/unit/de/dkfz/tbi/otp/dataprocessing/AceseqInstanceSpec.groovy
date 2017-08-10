@@ -24,6 +24,7 @@ import static de.dkfz.tbi.otp.dataprocessing.AceseqInstance.AceseqPlots.*
         Pipeline,
         Project,
         ProjectCategory,
+        ProjectSeqType,
         Realm,
         ReferenceGenome,
         RoddyBamFile,

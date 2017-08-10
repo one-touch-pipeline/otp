@@ -11,7 +11,7 @@ import groovy.lang.Sequence
 import org.junit.*
 
 @TestMixin(GrailsUnitTestMixin)
-@Build([AlignmentPass, ProcessedSaiFile, ReferenceGenome])
+@Build([AlignmentPass, ProcessedSaiFile, ProjectSeqType, ReferenceGenome])
 class BwaPairingAndSortingJobUnitTest {
 
     static final String FILE_MATE1 = "file_R1_abc.fastq.gz"

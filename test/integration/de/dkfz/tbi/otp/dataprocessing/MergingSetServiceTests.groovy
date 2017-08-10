@@ -495,10 +495,12 @@ class MergingSetServiceTests {
 
 
     private MergingWorkPackage createMergingWorkPackage() {
+        ProjectSeqType projectSeqType = DomainFactory.createProjectSeqTypeLazy(seqTrack.project, seqType)
+
         MergingWorkPackage mergingWorkPackage = testData.createMergingWorkPackage(
                         sample: sample,
                         seqType: seqType,
-                        seqPlatformGroup: seqPlatform.seqPlatformGroup,
+                        seqPlatformGroup: seqPlatform.getSeqPlatformGroup(projectSeqType),
                         )
         assertNotNull(mergingWorkPackage.save([flush: true, failOnError: true]))
         return mergingWorkPackage

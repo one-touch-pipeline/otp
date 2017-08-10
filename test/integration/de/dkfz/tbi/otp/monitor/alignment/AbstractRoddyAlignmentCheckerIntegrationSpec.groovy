@@ -30,12 +30,14 @@ abstract class AbstractRoddyAlignmentCheckerIntegrationSpec extends Specificatio
 
 
     List<SeqTrack> createSeqTracks(Map properties = [:]) {
-        return seqTypes.collect {
-            DomainFactory.createSeqTrack([
+        seqTypes.collect {
+            SeqTrack seqTrack = DomainFactory.createSeqTrack([
                     seqType              : it,
                     libraryPreparationKit: properties.hasProperty('libraryPreparationKit') ? properties.libraryPreparationKit :
                             it.isExome() ? DomainFactory.createLibraryPreparationKit() : null
             ])
+            DomainFactory.createProjectSeqTypeLazy(seqTrack.project, seqTrack.seqType)
+            return seqTrack
         }
     }
 

@@ -8,7 +8,7 @@ import grails.test.mixin.*
 import de.dkfz.tbi.otp.ngsdata.*
 
 @TestFor(AlignmentPass)
-@Build([MergingWorkPackage, SeqTrack])
+@Build([MergingWorkPackage, SeqTrack, ProjectSeqType])
 class AlignmentPassUnitTests {
 
     @Test
@@ -24,7 +24,7 @@ class AlignmentPassUnitTests {
     @Test
     void testIsLatestPass_2Passes() {
         //preparation
-        SeqTrack seqTrack = SeqTrack.build()
+        SeqTrack seqTrack = DomainFactory.createSeqTrack()
         AlignmentPass alignmentPass1 = DomainFactory.createAlignmentPass(seqTrack: seqTrack, identifier: 0)
         AlignmentPass alignmentPass2 = DomainFactory.createAlignmentPass(seqTrack: seqTrack, identifier: 1)
 
@@ -38,7 +38,7 @@ class AlignmentPassUnitTests {
     @Test
     void testIsLatestPass_2PassesDifferentWorkPackages() {
         //preparation
-        SeqTrack seqTrack = SeqTrack.build()
+        SeqTrack seqTrack = DomainFactory.createSeqTrack()
         AlignmentPass alignmentPass1 = DomainFactory.createAlignmentPass(seqTrack: seqTrack, identifier: 0,
                 referenceGenome: ReferenceGenome.build())
         AlignmentPass alignmentPass2 = DomainFactory.createAlignmentPass(seqTrack: seqTrack, identifier: 1,

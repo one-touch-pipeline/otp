@@ -42,11 +42,11 @@ class MetaDataFieldsController {
                     dirName: it.dirName
             ]
         }
-
+        //TODO OTP-2607: adjust handling of seqPlatforms, put handling of seqPlatformGroups on a new page
         List seqPlatforms = SeqPlatform.list().collect {
             [
                     name       : it.name,
-                    platformGroup: it.seqPlatformGroup?.name,
+                    platformGroup: it.seqPlatformGroups?.name,
                     model      : it.seqPlatformModelLabel?.name,
                     modelAlias : it.seqPlatformModelLabel?.alias?.sort()?.join(' | '),
                     hasModel   : it.seqPlatformModelLabel ? true : false,

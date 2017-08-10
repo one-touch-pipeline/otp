@@ -22,6 +22,7 @@ import static org.junit.Assert.*
         MergingSetAssignment,
         MergingPass,
         ReferenceGenomeProjectSeqType,
+        ProjectSeqType,
 ])
 class ProcessedBamFileUnitTests {
 
@@ -44,7 +45,7 @@ class ProcessedBamFileUnitTests {
             )
         assertNotNull(project.save([flush: true, failOnError: true]))
 
-        seqPlatform = SeqPlatform.build()
+        seqPlatform = DomainFactory.createSeqPlatform()
 
         SeqCenter seqCenter = new SeqCenter(
             name: "name",

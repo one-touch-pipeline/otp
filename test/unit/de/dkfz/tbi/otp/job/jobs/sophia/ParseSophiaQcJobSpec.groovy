@@ -18,6 +18,7 @@ import spock.lang.*
         MergingWorkPackage,
         Pipeline,
         Project,
+        ProjectSeqType,
         Realm,
         ReferenceGenome,
         RoddyBamFile,

@@ -216,8 +216,9 @@ class RoddyAlignmentStartJobTest {
     }
 
     RoddyBamFile helperTestCreateRoddyBamFile_WhenBaseBamFileIsNull(MergingWorkPackage mwp) {
-        DomainFactory.createSeqTrackWithDataFiles(mwp)
-        Collection<SeqTrack> seqTracks = mwp.findMergeableSeqTracks()
+        Collection<SeqTrack> seqTracks = [DomainFactory.createSeqTrackWithDataFiles(mwp)]
+        mwp.seqTracks = seqTracks
+        mwp.save(flush: true, failOnError: true)
         DomainFactory.createRoddyProcessingOptions(TestCase.uniqueNonExistentPath)
 
         RoddyBamFile rbf = testRoddyAlignmentStartJob.createRoddyBamFile(mwp, null)
@@ -243,6 +244,8 @@ class RoddyAlignmentStartJobTest {
                 DomainFactory.createSeqTrackWithDataFiles(mwp),
                 DomainFactory.createSeqTrackWithDataFiles(mwp),
         ]
+        mwp.seqTracks.addAll(additionalSeqTracks)
+        mwp.save(flush: true, failOnError: true)
 
         DomainFactory.createRoddyProcessingOptions(TestCase.uniqueNonExistentPath)
 
@@ -338,7 +341,8 @@ class RoddyAlignmentStartJobTest {
 
     MergingWorkPackage createMergingWorkPackageWithSeqTrackInState(SeqTrack.DataProcessingState dataInstallationState) {
         MergingWorkPackage mergingWorkPackage = createMergingWorkPackage()
-        DomainFactory.createSeqTrackWithDataFiles(mergingWorkPackage, [dataInstallationState: dataInstallationState])
+        mergingWorkPackage.seqTracks = [DomainFactory.createSeqTrackWithDataFiles(mergingWorkPackage, [dataInstallationState: dataInstallationState])]
+        mergingWorkPackage.save(flush: true, failOnError: true)
         return mergingWorkPackage
     }
 

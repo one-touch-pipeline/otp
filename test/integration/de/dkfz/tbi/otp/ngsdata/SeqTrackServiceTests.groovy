@@ -5,6 +5,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
 import org.junit.After
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 
 import static de.dkfz.tbi.otp.ngsdata.SeqTrack.DataProcessingState.*
@@ -34,7 +35,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
     }
     @Test
     void testGetSeqTrackReadyForFastqcProcessing_getAll_noReadySeqTrackAvailable() {
-        SeqTrack.build(
+        DomainFactory.createSeqTrack(
                 fastqcState: UNKNOWN
         )
 
@@ -108,6 +109,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
 
 
     @Test
+    @Ignore("OTP-2603")
     void testDecideAndPrepareForAlignment_defaultDecider_shouldReturnOneWorkPackage() {
         SeqTrack seqTrack = setupSeqTrackProjectAndDataFile("defaultOtpAlignmentDecider")
 
@@ -183,7 +185,6 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         )
 
         SeqPlatform sp = seqTrack.seqPlatform
-        sp.seqPlatformGroup = DomainFactory.createSeqPlatformGroup()
         sp.save(flush: true)
 
         DomainFactory.createReferenceGenomeProjectSeqType(

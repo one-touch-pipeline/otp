@@ -20,6 +20,7 @@ import spock.lang.*
         ProcessingOption,
         Project,
         ProjectCategory,
+        ProjectSeqType,
         Sample,
         SamplePair,
         SampleType,

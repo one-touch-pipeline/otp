@@ -22,19 +22,19 @@ class RunUnitTests {
         SeqType seqType1 = SeqType.build()
         SeqType seqType2 = SeqType.build()
 
-        SeqTrack.build(
+        DomainFactory.createSeqTrack(
             run: run,
             seqType: seqType1,
         )
 
-        SeqTrack.build(
+        DomainFactory.createSeqTrack(
             run: run,
             seqType: seqType1,
         )
 
         assertNotNull(run.getSeqType())
 
-        SeqTrack.build(
+        DomainFactory.createSeqTrack(
              run: run,
              seqType: seqType2,
         )
@@ -58,12 +58,12 @@ class RunUnitTests {
             individual: individual2
         )
 
-        SeqTrack.build(
+        DomainFactory.createSeqTrack(
             run: run,
             sample: sample1
         )
 
-        SeqTrack.build(
+        DomainFactory.createSeqTrack(
             run: run,
             sample: sample1
         )

@@ -18,6 +18,7 @@ import spock.lang.*
         ProcessingOption,
         Project,
         ProjectCategory,
+        ProjectSeqType,
         Realm,
         ReferenceGenome,
         ReferenceGenomeProjectSeqType,

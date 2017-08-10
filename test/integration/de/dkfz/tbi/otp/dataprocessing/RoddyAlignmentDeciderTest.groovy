@@ -173,7 +173,8 @@ public class RoddyAlignmentDeciderTest {
 
     @Test
     void testPrepareForAlignment_noBamFileFound_shouldSetNeedsProcessing() {
-        SeqTrack seqTrack = SeqTrack.build()
+        SeqTrack seqTrack = DomainFactory.createSeqTrack()
+        DomainFactory.createProjectSeqTypeLazy(seqTrack.project, seqTrack.seqType)
 
         Pipeline pipeline = decider.getPipeline(seqTrack)
 

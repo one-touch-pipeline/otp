@@ -28,6 +28,7 @@ import static de.dkfz.tbi.otp.tracking.OtrsTicket.ProcessingStep.*
         ProcessingOption,
         Project,
         ProjectCategory,
+        ProjectSeqType,
         Realm,
         ReferenceGenome,
         ReferenceGenomeProjectSeqType,

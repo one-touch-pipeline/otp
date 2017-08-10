@@ -106,13 +106,11 @@ class TestData {
         seqCenter.dirName = "core"
         assertNotNull(seqCenter.save(flush: true))
 
-        SeqPlatformGroup seqPlatformGroup = new SeqPlatformGroup(name: "group")
+        SeqPlatformGroup seqPlatformGroup = new SeqPlatformGroup()
         assert seqPlatformGroup.save(flush: true)
 
-        seqPlatform = new SeqPlatform(
-                name: 'seqPlatform',
-                seqPlatformGroup: seqPlatformGroup,
-        )
+        seqPlatform = new SeqPlatform(name: 'seqPlatform')
+        seqPlatform.addToSeqPlatformGroups(seqPlatformGroup)
         assert seqPlatform.save(flush: true)
 
         run = createRun("testname1")

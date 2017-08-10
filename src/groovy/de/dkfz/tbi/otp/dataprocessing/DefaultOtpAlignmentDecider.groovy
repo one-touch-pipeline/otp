@@ -1,9 +1,9 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.dataprocessing.AlignmentPass.AlignmentState
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import org.springframework.context.annotation.Scope
-import org.springframework.stereotype.Component
+import de.dkfz.tbi.otp.ngsdata.*
+import org.springframework.context.annotation.*
+import org.springframework.stereotype.*
 
 /**
  * An {@link AlignmentDecider} which decides to do the default OTP alignment if the conditions for that are satisfied.
@@ -30,10 +30,5 @@ class DefaultOtpAlignmentDecider extends AbstractAlignmentDecider {
         } else {
             seqTrack.log("Not realigning{0} for ${workPackage}, because forceRealign is false.")
         }
-    }
-
-    @Override
-    String alignmentMessage() {
-        return "will be aligned with bwa aln"
     }
 }

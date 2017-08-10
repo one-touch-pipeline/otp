@@ -14,6 +14,7 @@ import spock.lang.*
         ProcessedMergedBamFile,
         QualityAssessmentMergedPass,
         Realm,
+        ProjectSeqType,
 ])
 class ProcessedMergedBamFileQaFileServiceSpecification extends Specification {
 

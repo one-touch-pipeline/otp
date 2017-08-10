@@ -25,6 +25,7 @@ import org.junit.Test
     FileType,
     ProcessedBamFile,
     ProcessingOption,
+    ProjectSeqType,
     Realm,
     ReferenceGenomeProjectSeqType,
     Run,

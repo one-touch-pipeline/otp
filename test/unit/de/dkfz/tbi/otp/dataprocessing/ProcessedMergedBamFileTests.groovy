@@ -18,6 +18,7 @@ import org.junit.*
         MergingSetAssignment,
         Pipeline,
         Project,
+        ProjectSeqType,
         ProcessedBamFile,
         ProcessedMergedBamFile,
         ReferenceGenome,

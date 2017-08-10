@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.ProjectSeqType
 import org.junit.Test
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -25,8 +26,8 @@ public class DefaultOtpAlignmentDeciderTest {
     }
 
     private void testPrepareForAlignment_whenEverythingIsOkay_shouldCreateAlignmentPass(boolean forceRealign) {
-        SeqTrack seqTrack = SeqTrack.build()
-
+        SeqTrack seqTrack = DomainFactory.createSeqTrack()
+        DomainFactory.createProjectSeqTypeLazy(seqTrack.project, seqTrack.seqType)
         MergingWorkPackage workPackage = TestData.createMergingWorkPackage(sample: seqTrack.sample, seqType: seqTrack.seqType, seqPlatformGroup: seqTrack.seqPlatformGroup)
         workPackage.save(failOnError: true)
 
@@ -40,7 +41,8 @@ public class DefaultOtpAlignmentDeciderTest {
 
     @Test
     void testPrepareForAlignment_whenAlignmentPassExists_shouldNotCreateAlignmentPass() {
-        SeqTrack seqTrack = SeqTrack.build()
+        SeqTrack seqTrack = DomainFactory.createSeqTrack()
+        DomainFactory.createProjectSeqTypeLazy(seqTrack.project, seqTrack.seqType)
 
         MergingWorkPackage workPackage = TestData.createMergingWorkPackage(sample: seqTrack.sample, seqType: seqTrack.seqType, seqPlatformGroup: seqTrack.seqPlatformGroup)
         workPackage.save(failOnError: true)
@@ -57,7 +59,8 @@ public class DefaultOtpAlignmentDeciderTest {
 
     @Test
     void testPrepareForAlignment_whenForceRealign_shouldCreateAnotherAlignmentPass() {
-        SeqTrack seqTrack = SeqTrack.build()
+        SeqTrack seqTrack = DomainFactory.createSeqTrack()
+        DomainFactory.createProjectSeqTypeLazy(seqTrack.project, seqTrack.seqType)
 
         MergingWorkPackage workPackage = TestData.createMergingWorkPackage(sample: seqTrack.sample, seqType: seqTrack.seqType, seqPlatformGroup: seqTrack.seqPlatformGroup)
         workPackage.save(failOnError: true)

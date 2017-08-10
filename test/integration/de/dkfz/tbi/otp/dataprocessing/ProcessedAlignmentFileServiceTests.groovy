@@ -37,7 +37,7 @@ class ProcessedAlignmentFileServiceTests {
     }
 
     private AlignmentPass createTestDataForMayProcessingFilesBeDeleted(Map secondProcessedMergedBamFileMap = [:], Map secondAlignmentPassMap = [:]) {
-        SeqTrack seqTrack = SeqTrack.build()
+        SeqTrack seqTrack = DomainFactory.createSeqTrack()
 
         AlignmentPass alignmentPass = DomainFactory.createAlignmentPass([
             seqTrack: seqTrack,
@@ -124,7 +124,7 @@ class ProcessedAlignmentFileServiceTests {
     void testMayProcessingFilesBeDeleted_SecondPass_OtherSeqTrack() {
         ProcessedAlignmentFileService processedAlignmentFileService = createServiceForMayProcessingFilesBeDeleted()
         AlignmentPass alignmentPass = createTestDataForMayProcessingFilesBeDeleted([:], [
-            seqTrack: SeqTrack.build(),
+            seqTrack: DomainFactory.createSeqTrack(),
         ])
         Date createdBefore = new Date().plus(1)
 
@@ -180,7 +180,7 @@ class ProcessedAlignmentFileServiceTests {
         Map seqTrackMap = map['seqTrackMap'] ?: [:]
         Map alignmentPassMap = map['alignmentPassMap'] ?: [:]
 
-        SeqTrack seqTrack = SeqTrack.build(seqTrackMap)
+        SeqTrack seqTrack = DomainFactory.createSeqTrack(seqTrackMap)
 
         ProcessedBamFile processedBamFile = ProcessedBamFile.build([
             alignmentPass: DomainFactory.createAlignmentPass([
@@ -221,7 +221,7 @@ class ProcessedAlignmentFileServiceTests {
         Map mergingPassMap = map['mergingPassMap']?:[:]
         Map mergingBamFileMap = map['mergingBamFileMap']?:[:]
 
-        SeqTrack seqTrack = SeqTrack.build(seqTrackMap).save(flush: true)
+        SeqTrack seqTrack = DomainFactory.createSeqTrack(seqTrackMap).save(flush: true)
 
         ProcessedBamFile processedBamFile = ProcessedBamFile.build([
             alignmentPass: DomainFactory.createAlignmentPass([
@@ -406,7 +406,7 @@ class ProcessedAlignmentFileServiceTests {
         Date createdBeforeDate = new Date().plus(1)
         List<ProcessedBamFile> processedBamFiles = createProcessedBamFileWithLaterProcessedPass(
                         passOfLaterBamFileMap: [
-                            seqTrack: SeqTrack.build()
+                            seqTrack: DomainFactory.createSeqTrack()
                         ])
         createProcessedAlignmentFileService()
 
@@ -714,7 +714,7 @@ class ProcessedAlignmentFileServiceTests {
         Date createdBeforeDate = new Date().plus(1)
         List<ProcessedBamFile> processedBamFiles = createProcessedBamFileWithSaiFileAndWithLaterProcessedPass(
                         passOfLaterBamFileMap: [
-                            seqTrack: SeqTrack.build()
+                            seqTrack: DomainFactory.createSeqTrack()
                         ])
         createProcessedAlignmentFileService()
 

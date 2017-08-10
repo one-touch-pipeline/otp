@@ -11,6 +11,7 @@ import org.junit.*
         QualityAssessmentPass,
 ])
 @Mock([
+        ProjectSeqType,
         QualityAssessmentMergedPass,
 ])
 class ProcessingPriorityUnitTest {
@@ -30,7 +31,7 @@ class ProcessingPriorityUnitTest {
 
     @Test
     void testGetProcessingPriorityForSeqtrack() {
-        assertPriority(SeqTrack.build())
+        assertPriority(DomainFactory.createSeqTrack())
     }
 
     @Test

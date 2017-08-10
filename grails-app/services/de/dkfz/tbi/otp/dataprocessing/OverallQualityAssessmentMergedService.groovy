@@ -72,13 +72,9 @@ where
                 dataFile.sequenceLength
             from
                 AbstractQualityAssessment abstractQualityAssessment,
-                SeqTrack seqTrack,
                 DataFile dataFile
             where
-                abstractQualityAssessment.qualityAssessmentMergedPass.abstractMergedBamFile.workPackage.sample = seqTrack.sample
-                and abstractQualityAssessment.qualityAssessmentMergedPass.abstractMergedBamFile.workPackage.seqType = seqTrack.seqType
-                and abstractQualityAssessment.qualityAssessmentMergedPass.abstractMergedBamFile.workPackage.seqPlatformGroup = seqTrack.run.seqPlatform.seqPlatformGroup
-                and dataFile.seqTrack = seqTrack
+                dataFile.seqTrack in elements(abstractQualityAssessment.qualityAssessmentMergedPass.abstractMergedBamFile.workPackage.seqTracks)
                 and abstractQualityAssessment.id in :abstractQualityAssessmentIds
         '''
         Map parameters = [

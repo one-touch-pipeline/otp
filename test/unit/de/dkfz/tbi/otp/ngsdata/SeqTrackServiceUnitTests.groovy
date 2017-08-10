@@ -18,6 +18,7 @@ import org.junit.*
         SeqPlatformGroup,
         SeqTrack,
         LogMessage,
+        ProjectSeqType,
 ])
 class SeqTrackServiceUnitTests {
 
@@ -234,7 +235,8 @@ class SeqTrackServiceUnitTests {
         SeqTrack seqTrack = DomainFactory.createSeqTrackWithOneDataFile(
                 run: DomainFactory.createRun(
                         seqPlatform: DomainFactory.createSeqPlatform(
-                                seqPlatformGroup: DomainFactory.createSeqPlatformGroup())))
+                                seqPlatformGroups: [DomainFactory.createSeqPlatformGroup()])))
+        DomainFactory.createProjectSeqTypeLazy(seqTrack.project, seqTrack.seqType)
 
         assert SeqTrackService.mayAlign(seqTrack)
     }
@@ -292,8 +294,9 @@ class SeqTrackServiceUnitTests {
     @Test
     void testMayAlign_whenSeqPlatformGroupIsNull_shouldReturnFalse() {
         SeqTrack seqTrack = DomainFactory.createSeqTrackWithOneDataFile([
-                run: DomainFactory.createRun(seqPlatform: DomainFactory.createSeqPlatform(seqPlatformGroup: null)),
+                run: DomainFactory.createRun(seqPlatform: DomainFactory.createSeqPlatform(seqPlatformGroups: null)),
         ])
+        DomainFactory.createProjectSeqTypeLazy(seqTrack.project, seqTrack.seqType)
 
         assert !SeqTrackService.mayAlign(seqTrack)
     }

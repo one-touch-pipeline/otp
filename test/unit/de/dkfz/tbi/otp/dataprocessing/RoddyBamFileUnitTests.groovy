@@ -30,6 +30,7 @@ import static de.dkfz.tbi.otp.dataprocessing.RoddyBamFile.QUALITY_CONTROL_JSON_F
         Pipeline,
         ProjectCategory,
         Project,
+        ProjectSeqType,
         Individual,
         Sample,
         ReferenceGenome,

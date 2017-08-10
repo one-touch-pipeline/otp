@@ -15,7 +15,7 @@ import de.dkfz.tbi.otp.utils.ExternalScript
 import grails.buildtestdata.mixin.Build
 
 @TestFor(SnvJobResult)
-@Mock([SnvCallingInstance, ExternalScript])
+@Mock([SnvCallingInstance, ExternalScript, ProjectSeqType])
 @Build([
         AlignmentPass,
         MergingPass,

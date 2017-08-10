@@ -16,7 +16,7 @@ import de.dkfz.tbi.otp.ngsdata.*
  * See the API for {@link grails.test.mixin.domain.DomainClassUnitTestMixin} for usage instructions
  */
 @TestFor(SnvCallingInstance)
-@Build([DataFile, FileType, MergingSetAssignment, MergingPass, ProcessedBamFile, SampleTypePerProject, SnvJobResult, ProcessingOption])
+@Build([DataFile, FileType, MergingSetAssignment, MergingPass, ProcessedBamFile, ProjectSeqType, SampleTypePerProject, SnvJobResult, ProcessingOption])
 class SnvCallingInstanceUnitTests {
 
     SnvCallingInstanceTestData testData = new SnvCallingInstanceTestData()

@@ -299,13 +299,15 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
                 fastqcState: SeqTrack.DataProcessingState.FINISHED,
                 run: DomainFactory.createRun(
                         seqPlatform: DomainFactory.createSeqPlatform(
-                                seqPlatformGroup: DomainFactory.createSeqPlatformGroup(),
+                                seqPlatformGroups: [DomainFactory.createSeqPlatformGroup()],
                         ),
                 ),
         ],
                 [runSegment: runSegment, fileLinked: true]
         )
-        setBamFileInProjectFolder(DomainFactory.createRoddyBamFile(
+        DomainFactory.createProjectSeqTypeLazy(seqTrack1.project, seqTrack1.seqType)
+        DomainFactory.createProjectSeqTypeLazy(seqTrack2.project, seqTrack2.seqType)
+        AbstractMergedBamFile abstractMergedBamFile = setBamFileInProjectFolder(DomainFactory.createRoddyBamFile(
                 DomainFactory.createRoddyBamFile([
                         workPackage: DomainFactory.createMergingWorkPackage(
                                 MergingWorkPackage.getMergingProperties(seqTrack2) +
@@ -314,6 +316,8 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
                 ]),
                 DomainFactory.randomProcessedBamFileProperties + [seqTracks: [seqTrack2] as Set],
         ))
+        ((MergingWorkPackage)(abstractMergedBamFile.workPackage)).seqTracks.add(seqTrack2)
+        abstractMergedBamFile.workPackage.save(flush: true, failOnError: true)
         ProcessingStatus expectedStatus = [
                 getInstallationProcessingStatus: { -> ALL_DONE },
                 getFastqcProcessingStatus: { -> ALL_DONE },
@@ -380,12 +384,15 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
                 fastqcState: SeqTrack.DataProcessingState.NOT_STARTED,
                 run: DomainFactory.createRun(
                         seqPlatform: DomainFactory.createSeqPlatform(
-                                seqPlatformGroup: DomainFactory.createSeqPlatformGroup(),
+                                seqPlatformGroups: [DomainFactory.createSeqPlatformGroup()],
                         ),
                 ),
         ],
                 [runSegment: runSegment, fileLinked: true]
         )
+        DomainFactory.createProjectSeqTypeLazy(seqTrack1.project, seqTrack1.seqType)
+        DomainFactory.createProjectSeqTypeLazy(seqTrack2.project, seqTrack2.seqType)
+
         setBamFileInProjectFolder(DomainFactory.createRoddyBamFile(
                 DomainFactory.createRoddyBamFile([
                         workPackage: DomainFactory.createMergingWorkPackage(
@@ -630,7 +637,10 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
     void "fillInMergingWorkPackageProcessingStatuses, 1 ST not alignable, rest merged, returns NOTHING_DONE_WONT_DO_MORE and ALL_DONE"() {
         given:
         AbstractMergedBamFile bamFile = createBamFileInProjectFolder(DomainFactory.randomProcessedBamFileProperties)
+        Set<SeqTrack> seqTracks = new HashSet<SeqTrack>(((MergingWorkPackage)(bamFile.workPackage)).seqTracks)
         SeqTrackProcessingStatus seqTrack1Status = createSeqTrackProcessingStatus(DomainFactory.createSeqTrackWithDataFiles(bamFile.mergingWorkPackage, [:], [fileWithdrawn: true]))
+        ((MergingWorkPackage)(bamFile.workPackage)).seqTracks = seqTracks
+        bamFile.workPackage.save(flush: true, failOnError: true)
         SeqTrackProcessingStatus seqTrack2Status = createSeqTrackProcessingStatus(bamFile.containedSeqTracks.first())
 
         when:

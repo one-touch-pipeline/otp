@@ -144,8 +144,6 @@ public class AbstractAlignmentDeciderTest {
             assert subject.contains(prefix)
             assert subject.contains(ticket.ticketNumber)
             assert subject.contains(seqTrack.sample.toString())
-            assert content.contains(seqTrack.seqPlatformGroup.name)
-            assert content.contains(workPackage.seqPlatformGroup.name)
             emailIsSent = true
         }
 
@@ -338,6 +336,7 @@ public class AbstractAlignmentDeciderTest {
 
         SeqTrack seqTrack = testData.createSeqTrack()
         seqTrack.save(failOnError: true)
+        DomainFactory.createProjectSeqTypeLazy(seqTrack.project, seqTrack.seqType)
 
         DataFile dataFile = testData.createDataFile(seqTrack: seqTrack)
         dataFile.save(failOnError: true)

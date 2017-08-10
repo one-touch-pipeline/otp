@@ -457,6 +457,12 @@ class DomainFactory {
 
     public static AlignmentPass createAlignmentPass(Map properties = [:]) {
         final SeqTrack seqTrack = properties.get('seqTrack') ?: createSeqTrack([:])
+
+        if(!seqTrack.seqPlatform.seqPlatformGroups) {
+            seqTrack.seqPlatform.addToSeqPlatformGroups(createSeqPlatformGroup())
+            seqTrack.seqPlatform.save(flush: true)
+        }
+
         final MergingWorkPackage workPackage = findOrSaveMergingWorkPackage(
                 seqTrack,
                 properties.get('referenceGenome'),
@@ -474,13 +480,14 @@ class DomainFactory {
     }
 
     public static MergingWorkPackage findOrSaveMergingWorkPackage(SeqTrack seqTrack, ReferenceGenome referenceGenome = null, Pipeline pipeline = null) {
+        createDomainObjectLazy(ProjectSeqType, [:], [project: seqTrack.project, seqType: seqTrack.seqType])
         if (referenceGenome == null || pipeline == null) {
             MergingWorkPackage workPackage = MergingWorkPackage.findWhere(
                     sample: seqTrack.sample,
                     seqType: seqTrack.seqType,
             )
             if (workPackage != null) {
-                assert workPackage.seqPlatformGroup == seqTrack.seqPlatform.seqPlatformGroup
+                assert workPackage.seqPlatformGroup == seqTrack.seqPlatformGroup
                 assert workPackage.libraryPreparationKit == seqTrack.libraryPreparationKit
                 return workPackage
             }
@@ -489,7 +496,7 @@ class DomainFactory {
         final MergingWorkPackage mergingWorkPackage = MergingWorkPackage.findOrSaveWhere(
                 sample: seqTrack.sample,
                 seqType: seqTrack.seqType,
-                seqPlatformGroup: seqTrack.seqPlatform.seqPlatformGroup,
+                seqPlatformGroup: seqTrack.seqPlatformGroup,
                 referenceGenome: referenceGenome ?: createReferenceGenomeLazy(),
                 libraryPreparationKit: seqTrack.libraryPreparationKit,
                 pipeline: pipeline ?: createDefaultOtpPipeline(),
@@ -594,6 +601,8 @@ class DomainFactory {
 
     public static ProcessedBamFile createProcessedBamFile(final MergingWorkPackage mergingWorkPackage, Map properties = [:]) {
         SeqTrack seqTrack = createSeqTrackWithDataFiles(mergingWorkPackage)
+        mergingWorkPackage.seqTracks.add(seqTrack)
+        mergingWorkPackage.save(flush: true, failOnError: true)
 
         final ProcessedBamFile bamFile = createProcessedBamFile([
                 alignmentPass: createAlignmentPass([
@@ -625,6 +634,8 @@ class DomainFactory {
             )
         }
         Collection<SeqTrack> seqTracks = bamFileProperties.seqTracks ?: [createSeqTrackWithDataFiles(workPackage)]
+        workPackage.seqTracks = seqTracks
+        workPackage.save(flush: true, failOnError: true)
         T bamFile = createDomainObject(clazz, [
                 numberOfMergedLanes: seqTracks.size(),
                 workDirectoryName: "${RoddyBamFile.WORK_DIR_PREFIX}_${counter++}",
@@ -731,7 +742,19 @@ class DomainFactory {
      * Creates a {@link MergingWorkPackage} with the same properties except for the specified ones.
      */
     static MergingWorkPackage createMergingWorkPackage(MergingWorkPackage base, Map properties) {
-        MergingWorkPackage mwp = new MergingWorkPackage((MergingWorkPackage.seqTrackPropertyNames(base.seqType) +
+        List<String> mergingProperties = [
+                "sample",
+                "seqType",
+                "seqPlatformGroup",
+        ]
+        if (!base.seqType.isWgbs()) {
+            mergingProperties.add("libraryPreparationKit")
+        }
+        if (base.seqType.isChipSeq()) {
+            mergingProperties.add("antibodyTarget")
+        }
+
+        MergingWorkPackage mwp = new MergingWorkPackage((mergingProperties +
                 MergingWorkPackage.processingParameterNames).collectEntries{[it, base."${it}"]} + properties)
         assert mwp.save(failOnError: true)
         return mwp
@@ -1170,10 +1193,19 @@ class DomainFactory {
     }
 
     public static SeqPlatform createSeqPlatform(Map seqPlatformProperties = [:]) {
-        return createDomainObject(SeqPlatform, [
-                name: 'seqPlatform_' + (counter++),
-                seqPlatformGroup: { createSeqPlatformGroup() },
+        Set<SeqPlatformGroup> spg = seqPlatformProperties.seqPlatformGroups as Set ?: [createSeqPlatformGroup()] as Set
+
+        SeqPlatform sp = createDomainObject(SeqPlatform, [
+                name             : 'seqPlatform_' + (counter++),
+                seqPlatformGroups: spg,
         ], seqPlatformProperties)
+
+        sp.seqPlatformGroups.each {
+            sp.addToSeqPlatformGroups(it)
+        }
+        sp.save(flush: true)
+
+        return sp
     }
 
     public static SeqPlatformModelLabel createSeqPlatformModelLabel(Map properties = [:]) {
@@ -1189,9 +1221,7 @@ class DomainFactory {
     }
 
     public static SeqPlatformGroup createSeqPlatformGroup(Map properties = [:]) {
-        return createDomainObject(SeqPlatformGroup, [
-                name: 'seqPlatformGroup_' + (counter++),
-        ], properties)
+        return createDomainObject(SeqPlatformGroup, [:], properties)
     }
 
     public static Run createRun(Map runProperties = [:]) {
@@ -1426,7 +1456,7 @@ class DomainFactory {
                 laneId         : 'laneId_' + counter++,
                 sample         : { createSample() },
                 pipelineVersion: { createSoftwareTool() },
-                run            : { createRun() },
+                run            : { properties.run ?: createRun() },
                 kitInfoReliability: properties.libraryPreparationKit ? InformationReliability.KNOWN : InformationReliability.UNKNOWN_UNVERIFIED,
                 normalizedLibraryName: SeqTrack.normalizeLibraryName(properties.libraryName),
         ]
@@ -1555,11 +1585,16 @@ class DomainFactory {
     }
 
     public static Map getMergingProperties(MergingWorkPackage mergingWorkPackage) {
+        SeqPlatform seqPlatform = mergingWorkPackage?.seqPlatformGroup?.seqPlatforms?.sort()?.first()
+        if (!seqPlatform) {
+            seqPlatform = createSeqPlatform(seqPlatformGroups: [mergingWorkPackage.seqPlatformGroup])
+        }
+
         Map properties = [
                 sample: mergingWorkPackage.sample,
                 seqType: mergingWorkPackage.seqType,
                 libraryPreparationKit: mergingWorkPackage.libraryPreparationKit,
-                run: createRun(seqPlatform: createSeqPlatform(seqPlatformGroup: mergingWorkPackage.seqPlatformGroup)),
+                run: createRun(seqPlatform: seqPlatform),
         ]
         if (mergingWorkPackage.seqType.isChipSeq()) {
             properties += [
@@ -1567,6 +1602,10 @@ class DomainFactory {
             ]
         }
         return properties
+    }
+
+    static ProjectSeqType createProjectSeqTypeLazy(Project project, SeqType seqType) {
+        return createDomainObjectLazy(ProjectSeqType, [:], [project: project, seqType: seqType])
     }
 
     public static SeqTrack createSeqTrackWithDataFiles(MergingWorkPackage mergingWorkPackage, Map seqTrackProperties = [:], Map dataFileProperties = [:]) {
@@ -1579,6 +1618,12 @@ class DomainFactory {
         } else {
             seqTrack = createSeqTrackWithOneDataFile(map, dataFileProperties)
         }
+
+        mergingWorkPackage.addToSeqTracks(seqTrack)
+        mergingWorkPackage.save(flush: true, failOnError: true)
+
+        createDomainObjectLazy(ProjectSeqType, [:], [project: seqTrack.project, seqType: seqTrack.seqType])
+
         assert mergingWorkPackage.satisfiesCriteria(seqTrack)
         return seqTrack
     }

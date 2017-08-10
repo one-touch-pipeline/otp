@@ -17,6 +17,7 @@ import spock.lang.*
     SampleType,
     SeqCenter,
     SeqPlatform,
+    SeqPlatformGroup,
     SeqTrack,
     SeqType,
     SoftwareTool,
@@ -27,7 +28,7 @@ class RunServiceSpec extends Specification {
 
     void 'retrieveMetaDataFiles finds correct MetaDataFiles'() {
         given:
-        SeqPlatform seqPlatform = DomainFactory.createSeqPlatform(seqPlatformGroup: null)
+        SeqPlatform seqPlatform = DomainFactory.createSeqPlatform(seqPlatformGroups: null)
 
         Run runWithoutDataFile = DomainFactory.createRun(seqPlatform: seqPlatform)
 

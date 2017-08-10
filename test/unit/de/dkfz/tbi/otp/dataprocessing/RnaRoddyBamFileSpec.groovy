@@ -1,6 +1,5 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.ngsdata.*
@@ -14,6 +13,7 @@ import spock.lang.*
         LibraryPreparationKit,
         Pipeline,
         Project,
+        ProjectSeqType,
         Realm,
         ReferenceGenome,
         ReferenceGenomeProjectSeqType,

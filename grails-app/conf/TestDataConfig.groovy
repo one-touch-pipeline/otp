@@ -81,11 +81,8 @@ testDataConfig {
             dirName  = {'seqCenterDirName_' + (counter++)}
         }
         'de.dkfz.tbi.otp.ngsdata.SeqPlatform' {
-            seqPlatformGroup = {SeqPlatformGroup.build()}
-            seqPlatformModelLabel = {SeqPlatformModelLabel.build()}
-        }
-        'de.dkfz.tbi.otp.ngsdata.SeqPlatformGroup' {
-            name = {'testSeqPlatformGroup_' + (counter++)}
+            seqPlatformGroups = {[DomainFactory.createSeqPlatformGroup()]}
+            seqPlatformModelLabel = {DomainFactory.createSeqPlatformModelLabel()}
         }
         'de.dkfz.tbi.otp.ngsdata.SeqPlatformModelLabel' {
             name = {'platformModelLabelName_' + (counter++)}

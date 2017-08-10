@@ -73,6 +73,7 @@ class RoddyBamFileTest {
     void testIsConsistentAndContainsNoWithdrawnData_seqTrackDoesNotBelongToBamFileWorkPackage_shouldReturnErrorMessage() {
         RoddyBamFile bamFile = DomainFactory.createRoddyBamFile()
         SeqTrack seqTrack = bamFile.seqTracks.iterator().next()
+        DomainFactory.createProjectSeqTypeLazy(seqTrack.project, seqTrack.seqType)
         seqTrack.seqType = SeqType.build()
         assert ["seqTrack ${seqTrack} does not satisfy merging criteria for ${bamFile.mergingWorkPackage}"] == bamFile.isConsistentAndContainsNoWithdrawnData()
     }

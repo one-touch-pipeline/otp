@@ -22,6 +22,7 @@ import spock.lang.*
         MergingWorkPackage,
         Pipeline,
         Project,
+        ProjectSeqType,
         ProjectCategory,
         Sample,
         SamplePair,

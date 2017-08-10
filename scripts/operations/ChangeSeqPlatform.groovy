@@ -19,10 +19,13 @@ Run.withTransaction {
             newPlatform.platform, newPlatform.model, newPlatform.kit)
     assert newSeqPlatform
 
-    assert newSeqPlatform.seqPlatformGroup == currentSeqPlatform.seqPlatformGroup
-
     Run run = exactlyOneElement(Run.findAllByName(runName))
     assert run.seqPlatform == currentSeqPlatform
+
+    SeqTrack.findAllByRun(run).each { SeqTrack st ->
+        ProjectSeqType pst = ProjectSeqType.findByProjectAndSeqType(st.project, st.seqType)
+        assert newSeqPlatform.getSeqPlatformGroup(pst) == currentSeqPlatform.getSeqPlatformGroup(pst)
+    }
 
     run.seqPlatform = newSeqPlatform
     assert run.save(flush: true)

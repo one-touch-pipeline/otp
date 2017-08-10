@@ -54,20 +54,20 @@ class SampleTypePerProjectTests extends TestCase {
         // no SeqTracks in database
         assert SampleTypePerProject.findMissingCombinations().isEmpty()
 
-        SeqTrack.build(sample: sampleProject1Type1, seqType: chipSeq)
+        DomainFactory.createSeqTrack(sample: sampleProject1Type1, seqType: chipSeq)
         // on ChIP Seq data no SNV calling is done, so no problem if there is no SampleTypePerProject for it
         assert SampleTypePerProject.findMissingCombinations().isEmpty()
 
-        final SeqTrack sampleProject1Type1WholeGenome = SeqTrack.build(sample: sampleProject1Type1, seqType: wholeGenome)
-        final SeqTrack sampleProject1Type1Exome = SeqTrack.build(sample: sampleProject1Type1, seqType: exome)
+        final SeqTrack sampleProject1Type1WholeGenome = DomainFactory.createSeqTrack(sample: sampleProject1Type1, seqType: wholeGenome)
+        final SeqTrack sampleProject1Type1Exome = DomainFactory.createSeqTrack(sample: sampleProject1Type1, seqType: exome)
         // distinct combination should be in the result only once
         assert containSame(SampleTypePerProject.findMissingCombinations(), [
                 [project1, sampleType1],
         ])
 
-        SeqTrack.build(sample: sampleProject1Type2, seqType: exome)
-        SeqTrack.build(sample: sampleProject2Type1, seqType: exome)
-        SeqTrack.build(sample: sampleProject2Type2, seqType: exome)
+        DomainFactory.createSeqTrack(sample: sampleProject1Type2, seqType: exome)
+        DomainFactory.createSeqTrack(sample: sampleProject2Type1, seqType: exome)
+        DomainFactory.createSeqTrack(sample: sampleProject2Type2, seqType: exome)
         // different combinations
         assert containSame(SampleTypePerProject.findMissingCombinations(), [
                 [project1, sampleType1],

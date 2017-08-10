@@ -9,6 +9,8 @@ import grails.plugin.springsecurity.*
 import org.joda.time.*
 import org.junit.*
 
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+
 @Ignore
 class ConveyBwaAlignmentWorkflowTests extends WorkflowTestCase {
     ProcessingOptionService processingOptionService
@@ -37,7 +39,7 @@ class ConveyBwaAlignmentWorkflowTests extends WorkflowTestCase {
         MergingWorkPackage workPackage = DomainFactory.createMergingWorkPackage([
                 pipeline        : DomainFactory.createDefaultOtpPipeline(),
                 seqType         : DomainFactory.createWholeGenomeSeqType(),
-                seqPlatformGroup: seqPlatform.seqPlatformGroup,
+                seqPlatformGroup: exactlyOneElement(seqPlatform.seqPlatformGroups),
                 referenceGenome : DomainFactory.createReferenceGenome([
                         fileNamePrefix: REF_GEN_FILE_NAME_PREFIX,
                 ]),
@@ -63,6 +65,8 @@ class ConveyBwaAlignmentWorkflowTests extends WorkflowTestCase {
                 fileWithdrawn: false,
                 nReads       : 10000,
         ])
+
+        DomainFactory.createProjectSeqTypeLazy(seqTrack.project, seqTrack.seqType)
 
         seqTrack.dataFiles.each {
             DomainFactory.createFastqcProcessedFile(

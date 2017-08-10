@@ -1,14 +1,11 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.ngsdata.*
+import grails.buildtestdata.mixin.*
+import grails.test.mixin.*
 import org.junit.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
-
-import de.dkfz.tbi.otp.ngsdata.DataFile
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.FileType
-import grails.buildtestdata.mixin.Build
-import grails.test.mixin.TestFor
 
 @Build([
     DataFile,
@@ -17,6 +14,7 @@ import grails.test.mixin.TestFor
     MergingSetAssignment,
     MergingWorkPackage,
     ProcessedMergedBamFile,
+    ProjectSeqType,
 ])
 @TestFor(AbstractBamFileService)
 class AbstractBamFileServiceUnitTests {

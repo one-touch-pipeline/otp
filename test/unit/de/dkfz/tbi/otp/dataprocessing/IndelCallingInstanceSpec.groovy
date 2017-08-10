@@ -18,6 +18,7 @@ import spock.lang.*
         Pipeline,
         Project,
         ProjectCategory,
+        ProjectSeqType,
         ReferenceGenome,
         RoddyBamFile,
         RoddyWorkflowConfig,

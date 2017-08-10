@@ -1,9 +1,8 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import org.springframework.context.annotation.Scope
-import org.springframework.stereotype.Component
-
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.*
+import org.springframework.context.annotation.*
+import org.springframework.stereotype.*
 
 /**
  * An {@link AlignmentDecider} which decides not to align.
@@ -16,10 +15,5 @@ class NoAlignmentDecider implements AlignmentDecider {
     Collection<MergingWorkPackage> decideAndPrepareForAlignment(SeqTrack seqTrack, boolean forceRealign) {
         seqTrack.log("Not aligning{0}, because it is configured to use the ${this.getClass().simpleName}.")
         return Collections.emptyList()
-    }
-
-    @Override
-    String alignmentMessage() {
-        return "shall not be aligned"
     }
 }

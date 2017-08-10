@@ -14,6 +14,7 @@ import org.junit.*
     MergingPass,
     MergingSet,
     ProcessedBamFile,
+    ProjectSeqType,
     Realm,
 ])
 class ProcessedMergedBamFileServiceUnitTests {

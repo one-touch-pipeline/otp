@@ -1,6 +1,9 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.utils.*
+
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+
 
 class SeqPlatform implements Entity {
 
@@ -8,23 +11,39 @@ class SeqPlatform implements Entity {
     SeqPlatformModelLabel seqPlatformModelLabel
     SequencingKitLabel sequencingKitLabel
 
-    /**
-     * If {@code null}, data from this {@link SeqPlatform} will not be aligned.
-     */
-    SeqPlatformGroup seqPlatformGroup
-
     String identifierInRunName
+
+    static hasMany = [
+            seqPlatformGroups: SeqPlatformGroup,
+    ]
 
     static constraints = {
         name(blank: false, unique: ['seqPlatformModelLabel','sequencingKitLabel'])
         seqPlatformModelLabel(nullable: true)
         sequencingKitLabel(nullable: true)
-        seqPlatformGroup(nullable: true)
         identifierInRunName(nullable: true, matches: /^[A-Z]{4}$/)
     }
 
     String toString() {
         return fullName()
+    }
+
+    SeqPlatformGroup getSeqPlatformGroup(ProjectSeqType projectSeqType) {
+        if (!projectSeqType) {
+            return null
+        }
+
+        List<SeqPlatformGroup> seqPlatformGroups = SeqPlatformGroup.withCriteria() {
+            seqPlatforms {
+                eq("id", this.id)
+            }
+            if (projectSeqType.useSeqPlatformGroups == ProjectSeqType.SpecificSeqPlatformGroups.USE_OTP_DEFAULT) {
+                isNull("projectSeqType")
+            } else {
+                eq("projectSeqType", projectSeqType)
+            }
+        }
+        return atMostOneElement(seqPlatformGroups)
     }
 
     String fullName() {

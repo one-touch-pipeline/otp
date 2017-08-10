@@ -21,6 +21,7 @@ import spock.lang.*
         Pipeline,
         Project,
         ProjectCategory,
+        ProjectSeqType,
         Sample,
         SamplePair,
         SampleType,

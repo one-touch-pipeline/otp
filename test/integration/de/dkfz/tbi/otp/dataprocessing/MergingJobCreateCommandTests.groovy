@@ -91,10 +91,11 @@ class MergingJobCreateCommandTests {
                         )
         assertNotNull(sample.save([flush: true, failOnError: true]))
 
+        ProjectSeqType projectSeqType = DomainFactory.createProjectSeqTypeLazy(project, seqType)
         MergingWorkPackage mergingWorkPackage = testData.createMergingWorkPackage(
                         sample: sample,
                         seqType: seqType,
-                        seqPlatformGroup: seqPlatform.seqPlatformGroup,
+                        seqPlatformGroup: seqPlatform.getSeqPlatformGroup(projectSeqType),
                         )
         assertNotNull(mergingWorkPackage.save([flush: true, failOnError: true]))
 

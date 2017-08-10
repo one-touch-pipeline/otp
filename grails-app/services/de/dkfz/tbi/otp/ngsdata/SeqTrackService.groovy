@@ -219,7 +219,7 @@ class SeqTrackService {
             return false
         }
 
-        if (seqTrack.seqPlatform.seqPlatformGroup == null) {
+        if (seqTrack.seqPlatformGroup == null) {
             notAligning("seqPlatformGroup is null for ${seqTrack.seqPlatform}")
             return false
         }

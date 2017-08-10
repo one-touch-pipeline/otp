@@ -8,6 +8,7 @@ import de.dkfz.tbi.otp.dataprocessing.roddy.JobStateLogFile
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.ProjectSeqType
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.Run
 import de.dkfz.tbi.otp.ngsdata.SeqCenter
@@ -34,6 +35,7 @@ import static de.dkfz.tbi.TestCase.shouldFail
         SeqPlatformGroup,
         SoftwareTool,
         MergingWorkPackage,
+        ProjectSeqType,
 ])
 class AbstractRoddyJobUnitTests {
 

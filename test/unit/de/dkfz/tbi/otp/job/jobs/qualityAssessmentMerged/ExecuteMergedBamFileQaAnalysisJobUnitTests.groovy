@@ -19,6 +19,7 @@ import static org.junit.Assert.*
         LibraryPreparationKit,
         BedFile,
         ProcessingOption,
+        ProjectSeqType,
 ])
 @Build([
     AlignmentPass,

@@ -291,14 +291,15 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
 
         MergingWorkPackage workPackage = exactlyOneElement(MergingWorkPackage.findAll())
 
-        SeqTrack seqtrack = createSeqTrack("readGroup1", [run: DomainFactory.createRun(
+        SeqTrack seqTrack = createSeqTrack("readGroup1", [run: DomainFactory.createRun(
                 name: 'runName_11',  // This name is encoded in @RG of the test BAM file
-                seqPlatform: DomainFactory.createSeqPlatform(seqPlatformGroup: workPackage.seqPlatformGroup),
+                seqPlatform: DomainFactory.createSeqPlatform(seqPlatformGroups: [workPackage.seqPlatformGroup]),
         )])
+        DomainFactory.createProjectSeqTypeLazy(seqTrack.project, seqTrack.seqType)
         RoddyBamFile firstBamFile = new RoddyBamFile(
                 workPackage: workPackage,
                 identifier: RoddyBamFile.nextIdentifier(workPackage),
-                seqTracks: [seqtrack] as Set,
+                seqTracks: [seqTrack] as Set,
                 config: exactlyOneElement(RoddyWorkflowConfig.findAllByObsoleteDateIsNull()),
                 numberOfMergedLanes: 1,
                 fileOperationStatus: FileOperationStatus.PROCESSED,

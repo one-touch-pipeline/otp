@@ -12,6 +12,7 @@ import org.junit.Test
 @Build([
     QualityAssessmentPass,
     ReferenceGenome,
+    ProjectSeqType,
 ])
 class ProcessedBamFileQaFileServiceUnitTests {
 

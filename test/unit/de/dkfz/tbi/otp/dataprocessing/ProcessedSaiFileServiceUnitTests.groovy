@@ -10,6 +10,7 @@ import org.junit.*
 @TestFor(ProcessedSaiFileService)
 @Build([
     ProcessedSaiFile,
+    ProjectSeqType,
     ReferenceGenome,
 ])
 class ProcessedSaiFileServiceUnitTests {

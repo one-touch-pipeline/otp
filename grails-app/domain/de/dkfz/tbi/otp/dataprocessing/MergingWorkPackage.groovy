@@ -33,23 +33,6 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
 
     ProcessingType processingType = ProcessingType.SYSTEM
 
-    // SeqTrack properties, part of merging criteria
-    static Collection<String> qualifiedSeqTrackPropertyNames(SeqType seqType) {
-        List<String> propertyNames = ['sample', 'seqType', 'run.seqPlatform.seqPlatformGroup']
-        if (!seqType.isWgbs()) {
-            propertyNames += 'libraryPreparationKit'
-        }
-        if (seqType.isChipSeq()) {
-            propertyNames += 'antibodyTarget'
-        }
-        return propertyNames.asImmutable()
-    }
-
-    static Collection<String> seqTrackPropertyNames(SeqType seqType) {
-        qualifiedSeqTrackPropertyNames(seqType).collect{nonQualifiedPropertyName(it)}.asImmutable()
-    }
-
-
     SeqPlatformGroup seqPlatformGroup
     LibraryPreparationKit libraryPreparationKit
 
@@ -115,29 +98,21 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
 
 
     Collection<SeqTrack> findMergeableSeqTracks() {
-        Map properties = [:]
-        String mergeableSeqTracksQuery = 'FROM SeqTrack WHERE ' + qualifiedSeqTrackPropertyNames(seqType).collect { String qualifiedPropertyName ->
-            String nonQualifiedPropertyName = nonQualifiedPropertyName(qualifiedPropertyName)
-            def value = this."${nonQualifiedPropertyName}"
-            if (value) {
-                properties."${nonQualifiedPropertyName}" = value
-                return "${qualifiedPropertyName} = :${nonQualifiedPropertyName}"
-            } else {
-                return "${qualifiedPropertyName} is null"
-            }
-        }.findAll().join(' AND ')
-
-        return SeqTrack.findAll(mergeableSeqTracksQuery, properties).findAll {
-            assert satisfiesCriteria(it)
-            return SeqTrackService.mayAlign(it, false)
-        }
+        return seqTracks ?: []
     }
 
     static Map getMergingProperties(SeqTrack seqTrack) {
-        Collection<String> propertyNames = seqTrackPropertyNames(seqTrack.seqType)
-        Map properties = [:]
-        propertyNames.each {
-            properties."${it}" = seqTrack."${it}"
+        Map<String, Entity> properties = [
+                sample          : seqTrack.sample,
+                seqType         : seqTrack.seqType,
+                seqPlatformGroup: seqTrack.seqPlatformGroup,
+        ]
+
+        if (!seqTrack.seqType.isWgbs()) {
+            properties += [libraryPreparationKit: seqTrack.libraryPreparationKit]
+        }
+        if (seqTrack.seqType.isChipSeq()) {
+            properties += [antibodyTarget: ((ChipSeqSeqTrack)seqTrack).antibodyTarget]
         }
         return properties
     }
@@ -148,10 +123,6 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
 
     boolean satisfiesCriteria(final AbstractBamFile bamFile) {
         return bamFile.mergingWorkPackage.id == id
-    }
-
-    static nonQualifiedPropertyName(String property) {
-        return property.substring(property.lastIndexOf('.') + 1)
     }
 
     AbstractMergedBamFile getCompleteProcessableBamFileInProjectFolder() {

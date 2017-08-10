@@ -10,6 +10,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 @Build([
     MergingSet,
     ProcessedBamFile,
+    ProjectSeqType,
 ])
 class MergingSetAssignmentTests {
 
@@ -53,8 +54,7 @@ class MergingSetAssignmentTests {
         seqCenter.save(flush: true)
         assertTrue(seqCenter.validate())
 
-        SeqPlatform seqPlatform = SeqPlatform.build()
-
+        SeqPlatform seqPlatform = DomainFactory.createSeqPlatform()
         Run run = new Run()
         run.name = "testname"
         run.seqCenter = seqCenter

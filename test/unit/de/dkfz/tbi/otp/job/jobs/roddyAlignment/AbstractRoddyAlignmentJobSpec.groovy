@@ -21,6 +21,7 @@ import spock.lang.*
         ProcessingOption,
         Project,
         ProjectCategory,
+        ProjectSeqType,
         Sample,
         SampleType,
         SeqCenter,

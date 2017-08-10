@@ -238,7 +238,7 @@ class SeqTrack implements ProcessParameterObject, Entity {
     }
 
     SeqPlatformGroup getSeqPlatformGroup() {
-        return seqPlatform.seqPlatformGroup
+        return seqPlatform.getSeqPlatformGroup(ProjectSeqType.findByProjectAndSeqType(project, seqType))
     }
 
     SeqCenter getSeqCenter() {

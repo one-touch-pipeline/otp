@@ -190,7 +190,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     @Test
     void test_changeMetadataEntry() {
         Sample sample = Sample.build()
-        SeqTrack seqTrack = SeqTrack.build(sample: sample)
+        SeqTrack seqTrack = DomainFactory.createSeqTrack(sample: sample)
         DataFile dataFile = DomainFactory.createDataFile(seqTrack: seqTrack)
         MetaDataKey metaDataKey = MetaDataKey.build()
         String newValue = "NEW"
@@ -222,7 +222,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
         Sample sample = Sample.build()
         SampleIdentifier sampleIdentifier = SampleIdentifier.build(sample: sample)
         String sampleIdentifierName = sampleIdentifier.name
-        SeqTrack seqTrack = SeqTrack.build(sample: sample)
+        SeqTrack seqTrack = DomainFactory.createSeqTrack(sample: sample)
         DataFile dataFile = DomainFactory.createDataFile(seqTrack: seqTrack)
         MetaDataKey metaDataKey = MetaDataKey.build(name: "SAMPLE_ID")
         MetaDataEntry metaDataEntry = MetaDataEntry.build(key: metaDataKey, dataFile: dataFile)
@@ -256,14 +256,14 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     @Test
     void test_getAndShowSeqTracksForSample() {
         Sample sample = Sample.build()
-        SeqTrack seqTrack = SeqTrack.build(sample: sample)
+        SeqTrack seqTrack = DomainFactory.createSeqTrack(sample: sample)
 
         assert [seqTrack] == dataSwapService.getAndShowSeqTracksForSample(sample, new StringBuilder())
     }
 
     @Test
     void test_getAndValidateAndShowDataFilesForSeqTracks_noDataFile_shouldFail() {
-        SeqTrack seqTrack = SeqTrack.build()
+        SeqTrack seqTrack = DomainFactory.createSeqTrack()
         List<SeqTrack> seqTracks = [seqTrack]
         Map<String, String> dataFileMap = [:]
 
@@ -274,7 +274,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
 
     @Test
     void test_getAndValidateAndShowDataFilesForSeqTracks() {
-        SeqTrack seqTrack = SeqTrack.build()
+        SeqTrack seqTrack = DomainFactory.createSeqTrack()
         List<SeqTrack> seqTracks = [seqTrack]
         DataFile dataFile = DomainFactory.createDataFile(seqTrack: seqTrack)
         Map<String, String> dataFileMap = [(dataFile.fileName): ""]
@@ -284,7 +284,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
 
     @Test
     void test_getAndValidateAndShowAlignmentDataFilesForSeqTracks() {
-        SeqTrack seqTrack = SeqTrack.build()
+        SeqTrack seqTrack = DomainFactory.createSeqTrack()
         List<SeqTrack> seqTracks = [seqTrack]
         DataFile dataFile = DomainFactory.createDataFile(seqTrack: seqTrack)
         Map<String, String> dataFileMap = [(dataFile.fileName): ""]
@@ -431,7 +431,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
 
     @Test
     public void testDeleteConnectionFromSeqTrackRepresentingABamFile() throws Exception {
-        SeqTrack seqTrack = SeqTrack.build()
+        SeqTrack seqTrack = DomainFactory.createSeqTrack()
         AlignmentLog alignmentLog = AlignmentLog.build(seqTrack: seqTrack)
         DataFile dataFile = DomainFactory.createDataFile(alignmentLog: alignmentLog)
 
@@ -443,7 +443,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
 
     @Test
     public void testDeleteAllProcessingInformationAndResultOfOneSeqTrack_ProcessedBamFile() throws Exception {
-        SeqTrack seqTrack = SeqTrack.build()
+        SeqTrack seqTrack = DomainFactory.createSeqTrack()
         DataFile dataFile = DomainFactory.createDataFile(seqTrack: seqTrack)
         ProcessedSaiFile processedSaiFile = ProcessedSaiFile.build(dataFile: dataFile)
 
@@ -494,7 +494,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
 
     @Test
     public void testDeleteSeqTrack() throws Exception {
-        SeqTrack seqTrack = SeqTrack.build()
+        SeqTrack seqTrack = DomainFactory.createSeqTrack()
         MergingAssignment mergingAssignment = MergingAssignment.build(seqTrack: seqTrack)
         DataFile dataFile = DomainFactory.createDataFile(seqTrack: seqTrack)
 
