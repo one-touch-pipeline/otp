@@ -23,6 +23,10 @@
                 <td><g:textField name="name" size="130" value="${cmd.name}"/></td>
             </tr>
             <tr>
+                <td class="myKey"><g:message code="createProject.phabricatorAlias"/></td>
+                <td><g:textField name="name" size="130" value="${cmd.phabricatorAlias}"/></td>
+            </tr>
+            <tr>
                 <td class="myKey"><g:message code="createProject.directory"/></td>
                 <td><g:textField name="directory" size="130" value="${cmd.directory}"/></td>
             </tr>

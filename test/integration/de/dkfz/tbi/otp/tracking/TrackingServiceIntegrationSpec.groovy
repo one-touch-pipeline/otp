@@ -137,7 +137,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
                         fastqcState: SeqTrack.DataProcessingState.FINISHED,
                 ],
                 [runSegment: DomainFactory.createRunSegment(otrsTicket: ticketB), fileLinked: true])
-        SeqTrack seqTrackB2 = DomainFactory.createSeqTrackWithOneDataFile(
+        DomainFactory.createSeqTrackWithOneDataFile(
                 [
                         dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
                         fastqcState: SeqTrack.DataProcessingState.IN_PROGRESS,
@@ -147,7 +147,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         DomainFactory.createProcessingOptionForOtrsTicketPrefix("the prefix")
 
         trackingService.createNotificationTextService = Mock(CreateNotificationTextService) {
-            notification(_, _, _) >> 'Something'
+            notification(_, _, _, _) >> 'Something'
         }
         DomainFactory.createProcessingOptionForNotificationRecipient()
 
@@ -264,8 +264,8 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         }
 
         trackingService.createNotificationTextService = Mock(CreateNotificationTextService) {
-            1 * notification(ticket, _, OtrsTicket.ProcessingStep.INSTALLATION) >> notificationText
-            0 * notification(_, _, _)
+            1 * notification(ticket, _, OtrsTicket.ProcessingStep.INSTALLATION, seqTrack.project) >> notificationText
+            0 * notification(_, _, _, _)
         }
 
         when:
@@ -344,9 +344,9 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         }
 
         trackingService.createNotificationTextService = Mock(CreateNotificationTextService) {
-            1 * notification(ticket, _, OtrsTicket.ProcessingStep.INSTALLATION) >> notificationText1
-            1 * notification(ticket, _, OtrsTicket.ProcessingStep.ALIGNMENT) >> notificationText2
-            0 * notification(_, _, _)
+            1 * notification(ticket, _, OtrsTicket.ProcessingStep.INSTALLATION, seqTrack1.project) >> notificationText1
+            1 * notification(ticket, _, OtrsTicket.ProcessingStep.ALIGNMENT, seqTrack1.project) >> notificationText2
+            0 * notification(_, _, _, _)
         }
 
         when:
@@ -395,32 +395,19 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
                 ]),
                 DomainFactory.randomProcessedBamFileProperties + [seqTracks: [seqTrack2] as Set],
         ))
-        ProcessingStatus expectedStatus = [
-                getInstallationProcessingStatus: { -> ALL_DONE },
-                getFastqcProcessingStatus: { -> ALL_DONE },
-                getAlignmentProcessingStatus: { -> PARTLY_DONE_WONT_DO_MORE },
-                getSnvProcessingStatus: { -> NOTHING_DONE_WONT_DO },
-        ] as ProcessingStatus
 
         String prefix = "the prefix"
         DomainFactory.createProcessingOptionForOtrsTicketPrefix(prefix)
 
         String otrsRecipient = HelperUtils.uniqueString
-        String notificationText1 = HelperUtils.uniqueString
-        String notificationText2 = HelperUtils.uniqueString
         DomainFactory.createProcessingOptionForNotificationRecipient(otrsRecipient)
-
-        String expectedEmailSubjectOperator = "${prefix}#${ticket.ticketNumber} Final Processing Status Update"
-        String expectedEmailSubjectCustomer = "[${prefix}#${ticket.ticketNumber}] TO BE SENT: ${seqTrack1.project.name} sequencing data "
-        String expectedEmailSubjectCustomer1 = expectedEmailSubjectCustomer + OtrsTicket.ProcessingStep.INSTALLATION.notificationSubject
-        String expectedEmailSubjectCustomer2 = expectedEmailSubjectCustomer + OtrsTicket.ProcessingStep.ALIGNMENT.notificationSubject
 
         trackingService.mailHelperService = Mock(MailHelperService) {
             0 * _
         }
 
         trackingService.createNotificationTextService = Mock(CreateNotificationTextService) {
-            0 * notification(_, _, _)
+            0 * notification(_, _, _, _)
         }
 
         when:
@@ -520,7 +507,8 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
             0 * sendEmail(_, _, _)
         }
         trackingService.createNotificationTextService = Mock(CreateNotificationTextService) {
-            callCount * notification(ticket, _, notificationStep) >> { OtrsTicket ticket1, ProcessingStatus status1, OtrsTicket.ProcessingStep processingStep ->
+            Project project = exactlyOneElement(seqTracks*.project.unique())
+            callCount * notification(ticket, _, notificationStep, project) >> { OtrsTicket ticket1, ProcessingStatus status1, OtrsTicket.ProcessingStep processingStep, Project project1->
                 TestCase.assertContainSame(status.seqTrackProcessingStatuses, status1.seqTrackProcessingStatuses)
                 return content
             }
@@ -566,8 +554,8 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
             0 * sendEmail(_, _, _)
         }
         trackingService.createNotificationTextService = Mock(CreateNotificationTextService) {
-            notification(ticket, _, OtrsTicket.ProcessingStep.INSTALLATION) >> { OtrsTicket ticket1, ProcessingStatus status1, OtrsTicket.ProcessingStep processingStep ->
-                return exactlyOneElement(status1.seqTrackProcessingStatuses*.seqTrack*.project.unique()).name
+            notification(ticket, _, OtrsTicket.ProcessingStep.INSTALLATION, _) >> { OtrsTicket ticket1, ProcessingStatus status1, OtrsTicket.ProcessingStep processingStep, Project project ->
+                return project.name
             }
         }
 

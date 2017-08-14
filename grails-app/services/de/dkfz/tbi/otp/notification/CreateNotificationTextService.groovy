@@ -32,10 +32,11 @@ class CreateNotificationTextService {
     ProcessingOptionService processingOptionService
 
 
-    String notification(OtrsTicket otrsTicket, ProcessingStatus status, ProcessingStep processingStep) {
+    String notification(OtrsTicket otrsTicket, ProcessingStatus status, ProcessingStep processingStep, Project project) {
         assert otrsTicket
         assert status
         assert processingStep
+        assert project
 
         String stepInformation = "${processingStep}Notification"(status).trim()
 
@@ -64,10 +65,17 @@ class CreateNotificationTextService {
                 null
         ) ?: ""
 
+        //TODO talk to research group which steps should be included
+        String phabricatorAlias = ""
+        if (project.phabricatorAlias && processingStep == INSTALLATION) {
+            phabricatorAlias = "\n!project #\$${project.phabricatorAlias}"
+        }
+
         return createMessage(OptionName.NOTIFICATION_TEMPLATE_BASE, [
                 stepInformation : stepInformation,
                 seqCenterComment: seqCenterComment,
                 addition        : addition,
+                phabricatorAlias: phabricatorAlias,
         ])
     }
 

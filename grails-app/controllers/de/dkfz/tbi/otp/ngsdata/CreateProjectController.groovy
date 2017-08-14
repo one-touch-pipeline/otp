@@ -23,6 +23,7 @@ class CreateProjectController {
             else {
                 ProjectService.ProjectParams projectParams = new ProjectService.ProjectParams(
                         name: cmd.name,
+                        phabricatorAlias: cmd.phabricatorAlias,
                         dirName: cmd.directory,
                         dirAnalysis: cmd.analysisDirectory,
                         realmName: Realm.LATEST_DKFZ_REALM,
@@ -58,6 +59,7 @@ class CreateProjectController {
 
 class CreateProjectControllerSubmitCommand implements Serializable {
     String name
+    String phabricatorAlias
     String directory
     String analysisDirectory
     String nameInMetadataFiles
@@ -82,6 +84,7 @@ class CreateProjectControllerSubmitCommand implements Serializable {
                 return 'A project with \'' + val + '\' as nameInMetadataFiles exists already'
             }
         })
+        phabricatorAlias(nullable: true)
         directory(blank: false, validator: {val, obj ->
             if (Project.findByDirName(val)) {
                 return 'This path \'' + val + '\' is used by another project already'

@@ -1178,6 +1178,7 @@ class DomainFactory {
     public static Project createProject(Map projectProperties = [:]) {
         return createDomainObject(Project, [
                 name                    : 'project_' + (counter++),
+                phabricatorAlias        : 'phabricatorAlias_' + (counter++),
                 dirName                 : 'projectDirName_' + (counter++),
                 realmName               : 'realmName_' + (counter++),
                 alignmentDeciderBeanName: 'DUMMY_BEAN_NAME',
@@ -1984,6 +1985,8 @@ class DomainFactory {
 base notification
 stepInformation: ${stepInformation}
 seqCenterComment: ${seqCenterComment}
+addition: ${addition}
+phabricatorAlias: ${phabricatorAlias}
 ''',
         ])
 

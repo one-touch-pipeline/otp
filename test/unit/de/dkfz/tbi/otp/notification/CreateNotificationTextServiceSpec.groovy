@@ -789,24 +789,25 @@ samplePairsNotProcessed: ${expectedSamplePairsNotProcessed}
 
     void "notification, when an argument is null, throw assert"() {
         when:
-        new CreateNotificationTextService().notification(ticket, status, processingStep)
+        new CreateNotificationTextService().notification(ticket, status, processingStep, project)
 
         then:
         AssertionError e = thrown()
         e.message.contains("assert ${text}")
 
         where:
-        ticket           | status                 | processingStep || text
-        new OtrsTicket() | new ProcessingStatus() | null           || 'processingStep'
-        new OtrsTicket() | null                   | SNV            || 'status'
-        null             | new ProcessingStatus() | SNV            || 'otrsTicket'
+        ticket           | status                 | processingStep | project       || text
+        new OtrsTicket() | new ProcessingStatus() | null           | new Project() || 'processingStep'
+        new OtrsTicket() | null                   | SNV            | new Project() || 'status'
+        null             | new ProcessingStatus() | SNV            | new Project() || 'otrsTicket'
+        new OtrsTicket() | new ProcessingStatus() | SNV            | null          || 'project'
     }
 
 
 
     void "notification, when call for ProcessingStep FASTQC, throw an exception"() {
         when:
-        new CreateNotificationTextService().notification(DomainFactory.createOtrsTicket(), new ProcessingStatus(), FASTQC)
+        new CreateNotificationTextService().notification(DomainFactory.createOtrsTicket(), new ProcessingStatus(), FASTQC, new Project())
 
         then:
         thrown(MissingMethodException)

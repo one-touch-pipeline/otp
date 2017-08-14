@@ -1,3 +1,4 @@
+import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.notification.*
 import de.dkfz.tbi.otp.tracking.*
 
@@ -6,6 +7,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 
 String ticketNumber = ''
+String projectName = ""
 
 //OtrsTicket.ProcessingStep processingStep = OtrsTicket.ProcessingStep.INSTALLATION
 //OtrsTicket.ProcessingStep processingStep = OtrsTicket.ProcessingStep.ALIGNMENT
@@ -23,8 +25,9 @@ CreateNotificationTextService notificationTextService = ctx.createNotificationTe
 
 OtrsTicket otrsTicket = exactlyOneElement(OtrsTicket.findAllByTicketNumber(ticketNumber))
 
+Project project = Project.findByName(projectName)
 
 println notificationTextService.notification(otrsTicket,
-        trackingService.getProcessingStatus(otrsTicket.findAllSeqTracks()), processingStep)
+        trackingService.getProcessingStatus(otrsTicket.findAllSeqTracks()), processingStep, project)
 
 ''

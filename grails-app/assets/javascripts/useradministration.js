@@ -73,7 +73,7 @@ $.otp.userAdministration.loadUserList = function () {
             });
         },
         fnRowCallback: function (nRow) {
-            $("td:eq(8) button", nRow).click(function (event) {
+            $("td:eq(7) button", nRow).click(function (event) {
                 var form;
                 event.preventDefault();
                 form = $("#switch-user-form");

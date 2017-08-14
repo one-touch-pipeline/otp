@@ -132,12 +132,20 @@ class ProjectConfigController {
         return roleName.isEmpty() ? null : exactlyOneElement(ContactPersonRole.findAllByName(roleName))
     }
 
+    JSON simpleDomainParamUpdate(SimpleUpdateCommand cmd) {
+        checkErrorAndCallMethod(cmd, { projectService.updateProjectField(cmd.value, cmd.fieldName, cmd.project) })
+    }
+
     JSON deleteContactPersonOrRemoveProject(UpdateDeleteContactPersonCommand cmd){
         checkErrorAndCallMethod(cmd, { contactPersonService.removeContactPersonFromProject(cmd.projectContactPerson) })
     }
 
     JSON updateName(UpdateContactPersonNameCommand cmd) {
         checkErrorAndCallMethod(cmd, { contactPersonService.updateName(cmd.contactPerson, cmd.newName) })
+    }
+
+    JSON updatePhabricatorAlias(SimpleUpdateCommand cmd) {
+        checkErrorAndCallMethod(cmd, { projectService.updatePhabricatorAlias(cmd.value, cmd.project) })
     }
 
     JSON updateEmail(UpdateContactPersonEmailCommand cmd) {
@@ -164,28 +172,16 @@ class ProjectConfigController {
         checkErrorAndCallMethod(cmd, { projectService.updateCategory(cmd.value, cmd.project) })
     }
 
-    JSON updateMailingListName(UpdateMailingListNameCommand cmd) {
-        checkErrorAndCallMethod(cmd, { projectService.updateProjectField(cmd.mailingListName, "mailingListName", cmd.project) })
+    JSON updateProcessingPriority(SimpleUpdateCommand cmd) {
+        checkErrorAndCallMethod(cmd, { projectService.updateProjectField(ProcessingPriority."${cmd.value}_PRIORITY", cmd.fieldName, cmd.project) })
     }
 
-    JSON updateCostCenter(UpdateCostCenterCommand cmd) {
-        checkErrorAndCallMethod(cmd, { projectService.updateProjectField(cmd.costCenter, "costCenter", cmd.project) })
+    JSON updateTumorEntity(SimpleUpdateCommand cmd) {
+        checkErrorAndCallMethod(cmd, { projectService.updateProjectField(TumorEntity.findByName(cmd.value), cmd.fieldName, cmd.project) })
     }
 
-    JSON updateDescription(UpdateDescriptionCommand cmd) {
-        checkErrorAndCallMethod(cmd, { projectService.updateProjectField(cmd.description, "description", cmd.project) })
-    }
-
-    JSON updateProcessingPriority(UpdateProcessingPriorityCommand cmd) {
-        checkErrorAndCallMethod(cmd, { projectService.updateProjectField(cmd.processingPriority, "processingPriority", cmd.project) })
-    }
-
-    JSON updateTumorEntity(UpdateTumorEntityCommand cmd) {
-        checkErrorAndCallMethod(cmd, { projectService.updateProjectField(cmd.tumorEntity, "tumorEntity", cmd.project) })
-    }
-
-    JSON updateSnv(UpdateSnvCommand cmd) {
-        checkErrorAndCallMethod(cmd, { projectService.setSnv(cmd.project, Project.Snv.valueOf(cmd.value))})
+    JSON updateSnv(SimpleUpdateCommand cmd) {
+        checkErrorAndCallMethod(cmd, { projectService.updateProjectField(Project.Snv.valueOf(cmd.value), cmd.fieldName, cmd.project) })
     }
 
     JSON snvDropDown() {
@@ -315,6 +311,16 @@ class ProjectConfigController {
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
         dataToRender.aaData = data
         render dataToRender as JSON
+    }
+}
+
+class SimpleUpdateCommand implements Serializable {
+    Project project
+    String value
+    String fieldName
+
+    static constraints = {
+        fieldName(nullable: true)
     }
 }
 
@@ -452,60 +458,7 @@ class UpdateAnalysisDirectoryCommand implements Serializable {
     }
 }
 
-class UpdateSnvCommand implements Serializable {
-    Project project
-    String value
-}
-
 class UpdateCategoryCommand implements Serializable {
     List<String> value = [].withLazyDefault {new String()}
     Project project
-}
-
-class UpdateMailingListNameCommand implements Serializable {
-    String mailingListName
-    Project project
-    void setValue(String mailingListName) {
-        this.mailingListName = mailingListName
-    }
-}
-
-class UpdateCostCenterCommand implements Serializable {
-    String costCenter
-    Project project
-    void setValue(String costCenter) {
-        this.costCenter = costCenter
-    }
-}
-
-class UpdateDescriptionCommand implements Serializable {
-    String description
-    Project project
-    void setValue(String description) {
-        this.description = description
-    }
-}
-
-class UpdateProcessingPriorityCommand implements Serializable {
-    Project project
-    short processingPriority
-    void setValue(String value) {
-        switch (value) {
-            case "NORMAL":
-                this.processingPriority = ProcessingPriority.NORMAL_PRIORITY
-                break
-            case "FAST_TRACK":
-                this.processingPriority = ProcessingPriority.FAST_TRACK_PRIORITY
-                break
-        }
-    }
-}
-
-class UpdateTumorEntityCommand implements Serializable {
-    TumorEntity tumorEntity
-    Project project
-
-    void setValue(String tumorEntityName) {
-        tumorEntity = TumorEntity.findByName(tumorEntityName)
-    }
 }

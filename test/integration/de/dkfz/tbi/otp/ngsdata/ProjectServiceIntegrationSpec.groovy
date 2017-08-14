@@ -6,6 +6,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.testing.*
 import de.dkfz.tbi.otp.utils.*
 import grails.plugin.springsecurity.*
@@ -14,6 +15,7 @@ import grails.validation.*
 import org.codehaus.groovy.grails.commons.*
 import org.junit.*
 import org.junit.rules.*
+import org.springframework.security.acls.domain.*
 import spock.lang.*
 
 import java.nio.file.*
@@ -402,6 +404,47 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         then:
         AssertionError ex = thrown()
         ex.message.contains("Collection contains 0 elements. Expected 1.")
+    }
+
+    @Unroll
+    void "test updatePhabricatorAlias valid alias and valid user #username"() {
+        given:
+        String phabricatorAlias = "some alias"
+        Project project = Project.findByName("testProject")
+        Role role = new Role(authority: "GROUP_TEST_PROJECT").save(flush: true)
+        UserRole.create(User.findByUsername(USER), role)
+        SpringSecurityUtils.doWithAuth(ADMIN) {
+            aclUtilService.addPermission(project, new GrantedAuthoritySid(role.authority), BasePermission.READ)
+        }
+
+        when:
+        SpringSecurityUtils.doWithAuth(username) {
+            projectService.updatePhabricatorAlias(phabricatorAlias, project)
+        }
+
+        then:
+        project.phabricatorAlias == phabricatorAlias
+
+        where:
+        username   | _
+        ADMIN      | _
+        OPERATOR   | _
+        USER       | _
+    }
+
+    void "test updatePhabricatorAlias valid alias and invalide user"() {
+        given:
+        String phabricatorAlias = "some alias"
+        Project project = Project.findByName("testProject")
+
+        when:
+        SpringSecurityUtils.doWithAuth(TESTUSER) {
+            projectService.updatePhabricatorAlias(phabricatorAlias, project)
+        }
+
+        then:
+        org.springframework.security.access.AccessDeniedException e = thrown()
+        e.message.contains("Access is denied")
     }
 
     void "test updateCategory invalid project category should fail"() {

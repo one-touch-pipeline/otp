@@ -165,7 +165,7 @@ class TrackingService {
             }
             subject.append("${project.name} sequencing data ${notificationStep.notificationSubject}")
 
-            String content = createNotificationTextService.notification(ticket, status, notificationStep)
+            String content = createNotificationTextService.notification(ticket, status, notificationStep, project)
             mailHelperService.sendEmail(subject.toString(), content, recipients)
         }
     }

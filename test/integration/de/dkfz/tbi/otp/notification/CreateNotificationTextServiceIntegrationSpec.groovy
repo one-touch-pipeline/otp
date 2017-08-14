@@ -66,6 +66,7 @@ class CreateNotificationTextServiceIntegrationSpec extends IntegrationSpec {
     void "notification, return message"() {
         given:
         DomainFactory.createNotificationProcessingOptions()
+        Project project = DomainFactory.createProject()
         OtrsTicket ticket = DomainFactory.createOtrsTicket(
                 seqCenterComment: otrsTicketSeqCenterComment,
         )
@@ -120,10 +121,15 @@ ${otrsTicketSeqCenterComment}${otrsTicketSeqCenterComment ? "\n" : ""}${generalS
 base notification
 stepInformation: ${processingStep.toString()}
 seqCenterComment: ${expectedSeqCenterComment}
+addition: 
+phabricatorAlias: 
 """
+        if (processingStep == INSTALLATION) {
+            expected = expected + "!project #\$${project.phabricatorAlias}\n"
+        }
 
         when:
-        String message = createNotificationTextService.notification(ticket, processingStatus, processingStep)
+        String message = createNotificationTextService.notification(ticket, processingStatus, processingStep, project)
 
         then:
         expected == message

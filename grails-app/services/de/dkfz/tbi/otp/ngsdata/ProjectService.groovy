@@ -14,7 +14,6 @@ import grails.plugin.springsecurity.acl.*
 import org.springframework.security.access.prepost.*
 import org.springframework.security.acls.domain.*
 import org.springframework.security.acls.model.*
-import org.springframework.security.core.userdetails.*
 
 import java.nio.file.*
 import java.nio.file.attribute.*
@@ -121,6 +120,7 @@ class ProjectService {
     public Project createProject(ProjectParams projectParams) {
         assert OtpPath.isValidPathComponent(projectParams.unixGroup): "unixGroup '${projectParams.unixGroup}' contains invalid characters"
         Project project = createProject(projectParams.name, projectParams.dirName, projectParams.realmName, projectParams.alignmentDeciderBeanName, projectParams.categoryNames)
+        project.phabricatorAlias = projectParams.phabricatorAlias
         project.dirAnalysis = projectParams.dirAnalysis
         project.processingPriority = projectParams.processingPriority
         project.hasToBeCopied = projectParams.copyFiles
@@ -162,6 +162,7 @@ class ProjectService {
 
     public static class ProjectParams {
         String name
+        String phabricatorAlias
         String dirName
         String dirAnalysis
         String realmName
@@ -190,62 +191,26 @@ class ProjectService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     public <T> void updateProjectField (T fieldValue, String fieldName, Project project) {
+        assert fieldName && [
+                "costCenter",
+                "description",
+                "dirAnalysis",
+                "mailingListName",
+                "nameInMetadataFiles",
+                "processingPriority",
+                "projectCategories",
+                "snv",
+                "tumorEntity",
+        ].contains(fieldName)
+
         project."${fieldName}" = fieldValue
         project.save(flush: true)
     }
 
-    /**
-     * Discovers if a user has Projects.
-     * @return <code>true</code> if the user has Project(s), false otherwise
-     */
-    public boolean projectsAvailable() {
-        if (SpringSecurityUtils.ifAllGranted("ROLE_OPERATOR")) {
-            // shortcut for operator
-            if (Project.count() > 0) {
-                return true
-            }
-            return false
-        }
-        // for normal users
-        Set<String> roles = SpringSecurityUtils.authoritiesToRoles(SpringSecurityUtils.getPrincipalAuthorities())
-        if (springSecurityService.isLoggedIn()) {
-            // anonymous users do not have a principal
-            roles.add((springSecurityService.getPrincipal() as UserDetails).getUsername())
-        }
-        String query = '''
-SELECT count(p.id) FROM Project AS p, AclEntry AS ace
-JOIN ace.aclObjectIdentity AS aoi
-JOIN aoi.aclClass AS ac
-JOIN ace.sid AS sid
-WHERE
-aoi.objectId = p.id
-AND sid.sid IN (:roles)
-AND ace.mask IN (:permissions)
-AND ace.granting = true
-'''
-        Map params = [
-                permissions: [
-                        BasePermission.READ.getMask(),
-                        BasePermission.ADMINISTRATION.getMask()
-                ],
-                roles      : roles
-        ]
-        List result = Project.executeQuery(query, params)
-        if (!result) {
-            return false
-        }
-        if ((result[0] as Long) >= 1) {
-            return true
-        }
-        return false
-    }
-
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void setSnv(Project project, Project.Snv snv) {
-        assert project: "the input project must not be null"
-        assert snv: "the input snv must not be null"
-        project.snv = snv
-        project.save(flush: true, failOnError: true)
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'read')")
+    public void updatePhabricatorAlias(String value, Project project) {
+        project.phabricatorAlias = value
+        project.save(flush: true)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")

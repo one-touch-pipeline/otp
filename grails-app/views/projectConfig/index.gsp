@@ -56,7 +56,7 @@
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
                                 template="dropDown"
-                                link="${g.createLink(controller: 'projectConfig', action: "updateProcessingPriority", params: ['project.id': project.id])}"
+                                link="${g.createLink(controller: 'projectConfig', action: "updateProcessingPriority", params: ['project.id': project.id, 'fieldName': 'processingPriority'])}"
                                 values="${processingPriorities}"
                                 value="${(project.processingPriority == 0) ? "NORMAL" : "FAST_TRACK"}"/>
                     </td>
@@ -104,8 +104,17 @@
                     <td>
                         <otp:editorSwitch
                             roles="ROLE_OPERATOR"
-                            link="${g.createLink(controller: 'projectConfig', action: 'updateMailingListName', params: ['project.id': project.id])}"
+                            link="${g.createLink(controller: 'projectConfig', action: 'simpleDomainParamUpdate', params: ['project.id': project.id, 'fieldName': 'mailingListName'])}"
                             value="${mailingListName}"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="myKey"><g:message code="projectOverview.phabricatorAlias"/></td>
+                    <td>
+                        <otp:editorSwitch
+                                roles="ROLE_USER"
+                                link="${g.createLink(controller: 'projectConfig', action: 'updatePhabricatorAlias', params: ['project.id': project.id])}"
+                                value="${project.phabricatorAlias}"/>
                     </td>
                 </tr>
                 <tr id="descriptionRow">
@@ -114,7 +123,7 @@
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
                                 template="textArea"
-                                link="${g.createLink(controller: 'projectConfig', action: 'updateDescription', params: ['project.id': project.id])}"
+                                link="${g.createLink(controller: 'projectConfig', action: 'simpleDomainParamUpdate', params: ['project.id': project.id, 'fieldName': 'description'])}"
                                 value="${description}"/>
                     </td>
                 </tr>
@@ -127,7 +136,7 @@
                     <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
-                                link="${g.createLink(controller: 'projectConfig', action: 'updateCostCenter', params: ['project.id': project.id])}"
+                                link="${g.createLink(controller: 'projectConfig', action: 'simpleDomainParamUpdate', params: ['project.id': project.id, 'fieldName': 'costCenter'])}"
                                 value="${costCenter}"/>
                     </td>
                 </tr>
@@ -137,7 +146,7 @@
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
                                 template="dropDown"
-                                link="${g.createLink(controller: "projectConfig", action: "updateTumorEntity", params: ['project.id': project.id])}"
+                                link="${g.createLink(controller: "projectConfig", action: "updateTumorEntity", params: ['project.id': project.id, 'fieldName': 'tumorEntity'])}"
                                 values="${tumorEntities}"
                                 value="${tumorEntity}"/>
                     </td>
@@ -317,7 +326,7 @@
                         <td class="myValue typeDropDown">
                             <otp:editorSwitch roles="ROLE_OPERATOR"
                                               template="dropDown"
-                                              link="${g.createLink(controller: 'projectConfig', action: 'updateSnv', params: ['project.id': project.id])}"
+                                              link="${g.createLink(controller: 'projectConfig', action: 'updateSnv', params: ['project.id': project.id, 'fieldName': 'snv'])}"
                                               values="${snvDropDown}"
                                               value="${snv}"/>
                         </td>

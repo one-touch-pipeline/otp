@@ -22,6 +22,7 @@ class Project implements Commentable, Entity, AlignmentConfig {
     Snv snv = Snv.UNKNOWN
 
     String name
+    String phabricatorAlias
     String dirName
     String realmName
     String dirAnalysis
@@ -71,6 +72,7 @@ class Project implements Commentable, Entity, AlignmentConfig {
                 return 'this name is already used in another project as nameInMetadataFiles entry'
             }
         })
+        phabricatorAlias(nullable: true, unique: true, blank: false)
         dirName(blank: false, unique: true, validator: { String val ->
             OtpPath.isValidRelativePath(val) &&
                     ['icgc', 'dkfzlsdf', 'lsdf', 'project'].every { !val.startsWith("${it}/") }
