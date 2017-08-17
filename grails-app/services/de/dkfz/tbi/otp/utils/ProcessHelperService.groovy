@@ -12,7 +12,7 @@ class ProcessHelperService {
         int exitCode
 
         ProcessOutput assertExitCodeZero() {
-            assert exitCode == 0 : "Expected exit code to be 0, but it is ${exitCode}"
+            assert exitCode == 0 : "Expected exit code to be 0, but it is ${exitCode}\nstdout: ${stdout}\nstderr: ${stderr}"
             return this
         }
 
