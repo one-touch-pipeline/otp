@@ -104,6 +104,8 @@ class ExecuteRoddyIndelJobSpec extends Specification {
                 "CHR_SUFFIX:${indelCallingInstance.referenceGenome.chromosomeSuffix}",
                 "CHR_PREFIX:${indelCallingInstance.referenceGenome.chromosomePrefix}",
                 "analysisMethodNameOnOutput:${analysisMethodNameOnOutput}",
+                "VCF_NORMAL_HEADER_COL:${bamFileControl.sampleType.dirName}",
+                "VCF_TUMOR_HEADER_COL:${bamFileDisease.sampleType.dirName}",
         ]
 
         when:

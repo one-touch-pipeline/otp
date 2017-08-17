@@ -74,6 +74,8 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
 
 
     private void commonBamFileSetup() {
+        adaptSampleTypes()
+
         individual = bamFileTumor.individual
         project = individual.project
         sampleTypeControl = bamFileControl.sampleType
@@ -97,6 +99,8 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
         createThresholds()
         setupBamFilesInFileSystem()
     }
+
+    void adaptSampleTypes() {}
 
 
     void createSampleTypeCategories() {

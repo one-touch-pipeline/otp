@@ -5,13 +5,13 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.*
-import org.junit.Test
+import org.junit.*
 import workflows.analysis.pair.*
 
 abstract class AbstractIndelWorkflowTests extends AbstractRoddyBamFilePairAnalysisWorkflowTests<IndelCallingInstance> {
 
     static final String PLUGIN_NAME = 'IndelCallingWorkflow'
-    static final String PLUGIN_VERSION = '1.0.167'
+    static final String PLUGIN_VERSION = '1.0.176-1'
     static final String PLUGIN = "${PLUGIN_NAME}:${PLUGIN_VERSION}"
     static final String CONFIG_VERSION = 'v1_0'
     static final String ANALYSIS = 'indelCallingAnalysis'
