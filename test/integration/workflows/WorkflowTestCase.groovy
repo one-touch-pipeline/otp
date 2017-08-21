@@ -19,7 +19,7 @@ import groovy.json.*
 import groovy.sql.*
 import groovy.util.logging.*
 import org.hibernate.*
-import org.joda.time.*
+import org.joda.time.DateTime
 import org.joda.time.format.*
 import org.junit.*
 
