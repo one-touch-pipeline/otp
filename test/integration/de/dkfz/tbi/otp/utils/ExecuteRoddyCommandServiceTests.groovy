@@ -521,7 +521,7 @@ ${primaryGroup}
 
     @Test
     void testDeleteContentOfOtherUnixUserDirectory_AllFineWrongUser() {
-        realm.roddyUser = grailsApplication.config.otp.testing.workflows.account
+        realm.roddyUser = "nobody"
         realm.save(flush: true)
         helperTestDeleteContentOfOtherUnixUserDirectory_AllFine(true) { String output ->
             assert !output.contains("delete content of")
