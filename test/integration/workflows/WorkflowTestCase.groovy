@@ -173,9 +173,6 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         File rootDirectory = getRootDirectory()
         assert rootDirectory.list()?.size() : "${rootDirectory} seems not to be mounted"
 
-        testDataDir = "${getRootDirectory()}/files"
-        ftpDir = "${getBaseDirectory()}/ftp"
-
         Map realmParams = [
                 programsRootPath: "/",
                 unixUser: getAccountName(),
@@ -207,6 +204,8 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         ])
         DomainFactory.createProcessingOptionBasePathReferenceGenome(new File(realm.processingRootPath, "reference_genomes").absolutePath)
 
+        testDataDir = "${getRootDirectory()}/files"
+        ftpDir = "${getBaseDirectory()}/ftp"
     }
 
     public void createDirectories(List<File> files) {
