@@ -57,10 +57,6 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
 
     // The scheduler needs to access the created objects while the test is being executed
     boolean transactional = false
-    
-    // set this to true if you are working on the tests and want to keep the workflow results
-    // don't forget to delete them manually
-    protected static final boolean KEEP_TEMP_FOLDER = false
 
     // fast queue, here we come!
     static final String jobSubmissionOptions = JsonOutput.toJson([
