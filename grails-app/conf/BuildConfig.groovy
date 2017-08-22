@@ -124,6 +124,8 @@ coverage {
             '**/de/dkfz/tbi/otp/testing/**',
             // tests
             'test/**',
+            // Controller
+            '**/*Controller*'
     ]
     xml = true
 }
