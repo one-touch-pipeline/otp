@@ -56,14 +56,13 @@ class MergingJobCreateCommandTests {
         basePathMerging = "${basePath}/merging"
         basePathMergingOutput = "${basePathMerging}//sampleType-1/${SEQ_TYPE_NAME}/${LIBRARY_LAYOUT_NAME}/DEFAULT/0/pass0"
 
-        seqPlatform = SeqPlatform.build()
+        seqPlatform = DomainFactory.createSeqPlatform()
 
-        seqType = new SeqType(
+        seqType = DomainFactory.createSeqType(
                         name: SEQ_TYPE_NAME,
                         libraryLayout: LIBRARY_LAYOUT_NAME,
                         dirName: "dir"
-                        )
-        assertNotNull(seqType.save([flush: true, failOnError: true]))
+        )
 
         Project project = DomainFactory.createProject(
                         name: "project_1",

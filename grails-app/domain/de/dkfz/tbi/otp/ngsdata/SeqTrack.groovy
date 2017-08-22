@@ -18,6 +18,8 @@ import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.*
  */
 class SeqTrack implements ProcessParameterObject, Entity {
 
+    static final String RUN_PREFIX = "run"
+
     static final Closure<? extends SeqTrack> FACTORY = { Map properties -> new SeqTrack(properties) }
 
     enum DataProcessingState {
@@ -296,6 +298,36 @@ class SeqTrack implements ProcessParameterObject, Entity {
                 logMessages.add(logMessage)
                 this.save(flush: true, failOnError: true)
             }
+        }
+    }
+
+    String getReadGroupName() {
+        Run run = run
+        if (seqType.libraryLayout == SeqType.LIBRARYLAYOUT_SINGLE) {
+            DataFile dataFile = exactlyOneElement(getDataFiles())
+            String fileNameWithoutExtension = dataFile.vbpFileName.split(/\./).first()
+            return "${RUN_PREFIX}${run.name}_${fileNameWithoutExtension}"
+        } else {
+            List<DataFile> dataFiles = getDataFiles()
+            assert dataFiles.size() == 2
+            // if the names of datafile1 and datafile2 of one seqTrack are the same, something strange happened -> should fail
+            assert dataFiles[0].vbpFileName != dataFiles[1].vbpFileName
+            String commonFastQFilePrefix = getLongestCommonPrefixBeforeLastUnderscore(dataFiles[0].vbpFileName, dataFiles[1].vbpFileName)
+            return "${RUN_PREFIX}${run.name}_${commonFastQFilePrefix}"
+        }
+    }
+
+    static String getLongestCommonPrefixBeforeLastUnderscore(String filename1, String filename2) {
+        assert filename1 : "The input filename1 must not be null"
+        assert filename2 : "The input filename2 must not be null"
+        String commonFastqFilePrefix = StringUtils.longestCommonPrefix(filename1, filename2)
+        String pattern = /^(.*)_([^_]*)$/
+        def matcher = commonFastqFilePrefix =~ pattern
+        if (matcher.matches()) {
+            return matcher.group(1)
+        } else {
+            return commonFastqFilePrefix
+
         }
     }
 

@@ -7,6 +7,7 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.job.jobs.AutoRestartableJob
 import de.dkfz.tbi.otp.ngsdata.BedFile
 import de.dkfz.tbi.otp.ngsdata.DataFile
+import de.dkfz.tbi.otp.ngsdata.LibraryLayout
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.ngsdata.MetaDataService
 import de.dkfz.tbi.otp.ngsdata.Realm
@@ -56,7 +57,7 @@ class ExecutePanCanJob extends AbstractRoddyAlignmentJob implements AutoRestarta
 
         roddyBamFile.seqTracks.each { SeqTrack seqTrack ->
             List<DataFile> dataFiles = DataFile.findAllBySeqTrack(seqTrack)
-            assert 2 == dataFiles.size()
+            assert LibraryLayout.valueOf(seqTrack.seqType.libraryLayout).mateCount == dataFiles.size()
             dataFiles.sort {it.mateNumber}.each { DataFile dataFile ->
                 File file = new File(lsdfFilesService.getFileViewByPidPath(dataFile))
                 LsdfFilesService.ensureFileIsReadableAndNotEmpty(file)
@@ -65,8 +66,10 @@ class ExecutePanCanJob extends AbstractRoddyAlignmentJob implements AutoRestarta
             }
         }
 
-        vbpDataFiles.collate(2).each {
-            MetaDataService.ensurePairedSequenceFileNameConsistency(it.first().path, it.last().path)
+        if (LibraryLayout.valueOf(roddyBamFile.seqType.libraryLayout).mateCount == 2) {
+            vbpDataFiles.collate(2).each {
+                MetaDataService.ensurePairedSequenceFileNameConsistency(it.first().path, it.last().path)
+            }
         }
 
         return vbpDataFiles

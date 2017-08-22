@@ -147,7 +147,7 @@ class CreateNotificationTextService {
                 builder << "\n***********************\n"
                 builder << project
             }
-            projectBamFiles.groupBy { it.seqType }.sort { it.key.displayName }.
+            projectBamFiles.groupBy { it.seqType }.sort { it.key.displayNameWithLibraryLayout }.
                     each { SeqType seqType, List<AbstractMergedBamFile> seqTypeBamFiles ->
                 Map<AlignmentConfig, List<AbstractMergedBamFile>> bamFilePerConfig = seqTypeBamFiles.groupBy { it.alignmentConfig }
                 boolean multipleConfigs = bamFilePerConfig.size() > 1 && project.alignmentDeciderBeanName == "panCanAlignmentDecider"
@@ -155,7 +155,7 @@ class CreateNotificationTextService {
                     AlignmentInfo alignmentInfo = alignmentInfoByConfig.get(config)
                     String individuals = multipleConfigs ? (config.individual ?: "default") : ""
                     builder << createMessage(OptionName.NOTIFICATION_TEMPLATE_ALIGNMENT_PROCESSING, [
-                            seqType           : seqType.displayName,
+                            seqType           : seqType.displayNameWithLibraryLayout,
                             individuals       : individuals,
                             referenceGenome   : configBamFiles*.referenceGenome.unique().join(', '),
                             alignmentProgram  : alignmentInfo.bwaCommand,
@@ -290,7 +290,7 @@ class CreateNotificationTextService {
     String getSampleName(SeqTrack seqTrack) {
         assert seqTrack
 
-        return "${seqTrack.individual.displayName} ${seqTrack.sampleType.displayName} ${seqTrack.seqType.displayName}"
+        return "${seqTrack.individual.displayName} ${seqTrack.sampleType.displayName} ${seqTrack.seqType.displayNameWithLibraryLayout}"
     }
 
     String getSampleIdentifiers(Collection<SeqTrack> seqTracks) {
@@ -351,7 +351,7 @@ class CreateNotificationTextService {
 
     String getSamplePairRepresentation(List<SamplePair> samplePairs) {
         return samplePairs.collect { SamplePair samplePair ->
-            "${samplePair.individual.displayName} ${samplePair.sampleType1.displayName} ${samplePair.sampleType2.displayName} ${samplePair.seqType.displayName}"
+            "${samplePair.individual.displayName} ${samplePair.sampleType1.displayName} ${samplePair.sampleType2.displayName} ${samplePair.seqType.displayNameWithLibraryLayout}"
         }.sort().unique().join('\n')
     }
 }

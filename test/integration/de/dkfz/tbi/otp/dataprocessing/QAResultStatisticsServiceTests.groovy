@@ -75,12 +75,7 @@ class QAResultStatisticsServiceTests {
                         )
         assertNotNull(sample.save([flush: true]))
 
-        seqType = new SeqType(
-                        name: SeqTypeNames.WHOLE_GENOME.seqTypeName,
-                        libraryLayout: "seqTypeLibrary",
-                        dirName: "seqTypeDirName"
-                        )
-        assertNotNull(seqType.save([flush: true]))
+        seqType = DomainFactory.createWholeGenomeSeqType()
 
         SeqPlatform seqPlatform = SeqPlatform.build()
 
@@ -561,13 +556,13 @@ class QAResultStatisticsServiceTests {
         Map actual = QAResultStatisticsService.statisticsFile(processedMergedBamFile)
 
         // Location of the statistics file on the processing side, will be copied
-        final FINAL_PATH_FILE = realm.rootPath + '/projectDirName/sequencing/seqTypeDirName/view-by-pid/pid_1/control/seqtypelibrary/merged-alignment/.tmp/QualityAssessment'
+        final FINAL_PATH_FILE = realm.rootPath + "/projectDirName/sequencing/${seqType.dirName}/view-by-pid/pid_1/control/${seqType.libraryLayoutDirName}/merged-alignment/.tmp/QualityAssessment"
 
         Map expect = [
             'small': "${FINAL_PATH_FILE}/${FileNames.QA_RESULT_OVERVIEW}",
             'extended': "${FINAL_PATH_FILE}/${FileNames.QA_RESULT_OVERVIEW_EXTENDED}",
         ]
-        assertTrue expect == actual
+        assert expect == actual
     }
 
     @Test(expected = IllegalArgumentException)

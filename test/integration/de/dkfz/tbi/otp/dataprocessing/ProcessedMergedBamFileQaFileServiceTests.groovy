@@ -56,12 +56,11 @@ class ProcessedMergedBamFileQaFileServiceTests {
                         )
         assertNotNull(sample.save([flush: true]))
 
-        SeqType seqType = new SeqType(
+        SeqType seqType = DomainFactory.createSeqType(
                         name: "seq-type",
                         libraryLayout: "library",
                         dirName: "seq-type-dir"
-                        )
-        assertNotNull(seqType.save([flush: true]))
+        )
 
         MergingWorkPackage mergingWorkPackage = new TestData().createMergingWorkPackage(
                         sample: sample,

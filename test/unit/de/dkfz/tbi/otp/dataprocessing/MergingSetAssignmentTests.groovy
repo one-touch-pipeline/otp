@@ -45,12 +45,7 @@ class MergingSetAssignmentTests {
         sample.save(flush: true)
         assertTrue(sample.validate())
 
-        SeqType seqType = new SeqType()
-        seqType.name = "WHOLE_GENOME"
-        seqType.libraryLayout = SeqType.LIBRARYLAYOUT_SINGLE
-        seqType.dirName = "whole_genome_sequencing"
-        seqType.save(flush: true)
-        assertTrue(seqType.validate())
+        SeqType seqType = DomainFactory.createWholeGenomeSeqType(SeqType.LIBRARYLAYOUT_SINGLE)
 
         SeqCenter seqCenter = new SeqCenter()
         seqCenter.name = "DKFZ"

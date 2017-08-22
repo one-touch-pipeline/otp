@@ -208,12 +208,11 @@ class MergingPassServiceTests {
                         )
         assertNotNull(sample.save([flush: true, failOnError: true]))
 
-        SeqType seqType = new SeqType(
+        SeqType seqType = DomainFactory.createSeqType([
                         name:"seqType_" + uniqueId,
                         libraryLayout:"library",
                         dirName: "dir_" + uniqueId
-                        )
-        assertNotNull(seqType.save([flush: true, failOnError: true]))
+        ])
 
         MergingWorkPackage mergingWorkPackage = testData.createMergingWorkPackage(
                         sample: sample,

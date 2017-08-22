@@ -139,20 +139,11 @@ class LsdfFilesServiceTests {
         return dataFile
     }
 
-    SeqType createSeqType(String name, String dirName) {
-        SeqType seqType = new SeqType()
-        seqType.name = name
-        seqType.libraryLayout = libraryLayout
-        seqType.dirName = dirName
-        assertNotNull(seqType.save([flush: true]))
-        return seqType
-    }
-
     @Test
     void testGetFileViewByPidRelativeDirectorySeqTrackAboutAlignmentLog() {
         final String SEQ_TYPE = "OtherThanChipSeq"
         final String SEQ_TYPE_SEQUENCING_DIR = SEQ_TYPE
-        SeqType seqType = createSeqType(SEQ_TYPE, SEQ_TYPE_SEQUENCING_DIR)
+        SeqType seqType = DomainFactory.createSeqType([name: SEQ_TYPE, dirName:  SEQ_TYPE_SEQUENCING_DIR])
 
         SeqTrack seqTrack = createSeqTrack(seqType: seqType)
         DataFile dataFile = createDataFile(seqTrack, fastqR1Filename)
@@ -181,7 +172,7 @@ class LsdfFilesServiceTests {
     void testGetFileViewByPidRelativeDirectory() {
         final String SEQ_TYPE = "OtherThanChipSeq"
         final String SEQ_TYPE_SEQUENCING_DIR = SEQ_TYPE
-        SeqType seqType = createSeqType(SEQ_TYPE, SEQ_TYPE_SEQUENCING_DIR)
+        SeqType seqType = DomainFactory.createSeqType([name: SEQ_TYPE, dirName:  SEQ_TYPE_SEQUENCING_DIR])
 
         SeqTrack seqTrack = createSeqTrack(seqType: seqType)
         DataFile dataFile = createDataFile(seqTrack, fastqR1Filename)
@@ -195,7 +186,7 @@ class LsdfFilesServiceTests {
         final String SEQ_TYPE = SeqTypeNames.CHIP_SEQ.seqTypeName
         final String CHIP_SEQ_SEQUENCING_DIR = "chip_seq_sequencing"
         final String ANTIBODY_TARGET_NAME = "antibody1"
-        SeqType seqType = createSeqType(SEQ_TYPE, CHIP_SEQ_SEQUENCING_DIR)
+        SeqType seqType = DomainFactory.createSeqType([name: SEQ_TYPE, dirName:  CHIP_SEQ_SEQUENCING_DIR])
         // creating required Antibody target objects
         AntibodyTarget antibodyTarget = new AntibodyTarget()
         antibodyTarget.name = ANTIBODY_TARGET_NAME

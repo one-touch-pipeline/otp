@@ -67,7 +67,7 @@ class MetaDataFieldsController {
                                     PAIRED   : SeqType.findByNameAndLibraryLayout(it.name, SeqType.LIBRARYLAYOUT_PAIRED) ? true : false,
                                     MATE_PAIR: SeqType.findByNameAndLibraryLayout(it.name, SeqType.LIBRARYLAYOUT_MATE_PAIR) ? true : false
                             ],
-                    alias         : it.alias
+                    displayName   : it.displayName
             ]
         }.unique()
 
@@ -123,7 +123,7 @@ class MetaDataFieldsController {
             return
         }
         SeqType.withTransaction{
-            createSeqTyp(cmd, cmd.type, cmd.dirName, cmd.alias)
+            createSeqTyp(cmd, cmd.type, cmd.dirName, cmd.displayName)
         }
     }
 
@@ -135,19 +135,19 @@ class MetaDataFieldsController {
         }
         SeqType seqType = SeqType.findByName(cmd.id)
         SeqType.withTransaction{
-            createSeqTyp(cmd, seqType.name, seqType.dirName, seqType.alias)
+            createSeqTyp(cmd, seqType.name, seqType.dirName, seqType.displayName)
         }
     }
 
-    private void createSeqTyp(Serializable cmd, String name, String dirName, String alias) {
+    private void createSeqTyp(Serializable cmd, String name, String dirName, String displayName) {
         if (cmd.single) {
-            checkErrorAndCallMethod(cmd, { seqTypeService.createSeqType(name, dirName, alias, SeqType.LIBRARYLAYOUT_SINGLE) })
+            checkErrorAndCallMethod(cmd, { seqTypeService.createSeqType(name, dirName, displayName, SeqType.LIBRARYLAYOUT_SINGLE) })
         }
         if (cmd.paired) {
-            checkErrorAndCallMethod(cmd, { seqTypeService.createSeqType(name, dirName, alias, SeqType.LIBRARYLAYOUT_PAIRED) })
+            checkErrorAndCallMethod(cmd, { seqTypeService.createSeqType(name, dirName, displayName, SeqType.LIBRARYLAYOUT_PAIRED) })
         }
         if (cmd.mate_pair) {
-            checkErrorAndCallMethod(cmd, { seqTypeService.createSeqType(name, dirName, alias, SeqType.LIBRARYLAYOUT_MATE_PAIR) })
+            checkErrorAndCallMethod(cmd, { seqTypeService.createSeqType(name, dirName, displayName, SeqType.LIBRARYLAYOUT_MATE_PAIR) })
         }
     }
 
@@ -352,22 +352,22 @@ class CreateSeqTypeCommand implements Serializable {
         boolean anyLayout = true
         String type
         String dirName
-        String alias
+        String displayName
         static constraints = {
             anyLayout(blank: false,validator: {val, obj ->
                 if (!(obj.single || obj.paired || obj.mate_pair)) {
                     return 'Empty'
                 }})
             type(blank: false, validator: {val, obj ->
-                if (SeqTypeService.hasSeqTypeByNameOrAlias(val)) {
+                if (SeqTypeService.hasSeqTypeByNameOrDisplayName(val)) {
                     return 'Duplicate'
                 }})
             dirName(blank: false, validator: {val, obj ->
                 if (SeqType.findByDirName(val)) {
                     return 'Duplicate'
                 }})
-            alias(nullable: true, blank: false, validator: {val, obj ->
-                if (val != null && SeqTypeService.hasSeqTypeByNameOrAlias(val)) {
+            displayName(blank: false, validator: {val, obj ->
+                if (SeqTypeService.hasSeqTypeByNameOrDisplayName(val)) {
                     return 'Duplicate'
                 }})
 
@@ -378,10 +378,10 @@ class CreateSeqTypeCommand implements Serializable {
         void setDirName(String dirName) {
             this.dirName = dirName?.trim()?.replaceAll(" +", " ")
         }
-        void setAlias(String alias) {
-            this.alias = alias?.trim()?.replaceAll(" +", " ")
-            if (this.alias.equals("")) {
-                this.alias = null
+        void setDisplayName(String displayName) {
+            this.displayName = displayName?.trim()?.replaceAll(" +", " ")
+            if (this.displayName.equals("")) {
+                this.displayName = null
             }
         }
 }

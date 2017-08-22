@@ -41,9 +41,7 @@ class RnaRoddyAlignmentCheckerIntegrationSpec extends AbstractRoddyAlignmentChec
 
     void "seqTypes, should return RNA"() {
         given:
-        List<SeqType> seqTypes = [
-                DomainFactory.createRnaSeqType(),
-        ]
+        List<SeqType> seqTypes = DomainFactory.createRnaAlignableSeqTypes()
 
         expect:
         TestCase.assertContainSame(seqTypes, createRoddyAlignmentChecker().getSeqTypes())

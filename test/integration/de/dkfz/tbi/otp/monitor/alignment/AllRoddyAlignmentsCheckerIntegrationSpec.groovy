@@ -16,7 +16,7 @@ class AllRoddyAlignmentsCheckerIntegrationSpec extends Specification {
 
         SeqTrack wrongSeqType = DomainFactory.createSeqTrack()
 
-        List<SeqTrack> panCanSeqTracks = DomainFactory.createPanCanAlignableSeqTypes().collect {
+        List<SeqTrack> panCanSeqTracks = DomainFactory.createRoddyAlignableSeqTypes().collect {
             DomainFactory.createSeqTrack(
                     DomainFactory.createMergingWorkPackage(
                             seqType: it,

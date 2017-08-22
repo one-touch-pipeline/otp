@@ -187,12 +187,11 @@ LIBRARY\tUNPAIRED_READS_EXAMINED\tREAD_PAIRS_EXAMINED\tUNMAPPED_READS\tUNPAIRED_
                         )
         assertNotNull(sample.save([flush: true, failOnError: true]))
 
-        SeqType seqType = new SeqType(
+        SeqType seqType = DomainFactory.createSeqType(
                         name: "seq-type",
                         libraryLayout: "library",
                         dirName: "seq-type-dir"
-                        )
-        assertNotNull(seqType.save([flush: true, failOnError: true]))
+        )
 
         MergingWorkPackage mergingWorkPackage = new TestData().createMergingWorkPackage(
                         sample: sample,

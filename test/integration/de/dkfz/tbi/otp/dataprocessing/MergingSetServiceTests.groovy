@@ -51,14 +51,9 @@ class MergingSetServiceTests {
                         )
         assertNotNull(sample.save([flush: true, failOnError: true]))
 
-        seqType = new SeqType(
-                        name: "name",
-                        libraryLayout: "library",
-                        dirName: "dirName"
-                        )
-        assertNotNull(seqType.save([flush: true, failOnError: true]))
+        seqType = DomainFactory.createSeqType()
 
-        seqPlatform = SeqPlatform.build()
+        seqPlatform = DomainFactory.createSeqPlatform()
 
         SeqCenter seqCenter = new SeqCenter(
                         name: "name",

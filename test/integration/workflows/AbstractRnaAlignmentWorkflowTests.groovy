@@ -12,8 +12,7 @@ import java.nio.file.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
-@Ignore
-class RnaAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkflowTests {
+abstract class AbstractRnaAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkflowTests {
 
     @Test
     void testAlignLanesOnly_NoBaseBamExist_OneLane_allFine() {
@@ -226,6 +225,10 @@ class RnaAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkflowTests {
                         new File(baseTestDataDirRNA, 'rna_100k_reads_L001_R1_complete_filtered.fastq.gz'),
                         new File(baseTestDataDirRNA, 'rna_100k_reads_L001_R2_complete_filtered.fastq.gz'),
                 ].asImmutable(),
+                readGroup2: [
+                        new File(baseTestDataDirRNA, 'rna_100k_reads_L002_R1_complete_filtered.fastq.gz'),
+                        new File(baseTestDataDirRNA, 'rna_100k_reads_L002_R2_complete_filtered.fastq.gz'),
+                ].asImmutable(),
         ].asImmutable()
         baseTestDataDir = new File(rootDirectory, 'PanCanAlignmentSetupFiles')
         firstBamFile = new File(baseTestDataDir, 'first-bam-file/first-bam-file_merged.mdup.bam')
@@ -262,10 +265,5 @@ class RnaAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkflowTests {
     @Override
     Duration getTimeout() {
         Duration.standardHours(5)
-    }
-
-    @Override
-    SeqType findSeqType() {
-        DomainFactory.createRnaSeqType()
     }
 }

@@ -16,12 +16,7 @@ class SeqTypeUnitTests {
 
     @Test
     void testGetWholeGenomePairedSeqType_NoWGSPairedSeqTypeInDB_ShouldFail() {
-        SeqType seqType = new SeqType(
-                name: SeqTypeNames.WHOLE_GENOME.seqTypeName,
-                libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE,
-                dirName: "whole_genome_sequencing"
-        )
-        assert seqType.save(flush: true)
+        DomainFactory.createWholeGenomeSeqType(SeqType.LIBRARYLAYOUT_SINGLE)
 
         shouldFail(AssertionError) {
             SeqType.wholeGenomePairedSeqType
@@ -30,13 +25,7 @@ class SeqTypeUnitTests {
 
     @Test
     void testGetWholeGenomePairedSeqType_AllFine() {
-        SeqType seqType = new SeqType(
-                name: SeqTypeNames.WHOLE_GENOME.seqTypeName,
-                libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED,
-                dirName: "whole_genome_sequencing"
-        )
-        assert seqType.save(flush: true)
-
+        SeqType seqType = DomainFactory.createWholeGenomeSeqType()
         assert seqType == SeqType.wholeGenomePairedSeqType
     }
 
@@ -50,12 +39,7 @@ class SeqTypeUnitTests {
 
     @Test
     void testGetExomePairedSeqType_NoExomePairedSeqTypeInDB_ShouldFail() {
-        SeqType seqType = new SeqType(
-                name: SeqTypeNames.EXOME.seqTypeName,
-                libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE,
-                dirName: "exome_sequencing"
-        )
-        assert seqType.save(flush: true)
+        DomainFactory.createExomeSeqType(SeqType.LIBRARYLAYOUT_SINGLE)
         shouldFail(AssertionError) {
             SeqType.exomePairedSeqType
         }
@@ -63,11 +47,7 @@ class SeqTypeUnitTests {
 
     @Test
     void testGetExomePairedSeqType_AllFine() {
-        SeqType seqType = new SeqType(
-                name: SeqTypeNames.EXOME.seqTypeName,
-                libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED,
-                dirName: "exome_sequencing"
-        )
+        SeqType seqType = DomainFactory.createExomeSeqType()
         assert seqType.save(flush: true)
         assert seqType == SeqType.exomePairedSeqType
     }

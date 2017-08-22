@@ -28,7 +28,7 @@ public class RoddyAlignmentDeciderTest {
 
     @Test
     void testGetPipelineRNA() {
-        SeqTrack seqTrack = DomainFactory.createSeqTrack([seqType: DomainFactory.createRnaSeqType()])
+        SeqTrack seqTrack = DomainFactory.createSeqTrack([seqType: DomainFactory.createRnaPairedSeqType()])
         Pipeline pipeline = decider.getPipeline(seqTrack)
         assert pipeline.name == Pipeline.Name.RODDY_RNA_ALIGNMENT
         assert pipeline.type == Pipeline.Type.ALIGNMENT

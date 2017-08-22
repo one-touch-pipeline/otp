@@ -389,7 +389,7 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
         when:
         controller.params.type = type
         controller.params.dirName = dirName
-        controller.params.alias = alias
+        controller.params.displayName = displayName
         controller.params.single = single
         controller.params.paired = paired
         controller.params.mate_pair = mate_pair
@@ -406,21 +406,20 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
         !mate_pair || SeqType.findByNameAndDirNameAndLibraryLayout(type, dirName, SeqType.LIBRARYLAYOUT_MATE_PAIR)
 
         where:
-        type        | dirName       | alias         | single    | paired    | mate_pair
-        'SEQTYPE'   | 'seqtype'     | ''            | true      | false     | false
-        'SEQTYPE'   | 'seqtype'     | ''            | false     | true      | false
-        'SEQTYPE'   | 'seqtype'     | ''            | true      | true      | false
-        'SEQTYPE'   | 'seqtype'     | ''            | false     | false     | true
-        'SEQTYPE'   | 'seqtype'     | ''            | true      | false     | true
-        'SEQTYPE'   | 'seqtype'     | ''            | false     | true      | true
-        'SEQTYPE'   | 'seqtype'     | ''            | true      | true      | true
+        type        | dirName       | displayName   | single    | paired    | mate_pair
         'SEQTYPE'   | 'seqtype'     | 'SEQ TYPE'    | true      | false     | false
+        'SEQTYPE'   | 'seqtype'     | 'SEQ TYPE'    | false     | true      | false
+        'SEQTYPE'   | 'seqtype'     | 'SEQ TYPE'    | true      | true      | false
+        'SEQTYPE'   | 'seqtype'     | 'SEQ TYPE'    | false     | false     | true
+        'SEQTYPE'   | 'seqtype'     | 'SEQ TYPE'    | true      | false     | true
+        'SEQTYPE'   | 'seqtype'     | 'SEQ TYPE'    | false     | true      | true
+        'SEQTYPE'   | 'seqtype'     | 'SEQ TYPE'    | true      | true      | true
     }
 
     @Unroll
     void "test JSON createSeqType invalid input"() {
         given:
-        SeqType seqType = new SeqType(name: 'SEQTYPE', dirName: 'seqtype', alias: 'SEQ TYPE',libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE)
+        SeqType seqType = new SeqType(name: 'SEQTYPE', dirName: 'seqtype', displayName: 'SEQ TYPE',libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE)
         seqType.save(flush: true)
 
         when:
@@ -454,12 +453,9 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
     @Unroll
     void "test JSON createLayout valid input"() {
         given:
-        SeqType seqType = new SeqType(name: 'SEQTYPE', dirName: 'SEQTYPE',libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE)
-        seqType.save(flush: true)
-        SeqType seqType2 = new SeqType(name: 'SEQTYPE2', dirName: 'SEQTYPE2',libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED)
-        seqType2.save(flush: true)
-        SeqType seqType3 = new SeqType(name: 'SEQTYPE3', dirName: 'SEQTYPE3',libraryLayout: SeqType.LIBRARYLAYOUT_MATE_PAIR)
-        seqType3.save(flush: true)
+        DomainFactory.createSeqType(name: 'SEQTYPE', dirName: 'SEQTYPE',libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE)
+        DomainFactory.createSeqType(name: 'SEQTYPE2', dirName: 'SEQTYPE2',libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED)
+        DomainFactory.createSeqType(name: 'SEQTYPE3', dirName: 'SEQTYPE3',libraryLayout: SeqType.LIBRARYLAYOUT_MATE_PAIR)
 
         when:
         controller.params.id = id
@@ -494,12 +490,9 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
     @Unroll
     void "test JSON createLayout invalid input"() {
         given:
-        SeqType seqType = new SeqType(name: 'SEQTYPE', dirName: 'SEQTYPE',libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE)
-        seqType.save(flush: true)
-        SeqType seqType2 = new SeqType(name: 'SEQTYPE2', dirName: 'SEQTYPE2',libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED)
-        seqType2.save(flush: true)
-        SeqType seqType3 = new SeqType(name: 'SEQTYPE3', dirName: 'SEQTYPE3',libraryLayout: SeqType.LIBRARYLAYOUT_MATE_PAIR)
-        seqType3.save(flush: true)
+        DomainFactory.createSeqType(name: 'SEQTYPE', dirName: 'SEQTYPE',libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE)
+        DomainFactory.createSeqType(name: 'SEQTYPE2', dirName: 'SEQTYPE2',libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED)
+        DomainFactory.createSeqType(name: 'SEQTYPE3', dirName: 'SEQTYPE3',libraryLayout: SeqType.LIBRARYLAYOUT_MATE_PAIR)
 
         when:
         controller.params.id = id

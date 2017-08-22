@@ -68,12 +68,7 @@ class MergingCriteriaServiceTests {
                         )
         assertNotNull(sample.save([flush: true, failOnError: true]))
 
-        seqType = new SeqType(
-                        name: "name",
-                        libraryLayout: "library",
-                        dirName: "dirName"
-                        )
-        assertNotNull(seqType.save([flush: true, failOnError: true]))
+        seqType = DomainFactory.createSeqType()
 
         softwareTool = new SoftwareTool(
                         programName: "name",

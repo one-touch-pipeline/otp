@@ -245,7 +245,7 @@ class ProjectConfigController {
         table.add(["", "Config created", "Version"])
         seqTypes.each { SeqType seqType ->
             List<String> row = []
-            row.add(seqType.displayName)
+            row.add(seqType.displayNameWithLibraryLayout)
             SnvConfig snvConfig
             RoddyWorkflowConfig roddyWorkflowConfig
             if (pipeline.type == Pipeline.Type.SNV && (snvConfig = atMostOneElement(SnvConfig.findAllByProjectAndSeqTypeAndObsoleteDateIsNull(project, seqType)))) {
@@ -271,8 +271,8 @@ class ProjectConfigController {
         row.add(message(code: "projectOverview.analysis.sampleType"))
         row.add(message(code: "projectOverview.analysis.category"))
         seqTypes.each {
-            row.add(message(code: "projectOverview.analysis.minLanes", args:[it.displayName, it.libraryLayout]))
-            row.add(message(code: "projectOverview.analysis.coverage", args:[it.displayName, it.libraryLayout]))
+            row.add(message(code: "projectOverview.analysis.minLanes", args:[it.displayNameWithLibraryLayout]))
+            row.add(message(code: "projectOverview.analysis.coverage", args:[it.displayNameWithLibraryLayout]))
         }
         thresholdsTable.add(row)
 

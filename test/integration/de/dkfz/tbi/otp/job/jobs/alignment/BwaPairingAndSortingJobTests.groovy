@@ -55,12 +55,7 @@ class BwaPairingAndSortingJobTests {
             )
         assertNotNull(sample.save([flush: true, failOnError: true]))
 
-        SeqType seqType = new SeqType(
-            name: "seqTypeName",
-            libraryLayout: "library",
-            dirName: "dirName"
-            )
-        assertNotNull(seqType.save([flush: true, failOnError: true]))
+        SeqType seqType = DomainFactory.createSeqType(libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED)
 
         SeqPlatform seqPlatform = SeqPlatform.build(name: SAMPlatformLabel.ILLUMINA.key)
 

@@ -319,7 +319,7 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
         DomainFactory.createRealmDataProcessing(temporaryFolder.newFolder(), [name: roddyBamFile.project.realmName])
 
         String readGroupHeaders = roddyBamFile.containedSeqTracks.collect {
-            "@RG     ID:${RoddyBamFile.getReadGroupName(it)}        LB:tumor_123    PL:ILLUMINA     SM:sample_tumor_123"
+            "@RG     ID:${it.getReadGroupName()}        LB:tumor_123    PL:ILLUMINA     SM:sample_tumor_123"
         }.join('\n') + '\n'
 
         SeqTrack seqTrack = DomainFactory.createSeqTrackWithTwoDataFiles(roddyBamFile.mergingWorkPackage)
@@ -341,9 +341,9 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
 
         String expectedErrorMessage = """Read groups in BAM file are not as expected.
 Read groups in ${roddyBamFile.workBamFile}:
-${(roddyBamFile.containedSeqTracks - seqTrack).collect { RoddyBamFile.getReadGroupName(it) }.sort().join('\n')}
+${(roddyBamFile.containedSeqTracks - seqTrack).collect { it.getReadGroupName() }.sort().join('\n')}
 Expected read groups:
-${roddyBamFile.containedSeqTracks.collect { RoddyBamFile.getReadGroupName(it) }.sort().join('\n')}"""
+${roddyBamFile.containedSeqTracks.collect { it.getReadGroupName() }.sort().join('\n')}"""
 
         when:
         abstractRoddyAlignmentJob.validateReadGroups(roddyBamFile)
@@ -370,7 +370,7 @@ ${roddyBamFile.containedSeqTracks.collect { RoddyBamFile.getReadGroupName(it) }.
         roddyBamFile.save()
 
         String readGroupHeaders = roddyBamFile.containedSeqTracks.collect {
-            "@RG     ID:${RoddyBamFile.getReadGroupName(it)}        LB:tumor_123    PL:ILLUMINA     SM:sample_tumor_123"
+            "@RG     ID:${it.getReadGroupName()}        LB:tumor_123    PL:ILLUMINA     SM:sample_tumor_123"
         }.join('\n') + '\n'
 
         AbstractRoddyAlignmentJob abstractRoddyAlignmentJob = Spy(AbstractRoddyAlignmentJob) {

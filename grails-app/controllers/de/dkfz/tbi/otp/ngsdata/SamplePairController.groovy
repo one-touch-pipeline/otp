@@ -46,7 +46,7 @@ class SamplePairController {
             dataToRender.aaData << [
                 sampleType1: samplePair.sampleType1.name,
                 sampleType2: samplePair.sampleType2.name,
-                seqType: samplePair.seqType.displayName,
+                seqType: samplePair.seqType.displayNameWithLibraryLayout,
                 samplePairPath: samplePair.snvSamplePairPath.getAbsoluteDataManagementPath().getAbsolutePath(),
                 lastUpdated: snvCallingInstance.lastUpdated?.format("yyyy-MM-dd")
             ]
@@ -65,7 +65,7 @@ class SamplePairController {
             dataToRender.aaData << [
                 sampleType1: samplePair.sampleType1.name,
                 sampleType2: samplePair.sampleType2.name,
-                seqType: samplePair.seqType.displayName,
+                seqType: samplePair.seqType.displayNameWithLibraryLayout,
                 dateCreated: snvCallingInstance.dateCreated?.format("yyyy-MM-dd")
             ]
         }
@@ -85,7 +85,7 @@ class SamplePairController {
             def tmp = [
                 sampleType1: samplePair?.sampleType1?.name,
                 sampleType2: samplePair?.sampleType2?.name,
-                seqType: samplePair?.seqType?.displayName,
+                seqType: samplePair?.seqType?.displayNameWithLibraryLayout,
                 laneCount1: valueHelper(processedMergedBamFile1?.numberOfMergedLanes, threshold1?.numberOfLanes),
                 laneCount2: valueHelper(processedMergedBamFile2?.numberOfMergedLanes, threshold2?.numberOfLanes),
                 coverage1: valueHelper(processedMergedBamFile1?.coverage, threshold1?.coverage),
@@ -129,7 +129,7 @@ class SamplePairController {
             dataToRender.aaData << [
                 sampleType1: samplePair.sampleType1.name,
                 sampleType2: samplePair.sampleType2.name,
-                seqType: samplePair.seqType.displayName,
+                seqType: samplePair.seqType.displayNameWithLibraryLayout,
             ]
         }
         render dataToRender as JSON

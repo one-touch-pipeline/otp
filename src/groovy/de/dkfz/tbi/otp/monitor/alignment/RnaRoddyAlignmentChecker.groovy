@@ -14,7 +14,7 @@ class RnaRoddyAlignmentChecker extends AbstractRoddyAlignmentChecker {
     }
 
     List<SeqType> getSeqTypes() {
-        return [SeqType.rnaPairedSeqType]
+        return SeqType.rnaAlignableSeqTypes
     }
 
 }

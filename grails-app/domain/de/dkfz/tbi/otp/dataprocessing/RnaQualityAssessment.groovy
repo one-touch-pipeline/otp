@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.ngsdata.*
+
 class RnaQualityAssessment extends RoddyQualityAssessment {
 
     double threePNorm
@@ -14,23 +16,23 @@ class RnaQualityAssessment extends RoddyQualityAssessment {
 
     long cumulGapLength
 
-    double end1PercentageSense
+    Double end1PercentageSense
 
     long end1Antisense
 
     double end1MappingRate
 
-    double end1MismatchRate
+    Double end1MismatchRate
 
     double end1Sense
 
-    double end2PercentageSense
+    Double end2PercentageSense
 
     long end2Antisense
 
     double end2MappingRate
 
-    double end2MismatchRate
+    Double end2MismatchRate
 
     double end2Sense
 
@@ -94,7 +96,7 @@ class RnaQualityAssessment extends RoddyQualityAssessment {
 
     double duplicatesRate
 
-    double properlyPairedPercentage
+    Double properlyPairedPercentage
 
     long secondaryAlignments
 
@@ -102,7 +104,7 @@ class RnaQualityAssessment extends RoddyQualityAssessment {
 
     double totalMappedReadCounterPercentage
 
-    double singletonsPercentage
+    Double singletonsPercentage
 
     static constraints = {
         genomeWithoutNCoverageQcBases validator: { it == null }
@@ -120,5 +122,21 @@ class RnaQualityAssessment extends RoddyQualityAssessment {
         noCovered5P nullable: true
         numGaps nullable: true
         threePNorm nullable: true
+        end2PercentageSense nullable: true, validator: nullIfAndOnlyIfLayoutIsSingle
+        end2MismatchRate nullable: true, validator: nullIfAndOnlyIfLayoutIsSingle
+        end1PercentageSense nullable: true, validator: nullIfAndOnlyIfLayoutIsSingle
+        end1MismatchRate nullable: true, validator: nullIfAndOnlyIfLayoutIsSingle
+        properlyPaired nullable: true, validator: nullIfAndOnlyIfLayoutIsSingle
+        properlyPairedPercentage nullable: true, validator: nullIfAndOnlyIfLayoutIsSingle
+        singletons nullable: true, validator: nullIfAndOnlyIfLayoutIsSingle
+        singletonsPercentage nullable: true, validator: nullIfAndOnlyIfLayoutIsSingle
+    }
+
+    static def nullIfAndOnlyIfLayoutIsSingle = { val, RnaQualityAssessment obj ->
+        if (obj.roddyBamFile.seqType.libraryLayout == SeqType.LIBRARYLAYOUT_PAIRED && val == null) {
+            return "value must be set if layout is paired, but is null"
+        } else if (obj.roddyBamFile.seqType.libraryLayout == SeqType.LIBRARYLAYOUT_SINGLE && val != null) {
+            return "value must be null if layout is single"
+        }
     }
 }

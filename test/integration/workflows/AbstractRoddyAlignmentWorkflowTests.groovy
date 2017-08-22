@@ -355,7 +355,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
 
     void linkFastqFiles(SeqTrack seqTrack, String readGroupNum) {
         List<DataFile> dataFiles = DataFile.findAllBySeqTrack(seqTrack)
-        assert 2 == dataFiles.size()
+        assert LibraryLayout.valueOf(seqTrack.seqType.libraryLayout).mateCount == dataFiles.size()
 
         Map sourceLinkMap = [:]
         dataFiles.eachWithIndex { dataFile, index ->
@@ -452,13 +452,13 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
     }
 
     void checkFirstBamFileState(RoddyBamFile bamFile, boolean isMostResentBamFile, Map bamFileProperties = [:]) {
-        SeqTrack seqTrack = SeqTrack.findByLaneId("readGroup1")
+        List<SeqTrack> seqTracks = SeqTrack.findAllByLaneIdInList(["readGroup1", "readGroup2"])
         checkBamFileState(bamFile, [
                 identifier         : 0L,
                 mostResentBamFile  : isMostResentBamFile,
                 baseBamFile        : null,
-                seqTracks          : [seqTrack],
-                containedSeqTracks : [seqTrack],
+                seqTracks          : seqTracks,
+                containedSeqTracks : seqTracks,
                 fileOperationStatus: FileOperationStatus.PROCESSED,
                 withdrawn          : false
         ] + bamFileProperties)

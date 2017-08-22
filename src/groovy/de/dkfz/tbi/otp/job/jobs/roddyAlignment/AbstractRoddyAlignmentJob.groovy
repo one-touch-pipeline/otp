@@ -105,7 +105,7 @@ abstract class AbstractRoddyAlignmentJob extends AbstractExecutePanCanJob<RoddyB
         }.sort()
 
         List<String> expectedReadGroups = bamFile.containedSeqTracks.collect {
-            RoddyBamFile.getReadGroupName(it)
+            it.getReadGroupName()
         }.sort()
 
         if (readGroupsInBam != expectedReadGroups) {

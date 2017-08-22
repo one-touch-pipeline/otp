@@ -75,12 +75,7 @@ class ProcessedBamFileUnitTests {
         )
         assertNotNull(sample.save([flush: true, failOnError: true]))
 
-        SeqType seqType = new SeqType(
-            name: "name",
-            libraryLayout: "library",
-            dirName: "dirName"
-            )
-        assertNotNull(seqType.save([flush: true, failOnError: true]))
+        SeqType seqType = DomainFactory.createSeqType()
 
         softwareTool = new SoftwareTool(
             programName: "name",
@@ -146,12 +141,7 @@ class ProcessedBamFileUnitTests {
 
     @Test
     void testGetBedFile_ExomeBamFile() {
-        SeqType exomeSeqType = new SeqType(
-                name: SeqTypeNames.EXOME.seqTypeName,
-                libraryLayout: "library",
-                dirName: "exomeDirName"
-                )
-        assertNotNull(exomeSeqType.save([flush: true, failOnError: true]))
+        SeqType exomeSeqType = DomainFactory.createExomeSeqType()
 
         ReferenceGenome referenceGenome = DomainFactory.createReferenceGenomeLazy()
 

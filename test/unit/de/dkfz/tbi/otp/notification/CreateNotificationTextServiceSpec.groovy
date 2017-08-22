@@ -467,8 +467,8 @@ class CreateNotificationTextServiceSpec extends Specification {
                 mergedAlignmentDataFileService: new MergedAlignmentDataFileService(),
         ).getSamplePairRepresentation([samplePair1, samplePair2])
         String expectedSamplePair = [
-                "${samplePair1.individual.displayName} ${samplePair1.sampleType1.displayName} ${samplePair1.sampleType2.displayName} ${samplePair1.seqType.displayName}",
-                "${samplePair2.individual.displayName} ${samplePair2.sampleType1.displayName} ${samplePair2.sampleType2.displayName} ${samplePair2.seqType.displayName}",
+                "${samplePair1.individual.displayName} ${samplePair1.sampleType1.displayName} ${samplePair1.sampleType2.displayName} ${samplePair1.seqType.displayNameWithLibraryLayout}",
+                "${samplePair2.individual.displayName} ${samplePair2.sampleType1.displayName} ${samplePair2.sampleType2.displayName} ${samplePair2.seqType.displayNameWithLibraryLayout}",
         ].sort().join('\n')
 
         then:
@@ -902,7 +902,7 @@ samplePairsNotProcessed: ${expectedSamplePairsNotProcessed}
     }
 
     private static ProjectOverviewService.AlignmentInfo createAlignmentInfo(SeqTrack seqTrack) {
-        String prefix = "${seqTrack.project.name}_${seqTrack.seqType.displayName}"
+        String prefix = "${seqTrack.project.name}_${seqTrack.seqType.displayNameWithLibraryLayout}"
         return new ProjectOverviewService.AlignmentInfo(
                 bwaCommand: "${prefix}_bwaCommand",
                 bwaOptions: "${prefix}_bwaOptions",
@@ -915,7 +915,7 @@ samplePairsNotProcessed: ${expectedSamplePairsNotProcessed}
     private static String createAlignmentInfoString(Map data) {
         return """\
 alignment information
-seqType: ${data.seqTrack.seqType.displayName}
+seqType: ${data.seqTrack.seqType.displayNameWithLibraryLayout}
 referenceGenome: ${data.referenceGenome}
 alignmentProgram: ${data.alignmentInfo.bwaCommand}
 alignmentParameter: ${data.alignmentInfo.bwaOptions}

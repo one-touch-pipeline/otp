@@ -55,11 +55,7 @@ class MergingWorkPackageUnitTests {
             sampleType: sampleType)
         this.sample.save(flush: true)
 
-        this.seqType = new SeqType(
-            name: "WHOLE_GENOME",
-            libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE,
-            dirName: "whole_genome_sequencing")
-        seqType.save(flush: true)
+        this.seqType = DomainFactory.createWholeGenomeSeqType(SeqType.LIBRARYLAYOUT_SINGLE)
     }
 
     @After

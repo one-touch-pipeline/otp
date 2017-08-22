@@ -62,14 +62,6 @@ class SeqTypeServiceUnitTests {
     }
 
     @Test
-    void testCreateSeqTypeUsingSeqTypeAndSeqTypeDirAndNullAndSingle() {
-        assertEquals(
-                seqTypeService.createSeqType(SEQ_TYPE, SEQ_TYPE_DIR, null, SeqType.LIBRARYLAYOUT_SINGLE),
-                SeqType.findByNameAndDirNameAndLibraryLayout(SEQ_TYPE, SEQ_TYPE_DIR,  SeqType.LIBRARYLAYOUT_SINGLE)
-        )
-    }
-
-    @Test
     void testCreateSeqTypeUsingSeqTypeAndSeqTypeDirAndSeqTypeAliasAndNull() {
         shouldFail(AssertionError) {
             seqTypeService.createSeqType(SEQ_TYPE, SEQ_TYPE_DIR, SEQ_TYPE_ALIAS, null)

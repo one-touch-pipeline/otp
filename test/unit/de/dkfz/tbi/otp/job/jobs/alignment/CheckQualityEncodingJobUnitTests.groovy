@@ -79,14 +79,14 @@ class CheckQualityEncodingJobUnitTests {
                         )
         assertNotNull(sample.save([flush: true]))
 
-        SeqType seqType = new SeqType(
+        SeqType seqType = DomainFactory.createSeqType([
                         name: "seqTypeName",
+                        displayName: "seqTypeName",
                         libraryLayout: "library",
                         dirName: "dirName"
-                        )
-        assertNotNull(seqType.save([flush: true]))
+        ])
 
-        SeqPlatform seqPlatform = SeqPlatform.build()
+        SeqPlatform seqPlatform = DomainFactory.createSeqPlatform()
 
         SeqCenter seqCenter = new SeqCenter(
                         name: "name",

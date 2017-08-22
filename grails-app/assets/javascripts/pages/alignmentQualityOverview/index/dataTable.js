@@ -25,7 +25,7 @@ $.otp.alignmentQualityOverviewTable = {
             fnServerData : function (sSource, aoData, fnCallback) {
                 aoData.push({
                     name : "project",
-                    value : $('#project').find('option:selected').text()
+                    value : $('#project').val()
                 });
                 aoData.push({
                     name : "seqType",
@@ -43,7 +43,7 @@ $.otp.alignmentQualityOverviewTable = {
                     },
                     "success" : function (json) {
                         $("#withdrawn_description").hide();
-                        var seqType = $('#seqType').val();
+                        var seqType = $('#seqType').find('option:selected').text();
                         for (var i = 0; i < json.aaData.length; i += 1) {
                             var row = json.aaData[i];
                             var identifier, coverage, general;
@@ -58,19 +58,18 @@ $.otp.alignmentQualityOverviewTable = {
                                 }),
                                 row.sampleType,
                             ];
-
-                            if (seqType === 'WGS' || seqType === 'WGBS' || seqType === 'WGBS_TAG' || seqType === "ChIP") {
+                            if (seqType === 'WGS PAIRED' || seqType === 'WGBS PAIRED' || seqType === 'WGBS_TAG PAIRED' || seqType === "ChIP PAIRED") {
                                 coverage = [
                                     row.coverageWithoutN,
                                     row.coverageX,
                                     row.coverageY,
                                 ];
-                            } else if (seqType === 'EXOME') {
+                            } else if (seqType === 'EXOME PAIRED') {
                                 coverage = [
                                     "<span class='" + row.onTargetRateWarning + "'>" + row.onTargetRate + " </span>",
                                     row.targetCoverage,
                                 ];
-                            } else if (seqType === 'RNA') {
+                            } else if (seqType === 'RNA PAIRED' || seqType === 'RNA SINGLE') {
                                 coverage = [
                                     row.totalReadCounter,
                                     row.duplicates,
@@ -97,7 +96,7 @@ $.otp.alignmentQualityOverviewTable = {
                                 ]
                             }
 
-                            if (seqType === 'RNA') {
+                            if (seqType === 'RNA PAIRED' || seqType === 'RNA SINGLE') {
                                 general = [
                                     "<span title='" + row.kit.name + "'>" + row.kit.shortName + "</span>",
                                     row.dateFromFileSystem,

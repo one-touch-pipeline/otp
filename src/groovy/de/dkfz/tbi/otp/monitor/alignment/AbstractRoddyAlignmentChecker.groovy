@@ -52,7 +52,7 @@ abstract class AbstractRoddyAlignmentChecker extends PipelinesChecker<SeqTrack> 
 
         if (seqTrackMap[false]) {
             output.showUniqueList(HEADER_NOT_SUPPORTED_SEQTYPES, seqTrackMap[false], { SeqTrack seqTrack ->
-                "${seqTrack.seqType.alias} ${seqTrack.seqType.libraryLayout}}"
+                "${seqTrack.seqType.displayNameWithLibraryLayout}"
             })
         }
 

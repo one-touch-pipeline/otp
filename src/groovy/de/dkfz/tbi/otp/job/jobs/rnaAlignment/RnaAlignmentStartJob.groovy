@@ -12,7 +12,7 @@ import org.springframework.stereotype.*
 class RnaAlignmentStartJob extends RoddyAlignmentStartJob {
     @Override
     List<SeqType> getSeqTypes() {
-        return [SeqType.getRnaPairedSeqType()]
+        return SeqType.getRnaAlignableSeqTypes()
     }
 
     /**

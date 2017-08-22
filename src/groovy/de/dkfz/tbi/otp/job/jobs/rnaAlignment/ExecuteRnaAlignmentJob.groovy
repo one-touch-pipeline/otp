@@ -2,16 +2,15 @@ package de.dkfz.tbi.otp.job.jobs.rnaAlignment
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.jobs.roddyAlignment.*
-import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.*
 
 class ExecuteRnaAlignmentJob extends ExecutePanCanJob {
 
     @Override
     protected List<String> prepareAndReturnWorkflowSpecificCValues(RoddyBamFile roddyBamFile) {
         assert roddyBamFile : "roddyBamFile must not be null"
-
         List<File> filesToMerge = getFilesToMerge(roddyBamFile)
-
         List<String> cValues = prepareAndReturnAlignmentCValues(roddyBamFile)
 
         cValues.add("fastq_list:${filesToMerge.join(";")}")
@@ -24,6 +23,12 @@ class ExecuteRnaAlignmentJob extends ExecutePanCanJob {
         // the following two variables need to be provided since Roddy does not use the normal path definition for RNA
         cValues.add("ALIGNMENT_DIR:${roddyBamFile.workDirectory}")
         cValues.add("outputBaseDirectory:${roddyBamFile.workDirectory}")
+
+        if (roddyBamFile.seqType.libraryLayout == SeqType.LIBRARYLAYOUT_SINGLE) {
+            cValues.add("useSingleEndProcessing:true")
+        } else if (roddyBamFile.seqType.libraryLayout == SeqType.LIBRARYLAYOUT_PAIRED) {
+            cValues.add("useSingleEndProcessing:false")
+        }
 
         return cValues
     }

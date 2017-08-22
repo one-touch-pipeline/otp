@@ -1,7 +1,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.InformationReliability
+import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.dataprocessing.*
 import grails.test.mixin.*
 import grails.test.mixin.support.*
 import org.junit.*
@@ -9,8 +10,31 @@ import org.junit.*
 
 @TestMixin(GrailsUnitTestMixin)
 @TestFor(SeqTrack)
-@Mock([DataFile, Sample, Individual, Project, ProjectCategory,])
+@Mock([
+        DataFile,
+        FileType,
+        Individual,
+        LibraryPreparationKit,
+        MergingWorkPackage,
+        Pipeline,
+        Project,
+        ProjectCategory,
+        ReferenceGenome,
+        Run,
+        RunSegment,
+        Sample,
+        SampleType,
+        SeqCenter,
+        SeqPlatform,
+        SeqPlatformGroup,
+        SeqType,
+        SoftwareTool,
+])
 class SeqTrackUnitTests {
+
+    final String FIRST_DATAFILE_NAME = "4_NoIndex_L004_R1_complete_filtered.fastq.gz"
+    final String SECOND_DATAFILE_NAME = "4_NoIndex_L004_R2_complete_filtered.fastq.gz"
+    final String COMMON_PREFIX = "4_NoIndex_L004"
 
     @Test
     void testIsWithDrawn() {
@@ -134,6 +158,88 @@ class SeqTrackUnitTests {
         assert "0" == SeqTrack.normalizeLibraryName("lib000")
         assert "1" == SeqTrack.normalizeLibraryName("lib0001")
         assert "1" == SeqTrack.normalizeLibraryName("library1")
+    }
+
+
+    @Test
+    void testGetLongestCommonPrefixBeforeLastUnderscore_FirstStringNull_ShouldFail() {
+        TestCase.shouldFail(AssertionError) {
+            SeqTrack.getLongestCommonPrefixBeforeLastUnderscore(null, SECOND_DATAFILE_NAME)
+        }
+    }
+
+    @Test
+    void testGetLongestCommonPrefixBeforeLastUnderscore_SecondStringNull_ShouldFail() {
+        TestCase.shouldFail(AssertionError) {
+            SeqTrack.getLongestCommonPrefixBeforeLastUnderscore(FIRST_DATAFILE_NAME, null)
+        }
+    }
+
+    @Test
+    void testGetLongestCommonPrefixBeforeLastUnderscore_FirstStringEmpty_ShouldFail() {
+        TestCase.shouldFail(AssertionError) {
+            SeqTrack.getLongestCommonPrefixBeforeLastUnderscore("", SECOND_DATAFILE_NAME)
+        }
+    }
+
+    @Test
+    void testGetLongestCommonPrefixBeforeLastUnderscore_SecondStringEmpty_ShouldFail() {
+        TestCase.shouldFail(AssertionError) {
+            SeqTrack.getLongestCommonPrefixBeforeLastUnderscore(FIRST_DATAFILE_NAME, "")
+        }
+    }
+
+    @Test
+    void testGetLongestCommonPrefixBeforeLastUnderscore_StringsAreEqual() {
+        assert "4_NoIndex_L004_R1_complete" ==
+                SeqTrack.getLongestCommonPrefixBeforeLastUnderscore(FIRST_DATAFILE_NAME, FIRST_DATAFILE_NAME)
+    }
+
+    @Test
+    void testGetLongestCommonPrefixBeforeLastUnderscore_PrefixIsEqual() {
+        assert COMMON_PREFIX ==
+                SeqTrack.getLongestCommonPrefixBeforeLastUnderscore(FIRST_DATAFILE_NAME, SECOND_DATAFILE_NAME)
+    }
+
+    @Test
+    void testGetLongestCommonPrefixBeforeLastUnderscore_NoUnderScoreInStrings() {
+        assert "NoUnderScoreR" ==
+                SeqTrack.getLongestCommonPrefixBeforeLastUnderscore("NoUnderScoreR1.tar.gz", "NoUnderScoreR2.tar.gz")
+    }
+
+
+    @Test
+    void testGetReadGroupName_PAIRED_OnlyOneDataFile_ShouldFail() {
+        SeqTrack seqTrack = DomainFactory.createSeqTrackWithDataFiles(DomainFactory.createMergingWorkPackage())
+        DataFile.findAllBySeqTrack(seqTrack)[0].delete(flush: true)
+        TestCase.shouldFail(AssertionError) {
+            seqTrack.getReadGroupName()
+        }
+    }
+
+    @Test
+    void testGetReadGroupName_PAIRED_SameDataFileName_ShouldFail() {
+        SeqTrack seqTrack = DomainFactory.createSeqTrackWithDataFiles(DomainFactory.createMergingWorkPackage())
+        assert DomainFactory.createSequenceDataFile([seqTrack: seqTrack])
+        TestCase.shouldFail(AssertionError) {
+            seqTrack.getReadGroupName()
+        }
+    }
+
+    @Test
+    void testGetReadGroupName_PAIRED_AllFine() {
+        MergingWorkPackage mwp = DomainFactory.createMergingWorkPackage(seqType: DomainFactory.createRnaPairedSeqType())
+        SeqTrack seqTrack = DomainFactory.createSeqTrackWithDataFiles(mwp)
+        List<DataFile> dataFiles = DataFile.findAllBySeqTrack(seqTrack)
+        dataFiles[0].vbpFileName = FIRST_DATAFILE_NAME
+        dataFiles[1].vbpFileName = SECOND_DATAFILE_NAME
+        assert "run${seqTrack.run.name}_${COMMON_PREFIX}" == seqTrack.getReadGroupName()
+    }
+
+    @Test
+    void testGetReadGroupName_SINGLE_AllFine() {
+        SeqTrack seqTrack1 = DomainFactory.createSeqTrackWithOneDataFile([:], [vbpFileName: "fileName.fastq.gz"])
+        assert "run${seqTrack1.run.name}_${'fileName'}" == seqTrack1.getReadGroupName()
     }
 
 

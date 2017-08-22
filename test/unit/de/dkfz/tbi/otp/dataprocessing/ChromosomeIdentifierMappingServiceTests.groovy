@@ -36,11 +36,7 @@ class ChromosomeIdentifierMappingServiceTests {
         project.realmName = realm.name
         project.save(flush: true)
 
-        seqType = new SeqType()
-        seqType.name = "WHOLE_GENOME"
-        seqType.libraryLayout = SeqType.LIBRARYLAYOUT_SINGLE
-        seqType.dirName = "whole_genome_sequencing"
-        seqType.save(flush: true)
+        seqType = DomainFactory.createWholeGenomeSeqType(SeqType.LIBRARYLAYOUT_SINGLE)
 
         referenceGenome = DomainFactory.createReferenceGenome([
                         name: "hg19_1_24",

@@ -37,7 +37,7 @@ class AllRoddyAlignmentsChecker extends PipelinesChecker<SeqTrack> {
         List<SeqTrack> unsupportedSeqTracks = seqTracksBySeqType.values().flatten()
 
         output.showUniqueList(HEADER_NOT_SUPPORTED_SEQTYPES, unsupportedSeqTracks, { SeqTrack seqTrack ->
-            "${seqTrack.seqType.alias} ${seqTrack.seqType.libraryLayout}}"
+            "${seqTrack.seqType.displayNameWithLibraryLayout}"
         })
 
         return seqTracksPerChecker.collect { AbstractRoddyAlignmentChecker checker, List<SeqTrack> seqTrackList ->

@@ -81,7 +81,7 @@ class LibPrepKitAdapterValidatorSpec extends Specification {
         identifierRnaWithProjectRoddyConfig.sample.individual.project.save(flush: true)
         DomainFactory.createRoddyWorkflowConfig([
                 project: identifierRnaWithProjectRoddyConfig.project,
-                seqType: DomainFactory.createRnaSeqType(),
+                seqType: DomainFactory.createRnaPairedSeqType(),
                 pipeline: DomainFactory.createRnaPipeline(),
                 adapterTrimmingNeeded: true
         ])

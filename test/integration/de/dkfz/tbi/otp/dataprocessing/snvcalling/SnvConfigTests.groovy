@@ -51,12 +51,7 @@ class SnvConfigTests {
         )
         assert project.save(flush: true)
 
-        seqType = new SeqType(
-                name: "seqTypeName",
-                libraryLayout: "seqTypeLibraryLayout",
-                dirName: "seqTypeDirName"
-        )
-        assert seqType.save(flush: true)
+        seqType = DomainFactory.createWholeGenomeSeqType()
 
         DomainFactory.createOtpSnvPipelineLazy()
     }
@@ -88,12 +83,7 @@ class SnvConfigTests {
                 )
         assert project2.save()
 
-        SeqType seqType2 = new SeqType(
-                name: "seqType2Name",
-                libraryLayout: "seqType2LibraryLayout",
-                dirName: "seqType2DirName"
-                )
-        assert seqType2.save()
+        SeqType seqType2 = DomainFactory.createSeqType()
 
         SnvConfig config2 = new SnvConfig(
                 project: project2,

@@ -260,15 +260,15 @@
 
                         </td>
                         <td>
-                            ${seqType.alias}
+                            ${seqType.displayName}
                         </td>
                     </tr>
                 </g:each>
                 <td colspan="4">
                     <otp:editorSwitchNewValues
                         roles="ROLE_OPERATOR"
-                        labels="${["Type", "Directory", "Alias", "SINGLE", "PAIRED", "MATE_PAIR"]}"
-                        textFields="${["type", "dirName", "alias"]}"
+                        labels="${["Type", "Directory", "Display Name", "SINGLE", "PAIRED", "MATE_PAIR"]}"
+                        textFields="${["type", "dirName", "displayName"]}"
                         checkBoxes="${[single: false, paired: true, mate_pair: false]}"
                         link="${g.createLink(controller: 'metaDataFields', action: 'createSeqType')}"
                     />

@@ -31,7 +31,6 @@ class AggregateSequences implements Serializable {
 
     /** fields from {@link SeqType} */
     String seqTypeName
-    String seqTypeAlias
     String seqTypeDisplayName
     String libraryLayout
     String dirName
@@ -78,8 +77,5 @@ class AggregateSequences implements Serializable {
         seqPlatformModelLabelName(nullable: true)
         // nullable constraints from SequencingKitLabel
         sequencingKitLabelName(nullable: true)
-        // nullable constraints from SeqType
-        seqTypeAlias(nullable: true)
-        seqTypeDisplayName(nullable: true)
     }
 }

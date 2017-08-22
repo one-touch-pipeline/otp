@@ -66,7 +66,6 @@ class Sequence implements Serializable {
 
     /** fields from {@link SeqType} */
     String seqTypeName
-    String seqTypeAlias
     String seqTypeDisplayName
     String libraryLayout
     String dirName
@@ -123,9 +122,6 @@ class Sequence implements Serializable {
         seqPlatformModelLabelName(nullable: true)
         // nullable constraints from SequencingKitLabel
         sequencingKitLabelName(nullable: true)
-        // nullable constraints from SeqType
-        seqTypeAlias(nullable: true)
-        seqTypeDisplayName(nullable: true)
         nBasePairs(nullable: true)
         problem nullable: true
     }

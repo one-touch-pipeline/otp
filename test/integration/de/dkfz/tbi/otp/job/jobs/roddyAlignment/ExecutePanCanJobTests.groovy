@@ -205,7 +205,7 @@ class ExecutePanCanJobTests {
 
         assert TestCase.shouldFail(AssertionError) {
             executePanCanJob.getFilesToMerge(roddyBamFile)
-        }.contains("2 == dataFiles.size()")
+        }.contains("LibraryLayout.valueOf(seqTrack.seqType.libraryLayout).mateCount == dataFiles.size()")
     }
 
 

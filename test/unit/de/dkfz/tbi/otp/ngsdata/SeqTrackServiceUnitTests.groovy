@@ -153,7 +153,7 @@ class SeqTrackServiceUnitTests {
         withTestMidtermStorageMountPoint {
             SeqTrack seqTrack = createDataForDetermineAndStoreIfFastqFilesHaveToBeLinked()
 
-            SeqType rnaSeqType = DomainFactory.createRnaSeqType()
+            SeqType rnaSeqType = DomainFactory.createRnaPairedSeqType()
             seqTrack.seqType = rnaSeqType
 
             seqTrackService.determineAndStoreIfFastqFilesHaveToBeLinked(seqTrack, true)

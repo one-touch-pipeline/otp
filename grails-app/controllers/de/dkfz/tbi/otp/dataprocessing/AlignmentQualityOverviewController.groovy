@@ -105,7 +105,7 @@ class AlignmentQualityOverviewController {
     ProjectService projectService
     ProjectSelectionService projectSelectionService
 
-    Map index() {
+    Map index(AlignmentQcCommand cmd) {
         String projectName = params.project
         if (projectName) {
             Project project
@@ -126,13 +126,9 @@ class AlignmentQualityOverviewController {
             project = projects.first()
         }
 
-        List<String> seqTypes = seqTypeService.alignableSeqTypesByProject(project)*.displayName
+        List<SeqType> seqTypes = seqTypeService.alignableSeqTypesByProject(project)
 
-        String seqTypeName = (params.seqType && seqTypes.contains(params.seqType)) ? params.seqType : seqTypes[0]
-
-        SeqType seqType = SeqType.findWhere(
-                displayName: seqTypeName
-        )
+        SeqType seqType = (cmd.seqType && seqTypes.contains(cmd.seqType)) ? cmd.seqType : seqTypes[0]
 
         List<String> header = null
         switch (seqType?.name) {
@@ -152,14 +148,14 @@ class AlignmentQualityOverviewController {
                 header = HEADER_RNA
                 break
             default:
-                throw new RuntimeException("How should ${seqTypeName} be handled")
+                throw new RuntimeException("How should ${seqType.naturalId} be handled")
         }
 
         return [
                 projects: projects,
                 project : project,
                 seqTypes: seqTypes,
-                seqType : seqTypeName,
+                seqType : seqType,
                 header  : header,
         ]
     }
@@ -167,8 +163,8 @@ class AlignmentQualityOverviewController {
 
     JSON dataTableSource(DataTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()
-        String projectName = params.project
-        String seqTypeName = params.seqType
+        Long projectName = params.project as Long
+        Long seqTypeName = params.seqType as Long
 
         if (!projectName || !seqTypeName) {
             dataToRender.iTotalRecords = 0
@@ -178,11 +174,8 @@ class AlignmentQualityOverviewController {
             return
         }
 
-        Project project = projectService.getProjectByName(projectName)
-        SeqType seqType = SeqType.findWhere(
-                displayName: seqTypeName,
-                'libraryLayout': SeqType.LIBRARYLAYOUT_PAIRED
-        )
+        Project project = projectService.getProject(projectName)
+        SeqType seqType = SeqType.get(seqTypeName)
 
 
         List<AbstractQualityAssessment> dataOverall = overallQualityAssessmentMergedService.findAllByProjectAndSeqType(project, seqType)
@@ -372,4 +365,8 @@ class AlignmentQualityOverviewController {
             return WarningLevel.NO
         }
     }
+}
+
+class AlignmentQcCommand {
+    SeqType seqType
 }

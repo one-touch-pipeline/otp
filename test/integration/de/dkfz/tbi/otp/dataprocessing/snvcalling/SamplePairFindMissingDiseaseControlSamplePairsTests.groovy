@@ -27,7 +27,7 @@ class SamplePairFindMissingDiseaseControlSamplePairsTests {
     void before() {
         wholeGenome = SeqType.build(name: SeqTypeNames.WHOLE_GENOME.seqTypeName, libraryLayout: 'PAIRED')
         exome = SeqType.build(name: SeqTypeNames.EXOME.seqTypeName, libraryLayout: 'PAIRED')
-        rna = DomainFactory.createRnaSeqType()
+        rna = DomainFactory.createRnaPairedSeqType()
         LibraryPreparationKit libraryPreparationKit = LibraryPreparationKit.build()
 
         project = Project.build()

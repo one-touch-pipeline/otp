@@ -31,19 +31,15 @@ class SeqType implements Entity {
     /**
      * One of {@link SeqTypeNames#seqTypeName}.
      * Used in file system paths, for example by ProcessedMergedBamFileService.fileNameNoSuffix(ProcessedMergedBamFile).
-     * Used in the GUI unless {@link #alias} is set.
      */
     String name
     String libraryLayout
     String dirName
     /**
-     * Can be set to override {@link #name} for display in the GUI.
-     */
-    String alias
-    /**
      * Display name used in the GUI.
      */
     String displayName
+
     /** name used in roddy config files */
     String roddyName
 
@@ -52,16 +48,10 @@ class SeqType implements Entity {
         name(blank: false)
         libraryLayout(blank: false, unique: 'name', validator: { OtpPath.isValidPathComponent(it) })
         dirName(blank: false, unique: 'libraryLayout', validator: { OtpPath.isValidPathComponent(it) })  // TODO: OTP-1124: unique constraint for (dirName, libraryLayoutDirName)
-        alias(nullable: true, blank: false)
-        //For unknown reason the object creation fail, if it is not set as nullable
-        displayName(nullable: true, blank: false)
+        displayName(blank: false)
         roddyName(nullable: true, blank: false, validator: {
             !it?.contains('_')  // Roddy has problems with underscores
         })
-    }
-
-    static mapping = {
-        displayName formula: '(CASE WHEN alias IS NOT NULL THEN alias ELSE name END)'
     }
 
     /**
@@ -70,6 +60,10 @@ class SeqType implements Entity {
      */
     String getNaturalId() {
         return "${name}_${libraryLayout}"
+    }
+
+    String getDisplayNameWithLibraryLayout() {
+        return "${displayName} ${libraryLayout}"
     }
 
     String getLibraryLayoutDirName() {
@@ -81,7 +75,7 @@ class SeqType implements Entity {
     }
 
     String getProcessingOptionName() {
-        return alias ?: name
+        return displayName ?: name
     }
 
     SeqTypeNames getSeqTypeName() {
@@ -113,7 +107,7 @@ class SeqType implements Entity {
     }
 
     String toString() {
-        "${displayName} ${libraryLayout}"
+        return displayNameWithLibraryLayout
     }
 
 
@@ -153,6 +147,12 @@ class SeqType implements Entity {
         )
     }
 
+    static SeqType getRnaSingleSeqType() {
+        return CollectionUtils.exactlyOneElement(
+                findAllByNameAndLibraryLayout(SeqTypeNames.RNA.seqTypeName, LIBRARYLAYOUT_SINGLE)
+        )
+    }
+
     static List<SeqType> getDefaultOtpAlignableSeqTypes() {
         return [
                 getExomePairedSeqType(),
@@ -170,11 +170,25 @@ class SeqType implements Entity {
         ]
     }
 
+    static List<SeqType> getRnaAlignableSeqTypes() {
+        return [
+                getRnaPairedSeqType(),
+                getRnaSingleSeqType(),
+        ]
+    }
+
     static List<SeqType> getRoddyAlignableSeqTypes() {
         return [
                 getPanCanAlignableSeqTypes(),
-                getRnaPairedSeqType(),
+                getRnaAlignableSeqTypes(),
         ].flatten()
+    }
+
+    static List<SeqType> getAllAlignableSeqTypes() {
+        return [
+                getDefaultOtpAlignableSeqTypes(),
+                getRoddyAlignableSeqTypes(),
+        ].flatten().unique()
     }
 
     static List<SeqType> getSnvPipelineSeqTypes() {
@@ -212,12 +226,6 @@ class SeqType implements Entity {
         ].flatten().unique()
     }
 
-    static List<SeqType> getAllAlignableSeqTypes() {
-        return [
-                getDefaultOtpAlignableSeqTypes(),
-                getRoddyAlignableSeqTypes(),
-        ].flatten().unique()
-    }
 
     static List<SeqType> getSeqTypesIgnoringLibraryPreparationKitForMerging() {
         return [

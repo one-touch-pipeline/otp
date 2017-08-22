@@ -253,12 +253,12 @@ class ProjectOverviewService {
                 case PanCanAlignmentDecider:
                     List<ReferenceGenomeProjectSeqType> rgpst = ReferenceGenomeProjectSeqType.findAllByProjectAndDeprecatedDateIsNull(project)
                     Map<String, AlignmentInfo> result = [:]
-                    rgpst*.seqType.unique().sort {it.displayName }.each { SeqType seqType ->
+                    rgpst*.seqType.unique().sort {it.displayNameWithLibraryLayout }.each { SeqType seqType ->
                         RoddyWorkflowConfig workflowConfig = RoddyWorkflowConfig.getLatestForProject(project, seqType, Pipeline.findByNameAndType(Pipeline.Name.forSeqType(seqType), Pipeline.Type.ALIGNMENT))
                         if (!workflowConfig) {
                             return //pancan not configured for this seq type, skipped
                         }
-                        result.put(seqType.displayName, getRoddyAlignmentInformation(workflowConfig))
+                        result.put(seqType.displayNameWithLibraryLayout, getRoddyAlignmentInformation(workflowConfig))
                     }
                     return result
                 case DefaultOtpAlignmentDecider:

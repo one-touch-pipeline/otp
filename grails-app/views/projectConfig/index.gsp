@@ -230,14 +230,14 @@
                     <ul>
                         <g:each in="${seqTypes}" var="seqType">
                             <li>
-                                <g:if test="${seqType.displayName == "RNA"}">
+                                <g:if test="${seqType.isRna()}">
                                     <g:link controller='configurePipeline' action='rnaAlignment' params='["project.id": project.id, "seqType.id": seqType.id]' class="configure">
-                                        ${seqType.displayName}
+                                        ${seqType.displayNameWithLibraryLayout}
                                     </g:link>
                                 </g:if>
                                 <g:else>
                                     <g:link controller='configurePipeline' action='alignment' params='["project.id": project.id, "seqType.id": seqType.id]' class="configure">
-                                        ${seqType.displayName}
+                                        ${seqType.displayNameWithLibraryLayout}
                                     </g:link>
                                 </g:else>
                             </li>
@@ -306,7 +306,7 @@
                     <g:each in="${snvSeqTypes}" var="seqType">
                         <li>
                             <g:link controller='configurePipeline' action='snv' params='["project.id": project.id, "seqType.id": seqType.id]' class="configure">
-                                ${seqType.displayName}
+                                ${seqType.displayNameWithLibraryLayout}
                             </g:link>
                         </li>
                     </g:each>
@@ -349,7 +349,7 @@
                     <g:each in="${indelSeqTypes}" var="seqType">
                         <li>
                             <g:link controller='configurePipeline' action='indel' params='["project.id": project.id, "seqType.id": seqType.id]' class="configure">
-                                ${seqType.displayName}
+                                ${seqType.displayNameWithLibraryLayout}
                             </g:link>
                         </li>
                     </g:each>
@@ -380,7 +380,7 @@
                         <g:if test="${!checkSophiaReferenceGenome}">
                             <g:each in="${sophiaSeqType}" var="seqType">
                                 <g:link controller='configurePipeline' action='sophia' params='["project.id": project.id, "seqType.id": seqType.id]' class="configure">
-                                    ${seqType.displayName}
+                                    ${seqType.displayNameWithLibraryLayout}
                                 </g:link>
                             </g:each>
                         </g:if>
@@ -415,7 +415,7 @@
                         <g:if test="${!checkAceseqReferenceGenome}">
                             <g:each in="${aceseqSeqType}" var="seqType">
                                 <g:link controller='configurePipeline' action='aceseq' params='["project.id": project.id, "seqType.id": seqType.id]' class="configure">
-                                    ${seqType.displayName}
+                                    ${seqType.displayNameWithLibraryLayout}
                                 </g:link>
                             </g:each>
                         </g:if>

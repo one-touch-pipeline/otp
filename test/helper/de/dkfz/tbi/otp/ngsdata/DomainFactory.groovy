@@ -602,7 +602,7 @@ class DomainFactory {
     public static <T> T createRoddyBamFile(Map bamFileProperties = [:], Class<T> clazz = RoddyBamFile) {
         MergingWorkPackage workPackage = bamFileProperties.workPackage
         if (!workPackage) {
-            SeqType seqType = (clazz == RnaRoddyBamFile) ? createRnaSeqType() : createWholeGenomeSeqType()
+            SeqType seqType = (clazz == RnaRoddyBamFile) ? createRnaPairedSeqType() : createWholeGenomeSeqType()
             Pipeline pipeline = (clazz == RnaRoddyBamFile) ? createRoddyRnaPipeline() : createPanCanPipeline()
             workPackage = createMergingWorkPackage(
                     pipeline: pipeline,
@@ -1247,7 +1247,7 @@ class DomainFactory {
                 name         : defaultName,
                 libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE,
                 dirName      : 'seqTypeDirName_' + (counter++),
-                displayName  : seqTypeProperties.get('alias') ?: seqTypeProperties.get('name') ?: defaultName,
+                displayName  : seqTypeProperties.get('displayName') ?: seqTypeProperties.get('name') ?: defaultName,
         ], seqTypeProperties, saveAndValidate)
     }
 
@@ -1707,22 +1707,22 @@ class DomainFactory {
         ] + myProps)
     }
 
-    static SeqType createSeqTypeLazy(SeqTypeNames seqTypeNames, String alias, String dirName, String roddyName = null, String libraryLayout = SeqType.LIBRARYLAYOUT_PAIRED) {
+    static SeqType createSeqTypeLazy(SeqTypeNames seqTypeNames, String displayName, String dirName, String roddyName = null, String libraryLayout = SeqType.LIBRARYLAYOUT_PAIRED) {
         createDomainObjectLazy(SeqType, [:], [
                 name: seqTypeNames.seqTypeName,
-                alias: alias,
+                displayName: displayName,
                 roddyName: roddyName,
                 dirName: dirName,
                 libraryLayout: libraryLayout,
         ]).refresh()
     }
 
-    static SeqType createWholeGenomeSeqType() {
-        createSeqTypeLazy(SeqTypeNames.WHOLE_GENOME, 'WGS', 'whole_genome_sequencing', 'WGS')
+    static SeqType createWholeGenomeSeqType(String libraryLayout = SeqType.LIBRARYLAYOUT_PAIRED) {
+        createSeqTypeLazy(SeqTypeNames.WHOLE_GENOME, 'WGS', 'whole_genome_sequencing', 'WGS', libraryLayout)
     }
 
-    static SeqType createExomeSeqType() {
-        createSeqTypeLazy(SeqTypeNames.EXOME, 'EXOME', 'exon_sequencing', 'WES')
+    static SeqType createExomeSeqType(String libraryLayout = SeqType.LIBRARYLAYOUT_PAIRED) {
+        createSeqTypeLazy(SeqTypeNames.EXOME, 'EXOME', 'exon_sequencing', 'WES', libraryLayout)
     }
 
     static SeqType createWholeGenomeBisulfiteSeqType() {
@@ -1737,8 +1737,12 @@ class DomainFactory {
         createSeqTypeLazy(SeqTypeNames.CHIP_SEQ, 'ChIP', 'chip_seq_sequencing', "CHIPSEQ")
     }
 
-    static SeqType createRnaSeqType() {
+    static SeqType createRnaPairedSeqType() {
         createSeqTypeLazy(SeqTypeNames.RNA, 'RNA', 'rna_sequencing', "RNA")
+    }
+
+    static SeqType createRnaSingleSeqType() {
+        createSeqTypeLazy(SeqTypeNames.RNA, 'RNA', 'rna_sequencing', "RNA", SeqType.LIBRARYLAYOUT_SINGLE)
     }
 
     static List<SeqType> createDefaultOtpAlignableSeqTypes() {
@@ -1758,10 +1762,17 @@ class DomainFactory {
         ]
     }
 
+    static List<SeqType> createRnaAlignableSeqTypes() {
+        [
+                createRnaPairedSeqType(),
+                createRnaSingleSeqType(),
+        ]
+    }
+
     static List<SeqType> createRoddyAlignableSeqTypes() {
         [
                 createPanCanAlignableSeqTypes(),
-                createRnaSeqType(),
+                createRnaAlignableSeqTypes(),
         ].flatten()
     }
 
@@ -1772,14 +1783,6 @@ class DomainFactory {
         ].flatten().unique()
     }
 
-    static List<SeqType> createAllAnalysableSeqTypes() {
-        [
-                createSnvSeqTypes(),
-                createIndelSeqTypes(),
-                createSophiaSeqTypes(),
-                createAceseqSeqTypes(),
-        ].flatten().unique()
-    }
 
     static List<SeqType> createSnvSeqTypes() {
         [
@@ -1805,6 +1808,15 @@ class DomainFactory {
         [
                 createWholeGenomeSeqType(),
         ]
+    }
+
+    static List<SeqType> createAllAnalysableSeqTypes() {
+        [
+                createSnvSeqTypes(),
+                createIndelSeqTypes(),
+                createSophiaSeqTypes(),
+                createAceseqSeqTypes(),
+        ].flatten().unique()
     }
 
     static MetaDataKey createMetaDataKeyLazy(Map properties = [:]) {

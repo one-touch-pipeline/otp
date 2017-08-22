@@ -24,8 +24,6 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
 
     static final String MERGED_DIR = "merged"
 
-    static final String RUN_PREFIX = "run"
-
     static final String METADATATABLE_FILE = "metadataTable.tsv"
 
     static final String INSERT_SIZE_FILE_SUFFIX = 'insertsize_plot.png_qcValues.txt'
@@ -324,7 +322,7 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
     Map<SeqTrack, File> getSingleLaneQADirectoriesHelper(File baseDirectory) {
         Map<SeqTrack, File> directoriesPerSeqTrack = new HashMap<SeqTrack, File>()
         seqTracks.each { SeqTrack seqTrack ->
-            String readGroupName = getReadGroupName(seqTrack)
+            String readGroupName = seqTrack.getReadGroupName()
             directoriesPerSeqTrack.put(seqTrack, new File(baseDirectory, readGroupName))
         }
         return directoriesPerSeqTrack
@@ -423,31 +421,6 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
             LogThreadLocal.threadLog.info "Withdrawing ${this}"
             withdrawn = true
             assert save(flush: true)
-        }
-    }
-
-    static String getReadGroupName(SeqTrack seqTrack) {
-        assert seqTrack : "The input seqTrack must not be null"
-        Run run = seqTrack.run
-        List<DataFile> dataFiles = DataFile.findAllBySeqTrack(seqTrack)
-        assert dataFiles.size() == 2
-        //if the names of datafile1 and datafile2 of one seqtrack are the same something strange happened -> should fail
-        assert !dataFiles[0].vbpFileName.equals(dataFiles[1].vbpFileName)
-        String commonFastQFilePrefix = getLongestCommonPrefixBeforeLastUnderscore(dataFiles[0].vbpFileName, dataFiles[1].vbpFileName)
-        return "${RUN_PREFIX}${run.name}_${commonFastQFilePrefix}"
-    }
-
-    static String getLongestCommonPrefixBeforeLastUnderscore(String filename1, String filename2) {
-        assert filename1 : "The input filename1 must not be null"
-        assert filename2 : "The input filename2 must not be null"
-        String commonFastqFilePrefix = StringUtils.longestCommonPrefix(filename1, filename2)
-        String pattern = /^(.*)_([^_]*)$/
-        def matcher = commonFastqFilePrefix =~ pattern
-        if (matcher.matches()) {
-            return matcher.group(1)
-        } else {
-            return commonFastqFilePrefix
-
         }
     }
 
