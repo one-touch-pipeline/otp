@@ -89,6 +89,36 @@ class AbstractQualityAssessment implements Entity {
      */
     Double insertSizeSD
 
+
+    Double getPercentDuplicates() {
+        calculatePercentage(duplicates , totalReadCounter)
+    }
+
+    Double getPercentProperlyPaired() {
+        calculatePercentage(properlyPaired, pairedInSequencing)
+    }
+
+    Double getPercentDiffChr() {
+        calculatePercentage(withMateMappedToDifferentChr, totalReadCounter)
+    }
+
+    Double getPercentMappedReads() {
+        calculatePercentage(totalMappedReadCounter, totalReadCounter)
+    }
+
+    Double getPercentSingletons() {
+        calculatePercentage(singletons, totalReadCounter)
+    }
+
+    Double getOnTargetRatio() {
+        calculatePercentage(onTargetMappedBases, allBasesMapped)
+    }
+
+    private static Double calculatePercentage(Number numerator, Number denominator) {
+        numerator != null && denominator ?
+                numerator / denominator * 100.0 : null
+    }
+
     static constraints = {
         // not available for RNA
         referenceLength nullable: true, validator: { it != null }

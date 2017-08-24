@@ -109,7 +109,7 @@ class AlignmentQualityOverviewController {
         String projectName = params.project
         if (projectName) {
             Project project
-            if ((project =  projectService.getProjectByName(projectName))) {
+            if ((project = projectService.getProjectByName(projectName))) {
                 projectSelectionService.setSelectedProject([project], project.name)
                 redirect(controller: controllerName, action: actionName)
                 return
@@ -201,35 +201,32 @@ class AlignmentQualityOverviewController {
             QualityAssessmentMergedPass qualityAssessmentMergedPass = it.qualityAssessmentMergedPass
             AbstractMergedBamFile abstractMergedBamFile = qualityAssessmentMergedPass.abstractMergedBamFile
             Set<LibraryPreparationKit> kit = qualityAssessmentMergedPass.containedSeqTracks*.libraryPreparationKit.findAll().unique() //findAll removes null values
-            double duplicates = it.duplicates / it.totalReadCounter * 100.0 //%duplicates (picard)
-            double properlyPaired = it.properlyPaired / it.pairedInSequencing * 100.0
             String readLengthString = sequenceLengthsMap[it.id][0][1]
             double readLength = readLengthString.contains('-') ? (readLengthString.split('-').sum {
                 it as double
             } / 2) : readLengthString as double
-            double diffChr = it.withMateMappedToDifferentChr / it.totalReadCounter * 100.0 // % diff chrom
 
             Map map = [
                     mockPid               : abstractMergedBamFile.individual.mockPid,
                     sampleType            : abstractMergedBamFile.sampleType.name,
-                    mappedReads           : FormatHelper.formatToTwoDecimalsNullSave(it.totalMappedReadCounter / (it.totalReadCounter as Double) * 100.0), //%mapped reads (flagstat)
-                    duplicates            : FormatHelper.formatToTwoDecimalsNullSave(duplicates), //%duplicates (picard)
-                    diffChr               : FormatHelper.formatToTwoDecimalsNullSave(diffChr),
-                    properlyPaired        : FormatHelper.formatToTwoDecimalsNullSave(properlyPaired), //%properly_paired (flagstat)
-                    singletons            : FormatHelper.formatToTwoDecimalsNullSave(it.singletons / it.totalReadCounter * 100.0), //%singletons (flagstat)
+                    mappedReads           : FormatHelper.formatToTwoDecimalsNullSave(it.percentMappedReads),    // flagstat
+                    duplicates            : FormatHelper.formatToTwoDecimalsNullSave(it.percentDuplicates),     // picard
+                    diffChr               : FormatHelper.formatToTwoDecimalsNullSave(it.percentDiffChr),
+                    properlyPaired        : FormatHelper.formatToTwoDecimalsNullSave(it.percentProperlyPaired), // flagstat
+                    singletons            : FormatHelper.formatToTwoDecimalsNullSave(it.percentSingletons),     // flagstat
                     medianPE_insertsize   : FormatHelper.formatToTwoDecimalsNullSave(it.insertSizeMedian), //Median PE_insertsize
                     dateFromFileSystem    : abstractMergedBamFile.dateFromFileSystem?.format("yyyy-MM-dd"),
                     //warning for duplicates
-                    duplicateWarning      : warningLevelForDuplicates(duplicates).styleClass,
+                    duplicateWarning      : warningLevelForDuplicates(it.percentDuplicates).styleClass,
 
                     //warning for Median PE_insertsize
                     medianWarning         : warningLevelForMedian(it.insertSizeMedian, readLength).styleClass,
 
                     //warning for properlyPpaired
-                    properlyPpairedWarning: warningLevelForProperlyPaired(properlyPaired).styleClass,
+                    properlyPpairedWarning: warningLevelForProperlyPaired(it.properlyPaired).styleClass,
 
                     //warning for diff chrom
-                    diffChrWarning        : warningLevelForDiffChrom(diffChr).styleClass,
+                    diffChrWarning        : warningLevelForDiffChrom(it.percentDiffChr).styleClass,
 
                     plot                  : it.id,
                     withdrawn             : abstractMergedBamFile.withdrawn,
@@ -265,13 +262,12 @@ class AlignmentQualityOverviewController {
                     break
 
                 case SeqTypeNames.EXOME.seqTypeName:
-                    double onTargetRate = it.onTargetMappedBases / it.allBasesMapped * 100.0
                     map << [
-                            onTargetRate       : FormatHelper.formatToTwoDecimalsNullSave(onTargetRate),//on target ratio
-                            targetCoverage     : FormatHelper.formatToTwoDecimalsNullSave(abstractMergedBamFile.coverage), //coverage
+                            onTargetRate       : FormatHelper.formatToTwoDecimalsNullSave(it.onTargetRatio),
+                            targetCoverage     : FormatHelper.formatToTwoDecimalsNullSave(abstractMergedBamFile.coverage), // coverage
 
                             //warning for onTargetRate
-                            onTargetRateWarning: warningLevelForOnTargetRate(onTargetRate).styleClass,
+                            onTargetRateWarning: warningLevelForOnTargetRate(it.onTargetRatio).styleClass,
                     ]
                     break
 
@@ -317,53 +313,34 @@ class AlignmentQualityOverviewController {
     }
 
     private static WarningLevel warningLevelForDuplicates(Double duplicates) {
-        if (duplicates > 25) {
-            return WarningLevel.WarningLevel2
-        } else if (duplicates > 15) {
-            return WarningLevel.WarningLevel1
-        } else {
-            return WarningLevel.NO
-        }
+        warningLevel(duplicates, duplicates > 25, duplicates > 15)
     }
 
     private static WarningLevel warningLevelForProperlyPaired(Double properlyPaired) {
-        if (properlyPaired < 90) {
-            return WarningLevel.WarningLevel2
-        } else if (properlyPaired < 95) {
-            return WarningLevel.WarningLevel1
-        } else {
-            return WarningLevel.NO
-        }
+        warningLevel(properlyPaired, properlyPaired < 90, properlyPaired < 95)
     }
 
     private static WarningLevel warningLevelForMedian(Double median, double readLength) {
-        if (median < 2.2 * readLength) {
-            return WarningLevel.WarningLevel2
-        } else if (median < 2.5 * readLength) {
-            return WarningLevel.WarningLevel1
-        } else {
-            return WarningLevel.NO
-        }
+        warningLevel(median, median < 2.2 * readLength, median < 2.5 * readLength)
     }
 
     private static WarningLevel warningLevelForOnTargetRate(Double onTargetRate) {
-        if (onTargetRate < 60) {
-            return WarningLevel.WarningLevel2
-        } else if (onTargetRate < 70) {
-            return WarningLevel.WarningLevel1
-        } else {
-            return WarningLevel.NO
-        }
+        warningLevel(onTargetRate, onTargetRate < 60, onTargetRate < 70)
     }
 
     private static WarningLevel warningLevelForDiffChrom(Double diffChrom) {
-        if (diffChrom > 3) {
-            return WarningLevel.WarningLevel2
-        } else if (diffChrom > 2) {
-            return WarningLevel.WarningLevel1
-        } else {
-            return WarningLevel.NO
+        warningLevel(diffChrom, diffChrom > 3, diffChrom > 2)
+    }
+
+    private static WarningLevel warningLevel(Double value, boolean conditionForLevel2, boolean conditionForLevel1) {
+        if (value != null) {
+            if (conditionForLevel2) {
+                return WarningLevel.WarningLevel2
+            } else if (conditionForLevel1) {
+                return WarningLevel.WarningLevel1
+            }
         }
+        return WarningLevel.NO
     }
 }
 
