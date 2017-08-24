@@ -21,8 +21,8 @@ import static org.junit.Assert.*
         ExomeSeqTrack,
         MergingSetAssignment,
         MergingPass,
+        MergingCriteria,
         ReferenceGenomeProjectSeqType,
-        ProjectSeqType,
 ])
 class ProcessedBamFileUnitTests {
 

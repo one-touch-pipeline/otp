@@ -480,7 +480,7 @@ class DomainFactory {
     }
 
     public static MergingWorkPackage findOrSaveMergingWorkPackage(SeqTrack seqTrack, ReferenceGenome referenceGenome = null, Pipeline pipeline = null) {
-        createDomainObjectLazy(ProjectSeqType, [:], [project: seqTrack.project, seqType: seqTrack.seqType])
+        createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
         if (referenceGenome == null || pipeline == null) {
             MergingWorkPackage workPackage = MergingWorkPackage.findWhere(
                     sample: seqTrack.sample,
@@ -1604,10 +1604,6 @@ class DomainFactory {
         return properties
     }
 
-    static ProjectSeqType createProjectSeqTypeLazy(Project project, SeqType seqType) {
-        return createDomainObjectLazy(ProjectSeqType, [:], [project: project, seqType: seqType])
-    }
-
     public static SeqTrack createSeqTrackWithDataFiles(MergingWorkPackage mergingWorkPackage, Map seqTrackProperties = [:], Map dataFileProperties = [:]) {
         Map map = getMergingProperties(mergingWorkPackage) + [
                 kitInfoReliability:  mergingWorkPackage.libraryPreparationKit ? InformationReliability.KNOWN : InformationReliability.UNKNOWN_UNVERIFIED,
@@ -1622,7 +1618,7 @@ class DomainFactory {
         mergingWorkPackage.addToSeqTracks(seqTrack)
         mergingWorkPackage.save(flush: true, failOnError: true)
 
-        createDomainObjectLazy(ProjectSeqType, [:], [project: seqTrack.project, seqType: seqTrack.seqType])
+        createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
 
         assert mergingWorkPackage.satisfiesCriteria(seqTrack)
         return seqTrack
@@ -2497,6 +2493,14 @@ samplePairsNotProcessed: ${samplePairsNotProcessed}
 
     static MergingCriteria createMergingCriteria(Map properties = [:]) {
         return createDomainObject(MergingCriteria, [
+                project: { createProject() },
+                seqType: { createSeqType() },
+        ], properties )
+    }
+
+
+    public static MergingCriteria createMergingCriteriaLazy(Map properties = [:]) {
+        return createDomainObjectLazy(MergingCriteria, [
                 project: { createProject() },
                 seqType: { createSeqType() },
         ], properties )

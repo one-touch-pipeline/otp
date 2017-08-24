@@ -8,7 +8,7 @@ import grails.test.mixin.*
 import de.dkfz.tbi.otp.ngsdata.*
 
 @TestFor(AlignmentPass)
-@Build([MergingWorkPackage, SeqTrack, ProjectSeqType])
+@Build([MergingCriteria, MergingWorkPackage, SeqTrack,])
 class AlignmentPassUnitTests {
 
     @Test

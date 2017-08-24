@@ -305,8 +305,8 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         ],
                 [runSegment: runSegment, fileLinked: true]
         )
-        DomainFactory.createProjectSeqTypeLazy(seqTrack1.project, seqTrack1.seqType)
-        DomainFactory.createProjectSeqTypeLazy(seqTrack2.project, seqTrack2.seqType)
+        DomainFactory.createMergingCriteriaLazy(project: seqTrack1.project, seqType: seqTrack1.seqType)
+        DomainFactory.createMergingCriteriaLazy(project: seqTrack2.project, seqType: seqTrack2.seqType)
         AbstractMergedBamFile abstractMergedBamFile = setBamFileInProjectFolder(DomainFactory.createRoddyBamFile(
                 DomainFactory.createRoddyBamFile([
                         workPackage: DomainFactory.createMergingWorkPackage(
@@ -390,8 +390,8 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         ],
                 [runSegment: runSegment, fileLinked: true]
         )
-        DomainFactory.createProjectSeqTypeLazy(seqTrack1.project, seqTrack1.seqType)
-        DomainFactory.createProjectSeqTypeLazy(seqTrack2.project, seqTrack2.seqType)
+        DomainFactory.createMergingCriteriaLazy(project: seqTrack1.project, seqType: seqTrack1.seqType)
+        DomainFactory.createMergingCriteriaLazy(project: seqTrack2.project, seqType: seqTrack2.seqType)
 
         setBamFileInProjectFolder(DomainFactory.createRoddyBamFile(
                 DomainFactory.createRoddyBamFile([

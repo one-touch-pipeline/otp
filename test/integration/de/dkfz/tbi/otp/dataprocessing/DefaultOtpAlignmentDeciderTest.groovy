@@ -1,14 +1,8 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.ProjectSeqType
-import org.junit.Test
-import org.springframework.beans.factory.annotation.Autowired
-
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.ngsdata.SeqTypeNames
-import de.dkfz.tbi.otp.ngsdata.TestData
+import de.dkfz.tbi.otp.ngsdata.*
+import org.junit.*
+import org.springframework.beans.factory.annotation.*
 
 public class DefaultOtpAlignmentDeciderTest {
     @Autowired
@@ -27,7 +21,7 @@ public class DefaultOtpAlignmentDeciderTest {
 
     private void testPrepareForAlignment_whenEverythingIsOkay_shouldCreateAlignmentPass(boolean forceRealign) {
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
-        DomainFactory.createProjectSeqTypeLazy(seqTrack.project, seqTrack.seqType)
+        DomainFactory.createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
         MergingWorkPackage workPackage = TestData.createMergingWorkPackage(sample: seqTrack.sample, seqType: seqTrack.seqType, seqPlatformGroup: seqTrack.seqPlatformGroup)
         workPackage.save(failOnError: true)
 
@@ -42,7 +36,7 @@ public class DefaultOtpAlignmentDeciderTest {
     @Test
     void testPrepareForAlignment_whenAlignmentPassExists_shouldNotCreateAlignmentPass() {
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
-        DomainFactory.createProjectSeqTypeLazy(seqTrack.project, seqTrack.seqType)
+        DomainFactory.createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
 
         MergingWorkPackage workPackage = TestData.createMergingWorkPackage(sample: seqTrack.sample, seqType: seqTrack.seqType, seqPlatformGroup: seqTrack.seqPlatformGroup)
         workPackage.save(failOnError: true)
@@ -60,7 +54,7 @@ public class DefaultOtpAlignmentDeciderTest {
     @Test
     void testPrepareForAlignment_whenForceRealign_shouldCreateAnotherAlignmentPass() {
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
-        DomainFactory.createProjectSeqTypeLazy(seqTrack.project, seqTrack.seqType)
+        DomainFactory.createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
 
         MergingWorkPackage workPackage = TestData.createMergingWorkPackage(sample: seqTrack.sample, seqType: seqTrack.seqType, seqPlatformGroup: seqTrack.seqPlatformGroup)
         workPackage.save(failOnError: true)

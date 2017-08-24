@@ -11,10 +11,10 @@ import org.junit.*
 
 @TestFor(ProcessedMergedBamFileService)
 @Build([
+    MergingCriteria,
     MergingPass,
     MergingSet,
     ProcessedBamFile,
-    ProjectSeqType,
     Realm,
 ])
 class ProcessedMergedBamFileServiceUnitTests {

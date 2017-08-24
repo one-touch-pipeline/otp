@@ -1,21 +1,15 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
-import de.dkfz.tbi.otp.dataprocessing.AlignmentPass
-import de.dkfz.tbi.otp.dataprocessing.AnalysisProcessingStates
-import de.dkfz.tbi.otp.dataprocessing.MergingPass
-import de.dkfz.tbi.otp.dataprocessing.MergingSet
-import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
-import de.dkfz.tbi.otp.job.jobs.snvcalling.SnvCallingJob
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.job.jobs.snvcalling.*
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.*
+import grails.buildtestdata.mixin.*
 import grails.test.mixin.*
 import org.junit.*
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
-import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.ExternalScript
-import grails.buildtestdata.mixin.Build
 
 @TestFor(SnvJobResult)
-@Mock([SnvCallingInstance, ExternalScript, ProjectSeqType])
+@Mock([SnvCallingInstance, ExternalScript, MergingCriteria,])
 @Build([
         AlignmentPass,
         MergingPass,

@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.dataprocessing.MergingCriteria
 import de.dkfz.tbi.otp.utils.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
@@ -28,8 +29,14 @@ class SeqPlatform implements Entity {
         return fullName()
     }
 
-    SeqPlatformGroup getSeqPlatformGroup(ProjectSeqType projectSeqType) {
-        if (!projectSeqType) {
+    SeqPlatformGroup getSeqPlatformGroup(Project project, SeqType seqType) {
+        if (!(project && seqType)) {
+            return null
+        }
+
+        MergingCriteria mergingCriteria = MergingCriteria.findByProjectAndSeqType(project, seqType)
+
+        if (!mergingCriteria) {
             return null
         }
 
@@ -37,10 +44,10 @@ class SeqPlatform implements Entity {
             seqPlatforms {
                 eq("id", this.id)
             }
-            if (projectSeqType.useSeqPlatformGroups == ProjectSeqType.SpecificSeqPlatformGroups.USE_OTP_DEFAULT) {
-                isNull("projectSeqType")
+            if (mergingCriteria.seqPlatformGroup == MergingCriteria.SpecificSeqPlatformGroups.USE_OTP_DEFAULT) {
+                isNull("mergingCriteria")
             } else {
-                eq("projectSeqType", projectSeqType)
+                eq("mergingCriteria", mergingCriteria)
             }
         }
         return atMostOneElement(seqPlatformGroups)

@@ -17,10 +17,10 @@ import org.junit.rules.ErrorCollector
     SeqType,
     SeqPlatform,
     SeqTrack,
+    MergingCriteria,
     MergingWorkPackage,
     ProcessedBamFile,
     AlignmentPass,
-    ProjectSeqType,
 ])
 class MergingWorkPackageUnitTests {
 
@@ -76,7 +76,7 @@ class MergingWorkPackageUnitTests {
     @Test
     void testGetMergingProperties_NoLibraryPreperationKit() {
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
-        DomainFactory.createProjectSeqTypeLazy(seqTrack.project, seqTrack.seqType)
+        DomainFactory.createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
         def result = MergingWorkPackage.getMergingProperties(seqTrack)
         def expectedResult = [
                 sample: seqTrack.sample,
@@ -94,7 +94,7 @@ class MergingWorkPackageUnitTests {
                 libraryPreparationKit: libraryPreparationKit,
                 kitInfoReliability: InformationReliability.KNOWN
         )
-        DomainFactory.createProjectSeqTypeLazy(seqTrack.project, seqTrack.seqType)
+        DomainFactory.createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
         def result = MergingWorkPackage.getMergingProperties(seqTrack)
         def expectedResult = [
                 sample: seqTrack.sample,
@@ -114,7 +114,7 @@ class MergingWorkPackageUnitTests {
                 kitInfoReliability: InformationReliability.KNOWN,
                 antibodyTarget: antibodyTarget,
         )
-        DomainFactory.createProjectSeqTypeLazy(seqTrack.project, seqTrack.seqType)
+        DomainFactory.createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
         def result = MergingWorkPackage.getMergingProperties(seqTrack)
         def expectedResult = [
                 sample: seqTrack.sample,
@@ -129,7 +129,7 @@ class MergingWorkPackageUnitTests {
     @Test
     void testSatisfiesCriteriaSeqTrack_whenCorrect_NoLibraryPreparationKit() {
         SeqTrack seqTrack = DomainFactory.createSeqTrack(libraryPreparationKit: null)
-        DomainFactory.createProjectSeqTypeLazy(seqTrack.project, seqTrack.seqType)
+        DomainFactory.createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
         MergingWorkPackage workPackage = DomainFactory.createMergingWorkPackage(sample: seqTrack.sample, seqType: seqTrack.seqType, seqPlatformGroup: seqTrack.seqPlatformGroup, libraryPreparationKit: seqTrack.libraryPreparationKit)
         assert workPackage.satisfiesCriteria(seqTrack)
     }
@@ -140,7 +140,7 @@ class MergingWorkPackageUnitTests {
                 libraryPreparationKit: DomainFactory.createLibraryPreparationKit(),
                 kitInfoReliability: InformationReliability.KNOWN,
         )
-        DomainFactory.createProjectSeqTypeLazy(seqTrack.project, seqTrack.seqType)
+        DomainFactory.createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
         MergingWorkPackage workPackage = MergingWorkPackage.build(sample: seqTrack.sample, seqType: seqTrack.seqType, seqPlatformGroup: seqTrack.seqPlatformGroup, libraryPreparationKit: seqTrack.libraryPreparationKit)
         assert workPackage.satisfiesCriteria(seqTrack)
     }
@@ -148,7 +148,7 @@ class MergingWorkPackageUnitTests {
     @Test
     void testSatisfiesCriteriaSeqTrack_whenIncorrectSample() {
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
-        DomainFactory.createProjectSeqTypeLazy(seqTrack.project, seqTrack.seqType)
+        DomainFactory.createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
         MergingWorkPackage workPackage = MergingWorkPackage.build(sample: Sample.build(), seqType: seqTrack.seqType, seqPlatformGroup: seqTrack.seqPlatformGroup, libraryPreparationKit: seqTrack.libraryPreparationKit)
         assert !workPackage.satisfiesCriteria(seqTrack)
     }
@@ -156,7 +156,7 @@ class MergingWorkPackageUnitTests {
     @Test
     void testSatisfiesCriteriaSeqTrack_whenIncorrectSeqType() {
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
-        DomainFactory.createProjectSeqTypeLazy(seqTrack.project, seqTrack.seqType)
+        DomainFactory.createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
         MergingWorkPackage workPackage = MergingWorkPackage.build(sample: seqTrack.sample, seqType: seqType.build(), seqPlatformGroup: seqTrack.seqPlatformGroup, libraryPreparationKit: seqTrack.libraryPreparationKit)
         assert !workPackage.satisfiesCriteria(seqTrack)
     }
@@ -164,7 +164,7 @@ class MergingWorkPackageUnitTests {
     @Test
     void testSatisfiesCriteriaSeqTrack_whenIncorrectSeqPlatformGroup() {
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
-        DomainFactory.createProjectSeqTypeLazy(seqTrack.project, seqTrack.seqType)
+        DomainFactory.createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
         MergingWorkPackage workPackage = MergingWorkPackage.build(sample: seqTrack.sample, seqType: seqTrack.seqType, seqPlatformGroup: SeqPlatformGroup.build(), libraryPreparationKit: seqTrack.libraryPreparationKit)
         assert !workPackage.satisfiesCriteria(seqTrack)
     }
@@ -175,7 +175,7 @@ class MergingWorkPackageUnitTests {
                 libraryPreparationKit: DomainFactory.createLibraryPreparationKit(),
                 kitInfoReliability: InformationReliability.KNOWN,
         )
-        DomainFactory.createProjectSeqTypeLazy(seqTrack.project, seqTrack.seqType)
+        DomainFactory.createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
         MergingWorkPackage workPackage = MergingWorkPackage.build(sample: seqTrack.sample, seqType: seqTrack.seqType, seqPlatformGroup: seqTrack.seqPlatformGroup, libraryPreparationKit: null)
         assert !workPackage.satisfiesCriteria(seqTrack)
     }
@@ -183,7 +183,7 @@ class MergingWorkPackageUnitTests {
     @Test
     void testSatisfiesCriteriaSeqTrack_whenOnlyMergingWorkPackageHasLibraryPrepationKit() {
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
-        DomainFactory.createProjectSeqTypeLazy(seqTrack.project, seqTrack.seqType)
+        DomainFactory.createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
         MergingWorkPackage workPackage = MergingWorkPackage.build(sample: seqTrack.sample, seqType: seqTrack.seqType, seqPlatformGroup: seqTrack.seqPlatformGroup, libraryPreparationKit: DomainFactory.createLibraryPreparationKit())
         assert !workPackage.satisfiesCriteria(seqTrack)
     }
@@ -194,7 +194,7 @@ class MergingWorkPackageUnitTests {
                 libraryPreparationKit: DomainFactory.createLibraryPreparationKit(),
                 kitInfoReliability: InformationReliability.KNOWN,
         )
-        DomainFactory.createProjectSeqTypeLazy(seqTrack.project, seqTrack.seqType)
+        DomainFactory.createMergingCriteriaLazy([project: seqTrack.project, seqType: seqTrack.seqType])
         MergingWorkPackage workPackage = MergingWorkPackage.build(sample: seqTrack.sample, seqType: seqTrack.seqType, seqPlatformGroup: seqTrack.seqPlatformGroup, libraryPreparationKit: DomainFactory.createLibraryPreparationKit())
         assert !workPackage.satisfiesCriteria(seqTrack)
     }
@@ -205,7 +205,7 @@ class MergingWorkPackageUnitTests {
         SeqPlatformGroup seqPlatformGroup = DomainFactory.createSeqPlatformGroup()
         SeqPlatform seqPlatform = DomainFactory.createSeqPlatform(seqPlatformGroups: [seqPlatformGroup])
         SeqTrack seqTrack = DomainFactory.createSeqTrack(run: DomainFactory.createRun(seqPlatform: seqPlatform))
-        DomainFactory.createProjectSeqTypeLazy(seqTrack.project, seqTrack.seqType)
+        DomainFactory.createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
         MergingWorkPackage workPackage = MergingWorkPackage.build(sample: seqTrack.sample, seqType: seqTrack.seqType, seqPlatformGroup: seqPlatformGroup)
         AlignmentPass alignmentPass = AlignmentPass.build(seqTrack: seqTrack, workPackage: workPackage)
 

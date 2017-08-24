@@ -66,7 +66,7 @@ class ConveyBwaAlignmentWorkflowTests extends WorkflowTestCase {
                 nReads       : 10000,
         ])
 
-        DomainFactory.createProjectSeqTypeLazy(seqTrack.project, seqTrack.seqType)
+        DomainFactory.createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
 
         seqTrack.dataFiles.each {
             DomainFactory.createFastqcProcessedFile(

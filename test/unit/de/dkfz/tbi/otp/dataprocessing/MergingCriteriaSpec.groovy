@@ -3,7 +3,6 @@ package de.dkfz.tbi.otp.dataprocessing
 import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.ngsdata.*
 import grails.test.mixin.*
-import junit.framework.Assert
 import spock.lang.*
 
 @Mock([
@@ -15,7 +14,7 @@ class MergingCriteriaSpec extends Specification {
 
     void "test that for Exome data LibPrepKit must be true"() {
         expect:
-        DomainFactory.createMergingCriteria([
+        DomainFactory.createMergingCriteriaLazy([
                 seqType: DomainFactory.createExomeSeqType(),
                 libPrepKit: true,
         ])
@@ -23,7 +22,7 @@ class MergingCriteriaSpec extends Specification {
 
     void "test that for Exome data LibPrepKit must be true, should fail when it is false"() {
         given:
-        MergingCriteria mergingCriteria = DomainFactory.createMergingCriteria()
+        MergingCriteria mergingCriteria = DomainFactory.createMergingCriteriaLazy()
         SeqType seqType = DomainFactory.createExomeSeqType()
 
         when:

@@ -241,7 +241,6 @@ class ProjectService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void configurePanCanAlignmentDeciderProject(PanCanAlignmentConfiguration panCanAlignmentConfiguration) {
         deprecatedReferenceGenomeProjectSeqTypeAndSetDecider(panCanAlignmentConfiguration)
-        ProjectSeqType.findOrSaveByProjectAndSeqType(panCanAlignmentConfiguration.project, panCanAlignmentConfiguration.seqType)
 
         ReferenceGenome referenceGenome = exactlyOneElement(ReferenceGenome.findAllByName(panCanAlignmentConfiguration.referenceGenome))
 
@@ -301,7 +300,6 @@ class ProjectService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void configureRnaAlignmentConfig(RoddyConfiguration rnaAlignmentConfiguration) {
-        ProjectSeqType.findOrSaveByProjectAndSeqType(rnaAlignmentConfiguration.project, rnaAlignmentConfiguration.seqType)
         assert OtpPath.isValidPathComponent(rnaAlignmentConfiguration.pluginName): "pluginName '${rnaAlignmentConfiguration.pluginName}' is an invalid path component"
         assert OtpPath.isValidPathComponent(rnaAlignmentConfiguration.pluginVersion): "pluginVersion '${rnaAlignmentConfiguration.pluginVersion}' is an invalid path component"
         assert OtpPath.isValidPathComponent(rnaAlignmentConfiguration.baseProjectConfig): "baseProjectConfig '${rnaAlignmentConfiguration.baseProjectConfig}' is an invalid path component"
@@ -421,7 +419,6 @@ class ProjectService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void copyPanCanAlignmentXml(Project basedProject, SeqType seqType, Project project) {
         ReferenceGenomeProjectSeqType refSeqType = exactlyOneElement(ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(basedProject, seqType))
-        ProjectSeqType.findOrSaveByProjectAndSeqType(project, seqType)
 
         setReferenceGenomeProjectSeqTypeDeprecated(project, seqType)
 

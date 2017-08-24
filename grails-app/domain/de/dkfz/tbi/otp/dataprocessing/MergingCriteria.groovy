@@ -8,7 +8,13 @@ class MergingCriteria implements Entity {
     Project project
     SeqType seqType
     boolean libPrepKit = true
-    boolean seqPlatformGroup = true
+    SpecificSeqPlatformGroups seqPlatformGroup = SpecificSeqPlatformGroups.USE_OTP_DEFAULT
+
+    enum SpecificSeqPlatformGroups {
+        USE_OTP_DEFAULT,
+        USE_PROJECT_SEQ_TYPE_SPECIFIC,
+        IGNORE_FOR_MERGING,
+    }
 
     static constraints = {
         libPrepKit validator : { val, obj ->
@@ -16,5 +22,6 @@ class MergingCriteria implements Entity {
                 return "In case of Exome data, the libraryPreparationKit must be part of the MergingCriteria"
             }
         }
+        project unique: 'seqType'
     }
 }

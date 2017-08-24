@@ -11,6 +11,7 @@ import org.junit.*
 @Mock([SeqTypeService])
 @Build([
         DataFile,
+        MergingCriteria,
         Pipeline,
         RoddyWorkflowConfig,
         RunSegment,
@@ -18,7 +19,6 @@ import org.junit.*
         SeqPlatformGroup,
         SeqTrack,
         LogMessage,
-        ProjectSeqType,
 ])
 class SeqTrackServiceUnitTests {
 
@@ -236,7 +236,7 @@ class SeqTrackServiceUnitTests {
                 run: DomainFactory.createRun(
                         seqPlatform: DomainFactory.createSeqPlatform(
                                 seqPlatformGroups: [DomainFactory.createSeqPlatformGroup()])))
-        DomainFactory.createProjectSeqTypeLazy(seqTrack.project, seqTrack.seqType)
+        DomainFactory.createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
 
         assert SeqTrackService.mayAlign(seqTrack)
     }
@@ -296,7 +296,7 @@ class SeqTrackServiceUnitTests {
         SeqTrack seqTrack = DomainFactory.createSeqTrackWithOneDataFile([
                 run: DomainFactory.createRun(seqPlatform: DomainFactory.createSeqPlatform(seqPlatformGroups: null)),
         ])
-        DomainFactory.createProjectSeqTypeLazy(seqTrack.project, seqTrack.seqType)
+        DomainFactory.createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
 
         assert !SeqTrackService.mayAlign(seqTrack)
     }

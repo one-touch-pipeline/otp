@@ -13,13 +13,13 @@ import static org.junit.Assert.*
 
 @TestFor(ReferenceGenome)
 @Mock([
-        QualityAssessmentMergedPass,
-        Realm,
+        BedFile,
         ExomeSeqTrack,
         LibraryPreparationKit,
-        BedFile,
+        MergingCriteria,
         ProcessingOption,
-        ProjectSeqType,
+        QualityAssessmentMergedPass,
+        Realm,
 ])
 @Build([
     AlignmentPass,

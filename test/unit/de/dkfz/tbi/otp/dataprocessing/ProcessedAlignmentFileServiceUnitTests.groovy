@@ -13,11 +13,11 @@ import org.springframework.context.*
 
 @Build([
     AlignmentPass,
+    MergingCriteria,
     ProcessedBamFile,
     QualityAssessmentPass,
     ProcessedSaiFile,
     ReferenceGenome,
-    ProjectSeqType,
 ])
 @TestFor(ProcessedAlignmentFileService)
 class ProcessedAlignmentFileServiceUnitTests {
@@ -211,7 +211,7 @@ class ProcessedAlignmentFileServiceUnitTests {
 
     private AlignmentPass createTestDataForMayProcessingFilesBeDeleted(boolean createBamFile = true, boolean createSaiFile = false) {
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
-        DomainFactory.createProjectSeqTypeLazy(seqTrack.project, seqTrack.seqType)
+        DomainFactory.createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
 
         AlignmentPass alignmentPass = DomainFactory.createAlignmentPass(
             seqTrack: seqTrack,

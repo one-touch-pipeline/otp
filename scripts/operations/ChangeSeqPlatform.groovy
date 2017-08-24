@@ -2,6 +2,8 @@
  * Change the SeqPlatform of a Run and its SeqTracks.
  */
 
+
+import de.dkfz.tbi.otp.dataprocessing.MergingCriteria
 import de.dkfz.tbi.otp.ngsdata.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
@@ -23,8 +25,7 @@ Run.withTransaction {
     assert run.seqPlatform == currentSeqPlatform
 
     SeqTrack.findAllByRun(run).each { SeqTrack st ->
-        ProjectSeqType pst = ProjectSeqType.findByProjectAndSeqType(st.project, st.seqType)
-        assert newSeqPlatform.getSeqPlatformGroup(pst) == currentSeqPlatform.getSeqPlatformGroup(pst)
+        assert newSeqPlatform.getSeqPlatformGroup(st.project, st.seqType) == currentSeqPlatform.getSeqPlatformGroup(st.project, st.seqType)
     }
 
     run.seqPlatform = newSeqPlatform

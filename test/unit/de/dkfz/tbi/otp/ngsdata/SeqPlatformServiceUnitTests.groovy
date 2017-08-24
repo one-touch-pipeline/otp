@@ -21,7 +21,7 @@ class SeqPlatformServiceUnitTests {
     void testCreateNewSeqPlatform_OnlyNameIsProvided_AllFine() {
         SeqPlatform seqPlatform = SeqPlatformService.createNewSeqPlatform(PLATFORM_NAME)
         assert seqPlatform.name == PLATFORM_NAME
-        assert seqPlatform.getSeqPlatformGroup(null) == null
+        assert seqPlatform.getSeqPlatformGroup(null, null) == null
         assert seqPlatform.seqPlatformModelLabel == null
         assert seqPlatform.sequencingKitLabel == null
     }
@@ -34,7 +34,7 @@ class SeqPlatformServiceUnitTests {
                 seqPlatformGroup
         )
         assert seqPlatform.name == PLATFORM_NAME
-        assert seqPlatform.getSeqPlatformGroup(null) == seqPlatformGroup
+        assert seqPlatform.getSeqPlatformGroup(null, null) == seqPlatformGroup
         assert seqPlatform.seqPlatformModelLabel == null
         assert seqPlatform.sequencingKitLabel == null
     }
@@ -49,7 +49,7 @@ class SeqPlatformServiceUnitTests {
                 seqPlatformModelLabel
         )
         assert seqPlatform.name == PLATFORM_NAME
-        assert seqPlatform.getSeqPlatformGroup(null) == seqPlatformGroup
+        assert seqPlatform.getSeqPlatformGroup(null, null) == seqPlatformGroup
         assert seqPlatform.seqPlatformModelLabel == seqPlatformModelLabel
         assert seqPlatform.sequencingKitLabel == null
     }
@@ -66,7 +66,7 @@ class SeqPlatformServiceUnitTests {
                 sequencingKitLabel
         )
         assert seqPlatform.name == PLATFORM_NAME
-        assert seqPlatform.getSeqPlatformGroup(null) == seqPlatformGroup
+        assert seqPlatform.getSeqPlatformGroup(null, null) == seqPlatformGroup
         assert seqPlatform.seqPlatformModelLabel == seqPlatformModelLabel
         assert seqPlatform.sequencingKitLabel == sequencingKitLabel
     }

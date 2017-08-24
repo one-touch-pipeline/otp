@@ -11,8 +11,8 @@ import org.junit.*
         QualityAssessmentPass,
 ])
 @Mock([
-        ProjectSeqType,
         QualityAssessmentMergedPass,
+        MergingCriteria,
 ])
 class ProcessingPriorityUnitTest {
 

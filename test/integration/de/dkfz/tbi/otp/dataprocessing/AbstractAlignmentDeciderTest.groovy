@@ -336,8 +336,7 @@ public class AbstractAlignmentDeciderTest {
 
         SeqTrack seqTrack = testData.createSeqTrack()
         seqTrack.save(failOnError: true)
-        DomainFactory.createProjectSeqTypeLazy(seqTrack.project, seqTrack.seqType)
-
+        DomainFactory.createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
         DataFile dataFile = testData.createDataFile(seqTrack: seqTrack)
         dataFile.save(failOnError: true)
 

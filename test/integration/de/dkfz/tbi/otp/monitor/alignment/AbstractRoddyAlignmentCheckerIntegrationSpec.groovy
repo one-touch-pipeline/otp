@@ -36,7 +36,7 @@ abstract class AbstractRoddyAlignmentCheckerIntegrationSpec extends Specificatio
                     libraryPreparationKit: properties.hasProperty('libraryPreparationKit') ? properties.libraryPreparationKit :
                             it.isExome() ? DomainFactory.createLibraryPreparationKit() : null
             ])
-            DomainFactory.createProjectSeqTypeLazy(seqTrack.project, seqTrack.seqType)
+            DomainFactory.createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
             return seqTrack
         }
     }

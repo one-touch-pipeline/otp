@@ -11,10 +11,10 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
     DataFile,
     FileType,
     ProcessedBamFile,
+    MergingCriteria,
     MergingSetAssignment,
     MergingWorkPackage,
     ProcessedMergedBamFile,
-    ProjectSeqType,
 ])
 @TestFor(AbstractBamFileService)
 class AbstractBamFileServiceUnitTests {

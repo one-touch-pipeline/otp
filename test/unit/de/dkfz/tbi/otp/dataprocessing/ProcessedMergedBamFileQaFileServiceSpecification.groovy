@@ -10,11 +10,11 @@ import spock.lang.*
 
 @Build([
         AlignmentPass,
+        MergingCriteria,
         MergingSetAssignment,
         ProcessedMergedBamFile,
         QualityAssessmentMergedPass,
         Realm,
-        ProjectSeqType,
 ])
 class ProcessedMergedBamFileQaFileServiceSpecification extends Specification {
 
