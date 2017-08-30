@@ -1,0 +1,42 @@
+---
+image: grails:2.5.1
+
+variables:
+  GRAILS_OPTS: '-Xms1G'
+
+stages:
+  - build
+  - test
+
+compile:
+  stage: build
+  script:
+    - grails compile
+
+unit tests:
+  stage: test
+  image: otp-tests
+  before_script:
+    - echo 'otp.testing.group=othergroup' > /home/grails/.otp.properties
+  script:
+    - 'grails test-app unit:'
+
+integration tests:
+  stage: test
+  image: otp-tests
+  before_script:
+    - echo 'otp.testing.group=othergroup' > /home/grails/.otp.properties
+  script:
+    - 'grails test-app integration:'
+        
+codenarc:
+  stage: test
+  script:
+    - grails compile
+    - grails codenarc
+  after_script:
+    - sed -i "s@<SourceDirectory></SourceDirectory>@<SourceDirectory>$(pwd)</SourceDirectory>@" target/CodeNarc-Report.xml
+  artifacts:
+    paths:
+      - target/CodeNarc-Report.xml
+    expire_in: 2 weeks
