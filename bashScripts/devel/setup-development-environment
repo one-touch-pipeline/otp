@@ -39,11 +39,6 @@ systemctl daemon-reload
 systemctl stop postgresql.service
 
 
-#install RBTools
-zypper in python-pip
-pip install --proxy=${PROXYURL} -U RBTools
-
-
 #workflow integration testing setup
 echo "Add $USERNAME to the sudoer file."
 
