@@ -977,6 +977,18 @@ class DomainFactory {
         return createDomainObject(IndelCallingInstance, map, properties)
     }
 
+    public static IndelCallingInstance createIndelCallingInstanceWithSameSamplePair(BamFilePairAnalysis instance) {
+        return createDomainObject(IndelCallingInstance, [
+                processingState: AnalysisProcessingStates.FINISHED,
+                sampleType1BamFile: instance.sampleType1BamFile,
+                sampleType2BamFile: instance.sampleType2BamFile,
+                config: createRoddyWorkflowConfigLazy(pipeline: createIndelPipelineLazy()),
+                instanceName: "instance-${counter++}",
+                samplePair: instance.samplePair,
+                latestDataFileCreationDate: instance.latestDataFileCreationDate,
+        ], [:])
+    }
+
     public static AceseqInstance createAceseqInstanceWithRoddyBamFiles(Map properties = [:], Map bamFile1Properties = [:], Map bamFile2Properties = [:]) {
         Map map = createAnalysisInstanceWithRoddyBamFilesMapHelper(properties, bamFile1Properties, bamFile2Properties)
         SamplePair samplePair = map.samplePair
@@ -1017,6 +1029,18 @@ class DomainFactory {
         ], properties)
     }
 
+    public static SophiaInstance createSophiaInstanceWithSameSamplePair(BamFilePairAnalysis instance) {
+        return createDomainObject(SophiaInstance, [
+                processingState: AnalysisProcessingStates.FINISHED,
+                sampleType1BamFile: instance.sampleType1BamFile,
+                sampleType2BamFile: instance.sampleType2BamFile,
+                config: createRoddyWorkflowConfigLazy(pipeline: createSophiaPipelineLazy()),
+                instanceName: "instance-${counter++}",
+                samplePair: instance.samplePair,
+                latestDataFileCreationDate: instance.latestDataFileCreationDate,
+        ], [:])
+    }
+
     public static SophiaQc createSophiaQc(Map properties) {
         return createDomainObject(SophiaQc, [
 
@@ -1044,7 +1068,7 @@ class DomainFactory {
                 sampleType1BamFile: instance.sampleType1BamFile,
                 sampleType2BamFile: instance.sampleType2BamFile,
                 config: createRoddyWorkflowConfigLazy(pipeline: createAceseqPipelineLazy()),
-                instanceName: "2017-03-17_10h44",
+                instanceName: "instance-${counter++}",
                 samplePair: instance.samplePair,
         ])
     }
@@ -1104,7 +1128,7 @@ class DomainFactory {
     }
 
 
-    public static SnvJobResult createSnvJobResult(Map properties) {
+    public static SnvJobResult createSnvJobResult(Map properties = [:]) {
         return createDomainObject(SnvJobResult, [
                 step: SnvCallingStep.CALLING,
                 externalScript: { createExternalScript() },
@@ -1599,7 +1623,7 @@ class DomainFactory {
         return createDomainObject(RoddySnvCallingInstance, properties,[:])
     }
 
-    public static SnvCallingInstance createSnvCallingInstance(Map properties) {
+    public static SnvCallingInstance createSnvCallingInstance(Map properties = [:]) {
         if (!properties.containsKey('latestDataFileCreationDate')) {
             properties += [latestDataFileCreationDate: AbstractBamFile.getLatestSequenceDataFileCreationDate(
                     properties.sampleType1BamFile, properties.sampleType2BamFile)]

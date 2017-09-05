@@ -1,11 +1,10 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import org.junit.Test
+import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.ngsdata.*
+import org.junit.*
 
-import static org.junit.Assert.assertEquals
-
+import static org.junit.Assert.*
 
 /**
  */
@@ -114,4 +113,5 @@ class AbstractMergedBamFileTests {
 
         assert bamFile.mergingWorkPackage.bamFileInProjectFolder == bamFile
     }
+
 }

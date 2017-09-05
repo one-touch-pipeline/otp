@@ -1,10 +1,10 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.utils.Entity
-
-import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
-
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.utils.logging.*
+
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 abstract class AbstractBamFile implements Entity {
 
@@ -187,9 +187,24 @@ abstract class AbstractBamFile implements Entity {
         }
     }
 
+    void withdraw() {
+        withTransaction {
+            withdrawn = true
+            if (status == AbstractBamFile.State.NEEDS_PROCESSING) {
+                //if withdraw, the status may not be NEEDS_PROCESSING
+                status = AbstractBamFile.State.DECLARED
+            }
+            assert save(flush: true)
 
-    private withdrawDownstreamBamFiles() {
-        List<MergingSetAssignment> assignments = MergingSetAssignment.findAllByBamFile(this)*.mergingSet*.id
+            assert LogThreadLocal.threadLog: 'This method produces relevant log messages. Thread log must be set.'
+            LogThreadLocal.threadLog.info("Execute WithdrawnFilesRename.groovy script afterwards")
+            LogThreadLocal.threadLog.info("Withdrawing ${this}")
+        }
+    }
+
+    //shared between ProcessedMergedBamFile and ProcessedBamFile
+    protected void withdrawDownstreamBamFiles() {
+        List<Long> assignments = MergingSetAssignment.findAllByBamFile(this)*.mergingSet*.id
 
         if (assignments) {
             ProcessedMergedBamFile.createCriteria().list {

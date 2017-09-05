@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.dataprocessing.snvcalling
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.utils.*
+import org.hibernate.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
@@ -23,7 +24,7 @@ class SnvCallingInstance extends BamFilePairAnalysis implements ProcessParameter
             }
         }
         config validator: { val, obj ->
-            val instanceof SnvConfig
+            SnvConfig.isAssignableFrom(Hibernate.getClass(val))
         }
     }
 
@@ -84,4 +85,14 @@ class SnvCallingInstance extends BamFilePairAnalysis implements ProcessParameter
     public String toString() {
         return "SCI ${id} ${withdrawn ? ' (withdrawn)': ''}: ${instanceName} ${samplePair.toStringWithoutId()}"
     }
+
+    void withdraw() {
+        withTransaction {
+            SnvJobResult.findByInputResultIsNullAndSnvCallingInstance(this).each {
+                it.withdraw()
+            }
+            super.withdraw()
+        }
+    }
+
 }

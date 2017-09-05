@@ -1,11 +1,10 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 import org.hibernate.*
 
-import static org.springframework.util.Assert.notNull
+import static org.springframework.util.Assert.*
 
 /**
  * Represents a single generation of one merged BAM file (whereas a {@link AbstractMergingWorkPackage} represents all
@@ -60,12 +59,11 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile {
         workPackage index: "abstract_merged_bam_file_work_package_idx"
     }
 
-
 /**
  * This enum is used to specify the different transfer states of the {@link AbstractMergedBamFile} until it is copied to the project folder
  */
     enum FileOperationStatus {
-         /**
+        /**
          * default value -> state of the {@link AbstractMergedBamFile} when it is created (declared)
          * no processing has been started on the bam file and it is also not ready to be transferred yet
          */
@@ -73,7 +71,7 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile {
         /**
          * An {@link AbstractMergedBamFile} with this status needs to be transferred.
          */
-         NEEDS_PROCESSING,
+        NEEDS_PROCESSING,
         /**
          * An {@link AbstractMergedBamFile} is in process of being transferred.
          */
@@ -100,8 +98,8 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile {
             assert !withdrawn
             assert CollectionUtils.exactlyOneElement(AbstractMergedBamFile.findAll {
                 workPackage == this.workPackage &&
-                withdrawn == false &&
-                fileOperationStatus == FileOperationStatus.INPROGRESS
+                        withdrawn == false &&
+                        fileOperationStatus == FileOperationStatus.INPROGRESS
             }).id == this.id
 
             workPackage.bamFileInProjectFolder = this
@@ -109,29 +107,19 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile {
         }
     }
 
-
-    abstract public void withdraw()
-
-
-    private withdrawCorrespondingSnvResults() {
+    void withdraw() {
         withTransaction {
-            //find snv and make them withdrawn
-            SnvJobResult.withCriteria {
-                isNull 'inputResult'
-                snvCallingInstance {
-                    or {
-                        eq 'sampleType1BamFile', this
-                        eq 'sampleType2BamFile', this
-                    }
-                }
-            }.each {
+            BamFilePairAnalysis.findAllBySampleType1BamFileOrSampleType2BamFile(this, this).each {
                 it.withdraw()
             }
+
+            super.withdraw()
         }
     }
 
+
     File getBaseDirectory() {
-        String antiBodyTarget = seqType.isChipSeq() ? "-${((MergingWorkPackage)mergingWorkPackage).antibodyTarget.name}" : ''
+        String antiBodyTarget = seqType.isChipSeq() ? "-${((MergingWorkPackage) mergingWorkPackage).antibodyTarget.name}" : ''
         OtpPath viewByPid = individual.getViewByPidPath(seqType)
         OtpPath path = new OtpPath(
                 viewByPid,

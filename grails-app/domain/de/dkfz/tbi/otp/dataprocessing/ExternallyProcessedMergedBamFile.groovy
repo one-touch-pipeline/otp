@@ -45,18 +45,6 @@ class ExternallyProcessedMergedBamFile extends AbstractMergedBamFile {
     }
 
     @Override
-    void withdraw() {
-        withTransaction {
-
-            assert LogThreadLocal.threadLog: 'This method produces relevant log messages. Thread log must be set.'
-            LogThreadLocal.threadLog.info "Execute WithdrawnFilesRename.groovy script afterwards"
-            LogThreadLocal.threadLog.info "Withdrawing ${this}"
-            withdrawn = true
-            assert save(flush: true)
-        }
-    }
-
-    @Override
     ExternalMergingWorkPackage getMergingWorkPackage() {
         return ExternalMergingWorkPackage.get(workPackage.id)
     }

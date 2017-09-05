@@ -165,7 +165,7 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
 
     @Override
     public boolean isMostRecentBamFile() {
-        return identifier == maxIdentifier(workPackage)
+        return identifier == maxIdentifier(mergingWorkPackage)
     }
 
     public static int nextIdentifier(final MergingWorkPackage mergingWorkPackage) {
@@ -408,19 +408,12 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
 
     void withdraw() {
         withTransaction {
-            //find snv and make them withdrawn
-            super.withdrawCorrespondingSnvResults()
-
             //get later bam files
             RoddyBamFile.findAllByBaseBamFile(this).each {
                 it.withdraw()
             }
 
-            assert LogThreadLocal.threadLog : 'This method produces relevant log messages. Thread log must be set.'
-            LogThreadLocal.threadLog.info "Execute WithdrawnFilesRename.groovy script afterwards"
-            LogThreadLocal.threadLog.info "Withdrawing ${this}"
-            withdrawn = true
-            assert save(flush: true)
+            super.withdraw()
         }
     }
 

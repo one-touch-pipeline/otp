@@ -2,17 +2,20 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
+import de.dkfz.tbi.otp.dataprocessing.sophia.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.utils.logging.*
 import grails.test.mixin.*
-import grails.validation.*
 import spock.lang.*
 
 @Mock([
+        AceseqInstance,
         DataFile,
         ExternalScript,
         FileType,
         Individual,
+        IndelCallingInstance,
         LibraryPreparationKit,
         MergingSet,
         MergingWorkPackage,
@@ -21,6 +24,7 @@ import spock.lang.*
         ProjectCategory,
         ReferenceGenome,
         RoddyBamFile,
+        RoddySnvCallingInstance,
         RoddyWorkflowConfig,
         Run,
         RunSegment,
@@ -33,7 +37,9 @@ import spock.lang.*
         SeqPlatformGroup,
         SeqTrack,
         SeqType,
-        SoftwareTool
+        SoftwareTool,
+        SophiaInstance,
+        SnvJobResult,
 ])
 class BamFilePairAnalysisSpec extends Specification {
 
@@ -102,6 +108,37 @@ class BamFilePairAnalysisSpec extends Specification {
 
         then:
         !bamFilePairAnalysisSameName.validate()
+    }
+
+    @Unroll
+    void "withdraw, the flag withdraw should be true"() {
+        given:
+        BamFilePairAnalysis analysis = createAnalysisClosure()
+
+
+        when:
+        LogThreadLocal.withThreadLog(System.out) {
+            analysis.withdraw()
+        }
+
+        then:
+        analysis.withdrawn
+
+        where:
+        createAnalysisClosure << [
+                {
+                    DomainFactory.createRoddySnvInstanceWithRoddyBamFiles()
+                },
+                {
+                    DomainFactory.createIndelCallingInstanceWithRoddyBamFiles()
+                },
+                {
+                    DomainFactory.createSophiaInstanceWithRoddyBamFiles()
+                },
+                {
+                    DomainFactory.createAceseqInstanceWithRoddyBamFiles()
+                },
+        ]
     }
 
 

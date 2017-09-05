@@ -1,22 +1,26 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import static org.junit.Assert.*
-import grails.buildtestdata.mixin.Build
-import grails.test.mixin.*
-
-import org.junit.*
-import de.dkfz.tbi.otp.InformationReliability
+import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.State
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.Individual.Type
+import de.dkfz.tbi.otp.utils.logging.*
+import grails.buildtestdata.mixin.*
+import grails.test.mixin.*
+import org.junit.*
+
+import static org.junit.Assert.*
 
 @TestFor(ProcessedBamFile)
 @Build([
         AlignmentPass,
+        BamFilePairAnalysis,
         BedFile,
         LibraryPreparationKit,
         ExomeSeqTrack,
+        MergingSetAssignment,
+        MergingPass,
         ReferenceGenomeProjectSeqType,
 ])
 class ProcessedBamFileUnitTests {
@@ -198,5 +202,27 @@ class ProcessedBamFileUnitTests {
         )
         assertNotNull(bamFile.save([flush: true, failOnError: true]))
         assert shouldFail(AssertionError, { bamFile.bedFile }).contains("A BedFile is only available when the sequencing type is exome")
+    }
+
+    @Test
+    void testWithdraw_SetOneBamFileWithdrawn() {
+        ProcessedBamFile bamFile = DomainFactory.createProcessedBamFile()
+
+        LogThreadLocal.withThreadLog(System.out) {
+            bamFile.withdraw()
+        }
+        assert bamFile.withdrawn
+    }
+
+    @Test
+    void testWithdraw_SetBameFileAndMergedBamFileWithdrawn() {
+        ProcessedMergedBamFile processedMergedBamFile = DomainFactory.createProcessedMergedBamFile()
+        ProcessedBamFile bamFile = DomainFactory.assignNewProcessedBamFile(processedMergedBamFile)
+
+        LogThreadLocal.withThreadLog(System.out) {
+            bamFile.withdraw()
+        }
+        assert bamFile.withdrawn
+        assert processedMergedBamFile.withdrawn
     }
 }

@@ -55,4 +55,12 @@ class ProcessedBamFile extends AbstractFileSystemBamFile implements ProcessParam
     static mapping = {
         alignmentPass index: "abstract_bam_file_alignment_pass_idx"
     }
+
+    void withdraw() {
+        withTransaction {
+            super.withdraw()
+
+            withdrawDownstreamBamFiles()
+        }
+    }
 }

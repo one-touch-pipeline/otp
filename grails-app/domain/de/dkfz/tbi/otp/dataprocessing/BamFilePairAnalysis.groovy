@@ -6,8 +6,8 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.utils.logging.*
 import org.hibernate.*
-
 
 abstract class BamFilePairAnalysis implements ProcessParameterObject, Entity {
     /**
@@ -53,11 +53,13 @@ abstract class BamFilePairAnalysis implements ProcessParameterObject, Entity {
         sampleType1BamFile validator: { AbstractMergedBamFile val, BamFilePairAnalysis obj ->
             obj.samplePair &&
                     val.fileOperationStatus == FileOperationStatus.PROCESSED &&
-                    val.mergingWorkPackage.id == obj.samplePair.mergingWorkPackage1.id}
+                    val.mergingWorkPackage.id == obj.samplePair.mergingWorkPackage1.id
+        }
         sampleType2BamFile validator: { AbstractMergedBamFile val, BamFilePairAnalysis obj ->
             obj.samplePair &&
                     val.fileOperationStatus == FileOperationStatus.PROCESSED &&
-                    val.mergingWorkPackage.id == obj.samplePair.mergingWorkPackage2.id}
+                    val.mergingWorkPackage.id == obj.samplePair.mergingWorkPackage2.id
+        }
         latestDataFileCreationDate validator: { Date latestDataFileCreationDate, BamFilePairAnalysis instance ->
             latestDataFileCreationDate == AbstractBamFile.getLatestSequenceDataFileCreationDate(instance.sampleType1BamFile, instance.sampleType2BamFile)
         }
@@ -105,7 +107,7 @@ abstract class BamFilePairAnalysis implements ProcessParameterObject, Entity {
     }
 
     void updateProcessingState(AnalysisProcessingStates state) {
-        assert state : 'The argument "state" is not allowed to be null'
+        assert state: 'The argument "state" is not allowed to be null'
         if (processingState != state) {
             processingState = state
             this.save([flush: true])
@@ -113,4 +115,12 @@ abstract class BamFilePairAnalysis implements ProcessParameterObject, Entity {
     }
 
     abstract OtpPath getInstancePath()
+
+    void withdraw() {
+        withTransaction {
+            withdrawn = true
+            assert save(flush: true)
+            LogThreadLocal.threadLog.info("Withdrawing ${this}")
+        }
+    }
 }

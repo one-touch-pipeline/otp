@@ -1,7 +1,8 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
+import de.dkfz.tbi.otp.ngsdata.*
+import org.hibernate.*
 
 class RoddySnvCallingInstance extends SnvCallingInstance implements RoddyAnalysisResult {
 
@@ -11,7 +12,7 @@ class RoddySnvCallingInstance extends SnvCallingInstance implements RoddyAnalysi
 
     static constraints = {
         config validator: { val, obj ->
-            val instanceof RoddyWorkflowConfig
+            RoddyWorkflowConfig.isAssignableFrom(Hibernate.getClass(val))
         }
     }
 

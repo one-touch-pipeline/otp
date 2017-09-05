@@ -111,6 +111,7 @@ class ProcessedMergedBamFileIntegrationTests {
             testData.bamFileTumor.withdraw()
         }
         assert testData.bamFileTumor.withdrawn
+        assert snvCallingInstance.withdrawn
         assert callingResult.withdrawn
     }
 

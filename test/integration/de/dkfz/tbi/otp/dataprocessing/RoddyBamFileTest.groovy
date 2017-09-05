@@ -226,6 +226,8 @@ class RoddyBamFileTest {
             snvJobResult.sampleType1BamFile.withdraw()
         }
         assert snvJobResult.sampleType1BamFile.withdrawn
+        assert snvJobResult.snvCallingInstance.withdrawn
+        assert snvJobResult.withdrawn
     }
 
 
