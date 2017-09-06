@@ -66,6 +66,10 @@ class ConfigService {
         return otpProperties.getProperty("otp.ssh.useSshAgent") ?: true
     }
 
+    boolean otpSendsMails() {
+        return otpProperties.getProperty("otp.mail.allowOtpToSendMails") ?: false
+    }
+
     static DateTimeZone getDateTimeZone() {
         return DateTimeZone.forID(ProcessingOptionService.findOptionAssure(ProcessingOption.OptionName.TIME_ZONE, null, null))
     }

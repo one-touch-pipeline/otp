@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.utils
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.ngsdata.*
 import grails.plugin.mail.*
 import org.codehaus.groovy.grails.commons.*
 import org.springframework.beans.factory.annotation.*
@@ -11,6 +12,7 @@ class MailHelperService {
     GrailsApplication grailsApplication
 
     MailService mailService
+    ConfigService configService
 
     void sendEmail(String emailSubject, String content, String recipient) {
        sendEmail(emailSubject, content, Arrays.asList(recipient))
@@ -22,11 +24,13 @@ class MailHelperService {
         assert recipients
         assert recipients.every { it.contains('@') }
         log.info "Send email: subject: '${emailSubject}', to: '${recipients}', content: '${content}'"
-        mailService.sendMail {
-            from ProcessingOptionService.findOption(ProcessingOption.OptionName.EMAIL_SENDER, null, null)
-            to recipients
-            subject emailSubject
-            body content
+        if (configService.otpSendsMails()) {
+            mailService.sendMail {
+                from ProcessingOptionService.findOption(ProcessingOption.OptionName.EMAIL_SENDER, null, null)
+                to recipients
+                subject emailSubject
+                body content
+            }
         }
     }
 }
