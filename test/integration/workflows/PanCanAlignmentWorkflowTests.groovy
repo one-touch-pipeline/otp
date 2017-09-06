@@ -25,6 +25,8 @@ abstract class PanCanAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkfl
         RoddyBamFile firstBamFile = createFirstRoddyBamFile()
         createSeqTrack("readGroup2")
 
+        List<SeqTrack> seqTracks = SeqTrack.findAllByLaneIdInList(["readGroup1"])
+
         MergingWorkPackage workPackage = exactlyOneElement(MergingWorkPackage.findAll())
         workPackage.needsProcessing = false
         workPackage.save(flush: true, failOnError: true)
@@ -35,7 +37,10 @@ abstract class PanCanAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkfl
         // check
         assert 0 == Process.list().size()
         assert 1 == RoddyBamFile.findAll().size()
-        checkFirstBamFileState(firstBamFile, true)
+        checkFirstBamFileState(firstBamFile, true, [
+                seqTracks: seqTracks,
+                containedSeqTracks : seqTracks
+        ])
         assertBamFileFileSystemPropertiesSet(firstBamFile)
     }
 

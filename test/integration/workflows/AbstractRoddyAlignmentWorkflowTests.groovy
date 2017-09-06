@@ -444,7 +444,12 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
         RoddyBamFile firstBamFile = RoddyBamFile.findByIdentifier(0L)
         RoddyBamFile latestBamFile = RoddyBamFile.findByIdentifier(1L)
 
-        checkFirstBamFileState(firstBamFile, false)
+        List<SeqTrack> seqTrackOfFirstBamFile = SeqTrack.findAllByLaneIdInList(["readGroup1"])
+
+        checkFirstBamFileState(firstBamFile, false, [
+                seqTracks: seqTrackOfFirstBamFile,
+                containedSeqTracks: seqTrackOfFirstBamFile,
+        ])
         assertBamFileFileSystemPropertiesSet(firstBamFile)
 
         checkLatestBamFileState(latestBamFile, firstBamFile)
