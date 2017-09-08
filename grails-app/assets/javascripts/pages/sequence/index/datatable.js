@@ -21,7 +21,7 @@ $.otp.sequence = {
                     var iframe = document.createElement('iframe');
                     iframe.style.height = "0px";
                     iframe.style.width = "0px";
-                    iframe.src = link + "?filtering=" + JSON.stringify(searchCriteria()) + "&" + dt._fnAjaxParameters;
+                    iframe.src = link + "?filtering=" + encodeURIComponent(JSON.stringify(searchCriteria()));
                     document.body.appendChild( iframe );
                 }
             }],
