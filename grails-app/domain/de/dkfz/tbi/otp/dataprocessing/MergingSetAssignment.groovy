@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.utils.*
+import org.hibernate.*
 
 /**
  * many to many connection between
@@ -21,7 +22,8 @@ class MergingSetAssignment implements Entity {
             }
             /** Before you remove this constraint, make sure that all existing code
                 correctly handles other types of {@link AbstractBamFile}s in a merging set. */
-            return bamFile instanceof ProcessedBamFile || bamFile instanceof ProcessedMergedBamFile
+            Class bamFileClass = Hibernate.getClass(bamFile)
+            return ProcessedBamFile.isAssignableFrom(bamFileClass) || ProcessedMergedBamFile.isAssignableFrom(bamFileClass)
         }
     }
 

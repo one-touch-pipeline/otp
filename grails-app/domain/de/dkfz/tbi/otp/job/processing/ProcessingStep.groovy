@@ -1,9 +1,9 @@
 package de.dkfz.tbi.otp.job.processing
 
-import de.dkfz.tbi.otp.job.plan.JobDefinition
-import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
-import de.dkfz.tbi.otp.utils.Entity
-import grails.util.Environment
+import de.dkfz.tbi.otp.job.plan.*
+import de.dkfz.tbi.otp.utils.*
+import grails.util.*
+import org.hibernate.*
 
 /**
  * A ProcessingStep represents one execution of a Job for a JobDefinition.
@@ -232,7 +232,7 @@ public class ProcessingStep implements Serializable, Entity {
     }
 
     public static ProcessingStep findTopMostProcessingStep(ProcessingStep step) {
-        if (step instanceof RestartedProcessingStep) {
+        if (RestartedProcessingStep.isAssignableFrom(Hibernate.getClass(step))) {
             if (step.original) {
                 return findTopMostProcessingStep(step.original)
             }

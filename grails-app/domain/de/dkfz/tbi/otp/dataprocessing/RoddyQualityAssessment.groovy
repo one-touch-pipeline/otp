@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
+import de.dkfz.tbi.otp.ngsdata.*
+import org.hibernate.*
 
 class RoddyQualityAssessment extends AbstractQualityAssessment {
 
@@ -33,7 +34,9 @@ class RoddyQualityAssessment extends AbstractQualityAssessment {
     }
 
     static constraints = {
-        qualityAssessmentMergedPass(validator: { it.abstractMergedBamFile instanceof RoddyBamFile })
+        qualityAssessmentMergedPass(validator: {
+            RoddyBamFile.isAssignableFrom(Hibernate.getClass(it.abstractMergedBamFile))
+        })
 
         chromosome blank: false
 

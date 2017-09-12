@@ -1,8 +1,9 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
+import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.utils.*
+import org.hibernate.*
 
 /**
  * Each execution of the Quality Assessment Merged Workflow on the particular data file (merged bam file) is represented as QualityAssessmentMergedPass.
@@ -20,7 +21,7 @@ class QualityAssessmentMergedPass implements ProcessParameterObject, Entity {
 
     static constraints = {
         identifier(unique: 'abstractMergedBamFile', validator: { int val, QualityAssessmentMergedPass obj ->
-            return val == 0 || !(obj.abstractMergedBamFile instanceof RoddyBamFile)
+            return val == 0 || !(RoddyBamFile.isAssignableFrom(Hibernate.getClass(obj.abstractMergedBamFile)))
         })
         description(nullable: true)
     }
@@ -78,7 +79,7 @@ class QualityAssessmentMergedPass implements ProcessParameterObject, Entity {
     }
 
     MergingSet getMergingSet() {
-        if(abstractMergedBamFile instanceof ProcessedMergedBamFile) {
+        if (ProcessedMergedBamFile.isAssignableFrom(Hibernate.getClass(abstractMergedBamFile))) {
             return abstractMergedBamFile.mergingSet
         } else {
             throw new RuntimeException("MergingSet exists only for ProcessedMergedBamFiles")
@@ -90,7 +91,7 @@ class QualityAssessmentMergedPass implements ProcessParameterObject, Entity {
     }
 
     MergingPass getMergingPass() {
-        if(abstractMergedBamFile instanceof ProcessedMergedBamFile) {
+        if (ProcessedMergedBamFile.isAssignableFrom(Hibernate.getClass(abstractMergedBamFile))) {
             return abstractMergedBamFile.mergingPass
         } else {
             throw new RuntimeException("MergingPass exists only for ProcessedMergedBamFiles")

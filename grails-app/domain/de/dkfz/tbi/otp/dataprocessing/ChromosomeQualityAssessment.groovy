@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry
+import de.dkfz.tbi.otp.ngsdata.*
+import org.hibernate.*
 
 /**
  * Class to represent chromosomes that will be considered independently (1 to 22, X, Y and M)
@@ -19,6 +20,8 @@ class ChromosomeQualityAssessment extends QaJarQualityAssessment {
     ]
 
     static constraints = {
-        qualityAssessmentPass(validator: { it.processedBamFile instanceof ProcessedBamFile })
+        qualityAssessmentPass(validator: {
+            ProcessedBamFile.isAssignableFrom(Hibernate.getClass(it.processedBamFile))
+        })
     }
 }

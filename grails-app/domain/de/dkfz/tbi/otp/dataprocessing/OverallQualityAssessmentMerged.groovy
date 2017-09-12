@@ -1,10 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.ngsdata.Individual
-import de.dkfz.tbi.otp.ngsdata.Project
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
-import de.dkfz.tbi.otp.ngsdata.SampleType
-import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.*
+import org.hibernate.*
 
 /**
  * To be extended later on
@@ -18,7 +15,9 @@ class OverallQualityAssessmentMerged extends QaJarQualityAssessment {
     ]
 
     static constraints = {
-        qualityAssessmentMergedPass(validator: { it.abstractMergedBamFile instanceof ProcessedMergedBamFile })
+        qualityAssessmentMergedPass(validator: {
+            ProcessedMergedBamFile.isAssignableFrom(Hibernate.getClass(it.abstractMergedBamFile))
+        })
     }
 
     static mapping = {
