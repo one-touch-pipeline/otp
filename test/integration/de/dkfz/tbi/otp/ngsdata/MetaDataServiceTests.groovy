@@ -4,7 +4,7 @@ import de.dkfz.tbi.otp.testing.*
 import grails.plugin.springsecurity.*
 import grails.plugin.springsecurity.acl.*
 import org.junit.*
-import org.junit.rules.TemporaryFolder
+import org.junit.rules.*
 import org.springframework.security.access.*
 import org.springframework.security.acls.domain.*
 
@@ -40,12 +40,15 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
     void testGetMetaDataEntryByIdNoProjectAnonymous() {
         MetaDataEntry entry = mockEntry()
 
-        authenticateAnonymous()
         shouldFail(AccessDeniedException) {
-            metaDataService.getMetaDataEntryById(entry.id)
+            doWithAnonymousAuth {
+                metaDataService.getMetaDataEntryById(entry.id)
+            }
         }
         // accessing a non-existing id should still work
-        assertNull(metaDataService.getMetaDataEntryById(entry.id + 1))
+        doWithAnonymousAuth {
+            assertNull(metaDataService.getMetaDataEntryById(entry.id + 1))
+        }
     }
 
     /**
@@ -103,13 +106,16 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
     void testGetMetaDataEntryByIdWithProjectNoAclAsAnonymous() {
         MetaDataEntry entry = mockEntry()
 
-        authenticateAnonymous()
         shouldFail(AccessDeniedException) {
-            metaDataService.getMetaDataEntryById(entry.id)
+            doWithAnonymousAuth {
+                metaDataService.getMetaDataEntryById(entry.id)
+            }
         }
 
         // accessing a non-existing id should still work
-        assertNull(metaDataService.getMetaDataEntryById(entry.id + 1))
+        doWithAnonymousAuth {
+            assertNull(metaDataService.getMetaDataEntryById(entry.id + 1))
+        }
     }
 
     /**
@@ -186,9 +192,10 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
     @Test
     void testUpdateMetaDataEntryNoProjectAsAnonymous() {
         MetaDataEntry entry = mockEntry()
-        authenticateAnonymous()
         shouldFail(AccessDeniedException) {
-            metaDataService.updateMetaDataEntry(entry, "test2")
+            doWithAnonymousAuth {
+                metaDataService.updateMetaDataEntry(entry, "test2")
+            }
         }
     }
 
@@ -237,9 +244,10 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
     @Test
     void testUpdateMetaDataEntryWithProjectAsAnonymous() {
         MetaDataEntry entry = mockEntry()
-        authenticateAnonymous()
         shouldFail(AccessDeniedException) {
-            metaDataService.updateMetaDataEntry(entry, "test2")
+            doWithAnonymousAuth {
+                metaDataService.updateMetaDataEntry(entry, "test2")
+            }
         }
     }
 
@@ -255,8 +263,10 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
                 metaDataService.updateMetaDataEntry(entry, "test2")
             }
         }
-        aclUtilService.addPermission(entry.dataFile.project, "testuser", BasePermission.READ)
-        aclUtilService.addPermission(entry.dataFile.project, "testuser", BasePermission.WRITE)
+        doWithAnonymousAuth {
+            aclUtilService.addPermission(entry.dataFile.project, "testuser", BasePermission.READ)
+            aclUtilService.addPermission(entry.dataFile.project, "testuser", BasePermission.WRITE)
+        }
         SpringSecurityUtils.doWithAuth("testuser") {
             assertTrue(metaDataService.updateMetaDataEntry(entry, "test2"))
         }
@@ -267,7 +277,9 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
             }
         }
         // let's give that user read permission
-        aclUtilService.addPermission(entry.dataFile.project, "user", BasePermission.READ)
+        doWithAnonymousAuth {
+            aclUtilService.addPermission(entry.dataFile.project, "user", BasePermission.READ)
+        }
         SpringSecurityUtils.doWithAuth("user") {
             shouldFail(AccessDeniedException) {
                 metaDataService.updateMetaDataEntry(entry, "test3")

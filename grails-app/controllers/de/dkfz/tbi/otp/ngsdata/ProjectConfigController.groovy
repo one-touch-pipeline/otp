@@ -42,6 +42,11 @@ class ProjectConfigController {
         List<ProjectContactPerson> projectContactPersons = ProjectContactPerson.findAllByProject(project)
         List<String> contactPersonRoles = [''] + ContactPersonRole.findAll()*.name
 
+        List<MergingCriteria> mergingCriteria = MergingCriteria.findAllByProject(project)
+        Map<SeqType, MergingCriteria> seqTypeMergingCriteria = SeqType.roddyAlignableSeqTypes.collectEntries { SeqType seqType ->
+            [(seqType): mergingCriteria.find {it.seqType == seqType}]
+        }.sort { Map.Entry<SeqType, MergingCriteria> it -> it.key.displayNameWithLibraryLayout }
+
         List<List> thresholdsTable = createThresholdTable(project)
 
         List snvConfigTable = createAnalysisConfigTable(project,  SeqType.getSnvPipelineSeqTypes(), Pipeline.findByName(Pipeline.Name.RODDY_SNV))
@@ -67,7 +72,8 @@ class ProjectConfigController {
                 lastReceivedDate: dates.lastReceivedDate,
                 comment: project.comment,
                 nameInMetadata: project.nameInMetadataFiles?: '',
-                seqTypes: SeqType.roddyAlignableSeqTypes,
+                seqTypeMergingCriteria: seqTypeMergingCriteria,
+                seqTypes: SeqType.roddyAlignableSeqTypes.sort { it.displayNameWithLibraryLayout },
                 snvSeqTypes: SeqType.snvPipelineSeqTypes,
                 indelSeqTypes: SeqType.indelPipelineSeqTypes,
                 sophiaSeqType: SeqType.sophiaPipelineSeqTypes,
@@ -307,7 +313,7 @@ class ProjectConfigController {
             String adapterTrimming = it.sampleType ? "" :
                     it.seqType.isWgbs() || it.seqType.isWgbs() ?:
                             RoddyWorkflowConfig.getLatestForProject(project, it.seqType, Pipeline.findByName(Pipeline.Name.PANCAN_ALIGNMENT))?.adapterTrimmingNeeded
-            [it.seqType.name, it.seqType.libraryLayout, it.sampleType?.name, it.referenceGenome.name, it.statSizeFileName ?: "", adapterTrimming]
+            [it.seqType.displayNameWithLibraryLayout, it.sampleType?.name, it.referenceGenome.name, it.statSizeFileName ?: "", adapterTrimming]
         }
         dataToRender.iTotalRecords = data.size()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords

@@ -3,6 +3,10 @@ package de.dkfz.tbi.otp.testing
 import de.dkfz.tbi.otp.security.*
 import grails.plugin.springsecurity.*
 import grails.plugin.springsecurity.acl.*
+import org.springframework.security.authentication.*
+import org.springframework.security.core.*
+import org.springframework.security.core.authority.*
+import org.springframework.security.core.context.*
 
 import static org.junit.Assert.*
 
@@ -75,5 +79,23 @@ trait UserAndRoles {
         Role operatorRole = new Role(authority: "ROLE_OPERATOR")
         assertNotNull(operatorRole.save(flush: true))
         UserRole.create(operator, operatorRole, true)
+    }
+
+    static Object doWithAnonymousAuth(@SuppressWarnings("rawtypes") final Closure closure) {
+        Authentication previousAuth = SecurityContextHolder.getContext().getAuthentication();
+        AnonymousAuthenticationToken auth = new AnonymousAuthenticationToken("test", "Anonymous", [new SimpleGrantedAuthority("ROLE_ANONYMOUS")])
+        SecurityContextHolder.getContext().setAuthentication(auth)
+
+        try {
+            return closure.call();
+        }
+        finally {
+            if (previousAuth == null) {
+                SecurityContextHolder.clearContext();
+            }
+            else {
+                SecurityContextHolder.getContext().setAuthentication(previousAuth);
+            }
+        }
     }
 }

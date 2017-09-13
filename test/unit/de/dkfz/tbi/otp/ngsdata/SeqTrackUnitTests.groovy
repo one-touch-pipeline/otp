@@ -15,6 +15,7 @@ import org.junit.*
         FileType,
         Individual,
         LibraryPreparationKit,
+        MergingCriteria,
         MergingWorkPackage,
         Pipeline,
         Project,

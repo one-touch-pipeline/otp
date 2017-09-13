@@ -1,8 +1,12 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import static org.springframework.util.Assert.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.State
 import de.dkfz.tbi.otp.ngsdata.*
+import grails.validation.*
+import org.springframework.security.access.prepost.*
+import org.springframework.validation.*
+
+import static org.springframework.util.Assert.*
 
 class MergingCriteriaService {
 
@@ -42,5 +46,23 @@ class MergingCriteriaService {
             throw new SavingException(object.toString())
         }
         return object
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    MergingCriteria findMergingCriteria(Project project, SeqType seqType) {
+        return MergingCriteria.findByProjectAndSeqType(project, seqType) ?: new MergingCriteria()
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    Errors createOrUpdateMergingCriteria(Project project, SeqType seqType, boolean libPrepKit, MergingCriteria.SpecificSeqPlatformGroups seqPlatformGroups) {
+        MergingCriteria mergingCriteria = MergingCriteria.findOrCreateWhere(project: project, seqType: seqType)
+        mergingCriteria.libPrepKit = libPrepKit
+        mergingCriteria.seqPlatformGroup = seqPlatformGroups
+        try {
+            mergingCriteria.save(flush: true)
+        } catch (ValidationException e) {
+            return e.errors
+        }
+        return null
     }
 }

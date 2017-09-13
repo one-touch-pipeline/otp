@@ -2,9 +2,9 @@
 <%@ page import="de.dkfz.tbi.otp.ngsdata.Project.Snv" %>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<meta name="layout" content="main" />
-<title><g:message code="projectOverview.title" args="[project.name]"/></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="layout" content="main" />
+    <title><g:message code="projectOverview.title" args="[project.name]"/></title>
     <asset:javascript src="pages/projectConfig/index/init_description.js"/>
     <asset:javascript src="pages/projectConfig/index/functions.js"/>
     <asset:javascript src="modules/editorSwitch"/>
@@ -237,11 +237,11 @@
                 </ul>
             </div>
         </sec:ifAllGranted>
+        <h2>${g.message(code: 'projectOverview.alignmentInformation.title')}</h2>
         <div>
-            <h3>${g.message(code: 'projectOverview.alignmentInformation.title')}</h3>
             <sec:ifAllGranted roles="ROLE_OPERATOR">
+                <h3><g:message code="projectOverview.alignmentInformation.configure"/></h3>
                 <div class="show_button">
-                    <g:message code="projectOverview.alignmentInformation.configure"/>
                     <ul>
                         <g:each in="${seqTypes}" var="seqType">
                             <li>
@@ -271,13 +271,42 @@
                 </table>
             </div>
         </div>
+        <div>
+            <h3>${g.message(code: 'projectOverview.mergingCriteria')}</h3>
+            <table>
+                <tr>
+                    <th>${g.message(code: 'projectOverview.mergingCriteria.seqType')}</th>
+                    <th>${g.message(code: 'projectOverview.mergingCriteria.libPrepKit')}</th>
+                    <th>${g.message(code: 'projectOverview.mergingCriteria.seqPlatformGroup')}</th>
+                </tr>
+                <g:each in="${seqTypeMergingCriteria}" var="m">
+                    <tr>
+                        <td>
+                            <sec:ifAllGranted roles="ROLE_OPERATOR">
+                                <g:link controller="mergingCriteria" params='["project.id": project.id,
+                                                                              "seqType.id": m.key.id]'>
+                                    ${m.key}</g:link>
+                            </sec:ifAllGranted>
+                            <sec:ifNotGranted roles="ROLE_OPERATOR">
+                                ${m.key}
+                            </sec:ifNotGranted>
+                        </td>
+                        <td>
+                            ${m.value?.libPrepKit != null ? m.value.libPrepKit : "Not configured"}
+                        </td>
+                        <td>
+                            ${m.value?.seqPlatformGroup ?: "Not configured"}
+                        </td>
+                    </tr>
+                </g:each>
+            </table>
+        </div>
         <br>
         <div class="otpDataTables">
         <h3>${g.message(code: 'projectOverview.listReferenceGenome.title')}</h3>
             <otp:dataTable
                 codes="${[
                     'projectOverview.index.referenceGenome.sequenceTypeName',
-                    'projectOverview.index.referenceGenome.libraryLayout',
                     'projectOverview.index.referenceGenome.sampleTypeName',
                     'projectOverview.index.referenceGenome',
                     'projectOverview.index.statSizeFile',
@@ -286,8 +315,9 @@
                 id="listReferenceGenome" />
         </div>
         <br>
+        <h2>${g.message(code: 'projectOverview.analysis.title')}</h2>
         <div>
-            <h3>${g.message(code: 'projectOverview.analysis.title')}</h3>
+            <h3>${g.message(code: 'projectOverview.analysis.thresholds')}</h3>
             <sec:ifAllGranted roles="ROLE_OPERATOR">
                 <ul>
                     <li>
@@ -313,6 +343,9 @@
                     </g:each>
                 </table>
             </g:if>
+            <g:else>
+                ${g.message(code: 'projectOverview.analysis.noThresholds')}
+            </g:else>
         </div>
         <div>
             <h3>${g.message(code: 'projectOverview.snv.title')}</h3>
