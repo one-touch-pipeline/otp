@@ -42,11 +42,10 @@ class MetaDataFieldsController {
                     dirName: it.dirName
             ]
         }
-        //TODO OTP-2607: adjust handling of seqPlatforms, put handling of seqPlatformGroups on a new page
+
         List seqPlatforms = SeqPlatform.list().collect {
             [
                     name       : it.name,
-                    platformGroup: it.seqPlatformGroups?.name,
                     model      : it.seqPlatformModelLabel?.name,
                     modelAlias : it.seqPlatformModelLabel?.alias?.sort()?.join(' | '),
                     hasModel   : it.seqPlatformModelLabel ? true : false,
@@ -54,7 +53,7 @@ class MetaDataFieldsController {
                     seqKitAlias: it.sequencingKitLabel?.alias?.sort()?.join(' | '),
                     hasSeqKit  : it.sequencingKitLabel?.name ? true : false
             ]
-        }.sort{"${it.platformGroup}, ${it.name}, ${it.model}, ${it.seqKit}"}
+        }.sort{"${it.name}, ${it.model}, ${it.seqKit}"}
 
         List seqTypes = SeqType.list(sort: "name", order: "asc").collect {
             [
@@ -105,7 +104,7 @@ class MetaDataFieldsController {
     }
 
     JSON createSeqPlatform(CreateSeqPlatformCommand cmd) {
-        checkErrorAndCallMethod(cmd, { seqPlatformService.createNewSeqPlatform(cmd.platform, cmd.group, cmd.model, cmd.kit) })
+        checkErrorAndCallMethod(cmd, { seqPlatformService.createNewSeqPlatform(cmd.platform, cmd.model, cmd.kit) })
     }
 
     JSON createModelAlias(CreateModelAliasCommand cmd) {
@@ -277,7 +276,6 @@ class CreateSeqCenterCommand implements Serializable {
 
 class CreateSeqPlatformCommand implements Serializable {
         String platform
-        String group
         String model
         String kit
         static constraints = {
@@ -287,18 +285,11 @@ class CreateSeqPlatformCommand implements Serializable {
                             return 'Duplicate'
                         }
                     })
-            group(blank: false, nullable: true)
             model(blank: false, nullable: false)
             kit(blank: false, nullable: true)
         }
         void setPlatform(String platform) {
             this.platform = platform?.trim()?.replaceAll(" +", " ")
-        }
-        void setGroup(String group) {
-            this.group = group?.trim()?.replaceAll(" +", " ")
-            if (this.group.equals("")) {
-                this.group = null
-            }
         }
         void setModel(String model) {
             this.model = model?.trim()?.replaceAll(" +", " ")

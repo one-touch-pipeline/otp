@@ -179,11 +179,8 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
     }
 
     @Unroll
-    @Ignore("OTP-2607")
     void "test JSON createSeqPlatform valid input"() {
         given:
-        SeqPlatformGroup seqPlatformGroup = new SeqPlatformGroup(name: "SeqPlatformGroup")
-        seqPlatformGroup.save(flush: true)
         SeqPlatformModelLabel seqPlatformModelLabel = new SeqPlatformModelLabel(name: "SeqPlatformModelLabel")
         seqPlatformModelLabel.save(flush: true)
         SequencingKitLabel sequencingKitLabel = new SequencingKitLabel(name: "SequencingKitLabel")
@@ -191,7 +188,6 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
 
         when:
         controller.params.platform = platform
-        controller.params.group = group
         controller.params.model = model
         controller.params.kit = kit
         SpringSecurityUtils.doWithAuth("operator"){
@@ -201,29 +197,21 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
         then:
         controller.response.status == 200
         controller.response.json.success
-        SeqPlatform.findByNameAndSeqPlatformModelLabelAndSequencingKitLabelAndSeqPlatformGroup(
+        SeqPlatform.findByNameAndSeqPlatformModelLabelAndSequencingKitLabel(
                 platform,
                 controller.params.model? seqPlatformModelLabel:null,
                 controller.params.kit? sequencingKitLabel:null,
-                controller.params.group? seqPlatformGroup:null
         )
 
         where:
-        platform            | group                     | model                         | kit
-        'SeqPlatform'       | ''                        | 'SeqPlatformModelLabel'       | ''
-        'SeqPlatform'       | 'SeqPlatformGroup'        | 'SeqPlatformModelLabel'       | ''
-        'SeqPlatform'       | ''                        | 'SeqPlatformModelLabel'       | 'SequencingKitLabel'
-        'SeqPlatform'       | 'SeqPlatformGroup'        | 'SeqPlatformModelLabel'       | 'SequencingKitLabel'
+        platform            | model                         | kit
+        'SeqPlatform'       | 'SeqPlatformModelLabel'       | ''
+        'SeqPlatform'       | 'SeqPlatformModelLabel'       | 'SequencingKitLabel'
     }
 
     @Unroll
-    @Ignore("OTP-2607")
-   void "test JSON createSeqPlatform valid input with preexisting SeqPlatform"() {
+    void "test JSON createSeqPlatform valid input with preexisting SeqPlatform"() {
         given:
-        SeqPlatformGroup seqPlatformGroup = new SeqPlatformGroup(name: "SeqPlatformGroup")
-        seqPlatformGroup.save(flush: true)
-        SeqPlatformGroup seqPlatformGroup2 = new SeqPlatformGroup(name: "SeqPlatformGroup2")
-        seqPlatformGroup2.save(flush: true)
         SeqPlatformModelLabel seqPlatformModelLabel = new SeqPlatformModelLabel(name: "SeqPlatformModelLabel")
         seqPlatformModelLabel.save(flush: true)
         SeqPlatformModelLabel seqPlatformModelLabel2 = new SeqPlatformModelLabel(name: "SeqPlatformModelLabel2")
@@ -236,12 +224,10 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
                 name: "SeqPlatform",
                 seqPlatformModelLabel: seqPlatformModelLabel,
                 sequencingKitLabel: sequencingKitLabel,
-                seqPlatformGroup: seqPlatformGroup
         )
 
         when:
         controller.params.platform = platform
-        controller.params.group = group
         controller.params.model = model
         controller.params.kit = kit
         SpringSecurityUtils.doWithAuth("operator"){
@@ -251,25 +237,22 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
         then:
         controller.response.status == 200
         controller.response.json.success
-        SeqPlatform.findByNameAndSeqPlatformModelLabelAndSequencingKitLabelAndSeqPlatformGroup(
+        SeqPlatform.findByNameAndSeqPlatformModelLabelAndSequencingKitLabel(
                 platform,
                 controller.params.model? SeqPlatformModelLabel.findByName(model):null,
                 controller.params.kit? SequencingKitLabel.findByName(kit):null,
-                controller.params.group? SeqPlatformGroup.findByName(group):null
         )
 
         where:
-        platform            | group                     | model                         | kit
-        'SeqPlatform2'      | 'SeqPlatformGroup'        | 'SeqPlatformModelLabel'       | 'SequencingKitLabel'
-        'SeqPlatform'       | 'SeqPlatformGroup'        | 'SeqPlatformModelLabel2'      | 'SequencingKitLabel'
-        'SeqPlatform'       | 'SeqPlatformGroup'        | 'SeqPlatformModelLabel'       | 'SequencingKitLabel2'
+        platform        | model                         | kit
+        'SeqPlatform2'  | 'SeqPlatformModelLabel'       | 'SequencingKitLabel'
+        'SeqPlatform'   | 'SeqPlatformModelLabel2'      | 'SequencingKitLabel'
+        'SeqPlatform'   | 'SeqPlatformModelLabel'       | 'SequencingKitLabel2'
     }
 
     @Unroll
     void "test JSON createSeqPlatform invalid input"() {
         given:
-        SeqPlatformGroup seqPlatformGroup = new SeqPlatformGroup(name: "SeqPlatformGroup")
-        seqPlatformGroup.save(flush: true)
         SeqPlatformModelLabel seqPlatformModelLabel = new SeqPlatformModelLabel(name: "SeqPlatformModelLabel")
         seqPlatformModelLabel.save(flush: true)
         SequencingKitLabel sequencingKitLabel = new SequencingKitLabel(name: "SequencingKitLabel")
@@ -278,13 +261,11 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
                 name: "SeqPlatform",
                 seqPlatformModelLabel: seqPlatformModelLabel,
                 sequencingKitLabel: sequencingKitLabel,
-                seqPlatformGroup: seqPlatformGroup
         )
         seqPlatform.save(flush: true)
 
         when:
         controller.params.platform = platform
-        controller.params.group = group
         controller.params.model = model
         controller.params.kit = kit
         SpringSecurityUtils.doWithAuth("operator"){
@@ -296,17 +277,12 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
         !controller.response.json.success
 
         where:
-        platform            | group                     | model                         | kit
-        ''                  | ''                        | ''                            | ''
-        ''                  | 'SeqPlatformGroup'        | ''                            | ''
-        ''                  | ''                        | 'SeqPlatformModelLabel'       | ''
-        ''                  | 'SeqPlatformGroup'        | 'SeqPlatformModelLabel'       | ''
-        ''                  | ''                        | ''                            | 'SequencingKitLabel'
-        ''                  | 'SeqPlatformGroup'        | ''                            | 'SequencingKitLabel'
-        ''                  | ''                        | 'SeqPlatformModelLabel'       | 'SequencingKitLabel'
-        'SeqPlatform'       | ''                        | 'SeqPlatformModelLabel'       | 'SequencingKitLabel'
-        ''                  | 'SeqPlatformGroup'        | 'SeqPlatformModelLabel'       | 'SequencingKitLabel'
-        'SeqPlatform'       | 'SeqPlatformGroup'        | 'SeqPlatformModelLabel'       | 'SequencingKitLabel'
+        platform            | model                         | kit
+        ''                  | ''                            | ''
+        ''                  | 'SeqPlatformModelLabel'       | ''
+        ''                  | ''                            | 'SequencingKitLabel'
+        ''                  | 'SeqPlatformModelLabel'       | 'SequencingKitLabel'
+        'SeqPlatform'       | 'SeqPlatformModelLabel'       | 'SequencingKitLabel'
     }
 
     void "test JSON createModelAlias valid input"() {

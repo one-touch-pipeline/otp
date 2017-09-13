@@ -159,7 +159,6 @@
         <table>
             <thead>
                     <tr>
-                        <th><g:message code="dataFields.listPlatformGroup"/></th>
                         <th><g:message code="dataFields.listPlatformName"/></th>
                         <th><g:message code="dataFields.listPlatformModelLabel"/></th>
                         <th><g:message code="dataFields.listPlatformModelLabelAlias"/></th>
@@ -172,9 +171,6 @@
             <tbody>
                     <g:each var="seqPlatform" in="${seqPlatforms}" >
                     <tr>
-                        <td>
-                            ${seqPlatform.platformGroup}
-                        </td>
                         <td>
                             ${seqPlatform.name}
                         </td>
@@ -215,8 +211,8 @@
                 <td colspan="8">
                     <otp:editorSwitchNewValues
                         roles="ROLE_OPERATOR"
-                        labels="${["Group", "Platform", "Model", "Kit"]}"
-                        textFields="${["group", "platform", "model", "kit"]}"
+                        labels="${["Platform", "Model", "Kit"]}"
+                        textFields="${["platform", "model", "kit"]}"
                         link="${g.createLink(controller: 'metaDataFields', action: 'createSeqPlatform')}"
                     />
                 </td>
