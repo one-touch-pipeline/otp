@@ -7,7 +7,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.dataprocessing.*
 
 //the merging work package to use
-MergingWorkpackage mwp = MergingSet.get(    ).mergingWorkPackage,
+MergingWorkpackage mwp = MergingSet.get(    ).mergingWorkPackage
 //the ids of the bam files to use in the merging set
 List<Long> bamFileIds = [    ]
 
@@ -22,8 +22,8 @@ MergingSet createNewMergingSetAndAssignBamFiles(MergingWorkPackage workPackage, 
     MergingSet mergingSet = new MergingSet(identifier: MergingSet.nextIdentifier(workPackage), mergingWorkPackage: workPackage)
     ctx.mergingSetService.assertSave(mergingSet)
     bamFiles.each {AbstractBamFile bamFile ->
-        MergingSetAssignment mergingAssigment = new MergingSetAssignment(mergingSet: mergingSet, bamFile: bamFile)
-        ctx.mergingSetService.assertSave(mergingAssigment)
+        MergingSetAssignment mergingAssignment = new MergingSetAssignment(mergingSet: mergingSet, bamFile: bamFile)
+        ctx.mergingSetService.assertSave(mergingAssignment)
         ctx.abstractBamFileService.assignedToMergingSet(bamFile)
     }
     mergingSet.status = MergingSet.State.NEEDS_PROCESSING

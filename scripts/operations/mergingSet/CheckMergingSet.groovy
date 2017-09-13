@@ -28,5 +28,5 @@ def display = { display, bamFile, space = "" ->
 }
 
 MergingPass mergingPass = MergingPass.findAllByMergingSet(mergingSet).find{it.latestPass}
-display(display, CollectionUtils.exactlyOneElement(ProcessedMergedBamFile.findAllByMergingPass(mergingPass))
+display(display, CollectionUtils.exactlyOneElement(ProcessedMergedBamFile.findAllByMergingPass(mergingPass)))
 println ""
