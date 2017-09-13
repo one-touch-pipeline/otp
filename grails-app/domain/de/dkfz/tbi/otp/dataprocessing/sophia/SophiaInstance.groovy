@@ -35,7 +35,7 @@ class SophiaInstance extends BamFilePairAnalysis implements ProcessParameterObje
 
     @Override
     RoddyWorkflowConfig getConfig() {
-        return super.config
+        return RoddyWorkflowConfig.get(super.config.id)
     }
 
     File getFinalAceseqInputFile() {

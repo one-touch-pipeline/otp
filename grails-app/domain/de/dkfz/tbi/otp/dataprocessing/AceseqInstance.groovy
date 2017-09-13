@@ -40,7 +40,7 @@ class AceseqInstance extends BamFilePairAnalysis implements ProcessParameterObje
 
     @Override
     RoddyWorkflowConfig getConfig() {
-        return super.config
+        return RoddyWorkflowConfig.get(super.config.id)
     }
 
     File getQcJsonFile() {

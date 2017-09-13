@@ -31,7 +31,7 @@ class IndelCallingInstance extends BamFilePairAnalysis implements ProcessParamet
 
     @Override
     RoddyWorkflowConfig getConfig() {
-        return super.config
+        return RoddyWorkflowConfig.get(super.config.id)
     }
 
     List<File> getResultFilePathsToValidate() {
