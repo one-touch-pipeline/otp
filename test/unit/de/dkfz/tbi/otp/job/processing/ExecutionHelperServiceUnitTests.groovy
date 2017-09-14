@@ -1,17 +1,13 @@
 package de.dkfz.tbi.otp.job.processing
 
-import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.utils.HelperUtils
-import de.dkfz.tbi.otp.utils.ProcessHelperService
-import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
+import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.utils.logging.*
 import grails.test.mixin.*
 import grails.test.mixin.support.*
-import de.dkfz.tbi.otp.ngsdata.*
-import org.junit.After
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.TemporaryFolder
+import org.junit.*
+import org.junit.rules.*
 
 /**
  * Unit tests for the {@link ExecutionHelperService}.
@@ -43,7 +39,7 @@ class ExecutionHelperServiceUnitTests {
     @Test
     void "test setGroup & getGroup allFine"() {
         File tmpFile = temporaryFolder.newFile()
-        String group = TestCase.testingGroup(grailsApplication)
+        String group = TestConfigHelper.testingGroup(grailsApplication)
 
         service.executionService = [
                 executeCommand: { Realm realm, String command ->

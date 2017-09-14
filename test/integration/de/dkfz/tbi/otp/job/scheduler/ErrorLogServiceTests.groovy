@@ -1,21 +1,17 @@
 package de.dkfz.tbi.otp.job.scheduler
 
-import de.dkfz.tbi.TestCase
-import org.apache.commons.io.FileUtils
-import org.codehaus.groovy.grails.commons.GrailsApplication
-import org.junit.After
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.TemporaryFolder
+import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.ngsdata.*
+import org.apache.commons.io.*
+import org.junit.*
+import org.junit.rules.*
 
-import static org.junit.Assert.assertEquals
-import static org.junit.Assert.assertTrue
+import static org.junit.Assert.*
 
 class ErrorLogServiceTests {
 
     ErrorLogService errorLogService
-    GrailsApplication grailsApplication
+    ConfigService configService
 
     File exceptionStoringFile
     File stacktraceFile
@@ -41,7 +37,7 @@ class ErrorLogServiceTests {
     @Test
     void testLog() {
         File testDirectory = tmpDir.newFolder("otp-test", "stacktraces")
-        errorLogService.metaClass.getStackTracesDirectory = {
+        configService.metaClass.getStackTracesDirectory = {
             return testDirectory.absolutePath
         }
         // To test whether calling log method produces error
@@ -55,7 +51,7 @@ class ErrorLogServiceTests {
         def timestamps = contentOfFile.timestamp.findAll{ it }
         assertEquals(1, timestamps.size())
         assertTrue(contentOfFile.@exceptionMessage == ERROR_MESSAGE)
-        TestCase.removeMetaClass(ErrorLogService, errorLogService)
+        TestCase.removeMetaClass(ConfigService, configService)
     }
 
     @Test(expected = RuntimeException)

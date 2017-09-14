@@ -181,33 +181,6 @@ class UserAdministrationController {
         render data as JSON
     }
 
-    /**
-     * Action to render the view to register a new user as admin
-     */
-    def register = {
-    }
-
-    /**
-     * Action to perform the registration of a new user as admin
-     */
-    def performRegistration = { RegistrationCommand cmd ->
-        def data = [:]
-        if (cmd.hasErrors()) {
-            data.put("error", true)
-            data.put("username", resolveErrorMessage(cmd, "username", "User Name"))
-            data.put("email", resolveErrorMessage(cmd, "email", "Email"))
-        } else {
-            try {
-                data.put("user", userService.register(cmd.toUser()))
-                data.put("success", true)
-            } catch (OtpException e) {
-                data.clear()
-                data.put("error", true)
-                data.put("username", e.message)
-            }
-        }
-        render data as JSON
-    }
 
     /**
      * Action for editing non-security relevant user information.

@@ -125,7 +125,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         DomainFactory.createProcessingOptionForNotificationRecipient()
         DomainFactory.createProcessingOption([
                 name: OptionName.OTP_USER_LINUX_GROUP,
-                value: TestCase.testingGroup(grailsApplication),
+                value: TestConfigHelper.testingGroup(grailsApplication),
         ])
         DomainFactory.createProcessingOption(name: OptionName.TIME_ZONE, type: null, value: "Europe/Berlin")
         DomainFactory.createProcessingOption(name: OptionName.STATISTICS_BASES_PER_BYTES_FASTQ, type: null, value: 2.339)
@@ -176,7 +176,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
 
         Map realmParams = [
                 programsRootPath: "/",
-                unixUser: getAccountName(),
+                unixUser: TestConfigHelper.getWorkflowTestAccountName(grailsApplication),
                 defaultJobSubmissionOptions: jobSubmissionOptions,
         ]
 
@@ -306,16 +306,6 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
     }
 
     /**
-     * The account name to use on the DKFZ cluster. This can be overwritten by the key
-     * <code>otp.testing.workflows.account</code> in the configuration file.
-     *
-     * @return the account name set in the configuration file, or the default account name otherwise.
-     */
-    protected String getAccountName() {
-        return grailsApplication.config.otp.testing.workflows.account
-    }
-
-    /**
      * The base directory for this test instance. It can be considered as "local root", meaning all files
      * and directories should be created under this directory.
      *
@@ -413,7 +403,7 @@ echo \$TEMP_DIR
      * @see #getBaseDirectory()
      */
     protected File getRootDirectory() {
-        return new File(grailsApplication.config.otp.testing.workflows.rootdir)
+        return TestConfigHelper.getWorkflowTestRootDir(grailsApplication)
     }
 
     /**
@@ -502,9 +492,9 @@ echo \$TEMP_DIR
 
     protected void setPermissionsRecursive(File directory, String modeDir, String modeFile) {
         assert directory.absolutePath.startsWith(baseDirectory.absolutePath)
-        String cmd = "find -L ${directory} -user ${getAccountName()} -type d -not -perm ${modeDir} -exec chmod ${modeDir} '{}' \\; 2>&1"
+        String cmd = "find -L ${directory} -user ${TestConfigHelper.getWorkflowTestAccountName(grailsApplication)} -type d -not -perm ${modeDir} -exec chmod ${modeDir} '{}' \\; 2>&1"
         assert executionService.executeCommand(realm, cmd).empty
-        cmd = "find -L ${directory} -user ${getAccountName()} -type f -not -perm ${modeFile} -exec chmod ${modeFile} '{}' \\; 2>&1"
+        cmd = "find -L ${directory} -user ${TestConfigHelper.getWorkflowTestAccountName(grailsApplication)} -type f -not -perm ${modeFile} -exec chmod ${modeFile} '{}' \\; 2>&1"
         assert executionService.executeCommand(realm, cmd).empty
     }
 }

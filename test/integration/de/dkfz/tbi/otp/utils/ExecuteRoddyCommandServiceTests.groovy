@@ -45,7 +45,7 @@ class ExecuteRoddyCommandServiceTests {
 
         DomainFactory.createProcessingOption([
                 name: OptionName.OTP_USER_LINUX_GROUP,
-                value: TestCase.testingGroup(grailsApplication),
+                value: TestConfigHelper.testingGroup(grailsApplication),
                 ]
         )
 
@@ -463,7 +463,7 @@ correct group permission to ${primaryGroup}
                 }
         ] as ExecutionService
 
-        String testingGroup = TestCase.testingGroup(grailsApplication)
+        String testingGroup = TestConfigHelper.testingGroup(grailsApplication)
 
         CreateFileHelper.createFile(new File(roddyBamFile.workDirectory, "file"))
         assert executeAndAssertExitCodeAndErrorOutAndReturnStdout("chgrp ${testingGroup} ${roddyBamFile.workDirectory}/file").empty
@@ -538,7 +538,7 @@ ${primaryGroup}
     @Test
     void testCorrectPermissionsAndGroups() {
         String primaryGroup = TestCase.primaryGroup()
-        String group = TestCase.testingGroup(grailsApplication)
+        String group = TestConfigHelper.testingGroup(grailsApplication)
 
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
 

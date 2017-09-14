@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp
 
+import de.dkfz.tbi.otp.ngsdata.ConfigService
 import grails.util.Environment
 
 import grails.plugin.springsecurity.SpringSecurityUtils
@@ -7,10 +8,7 @@ import grails.plugin.springsecurity.SpringSecurityUtils
 class OtpTagLib {
     static namespace = "otp"
 
-    /**
-     * Dependency Injection of GrailsApplication
-     */
-    def grailsApplication
+    ConfigService configService
 
     /**
      * Renders a text field with editor functionality. The editor renders the text with a button next to it.
@@ -107,11 +105,7 @@ class OtpTagLib {
      * This name can be used to have environment or instance specific CSS classes.
      */
     def environmentName = {
-        if (!(grailsApplication.config.otp.environment.name instanceof ConfigObject)) {
-            out << grailsApplication.config.otp.environment.name
-        } else {
-            out << Environment.getCurrent().name
-        }
+        out << configService.getEnvironmentName()
     }
 
     /**

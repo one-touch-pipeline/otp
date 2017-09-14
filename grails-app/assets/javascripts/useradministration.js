@@ -325,33 +325,6 @@ $.otp.userAdministration.editUser = {
     }
 };
 
-$.otp.userAdministration.register = function () {
-    "use strict";
-    $("#registerForm").submit(function (event) {
-        event.preventDefault();
-        $.ajax({
-            type: 'GET',
-            url: "performRegistration",
-            dataType: 'json',
-            cache: 'false',
-            data: {
-                username: $("#register-form-username").val(),
-                userRealName: $("#register-form-name").val(),
-                email: $("#register-form-email").val()
-            },
-            success: function (data) {
-                if (data.error) {
-                    $.otp.warningMessage(data.username);
-                    $.otp.warningMessage(data.userRealName);
-                    $.otp.warningMessage(data.email);
-                } else if (data.success) {
-                    $.otp.infoMessage($L("user.administration.register.success", data.user));
-                }
-            }
-        });
-    });
-};
-
 $.otp.userAdministration.create = {
     register: function () {
         "use strict";

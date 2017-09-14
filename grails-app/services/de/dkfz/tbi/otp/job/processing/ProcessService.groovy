@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.job.processing
 
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.scheduler.*
+import de.dkfz.tbi.otp.ngsdata.ConfigService
 import grails.plugin.springsecurity.*
 import grails.plugin.springsecurity.acl.*
 import org.codehaus.groovy.grails.commons.*
@@ -32,7 +33,7 @@ class ProcessService {
 
     LinkGenerator grailsLinkGenerator
 
-    GrailsApplication grailsApplication
+    ConfigService configService
 
     /**
      * Security aware way to access a Process.
@@ -79,7 +80,7 @@ class ProcessService {
     }
 
     private File getLogForProcessingStep(ProcessingStep step) {
-        return new File("${grailsApplication.config.otp.logging.jobLogDir}${File.separatorChar}${step.process.id}", "${step.id}.log")
+        return new File(new File(configService.getJobLogDirectory(), "${step.process.id}"), "${step.id}.log")
     }
 
     /**

@@ -11,7 +11,6 @@ try {
 } catch (Exception e) {
     otpProperties.setProperty("otp.security.ldap.enabled", "false")
 }
-def otpConfig = new ConfigSlurper().parse(otpProperties)
 List pluginsToExclude = []
 
 grails.project.groupId = appName // change this to alter the default package name and Maven publishing destination
@@ -81,16 +80,10 @@ grails.exceptionresolver.params.exclude = ['password']
 environments {
     development {
         grails.logging.jul.usebridge = true
-
-        // Backdoor config options for BackdoorFilter in development mode
-        if (!(otpConfig.otp.security.useBackdoor instanceof ConfigObject)) {
-            otp.security.useBackdoor = Boolean.parseBoolean(otpConfig.otp.security.useBackdoor)
-            otp.security.backdoorUser = otpConfig.otp.security.backdoorUser
-        }
     }
     production {
         grails.logging.jul.usebridge = false
-        grails.serverURL = otpConfig.otp.server.url
+        grails.serverURL = otpProperties.getProperty("otp.server.url")
     }
     WORKFLOW_TEST {
         grails.serverURL = "http://localhost:8080"
@@ -98,11 +91,7 @@ environments {
 }
 
 
-if (otpConfig.otp.logging.jobLogDir instanceof ConfigObject) {
-    otp.logging.jobLogDir = "logs"
-} else {
-    otp.logging.jobLogDir = otpConfig.otp.logging.jobLogDir
-}
+otp.logging.jobLogDir = otpProperties.getProperty("otp.logging.jobLogDir") ?: "logs/jobs"
 
 File jobLogDir = new File(otp.logging.jobLogDir)
 
@@ -145,97 +134,14 @@ log4j = {
     ], additivity: false
 }
 
-// mail settings
-if (otpConfig.otp.mail.sender instanceof ConfigObject) {
-    otp.mail.sender = "otp@localhost"
-} else {
-    otp.mail.sender = otpConfig.otp.mail.sender
-}
-
-if (otpConfig.otp.mail.notification.to instanceof ConfigObject) {
-    otp.mail.notification.to = ''
-} else {
-    otp.mail.notification.to = otpConfig.otp.mail.notification.to
-}
-
-if (otpConfig.otp.mail.notification.fasttrack.to instanceof ConfigObject) {
-    otp.mail.notification.fasttrack.to = ''
-} else {
-    otp.mail.notification.fasttrack.to = otpConfig.otp.mail.notification.fasttrack.to
-}
-
-// Folder for putting stacktrace files made by error log service
-if (otpConfig.otp.errorLogging.stacktraces instanceof ConfigObject) {
-    otp.errorLogging.stacktraces = "/tmp/otp/stacktraces/"
-} else {
-    otp.errorLogging.stacktraces = otpConfig.otp.errorLogging.stacktraces
-}
-
-if (otpConfig.otp.dataprocessing.outputbasedir instanceof ConfigObject) {
-    otp.dataprocessing.outputbasedir = ""
-} else {
-    otp.dataprocessing.outputbasedir = otpConfig.otp.dataprocessing.outputbasedir
-}
-
-if (otpConfig.otp.dataprocessing.scriptdir instanceof ConfigObject) {
-    otp.dataprocessing.scriptdir = ""
-} else {
-    otp.dataprocessing.scriptdir = otpConfig.otp.dataprocessing.scriptdir
-}
-
-if (otpConfig.otp.dataprocessing.alignment.referenceIndex instanceof ConfigObject) {
-    otp.dataprocessing.alignment.referenceIndex = ""
-} else {
-    otp.dataprocessing.alignment.referenceIndex = otpConfig.otp.dataprocessing.alignment.referenceIndex
-}
-
-otp.environment.name = otpConfig.otp.environment.name
-
-// pbs password
-if (otpConfig.otp.pbs.ssh.password instanceof ConfigObject) {
-    otp.pbs.ssh.password = ""
-} else {
-    otp.pbs.ssh.password = otpConfig.otp.pbs.ssh.password
-}
-// pbs ssh key file
-if (otpConfig.otp.pbs.ssh.keyFile instanceof ConfigObject) {
-    otp.pbs.ssh.keyFile = System.getProperty("user.home") + "/.ssh/id_rsa"
-} else {
-    otp.pbs.ssh.keyFile = otpConfig.otp.pbs.ssh.keyFile
-}
-// should ssh-agent be used to get the password for the ssh key (true or false)
-// if false, only key files without password can be used
-// if true, an ssh-agent must be running and the key must be added to it, even if the key file doesn't have a password
-if (otpConfig.otp.pbs.ssh.useSshAgent instanceof ConfigObject) {
-    otp.pbs.ssh.useSshAgent = true
-} else {
-    otp.pbs.ssh.useSshAgent = otpConfig.otp.pbs.ssh.useSshAgent as boolean
-}
-if (otp.pbs.ssh.keyFile == "") {
-    println "\n##### No SSH key file provided               #####"
-    println "##### Using insecure password authentication #####"
-}
-// pbs unixUser
-if (otpConfig.otp.pbs.ssh.unixUser instanceof ConfigObject) {
-    otp.pbs.ssh.unixUser = ""
-} else {
-    otp.pbs.ssh.unixUser = otpConfig.otp.pbs.ssh.unixUser
-}
-// pbs host
-if (otpConfig.otp.pbs.ssh.host instanceof ConfigObject) {
-    otp.pbs.ssh.host = ""
-} else {
-    otp.pbs.ssh.host = otpConfig.otp.pbs.ssh.host
-}
 
 otp {
     testing {
-        // Default settings for work-flow integration tests
         workflows {
             account = otpProperties.getProperty("otp.testing.workflows.account")
             rootdir = otpProperties.getProperty("otp.testing.workflows.rootdir")
         }
-        group = otpConfig.otp.testing.group ?: ''    //A real group of the developer but not the primary one
+        group = otpProperties.getProperty("otp.testing.group")
     }
 }
 
@@ -245,19 +151,19 @@ grails.plugin.springsecurity.userLookup.authorityJoinClassName = 'de.dkfz.tbi.ot
 grails.plugin.springsecurity.authority.className = 'de.dkfz.tbi.otp.security.Role'
 
 // ldap
-if ((otpConfig.otp.security.ldap.enabled instanceof ConfigObject) || !Boolean.parseBoolean(otpConfig.otp.security.ldap.enabled)) {
+if (!Boolean.parseBoolean(otpProperties.getProperty("otp.security.ldap.enabled"))) {
     otp.security.ldap.enabled = false
     println("Excluding ldap")
     pluginsToExclude << "spring-security-ldap"
 } else {
     println("using ldap")
     otp.security.ldap.enabled = true
-    grails.plugin.springsecurity.ldap.context.managerDn         = otpConfig.otp.security.ldap.managerDn
-    grails.plugin.springsecurity.ldap.context.managerPassword   = otpConfig.otp.security.ldap.managerPw
-    grails.plugin.springsecurity.ldap.context.server            = otpConfig.otp.security.ldap.server
-    grails.plugin.springsecurity.ldap.search.base               = otpConfig.otp.security.ldap.search.base
-    grails.plugin.springsecurity.ldap.authorities.searchSubtree = otpConfig.otp.security.ldap.search.subTree
-    grails.plugin.springsecurity.ldap.search.filter             = otpConfig.otp.security.ldap.search.filter
+    grails.plugin.springsecurity.ldap.context.managerDn         = otpProperties.getProperty("otp.security.ldap.managerDn")
+    grails.plugin.springsecurity.ldap.context.managerPassword   = otpProperties.getProperty("otp.security.ldap.managerPw")
+    grails.plugin.springsecurity.ldap.context.server            = otpProperties.getProperty("otp.security.ldap.server")
+    grails.plugin.springsecurity.ldap.search.base               = otpProperties.getProperty("otp.security.ldap.search.base")
+    grails.plugin.springsecurity.ldap.authorities.searchSubtree = otpProperties.getProperty("otp.security.ldap.search.subTree")
+    grails.plugin.springsecurity.ldap.search.filter             = otpProperties.getProperty("otp.security.ldap.search.filter")
 
     // static options
     grails.plugin.springsecurity.ldap.authorities.ignorePartialResultException = true

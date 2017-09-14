@@ -1,8 +1,8 @@
 package de.dkfz.tbi.otp.utils
 
+import de.dkfz.tbi.otp.ngsdata.*
 import grails.util.*
 import groovy.transform.*
-import org.codehaus.groovy.grails.commons.*
 import org.springframework.beans.factory.annotation.*
 import org.springframework.context.annotation.*
 import org.springframework.security.authentication.*
@@ -36,11 +36,9 @@ import javax.servlet.http.*
 @Component("backdoorFilter")
 @Scope("singleton")
 class BackdoorFilter extends GenericFilterBean {
-    /**
-     * Dependency Injection of grailsApplication
-     */
+
     @Autowired
-    GrailsApplication grailsApplication
+    ConfigService configService
     /**
      * Ensures, that the filter is only applied once per request
      */
@@ -70,8 +68,7 @@ class BackdoorFilter extends GenericFilterBean {
             chain.doFilter(request, response)
             return
         }
-        if (grailsApplication.config.otp.security.useBackdoor instanceof ConfigObject || !grailsApplication.config.otp.security.useBackdoor ||
-                grailsApplication.config.otp.security.backdoorUser instanceof ConfigObject) {
+        if (!configService.useBackdoor() || !configService.getBackdoorUser()) {
             // backdoor filter disabled by configuration
             chain.doFilter(request, response)
             return
@@ -80,7 +77,7 @@ class BackdoorFilter extends GenericFilterBean {
         try {
             Authentication authentication = SecurityContextHolder.context.authentication
             if (!authentication || !authentication.isAuthenticated()) {
-                Principal principal = new Principal(username: grailsApplication.config.otp.security.backdoorUser)
+                Principal principal = new Principal(username: configService.getBackdoorUser())
                 SecurityContextHolder.context.authentication = new UsernamePasswordAuthenticationToken(principal, null, authorities)
             }
             chain.doFilter(holder.getRequest(), holder.getResponse())

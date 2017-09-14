@@ -2,10 +2,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import grails.util.*
-import org.codehaus.groovy.grails.commons.*
 import org.joda.time.*
-
-import javax.servlet.*
 
 /**
  * This service knows all the configuration parameters like root paths,
@@ -15,11 +12,17 @@ import javax.servlet.*
  */
 class ConfigService {
 
-    /**
-     * Dependency injection grails application
-     */
-    GrailsApplication grailsApplication
-    ServletContext servletContext
+    private Properties otpProperties
+
+    ConfigService() {
+        otpProperties = new Properties()
+        String propertiesFile = System.getenv("OTP_PROPERTIES")
+        if (propertiesFile && new File(propertiesFile).canRead()) {
+            otpProperties.load(new FileInputStream(propertiesFile))
+        } else {
+            otpProperties.load(new FileInputStream(System.getProperty("user.home") + System.getProperty("file.separator") + ".otp.properties"))
+        }
+    }
 
     static Realm getRealm(Project project, Realm.OperationType operationType) {
         def c = Realm.createCriteria()
@@ -52,21 +55,63 @@ class ConfigService {
     }
 
     String getPbsPassword() {
-        return grailsApplication.config.otp.pbs.ssh.password
+        return otpProperties.getProperty("otp.ssh.password") ?: ""
     }
 
     File getSshKeyFile() {
-        if (grailsApplication.config.otp.pbs.ssh.keyFile) {
-            return new File(grailsApplication.config.otp.pbs.ssh.keyFile)
-        }
-        return null
+        return new File(otpProperties.getProperty("otp.ssh.keyFile") ?: System.getProperty("user.home") + "/.ssh/id_rsa")
     }
 
     boolean useSshAgent() {
-        return grailsApplication.config.otp.pbs.ssh.useSshAgent
+        return otpProperties.getProperty("otp.ssh.useSshAgent") ?: true
     }
 
     static DateTimeZone getDateTimeZone() {
         return DateTimeZone.forID(ProcessingOptionService.findOptionAssure(ProcessingOption.OptionName.TIME_ZONE, null, null))
     }
+
+    boolean useBackdoor() {
+        if (Environment.isDevelopmentMode()) {
+            return otpProperties.getProperty("otp.security.useBackdoor")
+        } else {
+            return false
+        }
+    }
+
+    String getBackdoorUser() {
+        if (Environment.isDevelopmentMode()) {
+            return otpProperties.getProperty("otp.security.backdoorUser")
+        } else {
+            return null
+        }
+    }
+
+    String getEnvironmentName() {
+        if (otpProperties.getProperty("otp.environment.name")) {
+            return otpProperties.getProperty("otp.environment.name")
+        } else {
+            return Environment.getCurrent().name
+        }
+    }
+
+    File getJobLogDirectory() {
+        return getAndCheckPathFromProperty("otp.logging.jobLogDir", "logs/jobs/")
+    }
+
+    File getStackTracesDirectory() {
+        return getAndCheckPathFromProperty('otp.errorLogging.stacktraces', "logs/stacktraces/")
+    }
+
+    private File getAndCheckPathFromProperty(String property, String defaultValue) {
+        File file = new File(otpProperties.getProperty(property) ?: defaultValue)
+        if (!file.absolute && Environment.getCurrent() == Environment.PRODUCTION) {
+            throw new RuntimeException("${property} is \"${file}\", but only an absolute path is allowed.")
+        }
+        return file
+    }
+
+    String getSshUser() {
+        return otpProperties.getProperty("otp.ssh.user") ?: ""
+    }
+
 }

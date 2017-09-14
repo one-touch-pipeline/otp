@@ -266,11 +266,4 @@ class TestCase {
     static String primaryGroup() {
         return executeAndWait("id -g -n").assertExitCodeZeroAndStderrEmpty().stdout.trim()
     }
-
-    static String testingGroup(GrailsApplication grailsApplication) {
-        String testingGroup = grailsApplication.config.otp.testing.group
-        assert testingGroup: '"otp.testing.group" is not set in your "otp.properties". Please add it with an existing secondary group.'
-        assert testingGroup != primaryGroup(): '"otp.testing.group" does not differ from your primary group'
-        return testingGroup
-    }
 }

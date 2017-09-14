@@ -1,10 +1,10 @@
 package de.dkfz.tbi.otp.job.scheduler
 
-import static org.springframework.util.Assert.*
-import groovy.xml.MarkupBuilder
+import de.dkfz.tbi.otp.ngsdata.*
+import groovy.xml.*
+import org.apache.commons.io.*
 
-import org.apache.commons.io.FileUtils
-import org.codehaus.groovy.grails.commons.GrailsApplication
+import static org.springframework.util.Assert.*
 
 /**
  * Service for logging exceptions to files
@@ -21,21 +21,11 @@ import org.codehaus.groovy.grails.commons.GrailsApplication
  */
 class ErrorLogService {
 
-    GrailsApplication grailsApplication
+    ConfigService configService
 
-    public File getStackTracesDirectory() {
-        final String propertyName = 'otp.errorLogging.stacktraces'
-        final String propertyValue = grailsApplication.flatConfig[propertyName]
-        final File dir = new File(propertyValue)
-        if (!dir.absolute) {
-            throw new RuntimeException("${propertyName} is \"${dir}\", but only an absolute path is allowed.")
-        }
-        return dir
-    }
-
-    public File getStackTracesFile(final String stackTraceIdentifier) {
+    File getStackTracesFile(final String stackTraceIdentifier) {
         notNull stackTraceIdentifier, "stackTraceIdentifier must not be null."
-        return new File(stackTracesDirectory, stackTraceIdentifier + ".xml")
+        return new File(configService.stackTracesDirectory, stackTraceIdentifier + ".xml")
     }
 
     /**
