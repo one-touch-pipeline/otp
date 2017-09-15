@@ -19,6 +19,6 @@ processingOptionService.createOrUpdate(
         ProcessingOption.OptionName.PIPELINE_ACESEQ_BASE_PROJECT_CONFIG,
         null,
         null,
-        'otpACEseq-1.0'
+        'otpACEseq-1.1'
 )
 
