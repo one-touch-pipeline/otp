@@ -119,15 +119,13 @@ class ClusterJobMonitoringService {
             List<ClusterJobIdentifier> finishedJobs = []
             // again a copy for thread safety
             (new ArrayList<ClusterJobIdentifier>(jobIdentifiers)).each { ClusterJobIdentifier jobIdentifier ->
-                log.debug("Checking job id ${jobIdentifier.clusterJobId}")
                 boolean completed
                 // a job is considered complete if it either has status "completed" or it is not known anymore,
                 // unless the cluster it runs on couldn't be checked
                 Status status = jobStates.getOrDefault(jobIdentifier, Status.COMPLETED)
                 completed = (status == Status.COMPLETED && !failedClusterQueries.contains(new RealmAndUser(jobIdentifier.realm, jobIdentifier.userName)))
-                log.debug("${jobIdentifier.clusterJobId} still running: ${completed ? 'no' : 'yes'}")
+                log.debug("Checking cluster job ID ${jobIdentifier.clusterJobId}: ${completed ? 'finished' : 'still running'}")
                 if (completed) {
-                    log.info("${jobIdentifier.clusterJobId} finished on Realm ${jobIdentifier.realm}")
                     try {
                         clusterJobSchedulerService.retrieveAndSaveJobStatistics(jobIdentifier)
                     } catch (Throwable e) {
