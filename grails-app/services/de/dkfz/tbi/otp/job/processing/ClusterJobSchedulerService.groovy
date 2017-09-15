@@ -153,12 +153,14 @@ echo "${logMessage}" >> "${logFile}"
         Map<String, GenericJobInfo> jobInfos = jobManager.queryExtendedJobStateById([jobIdentifier.clusterJobId], true)
         GenericJobInfo jobInfo = jobInfos.get(jobIdentifier.clusterJobId)
 
-        ClusterJob.Status status = null
-        if (jobInfo.jobState && jobInfo.exitCode) {
-            status = jobInfo.jobState in finished && jobInfo.exitCode != 0 ? ClusterJob.Status.COMPLETED : ClusterJob.Status.FAILED
-        }
+        if (jobInfo) {
+            ClusterJob.Status status = null
+            if (jobInfo.jobState && jobInfo.exitCode) {
+                status = jobInfo.jobState in finished && jobInfo.exitCode != 0 ? ClusterJob.Status.COMPLETED : ClusterJob.Status.FAILED
+            }
 
-        clusterJobService.completeClusterJob(jobIdentifier, status, jobInfo)
+            clusterJobService.completeClusterJob(jobIdentifier, status, jobInfo)
+        }
     }
 
     private final List<JobState> failed = [
