@@ -4,19 +4,11 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
-import grails.plugin.springsecurity.*
 import org.springframework.security.access.prepost.*
-import org.springframework.security.acls.domain.*
-import org.springframework.security.core.userdetails.*
 
 import static org.springframework.util.Assert.*
 
 class ProcessingOptionService {
-
-    /**
-     * Dependency Injection of Spring Security Service - needed for ACL checks
-     */
-    def springSecurityService
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     public ProcessingOption createOrUpdate(OptionName name, String type, Project project, String value) {
@@ -134,42 +126,5 @@ class ProcessingOptionService {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public List<ProcessingOption> listProcessingOptions() {
         return ProcessingOption.findAllByDateObsoletedIsNull()
-    }
-
-    /**
-     * Counts ProcessingOptions which are available to the user.
-     * @return The number of ProcessingOptions
-     */
-    public int countProcessingOption() {
-        if (SpringSecurityUtils.ifAllGranted("ROLE_OPERATOR")) {
-            // shortcut for operator
-            return ProcessingOption.count()
-        }
-        // for normal users
-        Set<String> roles = SpringSecurityUtils.authoritiesToRoles(SpringSecurityUtils.getPrincipalAuthorities())
-        if (springSecurityService.isLoggedIn()) {
-            // anonymous users do not have a principal
-            roles.add((springSecurityService.getPrincipal() as UserDetails).getUsername())
-        }
-        String query = '''
-SELECT count(p.id) FROM ProcessingOption AS p, AclEntry AS ace
-JOIN ace.aclObjectIdentity AS aoi
-JOIN aoi.aclClass AS ac
-JOIN ace.sid AS sid
-WHERE
-aoi.objectId = p.id
-AND sid.sid IN (:roles)
-AND ace.mask IN (:permissions)
-AND ace.granting = true
-'''
-        Map params = [
-            permissions: [BasePermission.READ.getMask(), BasePermission.ADMINISTRATION.getMask()],
-            roles: roles
-        ]
-        List result = Project.executeQuery(query, params)
-        if (!result) {
-            return 0
-        }
-        return result[0]
     }
 }

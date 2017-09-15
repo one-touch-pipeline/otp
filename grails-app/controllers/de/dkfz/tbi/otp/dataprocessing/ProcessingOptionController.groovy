@@ -15,7 +15,7 @@ class ProcessingOptionController {
         Map dataToRender = cmd.dataToRender()
 
         List<ProcessingOption> processingOptions = processingOptionService.listProcessingOptions()
-        dataToRender.iTotalRecords = processingOptionService.countProcessingOption()
+        dataToRender.iTotalRecords = processingOptions.size()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
 
         processingOptions.each { processingOption ->
