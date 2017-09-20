@@ -1,7 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
-
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 /**
  * Represents all generations of one merged BAM file (whereas an {@link AbstractMergedBamFile} represents a single
@@ -94,11 +94,15 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
                 assert false: "Pipeline name is unknown: ${obj.pipeline?.name}"
             }
         }
-    }
 
-
-    Collection<SeqTrack> findMergeableSeqTracks() {
-        return seqTracks ?: []
+        seqTracks(validator: {val, obj ->
+            val.each {
+                if (!obj.satisfiesCriteria(it)) {
+                    return false
+                }
+            }
+            return true
+        })
     }
 
     static Map getMergingProperties(SeqTrack seqTrack) {
@@ -107,8 +111,7 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
                 seqType         : seqTrack.seqType,
                 seqPlatformGroup: seqTrack.seqPlatformGroup,
         ]
-
-        if (!seqTrack.seqType.isWgbs()) {
+        if (atMostOneElement(MergingCriteria.findAllByProjectAndSeqType(seqTrack.project, seqTrack.seqType).libPrepKit)) {
             properties += [libraryPreparationKit: seqTrack.libraryPreparationKit]
         }
         if (seqTrack.seqType.isChipSeq()) {
@@ -127,7 +130,7 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
 
     AbstractMergedBamFile getCompleteProcessableBamFileInProjectFolder() {
         AbstractMergedBamFile bamFile = getProcessableBamFileInProjectFolder()
-        if (bamFile && bamFile.containedSeqTracks == findMergeableSeqTracks().toSet()) {
+        if (bamFile && bamFile.containedSeqTracks == seqTracks) {
             return bamFile
         } else {
             return null

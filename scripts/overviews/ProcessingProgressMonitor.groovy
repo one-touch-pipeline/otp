@@ -696,7 +696,7 @@ if (allProcessed) {
         ${bamFileInProgressingOrThresouldReached('2')}
     """).each { SamplePair samplePair ->
         [samplePair.mergingWorkPackage1, samplePair.mergingWorkPackage2].each { MergingWorkPackage mergingWorkPackage ->
-            seqTracks.addAll(mergingWorkPackage.findMergeableSeqTracks())
+            seqTracks.addAll(mergingWorkPackage.seqTracks)
         }
     }
 
@@ -725,7 +725,7 @@ if (allProcessed) {
         where
             mergingWorkPackage.needsProcessing = true
     """).each {
-        def mergeableSeqTracks = it.findMergeableSeqTracks()
+        def mergeableSeqTracks = it.seqTracks
         if(mergeableSeqTracks) {
             seqTracks += mergeableSeqTracks - (it.seqType.isWgbs() ? ctx.WgbsAlignmentStartJob : ctx.PanCanStartJob).findUsableBaseBamFile(it)?.containedSeqTracks
         }

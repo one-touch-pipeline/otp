@@ -78,7 +78,7 @@ abstract class RoddyAlignmentStartJob extends AbstractStartJobImpl implements Re
 
     static boolean isDataInstallationWFInProgress(MergingWorkPackage mergingWorkPackage) {
         assert mergingWorkPackage
-        mergingWorkPackage.findMergeableSeqTracks().find {
+        mergingWorkPackage.seqTracks.find {
             it.dataInstallationState != SeqTrack.DataProcessingState.FINISHED
         }
     }
@@ -128,7 +128,7 @@ abstract class RoddyAlignmentStartJob extends AbstractStartJobImpl implements Re
     RoddyBamFile createRoddyBamFile(MergingWorkPackage mergingWorkPackage, RoddyBamFile baseBamFile) {
         assert mergingWorkPackage
         RoddyBamFile previousRoddyBamFile = mergingWorkPackage.bamFileInProjectFolder
-        List<Long> mergableSeqtracks =  mergingWorkPackage.findMergeableSeqTracks()*.id
+        List<Long> mergableSeqtracks =  mergingWorkPackage.seqTracks*.id
         List<Long> containedSeqTracks = baseBamFile?.containedSeqTracks*.id
         Set<SeqTrack> seqTracks = SeqTrack.getAll(mergableSeqtracks - containedSeqTracks) as Set
 

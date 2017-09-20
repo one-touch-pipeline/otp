@@ -179,11 +179,11 @@ public class RoddyAlignmentDeciderTest {
         Pipeline pipeline = decider.getPipeline(seqTrack)
 
         MergingWorkPackage workPackage = TestData.createMergingWorkPackage(
-                sample: seqTrack.sample,
-                seqType: seqTrack.seqType,
-                seqPlatformGroup: seqTrack.seqPlatformGroup,
+                MergingWorkPackage.getMergingProperties(seqTrack) +
+                [
                 pipeline: pipeline,
-                statSizeFileName: pipeline.name == Pipeline.Name.PANCAN_ALIGNMENT ? DomainFactory.DEFAULT_TAB_FILE_NAME : null
+                statSizeFileName: pipeline.name == Pipeline.Name.PANCAN_ALIGNMENT ? DomainFactory.DEFAULT_TAB_FILE_NAME : null,
+                ]
         )
         workPackage.save(failOnError: true)
 

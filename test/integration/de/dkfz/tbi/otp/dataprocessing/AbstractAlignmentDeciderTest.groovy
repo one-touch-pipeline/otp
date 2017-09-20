@@ -56,6 +56,22 @@ public class AbstractAlignmentDeciderTest {
         Collection<MergingWorkPackage> workPackages = decider.decideAndPrepareForAlignment(seqTrack, true)
 
         assertSeqTrackProperties(exactlyOneElement(workPackages), seqTrack)
+        assert exactlyOneElement(workPackages).seqTracks == [seqTrack] as Set<SeqTrack>
+    }
+
+    @Test
+    void testFindOrSaveWorkPackagesTwice_whenEverythingIsOkay_workPackageShouldContainBothSeqTracks() {
+        SeqTrack seqTrack = DomainFactory.createSeqTrack()
+        DomainFactory.createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
+        SeqTrack seqTrack2 = DomainFactory.createSeqTrack(sample: seqTrack.sample, seqType: seqTrack.seqType, run: DomainFactory.createRun(seqPlatform: seqTrack.seqPlatform))
+        DomainFactory.createMergingCriteriaLazy(project: seqTrack2.project, seqType: seqTrack2.seqType)
+        ReferenceGenome referenceGenome = DomainFactory.createReferenceGenome()
+        DomainFactory.createReferenceGenomeProjectSeqType(project: seqTrack.project, referenceGenome: referenceGenome, seqType: seqTrack.seqType)
+
+        Collection<MergingWorkPackage> workPackages =  decider.findOrSaveWorkPackages(seqTrack, seqTrack.configuredReferenceGenomeProjectSeqType, decider.getPipeline(seqTrack))
+        decider.findOrSaveWorkPackages(seqTrack2, seqTrack2.configuredReferenceGenomeProjectSeqType, decider.getPipeline(seqTrack2))
+
+        assert exactlyOneElement(workPackages).seqTracks == [seqTrack, seqTrack2] as Set<SeqTrack>
     }
 
     @Test
@@ -237,6 +253,8 @@ public class AbstractAlignmentDeciderTest {
         Collection<MergingWorkPackage> workPackages = decider.decideAndPrepareForAlignment(seqTrack, true)
 
         assertSeqTrackProperties(exactlyOneElement(workPackages), seqTrack)
+        assert exactlyOneElement(workPackages).seqTracks.contains(seqTrack)
+        assert exactlyOneElement(workPackages).seqTracks.size() == 1
     }
 
     @Test

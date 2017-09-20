@@ -72,15 +72,14 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
                                                           ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType,
                                                           Pipeline pipeline) {
 
-        AntibodyTarget antibodyTarget = seqTrack instanceof ChipSeqSeqTrack ? seqTrack.antibodyTarget : null
         // TODO OTP-1401: In the future there may be more than one MWP for the sample and seqType.
         MergingWorkPackage workPackage = atMostOneElement(
                 MergingWorkPackage.findAllWhere(
                         sample: seqTrack.sample,
                         seqType: seqTrack.seqType,
-                        antibodyTarget: antibodyTarget,
+                        antibodyTarget: seqTrack instanceof ChipSeqSeqTrack ? seqTrack.antibodyTarget : null,
                 ))
-        if (workPackage != null) {
+        if (workPackage) {
             assert workPackage.referenceGenome.id == referenceGenomeProjectSeqType.referenceGenome.id
             assert workPackage.statSizeFileName == referenceGenomeProjectSeqType.statSizeFileName
             assert workPackage.pipeline.id == pipeline.id
@@ -114,13 +113,14 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
                     referenceGenome: referenceGenomeProjectSeqType.referenceGenome,
                     statSizeFileName: referenceGenomeProjectSeqType.statSizeFileName,
                     pipeline: pipeline,
-                    antibodyTarget: antibodyTarget,
             ])
             workPackage.alignmentProperties = referenceGenomeProjectSeqType.alignmentProperties?.collect { ReferenceGenomeProjectSeqTypeAlignmentProperty alignmentProperty ->
                 new MergingWorkPackageAlignmentProperty(name: alignmentProperty.name, value: alignmentProperty.value, mergingWorkPackage: workPackage)
             } as Set
-            assert workPackage.save(flush: true)
         }
+
+        workPackage.addToSeqTracks(seqTrack)
+        assert workPackage.save(flush: true)
 
         return [workPackage]
     }

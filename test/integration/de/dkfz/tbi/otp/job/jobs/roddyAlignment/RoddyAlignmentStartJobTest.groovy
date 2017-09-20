@@ -264,7 +264,6 @@ class RoddyAlignmentStartJobTest {
     void testCreateRoddyBamFile_WhenBaseBamFileIsNullAndNoConfigAvailable_ShouldFail() {
         MergingWorkPackage mwp = createMergingWorkPackage()
         DomainFactory.createSeqTrackWithDataFiles(mwp)
-        Collection<SeqTrack> seqTracks = mwp.findMergeableSeqTracks()
         DomainFactory.createRoddyProcessingOptions()
         RoddyWorkflowConfig.list()*.delete(flush: true)
         assert 0 == RoddyWorkflowConfig.list().size()

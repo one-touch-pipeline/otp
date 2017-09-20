@@ -22,7 +22,7 @@ public class DefaultOtpAlignmentDeciderTest {
     private void testPrepareForAlignment_whenEverythingIsOkay_shouldCreateAlignmentPass(boolean forceRealign) {
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
         DomainFactory.createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
-        MergingWorkPackage workPackage = TestData.createMergingWorkPackage(sample: seqTrack.sample, seqType: seqTrack.seqType, seqPlatformGroup: seqTrack.seqPlatformGroup)
+        MergingWorkPackage workPackage = TestData.createMergingWorkPackage(MergingWorkPackage.getMergingProperties(seqTrack))
         workPackage.save(failOnError: true)
 
         defaultOtpAlignmentDecider.prepareForAlignment(workPackage, seqTrack, forceRealign)
@@ -38,7 +38,7 @@ public class DefaultOtpAlignmentDeciderTest {
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
         DomainFactory.createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
 
-        MergingWorkPackage workPackage = TestData.createMergingWorkPackage(sample: seqTrack.sample, seqType: seqTrack.seqType, seqPlatformGroup: seqTrack.seqPlatformGroup)
+        MergingWorkPackage workPackage = TestData.createMergingWorkPackage(MergingWorkPackage.getMergingProperties(seqTrack))
         workPackage.save(failOnError: true)
 
         AlignmentPass alignmentPass1 = DomainFactory.createAlignmentPass(seqTrack: seqTrack, workPackage: workPackage)
@@ -56,7 +56,7 @@ public class DefaultOtpAlignmentDeciderTest {
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
         DomainFactory.createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
 
-        MergingWorkPackage workPackage = TestData.createMergingWorkPackage(sample: seqTrack.sample, seqType: seqTrack.seqType, seqPlatformGroup: seqTrack.seqPlatformGroup)
+        MergingWorkPackage workPackage = TestData.createMergingWorkPackage(MergingWorkPackage.getMergingProperties(seqTrack))
         workPackage.save(failOnError: true)
 
         AlignmentPass alignmentPass1 = DomainFactory.createAlignmentPass(seqTrack: seqTrack, workPackage: workPackage)

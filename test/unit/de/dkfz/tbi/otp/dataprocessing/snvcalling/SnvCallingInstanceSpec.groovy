@@ -14,6 +14,7 @@ import spock.lang.*
         FileType,
         Individual,
         LibraryPreparationKit,
+        MergingCriteria,
         MergingWorkPackage,
         Pipeline,
         Project,

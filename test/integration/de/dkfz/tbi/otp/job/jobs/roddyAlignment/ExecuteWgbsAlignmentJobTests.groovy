@@ -31,7 +31,7 @@ class ExecuteWgbsAlignmentJobTests {
         roddyBamFile = DomainFactory.createRoddyBamFile()
         SeqType wgbsSeqType = DomainFactory.createWholeGenomeBisulfiteSeqType()
         DomainFactory.changeSeqType(roddyBamFile, wgbsSeqType)
-        roddyBamFile.workPackage.metaClass.findMergeableSeqTracks = { -> SeqTrack.list() }
+        roddyBamFile.workPackage.metaClass.seqTracks = SeqTrack.list()
 
         roddyBamFile.referenceGenome.cytosinePositionsIndex = "cytosine_idx.pos.gz"
         roddyBamFile.referenceGenome.save(flush: true, failOnError: true)
@@ -234,6 +234,7 @@ class ExecuteWgbsAlignmentJobTests {
     void testWorkflowSpecificValidation_MethylationLibraryDirDoesNotExist_ShouldFail() {
         roddyBamFile.seqTracks.add(DomainFactory.createSeqTrackWithDataFiles(roddyBamFile.workPackage, [libraryName: "lib1", normalizedLibraryName: "1"]))
         roddyBamFile.numberOfMergedLanes = 2
+        MergingCriteria.list()*.libPrepKit = false
         roddyBamFile.save(flush: true)
 
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)

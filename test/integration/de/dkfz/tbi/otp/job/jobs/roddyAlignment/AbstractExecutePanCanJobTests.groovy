@@ -39,7 +39,7 @@ class AbstractExecutePanCanJobTests {
                 fileOperationStatus         : AbstractMergedBamFile.FileOperationStatus.DECLARED,
                 roddyExecutionDirectoryNames: [DomainFactory.DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY],
         ])
-        roddyBamFile.workPackage.metaClass.findMergeableSeqTracks = { -> SeqTrack.list() }
+        roddyBamFile.workPackage.metaClass.seqTracks = SeqTrack.list()
 
         Realm dataProcessing = DomainFactory.createRealmDataProcessing(tmpDir.root, [name: roddyBamFile.project.realmName])
         dataManagement = DomainFactory.createRealmDataManagement(tmpDir.root, [name: roddyBamFile.project.realmName])
