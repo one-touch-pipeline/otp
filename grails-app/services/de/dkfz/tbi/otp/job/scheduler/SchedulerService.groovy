@@ -289,7 +289,7 @@ class SchedulerService {
      *
      * Do not invoke this method manually.
      */
-    @Scheduled(fixedDelay=180000l)
+    @Scheduled(fixedDelay=30000l)
     public void clusterJobCheck() {
         if (!schedulerActive) {
             return
