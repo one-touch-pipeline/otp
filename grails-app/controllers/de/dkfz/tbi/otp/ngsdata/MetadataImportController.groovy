@@ -8,6 +8,8 @@ import de.dkfz.tbi.otp.user.*
 import grails.converters.*
 import grails.validation.*
 import groovy.transform.*
+import org.codehaus.groovy.grails.web.mapping.*
+import org.springframework.beans.factory.annotation.*
 import org.springframework.validation.*
 
 import java.util.regex.*
@@ -161,9 +163,21 @@ class MetadataImportController {
             } else {
                 text.append('These metadata files failed validation:')
             }
+            List<File> metadataFiles = []
             e.failedValidations.each {
                 text.append("\n${it.metadataFile}")
+                metadataFiles.add(it.metadataFile)
             }
+            text.append("\n\nClick here for manual import:")
+            text.append("\n"+g.createLink(
+                    action: 'index',
+                    absolute: 'true',
+                    params: [
+                        'ticketNumber': otrsTicketNumber,
+                        'paths': metadataFiles,
+                        'directory': MetadataImportService.MIDTERM_ILSE_DIRECTORY_STRUCTURE_BEAN_NAME
+                    ])
+            )
         }
         return text
     }
