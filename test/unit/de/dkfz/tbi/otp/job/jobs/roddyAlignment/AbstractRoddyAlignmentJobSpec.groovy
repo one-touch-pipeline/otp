@@ -4,6 +4,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
+import de.dkfz.tbi.otp.job.processing.ExecutionService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 import grails.test.mixin.*
@@ -46,6 +47,24 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
 
     @Rule
     TemporaryFolder temporaryFolder
+
+    void setup() {
+        DomainFactory.createProcessingOption(
+                name: ProcessingOption.OptionName.COMMAND_LOAD_MODULE_LOADER,
+                type: null,
+                value: "load load",
+        )
+        DomainFactory.createProcessingOption(
+                name: ProcessingOption.OptionName.COMMAND_SAMTOOLS,
+                type: null,
+                value: "samtools",
+        )
+        DomainFactory.createProcessingOption(
+                name: ProcessingOption.OptionName.COMMAND_ACTIVATION_SAMTOOLS,
+                type: null,
+                value: "load samtools",
+        )
+    }
 
 
     void "prepareAndReturnAlignmentCValues, when RoddyBamFile is null, throw assert"() {
@@ -134,8 +153,11 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
             0 * ensureCorrectBaseBamFileIsOnFileSystem(_)
 
         }
+        Realm realm = DomainFactory.createRealmDataProcessing()
         RoddyBamFile roddyBamFile = Mock(RoddyBamFile) {
-            getProject() >> new Project()
+            getProject() >> new Project(
+                    realmName: realm.name
+            )
         }
 
         when:
@@ -315,7 +337,7 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
     void "validateReadGroups, when read groups are not as expected, throw an exception"() {
         given:
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
-        DomainFactory.createRealmDataManagement(temporaryFolder.newFolder(), [name: roddyBamFile.project.realmName])
+        Realm realm = DomainFactory.createRealmDataManagement(temporaryFolder.newFolder(), [name: roddyBamFile.project.realmName])
         DomainFactory.createRealmDataProcessing(temporaryFolder.newFolder(), [name: roddyBamFile.project.realmName])
 
         String readGroupHeaders = roddyBamFile.containedSeqTracks.collect {
@@ -327,41 +349,42 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
         roddyBamFile.numberOfMergedLanes++
         roddyBamFile.save()
 
+        String expectedCommand = """\
+            set -o pipefail
+            load load
+            load samtools
+            samtools view -H ${roddyBamFile.workBamFile} | grep ^@RG\\\\s
+            """.stripIndent()
+
         AbstractRoddyAlignmentJob abstractRoddyAlignmentJob = Spy(AbstractRoddyAlignmentJob) {
             getConfigService() >> new ConfigService()
+            getExecutionService() >>
+                    Mock(ExecutionService) {
+                        executeCommand(realm, expectedCommand) >> readGroupHeaders
+                    }
         }
 
-        GroovyMock(ProcessHelperService, global: true) {
-            ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(_) >> { String command ->
-                String expectedCommand = "set -o pipefail; samtools view -H ${roddyBamFile.workBamFile} | grep ^@RG\\\\s"
-                assert command == expectedCommand
-                return readGroupHeaders
-            }
-        }
-
-        String expectedErrorMessage = """Read groups in BAM file are not as expected.
-Read groups in ${roddyBamFile.workBamFile}:
-${(roddyBamFile.containedSeqTracks - seqTrack).collect { it.getReadGroupName() }.sort().join('\n')}
-Expected read groups:
-${roddyBamFile.containedSeqTracks.collect { it.getReadGroupName() }.sort().join('\n')}"""
+        String expectedErrorMessage = """\
+            |Read groups in BAM file are not as expected.
+            |Read groups in ${roddyBamFile.workBamFile}:
+            |${(roddyBamFile.containedSeqTracks - seqTrack).collect { it.getReadGroupName() }.sort().join('\n') }
+            |Expected read groups:
+            |${roddyBamFile.containedSeqTracks.collect { it.getReadGroupName() }.sort().join('\n') }
+            |""".stripMargin()
 
         when:
         abstractRoddyAlignmentJob.validateReadGroups(roddyBamFile)
 
         then:
-        true
         RuntimeException e = thrown()
         e.message.contains(expectedErrorMessage)
-
-        cleanup:
-        GroovySystem.metaClassRegistry.removeMetaClass(ProcessHelperService)
     }
 
 
     void "validateReadGroups, when read groups are fine, return without exception"() {
         given:
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
-        DomainFactory.createRealmDataManagement(temporaryFolder.newFolder(), [name: roddyBamFile.project.realmName])
+        Realm realm = DomainFactory.createRealmDataManagement(temporaryFolder.newFolder(), [name: roddyBamFile.project.realmName])
         DomainFactory.createRealmDataProcessing(temporaryFolder.newFolder(), [name: roddyBamFile.project.realmName])
 
         SeqTrack seqTrack = DomainFactory.createSeqTrackWithTwoDataFiles(roddyBamFile.mergingWorkPackage)
@@ -373,16 +396,19 @@ ${roddyBamFile.containedSeqTracks.collect { it.getReadGroupName() }.sort().join(
             "@RG     ID:${it.getReadGroupName()}        LB:tumor_123    PL:ILLUMINA     SM:sample_tumor_123"
         }.join('\n') + '\n'
 
+        String expectedCommand = """\
+            set -o pipefail
+            load load
+            load samtools
+            samtools view -H ${roddyBamFile.workBamFile} | grep ^@RG\\\\s
+            """.stripIndent()
+
         AbstractRoddyAlignmentJob abstractRoddyAlignmentJob = Spy(AbstractRoddyAlignmentJob) {
             getConfigService() >> new ConfigService()
-        }
-
-        GroovyMock(ProcessHelperService, global: true) {
-            ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(_) >> { String command ->
-                String expectedCommand = "set -o pipefail; samtools view -H ${roddyBamFile.workBamFile} | grep ^@RG\\\\s"
-                assert command == expectedCommand
-                return readGroupHeaders
-            }
+            getExecutionService() >>
+                    Mock(ExecutionService) {
+                        executeCommand(realm, expectedCommand) >> readGroupHeaders
+                    }
         }
 
 
@@ -391,9 +417,6 @@ ${roddyBamFile.containedSeqTracks.collect { it.getReadGroupName() }.sort().join(
 
         then:
         noExceptionThrown()
-
-        cleanup:
-        GroovySystem.metaClassRegistry.removeMetaClass(ProcessHelperService)
     }
 
 

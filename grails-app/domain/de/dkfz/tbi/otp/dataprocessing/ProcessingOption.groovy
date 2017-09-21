@@ -40,6 +40,8 @@ class ProcessingOption implements Entity {
         PIPELINE_RODDY_ALIGNMENT_BWA_PATHS("Path to bwa_mem", null, Type.PATH),
         PIPELINE_RODDY_ALIGNMENT_SAMBAMBA_PATHS("Path to sambamba", null, Type.PATH),
         PIPELINE_RODDY_ALIGNMENT_GENOME_STAR_INDEX("Default genome star index", null, Type.SINGLE_LINE_TEXT),
+        COMMAND_ACTIVATION_SAMTOOLS("command to enable the module containing samtools (executed in Bash, may be empty if not required)", "", Type.SINGLE_LINE_TEXT),
+        COMMAND_SAMTOOLS("samtools (Tools for alignments in the SAM format)", null, Type.SINGLE_LINE_TEXT),
 
         PIPELINE_OTP_ALIGNMENT_BWA_NUMBER_OF_CORES("number of cores/threads", null, Type.SINGLE_LINE_TEXT),
         PIPELINE_OTP_ALIGNMENT_CONVEY_BWA_NUMBER_OF_CORES("number of cores/threads", null, Type.SINGLE_LINE_TEXT),
@@ -53,6 +55,14 @@ class ProcessingOption implements Entity {
         PIPELINE_OTP_ALIGNMENT_NUMBER_OF_SAMTOOLS_SORT_THREADS("number of threads to be used in processing with samtools sort", null, Type.SINGLE_LINE_TEXT),
         PIPELINE_OTP_ALIGNMENT_MBUFFER_PAIRING_SORTING("size of buffer to be used for pairing with binary bwa sampe", null, Type.SINGLE_LINE_TEXT),
         PIPELINE_OTP_ALIGNMENT_INSERT_SIZE_CUT_OFF("BWA pairing insert size cut-off", null, Type.SINGLE_LINE_TEXT),
+        COMMAND_BWA("BWA command for pairing and sorting", "", Type.SINGLE_LINE_TEXT),
+        COMMAND_CONVEY_BWA("BWA convey command for alignment", "", Type.SINGLE_LINE_TEXT),
+        COMMAND_PICARD_MDUP("command for versioned picard", "picard-1.61.sh MarkDuplicates", Type.SINGLE_LINE_TEXT),
+
+        COMMAND_ACTIVATION_FASTQC("command to enable the module containing fastqc (executed in Bash, may be empty if not required)", "", Type.SINGLE_LINE_TEXT),
+        COMMAND_FASTQC("command for fastqc", null, Type.SINGLE_LINE_TEXT),
+
+        COMMAND_LOAD_MODULE_LOADER("command to load the module system (executed in Bash, may be empty if not required)", null, Type.SINGLE_LINE_TEXT),
 
         //basePath
         BASE_PATH_REFERENCE_GENOME("Base path for reference genomes", null, Type.PATH),
@@ -63,13 +73,6 @@ class ProcessingOption implements Entity {
         RODDY_BASE_CONFIGS_PATH("Path to the baseConfig-files which are needed to execute Roddy", null, Type.PATH),
         RODDY_APPLICATION_INI("Path to the application.ini which is needed to execute Roddy", null, Type.PATH),
         RODDY_FEATURE_TOGGLES_CONFIG_PATH("Path to featureToggles.ini which contains feature toggles for Roddy", null, Type.PATH),
-
-        //commands
-        COMMAND_CONVEY_BWA("BWA convey command for alignment", "", Type.SINGLE_WORD_TEXT),
-        COMMAND_BWA("BWA command for pairing and sorting", "", Type.SINGLE_WORD_TEXT),
-        COMMAND_SAMTOOLS("samtools (Tools for alignments in the SAM format)", "samtools-0.1.19", Type.SINGLE_WORD_TEXT),
-        COMMAND_FASTQC("command for fastqc with java", "fastqc-0.10.1 --java /path/to/programs/jdk/jdk1.6.0_45/bin/java", Type.SINGLE_LINE_TEXT),
-        COMMAND_PICARD_MDUP("command for versioned picard", "picard-1.61.sh MarkDuplicates", Type.SINGLE_LINE_TEXT),
 
         //executionRestrictions
         MAXIMUM_NUMBER_OF_JOBS("max parallel jobs", null, Type.POSITIVE_NUMBER),

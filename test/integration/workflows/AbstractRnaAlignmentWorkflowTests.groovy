@@ -259,6 +259,7 @@ abstract class AbstractRnaAlignmentWorkflowTests extends AbstractRoddyAlignmentW
          "scripts/initializations/AddPathToConfigFilesToProcessingOptions.groovy",
          "scripts/initializations/AddRoddyPathAndVersionToProcessingOptions.groovy",
          "scripts/initializations/RoddyProcessingOptions.groovy",
+         "scripts/initializations/LoadSoftwareModules.groovy",
         ]
     }
 

@@ -29,6 +29,11 @@ class ProcessingOptionService {
         return option
     }
 
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    public ProcessingOption createOrUpdate(OptionName name, String value) {
+        createOrUpdate(name, null, null, value)
+    }
+
     private void obsoleteOption(ProcessingOption option) {
         option.dateObsoleted = new Date()
         assert(option.save(flush: true))

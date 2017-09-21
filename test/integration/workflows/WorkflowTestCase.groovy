@@ -183,7 +183,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         Realm realmManagement = WorkflowTestRealms.createRealmDataManagementDKFZ(realmParams).save(flush: true)
         realm = WorkflowTestRealms.createRealmDataProcessingDKFZ(realmParams).save(flush: true)
 
-        println "Base directory:${getBaseDirectory()}"
+        println "Base directory: ${getBaseDirectory()}"
 
         realm.rootPath = "${getBaseDirectory()}/root_path"
         realm.processingRootPath = "${getBaseDirectory()}/processing_root_path"

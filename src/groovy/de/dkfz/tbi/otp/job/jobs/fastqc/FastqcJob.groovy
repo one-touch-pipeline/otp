@@ -111,7 +111,14 @@ class FastqcJob extends AbstractOtpJob implements AutoRestartableJob {
         dataFiles.each { dataFile ->
             String rawSeq = lsdfFilesService.getFileFinalPath(dataFile)
             String fastqcCommand = ProcessingOptionService.findOption(ProcessingOption.OptionName.COMMAND_FASTQC, null, null)
-            String command = "${fastqcCommand} ${rawSeq} --noextract --nogroup -o ${outDir};chmod -R 440 ${outDir}/*.zip"
+            String fastqcActivation = ProcessingOptionService.findOption(ProcessingOption.OptionName.COMMAND_ACTIVATION_FASTQC, null, null)
+            String moduleLoader = ProcessingOptionService.findOption(ProcessingOption.OptionName.COMMAND_LOAD_MODULE_LOADER, null, null)
+            String command = """\
+                    ${moduleLoader}
+                    ${fastqcActivation}
+                    ${fastqcCommand} ${rawSeq} --noextract --nogroup -o ${outDir}
+                    chmod -R 440 ${outDir}/*.zip
+                    """.stripIndent()
             clusterJobSchedulerService.executeJob(realm, command)
             createFastqcProcessedFileIfNotExisting(dataFile)
         }
@@ -139,12 +146,12 @@ class FastqcJob extends AbstractOtpJob implements AutoRestartableJob {
             File seqCenterFastQcFile = fastqcDataFilesService.pathToFastQcResultFromSeqCenter(dataFile)
             File seqCenterFastQcFileMd5Sum = fastqcDataFilesService.pathToFastQcResultMd5SumFromSeqCenter(dataFile)
             lsdfFilesService.ensureFileIsReadableAndNotEmpty(seqCenterFastQcFile)
-            String md5SumCreationCommand = """
-cd ${seqCenterFastQcFile.parent};
-md5sum ${seqCenterFastQcFile.name} > ${outDir}/${seqCenterFastQcFileMd5Sum.name};
-cp ${seqCenterFastQcFile} ${outDir};
-chmod 0644 ${outDir}/*
-"""
+            String md5SumCreationCommand = """\
+                    cd ${seqCenterFastQcFile.parent};
+                    md5sum ${seqCenterFastQcFile.name} > ${outDir}/${seqCenterFastQcFileMd5Sum.name};
+                    cp ${seqCenterFastQcFile} ${outDir};
+                    chmod 0644 ${outDir}/*
+                    """.stripIndent()
             executionService.executeCommand(realm, md5SumCreationCommand)
             lsdfFilesService.ensureFileIsReadableAndNotEmpty(new File(outDir, seqCenterFastQcFile.name))
 
