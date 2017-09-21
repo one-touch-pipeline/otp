@@ -94,14 +94,14 @@ class JobMailService {
                     jobName            : clusterJob.clusterJobName,
 
                     queue              : dateString(clusterJob.queued),
+                    eligible           : dateString(clusterJob.eligible), //time when job is ready for start (no hold anymore)
                     start              : dateString(clusterJob.started),
                     ended              : dateString(clusterJob.ended),
                     runningHours       : clusterJob.started && clusterJob.ended ? clusterJob.getElapsedWalltime().standardHours : 'na',
                     logFile            : job.getLogFilePath(clusterJob),
 
-                    clusterErrorMessage: '',
-                    errorType          : '',
-                    node               : '',
+                    node               : clusterJob.node,
+                    clusterStartCount  : clusterJob.startCount,
             ]
 
             message << mapToString('Cluster Job', clusterProperties)

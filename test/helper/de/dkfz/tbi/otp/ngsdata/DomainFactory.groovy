@@ -395,6 +395,14 @@ class DomainFactory {
         )
     }
 
+    public static void createProcessingOptionForErrorRecipient(String recipientEmail = "email${counter++}@example.example") {
+        createProcessingOption(
+                name: OptionName.EMAIL_RECIPIENT_ERRORS,
+                type: null,
+                project: null,
+                value: recipientEmail,
+        )
+    }
 
     public static ProcessingOption createProcessingOptionBasePathReferenceGenome(String fileName = TestCase.uniqueNonExistentPath.path) {
         return createProcessingOption(

@@ -28,7 +28,7 @@ class JobMailServiceIntegrationSpec extends Specification {
 
         Realm realm = DomainFactory.createRealmDataProcessing(temporaryFolder.newFolder(), [name: seqTrack.project.realmName])
 
-        DomainFactory.createProcessingOptionForNotificationRecipient()
+        DomainFactory.createProcessingOptionForErrorRecipient()
         ProcessingStep step = DomainFactory.createProcessingStepUpdate().processingStep
 
 
@@ -65,7 +65,8 @@ class JobMailServiceIntegrationSpec extends Specification {
 
         JobMailService jobMailService = new JobMailService([
                 mailHelperService      : Mock(MailHelperService) {
-                    0 * sendEmail(_, _, _) >> { String emailSubject, String content, List<String> recipients ->
+                    1 * sendEmail(_, _, _) >> { String emailSubject, String content, List<String> recipients ->
+                        println content
                         assert emailSubject.startsWith(processingPriority >= ProcessingPriority.FAST_TRACK_PRIORITY ? "FASTTRACK ERROR:" : "ERROR:")
                         assert emailSubject.contains("${step.jobExecutionPlan.name} ${step.processParameterObject.individual.displayName} ${step.processParameterObject.project.name}")
                         assert content.contains('\nWorkflow:\n')
