@@ -261,8 +261,9 @@ class MetadataImportService {
         runRows.groupBy { MultiplexingService.combineLaneNumberAndBarcode(it.getCellByColumnTitle(LANE_NO.name()).text,
                 extractBarcode(it).value) }.each { String laneId, List<Row> rows ->
             String ilseNumber = uniqueColumnValue(rows, ILSE_NO)
+            String tagmentation = uniqueColumnValue(rows, TAGMENTATION_BASED_LIBRARY)?.toLowerCase()
             SeqType seqType = exactlyOneElement(SeqType.findAllWhere(
-                    name: uniqueColumnValue(rows, SEQUENCING_TYPE) + (uniqueColumnValue(rows, TAGMENTATION_BASED_LIBRARY) ? '_TAGMENTATION' : ''),
+                    name: uniqueColumnValue(rows, SEQUENCING_TYPE) + ((tagmentation && ["1", "true"].contains(tagmentation)) ? '_TAGMENTATION' : ''),
                     libraryLayout: uniqueColumnValue(rows, LIBRARY_LAYOUT),
             ))
             SeqTypeNames seqTypeName = seqType.seqTypeName
@@ -443,7 +444,8 @@ class MetadataImportService {
     }
 
     public static String getSeqTypeNameFromMetadata(ValueTuple tuple) {
-        return tuple.getValue(SEQUENCING_TYPE.name()) + (tuple.getValue(TAGMENTATION_BASED_LIBRARY.name()) ? SeqType.TAGMENTATION_SUFFIX : '')
+        String tagmentation = tuple.getValue(TAGMENTATION_BASED_LIBRARY.name())?.toLowerCase()
+        return tuple.getValue(SEQUENCING_TYPE.name()) + ((tagmentation && ["1", "true"].contains(tagmentation)) ? SeqType.TAGMENTATION_SUFFIX : '')
     }
 
 }

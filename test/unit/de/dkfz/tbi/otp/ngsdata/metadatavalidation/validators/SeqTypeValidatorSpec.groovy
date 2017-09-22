@@ -58,7 +58,8 @@ class SeqTypeValidatorSpec extends Specification {
                         "SeqType1\t\n" +
                         "SeqType1\ttrue\n" +
                         "SeqType2\t\n" +
-                        "SeqType2\ttrue\n")
+                        "SeqType2\ttrue\n" +
+                        "SeqType2\tfalse\n")
         DomainFactory.createSeqType(name: 'SeqType1', libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE)
         DomainFactory.createSeqType(name: 'SeqType2', libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED)
         DomainFactory.createSeqType(name: 'SeqType1_TAGMENTATION', libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED)
