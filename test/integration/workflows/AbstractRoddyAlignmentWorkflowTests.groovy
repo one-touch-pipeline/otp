@@ -137,10 +137,6 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
         //OtherUnixUser user has very limited permissions, it must be checked in the tests
         //that roddy has enough permissions to work and does not try to damage other files
         setPermissionsRecursive(baseDirectory, TEST_DATA_MODE_DIR, TEST_DATA_MODE_FILE)
-
-        SpringSecurityUtils.doWithAuth("operator") {
-            processingOptionService.createOrUpdate(OptionName.STATISTICS_BASES_PER_BYTES_FASTQ, null, null, "2.339")
-        }
     }
 
     void setUpFilesVariables() {
