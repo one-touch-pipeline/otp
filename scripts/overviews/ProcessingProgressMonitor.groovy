@@ -105,13 +105,19 @@ def seqTracksWithReferenceGenome = {List<SeqTrack> seqTracks ->
     if (!seqTracks) {
         return []
     }
-    Map map = seqTracks.groupBy {
+    Map mapSpecificReferenceGenomeType = seqTracks.groupBy {
+        return it.sampleType.specificReferenceGenome == SampleType.SpecificReferenceGenome.UNKNOWN
+    }
+    if (mapSpecificReferenceGenomeType[true]) {
+        output << "${INDENT}${mapSpecificReferenceGenomeType[true].size()} lanes removed, because the used sampleType has not defined the type of reference genome (Project or sample type specific): ${mapSpecificReferenceGenomeType[true]*.sampleType*.name.unique().sort()}}"
+    }
+    Map mapNoReferenceGenome = (mapSpecificReferenceGenomeType[false] ?: [:]).groupBy {
         return !it.configuredReferenceGenome
     }
-    if (map[true]) {
-        output << "${INDENT}${map[true].size()} lanes removed, because the used project(s) has/have no reference genome(s): ${map[true]*.project.unique().sort {it.name}}"
+    if (mapNoReferenceGenome[true]) {
+        output << "${INDENT}${mapNoReferenceGenome[true].size()} lanes removed, because the used project(s) has/have no reference genome(s): ${mapNoReferenceGenome[true]*.project.unique().sort {it.name}}"
     }
-    return map[false] ?: []
+    return mapNoReferenceGenome[false] ?: []
 }
 
 def exomeSeqTracksWithEnrichmentKit = {List<SeqTrack> seqTracks->
@@ -206,7 +212,7 @@ def handleStateMap = {Map map, String workflow, Closure valueToShow, Closure obj
         def values = map[key]
         switch (key.ordinal()) {
             case 0:
-                output.showNotTriggered(workflow, values, valueToShow)
+                output.showNotTriggered(values, valueToShow)
                 break
             case 1:
                 output.showWaiting(values, valueToShow)
