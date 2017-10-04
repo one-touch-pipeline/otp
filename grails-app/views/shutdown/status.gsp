@@ -42,7 +42,6 @@
                         <td><g:link controller="processes" action="plan" id="${step.process.jobExecutionPlan.id}">${step.process.jobExecutionPlan.name}</g:link></td>
                         <td><g:link controller="processes" action="process" id="${step.process.id}">${step.process.id}</g:link></td>
                         <td><g:link controller="processes" action="processingStep" id="${step.id}">${step.jobDefinition.name}</g:link></td>
-                        <td>${step.jobClass}<br/>${step.jobVersion}</td>
                     </tr>
                 </g:each>
             </tbody>
@@ -57,15 +56,14 @@
                     <th>Job</th>
                     </tr>
             </thead>
-        <tbody>
-            <g:each var="step" in="${resumableJobs}">
-                <tr>
-                    <td><g:link controller="processes" action="plan" id="${step.process.jobExecutionPlan.id}">${step.process.jobExecutionPlan.name}</g:link></td>
-                    <td><g:link controller="processes" action="process" id="${step.process.id}">${step.process.id}</g:link></td>
-                    <td><g:link controller="processes" action="processingStep" id="${step.id}">${step.jobDefinition.name}</g:link></td>
-                    <td>${step.jobClass}<br/>${step.jobVersion}</td>
-                </tr>
-            </g:each>
+            <tbody>
+                <g:each var="step" in="${resumableJobs}">
+                    <tr>
+                        <td><g:link controller="processes" action="plan" id="${step.process.jobExecutionPlan.id}">${step.process.jobExecutionPlan.name}</g:link></td>
+                        <td><g:link controller="processes" action="process" id="${step.process.id}">${step.process.id}</g:link></td>
+                        <td><g:link controller="processes" action="processingStep" id="${step.id}">${step.jobDefinition.name}</g:link></td>
+                    </tr>
+                </g:each>
             </tbody>
         <table>
         <hr/>
