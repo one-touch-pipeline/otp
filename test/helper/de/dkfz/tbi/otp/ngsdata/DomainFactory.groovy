@@ -2004,6 +2004,36 @@ class DomainFactory {
         ], properties)
     }
 
+    static IndelSampleSwapDetection createIndelSampleSwapDetection(Map properties = [:]) {
+        IndelCallingInstance indelCallingInstance = properties.get("indelCallingInstance") ?: createIndelCallingInstance()
+        return createDomainObject(IndelSampleSwapDetection, [
+                indelCallingInstance: indelCallingInstance,
+                somaticSmallVarsInTumorCommonInGnomADPer: counter++,
+                somaticSmallVarsInControlCommonInGnomad: counter++,
+                tindaSomaticAfterRescue: counter++,
+                somaticSmallVarsInControlInBiasPer: counter++,
+                somaticSmallVarsInTumorPass: counter++,
+                pid: indelCallingInstance.individual.pid,
+                somaticSmallVarsInControlPass: counter++,
+                somaticSmallVarsInControlPassPer: counter++,
+                tindaSomaticAfterRescueMedianAlleleFreqInControl: counter++ as double,
+                somaticSmallVarsInTumorInBiasPer: counter++ as double,
+                somaticSmallVarsInControlCommonInGnomadPer: counter++,
+                somaticSmallVarsInTumorInBias: counter++,
+                somaticSmallVarsInControlCommonInGnomasPer: counter++,
+                germlineSNVsHeterozygousInBothRare: counter++,
+                germlineSmallVarsHeterozygousInBothRare: counter++,
+                tindaGermlineRareAfterRescue: counter++,
+                somaticSmallVarsInTumorCommonInGnomad: counter++,
+                somaticSmallVarsInControlInBias: counter++,
+                somaticSmallVarsInControl: counter++,
+                somaticSmallVarsInTumor: counter++,
+                germlineSNVsHeterozygousInBoth: counter++,
+                somaticSmallVarsInTumorPassPer: counter++ as double,
+                somaticSmallVarsInTumorCommonInGnomadPer: counter++,
+        ], properties)
+    }
+
     static void createNotificationProcessingOptions() {
 
         createProcessingOption([
@@ -2333,8 +2363,76 @@ samplePairsNotProcessed: ${samplePairsNotProcessed}
 """
     }
 
+    static void createIndelQcFileOnFileSystem(File qcFile) {
+        qcFile.parentFile.mkdirs()
+        qcFile << """
+{
+  "all": {
+    "file": "${qcFile.path}",
+    "numIndels":23,
+    "numIns":24,
+    "numDels":25,
+    "numSize1_3":26,
+    "numSize4_10":27,
+    "numSize11plus":28,
+    "numInsSize1_3":29,
+    "numInsSize4_10":30,
+    "numInsSize11plus":31,
+    "numDelsSize1_3":32,
+    "numDelsSize4_10":33,
+    "numDelsSize11plus":34,
+    "percentIns":35.0,
+    "percentDels":36.0,
+    "percentSize1_3":37.0,
+    "percentSize4_10":38.0,
+    "percentSize11plus":39.0,
+    "percentInsSize1_3":40.0,
+    "percentInsSize4_10":41.0,
+    "percentInsSize11plus":42.0,
+    "percentDelsSize1_3":43.0,
+    "percentDelsSize4_10":44.0,
+    "percentDelsSize11plus":45.0,
+    }
+}
+"""
+    }
 
-    public static void createAclObjects(Object domainObject, Map properties = [:]) {
+
+    static void createIndelSampleSwapDetectionFileOnFileSystem(File qcFile, Individual individual) {
+        qcFile.parentFile.mkdirs()
+        qcFile << """
+{
+    "somaticSmallVarsInTumorCommonInGnomADPer":1,
+    "somaticSmallVarsInControlCommonInGnomad":2,
+    "tindaSomaticAfterRescue":3,
+    "somaticSmallVarsInControlInBiasPer":4,
+    "somaticSmallVarsInTumorPass":5,
+    "pid": ${individual.pid},
+    "somaticSmallVarsInControlPass":6,
+    "somaticSmallVarsInControlPassPer":7,
+    "tindaSomaticAfterRescueMedianAlleleFreqInControl":8.0,
+    "somaticSmallVarsInTumorInBiasPer":9.0,
+    "somaticSmallVarsInControlCommonInGnomadPer":10,
+    "somaticSmallVarsInTumorInBias":11,
+    "somaticSmallVarsInControlCommonInGnomasPer":12,
+    "germlineSNVsHeterozygousInBothRare":13,
+    "germlineSmallVarsHeterozygousInBothRare":14,
+    "tindaGermlineRareAfterRescue":15,
+    "somaticSmallVarsInTumorCommonInGnomad":16,
+    "somaticSmallVarsInControlInBias":17,
+    "somaticSmallVarsInControl":18,
+    "somaticSmallVarsInTumor":19,
+    "germlineSNVsHeterozygousInBoth":20,
+    "somaticSmallVarsInTumorPassPer":21.9,
+    "somaticSmallVarsInTumorCommonInGnomadPer":22,
+}
+"""
+
+    }
+
+
+
+        public static void createAclObjects(Object domainObject, Map properties = [:]) {
         AclObjectIdentity aclObjectIdentity = createDomainObject(AclObjectIdentity, [objectId: domainObject.id, aclClass: {createDomainObject(AclClass, [className: domainObject.class.name], [:])}], [:])
         createDomainObject(AclEntry, [aclObjectIdentity: aclObjectIdentity, sid: {createDomainObject(AclSid, [sid: "ROLE_ADMIN"], properties)}], [:])
     }

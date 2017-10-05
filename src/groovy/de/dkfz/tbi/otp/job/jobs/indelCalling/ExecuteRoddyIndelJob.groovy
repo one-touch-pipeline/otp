@@ -52,6 +52,13 @@ class ExecuteRoddyIndelJob extends AbstractExecutePanCanJob<IndelCallingInstance
         cValues.add("analysisMethodNameOnOutput:${individualPath.relativize(resultDirectory).toString()}")
         cValues.add("VCF_NORMAL_HEADER_COL:${bamFileControl.sampleType.dirName}")
         cValues.add("VCF_TUMOR_HEADER_COL:${bamFileDisease.sampleType.dirName}")
+        cValues.add("SEQUENCE_TYPE:${bamFileDisease.seqType.roddyName}")
+
+        if (bamFileDisease.seqType.isExome()) {
+            BedFile bedFile = bamFileDisease.bedFile
+            File bedFilePath = bedFileService.filePath(bedFile) as File
+            cValues.add("EXOME_CAPTURE_KIT_BEDFILE:${bedFilePath}")
+        }
 
         return cValues
     }
@@ -75,6 +82,8 @@ class ExecuteRoddyIndelJob extends AbstractExecutePanCanJob<IndelCallingInstance
 
         List<File> files = [
                 indelCallingInstance.getCombinedPlotPath(),
+                indelCallingInstance.getIndelQcJsonFile(),
+                indelCallingInstance.getSampleSwapJsonFile(),
         ]
 
         files.addAll(indelCallingInstance.getResultFilePathsToValidate())
@@ -88,7 +97,5 @@ class ExecuteRoddyIndelJob extends AbstractExecutePanCanJob<IndelCallingInstance
         }
 
         indelCallingService.validateInputBamFiles(indelCallingInstance)
-
-        indelCallingInstance.updateProcessingState(AnalysisProcessingStates.FINISHED)
     }
 }

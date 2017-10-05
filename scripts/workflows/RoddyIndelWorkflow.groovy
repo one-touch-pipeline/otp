@@ -7,6 +7,7 @@ String workflowName = "IndelWorkflow"
 plan(workflowName, ctx, true) {
     start("roddyIndelStart", "roddyIndelStartJob")
     job("executeRoddyIndel", "executeRoddyIndelJob")
+    job("parseIndelQc", "parseIndelQcJob")
     job("notifyProcessFinished", "notifyProcessFinishedJob")
 }
 

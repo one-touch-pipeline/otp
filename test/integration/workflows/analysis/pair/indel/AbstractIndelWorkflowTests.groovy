@@ -2,7 +2,9 @@ package workflows.analysis.pair.indel
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import grails.plugin.springsecurity.*
+import htsjdk.samtools.util.CollectionUtil
 import org.junit.*
 import workflows.analysis.pair.*
 
@@ -66,6 +68,8 @@ abstract class AbstractIndelWorkflowTests extends AbstractRoddyBamFilePairAnalys
         return [
                 indelCallingInstance.getResultFilePathsToValidate(),
                 indelCallingInstance.getCombinedPlotPath(),
+                indelCallingInstance.getIndelQcJsonFile(),
+                indelCallingInstance.getSampleSwapJsonFile(),
         ].flatten()
     }
 
@@ -73,5 +77,11 @@ abstract class AbstractIndelWorkflowTests extends AbstractRoddyBamFilePairAnalys
     @Override
     File getWorkflowData() {
         new File(getDataDirectory(), 'indel')
+    }
+
+    @Override
+    void checkAnalysisSpecific(IndelCallingInstance indelCallingInstance) {
+        CollectionUtils.exactlyOneElement(IndelQualityControl.findAllByIndelCallingInstance(indelCallingInstance))
+        CollectionUtils.exactlyOneElement(IndelSampleSwapDetection.findAllByIndelCallingInstance(indelCallingInstance))
     }
 }

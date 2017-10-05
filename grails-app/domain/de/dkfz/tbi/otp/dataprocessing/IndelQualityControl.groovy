@@ -56,10 +56,15 @@ class IndelQualityControl implements Entity {
 
 
     static constraints = {
-        file(validator: { OtpPath.isValidPathComponent(it) })
+        file(validator: { OtpPath.isValidAbsolutePath(it) })
+        indelCallingInstance unique: true
     }
 
     static belongsTo = [
         indelCallingInstance: IndelCallingInstance
     ]
+
+    static mapping = {
+        file type: "text"
+    }
 }

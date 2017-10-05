@@ -43,4 +43,12 @@ class IndelCallingInstance extends BamFilePairAnalysis implements ProcessParamet
     File getCombinedPlotPath() {
         return new File(getWorkDirectory(), "screenshots/indel_somatic_functional_combined.pdf")
     }
+
+    File getIndelQcJsonFile() {
+        return new File(getWorkDirectory(), "indel.json")
+    }
+
+    File getSampleSwapJsonFile() {
+        return new File(getWorkDirectory(), "checkSampleSwap.json")
+    }
 }

@@ -15,6 +15,7 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
 
 
     ProcessedMergedBamFileService processedMergedBamFileService
+    BedFileService bedFileService
 
 
     AbstractMergedBamFile bamFileControl
@@ -54,6 +55,7 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
         ])
 
         commonBamFileSetup()
+        createBedFileAndLibPrepKit()
     }
 
 
@@ -70,6 +72,7 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
                 createProcessMergedBamFileProperties())
 
         commonBamFileSetup()
+        createBedFileAndLibPrepKit()
     }
 
 
@@ -166,6 +169,17 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
 
     File getBamFilePairBaseDirectory() {
         new File(getDataDirectory(), 'bamFiles')
+    }
+
+    void createBedFileAndLibPrepKit () {
+        LibraryPreparationKit kit = DomainFactory.createLibraryPreparationKit(name: "Agilent5withoutUTRs")
+        BedFile bedFile = DomainFactory.createBedFile(
+                fileName: "Agilent5withoutUTRs_plain.bed",
+                libraryPreparationKit: kit,
+                referenceGenome: referenceGenome,
+        )
+        bamFileTumor.containedSeqTracks*.libraryPreparationKit = kit
+        bamFileTumor.containedSeqTracks*.save(flush: true)
     }
 
     @Override

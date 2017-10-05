@@ -83,6 +83,8 @@ class CreateRoddyFileHelper {
         }
 
         CreateFileHelper.createFile(indelCallingInstance.getCombinedPlotPath())
+        CreateFileHelper.createFile(indelCallingInstance.getIndelQcJsonFile())
+        CreateFileHelper.createFile(indelCallingInstance.getSampleSwapJsonFile())
 
         indelCallingInstance.getResultFilePathsToValidate().each {
             CreateFileHelper.createFile(it)

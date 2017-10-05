@@ -11,6 +11,7 @@ import org.junit.rules.*
 import spock.lang.*
 
 @Mock([
+        BedFile,
         DataFile,
         FileType,
         IndelCallingInstance,
@@ -58,7 +59,7 @@ class ExecuteRoddyIndelJobSpec extends Specification {
     }
 
 
-    void "prepareAndReturnWorkflowSpecificCValues, when all fine, return correct value list"() {
+    void "prepareAndReturnWorkflowSpecificCValues, when all fine and WGS, return correct value list"() {
         given:
         File fasta = CreateFileHelper.createFile(new File(temporaryFolder.newFolder(), "fasta.fa"))
 
@@ -87,16 +88,13 @@ class ExecuteRoddyIndelJobSpec extends Specification {
         bamFileControl.mergingWorkPackage.bamFileInProjectFolder = bamFileControl
         assert bamFileControl.mergingWorkPackage.save(flush: true)
 
-        String bamFileDiseasePath = bamFileDisease.pathForFurtherProcessing.path
-        String bamFileControlPath = bamFileControl.pathForFurtherProcessing.path
-
         String analysisMethodNameOnOutput = "indel_results/${indelCallingInstance.seqType.libraryLayoutDirName}/" +
                 "${indelCallingInstance.sampleType1BamFile.sampleType.dirName}_${indelCallingInstance.sampleType2BamFile.sampleType.dirName}/" +
                 "${indelCallingInstance.instanceName}"
 
 
         List<String> expectedList = [
-                "bamfile_list:${bamFileControlPath};${bamFileDiseasePath}",
+                "bamfile_list:${bamFileControl.pathForFurtherProcessing.path};${bamFileDisease.pathForFurtherProcessing.path}",
                 "sample_list:${bamFileControl.sampleType.dirName};${bamFileDisease.sampleType.dirName}",
                 "possibleTumorSampleNamePrefixes:${bamFileDisease.sampleType.dirName}",
                 "possibleControlSampleNamePrefixes:${bamFileControl.sampleType.dirName}",
@@ -106,6 +104,7 @@ class ExecuteRoddyIndelJobSpec extends Specification {
                 "analysisMethodNameOnOutput:${analysisMethodNameOnOutput}",
                 "VCF_NORMAL_HEADER_COL:${bamFileControl.sampleType.dirName}",
                 "VCF_TUMOR_HEADER_COL:${bamFileDisease.sampleType.dirName}",
+                "SEQUENCE_TYPE:${bamFileDisease.seqType.roddyName}",
         ]
 
         when:
@@ -114,6 +113,86 @@ class ExecuteRoddyIndelJobSpec extends Specification {
         then:
         expectedList == returnedList
     }
+
+
+    void "prepareAndReturnWorkflowSpecificCValues, when all fine and WES, return correct value list"() {
+        given:
+        File fasta = CreateFileHelper.createFile(new File(temporaryFolder.newFolder(), "fasta.fa"))
+        File bedFile = CreateFileHelper.createFile(new File(temporaryFolder.newFolder(), "bed.txt"))
+
+        ExecuteRoddyIndelJob job = new ExecuteRoddyIndelJob([
+                indelCallingService     : Mock(IndelCallingService) {
+                    1 * validateInputBamFiles(_) >> {}
+                },
+                referenceGenomeService: Mock(ReferenceGenomeService) {
+                    1 * fastaFilePath(_) >> fasta
+                    0 * _
+                },
+                bedFileService : Mock(BedFileService) {
+                    1* filePath(_) >> bedFile
+                },
+        ])
+
+        IndelCallingInstance indelCallingInstance = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles()
+        DomainFactory.createRealmDataManagement(temporaryFolder.newFolder(), [name: indelCallingInstance.project.realmName])
+        SeqType seqType = DomainFactory.createExomeSeqType()
+
+        LibraryPreparationKit kit = DomainFactory.createLibraryPreparationKit()
+        indelCallingInstance.containedSeqTracks*.libraryPreparationKit = kit
+        assert indelCallingInstance.containedSeqTracks*.save(flush: true)
+        DomainFactory.createBedFile(
+                libraryPreparationKit: kit,
+                referenceGenome: indelCallingInstance.referenceGenome
+        )
+
+        indelCallingInstance.samplePair.mergingWorkPackage1.seqType = seqType
+        assert indelCallingInstance.samplePair.mergingWorkPackage1.save(flush: true)
+        indelCallingInstance.samplePair.mergingWorkPackage2.seqType = seqType
+        assert indelCallingInstance.samplePair.mergingWorkPackage2.save(flush: true)
+        indelCallingInstance.containedSeqTracks*.seqType = seqType
+        assert indelCallingInstance.containedSeqTracks*.save(flush: true)
+
+        AbstractMergedBamFile bamFileDisease = indelCallingInstance.sampleType1BamFile
+        AbstractMergedBamFile bamFileControl = indelCallingInstance.sampleType2BamFile
+
+        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(bamFileDisease)
+        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(bamFileControl)
+
+        bamFileDisease.mergingWorkPackage.bamFileInProjectFolder = bamFileDisease
+        assert bamFileDisease.mergingWorkPackage.save(flush: true)
+
+        bamFileControl.mergingWorkPackage.bamFileInProjectFolder = bamFileControl
+        assert bamFileControl.mergingWorkPackage.save(flush: true)
+
+        String analysisMethodNameOnOutput = "indel_results/${indelCallingInstance.seqType.libraryLayoutDirName}/" +
+                "${indelCallingInstance.sampleType1BamFile.sampleType.dirName}_${indelCallingInstance.sampleType2BamFile.sampleType.dirName}/" +
+                "${indelCallingInstance.instanceName}"
+
+
+        List<String> expectedList = [
+                "bamfile_list:${bamFileControl.pathForFurtherProcessing.path};${bamFileDisease.pathForFurtherProcessing.path}",
+                "sample_list:${bamFileControl.sampleType.dirName};${bamFileDisease.sampleType.dirName}",
+                "possibleTumorSampleNamePrefixes:${bamFileDisease.sampleType.dirName}",
+                "possibleControlSampleNamePrefixes:${bamFileControl.sampleType.dirName}",
+                "REFERENCE_GENOME:${fasta.path}",
+                "CHR_SUFFIX:${indelCallingInstance.referenceGenome.chromosomeSuffix}",
+                "CHR_PREFIX:${indelCallingInstance.referenceGenome.chromosomePrefix}",
+                "analysisMethodNameOnOutput:${analysisMethodNameOnOutput}",
+                "VCF_NORMAL_HEADER_COL:${bamFileControl.sampleType.dirName}",
+                "VCF_TUMOR_HEADER_COL:${bamFileDisease.sampleType.dirName}",
+                "SEQUENCE_TYPE:${bamFileDisease.seqType.roddyName}",
+                "EXOME_CAPTURE_KIT_BEDFILE:${bedFile}"
+        ]
+
+
+        when:
+        List<String> returnedList = job.prepareAndReturnWorkflowSpecificCValues(indelCallingInstance)
+
+        then:
+        expectedList == returnedList
+    }
+
+
 
 
     @Unroll
@@ -145,11 +224,8 @@ class ExecuteRoddyIndelJobSpec extends Specification {
 
         CreateRoddyFileHelper.createIndelResultFiles(indelCallingInstance)
 
-        when:
+        expect:
         job.validate(indelCallingInstance)
-
-        then:
-        indelCallingInstance.processingState == AnalysisProcessingStates.FINISHED
     }
 
 
@@ -230,6 +306,12 @@ class ExecuteRoddyIndelJobSpec extends Specification {
                 },
                 { IndelCallingInstance it ->
                     it.resultFilePathsToValidate.last()
+                },
+                { IndelCallingInstance it ->
+                    it.getIndelQcJsonFile()
+                },
+                { IndelCallingInstance it ->
+                    it.getSampleSwapJsonFile()
                 },
         ]
     }
