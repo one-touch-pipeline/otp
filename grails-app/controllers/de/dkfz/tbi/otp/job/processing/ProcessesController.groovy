@@ -69,12 +69,22 @@ class ProcessesController {
         Map<String, Long> processCounts
         Map<String, Long> successProcessCounts
         Map<String, Long> finishedProcessCounts
+        Map<String, Long> failedProcessCounts
         Map<String, Date> lastSuccessDates
         Map<String, Date> lastFailureDates
 
         Authentication auth = SecurityContextHolder.context.authentication
 
         GParsPool.withPool() {
+            Future failedProcessesCount = {
+                SecurityContextHolder.context.authentication = auth
+                try {
+                    jobExecutionPlanService.failedProcessCount()
+                } finally {
+                    SecurityContextHolder.context.authentication = null
+                }
+            }.async()()
+
             Closure lastSuccessDatesClosure = {
                 SecurityContextHolder.context.authentication = auth
                 try {
@@ -98,15 +108,15 @@ class ProcessesController {
             Future lastFailureDatesFuture = lastFailureDatesClosureAsync()
 
             processCounts = jobExecutionPlanService.processCount()
-            successProcessCounts = jobExecutionPlanService.successfulProcessCount()
             finishedProcessCounts = jobExecutionPlanService.finishedProcessCount()
+            failedProcessCounts = failedProcessesCount.get()
             lastSuccessDates = lastSuccessDatesFuture.get()
             lastFailureDates = lastFailureDatesFuture.get()
 
             dataToRender.aaData = plans.collectParallel { plan ->
                 long allProcessesCount = processCounts[plan.name] ?: 0L
-                long successfulProcessesCount = successProcessCounts[plan.name] ?: 0L
                 long finishedProcessesCount = finishedProcessCounts[plan.name] ?: 0L
+                long failedProcessCount = failedProcessCounts[plan.name] ?: 0L
                 Date successDate = lastSuccessDates[plan.name]
                 Date failureDate = lastFailureDates[plan.name]
 
@@ -116,8 +126,7 @@ class ProcessesController {
                         enabled                 : plan.enabled,
                         allProcessesCount       : allProcessesCount,
                         finishedProcessesCount  : finishedProcessesCount,
-                        successfulProcessesCount: successfulProcessesCount,
-                        failedProcessesCount    : finishedProcessesCount - successfulProcessesCount,
+                        failedProcessesCount    : failedProcessCount,
                         runningProcessesCount   : allProcessesCount - finishedProcessesCount,
                         lastSuccessfulDate      : successDate,
                         lastFailureDate         : failureDate,

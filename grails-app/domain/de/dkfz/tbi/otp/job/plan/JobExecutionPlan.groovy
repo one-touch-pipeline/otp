@@ -36,10 +36,6 @@ class JobExecutionPlan implements Serializable, Entity {
      */
     boolean enabled
     /**
-     * Number of Processes which finished successful for this JobExecutionPlan
-     */
-    int finishedSuccessful = 0
-    /**
      * The parameter which is static for the process
      */
     ProcessParameter processParameter

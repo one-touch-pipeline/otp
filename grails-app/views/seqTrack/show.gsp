@@ -79,7 +79,6 @@
                 <td><g:message code="seqTrack.show.jobExecutionPlan.planVersion"/></td>
                 <td><g:message code="seqTrack.show.jobExecutionPlan.obsoleted"/></td>
                 <td><g:message code="seqTrack.show.jobExecutionPlan.enabled"/></td>
-                <td><g:message code="seqTrack.show.jobExecutionPlan.finishedSuccessful"/></td>
             </tr>
         </thead>
         <tbody>
@@ -101,7 +100,6 @@
                     <td class="myValue false">
                 </g:else>
                 </td>
-                <td>${jobExecutionPlan.finishedSuccessful}</td>
             </tr>
         </g:each>
         </tbody>

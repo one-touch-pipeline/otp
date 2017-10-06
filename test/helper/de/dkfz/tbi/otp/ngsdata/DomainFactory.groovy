@@ -1687,12 +1687,12 @@ class DomainFactory {
     }
 
     public static ProcessingStepUpdate createProcessingStepUpdate(final ProcessingStep step, final ExecutionState state) {
-        return new ProcessingStepUpdate(
+        return createProcessingStepUpdate([
                 date: new Date(),
                 state: state,
                 previous: step.latestProcessingStepUpdate,
                 processingStep: step,
-        )
+        ])
     }
 
     public static ProcessingStep createProcessingStepWithUpdates(ProcessingStep processingStep = createProcessingStep()) {

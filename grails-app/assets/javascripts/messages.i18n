@@ -598,7 +598,6 @@ seqTrack.show.jobExecutionPlan.name
 seqTrack.show.jobExecutionPlan.planVersion
 seqTrack.show.jobExecutionPlan.obsoleted
 seqTrack.show.jobExecutionPlan.enabled
-seqTrack.show.jobExecutionPlan.finishedSuccessful
 
 # Alignment quality overview
 alignment.quality.project

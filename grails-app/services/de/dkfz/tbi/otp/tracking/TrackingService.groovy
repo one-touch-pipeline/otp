@@ -90,7 +90,7 @@ class TrackingService {
         }
     }
 
-    public synchronized void processFinished(Set<SeqTrack> seqTracks) {
+    public void processFinished(Set<SeqTrack> seqTracks) {
         SamplePairDiscovery samplePairDiscovery = new SamplePairDiscovery()
         for (OtrsTicket ticket : findAllOtrsTickets(seqTracks)) {
             setFinishedTimestampsAndNotify(ticket, samplePairDiscovery)

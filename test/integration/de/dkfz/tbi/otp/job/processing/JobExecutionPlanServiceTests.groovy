@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.job.processing
 
-import de.dkfz.tbi.otp.job.jobs.TestSingletonStartJob
+import de.dkfz.tbi.otp.job.jobs.*
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.testing.*
@@ -10,7 +10,6 @@ import org.springframework.security.access.*
 import org.springframework.security.acls.domain.*
 
 import static org.junit.Assert.*
-
 
 class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
     def jobExecutionPlanService
@@ -945,24 +944,62 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
     }
 
     @Test
-    void "test successProcessCount"() {
+    void "test failProcessCount"() {
         setup:
         // JEP with an obsolete predecessor JEP
-        def jep = DomainFactory.createJobExecutionPlan(name: "runSeqScan", finishedSuccessful: 20, obsoleted: true, planVersion: 0)
-        DomainFactory.createJobExecutionPlan(name: "runSeqScan", finishedSuccessful: 5, planVersion: 1, previousPlan: jep)
+        JobExecutionPlan plan1a = DomainFactory.createJobExecutionPlan(name: "a", obsoleted: true, planVersion: 0)
+        JobExecutionPlan plan1b = DomainFactory.createJobExecutionPlan(name: "a", planVersion: 1, previousPlan: plan1a)
+        createProcessingStepHelper(plan1a, ExecutionState.FAILURE)
+        createProcessingStepHelper(plan1b, ExecutionState.FAILURE)
 
-        // JEP without successful processes
-        DomainFactory.createJobExecutionPlan(name: "SnvAlignmentDiscovery")
+        // JEP without processes
+        DomainFactory.createJobExecutionPlan(name: "b")
+
+        // process has fail and afterwards finished state
+        JobExecutionPlan plan3 = DomainFactory.createJobExecutionPlan(name: "c")
+        DomainFactory.createProcessingStepUpdate(createProcessingStepHelper(plan3, ExecutionState.FAILURE), ExecutionState.FINISHED)
+
+        // process with restarted job
+        JobExecutionPlan plan4 = DomainFactory.createJobExecutionPlan(name: "d")
+        DomainFactory.createProcessingStepUpdate(
+                DomainFactory.createProcessingStepUpdate(
+                        DomainFactory.createRestartedProcessingStep([
+                                original: createProcessingStepHelper(plan4, ExecutionState.FAILURE)
+                        ]),
+                        ExecutionState.CREATED).processingStep,
+                ExecutionState.FINISHED)
+
+        // process in different states
+        JobExecutionPlan plan5 = DomainFactory.createJobExecutionPlan(name: "e")
+        createProcessingStepHelper(plan5, ExecutionState.SUCCESS)
+        createProcessingStepHelper(plan5, ExecutionState.FINISHED)
+        createProcessingStepHelper(plan5, ExecutionState.RESTARTED)
+        createProcessingStepHelper(plan5, ExecutionState.RESUMED)
+        createProcessingStepHelper(plan5, ExecutionState.STARTED)
+        createProcessingStepHelper(plan5, ExecutionState.SUSPENDED)
+
 
         when:
         def result
         SpringSecurityUtils.doWithAuth("admin") {
-            result = jobExecutionPlanService.successfulProcessCount()
+            result = jobExecutionPlanService.failedProcessCount()
         }
 
         then:
-        assert result == [runSeqScan: 25L, SnvAlignmentDiscovery: 0L]
+        assert result == [a: 2l]
     }
+
+    ProcessingStep createProcessingStepHelper(JobExecutionPlan plan, ExecutionState state) {
+        ProcessingStep step = DomainFactory.createProcessingStep(
+                process: DomainFactory.createProcess(
+                        jobExecutionPlan: plan
+                )
+        )
+        DomainFactory.createProcessingStepUpdate(step, ExecutionState.CREATED)
+        DomainFactory.createProcessingStepUpdate(step, state)
+        return step
+    }
+
 
     @Test
     void "test lastProcessDate, finds date of newest update with the given state" () {

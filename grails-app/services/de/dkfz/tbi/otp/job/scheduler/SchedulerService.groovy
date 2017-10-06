@@ -746,18 +746,6 @@ class SchedulerService {
         } finally {
             lock.unlock()
         }
-
-        JobExecutionPlan.withNewSession {
-            JobExecutionPlan plan = JobExecutionPlan.lock(last.process.jobExecutionPlan.id)
-            plan.refresh()
-
-            if (!plan.finishedSuccessful) {
-                plan.finishedSuccessful = 1
-            } else {
-                plan.finishedSuccessful++
-            }
-            plan.save(flush: true)
-        }
     }
 
     // TODO: comment me

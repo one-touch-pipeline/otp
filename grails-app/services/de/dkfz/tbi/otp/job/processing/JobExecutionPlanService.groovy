@@ -317,23 +317,6 @@ AND u.id IN (
     }
 
     /**
-     * Number of successful processes of each workflow
-     * @return Map of job execution plan names -> successful processes
-     */
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    Map<String, Long> successfulProcessCount() {
-        JobExecutionPlan.createCriteria().list {
-            projections {
-                groupProperty("name")
-                sum("finishedSuccessful")
-            }
-            order("name", "asc")
-        }.collectEntries { e ->
-            [e[0], e[1]]
-        }
-    }
-
-    /**
      * Number of finished processes of each workflow
      * @return Map of job execution plan names -> finished processes
      */
@@ -348,6 +331,45 @@ AND u.id IN (
             }
             order("jep.name", "asc")
         }.collectEntries { e ->
+            [e[0], e[1]]
+        }
+    }
+
+    /**
+     * Number of failed processes of each workflow
+     * @return Map of job execution plan names -> failed processes
+     */
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    Map<String, Long> failedProcessCount() {
+        String query = """
+SELECT
+    plan.name,
+    count(u.id)
+FROM
+    ProcessingStepUpdate as u
+    INNER JOIN u.processingStep as step
+    INNER JOIN step.process as p
+    INNER JOIN p.jobExecutionPlan as plan
+WHERE
+    step.next IS NULL
+    AND u.state = '${ExecutionState.FAILURE}'
+    AND u.id IN (
+        SELECT
+            MAX(u2.id)
+        FROM
+            ProcessingStepUpdate AS u2
+            INNER JOIN u2.processingStep as step2
+            INNER JOIN step2.process as p2
+            INNER JOIN p2.jobExecutionPlan as plan2
+        WHERE
+            step2.next IS NULL
+        GROUP BY
+            p2.id
+    )
+GROUP BY
+    plan.name
+"""
+        return Process.executeQuery(query, []).collectEntries { e ->
             [e[0], e[1]]
         }
     }
