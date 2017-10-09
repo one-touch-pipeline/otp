@@ -111,6 +111,7 @@ otp.menu.alignmentQuality
 otp.menu.mmmlIdentifierMapping
 otp.menu.projectConfig
 otp.menu.progress
+otp.menu.sampleSwap
 otp.menu.adminSection
 otp.menu.userAdministration
 otp.menu.groupAdministration
