@@ -13,7 +13,7 @@ class VariantCallingPipelinesChecker extends PipelinesChecker<AbstractMergedBamF
         List<BamFilePairAnalysis> snvFinished = new SnvCallingPipelineChecker().handle(samplePairs, output)
         List<BamFilePairAnalysis> indelFinished = new IndelCallingPipelineChecker().handle(samplePairs, output)
         List<BamFilePairAnalysis> sophiaFinished = new SophiaCallingPipelineChecker().handle(samplePairs, output)
-        List<BamFilePairAnalysis> aceseqFinished = new AceseqCallingPipelineChecker().handle(samplePairs, output)
+        List<BamFilePairAnalysis> aceseqFinished = new AceseqCallingPipelineChecker().handle(sophiaFinished*.samplePair, output)
         List<SamplePair> finished = samplePairs.intersect(snvFinished*.samplePair).
                 intersect(indelFinished*.samplePair).
                 intersect(sophiaFinished*.samplePair).

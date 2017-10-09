@@ -27,7 +27,7 @@ class OtpSnvCallingPipelineCheckerIntegrationSpec extends AbstractSnvCallingPipe
 
     void "workflowName, should return SnvWorkflow"() {
         expect:
-        'SnvWorkflow' == new SnvCallingPipelineChecker().getWorkflowName()
+        'RoddySnvWorkflow' == new SnvCallingPipelineChecker().getWorkflowName()
     }
 
     void "processingStateMember, should return snvProcessingStatus"() {

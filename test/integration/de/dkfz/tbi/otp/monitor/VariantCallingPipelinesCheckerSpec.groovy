@@ -7,6 +7,16 @@ import spock.lang.*
 
 class VariantCallingPipelinesCheckerSpec extends Specification {
 
+    SamplePair createSamplePair(Map properties = [:]) {
+        return DomainFactory.createSamplePairPanCan([
+                mergingWorkPackage1: DomainFactory.createMergingWorkPackage([
+                        seqType: SeqType.wholeGenomePairedSeqType,
+                        pipeline: DomainFactory.createPanCanPipeline(),
+                ])
+        ] + properties)
+    }
+
+
     void "handle, when no bamFiles given, then return empty list and create no output"() {
         given:
         MonitorOutputCollector output = Mock(MonitorOutputCollector)
@@ -22,11 +32,12 @@ class VariantCallingPipelinesCheckerSpec extends Specification {
 
     void "handle, if bamFiles given, then return SamplePairs with finished all analysis and create output for the others"() {
         given:
+        DomainFactory.createAllAlignableSeqTypes()
         MonitorOutputCollector output = Mock(MonitorOutputCollector)
         VariantCallingPipelinesChecker checker = new VariantCallingPipelinesChecker()
 
         and: 'sample pair with all analysis'
-        SamplePair finishedSamplePair = DomainFactory.createSamplePairPanCan([
+        SamplePair finishedSamplePair = createSamplePair([
                 snvProcessingStatus  : SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED,
                 indelProcessingStatus: SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED,
                 sophiaProcessingStatus: SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED,
@@ -53,7 +64,7 @@ class VariantCallingPipelinesCheckerSpec extends Specification {
         and: 'sample pair with only snv'
         BamFilePairAnalysis onlySnvFinished = DomainFactory.createRoddySnvInstanceWithRoddyBamFiles([
                 processingState: AnalysisProcessingStates.FINISHED,
-                samplePair     : DomainFactory.createSamplePairPanCan([
+                samplePair     : createSamplePair([
                         snvProcessingStatus: SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED,
                 ])
         ])
@@ -62,7 +73,7 @@ class VariantCallingPipelinesCheckerSpec extends Specification {
         and: 'sample pair with only indel'
         BamFilePairAnalysis onlyIndelFinished = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles([
                 processingState: AnalysisProcessingStates.FINISHED,
-                samplePair     : DomainFactory.createSamplePairPanCan([
+                samplePair     : createSamplePair([
                         indelProcessingStatus: SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED,
                 ])
         ])
@@ -71,7 +82,7 @@ class VariantCallingPipelinesCheckerSpec extends Specification {
         and: 'sample pair with only sophia'
         BamFilePairAnalysis onlySophiaFinished = DomainFactory.createSophiaInstanceWithRoddyBamFiles([
                 processingState: AnalysisProcessingStates.FINISHED,
-                samplePair     : DomainFactory.createSamplePairPanCan([
+                samplePair     : createSamplePair([
                         sophiaProcessingStatus: SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED,
                 ])
         ])
@@ -80,7 +91,7 @@ class VariantCallingPipelinesCheckerSpec extends Specification {
         and: 'sample pair with only aceseq'
         BamFilePairAnalysis onlyAceseqFinished = DomainFactory.createAceseqInstanceWithRoddyBamFiles([
                 processingState: AnalysisProcessingStates.FINISHED,
-                samplePair     : DomainFactory.createSamplePairPanCan([
+                samplePair     : createSamplePair([
                         aceseqProcessingStatus: SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED,
                 ])
         ])
@@ -112,14 +123,16 @@ class VariantCallingPipelinesCheckerSpec extends Specification {
         then:
         expectedSamplePairs == result
 
-        1 * output.showWorkflow('Sample pairs')
+        1 * output.showWorkflow('Sample pairs', false)
 
         then:
-        1 * output.showWorkflow('SnvWorkflow')
+        1 * output.showWorkflow('RoddySnvWorkflow')
         1 * output.showWorkflow('IndelWorkflow')
         1 * output.showWorkflow('SophiaWorkflow')
         1 * output.showWorkflow('ACEseqWorkflow')
+
         0 * output.showWorkflow(_)
+        0 * output.showWorkflow(_, _)
     }
 
 }

@@ -37,6 +37,15 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
         createAnalysisForCrosschecking([:])
     }
 
+    SamplePair createSamplePair(Map properties = [:]) {
+        return DomainFactory.createSamplePairPanCan([
+                mergingWorkPackage1: DomainFactory.createMergingWorkPackage([
+                        seqType: SeqType.wholeGenomePairedSeqType,
+                        pipeline: DomainFactory.createPanCanPipeline(),
+                ])
+        ] + properties)
+    }
+
 
     void "samplePairWithoutCorrespondingConfigForPipelineAndSeqTypeAndProject, when some sample pairs have a config and some not some not, return project and seqtype of sample pairs without config"() {
         given:
@@ -237,22 +246,31 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
 
     void "handle, if samplePairs given, then return analysis and create output for the others"() {
         given:
+        DomainFactory.createAllAnalysableSeqTypes()
         MonitorOutputCollector output = Mock(MonitorOutputCollector)
         AbstractVariantCallingPipelineChecker pipelineChecker = Spy(createVariantCallingPipelineChecker().class)
 
         String processingStateMember = pipelineChecker.getProcessingStateMember()
 
         //sample pair with needs processing but no config
-        SamplePair samplePairWithoutConfig = DomainFactory.createSamplePairPanCan()
+        SamplePair samplePairWithUnsupportedSeqType = createSamplePair(
+                mergingWorkPackage1: DomainFactory.createMergingWorkPackage([
+                        seqType: DomainFactory.createSeqType(),
+                        pipeline: DomainFactory.createPanCanPipeline(),
+                ])
+        )
+
+        //sample pair with needs processing but no config
+        SamplePair samplePairWithoutConfig = createSamplePair()
 
         //disabled sample pair
-        SamplePair samplePairDisabled = DomainFactory.createSamplePairPanCan([
+        SamplePair samplePairDisabled = createSamplePair([
                 (processingStateMember): SamplePair.ProcessingStatus.DISABLED,
         ])
         createConfig(samplePairDisabled)
 
         //sample pair with needs processing and no config and running instance
-        SamplePair samplePairWithOldRunningInstance = DomainFactory.createSamplePairPanCan([
+        SamplePair samplePairWithOldRunningInstance = createSamplePair([
                 (processingStateMember): SamplePair.ProcessingStatus.NEEDS_PROCESSING,
         ])
         BamFilePairAnalysis oldRunningInstance = createAnalysis([
@@ -260,19 +278,19 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
         ])
 
         //sample pair waiting for start
-        SamplePair samplePairWaitingForStart = DomainFactory.createSamplePairPanCan([
+        SamplePair samplePairWaitingForStart = createSamplePair([
                 (processingStateMember): SamplePair.ProcessingStatus.NEEDS_PROCESSING,
         ])
         createConfig(samplePairWaitingForStart)
 
         //sample pair with no processing needed and no instance
-        SamplePair samplePairNotTriggered = DomainFactory.createSamplePairPanCan([
+        SamplePair samplePairNotTriggered = createSamplePair([
                 (processingStateMember): SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED,
         ])
         createConfig(samplePairNotTriggered)
 
         //sample pair with no processing needed and withdrawn analysis
-        SamplePair samplePairWithWithdrawnRunningAnalysis = DomainFactory.createSamplePairPanCan([
+        SamplePair samplePairWithWithdrawnRunningAnalysis = createSamplePair([
                 (processingStateMember): SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED,
         ])
         BamFilePairAnalysis runningWithdrawnAnalysis = createAnalysis([
@@ -282,7 +300,7 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
         runningWithdrawnAnalysis.save(flush: true)
 
         //sample pair with no processing needed and analysis running
-        SamplePair samplePairWithRunningAnalysis = DomainFactory.createSamplePairPanCan([
+        SamplePair samplePairWithRunningAnalysis = createSamplePair([
                 (processingStateMember): SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED,
         ])
         BamFilePairAnalysis runningAnalysis = createAnalysis([
@@ -290,7 +308,7 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
         ])
 
         //sample pair with no processing needed and withrawn analysis finished
-        SamplePair samplePairWithFinishedWithdrawnAnalysis = DomainFactory.createSamplePairPanCan([
+        SamplePair samplePairWithFinishedWithdrawnAnalysis = createSamplePair([
                 (processingStateMember): SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED,
         ])
         BamFilePairAnalysis finishedWithdrawnAnalysis = createAnalysis([
@@ -301,7 +319,7 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
         finishedWithdrawnAnalysis.save(flush: true)
 
         //sample pair with no processing needed and analysis finished
-        SamplePair samplePairWithFinishedAnalysis = DomainFactory.createSamplePairPanCan([
+        SamplePair samplePairWithFinishedAnalysis = createSamplePair([
                 (processingStateMember): SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED,
         ])
         BamFilePairAnalysis finishedAnalysis = createAnalysis([
@@ -311,6 +329,7 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
 
         List<SamplePair> samplePairs = [
                 samplePairDisabled,
+                samplePairWithUnsupportedSeqType,
                 samplePairWithoutConfig,
                 samplePairWithOldRunningInstance,
                 samplePairWaitingForStart,
@@ -324,7 +343,6 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
                 finishedAnalysis,
         ]
 
-
         when:
         List<SamplePair> result = pipelineChecker.handle(samplePairs, output)
 
@@ -332,6 +350,9 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
         1 * output.showWorkflow(_)
 
         finishedSamplePairs == result
+
+        then:
+        1 * output.showUniqueNotSupportedSeqTypes([samplePairWithUnsupportedSeqType], _)
 
         then:
         1 * pipelineChecker.samplePairWithoutCorrespondingConfigForPipelineAndSeqTypeAndProject(_)
@@ -364,6 +385,8 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
 
         then:
         1 * output.showFinished([finishedAnalysis])
+
+        0 * output._
     }
 
 }

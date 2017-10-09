@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.monitor
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.ngsdata.*
 
 class IndelCallingPipelineChecker extends AbstractVariantCallingPipelineChecker {
 
@@ -14,6 +15,10 @@ class IndelCallingPipelineChecker extends AbstractVariantCallingPipelineChecker 
 
     Pipeline.Type getPipelineType() {
         Pipeline.Type.INDEL
+    }
+
+    List<SeqType> getSeqTypes() {
+        SeqType.indelPipelineSeqTypes
     }
 
     Class<? extends BamFilePairAnalysis> getBamFilePairAnalysisClass() {

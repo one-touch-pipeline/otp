@@ -1,6 +1,8 @@
 package de.dkfz.tbi.otp.monitor
 
-import de.dkfz.tbi.otp.Comment
+import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.processing.*
 
 class MonitorOutputCollector {
@@ -14,16 +16,20 @@ class MonitorOutputCollector {
     public static final String HEADER_WAITING = 'The following objects are waiting'
     public static final String HEADER_RUNNING = 'The following objects are in processing'
     public static final String HEADER_FINISHED = 'The following objects are finished'
+    public static final String HEADER_NOT_SUPPORTED_SEQTYPES = 'The following SeqTypes are unsupported by this workflow'
 
 
     final boolean showFinishedEntries
+
+    final boolean showNotSupportedSeqTypes
 
 
     private List<String> output = []
 
 
-    MonitorOutputCollector(boolean showFinishedEntries = false) {
+    MonitorOutputCollector(boolean showFinishedEntries = false, boolean showNotSupportedSeqTypes = false) {
         this.showFinishedEntries = showFinishedEntries
+        this.showNotSupportedSeqTypes = showNotSupportedSeqTypes
     }
 
     MonitorOutputCollector leftShift(Object value) {
@@ -49,8 +55,16 @@ class MonitorOutputCollector {
         }
     }
 
-    void showWorkflow(String workflowName) {
+    void showWorkflow(String workflowName, boolean withSlots = true) {
         output << '\n' << workflowName
+        if (withSlots) {
+            long occupiedSlots = Process.countByFinishedAndJobExecutionPlan(false, JobExecutionPlan.findByName(workflowName))
+            long totalSlots = ProcessingOptionService.findOptionAsNumber(ProcessingOption.OptionName.MAXIMUM_NUMBER_OF_JOBS, workflowName, null, 0)
+            long fastTrackSlots = ProcessingOptionService.findOptionAsNumber(ProcessingOption.OptionName.MAXIMUM_NUMBER_OF_JOBS_RESERVED_FOR_FAST_TRACK, workflowName, null, 1)
+            long normalSlots = totalSlots - fastTrackSlots
+            output << "${INDENT}Used Slots: ${occupiedSlots}, Normal priority slots: ${normalSlots}, additional fasttrack slots: ${fastTrackSlots}"
+        }
+        output << ''
     }
 
 
@@ -77,10 +91,15 @@ ${prefix(objectsToStrings(objects, valueToShow).join('\n'))}
     }
 
 
+    void showUniqueNotSupportedSeqTypes(List objects, Closure valueToShow = { it }) {
+        if (showNotSupportedSeqTypes) {
+            showUniqueList(HEADER_NOT_SUPPORTED_SEQTYPES, objects, valueToShow)
+        }
+    }
+
     void showNotTriggered(List objects, Closure valueToShow = { it }) {
         showList(HEADER_NOT_TRIGGERED, objects, valueToShow)
     }
-
 
     void showShouldStart(List objects, Closure valueToShow = { it }) {
         showList(HEADER_SHOULD_START, objects, valueToShow)
@@ -97,8 +116,8 @@ ${prefix(objectsToStrings(objects, valueToShow).join('\n'))}
     }
 
     void showRunningWithHeader(String header, String workflow, List objects,
-                     Closure valueToShow = { it as String },
-                     Closure objectToCheck = { it }) {
+                               Closure valueToShow = { it as String },
+                               Closure objectToCheck = { it }) {
         showList(header, objects, valueToShow)
         addInfoAboutProcessErrors(workflow, objects, valueToShow, objectToCheck)
     }
@@ -129,7 +148,7 @@ ${prefix(objectsToStrings(objects, valueToShow).join('\n'))}
             output << "\n${INDENT}objects without process: ${noProcess}"
         }
         if (processWithError) {
-            output << "\n${INDENT}objects with error: ${processWithError}"
+            output << "\n${INDENT}objects with error: ${processWithError.join(', ')}"
         }
         output << ''
     }

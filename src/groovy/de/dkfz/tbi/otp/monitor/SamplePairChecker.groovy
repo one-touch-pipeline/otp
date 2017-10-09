@@ -33,7 +33,21 @@ class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
         if (!bamFiles) {
             return []
         }
-        output.showWorkflow("Sample pairs")
+        output.showWorkflow("Sample pairs", false)
+
+        List<SeqType> supportedSeqTypes = SeqType.allAnalysableSeqTypes
+
+        Map bamFileOfSupportedSeqType = bamFiles.groupBy {
+            supportedSeqTypes.contains(it.seqType)
+        }
+
+        if (bamFileOfSupportedSeqType[false]) {
+            output.showUniqueNotSupportedSeqTypes(bamFileOfSupportedSeqType[false], { AbstractBamFile abstractBamFile ->
+                "${abstractBamFile.seqType.displayNameWithLibraryLayout}"
+            })
+        }
+
+        bamFiles = bamFileOfSupportedSeqType[true] ?: []
 
         List<AbstractMergedBamFile> unknownDiseaseStatus = bamFilesWithoutCategory(bamFiles)
         output.showUniqueList(HEADER_UNKNOWN_DISEASE_STATUS, unknownDiseaseStatus, {

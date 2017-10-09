@@ -340,7 +340,7 @@ abstract class AbstractRoddyAlignmentCheckerIntegrationSpec extends Specificatio
         1 * output.showWorkflow(workflowName)
 
         then:
-        1 * output.showUniqueList(AbstractRoddyAlignmentChecker.HEADER_NOT_SUPPORTED_SEQTYPES, [wrongSeqType], _)
+        1 * output.showUniqueNotSupportedSeqTypes([wrongSeqType], _)
 
         then:
         1 * checker.seqTracksWithoutCorrespondingRoddyAlignmentConfig(_)

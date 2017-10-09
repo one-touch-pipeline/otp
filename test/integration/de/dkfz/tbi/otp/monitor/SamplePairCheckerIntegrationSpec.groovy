@@ -9,6 +9,24 @@ import spock.lang.*
 
 class SamplePairCheckerIntegrationSpec extends Specification {
 
+    SamplePair createSamplePair(Map properties = [:]) {
+        return DomainFactory.createSamplePairPanCan([
+                mergingWorkPackage1: DomainFactory.createMergingWorkPackage([
+                        seqType : SeqType.wholeGenomePairedSeqType,
+                        pipeline: DomainFactory.createDefaultOtpPipeline(),
+                ])
+        ] + properties)
+    }
+
+    ProcessedMergedBamFile createProcessedMergedBamFile(Map properties = [:]) {
+        return DomainFactory.createProcessedMergedBamFile([
+                workPackage: DomainFactory.createMergingWorkPackage([
+                        seqType : DomainFactory.createWholeGenomeSeqType(),
+                        pipeline: DomainFactory.createDefaultOtpPipeline(),
+                ])
+        ] + properties)
+    }
+
 
     void "bamFilesWithoutCategory, when some bam files has a category and some not, return only bam files without category"() {
         given:
@@ -230,62 +248,76 @@ class SamplePairCheckerIntegrationSpec extends Specification {
 
     void "handle, if bam files given, then return non waiting sample pairs and create output for the others"() {
         given:
+        DomainFactory.createAllAlignableSeqTypes()
         MonitorOutputCollector output = Mock(MonitorOutputCollector)
         SamplePairChecker samplePairChecker = Spy(SamplePairChecker)
 
-        AbstractBamFile unknownDiseaseStatus = DomainFactory.createProcessedMergedBamFile()
+        and: 'bam has not supported seq type'
+        AbstractBamFile unsupportedSeqType = DomainFactory.createProcessedMergedBamFile()
+
+        and: 'sample type has no disease state'
+        AbstractBamFile unknownDiseaseStatus = createProcessedMergedBamFile()
         DomainFactory.createProcessingThresholdsForBamFile(unknownDiseaseStatus)
 
-        AbstractBamFile ignoredDiseaseStatus = DomainFactory.createProcessedMergedBamFile()
+        and: 'sample type has disease state ignored'
+        AbstractBamFile ignoredDiseaseStatus = createProcessedMergedBamFile()
         DomainFactory.createSampleTypePerProjectForBamFile(ignoredDiseaseStatus, SampleType.Category.IGNORED)
         DomainFactory.createProcessingThresholdsForBamFile(ignoredDiseaseStatus)
 
-        AbstractBamFile unknownThreshold = DomainFactory.createProcessedMergedBamFile()
+        and: 'sample type has no threshold'
+        AbstractBamFile unknownThreshold = createProcessedMergedBamFile()
         DomainFactory.createSampleTypePerProjectForBamFile(unknownThreshold, SampleType.Category.DISEASE)
 
-        AbstractBamFile noSamplePairFound = DomainFactory.createProcessedMergedBamFile()
+        and: 'na sample pair exist for bam file'
+        AbstractBamFile noSamplePairFound = createProcessedMergedBamFile()
         DomainFactory.createSampleTypePerProjectForBamFile(noSamplePairFound, SampleType.Category.DISEASE)
         DomainFactory.createProcessingThresholdsForBamFile(noSamplePairFound)
 
-        AbstractBamFile missingDiseaseBamFile = DomainFactory.createProcessedMergedBamFile()
+        and: 'sample pair without disease bam file'
+        AbstractBamFile missingDiseaseBamFile = createProcessedMergedBamFile()
         DomainFactory.createSampleTypePerProjectForBamFile(missingDiseaseBamFile, SampleType.Category.CONTROL)
         DomainFactory.createProcessingThresholdsForBamFile(missingDiseaseBamFile)
         SamplePair missingDiseaseSamplePair = DomainFactory.createSamplePair([mergingWorkPackage2: missingDiseaseBamFile.mergingWorkPackage])
 
-        AbstractBamFile missingControlBamFile = DomainFactory.createProcessedMergedBamFile()
+        and: 'sample pair without control bam file'
+        AbstractBamFile missingControlBamFile = createProcessedMergedBamFile()
         DomainFactory.createSampleTypePerProjectForBamFile(missingControlBamFile, SampleType.Category.DISEASE)
         DomainFactory.createProcessingThresholdsForBamFile(missingControlBamFile)
         SamplePair missingControlSamplePair = DomainFactory.createSamplePair([mergingWorkPackage1: missingControlBamFile.mergingWorkPackage])
 
-        SamplePair thresholdSamplePair = DomainFactory.createSamplePair()
-        AbstractBamFile thresholdDiseaseBamFile = DomainFactory.createProcessedMergedBamFile(thresholdSamplePair.mergingWorkPackage1, [coverage: 10])
+        and: 'bam files of sample pair does not reached threshold'
+        SamplePair thresholdSamplePair = createSamplePair()
+        AbstractBamFile thresholdDiseaseBamFile = createProcessedMergedBamFile([workPackage: thresholdSamplePair.mergingWorkPackage1, coverage: 10])
         DomainFactory.createProcessingThresholdsForBamFile(thresholdDiseaseBamFile, [coverage: 50])
-        AbstractBamFile thresholdControlFile = DomainFactory.createProcessedMergedBamFile(thresholdSamplePair.mergingWorkPackage2, [coverage: 10])
+        AbstractBamFile thresholdControlFile = createProcessedMergedBamFile([workPackage: thresholdSamplePair.mergingWorkPackage2, coverage: 10])
         DomainFactory.createProcessingThresholdsForBamFile(thresholdControlFile, [coverage: 50])
         DomainFactory.createSampleTypePerProjectForBamFile(thresholdControlFile)
 
-        SamplePair fineSamplePair = DomainFactory.createSamplePair()
-        AbstractBamFile diseaseBamFile = DomainFactory.createProcessedMergedBamFile(fineSamplePair.mergingWorkPackage1, [
+        and: 'fine sample pair'
+        SamplePair fineSamplePair = createSamplePair()
+        AbstractBamFile diseaseBamFile = createProcessedMergedBamFile([
+                workPackage        : fineSamplePair.mergingWorkPackage1,
                 coverage           : 30,
                 numberOfMergedLanes: 2,
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
                 md5sum             : HelperUtils.randomMd5sum,
                 fileSize           : DomainFactory.counter++,
         ])
-        AbstractBamFile controlBamFile = DomainFactory.createProcessedMergedBamFile(fineSamplePair.mergingWorkPackage2, [
+        AbstractBamFile controlBamFile = createProcessedMergedBamFile([
+                workPackage        : fineSamplePair.mergingWorkPackage2,
                 coverage           : 30,
                 numberOfMergedLanes: 2,
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
                 md5sum             : HelperUtils.randomMd5sum,
                 fileSize           : DomainFactory.counter++,
         ])
-
         DomainFactory.createSampleTypePerProjectForBamFile(controlBamFile)
-
         DomainFactory.createProcessingThresholdsForBamFile(diseaseBamFile, [coverage: 10, numberOfLanes: 1])
         DomainFactory.createProcessingThresholdsForBamFile(controlBamFile, [coverage: 10, numberOfLanes: 1])
 
+        and: 'other preparing'
         List<AbstractMergedBamFile> bamFiles = [
+                unsupportedSeqType,
                 unknownDiseaseStatus,
                 ignoredDiseaseStatus,
                 unknownThreshold,
@@ -301,9 +333,12 @@ class SamplePairCheckerIntegrationSpec extends Specification {
         List<SamplePair> result = samplePairChecker.handle(bamFiles, output)
 
         then:
-        1 * output.showWorkflow(_)
+        1 * output.showWorkflow(_, _)
 
         samplePairs == result
+
+        then:
+        1 * output.showUniqueNotSupportedSeqTypes([unsupportedSeqType], _)
 
         then:
         1 * samplePairChecker.bamFilesWithoutCategory(_)
@@ -332,5 +367,7 @@ class SamplePairCheckerIntegrationSpec extends Specification {
             assert !blocked.empty
             assert blocked[0].samplePair == thresholdSamplePair
         }
+
+        0 * output._
     }
 }

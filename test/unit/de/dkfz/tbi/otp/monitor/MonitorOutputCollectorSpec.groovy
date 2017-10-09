@@ -1,8 +1,18 @@
 package de.dkfz.tbi.otp.monitor
 
 import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.job.plan.*
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.ngsdata.*
+import grails.test.mixin.*
 import spock.lang.*
 
+@Mock([
+        JobExecutionPlan,
+        Process,
+        ProcessingOption,
+])
 class MonitorOutputCollectorSpec extends Specification {
 
     void "leftShift, added value appear in output"() {
@@ -78,19 +88,43 @@ class MonitorOutputCollectorSpec extends Specification {
     }
 
 
-    void "showWorkflow, check that it is added with newlines before"() {
+    void "showWorkflow without slot information, check that it is added with newlines before"() {
         given:
         String workflowName = TestCase.createUniqueString()
         MonitorOutputCollector collector = new MonitorOutputCollector()
-        String expected = "\n\n${workflowName}"
+        String expected = "\n\n${workflowName}\n"
 
         when:
-        collector.showWorkflow(workflowName)
+        collector.showWorkflow(workflowName, false)
 
         then:
         expected == collector.getOutput()
     }
 
+    void "showWorkflow with slot information, check that it is added with newlines before"() {
+        given:
+        MonitorOutputCollector collector = new MonitorOutputCollector()
+        JobExecutionPlan plan = DomainFactory.createJobExecutionPlan()
+        DomainFactory.createProcessingOption([name: ProcessingOption.OptionName.MAXIMUM_NUMBER_OF_JOBS, type: plan.name, value: 50])
+        DomainFactory.createProcessingOption([name: ProcessingOption.OptionName.MAXIMUM_NUMBER_OF_JOBS_RESERVED_FOR_FAST_TRACK, type: plan.name, value: 20])
+
+        and: 'jobs already finished'
+        3.times {
+            DomainFactory.createProcess([jobExecutionPlan: plan, finished: true])
+        }
+
+        and: 'running jobs'
+        7.times {
+            DomainFactory.createProcess([jobExecutionPlan: plan, finished: false])
+        }
+        String expected = "\n\n${plan.name}\n    Used Slots: 7, Normal priority slots: 30, additional fasttrack slots: 20\n"
+
+        when:
+        collector.showWorkflow(plan.name)
+
+        then:
+        expected == collector.getOutput()
+    }
 
     @Unroll
     void "showList, add list name and values of list as expected (#listName)"() {

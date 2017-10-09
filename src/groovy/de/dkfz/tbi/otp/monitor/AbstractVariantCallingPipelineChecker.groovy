@@ -28,9 +28,22 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
 
         output.showWorkflow(getWorkflowName())
 
+        List<SeqType> supportedSeqTypes = getSeqTypes()
+
+        Map samplePaarSupportedSeqType = samplePairs.groupBy {
+            supportedSeqTypes.contains(it.seqType)
+        }
+
+        if (samplePaarSupportedSeqType[false]) {
+            output.showUniqueNotSupportedSeqTypes(samplePaarSupportedSeqType[false], { SamplePair samplePair ->
+                "${samplePair.seqType.displayNameWithLibraryLayout}"
+            })
+        }
+
+        samplePairs = samplePaarSupportedSeqType[true] ?: []
 
         List<SamplePair> noConfig = samplePairWithoutCorrespondingConfigForPipelineAndSeqTypeAndProject(samplePairs)
-        output.showUniqueList(HEADER_NO_CONFIG, noConfig, {SamplePair samplePair -> "${samplePair.project} ${samplePair.seqType.name} ${samplePair.seqType.libraryLayout}"})
+        output.showUniqueList(HEADER_NO_CONFIG, noConfig, { SamplePair samplePair -> "${samplePair.project} ${samplePair.seqType.name} ${samplePair.seqType.libraryLayout}" })
 
         List<SamplePair> samplePairsWithConfig = samplePairs - noConfig
 
@@ -57,11 +70,13 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
 
             List<BamFilePairAnalysis> analysis = lastAnalysisForSamplePair(noProcessingNeeded)
 
-            Map<AnalysisProcessingStates,Map<Boolean, BamFilePairAnalysis>> analysisStateMap = analysis.groupBy([{BamFilePairAnalysis it ->
-                it.processingState
-            }, { BamFilePairAnalysis it ->
+            Map<AnalysisProcessingStates, Map<Boolean, BamFilePairAnalysis>> analysisStateMap = analysis.groupBy([
+                    { BamFilePairAnalysis it ->
+                        it.processingState
+                    }, { BamFilePairAnalysis it ->
                 it.isWithdrawn()
-            }])
+                    },
+            ])
 
             output.showList(HEADER_WITHDRAWN_ANALYSIS_RUNNING, analysisStateMap[AnalysisProcessingStates.IN_PROGRESS]?.get(true))
 
@@ -183,6 +198,8 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
     abstract String getProcessingStateMember()
 
     abstract Pipeline.Type getPipelineType()
+
+    abstract List<SeqType> getSeqTypes()
 
     abstract Class<? extends BamFilePairAnalysis> getBamFilePairAnalysisClass()
 

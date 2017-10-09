@@ -7,9 +7,6 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 abstract class AbstractRoddyAlignmentChecker extends PipelinesChecker<SeqTrack> {
 
-    static final String HEADER_NOT_SUPPORTED_SEQTYPES =
-            'The following SeqTypes are unsupported by this plugin'
-
     static final String HEADER_NO_CONFIG =
             'For the following project seqtype combination no config is defined'
 
@@ -51,7 +48,7 @@ abstract class AbstractRoddyAlignmentChecker extends PipelinesChecker<SeqTrack> 
         }
 
         if (seqTrackMap[false]) {
-            output.showUniqueList(HEADER_NOT_SUPPORTED_SEQTYPES, seqTrackMap[false], { SeqTrack seqTrack ->
+            output.showUniqueNotSupportedSeqTypes(seqTrackMap[false], { SeqTrack seqTrack ->
                 "${seqTrack.seqType.displayNameWithLibraryLayout}"
             })
         }

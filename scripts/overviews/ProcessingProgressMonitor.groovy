@@ -12,12 +12,13 @@ The following code allows to show the processing state for
 ** waiting/running alignments
 *** seqtracks which belong to run segments where flag 'align' is set to false are ignored
 *** running OTP alignments (WGS, WES)
-*** running roddy alignments (WGS, WES, WGBS, RNA) (if not withdrawn)
+*** running roddy alignments (WGS, WES, WGBS, RNA, ChipSeq) (if not withdrawn)
 ** running variant calling (snv, indel, ...) (if not withdrawn)
 ** waiting variant calling (snv, indel, ...) if
 *** a config is available
 *** the last bam file is not withdrawn
 *** the last bam file is in processing or has reached the threshold
+*** depending analysis is finished
 
 
 Entries are trimmed (spaces before after are removed)
@@ -71,9 +72,12 @@ boolean allProcessed = false
 //flag if for all workflows the finished entries should be shown
 boolean showFinishedEntries = false
 
+//flag if for all workflows the finished entries should be shown
+boolean showUnsupportedSeqTypes = false
+
 //==================================================
 
-MonitorOutputCollector output = new MonitorOutputCollector(showFinishedEntries)
+MonitorOutputCollector output = new MonitorOutputCollector(showFinishedEntries, showUnsupportedSeqTypes)
 
 SeqType exomePaired = SeqType.exomePairedSeqType
 List<SeqType> allignableSeqtypes = SeqType.allAlignableSeqTypes
@@ -204,7 +208,7 @@ def findAlignable = { List<SeqTrack> seqTracks ->
 
 
 def handleStateMap = {Map map, String workflow, Closure valueToShow, Closure objectToCheck = {it} ->
-    output << "\n${workflow}: "
+    output.showWorkflow(workflow)
     def ret
     def keys = map.keySet().sort{it}
 
@@ -625,20 +629,20 @@ if (allProcessed) {
 
     def needsProcessing = { String property, Pipeline.Type type ->
         return """
-            (
-                samplePair.${property} = '${SamplePair.ProcessingStatus.NEEDS_PROCESSING}'
-                and exists (
-                    select
-                        config
-                    from
-                        ConfigPerProject config
-                    where
-                        config.project = samplePair.mergingWorkPackage1.sample.individual.project
-                        and config.seqType = samplePair.mergingWorkPackage1.seqType
-                        and config.pipeline.type = '${type}'
-                        and config.obsoleteDate is null
-                )
-            )"""
+                (
+                    samplePair.${property} = '${SamplePair.ProcessingStatus.NEEDS_PROCESSING}'
+                    and exists (
+                        select
+                            config
+                        from
+                            ConfigPerProject config
+                        where
+                            config.project = samplePair.mergingWorkPackage1.sample.individual.project
+                            and config.seqType = samplePair.mergingWorkPackage1.seqType
+                            and config.pipeline.type = '${type}'
+                            and config.obsoleteDate is null
+                    )
+                )"""
     }
 
     def bamFileInProgressingOrThresouldReached = { String number ->
@@ -675,7 +679,18 @@ if (allProcessed) {
             ${needsProcessing('snvProcessingStatus', Pipeline.Type.SNV)}
             or ${needsProcessing('indelProcessingStatus', Pipeline.Type.INDEL)}
             or ${needsProcessing('sophiaProcessingStatus', Pipeline.Type.SOPHIA)}
-            or ${needsProcessing('aceseqProcessingStatus', Pipeline.Type.ACESEQ)}
+            or (
+                ${needsProcessing('aceseqProcessingStatus', Pipeline.Type.ACESEQ)}
+                and exists (
+                    select
+                        sophiaInstance
+                    from
+                        SophiaInstance sophiaInstance
+                    where
+                        sophiaInstance.samplePair = samplePair
+                        and sophiaInstance.processingState = '${AnalysisProcessingStates.FINISHED}'
+                )
+            )
         )
         ${bamFileInProgressingOrThresouldReached('1')}
         ${bamFileInProgressingOrThresouldReached('2')}
