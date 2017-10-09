@@ -1,5 +1,4 @@
 package de.dkfz.tbi.otp.ngsdata
-
 /**
  * This class represents a ChipSeq seq Track
  *
@@ -16,7 +15,7 @@ class ChipSeqSeqTrack extends SeqTrack {
     }
 
     static belongsTo = [
-        antibodyTarget: AntibodyTarget
+            antibodyTarget: AntibodyTarget
     ]
 
     public String toString() {

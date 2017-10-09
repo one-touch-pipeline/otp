@@ -1,5 +1,4 @@
 package de.dkfz.tbi.otp.ngsdata
-
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.processing.*
@@ -10,8 +9,6 @@ import java.text.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.*
-
-
 /*
  * In the GUI and e-mails sent by OTP this shall be called "Lane", even if it is only part of a multiplexed physical
  * lane. An explaining tooltip should be provided. (Decided together with the OTP Product Owner on 2016-07-19.)
@@ -120,13 +117,11 @@ class SeqTrack implements ProcessParameterObject, Entity {
         Sample,
         SeqType,
         LibraryPreparationKit,
-
     ]
 
     static hasMany = [
             logMessages: LogMessage
     ]
-
     static constraints = {
         laneId(validator: { OtpPath.isValidPathComponent(it) })
         hasOriginalBam()

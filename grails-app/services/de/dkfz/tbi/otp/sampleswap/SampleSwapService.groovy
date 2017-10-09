@@ -1,8 +1,11 @@
 package de.dkfz.tbi.otp.sampleswap
 
 import de.dkfz.tbi.otp.ngsdata.*
+import grails.plugin.springsecurity.*
 
 class SampleSwapService {
+
+    SpringSecurityService springSecurityService
 
     Map getPropertiesForSampleSwap(SeqTrack seqTrack) {
         assert seqTrack
@@ -49,11 +52,21 @@ class SampleSwapService {
             it.sampleSwapInfos.sort { a, b ->
                 a.key <=> b.key ?: a.level.getValue() <=> b.level.getValue()
             }
+
         }
         if (data.comment == "") {
             data.data << new SampleSwapData(new SampleSwapInfo('', '', '', 'comment', 'Comment is not allowed to be empty', SampleSwapLevel.ERROR))
         }
+
         return data
+    }
+
+    void doSwap(Map data) {
+        SwapInfo swapInfo = new SwapInfo(user: springSecurityService.getCurrentUser(), comment: data.comment, descriptionOfChanges: "")
+        data.data.each { SampleSwapData it ->
+            swapInfo.descriptionOfChanges += it.getSampleSwapInfosAsString()
+            assert swapInfo.addToSeqTracks(SeqTrack.get(it.seqTrackId)).save(flush: true)
+        }
     }
 
     private List validateAntibodyTarget(SampleSwapData data) {
@@ -164,5 +177,9 @@ class SampleSwapData {
             }
         }
         return output
+    }
+
+    String getSampleSwapInfosAsString() {
+        return sampleSwapInfos*.description.join(", ")
     }
 }
