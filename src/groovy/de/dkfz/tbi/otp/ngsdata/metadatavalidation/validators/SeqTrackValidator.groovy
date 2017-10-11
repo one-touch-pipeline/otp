@@ -211,11 +211,11 @@ class SeqTrackValidator extends ColumnSetValidator<MetadataValidationContext> im
     }
 
     static Set<Cell> seqTrackCells(Collection<RowWithExtractedValues> rows) {
-        return rows*.runName*.cells.sum() + rows*.laneNumber*.cells.sum() + rows*.barcode*.cells.sum()
+        return rows*.runName*.cells.flatten() + rows*.laneNumber*.cells.flatten() + rows*.barcode*.cells.flatten()
     }
 
     static Set<Cell> mateCells(Collection<RowWithExtractedValues> rows) {
-        return seqTrackCells(rows) + (Set<Cell>) rows*.mateNumber.findAll()*.cells.sum()
+        return seqTrackCells(rows) + (Set<Cell>) rows*.mateNumber.findAll()*.cells.flatten()
     }
 }
 
