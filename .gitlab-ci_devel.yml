@@ -7,6 +7,7 @@ variables:
 stages:
   - build
   - test
+  - war
 
 compile:
   stage: build
@@ -19,7 +20,11 @@ unit tests:
   before_script:
     - echo 'otp.testing.group=othergroup' > /home/grails/.otp.properties
   script:
-    - 'grails test-app unit:'
+    - 'grails test-app unit: -xml'
+  artifacts:
+    paths:
+      - target/test-reports/*.xml
+    expire_in: 1 weeks
 
 integration tests:
   stage: test
@@ -27,8 +32,12 @@ integration tests:
   before_script:
     - echo 'otp.testing.group=othergroup' > /home/grails/.otp.properties
   script:
-    - 'grails test-app integration:'
-        
+    - 'grails test-app integration: -xml'
+  artifacts:
+    paths:
+      - target/test-reports/*.xml
+    expire_in: 1 weeks
+
 codenarc:
   stage: test
   script:
@@ -39,4 +48,20 @@ codenarc:
   artifacts:
     paths:
       - target/CodeNarc-Report.xml
-    expire_in: 2 weeks
+    expire_in: 1 weeks
+
+war:
+  stage: war
+  image: otp-tests
+  before_script:
+    - echo 'otp.testing.group=othergroup' > /home/grails/.otp.properties
+    - mkdir -p logs/jobs
+  script:
+    - 'grails war'
+    - md5sum "target/otp.war" | tee "target/otp.war.md5"
+    - sha256sum "target/otp.war" | tee "target/otp.war.sha256"
+    - git rev-parse HEAD | tee "target/otp.war.gitrev"
+  artifacts:
+    paths:
+      - target/otp.war*
+    expire_in: 1 weeks
