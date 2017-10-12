@@ -24,7 +24,7 @@
             </tr>
             <tr>
                 <td class="myKey"><g:message code="createProject.phabricatorAlias"/></td>
-                <td><g:textField name="name" size="130" value="${cmd.phabricatorAlias}"/></td>
+                <td><g:textField name="phabricatorAlias" size="130" value="${cmd.phabricatorAlias}"/></td>
             </tr>
             <tr>
                 <td class="myKey"><g:message code="createProject.directory"/></td>
