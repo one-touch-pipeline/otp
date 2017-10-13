@@ -97,6 +97,8 @@ class ProjectConfigController {
                 processingPriorities: ProjectService.processingPriorities,
                 checkSophiaReferenceGenome: checkSophiaReferenceGenome,
                 checkAceseqReferenceGenome: checkAceseqReferenceGenome,
+                hasErrors: params.hasErrors,
+                message: params.message,
         ]
     }
 

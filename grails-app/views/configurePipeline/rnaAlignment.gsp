@@ -7,10 +7,12 @@
     <asset:javascript src="pages/configurePipeline/alignment/configureAlignment.js"/>
     <asset:javascript src="modules/editorSwitch"/>
 </head>
-
 <body>
 <div class="body">
-    <h1><g:message code="configurePipeline.rnaAlignment.title" args="[project.name, seqType.displayName]"/></h1>
+    <h1 style="display: inline"><g:message code="configurePipeline.rnaAlignment.title" args="[project.name, seqType.displayName]"/></h1>
+    <g:form controller="projectConfig" style="display: inline; float: right">
+        <g:submitButton name="back" value="Back to Overview"/>
+    </g:form>
     <g:if test="${hasErrors == 'true'}">
         <div class="errors"><li>${message}</li></div>
     </g:if>
@@ -20,13 +22,6 @@
     <g:else>
         <div class="empty"><br></div>
     </g:else>
-    <g:if test="${lastRoddyConfig}">
-        <h2><g:message code="configurePipeline.alignment.configFile.invalid"/></h2>
-        <g:form controller="configurePipeline" action="rnaAlignmentConfigInvalid"
-                params='["project.id": project.id, "seqType.id": seqType.id]'>
-            <g:submitButton name="invalidConfig" value="Invalid Config"/>
-        </g:form>
-    </g:if>
     <h2><g:message code="configurePipeline.alignment.configFile"/></h2>
     <g:message code="configurePipeline.alignment.info.config.rna"/>
     <g:form controller="configurePipeline" action="rnaAlignmentConfig"
@@ -153,18 +148,16 @@
             </tr>
         </table>
     </g:form>
-
     <g:if test="${lastRoddyConfig}">
         <h2><g:message code="configurePipeline.last.config"/></h2>
+        <g:form controller="configurePipeline" action="invalidateConfig"
+                params='["project.id": project.id, "seqType.id": seqType.id, "pipeline.id": pipeline.id, "originAction": actionName]'>
+            <g:submitButton name="invalidateConfig" value="Invalidate Config"/>
+        </g:form>
         <code style="white-space: pre-wrap">
             ${lastRoddyConfig}
         </code>
     </g:if>
-
-    <br>
-    <g:form controller="projectConfig">
-        <g:submitButton name="back" value="Back to Overview"/>
-    </g:form>
 </div>
 <asset:script>
     $(function() {

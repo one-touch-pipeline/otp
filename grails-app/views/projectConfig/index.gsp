@@ -11,6 +11,12 @@
 </head>
 <body>
     <div class="body">
+        <g:if test="${hasErrors == true}">
+            <div class="errors"> <li>${message}</li></div>
+        </g:if>
+        <g:elseif test="${message}">
+            <div class="message">${message}</div>
+        </g:elseif>
         <div id="projectCommentBox" class="commentBoxContainer">
             <div id="commentLabel">Comment:</div>
             <sec:ifNotGranted roles="ROLE_OPERATOR">

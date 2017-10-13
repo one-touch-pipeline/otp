@@ -314,7 +314,7 @@ class ProjectService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void alignmentConfigInvalid(Project project, SeqType seqType, Pipeline pipeline) {
+    void invalidateProjectConfig(Project project, SeqType seqType, Pipeline pipeline) {
         RoddyWorkflowConfig roddyWorkflowConfig = RoddyWorkflowConfig.getLatestForProject(project, seqType, pipeline)
         if (roddyWorkflowConfig) {
             roddyWorkflowConfig.makeObsolete()

@@ -36,12 +36,15 @@ class ConfigurePipelineController {
                     adapterTrimmingNeeded: cmd.adapterTrimmingNeeded,
             ])
             projectService.configurePanCanAlignmentDeciderProject(panCanAlignmentConfiguration)
-            redirect(controller: "projectConfig")
+
+            result << [message: 'The config settings were saved successfully']
+            redirect(controller: "projectConfig", params: result)
         }
 
         if (cmd.copy) {
             projectService.copyPanCanAlignmentXml(cmd.basedProject, cmd.seqType, cmd.project)
-            redirect(controller: "projectConfig")
+            result << [message: 'The config settings were copied successfully']
+            redirect(controller: "projectConfig", params: result)
         }
 
         String defaultPluginName = ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_ALIGNMENT_PLUGIN_NAME, cmd.seqType.roddyName, null)
@@ -62,6 +65,7 @@ class ConfigurePipelineController {
         assert MergeConstants.ALL_MERGE_TOOLS.containsAll(allMergeTools)
         assert ReferenceGenome.findByName(defaultReferenceGenome)
 
+        result << params
         result << getValues(cmd.project, cmd.seqType, pipeline)
 
         String referenceGenome = ReferenceGenomeProjectSeqType.findByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(cmd.project, cmd.seqType)?.referenceGenome?.name ?: defaultReferenceGenome
@@ -71,6 +75,7 @@ class ConfigurePipelineController {
 
         result << [
                 projects                : projects,
+                pipeline                : pipeline,
 
                 referenceGenome         : referenceGenome,
                 referenceGenomes        : referenceGenomes,
@@ -161,6 +166,7 @@ class ConfigurePipelineController {
 
         result << [
                 projects                : projects,
+                pipeline                : pipeline,
                 toolNames               : getToolNames(),
 
                 referenceGenome         : referenceGenome,
@@ -217,23 +223,6 @@ class ConfigurePipelineController {
             projectService.configureRnaAlignmentConfig(rnaAlignmentConfiguration)
             result << [message: 'The config settings were saved successfully']
         }
-
-        forward(action: "rnaAlignment", params: result)
-    }
-
-    def rnaAlignmentConfigInvalid(BaseConfigurePipelineSubmitCommand cmd) {
-        boolean hasErrors = cmd.hasErrors()
-        Map result = [hasErrors: hasErrors]
-
-        if (hasErrors) {
-            FieldError errors = cmd.errors.getFieldError()
-            result << [message: "'${errors.getRejectedValue()}' is not a valid value for '${errors.getField()}'. Error code: '${errors.code}'"]
-
-        } else {
-            projectService.alignmentConfigInvalid(cmd.project, cmd.seqType, Pipeline.Name.RODDY_RNA_ALIGNMENT.pipeline)
-            result << [message: 'Marking the config settings as invalid was successful.']
-        }
-
         forward(action: "rnaAlignment", params: result)
     }
 
@@ -261,7 +250,6 @@ class ConfigurePipelineController {
             projectService.configureRnaAlignmentReferenceGenome(rnaConfiguration)
             result << [message: 'The reference genome settings were saved successfully']
         }
-
         forward(action: "rnaAlignment", params: result)
     }
 
@@ -304,7 +292,6 @@ class ConfigurePipelineController {
         return createAnalysisConfig(cmd, pipeline, defaultPluginName, defaultPluginVersion, defaultBaseProjectConfig)
     }
 
-
     def indel(ConfigurePipelineSubmitCommand cmd) {
         Pipeline pipeline = Pipeline.Name.RODDY_INDEL.pipeline
 
@@ -335,6 +322,21 @@ class ConfigurePipelineController {
         return createAnalysisConfig(cmd, pipeline, defaultPluginName, defaultPluginVersion, defaultBaseProjectConfig)
     }
 
+    def invalidateConfig(InvalidateConfigurationCommand cmd) {
+        boolean hasErrors = cmd.hasErrors()
+        Map result = [hasErrors: hasErrors]
+
+        if (hasErrors) {
+            FieldError errors = cmd.errors.getFieldError()
+            result << [message: "'${errors.getRejectedValue()}' is not a valid value for '${errors.getField()}'. Error code: '${errors.code}'"]
+            forward(action: cmd.originAction, params: result)
+        } else {
+            projectService.invalidateProjectConfig(cmd.project, cmd.seqType, cmd.pipeline)
+            result << [message: 'Successfully invalidated the config']
+            redirect(controller: "projectConfig", params: result)
+        }
+    }
+
     private Map createAnalysisConfig(ConfigurePipelineSubmitCommand cmd, Pipeline pipeline, String defaultPluginName, String defaultPluginVersion, String defaultBaseProjectConfig) {
         Map result = checkErrorsIfSubmitted(cmd, pipeline)
         if (!result) {
@@ -361,12 +363,17 @@ class ConfigurePipelineController {
                     projectService.configureSophiaPipelineProject(configuration)
                     break
             }
-            redirect(controller: "projectConfig")
+
+            result << [message: "The config settings were saved successfully"]
+            redirect(controller: "projectConfig", params: result)
         }
 
+        result << params
         result << getValues(cmd.project, cmd.seqType, pipeline)
 
         result << [
+                pipeline                : pipeline,
+
                 pluginName              : defaultPluginName,
                 defaultPluginName       : defaultPluginName,
 
@@ -382,7 +389,6 @@ class ConfigurePipelineController {
     private static Map checkErrorsIfSubmitted(ConfigurePipelineSubmitCommand cmd, Pipeline pipeline) {
         boolean hasErrors = false
         String message = ""
-
         if (cmd.submit) {
             hasErrors = cmd.hasErrors()
             boolean duplicateConfigVersion = false
@@ -442,7 +448,6 @@ class ConfigurePipelineController {
                 lastRoddyConfig: lastRoddyConfig,
         ]
     }
-
 
     private List getToolNames() {
         List<String> toolNames = ToolName.findAllByTypeAndNameNotIlike(ToolName.Type.RNA, "GENOME_STAR_INDEX%")*.name
@@ -554,6 +559,18 @@ class ConfigurePipelineSubmitCommand extends BaseConfigurePipelineSubmitCommand 
 
     void setConfig(String config) {
         this.config = config?.trim()?.replaceAll(" +", " ")
+    }
+}
+
+
+@ToString(includeNames = true, includeSuper = true)
+class InvalidateConfigurationCommand extends BaseConfigurePipelineSubmitCommand {
+    Pipeline pipeline
+    String originAction
+
+    static constraints = {
+        pipeline(nullable: false)
+        originAction(nullable: false)
     }
 }
 

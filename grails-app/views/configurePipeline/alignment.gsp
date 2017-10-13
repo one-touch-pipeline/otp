@@ -9,7 +9,19 @@
 </head>
 <body>
     <div class="body">
-        <h1><g:message code="configurePipeline.alignment.title" args="[project.name, seqType.displayName]"/></h1>
+        <h1 style="display: inline"><g:message code="configurePipeline.alignment.title" args="[project.name, seqType.displayName]"/></h1>
+        <g:form controller="projectConfig" style="display: inline; float: right">
+            <g:submitButton name="back" value="Back to Overview"/>
+        </g:form>
+        <g:if test="${hasErrors == true}">
+            <div class="errors"> <li>${message}</li></div>
+        </g:if>
+        <g:elseif test="${message}">
+            <div class="message">${message}</div>
+        </g:elseif>
+        <g:else>
+            <div class="empty"><br></div>
+        </g:else>
         <g:if test="${projects}">
             <g:form controller="configurePipeline" action="alignment"
                     params='["project.id": project.id, "seqType.id": seqType.id]'>
@@ -19,16 +31,8 @@
                           from='${projects}' optionKey='id' optionValue='name'/>
                 <g:submitButton name="copy" value="Copy"/>
             </g:form>
+            <br>
         </g:if>
-        <g:if test="${hasErrors}">
-            <div class="errors"> <li>${message}</li></div>
-        </g:if>
-        <g:elseif test="${message}">
-            <div class="message">${message}</div>
-        </g:elseif>
-        <g:else>
-            <div class="empty"><br></div>
-        </g:else>
         <g:message code="configurePipeline.alignment.info"/>
         <g:form controller="configurePipeline" action="alignment" params='["project.id": project.id, "seqType.id": seqType.id]'>
             <table class="alignmentTable">
@@ -115,7 +119,11 @@
             </table>
         </g:form>
         <g:if test="${lastRoddyConfig}">
-            <g:message code="configurePipeline.last.config"/>
+            <h2><g:message code="configurePipeline.last.config"/></h2>
+            <g:form controller="configurePipeline" action="invalidateConfig"
+                    params='["project.id": project.id, "seqType.id": seqType.id, "pipeline.id": pipeline.id, "originAction": actionName]'>
+                <g:submitButton name="invalidateConfig" value="Invalidate Config"/>
+            </g:form>
             <code style="white-space: pre-wrap">
                 ${lastRoddyConfig}
             </code>
