@@ -46,9 +46,9 @@ class JobMailService {
         }
         Collection<SeqTrack> seqTracks = object.containedSeqTracks
         String ilseNumbers = seqTracks*.ilseSubmission*.ilseNumber.unique().sort().join(', ')
-        Collection<OtrsTicket> openTickets = seqTracks ? trackingService.findAllOtrsTickets(seqTracks).findAll { OtrsTicket otrsTicket ->
+        Collection<String> openTickets = seqTracks ? trackingService.findAllOtrsTickets(seqTracks).findAll { OtrsTicket otrsTicket ->
             !otrsTicket.finalNotificationSent
-        } : []
+        }*.getUrl() : []
 
         List<ClusterJob> clusterJobs = ClusterJob.findAllByProcessingStep(step)
         List<ClusterJobIdentifier> clusterJobIdentifiers = ClusterJobIdentifier.asClusterJobIdentifierList(clusterJobs)

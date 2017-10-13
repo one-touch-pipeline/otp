@@ -22,11 +22,27 @@ class JobMailServiceIntegrationSpec extends Specification {
         given:
         JobStatusLoggingService jobStatusLoggingService = new JobStatusLoggingService()
 
+        OtrsTicket otrsTicket = DomainFactory.createOtrsTicket()
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
         seqTrack.project.processingPriority = processingPriority
+        seqTrack.ilseSubmission = DomainFactory.createIlseSubmission()
         seqTrack.save(flush: true)
 
+        DomainFactory.createDataFile([
+                seqTrack: seqTrack,
+                runSegment: DomainFactory.createRunSegment([
+                        otrsTicket: otrsTicket
+                ])
+        ])
+
         Realm realm = DomainFactory.createRealmDataProcessing(temporaryFolder.newFolder(), [name: seqTrack.project.realmName])
+
+        DomainFactory.createProcessingOption([
+                name: ProcessingOption.OptionName.TICKET_SYSTEM_URL,
+                type: null,
+                value: "http:/localhost:8080"
+        ])
+        String url = otrsTicket.getUrl()
 
         DomainFactory.createProcessingOptionForErrorRecipient()
         ProcessingStep step = DomainFactory.createProcessingStepUpdate().processingStep
@@ -66,11 +82,12 @@ class JobMailServiceIntegrationSpec extends Specification {
         JobMailService jobMailService = new JobMailService([
                 mailHelperService      : Mock(MailHelperService) {
                     1 * sendEmail(_, _, _) >> { String emailSubject, String content, List<String> recipients ->
-                        println content
                         assert emailSubject.startsWith(processingPriority >= ProcessingPriority.FAST_TRACK_PRIORITY ? "FASTTRACK ERROR:" : "ERROR:")
                         assert emailSubject.contains("${step.jobExecutionPlan.name} ${step.processParameterObject.individual.displayName} ${step.processParameterObject.project.name}")
                         assert content.contains('\nWorkflow:\n')
                         assert content.contains('\nOTP Job:\n')
+                        assert content.contains("\n  ilseNumbers: ${seqTrack.ilseSubmission.ilseNumber}\n")
+                        assert content.contains("\n  openTickets: ${url}\n")
                         assert (failedCount > 0) == content.contains('\nCluster Job:\n')
                         completedClusterJobs.each {
                             assert !content.contains("clusterId: ${it.clusterJobId}")
