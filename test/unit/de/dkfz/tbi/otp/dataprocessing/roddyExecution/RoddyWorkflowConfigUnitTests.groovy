@@ -251,21 +251,10 @@ public class RoddyWorkflowConfigUnitTests {
     @Test
     void testGetNameUsedInConfig_withConfigVersion_shouldBeCorrect() {
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig()
-        String expected = "${roddyWorkflowConfig.pipeline.name}_${roddyWorkflowConfig.seqType.roddyName}_${roddyWorkflowConfig.pluginVersion}_${roddyWorkflowConfig.configVersion}"
+        String expected = "${roddyWorkflowConfig.pipeline.name}_${roddyWorkflowConfig.seqType.roddyName}_${roddyWorkflowConfig.seqType.libraryLayout}_${roddyWorkflowConfig.pluginVersion}_${roddyWorkflowConfig.configVersion}"
 
         assert expected == roddyWorkflowConfig.nameUsedInConfig
     }
-
-    @Test
-    void testGetNameUsedInConfig_withoutConfigVersion_shouldThrowException() {
-        RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig(configVersion: null)
-
-        TestCase.shouldFailWithMessageContaining(AssertionError, 'Config version is not set') {
-            roddyWorkflowConfig.nameUsedInConfig
-        }
-    }
-
-
 
     @Test
     void testValidateConfig_shouldBeValid() {

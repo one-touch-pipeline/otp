@@ -307,7 +307,7 @@ class ProjectConfigController {
             String adapterTrimming = it.sampleType ? "" :
                     it.seqType.isWgbs() || it.seqType.isWgbs() ?:
                             RoddyWorkflowConfig.getLatestForProject(project, it.seqType, Pipeline.findByName(Pipeline.Name.PANCAN_ALIGNMENT))?.adapterTrimmingNeeded
-            [it.seqType.name, it.sampleType?.name, it.referenceGenome.name, it.statSizeFileName ?: "", adapterTrimming]
+            [it.seqType.name, it.seqType.libraryLayout, it.sampleType?.name, it.referenceGenome.name, it.statSizeFileName ?: "", adapterTrimming]
         }
         dataToRender.iTotalRecords = data.size()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords

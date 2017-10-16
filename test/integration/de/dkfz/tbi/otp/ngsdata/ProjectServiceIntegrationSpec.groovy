@@ -1045,8 +1045,8 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         DomainFactory.createRealmDataProcessing(temporaryFolder.newFolder(), [name: realm.name])
         Project basedProject = DomainFactory.createProject(name: 'basedTestProjectAlignment', realmName: realm.name, alignmentDeciderBeanName: 'basedTest')
 
-        File tempFile = temporaryFolder.newFile("PANCAN_ALIGNMENT_WES_1.1.51_v1_0.xml")
-        CreateFileHelper.createRoddyWorkflowConfig(tempFile, "PANCAN_ALIGNMENT_WES_pluginVersion:1.1.51_v1_0")
+        File tempFile = temporaryFolder.newFile("PANCAN_ALIGNMENT_WES_PAIRED_1.1.51_v1_0.xml")
+        CreateFileHelper.createRoddyWorkflowConfig(tempFile, "PANCAN_ALIGNMENT_WES_PAIRED_pluginVersion:1.1.51_v1_0")
 
         Pipeline pipeline = CollectionUtils.exactlyOneElement(Pipeline.findAllByTypeAndName(
                 Pipeline.Type.ALIGNMENT,

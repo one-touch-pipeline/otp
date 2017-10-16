@@ -1520,13 +1520,14 @@ class DomainFactory {
         return [
                 pipeline: pipeline,
                 seqType: seqType,
-                configFilePath: {"${TestCase.uniqueNonExistentPath}/${pipeline.name.name()}_${seqType.roddyName}_${pluginVersion.substring(pluginVersion.indexOf(':') + 1)}_${configVersion}.xml"},
+                configFilePath: {"${TestCase.uniqueNonExistentPath}/${pipeline.name.name()}_${seqType.roddyName}_${seqType.libraryLayout}_${pluginVersion.substring(pluginVersion.indexOf(':') + 1)}_${configVersion}.xml"},
                 pluginVersion: pluginVersion,
                 configVersion: configVersion,
                 project: { properties.individual?.project ?: createProject() },
                 dateCreated: {new Date()},
                 lastUpdated: {new Date()},
                 adapterTrimmingNeeded: {seqType.isWgbs() || seqType.isRna() || seqType.isChipSeq()},
+                nameUsedInConfig: RoddyWorkflowConfig.getNameUsedInConfig(pipeline.name, seqType, pluginVersion, configVersion)
         ]
     }
 

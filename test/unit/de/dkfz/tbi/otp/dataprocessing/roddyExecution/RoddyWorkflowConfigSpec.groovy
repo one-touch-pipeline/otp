@@ -178,7 +178,7 @@ class RoddyWorkflowConfigSpec extends Specification {
         String fileName = RoddyWorkflowConfig.getConfigFileName(workflowName, seqType, PLUGIN_VERSION, CONFIG_VERSION)
 
         then:
-        fileName ==~ /${workflowName.name()}_${seqType.roddyName}_${PLUGIN_VERSION}_${CONFIG_VERSION}.xml/
+        fileName ==~ /${workflowName.name()}_${seqType.roddyName}_${seqType.libraryLayout}_${PLUGIN_VERSION}_${CONFIG_VERSION}.xml/
     }
 
     @Unroll
@@ -245,7 +245,7 @@ class RoddyWorkflowConfigSpec extends Specification {
         given:
         Pipeline.Name pipelineName = Pipeline.Name.PANCAN_ALIGNMENT
         SeqType seqType = DomainFactory.createSeqType(roddyName: RODDY_NAME)
-        String expected = "${pipelineName.name()}_${seqType.roddyName}_${PLUGIN_VERSION}_${CONFIG_VERSION}"
+        String expected = "${pipelineName.name()}_${seqType.roddyName}_${seqType.libraryLayout}_${PLUGIN_VERSION}_${CONFIG_VERSION}"
 
         when:
         String name = RoddyWorkflowConfig.getNameUsedInConfig(pipelineName, seqType, PLUGIN_VERSION, CONFIG_VERSION)

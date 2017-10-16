@@ -30,7 +30,7 @@ class RoddyWorkflowConfig extends ConfigPerProject implements AlignmentConfig {
      * the full path to the config file which is used in this project and pipeline. The name of the config file contains the version number.
      *
      * The file should be located in: $OTP_ROOT_PATH/$Project/configFiles/${Pipeline}/
-     * The file should be named as: ${Pipeline}_${seqType.roddyName}_${PluginVersion}_${configVersion}.xml
+     * The file should be named as: ${Pipeline}_${seqType.roddyName}_${seqType.libraryLayout}_${PluginVersion}_${configVersion}.xml
      *
      * for example: $OTP_ROOT_PATH/$PROJECT/configFiles/PANCAN_ALIGNMENT/PANCAN_ALIGNMENT_WES_1.0.177_v1_0.xml
      */
@@ -39,6 +39,8 @@ class RoddyWorkflowConfig extends ConfigPerProject implements AlignmentConfig {
     String pluginVersion
 
     String configVersion
+
+    String nameUsedInConfig
 
     /**
      * In general this field should not be used but only in cases where the standard configuration does not fit.
@@ -84,6 +86,7 @@ class RoddyWorkflowConfig extends ConfigPerProject implements AlignmentConfig {
                 !id || id == config.id
             }
         }
+        nameUsedInConfig nullable: true, blank: true
         individual nullable: true, validator: { Individual val, RoddyWorkflowConfig obj ->
             return val == null || val.project == obj.project
         }
@@ -121,6 +124,7 @@ class RoddyWorkflowConfig extends ConfigPerProject implements AlignmentConfig {
                 configVersion: configVersion,
                 individual: individual,
                 adapterTrimmingNeeded: adapterTrimmingNeeded,
+                nameUsedInConfig: getNameUsedInConfig(pipeline.name, seqType, pluginVersionToUse, configVersion)
         )
         config.validateConfig()
         config.createConfigPerProject()
@@ -153,7 +157,7 @@ class RoddyWorkflowConfig extends ConfigPerProject implements AlignmentConfig {
     void validateConfig() {
         File configFile = configFilePath as File
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(configFile)
-        String pattern = /^${Pattern.quote(pipeline.name.name())}_${Pattern.quote(seqType.roddyName)}_(.+)_${Pattern.quote(configVersion)}\.xml$/
+        String pattern = /^${Pattern.quote(pipeline.name.name())}_${Pattern.quote(seqType.roddyName)}_${Pattern.quote(seqType.libraryLayout)}_(.+)_${Pattern.quote(configVersion)}\.xml$/
         Matcher matcher = configFile.name =~ pattern
         assert matcher.matches(): "The file name '${configFile.name}' does not match the pattern '${pattern}'"
         assert pluginVersion.endsWith(":${matcher.group(1)}")
@@ -164,22 +168,17 @@ class RoddyWorkflowConfig extends ConfigPerProject implements AlignmentConfig {
         }
     }
 
-    String getNameUsedInConfig() {
-        assert configVersion != null : 'Config version is not set'
-        return getNameUsedInConfig(pipeline.name, seqType, pluginVersion, configVersion)
-    }
-
     static String getNameUsedInConfig(Pipeline.Name pipelineName, SeqType seqType, String pluginNameAndVersion, String configVersion) {
         assert pipelineName
         assert seqType
         assert pluginNameAndVersion
         assert configVersion
 
-        return "${pipelineName.name()}_${seqType.roddyName}_${pluginNameAndVersion}_${configVersion}"
+        return "${pipelineName.name()}_${seqType.roddyName}_${seqType.libraryLayout}_${pluginNameAndVersion}_${configVersion}"
     }
 
     static String getNameUsedInConfig(Pipeline.Name pipelineName, SeqType seqType, String pluginName, String pluginVersion, String configVersion) {
-        getNameUsedInConfig(pipelineName, seqType, "${pluginName}:${pluginVersion}", configVersion)
+        return getNameUsedInConfig(pipelineName, seqType, "${pluginName}:${pluginVersion}", configVersion)
     }
 
     static File getStandardConfigDirectory(Project project, Pipeline.Name pipelineName) {

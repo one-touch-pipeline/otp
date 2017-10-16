@@ -277,6 +277,7 @@
             <otp:dataTable
                 codes="${[
                     'projectOverview.index.referenceGenome.sequenceTypeName',
+                    'projectOverview.index.referenceGenome.libraryLayout',
                     'projectOverview.index.referenceGenome.sampleTypeName',
                     'projectOverview.index.referenceGenome',
                     'projectOverview.index.statSizeFile',
