@@ -25,8 +25,6 @@ class CreateNotificationTextService {
 
     LsdfFilesService lsdfFilesService
 
-    MergedAlignmentDataFileService mergedAlignmentDataFileService
-
     ProjectOverviewService projectOverviewService
 
     ProcessingOptionService processingOptionService
@@ -135,7 +133,6 @@ class CreateNotificationTextService {
         }.sort().collect { String sample, List<SeqTrack> seqTracksOfSample ->
             "${sample}${getSampleIdentifiers(seqTracksOfSample)}"
         }.join('\n')
-        String directories = getMergingDirectories(seqTracks)
 
         Collection<AbstractMergedBamFile> allGoodBamFiles =
                 status.mergingWorkPackageProcessingStatuses*.completeProcessableBamFileInProjectFolder
@@ -145,6 +142,8 @@ class CreateNotificationTextService {
                 }
 
         String links = createOtpLinks(allGoodBamFiles*.project, 'alignmentQualityOverview', 'index')
+
+        String directories = getMergingDirectories(allGoodBamFiles)
 
         Map<Project, List<AbstractMergedBamFile>> bamFilesByProject = allGoodBamFiles.groupBy { it.project }
         boolean multipleProject = bamFilesByProject.size() > 1
@@ -331,24 +330,18 @@ class CreateNotificationTextService {
         }.unique().sort()*.path.join('\n')
     }
 
-    String getMergingDirectories(List<SeqTrack> seqTracks) {
-        assert seqTracks
+    String getMergingDirectories(List<AbstractBamFile> bamFiles) {
+        assert bamFiles
+        String pid = '${PID}'
+        String sampleType = '${SAMPLE_TYPE}'
 
-        return seqTracks.collect {
-            Sample fakeSample = new Sample(
-                    individual: new Individual(
-                            project: it.sample.project,
-                            pid: '_OTP_PID',
-                    ),
-                    sampleType: new SampleType() {
-                        @Override
-                        String getDirName() {
-                            return '_OTP_SAMPLE_TYPE'
-                        }
-                    },
-            )
-            LsdfFilesService.normalizePathForCustomers(new OtpPath(it.project, mergedAlignmentDataFileService.buildRelativePath(it.seqType, fakeSample)).absoluteDataManagementPath)
-        }.unique().sort()*.path.join('\n').replace('_OTP_PID', '${PID}').replace('_OTP_SAMPLE_TYPE', '${SAMPLE_TYPE}')
+        return bamFiles.collect {
+            String projectDir = it.project.projectDirectory
+            String seqTypeDir = it.seqType.dirName
+            String layout = it.seqType.libraryLayoutDirName
+            String antiBodyTarget = it.seqType.isChipSeq() ? '-${ANTI_BODY_TARGET}' : ''
+            LsdfFilesService.normalizePathForCustomers("${projectDir}/sequencing/${seqTypeDir}/view-by-pid/${pid}/${sampleType}${antiBodyTarget}/${layout}/merged-alignment").absolutePath
+        }.unique().sort().join('\n')
     }
 
     String variantCallingDirectories(List<SamplePair> samplePairsFinished, ProcessingStep notificationStep) {

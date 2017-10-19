@@ -14,6 +14,8 @@ import spock.lang.*
 import static de.dkfz.tbi.otp.tracking.OtrsTicket.ProcessingStep.*
 
 @Mock([
+        AntibodyTarget,
+        ChipSeqSeqTrack,
         DataFile,
         FileType,
         Individual,
@@ -330,39 +332,40 @@ class CreateNotificationTextServiceSpec extends Specification {
     }
 
 
-    void "getMergingDirectories, when seqTracks is null, throw assert"() {
+    void "getMergingDirectories, when bamFiles is null, throw assert"() {
         when:
         new CreateNotificationTextService().getMergingDirectories(null)
 
         then:
         AssertionError e = thrown()
-        e.message.contains('assert seqTracks')
+        e.message.contains('assert bamFiles')
     }
 
 
     void "getMergingDirectories, when paths do not start with icgc, then the paths should not be changed"() {
         given:
-        SeqTrack seqTrack1 = DomainFactory.createSeqTrackWithTwoDataFiles()
-        SeqTrack seqTrack2 = DomainFactory.createSeqTrackWithTwoDataFiles()
-        // seqTrack3 has the same path with placeholders as seqTrack1
-        SeqTrack seqTrack3 = DomainFactory.createSeqTrackWithTwoDataFiles(
-                sample: DomainFactory.createSample(
-                        individual: DomainFactory.createIndividual(
-                                project: seqTrack1.project,
-                        ),
-                ),
-                seqType: seqTrack1.seqType,
-        )
-        Realm realm1 = DomainFactory.createRealmDataManagement(name: seqTrack1.project.realmName)
-        Realm realm2 = DomainFactory.createRealmDataManagement(name: seqTrack2.project.realmName)
+        RoddyBamFile roddyBamFile1 = DomainFactory.createRoddyBamFile()
+        RoddyBamFile roddyBamFile2 = DomainFactory.createRoddyBamFile()
+        // roddyBamFile3 has the same path with placeholders as roddyBamFile1
+        RoddyBamFile roddyBamFile3 = DomainFactory.createRoddyBamFile([
+                workPackage: DomainFactory.createMergingWorkPackage([
+                        sample: DomainFactory.createSample([
+                                individual: DomainFactory.createIndividual([
+                                        project: roddyBamFile1.project,
+                                ]),
+                        ]),
+                        seqType: roddyBamFile1.seqType,
+                        pipeline: roddyBamFile1.pipeline,
+                ])
+        ])
+        Realm realm1 = DomainFactory.createRealmDataManagement(name: roddyBamFile1.project.realmName)
+        Realm realm2 = DomainFactory.createRealmDataManagement(name: roddyBamFile2.project.realmName)
 
         when:
-        String fileNameString = new CreateNotificationTextService(
-                mergedAlignmentDataFileService: new MergedAlignmentDataFileService(),
-        ).getMergingDirectories([seqTrack1, seqTrack2, seqTrack3])
+        String fileNameString = new CreateNotificationTextService().getMergingDirectories([roddyBamFile1,roddyBamFile2,roddyBamFile3])
         String expected = [
-                new File("${realm1.rootPath}/${seqTrack1.project.dirName}/sequencing/${seqTrack1.seqType.dirName}/view-by-pid/\${PID}/\${SAMPLE_TYPE}/${seqTrack1.seqType.libraryLayoutDirName}/merged-alignment"),
-                new File("${realm2.rootPath}/${seqTrack2.project.dirName}/sequencing/${seqTrack2.seqType.dirName}/view-by-pid/\${PID}/\${SAMPLE_TYPE}/${seqTrack2.seqType.libraryLayoutDirName}/merged-alignment"),
+                new File("${realm1.rootPath}/${roddyBamFile1.project.dirName}/sequencing/${roddyBamFile1.seqType.dirName}/view-by-pid/\${PID}/\${SAMPLE_TYPE}/${roddyBamFile1.seqType.libraryLayoutDirName}/merged-alignment"),
+                new File("${realm2.rootPath}/${roddyBamFile2.project.dirName}/sequencing/${roddyBamFile2.seqType.dirName}/view-by-pid/\${PID}/\${SAMPLE_TYPE}/${roddyBamFile2.seqType.libraryLayoutDirName}/merged-alignment"),
         ].sort().join('\n')
 
         then:
@@ -372,17 +375,33 @@ class CreateNotificationTextServiceSpec extends Specification {
 
     void "getMergingDirectories, when path starts with icgc, then the path should be changed to start with lsdf"() {
         given:
-        SeqTrack seqTrack = DomainFactory.createSeqTrackWithTwoDataFiles()
+        RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
         DomainFactory.createRealmDataManagement([
-                name    : seqTrack.project.realmName,
+                name    : roddyBamFile.project.realmName,
                 rootPath: LsdfFilesService.MOUNTPOINT_WITH_ICGC
         ])
 
         when:
-        String fileNameString = new CreateNotificationTextService(
-                mergedAlignmentDataFileService: new MergedAlignmentDataFileService(),
-        ).getMergingDirectories([seqTrack])
-        String expected = new File("${LsdfFilesService.MOUNTPOINT_WITH_LSDF}/${seqTrack.project.dirName}/sequencing/${seqTrack.seqType.dirName}/view-by-pid/\${PID}/\${SAMPLE_TYPE}/${seqTrack.seqType.libraryLayoutDirName}/merged-alignment").path
+        String fileNameString = new CreateNotificationTextService().getMergingDirectories([roddyBamFile])
+        String expected = new File("${LsdfFilesService.MOUNTPOINT_WITH_LSDF}/${roddyBamFile.project.dirName}/sequencing/${roddyBamFile.seqType.dirName}/view-by-pid/\${PID}/\${SAMPLE_TYPE}/${roddyBamFile.seqType.libraryLayoutDirName}/merged-alignment").path
+
+        then:
+        expected == fileNameString
+    }
+
+    void "getMergingDirectories, when seqtype is chipseq, then the path should contain antibody"() {
+        given:
+        RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile([
+                workPackage: DomainFactory.createMergingWorkPackage([
+                        seqType : DomainFactory.createChipSeqType(),
+                        pipeline: DomainFactory.createPanCanPipeline(),
+                ])
+        ])
+        Realm realm = DomainFactory.createRealmDataManagement([name: roddyBamFile.project.realmName])
+
+        when:
+        String fileNameString = new CreateNotificationTextService().getMergingDirectories([roddyBamFile])
+        String expected = new File("${realm.rootPath}/${roddyBamFile.project.dirName}/sequencing/${roddyBamFile.seqType.dirName}/view-by-pid/\${PID}/\${SAMPLE_TYPE}-\${ANTI_BODY_TARGET}/${roddyBamFile.seqType.libraryLayoutDirName}/merged-alignment").path
 
         then:
         expected == fileNameString
@@ -448,9 +467,7 @@ class CreateNotificationTextServiceSpec extends Specification {
 
     void "getSamplePairRepresentation, when empty sample pair list, should return empty string"() {
         when:
-        String samplePairs = new CreateNotificationTextService(
-                mergedAlignmentDataFileService: new MergedAlignmentDataFileService(),
-        ).getSamplePairRepresentation([])
+        String samplePairs = new CreateNotificationTextService().getSamplePairRepresentation([])
 
         then:
         '' == samplePairs
@@ -463,9 +480,7 @@ class CreateNotificationTextServiceSpec extends Specification {
         SamplePair samplePair2 = DomainFactory.createSamplePair()
 
         when:
-        String samplePairs = new CreateNotificationTextService(
-                mergedAlignmentDataFileService: new MergedAlignmentDataFileService(),
-        ).getSamplePairRepresentation([samplePair1, samplePair2])
+        String samplePairs = new CreateNotificationTextService().getSamplePairRepresentation([samplePair1, samplePair2])
         String expectedSamplePair = [
                 "${samplePair1.individual.displayName} ${samplePair1.sampleType1.displayName} ${samplePair1.sampleType2.displayName} ${samplePair1.seqType.displayNameWithLibraryLayout}",
                 "${samplePair2.individual.displayName} ${samplePair2.sampleType1.displayName} ${samplePair2.sampleType2.displayName} ${samplePair2.seqType.displayNameWithLibraryLayout}",
@@ -520,7 +535,6 @@ class CreateNotificationTextServiceSpec extends Specification {
                 },
                 configService: new ConfigService(),
                 lsdfFilesService: new LsdfFilesService(),
-                mergedAlignmentDataFileService: new MergedAlignmentDataFileService(),
         )
 
         List<SeqTrack> seqTracks = [data1.seqTrack]
@@ -609,7 +623,6 @@ ${expectedAlign}"""
                 linkGenerator: Mock(LinkGenerator) {
                     projectCount * link(_) >> 'link'
                 },
-                mergedAlignmentDataFileService: new MergedAlignmentDataFileService(),
         )
 
         List<SeqTrack> seqTracks = [data1.seqTrack]
@@ -738,7 +751,6 @@ ${expectedVariantCallingRunning}${expectedVariantCallingNotRunning}"""
                 linkGenerator: Mock(LinkGenerator) {
                     projectCount * link(_) >> 'link'
                 },
-                mergedAlignmentDataFileService: new MergedAlignmentDataFileService(),
         )
 
         List<SamplePair> samplePairWithAnalysis = [data1.samplePair]
