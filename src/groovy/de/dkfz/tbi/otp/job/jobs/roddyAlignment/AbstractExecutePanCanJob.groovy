@@ -11,8 +11,6 @@ import java.util.regex.*
 
 abstract class AbstractExecutePanCanJob<R extends RoddyResult> extends AbstractRoddyJob<R> {
 
-    public static final Pattern READ_GROUP_PATTERN = Pattern.compile(/^@RG\s+ID:([^\s]+)\s/)
-
     @Autowired
     ReferenceGenomeService referenceGenomeService
 

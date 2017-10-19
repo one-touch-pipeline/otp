@@ -4,7 +4,6 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
-import de.dkfz.tbi.otp.job.processing.ExecutionService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 import grails.test.mixin.*
@@ -47,24 +46,6 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
 
     @Rule
     TemporaryFolder temporaryFolder
-
-    void setup() {
-        DomainFactory.createProcessingOption(
-                name: ProcessingOption.OptionName.COMMAND_LOAD_MODULE_LOADER,
-                type: null,
-                value: "load load",
-        )
-        DomainFactory.createProcessingOption(
-                name: ProcessingOption.OptionName.COMMAND_SAMTOOLS,
-                type: null,
-                value: "samtools",
-        )
-        DomainFactory.createProcessingOption(
-                name: ProcessingOption.OptionName.COMMAND_ACTIVATION_SAMTOOLS,
-                type: null,
-                value: "load samtools",
-        )
-    }
 
 
     void "prepareAndReturnAlignmentCValues, when RoddyBamFile is null, throw assert"() {
@@ -153,11 +134,8 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
             0 * ensureCorrectBaseBamFileIsOnFileSystem(_)
 
         }
-        Realm realm = DomainFactory.createRealmDataProcessing()
         RoddyBamFile roddyBamFile = Mock(RoddyBamFile) {
-            getProject() >> new Project(
-                    realmName: realm.name
-            )
+            getProject() >> new Project()
         }
 
         when:
@@ -333,35 +311,36 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
         noExceptionThrown()
     }
 
+    private static String createMinimalSamFile(Collection<String> readGroup) {
+        """\
+        |@HD\tVN:1.5\tSO:coordinate
+        |@SQ\tSN:ref\tLN:45
+        |${readGroup.collect {"@RG\tID:${it}\tLB:2_TTAGGC\tSM:sample_tumor_123"}.join('\n')}
+        |r001\t99\tref\t7\t30\t8M2I4M1D3M\t=\t37\t39\tTTAGATAAAGGATACTG\t*
+        |r002\t0\tref\t9\t30\t3S6M1P1I4M\t*\t0\t0\tAAAAGATAAGGATA\t*
+        |r003\t0\tref\t9\t30\t5S6M\t*\t0\t0\tGCCTAAGCTAA\t*\tSA:Z:ref,29,-,6H5M,17,0;
+        |r004\t0\tref\t16\t30\t6M14N5M\t*\t0\t0\tATAGCTTCAGC\t*
+        |r003\t2064\tref\t29\t17\t6H5M\t*\t0\t0\tTAGGC\t*\tSA:Z:ref,9,+,5S6M,30,1;
+        |r001\t147\tref\t37\t30\t9M\t=\t7\t-39\tCAGCGGCAT\t*\tNM:i:1
+        |""".stripMargin()
+    }
 
     void "validateReadGroups, when read groups are not as expected, throw an exception"() {
         given:
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
-        Realm realm = DomainFactory.createRealmDataManagement(temporaryFolder.newFolder(), [name: roddyBamFile.project.realmName])
+        DomainFactory.createRealmDataManagement(temporaryFolder.newFolder(), [name: roddyBamFile.project.realmName])
         DomainFactory.createRealmDataProcessing(temporaryFolder.newFolder(), [name: roddyBamFile.project.realmName])
 
-        String readGroupHeaders = roddyBamFile.containedSeqTracks.collect {
-            "@RG     ID:${it.getReadGroupName()}        LB:tumor_123    PL:ILLUMINA     SM:sample_tumor_123"
-        }.join('\n') + '\n'
+        roddyBamFile.workBamFile.parentFile.mkdirs()
+        roddyBamFile.workBamFile.text = createMinimalSamFile(roddyBamFile.containedSeqTracks*.getReadGroupName())
 
         SeqTrack seqTrack = DomainFactory.createSeqTrackWithTwoDataFiles(roddyBamFile.mergingWorkPackage)
         roddyBamFile.seqTracks.add(seqTrack)
         roddyBamFile.numberOfMergedLanes++
         roddyBamFile.save()
 
-        String expectedCommand = """\
-            set -o pipefail
-            load load
-            load samtools
-            samtools view -H ${roddyBamFile.workBamFile} | grep ^@RG\\\\s
-            """.stripIndent()
-
         AbstractRoddyAlignmentJob abstractRoddyAlignmentJob = Spy(AbstractRoddyAlignmentJob) {
             getConfigService() >> new ConfigService()
-            getExecutionService() >>
-                    Mock(ExecutionService) {
-                        executeCommand(realm, expectedCommand) >> readGroupHeaders
-                    }
         }
 
         String expectedErrorMessage = """\
@@ -384,7 +363,7 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
     void "validateReadGroups, when read groups are fine, return without exception"() {
         given:
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
-        Realm realm = DomainFactory.createRealmDataManagement(temporaryFolder.newFolder(), [name: roddyBamFile.project.realmName])
+        DomainFactory.createRealmDataManagement(temporaryFolder.newFolder(), [name: roddyBamFile.project.realmName])
         DomainFactory.createRealmDataProcessing(temporaryFolder.newFolder(), [name: roddyBamFile.project.realmName])
 
         SeqTrack seqTrack = DomainFactory.createSeqTrackWithTwoDataFiles(roddyBamFile.mergingWorkPackage)
@@ -392,25 +371,12 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
         roddyBamFile.numberOfMergedLanes++
         roddyBamFile.save()
 
-        String readGroupHeaders = roddyBamFile.containedSeqTracks.collect {
-            "@RG     ID:${it.getReadGroupName()}        LB:tumor_123    PL:ILLUMINA     SM:sample_tumor_123"
-        }.join('\n') + '\n'
-
-        String expectedCommand = """\
-            set -o pipefail
-            load load
-            load samtools
-            samtools view -H ${roddyBamFile.workBamFile} | grep ^@RG\\\\s
-            """.stripIndent()
+        roddyBamFile.workBamFile.parentFile.mkdirs()
+        roddyBamFile.workBamFile.text = createMinimalSamFile(roddyBamFile.containedSeqTracks*.getReadGroupName())
 
         AbstractRoddyAlignmentJob abstractRoddyAlignmentJob = Spy(AbstractRoddyAlignmentJob) {
             getConfigService() >> new ConfigService()
-            getExecutionService() >>
-                    Mock(ExecutionService) {
-                        executeCommand(realm, expectedCommand) >> readGroupHeaders
-                    }
         }
-
 
         when:
         abstractRoddyAlignmentJob.validateReadGroups(roddyBamFile)

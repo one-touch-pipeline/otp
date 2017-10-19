@@ -35,6 +35,7 @@ grails.project.dependency.resolution = {
         compile "com.github.broadinstitute:picard:1.134"
         // bedUtils
         compile 'bedUtils:bedUtils:0.7'
+        compile 'com.github.samtools:htsjdk:2.12.0'
 
         // general dependencies
         compile "commons-logging:commons-logging:1.2"  // LogThreadLocal.withThreadLog requires version >= 1.0.4

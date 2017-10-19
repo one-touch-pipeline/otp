@@ -7,6 +7,8 @@ import org.joda.time.*
 import org.junit.*
 import org.springframework.beans.factory.annotation.*
 
+import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
+
 public class RoddySnvCallingStartJobTests {
 
     private static long ARBITRARY_TIMESTAMP = 1337
@@ -20,7 +22,7 @@ public class RoddySnvCallingStartJobTests {
     void test_ConfigClass_Config_Instance() {
         snvTestData = new SnvCallingInstanceTestData()
         snvTestData.createSnvObjects()
-        DomainFactory.createProcessingOption(name: 'TIME_ZONE', type: null, value: 'Europe/Berlin')
+        DomainFactory.createProcessingOption(name: TIME_ZONE, type: null, value: 'Europe/Berlin')
 
         try {
             SamplePair samplePair = snvTestData.samplePair

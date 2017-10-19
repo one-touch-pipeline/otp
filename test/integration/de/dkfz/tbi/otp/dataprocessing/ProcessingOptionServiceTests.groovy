@@ -18,7 +18,6 @@ class ProcessingOptionServiceTests {
         ProcessingOption option = new ProcessingOption(
             name: NAME,
             value: VALUE,
-            comment: "test"
         )
         assertNotNull(option.save(flush: true))
     }

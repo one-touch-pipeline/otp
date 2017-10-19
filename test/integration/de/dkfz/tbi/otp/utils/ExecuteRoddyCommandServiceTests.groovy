@@ -46,8 +46,8 @@ class ExecuteRoddyCommandServiceTests {
         DomainFactory.createProcessingOption([
                 name: OptionName.OTP_USER_LINUX_GROUP,
                 value: TestConfigHelper.testingGroup(grailsApplication),
-                ]
-        )
+                type: null,
+        ])
 
         roddyPath = new File(ProcessingOptionService.getValueOfProcessingOption(OptionName.RODDY_PATH))
         roddyCommand = new File(roddyPath, 'roddy.sh')

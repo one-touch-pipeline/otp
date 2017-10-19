@@ -3,9 +3,9 @@ package de.dkfz.tbi.otp.dataprocessing
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
 import org.springframework.security.access.prepost.*
 
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 import static org.springframework.util.Assert.*
 
 class ProcessingOptionService {
@@ -74,12 +74,12 @@ class ProcessingOptionService {
     }
 
     private static ProcessingOption findStrict(OptionName name, String type, Project project) {
-        return ProcessingOption.findWhere(
+        return singleElement(ProcessingOption.findAllWhere(
             name: name,
             type: type,
             project: project,
             dateObsoleted: null
-        )
+        ), true)
     }
 
     public static String findOption(OptionName name, String type, Project project) {
@@ -121,7 +121,9 @@ class ProcessingOptionService {
      * If there is more than one or none ProcessingOption found by the query an Error is thrown.
      */
     static String getValueOfProcessingOption(OptionName name) {
-        return CollectionUtils.exactlyOneElement(ProcessingOption.findAllByNameAndDateObsoleted(name, null)).value
+        ProcessingOption processingOption = findStrict(name, null, null)
+        assert processingOption : "Collection contains 0 elements"
+        return processingOption.value
     }
 
     /**
@@ -130,6 +132,8 @@ class ProcessingOptionService {
      */
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public List<ProcessingOption> listProcessingOptions() {
-        return ProcessingOption.findAllByDateObsoletedIsNull()
+        ProcessingOption.findAllByDateObsoletedIsNull().findAll {
+            !OptionName.class.getField(it.name.name()).isAnnotationPresent(Deprecated)
+        }
     }
 }

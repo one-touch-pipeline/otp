@@ -40,7 +40,6 @@ class ProcessingOption implements Entity {
         PIPELINE_RODDY_ALIGNMENT_BWA_PATHS("Path to bwa_mem", null, Type.PATH),
         PIPELINE_RODDY_ALIGNMENT_SAMBAMBA_PATHS("Path to sambamba", null, Type.PATH),
         PIPELINE_RODDY_ALIGNMENT_GENOME_STAR_INDEX("Default genome star index", null, Type.SINGLE_LINE_TEXT),
-        COMMAND_ACTIVATION_SAMTOOLS("command to enable the module containing samtools (executed in Bash, may be empty if not required)", "", Type.SINGLE_LINE_TEXT),
         COMMAND_SAMTOOLS("samtools (Tools for alignments in the SAM format)", null, Type.SINGLE_LINE_TEXT),
 
         PIPELINE_OTP_ALIGNMENT_BWA_NUMBER_OF_CORES("number of cores/threads", null, Type.SINGLE_LINE_TEXT),
@@ -131,7 +130,10 @@ class ProcessingOption implements Entity {
         GUI_CONTACT_DATA_POSTAL_ADDRESS("", null, Type.SINGLE_LINE_TEXT),
         GUI_CONTACT_DATA_OPERATED_BY("", null, Type.SINGLE_LINE_TEXT),
         GUI_SHOW_PARTNERS("", null, Type.BOOLEAN),
-        GUI_ABOUT_OTP("", null, Type.MULTI_LINE_TEXT)
+        GUI_ABOUT_OTP("", null, Type.MULTI_LINE_TEXT),
+
+        @Deprecated
+        COMMAND_ACTIVATION_SAMTOOLS("command to enable the module containing samtools (executed in Bash, may be empty if not required)", "", Type.SINGLE_LINE_TEXT),
 
 
         private final String description

@@ -2,8 +2,7 @@ package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
-
-import java.util.regex.*
+import htsjdk.samtools.*
 
 import static de.dkfz.tbi.otp.ngsdata.LsdfFilesService.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
@@ -93,27 +92,12 @@ abstract class AbstractRoddyAlignmentJob extends AbstractExecutePanCanJob<RoddyB
 
     void validateReadGroups(RoddyBamFile bamFile) {
         File bamFilePath = bamFile.workBamFile
-        String samtoolsCommand = ProcessingOptionService.findOption(ProcessingOption.OptionName.COMMAND_SAMTOOLS, null, null)
-        String samtoolsActivation = ProcessingOptionService.findOption(ProcessingOption.OptionName.COMMAND_ACTIVATION_SAMTOOLS, null, null)
-        String moduleLoader = ProcessingOptionService.findOption(ProcessingOption.OptionName.COMMAND_LOAD_MODULE_LOADER, null, null)
 
-        List<String> readGroupsInBam = executionService.executeCommand(configService.getRealmDataManagement(bamFile.project), """\
-                    set -o pipefail
-                    ${moduleLoader}
-                    ${samtoolsActivation}
-                    ${samtoolsCommand} view -H ${bamFilePath} | grep ^@RG\\\\s
-                    """.stripIndent()
-        ).split('\n').findAll { it != "" }.collect {
-            Matcher matcher = READ_GROUP_PATTERN.matcher(it)
-            if (!matcher.find()) {
-                throw new RuntimeException("Line does not match expected @RG pattern: ${it}")
-            }
-            return matcher.group(1)
-        }.sort()
+        final SamReaderFactory factory = SamReaderFactory.makeDefault()
+                .enable(SamReaderFactory.Option.VALIDATE_CRC_CHECKSUMS)
+        List<String> readGroupsInBam = factory.getFileHeader(bamFilePath).getReadGroups().collect { it.id }.sort()
 
-        List<String> expectedReadGroups = bamFile.containedSeqTracks.collect {
-            it.getReadGroupName()
-        }.sort()
+        List<String> expectedReadGroups = bamFile.containedSeqTracks.collect { it.getReadGroupName() }.sort()
 
         if (readGroupsInBam != expectedReadGroups) {
             throw new RuntimeException("""Read groups in BAM file are not as expected.

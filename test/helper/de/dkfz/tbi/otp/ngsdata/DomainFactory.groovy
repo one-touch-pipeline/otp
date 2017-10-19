@@ -360,7 +360,6 @@ class DomainFactory {
     public static ProcessingOption createProcessingOption(Map properties = [:]) {
         return createDomainObject(ProcessingOption, [
                 name: OptionName.PIPELINE_RODDY_SNV_PLUGIN_NAME,
-                type: "processingOptionType_${counter++}",
                 value:  "processingOptionValue_${counter++}",
         ], properties)
     }
