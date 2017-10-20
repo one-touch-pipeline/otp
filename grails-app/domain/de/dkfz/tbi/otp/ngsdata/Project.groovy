@@ -72,7 +72,7 @@ class Project implements Commentable, Entity, AlignmentConfig {
                 return 'this name is already used in another project as nameInMetadataFiles entry'
             }
         })
-        phabricatorAlias(nullable: true, unique: true, blank: false)
+        phabricatorAlias(nullable: true, unique: true, blank: true)
         dirName(blank: false, unique: true, validator: { String val ->
             OtpPath.isValidRelativePath(val) &&
                     ['icgc', 'dkfzlsdf', 'lsdf', 'project'].every { !val.startsWith("${it}/") }
