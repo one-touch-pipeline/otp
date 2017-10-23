@@ -64,7 +64,7 @@
         <div class="col-xs-12 main">
             <h2><g:message code="intro.about.title" /></h2>
             <hr>
-            <p class="keep-whitespace">${aboutOtp}</p>
+            <p class="keep-whitespace">${raw(aboutOtp)}</p>
         </div>
     </div>
 <g:if test="${showPartners}">
@@ -74,7 +74,7 @@
             <hr>
         </div>
         <div id="partner">
-            <div class="col-xs-6 col-md-3 otp-partner">
+            <div class="col-xs-3 col-md-2 otp-partner">
                 <ul>
                     <li>
                         <a href="https://www.dkfz.de/en/dktk/" target="_blank">

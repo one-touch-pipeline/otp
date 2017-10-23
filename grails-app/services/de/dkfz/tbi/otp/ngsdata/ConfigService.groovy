@@ -63,11 +63,11 @@ class ConfigService {
     }
 
     boolean useSshAgent() {
-        return otpProperties.getProperty("otp.ssh.useSshAgent") ?: true
+        return getBooleanValue("otp.ssh.useSshAgent", true)
     }
 
     boolean otpSendsMails() {
-        return otpProperties.getProperty("otp.mail.allowOtpToSendMails") ?: false
+        return getBooleanValue("otp.mail.allowOtpToSendMails", false)
     }
 
     static DateTimeZone getDateTimeZone() {
@@ -76,7 +76,7 @@ class ConfigService {
 
     boolean useBackdoor() {
         if (Environment.isDevelopmentMode()) {
-            return otpProperties.getProperty("otp.security.useBackdoor")
+            return getBooleanValue("otp.security.useBackdoor", false)
         } else {
             return false
         }
@@ -116,6 +116,10 @@ class ConfigService {
 
     String getSshUser() {
         return otpProperties.getProperty("otp.ssh.user") ?: ""
+    }
+
+    private boolean getBooleanValue(String otpPropertiesValue, boolean defaultValue) {
+        return otpProperties.getProperty(otpPropertiesValue) ? Boolean.parseBoolean(otpProperties.getProperty(otpPropertiesValue)) : defaultValue
     }
 
 }
