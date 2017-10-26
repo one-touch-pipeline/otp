@@ -26,7 +26,7 @@ grails.project.dependency.resolution = {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes
 
         // JDBC
-        runtime "postgresql:postgresql:9.1-901.jdbc4"
+        runtime "org.postgresql:postgresql:42.1.4"
 
         // bioinformatics tools
         // ngstools
