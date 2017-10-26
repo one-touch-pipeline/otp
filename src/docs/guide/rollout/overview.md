@@ -11,7 +11,7 @@ For the installation 2 host are recommended:
 This  documentation use following versions:
 - Host system: CentOS Linux release 7.4
 - postgres version: 10
-- tomcat version: 8.5.22
+- tomcat version: 8.5.23
 
 If you use other version adjustment may be necessary.
 
@@ -38,6 +38,28 @@ GROUP
 
 Additional a common group for $WEB_USER and $CLUSTER_USER is needed, which is used to protect directories
 from access for normal users: $COMMON_GROUP
+
+
+LDAP
+----
+- $LDAP_SERVER: name of the ldap server
+- $LDAP_MANAGER_PASSWD: Password to access the ldap, can be empty
+- $LDAP_SEARCH_BASE: part of the ldap tree to search in, for example: 'ou\=users,dc\=example,dc\=com'
+- $LDAP_MANAGER_DN:
+- $LDAP_SEARCH_FILTER: The filter to search for people, for example: '(uid\={0})'
+
+Please note that all '=' in the values needs to be escaped with backslash
+
+
+Additional Variables
+--------------------
+
+The following additional variables are used:
+- $IP_WEB: the ip of the host $WEB_HOST
+- $IP_DB: the ip of the host $DB_HOST
+- $TOMCAT_VERSION: the version of tomcat, here 8.5.23
+- $DOWNLOAD_PATH: the path used for download
+- $WORK_DIRECTORY
 
 
 [Back to Rollout Overview](index.md)

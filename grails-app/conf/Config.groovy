@@ -158,8 +158,15 @@ if (!Boolean.parseBoolean(otpProperties.getProperty("otp.security.ldap.enabled")
 } else {
     println("using ldap")
     otp.security.ldap.enabled = true
-    grails.plugin.springsecurity.ldap.context.managerDn         = otpProperties.getProperty("otp.security.ldap.managerDn")
-    grails.plugin.springsecurity.ldap.context.managerPassword   = otpProperties.getProperty("otp.security.ldap.managerPw")
+    if (otpProperties.getProperty("otp.security.ldap.managerDn")) {
+        grails.plugin.springsecurity.ldap.context.managerDn     = otpProperties.getProperty("otp.security.ldap.managerDn")
+    }
+    grails.plugin.springsecurity.ldap.context.managerPassword = otpProperties.getProperty("otp.security.ldap.managerPw")
+    if (otpProperties.getProperty("otp.security.ldap.managerPw")) {
+        grails.plugin.springsecurity.ldap.auth.useAuthPassword = true
+    } else {
+        grails.plugin.springsecurity.ldap.auth.useAuthPassword = false
+    }
     grails.plugin.springsecurity.ldap.context.server            = otpProperties.getProperty("otp.security.ldap.server")
     grails.plugin.springsecurity.ldap.search.base               = otpProperties.getProperty("otp.security.ldap.search.base")
     grails.plugin.springsecurity.ldap.authorities.searchSubtree = otpProperties.getProperty("otp.security.ldap.search.subTree")
@@ -167,7 +174,7 @@ if (!Boolean.parseBoolean(otpProperties.getProperty("otp.security.ldap.enabled")
 
     // static options
     grails.plugin.springsecurity.ldap.authorities.ignorePartialResultException = true
-    grails.plugin.springsecurity.ldap.authorities.retrieveGroupRoles = true
+    grails.plugin.springsecurity.ldap.authorities.retrieveGroupRoles = false
     grails.plugin.springsecurity.ldap.authorities.retrieveDatabaseRoles = true
     grails.plugin.springsecurity.ldap.mapper.userDetailsClass = 'inetOrgPerson'
 }
