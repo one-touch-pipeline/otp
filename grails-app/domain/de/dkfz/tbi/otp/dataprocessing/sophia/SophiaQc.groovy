@@ -1,8 +1,9 @@
 package de.dkfz.tbi.otp.dataprocessing.sophia
 
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 
-class SophiaQc implements Entity {
+class SophiaQc implements Entity, QcTrafficLightValue {
 
     SophiaInstance sophiaInstance
 

@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.qcTrafficLight.QcThreshold
 import de.dkfz.tbi.otp.utils.*
 import grails.converters.*
 
@@ -12,20 +13,6 @@ class AlignmentQualityOverviewController {
 
     public static final String CHR_X_HG19 = 'chrX'
     public static final String CHR_Y_HG19 = 'chrY'
-
-
-    static enum WarningLevel {
-        NO('okay'),
-        WarningLevel1('warning1'),
-        WarningLevel2('warning2')
-
-        final String styleClass
-
-        WarningLevel(String styleClass) {
-            this.styleClass = styleClass
-        }
-    }
-
 
     private static final List<String> chromosomes = [Chromosomes.CHR_X.alias, Chromosomes.CHR_Y.alias, CHR_X_HG19, CHR_Y_HG19].asImmutable()
 
@@ -190,6 +177,12 @@ class AlignmentQualityOverviewController {
         // TODO: has to be adapted when issue OTP-1670 is solved
         Map sequenceLengthsMap = sequenceLengths.groupBy { it[0] }
 
+        QcThreshold percentDuplicatesThreshold = !dataOverall.empty ? getQcThresholdInstance(project, seqType, dataOverall.first().class.toString(), "percentDuplicates") : null
+        QcThreshold properlyPairedThreshold = !dataOverall.empty ? getQcThresholdInstance(project, seqType, dataOverall.first().class.toString(), "properlyPaired") : null
+        QcThreshold percentDiffChrThreshold = !dataOverall.empty ? getQcThresholdInstance(project, seqType, dataOverall.first().class.toString(), "percentDiffChr") : null
+        QcThreshold insertSizeMedianThreshold = !dataOverall.empty ? getQcThresholdInstance(project, seqType, dataOverall.first().class.toString(), "insertSizeMedian") : null
+        QcThreshold onTargetRatioThreshold = (!dataOverall.empty  && seqType.isExome()) ? getQcThresholdInstance(project, seqType, dataOverall.first().class.toString(), "onTargetRatio") : null
+
         Map<Long, Map<String, List<ReferenceGenomeEntry>>> chromosomeLengthForChromosome =
                 overallQualityAssessmentMergedService.findChromosomeLengthForQualityAssessmentMerged(chromosomes, dataOverall).
                         groupBy({ it.referenceGenome.id }, { it.alias })
@@ -205,7 +198,6 @@ class AlignmentQualityOverviewController {
             double readLength = readLengthString.contains('-') ? (readLengthString.split('-').sum {
                 it as double
             } / 2) : readLengthString as double
-
             Map map = [
                     mockPid               : abstractMergedBamFile.individual.mockPid,
                     sampleType            : abstractMergedBamFile.sampleType.name,
@@ -217,17 +209,15 @@ class AlignmentQualityOverviewController {
                     medianPE_insertsize   : FormatHelper.formatToTwoDecimalsNullSave(it.insertSizeMedian), //Median PE_insertsize
                     dateFromFileSystem    : abstractMergedBamFile.dateFromFileSystem?.format("yyyy-MM-dd"),
                     //warning for duplicates
-                    duplicateWarning      : warningLevelForDuplicates(it.percentDuplicates).styleClass,
+                    duplicateWarning      : percentDuplicatesThreshold?.qcPassed(it)?.styleClass,
 
-                    //warning for Median PE_insertsize
-                    medianWarning         : warningLevelForMedian(it.insertSizeMedian, readLength).styleClass,
 
                     //warning for properlyPpaired
-                    properlyPpairedWarning: warningLevelForProperlyPaired(it.properlyPaired).styleClass,
+                    properlyPairedWarning : properlyPairedThreshold?.qcPassed(it)?.styleClass,
 
                     //warning for diff chrom
-                    diffChrWarning        : warningLevelForDiffChrom(it.percentDiffChr).styleClass,
-
+                    diffChrWarning        : percentDiffChrThreshold?.qcPassed(it)?.styleClass,
+                    medianWarning         : insertSizeMedianThreshold?.qcPassed(it, readLength)?.styleClass,
                     plot                  : it.id,
                     withdrawn             : abstractMergedBamFile.withdrawn,
                     pipeline              : abstractMergedBamFile.workPackage.pipeline.displayName,
@@ -267,7 +257,7 @@ class AlignmentQualityOverviewController {
                             targetCoverage     : FormatHelper.formatToTwoDecimalsNullSave(abstractMergedBamFile.coverage), // coverage
 
                             //warning for onTargetRate
-                            onTargetRateWarning: warningLevelForOnTargetRate(it.onTargetRatio).styleClass,
+                            onTargetRateWarning: onTargetRatioThreshold?.qcPassed(it).styleClass,
                     ]
                     break
 
@@ -312,36 +302,14 @@ class AlignmentQualityOverviewController {
         return exactlyOneElement(chromosomeNames.findResult { qualityAssessmentMergedPassGroupedByChromosome.get(it) })
     }
 
-    private static WarningLevel warningLevelForDuplicates(Double duplicates) {
-        warningLevel(duplicates, duplicates > 25, duplicates > 15)
+
+    static QcThreshold getQcThresholdInstance(Project project1, SeqType seqType1, String qcClass1, String qcProperty) {
+        return CollectionUtils.atMostOneElement(QcThreshold.findAllByProjectAndSeqTypeAndQcClassAndQcProperty1(project1, seqType1, qcClass1, qcProperty)) ?:
+                        CollectionUtils.atMostOneElement(QcThreshold.findAllByProjectAndQcClassAndQcProperty1AndSeqTypeIsNull(project1, qcClass1, qcProperty)) ?:
+                                CollectionUtils.atMostOneElement(QcThreshold.findAllBySeqTypeAndQcClassAndQcProperty1AndProjectIsNull(seqType1, qcClass1, qcProperty)) ?:
+                                        CollectionUtils.atMostOneElement(QcThreshold.findAllByQcClassAndQcProperty1AndProjectIsNullAndSeqTypeIsNull(qcClass1, qcProperty)) ?: null
     }
 
-    private static WarningLevel warningLevelForProperlyPaired(Double properlyPaired) {
-        warningLevel(properlyPaired, properlyPaired < 90, properlyPaired < 95)
-    }
-
-    private static WarningLevel warningLevelForMedian(Double median, double readLength) {
-        warningLevel(median, median < 2.2 * readLength, median < 2.5 * readLength)
-    }
-
-    private static WarningLevel warningLevelForOnTargetRate(Double onTargetRate) {
-        warningLevel(onTargetRate, onTargetRate < 60, onTargetRate < 70)
-    }
-
-    private static WarningLevel warningLevelForDiffChrom(Double diffChrom) {
-        warningLevel(diffChrom, diffChrom > 3, diffChrom > 2)
-    }
-
-    private static WarningLevel warningLevel(Double value, boolean conditionForLevel2, boolean conditionForLevel1) {
-        if (value != null) {
-            if (conditionForLevel2) {
-                return WarningLevel.WarningLevel2
-            } else if (conditionForLevel1) {
-                return WarningLevel.WarningLevel1
-            }
-        }
-        return WarningLevel.NO
-    }
 }
 
 class AlignmentQcCommand {

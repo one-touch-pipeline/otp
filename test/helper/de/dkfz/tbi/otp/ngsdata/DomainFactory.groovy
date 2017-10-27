@@ -15,6 +15,7 @@ import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.Realm.Cluster
 import de.dkfz.tbi.otp.ngsdata.SampleType.SpecificReferenceGenome
+import de.dkfz.tbi.otp.qcTrafficLight.*
 import de.dkfz.tbi.otp.tracking.*
 import de.dkfz.tbi.otp.utils.*
 import grails.plugin.springsecurity.acl.*
@@ -2439,16 +2440,26 @@ samplePairsNotProcessed: ${samplePairsNotProcessed}
 
 
 
-        public static void createAclObjects(Object domainObject, Map properties = [:]) {
+    static void createAclObjects(Object domainObject, Map properties = [:]) {
         AclObjectIdentity aclObjectIdentity = createDomainObject(AclObjectIdentity, [objectId: domainObject.id, aclClass: {createDomainObject(AclClass, [className: domainObject.class.name], [:])}], [:])
         createDomainObject(AclEntry, [aclObjectIdentity: aclObjectIdentity, sid: {createDomainObject(AclSid, [sid: "ROLE_ADMIN"], properties)}], [:])
     }
 
 
-    public static MergingCriteria createMergingCriteria(Map properties = [:]) {
+    static MergingCriteria createMergingCriteria(Map properties = [:]) {
         return createDomainObject(MergingCriteria, [
                 project: { createProject() },
                 seqType: { createSeqType() },
         ], properties )
+    }
+
+    static QcThreshold createQcThreshold(Map properties = [:]) {
+        return createDomainObject(QcThreshold, [
+                qcProperty1: "qcProperty${counter++}",
+                warningThreshold: counter++,
+                errorThreshold: counter++,
+                compare: QcThreshold.Compare.biggerThanThreshold
+                //qcClass needs to be defined per test since it depends on the QC domain the value belongs to
+        ], properties)
     }
 }

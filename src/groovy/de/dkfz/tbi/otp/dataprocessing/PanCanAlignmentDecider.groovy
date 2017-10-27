@@ -1,8 +1,8 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import org.springframework.context.annotation.Scope
-import org.springframework.stereotype.Component
+import de.dkfz.tbi.otp.ngsdata.*
+import org.springframework.context.annotation.*
+import org.springframework.stereotype.*
 
 @Component
 @Scope("singleton")

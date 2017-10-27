@@ -1,8 +1,9 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 
-class IndelSampleSwapDetection implements Entity {
+class IndelSampleSwapDetection implements Entity, QcTrafficLightValue {
 
     IndelCallingInstance indelCallingInstance
 

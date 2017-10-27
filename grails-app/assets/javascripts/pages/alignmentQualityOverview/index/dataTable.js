@@ -106,7 +106,7 @@ $.otp.alignmentQualityOverviewTable = {
                                     "<span title='" + row.kit.name + "'>" + row.kit.shortName + "</span>",
                                     row.mappedReads,
                                     "<span class='" + row.duplicateWarning + "'>" + row.duplicates + " </span>",
-                                    "<span class='" + row.properlyPpairedWarning + "'>" + row.properlyPaired + " </span>",
+                                    "<span class='" + row.properlyPairedWarning + "'>" + row.properlyPaired + " </span>",
                                     row.singletons,
                                     "<span class='" + row.medianWarning + "'>" + row.medianPE_insertsize + " </span>",
                                     "<span class='" + row.diffChrWarning + "'>" + row.diffChr + " </span>",

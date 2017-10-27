@@ -1,8 +1,9 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 
-class AceseqQc implements Entity {
+class AceseqQc implements Entity, QcTrafficLightValue {
 
     AceseqInstance aceseqInstance
 
