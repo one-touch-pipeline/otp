@@ -4,12 +4,17 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
 import de.dkfz.tbi.util.spreadsheet.validation.*
+import org.springframework.beans.factory.annotation.*
 import org.springframework.stereotype.*
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 
 @Component
 class SeqPlatformGroupValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
+
+    @Autowired
+    LibraryPreparationKitService libraryPreparationKitService
+
 
     @Override
     Collection<String> getDescriptions() {
@@ -75,7 +80,7 @@ class SeqPlatformGroupValidator extends ValueTuplesValidator<MetadataValidationC
             }
 
             if (!seqType.isWgbs()) {
-                LibraryPreparationKit libraryPreparationKit = LibraryPreparationKit.findByName(it.getValue(LIB_PREP_KIT.name()))
+                LibraryPreparationKit libraryPreparationKit = libraryPreparationKitService.findLibraryPreparationKitByNameOrAlias(it.getValue(LIB_PREP_KIT.name()))
                 if (mergingWorkPackage.libraryPreparationKit != libraryPreparationKit) {
                     context.addProblem(
                             it.cells.findAll() { cell ->

@@ -14,6 +14,7 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 @Mock([
         Individual,
         LibraryPreparationKit,
+        LibraryPreparationKitSynonym,
         Pipeline,
         ProcessingOption,
         Project,
@@ -31,6 +32,8 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 public class SeqPlatformGroupValidatorSpec extends Specification {
 
     LibraryPreparationKit libraryPreparationKit
+    LibraryPreparationKitSynonym libraryPreparationKitSynonym
+    LibraryPreparationKitSynonym libraryPreparationKitSynonym2
     MergingWorkPackage mergingWorkPackage1
     MergingWorkPackage mergingWorkPackage2
     MergingWorkPackage mergingWorkPackage3
@@ -63,6 +66,8 @@ public class SeqPlatformGroupValidatorSpec extends Specification {
         mergingWorkPackage3 = DomainFactory.createMergingWorkPackage(sample: sampleIdentifier3.sample, seqType: seqType3)
         seqPlatformGroup = DomainFactory.createSeqPlatformGroup()
         libraryPreparationKit = DomainFactory.createLibraryPreparationKit()
+        libraryPreparationKitSynonym = DomainFactory.createLibraryPreparationKitSynonym(libraryPreparationKit: libraryPreparationKit)
+        libraryPreparationKitSynonym2 = DomainFactory.createLibraryPreparationKitSynonym(libraryPreparationKit: mergingWorkPackage1.libraryPreparationKit)
         model1 = DomainFactory.createSeqPlatformModelLabel(name: 'Model1', alias: ['Model1Alias'])
         model2 = DomainFactory.createSeqPlatformModelLabel(name: 'Model2', alias: ['Model2Alias'])
         model3 = DomainFactory.createSeqPlatformModelLabel(name: 'Model3', alias: ['Model3Alias'])
@@ -96,9 +101,11 @@ public class SeqPlatformGroupValidatorSpec extends Specification {
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${SAMPLE_ID}\t${SEQUENCING_TYPE}\t${LIBRARY_LAYOUT}\t${INSTRUMENT_PLATFORM}\t${INSTRUMENT_MODEL}\t${SEQUENCING_KIT}\t${LIB_PREP_KIT}\n" +
                 "SampleIdentifier1\tSeqType1\tPAIRED\tPlatform1\tModel1\tKit1\t${mergingWorkPackage1.libraryPreparationKit.name}\n" +
+                "SampleIdentifier1\tSeqType1\tPAIRED\tPlatform1\tModel1\tKit1\t${libraryPreparationKitSynonym2.name}\n" +
                 "SampleIdentifier2\tSeqType2\tPAIRED\tPlatform2\tModel2\tKit2\t${mergingWorkPackage2.libraryPreparationKit.name}\n" +
                 "SampleIdentifier3\tSeqType3\tPAIRED\tPlatform3\tModel3\tKit3\t${mergingWorkPackage3.libraryPreparationKit.name}\n" +
                 "SampleIdentifier1\tSeqType1\tPAIRED\tPlatform1\tModel1\tKit1\t${libraryPreparationKit.name}\n" +
+                "SampleIdentifier1\tSeqType1\tPAIRED\tPlatform1\tModel1\tKit1\t${libraryPreparationKitSynonym.name}\n" +
                 "SampleIdentifier42\tSeqType1\tPAIRED\tPlatform1\tModel1\tKit1\t${mergingWorkPackage1.libraryPreparationKit.name}\n" +
                 "SampleIdentifier1\tSeqType42\tPAIRED\tPlatform1\tModel1\tKit1\t${mergingWorkPackage1.libraryPreparationKit.name}\n" +
                 "SampleIdentifier1\tSeqType1\tPAIRED42\tPlatform1\tModel1\tKit1\t${mergingWorkPackage1.libraryPreparationKit.name}\n" +
@@ -108,15 +115,17 @@ public class SeqPlatformGroupValidatorSpec extends Specification {
         )
 
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[2].cells[0..5] as Set, Level.WARNING,
+                new Problem(context.spreadsheet.dataRows[3].cells[0..5] as Set, Level.WARNING,
                         "The combination of sample '${sampleIdentifier3.sample.displayName}' and sequencing type '${seqType3.name}' with sequencing platform group '${seqPlatformGroup.name}' is registered with another sequencing platform group '${mergingWorkPackage3.seqPlatformGroup.name}' in the OTP database."),
-                new Problem(context.spreadsheet.dataRows[3].cells[0..2,6] as Set, Level.WARNING,
+                new Problem(context.spreadsheet.dataRows[4].cells[0..2,6] as Set, Level.WARNING,
+                        "The combination of sample '${sampleIdentifier1.sample.displayName}' and sequencing type '${seqType1.name}' with library preparation kit '${libraryPreparationKit.name}' is registered with another library preparation kit '${mergingWorkPackage1.libraryPreparationKit.name}' in the OTP database."),
+                new Problem(context.spreadsheet.dataRows[5].cells[0..2,6] as Set, Level.WARNING,
                         "The combination of sample '${sampleIdentifier1.sample.displayName}' and sequencing type '${seqType1.name}' with library preparation kit '${libraryPreparationKit.name}' is registered with another library preparation kit '${mergingWorkPackage1.libraryPreparationKit.name}' in the OTP database."),
 
         ]
 
         when:
-        new SeqPlatformGroupValidator().validate(context)
+        new SeqPlatformGroupValidator(libraryPreparationKitService: new LibraryPreparationKitService()).validate(context)
 
         then:
         assertContainSame(context.problems, expectedProblems)

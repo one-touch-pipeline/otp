@@ -1307,6 +1307,13 @@ class DomainFactory {
         ], properties)
     }
 
+    static LibraryPreparationKitSynonym createLibraryPreparationKitSynonym(Map properties = [:]) {
+        return createDomainObject(LibraryPreparationKitSynonym, [
+                name: "libPrepKitAlias_${counter++}",
+                libraryPreparationKit: {createLibraryPreparationKit()},
+        ], properties)
+    }
+
     static ReferenceGenome createReferenceGenome(Map properties = [:], boolean saveAndValidate = true) {
         return createDomainObject(ReferenceGenome, [
                 name                        : "name${counter++}",
