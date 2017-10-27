@@ -20,6 +20,10 @@ public class AnalysisDeletionService {
             indelQualityControl.each {
                 it.delete(flush: true)
             }
+            List<IndelSampleSwapDetection> indelSampleSwapDetections = IndelSampleSwapDetection.findAllByIndelCallingInstance(analysisInstance, [sort: 'id', order: 'desc'])
+            indelSampleSwapDetections.each {
+                it.delete(flush: true)
+            }
         } else if (analysisInstance instanceof SophiaInstance) {
             List<SophiaQc> sophiaQc = SophiaQc.findAllBySophiaInstance(analysisInstance, [sort: 'id', order: 'desc'])
             sophiaQc.each {
