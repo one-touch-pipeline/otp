@@ -21,6 +21,14 @@ class InformSampleIdentifierParser implements SampleIdentifierParser {
         return null
     }
 
+    public boolean isForProject(String projectName) {
+        return projectName == 'INFORM'
+    }
+
+    public boolean tryParsePid(String pid) {
+            return pid =~ "^"+getPidRegex()+/$/
+    }
+
     private Collection<SampleIdentifier> findSampleIdentifiersByPidAndTissueTypeKey(String pid, String tissueTypeKey) {
         Collection<SampleIdentifier> result = SampleIdentifier.createCriteria().list {
             sample {
@@ -51,14 +59,18 @@ class InformSampleIdentifierParser implements SampleIdentifierParser {
         return tissueType
     }
 
-    private static String createRegex() {
+    private static getPidRegex() {
         String treatingCenterId = "([0-9]{3})"
         String patientId =  "([0-9]{3})"
+        return "(I${treatingCenterId}_${patientId})"
+    }
+
+    private static String createRegex() {
         String sampleTypeNumber = "(?<sampleTypeNumber>([0-9X]))"
         String tissueTypeKey = "(?<tissueTypeKey>([TMCFL]))"
         String sampleId = "(${sampleTypeNumber}${tissueTypeKey}[0-9]_[DRPI][0-9])"
         return "^"+
-                "(?<pid>(I${treatingCenterId}_${patientId}))_" +
+                "(?<pid>${getPidRegex()})_" +
                 "${sampleId}" +
                 /$/
     }

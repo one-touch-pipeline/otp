@@ -11,7 +11,7 @@
     <ul>
     <g:each var="body" in="${data}" >
         <g:each var="message" in="${body.sampleSwapInfos}" >
-            <li class="${message.level}"><span style="white-space: pre-line "> ${message.description}</span></li>
+            <g:if test="${message.description!=''}"><li class="${message.level}"><span style="white-space: pre-line "> ${message.description}</span></li> </g:if>
         </g:each>
     </g:each>
     </ul>

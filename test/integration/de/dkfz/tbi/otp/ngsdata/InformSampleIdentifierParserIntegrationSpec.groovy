@@ -34,11 +34,14 @@ class InformSampleIdentifierParserIntegrationSpec extends Specification{
     void "test parse valid input"() {
         given:
         DefaultParsedSampleIdentifier defaultParsedSampleIdentifier
+        boolean validPid
 
         when:
         defaultParsedSampleIdentifier = informSampleIdentifierParser.tryParse(input)
+        validPid = informSampleIdentifierParser.tryParsePid(pid)
 
         then:
+        validPid
         defaultParsedSampleIdentifier.projectName == 'INFORM'
         defaultParsedSampleIdentifier.pid == pid
         defaultParsedSampleIdentifier.sampleTypeDbName == sampleTypeDbName
@@ -87,5 +90,24 @@ class InformSampleIdentifierParserIntegrationSpec extends Specification{
         'I124_456_0T0_D1'   | _
         and: 'Input with same PID and different sampleTypeNumber as invalid preexisting Database entry'
         'I124_456_2T0_D1'   | _
+    }
+
+    @Unroll
+    void "test parsePid invalid input #pid"() {
+        given:
+        boolean validPid
+
+        when:
+        validPid = informSampleIdentifierParser.tryParsePid(pid)
+
+        then:
+        !validPid
+
+        where:
+        pid                 | _
+        ''                  | _
+        null                | _
+        and: 'Input with invalid pid'
+        'Z123_456'          | _
     }
 }

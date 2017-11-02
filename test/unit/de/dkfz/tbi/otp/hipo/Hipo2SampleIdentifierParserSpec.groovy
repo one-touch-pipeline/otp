@@ -12,8 +12,10 @@ class Hipo2SampleIdentifierParserSpec extends Specification {
 
         when:
         ParsedSampleIdentifier parsed = parser.tryParse(identifier)
+        boolean validPid = parser.tryParsePid(identifier.split("-")[0,1].join("-"))
 
         then:
+        validPid
         parsed.projectName == 'hipo_K12A'
         parsed.pid == identifier.split("-")[0,1].join("-")
         parsed.sampleTypeDbName == sampleTypeDbName
@@ -122,5 +124,24 @@ class Hipo2SampleIdentifierParserSpec extends Specification {
                 'K12A-123ABC-T0-1C0X',
                 'K12A-123ABC-T0-XC01',
         ]
+    }
+
+    @Unroll
+    void "test parsePid invalid input #pid"() {
+        given:
+        boolean validPid
+
+        when:
+        validPid = parser.tryParsePid(pid)
+
+        then:
+        !validPid
+
+        where:
+        pid                 | _
+        ''                  | _
+        null                | _
+        and: 'Input with invalid pid'
+        'INVALID_PID'          | _
     }
 }

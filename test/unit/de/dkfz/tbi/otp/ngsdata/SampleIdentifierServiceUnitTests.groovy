@@ -273,11 +273,27 @@ class TestParser_CanParse implements SampleIdentifierParser {
     ParsedSampleIdentifier tryParse(String someString) {
         return new DefaultParsedSampleIdentifier(someString, someString, someString, someString)
     }
+
+    public boolean isForProject(String projectName) {
+        return true
+    }
+
+    public boolean tryParsePid(String pid) {
+        return true
+    }
 }
 
 class TestParser_CannotParse implements SampleIdentifierParser {
 
     ParsedSampleIdentifier tryParse(String sampleIdentifier) {
         return null
+    }
+
+    public boolean isForProject(String projectName) {
+        return false
+    }
+
+    public boolean tryParsePid(String pid) {
+        return false
     }
 }

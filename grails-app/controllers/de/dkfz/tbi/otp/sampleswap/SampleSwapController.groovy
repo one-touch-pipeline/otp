@@ -42,10 +42,9 @@ class SampleSwapController {
         return [
                 project        : project,
                 projects       : projects,
-                individual     : individual,
                 individuals    : individuals,
                 sampleTypes    : SampleType.list(sort: "name", order: "asc").collect { it.name },
-                seqTypes       : SeqType.list(sort: "displayName", order: "asc").collect { it.displayName } as Set,
+                seqTypes       : SeqType.list(sort: "displayName", order: "asc").collect { it.displayName }.unique(),
                 libPrepKits    : [""] + LibraryPreparationKit.list(sort: "name", order: "asc").collect { it.name },
                 libraryLayouts : LibraryLayout.findAll()*.toString(),
                 antibodyTargets: [""] + AntibodyTarget.list(sort: "name", order: "asc").collect { it.name },
@@ -58,47 +57,48 @@ class SampleSwapController {
         List data = []
         boolean chipSeq = false
         int numberOfFiles = 0
-
-        individual?.getSamples().each { sample ->
-            SeqTrack.findAllBySample(sample).each { seqTrack ->
-                if (seqTrack.seqType.name == "ChIP Seq" || (params["${seqTrack.id}!seqType"] == "ChIP")) {
-                    chipSeq = true
-                }
-
-                Map dataFiles = [:]
-                DataFile.findAllBySeqTrack(seqTrack, [sort: "fileName", order: "asc"]).each {
-                    dataFiles.put("${it.id}", params["${seqTrack.id}!files!${it.id}"])
-                }
-
-                if (dataFiles.size() > numberOfFiles) {
-                    numberOfFiles = dataFiles.size()
-                }
-
-                data << new SampleSwapData(sampleSwapService.getPropertiesForSampleSwap(seqTrack),
-                        [
-                                project       : params["${seqTrack.id}!project"],
-                                pid           : params["${seqTrack.id}!pid"],
-                                sampleType    : params["${seqTrack.id}!sampleType"],
-                                seqType       : params["${seqTrack.id}!seqType"],
-                                libPrepKit    : params["${seqTrack.id}!libPrepKit"],
-                                antibodyTarget: params["${seqTrack.id}!antibodyTarget"],
-                                antibody      : params["${seqTrack.id}!antibody"],
-                                libraryLayout : params["${seqTrack.id}!libraryLayout"],
-                                run           : seqTrack.run.name,
-                                lane          : seqTrack.laneId,
-                                ilse          : seqTrack.ilseId ? Integer.toString(seqTrack.ilseId) : "",
-                                files         : dataFiles,
-                        ], Long.toString(seqTrack.id))
+        int rowNumber = 1
+        SeqTrack.createCriteria().list {
+            sample {
+                eq('individual', individual)
+            }
+            order('id', 'asc')
+        }.each { seqTrack ->
+            if (seqTrack.seqType.name == "ChIP Seq" || (params["${seqTrack.id}!seqType"] == "ChIP")) {
+                chipSeq = true
             }
 
+            Map dataFiles = [:]
+            DataFile.findAllBySeqTrack(seqTrack, [sort: "fileName", order: "asc"]).each {
+                dataFiles.put("${it.id}", params["${seqTrack.id}!files!${it.id}"])
+            }
+
+            if (dataFiles.size() > numberOfFiles) {
+                numberOfFiles = dataFiles.size()
+            }
+
+            data << new SampleSwapData(sampleSwapService.getPropertiesForSampleSwap(seqTrack),
+                    [
+                            project       : params["${seqTrack.id}!project"],
+                            pid           : params["${seqTrack.id}!pid"],
+                            sampleType    : params["${seqTrack.id}!sampleType"],
+                            seqType       : params["${seqTrack.id}!seqType"],
+                            libPrepKit    : params["${seqTrack.id}!libPrepKit"],
+                            antibodyTarget: params["${seqTrack.id}!antibodyTarget"],
+                            antibody      : params["${seqTrack.id}!antibody"],
+                            libraryLayout : params["${seqTrack.id}!libraryLayout"],
+                            run           : seqTrack.run.name,
+                            lane          : seqTrack.laneId,
+                            ilse          : seqTrack.ilseId ? Integer.toString(seqTrack.ilseId) : "",
+                            files         : dataFiles,
+                    ], Long.toString(seqTrack.id), rowNumber++)
         }
-        int rowNumber = 1
+
         Map output = [
                 chipSeq      : chipSeq,
                 numberOfFiles: numberOfFiles,
-                data         : data.sort { a, b -> a.seqTrackId <=> b.seqTrackId }.each {
-                    it.rowNumber = rowNumber++
-                },
+                data         : data,
+                individual   : individual,
         ]
         return output
     }
@@ -107,29 +107,33 @@ class SampleSwapController {
         List data = []
         boolean chipSeq = false
         int numberOfFiles = 0
-
-        individual?.getSamples().each { sample ->
-            SeqTrack.findAllBySample(sample).each { seqTrack ->
-                if (seqTrack.seqType.name == "ChIP Seq") {
-                    chipSeq = true
-                }
-                Map seqTrackData = sampleSwapService.getPropertiesForSampleSwap(seqTrack)
-                if (seqTrackData.files.size() > numberOfFiles) {
-                    numberOfFiles = seqTrackData.files.size()
-                }
-                data << new SampleSwapData(seqTrackData, seqTrackData, Long.toString(seqTrack.id))
-            }
-        }
         int rowNumber = 1
+
+        SeqTrack.createCriteria().list {
+            sample {
+                eq('individual', individual)
+            }
+            order('id', 'asc')
+        }.each { seqTrack ->
+            if (seqTrack.seqType.name == "ChIP Seq") {
+                chipSeq = true
+            }
+            Map seqTrackData = sampleSwapService.getPropertiesForSampleSwap(seqTrack)
+            if (seqTrackData.files.size() > numberOfFiles) {
+                numberOfFiles = seqTrackData.files.size()
+            }
+            data << new SampleSwapData(seqTrackData, seqTrackData, Long.toString(seqTrack.id), rowNumber++)
+        }
+
         Map output = [
                 chipSeq      : chipSeq,
                 numberOfFiles: numberOfFiles,
-                data         : data.sort { a, b -> a.seqTrackId <=> b.seqTrackId }.each {
-                    it.rowNumber = rowNumber++
-                },
+                data         : data,
+                individual   : individual,
         ]
         return output
     }
+
 }
 
 class SampleSwapIndexCommand {

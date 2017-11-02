@@ -13,8 +13,10 @@ class HipoSampleIdentifierSpec extends Specification {
 
         when:
         HipoSampleIdentifier identifier = parser.tryParse(fullSampleName)
+        boolean validPid = parser.tryParsePid(fullSampleName.substring(0, 11))
 
         then:
+        validPid
         identifier.sampleNumber == sampleNumber
         identifier.sampleTypeDbName == "TUMOR${sampleNumber}".toString()
         identifier.fullSampleName == fullSampleName
@@ -33,5 +35,24 @@ class HipoSampleIdentifierSpec extends Specification {
 
         where:
         sampleNumber << ['00', '01', '02', '10', '11']
+    }
+
+    @Unroll
+    void "test parsePid invalid input #pid"() {
+        given:
+        boolean validPid
+
+        when:
+        validPid = parser.tryParsePid(pid)
+
+        then:
+        !validPid
+
+        where:
+        pid                 | _
+        ''                  | _
+        null                | _
+        and: 'Input with invalid pid'
+        'INVALID_PID'          | _
     }
 }
