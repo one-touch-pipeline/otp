@@ -187,32 +187,6 @@ processingOptionService.createOrUpdate(
         '0.6.5'
 )
 
-processingOptionService.createOrUpdate(
-        OptionName.PIPELINE_RODDY_ALIGNMENT_SAMBAMBA_PATHS,
-        "0.5.9",
-        null,
-        '/path/to/programs/sambamba/sambamba-0.5.9/bin/sambamba'
-)
-
-processingOptionService.createOrUpdate(
-        OptionName.PIPELINE_RODDY_ALIGNMENT_SAMBAMBA_PATHS,
-        "0.6.5",
-        null,
-        '/path/to/programs/sambamba/sambamba-0.6.5/bin/sambamba'
-)
-
-processingOptionService.createOrUpdate(
-        OptionName.PIPELINE_RODDY_ALIGNMENT_BWA_PATHS,
-        "0.7.8",
-        null,
-        '/path/to/programs/bwa/bwa-0.7.8/bwa'
-)
-processingOptionService.createOrUpdate(
-        OptionName.PIPELINE_RODDY_ALIGNMENT_BWA_PATHS,
-        "0.7.15",
-        null,
-        '/path/to/programs/bwa/bwa-0.7.15/bin/bwa'
-)
 
 //ChipSeq
 

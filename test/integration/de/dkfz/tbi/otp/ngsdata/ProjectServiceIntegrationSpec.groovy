@@ -75,20 +75,11 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 value: "bwa-mem",
         ])
         DomainFactory.createProcessingOptionLazy([
-                name: ProcessingOption.OptionName.PIPELINE_RODDY_ALIGNMENT_BWA_PATHS,
-                type: "bwa-mem",
-                value: temporaryFolder.newFile(),
-        ])
-        DomainFactory.createProcessingOptionLazy([
                 name: OptionName.PIPELINE_RODDY_ALIGNMENT_SAMBAMBA_VERSION_AVAILABLE,
                 type: null,
                 value: "sambamba",
         ])
-        DomainFactory.createProcessingOptionLazy([
-                name: ProcessingOption.OptionName.PIPELINE_RODDY_ALIGNMENT_SAMBAMBA_PATHS,
-                type: "sambamba",
-                value: temporaryFolder.newFile(),
-        ])
+
         DomainFactory.createProcessingOptionBasePathReferenceGenome(new File(configService.getRootPath(), "reference_genome").path)
     }
 
@@ -776,22 +767,6 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         exception.message ==~ /Invalid bwa_mem version: 'invalidBwa_memVersion',.*/
     }
 
-    void "test configurePanCanAlignmentDeciderProject alignment version path does not exist"() {
-        setup:
-        PanCanAlignmentConfiguration configuration = createPanCanAlignmentConfiguration()
-        assert new File(ProcessingOption.findByName(OptionName.PIPELINE_RODDY_ALIGNMENT_BWA_PATHS).value).delete()
-
-        when:
-        SpringSecurityUtils.doWithAuth("admin") {
-            projectService.configurePanCanAlignmentDeciderProject(configuration)
-        }
-
-        then:
-        AssertionError exception = thrown()
-        exception.message ==~ /.* does not exist.*/
-    }
-
-
     void "test configurePanCanAlignmentDeciderProject invalid mergeTool input"() {
         setup:
         PanCanAlignmentConfiguration configuration = createPanCanAlignmentConfiguration(
@@ -825,25 +800,6 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         AssertionError exception = thrown()
         exception.message ==~ /Invalid sambamba version: 'invalidSambambaVersion',.*/
     }
-
-
-    void "test configurePanCanAlignmentDeciderProject sambamba version path does not exist"() {
-        setup:
-        PanCanAlignmentConfiguration configuration = createPanCanAlignmentConfiguration(
-                mergeTool: MergeConstants.MERGE_TOOL_SAMBAMBA,
-        )
-        assert new File(ProcessingOption.findByName(ProcessingOption.OptionName.PIPELINE_RODDY_ALIGNMENT_SAMBAMBA_PATHS).value).delete()
-
-        when:
-        SpringSecurityUtils.doWithAuth("admin") {
-            projectService.configurePanCanAlignmentDeciderProject(configuration)
-        }
-
-        then:
-        AssertionError exception = thrown()
-        exception.message ==~ /.* does not exist.*/
-    }
-
 
     @Unroll
     void "test configurePanCanAlignmentDeciderProject phix reference genome require sambamba for merge"() {

@@ -12,19 +12,19 @@ class RoddyPanCanConfigTemplate {
         WGS('qcAnalysis', ''),
         CHIPSEQ('qcAnalysis', ''),
         WGBS('bisulfiteCoreAnalysis', '''
-                <!-- BWA Binary -->
-                <cvalue name="BWA_BINARY" value="bwa-0.7.8-bisulfite" type="filename"
-                        description="The BWA version suffixed by -bisulfite has the FASTQ read identifier check turned off, compared to the version without the suffix."/>
+                <!-- BWA Version -->
+                <cvalue name="BWA_VERSION" value="0.7.8" type="string"
+                        description="Use e.g. 0.7.8-r2.05 for a specific revision of bb-bwa. Suffix with -bisulfite to load a bisulfite patched version."/>
 
-                <cvalue name='IS_TAGMENTATION' value="false" type="boolean"
+                <cvalue name="IS_TAGMENTATION" value="false" type="boolean"
                         description="true: tagmentation; false: standard WGBS."/>
 '''),
         WGBSTAG('bisulfiteCoreAnalysis', '''
-                <!-- BWA Binary -->
-                <cvalue name="BWA_BINARY" value="bwa-0.7.8-bisulfite" type="filename"
-                        description="The BWA version suffixed by -bisulfite has the FASTQ read identifier check turned off, compared to the version without the suffix."/>
+                <!-- BWA Version -->
+                <cvalue name="BWA_VERSION" value="0.7.8" type="string"
+                        description="Use e.g. 0.7.8-r2.05 for a specific revision of bb-bwa. Suffix with -bisulfite to load a bisulfite patched version."/>
 
-                <cvalue name='IS_TAGMENTATION' value="true" type="boolean"
+                <cvalue name="IS_TAGMENTATION" value="true" type="boolean"
                         description="true: tagmentation; false: standard WGBS."/>
 ''')
 
@@ -43,13 +43,13 @@ class RoddyPanCanConfigTemplate {
 
     static String createConfig(PanCanAlignmentConfiguration panCanAlignmentConfiguration) {
         SeqTypeOptions template = SeqTypeOptions.findByRoddyName(panCanAlignmentConfiguration.seqType.roddyName)
-        String additional = ''
+        String additional = ""
 
         if (!panCanAlignmentConfiguration.seqType.isWgbs()) {
             additional = """
-                <!-- BWA Binary -->
-                <cvalue name="BWA_BINARY" value="${panCanAlignmentConfiguration.bwaMemPath}" type="filename"
-                        description=""/>
+                <!-- BWA Version -->
+                <cvalue name="BWA_VERSION" value="${panCanAlignmentConfiguration.bwaMemVersion}" type="string"
+                        description="Use e.g. 0.7.8-r2.05 for a specific revision of bb-bwa. Suffix with -bisulfite to load a bisulfite patched version."/>
                 """
         } else {
             additional = template.additionalProperties
@@ -58,33 +58,32 @@ class RoddyPanCanConfigTemplate {
         if (panCanAlignmentConfiguration.mergeTool == MergeConstants.MERGE_TOOL_SAMBAMBA) {
             additional += """
                 <!-- Merging and Markdup version of sambamba -->
-                <cvalue name="SAMBAMBA_MARKDUP_BINARY" value="${panCanAlignmentConfiguration.sambambaPath}" type="string"
-                description="The sambamba version used only for duplication marking and merging."/>
+                <cvalue name="SAMBAMBA_MARKDUP_VERSION" value="${panCanAlignmentConfiguration.sambambaVersion}" type="string"
+                description="Only used for duplication marking."/>
                 """
         }
 
         return """
 <configuration
-        configurationType='project'
-        name='${RoddyWorkflowConfig.getNameUsedInConfig(Pipeline.Name.PANCAN_ALIGNMENT, panCanAlignmentConfiguration.seqType,
-                "${panCanAlignmentConfiguration.pluginName}:${panCanAlignmentConfiguration.pluginVersion}", panCanAlignmentConfiguration.configVersion)}'
-        description='Alignment configuration for project ${panCanAlignmentConfiguration.project.name}.'
-        imports='${panCanAlignmentConfiguration.baseProjectConfig}'>
+        configurationType="project"
+        name="${RoddyWorkflowConfig.getNameUsedInConfig(Pipeline.Name.PANCAN_ALIGNMENT, panCanAlignmentConfiguration.seqType,
+                "${panCanAlignmentConfiguration.pluginName}:${panCanAlignmentConfiguration.pluginVersion}", panCanAlignmentConfiguration.configVersion)}"
+        description="Alignment configuration for project ${panCanAlignmentConfiguration.project.name}."
+        imports="${panCanAlignmentConfiguration.baseProjectConfig}">
 
     <subconfigurations>
-        <configuration name='config' usedresourcessize='${panCanAlignmentConfiguration.resources}'>
+        <configuration name="config" usedresourcessize="${panCanAlignmentConfiguration.resources}">
             <availableAnalyses>
-                <analysis id='${panCanAlignmentConfiguration.seqType.roddyName}' configuration='${template.analysis}' killswitches='FilenameSection'/>
+                <analysis id="${panCanAlignmentConfiguration.seqType.roddyName}" configuration="${template.analysis}" killswitches="FilenameSection"/>
             </availableAnalyses>
             <configurationvalues>
 
-                <!-- Convey -->
-                <cvalue name='useAcceleratedHardware' value='false' type='boolean'
-                    description='Map reads with Convey BWA-MEM (true) or software BWA-MEM (false; PCAWF standard)'/>
+                <cvalue name="useAcceleratedHardware" value="false" type="boolean"
+                    description=""/>
 
                 <!-- Merge tool -->
-                <cvalue name='markDuplicatesVariant' value='${panCanAlignmentConfiguration.mergeTool}' type='string'
-                    description='Allowed values: biobambam, picard, sambamba. Default: empty. If set, this option takes precedence over the older useBioBamBamMarkDuplicates option.'/>
+                <cvalue name="markDuplicatesVariant" value="${panCanAlignmentConfiguration.mergeTool}" type="string"
+                    description="Allowed values: biobambam, picard, sambamba. Default: empty. If set, this option takes precedence over the older useBioBamBamMarkDuplicates option."/>
 
 ${additional}
 

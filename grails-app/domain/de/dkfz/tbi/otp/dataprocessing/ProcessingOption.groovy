@@ -39,7 +39,9 @@ class ProcessingOption implements Entity {
         PIPELINE_RODDY_ALIGNMENT_BWA_VERSION_AVAILABLE("Available versions for alignment with bwa_mem", null, Type.SINGLE_LINE_TEXT),
         PIPELINE_RODDY_ALIGNMENT_SAMBAMBA_VERSION_DEFAULT("Default version for merging and duplication marking with sambamba", "0.6.5", Type.SINGLE_LINE_TEXT),
         PIPELINE_RODDY_ALIGNMENT_SAMBAMBA_VERSION_AVAILABLE("Available versions for merging and duplication marking with sambamba", null, Type.SINGLE_LINE_TEXT),
+        @Deprecated
         PIPELINE_RODDY_ALIGNMENT_BWA_PATHS("Path to bwa_mem", null, Type.PATH),
+        @Deprecated
         PIPELINE_RODDY_ALIGNMENT_SAMBAMBA_PATHS("Path to sambamba", null, Type.PATH),
         PIPELINE_RODDY_ALIGNMENT_GENOME_STAR_INDEX("Default genome star index", null, Type.SINGLE_LINE_TEXT),
         COMMAND_SAMTOOLS("samtools (Tools for alignments in the SAM format)", null, Type.SINGLE_LINE_TEXT),
