@@ -539,7 +539,7 @@ $.otp.saveComment = function (id, comment, controller, action) {
 $.otp.tableButtons = [
     {
         extend: 'csvHtml5',
-        text: 'Donwload CSV',
+        text: 'Download CSV',
         footer: false
     }
 ];
