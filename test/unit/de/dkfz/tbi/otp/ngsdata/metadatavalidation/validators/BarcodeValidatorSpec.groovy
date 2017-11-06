@@ -16,7 +16,8 @@ class BarcodeValidatorSpec extends Specification {
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${MetaDataColumn.BARCODE}\n" +
                 "\n" +
-                 "AGGCAGAA\n"
+                 "AGGCAGAA\n" +
+                 "AGGCAGAA-AGGCAGAA\n"
         )
 
         when:
