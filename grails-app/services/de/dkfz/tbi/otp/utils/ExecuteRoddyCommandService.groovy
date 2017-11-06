@@ -84,12 +84,7 @@ class ExecuteRoddyCommandService {
         assert configName : "configName is not allowed to be null"
         assert analysisId : "analysisId is not allowed to be null"
         assert type : "type is not allowed to be null"
-        //we change to tmp dir to be on a specified directory where OtherUnixUser has access to
-        return "cd /tmp && ${executeCommandAsRoddyUser()} ${roddyPath}/roddy.sh ${type.cmd} ${configName}.config@${analysisId} "
-    }
-
-    String executeCommandAsRoddyUser() {
-        return "sudo -u OtherUnixUser"
+        return "${roddyPath}/roddy.sh ${type.cmd} ${configName}.config@${analysisId} "
     }
 
 
@@ -132,61 +127,38 @@ class ExecuteRoddyCommandService {
     void correctPermissions(RoddyResult roddyResult, Realm realm) {
         assert roddyResult : "roddyResult should not be null"
         String cmd = """\
-set -e
-cd "${roddyResult.workDirectory}"
+            set -e
+            cd "${roddyResult.workDirectory}"
 
-echo ""
-echo "correct directory permission"
-find -type d -user ${realm.roddyUser} -not -perm 2750 -print -exec chmod 2750 '{}' \\; | wc -l
+            echo ""
+            echo "correct directory permission"
+            find -type d -not -perm 2750 -print -exec chmod 2750 '{}' \\; | wc -l
 
-echo ""
-echo "correct file permission for non bam/bai files"
-# The file is not changed, since it needs to be stay writable"
-find -type f -user ${realm.roddyUser} -not -perm 440 -not -name "*.bam" -not -name "*.bai" -not -name ".roddyExecCache.txt" -not -name "zippedAnalysesMD5.txt" -print -exec chmod 440 '{}' \\; | wc -l
+            echo ""
+            echo "correct file permission for non bam/bai files"
+            # The file is not changed, since it needs to be stay writable"
+            find -type f -not -perm 440 -not -name "*.bam" -not -name "*.bai" -not -name ".roddyExecCache.txt" -not -name "zippedAnalysesMD5.txt" -print -exec chmod 440 '{}' \\; | wc -l
 
-echo ""
-echo "correct file permission for bam/bai files"
-find -type f -user ${realm.roddyUser} -not -perm 444 \\( -name "*.bam" -or -name "*.bai" \\) -print -exec chmod 444 '{}' \\; | wc -l
-"""
-        executionService.executeCommandReturnProcessOutput(realm, cmd, realm.roddyUser).assertExitCodeZeroAndStderrEmpty()
+            echo ""
+            echo "correct file permission for bam/bai files"
+            find -type f -not -perm 444 \\( -name "*.bam" -or -name "*.bai" \\) -print -exec chmod 444 '{}' \\; | wc -l
+            """.stripMargin()
+        executionService.executeCommandReturnProcessOutput(realm, cmd).assertExitCodeZeroAndStderrEmpty()
     }
 
     void correctGroups(RoddyResult roddyResult, Realm realm) {
         assert roddyResult : "roddyResult should not be null"
         String cmd = """\
-set -e
-cd "${roddyResult.workDirectory}"
+            set -e
+            cd "${roddyResult.workDirectory}"
 
-#correct group
-groupname=`stat -c '%G' .`
-echo ""
-echo "correct group permission to" \$groupname
-find -not -type l -user ${realm.roddyUser} -not -group \$groupname -print -exec chgrp \$groupname '{}' \\; | wc -l
-"""
-        executionService.executeCommandReturnProcessOutput(realm, cmd, realm.roddyUser).assertExitCodeZeroAndStderrEmpty()
-    }
-
-    void deleteContentOfOtherUnixUserDirectory(File basePath, Realm realm) {
-        assert basePath : "basePath is not allowed to be null"
-        String cmd = """\
-set -e
-cd "${basePath}"
-
-echo ""
-echo "delete ${realm.roddyUser} directory content of" `pwd`
-find -user ${realm.roddyUser} -type d -not -empty -prune | \\
-while read line
-do
-  echo ""
-  echo "delete content of" \$line
-  (
-    set -e
-    cd \$line
-    rm -rf *
-  )
-done
-"""
-        executionService.executeCommandReturnProcessOutput(realm, cmd, realm.roddyUser).assertExitCodeZeroAndStderrEmpty()
+            #correct group
+            groupname=`stat -c '%G' .`
+            echo ""
+            echo "correct group permission to" \$groupname
+            find -not -type l -not -group \$groupname -print -exec chgrp \$groupname '{}' \\; | wc -l
+            """.stripMargin()
+        executionService.executeCommandReturnProcessOutput(realm, cmd).assertExitCodeZeroAndStderrEmpty()
     }
 
     File featureTogglesConfigPath() {

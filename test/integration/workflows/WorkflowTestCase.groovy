@@ -123,15 +123,18 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
 
         DomainFactory.createAllAlignableSeqTypes()
         DomainFactory.createProcessingOptionForNotificationRecipient()
-        DomainFactory.createProcessingOption([
+        DomainFactory.createProcessingOptionLazy([
                 name: OptionName.OTP_USER_LINUX_GROUP,
                 value: TestConfigHelper.testingGroup(grailsApplication),
         ])
-        DomainFactory.createProcessingOption(name: OptionName.TIME_ZONE, type: null, value: "Europe/Berlin")
-        DomainFactory.createProcessingOption(name: OptionName.STATISTICS_BASES_PER_BYTES_FASTQ, type: null, value: 2.339)
+        DomainFactory.createProcessingOptionLazy(name: OptionName.TIME_ZONE, type: null, value: "Europe/Berlin")
+        DomainFactory.createProcessingOptionLazy(name: OptionName.STATISTICS_BASES_PER_BYTES_FASTQ, type: null, value: 2.339)
 
         createUserAndRoles()
         loadWorkflow()
+
+        DomainFactory.createProcessingOptionLazy(name: OptionName.RODDY_APPLICATION_INI, type: null, value: new File(getRootDirectory(), "applicationProperties.ini").absolutePath)
+
 
         assert schedulerService.running.empty
         assert schedulerService.queue.empty
@@ -164,7 +167,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         sessionFactory.currentSession.clear()
         TestCase.cleanTestDirectory()
 
-        cleanupDirectories()
+        println "Base directory: ${getBaseDirectory()}"
     }
 
 
@@ -236,16 +239,6 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
             assert key.text == value + '\n'
         }
     }
-
-
-    private void cleanupDirectories() {
-        String cmd = "find \'${getBaseDirectory().absolutePath}\' -user OtherUnixUser -not -type l -print -exec chmod 2770 '{}' \\; | wc -l"
-        ProcessOutput processOutput = executionService.executeCommandReturnProcessOutput(realm, cmd, realm.roddyUser)
-        processOutput.assertExitCodeZeroAndStderrEmpty()
-
-        println "Base directory: ${getBaseDirectory()}"
-    }
-
 
     private waitUntilWorkflowFinishes(org.joda.time.Duration timeout, int numberOfProcesses = 1) {
         println "Started to wait (until workflow is finished or timeout)"

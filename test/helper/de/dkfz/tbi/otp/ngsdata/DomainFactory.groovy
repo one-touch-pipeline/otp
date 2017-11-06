@@ -141,7 +141,6 @@ class DomainFactory {
                 host              : 'test.host.invalid',
                 port              : -1,
                 unixUser          : '!fakeuser',
-                roddyUser         : '!fakeroddyuser',
                 timeout           : -1,
                 defaultJobSubmissionOptions: '',
                 cluster           : Cluster.DKFZ,
@@ -358,11 +357,16 @@ class DomainFactory {
         ], properties)
     }
 
-    public static ProcessingOption createProcessingOption(Map properties = [:]) {
-        return createDomainObject(ProcessingOption, [
-                name: OptionName.PIPELINE_RODDY_SNV_PLUGIN_NAME,
-                value:  "processingOptionValue_${counter++}",
-        ], properties)
+    public static ProcessingOption createProcessingOptionLazy(Map properties = [:]) {
+        ProcessingOption processingOption = createDomainObjectLazy(ProcessingOption,
+                [value: "processingOptionValue_${counter++}"],
+                properties.findAll { it.key != "value" },
+        )
+        if (properties.containsKey("value")) {
+            processingOption.value = properties.value
+        }
+        processingOption.save(flush: true)
+        return processingOption
     }
 
     static JobErrorDefinition createJobErrorDefinition(Map properties = [:]) {
@@ -387,7 +391,7 @@ class DomainFactory {
     }
 
     public static void createProcessingOptionForNotificationRecipient(String recipientEmail = "email${counter++}@example.example"){
-        createProcessingOption(
+        createProcessingOptionLazy(
                 name: OptionName.EMAIL_RECIPIENT_NOTIFICATION,
                 type: null,
                 project: null,
@@ -396,7 +400,7 @@ class DomainFactory {
     }
 
     public static void createProcessingOptionForErrorRecipient(String recipientEmail = "email${counter++}@example.example") {
-        createProcessingOption(
+        createProcessingOptionLazy(
                 name: OptionName.EMAIL_RECIPIENT_ERRORS,
                 type: null,
                 project: null,
@@ -405,7 +409,7 @@ class DomainFactory {
     }
 
     public static ProcessingOption createProcessingOptionBasePathReferenceGenome(String fileName = TestCase.uniqueNonExistentPath.path) {
-        return createProcessingOption(
+        return createProcessingOptionLazy(
                 name: OptionName.BASE_PATH_REFERENCE_GENOME,
                 type: null,
                 project: null,
@@ -883,7 +887,7 @@ class DomainFactory {
         createProcessingThresholdsForBamFile(bamFileTumor, [numberOfLanes: null])
         createProcessingThresholdsForBamFile(bamFileControl, [numberOfLanes: null])
 
-        createProcessingOption(
+        createProcessingOptionLazy(
                 name: OptionName.PIPELINE_SOPHIA_REFERENCE_GENOME,
                 type: null,
                 project: null,
@@ -1912,31 +1916,31 @@ class DomainFactory {
 
     static Map<String, String> createOtpAlignmentProcessingOptions(Map properties = [:]) {
         [
-                createProcessingOption(
+                createProcessingOptionLazy(
                         name: OptionName.COMMAND_CONVEY_BWA,
                         type: null,
                         project: null,
                         value: properties[OptionName.COMMAND_CONVEY_BWA] ?: "value ${counter++}",
                 ),
-                createProcessingOption(
+                createProcessingOptionLazy(
                         name: OptionName.PIPELINE_OTP_ALIGNMENT_BWA_QUEUE_PARAMETER,
                         type: null,
                         project: null,
                         value: properties[OptionName.PIPELINE_OTP_ALIGNMENT_BWA_QUEUE_PARAMETER] ?: "value ${counter++}",
                 ),
-                createProcessingOption(
+                createProcessingOptionLazy(
                         name: OptionName.COMMAND_SAMTOOLS,
                         type: null,
                         project: null,
                         value: properties[OptionName.COMMAND_SAMTOOLS] ?: "value ${counter++}",
                 ),
-                createProcessingOption(
+                createProcessingOptionLazy(
                         name: OptionName.COMMAND_PICARD_MDUP,
                         type: null,
                         project: null,
                         value: properties[OptionName.COMMAND_PICARD_MDUP] ?: "value ${counter++}",
                 ),
-                createProcessingOption(
+                createProcessingOptionLazy(
                         name: OptionName.PIPELINE_OTP_ALIGNMENT_PICARD_MDUP,
                         type: null,
                         project: null,
@@ -2044,7 +2048,7 @@ class DomainFactory {
 
     static void createNotificationProcessingOptions() {
 
-        createProcessingOption([
+        createProcessingOptionLazy([
                 name   : OptionName.NOTIFICATION_TEMPLATE_BASE,
                 type   : null,
                 project: null,
@@ -2057,7 +2061,7 @@ phabricatorAlias: ${phabricatorAlias}
 ''',
         ])
 
-        createProcessingOption([
+        createProcessingOptionLazy([
                 name   : OptionName.NOTIFICATION_TEMPLATE_INSTALLATION,
                 type   : null,
                 project: null,
@@ -2070,14 +2074,14 @@ links: ${links}
 ''',
         ])
 
-        createProcessingOption([
+        createProcessingOptionLazy([
                 name   : OptionName.NOTIFICATION_TEMPLATE_INSTALLATION_FURTHER_PROCESSING,
                 type   : null,
                 project: null,
                 value  : '''further processing''',
         ])
 
-        createProcessingOption([
+        createProcessingOptionLazy([
                 name   : OptionName.NOTIFICATION_TEMPLATE_ALIGNMENT,
                 type   : null,
                 project: null,
@@ -2091,7 +2095,7 @@ paths: ${paths}
         ])
 
 
-        createProcessingOption([
+        createProcessingOptionLazy([
                 name: OptionName.NOTIFICATION_TEMPLATE_ALIGNMENT_FURTHER_PROCESSING,
                 type: null,
                 project: null,
@@ -2102,7 +2106,7 @@ samplePairsWillProcess: ${samplePairsWillProcess}
 ''',
         ])
 
-        createProcessingOption([
+        createProcessingOptionLazy([
                 name: OptionName.NOTIFICATION_TEMPLATE_ALIGNMENT_NO_FURTHER_PROCESSING,
                 type: null,
                 project: null,
@@ -2112,7 +2116,7 @@ samplePairsWontProcess: ${samplePairsWontProcess}
 ''',
         ])
 
-        createProcessingOption([
+        createProcessingOptionLazy([
                 name: OptionName.NOTIFICATION_TEMPLATE_ALIGNMENT_PROCESSING,
                 type: null,
                 project: null,
@@ -2129,7 +2133,7 @@ samtoolsProgram: ${samtoolsProgram}
         ])
 
 
-        createProcessingOption([
+        createProcessingOptionLazy([
                 name: OptionName.NOTIFICATION_TEMPLATE_SNV_PROCESSED,
                 type: null,
                 project: null,
@@ -2142,7 +2146,7 @@ directories: ${directories}
         ])
 
 
-        createProcessingOption([
+        createProcessingOptionLazy([
                 name: OptionName.NOTIFICATION_TEMPLATE_SNV_NOT_PROCESSED,
                 type: null,
                 project: null,
@@ -2152,7 +2156,7 @@ samplePairsNotProcessed: ${samplePairsNotProcessed}
 ''',
         ])
 
-        createProcessingOption([
+        createProcessingOptionLazy([
                 name: OptionName.NOTIFICATION_TEMPLATE_INDEL_PROCESSED,
                 type: null,
                 project: null,
@@ -2164,7 +2168,7 @@ directories: ${directories}
 ''',
         ])
 
-        createProcessingOption([
+        createProcessingOptionLazy([
                 name: OptionName.NOTIFICATION_TEMPLATE_INDEL_NOT_PROCESSED,
                 type: null,
                 project: null,
@@ -2174,7 +2178,7 @@ samplePairsNotProcessed: ${samplePairsNotProcessed}
 ''',
         ])
 
-        createProcessingOption([
+        createProcessingOptionLazy([
                 name: OptionName.NOTIFICATION_TEMPLATE_ACESEQ_PROCESSED,
                 type: null,
                 project: null,
@@ -2186,7 +2190,7 @@ directories: ${directories}
 ''',
         ])
 
-        createProcessingOption([
+        createProcessingOptionLazy([
                 name: OptionName.NOTIFICATION_TEMPLATE_ACESEQ_NOT_PROCESSED,
                 type: null,
                 project: null,
@@ -2196,7 +2200,7 @@ samplePairsNotProcessed: ${samplePairsNotProcessed}
 ''',
         ])
 
-        createProcessingOption([
+        createProcessingOptionLazy([
                 name: OptionName.NOTIFICATION_TEMPLATE_SOPHIA_PROCESSED,
                 type: null,
                 project: null,
@@ -2208,7 +2212,7 @@ directories: ${directories}
 ''',
         ])
 
-        createProcessingOption([
+        createProcessingOptionLazy([
                 name: OptionName.NOTIFICATION_TEMPLATE_SOPHIA_NOT_PROCESSED,
                 type: null,
                 project: null,

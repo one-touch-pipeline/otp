@@ -121,7 +121,7 @@ class LinkFilesToFinalDestinationService {
         }
 
         if (roddyBamFile.baseBamFile?.isOldStructureUsed()) {
-            executeRoddyCommandService.deleteContentOfOtherUnixUserDirectory(roddyBamFile.baseBamFile.finalMergedQADirectory, realm)
+            lsdfFilesService.deleteFilesRecursive(realm, [roddyBamFile.baseBamFile.finalMergedQADirectory])
         }
 
         //create the collected links
@@ -156,12 +156,6 @@ class LinkFilesToFinalDestinationService {
         }
         List<File> foundFiles = roddyBamFile.workDirectory.listFiles() ?: []
         List<File> filesToDelete = foundFiles - expectedFiles
-
-        filesToDelete.findAll {
-            it.isDirectory()
-        }.each {
-            executeRoddyCommandService.deleteContentOfOtherUnixUserDirectory(it, realm)
-        }
 
         lsdfFilesService.deleteFilesRecursive(realm, filesToDelete)
     }
@@ -204,10 +198,6 @@ class LinkFilesToFinalDestinationService {
         }
 
         if (filesToDelete) {
-            roddyDirsToDelete.findAll { it.exists() }.each {
-                executeRoddyCommandService.deleteContentOfOtherUnixUserDirectory(it, realm)
-            }
-
             lsdfFilesService.deleteFilesRecursive(realm, filesToDelete)
         }
     }
@@ -216,9 +206,6 @@ class LinkFilesToFinalDestinationService {
         List<RoddyBamFile> roddyBamFiles = RoddyBamFile.findAllByWorkPackageAndIdNotEqual(roddyBamFile.mergingWorkPackage, roddyBamFile.id)
         List<File> workDirs = roddyBamFiles*.workDirectory
         if (workDirs) {
-            workDirs.findAll { it.exists() }.each {
-                executeRoddyCommandService.deleteContentOfOtherUnixUserDirectory(it, realm)
-            }
             lsdfFilesService.deleteFilesRecursive(realm, workDirs)
         }
         String cmd = "find ${roddyBamFile.getBaseDirectory()} -maxdepth 1 -lname '.merging*/*' -delete;"

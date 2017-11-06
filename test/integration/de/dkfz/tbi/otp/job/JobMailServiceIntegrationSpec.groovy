@@ -37,7 +37,7 @@ class JobMailServiceIntegrationSpec extends Specification {
 
         Realm realm = DomainFactory.createRealmDataProcessing(temporaryFolder.newFolder(), [name: seqTrack.project.realmName])
 
-        DomainFactory.createProcessingOption([
+        DomainFactory.createProcessingOptionLazy([
                 name: ProcessingOption.OptionName.TICKET_SYSTEM_URL,
                 type: null,
                 value: "http:/localhost:8080"

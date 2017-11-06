@@ -141,7 +141,7 @@ class CreateNotificationTextServiceSpec extends Specification {
         String templateText = 'Some text ${placeholder} some text'
         String placeHolder = 'information'
 
-        DomainFactory.createProcessingOption([
+        DomainFactory.createProcessingOptionLazy([
                 name   : templateName,
                 type   : null,
                 project: null,

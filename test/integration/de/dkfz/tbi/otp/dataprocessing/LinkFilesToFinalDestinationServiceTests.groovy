@@ -128,21 +128,6 @@ class LinkFilesToFinalDestinationServiceTests {
     }
 
     @Test
-    void testCleanupWorkDirectory_deleteContentOfOtherUnixUserDirectoryThrowsException_shouldFail() {
-        final String FAIL_MESSAGE = HelperUtils.uniqueString
-
-        linkFilesToFinalDestinationService.executeRoddyCommandService.metaClass.deleteContentOfOtherUnixUserDirectory = { File basePath, Realm realm ->
-            assert false: FAIL_MESSAGE
-        }
-        File file = new File(roddyBamFile.workDirectory, HelperUtils.uniqueString)
-        assert file.mkdirs()
-
-        TestCase.shouldFailWithMessageContaining(AssertionError, FAIL_MESSAGE) {
-            linkFilesToFinalDestinationService.cleanupWorkDirectory(roddyBamFile, realm)
-        }
-    }
-
-    @Test
     void testCleanupWorkDirectory_removeDirsThrowsException_shouldFail() {
         assert roddyBamFile.workDirectory.mkdirs()
         assert new File(roddyBamFile.workDirectory, HelperUtils.uniqueString).createNewFile()
@@ -180,7 +165,6 @@ class LinkFilesToFinalDestinationServiceTests {
         }
 
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
-        int callDeletedRoddy = 0
         boolean callDeleted = false
         List<File> filesNotToBeCalledFor = [
                 roddyBamFile.workBamFile,
@@ -210,13 +194,6 @@ class LinkFilesToFinalDestinationServiceTests {
         }
         assert countTmpDir == tmpDirectories.size()
 
-        linkFilesToFinalDestinationService.executeRoddyCommandService.metaClass.deleteContentOfOtherUnixUserDirectory = { File file, Realm realm ->
-            assert roddyBamFile.workDirectory == file.parentFile
-            assert !filesNotToBeCalledFor.contains(file)
-            assert tmpDirectories.contains(file)
-            callDeletedRoddy++
-        }
-
         linkFilesToFinalDestinationService.executionService.metaClass.executeCommand = { Realm realm, String command ->
             assert filesNotToBeCalledFor.every{
                 !command.contains(it.path)
@@ -237,7 +214,6 @@ class LinkFilesToFinalDestinationServiceTests {
         linkFilesToFinalDestinationService.cleanupWorkDirectory(roddyBamFile, realm)
 
         assert callDeleted  == (countTmpDir + countTmpFiles > 0)
-        assert countTmpDir == callDeletedRoddy
         tmpDirectories.each {
             assert !it.exists()
         }
@@ -322,19 +298,6 @@ class LinkFilesToFinalDestinationServiceTests {
         }
     }
 
-    @Test
-    void testLinkNewResults_deleteContentOfOtherUnixUserDirectoryThrowsException_shouldFail() {
-        final String FAIL_MESSAGE = HelperUtils.uniqueString
-
-        linkFilesToFinalDestinationService.linkFileUtils.metaClass.createAndValidateLinks = { Map<File, File> sourceLinkMap, Realm realm ->
-            assert false: FAIL_MESSAGE
-        }
-
-        TestCase.shouldFailWithMessageContaining(AssertionError, FAIL_MESSAGE) {
-            linkFilesToFinalDestinationService.linkNewResults(roddyBamFile, realm)
-        }
-    }
-
     private void testLinkNewResults_methylation_setup(){
         SeqType seqType = roddyBamFile.mergingWorkPackage.seqType
         seqType.name = SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName
@@ -415,10 +378,6 @@ class LinkFilesToFinalDestinationServiceTests {
             assert false: 'should not be called'
         }
 
-        linkFilesToFinalDestinationService.executeRoddyCommandService.metaClass.deleteContentOfOtherUnixUserDirectory = { File basePath, Realm realm ->
-            assert false: 'should not be called'
-        }
-
         linkFilesToFinalDestinationService.cleanupOldResults(roddyBamFile2, realm)
     }
 
@@ -429,21 +388,12 @@ class LinkFilesToFinalDestinationServiceTests {
         CreateRoddyFileHelper.createRoddyAlignmentFinalResultFiles(roddyBamFile)
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile2)
-        boolean hasCalled_deleteContentOfOtherUnixUserDirectory = false
         assert roddyBamFile.workDirectory.exists()
-
-        linkFilesToFinalDestinationService.executeRoddyCommandService.metaClass.deleteContentOfOtherUnixUserDirectory = { File basePath, Realm realm ->
-            hasCalled_deleteContentOfOtherUnixUserDirectory = true
-            assert basePath.exists()
-            assert basePath.isDirectory()
-            assert basePath.deleteDir()
-        }
 
         TestCase.withMockedExecutionService(linkFilesToFinalDestinationService.executionService, {
             linkFilesToFinalDestinationService.cleanupOldResults(roddyBamFile2, realm)
         })
 
-        assert hasCalled_deleteContentOfOtherUnixUserDirectory
         assert !roddyBamFile.workDirectory.exists()
         assert roddyBamFile2.workDirectory.exists()
         assert !roddyBamFile.finalExecutionStoreDirectory.exists()
@@ -469,19 +419,10 @@ class LinkFilesToFinalDestinationServiceTests {
         CreateRoddyFileHelper.createRoddyAlignmentFinalResultFiles(roddyBamFile)
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile2)
         assert roddyBamFile2.workDirectory.exists()
-        boolean isCalledForMergedQaDirectory = false
 
         linkFilesToFinalDestinationService.executionService.metaClass.executeCommand = { Realm realm, String command ->
             assert latestIsOld == !command.contains(RoddyBamFile.WORK_DIR_PREFIX)
             return ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
-        }
-
-        linkFilesToFinalDestinationService.executeRoddyCommandService.metaClass.deleteContentOfOtherUnixUserDirectory = { File basePath, Realm realm ->
-            assert !basePath.absolutePath.contains(RoddyBamFile.WORK_DIR_PREFIX)
-            assert basePath.deleteDir()
-            if (basePath.path.contains("${RoddyBamFile.QUALITY_CONTROL_DIR}/${RoddyBamFile.MERGED_DIR}")) {
-                isCalledForMergedQaDirectory = true
-            }
         }
 
         linkFilesToFinalDestinationService.cleanupOldResults(roddyBamFile2, realm)
@@ -492,7 +433,6 @@ class LinkFilesToFinalDestinationServiceTests {
         roddyBamFile.finalSingleLaneQADirectories.values().each {
             assert !it.exists()
         }
-        assert latestIsOld == isCalledForMergedQaDirectory
     }
 
     @Test
@@ -500,10 +440,6 @@ class LinkFilesToFinalDestinationServiceTests {
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
 
         linkFilesToFinalDestinationService.executionService.metaClass.executeCommand = { Realm realm, String command ->
-            assert false: 'should not be called'
-        }
-
-        linkFilesToFinalDestinationService.executeRoddyCommandService.metaClass.deleteContentOfOtherUnixUserDirectory = { File basePath, Realm realm ->
             assert false: 'should not be called'
         }
 
@@ -544,8 +480,6 @@ class LinkFilesToFinalDestinationServiceTests {
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile2)
 
-        linkFilesToFinalDestinationService.executeRoddyCommandService.metaClass.deleteContentOfOtherUnixUserDirectory = { File basePath, Realm realm -> }
-
         linkFilesToFinalDestinationService.createClusterScriptService.metaClass.removeDirs = { Collection<File> dirs, CreateClusterScriptService.RemoveOption option ->
             assert false: FAIL_MESSAGE
         }
@@ -562,8 +496,6 @@ class LinkFilesToFinalDestinationServiceTests {
         RoddyBamFile roddyBamFile2 = DomainFactory.createRoddyBamFile(roddyBamFile)
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile2)
-
-        linkFilesToFinalDestinationService.executeRoddyCommandService.metaClass.deleteContentOfOtherUnixUserDirectory = { File basePath, Realm realm -> }
 
         linkFilesToFinalDestinationService.executionService.metaClass.executeCommand = { Realm realm, String command ->
             assert false: FAIL_MESSAGE

@@ -64,22 +64,22 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
             }
         }
 
-        DomainFactory.createProcessingOption([
+        DomainFactory.createProcessingOptionLazy([
                 name: OptionName.PIPELINE_RODDY_ALIGNMENT_BWA_VERSION_AVAILABLE,
                 type: null,
                 value: "bwa-mem",
         ])
-        DomainFactory.createProcessingOption([
+        DomainFactory.createProcessingOptionLazy([
                 name: ProcessingOption.OptionName.PIPELINE_RODDY_ALIGNMENT_BWA_PATHS,
                 type: "bwa-mem",
                 value: temporaryFolder.newFile(),
         ])
-        DomainFactory.createProcessingOption([
+        DomainFactory.createProcessingOptionLazy([
                 name: OptionName.PIPELINE_RODDY_ALIGNMENT_SAMBAMBA_VERSION_AVAILABLE,
                 type: null,
                 value: "sambamba",
         ])
-        DomainFactory.createProcessingOption([
+        DomainFactory.createProcessingOptionLazy([
                 name: ProcessingOption.OptionName.PIPELINE_RODDY_ALIGNMENT_SAMBAMBA_PATHS,
                 type: "sambamba",
                 value: temporaryFolder.newFile(),

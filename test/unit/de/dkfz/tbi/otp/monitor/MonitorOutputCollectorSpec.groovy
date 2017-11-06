@@ -105,8 +105,8 @@ class MonitorOutputCollectorSpec extends Specification {
         given:
         MonitorOutputCollector collector = new MonitorOutputCollector()
         JobExecutionPlan plan = DomainFactory.createJobExecutionPlan()
-        DomainFactory.createProcessingOption([name: ProcessingOption.OptionName.MAXIMUM_NUMBER_OF_JOBS, type: plan.name, value: 50])
-        DomainFactory.createProcessingOption([name: ProcessingOption.OptionName.MAXIMUM_NUMBER_OF_JOBS_RESERVED_FOR_FAST_TRACK, type: plan.name, value: 20])
+        DomainFactory.createProcessingOptionLazy([name: ProcessingOption.OptionName.MAXIMUM_NUMBER_OF_JOBS, type: plan.name, value: 50])
+        DomainFactory.createProcessingOptionLazy([name: ProcessingOption.OptionName.MAXIMUM_NUMBER_OF_JOBS_RESERVED_FOR_FAST_TRACK, type: plan.name, value: 20])
 
         and: 'jobs already finished'
         3.times {

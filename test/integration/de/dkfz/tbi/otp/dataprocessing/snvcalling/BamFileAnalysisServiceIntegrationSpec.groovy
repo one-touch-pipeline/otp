@@ -73,13 +73,13 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
                 project: samplePair1.project,
                 pipeline: pipeline()
         )
-        DomainFactory.createProcessingOption([
+        DomainFactory.createProcessingOptionLazy([
                 name: ProcessingOption.OptionName.PIPELINE_ACESEQ_REFERENCE_GENOME,
                 type: null,
                 project: null,
                 value: samplePair1.mergingWorkPackage1.referenceGenome.name,
         ])
-        DomainFactory.createProcessingOption([
+        DomainFactory.createProcessingOptionLazy([
                 name: ProcessingOption.OptionName.PIPELINE_SOPHIA_REFERENCE_GENOME,
                 type: null,
                 project: null,
@@ -106,7 +106,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
                 project: samplePair1.project,
                 pipeline:  pipeline()
         )
-        DomainFactory.createProcessingOption([
+        DomainFactory.createProcessingOptionLazy([
                 name: optionName,
                 type: null,
                 project: null,
@@ -544,7 +544,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
     private void prepareSophiaForAceseqBase() {
         samplePair1.sophiaProcessingStatus = ProcessingStatus.NO_PROCESSING_NEEDED
         samplePair1.save(flush: true)
-        DomainFactory.createProcessingOption([
+        DomainFactory.createProcessingOptionLazy([
                 name   : OptionName.PIPELINE_ACESEQ_REFERENCE_GENOME,
                 type   : null,
                 project: null,

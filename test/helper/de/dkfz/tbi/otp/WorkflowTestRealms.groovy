@@ -18,7 +18,6 @@ class WorkflowTestRealms {
             jobScheduler: Realm.JobScheduler.PBS,
             host: 'headnode',
             port: DEFAULT_PORT,
-            roddyUser: 'OtherUnixUser',
             timeout: 0,
             defaultJobSubmissionOptions: JsonOutput.toJson([
                     (JobSubmissionOption.WALLTIME): Duration.ofMinutes(30).toString(),

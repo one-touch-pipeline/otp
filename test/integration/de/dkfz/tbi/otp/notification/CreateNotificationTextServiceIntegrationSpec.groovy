@@ -76,7 +76,7 @@ class CreateNotificationTextServiceIntegrationSpec extends IntegrationSpec {
                 ),
         )
         ProcessingStatus processingStatus = new ProcessingStatus()
-        DomainFactory.createProcessingOption(
+        DomainFactory.createProcessingOptionLazy(
                 name: ProcessingOption.OptionName.NOTIFICATION_TEMPLATE_SEQ_CENTER_NOTE,
                 type: exactlyOneElement(ticket.findAllSeqTracks()*.seqCenter.unique()).name,
                 value: generalSeqCenterComment

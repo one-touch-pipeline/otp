@@ -78,7 +78,6 @@ class AbstractRoddyJobTests {
         realm = Realm.build(
                 name: roddyBamFile.project.realmName,
                 operationType: Realm.OperationType.DATA_MANAGEMENT,
-                roddyUser: "roddyuser",
         )
 
         roddyJob = [
@@ -240,10 +239,10 @@ newLine"""
         ProcessingStep processingStep = DomainFactory.createAndSaveProcessingStep()
         assert processingStep
 
-        ClusterJob clusterJob = clusterJobService.createClusterJob(realm, "0000", realm.roddyUser, processingStep)
+        ClusterJob clusterJob = clusterJobService.createClusterJob(realm, "0000", realm.unixUser, processingStep)
         assert clusterJob
 
-        final ClusterJobIdentifier jobIdentifier = new ClusterJobIdentifier(realm, clusterJob.clusterJobId, realm.roddyUser)
+        final ClusterJobIdentifier jobIdentifier = new ClusterJobIdentifier(realm, clusterJob.clusterJobId, realm.unixUser)
 
         roddyJob.metaClass.maybeSubmit = {
             throw new RuntimeException("should not come here")

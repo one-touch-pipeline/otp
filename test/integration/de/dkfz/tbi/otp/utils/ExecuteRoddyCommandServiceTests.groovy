@@ -43,7 +43,7 @@ class ExecuteRoddyCommandServiceTests {
     void setUp() {
         DomainFactory.createRoddyProcessingOptions(temporaryFolder.newFolder())
 
-        DomainFactory.createProcessingOption([
+        DomainFactory.createProcessingOptionLazy([
                 name: OptionName.OTP_USER_LINUX_GROUP,
                 value: TestConfigHelper.testingGroup(grailsApplication),
                 type: null,
@@ -59,7 +59,6 @@ class ExecuteRoddyCommandServiceTests {
                 name              : roddyBamFile.project.realmName,
                 rootPath          : "${tmpOutputDir}/root",
                 processingRootPath: "${tmpOutputDir}/processing",
-                roddyUser         : System.getProperty("user.name"),
         ])
         assert realm.save(flush: true)
 
@@ -106,7 +105,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testRoddyBaseCommand_AllFine() {
-        String expectedCmd = "cd /tmp && sudo -u OtherUnixUser ${roddyPath}/roddy.sh rerun ${CONFIG_NAME}.config@${ANALYSIS_ID} "
+        String expectedCmd = "${roddyPath}/roddy.sh rerun ${CONFIG_NAME}.config@${ANALYSIS_ID} "
         String actualCmd = executeRoddyCommandService.roddyBaseCommand(roddyPath, CONFIG_NAME, ANALYSIS_ID, ExecuteRoddyCommandService.RoddyInvocationType.EXECUTE)
         assert expectedCmd == actualCmd
     }
@@ -243,8 +242,8 @@ class ExecuteRoddyCommandServiceTests {
 
         String viewByPid = roddyBamFile.individual.getViewByPidPathBase(roddyBamFile.seqType).absoluteDataManagementPath.path
 
-        String expectedCmd = "cd /tmp && " +
-                "sudo -u OtherUnixUser ${roddyCommand} rerun ${CONFIG_NAME}.config@${ANALYSIS_ID} " +
+        String expectedCmd =
+                "${roddyCommand} rerun ${CONFIG_NAME}.config@${ANALYSIS_ID} " +
                 "${roddyBamFile.individual.pid} " +
                 "--useconfig=${applicationIniPath} " +
                 "--usefeaturetoggleconfig=${featureTogglesConfigPath} " +
@@ -294,8 +293,8 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testRoddyGetRuntimeConfigCommand_AllFine() {
-        String expectedCmd = "cd /tmp && " +
-                "sudo -u OtherUnixUser ${roddyCommand} printidlessruntimeconfig ${CONFIG_NAME}.config@${ANALYSIS_ID} " +
+        String expectedCmd =
+                "${roddyCommand} printidlessruntimeconfig ${CONFIG_NAME}.config@${ANALYSIS_ID} " +
                 "--useconfig=${applicationIniPath} " +
                 "--usefeaturetoggleconfig=${featureTogglesConfigPath} " +
                 "--usePluginVersion=${roddyBamFile.config.pluginVersion} " +
@@ -306,13 +305,6 @@ class ExecuteRoddyCommandServiceTests {
             assert expectedCmd == actualCmd
         }
     }
-
-
-    @Test
-    void testExecuteCommandAsRoddyUser() {
-        assert 'sudo -u OtherUnixUser' == executeRoddyCommandService.executeCommandAsRoddyUser()
-    }
-
 
     @Test
     void testCreateWorkOutputDirectory_RealmIsNull_ShouldFail() {
@@ -351,14 +343,14 @@ class ExecuteRoddyCommandServiceTests {
         assert tmpOutputDir.exists()
 
         String permissionAndGroup = executeAndAssertExitCodeAndErrorOutAndReturnStdout("""\
-stat -c %a ${tmpOutputDir}
-stat -c %G ${tmpOutputDir}
-""")
+            stat -c %a ${tmpOutputDir}
+            stat -c %G ${tmpOutputDir}
+            """.stripIndent())
         //make the 2 optional, since it does not work for all developer, allow group jenkins, since user jenkins is not part of jenkins
         String expected = """\
-2?770
-(${ProcessingOptionService.getValueOfProcessingOption(OptionName.OTP_USER_LINUX_GROUP)}|jenkins)
-"""
+            2?770
+            (${ProcessingOptionService.getValueOfProcessingOption(OptionName.OTP_USER_LINUX_GROUP)}|jenkins)
+            """.stripIndent()
 
         assert permissionAndGroup ==~ expected
     }
@@ -376,14 +368,14 @@ stat -c %G ${tmpOutputDir}
 
         //then:
         String permissionAndGroup = executeAndAssertExitCodeAndErrorOutAndReturnStdout("""\
-stat -c %a ${tmpOutputDir}
-stat -c %G ${tmpOutputDir}
-""")
+            stat -c %a ${tmpOutputDir}
+            stat -c %G ${tmpOutputDir}
+            """.stripIndent())
         //make the 2 optional, since it does not work for all developer, allow group jenkins, since user jenkins is not part of jenkins
         String expected = """\
-2?770
-(${ProcessingOptionService.getValueOfProcessingOption(OptionName.OTP_USER_LINUX_GROUP)}|jenkins)
-"""
+            2?770
+            (${ProcessingOptionService.getValueOfProcessingOption(OptionName.OTP_USER_LINUX_GROUP)}|jenkins)
+            """.stripIndent()
 
         assert permissionAndGroup ==~ expected
     }
@@ -391,21 +383,21 @@ stat -c %G ${tmpOutputDir}
     @Test
     void testCorrectPermission_AllOkay() {
         executeRoddyCommandService.executionService = [
-                executeCommandReturnProcessOutput: { Realm realm1, String cmd, String user ->
+                executeCommandReturnProcessOutput: { Realm realm1, String cmd ->
                     assert realm1 == realm
-                    assert user == realm.roddyUser
                     ProcessOutput out = executeAndWait(cmd)
                     out.assertExitCodeZeroAndStderrEmpty()
-                    assert out.stdout == """
-correct directory permission
-2
+                    assert out.stdout == """\
 
-correct file permission for non bam/bai files
-1
+                        correct directory permission
+                        2
 
-correct file permission for bam/bai files
-2
-"""
+                        correct file permission for non bam/bai files
+                        1
+
+                        correct file permission for bam/bai files
+                        2
+                        """.stripIndent()
                     return out
                 }
         ] as ExecutionService
@@ -416,27 +408,29 @@ correct file permission for bam/bai files
         assert new File(roddyBamFile.workDirectory, "dir").mkdirs()
 
         assert executeAndAssertExitCodeAndErrorOutAndReturnStdout("""\
-chmod 777 ${roddyBamFile.workDirectory}/dir
-chmod 777 ${roddyBamFile.workDirectory}/file
-chmod 777 ${roddyBamFile.workDirectory}/${roddyBamFile.baiFileName}
-chmod 777 ${roddyBamFile.workDirectory}/${roddyBamFile.bamFileName}
-""").empty
+            chmod 777 ${roddyBamFile.workDirectory}/dir
+            chmod 777 ${roddyBamFile.workDirectory}/file
+            chmod 777 ${roddyBamFile.workDirectory}/${roddyBamFile.baiFileName}
+            chmod 777 ${roddyBamFile.workDirectory}/${roddyBamFile.bamFileName}
+            """.stripIndent()).empty
 
 
         executeRoddyCommandService.correctPermissions(roddyBamFile, realm)
 
 
-        assert executeAndAssertExitCodeAndErrorOutAndReturnStdout("""\
-stat -c %a ${roddyBamFile.workDirectory}/dir
-stat -c %a ${roddyBamFile.workDirectory}/file
-stat -c %a ${roddyBamFile.workDirectory}/${roddyBamFile.baiFileName}
-stat -c %a ${roddyBamFile.workDirectory}/${roddyBamFile.bamFileName}
-""") == """\
-2750
-440
-444
-444
-"""
+        String expected = """\
+            2750
+            440
+            444
+            444
+            """.stripIndent()
+
+        assert expected == executeAndAssertExitCodeAndErrorOutAndReturnStdout("""\
+            stat -c %a ${roddyBamFile.workDirectory}/dir
+            stat -c %a ${roddyBamFile.workDirectory}/file
+            stat -c %a ${roddyBamFile.workDirectory}/${roddyBamFile.baiFileName}
+            stat -c %a ${roddyBamFile.workDirectory}/${roddyBamFile.bamFileName}
+            """.stripIndent())
     }
 
     @Test
@@ -450,15 +444,15 @@ stat -c %a ${roddyBamFile.workDirectory}/${roddyBamFile.bamFileName}
     void testCorrectGroup_AllFine() {
         String primaryGroup = TestCase.primaryGroup()
         executeRoddyCommandService.executionService = [
-                executeCommandReturnProcessOutput: { Realm realm1, String cmd, String user ->
+                executeCommandReturnProcessOutput: { Realm realm1, String cmd ->
                     assert realm1 == realm
-                    assert user == realm.roddyUser
                     ProcessOutput out = executeAndWait(cmd)
                     out.assertExitCodeZeroAndStderrEmpty()
-                    assert out.stdout == """
-correct group permission to ${primaryGroup}
-1
-""" as String
+                    assert out.stdout == """\
+
+                        correct group permission to ${primaryGroup}
+                        1
+                        """.stripIndent() as String
                     return out
                 }
         ] as ExecutionService
@@ -471,11 +465,9 @@ correct group permission to ${primaryGroup}
         executeRoddyCommandService.correctGroups(roddyBamFile, realm)
 
 
-        assert executeAndAssertExitCodeAndErrorOutAndReturnStdout("""\
-stat -c %G ${roddyBamFile.workDirectory}/file
-""") == """\
-${primaryGroup}
-""" as String
+        assert "${primaryGroup}\n" as String == executeAndAssertExitCodeAndErrorOutAndReturnStdout(
+                "stat -c %G ${roddyBamFile.workDirectory}/file"
+        )
     }
 
     @Test
@@ -483,56 +475,6 @@ ${primaryGroup}
         assert TestCase.shouldFail(AssertionError) {
             executeRoddyCommandService.correctGroups(null, realm)
         }.contains('roddyResult')
-    }
-
-
-    void helperTestDeleteContentOfOtherUnixUserDirectory_AllFine(boolean fileExist, Closure checkCallback) {
-        executeRoddyCommandService.executionService = [
-                executeCommandReturnProcessOutput: { Realm realm1, String cmd, String user ->
-                    assert realm1 == realm
-                    assert user == realm.roddyUser
-                    ProcessOutput out = executeAndWait(cmd)
-                    out.assertExitCodeZeroAndStderrEmpty()
-                    assert out.stdout.startsWith("\ndelete ${user} directory content of ${roddyBamFile.workDirectory}\n")
-                    checkCallback(out.stdout)
-                    return out
-                }
-        ] as ExecutionService
-
-        File ownDir = new File(roddyBamFile.workDirectory, "ownDir")
-        assert ownDir.mkdirs()
-        File ownFileInDir = CreateFileHelper.createFile(new File(roddyBamFile.workDirectory, "ownFileInDir"))
-        File ownFile = CreateFileHelper.createFile(new File(ownDir, "ownFile"))
-
-        //For a real test it would be necessary to create dirs and files as another user
-
-        executeRoddyCommandService.deleteContentOfOtherUnixUserDirectory(roddyBamFile.workDirectory, realm)
-
-        assert fileExist == ownFileInDir.exists()
-        assert fileExist == ownFile.exists()
-    }
-
-    @Test
-    void testDeleteContentOfOtherUnixUserDirectory_AllFineCorrectUser() {
-        helperTestDeleteContentOfOtherUnixUserDirectory_AllFine(false) { String output ->
-            assert output.contains("delete content of .")
-        }
-    }
-
-    @Test
-    void testDeleteContentOfOtherUnixUserDirectory_AllFineWrongUser() {
-        realm.roddyUser = "nobody"
-        realm.save(flush: true)
-        helperTestDeleteContentOfOtherUnixUserDirectory_AllFine(true) { String output ->
-            assert !output.contains("delete content of")
-        }
-    }
-
-    @Test
-    void testDeleteContentOfOtherUnixUserDirectory_BamFileIsNull_shouldFail() {
-        assert TestCase.shouldFail(AssertionError) {
-            executeRoddyCommandService.deleteContentOfOtherUnixUserDirectory(null, realm)
-        }.contains('basePath is not allowed to be null')
     }
 
     @Test
@@ -543,12 +485,17 @@ ${primaryGroup}
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
 
         assert executeAndAssertExitCodeAndErrorOutAndReturnStdout("""\
-chmod -R 777 ${roddyBamFile.workDirectory}
-chgrp -R ${group} ${roddyBamFile.workDirectory}
-chgrp ${primaryGroup} ${roddyBamFile.baseDirectory}
-""").empty
+            chmod -R 777 ${roddyBamFile.workDirectory}
+            chgrp -R ${group} ${roddyBamFile.workDirectory}
+            chgrp ${primaryGroup} ${roddyBamFile.baseDirectory}
+            """.stripIndent()).empty
 
         executeRoddyCommandService.executionService.metaClass.executeCommandReturnProcessOutput = { Realm realm1, String cmd, String user ->
+            ProcessOutput out = executeAndWait(cmd)
+            out.assertExitCodeZeroAndStderrEmpty()
+            return out
+        }
+        executeRoddyCommandService.executionService.metaClass.executeCommandReturnProcessOutput = { Realm realm1, String cmd ->
             ProcessOutput out = executeAndWait(cmd)
             out.assertExitCodeZeroAndStderrEmpty()
             return out
@@ -558,33 +505,34 @@ chgrp ${primaryGroup} ${roddyBamFile.baseDirectory}
 
 
         String value = executeAndAssertExitCodeAndErrorOutAndReturnStdout("""\
-stat -c %a ${roddyBamFile.workDirectory.path}
-stat -c %a ${roddyBamFile.workMergedQADirectory.path}
-stat -c %a ${roddyBamFile.workBamFile.path}
-stat -c %a ${roddyBamFile.workBaiFile.path}
-stat -c %a ${roddyBamFile.workMergedQAJsonFile.path}
+            stat -c %a ${roddyBamFile.workDirectory.path}
+            stat -c %a ${roddyBamFile.workMergedQADirectory.path}
+            stat -c %a ${roddyBamFile.workBamFile.path}
+            stat -c %a ${roddyBamFile.workBaiFile.path}
+            stat -c %a ${roddyBamFile.workMergedQAJsonFile.path}
 
-stat -c %G ${roddyBamFile.workDirectory.path}
-stat -c %G ${roddyBamFile.workMergedQADirectory.path}
-stat -c %G ${roddyBamFile.workBamFile.path}
-stat -c %G ${roddyBamFile.workBaiFile.path}
-stat -c %G ${roddyBamFile.workMergedQAJsonFile.path}
-""")
+            stat -c %G ${roddyBamFile.workDirectory.path}
+            stat -c %G ${roddyBamFile.workMergedQADirectory.path}
+            stat -c %G ${roddyBamFile.workBamFile.path}
+            stat -c %G ${roddyBamFile.workBaiFile.path}
+            stat -c %G ${roddyBamFile.workMergedQAJsonFile.path}
+            """.stripIndent()
+        )
 
         //On some computers the group id are not set for unknown reasons.
         //Therefore allow for the test also the other case
         String expected = """\
-2?750
-2?750
-444
-444
-440
-${primaryGroup}
-${primaryGroup}
-${primaryGroup}
-${primaryGroup}
-${primaryGroup}
-"""
+            2?750
+            2?750
+            444
+            444
+            440
+            ${primaryGroup}
+            ${primaryGroup}
+            ${primaryGroup}
+            ${primaryGroup}
+            ${primaryGroup}
+            """.stripIndent()
 
         assert value ==~ expected
     }

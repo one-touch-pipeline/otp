@@ -49,7 +49,6 @@ class Realm implements Entity, Serializable {
     String host                         // job submission host name
     int port                            // job submission host port
     String unixUser
-    String roddyUser
     int timeout
     String defaultJobSubmissionOptions  // default options for job submission
 
@@ -57,7 +56,6 @@ class Realm implements Entity, Serializable {
         // TODO OTP-1067: Add validation on the paths
         loggingRootPath blank:false, nullable:false
         stagingRootPath blank:true, nullable:true
-        roddyUser blank: false, nullable: true
         defaultJobSubmissionOptions validator: {
             ClusterJobSubmissionOptionsService.validateJsonString(it)
         }

@@ -21,7 +21,7 @@ public class SnvCallingStartJobTests {
     void test_ConfigClass_Config_Instance() {
         snvTestData = new SnvCallingInstanceTestData()
         snvTestData.createSnvObjects()
-        DomainFactory.createProcessingOption(name: TIME_ZONE, type: null, value: 'Europe/Berlin')
+        DomainFactory.createProcessingOptionLazy(name: TIME_ZONE, type: null, value: 'Europe/Berlin')
 
         try {
             SamplePair samplePair = snvTestData.samplePair

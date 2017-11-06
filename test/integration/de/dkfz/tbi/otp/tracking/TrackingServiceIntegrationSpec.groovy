@@ -63,13 +63,13 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
                 createNotificationTextService: createNotificationTextService,
         )
         DomainFactory.createAllAnalysableSeqTypes()
-        processingOption = DomainFactory.createProcessingOption([
+        processingOption = DomainFactory.createProcessingOptionLazy([
                 name: ProcessingOption.OptionName.PIPELINE_ACESEQ_REFERENCE_GENOME,
                 type: null,
                 project: null,
                 value: 'test',
         ])
-        processingOption2 = DomainFactory.createProcessingOption([
+        processingOption2 = DomainFactory.createProcessingOptionLazy([
                 name: ProcessingOption.OptionName.PIPELINE_SOPHIA_REFERENCE_GENOME,
                 type: null,
                 project: null,

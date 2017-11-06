@@ -100,9 +100,8 @@ class SnvCallingStartJobIntegrationSpec extends Specification {
             1 * getInstanceName(_) >> "someOtherInstanceName"
         }
         roddySnvCallingStartJob.executionService = Mock(ExecutionService) {
-            1 * executeCommandReturnProcessOutput(_, _, _) >> { Realm realm, String cmd, String user ->
+            1 * executeCommandReturnProcessOutput(_, _) >> { Realm realm, String cmd ->
                 assert cmd == "rm -rf ${failedInstance.instancePath.absoluteDataManagementPath} ${failedInstance.instancePath.absoluteStagingPath}"
-                assert user == realm.roddyUser
             }
         }
         roddySnvCallingStartJob.configService = new ConfigService()

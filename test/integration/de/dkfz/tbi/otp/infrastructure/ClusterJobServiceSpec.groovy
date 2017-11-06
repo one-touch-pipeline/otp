@@ -36,7 +36,7 @@ class ClusterJobServiceSpec extends Specification {
 
     void "test completeClusterJob with values"() {
         given:
-        DomainFactory.createProcessingOption(name: ProcessingOption.OptionName.TIME_ZONE, type: null, value: "Europe/Berlin")
+        DomainFactory.createProcessingOptionLazy(name: ProcessingOption.OptionName.TIME_ZONE, type: null, value: "Europe/Berlin")
 
         def(job, run) = createClusterJobWithRun(null, [seqType: seqType])
         job = job as ClusterJob
@@ -92,7 +92,7 @@ class ClusterJobServiceSpec extends Specification {
 
     void "test completeClusterJob empty"() {
         given:
-        DomainFactory.createProcessingOption(name: ProcessingOption.OptionName.TIME_ZONE, type: null, value: "Canada/Saskatchewan")
+        DomainFactory.createProcessingOptionLazy(name: ProcessingOption.OptionName.TIME_ZONE, type: null, value: "Canada/Saskatchewan")
 
         def(job, run) = createClusterJobWithRun(null, [seqType: seqType])
         job = job as ClusterJob
@@ -149,7 +149,7 @@ class ClusterJobServiceSpec extends Specification {
 
     void "test convertFromJava8LocalDateTimeToJodaDateTime with value"() {
         given:
-        DomainFactory.createProcessingOption(name: ProcessingOption.OptionName.TIME_ZONE, type: null, value: "Australia/West")
+        DomainFactory.createProcessingOptionLazy(name: ProcessingOption.OptionName.TIME_ZONE, type: null, value: "Australia/West")
 
         expect:
         new org.joda.time.DateTime(2017, 8, 8, 1, 0, ConfigService.dateTimeZone) == clusterJobService.convertFromJava8LocalDateTimeToJodaDateTime(java.time.LocalDateTime.of(2017, 8, 8, 1, 0))

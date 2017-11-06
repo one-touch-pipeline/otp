@@ -54,7 +54,7 @@ class RoddySophiaStartJobIntegrationSpec extends IntegrationSpec{
                 project: samplePair.project,
                 pipeline: DomainFactory.createSophiaPipelineLazy()
         )
-        DomainFactory.createProcessingOption([
+        DomainFactory.createProcessingOptionLazy([
                 name: ProcessingOption.OptionName.PIPELINE_SOPHIA_REFERENCE_GENOME,
                 type: null,
                 project: null,
@@ -79,7 +79,7 @@ class RoddySophiaStartJobIntegrationSpec extends IntegrationSpec{
                 project: samplePair.project,
                 pipeline: DomainFactory.createSophiaPipelineLazy()
         )
-        DomainFactory.createProcessingOption([
+        DomainFactory.createProcessingOptionLazy([
                 name: ProcessingOption.OptionName.PIPELINE_SOPHIA_REFERENCE_GENOME,
                 type: null,
                 project: null,

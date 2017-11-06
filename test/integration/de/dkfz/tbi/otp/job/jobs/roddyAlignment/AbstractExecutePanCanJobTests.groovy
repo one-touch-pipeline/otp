@@ -41,7 +41,7 @@ class AbstractExecutePanCanJobTests {
         ])
         roddyBamFile.workPackage.metaClass.findMergeableSeqTracks = { -> SeqTrack.list() }
 
-        Realm dataProcessing = DomainFactory.createRealmDataProcessing(tmpDir.root, [name: roddyBamFile.project.realmName, roddyUser: HelperUtils.uniqueString])
+        Realm dataProcessing = DomainFactory.createRealmDataProcessing(tmpDir.root, [name: roddyBamFile.project.realmName])
         dataManagement = DomainFactory.createRealmDataManagement(tmpDir.root, [name: roddyBamFile.project.realmName])
         abstractExecutePanCanJob = [
                 prepareAndReturnWorkflowSpecificCValues  : { RoddyBamFile bamFile -> ["${workflowSpecificCValues}"] },
@@ -136,8 +136,7 @@ class AbstractExecutePanCanJobTests {
         abstractExecutePanCanJob.executeRoddyCommandService.metaClass.createWorkOutputDirectory = { Realm realm, File file -> }
 
         String expectedCmd = """\
-cd /tmp \
-&& sudo -u OtherUnixUser ${roddyCommand} rerun \
+${roddyCommand} rerun \
 ${roddyBamFile.pipeline.name}_${roddyBamFile.seqType.roddyName}_${roddyBamFile.seqType.libraryLayout}_\
 ${roddyBamFile.config.pluginVersion}_${roddyBamFile.config.configVersion}.config@WGS \
 ${roddyBamFile.individual.pid} \

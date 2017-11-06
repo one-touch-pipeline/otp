@@ -87,7 +87,6 @@ abstract class AbstractBamFilePairAnalysisStartJob extends AbstractStartJobImpl 
 
         String deleteFiles = "rm -rf ${analysis.getWorkDirectory()} ${analysis.instancePath.absoluteStagingPath}"
 
-        executionService.executeCommandReturnProcessOutput(realm, deleteFiles, realm.roddyUser)
         executionService.executeCommandReturnProcessOutput(realm, deleteFiles)
     }
 

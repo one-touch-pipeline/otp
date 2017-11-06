@@ -19,14 +19,6 @@ import org.junit.rules.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 import static de.dkfz.tbi.otp.utils.ProcessHelperService.*
 
-// TODO: change owner of input files to otptest
-
-// all the tmp test directories are created with otptest user and will have localGroup as group
-// (base dir is crated with SetGID);
-// roddy.sh will be called with OtherUnixUser user, which has very restricted set of rights.
-// it is assumed then that OtherUnixUser is also in localGroup group to be able to read
-// tmp test data and write into roddyOutput dir created by workflow.
-
 abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
 
     //The number of reads of the example fastqc files

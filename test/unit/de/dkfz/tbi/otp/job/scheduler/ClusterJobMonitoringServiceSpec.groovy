@@ -18,7 +18,6 @@ class ClusterJobMonitoringServiceSpec extends Specification {
     void setup() {
         Realm realm1 = DomainFactory.createRealmDataProcessing()
         realm1.unixUser = "unx"
-        realm1.roddyUser = "rdy"
         clusterJob = new ClusterJobIdentifier(realm1, "JOB-ID", realm1.unixUser)
         monitoringJob = new TestMultiJob()
 

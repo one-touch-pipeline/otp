@@ -152,7 +152,7 @@ abstract class AbstractRoddyJob<R extends RoddyResult> extends AbstractMaybeSubm
                     throw new RuntimeException("'${jobId}' is not a valid job ID.")
                 }
 
-                submittedClusterJobs.add(clusterJobService.createClusterJob(realm, jobId, realm.roddyUser, processingStep, seqType, jobName, jobClass))
+                submittedClusterJobs.add(clusterJobService.createClusterJob(realm, jobId, realm.unixUser, processingStep, seqType, jobName, jobClass))
             }
         }
         assert submittedClusterJobs.empty == roddyOutput.stderr.contains(NO_STARTED_JOBS_MESSAGE)
