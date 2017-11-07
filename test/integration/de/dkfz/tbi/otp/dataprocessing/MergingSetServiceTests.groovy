@@ -53,7 +53,7 @@ class MergingSetServiceTests {
 
         seqType = DomainFactory.createSeqType()
 
-        seqPlatform = DomainFactory.createSeqPlatform()
+        seqPlatform = DomainFactory.createSeqPlatformWithSeqPlatformGroup()
 
         SeqCenter seqCenter = new SeqCenter(
                         name: "name",

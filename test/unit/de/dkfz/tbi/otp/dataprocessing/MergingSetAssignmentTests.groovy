@@ -54,7 +54,7 @@ class MergingSetAssignmentTests {
         seqCenter.save(flush: true)
         assertTrue(seqCenter.validate())
 
-        SeqPlatform seqPlatform = DomainFactory.createSeqPlatform()
+        SeqPlatform seqPlatform = DomainFactory.createSeqPlatformWithSeqPlatformGroup()
         Run run = new Run()
         run.name = "testname"
         run.seqCenter = seqCenter

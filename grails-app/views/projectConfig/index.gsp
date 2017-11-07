@@ -282,14 +282,10 @@
                 <g:each in="${seqTypeMergingCriteria}" var="m">
                     <tr>
                         <td>
-                            <sec:ifAllGranted roles="ROLE_OPERATOR">
-                                <g:link controller="mergingCriteria" params='["project.id": project.id,
-                                                                              "seqType.id": m.key.id]'>
-                                    ${m.key}</g:link>
-                            </sec:ifAllGranted>
-                            <sec:ifNotGranted roles="ROLE_OPERATOR">
+                            <g:link controller="mergingCriteria" params='["project.id": project.id,
+                                                                          "seqType.id": m.key.id]'>
                                 ${m.key}
-                            </sec:ifNotGranted>
+                            </g:link>
                         </td>
                         <td>
                             ${m.value?.libPrepKit != null ? m.value.libPrepKit : "Not configured"}

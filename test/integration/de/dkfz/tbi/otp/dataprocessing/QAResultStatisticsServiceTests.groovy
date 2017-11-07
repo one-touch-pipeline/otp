@@ -77,7 +77,7 @@ class QAResultStatisticsServiceTests {
 
         seqType = DomainFactory.createWholeGenomeSeqType()
 
-        SeqPlatform seqPlatform = DomainFactory.createSeqPlatform()
+        SeqPlatform seqPlatform = DomainFactory.createSeqPlatformWithSeqPlatformGroup()
 
         SeqCenter seqCenter = new SeqCenter(
                         name: "seqCenterName",

@@ -9,7 +9,7 @@ import spock.lang.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
-@Mock([SeqPlatform, SeqPlatformGroup])
+@Mock([SeqPlatform, SeqPlatformGroup, SeqPlatformModelLabel,])
 class InstrumentPlatformValidatorSpec extends Specification {
 
     void 'validate, when column is missing, adds error'() {
@@ -37,8 +37,8 @@ class InstrumentPlatformValidatorSpec extends Specification {
                 "Platform1\n" +
                 "Platform2\n" +
                 "Platform1\n")
-        DomainFactory.createSeqPlatform(name: 'Platform2')
-        DomainFactory.createSeqPlatform(name: 'Platform2')
+        DomainFactory.createSeqPlatformWithSeqPlatformGroup(name: 'Platform2')
+        DomainFactory.createSeqPlatformWithSeqPlatformGroup(name: 'Platform2')
 
         when:
         new InstrumentPlatformValidator().validate(context)

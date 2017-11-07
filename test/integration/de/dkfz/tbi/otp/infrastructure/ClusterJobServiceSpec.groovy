@@ -276,7 +276,7 @@ class ClusterJobServiceSpec extends Specification {
     void testIsXten_WhenSeqTrackProcessedWithXten_ShouldReturnTrue() {
         given:
         SeqPlatformModelLabel seqPlatformModelLabel = SeqPlatformModelLabel.build(name: "HiSeq X Ten")
-        SeqPlatform seqPlatform = DomainFactory.createSeqPlatform([seqPlatformModelLabel: seqPlatformModelLabel])
+        SeqPlatform seqPlatform = DomainFactory.createSeqPlatformWithSeqPlatformGroup([seqPlatformModelLabel: seqPlatformModelLabel])
         def(job, run) = createClusterJobWithRun(DomainFactory.createRun(seqPlatform: seqPlatform))
         DomainFactory.createSeqTrack(run: run)
 
@@ -287,7 +287,7 @@ class ClusterJobServiceSpec extends Specification {
     void testIsXten_WhenSeqTrackNotProcessedWithXten_ShouldReturnFalse() {
         given:
         SeqPlatformModelLabel seqPlatformModelLabel = SeqPlatformModelLabel.build(name: "HiSeq2500")
-        SeqPlatform seqPlatform = DomainFactory.createSeqPlatform([seqPlatformModelLabel: seqPlatformModelLabel])
+        SeqPlatform seqPlatform = DomainFactory.createSeqPlatformWithSeqPlatformGroup([seqPlatformModelLabel: seqPlatformModelLabel])
         def(job, run) = createClusterJobWithRun(DomainFactory.createRun(seqPlatform: seqPlatform))
         DomainFactory.createSeqTrack(run: run)
 

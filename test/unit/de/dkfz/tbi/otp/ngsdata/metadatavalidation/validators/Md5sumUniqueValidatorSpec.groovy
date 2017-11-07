@@ -28,6 +28,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
         SeqCenter,
         SeqPlatform,
         SeqPlatformGroup,
+        SeqPlatformModelLabel,
         SeqTrack,
         SeqType,
         SoftwareTool,
@@ -137,14 +138,14 @@ ${md5sum3}
 ${md5sum2}
 """)
         DomainFactory.createExternallyProcessedMergedBamFile(
-                md5sum:              md5sum3,
+                md5sum: md5sum3,
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
-                fileSize:            1
+                fileSize: 1
         )
         DomainFactory.createExternallyProcessedMergedBamFile(
-                md5sum:              md5sum4,
+                md5sum: md5sum4,
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
-                fileSize:            1
+                fileSize: 1
         )
         Collection<Problem> expectedProblems = [
                 new Problem(context.spreadsheet.dataRows[1].cells + context.spreadsheet.dataRows[3].cells as Set, Level.WARNING,

@@ -29,6 +29,7 @@ import org.junit.*
         SeqCenter,
         SeqPlatform,
         SeqPlatformGroup,
+        SeqPlatformModelLabel,
         SeqTrack,
         SeqType,
         SoftwareTool,

@@ -69,7 +69,7 @@ class SeqPlatformIntegrationSpec extends IntegrationSpec {
     }
 
 
-    void "test add a SP which belongs to a default SPG to another default SPG, fails"() {
+    void "test add a SP which belongs already to a default SPG to another default SPG, fails"() {
         when:
         sp3.addToSeqPlatformGroups(spg_useDefault2)
         sp3.save(flush: true, failOnError: true)
@@ -78,7 +78,17 @@ class SeqPlatformIntegrationSpec extends IntegrationSpec {
         thrown(ValidationException)
     }
 
-    void "test add a SP which belongs to a default SPG to a PST specific SPG with multiple SPs, succeeds"() {
+    void "test add a SP which belongs already to a default SPG to a new default SPG, fails"() {
+        when:
+        SeqPlatformGroup seqPlatformGroup = new SeqPlatformGroup()
+        seqPlatformGroup.addToSeqPlatforms(sp3)
+        assert seqPlatformGroup.save(flush: true, failOnError: true)
+
+        then:
+        thrown(ValidationException)
+    }
+
+    void "test add a SP which belongs to a default SPG to a project and seqType specific SPG with multiple SPs, succeeds"() {
         when:
         sp4.addToSeqPlatformGroups(spg_project1)
         sp4.save(flush: true, failOnError: true)
@@ -87,7 +97,7 @@ class SeqPlatformIntegrationSpec extends IntegrationSpec {
         notThrown(Throwable)
     }
 
-    void "test add a SP which belongs to a default SPG to a PST specific SPG, succeeds"() {
+    void "test add a SP which belongs to a default SPG to a project and seqType specific SPG, succeeds"() {
         when:
         sp4.addToSeqPlatformGroups(spg_project2)
         sp4.save(flush: true, failOnError: true)
@@ -96,7 +106,7 @@ class SeqPlatformIntegrationSpec extends IntegrationSpec {
         notThrown(Throwable)
     }
 
-    void "test add a SPG which belongs to a specific PST to a SP with a default SPG, succeeds"() {
+    void "test add a SPG which belongs to a specific project and seqType to a SP with a default SPG, succeeds"() {
         when:
         spg_project2.addToSeqPlatforms(sp4)
         spg_project2.save(flush: true, failOnError: true)
@@ -105,7 +115,20 @@ class SeqPlatformIntegrationSpec extends IntegrationSpec {
         notThrown(Throwable)
     }
 
-    void "test add a SPG which belongs to a specific PST to a SP which already has another SPG with that specific PSt"() {
+    void "test add a SPG which belongs to a specific project and seqType to a SP which belongs to another SPG, succeeds"() {
+        when:
+        MergingCriteria mergingCriteria = DomainFactory.createMergingCriteria([seqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC])
+        SeqPlatformGroup spg_project3 = DomainFactory.createSeqPlatformGroup(
+                mergingCriteria: mergingCriteria
+        )
+        spg_project3.addToSeqPlatforms(sp2)
+        spg_project3.save(flush: true, failOnError: true)
+
+        then:
+        notThrown(Throwable)
+    }
+
+    void "test add a SPG which belongs to a specific project and seqType to a SP which already has another SPG with the same project and seqType, fails"() {
         when:
         spg_project2.addToSeqPlatforms(sp2)
         spg_project2.save(flush: true, failOnError: true)
@@ -114,8 +137,20 @@ class SeqPlatformIntegrationSpec extends IntegrationSpec {
         thrown(ValidationException)
     }
 
+    void "test add a new SPG which belongs to a specific project and seqType to a SP which already has another SPG with the same project and seqType, fails"() {
+        when:
+        SeqPlatformGroup seqPlatformGroup = new SeqPlatformGroup(
+                mergingCriteria: mergingCriteria_useProject,
+        )
+        seqPlatformGroup.addToSeqPlatforms(sp2)
+        assert seqPlatformGroup.save(flush: true, failOnError: true)
 
-    void "test get correct SPGs for SP and PST"() {
+        then:
+        thrown(ValidationException)
+    }
+
+
+    void "test get correct SPGs for SP and project and seqType"() {
         expect:
         spg_project1 == sp1.getSeqPlatformGroup(mergingCriteria_useProject.project, mergingCriteria_useProject.seqType)
         spg_project1 == sp2.getSeqPlatformGroup(mergingCriteria_useProject.project, mergingCriteria_useProject.seqType)

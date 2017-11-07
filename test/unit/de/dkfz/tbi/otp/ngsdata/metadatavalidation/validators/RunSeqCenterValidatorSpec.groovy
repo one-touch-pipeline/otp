@@ -15,6 +15,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
         SeqCenter,
         SeqPlatform,
         SeqPlatformGroup,
+        SeqPlatformModelLabel,
 ])
 class RunSeqCenterValidatorSpec extends Specification {
 

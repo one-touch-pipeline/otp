@@ -42,10 +42,12 @@ class SeqPlatformGroup implements Entity {
                     } else {
                         eq("mergingCriteria", seqPlatformGroup.mergingCriteria)
                     }
-                    ne("id", seqPlatformGroup.id)
+                    if (seqPlatformGroup.id != null) {
+                        ne("id", seqPlatformGroup.id)
+                    }
                 }
                 if (l.size() > 0) {
-                    errors.rejectValue('seqPlatforms', "seqPlatform '${seqPlatform}' must not be part of muliple groups for mergingCriteria '${seqPlatformGroup.mergingCriteria}'")
+                    errors.rejectValue('seqPlatforms', "seqPlatform '${seqPlatform}' must not be part of multiple groups for mergingCriteria '${seqPlatformGroup.mergingCriteria}'")
                 }
             }
             return

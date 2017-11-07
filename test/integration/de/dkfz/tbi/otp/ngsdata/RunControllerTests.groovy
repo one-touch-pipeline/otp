@@ -54,7 +54,7 @@ class RunControllerTests implements UserAndRoles{
     @Ignore
     @Test
     void testShowRunMinimalData() {
-        SeqPlatform seqPlatform = DomainFactory.createSeqPlatform()
+        SeqPlatform seqPlatform = DomainFactory.createSeqPlatformWithSeqPlatformGroup()
         SeqCenter seqCenter = new SeqCenter(name: "test", dirName: "directory")
         assertNotNull(seqCenter.save())
         Run run = new Run(name: "test", seqCenter: seqCenter, seqPlatform: seqPlatform)
@@ -77,7 +77,7 @@ class RunControllerTests implements UserAndRoles{
     @Ignore
     @Test
     void testShowRunByName() {
-        SeqPlatform seqPlatform = DomainFactory.createSeqPlatform()
+        SeqPlatform seqPlatform = DomainFactory.createSeqPlatformWithSeqPlatformGroup()
         SeqCenter seqCenter = new SeqCenter(name: "test", dirName: "directory")
         assertNotNull(seqCenter.save())
         Run run = new Run(name: "test", seqCenter: seqCenter, seqPlatform: seqPlatform)
@@ -100,7 +100,7 @@ class RunControllerTests implements UserAndRoles{
     @Ignore
     @Test
     void testShowRunWithNextRun() {
-        SeqPlatform seqPlatform = DomainFactory.createSeqPlatform()
+        SeqPlatform seqPlatform = DomainFactory.createSeqPlatformWithSeqPlatformGroup()
         SeqCenter seqCenter = new SeqCenter(name: "test", dirName: "directory")
         assertNotNull(seqCenter.save())
         Run run = new Run(name: "test", seqCenter: seqCenter, seqPlatform: seqPlatform)
@@ -119,7 +119,7 @@ class RunControllerTests implements UserAndRoles{
 
     @Test
     void testShowRunWithPrevRun() {
-        SeqPlatform seqPlatform = DomainFactory.createSeqPlatform()
+        SeqPlatform seqPlatform = DomainFactory.createSeqPlatformWithSeqPlatformGroup()
         SeqCenter seqCenter = new SeqCenter(name: "test", dirName: "directory")
         assertNotNull(seqCenter.save())
         Run run = new Run(name: "test", seqCenter: seqCenter, seqPlatform: seqPlatform)
@@ -144,7 +144,7 @@ class RunControllerTests implements UserAndRoles{
 
     @Test
     void testShowRunWithPrevNextRun() {
-        SeqPlatform seqPlatform = DomainFactory.createSeqPlatform()
+        SeqPlatform seqPlatform = DomainFactory.createSeqPlatformWithSeqPlatformGroup()
         SeqCenter seqCenter = new SeqCenter(name: "test", dirName: "directory")
         assertNotNull(seqCenter.save())
         Run run1 = new Run(name: "test", seqCenter: seqCenter, seqPlatform: seqPlatform)

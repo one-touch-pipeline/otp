@@ -4,21 +4,22 @@ import grails.test.mixin.*
 import spock.lang.*
 
 @Mock([
-    DataFile,
-    FileType,
-    Individual,
-    Project,
-    ProjectCategory,
-    Run,
-    RunSegment,
-    Sample,
-    SampleType,
-    SeqCenter,
-    SeqPlatform,
-    SeqPlatformGroup,
-    SeqTrack,
-    SeqType,
-    SoftwareTool,
+        DataFile,
+        FileType,
+        Individual,
+        Project,
+        ProjectCategory,
+        Run,
+        RunSegment,
+        Sample,
+        SampleType,
+        SeqCenter,
+        SeqPlatform,
+        SeqPlatformGroup,
+        SeqPlatformModelLabel,
+        SeqTrack,
+        SeqType,
+        SoftwareTool,
 ])
 public class SeqTrackSpec extends Specification {
 
@@ -32,9 +33,9 @@ public class SeqTrackSpec extends Specification {
         seqTrack.getNReads() == null
 
         where:
-        input   | _
-        null    | _
-        420     | _
+        input | _
+        null  | _
+        420   | _
     }
 
     void "test getNReads, returns sum"() {

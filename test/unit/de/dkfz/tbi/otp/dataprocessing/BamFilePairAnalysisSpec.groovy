@@ -36,6 +36,7 @@ import spock.lang.*
         SeqCenter,
         SeqPlatform,
         SeqPlatformGroup,
+        SeqPlatformModelLabel,
         SeqTrack,
         SeqType,
         SoftwareTool,
@@ -155,11 +156,11 @@ class BamFilePairAnalysisSpec extends Specification {
         RoddyBamFile control = DomainFactory.createRoddyBamFile([workPackage: controlWorkPackage, config: disease.config])
 
         return new MockBamFilePairAnalysis([
-                instanceName: "2014-08-25_15h32",
-                samplePair: samplePair,
-                sampleType1BamFile: disease,
-                sampleType2BamFile: control,
-                config: DomainFactory.createRoddyWorkflowConfig([seqType: samplePair.seqType, pipeline: snvPipeline]),
+                instanceName              : "2014-08-25_15h32",
+                samplePair                : samplePair,
+                sampleType1BamFile        : disease,
+                sampleType2BamFile        : control,
+                config                    : DomainFactory.createRoddyWorkflowConfig([seqType: samplePair.seqType, pipeline: snvPipeline]),
                 latestDataFileCreationDate: AbstractBamFile.getLatestSequenceDataFileCreationDate(disease, control),
         ])
     }

@@ -203,7 +203,7 @@ class MergingWorkPackageUnitTests {
     @Test
     void testSatisfiesCriteriaBamFile_whenValid() {
         SeqPlatformGroup seqPlatformGroup = DomainFactory.createSeqPlatformGroup()
-        SeqPlatform seqPlatform = DomainFactory.createSeqPlatform(seqPlatformGroups: [seqPlatformGroup])
+        SeqPlatform seqPlatform = DomainFactory.createSeqPlatformWithSeqPlatformGroup(seqPlatformGroups: [seqPlatformGroup])
         SeqTrack seqTrack = DomainFactory.createSeqTrack(run: DomainFactory.createRun(seqPlatform: seqPlatform))
         DomainFactory.createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
         MergingWorkPackage workPackage = MergingWorkPackage.build(sample: seqTrack.sample, seqType: seqTrack.seqType, seqPlatformGroup: seqPlatformGroup)

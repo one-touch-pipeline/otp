@@ -32,7 +32,7 @@ class ConveyBwaAlignmentWorkflowTests extends WorkflowTestCase {
         File sourceFastqR2 = new File(testDataDir, "35-3B_NoIndex_L007_R2_complete_filtered.fastq.gz")
         File sourceRefGenDir = new File("${testDataDir}/reference_genomes/bwa06_1KGRef")
 
-        SeqPlatform seqPlatform = DomainFactory.createSeqPlatform([
+        SeqPlatform seqPlatform = DomainFactory.createSeqPlatformWithSeqPlatformGroup([
                 name: "Illumina SeqDingsi"
         ])
 

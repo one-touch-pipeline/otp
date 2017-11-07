@@ -56,7 +56,7 @@ class SeqPlatformServiceTests {
                     sequencingKitLabel2,
                     null
                 ].each {kit->
-                    DomainFactory.createSeqPlatform([
+                    DomainFactory.createSeqPlatformWithSeqPlatformGroup([
                         name: name,
                         seqPlatformModelLabel: model,
                         sequencingKitLabel: kit,
@@ -200,7 +200,7 @@ class SeqPlatformServiceTests {
 
         SeqPlatformModelLabel seqPlatformModelLabel = SeqPlatformModelLabel.build(name: MODEL_NAME)
         SequencingKitLabel sequencingKitLabel = SequencingKitLabel.build(name: KIT_NAME)
-        DomainFactory.createSeqPlatform([
+        DomainFactory.createSeqPlatformWithSeqPlatformGroup([
             name: PLATFORM_NAME,
             seqPlatformModelLabel: seqPlatformModelLabel,
             sequencingKitLabel: sequencingKitLabel,
@@ -212,7 +212,7 @@ class SeqPlatformServiceTests {
             dataFile = DataFile.build(run: run)
             MetaDataEntry.build(dataFile: dataFile, key: platformKey, value: platform)
             MetaDataEntry.build(dataFile: dataFile, key: modelKey, value: model)
-            DomainFactory.createSeqPlatform([
+            DomainFactory.createSeqPlatformWithSeqPlatformGroup([
                 name: PLATFORM_NAME,
                 seqPlatformModelLabel: seqPlatformModelLabel,
                 sequencingKitLabel: null,
@@ -224,7 +224,7 @@ class SeqPlatformServiceTests {
 
     @Test
     void testCreateNewSeqPlatform_SeqPlatformExistsAlready_shouldFail() {
-        DomainFactory.createSeqPlatform(
+        DomainFactory.createSeqPlatformWithSeqPlatformGroup(
                 name: PLATFORM_NAME,
                 seqPlatformGroups: null,
                 seqPlatformModelLabel: null,

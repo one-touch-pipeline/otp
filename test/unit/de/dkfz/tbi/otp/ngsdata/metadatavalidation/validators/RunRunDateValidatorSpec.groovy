@@ -16,6 +16,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
         SeqCenter,
         SeqPlatform,
         SeqPlatformGroup,
+        SeqPlatformModelLabel,
 ])
 class RunRunDateValidatorSpec extends Specification {
 
@@ -27,11 +28,11 @@ class RunRunDateValidatorSpec extends Specification {
                         "2016-01-01\tInconsistentMetadata\n" +
                         "2016-01-02\tInconsistentMetadata\n" +
                         "2016-01-02\tInconsistentDatabaseAndMetadata\n" +
-                        "2016-01-01\tConsistentDatabaseAndMetadata\n"+
-                        "2016-01-01\t160102InconsistentRunName\n"+
+                        "2016-01-01\tConsistentDatabaseAndMetadata\n" +
+                        "2016-01-01\t160102InconsistentRunName\n" +
                         "2016-01-01\t160101tConsistentDatabaseAndMetadata\n")
         Date date = ISODateTimeFormat.date().parseDateTime("2016-01-01").toDate()
-        SeqPlatform seqPlatform = DomainFactory.createSeqPlatform(name: "Illumina")
+        SeqPlatform seqPlatform = DomainFactory.createSeqPlatformWithSeqPlatformGroup(name: "Illumina")
         DomainFactory.createRun(name: 'InconsistentDatabaseAndMetadata', dateExecuted: date)
         DomainFactory.createRun(name: 'ConsistentDatabaseAndMetadata', dateExecuted: date)
         DomainFactory.createRun(name: '20160102InconsistentRunName', dateExecuted: date, seqPlatform: seqPlatform)

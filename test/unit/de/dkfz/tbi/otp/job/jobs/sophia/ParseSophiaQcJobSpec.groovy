@@ -32,6 +32,7 @@ import spock.lang.*
         SeqCenter,
         SeqPlatform,
         SeqPlatformGroup,
+        SeqPlatformModelLabel,
         SeqTrack,
         SeqType,
         SoftwareTool,

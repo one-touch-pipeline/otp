@@ -320,7 +320,7 @@ class AlignmentPassServiceIntegrationTests extends TestData {
     private SeqTrack createProcessableSeqTrack(){
         SeqTrack seqTrack = DomainFactory.createSeqTrackWithOneDataFile(
                 run: DomainFactory.createRun(
-                        seqPlatform: DomainFactory.createSeqPlatform(
+                        seqPlatform: DomainFactory.createSeqPlatformWithSeqPlatformGroup(
                                 seqPlatformGroups: [DomainFactory.createSeqPlatformGroup()])))
         DataFile dataFile = CollectionUtils.exactlyOneElement(DataFile.findAllBySeqTrack(seqTrack))
         dataFile.fileExists = true

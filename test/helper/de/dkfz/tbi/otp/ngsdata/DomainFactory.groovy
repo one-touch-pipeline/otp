@@ -1192,13 +1192,10 @@ class DomainFactory {
         ], seqCenterProperties)
     }
 
-    public static SeqPlatform createSeqPlatform(Map seqPlatformProperties = [:]) {
+    public static SeqPlatform createSeqPlatformWithSeqPlatformGroup(Map seqPlatformProperties = [:]) {
         Set<SeqPlatformGroup> spg = seqPlatformProperties.seqPlatformGroups as Set ?: [createSeqPlatformGroup()] as Set
 
-        SeqPlatform sp = createDomainObject(SeqPlatform, [
-                name             : 'seqPlatform_' + (counter++),
-                seqPlatformGroups: spg,
-        ], seqPlatformProperties)
+        SeqPlatform sp = createSeqPlatform([seqPlatformGroups: spg] + seqPlatformProperties)
 
         sp.seqPlatformGroups.each {
             sp.addToSeqPlatformGroups(it)
@@ -1206,6 +1203,13 @@ class DomainFactory {
         sp.save(flush: true)
 
         return sp
+    }
+
+    static SeqPlatform createSeqPlatform(Map seqPlatformProperties = [:]) {
+        return createDomainObject(SeqPlatform, [
+                name             : 'seqPlatform_' + (counter++),
+                seqPlatformModelLabel: { createSeqPlatformModelLabel() },
+        ], seqPlatformProperties)
     }
 
     public static SeqPlatformModelLabel createSeqPlatformModelLabel(Map properties = [:]) {
@@ -1224,11 +1228,20 @@ class DomainFactory {
         return createDomainObject(SeqPlatformGroup, [:], properties)
     }
 
+    static SeqPlatformGroup createSeqPlatformGroupWithMergingCriteria(Map properties = [:]) {
+        return createDomainObject(SeqPlatformGroup, [
+                mergingCriteria: createMergingCriteriaLazy(
+                    seqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
+                )
+        ], properties)
+
+    }
+
     public static Run createRun(Map runProperties = [:]) {
         return createDomainObject(Run, [
                 name       : 'runName_' + (counter++),
                 seqCenter  : { createSeqCenter() },
-                seqPlatform: { createSeqPlatform() },
+                seqPlatform: { createSeqPlatformWithSeqPlatformGroup() },
         ], runProperties)
     }
 
@@ -1587,7 +1600,7 @@ class DomainFactory {
     public static Map getMergingProperties(MergingWorkPackage mergingWorkPackage) {
         SeqPlatform seqPlatform = mergingWorkPackage?.seqPlatformGroup?.seqPlatforms?.sort()?.first()
         if (!seqPlatform) {
-            seqPlatform = createSeqPlatform(seqPlatformGroups: [mergingWorkPackage.seqPlatformGroup])
+            seqPlatform = createSeqPlatformWithSeqPlatformGroup(seqPlatformGroups: [mergingWorkPackage.seqPlatformGroup])
         }
 
         Map properties = [
@@ -2499,7 +2512,7 @@ samplePairsNotProcessed: ${samplePairsNotProcessed}
     }
 
 
-    public static MergingCriteria createMergingCriteriaLazy(Map properties = [:]) {
+    static MergingCriteria createMergingCriteriaLazy(Map properties = [:]) {
         return createDomainObjectLazy(MergingCriteria, [
                 project: { createProject() },
                 seqType: { createSeqType() },

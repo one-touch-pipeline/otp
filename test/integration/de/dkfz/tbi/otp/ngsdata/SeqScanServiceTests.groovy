@@ -44,7 +44,7 @@ class SeqScanServiceTests {
         SeqCenter seqCenter = new SeqCenter(name: "testSeqCenter", dirName: "testDir")
         assert(seqCenter.save())
         run.seqCenter = seqCenter
-        SeqPlatform seqPlatform = DomainFactory.createSeqPlatform()
+        SeqPlatform seqPlatform = DomainFactory.createSeqPlatformWithSeqPlatformGroup()
         run.seqPlatform = seqPlatform
         assert(run.save())
         SeqType seqType = new SeqType(name: "testSeqType", libraryLayout: "testLibraryLayout", dirName: "testDir")
@@ -85,7 +85,7 @@ class SeqScanServiceTests {
         SeqCenter seqCenter = new SeqCenter(name: "testSeqCenter", dirName: "testDir")
         assert(seqCenter.save())
         run.seqCenter = seqCenter
-        SeqPlatform seqPlatform = DomainFactory.createSeqPlatform()
+        SeqPlatform seqPlatform = DomainFactory.createSeqPlatformWithSeqPlatformGroup()
         run.seqPlatform = seqPlatform
         assert(run.save())
         SeqType seqType = new SeqType(name: "testSeqType", libraryLayout: "testLibraryLayout", dirName: "testDir")
@@ -126,7 +126,7 @@ class SeqScanServiceTests {
         SeqCenter seqCenter = new SeqCenter(name: "testSeqCenter", dirName: "testDir")
         assert(seqCenter.save())
         run.seqCenter = seqCenter
-        SeqPlatform seqPlatform = DomainFactory.createSeqPlatform()
+        SeqPlatform seqPlatform = DomainFactory.createSeqPlatformWithSeqPlatformGroup()
         run.seqPlatform = seqPlatform
         assert(run.save())
         SeqType seqType = new SeqType(name: "testSeqType", libraryLayout: "testLibraryLayout", dirName: "testDir")
@@ -161,7 +161,7 @@ class SeqScanServiceTests {
         assert(sample.save())
         SeqType seqType = new SeqType(name: "testSeqType", libraryLayout: "testLibraryLayout", dirName: "testDir")
         assert(seqType.save())
-        SeqPlatform seqPlatform = DomainFactory.createSeqPlatform()
+        SeqPlatform seqPlatform = DomainFactory.createSeqPlatformWithSeqPlatformGroup()
         SeqScan seqScan = new SeqScan(sample: sample, seqType: seqType, seqCenters: "testCenters", insertSize: "7", nLanes: 4, nBasePairs: 9l, coverage: 8.8, state: SeqScan.State.PROCESSING, qcState: SeqScan.QCState.PASS, seqPlatform: seqPlatform)
         assert(seqScan.save())
         seqScanService.fillSeqCenters(seqScan)
@@ -183,7 +183,7 @@ class SeqScanServiceTests {
         assert(sample.save())
         SeqType seqType = new SeqType(name: "testSeqType", libraryLayout: "testLibraryLayout", dirName: "testDir")
         assert(seqType.save())
-        SeqPlatform seqPlatform = DomainFactory.createSeqPlatform()
+        SeqPlatform seqPlatform = DomainFactory.createSeqPlatformWithSeqPlatformGroup()
         SeqScan seqScan = new SeqScan(sample: sample, seqType: seqType, seqCenters: "testCenters", insertSize: "7", nLanes: 4, nBasePairs: 9l, coverage: 8.8, state: SeqScan.State.PROCESSING, qcState: SeqScan.QCState.PASS, seqPlatform: seqPlatform)
         assert(seqScan.save())
         Run run = new Run()

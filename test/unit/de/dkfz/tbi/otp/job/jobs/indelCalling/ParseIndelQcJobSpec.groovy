@@ -19,6 +19,7 @@ import spock.lang.*
         IndelQualityControl,
         Individual,
         LibraryPreparationKit,
+        MergingCriteria,
         MergingWorkPackage,
         Pipeline,
         ProcessingOption,

@@ -13,27 +13,28 @@ import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus
 
 @TestMixin(ControllerUnitTestMixin)
 @Mock([
-    DataFile,
-    FileType,
-    IlseSubmission,
-    Individual,
-    OtrsTicket,
-    MergingWorkPackage,
-    ProcessingOption,
-    Project,
-    ProjectCategory,
-    ReferenceGenome,
-    ReferenceGenomeProjectSeqType,
-    Run,
-    RunSegment,
-    Sample,
-    SampleType,
-    SeqCenter,
-    SeqPlatform,
-    SeqPlatformGroup,
-    SeqTrack,
-    SeqType,
-    SoftwareTool,
+        DataFile,
+        FileType,
+        IlseSubmission,
+        Individual,
+        OtrsTicket,
+        MergingWorkPackage,
+        ProcessingOption,
+        Project,
+        ProjectCategory,
+        ReferenceGenome,
+        ReferenceGenomeProjectSeqType,
+        Run,
+        RunSegment,
+        Sample,
+        SampleType,
+        SeqCenter,
+        SeqPlatform,
+        SeqPlatformGroup,
+        SeqPlatformModelLabel,
+        SeqTrack,
+        SeqType,
+        SoftwareTool,
 ])
 class TrackingServiceSpec extends Specification {
 
@@ -42,7 +43,7 @@ class TrackingServiceSpec extends Specification {
     TrackingService trackingService = new TrackingService()
 
     @Unroll
-    def 'test createOrResetOtrsTicket, when no OtrsTicket with ticket number exists, creates one' () {
+    def 'test createOrResetOtrsTicket, when no OtrsTicket with ticket number exists, creates one'() {
         given:
         OtrsTicket otrsTicket
         TrackingService trackingService = new TrackingService()
@@ -63,16 +64,16 @@ class TrackingServiceSpec extends Specification {
         ]
     }
 
-    def 'test createOrResetOtrsTicket, when OtrsTicket with ticket number exists, resets it' () {
+    def 'test createOrResetOtrsTicket, when OtrsTicket with ticket number exists, resets it'() {
         given:
         OtrsTicket otrsTicket = DomainFactory.createOtrsTicket([
-                ticketNumber: TICKET_NUMBER,
-                installationFinished: new Date(),
-                fastqcFinished: new Date(),
-                alignmentFinished: new Date(),
-                snvFinished: new Date(),
-                indelFinished: new Date(),
-                aceseqFinished: new Date(),
+                ticketNumber         : TICKET_NUMBER,
+                installationFinished : new Date(),
+                fastqcFinished       : new Date(),
+                alignmentFinished    : new Date(),
+                snvFinished          : new Date(),
+                indelFinished        : new Date(),
+                aceseqFinished       : new Date(),
                 finalNotificationSent: true,
                 automaticNotification: true,
         ])
@@ -89,7 +90,7 @@ class TrackingServiceSpec extends Specification {
     def 'test createOrResetOtrsTicket, when OtrsTicket with ticket number exists, combine the seq center comment'() {
         given:
         OtrsTicket otrsTicket = DomainFactory.createOtrsTicket([
-                ticketNumber: TICKET_NUMBER,
+                ticketNumber    : TICKET_NUMBER,
                 seqCenterComment: comment1
         ])
         TrackingService trackingService = new TrackingService()
@@ -110,7 +111,7 @@ class TrackingServiceSpec extends Specification {
     }
 
 
-    def 'test createOrResetOtrsTicket, when ticket number is null, throws ValidationException' () {
+    def 'test createOrResetOtrsTicket, when ticket number is null, throws ValidationException'() {
         given:
         TrackingService trackingService = new TrackingService()
 
@@ -122,7 +123,7 @@ class TrackingServiceSpec extends Specification {
         ex.message.contains("on field 'ticketNumber': rejected value [null]")
     }
 
-    def 'test createOrResetOtrsTicket, when ticket number is blank, throws ValidationException' () {
+    def 'test createOrResetOtrsTicket, when ticket number is blank, throws ValidationException'() {
         given:
         TrackingService trackingService = new TrackingService()
 
@@ -134,7 +135,7 @@ class TrackingServiceSpec extends Specification {
         ex.message.contains("on field 'ticketNumber': rejected value []")
     }
 
-    def 'test setStarted' () {
+    def 'test setStarted'() {
         given:
         TrackingService trackingService = new TrackingService()
         OtrsTicket otrsTicket = DomainFactory.createOtrsTicket()
@@ -146,16 +147,16 @@ class TrackingServiceSpec extends Specification {
         otrsTicket."${step}Started" != null
 
         where:
-        step                                    | _
-        OtrsTicket.ProcessingStep.INSTALLATION  | _
-        OtrsTicket.ProcessingStep.FASTQC        | _
-        OtrsTicket.ProcessingStep.ALIGNMENT     | _
-        OtrsTicket.ProcessingStep.SNV           | _
-        OtrsTicket.ProcessingStep.INDEL         | _
-        OtrsTicket.ProcessingStep.ACESEQ        | _
+        step                                   | _
+        OtrsTicket.ProcessingStep.INSTALLATION | _
+        OtrsTicket.ProcessingStep.FASTQC       | _
+        OtrsTicket.ProcessingStep.ALIGNMENT    | _
+        OtrsTicket.ProcessingStep.SNV          | _
+        OtrsTicket.ProcessingStep.INDEL        | _
+        OtrsTicket.ProcessingStep.ACESEQ       | _
     }
 
-    def 'test setStarted, twice' () {
+    def 'test setStarted, twice'() {
         given:
         TrackingService trackingService = new TrackingService()
         OtrsTicket otrsTicket = DomainFactory.createOtrsTicket()
@@ -176,12 +177,12 @@ class TrackingServiceSpec extends Specification {
         DomainFactory.createProcessingOptionForOtrsTicketPrefix(prefix)
         ProcessingStatus status = [
                 getInstallationProcessingStatus: { -> ALL_DONE },
-                getFastqcProcessingStatus: { -> PARTLY_DONE_MIGHT_DO_MORE },
-                getAlignmentProcessingStatus: { -> NOTHING_DONE_MIGHT_DO },
-                getSnvProcessingStatus: { -> NOTHING_DONE_WONT_DO },
-                getIndelProcessingStatus: { -> NOTHING_DONE_MIGHT_DO },
-                getSophiaProcessingStatus: { -> NOTHING_DONE_MIGHT_DO },
-                getAceseqProcessingStatus: { -> NOTHING_DONE_MIGHT_DO}
+                getFastqcProcessingStatus      : { -> PARTLY_DONE_MIGHT_DO_MORE },
+                getAlignmentProcessingStatus   : { -> NOTHING_DONE_MIGHT_DO },
+                getSnvProcessingStatus         : { -> NOTHING_DONE_WONT_DO },
+                getIndelProcessingStatus       : { -> NOTHING_DONE_MIGHT_DO },
+                getSophiaProcessingStatus      : { -> NOTHING_DONE_MIGHT_DO },
+                getAceseqProcessingStatus      : { -> NOTHING_DONE_MIGHT_DO }
         ] as ProcessingStatus
         Run runA = DomainFactory.createRun(name: 'runA')
         Run runB = DomainFactory.createRun(name: 'runB')
@@ -234,7 +235,7 @@ ILSe 5678, runA, lane 1, ${sampleText}
         trackingService.sendOperatorNotification(ticket, seqTracks, status, false)
 
         then:
-        callCount  == 1
+        callCount == 1
     }
 
     void 'sendOperatorNotification, when finalNotification is true, sends final notification with correct subject'() {

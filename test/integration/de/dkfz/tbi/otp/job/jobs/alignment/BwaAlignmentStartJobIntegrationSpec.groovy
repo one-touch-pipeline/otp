@@ -18,7 +18,7 @@ class BwaAlignmentStartJobIntegrationSpec extends IntegrationSpec {
         given:
         SeqTrack seqTrack = DomainFactory.createSeqTrack(
                 run: DomainFactory.createRun(
-                        seqPlatform: DomainFactory.createSeqPlatform(
+                        seqPlatform: DomainFactory.createSeqPlatformWithSeqPlatformGroup(
                                 seqPlatformGroups: [DomainFactory.createSeqPlatformGroup()])))
         OtrsTicket otrsTicket = DomainFactory.createOtrsTicket()
         AlignmentPass alignmentPass = DomainFactory.createAlignmentPass([seqTrack: seqTrack])

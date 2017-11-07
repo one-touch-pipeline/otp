@@ -57,7 +57,7 @@ class BwaPairingAndSortingJobTests {
 
         SeqType seqType = DomainFactory.createSeqType(libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED)
 
-        SeqPlatform seqPlatform = DomainFactory.createSeqPlatform(name: SAMPlatformLabel.ILLUMINA.key)
+        SeqPlatform seqPlatform = DomainFactory.createSeqPlatformWithSeqPlatformGroup(name: SAMPlatformLabel.ILLUMINA.key)
 
         SeqCenter seqCenter = new SeqCenter(
             name: "name",

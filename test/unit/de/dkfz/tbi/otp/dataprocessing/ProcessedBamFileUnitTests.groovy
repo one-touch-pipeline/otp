@@ -45,7 +45,7 @@ class ProcessedBamFileUnitTests {
             )
         assertNotNull(project.save([flush: true, failOnError: true]))
 
-        seqPlatform = DomainFactory.createSeqPlatform()
+        seqPlatform = DomainFactory.createSeqPlatformWithSeqPlatformGroup()
 
         SeqCenter seqCenter = new SeqCenter(
             name: "name",

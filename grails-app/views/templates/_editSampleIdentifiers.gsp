@@ -15,5 +15,5 @@
             </td>
         </tr>
     </table>
-    <p class="sample-identifiers-field-label"><span class="wordBreak">${value}</span><button class="edit">&nbsp;</button></p>
+    <p class="inline-element"><span class="wordBreak">${value}</span><button class="edit">&nbsp;</button></p>
 </div>

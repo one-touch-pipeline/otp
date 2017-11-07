@@ -5,22 +5,23 @@ import grails.test.mixin.*
 import spock.lang.*
 
 @Mock([
-    DataFile,
-    FileType,
-    Individual,
-    MetaDataFile,
-    Project,
-    ProjectCategory,
-    Run,
-    RunSegment,
-    Sample,
-    SampleType,
-    SeqCenter,
-    SeqPlatform,
-    SeqPlatformGroup,
-    SeqTrack,
-    SeqType,
-    SoftwareTool,
+        DataFile,
+        FileType,
+        Individual,
+        MetaDataFile,
+        Project,
+        ProjectCategory,
+        Run,
+        RunSegment,
+        Sample,
+        SampleType,
+        SeqCenter,
+        SeqPlatform,
+        SeqPlatformGroup,
+        SeqPlatformModelLabel,
+        SeqTrack,
+        SeqType,
+        SoftwareTool,
 ])
 class RunServiceSpec extends Specification {
 
@@ -28,7 +29,7 @@ class RunServiceSpec extends Specification {
 
     void 'retrieveMetaDataFiles finds correct MetaDataFiles'() {
         given:
-        SeqPlatform seqPlatform = DomainFactory.createSeqPlatform(seqPlatformGroups: null)
+        SeqPlatform seqPlatform = DomainFactory.createSeqPlatformWithSeqPlatformGroup(seqPlatformGroups: null)
 
         Run runWithoutDataFile = DomainFactory.createRun(seqPlatform: seqPlatform)
 

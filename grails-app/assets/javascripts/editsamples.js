@@ -3,7 +3,7 @@
 
 $(function() {
     $.otp.editSamples = {};
-    $("div.sample-identifiers-field p.sample-identifiers-field-label button.edit").click(function () {
+    $("div.sample-identifiers-field p.inline-element button.edit").click(function () {
         "use strict";
         var outerContainer, existingValues, extractedElements = [], textField, textFieldContainer, saveButton, cancelButton, concreteTextField, concreteCancelButton, concreteSaveButton, lastExistingRow, plusButton;
         outerContainer = $(this).parent().parent();

@@ -86,7 +86,7 @@ class CheckQualityEncodingJobUnitTests {
                         dirName: "dirName"
         ])
 
-        SeqPlatform seqPlatform = DomainFactory.createSeqPlatform()
+        SeqPlatform seqPlatform = DomainFactory.createSeqPlatformWithSeqPlatformGroup()
 
         SeqCenter seqCenter = new SeqCenter(
                         name: "name",

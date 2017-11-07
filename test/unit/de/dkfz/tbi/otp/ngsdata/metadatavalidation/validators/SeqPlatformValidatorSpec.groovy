@@ -38,12 +38,12 @@ class SeqPlatformValidatorSpec extends Specification {
         kit2 = DomainFactory.createSequencingKitLabel(name: 'Kit2', alias: ['Kit2Alias'])
         kit3 = DomainFactory.createSequencingKitLabel(name: 'Kit3', alias: ['Kit3Alias'])
         kit4 = DomainFactory.createSequencingKitLabel(name: 'Kit4', alias: ['Kit4Alias'])
-        platform_1_1_1 = DomainFactory.createSeqPlatform(
+        platform_1_1_1 = DomainFactory.createSeqPlatformWithSeqPlatformGroup(
                 name: 'Platform1',
                 seqPlatformModelLabel: model1,
                 sequencingKitLabel: kit1,
         )
-        platform_3_3_X = DomainFactory.createSeqPlatform(
+        platform_3_3_X = DomainFactory.createSeqPlatformWithSeqPlatformGroup(
                 name: 'Platform3',
                 seqPlatformModelLabel: model3,
                 sequencingKitLabel: null,

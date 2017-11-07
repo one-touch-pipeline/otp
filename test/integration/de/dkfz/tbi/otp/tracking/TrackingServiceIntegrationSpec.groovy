@@ -298,7 +298,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
                 dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
                 fastqcState: SeqTrack.DataProcessingState.FINISHED,
                 run: DomainFactory.createRun(
-                        seqPlatform: DomainFactory.createSeqPlatform(
+                        seqPlatform: DomainFactory.createSeqPlatformWithSeqPlatformGroup(
                                 seqPlatformGroups: [DomainFactory.createSeqPlatformGroup()],
                         ),
                 ),
@@ -383,7 +383,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
                 dataInstallationState: SeqTrack.DataProcessingState.IN_PROGRESS,
                 fastqcState: SeqTrack.DataProcessingState.NOT_STARTED,
                 run: DomainFactory.createRun(
-                        seqPlatform: DomainFactory.createSeqPlatform(
+                        seqPlatform: DomainFactory.createSeqPlatformWithSeqPlatformGroup(
                                 seqPlatformGroups: [DomainFactory.createSeqPlatformGroup()],
                         ),
                 ),

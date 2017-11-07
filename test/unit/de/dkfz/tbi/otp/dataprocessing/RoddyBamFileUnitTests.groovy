@@ -33,6 +33,7 @@ import static de.dkfz.tbi.otp.dataprocessing.RoddyBamFile.QUALITY_CONTROL_JSON_F
         Project,
         Individual,
         Sample,
+        SeqPlatformModelLabel,
         ReferenceGenome,
         ReferenceGenomeProjectSeqType,
         RunSegment,
@@ -80,12 +81,12 @@ class RoddyBamFileUnitTests {
     }
 
     @Test
-    void testGetRoddyBaiFileName(){
+    void testGetRoddyBaiFileName() {
         assert "${sampleType.dirName}_${individual.pid}_merged.mdup.bam.bai" == roddyBamFile.getBaiFileName()
     }
 
     @Test
-    void testGetRoddyMd5sumFileName(){
+    void testGetRoddyMd5sumFileName() {
         assert "${sampleType.dirName}_${individual.pid}_merged.mdup.bam.md5" == roddyBamFile.getMd5sumFileName()
     }
 
@@ -205,7 +206,7 @@ class RoddyBamFileUnitTests {
         }
 
         Map<SeqTrack, File> actual = roddyBamFile.workSingleLaneQADirectories
-        assert  expected == actual
+        assert expected == actual
     }
 
     @Test
@@ -243,7 +244,7 @@ class RoddyBamFileUnitTests {
         }
 
         Map<SeqTrack, File> actual = roddyBamFile.finalSingleLaneQADirectories
-        assert  expected == actual
+        assert expected == actual
     }
 
     @Test
@@ -347,7 +348,6 @@ class RoddyBamFileUnitTests {
                 'exec_654321_987654321_bla_bla'
         ])
     }
-
 
 
     @Test

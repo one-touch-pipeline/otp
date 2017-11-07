@@ -28,6 +28,7 @@ import org.junit.*
         SeqCenter,
         SeqPlatform,
         SeqPlatformGroup,
+        SeqPlatformModelLabel,
         SeqType,
         SoftwareTool,
 ])
@@ -61,7 +62,7 @@ class SeqTrackUnitTests {
         Project project = DomainFactory.createProject()
         assert null != project.save(validate: false)
 
-        Individual individual = new Individual (project: project)
+        Individual individual = new Individual(project: project)
         assert null != individual.save(validate: false)
 
         Sample sample = new Sample(individual: individual)
@@ -72,7 +73,6 @@ class SeqTrackUnitTests {
 
         assertEquals(seqTrack.project, project)
     }
-
 
 
     @Test
@@ -131,7 +131,7 @@ class SeqTrackUnitTests {
     @Test
     void testValidateWithKitInfoReliabilityIsUnknownUnverifiedAndNoLibraryPreparationKit() {
         SeqTrack seqTrack = createSeqTrack()
-        seqTrack.kitInfoReliability= InformationReliability.UNKNOWN_UNVERIFIED
+        seqTrack.kitInfoReliability = InformationReliability.UNKNOWN_UNVERIFIED
         seqTrack.libraryPreparationKit = null
 
         assertTrue(seqTrack.validate())
@@ -140,7 +140,7 @@ class SeqTrackUnitTests {
     @Test
     void testValidateWithKitInfoReliabilityIsUnknownUnverifiedAndGivenLibraryPreparationKit() {
         SeqTrack seqTrack = createSeqTrack()
-        seqTrack.kitInfoReliability= InformationReliability.UNKNOWN_UNVERIFIED
+        seqTrack.kitInfoReliability = InformationReliability.UNKNOWN_UNVERIFIED
         seqTrack.libraryPreparationKit = new LibraryPreparationKit()
 
         TestCase.assertValidateError(seqTrack, "libraryPreparationKit", "validator.invalid", seqTrack.libraryPreparationKit)
@@ -246,12 +246,12 @@ class SeqTrackUnitTests {
 
     private SeqTrack createSeqTrack() throws Exception {
         return new SeqTrack(
-                        laneId: "lane",
-                        run: new Run(),
-                        sample: new Sample(),
-                        seqType: new SeqType(),
-                        seqPlatform: new SeqPlatform(),
-                        pipelineVersion: new SoftwareTool()
-                        )
+                laneId: "lane",
+                run: new Run(),
+                sample: new Sample(),
+                seqType: new SeqType(),
+                seqPlatform: new SeqPlatform(),
+                pipelineVersion: new SoftwareTool()
+        )
     }
 }

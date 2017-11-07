@@ -14,18 +14,19 @@ import static de.dkfz.tbi.otp.ngsdata.MultiplexingService.*
 import static de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory.*
 
 @Mock([
-    Individual,
-    Project,
-    ProjectCategory,
-    Run,
-    Sample,
-    SampleType,
-    SeqCenter,
-    SeqPlatform,
-    SeqPlatformGroup,
-    SeqTrack,
-    SeqType,
-    SoftwareTool,
+        Individual,
+        Project,
+        ProjectCategory,
+        Run,
+        Sample,
+        SampleType,
+        SeqCenter,
+        SeqPlatform,
+        SeqPlatformGroup,
+        SeqPlatformModelLabel,
+        SeqTrack,
+        SeqType,
+        SoftwareTool,
 ])
 class SeqTrackValidatorSpec extends Specification {
 
@@ -35,7 +36,8 @@ class SeqTrackValidatorSpec extends Specification {
 
     private static final Collection<MetaDataColumn> mateColumns = (seqTrackColumns + MATE).asImmutable()
 
-    private static Set<Cell> cells(MetadataValidationContext context, Collection<MetaDataColumn> columns, int... rowIndices) {
+    private
+    static Set<Cell> cells(MetadataValidationContext context, Collection<MetaDataColumn> columns, int ... rowIndices) {
         Set<Cell> cells = [] as Set
         columns.each {
             Column column = context.spreadsheet.getColumn(it.name())
@@ -115,7 +117,6 @@ class SeqTrackValidatorSpec extends Specification {
         context.problems.isEmpty()
     }
 
-
     // validate, given data without barcode ...
 
     void 'validate, given data without barcode and no data for same lane in database, succeeds'() {
@@ -181,7 +182,6 @@ class SeqTrackValidatorSpec extends Specification {
         then:
         assertContainSame(context.problems, expectedProblems)
     }
-
 
     // validate, given data with barcode ...
 
@@ -277,7 +277,6 @@ class SeqTrackValidatorSpec extends Specification {
         then:
         assertContainSame(context.problems, expectedProblems)
     }
-
 
     // validate, given data with and without barcode ...
 
@@ -406,7 +405,6 @@ class SeqTrackValidatorSpec extends Specification {
         assertContainSame(context.problems, expectedProblems)
     }
 
-
     // equal values in columns
 
     void 'validate, when columns which must have equal values for a SeqTrack have different values, adds errors'() {
@@ -439,7 +437,6 @@ class SeqTrackValidatorSpec extends Specification {
         then:
         assertContainSame(context.problems, expectedProblems)
     }
-
 
     // mates
 
@@ -613,7 +610,6 @@ class SeqTrackValidatorSpec extends Specification {
         then:
         context.problems.isEmpty()
     }
-
 
     // filenames and mates
 

@@ -48,7 +48,6 @@ class MergingCriteriaService {
         return object
     }
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     MergingCriteria findMergingCriteria(Project project, SeqType seqType) {
         return MergingCriteria.findByProjectAndSeqType(project, seqType) ?: new MergingCriteria()
     }
@@ -64,5 +63,71 @@ class MergingCriteriaService {
             return e.errors
         }
         return null
+    }
+
+    List<SeqPlatformGroup> findDefaultSeqPlatformGroups() {
+        return SeqPlatformGroup.findAllByMergingCriteriaIsNull()
+    }
+
+    List<SeqPlatformGroup> findSeqPlatformGroupsForProjectAndSeqType(Project project, SeqType seqType) {
+        return SeqPlatformGroup.createCriteria().list {
+            mergingCriteria {
+                eq("project", project)
+                eq("seqType", seqType)
+            }
+        }
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void removePlatformFromSeqPlatformGroup(SeqPlatformGroup group, SeqPlatform platform) {
+        group.removeFromSeqPlatforms(platform)
+        assert group.save(flush: true)
+        if (group.seqPlatforms.isEmpty()) {
+            deleteSeqPlatformGroup(group)
+        }
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void addPlatformToExistingSeqPlatformGroup(SeqPlatformGroup group, SeqPlatform platform) {
+        group.addToSeqPlatforms(platform)
+        assert group.save(flush: true)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void addPlatformToNewGroup(SeqPlatform platform, MergingCriteria mergingCriteria) {
+        SeqPlatformGroup seqPlatformGroup = new SeqPlatformGroup(
+                mergingCriteria: mergingCriteria,
+        )
+        seqPlatformGroup.addToSeqPlatforms(platform)
+        assert seqPlatformGroup.save(flush: true)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    // the group will not be deleted internally for reproducibility reasons, but the user will think the group is deleted
+    void deleteSeqPlatformGroup(SeqPlatformGroup group) {
+        // code necessary because of grails behaviour with many-to-many relationships
+        Set<SeqPlatform> seqPlatforms = new HashSet<SeqPlatform>(group.seqPlatforms ?: [])
+        seqPlatforms.each {
+            group.removeFromSeqPlatforms(it)
+        }
+        assert group.save(flush: true)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void copyDefaultToSpecific(SeqPlatformGroup seqPlatformGroup, MergingCriteria mergingCriteria) {
+        SeqPlatformGroup seqPlatformGroup1  = new SeqPlatformGroup(
+                mergingCriteria: mergingCriteria,
+        )
+        seqPlatformGroup.seqPlatforms?.each { SeqPlatform seqPlatform ->
+            seqPlatformGroup1.addToSeqPlatforms(seqPlatform)
+        }
+        assert seqPlatformGroup1.save(flush: true)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void copyAllDefaultToSpecific(MergingCriteria mergingCriteria) {
+        SeqPlatformGroup.findAllByMergingCriteriaIsNull().each { SeqPlatformGroup seqPlatformGroup ->
+            copyDefaultToSpecific(seqPlatformGroup, mergingCriteria)
+        }
     }
 }

@@ -25,6 +25,7 @@ import org.junit.*
         SeqCenter,
         SeqPlatform,
         SeqPlatformGroup,
+        SeqPlatformModelLabel,
         SeqTrack,
         SeqType,
         SoftwareTool,
@@ -53,10 +54,10 @@ class RoddyBamFile_PropertiesUnitTest {
         seqType = DomainFactory.createSeqType()
         pipeline = DomainFactory.createPanCanPipeline()
         workPackage = DomainFactory.createMergingWorkPackage(
-                sample:          sample,
+                sample: sample,
                 referenceGenome: referenceGenome,
-                seqType:         seqType,
-                pipeline:        pipeline,
+                seqType: seqType,
+                pipeline: pipeline,
         )
         bamFile = DomainFactory.createRoddyBamFile(workPackage: workPackage)
     }

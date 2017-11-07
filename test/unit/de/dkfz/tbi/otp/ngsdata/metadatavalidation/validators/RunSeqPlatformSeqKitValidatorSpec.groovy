@@ -30,7 +30,7 @@ class RunSeqPlatformSeqKitValidatorSpec extends Specification {
 
         SeqPlatformModelLabel model = DomainFactory.createSeqPlatformModelLabel(name: platformName, alias: [platformName])
         SequencingKitLabel kit = DomainFactory.createSequencingKitLabel(name: kitName, alias: [kitName])
-        SeqPlatform platform = DomainFactory.createSeqPlatform(
+        SeqPlatform platform = DomainFactory.createSeqPlatformWithSeqPlatformGroup(
                 name: 'Platform',
                 seqPlatformModelLabel: model,
                 sequencingKitLabel: kit,

@@ -38,37 +38,37 @@ class RunSeqPlatformValidatorSpec extends Specification {
         model2 = DomainFactory.createSeqPlatformModelLabel(name: 'Model2', alias: ['Model2Alias'])
         kit1 = DomainFactory.createSequencingKitLabel(name: 'Kit1', alias: ['Kit1Alias'])
         kit2 = DomainFactory.createSequencingKitLabel(name: 'Kit2', alias: ['Kit2Alias'])
-        platform_1_1_1 = DomainFactory.createSeqPlatform(
+        platform_1_1_1 = DomainFactory.createSeqPlatformWithSeqPlatformGroup(
                 name: 'Platform1',
                 seqPlatformModelLabel: model1,
                 sequencingKitLabel: kit1,
         )
-        platform_2_1_1 = DomainFactory.createSeqPlatform(
+        platform_2_1_1 = DomainFactory.createSeqPlatformWithSeqPlatformGroup(
                 name: 'Platform2',
                 seqPlatformModelLabel: model1,
                 sequencingKitLabel: kit1,
         )
-        platform_1_2_1 = DomainFactory.createSeqPlatform(
+        platform_1_2_1 = DomainFactory.createSeqPlatformWithSeqPlatformGroup(
                 name: 'Platform1',
                 seqPlatformModelLabel: model2,
                 sequencingKitLabel: kit1,
         )
-        platform_1_1_2 = DomainFactory.createSeqPlatform(
+        platform_1_1_2 = DomainFactory.createSeqPlatformWithSeqPlatformGroup(
                 name: 'Platform1',
                 seqPlatformModelLabel: model1,
                 sequencingKitLabel: kit2,
         )
-        platform_2_2_X = DomainFactory.createSeqPlatform(
+        platform_2_2_X = DomainFactory.createSeqPlatformWithSeqPlatformGroup(
                 name: 'Platform2',
                 seqPlatformModelLabel: model2,
                 sequencingKitLabel: null,
         )
-        platform_1_2_X = DomainFactory.createSeqPlatform(
+        platform_1_2_X = DomainFactory.createSeqPlatformWithSeqPlatformGroup(
                 name: 'Platform1',
                 seqPlatformModelLabel: model2,
                 sequencingKitLabel: null,
         )
-        platform_2_1_X = DomainFactory.createSeqPlatform(
+        platform_2_1_X = DomainFactory.createSeqPlatformWithSeqPlatformGroup(
                 name: 'Platform2',
                 seqPlatformModelLabel: model1,
                 sequencingKitLabel: null,

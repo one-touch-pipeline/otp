@@ -56,7 +56,7 @@ class MergingJobCreateCommandTests {
         basePathMerging = "${basePath}/merging"
         basePathMergingOutput = "${basePathMerging}//sampleType-1/${SEQ_TYPE_NAME}/${LIBRARY_LAYOUT_NAME}/DEFAULT/0/pass0"
 
-        seqPlatform = DomainFactory.createSeqPlatform()
+        seqPlatform = DomainFactory.createSeqPlatformWithSeqPlatformGroup()
 
         seqType = DomainFactory.createSeqType(
                         name: SEQ_TYPE_NAME,

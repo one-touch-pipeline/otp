@@ -38,6 +38,7 @@ import static de.dkfz.tbi.otp.dataprocessing.AceseqInstance.AceseqPlots.*
         SeqCenter,
         SeqPlatform,
         SeqPlatformGroup,
+        SeqPlatformModelLabel,
         SeqTrack,
         SeqType,
         SoftwareTool

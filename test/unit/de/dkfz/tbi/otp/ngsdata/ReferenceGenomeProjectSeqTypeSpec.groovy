@@ -14,6 +14,7 @@ import spock.lang.*
         SeqCenter,
         SeqPlatform,
         SeqPlatformGroup,
+        SeqPlatformModelLabel,
         SeqType,
         SoftwareTool,
         ReferenceGenome,
@@ -29,7 +30,6 @@ class ReferenceGenomeProjectSeqTypeSpec extends Specification {
     static final String OTHER_PROJECT_NAME = "otherProject"
     static final String OTHER_SEQ_TYPE_NAME = "otherSeqType"
     static final String OTHER_SAMPLE_TYPE_NAME = "otherSampleType"
-
 
 
     @Unroll

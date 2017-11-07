@@ -6,7 +6,7 @@ import org.junit.*
 
 import static org.junit.Assert.*
 
-@Mock([DataFile, FastqcProcessedFile, FileType, Individual, Project, ProjectCategory, Realm, Run, RunSegment, Sample, SampleType, SeqCenter, SeqPlatform, SeqPlatformGroup, SeqTrack, SeqType, SoftwareTool])
+@Mock([DataFile, FastqcProcessedFile, FileType, Individual, Project, ProjectCategory, Realm, Run, RunSegment, Sample, SampleType, SeqCenter, SeqPlatform, SeqPlatformGroup, SeqPlatformModelLabel, SeqTrack, SeqType, SoftwareTool])
 @TestFor(FastqcDataFilesService)
 class FastqcDataFilesServiceUnitTests {
 

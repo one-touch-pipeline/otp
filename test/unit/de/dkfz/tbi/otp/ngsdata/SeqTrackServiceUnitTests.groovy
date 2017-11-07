@@ -234,7 +234,7 @@ class SeqTrackServiceUnitTests {
     void testMayAlign_everythingIsOkay_shouldReturnTrue() {
         SeqTrack seqTrack = DomainFactory.createSeqTrackWithOneDataFile(
                 run: DomainFactory.createRun(
-                        seqPlatform: DomainFactory.createSeqPlatform(
+                        seqPlatform: DomainFactory.createSeqPlatformWithSeqPlatformGroup(
                                 seqPlatformGroups: [DomainFactory.createSeqPlatformGroup()])))
         DomainFactory.createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
 
@@ -294,7 +294,7 @@ class SeqTrackServiceUnitTests {
     @Test
     void testMayAlign_whenSeqPlatformGroupIsNull_shouldReturnFalse() {
         SeqTrack seqTrack = DomainFactory.createSeqTrackWithOneDataFile([
-                run: DomainFactory.createRun(seqPlatform: DomainFactory.createSeqPlatform(seqPlatformGroups: null)),
+                run: DomainFactory.createRun(seqPlatform: DomainFactory.createSeqPlatform()),
         ])
         DomainFactory.createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
 
