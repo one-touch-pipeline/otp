@@ -144,10 +144,10 @@ println processingOptionService.createOrUpdate(
         OptionName.NOTIFICATION_TEMPLATE_ACESEQ_PROCESSED,
         null,
         null,
-        '''The CNV calling from AceSEQ for following sample pairs is finished:
+        '''The CNV calling from ACEseq for following sample pairs is finished:
 ${samplePairsFinished}
 
-For the CNV calling from AceSEQ you can find links to the plots here:
+For the CNV calling from ACEseq you can find links to the plots here:
 ${otpLinks}
 
 The result files are available in the directories:
@@ -221,5 +221,14 @@ println processingOptionService.createOrUpdate(
         null,
         '''
 SV calling is done by SOPHIA, an unpublished algorithm developed by Umut Toprak, Division of Theoretical Bioinformatics. For questions regarding the output and its interpretation please contact u.toprak@dkfz.de
+'''
+)
+
+println processingOptionService.createOrUpdate(
+        OptionName.NOTIFICATION_TEMPLATE_ADDITION,
+        OtrsTicket.ProcessingStep.ACESEQ.notificationSubject,
+        null,
+        '''
+CNV calling is done by ACEseq developed by Kortine Kleinheinz, Division of Theoretical Bioinformatics. For questions regarding the output and its interpretation a documentation can be found here: http://aceseq.readthedocs.io/
 '''
 )
