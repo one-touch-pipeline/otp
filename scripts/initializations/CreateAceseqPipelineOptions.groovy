@@ -13,7 +13,7 @@ processingOptionService.createOrUpdate(
         ProcessingOption.OptionName.PIPELINE_ACESEQ_PLUGIN_VERSION,
         null,
         null,
-        '1.2.8-2'
+        '1.2.8-3'
 )
 processingOptionService.createOrUpdate(
         ProcessingOption.OptionName.PIPELINE_ACESEQ_BASE_PROJECT_CONFIG,
