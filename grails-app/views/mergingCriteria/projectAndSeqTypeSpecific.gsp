@@ -115,22 +115,24 @@
         <div style="float:right; width:50%;">
             <g:if test="${mergingCriteria.seqPlatformGroup in [MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC]}">
                 <h4>${g.message(code: "mergingCriteria.seqPlatformDefinition.specific")}</h4>
+
                 <sec:ifAllGranted roles="ROLE_OPERATOR">
                     <g:if test="${!allSeqPlatformsWithoutGroup.empty}">
                         <div class="small-frame-box">
                             New group
                             <ul>
                                 <li>
-                                    <g:form action="addPlatformToNewGroup">
+                                    <g:form action="createNewSpecificGroupAndAddPlatform">
                                         <g:select name="platform.id" from="${allSeqPlatformsWithoutGroup}" optionKey="id" noSelection="${[null: 'Select to create new group']}"/>
                                         <g:hiddenField name="mergingCriteria.id" value="${mergingCriteria.id}"/>
-                                        <g:submitButton name="Save"/>
+                                            <g:submitButton name="Save"/>
                                     </g:form>
                                 </li>
                             </ul>
                         </div>
                     </g:if>
                 </sec:ifAllGranted>
+
                 <g:each in="${seqPlatformGroupsPerProjectAndSeqType}" var="seqPlatformGroup">
                     <div class="small-frame-box">
                         <ul>

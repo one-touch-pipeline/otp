@@ -10,13 +10,13 @@ class MergingCriteriaController {
     ProjectSelectionService projectSelectionService
     MergingCriteriaService mergingCriteriaService
 
-    def index(ProjectAndSeqTypeCommand cmd) {
+    def projectAndSeqTypeSpecific(ProjectAndSeqTypeCommand cmd) {
         if (!cmd.validate()) {
             render status: 403
             return
         }
         MergingCriteria mergingCriteria = mergingCriteriaService.findMergingCriteria(cmd.project, cmd.seqType)
-        List<SeqPlatformGroup> seqPlatformGroups = mergingCriteriaService.findDefaultSeqPlatformGroups().sort { it.seqPlatforms.sort {it.fullName()}.first().fullName() }
+        List<SeqPlatformGroup> seqPlatformGroups = mergingCriteriaService.findDefaultSeqPlatformGroups()
         List<SeqPlatformGroup> seqPlatformGroupsPerProjectAndSeqType = mergingCriteriaService.findSeqPlatformGroupsForProjectAndSeqType(cmd.project, cmd.seqType).sort{it.id}.reverse()
         List<SeqPlatform> allUsedSpecificSeqPlatforms = seqPlatformGroupsPerProjectAndSeqType*.seqPlatforms.flatten()
         List<SeqPlatform> allSeqPlatformsWithoutGroup = SeqPlatform.all.sort{it.toString()} - allUsedSpecificSeqPlatforms
@@ -33,6 +33,16 @@ class MergingCriteriaController {
         ]
     }
 
+    def defaultSeqPlatformGroupConfiguration() {
+        List<SeqPlatformGroup> seqPlatformGroups = mergingCriteriaService.findDefaultSeqPlatformGroupsOperator()
+        List<SeqPlatform> allSeqPlatformsWithoutGroup = SeqPlatform.all.sort{it.toString()} - seqPlatformGroups*.seqPlatforms.flatten()
+
+        [
+                seqPlatformGroups          : seqPlatformGroups,
+                allSeqPlatformsWithoutGroup: allSeqPlatformsWithoutGroup,
+        ]
+    }
+
     def update(UpdateMergingCriteriaCommand cmd) {
         if (!cmd.validate()) {
             render status: 403
@@ -44,37 +54,50 @@ class MergingCriteriaController {
             flash.message = "An error occurred"
             flash.errors = errors
         }
-        redirect(action: "index", params: ["project.id": cmd.project.id, "seqType.id": cmd.seqType.id])
+        redirect(action: "projectAndSeqTypeSpecific", params: ["project.id": cmd.project.id, "seqType.id": cmd.seqType.id])
+    }
+
+    private void redirectHelper(MergingCriteria mergingCriteria) {
+        if (mergingCriteria) {
+            redirect(action: "projectAndSeqTypeSpecific", params: ["project.id": mergingCriteria.project.id, "seqType.id": mergingCriteria.seqType.id])
+        } else {
+            redirect(action: "defaultSeqPlatformGroupConfiguration")
+        }
     }
 
     def removePlatformFromSeqPlatformGroup(SeqPlatformGroup group, SeqPlatform platform) {
         mergingCriteriaService.removePlatformFromSeqPlatformGroup(group, platform)
-        redirect(action: "index", params: ["project.id": group.mergingCriteria.project.id, "seqType.id": group.mergingCriteria.seqType.id])
+        redirectHelper(group.mergingCriteria)
    }
 
     def addPlatformToExistingSeqPlatformGroup(SeqPlatformGroup group, SeqPlatform platform) {
         mergingCriteriaService.addPlatformToExistingSeqPlatformGroup(group, platform)
-        redirect(action: "index", params: ["project.id": group.mergingCriteria.project.id, "seqType.id": group.mergingCriteria.seqType.id])
+        redirectHelper(group.mergingCriteria)
    }
 
-    def addPlatformToNewGroup(SeqPlatform platform, MergingCriteria mergingCriteria) {
-        mergingCriteriaService.addPlatformToNewGroup(platform, mergingCriteria)
-        redirect(action: "index", params: ["project.id": mergingCriteria.project.id, "seqType.id": mergingCriteria.seqType.id])
+    def createNewSpecificGroupAndAddPlatform(SeqPlatform platform, MergingCriteria mergingCriteria) {
+        mergingCriteriaService.createNewGroupAndAddPlatform(platform, mergingCriteria)
+        redirectHelper(mergingCriteria)
+    }
+
+    def createNewDefaultGroupAndAddPlatform(SeqPlatform platform) {
+        mergingCriteriaService.createNewGroupAndAddPlatform(platform)
+        redirectHelper(null)
     }
 
     def deleteSeqPlatformGroup(SeqPlatformGroup group) {
         mergingCriteriaService.deleteSeqPlatformGroup(group)
-        redirect(action: "index", params: ["project.id": group.mergingCriteria.project.id, "seqType.id": group.mergingCriteria.seqType.id])
+        redirectHelper(group.mergingCriteria)
     }
 
     def copyDefaultToSpecific(SeqPlatformGroup seqPlatformGroup, MergingCriteria mergingCriteria) {
         mergingCriteriaService.copyDefaultToSpecific(seqPlatformGroup, mergingCriteria)
-        redirect(action: "index", params: ["project.id": mergingCriteria.project.id, "seqType.id": mergingCriteria.seqType.id])
+        redirect(action: "projectAndSeqTypeSpecific", params: ["project.id": mergingCriteria.project.id, "seqType.id": mergingCriteria.seqType.id])
     }
 
     def copyAllDefaultToSpecific(MergingCriteria mergingCriteria) {
         mergingCriteriaService.copyAllDefaultToSpecific(mergingCriteria)
-        redirect(action: "index", params: ["project.id": mergingCriteria.project.id, "seqType.id": mergingCriteria.seqType.id])
+        redirect(action: "projectAndSeqTypeSpecific", params: ["project.id": mergingCriteria.project.id, "seqType.id": mergingCriteria.seqType.id])
     }
 }
 

@@ -9,7 +9,7 @@ class CommentService {
     SpringSecurityService springSecurityService
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public Comment saveComment(Commentable commentable, String message) {
+    Comment saveComment(Commentable commentable, String message) {
         String userName = springSecurityService.principal.username
         return createOrUpdateComment(commentable, message, userName)
     }
@@ -24,5 +24,22 @@ class CommentService {
         commentable.comment = comment
         assert commentable.save(flush: true)
         return comment
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void saveComment(CommentableWithHistory commentableWithHistory, String message) {
+        String userName = springSecurityService.principal.username
+        addCommentToList(commentableWithHistory, message, userName)
+    }
+
+    void addCommentToList(CommentableWithHistory commentableWithHistory, String message, String userName) {
+        Comment comment = new Comment(
+                comment: message,
+                modificationDate: new Date(),
+                author: userName,
+        )
+        comment.save(flush: true)
+        commentableWithHistory.comments.add(comment)
+        assert commentableWithHistory.save(flush: true)
     }
 }

@@ -1,8 +1,10 @@
 package de.dkfz.tbi.otp.testing
 
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.security.*
 import grails.plugin.springsecurity.*
 import grails.plugin.springsecurity.acl.*
+import org.springframework.security.acls.domain.*
 import org.springframework.security.authentication.*
 import org.springframework.security.core.*
 import org.springframework.security.core.authority.*
@@ -96,6 +98,14 @@ trait UserAndRoles {
             else {
                 SecurityContextHolder.getContext().setAuthentication(previousAuth);
             }
+        }
+    }
+
+    void addUserToProject(String user, Project project) {
+        Role role = new Role(authority: "GROUP_TEST_PROJECT").save(flush: true)
+        UserRole.create(User.findByUsername(user), role)
+        SpringSecurityUtils.doWithAuth(ADMIN) {
+            aclUtilService.addPermission(project, new GrantedAuthoritySid(role.authority), BasePermission.READ)
         }
     }
 }

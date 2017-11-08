@@ -10,15 +10,16 @@ import org.springframework.validation.*
  * Depending on the value of {@link MergingCriteria#seqPlatformGroup}, a SeqPlatformGroup where {@link #mergingCriteria}
  * is null or refers to the project and seqType is used
  */
-class SeqPlatformGroup implements Entity {
+class SeqPlatformGroup implements Entity, CommentableWithHistory {
 
     Set<SeqPlatform> seqPlatforms
     MergingCriteria mergingCriteria
 
-    Comment comment
+    List<Comment> comments = []
 
     static hasMany = [
             seqPlatforms: SeqPlatform,
+            comments: Comment,
     ]
     static belongsTo = SeqPlatform
 
@@ -30,7 +31,6 @@ class SeqPlatformGroup implements Entity {
             }
             return true
         }
-        comment nullable: true
         seqPlatforms validator: { Set<SeqPlatform> seqPlatforms1, SeqPlatformGroup seqPlatformGroup, Errors errors ->
             seqPlatforms1.each { SeqPlatform seqPlatform ->
                 List<SeqPlatformGroup> l = withCriteria() {

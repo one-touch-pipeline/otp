@@ -1,23 +1,23 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.State
 import de.dkfz.tbi.otp.ngsdata.*
 import grails.validation.*
 import org.springframework.security.access.prepost.*
 import org.springframework.validation.*
 
-import static org.springframework.util.Assert.*
-
 class MergingCriteriaService {
 
     MergingCriteriaSpecificService mergingCriteriaSpecificService
+    CommentService commentService
 
     /**
      * Finds {@link ProcessedBamFile}s to be merged and sets their {@link ProcessedBamFile#status} to
      * {@link State#INPROGRESS}.
      */
     List<ProcessedBamFile> processedBamFilesForMerging(MergingWorkPackage workPackage) {
-        notNull(workPackage)
+        assert workPackage
         List<ProcessedBamFile> bamFiles2Merge = mergingCriteriaSpecificService.processedBamFilesForMerging(workPackage)
         bamFiles2Merge.each { ProcessedBamFile processedBamFile ->
             processedBamFile.status = State.INPROGRESS
@@ -31,7 +31,7 @@ class MergingCriteriaService {
      * {@link State#INPROGRESS}. May return {@code null}
      */
     ProcessedMergedBamFile processedMergedBamFileForMerging(MergingWorkPackage workPackage) {
-        notNull(workPackage, "the workPackage for the method mergedBamFiles2Merge is null")
+        assert workPackage : "the workPackage for the method mergedBamFiles2Merge is null"
         ProcessedMergedBamFile processedMergedBamFile =
                 mergingCriteriaSpecificService.processedMergedBamFileForMerging(workPackage)
         if (processedMergedBamFile) {
@@ -48,6 +48,7 @@ class MergingCriteriaService {
         return object
     }
 
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, read)")
     MergingCriteria findMergingCriteria(Project project, SeqType seqType) {
         return MergingCriteria.findByProjectAndSeqType(project, seqType) ?: new MergingCriteria()
     }
@@ -65,36 +66,46 @@ class MergingCriteriaService {
         return null
     }
 
+    @PreAuthorize("hasRole('ROLE_USER')")
     List<SeqPlatformGroup> findDefaultSeqPlatformGroups() {
-        return SeqPlatformGroup.findAllByMergingCriteriaIsNull()
+        return SeqPlatformGroup.createCriteria().list {
+            isNull("mergingCriteria")
+            isNotEmpty("seqPlatforms")
+        }.sort { it.seqPlatforms.sort { it.fullName() }.first().fullName() }
     }
 
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    List<SeqPlatformGroup> findDefaultSeqPlatformGroupsOperator() {
+        findDefaultSeqPlatformGroups()
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, read)")
     List<SeqPlatformGroup> findSeqPlatformGroupsForProjectAndSeqType(Project project, SeqType seqType) {
         return SeqPlatformGroup.createCriteria().list {
             mergingCriteria {
                 eq("project", project)
                 eq("seqType", seqType)
             }
+            isNotEmpty("seqPlatforms")
         }
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void removePlatformFromSeqPlatformGroup(SeqPlatformGroup group, SeqPlatform platform) {
+        commentService.saveComment(group, group.seqPlatforms.collect { it.fullName() }.join("\n"))
         group.removeFromSeqPlatforms(platform)
         assert group.save(flush: true)
-        if (group.seqPlatforms.isEmpty()) {
-            deleteSeqPlatformGroup(group)
-        }
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void addPlatformToExistingSeqPlatformGroup(SeqPlatformGroup group, SeqPlatform platform) {
+        commentService.saveComment(group, group.seqPlatforms.collect { it.fullName() }.join("\n"))
         group.addToSeqPlatforms(platform)
         assert group.save(flush: true)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void addPlatformToNewGroup(SeqPlatform platform, MergingCriteria mergingCriteria) {
+    void createNewGroupAndAddPlatform(SeqPlatform platform, MergingCriteria mergingCriteria = null) {
         SeqPlatformGroup seqPlatformGroup = new SeqPlatformGroup(
                 mergingCriteria: mergingCriteria,
         )
@@ -107,6 +118,7 @@ class MergingCriteriaService {
     void deleteSeqPlatformGroup(SeqPlatformGroup group) {
         // code necessary because of grails behaviour with many-to-many relationships
         Set<SeqPlatform> seqPlatforms = new HashSet<SeqPlatform>(group.seqPlatforms ?: [])
+        commentService.saveComment(group, seqPlatforms.collect { it.fullName() }.join("\n"))
         seqPlatforms.each {
             group.removeFromSeqPlatforms(it)
         }

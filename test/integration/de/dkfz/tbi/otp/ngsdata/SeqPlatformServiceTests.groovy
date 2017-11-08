@@ -10,16 +10,10 @@ import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 class SeqPlatformServiceTests {
 
     static final String PLATFORM_NAME = 'Some platform name'
-    static final String MODEL_NAME = 'Some model name'
-    static final String KIT_NAME = 'Some kit name'
-
-
 
     SeqPlatformService seqPlatformService
 
     CheckedLogger checkedLogger
-
-
 
     @Before
     void setUp() {
@@ -35,13 +29,12 @@ class SeqPlatformServiceTests {
     }
 
 
-
-    private List createDataFor_findForNameAndModelAndSequencingKit() {
+    private static List createDataFor_findForNameAndModelAndSequencingKit() {
         final String OTHER_PLATFORM_NAME = 'Some other platform name'
-        SeqPlatformModelLabel seqPlatformModelLabel = SeqPlatformModelLabel.build()
-        SeqPlatformModelLabel seqPlatformModelLabel2 = SeqPlatformModelLabel.build()
-        SequencingKitLabel sequencingKitLabel = SequencingKitLabel.build()
-        SequencingKitLabel sequencingKitLabel2 = SequencingKitLabel.build()
+        SeqPlatformModelLabel seqPlatformModelLabel = DomainFactory.createSeqPlatformModelLabel()
+        SeqPlatformModelLabel seqPlatformModelLabel2 = DomainFactory.createSeqPlatformModelLabel()
+        SequencingKitLabel sequencingKitLabel = DomainFactory.createSequencingKitLabel()
+        SequencingKitLabel sequencingKitLabel2 = DomainFactory.createSequencingKitLabel()
         [
             PLATFORM_NAME,
             OTHER_PLATFORM_NAME
@@ -69,7 +62,6 @@ class SeqPlatformServiceTests {
             sequencingKitLabel
         ]
     }
-
 
 
     @Test
@@ -119,7 +111,6 @@ class SeqPlatformServiceTests {
     @Test
     void test_findForNameAndModelAndSequencingKit_shouldReturnSeqplatform_PlatformNameInOtherCaseAndModelAndKitGiven() {
         def (model, kit) = createDataFor_findForNameAndModelAndSequencingKit()
-        String nameUpperCase = PLATFORM_NAME.toUpperCase()
 
         SeqPlatform seqPlatform = seqPlatformService.findForNameAndModelAndSequencingKit(PLATFORM_NAME, model, kit)
         assert seqPlatform
@@ -168,58 +159,6 @@ class SeqPlatformServiceTests {
         TestCase.shouldFail(AssertionError) {
             seqPlatformService.findForNameAndModelAndSequencingKit('', model, kit)
         }
-    }
-
-
-
-    private List createDataFor_validateSeqPlatform(Map map = [:], boolean createSecondDataFile = false) {
-        Run run = Run.build()
-
-        String platform = PLATFORM_NAME
-        String model =  MODEL_NAME
-        String kit = KIT_NAME
-
-        if (map.containsKey('platform')) {
-            platform = map.get('platform')
-        }
-        if (map.containsKey('model')) {
-            model = map.get('model')
-        }
-        if (map.containsKey('kit')) {
-            kit = map.get('kit')
-        }
-
-        MetaDataKey platformKey = MetaDataKey.build(name: MetaDataColumn.INSTRUMENT_PLATFORM.name())
-        MetaDataKey modelKey = MetaDataKey.build(name: MetaDataColumn.INSTRUMENT_MODEL.name())
-        MetaDataKey sequencingKit = MetaDataKey.build(name: MetaDataColumn.SEQUENCING_KIT.name())
-
-        DataFile dataFile = DataFile.build(run: run)
-        MetaDataEntry.build(dataFile: dataFile, key: platformKey, value: platform)
-        MetaDataEntry.build(dataFile: dataFile, key: modelKey, value: model)
-        MetaDataEntry.build(dataFile: dataFile, key: sequencingKit, value: kit)
-
-        SeqPlatformModelLabel seqPlatformModelLabel = SeqPlatformModelLabel.build(name: MODEL_NAME)
-        SequencingKitLabel sequencingKitLabel = SequencingKitLabel.build(name: KIT_NAME)
-        DomainFactory.createSeqPlatformWithSeqPlatformGroup([
-            name: PLATFORM_NAME,
-            seqPlatformModelLabel: seqPlatformModelLabel,
-            sequencingKitLabel: sequencingKitLabel,
-        ])
-
-
-        if (createSecondDataFile) {
-            //second file with other platform
-            dataFile = DataFile.build(run: run)
-            MetaDataEntry.build(dataFile: dataFile, key: platformKey, value: platform)
-            MetaDataEntry.build(dataFile: dataFile, key: modelKey, value: model)
-            DomainFactory.createSeqPlatformWithSeqPlatformGroup([
-                name: PLATFORM_NAME,
-                seqPlatformModelLabel: seqPlatformModelLabel,
-                sequencingKitLabel: null,
-            ])
-        }
-
-        return [run, dataFile]
     }
 
     @Test

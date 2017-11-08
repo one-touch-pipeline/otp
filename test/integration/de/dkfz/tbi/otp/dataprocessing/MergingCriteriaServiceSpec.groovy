@@ -115,7 +115,7 @@ class MergingCriteriaServiceSpec extends Specification implements UserAndRoles {
         SeqPlatformGroup.list().size() == 1
         SeqPlatformGroup.list().first() == group
         group.seqPlatforms.contains(seqPlatform2)
-
+        !group.comments.empty
     }
 
 
@@ -134,7 +134,8 @@ class MergingCriteriaServiceSpec extends Specification implements UserAndRoles {
         then:
         SeqPlatform.list().contains(seqPlatform)
         SeqPlatformGroup.list().contains(group)
-        group.seqPlatforms.empty
+        SeqPlatformGroup.list().first().seqPlatforms.empty
+        !group.comments.empty
     }
 
 
@@ -150,16 +151,17 @@ class MergingCriteriaServiceSpec extends Specification implements UserAndRoles {
 
         then:
         group.seqPlatforms.contains(seqPlatform)
+        !group.comments.empty
     }
 
 
-    def "test addPlatformToNewGroup, mergingCriteria is null"() {
+    def "test createNewGroupAndAddPlatform, mergingCriteria is null"() {
         given:
         SeqPlatform seqPlatform = DomainFactory.createSeqPlatform()
 
         when:
         SpringSecurityUtils.doWithAuth(OPERATOR) {
-            mergingCriteriaService.addPlatformToNewGroup(seqPlatform, null)
+            mergingCriteriaService.createNewGroupAndAddPlatform(seqPlatform, null)
         }
 
         then:
@@ -168,7 +170,7 @@ class MergingCriteriaServiceSpec extends Specification implements UserAndRoles {
     }
 
 
-    def "test addPlatformToNewGroup, mergingCriteria exists"() {
+    def "test createNewGroupAndAddPlatform, mergingCriteria exists"() {
         given:
         SeqPlatform seqPlatform = DomainFactory.createSeqPlatform()
         MergingCriteria mergingCriteria = DomainFactory.createMergingCriteriaLazy(
@@ -177,7 +179,7 @@ class MergingCriteriaServiceSpec extends Specification implements UserAndRoles {
 
         when:
         SpringSecurityUtils.doWithAuth(OPERATOR) {
-            mergingCriteriaService.addPlatformToNewGroup(seqPlatform, mergingCriteria)
+            mergingCriteriaService.createNewGroupAndAddPlatform(seqPlatform, mergingCriteria)
         }
 
         then:
@@ -189,15 +191,18 @@ class MergingCriteriaServiceSpec extends Specification implements UserAndRoles {
 
     def "test deleteSeqPlatformGroup when no seqPlatform is left"() {
         given:
-        SeqPlatformGroup seqPlatformGroup = DomainFactory.createSeqPlatformGroup()
+        SeqPlatformGroup group = DomainFactory.createSeqPlatformGroup()
 
         when:
         SpringSecurityUtils.doWithAuth(OPERATOR) {
-            mergingCriteriaService.deleteSeqPlatformGroup(seqPlatformGroup)
+            mergingCriteriaService.deleteSeqPlatformGroup(group)
         }
 
         then:
-        SeqPlatformGroup.list().contains(seqPlatformGroup)
+        SeqPlatformGroup.list().contains(group)
+        SeqPlatformGroup.list().size() == 1
+        !SeqPlatformGroup.list().first().seqPlatforms
+        !group.comments.empty
     }
 
 
@@ -215,10 +220,10 @@ class MergingCriteriaServiceSpec extends Specification implements UserAndRoles {
         }
 
         then:
-        SeqPlatformGroup.list().contains(seqPlatformGroup)
-        SeqPlatform.list().size() == 2
         SeqPlatformGroup.list().size() == 1
-        SeqPlatformGroup.list().first().seqPlatforms?.empty
+        !SeqPlatformGroup.list().first().seqPlatforms
+        SeqPlatform.list().size() == 2
+        !seqPlatformGroup.comments.empty
     }
 
     def "test copyDefaultToSpecific"() {
@@ -260,5 +265,32 @@ class MergingCriteriaServiceSpec extends Specification implements UserAndRoles {
         then:
         SeqPlatformGroup.findAllByMergingCriteria(mergingCriteria).size() == 2
         CollectionUtils.containSame(SeqPlatformGroup.findAllByMergingCriteria(mergingCriteria)*.seqPlatforms, [[seqPlatform] as Set, [seqPlatform1] as Set])
+
+    }
+
+    def "test findSeqPlatformGroupsForProjectAndSeqType"() {
+        given:
+        DomainFactory.createSeqPlatformGroup()
+        SeqPlatformGroup seqPlatformGroup = DomainFactory.createSeqPlatformGroupWithMergingCriteria()
+        seqPlatformGroup.addToSeqPlatforms(DomainFactory.createSeqPlatform())
+        assert seqPlatformGroup.save(flush: true)
+        DomainFactory.createSeqPlatformWithSeqPlatformGroup()
+
+        expect:
+        [seqPlatformGroup] == SpringSecurityUtils.doWithAuth(OPERATOR) {
+            mergingCriteriaService.findSeqPlatformGroupsForProjectAndSeqType(seqPlatformGroup.mergingCriteria.project, seqPlatformGroup.mergingCriteria.seqType)
+        }
+    }
+
+    def "test findDefaultSeqPlatformGroups"() {
+        given:
+        DomainFactory.createSeqPlatformGroup()
+        DomainFactory.createSeqPlatformGroupWithMergingCriteria()
+        SeqPlatform platform = DomainFactory.createSeqPlatformWithSeqPlatformGroup()
+
+        expect:
+        platform.seqPlatformGroups == SpringSecurityUtils.doWithAuth(OPERATOR) {
+            mergingCriteriaService.findDefaultSeqPlatformGroups()
+        } as Set
     }
 }

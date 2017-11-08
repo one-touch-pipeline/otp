@@ -282,8 +282,8 @@
                 <g:each in="${seqTypeMergingCriteria}" var="m">
                     <tr>
                         <td>
-                            <g:link controller="mergingCriteria" params='["project.id": project.id,
-                                                                          "seqType.id": m.key.id]'>
+                            <g:link controller="mergingCriteria" action="projectAndSeqTypeSpecific"
+                                    params='["project.id": project.id, "seqType.id": m.key.id]'>
                                 ${m.key}
                             </g:link>
                         </td>

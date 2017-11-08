@@ -6,7 +6,6 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.testing.*
 import de.dkfz.tbi.otp.utils.*
 import grails.plugin.springsecurity.*
@@ -15,7 +14,6 @@ import grails.validation.*
 import org.codehaus.groovy.grails.commons.*
 import org.junit.*
 import org.junit.rules.*
-import org.springframework.security.acls.domain.*
 import spock.lang.*
 
 import java.nio.file.*
@@ -411,11 +409,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         given:
         String phabricatorAlias = "some alias"
         Project project = Project.findByName("testProject")
-        Role role = new Role(authority: "GROUP_TEST_PROJECT").save(flush: true)
-        UserRole.create(User.findByUsername(USER), role)
-        SpringSecurityUtils.doWithAuth(ADMIN) {
-            aclUtilService.addPermission(project, new GrantedAuthoritySid(role.authority), BasePermission.READ)
-        }
+        addUserToProject(USER, project)
 
         when:
         SpringSecurityUtils.doWithAuth(username) {
