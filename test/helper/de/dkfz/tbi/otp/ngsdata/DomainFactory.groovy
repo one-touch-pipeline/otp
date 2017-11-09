@@ -739,13 +739,17 @@ class DomainFactory {
     }
 
     /**
-     * Creates a {@link MergingWorkPackage} with the same properties except for the specified ones.
+     * Creates a {@link MergingWorkPackage} with the properties of the base MergingWorkPackage,
+     * but properties can be overwritten in the properties map.
      */
     static MergingWorkPackage createMergingWorkPackage(MergingWorkPackage base, Map properties) {
         List<String> mergingProperties = [
                 "sample",
                 "seqType",
                 "seqPlatformGroup",
+                'referenceGenome',
+                'statSizeFileName',
+                'pipeline',
         ]
         if (!base.seqType.isWgbs()) {
             mergingProperties.add("libraryPreparationKit")
@@ -754,8 +758,7 @@ class DomainFactory {
             mergingProperties.add("antibodyTarget")
         }
 
-        MergingWorkPackage mwp = new MergingWorkPackage((mergingProperties +
-                MergingWorkPackage.processingParameterNames).collectEntries{[it, base."${it}"]} + properties)
+        MergingWorkPackage mwp = new MergingWorkPackage((mergingProperties + []).collectEntries {[it, base."${it}"]} + properties)
         assert mwp.save(failOnError: true)
         return mwp
     }

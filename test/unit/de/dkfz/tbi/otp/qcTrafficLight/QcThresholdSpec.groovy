@@ -28,6 +28,7 @@ import spock.lang.*
         SampleTypePerProject,
         SeqCenter,
         SeqPlatform,
+        SeqPlatformModelLabel,
         SeqPlatformGroup,
         SeqPlatformModelLabel,
         SeqTrack,

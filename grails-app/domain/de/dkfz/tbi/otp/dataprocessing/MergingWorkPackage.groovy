@@ -35,9 +35,6 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
 
     SeqPlatformGroup seqPlatformGroup
     LibraryPreparationKit libraryPreparationKit
-
-    // Processing parameters, part of merging criteria
-    static final Collection<String> processingParameterNames = ['referenceGenome', 'statSizeFileName', 'pipeline', 'antibodyTarget'].asImmutable()
     String statSizeFileName
 
     //reference genome depending options
@@ -143,7 +140,7 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
     }
 
     String toStringWithoutIdAndPipeline() {
-        return "${sample} ${seqType} ${libraryPreparationKit ?: ''} ${seqPlatformGroup} ${referenceGenome}"
+        return "${sample} ${seqType} ${libraryPreparationKit ?: ''} ${referenceGenome}"
     }
 
     @Override
