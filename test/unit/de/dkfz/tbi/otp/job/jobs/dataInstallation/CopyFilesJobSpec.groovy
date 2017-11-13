@@ -100,6 +100,10 @@ class CopyFilesJobSpec extends Specification {
         copyFilesJob.clusterJobSchedulerService = Mock(ClusterJobSchedulerService) {
             1 * executeJob(_, _) >> { Realm realm, String command ->
                 assert command ==~ """
+#for debug kerberos problem
+klist
+
+
 mkdir -p -m 2750 .*
 cd .*
 if \\[ -e ".*" \\]; then
@@ -124,6 +128,10 @@ chmod 440 .* .*
         copyFilesJob.executionService = Mock(ExecutionService) {
             1 * executeCommand(_, _) >> { Realm realm, String command ->
                 assert command ==~ """
+#for debug kerberos problem
+klist
+
+
 mkdir -p -m 2750 .*
 cd .*
 if \\[ -e ".*" \\]; then
@@ -152,6 +160,10 @@ ln -s .* .*
         copyFilesJob.executionService = Mock(ExecutionService) {
             1 * executeCommand(_, _) >> { Realm realm, String command ->
                 assert command ==~ """
+#for debug kerberos problem
+klist
+
+
 mkdir -p -m 2750 .*
 cd .*
 if \\[ -e ".*" \\]; then
