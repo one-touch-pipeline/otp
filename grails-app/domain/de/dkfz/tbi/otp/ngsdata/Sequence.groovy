@@ -88,6 +88,9 @@ class Sequence implements Serializable {
     String seqCenterName
     String seqCenterDirName
 
+    /** fields from {@link LibraryPreparationKit} */
+    String libraryPreparationKit
+
     // derived property for calculating the creation date without time
     Date dayCreated
 
@@ -108,6 +111,7 @@ class Sequence implements Serializable {
         individualId column: 'individual_id'
         projectId column: 'project_id'
         ilseId column: 'ilse_id'
+        libraryPreparationKit column: 'library_preparation_kit'
         id composite: ['seqTrackId', 'seqTypeId', 'seqPlatformId', 'sampleId', 'runId', 'pipelineVersionId', 'seqCenterId', 'sampleTypeId', 'individualId', 'projectId']
         dayCreated formula: 'DATE(date_created)'
     }
@@ -124,6 +128,7 @@ class Sequence implements Serializable {
         sequencingKitLabelName(nullable: true)
         nBasePairs(nullable: true)
         problem nullable: true
+        libraryPreparationKit nullable: true
     }
 
     String getLibraryLayoutDirName() {

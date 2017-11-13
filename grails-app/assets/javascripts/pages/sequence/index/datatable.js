@@ -86,7 +86,6 @@ $.otp.sequence = {
                                     text: row.projectName,
                                     title: row.projectName
                                 }),
-
                                 $.otp.createLinkMarkup({
                                     controller: 'individual',
                                     action: 'show',
@@ -98,6 +97,8 @@ $.otp.sequence = {
                                 row.seqTypeDisplayName,
                                 row.libraryLayout,
                                 row.seqCenterName,
+                                row.libraryPreparationKit ?
+                                    "<span title='" + row.libraryPreparationKit + "'>" + row.libraryPreparationKit + "</span>" : "",
                                 $.otp.createLinkMarkup({
                                     controller: 'run',
                                     action: 'show',
@@ -105,11 +106,12 @@ $.otp.sequence = {
                                     title: row.name,
                                     text: row.name
                                 }),
-                                row.laneId,
+                                row.laneId ?
+                                    "<span title='" + row.laneId + "'>" + row.laneId + "</span>" : "",
                                 row.libraryName,
                                 fastQC,
                                 row.ilseId,
-                               row.problem ?
+                                row.problem ?
                                    "<span title='" + row.problemDescription + "'>" + row.problem.name + "</span>" : "",
                                 row.dateCreated
                             ];
@@ -132,7 +134,7 @@ $.otp.sequence = {
             },
             fnRowCallback: function (nRow) {
                 var fastqc;
-                fastqc = $("td:eq(9)", nRow);
+                fastqc = $("td:eq(10)", nRow);
                 if ($("a", fastqc).length > 0) {
                     fastqc.addClass("true");
                 } else {
@@ -140,7 +142,7 @@ $.otp.sequence = {
                     fastqc.addClass("false");
                     fastqc.text("");
                 }
-                var contamination = $("td:eq(11)", nRow);
+                var contamination = $("td:eq(12)", nRow);
                 if (contamination.text() === "") {
                     contamination.attr("title", "No known problems");
                     contamination.addClass("VALID");

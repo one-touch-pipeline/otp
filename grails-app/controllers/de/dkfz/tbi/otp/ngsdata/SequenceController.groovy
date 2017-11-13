@@ -13,11 +13,13 @@ class SequenceController {
 
     def index() {
         List<SeqType> seqTypes = SeqType.list(sort: "name", order: "asc")
-        [projects: projectService.getAllProjects(),
+        [
+            projects: projectService.getAllProjects(),
             sampleTypes: SampleType.list(sort: "name", order: "asc"),
             seqTypes: new TreeSet(seqTypes.collect { it.displayName }),
             libraryLayouts: new TreeSet(seqTypes.collect { it.libraryLayout }),
-            seqCenters: SeqCenter.list(sort: "name", order: "asc")
+            seqCenters: SeqCenter.list(sort: "name", order: "asc"),
+            libaryPreparationKits: LibraryPreparationKit.list(sort: "shortDisplayName", order: "asc").shortDisplayName,
         ]
     }
 
@@ -76,6 +78,7 @@ class SequenceController {
                     row.seqTypeDisplayName,
                     row.libraryLayout,
                     row.seqCenterName,
+                    row.libraryPreparationKit,
                     row.name,
                     row.laneId,
                     row.libraryName,
@@ -91,6 +94,7 @@ class SequenceController {
             'Sequence Type',
             'Library Layout',
             'Sequence Center',
+            'Library Preparation Kit',
             'Run',
             'Lane',
             'Library',
@@ -106,12 +110,13 @@ class SequenceController {
 }
 
 enum SequenceSortColumn {
-    PROJECT("projectId"),
+    PROJECT("projectName"),
     INDIVIDUAL("mockPid"),
     SAMPLE_TYPE("sampleTypeName"),
     SEQ_TYPE("seqTypeName"),
     LIBRARY_LAYOUT("libraryLayout"),
     SEQ_CENTER("seqCenterName"),
+    LIBRARY_PREPARATION_KIT("libraryPreparationKit"),
     RUN("name"),
     LANE("laneId"),
     LIBRARY("libraryName"),
@@ -141,18 +146,20 @@ enum SequenceSortColumn {
             case 5:
                 return SequenceSortColumn.SEQ_CENTER
             case 6:
-                return SequenceSortColumn.RUN
+                return SequenceSortColumn.LIBRARY_PREPARATION_KIT
             case 7:
-                return SequenceSortColumn.LANE
+                return SequenceSortColumn.RUN
             case 8:
-                return SequenceSortColumn.LIBRARY
+                return SequenceSortColumn.LANE
             case 9:
-                return SequenceSortColumn.FASTQC
+                return SequenceSortColumn.LIBRARY
             case 10:
-                return SequenceSortColumn.ILSEID
+                return SequenceSortColumn.FASTQC
             case 11:
-                return SequenceSortColumn.KNOWN_ISSUES
+                return SequenceSortColumn.ILSEID
             case 12:
+                return SequenceSortColumn.KNOWN_ISSUES
+            case 13:
                 return SequenceSortColumn.DATE
             default:
                 return SequenceSortColumn.PROJECT
@@ -165,14 +172,15 @@ enum SequenceSortColumn {
  *
  */
 class SequenceFiltering {
-    List<Long> project = []
+    List<String> project = []
     List<String> individual = []
     List<Long> sampleType = []
     List<String> seqType = []
     List<String> libraryLayout = []
     List<Integer> ilseId = []
-    List<Long> seqCenter = []
+    List<Integer> seqCenter = []
     List<String> run = []
+    List<String> libraryPreparationKit = []
 
     boolean enabled = false
 
@@ -185,8 +193,8 @@ class SequenceFiltering {
         slurper.parseText(json).each {
             switch (it.type) {
                 case "projectSelection":
-                    if (it.value.isLong()) {
-                        filtering.project << (it.value as Long)
+                    if (it.value) {
+                        filtering.project << it.value
                         filtering.enabled = true
                     }
                     break
@@ -229,6 +237,12 @@ class SequenceFiltering {
                 case "runSearch":
                     if (it.value && it.value.length() >= 3) {
                         filtering.run << it.value
+                        filtering.enabled = true
+                    }
+                    break
+                case "libraryPreparationKitSelection":
+                    if (it.value) {
+                        filtering.libraryPreparationKit << it.value
                         filtering.enabled = true
                     }
                     break

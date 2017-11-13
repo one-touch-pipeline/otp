@@ -26,17 +26,19 @@
                             <option value="seqTypeSelection"><g:message code="sequence.search.seqType"/></option>
                             <option value="ilseIdSearch"><g:message code="sequence.search.ilse"/></option>
                             <option value="libraryLayoutSelection"><g:message code="sequence.search.libLayout"/></option>
+                            <option value="libraryPreparationKitSelection"><g:message code="sequence.search.libPrepKit"/></option>
                             <option value="seqCenterSelection"><g:message code="sequence.search.seqCenter"/></option>
                             <option value="runSearch"><g:message code="sequence.search.run"/></option>
                         </select>
                     </td>
                     <td class="value">
-                        <g:select class="criteria" name="projectSelection" from="${projects}" optionValue="name" optionKey="id" style="display: none"/>
+                        <g:select class="criteria" name="projectSelection" from="${projects}" optionValue="name" optionKey="name" style="display: none"/>
                         <input class="criteria" type="text" name="individualSearch" style="display: none" placeholder="min. 3 characters"/>
                         <g:select class="criteria" name="sampleTypeSelection" from="${sampleTypes}" optionValue="name" optionKey="id" style="display: none"/>
                         <g:select class="criteria" name="seqTypeSelection" from="${seqTypes}" style="display: none"/>
                         <input class="criteria" type="text" name="ilseIdSearch" style="display: none"/>
                         <g:select class="criteria" name="libraryLayoutSelection" from="${libraryLayouts}" style="display: none"/>
+                        <g:select class="criteria" name="libraryPreparationKitSelection" from="${libaryPreparationKits}" style="display: none"/>
                         <g:select class="criteria" name="seqCenterSelection" from="${seqCenters}" optionValue="name" optionKey="id" style="display: none"/>
                         <input class="criteria" type="text" name="runSearch" style="display: none" placeholder="min. 3 characters"/>
                     </td>
@@ -63,6 +65,7 @@
                     'sequence.list.headers.seqType',
                     'sequence.list.headers.libLayout',
                     'sequence.list.headers.seqCenter',
+                    'sequence.list.headers.libPrepKit',
                     'sequence.list.headers.run',
                     'sequence.list.headers.lane',
                     'sequence.list.headers.library',

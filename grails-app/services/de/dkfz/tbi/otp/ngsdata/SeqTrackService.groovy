@@ -57,9 +57,9 @@ class SeqTrackService {
         if (filtering.enabled) {
             def c = Sequence.createCriteria()
             return c.list {
-                'in'('projectId', projectService.getAllProjects().collect { it.id })
+                'in'('projectName', projectService.getAllProjects().collect { it.name })
                 if (filtering.project) {
-                    'in'('projectId', filtering.project)
+                    'in'('projectName', filtering.project)
                 }
                 if (filtering.individual) {
                     or {
@@ -79,6 +79,9 @@ class SeqTrackService {
                 }
                 if (filtering.seqCenter) {
                     'in'('seqCenterId', filtering.seqCenter)
+                }
+                if (filtering.libraryPreparationKit) {
+                    'in'('libraryPreparationKit', filtering.libraryPreparationKit)
                 }
                 if (filtering.ilseId) {
                     'in'('ilseId', filtering.ilseId)
@@ -110,9 +113,9 @@ class SeqTrackService {
         if (filtering.enabled) {
             def c = Sequence.createCriteria()
             return c.get {
-                'in'('projectId', projectService.getAllProjects().collect { it.id })
+                'in'('projectName', projectService.getAllProjects().collect { it.name })
                 if (filtering.project) {
-                    'in'('projectId', filtering.project)
+                    'in'('projectName', filtering.project)
                 }
                 if (filtering.individual) {
                     or {
@@ -132,6 +135,9 @@ class SeqTrackService {
                 }
                 if (filtering.seqCenter) {
                     'in'('seqCenterId', filtering.seqCenter)
+                }
+                if (filtering.libraryPreparationKit) {
+                    'in'('libraryPreparationKit', filtering.libraryPreparationKit)
                 }
                 if (filtering.ilseId) {
                     'in'('ilseId', filtering.ilseId)
