@@ -44,6 +44,8 @@ abstract class BamFileAnalysisService {
         final String SEQ_TYPE = "${WORKPACKAGE}.seqType"
         final String INDIVIDUAL = "${SAMPLE}.individual"
 
+        double threshold = ProcessingOptionService.findOption(ProcessingOption.OptionName.PIPELINE_MIN_COVERAGE, getAnalysisType().toString(), null)?.toDouble() ?: 0.0
+
         def testIfBamFileFulfillCriteria = { String number ->
             return "AND EXISTS (FROM AbstractMergedBamFile ambf${number} " +
             // check that the file is not withdrawn
@@ -59,6 +61,7 @@ abstract class BamFileAnalysisService {
             "           AND pt.seqType = ambf${number}.${SEQ_TYPE} " +
             "           AND pt.sampleType = ambf${number}.${SAMPLE_TYPE} " +
             "           AND (pt.coverage is null OR pt.coverage <= ambf${number}.coverage) " +
+            "           AND (:threshold <= ambf${number}.coverage) " +
             "           AND (pt.numberOfLanes is null OR pt.numberOfLanes <= ambf${number}.numberOfMergedLanes) " +
             "           ) " +
             //check that the file is in the workpackage
@@ -120,6 +123,7 @@ abstract class BamFileAnalysisService {
                 minPriority: minPriority,
                 analysis: getAnalysisType(),
                 seqTypes: seqTypes,
+                threshold: threshold,
         ]
         if (sp) {
             parameters.sp = sp

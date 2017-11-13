@@ -9,6 +9,8 @@ class ProcessingOption implements Entity {
 
     enum OptionName {
         //pipeline
+        PIPELINE_MIN_COVERAGE("minimum coverage to start a pipeline", null, Type.FLOAT),
+
         PIPELINE_RODDY_SNV_PLUGIN_NAME("Name of the Roddy SNV pipeline plugin", "SNVCallingWorkflow", Type.SINGLE_WORD_TEXT),
         PIPELINE_RODDY_SNV_PLUGIN_VERSION("The version of the Roddy SNV pipeline plugin", "1.0.166-1", Type.PLUGIN),
         PIPELINE_RODDY_SNV_BASE_PROJECT_CONFIG("The base project file for Roddy SNV pipeline", null, Type.SINGLE_WORD_TEXT),

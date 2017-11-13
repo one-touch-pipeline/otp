@@ -526,6 +526,21 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         null == aceseqService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
     }
 
+    void "samplePairForProcessing, for ACEseq pipeline, coverage is not high enough, should not return SamplePair"() {
+        given:
+        prepareSophiaForAceseq([:], [:])
+        DomainFactory.createProcessingOption([
+                name: ProcessingOption.OptionName.PIPELINE_MIN_COVERAGE,
+                type: Pipeline.Type.ACESEQ.toString(),
+                project: null,
+                value: "40",
+        ])
+
+        expect:
+        !aceseqService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
+    }
+
+
     private void prepareSophiaForAceseqBase() {
         samplePair1.sophiaProcessingStatus = ProcessingStatus.NO_PROCESSING_NEEDED
         samplePair1.save(flush: true)
