@@ -529,8 +529,8 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
     void "samplePairForProcessing, for ACEseq pipeline, coverage is not high enough, should not return SamplePair"() {
         given:
         prepareSophiaForAceseq([:], [:])
-        DomainFactory.createProcessingOption([
-                name: ProcessingOption.OptionName.PIPELINE_MIN_COVERAGE,
+        DomainFactory.createProcessingOptionLazy([
+                name: OptionName.PIPELINE_MIN_COVERAGE,
                 type: Pipeline.Type.ACESEQ.toString(),
                 project: null,
                 value: "40",
