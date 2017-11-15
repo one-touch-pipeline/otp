@@ -81,9 +81,10 @@ class FastqcJobTest {
             return 'pbsJobId'
         }
 
-        fastqcJob.executionService.metaClass.executeCommand = { Realm inputRealm, String command ->
+        fastqcJob.executionService.metaClass.executeCommandReturnProcessOutput = { Realm inputRealm, String command ->
             assert command.contains("umask 027; mkdir -p -m 2750")
             assert !command.contains("cp ")
+            return new ProcessHelperService.ProcessOutput('','',0)
         }
 
         fastqcJob.maybeSubmit()
@@ -105,8 +106,9 @@ class FastqcJobTest {
             assert false : "this method should not be reached"
         }
 
-        fastqcJob.executionService.metaClass.executeCommand = { Realm inputRealm, String command ->
+        fastqcJob.executionService.metaClass.executeCommandReturnProcessOutput = { Realm inputRealm, String command ->
             assert command.contains("umask 027; mkdir -p -m 2750") || command.contains("cp ")
+            return new ProcessHelperService.ProcessOutput('','',0)
         }
 
         fastqcJob.fastqcUploadService.metaClass.uploadFastQCFileContentsToDataBase = { FastqcProcessedFile fastqc -> }

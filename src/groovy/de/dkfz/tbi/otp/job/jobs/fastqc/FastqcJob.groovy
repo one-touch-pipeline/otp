@@ -47,7 +47,7 @@ class FastqcJob extends AbstractOtpJob implements AutoRestartableJob {
         // create fastqc output directory
         File directory = new File(fastqcDataFilesService.fastqcOutputDirectory(seqTrack))
         String cmd = "umask 027; mkdir -p -m 2750 " + directory.path
-        executionService.executeCommand(realm, cmd)
+        executionService.executeCommandReturnProcessOutput(realm, cmd).assertExitCodeZeroAndStderrEmpty()
         WaitingFileUtils.waitUntilExists(directory)
 
         // copy fastqc or execute fastqc on cluster
@@ -146,13 +146,14 @@ class FastqcJob extends AbstractOtpJob implements AutoRestartableJob {
             File seqCenterFastQcFile = fastqcDataFilesService.pathToFastQcResultFromSeqCenter(dataFile)
             File seqCenterFastQcFileMd5Sum = fastqcDataFilesService.pathToFastQcResultMd5SumFromSeqCenter(dataFile)
             lsdfFilesService.ensureFileIsReadableAndNotEmpty(seqCenterFastQcFile)
-            String md5SumCreationCommand = """\
+            String copyAndMd5sumCommand = """\
+                    set -e
                     cd ${seqCenterFastQcFile.parent};
                     md5sum ${seqCenterFastQcFile.name} > ${outDir}/${seqCenterFastQcFileMd5Sum.name};
                     cp ${seqCenterFastQcFile} ${outDir};
                     chmod 0644 ${outDir}/*
                     """.stripIndent()
-            executionService.executeCommand(realm, md5SumCreationCommand)
+            executionService.executeCommandReturnProcessOutput(realm, copyAndMd5sumCommand).assertExitCodeZeroAndStderrEmpty()
             lsdfFilesService.ensureFileIsReadableAndNotEmpty(new File(outDir, seqCenterFastQcFile.name))
 
             String validateMd5Sum = "cd ${outDir}; md5sum -c ${seqCenterFastQcFileMd5Sum.name}"
