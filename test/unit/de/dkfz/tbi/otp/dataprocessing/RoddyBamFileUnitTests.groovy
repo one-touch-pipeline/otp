@@ -393,6 +393,8 @@ class RoddyBamFileUnitTests {
     }
 
 
+
+
     void helperTestFinalRoddyExecutionDirectories(List<String> roddyExecutionDirectoryNames) {
         roddyBamFile.roddyExecutionDirectoryNames.addAll(roddyExecutionDirectoryNames)
         List<String> expectedResult = roddyExecutionDirectoryNames.collect {

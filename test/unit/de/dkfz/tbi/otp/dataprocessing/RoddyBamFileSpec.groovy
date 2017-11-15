@@ -1,11 +1,14 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.ngsdata.*
 import grails.test.mixin.*
+import grails.validation.*
 import spock.lang.*
 
 @Mock([
+        Comment,
         DataFile,
         FileType,
         Individual,
@@ -216,5 +219,39 @@ class RoddyBamFileSpec extends Specification {
 
         then:
         100 == roddyBamFile.getMaximalReadLength()
+    }
+
+    void "test qcTrafficLightStatus constraint, should fail since bam file is blocked but no comment is provided"() {
+        given:
+        roddyBamFile.qcTrafficLightStatus = AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED
+
+        when:
+        roddyBamFile.save(flush: true)
+
+        then:
+        ValidationException e = thrown()
+        e.message.contains("a comment is required then the QC status is set to ACCEPTED, REJECTED or BLOCKED")
+    }
+
+
+    void "test qcTrafficLightStatus constraint, is valid since bam file is blocked and comment is provided"() {
+        given:
+        roddyBamFile.qcTrafficLightStatus = AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED
+        roddyBamFile.comment = DomainFactory.createComment()
+
+        expect:
+        roddyBamFile.save(flush: true)
+    }
+
+    void "test getPathForFurtherProcessing, returns null since qcTrafficLightStatus is #status"() {
+        given:
+        roddyBamFile.qcTrafficLightStatus = status
+        roddyBamFile.comment = DomainFactory.createComment()
+
+        expect:
+        !roddyBamFile.getPathForFurtherProcessing()
+
+        where:
+        status << [AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED, AbstractMergedBamFile.QcTrafficLightStatus.REJECTED]
     }
 }

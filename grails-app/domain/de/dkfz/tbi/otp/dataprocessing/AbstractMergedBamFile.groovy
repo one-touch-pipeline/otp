@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.Comment
+import de.dkfz.tbi.otp.Commentable
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 import org.hibernate.*
@@ -10,7 +12,7 @@ import static org.springframework.util.Assert.*
  * Represents a single generation of one merged BAM file (whereas a {@link AbstractMergingWorkPackage} represents all
  * generations).
  */
-abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile {
+abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile implements Commentable {
 
     /**
      * Holds the number of lanes which were merged in this bam file
@@ -28,6 +30,21 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile {
      * whereas in the RoddyBamFile it is only used for documentation of the state.
      */
     FileOperationStatus fileOperationStatus = FileOperationStatus.DECLARED
+
+    Comment comment
+
+    QcTrafficLightStatus qcTrafficLightStatus
+
+    enum QcTrafficLightStatus {
+        // status is set by OTP when QC threshold passed
+        QC_PASSED,
+        // status is set by bioinformaticians when they decide to keep the file although a QC threshold not passed
+        ACCEPTED,
+        // status is set by OTP when a QC error threshold not passed
+        BLOCKED,
+        // status is set by  bioinformaticians when they decide not to use a file for further analyses
+        REJECTED
+    }
 
     public abstract boolean isMostRecentBamFile()
 
@@ -51,6 +68,12 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile {
         fileOperationStatus validator: { val, obj ->
             return (val == FileOperationStatus.PROCESSED) == (obj.md5sum != null)
         }
+        qcTrafficLightStatus nullable: true, validator: { status, obj ->
+            if ([QcTrafficLightStatus.ACCEPTED, QcTrafficLightStatus.REJECTED, QcTrafficLightStatus.BLOCKED].contains(status) && !obj.comment) {
+                return "a comment is required then the QC status is set to ACCEPTED, REJECTED or BLOCKED"
+            }
+        }
+        comment nullable: true
     }
 
     static mapping = {
@@ -131,6 +154,9 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile {
     }
 
     File getPathForFurtherProcessing() {
+        if ([QcTrafficLightStatus.REJECTED, QcTrafficLightStatus.BLOCKED].contains(this.qcTrafficLightStatus)) {
+            return null
+        }
         mergingWorkPackage.refresh() //Sometimes the mergingWorkPackage.processableBamFileInProjectFolder is empty but should have a value
         AbstractMergedBamFile processableBamFileInProjectFolder = mergingWorkPackage.processableBamFileInProjectFolder
         if (this.id == processableBamFileInProjectFolder?.id) {
