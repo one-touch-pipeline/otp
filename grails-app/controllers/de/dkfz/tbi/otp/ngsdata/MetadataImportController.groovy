@@ -163,10 +163,8 @@ class MetadataImportController {
             } else {
                 text.append('These metadata files failed validation:')
             }
-            List<File> metadataFiles = []
             e.failedValidations.each {
                 text.append("\n${it.metadataFile}")
-                metadataFiles.add(it.metadataFile)
             }
             text.append("\n\nClick here for manual import:")
             text.append("\n"+g.createLink(
@@ -174,7 +172,7 @@ class MetadataImportController {
                     absolute: 'true',
                     params: [
                         'ticketNumber': otrsTicketNumber,
-                        'paths': metadataFiles,
+                        'paths': e.allPaths,
                         'directory': MetadataImportService.MIDTERM_ILSE_DIRECTORY_STRUCTURE_BEAN_NAME
                     ])
             )

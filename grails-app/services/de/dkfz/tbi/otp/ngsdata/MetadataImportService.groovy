@@ -148,7 +148,7 @@ class MetadataImportService {
         if (failedValidations.isEmpty()) {
             return results
         } else {
-            throw new MultiImportFailedException(failedValidations)
+            throw new MultiImportFailedException(failedValidations, metadataFiles)
         }
     }
 
@@ -476,4 +476,7 @@ class ValidateAndImportResult {
 @TupleConstructor
 class MultiImportFailedException extends RuntimeException {
     final List<MetadataValidationContext> failedValidations
+
+    final List<File> allPaths
+
 }
