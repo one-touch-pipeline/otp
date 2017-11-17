@@ -19,10 +19,7 @@ class SampleTypeService {
                     groupProperty("sampleType")
                 }
             }
-            seqType {
-                'in'('name', ['WHOLE_GENOME', 'EXON'])
-                eq('libraryLayout', 'PAIRED')
-            }
+            'in'("seqType", SeqType.allAnalysableSeqTypes)
         }
         return seq
     }

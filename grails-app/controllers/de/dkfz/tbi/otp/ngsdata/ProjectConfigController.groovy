@@ -19,10 +19,10 @@ class ProjectConfigController {
     ProjectOverviewService projectOverviewService
     SeqTrackService seqTrackService
     ContactPersonService contactPersonService
-    SampleTypePerProjectService sampleTypePerProjectService
     ProcessingThresholdsService processingThresholdsService
     CommentService commentService
     ProjectSelectionService projectSelectionService
+    SampleTypeService sampleTypeService
 
     Map index() {
         List<Project> projects = projectService.getAllProjects()
@@ -274,12 +274,12 @@ class ProjectConfigController {
         }
         thresholdsTable.add(row)
 
-        sampleTypePerProjectService.findByProject(project).each() { sampleTypePerProject ->
+        sampleTypeService.findUsedSampleTypesForProject(project).each() { SampleType sampleType ->
             row = []
-            row.add(sampleTypePerProject.sampleType.name)
-            row.add(sampleTypePerProject.category)
+            row.add(sampleType.name)
+            row.add(sampleType.getCategory(project) ?: SampleType.Category.UNDEFINED)
             seqTypes.each {
-                ProcessingThresholds processingThresholds = processingThresholdsService.findByProjectAndSampleTypeAndSeqType(project, sampleTypePerProject.sampleType, it)
+                ProcessingThresholds processingThresholds = processingThresholdsService.findByProjectAndSampleTypeAndSeqType(project, sampleType, it)
                 row.add(processingThresholds?.numberOfLanes)
                 row.add(processingThresholds?.coverage)
             }

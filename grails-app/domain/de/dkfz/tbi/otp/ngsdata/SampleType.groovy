@@ -23,9 +23,10 @@ class SampleType implements Entity {
          * combination of project and sample type), such workflows should warn about the sample type category being
          * unknown.
          */
-        IGNORED,
+        UNDEFINED,
         DISEASE,
-        CONTROL
+        CONTROL,
+        IGNORED,
     }
 
     /**
