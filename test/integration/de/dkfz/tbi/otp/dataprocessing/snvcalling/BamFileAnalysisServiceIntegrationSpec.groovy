@@ -123,6 +123,102 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
 
     }
 
+    @Unroll
+    void "samplePairForProcessing does not return a sample pair since qc of bam file is too bad"() {
+        given:
+        samplePair1."${processingStatus}" = ProcessingStatus.NEEDS_PROCESSING
+        if (processingStatus == "aceseqProcessingStatus") {
+            samplePair1.sophiaProcessingStatus = ProcessingStatus.NO_PROCESSING_NEEDED
+            DomainFactory.createSophiaInstance(samplePair1)
+        }
+        assert samplePair1.save(flush: true)
+
+        AbstractMergedBamFile bamFile = samplePair1.mergingWorkPackage1.bamFileInProjectFolder
+        bamFile.comment = DomainFactory.createComment()
+        bamFile.qcTrafficLightStatus = qc
+        bamFile.save(flush: true)
+
+        DomainFactory.createRoddyWorkflowConfig(
+                seqType: samplePair1.seqType,
+                project: samplePair1.project,
+                pipeline: pipeline()
+        )
+        DomainFactory.createProcessingOptionLazy([
+                name: ProcessingOption.OptionName.PIPELINE_ACESEQ_REFERENCE_GENOME,
+                type: null,
+                project: null,
+                value: samplePair1.mergingWorkPackage1.referenceGenome.name,
+        ])
+        DomainFactory.createProcessingOptionLazy([
+                name: ProcessingOption.OptionName.PIPELINE_SOPHIA_REFERENCE_GENOME,
+                type: null,
+                project: null,
+                value: samplePair1.mergingWorkPackage1.referenceGenome.name,
+        ])
+
+        expect:
+        !service.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
+
+        where:
+        processingStatus         | pipeline                                     | service                   | qc
+        "indelProcessingStatus"  | { DomainFactory.createIndelPipelineLazy() }  | this.indelCallingService  | AbstractMergedBamFile.QcTrafficLightStatus.REJECTED
+        "sophiaProcessingStatus" | { DomainFactory.createSophiaPipelineLazy() } | this.sophiaService        | AbstractMergedBamFile.QcTrafficLightStatus.REJECTED
+        "aceseqProcessingStatus" | { DomainFactory.createAceseqPipelineLazy() } | this.aceseqService        | AbstractMergedBamFile.QcTrafficLightStatus.REJECTED
+        "indelProcessingStatus"  | { DomainFactory.createIndelPipelineLazy() }  | this.indelCallingService  | AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED
+        "sophiaProcessingStatus" | { DomainFactory.createSophiaPipelineLazy() } | this.sophiaService        | AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED
+        "aceseqProcessingStatus" | { DomainFactory.createAceseqPipelineLazy() } | this.aceseqService        | AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED
+    }
+
+
+    @Unroll
+    void "samplePairForProcessing returns a sample pair since qc of bam file is okey"() {
+        given:
+        samplePair1."${processingStatus}" = ProcessingStatus.NEEDS_PROCESSING
+        if (processingStatus == "aceseqProcessingStatus") {
+            samplePair1.sophiaProcessingStatus = ProcessingStatus.NO_PROCESSING_NEEDED
+            DomainFactory.createSophiaInstance(samplePair1)
+        }
+        assert samplePair1.save(flush: true)
+
+        AbstractMergedBamFile bamFile = samplePair1.mergingWorkPackage1.bamFileInProjectFolder
+        if (qc == AbstractMergedBamFile.QcTrafficLightStatus.ACCEPTED) {
+            bamFile.comment = DomainFactory.createComment()
+        }
+        bamFile.qcTrafficLightStatus = qc
+        bamFile.save(flush: true)
+
+        DomainFactory.createRoddyWorkflowConfig(
+                seqType: samplePair1.seqType,
+                project: samplePair1.project,
+                pipeline: pipeline()
+        )
+        DomainFactory.createProcessingOptionLazy([
+                name: ProcessingOption.OptionName.PIPELINE_ACESEQ_REFERENCE_GENOME,
+                type: null,
+                project: null,
+                value: samplePair1.mergingWorkPackage1.referenceGenome.name,
+        ])
+        DomainFactory.createProcessingOptionLazy([
+                name: ProcessingOption.OptionName.PIPELINE_SOPHIA_REFERENCE_GENOME,
+                type: null,
+                project: null,
+                value: samplePair1.mergingWorkPackage1.referenceGenome.name,
+        ])
+
+        expect:
+        samplePair1 == service.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
+
+        where:
+        processingStatus         | pipeline                                     | service                   | qc
+        "indelProcessingStatus"  | { DomainFactory.createIndelPipelineLazy() }  | this.indelCallingService  | AbstractMergedBamFile.QcTrafficLightStatus.ACCEPTED
+        "sophiaProcessingStatus" | { DomainFactory.createSophiaPipelineLazy() } | this.sophiaService        | AbstractMergedBamFile.QcTrafficLightStatus.ACCEPTED
+        "aceseqProcessingStatus" | { DomainFactory.createAceseqPipelineLazy() } | this.aceseqService        | AbstractMergedBamFile.QcTrafficLightStatus.ACCEPTED
+        "indelProcessingStatus"  | { DomainFactory.createIndelPipelineLazy() }  | this.indelCallingService  | AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED
+        "sophiaProcessingStatus" | { DomainFactory.createSophiaPipelineLazy() } | this.sophiaService        | AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED
+        "aceseqProcessingStatus" | { DomainFactory.createAceseqPipelineLazy() } | this.aceseqService        | AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED
+    }
+
+
     void "samplePairForProcessing when #status is NEEDS_PROCESSING but the #service is requested"() {
         given:
         samplePair1[status] = ProcessingStatus.NEEDS_PROCESSING

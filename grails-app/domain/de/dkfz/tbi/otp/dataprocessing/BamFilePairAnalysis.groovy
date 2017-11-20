@@ -1,6 +1,8 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.QcTrafficLightStatus
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.job.processing.*
@@ -48,6 +50,10 @@ abstract class BamFilePairAnalysis implements ProcessParameterObject, Entity {
      */
     AnalysisProcessingStates processingState = AnalysisProcessingStates.IN_PROGRESS
 
+    Comment comment
+
+    QcTrafficLightStatus qcTrafficLightStatus
+
 
     static constraints = {
         sampleType1BamFile validator: { AbstractMergedBamFile val, BamFilePairAnalysis obj ->
@@ -69,6 +75,12 @@ abstract class BamFilePairAnalysis implements ProcessParameterObject, Entity {
                     RoddyWorkflowConfig.isAssignableFrom(Hibernate.getClass(val))) &&
                     val?.pipeline?.type != Pipeline.Type.ALIGNMENT
         }
+        qcTrafficLightStatus nullable: true, validator: { status, obj ->
+            if ([QcTrafficLightStatus.ACCEPTED, QcTrafficLightStatus.REJECTED, QcTrafficLightStatus.BLOCKED].contains(status) && !obj.comment) {
+                return "a comment is required then the QC status is set to ACCEPTED, REJECTED or BLOCKED"
+            }
+        }
+        comment nullable: true
     }
 
     static mapping = {
