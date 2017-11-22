@@ -1,4 +1,4 @@
 integration:
-  image: postgres:9.1.19
+  image: postgres:9.5.9
   ports:
     - "5432"
