@@ -3,67 +3,114 @@ image: grails:2.5.1
 
 variables:
   GRAILS_OPTS: '-Xms1G'
+  ARTIFACTS_BASE_DIRECTORY: 'deployment-scripts'
+  MIGRATION_SCRIPT_PATH: $ARTIFACTS_BASE_DIRECTORY/migration-scripts
+  WAR_DIRECTORY: $ARTIFACTS_BASE_DIRECTORY/war
+  WAR_FILE: $ARTIFACTS_BASE_DIRECTORY/war/otp.war
+
+
+
 
 stages:
   - build
   - test
   - war
 
+
+
+
+.abstract only branches: &only_branches
+  only:
+    - branches
+
+.abstract artifacts: &artifacts_job_template
+  <<: *only_branches
+  dependencies: []
+  artifacts: &artifacts_template
+    paths:
+      - $ARTIFACTS_BASE_DIRECTORY
+    expire_in: 1 week
+
+
+
+
 compile:
+  <<: *only_branches
   stage: build
+  dependencies: []
   script:
     - grails compile
 
-unit tests:
+
+
+
+.abstract test: &test_template
+  <<: *only_branches
   stage: test
   image: otp-tests
+  dependencies: []
   before_script:
     - echo 'otp.testing.group=othergroup' > /home/grails/.otp.properties
   script:
-    - 'grails test-app unit:'
+    - grails test compile
+    - "grails test-app $TEST_TYPE: -coverage de.**.*"
+  after_script:
+    - head -1 target/test-reports/cobertura/coverage.xml
+  coverage: /line-rate="\d.(\d\d)\d+"/
   artifacts:
+    <<: *artifacts_template
     paths:
       - target/test-reports/*.xml
       - target/test-reports/html/
-    expire_in: 1 weeks
+      - target/test-reports/cobertura/coverage.xml
+    when: always
+
+unit tests:
+  <<: *test_template
+  variables:
+    TEST_TYPE: unit
 
 integration tests:
-  stage: test
-  image: otp-tests
-  before_script:
-    - echo 'otp.testing.group=othergroup' > /home/grails/.otp.properties
-  script:
-    - 'grails test-app integration:'
-  artifacts:
-    paths:
-      - target/test-reports/*.xml
-      - target/test-reports/html/
-    expire_in: 1 weeks
+  <<: *test_template
+  variables:
+    TEST_TYPE: integration
+
 
 codenarc:
+  <<: *only_branches
   stage: test
+  dependencies: []
   script:
     - grails compile
     - grails codenarc
   after_script:
     - sed -i "s@<SourceDirectory></SourceDirectory>@<SourceDirectory>$(pwd)</SourceDirectory>@" target/CodeNarc-Report.xml
   artifacts:
+    <<: *artifacts_template
     paths:
       - target/CodeNarc-Report.xml
-    expire_in: 1 weeks
+    when: always
+
+
+
 
 war:
+  <<: *artifacts_job_template
   stage: war
   image: otp-tests
   before_script:
     - echo 'otp.testing.group=othergroup' > /home/grails/.otp.properties
     - mkdir -p logs/jobs
   script:
+    - set -e -o pipefail
+
+    - echo $WAR_DIRECTORY
+    - echo $WAR_FILE
+
     - 'grails war'
-    - md5sum "target/otp.war" | tee "target/otp.war.md5"
-    - sha256sum "target/otp.war" | tee "target/otp.war.sha256"
-    - git rev-parse HEAD | tee "target/otp.war.gitrev"
-  artifacts:
-    paths:
-      - target/otp.war*
-    expire_in: 1 weeks
+
+    - mkdir -p $WAR_DIRECTORY
+    - mv target/otp.war $WAR_DIRECTORY
+    - md5sum "$WAR_FILE" | tee "$WAR_FILE.md5"
+    - sha256sum "$WAR_FILE" | tee "$WAR_FILE.sha256"
+    - git rev-parse HEAD | tee "$WAR_FILE.gitrev"
