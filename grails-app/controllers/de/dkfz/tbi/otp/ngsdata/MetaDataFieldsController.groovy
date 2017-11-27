@@ -66,7 +66,8 @@ class MetaDataFieldsController {
                                     PAIRED   : SeqType.findByNameAndLibraryLayout(it.name, SeqType.LIBRARYLAYOUT_PAIRED) ? true : false,
                                     MATE_PAIR: SeqType.findByNameAndLibraryLayout(it.name, SeqType.LIBRARYLAYOUT_MATE_PAIR) ? true : false
                             ],
-                    displayName   : it.displayName
+                    displayName   : it.displayName,
+                    aliases       : SeqType.findByName(it.name).alias.sort().join(' | ')
             ]
         }.unique()
 
@@ -115,14 +116,21 @@ class MetaDataFieldsController {
         checkErrorAndCallMethod(cmd, { sequencingKitLabelService.addNewAliasToSequencingKitLabel(cmd.id, cmd.alias) })
     }
 
+    JSON createSeqTypeAlias(SeqTypeAliasCommand cmd) {
+        checkErrorAndCallMethod(cmd, { seqTypeService.addNewAliasToSeqType(cmd.id, cmd.alias) })
+    }
+
     JSON createSeqType(CreateSeqTypeCommand cmd) {
         if (cmd.hasErrors()) {
             Map data = getErrorData(cmd.errors.getFieldError())
             render data as JSON
             return
         }
+
+        Set<String> alias = (cmd.alias) ? [cmd.alias] : null
+
         SeqType.withTransaction{
-            createSeqTyp(cmd, cmd.type, cmd.dirName, cmd.displayName)
+            createSeqTypeHelper(cmd, cmd.type, cmd.dirName, cmd.displayName, alias)
         }
     }
 
@@ -134,19 +142,19 @@ class MetaDataFieldsController {
         }
         SeqType seqType = SeqType.findByName(cmd.id)
         SeqType.withTransaction{
-            createSeqTyp(cmd, seqType.name, seqType.dirName, seqType.displayName)
+            createSeqTypeHelper(cmd, seqType.name, seqType.dirName, seqType.displayName, seqType.alias?.toSet())
         }
     }
 
-    private void createSeqTyp(Serializable cmd, String name, String dirName, String displayName) {
+    private void createSeqTypeHelper(Serializable cmd, String name, String dirName, String displayName, Set<String> alias) {
         if (cmd.single) {
-            checkErrorAndCallMethod(cmd, { seqTypeService.createSeqType(name, dirName, displayName, SeqType.LIBRARYLAYOUT_SINGLE) })
+            checkErrorAndCallMethod(cmd, { seqTypeService.createSeqType(name, dirName, displayName, alias, SeqType.LIBRARYLAYOUT_SINGLE) })
         }
         if (cmd.paired) {
-            checkErrorAndCallMethod(cmd, { seqTypeService.createSeqType(name, dirName, displayName, SeqType.LIBRARYLAYOUT_PAIRED) })
+            checkErrorAndCallMethod(cmd, { seqTypeService.createSeqType(name, dirName, displayName, alias, SeqType.LIBRARYLAYOUT_PAIRED) })
         }
         if (cmd.mate_pair) {
-            checkErrorAndCallMethod(cmd, { seqTypeService.createSeqType(name, dirName, displayName, SeqType.LIBRARYLAYOUT_MATE_PAIR) })
+            checkErrorAndCallMethod(cmd, { seqTypeService.createSeqType(name, dirName, displayName, alias, SeqType.LIBRARYLAYOUT_MATE_PAIR) })
         }
     }
 
@@ -336,6 +344,21 @@ class CreateSequencingKitAliasCommand implements Serializable {
     }
 }
 
+class SeqTypeAliasCommand implements Serializable {
+    String alias
+    String id
+    static constraints = {
+        alias(blank: false, validator: {val, obj ->
+            if(SeqTypeService.findSeqTypeByNameOrAlias(val)) {
+                return 'Duplicate'
+            }})
+        id(blank: false)
+    }
+    void setAlias(String alias) {
+        this.alias = alias?.trim()?.replaceAll(" +", " ")
+    }
+}
+
 class CreateSeqTypeCommand implements Serializable {
         boolean single
         boolean paired
@@ -344,6 +367,7 @@ class CreateSeqTypeCommand implements Serializable {
         String type
         String dirName
         String displayName
+        String alias
         static constraints = {
             anyLayout(blank: false,validator: {val, obj ->
                 if (!(obj.single || obj.paired || obj.mate_pair)) {
@@ -361,7 +385,10 @@ class CreateSeqTypeCommand implements Serializable {
                 if (SeqTypeService.hasSeqTypeByNameOrDisplayName(val)) {
                     return 'Duplicate'
                 }})
-
+            alias(blank: true, validator: {val, obj ->
+                if (val != '' && SeqTypeService.findSeqTypeByNameOrAlias(val)) {
+                    return 'Duplicate'
+                }})
         }
         void setType(String type) {
             this.type = type?.trim()?.replaceAll(" +", " ")
@@ -374,6 +401,9 @@ class CreateSeqTypeCommand implements Serializable {
             if (this.displayName.equals("")) {
                 this.displayName = null
             }
+        }
+        void setAlias(String alias) {
+            this.alias = alias?.trim()?.replaceAll(" +", " ")
         }
 }
 

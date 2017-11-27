@@ -229,7 +229,9 @@
                         <th><g:message code="dataFields.listSeqTypeDir"/></th>
                         <th><g:message code="dataFields.listSeqTypeLayouts"/></th>
                         <th></th>
+                        <th><g:message code="dataFields.listSeqTypeDisplayNames"/></th>
                         <th><g:message code="dataFields.listSeqTypeAlias"/></th>
+                        <th></th>
                     </tr>
             </thead>
             <tbody>
@@ -253,18 +255,28 @@
                                 link="${g.createLink(controller: 'metaDataFields', action: 'createLayout', id: seqType.name)}"
                             />
                             </g:if>
-
                         </td>
                         <td>
                             ${seqType.displayName}
                         </td>
+                        <td>
+                            ${seqType.aliases}
+                        </td>
+                        <td>
+                            <otp:editorSwitchNewValues
+                                roles="ROLE_OPERATOR"
+                                labels="${["Alias"]}"
+                                textFields="${["alias"]}"
+                                link="${g.createLink(controller: 'metaDataFields', action: 'createSeqTypeAlias', id: seqType.name)}"
+                            />
+                        </td>
                     </tr>
                 </g:each>
-                <td colspan="4">
+                <td colspan="6">
                     <otp:editorSwitchNewValues
                         roles="ROLE_OPERATOR"
-                        labels="${["Type", "Directory", "Display Name", "SINGLE", "PAIRED", "MATE_PAIR"]}"
-                        textFields="${["type", "dirName", "displayName"]}"
+                        labels="${["Type", "Directory", "Display Name", "Alias", "SINGLE", "PAIRED", "MATE_PAIR"]}"
+                        textFields="${["type", "dirName", "displayName", "alias"]}"
                         checkBoxes="${[single: false, paired: true, mate_pair: false]}"
                         link="${g.createLink(controller: 'metaDataFields', action: 'createSeqType')}"
                     />

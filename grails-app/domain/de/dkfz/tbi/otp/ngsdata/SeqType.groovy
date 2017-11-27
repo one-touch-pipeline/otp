@@ -43,6 +43,7 @@ class SeqType implements Entity {
     /** name used in roddy config files */
     String roddyName
 
+    static hasMany = [alias : String]
 
     static constraints = {
         name(blank: false)

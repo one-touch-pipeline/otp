@@ -369,6 +369,7 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
         controller.params.type = type
         controller.params.dirName = dirName
         controller.params.displayName = displayName
+        controller.params.alias = alias
         controller.params.single = single
         controller.params.paired = paired
         controller.params.mate_pair = mate_pair
@@ -385,25 +386,26 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
         !mate_pair || SeqType.findByNameAndDirNameAndLibraryLayout(type, dirName, SeqType.LIBRARYLAYOUT_MATE_PAIR)
 
         where:
-        type        | dirName       | displayName   | single    | paired    | mate_pair
-        'SEQTYPE'   | 'seqtype'     | 'SEQ TYPE'    | true      | false     | false
-        'SEQTYPE'   | 'seqtype'     | 'SEQ TYPE'    | false     | true      | false
-        'SEQTYPE'   | 'seqtype'     | 'SEQ TYPE'    | true      | true      | false
-        'SEQTYPE'   | 'seqtype'     | 'SEQ TYPE'    | false     | false     | true
-        'SEQTYPE'   | 'seqtype'     | 'SEQ TYPE'    | true      | false     | true
-        'SEQTYPE'   | 'seqtype'     | 'SEQ TYPE'    | false     | true      | true
-        'SEQTYPE'   | 'seqtype'     | 'SEQ TYPE'    | true      | true      | true
+        type        | dirName       | displayName   | alias     | single    | paired    | mate_pair
+        'SEQTYPE'   | 'seqtype'     | 'SEQ TYPE'    | 'alias'   | true      | false     | false
+        'SEQTYPE'   | 'seqtype'     | 'SEQ TYPE'    | 'alias'   | false     | true      | false
+        'SEQTYPE'   | 'seqtype'     | 'SEQ TYPE'    | 'alias'   | true      | true      | false
+        'SEQTYPE'   | 'seqtype'     | 'SEQ TYPE'    | 'alias'   | false     | false     | true
+        'SEQTYPE'   | 'seqtype'     | 'SEQ TYPE'    | 'alias'   | true      | false     | true
+        'SEQTYPE'   | 'seqtype'     | 'SEQ TYPE'    | 'alias'   | false     | true      | true
+        'SEQTYPE'   | 'seqtype'     | 'SEQ TYPE'    | 'alias'   | true      | true      | true
     }
 
     @Unroll
     void "test JSON createSeqType invalid input"() {
         given:
-        SeqType seqType = new SeqType(name: 'SEQTYPE', dirName: 'seqtype', displayName: 'SEQ TYPE',libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE)
+        SeqType seqType = new SeqType(name: 'SEQTYPE', dirName: 'seqtype', displayName: 'SEQ TYPE', alias: ["alias"], libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE)
         seqType.save(flush: true)
 
         when:
         controller.params.type = type
         controller.params.dirName = dirName
+        controller.params.displayName = displayName
         controller.params.alias = alias
         controller.params.single = single
         controller.params.paired = paired
@@ -418,23 +420,26 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
         !controller.response.json.success
 
         where:
-        type        | dirName       | alias         | single    | paired    | mate_pair
-        ''          | ''            | ''            | false     | false     | false
-        ''          | ''            | ''            | true      | false     | false
-        'SEQTYPE2'  | ''            | ''            | true      | false     | false
-        'SEQTYPE'   | 'seqtype2'    | ''            | true      | false     | false
-        'SEQ TYPE'  | 'seqtype2'    | ''            | true      | false     | false
-        'SEQTYPE2'  | 'seqtype'     | ''            | true      | false     | false
-        'SEQTYPE2'  | 'seqtype2'    | 'SEQTYPE'     | true      | false     | false
-        'SEQTYPE2'  | 'seqtype2'    | 'SEQ TYPE'    | true      | false     | false
+        type        | dirName       | displayName   | alias     | single    | paired    | mate_pair
+        ''          | ''            | ''            | ''        | false     | false     | false
+        ''          | ''            | ''            | ''        | true      | false     | false
+        'SEQTYPE2'  | ''            | ''            | ''        | true      | false     | false
+        'SEQTYPE'   | 'seqtype2'    | ''            | ''        | true      | false     | false
+        'SEQ TYPE'  | 'seqtype2'    | ''            | ''        | true      | false     | false
+        'SEQTYPE2'  | 'seqtype'     | ''            | ''        | true      | false     | false
+        'SEQTYPE2'  | 'seqtype2'    | 'SEQTYPE'     | ''        | true      | false     | false
+        'SEQTYPE2'  | 'seqtype2'    | 'SEQ TYPE'    | ''        | true      | false     | false
+        'SEQTYPE2'  | 'seqtype2'    | 'SEQTYPE'     | 'alias'   | true      | false     | false
+        'SEQTYPE2'  | 'seqtype2'    | 'SEQTYPE'     | ''        | true      | false     | false
+        'SEQTYPE2'  | 'seqtype2'    | 'SEQTYPE'     | null      | true      | false     | false
     }
 
     @Unroll
     void "test JSON createLayout valid input"() {
         given:
-        DomainFactory.createSeqType(name: 'SEQTYPE', dirName: 'SEQTYPE',libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE)
-        DomainFactory.createSeqType(name: 'SEQTYPE2', dirName: 'SEQTYPE2',libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED)
-        DomainFactory.createSeqType(name: 'SEQTYPE3', dirName: 'SEQTYPE3',libraryLayout: SeqType.LIBRARYLAYOUT_MATE_PAIR)
+        DomainFactory.createSeqType(name: 'SEQTYPE', dirName: 'SEQTYPE', libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE)
+        DomainFactory.createSeqType(name: 'SEQTYPE2', dirName: 'SEQTYPE2', libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED)
+        DomainFactory.createSeqType(name: 'SEQTYPE3', dirName: 'SEQTYPE3', libraryLayout: SeqType.LIBRARYLAYOUT_MATE_PAIR)
 
         when:
         controller.params.id = id
@@ -469,9 +474,9 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
     @Unroll
     void "test JSON createLayout invalid input"() {
         given:
-        DomainFactory.createSeqType(name: 'SEQTYPE', dirName: 'SEQTYPE',libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE)
-        DomainFactory.createSeqType(name: 'SEQTYPE2', dirName: 'SEQTYPE2',libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED)
-        DomainFactory.createSeqType(name: 'SEQTYPE3', dirName: 'SEQTYPE3',libraryLayout: SeqType.LIBRARYLAYOUT_MATE_PAIR)
+        DomainFactory.createSeqType(name: 'SEQTYPE', dirName: 'SEQTYPE', libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE)
+        DomainFactory.createSeqType(name: 'SEQTYPE2', dirName: 'SEQTYPE2', libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED)
+        DomainFactory.createSeqType(name: 'SEQTYPE3', dirName: 'SEQTYPE3', libraryLayout: SeqType.LIBRARYLAYOUT_MATE_PAIR)
 
         when:
         controller.params.id = id
@@ -498,5 +503,51 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
         'SEQTYPE'   | true      | true      | true
         'SEQTYPE2'  | true      | true      | true
         'SEQTYPE3'  | true      | true      | true
+    }
+
+    void "test JSON createSeqTypeAlias valid input"() {
+        given:
+        DomainFactory.createSeqType(name: 'SEQTYPE', dirName: 'SEQTYPE', alias: [], libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE)
+
+        when:
+        controller.params.id = id
+        controller.params.alias = alias
+        SpringSecurityUtils.doWithAuth("operator"){
+            controller.createSeqTypeAlias()
+        }
+
+        then:
+        controller.response.status == 200
+        controller.response.json.success
+
+        where:
+        id          | alias
+        'SEQTYPE'   | 'alias1'
+        'SEQTYPE'   | 'alias2'
+    }
+
+    @Unroll
+    void "test JSON createSeqTypeAlias invalid input"() {
+        given:
+        DomainFactory.createSeqType(name: 'SEQTYPE1', dirName: 'SEQTYPE1', alias: [], libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE)
+        DomainFactory.createSeqType(name: 'SEQTYPE2', dirName: 'SEQTYPE2', alias: ['alias2'], libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE)
+
+        when:
+        controller.params.id = id
+        controller.params.alias = alias
+        SpringSecurityUtils.doWithAuth("operator"){
+            controller.createSeqTypeAlias()
+        }
+
+        then:
+        controller.response.status == 200
+        !controller.response.json.success
+
+        where:
+        id          | alias
+        'SEQTYPE1'  | null
+        'SEQTYPE1'  | ''
+        'SEQTYPE1'  | 'alias2'
+        'SEQTYPE2'  | 'alias2'
     }
 }

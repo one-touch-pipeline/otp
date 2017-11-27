@@ -1328,6 +1328,7 @@ class DomainFactory {
                 libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE,
                 dirName      : 'seqTypeDirName_' + (counter++),
                 displayName  : seqTypeProperties.get('displayName') ?: seqTypeProperties.get('name') ?: defaultName,
+                alias        : []
         ], seqTypeProperties, saveAndValidate)
     }
 
