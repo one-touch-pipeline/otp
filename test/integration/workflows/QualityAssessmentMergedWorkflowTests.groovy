@@ -239,12 +239,7 @@ class QualityAssessmentMergedWorkflowTests extends WorkflowTestCase {
         )
         assertNotNull(softwareTool.save([flush: true]))
 
-        SeqPlatform seqPlatform = new SeqPlatform(
-                seqPlatformGroup: SeqPlatformGroup.build(),
-                name: "name",
-                model: "model"
-        )
-        assertNotNull(seqPlatform.save([flush: true]))
+        SeqPlatform seqPlatform = DomainFactory.createSeqPlatformWithSeqPlatformGroup()
 
         SeqCenter seqCenter = new SeqCenter(
                 name: "name",
