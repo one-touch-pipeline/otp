@@ -2,7 +2,9 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
+import groovy.transform.ToString
 
+@ToString(includeNames=true)
 class MergingCriteria implements Entity {
 
     Project project

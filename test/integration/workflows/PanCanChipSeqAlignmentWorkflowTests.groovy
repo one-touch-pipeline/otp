@@ -73,13 +73,13 @@ class PanCanChipSeqAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkflow
                 sample               : workPackage.sample,
                 pipeline             : workPackage.pipeline,
                 seqType              : workPackage.seqType,
+                seqPlatformGroup     : workPackage.seqPlatformGroup,
                 referenceGenome      : workPackage.referenceGenome,
                 needsProcessing      : false,
                 statSizeFileName     : workPackage.statSizeFileName,
                 libraryPreparationKit: workPackage.libraryPreparationKit,
                 antibodyTarget       : DomainFactory.createAntibodyTarget()
         ])
-
 
         SeqTrack secondSeqTrack = DomainFactory.createSeqTrackWithDataFiles(secondMergingWorkPackage, [
                 laneId               : "readGroup2",

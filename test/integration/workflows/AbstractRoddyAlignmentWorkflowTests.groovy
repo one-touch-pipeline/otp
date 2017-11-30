@@ -192,6 +192,14 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
         workPackage.project.realmName = realm.name
         workPackage.project.save(flush: true)
 
+        workPackage.seqPlatformGroup.mergingCriteria = DomainFactory.createMergingCriteria(
+                project: workPackage.individual.project,
+                seqType: workPackage.seqType,
+                libPrepKit: !seqType.isWgbs(),
+                seqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
+        )
+        workPackage.seqPlatformGroup.save(flush: true)
+
         return workPackage
     }
 
@@ -295,7 +303,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
                 name: 'runName_11',  // This name is encoded in @RG of the test BAM file
                 seqPlatform: DomainFactory.createSeqPlatformWithSeqPlatformGroup(seqPlatformGroups: [workPackage.seqPlatformGroup]),
         )])
-        DomainFactory.createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
+
         RoddyBamFile firstBamFile = new RoddyBamFile(
                 workPackage: workPackage,
                 identifier: RoddyBamFile.nextIdentifier(workPackage),
