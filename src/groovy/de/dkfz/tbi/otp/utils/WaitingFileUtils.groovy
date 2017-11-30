@@ -12,7 +12,7 @@ import grails.util.Environment
  */
 class WaitingFileUtils {
 
-    public static Duration defaultTimeout = Duration.standardMinutes(1)
+    public static Duration defaultTimeout = Duration.standardMinutes(2)
 
     static {
         if (Environment.current == Environment.TEST) {
