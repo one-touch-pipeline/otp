@@ -295,7 +295,8 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
                 name: 'runName_11',  // This name is encoded in @RG of the test BAM file
                 seqPlatform: DomainFactory.createSeqPlatformWithSeqPlatformGroup(seqPlatformGroups: [workPackage.seqPlatformGroup]),
         )])
-        DomainFactory.createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)        RoddyBamFile firstBamFile = new RoddyBamFile(
+        DomainFactory.createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
+        RoddyBamFile firstBamFile = new RoddyBamFile(
                 workPackage: workPackage,
                 identifier: RoddyBamFile.nextIdentifier(workPackage),
                 seqTracks: [seqTrack] as Set,
