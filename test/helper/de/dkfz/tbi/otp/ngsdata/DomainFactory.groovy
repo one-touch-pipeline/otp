@@ -485,9 +485,9 @@ class DomainFactory {
             MergingWorkPackage workPackage = MergingWorkPackage.findWhere(
                     sample: seqTrack.sample,
                     seqType: seqTrack.seqType,
+                    seqPlatformGroup: seqTrack.seqPlatformGroup
             )
             if (workPackage != null) {
-                assert workPackage.seqPlatformGroup == seqTrack.seqPlatformGroup
                 assert workPackage.libraryPreparationKit == seqTrack.libraryPreparationKit
                 return workPackage
             }

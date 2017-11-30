@@ -83,14 +83,11 @@ class MergingWorkflowTests extends WorkflowTestCase {
         )
         assert seqCenter.save(flush: true)
 
-        SeqPlatformGroup seqPlatformGroup = new SeqPlatformGroup(name: 'seqPlatformGroup')
-        assert seqPlatformGroup.save(flush: true)
+        SeqPlatformGroup seqPlatformGroup = DomainFactory.createSeqPlatformGroup()
 
-        SeqPlatform seqPlatform = new SeqPlatform(
-                name: 'seqPlatformName',
-                seqPlatformGroup: seqPlatformGroup,
+        SeqPlatform seqPlatform = DomainFactory.createSeqPlatform(
+                seqPlatformGroups: [seqPlatformGroup] as Set,
         )
-        assert seqPlatform.save(flush: true)
 
         Run run = new Run(
                 name: "testname1",
