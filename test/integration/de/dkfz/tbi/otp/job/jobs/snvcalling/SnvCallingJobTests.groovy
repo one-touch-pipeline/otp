@@ -249,7 +249,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
 
                 String scriptCommandPart = "/tmp/scriptLocation/calling.sh"
 
-                String qsubParameterCommandPart = "-v CONFIG_FILE=" +
+                String qsubParameterCommandPart = "-v \"CONFIG_FILE=" +
                         "${snvCallingInstance.configFilePath.absoluteDataManagementPath}," +
                         "pid=${snvCallingInstance.individual.pid}," +
                         "PID=${snvCallingInstance.individual.pid}," +
@@ -257,14 +257,14 @@ CHROMOSOME_INDICES=( {1..21} XY)
                         "CONTROL_BAMFILE_FULLPATH_BP=${controlBamFile}," +
                         "TOOL_ID=snvCalling," +
                         "PARM_CHR_INDEX=${chromosome}," +
-                        "FILENAME_VCF_SNVS=${snvFile}"
+                        "FILENAME_VCF_SNVS=${snvFile}\""
 
                 assert command.contains(scriptCommandPart)
                 assert command.contains(qsubParameterCommandPart)
 
             } else if (command.startsWith("mkdir -p ")) {
                 return ProcessHelperService.executeAndWait(command).assertExitCodeZeroAndStderrEmpty()
-            } else if (!command.startsWith("qrls")) {
+            } else if (!command.startsWith("qrls") && !command.startsWith("qstat")) {
                 File snvFile = new OtpPath(snvCallingInstance.instancePath, SnvCallingStep.CALLING.getResultFileName(snvCallingInstance.individual, null)).absoluteDataManagementPath
                 String scriptCommandPart = "/tmp/scriptLocation/joining.sh; " +
                         "md5sum ${snvFile} > ${snvFile}.md5sum"

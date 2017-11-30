@@ -35,6 +35,9 @@ class MergingJob extends AbstractJobImpl {
     @Autowired
     ProcessingOptionService optionService
 
+    @Autowired
+    ClusterJobManagerFactoryService clusterJobManagerFactory
+
     @Override
     public void execute() throws Exception {
         long mergingPassId = Long.parseLong(getProcessParameterValue())
@@ -52,7 +55,7 @@ class MergingJob extends AbstractJobImpl {
 
     private String createCommand(ProcessedMergedBamFile processedMergedBamFile, Realm realm) {
         Project project = mergingPassService.project(processedMergedBamFile.mergingPass)
-        String tempDir = "\${PBS_SCRATCH_DIR}/${ClusterJobSchedulerService.getJobIdEnvironmentVariable(realm)}"
+        String tempDir = "\${PBS_SCRATCH_DIR}/\${${clusterJobManagerFactory.getJobManager(realm).getJobIdVariable()}}"
         String createTempDir = "mkdir -p -m 2750 ${tempDir}"
         String javaOptions = optionService.findOptionSafe(OptionName.PIPELINE_OTP_ALIGNMENT_PICARD_JAVA_SETTINGS, null, project)
         String picard = ProcessingOptionService.findOptionAssure(OptionName.COMMAND_PICARD_MDUP, null, project)

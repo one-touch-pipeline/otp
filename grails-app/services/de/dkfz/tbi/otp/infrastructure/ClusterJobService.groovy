@@ -65,6 +65,26 @@ class ClusterJobService {
     }
 
     /**
+     * Stores values for statistics after the job has been sent
+     */
+    public void amendClusterJob(ClusterJob job, GenericJobInfo jobInfo) {
+        job.requestedCores = jobInfo.askedResources?.cores
+        job.requestedWalltime = convertFromJava8DurationToJodaDuration(jobInfo?.askedResources?.walltime)
+        job.requestedMemory = jobInfo.askedResources?.mem?.toLong(BufferUnit.k)
+
+        job.jobLog = jobInfo.logFile
+        job.accountName = jobInfo.account
+        job.dependencies = jobInfo.parentJobIDs ? jobInfo.parentJobIDs.collect { ClusterJob.get(it as Long) } : []
+
+        job.xten = isXten(job)
+        job.nBases = getBasesSum(job)
+        job.nReads = getReadsSum(job)
+        job.fileSize = getFileSizesSum(job)
+
+        assert job.save(flush: true, failOnError: true)
+    }
+
+    /**
      * Stores values for statistics after the job has finished
      */
     public void completeClusterJob(
@@ -94,20 +114,11 @@ class ClusterJobService {
         job.cpuTime = convertFromJava8DurationToJodaDuration(jobInfo.cpuTime)
         job.usedCores = jobInfo.usedResources?.cores
         job.usedMemory = jobInfo.usedResources?.mem?.toLong(BufferUnit.k)
-        job.requestedCores = jobInfo.askedResources?.cores
-        job.requestedWalltime = convertFromJava8DurationToJodaDuration(jobInfo?.askedResources?.walltimeAsDuration)
-        job.requestedMemory = jobInfo.askedResources?.mem?.toLong(BufferUnit.k)
-        job.usedSwap = jobInfo.swap?.toLong(BufferUnit.k)
+        job.usedSwap = jobInfo.usedResources?.swap?.toLong(BufferUnit.k)
 
         job.node = jobInfo.executionHosts
-        job.accountName = jobInfo.account
         job.startCount = jobInfo.startCount
-        job.dependencies = jobInfo.parentJobIDs ? jobInfo.parentJobIDs.collect { ClusterJob.get(it as Long) } : []
 
-        job.xten = isXten(job)
-        job.nBases = getBasesSum(job)
-        job.nReads = getReadsSum(job)
-        job.fileSize = getFileSizesSum(job)
         assert job.save(flush: true, failOnError: true)
 
         handleObviouslyFailedClusterJob(job)

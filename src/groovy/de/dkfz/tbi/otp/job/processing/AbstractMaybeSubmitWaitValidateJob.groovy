@@ -33,7 +33,7 @@ ${
     failedClusterJobs.sort(
             { ClusterJobIdentifier identifier1, ClusterJobIdentifier identifier2 -> identifier1.clusterJobId <=> identifier2.clusterJobId } as Comparator
     ).collect { ClusterJobIdentifier clusterJobIdentifier, String reason ->
-        "${clusterJobIdentifier}: ${reason}\n${"Log file: ${getLogFilePath(ClusterJob.findByClusterJobIdentifier(clusterJobIdentifier))}" }\n"
+        "${clusterJobIdentifier}: ${reason}\n${"Log file: ${ClusterJob.findByClusterJobIdentifier(clusterJobIdentifier).jobLog}" }\n"
     }.join("\n")
 }"""
     }

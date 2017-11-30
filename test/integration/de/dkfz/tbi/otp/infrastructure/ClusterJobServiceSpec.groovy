@@ -33,6 +33,55 @@ class ClusterJobServiceSpec extends Specification {
         seqType = DomainFactory.createSeqType()
     }
 
+    void "test amendClusterJob with values"() {
+        given:
+        DomainFactory.createProcessingOptionLazy(name: ProcessingOption.OptionName.TIME_ZONE, type: null, value: "Europe/Berlin")
+
+        def(job, run) = createClusterJobWithRun(null, [seqType: seqType])
+        job = job as ClusterJob
+
+        ClusterJob c2 = createClusterJob(seqType: seqType)
+
+        GenericJobInfo jobInfo = new GenericJobInfo(null, null, null, null, [c2.id as String])
+
+        jobInfo.askedResources = new ResourceSet(new BufferValue(7), 8, 9, java.time.Duration.ofSeconds(10), new BufferValue(11), "fasttrack", null)
+        jobInfo.logFile = new File("/file.log")
+        jobInfo.account = "257"
+
+        when:
+        clusterJobService.amendClusterJob(job, jobInfo)
+
+        then:
+        job.requestedCores == 8
+        job.requestedWalltime == org.joda.time.Duration.standardSeconds(10)
+        job.requestedMemory == 7*1024*1024
+
+        job.accountName == "257"
+        job.jobLog == new File("/file.log").absolutePath
+        job.dependencies == [c2] as Set
+    }
+
+    void "test amendClusterJob empty"() {
+        given:
+        DomainFactory.createProcessingOptionLazy(name: ProcessingOption.OptionName.TIME_ZONE, type: null, value: "Europe/Berlin")
+
+        def(job, run) = createClusterJobWithRun(null, [seqType: seqType])
+        job = job as ClusterJob
+
+        GenericJobInfo jobInfo = new GenericJobInfo(null, null, null, null, null)
+
+        when:
+        clusterJobService.amendClusterJob(job, jobInfo)
+
+        then:
+        job.requestedCores == null
+        job.requestedWalltime == null
+        job.requestedMemory == null
+
+        job.accountName == null
+        job.jobLog == null
+        job.dependencies == [] as Set
+    }
 
     void "test completeClusterJob with values"() {
         given:
@@ -56,7 +105,7 @@ class ClusterJobServiceSpec extends Specification {
         jobInfo.cpuTime = java.time.Duration.ofSeconds(789)
         jobInfo.usedResources = new ResourceSet(new BufferValue(2), 3, 4, java.time.Duration.ofSeconds(5), new BufferValue(6), "fasttrack", null)
         jobInfo.askedResources = new ResourceSet(new BufferValue(7), 8, 9, java.time.Duration.ofSeconds(10), new BufferValue(11), "fasttrack", null)
-        jobInfo.swap = new BufferValue(12)
+        jobInfo.usedResources.swap = new BufferValue(12)
 
         jobInfo.executionHosts = "host"
         jobInfo.account = "257"
@@ -79,15 +128,10 @@ class ClusterJobServiceSpec extends Specification {
         job.cpuTime == org.joda.time.Duration.standardSeconds(789)
         job.usedCores == 3
         job.usedMemory == 2*1024*1024
-        job.requestedCores == 8
-        job.requestedWalltime == org.joda.time.Duration.standardSeconds(10)
-        job.requestedMemory == 7*1024*1024
         job.usedSwap == 12*1024*1024
 
         job.node == "host"
-        job.accountName == "257"
         job.startCount == 361
-        job.dependencies == [c2] as Set
     }
 
     void "test completeClusterJob empty"() {
@@ -126,7 +170,7 @@ class ClusterJobServiceSpec extends Specification {
         job.node == null
         job.accountName == null
         job.startCount == null
-        job.dependencies == [] as Set
+        job.dependencies == null
     }
 
     void "test convertFromJava8DurationToJodaDuration"() {

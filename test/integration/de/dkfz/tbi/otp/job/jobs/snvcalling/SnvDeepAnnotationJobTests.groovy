@@ -63,6 +63,10 @@ class SnvDeepAnnotationJobTests {
     @Autowired
     LinkFileUtils linkFileUtils
 
+    @Autowired
+    ClusterJobLoggingService clusterJobLoggingService
+
+
     File testDirectory
     SnvDeepAnnotationJob snvDeepAnnotationJob
     SnvCallingInstance snvCallingInstance1
@@ -222,7 +226,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         removeMetaClass(ClusterJobSchedulerService, clusterJobSchedulerService)
         removeMetaClass(CreateClusterScriptService, createClusterScriptService)
         removeMetaClass(LinkFileUtils, linkFileUtils)
-        removeMetaClass(ClusterJobLoggingService, clusterJobSchedulerService.clusterJobLoggingService)
+        clusterJobSchedulerService.clusterJobLoggingService = clusterJobLoggingService
 
         LsdfFilesService.metaClass = null
         WaitingFileUtils.metaClass = null
@@ -284,9 +288,9 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         TestCase.mockCreateDirectory(lsdfFilesService)
         SnvCallingStep step = SnvCallingStep.SNV_DEEPANNOTATION
 
-        clusterJobSchedulerService.clusterJobLoggingService.metaClass.createAndGetLogDirectory = { Realm realm, ProcessingStep processingStep ->
+        clusterJobSchedulerService.clusterJobLoggingService = [createAndGetLogDirectory: { Realm realm, ProcessingStep processingStep ->
             return TestCase.uniqueNonExistentPath
-        }
+        }] as ClusterJobLoggingService
         snvDeepAnnotationJob.metaClass.createAndSaveSnvJobResult = { SnvCallingInstance instance, ExternalScript externalScript, SnvJobResult inputResult -> }
         snvDeepAnnotationJob.metaClass.writeConfigFile = { SnvCallingInstance instance ->
             return testData.createConfigFileWithContentInFileSystem(
@@ -304,7 +308,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
                     "/tmp/scriptLocation/deepAnnotation.sh; " +
                     "md5sum ${snvFile} > ${md5sumFile}"
 
-            String qsubParameterCommandPart = "-v CONFIG_FILE=" +
+            String qsubParameterCommandPart = "-v \"CONFIG_FILE=" +
                     "${snvCallingInstance2.configFilePath.absoluteDataManagementPath}," +
                     "pid=${snvCallingInstance2.individual.pid}," +
                     "PID=${snvCallingInstance2.individual.pid}," +
@@ -312,10 +316,10 @@ CHROMOSOME_INDICES=( {1..21} X Y)
                     "PIPENAME=SNV_DEEPANNOTATION," +
                     "FILENAME_VCF=${snvFile}," +
                     "FILENAME_VCF_SNVS=${snvFile}," +
-                    "FILENAME_CHECKPOINT=${step.getCheckpointFilePath(snvCallingInstance2).absoluteDataManagementPath}"
+                    "FILENAME_CHECKPOINT=${step.getCheckpointFilePath(snvCallingInstance2).absoluteDataManagementPath}\""
 
 
-            if (!command.startsWith("qrls")) {
+            if (!command.startsWith("qrls") && !command.startsWith("qstat")) {
                 assert command.contains(scriptCommandPart)
                 assert command.contains(qsubParameterCommandPart)
             }

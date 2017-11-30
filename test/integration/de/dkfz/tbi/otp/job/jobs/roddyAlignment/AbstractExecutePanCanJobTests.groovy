@@ -130,9 +130,6 @@ class AbstractExecutePanCanJobTests {
 
     @Test
     void testPrepareAndReturnWorkflowSpecificCommand_AllFine() {
-        roddyBamFile.project.processingPriority = ProcessingPriority.FAST_TRACK_PRIORITY
-        assert roddyBamFile.project.save(flush: true)
-
         abstractExecutePanCanJob.executeRoddyCommandService.metaClass.createWorkOutputDirectory = { Realm realm, File file -> }
 
         String expectedCmd = """\
@@ -146,8 +143,7 @@ ${roddyBamFile.individual.pid} \
 --configurationDirectories=${new File(roddyBamFile.config.configFilePath).parent},${roddyBaseConfigsPath} \
 --useiodir=${viewByPidString()},${roddyBamFile.workDirectory} \
 workflowSpecificParameter \
---cvalues="$workflowSpecificCValues,\
-PBS_AccountName:FASTTRACK"\
+--cvalues="$workflowSpecificCValues"\
 """
 
         String actualCmd = abstractExecutePanCanJob.prepareAndReturnWorkflowSpecificCommand(roddyBamFile, dataManagement)
@@ -168,24 +164,8 @@ PBS_AccountName:FASTTRACK"\
         String expectedCommand = """\
 --cvalues="$workflowSpecificCValues"\
 """
-        String actualCommand = abstractExecutePanCanJob.prepareAndReturnCValues(roddyBamFile)
-        assert expectedCommand == actualCommand
-    }
-
-
-    @Test
-    void testPrepareAndReturnCValues_FastTrack_setUpCorrect() {
-        roddyBamFile.project.processingPriority = ProcessingPriority.FAST_TRACK_PRIORITY
-        assert roddyBamFile.project.save(flush: true)
-
-        String expectedCommand = """\
---cvalues=\
-"$workflowSpecificCValues,\
-PBS_AccountName:FASTTRACK"\
-"""
         assert expectedCommand == abstractExecutePanCanJob.prepareAndReturnCValues(roddyBamFile)
     }
-
 
     @Test
     void testGetChromosomeIndexParameterWithMitochondrium_RoddyResultIsNull_ShouldFail() {

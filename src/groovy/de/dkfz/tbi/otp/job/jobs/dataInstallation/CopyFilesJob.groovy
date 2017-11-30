@@ -65,7 +65,7 @@ class CopyFilesJob extends AbstractOtpJob implements AutoRestartableJob {
     private String getScript(File sourceFile, File targetFile, String copyOrLinkCommand, String calculateMd5 = "", String changeMode = "") {
         return """
 #for debug kerberos problem
-klist
+klist || true
 
 
 mkdir -p -m 2750 ${targetFile.parent}

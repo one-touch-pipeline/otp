@@ -127,7 +127,7 @@ class ClusterJobMonitoringService {
                 log.debug("Checking cluster job ID ${jobIdentifier.clusterJobId}: ${completed ? 'finished' : 'still running'}")
                 if (completed) {
                     try {
-                        clusterJobSchedulerService.retrieveAndSaveJobStatistics(jobIdentifier)
+                        clusterJobSchedulerService.retrieveAndSaveJobStatisticsAfterJobFinished(jobIdentifier)
                     } catch (Throwable e) {
                         log.warn("Failed to fill in runtime statistics for ${jobIdentifier}", e)
                     }

@@ -260,7 +260,7 @@ class Scheduler {
 
     /**
      * Helper function to set a Process as failed and send out an error notification.
-     * @param step The ProcessignStep which failed
+     * @param step The ProcessingStep which failed
      * @param error The error message why this step failed.
      */
     private void markProcessAsFailed(ProcessingStep step, String error) {

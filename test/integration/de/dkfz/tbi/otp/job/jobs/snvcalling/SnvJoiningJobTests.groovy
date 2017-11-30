@@ -66,7 +66,7 @@ class SnvJoiningJobTests {
         executionService.metaClass.querySsh = { String host, int port, int timeout, String username, String password, File keyFile, boolean useSshAgent, String command ->
             if (command.startsWith("mkdir -p ")) {
                 return ProcessHelperService.executeAndWait(command).assertExitCodeZeroAndStderrEmpty()
-            } else if (!command.startsWith("qrls")) {
+            } else if (!command.startsWith("qrls") && !command.startsWith("qstat")) {
                 assert !querySshCalled
                 querySshCalled = true
                 File snvFile = new OtpPath(snvCallingInstance.instancePath, SnvCallingStep.CALLING.getResultFileName(snvCallingInstance.individual, null)).absoluteDataManagementPath

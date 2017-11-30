@@ -15,8 +15,8 @@ class WorkflowTestRealms {
     public static final Map REALM_DEFAULTS_DKFZ_CLUSTER = [
             name: LABEL_DKFZ,
             cluster: Realm.Cluster.DKFZ,
-            jobScheduler: Realm.JobScheduler.PBS,
-            host: 'headnode',
+            jobScheduler: Realm.JobScheduler.LSF,
+            host: 'host',
             port: DEFAULT_PORT,
             timeout: 0,
             defaultJobSubmissionOptions: JsonOutput.toJson([

@@ -1,24 +1,28 @@
 package de.dkfz.tbi.otp.job.processing
 
-import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.getThreadLog
-import static org.springframework.util.Assert.notNull
+import de.dkfz.tbi.otp.infrastructure.*
+import de.dkfz.tbi.otp.ngsdata.*
+import groovy.transform.*
 
-import java.util.regex.Pattern
+import java.util.regex.*
 
-import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
-import de.dkfz.tbi.otp.ngsdata.Realm
+import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.*
+import static org.springframework.util.Assert.*
 
 /**
  * A service to construct paths and messages for logging the status of cluster jobs.
  *
  */
+@CompileStatic
 class JobStatusLoggingService {
+
+    ClusterJobManagerFactoryService clusterJobManagerFactoryService
 
     final static LOGFILE_EXTENSION = '.log'
     final static STATUS_LOGGING_BASE_DIR = 'log/status'
 
-    private static String shellSnippetForClusterJobId(Realm realm) {
-        return "\$(echo ${ClusterJobSchedulerService.getJobIdEnvironmentVariable(realm)} | cut -d. -f1)"
+    private String shellSnippetForClusterJobId(Realm realm) {
+        return "\$(echo \${${clusterJobManagerFactoryService.getJobManager(realm).getJobIdVariable()}} | cut -d. -f1)"
     }
 
     /**
@@ -99,11 +103,11 @@ class JobStatusLoggingService {
         notNull clusterJobs
         def invalidInput = clusterJobs.findAll( { it == null || it.realm == null || it.clusterJobId == null } )
         assert invalidInput == []: "clusterJobs argument contains null values: ${invalidInput}"
-        final Map<Realm, Collection<ClusterJobIdentifier>> map = clusterJobs.groupBy( {it.realm} ).collectEntries { realm, clusterJob ->
+        final Map<Realm, Collection<ClusterJobIdentifier>> clusterJobMap = (clusterJobs.groupBy( {it.realm} ).collectEntries { realm, clusterJob ->
             [(realm): clusterJob]
-        }
-        assert map.values().flatten().size() == clusterJobs.size()
-        return failedOrNotFinishedClusterJobs(processingStep, map)
+        } as Map<Realm, Collection<ClusterJobIdentifier>>)
+        assert clusterJobMap.values().flatten().size() == clusterJobs.size()
+        return failedOrNotFinishedClusterJobs(processingStep, clusterJobMap)
     }
 
 

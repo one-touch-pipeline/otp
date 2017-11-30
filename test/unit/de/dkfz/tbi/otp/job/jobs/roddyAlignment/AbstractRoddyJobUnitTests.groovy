@@ -47,23 +47,6 @@ class AbstractRoddyJobUnitTests {
     }
 
     @Test
-    void testGetLogFilePath() {
-        Realm realm = Realm.build(
-                name: roddyBamFile.project.realmName,
-                rootPath: tmpDir.root.path,
-        )
-        ClusterJob clusterJob = ClusterJob.build(realm: realm)
-        File logDirectory = new File(roddyBamFile.workExecutionStoreDirectory, 'exec_150625_102449388_username_analysis')
-        assert logDirectory.mkdirs()
-
-        roddyBamFile.roddyExecutionDirectoryNames.add('exec_150625_102449388_username_analysis')
-
-        String expected = "Log file: ${new File(logDirectory, "${clusterJob.clusterJobName}.o${clusterJob.clusterJobId}")}"
-
-        assert "Log file: ${abstractRoddyJob.getLogFilePath(clusterJob)}" == expected
-    }
-
-    @Test
     void testFailedOrNotFinishedClusterJobs_WhenRoddyExecutionDirectoryDoesNotExist_ShouldFail() {
         roddyBamFile.metaClass.getWorkExecutionStoreDirectory = { ->
             return TestCase.uniqueNonExistentPath

@@ -50,6 +50,8 @@ class ClusterJob implements Entity {
      * name of the cluster job
      */
     String clusterJobName
+    /** Location of the job log on the file system (absolute path) */
+    String jobLog
     /**
      * class of the {@link Job} that submitted this cluster job
      */
@@ -164,6 +166,7 @@ class ClusterJob implements Entity {
         basesPerBytesFastq(nullable: true)
         xten(nullable: true)
         queued(nullable: false)
+        jobLog nullable: true, validator: {  !it || new File(it).isAbsolute() } // can't use OtpPath.isValidAbsolutePath(it) here, because path may contain ":"
         // the following values must be nullable because they get filled after the job is finished
         // and may not be available from every cluster job scheduler
         exitStatus(nullable: true)
@@ -195,6 +198,7 @@ class ClusterJob implements Entity {
         cpuTime type: PersistentDurationAsMillis
         systemSuspendStateDuration type: PersistentDurationAsMillis
         userSuspendStateDuration type: PersistentDurationAsMillis
+        jobLog type: 'text'
 
         clusterJobId index: "cluster_job_cluster_job_id_idx"
         clusterJobName index: "cluster_job_cluster_job_name_idx"

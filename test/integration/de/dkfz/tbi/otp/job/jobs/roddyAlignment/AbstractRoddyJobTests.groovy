@@ -7,6 +7,7 @@ import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.infrastructure.ClusterJobService
 import de.dkfz.tbi.otp.job.processing.AbstractMultiJob
+import de.dkfz.tbi.otp.job.processing.ClusterJobSchedulerService
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.ngsdata.ConfigService
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
@@ -90,6 +91,9 @@ class AbstractRoddyJobTests {
         roddyJob.executeRoddyCommandService = new ExecuteRoddyCommandService()
         roddyJob.configService = new ConfigService()
         roddyJob.clusterJobService = new ClusterJobService()
+        roddyJob.clusterJobSchedulerService = [
+                retrieveAndSaveJobInformationAfterJobStarted: { ClusterJob clusterJob -> }
+        ] as ClusterJobSchedulerService
     }
 
     @After

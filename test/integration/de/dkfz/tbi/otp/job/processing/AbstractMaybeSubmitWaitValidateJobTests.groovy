@@ -28,23 +28,28 @@ class AbstractMaybeSubmitWaitValidateJobTests extends TestCase {
         assert processingStep
 
         ClusterJob clusterJob1 = clusterJobService.createClusterJob(realm, "1111", realm.unixUser, processingStep)
+        clusterJob1.jobLog = "/test-job1.log"
+        clusterJob1.save(flush: true, failOnError: true)
         ClusterJobIdentifier identifier1 = new ClusterJobIdentifier(clusterJob1)
 
         ClusterJob clusterJob2 = clusterJobService.createClusterJob(realm, "2222", realm.unixUser, processingStep)
+        clusterJob1.jobLog = "/test-job1.log"
+        clusterJob1.save(flush: true, failOnError: true)
         ClusterJobIdentifier identifier2 = new ClusterJobIdentifier(clusterJob2)
 
         Map failedClusterJobs = [(identifier2): "Failed2.", (identifier1): "Failed1."]
         List finishedClusterJobs = [identifier2, identifier1]
 
-        String expected = """
-2 of 2 cluster jobs failed:
+        String expected = """\
 
-${identifier1}: Failed1.
-Log file: ${AbstractOtpJob.getDefaultLogFilePath(clusterJob1).path}
+            2 of 2 cluster jobs failed:
 
-${identifier2}: Failed2.
-Log file: ${AbstractOtpJob.getDefaultLogFilePath(clusterJob2).path}
-"""
+            ${identifier1}: Failed1.
+            Log file: ${clusterJob1.jobLog}
+
+            ${identifier2}: Failed2.
+            Log file: ${clusterJob2.jobLog}
+            """.stripIndent()
 
         String actual = abstractMaybeSubmitWaitValidateJob.createExceptionString(failedClusterJobs, finishedClusterJobs)
 

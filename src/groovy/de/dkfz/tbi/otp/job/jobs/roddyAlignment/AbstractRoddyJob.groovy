@@ -34,6 +34,8 @@ abstract class AbstractRoddyJob<R extends RoddyResult> extends AbstractMaybeSubm
     @Autowired
     ClusterJobService clusterJobService
     @Autowired
+    ClusterJobSchedulerService clusterJobSchedulerService
+    @Autowired
     SchedulerService schedulerService
 
     // Example:
@@ -65,7 +67,8 @@ abstract class AbstractRoddyJob<R extends RoddyResult> extends AbstractMaybeSubm
             if (submittedClusterJobs) {
                 saveRoddyExecutionStoreDirectory(roddyResult, output.stderr)
                 submittedClusterJobs.each {
-                    threadLog?.info("Log file: ${getLogFilePath(it)}" )
+                    clusterJobSchedulerService.retrieveAndSaveJobInformationAfterJobStarted(it)
+                    threadLog?.info("Log file: ${it.jobLog}" )
                 }
                 return AbstractMultiJob.NextAction.WAIT_FOR_CLUSTER_JOBS
             } else {
@@ -93,12 +96,6 @@ abstract class AbstractRoddyJob<R extends RoddyResult> extends AbstractMaybeSubm
     }
 
     protected abstract void validate(R roddyResultObject) throws Throwable
-
-    @Override
-    protected File getLogFilePath(ClusterJob clusterJob) {
-        File logDirectory = ((RoddyResult) getRefreshedProcessParameterObject()).latestWorkExecutionDirectory
-        return new File(logDirectory, "${clusterJob.clusterJobName}.o${clusterJob.clusterJobId}")
-    }
 
     @Override
     protected Map<ClusterJobIdentifier, String> failedOrNotFinishedClusterJobs(
@@ -152,7 +149,9 @@ abstract class AbstractRoddyJob<R extends RoddyResult> extends AbstractMaybeSubm
                     throw new RuntimeException("'${jobId}' is not a valid job ID.")
                 }
 
-                submittedClusterJobs.add(clusterJobService.createClusterJob(realm, jobId, realm.unixUser, processingStep, seqType, jobName, jobClass))
+                submittedClusterJobs.add(clusterJobService.createClusterJob(
+                        realm, jobId, realm.unixUser, processingStep, seqType, jobName, jobClass
+                ))
             }
         }
         assert submittedClusterJobs.empty == roddyOutput.stderr.contains(NO_STARTED_JOBS_MESSAGE)

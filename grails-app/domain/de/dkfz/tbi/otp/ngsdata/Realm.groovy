@@ -14,6 +14,7 @@ class Realm implements Entity, Serializable {
     }
 
     public enum JobScheduler {
+        LSF,
         PBS,
     }
 

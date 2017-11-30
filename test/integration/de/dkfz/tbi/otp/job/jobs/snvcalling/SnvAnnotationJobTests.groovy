@@ -54,6 +54,10 @@ class SnvAnnotationJobTests {
     @Autowired
     SnvCallingService snvCallingService
 
+    @Autowired
+    ClusterJobLoggingService clusterJobLoggingService
+
+
     File testDirectory
     SnvAnnotationJob snvAnnotationJob
     SnvCallingInstance snvCallingInstance
@@ -171,7 +175,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         TestCase.removeMetaClass(ExecutionService, executionService)
         TestCase.removeMetaClass(ClusterJobSchedulerService, clusterJobSchedulerService)
         TestCase.removeMetaClass(LinkFileUtils, linkFileUtils)
-        TestCase.removeMetaClass(ClusterJobLoggingService, clusterJobSchedulerService.clusterJobLoggingService)
+        clusterJobSchedulerService.clusterJobLoggingService = clusterJobLoggingService
         TestCase.removeMetaClass(SnvCallingService, snvCallingService)
         TestCase.removeMetaClass(AbstractMergedBamFileService, snvAnnotationJob.abstractMergedBamFileService)
 
@@ -231,9 +235,9 @@ CHROMOSOME_INDICES=( {1..21} XY)
     @Test
     void testMaybeSubmit() {
         TestCase.mockCreateDirectory(lsdfFilesService)
-        clusterJobSchedulerService.clusterJobLoggingService.metaClass.createAndGetLogDirectory = { Realm realm, ProcessingStep processingStep ->
+        clusterJobSchedulerService.clusterJobLoggingService = [createAndGetLogDirectory: { Realm realm, ProcessingStep processingStep ->
             return TestCase.uniqueNonExistentPath
-        }
+        }] as ClusterJobLoggingService
         snvAnnotationJob.metaClass.createAndSaveSnvJobResult = { SnvCallingInstance instance, ExternalScript externalScript, SnvJobResult inputResult -> }
         snvAnnotationJob.abstractMergedBamFileService.metaClass.getExistingBamFilePath = {ProcessedMergedBamFile bamFile ->
             return new File(AbstractMergedBamFileService.destinationDirectory(processedMergedBamFile1), processedMergedBamFile1.getBamFileName())
@@ -256,7 +260,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
 
             String commandScriptPart = "/tmp/scriptLocation/annotation.sh"
 
-            String commandParameterPart = "-v CONFIG_FILE=" +
+            String commandParameterPart = "-v \"CONFIG_FILE=" +
                     "${snvCallingInstance2.configFilePath.absoluteDataManagementPath}," +
                     "pid=${snvCallingInstance2.individual.pid}," +
                     "PID=${snvCallingInstance2.individual.pid}," +
@@ -264,9 +268,9 @@ CHROMOSOME_INDICES=( {1..21} XY)
                     "TOOL_ID=snvAnnotation," +
                     "FILENAME_VCF_IN=${inputFileCopy}," +
                     "FILENAME_VCF_OUT=${resultFile}," +
-                    "FILENAME_CHECKPOINT=${callingStep.getCheckpointFilePath(snvCallingInstance2).absoluteDataManagementPath}"
+                    "FILENAME_CHECKPOINT=${callingStep.getCheckpointFilePath(snvCallingInstance2).absoluteDataManagementPath}\""
 
-            if (!command.startsWith("qrls")) {
+            if (!command.startsWith("qrls") && !command.startsWith("qstat")) {
                 assert command.contains(commandLinkPart)
                 assert command.contains(commandScriptPart)
                 assert command.contains(commandParameterPart)

@@ -44,8 +44,8 @@ grails.project.dependency.resolution = {
         compile "org.jadira.usertype:usertype.jodatime:2.0.1"
 
         // library for interacting with cluster job schedulers
-        compile ("de.dkfz.roddy:BatchEuphoria:Roddy_2.4.0-43-g15d4082") {
-            excludes "logstash-logback-encoder", "sshj", "commons-io"
+        compile('com.github.eilslabs:BatchEuphoria:SGE-Direct-Beta-Release-1-160-gddb9a0d') {
+            excludes "logstash-logback-encoder", "commons-io"
         }
 
         // ssh and ssh-agent proxy library

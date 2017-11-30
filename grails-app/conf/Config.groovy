@@ -128,7 +128,7 @@ log4j = {
             'grails.app.controllers.de.dkfz.tbi.otp',           // controllers
             'grails.app.domain.de.dkfz.tbi.otp',
             'grails.app.services.de.dkfz.tbi.otp',
-            'grails.app.taglib.de.dkfz.tbi.otp'
+            'grails.app.taglib.de.dkfz.tbi.otp',
     ], jobs: [
             'de.dkfz.tbi.otp.job.jobs',
     ], additivity: false

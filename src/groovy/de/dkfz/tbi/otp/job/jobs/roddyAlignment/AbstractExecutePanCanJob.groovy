@@ -48,12 +48,7 @@ abstract class AbstractExecutePanCanJob<R extends RoddyResult> extends AbstractR
 
     public String prepareAndReturnCValues(R roddyResult) {
         assert roddyResult: "roddyResult must not be null"
-
         List<String> cValues = prepareAndReturnWorkflowSpecificCValues(roddyResult)
-        if (roddyResult.processingPriority >= ProcessingPriority.FAST_TRACK_PRIORITY) {
-            cValues.add("PBS_AccountName:FASTTRACK")
-        }
-
         return "--cvalues=\"${cValues.join(',').replace('$', '\\$')}\""
     }
 

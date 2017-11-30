@@ -32,7 +32,7 @@ class ClusterJobMonitoringServiceSpec extends Specification {
         setup:
         clusterJobMonitoringService.clusterJobSchedulerService = Mock(ClusterJobSchedulerService) {
             1 * retrieveKnownJobsWithState(_, _) >> [(clusterJob): status]
-            notifyCalls * retrieveAndSaveJobStatistics(clusterJob) >> null
+            notifyCalls * retrieveAndSaveJobStatisticsAfterJobFinished(clusterJob) >> null
         }
 
         when:
@@ -53,7 +53,7 @@ class ClusterJobMonitoringServiceSpec extends Specification {
         setup:
         clusterJobMonitoringService.clusterJobSchedulerService = Mock(ClusterJobSchedulerService) {
             1 * retrieveKnownJobsWithState(_, _) >> { throw new IllegalStateException() }
-            0 * retrieveAndSaveJobStatistics(clusterJob)
+            0 * retrieveAndSaveJobStatisticsAfterJobFinished(clusterJob)
         }
 
         when:
@@ -69,7 +69,7 @@ class ClusterJobMonitoringServiceSpec extends Specification {
         setup:
         clusterJobMonitoringService.clusterJobSchedulerService = Mock(ClusterJobSchedulerService) {
             1 * retrieveKnownJobsWithState(_, _) >> [:]
-            1 * retrieveAndSaveJobStatistics(clusterJob) >> null
+            1 * retrieveAndSaveJobStatisticsAfterJobFinished(clusterJob) >> null
         }
 
         when:

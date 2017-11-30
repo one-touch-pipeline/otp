@@ -4,6 +4,7 @@ import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
+import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.scheduler.*
@@ -34,7 +35,7 @@ import static de.dkfz.tbi.otp.utils.ProcessHelperService.*
  * Base class for work-flow integration test cases.
  *
  * To run the workflow tests the preparation steps described in
- * src/docs/guide/devel/testing/workflowTesting.gdoc have to be followed.
+ * src/docs/guide/testing.md have to be followed.
  *
  */
 @Log4j
@@ -129,6 +130,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         ])
         DomainFactory.createProcessingOptionLazy(name: OptionName.TIME_ZONE, type: null, value: "Europe/Berlin")
         DomainFactory.createProcessingOptionLazy(name: OptionName.STATISTICS_BASES_PER_BYTES_FASTQ, type: null, value: 2.339)
+        DomainFactory.createProcessingOptionLazy(name: OptionName.CLUSTER_SUBMISSIONS_FAST_TRACK_QUEUE, type: null, value: "fasttrack")
 
         createUserAndRoles()
         loadWorkflow()
@@ -278,16 +280,13 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         }
     }
 
-
-    private void ensureThatWorkflowHasNotFailed() {
-        Collection<ProcessingStepUpdate> failureProcessingStepUpdates = ProcessingStepUpdate.findAllByState(ExecutionState.FAILURE)
-        outputFailureInfoAndThrowException(failureProcessingStepUpdates)
-    }
-
-    private void ensureThatRestartedWorkflowHasNotFailed(ProcessingStepUpdate existingFailureProcessingStepUpdate) {
+    private void ensureThatWorkflowHasNotFailed(List<ProcessingStepUpdate> existingFailureProcessingStepUpdate = []) {
         Collection<ProcessingStepUpdate> allFailureProcessingStepUpdates = ProcessingStepUpdate.findAllByState(ExecutionState.FAILURE)
-        Collection<ProcessingStepUpdate> failureProcessingStepUpdatesAfterRestart = allFailureProcessingStepUpdates - [existingFailureProcessingStepUpdate]
+        Collection<ProcessingStepUpdate> failureProcessingStepUpdatesAfterRestart = allFailureProcessingStepUpdates - existingFailureProcessingStepUpdate
         outputFailureInfoAndThrowException(failureProcessingStepUpdatesAfterRestart)
+
+        assert ClusterJob.all.every { it.exitStatus != null }
+        assert ClusterJob.all.every { it.jobLog != null }
     }
 
     private boolean areAllProcessesFinished(int numberOfProcesses) {
@@ -455,7 +454,7 @@ echo \$TEMP_DIR
         println "RESTARTED THE WORKFLOW FROM THE FAILED JOB"
         waitUntilWorkflowFinishes(timeout)
         if (ensureNoFailure) {
-            ensureThatRestartedWorkflowHasNotFailed(failureStepUpdate)
+            ensureThatWorkflowHasNotFailed([failureStepUpdate])
         }
     }
 

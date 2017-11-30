@@ -101,7 +101,7 @@ class CopyFilesJobSpec extends Specification {
             1 * executeJob(_, _) >> { Realm realm, String command ->
                 assert command ==~ """
 #for debug kerberos problem
-klist
+klist \\|\\| true
 
 
 mkdir -p -m 2750 .*
@@ -129,7 +129,7 @@ chmod 440 .* .*
             1 * executeCommand(_, _) >> { Realm realm, String command ->
                 assert command ==~ """
 #for debug kerberos problem
-klist
+klist \\|\\| true
 
 
 mkdir -p -m 2750 .*
@@ -161,7 +161,7 @@ ln -s .* .*
             1 * executeCommand(_, _) >> { Realm realm, String command ->
                 assert command ==~ """
 #for debug kerberos problem
-klist
+klist \\|\\| true
 
 
 mkdir -p -m 2750 .*

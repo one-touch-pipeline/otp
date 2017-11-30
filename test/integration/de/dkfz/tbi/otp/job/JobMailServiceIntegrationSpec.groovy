@@ -75,7 +75,6 @@ class JobMailServiceIntegrationSpec extends Specification {
 
         AbstractJobImpl job = Mock(AbstractJobImpl) {
             _ * getProcessingStep() >> step
-            _ * getLogFilePath(_) >> TestCase.uniqueNonExistentPath
             0 * _
         }
 

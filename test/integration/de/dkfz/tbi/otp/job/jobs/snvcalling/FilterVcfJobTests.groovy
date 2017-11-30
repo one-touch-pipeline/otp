@@ -56,6 +56,10 @@ class FilterVcfJobTests {
     @Autowired
     SnvCallingInstanceTestData snvCallingInstanceTestData
 
+    @Autowired
+    ClusterJobLoggingService clusterJobLoggingService
+
+
     File testDirectory
     FilterVcfJob filterVcfJob
     SnvCallingInstance snvCallingInstance1
@@ -231,7 +235,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         removeMetaClass(ExecutionService, executionService)
         removeMetaClass(ClusterJobSchedulerService, clusterJobSchedulerService)
         removeMetaClass(LinkFileUtils, linkFileUtils)
-        removeMetaClass(ClusterJobLoggingService, clusterJobSchedulerService.clusterJobLoggingService)
+        clusterJobSchedulerService.clusterJobLoggingService = clusterJobLoggingService
     }
 
 
@@ -265,10 +269,9 @@ CHROMOSOME_INDICES=( {1..21} XY)
             return true
         }
 
-        clusterJobSchedulerService.clusterJobLoggingService.metaClass.createAndGetLogDirectory = { Realm realm, ProcessingStep processingStep ->
+        clusterJobSchedulerService.clusterJobLoggingService = [createAndGetLogDirectory: { Realm realm, ProcessingStep processingStep ->
             return TestCase.uniqueNonExistentPath
-        }
-
+        }] as ClusterJobLoggingService
         File pmbf1 = snvCallingInstanceTestData.createBamFile(processedMergedBamFile1)
         snvCallingInstanceTestData.createBamFile(processedMergedBamFile2)
 
@@ -282,7 +285,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
                         "rm -f ${snvCallingInstance2.instancePath.absoluteDataManagementPath}" +
                         "# END ORIGINAL SCRIPT"
 
-                String qsubParameterCommandPart = "-v CONFIG_FILE=" +
+                String qsubParameterCommandPart = "-v \"CONFIG_FILE=" +
                         "${snvCallingInstance2.configFilePath.absoluteDataManagementPath}," +
                         "pid=${snvCallingInstance2.individual.pid}," +
                         "PID=${snvCallingInstance2.individual.pid}," +
@@ -290,9 +293,9 @@ CHROMOSOME_INDICES=( {1..21} XY)
                         "SNVFILE_PREFIX=snvs_," +
                         "TUMOR_BAMFILE_FULLPATH_BP=${pmbf1.absolutePath}," +
                         "FILENAME_VCF=${new OtpPath(snvCallingInstance2.instancePath, SnvCallingStep.SNV_DEEPANNOTATION.getResultFileName(snvCallingInstance1.individual)).absoluteDataManagementPath}," +
-                        "FILENAME_CHECKPOINT=${SnvCallingStep.FILTER_VCF.getCheckpointFilePath(snvCallingInstance2).absoluteDataManagementPath}"
+                        "FILENAME_CHECKPOINT=${SnvCallingStep.FILTER_VCF.getCheckpointFilePath(snvCallingInstance2).absoluteDataManagementPath}\""
 
-            if (!command.startsWith("qrls")) {
+            if (!command.startsWith("qrls") && !command.startsWith("qstat")) {
                 assert command.contains(scriptCommandPart)
                 assert command.contains(qsubParameterCommandPart)
             }
