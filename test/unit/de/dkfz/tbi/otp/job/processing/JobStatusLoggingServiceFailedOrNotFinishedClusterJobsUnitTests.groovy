@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.job.processing
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.ngsdata.Realm
 import grails.buildtestdata.mixin.Build
@@ -19,6 +20,7 @@ import org.junit.Test
 @TestMixin(GrailsUnitTestMixin)
 @Build([ProcessingStep, Realm])
 class JobStatusLoggingServiceFailedOrNotFinishedClusterJobsUnitTests extends TestCase {
+    TestConfigService configService
 
     final static Long ARBITRARY_REALM_ID = 987
 
@@ -52,19 +54,24 @@ class JobStatusLoggingServiceFailedOrNotFinishedClusterJobsUnitTests extends Tes
     void setUp() {
         tempDirectory = TestCase.createEmptyTestDirectory()
 
+        configService = new TestConfigService(['otp.logging.root.path': tempDirectory.path])
+        service.configService = configService
+
         processingStep = JobStatusLoggingServiceUnitTests.createFakeProcessingStep()
+        assert new File(service.logFileBaseDir(processingStep)).mkdirs()
 
         int realmId = ARBITRARY_REALM_ID
-        realm1 = Realm.build([id: realmId++, name: 'realm1', loggingRootPath: new File(tempDirectory, '1').path])
-        assert new File(service.logFileBaseDir(realm1, processingStep)).mkdirs()
-        realm2 = Realm.build([id: realmId++, name: 'realm2', loggingRootPath: new File(tempDirectory, '2').path])
-        assert new File(service.logFileBaseDir(realm2, processingStep)).mkdirs()
-        realmWithEmptyLogFile = new Realm([id: realmId++, name: 'realmWithEmptyLogFile', loggingRootPath: new File(tempDirectory, '3').path, unixUser: "notEmtpy"])
-        assert new File(service.logFileBaseDir(realmWithEmptyLogFile, processingStep)).mkdirs()
-        realmWithoutLogFile = new Realm([id: realmId++, name: 'realmWithoutLogFile', loggingRootPath: new File(tempDirectory, '4').path, unixUser: "notEmtpy"])
-        assert new File(service.logFileBaseDir(realmWithoutLogFile, processingStep)).mkdirs()
-        realmWithoutLogDir = new Realm([id: realmId++, name: 'realmWithoutLogDir', loggingRootPath: new File(tempDirectory, '5').path, unixUser: "notEmtpy"])
-        realmWithSameLogDirAs1 = new Realm([id: realmId++, name: 'realmWithSameLogDirAs1', loggingRootPath: realm1.loggingRootPath, unixUser: "notEmtpy"])
+
+        realm1 = Realm.build([id: realmId++, name: 'realm1'])
+
+        realm2 = Realm.build([id: realmId++, name: 'realm2'])
+
+        realmWithEmptyLogFile = new Realm([id: realmId++, name: 'realmWithEmptyLogFile', unixUser: "notEmpty"])
+
+        realmWithoutLogFile = new Realm([id: realmId++, name: 'realmWithoutLogFile', unixUser: "notEmpty"])
+
+        realmWithoutLogDir = new Realm([id: realmId++, name: 'realmWithoutLogDir', loggingRootPath: new File(tempDirectory, '5').path, unixUser: "notEmpty"])
+        realmWithSameLogDirAs1 = new Realm([id: realmId++, name: 'realmWithSameLogDirAs1', unixUser: "notEmpty"])
 
         final String id1 = '1001'
         final String id2 = '1002'
@@ -130,6 +137,7 @@ class JobStatusLoggingServiceFailedOrNotFinishedClusterJobsUnitTests extends Tes
     @After
     void tearDown() {
         assert tempDirectory.deleteDir()
+        configService.clean()
     }
 
     @Test

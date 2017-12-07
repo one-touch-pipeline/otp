@@ -551,12 +551,12 @@ class QAResultStatisticsServiceTests {
 
     @Test
     void testStatisticsFile() {
-        Realm realm = DomainFactory.createRealmDataManagement(name: project.realmName)
+        TestConfigService configService = new TestConfigService()
 
         Map actual = QAResultStatisticsService.statisticsFile(processedMergedBamFile)
 
         // Location of the statistics file on the processing side, will be copied
-        final FINAL_PATH_FILE = realm.rootPath + "/projectDirName/sequencing/${seqType.dirName}/view-by-pid/pid_1/control/${seqType.libraryLayoutDirName}/merged-alignment/.tmp/QualityAssessment"
+        final FINAL_PATH_FILE = configService.getRootPath().path + "/projectDirName/sequencing/${seqType.dirName}/view-by-pid/pid_1/control/${seqType.libraryLayoutDirName}/merged-alignment/.tmp/QualityAssessment"
 
         Map expect = [
             'small': "${FINAL_PATH_FILE}/${FileNames.QA_RESULT_OVERVIEW}",

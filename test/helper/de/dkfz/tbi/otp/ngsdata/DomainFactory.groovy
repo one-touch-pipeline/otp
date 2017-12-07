@@ -105,38 +105,16 @@ class DomainFactory {
         ] + properties)
     }
 
-    static Realm createRealmDataManagement(File testDirectory, Map properties = [:]) {
-        assert testDirectory.isAbsolute()
-        createRealmDataManagement([
-                rootPath:           new File(testDirectory, 'root').path,
-        ] + properties)
-    }
-
     static Realm createRealmDataProcessing(Map properties = [:]) {
         createRealm([
                 operationType:      Realm.OperationType.DATA_PROCESSING,
         ] + properties)
     }
 
-    static Realm createRealmDataProcessing(File testDirectory, Map properties = [:]) {
-        assert testDirectory.isAbsolute()
-        createRealmDataProcessing([
-                processingRootPath: new File(testDirectory, 'processing').path,
-                stagingRootPath:    new File(testDirectory, 'staging').path,
-                loggingRootPath:    new File(testDirectory, 'logging').path,
-        ] + properties)
-    }
-
     static Realm createRealm(Map realmProperties = [:]) {
-        File fakePath = TestCase.uniqueNonExistentPath
         return createDomainObject(Realm, [
                 name              : 'realmName_' + (counter++),
                 env               : Environment.current.name,
-                rootPath          : { new File(fakePath, 'root').path },
-                processingRootPath: { new File(fakePath, 'processing').path },
-                loggingRootPath   : { new File(fakePath, 'logging').path },
-                programsRootPath  : { new File(fakePath, 'programs').path },
-                stagingRootPath   : { new File(fakePath, 'staging').path },
                 webHost           : 'test.host.invalid',
                 jobScheduler      : Realm.JobScheduler.PBS,
                 host              : 'test.host.invalid',

@@ -20,9 +20,6 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends WorkflowTestCase {
 
     LsdfFilesService lsdfFilesService
 
-
-
-
     private static final String CHROMOSOME_X_NAME = "CHR_X"
     private static final String CHROMOSOME_Y_NAME = "CHR_Y"
 
@@ -49,7 +46,7 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends WorkflowTestCase {
 
     @Before
     void setUp() {
-        mergingMiddleDir = "${realm.processingRootPath}/project1/results_per_pid/pid_1/merging/control/EXON/PAIRED/DEFAULT"
+        mergingMiddleDir = "${configService.getProcessingRootPath()}/project1/results_per_pid/pid_1/merging/control/EXON/PAIRED/DEFAULT"
         filePathMergedBamFile1 = "${mergingMiddleDir}/0/pass0/"
         fileNameMergedBamFile1 = "${filePathMergedBamFile1}control_pid_1_EXON_PAIRED_merged.mdup.bam"
         filePathMergedBamFile2 = "${mergingMiddleDir}/1/pass0/"
@@ -62,7 +59,7 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends WorkflowTestCase {
         fileNameMergedBamFileQA1 = "${filePathMergedBamFileQA1}/plot.jpg"
         filePathMergedBamFileQA2 = "${mergingMiddleDir}/1/pass0/QualityAssessment/pass0/"
         fileNameMergedBamFileQA2 = "${filePathMergedBamFileQA2}/plot.jpg"
-        destinationDirMergedBamFile = "${realm.rootPath}/project1/sequencing/exon_sequencing/view-by-pid/pid_1/control/paired/merged-alignment"
+        destinationDirMergedBamFile = "${configService.getRootPath().path}/project1/sequencing/exon_sequencing/view-by-pid/pid_1/control/paired/merged-alignment"
         destinationFileNameMergedBamFile = "${destinationDirMergedBamFile}/control_pid_1_EXON_PAIRED_merged.mdup.bam"
         destinationDirQaResults = "${destinationDirMergedBamFile}/QualityAssessment/"
         qaResultOverviewFile = "${destinationDirQaResults}/${FileNames.QA_RESULT_OVERVIEW}"

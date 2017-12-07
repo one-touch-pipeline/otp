@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.dataInstallation
 
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
@@ -38,23 +39,28 @@ class CopyFilesJobSpec extends Specification {
 
     final long PROCESSING_STEP_ID = 1234567
 
+    TestConfigService configService
     CopyFilesJob copyFilesJob
     ProcessingStep step
 
+    @Rule
+    TemporaryFolder temporaryFolder
+
     def setup() {
         step = DomainFactory.createProcessingStep(id: PROCESSING_STEP_ID)
+        configService = new TestConfigService(['otp.root.path': temporaryFolder.newFolder("root").path])
         copyFilesJob = new CopyFilesJob()
         copyFilesJob.processingStep = step
-        copyFilesJob.configService = new ConfigService()
+        copyFilesJob.configService = configService
         copyFilesJob.lsdfFilesService = new LsdfFilesService()
         copyFilesJob.checksumFileService = new ChecksumFileService()
         copyFilesJob.checksumFileService.lsdfFilesService = copyFilesJob.lsdfFilesService
-        copyFilesJob.lsdfFilesService.configService =  copyFilesJob.configService
-
+        copyFilesJob.lsdfFilesService.configService = configService
     }
 
-    @Rule
-    TemporaryFolder temporaryFolder
+    def cleanup() {
+        configService.clean()
+    }
 
     void "test checkInitialSequenceFiles where no data files are connected, should fail"() {
         given:
@@ -237,7 +243,7 @@ ln -s .* .*
         DataFile dataFile = CollectionUtils.exactlyOneElement(seqTrack.dataFiles)
         CreateFileHelper.createFile(new File("${dataFile.initialDirectory}/${dataFile.fileName}"))
 
-        DomainFactory.createRealmDataManagement([name: seqTrack.project.realmName, rootPath: temporaryFolder.newFolder("root").path])
+        DomainFactory.createRealmDataManagement([name: seqTrack.project.realmName])
 
         DomainFactory.createProcessParameter([
                 process: step.process, value: seqTrack.id, className: SeqTrack.class.name])

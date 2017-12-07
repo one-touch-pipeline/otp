@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.notification
 
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
@@ -52,6 +53,8 @@ import static de.dkfz.tbi.otp.tracking.OtrsTicket.ProcessingStep.*
 //TODO refactor classes SNV INDEL ACESEQSpec abstract from BamFilePairAnalyses abstract
 @TestMixin(GrailsUnitTestMixin)
 class CreateNotificationTextServiceSpec extends Specification {
+
+    TestConfigService configService
 
     static List listPairAnalyses = [
             [
@@ -293,17 +296,17 @@ class CreateNotificationTextServiceSpec extends Specification {
         given:
         SeqTrack seqTrack1 = DomainFactory.createSeqTrackWithTwoDataFiles()
         SeqTrack seqTrack2 = DomainFactory.createSeqTrackWithTwoDataFiles()
-        Realm realm1 = DomainFactory.createRealmDataManagement(name: seqTrack1.project.realmName)
-        Realm realm2 = DomainFactory.createRealmDataManagement(name: seqTrack2.project.realmName)
+
+        configService = new TestConfigService()
 
         when:
         String fileNameString = new CreateNotificationTextService(
-                configService: new ConfigService(),
+                configService: configService,
                 lsdfFilesService: new LsdfFilesService(),
         ).getSeqTypeDirectories([seqTrack1, seqTrack2])
         String expected = [
-                new File("${realm1.rootPath}/${seqTrack1.project.dirName}/sequencing/${seqTrack1.seqType.dirName}"),
-                new File("${realm2.rootPath}/${seqTrack2.project.dirName}/sequencing/${seqTrack2.seqType.dirName}"),
+                new File("${configService.getRootPath()}/${seqTrack1.project.dirName}/sequencing/${seqTrack1.seqType.dirName}"),
+                new File("${configService.getRootPath()}/${seqTrack2.project.dirName}/sequencing/${seqTrack2.seqType.dirName}"),
         ].sort().join('\n')
 
         then:
@@ -316,12 +319,12 @@ class CreateNotificationTextServiceSpec extends Specification {
         SeqTrack seqTrack = DomainFactory.createSeqTrackWithTwoDataFiles()
         DomainFactory.createRealmDataManagement([
                 name    : seqTrack.project.realmName,
-                rootPath: LsdfFilesService.MOUNTPOINT_WITH_ICGC
         ])
+        configService = new TestConfigService(['otp.root.path': LsdfFilesService.MOUNTPOINT_WITH_ICGC])
 
         when:
         String fileNameString = new CreateNotificationTextService(
-                configService: new ConfigService(),
+                configService: configService,
                 lsdfFilesService: new LsdfFilesService(),
         ).getSeqTypeDirectories([seqTrack])
         String expected = [
@@ -330,6 +333,9 @@ class CreateNotificationTextServiceSpec extends Specification {
 
         then:
         expected == fileNameString
+
+        cleanup:
+        configService.clean()
     }
 
 
@@ -359,14 +365,13 @@ class CreateNotificationTextServiceSpec extends Specification {
                         pipeline: roddyBamFile1.pipeline,
                 ])
         ])
-        Realm realm1 = DomainFactory.createRealmDataManagement(name: roddyBamFile1.project.realmName)
-        Realm realm2 = DomainFactory.createRealmDataManagement(name: roddyBamFile2.project.realmName)
+        configService = new TestConfigService()
 
         when:
         String fileNameString = new CreateNotificationTextService().getMergingDirectories([roddyBamFile1,roddyBamFile2,roddyBamFile3])
         String expected = [
-                new File("${realm1.rootPath}/${roddyBamFile1.project.dirName}/sequencing/${roddyBamFile1.seqType.dirName}/view-by-pid/\${PID}/\${SAMPLE_TYPE}/${roddyBamFile1.seqType.libraryLayoutDirName}/merged-alignment"),
-                new File("${realm2.rootPath}/${roddyBamFile2.project.dirName}/sequencing/${roddyBamFile2.seqType.dirName}/view-by-pid/\${PID}/\${SAMPLE_TYPE}/${roddyBamFile2.seqType.libraryLayoutDirName}/merged-alignment"),
+                new File("${configService.getRootPath()}/${roddyBamFile1.project.dirName}/sequencing/${roddyBamFile1.seqType.dirName}/view-by-pid/\${PID}/\${SAMPLE_TYPE}/${roddyBamFile1.seqType.libraryLayoutDirName}/merged-alignment"),
+                new File("${configService.getRootPath()}/${roddyBamFile2.project.dirName}/sequencing/${roddyBamFile2.seqType.dirName}/view-by-pid/\${PID}/\${SAMPLE_TYPE}/${roddyBamFile2.seqType.libraryLayoutDirName}/merged-alignment"),
         ].sort().join('\n')
 
         then:
@@ -378,9 +383,9 @@ class CreateNotificationTextServiceSpec extends Specification {
         given:
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
         DomainFactory.createRealmDataManagement([
-                name    : roddyBamFile.project.realmName,
-                rootPath: LsdfFilesService.MOUNTPOINT_WITH_ICGC
+                name    : roddyBamFile.project.realmName
         ])
+        configService = new TestConfigService(['otp.root.path': LsdfFilesService.MOUNTPOINT_WITH_ICGC])
 
         when:
         String fileNameString = new CreateNotificationTextService().getMergingDirectories([roddyBamFile])
@@ -388,6 +393,9 @@ class CreateNotificationTextServiceSpec extends Specification {
 
         then:
         expected == fileNameString
+
+        cleanup:
+        configService.clean()
     }
 
     void "getMergingDirectories, when seqtype is chipseq, then the path should contain antibody"() {
@@ -398,11 +406,11 @@ class CreateNotificationTextServiceSpec extends Specification {
                         pipeline: DomainFactory.createPanCanPipeline(),
                 ])
         ])
-        Realm realm = DomainFactory.createRealmDataManagement([name: roddyBamFile.project.realmName])
+        configService = new TestConfigService()
 
         when:
         String fileNameString = new CreateNotificationTextService().getMergingDirectories([roddyBamFile])
-        String expected = new File("${realm.rootPath}/${roddyBamFile.project.dirName}/sequencing/${roddyBamFile.seqType.dirName}/view-by-pid/\${PID}/\${SAMPLE_TYPE}-\${ANTI_BODY_TARGET}/${roddyBamFile.seqType.libraryLayoutDirName}/merged-alignment").path
+        String expected = new File("${configService.getRootPath()}/${roddyBamFile.project.dirName}/sequencing/${roddyBamFile.seqType.dirName}/view-by-pid/\${PID}/\${SAMPLE_TYPE}-\${ANTI_BODY_TARGET}/${roddyBamFile.seqType.libraryLayoutDirName}/merged-alignment").path
 
         then:
         expected == fileNameString
@@ -420,14 +428,13 @@ class CreateNotificationTextServiceSpec extends Specification {
         SamplePair samplePair1 = DomainFactory.createSamplePair()
         SamplePair samplePair2 = DomainFactory.createSamplePair()
 
-        Realm realm1 = DomainFactory.createRealmDataManagement(name: samplePair1.project.realmName)
-        Realm realm2 = DomainFactory.createRealmDataManagement(name: samplePair2.project.realmName)
+        configService = new TestConfigService()
 
         when:
         String fileNameString = new CreateNotificationTextService().variantCallingDirectories([samplePair1, samplePair2], analysis)
         String expected = [
-                new File("${realm1.rootPath}/${samplePair1.project.dirName}/sequencing/${samplePair1.seqType.dirName}/view-by-pid/${samplePair1.individual.pid}/${pathSegment}/${samplePair1.seqType.libraryLayoutDirName}/${samplePair1.sampleType1.dirName}_${samplePair1.sampleType2.dirName}"),
-                new File("${realm2.rootPath}/${samplePair2.project.dirName}/sequencing/${samplePair2.seqType.dirName}/view-by-pid/${samplePair2.individual.pid}/${pathSegment}/${samplePair2.seqType.libraryLayoutDirName}/${samplePair2.sampleType1.dirName}_${samplePair2.sampleType2.dirName}"),
+                new File("${configService.getRootPath()}/${samplePair1.project.dirName}/sequencing/${samplePair1.seqType.dirName}/view-by-pid/${samplePair1.individual.pid}/${pathSegment}/${samplePair1.seqType.libraryLayoutDirName}/${samplePair1.sampleType1.dirName}_${samplePair1.sampleType2.dirName}"),
+                new File("${configService.getRootPath()}/${samplePair2.project.dirName}/sequencing/${samplePair2.seqType.dirName}/view-by-pid/${samplePair2.individual.pid}/${pathSegment}/${samplePair2.seqType.libraryLayoutDirName}/${samplePair2.sampleType1.dirName}_${samplePair2.sampleType2.dirName}"),
         ].sort().join('\n')
 
         then:
@@ -441,21 +448,23 @@ class CreateNotificationTextServiceSpec extends Specification {
         ACESEQ   || "cnv_results"
     }
 
-
+    //@Unroll
     void "variantCallingDirectories, when path starts with icgc, then the path should be changed to start with lsdf"() {
         given:
         SamplePair samplePair = DomainFactory.createSamplePair()
-        DomainFactory.createRealmDataManagement([
-                name    : samplePair.project.realmName,
-                rootPath: LsdfFilesService.MOUNTPOINT_WITH_ICGC
-        ])
+        DomainFactory.createRealmDataManagement([name: samplePair.project.realmName])
+
+        configService = new TestConfigService(['otp.root.path': LsdfFilesService.MOUNTPOINT_WITH_ICGC])
 
         when:
         String fileNameString = new CreateNotificationTextService().variantCallingDirectories([samplePair], analysis)
         String expected = new File("${LsdfFilesService.MOUNTPOINT_WITH_LSDF}/${samplePair.project.dirName}/sequencing/${samplePair.seqType.dirName}/view-by-pid/${samplePair.individual.pid}/${pathSegment}/${samplePair.seqType.libraryLayoutDirName}/${samplePair.sampleType1.dirName}_${samplePair.sampleType2.dirName}").path
 
-         then:
+        then:
         expected == fileNameString
+
+        cleanup:
+        configService.clean()
 
         where:
         analysis || pathSegment
@@ -534,7 +543,7 @@ class CreateNotificationTextServiceSpec extends Specification {
                 linkGenerator: Mock(LinkGenerator) {
                     projectCount * link(_) >> 'link'
                 },
-                configService: new ConfigService(),
+                configService: new TestConfigService(),
                 lsdfFilesService: new LsdfFilesService(),
         )
 

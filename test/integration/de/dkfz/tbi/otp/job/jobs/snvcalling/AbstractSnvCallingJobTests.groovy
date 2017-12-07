@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.AnalysisProcessingStates
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile
@@ -29,6 +30,7 @@ class AbstractSnvCallingJobTests {
     @Autowired
     ApplicationContext applicationContext
 
+    TestConfigService configService
     AbstractSnvCallingJob abstractSnvCallingJob
     File testDirectory
     SnvCallingInstanceTestData testData
@@ -79,18 +81,23 @@ CHROMOSOME_INDICES=( {1..21} X Y)
                 getPreviousStep:{ -> return SnvCallingStep.CALLING }
         ] as AbstractSnvCallingJob
 
-        abstractSnvCallingJob.configService = new ConfigService()
-        abstractSnvCallingJob.executionService = new ExecutionService()
-        abstractSnvCallingJob.lsdfFilesService = new LsdfFilesService()
-        abstractSnvCallingJob.linkFileUtils = new LinkFileUtils()
-
         testDirectory = tmpDir.newFolder("otp-test")
         if(!testDirectory.exists()) {
             assert testDirectory.mkdirs()
         }
 
+        configService = new TestConfigService([
+                        'otp.root.path': testDirectory.path+"/root",
+                        'otp.staging.root.path': testDirectory.path+"/staging"
+        ])
+
+        abstractSnvCallingJob.configService = configService
+        abstractSnvCallingJob.executionService = new ExecutionService()
+        abstractSnvCallingJob.lsdfFilesService = new LsdfFilesService()
+        abstractSnvCallingJob.linkFileUtils = new LinkFileUtils()
+
         testData = new SnvCallingInstanceTestData()
-        testData.createSnvObjects(testDirectory)
+        testData.createSnvObjects()
 
         realm_processing = testData.realmProcessing
 
@@ -168,6 +175,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         snvCallingJobResult = null
         snvConfig = null
         assert testDirectory.deleteDir()
+        configService.clean()
     }
 
 

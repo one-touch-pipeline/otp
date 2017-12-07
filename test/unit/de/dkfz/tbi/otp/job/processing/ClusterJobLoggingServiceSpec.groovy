@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.processing
 
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.ngsdata.*
 import grails.test.mixin.*
@@ -17,12 +18,10 @@ import spock.lang.*
 ])
 class ClusterJobLoggingServiceSpec extends Specification {
 
-
+    TestConfigService configService
 
     @Rule
     TemporaryFolder temporaryFolder = new TemporaryFolder()
-
-
 
     Realm realm
     ProcessingStepUpdate processingStepUpdate
@@ -30,7 +29,8 @@ class ClusterJobLoggingServiceSpec extends Specification {
 
 
     void setup() {
-        realm = DomainFactory.createRealmDataProcessing(temporaryFolder.newFolder())
+        configService = new TestConfigService(['otp.logging.root.path': temporaryFolder.newFolder().path])
+        realm = DomainFactory.createRealmDataProcessing()
         processingStepUpdate = DomainFactory.createProcessingStepUpdate()
         service = new ClusterJobLoggingService()
         service.lsdfFilesService = Stub(LsdfFilesService) {
@@ -40,35 +40,26 @@ class ClusterJobLoggingServiceSpec extends Specification {
         }
     }
 
-
+    void cleanup() {
+        configService.clean()
+    }
 
     void "test logDirectory, when all fine return correct path"() {
         when:
-        File logDir = service.logDirectory(realm, processingStepUpdate.processingStep)
+        File logDir = service.logDirectory(processingStepUpdate.processingStep)
 
         then:
-        logDir.path ==~ /${realm.loggingRootPath}\/${ClusterJobLoggingService.CLUSTER_LOG_BASE_DIR}\/\d{4}-\d\d-\d\d/
-    }
-
-    void "test logDirectory, when realm is null throw exception"() {
-        when:
-        ClusterJobLoggingService.logDirectory(null, processingStepUpdate.processingStep)
-
-        then:
-        AssertionError e = thrown()
-        e.message.contains('realm')
+        logDir.path ==~ /${configService.getLoggingRootPath().path}\/${ClusterJobLoggingService.CLUSTER_LOG_BASE_DIR}\/\d{4}-\d\d-\d\d/
     }
 
     void "test logDirectory, when processingStep is null throw exception"() {
         when:
-        ClusterJobLoggingService.logDirectory(realm, null)
+        service.logDirectory(null)
 
         then:
         AssertionError e = thrown()
         e.message.contains('processingStep')
     }
-
-
 
     void "test createAndGetLogDirectory, when all fine the log directory is created"() {
         when:

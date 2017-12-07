@@ -9,7 +9,7 @@ import grails.test.mixin.*
 import org.junit.*
 
 @TestFor(SnvJobResult)
-@Mock([SnvCallingInstance, ExternalScript, MergingCriteria,])
+@Mock([Realm, SnvCallingInstance, ExternalScript, MergingCriteria,])
 @Build([
         AlignmentPass,
         MergingPass,

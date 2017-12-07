@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.processing
 
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
@@ -8,6 +9,7 @@ import grails.buildtestdata.mixin.Build
 import grails.test.mixin.TestFor
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
+import org.junit.After
 import org.junit.Test
 
 /**
@@ -18,6 +20,7 @@ import org.junit.Test
 @TestMixin(GrailsUnitTestMixin)
 @Build([JobDefinition, JobExecutionPlan, Process, ProcessingStep, Realm])
 class JobStatusLoggingServiceUnitTests {
+    TestConfigService configService
 
     final static String LOGGING_ROOT_PATH = '/fakeRootPath'
     final static String EXPECTED_BASE_PATH = '/fakeRootPath/log/status'
@@ -39,21 +42,20 @@ class JobStatusLoggingServiceUnitTests {
     Realm realm
 
     void setUp() {
-        realm = DomainFactory.createRealm(
-                operationType: Realm.OperationType.DATA_MANAGEMENT,
-                loggingRootPath: LOGGING_ROOT_PATH,
-        )
+        realm = DomainFactory.createRealmDataManagement()
+        configService = new TestConfigService(['otp.logging.root.path': LOGGING_ROOT_PATH])
+        service.configService = configService
         EXPECTED_LOGFILE_PATH = "/fakeRootPath/log/status/joblog_${ARBITRARY_PROCESS_ID}_${ARBITRARY_PBS_ID}_${realm.id}.log"
     }
 
-    @Test
-    void testLogFileBaseDirWhenRealmIsNull() {
-        shouldFail IllegalArgumentException, { service.logFileBaseDir(null, new ProcessingStep()) }
+    @After
+    void tearDown() {
+        configService.clean()
     }
 
     @Test
     void testLogFileBaseDirWhenProcessingStepIsNull() {
-        shouldFail IllegalArgumentException, { service.logFileBaseDir(new Realm(), null) }
+        shouldFail IllegalArgumentException, { service.logFileBaseDir(null) }
     }
 
     @Test
@@ -69,7 +71,7 @@ class JobStatusLoggingServiceUnitTests {
     @Test
     void testLogFileBaseDir() {
         ProcessingStep processingStep = createFakeProcessingStep()
-        def actual = service.logFileBaseDir(realm, processingStep)
+        String actual = service.logFileBaseDir(processingStep)
         assert EXPECTED_BASE_PATH == actual
     }
 

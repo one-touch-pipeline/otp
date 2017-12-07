@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.utils
 
 import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.job.processing.*
@@ -30,6 +31,7 @@ class ExecuteRoddyCommandServiceTests {
     public static final String RODDY_EXECUTION_DIR_NAME_1 = "exec_000000_000000000_a_a"
     public static final String RODDY_EXECUTION_DIR_NAME_2 = "exec_000000_000000000_b_b"
 
+    TestConfigService configService
     File roddyPath
     File roddyCommand
     File tmpOutputDir
@@ -52,13 +54,13 @@ class ExecuteRoddyCommandServiceTests {
         roddyPath = new File(ProcessingOptionService.getValueOfProcessingOption(OptionName.RODDY_PATH))
         roddyCommand = new File(roddyPath, 'roddy.sh')
         tmpOutputDir = temporaryFolder.newFolder("temporaryOutputDir")
-
         roddyBamFile = DomainFactory.createRoddyBamFile()
-
+        configService = new TestConfigService([
+                        'otp.root.path': tmpOutputDir.path+"/root",
+                        'otp.processing.root.path': tmpOutputDir.path+"/processing"
+        ])
         realm = DomainFactory.createRealmDataManagementDKFZ([
                 name              : roddyBamFile.project.realmName,
-                rootPath          : "${tmpOutputDir}/root",
-                processingRootPath: "${tmpOutputDir}/processing",
         ])
         assert realm.save(flush: true)
 
@@ -72,6 +74,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @After
     void tearDown() {
+        configService.clean()
         roddyPath = null
         tmpOutputDir = null
         realm = null

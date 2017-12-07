@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
 import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
@@ -16,6 +17,7 @@ class AbstractExecutePanCanJobTests {
     LsdfFilesService lsdfFilesService
 
     Realm dataManagement
+    TestConfigService configService
     RoddyBamFile roddyBamFile
     File configFile
     File roddyCommand
@@ -41,8 +43,13 @@ class AbstractExecutePanCanJobTests {
         ])
         roddyBamFile.workPackage.metaClass.seqTracks = SeqTrack.list()
 
-        Realm dataProcessing = DomainFactory.createRealmDataProcessing(tmpDir.root, [name: roddyBamFile.project.realmName])
-        dataManagement = DomainFactory.createRealmDataManagement(tmpDir.root, [name: roddyBamFile.project.realmName])
+        Realm dataProcessing = DomainFactory.createRealmDataProcessing([name: roddyBamFile.project.realmName])
+        configService = new TestConfigService([
+                        'otp.root.path': tmpDir.root.path+"/root",
+                        'otp.processing.root.path': tmpDir.root.path+"/processing"
+                ]
+        )
+        dataManagement = DomainFactory.createRealmDataManagement([name: roddyBamFile.project.realmName])
         abstractExecutePanCanJob = [
                 prepareAndReturnWorkflowSpecificCValues  : { RoddyBamFile bamFile -> ["${workflowSpecificCValues}"] },
                 prepareAndReturnWorkflowSpecificParameter: { RoddyBamFile bamFile -> "workflowSpecificParameter " },
@@ -50,15 +57,15 @@ class AbstractExecutePanCanJobTests {
         ] as AbstractExecutePanCanJob
 
         abstractExecutePanCanJob.referenceGenomeService = new ReferenceGenomeService()
-        abstractExecutePanCanJob.referenceGenomeService.configService = new ConfigService()
+        abstractExecutePanCanJob.referenceGenomeService.configService = configService
         abstractExecutePanCanJob.referenceGenomeService.processingOptionService = new ProcessingOptionService()
         abstractExecutePanCanJob.lsdfFilesService = new LsdfFilesService()
         abstractExecutePanCanJob.executeRoddyCommandService = new ExecuteRoddyCommandService()
         abstractExecutePanCanJob.bedFileService = new BedFileService()
-        abstractExecutePanCanJob.configService = new ConfigService()
+        abstractExecutePanCanJob.configService = configService
         abstractExecutePanCanJob.chromosomeIdentifierSortingService = new ChromosomeIdentifierSortingService()
 
-        File processingRootPath = dataProcessing.processingRootPath as File
+        File processingRootPath = configService.getProcessingRootPath()
 
         DomainFactory.createRoddyProcessingOptions(tmpDir.newFolder())
 
@@ -93,6 +100,7 @@ class AbstractExecutePanCanJobTests {
     void tearDown() {
         TestCase.removeMetaClass(ExecuteRoddyCommandService, abstractExecutePanCanJob.executeRoddyCommandService)
         TestCase.removeMetaClass(ReferenceGenomeService, abstractExecutePanCanJob.referenceGenomeService)
+        configService.clean()
     }
 
 

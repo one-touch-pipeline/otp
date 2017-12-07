@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.job
 
 import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.processing.*
@@ -21,6 +22,8 @@ class JobMailServiceIntegrationSpec extends Specification {
     void "sendErrorNotification, when with #completedCount completed cluster jobs and with #failedCount failed cluster job, send expected email"() {
         given:
         JobStatusLoggingService jobStatusLoggingService = new JobStatusLoggingService()
+        TestConfigService configService = new TestConfigService(['otp.logging.root.path': temporaryFolder.newFolder().path])
+        jobStatusLoggingService.configService = configService
 
         OtrsTicket otrsTicket = DomainFactory.createOtrsTicket()
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
@@ -35,7 +38,7 @@ class JobMailServiceIntegrationSpec extends Specification {
                 ])
         ])
 
-        Realm realm = DomainFactory.createRealmDataProcessing(temporaryFolder.newFolder(), [name: seqTrack.project.realmName])
+        Realm realm = DomainFactory.createRealmDataProcessing([name: seqTrack.project.realmName])
 
         DomainFactory.createProcessingOptionLazy([
                 name: ProcessingOption.OptionName.TICKET_SYSTEM_URL,
@@ -110,6 +113,9 @@ class JobMailServiceIntegrationSpec extends Specification {
 
         then:
         noExceptionThrown()
+
+        cleanup:
+        configService.clean()
 
         where:
         completedCount | failedCount | processingPriority

@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.job.jobs.aceseq
 
 import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
@@ -50,7 +51,7 @@ class ParseAceseqQcJobSpec extends Specification {
         File temporaryFile = temporaryFolder.newFolder()
         File aceseqOutputFile = new File(temporaryFile, "aceseqOutputFile.txt")
         CreateFileHelper.createFile(aceseqOutputFile)
-        Realm realm = DomainFactory.createRealmDataManagement(rootPath: temporaryFile)
+        Realm realm = DomainFactory.createRealmDataManagement()
 
         AceseqInstance instance = DomainFactory.createAceseqInstanceWithRoddyBamFiles()
         instance.project.realmName = realm.name
@@ -60,6 +61,8 @@ class ParseAceseqQcJobSpec extends Specification {
             return [aceseqOutputFile]
 
         }
+
+        TestConfigService configService = new TestConfigService(['otp.root.path': temporaryFile.path])
 
         DomainFactory.createAceseqQaFileOnFileSystem(instance.getQcJsonFile())
 
@@ -89,5 +92,8 @@ class ParseAceseqQcJobSpec extends Specification {
         qc2.solutionPossible == 4
 
         instance.processingState == AnalysisProcessingStates.FINISHED
+
+        cleanup:
+        configService.clean()
     }
 }

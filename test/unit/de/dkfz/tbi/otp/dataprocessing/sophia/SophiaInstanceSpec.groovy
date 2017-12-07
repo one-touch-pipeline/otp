@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing.sophia
 
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
@@ -45,6 +46,8 @@ class SophiaInstanceSpec extends Specification {
     @Rule
     TemporaryFolder temporaryFolder
 
+    TestConfigService configService
+
     SophiaInstance instance
     File instancePath
 
@@ -54,7 +57,8 @@ class SophiaInstanceSpec extends Specification {
      */
     void setup() {
         File temporaryFile = temporaryFolder.newFolder()
-        Realm realm = DomainFactory.createRealmDataManagement(rootPath: temporaryFile)
+        Realm realm = DomainFactory.createRealmDataManagement()
+        configService = new TestConfigService(['otp.root.path': temporaryFile.path])
 
         this.instance = DomainFactory.createSophiaInstanceWithRoddyBamFiles()
         instance.project.realmName = realm.name
@@ -70,8 +74,11 @@ class SophiaInstanceSpec extends Specification {
         )
     }
 
-    void "getSophiaInstancePath, tests if path is in a valid form"() {
+    void cleanup() {
+        configService.clean()
+    }
 
+    void "getSophiaInstancePath, tests if path is in a valid form"() {
         when:
         OtpPath sophiaInstancePath = instance.getInstancePath()
 

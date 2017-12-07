@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
@@ -18,6 +19,7 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends IntegrationSpec 
 
     RnaRoddyBamFile roddyBamFile
     Realm realm
+    TestConfigService configService
     String fileName
 
     void setup() {
@@ -33,7 +35,12 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends IntegrationSpec 
 
         roddyBamFile = DomainFactory.createRoddyBamFile([:], RnaRoddyBamFile)
 
-        realm = DomainFactory.createRealmDataManagement(temporaryFolder.newFolder(), [name: roddyBamFile.project.realmName])
+        realm = DomainFactory.createRealmDataManagement([name: roddyBamFile.project.realmName])
+        configService = new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path])
+    }
+
+    void cleanup() {
+        configService.clean()
     }
 
     void "test linkNewRnaResults"() {

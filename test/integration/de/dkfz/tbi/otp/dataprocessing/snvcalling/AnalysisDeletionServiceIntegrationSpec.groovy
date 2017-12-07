@@ -1,6 +1,5 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
-import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import spock.lang.*
@@ -21,7 +20,7 @@ class AnalysisDeletionServiceIntegrationSpec extends Specification {
 
     void setup() {
         testData = new SnvCallingInstanceTestData()
-        testData.createSnvObjects(TestCase.uniqueNonExistentPath)
+        testData.createSnvObjects()
         snvCallingInstance = testData.createSnvCallingInstance()
         assert snvCallingInstance.save()
         indelCallingInstance = DomainFactory.createIndelInstanceWithSameSamplePair(snvCallingInstance)

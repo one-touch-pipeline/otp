@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QaProcessingStatus
 import de.dkfz.tbi.otp.ngsdata.*
@@ -51,14 +52,11 @@ class AlignmentPassServiceUnitTests extends TestData {
         DomainFactory.createProcessingOptionBasePathReferenceGenome(referenceGenomeDir.parent)
         alignmentPassService = new AlignmentPassService()
         alignmentPassService.referenceGenomeService = new ReferenceGenomeService()
-        alignmentPassService.referenceGenomeService.configService = new ConfigService()
+        alignmentPassService.referenceGenomeService.configService = new TestConfigService()
         alignmentPassService.referenceGenomeService.processingOptionService = new ProcessingOptionService()
         createObjects()
         alignmentPass = DomainFactory.createAlignmentPass(identifier: 2, seqTrack: seqTrack)
         alignmentPass.save(flush: true)
-
-        realm.processingRootPath = baseDir.path
-        assert realm.save(flush: true)
     }
 
     @After

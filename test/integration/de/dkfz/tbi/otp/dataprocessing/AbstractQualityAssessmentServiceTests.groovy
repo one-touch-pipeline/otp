@@ -1,5 +1,8 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.TestConfigService
+import org.junit.After
+
 import static de.dkfz.tbi.otp.dataprocessing.AbstractBamFileServiceTests.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
@@ -18,6 +21,7 @@ import org.junit.rules.TemporaryFolder
 class AbstractQualityAssessmentServiceTests {
 
     AbstractQualityAssessmentService abstractQualityAssessmentService
+    TestConfigService configService
 
     final static REFERENCE_GENOME_LENGTH = 80
     final static REFERENCE_GENOME_LENGTH_WITH_N = 40
@@ -41,6 +45,12 @@ class AbstractQualityAssessmentServiceTests {
         }
         assert data.referenceGenome.save([flush: true])
         DomainFactory.createAllAlignableSeqTypes()
+        configService = new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path])
+    }
+
+    @After
+    void tearDown() {
+        configService.clean()
     }
 
     @Test
@@ -94,7 +104,7 @@ class AbstractQualityAssessmentServiceTests {
                         pipeline: DomainFactory.createPanCanPipeline(),
                 )
         )
-        DomainFactory.createRealmDataManagement(temporaryFolder.newFolder(), [name: roddyBamFile.project.realmName])
+        DomainFactory.createRealmDataManagement([name: roddyBamFile.project.realmName])
         createReferenceGenomeEntries(roddyBamFile.referenceGenome)
         DomainFactory.createQaFileOnFileSystem(roddyBamFile.workMergedQAJsonFile, SOME_VALUE_1)
         DomainFactory.createQaFileOnFileSystem(roddyBamFile.workMergedQATargetExtractJsonFile, SOME_VALUE_2)

@@ -50,7 +50,7 @@ class SeqScanServiceTests {
         SeqType seqType = new SeqType(name: "testSeqType", libraryLayout: "testLibraryLayout", dirName: "testDir")
         assert(seqType.save())
         Sample sample = new Sample(type: Sample.Type.TUMOR, subType: null)
-        Realm realm = new Realm(name: "test", rootPath: "/", webHost: "http://test.me", host: "127.0.0.1", port: 12345, unixUser: "test", timeout: 100, defaultJobSubmissionOptions: "")
+        Realm realm = new Realm(name: "test", webHost: "http://test.me", host: "127.0.0.1", port: 12345, unixUser: "test", timeout: 100, defaultJobSubmissionOptions: "")
         assertNotNull(realm.save())
         Project project = DomainFactory.createProject(name: "testProject", dirName: "testDir", host: "dkfz", realm: realm)
         assert(project.save())
@@ -91,7 +91,7 @@ class SeqScanServiceTests {
         SeqType seqType = new SeqType(name: "testSeqType", libraryLayout: "testLibraryLayout", dirName: "testDir")
         assert(seqType.save())
         Sample sample = new Sample(type: Sample.Type.TUMOR, subType: null)
-        Realm realm = new Realm(name: "test", rootPath: "/", webHost: "http://test.me", host: "127.0.0.1", port: 12345, unixUser: "test", timeout: 100, defaultJobSubmissionOptions: "")
+        Realm realm = new Realm(name: "test", webHost: "http://test.me", host: "127.0.0.1", port: 12345, unixUser: "test", timeout: 100, defaultJobSubmissionOptions: "")
         assertNotNull(realm.save())
         Project project = DomainFactory.createProject(name: "testProject", dirName: "testDir", host: "dkfz", realm: realm)
         assert(project.save())
@@ -132,7 +132,7 @@ class SeqScanServiceTests {
         SeqType seqType = new SeqType(name: "testSeqType", libraryLayout: "testLibraryLayout", dirName: "testDir")
         assert(seqType.save())
         Sample sample = new Sample(type: Sample.Type.TUMOR, subType: null)
-        Realm realm = new Realm(name: "test", rootPath: "/", webHost: "http://test.me", host: "127.0.0.1", port: 12345, unixUser: "test", timeout: 100, defaultJobSubmissionOptions: "")
+        Realm realm = new Realm(name: "test", webHost: "http://test.me", host: "127.0.0.1", port: 12345, unixUser: "test", timeout: 100, defaultJobSubmissionOptions: "")
         assertNotNull(realm.save())
         Project project = DomainFactory.createProject(name: "testProject", dirName: "testDir", host: "dkfz", realm: realm)
         assert(project.save())
@@ -151,7 +151,7 @@ class SeqScanServiceTests {
     @Test
     void testFillSeqScan() {
         Sample sample = new Sample(type: Sample.Type.TUMOR, subType: null)
-        Realm realm = new Realm(name: "test", rootPath: "/", webHost: "http://test.me", host: "127.0.0.1", port: 12345, unixUser: "test", timeout: 100, defaultJobSubmissionOptions: "")
+        Realm realm = new Realm(name: "test", webHost: "http://test.me", host: "127.0.0.1", port: 12345, unixUser: "test", timeout: 100, defaultJobSubmissionOptions: "")
         assertNotNull(realm.save())
         Project project = DomainFactory.createProject(name: "testProject", dirName: "testDir", host: "dkfz", realm: realm)
         assert(project.save())
@@ -173,7 +173,7 @@ class SeqScanServiceTests {
     @Test
     void testFillInsertSize() {
         Sample sample = new Sample(type: Sample.Type.TUMOR, subType: null)
-        Realm realm = new Realm(name: "test", rootPath: "/", webHost: "http://test.me", host: "127.0.0.1", port: 12345, unixUser: "test", timeout: 100, defaultJobSubmissionOptions: "")
+        Realm realm = new Realm(name: "test", webHost: "http://test.me", host: "127.0.0.1", port: 12345, unixUser: "test", timeout: 100, defaultJobSubmissionOptions: "")
         assertNotNull(realm.save())
         Project project = DomainFactory.createProject(name: "testProject", dirName: "testDir", host: "dkfz", realm: realm)
         assert(project.save())

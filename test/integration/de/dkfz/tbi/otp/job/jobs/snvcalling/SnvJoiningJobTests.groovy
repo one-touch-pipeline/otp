@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.AnalysisProcessingStates
 import de.dkfz.tbi.otp.utils.ProcessHelperService
 
@@ -35,6 +36,7 @@ class SnvJoiningJobTests {
     @Autowired
     SchedulerService schedulerService
 
+    TestConfigService configService
     File testDirectory
     SnvCallingInstanceTestData testData
     SnvCallingInstance snvCallingInstance
@@ -45,11 +47,15 @@ class SnvJoiningJobTests {
     void setUp() {
         testDirectory = TestCase.createEmptyTestDirectory()
         testData = new SnvCallingInstanceTestData()
-        testData.createSnvObjects(testDirectory)
+        testData.createSnvObjects()
         testData.createSnvConfig(SnvCallingJobTests.CONFIGURATION)
         snvCallingInstance = testData.createAndSaveSnvCallingInstance()
         jobResult = testData.createAndSaveSnvJobResult(snvCallingInstance, SnvCallingStep.CALLING, null, AnalysisProcessingStates.IN_PROGRESS)
-
+        configService = new TestConfigService([
+                        'otp.root.path': testDirectory.path+"/root",
+                        'otp.staging.root.path': testDirectory.path+"/staging",
+                        'otp.logging.root.path': testDirectory.path+"/logging",
+        ])
         job = applicationContext.getBean('snvJoiningJob')
         job.processingStep = DomainFactory.createAndSaveProcessingStep(SnvJoiningJob.toString(), snvCallingInstance)
         job.log = new NoOpLog()
@@ -57,6 +63,7 @@ class SnvJoiningJobTests {
 
     @After
     void tearDown() {
+        configService.clean()
         testDirectory.deleteDir()
     }
 

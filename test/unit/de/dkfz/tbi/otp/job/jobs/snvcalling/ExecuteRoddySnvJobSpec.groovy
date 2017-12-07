@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
@@ -45,6 +46,7 @@ import spock.lang.*
 ])
 class ExecuteRoddySnvJobSpec extends Specification {
 
+    TestConfigService configService
 
     @Rule
     TemporaryFolder temporaryFolder
@@ -65,7 +67,10 @@ class ExecuteRoddySnvJobSpec extends Specification {
         File fasta = CreateFileHelper.createFile(new File(temporaryFolder.newFolder(), "fasta.fa"))
         File chromosomeLength = temporaryFolder.newFile()
 
+        TestConfigService configService = new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path])
+
         ExecuteRoddySnvJob job = new ExecuteRoddySnvJob([
+                configService         : configService,
                 snvCallingService     : Mock(SnvCallingService) {
                     1 * validateInputBamFiles(_) >> {}
                 },
@@ -78,7 +83,7 @@ class ExecuteRoddySnvJobSpec extends Specification {
         job.chromosomeIdentifierSortingService = new ChromosomeIdentifierSortingService()
 
         RoddySnvCallingInstance roddySnvCallingInstance = DomainFactory.createRoddySnvInstanceWithRoddyBamFiles()
-        DomainFactory.createRealmDataManagement(temporaryFolder.newFolder(), [name: roddySnvCallingInstance.project.realmName])
+        DomainFactory.createRealmDataManagement([name: roddySnvCallingInstance.project.realmName])
 
         AbstractMergedBamFile bamFileDisease = roddySnvCallingInstance.sampleType1BamFile
         AbstractMergedBamFile bamFileControl = roddySnvCallingInstance.sampleType2BamFile
@@ -120,6 +125,9 @@ class ExecuteRoddySnvJobSpec extends Specification {
 
         then:
         expectedList == returnedList
+
+        cleanup:
+        configService.clean()
     }
 
 
@@ -138,8 +146,9 @@ class ExecuteRoddySnvJobSpec extends Specification {
 
     void "validate, when all fine, set processing state to finished"() {
         given:
+        TestConfigService configService = new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path])
         ExecuteRoddySnvJob job = new ExecuteRoddySnvJob([
-                configService             : new ConfigService(),
+                configService             : configService,
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
                     1 * correctPermissionsAndGroups(_, _) >> {}
                 },
@@ -148,7 +157,7 @@ class ExecuteRoddySnvJobSpec extends Specification {
                 }
         ])
         RoddySnvCallingInstance roddySnvCallingInstance = DomainFactory.createRoddySnvInstanceWithRoddyBamFiles()
-        DomainFactory.createRealmDataManagement(temporaryFolder.newFolder(), [name: roddySnvCallingInstance.project.realmName])
+        DomainFactory.createRealmDataManagement([name: roddySnvCallingInstance.project.realmName])
 
         CreateRoddyFileHelper.createRoddySnvResultFiles(roddySnvCallingInstance)
 
@@ -157,6 +166,9 @@ class ExecuteRoddySnvJobSpec extends Specification {
 
         then:
         roddySnvCallingInstance.processingState == AnalysisProcessingStates.FINISHED
+
+        cleanup:
+        configService.clean()
     }
 
 
@@ -173,8 +185,9 @@ class ExecuteRoddySnvJobSpec extends Specification {
     void "validate, when correctPermissionsAndGroups fail, throw assert"() {
         given:
         String md5sum = HelperUtils.uniqueString
+        TestConfigService configService = new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path])
         ExecuteRoddySnvJob job = new ExecuteRoddySnvJob([
-                configService             : new ConfigService(),
+                configService             : configService,
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
                     1 * correctPermissionsAndGroups(_, _) >> {
                         throw new AssertionError(md5sum)
@@ -182,7 +195,7 @@ class ExecuteRoddySnvJobSpec extends Specification {
                 },
         ])
         RoddySnvCallingInstance roddySnvCallingInstance = DomainFactory.createRoddySnvInstanceWithRoddyBamFiles()
-        DomainFactory.createRealmDataManagement(temporaryFolder.newFolder(), [name: roddySnvCallingInstance.project.realmName])
+        DomainFactory.createRealmDataManagement([name: roddySnvCallingInstance.project.realmName])
 
         CreateRoddyFileHelper.createRoddySnvResultFiles(roddySnvCallingInstance)
 
@@ -193,20 +206,24 @@ class ExecuteRoddySnvJobSpec extends Specification {
         AssertionError e = thrown()
         e.message.contains(md5sum)
         roddySnvCallingInstance.processingState != AnalysisProcessingStates.FINISHED
+
+        cleanup:
+        configService.clean()
     }
 
 
     @Unroll
     void "validate, when file not exist, throw assert"() {
         given:
+        TestConfigService configService = new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path])
         ExecuteRoddySnvJob job = new ExecuteRoddySnvJob([
-                configService             : new ConfigService(),
+                configService             : configService,
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
                     1 * correctPermissionsAndGroups(_, _) >> {}
                 },
         ])
         RoddySnvCallingInstance roddySnvCallingInstance = DomainFactory.createRoddySnvInstanceWithRoddyBamFiles()
-        DomainFactory.createRealmDataManagement(temporaryFolder.newFolder(), [name: roddySnvCallingInstance.project.realmName])
+        DomainFactory.createRealmDataManagement([name: roddySnvCallingInstance.project.realmName])
 
         CreateRoddyFileHelper.createRoddySnvResultFiles(roddySnvCallingInstance)
 
@@ -220,6 +237,9 @@ class ExecuteRoddySnvJobSpec extends Specification {
         AssertionError e = thrown()
         e.message.contains(fileToDelete.path)
         roddySnvCallingInstance.processingState != AnalysisProcessingStates.FINISHED
+
+        cleanup:
+        configService.clean()
 
         where:
         fileClousure << [

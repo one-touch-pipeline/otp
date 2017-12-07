@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.indelCalling
 
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
@@ -49,14 +50,24 @@ import spock.lang.*
 ])
 class ParseIndelQcJobSpec extends Specification {
 
+    TestConfigService configService
+
     @Rule
     TemporaryFolder temporaryFolder
+
+    void setup() {
+        configService = new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path])
+    }
+
+    void cleanup() {
+        configService.clean()
+    }
 
     @Unroll
     void "test execute method, throw error since #notAvailable does not exist"() {
         given:
         IndelCallingInstance indelCallingInstance = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles()
-        DomainFactory.createRealmDataManagement(temporaryFolder.newFolder(), [name: indelCallingInstance.project.realmName])
+        DomainFactory.createRealmDataManagement([name: indelCallingInstance.project.realmName])
 
         if (available == "sampleSwapJsonFile") {
             DomainFactory.createIndelSampleSwapDetectionFileOnFileSystem(indelCallingInstance.sampleSwapJsonFile, indelCallingInstance.individual)
@@ -83,7 +94,7 @@ class ParseIndelQcJobSpec extends Specification {
     void "test execute method when both files available"() {
         given:
         IndelCallingInstance indelCallingInstance = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles()
-        DomainFactory.createRealmDataManagement(temporaryFolder.newFolder(), [name: indelCallingInstance.project.realmName])
+        DomainFactory.createRealmDataManagement([name: indelCallingInstance.project.realmName])
 
         DomainFactory.createIndelQcFileOnFileSystem(indelCallingInstance.indelQcJsonFile)
         DomainFactory.createIndelSampleSwapDetectionFileOnFileSystem(indelCallingInstance.sampleSwapJsonFile, indelCallingInstance.individual)

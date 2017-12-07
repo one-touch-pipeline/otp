@@ -5,15 +5,8 @@ import org.junit.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QaProcessingStatus
-import de.dkfz.tbi.otp.dataprocessing.MergingSet.State
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.Individual
-import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.ngsdata.Sample
-import de.dkfz.tbi.otp.ngsdata.SampleType
-import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.ngsdata.TestData
 
 class QualityAssessmentMergedPassServiceTests {
 
@@ -25,11 +18,7 @@ class QualityAssessmentMergedPassServiceTests {
 
     @Before
     void setUp() {
-        realm = DomainFactory.createRealmDataProcessing([
-            rootPath: '/tmp/otp-unit-test/pmfs/root',
-            processingRootPath: '/tmp/otp-unit-test/pmbfs/processing',
-            ]).save([flush: true])
-
+        realm = DomainFactory.createRealmDataProcessing().save([flush: true])
 
         processedMergedBamFile = DomainFactory.createProcessedMergedBamFile()
 

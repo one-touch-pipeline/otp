@@ -1,11 +1,11 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
-import grails.validation.*
 import org.apache.commons.logging.impl.*
 import org.junit.*
 import org.junit.rules.*
@@ -19,7 +19,7 @@ class LinkFilesToFinalDestinationServiceTests {
 
     RoddyBamFile roddyBamFile
     Realm realm
-
+    TestConfigService configService
 
     final static String SOME_GROUP = "GROUP"
 
@@ -37,7 +37,8 @@ class LinkFilesToFinalDestinationServiceTests {
         roddyBamFile.roddyExecutionDirectoryNames = ["exec_123456_123456789_test_test"]
         assert roddyBamFile.save(flush: true, failOnError: true)
 
-        realm = DomainFactory.createRealmDataManagement(temporaryFolder.newFolder(), [name: roddyBamFile.project.realmName])
+        realm = DomainFactory.createRealmDataManagement([name: roddyBamFile.project.realmName])
+        configService = new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path])
 
         SeqTrack seqTrack = roddyBamFile.seqTracks.iterator()[0]
         seqTrack.fastqcState = SeqTrack.DataProcessingState.FINISHED
@@ -61,6 +62,7 @@ class LinkFilesToFinalDestinationServiceTests {
         TestCase.removeMetaClass(CreateClusterScriptService, linkFilesToFinalDestinationService.createClusterScriptService)
         TestCase.removeMetaClass(LinkFileUtils, linkFilesToFinalDestinationService.linkFileUtils)
         GroovySystem.metaClassRegistry.removeMetaClass(ProcessHelperService)
+        configService.clean()
     }
 
     void setUp_allFine() {

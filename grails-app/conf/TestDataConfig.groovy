@@ -47,11 +47,6 @@ testDataConfig {
         'de.dkfz.tbi.otp.ngsdata.Realm' {
             name = {'realmName_' + (counter++)}
             env = Environment.current.name
-            rootPath = {new File(TestCase.uniqueNonExistentPath, 'root').path}
-            processingRootPath = {new File(TestCase.uniqueNonExistentPath, 'processing').path}
-            loggingRootPath = {new File(TestCase.uniqueNonExistentPath, 'log').path}
-            programsRootPath = {new File(TestCase.uniqueNonExistentPath, 'programs').path}
-            stagingRootPath = {new File(TestCase.uniqueNonExistentPath, 'staging').path}
             webHost = 'host.invalid'
             host = 'host.invalid'
             port = 22

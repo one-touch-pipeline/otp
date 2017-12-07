@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.fileSystemConsistency.*
@@ -10,14 +11,12 @@ import grails.plugin.springsecurity.*
 import org.junit.*
 import org.junit.rules.*
 
-import static de.dkfz.tbi.otp.ngsdata.Realm.OperationType.*
-
 class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     DataSwapService dataSwapService
     LsdfFilesService lsdfFilesService
     ProcessedMergedBamFileService processedMergedBamFileService
     DataProcessingFilesService dataProcessingFilesService
-
+    TestConfigService configService
 
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder()
@@ -28,8 +27,17 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     void setUp() {
         createUserAndRoles()
         outputFolder = temporaryFolder.newFolder("outputFolder")
+        configService = new TestConfigService([
+                        'otp.root.path': outputFolder.path,
+                        'otp.processing.root.path': outputFolder.path
+        ])
+        lsdfFilesService.configService = configService
     }
 
+    @After
+    void tearDown() {
+        configService.clean()
+    }
 
     @Test
     void test_moveSample() {
@@ -39,8 +47,10 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
         ])
         String script = "TEST-MOVE_SAMPLE"
         Individual individual = DomainFactory.createIndividual(project: bamFile.project)
-        Realm realm = DomainFactory.createRealmDataManagement(name: bamFile.project.realmName, rootPath: temporaryFolder.newFolder("mgmt"))
-        DomainFactory.createRealmDataProcessing(name: bamFile.project.realmName, rootPath: temporaryFolder.newFolder("proc"))
+
+        DomainFactory.createRealmDataManagement(name: bamFile.project.realmName)
+        DomainFactory.createRealmDataProcessing(name: bamFile.project.realmName)
+
         SeqTrack seqTrack = bamFile.seqTracks.iterator().next()
         List<String> dataFileLinks = []
         DataFile.findAllBySeqTrack(seqTrack).each {
@@ -101,7 +111,6 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
             assert copyScriptContent.contains("ln -s '${lsdfFilesService.getFileFinalPath(it)}' '${lsdfFilesService.getFileViewByPidPath(it)}'")
             assert it.getComment().comment == "Attention: Datafile swapped!"
         }
-
     }
 
 
@@ -113,8 +122,6 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
         ])
         Project newProject = Project.build(realmName: bamFile.project.realmName)
         String script = "TEST-MOVE-INDIVIDUAL"
-        Realm realm = Realm.build(name: bamFile.project.realmName, operationType: DATA_MANAGEMENT, rootPath: temporaryFolder.newFolder("mgmt"))
-        Realm.build(name: bamFile.project.realmName, operationType: DATA_PROCESSING, rootPath: temporaryFolder.newFolder("proc"))
         SeqTrack seqTrack = bamFile.seqTracks.iterator().next()
         List<String> dataFileLinks = []
         List<String> dataFilePaths = []
@@ -657,8 +664,8 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
         SeqTrack seqTrack = DomainFactory.createSeqTrackWithTwoDataFiles()
         Project project = seqTrack.project
 
-        DomainFactory.createRealmDataProcessing(name: project.realmName, processingRootPath: outputFolder.path)
-        DomainFactory.createRealmDataManagement(name: project.realmName, rootPath: outputFolder.path)
+        DomainFactory.createRealmDataProcessing(name: project.realmName)
+        DomainFactory.createRealmDataManagement(name: project.realmName)
         return seqTrack
     }
 
@@ -702,8 +709,8 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
         assert mergingWorkPackage.save(flush: true)
         Project project = bamFile.project
         if (addRealms) {
-            DomainFactory.createRealmDataProcessing(name: project.realmName, processingRootPath: outputFolder.path)
-            DomainFactory.createRealmDataManagement(name: project.realmName, rootPath: outputFolder.path)
+            DomainFactory.createRealmDataProcessing(name: project.realmName)
+            DomainFactory.createRealmDataManagement(name: project.realmName)
         }
     }
 

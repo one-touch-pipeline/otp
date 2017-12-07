@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.bamImport
 
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.jobs.importExternallyMergedBam.*
 import de.dkfz.tbi.otp.job.plan.*
@@ -45,6 +46,8 @@ class ImportExternallyMergedBamJobSpec extends Specification {
     File subDirectory
     File file
 
+    TestConfigService configService
+
     @Rule
     TemporaryFolder temporaryFolder
 
@@ -78,6 +81,9 @@ class ImportExternallyMergedBamJobSpec extends Specification {
         assert epmbfWithoutMd5sum.individual.save(flush: true)
     }
 
+    void cleanup() {
+        configService.clean()
+    }
 
     void "test maybe submit, when files have to be copied, have a md5Sum and not exist already"() {
         given:
@@ -245,16 +251,18 @@ class ImportExternallyMergedBamJobSpec extends Specification {
                 getProcessingStep         : { -> step },
         ] as ImportExternallyMergedBamJob
 
-        importExternallyMergedBamJob.configService = new ConfigService()
+        configService = new TestConfigService(['otp.root.path' : temporaryFolder.newFolder("root").path])
+
+        importExternallyMergedBamJob.configService = configService
         importExternallyMergedBamJob.checksumFileService = new ChecksumFileService()
         importExternallyMergedBamJob.executionHelperService = new ExecutionHelperService()
         importExternallyMergedBamJob.metaClass.log = new NoOpLog()
 
         CreateFileHelper.createFile(new File("${importProcess.externallyProcessedMergedBamFiles[0].importedFrom}"))
 
+
         DomainFactory.createRealmDataManagement([
                 name     : importProcess.externallyProcessedMergedBamFiles.first().project.realmName,
-                rootPath : temporaryFolder.newFolder("root").path
         ])
 
         DomainFactory.createProcessParameter([

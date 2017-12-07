@@ -88,7 +88,7 @@ class LsdfFileServiceUnitTests {
 
     @Test
     void test_deleteFilesRecursive_shouldBeFine() {
-        Realm realm = DomainFactory.createRealmDataManagement(tempFolder.newFolder())
+        Realm realm = DomainFactory.createRealmDataManagement()
         service.executionService = [
                 executeCommand: {Realm realm2, String command->
                     ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
@@ -141,7 +141,7 @@ class LsdfFileServiceUnitTests {
     @Test
     void test_deleteFilesRecursive_deletionFail_shouldThrowException() {
         final String MESSAGE = HelperUtils.uniqueString
-        Realm realm = DomainFactory.createRealmDataManagement(tempFolder.newFolder())
+        Realm realm = DomainFactory.createRealmDataManagement()
         service.executionService = [
                 executeCommand: {Realm realm2, String command->
                     assert false: MESSAGE

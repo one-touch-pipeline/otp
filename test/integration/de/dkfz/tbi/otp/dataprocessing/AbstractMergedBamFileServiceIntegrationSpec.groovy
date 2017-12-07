@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.ProcessingStatus
 import de.dkfz.tbi.otp.ngsdata.*
@@ -14,10 +15,7 @@ class AbstractMergedBamFileServiceIntegrationSpec extends Specification {
     def "destination directory of ProcessedMergedBamFile"() {
         given:
         ProcessedMergedBamFile mergedBamFile = DomainFactory.createProcessedMergedBamFile()
-        Realm realm = DomainFactory.createRealmDataManagement(
-                name: mergedBamFile.project.realmName,
-        )
-        String destinationExp = expectedMergedAlignmentPath(mergedBamFile, realm)
+        String destinationExp = expectedMergedAlignmentPath(mergedBamFile)
 
         when:
         String destinationAct = AbstractMergedBamFileService.destinationDirectory(mergedBamFile)
@@ -29,10 +27,7 @@ class AbstractMergedBamFileServiceIntegrationSpec extends Specification {
     def "destination directory of RoddyBamFile"() {
         given:
         RoddyBamFile mergedBamFile = DomainFactory.createRoddyBamFile()
-        Realm realm = DomainFactory.createRealmDataManagement(
-                name: mergedBamFile.project.realmName,
-        )
-        String destinationExp = expectedMergedAlignmentPath(mergedBamFile, realm)
+        String destinationExp = expectedMergedAlignmentPath(mergedBamFile)
 
         when:
         String destinationAct = AbstractMergedBamFileService.destinationDirectory(mergedBamFile)
@@ -41,8 +36,8 @@ class AbstractMergedBamFileServiceIntegrationSpec extends Specification {
         destinationExp == destinationAct
     }
 
-    private String expectedMergedAlignmentPath(AbstractMergedBamFile mergedBamFile, Realm realm) {
-        String pidPath = "${realm.rootPath}/${mergedBamFile.project.dirName}/sequencing/${mergedBamFile.seqType.dirName}/view-by-pid/${mergedBamFile.individual.pid}"
+    private String expectedMergedAlignmentPath(AbstractMergedBamFile mergedBamFile) {
+        String pidPath = "${TestConfigService.getRootPathFromSelfFoundContext()}/${mergedBamFile.project.dirName}/sequencing/${mergedBamFile.seqType.dirName}/view-by-pid/${mergedBamFile.individual.pid}"
         return "${pidPath}/${mergedBamFile.sampleType.dirName}/${mergedBamFile.seqType.libraryLayoutDirName}/${MERGED_BAM_FILES_PATH}/"
     }
 

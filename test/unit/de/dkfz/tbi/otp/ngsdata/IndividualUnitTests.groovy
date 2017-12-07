@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.ngsdata.Individual.Type
 import grails.buildtestdata.mixin.Build
 import grails.test.mixin.Mock
@@ -16,6 +17,8 @@ import static org.junit.Assert.assertEquals
 @Mock([Project, Sample])
 @Build([Individual, Realm, SampleType, SeqType])
 class IndividualUnitTests {
+
+    TestConfigService configService
 
     @Test
     void testSaveIndividual_AllCorrect() {
@@ -102,10 +105,10 @@ class IndividualUnitTests {
     @Test
     void testGetViewByPidPathBase() {
         Individual individual = Individual.build()
-        SeqType seqType = SeqType.build()
-        Realm realm = Realm.build(operationType: Realm.OperationType.DATA_MANAGEMENT, name: individual.project.realmName)
+        SeqType seqType = DomainFactory.createSeqType()
+        configService = new TestConfigService()
 
-        String expectedPath = "${realm.rootPath}/${individual.project.dirName}/sequencing/${seqType.dirName}/view-by-pid"
+        String expectedPath = "${configService.getRootPath()}/${individual.project.dirName}/sequencing/${seqType.dirName}/view-by-pid"
         String actualPath = individual.getViewByPidPathBase(seqType).absoluteDataManagementPath
 
         assert expectedPath == actualPath
@@ -114,10 +117,10 @@ class IndividualUnitTests {
     @Test
     void testGetViewByPidPath() {
         Individual individual = Individual.build()
-        SeqType seqType = SeqType.build()
-        Realm realm = Realm.build(operationType: Realm.OperationType.DATA_MANAGEMENT, name: individual.project.realmName)
+        SeqType seqType = DomainFactory.createSeqType()
+        configService = new TestConfigService()
 
-        String expectedPath = "${realm.rootPath}/${individual.project.dirName}/sequencing/${seqType.dirName}/view-by-pid/${individual.pid}"
+        String expectedPath = "${configService.getRootPath()}/${individual.project.dirName}/sequencing/${seqType.dirName}/view-by-pid/${individual.pid}"
         String actualPath = individual.getViewByPidPath(seqType).absoluteDataManagementPath
 
         assert expectedPath == actualPath
@@ -137,7 +140,9 @@ class IndividualUnitTests {
         Individual individual = createIndividual()
         individual.project = project
 
-        String expectedPath = "${realm.rootPath}/${project.dirName}/results_per_pid/${individual.pid}"
+        configService = new TestConfigService()
+
+        String expectedPath = "${configService.getRootPath()}/${project.dirName}/results_per_pid/${individual.pid}"
         String actualPath = individual.getResultsPerPidPath().absoluteDataManagementPath
 
         assertEquals(expectedPath, actualPath)

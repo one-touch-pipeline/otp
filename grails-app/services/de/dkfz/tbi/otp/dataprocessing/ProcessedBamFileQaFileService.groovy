@@ -35,7 +35,7 @@ class ProcessedBamFileQaFileService {
 
     public File finalDestinationDirectory(final QualityAssessmentPass pass) {
         return getPath(
-                configService.getProjectRootPath(pass.project),
+                configService.getRootPath().path,
                 mergedAlignmentDataFileService.buildRelativePath(pass.seqType, pass.sample),
                 QUALITY_ASSESSMENT_DIR_NAME,
                 processedAlignmentFileService.getRunLaneDirectory(pass.seqTrack),

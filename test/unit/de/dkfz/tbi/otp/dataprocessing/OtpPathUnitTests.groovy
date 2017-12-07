@@ -1,20 +1,23 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.TestConfigService
+
 import static groovy.util.GroovyTestCase.assertEquals
 
 import org.junit.Before
 import org.junit.Test
 import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.ngsdata.Realm.OperationType
 import grails.buildtestdata.mixin.Build
-import grails.util.Environment
 
 @Build([
         Project,
         Realm,
 ])
+
 class OtpPathUnitTests {
+
+    TestConfigService configService
 
     String projectName
     String realmName
@@ -29,6 +32,8 @@ class OtpPathUnitTests {
                 realmName: realmName,
         ])
 
+        configService = new TestConfigService()
+
         final OtpPath path0 = new OtpPath(project, 'first', 'second', 'third')
         assertEquals project, path0.project
         assertEquals new File('first/second/third'), path0.relativePath
@@ -38,65 +43,42 @@ class OtpPathUnitTests {
         assertEquals new File('first/second/third/fourth'), path.relativePath
     }
 
-    private Realm buildRealm(final OperationType operationType) {
-        return Realm.build([
-                name: realmName,
-                operationType: operationType,
-                env: Environment.getCurrent().name,
-                rootPath: '',
-                processingRootPath: '',
-                stagingRootPath: null,
-        ])
-    }
-
     @Test
     void testGetAbsoluteStagingPath() {
+        configService.setOtpProperty('otp.staging.root.path', 'staging_root')
+        assertEquals "staging_root is not absolute.", shouldFail { path.absoluteStagingPath }
 
-        assertEquals "No DATA_PROCESSING realm found for project ${projectName}.", shouldFail { path.absoluteStagingPath }
-
-        final Realm realm = buildRealm(OperationType.DATA_PROCESSING)
-        assertEquals "stagingRootPath is not set for ${realm}.", shouldFail { path.absoluteStagingPath }
-
-        realm.stagingRootPath = 'staging_root'
-        assert realm.save()
-        assertEquals "stagingRootPath (${realm.stagingRootPath}) is not absolute for ${realm}.", shouldFail { path.absoluteStagingPath }
-
-        realm.stagingRootPath = '/staging_root'
-        assert realm.save()
-        assertEquals new File('/staging_root/first/second/third/fourth'), path.absoluteStagingPath
+        configService.setOtpProperty('otp.staging.root.path', '/staging_root')
+        assertEquals "/staging_root/first/second/third/fourth", path.absoluteStagingPath.path
     }
 
     @Test
     void testGetAbsoluteDataProcessingPath() {
+        configService.setOtpProperty('otp.processing.root.path', 'processing_root')
+        assertEquals "processing_root is not absolute.", shouldFail { path.absoluteDataProcessingPath }
 
-        assertEquals "No DATA_PROCESSING realm found for project ${projectName}.", shouldFail { path.absoluteDataProcessingPath }
-
-        final Realm realm = buildRealm(OperationType.DATA_PROCESSING)
-        assertEquals "processingRootPath is not set for ${realm}.", shouldFail { path.absoluteDataProcessingPath }
-
-        realm.processingRootPath = 'processing_root'
-        assert realm.save()
-        assertEquals "processingRootPath (${realm.processingRootPath}) is not absolute for ${realm}.", shouldFail { path.absoluteDataProcessingPath }
-
-        realm.processingRootPath = '/processing_root'
-        assert realm.save()
-        assertEquals new File('/processing_root/first/second/third/fourth'), path.absoluteDataProcessingPath
+        configService.setOtpProperty('otp.processing.root.path', '/processing_root')
+        assertEquals "/processing_root/first/second/third/fourth", path.absoluteDataProcessingPath.path
     }
 
     @Test
     void testGetAbsoluteDataManagementPath() {
+        configService.setOtpProperty('otp.root.path', 'root_path')
+        assertEquals "root_path is not absolute.", shouldFail { path.absoluteDataManagementPath }
 
-        assertEquals "No DATA_MANAGEMENT realm found for project ${projectName}.", shouldFail { path.absoluteDataManagementPath }
+        configService.setOtpProperty('otp.root.path', '/root_path')
+        assertEquals "/root_path/first/second/third/fourth", path.absoluteDataManagementPath.path
+    }
 
-        final Realm realm = buildRealm(OperationType.DATA_MANAGEMENT)
-        assertEquals "rootPath is not set for ${realm}.", shouldFail { path.absoluteDataManagementPath }
+    @Test
+    void testGetAbsolutePath() {
+        final String ABSOLUTE_PATH = "/absolute_path"
+        final String RELATIVE_PATH = "relative_path"
 
-        realm.rootPath = 'project_root'
-        assert realm.save()
-        assertEquals "rootPath (${realm.rootPath}) is not absolute for ${realm}.", shouldFail { path.absoluteDataManagementPath }
+        assertEquals "${RELATIVE_PATH} is not absolute.", shouldFail {
+            path.getAbsolutePath(new File(RELATIVE_PATH))
+        }
 
-        realm.rootPath = '/project_root'
-        assert realm.save()
-        assertEquals new File('/project_root/first/second/third/fourth'), path.absoluteDataManagementPath
+        assertEquals "/absolute_path/first/second/third/fourth", path.getAbsolutePath(new File(ABSOLUTE_PATH)).path
     }
 }

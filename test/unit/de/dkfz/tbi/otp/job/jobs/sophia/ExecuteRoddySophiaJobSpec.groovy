@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.sophia
 
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
@@ -46,10 +47,8 @@ import spock.lang.*
 ])
 class ExecuteRoddySophiaJobSpec extends Specification {
 
-
     @Rule
     TemporaryFolder temporaryFolder
-
 
     void "prepareAndReturnWorkflowSpecificCValues, when roddySophiaInstance is null, throw assert"() {
         when:
@@ -70,7 +69,8 @@ class ExecuteRoddySophiaJobSpec extends Specification {
         ])
 
         SophiaInstance sophiaInstance = DomainFactory.createSophiaInstanceWithRoddyBamFiles()
-        DomainFactory.createRealmDataManagement(temporaryFolder.newFolder(), [name: sophiaInstance.project.realmName])
+        TestConfigService configService = new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path])
+        DomainFactory.createRealmDataManagement(name: sophiaInstance.project.realmName)
 
         RoddyBamFile bamFileDisease = sophiaInstance.sampleType1BamFile as RoddyBamFile
         RoddyBamFile bamFileControl = sophiaInstance.sampleType2BamFile as RoddyBamFile
@@ -104,6 +104,9 @@ class ExecuteRoddySophiaJobSpec extends Specification {
 
         then:
         expectedList == returnedList
+
+        cleanup:
+        configService.clean()
     }
 
 
@@ -122,8 +125,9 @@ class ExecuteRoddySophiaJobSpec extends Specification {
 
     void "validate, when all fine, set processing state to finished"() {
         given:
+        TestConfigService configService = new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path])
         ExecuteRoddySophiaJob job = new ExecuteRoddySophiaJob([
-                configService             : new ConfigService(),
+                configService             : configService,
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
                     1 * correctPermissionsAndGroups(_, _) >> {}
                 },
@@ -132,7 +136,7 @@ class ExecuteRoddySophiaJobSpec extends Specification {
                 }
         ])
         SophiaInstance sophiaInstance = DomainFactory.createSophiaInstanceWithRoddyBamFiles()
-        DomainFactory.createRealmDataManagement(temporaryFolder.newFolder(), [name: sophiaInstance.project.realmName])
+        DomainFactory.createRealmDataManagement([name: sophiaInstance.project.realmName])
 
         CreateRoddyFileHelper.createSophiaResultFiles(sophiaInstance)
 
@@ -141,6 +145,9 @@ class ExecuteRoddySophiaJobSpec extends Specification {
 
         then:
         sophiaInstance.processingState == AnalysisProcessingStates.FINISHED
+
+        cleanup:
+        configService.clean()
     }
 
 
@@ -157,8 +164,9 @@ class ExecuteRoddySophiaJobSpec extends Specification {
     void "validate, when correctPermissionsAndGroups fail, throw assert"() {
         given:
         String md5sum = HelperUtils.uniqueString
+        TestConfigService configService = new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path])
         ExecuteRoddySophiaJob job = new ExecuteRoddySophiaJob([
-                configService             : new ConfigService(),
+                configService             : configService,
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
                     1 * correctPermissionsAndGroups(_, _) >> {
                         throw new AssertionError(md5sum)
@@ -166,7 +174,7 @@ class ExecuteRoddySophiaJobSpec extends Specification {
                 },
         ])
         SophiaInstance sophiaInstance = DomainFactory.createSophiaInstanceWithRoddyBamFiles()
-        DomainFactory.createRealmDataManagement(temporaryFolder.newFolder(), [name: sophiaInstance.project.realmName])
+        DomainFactory.createRealmDataManagement([name: sophiaInstance.project.realmName])
 
         CreateRoddyFileHelper.createSophiaResultFiles(sophiaInstance)
 
@@ -177,20 +185,25 @@ class ExecuteRoddySophiaJobSpec extends Specification {
         AssertionError e = thrown()
         e.message.contains(md5sum)
         sophiaInstance.processingState != AnalysisProcessingStates.FINISHED
+
+        cleanup:
+        configService.clean()
     }
 
 
     @Unroll
     void "validate, when file not exist, throw assert"() {
         given:
+        TestConfigService configService = new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path])
         ExecuteRoddySophiaJob job = new ExecuteRoddySophiaJob([
-                configService             : new ConfigService(),
+                configService             : configService,
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
                     1 * correctPermissionsAndGroups(_, _) >> {}
                 },
         ])
+
         SophiaInstance sophiaInstance = DomainFactory.createSophiaInstanceWithRoddyBamFiles()
-        DomainFactory.createRealmDataManagement(temporaryFolder.newFolder(), [name: sophiaInstance.project.realmName])
+        DomainFactory.createRealmDataManagement([name: sophiaInstance.project.realmName])
 
         CreateRoddyFileHelper.createSophiaResultFiles(sophiaInstance)
 
@@ -204,6 +217,9 @@ class ExecuteRoddySophiaJobSpec extends Specification {
         AssertionError e = thrown()
         e.message.contains(fileToDelete.path)
         sophiaInstance.processingState != AnalysisProcessingStates.FINISHED
+
+        cleanup:
+        configService.clean()
 
         where:
         fileClousure << [

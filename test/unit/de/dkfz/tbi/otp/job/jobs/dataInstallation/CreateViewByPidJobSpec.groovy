@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.dataInstallation
 
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
@@ -45,7 +46,7 @@ class CreateViewByPidJobSpec extends Specification {
         createViewByPidJob.processingStep = step
 
         createViewByPidJob.lsdfFilesService = new LsdfFilesService()
-        createViewByPidJob.configService = new ConfigService()
+        createViewByPidJob.configService = new TestConfigService()
         createViewByPidJob.lsdfFilesService.configService = createViewByPidJob.configService
     }
 

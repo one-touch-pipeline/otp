@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
@@ -129,7 +130,7 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
                     throw new AssertionError(errorMessage)
                 }
             }
-            getConfigService() >> Mock(ConfigService) {
+            getConfigService() >> Mock(TestConfigService) {
                 getRealmDataProcessing(_) >> new Realm()
             }
             0 * ensureCorrectBaseBamFileIsOnFileSystem(_)
@@ -155,7 +156,7 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
             getExecuteRoddyCommandService() >> Mock(ExecuteRoddyCommandService) {
                 1 * correctPermissions(_, _) >> {}
             }
-            getConfigService() >> Mock(ConfigService) {
+            getConfigService() >> Mock(TestConfigService) {
                 getRealmDataProcessing(_) >> new Realm()
             }
             1 * ensureCorrectBaseBamFileIsOnFileSystem(_) >> {
@@ -180,11 +181,12 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
     @Unroll
     void "validate, when #file not exist, throw assert"() {
         given:
+        TestConfigService configService = new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path])
         AbstractRoddyAlignmentJob abstractRoddyAlignmentJob = Spy(AbstractRoddyAlignmentJob) {
             getExecuteRoddyCommandService() >> Mock(ExecuteRoddyCommandService) {
                 1 * correctPermissions(_, _) >> {}
             }
-            getConfigService() >> new ConfigService()
+            getConfigService() >> configService
             1 * ensureCorrectBaseBamFileIsOnFileSystem(_) >> {}
             validateReadGroups(_) >> {}
             workflowSpecificValidation(_) >> {}
@@ -192,7 +194,7 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
         }
 
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
-        DomainFactory.createRealmDataManagement(temporaryFolder.newFolder(), [name: roddyBamFile.project.realmName])
+        DomainFactory.createRealmDataManagement([name: roddyBamFile.project.realmName])
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
         CreateFileHelper.createFile(new File(roddyBamFile.workMergedQAJsonFile.parent, 'OtherFile.txt"'))
         CreateFileHelper.createFile(new File(roddyBamFile.workExecutionStoreDirectory.parent, 'OtherFile.txt"'))
@@ -212,6 +214,9 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
         AssertionError e = thrown()
         e.message.contains(deletedFile.path)
 
+        cleanup:
+        configService.clean()
+
         where:
         file << [
                 'workBamFile',
@@ -227,11 +232,12 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
 
     void "validate, when wrong operation status, throw assert"() {
         given:
+        TestConfigService configService = new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path])
         AbstractRoddyAlignmentJob abstractRoddyAlignmentJob = Spy(AbstractRoddyAlignmentJob) {
             getExecuteRoddyCommandService() >> Mock(ExecuteRoddyCommandService) {
                 1 * correctPermissions(_, _) >> {}
             }
-            getConfigService() >> new ConfigService()
+            getConfigService() >> configService
             1 * ensureCorrectBaseBamFileIsOnFileSystem(_) >> {}
             validateReadGroups(_) >> {}
             workflowSpecificValidation(_) >> {}
@@ -242,7 +248,7 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.INPROGRESS,
                 md5sum             : null,
         ])
-        DomainFactory.createRealmDataManagement(temporaryFolder.newFolder(), [name: roddyBamFile.project.realmName])
+        DomainFactory.createRealmDataManagement([name: roddyBamFile.project.realmName])
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
 
         when:
@@ -251,16 +257,20 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
         then:
         AssertionError e = thrown()
         e.message.contains(AbstractMergedBamFile.FileOperationStatus.INPROGRESS.name())
+
+        cleanup:
+        configService.clean()
     }
 
 
     void "validate, when all fine, return without exception"() {
         given:
+        TestConfigService configService = new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path])
         AbstractRoddyAlignmentJob abstractRoddyAlignmentJob = Spy(AbstractRoddyAlignmentJob) {
             getExecuteRoddyCommandService() >> Mock(ExecuteRoddyCommandService) {
                 1 * correctPermissions(_, _) >> {}
             }
-            getConfigService() >> new ConfigService()
+            getConfigService() >> configService
             1 * ensureCorrectBaseBamFileIsOnFileSystem(_) >> {}
             1 * validateReadGroups(_) >> {}
             1 * workflowSpecificValidation(_) >> {}
@@ -271,7 +281,7 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.DECLARED,
                 md5sum             : null,
         ])
-        DomainFactory.createRealmDataManagement(temporaryFolder.newFolder(), [name: roddyBamFile.project.realmName])
+        DomainFactory.createRealmDataManagement([name: roddyBamFile.project.realmName])
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
 
         when:
@@ -279,16 +289,20 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
 
         then:
         noExceptionThrown()
+
+        cleanup:
+        configService.clean()
     }
 
 
     void "validate, when all fine and seqtype is RNA, return without exception"() {
         given:
+        TestConfigService configService = new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path])
         AbstractRoddyAlignmentJob abstractRoddyAlignmentJob = Spy(AbstractRoddyAlignmentJob) {
             getExecuteRoddyCommandService() >> Mock(ExecuteRoddyCommandService) {
                 1 * correctPermissions(_, _) >> {}
             }
-            getConfigService() >> new ConfigService()
+            getConfigService() >> configService
             1 * ensureCorrectBaseBamFileIsOnFileSystem(_) >> {}
             1 * validateReadGroups(_) >> {}
             1 * workflowSpecificValidation(_) >> {}
@@ -299,7 +313,7 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.DECLARED,
                 md5sum             : null,
         ], RnaRoddyBamFile)
-        DomainFactory.createRealmDataManagement(temporaryFolder.newFolder(), [name: roddyBamFile.project.realmName])
+        DomainFactory.createRealmDataManagement([name: roddyBamFile.project.realmName])
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
         roddyBamFile.workSingleLaneQAJsonFiles.values().each { File file ->
             file.delete()
@@ -310,6 +324,9 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
 
         then:
         noExceptionThrown()
+
+        cleanup:
+        configService.clean()
     }
 
     private static String createMinimalSamFile(Collection<String> readGroup) {
@@ -328,9 +345,10 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
 
     void "validateReadGroups, when read groups are not as expected, throw an exception"() {
         given:
+        TestConfigService configService = new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path])
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
-        DomainFactory.createRealmDataManagement(temporaryFolder.newFolder(), [name: roddyBamFile.project.realmName])
-        DomainFactory.createRealmDataProcessing(temporaryFolder.newFolder(), [name: roddyBamFile.project.realmName])
+        DomainFactory.createRealmDataManagement([name: roddyBamFile.project.realmName])
+        DomainFactory.createRealmDataProcessing([name: roddyBamFile.project.realmName])
 
         roddyBamFile.workBamFile.parentFile.mkdirs()
         roddyBamFile.workBamFile.text = createMinimalSamFile(roddyBamFile.containedSeqTracks*.getReadGroupName())
@@ -341,7 +359,7 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
         roddyBamFile.save()
 
         AbstractRoddyAlignmentJob abstractRoddyAlignmentJob = Spy(AbstractRoddyAlignmentJob) {
-            getConfigService() >> new ConfigService()
+            getConfigService() >> configService
         }
 
         String expectedErrorMessage = """\
@@ -358,14 +376,18 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
         then:
         RuntimeException e = thrown()
         e.message.contains(expectedErrorMessage)
+
+        cleanup:
+        configService.clean()
     }
 
 
     void "validateReadGroups, when read groups are fine, return without exception"() {
         given:
+        TestConfigService configService = new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path])
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
-        DomainFactory.createRealmDataManagement(temporaryFolder.newFolder(), [name: roddyBamFile.project.realmName])
-        DomainFactory.createRealmDataProcessing(temporaryFolder.newFolder(), [name: roddyBamFile.project.realmName])
+        DomainFactory.createRealmDataManagement([name: roddyBamFile.project.realmName])
+        DomainFactory.createRealmDataProcessing([name: roddyBamFile.project.realmName])
 
         SeqTrack seqTrack = DomainFactory.createSeqTrackWithTwoDataFiles(roddyBamFile.mergingWorkPackage)
         roddyBamFile.seqTracks.add(seqTrack)
@@ -376,7 +398,7 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
         roddyBamFile.workBamFile.text = createMinimalSamFile(roddyBamFile.containedSeqTracks*.getReadGroupName())
 
         AbstractRoddyAlignmentJob abstractRoddyAlignmentJob = Spy(AbstractRoddyAlignmentJob) {
-            getConfigService() >> new ConfigService()
+            getConfigService() >> configService
         }
 
         when:
@@ -384,6 +406,9 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
 
         then:
         noExceptionThrown()
+
+        cleanup:
+        configService.clean()
     }
 
 
@@ -399,7 +424,7 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
     void "ensureCorrectBaseBamFileIsOnFileSystem, base bam file exist but not on file system, throw assert"() {
         given:
         RoddyBamFile baseRoddyBamFile = DomainFactory.createRoddyBamFile()
-        DomainFactory.createRealmDataManagement(temporaryFolder.newFolder(), [name: baseRoddyBamFile.project.realmName])
+        DomainFactory.createRealmDataManagement([name: baseRoddyBamFile.project.realmName])
 
         baseRoddyBamFile.mergingWorkPackage.bamFileInProjectFolder = baseRoddyBamFile
         assert baseRoddyBamFile.mergingWorkPackage.save(flush: true)
@@ -417,8 +442,9 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
 
     void "ensureCorrectBaseBamFileIsOnFileSystem, base bam file exist and is correct, return without exception"() {
         given:
+        TestConfigService configService = new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path])
         RoddyBamFile baseRoddyBamFile = DomainFactory.createRoddyBamFile()
-        DomainFactory.createRealmDataManagement(temporaryFolder.newFolder(), [name: baseRoddyBamFile.project.realmName])
+        DomainFactory.createRealmDataManagement([name: baseRoddyBamFile.project.realmName])
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(baseRoddyBamFile)
 
         baseRoddyBamFile.mergingWorkPackage.bamFileInProjectFolder = baseRoddyBamFile
@@ -434,6 +460,9 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
 
         then:
         noExceptionThrown()
+
+        cleanup:
+        configService.clean()
     }
 
 }

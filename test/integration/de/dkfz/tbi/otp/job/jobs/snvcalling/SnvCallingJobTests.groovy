@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.utils.ProcessHelperService
 import org.apache.commons.logging.impl.NoOpLog
 
@@ -54,6 +55,7 @@ class SnvCallingJobTests {
     @Autowired
     LinkFileUtils linkFileUtils
 
+    TestConfigService configService
     File testDirectory
     Realm realm_processing
     Project project
@@ -91,7 +93,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         }
 
         testData = new SnvCallingInstanceTestData()
-        testData.createSnvObjects(testDirectory)
+        testData.createSnvObjects()
         realm_processing = testData.realmProcessing
 
         samplePair = testData.samplePair
@@ -102,6 +104,11 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         processedMergedBamFile1 = testData.bamFileTumor
         processedMergedBamFile2 = testData.bamFileControl
 
+        configService = new TestConfigService([
+                        'otp.root.path': testDirectory.path+"/root",
+                        'otp.staging.root.path': testDirectory.path+"/staging",
+                        'otp.logging.root.path': testDirectory.path+"/logging"
+        ])
 
         processedMergedBamFile1.mergingWorkPackage.bamFileInProjectFolder = processedMergedBamFile1
         assert processedMergedBamFile1.mergingWorkPackage.save(flush: true)
@@ -185,6 +192,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         removeMetaClass(LinkFileUtils, linkFileUtils)
         removeMetaClass(LsdfFilesService, lsdfFilesService)
         assert testDirectory.deleteDir()
+        configService.clean()
 
         TestCase.cleanTestDirectory()
     }

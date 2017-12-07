@@ -5,14 +5,11 @@ import java.util.regex.Pattern
 import de.dkfz.tbi.otp.ngsdata.ConfigService
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.ngsdata.Project
-import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.ngsdata.Realm.OperationType
 
 /**
  * Represents a relative file system path.
  */
 class OtpPath {
-
     final Project project
     final File relativePath
 
@@ -31,37 +28,28 @@ class OtpPath {
      * Example: STORAGE_ROOT/dmg/otp/production/staging/...
      */
     File getAbsoluteStagingPath() {
-        return getAbsolutePath(OperationType.DATA_PROCESSING, 'stagingRootPath')
+        return getAbsolutePath(ConfigService.getStagingRootPathFromSelfFoundContext())
     }
 
     /**
      * Example: ${otp.processing.root.path}/...
      */
     File getAbsoluteDataProcessingPath() {
-        return getAbsolutePath(OperationType.DATA_PROCESSING, 'processingRootPath')
+        return getAbsolutePath(ConfigService.getProcessingRootPathFromSelfFoundContext())
     }
 
     /**
      * Example: $OTP_ROOT_PATH/...
      */
     File getAbsoluteDataManagementPath() {
-        return getAbsolutePath(OperationType.DATA_MANAGEMENT, 'rootPath')
+        return getAbsolutePath(ConfigService.getRootPathFromSelfFoundContext())
     }
 
-    private File getAbsolutePath(final OperationType operationType, final String rootPathName) {
-        final Realm realm = ConfigService.getRealm(project, operationType)
-        if (realm == null) {
-            throw new RuntimeException("No ${operationType} realm found for project ${project}.")
+    private File getAbsolutePath(File path) {
+        if (!path.isAbsolute()) {
+            throw new RuntimeException("${path} is not absolute.")
         }
-        final String rootPathString = realm."${rootPathName}"
-        if (!rootPathString) {
-            throw new RuntimeException("${rootPathName} is not set for ${realm}.")
-        }
-        final File rootPath = new File(rootPathString)
-        if (!rootPath.isAbsolute()) {
-            throw new RuntimeException("${rootPathName} (${rootPath}) is not absolute for ${realm}.")
-        }
-        return new File(rootPath, relativePath.path)
+        return new File(path.absolutePath, relativePath.path)
     }
 
     static final String PATH_COMPONENT_REGEX = /[a-zA-Z0-9_\-\+\.]+/

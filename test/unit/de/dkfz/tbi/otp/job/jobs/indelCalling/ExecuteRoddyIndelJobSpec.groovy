@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.indelCalling
 
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
@@ -74,8 +75,10 @@ class ExecuteRoddyIndelJobSpec extends Specification {
                 },
         ])
 
+        TestConfigService configService = new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path])
+
         IndelCallingInstance indelCallingInstance = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles()
-        DomainFactory.createRealmDataManagement(temporaryFolder.newFolder(), [name: indelCallingInstance.project.realmName])
+        DomainFactory.createRealmDataManagement([name: indelCallingInstance.project.realmName])
 
         AbstractMergedBamFile bamFileDisease = indelCallingInstance.sampleType1BamFile
         AbstractMergedBamFile bamFileControl = indelCallingInstance.sampleType2BamFile
@@ -113,6 +116,9 @@ class ExecuteRoddyIndelJobSpec extends Specification {
 
         then:
         expectedList == returnedList
+
+        cleanup:
+        configService.clean()
     }
 
 
@@ -133,9 +139,9 @@ class ExecuteRoddyIndelJobSpec extends Specification {
                     1* filePath(_) >> bedFile
                 },
         ])
-
+        new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path])
         IndelCallingInstance indelCallingInstance = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles()
-        DomainFactory.createRealmDataManagement(temporaryFolder.newFolder(), [name: indelCallingInstance.project.realmName])
+        DomainFactory.createRealmDataManagement([name: indelCallingInstance.project.realmName])
         SeqType seqType = DomainFactory.createExomeSeqType()
 
         LibraryPreparationKit kit = DomainFactory.createLibraryPreparationKit()
@@ -212,7 +218,7 @@ class ExecuteRoddyIndelJobSpec extends Specification {
     void "validate, when all fine, set processing state to finished"() {
         given:
         ExecuteRoddyIndelJob job = new ExecuteRoddyIndelJob([
-                configService             : new ConfigService(),
+                configService             : new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path]),
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
                     1 * correctPermissionsAndGroups(_, _) >> {}
                 },
@@ -221,7 +227,7 @@ class ExecuteRoddyIndelJobSpec extends Specification {
                 }
         ])
         IndelCallingInstance indelCallingInstance = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles()
-        DomainFactory.createRealmDataManagement(temporaryFolder.newFolder(), [name: indelCallingInstance.project.realmName])
+        DomainFactory.createRealmDataManagement([name: indelCallingInstance.project.realmName])
 
         CreateRoddyFileHelper.createIndelResultFiles(indelCallingInstance)
 
@@ -244,7 +250,7 @@ class ExecuteRoddyIndelJobSpec extends Specification {
         given:
         String md5sum = HelperUtils.uniqueString
         ExecuteRoddyIndelJob job = new ExecuteRoddyIndelJob([
-                configService             : new ConfigService(),
+                configService             : new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path]),
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
                     1 * correctPermissionsAndGroups(_, _) >> {
                         throw new AssertionError(md5sum)
@@ -252,7 +258,7 @@ class ExecuteRoddyIndelJobSpec extends Specification {
                 },
         ])
         IndelCallingInstance indelCallingInstance = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles()
-        DomainFactory.createRealmDataManagement(temporaryFolder.newFolder(), [name: indelCallingInstance.project.realmName])
+        DomainFactory.createRealmDataManagement([name: indelCallingInstance.project.realmName])
 
         CreateRoddyFileHelper.createIndelResultFiles(indelCallingInstance)
 
@@ -270,13 +276,13 @@ class ExecuteRoddyIndelJobSpec extends Specification {
     void "validate, when file not exist, throw assert"() {
         given:
         ExecuteRoddyIndelJob job = new ExecuteRoddyIndelJob([
-                configService             : new ConfigService(),
+                configService             : new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path]),
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
                     1 * correctPermissionsAndGroups(_, _) >> {}
                 },
         ])
         IndelCallingInstance indelCallingInstance = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles()
-        DomainFactory.createRealmDataManagement(temporaryFolder.newFolder(), [name: indelCallingInstance.project.realmName])
+        DomainFactory.createRealmDataManagement([name: indelCallingInstance.project.realmName])
 
         CreateRoddyFileHelper.createIndelResultFiles(indelCallingInstance)
 

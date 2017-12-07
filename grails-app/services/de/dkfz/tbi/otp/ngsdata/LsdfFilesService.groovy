@@ -128,7 +128,7 @@ class LsdfFilesService {
         if (!checkFinalPathDefined(file)) {
             return null
         }
-        String basePath = configService.getProjectSequencePath(file.project)
+        String basePath = configService.getProjectSequencePath(file.project).path
         String relativePath = getFileViewByPidRelativePath(file, sequence)
         return "${basePath}/${relativePath}"
     }

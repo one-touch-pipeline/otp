@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
@@ -8,6 +9,7 @@ import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import org.codehaus.groovy.grails.commons.spring.GrailsApplicationContext
+import org.junit.After
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
@@ -27,9 +29,15 @@ class ParseWgbsAlignmentQcJobTests {
 
     ParseWgbsAlignmentQcJob parseWgbsAlignmentQcJob
 
+    TestConfigService configService
 
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder()
+
+    @After
+    void tearDown() {
+        configService.clean()
+    }
 
     @Test
     void testExecute_OnlyOneLibraryInMergedBamFile() {
@@ -117,12 +125,13 @@ class ParseWgbsAlignmentQcJobTests {
 
     private RoddyBamFile testExecuteSetup() {
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
+        configService = new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path])
         SeqTrack seqTrack = exactlyOneElement(roddyBamFile.seqTracks)
         seqTrack.libraryName = "library12"
         seqTrack.normalizedLibraryName = "12"
         assert seqTrack.save(flush: true)
 
-        DomainFactory.createRealmDataManagement(temporaryFolder.newFolder(), [name: roddyBamFile.project.realmName])
+        DomainFactory.createRealmDataManagement([name: roddyBamFile.project.realmName])
 
         ReferenceGenome referenceGenome = DomainFactory.createReferenceGenome()
         DomainFactory.createReferenceGenomeEntries(referenceGenome, ['7', '8'])

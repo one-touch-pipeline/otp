@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
 import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
 import de.dkfz.tbi.otp.ngsdata.*
@@ -20,6 +21,8 @@ class ExecutePanCanJobTests {
     Realm dataProcessingRealm
     Realm dataManagementRealm
 
+    TestConfigService configService
+
     @Rule
     public TemporaryFolder tmpDir = new TemporaryFolder()
 
@@ -27,14 +30,21 @@ class ExecutePanCanJobTests {
     void setUp() {
         DomainFactory.createRoddyAlignableSeqTypes()
 
+        configService = new TestConfigService([
+                'otp.root.path': tmpDir.root.path,
+                'otp.processing.root.path': tmpDir.root.path
+        ])
+
         roddyBamFile = DomainFactory.createRoddyBamFile([
                 md5sum: null,
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.DECLARED,
                 roddyExecutionDirectoryNames: [DomainFactory.DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY],
         ])
 
-        dataProcessingRealm = DomainFactory.createRealmDataProcessing(tmpDir.root, [name: roddyBamFile.project.realmName])
-        dataManagementRealm = DomainFactory.createRealmDataManagement(tmpDir.root, [name: roddyBamFile.project.realmName])
+        executePanCanJob.lsdfFilesService.configService = configService
+
+        dataProcessingRealm = DomainFactory.createRealmDataProcessing([name: roddyBamFile.project.realmName])
+        dataManagementRealm = DomainFactory.createRealmDataManagement([name: roddyBamFile.project.realmName])
 
         DomainFactory.createProcessingOptionBasePathReferenceGenome(new File(tmpDir.root, "reference_genomes").path)
 
@@ -48,6 +58,7 @@ class ExecutePanCanJobTests {
     @After
     void tearDown() {
         TestCase.removeMetaClass(BedFileService, executePanCanJob.bedFileService)
+        configService.clean()
     }
 
 

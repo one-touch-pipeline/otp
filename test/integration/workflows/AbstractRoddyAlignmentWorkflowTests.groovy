@@ -81,8 +81,6 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
 
     ProjectService projectService
 
-    ConfigService configService
-
 
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder()
@@ -106,7 +104,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
     @Before
     void setUp() {
         String group = TestConfigHelper.testingGroup(grailsApplication)
-        executionHelperService.setGroup(realm, realm.rootPath as File, group)
+        executionHelperService.setGroup(realm, configService.getRootPath() as File, group)
 
         setUpFilesVariables()
 
@@ -205,9 +203,9 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
 
     void createProjectConfig(MergingWorkPackage workPackage, Map options = [:]) {
 
-        lsdfFilesService.createDirectory(new File(configService.getProjectSequencePath(workPackage.project)), realm)
+        lsdfFilesService.createDirectory(new File(configService.getProjectSequencePath(workPackage.project).path), realm)
 
-         SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth("operator") {
             projectService.configurePanCanAlignmentDeciderProject(new PanCanAlignmentConfiguration([
                     project          : workPackage.project,
                     seqType          : workPackage.seqType,
@@ -218,7 +216,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
                     referenceGenome  : workPackage.referenceGenome,
                     statSizeFileName : workPackage.statSizeFileName,
                     mergeTool        : ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_MERGE_TOOL, workPackage.seqType.roddyName, null),
-                    bwaMemVersion   : ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_ALIGNMENT_BWA_VERSION_DEFAULT, null, null),
+                    bwaMemVersion    : ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_ALIGNMENT_BWA_VERSION_DEFAULT, null, null),
                     sambambaVersion  : ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_ALIGNMENT_SAMBAMBA_VERSION_DEFAULT, null, null),
                     resources        : "${workPackage.seqType.isChipSeq() ? 'xl' : 't'}",
             ] + options))

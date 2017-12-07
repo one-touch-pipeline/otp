@@ -39,11 +39,6 @@ class Realm implements Entity, Serializable {
      */
     Cluster cluster
 
-    String rootPath                    // mount path of the file system with data
-    String processingRootPath          // mount path for the file system with results data
-    String programsRootPath            // location of programs
-    String loggingRootPath             // mount path of the file system with logging data (needs to be read-write)
-    String stagingRootPath             // path where OTP is able to write
     String webHost                     // web address
 
     JobScheduler jobScheduler
@@ -54,9 +49,6 @@ class Realm implements Entity, Serializable {
     String defaultJobSubmissionOptions  // default options for job submission
 
     static constraints = {
-        // TODO OTP-1067: Add validation on the paths
-        loggingRootPath blank:false, nullable:false
-        stagingRootPath blank:true, nullable:true
         defaultJobSubmissionOptions validator: {
             ClusterJobSubmissionOptionsService.validateJsonString(it)
         }

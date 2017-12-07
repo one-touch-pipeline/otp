@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.job.jobs.*
@@ -14,6 +15,12 @@ class SnvCallingStartJobIntegrationSpec extends Specification {
     TestAbstractSnvCallingStartJob snvCallingStartJob
     TestAbstractSnvCallingStartJob roddySnvCallingStartJob
 
+    TestConfigService configService
+
+
+    void setup() {
+        configService = new TestConfigService()
+    }
 
     void "test method restart, fail when process is null"() {
         when:
@@ -24,7 +31,6 @@ class SnvCallingStartJobIntegrationSpec extends Specification {
         AssertionError error = thrown()
         error.message.contains("assert process")
     }
-
 
     void "test method restart with SnvCallingInstance"() {
         given:
@@ -52,7 +58,7 @@ class SnvCallingStartJobIntegrationSpec extends Specification {
                 assert cmd == "rm -rf ${failedInstance.instancePath.absoluteDataManagementPath} ${failedInstance.instancePath.absoluteStagingPath}"
             }
         }
-        snvCallingStartJob.configService = new ConfigService()
+        snvCallingStartJob.configService = configService
         snvCallingStartJob.schedulerService = Mock(SchedulerService) {
             1 * createProcess(_, _, _) >> { StartJob startJob, List<Parameter> input, ProcessParameter processParameter2 ->
                 Process process2 = DomainFactory.createProcess(
@@ -104,7 +110,7 @@ class SnvCallingStartJobIntegrationSpec extends Specification {
                 assert cmd == "rm -rf ${failedInstance.instancePath.absoluteDataManagementPath} ${failedInstance.instancePath.absoluteStagingPath}"
             }
         }
-        roddySnvCallingStartJob.configService = new ConfigService()
+        roddySnvCallingStartJob.configService = configService
         roddySnvCallingStartJob.schedulerService = Mock(SchedulerService) {
             1 * createProcess(_, _, _) >> { StartJob startJob, List<Parameter> input, ProcessParameter processParameter2 ->
                 Process process2 = DomainFactory.createProcess(

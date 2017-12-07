@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.AnalysisProcessingStates
 import de.dkfz.tbi.otp.job.processing.ClusterJobLoggingService
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
@@ -66,6 +67,7 @@ class SnvDeepAnnotationJobTests {
     @Autowired
     ClusterJobLoggingService clusterJobLoggingService
 
+    TestConfigService configService
 
     File testDirectory
     SnvDeepAnnotationJob snvDeepAnnotationJob
@@ -101,7 +103,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         }
 
         testData = new SnvCallingInstanceTestData()
-        testData.createSnvObjects(testDirectory)
+        testData.createSnvObjects()
 
         processedMergedBamFile1 = testData.bamFileTumor
         ProcessedMergedBamFile processedMergedBamFile2 = testData.bamFileControl
@@ -217,6 +219,8 @@ CHROMOSOME_INDICES=( {1..21} X Y)
                 parameterUsage: ParameterUsage.OUTPUT
                 )
         assert typeScript.save()
+
+        configService = new TestConfigService(['otp.root.path': testDirectory.path])
     }
 
     @After
@@ -232,6 +236,8 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         WaitingFileUtils.metaClass = null
         // Clean-up
         TestCase.cleanTestDirectory()
+
+        configService.clean()
     }
 
     @Test

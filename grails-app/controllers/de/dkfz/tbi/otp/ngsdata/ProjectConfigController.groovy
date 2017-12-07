@@ -23,6 +23,7 @@ class ProjectConfigController {
     CommentService commentService
     ProjectSelectionService projectSelectionService
     SampleTypeService sampleTypeService
+    ConfigService configService
 
     Map index() {
         List<Project> projects = projectService.getAllProjects()
@@ -57,9 +58,8 @@ class ProjectConfigController {
         String checkSophiaReferenceGenome = projectService.checkReferenceGenomeForSophia(project).getError()
         String checkAceseqReferenceGenome = projectService.checkReferenceGenomeForAceseq(project).getError()
 
-        Realm realm = ConfigService.getRealm(project, Realm.OperationType.DATA_MANAGEMENT)
         File projectDirectory = LsdfFilesService.getPath(
-                realm.rootPath,
+                configService.getRootPath().path,
                 project.dirName,
         )
 

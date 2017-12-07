@@ -1,10 +1,10 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.job.jobs.merging.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.Realm.OperationType
 import de.dkfz.tbi.otp.ngsdata.SoftwareTool.Type
 import de.dkfz.tbi.otp.utils.*
 import org.junit.*
@@ -17,6 +17,7 @@ class MergingJobCreateCommandTests {
 
     ProcessedBamFileService processedBamFileService
     ProcessedMergedBamFileService processedMergedBamFileService
+    TestConfigService configService
 
     @Rule
     public TemporaryFolder tempFolder = new TemporaryFolder()
@@ -46,12 +47,10 @@ class MergingJobCreateCommandTests {
 
     @Before
     void setUp() {
-        realm = Realm.build(
-                operationType: OperationType.DATA_PROCESSING,
-                processingRootPath: tempFolder.root.path,
-        )
+        realm = DomainFactory.createRealmDataProcessing()
+        configService = new TestConfigService(['otp.processing.root.path': tempFolder.root.path])
 
-        basePath = "${realm.processingRootPath}/dirName/results_per_pid/pid_1"
+        basePath = "${configService.getProcessingRootPathFromSelfFoundContext().path}/dirName/results_per_pid/pid_1"
         basePathAlignment = "${basePath}/alignment"
         basePathMerging = "${basePath}/merging"
         basePathMergingOutput = "${basePathMerging}//sampleType-1/${SEQ_TYPE_NAME}/${LIBRARY_LAYOUT_NAME}/DEFAULT/0/pass0"
@@ -155,6 +154,7 @@ class MergingJobCreateCommandTests {
         seqPlatform = null
         seqType = null
         mergingPass = null
+        configService.clean()
     }
 
     @Test(expected = NullPointerException)

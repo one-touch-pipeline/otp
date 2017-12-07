@@ -1,9 +1,9 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 import grails.buildtestdata.mixin.Build
-import grails.test.mixin.Mock
 import org.junit.*
 import org.junit.rules.*
 import spock.lang.*
@@ -27,16 +27,23 @@ class ProcessedMergedBamFileQaFileServiceSpecification extends Specification {
     @Rule
     TemporaryFolder temporaryFolder
 
+    TestConfigService configService
 
+    void setup() {
+        configService = new TestConfigService(['otp.processing.root.path': temporaryFolder.newFolder().path])
+    }
+
+    void cleanup() {
+        configService.clean()
+    }
 
     void "test validateQADataFiles allFine"() {
         setup:
         QualityAssessmentMergedPass pass = DomainFactory.createQualityAssessmentMergedPass()
-        DomainFactory.createRealmDataProcessing(temporaryFolder.newFolder(), [name: pass.project.realmName])
+        DomainFactory.createRealmDataProcessing([name: pass.project.realmName])
         CreateFileHelper.createFile(new File(service.coverageDataFilePath(pass)))
         CreateFileHelper.createFile(new File(service.qualityAssessmentDataFilePath(pass)))
         CreateFileHelper.createFile(new File(service.insertSizeDataFilePath(pass)))
-
 
         when:
         service.validateQADataFiles(pass)
@@ -49,7 +56,7 @@ class ProcessedMergedBamFileQaFileServiceSpecification extends Specification {
     void "test validateQADataFiles fail"() {
         setup:
         QualityAssessmentMergedPass pass = DomainFactory.createQualityAssessmentMergedPass()
-        DomainFactory.createRealmDataProcessing(temporaryFolder.newFolder(), [name: pass.project.realmName])
+        DomainFactory.createRealmDataProcessing([name: pass.project.realmName])
         if (coverage) {
             CreateFileHelper.createFile(new File(service.coverageDataFilePath(pass)))
         }

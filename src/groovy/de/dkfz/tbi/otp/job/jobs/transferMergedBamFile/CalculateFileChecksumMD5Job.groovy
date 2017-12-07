@@ -43,7 +43,7 @@ class CalculateFileChecksumMD5Job extends AbstractJobImpl {
         Project project = processedMergedBamFileService.project(bamFile)
         Map<String, String> locations = processedMergedBamFileService.locationsForFileCopying(bamFile)
         Realm realm = configService.getRealmDataProcessing(project)
-        String projectDir = configService.getProjectRootPath(project) + "/" + project.dirName
+        String projectDir = configService.getRootPath().path + "/" + project.dirName
         String cmd = scriptText(bamFile, locations, projectDir)
         String jobId = clusterJobSchedulerService.executeJob(realm, cmd)
         log.debug "Job ${jobId} submitted to cluster job scheduler"

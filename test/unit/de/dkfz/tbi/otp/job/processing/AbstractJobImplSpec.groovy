@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.processing
 
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.ngsdata.*
@@ -18,6 +19,7 @@ import spock.lang.*
 class AbstractJobImplSpec extends Specification {
 
     AbstractJobImpl abstractJobImpl
+    TestConfigService configService
 
     void "test failedOrNotFinishedClusterJobs, no send step, throws RunTimeException"() {
         given:
@@ -55,11 +57,13 @@ class AbstractJobImplSpec extends Specification {
 
     void "test failedOrNotFinishedClusterJobs return list of failed or not finished jobs"() {
         given:
+        configService = new TestConfigService()
         def (send, wait, validate) = createProcessingStepWithHierarchy()
         abstractJobImpl = [
                 getProcessingStep : { return validate },
         ] as AbstractJobImpl
         abstractJobImpl.jobStatusLoggingService = new JobStatusLoggingService()
+        abstractJobImpl.jobStatusLoggingService.configService = configService
 
         ClusterJob clusterJobSend = DomainFactory.createClusterJob(processingStep: send)
 

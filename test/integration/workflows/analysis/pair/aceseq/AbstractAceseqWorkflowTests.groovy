@@ -11,8 +11,6 @@ import workflows.analysis.pair.*
 
 abstract class AbstractAceseqWorkflowTests extends AbstractRoddyBamFilePairAnalysisWorkflowTests<AceseqInstance> {
 
-    ConfigService configService
-
     LsdfFilesService lsdfFilesService
 
     ProjectService projectService
@@ -35,7 +33,7 @@ abstract class AbstractAceseqWorkflowTests extends AbstractRoddyBamFilePairAnaly
                 project: project,
                 seqType: seqType,
         )
-        lsdfFilesService.createDirectory(new File(configService.getProjectSequencePath(project)), realm)
+        lsdfFilesService.createDirectory(new File(configService.getProjectSequencePath(project).path), realm)
 
         SpringSecurityUtils.doWithAuth("operator") {
             config = projectService.configureAceseqPipelineProject(

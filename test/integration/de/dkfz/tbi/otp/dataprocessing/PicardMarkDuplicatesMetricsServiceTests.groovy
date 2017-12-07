@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.ngsdata.*
 import org.junit.After
 import org.junit.Before
@@ -14,6 +15,7 @@ class PicardMarkDuplicatesMetricsServiceTests {
     PicardMarkDuplicatesMetricsService picardMarkDuplicatesMetricsService
 
     Realm realm
+    TestConfigService configService
 
     File metrics
 
@@ -29,15 +31,16 @@ class PicardMarkDuplicatesMetricsServiceTests {
     @Before
     void setUp() {
         testDirectory = tmpDir.newFolder('otp-test')
-
         directory = testDirectory.absolutePath + "/processing/project-dir/results_per_pid/patient/merging//sample-type/seq-type/library/DEFAULT/0/pass0"
         baseFile = "sample-type_patient_seq-type_library_merged.mdup_metrics.txt"
         basePath = "${directory}/${baseFile}"
 
-        realm = DomainFactory.createRealmDataProcessingDKFZ([
-            rootPath: testDirectory.absolutePath + '/root',
-            processingRootPath: testDirectory.absolutePath + '/processing',
-            ]).save([flush: true])
+        realm = DomainFactory.createRealmDataProcessingDKFZ().save([flush: true])
+
+        configService = new TestConfigService([
+                        'otp.root.path': testDirectory.absolutePath + '/root',
+                        'otp.processing.root.path': testDirectory.absolutePath + '/processing',
+        ])
 
         File baseDir = new File(directory)
         metrics = new File(basePath)
@@ -54,6 +57,7 @@ class PicardMarkDuplicatesMetricsServiceTests {
         if (metrics.exists()) {
             assertTrue(metrics.delete())
         }
+        configService.clean()
     }
 
     @Test

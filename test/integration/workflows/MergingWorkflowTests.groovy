@@ -43,8 +43,7 @@ class MergingWorkflowTests extends WorkflowTestCase {
     void setUp() {
         // this file is already available in the file system in the MergingWorkflowTest folder
         inputSingleLaneAlingment = "${getWorkflowDirectory().absolutePath}/inputFile/blood_runName_s_laneId_PAIRED.sorted.bam"
-
-        pidDir = "${realm.processingRootPath}/otp_test_project/results_per_pid/654321"
+        pidDir = "${configService.getProcessingRootPath().path}/otp_test_project/results_per_pid/654321"
         alignmentDir = "${pidDir}/alignment//testname1_123/pass0"
         singleLaneBamFile = "${alignmentDir}/tumor_testname1_s_123_PAIRED.sorted.bam"
 

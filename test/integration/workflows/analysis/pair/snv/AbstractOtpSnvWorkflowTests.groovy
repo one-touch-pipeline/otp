@@ -31,7 +31,7 @@ abstract class AbstractOtpSnvWorkflowTests extends AbstractSnvWorkflowTests {
         DomainFactory.createOtpSnvPipelineLazy()
         createExternalScripts()
 
-        String mkDirs = createClusterScriptService.makeDirs([new File(realm.stagingRootPath, "clusterScriptExecutorScripts")], "0777")
+        String mkDirs = createClusterScriptService.makeDirs([new File(configService.getStagingRootPath(), "clusterScriptExecutorScripts")], "0777")
         assert executionService.executeCommand(realm, mkDirs).toInteger() == 0
     }
 

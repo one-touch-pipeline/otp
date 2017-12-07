@@ -25,14 +25,12 @@ class SnvCallingInstanceTestData {
     SnvConfig snvConfig
     ExternalScript externalScript_Joining
 
-    void createSnvObjects(File testDirectory = null) {
+    void createSnvObjects() {
         bamFileControl = DomainFactory.createProcessedMergedBamFile(DomainFactory.createMergingSet(), DomainFactory.randomProcessedBamFileProperties)
-        if (testDirectory) {
-            ['Management', 'Processing'].each {
-                this."realm${it}" = DomainFactory."createRealmData${it}"(testDirectory, [
-                        name: bamFileControl.project.realmName,
-                ])
-            }
+        ['Management', 'Processing'].each {
+            this."realm${it}" = DomainFactory."createRealmData${it}"([
+                    name: bamFileControl.project.realmName,
+            ])
         }
         bamFileControl.seqType.name = SeqTypeNames.WHOLE_GENOME.seqTypeName
         assert bamFileControl.seqType.save(flush: true, failOnError: true)

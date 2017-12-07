@@ -1,8 +1,10 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.utils.CreateFileHelper
+import org.junit.After
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
@@ -12,6 +14,7 @@ import static org.junit.Assert.*
 class ReferenceGenomeServiceTests {
 
     ReferenceGenomeService referenceGenomeService
+    TestConfigService configService
 
     File directory
     File statFile
@@ -21,18 +24,14 @@ class ReferenceGenomeServiceTests {
     public TemporaryFolder temporaryFolder = new TemporaryFolder()
 
     private MergingWorkPackage createDataForChromosomeSizeInformationFiles()  {
+        configService = new TestConfigService(['otp.processing.root.path': temporaryFolder.newFolder().path])
         MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage([
                 statSizeFileName: DomainFactory.DEFAULT_TAB_FILE_NAME,
                 referenceGenome: DomainFactory.createReferenceGenome(chromosomeLengthFilePath: DomainFactory.DEFAULT_CHROMOSOME_LENGTH_FILE_NAME),
                 pipeline: DomainFactory.createPanCanPipeline(),
         ])
 
-        Realm realm = DomainFactory.createRealmDataProcessing([
-                name: mergingWorkPackage.project.realmName,
-                processingRootPath: temporaryFolder.newFolder().path
-        ])
-
-        File referenceGenomeDirectory = new File(realm.processingRootPath, 'reference_genomes')
+        File referenceGenomeDirectory = new File(configService.getProcessingRootPath(), 'reference_genomes')
         DomainFactory.createProcessingOptionBasePathReferenceGenome(referenceGenomeDirectory.path)
         directory = new File(
                 new File(referenceGenomeDirectory,
@@ -44,6 +43,10 @@ class ReferenceGenomeServiceTests {
         return mergingWorkPackage
     }
 
+    @After
+    void tearDown() {
+        configService.clean()
+    }
 
     @Test
     void testChromosomeStatSizeFile_AllFine() {

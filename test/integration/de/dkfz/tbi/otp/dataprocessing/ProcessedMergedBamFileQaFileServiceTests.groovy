@@ -1,7 +1,9 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.TestConfigService
+
 import static org.junit.Assert.*
-import grails.util.Environment
+
 import org.junit.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
@@ -21,10 +23,11 @@ class ProcessedMergedBamFileQaFileServiceTests {
     @Test
     void testQaResultsMd5sumFile() {
         MergingPass mergingPass = createMergingPass()
-        Realm realm = DomainFactory.createRealmDataProcessing(name: mergingPass.project.realmName)
+        TestConfigService configService = new TestConfigService(['otp.processing.root.path': '/processing_root_path'])
         ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile(mergingPass)
-        String destinationExp = realm.processingRootPath + "/project-dir/results_per_pid/patient/merging//sample-type/seq-type/library/DEFAULT/0/pass0/QualityAssessment/pass1/MD5SUMS"
+        String destinationExp = configService.getProcessingRootPathFromSelfFoundContext().path + "/project-dir/results_per_pid/patient/merging//sample-type/seq-type/library/DEFAULT/0/pass0/QualityAssessment/pass1/MD5SUMS"
         String destinationAct = processedMergedBamFileQaFileService.qaResultsMd5sumFile(mergedBamFile)
+        configService.clean()
         assertEquals(destinationExp, destinationAct)
     }
 

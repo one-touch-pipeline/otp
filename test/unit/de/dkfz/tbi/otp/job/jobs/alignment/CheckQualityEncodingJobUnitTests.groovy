@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.alignment
 
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.ngsdata.*
 import grails.buildtestdata.mixin.*
 import grails.test.mixin.*
@@ -31,11 +32,14 @@ import java.util.zip.*
 @TestMixin(GrailsUnitTestMixin)
 class CheckQualityEncodingJobUnitTests {
 
+    TestConfigService configService
+
     CheckQualityEncodingJob checkQualityEncodingJob
 
     DataFile dataFile
 
     File file
+
 
     @Rule
     public TemporaryFolder tmpDir = new TemporaryFolder()
@@ -44,9 +48,12 @@ class CheckQualityEncodingJobUnitTests {
 
     @Before
     public void setUp() throws Exception {
+        testDirectory = tmpDir.newFolder("otp-test")
+
+        configService = new TestConfigService(['otp.root.path': testDirectory.path])
         checkQualityEncodingJob = new CheckQualityEncodingJob(
             lsdfFilesService: new LsdfFilesService(
-                configService: new ConfigService()
+                configService: configService
             )
         )
 
@@ -136,12 +143,7 @@ class CheckQualityEncodingJobUnitTests {
                         )
         assertNotNull(dataFile.save(flush: true))
 
-        testDirectory = tmpDir.newFolder("otp-test")
-
-        Realm realm = DomainFactory.createRealmDataManagement(
-                name: project.realmName,
-                rootPath: testDirectory.absolutePath,
-        )
+        Realm realm = DomainFactory.createRealmDataManagement(name: project.realmName)
         assertNotNull(realm.save(flush: true, failOnError: true))
 
         file = new File(checkQualityEncodingJob.lsdfFilesService.getFileViewByPidPath(dataFile))
@@ -159,6 +161,7 @@ class CheckQualityEncodingJobUnitTests {
         if (file.exists()) {
             assertTrue(file.delete())
         }
+        configService.clean()
         checkQualityEncodingJob = null
         dataFile = null
         file = null

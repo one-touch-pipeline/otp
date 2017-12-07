@@ -9,7 +9,7 @@ import de.dkfz.tbi.otp.infrastructure.ClusterJobService
 import de.dkfz.tbi.otp.job.processing.AbstractMultiJob
 import de.dkfz.tbi.otp.job.processing.ClusterJobSchedulerService
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
-import de.dkfz.tbi.otp.ngsdata.ConfigService
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
@@ -62,6 +62,7 @@ class AbstractRoddyJobTests {
     AbstractRoddyJob roddyJob
     RoddyBamFile roddyBamFile
     Realm realm
+    TestConfigService configService
     int executeCommandCounter
     int validateCounter
 
@@ -76,10 +77,9 @@ class AbstractRoddyJobTests {
         validateCounter = 0
 
         roddyBamFile = DomainFactory.createRoddyBamFile()
-        realm = Realm.build(
-                name: roddyBamFile.project.realmName,
-                operationType: Realm.OperationType.DATA_MANAGEMENT,
-        )
+
+        realm = DomainFactory.createRealmDataManagement(name: roddyBamFile.project.realmName)
+        configService = new TestConfigService()
 
         roddyJob = [
                 getProcessParameterObject: { -> roddyBamFile },
@@ -89,7 +89,7 @@ class AbstractRoddyJobTests {
         ] as AbstractRoddyJob
 
         roddyJob.executeRoddyCommandService = new ExecuteRoddyCommandService()
-        roddyJob.configService = new ConfigService()
+        roddyJob.configService = configService
         roddyJob.clusterJobService = new ClusterJobService()
         roddyJob.clusterJobSchedulerService = [
                 retrieveAndSaveJobInformationAfterJobStarted: { ClusterJob clusterJob -> }
@@ -102,11 +102,11 @@ class AbstractRoddyJobTests {
         TestCase.removeMetaClass(AbstractRoddyJob, roddyJob)
         roddyBamFile = null
         GroovySystem.metaClassRegistry.removeMetaClass(ProcessHelperService)
+        configService.clean()
     }
 
     private File setRootPathAndCreateWorkExecutionStoreDirectory() {
-        realm.rootPath = tmpDir.newFolder().path
-        assert realm.save(failOnError: true)
+        configService.setOtpProperty('otp.root.path', tmpDir.newFolder().path)
         File workRoddyExecutionDir =  new File(roddyBamFile.workExecutionStoreDirectory, RODDY_EXECUTION_STORE_DIRECTORY_NAME)
         assert workRoddyExecutionDir.mkdirs()
         return workRoddyExecutionDir

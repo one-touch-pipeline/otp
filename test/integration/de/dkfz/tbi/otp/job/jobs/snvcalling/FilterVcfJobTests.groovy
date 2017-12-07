@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.AnalysisProcessingStates
 import de.dkfz.tbi.otp.job.processing.ClusterJobLoggingService
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
@@ -59,6 +60,7 @@ class FilterVcfJobTests {
     @Autowired
     ClusterJobLoggingService clusterJobLoggingService
 
+    TestConfigService configService
 
     File testDirectory
     FilterVcfJob filterVcfJob
@@ -93,7 +95,9 @@ CHROMOSOME_INDICES=( {1..21} X Y)
             assert testDirectory.mkdirs()
         }
 
-        snvCallingInstanceTestData.createSnvObjects(testDirectory)
+        configService = new TestConfigService(['otp.root.path': testDirectory.path])
+
+        snvCallingInstanceTestData.createSnvObjects()
 
         processedMergedBamFile1 = snvCallingInstanceTestData.bamFileTumor
         processedMergedBamFile2 = snvCallingInstanceTestData.bamFileControl
@@ -236,6 +240,8 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         removeMetaClass(ClusterJobSchedulerService, clusterJobSchedulerService)
         removeMetaClass(LinkFileUtils, linkFileUtils)
         clusterJobSchedulerService.clusterJobLoggingService = clusterJobLoggingService
+        removeMetaClass(ClusterJobLoggingService, clusterJobSchedulerService.clusterJobLoggingService)
+        configService.clean()
     }
 
 

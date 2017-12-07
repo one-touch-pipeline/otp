@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.aceseq
 
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
@@ -54,6 +55,8 @@ class ExecuteRoddyAceseqJobSpec extends Specification {
 
     AceseqInstance aceseqInstance
 
+    TestConfigService configService
+
     void setup() {
         aceseqInstance = DomainFactory.createAceseqInstanceWithRoddyBamFiles()
         aceseqInstance.samplePair.mergingWorkPackage1.bamFileInProjectFolder = aceseqInstance.sampleType1BamFile
@@ -61,10 +64,14 @@ class ExecuteRoddyAceseqJobSpec extends Specification {
         aceseqInstance.samplePair.mergingWorkPackage2.bamFileInProjectFolder = aceseqInstance.sampleType2BamFile
         assert aceseqInstance.samplePair.mergingWorkPackage2.save(flush: true)
 
-        DomainFactory.createRealmDataManagement(temporaryFolder.newFolder(), [name: aceseqInstance.project.realmName])
-        DomainFactory.createRealmDataProcessing(temporaryFolder.newFolder(), [name: aceseqInstance.project.realmName])
+        DomainFactory.createRealmDataManagement([name: aceseqInstance.project.realmName])
+        DomainFactory.createRealmDataProcessing([name: aceseqInstance.project.realmName])
+        configService = new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path])
     }
 
+    void cleanup() {
+        configService.clean()
+    }
 
     void "prepareAndReturnWorkflowSpecificCValues, when aceseqInstance is null, throw assert"() {
         when:
@@ -86,7 +93,7 @@ class ExecuteRoddyAceseqJobSpec extends Specification {
         CreateRoddyFileHelper.createSophiaResultFiles(sophiaInstance)
 
         ExecuteRoddyAceseqJob job = new ExecuteRoddyAceseqJob([
-                configService             : new ConfigService(),
+                configService             : configService,
                 linkFileUtils             : Mock(LinkFileUtils) {
                     1 * createAndValidateLinks(_, _) >> { Map<File, File> sourceLinkMap, Realm realm ->
                         CreateFileHelper.createFile(aceseqInstance.instancePath.absoluteDataManagementPath, sophiaInstance.finalAceseqInputFile.name)
@@ -171,7 +178,7 @@ class ExecuteRoddyAceseqJobSpec extends Specification {
     void "validate, when all fine, set processing state to finished"() {
         given:
         ExecuteRoddyAceseqJob job = new ExecuteRoddyAceseqJob([
-                configService             : new ConfigService(),
+                configService             : configService,
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
                     1 * correctPermissionsAndGroups(_, _) >> {}
                 },
@@ -206,7 +213,7 @@ class ExecuteRoddyAceseqJobSpec extends Specification {
         given:
         String md5sum = HelperUtils.uniqueString
         ExecuteRoddyAceseqJob job = new ExecuteRoddyAceseqJob([
-                configService             : new ConfigService(),
+                configService             : configService,
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
                     1 * correctPermissionsAndGroups(_, _) >> {
                         throw new AssertionError(md5sum)
@@ -232,7 +239,7 @@ class ExecuteRoddyAceseqJobSpec extends Specification {
     void "validate, when file not exist, throw assert"() {
         given:
         ExecuteRoddyAceseqJob job = new ExecuteRoddyAceseqJob([
-                configService             : new ConfigService(),
+                configService             : configService,
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
                     1 * correctPermissionsAndGroups(_, _) >> {}
                 },

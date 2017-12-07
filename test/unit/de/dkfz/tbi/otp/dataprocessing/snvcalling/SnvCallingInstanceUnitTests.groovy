@@ -12,7 +12,7 @@ import org.junit.*
  * See the API for {@link grails.test.mixin.domain.DomainClassUnitTestMixin} for usage instructions
  */
 @TestFor(SnvCallingInstance)
-@Build([DataFile, FileType, MergingCriteria, MergingSetAssignment, MergingPass, ProcessedBamFile, SampleTypePerProject, SnvJobResult, ProcessingOption])
+@Build([Realm, DataFile, FileType, MergingCriteria, MergingSetAssignment, MergingPass, ProcessedBamFile, SampleTypePerProject, SnvJobResult, ProcessingOption])
 class SnvCallingInstanceUnitTests {
 
     SnvCallingInstanceTestData testData = new SnvCallingInstanceTestData()

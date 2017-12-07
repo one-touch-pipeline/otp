@@ -49,6 +49,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
     SessionFactory sessionFactory
     DataSource dataSource
     SchedulerService schedulerService
+    TestConfigService configService
 
     ClusterJobMonitoringService clusterJobMonitoringService
 
@@ -180,7 +181,6 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         assert rootDirectory.list()?.size() : "${rootDirectory} seems not to be mounted"
 
         Map realmParams = [
-                programsRootPath: "/",
                 unixUser: TestConfigHelper.getWorkflowTestAccountName(grailsApplication),
                 defaultJobSubmissionOptions: jobSubmissionOptions,
         ]
@@ -190,25 +190,21 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
 
         println "Base directory: ${getBaseDirectory()}"
 
-        realm.rootPath = "${getBaseDirectory()}/root_path"
-        realm.processingRootPath = "${getBaseDirectory()}/processing_root_path"
-        realm.loggingRootPath = "${getBaseDirectory()}/logging_root_path"
-        realm.stagingRootPath = "${getBaseDirectory()}/staging_root_path"
-        assert realm.save(flush: true)
+        [
+                'otp.root.path'             : "${getBaseDirectory()}/root_path",
+                'otp.processing.root.path'  : "${getBaseDirectory()}/processing_root_path",
+                'otp.logging.root.path'     : "${getBaseDirectory()}/logging_root_path",
+                'otp.staging.root.path'     : "${getBaseDirectory()}/staging_root_path",
+        ].each { key, value ->
+            configService.setOtpProperty(key, value)
+        }
 
-        realmManagement.rootPath = "${getBaseDirectory()}/root_path"
-        realmManagement.processingRootPath = "${getBaseDirectory()}/processing_root_path"
-        realmManagement.loggingRootPath = "${getBaseDirectory()}/logging_root_path"
-        realmManagement.stagingRootPath = "${getBaseDirectory()}/staging_root_path"
-        assert realmManagement.save(flush: true)
-
-        assert realm
         createDirectories([
-                new File(realm.rootPath),
-                new File(realm.loggingRootPath, JobStatusLoggingService.STATUS_LOGGING_BASE_DIR),
-                new File(realm.stagingRootPath),
+                configService.getRootPath(),
+                new File(configService.getLoggingRootPath(), JobStatusLoggingService.STATUS_LOGGING_BASE_DIR),
+                configService.getStagingRootPath(),
         ])
-        DomainFactory.createProcessingOptionBasePathReferenceGenome(new File(realm.processingRootPath, "reference_genomes").absolutePath)
+        DomainFactory.createProcessingOptionBasePathReferenceGenome(new File(configService.getProcessingRootPath(), "reference_genomes").absolutePath)
 
         testDataDir = "${getRootDirectory()}/files"
         ftpDir = "${getBaseDirectory()}/ftp"

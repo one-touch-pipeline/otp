@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.InformationReliability
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QaProcessingStatus
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.MergingSet.State
@@ -28,6 +29,7 @@ class ProcessedMergedBamFileServiceTests {
     public TemporaryFolder tmpDir = new TemporaryFolder()
 
     File testDirectory
+    TestConfigService configService
 
     String directory
     String baseFile
@@ -43,14 +45,13 @@ class ProcessedMergedBamFileServiceTests {
         basePath = directory + "/" + baseFile
         realmName = "Realm_${HelperUtils.uniqueString}"
 
-        DomainFactory.createRealmDataProcessing(
-                name: realmName,
-                processingRootPath: testDirectory.absolutePath + '/processing',
-        )
-        DomainFactory.createRealmDataManagement(
-                name: realmName,
-                rootPath: testDirectory.absolutePath + '/root',
-        )
+        DomainFactory.createRealmDataProcessing(name: realmName)
+        DomainFactory.createRealmDataManagement(name: realmName)
+
+        configService = new TestConfigService([
+                        'otp.root.path': testDirectory.absolutePath + '/root',
+                        'otp.processing.root.path': testDirectory.absolutePath + '/processing'
+        ])
 
         baseDir = new File(directory)
         File bam = new File(basePath + ".bam")
@@ -75,6 +76,7 @@ class ProcessedMergedBamFileServiceTests {
             assertTrue(file.delete())
         }
         baseDir = null
+        configService.clean()
     }
 
     @Test(expected = IllegalArgumentException)

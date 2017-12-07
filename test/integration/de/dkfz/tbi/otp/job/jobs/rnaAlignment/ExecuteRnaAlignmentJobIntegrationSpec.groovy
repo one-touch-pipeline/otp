@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.rnaAlignment
 
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
 import de.dkfz.tbi.otp.ngsdata.*
@@ -16,6 +17,19 @@ class ExecuteRnaAlignmentJobIntegrationSpec extends IntegrationSpec {
 
     @Rule
     public TemporaryFolder tmpDir = new TemporaryFolder()
+    TestConfigService configService
+
+    void setup() {
+        configService = new TestConfigService([
+                        'otp.root.path': tmpDir.root.path,
+                        'otp.processing.root.path': tmpDir.root.path
+        ])
+    }
+
+    void cleanup() {
+        configService.clean()
+    }
+
 
     void "test prepareAndReturnWorkflowSpecificCValues no adapter sequence available"() {
         given:
@@ -56,15 +70,15 @@ class ExecuteRnaAlignmentJobIntegrationSpec extends IntegrationSpec {
     private RnaRoddyBamFile setUpForPrepareAndReturnWorkflowSpecificCValues() {
         executeRnaAlignmentJob = new ExecuteRnaAlignmentJob()
         executeRnaAlignmentJob.lsdfFilesService = new LsdfFilesService()
-        executeRnaAlignmentJob.lsdfFilesService.configService = new ConfigService()
+        executeRnaAlignmentJob.lsdfFilesService.configService = configService
         executeRnaAlignmentJob.referenceGenomeService = new ReferenceGenomeService()
         executeRnaAlignmentJob.referenceGenomeService.configService = executeRnaAlignmentJob.lsdfFilesService.configService
         executeRnaAlignmentJob.referenceGenomeService.processingOptionService = new ProcessingOptionService()
 
         DomainFactory.createProcessingOptionBasePathReferenceGenome(tmpDir.root.absolutePath)
         RnaRoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile([:], RnaRoddyBamFile)
-        DomainFactory.createRealmDataManagement(tmpDir.root, [name: roddyBamFile.project.realmName])
-        DomainFactory.createRealmDataProcessing(tmpDir.root, [name: roddyBamFile.project.realmName])
+        DomainFactory.createRealmDataManagement([name: roddyBamFile.project.realmName])
+        DomainFactory.createRealmDataProcessing([name: roddyBamFile.project.realmName])
         roddyBamFile.containedSeqTracks.each { SeqTrack s ->
             s.dataFiles.each { DataFile dataFile ->
                 File file = new File(executeRnaAlignmentJob.lsdfFilesService.getFileViewByPidPath(dataFile))

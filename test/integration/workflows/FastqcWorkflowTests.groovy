@@ -3,7 +3,6 @@ package workflows
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
-import grails.plugin.springsecurity.*
 import org.joda.time.*
 import org.junit.*
 
@@ -56,7 +55,7 @@ class FastqcWorkflowTests extends WorkflowTestCase {
                 vbpFileName: 'asdf.fastq.gz',
                 seqTrack: seqTrack,
                 run: run,
-                initialDirectory: "${realm.stagingRootPath}/${run.name}",
+                initialDirectory: "${configService.getStagingRootPath()}/${run.name}",
         )
 
         linkFileUtils.createAndValidateLinks([(sourceFastq): new File(lsdfFilesService.getFileFinalPath(dataFile))], realm)

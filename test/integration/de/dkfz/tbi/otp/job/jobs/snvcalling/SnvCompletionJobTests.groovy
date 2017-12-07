@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.AnalysisProcessingStates
 import org.apache.commons.logging.impl.NoOpLog
 
@@ -19,7 +20,7 @@ class SnvCompletionJobTests {
     @Autowired
     ApplicationContext applicationContext
     @Autowired
-    ConfigService configService
+    TestConfigService configService
     @Autowired
     ExecutionService executionService
     @Autowired
@@ -54,7 +55,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         testDirectory = TestCase.createEmptyTestDirectory()
 
         testData = new SnvCallingInstanceTestData()
-        testData.createSnvObjects(testDirectory)
+        testData.createSnvObjects()
         realm_processing = testData.realmProcessing
 
         processedMergedBamFile1 = testData.bamFileTumor
@@ -63,6 +64,8 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         samplePair = testData.samplePair
         project = samplePair.project
         seqType = samplePair.seqType
+
+        configService = new TestConfigService(['otp.staging.root.path': testDirectory.path+"/staging"])
 
         SnvCallingInstanceTestData.createOrFindExternalScript()
         snvConfig = new SnvConfig(
@@ -101,9 +104,10 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         snvCompletionJob.linkFileUtils.metaClass = null
         TestCase.removeMetaClass(ExecutionService, executionService)
 
-
         // Clean-up file-system
         TestCase.cleanTestDirectory()
+
+        configService.clean()
     }
 
     @Test

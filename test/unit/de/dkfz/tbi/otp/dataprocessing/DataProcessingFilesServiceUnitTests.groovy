@@ -1,9 +1,9 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.DataProcessingFilesService.OutputDirectories
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.Realm.OperationType
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.*
 import grails.buildtestdata.mixin.*
@@ -32,9 +32,10 @@ class DataProcessingFilesServiceUnitTests {
 
 
 
-    CheckedLogger checkedLogger
+    TestConfigService configService
     DataProcessingFilesService dataProcessingFilesService
-    Realm realm
+
+    CheckedLogger checkedLogger
     Project project
     ProcessedBamFile processedBamFile
 
@@ -57,7 +58,7 @@ class DataProcessingFilesServiceUnitTests {
 
     @Before
     void setUp() {
-        realm = Realm.build()
+        configService = new TestConfigService()
 
         dataProcessingFilesService = new DataProcessingFilesService()
         dataProcessingFilesService.lsdfFilesService = [
@@ -70,9 +71,7 @@ class DataProcessingFilesServiceUnitTests {
                 assert file.delete()
             },
         ] as LsdfFilesService
-        dataProcessingFilesService.configService = [
-            getRealmDataProcessing: {realm}
-        ] as ConfigService
+        dataProcessingFilesService.configService = configService
 
         checkedLogger = new CheckedLogger()
         LogThreadLocal.setThreadLog(checkedLogger)
@@ -81,7 +80,6 @@ class DataProcessingFilesServiceUnitTests {
     @After
     void tearDown() {
         dataProcessingFilesService = null
-        realm = null
         if (dir && dir.exists()){
             assert dir.deleteDir()
             assert !dir.exists()
@@ -100,7 +98,6 @@ class DataProcessingFilesServiceUnitTests {
         passes = null
         passClosure = null
 
-
         LogThreadLocal.removeThreadLog()
         checkedLogger.assertAllMessagesConsumed()
         checkedLogger = null
@@ -109,7 +106,7 @@ class DataProcessingFilesServiceUnitTests {
 
 
     void createTestDirectory() {
-        dir = tmpDir.newFolder(realm.processingRootPath.split('/'))
+        dir = tmpDir.newFolder(configService.getProcessingRootPath().path.split('/'))
         if (dir.exists()) {
             dir.deleteDir()
         }
@@ -760,15 +757,12 @@ class DataProcessingFilesServiceUnitTests {
 
     @Test
     void testGetOutputDirectory() {
-        Realm realm = Realm.build([
-            operationType: OperationType.DATA_PROCESSING
-        ])
+        Realm realm = DomainFactory.createRealmDataProcessing()
 
         Project project = Project.build([
             name: "projectName",
             realmName: realm.name
-        ]
-        )
+        ])
 
         Individual individual = Individual.build([
             project: project
@@ -776,25 +770,25 @@ class DataProcessingFilesServiceUnitTests {
 
         String pid = individual.pid
         String projectDir = project.dirName
-        String realmDir = realm.processingRootPath
+        String rootDir = configService.getProcessingRootPath()
         //!dir || dir == OutputDirectories.BASE) ? "" : "${dir.toString().toLowerCase() -> postfix
         //${outputBaseDir}/results_per_pid/${individual.pid}/${postfix}"
         // rpPath = realm.processingRootPath
         //String pdName = project.dirName
         //return "${rpPath}/${pdName}"
-        String expectedPath = "${realmDir}/${projectDir}/results_per_pid/${pid}/"
+        String expectedPath = "${rootDir}/${projectDir}/results_per_pid/${pid}/"
         String actualPath = dataProcessingFilesService.getOutputDirectory(individual, null)
         assertEquals(expectedPath, actualPath)
 
-        expectedPath = "${realmDir}/${projectDir}/results_per_pid/${pid}/"
+        expectedPath = "${rootDir}/${projectDir}/results_per_pid/${pid}/"
         actualPath = dataProcessingFilesService.getOutputDirectory(individual, OutputDirectories.BASE)
         assertEquals(expectedPath, actualPath)
 
-        expectedPath = "${realmDir}/${projectDir}/results_per_pid/${pid}/alignment/"
+        expectedPath = "${rootDir}/${projectDir}/results_per_pid/${pid}/alignment/"
         actualPath = dataProcessingFilesService.getOutputDirectory(individual, OutputDirectories.ALIGNMENT)
         assertEquals(expectedPath, actualPath)
 
-        expectedPath = "${realmDir}/${projectDir}/results_per_pid/${pid}/fastx_qc/"
+        expectedPath = "${rootDir}/${projectDir}/results_per_pid/${pid}/fastx_qc/"
         actualPath = dataProcessingFilesService.getOutputDirectory(individual, OutputDirectories.FASTX_QC)
         assertEquals(expectedPath, actualPath)
     }

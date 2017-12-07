@@ -481,7 +481,7 @@ chmod 440 ${newDirectFileName}
         }
 
         bashScriptToMoveFiles << "\n\n\n ################ delete old Individual ################ \n"
-        bashScriptToMoveFiles << "# rm -rf '${configService.getProjectRootPath(oldProject)}/sequencing/*/view-by-pid/${oldPid}/' \n"
+        bashScriptToMoveFiles << "# rm -rf '${configService.getRootPath()}/sequencing/*/view-by-pid/${oldPid}/' \n"
         bashScriptToMoveFiles << "# rm -rf '${processingPathToOldIndividual}'\n"
 
         individualService.createComment("Individual swap", [individual: oldIndividual, project: oldProjectName, pid: oldPid], [individual: oldIndividual, project: newProjectName, pid: newPid])

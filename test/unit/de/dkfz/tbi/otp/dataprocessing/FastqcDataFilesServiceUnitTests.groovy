@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.ngsdata.*
 import grails.test.mixin.*
 import org.junit.*
@@ -11,6 +12,7 @@ import static org.junit.Assert.*
 class FastqcDataFilesServiceUnitTests {
 
     FastqcDataFilesService fastqcDataFilesService
+    TestConfigService configService
 
     SeqTrack seqTrack
     DataFile dataFile
@@ -18,9 +20,10 @@ class FastqcDataFilesServiceUnitTests {
 
     @Before
     public void setUp() throws Exception {
+        configService = new TestConfigService()
         fastqcDataFilesService = new FastqcDataFilesService()
         fastqcDataFilesService.lsdfFilesService = new LsdfFilesService()
-        fastqcDataFilesService.lsdfFilesService.configService = new ConfigService()
+        fastqcDataFilesService.lsdfFilesService.configService = configService
 
         realm = DomainFactory.createRealmDataManagement()
 
@@ -144,7 +147,7 @@ class FastqcDataFilesServiceUnitTests {
     void testFastqcOutputDirectory() {
         String fastqc = DataProcessingFilesService.OutputDirectories.FASTX_QC.toString().toLowerCase()
 
-        String viewByPidPath = "${realm.rootPath}/${seqTrack.project.dirName}/sequencing/${seqTrack.seqType.dirName}/view-by-pid"
+        String viewByPidPath = "${configService.getRootPath()}/${seqTrack.project.dirName}/sequencing/${seqTrack.seqType.dirName}/view-by-pid"
         String expectedPath = "${viewByPidPath}/${seqTrack.individual.pid}/${seqTrack.sampleType.dirName}/${seqTrack.seqType.libraryLayoutDirName}/run${seqTrack.run.name}/${fastqc}"
         String actualPath = fastqcDataFilesService.fastqcOutputDirectory(seqTrack)
 

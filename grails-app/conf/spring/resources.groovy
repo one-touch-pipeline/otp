@@ -25,6 +25,9 @@ beans = {
             task.'annotation-driven'(executor: "taskExecutor", scheduler: "taskScheduler")
         }
     }
+    if (Environment.getCurrent() == Environment.TEST || Environment.getCurrent().getName() == "WORKFLOW_TEST") {
+        configService(de.dkfz.tbi.otp.TestConfigService)
+    }
 
     // http://stackoverflow.com/questions/10013288/another-unnamed-cachemanager-already-exists-in-the-same-vm-ehcache-2-5
     aclCacheManager(EhCacheManagerFactoryBean) {

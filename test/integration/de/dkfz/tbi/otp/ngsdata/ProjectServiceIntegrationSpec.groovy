@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
@@ -28,6 +29,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
     GrailsApplication grailsApplication
     ProcessingOptionService processingOptionService
 
+    TestConfigService configService
 
     @Rule
     public TemporaryFolder temporaryFolder
@@ -42,8 +44,14 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         DomainFactory.createProjectCategory(name: 'category')
 
         int counter = 0
-        Realm realm = DomainFactory.createRealmDataManagement(temporaryFolder.newFolder(), [name: Realm.LATEST_DKFZ_REALM])
-        DomainFactory.createRealmDataProcessing(temporaryFolder.newFolder(), [name: realm.name])
+        Realm realm = DomainFactory.createRealmDataManagement([name: Realm.LATEST_DKFZ_REALM])
+        DomainFactory.createRealmDataProcessing([name: realm.name])
+
+        configService = new TestConfigService([
+                'otp.root.path': temporaryFolder.newFolder().path,
+                'otp.processing.root.path': temporaryFolder.newFolder().path,
+        ])
+
         DomainFactory.createProject(name: 'testProjectAlignment', realmName: realm.name, alignmentDeciderBeanName: 'test')
         DomainFactory.createReferenceGenome(name: 'testReferenceGenome')
         DomainFactory.createReferenceGenome(name: 'testReferenceGenome2')
@@ -82,7 +90,11 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 type: "sambamba",
                 value: temporaryFolder.newFile(),
         ])
-        DomainFactory.createProcessingOptionBasePathReferenceGenome(new File(realm.rootPath, "reference_genome").path)
+        DomainFactory.createProcessingOptionBasePathReferenceGenome(new File(configService.getRootPath(), "reference_genome").path)
+    }
+
+    def cleanup() {
+        configService.clean()
     }
 
     void "test createProject valid input"() {
@@ -158,10 +170,8 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         }
 
         then:
-        Realm realm = ConfigService.getRealm(project, Realm.OperationType.DATA_MANAGEMENT)
-
         File projectDirectory = LsdfFilesService.getPath(
-                realm.rootPath,
+                configService.getRootPath().absolutePath,
                 project.dirName,
         )
         assert projectDirectory.exists()
@@ -301,9 +311,8 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
     void "test createProject valid input, when directory with wrong unix group already exists"() {
         given:
         String group = TestConfigHelper.testingGroup(grailsApplication)
-        Realm realm = CollectionUtils.exactlyOneElement(Realm.findAllByOperationType(Realm.OperationType.DATA_MANAGEMENT))
         File projectDirectory = LsdfFilesService.getPath(
-                realm.rootPath,
+                configService.getRootPath().absolutePath,
                 "/dir",
         )
 
@@ -916,9 +925,8 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 baseProjectConfig: 'baseConfig',
                 configVersion    : 'v1_0',
         )
-        Realm realm = ConfigService.getRealm(configuration.project, Realm.OperationType.DATA_MANAGEMENT)
         File projectDirectory = LsdfFilesService.getPath(
-                realm.rootPath,
+                configService.getRootPath().path,
                 configuration.project.dirName,
         )
         assert projectDirectory.mkdirs()
@@ -1035,8 +1043,8 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         SeqType seqType = DomainFactory.createExomeSeqType()
         Project project = Project.findByName("testProjectAlignment")
 
-        Realm realm = ConfigService.getRealm(project, Realm.OperationType.DATA_MANAGEMENT)
-        DomainFactory.createRealmDataProcessing(temporaryFolder.newFolder(), [name: realm.name])
+        Realm realm = TestConfigService.getRealm(project, Realm.OperationType.DATA_MANAGEMENT)
+        DomainFactory.createRealmDataProcessing([name: realm.name])
         Project basedProject = DomainFactory.createProject(name: 'basedTestProjectAlignment', realmName: realm.name, alignmentDeciderBeanName: 'basedTest')
 
         File tempFile = temporaryFolder.newFile("PANCAN_ALIGNMENT_WES_PAIRED_1.1.51_v1_0.xml")
@@ -1202,9 +1210,8 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 project          : Project.findByName("testProjectAlignment"),
                 seqType          : SeqType.exomePairedSeqType,
         ])
-        Realm realm = ConfigService.getRealm(configuration.project, Realm.OperationType.DATA_MANAGEMENT)
         File projectDirectory = LsdfFilesService.getPath(
-                realm.rootPath,
+                configService.getRootPath().absolutePath,
                 configuration.project.dirName,
         )
         assert projectDirectory.exists() || projectDirectory.mkdirs()
@@ -1380,9 +1387,8 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 configVersion    : 'v1_0',
                 adapterTrimmingNeeded: true,
         ] + properties)
-        Realm realm = ConfigService.getRealm(configuration.project, Realm.OperationType.DATA_MANAGEMENT)
         File projectDirectory = LsdfFilesService.getPath(
-                realm.rootPath,
+                configService.getRootPath().absolutePath,
                 configuration.project.dirName,
         )
         assert projectDirectory.exists() || projectDirectory.mkdirs()
@@ -1406,9 +1412,8 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 geneModel          : DomainFactory.createGeneModel(),
                 mouseData          : true,
         ] + properties)
-        Realm realm = ConfigService.getRealm(configuration.project, Realm.OperationType.DATA_MANAGEMENT)
         File projectDirectory = LsdfFilesService.getPath(
-                realm.rootPath,
+                configService.getRootPath().absolutePath,
                 configuration.project.dirName,
         )
         assert projectDirectory.exists() || projectDirectory.mkdirs()
@@ -1469,9 +1474,8 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
     }
 
     private checkProjectDirectory(RoddyConfiguration configuration) {
-        Realm realm = ConfigService.getRealm(configuration.project, Realm.OperationType.DATA_MANAGEMENT)
         File projectDirectory = LsdfFilesService.getPath(
-                realm.rootPath,
+                configService.getRootPath().absolutePath,
                 configuration.project.dirName,
         )
         assert projectDirectory.exists() || projectDirectory.mkdirs()

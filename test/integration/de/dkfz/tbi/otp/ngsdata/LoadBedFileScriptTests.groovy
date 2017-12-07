@@ -87,7 +87,6 @@ class LoadBedFileScriptTests extends GroovyScriptAwareTestCase {
 
         realm = DomainFactory.createRealmDataProcessing([
             name: WorkflowTestRealms.LABEL_DKFZ,
-            processingRootPath: baseFolder.path,
         ]).save(flush : true)
 
         File referenceGenomeDirectory = new File(baseFolder, REFERENCE_GENOME_PATH)

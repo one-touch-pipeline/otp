@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.bamImport
 
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.jobs.importExternallyMergedBam.*
 import de.dkfz.tbi.otp.job.plan.*
@@ -41,6 +42,8 @@ class ReplaceSourceWithLinkJobSpec extends Specification {
 
     ImportProcess importProcess
 
+    TestConfigService configService
+
     @Rule
     TemporaryFolder temporaryFolder
 
@@ -65,6 +68,10 @@ class ReplaceSourceWithLinkJobSpec extends Specification {
                 externallyProcessedMergedBamFiles : [epmbf],
                 replaceSourceWithLink             : true
         ).save()
+    }
+
+    def cleanup() {
+        configService.clean()
     }
 
     void "test execute when everything is fine"() {
@@ -124,10 +131,9 @@ echo OK
 
         CreateFileHelper.createFile(new File("${importProcess.externallyProcessedMergedBamFiles[0].importedFrom}"))
 
-        DomainFactory.createRealmDataManagement([
-                name     : importProcess.externallyProcessedMergedBamFiles.first().project.realmName,
-                rootPath : temporaryFolder.newFolder("root").path
-        ])
+        configService = new TestConfigService(['otp.root.path': temporaryFolder.newFolder("root").path])
+
+        DomainFactory.createRealmDataManagement(['name' : importProcess.externallyProcessedMergedBamFiles.first().project.realmName])
 
         DomainFactory.createProcessParameter([
                 process   : step.process,
@@ -135,7 +141,7 @@ echo OK
                 className : ImportProcess.class.name
         ])
 
-        linkingJob.configService = new ConfigService()
+        linkingJob.configService = configService
         linkingJob.executionService = new ExecutionService()
     }
 }

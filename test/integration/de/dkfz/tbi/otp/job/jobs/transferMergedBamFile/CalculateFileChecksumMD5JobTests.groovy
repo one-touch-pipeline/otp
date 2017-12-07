@@ -1,12 +1,12 @@
 package de.dkfz.tbi.otp.job.jobs.transferMergedBamFile
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys
 import de.dkfz.tbi.otp.job.processing.ClusterJobSchedulerService
 import de.dkfz.tbi.otp.ngsdata.ChecksumFileService
-import de.dkfz.tbi.otp.ngsdata.ConfigService
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.ProcessHelperService
@@ -34,7 +34,7 @@ class CalculateFileChecksumMD5JobTests {
     ProcessedMergedBamFileQaFileService processedMergedBamFileQaFileService
 
     @Autowired
-    ConfigService configService
+    TestConfigService configService
 
     @Autowired
     ChecksumFileService checksumFileService
@@ -49,8 +49,8 @@ class CalculateFileChecksumMD5JobTests {
         processedMergedBamFile = DomainFactory.createProcessedMergedBamFile(mergingWorkPackage, [fileOperationStatus: FileOperationStatus.INPROGRESS])
         qualityAssessmentMergedPass = DomainFactory.createQualityAssessmentMergedPass(abstractMergedBamFile: processedMergedBamFile)
 
-        DomainFactory.createRealmDataProcessing(tmpDir.root, [name: processedMergedBamFile.project.realmName])
-        DomainFactory.createRealmDataManagement(tmpDir.root, [name: processedMergedBamFile.project.realmName])
+        DomainFactory.createRealmDataProcessing([name: processedMergedBamFile.project.realmName])
+        DomainFactory.createRealmDataManagement([name: processedMergedBamFile.project.realmName])
 
 
         calculateFileChecksumMD5Job.metaClass.getProcessParameterValue = { -> "${processedMergedBamFile.id}" }
@@ -63,13 +63,19 @@ class CalculateFileChecksumMD5JobTests {
             ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
         }
 
+        configService = new TestConfigService([
+                        'otp.root.path': tmpDir.root.path,
+                        'otp.processing.root.path': tmpDir.root.path
+        ])
         calculateFileChecksumMD5Job.log = new NoOpLog()
+        calculateFileChecksumMD5Job.configService = configService
     }
 
     @After
     void tearDown() {
         TestCase.removeMetaClass(ClusterJobSchedulerService, calculateFileChecksumMD5Job.clusterJobSchedulerService)
         TestCase.removeMetaClass(CalculateFileChecksumMD5Job, calculateFileChecksumMD5Job)
+        configService.clean()
     }
 
 

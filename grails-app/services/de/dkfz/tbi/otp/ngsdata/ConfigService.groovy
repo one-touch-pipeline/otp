@@ -3,6 +3,8 @@ package de.dkfz.tbi.otp.ngsdata
 import de.dkfz.tbi.otp.dataprocessing.*
 import grails.util.*
 import org.joda.time.*
+import org.springframework.beans.*
+import org.springframework.context.*
 
 /**
  * This service knows all the configuration parameters like root paths,
@@ -10,18 +12,21 @@ import org.joda.time.*
  *
  *
  */
-class ConfigService {
+class ConfigService implements ApplicationContextAware {
 
-    private Properties otpProperties
+    protected Map<String, String> otpProperties
+
+    static ApplicationContext context
 
     ConfigService() {
-        otpProperties = new Properties()
+        Properties properties = new Properties()
         String propertiesFile = System.getenv("OTP_PROPERTIES")
         if (propertiesFile && new File(propertiesFile).canRead()) {
-            otpProperties.load(new FileInputStream(propertiesFile))
+            properties.load(new FileInputStream(propertiesFile))
         } else {
-            otpProperties.load(new FileInputStream(System.getProperty("user.home") + System.getProperty("file.separator") + ".otp.properties"))
+            properties.load(new FileInputStream(System.getProperty("user.home") + System.getProperty("file.separator") + ".otp.properties"))
         }
+        this.otpProperties = (Map)properties
     }
 
     static Realm getRealm(Project project, Realm.OperationType operationType) {
@@ -44,22 +49,52 @@ class ConfigService {
         return getRealm(project, Realm.OperationType.DATA_MANAGEMENT)
     }
 
-    static String getProjectRootPath(Project project) {
-        Realm realm = getRealm(project, Realm.OperationType.DATA_MANAGEMENT)
-        return realm.rootPath
+    static File getRootPathFromSelfFoundContext() {
+        ConfigService configServiceBean = context.getBean("configService")
+        return configServiceBean.getRootPath()
     }
 
-    String getProjectSequencePath(Project proj) {
-        String base = getProjectRootPath(proj)
-        return "${base}/${proj.dirName}/sequencing/"
+    File getRootPath() {
+        return new File(otpProperties.get("otp.root.path") ?: "")
+    }
+
+    static File getProcessingRootPathFromSelfFoundContext() {
+        ConfigService configServiceBean = context.getBean("configService")
+        return configServiceBean.getProcessingRootPath()
+    }
+
+    File getProcessingRootPath() {
+        return new File(otpProperties.get("otp.processing.root.path") ?: "")
+    }
+
+    static File getLoggingRootPathFromSelfFoundContext() {
+        ConfigService configServiceBean = context.getBean("configService")
+        return configServiceBean.getLoggingRootPath()
+    }
+
+    File getLoggingRootPath() {
+        return new File(otpProperties.get("otp.logging.root.path") ?: "")
+    }
+
+    static File getStagingRootPathFromSelfFoundContext() {
+        ConfigService configServiceBean = context.getBean("configService")
+        return configServiceBean.getStagingRootPath()
+    }
+
+    File getStagingRootPath() {
+        return new File(otpProperties.get("otp.staging.root.path") ?: "")
+    }
+
+    File getProjectSequencePath(Project proj) {
+        return new File("${getRootPath().path}/${proj.dirName}/sequencing/")
     }
 
     String getPbsPassword() {
-        return otpProperties.getProperty("otp.ssh.password") ?: ""
+        return otpProperties.get("otp.ssh.password") ?: ""
     }
 
     File getSshKeyFile() {
-        return new File(otpProperties.getProperty("otp.ssh.keyFile") ?: System.getProperty("user.home") + "/.ssh/id_rsa")
+        return new File(otpProperties.get("otp.ssh.keyFile") ?: System.getProperty("user.home") + "/.ssh/id_rsa")
     }
 
     boolean useSshAgent() {
@@ -88,15 +123,15 @@ class ConfigService {
 
     String getBackdoorUser() {
         if (Environment.isDevelopmentMode()) {
-            return otpProperties.getProperty("otp.security.backdoorUser")
+            return otpProperties.get("otp.security.backdoorUser")
         } else {
             return null
         }
     }
 
     String getEnvironmentName() {
-        if (otpProperties.getProperty("otp.environment.name")) {
-            return otpProperties.getProperty("otp.environment.name")
+        if (otpProperties.get("otp.environment.name")) {
+            return otpProperties.get("otp.environment.name")
         } else {
             return Environment.getCurrent().name
         }
@@ -111,7 +146,7 @@ class ConfigService {
     }
 
     private File getAndCheckPathFromProperty(String property, String defaultValue) {
-        File file = new File(otpProperties.getProperty(property) ?: defaultValue)
+        File file = new File(otpProperties.get(property) ?: defaultValue)
         if (!file.absolute && Environment.getCurrent() == Environment.PRODUCTION) {
             throw new RuntimeException("${property} is \"${file}\", but only an absolute path is allowed.")
         }
@@ -119,11 +154,15 @@ class ConfigService {
     }
 
     String getSshUser() {
-        return otpProperties.getProperty("otp.ssh.user") ?: ""
+        return otpProperties.get("otp.ssh.user") ?: ""
     }
 
     private boolean getBooleanValue(String otpPropertiesValue, boolean defaultValue) {
-        return otpProperties.getProperty(otpPropertiesValue) ? Boolean.parseBoolean(otpProperties.getProperty(otpPropertiesValue)) : defaultValue
+        return otpProperties.get(otpPropertiesValue) ? Boolean.parseBoolean(otpProperties.get(otpPropertiesValue)) : defaultValue
     }
 
+    @Override
+    void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        context = applicationContext
+    }
 }

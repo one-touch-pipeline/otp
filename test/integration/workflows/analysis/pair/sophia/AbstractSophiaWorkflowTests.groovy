@@ -10,9 +10,6 @@ import workflows.analysis.pair.*
 
 abstract class AbstractSophiaWorkflowTests extends AbstractRoddyBamFilePairAnalysisWorkflowTests<SophiaInstance> {
 
-
-    ConfigService configService
-
     LsdfFilesService lsdfFilesService
 
     ProjectService projectService
@@ -29,7 +26,7 @@ abstract class AbstractSophiaWorkflowTests extends AbstractRoddyBamFilePairAnaly
                 project: project,
                 seqType: seqType,
         )
-        lsdfFilesService.createDirectory(new File(configService.getProjectSequencePath(project)), realm)
+        lsdfFilesService.createDirectory(configService.getProjectSequencePath(project), realm)
 
         SpringSecurityUtils.doWithAuth("operator") {
             config = projectService.configureSophiaPipelineProject(

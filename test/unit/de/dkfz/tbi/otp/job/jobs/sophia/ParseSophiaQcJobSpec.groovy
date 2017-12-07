@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.sophia
 
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
@@ -47,7 +48,8 @@ class ParseSophiaQcJobSpec extends Specification {
     void "test execute"() {
         given:
         File temporaryFile = temporaryFolder.newFolder()
-        Realm realm = DomainFactory.createRealmDataManagement(rootPath: temporaryFile)
+        Realm realm = DomainFactory.createRealmDataManagement()
+        TestConfigService configService = new TestConfigService(['otp.root.path': temporaryFile.path])
 
         SophiaInstance instance = DomainFactory.createSophiaInstanceWithRoddyBamFiles()
         instance.project.realmName = realm.name
@@ -72,5 +74,8 @@ class ParseSophiaQcJobSpec extends Specification {
         qc.rnaDecontaminationApplied == false
 
         instance.processingState == AnalysisProcessingStates.FINISHED
+
+        cleanup:
+        configService.clean()
     }
 }

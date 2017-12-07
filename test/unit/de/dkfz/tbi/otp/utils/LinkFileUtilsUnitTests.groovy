@@ -29,7 +29,7 @@ class LinkFileUtilsUnitTests {
             assert testDirectory.mkdirs()
         }
 
-        realm = Realm.build()
+        realm = DomainFactory.createRealm(operationType: Realm.OperationType.DATA_MANAGEMENT)
 
         ExecutionService executionService = [
                 executeCommand: { Realm realm, String command ->

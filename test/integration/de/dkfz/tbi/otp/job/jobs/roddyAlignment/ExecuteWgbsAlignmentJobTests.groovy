@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
 import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
@@ -20,6 +21,7 @@ class ExecuteWgbsAlignmentJobTests {
 
     RoddyBamFile roddyBamFile
 
+    TestConfigService configService
 
     @Rule
     public TemporaryFolder tmpDir = new TemporaryFolder()
@@ -51,8 +53,13 @@ class ExecuteWgbsAlignmentJobTests {
             )
         }
 
-        DomainFactory.createRealmDataProcessing(tmpDir.root, [name: roddyBamFile.project.realmName])
-        DomainFactory.createRealmDataManagement(tmpDir.root, [name: roddyBamFile.project.realmName])
+        configService = new TestConfigService([
+                'otp.root.path': tmpDir.root.path,
+                'otp.processing.root.path': tmpDir.root.path
+        ])
+
+        DomainFactory.createRealmDataProcessing([name: roddyBamFile.project.realmName])
+        DomainFactory.createRealmDataManagement([name: roddyBamFile.project.realmName])
 
         CreateFileHelper.createFile(executeWgbsAlignmentJob.referenceGenomeService.fastaFilePath(roddyBamFile.referenceGenome, false))
         CreateFileHelper.createFile(executeWgbsAlignmentJob.referenceGenomeService.chromosomeStatSizeFile(roddyBamFile.mergingWorkPackage, false))
@@ -61,6 +68,7 @@ class ExecuteWgbsAlignmentJobTests {
     @After
     void tearDown() {
         TestCase.removeMetaClass(ExecutionService, executeWgbsAlignmentJob.executionService)
+        configService.clean()
     }
 
 

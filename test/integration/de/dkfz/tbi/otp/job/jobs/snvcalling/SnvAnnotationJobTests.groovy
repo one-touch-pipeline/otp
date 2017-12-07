@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.AnalysisProcessingStates
 import de.dkfz.tbi.otp.job.processing.ClusterJobLoggingService
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
@@ -57,6 +58,7 @@ class SnvAnnotationJobTests {
     @Autowired
     ClusterJobLoggingService clusterJobLoggingService
 
+    TestConfigService configService
 
     File testDirectory
     SnvAnnotationJob snvAnnotationJob
@@ -86,7 +88,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         testDirectory = TestCase.createEmptyTestDirectory()
 
         testData = new SnvCallingInstanceTestData()
-        testData.createSnvObjects(testDirectory)
+        testData.createSnvObjects()
         testData.createSnvConfig()
 
         processedMergedBamFile1 = testData.bamFileTumor
@@ -95,6 +97,8 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         SnvConfig snvConfig = testData.snvConfig
         snvConfig.configuration = CONFIGURATION
         assert snvConfig.save()
+
+        configService = new TestConfigService(['otp.root.path': testDirectory.path+"/root"])
 
         snvCallingInstance = testData.createSnvCallingInstance([
             sampleType1BamFile: processedMergedBamFile1,
@@ -178,6 +182,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         clusterJobSchedulerService.clusterJobLoggingService = clusterJobLoggingService
         TestCase.removeMetaClass(SnvCallingService, snvCallingService)
         TestCase.removeMetaClass(AbstractMergedBamFileService, snvAnnotationJob.abstractMergedBamFileService)
+        configService.clean()
 
         LsdfFilesService.metaClass = null
         WaitingFileUtils.metaClass = null

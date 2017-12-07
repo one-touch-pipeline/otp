@@ -10,8 +10,6 @@ import workflows.analysis.pair.*
 
 abstract class AbstractIndelWorkflowTests extends AbstractRoddyBamFilePairAnalysisWorkflowTests<IndelCallingInstance> {
 
-    ConfigService configService
-
     LsdfFilesService lsdfFilesService
 
     ProjectService projectService
@@ -36,7 +34,7 @@ abstract class AbstractIndelWorkflowTests extends AbstractRoddyBamFilePairAnalys
                 project: project,
                 seqType: seqType,
         )
-        lsdfFilesService.createDirectory(new File(configService.getProjectSequencePath(project)), realm)
+        lsdfFilesService.createDirectory(new File(configService.getProjectSequencePath(project).path), realm)
 
         SpringSecurityUtils.doWithAuth("operator") {
             config = projectService.configureIndelPipelineProject(

@@ -17,6 +17,7 @@ import static org.springframework.util.Assert.*
 class JobStatusLoggingService {
 
     ClusterJobManagerFactoryService clusterJobManagerFactoryService
+    ConfigService configService
 
     final static LOGFILE_EXTENSION = '.log'
     final static STATUS_LOGGING_BASE_DIR = 'log/status'
@@ -28,14 +29,12 @@ class JobStatusLoggingService {
     /**
      * Get the base directory of the status log file of a workflow.
      *
-     * @param realm the realm the job runs in
      * @param processingStep the processing step of the job
      * @return the base directory of the status log file
      */
-    String logFileBaseDir(Realm realm, ProcessingStep processingStep) {
-        notNull realm, 'No realm specified.'
+    String logFileBaseDir(ProcessingStep processingStep) {
         notNull processingStep, 'No processing step specified.'
-        return "${realm.loggingRootPath}/${STATUS_LOGGING_BASE_DIR}"
+        return "${configService.getLoggingRootPath()}/${STATUS_LOGGING_BASE_DIR}"
     }
 
     /**
@@ -49,7 +48,8 @@ class JobStatusLoggingService {
      * @return the location of the status log file
      */
     String constructLogFileLocation(Realm realm, ProcessingStep processingStep, String clusterJobId = null) {
-        String baseDir = logFileBaseDir(realm, processingStep)
+        notNull realm, 'No realm specified.'
+        String baseDir = logFileBaseDir(processingStep)
         String fileName = [
                 "joblog",
                 processingStep.process.id,

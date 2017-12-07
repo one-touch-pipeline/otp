@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CreateJobStateLogFileHelper
@@ -25,7 +26,6 @@ import static de.dkfz.tbi.otp.dataprocessing.RoddyBamFile.QUALITY_CONTROL_JSON_F
         SeqCenter,
         SeqType,
         SeqTrack,
-        Realm,
         RoddyBamFile,
         SampleType,
         Pipeline,
@@ -43,6 +43,8 @@ import static de.dkfz.tbi.otp.dataprocessing.RoddyBamFile.QUALITY_CONTROL_JSON_F
         Run,
 ])
 class RoddyBamFileUnitTests {
+
+    TestConfigService configService
 
     public static final String RODDY_EXECUTION_DIR_NAME = "exec_000000_000000000_a_a"
     SampleType sampleType
@@ -64,7 +66,7 @@ class RoddyBamFileUnitTests {
         ])
         sampleType = roddyBamFile.sampleType
         individual = roddyBamFile.individual
-        Realm realm = DomainFactory.createRealmDataManagement(tmpDir.newFolder(), [name: roddyBamFile.project.realmName])
+        configService = new TestConfigService()
         testDir = "${individual.getViewByPidPath(roddyBamFile.seqType).absoluteDataManagementPath.path}/${sampleType.dirName}/${roddyBamFile.seqType.libraryLayoutDirName}/merged-alignment"
     }
 
