@@ -5,6 +5,7 @@ import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.*
 
 /**
  * Correct the set library preparation kit in seqTracks, metadata and MergingWorkPackages
@@ -29,7 +30,7 @@ assert libPrepKit
 assert commentInfo
 
 
-LibraryPreparationKit libraryPreparationKit = CollectionUtils.exactlyOneElement(LibraryPreparationKitSynonym.findAllByName(libPrepKit)).libraryPreparationKit
+LibraryPreparationKit libraryPreparationKit = CollectionUtils.exactlyOneElement(LibraryPreparationKit.findAllByName(libPrepKit))
 
 MetaDataKey key = CollectionUtils.exactlyOneElement(MetaDataKey.findAllByName(MetaDataColumn.LIB_PREP_KIT.name()))
 
@@ -47,6 +48,7 @@ SeqTrack.withTransaction {
     seqTrackList.each { SeqTrack seqTrack ->
         println "$seqTrack  ${seqTrack.libraryPreparationKit}"
         seqTrack.libraryPreparationKit = libraryPreparationKit
+        seqTrack.kitInfoReliability = InformationReliability.KNOWN
         DataFile.findAllBySeqTrack(seqTrack).each {
             MetaDataEntry entry = CollectionUtils.exactlyOneElement(MetaDataEntry.findAllByDataFileAndKey(it, key))
             String oldComment = it.comment?.comment ?: ''
