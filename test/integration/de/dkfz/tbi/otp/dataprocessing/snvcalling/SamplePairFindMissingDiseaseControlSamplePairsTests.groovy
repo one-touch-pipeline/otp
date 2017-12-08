@@ -25,10 +25,10 @@ class SamplePairFindMissingDiseaseControlSamplePairsTests {
 
     @Before
     void before() {
-        wholeGenome = SeqType.build(name: SeqTypeNames.WHOLE_GENOME.seqTypeName, libraryLayout: 'PAIRED')
-        exome = SeqType.build(name: SeqTypeNames.EXOME.seqTypeName, libraryLayout: 'PAIRED')
+        wholeGenome = DomainFactory.createWholeGenomeSeqType()
+        exome = DomainFactory.createExomeSeqType()
         rna = DomainFactory.createRnaPairedSeqType()
-        LibraryPreparationKit libraryPreparationKit = LibraryPreparationKit.build()
+        LibraryPreparationKit libraryPreparationKit = DomainFactory.createLibraryPreparationKit()
 
         project = Project.build()
         diseaseSampleType = SampleType.build()
@@ -104,7 +104,7 @@ class SamplePairFindMissingDiseaseControlSamplePairsTests {
     }
 
     @Test
-    void testDiseaseLibPrepKitMismatch_NonWGSNonWGBS() {
+    void testDiseaseLibPrepKitMismatch_Exome() {
         diseaseMwp.libraryPreparationKit = DomainFactory.createLibraryPreparationKit()
         diseaseMwp.seqType = exome
         diseaseMwp.save(flush: true)
@@ -112,7 +112,7 @@ class SamplePairFindMissingDiseaseControlSamplePairsTests {
         controlMwp.seqType = exome
         controlMwp.save(flush: true)
 
-        assertFindsNothing()
+        assertFindsOne()
     }
 
     @Test

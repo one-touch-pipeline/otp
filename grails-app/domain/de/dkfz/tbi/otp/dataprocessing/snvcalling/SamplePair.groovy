@@ -249,9 +249,6 @@ class SamplePair implements Entity {
               stpp2.sampleType = sampleType_2 AND
               stpp1.category = :disease AND
               stpp2.category = :control AND
-              (mwp1.libraryPreparationKit = mwp2.libraryPreparationKit OR
-              mwp1.libraryPreparationKit IS NULL AND mwp2.libraryPreparationKit IS NULL OR
-              mwp1.seqType.name in (:mwpLibPrepKitsMayMismatchSeqTypeNames)) AND
               NOT EXISTS (
                 FROM
                   SamplePair
@@ -261,7 +258,6 @@ class SamplePair implements Entity {
             """, [
                 disease: SampleType.Category.DISEASE,
                 control: SampleType.Category.CONTROL,
-                mwpLibPrepKitsMayMismatchSeqTypeNames: (SeqType.WGBS_SEQ_TYPE_NAMES + SeqTypeNames.WHOLE_GENOME)*.seqTypeName,
                 analysableSeqTypes: SeqType.getAllAnalysableSeqTypes(),
             ], [readOnly: true])
         return queryResults.collect {
