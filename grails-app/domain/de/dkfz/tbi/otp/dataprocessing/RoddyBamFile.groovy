@@ -90,11 +90,6 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
             }
         }
 
-        seqTracks.each {
-            assertAndTrackOnError !mergingWorkPackage || mergingWorkPackage.satisfiesCriteria(it),
-                    "seqTrack ${it} does not satisfy merging criteria for ${mergingWorkPackage}"
-        }
-
         withNewSession { session ->
             if (baseBamFile) {
                 assertAndTrackOnError !mergingWorkPackage || mergingWorkPackage.satisfiesCriteria(baseBamFile),
