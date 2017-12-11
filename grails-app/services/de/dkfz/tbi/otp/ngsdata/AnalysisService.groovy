@@ -57,6 +57,9 @@ class AnalysisService {
                         }
                     }
                 }
+                config {
+                    property('pluginVersion', "pluginVersion")
+                }
                 property('processingState', "processingState")
                 property('id', "instanceId")
                 property('dateCreated', "dateCreated")

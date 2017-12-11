@@ -18,6 +18,7 @@
                         'analysis.sampleTypes',
                         'analysis.seqType',
                         'analysis.libPrepKits',
+                        'analysis.pluginVersion',
                         'analysis.processingDate',
                         'analysis.progress',
                         'analysis.plots',

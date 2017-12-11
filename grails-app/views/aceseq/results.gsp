@@ -22,6 +22,7 @@
                             'aceseq.goodnessOfFit',
                             'aceseq.gender',
                             'aceseq.solutionPossible',
+                            'analysis.pluginVersion',
                             'analysis.processingDate',
                             'analysis.progress',
                             'analysis.plots',

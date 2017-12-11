@@ -77,7 +77,7 @@ $.otp.resultsTable = {
                     row.goodnessOfFit,
                     row.gender,
                     row.solutionPossible,
-
+                    row.pluginVersion,
                     row.dateCreated,
                     row.processingState.name,
                 ];
@@ -130,6 +130,7 @@ $.otp.resultsTable = {
                     row.somaticSmallVarsInControlPass,
                     row.tindaSomaticAfterRescue,
                     row.tindaSomaticAfterRescueMedianAlleleFreqInControl,
+                    row.pluginVersion,
                     row.dateCreated,
                     row.processingState.name,
                 ];
@@ -172,7 +173,7 @@ $.otp.resultsTable = {
                     row.tumorMassiveInvFilteringLevel,
                     row.rnaContaminatedGenesCount,
                     row.rnaDecontaminationApplied,
-
+                    row.pluginVersion,
                     row.dateCreated,
                     row.processingState.name,
                 ];
@@ -214,6 +215,7 @@ $.otp.resultsTable = {
                     row.sampleType1 + " \u2013 " + row.sampleType2,
                     row.seqType,
                     row.libPrepKits,
+                    row.pluginVersion,
                     row.dateCreated,
                     row.processingState.name,
                 ];

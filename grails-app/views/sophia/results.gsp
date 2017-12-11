@@ -20,6 +20,7 @@
                             'sophia.tumorMassiveInvFilteringLevel',
                             'sophia.rnaContaminatedGenesCount',
                             'sophia.rnaDecontaminationApplied',
+                            'analysis.pluginVersion',
                             'analysis.processingDate',
                             'analysis.progress',
                             'analysis.plots',

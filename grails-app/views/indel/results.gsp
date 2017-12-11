@@ -19,7 +19,7 @@
                         <th colspan="5"><g:message code="analysis.indel.indels"/></th>
                         <th colspan="6"><g:message code="analysis.indel.swapChecker"/></th>
                         <th colspan="2"><g:message code="analysis.indel.tinda"/></th>
-                        <th colspan="3"></th>
+                        <th colspan="4"></th>
                     </tr>
                     <tr>
                         <th><g:message code="projectOverview.index.PID"/></th>
@@ -39,6 +39,7 @@
                         <th><g:message code="analysis.indel.swapChecker.somaticSmallVarsInControlPass"/></th>
                         <th><g:message code="analysis.indel.tinda.tindaSomaticAfterRescue"/></th>
                         <th><g:message code="analysis.indel.tinda.tindaSomaticAfterRescueMedianAlleleFreqInControl"/></th>
+                        <th><g:message code="analysis.pluginVersion"/></th>
                         <th><g:message code="analysis.processingDate"/></th>
                         <th><g:message code="analysis.progress"/></th>
                         <th><g:message code="analysis.plots"/></th>
