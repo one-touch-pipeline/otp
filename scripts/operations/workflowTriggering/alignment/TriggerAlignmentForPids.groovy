@@ -1,3 +1,6 @@
+
+
+
 /**
  * script to trigger alignments for a patient or a project or a ilse.
  * It is Possible to restrict the selection to specific SeqTypes
@@ -46,7 +49,7 @@ LogThreadLocal.withThreadLog(System.out, {
 
         //show seqtracks
         seqTracks.each {
-            println "${it.id}    ${it.project.name}    ${it.individual.mockPid}     ${it.sampleType.name}    ${it.seqType}    ${it.laneId}    ${it.run.name}    ${it.ilseId}    ${it.libraryPreparationKit}  ${it.seqPlatformGroup}"
+            println "${it.id}    ${it.project.name}    ${it.individual.mockPid}     ${it.sampleType.name}    ${it.seqType}    ${it.laneId}    ${it.run.name}    ${it.ilseId}    ${it.libraryPreparationKit}  ${it.seqPlatform}  (${it.seqPlatformGroup?.id})"
         }
         println seqTracks.size()
         println seqTracks*.sample.unique().size()
