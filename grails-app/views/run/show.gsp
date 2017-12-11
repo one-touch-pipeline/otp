@@ -8,15 +8,6 @@
 <body>
   <div class="body_grow">
     <h1><g:message code="run.show.title"/></h1>
-    <ul>
-        <g:if test="${nextRun}">
-            <li class="button"><g:link action="show" id="${nextRun.id}">next run</g:link></li>
-        </g:if>
-        <g:if test="${previousRun}">
-            <li class="button"><g:link action="show" id="${previousRun.id}">previous run</g:link></li>
-        </g:if>
-    </ul>
-
 
     <h1><g:message code="run.show.general"/></h1>
 

@@ -7,16 +7,6 @@
 </head>
 <body>
   <div class="body">
-
-    <ul>
-        <g:if test="${next}">
-            <li class="button"><g:link action="show" id="${next.id}"><g:message code="seqTrack.show.nextSeqTrack"/></g:link></li>
-        </g:if>
-        <g:if test="${previous}">
-            <li class="button"><g:link action="show" id="${previous.id}"><g:message code="seqTrack.show.previousSeqTrack"/></g:link></li>
-        </g:if>
-    </ul>
-
     <h1><g:message code="seqTrack.show.title"/></h1>
     <div class="tableBlock">
     <input type="hidden" name="seqTrackId" value="${seqTrack.id}"/>

@@ -42,8 +42,6 @@ class IndividualController {
 
         [
             ind: ind,
-            previous: individualService.previousIndividual(ind),
-            next: individualService.nextIndividual(ind),
             comment: ind.comment,
             typeDropDown: Individual.Type.values(),
             sampleTypeDropDown: individualService.getSampleTypeNames()

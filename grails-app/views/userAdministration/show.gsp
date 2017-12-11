@@ -51,12 +51,6 @@
             </div>
             <ul>
                 <li class="button"><g:link action="index"><g:message code="user.administration.backToOverview"/></g:link></li>
-                <g:if test="${next}">
-                    <li class="button"><g:link action="show" id="${next.id}"><g:message code="user.administration.nextUser"/></g:link></li>
-                </g:if>
-                <g:if test="${previous}">
-                    <li class="button"><g:link action="show" id="${previous.id}"><g:message code="user.administration.previousUser"/></g:link></li>
-                </g:if>
             </ul>
             <h1><g:message code="user.administration.ui.heading.user"/></h1>
             <div>

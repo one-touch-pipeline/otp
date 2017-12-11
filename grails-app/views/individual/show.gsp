@@ -12,14 +12,6 @@
     <div class="body_grow">
         <div id="processInfoBox">
             <h1><g:message code="individual.show.title"/></h1>
-            <div>
-                <g:if test="${next}">
-                    <div class="button" id="nextIndividualBtn"><g:link action="show" id="${next.id}"><g:message code="individual.show.nextIndividual"/></g:link></div>
-                </g:if>
-                <g:if test="${previous}">
-                    <div class="button" id ="prevIndividualBtn"><g:link action="show" id="${previous.id}"><g:message code="individual.show.previousIndividual"/></g:link></div>
-                </g:if>
-            </div>
         </div>
         <div id="individualCommentBox" class="commentBoxContainer">
             <div id="commentLabel">Comment:</div>

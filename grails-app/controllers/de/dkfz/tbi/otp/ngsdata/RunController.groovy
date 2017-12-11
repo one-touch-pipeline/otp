@@ -37,8 +37,6 @@ class RunController {
             metaDataFiles: runService.retrieveMetaDataFiles(run),
             seqTracks: runService.retrieveSequenceTrackInformation(run),
             errorFiles: runService.dataFilesWithError(run),
-            nextRun: runService.nextRun(run),
-            previousRun: runService.previousRun(run),
             fastqcLinks: fastqcResultsService.fastqcLinkMap(run),
         ]
     }

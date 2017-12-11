@@ -21,8 +21,6 @@ class SeqTrackController {
         return [
             seqTrack: seqTrack,
             jobExecutionPlans: jobExecutionPlans,
-            previous: seqTrackService.previousSeqTrack(seqTrack),
-            next: seqTrackService.nextSeqTrack(seqTrack)
         ]
     }
 
