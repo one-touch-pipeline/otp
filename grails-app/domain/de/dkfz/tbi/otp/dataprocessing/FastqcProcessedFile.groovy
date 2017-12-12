@@ -25,6 +25,7 @@ class FastqcProcessedFile implements Entity {
 
     static constraints = {
         dateFromFileSystem(nullable: true)
+        dataFile(unique: true)
     }
 
     static mapping = {
