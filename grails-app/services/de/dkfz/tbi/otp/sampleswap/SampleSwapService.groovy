@@ -1,13 +1,18 @@
 package de.dkfz.tbi.otp.sampleswap
 
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.ngsdata.*
 import grails.plugin.springsecurity.*
 import org.springframework.security.access.prepost.PreAuthorize
+import de.dkfz.tbi.otp.dataprocessing.*
+
+import java.nio.file.Files
 
 class SampleSwapService {
 
     SpringSecurityService springSecurityService
     SampleIdentifierService sampleIdentifierService
+    LsdfFilesService lsdfFilesService
 
 
     Map getPropertiesForSampleSwap(SeqTrack seqTrack) {
@@ -60,23 +65,83 @@ class SampleSwapService {
             it.sampleSwapInfos += validateAntibody(it)
             it.sampleSwapInfos += validateLibPrepKit(it)
             it.sampleSwapInfos += validateFiles(it)
+            if (it.sampleSwapInfos.size() > 0) {
+                it.sampleSwapInfos += checkFastq(it)
+            }
             it.sampleSwapInfos.sort { a, b ->
                 b.level.getValue() <=> a.level.getValue() ?: a.key <=> b.key
             }
 
         }
 
-        data.data << new SampleSwapData(validateProject(data) + (data.comment == "" ? [new SampleSwapInfo('', '', '', 'comment', 'Comment is not allowed to be empty.', SampleSwapLevel.ERROR)] : []))
+        data.data << new SampleSwapData(validateProject(data) + validateSample(data) + checkAnalysis(data) + (data.comment == "" ? [new SampleSwapInfo('', '', '', 'comment', 'Comment is not allowed to be empty.', SampleSwapLevel.ERROR)] : []))
 
         return data
     }
 
     void doSwap(Map data) {
+        throw new UnsupportedOperationException("This Method is not yet implemented")
         SwapInfo swapInfo = new SwapInfo(user: springSecurityService.getCurrentUser(), comment: data.comment, descriptionOfChanges: "")
         data.data.each { SampleSwapData it ->
             swapInfo.descriptionOfChanges += it.getSampleSwapInfosAsString()
             assert swapInfo.addToSeqTracks(SeqTrack.get(it.seqTrackId)).save(flush: true)
         }
+
+    }
+
+    private List checkAnalysis(Map data) {
+        List sampleSwapInfoData = []
+        List rows = []
+        List seqTrackIds = []
+        data.data.each {
+            if (it.sampleSwapInfos.size() > 0) {
+                SeqTrack seqTrack = SeqTrack.get(it.seqTrackId)
+                List<RoddyBamFile> roddyBamFiles = RoddyBamFile.createCriteria().list {
+                    seqTracks {
+                        eq("id", seqTrack.id)
+                    }
+                }
+                if (BamFilePairAnalysis.findAllBySampleType1BamFileInListOrSampleType2BamFileInList(roddyBamFiles, roddyBamFiles)) {
+                    seqTrackIds << seqTrack.id
+                    rows << it.rowNumber
+                }
+            }
+        }
+
+        if (rows) {
+            sampleSwapInfoData << new SampleSwapInfo('', '', seqTrackIds.join(","), 'analysis', "Analysis for rows '${rows.join("', '")}' will be deleted.", SampleSwapLevel.INFO)
+        }
+        return sampleSwapInfoData
+    }
+
+    private List checkFastq(SampleSwapData data) {
+        List output = []
+        data.newValues.files.eachWithIndex { k, v, index ->
+            DataFile dataFile = DataFile.get(k)
+            if (dataFile) {
+                File file = new File(lsdfFilesService.getFileFinalPath(dataFile))
+                if (file.exists()) {
+                    if (Files.isSymbolicLink(file.toPath())) {
+                        SeqType seqType = SeqType.findByDisplayNameAndLibraryLayout(data.newValues.seqType, data.newValues.libraryLayout)
+                        Project project = Project.findByName(data.newValues.project)
+                        Pipeline pipeline = Pipeline.Name.forSeqType(seqType)?.getPipeline()
+                        if (seqType && project && pipeline) {
+                            RoddyWorkflowConfig config = RoddyWorkflowConfig.getLatestForProject(project, seqType, pipeline)
+                            if (SeqType.getAllAlignableSeqTypes().contains(seqType) && project.alignmentDeciderBeanName != "" && project.alignmentDeciderBeanName != "noAlignmentDecider" && config) {
+                                output << new SampleSwapInfo(data.oldValues.files.get(k), v, data.seqTrackId, 'files', "'datafile ${index + 1}' with value '${v}' will be realigned and is linked and not copied, therefore make sure that it is not deleted by the GPCF.", SampleSwapLevel.WARNING, index + 1)
+                            } else {
+                                output << new SampleSwapInfo(data.oldValues.files.get(k), v, data.seqTrackId, 'files', "'datafile ${index + 1}' with value '${v}' will not be realigned and is linked and not copied, therefore the file has to be copied manually.", SampleSwapLevel.ERROR, index + 1)
+                            }
+                        } else {
+                            output << new SampleSwapInfo(data.oldValues.files.get(k), v, data.seqTrackId, 'files', "'datafile ${index + 1}' with value '${v}' will not be realigned and is linked and not copied, therefore the file has to be copied manually.", SampleSwapLevel.ERROR, index + 1)
+                        }
+                    }
+                } else {
+                    output << new SampleSwapInfo(data.oldValues.files.get(k), v, data.seqTrackId, 'files', "'datafile ${index + 1}' with value '${v}' does not exists.", SampleSwapLevel.ERROR, index + 1)
+                }
+            }
+        }
+        return output
     }
 
     private List validateProject(Map data) {
@@ -129,7 +194,7 @@ class SampleSwapService {
             }
         }
         if (individualDeleted) {
-            sampleSwapInfoData << new SampleSwapInfo('', '', '', 'individual', "'individual' '${data.individual.pid}' will be deleted", SampleSwapLevel.INFO)
+            sampleSwapInfoData << new SampleSwapInfo('', '', '', 'individual', "'individual' '${data.individual.pid}' will be deleted.", SampleSwapLevel.INFO)
         }
         return sampleSwapInfoData.sort { a, b ->
             b.level.getValue() <=> a.level.getValue() ?: a.key <=> b.key
@@ -149,6 +214,9 @@ class SampleSwapService {
                     output << new SampleSwapInfo(it.oldValue, it.newValue, it.seqTrackId, 'pid', "Column 'pid' of '${data.rowNumber}' can't change from '${it.oldValue}' to '${it.newValue}' because 'project' is '${data.newValues.project}' and the 'pid' doesn't conform to the naming scheme conventions.", SampleSwapLevel.WARNING)
                 }
             }
+            if (hasExternallyProcessedMergedBamFiles(SeqTrack.get(it.seqTrackId).individual)) {
+                output << new SampleSwapInfo(it.oldValue, it.newValue, it.seqTrackId, 'pid', "Column 'pid' of '${data.rowNumber}' with value '${it.oldValue}' can't be changed because there are 'ExternallyProcessedMergedBamFiles' registered in the OTP database.", SampleSwapLevel.ERROR)
+            }
             Individual individual = Individual.findByPid(it.newValue)
             if (individual) {
                 if (individual.project.name != data.newValues.project) {
@@ -163,13 +231,23 @@ class SampleSwapService {
             data.newValues.files.eachWithIndex { k, v, index ->
                 if (data.oldValues.files.get(k).startsWith(data.oldValues.pid)) {
                     if (!v.startsWith(data.newValues.pid)) {
-                        output << new SampleSwapInfo(data.oldValues.files.get(k), v, it.seqTrackId, 'files', "Column 'datafiles ${index+1}' of '${data.rowNumber}' with value '${v}' has to start with '${data.newValues.pid}'.", SampleSwapLevel.ERROR, index+1)
+                        output << new SampleSwapInfo(data.oldValues.files.get(k), v, it.seqTrackId, 'files', "Column 'datafile ${index + 1}' of '${data.rowNumber}' with value '${v}' has to start with '${data.newValues.pid}'.", SampleSwapLevel.ERROR, index + 1)
                         output << new SampleSwapInfo(data.oldValues.pid, data.newValues.pid, it.seqTrackId, 'pid', "", SampleSwapLevel.ERROR)
                     }
                 }
             }
         }
         return output
+    }
+
+    private boolean hasExternallyProcessedMergedBamFiles(Individual individual) {
+        return ExternallyProcessedMergedBamFile.createCriteria().list {
+            workPackage {
+                sample {
+                    eq('individual', individual)
+                }
+            }
+        }
     }
 
     private List validateSampleType(SampleSwapData data) {
@@ -183,6 +261,28 @@ class SampleSwapService {
         return output
     }
 
+    private List validateSample(Map data) {
+        List output = []
+        Map changedData = data.data.findAll { it.findByKey("sampleType") || it.findByKey("pid") }.groupBy {
+            [it.newValues.pid, it.newValues.sampleType]
+        }
+        changedData.each { k, v ->
+            Individual individual = Individual.findByPid(k[0])
+            SampleType sampleType = SampleType.findByName(k[1])
+            if (sampleType) {
+                if (individual) {
+                    Sample sample = Sample.findByIndividualAndSampleType(individual, sampleType)
+                    if (!sample) {
+                        output << new SampleSwapInfo('', '', v.first().seqTrackId, 'sample', "'sample' '${individual.pid} ${sampleType.displayName}' will be created", SampleSwapLevel.INFO)
+                    }
+                } else {
+                    output << new SampleSwapInfo('', '', v.first().seqTrackId, 'sample', "'sample' '${k[0]} ${sampleType.displayName}' will be created", SampleSwapLevel.INFO)
+                }
+            }
+        }
+        return output
+    }
+
     private List validateSeqType(SampleSwapData data) {
         List output = []
         data.findByKey("seqType").each { SampleSwapInfo it ->
@@ -190,6 +290,7 @@ class SampleSwapService {
             if (!seqType) {
                 output << new SampleSwapInfo(it.oldValue, it.newValue, it.seqTrackId, 'seqType', "Column 'seqType' of '${data.rowNumber}' with value '${it.newValue}' is not registered in the OTP database.", SampleSwapLevel.ERROR)
             }
+
             if (it.oldValue == "ChIP" && it.newValue != "ChIP" && data.oldValues.antibodyTarget == data.newValues.antibodyTarget && data.newValues.antibodyTarget != '') {
                 output << new SampleSwapInfo(data.oldValues.antibodyTarget, data.newValues.antibodyTarget, it.seqTrackId, 'antibodyTarget', "Column 'antibodyTarget' of '${data.rowNumber}' will be set from '${data.newValues.antibodyTarget}' to '' because 'seqType' was set from '${it.oldValue}' to '${it.newValue}'.", SampleSwapLevel.WARNING)
             }
@@ -257,7 +358,7 @@ class SampleSwapService {
             if (data.findByKey("pid").size() == 0) {
                 if (it.oldValue.startsWith(data.oldValues.pid)) {
                     if (!it.newValue.startsWith(data.newValues.pid)) {
-                        output << new SampleSwapInfo(it.oldValue, it.newValue, it.seqTrackId, 'files', "Column 'datafiles ${it.index}' of '${data.rowNumber}' with value '${it.newValue}' has to start with '${data.newValues.pid}'.", SampleSwapLevel.ERROR, it.index)
+                        output << new SampleSwapInfo(it.oldValue, it.newValue, it.seqTrackId, 'files', "Column 'datafile ${it.index}' of '${data.rowNumber}' with value '${it.newValue}' has to start with '${data.newValues.pid}'.", SampleSwapLevel.ERROR, it.index)
                     }
                 }
             }
@@ -334,6 +435,8 @@ class SampleSwapData {
     }
 
     void removeSampleSwapInfos(String key, List<SampleSwapLevel> levels) {
-        sampleSwapInfos.removeAll { it.key == key && levels.contains(it.level) }
+        sampleSwapInfos.removeAll {
+            it.key == key && levels.contains(it.level) && !it.description.contains("ExternallyProcessedMergedBamFiles")
+        }
     }
 }

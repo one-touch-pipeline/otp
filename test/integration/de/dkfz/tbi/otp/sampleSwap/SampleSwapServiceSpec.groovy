@@ -1,40 +1,67 @@
 package de.dkfz.tbi.otp.sampleSwap
 
+import de.dkfz.tbi.otp.dataprocessing.Pipeline
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.sampleswap.*
 import de.dkfz.tbi.otp.testing.*
 import de.dkfz.tbi.otp.utils.*
-import grails.plugin.springsecurity.SpringSecurityUtils
-import spock.lang.Specification
+import grails.plugin.springsecurity.*
+import org.junit.Rule
+import org.junit.rules.TemporaryFolder
+import spock.lang.*
+
+import java.nio.file.*
 
 class SampleSwapServiceSpec extends Specification implements UserAndRoles {
 
+    @Rule
+    TemporaryFolder temporaryFolder
+
     SampleSwapService sampleSwapService
+    File testFolder
     SeqTrack seqTrack1
     SeqTrack seqTrack11
     SeqTrack seqTrack12
+    SeqTrack seqTrack13
     SeqTrack seqTrack2
     SeqTrack seqTrack3
+    Realm realm
 
     def setup() {
         createUserAndRoles()
-        Project project1 = DomainFactory.createProject()
-        Project project2 = DomainFactory.createProject()
-        Project project3 = DomainFactory.createProject()
+        DomainFactory.createAllAlignableSeqTypes()
+        realm = DomainFactory.createRealm()
+        Project project1 = DomainFactory.createProject(realm: realm)
+        Project project2 = DomainFactory.createProject(realm: realm)
+        Project project3 = DomainFactory.createProject(realm: realm)
 
         Individual individual1 = DomainFactory.createIndividual(project: project1)
+        Individual individual13 = DomainFactory.createIndividual(project: project1)
         Individual individual2 = DomainFactory.createIndividual(project: project2)
         Individual individual3 = DomainFactory.createIndividual(project: project3)
 
-        Sample sample1 = DomainFactory.createSample(individual: individual1)
-        Sample sample2 = DomainFactory.createSample(individual: individual2)
-        Sample sample3 = DomainFactory.createSample(individual: individual3)
+        SampleType sampleType = DomainFactory.createSampleType()
+
+        Sample sample1 = DomainFactory.createSample(individual: individual1, sampleType: sampleType)
+        Sample sample13 = DomainFactory.createSample(individual: individual13, sampleType: sampleType)
+        Sample sample2 = DomainFactory.createSample(individual: individual2, sampleType: sampleType)
+        Sample sample3 = DomainFactory.createSample(individual: individual3, sampleType: sampleType)
 
         seqTrack1 = DomainFactory.createSeqTrack(sample: sample1)
         seqTrack11 = DomainFactory.createSeqTrack(sample: sample1)
         seqTrack12 = DomainFactory.createSeqTrack(sample: sample1)
+        seqTrack13 = DomainFactory.createSeqTrack(sample: sample13)
         seqTrack2 = DomainFactory.createSeqTrack(sample: sample2)
         seqTrack3 = DomainFactory.createSeqTrack(sample: sample3)
+
+        testFolder = temporaryFolder.newFolder("test")
+        temporaryFolder.newFolder("test", "initial")
+        temporaryFolder.newFolder("test", "linked")
+    }
+
+    def cleanup() {
+        sampleSwapService.lsdfFilesService = new LsdfFilesService()
     }
 
     void "test validateInput comment missing, fails"() {
@@ -278,7 +305,7 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
         SampleSwapData sampleSwapData = CollectionUtils.exactlyOneElement(data.data.findAll {
             ![sampleSwapData1, sampleSwapData11, sampleSwapData12].contains(it)
         })
-        sampleSwapData.sampleSwapInfos.size() == 1
+        sampleSwapData.sampleSwapInfos.size() == 2
         sampleSwapData.sampleSwapInfos.findAll { it.level == SampleSwapLevel.ERROR }.size() == 0
     }
 
@@ -311,7 +338,7 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
         SampleSwapData sampleSwapData = CollectionUtils.exactlyOneElement(data.data.findAll {
             ![sampleSwapData1, sampleSwapData11, sampleSwapData12].contains(it)
         })
-        sampleSwapData.sampleSwapInfos.size() == 1
+        sampleSwapData.sampleSwapInfos.size() == 2
         sampleSwapData.sampleSwapInfos.findAll { it.level == SampleSwapLevel.ERROR }.size() == 0
     }
 
@@ -342,7 +369,7 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
         SampleSwapData sampleSwapData = CollectionUtils.exactlyOneElement(data.data.findAll {
             ![sampleSwapData1, sampleSwapData11, sampleSwapData12].contains(it)
         })
-        sampleSwapData.sampleSwapInfos.size() == 1
+        sampleSwapData.sampleSwapInfos.size() == 2
         sampleSwapData.sampleSwapInfos.findAll { it.level == SampleSwapLevel.ERROR }.size() == 0
     }
 
@@ -375,7 +402,7 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
         SampleSwapData sampleSwapData = CollectionUtils.exactlyOneElement(data.data.findAll {
             ![sampleSwapData1, sampleSwapData11, sampleSwapData12].contains(it)
         })
-        sampleSwapData.sampleSwapInfos.size() == 1
+        sampleSwapData.sampleSwapInfos.size() == 2
         sampleSwapData.sampleSwapInfos.findAll { it.level == SampleSwapLevel.ERROR }.size() == 0
     }
 
@@ -408,7 +435,7 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
         SampleSwapData sampleSwapData = CollectionUtils.exactlyOneElement(data.data.findAll {
             ![sampleSwapData1, sampleSwapData11, sampleSwapData12].contains(it)
         })
-        sampleSwapData.sampleSwapInfos.size() == 4
+        sampleSwapData.sampleSwapInfos.size() == 7
         sampleSwapData.sampleSwapInfos.findAll { it.level == SampleSwapLevel.ERROR }.size() == 0
     }
 
@@ -474,7 +501,7 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
         SampleSwapData sampleSwapData = CollectionUtils.exactlyOneElement(data.data.findAll {
             ![sampleSwapData1, sampleSwapData11].contains(it)
         })
-        sampleSwapData.sampleSwapInfos.size() == 2
+        sampleSwapData.sampleSwapInfos.size() == 4
         sampleSwapData.sampleSwapInfos.findAll { it.level == SampleSwapLevel.ERROR }.size() == 0
     }
 
@@ -524,7 +551,7 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
         sampleSwapInfo.description == "Column 'pid' of '1' didn't change from '${seqTrack1.individual.pid}', but 'project' is 'DEEP' and the 'pid' doesn't conform to the naming scheme conventions."
     }
 
-    void "test validateInput with project deep and invalid pid,  shows warnings"() {
+    void "test validateInput with project deep and invalid pid, shows warnings"() {
         given:
         seqTrack1.individual.project = DomainFactory.createProject(name: "DEEP")
         seqTrack1.individual.pid = "41_Hf01_BlAd_CD_WGBS_S_1"
@@ -570,18 +597,19 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
 
     void "test validateInput with project hipo and invalid datafile name, fails"() {
         given:
-        seqTrack1.individual.project = DomainFactory.createProject(name: "hipo059")
+        File validFileName = temporaryFolder.newFile("test/linked/H059-ABCDEF_filename")
+
+        seqTrack1.individual.project = DomainFactory.createProject(name: "hipo059", realm: realm)
         seqTrack1.individual.pid = "H059-ABCDEF"
-        DataFile dataFile1 = DomainFactory.createDataFile(seqTrack: seqTrack1, fileName: "H059-ABCDEF_filename")
-        SampleSwapData sampleSwapData1 = createSampleSwapData(seqTrack1, [files: ["${dataFile1.id}": "invalidFileName"]], 1)
+        DataFile dataFile = DomainFactory.createDataFile(seqTrack: seqTrack1, fileName: validFileName.name, initialDirectory: "${testFolder.absolutePath}/linked")
+        SampleSwapData sampleSwapData1 = createSampleSwapData(seqTrack1, [files: ["${dataFile.id}": "invalidFileName"]], 1)
 
-        seqTrack11.individual.pid = "H059-ABCDEF"
-        DomainFactory.createDataFile(seqTrack: seqTrack11, fileName: "H059-ABCDEF_filename")
-        SampleSwapData sampleSwapData2 = createSampleSwapData(seqTrack11, [pid: "H059-ABCDEG", project: "hipo059"], 2)
-
+        sampleSwapService.lsdfFilesService = Mock(LsdfFilesService) {
+            1 * getFileFinalPath(_) >> "${validFileName.absolutePath}"
+        }
 
         Map data = [
-                data      : [sampleSwapData1, sampleSwapData2],
+                data      : [sampleSwapData1],
                 comment   : "comment",
                 individual: seqTrack1.individual,
         ]
@@ -596,25 +624,22 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
         SampleSwapInfo sampleSwapInfo1 = CollectionUtils.exactlyOneElement(sampleSwapData1.sampleSwapInfos.findAll {
             it.level == SampleSwapLevel.ERROR
         })
-        sampleSwapInfo1.description == "Column 'datafiles 1' of '1' with value 'invalidFileName' has to start with 'H059-ABCDEF'."
-
-        sampleSwapData2.sampleSwapInfos.size() == 3
-
-        Set sampleSwapInfos = sampleSwapData2.sampleSwapInfos.findAll { it.level == SampleSwapLevel.ERROR }
-        sampleSwapInfos.size() == 2
-        sampleSwapInfos*.description ==
-                [
-                        "Column 'datafiles 1' of '2' with value 'H059-ABCDEF_filename' has to start with 'H059-ABCDEG'.",
-                        ""
-                ]
+        sampleSwapInfo1.description == "Column 'datafile 1' of '1' with value 'invalidFileName' has to start with 'H059-ABCDEF'."
     }
 
     void "test validateInput with project hipo and valid datafile name, succeeds"() {
         given:
-        seqTrack1.individual.project = DomainFactory.createProject(name: "hipo059")
+        File invalidFileName = temporaryFolder.newFile("test/linked/invalid_filename")
+
+        seqTrack1.individual.project = DomainFactory.createProject(name: "hipo059", realm: realm)
         seqTrack1.individual.pid = "H059-ABCDEF"
-        DataFile dataFile = DomainFactory.createDataFile(seqTrack: seqTrack1, fileName: "H059-ABCDEF_filename")
+        DataFile dataFile = DomainFactory.createDataFile(seqTrack: seqTrack1, fileName: invalidFileName.name, initialDirectory: "${testFolder.absolutePath}/linked")
         SampleSwapData sampleSwapData = createSampleSwapData(seqTrack1, [pid: "H059-ABCDEG", files: ["${dataFile.id}": "H059-ABCDEG_filename"]], 1)
+
+        sampleSwapService.lsdfFilesService = Mock(LsdfFilesService) {
+            1 * getFileFinalPath(_) >> "${invalidFileName.absolutePath}"
+        }
+
         Map data = [
                 data      : [sampleSwapData],
                 comment   : "comment",
@@ -745,19 +770,16 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
         })
         sampleSwapInfo2.description == "Column 'libPrepKit' of '2' must be filled in because 'seqType' is '${seqType.name}'."
     }
+
     void "test validateInput with SeqType EXOME, WGBS and RNA no libPrepKit, fails"() {
         given:
-        SeqType exome = DomainFactory.createExomeSeqType()
-        SeqType wgbs = DomainFactory.createWholeGenomeBisulfiteSeqType()
-        SeqType rna = DomainFactory.createRnaPairedSeqType()
-
-        SampleSwapData sampleSwapData1 = createSampleSwapData(seqTrack1, [seqType: exome.displayName], 1)
-        SampleSwapData sampleSwapData11 = createSampleSwapData(seqTrack11, [seqType: wgbs.displayName], 2)
-        SampleSwapData sampleSwapData12 = createSampleSwapData(seqTrack12, [seqType: rna.displayName], 3)
+        SampleSwapData sampleSwapData1 = createSampleSwapData(seqTrack1, [seqType: SeqType.exomePairedSeqType.displayName], 1)
+        SampleSwapData sampleSwapData11 = createSampleSwapData(seqTrack11, [seqType: SeqType.wholeGenomeBisulfitePairedSeqType.displayName], 2)
+        SampleSwapData sampleSwapData12 = createSampleSwapData(seqTrack12, [seqType: SeqType.rnaPairedSeqType.displayName], 3)
 
 
         Map data = [
-                data      : [sampleSwapData1, sampleSwapData11,sampleSwapData12],
+                data      : [sampleSwapData1, sampleSwapData11, sampleSwapData12],
                 comment   : "comment",
                 individual: seqTrack1.individual,
         ]
@@ -811,6 +833,215 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
         ]
     }
 
+    void "test validateInput with new Individual SampleType combination, shows info"() {
+        given:
+        Individual individual = DomainFactory.createIndividual(project: seqTrack1.project)
+        SampleType sampleType = DomainFactory.createSampleType()
+        SampleSwapData sampleSwapData1 = createSampleSwapData(seqTrack1, [pid: individual.pid], 1)
+        SampleSwapData sampleSwapData11 = createSampleSwapData(seqTrack11, [sampleType: sampleType.displayName], 2)
+
+        Map data = [
+                data      : [sampleSwapData1, sampleSwapData11],
+                comment   : "comment",
+                individual: seqTrack1.individual,
+        ]
+
+        when:
+        SpringSecurityUtils.doWithAuth("admin") {
+            sampleSwapService.validateInput(data)
+        }
+
+        then:
+        SampleSwapData sampleSwapData = CollectionUtils.exactlyOneElement(data.data.findAll {
+            ![sampleSwapData1, sampleSwapData11].contains(it)
+        })
+        sampleSwapData.sampleSwapInfos.size() == 2
+        sampleSwapData.sampleSwapInfos*.description == [
+                "'sample' '${individual.pid} ${seqTrack1.sampleType.displayName}' will be created",
+                "'sample' '${seqTrack11.individual.pid} ${sampleType.displayName}' will be created",
+        ]
+    }
+
+    void "test validateInput with pids that have ExternallyProcessedMergedBamFiles registered to them, fails"() {
+        given:
+        DomainFactory.createExternallyProcessedMergedBamFile(workPackage:
+                DomainFactory.createExternalMergingWorkPackage(sample: seqTrack1.sample))
+
+        SampleSwapData sampleSwapData1 = createSampleSwapData(seqTrack1, [pid: seqTrack13.individual.pid], 1)
+
+        Map data = [
+                data      : [sampleSwapData1],
+                comment   : "comment",
+                individual: seqTrack1.individual,
+        ]
+
+        when:
+        SpringSecurityUtils.doWithAuth("admin") {
+            sampleSwapService.validateInput(data)
+        }
+
+        then:
+        sampleSwapData1.sampleSwapInfos.size() == 2
+        SampleSwapInfo sampleSwapInfo1 = CollectionUtils.exactlyOneElement(sampleSwapData1.sampleSwapInfos.findAll {
+            it.level == SampleSwapLevel.ERROR
+        })
+        sampleSwapInfo1.description == "Column 'pid' of '1' with value '${seqTrack1.individual.pid}' can't be changed because there are 'ExternallyProcessedMergedBamFiles' registered in the OTP database."
+    }
+
+    void "test validateInput when datafile is linked and will be realigned, shows warning"() {
+        given:
+        seqTrack1.seqType = SeqType.getExomePairedSeqType()
+        DomainFactory.createRoddyWorkflowConfig(seqType: seqTrack1.seqType, project: seqTrack1.individual.project, individual: null, pipeline: DomainFactory.createPanCanPipeline())
+        File initialFile = temporaryFolder.newFile("test/initial/linkedFileName")
+        DataFile dataFile1 = DomainFactory.createDataFile(seqTrack: seqTrack1, fileName: initialFile.name, initialDirectory: "${testFolder.absolutePath}/initial")
+        Files.createSymbolicLink(new File("${testFolder.absolutePath}/linked/linkedFileName").toPath(), initialFile.toPath())
+
+        sampleSwapService.lsdfFilesService = Mock(LsdfFilesService) {
+            1 * getFileFinalPath(dataFile1) >> "${testFolder.absolutePath}/linked/linkedFileName"
+        }
+
+        SampleSwapData sampleSwapData1 = createSampleSwapData(seqTrack1, [sampleType: DomainFactory.createSampleType().displayName], 1)
+
+        Map data = [
+                data      : [sampleSwapData1],
+                comment   : "comment",
+                individual: seqTrack1.individual,
+        ]
+
+        when:
+        SpringSecurityUtils.doWithAuth("admin") {
+            sampleSwapService.validateInput(data)
+        }
+
+        then:
+        sampleSwapData1.sampleSwapInfos.size() == 2
+        SampleSwapInfo sampleSwapInfo1 = CollectionUtils.exactlyOneElement(sampleSwapData1.sampleSwapInfos.findAll {
+            it.level == SampleSwapLevel.WARNING
+        })
+        sampleSwapInfo1.description == "'datafile 1' with value 'linkedFileName' will be realigned and is linked and not copied, therefore make sure that it is not deleted by the GPCF."
+    }
+
+    void "test validateInput when datafile is linked and will not be realigned, fails"() {
+        given:
+        seqTrack1.seqType = SeqType.getExomePairedSeqType()
+        DomainFactory.createPanCanPipeline()
+        File initialFile = temporaryFolder.newFile("test/initial/linkedFileName")
+        DataFile dataFile1 = DomainFactory.createDataFile(seqTrack: seqTrack1, fileName: initialFile.name, initialDirectory: "${testFolder.absolutePath}/initial")
+        Files.createSymbolicLink(new File("${testFolder.absolutePath}/linked/linkedFileName").toPath(), initialFile.toPath())
+
+        sampleSwapService.lsdfFilesService = Mock(LsdfFilesService) {
+            1 * getFileFinalPath(dataFile1) >> "${testFolder.absolutePath}/linked/linkedFileName"
+        }
+        SampleSwapData sampleSwapData1 = createSampleSwapData(seqTrack1, [sampleType: DomainFactory.createSampleType().displayName], 1)
+
+        Map data = [
+                data      : [sampleSwapData1],
+                comment   : "comment",
+                individual: seqTrack1.individual,
+        ]
+
+        when:
+        SpringSecurityUtils.doWithAuth("admin") {
+            sampleSwapService.validateInput(data)
+        }
+
+        then:
+        sampleSwapData1.sampleSwapInfos.size() == 2
+        SampleSwapInfo sampleSwapInfo1 = CollectionUtils.exactlyOneElement(sampleSwapData1.sampleSwapInfos.findAll {
+            it.level == SampleSwapLevel.ERROR
+        })
+        sampleSwapInfo1.description == "'datafile 1' with value 'linkedFileName' will not be realigned and is linked and not copied, therefore the file has to be copied manually."
+    }
+
+    void "test validateInput when datafile is missing, fails"() {
+        given:
+        File initialFile = temporaryFolder.newFile("test/initial/deletedFileName")
+        DataFile dataFile1 = DomainFactory.createDataFile(seqTrack: seqTrack1, fileName: initialFile.name, initialDirectory: "${testFolder.absolutePath}/initial")
+        Files.createSymbolicLink(new File("${testFolder.absolutePath}/linked/deletedFileName").toPath(), initialFile.toPath())
+
+        sampleSwapService.lsdfFilesService = Mock(LsdfFilesService) {
+            1 * getFileFinalPath(dataFile1) >> "${testFolder.absolutePath}/linked/deletedFileName"
+        }
+
+        initialFile.delete()
+
+        SampleSwapData sampleSwapData1 = createSampleSwapData(seqTrack1, [sampleType: DomainFactory.createSampleType().displayName], 1)
+
+        Map data = [
+                data      : [sampleSwapData1],
+                comment   : "comment",
+                individual: seqTrack1.individual,
+        ]
+
+        when:
+        SpringSecurityUtils.doWithAuth("admin") {
+            sampleSwapService.validateInput(data)
+        }
+
+        then:
+        sampleSwapData1.sampleSwapInfos.size() == 2
+
+        SampleSwapInfo sampleSwapInfo1 = CollectionUtils.exactlyOneElement(sampleSwapData1.sampleSwapInfos.findAll {
+            it.level == SampleSwapLevel.ERROR
+        })
+        sampleSwapInfo1.description == "'datafile 1' with value 'deletedFileName' does not exists."
+    }
+
+    void "test validateInput when datafile is copied, succeeds"() {
+        given:
+        File initialFile = temporaryFolder.newFile("test/initial/fileName")
+        DataFile dataFile1 = DomainFactory.createDataFile(seqTrack: seqTrack1, fileName: initialFile.name, initialDirectory: "${testFolder.absolutePath}/initial")
+        Files.copy(initialFile.toPath(), new File("${testFolder.absolutePath}/linked/fileName").toPath())
+
+        sampleSwapService.lsdfFilesService = Mock(LsdfFilesService) {
+            1 * getFileFinalPath(dataFile1) >> "${testFolder.absolutePath}/linked/fileName"
+        }
+
+        SampleSwapData sampleSwapData1 = createSampleSwapData(seqTrack1, [seqType: SeqType.exomePairedSeqType.displayName, libPrepKit: DomainFactory.createLibraryPreparationKit().name], 1)
+
+        Map data = [
+                data      : [sampleSwapData1],
+                comment   : "comment",
+                individual: seqTrack1.individual,
+        ]
+
+        when:
+        SpringSecurityUtils.doWithAuth("admin") {
+            sampleSwapService.validateInput(data)
+        }
+
+        then:
+        sampleSwapData1.sampleSwapInfos.size() == 2
+        sampleSwapData1.sampleSwapInfos.findAll { it.level == SampleSwapLevel.ERROR }.size() == 0
+    }
+
+    void "test validateInput with analysis, shows info"() {
+        given:
+        DomainFactory.createIndelCallingInstanceWithRoddyBamFiles([:], [seqTracks: [seqTrack1, seqTrack11]])
+        SampleSwapData sampleSwapData1 = createSampleSwapData(seqTrack1, [seqType: DomainFactory.createSeqType().displayName], 1)
+        SampleSwapData sampleSwapData11 = createSampleSwapData(seqTrack11, [seqType: DomainFactory.createSeqType().displayName], 2)
+        Map data = [
+                data      : [sampleSwapData1, sampleSwapData11],
+                comment   : "comment",
+                individual: seqTrack1.individual,
+        ]
+
+        when:
+        SpringSecurityUtils.doWithAuth("admin") {
+            sampleSwapService.validateInput(data)
+        }
+
+        then:
+        SampleSwapData sampleSwapData = CollectionUtils.exactlyOneElement(data.data.findAll {
+            ![sampleSwapData1, sampleSwapData11].contains(it)
+        })
+        sampleSwapData.sampleSwapInfos.size() == 1
+        SampleSwapInfo sampleSwapInfo = CollectionUtils.exactlyOneElement(sampleSwapData.sampleSwapInfos.findAll {
+            it.level == SampleSwapLevel.INFO
+        })
+
+        sampleSwapInfo.description == "Analysis for rows '1', '2' will be deleted."
+    }
 
     private SampleSwapData createSampleSwapData(SeqTrack seqTrack, Map changedData = [:], int rowNumber) {
         return new SampleSwapData(sampleSwapService.getPropertiesForSampleSwap(seqTrack), sampleSwapService.getPropertiesForSampleSwap(seqTrack) + changedData, Long.toString(seqTrack.id), rowNumber)

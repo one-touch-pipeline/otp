@@ -9,9 +9,9 @@ import java.util.regex.*
 class Hipo2SampleIdentifierParser implements SampleIdentifierParser {
 
     static String REGEX = /^(?<pid>${PIDREGEX})-(?<tissueType>[${HipoTissueType.values()*.key.join('')}])(?<tissueNumber>[0-9]{1,2})-(?<analyte>[DRPAWYTBMLSE][0-9]|[0-9][CGH][0-9]{2})$/
-    private final static PIDREGEX = "(?<project>K[0-9]{2}[A-Z])-[A-Z0-9]{4}([A-Z0-9]{2})?"
+    private final static String PIDREGEX = "(?<project>[KST][0-9]{2}[A-Z])-[A-Z0-9]{4}([A-Z0-9]{2})?"
     public boolean isForProject(String projectName) {
-        return projectName.startsWith("hipo_K")
+        return projectName.matches("hipo_[KST]")
     }
 
     public boolean tryParsePid(String pid) {

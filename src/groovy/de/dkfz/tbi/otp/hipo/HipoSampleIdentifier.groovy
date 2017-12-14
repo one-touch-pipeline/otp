@@ -12,10 +12,10 @@ import org.springframework.stereotype.Component
 class HipoSampleIdentifierParser implements SampleIdentifierParser {
 
     private final static String REGEX =/^(${PIDREGEX})-([${HipoTissueType.values()*.key.join("")}])(\d{1,2})-(([DRPACWY])(\d{1,2}))$/
-    private final static String PIDREGEX = "([A-JL-Z])(\\d\\d\\w)-(?:\\w\\w)?\\w\\w\\w(\\w)"
+    private final static String PIDREGEX = "([A-JL-RU-Z])(\\d\\d\\w)-(?:\\w\\w)?\\w\\w\\w(\\w)"
 
     public boolean isForProject(String projectName) {
-        return projectName.startsWith("hipo") && !projectName.startsWith("hipo_K")
+        return projectName.matches("hipo_[A-JL-RU-Z]")
     }
 
     public boolean tryParsePid(String pid) {
