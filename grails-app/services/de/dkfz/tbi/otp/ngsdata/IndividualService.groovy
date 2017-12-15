@@ -420,7 +420,7 @@ class IndividualService {
     private String createCommentString(String operation, Map oldProperties, Map newProperties, Date date, String additionalInformation) {
         Map diff = oldProperties - newProperties
 
-        String output = "== ${operation} - ${date.format("yyyy-MM-dd hh:mm")} ==\n"
+        String output = "== ${operation} - ${date.format("yyyy-MM-dd HH:mm")} ==\n"
         if(additionalInformation) {
             output += "${additionalInformation}\n"
         }

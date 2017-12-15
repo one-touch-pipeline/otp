@@ -42,7 +42,7 @@ class SophiaController {
 
     JSON dataTableResults(ResultTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()
-        SimpleDateFormat sdf = new SimpleDateFormat('yyyy-MM-dd hh:mm')
+        SimpleDateFormat sdf = new SimpleDateFormat('yyyy-MM-dd HH:mm')
         List results = analysisService.getCallingInstancesForProject(SophiaInstance, cmd.project.name)
         List data = results.collect { Map properties ->
             SophiaQc qc = SophiaQc.findBySophiaInstance(SophiaInstance.get(properties.instanceId as long))

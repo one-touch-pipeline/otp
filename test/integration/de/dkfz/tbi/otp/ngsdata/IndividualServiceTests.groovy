@@ -1132,7 +1132,7 @@ class IndividualServiceTests extends AbstractIntegrationTest {
         Map mapB = [a: 1, b: 3, c: 4]
         Date date = new Date()
 
-        assert """== operation - ${date.format("yyyy-MM-dd hh:mm")} ==
+        assert """== operation - ${date.format("yyyy-MM-dd HH:mm")} ==
 Old:
 b: 2
 c: 3
@@ -1150,7 +1150,7 @@ c: 4
         Date date = new Date()
         String additionalInformation = "additional information"
 
-        assert """== operation - ${date.format("yyyy-MM-dd hh:mm")} ==
+        assert """== operation - ${date.format("yyyy-MM-dd HH:mm")} ==
 ${additionalInformation}
 Old:
 a: 1
@@ -1171,7 +1171,7 @@ a: 2
             individualService.createComment(operation, mapOld, mapNew)
         }
 
-        assert """== operation - ${new Date().format("yyyy-MM-dd hh:mm")} ==
+        assert """== operation - ${new Date().format("yyyy-MM-dd HH:mm")} ==
 Old:
 individual: ${indOld}
 New:

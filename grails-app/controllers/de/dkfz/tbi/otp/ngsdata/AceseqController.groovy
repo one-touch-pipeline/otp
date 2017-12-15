@@ -42,7 +42,7 @@ class AceseqController {
 
     JSON dataTableResults(ResultTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()
-        SimpleDateFormat sdf = new SimpleDateFormat('yyyy-MM-dd hh:mm')
+        SimpleDateFormat sdf = new SimpleDateFormat('yyyy-MM-dd HH:mm')
         List results = analysisService.getCallingInstancesForProject(AceseqInstance, cmd.project.name)
         List data = results.collect { Map properties ->
             AceseqQc qc = AceseqQc.findByAceseqInstanceAndNumber(AceseqInstance.get(properties.instanceId as long), 1)

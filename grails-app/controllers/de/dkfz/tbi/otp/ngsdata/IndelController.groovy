@@ -74,7 +74,7 @@ class IndelController {
 
     JSON dataTableResults(ResultTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()
-        SimpleDateFormat sdf = new SimpleDateFormat('yyyy-MM-dd hh:mm')
+        SimpleDateFormat sdf = new SimpleDateFormat('yyyy-MM-dd HH:mm')
         List results = analysisService.getCallingInstancesForProject(IndelCallingInstance, cmd.project.name)
         List data = results.collect { Map properties ->
             IndelQualityControl qc = IndelQualityControl.findByIndelCallingInstance(IndelCallingInstance.get(properties.instanceId as long))
