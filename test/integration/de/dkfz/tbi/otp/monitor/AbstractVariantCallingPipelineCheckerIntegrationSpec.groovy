@@ -139,6 +139,60 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
         TestCase.assertContainSame(expected, returnValue)
     }
 
+    void "toLittleCoverageForAnalysis, when some sample pairs have bam files with to less coverage, return this samplePairs"() {
+        given:
+        AbstractVariantCallingPipelineChecker pipelineChecker = createVariantCallingPipelineChecker()
+        DomainFactory.createProcessingOptionLazy(
+                name: ProcessingOption.OptionName.PIPELINE_MIN_COVERAGE,
+                type: pipelineChecker.pipelineType.toString(),
+                value: '30.0',
+        )
+
+        List<SamplePair> expected = []
+        List<SamplePair> samplePairs = [
+                [
+                        fine: true,
+                        coverage1: 50.0,
+                        coverage2: 50.0,
+                ],
+                [
+                        fine: false,
+                        coverage1: 10.0,
+                        coverage2: 50.0,
+                ],
+                [
+                        fine: false,
+                        coverage1: 50.0,
+                        coverage2: 10.0,
+                ],
+                [
+                        fine: false,
+                        coverage1: 10.0,
+                        coverage2: 10.0,
+                ],
+        ].collect {
+            SamplePair samplePair = DomainFactory.createSamplePair()
+            DomainFactory.createProcessedMergedBamFile([
+                    workPackage: samplePair.mergingWorkPackage1,
+                    coverage   : it.coverage1,
+            ])
+            DomainFactory.createProcessedMergedBamFile([
+                    workPackage: samplePair.mergingWorkPackage2,
+                    coverage   : it.coverage2,
+            ])
+            if (!it.fine) {
+                expected << samplePair
+            }
+            return samplePair
+        }
+
+        when:
+        List returnValue = pipelineChecker.toLittleCoverageForAnalysis(samplePairs)
+
+        then:
+        TestCase.assertContainSame(expected, returnValue*.samplePair)
+    }
+
 
     void "samplePairsWithoutAnalysis, when some sample pairs are triggered for analysis and some not, return the not triggered SamplePairs"() {
         given:
@@ -250,7 +304,19 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
         MonitorOutputCollector output = Mock(MonitorOutputCollector)
         AbstractVariantCallingPipelineChecker pipelineChecker = Spy(createVariantCallingPipelineChecker().class)
 
+        DomainFactory.createProcessingOptionLazy(
+                name: ProcessingOption.OptionName.PIPELINE_MIN_COVERAGE,
+                type: pipelineChecker.pipelineType.toString(),
+                value: '20.0',
+        )
+
         String processingStateMember = pipelineChecker.getProcessingStateMember()
+
+        DomainFactory.createProcessingOptionLazy(
+                name: ProcessingOption.OptionName.PIPELINE_MIN_COVERAGE,
+                type: pipelineChecker.pipelineType.toString(),
+                value: '30.0',
+        )
 
         //sample pair with needs processing but no config
         SamplePair samplePairWithUnsupportedSeqType = createSamplePair(
@@ -276,6 +342,21 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
         BamFilePairAnalysis oldRunningInstance = createAnalysis([
                 samplePair: samplePairWithOldRunningInstance,
         ])
+
+        //sample pair with to less coverage
+        SamplePair samplePairToLittleCoverage = createSamplePair([
+                (processingStateMember): SamplePair.ProcessingStatus.NEEDS_PROCESSING,
+        ])
+        createConfig(samplePairToLittleCoverage)
+        DomainFactory.createRoddyBamFile([
+                workPackage: samplePairToLittleCoverage.mergingWorkPackage1,
+                coverage   : 10,
+        ])
+        DomainFactory.createRoddyBamFile([
+                workPackage: samplePairToLittleCoverage.mergingWorkPackage2,
+                coverage   : 10,
+        ])
+        AbstractVariantCallingPipelineChecker.ToLittleCoverageSamplePair toLittleCoverageSamplePair = new AbstractVariantCallingPipelineChecker.ToLittleCoverageSamplePair(samplePairToLittleCoverage, 10, 10, 30)
 
         //sample pair waiting for start
         SamplePair samplePairWaitingForStart = createSamplePair([
@@ -332,6 +413,7 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
                 samplePairWithUnsupportedSeqType,
                 samplePairWithoutConfig,
                 samplePairWithOldRunningInstance,
+                samplePairToLittleCoverage,
                 samplePairWaitingForStart,
                 samplePairNotTriggered,
                 samplePairWithWithdrawnRunningAnalysis,
@@ -364,6 +446,10 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
         then:
         1 * pipelineChecker.analysisAlreadyRunningForSamplePairAndPipeline(_)
         1 * output.showRunningWithHeader(AbstractVariantCallingPipelineChecker.HEADER_OLD_INSTANCE_RUNNING, _, [oldRunningInstance])
+
+        then:
+        1 * pipelineChecker.toLittleCoverageForAnalysis(_)
+        1 * output.showList(AbstractVariantCallingPipelineChecker.HEADER_TOO_LITTLE_COVERAGE_FOR_ANALYSIS, [toLittleCoverageSamplePair])
 
         then:
         1 * output.showWaiting([samplePairWaitingForStart], _)

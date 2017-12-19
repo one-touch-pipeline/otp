@@ -18,6 +18,7 @@ The following code allows to show the processing state for
 *** a config is available
 *** the last bam file is not withdrawn
 *** the last bam file is in processing or has reached the threshold
+*** the bam files has reached the min coverage for the analysis
 *** depending analysis is finished
 
 
@@ -641,6 +642,7 @@ if (allProcessed) {
     //collect waiting SamplePairs
 
     def needsProcessing = { String property, Pipeline.Type type ->
+        Double minCoverage = ProcessingOptionService.findOption(ProcessingOption.OptionName.PIPELINE_MIN_COVERAGE, type.toString(),null) as Double ?: 0.0
         return """
                 (
                     samplePair.${property} = '${SamplePair.ProcessingStatus.NEEDS_PROCESSING}'
@@ -655,39 +657,40 @@ if (allProcessed) {
                             and config.pipeline.type = '${type}'
                             and config.obsoleteDate is null
                     )
+                    and bamFile1.coverage >= ${minCoverage}
+                    and bamFile2.coverage >= ${minCoverage}
                 )"""
     }
 
-    def bamFileInProgressingOrThresouldReached = { String number ->
+    def connectBamFile = {String number ->
         return """
-            and exists (
-                from
-                    AbstractMergedBamFile bamFile
-                    join bamFile.workPackage mwp
-                where
-                    mwp = samplePair.mergingWorkPackage${number}
-                    and bamFile.withdrawn = false
-                    and bamFile.id = (select max( maxBamFile.id) from AbstractMergedBamFile maxBamFile where maxBamFile.workPackage = bamFile.workPackage)
-                    and (
-                        bamFile.fileOperationStatus <> '${AbstractMergedBamFile.FileOperationStatus.PROCESSED}'
-                        or exists (
-                            from
-                                ProcessingThresholds pt
-                            where
-                                pt.project = mwp.sample.individual.project
-                                and pt.seqType = mwp.seqType
-                                and pt.sampleType = mwp.sample.sampleType
-                                and (pt.coverage is null OR pt.coverage <= bamFile.coverage)
-                                and (pt.numberOfLanes is null OR pt.numberOfLanes <= bamFile.numberOfMergedLanes)
-                        )
-                    )
+            mwp${number} = samplePair.mergingWorkPackage${number}
+            and bamFile${number}.withdrawn = false
+            and bamFile${number}.id = (select max( maxBamFile.id) from AbstractMergedBamFile maxBamFile where maxBamFile.workPackage = bamFile${number}.workPackage)
+            and (
+                bamFile${number}.fileOperationStatus <> '${AbstractMergedBamFile.FileOperationStatus.PROCESSED}'
+                or exists (
+                    from
+                        ProcessingThresholds pt
+                    where
+                        pt.project = mwp${number}.sample.individual.project
+                        and pt.seqType = mwp${number}.seqType
+                        and pt.sampleType = mwp${number}.sample.sampleType
+                        and (pt.coverage is null OR pt.coverage <= bamFile${number}.coverage)
+                        and (pt.numberOfLanes is null OR pt.numberOfLanes <= bamFile${number}.numberOfMergedLanes)
+                )
             )
         """
     }
 
     SamplePair.executeQuery("""
         select samplePair
-        from SamplePair samplePair
+        from
+            SamplePair samplePair,
+            AbstractMergedBamFile bamFile1
+                join bamFile1.workPackage mwp1,
+            AbstractMergedBamFile bamFile2
+                join bamFile2.workPackage mwp2
         where (
             ${needsProcessing('snvProcessingStatus', Pipeline.Type.SNV)}
             or ${needsProcessing('indelProcessingStatus', Pipeline.Type.INDEL)}
@@ -705,8 +708,8 @@ if (allProcessed) {
                 )
             )
         )
-        ${bamFileInProgressingOrThresouldReached('1')}
-        ${bamFileInProgressingOrThresouldReached('2')}
+        and ${connectBamFile('1')}
+        and ${connectBamFile('2')}
     """).each { SamplePair samplePair ->
         [samplePair.mergingWorkPackage1, samplePair.mergingWorkPackage2].each { MergingWorkPackage mergingWorkPackage ->
             seqTracks.addAll(mergingWorkPackage.seqTracks)

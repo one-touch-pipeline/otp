@@ -4,12 +4,14 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
+import groovy.transform.*
 
 abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<SamplePair> {
 
 
     static final String HEADER_NO_CONFIG = 'For the following project seqtype combination no config is defined'
     static final String HEADER_DISABLED_SAMPLE_PAIR = 'The following samplePairs are disabled for processing'
+    static final String HEADER_TOO_LITTLE_COVERAGE_FOR_ANALYSIS = 'The following samplePairs have not enough coverage to run this analysis'
     static final String HEADER_OLD_INSTANCE_RUNNING = 'old instance running'
     static final String HEADER_WITHDRAWN_ANALYSIS_RUNNING = 'The following Analysis are withdrawn and running'
     static final String HEADER_WITHDRAWN_ANALYSIS_FINISHED = 'The following Analysis are withdrawn and finished'
@@ -60,6 +62,11 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
             output.showRunningWithHeader(HEADER_OLD_INSTANCE_RUNNING, getWorkflowName(), alreadyRunning)
 
             List<SamplePair> waiting = needsProcessing - alreadyRunning*.samplePair
+
+            List<ToLittleCoverageSamplePair> toLittleCoverageSamplePairs = toLittleCoverageForAnalysis(waiting)
+            output.showList(HEADER_TOO_LITTLE_COVERAGE_FOR_ANALYSIS, toLittleCoverageSamplePairs)
+
+            waiting = waiting - toLittleCoverageSamplePairs*.samplePair
             output.showWaiting(waiting, displayWaitingWithInfos)
         }
 
@@ -70,13 +77,16 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
 
             List<BamFilePairAnalysis> analysis = lastAnalysisForSamplePair(noProcessingNeeded)
 
-            Map<AnalysisProcessingStates, Map<Boolean, BamFilePairAnalysis>> analysisStateMap = analysis.groupBy([
-                    { BamFilePairAnalysis it ->
-                        it.processingState
-                    }, { BamFilePairAnalysis it ->
-                it.isWithdrawn()
-                    },
-            ])
+            Map<AnalysisProcessingStates, Map<Boolean, BamFilePairAnalysis>> analysisStateMap = analysis.groupBy(
+                    [
+                            { BamFilePairAnalysis it ->
+                                it.processingState
+                            },
+                            { BamFilePairAnalysis it ->
+                                it.isWithdrawn()
+                            },
+                    ]
+            )
 
             output.showList(HEADER_WITHDRAWN_ANALYSIS_RUNNING, analysisStateMap[AnalysisProcessingStates.IN_PROGRESS]?.get(true))
 
@@ -122,6 +132,70 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
         if (!samplePairs) {
             return []
         }
+        return SamplePair.executeQuery("""
+                    select
+                        analysis
+                    from
+                        ${getBamFilePairAnalysisClass().simpleName} analysis
+                    where
+                        analysis.samplePair in (:samplePairs)
+                        and analysis.processingState = '${AnalysisProcessingStates.IN_PROGRESS}'
+                        and analysis.withdrawn = false
+                        and analysis.config.pipeline.type = :pipelineType
+                """, [
+                samplePairs : samplePairs,
+                pipelineType: getPipelineType(),
+        ])
+    }
+
+    List<ToLittleCoverageSamplePair> toLittleCoverageForAnalysis(List<SamplePair> samplePairs) {
+        if (!samplePairs) {
+            return []
+        }
+        Double minCoverage = ProcessingOptionService.findOption(ProcessingOption.OptionName.PIPELINE_MIN_COVERAGE, pipelineType.toString(),null) as Double
+        if (minCoverage == null) {
+            return []
+        }
+
+        def connectBamFile = { String number ->
+            return """(
+                        bamFile${number}.workPackage = samplePair.mergingWorkPackage${number}
+                        and bamFile${number}.id = (
+                            select
+                                max(bamFile.id)
+                            from
+                                AbstractMergedBamFile bamFile
+                            where
+                                bamFile.workPackage = bamFile${number}.workPackage
+                        )
+                    )"""
+        }
+
+        return SamplePair.executeQuery("""
+                select
+                    new ${ToLittleCoverageSamplePair.class.getName()} (
+                        samplePair,
+                        bamFile1.coverage,
+                        bamFile2.coverage,
+                        ${minCoverage}
+                    )
+                from
+                    SamplePair samplePair,
+                    AbstractMergedBamFile bamFile1,
+                    AbstractMergedBamFile bamFile2
+                where
+                    samplePair in (:samplePair)
+                    and ${connectBamFile('1')}
+                    and ${connectBamFile('2')}
+                    and (
+                        bamFile1.coverage < ${minCoverage}
+                        or bamFile2.coverage < ${minCoverage}
+                    )
+            """, [
+                samplePair: samplePairs
+        ])
+
+
         return SamplePair.executeQuery("""
                     select
                         analysis
@@ -236,5 +310,30 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
             }
         }
         return "${samplePair} ${ret ? " (${ret.join(', ')})" : ''}"
+    }
+
+
+    @TupleConstructor
+    @EqualsAndHashCode
+    static class ToLittleCoverageSamplePair {
+        SamplePair samplePair
+        Double coverageBamFile1
+        Double coverageBamFile2
+        Double coverage
+
+        @Override
+        String toString() {
+            List<String> reasonsForBlocking = []
+            [
+                    disease: coverageBamFile1,
+                    control: coverageBamFile2,
+            ].each { String key, Double coverageBamFile ->
+                if (coverageBamFile < coverage) {
+                    reasonsForBlocking << "${key} ${coverageBamFile} of ${coverage}"
+                }
+
+            }
+            return "${samplePair} (${reasonsForBlocking.join(', ')})"
+        }
     }
 }

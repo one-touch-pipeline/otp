@@ -11,6 +11,8 @@ class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
             'For the following project sampleType combination the sampleType was not classified as disease or control'
     static final String HEADER_DISEASE_STATE_IGNORED =
             'For the following project sampleType combination the sampleType category is set to IGNORED'
+    static final String HEADER_DISEASE_STATE_UNDEFINED =
+            'For the following project sampleType combination the sampleType category is set to UNDEFINED'
     static final String HEADER_UNKNOWN_THRESHOLD =
             'For the following project sampleType seqType combination no threshold is defined'
     static final String HEADER_NO_SAMPLE_PAIR =
@@ -56,7 +58,13 @@ class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
 
         bamFiles = bamFiles - unknownDiseaseStatus
 
-        List<AbstractMergedBamFile> ignoredDiseaseStatus = bamFilesWithIgnoredCategory(bamFiles)
+        List<AbstractMergedBamFile> undefinedDiseaseStatus = bamFilesWithCategory(bamFiles, SampleType.Category.UNDEFINED)
+        output.showUniqueList(HEADER_DISEASE_STATE_UNDEFINED, undefinedDiseaseStatus, {
+            "${it.project.name} ${it.sampleType.name}"
+        })
+        bamFiles = bamFiles - undefinedDiseaseStatus
+
+        List<AbstractMergedBamFile> ignoredDiseaseStatus = bamFilesWithCategory(bamFiles, SampleType.Category.IGNORED)
         output.showUniqueList(HEADER_DISEASE_STATE_IGNORED, ignoredDiseaseStatus, {
             "${it.project.name} ${it.sampleType.name}"
         })
@@ -114,7 +122,7 @@ class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
         ])
     }
 
-    List<AbstractMergedBamFile> bamFilesWithIgnoredCategory(List<AbstractMergedBamFile> bamFiles) {
+    List<AbstractMergedBamFile> bamFilesWithCategory(List<AbstractMergedBamFile> bamFiles, SampleType.Category category) {
         if (!bamFiles) {
             return []
         }
@@ -128,7 +136,7 @@ class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
                     bamFile in (:bamFiles)
                     and sampleTypePerProject.project = bamFile.workPackage.sample.individual.project
                     and sampleTypePerProject.sampleType = bamFile.workPackage.sample.sampleType
-                    and sampleTypePerProject.category = '${SampleType.Category.IGNORED}'
+                    and sampleTypePerProject.category = '${category}'
                     )
             """, [
                 bamFiles: bamFiles,
@@ -243,7 +251,7 @@ class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
                         bamFile${number}.workPackage = samplePair.mergingWorkPackage${number}
                         and sampleTypePerProject${number}.project = samplePair.mergingWorkPackage${number}.sample.individual.project
                         and sampleTypePerProject${number}.sampleType = samplePair.mergingWorkPackage${number}.sample.sampleType
-                        and sampleTypePerProject${number}.category <> '${SampleType.Category.IGNORED}'
+                        and sampleTypePerProject${number}.category in ('${SampleType.Category.DISEASE}', '${SampleType.Category.CONTROL}')
                         and processingThresholds${number}.project = samplePair.mergingWorkPackage${number}.sample.individual.project
                         and processingThresholds${number}.sampleType = samplePair.mergingWorkPackage${number}.sample.sampleType
                         and processingThresholds${number}.seqType = samplePair.mergingWorkPackage${number}.seqType
