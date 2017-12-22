@@ -16,6 +16,7 @@ import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.Realm.Cluster
 import de.dkfz.tbi.otp.ngsdata.SampleType.SpecificReferenceGenome
 import de.dkfz.tbi.otp.qcTrafficLight.*
+import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.tracking.*
 import de.dkfz.tbi.otp.utils.*
 import grails.plugin.springsecurity.acl.*
@@ -146,6 +147,45 @@ class DomainFactory {
                 cluster           : Cluster.DKFZ,
         ], realmProperties)
     }
+
+    static Role createRoleLazy(Map properties = [:]) {
+        return createDomainObjectLazy(Role, [
+                authority: "ROLE_${counter++}",
+        ], properties)
+    }
+
+    static Role createRoleUserLazy() {
+        return createRoleLazy([
+                authority: Role.ROLE_USER,
+        ])
+    }
+
+    static Role createRoleOperatorLazy() {
+        return createRoleLazy([
+                authority: Role.ROLE_OPERATOR,
+        ])
+    }
+
+    static Role createRoleAdminLazy() {
+        return createRoleLazy([
+                authority: Role.ROLE_ADMIN,
+        ])
+    }
+
+    static Role createRoleSwitchUserLazy() {
+        return createRoleLazy([
+                authority: Role.ROLE_SWITCH_USER,
+        ])
+    }
+
+    static User createUser(Map properties = [:]) {
+        return createDomainObject(User, [
+                username: "user_${counter++}",
+                password: "password_${counter++}",
+                enabled : true,
+        ], properties)
+    }
+
 
     /**
      * creates a Pipeline, Name and Type have to be given e.g. Pipeline.Name.PANCAN_ALIGNMENT Pipeline.Type.ALIGNMENT
@@ -2504,7 +2544,7 @@ samplePairsNotProcessed: ${samplePairsNotProcessed}
 
     static void createAclObjects(Object domainObject, Map properties = [:]) {
         AclObjectIdentity aclObjectIdentity = createDomainObject(AclObjectIdentity, [objectId: domainObject.id, aclClass: {createDomainObject(AclClass, [className: domainObject.class.name], [:])}], [:])
-        createDomainObject(AclEntry, [aclObjectIdentity: aclObjectIdentity, sid: {createDomainObject(AclSid, [sid: "ROLE_ADMIN"], properties)}], [:])
+        createDomainObject(AclEntry, [aclObjectIdentity: aclObjectIdentity, sid: {createDomainObject(AclSid, [sid: Role.ROLE_ADMIN], properties)}], [:])
     }
 
 

@@ -125,6 +125,7 @@ log4j = {
 
     debug stdout: [
             'de.dkfz.tbi.otp',                                  // our own stuff
+            'seedme',                                           // seed plugin
             'grails.app.controllers.de.dkfz.tbi.otp',           // controllers
             'grails.app.domain.de.dkfz.tbi.otp',
             'grails.app.services.de.dkfz.tbi.otp',
@@ -182,6 +183,7 @@ if (!Boolean.parseBoolean(otpProperties.getProperty("otp.security.ldap.enabled")
 
 // protect everything for role user
 grails.plugin.springsecurity.controllerAnnotations.staticRules = [
+    "/adminSeed/**": ['denyAll'],
     "/projectOverview/mmmlIdentifierMapping/**": ['ROLE_MMML_MAPPING'],
     "/grails-errorhandler/**": ['IS_AUTHENTICATED_ANONYMOUSLY'],
     "/seqTrackDataProvider/**": ['IS_AUTHENTICATED_ANONYMOUSLY'],
@@ -251,6 +253,15 @@ environments {
     }
     test {
         grails.mail.disabled=true
+    }
+
+    //seed
+    grails.plugin.seed.skipPlugins=true
+    production {
+        grails.plugin.seed.autoSeed=true
+    }
+    development {
+        grails.plugin.seed.autoSeed=true
     }
 }
 

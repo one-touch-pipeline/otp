@@ -47,8 +47,8 @@ class BackdoorFilter extends GenericFilterBean {
      * The filter injects a user with the ROLE_USER and ROLE_ADMIN authorities
      */
     private List<GrantedAuthority> authorities = [
-            new SimpleGrantedAuthority("ROLE_USER"),
-            new SimpleGrantedAuthority("ROLE_ADMIN"),
+            new SimpleGrantedAuthority(de.dkfz.tbi.otp.security.Role.ROLE_USER),
+            new SimpleGrantedAuthority(de.dkfz.tbi.otp.security.Role.ROLE_ADMIN),
     ]
 
     @Override

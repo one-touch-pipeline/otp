@@ -1,3 +1,4 @@
+import de.dkfz.tbi.otp.administration.*
 import de.dkfz.tbi.otp.job.scheduler.*
 import de.dkfz.tbi.otp.ngsdata.*
 import grails.plugin.springsecurity.*
@@ -25,7 +26,12 @@ class BootStrap {
             // adds the backdoor filter allowing a developer to login without password only in development mode
             SpringSecurityUtils.clientRegisterFilter('backdoorFilter', SecurityFilterPosition.SECURITY_CONTEXT_FILTER.order + 10)
         }
+
+        if ([Environment.PRODUCTION, Environment.DEVELOPMENT].contains(Environment.getCurrent())) {
+            UserService.createFirstAdminUserIfNoUserExists()
+        }
     }
+
     def destroy = {
     }
 }

@@ -82,6 +82,9 @@ grails.project.dependency.resolution = {
         compile ":codenarc:0.24.1"
         test ":code-coverage:1.2.7"
 
+        // allow to create default data
+        compile "org.grails.plugins:seed-me:0.7.2"
+
         // plugins needed at runtime
         runtime ":database-migration:1.4.0"
         // jQuery

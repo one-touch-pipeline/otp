@@ -5,7 +5,9 @@ import de.dkfz.tbi.otp.security.Role
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.UserRole
 import de.dkfz.tbi.otp.user.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import grails.plugin.springsecurity.SpringSecurityUtils
+import grails.util.Environment
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.authentication.AnonymousAuthenticationToken
@@ -272,42 +274,50 @@ u.id not in (:ids)
         }
         List<Role> userRoles = getRolesForUser(id)
         for (Role role in userRoles) {
-            if (role.authority == 'ROLE_ADMIN') {
+            if (role.authority == Role.ROLE_ADMIN) {
                 return null
             }
-            if (role.authority == 'ROLE_OPERATOR') {
+            if (role.authority == Role.ROLE_OPERATOR) {
                 return null
             }
         }
         return user.username
     }
 
-    boolean persistAdminWithRoles(User person) {
-        boolean ok = true
-        User.withTransaction { TransactionStatus status ->
-            if (!person.save()) {
-                ok = false
-                status.setRollbackOnly()
-            }
-            if (!createRolesForAdmin(person)) {
-                ok = false
-                status.setRollbackOnly()
-            }
-        }
-        return ok
-    }
 
-    boolean createRolesForAdmin(User user) {
-        Role adminRole = new Role(authority: "ROLE_ADMIN")
-        if (!adminRole.save(flush: true)) {
-            return false
+    /**
+     * In case that no user exists, a user with admin rights is created.
+     *
+     * The user name is taken from the property 'user.name'.
+     *
+     * If already a user exists, nothing is done.
+     */
+    static void createFirstAdminUserIfNoUserExists() {
+        if (User.count == 0) {
+            User.withTransaction {
+                String currentUser = System.properties.getProperty('user.name')
+                log.debug """\n\n
+--------------------------------------------------------------------------------
+No user exists yet, create user ${currentUser} with admin rights.
+--------------------------------------------------------------------------------
+\n"""
+                User user = new User([
+                        username       : currentUser,
+                        email          : null,
+                        enabled        : true,
+                        accountExpired : false,
+                        accountLocked  : false,
+                        passwordExpired: false,
+                        password       : "*", //need for plugin, but unused in OTP
+                ]).save(flush: true)
+
+                [Role.ROLE_ADMIN, Role.ROLE_USER].each {
+                    new UserRole([
+                            user: user,
+                            role: CollectionUtils.exactlyOneElement(Role.findAllByAuthority(it))
+                    ]).save(flush: true)
+                }
+            }
         }
-        addRoleToUser(user.id, adminRole.id)
-        Role userRole = new Role(authority: "ROLE_USER")
-        if (!userRole.save(flush: true)) {
-            return false
-        }
-        addRoleToUser(user.id, userRole.id)
-        return true
     }
 }
