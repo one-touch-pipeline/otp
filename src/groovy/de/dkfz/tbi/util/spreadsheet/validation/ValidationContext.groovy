@@ -18,8 +18,8 @@ class ValidationContext {
         this.problemsObject = problems
     }
 
-    Problem addProblem(Set<Cell> affectedCells, Level level, String message) {
-        return problemsObject.addProblem(affectedCells, level, message)
+    Problem addProblem(Set<Cell> affectedCells, Level level, String message, String type = message) {
+        return problemsObject.addProblem(affectedCells, level, message, type)
     }
 
     Level getMaximumProblemLevel() {

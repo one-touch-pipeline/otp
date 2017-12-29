@@ -36,13 +36,13 @@ class LibrarySampleValidatorIntegrationSpec extends Specification {
         then:
         Collection<Problem> expectedProblems = [
                 new Problem((context.spreadsheet.dataRows[0].cells + context.spreadsheet.dataRows[8].cells) as Set, Level.WARNING,
-                        "In project 'project01' the following library names which look similar to '1' are already registered: 'lib1', 'library1'."),
+                        "In project 'project01' the following library names which look similar to '1' are already registered: 'lib1', 'library1'.", "For at least one project library names which look similar to entries in the metadata file are already registered."),
                 new Problem(context.spreadsheet.dataRows[2].cells as Set, Level.WARNING,
-                        "In project 'project02' the following library names which look similar to '1' are already registered: 'lib1'."),
+                        "In project 'project02' the following library names which look similar to '1' are already registered: 'lib1'.", "For at least one project library names which look similar to entries in the metadata file are already registered."),
                 new Problem((context.spreadsheet.dataRows[1].cells + context.spreadsheet.dataRows[2].cells) as Set, Level.WARNING,
-                        "All rows for project 'project02' which look similar to '1' should have the same value in column '${CUSTOMER_LIBRARY}'."),
+                        "All rows for project 'project02' which look similar to '1' should have the same value in column '${CUSTOMER_LIBRARY}'.", "All rows for one project which have a similar customer library should have the same value in column 'CUSTOMER_LIBRARY'."),
                 new Problem((context.spreadsheet.dataRows[3].cells + context.spreadsheet.dataRows[4].cells) as Set, Level.WARNING,
-                        "All rows for project 'project01' which look similar to '5' should have the same value in column '${CUSTOMER_LIBRARY}'."),
+                        "All rows for project 'project01' which look similar to '5' should have the same value in column '${CUSTOMER_LIBRARY}'.", "All rows for one project which have a similar customer library should have the same value in column 'CUSTOMER_LIBRARY'."),
         ]
         assertContainSame(context.problems, expectedProblems)
     }

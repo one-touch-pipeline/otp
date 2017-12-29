@@ -22,7 +22,7 @@ class WithdrawnDateValidatorSpec extends Specification {
         )
         Collection<Problem> expectedProblems = [
                 new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.ERROR,
-                        "'2015' is not an acceptable '${MetaDataColumn.WITHDRAWN_DATE.name()}' value. It must be empty or 'None'. Withdrawn data cannot be imported into OTP."),
+                        "'2015' is not an acceptable '${MetaDataColumn.WITHDRAWN_DATE.name()}' value. It must be empty or 'None'. Withdrawn data cannot be imported into OTP.", "Withdrawn data cannot be imported into OTP."),
         ]
 
         when:

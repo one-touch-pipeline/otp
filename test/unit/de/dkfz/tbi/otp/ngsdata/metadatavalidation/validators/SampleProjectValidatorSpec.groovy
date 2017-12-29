@@ -52,9 +52,9 @@ class SampleProjectValidatorSpec extends Specification {
         ] as SampleIdentifierService
         Collection<Problem> expectedProblems = [
                 new Problem(context.spreadsheet.dataRows[3].cells as Set<Cell>, Level.WARNING,
-                        "Sample identifier 'project_D' is already registered in OTP with project 'Z', not with project 'D'. If you ignore this warning, OTP will keep the assignment of the sample identifier to project 'Z' and ignore the value 'D' in the '${PROJECT}' column."),
+                        "Sample identifier 'project_D' is already registered in OTP with project 'Z', not with project 'D'. If you ignore this warning, OTP will keep the assignment of the sample identifier to project 'Z' and ignore the value 'D' in the '${PROJECT}' column.", "At least one sample identifier is already registered in OTP but with another project."),
                 new Problem(context.spreadsheet.dataRows[6].cells as Set<Cell>, Level.WARNING,
-                        "Sample identifier 'project_W' looks like it belongs to project 'W', not to project 'G'. If you ignore this warning, OTP will assign the sample to project 'W' and ignore the value 'G' in the '${PROJECT}' column."),
+                        "Sample identifier 'project_W' looks like it belongs to project 'W', not to project 'G'. If you ignore this warning, OTP will assign the sample to project 'W' and ignore the value 'G' in the '${PROJECT}' column.", "At least one sample identifier looks like is belongs to another project than in the 'PROJECT' column."),
         ]
 
         when:

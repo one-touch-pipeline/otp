@@ -22,7 +22,7 @@ class SeqTypeBamValidator extends SingleValueValidator<BamMetadataValidationCont
     @Override
     void validateValue(BamMetadataValidationContext context, String seqType, Set<Cell> cells) {
         if (!SeqType.findByName(seqType)) {
-            context.addProblem(cells, Level.ERROR, "The sequencing type '${seqType}' is not registered in OTP.")
+            context.addProblem(cells, Level.ERROR, "The sequencing type '${seqType}' is not registered in OTP.", "At least one sequencing type is not registered in OTP.")
         }
     }
 }

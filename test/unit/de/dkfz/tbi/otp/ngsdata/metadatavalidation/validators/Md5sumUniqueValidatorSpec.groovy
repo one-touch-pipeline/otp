@@ -110,9 +110,9 @@ ${md5sum2}
 
         Collection<Problem> expectedProblems = [
                 new Problem(context.spreadsheet.dataRows[1].cells + context.spreadsheet.dataRows[3].cells as Set, Level.WARNING,
-                        "The MD5 sum '${md5sum2}' is not unique in the metadata file."),
+                        "The MD5 sum '${md5sum2}' is not unique in the metadata file.", "At least one MD5 sum is not unique in the metadata file."),
                 new Problem(context.spreadsheet.dataRows[2].cells as Set, Level.WARNING,
-                        "A fastq file with the MD5 sum '${md5sum3}' is already registered in OTP."),
+                        "A fastq file with the MD5 sum '${md5sum3}' is already registered in OTP.", "At least one fastq file has a MD5 sum which is already registered in OTP."),
         ]
 
         when:
@@ -149,9 +149,9 @@ ${md5sum2}
         )
         Collection<Problem> expectedProblems = [
                 new Problem(context.spreadsheet.dataRows[1].cells + context.spreadsheet.dataRows[3].cells as Set, Level.WARNING,
-                        "The MD5 sum '${md5sum2}' is not unique in the metadata file."),
+                        "The MD5 sum '${md5sum2}' is not unique in the metadata file.", "At least one MD5 sum is not unique in the metadata file."),
                 new Problem(context.spreadsheet.dataRows[2].cells as Set, Level.WARNING,
-                        "A bam file with the MD5 sum '${md5sum3}' is already registered in OTP."),
+                        "A bam file with the MD5 sum '${md5sum3}' is already registered in OTP.", "At least one bam file has a MD5 sum is already registered in OTP."),
         ]
 
         when:

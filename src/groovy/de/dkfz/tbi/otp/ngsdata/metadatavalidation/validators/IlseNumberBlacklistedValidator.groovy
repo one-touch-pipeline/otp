@@ -31,7 +31,7 @@ class IlseNumberBlacklistedValidator extends SingleValueValidator<MetadataValida
         if (value && value.isInteger()) {
             IlseSubmission ilseSubmission = CollectionUtils.atMostOneElement(IlseSubmission.findAllByIlseNumberAndWarning(value.toInteger(), true))
             if (ilseSubmission) {
-                context.addProblem(cells, Level.WARNING, "The ilse ${value} is blacklisted:\n${ilseSubmission.comment.displayString()}.")
+                context.addProblem(cells, Level.WARNING, "The ilse ${value} is blacklisted:\n${ilseSubmission.comment.displayString()}.", "At least one ilse number is blacklisted.")
             }
         }
     }

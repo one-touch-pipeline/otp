@@ -38,11 +38,11 @@ class BarcodeFilenameValidator extends ValueTuplesValidator<MetadataValidationCo
             String fileNameBarcode = MultiplexingService.barcode(fileName)
 
             if (barcode == null && fileNameBarcode) {
-                context.addProblem(valueTuple.cells, Level.WARNING, "The ${BARCODE} column is missing. OTP will use the barcode '${fileNameBarcode}' parsed from filename '${fileName}'. (For multiplexed lanes the ${BARCODE} column should be filled.)")
+                context.addProblem(valueTuple.cells, Level.WARNING, "The ${BARCODE} column is missing. OTP will use the barcode '${fileNameBarcode}' parsed from filename '${fileName}'. (For multiplexed lanes the ${BARCODE} column should be filled.)", "The ${BARCODE} column is missing")
             } else if (barcode == '' && fileNameBarcode) {
-                context.addProblem(valueTuple.cells, Level.WARNING, "A barcode can be parsed from the filename '${fileName}', but the ${BARCODE} cell is empty. OTP will ignore the barcode parsed from the filename.")
+                context.addProblem(valueTuple.cells, Level.WARNING, "A barcode can be parsed from the filename '${fileName}', but the ${BARCODE} cell is empty. OTP will ignore the barcode parsed from the filename.", "A barcode can be parsed from the filename, but the ${BARCODE} cell is empty. OTP will ignore the barcode parsed from the filename.")
             } else if (barcode && fileNameBarcode && barcode != fileNameBarcode) {
-                context.addProblem(valueTuple.cells, Level.WARNING, "The barcode parsed from the filename '${fileName}' ('${fileNameBarcode}') is different from the value in the ${BARCODE} cell ('${barcode}'). OTP will ignore the barcode parsed from the filename and use the barcode '${barcode}'.")
+                context.addProblem(valueTuple.cells, Level.WARNING, "The barcode parsed from the filename '${fileName}' ('${fileNameBarcode}') is different from the value in the ${BARCODE} cell ('${barcode}'). OTP will ignore the barcode parsed from the filename and use the barcode '${barcode}'.", "At least one barcode parsed from the filename is different from the value in the ${BARCODE} cell. OTP will ignore the barcode parsed from the filename.")
             }
         }
     }

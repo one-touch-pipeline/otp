@@ -28,7 +28,7 @@ class TagmentationBasedLibraryValidator extends SingleValueValidator<MetadataVal
     @Override
     void validateValue(MetadataValidationContext context, String tagmentationBasedLibrary, Set<Cell> cells) {
         if (!(tagmentationBasedLibrary.toLowerCase() in ["", "1", "true", "false"])) {
-           context.addProblem(cells, Level.ERROR, "The tagmentation based library column value should be '1', 'true', 'false' or an empty string instead of '${tagmentationBasedLibrary}'")
+           context.addProblem(cells, Level.ERROR, "The tagmentation based library column value should be '1', 'true', 'false' or an empty string instead of '${tagmentationBasedLibrary}'.", "The tagmentation based library column value should be '1', 'true', 'false' or an empty string.")
         }
     }
 }

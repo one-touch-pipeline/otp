@@ -73,7 +73,7 @@ ${ilse}
         when:
         new IlseNumberBlacklistedValidator().validate(context)
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.WARNING, "The ilse ${ilse} is blacklisted:\n${ilseSubmission.comment.displayString()}."),
+                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.WARNING, "The ilse ${ilse} is blacklisted:\n${ilseSubmission.comment.displayString()}.", "At least one ilse number is blacklisted."),
         ]
 
         then:

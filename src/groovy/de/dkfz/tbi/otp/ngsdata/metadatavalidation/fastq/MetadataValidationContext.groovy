@@ -25,4 +25,8 @@ class MetadataValidationContext extends AbstractMetadataValidationContext {
         return new MetadataValidationContext(metadataFile, parametersForFile.metadataFileMd5sum,
                 parametersForFile.spreadsheet, parametersForFile.problems, directoryStructure, parametersForFile.bytes)
     }
+
+    List<String> getSummary() {
+        return getProblems()*.type.flatten().unique()
+    }
 }

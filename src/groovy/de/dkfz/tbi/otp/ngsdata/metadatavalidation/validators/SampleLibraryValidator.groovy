@@ -37,7 +37,7 @@ class SampleLibraryValidator extends ValueTuplesValidator<MetadataValidationCont
         valueTuples.each { ValueTuple valueTuple ->
             String sample = valueTuple.getValue(SAMPLE_ID.name())
             if (sample.toLowerCase(Locale.ENGLISH).contains(LIB) && !valueTuple.getValue(CUSTOMER_LIBRARY.name())) {
-                context.addProblem(valueTuple.cells, Level.WARNING, "For sample '${sample}' which contains 'lib', there should be a value in the ${CUSTOMER_LIBRARY} column.")
+                context.addProblem(valueTuple.cells, Level.WARNING, "For sample '${sample}' which contains 'lib', there should be a value in the ${CUSTOMER_LIBRARY} column.", "For samples which contain 'lib', there should be a value in the ${CUSTOMER_LIBRARY} column.")
             }
         }
     }

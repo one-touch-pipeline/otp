@@ -82,7 +82,7 @@ class BedFileValidatorSpec extends Specification {
 
         Collection<Problem> expectedProblems = expectError ? [
                 new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.WARNING,
-                        "No BED file is configured for sample '${sampleId}' (reference genome '${referenceGenome.name}') with library preparation kit '${libraryPreparationKit.name}'."),
+                        "No BED file is configured for sample '${sampleId}' (reference genome '${referenceGenome.name}') with library preparation kit '${libraryPreparationKit.name}'.", "No BED file is configured for at least on sample."),
         ] : []
 
 

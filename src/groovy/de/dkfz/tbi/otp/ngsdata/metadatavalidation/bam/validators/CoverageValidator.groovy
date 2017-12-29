@@ -27,7 +27,7 @@ class CoverageValidator extends SingleValueValidator<BamMetadataValidationContex
     void validateValue(BamMetadataValidationContext context, String coverage, Set<Cell> cells) {
         if (!coverage.empty) {
             if (!coverage.isDouble()) {
-                context.addProblem(cells, Level.ERROR, "The coverage '${coverage}' should be a double number.")
+                context.addProblem(cells, Level.ERROR, "The coverage '${coverage}' should be a double number.", "At least one coverage is not a double number.")
             }
         }
     }

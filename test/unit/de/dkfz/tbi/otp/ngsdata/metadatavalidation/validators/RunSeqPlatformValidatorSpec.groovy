@@ -101,17 +101,17 @@ class RunSeqPlatformValidatorSpec extends Specification {
         DomainFactory.createRun(name: 'ConsistentDatabaseAndMetadataWithoutKit', seqPlatform: platform_2_2_X)
         Collection<Problem> expectedProblems = [
                 new Problem(context.spreadsheet.dataRows[0].cells + context.spreadsheet.dataRows[1].cells as Set, Level.ERROR,
-                        "All entries for run 'InconsistentPlatformInMetadata' must have the same combination of values in the columns '${INSTRUMENT_PLATFORM}', '${INSTRUMENT_MODEL}' and '${SEQUENCING_KIT}'."),
+                        "All entries for run 'InconsistentPlatformInMetadata' must have the same combination of values in the columns '${INSTRUMENT_PLATFORM}', '${INSTRUMENT_MODEL}' and '${SEQUENCING_KIT}'.", "All entries for one run must have the same combination of values in the columns 'INSTRUMENT_PLATFORM', 'INSTRUMENT_MODEL' and 'SEQUENCING_KIT'."),
                 new Problem(context.spreadsheet.dataRows[2].cells + context.spreadsheet.dataRows[3].cells as Set, Level.ERROR,
-                        "All entries for run 'InconsistentModelInMetadata' must have the same combination of values in the columns '${INSTRUMENT_PLATFORM}', '${INSTRUMENT_MODEL}' and '${SEQUENCING_KIT}'."),
+                        "All entries for run 'InconsistentModelInMetadata' must have the same combination of values in the columns '${INSTRUMENT_PLATFORM}', '${INSTRUMENT_MODEL}' and '${SEQUENCING_KIT}'.", "All entries for one run must have the same combination of values in the columns 'INSTRUMENT_PLATFORM', 'INSTRUMENT_MODEL' and 'SEQUENCING_KIT'."),
                 new Problem(context.spreadsheet.dataRows[4].cells + context.spreadsheet.dataRows[5].cells as Set, Level.ERROR,
-                        "All entries for run 'InconsistentKitInMetadata' must have the same combination of values in the columns '${INSTRUMENT_PLATFORM}', '${INSTRUMENT_MODEL}' and '${SEQUENCING_KIT}'."),
+                        "All entries for run 'InconsistentKitInMetadata' must have the same combination of values in the columns '${INSTRUMENT_PLATFORM}', '${INSTRUMENT_MODEL}' and '${SEQUENCING_KIT}'.", "All entries for one run must have the same combination of values in the columns 'INSTRUMENT_PLATFORM', 'INSTRUMENT_MODEL' and 'SEQUENCING_KIT'."),
                 new Problem(context.spreadsheet.dataRows[6].cells as Set, Level.ERROR,
-                        "Run 'PlatformInconsistentInDatabaseAndMetadata' is already registered in the OTP database with sequencing platform '${platform_1_1_1.fullName()}', not with '${platform_2_1_1.fullName()}'."),
+                        "Run 'PlatformInconsistentInDatabaseAndMetadata' is already registered in the OTP database with sequencing platform '${platform_1_1_1.fullName()}', not with '${platform_2_1_1.fullName()}'.", "At least one run is already registered in the OTP database with another sequencing platform."),
                 new Problem(context.spreadsheet.dataRows[7].cells as Set, Level.ERROR,
-                        "Run 'ModelInconsistentInDatabaseAndMetadata' is already registered in the OTP database with sequencing platform '${platform_1_1_1.fullName()}', not with '${platform_1_2_1.fullName()}'."),
+                        "Run 'ModelInconsistentInDatabaseAndMetadata' is already registered in the OTP database with sequencing platform '${platform_1_1_1.fullName()}', not with '${platform_1_2_1.fullName()}'.", "At least one run is already registered in the OTP database with another sequencing platform."),
                 new Problem(context.spreadsheet.dataRows[8].cells as Set, Level.ERROR,
-                        "Run 'KitInconsistentInDatabaseAndMetadata' is already registered in the OTP database with sequencing platform '${platform_1_1_1.fullName()}', not with '${platform_1_1_2.fullName()}'."),
+                        "Run 'KitInconsistentInDatabaseAndMetadata' is already registered in the OTP database with sequencing platform '${platform_1_1_1.fullName()}', not with '${platform_1_1_2.fullName()}'.", "At least one run is already registered in the OTP database with another sequencing platform."),
         ]
 
         when:
@@ -145,15 +145,15 @@ class RunSeqPlatformValidatorSpec extends Specification {
                 new Problem(Collections.emptySet(), Level.WARNING,
                         "Optional column '${SEQUENCING_KIT}' is missing."),
                 new Problem(context.spreadsheet.dataRows[0].cells + context.spreadsheet.dataRows[1].cells as Set, Level.ERROR,
-                        "All entries for run 'InconsistentPlatformInMetadata' must have the same combination of values in the columns '${INSTRUMENT_PLATFORM}', '${INSTRUMENT_MODEL}' and '${SEQUENCING_KIT}'."),
+                        "All entries for run 'InconsistentPlatformInMetadata' must have the same combination of values in the columns '${INSTRUMENT_PLATFORM}', '${INSTRUMENT_MODEL}' and '${SEQUENCING_KIT}'.", "All entries for one run must have the same combination of values in the columns 'INSTRUMENT_PLATFORM', 'INSTRUMENT_MODEL' and 'SEQUENCING_KIT'."),
                 new Problem(context.spreadsheet.dataRows[2].cells + context.spreadsheet.dataRows[3].cells as Set, Level.ERROR,
-                        "All entries for run 'InconsistentModelInMetadata' must have the same combination of values in the columns '${INSTRUMENT_PLATFORM}', '${INSTRUMENT_MODEL}' and '${SEQUENCING_KIT}'."),
+                        "All entries for run 'InconsistentModelInMetadata' must have the same combination of values in the columns '${INSTRUMENT_PLATFORM}', '${INSTRUMENT_MODEL}' and '${SEQUENCING_KIT}'.", "All entries for one run must have the same combination of values in the columns 'INSTRUMENT_PLATFORM', 'INSTRUMENT_MODEL' and 'SEQUENCING_KIT'."),
                 new Problem(context.spreadsheet.dataRows[4].cells as Set, Level.ERROR,
-                        "Run 'PlatformInconsistentInDatabaseAndMetadata' is already registered in the OTP database with sequencing platform '${platform_2_2_X.fullName()}', not with '${platform_1_2_X.fullName()}'."),
+                        "Run 'PlatformInconsistentInDatabaseAndMetadata' is already registered in the OTP database with sequencing platform '${platform_2_2_X.fullName()}', not with '${platform_1_2_X.fullName()}'.", "At least one run is already registered in the OTP database with another sequencing platform."),
                 new Problem(context.spreadsheet.dataRows[5].cells as Set, Level.ERROR,
-                        "Run 'ModelInconsistentInDatabaseAndMetadata' is already registered in the OTP database with sequencing platform '${platform_2_2_X.fullName()}', not with '${platform_2_1_X.fullName()}'."),
+                        "Run 'ModelInconsistentInDatabaseAndMetadata' is already registered in the OTP database with sequencing platform '${platform_2_2_X.fullName()}', not with '${platform_2_1_X.fullName()}'.", "At least one run is already registered in the OTP database with another sequencing platform."),
                 new Problem(context.spreadsheet.dataRows[6].cells as Set, Level.ERROR,
-                        "Run 'KitInconsistentInDatabaseAndMetadata' is already registered in the OTP database with sequencing platform '${platform_1_2_1.fullName()}', not with '${platform_1_2_X.fullName()}'."),
+                        "Run 'KitInconsistentInDatabaseAndMetadata' is already registered in the OTP database with sequencing platform '${platform_1_2_1.fullName()}', not with '${platform_1_2_X.fullName()}'.", "At least one run is already registered in the OTP database with another sequencing platform."),
         ]
 
         when:

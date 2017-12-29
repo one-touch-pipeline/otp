@@ -42,7 +42,7 @@ class BarcodeFilenameValidatorSpec extends Specification {
 
         then:
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.WARNING, "The ${BARCODE} column is missing. OTP will use the barcode 'AGGCAGAA' parsed from filename 'testFileName_AGGCAGAA_1.fastq.gz'. (For multiplexed lanes the ${BARCODE} column should be filled.)")
+                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.WARNING, "The ${BARCODE} column is missing. OTP will use the barcode 'AGGCAGAA' parsed from filename 'testFileName_AGGCAGAA_1.fastq.gz'. (For multiplexed lanes the ${BARCODE} column should be filled.)", "The BARCODE column is missing")
         ]
         assertContainSame(context.problems, expectedProblems)
     }
@@ -76,7 +76,7 @@ class BarcodeFilenameValidatorSpec extends Specification {
 
         then:
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.WARNING, "A barcode can be parsed from the filename 'testFileName_AGGCAGAA_1.fastq.gz', but the ${BARCODE} cell is empty. OTP will ignore the barcode parsed from the filename.")
+                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.WARNING, "A barcode can be parsed from the filename 'testFileName_AGGCAGAA_1.fastq.gz', but the ${BARCODE} cell is empty. OTP will ignore the barcode parsed from the filename.", "A barcode can be parsed from the filename, but the BARCODE cell is empty. OTP will ignore the barcode parsed from the filename.")
         ]
         assertContainSame(context.problems, expectedProblems)
     }
@@ -126,7 +126,7 @@ class BarcodeFilenameValidatorSpec extends Specification {
 
         then:
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.WARNING, "The barcode parsed from the filename 'testFileName_AGGCAGGG_1.fastq.gz' ('AGGCAGGG') is different from the value in the ${BARCODE} cell ('AGGCAGAA'). OTP will ignore the barcode parsed from the filename and use the barcode 'AGGCAGAA'.")
+                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.WARNING, "The barcode parsed from the filename 'testFileName_AGGCAGGG_1.fastq.gz' ('AGGCAGGG') is different from the value in the ${BARCODE} cell ('AGGCAGAA'). OTP will ignore the barcode parsed from the filename and use the barcode 'AGGCAGAA'.", "At least one barcode parsed from the filename is different from the value in the BARCODE cell. OTP will ignore the barcode parsed from the filename.")
         ]
         assertContainSame(context.problems, expectedProblems)
     }

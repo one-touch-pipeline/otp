@@ -70,7 +70,7 @@ class LibrarySeqTypeValidatorSpec extends Specification {
 
         then:
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.WARNING, "For sequencing type '${SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName}' there should be a value in the ${CUSTOMER_LIBRARY} column.")
+                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.WARNING, "For sequencing type '${SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName}' there should be a value in the ${CUSTOMER_LIBRARY} column.", "For specific sequencing types there should be a value in the CUSTOMER_LIBRARY column.")
         ]
         assertContainSame(context.problems, expectedProblems)
     }
@@ -90,7 +90,7 @@ class LibrarySeqTypeValidatorSpec extends Specification {
 
         then:
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.WARNING, "For sequencing type '${SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName}' there should be a value in the ${CUSTOMER_LIBRARY} column.")
+                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.WARNING, "For sequencing type '${SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName}' there should be a value in the ${CUSTOMER_LIBRARY} column.", "For specific sequencing types there should be a value in the CUSTOMER_LIBRARY column.")
         ]
         containSame(context.problems, expectedProblems)
     }

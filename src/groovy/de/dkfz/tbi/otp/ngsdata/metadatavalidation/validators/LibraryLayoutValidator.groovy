@@ -24,7 +24,7 @@ class LibraryLayoutValidator extends SingleValueValidator<AbstractMetadataValida
     @Override
     void validateValue(AbstractMetadataValidationContext context, String libraryLayoutName, Set<Cell> cells) {
         if (!SeqType.findByLibraryLayout(libraryLayoutName)) {
-            context.addProblem(cells, Level.ERROR, "Library layout '${libraryLayoutName}' is not registered in OTP.")
+            context.addProblem(cells, Level.ERROR, "Library layout '${libraryLayoutName}' is not registered in OTP.", "At least one library layout is not registered in OTP.")
         }
     }
 }

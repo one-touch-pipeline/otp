@@ -107,7 +107,7 @@ class BedFileValidator extends ValueTuplesValidator<MetadataValidationContext> i
                 )
         )
         if (!bedFile) {
-            context.addProblem(valueTuple.cells, Level.WARNING, "No BED file is configured for sample '${sampleId}' (reference genome '${referenceGenome.name}') with library preparation kit '${libraryPreparationKitName}'.")
+            context.addProblem(valueTuple.cells, Level.WARNING, "No BED file is configured for sample '${sampleId}' (reference genome '${referenceGenome.name}') with library preparation kit '${libraryPreparationKitName}'.", "No BED file is configured for at least on sample.")
         }
     }
 }

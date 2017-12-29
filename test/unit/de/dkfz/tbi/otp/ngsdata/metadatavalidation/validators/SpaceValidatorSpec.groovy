@@ -25,17 +25,17 @@ class SpaceValidatorSpec extends Specification {
                 "  \n")
         Collection<Problem> expectedProblems = [
                 new Problem(context.spreadsheet.header.cells + context.spreadsheet.dataRows[5].cells as Set, Level.WARNING,
-                        "' x' starts with a space character."),
+                        "' x' starts with a space character.", "At least one value starts with a space character."),
                 new Problem(context.spreadsheet.dataRows[0].cells + context.spreadsheet.dataRows[6].cells as Set, Level.WARNING,
-                        "'x ' ends with a space character."),
+                        "'x ' ends with a space character.", "At least one value ends with a space character."),
                 new Problem(context.spreadsheet.dataRows[1].cells + context.spreadsheet.dataRows[7].cells as Set, Level.WARNING,
-                        "'x  x' contains subsequent space characters."),
+                        "'x  x' contains subsequent space characters.", "At least one value contains subsequent space characters."),
                 new Problem(context.spreadsheet.dataRows[2].cells + context.spreadsheet.dataRows[8].cells as Set, Level.WARNING,
-                        "'  ' starts with a space character."),
+                        "'  ' starts with a space character.", "At least one value starts with a space character."),
                 new Problem(context.spreadsheet.dataRows[2].cells + context.spreadsheet.dataRows[8].cells as Set, Level.WARNING,
-                        "'  ' ends with a space character."),
+                        "'  ' ends with a space character.", "At least one value ends with a space character."),
                 new Problem(context.spreadsheet.dataRows[2].cells + context.spreadsheet.dataRows[8].cells as Set, Level.WARNING,
-                        "'  ' contains subsequent space characters."),
+                        "'  ' contains subsequent space characters.", "At least one value contains subsequent space characters."),
         ]
 
         when:

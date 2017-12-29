@@ -30,7 +30,7 @@ class AntibodyTargetValidator extends SingleValueValidator<MetadataValidationCon
     void validateValue(MetadataValidationContext context, String antibodyTarget, Set<Cell> cells) {
 
         if (antibodyTarget && !AntibodyTarget.findByNameIlike(escapeForSqlLike(antibodyTarget))) {
-            context.addProblem(cells, Level.ERROR, "The antibody target '${antibodyTarget}' is not registered in OTP.")
+            context.addProblem(cells, Level.ERROR, "The antibody target '${antibodyTarget}' is not registered in OTP.", "At least one antibody target is not registered in OTP.")
         }
     }
 }

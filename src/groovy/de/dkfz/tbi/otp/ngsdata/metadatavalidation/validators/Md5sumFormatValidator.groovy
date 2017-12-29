@@ -43,7 +43,7 @@ class Md5sumFormatValidator extends SingleValueValidator<AbstractMetadataValidat
 
     static void checkMd5Sum(AbstractMetadataValidationContext context, String value, Set<Cell> cells) {
         if (!(value ==~ /^[0-9a-fA-F]{32}$/)) {
-            context.addProblem(cells, Level.ERROR, "Not a well-formatted MD5 sum: '${value}'")
+            context.addProblem(cells, Level.ERROR, "Not a well-formatted MD5 sum: '${value}'.", "At least one md5sum is not well formatted.")
         }
     }
 }

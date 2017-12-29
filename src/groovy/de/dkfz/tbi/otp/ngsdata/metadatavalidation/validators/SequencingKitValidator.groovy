@@ -27,7 +27,7 @@ class SequencingKitValidator extends SingleValueValidator<MetadataValidationCont
     @Override
     void validateValue(MetadataValidationContext context, String sequencingKitLabelNameOrAlias, Set<Cell> cells) {
         if (!sequencingKitLabelNameOrAlias.empty && !SequencingKitLabelService.findSequencingKitLabelByNameOrAlias(sequencingKitLabelNameOrAlias)) {
-            context.addProblem(cells, Level.ERROR, "Sequencing kit '${sequencingKitLabelNameOrAlias}' is not registered in the OTP database.")
+            context.addProblem(cells, Level.ERROR, "Sequencing kit '${sequencingKitLabelNameOrAlias}' is not registered in the OTP database.","At least one sequencing kit is not registered in the OTP database.")
         }
     }
 }

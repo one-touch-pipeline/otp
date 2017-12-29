@@ -41,14 +41,14 @@ class IlseNumberValidator extends ValueTuplesValidator<MetadataValidationContext
                 ValueTuple tuple = CollectionUtils.exactlyOneElement(valueTuplesOfIlseNo)
                 if (ilseNo != "") {
                     if (!ilseNo.isInteger()) {
-                        context.addProblem(tuple.cells, Level.ERROR, "The ILSe number '${ilseNo}' is not an integer.")
+                        context.addProblem(tuple.cells, Level.ERROR, "The ILSe number '${ilseNo}' is not an integer.", "At least one ILSe number is not an integer.")
                     } else if ((ilseNo as int) < 1000 || (ilseNo as int) > 999999) {
-                        context.addProblem(tuple.cells, Level.WARNING, "The ILSe number '${ilseNo}' is out of range [1000..999999].")
+                        context.addProblem(tuple.cells, Level.WARNING, "The ILSe number '${ilseNo}' is out of range [1000..999999].", "At least one ILSe number is out of range [1000..999999].")
                     } else if (IlseSubmission.findByIlseNumber(ilseNo as int)) {
-                        context.addProblem(tuple.cells, Level.WARNING, "The ILSe number '${ilseNo}' already exist.")
+                        context.addProblem(tuple.cells, Level.WARNING, "The ILSe number '${ilseNo}' already exists.", "At least one ILSe number already exists.")
                     }
                     if (!context.metadataFile.path.contains(ilseNo)) {
-                        context.addProblem(tuple.cells, Level.WARNING, "The metadata file path '${context.metadataFile.path}' does not contain the ILSe number '${ilseNo}'.")
+                        context.addProblem(tuple.cells, Level.WARNING, "The metadata file path '${context.metadataFile.path}' does not contain the ILSe number '${ilseNo}'.","At least one metadata file path does not contain the ILSe number.")
                     }
                 }
             }

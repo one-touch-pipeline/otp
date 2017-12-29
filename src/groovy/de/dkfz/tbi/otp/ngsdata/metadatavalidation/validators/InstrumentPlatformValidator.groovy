@@ -22,7 +22,7 @@ class InstrumentPlatformValidator extends SingleValueValidator<MetadataValidatio
     @Override
     void validateValue(MetadataValidationContext context, String seqPlatformName, Set<Cell> cells) {
         if (!SeqPlatform.findByName(seqPlatformName)) {
-            context.addProblem(cells, Level.ERROR, "Instrument platform '${seqPlatformName}' is not registered in the OTP database.")
+            context.addProblem(cells, Level.ERROR, "Instrument platform '${seqPlatformName}' is not registered in the OTP database.", "At least one instrument platform is not registered in the OTP database.")
         }
     }
 }

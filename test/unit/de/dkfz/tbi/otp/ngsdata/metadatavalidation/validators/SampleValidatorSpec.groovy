@@ -50,9 +50,9 @@ class SampleValidatorSpec extends Specification {
                 "${SAMPLE_ID}\nABC\nAAA")
         Collection<Problem> expectedProblems = [
                 new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.ERROR,
-                        "Sample identifier 'ABC' is neither registered in OTP nor matches a pattern known to OTP."),
+                        "Sample identifier 'ABC' is neither registered in OTP nor matches a pattern known to OTP.", "At least one sample identifier is neither registered in OTP nor matches a pattern known to OTP."),
                 new Problem(context.spreadsheet.dataRows[1].cells as Set, Level.ERROR,
-                        "Sample identifier 'AAA' is neither registered in OTP nor matches a pattern known to OTP."),
+                        "Sample identifier 'AAA' is neither registered in OTP nor matches a pattern known to OTP.", "At least one sample identifier is neither registered in OTP nor matches a pattern known to OTP."),
                 new Problem(Collections.emptySet(), Level.INFO,
                         "All sample identifiers which are neither registered in OTP nor match a pattern known to OTP:\nAAA\nABC"),
         ]
@@ -86,9 +86,9 @@ class SampleValidatorSpec extends Specification {
         Individual individual = DomainFactory.createIndividual(pid: 'Y')
         Collection<Problem> expectedProblems = [
                 new Problem([context.spreadsheet.dataRows[0].cells[0]] as Set, Level.ERROR,
-                        "Sample identifier 'P:X I:Y S:Z' is not registered in OTP. It looks like it belongs to project 'X', but no project with that name is registered in OTP."),
+                        "Sample identifier 'P:X I:Y S:Z' is not registered in OTP. It looks like it belongs to project 'X', but no project with that name is registered in OTP.", "At least one sample identifier is not registered in OTP. It looks like it belongs to a project not registered in OTP."),
                 new Problem([context.spreadsheet.dataRows[0].cells[0]] as Set, Level.ERROR,
-                        "Sample identifier 'P:X I:Y S:Z' is not registered in OTP. It looks like it belongs to project 'X' and individual 'Y', but individual 'Y' is already registered in OTP with project '${individual.project.name}'."),
+                        "Sample identifier 'P:X I:Y S:Z' is not registered in OTP. It looks like it belongs to project 'X' and individual 'Y', but individual 'Y' is already registered in OTP with project '${individual.project.name}'.", "At least one sample identifier is not registered in OTP. It looks like it belongs to a specific project and individual, but this individual is already registered in OTP with another project."),
         ]
 
         when:
@@ -196,7 +196,7 @@ class SampleValidatorSpec extends Specification {
                         context.spreadsheet.dataRows[4].cells as Set, Level.WARNING,
                         "The sample identifiers belong to different projects:\nProject 'B': 'P:B I:M S:N', 'SampleB'\nProject 'C': 'P:C I:M S:N', 'SampleC'"),
                 new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.ERROR,
-                        "Sample identifier 'SampleA' is neither registered in OTP nor matches a pattern known to OTP."),
+                        "Sample identifier 'SampleA' is neither registered in OTP nor matches a pattern known to OTP.", "At least one sample identifier is neither registered in OTP nor matches a pattern known to OTP."),
                 new Problem(Collections.emptySet(), Level.INFO,
                         "All sample identifiers which are neither registered in OTP nor match a pattern known to OTP:\nSampleA"),
         ]
@@ -219,7 +219,7 @@ class SampleValidatorSpec extends Specification {
         createSampleIdentifier('SampleB', 'B', 'W', 'X')
         Collection<Problem> expectedProblems = [
                 new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.ERROR,
-                        "Sample identifier 'SampleA' is neither registered in OTP nor matches a pattern known to OTP."),
+                        "Sample identifier 'SampleA' is neither registered in OTP nor matches a pattern known to OTP.", "At least one sample identifier is neither registered in OTP nor matches a pattern known to OTP."),
                 new Problem(Collections.emptySet(), Level.INFO,
                         "All sample identifiers which are neither registered in OTP nor match a pattern known to OTP:\nSampleA"),
         ]

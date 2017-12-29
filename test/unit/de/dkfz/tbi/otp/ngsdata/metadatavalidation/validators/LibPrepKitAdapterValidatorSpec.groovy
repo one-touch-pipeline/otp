@@ -135,13 +135,13 @@ class LibPrepKitAdapterValidatorSpec extends Specification {
         then:
         Collection<Problem> expectedProblems = [
                 new Problem((context.spreadsheet.dataRows[2].cells) as Set, Level.WARNING,
-                        "Adapter trimming is requested but adapter file for library preparation kit '${kitWithoutAdapterFile}' is missing."),
+                        "Adapter trimming is requested but adapter file for library preparation kit '${kitWithoutAdapterFile}' is missing.", "Adapter trimming is requested but the adapter file for at least one library preparation kit is missing."),
                 new Problem((context.spreadsheet.dataRows[3].cells) as Set, Level.WARNING,
-                        "Adapter trimming is requested but adapter file for library preparation kit '${kitWithoutAdapterFile}' is missing."),
+                        "Adapter trimming is requested but adapter file for library preparation kit '${kitWithoutAdapterFile}' is missing.", "Adapter trimming is requested but the adapter file for at least one library preparation kit is missing."),
                 new Problem((context.spreadsheet.dataRows[4].cells) as Set, Level.WARNING,
-                        "Adapter trimming is requested but reverse complement adapter sequence for library preparation kit '${kitWithoutAdapterSequence}' is missing."),
+                        "Adapter trimming is requested but reverse complement adapter sequence for library preparation kit '${kitWithoutAdapterSequence}' is missing.", "Adapter trimming is requested but the reverse complement adapter sequence for at least one library preparation kit is missing."),
                 new Problem((context.spreadsheet.dataRows[5].cells) as Set, Level.WARNING,
-                        "Adapter trimming is requested but adapter file for library preparation kit '${kitWithoutAdapterFile}' is missing."),
+                        "Adapter trimming is requested but adapter file for library preparation kit '${kitWithoutAdapterFile}' is missing.", "Adapter trimming is requested but the adapter file for at least one library preparation kit is missing."),
         ]
         containSame(context.problems, expectedProblems)
     }

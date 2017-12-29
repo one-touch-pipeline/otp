@@ -10,9 +10,9 @@ class Problems {
     private final Set<Problem> allProblems = new LinkedHashSet<Problem>()
     private final Map<Cell, Set<Problem>> problemsByCell = [:]
 
-    Problem addProblem(Set<Cell> affectedCells, Level level, String message) {
+    Problem addProblem(Set<Cell> affectedCells, Level level, String message, String type = message) {
         assert !affectedCells.contains(null)
-        Problem problem = new Problem(affectedCells, level, message)
+        Problem problem = new Problem(affectedCells, level, message, type)
         allProblems.add(problem)
         affectedCells.each {
             CollectionUtils.getOrPut(problemsByCell, it, new LinkedHashSet<Problem>()).add(problem)

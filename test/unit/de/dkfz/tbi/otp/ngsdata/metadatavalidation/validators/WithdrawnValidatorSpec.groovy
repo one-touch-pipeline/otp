@@ -26,13 +26,13 @@ class WithdrawnValidatorSpec extends Specification {
         )
         Collection<Problem> expectedProblems = [
                 new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.ERROR,
-                        "'YES' is not an acceptable '${MetaDataColumn.WITHDRAWN.name()}' value. It must be empty or '0' or 'None'. Withdrawn data cannot be imported into OTP."),
+                        "'YES' is not an acceptable '${MetaDataColumn.WITHDRAWN.name()}' value. It must be empty or '0' or 'None'. Withdrawn data cannot be imported into OTP.", "Withdrawn data cannot be imported into OTP."),
                 new Problem(context.spreadsheet.dataRows[1].cells as Set, Level.ERROR,
-                        "'TRUE' is not an acceptable '${MetaDataColumn.WITHDRAWN.name()}' value. It must be empty or '0' or 'None'. Withdrawn data cannot be imported into OTP."),
+                        "'TRUE' is not an acceptable '${MetaDataColumn.WITHDRAWN.name()}' value. It must be empty or '0' or 'None'. Withdrawn data cannot be imported into OTP.", "Withdrawn data cannot be imported into OTP."),
                 new Problem(context.spreadsheet.dataRows[2].cells as Set, Level.ERROR,
-                        "'1' is not an acceptable '${MetaDataColumn.WITHDRAWN.name()}' value. It must be empty or '0' or 'None'. Withdrawn data cannot be imported into OTP."),
+                        "'1' is not an acceptable '${MetaDataColumn.WITHDRAWN.name()}' value. It must be empty or '0' or 'None'. Withdrawn data cannot be imported into OTP.", "Withdrawn data cannot be imported into OTP."),
                 new Problem(context.spreadsheet.dataRows[3].cells as Set, Level.ERROR,
-                        "'-1' is not an acceptable '${MetaDataColumn.WITHDRAWN.name()}' value. It must be empty or '0' or 'None'. Withdrawn data cannot be imported into OTP."),
+                        "'-1' is not an acceptable '${MetaDataColumn.WITHDRAWN.name()}' value. It must be empty or '0' or 'None'. Withdrawn data cannot be imported into OTP.", "Withdrawn data cannot be imported into OTP."),
         ]
 
         when:

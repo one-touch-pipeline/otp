@@ -48,7 +48,7 @@ class SeqTypeLibraryLayoutValidator extends ValueTuplesValidator<AbstractMetadat
             }
             String libraryLayoutName = it.getValue(LIBRARY_LAYOUT.name())
             if (!SeqTypeService.findSeqTypeByNameOrAliasAndLibraryLayout(seqTypeName, libraryLayoutName)) {
-                context.addProblem(it.cells, Level.ERROR, "The combination of sequencing type '${seqTypeName}' and library layout '${libraryLayoutName}' is not registered in the OTP database.")
+                context.addProblem(it.cells, Level.ERROR, "The combination of sequencing type '${seqTypeName}' and library layout '${libraryLayoutName}' is not registered in the OTP database.", "At least one combination of sequencing type and library layout is not registered in the OTP database.")
             }
         }
     }

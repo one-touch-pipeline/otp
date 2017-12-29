@@ -72,10 +72,10 @@ class LibPrepKitAdapterValidator extends ValueTuplesValidator<MetadataValidation
                     project.alignmentDeciderBeanName == AlignmentDeciderBeanNames.PAN_CAN_ALIGNMENT.bean &&
                     config?.adapterTrimmingNeeded) {
                 if (!seqType.isRna() && !kit.adapterFile) {
-                    context.addProblem(valueTuple.cells, Level.WARNING, "Adapter trimming is requested but adapter file for library preparation kit '${kit}' is missing.")
+                    context.addProblem(valueTuple.cells, Level.WARNING, "Adapter trimming is requested but adapter file for library preparation kit '${kit}' is missing.", "Adapter trimming is requested but the adapter file for at least one library preparation kit is missing.")
                 }
                 if (seqType.isRna() && !kit.reverseComplementAdapterSequence) {
-                    context.addProblem(valueTuple.cells, Level.WARNING, "Adapter trimming is requested but reverse complement adapter sequence for library preparation kit '${kit}' is missing.")
+                    context.addProblem(valueTuple.cells, Level.WARNING, "Adapter trimming is requested but reverse complement adapter sequence for library preparation kit '${kit}' is missing.","Adapter trimming is requested but the reverse complement adapter sequence for at least one library preparation kit is missing.")
                 }
             }
         }

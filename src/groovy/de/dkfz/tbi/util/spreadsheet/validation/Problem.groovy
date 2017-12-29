@@ -12,11 +12,13 @@ class Problem {
     final Set<Cell> affectedCells
     final Level level
     final String message
+    final String type
 
-    Problem(Set<Cell> affectedCells, Level level, String message) {
+    Problem(Set<Cell> affectedCells, Level level, String message, String type = message) {
         this.affectedCells = new LinkedHashSet<Cell>(affectedCells).asImmutable()
         this.level = level
         this.message = message
+        this.type = type
     }
 
     String getLevelAndMessage() {

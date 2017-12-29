@@ -28,7 +28,7 @@ class MateNumberValidator extends SingleValueValidator<MetadataValidationContext
         if (!mateNumber) {
             context.addProblem(cells, Level.ERROR, "The mate number must be provided and must be a positive integer (value >= 1).")
         } else if (!mateNumber.isInteger() || mateNumber.toInteger() < 1) {
-            context.addProblem(cells, Level.ERROR, "The mate number ('${mateNumber}') must be a positive integer (value >= 1).")
+            context.addProblem(cells, Level.ERROR, "The mate number ('${mateNumber}') must be a positive integer (value >= 1).","At least one mate number is not a positive integer number.")
         }
     }
 }

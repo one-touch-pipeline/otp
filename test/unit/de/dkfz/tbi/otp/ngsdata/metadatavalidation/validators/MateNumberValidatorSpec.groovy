@@ -61,11 +61,11 @@ abc
                 new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.ERROR,
                         "The mate number must be provided and must be a positive integer (value >= 1)."),
                 new Problem(context.spreadsheet.dataRows[1].cells as Set, Level.ERROR,
-                        "The mate number ('-1') must be a positive integer (value >= 1)."),
+                        "The mate number ('-1') must be a positive integer (value >= 1).", "At least one mate number is not a positive integer number."),
                 new Problem(context.spreadsheet.dataRows[2].cells as Set, Level.ERROR,
-                        "The mate number ('0') must be a positive integer (value >= 1)."),
+                        "The mate number ('0') must be a positive integer (value >= 1).", "At least one mate number is not a positive integer number."),
                 new Problem(context.spreadsheet.dataRows[7].cells as Set, Level.ERROR,
-                        "The mate number ('abc') must be a positive integer (value >= 1)."),
+                        "The mate number ('abc') must be a positive integer (value >= 1).", "At least one mate number is not a positive integer number."),
         ]
 
         then:

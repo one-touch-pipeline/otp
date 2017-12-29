@@ -63,7 +63,7 @@ class LibrarySampleValidator extends ValueTuplesValidator<MetadataValidationCont
                 Set<Cell> cells = rows*.cells.sum() as Set<Cell>
 
                 if (((rows*.libraryName).findAll().unique()).size() > 1) {
-                    context.addProblem(cells, Level.WARNING, "All rows for project '${Project.get(projectId)}' which look similar to '${normalizedLibraryName}' should have the same value in column '${CUSTOMER_LIBRARY}'.")
+                    context.addProblem(cells, Level.WARNING, "All rows for project '${Project.get(projectId)}' which look similar to '${normalizedLibraryName}' should have the same value in column '${CUSTOMER_LIBRARY}'.", "All rows for one project which have a similar customer library should have the same value in column '${CUSTOMER_LIBRARY}'.")
                 }
 
                 List<String> result = SeqTrack.createCriteria().list {
@@ -85,7 +85,7 @@ class LibrarySampleValidator extends ValueTuplesValidator<MetadataValidationCont
                         cells = rows.findAll{it.libraryName != result[0]}*.cells.sum() as Set<Cell>
                     }
                     if (cells) {
-                        context.addProblem(cells, Level.WARNING, "In project '${Project.get(projectId)}' the following library names which look similar to '${normalizedLibraryName}' are already registered: '${result.join("', '")}'.")
+                        context.addProblem(cells, Level.WARNING, "In project '${Project.get(projectId)}' the following library names which look similar to '${normalizedLibraryName}' are already registered: '${result.join("', '")}'.", "For at least one project library names which look similar to entries in the metadata file are already registered.")
                     }
                 }
             }

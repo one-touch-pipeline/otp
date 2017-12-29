@@ -40,7 +40,7 @@ class CoverageValidatorSpec extends Specification {
         )
         Collection<Problem> expectedProblems = [
                 new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.ERROR,
-                        "The coverage '${COVERAGE_NO_DOUBLE}' should be a double number."),
+                        "The coverage '${COVERAGE_NO_DOUBLE}' should be a double number.", "At least one coverage is not a double number."),
         ]
 
 

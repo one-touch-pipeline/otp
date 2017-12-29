@@ -45,7 +45,7 @@ class DataFileExistenceValidator extends ValueTuplesValidator<MetadataValidation
                     synchronized (sync) {
                         addDirectoryStructureInfo()
                         context.addProblem((Set<Cell>)valueTuples*.cells.sum(), Level.WARNING,
-                                "Multiple rows reference the same file '${path}'.")
+                                "Multiple rows reference the same file '${path}'.", "Multiple rows reference the same file.")
                     }
                 }
                 String message = null
@@ -61,7 +61,7 @@ class DataFileExistenceValidator extends ValueTuplesValidator<MetadataValidation
                 if (message) {
                     synchronized (sync) {
                         addDirectoryStructureInfo()
-                        context.addProblem((Set<Cell>)valueTuples*.cells.sum(), Level.ERROR, message)
+                        context.addProblem((Set<Cell>)valueTuples*.cells.sum(), Level.ERROR, message, "At least one file can not be access by OTP, does not exist, is empty or is not a file.")
                     }
                 }
             }

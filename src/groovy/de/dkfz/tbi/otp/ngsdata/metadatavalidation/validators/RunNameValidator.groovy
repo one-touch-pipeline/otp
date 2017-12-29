@@ -24,7 +24,7 @@ class RunNameValidator extends SingleValueValidator<MetadataValidationContext> i
     @Override
     void validateValue(MetadataValidationContext context, String runName, Set<Cell> cells) {
         if (!OtpPath.isValidPathComponent(runName)) {
-            context.addProblem(cells, Level.ERROR, "The run name '${runName}' is not a valid directory name.")
+            context.addProblem(cells, Level.ERROR, "The run name '${runName}' is not a valid directory name.", "At least one run name is not a valid directory name.")
         }
     }
 }

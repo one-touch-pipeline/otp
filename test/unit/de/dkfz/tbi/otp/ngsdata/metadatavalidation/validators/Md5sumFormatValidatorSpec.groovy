@@ -27,7 +27,7 @@ class Md5sumFormatValidatorSpec extends Specification {
         Problem problem = exactlyOneElement(context.problems)
         problem.level == Level.ERROR
         containSame(problem.affectedCells*.cellAddress, ['A2', 'A4'])
-        problem.message.contains('Not a well-formatted MD5 sum')
+        problem.message.contains("Not a well-formatted MD5 sum: 'xxxxyyyyxxxxyyyyxxxxyyyyxxxxyyyy'.")
     }
 
     void 'validate concerning bam metadata, allows empty cells'() {

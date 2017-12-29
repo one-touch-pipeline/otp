@@ -34,9 +34,9 @@ class RunSeqCenterValidatorSpec extends Specification {
         DomainFactory.createRun(name: 'ConsistentDatabaseAndMetadata', seqCenter: center1)
         Collection<Problem> expectedProblems = [
                 new Problem(context.spreadsheet.dataRows[0].cells + context.spreadsheet.dataRows[1].cells as Set, Level.ERROR,
-                        "All entries for run 'InconsistentMetadata' must have the same value in the column '${CENTER_NAME}'."),
+                        "All entries for run 'InconsistentMetadata' must have the same value in the column '${CENTER_NAME}'.", "All entries for one run must have the same value in the column 'CENTER_NAME'."),
                 new Problem(context.spreadsheet.dataRows[2].cells as Set, Level.ERROR,
-                        "Run 'InconsistentDatabaseAndMetadata' is already registered in the OTP database with sequencing center 'Center1', not with 'Center2'."),
+                        "Run 'InconsistentDatabaseAndMetadata' is already registered in the OTP database with sequencing center 'Center1', not with 'Center2'.", "At least one run is already registered in the OTP database with another sequencing center."),
         ]
 
         when:

@@ -18,11 +18,11 @@ class UnusualCharactersValidatorSpec extends Specification {
         )
         Collection<Problem> expectedProblems = [
                 new Problem([context.spreadsheet.header.cells[1], context.spreadsheet.dataRows[0].cells[0]] as Set,
-                        Level.WARNING, "'M\u00e4use' contains an unusual character: '\u00e4' (0xe4)"),
+                        Level.WARNING, "'M\u00e4use' contains an unusual character: '\u00e4' (0xe4)", "At least one value contains an unusual character."),
                 new Problem([context.spreadsheet.dataRows[0].cells[1]] as Set,
-                        Level.WARNING, "'L\u00f6wen' contains an unusual character: '\u00f6' (0xf6)"),
+                        Level.WARNING, "'L\u00f6wen' contains an unusual character: '\u00f6' (0xf6)", "At least one value contains an unusual character."),
                 new Problem([context.spreadsheet.dataRows[1].cells[0]] as Set,
-                        Level.WARNING, "'Tausendf\u00fc\u00dfler' contains unusual characters: '\u00fc' (0xfc), '\u00df' (0xdf)"),
+                        Level.WARNING, "'Tausendf\u00fc\u00dfler' contains unusual characters: '\u00fc' (0xfc), '\u00df' (0xdf)", "At least one value contains an unusual character."),
         ]
 
         when:

@@ -29,15 +29,15 @@ class FilenameValidator extends SingleValueValidator<MetadataValidationContext> 
     @Override
     void validateValue(MetadataValidationContext context, String filename, Set<Cell> cells) {
         if (!filename.endsWith('.gz')) {
-            context.addProblem(cells, Level.ERROR, "Filename '${filename}' does not end with '.gz'.")
+            context.addProblem(cells, Level.ERROR, "Filename '${filename}' does not end with '.gz'.", "At least one filename does not end with '.gz'.")
         }
         try {
             FileTypeService.getFileType(filename, FileType.Type.SEQUENCE)
         } catch (FileTypeUndefinedException e) {
-            context.addProblem(cells, Level.ERROR, "Filename '${filename}' contains neither '_fastq' nor '.fastq'.")
+            context.addProblem(cells, Level.ERROR, "Filename '${filename}' contains neither '_fastq' nor '.fastq'.", "At least one filename contains neither '_fastq' nor '.fastq'.")
         }
         if (!(OtpPath.isValidPathComponent(filename) || OtpPath.isValidAbsolutePath(filename))) {
-            context.addProblem(cells, Level.ERROR, "Filename '${filename}' contains invalid characters.")
+            context.addProblem(cells, Level.ERROR, "Filename '${filename}' contains invalid characters.", "At least one filename contains invalid characters.")
         }
     }
 }

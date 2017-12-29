@@ -25,7 +25,7 @@ class SeqCenterValidator extends SingleValueValidator<MetadataValidationContext>
     @Override
     void validateValue(MetadataValidationContext context, String centerName, Set<Cell> cells) {
         if (!atMostOneElement(SeqCenter.findAllByName(centerName))) {
-            context.addProblem(cells, Level.ERROR, "Sequencing center '${centerName}' is not registered in the OTP database.")
+            context.addProblem(cells, Level.ERROR, "Sequencing center '${centerName}' is not registered in the OTP database.", "At least one sequencing center is not registered in the OTP database.")
         }
     }
 }

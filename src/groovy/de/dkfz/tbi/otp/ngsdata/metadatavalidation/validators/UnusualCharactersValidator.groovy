@@ -32,9 +32,9 @@ class UnusualCharactersValidator extends AllCellsValidator<AbstractMetadataValid
         if (unusualCharacters) {
             String unusualCharactersString = unusualCharacters.collect { "'${it}' (0x${Integer.toHexString((int)it.charValue())})" }.join(', ')
             if (unusualCharacters.size() == 1) {
-                context.addProblem(cells, Level.WARNING, "'${value}' contains an unusual character: ${unusualCharactersString}")
+                context.addProblem(cells, Level.WARNING, "'${value}' contains an unusual character: ${unusualCharactersString}", "At least one value contains an unusual character.")
             } else if (unusualCharacters.size() > 1) {
-                context.addProblem(cells, Level.WARNING, "'${value}' contains unusual characters: ${unusualCharactersString}")
+                context.addProblem(cells, Level.WARNING, "'${value}' contains unusual characters: ${unusualCharactersString}", "At least one value contains an unusual character.")
             }
         }
     }

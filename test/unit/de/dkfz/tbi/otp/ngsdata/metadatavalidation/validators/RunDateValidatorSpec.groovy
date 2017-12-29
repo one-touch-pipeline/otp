@@ -21,11 +21,11 @@ class RunDateValidatorSpec extends Specification {
                         "9999-01-01\n")
         Collection<Problem> expectedProblems = [
                 new Problem(context.spreadsheet.dataRows[1].cells as Set, Level.ERROR,
-                        "The format of the run date '2016-01-32' is invalid, it must match yyyy-MM-dd."),
+                        "The format of the run date '2016-01-32' is invalid, it must match yyyy-MM-dd.", "The format of at least one run date is invalid, it must match yyyy-MM-dd."),
                 new Problem(context.spreadsheet.dataRows[2].cells as Set, Level.ERROR,
-                        "The format of the run date '2016-0s1-22' is invalid, it must match yyyy-MM-dd."),
+                        "The format of the run date '2016-0s1-22' is invalid, it must match yyyy-MM-dd.", "The format of at least one run date is invalid, it must match yyyy-MM-dd."),
                 new Problem(context.spreadsheet.dataRows[3].cells as Set, Level.ERROR,
-                        "The run date '9999-01-01' must not be from the future."),
+                        "The run date '9999-01-01' must not be from the future.", "No run date may be from the future."),
                 ]
 
         when:

@@ -27,21 +27,21 @@ class BamFilePathValidator extends SingleValueValidator<BamMetadataValidationCon
     @Override
     void validateValue(BamMetadataValidationContext context, String filePath, Set<Cell> cells) {
         if (!filePath.endsWith(".bam")) {
-            context.addProblem(cells, Level.ERROR, "Filename '${filePath}' does not end with '.bam'.")
+            context.addProblem(cells, Level.ERROR, "Filename '${filePath}' does not end with '.bam'.", "At least one filename does not end with '.bam'.")
         }
         if (!OtpPath.isValidAbsolutePath(filePath)) {
-            context.addProblem(cells, Level.ERROR, "The path '${filePath}' is not an absolute path.")
+            context.addProblem(cells, Level.ERROR, "The path '${filePath}' is not an absolute path.", "At least one path is not an absolute path.")
         } else {
             try {
                 File bamFile = new File(filePath)
                 if (!bamFile.isFile()) {
                     if (!bamFile.exists()) {
-                        context.addProblem(cells, Level.ERROR, "'${filePath}' does not exist or cannot be accessed by OTP.")
+                        context.addProblem(cells, Level.ERROR, "'${filePath}' does not exist or cannot be accessed by OTP.","At least one file does not exist or cannot be accessed by OTP.")
                     } else {
-                        context.addProblem(cells, Level.ERROR, "'${filePath}' is not a file.")
+                        context.addProblem(cells, Level.ERROR, "'${filePath}' is not a file.", "At least one file is not a file.")
                     }
                 } else if (!bamFile.canRead()) {
-                    context.addProblem(cells, Level.ERROR, "'${filePath}' is not readable.")
+                    context.addProblem(cells, Level.ERROR, "'${filePath}' is not readable.", "At least one file is not readable.")
                 }
             } catch (Exception e) {
                 context.addProblem(Collections.emptySet(), Level.ERROR, e.message)

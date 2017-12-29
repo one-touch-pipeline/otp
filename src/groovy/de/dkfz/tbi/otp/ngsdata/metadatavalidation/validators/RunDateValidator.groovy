@@ -30,12 +30,12 @@ class RunDateValidator extends SingleValueValidator<MetadataValidationContext> i
         try {
             LocalDate date = ISODateTimeFormat.date().parseLocalDate(runDate)
             if (date > LocalDate.now().plusDays(1)) {
-                context.addProblem(cells, Level.ERROR, "The run date '${runDate}' must not be from the future.")
+                context.addProblem(cells, Level.ERROR, "The run date '${runDate}' must not be from the future.", "No run date may be from the future.")
             }
         } catch (IllegalFieldValueException e) {
-            context.addProblem(cells, Level.ERROR, "The format of the run date '${runDate}' is invalid, it must match yyyy-MM-dd.")
+            context.addProblem(cells, Level.ERROR, "The format of the run date '${runDate}' is invalid, it must match yyyy-MM-dd.", "The format of at least one run date is invalid, it must match yyyy-MM-dd.")
         } catch (IllegalArgumentException e) {
-            context.addProblem(cells, Level.ERROR, "The format of the run date '${runDate}' is invalid, it must match yyyy-MM-dd.")
+            context.addProblem(cells, Level.ERROR, "The format of the run date '${runDate}' is invalid, it must match yyyy-MM-dd.", "The format of at least one run date is invalid, it must match yyyy-MM-dd.")
         }
     }
 }

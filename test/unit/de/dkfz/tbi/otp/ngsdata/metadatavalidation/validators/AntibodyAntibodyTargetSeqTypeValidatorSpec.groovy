@@ -106,8 +106,8 @@ class AntibodyAntibodyTargetSeqTypeValidatorSpec extends Specification {
 
         then:
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.WARNING, "Antibody target ('some_antibody_target') and/or antibody ('some_antibody') are/is provided although data is no ChIP seq data. OTP will ignore the values."),
-                new Problem(context.spreadsheet.dataRows[2].cells as Set, Level.WARNING, "Antibody target ('some_antibody_target') and/or antibody ('some_antibody') are/is provided although data is no ChIP seq data. OTP will ignore the values."),
+                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.WARNING, "Antibody target ('some_antibody_target') and/or antibody ('some_antibody') are/is provided although data is no ChIP seq data. OTP will ignore the values.", "Antibody target and/or antibody are/is provided although data is no ChIP seq data. OTP will ignore the values."),
+                new Problem(context.spreadsheet.dataRows[2].cells as Set, Level.WARNING, "Antibody target ('some_antibody_target') and/or antibody ('some_antibody') are/is provided although data is no ChIP seq data. OTP will ignore the values.", "Antibody target and/or antibody are/is provided although data is no ChIP seq data. OTP will ignore the values."),
         ]
         assertContainSame(context.problems, expectedProblems)
     }

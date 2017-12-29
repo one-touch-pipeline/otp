@@ -43,7 +43,7 @@ class RunSeqPlatformSeqKitValidator extends ValueTuplesValidator<MetadataValidat
             SeqPlatform seqPlatform = SeqPlatformService.findSeqPlatform(valueTuple.getValue(INSTRUMENT_PLATFORM.name()), valueTuple.getValue(INSTRUMENT_MODEL.name()), valueTuple.getValue(SEQUENCING_KIT.name()) ?: null)
             String runName = valueTuple.getValue(RUN_ID.name())
             if (valueTuple.getValue(CENTER_NAME.name()) == "DKFZ" && seqPlatform?.identifierInRunName && !runName.contains(seqPlatform.identifierInRunName)) {
-                context.addProblem(valueTuple.cells, Level.WARNING, "The run name ${runName} does not contain the sequencing kit and sequencing platform specific run identifier ${seqPlatform.identifierInRunName}.")
+                context.addProblem(valueTuple.cells, Level.WARNING, "The run name ${runName} does not contain the sequencing kit and sequencing platform specific run identifier ${seqPlatform.identifierInRunName}.", "At least one run name does not contain the sequencing kit and sequencing platform specific run identifier.")
 
             }
         }

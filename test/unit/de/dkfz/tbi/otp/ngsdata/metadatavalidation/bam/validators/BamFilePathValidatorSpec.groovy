@@ -47,21 +47,21 @@ class BamFilePathValidatorSpec extends Specification {
         )
         Collection<Problem> expectedProblems = [
                 new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.ERROR,
-                        "The path 'testFile.bam' is not an absolute path."),
+                        "The path 'testFile.bam' is not an absolute path.", "At least one path is not an absolute path."),
                 new Problem(context.spreadsheet.dataRows[1].cells as Set, Level.ERROR,
-                        "The path 'abc/testFile.bam' is not an absolute path."),
+                        "The path 'abc/testFile.bam' is not an absolute path.", "At least one path is not an absolute path."),
                 new Problem(context.spreadsheet.dataRows[2].cells as Set, Level.ERROR,
-                        "The path '../testFile.bam' is not an absolute path."),
+                        "The path '../testFile.bam' is not an absolute path.", "At least one path is not an absolute path."),
                 new Problem(context.spreadsheet.dataRows[3].cells as Set, Level.ERROR,
-                        "The path './testFile.bam' is not an absolute path."),
+                        "The path './testFile.bam' is not an absolute path.", "At least one path is not an absolute path."),
                 new Problem(context.spreadsheet.dataRows[4].cells as Set, Level.ERROR,
-                        "Filename '${wrongFormatFile}' does not end with '.bam'."),
+                        "Filename '${wrongFormatFile}' does not end with '.bam'.", "At least one filename does not end with '.bam'."),
                 new Problem(context.spreadsheet.dataRows[5].cells as Set, Level.ERROR,
-                         "'/tmp/test.bam' does not exist or cannot be accessed by OTP."),
+                         "'/tmp/test.bam' does not exist or cannot be accessed by OTP.", "At least one file does not exist or cannot be accessed by OTP."),
                 new Problem(context.spreadsheet.dataRows[6].cells as Set, Level.ERROR,
-                         "'${dir.absolutePath}' is not a file."),
+                         "'${dir.absolutePath}' is not a file.", "At least one file is not a file."),
                 new Problem(context.spreadsheet.dataRows[7].cells as Set, Level.ERROR,
-                          "'${notReadAble.absolutePath}' is not readable."),
+                          "'${notReadAble.absolutePath}' is not readable.", "At least one file is not readable."),
         ]
 
         when:

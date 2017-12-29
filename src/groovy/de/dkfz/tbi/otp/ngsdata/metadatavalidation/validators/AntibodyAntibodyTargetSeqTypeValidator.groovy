@@ -42,7 +42,7 @@ class AntibodyAntibodyTargetSeqTypeValidator extends ValueTuplesValidator<Metada
             String seqType = MetadataImportService.getSeqTypeNameFromMetadata(valueTuple)
 
             if ((antibodyTarget || antibody) && seqType != SeqTypeNames.CHIP_SEQ.seqTypeName) {
-                context.addProblem(valueTuple.cells, Level.WARNING, "Antibody target ('${antibodyTarget}') and/or antibody ('${antibody}') are/is provided although data is no ChIP seq data. OTP will ignore the values.")
+                context.addProblem(valueTuple.cells, Level.WARNING, "Antibody target ('${antibodyTarget}') and/or antibody ('${antibody}') are/is provided although data is no ChIP seq data. OTP will ignore the values.", "Antibody target and/or antibody are/is provided although data is no ChIP seq data. OTP will ignore the values.")
             }
             if (seqType == SeqTypeNames.CHIP_SEQ.seqTypeName && !antibodyTarget) {
                 context.addProblem(valueTuple.cells, Level.ERROR, "Antibody target is not provided although data is ChIP seq data.")

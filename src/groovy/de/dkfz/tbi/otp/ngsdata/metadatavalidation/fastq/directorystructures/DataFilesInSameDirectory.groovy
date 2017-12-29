@@ -26,7 +26,7 @@ class DataFilesInSameDirectory implements DirectoryStructure {
         if (OtpPath.isValidPathComponent(fileName)) {
             return new File(context.metadataFile.parentFile, fileName)
         } else {
-            context.addProblem(valueTuple.cells, Level.ERROR, "'${fileName}' is not a valid file name.")
+            context.addProblem(valueTuple.cells, Level.ERROR, "'${fileName}' is not a valid file name.", "At least one file name is not a valid file name.")
             return null
         }
     }

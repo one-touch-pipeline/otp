@@ -34,7 +34,7 @@ class SeqTypeValidator extends ValueTuplesValidator<MetadataValidationContext> i
         valueTuples.each { ValueTuple valueTuple ->
             String seqType = MetadataImportService.getSeqTypeNameFromMetadata(valueTuple)
             if (!SeqTypeService.findSeqTypeByNameOrAlias(seqType)) {
-                context.addProblem(valueTuple.cells, Level.ERROR, "Sequencing type '${seqType}' is not registered in the OTP database.")
+                context.addProblem(valueTuple.cells, Level.ERROR, "Sequencing type '${seqType}' is not registered in the OTP database.", "At least one sequencing type is not registered in OTP.")
             }
         }
     }

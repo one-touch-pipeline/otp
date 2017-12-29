@@ -30,6 +30,12 @@
                         </li>
                     </g:each>
                 </ul>
+                <h4><g:message code="metadataImport.summary"/></h4>
+                <ul>
+                    <g:each var="problemType" in="${context.getSummary()}" >
+                        <li> <span style="white-space: pre-line ">${problemType} </span></li>
+                    </g:each>
+                </ul>
             </g:else>
             <div class="fixed-scrollbar-container">
                 <g:if test="${context.spreadsheet}">

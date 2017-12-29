@@ -58,6 +58,7 @@ class MetadataImportController {
             }
             isValidated = true
         }
+
         return [
             directoryStructures   : metadataImportService.getSupportedDirectoryStructures(),
             cmd                   : cmd,
@@ -65,7 +66,7 @@ class MetadataImportController {
             contexts              : metadataValidationContexts,
             implementedValidations: metadataImportService.getImplementedValidations(),
             isValidated           : isValidated,
-            problems              : problems
+            problems              : problems,
         ]
     }
 

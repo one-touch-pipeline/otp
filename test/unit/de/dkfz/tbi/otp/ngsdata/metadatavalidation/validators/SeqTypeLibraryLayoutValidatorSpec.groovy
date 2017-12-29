@@ -103,21 +103,21 @@ SeqType3\tLibraryLayout3\ttrue
 
         Collection<Problem> expectedProblems = [
                 new Problem(context.spreadsheet.dataRows[1].cells as Set, Level.ERROR,
-                        "The combination of sequencing type 'SeqType1' and library layout 'LibraryLayout2' is not registered in the OTP database."),
+                        "The combination of sequencing type 'SeqType1' and library layout 'LibraryLayout2' is not registered in the OTP database.", "At least one combination of sequencing type and library layout is not registered in the OTP database."),
                 new Problem(context.spreadsheet.dataRows[2].cells as Set, Level.ERROR,
-                        "The combination of sequencing type 'SeqType1' and library layout 'LibraryLayout3' is not registered in the OTP database."),
+                        "The combination of sequencing type 'SeqType1' and library layout 'LibraryLayout3' is not registered in the OTP database.", "At least one combination of sequencing type and library layout is not registered in the OTP database."),
                 new Problem(context.spreadsheet.dataRows[3].cells as Set, Level.ERROR,
-                        "The combination of sequencing type 'SeqType2' and library layout 'LibraryLayout1' is not registered in the OTP database."),
+                        "The combination of sequencing type 'SeqType2' and library layout 'LibraryLayout1' is not registered in the OTP database.", "At least one combination of sequencing type and library layout is not registered in the OTP database."),
                 new Problem(context.spreadsheet.dataRows[5].cells as Set, Level.ERROR,
-                        "The combination of sequencing type 'SeqType2' and library layout 'LibraryLayout3' is not registered in the OTP database."),
+                        "The combination of sequencing type 'SeqType2' and library layout 'LibraryLayout3' is not registered in the OTP database.", "At least one combination of sequencing type and library layout is not registered in the OTP database."),
                 new Problem(context.spreadsheet.dataRows[6].cells as Set, Level.ERROR,
-                        "The combination of sequencing type 'SeqType3' and library layout 'LibraryLayout1' is not registered in the OTP database."),
+                        "The combination of sequencing type 'SeqType3' and library layout 'LibraryLayout1' is not registered in the OTP database.", "At least one combination of sequencing type and library layout is not registered in the OTP database."),
                 new Problem(context.spreadsheet.dataRows[7].cells as Set, Level.ERROR,
-                        "The combination of sequencing type 'SeqType3' and library layout 'LibraryLayout2' is not registered in the OTP database."),
+                        "The combination of sequencing type 'SeqType3' and library layout 'LibraryLayout2' is not registered in the OTP database.", "At least one combination of sequencing type and library layout is not registered in the OTP database."),
                 new Problem(context.spreadsheet.dataRows[8].cells as Set, Level.ERROR,
-                        "The combination of sequencing type 'SeqType3' and library layout 'LibraryLayout3' is not registered in the OTP database."),
+                        "The combination of sequencing type 'SeqType3' and library layout 'LibraryLayout3' is not registered in the OTP database.", "At least one combination of sequencing type and library layout is not registered in the OTP database."),
                 new Problem(context.spreadsheet.dataRows[9].cells as Set, Level.ERROR,
-                        "The combination of sequencing type 'SeqType3_TAGMENTATION' and library layout 'LibraryLayout3' is not registered in the OTP database."),
+                        "The combination of sequencing type 'SeqType3_TAGMENTATION' and library layout 'LibraryLayout3' is not registered in the OTP database.", "At least one combination of sequencing type and library layout is not registered in the OTP database."),
         ]
 
         when:

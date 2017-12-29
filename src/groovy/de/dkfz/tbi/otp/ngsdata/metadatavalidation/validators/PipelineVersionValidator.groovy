@@ -24,7 +24,7 @@ class PipelineVersionValidator extends SingleValueValidator<MetadataValidationCo
     @Override
     void validateValue(MetadataValidationContext context, String pipelineVersion, Set<Cell> cells) {
         if (pipelineVersion && !SoftwareToolService.getBaseCallingTool(pipelineVersion)) {
-            context.addProblem(cells, Level.ERROR, "Pipeline version '${pipelineVersion}' is not registered in the OTP database.")
+            context.addProblem(cells, Level.ERROR, "Pipeline version '${pipelineVersion}' is not registered in the OTP database.", "At least one pipeline version is not registered in the OTP database.")
         }
     }
 }

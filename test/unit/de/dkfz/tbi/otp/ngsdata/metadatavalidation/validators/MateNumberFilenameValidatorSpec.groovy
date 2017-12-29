@@ -55,12 +55,12 @@ class MateNumberFilenameValidatorSpec extends Specification {
         )
         Collection<Problem> expectedProblems = [
                 new Problem(Collections.emptySet(), Level.WARNING,
-                        "Optional column 'MATE' is missing. OTP will try to guess the mate numbers from the filenames."),
+                        "Optional column 'MATE' is missing. OTP will try to guess the mate numbers from the filenames.", "Optional column 'MATE' is missing. OTP will try to guess the mate numbers from the filenames."),
                 new Problem(context.spreadsheet.dataRows[1].cells as Set, Level.WARNING,
                         "The mate number '2' parsed from filename 'NB_E_789_R.2.fastq.gz' is not viable with library layout 'SINGLE'." +
-                                " If you ignore this warning, OTP will ignore the mate number parsed from the filename."),
+                                " If you ignore this warning, OTP will ignore the mate number parsed from the filename.", "At least one mate number parsed from filename is not viable with the library layout."),
                 new Problem(context.spreadsheet.dataRows[4].cells as Set, Level.ERROR,
-                        "Cannot extract mate number, because neither a ${MATE} column exists, nor can a mate number be parsed from filename 'testFileName.fastq.gz' using any pattern known to OTP, nor can one be implied from the library layout 'testLibraryLayout'."),
+                        "Cannot extract mate number, because neither a ${MATE} column exists, nor can a mate number be parsed from filename 'testFileName.fastq.gz' using any pattern known to OTP, nor can one be implied from the library layout 'testLibraryLayout'.", "Cannot extract mate number"),
         ]
         when:
         new MateNumberFilenameValidator().validate(context)
@@ -84,10 +84,10 @@ class MateNumberFilenameValidatorSpec extends Specification {
         Collection<Problem> expectedProblems = [
                 new Problem(context.spreadsheet.dataRows[1].cells as Set, Level.WARNING,
                         "The value '2' in the MATE column is different from the mate number '1' parsed from the filename 'NB_E_789_R.1.fastq.gz'. " +
-                                "If you ignore this warning, OTP will use the mate number from the MATE column and ignore the value parsed from the filename."),
+                                "If you ignore this warning, OTP will use the mate number from the MATE column and ignore the value parsed from the filename.", "At least one value in the MATE column is different from the mate number parsed from the filename."),
                 new Problem(context.spreadsheet.dataRows[2].cells as Set, Level.WARNING,
                         "The value 'abc' in the MATE column is different from the mate number '1' parsed from the filename 'NB_E_789_R.1.fastq.gz'. " +
-                                "If you ignore this warning, OTP will use the mate number from the MATE column and ignore the value parsed from the filename."),
+                                "If you ignore this warning, OTP will use the mate number from the MATE column and ignore the value parsed from the filename.", "At least one value in the MATE column is different from the mate number parsed from the filename."),
         ]
         when:
         new MateNumberFilenameValidator().validate(context)
@@ -120,19 +120,19 @@ class MateNumberFilenameValidatorSpec extends Specification {
         Collection<Problem> expectedProblems = [
                 new Problem(context.spreadsheet.dataRows[3].cells.findAll({it.columnAddress=="A" || it.columnAddress=="B"}) as Set, Level.WARNING,
                         "The mate number '2' parsed from filename 'NB_E_789_R.2.fastq.gz' is not viable with library layout 'SINGLE'." +
-                                " If you ignore this warning, OTP will ignore the mate number parsed from the filename."),
+                                " If you ignore this warning, OTP will ignore the mate number parsed from the filename.", "At least one mate number parsed from filename is not viable with the library layout."),
                 new Problem(context.spreadsheet.dataRows[4].cells.findAll({it.columnAddress=="A" || it.columnAddress=="B"}) as Set, Level.WARNING,
                         "The mate number '2' parsed from filename 'NB_E_789_R.2.fastq.gz' is not viable with library layout 'SINGLE'." +
-                                " If you ignore this warning, OTP will ignore the mate number parsed from the filename."),
+                                " If you ignore this warning, OTP will ignore the mate number parsed from the filename.", "At least one mate number parsed from filename is not viable with the library layout."),
                 new Problem(context.spreadsheet.dataRows[5].cells.findAll({it.columnAddress=="A" || it.columnAddress=="B"}) as Set, Level.WARNING,
                         "The mate number '2' parsed from filename 'NB_E_789_R.2.fastq.gz' is not viable with library layout 'SINGLE'." +
-                                " If you ignore this warning, OTP will ignore the mate number parsed from the filename."),
+                                " If you ignore this warning, OTP will ignore the mate number parsed from the filename.", "At least one mate number parsed from filename is not viable with the library layout."),
                 new Problem(context.spreadsheet.dataRows[10].cells.findAll({it.columnAddress=="A" || it.columnAddress=="C"}) as Set, Level.WARNING,
                         "The value '2' in the MATE column is different from the mate number '1' parsed from the filename 'NB_E_789_R.1.fastq.gz'. " +
-                                "If you ignore this warning, OTP will use the mate number from the MATE column and ignore the value parsed from the filename."),
+                                "If you ignore this warning, OTP will use the mate number from the MATE column and ignore the value parsed from the filename.", "At least one value in the MATE column is different from the mate number parsed from the filename."),
                 new Problem(context.spreadsheet.dataRows[11].cells.findAll({it.columnAddress=="A" || it.columnAddress=="C"}) as Set, Level.WARNING,
                         "The value 'abc' in the MATE column is different from the mate number '1' parsed from the filename 'NB_E_789_R.1.fastq.gz'. " +
-                                "If you ignore this warning, OTP will use the mate number from the MATE column and ignore the value parsed from the filename."),
+                                "If you ignore this warning, OTP will use the mate number from the MATE column and ignore the value parsed from the filename.", "At least one value in the MATE column is different from the mate number parsed from the filename."),
         ]
         when:
         new MateNumberFilenameValidator().validate(context)

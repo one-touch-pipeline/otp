@@ -30,7 +30,7 @@ class WithdrawnValidator extends SingleValueValidator<MetadataValidationContext>
     void validateValue(MetadataValidationContext context, String value, Set<Cell> cells) {
         final String uppercaseValue = value.toUpperCase(Locale.ENGLISH)
         if (value != "" && value != "0" && uppercaseValue != NONE) {
-            context.addProblem(cells, Level.ERROR, "'${value}' is not an acceptable '${WITHDRAWN}' value. It must be empty or '0' or 'None'. Withdrawn data cannot be imported into OTP.")
+            context.addProblem(cells, Level.ERROR, "'${value}' is not an acceptable '${WITHDRAWN}' value. It must be empty or '0' or 'None'. Withdrawn data cannot be imported into OTP.", "Withdrawn data cannot be imported into OTP.")
         }
     }
 }

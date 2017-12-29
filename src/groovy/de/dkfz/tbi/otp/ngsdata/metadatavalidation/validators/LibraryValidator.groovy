@@ -32,9 +32,9 @@ class LibraryValidator extends SingleValueValidator<MetadataValidationContext> i
         if (library) {
             Matcher matcher = library =~ REGEX
             if (!OtpPath.isValidPathComponent(library)) {
-                context.addProblem(cells, Level.ERROR, "Library '${library}' contains invalid characters.")
+                context.addProblem(cells, Level.ERROR, "Library '${library}' contains invalid characters.", "At least one library contains invalid characters.")
             } else if (!matcher) {
-                context.addProblem(cells, Level.WARNING, "Library '${library}' does not match regular expression '${REGEX}'.")
+                context.addProblem(cells, Level.WARNING, "Library '${library}' does not match regular expression '${REGEX}'.", "At least one Library does not match regular expression '${REGEX}'.")
             }
         }
     }

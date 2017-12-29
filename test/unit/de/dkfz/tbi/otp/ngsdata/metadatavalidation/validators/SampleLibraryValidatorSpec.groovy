@@ -40,7 +40,7 @@ class SampleLibraryValidatorSpec extends Specification {
 
         then:
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[1].cells as Set, Level.WARNING, "For sample 'testSampleLib' which contains 'lib', there should be a value in the ${CUSTOMER_LIBRARY} column.")
+                new Problem(context.spreadsheet.dataRows[1].cells as Set, Level.WARNING, "For sample 'testSampleLib' which contains 'lib', there should be a value in the ${CUSTOMER_LIBRARY} column.", "For samples which contain 'lib', there should be a value in the CUSTOMER_LIBRARY column.")
         ]
         assertContainSame(context.problems, expectedProblems)
     }
@@ -95,7 +95,7 @@ class SampleLibraryValidatorSpec extends Specification {
 
         then:
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.WARNING, "For sample 'testSampleLib' which contains 'lib', there should be a value in the ${CUSTOMER_LIBRARY} column.")
+                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.WARNING, "For sample 'testSampleLib' which contains 'lib', there should be a value in the ${CUSTOMER_LIBRARY} column.", "For samples which contain 'lib', there should be a value in the CUSTOMER_LIBRARY column.")
         ]
         assertContainSame(context.problems, expectedProblems)
     }

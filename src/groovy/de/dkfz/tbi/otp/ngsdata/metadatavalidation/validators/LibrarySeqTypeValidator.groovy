@@ -30,7 +30,7 @@ class LibrarySeqTypeValidator extends ValueTuplesValidator<MetadataValidationCon
         valueTuples.each { ValueTuple valueTuple ->
             String seqType = MetadataImportService.getSeqTypeNameFromMetadata(valueTuple)
             if (seqType == SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName && !valueTuple.getValue(CUSTOMER_LIBRARY.name())) {
-                context.addProblem(valueTuple.cells, Level.WARNING, "For sequencing type '${seqType}' there should be a value in the ${CUSTOMER_LIBRARY} column.")
+                context.addProblem(valueTuple.cells, Level.WARNING, "For sequencing type '${seqType}' there should be a value in the ${CUSTOMER_LIBRARY} column.", "For specific sequencing types there should be a value in the ${CUSTOMER_LIBRARY} column.")
             }
         }
     }
