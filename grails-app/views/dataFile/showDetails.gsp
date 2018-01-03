@@ -102,7 +102,7 @@
         <table>
             <tr>
                 <td class="myKey"><g:message code="datafile.showDetails.metaDataStatus.project"/></td>
-                <td class="myValue"><g:link controller="projectOverview" action="index" params="[projectName: dataFile.project]">${dataFile.project}</g:link></td>
+                <td class="myValue"><g:link controller="projectOverview" action="index" params="[project: dataFile.project]">${dataFile.project}</g:link></td>
             </tr>
             <tr>
                 <td class="myKey"><g:message code="datafile.showDetails.metaDataStatus.isFileUsed"/></td>

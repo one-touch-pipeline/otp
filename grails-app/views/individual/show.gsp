@@ -62,7 +62,7 @@
                 </tr>
                 <tr>
                     <td class="myKey"><g:message code="individual.show.details.project"/></td>
-                    <td class="myValue"><g:link controller="projectOverview" action="index" params="[projectName: ind.project]">${ind.project}</g:link></td>
+                    <td class="myValue"><g:link controller="projectOverview" action="index" params="[project: ind.project]">${ind.project}</g:link></td>
                 </tr>
             </table>
         </div>
