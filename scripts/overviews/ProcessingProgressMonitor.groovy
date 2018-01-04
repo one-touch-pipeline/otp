@@ -8,9 +8,9 @@ The following code allows to show the processing state for
 * all lanes in processing:
 ** all withdrawn lanes are ignored
 ** waiting and running data installation workflow
-** waiting and running fastqc workflows for data loaded after 1.1.2015
+** waiting and running fastqc workflows for data loaded after 1.1.2015 and are not in blacklist
 ** waiting/running alignments
-*** seqtracks which belong to run segments where flag 'align' is set to false are ignored
+*** seqTracks which belong to run segments where flag 'align' is set to false are ignored
 *** running OTP alignments (WGS, WES)
 *** running roddy alignments (WGS, WES, WGBS, RNA, ChipSeq) (if not withdrawn)
 ** running variant calling (snv, indel, ...) (if not withdrawn)
@@ -87,6 +87,18 @@ MetaDataKey enrichmentKitKey = MetaDataKey.findByName("ENRICHMENT_KIT")
 MetaDataKey commentKey = MetaDataKey.findByName(MetaDataColumn.COMMENT.name())
 
 List blackList_MergingSetId = ([12174511] as long[]) as List
+
+List blackList_SeqTrackForFastQc = ([
+        33881224, 34409106, 34409201, 34409296, 34408057, 34409961, 34407757, 34407859, 34407957, 34408631,
+        34407552, 34408346, 34408916, 34408726, 34407655, 34408441, 34409011, 34408536, 34407448, 34408251,
+        34408821, 34408155, 34410056, 34406946, 34407041, 34407144, 34406471, 34407239, 34405996, 34406281,
+        34409486, 34406756, 34409771, 34406091, 34406376, 34409581, 34406851, 34409866, 34409676, 34405901,
+        34406186, 34409391, 34406661, 34406566, 34407340, 33143452, 33145115, 33144944, 33145058, 33143567,
+        33252540, 33252598, 33252655, 33929114, 33929510, 33903632, 33904059, 33904158, 33904257, 33928786,
+        33928885, 33903929, 33904356, 33929213, 33928687, 33903523, 33903731, 33903830, 33098976, 33099020,
+        33099108, 33099064, 33099152, 33099196, 33099284, 33099240, 33099372, 33099328, 33099460, 33099416,
+        33099548, 33099504, 1496693, 33928984, 33929312, 33929411, 1496693,
+] as long[]) as List
 
 String INDENT = MonitorOutputCollector.INDENT
 
@@ -570,6 +582,7 @@ if (allProcessed) {
             ) or (
                 seqTrack.fastqcState != '${SeqTrack.DataProcessingState.FINISHED}'
                 and seqTrack.id >= ${firstIdToCheck}
+                and not seqTrack.id in (${blackList_SeqTrackForFastQc.join(', ')})
             ) or (
                 seqTrack.id in (
                     select
