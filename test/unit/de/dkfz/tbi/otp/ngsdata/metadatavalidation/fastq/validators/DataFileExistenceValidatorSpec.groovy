@@ -1,17 +1,24 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.util.spreadsheet.*
 import de.dkfz.tbi.util.spreadsheet.validation.*
+import grails.test.mixin.*
 import org.junit.*
 import org.junit.rules.*
 import spock.lang.*
 
+import java.nio.file.*
 import java.util.regex.*
 
 import static de.dkfz.tbi.TestCase.*
 import static de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory.*
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
+
+@Mock([
+        Realm,
+])
 class DataFileExistenceValidatorSpec extends Specification {
 
     @Rule
@@ -32,7 +39,7 @@ class DataFileExistenceValidatorSpec extends Specification {
             getDataFilePath(_, _) >> { MetadataValidationContext context, ValueTuple valueTuple ->
                 Matcher matcher = valueTuple.getValue('FILENAME') =~ /^(.+) .$/
                 if (matcher) {
-                    return new File(dir, matcher.group(1))
+                    return Paths.get(dir.path, matcher.group(1))
                 } else {
                     return null
                 }
@@ -79,9 +86,10 @@ class DataFileExistenceValidatorSpec extends Specification {
                              context.spreadsheet.dataRows[11].cells + context.spreadsheet.dataRows[12].cells) as Set<Cell>,
                         Level.ERROR, "'${new File(dir, 'not_found3')}' does not exist or cannot be accessed by OTP.", "At least one file can not be access by OTP, does not exist, is empty or is not a file."),
         ]
+        DataFileExistenceValidator validator = new DataFileExistenceValidator()
 
         when:
-        new DataFileExistenceValidator().validate(context)
+        validator.validate(context)
 
         then:
         assertContainSame(context.problems, expectedProblems)

@@ -2,11 +2,16 @@ package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
+import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.ast.*
 import de.dkfz.tbi.otp.job.jobs.*
+import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
+import org.springframework.beans.factory.annotation.*
 import org.springframework.context.annotation.*
 import org.springframework.stereotype.*
+
+import java.nio.file.*
 
 import static de.dkfz.tbi.otp.ngsdata.LsdfFilesService.*
 
@@ -14,6 +19,9 @@ import static de.dkfz.tbi.otp.ngsdata.LsdfFilesService.*
 @Scope("prototype")
 @UseJobLog
 class ExecutePanCanJob extends AbstractRoddyAlignmentJob implements AutoRestartableJob {
+
+    @Autowired
+    FileSystemService fileSystemService
 
     @Override
     protected List<String> prepareAndReturnWorkflowSpecificCValues(RoddyBamFile roddyBamFile) {
@@ -55,10 +63,14 @@ class ExecutePanCanJob extends AbstractRoddyAlignmentJob implements AutoRestarta
             List<DataFile> dataFiles = DataFile.findAllBySeqTrack(seqTrack)
             assert LibraryLayout.valueOf(seqTrack.seqType.libraryLayout).mateCount == dataFiles.size()
             dataFiles.sort {it.mateNumber}.each { DataFile dataFile ->
-                File file = new File(lsdfFilesService.getFileViewByPidPath(dataFile))
-                LsdfFilesService.ensureFileIsReadableAndNotEmpty(file)
-                assert dataFile.fileSize == file.length()
-                vbpDataFiles.add(file)
+                String pathName = lsdfFilesService.getFileViewByPidPath(dataFile)
+                FileSystem fs = dataFile.fileLinked ?
+                        fileSystemService.getFilesystemForFastqImport() :
+                        fileSystemService.getFilesystemForRealm(dataFile.project.realm)
+                Path path = fs.getPath(pathName)
+                FileService.ensureFileIsReadableAndNotEmpty(path)
+                assert dataFile.fileSize == Files.size(path)
+                vbpDataFiles.add(new File(pathName))
             }
         }
 

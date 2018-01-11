@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import grails.test.mixin.*
 import org.junit.*
@@ -24,6 +25,7 @@ class FastqcDataFilesServiceUnitTests {
         fastqcDataFilesService = new FastqcDataFilesService()
         fastqcDataFilesService.lsdfFilesService = new LsdfFilesService()
         fastqcDataFilesService.lsdfFilesService.configService = configService
+        fastqcDataFilesService.fileSystemService = new TestFileSystemService()
 
         realm = DomainFactory.createRealm()
 

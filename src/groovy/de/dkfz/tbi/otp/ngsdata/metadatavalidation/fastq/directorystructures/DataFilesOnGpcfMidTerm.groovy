@@ -5,6 +5,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
 import de.dkfz.tbi.util.spreadsheet.validation.*
 import org.springframework.stereotype.*
 
+import java.nio.file.*
 import java.util.regex.*
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
@@ -26,7 +27,7 @@ class DataFilesOnGpcfMidTerm implements DirectoryStructure {
     }
 
     @Override
-    File getDataFilePath(MetadataValidationContext context, ValueTuple valueTuple) {
+    Path getDataFilePath(MetadataValidationContext context, ValueTuple valueTuple) {
         String fileName = valueTuple.getValue(FASTQ_FILE.name())
         String runId = valueTuple.getValue(RUN_ID.name())
         Matcher matcher = fileName =~ /^(.*)_R[12]\.fastq\.gz$/
@@ -35,7 +36,7 @@ class DataFilesOnGpcfMidTerm implements DirectoryStructure {
             return null
         } else {
             String dir = matcher.group(1)
-            return new File("${context.metadataFile.parentFile}/${runId}/${dir}/fastq/${fileName}")
+            return context.metadataFile.resolveSibling("${runId}/${dir}/fastq/${fileName}")
         }
     }
 }

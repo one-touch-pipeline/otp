@@ -4,18 +4,20 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
 import de.dkfz.tbi.util.spreadsheet.*
 import de.dkfz.tbi.util.spreadsheet.validation.*
 
+import java.nio.file.*
+
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 
 class MetadataValidationContext extends AbstractMetadataValidationContext {
 
     final DirectoryStructure directoryStructure
 
-    private MetadataValidationContext(File metadataFile, String metadataFileMd5sum, Spreadsheet spreadsheet, Problems problems, DirectoryStructure directoryStructure, byte[] content) {
+    private MetadataValidationContext(Path metadataFile, String metadataFileMd5sum, Spreadsheet spreadsheet, Problems problems, DirectoryStructure directoryStructure, byte[] content) {
         super(metadataFile, metadataFileMd5sum, spreadsheet, problems, content)
         this.directoryStructure = directoryStructure
     }
 
-    static MetadataValidationContext createFromFile(File metadataFile, DirectoryStructure directoryStructure) {
+    static MetadataValidationContext createFromFile(Path metadataFile, DirectoryStructure directoryStructure) {
 
         Map parametersForFile = readAndCheckFile(metadataFile, { Row row ->
             !row.getCellByColumnTitle(FASTQ_FILE.name())?.text?.startsWith('Undetermined') ||

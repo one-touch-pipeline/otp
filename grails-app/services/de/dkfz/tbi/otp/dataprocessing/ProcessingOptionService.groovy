@@ -117,6 +117,13 @@ class ProcessingOptionService {
     }
 
     /**
+     * Return boolean value of the option
+     */
+    public static boolean findOptionAsBoolean(OptionName name, String type, Project project) {
+        return findOptionSafe(name, type, project) == "true"
+    }
+
+    /**
      * Returns the ProcessingOption which belongs to the input parameter name.
      * If there is more than one or none ProcessingOption found by the query an Error is thrown.
      */

@@ -8,6 +8,8 @@ import org.junit.*
 import org.junit.rules.*
 import spock.lang.*
 
+import java.nio.file.*
+
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 class BamMetadataValidationContextSpec extends Specification {
@@ -25,7 +27,7 @@ class BamMetadataValidationContextSpec extends Specification {
 
     void "checkFilesInDirectory, when a folder is empty, add a warning"() {
         given:
-        File emptyFolder = temporaryFolder.newFolder()
+        Path emptyFolder = temporaryFolder.newFolder().toPath()
 
         when:
         context.checkFilesInDirectory(emptyFolder, problems)
@@ -38,10 +40,10 @@ class BamMetadataValidationContextSpec extends Specification {
 
     void "checkFilesInDirectory, when find a subfolder, check the content"() {
         given:
-        File folder = temporaryFolder.newFolder()
-        File subfolder = new File(folder, "subfolder")
-        assert subfolder.mkdirs()
-        File file2 = new File(subfolder, "file2.txt")
+        Path folder = temporaryFolder.newFolder().toPath()
+        Path subfolder = folder.resolve("subfolder")
+        assert Files.createDirectories(subfolder)
+        Path file2 = subfolder.resolve("file2.txt")
         file2.write("something other")
 
         when:
@@ -53,9 +55,9 @@ class BamMetadataValidationContextSpec extends Specification {
 
     void "checkFile, when is not readable, add the corresponding problem"() {
         given:
-        File notReadAble = temporaryFolder.newFile('notReadable.txt')
-        assert ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout("chmod a-r ${notReadAble.absolutePath} && echo OK").trim() == 'OK'
-        assert !notReadAble.canRead()
+        Path notReadAble = temporaryFolder.newFile('notReadable.txt').toPath()
+        assert ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout("chmod a-r ${notReadAble.toAbsolutePath()} && echo OK").trim() == 'OK'
+        assert !Files.isReadable(notReadAble)
 
         when:
         context.checkFile(notReadAble, problems)
@@ -68,7 +70,7 @@ class BamMetadataValidationContextSpec extends Specification {
 
     void "checkFile, when is empty, add the corresponding problem"() {
         given:
-        File emptyFile = temporaryFolder.newFile('emptyFile.txt')
+        Path emptyFile = temporaryFolder.newFile('emptyFile.txt').toPath()
 
         when:
         context.checkFile(emptyFile, problems)

@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.utils.*
 import org.codehaus.groovy.grails.commons.*
@@ -181,48 +182,24 @@ class LsdfFilesService {
         return "${seqTypeDir}/view-by-pid/${pid}/${sampleType}/${library}/run${runName}/${vbpPath}"
     }
 
-    boolean fileExists(String path) {
-        File file = new File(path)
-        return file.canRead()
-    }
-
-    long fileSize(String path) {
-        File file = new File(path)
-        if (file.isDirectory()) {
-            return 0L
-        }
-        return file.length()
-    }
-
+    @Deprecated
     static boolean isFileReadableAndNotEmpty(final File file) {
-        assert file.isAbsolute()
-        try {
-            waitUntilExists(file)
-        } catch (AssertionError e) {}
-        return file.exists() &&  file.isFile() && file.canRead() && file.length() > 0L
+        FileService.isFileReadableAndNotEmpty(file.toPath())
     }
 
-    private static void checkFileIsReadableAndNotEmpty(final File file, Closure existenceCheck) {
-        assert file.isAbsolute()
-        existenceCheck()
-        assert file.isFile()
-        assert file.canRead()
-        assert file.length() > 0L
-    }
-
+    @Deprecated
     static void ensureFileIsReadableAndNotEmpty(final File file) {
-        checkFileIsReadableAndNotEmpty(file) { waitUntilExists(file) }
+        FileService.ensureFileIsReadableAndNotEmpty(file.toPath())
     }
 
+    @Deprecated
     static void ensureDirIsReadableAndNotEmpty(final File dir) {
-        ensureDirIsReadable(dir)
-        assert dir.listFiles().length != 0
+        FileService.ensureDirIsReadableAndNotEmpty(dir.toPath())
     }
 
+    @Deprecated
     static void ensureDirIsReadable(final File dir) {
-        waitUntilExists(dir)
-        assert dir.directory
-        assert dir.canRead()
+        FileService.ensureDirIsReadable(dir.toPath())
     }
 
     /**
@@ -323,7 +300,7 @@ class LsdfFilesService {
 
     /**
      * Returns the absolute path to an ILSe Folder.
-     * Ususally stored at STORAGE_ROOTSEQUENCING_INBOX/00[first digit of ILSe]/00[ILSe]
+     * Usually stored at STORAGE_ROOTSEQUENCING_INBOX/00[first digit of ILSe]/00[ILSe]
      */
     public File getIlseFolder(String ilseId) {
         assert ilseId =~ /^\d{4,6}$/

@@ -4,14 +4,18 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators.*
 import de.dkfz.tbi.otp.utils.*
-import grails.test.mixin.Mock
+import grails.test.mixin.*
 import org.junit.*
 import org.junit.rules.*
 import spock.lang.*
 
+import java.nio.file.*
+
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
+
 @Mock([
         SeqType,
+        Realm,
 ])
 class MetadataValidationContextSpec extends Specification {
 
@@ -23,7 +27,7 @@ class MetadataValidationContextSpec extends Specification {
 
     void 'createFromFile, when file contains undetermined entries, ignores them'() {
         given:
-        File file = temporaryFolder.newFile("${HelperUtils.uniqueString}.tsv")
+        Path file = temporaryFolder.newFile("${HelperUtils.uniqueString}.tsv").toPath()
         file.bytes = ("c ${FASTQ_FILE} ${SAMPLE_ID} ${BARCODE}\n" +
                 "0 Undetermined_1.fastq.gz x x\n" +
                 "1 Undetermined_1.fastq.gz x Undetermined\n" +

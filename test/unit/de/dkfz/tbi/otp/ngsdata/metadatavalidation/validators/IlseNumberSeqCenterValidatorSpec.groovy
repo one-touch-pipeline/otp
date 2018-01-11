@@ -8,6 +8,8 @@ import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.util.spreadsheet.validation.*
 import spock.lang.*
 
+import java.nio.file.Paths
+
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 class IlseNumberSeqCenterValidatorSpec extends Specification {
@@ -18,7 +20,7 @@ class IlseNumberSeqCenterValidatorSpec extends Specification {
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${MetaDataColumn.ILSE_NO}\t${MetaDataColumn.CENTER_NAME}\n" +
                         "1234\tDKFZ\n",
-                ["metadataFile": new File("${TestCase.uniqueNonExistentPath}/1234/run${HelperUtils.uniqueString}, metadata_fastq.tsv")]
+                ["metadataFile": Paths.get("${TestCase.uniqueNonExistentPath}/1234/run${HelperUtils.uniqueString}/metadata_fastq.tsv")]
         )
 
         when:
@@ -34,7 +36,7 @@ class IlseNumberSeqCenterValidatorSpec extends Specification {
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${MetaDataColumn.CENTER_NAME}\n" +
                         "another center\n",
-                ["metadataFile": new File("${TestCase.uniqueNonExistentPath}/run${HelperUtils.uniqueString}, metadata_fastq.tsv")]
+                ["metadataFile": Paths.get("${TestCase.uniqueNonExistentPath}/run${HelperUtils.uniqueString}/metadata_fastq.tsv")]
         )
 
         when:
@@ -50,7 +52,7 @@ class IlseNumberSeqCenterValidatorSpec extends Specification {
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${MetaDataColumn.ILSE_NO}\t${MetaDataColumn.CENTER_NAME}\n" +
                         "1234\tanother center\n",
-                        ["metadataFile": new File("${TestCase.uniqueNonExistentPath}/1234/run${HelperUtils.uniqueString}, metadata_fastq.tsv")]
+                        ["metadataFile": Paths.get("${TestCase.uniqueNonExistentPath}/1234/run${HelperUtils.uniqueString}/metadata_fastq.tsv")]
         )
 
         when:
@@ -69,7 +71,7 @@ class IlseNumberSeqCenterValidatorSpec extends Specification {
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${MetaDataColumn.ILSE_NO}\t${MetaDataColumn.CENTER_NAME}\n" +
                         "\tDKFZ\n",
-                ["metadataFile": new File("${TestCase.uniqueNonExistentPath}/run${HelperUtils.uniqueString}, metadata_fastq.tsv")]
+                ["metadataFile": Paths.get("${TestCase.uniqueNonExistentPath}/run${HelperUtils.uniqueString}/metadata_fastq.tsv")]
         )
 
         when:

@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.*
 import org.springframework.context.*
 import org.springframework.security.access.prepost.*
 
+import java.nio.file.*
 import java.util.logging.*
 import java.util.regex.*
 
@@ -43,6 +44,7 @@ class MetadataImportService {
     SampleIdentifierService sampleIdentifierService
     SeqTrackService seqTrackService
     TrackingService trackingService
+    FileSystemService fileSystemService
 
     /**
      * @return A collection of descriptions of the validations which are performed
@@ -68,12 +70,15 @@ class MetadataImportService {
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")  // TODO: OTP-1908: Relax this restriction
     MetadataValidationContext validateWithAuth(File metadataFile, String directoryStructureName) {
-        return validate(metadataFile, directoryStructureName)
+        FileSystem fs = fileSystemService.getFilesystemForFastqImport()
+        return validate(fs.getPath(metadataFile.path), directoryStructureName)
     }
 
-    MetadataValidationContext validate(File metadataFile, String directoryStructureName) {
-        MetadataValidationContext context = MetadataValidationContext.createFromFile(metadataFile,
-                getDirectoryStructure(getDirectoryStructureBeanName(directoryStructureName, metadataFile)))
+    MetadataValidationContext validate(Path metadataFile, String directoryStructureName) {
+        MetadataValidationContext context = MetadataValidationContext.createFromFile(
+                metadataFile,
+                getDirectoryStructure(getDirectoryStructureBeanName(directoryStructureName, metadataFile)),
+        )
         if (context.spreadsheet) {
             metadataValidators*.validate(context)
         }
@@ -86,10 +91,11 @@ class MetadataImportService {
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     ValidateAndImportResult validateAndImportWithAuth(File metadataFile, String directoryStructureName, boolean align, boolean ignoreWarnings, String previousValidationMd5sum, String ticketNumber, String seqCenterComment, boolean automaticNotification) {
-        return validateAndImport(metadataFile, directoryStructureName, align, RunSegment.ImportMode.MANUAL, ignoreWarnings, previousValidationMd5sum, ticketNumber, seqCenterComment, automaticNotification)
+        FileSystem fs = fileSystemService.getFilesystemForFastqImport()
+        return validateAndImport(fs.getPath(metadataFile.path), directoryStructureName, align, RunSegment.ImportMode.MANUAL, ignoreWarnings, previousValidationMd5sum, ticketNumber, seqCenterComment, automaticNotification)
     }
 
-    ValidateAndImportResult validateAndImport(File metadataFile, String directoryStructureName, boolean align, RunSegment.ImportMode importMode, boolean ignoreWarnings, String previousValidationMd5sum, String ticketNumber, String seqCenterComment, boolean automaticNotification) {
+    ValidateAndImportResult validateAndImport(Path metadataFile, String directoryStructureName, boolean align, RunSegment.ImportMode importMode, boolean ignoreWarnings, String previousValidationMd5sum, String ticketNumber, String seqCenterComment, boolean automaticNotification) {
         MetadataValidationContext context = validate(metadataFile, directoryStructureName)
         MetaDataFile metadataFileObject = null
         if (mayImport(context, ignoreWarnings, previousValidationMd5sum)) {
@@ -113,11 +119,11 @@ class MetadataImportService {
 
     protected void copyMetaDataFileIfMidterm(MetadataValidationContext context) {
         if (context.directoryStructure instanceof DataFilesOnGpcfMidTerm) {
-            File source = context.metadataFile
+            Path source = context.metadataFile
             try {
                 String ilse = context.spreadsheet.dataRows[0].getCellByColumnTitle(MetaDataColumn.ILSE_NO.name()).text
                 File targetDirectory = lsdfFilesService.getIlseFolder(ilse)
-                File targetFile = new File(targetDirectory, source.name)
+                File targetFile = new File(targetDirectory, source.fileName.toString())
                 if (!targetFile.exists()) {
                     Realm realm = ConfigService.getDefaultRealm()
                     assert realm
@@ -135,12 +141,14 @@ class MetadataImportService {
     }
 
     List<ValidateAndImportResult> validateAndImportMultiple(String otrsTicketNumber, String ilseNumbers) {
+        FileSystem fs = fileSystemService.getFilesystemForFastqImport()
         return validateAndImportMultiple(otrsTicketNumber,
-                parseIlseNumbers(ilseNumbers).collect { getMetadataFilePathForIlseNumber(it) },
-                MIDTERM_ILSE_DIRECTORY_STRUCTURE_BEAN_NAME)
+                parseIlseNumbers(ilseNumbers).collect { getMetadataFilePathForIlseNumber(it, fs) },
+                MIDTERM_ILSE_DIRECTORY_STRUCTURE_BEAN_NAME
+        )
     }
 
-    List<ValidateAndImportResult> validateAndImportMultiple(String otrsTicketNumber, Collection<File> metadataFiles, String directoryStructureName) {
+    List<ValidateAndImportResult> validateAndImportMultiple(String otrsTicketNumber, List<Path> metadataFiles, String directoryStructureName) {
         List<ValidateAndImportResult> results = metadataFiles.collect {
             validateAndImport(it, directoryStructureName, true, RunSegment.ImportMode.AUTOMATIC, false, null, otrsTicketNumber, null, true)
         }
@@ -152,10 +160,13 @@ class MetadataImportService {
         }
     }
 
-    protected static File getMetadataFilePathForIlseNumber(int ilseNumber) {
+    protected static Path getMetadataFilePathForIlseNumber(int ilseNumber, FileSystem fileSystem) {
         String ilseNumberString = Integer.toString(ilseNumber)
-        return new File(LsdfFilesService.midtermStorageMountPoint.first(),
-                "${ilseNumberString.padLeft(6, '0')}/data/${ilseNumberString}_meta.tsv")
+        return fileSystem.getPath(LsdfFilesService.midtermStorageMountPoint.first(),
+                ilseNumberString.padLeft(6, '0'),
+                "data",
+                "${ilseNumberString}_meta.tsv"
+        )
     }
 
     protected static List<Integer> parseIlseNumbers(String ilseNumbers) {
@@ -189,7 +200,7 @@ class MetadataImportService {
         return applicationContext.getBeansOfType(MetadataValidator).values().sort { it.getClass().name }
     }
 
-    protected static String getDirectoryStructureBeanName(String directoryStructureName, File metadataFile) {
+    protected static String getDirectoryStructureBeanName(String directoryStructureName, Path metadataFile) {
         if (directoryStructureName == AUTO_DETECT_DIRECTORY_STRUCTURE_NAME) {
             // TODO: Really do auto-detection based on the metadata file path
             return DATA_FILES_IN_SAME_DIRECTORY_BEAN_NAME
@@ -199,7 +210,9 @@ class MetadataImportService {
     }
 
     protected DirectoryStructure getDirectoryStructure(String directoryStructureBeanName) {
-        return applicationContext.getBean(directoryStructureBeanName, DirectoryStructure)
+        DirectoryStructure directoryStructure = applicationContext.getBean(directoryStructureBeanName, DirectoryStructure)
+        directoryStructure.setFileSystem(fileSystemService?.getFilesystemForFastqImport())
+        return directoryStructure
     }
 
     public static boolean mayImport(AbstractMetadataValidationContext context, boolean ignoreWarnings, String previousValidationMd5sum) {
@@ -227,8 +240,8 @@ class MetadataImportService {
         importRuns(context, runSegment, context.spreadsheet.dataRows)
 
         MetaDataFile metaDataFile = new MetaDataFile(
-                fileName: context.metadataFile.name,
-                filePath: context.metadataFile.parent,
+                fileName: context.metadataFile.fileName.toString(),
+                filePath: context.metadataFile.parent.toString(),
                 md5sum: context.metadataFileMd5sum,
                 runSegment: runSegment,
         )
@@ -324,12 +337,12 @@ class MetadataImportService {
         )
         seqTrackRowsByMateNumber.each { Integer mateNumber, List<Row> rows ->
             Row row = exactlyOneElement(rows)
-            File file = context.directoryStructure.getDataFilePath(context, row)
+            Path file = context.directoryStructure.getDataFilePath(context, row)
             DataFile dataFile = new DataFile(
                     pathName: '',
-                    fileName: file.name,
-                    initialDirectory: file.parent,
-                    vbpFileName: file.name,
+                    fileName: file.fileName.toString(),
+                    initialDirectory: file.parent.toString(),
+                    vbpFileName: file.fileName.toString(),
                     md5sum: row.getCellByColumnTitle(MD5.name()).text.toLowerCase(Locale.ENGLISH),
                     project: seqTrack.project,
                     dateExecuted: seqTrack.run.dateExecuted,
@@ -338,11 +351,11 @@ class MetadataImportService {
                     run: seqTrack.run,
                     runSegment: runSegment,
                     seqTrack: seqTrack,
-                    fileType: FileTypeService.getFileType(file.name, FileType.Type.SEQUENCE),
+                    fileType: FileTypeService.getFileType(file.fileName.toString(), FileType.Type.SEQUENCE),
             )
             assert dataFile.save()
 
-            assert new File(LsdfFilesService.getFileInitialPath(dataFile)) == file
+            assert new File(LsdfFilesService.getFileInitialPath(dataFile)) == new File(file.toString())
 
             importMetadataEntries(context, dataFile, row)
         }
@@ -477,6 +490,6 @@ class ValidateAndImportResult {
 class MultiImportFailedException extends RuntimeException {
     final List<MetadataValidationContext> failedValidations
 
-    final List<File> allPaths
+    final List<Path> allPaths
 
 }

@@ -6,6 +6,9 @@ import de.dkfz.tbi.util.spreadsheet.*
 import de.dkfz.tbi.util.spreadsheet.validation.*
 import spock.lang.*
 
+import java.nio.file.Path
+import java.nio.file.Paths
+
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
@@ -20,19 +23,19 @@ class DataFilesOnGpcfMidTermSpec extends Specification {
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${FASTQ_FILE}\t${RUN_ID}\n" +
                         "${fileName}\trun_name\n",
-                [metadataFile: new File(directory, 'metadata.tsv')]
+                [metadataFile: Paths.get(directory.path, 'metadata.tsv')]
         )
         Set<Cell> invalidCells = context.spreadsheet.dataRows.get(0).cells as Set
 
 
         when:
-        File dataFilePath = directoryStructure.getDataFilePath(context, new ValueTuple(
+        Path dataFilePath = directoryStructure.getDataFilePath(context, new ValueTuple(
                 [(FASTQ_FILE.name()): fileName, (RUN_ID.name()): "run_name"], invalidCells)
         )
 
         then:
         if (valid) {
-            assert dataFilePath == new File(directory, "run_name/asdf/fastq/asdf_R1.fastq.gz")
+            assert dataFilePath == Paths.get(directory.path, "run_name/asdf/fastq/asdf_R1.fastq.gz")
             assert context.problems.isEmpty()
         } else {
             assert dataFilePath == null

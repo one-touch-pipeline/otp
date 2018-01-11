@@ -78,7 +78,8 @@ class ProcessingOption implements Entity {
         //executionRestrictions
         MAXIMUM_NUMBER_OF_JOBS("max parallel jobs", null, Type.POSITIVE_NUMBER),
         MAXIMUM_NUMBER_OF_JOBS_RESERVED_FOR_FAST_TRACK("", null, Type.POSITIVE_NUMBER),
-        MAXIMUM_PARALLEL_SSH_CALLS("Maximum number of ssh calls that can be executed in parallel", "30", Type.POSITIVE_NUMBER),
+        MAXIMUM_PARALLEL_SSH_CALLS("Maximum number of SSH channels / commands that can be executed in parallel", "30", Type.POSITIVE_NUMBER),
+        MAXIMUM_SFTP_CONNECTIONS("Maximum number of SFTP connections that can be open in parallel", "5", Type.POSITIVE_NUMBER),
         MAXIMUM_EXECUTED_RODDY_PROCESSES("Maximum number of Roddy jobs that can be executed in parallel due to high memory usage", "10", Type.POSITIVE_NUMBER),
 
         //statistics
@@ -88,6 +89,14 @@ class ProcessingOption implements Entity {
         TICKET_SYSTEM_URL("Ticket system URL", null, Type.SINGLE_LINE_TEXT),
         TICKET_SYSTEM_NUMBER_PREFIX("Prefix for the ticket number", null, Type.SINGLE_LINE_TEXT),
         TICKET_SYSTEM_AUTO_IMPORT_ENABLED("Enabled auto import from the ticket system", null, Type.BOOLEAN),
+
+
+        // FileSystem
+        FILESYSTEM_FASTQ_IMPORT("Realm to use for filesystem access when importing FASTQs, local is used if empty", null, Type.SINGLE_WORD_TEXT_OPTIONAL),
+        FILESYSTEM_BAM_IMPORT("Realm to use for filesystem access when importing BAMs, local is used if empty", null, Type.SINGLE_WORD_TEXT_OPTIONAL),
+        FILESYSTEM_PROCESSING_USE_REMOTE("Use remote (true) or local (false) filesystem when processing files", null, Type.BOOLEAN),
+        //realm
+        REALM_DEFAULT_VALUE("The default realm", null, Type.SINGLE_WORD_TEXT),
 
         //email
         EMAIL_RECIPIENT_NOTIFICATION("", null, Type.MAIL),
@@ -135,8 +144,6 @@ class ProcessingOption implements Entity {
         GUI_SHOW_PARTNERS("", null, Type.BOOLEAN),
         GUI_ABOUT_OTP("", null, Type.MULTI_LINE_TEXT),
 
-        //realm
-        REALM_DEFAULT_VALUE("The default realm", null, Type.SINGLE_WORD_TEXT),
 
         @Deprecated
         COMMAND_ACTIVATION_SAMTOOLS("command to enable the module containing samtools (executed in Bash, may be empty if not required)", "", Type.SINGLE_LINE_TEXT),
@@ -173,6 +180,7 @@ class ProcessingOption implements Entity {
         SINGLE_LINE_TEXT({it ==~ /[^\n]+/}),
         MULTI_LINE_TEXT({it ==~ /.*/}),
         SINGLE_WORD_TEXT({it ==~ /\S+/}),
+        SINGLE_WORD_TEXT_OPTIONAL({it ==~ /\S*/}),
         MAIL({EmailValidator.getInstance().isValid(it)}),
         PATH({OtpPath.isValidPathComponent(it)}),
         FILE({OtpPath.isValidAbsolutePath(it)}),

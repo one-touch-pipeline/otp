@@ -16,6 +16,7 @@ beans = {
         }
         executorService(de.dkfz.tbi.otp.testing.SynchronousTestingExecutorService)
         servletContext(de.dkfz.tbi.otp.testing.OTPServletContext)
+        fileSystemService(de.dkfz.tbi.otp.job.processing.TestFileSystemService)
     } else {
         // proper thread pool
         xmlns task: "http://www.springframework.org/schema/task"

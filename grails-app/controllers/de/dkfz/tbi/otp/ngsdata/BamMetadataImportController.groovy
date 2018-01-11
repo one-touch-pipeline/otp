@@ -16,14 +16,14 @@ class BamMetadataImportController {
         }
         if (cmd.submit == "Import" && !errorMessage) {
 
-            Map results = bamMetadataImportService.validateAndImport(new File(cmd.path), cmd.ignoreWarnings, cmd.md5,
+            Map results = bamMetadataImportService.validateAndImport(cmd.path, cmd.ignoreWarnings, cmd.md5,
                     cmd.replaceWithLink, cmd.triggerSnv, cmd.triggerIndel, cmd.triggerAceseq, cmd.furtherFilePaths)
             bamMetadataValidationContext = results.context
             if (results.project != null) {
                 redirect(controller: "projectOverview", action: "laneOverview", params: [project: results.project.name])
             }
         } else if (cmd.submit != null) {
-            bamMetadataValidationContext = bamMetadataImportService.validate(new File(cmd.path), cmd.furtherFilePaths)
+            bamMetadataValidationContext = bamMetadataImportService.validate(cmd.path, cmd.furtherFilePaths)
         }
 
         return [

@@ -51,8 +51,6 @@ class FastqcJobTest {
         fastqcJob.lsdfFilesService.metaClass.ensureDirIsReadableAndNotEmpty = { File file ->
             return true
         }
-
-
     }
 
     @After
@@ -93,7 +91,9 @@ class FastqcJobTest {
         long nReads = 100
         String sequenceLength = "90"
 
-        File fastqcFile = CreateFileHelper.createFile(fastqcJob.fastqcDataFilesService.pathToFastQcResultFromSeqCenter(dataFile))
+        File fastqcFile = CreateFileHelper.createFile(
+                new File(fastqcJob.fastqcDataFilesService.pathToFastQcResultFromSeqCenter(dataFile).toString())
+        )
 
         dataFile.nReads = nReads
         dataFile.sequenceLength = sequenceLength

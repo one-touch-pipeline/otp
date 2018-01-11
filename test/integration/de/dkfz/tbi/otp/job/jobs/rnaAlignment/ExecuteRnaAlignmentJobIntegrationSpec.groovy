@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.job.jobs.rnaAlignment
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
+import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 import grails.test.spock.*
@@ -34,6 +35,7 @@ class ExecuteRnaAlignmentJobIntegrationSpec extends IntegrationSpec {
     void "test prepareAndReturnWorkflowSpecificCValues no adapter sequence available"() {
         given:
         RnaRoddyBamFile roddyBamFile = setUpForPrepareAndReturnWorkflowSpecificCValues()
+        executeRnaAlignmentJob.fileSystemService = new TestFileSystemService()
 
         when:
         executeRnaAlignmentJob.prepareAndReturnWorkflowSpecificCValues(roddyBamFile)
@@ -51,6 +53,7 @@ class ExecuteRnaAlignmentJobIntegrationSpec extends IntegrationSpec {
             libraryPreparationKit.reverseComplementAdapterSequence = ADAPTER_SEQUENCE1
             assert libraryPreparationKit.save(flush: true)
         }
+        executeRnaAlignmentJob.fileSystemService = new TestFileSystemService()
 
         when:
         List<String> cValues = executeRnaAlignmentJob.prepareAndReturnWorkflowSpecificCValues(roddyBamFile)
@@ -64,6 +67,9 @@ class ExecuteRnaAlignmentJobIntegrationSpec extends IntegrationSpec {
         cValues.contains("ADAPTER_SEQ:${roddyBamFile.seqTracks.first().libraryPreparationKit.reverseComplementAdapterSequence}")
         cValues.contains("outputBaseDirectory:${roddyBamFile.workDirectory}")
         cValues.contains("ALIGNMENT_DIR:${roddyBamFile.workDirectory}")
+
+        cleanup:
+        executeRnaAlignmentJob.fileSystemService = null
     }
 
 

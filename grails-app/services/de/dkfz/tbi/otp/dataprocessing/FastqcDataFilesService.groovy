@@ -1,9 +1,10 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.*
 
+import java.nio.file.*
 import java.util.zip.*
 
 /**
@@ -18,6 +19,7 @@ class FastqcDataFilesService {
     ConfigService configService
     DataProcessingFilesService dataProcessingFilesService
     LsdfFilesService lsdfFilesService
+    FileSystemService fileSystemService
 
     final String FASTQC_FILE_SUFFIX = "_fastqc"
     final String FASTQC_ZIP_SUFFIX = ".zip"
@@ -108,13 +110,13 @@ class FastqcDataFilesService {
         return zipFile.getInputStream(zipEntry)
     }
 
-    public File pathToFastQcResultFromSeqCenter(DataFile dataFile) {
+    public Path pathToFastQcResultFromSeqCenter(DataFile dataFile) {
         String fastqcFileName = this.fastqcFileName(dataFile)
         File pathToSeqCenterFastQcFile = new File(lsdfFilesService.getFileInitialPath(dataFile)).parentFile
-        return new File(pathToSeqCenterFastQcFile, fastqcFileName)
+        return fileSystemService.filesystemForFastqImport.getPath(pathToSeqCenterFastQcFile.path, fastqcFileName)
     }
 
-    public File pathToFastQcResultMd5SumFromSeqCenter(DataFile dataFile) {
-        return new File("${pathToFastQcResultFromSeqCenter(dataFile)}.md5sum")
+    public Path pathToFastQcResultMd5SumFromSeqCenter(DataFile dataFile) {
+        return fileSystemService.filesystemForFastqImport.getPath("${pathToFastQcResultFromSeqCenter(dataFile)}.md5sum")
     }
 }

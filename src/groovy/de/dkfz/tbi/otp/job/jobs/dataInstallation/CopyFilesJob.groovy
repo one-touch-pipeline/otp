@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.dataInstallation
 
+import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.ast.*
 import de.dkfz.tbi.otp.job.jobs.*
 import de.dkfz.tbi.otp.job.processing.*
@@ -7,6 +8,8 @@ import de.dkfz.tbi.otp.ngsdata.*
 import org.springframework.beans.factory.annotation.*
 import org.springframework.context.annotation.*
 import org.springframework.stereotype.*
+
+import java.nio.file.*
 
 @Component
 @Scope("prototype")
@@ -29,6 +32,11 @@ class CopyFilesJob extends AbstractOtpJob implements AutoRestartableJob {
     @Autowired
     ExecutionService executionService
 
+    @Autowired
+    FileSystemService fileSystemService
+
+    @Autowired
+    FileService fileService
 
     @Override
     protected final AbstractMultiJob.NextAction maybeSubmit() throws Throwable {
@@ -85,15 +93,20 @@ ${changeMode}
         SeqTrack seqTrack = SeqTrack.get(Long.parseLong(getProcessParameterValue()))
 
         final Collection<String> problems = seqTrack.dataFiles.collect { DataFile dataFile ->
-            File targetFile = new File(lsdfFilesService.getFileFinalPath(dataFile))
+            String targetFile = lsdfFilesService.getFileFinalPath(dataFile)
             try {
-                lsdfFilesService.ensureFileIsReadableAndNotEmpty(targetFile)
+                FileSystem fs = seqTrack.linkedExternally ?
+                        fileSystemService.getFilesystemForFastqImport() :
+                        fileSystemService.getFilesystemForRealm(dataFile.project.realm)
+                Path targetPath = fs.getPath(targetFile)
+
+                fileService.ensureFileIsReadableAndNotEmpty(targetPath)
                 if (!seqTrack.linkedExternally) {
                     assert checksumFileService.compareMd5(dataFile)
                 }
 
-                dataFile.fileSize = targetFile.size()
-                dataFile.dateFileSystem = new Date(targetFile.lastModified())
+                dataFile.fileSize = Files.size(targetPath)
+                dataFile.dateFileSystem = new Date(Files.getLastModifiedTime(targetPath).toMillis())
                 dataFile.fileExists = true
                 assert dataFile.save(flush: true)
 

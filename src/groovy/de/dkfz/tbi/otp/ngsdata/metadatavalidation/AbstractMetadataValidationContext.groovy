@@ -15,41 +15,41 @@ abstract class AbstractMetadataValidationContext extends ValidationContext {
     static final Charset CHARSET = Charset.forName('UTF-8')
     static long MAX_METADATA_FILE_SIZE_IN_MIB = 1
 
-    final File metadataFile
+    final Path metadataFile
     final String metadataFileMd5sum
     final byte[] content
 
-    protected AbstractMetadataValidationContext(File metadataFile, String metadataFileMd5sum, Spreadsheet spreadsheet, Problems problems, byte[] content) {
+    protected AbstractMetadataValidationContext(Path metadataFile, String metadataFileMd5sum, Spreadsheet spreadsheet, Problems problems, byte[] content) {
         super(spreadsheet, problems)
         this.metadataFile = metadataFile
         this.content = content
         this.metadataFileMd5sum = metadataFileMd5sum
     }
 
-    static Map readAndCheckFile(File metadataFile, Closure<Boolean> dataRowFilter = {true}) {
+    static Map readAndCheckFile(Path metadataFile, Closure<Boolean> dataRowFilter = {true}) {
         Problems problems = new Problems()
         String metadataFileMd5sum = null
         Spreadsheet spreadsheet = null
         byte[] bytes = null
-        if (!OtpPath.isValidAbsolutePath(metadataFile.path)) {
+        if (!OtpPath.isValidAbsolutePath(metadataFile.toString())) {
             problems.addProblem(Collections.emptySet(), Level.ERROR, "'${metadataFile}' is not a valid absolute path.")
-        } else if (!metadataFile.name.endsWith('.tsv')) {
+        } else if (!metadataFile.toString().endsWith('.tsv')) {
             problems.addProblem(Collections.emptySet(), Level.ERROR, "The file name of '${metadataFile}' does not end with '.tsv'.")
-        } else if (!metadataFile.isFile()) {
-            if (!metadataFile.exists()) {
+        } else if (!Files.isRegularFile(metadataFile)) {
+            if (!Files.exists(metadataFile)) {
                 problems.addProblem(Collections.emptySet(), Level.ERROR, "${pathForMessage(metadataFile)} does not exist or cannot be accessed by OTP.")
             } else {
                 problems.addProblem(Collections.emptySet(), Level.ERROR, "${pathForMessage(metadataFile)} is not a file.")
             }
-        } else if (!metadataFile.canRead()) {
+        } else if (!Files.isReadable(metadataFile)) {
             problems.addProblem(Collections.emptySet(), Level.ERROR, "${pathForMessage(metadataFile)} is not readable.")
-        } else if (metadataFile.length() == 0L) {
+        } else if (Files.size(metadataFile) == 0L) {
             problems.addProblem(Collections.emptySet(), Level.ERROR, "${pathForMessage(metadataFile)} is empty.")
-        } else if (metadataFile.length() > MAX_METADATA_FILE_SIZE_IN_MIB * 1024L * 1024L) {
+        } else if (Files.size(metadataFile) > MAX_METADATA_FILE_SIZE_IN_MIB * 1024L * 1024L) {
             problems.addProblem(Collections.emptySet(), Level.ERROR, "${pathForMessage(metadataFile)} is larger than ${MAX_METADATA_FILE_SIZE_IN_MIB} MiB.")
         } else {
             try {
-                bytes = metadataFile.bytes
+                bytes = Files.readAllBytes(metadataFile)
                 metadataFileMd5sum = byteArrayToHexString(MessageDigest.getInstance('MD5').digest(bytes))
                 String document = new String(bytes, CHARSET)
                 if (document.getBytes(CHARSET) != bytes) {
@@ -73,10 +73,6 @@ abstract class AbstractMetadataValidationContext extends ValidationContext {
                 bytes             : bytes,
                 problems          : problems
         ]
-    }
-
-    static String pathForMessage(File file) {
-        return pathForMessage(file.toPath())
     }
 
     static String pathForMessage(Path path) {

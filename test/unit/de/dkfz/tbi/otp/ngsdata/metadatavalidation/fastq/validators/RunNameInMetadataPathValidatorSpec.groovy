@@ -7,6 +7,8 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures.*
 import de.dkfz.tbi.util.spreadsheet.validation.*
 import spock.lang.*
 
+import java.nio.file.Paths
+
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
 
@@ -20,7 +22,7 @@ class RunNameInMetadataPathValidatorSpec extends Specification {
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${MetaDataColumn.RUN_ID}\n" + data,
                 [
-                        metadataFile: mdFilenameContainsRunName ? new File("run1"): new File("whatever"),
+                        metadataFile: mdFilenameContainsRunName ? Paths.get("run1"): Paths.get("whatever"),
                         directoryStructure: isDataFilesOnGpcfMidTerm ? new DataFilesOnGpcfMidTerm() : [:],
                 ],
         )
@@ -57,7 +59,7 @@ class RunNameInMetadataPathValidatorSpec extends Specification {
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${MetaDataColumn.RUN_ID}\n${runEntry1}\n${runEntry2}",
                 [
-                        metadataFile: new File("whatever"),
+                        metadataFile: Paths.get("whatever"),
                         directoryStructure: new DataFilesWithAbsolutePath(),
                 ],
         )

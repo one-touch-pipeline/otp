@@ -9,6 +9,9 @@ import de.dkfz.tbi.util.spreadsheet.*
 import de.dkfz.tbi.util.spreadsheet.validation.*
 import spock.lang.*
 
+import java.nio.file.Path
+import java.nio.file.Paths
+
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 class DataFilesWithAbsolutePathSpec extends Specification {
@@ -22,23 +25,23 @@ class DataFilesWithAbsolutePathSpec extends Specification {
                 "${MetaDataColumn.FASTQ_FILE}\n" +
                 "${directory.path}/foo.fastq\n" +
                 "${directory.path}/foo(bar).fastq\n",
-                [metadataFile: new File(directory, 'metadata.tsv')]
+                [metadataFile: Paths.get(directory.path, 'metadata.tsv')]
         )
         Set<Cell> validCells = [context.spreadsheet.dataRows.get(0).cells.get(0)] as Set
         Set<Cell> invalidCells = [context.spreadsheet.dataRows.get(1).cells.get(0)] as Set
 
 
         when:
-        File dataFilePath1 = directoryStructure.getDataFilePath(context, new ValueTuple(
+        Path dataFilePath1 = directoryStructure.getDataFilePath(context, new ValueTuple(
                 [(MetaDataColumn.FASTQ_FILE.name()): "${directory.path}/foo.fastq"], validCells))
 
         then:
         context.problems.isEmpty()
-        dataFilePath1 == new File(directory, 'foo.fastq')
+        dataFilePath1 == Paths.get(directory.path, 'foo.fastq')
         context.problems.isEmpty()
 
         when:
-        File dataFilePath2 = directoryStructure.getDataFilePath(context, new ValueTuple(
+        Path dataFilePath2 = directoryStructure.getDataFilePath(context, new ValueTuple(
                 [(MetaDataColumn.FASTQ_FILE.name()): "${directory.path}/foo(bar).fastq"], invalidCells))
 
         then:

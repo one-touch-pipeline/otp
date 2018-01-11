@@ -13,6 +13,9 @@ import org.springframework.context.annotation.*
 import org.springframework.stereotype.*
 import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
 
+import java.nio.file.Files
+import java.nio.file.Path
+
 @Component
 @Scope("prototype")
 @UseJobLog
@@ -38,6 +41,9 @@ class FastqcJob extends AbstractOtpJob implements AutoRestartableJob {
 
     @Autowired
     ProcessHelperService processHelperService
+
+    @Autowired
+    FileService fileService
 
 
     @Override
@@ -142,20 +148,20 @@ class FastqcJob extends AbstractOtpJob implements AutoRestartableJob {
 
     private void createAndExecuteCopyCommand(Realm realm, List<DataFile> dataFiles, File outDir) {
         dataFiles.each { dataFile ->
-            File seqCenterFastQcFile = fastqcDataFilesService.pathToFastQcResultFromSeqCenter(dataFile)
-            File seqCenterFastQcFileMd5Sum = fastqcDataFilesService.pathToFastQcResultMd5SumFromSeqCenter(dataFile)
-            lsdfFilesService.ensureFileIsReadableAndNotEmpty(seqCenterFastQcFile)
+            Path seqCenterFastQcFile = fastqcDataFilesService.pathToFastQcResultFromSeqCenter(dataFile)
+            Path seqCenterFastQcFileMd5Sum = fastqcDataFilesService.pathToFastQcResultMd5SumFromSeqCenter(dataFile)
+            fileService.ensureFileIsReadableAndNotEmpty(seqCenterFastQcFile)
             String copyAndMd5sumCommand = """\
                     set -e
                     cd ${seqCenterFastQcFile.parent};
-                    md5sum ${seqCenterFastQcFile.name} > ${outDir}/${seqCenterFastQcFileMd5Sum.name};
+                    md5sum ${seqCenterFastQcFile.fileName} > ${outDir}/${seqCenterFastQcFileMd5Sum.fileName};
                     cp ${seqCenterFastQcFile} ${outDir};
                     chmod 0644 ${outDir}/*
                     """.stripIndent()
             executionService.executeCommandReturnProcessOutput(realm, copyAndMd5sumCommand).assertExitCodeZeroAndStderrEmpty()
-            lsdfFilesService.ensureFileIsReadableAndNotEmpty(new File(outDir, seqCenterFastQcFile.name))
+            lsdfFilesService.ensureFileIsReadableAndNotEmpty(new File(outDir, seqCenterFastQcFile.fileName.toString()))
 
-            String validateMd5Sum = "cd ${outDir}; md5sum -c ${seqCenterFastQcFileMd5Sum.name}"
+            String validateMd5Sum = "cd ${outDir}; md5sum -c ${seqCenterFastQcFileMd5Sum.fileName}"
             processHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(validateMd5Sum)
 
             createFastqcProcessedFileIfNotExisting(dataFile)
@@ -168,7 +174,7 @@ class FastqcJob extends AbstractOtpJob implements AutoRestartableJob {
     private boolean fastQcResultsFromSeqCenterAvailable(SeqTrack seqTrack) {
         List<DataFile> files = seqTrackService.getSequenceFilesForSeqTrack(seqTrack)
         return files.every { DataFile dataFile ->
-            fastqcDataFilesService.pathToFastQcResultFromSeqCenter(dataFile).exists()
+            Files.exists(fastqcDataFilesService.pathToFastQcResultFromSeqCenter(dataFile))
         }
     }
 }

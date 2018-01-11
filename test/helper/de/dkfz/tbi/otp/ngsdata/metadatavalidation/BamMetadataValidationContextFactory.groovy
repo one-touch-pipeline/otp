@@ -1,11 +1,12 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation
 
-import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.*
-import de.dkfz.tbi.otp.utils.HelperUtils
-import de.dkfz.tbi.util.spreadsheet.Spreadsheet
-import de.dkfz.tbi.util.spreadsheet.validation.Problems
+import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.util.spreadsheet.*
+import de.dkfz.tbi.util.spreadsheet.validation.*
 
+import java.nio.file.*
 
 class BamMetadataValidationContextFactory {
 
@@ -16,12 +17,12 @@ class BamMetadataValidationContextFactory {
 
     static BamMetadataValidationContext createContext(Map properties = [:]) {
         return new BamMetadataValidationContext(
-                properties.metadataFile ?: new File(new File(properties.testDirectory ?: TestCase.uniqueNonExistentPath, "run${HelperUtils.uniqueString}"), 'metadata_bam.tsv'),
+                properties.metadataFile ?: Paths.get(properties.testDirectory ?: TestCase.uniqueNonExistentPath.path, "run${HelperUtils.uniqueString}" as String, 'metadata_fastq.tsv'),
                 properties.metadataFileMd5sum ?: HelperUtils.randomMd5sum,
                 properties.spreadsheet ?: new Spreadsheet(properties.document ?: 'I am header!\nI am data!'),
                 properties.problems ?: new Problems(),
-                properties.content ?: ''.bytes
+                properties.content ?: ''.bytes,
+                properties.fileSystem ?: FileSystems.default,
         )
-
     }
 }

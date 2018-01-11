@@ -5,6 +5,8 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
 import de.dkfz.tbi.util.spreadsheet.validation.*
 import org.springframework.stereotype.*
 
+import java.nio.file.*
+
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 
 @Component
@@ -21,10 +23,10 @@ class DataFilesInSameDirectory implements DirectoryStructure {
     }
 
     @Override
-    File getDataFilePath(MetadataValidationContext context, ValueTuple valueTuple) {
+    Path getDataFilePath(MetadataValidationContext context, ValueTuple valueTuple) {
         String fileName = valueTuple.getValue(FASTQ_FILE.name())
         if (OtpPath.isValidPathComponent(fileName)) {
-            return new File(context.metadataFile.parentFile, fileName)
+            return context.metadataFile.resolveSibling(fileName)
         } else {
             context.addProblem(valueTuple.cells, Level.ERROR, "'${fileName}' is not a valid file name.", "At least one file name is not a valid file name.")
             return null

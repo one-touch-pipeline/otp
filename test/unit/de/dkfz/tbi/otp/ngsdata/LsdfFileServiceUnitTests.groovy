@@ -49,7 +49,7 @@ class LsdfFileServiceUnitTests {
     void testFileReadableAndNotEmptyMethods_IsNotAFile() {
         File file = tempFolder.newFolder()
         assert !LsdfFilesService.isFileReadableAndNotEmpty(file)
-        assert shouldFail(AssertionError, {LsdfFilesService.ensureFileIsReadableAndNotEmpty(file)}) =~ /(?i)isFile/
+        assert shouldFail(AssertionError, {LsdfFilesService.ensureFileIsReadableAndNotEmpty(file)}) =~ /(?i)isRegularFile/
     }
 
     @Test
@@ -59,7 +59,7 @@ class LsdfFileServiceUnitTests {
         try {
             file.setReadable(false)
             assert !LsdfFilesService.isFileReadableAndNotEmpty(file)
-            assert shouldFail(AssertionError, {LsdfFilesService.ensureFileIsReadableAndNotEmpty(file)}) =~ /(?i)canRead/
+            assert shouldFail(AssertionError, {LsdfFilesService.ensureFileIsReadableAndNotEmpty(file)}) =~ /(?i)isReadable/
         } finally {
             file.setReadable(true)
         }
@@ -69,7 +69,7 @@ class LsdfFileServiceUnitTests {
     void testFileReadableAndNotEmptyMethods_IsEmpty() {
         File file = tempFolder.newFile()
         assert !LsdfFilesService.isFileReadableAndNotEmpty(file)
-        assert shouldFail(AssertionError, {LsdfFilesService.ensureFileIsReadableAndNotEmpty(file)}) =~ /(?i)length/
+        assert shouldFail(AssertionError, {LsdfFilesService.ensureFileIsReadableAndNotEmpty(file)}) =~ /(?i)size/
     }
 
     @Test

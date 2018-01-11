@@ -1,11 +1,13 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.validators
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.*
 import de.dkfz.tbi.util.spreadsheet.*
 import de.dkfz.tbi.util.spreadsheet.validation.*
 import org.springframework.stereotype.*
-import de.dkfz.tbi.otp.ngsdata.*
+
+import java.nio.file.*
 
 @Component
 class BamFilePathValidator extends SingleValueValidator<BamMetadataValidationContext> implements BamMetadataValidator {
@@ -33,14 +35,14 @@ class BamFilePathValidator extends SingleValueValidator<BamMetadataValidationCon
             context.addProblem(cells, Level.ERROR, "The path '${filePath}' is not an absolute path.", "At least one path is not an absolute path.")
         } else {
             try {
-                File bamFile = new File(filePath)
-                if (!bamFile.isFile()) {
-                    if (!bamFile.exists()) {
+                Path bamFile = context.fileSystem.getPath(filePath)
+                if (!Files.isRegularFile(bamFile)) {
+                    if (!Files.exists(bamFile)) {
                         context.addProblem(cells, Level.ERROR, "'${filePath}' does not exist or cannot be accessed by OTP.","At least one file does not exist or cannot be accessed by OTP.")
                     } else {
                         context.addProblem(cells, Level.ERROR, "'${filePath}' is not a file.", "At least one file is not a file.")
                     }
-                } else if (!bamFile.canRead()) {
+                } else if (!Files.isReadable(bamFile)) {
                     context.addProblem(cells, Level.ERROR, "'${filePath}' is not readable.", "At least one file is not readable.")
                 }
             } catch (Exception e) {

@@ -35,7 +35,7 @@ class RootController {
                 break
         }
 
-        boolean showPartners = ProcessingOptionService.findOptionSafe(OptionName.GUI_SHOW_PARTNERS, null, null) == "true"
+        boolean showPartners = ProcessingOptionService.findOptionAsBoolean(OptionName.GUI_SHOW_PARTNERS, null, null)
         String aboutOtp = ProcessingOptionService.findOptionSafe(OptionName.GUI_ABOUT_OTP, null, null)
 
         return [

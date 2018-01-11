@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.job.jobs.dataInstallation
 
 import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
@@ -55,7 +56,9 @@ class CopyFilesJobSpec extends Specification {
         copyFilesJob.lsdfFilesService = new LsdfFilesService()
         copyFilesJob.checksumFileService = new ChecksumFileService()
         copyFilesJob.checksumFileService.lsdfFilesService = copyFilesJob.lsdfFilesService
-        copyFilesJob.lsdfFilesService.configService = configService
+        copyFilesJob.lsdfFilesService.configService =  copyFilesJob.configService
+        copyFilesJob.fileService = new FileService()
+        copyFilesJob.fileSystemService = new TestFileSystemService()
     }
 
     def cleanup() {

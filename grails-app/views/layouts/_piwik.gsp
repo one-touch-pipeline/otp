@@ -3,7 +3,7 @@
 <g:set var="PIWIK_URL" value="${ProcessingOptionService.findOption(OptionName.GUI_TRACKING_PIWIK_URL, null, null)}"/>
 <g:set var="SITE_ID" value="${(ProcessingOptionService.findOption(OptionName.GUI_TRACKING_SITE_ID, null, null)) as Integer}"/>
 
-<g:if test="${(ProcessingOptionService.findOption(OptionName.GUI_TRACKING_ENABLED, null, null))?.toBoolean()}">
+<g:if test="${(ProcessingOptionService.findOptionAsBoolean(OptionName.GUI_TRACKING_ENABLED, null, null))}">
     <script type="text/javascript">
         var _paq = _paq || [];
         (function () {

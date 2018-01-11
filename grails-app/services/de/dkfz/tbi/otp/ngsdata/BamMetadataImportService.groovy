@@ -1,16 +1,21 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.*
 import de.dkfz.tbi.util.spreadsheet.*
 import org.springframework.beans.factory.annotation.*
 import org.springframework.context.*
 import org.springframework.security.access.prepost.*
 
+import java.nio.file.*
+
 class BamMetadataImportService {
 
     @Autowired
     ApplicationContext applicationContext
+
+    FileSystemService fileSystemService
 
     /**
      * @return A collection of descriptions of the validations which are performed
@@ -23,8 +28,13 @@ class BamMetadataImportService {
         return applicationContext.getBeansOfType(BamMetadataValidator).values().sort { it.getClass().name }
     }
 
-    BamMetadataValidationContext validate(File metadataFile, List<String> furtherFiles) {
-        BamMetadataValidationContext context = BamMetadataValidationContext.createFromFile(metadataFile, furtherFiles)
+    BamMetadataValidationContext validate(String metadataFile, List<String> furtherFiles) {
+        FileSystem fileSystem = fileSystemService.getFilesystemForBamImport()
+        BamMetadataValidationContext context = BamMetadataValidationContext.createFromFile(
+                fileSystem.getPath(metadataFile),
+                furtherFiles,
+                fileSystem,
+        )
         if (context.spreadsheet) {
             bamMetadataValidators*.validate(context)
         }
@@ -32,7 +42,7 @@ class BamMetadataImportService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    Map validateAndImport(File metadataFile, boolean ignoreWarnings, String previousValidationMd5sum, boolean replaceWithLink,
+    Map validateAndImport(String metadataFile, boolean ignoreWarnings, String previousValidationMd5sum, boolean replaceWithLink,
                           boolean triggerSnv, boolean triggerIndel, boolean triggerAceseq, List<String> furtherFiles) {
         Project outputProject
         ImportProcess importProcess = new ImportProcess(externallyProcessedMergedBamFiles: [])

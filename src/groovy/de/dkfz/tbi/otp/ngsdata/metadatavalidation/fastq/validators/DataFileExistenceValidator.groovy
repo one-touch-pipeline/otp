@@ -6,6 +6,8 @@ import de.dkfz.tbi.util.spreadsheet.validation.*
 import groovyx.gpars.*
 import org.springframework.stereotype.*
 
+import java.nio.file.*
+
 import static de.dkfz.tbi.otp.ngsdata.metadatavalidation.AbstractMetadataValidationContext.*
 
 @Component
@@ -40,7 +42,7 @@ class DataFileExistenceValidator extends ValueTuplesValidator<MetadataValidation
 
         GParsPool.withPool(16) {
             allValueTuples.groupBy { context.directoryStructure.getDataFilePath(context, it)
-            }.findAll { it.key != null }.eachParallel { File path, List<ValueTuple> valueTuples ->
+            }.findAll { it.key != null }.eachParallel { Path path, List<ValueTuple> valueTuples ->
                 if (valueTuples*.cells.sum()*.row.unique().size() != 1) {
                     synchronized (sync) {
                         addDirectoryStructureInfo()
@@ -49,13 +51,13 @@ class DataFileExistenceValidator extends ValueTuplesValidator<MetadataValidation
                     }
                 }
                 String message = null
-                if (!path.isFile()) {
-                    if (!path.exists()) {
+                if (!Files.isRegularFile(path)) {
+                    if (!Files.exists(path)) {
                         message = "${pathForMessage(path)} does not exist or cannot be accessed by OTP."
                     } else {
                         message = "${pathForMessage(path)} is not a file."
                     }
-                } else if (path.length() == 0L) {
+                } else if (Files.size(path) == 0L) {
                     message = "${pathForMessage(path)} is empty."
                 }
                 if (message) {

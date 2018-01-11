@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.*
 import de.dkfz.tbi.util.spreadsheet.validation.*
@@ -10,6 +11,8 @@ import org.junit.*
 import org.junit.rules.*
 import org.springframework.context.*
 import spock.lang.*
+
+import java.nio.file.*
 
 import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
@@ -56,7 +59,7 @@ class BamMetadataImportServiceSpec extends Specification {
 
         given:
         File testDirectory = TestCase.createEmptyTestDirectory()
-        File metadataFile = new File(testDirectory, 'bamMetadata.tsv')
+        Path metadataFile = Paths.get(testDirectory.path, 'bamMetadata.tsv')
         metadataFile.bytes = 'Header\nI am metadata!'.getBytes(BamMetadataValidationContext.CHARSET)
         File qualityDirectory = new File(testDirectory,"quality")
         assert qualityDirectory.mkdirs()
@@ -80,9 +83,10 @@ class BamMetadataImportServiceSpec extends Specification {
                             ] as BamMetadataValidator,
                     ]
         }
+        service.fileSystemService = new TestFileSystemService()
 
         when:
-        BamMetadataValidationContext context = service.validate(metadataFile, furtherFiles)
+        BamMetadataValidationContext context = service.validate(metadataFile.toString(), furtherFiles)
 
         then:
         containSame(context.problems*.message, ['message1', 'message2', 'message3'])
@@ -121,7 +125,7 @@ class BamMetadataImportServiceSpec extends Specification {
         File qualityControlFile = new File(qualityDirectory, "file.qc")
         List<String> furtherFiles = ["/quality"]
 
-        File metadataFile = temporaryFolder.newFile("bamMetadata.tsv")
+        Path metadataFile = temporaryFolder.newFile("bamMetadata.tsv").toPath()
         metadataFile.bytes = (
                 "${REFERENCE_GENOME}\t${SEQUENCING_TYPE}\t${BAM_FILE_PATH}\t${SAMPLE_TYPE}\t${INDIVIDUAL}\t${LIBRARY_LAYOUT}\t${PROJECT}\t${COVERAGE}\n" +
                         "refGen1\tseqType1\t${pseudoBamFile1.path}\tsampleType1\tindividual1\tSINGLE\tproject_01\t\n" +
@@ -134,9 +138,10 @@ class BamMetadataImportServiceSpec extends Specification {
         service.applicationContext = Mock(ApplicationContext) {
             getBeansOfType(BamMetadataValidator) >> [:]
         }
+        service.fileSystemService = new TestFileSystemService()
 
         when:
-        Map results = service.validateAndImport(metadataFile, true, context.metadataFileMd5sum, false, false, false, false, furtherFiles)
+        Map results = service.validateAndImport(metadataFile.toString(), true, context.metadataFileMd5sum, false, false, false, false, furtherFiles)
 
         then:
         results.context.metadataFile == metadataFile

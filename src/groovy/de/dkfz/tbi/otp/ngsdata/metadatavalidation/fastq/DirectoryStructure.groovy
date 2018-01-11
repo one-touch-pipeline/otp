@@ -3,6 +3,8 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq
 import de.dkfz.tbi.util.spreadsheet.*
 import de.dkfz.tbi.util.spreadsheet.validation.*
 
+import java.nio.file.*
+
 trait DirectoryStructure {
 
     abstract String getDescription()
@@ -15,12 +17,12 @@ trait DirectoryStructure {
     /**
      * @return The path of the data file or {@code null} if it cannot be constructed
      */
-    abstract File getDataFilePath(MetadataValidationContext context, ValueTuple valueTuple)
+    abstract Path getDataFilePath(MetadataValidationContext context, ValueTuple valueTuple)
 
     /**
      * @return The path of the data file or {@code null} if it cannot be constructed
      */
-    File getDataFilePath(MetadataValidationContext context, Row row) {
+    Path getDataFilePath(MetadataValidationContext context, Row row) {
         Map<String, String> valuesByColumnTitle = [:]
         Set<Cell> cells = new LinkedHashSet<Cell>()
         getColumnTitles().each {
@@ -31,5 +33,15 @@ trait DirectoryStructure {
             }
         }
         return getDataFilePath(context, new ValueTuple(valuesByColumnTitle.asImmutable(), cells.asImmutable()))
+    }
+
+    private FileSystem fileSystem
+
+    void setFileSystem(FileSystem fileSystem) {
+        this.fileSystem = fileSystem
+    }
+
+    FileSystem getFileSystem() {
+        return fileSystem ?: FileSystems.getDefault()
     }
 }
