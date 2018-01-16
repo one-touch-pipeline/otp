@@ -1,16 +1,25 @@
-import grails.util.Environment
-import grails.plugin.springsecurity.SecurityFilterPosition
-import grails.plugin.springsecurity.SpringSecurityUtils
+import de.dkfz.tbi.otp.job.scheduler.*
+import de.dkfz.tbi.otp.ngsdata.*
+import grails.plugin.springsecurity.*
+import grails.util.*
+import org.codehaus.groovy.grails.commons.*
 
 class BootStrap {
-    def grailsApplication
-    def schedulerService
+    GrailsApplication grailsApplication
+    SchedulerService schedulerService
+    ConfigService configService
 
     def init = { servletContext ->
         // load the shutdown service
         grailsApplication.mainContext.getBean("shutdownService")
-        // startup the scheduler
-        schedulerService.startup()
+
+        if (configService.isJobSystemEnabled()) {
+            // startup the scheduler
+            log.info("JobSystem is enabled")
+            schedulerService.startup()
+        } else {
+            log.info("JobSystem is disabled")
+        }
 
         if (Environment.isDevelopmentMode()) {
             // adds the backdoor filter allowing a developer to login without password only in development mode

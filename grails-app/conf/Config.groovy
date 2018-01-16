@@ -129,6 +129,7 @@ log4j = {
             'grails.app.domain.de.dkfz.tbi.otp',
             'grails.app.services.de.dkfz.tbi.otp',
             'grails.app.taglib.de.dkfz.tbi.otp',
+            'grails.app.conf.BootStrap',
     ], jobs: [
             'de.dkfz.tbi.otp.job.jobs',
     ], additivity: false

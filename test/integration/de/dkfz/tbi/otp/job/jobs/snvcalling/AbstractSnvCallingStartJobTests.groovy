@@ -6,6 +6,7 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.ProcessingStatus
 import de.dkfz.tbi.otp.job.jobs.*
 import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.testing.*
 import de.dkfz.tbi.otp.tracking.*
@@ -26,13 +27,28 @@ public class AbstractSnvCallingStartJobTests extends GroovyScriptAwareTestCase i
     @Autowired
     private SnvCallingService snvCallingService
 
+    SchedulerService schedulerService
+
     SnvCallingInstanceTestData snvTestData
+
+    boolean originalSchedulerActive
+
+    @Before
+    void setUp() {
+        originalSchedulerActive = schedulerService.schedulerActive
+        schedulerService.schedulerActive = true
+    }
+
+    @After
+    void tearDown() {
+        schedulerService.schedulerActive = originalSchedulerActive
+    }
 
     @Test
     public void testExecute() {
         DomainFactory.createDefaultOtpAlignableSeqTypes()
         createUserAndRoles()
-        SpringSecurityUtils.doWithAuth('admin') { runScript(new File('scripts/workflows/SnvWorkflow.groovy')) }
+        SpringSecurityUtils.doWithAuth(getADMIN()) { runScript(new File('scripts/workflows/SnvWorkflow.groovy')) }
         snvTestData = new SnvCallingInstanceTestData()
         snvTestData.createSnvObjects()
 

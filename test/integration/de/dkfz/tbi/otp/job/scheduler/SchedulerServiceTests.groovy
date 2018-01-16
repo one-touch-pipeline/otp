@@ -23,8 +23,18 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
 
     Scheduler scheduler
 
+    boolean originalSchedulerActive
+    boolean originalStartupOk
+
     @Before
     void setUp() {
+        originalSchedulerActive = schedulerService.schedulerActive
+        createUserAndRoles()
+        SpringSecurityUtils.doWithAuth(getADMIN()) {
+            originalStartupOk = schedulerService.startupOk
+        }
+        schedulerService.schedulerActive = true
+        schedulerService.startupOk = true
         schedulerService.queue.clear()
         schedulerService.running.clear()
         restartCheckerService.metaClass.canWorkflowBeRestarted = { ProcessingStep step -> false }
@@ -32,6 +42,8 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
 
     @After
     void tearDown() {
+        schedulerService.schedulerActive = originalSchedulerActive
+        schedulerService.startupOk = originalStartupOk
         TestCase.removeMetaClass(RestartCheckerService, restartCheckerService)
     }
 
@@ -539,7 +551,6 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testCreateProcessWithDisabledScheduler() {
-        createUserAndRoles()
         assertTrue(schedulerService.queue.isEmpty())
         assertTrue(schedulerService.running.isEmpty())
         // create the JobExecutionPlan with one Job Definition

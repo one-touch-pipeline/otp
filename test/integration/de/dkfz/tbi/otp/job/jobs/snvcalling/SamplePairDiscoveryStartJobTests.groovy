@@ -1,6 +1,9 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
+import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import grails.plugin.springsecurity.SpringSecurityUtils
+import org.junit.After
+import org.junit.Before
 import org.junit.Test
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -13,12 +16,27 @@ class SamplePairDiscoveryStartJobTests extends GroovyScriptAwareTestCase {
     @Autowired
     SamplePairDiscoveryStartJob samplePairDiscoveryStartJob
 
+    SchedulerService schedulerService
+
     private static String PLAN_NAME = 'SamplePairDiscoveryWorkflow'
+
+    boolean originalSchedulerActive
+
+    @Before
+    void setUp() {
+        originalSchedulerActive = schedulerService.schedulerActive
+        schedulerService.schedulerActive = true
+    }
+
+    @After
+    void tearDown() {
+        schedulerService.schedulerActive = originalSchedulerActive
+    }
 
     @Test
     void testExecute() {
         createUserAndRoles()
-        SpringSecurityUtils.doWithAuth('admin') {
+        SpringSecurityUtils.doWithAuth(getADMIN()) {
             runScript('scripts/workflows/SamplePairDiscoveryWorkflow.groovy')
         }
         samplePairDiscoveryStartJob.jobExecutionPlan = TestJobHelper.findJobExecutionPlan(PLAN_NAME)

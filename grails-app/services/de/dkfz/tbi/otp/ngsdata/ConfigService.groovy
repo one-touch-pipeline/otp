@@ -70,6 +70,10 @@ class ConfigService {
         return getBooleanValue("otp.mail.allowOtpToSendMails", false)
     }
 
+    boolean isJobSystemEnabled() {
+        return getBooleanValue("otp.jobsystem.start", false)
+    }
+
     static DateTimeZone getDateTimeZone() {
         return DateTimeZone.forID(ProcessingOptionService.findOptionAssure(ProcessingOption.OptionName.TIME_ZONE, null, null))
     }

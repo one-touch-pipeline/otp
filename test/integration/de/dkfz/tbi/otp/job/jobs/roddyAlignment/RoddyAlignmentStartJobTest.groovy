@@ -6,6 +6,7 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.job.jobs.*
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.*
 import org.junit.*
@@ -18,8 +19,19 @@ class RoddyAlignmentStartJobTest {
     @Autowired
     TestRoddyAlignmentStartJob testRoddyAlignmentStartJob
 
+    SchedulerService schedulerService
+
+    boolean originalSchedulerActive
+
+    @Before
+    void setUp() {
+        originalSchedulerActive = schedulerService.schedulerActive
+        schedulerService.schedulerActive = true
+    }
+
     @After
     void tearDown() {
+        schedulerService.schedulerActive = originalSchedulerActive
         TestCase.cleanTestDirectory()
     }
 
