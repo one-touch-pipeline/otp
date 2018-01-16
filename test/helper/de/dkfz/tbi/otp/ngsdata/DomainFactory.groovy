@@ -2517,10 +2517,14 @@ samplePairsNotProcessed: ${samplePairsNotProcessed}
 
 
     static MergingCriteria createMergingCriteriaLazy(Map properties = [:]) {
+        if ((properties.get("seqType") as SeqType)?.isWgbs()) {
+            properties.get("libPrepKit") ?: properties.put("libPrepKit", false)
+        }
+
         return createDomainObjectLazy(MergingCriteria, [
                 project: { createProject() },
                 seqType: { createSeqType() },
-        ], properties )
+        ], properties)
     }
 
     static QcThreshold createQcThreshold(Map properties = [:]) {

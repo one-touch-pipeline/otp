@@ -32,4 +32,25 @@ class MergingCriteriaSpec extends Specification {
         then:
         TestCase.assertValidateError(mergingCriteria, "libPrepKit", "In case of Exome data, the libraryPreparationKit must be part of the MergingCriteria", false)
     }
+
+    void "test that for WGBS data LibPrepKit must be false"() {
+        expect:
+        DomainFactory.createMergingCriteriaLazy([
+                seqType   : DomainFactory.createWholeGenomeBisulfiteSeqType(),
+                libPrepKit: false,
+        ])
+    }
+
+    void "test that for WGBS data LibPrepKit must be false, should fail when it is true"() {
+        given:
+        MergingCriteria mergingCriteria = DomainFactory.createMergingCriteriaLazy()
+        SeqType seqType = DomainFactory.createWholeGenomeBisulfiteSeqType()
+
+        when:
+        mergingCriteria.libPrepKit = true
+        mergingCriteria.seqType = seqType
+
+        then:
+        TestCase.assertValidateError(mergingCriteria, "libPrepKit", "In case of WGBS data, the libraryPreparationKit must not be part of the MergingCriteria", true)
+    }
 }

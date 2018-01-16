@@ -38,6 +38,10 @@
                         true
                         <g:hiddenField name="libPrepKit" value="on"/>
                     </g:if>
+                    <g:elseif test="${seqType.isWgbs()}">
+                        false
+                        %{-- no hidden field needed --}%
+                    </g:elseif>
                     <g:else>
                         <sec:ifAllGranted roles="ROLE_OPERATOR">
                             <g:checkBox name="libPrepKit" value="${mergingCriteria.libPrepKit}" id="libPrepKit"/>
@@ -56,7 +60,7 @@
                         ${mergingCriteria.seqPlatformGroup}
                     </sec:ifNotGranted>
 
-            </td>
+                </td>
                 <td>
                     <sec:ifAllGranted roles="ROLE_OPERATOR">
                         <g:hiddenField name="project.id" value="${project.id}"/>
