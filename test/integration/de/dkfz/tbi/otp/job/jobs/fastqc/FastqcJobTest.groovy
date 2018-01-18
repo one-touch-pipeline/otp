@@ -220,7 +220,7 @@ class FastqcJobTest {
     }
 
     @Test
-    void testValidate_sequenceLengthIsDifferentForAllDataFiles_ShouldFail() {
+    void testValidate_sequenceLengthIsDifferentForAllDataFiles_ShouldPassValidation() {
         String sequenceLength1 = "50"
         String sequenceLength2 = "100"
         long nReads = 100
@@ -230,13 +230,10 @@ class FastqcJobTest {
         dataFile.save(flush: true, failOnError: true)
         DomainFactory.createFastqcProcessedFile([dataFile: dataFile])
 
-        DataFile dataFile2 = DomainFactory.createDataFile([seqTrack: seqTrack, project: seqTrack.project, run: seqTrack.run, runSegment: runSegment, sequenceLength: sequenceLength2, nReads: nReads])
+        DataFile dataFile2 = DomainFactory.createDataFile([seqTrack: seqTrack, project: seqTrack.project, run: seqTrack.run, runSegment: runSegment, sequenceLength: sequenceLength2, nReads: nReads, fileType: dataFile.fileType])
         DomainFactory.createFastqcProcessedFile([dataFile: dataFile2])
 
         fastqcJob.fastqcUploadService.metaClass.uploadFastQCFileContentsToDataBase = { FastqcProcessedFile fastqc -> }
-
-        TestCase.shouldFail(AssertionError) {
-            fastqcJob.validate()
-        }
+        fastqcJob.validate()
     }
 }

@@ -92,7 +92,6 @@ class FastqcJob extends AbstractOtpJob implements AutoRestartableJob {
                 fastqcDataFilesService.setFastqcProcessedFileUploaded(fastqc)
             }
             assert files*.nReads.unique().size() == 1
-            assert files*.sequenceLength.unique().size() == 1 || files*.sequenceLength.any { it.contains('-') }
             seqTrackService.setFastqcFinished(seqTrack)
             seqTrackService.fillBaseCount(seqTrack)
             setnBasesInClusterJobForFastqc(processingStep)
