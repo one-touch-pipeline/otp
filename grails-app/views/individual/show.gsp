@@ -131,7 +131,6 @@
                     </table>
                 </div>
             </g:each>
-            <h1><g:link controller="samplePair" action="index" params="[mockPid: ind.mockPid]"><g:message code="individual.snv.detail"/></g:link></h1>
         </g:form>
     </div>
 </body>

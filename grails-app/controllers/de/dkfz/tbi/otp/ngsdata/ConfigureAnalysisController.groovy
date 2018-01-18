@@ -69,16 +69,6 @@ class ConfigureAnalysisController {
                 groupedThresholds: groupedThresholds
         ]
     }
-
-    JSON dataTableSourceForIndividuals(DataTableCommand cmd) {
-        Map dataToRender = cmd.dataToRender()
-        Project project = projectService.getProjectByName(params.projectName)
-        List data = individualService.findAllMockPidsByProject(project)
-        dataToRender.iTotalRecords = data.size()
-        dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
-        dataToRender.aaData = data.collect{[it]}
-        render dataToRender as JSON
-    }
 }
 
 class AnalysisCommand implements Serializable {
