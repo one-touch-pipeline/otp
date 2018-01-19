@@ -17,8 +17,7 @@ public class JobStateLogFile {
     /**
      * each line in the file must satisfy this expression
      */
-    private static final String JOB_STATE_LOGFILE_REGEX = /^(.+?)\.(.+?):(.+?):(.+?):(.*)$/
-
+    private static final String JOB_STATE_LOGFILE_REGEX = /^(.+?):(.+?):(.+?):(.*)$/
     /**
      * represents content of the file; entries of the files are grouped by cluster job id
      */
@@ -62,10 +61,9 @@ public class JobStateLogFile {
             if (matcher) {
                 LogFileEntry logFileEntry = new LogFileEntry(
                         clusterJobId: matcher[0][1],
-                        host: matcher[0][2],
-                        statusCode: matcher[0][3],
-                        timeStamp: Long.parseLong(matcher[0][4]),
-                        jobClass: matcher[0][5]
+                        statusCode: matcher[0][2],
+                        timeStamp: Long.parseLong(matcher[0][3]),
+                        jobClass: matcher[0][4]
                 )
 
                 List<LogFileEntry> logFileEntries = entries[logFileEntry.clusterJobId]
@@ -116,7 +114,7 @@ public class JobStateLogFile {
         String jobClass
 
         public String toString() {
-            return "${clusterJobId}.${host}:${statusCode}:${timeStamp}:${jobClass}"
+            return "${clusterJobId}:${statusCode}:${timeStamp}:${jobClass}"
         }
     }
 }

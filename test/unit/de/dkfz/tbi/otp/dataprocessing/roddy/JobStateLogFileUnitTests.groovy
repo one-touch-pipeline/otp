@@ -81,13 +81,13 @@ ${logFileEntry2.toString()}"""
         JobStateLogFile jobStateLogFile = JobStateLogFile.getInstance(tmpDir.root)
 
         assert jobStateLogFile.logFileEntries.get(logFileEntry.clusterJobId).first().clusterJobId == logFileEntry.clusterJobId
-        assert jobStateLogFile.logFileEntries.get(logFileEntry.clusterJobId).first().host == logFileEntry.host
+        assert jobStateLogFile.logFileEntries.get(logFileEntry.clusterJobId).first().host == null
         assert jobStateLogFile.logFileEntries.get(logFileEntry.clusterJobId).first().statusCode == logFileEntry.statusCode
         assert jobStateLogFile.logFileEntries.get(logFileEntry.clusterJobId).first().timeStamp == logFileEntry.timeStamp
         assert jobStateLogFile.logFileEntries.get(logFileEntry.clusterJobId).first().jobClass == logFileEntry.jobClass
 
         assert jobStateLogFile.logFileEntries.get(logFileEntry2.clusterJobId).first().clusterJobId == logFileEntry2.clusterJobId
-        assert jobStateLogFile.logFileEntries.get(logFileEntry2.clusterJobId).first().host == logFileEntry2.host
+        assert jobStateLogFile.logFileEntries.get(logFileEntry2.clusterJobId).first().host == null
         assert jobStateLogFile.logFileEntries.get(logFileEntry2.clusterJobId).first().statusCode == logFileEntry2.statusCode
         assert jobStateLogFile.logFileEntries.get(logFileEntry2.clusterJobId).first().timeStamp == logFileEntry2.timeStamp
         assert jobStateLogFile.logFileEntries.get(logFileEntry2.clusterJobId).first().jobClass == logFileEntry2.jobClass
