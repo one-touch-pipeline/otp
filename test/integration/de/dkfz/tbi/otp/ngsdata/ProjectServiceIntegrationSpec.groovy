@@ -12,7 +12,6 @@ import de.dkfz.tbi.otp.utils.*
 import grails.plugin.springsecurity.*
 import grails.test.spock.*
 import grails.validation.*
-import org.codehaus.groovy.grails.commons.*
 import org.junit.*
 import org.junit.rules.*
 import spock.lang.*
@@ -26,7 +25,6 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
 
     ReferenceGenomeService referenceGenomeService
 
-    GrailsApplication grailsApplication
     ProcessingOptionService processingOptionService
 
     TestConfigService configService
@@ -99,7 +97,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
 
     void "test createProject valid input"() {
         given:
-        String group = TestConfigHelper.testingGroup(grailsApplication)
+        String group = configService.getTestingGroup()
 
         when:
         Project project
@@ -146,7 +144,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
 
     void "test createProject if directory is created"() {
         given:
-        String group = TestConfigHelper.testingGroup(grailsApplication)
+        String group = configService.getTestingGroup()
 
         when:
         Project project
@@ -183,7 +181,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
 
     void "test createProject invalid input"() {
         given:
-        String group = TestConfigHelper.testingGroup(grailsApplication)
+        String group = configService.getTestingGroup()
 
         when:
         Project project
@@ -250,7 +248,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
 
     void "test createProject with invalid mailingListName"() {
         given:
-        String group = TestConfigHelper.testingGroup(grailsApplication)
+        String group = configService.getTestingGroup()
 
         when:
         Project project
@@ -280,7 +278,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
 
     void "test createProject with invalid dirAnalysis"() {
         given:
-        String group = TestConfigHelper.testingGroup(grailsApplication)
+        String group = configService.getTestingGroup()
 
         when:
         Project project
@@ -310,7 +308,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
 
     void "test createProject valid input, when directory with wrong unix group already exists"() {
         given:
-        String group = TestConfigHelper.testingGroup(grailsApplication)
+        String group = configService.getTestingGroup()
         File projectDirectory = LsdfFilesService.getPath(
                 configService.getRootPath().absolutePath,
                 "/dir",
@@ -385,7 +383,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
 
     void "test createProject invalid project category should fail"() {
         given:
-        String group = TestConfigHelper.testingGroup(grailsApplication)
+        String group = configService.getTestingGroup()
 
         when:
         Project project

@@ -136,17 +136,6 @@ log4j = {
     ], additivity: false
 }
 
-
-otp {
-    testing {
-        workflows {
-            account = otpProperties.getProperty("otp.testing.workflows.account")
-            rootdir = otpProperties.getProperty("otp.testing.workflows.rootdir")
-        }
-        group = otpProperties.getProperty("otp.testing.group")
-    }
-}
-
 // Added by the Spring Security Core plugin:
 grails.plugin.springsecurity.userLookup.userDomainClassName = 'de.dkfz.tbi.otp.security.User'
 grails.plugin.springsecurity.userLookup.authorityJoinClassName = 'de.dkfz.tbi.otp.security.UserRole'

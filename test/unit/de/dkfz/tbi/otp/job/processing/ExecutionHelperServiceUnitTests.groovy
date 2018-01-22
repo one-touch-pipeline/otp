@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.job.processing
 
 import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.*
@@ -39,7 +40,7 @@ class ExecutionHelperServiceUnitTests {
     @Test
     void "test setGroup & getGroup allFine"() {
         File tmpFile = temporaryFolder.newFile()
-        String group = TestConfigHelper.testingGroup(grailsApplication)
+        String group = new TestConfigService().getTestingGroup()
 
         service.executionService = [
                 executeCommand: { Realm realm, String command ->

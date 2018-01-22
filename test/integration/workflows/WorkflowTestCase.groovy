@@ -127,7 +127,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         DomainFactory.createProcessingOptionForNotificationRecipient()
         DomainFactory.createProcessingOptionLazy([
                 name: OptionName.OTP_USER_LINUX_GROUP,
-                value: TestConfigHelper.testingGroup(grailsApplication),
+                value: configService.getTestingGroup(),
         ])
         DomainFactory.createProcessingOptionLazy(name: OptionName.TIME_ZONE, type: null, value: "Europe/Berlin")
         DomainFactory.createProcessingOptionLazy(name: OptionName.STATISTICS_BASES_PER_BYTES_FASTQ, type: null, value: 2.339)
@@ -181,12 +181,22 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         assert rootDirectory.list()?.size() : "${rootDirectory} seems not to be mounted"
 
         Map realmParams = [
-                unixUser: TestConfigHelper.getWorkflowTestAccountName(grailsApplication),
+                name: 'REALM_NAME',
+                cluster: Realm.Cluster.DKFZ,
+                unixUser: configService.getWorkflowTestAccountName(),
+                jobScheduler: configService.getWorkflowTestScheduler(),
+                host: configService.getWorkflowTestHost(),
+                port: 22,
+                timeout: 0,
                 defaultJobSubmissionOptions: jobSubmissionOptions,
         ]
 
-        Realm realmManagement = WorkflowTestRealms.createRealmDataManagementDKFZ(realmParams).save(flush: true)
-        realm = WorkflowTestRealms.createRealmDataProcessingDKFZ(realmParams).save(flush: true)
+        Realm realmManagement = DomainFactory.createRealm(realmParams + [
+                operationType: Realm.OperationType.DATA_MANAGEMENT,
+        ])
+        realm = DomainFactory.createRealm(realmParams + [
+                operationType: Realm.OperationType.DATA_PROCESSING,
+        ])
 
         println "Base directory: ${getBaseDirectory()}"
 
@@ -391,7 +401,7 @@ echo \$TEMP_DIR
      * @see #getBaseDirectory()
      */
     protected File getRootDirectory() {
-        return TestConfigHelper.getWorkflowTestRootDir(grailsApplication)
+        return configService.getWorkflowTestRootDir()
     }
 
     /**
@@ -481,9 +491,9 @@ echo \$TEMP_DIR
 
     protected void setPermissionsRecursive(File directory, String modeDir, String modeFile) {
         assert directory.absolutePath.startsWith(baseDirectory.absolutePath)
-        String cmd = "find -L ${directory} -user ${TestConfigHelper.getWorkflowTestAccountName(grailsApplication)} -type d -not -perm ${modeDir} -exec chmod ${modeDir} '{}' \\; 2>&1"
+        String cmd = "find -L ${directory} -user ${configService.getWorkflowTestAccountName()} -type d -not -perm ${modeDir} -exec chmod ${modeDir} '{}' \\; 2>&1"
         assert executionService.executeCommand(realm, cmd).empty
-        cmd = "find -L ${directory} -user ${TestConfigHelper.getWorkflowTestAccountName(grailsApplication)} -type f -not -perm ${modeFile} -exec chmod ${modeFile} '{}' \\; 2>&1"
+        cmd = "find -L ${directory} -user ${configService.getWorkflowTestAccountName()} -type f -not -perm ${modeFile} -exec chmod ${modeFile} '{}' \\; 2>&1"
         assert executionService.executeCommand(realm, cmd).empty
     }
 }

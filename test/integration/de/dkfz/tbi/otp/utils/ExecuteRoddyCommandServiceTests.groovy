@@ -7,15 +7,12 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.logging.*
-import org.codehaus.groovy.grails.commons.*
 import org.junit.*
 import org.junit.rules.*
 
 import static de.dkfz.tbi.otp.utils.ProcessHelperService.*
 
 class ExecuteRoddyCommandServiceTests {
-
-    GrailsApplication grailsApplication
 
     ExecuteRoddyCommandService executeRoddyCommandService
 
@@ -47,7 +44,7 @@ class ExecuteRoddyCommandServiceTests {
 
         DomainFactory.createProcessingOptionLazy([
                 name: OptionName.OTP_USER_LINUX_GROUP,
-                value: TestConfigHelper.testingGroup(grailsApplication),
+                value: configService.getTestingGroup(),
                 type: null,
         ])
 
@@ -460,7 +457,7 @@ class ExecuteRoddyCommandServiceTests {
                 }
         ] as ExecutionService
 
-        String testingGroup = TestConfigHelper.testingGroup(grailsApplication)
+        String testingGroup = configService.getTestingGroup()
 
         CreateFileHelper.createFile(new File(roddyBamFile.workDirectory, "file"))
         assert executeAndAssertExitCodeAndErrorOutAndReturnStdout("chgrp ${testingGroup} ${roddyBamFile.workDirectory}/file").empty
@@ -483,7 +480,7 @@ class ExecuteRoddyCommandServiceTests {
     @Test
     void testCorrectPermissionsAndGroups() {
         String primaryGroup = TestCase.primaryGroup()
-        String group = TestConfigHelper.testingGroup(grailsApplication)
+        String group = configService.getTestingGroup()
 
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
 

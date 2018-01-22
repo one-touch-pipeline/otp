@@ -6,7 +6,6 @@ import static org.junit.Assert.*
 
 import org.junit.*
 import de.dkfz.tbi.otp.testing.GroovyScriptAwareTestCase
-import de.dkfz.tbi.otp.WorkflowTestRealms
 
 /**
  * Script to test basic functionality to load bed files and it's
@@ -86,7 +85,7 @@ class LoadBedFileScriptTests extends GroovyScriptAwareTestCase {
         File baseFolder = temporaryFolder.newFolder()
 
         realm = DomainFactory.createRealmDataProcessing([
-            name: WorkflowTestRealms.LABEL_DKFZ,
+            name: 'DKFZ',
         ]).save(flush : true)
 
         File referenceGenomeDirectory = new File(baseFolder, REFERENCE_GENOME_PATH)

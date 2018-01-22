@@ -103,7 +103,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
 
     @Before
     void setUp() {
-        String group = TestConfigHelper.testingGroup(grailsApplication)
+        String group = configService.getTestingGroup()
         executionHelperService.setGroup(realm, configService.getRootPath() as File, group)
 
         setUpFilesVariables()
