@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
@@ -22,6 +23,11 @@ class ProcessedMergedBamFileServiceUnitTests {
     private final static String SOME_MD5SUM_VALUE = "12345678901234567890123456789012"
 
     private final static long SOME_FILE_LENGTH = 10  //Content should only be positive
+
+    @Before
+    void setup() {
+        new TestConfigService()
+    }
 
     @After
     void tearDown() {

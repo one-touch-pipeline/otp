@@ -1,8 +1,8 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.*
-import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
+import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
@@ -10,7 +10,6 @@ import org.apache.commons.logging.impl.*
 import org.junit.*
 import org.junit.rules.*
 import org.springframework.beans.factory.annotation.*
-
 
 class LinkFilesToFinalDestinationServiceTests {
 
@@ -70,6 +69,7 @@ class LinkFilesToFinalDestinationServiceTests {
         linkFilesToFinalDestinationService.metaClass.cleanupWorkDirectory = { RoddyBamFile roddyBamFile, Realm realm -> }
         linkFilesToFinalDestinationService.metaClass.deleteOldLinks = { RoddyBamFile roddyBamFile, Realm realm -> }
         linkFilesToFinalDestinationService.metaClass.linkNewResults = { RoddyBamFile roddyBamFile, Realm realm -> }
+        linkFilesToFinalDestinationService.metaClass.informResultsAreBlocked = { RoddyBamFile roddyBamFile-> }
         linkFilesToFinalDestinationService.metaClass.cleanupOldResults = { RoddyBamFile roddyBamFile, Realm realm -> }
         linkFilesToFinalDestinationService.executeRoddyCommandService.metaClass.correctPermissionsAndGroups = { RoddyResult roddyResult, Realm realm -> }
     }
@@ -516,6 +516,11 @@ class LinkFilesToFinalDestinationServiceTests {
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
 
         linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanup(roddyBamFile, realm)
+
+        assertBamFileIsFine()
+    }
+
+    void assertBamFileIsFine() {
         assert roddyBamFile.fileOperationStatus == AbstractMergedBamFile.FileOperationStatus.PROCESSED
         assert roddyBamFile.md5sum == DomainFactory.DEFAULT_MD5_SUM
         assert roddyBamFile.fileSize > 0
@@ -533,6 +538,8 @@ class LinkFilesToFinalDestinationServiceTests {
         assert roddyBamFile.numberOfReadsFromQa > roddyBamFile.numberOfReadsFromFastQc
 
         linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanup(roddyBamFile, realm)
+
+        assertBamFileIsFine()
     }
 
     @Test
@@ -547,6 +554,53 @@ class LinkFilesToFinalDestinationServiceTests {
         assert roddyBamFile.numberOfReadsFromQa < roddyBamFile.numberOfReadsFromFastQc
 
         linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanup(roddyBamFile, realm)
+
+        assertBamFileIsFine()
+    }
+
+    @Test
+    void testLinkToFinalDestinationAndCleanup_QcStatusEqualPassed() {
+        setUp_allFine()
+        roddyBamFile.qcTrafficLightStatus = AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED
+        assert roddyBamFile.save(flush: true)
+        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
+        linkFilesToFinalDestinationService.metaClass.informResultsAreBlocked = { RoddyBamFile roddyBamFile ->
+            assert false : "should not reach this part"
+        }
+
+
+        linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanup(roddyBamFile, realm)
+
+        assertBamFileIsFine()
+    }
+
+    @Test
+    void testLinkToFinalDestinationAndCleanup_QcStatusEqualBlocked() {
+        setUp_allFine()
+        roddyBamFile.comment = DomainFactory.createComment()
+        roddyBamFile.qcTrafficLightStatus = AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED
+        assert roddyBamFile.save(flush: true)
+        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
+        linkFilesToFinalDestinationService.metaClass.linkNewResults = { RoddyBamFile roddyBamFile, Realm realm ->
+            assert false : "should not reach this part"
+        }
+
+        linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanup(roddyBamFile, realm)
+
+        assertBamFileIsFine()
+    }
+
+    @Test
+    void testLinkToFinalDestinationAndCleanup_QcStatusEqualAccepted_ShouldFail() {
+        setUp_allFine()
+        roddyBamFile.comment = DomainFactory.createComment()
+        roddyBamFile.qcTrafficLightStatus = AbstractMergedBamFile.QcTrafficLightStatus.ACCEPTED
+        assert roddyBamFile.save(flush: true)
+        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
+        TestCase.shouldFailWithMessageContaining(RuntimeException,
+                "${AbstractMergedBamFile.QcTrafficLightStatus.ACCEPTED} is not a valid qcTrafficLightStatus here, only ${AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED} and ${AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED} is a valid status") {
+            linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanup(roddyBamFile, realm)
+        }
     }
 
     @Test

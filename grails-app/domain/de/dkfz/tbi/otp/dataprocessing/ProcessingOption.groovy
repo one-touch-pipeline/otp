@@ -122,6 +122,9 @@ class ProcessingOption implements Entity {
         NOTIFICATION_TEMPLATE_SEQ_CENTER_NOTE("", null, Type.MULTI_LINE_TEXT),
         NOTIFICATION_TEMPLATE_ADDITION("", null, Type.MULTI_LINE_TEXT),
 
+        NOTIFICATION_TEMPLATE_QC_TRAFFIC_BLOCKED_SUBJECT('', null, Type.MULTI_LINE_TEXT),
+        NOTIFICATION_TEMPLATE_QC_TRAFFIC_BLOCKED_MESSAGE('', null, Type.MULTI_LINE_TEXT),
+
         // cluster job scheduler
         CLUSTER_SUBMISSIONS_OPTION("", null, Type.CLUSTER_JOB_SUBMISSION_OPTION),
         CLUSTER_SUBMISSIONS_FAST_TRACK_QUEUE("name of the queue used by fast track projects", null, Type.SINGLE_WORD_TEXT),

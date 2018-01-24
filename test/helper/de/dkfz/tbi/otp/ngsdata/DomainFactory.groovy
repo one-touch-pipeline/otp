@@ -2313,6 +2313,25 @@ samplePairsNotProcessed: ${samplePairsNotProcessed}
         ])
     }
 
+    static void createQcTrafficAlignmentNotificationProcessingOptions() {
+        createProcessingOptionLazy([
+                name: OptionName.NOTIFICATION_TEMPLATE_QC_TRAFFIC_BLOCKED_SUBJECT,
+                type:Pipeline.Type.ALIGNMENT.name(),
+                project: null,
+                value: '''QC traffic alignment header ${roddyBamFile.sample} ${roddyBamFile.seqType}''',
+        ])
+        createProcessingOptionLazy([
+                name: OptionName.NOTIFICATION_TEMPLATE_QC_TRAFFIC_BLOCKED_MESSAGE,
+                type: Pipeline.Type.ALIGNMENT.name(),
+                project: null,
+                value: '''\
+QC traffic alignment body
+${roddyBamFile.sample} ${roddyBamFile.seqType} in project ${roddyBamFile.project}
+${link}
+''',
+        ])
+
+    }
 
     static ProcessedMergedBamFile createIncrementalMergedBamFile(ProcessedMergedBamFile processedMergedBamFile) {
         MergingSet mergingSet = createMergingSet(processedMergedBamFile.workPackage)

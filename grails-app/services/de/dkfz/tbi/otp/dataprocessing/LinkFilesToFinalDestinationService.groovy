@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.dataprocessing
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.notification.*
 import de.dkfz.tbi.otp.utils.*
 import org.springframework.beans.factory.annotation.*
 
@@ -32,6 +33,12 @@ class LinkFilesToFinalDestinationService {
     @Autowired
     AbstractMergedBamFileService abstractMergedBamFileService
 
+    @Autowired
+    MailHelperService mailHelperService
+
+    @Autowired
+    CreateNotificationTextService createNotificationTextService
+
 
     public void prepareRoddyBamFile(RoddyBamFile roddyBamFile) {
         assert roddyBamFile : "roddyBamFile must not be null"
@@ -56,7 +63,13 @@ class LinkFilesToFinalDestinationService {
             cleanupWorkDirectory(roddyBamFile, realm)
             executeRoddyCommandService.correctPermissionsAndGroups(roddyBamFile, realm)
             cleanupOldResults(roddyBamFile, realm)
-            linkNewResults(roddyBamFile, realm)
+            if (!roddyBamFile.qcTrafficLightStatus || roddyBamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED) {
+                linkNewResults(roddyBamFile, realm)
+            } else if (roddyBamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED) {
+                informResultsAreBlocked(roddyBamFile)
+            } else {
+                throw new RuntimeException("${roddyBamFile.qcTrafficLightStatus} is not a valid qcTrafficLightStatus here, only ${AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED} and ${AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED} is a valid status.")
+            }
             setBamFileValues(roddyBamFile)
         } else {
             threadLog?.info "The results of ${roddyBamFile} will not be moved since it is marked as withdrawn"
@@ -127,6 +140,46 @@ class LinkFilesToFinalDestinationService {
         //create the collected links
         linkFileUtils.createAndValidateLinks(linkMapSourceLink, realm)
     }
+
+    String createResultsAreBlockedSubject(RoddyBamFile roddyBamFile) {
+        StringBuilder subject = new StringBuilder()
+        if (!roddyBamFile.project.mailingListName) {
+            subject << 'TO BE SENT: '
+        }
+
+        subject << createNotificationTextService.createMessage(
+                ProcessingOption.OptionName.NOTIFICATION_TEMPLATE_QC_TRAFFIC_BLOCKED_SUBJECT,
+                Pipeline.Type.ALIGNMENT.name(),
+                [
+                        roddyBamFile: roddyBamFile,
+                ]
+        )
+
+        return subject.toString()
+    }
+
+
+    String createResultsAreBlockedMessage(RoddyBamFile roddyBamFile) {
+        return createNotificationTextService.createMessage(
+                ProcessingOption.OptionName.NOTIFICATION_TEMPLATE_QC_TRAFFIC_BLOCKED_MESSAGE,
+                Pipeline.Type.ALIGNMENT.name(),
+                [
+                        roddyBamFile: roddyBamFile,
+                        link: createNotificationTextService.createOtpLinks([roddyBamFile.project], 'alignmentQualityOverview', 'index')
+                ]
+        )
+    }
+
+    void informResultsAreBlocked (RoddyBamFile roddyBamFile) {
+        List<String> recipients = [
+                roddyBamFile.project.mailingListName,
+                ProcessingOptionService.getValueOfProcessingOption(ProcessingOption.OptionName.EMAIL_RECIPIENT_NOTIFICATION),
+        ]
+        String subject = createResultsAreBlockedSubject(roddyBamFile)
+        String content = createResultsAreBlockedMessage(roddyBamFile)
+        mailHelperService.sendEmail(subject, content, recipients)
+    }
+
 
     void linkNewRnaResults(RnaRoddyBamFile roddyBamFile, Realm realm) {
         File baseDirectory = roddyBamFile.getBaseDirectory()

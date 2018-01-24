@@ -59,7 +59,7 @@ class TestConfigService extends ConfigService {
     }
 
     void clean() {
-        this.otpProperties = cleanProperties
+        this.otpProperties = new HashMap<>(cleanProperties)
     }
 
 

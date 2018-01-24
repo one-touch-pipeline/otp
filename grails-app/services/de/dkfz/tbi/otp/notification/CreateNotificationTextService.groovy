@@ -270,9 +270,13 @@ class CreateNotificationTextService {
 
 
     String createMessage(OptionName templateName, Map properties) {
+        return createMessage(templateName, null, properties)
+    }
+
+    String createMessage(OptionName templateName, String type, Map properties) {
         assert templateName
 
-        String template = ProcessingOptionService.findOptionAssure(templateName, null, null)
+        String template = ProcessingOptionService.findOptionAssure(templateName, type, null)
         return new SimpleTemplateEngine().createTemplate(template).make(properties).toString()
     }
 

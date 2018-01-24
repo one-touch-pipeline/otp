@@ -232,3 +232,36 @@ println processingOptionService.createOrUpdate(
 CNV calling is done by ACEseq developed by Kortine Kleinheinz, Division of Theoretical Bioinformatics. For questions regarding the output and its interpretation a documentation can be found here: http://aceseq.readthedocs.io/
 '''
 )
+
+println processingOptionService.createOrUpdate(
+        OptionName.NOTIFICATION_TEMPLATE_QC_TRAFFIC_BLOCKED_SUBJECT,
+        Pipeline.Type.ALIGNMENT.name(),
+        null,
+        '''QC issues for bam file of ${roddyBamFile.sample} ${roddyBamFile.seqType}'''
+)
+
+println processingOptionService.createOrUpdate(
+        OptionName.NOTIFICATION_TEMPLATE_QC_TRAFFIC_BLOCKED_MESSAGE,
+        Pipeline.Type.ALIGNMENT.name(),
+        null,
+        '''\
+Dear user,
+
+There are QC issues for the bam file of ${roddyBamFile.sample} ${roddyBamFile.seqType} in project ${roddyBamFile.project}.
+Further processing of this sample was stopped and the result files were not linked in the usual structure.
+
+Please check out the result files on the filesystem: ${roddyBamFile.workDirectory}
+or directly on our GUI where the problematic fields are highlighted:
+${link}
+
+In case the QC issues are not problematic please mark the bam file in the GUI as valid and provide a reason in the comment field.
+As soon as the bam file is accepted the different variant callings are triggered automatically.
+In the other case please mark them as rejected and also provide a reason in the comment field.
+
+In case you have any questions please do not hesitate to contact us.
+
+
+Best regards,
+OTP
+'''
+)
