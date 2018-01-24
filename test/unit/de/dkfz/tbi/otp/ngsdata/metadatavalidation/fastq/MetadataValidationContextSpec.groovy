@@ -4,12 +4,15 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators.*
 import de.dkfz.tbi.otp.utils.*
+import grails.test.mixin.Mock
 import org.junit.*
 import org.junit.rules.*
 import spock.lang.*
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
-
+@Mock([
+        SeqType,
+])
 class MetadataValidationContextSpec extends Specification {
 
     DirectoryStructure directoryStructure = [:] as DirectoryStructure
@@ -48,19 +51,23 @@ class MetadataValidationContextSpec extends Specification {
 
     void 'test getSummary when problems occurred'()  {
         given:
+        DomainFactory.createAllAlignableSeqTypes()
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
-${MetaDataColumn.SEQUENCING_TYPE}\t${SAMPLE_ID}\t${CUSTOMER_LIBRARY}
-${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\ttestSampleLib\tlib
-${SeqTypeNames.EXOME.seqTypeName}\ttestSample1Lib\tlib
-${SeqTypeNames.RNA.seqTypeName}\ttest2SampleLib\t
-${SeqTypeNames.CHIP_SEQ.seqTypeName}\ttest3SampleLib\t
+${SEQUENCING_TYPE}\t${SAMPLE_ID}\t${CUSTOMER_LIBRARY}\t${LIBRARY_LAYOUT}
+${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\ttestSampleLib\tlib\t${LibraryLayout.PAIRED}
+${SeqTypeNames.EXOME.seqTypeName}\ttestSample1Lib\tlib\t${LibraryLayout.PAIRED}
+${SeqTypeNames.RNA.seqTypeName}\ttest2SampleLib\t\t${LibraryLayout.SINGLE}
+${SeqTypeNames.CHIP_SEQ.seqTypeName}\ttest3SampleLib\t\t${LibraryLayout.PAIRED}
 """)
         new SampleLibraryValidator().validate(context)
         new LibPrepKitSeqTypeValidator().validate(context)
 
         expect:
         context.getSummary() == ["For samples which contain 'lib', there should be a value in the CUSTOMER_LIBRARY column.",
-                                 "If the sequencing type is 'EXON' or 'WHOLE_GENOME_BISULFITE' or 'WHOLE_GENOME_BISULFITE_TAGMENTATION' or 'RNA' or 'ChIP Seq', the library preparation kit must be given."]
+                                 "If the sequencing type is 'WHOLE_GENOME_BISULFITE PAIRED', the library preparation kit must be given.",
+                                 "If the sequencing type is 'EXON PAIRED', the library preparation kit must be given.",
+                                 "If the sequencing type is 'RNA SINGLE', the library preparation kit must be given.",
+                                 "If the sequencing type is 'ChIP Seq PAIRED', the library preparation kit must be given."]
     }
 
 

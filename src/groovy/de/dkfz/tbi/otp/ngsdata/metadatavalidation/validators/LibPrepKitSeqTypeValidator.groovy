@@ -12,18 +12,17 @@ class LibPrepKitSeqTypeValidator extends ValueTuplesValidator<MetadataValidation
 
     @Override
     Collection<String> getDescriptions() {
-        return ["If the sequencing type is '${SeqTypeNames.EXOME.seqTypeName}' or '${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}' " +
-                        "or '${SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName}' or '${SeqTypeNames.RNA.seqTypeName}', the library preparation kit is not empty."]
+        return ["If the sequencing type is ${SeqType.seqTypesRequiredLibPrepKit*.nameWithLibraryLayout.join(' or ')}, the library preparation kit must not be empty."]
     }
 
     @Override
     List<String> getColumnTitles(MetadataValidationContext context) {
-        return [SEQUENCING_TYPE.name(), LIB_PREP_KIT.name(), TAGMENTATION_BASED_LIBRARY.name()]
+        return [SEQUENCING_TYPE.name(), LIBRARY_LAYOUT.name(), LIB_PREP_KIT.name(), TAGMENTATION_BASED_LIBRARY.name()]
     }
 
     @Override
     boolean columnMissing(MetadataValidationContext context, String columnTitle) {
-        if (columnTitle == SEQUENCING_TYPE.name()) {
+        if (columnTitle == SEQUENCING_TYPE.name() || columnTitle == LIBRARY_LAYOUT.name()) {
             return false
         }
         return true
@@ -31,13 +30,17 @@ class LibPrepKitSeqTypeValidator extends ValueTuplesValidator<MetadataValidation
 
     @Override
     void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {
+        List<SeqType> seqTypes = SeqType.getSeqTypesRequiredLibPrepKit()
         valueTuples.each { ValueTuple valueTuple ->
-            String seqType = MetadataImportService.getSeqTypeNameFromMetadata(valueTuple)
-            if ((seqType in [SeqTypeNames.EXOME, SeqTypeNames.RNA, SeqTypeNames.WHOLE_GENOME_BISULFITE, SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION,
-                             SeqTypeNames.CHIP_SEQ]*.seqTypeName) &&
-                    (!valueTuple.getValue(LIB_PREP_KIT.name()))) {
-                context.addProblem(valueTuple.cells, Level.ERROR, "If the sequencing type is '${SeqTypeNames.EXOME.seqTypeName}' or '${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}' " +
-                        "or '${SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName}' or '${SeqTypeNames.RNA.seqTypeName}' or '${SeqTypeNames.CHIP_SEQ.seqTypeName}'" +
+            String seqTypeName = MetadataImportService.getSeqTypeNameFromMetadata(valueTuple)
+            String libLayout = valueTuple.getValue(LIBRARY_LAYOUT.name())
+
+            SeqType seqType = seqTypes.find {
+                it.name == seqTypeName && it.libraryLayout == libLayout
+            }
+
+            if (seqType && !valueTuple.getValue(LIB_PREP_KIT.name())) {
+                context.addProblem(valueTuple.cells, Level.ERROR, "If the sequencing type is '${seqType.nameWithLibraryLayout}'" +
                         ", the library preparation kit must be given.")
             }
         }

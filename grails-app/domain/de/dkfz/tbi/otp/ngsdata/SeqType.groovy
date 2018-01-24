@@ -63,6 +63,10 @@ class SeqType implements Entity {
         return "${name}_${libraryLayout}"
     }
 
+    String getNameWithLibraryLayout() {
+        return "${name} ${libraryLayout}"
+    }
+
     String getDisplayNameWithLibraryLayout() {
         return "${displayName} ${libraryLayout}"
     }
@@ -190,6 +194,17 @@ class SeqType implements Entity {
                 getDefaultOtpAlignableSeqTypes(),
                 getRoddyAlignableSeqTypes(),
         ].flatten().unique()
+    }
+
+    static List<SeqType> getSeqTypesRequiredLibPrepKit() {
+        return [
+                exomePairedSeqType,
+                wholeGenomeBisulfitePairedSeqType,
+                wholeGenomeBisulfiteTagmentationPairedSeqType,
+                chipSeqPairedSeqType,
+                rnaPairedSeqType,
+                rnaSingleSeqType,
+        ]
     }
 
     static List<SeqType> getSnvPipelineSeqTypes() {
