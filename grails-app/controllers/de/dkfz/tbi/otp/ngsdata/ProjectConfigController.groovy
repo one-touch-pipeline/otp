@@ -19,7 +19,6 @@ class ProjectConfigController {
     ProjectService projectService
     ProjectOverviewService projectOverviewService
     SeqTrackService seqTrackService
-    ContactPersonService contactPersonService
     ProcessingThresholdsService processingThresholdsService
     CommentService commentService
     ProjectSelectionService projectSelectionService
@@ -39,9 +38,6 @@ class ProjectConfigController {
 
         project = atMostOneElement(Project.findAllByName(project?.name, [fetch: [projectCategories: 'join', projectGroup: 'join']]))
         Map<String, String> dates = getDates(project)
-
-        List<ProjectContactPerson> projectContactPersons = ProjectContactPerson.findAllByProject(project)
-        List<String> contactPersonRoles = [''] + ContactPersonRole.findAll()*.name
 
         List<MergingCriteria> mergingCriteria = MergingCriteria.findAllByProject(project)
         Map<SeqType, MergingCriteria> seqTypeMergingCriteria = SeqType.roddyAlignableSeqTypes.collectEntries { SeqType seqType ->
@@ -71,8 +67,6 @@ class ProjectConfigController {
             )
         }
 
-        List accessPersons = projectOverviewService.getAccessPersons(project)
-
         return [
                 projects                  : projects,
                 project                   : project,
@@ -87,8 +81,6 @@ class ProjectConfigController {
                 sophiaSeqType             : SeqType.sophiaPipelineSeqTypes,
                 aceseqSeqType             : SeqType.aceseqPipelineSeqTypes,
                 snv                       : project?.snv,
-                projectContactPersons     : projectContactPersons,
-                roleDropDown              : contactPersonRoles,
                 thresholdsTable           : thresholdsTable,
                 snvConfigTable            : snvConfigTable,
                 indelConfigTable          : indelConfigTable,
@@ -104,7 +96,6 @@ class ProjectConfigController {
                 description               : project?.description,
                 customFinalNotification   : project?.customFinalNotification,
                 projectCategories         : ProjectCategory.listOrderByName()*.name,
-                accessPersons             : accessPersons,
                 unixGroup                 : project?.unixGroup,
                 costCenter                : project?.costCenter,
                 tumorEntities             : TumorEntity.list().sort(),
@@ -133,61 +124,20 @@ class ProjectConfigController {
         render map as JSON
     }
 
-    JSON createContactPersonOrAddProject(UpdateContactPersonCommand cmd) {
-        if (cmd.hasErrors()) {
-            Map data = getErrorData(cmd.errors.getFieldError())
-            render data as JSON
-            return
-        }
-        if (ContactPerson.findByFullName(cmd.name)) {
-            checkErrorAndCallMethod(cmd, {
-                contactPersonService.addContactPersonToProject(cmd.name, cmd.project, cmd.contactPersonRole)
-            })
-        } else {
-            checkErrorAndCallMethod(cmd, {
-                contactPersonService.createContactPerson(cmd.name, cmd.email, cmd.aspera, cmd.project, cmd.contactPersonRole)
-            })
-        }
-    }
-
-    static ContactPersonRole getContactPersonRoleByName(String roleName) {
-        return roleName.isEmpty() ? null : exactlyOneElement(ContactPersonRole.findAllByName(roleName))
-    }
-
     JSON updateMailingListName(UpdateMailingListCommand cmd) {
         checkErrorAndCallMethod(cmd, { projectService.updateProjectField(cmd.value, cmd.fieldName, cmd.project) })
     }
+
     JSON updateDescription(UpdateProjectCommand cmd) {
         checkErrorAndCallMethod(cmd, { projectService.updateProjectField(cmd.value, cmd.fieldName, cmd.project) })
     }
+
     JSON updateCostCenter(UpdateProjectCommand cmd) {
         checkErrorAndCallMethod(cmd, { projectService.updateProjectField(cmd.value, cmd.fieldName, cmd.project) })
     }
 
-    JSON deleteContactPersonOrRemoveProject(UpdateDeleteContactPersonCommand cmd) {
-        checkErrorAndCallMethod(cmd, { contactPersonService.removeContactPersonFromProject(cmd.projectContactPerson) })
-    }
-
-    JSON updateName(UpdateContactPersonNameCommand cmd) {
-        checkErrorAndCallMethod(cmd, { contactPersonService.updateName(cmd.contactPerson, cmd.newName) })
-    }
-
     JSON updatePhabricatorAlias(UpdateProjectCommand cmd) {
         checkErrorAndCallMethod(cmd, { projectService.updatePhabricatorAlias(cmd.value, cmd.project) })
-    }
-
-    JSON updateEmail(UpdateContactPersonEmailCommand cmd) {
-        checkErrorAndCallMethod(cmd, { contactPersonService.updateEmail(cmd.contactPerson, cmd.newEmail) })
-    }
-
-    JSON updateAspera(UpdateContactPersonAsperaCommand cmd) {
-        checkErrorAndCallMethod(cmd, { contactPersonService.updateAspera(cmd.contactPerson, cmd.newAspera) })
-    }
-
-    JSON updateRole(UpdateContactPersonRoleCommand cmd) {
-        checkErrorAndCallMethod(cmd, {
-            contactPersonService.updateRole(cmd.projectContactPerson, getContactPersonRoleByName(cmd.newRole))
-        })
     }
 
     JSON updateAnalysisDirectory(UpdateAnalysisDirectoryCommand cmd) {
@@ -243,11 +193,6 @@ class ProjectConfigController {
         render Project.Snv.values() as JSON
     }
 
-    JSON contactPersons() {
-        List<String> contactPersons = contactPersonService.getAllContactPersons()*.fullName
-        render contactPersons as JSON
-    }
-
     JSON saveProjectComment(CommentCommand cmd) {
         Project project = projectService.getProject(cmd.id)
         commentService.saveComment(project, cmd.comment)
@@ -270,7 +215,6 @@ class ProjectConfigController {
         Map map = [success: true]
         render map as JSON
     }
-
 
     private void checkErrorAndCallMethod(Serializable cmd, Closure method) {
         Map data
@@ -414,113 +358,6 @@ class UpdateMailingListCommand extends UpdateProjectCommand {
                 }
             }
         })
-    }
-}
-
-class UpdateContactPersonCommand implements Serializable {
-    String name
-    String email
-    String aspera
-    ContactPersonRole contactPersonRole
-    Project project
-    static constraints = {
-        name(blank: false, validator: { val, obj ->
-            ContactPerson contactPerson = ContactPerson.findByFullName(val)
-            if (ProjectContactPerson.findByContactPersonAndProject(contactPerson, obj.project)) {
-                return 'Duplicate'
-            } else if (contactPerson && obj.email != "" && obj.email != contactPerson.email) {
-                return 'There is already a Person with \'' + contactPerson.fullName + '\' as Name and \'' + contactPerson.email + '\' as Email in the Database'
-            }
-        })
-        email(email: true, validator: { val, obj ->
-            if (!ContactPerson.findByFullName(obj.name) && val == "") {
-                return 'Empty'
-            }
-        })
-        aspera(blank: true)
-        project(nullable: false)
-        contactPersonRole(nullable: true)
-    }
-
-    void setName(String name) {
-        this.name = name?.trim()?.replaceAll(" +", " ")
-    }
-
-    void setEmail(String email) {
-        this.email = email?.trim()?.replaceAll(" +", " ")
-    }
-
-    void setAspera(String aspera) {
-        this.aspera = aspera?.trim()?.replaceAll(" +", " ")
-    }
-
-    void setRole(String role) {
-        this.contactPersonRole = ProjectConfigController.getContactPersonRoleByName(role)
-    }
-}
-
-class UpdateDeleteContactPersonCommand implements Serializable {
-    ProjectContactPerson projectContactPerson
-}
-
-class UpdateContactPersonNameCommand implements Serializable {
-    ContactPerson contactPerson
-    String newName
-    static constraints = {
-        newName(blank: false, validator: { val, obj ->
-            if (val == obj.contactPerson?.fullName) {
-                return 'No Change'
-            } else if (ContactPerson.findByFullName(val)) {
-                return 'Duplicate'
-            }
-        })
-    }
-
-    void setValue(String value) {
-        this.newName = value?.trim()?.replaceAll(" +", " ")
-    }
-}
-
-class UpdateContactPersonEmailCommand implements Serializable {
-    ContactPerson contactPerson
-    String newEmail
-    static constraints = {
-        newEmail(email: true, blank: false, validator: { val, obj ->
-            if (val == obj.contactPerson?.email) {
-                return 'No Change'
-            } else if (ContactPerson.findByEmail(val)) {
-                return 'Duplicate'
-            }
-        })
-    }
-
-    void setValue(String value) {
-        this.newEmail = value?.trim()?.replaceAll(" +", " ")
-    }
-}
-
-class UpdateContactPersonAsperaCommand implements Serializable {
-    ContactPerson contactPerson
-    String newAspera
-    static constraints = {
-        newAspera(blank: true, validator: { val, obj ->
-            if (val == obj.contactPerson?.aspera) {
-                return 'No Change'
-            }
-        })
-    }
-
-    void setValue(String value) {
-        this.newAspera = value?.trim()?.replaceAll(" +", " ")
-    }
-}
-
-class UpdateContactPersonRoleCommand implements Serializable {
-    ProjectContactPerson projectContactPerson
-    String newRole
-
-    void setValue(String value) {
-        this.newRole = value
     }
 }
 

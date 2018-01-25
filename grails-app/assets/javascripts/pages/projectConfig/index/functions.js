@@ -66,35 +66,6 @@ $.otp.projectConfig = {
         });
     },
 
-    deleteUser: function () {
-        $('.deletePerson').on('click', function (event) {
-            "use strict";
-            $.ajax({
-                type: 'GET',
-                url: $.otp.createLink({
-                    controller: 'projectConfig',
-                    action: 'deleteContactPersonOrRemoveProject'
-                }),
-                dataType: 'json',
-                cache: 'false',
-                data: {
-                    "projectContactPerson.id": $(event.target).data("id")
-                },
-                success: function (data) {
-                    if (data.success) {
-                        $.otp.infoMessage($L("editorswitch.notification.success"));
-                        $(event.target).parents("tr").remove();
-                    } else {
-                        $.otp.warningMessage(data.error);
-                    }
-                },
-                error: function (jqXHR, textStatus, errorThrown) {
-                    $.otp.warningMessage($L("editorswitch.notification.error", textStatus, errorThrown));
-                }
-            });
-        })
-    },
-
     /**
      * Asynchronous calls the getAlignmentInfo from the  ProjectOverviewController.
      * While loading displays a Loading text until the data arrived.
@@ -162,18 +133,5 @@ $.otp.projectConfig = {
                 '<tr><td style=\' padding: 5px;\'>' + samtools + '</td><td>' + value.samToolsCommand + '</td><td></td></tr>' +
                 '<tr><td style=\' padding: 5px;\'>' + roddyPipelineVersion + '</td><td>' + value.pluginVersion + '</td><td></td></tr>');
         });
-    },
-
-    toggle: function (controlElement, linkElement) {
-        var control = document.getElementById(controlElement);
-        var link = document.getElementById(linkElement);
-
-        if (control.style.display == "none") {
-            control.style.display = "";
-            link.innerHTML = "Hide list";
-        } else {
-            control.style.display = "none";
-            link.innerHTML = "Show list";
-        }
     }
 };
