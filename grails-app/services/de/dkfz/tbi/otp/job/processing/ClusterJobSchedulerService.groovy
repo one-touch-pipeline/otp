@@ -171,7 +171,7 @@ class ClusterJobSchedulerService {
         if (jobInfo) {
             ClusterJob.Status status = null
             if (jobInfo.jobState && jobInfo.exitCode != null) {
-                status = jobInfo.jobState in finished && jobInfo.exitCode != 0 ? ClusterJob.Status.COMPLETED : ClusterJob.Status.FAILED
+                status = jobInfo.jobState in finished && jobInfo.exitCode == 0 ? ClusterJob.Status.COMPLETED : ClusterJob.Status.FAILED
             }
             clusterJobService.completeClusterJob(jobIdentifier, status, jobInfo)
         }
