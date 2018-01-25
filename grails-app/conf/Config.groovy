@@ -98,10 +98,6 @@ File jobLogDir = new File(otp.logging.jobLogDir)
 // log4j configuration
 log4j = {
     appenders {
-        if(Environment.currentEnvironment == Environment.PRODUCTION) {
-            assert jobLogDir.isDirectory()
-        }
-
         def jobHtmlLayout = new de.dkfz.tbi.otp.utils.logging.JobHtmlLayout()
         def jobAppender = new de.dkfz.tbi.otp.utils.logging.JobAppender(logDirectory: jobLogDir, layout : jobHtmlLayout)
         appender name: "jobs", jobAppender

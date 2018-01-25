@@ -8,7 +8,9 @@ For the installation 2 host are recommended:
 - one for the database, in following referenced: $DB_HOST
 - one for the Webserver (tomcat), in following referenced: $WEB_HOST
 
-This  documentation use following versions:
+Additional an host is needed for job submission and file system changing: $SUBMISSION_HOST
+
+This documentation use following versions:
 - Host system: CentOS Linux release 7.4
 - postgres version: 10
 - tomcat version: 8.5.23
@@ -23,14 +25,13 @@ Additional a cluster is needed, where the complex jobs are running. Currently th
 - PBS
 - LSF (support currently added)
 
-
 User
 ----
 
 For the installation the following users are needed:
 - postgres user on $DB_HOST for running postgres. It is created on $DB_HOST during postgres installation.
 - tomcat user on $WEB_HOST: The user under which tomcat runs: $WEB_USER
-- file and cluster management user on the cluster: $CLUSTER_USER
+- file and cluster management user on the $SUBMISSION_HOST: $CLUSTER_USER
 
 
 GROUP
