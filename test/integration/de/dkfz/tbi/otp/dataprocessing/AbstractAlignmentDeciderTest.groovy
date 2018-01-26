@@ -157,8 +157,8 @@ public class AbstractAlignmentDeciderTest {
         workPackage.save(failOnError: true)
 
         decider.mailHelperService.metaClass.sendEmail = {String subject, String content, String recipient ->
-            assert subject.contains(prefix)
-            assert subject.contains(ticket.ticketNumber)
+            assert content.contains(prefix)
+            assert content.contains(ticket.ticketNumber)
             assert subject.contains(seqTrack.sample.toString())
             emailIsSent = true
         }
@@ -203,8 +203,8 @@ public class AbstractAlignmentDeciderTest {
         boolean emailIsSent = false
 
         decider.mailHelperService.metaClass.sendEmail = {String subject, String content, String recipient ->
-            assert subject.contains(prefix)
-            assert subject.contains(ticket.ticketNumber)
+            assert content.contains(prefix)
+            assert content.contains(ticket.ticketNumber)
             assert subject.contains(seqTrack.sample.toString())
             assert content.contains(seqTrack.libraryPreparationKit.name)
             assert content.contains(workPackage.libraryPreparationKit.name)

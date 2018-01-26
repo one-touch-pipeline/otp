@@ -53,4 +53,23 @@ class SeqPlatformGroup implements Entity, CommentableWithHistory {
             return
         }
     }
+
+    @Override
+    String toString() {
+        StringBuilder sb = new StringBuilder()
+        if (mergingCriteria) {
+            sb << "'${mergingCriteria.project} ${mergingCriteria.seqType?.displayNameWithLibraryLayout}'"
+        } else {
+            sb << "'OTP global'"
+        }
+        sb << " seq platform group with "
+        if (seqPlatforms) {
+            sb << seqPlatforms*.toString().sort().collect {
+                "'${it}'"
+            }.join(", ")
+        } else {
+            sb << " no seq platforms"
+        }
+        return sb.toString()
+    }
 }

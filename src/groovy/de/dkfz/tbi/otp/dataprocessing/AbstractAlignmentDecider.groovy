@@ -94,13 +94,14 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
                         body << "    MergingWorkPackage uses the value: ${workPackage[key]}"
                     }
                 }
-                body << "\n\nThis e-mail was generated automatically by OTP."
                 OtrsTicket ticket = atMostOneElement(trackingService.findAllOtrsTickets([seqTrack]))
-                String ticketSubject = ticket ?
-                        "${ProcessingOptionService.getValueOfProcessingOption(TICKET_SYSTEM_NUMBER_PREFIX)}#${ticket.ticketNumber} " :
-                        ""
+                if (ticket) {
+                    body << "\nThe corresponding ticket is: ${ProcessingOptionService.getValueOfProcessingOption(TICKET_SYSTEM_NUMBER_PREFIX)}#${ticket.ticketNumber}"
+                }
+                body << "\n\nThis e-mail was generated automatically by OTP."
+
                 mailHelperService.sendEmail(
-                        "${ticketSubject}Will not be aligned: ${seqTrack.ilseId ? "ILSe ${seqTrack.ilseId} " : ""} " +
+                        "Will not be aligned: ${seqTrack.ilseId ? "ILSe ${seqTrack.ilseId} " : ""} " +
                                 "${seqTrack.run.name} ${seqTrack.project} ${seqTrack.sample}",
                         body.join('\n'),
                         ProcessingOptionService.getValueOfProcessingOption(EMAIL_RECIPIENT_NOTIFICATION),
