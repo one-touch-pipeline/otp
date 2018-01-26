@@ -53,6 +53,8 @@ class MergingCriteriaController {
         if (errors) {
             flash.message = "An error occurred"
             flash.errors = errors
+        } else {
+            flash.message = "Data stored successfully"
         }
         redirect(action: "projectAndSeqTypeSpecific", params: ["project.id": cmd.project.id, "seqType.id": cmd.seqType.id])
     }
