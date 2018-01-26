@@ -7,15 +7,15 @@ class RoddySophiaConfigTemplate {
 
     static String createConfig(RoddyConfiguration sophiaPipelineConfiguration, Pipeline.Name pipelineName) {
         return """
-<configuration configurationType='project'
-               name='${RoddyWorkflowConfig.getNameUsedInConfig(pipelineName, sophiaPipelineConfiguration.seqType, sophiaPipelineConfiguration.pluginName, sophiaPipelineConfiguration.pluginVersion, sophiaPipelineConfiguration.configVersion)}'
-               description='Project configuration for ${sophiaPipelineConfiguration.seqType.roddyName} in OTP.'
+<configuration configurationType="project"
+               name="${RoddyWorkflowConfig.getNameUsedInConfig(pipelineName, sophiaPipelineConfiguration.seqType, sophiaPipelineConfiguration.pluginName, sophiaPipelineConfiguration.pluginVersion, sophiaPipelineConfiguration.configVersion)}"
+               description="Project configuration for ${sophiaPipelineConfiguration.seqType.roddyName} in OTP."
                imports="${sophiaPipelineConfiguration.baseProjectConfig}">
 
     <subconfigurations>
-        <configuration name='config' usedresourcessize='${sophiaPipelineConfiguration.resources}'>
+        <configuration name="config" usedresourcessize="${sophiaPipelineConfiguration.resources}">
             <availableAnalyses>
-                <analysis id='${sophiaPipelineConfiguration.seqType.roddyName}' configuration='sophiaAnalysis'/>
+                <analysis id="${sophiaPipelineConfiguration.seqType.roddyName}" configuration="sophiaAnalysis"/>
             </availableAnalyses>
         </configuration>
     </subconfigurations>

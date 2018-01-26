@@ -7,14 +7,14 @@ class RoddySnvConfigTemplate {
 
     static String createConfig(RoddyConfiguration snvPipelineConfiguration, Pipeline.Name pipelineName) {
         return """
-<configuration configurationType='project'
-               name='${RoddyWorkflowConfig.getNameUsedInConfig(pipelineName, snvPipelineConfiguration.seqType, snvPipelineConfiguration.pluginName, snvPipelineConfiguration.pluginVersion, snvPipelineConfiguration.configVersion)}'
-               description='SNV project configuration for ${snvPipelineConfiguration.seqType.roddyName} in OTP.'
+<configuration configurationType="project"
+               name="${RoddyWorkflowConfig.getNameUsedInConfig(pipelineName, snvPipelineConfiguration.seqType, snvPipelineConfiguration.pluginName, snvPipelineConfiguration.pluginVersion, snvPipelineConfiguration.configVersion)}"
+               description="SNV project configuration for ${snvPipelineConfiguration.seqType.roddyName} in OTP."
                imports="${snvPipelineConfiguration.baseProjectConfig}">
     <subconfigurations>
-        <configuration name='config' usedresourcessize='xl'>
+        <configuration name="config" usedresourcessize="xl">
             <availableAnalyses>
-                <analysis id='${snvPipelineConfiguration.seqType.roddyName}' configuration='snvCallingAnalysis'/>
+                <analysis id="${snvPipelineConfiguration.seqType.roddyName}" configuration="snvCallingAnalysis"/>
             </availableAnalyses>
         </configuration>
     </subconfigurations>
