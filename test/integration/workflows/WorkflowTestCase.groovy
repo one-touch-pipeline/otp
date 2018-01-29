@@ -421,6 +421,7 @@ echo \$TEMP_DIR
      *  either the workflow to finish or the timeout
      */
     protected void execute(int numberOfProcesses = 1, ensureNoFailure = true) {
+        schedulerService.startup()
         if(!startJobRunning) {
             AbstractStartJobImpl startJob = Holders.applicationContext.getBean(JobExecutionPlan.list()?.first()?.startJob?.bean, AbstractStartJobImpl)
             assert startJob : 'No start job found.'
