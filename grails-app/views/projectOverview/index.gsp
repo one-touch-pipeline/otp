@@ -9,6 +9,7 @@
 </head>
 <body>
     <div class="body">
+    <g:if test="${projects}">
         <h3 class="statisticTitle">
             <g:message code="projectOverview.pageTitle" />
         </h3>
@@ -91,12 +92,16 @@
                 <canvas id="sampleTypeCountByPatient" width="550">[No canvas support]</canvas>
          </div>
         </div>
-    </div>
     <asset:script>
         $(function() {
             $.otp.projectOverviewTable.register();
             $.otp.graph.project.init();
         });
     </asset:script>
+    </g:if>
+    <g:else>
+        <h3><g:message code="default.no.project"/></h3>
+    </g:else>
+    </div>
 </body>
 </html>

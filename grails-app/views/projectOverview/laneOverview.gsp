@@ -8,6 +8,7 @@
 </head>
 <body>
     <div class="body">
+    <g:if test="${projects}">
         <div class= "searchCriteriaTableSequences">
             <g:render template="/templates/projectSelection" model="['project': project, 'projects': projects]" />
             <table id="searchCriteriaTable2" style="display: inline-block">
@@ -94,12 +95,16 @@
                 </tfoot>
             </table>
         </div>
-    </div>
     <asset:script>
         $(function() {
             $.otp.projectOverviewTable.registerLaneOverviewId();
             $('.dataTables_scrollBody').height($('.body').height()-265);
         });
     </asset:script>
+    </g:if>
+    <g:else>
+        <h3><g:message code="default.no.project"/></h3>
+    </g:else>
+    </div>
 </body>
 </html>

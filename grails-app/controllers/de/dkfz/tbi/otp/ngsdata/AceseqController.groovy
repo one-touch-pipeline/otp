@@ -27,12 +27,7 @@ class AceseqController {
         List<Project> projects = projectService.getAllProjects()
         ProjectSelection selection = projectSelectionService.getSelectedProject()
 
-        Project project
-        if (selection.projects.size() == 1) {
-            project = selection.projects.first()
-        } else {
-            project = projects.first()
-        }
+        Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects(selection)
 
         return [
                 projects: projects,
@@ -43,7 +38,7 @@ class AceseqController {
     JSON dataTableResults(ResultTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()
         SimpleDateFormat sdf = new SimpleDateFormat('yyyy-MM-dd HH:mm')
-        List results = analysisService.getCallingInstancesForProject(AceseqInstance, cmd.project.name)
+        List results = analysisService.getCallingInstancesForProject(AceseqInstance, cmd.project?.name)
         List data = results.collect { Map properties ->
             AceseqQc qc = AceseqQc.findByAceseqInstanceAndNumber(AceseqInstance.get(properties.instanceId as long), 1)
             properties.putAll([

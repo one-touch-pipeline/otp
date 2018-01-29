@@ -16,13 +16,15 @@ class InfoController {
         [aboutOtp: aboutOtp,]
     }
 
-    def numbers() { }
+    def numbers() {
+        return [projects: projectService.getAllProjects().size()]
+    }
 
-    def faq() { }
+    def faq() {}
 
-    def contact() { }
+    def contact() {}
 
-    def partners() { }
+    def partners() {}
 
     JSON projectCountPerDate() {
         List data = statisticService.projectDateSortAfterDate(null)

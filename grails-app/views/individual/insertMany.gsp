@@ -8,6 +8,7 @@
 
 <body>
 <div class="body" id="bulk-sample-creation">
+    <g:if test="${projects}">
     <h1><g:message code="individual.insertMany.title"/></h1>
 
     <p>
@@ -93,6 +94,10 @@
             <g:submitButton name="submit"/>
         </div>
     </g:uploadForm>
+    </g:if>
+    <g:else>
+        <h3><g:message code="default.no.project"/></h3>
+    </g:else>
 </div>
 </body>
 </html>

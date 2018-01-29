@@ -27,7 +27,7 @@ class IndividualService {
      * If no Individual is found null is returned.
      * @param identifier Name or database Id
      * @return Individual
-     **/
+     * */
     @PostAuthorize("hasRole('ROLE_OPERATOR') or (returnObject == null) or hasPermission(returnObject.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', read)")
     Individual getIndividual(String identifier) {
         if (!identifier) {
@@ -52,13 +52,12 @@ class IndividualService {
         return individual
     }
 
-
     /**
      * Retrieves the given Individual.
      * Overloaded method for convenience.
      * @param identifier Name or database Id
      * @return Individual
-     **/
+     * */
     @PostAuthorize("hasRole('ROLE_OPERATOR') or (returnObject == null) or hasPermission(returnObject.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', read)")
     Individual getIndividual(long identifier) {
         return getIndividual("${identifier}")
@@ -75,12 +74,16 @@ class IndividualService {
      * @param filtering Filtering restrictions
      * @param filter Filter restrictions
      * @return List of Individuals matching the criterias and ACL restricted
-     **/
+     * */
     public List<Individual> listIndividuals(boolean sortOrder, IndividualSortColumn column, IndividualFiltering filtering, String filter) {
+        List projects = projectService.getAllProjects()
+        if (!projects) {
+            return []
+        }
         String columnName = "project"
         def c = Individual.createCriteria()
         return c.list {
-            'in'('project', projectService.getAllProjects())
+            'in'('project', projects)
             if (filter.length() >= 3) {
                 filter = "%${filter}%"
                 or {
@@ -203,12 +206,12 @@ class IndividualService {
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'write')")
     public Individual createIndividual(Project project, IndividualCommand command, List<SamplesParser> parsedSamples) throws IndividualCreationException {
         Individual individual = new Individual(
-                        pid: command.pid,
-                        mockPid: command.mockPid,
-                        mockFullName: command.mockFullName,
-                        internIdentifier: command.internIdentifier,
-                        type: command.individualType, project: project
-                        )
+                pid: command.pid,
+                mockPid: command.mockPid,
+                mockFullName: command.mockFullName,
+                internIdentifier: command.internIdentifier,
+                type: command.individualType, project: project
+        )
         if (!individual.validate()) {
             throw new IndividualCreationException("Individual does not validate")
         }
@@ -394,7 +397,7 @@ class IndividualService {
      * @param newProperties a Map that contains the new properties of the individual/sample/lane
      * @param additionalInformation a String with additional information that will be displayed between header and old/new properties
      */
-    public void createComment (String operation, Map oldProperties, Map newProperties, String additionalInformation = null) {
+    public void createComment(String operation, Map oldProperties, Map newProperties, String additionalInformation = null) {
         assert oldProperties
         assert oldProperties.individual
         assert newProperties
@@ -421,7 +424,7 @@ class IndividualService {
         Map diff = oldProperties - newProperties
 
         String output = "== ${operation} - ${date.format("yyyy-MM-dd HH:mm")} ==\n"
-        if(additionalInformation) {
+        if (additionalInformation) {
             output += "${additionalInformation}\n"
         }
 

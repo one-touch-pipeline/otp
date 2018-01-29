@@ -8,6 +8,7 @@
     </head>
 <body>
     <div class="body">
+    <g:if test="${projects}">
         <div class="dataTable_searchContainer">
             <div id="searchbox">
                 <span class="blue_label"><g:message code="simple.quick.search"/> :</span>
@@ -61,11 +62,15 @@
                 'run.list.dateExecuted',
                 ] }" id="runTable"/>
         </div>
-    </div>
     <asset:script>
         $(function() {
             $.otp.runList();
         });
     </asset:script>
+    </g:if>
+    <g:else>
+        <h3><g:message code="default.no.project"/></h3>
+    </g:else>
+    </div>
 </body>
 </html>

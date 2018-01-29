@@ -27,17 +27,16 @@ class ProjectConfigController {
 
     Map index() {
         List<Project> projects = projectService.getAllProjects()
+        if (!projects) {
+            return [
+                    projects: projects,
+            ]
+        }
         ProjectSelection selection = projectSelectionService.getSelectedProject()
 
-        Project project
-        if (selection.projects.size() == 1) {
-            project = selection.projects.first()
-        } else {
-            project = projects.first()
-        }
+        Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects(selection)
 
-        project = exactlyOneElement(Project.findAllByName(project.name, [fetch: [projectCategories: 'join', projectGroup: 'join']]))
-
+        project = atMostOneElement(Project.findAllByName(project?.name, [fetch: [projectCategories: 'join', projectGroup: 'join']]))
         Map<String, String> dates = getDates(project)
 
         List<ProjectContactPerson> projectContactPersons = ProjectContactPerson.findAllByProject(project)
@@ -45,12 +44,12 @@ class ProjectConfigController {
 
         List<MergingCriteria> mergingCriteria = MergingCriteria.findAllByProject(project)
         Map<SeqType, MergingCriteria> seqTypeMergingCriteria = SeqType.roddyAlignableSeqTypes.collectEntries { SeqType seqType ->
-            [(seqType): mergingCriteria.find {it.seqType == seqType}]
+            [(seqType): mergingCriteria.find { it.seqType == seqType }]
         }.sort { Map.Entry<SeqType, MergingCriteria> it -> it.key.displayNameWithLibraryLayout }
 
         List<List> thresholdsTable = createThresholdTable(project)
 
-        List snvConfigTable = createAnalysisConfigTable(project,  SeqType.getSnvPipelineSeqTypes(), Pipeline.findByName(Pipeline.Name.RODDY_SNV))
+        List snvConfigTable = createAnalysisConfigTable(project, SeqType.getSnvPipelineSeqTypes(), Pipeline.findByName(Pipeline.Name.RODDY_SNV))
         List indelConfigTable = createAnalysisConfigTable(project, SeqType.getIndelPipelineSeqTypes(), Pipeline.findByName(Pipeline.Name.RODDY_INDEL))
         List sophiaConfigTable = createAnalysisConfigTable(project, SeqType.getSophiaPipelineSeqTypes(), Pipeline.findByName(Pipeline.Name.RODDY_SOPHIA))
         List aceseqConfigTable = createAnalysisConfigTable(project, SeqType.getAceseqPipelineSeqTypes(), Pipeline.findByName(Pipeline.Name.RODDY_ACESEQ))
@@ -58,53 +57,57 @@ class ProjectConfigController {
         String checkSophiaReferenceGenome = projectService.checkReferenceGenomeForSophia(project).getError()
         String checkAceseqReferenceGenome = projectService.checkReferenceGenomeForAceseq(project).getError()
 
-        File projectDirectory = LsdfFilesService.getPath(
-                configService.getRootPath().path,
-                project.dirName,
-        )
+        File projectDirectory
+
+        if (project) {
+            projectDirectory = LsdfFilesService.getPath(
+                    configService.getRootPath().path,
+                    project.dirName,
+            )
+        }
 
         List accessPersons = projectOverviewService.getAccessPersons(project)
 
         return [
-                projects: projects,
-                project: project,
-                creationDate: dates.creationDate,
-                lastReceivedDate: dates.lastReceivedDate,
-                comment: project.comment,
-                nameInMetadata: project.nameInMetadataFiles?: '',
-                seqTypeMergingCriteria: seqTypeMergingCriteria,
-                seqTypes: SeqType.roddyAlignableSeqTypes.sort { it.displayNameWithLibraryLayout },
-                snvSeqTypes: SeqType.snvPipelineSeqTypes,
-                indelSeqTypes: SeqType.indelPipelineSeqTypes,
-                sophiaSeqType: SeqType.sophiaPipelineSeqTypes,
-                aceseqSeqType: SeqType.aceseqPipelineSeqTypes,
-                snv: project.snv,
-                projectContactPersons: projectContactPersons,
-                roleDropDown: contactPersonRoles,
-                thresholdsTable: thresholdsTable,
-                snvConfigTable: snvConfigTable,
-                indelConfigTable: indelConfigTable,
-                sophiaConfigTable: sophiaConfigTable,
-                aceseqConfigTable: aceseqConfigTable,
-                snvDropDown: Project.Snv.values(),
-                directory: projectDirectory,
-                analysisDirectory: project.dirAnalysis?: '',
-                projectGroup: project.projectGroup,
-                copyFiles: project.hasToBeCopied,
-                fingerPrinting: project.fingerPrinting,
-                mailingListName: project.mailingListName,
-                description: project.description,
-                projectCategories: ProjectCategory.listOrderByName(),
-                accessPersons: accessPersons,
-                unixGroup: project.unixGroup,
-                costCenter: project.costCenter,
-                tumorEntities: TumorEntity.list().sort(),
-                tumorEntity: project.tumorEntity,
-                processingPriorities: ProjectService.processingPriorities,
+                projects                  : projects,
+                project                   : project,
+                creationDate              : dates.creationDate,
+                lastReceivedDate          : dates.lastReceivedDate,
+                comment                   : project?.comment,
+                nameInMetadata            : project?.nameInMetadataFiles ?: '',
+                seqTypeMergingCriteria    : seqTypeMergingCriteria,
+                seqTypes                  : SeqType.roddyAlignableSeqTypes.sort { it.displayNameWithLibraryLayout },
+                snvSeqTypes               : SeqType.snvPipelineSeqTypes,
+                indelSeqTypes             : SeqType.indelPipelineSeqTypes,
+                sophiaSeqType             : SeqType.sophiaPipelineSeqTypes,
+                aceseqSeqType             : SeqType.aceseqPipelineSeqTypes,
+                snv                       : project?.snv,
+                projectContactPersons     : projectContactPersons,
+                roleDropDown              : contactPersonRoles,
+                thresholdsTable           : thresholdsTable,
+                snvConfigTable            : snvConfigTable,
+                indelConfigTable          : indelConfigTable,
+                sophiaConfigTable         : sophiaConfigTable,
+                aceseqConfigTable         : aceseqConfigTable,
+                snvDropDown               : Project.Snv.values(),
+                directory                 : projectDirectory ?: '',
+                analysisDirectory         : project?.dirAnalysis ?: '',
+                projectGroup              : project?.projectGroup,
+                copyFiles                 : project?.hasToBeCopied,
+                fingerPrinting            : project?.fingerPrinting,
+                mailingListName           : project?.mailingListName,
+                description               : project?.description,
+                projectCategories         : ProjectCategory.listOrderByName()*.name,
+                accessPersons             : accessPersons,
+                unixGroup                 : project?.unixGroup,
+                costCenter                : project?.costCenter,
+                tumorEntities             : TumorEntity.list().sort(),
+                tumorEntity               : project?.tumorEntity,
+                processingPriorities      : ProjectService.processingPriorities,
                 checkSophiaReferenceGenome: checkSophiaReferenceGenome,
                 checkAceseqReferenceGenome: checkAceseqReferenceGenome,
-                hasErrors: params.hasErrors,
-                message: params.message,
+                hasErrors                 : params.hasErrors,
+                message                   : params.message,
         ]
     }
 
@@ -123,16 +126,20 @@ class ProjectConfigController {
         render map as JSON
     }
 
-    JSON createContactPersonOrAddProject(UpdateContactPersonCommand cmd){
+    JSON createContactPersonOrAddProject(UpdateContactPersonCommand cmd) {
         if (cmd.hasErrors()) {
             Map data = getErrorData(cmd.errors.getFieldError())
             render data as JSON
             return
         }
         if (ContactPerson.findByFullName(cmd.name)) {
-            checkErrorAndCallMethod(cmd, { contactPersonService.addContactPersonToProject(cmd.name, cmd.project, cmd.contactPersonRole) })
+            checkErrorAndCallMethod(cmd, {
+                contactPersonService.addContactPersonToProject(cmd.name, cmd.project, cmd.contactPersonRole)
+            })
         } else {
-            checkErrorAndCallMethod(cmd, { contactPersonService.createContactPerson(cmd.name, cmd.email, cmd.aspera, cmd.project, cmd.contactPersonRole) })
+            checkErrorAndCallMethod(cmd, {
+                contactPersonService.createContactPerson(cmd.name, cmd.email, cmd.aspera, cmd.project, cmd.contactPersonRole)
+            })
         }
     }
 
@@ -144,7 +151,7 @@ class ProjectConfigController {
         checkErrorAndCallMethod(cmd, { projectService.updateProjectField(cmd.value, cmd.fieldName, cmd.project) })
     }
 
-    JSON deleteContactPersonOrRemoveProject(UpdateDeleteContactPersonCommand cmd){
+    JSON deleteContactPersonOrRemoveProject(UpdateDeleteContactPersonCommand cmd) {
         checkErrorAndCallMethod(cmd, { contactPersonService.removeContactPersonFromProject(cmd.projectContactPerson) })
     }
 
@@ -165,15 +172,21 @@ class ProjectConfigController {
     }
 
     JSON updateRole(UpdateContactPersonRoleCommand cmd) {
-        checkErrorAndCallMethod(cmd, { contactPersonService.updateRole(cmd.projectContactPerson, getContactPersonRoleByName(cmd.newRole)) })
+        checkErrorAndCallMethod(cmd, {
+            contactPersonService.updateRole(cmd.projectContactPerson, getContactPersonRoleByName(cmd.newRole))
+        })
     }
 
     JSON updateAnalysisDirectory(UpdateAnalysisDirectoryCommand cmd) {
-        checkErrorAndCallMethod(cmd, { projectService.updateProjectField(cmd.analysisDirectory, "dirAnalysis", cmd.project) })
+        checkErrorAndCallMethod(cmd, {
+            projectService.updateProjectField(cmd.analysisDirectory, "dirAnalysis", cmd.project)
+        })
     }
 
     JSON updateNameInMetadataFiles(UpdateNameInMetadataCommand cmd) {
-        checkErrorAndCallMethod(cmd, { projectService.updateProjectField(cmd.newNameInMetadata, "nameInMetadataFiles", cmd.project) })
+        checkErrorAndCallMethod(cmd, {
+            projectService.updateProjectField(cmd.newNameInMetadata, "nameInMetadataFiles", cmd.project)
+        })
     }
 
     JSON updateCategory(UpdateCategoryCommand cmd) {
@@ -181,15 +194,21 @@ class ProjectConfigController {
     }
 
     JSON updateProcessingPriority(SimpleUpdateCommand cmd) {
-        checkErrorAndCallMethod(cmd, { projectService.updateProjectField(ProcessingPriority."${cmd.value}_PRIORITY", cmd.fieldName, cmd.project) })
+        checkErrorAndCallMethod(cmd, {
+            projectService.updateProjectField(ProcessingPriority."${cmd.value}_PRIORITY", cmd.fieldName, cmd.project)
+        })
     }
 
     JSON updateTumorEntity(SimpleUpdateCommand cmd) {
-        checkErrorAndCallMethod(cmd, { projectService.updateProjectField(TumorEntity.findByName(cmd.value), cmd.fieldName, cmd.project) })
+        checkErrorAndCallMethod(cmd, {
+            projectService.updateProjectField(TumorEntity.findByName(cmd.value), cmd.fieldName, cmd.project)
+        })
     }
 
     JSON updateSnv(SimpleUpdateCommand cmd) {
-        checkErrorAndCallMethod(cmd, { projectService.updateProjectField(Project.Snv.valueOf(cmd.value), cmd.fieldName, cmd.project) })
+        checkErrorAndCallMethod(cmd, {
+            projectService.updateProjectField(Project.Snv.valueOf(cmd.value), cmd.fieldName, cmd.project)
+        })
     }
 
     JSON snvDropDown() {
@@ -234,7 +253,7 @@ class ProjectConfigController {
 
     Map<String, String> getDates(Project project) {
         Timestamp[] timestamps = Sequence.createCriteria().get {
-            eq("projectId", project.id)
+            eq("projectId", project?.id)
             projections {
                 min("dateCreated")
                 max("dateCreated")
@@ -244,7 +263,8 @@ class ProjectConfigController {
         return [creationDate: timestamps[0] ? simpleDateFormat.format(timestamps[0]) : null, lastReceivedDate: timestamps[0] ? simpleDateFormat.format(timestamps[1]) : null]
     }
 
-    private static List<List<String>> createAnalysisConfigTable(Project project, List<SeqType> seqTypes, Pipeline pipeline) {
+    private
+    static List<List<String>> createAnalysisConfigTable(Project project, List<SeqType> seqTypes, Pipeline pipeline) {
         List<List<String>> table = []
         table.add(["", "Config created", "Version"])
         seqTypes.each { SeqType seqType ->
@@ -275,8 +295,8 @@ class ProjectConfigController {
         row.add(message(code: "projectOverview.analysis.sampleType"))
         row.add(message(code: "projectOverview.analysis.category"))
         seqTypes.each {
-            row.add(message(code: "projectOverview.analysis.minLanes", args:[it.displayNameWithLibraryLayout]))
-            row.add(message(code: "projectOverview.analysis.coverage", args:[it.displayNameWithLibraryLayout]))
+            row.add(message(code: "projectOverview.analysis.minLanes", args: [it.displayNameWithLibraryLayout]))
+            row.add(message(code: "projectOverview.analysis.coverage", args: [it.displayNameWithLibraryLayout]))
         }
         thresholdsTable.add(row)
 
@@ -301,7 +321,7 @@ class ProjectConfigController {
     private static List removeEmptyColumns(List list) {
         list = list.transpose()
         list.removeAll {
-            it.findAll {it == null}.size() == (it.size() - 1)
+            it.findAll { it == null }.size() == (it.size() - 1)
         }
         return list.transpose()
     }
@@ -309,7 +329,7 @@ class ProjectConfigController {
     JSON dataTableSourceReferenceGenome(DataTableCommand cmd) {
         Project project = projectService.getProjectByName(params.project)
         Map dataToRender = cmd.dataToRender()
-        List data = projectOverviewService.listReferenceGenome(project).collect { ReferenceGenomeProjectSeqType it->
+        List data = projectOverviewService.listReferenceGenome(project).collect { ReferenceGenomeProjectSeqType it ->
             String adapterTrimming = it.sampleType ? "" :
                     it.seqType.isWgbs() || it.seqType.isWgbs() ?:
                             RoddyWorkflowConfig.getLatestForProject(project, it.seqType, Pipeline.findByName(Pipeline.Name.PANCAN_ALIGNMENT))?.adapterTrimmingNeeded
@@ -339,30 +359,36 @@ class UpdateContactPersonCommand implements Serializable {
     ContactPersonRole contactPersonRole
     Project project
     static constraints = {
-        name(blank: false, validator: {val, obj ->
+        name(blank: false, validator: { val, obj ->
             ContactPerson contactPerson = ContactPerson.findByFullName(val)
             if (ProjectContactPerson.findByContactPersonAndProject(contactPerson, obj.project)) {
                 return 'Duplicate'
             } else if (contactPerson && obj.email != "" && obj.email != contactPerson.email) {
                 return 'There is already a Person with \'' + contactPerson.fullName + '\' as Name and \'' + contactPerson.email + '\' as Email in the Database'
-            }})
-        email(email:true, validator: {val, obj ->
+            }
+        })
+        email(email: true, validator: { val, obj ->
             if (!ContactPerson.findByFullName(obj.name) && val == "") {
                 return 'Empty'
-            }})
+            }
+        })
         aspera(blank: true)
         project(nullable: false)
         contactPersonRole(nullable: true)
     }
+
     void setName(String name) {
         this.name = name?.trim()?.replaceAll(" +", " ")
     }
+
     void setEmail(String email) {
         this.email = email?.trim()?.replaceAll(" +", " ")
     }
+
     void setAspera(String aspera) {
         this.aspera = aspera?.trim()?.replaceAll(" +", " ")
     }
+
     void setRole(String role) {
         this.contactPersonRole = ProjectConfigController.getContactPersonRoleByName(role)
     }
@@ -376,7 +402,7 @@ class UpdateContactPersonNameCommand implements Serializable {
     ContactPerson contactPerson
     String newName
     static constraints = {
-        newName(blank: false, validator: {val, obj ->
+        newName(blank: false, validator: { val, obj ->
             if (val == obj.contactPerson?.fullName) {
                 return 'No Change'
             } else if (ContactPerson.findByFullName(val)) {
@@ -384,6 +410,7 @@ class UpdateContactPersonNameCommand implements Serializable {
             }
         })
     }
+
     void setValue(String value) {
         this.newName = value?.trim()?.replaceAll(" +", " ")
     }
@@ -393,7 +420,7 @@ class UpdateContactPersonEmailCommand implements Serializable {
     ContactPerson contactPerson
     String newEmail
     static constraints = {
-        newEmail(email:true, blank: false ,validator: {val, obj ->
+        newEmail(email: true, blank: false, validator: { val, obj ->
             if (val == obj.contactPerson?.email) {
                 return 'No Change'
             } else if (ContactPerson.findByEmail(val)) {
@@ -401,6 +428,7 @@ class UpdateContactPersonEmailCommand implements Serializable {
             }
         })
     }
+
     void setValue(String value) {
         this.newEmail = value?.trim()?.replaceAll(" +", " ")
     }
@@ -410,12 +438,13 @@ class UpdateContactPersonAsperaCommand implements Serializable {
     ContactPerson contactPerson
     String newAspera
     static constraints = {
-        newAspera(blank: true, validator: {val, obj ->
+        newAspera(blank: true, validator: { val, obj ->
             if (val == obj.contactPerson?.aspera) {
                 return 'No Change'
             }
         })
     }
+
     void setValue(String value) {
         this.newAspera = value?.trim()?.replaceAll(" +", " ")
     }
@@ -424,6 +453,7 @@ class UpdateContactPersonAsperaCommand implements Serializable {
 class UpdateContactPersonRoleCommand implements Serializable {
     ProjectContactPerson projectContactPerson
     String newRole
+
     void setValue(String value) {
         this.newRole = value
     }
@@ -443,6 +473,7 @@ class UpdateNameInMetadataCommand implements Serializable {
             }
         })
     }
+
     void setValue(String value) {
         this.newNameInMetadata = value?.trim()?.replaceAll(" +", " ")
         if (this.newNameInMetadata == "") {
@@ -461,12 +492,13 @@ class UpdateAnalysisDirectoryCommand implements Serializable {
             }
         })
     }
+
     void setValue(String value) {
         this.analysisDirectory = value
     }
 }
 
 class UpdateCategoryCommand implements Serializable {
-    List<String> value = [].withLazyDefault {new String()}
+    List<String> value = [].withLazyDefault { new String() }
     Project project
 }

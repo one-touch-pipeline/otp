@@ -8,6 +8,7 @@
 </head>
 <body>
     <div class="body">
+    <g:if test="${projects}">
         <h1><g:message code="individual.insert.title"/></h1>
         <form id="add-individual-form" method="POST">
             <div class="dialog">
@@ -132,11 +133,15 @@
                 <input type="submit" value="${g.message(code: 'individual.insert.save')}"/>
             </div>
         </form>
-    </div>
     <asset:script>
         $(function() {
             $.otp.addIndividual.register();
         });
     </asset:script>
+    </g:if>
+    <g:else>
+        <h3><g:message code="default.no.project"/></h3>
+    </g:else>
+    </div>
 </body>
 </html>

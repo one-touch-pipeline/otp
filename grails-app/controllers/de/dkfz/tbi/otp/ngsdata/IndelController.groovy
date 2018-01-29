@@ -27,12 +27,7 @@ class IndelController {
         List<Project> projects = projectService.getAllProjects()
         ProjectSelection selection = projectSelectionService.getSelectedProject()
 
-        Project project
-        if (selection.projects.size() == 1) {
-            project = selection.projects.first()
-        } else {
-            project = projects.first()
-        }
+        Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects(selection)
 
         return [
                 projects: projects,
@@ -75,7 +70,7 @@ class IndelController {
     JSON dataTableResults(ResultTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()
         SimpleDateFormat sdf = new SimpleDateFormat('yyyy-MM-dd HH:mm')
-        List results = analysisService.getCallingInstancesForProject(IndelCallingInstance, cmd.project.name)
+        List results = analysisService.getCallingInstancesForProject(IndelCallingInstance, cmd.project?.name)
         List data = results.collect { Map properties ->
             IndelQualityControl qc = IndelQualityControl.findByIndelCallingInstance(IndelCallingInstance.get(properties.instanceId as long))
             IndelSampleSwapDetection sampleSwap = IndelSampleSwapDetection.findByIndelCallingInstance(IndelCallingInstance.get(properties.instanceId as long))

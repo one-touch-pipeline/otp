@@ -24,8 +24,8 @@ class StatisticService {
                     List<Project> projects = projectService.projectByProjectGroup(projectGroup)
                     'in'("projectId", projects*.id)
                 }
-                groupProperty("projectName")
                 min("dateCreated", "minDate")
+                groupProperty("projectName")
             }
             order("minDate")
         }
@@ -91,9 +91,10 @@ SELECT DISTINCT seq.seq_track_id
  date_part('day', seq.date_created)
 '''
         List laneCountPerDay = []
-
-        sql.eachRow(query) {
-            laneCountPerDay << ["${it.year}-${it.month}-${it.day}" as String, it.laneCount]
+        if (projects) {
+            sql.eachRow(query) {
+                laneCountPerDay << ["${it.year}-${it.month}-${it.day}" as String, it.laneCount]
+            }
         }
 
         return laneCountPerDay
@@ -131,8 +132,10 @@ WHERE
 '''
         List gigaBasesPerDay = []
 
-        sql.eachRow(query) {
-            gigaBasesPerDay << ["${it.year}-${it.month}-${it.day}" as String, it.gigaBases]
+        if (projects) {
+            sql.eachRow(query) {
+                gigaBasesPerDay << ["${it.year}-${it.month}-${it.day}" as String, it.gigaBases]
+            }
         }
 
         return gigaBasesPerDay
@@ -155,7 +158,7 @@ WHERE
 
     public List sampleTypeCountBySeqType(Project project) {
         List seq = AggregateSequences.withCriteria {
-            eq("projectId", project.id)
+            eq("projectId", project?.id)
             projections {
                 groupProperty("seqTypeDisplayName")
                 count("sampleId")
@@ -167,7 +170,7 @@ WHERE
 
     public List sampleTypeCountByPatient(Project project) {
         List seq = Sequence.withCriteria {
-            eq("projectId", project.id)
+            eq("projectId", project?.id)
             projections {
                 groupProperty("mockPid")
                 countDistinct("sampleId")
@@ -182,6 +185,18 @@ WHERE
      * @param data A list containing lists with two elements, where the first element is a date and the second element is an integer
      */
     public Map dataPerDate(List data) {
+        getCountPerDate(data, true)
+    }
+
+    /**
+     * Convert creation date of projects to a format to be used for scatter plots
+     * @param data A list containing lists with one element which is a date
+     */
+    public Map projectCountPerDate(List data) {
+        getCountPerDate(data)
+    }
+
+    private Map getCountPerDate(List data, boolean multiple = false) {
         List<Integer> values = []
 
         YearMonth firstDate = new YearMonth(data[0][0])
@@ -192,45 +207,16 @@ WHERE
         LocalDate firstDateLocal = firstDate.toLocalDate(1)
         data.each {
             values << [
-                Days.daysBetween(firstDateLocal, new LocalDate(it[0])).days,
-                count += it[1] ?: 0
+                    Days.daysBetween(firstDateLocal, new LocalDate(it[0])).days,
+                    count += multiple ? (it[1] ?: 0) : 1
             ]
         }
 
         Map dataToRender = [
-            labels: monthLabels(firstDate, lastDate),
-            data: values,
-            count: count,
-            daysCount: daysCount.days
-        ]
-        return dataToRender
-    }
-
-    /**
-     * Convert creation date of projects to a format to be used for scatter plots
-     * @param data A list containing lists with one element which is a date
-     */
-    public Map projectCountPerDate(List data) {
-        List<Integer> values = []
-
-        YearMonth firstDate = new YearMonth(data[0][1])
-        YearMonth lastDate = new YearMonth(data[-1][1]).plusMonths(1)
-        Days daysCount = Days.daysBetween(firstDate, lastDate)
-
-        int count = 1
-        LocalDate firstDateLocal = firstDate.toLocalDate(1)
-        data.each {
-            values << [
-                Days.daysBetween(firstDateLocal, new LocalDate(it[1])).days,
-                count++
-            ]
-        }
-
-        Map dataToRender = [
-            labels: monthLabels(firstDate, lastDate),
-            data: values,
-            count: count,
-            daysCount: daysCount.days,
+                labels   : monthLabels(firstDate, lastDate),
+                data     : values,
+                count    : count,
+                daysCount: daysCount.days,
         ]
         return dataToRender
     }
@@ -239,15 +225,15 @@ WHERE
         List<String> labels = []
         YearMonth cal = firstDate
         List<Integer> validMonths
-        switch (Months.monthsBetween(cal,lastDate).months) {
+        switch (Months.monthsBetween(cal, lastDate).months) {
             case 0..20:
-                validMonths = [1,2,3,4,5,6,7,8,9,10,11,12]
+                validMonths = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
                 break
             case 21..50:
-                validMonths = [1,4,7,10]
+                validMonths = [1, 4, 7, 10]
                 break
             case 51..100:
-                validMonths = [1,7]
+                validMonths = [1, 7]
                 break
             default:
                 validMonths = [1]

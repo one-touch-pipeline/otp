@@ -8,6 +8,7 @@
 </head>
 <body>
     <div class="body">
+    <g:if test="${projects}">
          <div class= "searchCriteriaTableSequences">
          <table id="searchCriteriaTable2">
             <tr>
@@ -75,11 +76,15 @@
                     'sequence.list.headers.date'
             ]}" id="sequenceTable"/>
         </div>
-    </div>
     <asset:script>
         $(function() {
             $.otp.sequence.register();
         });
     </asset:script>
+    </g:if>
+    <g:else>
+        <h3><g:message code="default.no.project"/></h3>
+    </g:else>
+    </div>
 </body>
 </html>

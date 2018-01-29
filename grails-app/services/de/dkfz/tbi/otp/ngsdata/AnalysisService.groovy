@@ -12,6 +12,10 @@ class AnalysisService {
     ProjectService projectService
 
     List getCallingInstancesForProject(Class<BamFilePairAnalysis> callingInstance, String projectName) {
+        Project proj = projectService.getProjectByName(projectName)
+        if (!proj) {
+            return []
+        }
         return callingInstance.withCriteria {
             eq('withdrawn', false)
             samplePair {
@@ -19,7 +23,7 @@ class AnalysisService {
                     sample {
                         individual {
                             project {
-                                eq('name', projectService.getProjectByName(projectName).name)
+                                eq('name', proj.name)
                             }
                         }
                     }

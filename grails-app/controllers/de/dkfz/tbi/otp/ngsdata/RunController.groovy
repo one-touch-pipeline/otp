@@ -7,6 +7,7 @@ import de.dkfz.tbi.otp.utils.DataTableCommand
 
 class RunController {
 
+    ProjectService projectService
     def lsdfFilesService
     def runService
     def fastqcResultsService
@@ -30,23 +31,25 @@ class RunController {
         keys[1] = MetaDataKey.findByName(MetaDataColumn.WITHDRAWN.name())
 
         return [
-            run: run,
-            finalPaths: lsdfFilesService.getAllPathsForRun(run, true),
-            keys: keys,
-            processParameters: runService.retrieveProcessParameters(run),
-            metaDataFiles: runService.retrieveMetaDataFiles(run),
-            seqTracks: runService.retrieveSequenceTrackInformation(run),
-            errorFiles: runService.dataFilesWithError(run),
-            fastqcLinks: fastqcResultsService.fastqcLinkMap(run),
+                run              : run,
+                finalPaths       : lsdfFilesService.getAllPathsForRun(run, true),
+                keys             : keys,
+                processParameters: runService.retrieveProcessParameters(run),
+                metaDataFiles    : runService.retrieveMetaDataFiles(run),
+                seqTracks        : runService.retrieveSequenceTrackInformation(run),
+                errorFiles       : runService.dataFilesWithError(run),
+                fastqcLinks      : fastqcResultsService.fastqcLinkMap(run),
         ]
     }
 
     def list = {
         Map retValue = [
-            seqCenters: seqCenterService.allSeqCenters(),
+                seqCenters: seqCenterService.allSeqCenters(),
+                projects  : projectService.getAllProjects().size(),
         ]
         return retValue
     }
+
     def dataTableSource(DataTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()
 
@@ -57,11 +60,11 @@ class RunController {
 
         runService.listRuns(cmd.sortOrder, RunSortColumn.fromDataTable(cmd.iSortCol_0), filtering, cmd.sSearch).each { run ->
             dataToRender.aaData << [
-                id: run.id,
-                name: run.name,
-                seqCenters: run.seqCenter?.toString()?.toLowerCase(),
-                dateCreated: run.dateCreated?.format("yyyy-MM-dd"),
-                dateExecuted: run.dateExecuted?.format("yyyy-MM-dd"),
+                    id          : run.id,
+                    name        : run.name,
+                    seqCenters  : run.seqCenter?.toString()?.toLowerCase(),
+                    dateCreated : run.dateCreated?.format("yyyy-MM-dd"),
+                    dateExecuted: run.dateExecuted?.format("yyyy-MM-dd"),
             ]
         }
         render dataToRender as JSON

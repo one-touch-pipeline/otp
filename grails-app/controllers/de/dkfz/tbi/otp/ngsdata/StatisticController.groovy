@@ -56,7 +56,7 @@ class StatisticController {
 
         List sampleCountBySeqType = statisticService.sampleCountPerSequenceType(projectGroup)
 
-        int filterCount = sampleCountBySeqType.collect {it[1]}.sum() / 100
+        int filterCount = ((sampleCountBySeqType.collect { it[1] }.sum()) ?: 0) / 100
 
         sampleCountBySeqType.each {
             if (it[1] < filterCount) {
@@ -75,10 +75,10 @@ class StatisticController {
         }
 
         Map dataToRender = [
-            labels: labels,
-            labelsPercentage: labelsPercentage,
-            data: values,
-            count: values.size()
+                labels          : labels,
+                labelsPercentage: labelsPercentage,
+                data            : values,
+                count           : values.size()
         ]
         render dataToRender as JSON
     }
@@ -106,10 +106,10 @@ class StatisticController {
         }
 
         Map dataToRender = [
-            labels: labels,
-            labelsPercentage: labelsPercentage,
-            data: values,
-            count: values.size()
+                labels          : labels,
+                labelsPercentage: labelsPercentage,
+                data            : values,
+                count           : values.size()
         ]
         render dataToRender as JSON
     }
@@ -132,13 +132,15 @@ class StatisticController {
             projectSequenceCount += it[1]
         }
 
-        projectCountPerSequenceType.each { labelsPercentage << "${it[0]} ${Math.round(it[1] * 100 / projectSequenceCount)} %" }
+        projectCountPerSequenceType.each {
+            labelsPercentage << "${it[0]} ${Math.round(it[1] * 100 / projectSequenceCount)} %"
+        }
 
         Map dataToRender = [
-            labels: labels,
-            labelsPercentage: labelsPercentage,
-            data: values,
-            count: values.size()
+                labels          : labels,
+                labelsPercentage: labelsPercentage,
+                data            : values,
+                count           : values.size()
         ]
         render dataToRender as JSON
     }
@@ -162,10 +164,10 @@ class StatisticController {
         sampleTypeCount.each { labelsPercentage << "${it[0]} ${Math.round(it[1] * 100 / projectSequenceCount)} %" }
 
         Map dataToRender = [
-            labels: labels,
-            labelsPercentage: labelsPercentage,
-            data: values,
-            count: values.size()
+                labels          : labels,
+                labelsPercentage: labelsPercentage,
+                data            : values,
+                count           : values.size()
         ]
         render dataToRender as JSON
     }
@@ -182,11 +184,11 @@ class StatisticController {
         }
 
         Map dataToRender = [
-            projectId: project.id,
-            project: project.name,
-            labels: labels,
-            data: values,
-            count: values.size()
+                projectId: project?.id,
+                project  : project?.name,
+                labels   : labels,
+                data     : values,
+                count    : values.size()
         ]
         render dataToRender as JSON
     }

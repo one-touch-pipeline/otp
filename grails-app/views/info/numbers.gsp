@@ -6,6 +6,7 @@
 </head>
 
 <body>
+<g:if test="${projects}">
     <h2><g:message code="info.numbers.title" /></h2>
     <g:message code="info.numbers.text"/>
     <div class="homeGraph" style="clear: both;" >
@@ -21,5 +22,9 @@
         $.otp.graph.info.init();
     });
 </asset:script>
+</g:if>
+<g:else>
+    <h3><g:message code="default.no.project"/></h3>
+</g:else>
 </body>
 </html>

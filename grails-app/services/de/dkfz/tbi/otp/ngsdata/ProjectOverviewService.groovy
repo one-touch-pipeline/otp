@@ -37,13 +37,13 @@ class ProjectOverviewService {
      * determine, if the column sample identifier should be hide in the view
      */
     static boolean hideSampleIdentifier(Project project) {
-        return PROJECT_TO_HIDE_SAMPLE_IDENTIFIER.contains(project.name)
+        return PROJECT_TO_HIDE_SAMPLE_IDENTIFIER.contains(project?.name)
     }
 
     AlignmentInfo getRoddyAlignmentInformation(RoddyWorkflowConfig workflowConfig) {
         assert workflowConfig
 
-        ProcessOutput output= getRoddyProcessOutput(workflowConfig)
+        ProcessOutput output = getRoddyProcessOutput(workflowConfig)
 
         return generateAlignmentInfo(output, workflowConfig.seqType)
     }
@@ -82,7 +82,7 @@ class ProjectOverviewService {
      * @param seqType
      * @return new Alignment info
      */
-    AlignmentInfo generateAlignmentInfo( ProcessOutput output, SeqType seqType){
+    AlignmentInfo generateAlignmentInfo(ProcessOutput output, SeqType seqType) {
 
         Map<String, String> res = extractConfigRoddyOutput(output)
 
@@ -253,7 +253,7 @@ class ProjectOverviewService {
                 case PanCanAlignmentDecider:
                     List<ReferenceGenomeProjectSeqType> rgpst = ReferenceGenomeProjectSeqType.findAllByProjectAndDeprecatedDateIsNull(project)
                     Map<String, AlignmentInfo> result = [:]
-                    rgpst*.seqType.unique().sort {it.displayNameWithLibraryLayout }.each { SeqType seqType ->
+                    rgpst*.seqType.unique().sort { it.displayNameWithLibraryLayout }.each { SeqType seqType ->
                         RoddyWorkflowConfig workflowConfig = RoddyWorkflowConfig.getLatestForProject(project, seqType, Pipeline.findByNameAndType(Pipeline.Name.forSeqType(seqType), Pipeline.Type.ALIGNMENT))
                         if (!workflowConfig) {
                             return //pancan not configured for this seq type, skipped
@@ -285,7 +285,7 @@ class ProjectOverviewService {
     List overviewProjectQuery(projectName) {
         Project project = Project.findByName(projectName)
         List seq = AggregateSequences.withCriteria {
-            eq("projectId", project.id)
+            eq("projectId", project?.id)
             property("individualId")
             property("mockPid")
             property("sampleTypeName")
@@ -296,25 +296,25 @@ class ProjectOverviewService {
             property("laneCount")
             property("sum_N_BasePairsGb")
             property("projectName")
-            order ("mockPid")
-            order ("sampleTypeName")
-            order ("seqTypeDisplayName")
-            order ("libraryLayout")
-            order ("seqPlatformId")
-            order ("seqCenterName")
-            order ("laneCount")
+            order("mockPid")
+            order("sampleTypeName")
+            order("seqTypeDisplayName")
+            order("libraryLayout")
+            order("seqPlatformId")
+            order("seqCenterName")
+            order("laneCount")
         }
         List queryList = []
         for (def track in seq) {
             def queryListSingleRow = [
-                track.mockPid,
-                track.sampleTypeName,
-                track.seqTypeDisplayName,
-                track.libraryLayout,
-                track.seqCenterName,
-                SeqPlatform.get(track.seqPlatformId).toString(),
-                track.laneCount,
-                track.sum_N_BasePairsGb
+                    track.mockPid,
+                    track.sampleTypeName,
+                    track.seqTypeDisplayName,
+                    track.libraryLayout,
+                    track.seqCenterName,
+                    SeqPlatform.get(track.seqPlatformId).toString(),
+                    track.laneCount,
+                    track.sum_N_BasePairsGb
             ]
             queryList.add(queryListSingleRow)
         }
@@ -341,7 +341,7 @@ class ProjectOverviewService {
 
     public List patientsAndSamplesGBCountPerProject(Project project) {
         List seq = AggregateSequences.withCriteria {
-            eq("projectId", project.id)
+            eq("projectId", project?.id)
             projections {
                 groupProperty("seqTypeDisplayName")
                 groupProperty("libraryLayout")
@@ -349,14 +349,14 @@ class ProjectOverviewService {
                 count("sampleId")
                 sum("sum_N_BasePairsGb")
             }
-            order ("seqTypeDisplayName")
+            order("seqTypeDisplayName")
         }
         return seq
     }
 
     public Long individualCountByProject(Project project) {
         List seq = AggregateSequences.withCriteria {
-            eq("projectId", project.id)
+            eq("projectId", project?.id)
             projections { countDistinct("mockPid") }
         }
         return seq[0]
@@ -364,7 +364,7 @@ class ProjectOverviewService {
 
     public List sampleTypeNameCountBySample(Project project) {
         List seq = AggregateSequences.withCriteria {
-            eq("projectId", project.id)
+            eq("projectId", project?.id)
             projections {
                 groupProperty("sampleTypeName")
                 countDistinct("sampleId")
@@ -373,24 +373,24 @@ class ProjectOverviewService {
         return seq
     }
 
-    public List centerNameRunId(Project project){
+    public List centerNameRunId(Project project) {
         List seq = Sequence.withCriteria {
-            eq("projectId", project.id)
+            eq("projectId", project?.id)
             projections {
                 groupProperty("seqCenterName")
                 countDistinct("runId")
             }
-            order ("seqCenterName")
+            order("seqCenterName")
         }
         return seq
     }
 
-    public List centerNameRunIdLastMonth(Project project){
+    public List centerNameRunIdLastMonth(Project project) {
         Calendar cal = Calendar.getInstance()
         cal.add(Calendar.MONTH, -6)
         Date date = cal.getTime()
         List seq = Sequence.withCriteria {
-            eq("projectId", project.id)
+            eq("projectId", project?.id)
             gt("dateExecuted", date)
             projections {
                 groupProperty("seqCenterName")
@@ -402,17 +402,17 @@ class ProjectOverviewService {
     }
     /**
      * @param project the project for filtering the result
-     *  @return all SeqTypes used in the project
+     * @return all SeqTypes used in the project
      */
-    public List<SeqType> seqTypeByProject(Project project){
+    public List<SeqType> seqTypeByProject(Project project) {
         List<Long> seqTypeIds = AggregateSequences.withCriteria {
-            eq("projectId", project.id)
+            eq("projectId", project?.id)
             projections {
                 groupProperty("seqTypeId")
             }
         }
         List<SeqType> seqTypes = []
-        if(seqTypeIds) {
+        if (seqTypeIds) {
             seqTypes = SeqType.withCriteria {
                 'in'("id", seqTypeIds)
                 order("name")
@@ -423,9 +423,9 @@ class ProjectOverviewService {
     }
     /**
      * @param project the project for filtering the result
-     *  @return all MockPids used in the project
+     * @return all MockPids used in the project
      */
-    public List<String> mockPidByProject(Project project){
+    public List<String> mockPidByProject(Project project) {
         List<String> mockPids = AggregateSequences.withCriteria {
             eq("projectId", project.id)
             projections {
@@ -434,9 +434,10 @@ class ProjectOverviewService {
         }
         return mockPids
     }
-    public List<String> sampleTypeByProject(Project project){
+
+    public List<String> sampleTypeByProject(Project project) {
         List<String> sampleTypes = AggregateSequences.withCriteria {
-            eq("projectId", project.id)
+            eq("projectId", project?.id)
             projections {
                 groupProperty("sampleTypeName")
             }
@@ -445,7 +446,6 @@ class ProjectOverviewService {
         return sampleTypes
     }
 
-
     /**
      * fetch and return all combination of individual(mockPid) and sampleTypeName as list.
      * <br> Example: [[patient1, sampleType1],[patient1, sampleType2]...]
@@ -453,7 +453,7 @@ class ProjectOverviewService {
      * @param project the project for filtering the result
      * @return all combination of individual(mockPid) and sampleTypeName as list
      */
-    public List<List<String>> overviewMockPidSampleType(Project project){
+    public List<List<String>> overviewMockPidSampleType(Project project) {
         List<List<String>> mockPidSampleTypes = AggregateSequences.withCriteria {
             eq("projectId", project.id)
             projections {
@@ -467,12 +467,12 @@ class ProjectOverviewService {
     /**
      * fetch and return all combination of {@link Individual} (as mockpid) and {@link SampleType} with the first {@link SampleIdentifier}
      * as list.
-     *<br> Example:[[patient1, sampleType1, SampleIdentifier1],[patient1, sampleType2, SampleIdentifier2],[patient1, sampleType3, SampleIdentifier3]...]
+     * <br> Example:[[patient1, sampleType1, SampleIdentifier1],[patient1, sampleType2, SampleIdentifier2],[patient1, sampleType3, SampleIdentifier3]...]
      * @param project the project for filtering the result
      * @return all combination of name of individual(mockPid) and sampleTypeName with the first SampleIdentifier as list
      *
      */
-    public List<Object> overviewSampleIdentifier(Project project){
+    public List<Object> overviewSampleIdentifier(Project project) {
         List<Object> sampleIdentifiers = SampleIdentifier.withCriteria {
             projections {
                 sample {
@@ -492,19 +492,19 @@ class ProjectOverviewService {
 
     /**
      * fetch and return all combination of {@link Individual} (as mockpid) and of Sample type name with the number of lanes depend of {@link SeqType}
-     *as list.
-     *<br> Example:[
-     *[mockPid: patient1, sampleTypeName: sampleTypeName1, seqType: sampleType1, laneCount: laneCount1],
-     *[mockPid: patient1, sampleTypeName: sampleTypeName1, seqType: sampleType2, laneCount: laneCount2],
-     *[mockPid: patient1, sampleTypeName: sampleTypeName2, seqType: sampleType1, laneCount: laneCount3],
-     *[mockPid: patient2, sampleTypeName: sampleTypeName1, seqType: sampleType1, laneCount: laneCount4],
-     *...]
+     * as list.
+     * <br> Example:[
+     * [mockPid: patient1, sampleTypeName: sampleTypeName1, seqType: sampleType1, laneCount: laneCount1],
+     * [mockPid: patient1, sampleTypeName: sampleTypeName1, seqType: sampleType2, laneCount: laneCount2],
+     * [mockPid: patient1, sampleTypeName: sampleTypeName2, seqType: sampleType1, laneCount: laneCount3],
+     * [mockPid: patient2, sampleTypeName: sampleTypeName1, seqType: sampleType1, laneCount: laneCount4],
+     * ...]
      * @param project the project for filtering the result
      * @return all combination of  name of {@link Individual}(mockPid) and sampleTypeName with with the number of lanes depend of {@link SeqType}  as list
      */
-    public List<Map> laneCountForSeqtypesPerPatientAndSampleType(Project project){
+    public List<Map> laneCountForSeqtypesPerPatientAndSampleType(Project project) {
         List lanes = AggregateSequences.withCriteria {
-            eq("projectId", project.id)
+            eq("projectId", project?.id)
             projections {
                 groupProperty("mockPid")
                 groupProperty("sampleTypeName")
@@ -522,16 +522,19 @@ class ProjectOverviewService {
                 seqTypes.put(it[2], seqType)
             }
             [
-                mockPid: it[0],
-                sampleTypeName: it[1],
-                seqType: seqType,
-                laneCount: it[3],
+                    mockPid       : it[0],
+                    sampleTypeName: it[1],
+                    seqType       : seqType,
+                    laneCount     : it[3],
             ]
         }
         return ret
     }
 
     public Collection<AbstractMergedBamFile> abstractMergedBamFilesInProjectFolder(Project project) {
+        if (!project) {
+            return []
+        }
         return AbstractMergedBamFile.executeQuery("""
 from
         AbstractMergedBamFile abstractMergedBamFile
@@ -548,7 +551,7 @@ where
     }
 
     @PreAuthorize("hasRole('ROLE_MMML_MAPPING')")
-    public List tableForMMMLMapping(){
+    public List tableForMMMLMapping() {
         def seq = Individual.withCriteria {
             project {
                 'in'("name", PROJECT_TO_HIDE_SAMPLE_IDENTIFIER)
@@ -563,7 +566,7 @@ where
         return seq
     }
 
-    public List getAccessPersons(Project project){
+    public List getAccessPersons(Project project) {
         String query = """\
         SELECT username
         FROM users
@@ -578,7 +581,7 @@ where
         """
         List accessPersons = []
         def sql = new Sql(dataSource)
-        sql.eachRow(query, [projectId: project.id, className: Project.name]){
+        sql.eachRow(query, [projectId: project?.id, className: Project.name]) {
             accessPersons.add(it.username)
         }
         return accessPersons

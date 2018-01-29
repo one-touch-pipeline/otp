@@ -8,7 +8,7 @@
 </head>
 <body>
     <div class="body">
-
+    <g:if test="${projectQuery}">
     <h3><g:message code="home.pageTitle"/></h3>
         <div class="homeTable">
             <table>
@@ -58,12 +58,16 @@
                 <canvas id="gigaBasesPerDay" width="530" height="380">[No canvas support]</canvas>
             </div>
         </div>
+        <asset:script type="text/javascript">
+            $(function() {
+                $.otp.projectOverviewHome.register();
+                $.otp.graph.overview.init();
+             });
+        </asset:script>
+    </g:if>
+    <g:else>
+        <h3><g:message code="default.no.project"/></h3>
+    </g:else>
     </div>
-    <asset:script type="text/javascript">
-     $(function() {
-        $.otp.projectOverviewHome.register();
-        $.otp.graph.overview.init();
-         });
-    </asset:script>
 </body>
 </html>

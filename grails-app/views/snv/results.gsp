@@ -8,6 +8,7 @@
 </head>
 <body>
     <div class="body">
+    <g:if test="${projects}">
         <g:render template="/templates/projectSelection" model="['project': project, 'projects': projects]" />
         <br><br><br>
         <div class="table">
@@ -26,11 +27,15 @@
                     id="resultsTable" />
             </div>
         </div>
-    </div>
     <asset:script>
         $(function() {
             $.otp.resultsTable.registerSnv();
         });
     </asset:script>
+    </g:if>
+    <g:else>
+        <h3><g:message code="default.no.project"/></h3>
+    </g:else>
+    </div>
 </body>
 </html>

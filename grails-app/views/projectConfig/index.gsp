@@ -4,13 +4,14 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="layout" content="main" />
-    <title><g:message code="projectOverview.title" args="[project.name]"/></title>
+    <title><g:message code="projectOverview.title" args="[project?.name]"/></title>
     <asset:javascript src="pages/projectConfig/index/init_description.js"/>
     <asset:javascript src="pages/projectConfig/index/functions.js"/>
     <asset:javascript src="modules/editorSwitch"/>
 </head>
 <body>
     <div class="body">
+    <g:if test="${projects}">
         <g:if test="${hasErrors == true}">
             <div class="errors"> <li>${message}</li></div>
         </g:if>
@@ -64,7 +65,7 @@
                                 template="dropDown"
                                 link="${g.createLink(controller: 'projectConfig', action: "updateProcessingPriority", params: ['project.id': project.id, 'fieldName': 'processingPriority'])}"
                                 values="${processingPriorities}"
-                                value="${(project.processingPriority == 0) ? "NORMAL" : "FAST_TRACK"}"/>
+                                value="${project?(project.processingPriority == 0 ? "NORMAL" : "FAST_TRACK"):""}"/>
                     </td>
                 </tr>
                 <tr>
@@ -73,8 +74,8 @@
                         <otp:editorSwitchCheckboxes
                                 roles="ROLE_OPERATOR"
                                 link="${g.createLink(controller: 'projectConfig', action: 'updateCategory', params: ['project.id': project.id])}"
-                                availableValues="${projectCategories*.name}"
-                                selectedValues="${project.projectCategories*.name}"/>
+                                availableValues="${projectCategories}"
+                                selectedValues="${project?project.projectCategories*.name:""}"/>
                     </td>
                 </tr>
                 <tr>
@@ -120,7 +121,7 @@
                         <otp:editorSwitch
                                 roles="ROLE_USER"
                                 link="${g.createLink(controller: 'projectConfig', action: 'updatePhabricatorAlias', params: ['project.id': project.id])}"
-                                value="${project.phabricatorAlias}"/>
+                                value="${project?.phabricatorAlias}"/>
                     </td>
                 </tr>
                 <tr id="descriptionRow">
@@ -486,7 +487,6 @@
             </table>
             <br>
         </div>
-    </div>
     <asset:script>
         $(function() {
             $.otp.projectConfig.referenceGenome();
@@ -498,5 +498,10 @@
             $("#descriptionContent").find(':button').css('display', 'block');
         });
     </asset:script>
+    </g:if>
+    <g:else>
+        <h3><g:message code="default.no.project"/></h3>
+    </g:else>
+    </div>
 </body>
 </html>

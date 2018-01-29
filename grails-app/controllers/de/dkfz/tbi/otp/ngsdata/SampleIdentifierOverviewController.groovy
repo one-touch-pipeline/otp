@@ -15,12 +15,7 @@ class SampleIdentifierOverviewController {
         List<Project> projects = projectService.getAllProjects()
         ProjectSelection selection = projectSelectionService.getSelectedProject()
 
-        Project project
-        if (selection.projects.size() == 1) {
-            project = selection.projects.first()
-        } else {
-            project = projects.first()
-        }
+        Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects(selection)
 
         return [
                 projects: projects,

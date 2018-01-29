@@ -29,15 +29,19 @@ class RunService {
      * If no Run is found null is returned.
      * @param identifier Name or database Id
      * @return Run
-     **/
+     */
 
     public List<Run> listRuns(boolean sortOrder, RunSortColumn column, RunFiltering filtering, String filter) {
+        List seqCenters = seqCenterService.allSeqCenters()
+        if (!seqCenters) {
+            return []
+        }
         def c = Run.createCriteria()
         return c.list {
-            'in'('seqCenter', seqCenterService.allSeqCenters())
+            'in'('seqCenter', seqCenters)
             if (filter.length() >= 3) {
                 filter = "%${filter}%"
-                or  {
+                or {
                     ilike("name", filter)
                     seqCenter {
                         ilike("name", filter)
@@ -160,7 +164,7 @@ class RunService {
      * Overloaded method for convenience.
      * @param identifier Name or database Id
      * @return Run
-     **/
+     * */
     @PostAuthorize("hasRole('ROLE_OPERATOR') or returnObject == null or hasPermission(returnObject.seqCenter.id, 'de.dkfz.tbi.otp.ngsdata.SeqCenter', read)")
     Run getRun(long identifier) {
         return getRun("${identifier}")
@@ -170,7 +174,7 @@ class RunService {
      * Retrieves the ProcessParameters for the given Run.
      * @param run The Run for which the ProcessParameter should be retrieved.
      * @return List of ProcessParameter
-     **/
+     * */
     @PreAuthorize("hasRole('ROLE_OPERATOR') or #run == null or hasPermission(#run.seqCenter.id, 'de.dkfz.tbi.otp.ngsdata.SeqCenter', read)")
     List<ProcessParameter> retrieveProcessParameters(Run run) {
         if (!run) {
@@ -204,7 +208,7 @@ class RunService {
      * <ul>
      * @param run The Run for which the Sequence Track information should be retrieved
      * @return Data Structure as described above
-     **/
+     * */
     @PreAuthorize("hasRole('ROLE_OPERATOR') or #run == null or hasPermission(#run.seqCenter.id, 'de.dkfz.tbi.otp.ngsdata.SeqCenter', read)")
     Map<SeqTrack, Map<String, Object>> retrieveSequenceTrackInformation(Run run) {
         Map<SeqTrack, Map<String, Object>> returnData = new LinkedHashMap<SeqTrack, Map<String, Object>>()
@@ -228,7 +232,7 @@ class RunService {
      * List is sorted by file name.
      * @param run The Run for which the errornous data files need to be retrieved
      * @return List of DataFiles with errors.
-     **/
+     * */
     @PreAuthorize("hasRole('ROLE_OPERATOR') or #run == null or hasPermission(#run.seqCenter.id, 'de.dkfz.tbi.otp.ngsdata.SeqCenter', read)")
     List<DataFile> dataFilesWithError(Run run) {
         return DataFile.findAllByRunAndUsed(run, false, [sort: "fileName"])

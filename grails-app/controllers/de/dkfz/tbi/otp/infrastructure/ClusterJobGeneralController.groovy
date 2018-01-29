@@ -25,10 +25,9 @@ class ClusterJobGeneralController {
         }
 
         static GeneralClusterJobsColumns fromDataTable(int column) {
-            return values().find {it.index == column} ?: CLUSTER_JOB_ID
+            return values().find { it.index == column } ?: CLUSTER_JOB_ID
         }
     }
-
 
 
     public static final String FORMAT_STRING = "yyyy-MM-dd HH:mm:ss"
@@ -36,7 +35,7 @@ class ClusterJobGeneralController {
     ClusterJobService clusterJobService
 
     def index() {
-        def date = clusterJobService.getLatestJobDate()
+        def date = clusterJobService.getLatestJobDate() ?: new LocalDate()
         return [latestDate: date]
     }
 
@@ -92,7 +91,7 @@ class ClusterJobGeneralController {
         renderDataAsJSON(clusterJobService.&findAllMemoryUsageByDateBetween, ['memory'])
     }
 
-    private renderDataAsJSON (Closure method, keys) {
+    private renderDataAsJSON(Closure method, keys) {
         Map dataToRender = [data: [], labels: [], keys: []]
 
         LocalDate startDate = LocalDate.parse(params.from)
@@ -112,7 +111,7 @@ class ClusterJobGeneralController {
         render dataToRender as JSON
     }
 
-    private renderPieDataAsJSON (Closure method) {
+    private renderPieDataAsJSON(Closure method) {
         Map dataToRender = [data: [], labels: []]
 
         LocalDate startDate = LocalDate.parse(params.from)

@@ -14,9 +14,9 @@ class ClusterJobJobTypeSpecificController {
     ClusterJobService clusterJobService
 
     def index() {
-        LocalDate date = clusterJobService.getLatestJobDate()
+        LocalDate date = clusterJobService.getLatestJobDate() ?: new LocalDate()
         def jobClasses = clusterJobService.findAllJobClassesByDateBetween(date, date)
-        return [jobClasses: jobClasses, latestDate: date.toString("yyyy-MM-dd")]
+        return [jobClasses: jobClasses, latestDate: date?.toString("yyyy-MM-dd")]
     }
 
     def getJobTypeSpecificAvgCoreUsage() {
@@ -51,11 +51,11 @@ class ClusterJobJobTypeSpecificController {
 
         def data = clusterJobService.findJobClassAndSeqTypeSpecificCoverages(params.jobClass, seqType, startDate, endDate, referenceSize * GIGABASES_TO_BASES)
         dataToRender.data = [
-                            'minCov': data.minCov ? "${data.minCov.round(2)} (min)" : "",
-                             'maxCov': data.maxCov ? "${data.maxCov.round(2)} (max)" : "",
-                             'avgCov': data.avgCov ? "${data.avgCov?.round(2)} (avg)" : "",
-                             'medianCov': data.medianCov ? "${data.medianCov?.round(2)} (median)" : ""
-                            ]
+                'minCov'   : data.minCov ? "${data.minCov.round(2)} (min)" : "",
+                'maxCov'   : data.maxCov ? "${data.maxCov.round(2)} (max)" : "",
+                'avgCov'   : data.avgCov ? "${data.avgCov?.round(2)} (avg)" : "",
+                'medianCov': data.medianCov ? "${data.medianCov?.round(2)} (median)" : ""
+        ]
 
         render dataToRender as JSON
     }
@@ -108,7 +108,7 @@ class ClusterJobJobTypeSpecificController {
         renderDiagramDataAsJSON(clusterJobService.&findJobClassAndSeqTypeSpecificWalltimesByDateBetween)
     }
 
-    private renderDataAsJSON (Closure method) {
+    private renderDataAsJSON(Closure method) {
         Map dataToRender = [:]
 
         def (startDate, endDate, seqType) = parseParams()
@@ -118,7 +118,7 @@ class ClusterJobJobTypeSpecificController {
         render dataToRender as JSON
     }
 
-    private renderPieDataAsJSON (Closure method) {
+    private renderPieDataAsJSON(Closure method) {
         Map dataToRender = [data: [], labels: []]
 
         def (startDate, endDate, seqType) = parseParams()
@@ -133,7 +133,7 @@ class ClusterJobJobTypeSpecificController {
         render dataToRender as JSON
     }
 
-    private renderDiagramDataAsJSON (Closure method) {
+    private renderDiagramDataAsJSON(Closure method) {
         Map dataToRender = [data: [], labels: [], xMax: null]
 
         def (startDate, endDate, seqType) = parseParams()
@@ -149,8 +149,9 @@ class ClusterJobJobTypeSpecificController {
     private List parseParams() {
         LocalDate startDate = LocalDate.parse(params.from)
         LocalDate endDate = LocalDate.parse(params.to)
-        SeqType seqType = SeqType.get(Long.parseLong(params.seqType))
+        SeqType seqType = (params.seqType != "null") ? SeqType.get(Long.parseLong(params.seqType)) : null
 
         return [startDate, endDate, seqType]
     }
+
 }

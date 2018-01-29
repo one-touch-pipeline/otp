@@ -20,7 +20,7 @@ class ProjectOverviewController {
         String projectName = params.project
         if (projectName) {
             Project project
-            if ((project =  projectService.getProjectByName(projectName))) {
+            if ((project = projectService.getProjectByName(projectName))) {
                 projectSelectionService.setSelectedProject([project], project.name)
                 redirect(controller: controllerName, action: actionName)
                 return
@@ -29,16 +29,11 @@ class ProjectOverviewController {
         List<Project> projects = projectService.getAllProjects()
         ProjectSelection selection = projectSelectionService.getSelectedProject()
 
-        Project project
-        if (selection.projects.size() == 1) {
-            project = selection.projects.first()
-        } else {
-            project = projects.first()
-        }
+        Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects(selection)
 
         return [
                 projects: projects,
-                project: project,
+                project : project,
         ]
     }
 
@@ -59,25 +54,20 @@ class ProjectOverviewController {
         List<Project> projects = projectService.getAllProjects()
         ProjectSelection selection = projectSelectionService.getSelectedProject()
 
-        Project project
-        if (selection.projects.size() == 1) {
-            project = selection.projects.first()
-        } else {
-            project = projects.first()
-        }
+        Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects(selection)
 
-        List<SeqType> seqTypes  = projectOverviewService.seqTypeByProject(project)
-        List<String> sampleTypes  = projectOverviewService.sampleTypeByProject(project)
+        List<SeqType> seqTypes = projectOverviewService.seqTypeByProject(project)
+        List<String> sampleTypes = projectOverviewService.sampleTypeByProject(project)
         String sampleTypeName = (params.sampleType && sampleTypes.contains(params.sampleType)) ? params.sampleType : sampleTypes[0]
 
         return [
-            projects: projects,
-            hideSampleIdentifier: ProjectOverviewService.hideSampleIdentifier(project),
-            project: project,
-            seqTypes: seqTypes,
-            sampleTypes: sampleTypes,
-            sampleType: sampleTypeName,
-            pipelines: findPipelines(),
+                projects            : projects,
+                hideSampleIdentifier: ProjectOverviewService.hideSampleIdentifier(project),
+                project             : project,
+                seqTypes            : seqTypes,
+                sampleTypes         : sampleTypes,
+                sampleType          : sampleTypeName,
+                pipelines           : findPipelines(),
         ]
     }
 

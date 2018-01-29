@@ -51,14 +51,14 @@ class ClusterJobService {
                                        String clusterJobName = processingStep.getClusterJobName(),
                                        String jobClass = processingStep.nonQualifiedJobClass) {
         ClusterJob job = new ClusterJob(
-                                    processingStep: processingStep,
-                                    realm: realm,
-                                    clusterJobId: clusterJobId,
-                                    userName: userName,
-                                    clusterJobName: clusterJobName,
-                                    jobClass: jobClass,
-                                    seqType: seqType,
-                                    queued: new DateTime(),
+                processingStep: processingStep,
+                realm: realm,
+                clusterJobId: clusterJobId,
+                userName: userName,
+                clusterJobName: clusterJobName,
+                jobClass: jobClass,
+                seqType: seqType,
+                queued: new DateTime(),
         ).save(flush: true)
         assert job != null
         return job
@@ -149,7 +149,7 @@ class ClusterJobService {
     public static Boolean isXten(ClusterJob job) {
         ProcessParameterObject workflowObject = findProcessParameterObjectByClusterJob(job)
         List<SeqPlatformModelLabel> seqPlatformModelLabels = workflowObject.getContainedSeqTracks().toList()*.seqPlatform.seqPlatformModelLabel
-        if(seqPlatformModelLabels*.id.unique().size() == 1 && seqPlatformModelLabels.first() != null) {
+        if (seqPlatformModelLabels*.id.unique().size() == 1 && seqPlatformModelLabels.first() != null) {
             return seqPlatformModelLabels.first().name == "HiSeq X Ten"
         }
         return null
@@ -391,7 +391,7 @@ SELECT
 
         def sql = new Sql(dataSource)
 
-        Map data = ["queued":[], "started":[], "ended":[]]
+        Map data = ["queued": [], "started": [], "ended": []]
 
         data.keySet().each {
 
@@ -591,7 +591,7 @@ SELECT
 
         List exitCodeOccurenceList = []
 
-        sql.eachRow(query, [startDate.millis, endDate.millis, jobClass, seqType.id]) {
+        sql.eachRow(query, [startDate.millis, endDate.millis, jobClass, seqType?.id]) {
             exitCodeOccurenceList << [it.exitCode, it.exitCodeCount]
         }
 
@@ -623,7 +623,7 @@ SELECT
 
         List exitStatusOccurenceList = []
 
-        sql.eachRow(query, [startDate.millis, endDate.millis, jobClass, seqType.id]) {
+        sql.eachRow(query, [startDate.millis, endDate.millis, jobClass, seqType?.id]) {
             exitStatusOccurenceList << [it.exitStatus as ClusterJob.Status, it.exitStatusCount]
         }
 
@@ -640,7 +640,7 @@ SELECT
 
         def sql = new Sql(dataSource)
 
-        Map data = ["queued":[], "started":[], "ended":[]]
+        Map data = ["queued": [], "started": [], "ended": []]
 
         data.keySet().each {
 
@@ -659,7 +659,7 @@ SELECT
 
             Map hours = [:]
 
-            sql.eachRow(query, [startDate.millis, endDate.millis, jobClass, seqType.id]) {
+            sql.eachRow(query, [startDate.millis, endDate.millis, jobClass, seqType?.id]) {
                 hours[new DateTime(it.hour * HOURS_TO_MILLIS)] = it.count
             }
 
@@ -694,7 +694,7 @@ SELECT
 
         def walltimeData = []
 
-        sql.eachRow(query, [startDate.millis, endDate.millis, jobClass, seqType.id]) {
+        sql.eachRow(query, [startDate.millis, endDate.millis, jobClass, seqType?.id]) {
             walltimeData << [it.reads, it.elapsedWalltime, it.xten ? 'blue' : 'black', it.id]
         }
 
@@ -724,7 +724,7 @@ SELECT
 
         Double avgCpu
 
-        sql.query(query, [startDate.millis, endDate.millis, jobClass, seqType.id], {
+        sql.query(query, [startDate.millis, endDate.millis, jobClass, seqType?.id], {
             it.next()
             Long avgCpuTime = it.getLong('avgCpuTime')
             Long avgWalltime = it.getLong('avgWalltime')
@@ -754,7 +754,7 @@ SELECT
 
         Integer avgMemory
 
-        sql.query(query, [startDate.millis, endDate.millis, jobClass, seqType.id], {
+        sql.query(query, [startDate.millis, endDate.millis, jobClass, seqType?.id], {
             it.next()
             avgMemory = it.getLong('avgMemory')
         })
@@ -786,16 +786,16 @@ SELECT
 
         // prevents negative values that could appear cause of rounding errors with milliseconds values
         // OTP-1304, queued gets set through OTP, started & ended gets set by the cluster
-        sql.query(query, [startDate.millis, endDate.millis, jobClass, seqType.id], {
+        sql.query(query, [startDate.millis, endDate.millis, jobClass, seqType?.id], {
             it.next()
             avgBases = it.getLong('basesCount')
-            avgQueue =  Math.max(0, it.getLong('avgQueue') ?: 0)
+            avgQueue = Math.max(0, it.getLong('avgQueue') ?: 0)
             avgProcess = Math.max(0, it.getLong('avgProcess') ?: 0)
         })
 
         // normalize result to custom number of bases
         if (basesToBeNormalized) {
-            avgProcess = avgProcess / avgBases * basesToBeNormalized
+            avgProcess = avgProcess / (avgBases == 0L ? 1L : avgBases) * basesToBeNormalized
         }
 
         return ["avgQueue": avgQueue, "avgProcess": avgProcess]
@@ -826,7 +826,7 @@ WHERE
  AND n_bases IS NOT NULL
 """
 
-        sql.query(query, [startDate.millis, endDate.millis, jobClass, seqType.id]) {
+        sql.query(query, [startDate.millis, endDate.millis, jobClass, seqType?.id]) {
             it.next()
             jobCount = it.getLong('jobCount')
             if (jobCount) {
@@ -869,7 +869,7 @@ WHERE
         }
 
 
-        int medianOffset = Math.round(jobCount/2) - 1
+        int medianOffset = Math.round(jobCount / 2) - 1
 
         sql.query(query, [startDate.millis, endDate.millis, jobClass, seqType.id, medianOffset]) {
             it.next()
@@ -887,7 +887,9 @@ WHERE
         def sql = new Sql(dataSource)
 
         ClusterJob job = ClusterJob.get(id)
-        if(!job) {return null}
+        if (!job) {
+            return null
+        }
 
         Duration queue = new Duration(job.queued, job.started)
         Duration process = new Duration(job.started, job.ended)
@@ -897,7 +899,7 @@ WHERE
 
         long total = queueMillis + processMillis
 
-        int pProcess = Math.round(100/ total * processMillis)
+        int pProcess = Math.round(100 / total * processMillis)
         int pQueue = 100 - pProcess
 
         return ["queue": [pQueue, queue.millis], "process": [pProcess, process.millis]]
@@ -952,7 +954,7 @@ SELECT
      */
     public List getLabels(Long max, int quot) {
         def labels = (1..quot).collect {
-            (max/quot*it).toDouble().round(2)
+            (max / quot * it).toDouble().round(2)
         }
         def labelsAsString = labels*.toString()
 

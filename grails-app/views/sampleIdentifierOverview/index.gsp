@@ -8,6 +8,7 @@
 </head>
 <body>
     <div class="body">
+    <g:if test="${projects}">
         <div style="height: 20px;"></div>
         <g:render template="/templates/projectSelection" model="['project': project, 'projects': projects]" />
         <div style="width: 20px; height: 60px;"></div>
@@ -18,11 +19,15 @@
                         'sampleIdentifierOverview.index.sampleIdentifier',
                 ]}" id="sampleIdentifierOverviewTable" />
             </div>
+    <asset:script>
+        $(function() {
+            $.otp.sampleIdentifierOverviewTable.register();
+        });
+    </asset:script>
+    </g:if>
+    <g:else>
+        <h3><g:message code="default.no.project"/></h3>
+    </g:else>
     </div>
-<asset:script>
-    $(function() {
-        $.otp.sampleIdentifierOverviewTable.register();
-    });
-</asset:script>
 </body>
 </html>

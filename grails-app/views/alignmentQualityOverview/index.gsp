@@ -9,6 +9,7 @@
 
 <body>
     <div class="body">
+    <g:if test="${projects}">
         <g:render template="/templates/projectSelection" model="['project': project, 'projects': projects]" />
         <g:if test="${seqType}">
             <div class="blue_label" id="projectsGroupbox">
@@ -28,11 +29,15 @@
                 codes="${header}"
                 id="overviewTableProcessedMergedBMF"/>
         </div>
-    </div>
     <asset:script>
         $(function() {
             $.otp.alignmentQualityOverviewTable.register();
         });
     </asset:script>
+    </g:if>
+    <g:else>
+        <h3><g:message code="default.no.project"/></h3>
+    </g:else>
+    </div>
 </body>
 </html>

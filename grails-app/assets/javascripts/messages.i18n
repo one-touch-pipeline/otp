@@ -47,6 +47,8 @@ default.button.save.label
 
 default.new
 
+default.no.project
+
 
 # common strings
 otp.blank
