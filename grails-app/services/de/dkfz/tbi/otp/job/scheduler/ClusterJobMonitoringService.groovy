@@ -55,11 +55,11 @@ class ClusterJobMonitoringService {
                     }
                 }
                 if (append) {
-                    log.debug("Adding job for already registered MonitoringJob")
+                    log.debug("Adding job ${jobIdentifier.clusterJobId} on ${jobIdentifier.realm} for already registered MonitoringJob")
                     queuedJobs.get(monitoringJob).add(jobIdentifier)
                 }
             } else {
-                log.debug("Adding one MonitoringJob")
+                log.debug("Adding one MonitoringJob with job ${jobIdentifier.clusterJobId} on ${jobIdentifier.realm}")
                 queuedJobs.put(monitoringJob, [jobIdentifier])
             }
         } finally {
@@ -141,6 +141,8 @@ class ClusterJobMonitoringService {
                 removal.put(monitoringJob, finishedJobs)
             }
         }
+
+        log.debug("Remove ${removal.values().flatten().size()} cluster jobs from ${removal.size()} monitor jobs: ${removal.values().flatten()*.clusterJobId.sort().join('\n')}")
 
         if (!removal.empty) {
             // in case that some Jobs finished we need to remove them from our queue
