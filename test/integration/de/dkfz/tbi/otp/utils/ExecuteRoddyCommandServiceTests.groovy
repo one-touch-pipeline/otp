@@ -56,9 +56,7 @@ class ExecuteRoddyCommandServiceTests {
                         'otp.root.path': tmpOutputDir.path+"/root",
                         'otp.processing.root.path': tmpOutputDir.path+"/processing"
         ])
-        realm = DomainFactory.createRealmDataManagementDKFZ([
-                name              : roddyBamFile.project.realmName,
-        ])
+        realm = roddyBamFile.project.realm
         assert realm.save(flush: true)
 
         roddyBaseConfigsPath = new File(ProcessingOptionService.getValueOfProcessingOption(OptionName.RODDY_BASE_CONFIGS_PATH))

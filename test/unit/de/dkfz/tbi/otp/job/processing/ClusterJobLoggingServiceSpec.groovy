@@ -30,7 +30,7 @@ class ClusterJobLoggingServiceSpec extends Specification {
 
     void setup() {
         configService = new TestConfigService(['otp.logging.root.path': temporaryFolder.newFolder().path])
-        realm = DomainFactory.createRealmDataProcessing()
+        realm = DomainFactory.createRealm()
         processingStepUpdate = DomainFactory.createProcessingStepUpdate()
         service = new ClusterJobLoggingService()
         service.lsdfFilesService = Stub(LsdfFilesService) {

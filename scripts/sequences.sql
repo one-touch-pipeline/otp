@@ -19,6 +19,7 @@ r.seq_center_id,
 s.sample_type_id,
 s.individual_id,
 p.id AS project_id,
+re.id AS realm_id,
 
 st.quality_encoding,
 st.fastqc_state,
@@ -45,7 +46,7 @@ i.type,
 i.pid,
 i.mock_pid,
 i.mock_full_name,
-p.realm_name,
+re.name as realm_name,
 p.name AS project_name,
 p.dir_name AS project_dir_name,
 sc.name AS seq_center_name,
@@ -66,6 +67,8 @@ INNER JOIN individual AS i
 ON s.individual_id = i.id
 INNER JOIN project AS p
 ON i.project_id = p.id
+INNER JOIN realm as re
+on p.realm_id = re.id
 INNER JOIN seq_center AS sc
 ON r.seq_center_id = sc.id
 LEFT OUTER JOIN ilse_submission ilse

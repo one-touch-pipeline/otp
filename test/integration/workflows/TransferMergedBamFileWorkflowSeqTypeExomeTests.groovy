@@ -88,7 +88,7 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends WorkflowTestCase {
         Project project = DomainFactory.createProject(
                         name: projectName,
                         dirName: projectDirName,
-                        realmName: realm.name
+                        realm: realm
                         )
         assertNotNull(project.save([flush: true, failOnError: true]))
 

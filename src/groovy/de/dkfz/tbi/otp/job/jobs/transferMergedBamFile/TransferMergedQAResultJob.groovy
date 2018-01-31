@@ -22,9 +22,6 @@ class TransferMergedQAResultJob extends AbstractEndStateAwareJobImpl{
     ClusterJobSchedulerService clusterJobSchedulerService
 
     @Autowired
-    ConfigService configService
-
-    @Autowired
     ProcessedMergedBamFileService processedMergedBamFileService
 
     @Autowired
@@ -43,7 +40,7 @@ class TransferMergedQAResultJob extends AbstractEndStateAwareJobImpl{
         Project project = processedMergedBamFileService.project(bamFile)
 
         String cmd = scriptText(bamFile)
-        Realm realm = configService.getRealmDataProcessing(project)
+        Realm realm = project.realm
         String jobId = clusterJobSchedulerService.executeJob(realm, cmd)
         log.debug "Job ${jobId} submitted to cluster job scheduler"
 

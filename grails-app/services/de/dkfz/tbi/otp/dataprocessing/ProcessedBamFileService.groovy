@@ -1,16 +1,13 @@
 package de.dkfz.tbi.otp.dataprocessing
-
-import de.dkfz.tbi.otp.dataprocessing.AlignmentPass.AlignmentState
-import de.dkfz.tbi.otp.filehandling.BwaLogFileParser
-import de.dkfz.tbi.otp.ngsqc.FastqcResultsService
-
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
-import static org.springframework.util.Assert.*
-
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.State
+import de.dkfz.tbi.otp.dataprocessing.AlignmentPass.AlignmentState
+import de.dkfz.tbi.otp.filehandling.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
+import de.dkfz.tbi.otp.ngsqc.*
+import de.dkfz.tbi.otp.utils.logging.*
+
+import static org.springframework.util.Assert.*
 
 class ProcessedBamFileService {
 
@@ -130,8 +127,7 @@ class ProcessedBamFileService {
     }
 
     public Realm realm(ProcessedBamFile processedBamFile) {
-        Project project = project(processedBamFile)
-        return configService.getRealmDataProcessing(project)
+        return project(processedBamFile).realm
     }
 
     public Project project(ProcessedBamFile processedBamFile) {

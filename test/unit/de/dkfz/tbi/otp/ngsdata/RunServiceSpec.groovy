@@ -11,6 +11,7 @@ import spock.lang.*
         MetaDataFile,
         Project,
         ProjectCategory,
+        Realm,
         Run,
         RunSegment,
         Sample,

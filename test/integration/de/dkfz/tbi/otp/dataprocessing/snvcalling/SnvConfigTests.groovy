@@ -47,7 +47,6 @@ class SnvConfigTests {
         project = DomainFactory.createProject(
                 name: "projectName",
                 dirName: "projectDirName",
-                realmName: "realmName"
         )
         assert project.save(flush: true)
 
@@ -79,7 +78,6 @@ class SnvConfigTests {
         Project project2 = DomainFactory.createProject(
                 name: "project2Name",
                 dirName: "project2DirName",
-                realmName: "realmName"
                 )
         assert project2.save()
 

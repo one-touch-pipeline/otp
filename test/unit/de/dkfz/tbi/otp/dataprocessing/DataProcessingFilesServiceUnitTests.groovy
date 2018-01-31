@@ -757,11 +757,11 @@ class DataProcessingFilesServiceUnitTests {
 
     @Test
     void testGetOutputDirectory() {
-        Realm realm = DomainFactory.createRealmDataProcessing()
+        Realm realm = DomainFactory.createRealm()
 
         Project project = Project.build([
             name: "projectName",
-            realmName: realm.name
+            realm: realm
         ])
 
         Individual individual = Individual.build([

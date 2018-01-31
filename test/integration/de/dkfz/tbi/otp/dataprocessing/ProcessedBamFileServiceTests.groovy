@@ -38,13 +38,12 @@ class ProcessedBamFileServiceTests {
     void setUp() {
         testData = new TestData()
 
-        Realm realm = DomainFactory.createRealmDataProcessingDKFZ()
+        Realm realm = DomainFactory.createRealm()
         assertNotNull(realm.save([flush: true, failOnError: true]))
 
         Project project = DomainFactory.createProject(
                         name: "name",
                         dirName: "dirName",
-                        realmName: realm.name,
                         )
         assertNotNull(project.save([flush: true, failOnError: true]))
 

@@ -13,7 +13,6 @@ class ClusterJobSubmissionOptionsServiceIntegrationSpec extends IntegrationSpec 
         service.processingOptionService = new ProcessingOptionService()
 
         Realm realm = DomainFactory.createRealm(
-                operationType: Realm.OperationType.DATA_MANAGEMENT,
                 defaultJobSubmissionOptions: realmOption,
         )
 

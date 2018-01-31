@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
 import static groovy.util.GroovyTestCase.assertEquals
 
@@ -20,16 +21,14 @@ class OtpPathUnitTests {
     TestConfigService configService
 
     String projectName
-    String realmName
     OtpPath path
 
     @Before
     void before() {
         projectName = 'testProject' + Double.doubleToLongBits(Math.random())
-        realmName = 'testRealm' + Double.doubleToLongBits(Math.random())
         final Project project = Project.build([
-                name: projectName,
-                realmName: realmName,
+                name : projectName,
+                realm: DomainFactory.createRealm(),
         ])
 
         configService = new TestConfigService()

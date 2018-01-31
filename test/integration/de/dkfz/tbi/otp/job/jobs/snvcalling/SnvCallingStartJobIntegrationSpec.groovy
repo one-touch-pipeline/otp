@@ -36,8 +36,6 @@ class SnvCallingStartJobIntegrationSpec extends Specification {
         given:
         SnvJobResult snvJobResult = DomainFactory.createSnvJobResultWithRoddyBamFiles()
         SnvCallingInstance failedInstance = snvJobResult.snvCallingInstance
-        DomainFactory.createRealmDataManagement(name: failedInstance.project.realmName)
-        DomainFactory.createRealmDataProcessing(name: failedInstance.project.realmName)
 
         Process failedProcess = DomainFactory.createProcess()
         DomainFactory.createProcessParameter(failedProcess, failedInstance)
@@ -58,7 +56,6 @@ class SnvCallingStartJobIntegrationSpec extends Specification {
                 assert cmd == "rm -rf ${failedInstance.instancePath.absoluteDataManagementPath} ${failedInstance.instancePath.absoluteStagingPath}"
             }
         }
-        snvCallingStartJob.configService = configService
         snvCallingStartJob.schedulerService = Mock(SchedulerService) {
             1 * createProcess(_, _, _) >> { StartJob startJob, List<Parameter> input, ProcessParameter processParameter2 ->
                 Process process2 = DomainFactory.createProcess(
@@ -93,9 +90,6 @@ class SnvCallingStartJobIntegrationSpec extends Specification {
         given:
         RoddySnvCallingInstance failedInstance =  DomainFactory.createRoddySnvInstanceWithRoddyBamFiles()
 
-        DomainFactory.createRealmDataManagement(name: failedInstance.project.realmName)
-        DomainFactory.createRealmDataProcessing(name: failedInstance.project.realmName)
-
         Process failedProcess = DomainFactory.createProcess()
         DomainFactory.createProcessParameter(failedProcess, failedInstance)
 
@@ -110,7 +104,6 @@ class SnvCallingStartJobIntegrationSpec extends Specification {
                 assert cmd == "rm -rf ${failedInstance.instancePath.absoluteDataManagementPath} ${failedInstance.instancePath.absoluteStagingPath}"
             }
         }
-        roddySnvCallingStartJob.configService = configService
         roddySnvCallingStartJob.schedulerService = Mock(SchedulerService) {
             1 * createProcess(_, _, _) >> { StartJob startJob, List<Parameter> input, ProcessParameter processParameter2 ->
                 Process process2 = DomainFactory.createProcess(

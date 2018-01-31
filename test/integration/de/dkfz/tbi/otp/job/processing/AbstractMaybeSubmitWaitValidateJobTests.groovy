@@ -1,18 +1,14 @@
 package de.dkfz.tbi.otp.job.processing
-
-import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.infrastructure.ClusterJob
-import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
-import de.dkfz.tbi.otp.infrastructure.ClusterJobService
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.Realm
-import org.junit.Before
-import org.junit.Test
+import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.infrastructure.*
+import de.dkfz.tbi.otp.ngsdata.*
+import org.junit.*
 
 class AbstractMaybeSubmitWaitValidateJobTests extends TestCase {
 
     ClusterJobService clusterJobService
     AbstractMaybeSubmitWaitValidateJob abstractMaybeSubmitWaitValidateJob
+    ConfigService configService
 
     @Before
     void setUp() {
@@ -21,18 +17,18 @@ class AbstractMaybeSubmitWaitValidateJobTests extends TestCase {
 
     @Test
     void testCreateExceptionString() {
-        Realm realm = DomainFactory.createRealmDataProcessingDKFZ()
+        Realm realm = DomainFactory.createRealm()
         assert realm.save([flush: true, failOnError: true])
 
         ProcessingStep processingStep = DomainFactory.createAndSaveProcessingStep()
         assert processingStep
 
-        ClusterJob clusterJob1 = clusterJobService.createClusterJob(realm, "1111", realm.unixUser, processingStep)
+        ClusterJob clusterJob1 = clusterJobService.createClusterJob(realm, "1111", configService.getSshUser(), processingStep)
         clusterJob1.jobLog = "/test-job1.log"
         clusterJob1.save(flush: true, failOnError: true)
         ClusterJobIdentifier identifier1 = new ClusterJobIdentifier(clusterJob1)
 
-        ClusterJob clusterJob2 = clusterJobService.createClusterJob(realm, "2222", realm.unixUser, processingStep)
+        ClusterJob clusterJob2 = clusterJobService.createClusterJob(realm, "2222", configService.getSshUser(), processingStep)
         clusterJob1.jobLog = "/test-job1.log"
         clusterJob1.save(flush: true, failOnError: true)
         ClusterJobIdentifier identifier2 = new ClusterJobIdentifier(clusterJob2)

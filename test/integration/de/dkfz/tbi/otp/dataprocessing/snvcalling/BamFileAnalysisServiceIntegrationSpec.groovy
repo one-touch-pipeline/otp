@@ -264,7 +264,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
     void "samplePairForProcessing when config has wrong #property"() {
         given:
         if (property == "project") {
-            snvConfig1.project = DomainFactory.createProject(name: "otherProject", dirName: "tmp", realmName: "DKFZ")
+            snvConfig1.project = DomainFactory.createProject(name: "otherProject", dirName: "tmp")
         } else {
             snvConfig1.seqType = DomainFactory.createExomeSeqType()
         }

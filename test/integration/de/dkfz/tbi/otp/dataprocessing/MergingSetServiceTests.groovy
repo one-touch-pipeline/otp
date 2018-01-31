@@ -27,7 +27,6 @@ class MergingSetServiceTests {
         Project project = DomainFactory.createProject(
                         name: "name_1",
                         dirName: "dirName",
-                        realmName: "realmName"
                         )
         assertNotNull(project.save([flush: true, failOnError: true]))
 

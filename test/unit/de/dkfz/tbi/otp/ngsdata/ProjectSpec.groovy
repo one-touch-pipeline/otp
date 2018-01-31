@@ -13,7 +13,7 @@ class ProjectSpec extends Specification {
 
     void "test getProjectDirectory all fine should return File"() {
         given:
-        Project project = DomainFactory.createProjectWithRealms()
+        Project project = DomainFactory.createProject()
 
         when:
         File file = project.getProjectDirectory()
@@ -25,7 +25,7 @@ class ProjectSpec extends Specification {
 
     void "test getProjectDirectory project directory contains slashes should return File"() {
         given:
-        Project project = DomainFactory.createProjectWithRealms(
+        Project project = DomainFactory.createProject(
                 dirName: "${HelperUtils.uniqueString}/${HelperUtils.uniqueString}/${HelperUtils.uniqueString}"
         )
 

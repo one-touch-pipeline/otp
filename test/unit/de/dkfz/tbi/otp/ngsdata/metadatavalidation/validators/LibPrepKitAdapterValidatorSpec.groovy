@@ -22,6 +22,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
         Pipeline,
         ProcessingOption,
         Project,
+        Realm,
         RoddyWorkflowConfig,
         Sample,
         SampleIdentifier,

@@ -24,7 +24,7 @@ class Project implements Commentable, Entity, AlignmentConfig {
     String name
     String phabricatorAlias
     String dirName
-    String realmName
+    Realm realm
     String dirAnalysis
 
     short processingPriority = ProcessingPriority.NORMAL_PRIORITY
@@ -65,6 +65,7 @@ class Project implements Commentable, Entity, AlignmentConfig {
 
     static belongsTo = [
             ProjectGroup,
+            Realm
     ]
 
     static constraints = {
@@ -82,7 +83,7 @@ class Project implements Commentable, Entity, AlignmentConfig {
         dirAnalysis(nullable: true, validator: { String val ->
             !val || OtpPath.isValidAbsolutePath(val)
         })
-        realmName(blank: false)
+        realm(nullable: false)
         projectGroup(nullable: true)
         processingPriority max: ProcessingPriority.MAXIMUM_PRIORITY
         alignmentDeciderBeanName(blank: false)  // If no alignment is desired, set to noAlignmentDecider instead of leaving blank

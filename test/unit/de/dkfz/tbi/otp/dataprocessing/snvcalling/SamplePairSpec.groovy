@@ -23,9 +23,9 @@ import spock.lang.*
 class SamplePairSpec extends Specification {
 
     List setUpForPathTests(String analysisName) {
-        Realm realm = DomainFactory.createRealmDataManagement()
+        Realm realm = DomainFactory.createRealm()
         Project project = DomainFactory.createProject(
-                realmName: realm.name,
+                realm: realm,
         )
         Individual individual = DomainFactory.createIndividual(
                 project: project,

@@ -18,9 +18,6 @@ class CheckQaResultsChecksumMD5Job extends AbstractEndStateAwareJobImpl {
     ProcessedMergedBamFileService processedMergedBamFileService
 
     @Autowired
-    ConfigService configService
-
-    @Autowired
     ClusterJobSchedulerService clusterJobSchedulerService
 
     @Autowired
@@ -38,7 +35,7 @@ class CheckQaResultsChecksumMD5Job extends AbstractEndStateAwareJobImpl {
         log.debug "Attempting to check copied qa results"
         Project project = processedMergedBamFileService.project(file)
         String cmd = scriptText(temporalqaDestinationDir)
-        Realm realm = configService.getRealmDataManagement(project)
+        Realm realm = project.realm
         String jobId = clusterJobSchedulerService.executeJob(realm, cmd)
         log.debug "Job ${jobId} submitted to cluster job scheduler"
 

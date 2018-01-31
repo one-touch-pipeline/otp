@@ -34,6 +34,7 @@ class WatchdogJob extends AbstractEndStateAwareJobImpl implements MonitoringJob 
 
     @Autowired ClusterJobMonitoringService clusterJobMonitoringService
     @Autowired SchedulerService schedulerService
+    @Autowired ConfigService configService
 
     /**
      * Constant to indicate that no cluster job has executed such that the watchdog should not wait.
@@ -77,7 +78,7 @@ class WatchdogJob extends AbstractEndStateAwareJobImpl implements MonitoringJob 
             schedulerService.doEndCheck(this)
         } else {
             Realm realm = CollectionUtils.exactlyOneElement(Realm.findAllById(Long.parseLong(realmIdFromJob)))
-            clusterJobMonitoringService.monitor(queuedClusterJobIds.collect { new ClusterJobIdentifier(realm, it, realm.unixUser) }, this)
+            clusterJobMonitoringService.monitor(queuedClusterJobIds.collect { new ClusterJobIdentifier(realm, it, configService.getSshUser()) }, this)
         }
     }
 

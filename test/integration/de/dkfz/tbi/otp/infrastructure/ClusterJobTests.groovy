@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.infrastructure
 
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.job.plan.*
@@ -23,11 +24,13 @@ class ClusterJobTests {
     public static final DateTime STARTED = QUEUED.plusDays(1)
     public static final DateTime ENDED = STARTED.plusDays(1)
 
+    TestConfigService configService
     ProcessingStep step
     Realm realm
 
     @Before
     void before() {
+        configService = new TestConfigService()
 
         JobExecutionPlan plan = new JobExecutionPlan(name: "testFormula", obsoleted: true, planVersion: 0)
 
@@ -45,13 +48,18 @@ class ClusterJobTests {
 
         assertNotNull(step.save(flush: true))
 
-        realm = DomainFactory.createRealmDataManagement()
+        realm = DomainFactory.createRealm()
 
         assertNotNull(realm.save(flush: true))
 
         ProcessingOption option = new ProcessingOption([name: OptionName.STATISTICS_BASES_PER_BYTES_FASTQ, type: null, project: null, value: "1.0", comment: "some comment"])
 
         assertNotNull(option.save(flush: true))
+    }
+
+    @After
+    void after() {
+        configService.clean()
     }
 
     @Test
@@ -61,7 +69,7 @@ class ClusterJobTests {
                                                     processingStep: step,
                                                     realm: realm,
                                                     clusterJobId: "testID",
-                                                    userName: realm.unixUser,
+                                                    userName: configService.getSshUser(),
                                                     clusterJobName: "testName_${step.nonQualifiedJobClass}",
                                                     jobClass: step.nonQualifiedJobClass,
                                                     queued: QUEUED,
@@ -93,7 +101,7 @@ class ClusterJobTests {
                                                     processingStep: null,
                                                     realm: null,
                                                     clusterJobId: null,
-                                                    userName: realm.unixUser,
+                                                    userName: configService.getSshUser(),
                                                     clusterJobName: null,
                                                     jobClass: null,
                                                     queued: null,
@@ -110,7 +118,7 @@ class ClusterJobTests {
                                                     processingStep: step,
                                                     realm: realm,
                                                     clusterJobId: "testID",
-                                                    userName: realm.unixUser,
+                                                    userName: configService.getSshUser(),
                                                     clusterJobName: "testName_${step.nonQualifiedJobClass}",
                                                     jobClass: step.nonQualifiedJobClass,
                                                     seqType: null,
@@ -138,7 +146,7 @@ class ClusterJobTests {
                 processingStep: step,
                 realm: realm,
                 clusterJobId: "testID",
-                userName: realm.unixUser,
+                userName: configService.getSshUser(),
                 clusterJobName: "testName_${step.nonQualifiedJobClass}",
                 jobClass: step.nonQualifiedJobClass,
                 queued: QUEUED,
@@ -158,7 +166,7 @@ class ClusterJobTests {
                 processingStep: step,
                 realm: realm,
                 clusterJobId: "testID",
-                userName: realm.unixUser,
+                userName: configService.getSshUser(),
                 clusterJobName: "testName_${step.nonQualifiedJobClass}",
                 jobClass: step.nonQualifiedJobClass,
                 queued: QUEUED,
@@ -178,7 +186,7 @@ class ClusterJobTests {
                 processingStep: step,
                 realm: realm,
                 clusterJobId: "testID",
-                userName: realm.unixUser,
+                userName: configService.getSshUser(),
                 clusterJobName: "testName_${step.nonQualifiedJobClass}",
                 jobClass: step.nonQualifiedJobClass,
                 queued: QUEUED,

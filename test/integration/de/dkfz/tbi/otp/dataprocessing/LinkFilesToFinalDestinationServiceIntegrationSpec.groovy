@@ -35,7 +35,7 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends IntegrationSpec 
 
         roddyBamFile = DomainFactory.createRoddyBamFile([:], RnaRoddyBamFile)
 
-        realm = DomainFactory.createRealmDataManagement([name: roddyBamFile.project.realmName])
+        realm = roddyBamFile.project.realm
         configService = new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path])
     }
 

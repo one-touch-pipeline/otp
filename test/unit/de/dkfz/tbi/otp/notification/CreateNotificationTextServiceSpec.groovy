@@ -317,9 +317,6 @@ class CreateNotificationTextServiceSpec extends Specification {
     void "getSeqTypeDirectories, when path starts with icgc, then the path should be changed to start with lsdf"() {
         given:
         SeqTrack seqTrack = DomainFactory.createSeqTrackWithTwoDataFiles()
-        DomainFactory.createRealmDataManagement([
-                name    : seqTrack.project.realmName,
-        ])
         configService = new TestConfigService(['otp.root.path': LsdfFilesService.MOUNTPOINT_WITH_ICGC])
 
         when:
@@ -382,9 +379,6 @@ class CreateNotificationTextServiceSpec extends Specification {
     void "getMergingDirectories, when path starts with icgc, then the path should be changed to start with lsdf"() {
         given:
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
-        DomainFactory.createRealmDataManagement([
-                name    : roddyBamFile.project.realmName
-        ])
         configService = new TestConfigService(['otp.root.path': LsdfFilesService.MOUNTPOINT_WITH_ICGC])
 
         when:
@@ -452,7 +446,6 @@ class CreateNotificationTextServiceSpec extends Specification {
     void "variantCallingDirectories, when path starts with icgc, then the path should be changed to start with lsdf"() {
         given:
         SamplePair samplePair = DomainFactory.createSamplePair()
-        DomainFactory.createRealmDataManagement([name: samplePair.project.realmName])
 
         configService = new TestConfigService(['otp.root.path': LsdfFilesService.MOUNTPOINT_WITH_ICGC])
 
@@ -525,7 +518,7 @@ class CreateNotificationTextServiceSpec extends Specification {
                 sampleId1                   : 'sampleId2a',
                 sampleId2                   : 'sampleId2b',
                 pid                         : 'patient_2',
-                project                     : multipleProjects ? DomainFactory.createProjectWithRealms() : data1.seqTrack.project,
+                project                     : multipleProjects ? DomainFactory.createProject() : data1.seqTrack.project,
                 seqType                     : multipleSeqTypes ? DomainFactory.createSeqTypePaired() : data1.seqTrack.seqType,
                 run                         : multipleRuns ? DomainFactory.createRun() : data1.seqTrack.run,
                 installationProcessingStatus: installationProcessingStatus,
@@ -607,7 +600,7 @@ ${expectedAlign}"""
         Map data2 = createData(
                 sampleId1: 'sampleId2a',
                 sampleId2: 'sampleId2b',
-                project: multipleProjects ? DomainFactory.createProjectWithRealms() : data1.seqTrack.project,
+                project: multipleProjects ? DomainFactory.createProject() : data1.seqTrack.project,
                 seqType: multipleSeqTypes ? DomainFactory.createSeqTypePaired() : data1.seqTrack.seqType,
                 run: data1.seqTrack.run,
                 alignmentProcessingStatus: secondSampleAligned ? ProcessingStatus.WorkflowProcessingStatus.ALL_DONE : ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO,
@@ -746,7 +739,7 @@ ${expectedVariantCallingRunning}${expectedVariantCallingNotRunning}"""
         ])
 
         Map data2 = createData(
-                project: pairAnalysisContentsPermutationList.multipleProjects ? DomainFactory.createProjectWithRealms() : data1.seqTrack.project,
+                project: pairAnalysisContentsPermutationList.multipleProjects ? DomainFactory.createProject() : data1.seqTrack.project,
                 (pairAnalysisContentsPermutationList.customProcessingStatus): pairAnalysisContentsPermutationList.processingStatus,
         )
 
@@ -836,7 +829,7 @@ samplePairsNotProcessed: ${expectedSamplePairsNotProcessed}
     }
 
     private static Map createData(Map properties = [:]) {
-        Project project = properties.project ?: DomainFactory.createProjectWithRealms()
+        Project project = properties.project ?: DomainFactory.createProject()
         String pid = properties.pid ?: "pid_${DomainFactory.counter++}"
         SeqType seqType = properties.seqType ?: DomainFactory.createSeqTypePaired()
         ProcessingStatus.WorkflowProcessingStatus installationProcessingStatus = properties.installationProcessingStatus ?: ProcessingStatus.WorkflowProcessingStatus.ALL_DONE

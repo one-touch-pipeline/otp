@@ -92,7 +92,7 @@ class MergingPassServiceTests {
     void testRealmForDataProcessing() {
         MergingSet mergingSet = createMergingSet("1")
         MergingPass mergingPass = mergingPassService.create(ProcessingPriority.NORMAL_PRIORITY)
-        Realm realm = DomainFactory.createRealmDataProcessing(name: mergingSet.project.realmName)
+        Realm realm = mergingSet.project.realm
         Realm realmAct = mergingPassService.realmForDataProcessing(mergingPass)
         assertEquals(realm, realmAct)
     }
@@ -184,7 +184,6 @@ class MergingPassServiceTests {
         Project project = DomainFactory.createProject(
                         name: "project_" + uniqueId,
                         dirName: "project_" + uniqueId,
-                        realmName: 'DKFZ',
                         )
         assertNotNull(project.save([flush: true, failOnError: true]))
 

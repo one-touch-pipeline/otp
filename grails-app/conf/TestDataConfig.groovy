@@ -2,10 +2,7 @@ import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.HelperUtils
-import grails.util.Environment
-
-
+import de.dkfz.tbi.otp.utils.*
 /**
  * A counter used to handle unique constraints. You can use it in a closure to produce a unique value for a property.
  * The class Individual show therefore an example.
@@ -41,19 +38,15 @@ testDataConfig {
         'de.dkfz.tbi.otp.ngsdata.Project' {
             name = {'projectName_' + (counter++)}
             dirName = {'projectDir_' + (counter++)}
-            realmName = {HelperUtils.uniqueString}
+            realm = {DomainFactory.createRealm()}
 
         }
         'de.dkfz.tbi.otp.ngsdata.Realm' {
             name = {'realmName_' + (counter++)}
-            env = Environment.current.name
-            webHost = 'host.invalid'
             host = 'host.invalid'
             port = 22
-            unixUser = '!fakeuser'
             timeout = 60
             defaultJobSubmissionOptions = ''
-            cluster = Realm.Cluster.DKFZ
             jobScheduler = Realm.JobScheduler.PBS
         }
         'de.dkfz.tbi.otp.ngsdata.ReferenceGenome' {

@@ -77,8 +77,6 @@ class ExecuteRnaAlignmentJobIntegrationSpec extends IntegrationSpec {
 
         DomainFactory.createProcessingOptionBasePathReferenceGenome(tmpDir.root.absolutePath)
         RnaRoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile([:], RnaRoddyBamFile)
-        DomainFactory.createRealmDataManagement([name: roddyBamFile.project.realmName])
-        DomainFactory.createRealmDataProcessing([name: roddyBamFile.project.realmName])
         roddyBamFile.containedSeqTracks.each { SeqTrack s ->
             s.dataFiles.each { DataFile dataFile ->
                 File file = new File(executeRnaAlignmentJob.lsdfFilesService.getFileViewByPidPath(dataFile))

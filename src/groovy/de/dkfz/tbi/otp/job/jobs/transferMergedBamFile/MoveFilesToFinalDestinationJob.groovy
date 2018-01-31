@@ -40,7 +40,7 @@ class MoveFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl {
         String qaDestinationDirectory = processedMergedBamFileService.qaResultDestinationDirectory(mergedBamFile)
         Project project = processedMergedBamFileService.project(mergedBamFile)
         //has to be changed since the location of the log file moved from the .tmp folder to the final destination
-        Realm realm = configService.getRealmDataManagement(project)
+        Realm realm = project.realm
         String cmd = scriptText(dest, temporalDestinationDir, temporalQADestinationDir, qaDestinationDirectory)
         mergedBamFile.validateAndSetBamFileInProjectFolder()
         log.debug "Attempting to move files from the tmp directory to the final destination"

@@ -49,6 +49,7 @@ class ProjectService {
     GeneModelService geneModelService
     SophiaService sophiaService
     AceseqService aceseqService
+    ConfigService configService
 
     /**
      *
@@ -89,15 +90,15 @@ class ProjectService {
      * Creates a Project and grants permissions to Groups which have read/write privileges for Projects.
      * @param name
      * @param dirName
-     * @param realmName
+     * @param realm
      * @return The created project
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public Project createProject(String name, String dirName, String realmName, String alignmentDeciderBeanName, List<String> categoryNames) {
+    public Project createProject(String name, String dirName, Realm realm, String alignmentDeciderBeanName, List<String> categoryNames) {
         Project project = new Project(
                 name: name,
                 dirName: dirName,
-                realmName: realmName,
+                realm: realm,
                 alignmentDeciderBeanName: alignmentDeciderBeanName,
                 projectCategories: categoryNames.collect { exactlyOneElement(ProjectCategory.findAllByName(it)) },
         )
@@ -119,7 +120,7 @@ class ProjectService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     public Project createProject(ProjectParams projectParams) {
         assert OtpPath.isValidPathComponent(projectParams.unixGroup): "unixGroup '${projectParams.unixGroup}' contains invalid characters"
-        Project project = createProject(projectParams.name, projectParams.dirName, projectParams.realmName, projectParams.alignmentDeciderBeanName, projectParams.categoryNames)
+        Project project = createProject(projectParams.name, projectParams.dirName, projectParams.realm, projectParams.alignmentDeciderBeanName, projectParams.categoryNames)
         project.phabricatorAlias = projectParams.phabricatorAlias
         project.dirAnalysis = projectParams.dirAnalysis
         project.processingPriority = projectParams.processingPriority
@@ -165,7 +166,7 @@ class ProjectService {
         String phabricatorAlias
         String dirName
         String dirAnalysis
-        String realmName
+        Realm realm
         String alignmentDeciderBeanName
         List<String> categoryNames
         String unixGroup
@@ -624,7 +625,7 @@ chmod 2750 ${projectDirectory}
     }
 
     private void executeScript(String input, Project project) {
-        Realm realm = ConfigService.getRealm(project, Realm.OperationType.DATA_MANAGEMENT)
+        Realm realm = project.realm
         String script = """\
 #!/bin/bash
 set -evx

@@ -216,7 +216,7 @@ class DataProcessingFilesService {
         notNull file
         if (file.exists()) {
             final long freedBytes = file.length()
-            lsdfFilesService.deleteFile(configService.getRealmDataProcessing(project), file)
+            lsdfFilesService.deleteFile(project.realm, file)
             return freedBytes
         } else {
             threadLog.warn "File has already been deleted: ${file}."
@@ -246,7 +246,7 @@ class DataProcessingFilesService {
         } else if (directory.list().length != 0) {
             threadLog.error "Directory ${directory} is not empty. Will not delete it."
         } else {
-            lsdfFilesService.deleteDirectory(configService.getRealmDataProcessing(project), directory)
+            lsdfFilesService.deleteDirectory(project.realm, directory)
         }
     }
 }

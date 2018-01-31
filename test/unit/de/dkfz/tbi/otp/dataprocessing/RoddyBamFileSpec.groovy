@@ -43,7 +43,6 @@ class RoddyBamFileSpec extends Specification {
 
     def setup() {
         roddyBamFile = DomainFactory.createRoddyBamFile()
-        DomainFactory.createRealmDataManagement([name: roddyBamFile.project.realmName])
     }
 
     @Unroll

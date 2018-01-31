@@ -15,7 +15,10 @@ class ClusterJobManagerFactoryServiceSpec extends Specification {
     def "test getJobManager, get correct manager"(Realm.JobScheduler type, Class managerClass) {
         given:
         ClusterJobManagerFactoryService service = new ClusterJobManagerFactoryService()
-        Realm realm = DomainFactory.createRealmDataManagement(
+        service.configService = Mock(ConfigService) {
+            getSshUser() >> "user"
+        }
+        Realm realm = DomainFactory.createRealm(
                 jobScheduler: type,
         )
 
@@ -34,12 +37,15 @@ class ClusterJobManagerFactoryServiceSpec extends Specification {
     def "test getJobManager, get the different manager for the different realm"() {
         given:
         ClusterJobManagerFactoryService service = new ClusterJobManagerFactoryService()
-        Realm realm = DomainFactory.createRealmDataManagement(
+        service.configService = Mock(ConfigService) {
+            getSshUser() >> "user"
+        }
+        Realm realm = DomainFactory.createRealm(
                 jobScheduler: Realm.JobScheduler.LSF,
         )
         BatchEuphoriaJobManager manager = service.getJobManager(realm)
 
-        Realm realm2 = DomainFactory.createRealmDataManagement(
+        Realm realm2 = DomainFactory.createRealm(
                 jobScheduler: Realm.JobScheduler.LSF,
         )
 
@@ -50,7 +56,10 @@ class ClusterJobManagerFactoryServiceSpec extends Specification {
     def "test getJobManager, get the same manager for the same realm"() {
         given:
         ClusterJobManagerFactoryService service = new ClusterJobManagerFactoryService()
-        Realm realm = DomainFactory.createRealmDataManagement(
+        service.configService = Mock(ConfigService) {
+            getSshUser() >> "user"
+        }
+        Realm realm = DomainFactory.createRealm(
                 jobScheduler: Realm.JobScheduler.LSF,
         )
         BatchEuphoriaJobManager manager = service.getJobManager(realm)

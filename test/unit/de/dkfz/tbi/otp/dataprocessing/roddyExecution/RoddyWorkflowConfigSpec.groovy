@@ -134,7 +134,7 @@ class RoddyWorkflowConfigSpec extends Specification {
 
     void "test getStandardConfigDirectory all fine should return correct path for project"() {
         given:
-        Project project = DomainFactory.createProjectWithRealms()
+        Project project = DomainFactory.createProject()
         Pipeline.Name workflowName = Pipeline.Name.PANCAN_ALIGNMENT
 
         when:
@@ -158,7 +158,7 @@ class RoddyWorkflowConfigSpec extends Specification {
 
     void "test getStandardConfigDirectory no pipeline given should fail"() {
         given:
-        Project project = DomainFactory.createProjectWithRealms()
+        Project project = DomainFactory.createProject()
 
         when:
         RoddyWorkflowConfig.getStandardConfigDirectory(project, null)
@@ -226,7 +226,7 @@ class RoddyWorkflowConfigSpec extends Specification {
 
     void "test getStandardConfigFile all fine should return correct file"() {
         given:
-        Project project = DomainFactory.createProjectWithRealms()
+        Project project = DomainFactory.createProject()
         Pipeline.Name pipelineName = Pipeline.Name.PANCAN_ALIGNMENT
         SeqType seqType = DomainFactory.createSeqType(roddyName: RODDY_NAME)
 

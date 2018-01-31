@@ -58,9 +58,6 @@ class ExecuteWgbsAlignmentJobTests {
                 'otp.processing.root.path': tmpDir.root.path
         ])
 
-        DomainFactory.createRealmDataProcessing([name: roddyBamFile.project.realmName])
-        DomainFactory.createRealmDataManagement([name: roddyBamFile.project.realmName])
-
         CreateFileHelper.createFile(executeWgbsAlignmentJob.referenceGenomeService.fastaFilePath(roddyBamFile.referenceGenome, false))
         CreateFileHelper.createFile(executeWgbsAlignmentJob.referenceGenomeService.chromosomeStatSizeFile(roddyBamFile.mergingWorkPackage, false))
     }

@@ -9,6 +9,7 @@ import spock.lang.*
         Individual,
         Project,
         ProjectCategory,
+        Realm,
         Run,
         RunSegment,
         Sample,

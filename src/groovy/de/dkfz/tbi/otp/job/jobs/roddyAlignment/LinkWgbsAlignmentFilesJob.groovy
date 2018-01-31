@@ -29,7 +29,7 @@ class LinkWgbsAlignmentFilesJob extends AbstractEndStateAwareJobImpl {
     void execute() throws Exception {
         final RoddyBamFile roddyBamFile = getProcessParameterObject()
 
-        Realm realm = configService.getRealmDataManagement(roddyBamFile.project)
+        Realm realm = roddyBamFile.project.realm
         assert realm : "Realm should not be null"
 
         linkFilesToFinalDestinationService.prepareRoddyBamFile(roddyBamFile)

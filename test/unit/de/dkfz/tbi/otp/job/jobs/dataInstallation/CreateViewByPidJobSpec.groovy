@@ -62,7 +62,6 @@ class CreateViewByPidJobSpec extends Specification {
         )
 
         DataFile dataFile = CollectionUtils.exactlyOneElement(seqTrack.dataFiles)
-        DomainFactory.createRealmDataManagement([name: seqTrack.project.realmName])
 
         File source = new File(createViewByPidJob.lsdfFilesService.getFileFinalPath(dataFile))
         File target = new File(createViewByPidJob.lsdfFilesService.getFileViewByPidPath(dataFile))

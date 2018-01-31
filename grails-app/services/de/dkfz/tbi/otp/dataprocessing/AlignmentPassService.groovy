@@ -78,7 +78,7 @@ class AlignmentPassService {
     }
 
     public Realm realmForDataProcessing(AlignmentPass alignmentPass) {
-        return configService.getRealmDataProcessing(project(alignmentPass))
+        return project(alignmentPass).realm
     }
 
     public Project project(AlignmentPass alignmentPass) {

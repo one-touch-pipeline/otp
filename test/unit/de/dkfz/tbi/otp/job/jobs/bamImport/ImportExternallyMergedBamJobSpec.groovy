@@ -260,11 +260,6 @@ class ImportExternallyMergedBamJobSpec extends Specification {
 
         CreateFileHelper.createFile(new File("${importProcess.externallyProcessedMergedBamFiles[0].importedFrom}"))
 
-
-        DomainFactory.createRealmDataManagement([
-                name     : importProcess.externallyProcessedMergedBamFiles.first().project.realmName,
-        ])
-
         DomainFactory.createProcessParameter([
                 process   : step.process,
                 value     : importProcess.id.toString(),

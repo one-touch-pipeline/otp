@@ -59,11 +59,11 @@ class AceseqInstanceSpec extends Specification {
      */
     void setup() {
         File temporaryFile = temporaryFolder.newFolder()
-        Realm realm = DomainFactory.createRealmDataManagement()
+        Realm realm = DomainFactory.createRealm()
         configService = new TestConfigService(['otp.root.path': temporaryFile.path])
 
         this.instance = DomainFactory.createAceseqInstanceWithRoddyBamFiles()
-        instance.project.realmName = realm.name
+        instance.project.realm = realm
         instance.project.save(flush: true)
 
         instancePath = new File(

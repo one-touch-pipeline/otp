@@ -29,6 +29,9 @@ class MyPBSWatchdogJob extends AbstractEndStateAwareJobImpl implements Monitorin
     @Autowired
     SchedulerService schedulerService
 
+    @Autowired
+    ConfigService configService
+
     final int defaultTimeout = 60
 
     private List<String> queuedJobIds = []
@@ -49,10 +52,10 @@ class MyPBSWatchdogJob extends AbstractEndStateAwareJobImpl implements Monitorin
             realms = parseInputString(realmIds).collect( { CollectionUtils.exactlyOneElement(Realm.findAllById(Long.parseLong(it))) } )
             if (realms.size() == 1) {
                 Realm realm = CollectionUtils.exactlyOneElement(realms)
-                clusterJobMonitoringService.monitor(queuedJobIds.collect { new ClusterJobIdentifier(realm, it, realm.unixUser) }, this)
+                clusterJobMonitoringService.monitor(queuedJobIds.collect { new ClusterJobIdentifier(realm, it, configService.getSshUser()) }, this)
             } else {
                 Collection<ClusterJobIdentifier> jobIdentifiers = [realms, queuedJobIds].transpose().collect {
-                    new ClusterJobIdentifier(it[0], it[1], it[0].unixUser)
+                    new ClusterJobIdentifier(it[0], it[1], configService.getSshUser())
                 }
                 clusterJobMonitoringService.monitor(jobIdentifiers, this)
             }

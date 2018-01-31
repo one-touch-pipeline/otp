@@ -46,7 +46,7 @@ class CreateQAResultStatisticsFileJob extends AbstractEndStateAwareJobImpl {
         log.debug "Attempting to create statistics result file"
         Project project = processedMergedBamFileService.project(mergedBamFile)
         String cmd = scriptText(temporalDestinationDir, results, statisticsFiles, fastqFiles, mergedBamFile)
-        Realm realm = configService.getRealmDataManagement(project)
+        Realm realm = project.realm
         String jobId = clusterJobSchedulerService.executeJob(realm, cmd)
         log.debug "Job ${jobId} submitted to cluster job scheduler"
 

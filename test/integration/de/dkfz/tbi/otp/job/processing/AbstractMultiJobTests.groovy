@@ -33,11 +33,10 @@ class AbstractMultiJobTests {
     Scheduler scheduler
 
     final ProcessingStep step = createAndSaveProcessingStep()
-    final Realm realm1 = DomainFactory.createRealmDataProcessing()
-    final Realm realm2 = DomainFactory.createRealmDataProcessing()
-    final ClusterJobIdentifier clusterJob1 = new ClusterJobIdentifier(realm1, CLUSTER_JOB_1_ID, realm1.unixUser)
-    final ClusterJobIdentifier clusterJob2 = new ClusterJobIdentifier(realm2, CLUSTER_JOB_2_ID, realm2.unixUser)
-    final ClusterJobIdentifier clusterJob3 = new ClusterJobIdentifier(realm1, CLUSTER_JOB_3_ID, realm1.unixUser)
+    final Realm realm = createRealm()
+    final ClusterJobIdentifier clusterJob1 = new ClusterJobIdentifier(realm, CLUSTER_JOB_1_ID, "user")
+    final ClusterJobIdentifier clusterJob2 = new ClusterJobIdentifier(realm, CLUSTER_JOB_2_ID, "user")
+    final ClusterJobIdentifier clusterJob3 = new ClusterJobIdentifier(realm, CLUSTER_JOB_3_ID, "user")
     final Collection<ClusterJobIdentifier> clusterJobs1 = [clusterJob1, clusterJob2]
     final Collection<ClusterJobIdentifier> clusterJobs2 = [clusterJob3]
 
@@ -50,8 +49,7 @@ class AbstractMultiJobTests {
 
     @Before
     void before() {
-        assert realm1.save(flush: true)
-        assert realm2.save(flush: true)
+        assert realm.save(flush: true)
         clusterJobMonitoringService.queuedJobs = [:]
         restartCheckerService.metaClass.canWorkflowBeRestarted = { ProcessingStep step -> false }
     }

@@ -12,6 +12,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 @Mock([
         Individual,
         Project,
+        Realm,
         Sample,
         SampleType
 ])

@@ -130,15 +130,10 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
                     throw new AssertionError(errorMessage)
                 }
             }
-            getConfigService() >> Mock(TestConfigService) {
-                getRealmDataProcessing(_) >> new Realm()
-            }
             0 * ensureCorrectBaseBamFileIsOnFileSystem(_)
 
         }
-        RoddyBamFile roddyBamFile = Mock(RoddyBamFile) {
-            getProject() >> new Project()
-        }
+        RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
 
         when:
         abstractRoddyAlignmentJob.validate(roddyBamFile)
@@ -156,17 +151,12 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
             getExecuteRoddyCommandService() >> Mock(ExecuteRoddyCommandService) {
                 1 * correctPermissions(_, _) >> {}
             }
-            getConfigService() >> Mock(TestConfigService) {
-                getRealmDataProcessing(_) >> new Realm()
-            }
             1 * ensureCorrectBaseBamFileIsOnFileSystem(_) >> {
                 throw new AssertionError(errorMessage)
             }
 
         }
-        RoddyBamFile roddyBamFile = Mock(RoddyBamFile) {
-            getProject() >> new Project()
-        }
+        RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
 
         when:
         abstractRoddyAlignmentJob.validate(roddyBamFile)
@@ -194,7 +184,6 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
         }
 
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
-        DomainFactory.createRealmDataManagement([name: roddyBamFile.project.realmName])
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
         CreateFileHelper.createFile(new File(roddyBamFile.workMergedQAJsonFile.parent, 'OtherFile.txt"'))
         CreateFileHelper.createFile(new File(roddyBamFile.workExecutionStoreDirectory.parent, 'OtherFile.txt"'))
@@ -248,7 +237,6 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.INPROGRESS,
                 md5sum             : null,
         ])
-        DomainFactory.createRealmDataManagement([name: roddyBamFile.project.realmName])
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
 
         when:
@@ -281,7 +269,6 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.DECLARED,
                 md5sum             : null,
         ])
-        DomainFactory.createRealmDataManagement([name: roddyBamFile.project.realmName])
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
 
         when:
@@ -313,7 +300,6 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.DECLARED,
                 md5sum             : null,
         ], RnaRoddyBamFile)
-        DomainFactory.createRealmDataManagement([name: roddyBamFile.project.realmName])
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
         roddyBamFile.workSingleLaneQAJsonFiles.values().each { File file ->
             file.delete()
@@ -347,8 +333,6 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
         given:
         TestConfigService configService = new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path])
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
-        DomainFactory.createRealmDataManagement([name: roddyBamFile.project.realmName])
-        DomainFactory.createRealmDataProcessing([name: roddyBamFile.project.realmName])
 
         roddyBamFile.workBamFile.parentFile.mkdirs()
         roddyBamFile.workBamFile.text = createMinimalSamFile(roddyBamFile.containedSeqTracks*.getReadGroupName())
@@ -386,8 +370,6 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
         given:
         TestConfigService configService = new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path])
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
-        DomainFactory.createRealmDataManagement([name: roddyBamFile.project.realmName])
-        DomainFactory.createRealmDataProcessing([name: roddyBamFile.project.realmName])
 
         SeqTrack seqTrack = DomainFactory.createSeqTrackWithTwoDataFiles(roddyBamFile.mergingWorkPackage)
         roddyBamFile.seqTracks.add(seqTrack)
@@ -424,7 +406,6 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
     void "ensureCorrectBaseBamFileIsOnFileSystem, base bam file exist but not on file system, throw assert"() {
         given:
         RoddyBamFile baseRoddyBamFile = DomainFactory.createRoddyBamFile()
-        DomainFactory.createRealmDataManagement([name: baseRoddyBamFile.project.realmName])
 
         baseRoddyBamFile.mergingWorkPackage.bamFileInProjectFolder = baseRoddyBamFile
         assert baseRoddyBamFile.mergingWorkPackage.save(flush: true)
@@ -444,7 +425,6 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
         given:
         TestConfigService configService = new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path])
         RoddyBamFile baseRoddyBamFile = DomainFactory.createRoddyBamFile()
-        DomainFactory.createRealmDataManagement([name: baseRoddyBamFile.project.realmName])
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(baseRoddyBamFile)
 
         baseRoddyBamFile.mergingWorkPackage.bamFileInProjectFolder = baseRoddyBamFile

@@ -58,8 +58,7 @@ class FastqcDataFilesService {
     }
 
     public Realm fastqcRealm(SeqTrack seqTrack) {
-        Project project = seqTrack.project
-        return configService.getRealmDataProcessing(project)
+        return seqTrack.project.realm
     }
 
     public void createFastqcProcessedFile(DataFile dataFile) {

@@ -48,7 +48,7 @@ class ExecuteWgbsAlignmentJob extends AbstractRoddyAlignmentJob implements AutoR
     protected String prepareAndReturnWorkflowSpecificParameter(RoddyBamFile roddyBamFile) {
         assert roddyBamFile : "roddyBamFile must not be null"
 
-        final Realm realm = configService.getRealmDataManagement(roddyBamFile.project)
+        final Realm realm = roddyBamFile.project.realm
 
         File metadataFile = roddyBamFile.getWorkMetadataTableFile()
         LsdfFilesService.ensureDirIsReadable(metadataFile.parentFile)

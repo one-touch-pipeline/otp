@@ -16,7 +16,7 @@ class AbstractExecutePanCanJobTests {
 
     LsdfFilesService lsdfFilesService
 
-    Realm dataManagement
+    Realm realm
     TestConfigService configService
     RoddyBamFile roddyBamFile
     File configFile
@@ -43,13 +43,12 @@ class AbstractExecutePanCanJobTests {
         ])
         roddyBamFile.workPackage.metaClass.seqTracks = SeqTrack.list()
 
-        Realm dataProcessing = DomainFactory.createRealmDataProcessing([name: roddyBamFile.project.realmName])
         configService = new TestConfigService([
                         'otp.root.path': tmpDir.root.path+"/root",
                         'otp.processing.root.path': tmpDir.root.path+"/processing"
                 ]
         )
-        dataManagement = DomainFactory.createRealmDataManagement([name: roddyBamFile.project.realmName])
+        realm = DomainFactory.createRealm()
         abstractExecutePanCanJob = [
                 prepareAndReturnWorkflowSpecificCValues  : { RoddyBamFile bamFile -> ["${workflowSpecificCValues}"] },
                 prepareAndReturnWorkflowSpecificParameter: { RoddyBamFile bamFile -> "workflowSpecificParameter " },
@@ -112,7 +111,7 @@ class AbstractExecutePanCanJobTests {
     @Test
     void testPrepareAndReturnWorkflowSpecificCommand_RoddyResultIsNull_ShouldFail() {
         assert TestCase.shouldFail(AssertionError) {
-            abstractExecutePanCanJob.prepareAndReturnWorkflowSpecificCommand(null, dataManagement)
+            abstractExecutePanCanJob.prepareAndReturnWorkflowSpecificCommand(null, realm)
         }.contains("roddyResult must not be null")
     }
 
@@ -131,7 +130,7 @@ class AbstractExecutePanCanJobTests {
         assert configFile.delete()
 
         assert TestCase.shouldFail(AssertionError) {
-            abstractExecutePanCanJob.prepareAndReturnWorkflowSpecificCommand(roddyBamFile, dataManagement)
+            abstractExecutePanCanJob.prepareAndReturnWorkflowSpecificCommand(roddyBamFile, realm)
         }.contains(roddyBamFile.config.configFilePath)
     }
 
@@ -154,7 +153,7 @@ workflowSpecificParameter \
 --cvalues="$workflowSpecificCValues"\
 """
 
-        String actualCmd = abstractExecutePanCanJob.prepareAndReturnWorkflowSpecificCommand(roddyBamFile, dataManagement)
+        String actualCmd = abstractExecutePanCanJob.prepareAndReturnWorkflowSpecificCommand(roddyBamFile, realm)
         assert expectedCmd == actualCmd
     }
 

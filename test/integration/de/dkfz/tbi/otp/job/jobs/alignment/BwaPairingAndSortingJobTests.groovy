@@ -31,7 +31,6 @@ class BwaPairingAndSortingJobTests {
         Project project = DomainFactory.createProject(
             name: "projectName",
             dirName: "dirName",
-            realmName: 'DKFZ',
             )
         assertNotNull(project.save([flush: true, failOnError: true]))
 
@@ -231,9 +230,6 @@ class BwaPairingAndSortingJobTests {
         bamFile.validate()
         bamFile.errors
         assertNotNull(bamFile.save(flush: true))
-
-        DomainFactory.createRealmDataManagement(name: project.realmName)
-        DomainFactory.createRealmDataProcessing(name: project.realmName)
 
         File dirs = new File(tmpDir.root, "reference_genomes/hg19_1_24")
         dirs.mkdirs()

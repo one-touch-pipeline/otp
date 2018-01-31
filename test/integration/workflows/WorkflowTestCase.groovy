@@ -116,8 +116,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         // we use Grails >2.1)
         // check whether the correct environment is set
         Assume.assumeTrue(Environment.current.name == "WORKFLOW_TEST")
-
-        setupDirectoriesAndRealms()
+        setupDirectoriesAndRealm()
 
         sql = new Sql(dataSource)
         schemaDump = new File(TestCase.createEmptyTestDirectory(), "test-database-dump.sql")
@@ -126,7 +125,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         DomainFactory.createAllAlignableSeqTypes()
         DomainFactory.createProcessingOptionForNotificationRecipient()
         DomainFactory.createProcessingOptionLazy([
-                name: OptionName.OTP_USER_LINUX_GROUP,
+                name : OptionName.OTP_USER_LINUX_GROUP,
                 value: configService.getTestingGroup(),
         ])
         DomainFactory.createProcessingOptionLazy(name: OptionName.TIME_ZONE, type: null, value: "Europe/Berlin")
@@ -146,9 +145,13 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         // manually set up scheduled tasks
         // this is done here so they will be stopped when each test is finished,
         // otherwise there would be problems with the database being deleted
-        scheduler.scheduleWithFixedDelay({ Holders.applicationContext.getBean(SchedulerService).clusterJobCheck() } as Runnable, 0, 10, TimeUnit.SECONDS)
+        scheduler.scheduleWithFixedDelay({
+            Holders.applicationContext.getBean(SchedulerService).clusterJobCheck()
+        } as Runnable, 0, 10, TimeUnit.SECONDS)
 
-        scheduler.scheduleWithFixedDelay({ Holders.applicationContext.getBean(SchedulerService).schedule() } as Runnable, 0, 100, TimeUnit.MILLISECONDS)
+        scheduler.scheduleWithFixedDelay({
+            Holders.applicationContext.getBean(SchedulerService).schedule()
+        } as Runnable, 0, 100, TimeUnit.MILLISECONDS)
     }
 
 
@@ -174,29 +177,24 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
     }
 
 
-    private void setupDirectoriesAndRealms() {
+    private void setupDirectoriesAndRealm() {
         // check whether the wf test root dir is mounted
         // (assume it is mounted if it exists and contains files)
         File rootDirectory = getRootDirectory()
-        assert rootDirectory.list()?.size() : "${rootDirectory} seems not to be mounted"
+        assert rootDirectory.list()?.size(): "${rootDirectory} seems not to be mounted"
+
+        configService.setOtpProperty('otp.ssh.user', configService.getWorkflowTestAccountName())
 
         Map realmParams = [
-                name: 'REALM_NAME',
-                cluster: Realm.Cluster.DKFZ,
-                unixUser: configService.getWorkflowTestAccountName(),
-                jobScheduler: configService.getWorkflowTestScheduler(),
-                host: configService.getWorkflowTestHost(),
-                port: 22,
-                timeout: 0,
+                name                       : 'REALM_NAME',
+                jobScheduler               : configService.getWorkflowTestScheduler(),
+                host                       : configService.getWorkflowTestHost(),
+                port                       : 22,
+                timeout                    : 0,
                 defaultJobSubmissionOptions: jobSubmissionOptions,
         ]
 
-        Realm realmManagement = DomainFactory.createRealm(realmParams + [
-                operationType: Realm.OperationType.DATA_MANAGEMENT,
-        ])
-        realm = DomainFactory.createRealm(realmParams + [
-                operationType: Realm.OperationType.DATA_PROCESSING,
-        ])
+        realm = DomainFactory.createRealm(realmParams)
 
         println "Base directory: ${getBaseDirectory()}"
 
@@ -238,11 +236,11 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
 
     public void createFilesWithContent(Map<File, String> files) {
         createDirectories(files.keySet()*.parentFile.unique())
-        String cmd = files.collect {File key, String value ->
+        String cmd = files.collect { File key, String value ->
             "echo '${value}' > ${key}"
         }.join('\n')
         executionService.executeCommand(realm, cmd)
-        files.each  {File key, String value ->
+        files.each { File key, String value ->
             WaitingFileUtils.waitUntilExists(key)
             assert key.text == value + '\n'
         }
@@ -385,7 +383,7 @@ echo \$TEMP_DIR
         final FIRST_MATCH = 0
         final FIRST_GROUP = 1
         def classNameMatcher = (this.class.name =~ /\.?(\w+)Tests$/)
-        if(!classNameMatcher) {
+        if (!classNameMatcher) {
             throw new Exception("Class name must end with Tests")
         }
         return classNameMatcher[FIRST_MATCH][FIRST_GROUP]
@@ -425,16 +423,15 @@ echo \$TEMP_DIR
         }
     }
 
-
     /**
      *  find the start job and execute it, then wait for
      *  either the workflow to finish or the timeout
      */
     protected void execute(int numberOfProcesses = 1, ensureNoFailure = true) {
         schedulerService.startup()
-        if(!startJobRunning) {
+        if (!startJobRunning) {
             AbstractStartJobImpl startJob = Holders.applicationContext.getBean(JobExecutionPlan.list()?.first()?.startJob?.bean, AbstractStartJobImpl)
-            assert startJob : 'No start job found.'
+            assert startJob: 'No start job found.'
 
             scheduler.scheduleWithFixedDelay({
                 try {
@@ -449,7 +446,7 @@ echo \$TEMP_DIR
         }
 
         waitUntilWorkflowFinishes(timeout, numberOfProcesses)
-        if(ensureNoFailure) {
+        if (ensureNoFailure) {
             ensureThatWorkflowHasNotFailed()
         }
     }
@@ -474,12 +471,12 @@ echo \$TEMP_DIR
      */
     protected persist(instance) {
         def saved = instance.save(flush: true)
-        assert saved : "Failed to persist object \"${instance}\" to database!"
+        assert saved: "Failed to persist object \"${instance}\" to database!"
         return saved
     }
 
     String calculateMd5Sum(File file) {
-        assert file : 'file is null'
+        assert file: 'file is null'
         WaitingFileUtils.waitUntilExists(file)
         String md5sum
         LogThreadLocal.withThreadLog(System.out) {

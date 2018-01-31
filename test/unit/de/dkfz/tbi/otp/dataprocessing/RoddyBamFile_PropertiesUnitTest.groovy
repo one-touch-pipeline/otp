@@ -15,6 +15,7 @@ import org.junit.*
         Pipeline,
         Project,
         ProjectCategory,
+        Realm,
         ReferenceGenome,
         RoddyBamFile,
         RoddyWorkflowConfig,

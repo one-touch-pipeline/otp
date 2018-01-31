@@ -133,8 +133,6 @@ echo OK
 
         configService = new TestConfigService(['otp.root.path': temporaryFolder.newFolder("root").path])
 
-        DomainFactory.createRealmDataManagement(['name' : importProcess.externallyProcessedMergedBamFiles.first().project.realmName])
-
         DomainFactory.createProcessParameter([
                 process   : step.process,
                 value     : importProcess.id.toString(),

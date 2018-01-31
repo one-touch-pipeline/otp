@@ -34,7 +34,7 @@ class AbstractSnvCallingJobTests {
     AbstractSnvCallingJob abstractSnvCallingJob
     File testDirectory
     SnvCallingInstanceTestData testData
-    Realm realm_processing
+    Realm realm
     Project project
     SeqType seqType
     Individual individual
@@ -99,7 +99,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         testData = new SnvCallingInstanceTestData()
         testData.createSnvObjects()
 
-        realm_processing = testData.realmProcessing
+        realm = testData.realm
 
         samplePair = testData.samplePair
         project = samplePair.project
@@ -161,7 +161,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
     void tearDown() {
         abstractSnvCallingJob = null
         testData = null
-        realm_processing = null
+        realm = null
         project = null
         seqType = null
         individual = null
@@ -194,10 +194,6 @@ CHROMOSOME_INDICES=( {1..21} X Y)
 
         File configFileInProjectDirectory = snvCallingInstance.configFilePath.absoluteDataManagementPath
 
-        abstractSnvCallingJob.configService.metaClass.getRealmDataProcessing = { Project project ->
-            return realm_processing
-        }
-
         abstractSnvCallingJob.executionService.metaClass.executeCommandReturnProcessOutput = { Realm realm, String command ->
             String expectedCommand = "mkdir -p ${configFileInProjectDirectory.parent}; " +
                     "chmod 2750 ${configFileInProjectDirectory.parent}; " +
@@ -223,10 +219,6 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         testData.createConfigFileWithContentInFileSystem(
                 snvCallingInstance.configFilePath.absoluteStagingPath,
                 DIFFERENT_CONFIGURATION)
-
-        abstractSnvCallingJob.configService.metaClass.getRealmDataProcessing = { Project project ->
-            return realm_processing
-        }
 
         shouldFail(AssertionError, {abstractSnvCallingJob.writeConfigFile(snvCallingInstance)})
     }

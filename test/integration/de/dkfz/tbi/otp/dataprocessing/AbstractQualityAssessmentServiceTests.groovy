@@ -104,7 +104,6 @@ class AbstractQualityAssessmentServiceTests {
                         pipeline: DomainFactory.createPanCanPipeline(),
                 )
         )
-        DomainFactory.createRealmDataManagement([name: roddyBamFile.project.realmName])
         createReferenceGenomeEntries(roddyBamFile.referenceGenome)
         DomainFactory.createQaFileOnFileSystem(roddyBamFile.workMergedQAJsonFile, SOME_VALUE_1)
         DomainFactory.createQaFileOnFileSystem(roddyBamFile.workMergedQATargetExtractJsonFile, SOME_VALUE_2)

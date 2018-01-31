@@ -26,7 +26,7 @@ class CreateProjectController {
                         phabricatorAlias: cmd.phabricatorAlias,
                         dirName: cmd.directory,
                         dirAnalysis: cmd.analysisDirectory,
-                        realmName: Realm.LATEST_DKFZ_REALM,
+                        realm: ConfigService.getDefaultRealm(),
                         alignmentDeciderBeanName: 'noAlignmentDecider',
                         categoryNames: cmd.projectCategories,
                         unixGroup: cmd.unixGroup,

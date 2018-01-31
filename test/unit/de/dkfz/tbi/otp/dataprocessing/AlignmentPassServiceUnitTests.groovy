@@ -74,7 +74,6 @@ class AlignmentPassServiceUnitTests extends TestData {
         Project project2 = DomainFactory.createProject()
         project2.name = "test"
         project2.dirName = HelperUtils.uniqueString
-        project2.realmName = "test"
         project2.save(flush: true)
         referenceGenomeProjectSeqType.project = project2
         referenceGenomeProjectSeqType.save(flush: true)

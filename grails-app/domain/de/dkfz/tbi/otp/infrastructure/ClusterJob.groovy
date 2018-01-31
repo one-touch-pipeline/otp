@@ -4,7 +4,6 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.gorm.mapper.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.Realm.Cluster
 import de.dkfz.tbi.otp.utils.*
 import org.joda.time.*
 import org.joda.time.format.*
@@ -218,10 +217,6 @@ class ClusterJob implements Entity {
             basesPerBytesFastq = ProcessingOptionService.findOptionObject(ProcessingOption.OptionName.STATISTICS_BASES_PER_BYTES_FASTQ, null, null).value as float
             nBases = fileSize * basesPerBytesFastq
         }
-    }
-
-    public Cluster getCluster() {
-        return getRealm().cluster
     }
 
     /**

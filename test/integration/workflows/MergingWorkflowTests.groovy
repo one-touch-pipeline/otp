@@ -50,7 +50,7 @@ class MergingWorkflowTests extends WorkflowTestCase {
         Project project = DomainFactory.createProject(
                 name: "otp_test_project",
                 dirName: "otp_test_project",
-                realmName: realm.name,
+                realm: realm,
                 alignmentDeciderBeanName: DefaultOtpAlignmentDecider.getClass().name
         )
 

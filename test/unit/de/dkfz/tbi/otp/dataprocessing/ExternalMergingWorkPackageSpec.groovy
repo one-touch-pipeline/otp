@@ -6,6 +6,7 @@ import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Individual
 import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.ngsdata.ProjectCategory
+import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.ngsdata.Sample
 import de.dkfz.tbi.otp.ngsdata.SampleType
@@ -19,6 +20,7 @@ import spock.lang.Specification
         Pipeline,
         Project,
         ProjectCategory,
+        Realm,
         ReferenceGenome,
         Sample,
         SampleType,

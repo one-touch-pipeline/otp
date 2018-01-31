@@ -25,7 +25,7 @@ class AnalysisDeletionServiceIntegrationSpec extends Specification {
         assert snvCallingInstance.save()
         indelCallingInstance = DomainFactory.createIndelInstanceWithSameSamplePair(snvCallingInstance)
         aceseqInstance = DomainFactory.createAceseqInstanceWithSameSamplePair(snvCallingInstance)
-        Realm realm = DomainFactory.createRealmDataManagement()
+        Realm realm = DomainFactory.createRealm()
         assert realm.save()
         createAllJobResults(snvCallingInstance)
         (bamFileTumor2, samplePair2) = testData.createDisease(testData.bamFileControl.mergingWorkPackage)

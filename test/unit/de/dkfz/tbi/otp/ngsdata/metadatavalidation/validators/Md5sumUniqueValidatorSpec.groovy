@@ -20,6 +20,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
         Pipeline,
         Project,
         ProjectCategory,
+        Realm,
         ReferenceGenome,
         Run,
         RunSegment,

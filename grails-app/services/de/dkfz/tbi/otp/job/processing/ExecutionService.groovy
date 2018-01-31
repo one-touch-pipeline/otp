@@ -19,7 +19,7 @@ import java.util.concurrent.*
 class ExecutionService {
 
     @SuppressWarnings("GrailsStatelessService")
-    def configService
+    ConfigService configService
 
     private JSch jsch
 
@@ -32,11 +32,10 @@ class ExecutionService {
      *
      * @param realm The realm which identifies the host
      * @param command The command to be executed
-     * @param userName The user name used to log in (optional; if not set, unixUser of realm is used)
      * @return standard output of the command executed
      */
-    public String executeCommand(Realm realm, String command, String userName = null) {
-        return executeCommandReturnProcessOutput(realm, command, userName).stdout
+    public String executeCommand(Realm realm, String command) {
+        return executeCommandReturnProcessOutput(realm, command).stdout
     }
 
 
@@ -45,17 +44,16 @@ class ExecutionService {
      *
      * @param realm The realm which identifies the host
      * @param command The command to be executed
-     * @param userName The user name used to log in (optional; if not set, unixUser of realm is used)
      * @return process output of the command executed
      */
-
-    public ProcessOutput executeCommandReturnProcessOutput(Realm realm, String command, String userName = null) {
+    public ProcessOutput executeCommandReturnProcessOutput(Realm realm, String command) {
         assert realm : "No realm specified."
         assert command : "No command specified to be run remotely."
+        String sshUser = configService.getSshUser()
         String password = configService.getPbsPassword()
         File keyFile = configService.getSshKeyFile()
         boolean useSshAgent = configService.useSshAgent()
-        return querySsh(realm.host, realm.port, realm.timeout, userName ?: realm.unixUser, password, keyFile, useSshAgent, command)
+        return querySsh(realm.host, realm.port, realm.timeout, sshUser, password, keyFile, useSshAgent, command)
     }
 
     /**

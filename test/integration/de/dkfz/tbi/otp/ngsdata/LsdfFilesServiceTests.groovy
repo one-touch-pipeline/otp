@@ -18,7 +18,6 @@ class LsdfFilesServiceTests {
     String fastqR1Filename = "example_fileR1.fastq.gz"
     String runName = "130312_D00133_0018_ADTWTJACXX"
     String runDate = "2013-03-12"
-    String realmName = "DKFZ"
     String seqCenterName = "TheSequencingCenter"
     String sampleID = "SampleIdentifier"
     String sampleTypeName = "someSampleType"
@@ -67,7 +66,6 @@ class LsdfFilesServiceTests {
         project = DomainFactory.createProject()
         project.name = projectName
         project.dirName = projectName
-        project.realmName = realmName
         assertNotNull(project.save(flush: true))
 
         Individual individual = new Individual()
@@ -227,7 +225,6 @@ class LsdfFilesServiceTests {
 
     @Test
     void testGetFileViewByPidDirectory() {
-        DomainFactory.createRealmDataManagement([name: project.realmName])
         SeqType seqType = DomainFactory.createSeqType()
         SeqTrack seqTrack = createSeqTrack(seqType: seqType)
         createDataFile(seqTrack, fastqR1Filename)

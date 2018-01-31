@@ -11,17 +11,15 @@ class BEExecutionServiceAdapter implements BEExecutionService {
 
     private final ExecutionService executionService
     private final Realm realm
-    private final String user
 
-    BEExecutionServiceAdapter(ExecutionService executionService, Realm realm, String user) {
+    BEExecutionServiceAdapter(ExecutionService executionService, Realm realm) {
         this.executionService = executionService
         this.realm = realm
-        this.user = user
     }
 
     @Override
     ExecutionResult execute(String command) {
-        ProcessHelperService.ProcessOutput p = executionService.executeCommandReturnProcessOutput(realm, command, user)
+        ProcessHelperService.ProcessOutput p = executionService.executeCommandReturnProcessOutput(realm, command)
         new ExecutionResult((p.exitCode == 0), p.exitCode, p.stdout.split("\n") as List, null)
     }
 

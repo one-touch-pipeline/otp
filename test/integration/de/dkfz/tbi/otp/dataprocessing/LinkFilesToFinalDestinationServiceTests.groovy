@@ -37,7 +37,7 @@ class LinkFilesToFinalDestinationServiceTests {
         roddyBamFile.roddyExecutionDirectoryNames = ["exec_123456_123456789_test_test"]
         assert roddyBamFile.save(flush: true, failOnError: true)
 
-        realm = DomainFactory.createRealmDataManagement([name: roddyBamFile.project.realmName])
+        realm = roddyBamFile.project.realm
         configService = new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path])
 
         SeqTrack seqTrack = roddyBamFile.seqTracks.iterator()[0]

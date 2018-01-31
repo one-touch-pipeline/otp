@@ -72,7 +72,7 @@ class QualityAssessmentMergedPassService {
 
     public Realm realmForDataProcessing(QualityAssessmentMergedPass qualityAssessmentMergedPass) {
         notNull(qualityAssessmentMergedPass, "The input qualityAssessmentMergedPass of the method realmForDataProcessing is null")
-        return configService.getRealmDataProcessing(project(qualityAssessmentMergedPass))
+        return project(qualityAssessmentMergedPass).realm
     }
 
     public Project project(QualityAssessmentMergedPass qualityAssessmentMergedPass) {

@@ -19,6 +19,7 @@ import static org.junit.Assert.*
         ProcessingOption,
         Project,
         ProjectCategory,
+        Realm,
         ReferenceGenome,
         ReferenceGenomeEntry,
         StatSizeFileName

@@ -25,6 +25,7 @@ class ClusterJobServiceSpec extends Specification {
     public static final Long GiB_TO_KiB = 1024 * 1024
 
     ClusterJobService clusterJobService
+    ConfigService configService
 
     SeqType seqType
 
@@ -1253,13 +1254,13 @@ class ClusterJobServiceSpec extends Specification {
                 xten: false,
         ] + myProps
 
-        Realm realm = DomainFactory.createRealmDataProcessing()
+        Realm realm = DomainFactory.createRealm()
         assert realm.save([flush: true, failOnError: true])
 
         ProcessingStep processingStep = DomainFactory.createAndSaveProcessingStep(props.jobClass)
         assert processingStep
 
-        ClusterJob job = DomainFactory.createClusterJob(realm: realm, userName: realm.unixUser, processingStep: processingStep, seqType: props.seqType)
+        ClusterJob job = DomainFactory.createClusterJob(realm: realm, userName: "unixUser", processingStep: processingStep, seqType: props.seqType)
 
         job.clusterJobName = "test_" + processingStep.getNonQualifiedJobClass()
 

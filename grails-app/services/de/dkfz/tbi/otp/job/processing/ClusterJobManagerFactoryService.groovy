@@ -11,31 +11,32 @@ import java.time.*
 @CompileStatic
 class ClusterJobManagerFactoryService {
     ExecutionService executionService
+    ConfigService configService
 
-    private Map<RealmAndUser, BatchEuphoriaJobManager> managerPerRealm = [:]
+    private Map<Realm, BatchEuphoriaJobManager> managerPerRealm = [:]
 
     BatchEuphoriaJobManager getJobManager(Realm realm) {
-        BatchEuphoriaJobManager manager = managerPerRealm[new RealmAndUser(realm, realm.unixUser)]
+        BatchEuphoriaJobManager manager = managerPerRealm[realm]
 
         if (manager == null) {
             JobManagerOptions jobManagerParameters = JobManagerOptions.create()
                     .setStrictMode(true)
                     .setCreateDaemon(false)
                     .setUpdateInterval(Duration.ZERO)
-                    .setUserIdForJobQueries(realm.unixUser)
+                    .setUserIdForJobQueries(configService.getSshUser())
                     .setTrackUserJobsOnly(true)
                     .setTrackOnlyStartedJobs(false)
                     .setUserMask("027")
                     .build()
 
             if (realm.jobScheduler == Realm.JobScheduler.PBS) {
-                manager = new PBSJobManager(new BEExecutionServiceAdapter(executionService, realm, realm.unixUser), jobManagerParameters)
+                manager = new PBSJobManager(new BEExecutionServiceAdapter(executionService, realm), jobManagerParameters)
             } else if (realm.jobScheduler == Realm.JobScheduler.LSF) {
-                manager = new LSFJobManager(new BEExecutionServiceAdapter(executionService, realm, realm.unixUser), jobManagerParameters)
+                manager = new LSFJobManager(new BEExecutionServiceAdapter(executionService, realm), jobManagerParameters)
             }  else {
                 throw new Exception("Unsupported cluster job scheduler")
             }
-            managerPerRealm[new RealmAndUser(realm, realm.unixUser)] = manager
+            managerPerRealm[realm] = manager
         }
         return manager
     }

@@ -30,6 +30,7 @@ import org.junit.Test
         FileType,
         DataFile,
         Run,
+        Realm,
 ])
 class ProcessedMergedBamFile_PropertiesUnitTest {
 

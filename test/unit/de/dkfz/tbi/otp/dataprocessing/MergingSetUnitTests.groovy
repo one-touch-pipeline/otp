@@ -18,7 +18,7 @@ class MergingSetUnitTests {
         Project project = DomainFactory.createProject(
             name: "project",
             dirName: "dirName",
-            realmName: "DKFZ")
+        )
         project.save(flush: true)
 
         Individual individual = new Individual(

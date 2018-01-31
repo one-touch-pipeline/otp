@@ -17,6 +17,7 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
         ProcessingOption,
         Project,
         ProjectCategory,
+        Realm,
         Sample,
         SampleIdentifier,
         SampleType,

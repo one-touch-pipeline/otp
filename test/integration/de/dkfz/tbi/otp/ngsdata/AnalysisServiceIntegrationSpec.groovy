@@ -54,10 +54,7 @@ class AnalysisServiceIntegrationSpec extends IntegrationSpec implements UserAndR
         given:
         BamFilePairAnalysis analysisInstance = DomainFactory."create${analysis}InstanceWithRoddyBamFiles"(
         )
-        DomainFactory.createRealm(
-                name: analysisInstance.samplePair.project.realmName,
-                operationType: Realm.OperationType.DATA_MANAGEMENT,
-        )
+        DomainFactory.createRealm()
 
         when:
         File file

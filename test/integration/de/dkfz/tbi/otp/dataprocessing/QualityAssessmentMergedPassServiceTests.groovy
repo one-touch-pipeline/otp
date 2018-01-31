@@ -18,11 +18,11 @@ class QualityAssessmentMergedPassServiceTests {
 
     @Before
     void setUp() {
-        realm = DomainFactory.createRealmDataProcessing().save([flush: true])
+        realm = DomainFactory.createRealm().save([flush: true])
 
         processedMergedBamFile = DomainFactory.createProcessedMergedBamFile()
 
-        processedMergedBamFile.project.realmName = realm.name
+        processedMergedBamFile.project.realm = realm
         assert processedMergedBamFile.project.save(flush: true)
 
         qualityAssessmentMergedPass = new QualityAssessmentMergedPass(
@@ -175,7 +175,7 @@ class QualityAssessmentMergedPassServiceTests {
         assert processedMergedBamFile.save(flush: true)
 
         ProcessedMergedBamFile fastTrackBamFile =  processedMergedBamFile = DomainFactory.createProcessedMergedBamFile()
-        fastTrackBamFile.project.realmName = realm.name
+        fastTrackBamFile.project.realm = realm
         fastTrackBamFile.qualityAssessmentStatus = QaProcessingStatus.NOT_STARTED
         assert fastTrackBamFile.save(flush: true)
 

@@ -36,7 +36,7 @@ class TransferMergedBamFileJob extends AbstractEndStateAwareJobImpl {
         log.debug "Attempting to copy merged BAM file " + locations.get("bamFile") + " (id= " + file + " ) to " + locations.get("destinationDirectory")
         Project project = processedMergedBamFileService.project(file)
         String cmd = scriptText(locations, temporalDestinationDir)
-        Realm realm = configService.getRealmDataProcessing(project)
+        Realm realm = project.realm
         String jobId = clusterJobSchedulerService.executeJob(realm, cmd)
         log.debug "Job ${jobId} submitted to cluster job scheduler"
 

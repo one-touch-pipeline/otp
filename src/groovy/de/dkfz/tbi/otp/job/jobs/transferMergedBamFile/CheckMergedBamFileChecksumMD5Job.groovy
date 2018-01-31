@@ -18,9 +18,6 @@ class CheckMergedBamFileChecksumMD5Job extends AbstractEndStateAwareJobImpl {
     ProcessedMergedBamFileService processedMergedBamFileService
 
     @Autowired
-    ConfigService configService
-
-    @Autowired
     ClusterJobSchedulerService clusterJobSchedulerService
 
     @Autowired
@@ -36,7 +33,7 @@ class CheckMergedBamFileChecksumMD5Job extends AbstractEndStateAwareJobImpl {
         log.debug "Attempting to check copied merged BAM file " + locations.get("bamFile") + " (id= " + file + ")"
         Project project = processedMergedBamFileService.project(file)
         String cmd = scriptText(locations, temporalDestinationDir)
-        Realm realm = configService.getRealmDataManagement(project)
+        Realm realm = project.realm
         String jobId = clusterJobSchedulerService.executeJob(realm, cmd)
         log.debug "Job ${jobId} submitted to cluster job scheduler"
 

@@ -35,7 +35,7 @@ class PicardMarkDuplicatesMetricsServiceTests {
         baseFile = "sample-type_patient_seq-type_library_merged.mdup_metrics.txt"
         basePath = "${directory}/${baseFile}"
 
-        realm = DomainFactory.createRealmDataProcessingDKFZ().save([flush: true])
+        realm = DomainFactory.createRealm().save([flush: true])
 
         configService = new TestConfigService([
                         'otp.root.path': testDirectory.absolutePath + '/root',
@@ -167,7 +167,6 @@ LIBRARY\tUNPAIRED_READS_EXAMINED\tREAD_PAIRS_EXAMINED\tUNMAPPED_READS\tUNPAIRED_
         Project project = DomainFactory.createProject(
                         name: "project",
                         dirName: "project-dir",
-                        realmName: realm.name
                         )
         assertNotNull(project.save([flush: true, failOnError: true]))
 

@@ -6,45 +6,16 @@ import de.dkfz.tbi.otp.utils.*
 
 class Realm implements Entity, Serializable {
 
-    static final String LATEST_DKFZ_REALM = 'DKFZ_13.1'
-
-    public enum Cluster {
-        DKFZ,
-        BIOQUANT
-    }
-
     public enum JobScheduler {
         LSF,
         PBS,
     }
 
-
-    String name                        // name of the realm
-    String env                         // environment from grails
-
-    enum OperationType {DATA_MANAGEMENT, DATA_PROCESSING}
-    OperationType operationType
-
-    /**
-     * Reference to the cluster. It is used to identify the cluster in other code.
-     * The following properties of the realm are depend on the used cluster:
-     * <ul>
-     * <li>{@link #host}</li>
-     * <li>{@link #port}</li>
-     * <li>{@link #unixUser}</li>
-     * <li>{@link #timeout}</li>
-     * <li>{@link #defaultJobSubmissionOptions}</li>
-     * </ul>
-     * Therefore these properties should have the same value for the same cluster name.
-     */
-    Cluster cluster
-
-    String webHost                     // web address
+    String name
 
     JobScheduler jobScheduler
     String host                         // job submission host name
     int port                            // job submission host port
-    String unixUser
     int timeout
     String defaultJobSubmissionOptions  // default options for job submission
 
@@ -56,6 +27,6 @@ class Realm implements Entity, Serializable {
 
     @Override
     String toString() {
-        return "Realm ${id} ${name} ${operationType} ${env}"
+        return "Realm ${id} ${name}"
     }
 }

@@ -27,7 +27,7 @@ class FastqcWorkflowTests extends WorkflowTestCase {
         expectedFastqc = new File(testDataDir, "expected_result_fastqc-0.11.5-lsf.zip")
 
         Project project = Project.build(
-                realmName: realm.name
+                realm: realm
         )
 
         Individual individual = Individual.build(

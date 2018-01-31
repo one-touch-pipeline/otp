@@ -35,7 +35,7 @@ class CopyFilesJob extends AbstractOtpJob implements AutoRestartableJob {
         SeqTrack seqTrack = SeqTrack.get(Long.parseLong(getProcessParameterValue()))
         assert seqTrack : "No seqTrack found for id ${Long.parseLong(getProcessParameterValue())}."
 
-        Realm realm = configService.getRealmDataManagement(seqTrack.project)
+        Realm realm = seqTrack.project.realm
 
         checkInitialSequenceFiles(seqTrack)
 

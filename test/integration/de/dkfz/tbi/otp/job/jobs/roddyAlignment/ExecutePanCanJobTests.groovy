@@ -18,8 +18,6 @@ class ExecutePanCanJobTests {
     LsdfFilesService lsdfFilesService
 
     RoddyBamFile roddyBamFile
-    Realm dataProcessingRealm
-    Realm dataManagementRealm
 
     TestConfigService configService
 
@@ -42,9 +40,6 @@ class ExecutePanCanJobTests {
         ])
 
         executePanCanJob.lsdfFilesService.configService = configService
-
-        dataProcessingRealm = DomainFactory.createRealmDataProcessing([name: roddyBamFile.project.realmName])
-        dataManagementRealm = DomainFactory.createRealmDataManagement([name: roddyBamFile.project.realmName])
 
         DomainFactory.createProcessingOptionBasePathReferenceGenome(new File(tmpDir.root, "reference_genomes").path)
 
@@ -284,7 +279,6 @@ class ExecutePanCanJobTests {
     @Test
     void testWorkflowSpecificValidation_RnaBamFile_AllFine() {
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile([:], RnaRoddyBamFile)
-        roddyBamFile.project.realmName = dataManagementRealm.name
         assert roddyBamFile.project.save(flush: true)
 
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
@@ -294,7 +288,6 @@ class ExecutePanCanJobTests {
     @Test
     void testWorkflowSpecificValidation_RnaBamFile_ChimericFileDoesNotExist() {
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile([:], RnaRoddyBamFile)
-        roddyBamFile.project.realmName = dataManagementRealm.name
         assert roddyBamFile.project.save(flush: true)
 
         assert TestCase.shouldFail(AssertionError) {

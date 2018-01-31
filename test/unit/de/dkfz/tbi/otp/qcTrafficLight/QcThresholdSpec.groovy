@@ -37,7 +37,7 @@ import spock.lang.*
         SophiaQc,
         QcThreshold,
         SeqType,
-
+        Realm,
 ])
 class QcThresholdSpec extends Specification {
 

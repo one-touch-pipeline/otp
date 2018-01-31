@@ -84,7 +84,7 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
     void testChipSeqInstallation() {
         ChipSeqSeqTrack seqTrack = DomainFactory.createChipSeqSeqTrack()
         createDataFiles(seqTrack)
-        seqTrack.project.realmName = realm.name
+        seqTrack.project.realm = realm
         assert seqTrack.project.save(flush: true)
         execute()
 
@@ -132,7 +132,7 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
         SeqType seqType = DomainFactory.createWholeGenomeSeqType()
         SeqTrack seqTrack = DomainFactory.createSeqTrack([seqType: seqType])
         createDataFiles(seqTrack)
-        seqTrack.project.realmName = realm.name
+        seqTrack.project.realm = realm
         assert seqTrack.project.save(flush: true)
         return seqTrack
     }

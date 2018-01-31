@@ -24,6 +24,7 @@ import static de.dkfz.tbi.TestCase.*
         SampleIdentifier,
         SampleType,
         SeqType,
+        Realm,
         ReferenceGenome,
         ReferenceGenomeProjectSeqType,
 ])

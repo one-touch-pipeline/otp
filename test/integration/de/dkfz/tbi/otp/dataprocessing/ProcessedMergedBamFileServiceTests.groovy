@@ -34,7 +34,7 @@ class ProcessedMergedBamFileServiceTests {
     String directory
     String baseFile
     String basePath
-    String realmName
+    Realm realm
 
     @Before
     void setUp() {
@@ -43,10 +43,8 @@ class ProcessedMergedBamFileServiceTests {
         directory = testDirectory.absolutePath + "/processing/project-dir/results_per_pid/patient/merging//sample-type/seq-type/library/DEFAULT/0/pass0"
         baseFile = "sample-type_patient_seq-type_library_merged.mdup"
         basePath = directory + "/" + baseFile
-        realmName = "Realm_${HelperUtils.uniqueString}"
 
-        DomainFactory.createRealmDataProcessing(name: realmName)
-        DomainFactory.createRealmDataManagement(name: realmName)
+        realm =DomainFactory.createRealm()
 
         configService = new TestConfigService([
                         'otp.root.path': testDirectory.absolutePath + '/root',
@@ -564,7 +562,7 @@ class ProcessedMergedBamFileServiceTests {
 
     private ProcessedMergedBamFile createProcessedMergedBamFile() {
         ProcessedMergedBamFile mergedBamFile = DomainFactory.createProcessedMergedBamFile()
-        mergedBamFile.project.realmName = realmName
+        mergedBamFile.project.realm = realm
         mergedBamFile.project.dirName = 'project-dir'
         mergedBamFile.individual.pid = 'patient'
         mergedBamFile.sampleType.name = 'sample-type'

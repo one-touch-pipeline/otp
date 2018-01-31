@@ -64,8 +64,6 @@ class ExecuteRoddyAceseqJobSpec extends Specification {
         aceseqInstance.samplePair.mergingWorkPackage2.bamFileInProjectFolder = aceseqInstance.sampleType2BamFile
         assert aceseqInstance.samplePair.mergingWorkPackage2.save(flush: true)
 
-        DomainFactory.createRealmDataManagement([name: aceseqInstance.project.realmName])
-        DomainFactory.createRealmDataProcessing([name: aceseqInstance.project.realmName])
         configService = new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path])
     }
 

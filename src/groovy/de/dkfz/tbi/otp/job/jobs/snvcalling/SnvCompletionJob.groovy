@@ -26,8 +26,6 @@ class SnvCompletionJob extends AbstractEndStateAwareJobImpl implements AutoResta
     @Autowired
     ExecutionService executionService
     @Autowired
-    ConfigService configService
-    @Autowired
     CreateClusterScriptService scriptService
     @Autowired
     LsdfFilesService filesService
@@ -49,7 +47,7 @@ class SnvCompletionJob extends AbstractEndStateAwareJobImpl implements AutoResta
         File stagingPath = instance.instancePath.absoluteStagingPath
         File parentPath = stagingPath.parentFile
 
-        Realm realm = configService.getRealmDataProcessing(instance.project)
+        Realm realm = instance.project.realm
         filesService.deleteDirectoryRecursive(realm, parentPath)
     }
 }

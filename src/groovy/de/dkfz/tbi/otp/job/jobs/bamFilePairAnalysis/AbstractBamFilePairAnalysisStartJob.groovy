@@ -13,9 +13,6 @@ import org.springframework.scheduling.annotation.*
 abstract class AbstractBamFilePairAnalysisStartJob extends AbstractStartJobImpl implements RestartableStartJob {
 
     @Autowired
-    ConfigService configService
-
-    @Autowired
     ExecutionService executionService
 
     @Scheduled(fixedDelay = 60000l)
@@ -83,7 +80,7 @@ abstract class AbstractBamFilePairAnalysisStartJob extends AbstractStartJobImpl 
 
 
     private void tryToDeleteResultFilesOfFailedInstance(BamFilePairAnalysis analysis) {
-        final Realm realm = configService.getRealmDataManagement(analysis.project)
+        final Realm realm = analysis.project.realm
 
         String deleteFiles = "rm -rf ${analysis.getWorkDirectory()} ${analysis.instancePath.absoluteStagingPath}"
 

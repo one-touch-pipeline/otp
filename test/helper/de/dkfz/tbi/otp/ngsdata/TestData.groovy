@@ -76,7 +76,7 @@ class TestData {
             file << "test"
         }
 
-        realm = DomainFactory.createRealmDataProcessing([
+        realm = DomainFactory.createRealm([
             name: 'DKFZ',
         ])
         assertNotNull(realm.save(flush: true))
@@ -84,7 +84,7 @@ class TestData {
         project = createProject([
             name : "otp_test_project",
             dirName : "otp_test_project",
-            realmName : realm.name,
+            realm : realm,
         ])
         assertNotNull(project.save(flush: true))
 
@@ -142,7 +142,6 @@ class TestData {
         return new Project([
             name: "project",
             dirName: "dirName",
-            realmName: "DKFZ",
             alignmentDeciderBeanName: 'dummyNonExistentAlignmentDecider',
         ] + properties)
     }

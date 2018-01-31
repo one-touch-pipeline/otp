@@ -10,7 +10,7 @@ import spock.lang.*
 import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
-@Mock([Individual, Project])
+@Mock([Individual, Realm, Project])
 class IndividualValidatorSpec extends Specification {
 
     void 'validate, when column INDIVIDUAL missing, then add expected problem'() {

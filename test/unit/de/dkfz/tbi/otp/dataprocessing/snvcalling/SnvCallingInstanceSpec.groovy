@@ -19,6 +19,7 @@ import spock.lang.*
         Pipeline,
         Project,
         ProcessedBamFile,
+        Realm,
         ReferenceGenome,
         RoddyBamFile,
         Sample,

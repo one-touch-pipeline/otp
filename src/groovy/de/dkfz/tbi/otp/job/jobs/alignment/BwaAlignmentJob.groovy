@@ -29,9 +29,6 @@ class BwaAlignmentJob extends AbstractJobImpl {
     LsdfFilesService lsdfFilesService
 
     @Autowired
-    ConfigService configService
-
-    @Autowired
     ProcessedSaiFileService processedSaiFileService
 
     @Autowired
@@ -50,7 +47,7 @@ class BwaAlignmentJob extends AbstractJobImpl {
         List<DataFile> files = seqTrackService.getSequenceFilesForSeqTrack(seqTrack)
         for (DataFile file in files) {
             assert file.fileExists && file.fileSize > 0L
-            realm = configService.getRealmDataProcessing(file.project)
+            realm = file.project.realm
             ProcessedSaiFile saiFile = processedSaiFileService.createSaiFile(alignmentPass, file)
             jobIds << sendAlignmentScript(realm, saiFile)
         }

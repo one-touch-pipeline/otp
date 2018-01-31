@@ -43,7 +43,7 @@ class AbstractRoddyJobUnitTests {
                 roddyExecutionDirectoryNames: [],
         )
         abstractRoddyJob = [processingStepId: 123456789, getProcessParameterObject: { roddyBamFile }] as AbstractRoddyJob
-        clusterJobIdentifier = new ClusterJobIdentifier(DomainFactory.createRealmDataProcessing(), "clusterJobId", "userName")
+        clusterJobIdentifier = new ClusterJobIdentifier(DomainFactory.createRealm(), "clusterJobId", "userName")
     }
 
     @Test
@@ -77,7 +77,7 @@ class AbstractRoddyJobUnitTests {
 
     @Test
     void testFailedOrNotFinishedClusterJobs_WhenSeveralJobStates_ShouldReturnCorrectMap() {
-        Realm realm = DomainFactory.createRealmDataProcessing()
+        Realm realm = DomainFactory.createRealm()
         ClusterJobIdentifier identifierA = new ClusterJobIdentifier(realm, "pbsId1", "userName")
         ClusterJobIdentifier identifierB = new ClusterJobIdentifier(realm, "pbsId2", "userName")
         ClusterJobIdentifier identifierC = new ClusterJobIdentifier(realm, "pbsId3", "userName")

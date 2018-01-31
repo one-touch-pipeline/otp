@@ -40,7 +40,6 @@ class ProcessedMergedBamFileQaFileServiceSpecification extends Specification {
     void "test validateQADataFiles allFine"() {
         setup:
         QualityAssessmentMergedPass pass = DomainFactory.createQualityAssessmentMergedPass()
-        DomainFactory.createRealmDataProcessing([name: pass.project.realmName])
         CreateFileHelper.createFile(new File(service.coverageDataFilePath(pass)))
         CreateFileHelper.createFile(new File(service.qualityAssessmentDataFilePath(pass)))
         CreateFileHelper.createFile(new File(service.insertSizeDataFilePath(pass)))
@@ -56,7 +55,6 @@ class ProcessedMergedBamFileQaFileServiceSpecification extends Specification {
     void "test validateQADataFiles fail"() {
         setup:
         QualityAssessmentMergedPass pass = DomainFactory.createQualityAssessmentMergedPass()
-        DomainFactory.createRealmDataProcessing([name: pass.project.realmName])
         if (coverage) {
             CreateFileHelper.createFile(new File(service.coverageDataFilePath(pass)))
         }

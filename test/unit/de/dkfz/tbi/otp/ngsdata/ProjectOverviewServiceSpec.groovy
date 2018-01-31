@@ -14,6 +14,7 @@ import spock.lang.*
         Project,
         ProjectCategory,
         ProcessingOption,
+        Realm,
         RoddyWorkflowConfig,
         SeqType,
 ])

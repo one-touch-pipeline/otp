@@ -4,6 +4,7 @@ import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.ngsdata.ProjectCategory
+import de.dkfz.tbi.otp.ngsdata.Realm
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import org.junit.Test
@@ -12,7 +13,7 @@ import org.junit.Test
 class ConfigPerProjectImpl extends ConfigPerProject { }
 
 @TestFor(ConfigPerProjectImpl)
-@Mock([Pipeline, Project, ProjectCategory,])
+@Mock([Pipeline, Project, ProjectCategory, Realm])
 class ConfigPerProjectUnitTests {
 
     String configuration = "configuration"

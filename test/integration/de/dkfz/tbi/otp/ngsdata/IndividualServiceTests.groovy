@@ -1,17 +1,13 @@
 package de.dkfz.tbi.otp.ngsdata
-
-import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.Comment
-import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.testing.*
+import grails.plugin.springsecurity.*
+import org.junit.*
+import org.springframework.security.access.*
+import org.springframework.security.acls.domain.*
 
 import static org.junit.Assert.*
-
-import grails.plugin.springsecurity.SpringSecurityUtils
-import org.junit.*
-import org.springframework.security.access.AccessDeniedException
-import org.springframework.security.acls.domain.BasePermission
-
-import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
 
 class IndividualServiceTests extends AbstractIntegrationTest {
     def individualService
@@ -1211,7 +1207,7 @@ ${indOld.comment.comment}""" == indNew.comment.comment
         return Project.findOrSaveWhere(
                 name: name,
                 dirName: name,
-                realmName: name,
+                realm: DomainFactory.createRealm(),
                 alignmentDeciderBeanName: 'dummyNonExistentAlignmentDecider',
         )
     }

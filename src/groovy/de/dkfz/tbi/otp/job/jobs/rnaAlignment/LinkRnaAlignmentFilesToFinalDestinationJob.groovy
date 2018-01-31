@@ -28,7 +28,7 @@ class LinkRnaAlignmentFilesToFinalDestinationJob extends AbstractEndStateAwareJo
     void execute() throws Exception {
         final RnaRoddyBamFile roddyBamFile = getProcessParameterObject()
 
-        Realm realm = configService.getRealmDataManagement(roddyBamFile.project)
+        Realm realm = roddyBamFile.project.realm
         assert realm : "Realm should not be null"
 
         linkFilesToFinalDestinationService.prepareRoddyBamFile(roddyBamFile)

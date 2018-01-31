@@ -48,9 +48,6 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
         String script = "TEST-MOVE_SAMPLE"
         Individual individual = DomainFactory.createIndividual(project: bamFile.project)
 
-        DomainFactory.createRealmDataManagement(name: bamFile.project.realmName)
-        DomainFactory.createRealmDataProcessing(name: bamFile.project.realmName)
-
         SeqTrack seqTrack = bamFile.seqTracks.iterator().next()
         List<String> dataFileLinks = []
         DataFile.findAllBySeqTrack(seqTrack).each {
@@ -120,7 +117,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
         RoddyBamFile bamFile = DomainFactory.createRoddyBamFile([
                 roddyExecutionDirectoryNames: [DomainFactory.DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY]
         ])
-        Project newProject = Project.build(realmName: bamFile.project.realmName)
+        Project newProject = Project.build(realm: bamFile.project.realm)
         String script = "TEST-MOVE-INDIVIDUAL"
         SeqTrack seqTrack = bamFile.seqTracks.iterator().next()
         List<String> dataFileLinks = []
@@ -664,8 +661,6 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
         SeqTrack seqTrack = DomainFactory.createSeqTrackWithTwoDataFiles()
         Project project = seqTrack.project
 
-        DomainFactory.createRealmDataProcessing(name: project.realmName)
-        DomainFactory.createRealmDataManagement(name: project.realmName)
         return seqTrack
     }
 
@@ -703,14 +698,13 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
         createFastqFiles(bamFile.getContainedSeqTracks() as List)
     }
 
-    private void dataBaseSetupForMergedBamFiles(AbstractMergedBamFile bamFile, boolean addRealms = true) {
+    private void dataBaseSetupForMergedBamFiles(AbstractMergedBamFile bamFile, boolean addRealm = true) {
         AbstractMergingWorkPackage mergingWorkPackage = bamFile.mergingWorkPackage
         mergingWorkPackage.bamFileInProjectFolder = bamFile
         assert mergingWorkPackage.save(flush: true)
         Project project = bamFile.project
-        if (addRealms) {
-            DomainFactory.createRealmDataProcessing(name: project.realmName)
-            DomainFactory.createRealmDataManagement(name: project.realmName)
+        if (addRealm) {
+            project.realm = DomainFactory.createRealm()
         }
     }
 
@@ -952,8 +946,6 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
 
     private void testDeleteIndividualMethod(BamFilePairAnalysis instance) {
         List<File> filesToDelete = []
-
-        DomainFactory.createRealmDataManagement(name: instance.project.realmName)
 
         String pid = instance.individual.pid
         instance.sampleType1BamFile.containedSeqTracks.each { SeqTrack seqTrack ->

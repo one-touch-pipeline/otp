@@ -33,6 +33,7 @@ class TestConfigService extends ConfigService {
             }
         }
         otpProperties += [
+                'otp.ssh.user'              : "user",
                 'otp.root.path'             : TestCase.getUniqueNonExistentPath().path+'/root_path',
                 'otp.processing.root.path'  : TestCase.getUniqueNonExistentPath().path+'/processing_root_path',
                 'otp.logging.root.path'     : TestCase.getUniqueNonExistentPath().path+'/logging_root_path',

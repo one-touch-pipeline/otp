@@ -23,6 +23,7 @@ import spock.lang.*
         Pipeline,
         Project,
         ProjectCategory,
+        Realm,
         ReferenceGenome,
         RoddyBamFile,
         RoddySnvCallingInstance,

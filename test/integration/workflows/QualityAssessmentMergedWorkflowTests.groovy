@@ -207,7 +207,6 @@ class QualityAssessmentMergedWorkflowTests extends WorkflowTestCase {
         Project project = DomainFactory.createProject(
                 name: "project",
                 dirName: "project-dir",
-                realmName: realm.name
         )
         assertNotNull(project.save([flush: true]))
 

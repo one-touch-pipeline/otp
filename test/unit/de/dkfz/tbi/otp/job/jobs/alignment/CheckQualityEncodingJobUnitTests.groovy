@@ -62,7 +62,6 @@ class CheckQualityEncodingJobUnitTests {
         Project project = DomainFactory.createProject(
                         name: "projectName",
                         dirName: "dirName",
-                        realmName: 'DKFZ',
                         )
         assertNotNull(project.save([flush: true]))
 
@@ -142,9 +141,6 @@ class CheckQualityEncodingJobUnitTests {
                         vbpFileName: "dataFile1.fastq"
                         )
         assertNotNull(dataFile.save(flush: true))
-
-        Realm realm = DomainFactory.createRealmDataManagement(name: project.realmName)
-        assertNotNull(realm.save(flush: true, failOnError: true))
 
         file = new File(checkQualityEncodingJob.lsdfFilesService.getFileViewByPidPath(dataFile))
         assertNotNull(file)

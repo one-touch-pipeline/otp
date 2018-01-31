@@ -70,7 +70,7 @@ abstract class AbstractSnvCallingJob extends AbstractOtpJob {
      */
     File writeConfigFile(final SnvCallingInstance instance) {
         notNull(instance, "The input for method writeConfigFile is null")
-        final Realm realm = configService.getRealmDataProcessing(instance.project)
+        final Realm realm = instance.project.realm
         final File configFileInStagingDirectory = instance.configFilePath.absoluteStagingPath
         final File configFileInProjectDirectory = instance.configFilePath.absoluteDataManagementPath
 
@@ -186,7 +186,7 @@ rm ${configFileInStagingDirectory}
     protected void confirmCheckPointFileExistsAndDeleteIt(SnvCallingInstance instance, SnvCallingStep step) {
         final File checkpointFile = step.getCheckpointFilePath(instance).absoluteDataManagementPath
         waitUntilExists(checkpointFile)
-        deleteResultFileIfExists(checkpointFile, configService.getRealmDataProcessing(instance.project))
+        deleteResultFileIfExists(checkpointFile, instance.project.realm)
         waitUntilDoesNotExist(checkpointFile)
     }
 

@@ -17,8 +17,7 @@ class SnvCallingInstanceTestData {
     @Autowired
     ProcessedMergedBamFileService processedMergedBamFileService
 
-    Realm realmManagement
-    Realm realmProcessing
+    Realm realm
     ProcessedMergedBamFile bamFileTumor
     ProcessedMergedBamFile bamFileControl
     SamplePair samplePair
@@ -27,11 +26,9 @@ class SnvCallingInstanceTestData {
 
     void createSnvObjects() {
         bamFileControl = DomainFactory.createProcessedMergedBamFile(DomainFactory.createMergingSet(), DomainFactory.randomProcessedBamFileProperties)
-        ['Management', 'Processing'].each {
-            this."realm${it}" = DomainFactory."createRealmData${it}"([
-                    name: bamFileControl.project.realmName,
-            ])
-        }
+
+        this.realm = bamFileControl.project.realm
+
         bamFileControl.seqType.name = SeqTypeNames.WHOLE_GENOME.seqTypeName
         assert bamFileControl.seqType.save(flush: true, failOnError: true)
         (bamFileTumor, samplePair) = createDisease(bamFileControl.mergingWorkPackage)
@@ -76,14 +73,14 @@ class SnvCallingInstanceTestData {
             )
         }
         final SnvJobResult result = new SnvJobResult([
-            snvCallingInstance: instance,
-            step: step,
-            inputResult: inputResult,
-            processingState: processingState,
-            withdrawn: withdrawn,
-            externalScript: externalScript,
-            md5sum: HelperUtils.randomMd5sum,
-            fileSize: 1234l,
+                snvCallingInstance: instance,
+                step              : step,
+                inputResult       : inputResult,
+                processingState   : processingState,
+                withdrawn         : withdrawn,
+                externalScript    : externalScript,
+                md5sum            : HelperUtils.randomMd5sum,
+                fileSize          : 1234l,
         ])
         if (step == SnvCallingStep.CALLING) {
             result.chromosomeJoinExternalScript = externalScript_Joining
@@ -100,12 +97,12 @@ class SnvCallingInstanceTestData {
 
     SnvCallingInstance createSnvCallingInstance(Map properties = [:]) {
         return DomainFactory.createSnvCallingInstance([
-            processingState: AnalysisProcessingStates.IN_PROGRESS,
-            sampleType1BamFile: bamFileTumor,
-            sampleType2BamFile: bamFileControl,
-            config: (properties.snvConfig ?: snvConfig) ?: createSnvConfig(),
-            instanceName: "2014-08-25_15h32",
-            samplePair: samplePair
+                processingState   : AnalysisProcessingStates.IN_PROGRESS,
+                sampleType1BamFile: bamFileTumor,
+                sampleType2BamFile: bamFileControl,
+                config            : (properties.snvConfig ?: snvConfig) ?: createSnvConfig(),
+                instanceName      : "2014-08-25_15h32",
+                samplePair        : samplePair
         ] + properties)
     }
 
@@ -158,10 +155,10 @@ class SnvCallingInstanceTestData {
     static ExternalScript createOrFindExternalScript(Map properties = [:]) {
         final ExternalScript externalScript = ExternalScript.findOrSaveWhere([
                 scriptIdentifier: "externalScriptIdentifier",
-                scriptVersion: 'v1',
-                deprecatedDate: null,
-                filePath: "/dev/null/otp-test/externalScript.sh",
-                author: "otptest",
+                scriptVersion   : 'v1',
+                deprecatedDate  : null,
+                filePath        : "/dev/null/otp-test/externalScript.sh",
+                author          : "otptest",
         ] + properties)
         assert externalScript.save(flush: true)
         return externalScript

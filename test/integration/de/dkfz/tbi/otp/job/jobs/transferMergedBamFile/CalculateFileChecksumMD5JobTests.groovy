@@ -49,10 +49,6 @@ class CalculateFileChecksumMD5JobTests {
         processedMergedBamFile = DomainFactory.createProcessedMergedBamFile(mergingWorkPackage, [fileOperationStatus: FileOperationStatus.INPROGRESS])
         qualityAssessmentMergedPass = DomainFactory.createQualityAssessmentMergedPass(abstractMergedBamFile: processedMergedBamFile)
 
-        DomainFactory.createRealmDataProcessing([name: processedMergedBamFile.project.realmName])
-        DomainFactory.createRealmDataManagement([name: processedMergedBamFile.project.realmName])
-
-
         calculateFileChecksumMD5Job.metaClass.getProcessParameterValue = { -> "${processedMergedBamFile.id}" }
 
         calculateFileChecksumMD5Job.metaClass.addOutputParameter = { String parameterName, String ids ->

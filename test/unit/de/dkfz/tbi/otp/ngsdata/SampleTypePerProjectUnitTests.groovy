@@ -8,7 +8,7 @@ import org.junit.*
  * See the API for {@link grails.test.mixin.support.GrailsUnitTestMixin} for usage instructions
  */
 @TestMixin(GrailsUnitTestMixin)
-@Mock([Project, ProjectCategory, SampleType])
+@Mock([Realm, Project, ProjectCategory, SampleType])
 @TestFor(SampleTypePerProject)
 class SampleTypePerProjectUnitTests {
 

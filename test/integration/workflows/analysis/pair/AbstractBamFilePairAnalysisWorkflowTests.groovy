@@ -86,7 +86,7 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
         seqType = bamFileTumor.seqType
         referenceGenome = bamFileTumor.referenceGenome
 
-        project.realmName = realm.name
+        project.realm = realm
         assert project.save(flush: true)
 
         individual.pid = PID

@@ -22,7 +22,6 @@ class MergingSetAssignmentTests {
         Project project = DomainFactory.createProject()
         project.name = "SOME_PROJECT"
         project.dirName = "some/relative/path"
-        project.realmName = "def"
         project.save(flush: true)
         assertTrue(project.validate())
 

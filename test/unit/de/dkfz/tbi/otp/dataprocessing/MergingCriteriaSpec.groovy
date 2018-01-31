@@ -8,6 +8,7 @@ import spock.lang.*
 @Mock([
         MergingCriteria,
         Project,
+        Realm,
         SeqType,
 ])
 class MergingCriteriaSpec extends Specification {

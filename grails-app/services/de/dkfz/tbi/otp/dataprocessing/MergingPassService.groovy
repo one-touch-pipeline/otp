@@ -49,7 +49,7 @@ class MergingPassService {
     @Transactional
     public Realm realmForDataProcessing(MergingPass mergingPass) {
         notNull(mergingPass, "The parameter mergingPass is not allowed to be null")
-        return configService.getRealmDataProcessing(project(mergingPass))
+        return project(mergingPass).realm
     }
 
     @Transactional

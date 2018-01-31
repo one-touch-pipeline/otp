@@ -78,7 +78,7 @@ class AbstractRoddyJobTests {
 
         roddyBamFile = DomainFactory.createRoddyBamFile()
 
-        realm = DomainFactory.createRealmDataManagement(name: roddyBamFile.project.realmName)
+        realm = roddyBamFile.project.realm
         configService = new TestConfigService()
 
         roddyJob = [
@@ -237,16 +237,16 @@ newLine"""
         ] as AbstractRoddyJob
         roddyJob.executeRoddyCommandService = new ExecuteRoddyCommandService()
 
-        Realm realm = DomainFactory.createRealmDataProcessingDKFZ()
+        Realm realm = DomainFactory.createRealm()
         assert realm.save([flush: true, failOnError: true])
 
         ProcessingStep processingStep = DomainFactory.createAndSaveProcessingStep()
         assert processingStep
 
-        ClusterJob clusterJob = clusterJobService.createClusterJob(realm, "0000", realm.unixUser, processingStep)
+        ClusterJob clusterJob = clusterJobService.createClusterJob(realm, "0000", configService.getSshUser(), processingStep)
         assert clusterJob
 
-        final ClusterJobIdentifier jobIdentifier = new ClusterJobIdentifier(realm, clusterJob.clusterJobId, realm.unixUser)
+        final ClusterJobIdentifier jobIdentifier = new ClusterJobIdentifier(realm, clusterJob.clusterJobId, configService.getSshUser())
 
         roddyJob.metaClass.maybeSubmit = {
             throw new RuntimeException("should not come here")

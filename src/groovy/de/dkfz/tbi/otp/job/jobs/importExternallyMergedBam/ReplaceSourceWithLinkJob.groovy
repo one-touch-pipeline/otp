@@ -25,7 +25,7 @@ class ReplaceSourceWithLinkJob extends AbstractEndStateAwareJobImpl {
         final ImportProcess importProcess = getProcessParameterObject()
         if (importProcess.replaceSourceWithLink) {
             importProcess.externallyProcessedMergedBamFiles.each {
-                Realm realm = configService.getRealmDataManagement(it.project)
+                Realm realm = it.project.realm
                 File sourceBamFile = new File(it.importedFrom)
                 File sourceBaiFile = new File("${it.importedFrom}.bai")
                 File targetBamFile = it.getFilePath().absoluteDataManagementPath

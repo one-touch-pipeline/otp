@@ -129,12 +129,12 @@ class IndividualUnitTests {
 
     @Test
     void testGetResultsPerPidPath(){
-        Realm realm = DomainFactory.createRealmDataManagementDKFZ()
+        Realm realm = DomainFactory.createRealm()
         assert realm.save()
 
         Project project = DomainFactory.createProject(
                 dirName: "projectDirName",
-                realmName: realm.name
+                realm: realm
                 )
 
         Individual individual = createIndividual()

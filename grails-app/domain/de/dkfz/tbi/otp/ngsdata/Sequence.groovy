@@ -32,6 +32,7 @@ class Sequence implements Serializable {
     long sampleTypeId
     long individualId
     long projectId
+    long realmId
 
 
     /** fields from {@link SeqTrack} */
@@ -82,6 +83,8 @@ class Sequence implements Serializable {
     /** fields from {@link Project} */
     String projectName
     String projectDirName
+
+    /** fields from {@link Realm} */
     String realmName
 
     /** fields from {@link SeqCenter} */
@@ -112,6 +115,7 @@ class Sequence implements Serializable {
         projectId column: 'project_id'
         ilseId column: 'ilse_id'
         libraryPreparationKit column: 'library_preparation_kit'
+        realmId column: 'realm_id'
         id composite: ['seqTrackId', 'seqTypeId', 'seqPlatformId', 'sampleId', 'runId', 'pipelineVersionId', 'seqCenterId', 'sampleTypeId', 'individualId', 'projectId']
         dayCreated formula: 'DATE(date_created)'
     }

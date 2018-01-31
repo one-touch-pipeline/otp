@@ -58,7 +58,6 @@ class AbstractBamFileServiceTests {
         Project project = DomainFactory.createProject(
                 name: "project",
                 dirName: "project-dir",
-                realmName: "realmName"
                 )
         assertNotNull(project.save([flush: true]))
 

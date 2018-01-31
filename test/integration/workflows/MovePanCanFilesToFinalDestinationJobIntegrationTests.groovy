@@ -50,9 +50,6 @@ class MovePanCanFilesToFinalDestinationJobIntegrationTests extends WorkflowTestC
                 assert roddyBamFile.save(failOnError: true)
                 return roddyBamFile
             }
-            movePanCanFilesToFinalDestinationJob.configService.metaClass.getRealmDataManagement = { Project project ->
-                return Realm.build()
-            }
             movePanCanFilesToFinalDestinationJob.linkFilesToFinalDestinationService.metaClass.cleanupWorkDirectory = { RoddyBamFile roddyBamFile, Realm realm ->
                 throw new RuntimeException(exceptionMessage)
             }
@@ -63,7 +60,6 @@ class MovePanCanFilesToFinalDestinationJobIntegrationTests extends WorkflowTestC
             assert roddyBamFile.fileOperationStatus == FileOperationStatus.INPROGRESS
             assert roddyBamFile.mergingWorkPackage.bamFileInProjectFolder == roddyBamFile
         } finally {
-            TestCase.removeMetaClass(ConfigService, movePanCanFilesToFinalDestinationJob.configService)
             TestCase.removeMetaClass(LinkFilesToFinalDestinationService, movePanCanFilesToFinalDestinationJob.linkFilesToFinalDestinationService)
             TestCase.removeMetaClass(MovePanCanFilesToFinalDestinationJob, movePanCanFilesToFinalDestinationJob)
         }

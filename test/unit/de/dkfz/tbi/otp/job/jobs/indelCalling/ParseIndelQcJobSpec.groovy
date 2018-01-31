@@ -67,7 +67,6 @@ class ParseIndelQcJobSpec extends Specification {
     void "test execute method, throw error since #notAvailable does not exist"() {
         given:
         IndelCallingInstance indelCallingInstance = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles()
-        DomainFactory.createRealmDataManagement([name: indelCallingInstance.project.realmName])
 
         if (available == "sampleSwapJsonFile") {
             DomainFactory.createIndelSampleSwapDetectionFileOnFileSystem(indelCallingInstance.sampleSwapJsonFile, indelCallingInstance.individual)
@@ -94,7 +93,6 @@ class ParseIndelQcJobSpec extends Specification {
     void "test execute method when both files available"() {
         given:
         IndelCallingInstance indelCallingInstance = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles()
-        DomainFactory.createRealmDataManagement([name: indelCallingInstance.project.realmName])
 
         DomainFactory.createIndelQcFileOnFileSystem(indelCallingInstance.indelQcJsonFile)
         DomainFactory.createIndelSampleSwapDetectionFileOnFileSystem(indelCallingInstance.sampleSwapJsonFile, indelCallingInstance.individual)

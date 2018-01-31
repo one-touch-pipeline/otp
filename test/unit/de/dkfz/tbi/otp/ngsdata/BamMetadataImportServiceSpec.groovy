@@ -21,6 +21,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
         Individual,
         Project,
         Pipeline,
+        Realm,
         ReferenceGenome,
         Sample,
         SampleType,

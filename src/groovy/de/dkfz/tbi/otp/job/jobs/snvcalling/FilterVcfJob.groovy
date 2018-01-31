@@ -37,7 +37,7 @@ class FilterVcfJob extends AbstractSnvCallingJob implements AutoRestartableJob {
     @Override
     protected NextAction maybeSubmit(final SnvCallingInstance instance) throws Throwable {
         final SnvConfig config = instance.config.evaluate()
-        final Realm realm = configService.getRealmDataProcessing(instance.project)
+        final Realm realm = instance.project.realm
         if (config.getExecuteStepFlag(step)) {
 
             // Get results from the previous (deep annotation) step

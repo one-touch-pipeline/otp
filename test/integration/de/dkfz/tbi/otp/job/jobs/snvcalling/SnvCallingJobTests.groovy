@@ -57,7 +57,7 @@ class SnvCallingJobTests {
 
     TestConfigService configService
     File testDirectory
-    Realm realm_processing
+    Realm realm
     Project project
     SeqType seqType
     Individual individual
@@ -94,7 +94,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
 
         testData = new SnvCallingInstanceTestData()
         testData.createSnvObjects()
-        realm_processing = testData.realmProcessing
+        realm = testData.realm
 
         samplePair = testData.samplePair
         project = samplePair.project
@@ -178,7 +178,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         seqType = null
         samplePair = null
         snvCallingInstance = null
-        realm_processing = null
+        realm = null
         snvCallingInstance2 = null
         externalScript_Calling = null
         externalScript_Joining = null

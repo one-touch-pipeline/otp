@@ -167,7 +167,6 @@ class ProcessedMergedBamFileServiceUnitTests {
             fileOperationStatus: FileOperationStatus.PROCESSED,
             fileSize: 10000
         ])
-        DomainFactory.createRealmDataManagement([name: processedMergedBamFile.project.realmName])
 
         ProcessedMergedBamFileService processedMergedBamFileService = new ProcessedMergedBamFileService()
 

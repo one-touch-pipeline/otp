@@ -46,7 +46,7 @@ class ConveyBwaAlignmentWorkflowTests extends WorkflowTestCase {
                 needsProcessing : false,
         ])
 
-        workPackage.project.realmName = realm.name
+        workPackage.project.realm = realm
         workPackage.project.save(flush: true)
 
         seqTrack = DomainFactory.createSeqTrackWithTwoDataFiles(workPackage, [

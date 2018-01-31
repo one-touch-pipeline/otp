@@ -42,7 +42,7 @@ abstract class AbstractSnvCallJoinJob extends AbstractSnvCallingJob {
     @Override
     protected NextAction maybeSubmit(final SnvCallingInstance instance) throws Throwable {
         final SnvConfig config = instance.config.evaluate()
-        final Realm realm = configService.getRealmDataProcessing(instance.project)
+        final Realm realm = instance.project.realm
 
         if (config.getExecuteStepFlag(step)) {
             ExternalScript externalScriptJoining = ExternalScript.getLatestVersionOfScript(CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER, config.externalScriptVersion)

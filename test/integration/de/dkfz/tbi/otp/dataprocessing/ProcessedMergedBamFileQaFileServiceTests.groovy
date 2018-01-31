@@ -35,7 +35,6 @@ class ProcessedMergedBamFileQaFileServiceTests {
         Project project = DomainFactory.createProject(
                         name: "project",
                         dirName: "project-dir",
-                        realmName: 'DKFZ',
                         )
         assertNotNull(project.save([flush: true]))
 

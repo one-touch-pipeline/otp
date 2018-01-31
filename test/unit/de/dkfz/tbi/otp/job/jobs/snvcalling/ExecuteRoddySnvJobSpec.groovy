@@ -83,7 +83,6 @@ class ExecuteRoddySnvJobSpec extends Specification {
         job.chromosomeIdentifierSortingService = new ChromosomeIdentifierSortingService()
 
         RoddySnvCallingInstance roddySnvCallingInstance = DomainFactory.createRoddySnvInstanceWithRoddyBamFiles()
-        DomainFactory.createRealmDataManagement([name: roddySnvCallingInstance.project.realmName])
 
         AbstractMergedBamFile bamFileDisease = roddySnvCallingInstance.sampleType1BamFile
         AbstractMergedBamFile bamFileControl = roddySnvCallingInstance.sampleType2BamFile
@@ -157,7 +156,6 @@ class ExecuteRoddySnvJobSpec extends Specification {
                 }
         ])
         RoddySnvCallingInstance roddySnvCallingInstance = DomainFactory.createRoddySnvInstanceWithRoddyBamFiles()
-        DomainFactory.createRealmDataManagement([name: roddySnvCallingInstance.project.realmName])
 
         CreateRoddyFileHelper.createRoddySnvResultFiles(roddySnvCallingInstance)
 
@@ -195,7 +193,6 @@ class ExecuteRoddySnvJobSpec extends Specification {
                 },
         ])
         RoddySnvCallingInstance roddySnvCallingInstance = DomainFactory.createRoddySnvInstanceWithRoddyBamFiles()
-        DomainFactory.createRealmDataManagement([name: roddySnvCallingInstance.project.realmName])
 
         CreateRoddyFileHelper.createRoddySnvResultFiles(roddySnvCallingInstance)
 
@@ -223,7 +220,6 @@ class ExecuteRoddySnvJobSpec extends Specification {
                 },
         ])
         RoddySnvCallingInstance roddySnvCallingInstance = DomainFactory.createRoddySnvInstanceWithRoddyBamFiles()
-        DomainFactory.createRealmDataManagement([name: roddySnvCallingInstance.project.realmName])
 
         CreateRoddyFileHelper.createRoddySnvResultFiles(roddySnvCallingInstance)
 

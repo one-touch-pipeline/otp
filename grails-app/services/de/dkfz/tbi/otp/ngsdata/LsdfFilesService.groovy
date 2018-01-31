@@ -290,8 +290,7 @@ class LsdfFilesService {
     }
 
     public createDirectory(File dir, Project project) {
-        Realm realm = configService.getRealmDataProcessing(project)
-        createDirectory(dir, realm)
+        createDirectory(dir, project.realm)
     }
 
     public createDirectory(File dir, Realm realm) {

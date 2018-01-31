@@ -70,7 +70,6 @@ class ExecuteRoddySophiaJobSpec extends Specification {
 
         SophiaInstance sophiaInstance = DomainFactory.createSophiaInstanceWithRoddyBamFiles()
         TestConfigService configService = new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path])
-        DomainFactory.createRealmDataManagement(name: sophiaInstance.project.realmName)
 
         RoddyBamFile bamFileDisease = sophiaInstance.sampleType1BamFile as RoddyBamFile
         RoddyBamFile bamFileControl = sophiaInstance.sampleType2BamFile as RoddyBamFile
@@ -136,7 +135,6 @@ class ExecuteRoddySophiaJobSpec extends Specification {
                 }
         ])
         SophiaInstance sophiaInstance = DomainFactory.createSophiaInstanceWithRoddyBamFiles()
-        DomainFactory.createRealmDataManagement([name: sophiaInstance.project.realmName])
 
         CreateRoddyFileHelper.createSophiaResultFiles(sophiaInstance)
 
@@ -174,7 +172,6 @@ class ExecuteRoddySophiaJobSpec extends Specification {
                 },
         ])
         SophiaInstance sophiaInstance = DomainFactory.createSophiaInstanceWithRoddyBamFiles()
-        DomainFactory.createRealmDataManagement([name: sophiaInstance.project.realmName])
 
         CreateRoddyFileHelper.createSophiaResultFiles(sophiaInstance)
 
@@ -203,7 +200,6 @@ class ExecuteRoddySophiaJobSpec extends Specification {
         ])
 
         SophiaInstance sophiaInstance = DomainFactory.createSophiaInstanceWithRoddyBamFiles()
-        DomainFactory.createRealmDataManagement([name: sophiaInstance.project.realmName])
 
         CreateRoddyFileHelper.createSophiaResultFiles(sophiaInstance)
 

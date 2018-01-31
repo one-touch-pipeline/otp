@@ -28,7 +28,7 @@ class CreateViewByPidJob extends AbstractEndStateAwareJobImpl implements AutoRes
     @Override
     public void execute() throws Exception {
         SeqTrack seqTrack = SeqTrack.get(Long.parseLong(getProcessParameterValue()))
-        Realm realm = configService.getRealmDataManagement(seqTrack.project)
+        Realm realm = seqTrack.project.realm
 
         Map map = seqTrack.dataFiles.collectEntries{ DataFile dataFile ->
             linkDataFile(dataFile)

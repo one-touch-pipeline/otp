@@ -51,7 +51,6 @@ class QAResultStatisticsServiceTests {
         project = DomainFactory.createProject(
                         name: "projectName",
                         dirName: "projectDirName",
-                        realmName: 'DKFZ',
                         )
         assertNotNull(project.save([flush: true]))
 

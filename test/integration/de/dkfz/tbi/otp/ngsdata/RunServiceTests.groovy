@@ -356,7 +356,7 @@ class RunServiceTests extends AbstractIntegrationTest {
     }
 
     private SeqTrack mockSeqTrack(Run run, String pid, String laneId) {
-        Realm realm = Realm.findOrCreateByNameAndRootPathAndWebHostAndHostAndPortAndUnixUserAndTimeoutAndDefaultJobSubmissionOptions("test", "/", "http://localhost", "pbs", 1234, "test", 0, "")
+        Realm realm = Realm.findOrCreateByNameAndHostAndPortAndTimeoutAndDefaultJobSubmissionOptions("test", "pbs", 1234, 0, "")
         assertNotNull(realm.save())
         Project project = Project.findOrCreateByNameAndDirNameAndRealm("test", "test", realm)
         assertNotNull(project.save())

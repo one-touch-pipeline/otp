@@ -131,8 +131,6 @@ class ParseWgbsAlignmentQcJobTests {
         seqTrack.normalizedLibraryName = "12"
         assert seqTrack.save(flush: true)
 
-        DomainFactory.createRealmDataManagement([name: roddyBamFile.project.realmName])
-
         ReferenceGenome referenceGenome = DomainFactory.createReferenceGenome()
         DomainFactory.createReferenceGenomeEntries(referenceGenome, ['7', '8'])
 

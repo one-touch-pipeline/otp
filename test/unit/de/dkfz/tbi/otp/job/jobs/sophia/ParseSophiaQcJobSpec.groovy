@@ -48,12 +48,9 @@ class ParseSophiaQcJobSpec extends Specification {
     void "test execute"() {
         given:
         File temporaryFile = temporaryFolder.newFolder()
-        Realm realm = DomainFactory.createRealmDataManagement()
         TestConfigService configService = new TestConfigService(['otp.root.path': temporaryFile.path])
 
         SophiaInstance instance = DomainFactory.createSophiaInstanceWithRoddyBamFiles()
-        instance.project.realmName = realm.name
-        instance.project.save(flush: true)
 
         DomainFactory.createSophiaQcFileOnFileSystem(instance.getQcJsonFile())
 

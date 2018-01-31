@@ -11,7 +11,6 @@ class SampleTypePerProjectTests extends TestCase {
         Project project = DomainFactory.createProject(
                         name: "project",
                         dirName: "dirName",
-                        realmName: "DKFZ"
                         )
         assert project.save()
 

@@ -25,10 +25,10 @@ class FastqcDataFilesServiceUnitTests {
         fastqcDataFilesService.lsdfFilesService = new LsdfFilesService()
         fastqcDataFilesService.lsdfFilesService.configService = configService
 
-        realm = DomainFactory.createRealmDataManagement()
+        realm = DomainFactory.createRealm()
 
         seqTrack = DomainFactory.createSeqTrack()
-        seqTrack.project.realmName = realm.name
+        seqTrack.project.realm = realm
         assert seqTrack.project.save(flush: true)
 
         dataFile = DomainFactory.createDataFile([seqTrack: seqTrack, project: seqTrack.project, run: seqTrack.run])

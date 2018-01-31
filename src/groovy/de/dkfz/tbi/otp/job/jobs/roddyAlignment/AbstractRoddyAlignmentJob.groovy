@@ -56,7 +56,7 @@ abstract class AbstractRoddyAlignmentJob extends AbstractExecutePanCanJob<RoddyB
     protected void validate(RoddyBamFile roddyBamFile) throws Throwable {
         assert roddyBamFile: "Input roddyBamFile must not be null"
 
-        executeRoddyCommandService.correctPermissions(roddyBamFile, configService.getRealmDataProcessing(roddyBamFile.project))
+        executeRoddyCommandService.correctPermissions(roddyBamFile, roddyBamFile.project.realm)
 
         try {
             ensureCorrectBaseBamFileIsOnFileSystem(roddyBamFile.baseBamFile)

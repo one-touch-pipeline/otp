@@ -78,7 +78,6 @@ class ExecuteRoddyIndelJobSpec extends Specification {
         TestConfigService configService = new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path])
 
         IndelCallingInstance indelCallingInstance = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles()
-        DomainFactory.createRealmDataManagement([name: indelCallingInstance.project.realmName])
 
         AbstractMergedBamFile bamFileDisease = indelCallingInstance.sampleType1BamFile
         AbstractMergedBamFile bamFileControl = indelCallingInstance.sampleType2BamFile
@@ -141,7 +140,6 @@ class ExecuteRoddyIndelJobSpec extends Specification {
         ])
         new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path])
         IndelCallingInstance indelCallingInstance = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles()
-        DomainFactory.createRealmDataManagement([name: indelCallingInstance.project.realmName])
         SeqType seqType = DomainFactory.createExomeSeqType()
 
         LibraryPreparationKit kit = DomainFactory.createLibraryPreparationKit()
@@ -227,7 +225,6 @@ class ExecuteRoddyIndelJobSpec extends Specification {
                 }
         ])
         IndelCallingInstance indelCallingInstance = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles()
-        DomainFactory.createRealmDataManagement([name: indelCallingInstance.project.realmName])
 
         CreateRoddyFileHelper.createIndelResultFiles(indelCallingInstance)
 
@@ -258,7 +255,6 @@ class ExecuteRoddyIndelJobSpec extends Specification {
                 },
         ])
         IndelCallingInstance indelCallingInstance = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles()
-        DomainFactory.createRealmDataManagement([name: indelCallingInstance.project.realmName])
 
         CreateRoddyFileHelper.createIndelResultFiles(indelCallingInstance)
 
@@ -282,7 +278,6 @@ class ExecuteRoddyIndelJobSpec extends Specification {
                 },
         ])
         IndelCallingInstance indelCallingInstance = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles()
-        DomainFactory.createRealmDataManagement([name: indelCallingInstance.project.realmName])
 
         CreateRoddyFileHelper.createIndelResultFiles(indelCallingInstance)
 

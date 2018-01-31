@@ -21,6 +21,7 @@ import org.junit.*
         Project,
         ProcessedBamFile,
         ProcessedMergedBamFile,
+        Realm,
         ReferenceGenome,
         Run,
         RunSegment,

@@ -32,7 +32,7 @@ class ImportExternallyMergedBamJob extends AbstractOtpJob {
         AbstractMultiJob.NextAction action = AbstractMultiJob.NextAction.SUCCEED
 
         importProcess.externallyProcessedMergedBamFiles.each {ExternallyProcessedMergedBamFile epmbf ->
-            Realm realm = configService.getRealmDataManagement(epmbf.project)
+            Realm realm = epmbf.project.realm
             File sourceBam = new File(epmbf.importedFrom)
             File targetBam = epmbf.getFilePath().absoluteDataManagementPath
 

@@ -124,7 +124,6 @@ class ProcessedMergedBamFileIntegrationTests {
                 md5sum: HelperUtils.randomMd5sum,
                 fileSize: DomainFactory.DEFAULT_FILE_SIZE,
         ])
-        assert DomainFactory.createRealmDataManagement([name: bamFile.project.realmName]).save(flush: true, failOnError: true)
         File expected = new File(bamFile.baseDirectory, bamFile.bamFileName)
         bamFile.mergingWorkPackage.bamFileInProjectFolder = bamFile
         assert bamFile.mergingWorkPackage.save(flush: true, failOnError: true)
@@ -135,7 +134,6 @@ class ProcessedMergedBamFileIntegrationTests {
     @Test
     void testGetPathForFurtherProcessing_IsNotSetInMergingWorkPackage__shouldThrowException() {
         ProcessedMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFile()
-        assert DomainFactory.createRealmDataManagement([name: bamFile.project.realmName]).save(flush: true, failOnError: true)
 
         TestCase.shouldFailWithMessage(IllegalStateException, /^This BAM file is not in the project folder(?s).*$/) {
             bamFile.getPathForFurtherProcessing()

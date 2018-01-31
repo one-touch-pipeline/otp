@@ -29,7 +29,6 @@ class MergingCriteriaServiceTests {
         Project project = DomainFactory.createProject(
                         name: "name",
                         dirName: "dirName",
-                        realmName: "realmName"
                         )
         assertNotNull(project.save([flush: true, failOnError: true]))
 

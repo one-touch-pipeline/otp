@@ -47,7 +47,7 @@ class MergingJobCreateCommandTests {
 
     @Before
     void setUp() {
-        realm = DomainFactory.createRealmDataProcessing()
+        realm = DomainFactory.createRealm()
         configService = new TestConfigService(['otp.processing.root.path': tempFolder.root.path])
 
         basePath = "${configService.getProcessingRootPathFromSelfFoundContext().path}/dirName/results_per_pid/pid_1"
@@ -66,7 +66,6 @@ class MergingJobCreateCommandTests {
         Project project = DomainFactory.createProject(
                         name: "project_1",
                         dirName: "dirName",
-                        realmName: realm.name
                         )
         assertNotNull(project.save([flush: true, failOnError: true]))
 

@@ -37,8 +37,6 @@ class RnaRoddyBamFileSpec extends Specification {
     void "test method getCorrespondingWorkChimericBamFile"() {
         given:
         RnaRoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile([:], RnaRoddyBamFile)
-        DomainFactory.createRealmDataManagement([name: roddyBamFile.project.realmName])
-        DomainFactory.createRealmDataProcessing([name: roddyBamFile.project.realmName])
         String testDir = "${roddyBamFile.individual.getViewByPidPath(roddyBamFile.seqType).absoluteDataManagementPath.path}/${roddyBamFile.sampleType.dirName}/${roddyBamFile.seqType.libraryLayoutDirName}/merged-alignment"
         AbstractMergedBamFileService.metaClass.static.destinationDirectory = { AbstractMergedBamFile bamFile -> return TEST_DIR }
 

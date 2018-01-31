@@ -59,7 +59,7 @@ class ExecuteRoddySophiaJob extends AbstractExecutePanCanJob<SophiaInstance> imp
     protected void validate(SophiaInstance sophiaInstance) throws Throwable {
         assert sophiaInstance : "The input sophiaInstance must not be null"
 
-        executeRoddyCommandService.correctPermissionsAndGroups(sophiaInstance, configService.getRealmDataManagement(sophiaInstance.project))
+        executeRoddyCommandService.correctPermissionsAndGroups(sophiaInstance, sophiaInstance.project.realm)
 
         List<File> directories = [
                 sophiaInstance.workExecutionStoreDirectory

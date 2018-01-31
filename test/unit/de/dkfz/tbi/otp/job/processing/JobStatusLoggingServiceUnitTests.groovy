@@ -11,6 +11,7 @@ import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
 import org.junit.After
 import org.junit.Test
+import de.dkfz.tbi.otp.ngsdata.*
 
 /**
  * Unit tests for the {@link JobStatusLoggingService}.
@@ -42,7 +43,7 @@ class JobStatusLoggingServiceUnitTests {
     Realm realm
 
     void setUp() {
-        realm = DomainFactory.createRealmDataManagement()
+        realm = DomainFactory.createRealm()
         configService = new TestConfigService(['otp.logging.root.path': LOGGING_ROOT_PATH])
         service.configService = configService
         EXPECTED_LOGFILE_PATH = "/fakeRootPath/log/status/joblog_${ARBITRARY_PROCESS_ID}_${ARBITRARY_PBS_ID}_${realm.id}.log"
@@ -79,6 +80,7 @@ class JobStatusLoggingServiceUnitTests {
     void testLogFileLocationWhenClusterJobIdIsNotPassed() {
         ProcessingStep processingStep = createFakeProcessingStep()
         service.clusterJobManagerFactoryService = new ClusterJobManagerFactoryService()
+        service.clusterJobManagerFactoryService.configService = new TestConfigService()
         def actual = service.constructLogFileLocation(realm, processingStep)
         assert "${EXPECTED_BASE_PATH}/joblog_${ARBITRARY_PROCESS_ID}_\$(echo \${PBS_JOBID} | cut -d. -f1)_${realm.id}.log" == actual
     }
@@ -99,6 +101,7 @@ class JobStatusLoggingServiceUnitTests {
     void testConstructMessageWhenClusterJobIdIsNotPassed() {
         ProcessingStep processingStep = createFakeProcessingStep()
         service.clusterJobManagerFactoryService = new ClusterJobManagerFactoryService()
+        service.clusterJobManagerFactoryService.configService = new TestConfigService()
         def actual = service.constructMessage(realm, processingStep)
         assert "${processingStep.jobExecutionPlan.name},DummyJob,${ARBITRARY_ID},\$(echo \${PBS_JOBID} | cut -d. -f1)" == actual
     }

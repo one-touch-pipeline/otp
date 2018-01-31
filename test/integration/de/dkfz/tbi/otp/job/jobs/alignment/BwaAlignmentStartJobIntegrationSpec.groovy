@@ -48,8 +48,6 @@ class BwaAlignmentStartJobIntegrationSpec extends IntegrationSpec {
     void "test method restart"() {
         given:
         AlignmentPass failedInstance = DomainFactory.createAlignmentPass()
-        DomainFactory.createRealmDataManagement(name: failedInstance.project.realmName)
-        DomainFactory.createRealmDataProcessing(name: failedInstance.project.realmName)
 
         Process failedProcess = DomainFactory.createProcess()
         DomainFactory.createProcessParameter(failedProcess, failedInstance)

@@ -17,6 +17,7 @@ import static de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationConte
         Individual,
         Project,
         ProjectCategory,
+        Realm,
         Run,
         Sample,
         SampleType,

@@ -42,15 +42,14 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         DomainFactory.createProjectCategory(name: 'category')
 
         int counter = 0
-        Realm realm = DomainFactory.createRealmDataManagement([name: Realm.LATEST_DKFZ_REALM])
-        DomainFactory.createRealmDataProcessing([name: realm.name])
+        Realm realm = DomainFactory.createDefaultRealmWithProcessingOption()
 
         configService = new TestConfigService([
                 'otp.root.path': temporaryFolder.newFolder().path,
                 'otp.processing.root.path': temporaryFolder.newFolder().path,
         ])
 
-        DomainFactory.createProject(name: 'testProjectAlignment', realmName: realm.name, alignmentDeciderBeanName: 'test')
+        DomainFactory.createProject(name: 'testProjectAlignment', realm: realm, alignmentDeciderBeanName: 'test')
         DomainFactory.createReferenceGenome(name: 'testReferenceGenome')
         DomainFactory.createReferenceGenome(name: 'testReferenceGenome2')
         DomainFactory.createAllAlignableSeqTypes()
@@ -105,7 +104,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 name: name,
                 dirName: dirName,
                 dirAnalysis: dirAnalysis,
-                realmName: Realm.LATEST_DKFZ_REALM,
+                realm: ConfigService.getDefaultRealm(),
                 alignmentDeciderBeanName: AlignmentDeciderBeanNames.NO_ALIGNMENT.bean,
                 categoryNames: category,
                 unixGroup: group,
@@ -152,7 +151,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 name: 'project',
                 dirName: 'dir',
                 dirAnalysis: '/dirA',
-                realmName: Realm.LATEST_DKFZ_REALM,
+                realm: ConfigService.getDefaultRealm(),
                 alignmentDeciderBeanName: AlignmentDeciderBeanNames.NO_ALIGNMENT.bean,
                 categoryNames: ['category'],
                 unixGroup: group,
@@ -189,7 +188,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 name: name,
                 dirName: dirName,
                 dirAnalysis: '/dirA',
-                realmName: Realm.LATEST_DKFZ_REALM,
+                realm: ConfigService.getDefaultRealm(),
                 alignmentDeciderBeanName: AlignmentDeciderBeanNames.NO_ALIGNMENT.bean,
                 categoryNames: ['category'],
                 unixGroup: group,
@@ -226,7 +225,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 name: 'project',
                 dirName: 'dir',
                 dirAnalysis: '/dirA',
-                realmName: Realm.LATEST_DKFZ_REALM,
+                realm: ConfigService.getDefaultRealm(),
                 alignmentDeciderBeanName: AlignmentDeciderBeanNames.NO_ALIGNMENT.bean,
                 categoryNames: ['category'],
                 unixGroup: 'invalidValue',
@@ -256,7 +255,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 name: 'project',
                 dirName: 'dir',
                 dirAnalysis: '/dirA',
-                realmName: Realm.LATEST_DKFZ_REALM,
+                realm: ConfigService.getDefaultRealm(),
                 alignmentDeciderBeanName: AlignmentDeciderBeanNames.NO_ALIGNMENT.bean,
                 categoryNames: ['category'],
                 unixGroup: group,
@@ -286,7 +285,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 name: 'project',
                 dirName: 'dir',
                 dirAnalysis: 'invalidDirA',
-                realmName: Realm.LATEST_DKFZ_REALM,
+                realm: ConfigService.getDefaultRealm(),
                 alignmentDeciderBeanName: AlignmentDeciderBeanNames.NO_ALIGNMENT.bean,
                 categoryNames: ['category'],
                 unixGroup: group,
@@ -326,7 +325,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 name: 'project',
                 dirName: 'dir',
                 dirAnalysis: '/dirA',
-                realmName: Realm.LATEST_DKFZ_REALM,
+                realm: ConfigService.getDefaultRealm(),
                 alignmentDeciderBeanName: AlignmentDeciderBeanNames.NO_ALIGNMENT.bean,
                 categoryNames: ['category'],
                 unixGroup: group,
@@ -391,7 +390,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 name: 'project',
                 dirName: 'dir',
                 dirAnalysis: '/dirA',
-                realmName: Realm.LATEST_DKFZ_REALM,
+                realm: ConfigService.getDefaultRealm(),
                 alignmentDeciderBeanName: AlignmentDeciderBeanNames.NO_ALIGNMENT.bean,
                 categoryNames: ['invalid category'],
                 unixGroup: group,
@@ -1041,9 +1040,8 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         SeqType seqType = DomainFactory.createExomeSeqType()
         Project project = Project.findByName("testProjectAlignment")
 
-        Realm realm = TestConfigService.getRealm(project, Realm.OperationType.DATA_MANAGEMENT)
-        DomainFactory.createRealmDataProcessing([name: realm.name])
-        Project basedProject = DomainFactory.createProject(name: 'basedTestProjectAlignment', realmName: realm.name, alignmentDeciderBeanName: 'basedTest')
+        Realm realm = project.realm
+        Project basedProject = DomainFactory.createProject(name: 'basedTestProjectAlignment', realm: realm, alignmentDeciderBeanName: 'basedTest')
 
         File tempFile = temporaryFolder.newFile("PANCAN_ALIGNMENT_WES_PAIRED_1.1.51_v1_0.xml")
         CreateFileHelper.createRoddyWorkflowConfig(tempFile, "PANCAN_ALIGNMENT_WES_PAIRED_pluginVersion:1.1.51_v1_0")

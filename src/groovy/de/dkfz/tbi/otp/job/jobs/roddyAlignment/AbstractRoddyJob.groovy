@@ -48,7 +48,7 @@ abstract class AbstractRoddyJob<R extends RoddyResult> extends AbstractMaybeSubm
     protected final AbstractMultiJob.NextAction maybeSubmit() throws Throwable {
         Realm.withTransaction {
             final RoddyResult roddyResult = getRefreshedProcessParameterObject()
-            final Realm realm = configService.getRealmDataManagement(roddyResult.project)
+            final Realm realm = roddyResult.project.realm
             String cmd = prepareAndReturnWorkflowSpecificCommand(roddyResult, realm)
 
             roddyMemoryUsage.acquire()
@@ -150,7 +150,7 @@ abstract class AbstractRoddyJob<R extends RoddyResult> extends AbstractMaybeSubm
                 }
 
                 submittedClusterJobs.add(clusterJobService.createClusterJob(
-                        realm, jobId, realm.unixUser, processingStep, seqType, jobName, jobClass
+                        realm, jobId, configService.getSshUser(), processingStep, seqType, jobName, jobClass
                 ))
             }
         }

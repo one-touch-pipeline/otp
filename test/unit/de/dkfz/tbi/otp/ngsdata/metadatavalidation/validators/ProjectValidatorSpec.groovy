@@ -10,7 +10,7 @@ import spock.lang.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
-@Mock([Project, ProjectCategory,])
+@Mock([Realm, Project, ProjectCategory,])
 class ProjectValidatorSpec extends Specification {
 
     void 'validate concerning metadata, when column does not exist, succeeds'() {

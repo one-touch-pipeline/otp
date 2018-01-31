@@ -243,8 +243,6 @@ ln -s .* .*
         DataFile dataFile = CollectionUtils.exactlyOneElement(seqTrack.dataFiles)
         CreateFileHelper.createFile(new File("${dataFile.initialDirectory}/${dataFile.fileName}"))
 
-        DomainFactory.createRealmDataManagement([name: seqTrack.project.realmName])
-
         DomainFactory.createProcessParameter([
                 process: step.process, value: seqTrack.id, className: SeqTrack.class.name])
 

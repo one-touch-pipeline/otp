@@ -51,11 +51,8 @@ class ParseAceseqQcJobSpec extends Specification {
         File temporaryFile = temporaryFolder.newFolder()
         File aceseqOutputFile = new File(temporaryFile, "aceseqOutputFile.txt")
         CreateFileHelper.createFile(aceseqOutputFile)
-        Realm realm = DomainFactory.createRealmDataManagement()
 
         AceseqInstance instance = DomainFactory.createAceseqInstanceWithRoddyBamFiles()
-        instance.project.realmName = realm.name
-        instance.project.save(flush: true)
 
         instance.metaClass.getAllFiles = {
             return [aceseqOutputFile]

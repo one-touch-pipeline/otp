@@ -135,6 +135,9 @@ class ProcessingOption implements Entity {
         GUI_SHOW_PARTNERS("", null, Type.BOOLEAN),
         GUI_ABOUT_OTP("", null, Type.MULTI_LINE_TEXT),
 
+        //realm
+        REALM_DEFAULT_VALUE("The default realm", null, Type.SINGLE_WORD_TEXT),
+
         @Deprecated
         COMMAND_ACTIVATION_SAMTOOLS("command to enable the module containing samtools (executed in Bash, may be empty if not required)", "", Type.SINGLE_LINE_TEXT),
 

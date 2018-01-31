@@ -36,7 +36,7 @@ class ExecuteRoddyAceseqJob extends AbstractExecutePanCanJob<AceseqInstance> imp
         File bamFileDiseasePath = bamFileDisease.pathForFurtherProcessing
         File bamFileControlPath = bamFileControl.pathForFurtherProcessing
 
-        final Realm realm = configService.getRealmDataProcessing(aceseqInstance.project)
+        final Realm realm = aceseqInstance.project.realm
         ReferenceGenome referenceGenome = bamFileDisease.referenceGenome
         referenceGenomeService.checkReferenceGenomeFilesAvailability(bamFileDisease.mergingWorkPackage)
 
@@ -93,7 +93,7 @@ class ExecuteRoddyAceseqJob extends AbstractExecutePanCanJob<AceseqInstance> imp
     protected void validate(AceseqInstance aceseqInstance) throws Throwable {
         assert aceseqInstance : "The input aceseqInstance must not be null"
 
-        executeRoddyCommandService.correctPermissionsAndGroups(aceseqInstance, configService.getRealmDataManagement(aceseqInstance.project))
+        executeRoddyCommandService.correctPermissionsAndGroups(aceseqInstance, aceseqInstance.project.realm)
 
         List<File> directories = [
                 aceseqInstance.workExecutionStoreDirectory

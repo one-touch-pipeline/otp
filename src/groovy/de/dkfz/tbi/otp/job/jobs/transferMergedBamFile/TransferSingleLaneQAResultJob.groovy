@@ -16,9 +16,6 @@ import org.springframework.stereotype.*
 class TransferSingleLaneQAResultJob extends AbstractEndStateAwareJobImpl{
 
     @Autowired
-    ConfigService configService
-
-    @Autowired
     ProcessedMergedBamFileService processedMergedBamFileService
 
 
@@ -29,7 +26,7 @@ class TransferSingleLaneQAResultJob extends AbstractEndStateAwareJobImpl{
         ProcessedMergedBamFile mergedBamFile = ProcessedMergedBamFile.get(id)
         Project project = processedMergedBamFileService.project(mergedBamFile)
 
-        Realm realm = configService.getRealmDataProcessing(project)
+        Realm realm = project.realm
         addOutputParameter(JobParameterKeys.JOB_ID_LIST, WatchdogJob.SKIP_WATCHDOG)
         addOutputParameter(JobParameterKeys.REALM, realm.id.toString())
         succeed()

@@ -44,7 +44,7 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase {
                 (furtherFile): 'something other',
         ])
 
-        Project project = DomainFactory.createProject(realmName: realm.name)
+        Project project = DomainFactory.createProject(realm: realm)
         createDirectories([project.projectDirectory])
 
         ExternallyProcessedMergedBamFile epmbf01 = DomainFactory.createExternallyProcessedMergedBamFile(

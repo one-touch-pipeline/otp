@@ -187,7 +187,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
         workPackage.sampleType.name = "CONTROL"
         workPackage.sampleType.save(flush: true)
 
-        workPackage.project.realmName = realm.name
+        workPackage.project.realm = realm
         workPackage.project.save(flush: true)
 
         workPackage.seqPlatformGroup.mergingCriteria = DomainFactory.createMergingCriteria(

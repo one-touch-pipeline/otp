@@ -38,7 +38,8 @@ class JobMailServiceIntegrationSpec extends Specification {
                 ])
         ])
 
-        Realm realm = DomainFactory.createRealmDataProcessing([name: seqTrack.project.realmName])
+        Realm realm = DomainFactory.createRealm()
+        seqTrack.project.realm = realm
 
         DomainFactory.createProcessingOptionLazy([
                 name: ProcessingOption.OptionName.TICKET_SYSTEM_URL,

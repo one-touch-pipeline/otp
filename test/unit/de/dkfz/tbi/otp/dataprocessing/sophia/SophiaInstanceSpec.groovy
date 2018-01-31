@@ -57,12 +57,10 @@ class SophiaInstanceSpec extends Specification {
      */
     void setup() {
         File temporaryFile = temporaryFolder.newFolder()
-        Realm realm = DomainFactory.createRealmDataManagement()
+        Realm realm = DomainFactory.createRealm()
         configService = new TestConfigService(['otp.root.path': temporaryFile.path])
 
         this.instance = DomainFactory.createSophiaInstanceWithRoddyBamFiles()
-        instance.project.realmName = realm.name
-        instance.project.save(flush: true)
         instance.processingState = AnalysisProcessingStates.FINISHED
         assert instance.save(flush: true)
 

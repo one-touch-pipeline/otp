@@ -410,7 +410,7 @@ chmod 440 ${newDirectFileName}
         outputStringBuilder << "\n  seqtracks (${seqTracks.size()}): "
         seqTracks.each { outputStringBuilder << "\n    - ${it}" }
 
-        boolean sameLsdf = oldProject.realmName == newProject.realmName
+        boolean sameLsdf = oldProject.realm == newProject.realm
 
         List<File> dirsToDelete = []
 
@@ -548,7 +548,7 @@ chmod 440 ${newDirectFileName}
 
         Sample sample = getSingleSampleForIndividualAndSampleType(oldIndividual, oldSampleType, outputStringBuilder)
 
-        boolean sameLsdf = oldProject.realmName == newProject.realmName
+        boolean sameLsdf = oldProject.realm == newProject.realm
 
         List<SeqTrack> seqTrackList = getAndShowSeqTracksForSample(sample, outputStringBuilder)
 

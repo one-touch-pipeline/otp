@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import grails.test.mixin.*
 import spock.lang.*
 
@@ -7,6 +8,7 @@ import spock.lang.*
         Project,
         ProjectCategory,
         Individual,
+        Realm,
         Run,
         SeqTrack,
         Sample,

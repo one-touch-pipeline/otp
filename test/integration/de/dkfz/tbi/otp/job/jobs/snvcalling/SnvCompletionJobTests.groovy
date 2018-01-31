@@ -29,7 +29,7 @@ class SnvCompletionJobTests {
     File testDirectory
     Individual individual
     Project project
-    Realm realm_processing
+    Realm realm
     SeqType seqType
     SnvCallingInstance snvCallingInstance
     SnvCompletionJob snvCompletionJob
@@ -56,7 +56,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
 
         testData = new SnvCallingInstanceTestData()
         testData.createSnvObjects()
-        realm_processing = testData.realmProcessing
+        realm = testData.realm
 
         processedMergedBamFile1 = testData.bamFileTumor
         processedMergedBamFile2 = testData.bamFileControl
@@ -94,7 +94,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
     void tearDown() {
         project = null
         snvCallingInstance = null
-        realm_processing = null
+        realm = null
         snvConfig = null
         processedMergedBamFile1 = null
         processedMergedBamFile2 = null

@@ -88,7 +88,7 @@ class LsdfFileServiceUnitTests {
 
     @Test
     void test_deleteFilesRecursive_shouldBeFine() {
-        Realm realm = DomainFactory.createRealmDataManagement()
+        Realm realm = DomainFactory.createRealm()
         service.executionService = [
                 executeCommand: {Realm realm2, String command->
                     ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
@@ -110,7 +110,7 @@ class LsdfFileServiceUnitTests {
 
     @Test
     void test_deleteFilesRecursive_FilesOrDirectoriesIsEmpty_shouldDoNothing() {
-        Realm realm = DomainFactory.createRealmDataManagement()
+        Realm realm = DomainFactory.createRealm()
         service.executionService = [
                 executeCommand: {Realm realm2, String command->
                     assert false: 'Should not be called'
@@ -130,7 +130,7 @@ class LsdfFileServiceUnitTests {
 
     @Test
     void test_deleteFilesRecursive_FilesOrDirectoriesIsNull_shouldThrowException() {
-        Realm realm = DomainFactory.createRealmDataManagement()
+        Realm realm = DomainFactory.createRealm()
         TestCase.shouldFailWithMessageContaining(AssertionError, 'filesOrDirectories may not be null.') {
             service.deleteFilesRecursive(realm, null)
         }
@@ -141,7 +141,7 @@ class LsdfFileServiceUnitTests {
     @Test
     void test_deleteFilesRecursive_deletionFail_shouldThrowException() {
         final String MESSAGE = HelperUtils.uniqueString
-        Realm realm = DomainFactory.createRealmDataManagement()
+        Realm realm = DomainFactory.createRealm()
         service.executionService = [
                 executeCommand: {Realm realm2, String command->
                     assert false: MESSAGE

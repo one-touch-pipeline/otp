@@ -29,6 +29,7 @@ class ClusterJobSchedulerService {
     ClusterJobService clusterJobService
     ExecutionService executionService
     ClusterJobManagerFactoryService clusterJobManagerFactoryService
+    ConfigService configService
 
     ClusterJobLoggingService clusterJobLoggingService
 
@@ -123,7 +124,7 @@ class ClusterJobSchedulerService {
         jobManager.startHeldJobs([job])
 
         ClusterJob clusterJob = clusterJobService.createClusterJob(
-                realm, job.jobID.shortID, realm.unixUser, processingStep, seqType, jobName
+                realm, job.jobID.shortID, configService.getSshUser(), processingStep, seqType, jobName
         )
         retrieveAndSaveJobInformationAfterJobStarted(clusterJob)
 

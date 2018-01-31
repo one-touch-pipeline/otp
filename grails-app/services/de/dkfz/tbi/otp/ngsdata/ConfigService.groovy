@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import grails.util.*
 import org.joda.time.*
 import org.springframework.beans.*
@@ -26,27 +27,11 @@ class ConfigService implements ApplicationContextAware {
         } else {
             properties.load(new FileInputStream(System.getProperty("user.home") + System.getProperty("file.separator") + ".otp.properties"))
         }
-        this.otpProperties = (Map)properties
+        this.otpProperties = (Map) properties
     }
 
-    static Realm getRealm(Project project, Realm.OperationType operationType) {
-        def c = Realm.createCriteria()
-        Realm realm = c.get {
-            and {
-                eq("name", project.realmName)
-                eq("operationType", operationType)
-                eq("env", Environment.getCurrent().getName())
-            }
-        }
-        return realm
-    }
-
-    Realm getRealmDataProcessing(Project project) {
-        return getRealm(project, Realm.OperationType.DATA_PROCESSING)
-    }
-
-    Realm getRealmDataManagement(Project project) {
-        return getRealm(project, Realm.OperationType.DATA_MANAGEMENT)
+    static Realm getDefaultRealm() {
+        return CollectionUtils.exactlyOneElement(Realm.findAllByName(ProcessingOptionService.findOptionSafe(ProcessingOption.OptionName.REALM_DEFAULT_VALUE, null, null)))
     }
 
     static File getRootPathFromSelfFoundContext() {

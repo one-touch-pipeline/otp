@@ -23,20 +23,25 @@ import spock.lang.*
 ])
 class ClusterJobSchedulerServiceSpec extends Specification {
 
+    static final String SSHUSER = "user"
+
     void "retrieveKnownJobsWithState, when qstat fails, throws exception"(String stderr, int exitCode) {
         given:
-        Realm realm = DomainFactory.createRealmDataProcessing()
+        Realm realm = DomainFactory.createRealm()
         ClusterJobSchedulerService service = new ClusterJobSchedulerService()
         service.executionService = [
-                executeCommandReturnProcessOutput: { realm1, command, userName -> new ProcessOutput(
+                executeCommandReturnProcessOutput: { realm1, command -> new ProcessOutput(
                         stdout: "",
                         stderr: stderr,
                         exitCode: exitCode,
                 ) },
         ] as ExecutionService
+        service.configService = Mock(ConfigService) {
+            getSshUser() >> SSHUSER
+        }
 
         when:
-        service.retrieveKnownJobsWithState(realm, realm.unixUser)
+        service.retrieveKnownJobsWithState(realm, SSHUSER)
 
         then:
         thrown(Exception)
@@ -50,19 +55,22 @@ class ClusterJobSchedulerServiceSpec extends Specification {
 
     void "retrieveKnownJobsWithState, when qstat output is empty, returns empty map"() {
         given:
-        Realm realm = DomainFactory.createRealmDataProcessing()
+        Realm realm = DomainFactory.createRealm()
         ClusterJobSchedulerService service = new ClusterJobSchedulerService()
         service.clusterJobManagerFactoryService = new ClusterJobManagerFactoryService()
         service.clusterJobManagerFactoryService.executionService = [
-                executeCommandReturnProcessOutput: { realm1, command, userName -> new ProcessOutput(
+                executeCommandReturnProcessOutput: { realm1, command -> new ProcessOutput(
                         stdout: command.tokenize().last(),
                         stderr: "",
                         exitCode: 0,
                 ) },
         ] as ExecutionService
+        service.clusterJobManagerFactoryService.configService = Mock(ConfigService) {
+            getSshUser() >> SSHUSER
+        }
 
         when:
-        Map<ClusterJobIdentifier, ClusterJobMonitoringService.Status> result = service.retrieveKnownJobsWithState(realm, realm.unixUser)
+        Map<ClusterJobIdentifier, ClusterJobMonitoringService.Status> result = service.retrieveKnownJobsWithState(realm, SSHUSER)
 
         then:
         result.isEmpty()
@@ -71,23 +79,26 @@ class ClusterJobSchedulerServiceSpec extends Specification {
     @Unroll
     void "retrieveKnownJobsWithState, when status #pbsStatus appears in qstat, returns correct status #status"(String pbsStatus, ClusterJobMonitoringService.Status status) {
         given:
-        Realm realm = DomainFactory.createRealmDataProcessing()
+        Realm realm = DomainFactory.createRealm()
         String jobId = "5075615"
         ClusterJobSchedulerService service = new ClusterJobSchedulerService()
         service.clusterJobManagerFactoryService = new ClusterJobManagerFactoryService()
         service.clusterJobManagerFactoryService.executionService = [
-                executeCommandReturnProcessOutput: { realm1, String command, userName -> new ProcessOutput(
+                executeCommandReturnProcessOutput: { realm1, String command -> new ProcessOutput(
                         stdout: qstatOutput(jobId, pbsStatus),
                         stderr: "",
                         exitCode: 0,
                 ) },
         ] as ExecutionService
+        service.clusterJobManagerFactoryService.configService = Mock(ConfigService) {
+            getSshUser() >> SSHUSER
+        }
 
         when:
-        Map<ClusterJobIdentifier, ClusterJobMonitoringService.Status> result = service.retrieveKnownJobsWithState(realm, realm.unixUser)
+        Map<ClusterJobIdentifier, ClusterJobMonitoringService.Status> result = service.retrieveKnownJobsWithState(realm, SSHUSER)
 
         then:
-        def job = new ClusterJobIdentifier(realm, jobId, realm.unixUser)
+        def job = new ClusterJobIdentifier(realm, jobId, SSHUSER)
         result.containsKey(job)
         result.get(job) == status
 
@@ -120,7 +131,7 @@ ${jobId}.clust_head.ine  OtherUnixUser    fast     r160224_18005293    --      1
         given:
         ClusterJobSchedulerService service = new ClusterJobSchedulerService()
         SeqType seqType = DomainFactory.createSeqType()
-        Realm realm = DomainFactory.createRealmDataProcessing()
+        Realm realm = DomainFactory.createRealm()
         String clusterJobId = "123"
 
         ProcessParameterObject ppo = Stub(ProcessParameterObject) {
@@ -136,13 +147,18 @@ ${jobId}.clust_head.ine  OtherUnixUser    fast     r160224_18005293    --      1
         service.schedulerService = Stub(SchedulerService) {
             getJobExecutedByCurrentThread() >> job
         }
-
+        service.configService = Mock(ConfigService) {
+            getSshUser() >> SSHUSER
+        }
         service.clusterJobSubmissionOptionsService = Stub(ClusterJobSubmissionOptionsService)
         service.jobStatusLoggingService = Stub(JobStatusLoggingService)
         service.clusterJobService = Mock(ClusterJobService)
         service.clusterJobLoggingService = Mock(ClusterJobLoggingService)
         service.clusterJobManagerFactoryService = new ClusterJobManagerFactoryService()
         service.clusterJobManagerFactoryService.executionService = Mock(ExecutionService)
+        service.clusterJobManagerFactoryService.configService = Mock(ConfigService) {
+            getSshUser() >> SSHUSER
+        }
 
         ProcessOutput out = new ProcessOutput("${clusterJobId}.pbs", "", 0)
         ClusterJob clusterJob = DomainFactory.createClusterJob(clusterJobId: clusterJobId, realm: realm)
@@ -152,8 +168,8 @@ ${jobId}.clust_head.ine  OtherUnixUser    fast     r160224_18005293    --      1
         String result = service.executeJob(realm, "run the job")
 
         then:
-        3 * service.clusterJobManagerFactoryService.executionService.executeCommandReturnProcessOutput(realm, _ as String, _ as String) >> out
-        1 * service.clusterJobService.createClusterJob(realm, clusterJobId, realm.unixUser, step, seqType, _ as String) >> clusterJob
+        3 * service.clusterJobManagerFactoryService.executionService.executeCommandReturnProcessOutput(realm, _ as String) >> out
+        1 * service.clusterJobService.createClusterJob(realm, clusterJobId, SSHUSER, step, seqType, _ as String) >> clusterJob
         1 * service.clusterJobLoggingService.createAndGetLogDirectory(_, _) >> {TestCase.uniqueNonExistentPath}
         result == clusterJobId
     }
