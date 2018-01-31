@@ -60,20 +60,20 @@ class MetadataImportController {
         }
 
         return [
-            directoryStructures   : metadataImportService.getSupportedDirectoryStructures(),
-            cmd                   : cmd,
-            errorMessage          : errorMessage,
-            contexts              : metadataValidationContexts,
-            implementedValidations: metadataImportService.getImplementedValidations(),
-            isValidated           : isValidated,
-            problems              : problems,
+                directoryStructures   : metadataImportService.getSupportedDirectoryStructures(),
+                cmd                   : cmd,
+                errorMessage          : errorMessage,
+                contexts              : metadataValidationContexts,
+                implementedValidations: metadataImportService.getImplementedValidations(),
+                isValidated           : isValidated,
+                problems              : problems,
         ]
     }
 
     def details() {
         RunSegment runSegment = (RunSegment.get(params.id))
         [
-                data: getMetadataDetails(runSegment),
+                data      : getMetadataDetails(runSegment),
                 runSegment: runSegment,
         ]
     }
@@ -169,13 +169,13 @@ class MetadataImportController {
                 text.append("\n${it.metadataFile}")
             }
             text.append("\n\nClick here for manual import:")
-            text.append("\n"+g.createLink(
+            text.append("\n" + g.createLink(
                     action: 'index',
                     absolute: 'true',
                     params: [
-                        'ticketNumber': otrsTicketNumber,
-                        'paths': e.allPaths,
-                        'directory': MetadataImportService.MIDTERM_ILSE_DIRECTORY_STRUCTURE_BEAN_NAME
+                            'ticketNumber': otrsTicketNumber,
+                            'paths'       : e.allPaths,
+                            'directory'   : MetadataImportService.MIDTERM_ILSE_DIRECTORY_STRUCTURE_BEAN_NAME
                     ])
             )
         }
@@ -266,22 +266,23 @@ class MetadataImportControllerSubmitCommand implements Serializable {
     boolean ignoreWarnings
 
     static constraints = {
-        paths(nullable:true)
-        directory(nullable:true)
-        md5(nullable:true)
-        submit(nullable:true)
+        paths(nullable: true)
+        directory(nullable: true)
+        md5(nullable: true)
+        submit(nullable: true)
         seqCenterComment(nullable: true, validator: { val, obj ->
             return !val || obj.ticketNumber
         })
-        ticketNumber(nullable:true, validator: { val, obj ->
+        ticketNumber(nullable: true, validator: { val, obj ->
             if (val == null) {
                 return true
             }
             return OtrsTicket.ticketNumberConstraint(val) ?: true
         })
     }
+
     void setTicketNumber(String ticketNumber) {
-        String prefix = ProcessingOptionService.getValueOfProcessingOption(OptionName.TICKET_SYSTEM_NUMBER_PREFIX)
+        String prefix = ProcessingOptionService.findOptionSafe(OptionName.TICKET_SYSTEM_NUMBER_PREFIX, null, null)
         Matcher matcher = ticketNumber =~ /^\s*(((${Pattern.quote(prefix)})?#)?(?<number>(\d{16})))?\s*$/
         if (matcher.matches()) {
             this.ticketNumber = matcher.group('number') ?: null
