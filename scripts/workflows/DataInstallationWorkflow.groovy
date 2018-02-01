@@ -26,12 +26,12 @@ processingOptionService.createOrUpdate(
         OptionName.MAXIMUM_NUMBER_OF_JOBS,
         workflow,
         null,
-        '50'
+        '5'
 )
 
 processingOptionService.createOrUpdate(
         OptionName.MAXIMUM_NUMBER_OF_JOBS_RESERVED_FOR_FAST_TRACK,
         workflow,
         null,
-        '25'
+        '0'
 )
