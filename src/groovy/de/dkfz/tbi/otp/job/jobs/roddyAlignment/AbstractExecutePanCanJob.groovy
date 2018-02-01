@@ -40,9 +40,23 @@ abstract class AbstractExecutePanCanJob<R extends RoddyResult> extends AbstractR
 
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(new File(roddyResult.config.configFilePath))
 
-        return executeRoddyCommandService.defaultRoddyExecutionCommand(roddyResult, nameInConfigFile, analysisIDinConfigFile, realm) +
-                prepareAndReturnWorkflowSpecificParameter(roddyResult) +
-                prepareAndReturnCValues(roddyResult)
+        return [
+                executeRoddyCommandService.defaultRoddyExecutionCommand(roddyResult, nameInConfigFile, analysisIDinConfigFile, realm),
+                prepareAndReturnAdditionalImports(roddyResult),
+                prepareAndReturnWorkflowSpecificParameter(roddyResult),
+                prepareAndReturnCValues(roddyResult),
+        ].join(" ")
+    }
+
+    public String prepareAndReturnAdditionalImports(R roddyResult) {
+        assert roddyResult: "roddyResult must not be null"
+
+        String fasttrack = (roddyResult.processingPriority == ProcessingPriority.FAST_TRACK_PRIORITY) ?
+                "-fasttrack"
+                : ""
+        String pluginVersion = roddyResult.config.pluginVersion
+        String seqType = roddyResult.seqType.roddyName.toLowerCase()
+        return "--additionalImports=${pluginVersion}-${seqType}${fasttrack}"
     }
 
 

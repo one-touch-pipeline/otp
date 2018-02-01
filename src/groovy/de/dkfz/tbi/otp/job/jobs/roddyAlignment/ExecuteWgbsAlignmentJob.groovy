@@ -92,7 +92,7 @@ chmod 0444 ${metadataFile.path}
         assert output.exitCode == 0
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(metadataFile)
 
-        return "--usemetadatatable=${metadataFile.path} "
+        return "--usemetadatatable=${metadataFile.path}"
     }
 
 

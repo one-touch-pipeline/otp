@@ -209,7 +209,7 @@ class ExecuteWgbsAlignmentJobTests {
         File metaDataTableFile = roddyBamFile.workMetadataTableFile
         assert metaDataTableFile.parentFile.exists() || metaDataTableFile.parentFile.mkdirs()
 
-        String expectedCommand = "--usemetadatatable=${roddyBamFile.workMetadataTableFile.path} "
+        String expectedCommand = "--usemetadatatable=${roddyBamFile.workMetadataTableFile.path}"
         assert expectedCommand == executeWgbsAlignmentJob.prepareAndReturnWorkflowSpecificParameter(roddyBamFile)
 
         assert metaDataTableFile.exists()

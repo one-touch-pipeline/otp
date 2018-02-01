@@ -103,7 +103,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testRoddyBaseCommand_AllFine() {
-        String expectedCmd = "${roddyPath}/roddy.sh rerun ${CONFIG_NAME}.config@${ANALYSIS_ID} "
+        String expectedCmd = "${roddyPath}/roddy.sh rerun ${CONFIG_NAME}.config@${ANALYSIS_ID}"
         String actualCmd = executeRoddyCommandService.roddyBaseCommand(roddyPath, CONFIG_NAME, ANALYSIS_ID, ExecuteRoddyCommandService.RoddyInvocationType.EXECUTE)
         assert expectedCmd == actualCmd
     }
@@ -246,8 +246,8 @@ class ExecuteRoddyCommandServiceTests {
                 "--useconfig=${applicationIniPath} " +
                 "--usefeaturetoggleconfig=${featureTogglesConfigPath} " +
                 "--usePluginVersion=${roddyBamFile.config.pluginVersion} " +
-                "--configurationDirectories=${new File(roddyBamFile.config.configFilePath).parent},${roddyBaseConfigsPath} " +
-                "--useiodir=${viewByPid},${roddyBamFile.workDirectory} "
+                "--configurationDirectories=${new File(roddyBamFile.config.configFilePath).parent},${roddyBaseConfigsPath},${roddyBaseConfigsPath}/resource/${roddyBamFile.project.realm.jobScheduler.toString().toLowerCase()} " +
+                "--useiodir=${viewByPid},${roddyBamFile.workDirectory}"
 
         LogThreadLocal.withThreadLog(System.out) {
             String actualCmd = executeRoddyCommandService.defaultRoddyExecutionCommand(roddyBamFile, CONFIG_NAME, ANALYSIS_ID, realm)
@@ -296,7 +296,7 @@ class ExecuteRoddyCommandServiceTests {
                 "--useconfig=${applicationIniPath} " +
                 "--usefeaturetoggleconfig=${featureTogglesConfigPath} " +
                 "--usePluginVersion=${roddyBamFile.config.pluginVersion} " +
-                "--configurationDirectories=${new File(roddyBamFile.config.configFilePath).parent},${roddyBaseConfigsPath} "
+                "--configurationDirectories=${new File(roddyBamFile.config.configFilePath).parent},${roddyBaseConfigsPath}"
 
         LogThreadLocal.withThreadLog(System.out) {
             String actualCmd = executeRoddyCommandService.roddyGetRuntimeConfigCommand(roddyBamFile.config, CONFIG_NAME, ANALYSIS_ID)

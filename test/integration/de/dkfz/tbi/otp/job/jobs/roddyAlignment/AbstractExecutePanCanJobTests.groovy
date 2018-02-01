@@ -51,7 +51,7 @@ class AbstractExecutePanCanJobTests {
         realm = DomainFactory.createRealm()
         abstractExecutePanCanJob = [
                 prepareAndReturnWorkflowSpecificCValues  : { RoddyBamFile bamFile -> ["${workflowSpecificCValues}"] },
-                prepareAndReturnWorkflowSpecificParameter: { RoddyBamFile bamFile -> "workflowSpecificParameter " },
+                prepareAndReturnWorkflowSpecificParameter: { RoddyBamFile bamFile -> "workflowSpecificParameter" },
 
         ] as AbstractExecutePanCanJob
 
@@ -147,8 +147,9 @@ ${roddyBamFile.individual.pid} \
 --useconfig=${roddyApplicationIni} \
 --usefeaturetoggleconfig=${featureTogglesConfigPath} \
 --usePluginVersion=${roddyBamFile.config.pluginVersion} \
---configurationDirectories=${new File(roddyBamFile.config.configFilePath).parent},${roddyBaseConfigsPath} \
+--configurationDirectories=${new File(roddyBamFile.config.configFilePath).parent},${roddyBaseConfigsPath},${roddyBaseConfigsPath}/resource/${roddyBamFile.project.realm.jobScheduler.toString().toLowerCase()} \
 --useiodir=${viewByPidString()},${roddyBamFile.workDirectory} \
+--additionalImports=${roddyBamFile.config.pluginVersion}-${roddyBamFile.seqType.roddyName.toLowerCase()} \
 workflowSpecificParameter \
 --cvalues="$workflowSpecificCValues"\
 """

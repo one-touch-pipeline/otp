@@ -41,20 +41,24 @@ class ExecuteRoddyCommandService {
         //base view by pid directory
         File viewByPid = roddyResult.individual.getViewByPidPathBase(roddyResult.seqType).absoluteDataManagementPath
 
-        return roddyBaseCommand(nameInConfigFile, analysisIDinConfigFile, RoddyInvocationType.EXECUTE) +
-                "${roddyResult.individual.pid} " +
-                commonRoddy(config) +
-                "--useiodir=${viewByPid},${workOutputDir} "
+        return [
+                roddyBaseCommand(nameInConfigFile, analysisIDinConfigFile, RoddyInvocationType.EXECUTE),
+                "${roddyResult.individual.pid}",
+                commonRoddy(config, roddyResult.project.realm.jobScheduler),
+                "--useiodir=${viewByPid},${workOutputDir}",
+        ].join(" ")
     }
 
 
     String roddyGetRuntimeConfigCommand(RoddyWorkflowConfig config, String nameInConfigFile, String analysisIDinConfigFile) {
-        return roddyBaseCommand(nameInConfigFile, analysisIDinConfigFile, RoddyInvocationType.CONFIG) +
-                commonRoddy(config)
+        return [
+                roddyBaseCommand(nameInConfigFile, analysisIDinConfigFile, RoddyInvocationType.CONFIG),
+                commonRoddy(config, null),
+        ].join(" ")
     }
 
 
-    String commonRoddy(RoddyWorkflowConfig config) {
+    String commonRoddy(RoddyWorkflowConfig config, Realm.JobScheduler jobScheduler) {
         File roddyBaseConfigsPath = ProcessingOptionService.getValueOfProcessingOption(OptionName.RODDY_BASE_CONFIGS_PATH) as File
         File applicationIniPath = ProcessingOptionService.getValueOfProcessingOption(OptionName.RODDY_APPLICATION_INI) as File
 
@@ -65,12 +69,17 @@ class ExecuteRoddyCommandService {
 
         String pluginVersion = config.pluginVersion
         File configFile = new File(config.configFilePath)
+        String jobSchSpecificConfig = ""
+        if (jobScheduler) {
+            jobSchSpecificConfig = ",${roddyBaseConfigsPath}/resource/${jobScheduler.toString().toLowerCase()}"
+        }
 
-        return \
-            "--useconfig=${applicationIniPath} " +
-            "--usefeaturetoggleconfig=${featureTogglesConfigPath()} " +
-            "--usePluginVersion=${pluginVersion} " +
-            "--configurationDirectories=${configFile.parent},${roddyBaseConfigsPath} "
+        return [
+                "--useconfig=${applicationIniPath}",
+                "--usefeaturetoggleconfig=${featureTogglesConfigPath()}",
+                "--usePluginVersion=${pluginVersion}",
+                "--configurationDirectories=${configFile.parent},${roddyBaseConfigsPath}${jobSchSpecificConfig}",
+        ].join(" ")
     }
 
 
@@ -84,7 +93,7 @@ class ExecuteRoddyCommandService {
         assert configName : "configName is not allowed to be null"
         assert analysisId : "analysisId is not allowed to be null"
         assert type : "type is not allowed to be null"
-        return "${roddyPath}/roddy.sh ${type.cmd} ${configName}.config@${analysisId} "
+        return "${roddyPath}/roddy.sh ${type.cmd} ${configName}.config@${analysisId}"
     }
 
 
