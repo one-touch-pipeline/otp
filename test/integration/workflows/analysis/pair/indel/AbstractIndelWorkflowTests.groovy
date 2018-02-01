@@ -56,8 +56,7 @@ abstract class AbstractIndelWorkflowTests extends AbstractRoddyBamFilePairAnalys
     List<String> getWorkflowScripts() {
         return [
                 "scripts/workflows/RoddyIndelWorkflow.groovy",
-                "scripts/initializations/AddPathToConfigFilesToProcessingOptions.groovy",
-                "scripts/initializations/AddRoddyPathAndVersionToProcessingOptions.groovy",
+                "scripts/initializations/RoddyOptions.groovy",
                 "scripts/initializations/CreateRoddyIndelPipelineOptions.groovy",
         ]
     }

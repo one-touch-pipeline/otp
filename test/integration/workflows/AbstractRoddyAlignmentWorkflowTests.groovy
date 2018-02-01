@@ -89,9 +89,8 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
     @Override
     List<String> getWorkflowScripts() {
         return ["scripts/workflows/PanCanWorkflow.groovy",
-                "scripts/initializations/AddPathToConfigFilesToProcessingOptions.groovy",
-                "scripts/initializations/AddRoddyPathAndVersionToProcessingOptions.groovy",
-                "scripts/initializations/RoddyProcessingOptions.groovy",
+                "scripts/initializations/RoddyOptions.groovy",
+                "scripts/initializations/RoddyAlignmentPipelinesOptions.groovy",
                 "scripts/initializations/LoadSoftwareModules.groovy",
         ]
     }

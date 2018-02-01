@@ -135,7 +135,11 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         createUserAndRoles()
         loadWorkflow()
 
-        DomainFactory.createProcessingOptionLazy(name: OptionName.RODDY_APPLICATION_INI, type: null, value: new File(getRootDirectory(), "applicationProperties.ini").absolutePath)
+        DomainFactory.createProcessingOptionLazy(
+                name: OptionName.RODDY_APPLICATION_INI,
+                type: null,
+                value: new File(getRootDirectory(), "applicationProperties-3.0-lsf.ini").absolutePath
+        )
 
 
         assert schedulerService.running.empty

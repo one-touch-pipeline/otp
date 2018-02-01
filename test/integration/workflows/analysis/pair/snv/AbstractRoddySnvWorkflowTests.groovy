@@ -12,7 +12,7 @@ abstract class AbstractRoddySnvWorkflowTests extends AbstractSnvWorkflowTests {
     RoddyWorkflowConfigService roddyWorkflowConfigService
 
     static final String PLUGIN_NAME = 'SNVCallingWorkflow'
-    static final String PLUGIN_VERSION = '1.0.166-1'
+    static final String PLUGIN_VERSION = '1.2.166-1'
     static final String PLUGIN = "${PLUGIN_NAME}:${PLUGIN_VERSION}"
     static final String CONFIG_VERSION = 'v1_0'
     static final String ANALYSIS = 'snvCallingAnalysis'
@@ -101,8 +101,7 @@ echo 'OK'
     List<String> getWorkflowScripts() {
         return [
                 "scripts/workflows/RoddySnvWorkflow.groovy",
-                "scripts/initializations/AddPathToConfigFilesToProcessingOptions.groovy",
-                "scripts/initializations/AddRoddyPathAndVersionToProcessingOptions.groovy",
+                "scripts/initializations/RoddyOptions.groovy",
         ]
     }
 

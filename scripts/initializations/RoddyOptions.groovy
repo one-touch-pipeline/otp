@@ -2,24 +2,27 @@ import de.dkfz.tbi.otp.dataprocessing.*
 
 import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
 
+
 ProcessingOptionService processingOptionService = ctx.processingOptionService
 
+String path = "/path/to/roddy"
+
 processingOptionService.createOrUpdate(
-        PIPELINE_SOPHIA_PLUGIN_NAME,
-        'SophiaWorkflow'
+        RODDY_PATH,
+        "${path}/roddy/release"
 )
 
 processingOptionService.createOrUpdate(
-        PIPELINE_SOPHIA_PLUGIN_VERSIONS,
-        '1.2.16'
+        RODDY_BASE_CONFIGS_PATH,
+        "${path}/configs/"
 )
 
 processingOptionService.createOrUpdate(
-        PIPELINE_SOPHIA_BASE_PROJECT_CONFIG,
-        'otpSophia-1.1'
+        RODDY_APPLICATION_INI,
+        "${path}/configs/applicationProperties.ini"
 )
 
 processingOptionService.createOrUpdate(
-        PIPELINE_SOPHIA_REFERENCE_GENOME,
-        'hs37d5, 1KGRef_PhiX, hs37d5_GRCm38mm_PhiX, hs37d5+mouse, hs37d5_GRCm38mm'
+        RODDY_FEATURE_TOGGLES_CONFIG_PATH,
+        "${path}/configs/featureToggles.ini"
 )

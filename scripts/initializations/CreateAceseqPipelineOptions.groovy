@@ -1,24 +1,25 @@
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
+
+import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
 
 ProcessingOptionService processingOptionService = ctx.processingOptionService
 
 processingOptionService.createOrUpdate(
-        OptionName.PIPELINE_ACESEQ_PLUGIN_NAME,
-        null,
-        null,
+        PIPELINE_ACESEQ_PLUGIN_NAME,
         'ACEseqWorkflow'
 )
+
 processingOptionService.createOrUpdate(
-        ProcessingOption.OptionName.PIPELINE_ACESEQ_PLUGIN_VERSION,
-        null,
-        null,
+        PIPELINE_ACESEQ_PLUGIN_VERSION,
         '1.2.8-4'
 )
+
 processingOptionService.createOrUpdate(
-        ProcessingOption.OptionName.PIPELINE_ACESEQ_BASE_PROJECT_CONFIG,
-        null,
-        null,
+        PIPELINE_ACESEQ_BASE_PROJECT_CONFIG,
         'otpACEseq-1.1'
 )
 
+processingOptionService.createOrUpdate(
+        PIPELINE_ACESEQ_REFERENCE_GENOME,
+        'hs37d5, 1KGRef_PhiX, hs37d5_GRCm38mm_PhiX, hs37d5+mouse, hs37d5_GRCm38mm'
+)

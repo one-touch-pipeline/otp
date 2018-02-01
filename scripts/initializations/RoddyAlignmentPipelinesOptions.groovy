@@ -25,7 +25,7 @@ println processingOptionService.createOrUpdate(
         OptionName.PIPELINE_RODDY_ALIGNMENT_PLUGIN_VERSION,
         null,
         null,
-        "1.1.73"
+        "1.2.73-1"
 )
 
 //WES
@@ -137,7 +137,7 @@ println processingOptionService.createOrUpdate(
         OptionName.PIPELINE_RODDY_ALIGNMENT_PLUGIN_VERSION,
         SeqType.rnaPairedSeqType.roddyName,
         null,
-        "1.0.22-1"
+        "1.2.22-6"
 )
 
 println processingOptionService.createOrUpdate(

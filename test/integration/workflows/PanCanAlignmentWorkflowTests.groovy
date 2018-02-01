@@ -63,7 +63,7 @@ abstract class PanCanAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkfl
 
         createProjectConfig(mergingWorkPackage, [
                 pluginName       : "QualityControlWorkflows",
-                pluginVersion    : "1.0.182-1",
+                pluginVersion    : "1.2.182",
                 baseProjectConfig: "otpPanCanAlignmentWorkflow-1.3",
                 configVersion    : "v2_0",
         ])
@@ -124,7 +124,7 @@ abstract class PanCanAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkfl
 
         createProjectConfig(mergingWorkPackage, [
                 pluginName       : "QualityControlWorkflows",
-                pluginVersion    : "1.0.182-1",
+                pluginVersion    : "1.2.182",
                 baseProjectConfig: "otpPanCanAlignmentWorkflow-1.3",
                 configVersion    : "v2_0",
         ])

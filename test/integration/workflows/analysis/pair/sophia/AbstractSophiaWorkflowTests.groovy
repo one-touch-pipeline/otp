@@ -85,8 +85,7 @@ abstract class AbstractSophiaWorkflowTests extends AbstractRoddyBamFilePairAnaly
     List<String> getWorkflowScripts() {
         return [
                 "scripts/workflows/RoddySophiaWorkflow.groovy",
-                "scripts/initializations/AddPathToConfigFilesToProcessingOptions.groovy",
-                "scripts/initializations/AddRoddyPathAndVersionToProcessingOptions.groovy",
+                "scripts/initializations/RoddyOptions.groovy",
                 "scripts/initializations/CreateSophiaPipelineOptions.groovy",
         ]
     }
