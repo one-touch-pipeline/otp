@@ -14,4 +14,9 @@ class IndelCallingService extends BamFileAnalysisService {
     protected Pipeline.Type getAnalysisType() {
         return Pipeline.Type.INDEL
     }
+
+    @Override
+    protected String pipelineSpecificBamFileChecks(String number) {
+        return "AND ambf${number}.class = de.dkfz.tbi.otp.dataprocessing.RoddyBamFile"
+    }
 }

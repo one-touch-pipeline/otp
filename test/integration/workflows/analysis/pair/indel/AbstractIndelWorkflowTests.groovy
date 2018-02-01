@@ -17,14 +17,6 @@ abstract class AbstractIndelWorkflowTests extends AbstractRoddyBamFilePairAnalys
     ProcessingOptionService processingOptionService
 
 
-    @Test
-    void testWholeWorkflowWithProcessedMergedBamFile() {
-        setupProcessMergedBamFile()
-
-        executeTest()
-    }
-
-
     @Override
     ConfigPerProject createConfig() {
         DomainFactory.createIndelPipelineLazy()
