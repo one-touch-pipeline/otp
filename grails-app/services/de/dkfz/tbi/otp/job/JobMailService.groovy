@@ -100,6 +100,8 @@ class JobMailService {
                     runningHours       : clusterJob.started && clusterJob.ended ? clusterJob.getElapsedWalltime().standardHours : 'na',
                     logFile            : clusterJob.jobLog,
 
+                    exitStatus         : clusterJob.exitStatus,
+                    existCode          : clusterJob.exitCode,
                     node               : clusterJob.node,
                     clusterStartCount  : clusterJob.startCount,
             ]
