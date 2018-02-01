@@ -108,7 +108,7 @@ class ClusterJobServiceSpec extends Specification {
         jobInfo.askedResources = new ResourceSet(new BufferValue(7), 8, 9, java.time.Duration.ofSeconds(10), new BufferValue(11), "fasttrack", null)
         jobInfo.usedResources.swap = new BufferValue(12)
 
-        jobInfo.executionHosts = "host"
+        jobInfo.executionHosts = ["host"]
         jobInfo.account = "257"
         jobInfo.startCount = 361
 

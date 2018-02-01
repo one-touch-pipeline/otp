@@ -118,7 +118,7 @@ class ClusterJobSchedulerService {
         )
 
         BEJobResult jobResult = jobManager.submitJob(job)
-        if (!jobResult.wasExecuted) {
+        if (!jobResult.isSuccessful()) {
             try {
                 jobManager.killJobs([job])
             } catch (Exception e) {}

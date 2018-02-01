@@ -44,7 +44,7 @@ grails.project.dependency.resolution = {
         compile "org.jadira.usertype:usertype.jodatime:2.0.1"
 
         // library for interacting with cluster job schedulers
-        compile('com.github.eilslabs:BatchEuphoria:SGE-Direct-Beta-Release-1-160-gddb9a0d') {
+        compile('com.github.eilslabs:BatchEuphoria:0.0.1-9-ge1b994f') {
             excludes "logstash-logback-encoder", "commons-io"
         }
 

@@ -174,7 +174,7 @@ ${jobId}.clust_head.ine  OtherUnixUser    fast     r160224_18005293    --      1
         String result = service.executeJob(realm, "run the job")
 
         then:
-        3 * service.clusterJobManagerFactoryService.executionService.executeCommandReturnProcessOutput(realm, _ as String) >> out
+        4 * service.clusterJobManagerFactoryService.executionService.executeCommandReturnProcessOutput(realm, _ as String) >> out
         1 * service.clusterJobService.createClusterJob(realm, clusterJobId, SSHUSER, step, seqType, _ as String) >> clusterJob
         1 * service.clusterJobLoggingService.createAndGetLogDirectory(_, _) >> { TestCase.uniqueNonExistentPath }
         result == clusterJobId

@@ -117,7 +117,7 @@ class ClusterJobService {
         job.usedMemory = jobInfo.usedResources?.mem?.toLong(BufferUnit.k)
         job.usedSwap = jobInfo.usedResources?.swap?.toLong(BufferUnit.k)
 
-        job.node = jobInfo.executionHosts
+        job.node = jobInfo.executionHosts?.unique()?.sort()?.join(",")
         job.startCount = jobInfo.startCount
 
         assert job.save(flush: true, failOnError: true)

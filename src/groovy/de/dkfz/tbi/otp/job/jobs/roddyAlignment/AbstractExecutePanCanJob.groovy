@@ -7,8 +7,6 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 import org.springframework.beans.factory.annotation.*
 
-import java.util.regex.*
-
 abstract class AbstractExecutePanCanJob<R extends RoddyResult> extends AbstractRoddyJob<R> {
 
     @Autowired

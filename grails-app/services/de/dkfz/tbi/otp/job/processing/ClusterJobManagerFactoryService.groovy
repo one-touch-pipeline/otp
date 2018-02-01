@@ -27,6 +27,7 @@ class ClusterJobManagerFactoryService {
                     .setTrackUserJobsOnly(true)
                     .setTrackOnlyStartedJobs(false)
                     .setUserMask("027")
+                    .setPassEnvironment(true) // module system
                     .build()
 
             if (realm.jobScheduler == Realm.JobScheduler.PBS) {
