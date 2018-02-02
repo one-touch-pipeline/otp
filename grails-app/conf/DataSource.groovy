@@ -48,8 +48,11 @@ environments {
         dataSource {
             //the properties are described on http://tomcat.apache.org/tomcat-7.0-doc/jdbc-pool.html
             properties {
+                maxActive = 200                                         //max parallel connection
+                maxIdle = 50                                            //max parallel idle connection
+                minIdle = 25                                            //min idle connection
                 maxAge = HOURS.toMillis(1)                              //the time after which a connection will be closed
-                minEvictableIdleTimeMillis = MINUTES.toMillis(1)        //minimum time a connection need to be idle before remove
+                minEvictableIdleTimeMillis = MINUTES.toMillis(5)        //minimum time a connection need to be idle before remove
 
                 maxWait = SECONDS.toMillis(10)                          //max time a request wait for a free connection
 
