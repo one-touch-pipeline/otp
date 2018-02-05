@@ -39,11 +39,12 @@ class CreateNotificationTextService {
         String stepInformation = "${processingStep}Notification"(status).trim()
 
         String otrsTicketSeqCenterComment = otrsTicket.seqCenterComment ?: ""
-        String generalSeqCenterComment = ProcessingOptionService.findOptionSafe(
+        List<SeqCenter> seqCenters = otrsTicket.findAllSeqTracks()*.seqCenter.unique()
+        String generalSeqCenterComment = seqCenters.size() == 1 ? ProcessingOptionService.findOptionSafe(
                 OptionName.NOTIFICATION_TEMPLATE_SEQ_CENTER_NOTE,
-                exactlyOneElement(otrsTicket.findAllSeqTracks()*.seqCenter.unique()).name,
+                seqCenters.first().name,
                 null
-        ) ?: ""
+        ) ?: "" : ""
         String seqCenterComment = ""
 
         if (otrsTicketSeqCenterComment || generalSeqCenterComment) {

@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.*
 import spock.lang.*
 
 import static de.dkfz.tbi.otp.tracking.OtrsTicket.ProcessingStep.*
-import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 class CreateNotificationTextServiceIntegrationSpec extends IntegrationSpec {
 
@@ -63,7 +63,7 @@ class CreateNotificationTextServiceIntegrationSpec extends IntegrationSpec {
     }
 
     @Unroll
-    void "notification, return message"() {
+    void "notification, return message (#processingStep, otrs comment: #otrsTicketSeqCenterComment, default: #generalSeqCenterComment)"() {
         given:
         DomainFactory.createNotificationProcessingOptions()
         Project project = DomainFactory.createProject()
@@ -149,5 +149,79 @@ phabricatorAlias:
         INSTALLATION   | ''                         | 'Some general comment'
         INSTALLATION   | 'Some otrs comment'        | 'Some general comment'
         INSTALLATION   | NOTE                       | NOTE
+    }
+
+    void "notification, when ticket has more then one seq center, ignore seq center default message"() {
+        given:
+        String seqCenterMessage1 = "Message of seq center 1"
+        String seqCenterMessage2 = "Message of seq center 2"
+        DomainFactory.createNotificationProcessingOptions()
+        Project project = DomainFactory.createProject()
+        OtrsTicket ticket = DomainFactory.createOtrsTicket(
+                seqCenterComment: otrsTicketSeqCenterComment,
+        )
+        DataFile dataFile1 = DomainFactory.createDataFile(
+                runSegment: DomainFactory.createRunSegment(
+                        otrsTicket: ticket,
+                ),
+        )
+        DataFile dataFile2 = DomainFactory.createDataFile(
+                runSegment: DomainFactory.createRunSegment(
+                        otrsTicket: ticket,
+                ),
+        )
+        ProcessingStatus processingStatus = new ProcessingStatus()
+        DomainFactory.createProcessingOptionLazy(
+                name: ProcessingOption.OptionName.NOTIFICATION_TEMPLATE_SEQ_CENTER_NOTE,
+                type: dataFile1.run.seqCenter.name,
+                value: seqCenterMessage1
+        )
+        DomainFactory.createProcessingOptionLazy(
+                name: ProcessingOption.OptionName.NOTIFICATION_TEMPLATE_SEQ_CENTER_NOTE,
+                type: dataFile2.run.seqCenter.name,
+                value: seqCenterMessage2
+        )
+
+        CreateNotificationTextService createNotificationTextService = Spy(CreateNotificationTextService) {
+            0 * installationNotification(processingStatus) >> INSTALLATION.toString()
+            1 * alignmentNotification(processingStatus) >> ALIGNMENT.toString()
+            0 * snvNotification(processingStatus) >> SNV.toString()
+            0 * indelNotification(processingStatus) >> INDEL.toString()
+            0 * sophiaNotification(processingStatus) >> SOPHIA.toString()
+            0 * aceseqNotification(processingStatus) >> ACESEQ.toString()
+        }
+
+        String expectedSeqCenterComment
+
+        if (otrsTicketSeqCenterComment) {
+            expectedSeqCenterComment = """
+
+******************************
+Note from sequencing center:
+${otrsTicketSeqCenterComment}
+******************************"""
+        } else {
+            expectedSeqCenterComment = ""
+        }
+
+
+        String expected = """
+base notification
+stepInformation: ${processingStep.toString()}
+seqCenterComment: ${expectedSeqCenterComment}
+addition: 
+phabricatorAlias: 
+"""
+
+        when:
+        String message = createNotificationTextService.notification(ticket, processingStatus, processingStep, project)
+
+        then:
+        expected == message
+
+        where:
+        processingStep | otrsTicketSeqCenterComment
+        ALIGNMENT      | ''
+        ALIGNMENT      | 'Some comment'
     }
 }
