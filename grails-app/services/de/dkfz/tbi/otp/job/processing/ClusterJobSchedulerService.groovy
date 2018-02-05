@@ -153,7 +153,7 @@ class ClusterJobSchedulerService {
         } as Map<ClusterJobIdentifier, ClusterJobMonitoringService.Status>
     }
 
-    public void retrieveAndSaveJobInformationAfterJobStarted(ClusterJob clusterJob) {
+    public void retrieveAndSaveJobInformationAfterJobStarted(ClusterJob clusterJob) throws Exception {
         BatchEuphoriaJobManager jobManager = clusterJobManagerFactoryService.getJobManager(clusterJob.realm)
         GenericJobInfo jobInfo = jobManager.queryExtendedJobStateById([new BEJobID(clusterJob.clusterJobId)])
                 .get(new BEJobID(clusterJob.clusterJobId))
@@ -163,7 +163,7 @@ class ClusterJobSchedulerService {
          }
     }
 
-    public void retrieveAndSaveJobStatisticsAfterJobFinished(ClusterJobIdentifier jobIdentifier) {
+    public void retrieveAndSaveJobStatisticsAfterJobFinished(ClusterJobIdentifier jobIdentifier) throws Exception {
         BatchEuphoriaJobManager jobManager = clusterJobManagerFactoryService.getJobManager(jobIdentifier.realm)
         GenericJobInfo jobInfo = jobManager.queryExtendedJobStateById([new BEJobID(jobIdentifier.clusterJobId)])
                 .get(new BEJobID(jobIdentifier.clusterJobId))
