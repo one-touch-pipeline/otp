@@ -92,7 +92,11 @@ abstract class AbstractSophiaWorkflowTests extends AbstractRoddyBamFilePairAnaly
 
     @Override
     List<File> filesToCheck(SophiaInstance sophiaInstance) {
-        return [sophiaInstance.getFinalAceseqInputFile(), sophiaInstance.getQcJsonFile()]
+        return [
+                sophiaInstance.getFinalAceseqInputFile(),
+                sophiaInstance.getQcJsonFile(),
+                sophiaInstance.getCombinedPlotPath(),
+        ]
     }
 
     @Override

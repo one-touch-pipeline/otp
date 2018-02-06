@@ -9,8 +9,9 @@ import de.dkfz.tbi.otp.utils.*
 
 class SophiaInstance extends BamFilePairAnalysis implements ProcessParameterObject, Entity, RoddyAnalysisResult {
 
-    final static String SOPHIA_OUTPUT_FILE_SUFFIX = "filtered_somatic_minEventScore3.tsv"
-    static final String QUALITY_CONTROL_JSON_FILE_NAME = "qualitycontrol.json"
+    private final static String SOPHIA_OUTPUT_FILE_SUFFIX = "filtered_somatic_minEventScore3.tsv"
+    private final static String QUALITY_CONTROL_JSON_FILE_NAME = "qualitycontrol.json"
+    private final static String COMBINED_PLOT_FILE_SUFFIX = "filtered.tsv_score_3_scaled_merged.pdf"
 
     static hasMany = [
             roddyExecutionDirectoryNames: String
@@ -43,11 +44,15 @@ class SophiaInstance extends BamFilePairAnalysis implements ProcessParameterObje
     }
 
     File getCombinedPlotPath() {
-        return new File(getWorkDirectory(), "svs_${individual.pid}_${samplePair.sampleType1.name.toLowerCase()}-${samplePair.sampleType2.name.toLowerCase()}_filtered.tsv_score_3_scaled_merged.pdf")
+        return new File(getWorkDirectory(), "${fileNamePrefix}_${COMBINED_PLOT_FILE_SUFFIX}")
     }
 
     File getQcJsonFile() {
-        return new File(getInstancePath().absoluteDataManagementPath, QUALITY_CONTROL_JSON_FILE_NAME)
+        return new File(getWorkDirectory(), QUALITY_CONTROL_JSON_FILE_NAME)
+    }
+
+    private String getFileNamePrefix() {
+        "svs_${individual.pid}_${samplePair.sampleType1.name.toLowerCase()}-${samplePair.sampleType2.name.toLowerCase()}"
     }
 
     static SophiaInstance getLatestValidSophiaInstanceForSamplePair(SamplePair samplePair) {
