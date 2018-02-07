@@ -14,13 +14,13 @@ println processingOptionService.createOrUpdate(
         OptionName.PIPELINE_RODDY_INDEL_PLUGIN_VERSION,
         SeqType.wholeGenomePairedSeqType.roddyName,
         null,
-        '1.0.176-9'
+        '1.0.177-2'
 )
 println processingOptionService.createOrUpdate(
         OptionName.PIPELINE_RODDY_INDEL_PLUGIN_VERSION,
         SeqType.exomePairedSeqType.roddyName,
         null,
-        '1.0.176-9'
+        '1.0.177-2'
 )
 println processingOptionService.createOrUpdate(
         ProcessingOption.OptionName.PIPELINE_RODDY_INDEL_PLUGIN_CONFIG,
