@@ -256,7 +256,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         String expectedEmailSubjectCustomer = "[${prefix}#${ticket.ticketNumber}] TO BE SENT: ${seqTrack.project.name} sequencing data installed"
 
         trackingService.mailHelperService = Mock(MailHelperService) {
-            1 * sendEmail(expectedEmailSubjectOperator, _, otrsRecipient) >> { String emailSubject, String content, String recipient ->
+            1 * sendEmail(expectedEmailSubjectOperator, _, [otrsRecipient]) >> { String emailSubject, String content, List<String> recipient ->
                 assert content.contains(expectedStatus.toString())
             }
             1 * sendEmail(expectedEmailSubjectCustomer, notificationText, [otrsRecipient])
@@ -339,7 +339,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         String expectedEmailSubjectCustomer2 = expectedEmailSubjectCustomer + OtrsTicket.ProcessingStep.ALIGNMENT.notificationSubject
 
         trackingService.mailHelperService = Mock(MailHelperService) {
-            1 * sendEmail(expectedEmailSubjectOperator, _, otrsRecipient) >> { String emailSubject, String content, String recipient ->
+            1 * sendEmail(expectedEmailSubjectOperator, _, [otrsRecipient]) >> { String emailSubject, String content, List<String> recipient ->
                 assert content.contains(expectedStatus.toString())
             }
             1 * sendEmail(expectedEmailSubjectCustomer1, notificationText1, [otrsRecipient])

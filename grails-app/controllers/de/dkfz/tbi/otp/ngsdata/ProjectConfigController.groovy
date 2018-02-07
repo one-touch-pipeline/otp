@@ -97,6 +97,7 @@ class ProjectConfigController {
                 fingerPrinting            : project?.fingerPrinting,
                 mailingListName           : project?.mailingListName,
                 description               : project?.description,
+                customFinalNotification   : project?.customFinalNotification,
                 projectCategories         : ProjectCategory.listOrderByName()*.name,
                 accessPersons             : accessPersons,
                 unixGroup                 : project?.unixGroup,
@@ -231,6 +232,14 @@ class ProjectConfigController {
         assert id
         Project project = Project.get(id)
         projectService.updateFingerPrinting(project, value.toBoolean())
+        Map map = [success: true]
+        render map as JSON
+    }
+
+    JSON updateCustomFinalNotification(Long id, String value) {
+        assert id
+        Project project = Project.get(id)
+        projectService.updateCustomFinalNotification(project, value.toBoolean())
         Map map = [success: true]
         render map as JSON
     }

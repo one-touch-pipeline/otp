@@ -158,6 +158,17 @@
                                 value="${tumorEntity}"/>
                     </td>
                 </tr>
+                <tr>
+                    <td class="myKey"><g:message code="projectOverview.customFinalNotification.message"/></td>
+                    <td id="customFinalNotification">
+                        <otp:editorSwitch
+                                roles="ROLE_OPERATOR"
+                                template="dropDown"
+                                link="${g.createLink(controller: 'projectConfig', action: "updateCustomFinalNotification", id: project.id)}"
+                                values="${["true","false"]}"
+                                value="${customFinalNotification}"/>
+                    </td>
+                </tr>
             </table>
         </div>
 

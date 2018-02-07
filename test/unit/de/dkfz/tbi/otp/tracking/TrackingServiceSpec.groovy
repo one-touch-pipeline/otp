@@ -39,6 +39,7 @@ import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus
 class TrackingServiceSpec extends Specification {
 
     final static String TICKET_NUMBER = "2000010112345678"
+    final static String PREFIX = "the prefix"
 
     TrackingService trackingService = new TrackingService()
 
@@ -173,8 +174,7 @@ class TrackingServiceSpec extends Specification {
     void 'sendOperatorNotification, when finalNotification is false, sends normal notification with correct subject and content'() {
         given:
         OtrsTicket ticket = DomainFactory.createOtrsTicket()
-        String prefix = "the prefix"
-        DomainFactory.createProcessingOptionForOtrsTicketPrefix(prefix)
+        DomainFactory.createProcessingOptionForOtrsTicketPrefix(PREFIX)
         ProcessingStatus status = [
                 getInstallationProcessingStatus: { -> ALL_DONE },
                 getFastqcProcessingStatus      : { -> PARTLY_DONE_MIGHT_DO_MORE },
@@ -223,10 +223,10 @@ ILSe 5678, runA, lane 1, ${sampleText}
         int callCount = 0
         trackingService.mailHelperService = new MailHelperService() {
             @Override
-            void sendEmail(String emailSubject, String content, String recipient) {
+            void sendEmail(String emailSubject, String content, List<String> recipient) {
                 callCount++
-                assertEquals("${prefix}#${ticket.ticketNumber} Processing Status Update".toString(), emailSubject)
-                assertEquals(notificationRecipient, recipient)
+                assertEquals("${PREFIX}#${ticket.ticketNumber} Processing Status Update".toString(), emailSubject)
+                assertEquals([notificationRecipient], recipient)
                 assertEquals(expectedContent, content)
             }
         }
@@ -241,16 +241,65 @@ ILSe 5678, runA, lane 1, ${sampleText}
     void 'sendOperatorNotification, when finalNotification is true, sends final notification with correct subject'() {
         given:
         OtrsTicket ticket = DomainFactory.createOtrsTicket()
-        String prefix = "the prefix"
-        DomainFactory.createProcessingOptionForOtrsTicketPrefix(prefix)
+        DomainFactory.createProcessingOptionForOtrsTicketPrefix(PREFIX)
         String recipient = HelperUtils.uniqueString
         DomainFactory.createProcessingOptionForNotificationRecipient(recipient)
         trackingService.mailHelperService = Mock(MailHelperService) {
-            1 * sendEmail("${prefix}#${ticket.ticketNumber} Final Processing Status Update", _, recipient)
+            1 * sendEmail("${PREFIX}#${ticket.ticketNumber} Final Processing Status Update", _, [recipient])
         }
 
         expect:
-        trackingService.sendOperatorNotification(ticket, Collections.emptySet(), new ProcessingStatus(), true)
+        trackingService.sendOperatorNotification(ticket, [DomainFactory.createSeqTrack()] as Set, new ProcessingStatus(), true)
+    }
+
+    void 'sendOperatorNotification, when finalNotification is true and project.customFinalNotification is true and no Ilse, sends final notification with correct subject and to project list'() {
+        given:
+        OtrsTicket ticket = DomainFactory.createOtrsTicket()
+        String mailingListName = 'tr_a.b@c.d'
+        SeqTrack seqTrack = createSeqTrackforCustomFinalNotification(DomainFactory.createProject(mailingListName: mailingListName), null, ticket)
+        DomainFactory.createProcessingOptionForOtrsTicketPrefix(PREFIX)
+        String recipient = HelperUtils.uniqueString
+        DomainFactory.createProcessingOptionForNotificationRecipient(recipient)
+        trackingService.mailHelperService = Mock(MailHelperService) {
+            1 * sendEmail("${PREFIX}#${ticket.ticketNumber} Final Processing Status Update ${seqTrack.individual.pid} (${seqTrack.seqType.displayName})", _, [mailingListName, recipient])
+        }
+
+        expect:
+        trackingService.sendOperatorNotification(ticket, [seqTrack] as Set, new ProcessingStatus(), true)
+    }
+
+    void 'sendOperatorNotification, when finalNotification is true and project.customFinalNotification is true and has an Ilse Number, sends final notification with correct subject'() {
+        given:
+        OtrsTicket ticket = DomainFactory.createOtrsTicket()
+        SeqTrack seqTrack = createSeqTrackforCustomFinalNotification(DomainFactory.createProject(), DomainFactory.createIlseSubmission(), ticket)
+        DomainFactory.createProcessingOptionForOtrsTicketPrefix(PREFIX)
+        String recipient = HelperUtils.uniqueString
+        DomainFactory.createProcessingOptionForNotificationRecipient(recipient)
+        trackingService.mailHelperService = Mock(MailHelperService) {
+            1 * sendEmail("${PREFIX}#${ticket.ticketNumber} Final Processing Status Update [S#${seqTrack.ilseId}] ${seqTrack.individual.pid} (${seqTrack.seqType.displayName})", _, [recipient])
+        }
+
+        expect:
+        trackingService.sendOperatorNotification(ticket, [seqTrack] as Set, new ProcessingStatus(), true)
+    }
+
+    void 'sendOperatorNotification, when finalNotification is true and project.customFinalNotification is true for multiple seqTracks, sends final notification with correct subject'() {
+        given:
+        OtrsTicket ticket = DomainFactory.createOtrsTicket()
+        Project project = DomainFactory.createProject()
+        SeqTrack seqTrack1 = createSeqTrackforCustomFinalNotification(project, DomainFactory.createIlseSubmission(), ticket)
+        SeqTrack seqTrack2 = createSeqTrackforCustomFinalNotification(project, DomainFactory.createIlseSubmission(), ticket)
+        SeqTrack seqTrack3 = createSeqTrackforCustomFinalNotification(project, DomainFactory.createIlseSubmission(), ticket)
+
+        DomainFactory.createProcessingOptionForOtrsTicketPrefix(PREFIX)
+        String recipient = HelperUtils.uniqueString
+        DomainFactory.createProcessingOptionForNotificationRecipient(recipient)
+        trackingService.mailHelperService = Mock(MailHelperService) {
+            1 * sendEmail("${PREFIX}#${ticket.ticketNumber} Final Processing Status Update [S#${seqTrack1.ilseId},${seqTrack2.ilseId},${seqTrack3.ilseId}] ${seqTrack1.individual.pid}, ${seqTrack2.individual.pid}, ${seqTrack3.individual.pid} (${seqTrack1.seqType.displayName}, ${seqTrack2.seqType.displayName}, ${seqTrack3.seqType.displayName})", _, [recipient])
+        }
+
+        expect:
+        trackingService.sendOperatorNotification(ticket, [seqTrack1, seqTrack2, seqTrack3] as Set, new ProcessingStatus(), true)
     }
 
     void "getProcessingStatus returns expected status"() {
@@ -332,5 +381,21 @@ ILSe 5678, runA, lane 1, ${sampleText}
         assert otrsTicket.aceseqFinished == null
         assert !otrsTicket.finalNotificationSent
         return true
+    }
+
+    private SeqTrack createSeqTrackforCustomFinalNotification(Project project, IlseSubmission ilseSubmission, OtrsTicket ticket) {
+        SeqTrack seqTrack = DomainFactory.createSeqTrackWithOneDataFile(
+                [
+                        ilseSubmission: ilseSubmission,
+                        sample        : DomainFactory.createSample(
+                                individual: DomainFactory.createIndividual(
+                                        project: project
+                                )
+                        ),
+                ],
+                [runSegment: DomainFactory.createRunSegment(otrsTicket: ticket), fileLinked: true])
+        project.customFinalNotification = true
+        project.save(flush: true)
+        return seqTrack
     }
 }

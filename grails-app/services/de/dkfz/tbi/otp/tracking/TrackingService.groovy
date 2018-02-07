@@ -180,6 +180,30 @@ class TrackingService {
         }
         subject.append(' Processing Status Update')
 
+        List<String> recipients = []
+
+        List projects = seqTracks*.project.unique()
+
+        if (finalNotification && projects.size() == 1 && projects.first().customFinalNotification) {
+            List ilseSubmissions = seqTracks*.ilseSubmission.findAll().unique()
+            if (ilseSubmissions) {
+                subject.append(" [S#${ilseSubmissions*.ilseNumber.sort().join(',')}]")
+            }
+            List individuals = seqTracks*.individual.findAll().unique()
+            subject.append(" ${individuals*.pid.sort().join(', ')} ")
+            List seqTypes = seqTracks*.seqType.findAll().unique()
+            subject.append("(${seqTypes*.displayName.sort().join(', ')})")
+            String mailingList = null
+            if (ticket.automaticNotification) {
+                mailingList = projects.first().mailingListName
+            }
+            if (mailingList) {
+                recipients.add(mailingList)
+            }
+        }
+
+        recipients.add(ProcessingOptionService.getValueOfProcessingOption(EMAIL_RECIPIENT_NOTIFICATION))
+
         StringBuilder content = new StringBuilder()
         content.append(status.toString())
         content.append('\n').append(seqTracks.size()).append(' SeqTrack(s) in ticket ').append(ticket.ticketNumber).append(':\n')
@@ -187,8 +211,7 @@ class TrackingService {
             appendSeqTrackString(content, seqTrack)
             content.append('\n')
         }
-
-        mailHelperService.sendEmail(subject.toString(), content.toString(), ProcessingOptionService.getValueOfProcessingOption(EMAIL_RECIPIENT_NOTIFICATION))
+        mailHelperService.sendEmail(subject.toString(), content.toString(), recipients)
     }
 
     void appendSeqTrackString(StringBuilder sb, SeqTrack seqTrack) {
@@ -202,7 +225,7 @@ class TrackingService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void assignOtrsTicketToRunSegment(String ticketNumber, Long runSegmentId) {
         RunSegment runSegment = RunSegment.get(runSegmentId)
-        assert runSegment : "No RunSegment found for ${runSegmentId}."
+        assert runSegment: "No RunSegment found for ${runSegmentId}."
 
         OtrsTicket oldOtrsTicket = runSegment.otrsTicket
 
@@ -307,7 +330,8 @@ class TrackingService {
         }
     }
 
-    private static WorkflowProcessingStatus getAnalysisProcessingStatus(BamFilePairAnalysis analysis, SamplePair sp, BamFileAnalysisService service) {
+    private
+    static WorkflowProcessingStatus getAnalysisProcessingStatus(BamFilePairAnalysis analysis, SamplePair sp, BamFileAnalysisService service) {
         WorkflowProcessingStatus status
         if (analysis && !analysis.withdrawn && analysis.processingState == AnalysisProcessingStates.FINISHED && [1, 2].every {
             AbstractMergedBamFile bamFile = analysis."sampleType${it}BamFile"
@@ -320,9 +344,9 @@ class TrackingService {
             if (BamFileAnalysisService.ANALYSIS_CONFIG_CLASSES.any {
                 service.samplePairForProcessing(ProcessingPriority.MINIMUM_PRIORITY, it, [sp.seqType], sp)
             }) {
-              status = NOTHING_DONE_MIGHT_DO
+                status = NOTHING_DONE_MIGHT_DO
             } else {
-              status = NOTHING_DONE_WONT_DO
+                status = NOTHING_DONE_WONT_DO
             }
         } else {
             status = NOTHING_DONE_MIGHT_DO
@@ -346,15 +370,15 @@ class TrackingService {
                 indelStatus,
                 indelStatus == ALL_DONE ? ici : null,
                 sophiaStatus,
-                sophiaStatus == ALL_DONE ? si: null,
+                sophiaStatus == ALL_DONE ? si : null,
                 aceseqStatus,
                 aceseqStatus == ALL_DONE ? ai : null,
         )
     }
 
     static def <O> WorkflowProcessingStatus combineStatuses(Iterable<O> objects,
-                                                     Closure<WorkflowProcessingStatus> getObjectStatus,
-                                                     WorkflowProcessingStatus additionalStatus = null) {
+                                                            Closure<WorkflowProcessingStatus> getObjectStatus,
+                                                            WorkflowProcessingStatus additionalStatus = null) {
         Done done = additionalStatus?.done
         boolean mightDoMore = additionalStatus?.mightDoMore ?: false
         for (O object : objects) {

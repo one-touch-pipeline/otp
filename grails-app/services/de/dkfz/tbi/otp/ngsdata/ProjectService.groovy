@@ -664,6 +664,12 @@ echo 'OK'
         project.fingerPrinting = value
         assert project.save(flush: true)
     }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void updateCustomFinalNotification(Project project, boolean value) {
+        project.customFinalNotification = value
+        assert project.save(flush: true)
+    }
 }
 
 trait ProjectSeqTypeConfiguration {

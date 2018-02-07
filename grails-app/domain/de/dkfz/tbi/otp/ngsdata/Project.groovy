@@ -43,6 +43,8 @@ class Project implements Commentable, Entity, AlignmentConfig {
 
     boolean fingerPrinting = true
 
+    boolean customFinalNotification = false
+
     static hasMany = [
             projectCategories: ProjectCategory,
     ]
