@@ -182,19 +182,17 @@ class RestartParseServiceSpec extends Specification {
                 if (text.empty) {
                     return []
                 } else {
-                    return (1..text.size()).collect {
+                    return text.collect { String content ->
                         new ClusterJob(
-                                clusterJobId: it - 1,
+                                jobLog: {
+                                    if (content) {
+                                        return CreateFileHelper.createFile(temporaryFolder.newFile(), content).absolutePath
+                                    } else {
+                                        return TestCase.uniqueNonExistentPath.absolutePath
+                                    }
+                                }()
                         )
                     }
-                }
-            }
-            text.size() * getLogFilePath(_) >> { ClusterJob clusterJob ->
-                String content = text.getAt(clusterJob.clusterJobId as int)
-                if (content) {
-                    CreateFileHelper.createFile(temporaryFolder.newFile(), content)
-                } else {
-                    TestCase.uniqueNonExistentPath
                 }
             }
             _ * getLog() >> Mock(Log) {
@@ -242,8 +240,11 @@ class RestartParseServiceSpec extends Specification {
                 },
         )
         Job job = GroovyMock(Job) {
-            countClusterLog * failedOrNotFinishedClusterJobs() >> [new ClusterJob()]
-            _ * getLogFilePath(_) >> TestCase.uniqueNonExistentPath
+            countClusterLog * failedOrNotFinishedClusterJobs() >> [
+                    new ClusterJob([
+                            jobLog: TestCase.uniqueNonExistentPath.absolutePath
+                    ])
+            ]
             _ * getLog() >> Mock(Log) {
                 _ * debug(_)
             }
@@ -345,10 +346,11 @@ class RestartParseServiceSpec extends Specification {
         )
 
         Job job = GroovyMock(Job) {
-            _ * failedOrNotFinishedClusterJobs() >> [new ClusterJob()]
-            _ * getLogFilePath(_) >> { ClusterJob clusterJob ->
-                CreateFileHelper.createFile(temporaryFolder.newFile(), cluster)
-            }
+            _ * failedOrNotFinishedClusterJobs() >> [
+                    new ClusterJob([
+                            jobLog: CreateFileHelper.createFile(temporaryFolder.newFile(), cluster).absolutePath
+                    ])
+            ]
             _ * getLog() >> Mock(Log) {
                 _ * debug(_)
             }

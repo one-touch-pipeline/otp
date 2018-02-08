@@ -35,7 +35,9 @@ class RestartParseService {
 
     JobErrorDefinition.Action handleTypeClusterLogs(Job job, Collection<JobErrorDefinition> jobErrorDefinitions) {
         job.log.debug("Checking cluster job log(s).")
-        Collection<File> logFiles = job.failedOrNotFinishedClusterJobs().collect { job.getLogFilePath(it) }
+        Collection<File> logFiles = job.failedOrNotFinishedClusterJobs().collect {
+            it.jobLog as File
+        }
         if (logFiles.empty) {
             job.log.debug("Could not find any cluster job log.")
             return JobErrorDefinition.Action.STOP
