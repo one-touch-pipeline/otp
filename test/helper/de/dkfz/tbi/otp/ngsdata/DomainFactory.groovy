@@ -1101,7 +1101,7 @@ class DomainFactory {
         ], [:])
     }
 
-    public static SophiaQc createSophiaQc(Map properties) {
+    public static SophiaQc createSophiaQc(Map properties = [:], boolean createAndValidate = true) {
         return createDomainObject(SophiaQc, [
 
                 sophiaInstance                       : { createSophiaInstanceWithRoddyBamFiles() },
@@ -1111,10 +1111,10 @@ class DomainFactory {
                 rnaContaminatedGenesCount            : 1,
                 rnaDecontaminationApplied            : true,
 
-        ], properties)
+        ], properties, createAndValidate)
     }
 
-    public static AceseqInstance createAceseqInstance(Map properties) {
+    public static AceseqInstance createAceseqInstance(Map properties = [:]) {
         if (!properties.containsKey('latestDataFileCreationDate')) {
             properties += [latestDataFileCreationDate: AbstractBamFile.getLatestSequenceDataFileCreationDate(
                     properties.sampleType1BamFile, properties.sampleType2BamFile)]
@@ -1716,7 +1716,7 @@ class DomainFactory {
         return createDataFile(defaultProperties + properties)
     }
 
-    public static RoddySnvCallingInstance createRoddySnvCallingInstance(Map properties) {
+    public static RoddySnvCallingInstance createRoddySnvCallingInstance(Map properties = [:]) {
         if (!properties.containsKey('latestDataFileCreationDate')) {
             properties += [latestDataFileCreationDate: AbstractBamFile.getLatestSequenceDataFileCreationDate(
                     properties.sampleType1BamFile, properties.sampleType2BamFile)]

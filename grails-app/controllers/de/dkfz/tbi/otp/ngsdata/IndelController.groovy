@@ -87,7 +87,7 @@ class IndelController {
                     somaticSmallVarsInTumorPass: sampleSwap?.somaticSmallVarsInTumorPass ?: "",
                     somaticSmallVarsInControlPass: sampleSwap?.somaticSmallVarsInControlPass ?: "",
                     tindaSomaticAfterRescue: sampleSwap?.tindaSomaticAfterRescue ?: "",
-                    tindaSomaticAfterRescueMedianAlleleFreqInControl: sampleSwap ? FormatHelper.formatToTwoDecimalsNullSave(sampleSwap.tindaSomaticAfterRescueMedianAlleleFreqInControl) : "",
+                    tindaSomaticAfterRescueMedianAlleleFreqInControl: sampleSwap ? FormatHelper.formatNumber(sampleSwap.tindaSomaticAfterRescueMedianAlleleFreqInControl) : "",
             ])
             Collection<String> libPrepKitShortNames
             if (SeqTypeNames.fromSeqTypeName(properties.seqTypeName)?.isWgbs()) {

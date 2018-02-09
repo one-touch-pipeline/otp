@@ -57,12 +57,12 @@ class QcThresholdSpec extends Specification {
 
         where:
         compare                                  | qc1 | qc2 | warning
-        QcThreshold.Compare.biggerThanThreshold  | 15  | 20  | QcThreshold.WarningLevel.NO
-        QcThreshold.Compare.biggerThanThreshold  | 9   | 15  | QcThreshold.WarningLevel.WarningLevel1
-        QcThreshold.Compare.biggerThanThreshold  | 5   | 8   | QcThreshold.WarningLevel.WarningLevel2
-        QcThreshold.Compare.smallerThanThreshold | 5   | 8   | QcThreshold.WarningLevel.NO
-        QcThreshold.Compare.smallerThanThreshold | 15  | 9   | QcThreshold.WarningLevel.WarningLevel1
-        QcThreshold.Compare.smallerThanThreshold | 20  | 15  | QcThreshold.WarningLevel.WarningLevel2
+        QcThreshold.Compare.biggerThanThreshold  | 15  | 20  | QcThreshold.ThresholdLevel.OKAY
+        QcThreshold.Compare.biggerThanThreshold  | 9   | 15  | QcThreshold.ThresholdLevel.WARNING
+        QcThreshold.Compare.biggerThanThreshold  | 5   | 8   | QcThreshold.ThresholdLevel.ERROR
+        QcThreshold.Compare.smallerThanThreshold | 5   | 8   | QcThreshold.ThresholdLevel.OKAY
+        QcThreshold.Compare.smallerThanThreshold | 15  | 9   | QcThreshold.ThresholdLevel.WARNING
+        QcThreshold.Compare.smallerThanThreshold | 20  | 15  | QcThreshold.ThresholdLevel.ERROR
     }
 
 
@@ -84,12 +84,12 @@ class QcThresholdSpec extends Specification {
 
         where:
         compare                                    | control | tumor | warning
-        QcThreshold.Compare.biggerThanQcProperty2  | 15      | 20    | QcThreshold.WarningLevel.NO
-        QcThreshold.Compare.biggerThanQcProperty2  | 18      | 12    | QcThreshold.WarningLevel.WarningLevel1
-        QcThreshold.Compare.biggerThanQcProperty2  | 30      | 8     | QcThreshold.WarningLevel.WarningLevel2
-        QcThreshold.Compare.smallerThanQcProperty2 | 8       | 5     | QcThreshold.WarningLevel.NO
-        QcThreshold.Compare.smallerThanQcProperty2 | 5       | 11    | QcThreshold.WarningLevel.WarningLevel1
-        QcThreshold.Compare.smallerThanQcProperty2 | 5       | 20    | QcThreshold.WarningLevel.WarningLevel2
+        QcThreshold.Compare.biggerThanQcProperty2  | 15      | 20    | QcThreshold.ThresholdLevel.OKAY
+        QcThreshold.Compare.biggerThanQcProperty2  | 18      | 12    | QcThreshold.ThresholdLevel.WARNING
+        QcThreshold.Compare.biggerThanQcProperty2  | 30      | 8     | QcThreshold.ThresholdLevel.ERROR
+        QcThreshold.Compare.smallerThanQcProperty2 | 8       | 5     | QcThreshold.ThresholdLevel.OKAY
+        QcThreshold.Compare.smallerThanQcProperty2 | 5       | 11    | QcThreshold.ThresholdLevel.WARNING
+        QcThreshold.Compare.smallerThanQcProperty2 | 5       | 20    | QcThreshold.ThresholdLevel.ERROR
     }
 
 
@@ -110,11 +110,11 @@ class QcThresholdSpec extends Specification {
 
         where:
         compare                                                     | qc1 | qc2 | warning
-        QcThreshold.Compare.biggerThanThresholdFactorExternalValue  | 15  | 20  | QcThreshold.WarningLevel.NO
-        QcThreshold.Compare.biggerThanThresholdFactorExternalValue  | 4   | 15  | QcThreshold.WarningLevel.WarningLevel1
-        QcThreshold.Compare.biggerThanThresholdFactorExternalValue  | 2   | 4   | QcThreshold.WarningLevel.WarningLevel2
-        QcThreshold.Compare.smallerThanThresholdFactorExternalValue | 4   | 2   | QcThreshold.WarningLevel.NO
-        QcThreshold.Compare.smallerThanThresholdFactorExternalValue | 6   | 4   | QcThreshold.WarningLevel.WarningLevel1
-        QcThreshold.Compare.smallerThanThresholdFactorExternalValue | 8   | 6   | QcThreshold.WarningLevel.WarningLevel2
+        QcThreshold.Compare.biggerThanThresholdFactorExternalValue  | 15  | 20  | QcThreshold.ThresholdLevel.OKAY
+        QcThreshold.Compare.biggerThanThresholdFactorExternalValue  | 4   | 15  | QcThreshold.ThresholdLevel.WARNING
+        QcThreshold.Compare.biggerThanThresholdFactorExternalValue  | 2   | 4   | QcThreshold.ThresholdLevel.ERROR
+        QcThreshold.Compare.smallerThanThresholdFactorExternalValue | 4   | 2   | QcThreshold.ThresholdLevel.OKAY
+        QcThreshold.Compare.smallerThanThresholdFactorExternalValue | 6   | 4   | QcThreshold.ThresholdLevel.WARNING
+        QcThreshold.Compare.smallerThanThresholdFactorExternalValue | 8   | 6   | QcThreshold.ThresholdLevel.ERROR
     }
 }

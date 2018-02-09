@@ -3,29 +3,18 @@ package de.dkfz.tbi.otp.utils
 class FormatHelper {
 
     /**
-     * null pointer save formatter for double.
-     * If argument is null, return empty string, otherwise format the number
-     * to two digits and return the formated string.
+     * Method to format numbers.
+     * If the number is a floating point number, is formatted with 2 decimal places
+     * If the number is an integer, is formatted with group separators (groups of 3 digits are separated by a comma)
+     * If the number is null, return empty string
      */
-    public static String formatToTwoDecimalsNullSave(Double number) {
+    public static String formatNumber(Number number) {
         if (number == null) {
             return ""
+        } else if (number instanceof Float || number instanceof Double || number instanceof BigDecimal) {
+            return String.format(Locale.ENGLISH, '%.2f', number)
+        } else {
+            return String.format(Locale.ENGLISH, '%,d', number)
         }
-        return String.format(Locale.ENGLISH, '%.2f', number)
     }
-
-
-
-    /**
-     * null pointer save formatter for display number with group digits.
-     * If argument is null, return empty string, otherwise format the number
-     * using groups of three digest.
-     */
-    public static String formatGroupsNullSave(Long longValue) {
-        if (longValue == null) {
-            return ""
-        }
-        return String.format(Locale.ENGLISH, '%,d', longValue)
-    }
-
 }

@@ -33,19 +33,19 @@ class QcThreshold implements Entity {
         smallerThanThresholdFactorExternalValue,
     }
 
-    static enum WarningLevel {
-        NO('okay'),
-        WarningLevel1('warning1'),
-        WarningLevel2('warning2')
+    static enum ThresholdLevel {
+        OKAY('threshold-okay'),
+        WARNING('threshold-warning'),
+        ERROR('threshold-error')
 
         final String styleClass
 
-        WarningLevel(String styleClass) {
+        ThresholdLevel(String styleClass) {
             this.styleClass = styleClass
         }
     }
 
-    WarningLevel qcPassed(QcTrafficLightValue qc, double externalValue = 0) {
+    ThresholdLevel qcPassed(QcTrafficLightValue qc, double externalValue = 0) {
         switch (this.compare) {
             case QcThreshold.Compare.biggerThanQcProperty2:
                 isBiggerThanQcProperty2(qc)
@@ -69,55 +69,55 @@ class QcThreshold implements Entity {
         }
     }
 
-    private WarningLevel isBiggerThanQcProperty2(QcTrafficLightValue qc) {
+    private ThresholdLevel isBiggerThanQcProperty2(QcTrafficLightValue qc) {
         if (qc."${qcProperty1}" == null || qc."${qcProperty2}" == null) {
-            return WarningLevel.NO
+            return ThresholdLevel.OKAY
         }
         return warningLevel((qc."${qcProperty1}" - qc."${qcProperty2}") > warningThreshold, (qc."${qcProperty1}" - qc."${qcProperty2}") > errorThreshold)
     }
 
-    private WarningLevel isSmallerThanQcProperty2(QcTrafficLightValue qc) {
+    private ThresholdLevel isSmallerThanQcProperty2(QcTrafficLightValue qc) {
         if (qc."${qcProperty1}" == null || qc."${qcProperty2}" == null) {
-            return WarningLevel.NO
+            return ThresholdLevel.OKAY
         }
         return warningLevel((qc."${qcProperty2}" - qc."${qcProperty1}") > warningThreshold, (qc."${qcProperty2}" - qc."${qcProperty1}") > errorThreshold)
     }
 
-    private WarningLevel isBiggerThanThreshold(QcTrafficLightValue qc) {
+    private ThresholdLevel isBiggerThanThreshold(QcTrafficLightValue qc) {
         if (qc."${qcProperty1}" == null) {
-            return WarningLevel.NO
+            return ThresholdLevel.OKAY
         }
         return warningLevel(qc."${qcProperty1}" > warningThreshold, qc."${qcProperty1}" > errorThreshold)
     }
 
-    private WarningLevel isSmallerThanThreshold(QcTrafficLightValue qc) {
+    private ThresholdLevel isSmallerThanThreshold(QcTrafficLightValue qc) {
         if (qc."${qcProperty1}" == null) {
-            return WarningLevel.NO
+            return ThresholdLevel.OKAY
         }
         return warningLevel(qc."${qcProperty1}" < warningThreshold, qc."${qcProperty1}" < errorThreshold)
     }
 
-    private WarningLevel isBiggerThanThresholdFactorExternalValue(QcTrafficLightValue qc, double externalValue) {
+    private ThresholdLevel isBiggerThanThresholdFactorExternalValue(QcTrafficLightValue qc, double externalValue) {
         if (qc."${qcProperty1}" == null) {
-            return WarningLevel.NO
+            return ThresholdLevel.OKAY
         }
         return warningLevel(qc."${qcProperty1}" > (warningThreshold * externalValue), qc."${qcProperty1}" > (errorThreshold * externalValue))
     }
 
-    private WarningLevel isSmallerThanThresholdFactorExternalValue(QcTrafficLightValue qc, double externalValue) {
+    private ThresholdLevel isSmallerThanThresholdFactorExternalValue(QcTrafficLightValue qc, double externalValue) {
         if (qc."${qcProperty1}" == null) {
-            return WarningLevel.NO
+            return ThresholdLevel.OKAY
         }
         return warningLevel (qc."${qcProperty1}" < (warningThreshold * externalValue), qc."${qcProperty1}" < (errorThreshold * externalValue))
     }
 
-    private static WarningLevel warningLevel(boolean conditionForLevel1, boolean conditionForLevel2) {
-        if (conditionForLevel2) {
-            return WarningLevel.WarningLevel2
-        } else if (conditionForLevel1) {
-            return WarningLevel.WarningLevel1
+    private static ThresholdLevel warningLevel(boolean conditionForWarning, boolean conditionForError) {
+        if (conditionForError) {
+            return ThresholdLevel.ERROR
+        } else if (conditionForWarning) {
+            return ThresholdLevel.WARNING
         } else {
-            return WarningLevel.NO
+            return ThresholdLevel.OKAY
         }
     }
 }

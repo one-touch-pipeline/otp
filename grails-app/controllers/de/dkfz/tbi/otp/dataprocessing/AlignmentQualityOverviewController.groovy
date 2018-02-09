@@ -2,7 +2,7 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.qcTrafficLight.QcThreshold
+import de.dkfz.tbi.otp.qcTrafficLight.*
 import de.dkfz.tbi.otp.utils.*
 import grails.converters.*
 
@@ -91,6 +91,7 @@ class AlignmentQualityOverviewController {
 
     ProjectService projectService
     ProjectSelectionService projectSelectionService
+    QcThresholdService qcThresholdService
 
     Map index(AlignmentQcCommand cmd) {
         String projectName = params.project
@@ -172,11 +173,10 @@ class AlignmentQualityOverviewController {
         // TODO: has to be adapted when issue OTP-1670 is solved
         Map sequenceLengthsMap = sequenceLengths.groupBy { it[0] }
 
-        QcThreshold percentDuplicatesThreshold = !dataOverall.empty ? getQcThresholdInstance(project, seqType, dataOverall.first().class.toString(), "percentDuplicates") : null
-        QcThreshold properlyPairedThreshold = !dataOverall.empty ? getQcThresholdInstance(project, seqType, dataOverall.first().class.toString(), "properlyPaired") : null
-        QcThreshold percentDiffChrThreshold = !dataOverall.empty ? getQcThresholdInstance(project, seqType, dataOverall.first().class.toString(), "percentDiffChr") : null
-        QcThreshold insertSizeMedianThreshold = !dataOverall.empty ? getQcThresholdInstance(project, seqType, dataOverall.first().class.toString(), "insertSizeMedian") : null
-        QcThreshold onTargetRatioThreshold = (!dataOverall.empty  && seqType.isExome()) ? getQcThresholdInstance(project, seqType, dataOverall.first().class.toString(), "onTargetRatio") : null
+        QcThresholdService.ThresholdColorizer thresholdColorizer
+        if (dataOverall) {
+            thresholdColorizer = qcThresholdService.createThresholdColorizer(project, seqType, dataOverall.first().class)
+        }
 
         Map<Long, Map<String, List<ReferenceGenomeEntry>>> chromosomeLengthForChromosome =
                 overallQualityAssessmentMergedService.findChromosomeLengthForQualityAssessmentMerged(chromosomes, dataOverall).
@@ -193,32 +193,35 @@ class AlignmentQualityOverviewController {
             double readLength = readLengthString.contains('-') ? (readLengthString.split('-').sum {
                 it as double
             } / 2) : readLengthString as double
-            Map map = [
-                    mockPid               : abstractMergedBamFile.individual.mockPid,
+            Map<String, TableCellValue> map = [
+                    pid                   : new TableCellValue(
+                                                abstractMergedBamFile.individual.displayName, null,
+                                                g.createLink(
+                                                        controller: 'individual',
+                                                        action: 'show',
+                                                        id: abstractMergedBamFile.individual.id,
+                                                ).toString()
+                                            ),
                     sampleType            : abstractMergedBamFile.sampleType.name,
-                    mappedReads           : FormatHelper.formatToTwoDecimalsNullSave(it.percentMappedReads),    // flagstat
-                    duplicates            : FormatHelper.formatToTwoDecimalsNullSave(it.percentDuplicates),     // picard
-                    diffChr               : FormatHelper.formatToTwoDecimalsNullSave(it.percentDiffChr),
-                    properlyPaired        : FormatHelper.formatToTwoDecimalsNullSave(it.percentProperlyPaired), // flagstat
-                    singletons            : FormatHelper.formatToTwoDecimalsNullSave(it.percentSingletons),     // flagstat
-                    medianPE_insertsize   : FormatHelper.formatToTwoDecimalsNullSave(it.insertSizeMedian), //Median PE_insertsize
                     dateFromFileSystem    : abstractMergedBamFile.dateFromFileSystem?.format("yyyy-MM-dd"),
-                    //warning for duplicates
-                    duplicateWarning      : percentDuplicatesThreshold?.qcPassed(it)?.styleClass,
-
-
-                    //warning for properlyPpaired
-                    properlyPairedWarning : properlyPairedThreshold?.qcPassed(it)?.styleClass,
-
-                    //warning for diff chrom
-                    diffChrWarning        : percentDiffChrThreshold?.qcPassed(it)?.styleClass,
-                    medianWarning         : insertSizeMedianThreshold?.qcPassed(it, readLength)?.styleClass,
-                    plot                  : it.id,
                     withdrawn             : abstractMergedBamFile.withdrawn,
                     pipeline              : abstractMergedBamFile.workPackage.pipeline.displayName,
-                    kit                   : [name: kit*.name.join(", ") ?: "", shortName: kit*.shortDisplayName.join(", ") ?: "-"],
+                    kit                   : new TableCellValue(
+                                                kit*.shortDisplayName.join(", ") ?: "-", null, null,
+                                                kit*.name.join(", ") ?: ""
+                                            ),
             ]
 
+            Map<String, Double> qcKeysMap = [
+                    "insertSizeMedian": readLength,
+            ]
+            List<String> qcKeys = [
+                    "percentMappedReads",
+                    "percentDuplicates",
+                    "percentDiffChr",
+                    "percentProperlyPaired",
+                    "percentSingletons",
+            ]
 
             switch (seqType.name) {
                 case SeqTypeNames.WHOLE_GENOME.seqTypeName:
@@ -240,45 +243,44 @@ class AlignmentQualityOverviewController {
                     }
 
                     map << [
-                            coverageWithoutN: FormatHelper.formatToTwoDecimalsNullSave(abstractMergedBamFile.coverage), //Coverage w/o N
-                            coverageX       : FormatHelper.formatToTwoDecimalsNullSave(coverageX), //ChrX Coverage w/o N
-                            coverageY       : FormatHelper.formatToTwoDecimalsNullSave(coverageY), //ChrY Coverage w/o N
+                            coverageWithoutN: FormatHelper.formatNumber(abstractMergedBamFile.coverage), //Coverage w/o N
+                            coverageX       : FormatHelper.formatNumber(coverageX), //ChrX Coverage w/o N
+                            coverageY       : FormatHelper.formatNumber(coverageY), //ChrY Coverage w/o N
                     ]
                     break
 
                 case SeqTypeNames.EXOME.seqTypeName:
                     map << [
-                            onTargetRate       : FormatHelper.formatToTwoDecimalsNullSave(it.onTargetRatio),
-                            targetCoverage     : FormatHelper.formatToTwoDecimalsNullSave(abstractMergedBamFile.coverage), // coverage
-
-                            //warning for onTargetRate
-                            onTargetRateWarning: onTargetRatioThreshold?.qcPassed(it).styleClass,
+                            targetCoverage     : FormatHelper.formatNumber(abstractMergedBamFile.coverage),
+                    ]
+                    qcKeys += [
+                            "onTargetRatio",
                     ]
                     break
 
                 case SeqTypeNames.RNA.seqTypeName:
-                    map<<[
-                            threePNorm : FormatHelper.formatToTwoDecimalsNullSave(it.threePNorm),
-                            fivePNorm : FormatHelper.formatToTwoDecimalsNullSave(it.fivePNorm),
-                            chimericPairs : it.chimericPairs,
-                            duplicatesRate : FormatHelper.formatToTwoDecimalsNullSave(it.duplicatesRate),
-                            end1Sense : FormatHelper.formatToTwoDecimalsNullSave(it.end1Sense),
-                            end2Sense : FormatHelper.formatToTwoDecimalsNullSave(it.end2Sense),
-                            estimatedLibrarySize : it.estimatedLibrarySize,
-                            exonicRate : FormatHelper.formatToTwoDecimalsNullSave(it.exonicRate),
-                            expressionProfilingEfficiency : FormatHelper.formatToTwoDecimalsNullSave(it.expressionProfilingEfficiency),
-                            genesDetected : it.genesDetected,
-                            intergenicRate : FormatHelper.formatToTwoDecimalsNullSave(it.intergenicRate),
-                            intragenicRate : FormatHelper.formatToTwoDecimalsNullSave(it.intragenicRate),
-                            intronicRate : FormatHelper.formatToTwoDecimalsNullSave(it.intronicRate),
-                            mapped : it.mapped,
-                            mappedUnique : it.mappedUnique,
-                            mappedUniqueRateOfTotal : FormatHelper.formatToTwoDecimalsNullSave(it.mappedUniqueRateOfTotal),
-                            mappingRate : FormatHelper.formatToTwoDecimalsNullSave(it.mappingRate),
-                            meanCV : FormatHelper.formatToTwoDecimalsNullSave(it.meanCV),
-                            uniqueRateofMapped : FormatHelper.formatToTwoDecimalsNullSave(it.uniqueRateofMapped),
-                            rRNARate : FormatHelper.formatToTwoDecimalsNullSave(it.rRNARate),
-                            totalReadCounter : it.totalReadCounter,
+                    qcKeys += [
+                            "totalReadCounter",
+                            "threePNorm",
+                            "fivePNorm",
+                            "chimericPairs",
+                            "duplicatesRate",
+                            "end1Sense",
+                            "end2Sense",
+                            "estimatedLibrarySize",
+                            "exonicRate",
+                            "expressionProfilingEfficiency",
+                            "genesDetected",
+                            "intergenicRate",
+                            "intragenicRate",
+                            "intronicRate",
+                            "mapped",
+                            "mappedUnique",
+                            "mappedUniqueRateOfTotal",
+                            "mappingRate",
+                            "meanCV",
+                            "uniqueRateofMapped",
+                            "rRNARate",
                     ]
                     break
 
@@ -286,6 +288,8 @@ class AlignmentQualityOverviewController {
                     throw new RuntimeException("How should ${seqTypeName} be handled")
             }
 
+            map += thresholdColorizer.colorize(qcKeysMap, it)
+            map += thresholdColorizer.colorize(qcKeys, it)
             return map
         }
 
@@ -296,15 +300,6 @@ class AlignmentQualityOverviewController {
             List<AbstractQualityAssessment>> qualityAssessmentMergedPassGroupedByChromosome, List<String> chromosomeNames) {
         return exactlyOneElement(chromosomeNames.findResult { qualityAssessmentMergedPassGroupedByChromosome.get(it) })
     }
-
-
-    static QcThreshold getQcThresholdInstance(Project project1, SeqType seqType1, String qcClass1, String qcProperty) {
-        return CollectionUtils.atMostOneElement(QcThreshold.findAllByProjectAndSeqTypeAndQcClassAndQcProperty1(project1, seqType1, qcClass1, qcProperty)) ?:
-                        CollectionUtils.atMostOneElement(QcThreshold.findAllByProjectAndQcClassAndQcProperty1AndSeqTypeIsNull(project1, qcClass1, qcProperty)) ?:
-                                CollectionUtils.atMostOneElement(QcThreshold.findAllBySeqTypeAndQcClassAndQcProperty1AndProjectIsNull(seqType1, qcClass1, qcProperty)) ?:
-                                        CollectionUtils.atMostOneElement(QcThreshold.findAllByQcClassAndQcProperty1AndProjectIsNullAndSeqTypeIsNull(qcClass1, qcProperty)) ?: null
-    }
-
 }
 
 class AlignmentQcCommand {
