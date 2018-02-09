@@ -61,13 +61,18 @@ abstract class PanCanAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkfl
 
         MergingWorkPackage mergingWorkPackage = exactlyOneElement(MergingWorkPackage.findAll())
 
+        createProjectConfigForQualityControlWorkflow(mergingWorkPackage)
+
+        executeAndVerify_AlignLanesOnly_AllFine()
+    }
+
+    private createProjectConfigForQualityControlWorkflow(MergingWorkPackage mergingWorkPackage) {
         createProjectConfig(mergingWorkPackage, [
                 pluginName       : "QualityControlWorkflows",
                 pluginVersion    : "1.2.182",
                 baseProjectConfig: "otpPanCanAlignmentWorkflow-1.3",
                 configVersion    : "v2_0",
         ])
-        executeAndVerify_AlignLanesOnly_AllFine()
     }
 
     @Test
@@ -122,12 +127,7 @@ abstract class PanCanAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkfl
     void testAlignBaseBamAndNewLanes_workflow_1_0_182_1_allFine() {
         MergingWorkPackage mergingWorkPackage = exactlyOneElement(MergingWorkPackage.findAll())
 
-        createProjectConfig(mergingWorkPackage, [
-                pluginName       : "QualityControlWorkflows",
-                pluginVersion    : "1.2.182",
-                baseProjectConfig: "otpPanCanAlignmentWorkflow-1.3",
-                configVersion    : "v2_0",
-        ])
+        createProjectConfigForQualityControlWorkflow(mergingWorkPackage)
 
         alignBaseBamAndNewLanesHelper(false)
     }
