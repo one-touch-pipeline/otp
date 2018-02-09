@@ -58,6 +58,15 @@ class RoddyAlignmentStartJobTest {
     }
 
     @Test
+    void testFindProcessableMergingWorkPackages_WhenMergingWorkPackagesHasNoSeqTracks_ShouldNotReturnThatMergingWorkpackage() {
+        MergingWorkPackage mwp = createMergingWorkPackage()
+        mwp.seqTracks = null
+        mwp.save()
+
+        assert [] == testRoddyAlignmentStartJob.findProcessableMergingWorkPackages(0 as short)
+    }
+
+    @Test
     void testFindProcessableMergingWorkPackages_WhenRoddyBamFileIsNotProcessedAndNotWithdrawn_ShouldReturnEmptyList() {
         DomainFactory.createRoddyBamFile([
                 workPackage: createMergingWorkPackage(),
@@ -343,11 +352,14 @@ class RoddyAlignmentStartJobTest {
     }
 
     MergingWorkPackage createMergingWorkPackage() {
-        return DomainFactory.createMergingWorkPackage([
+        MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage([
                 seqType        : DomainFactory.createWholeGenomeSeqType(),
                 needsProcessing: true,
                 pipeline       : DomainFactory.createPanCanPipeline(),
         ])
+        mergingWorkPackage.seqTracks = [DomainFactory.createSeqTrack(mergingWorkPackage)]
+        mergingWorkPackage.save()
+        return mergingWorkPackage
     }
 
     MergingWorkPackage createMergingWorkPackageWithSeqTrackInState(SeqTrack.DataProcessingState dataInstallationState) {

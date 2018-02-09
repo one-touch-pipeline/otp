@@ -66,6 +66,7 @@ abstract class RoddyAlignmentStartJob extends AbstractStartJobImpl implements Re
                     'AND fileOperationStatus <> :processed ' +
                     'AND withdrawn = false ' +
                 ') ' +
+                'AND mwp.seqTracks is not empty ' +
                 'AND sample.individual.project.processingPriority >= :minPriority ' +
                 'ORDER BY sample.individual.project.processingPriority DESC, mwp.id ASC',
                 [
