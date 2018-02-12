@@ -567,6 +567,10 @@ where
     }
 
     public List getAccessPersons(Project project) {
+        getAccessPersons([project])
+    }
+
+    public List getAccessPersons(List<Project> projects) {
         String query = """\
         SELECT username
         FROM users
@@ -576,15 +580,15 @@ where
         JOIN acl_entry ON acl_sid.id = acl_entry.sid
         JOIN acl_object_identity ON acl_entry.acl_object_identity = acl_object_identity.id
         JOIN acl_class ON acl_object_identity.object_id_class = acl_class.id
-        WHERE object_id_identity = :projectId AND acl_class.class = :className
+        WHERE object_id_identity in ( ${projects*.id.join(', ')} ) AND acl_class.class = :className
         GROUP BY username ORDER BY username
         """
         List accessPersons = []
         def sql = new Sql(dataSource)
-        sql.eachRow(query, [projectId: project?.id, className: Project.name]) {
+        sql.eachRow(query, [className: Project.name]) {
             accessPersons.add(it.username)
         }
-        return accessPersons
+        return accessPersons.unique()
     }
 }
 

@@ -146,6 +146,9 @@ class ClusterJob implements Entity {
     Integer startCount
 
     Set<ClusterJob> dependencies
+
+    Individual individual
+
     static hasMany = [
             dependencies: ClusterJob
     ]
@@ -185,6 +188,7 @@ class ClusterJob implements Entity {
         systemSuspendStateDuration nullable: true
         userSuspendStateDuration nullable: true
         startCount nullable: true, min: 1
+        individual(nullable: true)
     }
 
     static mapping = {

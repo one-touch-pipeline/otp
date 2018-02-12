@@ -5,7 +5,7 @@
     <meta name="layout" content="mainV2"/>
 </head>
 <body>
-<div class="container">
+<div class="body container">
     <div class="row">
         <div class="col-xs-12">
             <h2><g:message code="intro.news.title" /> <a class="pull-right" data-toggle="modal" href="#moreNews"><g:message code="intro.news.more" /></a></h2>

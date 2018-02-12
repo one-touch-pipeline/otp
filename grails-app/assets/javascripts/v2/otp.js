@@ -156,12 +156,18 @@ OTP = {
             }
         }
         return scope[scopeSplit[scopeSplit.length - 1]];
-    }
+    },
 };
 
 $(function() {
     // enable bootstrap tooltips
     $('[title]').tooltip();
+
+    // changes the height of the body container to fit the whole page
+    $('.container.body').height($(window).height() - 250);
+    $(window).resize(function(){
+        $('.container.body').height($(window).height() - 250);
+    });
 
     // show/hide scroll to top button
     $(window).scroll(function() {

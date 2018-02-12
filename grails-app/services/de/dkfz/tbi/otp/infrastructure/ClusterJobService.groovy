@@ -52,6 +52,7 @@ class ClusterJobService {
                                        String jobClass = processingStep.nonQualifiedJobClass) {
         ClusterJob job = new ClusterJob(
                 processingStep: processingStep,
+                individual: processingStep.processParameterObject?.individual,
                 realm: realm,
                 clusterJobId: clusterJobId,
                 userName: userName,

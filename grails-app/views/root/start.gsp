@@ -5,10 +5,10 @@
     <meta name="layout" content="mainV2"/>
 </head>
 <body>
-<div class="container">
+<div class="body container">
     <div class="row">
         <div class="col-xs-12">
-            <h2>${projectSelection.getDisplayName()}</h2>
+            <h2>${projectSelection.getDisplayName()}s</h2>
             <hr>
             <p>
                 <g:if test="${projectSelection instanceof Project}">

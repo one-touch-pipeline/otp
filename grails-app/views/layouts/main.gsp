@@ -85,6 +85,7 @@
                                             <li><g:link controller="clusterJobGeneral" action="index"><g:message code="otp.menu.jobstats.general"/></g:link></li><br>
                                             <li><g:link controller="clusterJobJobTypeSpecific" action="index"><g:message code="otp.menu.jobstats.jobTypeSpecific"/></g:link></li><br>
                                             <li><g:link controller="processingTimeStatistics" action="index"><g:message code="otp.menu.processingTimeStatistics"/></g:link></li>
+                                            <li><g:link controller="statistics" action="kpi">${g.message(code: "otp.menu.kpi")}</g:link></li>
                                         </ul>
                                     </li>
                                 </ul>

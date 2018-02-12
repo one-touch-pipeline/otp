@@ -151,8 +151,20 @@
                                     <li><a href="#">${g.message(code: "otp.menu.sample")}</a></li>
                                     <li><a href="#">${g.message(code: "otp.menu.run")}</a></li>
                                     <li><a href="#">${g.message(code: "otp.menu.lane")}</a></li>
-                                    <li><a href="#">${g.message(code: "otp.menu.statistics")}</a></li>
                                     <sec:ifAnyGranted roles="ROLE_OPERATOR">
+                                        <li class="dropdown">
+                                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">${g.message(code: "otp.menu.statistics")}<span class="caret"></span></a>
+                                            <ul class="dropdown-menu">
+                                                <li><g:link controller="overviewMB" action="index">${g.message(code: "otp.menu.generalStatistics")}</g:link></li>
+                                                <li role="separator" class="divider"></li>
+                                                <li><g:link controller="clusterJobGeneral" action="index"><g:message code="otp.menu.jobstats.general"/></g:link></li>
+                                                <li><g:link controller="clusterJobJobTypeSpecific" action="index">${g.message(code: "otp.menu.jobstats.jobTypeSpecific")}</g:link></li>
+                                                <li role="separator" class="divider"></li>
+                                                <li><g:link controller="processingTimeStatistics" action="index">${g.message(code: "otp.menu.processingTimeStatistics")}</g:link></li>
+                                                <li role="separator" class="divider"></li>
+                                                <li><g:link controller="statistics" action="kpi">${g.message(code: "otp.menu.kpi")}</g:link></li>
+                                            </ul>
+                                        </li>
                                         <li class="dropdown">
                                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Operator <span class="caret"></span></a>
                                             <ul class="dropdown-menu">
@@ -189,6 +201,7 @@
                                             </ul>
                                         </li>
                                     </sec:ifAnyGranted>
+                                    <li><g:link controller="home" action="index">${g.message(code: "otp.menu.defaultLayout")}</g:link></li>
                                 </ul>
                             </div>
                         </div>

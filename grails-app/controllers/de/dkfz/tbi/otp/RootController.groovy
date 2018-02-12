@@ -26,11 +26,11 @@ class RootController {
         String messageText, type
         switch (params.login) {
             case 'required':
-                messageText = message(code:"login.message.pleaseLogin")
+                messageText = message(code: "login.message.pleaseLogin")
                 type = "warning"
                 break
             case 'failed':
-                messageText = message(code:"login.message.loginFailed")
+                messageText = message(code: "login.message.loginFailed")
                 type = "danger"
                 break
         }
@@ -39,13 +39,13 @@ class RootController {
         String aboutOtp = ProcessingOptionService.findOptionSafe(OptionName.GUI_ABOUT_OTP, null, null)
 
         return [
-                projects: Project.count,
-                lanes: SeqTrack.count,
-                username: session.getAttribute(SpringSecurityUtils.SPRING_SECURITY_LAST_USERNAME_KEY),
-                message: messageText,
-                type: type,
+                projects    : Project.count,
+                lanes       : SeqTrack.count,
+                username    : session.getAttribute(SpringSecurityUtils.SPRING_SECURITY_LAST_USERNAME_KEY),
+                message     : messageText,
+                type        : type,
                 showPartners: showPartners,
-                aboutOtp: aboutOtp,
+                aboutOtp    : aboutOtp,
         ]
     }
 
@@ -100,7 +100,6 @@ class RootController {
         render dataToRender as JSON
     }
 
-
     def start() {
         if (!springSecurityService.isLoggedIn()) {
             forward action: "intro"
@@ -130,7 +129,7 @@ class RootController {
 
         c = DataFile.createCriteria()
         int newIndividuals = c.get {
-            seqTrack{
+            seqTrack {
                 sample {
                     projections {
                         countDistinct("individual")
@@ -144,7 +143,7 @@ class RootController {
         }
         c = DataFile.createCriteria()
         int newSamples = c.get {
-            seqTrack{
+            seqTrack {
                 projections {
                     countDistinct("sample")
                 }
@@ -161,7 +160,7 @@ class RootController {
             projections {
                 countDistinct("seqTrack")
             }
-            seqTrack{
+            seqTrack {
                 sample {
                     individual {
                         'in'('project', selection.projects)
@@ -172,12 +171,12 @@ class RootController {
         }
 
         return [
-                numberIndividuals: individualsFinder,
-                numberSamples: samples,
-                numberSeqTracks: seqTracks,
+                numberIndividuals   : individualsFinder,
+                numberSamples       : samples,
+                numberSeqTracks     : seqTracks,
                 numberNewIndividuals: newIndividuals,
-                numberNewSamples: newSamples,
-                numberNewSeqTracks: newSeqTracks,
+                numberNewSamples    : newSamples,
+                numberNewSeqTracks  : newSeqTracks,
         ]
     }
 }
