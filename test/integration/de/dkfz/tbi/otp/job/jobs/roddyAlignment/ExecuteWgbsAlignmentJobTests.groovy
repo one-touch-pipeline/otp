@@ -58,6 +58,10 @@ class ExecuteWgbsAlignmentJobTests {
                 'otp.processing.root.path': tmpDir.root.path
         ])
 
+        executeWgbsAlignmentJob.lsdfFilesService.configService = configService
+
+        prepareDataFilesOnFileSystem(roddyBamFile)
+
         CreateFileHelper.createFile(executeWgbsAlignmentJob.referenceGenomeService.fastaFilePath(roddyBamFile.referenceGenome, false))
         CreateFileHelper.createFile(executeWgbsAlignmentJob.referenceGenomeService.chromosomeStatSizeFile(roddyBamFile.mergingWorkPackage, false))
     }
@@ -256,5 +260,23 @@ class ExecuteWgbsAlignmentJobTests {
     void testWorkflowSpecificValidation_AllFine() {
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
         executeWgbsAlignmentJob.workflowSpecificValidation(roddyBamFile)
+    }
+
+    private void prepareDataFilesOnFileSystem(RoddyBamFile bamFile) {
+        assert 1 == bamFile.seqTracks.size()
+        SeqTrack seqTrack = bamFile.seqTracks.iterator().next()
+        List<DataFile> dataFiles = DataFile.findAllBySeqTrack(seqTrack, [sort: 'mateNumber'])
+        assert 2 == dataFiles.size()
+        File dataFile1File = new File(executeWgbsAlignmentJob.lsdfFilesService.getFileViewByPidPath(dataFiles[0]))
+        createFileAndAddFileSize(dataFile1File, dataFiles[0])
+        File dataFile2File = new File(executeWgbsAlignmentJob.lsdfFilesService.getFileViewByPidPath(dataFiles[1]))
+        createFileAndAddFileSize(dataFile2File, dataFiles[1])
+    }
+
+
+    private void createFileAndAddFileSize(File file, DataFile dataFile) {
+        CreateFileHelper.createFile(file)
+        dataFile.fileSize = file.length()
+        assert dataFile.save(flush: true)
     }
 }

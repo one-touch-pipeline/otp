@@ -58,6 +58,10 @@ class ExecuteWgbsAlignmentJob extends AbstractRoddyAlignmentJob implements AutoR
         builder << HEADER
 
         builder << DataFile.findAllBySeqTrackInList(roddyBamFile.seqTracks).sort { it.mateNumber }.collect { DataFile dataFile ->
+            File file = new File(lsdfFilesService.getFileViewByPidPath(dataFile))
+            LsdfFilesService.ensureFileIsReadableAndNotEmpty(file)
+            assert dataFile.fileSize == file.length()
+
             [dataFile.sampleType.dirName, // it is correct that the header is 'Sample', this is because of the different names for the same things
              dataFile.seqTrack.getLibraryDirectoryName(),
              dataFile.individual.pid,
