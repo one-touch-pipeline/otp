@@ -1,11 +1,12 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.Entity
 
 class ProjectContactPerson implements Serializable, Entity {
 
     Project project
-    ContactPerson contactPerson
+    User user
     ContactPersonRole contactPersonRole
 
     static constraints = {

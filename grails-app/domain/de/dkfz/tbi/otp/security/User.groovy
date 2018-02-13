@@ -16,13 +16,17 @@ class User implements TimeStamped, Entity {
     boolean accountLocked
     boolean passwordExpired
     String email
+    String realName // with format '<first_name> <last_name>'
+    String asperaAccount
 
     boolean acceptedPrivacyPolicy
 
     static constraints = {
-        username blank: false, unique: true
-        password blank: false
-        email    nullable: true, email: true
+        username(blank: false, unique: true, nullable: true)
+        password(blank: false)
+        email(unique: true, email: true)
+        realName(blank: false)
+        asperaAccount(blank: false, nullable: true)
     }
 
     static mapping = {

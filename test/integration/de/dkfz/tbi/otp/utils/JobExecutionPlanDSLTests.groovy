@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.utils
 
+import grails.plugin.springsecurity.SpringSecurityService
 import org.junit.Test
 
 import static org.junit.Assert.*
@@ -17,6 +18,7 @@ import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
 
 
 class JobExecutionPlanDSLTests extends AbstractIntegrationTest {
+    SpringSecurityService springSecurityService
     def grailsApplication
     def planValidatorService
     def groupService

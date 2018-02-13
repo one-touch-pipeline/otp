@@ -13,6 +13,8 @@ class CreateUserCommand implements Serializable {
 
     String username
     String email
+    String realName
+    String asperaAccount
     List<Long> role
     List<Long> group
 
@@ -21,6 +23,8 @@ class CreateUserCommand implements Serializable {
             return User.findByUsername(value) == null
         })
         email(email: true)
+        realName(blank: false)
+        asperaAccount(nullable: true)
         role(nullable: true, validator: { value ->
             boolean valid = true
             value.each { id ->

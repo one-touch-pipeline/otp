@@ -148,6 +148,8 @@ class DomainFactory {
         return createDomainObject(User, [
                 username: "user_${counter++}",
                 password: "password_${counter++}",
+                email   : "user${counter++}@dummy.de",
+                realName: "realName_${counter++}",
                 enabled : true,
         ], properties)
     }

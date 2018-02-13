@@ -1,18 +1,11 @@
 package de.dkfz.tbi.otp.administration
 
-import de.dkfz.tbi.otp.security.Group
-import de.dkfz.tbi.otp.security.Role
-import de.dkfz.tbi.otp.security.User
-import de.dkfz.tbi.otp.security.UserRole
+import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.user.*
-import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.*
 import grails.plugin.springsecurity.SpringSecurityUtils
-import grails.util.Environment
-import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.security.access.AccessDeniedException
-import org.springframework.security.authentication.AnonymousAuthenticationToken
-import org.springframework.security.authentication.BadCredentialsException
-import org.springframework.transaction.TransactionStatus
+import org.springframework.security.access.prepost.*
+import org.springframework.security.authentication.*
 
 /**
  * @short Service for User administration.
@@ -58,14 +51,12 @@ class UserService {
         springSecurityService.reauthenticate(user.username, newPassword)
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN') or authentication.name==#user.username")
-    void editUser(User user) throws UserInvalidException {
-        User origUser = User.findByUsername(user.username)
-        origUser.email = user.email
-        if (!origUser.validate()) {
-            throw new UserInvalidException(user.username)
-        }
-        origUser.save(flush: true)
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void editUser(EditUserCommand cmd) {
+        User origUser = cmd.user
+        updateEmail(origUser, cmd.email)
+        updateRealName(origUser, cmd.realName)
+        updateAsperaAccount(origUser, cmd.asperaAccount)
     }
 
     @PreAuthorize("hasRole('ROLE_USER')")
@@ -109,7 +100,9 @@ class UserService {
                              accountExpired: false,
                              accountLocked: false,
                              passwordExpired: false,
-                             password: "*")
+                             password: "*",
+                             realName: command.realName,
+                             asperaAccount: null)
         if (!user.validate()) {
             throw new RegistrationException(command.username)
         }
@@ -121,6 +114,32 @@ class UserService {
             Group group = groupService.getGroup(it)
             groupService.addUserToGroup(user, group)
         }
+        return user
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    User updateRealName(User user, String newName) {
+        assert newName: "the input newName '${newName}' must not be null"
+        assert user: "the input user must not be null"
+        user.realName = newName
+        assert user.save(flush: true, failOnError: true)
+        return user
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    User updateEmail(User user, String email) {
+        assert email: "the input Email '${email}' must not be null"
+        assert user: "the input user must not be null"
+        user.email = email
+        assert user.save(flush: true, failOnError: true)
+        return user
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    User updateAsperaAccount(User user, String aspera) {
+        assert user: "the input user must not be null"
+        user.asperaAccount = aspera
+        assert user.save(flush: true, failOnError: true)
         return user
     }
 
@@ -323,12 +342,14 @@ No user exists yet, create user ${currentUser} with admin rights.
 \n"""
                 User user = new User([
                         username       : currentUser,
-                        email          : null,
+                        email          : "admin@dummy.de",
                         enabled        : true,
                         accountExpired : false,
                         accountLocked  : false,
                         passwordExpired: false,
                         password       : "*", //need for plugin, but unused in OTP
+                        realName       : currentUser,
+                        asperaAccount  : null,
                 ]).save(flush: true)
 
                 [Role.ROLE_ADMIN, Role.ROLE_USER].each {

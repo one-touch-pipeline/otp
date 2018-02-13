@@ -6,6 +6,8 @@ import de.dkfz.tbi.otp.user.*
 import de.dkfz.tbi.otp.utils.*
 import grails.converters.*
 import grails.plugin.springsecurity.annotation.*
+import org.springframework.validation.FieldError
+
 /**
  * @short Controller for user management.
  *
@@ -184,16 +186,7 @@ class UserAdministrationController {
      * Action for editing non-security relevant user information.
      */
     def editUser = { EditUserCommand cmd ->
-        Map data = [:]
-        if (cmd.hasErrors()) {
-            data.put("error", true)
-            data.put("username", resolveErrorMessage(cmd, "username", "Username"))
-            data.put("email", resolveErrorMessage(cmd, "email", "Email"))
-        } else {
-            userService.editUser(cmd.toUser())
-            data.put("success", true)
-        }
-        render data as JSON
+        checkErrorAndCallMethod(cmd, { userService.editUser(cmd) })
     }
 
     /**
@@ -244,19 +237,21 @@ class UserAdministrationController {
         render result as JSON
     }
 
-    private String resolveErrorMessage(EditUserCommand cmd, String field, String description) {
-        if (cmd.errors.getFieldError(field)) {
-            switch (cmd.errors.getFieldError(field).code) {
-            case "blank":
-                return g.message(code: "user.administration.${field}.blank")
-            case "email.invalid":
-                return g.message(code: "user.administration.${field}.invalid")
-            default:
-                return g.message(code: "error.unknown", args: [description])
-            }
+    private void checkErrorAndCallMethod(EditUserCommand cmd, Closure method) {
+        Map data
+        if (cmd.hasErrors()) {
+            data = getErrorData(cmd.errors.getFieldError())
+        } else {
+            method()
+            data = [success: true]
         }
-        return null
+        render data as JSON
     }
+
+    private Map getErrorData(FieldError errors) {
+        return [success: false, error: "'" + errors.getRejectedValue() + "' is not a valid value for '" + errors.getField() + "'. Error code: '" + errors.code + "'"]
+    }
+
 
     /**
      * Resolves the error message for a field error
@@ -307,28 +302,6 @@ class RegistrationCommand {
         email(nullable: false, email: true, blank: false)
     }
 
-    User toUser() {
-        return new User(username: this.username, email: this.email)
-    }
-}
-
-/**
- * @short Command Object to validate the user before editing.
- */
-class EditUserCommand implements Serializable {
-    private static final long serialVersionUID = 1L
-    String username
-    String email
-
-    static constraints = {
-        username(nullable: false, blank: false)
-        email(nullable: false, blank: false, email: true)
-    }
-
-    /**
-     *
-     * @return The command object as a User
-     */
     User toUser() {
         return new User(username: this.username, email: this.email)
     }

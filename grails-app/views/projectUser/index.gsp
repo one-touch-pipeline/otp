@@ -3,8 +3,8 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="layout" content="main" />
-    <title><g:message code="projectMember.title" args="[project?.name]"/></title>
-    <asset:javascript src="pages/projectMember/index/functions.js"/>
+    <title><g:message code="projectUser.title" args="[project?.name]"/></title>
+    <asset:javascript src="pages/projectUser/index/functions.js"/>
     <asset:javascript src="modules/editorSwitch"/>
 </head>
 <body>
@@ -38,55 +38,36 @@
                         <td>
                             <otp:editorSwitch
                                     roles="ROLE_OPERATOR"
-                                    link="${g.createLink(controller: 'projectMember', action: 'updateName', params: ["contactPerson.id": projectContactPerson.contactPerson.id])}"
-                                    value="${projectContactPerson.contactPerson.fullName}"
+                                    link="${g.createLink(controller: 'projectUser', action: 'updateName', params: ["user.id": projectContactPerson.user.id])}"
+                                    value="${projectContactPerson.user.realName}"
                                     values="${projectContactPersons}"/>
                         </td>
                         <td>
                             <otp:editorSwitch
                                     roles="ROLE_OPERATOR"
-                                    link="${g.createLink(controller: 'projectMember', action: 'updateEmail', params: ["contactPerson.id": projectContactPerson.contactPerson.id])}"
-                                    value="${projectContactPerson.contactPerson.email}"
+                                    link="${g.createLink(controller: 'projectUser', action: 'updateEmail', params: ["user.id": projectContactPerson.user.id])}"
+                                    value="${projectContactPerson.user.email}"
                                     values="${projectContactPersons}"/>
                         </td>
                         <td>
                             <otp:editorSwitch
                                     roles="ROLE_OPERATOR"
-                                    link="${g.createLink(controller: 'projectMember', action: 'updateAspera', params: ["contactPerson.id": projectContactPerson.contactPerson.id])}"
-                                    value="${projectContactPerson.contactPerson.aspera}"
+                                    link="${g.createLink(controller: 'projectUser', action: 'updateAspera', params: ["user.id": projectContactPerson.user.id])}"
+                                    value="${projectContactPerson.user.asperaAccount}"
                                     values="${projectContactPersons}"/>
                         </td>
                         <td>
-                            <otp:editorSwitch
-                                    roles="ROLE_OPERATOR"
-                                    template="dropDown"
-                                    link="${g.createLink(controller: 'projectMember', action: 'updateRole', params: ["projectContactPerson.id": projectContactPerson.id])}"
-                                    value="${projectContactPerson.contactPersonRole?.name ?: ''} "
-                                    values="${roleDropDown}"/>
+                            ${projectContactPerson.contactPersonRole?.name ?: ''}
                         </td>
-                        <sec:ifAllGranted roles="ROLE_OPERATOR">
-                            <td>
-                                <input type="button" class="deletePerson" value="Delete" data-id="${projectContactPerson.id}"/>
-                            </td>
-                        </sec:ifAllGranted>
                     </tr>
                 </g:each>
             </table>
         </div>
-        <p>
-            <otp:editorSwitchNewValues
-                    roles="ROLE_OPERATOR"
-                    labels="${["Name", "E-Mail", "Aspera Account", "Role"]}"
-                    textFields="${["name", "email", "aspera"]}"
-                    dropDowns="${[role: roleDropDown]}"
-                    link="${g.createLink(controller: 'projectMember', action: "createContactPersonOrAddToProject", params: ['project.id': project.id])}"
-            />
-        </p>
         <sec:ifAllGranted roles="ROLE_OPERATOR">
             <br>
             <div>
                 <h3><g:message code="projectOverview.accessPerson.headline" /></h3>
-                <a id="toggleLink" href="javascript:void(0)" onclick="$.otp.projectMember.toggle('controlElement', 'toggleLink')">Show list</a>
+                <a id="toggleLink" href="javascript:void(0)" onclick="$.otp.projectUser.toggle('controlElement', 'toggleLink')">Show list</a>
                 <ul id="controlElement" style="display: none">
                     <g:each in="${accessPersons}">
                         <li>
@@ -101,10 +82,5 @@
         <h3><g:message code="default.no.project"/></h3>
     </g:else>
     </div>
-    <asset:script>
-        $(function() {
-            $.otp.projectMember.deleteUser();
-        });
-    </asset:script>
 </body>
 </html>

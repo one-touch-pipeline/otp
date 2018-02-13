@@ -55,6 +55,7 @@
             <h1><g:message code="user.administration.ui.heading.user"/></h1>
             <div>
             <form id="edit-user-form" method="POST">
+                <input type="hidden" id="edit-user-userid" name="userid" value="${user.id}"/>
                 <table>
                     <thead></thead>
                     <tbody>
@@ -65,6 +66,14 @@
                     <tr>
                         <td><label for="edit-user-email"><g:message code="user.administration.ui.email"/>:</label></td>
                         <td><span><input type="text" id="edit-user-email" name="email" value="${user.email}"/></span></td>
+                    </tr>
+                    <tr>
+                        <td><label for="edit-user-realname"><g:message code="user.administration.ui.realName"/>:</label></td>
+                        <td><span><input type="text" id="edit-user-realname" name="realName" value="${user.realName}"/></span></td>
+                    </tr>
+                    <tr>
+                        <td><label for="edit-user-asperaaccount"><g:message code="user.administration.ui.asperaAccount"/>:</label></td>
+                        <td><span><input type="text" id="edit-user-asperaaccount" name="asperaAccount" value="${user.asperaAccount}"/></span></td>
                     </tr>
                     </tbody>
                 </table>
@@ -140,7 +149,7 @@
             </div>
         </div>
     </body>
-    <asset:script>
+    <asset:script type="text/javascript">
         $(function() {
             $.otp.userAdministration.editUser.register.call($.otp.userAdministration.editUser);
             $.otp.growBodyInit(240);

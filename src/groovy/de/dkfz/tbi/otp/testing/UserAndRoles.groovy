@@ -14,7 +14,6 @@ import static org.junit.Assert.*
 
 trait UserAndRoles {
 
-    SpringSecurityService springSecurityService
     AclUtilService aclUtilService
 
     final static String ADMIN = "admin"
@@ -24,63 +23,29 @@ trait UserAndRoles {
 
     /**
      * Creates four users and their roles:
-     * @li testuser with password secret and role ROLE_USER
-     * @li user with password verysecret and role ROLE_USER
-     * @li operator with password verysecret and ROLE_OPERATOR and ROLE_USER
-     * @li admin with password 1234 and ROLE_ADMIN and ROLE_USER
+     * @li testuser with role ROLE_USER
+     * @li user with role ROLE_USER
+     * @li operator with ROLE_USER and ROLE_OPERATOR
+     * @li admin with ROLE_USER and ROLE_ADMIN
      */
     void createUserAndRoles() {
-        User user = new User(username: TESTUSER,
-                password: "*",
-                userRealName: "Test",
-                email: "test@test.com",
-                enabled: true,
-                accountExpired: false,
-                accountLocked: false,
-                passwordExpired: false)
-        assertNotNull(user.save(flush: true))
-        assertNotNull(new AclSid(sid: user.username, principal: true).save(flush: true))
-        User user2 = new User(username: USER,
-                password: "*",
-                userRealName: "Test2",
-                email: "test2@test.com",
-                enabled: true,
-                accountExpired: false,
-                accountLocked: false,
-                passwordExpired: false)
-        assertNotNull(user2.save(flush: true))
-        assertNotNull(new AclSid(sid: user2.username, principal: true).save(flush: true))
-        User operator = new User(username: OPERATOR,
-                password: "*",
-                userRealName: "Operator",
-                email: "test2@test.com",
-                enabled: true,
-                accountExpired: false,
-                accountLocked: false,
-                passwordExpired: false)
-        assertNotNull(operator.save(flush: true))
-        assertNotNull(new AclSid(sid: operator.username, principal: true).save(flush: true))
-        User admin = new User(username: ADMIN,
-                password: "*",
-                userRealName: "Administrator",
-                email: "admin@test.com",
-                enabled: true,
-                accountExpired: false,
-                accountLocked: false,
-                passwordExpired: false)
-        assertNotNull(admin.save(flush: true))
-        assertNotNull(new AclSid(sid: admin.username, principal: true).save(flush: true))
         Role userRole = new Role(authority: Role.ROLE_USER)
         assertNotNull(userRole.save(flush: true))
-        UserRole.create(user, userRole, false)
-        UserRole.create(user2, userRole, false)
-        UserRole.create(admin, userRole, false)
+
         Role adminRole = new Role(authority: Role.ROLE_ADMIN)
         assertNotNull(adminRole.save(flush: true))
-        UserRole.create(admin, adminRole, false)
+
         Role operatorRole = new Role(authority: Role.ROLE_OPERATOR)
         assertNotNull(operatorRole.save(flush: true))
-        UserRole.create(operator, operatorRole, true)
+
+        [ADMIN, OPERATOR, TESTUSER, USER].each {
+            User user = DomainFactory.createUser([username: it])
+            assertNotNull(user.save(flush: true))
+            assertNotNull(new AclSid(sid: user.username, principal: true).save(flush: true))
+            UserRole.create(user, userRole, true)
+            it == ADMIN ? UserRole.create(user, adminRole, true) : ""
+            it == OPERATOR ? UserRole.create(user, operatorRole, true) : ""
+        }
     }
 
     static Object doWithAnonymousAuth(@SuppressWarnings("rawtypes") final Closure closure) {

@@ -296,17 +296,15 @@ $.otp.userAdministration.editUser = {
             dataType: 'json',
             cache: 'false',
             data: {
+                user: $("#edit-user-userid").val(),
                 username: $("#edit-user-username").val(),
-                email: $("#edit-user-email").val()
+                email: $("#edit-user-email").val(),
+                realName: $("#edit-user-realname").val(),
+                asperaAccount: $("#edit-user-asperaaccount").val()
             },
             success: function (data) {
                 if (data.error) {
-                    if (data.username) {
-                        $.otp.warningMessage($L(data.username));
-                    }
-                    if (data.email) {
-                        $.otp.warningMessage($L(data.email));
-                    }
+                    $.otp.warningMessage($L(data.error));
                 } else if (data.success) {
                     $.otp.infoMessage($L("user.administration.edit.success"));
                 }
