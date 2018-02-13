@@ -17,7 +17,7 @@ class InfoController {
     }
 
     def numbers() {
-        return [projects: projectService.getAllProjects().size()]
+        return [projects: projectService.getProjectCount()]
     }
 
     def faq() {}

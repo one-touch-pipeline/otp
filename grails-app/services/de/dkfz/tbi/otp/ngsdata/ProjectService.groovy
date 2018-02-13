@@ -60,6 +60,10 @@ class ProjectService {
         return Project.list(sort: "name", order: "asc", fetch: [projectCategories: 'join', projectGroup: 'join'])
     }
 
+    public int getProjectCount() {
+        return Project.count()
+    }
+
     /**
      * Returns the Project in an acl aware manner
      * @param id The Id of the Project
