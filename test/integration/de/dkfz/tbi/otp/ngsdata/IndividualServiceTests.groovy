@@ -6,11 +6,13 @@ import grails.plugin.springsecurity.*
 import org.junit.*
 import org.springframework.security.access.*
 import org.springframework.security.acls.domain.*
+import org.joda.time.*
 
 import static org.junit.Assert.*
 
 class IndividualServiceTests extends AbstractIntegrationTest {
-    def individualService
+    IndividualService individualService
+    private static long ARBITRARY_TIMESTAMP = 1337
 
     @Before
     void setUp() {
@@ -1163,17 +1165,21 @@ a: 2
         Map mapOld = [individual: indOld]
         Map mapNew = [individual: indNew]
 
+        DateTimeUtils.setCurrentMillisFixed(ARBITRARY_TIMESTAMP)
+
         SpringSecurityUtils.doWithAuth("operator") {
             individualService.createComment(operation, mapOld, mapNew)
         }
 
-        assert """== operation - ${new Date().format("yyyy-MM-dd HH:mm")} ==
+        assert """== operation - ${new DateTime().toDate().format("yyyy-MM-dd HH:mm")} ==
 Old:
 individual: ${indOld}
 New:
 individual: ${indNew}
 
 ${indOld.comment.comment}""" == indNew.comment.comment
+
+        DateTimeUtils.setCurrentMillisSystem()
     }
 
     @Test

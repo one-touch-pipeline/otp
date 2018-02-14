@@ -9,6 +9,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.acls.domain.BasePermission
 import org.springframework.security.core.userdetails.UserDetails
 import de.dkfz.tbi.otp.utils.ReferencedClass
+import org.joda.time.*
 
 class IndividualService {
     def springSecurityService
@@ -404,7 +405,7 @@ class IndividualService {
         assert newProperties.individual
         assert oldProperties.keySet() == newProperties.keySet()
 
-        Date date = new Date()
+        Date date = new DateTime().toDate()
 
         String output = createCommentString(operation, oldProperties, newProperties, date, additionalInformation)
         commentService.saveComment(newProperties.individual, oldProperties.individual.comment?.comment ? "${output}\n${oldProperties.individual.comment.comment}" : "${output}")
