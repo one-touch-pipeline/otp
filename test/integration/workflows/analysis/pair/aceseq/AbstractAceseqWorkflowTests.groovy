@@ -106,7 +106,7 @@ abstract class AbstractAceseqWorkflowTests extends AbstractRoddyBamFilePairAnaly
         return [
                 "scripts/workflows/RoddyAceseqWorkflow.groovy",
                 "scripts/initializations/RoddyOptions.groovy",
-                "scripts/initializations/CreateAceseqPipelineOptions.groovy",
+                "scripts/initializations/AceseqPipelineOptions.groovy",
         ]
     }
 
