@@ -6,6 +6,9 @@ import de.dkfz.tbi.util.spreadsheet.validation.*
 import org.springframework.beans.factory.annotation.*
 import org.springframework.stereotype.*
 
+import java.util.regex.Matcher
+import java.util.regex.Pattern
+
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
@@ -32,8 +35,14 @@ class SampleValidator extends ValueTuplesValidator<MetadataValidationContext> im
     @Override
     void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {
         Collection<String> missingIdentifiers = []
+        Pattern pattern = Pattern.compile("[A-Za-z0-9_-]+")
+
         Map<String, Collection<ValueTuple>> byProjectName = valueTuples.groupBy {
             String sampleId = it.getValue(SAMPLE_ID.name())
+            Matcher matcher = pattern.matcher(sampleId)
+            if (!matcher.matches()) {
+                context.addProblem(it.cells, Level.WARNING, "Sample identifier '${sampleId}' contains not allowed characters.", "Sample identifiers are only allowed with the characters [A-Za-z0-9_-]")
+            }
             ParsedSampleIdentifier parsedIdentifier = sampleIdentifierService.parseSampleIdentifier(sampleId)
             SampleIdentifier sampleIdentifier = atMostOneElement(SampleIdentifier.findAllByName(sampleId))
             if (!parsedIdentifier && !sampleIdentifier) {
