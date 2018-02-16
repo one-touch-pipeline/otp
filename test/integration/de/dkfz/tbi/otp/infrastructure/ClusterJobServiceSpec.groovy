@@ -43,7 +43,7 @@ class ClusterJobServiceSpec extends Specification {
 
         ClusterJob c2 = createClusterJob(seqType: seqType)
 
-        GenericJobInfo jobInfo = new GenericJobInfo(null, null, null, null, [c2.id as String])
+        GenericJobInfo jobInfo = new GenericJobInfo(null, null, null, null, [c2.clusterJobId])
 
         jobInfo.askedResources = new ResourceSet(new BufferValue(7), 8, 9, java.time.Duration.ofSeconds(10), new BufferValue(11), "fasttrack", null)
         jobInfo.logFile = new File("/file.log")

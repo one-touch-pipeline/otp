@@ -75,7 +75,7 @@ class ClusterJobService {
 
         job.jobLog = jobInfo.logFile
         job.accountName = jobInfo.account
-        job.dependencies = jobInfo.parentJobIDs ? jobInfo.parentJobIDs.collect { ClusterJob.get(it as Long) } : []
+        job.dependencies = jobInfo.parentJobIDs ? jobInfo.parentJobIDs.collect { ClusterJob.findByClusterJobId(it) } : []
 
         job.xten = isXten(job)
         job.nBases = getBasesSum(job)
