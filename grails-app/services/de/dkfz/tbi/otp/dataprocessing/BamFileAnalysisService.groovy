@@ -63,9 +63,9 @@ abstract class BamFileAnalysisService {
             "           WHERE pt.project = ambf${number}.${INDIVIDUAL}.project " +
             "           AND pt.seqType = ambf${number}.${SEQ_TYPE} " +
             "           AND pt.sampleType = ambf${number}.${SAMPLE_TYPE} " +
-            "           AND (pt.coverage is null OR pt.coverage <= ambf${number}.coverage) " +
-            "           AND (:threshold <= ambf${number}.coverage) " +
-            "           AND (pt.numberOfLanes is null OR pt.numberOfLanes <= ambf${number}.numberOfMergedLanes) " +
+            "           AND (pt.coverage is null OR ambf${number}.coverage IS NULL OR pt.coverage <= ambf${number}.coverage) " +
+            "           AND (:threshold <= ambf${number}.coverage OR ambf${number}.coverage IS NULL) " +
+            "           AND (pt.numberOfLanes is null OR ambf${number}.numberOfMergedLanes IS NULL OR pt.numberOfLanes <= ambf${number}.numberOfMergedLanes) " +
             "           ) " +
             //check that the file is in the workpackage
             "       AND ambf${number}.${WORKPACKAGE}.bamFileInProjectFolder = ambf${number} " +

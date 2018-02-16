@@ -34,7 +34,6 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
     ProcessingType processingType = ProcessingType.SYSTEM
 
     SeqPlatformGroup seqPlatformGroup
-    LibraryPreparationKit libraryPreparationKit
     String statSizeFileName
 
     //reference genome depending options
@@ -67,7 +66,7 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
             pipeline.name != Pipeline.Name.EXTERNALLY_PROCESSED
         })
 
-        libraryPreparationKit nullable: true, validator: {val, obj ->
+        libraryPreparationKit validator: {val, obj ->
             SeqTypeNames seqTypeName = obj.seqType?.seqTypeName
             if (seqTypeName == SeqTypeNames.EXOME) {
                 return val != null
@@ -145,6 +144,6 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
 
     @Override
     String toString() {
-        return "MWP ${id}: ${toStringWithoutIdAndPipeline()} ${pipeline.name}"
+        return "MWP ${id}: ${toStringWithoutIdAndPipeline()} ${pipeline?.name}"
     }
 }

@@ -40,7 +40,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         joinScript = map.joinScript
         roddyConfig1 = map.roddyConfig
 
-        DomainFactory.createIndelSeqTypes()
+        DomainFactory.createAllAnalysableSeqTypes()
     }
 
 
@@ -587,6 +587,46 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         !sophiaService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
     }
 
+    @Unroll
+    void "samplePairForProcessing, for Sophia pipeline, only EPMBF available with #property is #value, should not return any bam file"() {
+        given:
+        RoddyBamFile.list().each {
+            it.withdrawn = true
+            assert it.save(flush: true)
+        }
+        DomainFactory.createSamplePairWithExternalProcessedMergedBamFiles(true, [(property): value])
+
+
+        expect:
+        !sophiaService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
+
+        where:
+        property             | value
+        'coverage'           | 5
+        'insertSizeFile'     | null
+        'meanSequenceLength' | null
+    }
+
+    @Unroll
+    void "samplePairForProcessing, for Sophia pipeline, only EPMBF available with #property is #value, should return new instance"() {
+        given:
+        RoddyBamFile.list().each {
+            it.withdrawn = true
+            assert it.save(flush: true)
+        }
+        SamplePair samplePair = DomainFactory.createSamplePairWithExternalProcessedMergedBamFiles(true, [(property): value])
+
+        expect:
+        samplePair == sophiaService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
+
+        where:
+        property             | value
+        'coverage'           | 30
+        'coverage'           | null
+        'insertSizeFile'     | 'insertSize.txt'
+        'meanSequenceLength' | 5
+        'meanSequenceLength' | 200
+    }
 
     void "samplePairForProcessing, for Aceseq pipeline, when sophia has not run, should not return SamplePair"() {
         given:

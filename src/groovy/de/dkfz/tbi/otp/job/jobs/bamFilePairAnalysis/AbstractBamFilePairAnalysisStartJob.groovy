@@ -37,7 +37,6 @@ abstract class AbstractBamFilePairAnalysisStartJob extends AbstractStartJobImpl 
                             config: config,
                             sampleType1BamFile: sampleType1BamFile,
                             sampleType2BamFile: sampleType2BamFile,
-                            latestDataFileCreationDate: AbstractBamFile.getLatestSequenceDataFileCreationDate(sampleType1BamFile, sampleType2BamFile),
                     )
                     analysis.save(flush: true)
                     prepareCreatingTheProcessAndTriggerTracking(analysis)
@@ -70,7 +69,6 @@ abstract class AbstractBamFilePairAnalysisStartJob extends AbstractStartJobImpl 
                     config: failedAnalysis.config,
                     sampleType1BamFile: failedAnalysis.sampleType1BamFile,
                     sampleType2BamFile: failedAnalysis.sampleType2BamFile,
-                    latestDataFileCreationDate: failedAnalysis.latestDataFileCreationDate,
             )
             assert newAnalysis.save(flush: true)
 

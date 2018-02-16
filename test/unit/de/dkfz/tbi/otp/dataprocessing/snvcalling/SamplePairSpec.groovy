@@ -6,6 +6,7 @@ import grails.test.mixin.*
 import spock.lang.*
 
 @Mock([
+        ExternalMergingWorkPackage,
         Individual,
         LibraryPreparationKit,
         MergingWorkPackage,
@@ -94,5 +95,29 @@ class SamplePairSpec extends Specification {
                 "Indel",
                 "Snv",
         ]
+    }
+
+    @Unroll
+    void "check different mergingWorkPackage classes: #classMWP1, #classMWP2"() {
+        given:
+        AbstractMergingWorkPackage mergingWorkPackage1 = DomainFactory.createMergingWorkPackage(classMWP1)
+        AbstractMergingWorkPackage mergingWorkPackage2 = DomainFactory.createMergingWorkPackage(classMWP1, [
+                seqType: mergingWorkPackage1.seqType,
+                sample : DomainFactory.createSample([individual: mergingWorkPackage1.individual])
+        ])
+        DomainFactory.createSampleTypePerProjectForMergingWorkPackage(mergingWorkPackage1)
+
+        expect:
+        DomainFactory.createSamplePair(
+                mergingWorkPackage1: mergingWorkPackage1,
+                mergingWorkPackage2: mergingWorkPackage2,
+        )
+
+        where:
+        classMWP1                  | classMWP2
+        MergingWorkPackage         | MergingWorkPackage
+        ExternalMergingWorkPackage | MergingWorkPackage
+        MergingWorkPackage         | ExternalMergingWorkPackage
+        ExternalMergingWorkPackage | ExternalMergingWorkPackage
     }
 }

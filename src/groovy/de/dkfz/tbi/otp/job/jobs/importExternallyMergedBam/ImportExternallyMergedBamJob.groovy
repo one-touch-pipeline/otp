@@ -41,7 +41,7 @@ class ImportExternallyMergedBamJob extends AbstractOtpJob {
             File targetBai = new File("${targetBam}.bai")
 
             if (checkpoint.exists()) {
-                log.debug("Checkpoint found, skip copying")
+                log.debug("Checkpoint found for ${sourceBam}, skip copying")
             } else {
                 action = AbstractMultiJob.NextAction.WAIT_FOR_CLUSTER_JOBS
                 String md5sumBam

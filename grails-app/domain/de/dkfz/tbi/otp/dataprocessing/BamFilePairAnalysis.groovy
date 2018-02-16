@@ -22,12 +22,6 @@ abstract class BamFilePairAnalysis implements ProcessParameterObject, Entity {
     AbstractMergedBamFile sampleType2BamFile
 
     /**
-     * The maximum value of {@link DataFile#dateCreated} of all {@link DataFile}s that have been merged into one of
-     * {@link #sampleType1BamFile} and {@link #sampleType2BamFile}.
-     */
-    Date latestDataFileCreationDate
-
-    /**
      * Used to construct paths in {@link SnvCallingInstance#getInstancePath()}/{@link IndelCallingInstance#getInstancePath()} and {@link SnvCallingInstance#getConfigFilePath()}.
      * For example 2014-08-25_15h32.
      */
@@ -65,9 +59,6 @@ abstract class BamFilePairAnalysis implements ProcessParameterObject, Entity {
             obj.samplePair &&
                     val.fileOperationStatus == FileOperationStatus.PROCESSED &&
                     val.mergingWorkPackage.id == obj.samplePair.mergingWorkPackage2.id
-        }
-        latestDataFileCreationDate validator: { Date latestDataFileCreationDate, BamFilePairAnalysis instance ->
-            latestDataFileCreationDate == AbstractBamFile.getLatestSequenceDataFileCreationDate(instance.sampleType1BamFile, instance.sampleType2BamFile)
         }
         instanceName blank: false, unique: 'samplePair', validator: { OtpPath.isValidPathComponent(it) }
         config validator: { val ->

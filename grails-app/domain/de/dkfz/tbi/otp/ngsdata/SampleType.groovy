@@ -7,7 +7,6 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import groovy.transform.ToString
 
-@ToString()
 class SampleType implements Entity {
 
     /**
@@ -23,10 +22,32 @@ class SampleType implements Entity {
          * combination of project and sample type), such workflows should warn about the sample type category being
          * unknown.
          */
-        UNDEFINED,
-        DISEASE,
-        CONTROL,
-        IGNORED,
+        UNDEFINED {
+            @Override
+            Category correspondingCategory() {
+                return null
+            }
+        },
+        DISEASE{
+            @Override
+            Category correspondingCategory() {
+                return CONTROL
+            }
+        },
+        CONTROL{
+            @Override
+            Category correspondingCategory() {
+                return DISEASE
+            }
+        },
+        IGNORED{
+            @Override
+            Category correspondingCategory() {
+                return null
+            }
+        },
+
+        abstract Category correspondingCategory()
     }
 
     /**
@@ -73,5 +94,10 @@ class SampleType implements Entity {
     Category getCategory(final Project project) {
         assert project
         return atMostOneElement(SampleTypePerProject.findAllWhere(project: project, sampleType: this))?.category
+    }
+
+    @Override
+    String toString() {
+        return name
     }
 }

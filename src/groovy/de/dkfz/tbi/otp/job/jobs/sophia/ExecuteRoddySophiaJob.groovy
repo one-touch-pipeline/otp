@@ -24,8 +24,8 @@ class ExecuteRoddySophiaJob extends AbstractExecutePanCanJob<SophiaInstance> imp
 
         sophiaService.validateInputBamFiles(sophiaInstance)
 
-        RoddyBamFile bamFileDisease = sophiaInstance.sampleType1BamFile as RoddyBamFile
-        RoddyBamFile bamFileControl = sophiaInstance.sampleType2BamFile as RoddyBamFile
+        AbstractMergedBamFile bamFileDisease = sophiaInstance.sampleType1BamFile
+        AbstractMergedBamFile bamFileControl = sophiaInstance.sampleType2BamFile
         File bamFileDiseasePath = bamFileDisease.pathForFurtherProcessing
         File bamFileControlPath = bamFileControl.pathForFurtherProcessing
         File diseaseInsertSizeFile = bamFileDisease.finalInsertSizeFile
@@ -33,8 +33,10 @@ class ExecuteRoddySophiaJob extends AbstractExecutePanCanJob<SophiaInstance> imp
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(diseaseInsertSizeFile)
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(controlInsertSizeFile)
 
-        int tumorDefaultReadLength = bamFileDisease.getMaximalReadLength()
-        int controlDefaultReadLength = bamFileControl.getMaximalReadLength()
+        Integer tumorDefaultReadLength = bamFileDisease.getMaximalReadLength()
+        Integer controlDefaultReadLength = bamFileControl.getMaximalReadLength()
+
+        assert tumorDefaultReadLength && controlDefaultReadLength : "neither tumorDefaultReadLength nor controlDefaultReadLength may be null"
 
         List<String> cValues = []
         cValues.add("bamfile_list:${bamFileControlPath};${bamFileDiseasePath}")

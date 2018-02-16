@@ -827,6 +827,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         where:
         pairAnalysis << listPairAnalysis
     }
+
     @Unroll("fillInSamplePairStatuses, no #pairAnalysis.analysisType, bamFileInProjectFolder set, no samplePairForProcessing, returns NOTHING_DONE_WONT_DO")
     void "fillInSamplePairStatuses, no analysisInstance, bamFileInProjectFolder set, no samplePairForProcessing, returns NOTHING_DONE_WONT_DO"() {
         given:

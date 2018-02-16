@@ -11,7 +11,7 @@ import groovy.transform.ToString
  * This information will be requested via the SNV-GUI.
  *
  */
-@ToString
+@ToString(excludes=['dateCreated','lastUpdated'], includePackage = false)
 class SampleTypePerProject implements Entity {
 
     Project project

@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.*
 import de.dkfz.tbi.util.spreadsheet.*
@@ -14,6 +15,8 @@ class BamMetadataImportService {
 
     @Autowired
     ApplicationContext applicationContext
+
+    SamplePairDeciderService samplePairDeciderService
 
     FileSystemService fileSystemService
 
@@ -43,7 +46,7 @@ class BamMetadataImportService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     Map validateAndImport(String metadataFile, boolean ignoreWarnings, String previousValidationMd5sum, boolean replaceWithLink,
-                          boolean triggerSnv, boolean triggerIndel, boolean triggerAceseq, List<String> furtherFiles) {
+                          boolean triggerAnalysis, List<String> furtherFiles) {
         Project outputProject
         ImportProcess importProcess = new ImportProcess(externallyProcessedMergedBamFiles: [])
         BamMetadataValidationContext context = validate(metadataFile, furtherFiles)
@@ -109,10 +112,13 @@ class BamMetadataImportService {
 
             importProcess.state = ImportProcess.State.NOT_STARTED
             importProcess.replaceSourceWithLink = replaceWithLink
-            importProcess.triggerSnv = triggerSnv
-            importProcess.triggerIndel = triggerIndel
-            importProcess.triggerAceseq = triggerAceseq
+            importProcess.triggerAnalysis = triggerAnalysis
             assert importProcess.save(flush:true)
+
+            if (importProcess.triggerAnalysis) {
+                samplePairDeciderService.findOrCreateSamplePairs(importProcess.externallyProcessedMergedBamFiles*.workPackage)
+            }
+
 
             outputProject = importProcess.externallyProcessedMergedBamFiles.first().project
         }

@@ -11,6 +11,8 @@ abstract class AbstractMergingWorkPackage implements Entity {
     Pipeline pipeline
     AntibodyTarget antibodyTarget
 
+    LibraryPreparationKit libraryPreparationKit
+
     /**
      * The BAM file which moving to the final destination has been initiated for most recently.
      *
@@ -52,6 +54,7 @@ abstract class AbstractMergingWorkPackage implements Entity {
                 return true
             }
         }
+        libraryPreparationKit nullable: true
     }
 
     /**

@@ -1,0 +1,357 @@
+package de.dkfz.tbi.otp.dataprocessing.snvcalling
+
+import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
+import grails.test.mixin.*
+import spock.lang.*
+
+@Mock([
+        AbstractMergingWorkPackage,
+        ExternalMergingWorkPackage,
+        Individual,
+        LibraryPreparationKit,
+        MergingWorkPackage,
+        Pipeline,
+        Project,
+        Realm,
+        ReferenceGenome,
+        Sample,
+        SamplePair,
+        SampleType,
+        SampleTypePerProject,
+        SeqPlatformGroup,
+        SeqType,
+])
+class SamplePairDeciderServiceSpec extends Specification {
+
+
+    @Unroll
+    void "findOrCreateSamplePairs(mergingWorkPackage), create SamplePair for #pipelineName1 and #pipelineName2 and #category1"() {
+        given:
+        DomainFactory.createAllAlignableSeqTypes()
+        AbstractMergingWorkPackage mergingWorkPackage1 = DomainFactory.createMergingWorkPackageForPipeline(pipelineName1, [
+                seqType: SeqType.wholeGenomePairedSeqType,
+        ])
+        AbstractMergingWorkPackage mergingWorkPackage2 = DomainFactory.createMergingWorkPackageForPipeline(pipelineName2, [
+                seqType: mergingWorkPackage1.seqType,
+                sample : DomainFactory.createSample([individual: mergingWorkPackage1.individual])
+        ])
+        DomainFactory.createSampleTypePerProjectForMergingWorkPackage(mergingWorkPackage1, category1)
+        DomainFactory.createSampleTypePerProjectForMergingWorkPackage(mergingWorkPackage2, category1.correspondingCategory())
+
+        SamplePairDeciderService service = new SamplePairDeciderService([
+                abstractMergingWorkPackageService: Mock(AbstractMergingWorkPackageService) {
+                    1 * findMergingWorkPackage(_, _, _) >> [mergingWorkPackage1, mergingWorkPackage2]
+                    1 * filterByCategory(_, _) >> [mergingWorkPackage2]
+                    filterSeqPlatformGroup * filterBySequencingPlatformGroupIfAvailable(_, _) >> [mergingWorkPackage2]
+                }
+        ])
+
+        when:
+        List<SamplePair> samplePairs = service.findOrCreateSamplePairs(mergingWorkPackage1)
+
+        then:
+        SamplePair samplePair = CollectionUtils.exactlyOneElement(samplePairs)
+        if (category1 == SampleType.Category.DISEASE) {
+            assert samplePair.mergingWorkPackage1 == mergingWorkPackage1
+            assert samplePair.mergingWorkPackage2 == mergingWorkPackage2
+        } else {
+            assert samplePair.mergingWorkPackage1 == mergingWorkPackage2
+            assert samplePair.mergingWorkPackage2 == mergingWorkPackage1
+        }
+
+        where:
+        pipelineName1                      | pipelineName2                      | category1
+        Pipeline.Name.PANCAN_ALIGNMENT     | Pipeline.Name.PANCAN_ALIGNMENT     | SampleType.Category.DISEASE
+        Pipeline.Name.PANCAN_ALIGNMENT     | Pipeline.Name.EXTERNALLY_PROCESSED | SampleType.Category.DISEASE
+        Pipeline.Name.DEFAULT_OTP          | Pipeline.Name.DEFAULT_OTP          | SampleType.Category.DISEASE
+        Pipeline.Name.DEFAULT_OTP          | Pipeline.Name.EXTERNALLY_PROCESSED | SampleType.Category.DISEASE
+        Pipeline.Name.EXTERNALLY_PROCESSED | Pipeline.Name.EXTERNALLY_PROCESSED | SampleType.Category.DISEASE
+        Pipeline.Name.EXTERNALLY_PROCESSED | Pipeline.Name.PANCAN_ALIGNMENT     | SampleType.Category.DISEASE
+        Pipeline.Name.EXTERNALLY_PROCESSED | Pipeline.Name.DEFAULT_OTP          | SampleType.Category.DISEASE
+        Pipeline.Name.PANCAN_ALIGNMENT     | Pipeline.Name.PANCAN_ALIGNMENT     | SampleType.Category.CONTROL
+        Pipeline.Name.PANCAN_ALIGNMENT     | Pipeline.Name.EXTERNALLY_PROCESSED | SampleType.Category.CONTROL
+        Pipeline.Name.DEFAULT_OTP          | Pipeline.Name.DEFAULT_OTP          | SampleType.Category.CONTROL
+        Pipeline.Name.DEFAULT_OTP          | Pipeline.Name.EXTERNALLY_PROCESSED | SampleType.Category.CONTROL
+        Pipeline.Name.EXTERNALLY_PROCESSED | Pipeline.Name.EXTERNALLY_PROCESSED | SampleType.Category.CONTROL
+        Pipeline.Name.EXTERNALLY_PROCESSED | Pipeline.Name.PANCAN_ALIGNMENT     | SampleType.Category.CONTROL
+        Pipeline.Name.EXTERNALLY_PROCESSED | Pipeline.Name.DEFAULT_OTP          | SampleType.Category.CONTROL
+
+        filterSeqPlatformGroup = pipelineName1 == Pipeline.Name.EXTERNALLY_PROCESSED ? 0 : 1
+    }
+
+
+    void "findOrCreateSamplePairs(mergingWorkPackage), if multiple samples available, create correct sample pairs"() {
+        given:
+        SeqType seqType = DomainFactory.createAllAlignableSeqTypes().first()
+        Individual individual = DomainFactory.createIndividual()
+
+        List<AbstractMergingWorkPackage> mergingWorkPackages = (0..6).collect {
+            DomainFactory.createMergingWorkPackage([
+                    seqType: seqType,
+                    sample : DomainFactory.createSample([individual: individual]),
+            ])
+        }
+        mergingWorkPackages[0..1].each {
+            DomainFactory.createSampleTypePerProjectForMergingWorkPackage(it, SampleType.Category.DISEASE)
+        }
+        mergingWorkPackages[2..4].each {
+            DomainFactory.createSampleTypePerProjectForMergingWorkPackage(it, SampleType.Category.CONTROL)
+        }
+        DomainFactory.createSampleTypePerProjectForMergingWorkPackage(mergingWorkPackages[5], SampleType.Category.IGNORED)
+        DomainFactory.createSampleTypePerProjectForMergingWorkPackage(mergingWorkPackages[6], SampleType.Category.UNDEFINED)
+
+        SamplePairDeciderService service = new SamplePairDeciderService([
+                abstractMergingWorkPackageService: Mock(AbstractMergingWorkPackageService) {
+                    1 * findMergingWorkPackage(_, _, _) >> mergingWorkPackages
+                    1 * filterByCategory(_, _) >> mergingWorkPackages[2..4]
+                    1 * filterBySequencingPlatformGroupIfAvailable(_, _) >> mergingWorkPackages[2..4]
+                }
+        ])
+
+        when:
+        List<SamplePair> samplePairs = service.findOrCreateSamplePairs(mergingWorkPackages[0])
+
+        then:
+        samplePairs.size() == 3
+        samplePairs*.mergingWorkPackage1.unique() == [mergingWorkPackages[0]]
+        TestCase.assertContainSame(samplePairs*.mergingWorkPackage2, mergingWorkPackages[2..4])
+    }
+
+
+    void "findOrCreateSamplePairs(mergingWorkPackage), if SeqType is not alignable, return empty list"() {
+        given:
+        DomainFactory.createAllAlignableSeqTypes()
+        AbstractMergingWorkPackage mergingWorkPackage = new MergingWorkPackage([
+                seqType: DomainFactory.createSeqType()
+        ])
+
+        SamplePairDeciderService service = new SamplePairDeciderService([
+                abstractMergingWorkPackageService: Mock(AbstractMergingWorkPackageService) {
+                    0 * findMergingWorkPackage(_, _, _)
+                }
+        ])
+
+        when:
+        List<SamplePair> samplePairs = service.findOrCreateSamplePairs(mergingWorkPackage)
+
+        then:
+        samplePairs.empty
+    }
+
+    void "findOrCreateSamplePairs(mergingWorkPackage), if no category is not defined, return empty list"() {
+        given:
+        AbstractMergingWorkPackage mergingWorkPackage = new MergingWorkPackage([
+                seqType: DomainFactory.createAllAlignableSeqTypes().first(),
+                sample : new Sample([
+                        individual: new Individual([
+                                project: DomainFactory.createProject(),
+                        ]),
+                        sampleType: DomainFactory.createSampleType(),
+                ]),
+        ])
+
+        SamplePairDeciderService service = new SamplePairDeciderService([
+                abstractMergingWorkPackageService: Mock(AbstractMergingWorkPackageService) {
+                    0 * findMergingWorkPackage(_, _, _)
+                }
+        ])
+
+        when:
+        List<SamplePair> samplePairs = service.findOrCreateSamplePairs(mergingWorkPackage)
+
+        then:
+        samplePairs.empty
+    }
+
+    @Unroll
+    void "findOrCreateSamplePairs(mergingWorkPackage), if category is #category, return empty list"() {
+        given:
+        SampleTypePerProject sampleTypePerProject = DomainFactory.createSampleTypePerProject([
+                category: category,
+        ])
+        AbstractMergingWorkPackage mergingWorkPackage = new MergingWorkPackage([
+                seqType: DomainFactory.createAllAlignableSeqTypes().first(),
+                sample : new Sample([
+                        individual: new Individual([
+                                project: sampleTypePerProject.project,
+                        ]),
+                        sampleType: sampleTypePerProject.sampleType,
+                ]),
+        ])
+
+        SamplePairDeciderService service = new SamplePairDeciderService([
+                abstractMergingWorkPackageService: Mock(AbstractMergingWorkPackageService) {
+                    0 * findMergingWorkPackage(_, _, _)
+                }
+        ])
+
+        when:
+        List<SamplePair> samplePairs = service.findOrCreateSamplePairs(mergingWorkPackage)
+
+        then:
+        samplePairs.empty
+
+        where:
+        category << [
+                SampleType.Category.IGNORED,
+                SampleType.Category.UNDEFINED,
+        ]
+    }
+
+    void "findOrCreateSamplePairs(mergingWorkPackage), mergingWorkPackage is null, then throw assertion"() {
+        given:
+        SamplePairDeciderService service = new SamplePairDeciderService()
+
+        when:
+        service.findOrCreateSamplePairs(null as MergingWorkPackage)
+
+        then:
+        thrown(AssertionError)
+    }
+
+    void "findOrCreateSamplePairs(mergingWorkPackages), create correct sample pairs for all given MergingWorkPackages"() {
+        given:
+        SeqType seqType = DomainFactory.createAllAlignableSeqTypes().first()
+        Individual individual = DomainFactory.createIndividual()
+
+        List<AbstractMergingWorkPackage> mergingWorkPackages = (0..9).collect {
+            DomainFactory.createMergingWorkPackage([
+                    seqType: seqType,
+                    sample : DomainFactory.createSample([individual: individual]),
+            ])
+        }
+        mergingWorkPackages[0..3].each {
+            DomainFactory.createSampleTypePerProjectForMergingWorkPackage(it, SampleType.Category.DISEASE)
+        }
+        mergingWorkPackages[4..7].each {
+            DomainFactory.createSampleTypePerProjectForMergingWorkPackage(it, SampleType.Category.CONTROL)
+        }
+        DomainFactory.createSampleTypePerProjectForMergingWorkPackage(mergingWorkPackages[8], SampleType.Category.IGNORED)
+        DomainFactory.createSampleTypePerProjectForMergingWorkPackage(mergingWorkPackages[9], SampleType.Category.UNDEFINED)
+
+        SamplePairDeciderService service = new SamplePairDeciderService([
+                abstractMergingWorkPackageService: Mock(AbstractMergingWorkPackageService) {
+                    4 * findMergingWorkPackage(_, _, _) >> mergingWorkPackages
+                    2 * filterByCategory(_, SampleType.Category.DISEASE) >> mergingWorkPackages[0..3]
+                    2 * filterByCategory(_, SampleType.Category.CONTROL) >> mergingWorkPackages[4..7]
+                    4 * filterBySequencingPlatformGroupIfAvailable(_, _) >> { List<MergingWorkPackage> mergingWorkPackages1, def seqPlatformGroup ->
+                        return mergingWorkPackages1
+                    }
+                }
+        ])
+        List expectedCombination = [
+                [mergingWorkPackages[0], mergingWorkPackages[4]],
+                [mergingWorkPackages[0], mergingWorkPackages[5]],
+                [mergingWorkPackages[0], mergingWorkPackages[6]],
+                [mergingWorkPackages[0], mergingWorkPackages[7]],
+
+                [mergingWorkPackages[1], mergingWorkPackages[4]],
+                [mergingWorkPackages[1], mergingWorkPackages[5]],
+                [mergingWorkPackages[1], mergingWorkPackages[6]],
+                [mergingWorkPackages[1], mergingWorkPackages[7]],
+
+                [mergingWorkPackages[2], mergingWorkPackages[6]],
+                [mergingWorkPackages[2], mergingWorkPackages[7]],
+                [mergingWorkPackages[3], mergingWorkPackages[6]],
+                [mergingWorkPackages[3], mergingWorkPackages[7]],
+        ].sort()
+
+        when:
+        List<AbstractMergingWorkPackage> mergingWorkPackageList  = mergingWorkPackages[0, 1, 6, 7, 8, 9]
+        List<SamplePair> samplePairs = service.findOrCreateSamplePairs(mergingWorkPackageList)
+
+        then:
+        samplePairs.size() == 12
+        List foundCombination = samplePairs.collect {
+            [it.mergingWorkPackage1, it.mergingWorkPackage2]
+        }.sort()
+        foundCombination == expectedCombination
+    }
+
+    @Unroll
+    void "findOrCreateSamplePairs(mergingWorkPackages), if list is empty, return empty list"() {
+        given:
+        SamplePairDeciderService service = new SamplePairDeciderService()
+
+        when:
+        List<SamplePair> samplePairs = service.findOrCreateSamplePairs([])
+
+        then:
+        samplePairs.size() == 0
+    }
+
+    void "findOrCreateSamplePairs(mergingWorkPackages), if list is null, throw assertion"() {
+        given:
+        SamplePairDeciderService service = new SamplePairDeciderService()
+
+        when:
+        service.findOrCreateSamplePairs(null as List)
+
+        then:
+        thrown(AssertionError)
+    }
+
+    void "findOrCreateSamplePair(disease,  control), if sample pair does not exist, create new one"() {
+        given:
+        SamplePairDeciderService service = new SamplePairDeciderService()
+
+        DomainFactory.createAllAlignableSeqTypes()
+
+        MergingWorkPackage disease = DomainFactory.createMergingWorkPackage()
+        MergingWorkPackage control = DomainFactory.createMergingWorkPackage([
+                seqType: disease.seqType,
+                sample : DomainFactory.createSample([
+                        individual: disease.individual,
+                ]),
+        ])
+
+        DomainFactory.createSampleTypePerProjectForMergingWorkPackage(disease, SampleType.Category.DISEASE)
+        DomainFactory.createSampleTypePerProjectForMergingWorkPackage(control, SampleType.Category.CONTROL)
+
+        expect:
+        SamplePair.count() == 0
+
+        when:
+        SamplePair returnedSamplePairs = service.findOrCreateSamplePair(disease, control)
+
+        then:
+        returnedSamplePairs
+        returnedSamplePairs.mergingWorkPackage1 == disease
+        returnedSamplePairs.mergingWorkPackage2 == control
+        SamplePair.count() == 1
+
+    }
+
+    void "findOrCreateSamplePair(disease,  control), if sample pair already exist, return existing one"() {
+        SamplePairDeciderService service = new SamplePairDeciderService()
+
+        DomainFactory.createAllAlignableSeqTypes()
+
+        MergingWorkPackage disease = DomainFactory.createMergingWorkPackage()
+        MergingWorkPackage control = DomainFactory.createMergingWorkPackage([
+                seqType: disease.seqType,
+                sample : DomainFactory.createSample([
+                        individual: disease.individual,
+                ]),
+        ])
+
+        DomainFactory.createSampleTypePerProjectForMergingWorkPackage(disease, SampleType.Category.DISEASE)
+        DomainFactory.createSampleTypePerProjectForMergingWorkPackage(control, SampleType.Category.CONTROL)
+
+        SamplePair samplePair = DomainFactory.createSamplePair([
+                mergingWorkPackage1: disease,
+                mergingWorkPackage2: control,
+        ])
+
+        when:
+        SamplePair returnedSamplePairs = service.findOrCreateSamplePair(disease, control)
+
+        then:
+        returnedSamplePairs == samplePair
+        SamplePair.count() == 1
+    }
+
+}

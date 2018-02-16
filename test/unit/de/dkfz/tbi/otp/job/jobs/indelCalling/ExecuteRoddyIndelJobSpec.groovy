@@ -23,6 +23,7 @@ import spock.lang.*
         Pipeline,
         Project,
         ProjectCategory,
+        ProcessingOption,
         Sample,
         SamplePair,
         SampleType,
@@ -145,9 +146,14 @@ class ExecuteRoddyIndelJobSpec extends Specification {
         LibraryPreparationKit kit = DomainFactory.createLibraryPreparationKit()
         indelCallingInstance.containedSeqTracks*.libraryPreparationKit = kit
         assert indelCallingInstance.containedSeqTracks*.save(flush: true)
+        indelCallingInstance.samplePair.mergingWorkPackage1.libraryPreparationKit = kit
+        assert indelCallingInstance.samplePair.mergingWorkPackage1.save(flush: true)
+        indelCallingInstance.samplePair.mergingWorkPackage2.libraryPreparationKit = kit
+        assert indelCallingInstance.samplePair.mergingWorkPackage2.save(flush: true)
+
         DomainFactory.createBedFile(
                 libraryPreparationKit: kit,
-                referenceGenome: indelCallingInstance.referenceGenome
+                referenceGenome: indelCallingInstance.sampleType1BamFile.referenceGenome
         )
 
         indelCallingInstance.samplePair.mergingWorkPackage1.seqType = seqType

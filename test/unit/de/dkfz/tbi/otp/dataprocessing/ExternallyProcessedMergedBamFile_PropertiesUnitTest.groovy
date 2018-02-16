@@ -1,12 +1,22 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.ngsdata.*
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
-import grails.buildtestdata.mixin.Build
+import grails.test.mixin.*
+import org.junit.*
 
-@Build([SeqPlatformGroup, Pipeline, ExternalMergingWorkPackage])
+@Mock([
+        ExternalMergingWorkPackage,
+        ExternallyProcessedMergedBamFile,
+        Individual,
+        Sample,
+        SampleType,
+        SeqType,
+        Project,
+        Pipeline,
+        SeqPlatformGroup,
+        Realm,
+        ReferenceGenome,
+])
 class ExternallyProcessedMergedBamFile_PropertiesUnitTest {
 
     static final short PROCESSING_PRIORITY = 1
@@ -31,16 +41,6 @@ class ExternallyProcessedMergedBamFile_PropertiesUnitTest {
         bamFile = new ExternallyProcessedMergedBamFile(workPackage: externalMergingWorkPackage)
     }
 
-    @After
-    void tearDown() {
-        sample = null
-        sampleType = null
-        seqType = null
-        individual = null
-        project = null
-        referenceGenome = null
-        bamFile = null
-    }
 
     @Test
     void testGetProject() {

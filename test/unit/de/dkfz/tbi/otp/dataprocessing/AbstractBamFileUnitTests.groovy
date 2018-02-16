@@ -65,48 +65,6 @@ class AbstractBamFileUnitTests {
     }
 
     @Test
-    void testGetLatestSequenceDataFileCreationDate() {
-
-        final FileType sequenceFileType = FileType.build(type: FileType.Type.SEQUENCE)
-
-        final SeqTrack seqTrack1 = DomainFactory.createSeqTrack()
-        final DataFile dataFile11 = DomainFactory.createDataFile(
-                seqTrack: seqTrack1,
-                fileType: sequenceFileType,
-        )
-        sleep(1)
-        final SeqTrack seqTrack2 = DomainFactory.createSeqTrack()
-        final DataFile dataFile21 = DomainFactory.createDataFile(
-                seqTrack: seqTrack2,
-                fileType: sequenceFileType,
-        )
-        sleep(1)
-        final DataFile dataFile22 = DomainFactory.createDataFile(
-                seqTrack: seqTrack2,
-                fileType: sequenceFileType,
-        )
-        sleep(1)
-        final DataFile dataFile23 = DomainFactory.createDataFile(
-                seqTrack: seqTrack2,
-                fileType: FileType.build(type: FileType.Type.ALIGNMENT),
-        )
-
-        assert dataFile11.dateCreated < dataFile21.dateCreated
-        assert dataFile21.dateCreated < dataFile22.dateCreated
-        assert dataFile22.dateCreated < dataFile23.dateCreated
-
-        final AbstractBamFile bamFile1 = new MockAbstractBamFile(type: AbstractBamFile.BamType.SORTED)
-        bamFile1.metaClass.getContainedSeqTracks = { [seqTrack1].toSet() }
-        final AbstractBamFile bamFile2 = new MockAbstractBamFile(type: AbstractBamFile.BamType.SORTED)
-        bamFile2.metaClass.getContainedSeqTracks = { [seqTrack2].toSet() }
-        final AbstractBamFile bamFile3 = new MockAbstractBamFile(type: AbstractBamFile.BamType.SORTED)
-        bamFile3.metaClass.getContainedSeqTracks = { [seqTrack1, seqTrack2].toSet() }
-
-        assert AbstractBamFile.getLatestSequenceDataFileCreationDate(bamFile2, bamFile1) == dataFile22.dateCreated
-        assert AbstractBamFile.getLatestSequenceDataFileCreationDate(bamFile3) == dataFile22.dateCreated
-    }
-
-    @Test
     void testWithdraw_ChangeStatusFromNeedsProcessingToDeclared() {
         AbstractBamFile bamFile = new MockAbstractBamFile(
                 status: AbstractBamFile.State.NEEDS_PROCESSING,

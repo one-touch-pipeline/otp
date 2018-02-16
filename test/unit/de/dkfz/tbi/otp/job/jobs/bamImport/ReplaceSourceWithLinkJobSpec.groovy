@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.bamImport
 
-import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.jobs.importExternallyMergedBam.*
 import de.dkfz.tbi.otp.job.plan.*
@@ -66,7 +66,8 @@ class ReplaceSourceWithLinkJobSpec extends Specification {
 
         importProcess = new ImportProcess(
                 externallyProcessedMergedBamFiles : [epmbf],
-                replaceSourceWithLink             : true
+                replaceSourceWithLink             : true,
+                triggerAnalysis                   : true,
         ).save()
     }
 

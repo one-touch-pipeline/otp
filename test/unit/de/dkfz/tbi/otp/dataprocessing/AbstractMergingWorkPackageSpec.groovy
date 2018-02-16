@@ -75,6 +75,16 @@ class AbstractMergingWorkPackageSpec extends Specification {
         AbstractQualityAssessment getOverallQualityAssessment() {
             return null
         }
+
+        @Override
+        File getFinalInsertSizeFile() {
+            return null
+        }
+
+        @Override
+        Integer getMaximalReadLength() {
+            return null
+        }
     }
 
     def setup() {

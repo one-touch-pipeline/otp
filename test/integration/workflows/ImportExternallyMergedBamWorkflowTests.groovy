@@ -94,25 +94,29 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase {
     }
 
     private void checkThatFileCopyingWasSuccessful(ImportProcess importProcess) {
-        importProcess.refresh()
-        assert importProcess.state == ImportProcess.State.FINISHED
-        assert 2 == importProcess.externallyProcessedMergedBamFiles.size()
+        ImportProcess.withNewSession {
+                importProcess = ImportProcess.get(importProcess.id)
+                assert importProcess.state == ImportProcess.State.FINISHED
+                assert 2 == importProcess.externallyProcessedMergedBamFiles.size()
 
-        importProcess.externallyProcessedMergedBamFiles.each {
-            it.refresh()
-            assert it.fileSize > 0
-            assert it.getFilePath().absoluteDataManagementPath.exists()
+                importProcess.externallyProcessedMergedBamFiles.each {
+                    it.refresh()
+                    assert it.fileSize > 0
+                    assert it.getFilePath().absoluteDataManagementPath.exists()
+                }
         }
     }
 
     private void checkThatFileLinkingWasSuccessful(ImportProcess importProcess) {
-        importProcess.refresh()
-        assert importProcess.replaceSourceWithLink
+        ImportProcess.withNewSession {
+            importProcess = ImportProcess.get(importProcess.id)
+            assert importProcess.replaceSourceWithLink
 
-        importProcess.externallyProcessedMergedBamFiles.each {
-            File importedBamFile = new File(it.importedFrom)
-            assert importedBamFile.exists() && Files.isSymbolicLink(importedBamFile.toPath()) && importedBamFile.canRead()
-            assert Files.readSymbolicLink(importedBamFile.toPath()) == it.getFilePath().absoluteDataManagementPath.toPath()
+            importProcess.externallyProcessedMergedBamFiles.each {
+                File importedBamFile = new File(it.importedFrom)
+                assert importedBamFile.exists() && Files.isSymbolicLink(importedBamFile.toPath()) && importedBamFile.canRead()
+                assert Files.readSymbolicLink(importedBamFile.toPath()) == it.getFilePath().absoluteDataManagementPath.toPath()
+            }
         }
     }
 

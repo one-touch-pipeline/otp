@@ -109,17 +109,6 @@ abstract class AbstractOtpSnvWorkflowTests extends AbstractSnvWorkflowTests {
                 config: config,
                 instanceName: "2014-08-25_15h32",
                 samplePair: samplePair,
-                latestDataFileCreationDate: DataFile.createCriteria().get {
-                    seqTrack {
-                        'in'('id', [bamFileTumor, bamFileControl].sum { it.containedSeqTracks }*.id)
-                    }
-                    fileType {
-                        eq('type', FileType.Type.SEQUENCE)
-                    }
-                    projections {
-                        max('dateCreated')
-                    }
-                },
         )
         assertNotNull(instance.save(flush: true))
 

@@ -80,7 +80,6 @@ class SnvCallingStartJobIntegrationSpec extends Specification {
         restartedInstance.samplePair == failedInstance.samplePair
         restartedInstance.sampleType1BamFile == failedInstance.sampleType1BamFile
         restartedInstance.sampleType2BamFile == failedInstance.sampleType2BamFile
-        restartedInstance.latestDataFileCreationDate == failedInstance.latestDataFileCreationDate
 
         failedInstance.withdrawn == true
         snvJobResult.withdrawn == true

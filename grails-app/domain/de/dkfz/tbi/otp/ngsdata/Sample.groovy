@@ -18,11 +18,11 @@ class Sample implements Entity {
 
     String toString() {
         // useful for scaffolding
-        "${individual.mockPid} ${sampleType.name}"
+        "${individual?.mockPid} ${sampleType?.name}"
     }
 
     String getDisplayName() {
-        return "${individual.displayName} ${sampleType.displayName}"
+        return "${individual?.displayName} ${sampleType?.displayName}"
     }
 
     /**

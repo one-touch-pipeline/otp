@@ -75,6 +75,37 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
         createBedFileAndLibPrepKit()
     }
 
+    void setupExternalBamFile() {
+        ExternalMergingWorkPackage tumorMwp = DomainFactory.createExternalMergingWorkPackage(
+                seqType: seqTypeToUse(),
+                pipeline: DomainFactory.createExternallyProcessedPipelineLazy(),
+                referenceGenome: createReferenceGenome()
+        )
+        ExternalMergingWorkPackage controlMwp = DomainFactory.createExternalMergingWorkPackage(
+                seqType: tumorMwp.seqType,
+                pipeline: tumorMwp.pipeline,
+                referenceGenome: tumorMwp.referenceGenome,
+                sample: DomainFactory.createSample([
+                        individual: tumorMwp.individual,
+                ]),
+        )
+
+        bamFileTumor = DomainFactory.createExternallyProcessedMergedBamFile([
+                workPackage      : tumorMwp,
+                insertSizeFile   : 'tumor_insertsize_plot.png_qcValues.txt',
+                meanSequenceLength: 101,
+
+        ] + createProcessMergedBamFileProperties())
+
+        bamFileControl = DomainFactory.createExternallyProcessedMergedBamFile(createProcessMergedBamFileProperties() + [
+                workPackage      : controlMwp,
+                insertSizeFile   : 'control_insertsize_plot.png_qcValues.txt',
+                meanSequenceLength: 101,
+        ])
+        commonBamFileSetup()
+        createBedFileAndLibPrepKit()
+    }
+
 
     private void commonBamFileSetup() {
         adaptSampleTypes()
@@ -84,7 +115,7 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
         sampleTypeControl = bamFileControl.sampleType
         sampleTypeTumor = bamFileTumor.sampleType
         seqType = bamFileTumor.seqType
-        referenceGenome = bamFileTumor.referenceGenome
+        referenceGenome = bamFileControl.referenceGenome
 
         project.realm = realm
         assert project.save(flush: true)
@@ -179,6 +210,10 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
         )
         bamFileTumor.containedSeqTracks*.libraryPreparationKit = kit
         bamFileTumor.containedSeqTracks*.save(flush: true)
+        bamFileControl.containedSeqTracks*.libraryPreparationKit = kit
+        bamFileControl.containedSeqTracks*.save(flush: true)
+        bamFileTumor.workPackage.libraryPreparationKit = kit
+        bamFileControl.workPackage.libraryPreparationKit = kit
     }
 
     @Override

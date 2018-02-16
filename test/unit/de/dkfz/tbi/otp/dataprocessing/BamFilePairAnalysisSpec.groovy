@@ -10,21 +10,29 @@ import grails.test.mixin.*
 import spock.lang.*
 
 @Mock([
+        AlignmentPass,
         AceseqInstance,
         DataFile,
+        ExternalMergingWorkPackage,
+        ExternallyProcessedMergedBamFile,
         ExternalScript,
         FileType,
         Individual,
         IndelCallingInstance,
         LibraryPreparationKit,
         MergingCriteria,
+        MergingPass,
         MergingSet,
+        MergingSetAssignment,
         MergingWorkPackage,
         Pipeline,
+        ProcessedBamFile,
+        ProcessedMergedBamFile,
         Project,
         ProjectCategory,
         Realm,
         ReferenceGenome,
+        ReferenceGenomeProjectSeqType,
         RoddyBamFile,
         RoddySnvCallingInstance,
         RoddyWorkflowConfig,
@@ -66,25 +74,13 @@ class BamFilePairAnalysisSpec extends Specification {
         !bamFilePairAnalysis.validate()
 
         where:
-        property << ["config", "samplePair", "latestDataFileCreationDate", "instanceName"]
-    }
-
-
-    @Unroll
-    void "test constraints when one of the bam files is null, should fail"() {
-        given:
-        MockBamFilePairAnalysis bamFilePairAnalysis = createMockBamFilePairAnalysis()
-
-        when:
-        bamFilePairAnalysis[property] = null
-        bamFilePairAnalysis.validate()
-
-        then:
-        IllegalArgumentException e = thrown()
-        e.message.contains("At least one of the specified BAM files is null")
-
-        where:
-        property << ["sampleType1BamFile", "sampleType2BamFile"]
+        property << [
+                "config",
+                "samplePair",
+                "instanceName",
+                "sampleType1BamFile",
+                "sampleType2BamFile",
+        ]
     }
 
 
@@ -145,6 +141,72 @@ class BamFilePairAnalysisSpec extends Specification {
     }
 
 
+    @Unroll
+    void "check different bamFiles classes: #classBamFile1, #classBamFile2"() {
+        given:
+        AbstractMergedBamFile bamFile1 = createBamFile(classBamFile1)
+        AbstractMergedBamFile bamFile2 = createBamFile(classBamFile2, [
+                seqType: bamFile1.seqType,
+                sample : DomainFactory.createSample([individual: bamFile1.individual]),
+        ])
+
+        DomainFactory.createSampleTypePerProjectForMergingWorkPackage(bamFile1.mergingWorkPackage)
+
+
+        expect:
+        DomainFactory.createRoddySnvInstanceWithRoddyBamFiles(
+                sampleType1BamFile: bamFile1,
+                sampleType2BamFile: bamFile2,
+        )
+
+
+        where:
+        classBamFile1                    | classBamFile2
+        RoddyBamFile                     | RoddyBamFile
+        ProcessedMergedBamFile           | ProcessedMergedBamFile
+        ExternallyProcessedMergedBamFile | ExternallyProcessedMergedBamFile
+        RoddyBamFile                     | ExternallyProcessedMergedBamFile
+        ExternallyProcessedMergedBamFile | RoddyBamFile
+        ProcessedMergedBamFile           | ExternallyProcessedMergedBamFile
+        ExternallyProcessedMergedBamFile | ProcessedMergedBamFile
+        RoddyBamFile                     | ProcessedMergedBamFile
+        ProcessedMergedBamFile           | RoddyBamFile
+    }
+
+    private <E> AbstractMergedBamFile createBamFile(Class<E> clazz, Map propertiesForMergingWorkPackage = [:]) {
+        Map properties = [
+                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
+                md5sum             : DomainFactory.DEFAULT_MD5_SUM,
+                fileSize           : ++DomainFactory.counter,
+        ]
+        switch (clazz) {
+            case RoddyBamFile:
+                return DomainFactory.createRoddyBamFile([
+                        workPackage: DomainFactory.createMergingWorkPackage([
+                                pipeline: DomainFactory.createPanCanPipeline(),
+                                seqType : DomainFactory.createWholeGenomeSeqType(),
+                        ] + propertiesForMergingWorkPackage)
+                ] + properties)
+            case ProcessedMergedBamFile:
+                return DomainFactory.createProcessedMergedBamFile([
+                        workPackage: DomainFactory.createMergingWorkPackage([
+                                pipeline: DomainFactory.createDefaultOtpPipeline(),
+                                seqType : DomainFactory.createWholeGenomeSeqType(),
+                        ] + propertiesForMergingWorkPackage)
+                ] + properties)
+            case ExternallyProcessedMergedBamFile:
+                return DomainFactory.createExternallyProcessedMergedBamFile([
+                        workPackage: DomainFactory.createExternalMergingWorkPackage([
+                                pipeline: DomainFactory.createExternallyProcessedPipelineLazy(),
+                                seqType : DomainFactory.createWholeGenomeSeqType(),
+                        ] + propertiesForMergingWorkPackage)
+                ] + properties)
+            default:
+                assert false
+        }
+    }
+
+
     static MockBamFilePairAnalysis createMockBamFilePairAnalysis() {
         Pipeline alignmentPipeline = DomainFactory.createPanCanPipeline()
         Pipeline snvPipeline = DomainFactory.createRoddySnvPipelineLazy()
@@ -157,14 +219,14 @@ class BamFilePairAnalysisSpec extends Specification {
         RoddyBamFile control = DomainFactory.createRoddyBamFile([workPackage: controlWorkPackage, config: disease.config])
 
         return new MockBamFilePairAnalysis([
-                instanceName              : "2014-08-25_15h32",
-                samplePair                : samplePair,
-                sampleType1BamFile        : disease,
-                sampleType2BamFile        : control,
-                config                    : DomainFactory.createRoddyWorkflowConfig([seqType: samplePair.seqType, pipeline: snvPipeline]),
-                latestDataFileCreationDate: AbstractBamFile.getLatestSequenceDataFileCreationDate(disease, control),
+                instanceName      : "2014-08-25_15h32",
+                samplePair        : samplePair,
+                sampleType1BamFile: disease,
+                sampleType2BamFile: control,
+                config            : DomainFactory.createRoddyWorkflowConfig([seqType: samplePair.seqType, pipeline: snvPipeline]),
         ])
     }
+
 
 }
 

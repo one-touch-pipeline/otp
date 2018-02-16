@@ -4,6 +4,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.sophia.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.utils.logging.*
 import grails.plugin.springsecurity.*
 import org.joda.time.*
 import workflows.analysis.pair.*
@@ -67,10 +68,12 @@ abstract class AbstractSophiaWorkflowTests extends AbstractRoddyBamFilePairAnaly
         File finalTumorInsertSizeFile = bamFileTumor.getFinalInsertSizeFile()
         File finalControlInsertSizeFile = bamFileControl.getFinalInsertSizeFile()
 
-        linkFileUtils.createAndValidateLinks([
-                (tumorInsertSizeFile): finalTumorInsertSizeFile,
-                (controlInsertSizeFile): finalControlInsertSizeFile,
-        ], realm)
+        LogThreadLocal.withThreadLog(System.out) {
+            linkFileUtils.createAndValidateLinks([
+                    (tumorInsertSizeFile)  : finalTumorInsertSizeFile,
+                    (controlInsertSizeFile): finalControlInsertSizeFile,
+            ], realm)
+        }
     }
 
 

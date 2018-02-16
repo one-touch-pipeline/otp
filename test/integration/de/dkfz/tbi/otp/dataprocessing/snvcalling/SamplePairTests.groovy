@@ -66,17 +66,6 @@ class SamplePairTests {
     }
 
     @Test
-    void testConstraints_DifferentWorkflow_shouldFail() {
-        SamplePair samplePair = DomainFactory.createSamplePair()
-        MergingWorkPackage mergingWorkPackage1 = samplePair.mergingWorkPackage1
-        mergingWorkPackage1.pipeline = DomainFactory.createPanCanPipeline()
-        mergingWorkPackage1.statSizeFileName = "statSizeFileName.tab"
-        assert mergingWorkPackage1.save(flush: true)
-
-        TestCase.shouldFailWithMessageContaining(ValidationException, "pipeline", { samplePair.save(flush: true) })
-    }
-
-    @Test
     void testConstraints_DifferentSeqType_ShouldFail() {
         SamplePair samplePair = DomainFactory.createSamplePair()
         MergingWorkPackage mergingWorkPackage1 = samplePair.mergingWorkPackage1

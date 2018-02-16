@@ -117,19 +117,18 @@ abstract class AbstractBamFile implements Entity {
         qualityAssessmentStatus == QaProcessingStatus.FINISHED
     }
 
-    public BedFile getBedFile() {
+    BedFile getBedFile() {
         assert seqType.name == SeqTypeNames.EXOME.seqTypeName : "A BedFile is only available when the sequencing type is exome."
-        List<SeqTrack> seqTracks = containedSeqTracks as List
 
-        assert seqTracks.size() > 0
-        return exactlyOneElement(BedFile.findAllWhere(
+        List<BedFile> bedFiles = BedFile.findAllWhere(
                 referenceGenome: referenceGenome,
-                libraryPreparationKit: exactlyOneElement(seqTracks*.libraryPreparationKit.unique(), "Wrong libraryPreparationKit count"),
-        ), "Wrong BedFile count")
+                libraryPreparationKit: mergingWorkPackage.libraryPreparationKit
+        )
+        return exactlyOneElement(bedFiles, "Wrong BedFile count, found: ${bedFiles}")
     }
 
     Project getProject() {
-        return individual.project
+        return individual?.project
     }
 
     short getProcessingPriority() {
@@ -137,55 +136,32 @@ abstract class AbstractBamFile implements Entity {
     }
 
     Individual getIndividual() {
-        return sample.individual
+        return sample?.individual
     }
 
     Sample getSample() {
-        return mergingWorkPackage.sample
+        return mergingWorkPackage?.sample
     }
 
     SampleType getSampleType() {
-        return  sample.sampleType
+        return  sample?.sampleType
     }
 
     SeqType getSeqType() {
-        return mergingWorkPackage.seqType
+        return mergingWorkPackage?.seqType
     }
 
     Pipeline getPipeline() {
-        return mergingWorkPackage.pipeline
+        return mergingWorkPackage?.pipeline
     }
 
     /**
      * @return The reference genome which was used to produce this BAM file.
      */
     ReferenceGenome getReferenceGenome() {
-        return mergingWorkPackage.referenceGenome
+        return mergingWorkPackage?.referenceGenome
     }
 
-    /**
-     * The maximum value of {@link DataFile#dateCreated} of all {@link DataFile}s that have been merged into one of
-     * the specified BAM files, or <code>null</code> if no such {@link DataFile} exists.
-     */
-    static Date getLatestSequenceDataFileCreationDate(final AbstractBamFile... bamFiles) {
-        if (!bamFiles) {
-            throw new IllegalArgumentException('No BAM files specified.')
-        }
-        if (bamFiles.contains(null)) {
-            throw new IllegalArgumentException('At least one of the specified BAM files is null.')
-        }
-        return DataFile.createCriteria().get {
-            seqTrack {
-                'in'('id', bamFiles.sum{it.containedSeqTracks}*.id)
-            }
-            fileType {
-                eq('type', FileType.Type.SEQUENCE)
-            }
-            projections {
-                max('dateCreated')
-            }
-        }
-    }
 
     void withdraw() {
         withTransaction {

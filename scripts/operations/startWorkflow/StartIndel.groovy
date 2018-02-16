@@ -48,7 +48,6 @@ SamplePair.withTransaction {
                 config: config,
                 sampleType1BamFile: sampleType1BamFile,
                 sampleType2BamFile: sampleType2BamFile,
-                latestDataFileCreationDate: AbstractBamFile.getLatestSequenceDataFileCreationDate(sampleType1BamFile, sampleType2BamFile),
         )
         analysis.save(flush: true)
         roddyIndelCallingStartJob.prepareCreatingTheProcessAndTriggerTracking(analysis)

@@ -100,20 +100,12 @@
                 <td><label><g:message code="bamMetadataImport.furtherFile"/></label></td>
                 <td class="input-fields-wrap">
                     <input type="text" style="width:600px" name="furtherFilePaths"><button class="add-field-button">+</button>
-                    <label style="color: red">It must be located next to the bam file!</label>
+                    <label style="color: red"><g:message code="bamMetadataImport.furtherFile.info"/></label>
                 </td>
             </tr>
             <tr>
-                <td><label><g:message code="bamMetadataImport.triggerSnv"/></label></td>
-                <td><g:checkBox name="triggerSnv" checked="${cmd.triggerSnv}"/><i> Not implemented yet</i></td>
-            </tr>
-            <tr>
-                <td><label><g:message code="bamMetadataImport.triggerIndel"/></label></td>
-                <td><g:checkBox name="triggerIndel" checked="${cmd.triggerIndel}"/><i> Not implemented yet</i></td>
-            </tr>
-            <tr>
-                <td><label><g:message code="bamMetadataImport.triggerAceseq"/></label></td>
-                <td><g:checkBox name="triggerAceseq" checked="${cmd.triggerAceseq}"/><i> Not implemented yet</i></td>
+                <td><label><g:message code="bamMetadataImport.triggerAnalysis"/></label></td>
+                <td><g:checkBox name="triggerAnalysis" checked="${cmd.triggerAnalysis}"/><i><g:message code="bamMetadataImport.triggerAnalysis.info"/></i></td>
             </tr>
         </table>
         <br>

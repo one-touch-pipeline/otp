@@ -54,6 +54,10 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile implement
 
     public abstract AlignmentConfig getAlignmentConfig()
 
+    abstract File getFinalInsertSizeFile()
+
+    abstract Integer getMaximalReadLength()
+
     static constraints = {
         numberOfMergedLanes nullable: true, validator: { val, obj ->
             if (Hibernate.getClass(obj) == ExternallyProcessedMergedBamFile) {

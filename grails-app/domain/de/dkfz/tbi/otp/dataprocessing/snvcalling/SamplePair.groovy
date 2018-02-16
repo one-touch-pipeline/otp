@@ -49,8 +49,8 @@ class SamplePair implements Entity {
         DISABLED,
     }
 
-    MergingWorkPackage mergingWorkPackage1
-    MergingWorkPackage mergingWorkPackage2
+    AbstractMergingWorkPackage mergingWorkPackage1
+    AbstractMergingWorkPackage mergingWorkPackage2
 
     String relativePath
 
@@ -73,22 +73,22 @@ class SamplePair implements Entity {
     Date lastUpdated
 
     static constraints = {
-        mergingWorkPackage1 validator: { MergingWorkPackage val, SamplePair obj, Errors errors ->
+        mergingWorkPackage1 validator: { AbstractMergingWorkPackage val, SamplePair obj, Errors errors ->
             final SampleType.Category category = val.sampleType.getCategory(obj.project)
             if (category != SampleType.Category.DISEASE) {
                 errors.reject(null, "Category of mergingWorkPackage1.sampleType is ${category}. Expected ${SampleType.Category.DISEASE}.")
             }
         }
-        mergingWorkPackage2 unique: 'mergingWorkPackage1', validator: { MergingWorkPackage val, SamplePair obj, Errors errors ->
+        mergingWorkPackage2 unique: 'mergingWorkPackage1', validator: { AbstractMergingWorkPackage val, SamplePair obj, Errors errors ->
             if (val == obj.mergingWorkPackage1) {
                 errors.reject(null, "mergingWorkPackage1 and mergingWorkPackage2 are equal.")
             }
             // For one sample pair the individual, the seqType and the pipeline must be the same.
             // To provide the possibility to create sample pairs manually other properties are ignored here.
-            ['individual', 'seqType', 'pipeline'].each {
+            ['individual', 'seqType'].each {
                 def mwp1Value = obj.mergingWorkPackage1."${it}"
                 def mwp2Value = val."${it}"
-                if (mwp1Value != mwp2Value && !(mwp1Value?.hasProperty('id') && mwp2Value?.hasProperty('id') && mwp1Value.id == mwp2Value.id)) {
+                if (mwp1Value != mwp2Value) {
                     errors.reject(null, "${it} of mergingWorkPackage1 and mergingWorkPackage2 are different:\n${mwp1Value}\n${mwp2Value}")
                 }
             }
@@ -169,7 +169,7 @@ class SamplePair implements Entity {
     }
 
     String toStringWithoutId() {
-        return "${individual.pid} ${sampleType1.name} ${sampleType2.name} ${seqType.name} ${seqType.libraryLayout}"
+        return "${individual.mockPid} ${sampleType1.name} ${sampleType2.name} ${seqType.displayName} ${seqType.libraryLayout}"
     }
 
     @Override
@@ -231,10 +231,10 @@ class SamplePair implements Entity {
               mwp1,
               mwp2
             FROM
-              MergingWorkPackage mwp1
+              AbstractMergingWorkPackage mwp1
                 join mwp1.sample.individual.project project_1
                 join mwp1.sample.sampleType sampleType_1,
-              MergingWorkPackage mwp2
+              AbstractMergingWorkPackage mwp2
                 join mwp2.sample.sampleType sampleType_2,
               SampleTypePerProject stpp1,
               SampleTypePerProject stpp2

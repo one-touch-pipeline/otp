@@ -21,11 +21,7 @@ class ImportProcess implements Entity, ProcessParameterObject {
 
     boolean replaceSourceWithLink
 
-    boolean triggerSnv
-
-    boolean triggerIndel
-
-    boolean triggerAceseq
+    boolean triggerAnalysis
 
     Set<ExternallyProcessedMergedBamFile> externallyProcessedMergedBamFiles
 

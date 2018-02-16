@@ -23,7 +23,7 @@ class AnalysisDeletionServiceIntegrationSpec extends Specification {
         testData.createSnvObjects()
         snvCallingInstance = testData.createSnvCallingInstance()
         assert snvCallingInstance.save()
-        indelCallingInstance = DomainFactory.createIndelInstanceWithSameSamplePair(snvCallingInstance)
+        indelCallingInstance = DomainFactory.createIndelCallingInstanceWithSameSamplePair(snvCallingInstance)
         aceseqInstance = DomainFactory.createAceseqInstanceWithSameSamplePair(snvCallingInstance)
         Realm realm = DomainFactory.createRealm()
         assert realm.save()
@@ -104,7 +104,7 @@ class AnalysisDeletionServiceIntegrationSpec extends Specification {
                 samplePair: samplePair2,
         ])
         assert snvCallingInstance2.save()
-        IndelCallingInstance indelCallingInstance2 = DomainFactory.createIndelInstanceWithSameSamplePair(snvCallingInstance2)
+        IndelCallingInstance indelCallingInstance2 = DomainFactory.createIndelCallingInstanceWithSameSamplePair(snvCallingInstance2)
         AceseqInstance aceseqInstance2 = DomainFactory.createAceseqInstanceWithSameSamplePair(snvCallingInstance2)
         List<File> instancesDirectories = new ArrayList<>()
         List<File> samplePairsDirectories

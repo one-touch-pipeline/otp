@@ -369,6 +369,7 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
         return new File(finalMergedQADirectory, INSERT_SIZE_FILE_DIRECTORY)
     }
 
+    @Override
     File getFinalInsertSizeFile() {
         return new File(finalInsertSizeDirectory, "${this.sampleType.dirName}_${this.individual.pid}_${INSERT_SIZE_FILE_SUFFIX}")
     }
@@ -440,7 +441,7 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
         return config
     }
 
-    int getMaximalReadLength() {
+    Integer getMaximalReadLength() {
         return getSeqTracks()*.dataFiles.flatten().max { it.meanSequenceLength }.meanSequenceLength
     }
 }

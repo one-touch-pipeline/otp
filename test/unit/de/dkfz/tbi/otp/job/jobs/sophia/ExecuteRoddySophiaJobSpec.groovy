@@ -23,6 +23,7 @@ import spock.lang.*
         Pipeline,
         Project,
         ProjectCategory,
+        ProcessingOption,
         Sample,
         SamplePair,
         SampleType,
@@ -94,8 +95,8 @@ class ExecuteRoddySophiaJobSpec extends Specification {
                 "insertsizesfile_list:${bamFileDisease.finalInsertSizeFile};${bamFileControl.finalInsertSizeFile}",
                 "possibleTumorSampleNamePrefixes:${bamFileDisease.sampleType.dirName}",
                 "possibleControlSampleNamePrefixes:${bamFileControl.sampleType.dirName}",
-                "controlDefaultReadLength:${bamFileDisease.getMaximalReadLength()}",
-                "tumorDefaultReadLength:${bamFileControl.getMaximalReadLength()}",
+                "controlDefaultReadLength:${bamFileControl.getMaximalReadLength()}",
+                "tumorDefaultReadLength:${bamFileDisease.getMaximalReadLength()}",
         ]
 
         when:

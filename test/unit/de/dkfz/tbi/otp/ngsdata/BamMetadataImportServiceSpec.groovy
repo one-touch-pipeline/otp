@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.*
@@ -98,7 +99,6 @@ class BamMetadataImportServiceSpec extends Specification {
         testDirectory.deleteDir()
     }
 
-    @Unroll
     void "validateAndImport, when there are no problems, returns an importProcess object"() {
 
         given:
@@ -139,9 +139,12 @@ class BamMetadataImportServiceSpec extends Specification {
             getBeansOfType(BamMetadataValidator) >> [:]
         }
         service.fileSystemService = new TestFileSystemService()
+        service.samplePairDeciderService = Mock(SamplePairDeciderService) {
+            1 * findOrCreateSamplePairs(_)
+        }
 
         when:
-        Map results = service.validateAndImport(metadataFile.toString(), true, context.metadataFileMd5sum, false, false, false, false, furtherFiles)
+        Map results = service.validateAndImport(metadataFile.toString(), true, context.metadataFileMd5sum, false, true, furtherFiles)
 
         then:
         results.context.metadataFile == metadataFile

@@ -29,7 +29,16 @@ class SophiaService extends BamFileAnalysisService {
 
     @Override
     protected String pipelineSpecificBamFileChecks(String number) {
-        return "AND ambf${number}.class = de.dkfz.tbi.otp.dataprocessing.RoddyBamFile"
+        return """
+        AND (
+            ambf${number}.class = de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+            OR (
+                ambf${number}.class = de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedMergedBamFile
+                AND ambf${number}.insertSizeFile IS NOT NULL
+                AND ambf${number}.meanSequenceLength IS NOT NULL
+            )
+        )
+        """.replaceAll('\n', ' ')
     }
 
     @Override

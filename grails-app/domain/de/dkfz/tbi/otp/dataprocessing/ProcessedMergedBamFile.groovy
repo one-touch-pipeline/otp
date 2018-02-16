@@ -104,6 +104,16 @@ class ProcessedMergedBamFile extends AbstractMergedBamFile implements ProcessPar
         return project
     }
 
+    @Override
+    File getFinalInsertSizeFile() {
+        assert false: 'not available for ProcessedMergedBamFile'
+    }
+
+    @Override
+    Integer getMaximalReadLength() {
+        assert false: 'not used for ProcessedMergedBamFile'
+    }
+
     void withdraw() {
         withTransaction {
             super.withdraw()

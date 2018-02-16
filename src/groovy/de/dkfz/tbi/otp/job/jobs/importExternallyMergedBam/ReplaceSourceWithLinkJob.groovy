@@ -57,8 +57,10 @@ echo OK
                 assert executionService.executeCommandReturnProcessOutput(realm, cmd).assertExitCodeZero().stdout.trim() == 'OK'
             }
         }
-        importProcess.state = ImportProcess.State.FINISHED
-        importProcess.save(flush: true)
+        ImportProcess.withTransaction {
+            importProcess.state = ImportProcess.State.FINISHED
+            importProcess.save(flush: true)
+        }
         succeed()
     }
 }

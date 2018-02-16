@@ -17,7 +17,7 @@ class BamMetadataImportController {
         if (cmd.submit == "Import" && !errorMessage) {
 
             Map results = bamMetadataImportService.validateAndImport(cmd.path, cmd.ignoreWarnings, cmd.md5,
-                    cmd.replaceWithLink, cmd.triggerSnv, cmd.triggerIndel, cmd.triggerAceseq, cmd.furtherFilePaths)
+                    cmd.replaceWithLink, cmd.triggerAnalysis, cmd.furtherFilePaths)
             bamMetadataValidationContext = results.context
             if (results.project != null) {
                 redirect(controller: "projectOverview", action: "laneOverview", params: [project: results.project.name])
@@ -41,9 +41,7 @@ class BamMetadataControllerSubmitCommand implements Serializable {
     String md5
     List<String> furtherFilePaths
     boolean replaceWithLink
-    boolean triggerSnv
-    boolean triggerIndel
-    boolean triggerAceseq
+    boolean triggerAnalysis
     boolean ignoreWarnings
 
     static constraints = {
