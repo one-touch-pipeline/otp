@@ -46,7 +46,7 @@ class DeepSampleIdentifierParser implements SampleIdentifierParser {
 
     protected String createRegex(boolean hasOptChange) {
 
-        String libraryStrategy = "(ATAC|CTCF|DNase|H3K27ac|H3K27me3|H3K36me3|H3K4me1|H3K4me2|H3K4me3|H3K9me3|H3K122ac|Input|mRNA|NOMe|PpargAb[12]|reH3K4me3|reH3K27me3|RRBS|snRNA|tRNA|WGBS)"
+        String libraryStrategy = "(ATAC|CTCF|DNase|H3|H3K27ac|H3K27me3|H3K36me3|H3K4me1|H3K4me2|H3K4me3|H3K9me3|H3K122ac|Input|mRNA|NOMe|PpargAb[12]|reH3K4me3|reH3K27me3|RRBS|snRNA|tRNA|WGBS)"
         String sequenceCenter = "(B|E|F|K|M|S|I|R)"
         String replicateNr = "([1-9])"
         String optChange = ""
