@@ -29,8 +29,8 @@ class FileSystemService {
         FileSystem fileSystem = createdFileSystems[realm]
         if (fileSystem == null || !fileSystem.isOpen()) {
             SFTPEnvironment env = new SFTPEnvironment()
-                    .withUsername(realm.unixUser)
-                    .withClientConnectionCount(ProcessingOptionService.findOptionAsNumber(ProcessingOption.OptionName.MAXIMUM_SFTP_CONNECTIONS, null, null, 5).toInteger())
+                    .withUsername(configService.sshUser)
+                    .withClientConnectionCount(ProcessingOptionService.findOptionAsNumber(MAXIMUM_SFTP_CONNECTIONS, null, null, 5).toInteger())
             if (configService.sshKeyFile) {
                 env.withIdentity(fromFiles(configService.sshKeyFile))
 
@@ -66,9 +66,18 @@ class FileSystemService {
         return fileSystem
     }
 
-    FileSystem getFilesystemForRealm(Realm realm) throws Throwable {
+    FileSystem getFilesystemForProcessingForRealm(Realm realm) throws Throwable {
         assert realm
         if (ProcessingOptionService.findOptionAsBoolean(FILESYSTEM_PROCESSING_USE_REMOTE, null, null)) {
+            getFilesystem(realm)
+        } else {
+            return FileSystems.default
+        }
+    }
+
+    FileSystem getFilesystemForConfigFileChecksForRealm(Realm realm) throws Throwable {
+        assert realm
+        if (ProcessingOptionService.findOptionAsBoolean(FILESYSTEM_CONFIG_FILE_CHECKS_USE_REMOTE, null, null)) {
             getFilesystem(realm)
         } else {
             return FileSystems.default
@@ -100,7 +109,11 @@ class FileSystemService {
     @Scheduled(fixedDelay = 30000L)
     void keepAlive() {
         createdFileSystems.each { Realm realm, FileSystem fileSystem ->
-            SFTPFileSystemProvider.keepAlive(fileSystem)
+            try {
+                SFTPFileSystemProvider.keepAlive(fileSystem)
+            } catch (ProviderMismatchException e) {
+                // workaround for https://github.com/robtimus/sftp-fs/issues/3
+            }
         }
     }
 }

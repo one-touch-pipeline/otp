@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.dataprocessing.roddyExecution
 
 import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 import grails.test.mixin.*
@@ -261,16 +262,18 @@ public class RoddyWorkflowConfigUnitTests {
     void testValidateConfig_shouldBeValid() {
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig()
         createXml(roddyWorkflowConfig, roddyWorkflowConfig.getNameUsedInConfig())
+        RoddyWorkflowConfigService service = createService()
 
-        roddyWorkflowConfig.validateConfig()
+        service.validateConfig(roddyWorkflowConfig)
     }
 
     @Test
     void testValidateConfig_shouldFailForMissingFile() {
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig()
+        RoddyWorkflowConfigService service = createService()
 
         TestCase.shouldFailWithMessageContaining(AssertionError, 'not found.') {
-            roddyWorkflowConfig.validateConfig()
+            service.validateConfig(roddyWorkflowConfig)
         }
     }
 
@@ -280,9 +283,10 @@ public class RoddyWorkflowConfigUnitTests {
         File file = new File(configDir, "${HelperUtils.uniqueString}.xml")
         roddyWorkflowConfig.configFilePath = file.path
         CreateFileHelper.createFile(file)
+        RoddyWorkflowConfigService service = createService()
 
         TestCase.shouldFailWithMessage(AssertionError, '.*The file name .*does not match the pattern.*') {
-            roddyWorkflowConfig.validateConfig()
+            service.validateConfig(roddyWorkflowConfig)
         }
     }
 
@@ -291,9 +295,10 @@ public class RoddyWorkflowConfigUnitTests {
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig()
         createXml(roddyWorkflowConfig, roddyWorkflowConfig.getNameUsedInConfig())
         roddyWorkflowConfig.pluginVersion = "plugin:invalid"
+        RoddyWorkflowConfigService service = createService()
 
         TestCase.shouldFailWithMessageContaining(AssertionError, 'plugin:invalid') {
-            roddyWorkflowConfig.validateConfig()
+            service.validateConfig(roddyWorkflowConfig)
         }
     }
 
@@ -301,9 +306,10 @@ public class RoddyWorkflowConfigUnitTests {
     void testValidateConfig_shouldFailForLabelInFile() {
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig()
         createXml(roddyWorkflowConfig, 'label')
+        RoddyWorkflowConfigService service = createService()
 
-        TestCase.shouldFailWithMessageContaining(AssertionError, 'assert configuration.@name == getNameUsedInConfig()') {
-            roddyWorkflowConfig.validateConfig()
+        TestCase.shouldFailWithMessageContaining(AssertionError, 'assert configuration.@name == config.getNameUsedInConfig()') {
+            service.validateConfig(roddyWorkflowConfig)
         }
     }
 
@@ -313,8 +319,9 @@ public class RoddyWorkflowConfigUnitTests {
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig(individual: individual)
         configDir = new File(configDir, individual.pid)
         createXml(roddyWorkflowConfig, roddyWorkflowConfig.getNameUsedInConfig())
+        RoddyWorkflowConfigService service = createService()
 
-        roddyWorkflowConfig.validateConfig()
+        service.validateConfig(roddyWorkflowConfig)
     }
 
 
@@ -323,10 +330,17 @@ public class RoddyWorkflowConfigUnitTests {
         Individual individual = DomainFactory.createIndividual()
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig(individual: individual)
         createXml(roddyWorkflowConfig, roddyWorkflowConfig.getNameUsedInConfig())
+        RoddyWorkflowConfigService service = createService()
 
-        TestCase.shouldFailWithMessageContaining(AssertionError, "assert configFilePath.contains(individual.pid)") {
-            roddyWorkflowConfig.validateConfig()
+        TestCase.shouldFailWithMessageContaining(AssertionError, "assert config.configFilePath.contains(config.individual.pid)") {
+            service.validateConfig(roddyWorkflowConfig)
         }
+    }
+
+    static RoddyWorkflowConfigService createService() {
+        RoddyWorkflowConfigService service = new RoddyWorkflowConfigService()
+        service.fileSystemService = new TestFileSystemService()
+        return service
     }
 
     void createXml(RoddyWorkflowConfig roddyWorkflowConfig, String label) {

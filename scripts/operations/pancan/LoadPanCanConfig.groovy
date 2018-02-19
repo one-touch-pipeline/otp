@@ -49,7 +49,7 @@ String configFilePath = ''
 boolean adapterTrimmingNeeded = false
 
 //-----------------------
-
+RoddyWorkflowConfigService roddyWorkflowConfigService = ctx.roddyWorkflowConfigService
 String panCanAlignmentDeciderBeanName = AlignmentDeciderBeanNames.PAN_CAN_ALIGNMENT.bean
 
 LogThreadLocal.withThreadLog(System.out, { Project.withTransaction {
@@ -72,7 +72,7 @@ LogThreadLocal.withThreadLog(System.out, { Project.withTransaction {
     Project project = CollectionUtils.exactlyOneElement(Project.findAllByName(projectName))
 
     if (!individualPid) {
-        RoddyWorkflowConfig.importProjectConfigFile(
+        roddyWorkflowConfigService.importProjectConfigFile(
                 project,
                 seqType,
                 pluginVersionToUse,
@@ -83,7 +83,7 @@ LogThreadLocal.withThreadLog(System.out, { Project.withTransaction {
         )
     } else {
         Individual individual = CollectionUtils.exactlyOneElement(Individual.findAllByPid(individualPid))
-        RoddyWorkflowConfigService.loadPanCanConfigAndTriggerAlignment(
+        roddyWorkflowConfigService.loadPanCanConfigAndTriggerAlignment(
                 project,
                 seqType,
                 pluginVersionToUse,

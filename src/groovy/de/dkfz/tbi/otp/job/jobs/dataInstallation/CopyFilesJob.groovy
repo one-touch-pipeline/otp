@@ -97,7 +97,7 @@ ${changeMode}
             try {
                 FileSystem fs = seqTrack.linkedExternally ?
                         fileSystemService.getFilesystemForFastqImport() :
-                        fileSystemService.getFilesystemForRealm(dataFile.project.realm)
+                        fileSystemService.getFilesystemForProcessingForRealm(dataFile.project.realm)
                 Path targetPath = fs.getPath(targetFile)
 
                 fileService.ensureFileIsReadableAndNotEmpty(targetPath)

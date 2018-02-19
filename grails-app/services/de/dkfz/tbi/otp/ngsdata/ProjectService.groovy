@@ -5,6 +5,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
+import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.utils.*
@@ -50,6 +51,8 @@ class ProjectService {
     SophiaService sophiaService
     AceseqService aceseqService
     ConfigService configService
+    FileSystemService fileSystemService
+    RoddyWorkflowConfigService roddyWorkflowConfigService
 
     /**
      *
@@ -150,7 +153,7 @@ class ProjectService {
                 writeSequenceCenter: false,
         )
         Group group = groupService.createGroup(groupCommand)
-        groupService.aclUtilService.addPermission(project, new GrantedAuthoritySid(group.role.authority), BasePermission.READ)
+        aclUtilService.addPermission(project, new GrantedAuthoritySid(group.role.authority), BasePermission.READ)
 
         File projectDirectory = project.getProjectDirectory()
         if (projectDirectory.exists()) {
@@ -160,7 +163,8 @@ class ProjectService {
             }
         }
         executeScript(buildCreateProjectDirectory(projectParams.unixGroup, projectDirectory), project)
-        WaitingFileUtils.waitUntilExists(projectDirectory)
+        FileSystem fs = fileSystemService.getFilesystemForConfigFileChecksForRealm(project.realm)
+        FileService.waitUntilExists(fs.getPath(projectDirectory.absolutePath))
 
         return project
     }
@@ -410,7 +414,7 @@ class ProjectService {
 
         executeScript(getScriptBash(configDirectory, xmlConfig, configFilePath), alignmentConfiguration.project)
 
-        RoddyWorkflowConfig.importProjectConfigFile(
+        roddyWorkflowConfigService.importProjectConfigFile(
                 alignmentConfiguration.project,
                 alignmentConfiguration.seqType,
                 "${alignmentConfiguration.pluginName}:${alignmentConfiguration.pluginVersion}",
@@ -450,7 +454,7 @@ class ProjectService {
         executeScript(getCopyBashScript(configDirectory, configFilePathBasedProject, executionHelperService.getGroup(projectDirectory)), project)
 
         File configFilePath = new File(configDirectory, configFilePathBasedProject.name)
-        RoddyWorkflowConfig.importProjectConfigFile(
+        roddyWorkflowConfigService.importProjectConfigFile(
                 project,
                 roddyWorkflowConfigBasedProject.seqType,
                 roddyWorkflowConfigBasedProject.pluginVersion,
@@ -532,7 +536,7 @@ class ProjectService {
 
         executeScript(getScriptBash(configDirectory, xmlConfig, configFilePath), configuration.project)
 
-        return RoddyWorkflowConfig.importProjectConfigFile(
+        return roddyWorkflowConfigService.importProjectConfigFile(
                 configuration.project,
                 configuration.seqType,
                 "${configuration.pluginName}:${configuration.pluginVersion}",

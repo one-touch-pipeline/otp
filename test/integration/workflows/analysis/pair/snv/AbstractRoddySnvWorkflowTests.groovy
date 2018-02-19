@@ -9,6 +9,8 @@ import de.dkfz.tbi.otp.utils.logging.*
 
 abstract class AbstractRoddySnvWorkflowTests extends AbstractSnvWorkflowTests {
 
+    RoddyWorkflowConfigService roddyWorkflowConfigService
+
     static final String PLUGIN_NAME = 'SNVCallingWorkflow'
     static final String PLUGIN_VERSION = '1.0.166-1'
     static final String PLUGIN = "${PLUGIN_NAME}:${PLUGIN_VERSION}"
@@ -80,7 +82,7 @@ echo 'OK'
     ConfigPerProject createConfig() {
         File xmlFilePath = createXml()
 
-        config = RoddyWorkflowConfig.importProjectConfigFile(
+        config = roddyWorkflowConfigService.importProjectConfigFile(
                 project,
                 seqType,
                 PLUGIN,

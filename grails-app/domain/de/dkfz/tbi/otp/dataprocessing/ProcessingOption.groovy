@@ -95,6 +95,7 @@ class ProcessingOption implements Entity {
         FILESYSTEM_FASTQ_IMPORT("Realm to use for filesystem access when importing FASTQs, local is used if empty", null, Type.SINGLE_WORD_TEXT_OPTIONAL),
         FILESYSTEM_BAM_IMPORT("Realm to use for filesystem access when importing BAMs, local is used if empty", null, Type.SINGLE_WORD_TEXT_OPTIONAL),
         FILESYSTEM_PROCESSING_USE_REMOTE("Use remote (true) or local (false) filesystem when processing files", null, Type.BOOLEAN),
+        FILESYSTEM_CONFIG_FILE_CHECKS_USE_REMOTE("Use remote (true) or local (false) filesystem for config file checks", null, Type.BOOLEAN),
         //realm
         REALM_DEFAULT_VALUE("The default realm", null, Type.SINGLE_WORD_TEXT),
 

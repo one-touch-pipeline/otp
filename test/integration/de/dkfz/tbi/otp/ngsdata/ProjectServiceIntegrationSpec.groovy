@@ -1,7 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.*
-import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
@@ -21,13 +21,13 @@ import java.nio.file.attribute.*
 
 class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRoles {
 
-    ProjectService projectService
-
-    ReferenceGenomeService referenceGenomeService
-
+    ExecutionService executionService
     ProcessingOptionService processingOptionService
-
+    ProjectService projectService
+    ReferenceGenomeService referenceGenomeService
+    RoddyWorkflowConfigService roddyWorkflowConfigService
     TestConfigService configService
+
 
     @Rule
     public TemporaryFolder temporaryFolder
@@ -66,6 +66,8 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 return ProcessHelperService.executeAndWait("bash ${script.absolutePath}").assertExitCodeZero().stdout
             }
         }
+        projectService.roddyWorkflowConfigService = new RoddyWorkflowConfigService()
+        projectService.roddyWorkflowConfigService.fileSystemService = new TestFileSystemService()
 
         DomainFactory.createProcessingOptionLazy([
                 name: OptionName.PIPELINE_RODDY_ALIGNMENT_BWA_VERSION_AVAILABLE,
@@ -91,6 +93,8 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
     }
 
     def cleanup() {
+        projectService.executionService = executionService
+        projectService.roddyWorkflowConfigService = roddyWorkflowConfigService
         configService.clean()
     }
 

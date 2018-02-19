@@ -3,8 +3,6 @@ package de.dkfz.tbi.otp.dataprocessing.roddyExecution
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 
-import java.util.regex.*
-
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 /**
@@ -104,35 +102,6 @@ class RoddyWorkflowConfig extends ConfigPerProject implements AlignmentConfig {
         }
     }
 
-    static RoddyWorkflowConfig importProjectConfigFile(Project project, SeqType seqType, String pluginVersionToUse, Pipeline pipeline, String configFilePath, String configVersion, boolean adapterTrimmingNeeded = false, Individual individual = null) {
-        assert project : "The project is not allowed to be null"
-        assert seqType : "The seqType is not allowed to be null"
-        assert pipeline : "The pipeline is not allowed to be null"
-        assert pluginVersionToUse:"The pluginVersionToUse is not allowed to be null"
-        assert configFilePath : "The configFilePath is not allowed to be null"
-        assert configVersion : "The configVersion is not allowed to be null"
-
-        RoddyWorkflowConfig roddyWorkflowConfig = getLatest(project, individual, seqType, pipeline)
-
-        RoddyWorkflowConfig config = new RoddyWorkflowConfig(
-                project: project,
-                seqType: seqType,
-                pipeline: pipeline,
-                configFilePath: configFilePath,
-                pluginVersion: pluginVersionToUse,
-                previousConfig: roddyWorkflowConfig,
-                configVersion: configVersion,
-                individual: individual,
-                adapterTrimmingNeeded: adapterTrimmingNeeded,
-                nameUsedInConfig: getNameUsedInConfig(pipeline.name, seqType, pluginVersionToUse, configVersion)
-        )
-        config.validateConfig()
-        config.createConfigPerProject()
-
-        return config
-    }
-
-
     protected static RoddyWorkflowConfig getLatest(final Project project, final Individual individual, final SeqType seqType, final Pipeline pipeline) {
         assert project : "The project is not allowed to be null"
         assert seqType : "The seqType is not allowed to be null"
@@ -152,20 +121,6 @@ class RoddyWorkflowConfig extends ConfigPerProject implements AlignmentConfig {
     static RoddyWorkflowConfig getLatestForIndividual(final Individual individual, final SeqType seqType, final Pipeline pipeline) {
         assert individual : "The individual is not allowed to be null"
         return getLatest(individual.project, individual, seqType, pipeline) ?: getLatestForProject(individual.project, seqType, pipeline)
-    }
-
-    void validateConfig() {
-        File configFile = configFilePath as File
-        LsdfFilesService.ensureFileIsReadableAndNotEmpty(configFile)
-        String pattern = /^${Pattern.quote(pipeline.name.name())}_${Pattern.quote(seqType.roddyName)}_${Pattern.quote(seqType.libraryLayout)}_(.+)_${Pattern.quote(configVersion)}\.xml$/
-        Matcher matcher = configFile.name =~ pattern
-        assert matcher.matches(): "The file name '${configFile.name}' does not match the pattern '${pattern}'"
-        assert pluginVersion.endsWith(":${matcher.group(1)}")
-        def configuration = new XmlParser().parseText(configFile.text)
-        assert configuration.@name == getNameUsedInConfig()
-        if (individual) {
-            assert configFilePath.contains(individual.pid)
-        }
     }
 
     static String getNameUsedInConfig(Pipeline.Name pipelineName, SeqType seqType, String pluginNameAndVersion, String configVersion) {
