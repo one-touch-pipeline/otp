@@ -43,7 +43,7 @@ try {
         ConfigPerProject.findAllByProjectAndPreviousConfigIsNotNull(project)*.delete(flush: true)
         ConfigPerProject.findAllByProject(project)*.delete(flush: true)
 
-        ProjectContactPerson.findAllByProject(project)*.delete(flush: true)
+        UserProjectRole.findAllByProject(project)*.delete(flush: true)
 
         /*
          * Finally delete the project

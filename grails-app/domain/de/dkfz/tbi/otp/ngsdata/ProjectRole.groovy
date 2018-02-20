@@ -2,7 +2,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.utils.Entity
 
-class ContactPersonRole implements Entity {
+class ProjectRole implements Entity {
 
     String name
     boolean accessToOtp

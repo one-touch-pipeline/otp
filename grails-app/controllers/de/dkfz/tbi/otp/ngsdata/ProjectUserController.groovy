@@ -28,14 +28,14 @@ class ProjectUserController {
 
         project = exactlyOneElement(Project.findAllByName(project.name, [fetch: [projectCategories: 'join', projectGroup: 'join']]))
 
-        List<ProjectContactPerson> projectContactPersons = ProjectContactPerson.findAllByProject(project)
+        List<UserProjectRole> projectUsers = UserProjectRole.findAllByProject(project)
 
         List accessPersons = projectOverviewService.getAccessPersons(project)
 
         return [
                 projects: projects,
                 project: project,
-                projectContactPersons: projectContactPersons,
+                projectUsers: projectUsers,
                 accessPersons: accessPersons,
                 hasErrors: params.hasErrors,
                 message: params.message,

@@ -21,43 +21,43 @@
 
         <div class="otpDataTables">
             <h3>
-                <g:message code="projectOverview.contactPerson.headline" />
+                <g:message code="projectOverview.projectUser.headline" />
             </h3>
             <table>
                 <tr>
-                    <th><g:message code="projectOverview.contactPerson.name"/></th>
-                    <th><g:message code="projectOverview.contactPerson.email"/></th>
-                    <th><g:message code="projectOverview.contactPerson.aspera"/></th>
-                    <th><g:message code="projectOverview.contactPerson.role"/></th>
+                    <th><g:message code="projectOverview.projectUser.name"/></th>
+                    <th><g:message code="projectOverview.projectUser.email"/></th>
+                    <th><g:message code="projectOverview.projectUser.aspera"/></th>
+                    <th><g:message code="projectOverview.projectUser.role"/></th>
                     <sec:ifAllGranted roles="ROLE_OPERATOR">
                         <th></th>
                     </sec:ifAllGranted>
                 </tr>
-                <g:each in="${projectContactPersons}" var="projectContactPerson">
+                <g:each in="${projectUsers}" var="projectUser">
                     <tr>
                         <td>
                             <otp:editorSwitch
                                     roles="ROLE_OPERATOR"
-                                    link="${g.createLink(controller: 'projectUser', action: 'updateName', params: ["user.id": projectContactPerson.user.id])}"
-                                    value="${projectContactPerson.user.realName}"
-                                    values="${projectContactPersons}"/>
+                                    link="${g.createLink(controller: 'projectUser', action: 'updateName', params: ["user.id": projectUser.user.id])}"
+                                    value="${projectUser.user.realName}"
+                                    values="${projectUsers}"/>
                         </td>
                         <td>
                             <otp:editorSwitch
                                     roles="ROLE_OPERATOR"
-                                    link="${g.createLink(controller: 'projectUser', action: 'updateEmail', params: ["user.id": projectContactPerson.user.id])}"
-                                    value="${projectContactPerson.user.email}"
-                                    values="${projectContactPersons}"/>
+                                    link="${g.createLink(controller: 'projectUser', action: 'updateEmail', params: ["user.id": projectUser.user.id])}"
+                                    value="${projectUser.user.email}"
+                                    values="${projectUsers}"/>
                         </td>
                         <td>
                             <otp:editorSwitch
                                     roles="ROLE_OPERATOR"
-                                    link="${g.createLink(controller: 'projectUser', action: 'updateAspera', params: ["user.id": projectContactPerson.user.id])}"
-                                    value="${projectContactPerson.user.asperaAccount}"
-                                    values="${projectContactPersons}"/>
+                                    link="${g.createLink(controller: 'projectUser', action: 'updateAspera', params: ["user.id": projectUser.user.id])}"
+                                    value="${projectUser.user.asperaAccount}"
+                                    values="${projectUsers}"/>
                         </td>
                         <td>
-                            ${projectContactPerson.contactPersonRole?.name ?: ''}
+                            ${projectUser.projectRole?.name ?: ''}
                         </td>
                     </tr>
                 </g:each>

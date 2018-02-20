@@ -3,14 +3,15 @@ package de.dkfz.tbi.otp.ngsdata
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.Entity
 
-class ProjectContactPerson implements Serializable, Entity {
+class UserProjectRole implements Serializable, Entity {
 
     Project project
     User user
-    ContactPersonRole contactPersonRole
+    ProjectRole projectRole
+    boolean enabled = true
 
     static constraints = {
-        contactPersonRole(nullable: true)
+        projectRole(nullable: true)
     }
 
     static mapping = {

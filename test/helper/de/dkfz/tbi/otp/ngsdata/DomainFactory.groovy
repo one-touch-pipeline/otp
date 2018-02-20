@@ -1389,17 +1389,17 @@ class DomainFactory {
         ], projectProperties)
     }
 
-    public static ProjectContactPerson createProjectContactPerson(Map projectContactPersonProperties = [:]) {
-        return createDomainObject(ProjectContactPerson, [
-                project          : { createProject() },
-                contactPersonRole: { createContactPersonRole() },
-        ], projectContactPersonProperties)
+    public static UserProjectRole createUserProjectRole(Map userProjectRoleProperties = [:]) {
+        return createDomainObject(UserProjectRole, [
+                project    : { createProject() },
+                projectRole: { createProjectRole() },
+        ], userProjectRoleProperties)
     }
 
-    public static ContactPersonRole createContactPersonRole(Map contactPersonRoleProperties = [:]) {
-        return createDomainObject(ContactPersonRole, [
+    public static ProjectRole createProjectRole(Map projectRoleProperties = [:]) {
+        return createDomainObject(ProjectRole, [
                 name: 'roleName',
-        ], contactPersonRoleProperties)
+        ], projectRoleProperties)
     }
 
     public static Individual createIndividual(Map individualProperties = [:]) {
