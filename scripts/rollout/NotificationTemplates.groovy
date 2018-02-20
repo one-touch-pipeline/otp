@@ -14,7 +14,7 @@ Dear user,
 
 ${stepInformation}${seqCenterComment}
 
-If you want to get access to OTP, please contact the DMG service team.
+If you want to get access to OTP, please contact the OTP service team.
 ${addition}
 
 Best regards,
@@ -87,7 +87,7 @@ println processingOptionService.createOrUpdate(
         null,
 '''The following sample pairs will not been variant-called, most likely because they have not reached a threshold yet:
 ${samplePairsWontProcess}
-If you want these sample pairs to be processed nevertheless, please contact the DMG service team.
+If you want these sample pairs to be processed nevertheless, please contact the OTP service team.
 '''
 )
 
@@ -180,7 +180,7 @@ println processingOptionService.createOrUpdate(
         null,
 '''The following sample pairs have not been SNV-called, most likely because they have not reached a threshold yet:
 ${samplePairsNotProcessed}
-If you want these sample pairs to be processed nevertheless, please contact the DMG service team.
+If you want these sample pairs to be processed nevertheless, please contact the OTP service team.
 '''
 )
 
@@ -191,7 +191,7 @@ println processingOptionService.createOrUpdate(
         null,
 '''The following sample pairs have not been Indel-called, most likely because they have not reached a threshold yet:
 ${samplePairsNotProcessed}
-If you want these sample pairs to be processed nevertheless, please contact the DMG service team.
+If you want these sample pairs to be processed nevertheless, please contact the OTP service team.
 '''
 )
 
@@ -201,7 +201,7 @@ println processingOptionService.createOrUpdate(
         null,
         '''The following sample pairs have not been CNV-called, most likely because they have not reached a threshold yet:
 ${samplePairsNotProcessed}
-If you want these sample pairs to be processed nevertheless, please contact the DMG service team.
+If you want these sample pairs to be processed nevertheless, please contact the OTP service team.
 '''
 )
 
@@ -211,7 +211,7 @@ println processingOptionService.createOrUpdate(
         null,
         '''The following sample pairs have not been SV-called, most likely because they have not reached a threshold yet:
 ${samplePairsNotProcessed}
-If you want these sample pairs to be processed nevertheless, please contact the DMG service team.
+If you want these sample pairs to be processed nevertheless, please contact the OTP service team.
 '''
 )
 
