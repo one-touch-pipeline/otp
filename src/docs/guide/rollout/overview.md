@@ -61,6 +61,7 @@ The following additional variables are used:
 - $TOMCAT_VERSION: the version of tomcat, here 8.5.23
 - $DOWNLOAD_PATH: the path used for download
 - $WORK_DIRECTORY
+- $FASTQC_ZIP: name of the downloaded fastqc program
 
 
 [Back to Rollout Overview](index.md)

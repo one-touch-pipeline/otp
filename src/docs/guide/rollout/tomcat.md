@@ -161,4 +161,9 @@ remote as web user
     ~/apache-tomcat-$TOMCAT_VERSION/bin/startup.sh ; tail -f ~/apache-tomcat-$TOMCAT_VERSION/logs/catalina.out
     ```
 
+- adapt the property 'otp.database.dbCreate' in the otp property file "~.otp.properties" to 'validate'
+    <br> This ensure, that otp won't do any ddl modification automatically, instead it check that all required table and columns are available.
+
+
+
 [Back to Rollout Overview](index.md)
