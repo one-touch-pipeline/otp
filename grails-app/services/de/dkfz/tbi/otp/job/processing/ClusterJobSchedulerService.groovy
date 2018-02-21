@@ -7,6 +7,8 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.scheduler.*
 import de.dkfz.tbi.otp.ngsdata.*
+import grails.compiler.*
+import grails.util.Environment
 import groovy.transform.*
 
 import java.time.*
@@ -20,8 +22,10 @@ import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.*
  * It executes job submission/monitoring commands on the cluster head node using
  * the <a href="https://github.com/eilslabs/BatchEuphoria">BatchEuphoria</a> library.
  */
-@CompileStatic
+@GrailsCompileStatic
 class ClusterJobSchedulerService {
+
+    static final int WAITING_TIME_FOR_SECOND_TRY_IN_MILLISECONDS = (Environment.getCurrent() == Environment.TEST) ? 0 : 10000
 
     ClusterJobSubmissionOptionsService clusterJobSubmissionOptionsService
     JobStatusLoggingService jobStatusLoggingService
@@ -155,10 +159,21 @@ class ClusterJobSchedulerService {
     }
 
     public void retrieveAndSaveJobInformationAfterJobStarted(ClusterJob clusterJob) throws Exception {
+        BEJobID beJobID = new BEJobID(clusterJob.clusterJobId)
         BatchEuphoriaJobManager jobManager = clusterJobManagerFactoryService.getJobManager(clusterJob.realm)
-        GenericJobInfo jobInfo = jobManager.queryExtendedJobStateById([new BEJobID(clusterJob.clusterJobId)])
-                .get(new BEJobID(clusterJob.clusterJobId))
+        GenericJobInfo jobInfo = null
 
+        try {
+            jobInfo = jobManager.queryExtendedJobStateById([beJobID]).get(beJobID)
+        } catch (Throwable e) {
+            threadLog?.warn("Failed to fill in runtime statistics after start for ${clusterJob.clusterJobId}, try again", e)
+            Thread.sleep(WAITING_TIME_FOR_SECOND_TRY_IN_MILLISECONDS)
+            try {
+                jobInfo = jobManager.queryExtendedJobStateById([beJobID]).get(beJobID)
+            } catch (Throwable e2) {
+                threadLog?.warn("Failed to fill in runtime statistics after start for ${clusterJob.clusterJobId} the second time", e2)
+            }
+        }
         if (jobInfo) {
             clusterJobService.amendClusterJob(clusterJob, jobInfo)
          }

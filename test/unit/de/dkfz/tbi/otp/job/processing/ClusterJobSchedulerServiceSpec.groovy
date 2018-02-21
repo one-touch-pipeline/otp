@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.processing
 
+import de.dkfz.roddy.execution.jobs.*
 import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.infrastructure.*
@@ -9,7 +10,6 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.ProcessHelperService.ProcessOutput
 import grails.test.mixin.*
 import spock.lang.*
-
 
 @Mock([
         ClusterJob,
@@ -30,11 +30,13 @@ class ClusterJobSchedulerServiceSpec extends Specification {
         Realm realm = DomainFactory.createRealm()
         ClusterJobSchedulerService service = new ClusterJobSchedulerService()
         service.executionService = [
-                executeCommandReturnProcessOutput: { realm1, command -> new ProcessOutput(
-                        stdout: "",
-                        stderr: stderr,
-                        exitCode: exitCode,
-                ) },
+                executeCommandReturnProcessOutput: { realm1, command ->
+                    new ProcessOutput(
+                            stdout: "",
+                            stderr: stderr,
+                            exitCode: exitCode,
+                    )
+                },
         ] as ExecutionService
         service.configService = Mock(ConfigService) {
             getSshUser() >> SSHUSER
@@ -59,11 +61,13 @@ class ClusterJobSchedulerServiceSpec extends Specification {
         ClusterJobSchedulerService service = new ClusterJobSchedulerService()
         service.clusterJobManagerFactoryService = new ClusterJobManagerFactoryService()
         service.clusterJobManagerFactoryService.executionService = [
-                executeCommandReturnProcessOutput: { realm1, command -> new ProcessOutput(
-                        stdout: command.tokenize().last(),
-                        stderr: "",
-                        exitCode: 0,
-                ) },
+                executeCommandReturnProcessOutput: { realm1, command ->
+                    new ProcessOutput(
+                            stdout: command.tokenize().last(),
+                            stderr: "",
+                            exitCode: 0,
+                    )
+                },
         ] as ExecutionService
         service.clusterJobManagerFactoryService.configService = Mock(ConfigService) {
             getSshUser() >> SSHUSER
@@ -84,11 +88,13 @@ class ClusterJobSchedulerServiceSpec extends Specification {
         ClusterJobSchedulerService service = new ClusterJobSchedulerService()
         service.clusterJobManagerFactoryService = new ClusterJobManagerFactoryService()
         service.clusterJobManagerFactoryService.executionService = [
-                executeCommandReturnProcessOutput: { realm1, String command -> new ProcessOutput(
-                        stdout: qstatOutput(jobId, pbsStatus),
-                        stderr: "",
-                        exitCode: 0,
-                ) },
+                executeCommandReturnProcessOutput: { realm1, String command ->
+                    new ProcessOutput(
+                            stdout: qstatOutput(jobId, pbsStatus),
+                            stderr: "",
+                            exitCode: 0,
+                    )
+                },
         ] as ExecutionService
         service.clusterJobManagerFactoryService.configService = Mock(ConfigService) {
             getSshUser() >> SSHUSER
@@ -170,7 +176,90 @@ ${jobId}.clust_head.ine  OtherUnixUser    fast     r160224_18005293    --      1
         then:
         3 * service.clusterJobManagerFactoryService.executionService.executeCommandReturnProcessOutput(realm, _ as String) >> out
         1 * service.clusterJobService.createClusterJob(realm, clusterJobId, SSHUSER, step, seqType, _ as String) >> clusterJob
-        1 * service.clusterJobLoggingService.createAndGetLogDirectory(_, _) >> {TestCase.uniqueNonExistentPath}
+        1 * service.clusterJobLoggingService.createAndGetLogDirectory(_, _) >> { TestCase.uniqueNonExistentPath }
         result == clusterJobId
+    }
+
+
+    private List createDataFor_retrieveAndSaveJobInformationAfterJobStarted(int queryExtendedJobStateByIdCallCount, boolean calledAmendClusterJob) {
+        String clusterId = 1234
+        Realm realm = new Realm()
+        ClusterJob job = new ClusterJob([
+                clusterJobId: clusterId,
+                realm       : realm,
+        ])
+
+        int amendClusterJobCallCount = calledAmendClusterJob ? 1 : 0
+
+        int counter = 0
+        ClusterJobSchedulerService clusterJobSchedulerService = new ClusterJobSchedulerService([
+                clusterJobManagerFactoryService: Mock(ClusterJobManagerFactoryService) {
+                    1 * getJobManager(realm) >> {
+                        return Mock(BatchEuphoriaJobManager) {
+                            queryExtendedJobStateByIdCallCount * queryExtendedJobStateById(_) >> { List<BEJobID> jobIds ->
+                                assert jobIds.size() == 1
+                                counter++
+                                if (queryExtendedJobStateByIdCallCount == counter && calledAmendClusterJob) {
+                                    return [(new BEJobID(clusterId)): new GenericJobInfo(null, null, null, null, null)]
+                                } else {
+                                    throw new RuntimeException()
+                                }
+                            }
+                        }
+                    }
+                },
+                clusterJobService              : Mock(ClusterJobService) {
+                    amendClusterJobCallCount * amendClusterJob(_, _)
+                }
+        ])
+        return [
+                job,
+                clusterJobSchedulerService
+        ]
+    }
+
+
+    @Unroll
+    void "retrieveAndSaveJobInformationAfterJobStarted, #name"() {
+        given:
+        String clusterId = 1234
+        Realm realm = new Realm()
+        ClusterJob job = new ClusterJob([
+                clusterJobId: clusterId,
+                realm       : realm,
+        ])
+
+        int amendClusterJobCallCount = calledAmendClusterJob ? 1 : 0
+
+        int counter = 0
+        ClusterJobSchedulerService clusterJobSchedulerService = new ClusterJobSchedulerService([
+                clusterJobManagerFactoryService: Mock(ClusterJobManagerFactoryService) {
+                    1 * getJobManager(realm) >> {
+                        return Mock(BatchEuphoriaJobManager) {
+                            queryExtendedJobStateByIdCallCount * queryExtendedJobStateById(_) >> { List<BEJobID> jobIds ->
+                                assert jobIds.size() == 1
+                                counter++
+                                if (queryExtendedJobStateByIdCallCount == counter && calledAmendClusterJob) {
+                                    return [(new BEJobID(clusterId)): new GenericJobInfo(null, null, null, null, null)]
+                                } else {
+                                    throw new RuntimeException()
+                                }
+                            }
+                        }
+                    }
+                },
+                clusterJobService              : Mock(ClusterJobService) {
+                    amendClusterJobCallCount * amendClusterJob(_, _)
+                }
+        ])
+
+        expect:
+        clusterJobSchedulerService.retrieveAndSaveJobInformationAfterJobStarted(job)
+
+        where:
+        name                        | queryExtendedJobStateByIdCallCount | calledAmendClusterJob
+        'get value the first time'  | 1                                  | true
+        'get value the second time' | 2                                  | true
+        'do not get the'            | 2                                  | false
     }
 }
