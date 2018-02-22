@@ -36,7 +36,7 @@ class ProjectSelectionService {
         }
     }
 
-    @PostAuthorize("hasRole('ROLE_OPERATOR') or returnObject == null or hasPermission(returnObject, 'read')")
+    @PostAuthorize("hasRole('ROLE_OPERATOR') or returnObject == null or hasPermission(returnObject, 'OTP_READ_ACCESS')")
     public Project getProjectFromProjectSelectionOrAllProjects(ProjectSelection projectSelection) {
         if (projectSelection.projects.size() == 1) {
             return projectSelection.projects.first()

@@ -15,7 +15,7 @@ class MetaDataService {
      * @param id The id of the MetaDataEntry to retrieve
      * @return The MetaDataEntry if present, otherwise null
      */
-    @PostAuthorize("hasRole('ROLE_OPERATOR') or (returnObject == null) or ((returnObject.dataFile.project != null) and hasPermission(returnObject.dataFile.project?.id, 'de.dkfz.tbi.otp.ngsdata.Project', read))")
+    @PostAuthorize("hasRole('ROLE_OPERATOR') or (returnObject == null) or ((returnObject.dataFile.project != null) and hasPermission(returnObject.dataFile.project, 'OTP_READ_ACCESS'))")
     MetaDataEntry getMetaDataEntryById(Long id) {
         return MetaDataEntry.get(id)
     }
@@ -74,7 +74,7 @@ class MetaDataService {
      * @param entry The MetaDataEntry for which the ChangeLog should be retrieved
      * @return List of ChangeLog entries
      */
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or ((#entry.dataFile.project != null) and hasPermission(#entry.dataFile.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', read))")
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or ((#entry.dataFile.project != null) and hasPermission(#entry.dataFile.project, 'OTP_READ_ACCESS'))")
     List<ChangeLog> retrieveChangeLog(MetaDataEntry entry) {
         ReferencedClass clazz = ReferencedClass.findByClassName(MetaDataEntry.class.getName())
         if (!clazz) {
@@ -88,7 +88,7 @@ class MetaDataService {
      * @param id The Id of the DataFile.
      * @return DataFile if it exists, otherwise null
      */
-    @PostAuthorize("hasRole('ROLE_OPERATOR') or (returnObject == null) or ((returnObject.project != null) and hasPermission(returnObject.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', 'read')) or ((returnObject.run != null) and hasPermission(returnObject.run.seqCenter.id, 'de.dkfz.tbi.otp.ngsdata.SeqCenter', 'read'))")
+    @PostAuthorize("hasRole('ROLE_OPERATOR') or (returnObject == null) or ((returnObject.project != null) and hasPermission(returnObject.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', 'OTP_READ_ACCESS')) or ((returnObject.run != null) and hasPermission(returnObject.run.seqCenter.id, 'de.dkfz.tbi.otp.ngsdata.SeqCenter', 'read'))")
     DataFile getDataFile(Long id) {
         return DataFile.get(id)
     }

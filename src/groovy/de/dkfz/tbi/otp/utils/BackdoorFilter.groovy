@@ -2,7 +2,6 @@ package de.dkfz.tbi.otp.utils
 
 import de.dkfz.tbi.otp.ngsdata.*
 import grails.util.*
-import groovy.transform.*
 import org.springframework.beans.factory.annotation.*
 import org.springframework.context.annotation.*
 import org.springframework.security.authentication.*
@@ -85,16 +84,5 @@ class BackdoorFilter extends GenericFilterBean {
         } finally {
             request.removeAttribute(FILTER_APPLIED)
         }
-    }
-}
-
-@Immutable
-class Principal {
-    String username
-    String displayName = "OTP Developer"
-
-    @Override
-    String toString() {
-        return username
     }
 }

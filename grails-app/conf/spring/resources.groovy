@@ -1,6 +1,8 @@
+import de.dkfz.tbi.otp.security.OtpPermissionEvaluator
 import grails.util.Environment
 import org.springframework.cache.ehcache.EhCacheManagerFactoryBean
 import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler
+import org.springframework.security.acls.AclPermissionEvaluator
 
 // Place your Spring DSL code here
 beans = {
@@ -28,6 +30,14 @@ beans = {
     }
     if (Environment.getCurrent() == Environment.TEST || Environment.getCurrent().getName() == "WORKFLOW_TEST") {
         configService(de.dkfz.tbi.otp.TestConfigService)
+    }
+
+    permissionEvaluator(OtpPermissionEvaluator) {}
+    aclPermissionEvaluator(AclPermissionEvaluator, ref('aclService')) {
+        objectIdentityRetrievalStrategy = ref('objectIdentityRetrievalStrategy')
+        objectIdentityGenerator = ref('objectIdentityRetrievalStrategy')
+        sidRetrievalStrategy = ref('sidRetrievalStrategy')
+        permissionFactory = ref('aclPermissionFactory')
     }
 
     // http://stackoverflow.com/questions/10013288/another-unnamed-cachemanager-already-exists-in-the-same-vm-ehcache-2-5

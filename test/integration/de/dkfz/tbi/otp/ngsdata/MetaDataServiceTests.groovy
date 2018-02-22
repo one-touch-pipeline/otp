@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.testing.*
 import grails.plugin.springsecurity.*
 import grails.plugin.springsecurity.acl.*
@@ -59,7 +60,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
     void testGetMetaDataEntryByIdNoProjectUser() {
         MetaDataEntry entry = mockEntry()
 
-        SpringSecurityUtils.doWithAuth("testuser") {
+        SpringSecurityUtils.doWithAuth(TESTUSER) {
             shouldFail(AccessDeniedException) {
                 metaDataService.getMetaDataEntryById(entry.id)
             }
@@ -76,7 +77,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
     void testGetMetaDataEntryByIdNoProjectOperator() {
         MetaDataEntry entry = mockEntry()
 
-        SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             assertSame(entry, metaDataService.getMetaDataEntryById(entry.id))
             // accessing a non-existing id should still work
             assertNull(metaDataService.getMetaDataEntryById(entry.id + 1))
@@ -91,7 +92,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
     void testGetMetaDataEntryByIdNoProjectAdmin() {
         MetaDataEntry entry = mockEntry()
 
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             assertSame(entry, metaDataService.getMetaDataEntryById(entry.id))
             // accessing a non-existing id should still work
             assertNull(metaDataService.getMetaDataEntryById(entry.id + 1))
@@ -126,7 +127,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
     void testGetMetaDataEntryByIdWithProjectAsUser() {
         MetaDataEntry entry = mockEntry()
 
-        SpringSecurityUtils.doWithAuth("testuser") {
+        SpringSecurityUtils.doWithAuth(TESTUSER) {
             shouldFail(AccessDeniedException) {
                 metaDataService.getMetaDataEntryById(entry.id)
             }
@@ -134,11 +135,8 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
             assertNull(metaDataService.getMetaDataEntryById(entry.id + 1))
         }
 
-        // now create ACL for this user on the Project
-        SpringSecurityUtils.doWithAuth("admin") {
-            aclUtilService.addPermission(entry.dataFile.project, "testuser", BasePermission.READ)
-        }
-        SpringSecurityUtils.doWithAuth("testuser") {
+        addUserWithReadAccessToProject(User.findByUsername(TESTUSER), entry.dataFile.project)
+        SpringSecurityUtils.doWithAuth(TESTUSER) {
             // now our test user should have access
             assertSame(entry, metaDataService.getMetaDataEntryById(entry.id))
             // accessing a non-existing id should still work
@@ -146,7 +144,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
         }
 
         // but another user should not have
-        SpringSecurityUtils.doWithAuth("user") {
+        SpringSecurityUtils.doWithAuth(USER) {
             shouldFail(AccessDeniedException) {
                 metaDataService.getMetaDataEntryById(entry.id)
             }
@@ -163,7 +161,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
     void testGetMetaDataEntryByIdWithProjectAsOperator() {
         MetaDataEntry entry = mockEntry()
 
-        SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             assertSame(entry, metaDataService.getMetaDataEntryById(entry.id))
             // accessing a non-existing id should still work
             assertNull(metaDataService.getMetaDataEntryById(entry.id + 1))
@@ -178,7 +176,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
     void testGetMetaDataEntryByIdWithProjectAsAdmin() {
         MetaDataEntry entry = mockEntry()
 
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             assertSame(entry, metaDataService.getMetaDataEntryById(entry.id))
             // accessing a non-existing id should still work
             assertNull(metaDataService.getMetaDataEntryById(entry.id + 1))
@@ -206,7 +204,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
     @Test
     void testUpdateMetaDataEntryNoProjectAsUser() {
         MetaDataEntry entry = mockEntry()
-        SpringSecurityUtils.doWithAuth("testuser") {
+        SpringSecurityUtils.doWithAuth(TESTUSER) {
             shouldFail(AccessDeniedException) {
                 metaDataService.updateMetaDataEntry(entry, "test2")
             }
@@ -220,7 +218,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
     @Test
     void testUpdateMetaDataEntryNoProjectAsOperator() {
         MetaDataEntry entry = mockEntry()
-        SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             assertTrue(metaDataService.updateMetaDataEntry(entry, "test2"))
         }
     }
@@ -232,7 +230,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
     @Test
     void testUpdateMetaDataEntryNoProjectAsAdmin() {
         MetaDataEntry entry = mockEntry()
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             assertTrue(metaDataService.updateMetaDataEntry(entry, "test2"))
         }
     }
@@ -258,29 +256,29 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
     @Test
     void testUpdateMetaDataEntryWithProjectAsUser() {
         MetaDataEntry entry = mockEntry()
-        SpringSecurityUtils.doWithAuth("testuser") {
+        SpringSecurityUtils.doWithAuth(TESTUSER) {
             shouldFail(AccessDeniedException) {
                 metaDataService.updateMetaDataEntry(entry, "test2")
             }
         }
         doWithAnonymousAuth {
-            aclUtilService.addPermission(entry.dataFile.project, "testuser", BasePermission.READ)
-            aclUtilService.addPermission(entry.dataFile.project, "testuser", BasePermission.WRITE)
+            aclUtilService.addPermission(entry.dataFile.project, TESTUSER, BasePermission.READ)
+            aclUtilService.addPermission(entry.dataFile.project, TESTUSER, BasePermission.WRITE)
         }
-        SpringSecurityUtils.doWithAuth("testuser") {
+        SpringSecurityUtils.doWithAuth(TESTUSER) {
             assertTrue(metaDataService.updateMetaDataEntry(entry, "test2"))
         }
         // other user should not have access
-        SpringSecurityUtils.doWithAuth("user") {
+        SpringSecurityUtils.doWithAuth(USER) {
             shouldFail(AccessDeniedException) {
                 metaDataService.updateMetaDataEntry(entry, "test3")
             }
         }
         // let's give that user read permission
         doWithAnonymousAuth {
-            aclUtilService.addPermission(entry.dataFile.project, "user", BasePermission.READ)
+            aclUtilService.addPermission(entry.dataFile.project, USER, BasePermission.READ)
         }
-        SpringSecurityUtils.doWithAuth("user") {
+        SpringSecurityUtils.doWithAuth(USER) {
             shouldFail(AccessDeniedException) {
                 metaDataService.updateMetaDataEntry(entry, "test3")
             }
@@ -357,29 +355,29 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
     void testRetrieveChangelogWithProjectNoAcl() {
         MetaDataEntry entry = mockEntry()
         // admin should always be able to see the entry
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             assertTrue(metaDataService.retrieveChangeLog(entry).empty)
         }
         // also the operator
-        SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             assertTrue(metaDataService.retrieveChangeLog(entry).empty)
         }
         // but a user should not
-        SpringSecurityUtils.doWithAuth("testuser") {
+        SpringSecurityUtils.doWithAuth(TESTUSER) {
             shouldFail(AccessDeniedException) {
                 metaDataService.retrieveChangeLog(entry)
             }
         }
         // creating a changelog entry should not change anything
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             metaDataService.updateMetaDataEntry(entry, "test2")
             assertEquals(1, metaDataService.retrieveChangeLog(entry).size())
         }
-        SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             assertEquals(1, metaDataService.retrieveChangeLog(entry).size())
         }
         // a user should still not be able to see it
-        SpringSecurityUtils.doWithAuth("testuser") {
+        SpringSecurityUtils.doWithAuth(TESTUSER) {
             shouldFail(AccessDeniedException) {
                 metaDataService.retrieveChangeLog(entry)
             }
@@ -393,21 +391,21 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
     @Test
     void testRetrieveEmptyChangelogWithAcl() {
         MetaDataEntry entry = mockEntry()
+        addUserWithReadAccessToProject(User.findByUsername(TESTUSER), entry.dataFile.project)
         // admin should always be able to see the entry
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             assertTrue(metaDataService.retrieveChangeLog(entry).empty)
-            aclUtilService.addPermission(entry.dataFile.project, "testuser", BasePermission.READ)
         }
         // now the user should be able to retrieve the changelog
-        SpringSecurityUtils.doWithAuth("testuser") {
+        SpringSecurityUtils.doWithAuth(TESTUSER) {
             assertTrue(metaDataService.retrieveChangeLog(entry).empty)
         }
         // operator should see it
-        SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             assertTrue(metaDataService.retrieveChangeLog(entry).empty)
         }
         // but another user should not
-        SpringSecurityUtils.doWithAuth("user") {
+        SpringSecurityUtils.doWithAuth(USER) {
             shouldFail(AccessDeniedException) {
                 metaDataService.retrieveChangeLog(entry)
             }
@@ -421,23 +419,23 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
     @Test
     void testRetrieveChangelogWithAcl() {
         MetaDataEntry entry = mockEntry()
+        addUserWithReadAccessToProject(User.findByUsername(TESTUSER), entry.dataFile.project)
         // grant read to user and add an update
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             assertTrue(metaDataService.retrieveChangeLog(entry).empty)
             metaDataService.updateMetaDataEntry(entry, "test2")
             assertEquals(1, metaDataService.retrieveChangeLog(entry).size())
-            aclUtilService.addPermission(entry.dataFile.project, "testuser", BasePermission.READ)
         }
         // now user should be able to see the changelog
-        SpringSecurityUtils.doWithAuth("testuser") {
+        SpringSecurityUtils.doWithAuth(TESTUSER) {
             assertEquals(1, metaDataService.retrieveChangeLog(entry).size())
         }
         // operator should see it
-        SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             assertEquals(1, metaDataService.retrieveChangeLog(entry).size())
         }
         // but a different user should not
-        SpringSecurityUtils.doWithAuth("user") {
+        SpringSecurityUtils.doWithAuth(USER) {
             shouldFail(AccessDeniedException) {
                 metaDataService.retrieveChangeLog(entry)
             }

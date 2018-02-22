@@ -5,7 +5,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 class OverallQualityAssessmentMergedService {
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, read)")
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
     List<AbstractQualityAssessment> findAllByProjectAndSeqType(Project project, SeqType seqType) {
 
         String maxQualityAssessmentMergedPassIdentifier = """

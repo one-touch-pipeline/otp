@@ -7,6 +7,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.testing.*
 import de.dkfz.tbi.otp.utils.*
 import grails.plugin.springsecurity.*
@@ -415,7 +416,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         given:
         String phabricatorAlias = "some alias"
         Project project = Project.findByName("testProject")
-        addUserToProject(USER, project)
+        addUserWithReadAccessToProject(User.findByUsername(USER), project)
 
         when:
         SpringSecurityUtils.doWithAuth(username) {

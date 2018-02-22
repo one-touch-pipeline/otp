@@ -148,6 +148,22 @@ class ConfigService implements ApplicationContextAware {
         }
     }
 
+    String getLdapServer() {
+        return otpProperties.get("otp.security.ldap.server")
+    }
+
+    String getLdapSearchBase() {
+        return otpProperties.get("otp.security.ldap.search.base")
+    }
+
+    String getLdapManagerDistinguishedName() {
+        return otpProperties.get("otp.security.ldap.managerDn")
+    }
+
+    String getLdapManagerPassword() {
+        return otpProperties.get("otp.security.ldap.managerPw")
+    }
+
     String getEnvironmentName() {
         if (otpProperties.get("otp.environment.name")) {
             return otpProperties.get("otp.environment.name")

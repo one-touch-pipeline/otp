@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.testing.*
 import grails.plugin.springsecurity.*
 import org.junit.*
@@ -28,33 +29,33 @@ class IndividualServiceTests extends AbstractIntegrationTest {
     void testGetIndividualByName() {
         Individual individual = mockIndividual()
         // a user should not be able to get the Individual
-        SpringSecurityUtils.doWithAuth("testuser") {
+        SpringSecurityUtils.doWithAuth(TESTUSER) {
             shouldFail(AccessDeniedException) {
                 individualService.getIndividual("test")
             }
             // but trying to access an individual that does not exist should work
             assertNull(individualService.getIndividual("test1"))
         }
-        SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             // operator user should find this individual
             assertSame(individual, individualService.getIndividual("test"))
             // searching for something else should not retrieve this one
             assertNull(individualService.getIndividual("test1"))
         }
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             // admin user should find this individual
             assertSame(individual, individualService.getIndividual("test"))
             // searching for something else should not retrieve this one
             assertNull(individualService.getIndividual("test1"))
             // grant read to testuser
-            aclUtilService.addPermission(individual.project, "testuser", BasePermission.READ)
+            addUserWithReadAccessToProject(User.findByUsername(TESTUSER), individual.project)
         }
         // now the user should be allowed to read this individual
-        SpringSecurityUtils.doWithAuth("testuser") {
+        SpringSecurityUtils.doWithAuth(TESTUSER) {
             assertSame(individual, individualService.getIndividual("test"))
         }
         // but a different user should still not be allowed to get the Individual
-        SpringSecurityUtils.doWithAuth("user") {
+        SpringSecurityUtils.doWithAuth(USER) {
             shouldFail(AccessDeniedException) {
                 individualService.getIndividual("test")
             }
@@ -67,33 +68,33 @@ class IndividualServiceTests extends AbstractIntegrationTest {
     void testGetIndividualById() {
         Individual individual = mockIndividual()
         // a user should not be able to get the Individual
-        SpringSecurityUtils.doWithAuth("testuser") {
+        SpringSecurityUtils.doWithAuth(TESTUSER) {
             shouldFail(AccessDeniedException) {
                 individualService.getIndividual(individual.id)
             }
             // but trying to access an individual that does not exist should work
             assertNull(individualService.getIndividual(individual.id + 1))
         }
-        SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             // admin user should find this individual
             assertSame(individual, individualService.getIndividual(individual.id))
             // searching for something else should not retrieve this one
             assertNull(individualService.getIndividual(individual.id + 1))
         }
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             // admin user should find this individual
             assertSame(individual, individualService.getIndividual(individual.id))
             // searching for something else should not retrieve this one
             assertNull(individualService.getIndividual(individual.id + 1))
             // grant read to testuser
-            aclUtilService.addPermission(individual.project, "testuser", BasePermission.READ)
+            addUserWithReadAccessToProject(User.findByUsername(TESTUSER), individual.project)
         }
         // now the user should be allowed to read this individual
-        SpringSecurityUtils.doWithAuth("testuser") {
+        SpringSecurityUtils.doWithAuth(TESTUSER) {
             assertSame(individual, individualService.getIndividual(individual.id))
         }
         // but a different user should still not be allowed to get the Individual
-        SpringSecurityUtils.doWithAuth("user") {
+        SpringSecurityUtils.doWithAuth(USER) {
             shouldFail(AccessDeniedException) {
                 individualService.getIndividual(individual.id)
             }
@@ -144,7 +145,7 @@ class IndividualServiceTests extends AbstractIntegrationTest {
         Individual individual15 = new Individual(pid: "109", mockPid: "yrgf", mockFullName: "testo", project: project3, type: Individual.Type.CELLLINE)
         assertNotNull(individual15.save())
 
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             // without any constraints we should get all individuals
             assertEquals(15, individualService.countIndividual(""))
             List<Individual> results = individualService.listIndividuals(0, 15, true, 0, "")
@@ -281,7 +282,7 @@ class IndividualServiceTests extends AbstractIntegrationTest {
         Individual individual15 = new Individual(pid: "109", mockPid: "yrgf", mockFullName: "testo", project: project3, type: Individual.Type.CELLLINE)
         assertNotNull(individual15.save())
 
-        SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             // without any constraints we should get all individuals
             assertEquals(15, individualService.countIndividual(""))
             List<Individual> results = individualService.listIndividuals(0, 15, true, 0, "")
@@ -417,7 +418,7 @@ class IndividualServiceTests extends AbstractIntegrationTest {
         assertNotNull(individual14.save())
         Individual individual15 = new Individual(pid: "109", mockPid: "yrgf", mockFullName: "testo", project: project3, type: Individual.Type.CELLLINE)
         assertNotNull(individual15.save())
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             // no filter should not change anything
             assertEquals(15, individualService.countIndividual(""))
             List<Individual> results = individualService.listIndividuals(0, 15, true, 0, "")
@@ -601,7 +602,7 @@ class IndividualServiceTests extends AbstractIntegrationTest {
         assertNotNull(individual14.save())
         Individual individual15 = new Individual(pid: "109", mockPid: "yrgf", mockFullName: "testo", project: project3, type: Individual.Type.CELLLINE)
         assertNotNull(individual15.save())
-        SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             // no filter should not change anything
             assertEquals(15, individualService.countIndividual(""))
             List<Individual> results = individualService.listIndividuals(0, 15, true, 0, "")
@@ -787,34 +788,34 @@ class IndividualServiceTests extends AbstractIntegrationTest {
         assertNotNull(individual15.save())
 
         // no ACL defined, testuser should not see anything
-        SpringSecurityUtils.doWithAuth("testuser") {
+        SpringSecurityUtils.doWithAuth(TESTUSER) {
             assertEquals(0, individualService.countIndividual(""))
             assertEquals(0, individualService.listIndividuals(0, 15, true, 0, "").size())
         }
 
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             // let's grant privs for one of the projects
-            aclUtilService.addPermission(project1, "testuser", BasePermission.READ)
+            aclUtilService.addPermission(project1, TESTUSER, BasePermission.READ)
         }
         // now testuser should be able to see those
-        SpringSecurityUtils.doWithAuth("testuser") {
+        SpringSecurityUtils.doWithAuth(TESTUSER) {
             assertEquals(5, individualService.countIndividual(""))
             assertEquals(5, individualService.listIndividuals(0, 15, true, 0, "").size())
         }
         // other user should not be able to see something
-        SpringSecurityUtils.doWithAuth("user") {
+        SpringSecurityUtils.doWithAuth(USER) {
             assertEquals(0, individualService.countIndividual(""))
             assertEquals(0, individualService.listIndividuals(0, 15, true, 0, "").size())
         }
 
         // now grant privs to the other projects
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             // let's grant privs for one of the projects
-            aclUtilService.addPermission(project2, "testuser", BasePermission.READ)
-            aclUtilService.addPermission(project3, "testuser", BasePermission.READ)
+            aclUtilService.addPermission(project2, TESTUSER, BasePermission.READ)
+            aclUtilService.addPermission(project3, TESTUSER, BasePermission.READ)
         }
         // now the same tests as in the admin case
-        SpringSecurityUtils.doWithAuth("testuser") {
+        SpringSecurityUtils.doWithAuth(TESTUSER) {
             // without any constraints we should get all individuals
             assertEquals(15, individualService.countIndividual(""))
             List<Individual> results = individualService.listIndividuals(0, 15, true, 0, "")
@@ -952,34 +953,34 @@ class IndividualServiceTests extends AbstractIntegrationTest {
         assertNotNull(individual15.save())
 
         // no ACL defined, testuser should not see anything
-        SpringSecurityUtils.doWithAuth("testuser") {
+        SpringSecurityUtils.doWithAuth(TESTUSER) {
             assertEquals(0, individualService.countIndividual("test"))
             assertEquals(0, individualService.listIndividuals(0, 15, true, 0, "test").size())
         }
 
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             // let's grant privs for one of the projects
-            aclUtilService.addPermission(project1, "testuser", BasePermission.READ)
+            aclUtilService.addPermission(project1, TESTUSER, BasePermission.READ)
         }
         // now testuser should be able to see those
-        SpringSecurityUtils.doWithAuth("testuser") {
+        SpringSecurityUtils.doWithAuth(TESTUSER) {
             assertEquals(5, individualService.countIndividual("test"))
             assertEquals(5, individualService.listIndividuals(0, 15, true, 0, "test").size())
         }
         // other user should not be able to see something
-        SpringSecurityUtils.doWithAuth("user") {
+        SpringSecurityUtils.doWithAuth(USER) {
             assertEquals(0, individualService.countIndividual("test"))
             assertEquals(0, individualService.listIndividuals(0, 15, true, 0, "test").size())
         }
 
         // now grant privs to the other projects
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             // let's grant privs for one of the projects
-            aclUtilService.addPermission(project2, "testuser", BasePermission.READ)
-            aclUtilService.addPermission(project3, "testuser", BasePermission.READ)
+            aclUtilService.addPermission(project2, TESTUSER, BasePermission.READ)
+            aclUtilService.addPermission(project3, TESTUSER, BasePermission.READ)
         }
         // now the same tests as in the admin case
-        SpringSecurityUtils.doWithAuth("testuser") {
+        SpringSecurityUtils.doWithAuth(TESTUSER) {
             // no filter should not change anything
             assertEquals(15, individualService.countIndividual(""))
             List<Individual> results = individualService.listIndividuals(0, 15, true, 0, "")

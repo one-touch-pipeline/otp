@@ -2,9 +2,8 @@ package de.dkfz.tbi.otp.testing
 
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.security.*
-import grails.plugin.springsecurity.*
+import de.dkfz.tbi.otp.utils.Principal
 import grails.plugin.springsecurity.acl.*
-import org.springframework.security.acls.domain.*
 import org.springframework.security.authentication.*
 import org.springframework.security.core.*
 import org.springframework.security.core.authority.*
@@ -50,7 +49,7 @@ trait UserAndRoles {
 
     static Object doWithAnonymousAuth(@SuppressWarnings("rawtypes") final Closure closure) {
         Authentication previousAuth = SecurityContextHolder.getContext().getAuthentication();
-        AnonymousAuthenticationToken auth = new AnonymousAuthenticationToken("test", "Anonymous", [new SimpleGrantedAuthority("ROLE_ANONYMOUS")])
+        AnonymousAuthenticationToken auth = new AnonymousAuthenticationToken("test", new Principal(username: "Anonymous"), [new SimpleGrantedAuthority("ROLE_ANONYMOUS")])
         SecurityContextHolder.getContext().setAuthentication(auth)
 
         try {
@@ -66,11 +65,11 @@ trait UserAndRoles {
         }
     }
 
-    void addUserToProject(String user, Project project) {
-        Role role = new Role(authority: "GROUP_TEST_PROJECT").save(flush: true)
-        UserRole.create(User.findByUsername(user), role)
-        SpringSecurityUtils.doWithAuth(ADMIN) {
-            aclUtilService.addPermission(project, new GrantedAuthoritySid(role.authority), BasePermission.READ)
-        }
+    void addUserWithReadAccessToProject(User user, Project project) {
+        DomainFactory.createUserProjectRole(
+                user: user,
+                project: project,
+                projectRole: DomainFactory.createProjectRole(accessToOtp: true),
+        )
     }
 }

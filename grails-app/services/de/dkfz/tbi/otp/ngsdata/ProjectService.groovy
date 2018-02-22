@@ -62,7 +62,7 @@ class ProjectService {
      *
      * @return List of all available Projects
      */
-    @PostFilter("hasRole('ROLE_OPERATOR') or hasPermission(filterObject, 'read')")
+    @PostFilter("hasRole('ROLE_OPERATOR') or hasPermission(filterObject, 'OTP_READ_ACCESS')")
     public List<Project> getAllProjects() {
         return Project.list(sort: "name", order: "asc", fetch: [projectCategories: 'join', projectGroup: 'join'])
     }
@@ -76,12 +76,12 @@ class ProjectService {
      * @param id The Id of the Project
      * @return The Project
      */
-    @PostAuthorize("hasRole('ROLE_OPERATOR') or returnObject == null or hasPermission(returnObject, 'read')")
+    @PostAuthorize("hasRole('ROLE_OPERATOR') or returnObject == null or hasPermission(returnObject, 'OTP_READ_ACCESS')")
     public Project getProject(Long id) {
         return Project.get(id)
     }
 
-    @PostAuthorize("hasRole('ROLE_OPERATOR') or returnObject == null or hasPermission(returnObject, 'read')")
+    @PostAuthorize("hasRole('ROLE_OPERATOR') or returnObject == null or hasPermission(returnObject, 'OTP_READ_ACCESS')")
     public Project getProjectByName(String name) {
         return Project.findByName(name)
     }
@@ -286,7 +286,7 @@ class ProjectService {
         project.save(flush: true)
     }
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'read')")
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
     public void updatePhabricatorAlias(String value, Project project) {
         project.phabricatorAlias = value
         project.save(flush: true)

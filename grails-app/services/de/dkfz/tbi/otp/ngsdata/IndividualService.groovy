@@ -29,7 +29,7 @@ class IndividualService {
      * @param identifier Name or database Id
      * @return Individual
      * */
-    @PostAuthorize("hasRole('ROLE_OPERATOR') or (returnObject == null) or hasPermission(returnObject.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', read)")
+    @PostAuthorize("hasRole('ROLE_OPERATOR') or (returnObject == null) or hasPermission(returnObject.project, 'OTP_READ_ACCESS')")
     Individual getIndividual(String identifier) {
         if (!identifier) {
             return null
@@ -44,7 +44,7 @@ class IndividualService {
         return individual
     }
 
-    @PostAuthorize("hasRole('ROLE_OPERATOR') or (returnObject == null) or hasPermission(returnObject.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', read)")
+    @PostAuthorize("hasRole('ROLE_OPERATOR') or (returnObject == null) or hasPermission(returnObject.project, 'OTP_READ_ACCESS')")
     Individual getIndividualByMockPid(String mockPid) {
         if (!mockPid) {
             return null
@@ -59,7 +59,7 @@ class IndividualService {
      * @param identifier Name or database Id
      * @return Individual
      * */
-    @PostAuthorize("hasRole('ROLE_OPERATOR') or (returnObject == null) or hasPermission(returnObject.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', read)")
+    @PostAuthorize("hasRole('ROLE_OPERATOR') or (returnObject == null) or hasPermission(returnObject.project, 'OTP_READ_ACCESS')")
     Individual getIndividual(long identifier) {
         return getIndividual("${identifier}")
     }
@@ -244,7 +244,7 @@ class IndividualService {
      * Fetches all SampleIdentifiers available
      * @return List of SampleIdentifiers
      */
-    @PostFilter("hasRole('ROLE_OPERATOR') or hasPermission(filterObject.sample.individual.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', read)")
+    @PostFilter("hasRole('ROLE_OPERATOR') or hasPermission(filterObject.sample.individual.project, 'OTP_READ_ACCESS')")
     public List<SampleIdentifier> getSampleIdentifiers() {
         return SampleIdentifier.list()
     }
@@ -255,7 +255,7 @@ class IndividualService {
      * @param sType The {@link SampleType}'s name of which {@link SampleIdentifier}s are fetched
      * @return List of SampleIdentifiers
      */
-    @PostFilter("hasRole('ROLE_OPERATOR') or hasPermission(filterObject.sample.individual.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', read)")
+    @PostFilter("hasRole('ROLE_OPERATOR') or hasPermission(filterObject.sample.individual.project, 'OTP_READ_ACCESS')")
     public List<SampleIdentifier> getSampleIdentifiers(Long individualId, String sType) {
         List<SampleIdentifier> sampleIdentifiers = SampleIdentifier.withCriteria {
             sample {
@@ -377,7 +377,7 @@ class IndividualService {
     /**
      * show the List of Individual per Project
      */
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'read')")
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
     public List findAllMockPidsByProject(Project project) {
         List seq = Sequence.withCriteria {
             eq("projectId", project.id)

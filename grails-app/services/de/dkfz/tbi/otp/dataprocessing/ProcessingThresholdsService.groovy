@@ -33,7 +33,7 @@ class ProcessingThresholdsService {
         return processingThresholds
     }
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'read')")
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
     ProcessingThresholds findByProjectAndSampleTypeAndSeqType(Project project, SampleType sampleType, SeqType seqType) {
         return ProcessingThresholds.findByProjectAndSampleTypeAndSeqType(project, sampleType, seqType)
     }

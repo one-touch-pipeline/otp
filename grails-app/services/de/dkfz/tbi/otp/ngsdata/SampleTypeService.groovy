@@ -9,7 +9,7 @@ class SampleTypeService {
     /**
      * return the used sample types of the project
      */
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'read')")
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
     public List findUsedSampleTypesForProject(Project project) {
         List<SeqType> allAnalysableSeqTypes = SeqType.allAnalysableSeqTypes
 

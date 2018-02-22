@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.testing.*
 import de.dkfz.tbi.otp.utils.*
 import grails.plugin.springsecurity.*
@@ -75,10 +76,10 @@ class MergingCriteriaControllerIntegrationSpec extends Specification implements 
     }
 
     @Unroll
-    void "test projectAndSeqTypeSpecific, works users with authorization"() {
+    void "test projectAndSeqTypeSpecific, works users with authorization of #username"() {
         given:
         Project project = DomainFactory.createProject()
-        addUserToProject(USER, project)
+        addUserWithReadAccessToProject(User.findByUsername(USER), project)
         SeqType seqType = DomainFactory.createWholeGenomeSeqType()
 
         when:

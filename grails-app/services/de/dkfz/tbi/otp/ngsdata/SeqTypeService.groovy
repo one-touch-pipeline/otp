@@ -5,7 +5,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 
 class SeqTypeService extends MetadataFieldsService<SeqType> {
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, read)")
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
     List<SeqType> alignableSeqTypesByProject(Project project) {
         return SeqTrack.createCriteria().listDistinct {
             projections {

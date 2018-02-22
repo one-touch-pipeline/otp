@@ -7,7 +7,7 @@ class SampleTypePerProjectService {
     /**
      * @return SampleTypePerProject for a given Project
      */
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'read')")
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
     public List<SampleTypePerProject> findByProject(Project project) {
         return SampleTypePerProject.findAllByProject(project)
     }

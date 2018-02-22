@@ -4,12 +4,12 @@ import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
 import grails.plugin.springsecurity.SpringSecurityUtils
 import org.junit.Before
 import org.junit.Test
 import org.springframework.security.access.AccessDeniedException
-import org.springframework.security.acls.domain.BasePermission
 
 class OverallQualityAssessmentMergedServiceTest extends AbstractIntegrationTest {
 
@@ -18,7 +18,6 @@ class OverallQualityAssessmentMergedServiceTest extends AbstractIntegrationTest 
     OverallQualityAssessmentMergedService overallQualityAssessmentMergedService
 
     OverallQualityAssessmentMerged overallQualityAssessmentMerged
-
 
 
     @Before
@@ -37,7 +36,6 @@ class OverallQualityAssessmentMergedServiceTest extends AbstractIntegrationTest 
     }
 
 
-
     private void prepareFindSequenceLengthForOverallQualityAssessmentMerged() {
         ProcessedBamFile processedBamFile = DomainFactory.assignNewProcessedBamFile(overallQualityAssessmentMerged.mergingSet)
         List<DataFile> dataFiles = DataFile.findAllBySeqTrack(processedBamFile.seqTrack)
@@ -46,14 +44,13 @@ class OverallQualityAssessmentMergedServiceTest extends AbstractIntegrationTest 
     }
 
 
-
     @Test
     void testFindAllByProjectAndSeqType_admin() {
         List expected = [
             overallQualityAssessmentMerged
         ]
 
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             List<OverallQualityAssessmentMerged> result = overallQualityAssessmentMergedService.findAllByProjectAndSeqType(overallQualityAssessmentMerged.project, overallQualityAssessmentMerged.seqType)
             assert expected == result
         }
@@ -65,7 +62,7 @@ class OverallQualityAssessmentMergedServiceTest extends AbstractIntegrationTest 
             overallQualityAssessmentMerged
         ]
 
-        SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             List<OverallQualityAssessmentMerged> result = overallQualityAssessmentMergedService.findAllByProjectAndSeqType(overallQualityAssessmentMerged.project, overallQualityAssessmentMerged.seqType)
             assert expected == result
         }
@@ -76,11 +73,8 @@ class OverallQualityAssessmentMergedServiceTest extends AbstractIntegrationTest 
         List expected = [
             overallQualityAssessmentMerged
         ]
-        SpringSecurityUtils.doWithAuth("admin") {
-            aclUtilService.addPermission(overallQualityAssessmentMerged.project, "testuser", BasePermission.READ)
-        }
-
-        SpringSecurityUtils.doWithAuth("testuser") {
+        addUserWithReadAccessToProject(User.findByUsername(TESTUSER), overallQualityAssessmentMerged.project)
+        SpringSecurityUtils.doWithAuth(TESTUSER) {
             List<OverallQualityAssessmentMerged> result = overallQualityAssessmentMergedService.findAllByProjectAndSeqType(overallQualityAssessmentMerged.project, overallQualityAssessmentMerged.seqType)
             assert expected == result
         }
@@ -89,7 +83,7 @@ class OverallQualityAssessmentMergedServiceTest extends AbstractIntegrationTest 
     @Test
     void testFindAllByProjectAndSeqType_userWithoutAccess() {
 
-        SpringSecurityUtils.doWithAuth("testuser") {
+        SpringSecurityUtils.doWithAuth(TESTUSER) {
             shouldFail(AccessDeniedException) {
                 overallQualityAssessmentMergedService.findAllByProjectAndSeqType(overallQualityAssessmentMerged.project, overallQualityAssessmentMerged.seqType)
             }
@@ -100,7 +94,7 @@ class OverallQualityAssessmentMergedServiceTest extends AbstractIntegrationTest 
     void testFindAllByProjectAndSeqType_wrongProject() {
         List expected = []
 
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             List<OverallQualityAssessmentMerged> result = overallQualityAssessmentMergedService.findAllByProjectAndSeqType(Project.build(), overallQualityAssessmentMerged.seqType)
             assert expected == result
         }
@@ -110,7 +104,7 @@ class OverallQualityAssessmentMergedServiceTest extends AbstractIntegrationTest 
     void testFindAllByProjectAndSeqType_wrongSeqType() {
         List expected = []
 
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             List<OverallQualityAssessmentMerged> result = overallQualityAssessmentMergedService.findAllByProjectAndSeqType(overallQualityAssessmentMerged.project, SeqType.build())
             assert expected == result
         }
@@ -121,7 +115,7 @@ class OverallQualityAssessmentMergedServiceTest extends AbstractIntegrationTest 
         List expected = []
         QualityAssessmentMergedPass.build(abstractMergedBamFile: overallQualityAssessmentMerged.processedMergedBamFile, identifier: overallQualityAssessmentMerged.qualityAssessmentMergedPass.identifier + 1)
 
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             List<OverallQualityAssessmentMerged> result = overallQualityAssessmentMergedService.findAllByProjectAndSeqType(overallQualityAssessmentMerged.project, SeqType.build())
             assert expected == result
         }
@@ -132,7 +126,7 @@ class OverallQualityAssessmentMergedServiceTest extends AbstractIntegrationTest 
         List expected = []
         MergingPass.build(mergingSet: overallQualityAssessmentMerged.mergingSet, identifier: overallQualityAssessmentMerged.mergingPass.identifier + 1)
 
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             List<OverallQualityAssessmentMerged> result = overallQualityAssessmentMergedService.findAllByProjectAndSeqType(overallQualityAssessmentMerged.project, SeqType.build())
             assert expected == result
         }
@@ -143,7 +137,7 @@ class OverallQualityAssessmentMergedServiceTest extends AbstractIntegrationTest 
         List expected = []
         MergingSet.build(mergingWorkPackage: overallQualityAssessmentMerged.mergingWorkPackage, identifier: overallQualityAssessmentMerged.mergingSet.identifier + 1)
 
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             List<OverallQualityAssessmentMerged> result = overallQualityAssessmentMergedService.findAllByProjectAndSeqType(overallQualityAssessmentMerged.project, SeqType.build())
             assert expected == result
         }
@@ -155,7 +149,7 @@ class OverallQualityAssessmentMergedServiceTest extends AbstractIntegrationTest 
         overallQualityAssessmentMerged.processedMergedBamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.INPROGRESS
         overallQualityAssessmentMerged.processedMergedBamFile.md5sum = null
 
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             List<OverallQualityAssessmentMerged> result = overallQualityAssessmentMergedService.findAllByProjectAndSeqType(overallQualityAssessmentMerged.project, SeqType.build())
             assert expected == result
         }
@@ -166,7 +160,7 @@ class OverallQualityAssessmentMergedServiceTest extends AbstractIntegrationTest 
         List expected = []
         overallQualityAssessmentMerged.processedMergedBamFile.withdrawn = true
 
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             List<OverallQualityAssessmentMerged> result = overallQualityAssessmentMergedService.findAllByProjectAndSeqType(overallQualityAssessmentMerged.project, SeqType.build())
             assert expected == result
         }
@@ -177,13 +171,11 @@ class OverallQualityAssessmentMergedServiceTest extends AbstractIntegrationTest 
         List expected = []
         overallQualityAssessmentMerged.processedMergedBamFile.qualityAssessmentStatus = AbstractBamFile.QaProcessingStatus.IN_PROGRESS
 
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             List<OverallQualityAssessmentMerged> result = overallQualityAssessmentMergedService.findAllByProjectAndSeqType(overallQualityAssessmentMerged.project, SeqType.build())
             assert expected == result
         }
     }
-
-
 
     @Test
     void testFindSequenceLengthForQualityAssessmentMerged() {

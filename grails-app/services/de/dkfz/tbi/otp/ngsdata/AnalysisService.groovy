@@ -69,7 +69,7 @@ class AnalysisService {
         }
     }
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#callingInstance.project, read)")
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#callingInstance.project, 'OTP_READ_ACCESS')")
     List<File> getFiles(BamFilePairAnalysis callingInstance, PlotType plotType) {
         if (!callingInstance) {
             return null

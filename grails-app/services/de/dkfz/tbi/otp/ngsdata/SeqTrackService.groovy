@@ -450,7 +450,7 @@ AND entry.value = :value
         return entry.value
     }
 
-    @PostAuthorize("hasRole('ROLE_OPERATOR') or (returnObject == null) or hasPermission(returnObject.sample.individual.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', read)")
+    @PostAuthorize("hasRole('ROLE_OPERATOR') or (returnObject == null) or hasPermission(returnObject.sample.individual.project, 'OTP_READ_ACCESS')")
     public SeqTrack getSeqTrack(String identifier) {
         if (!identifier) {
             return null

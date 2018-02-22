@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.testing.*
 import spock.lang.Specification
 import spock.lang.Shared
@@ -25,7 +26,7 @@ class SeqTypeServiceIntegrationSpec extends Specification implements UserAndRole
     void setup() {
         createUserAndRoles()
         seqTrack = DomainFactory.createSeqTrack()
-        addUserToProject("user", seqTrack.project)
+        addUserWithReadAccessToProject(User.findByUsername("user"), seqTrack.project)
     }
 
     void cleanupSpec() {

@@ -11,7 +11,7 @@ class MergingCriteriaService {
 
     CommentService commentService
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, read)")
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
     MergingCriteria findMergingCriteria(Project project, SeqType seqType) {
         return MergingCriteria.findByProjectAndSeqType(project, seqType) ?: new MergingCriteria()
     }
@@ -42,7 +42,7 @@ class MergingCriteriaService {
         findDefaultSeqPlatformGroups()
     }
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, read)")
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
     List<SeqPlatformGroup> findSeqPlatformGroupsForProjectAndSeqType(Project project, SeqType seqType) {
         return SeqPlatformGroup.createCriteria().list {
             mergingCriteria {
