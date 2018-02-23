@@ -41,6 +41,12 @@ remote as root
     firewall-cmd --reload
     ```
 
+- increase count of open files in '/etc/security/limits.conf' 
+    ```
+    * hard nofile 131072
+    * soft nofile 65536
+    ```
+
 - logout
     ```
     exit
