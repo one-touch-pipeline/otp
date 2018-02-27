@@ -52,7 +52,7 @@ grails.project.dependency.resolution = {
         runtime "com.jcraft:jsch:0.1.54"
         runtime "com.jcraft:jsch.agentproxy.jsch:0.0.9"
         runtime "com.jcraft:jsch.agentproxy.connector-factory:0.0.9"
-        compile 'com.github.robtimus:sftp-fs:1.2'
+        compile 'com.github.robtimus:sftp-fs:1.2.1'
 
         // library for easy HTML editing
         compile "org.jsoup:jsoup:1.9.2"

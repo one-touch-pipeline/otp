@@ -109,11 +109,7 @@ class FileSystemService {
     @Scheduled(fixedDelay = 30000L)
     void keepAlive() {
         createdFileSystems.each { Realm realm, FileSystem fileSystem ->
-            try {
-                SFTPFileSystemProvider.keepAlive(fileSystem)
-            } catch (ProviderMismatchException e) {
-                // workaround for https://github.com/robtimus/sftp-fs/issues/3
-            }
+            SFTPFileSystemProvider.keepAlive(fileSystem)
         }
     }
 }
