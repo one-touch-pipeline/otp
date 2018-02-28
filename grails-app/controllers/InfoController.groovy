@@ -1,12 +1,14 @@
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.ngsdata.*
+import grails.compiler.*
 import grails.converters.*
 
 /*
  * show information about OTP
  */
 
+@GrailsCompileStatic
 class InfoController {
     StatisticService statisticService
     ProjectService projectService
@@ -25,6 +27,9 @@ class InfoController {
     def contact() {}
 
     def partners() {}
+
+    def templates() {}
+
 
     JSON projectCountPerDate() {
         List data = statisticService.projectDateSortAfterDate(null)

@@ -32,6 +32,11 @@
                 </div>
             </a>
         </g:if>
+        <a href="${g.createLink(action: "templates")}">
+            <div class="infoMenuButton ${(actionName == "templates") ? "infoMenuButtonActive" : ""}">
+                <div class="infoMenuButtonText"><g:message code="info.templates.link" /></div>
+            </div>
+        </a>
     </div>
 
     <sec:ifNotLoggedIn>

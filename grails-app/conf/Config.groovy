@@ -175,6 +175,7 @@ grails.plugin.springsecurity.controllerAnnotations.staticRules = [
     "/fastqFilePathDataProvider/**": ['IS_AUTHENTICATED_ANONYMOUSLY'],
     "/login/**":             ['IS_AUTHENTICATED_ANONYMOUSLY'],
     "/logout/**":            ['IS_AUTHENTICATED_ANONYMOUSLY'],
+    "/document/download/**": ['IS_AUTHENTICATED_ANONYMOUSLY'],
     "/info/**":              ['permitAll'],
     "/root/intro*":          ['permitAll'],
     "/":                     ['permitAll'],

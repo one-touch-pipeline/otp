@@ -7,16 +7,7 @@
 
 <body>
 <div class="body">
-    <g:if test="${flash.message}">
-        <div id="infoBox"><div class="message">
-            <p>
-                ${flash.message}<br>
-                ${flash.errors}
-            </p>
-            <div class="close"><button onclick="$(this).parent().parent().remove();"></button></div>
-            <div style="clear: both;"></div>
-        </div></div>
-    </g:if>
+    <g:render template="/templates/messages"/>
 
     <g:link controller="projectConfig"> Back to project configuration</g:link>
     <h2>${g.message(code: "mergingCriteria.title", args: [project.name])}</h2>

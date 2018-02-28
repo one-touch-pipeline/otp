@@ -349,6 +349,10 @@ fieldset.embedded {
     }
 }
 /* MESSAGES AND ERRORS */
+.errors ul,
+.message {
+    padding: 0;
+}
 .errors,
 .message {
     font-size: 0.8em;
@@ -358,11 +362,10 @@ fieldset.embedded {
 }
 .message {
     .box-shadowed(0, 0, 0.25em, #b2d1ff);
-    background: #f3f3ff;
+    background: #f3f3ff url(../images/skin/information.png) 0 50% no-repeat;
     border: 1px solid #b2d1ff;
     color: #006dba;
-    background: transparent url(../images/skin/information.png) 0 50% no-repeat;
-    text-indent: 22px;
+    padding-left: 22px;
 }
 .errors {
     .box-shadowed(0, 0, 0.25em, #ff8888);
@@ -370,16 +373,12 @@ fieldset.embedded {
     border: 1px solid #ffaaaa;
     color: #cc0000;
 }
-.errors ul,
-.message {
-    padding: 0;
-}
 .errors li, .errors p {
     list-style: none;
     background: transparent url(../images/skin/exclamation.png) 0 50% no-repeat;
     text-indent: 22px;
 }
-div.message {
+div.message, div.errors {
     p {
         float: left;
     }
