@@ -2,7 +2,6 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.administration.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
@@ -20,6 +19,7 @@ import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.tracking.*
 import de.dkfz.tbi.otp.utils.*
 import grails.plugin.springsecurity.acl.*
+import grails.util.*
 import org.joda.time.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
@@ -2588,13 +2588,6 @@ ${link}
                 errorThreshold  : counter++,
                 compare         : QcThreshold.Compare.biggerThanThreshold
                 //qcClass needs to be defined per test since it depends on the QC domain the value belongs to
-        ], properties)
-    }
-
-    static Document createDocument(Map properties = [:]) {
-        return createDomainObject(Document, [
-                content : HelperUtils.getUniqueString(),
-                type: Document.Type.PDF,
         ], properties)
     }
 }

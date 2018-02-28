@@ -31,7 +31,7 @@ trait UserAndRoles {
      */
     void createUserAndRoles() {
         User user = new User(username: TESTUSER,
-                password: "*",
+                password: springSecurityService.encodePassword("secret"),
                 userRealName: "Test",
                 email: "test@test.com",
                 enabled: true,
@@ -41,7 +41,7 @@ trait UserAndRoles {
         assertNotNull(user.save(flush: true))
         assertNotNull(new AclSid(sid: user.username, principal: true).save(flush: true))
         User user2 = new User(username: USER,
-                password: "*",
+                password: springSecurityService.encodePassword("verysecret"),
                 userRealName: "Test2",
                 email: "test2@test.com",
                 enabled: true,
@@ -51,7 +51,7 @@ trait UserAndRoles {
         assertNotNull(user2.save(flush: true))
         assertNotNull(new AclSid(sid: user2.username, principal: true).save(flush: true))
         User operator = new User(username: OPERATOR,
-                password: "*",
+                password: springSecurityService.encodePassword("verysecret"),
                 userRealName: "Operator",
                 email: "test2@test.com",
                 enabled: true,
@@ -61,7 +61,7 @@ trait UserAndRoles {
         assertNotNull(operator.save(flush: true))
         assertNotNull(new AclSid(sid: operator.username, principal: true).save(flush: true))
         User admin = new User(username: ADMIN,
-                password: "*",
+                password: springSecurityService.encodePassword("1234"),
                 userRealName: "Administrator",
                 email: "admin@test.com",
                 enabled: true,
