@@ -1,13 +1,19 @@
+import de.dkfz.tbi.otp.administration.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.ngsdata.*
+import grails.compiler.*
 import grails.converters.*
+
+import static de.dkfz.tbi.otp.administration.Document.Name.*
 
 /*
  * show information about OTP
  */
 
+@GrailsCompileStatic
 class InfoController {
+    DocumentService documentService
     StatisticService statisticService
     ProjectService projectService
 
@@ -25,6 +31,20 @@ class InfoController {
     def contact() {}
 
     def partners() {}
+
+    def templates() {
+        List<Document.Name> availableTemplates = [
+                PROJECT_FORM,
+                METADATA_TEMPLATE,
+                PROCESSING_INFORMATION,
+        ].findAll {
+            documentService.getDocument(it)
+        }
+        return [
+                availableTemplates: availableTemplates,
+        ]
+    }
+
 
     JSON projectCountPerDate() {
         List data = statisticService.projectDateSortAfterDate(null)
