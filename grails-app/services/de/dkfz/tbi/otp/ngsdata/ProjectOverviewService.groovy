@@ -45,7 +45,7 @@ class ProjectOverviewService {
 
         ProcessOutput output = getRoddyProcessOutput(workflowConfig)
 
-        return generateAlignmentInfo(output, workflowConfig.seqType)
+        return generateAlignmentInfo(output, workflowConfig.seqType, workflowConfig.pluginVersion)
     }
 
     /**
@@ -82,7 +82,7 @@ class ProjectOverviewService {
      * @param seqType
      * @return new Alignment info
      */
-    AlignmentInfo generateAlignmentInfo(ProcessOutput output, SeqType seqType) {
+    AlignmentInfo generateAlignmentInfo(ProcessOutput output, SeqType seqType, String pluginVersion) {
 
         Map<String, String> res = extractConfigRoddyOutput(output)
 
@@ -96,6 +96,7 @@ class ProjectOverviewService {
                 samToolsCommand: res.get("SAMTOOLS_BINARY"),
                 mergeCommand: merge.command,
                 mergeOptions: merge.options,
+                pluginVersion: pluginVersion,
         )
 
     }
@@ -280,6 +281,7 @@ class ProjectOverviewService {
         String samToolsCommand
         String mergeCommand
         String mergeOptions
+        String pluginVersion
     }
 
     List overviewProjectQuery(projectName) {

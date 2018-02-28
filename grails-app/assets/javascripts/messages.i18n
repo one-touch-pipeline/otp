@@ -669,6 +669,7 @@ projectOverview.alignmentInformation.aligning
 projectOverview.alignmentInformation.merging
 projectOverview.alignmentInformation.samtools
 projectOverview.alignmentInformation.noAlign
+projectOverview.alignmentInformation.roddyPipelineVersion
 
 
 #Home

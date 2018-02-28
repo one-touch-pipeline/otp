@@ -152,13 +152,15 @@ $.otp.projectConfig = {
         var aligning = $L("projectOverview.alignmentInformation.aligning");
         var merging = $L("projectOverview.alignmentInformation.merging");
         var samtools = $L("projectOverview.alignmentInformation.samtools");
+        var roddyPipelineVersion = $L("projectOverview.alignmentInformation.roddyPipelineVersion");
 
         $.each(data.alignmentInfo, function (key, value) {
             $('#alignment_info_table tr:last').after(
                 '<tr><td colspan="3"><strong>' + key + '</strong></td></tr>' +
                 '<tr><td style=\' padding: 5px;\'>' + aligning + '<td>' + value.bwaCommand + '</td><td>' + value.bwaOptions + '</td></tr>' +
                 '<tr><td style=\' padding: 5px;\'>' + merging + '</td><td>' + value.mergeCommand + '</td><td>' + value.mergeOptions + '</td></tr>' +
-                '<tr><td style=\' padding: 5px;\'>' + samtools + '</td><td>' + value.samToolsCommand + '</td><td></td></tr>');
+                '<tr><td style=\' padding: 5px;\'>' + samtools + '</td><td>' + value.samToolsCommand + '</td><td></td></tr>' +
+                '<tr><td style=\' padding: 5px;\'>' + roddyPipelineVersion + '</td><td>' + value.pluginVersion + '</td><td></td></tr>');
         });
     },
 

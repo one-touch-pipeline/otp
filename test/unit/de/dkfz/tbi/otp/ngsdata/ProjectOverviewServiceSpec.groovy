@@ -65,7 +65,7 @@ class ProjectOverviewServiceSpec extends Specification {
     @Unroll
     void "getRoddyAlignmentInformation, when useConfig is #useConvey and mergeTool is #mergeTool, return alignment info with the correct data"() {
         given:
-        RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig()
+        RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig(["pluginVersion":"pluginVersion:1.1.0"])
         ProjectOverviewService service = new ProjectOverviewService([
                 processingOptionService   : new ProcessingOptionService(),
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
@@ -109,16 +109,17 @@ SAMTOOLS_BINARY=samTool
         mergeCommand == alignmentInfo.mergeCommand
         mergeOpt == alignmentInfo.mergeOptions
         'samTool' == alignmentInfo.samToolsCommand
+        roddyPipelineVersion == alignmentInfo.pluginVersion
 
         cleanup:
         GroovySystem.metaClassRegistry.removeMetaClass(ProcessHelperService)
 
         where:
-        useConvey | mergeTool                               || alignCommand || alignOpt           || mergeCommand || mergeOpt
-        false     | MergeConstants.MERGE_TOOL_BIOBAMBAM     || 'nonConvey'  || 'alnOpt'           || 'bioBamBam'  || 'bioBamBamOpt'
-        false     | MergeConstants.MERGE_TOOL_PICARD        || 'nonConvey'  || 'alnOpt'           || 'picard'     || ''
-        false     | MergeConstants.MERGE_TOOL_SAMBAMBA      || 'nonConvey'  || 'alnOpt'           || 'sambamba'   || 'sambambaOpt'
-        true      | MergeConstants.MERGE_TOOL_BIOBAMBAM     || 'convey'     || 'alnOpt conveyOpt' || 'bioBamBam'  || 'bioBamBamOpt'
+        useConvey | mergeTool                               || alignCommand || alignOpt           || mergeCommand || mergeOpt       || roddyPipelineVersion
+        false     | MergeConstants.MERGE_TOOL_BIOBAMBAM     || 'nonConvey'  || 'alnOpt'           || 'bioBamBam'  || 'bioBamBamOpt' || 'pluginVersion:1.1.0'
+        false     | MergeConstants.MERGE_TOOL_PICARD        || 'nonConvey'  || 'alnOpt'           || 'picard'     || ''             || 'pluginVersion:1.1.0'
+        false     | MergeConstants.MERGE_TOOL_SAMBAMBA      || 'nonConvey'  || 'alnOpt'           || 'sambamba'   || 'sambambaOpt'  || 'pluginVersion:1.1.0'
+        true      | MergeConstants.MERGE_TOOL_BIOBAMBAM     || 'convey'     || 'alnOpt conveyOpt' || 'bioBamBam'  || 'bioBamBamOpt' || 'pluginVersion:1.1.0'
     }
 
 
