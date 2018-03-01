@@ -217,6 +217,15 @@ If you want these sample pairs to be processed nevertheless, please contact the 
 
 println processingOptionService.createOrUpdate(
         OptionName.NOTIFICATION_TEMPLATE_ADDITION,
+        OtrsTicket.ProcessingStep.INSTALLATION.notificationSubject,
+        null,
+        '''For more information check out our paper: https://dx.doi.org/10.1016/j.jbiotec.2017.08.006
+If you use data processed by OTP, please cite it in your publication.
+'''
+)
+
+println processingOptionService.createOrUpdate(
+        OptionName.NOTIFICATION_TEMPLATE_ADDITION,
         OtrsTicket.ProcessingStep.SOPHIA.notificationSubject,
         null,
         '''
