@@ -14,9 +14,15 @@ class StatisticsController {
 
     def downloadDirectoriesCSV() {
         ProjectSelection selection = projectSelectionService.getSelectedProject()
-        String output = selection.projects*.dirName.join('\n')
+        StringBuilder output
 
-        render file: new ByteArrayInputStream(output.getBytes("UTF-8")), fileName:'directories.csv', contentType: 'text/csv'
+        selection.projects.each { Project project ->
+            output << project.projectDirectory << ","
+            output << project.dirAnalysis ?: ''
+            output << "\n"
+        }
+
+        render file: new ByteArrayInputStream(output.toString().getBytes("UTF-8")), fileName:'directories.csv', contentType: 'text/csv'
     }
 
 
