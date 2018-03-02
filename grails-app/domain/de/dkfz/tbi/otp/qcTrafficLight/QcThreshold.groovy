@@ -34,15 +34,9 @@ class QcThreshold implements Entity {
     }
 
     static enum ThresholdLevel {
-        OKAY('threshold-okay'),
-        WARNING('threshold-warning'),
-        ERROR('threshold-error')
-
-        final String styleClass
-
-        ThresholdLevel(String styleClass) {
-            this.styleClass = styleClass
-        }
+        OKAY,
+        WARNING,
+        ERROR,
     }
 
     ThresholdLevel qcPassed(QcTrafficLightValue qc, double externalValue = 0) {

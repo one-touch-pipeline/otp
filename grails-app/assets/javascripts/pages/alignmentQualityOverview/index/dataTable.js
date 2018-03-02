@@ -27,13 +27,22 @@ $.otp.alignmentQualityOverviewTable = {
         if (!data) {
             return "";
         }
-        if (!data.value) {
+        if ((data.value === undefined) && (data.icon === undefined)) {
             return $('<div>').text(data).html(); // escape HTML
         }
         var result = $('<div>').text(data.value).html(); // escape HTML
-        if (data.warnClass) {
-            result ="<span class='" + data.warnClass + "'>" + result + " </span>"
+
+        var cssClass = [];
+        if (data.warnColor) {
+            cssClass.push("text-" + data.warnColor)
         }
+        if (data.icon) {
+            cssClass.push("icon-" + data.icon)
+        }
+        if (cssClass.length !== 0) {
+            result ="<span class='" + cssClass + "'>" + result + " </span>"
+        }
+
         if (data.tooltip) {
             result ="<span title='" + data.tooltip + "'>" + result + "</span>"
         }
@@ -90,6 +99,7 @@ $.otp.alignmentQualityOverviewTable = {
                             var columnNames = [
                                 "pid",
                                 "sampleType",
+                                "qcStatus",
                             ];
 
                             // coverage

@@ -74,7 +74,7 @@ $.otp.sequence = {
                                     fastQC += " ";
                                 }
                             } else {
-                                fastQC = row.fastqcState.name;
+                                fastQC = row.fastqcState;
                             }
                             rowData = [
                                 $.otp.createLinkMarkup({
@@ -112,7 +112,7 @@ $.otp.sequence = {
                                 fastQC,
                                 row.ilseId,
                                 row.problem ?
-                                   "<span title='" + row.problemDescription + "'>" + row.problem.name + "</span>" : "",
+                                   "<span title='" + row.problemDescription + "'>" + row.problem + "</span>" : "",
                                 row.dateCreated
                             ];
 

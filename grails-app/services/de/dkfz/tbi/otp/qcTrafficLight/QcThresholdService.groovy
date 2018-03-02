@@ -40,8 +40,8 @@ class QcThresholdService {
         Map<String, TableCellValue> colorize(List<String> properties, T qcObject) {
             properties.collectEntries { String property ->
                 String value = FormatHelper.formatNumber(qcObject."${property}")
-                String warn = thresholdList[property]?.qcPassed(qcObject)?.styleClass ?:
-                        QcThreshold.ThresholdLevel.OKAY.styleClass
+                TableCellValue.WarnColor warn = convert(thresholdList[property]?.qcPassed(qcObject) ?:
+                        QcThreshold.ThresholdLevel.OKAY)
                 [(property), new TableCellValue(value, warn)]
             }
         }
@@ -50,10 +50,18 @@ class QcThresholdService {
         Map<String, TableCellValue> colorize(Map<String, Double> properties, T qcObject) {
             properties.collectEntries { String property, Double externalValue ->
                 String value = FormatHelper.formatNumber(qcObject."${property}")
-                String warn = thresholdList[property]?.qcPassed(qcObject, externalValue)?.styleClass ?:
-                        QcThreshold.ThresholdLevel.OKAY.styleClass
+                TableCellValue.WarnColor warn = convert(thresholdList[property]?.qcPassed(qcObject, externalValue) ?:
+                        QcThreshold.ThresholdLevel.OKAY)
                 [(property), new TableCellValue(value, warn)]
             } as Map<String, TableCellValue>
+        }
+
+        private TableCellValue.WarnColor convert(QcThreshold.ThresholdLevel t) {
+            return [
+                    (QcThreshold.ThresholdLevel.OKAY)   : TableCellValue.WarnColor.OKAY,
+                    (QcThreshold.ThresholdLevel.WARNING): TableCellValue.WarnColor.WARNING,
+                    (QcThreshold.ThresholdLevel.ERROR)  : TableCellValue.WarnColor.ERROR,
+            ].get(t)
         }
     }
 }
@@ -63,7 +71,20 @@ class QcThresholdService {
 @EqualsAndHashCode
 class TableCellValue implements Serializable {
     String value
-    String warnClass
+    WarnColor warnColor
     String link
     String tooltip
+    Icon icon
+
+    enum WarnColor {
+        OKAY,
+        WARNING,
+        ERROR,
+    }
+
+    enum Icon {
+        OKAY,
+        WARNING,
+        ERROR,
+    }
 }

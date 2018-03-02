@@ -19,6 +19,7 @@ class AlignmentQualityOverviewController {
     private static final List<String> HEADER_WHOLE_GENOME = [
             'alignment.quality.individual',
             'alignment.quality.sampleType',
+            'alignment.quality.qcStatus',
             'alignment.quality.coverageWithoutN',
             'alignment.quality.coverageX',
             'alignment.quality.coverageY',
@@ -36,6 +37,7 @@ class AlignmentQualityOverviewController {
     private static final List<String> HEADER_RNA = [
             'alignment.quality.individual',
             'alignment.quality.sampleType',
+            'alignment.quality.qcStatus',
             'alignment.quality.totalReadCounter',
             'alignment.quality.duplicates',
             'alignment.quality.3pnorm',
@@ -65,6 +67,7 @@ class AlignmentQualityOverviewController {
     private static final List<String> HEADER_EXOME = [
             'alignment.quality.individual',
             'alignment.quality.sampleType',
+            'alignment.quality.qcStatus',
             'alignment.quality.onTargetRatio',
             'alignment.quality.targetCoverage',
             'alignment.quality.kit',
@@ -193,6 +196,12 @@ class AlignmentQualityOverviewController {
             double readLength = readLengthString.contains('-') ? (readLengthString.split('-').sum {
                 it as double
             } / 2) : readLengthString as double
+
+            TableCellValue.Icon icon = [
+                    (AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED)  : TableCellValue.Icon.WARNING,
+                    (AbstractMergedBamFile.QcTrafficLightStatus.REJECTED) : TableCellValue.Icon.ERROR,
+            ].getOrDefault(abstractMergedBamFile.qcTrafficLightStatus, TableCellValue.Icon.OKAY)
+
             Map<String, TableCellValue> map = [
                     pid                   : new TableCellValue(
                                                 abstractMergedBamFile.individual.displayName, null,
@@ -206,6 +215,14 @@ class AlignmentQualityOverviewController {
                     dateFromFileSystem    : abstractMergedBamFile.dateFromFileSystem?.format("yyyy-MM-dd"),
                     withdrawn             : abstractMergedBamFile.withdrawn,
                     pipeline              : abstractMergedBamFile.workPackage.pipeline.displayName,
+                    qcStatus              : new TableCellValue(
+                                                abstractMergedBamFile.comment ?
+                                                        "${abstractMergedBamFile.comment?.comment} — ${abstractMergedBamFile.comment?.author}" :
+                                                        "",
+                                                null, null,
+                                                (abstractMergedBamFile.qcTrafficLightStatus ?: "").toString(),
+                                                icon,
+                                            ),
                     kit                   : new TableCellValue(
                                                 kit*.shortDisplayName.join(", ") ?: "-", null, null,
                                                 kit*.name.join(", ") ?: ""

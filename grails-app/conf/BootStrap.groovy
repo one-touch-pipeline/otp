@@ -1,6 +1,7 @@
 import de.dkfz.tbi.otp.administration.*
 import de.dkfz.tbi.otp.job.scheduler.*
 import de.dkfz.tbi.otp.ngsdata.*
+import grails.converters.*
 import grails.plugin.springsecurity.*
 import grails.util.*
 import org.codehaus.groovy.grails.commons.*
@@ -30,6 +31,8 @@ class BootStrap {
         if ([Environment.PRODUCTION, Environment.DEVELOPMENT].contains(Environment.getCurrent())) {
             UserService.createFirstAdminUserIfNoUserExists()
         }
+
+        JSON.registerObjectMarshaller(Enum, { Enum e -> e.name() })
     }
 
     def destroy = {

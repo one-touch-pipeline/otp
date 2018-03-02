@@ -523,6 +523,34 @@ th {
     }
 }
 
+// style for TableCellValue.WarnColor, TableCellValue.Icon
+td span {
+    &.text-OKAY {
+        //use default color
+    }
+    &.text-WARNING {
+        color: #E57F00;
+    }
+    &.text-ERROR {
+        color: red;
+    }
+    .background-usage-hint {
+        padding-left: 18px;
+    }
+    &.icon-OKAY {
+        .background-usage-hint;
+        background: url(ok.png) left center no-repeat;
+    }
+    &.icon-WARNING {
+        .background-usage-hint;
+        background: url(warning.png) left center no-repeat;
+    }
+    &.icon-ERROR {
+        .background-usage-hint;
+        background: url(error.png) left center no-repeat;
+    }
+}
+
 /* my styles for boolean values */
 td {
     .background-usage-hint {
@@ -1368,15 +1396,6 @@ body {
 
 #processOverview td:nth-child(4) {
     max-width: 200px;
-}
-
-.threshold-okay {
-}
-.threshold-warning {
-    color: #E57F00;
-}
-.threshold-error {
-    color: red;
 }
 
 #clusterJobGeneralTableContainer {

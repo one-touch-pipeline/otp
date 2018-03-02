@@ -6,7 +6,7 @@ import de.dkfz.tbi.otp.qcTrafficLight.*
 import grails.test.mixin.*
 import spock.lang.*
 
-import static de.dkfz.tbi.otp.qcTrafficLight.QcThreshold.ThresholdLevel.*
+import static de.dkfz.tbi.otp.qcTrafficLight.TableCellValue.WarnColor.*
 
 @Mock([
         Project,
@@ -47,7 +47,7 @@ class QcThresholdServiceSpec extends Specification {
         Map<String, TableCellValue> result = thresholdColorizer.colorize([testedProperty], sophiaQc)
 
         then:
-        result.get(testedProperty) == new TableCellValue(testedPropertyValue.toString(), OKAY.styleClass, null, null)
+        result.get(testedProperty) == new TableCellValue(testedPropertyValue.toString(), OKAY, null, null)
     }
 
     @Unroll
@@ -68,7 +68,7 @@ class QcThresholdServiceSpec extends Specification {
         Map<String, TableCellValue> result = thresholdColorizer.colorize([testedProperty], sophiaQc)
 
         then:
-        result.get(testedProperty) == new TableCellValue(testedPropertyValue.toString(), WARNING.styleClass, null, null)
+        result.get(testedProperty) == new TableCellValue(testedPropertyValue.toString(), WARNING, null, null)
 
         where:
         useProject | useSeqType
@@ -105,7 +105,7 @@ class QcThresholdServiceSpec extends Specification {
         Map<String, TableCellValue> result = thresholdColorizer.colorize([testedProperty], sophiaQc)
 
         then:
-        result.get(testedProperty) == new TableCellValue(testedPropertyValue.toString(), thresholdLevel.styleClass, null, null)
+        result.get(testedProperty) == new TableCellValue(testedPropertyValue.toString(), thresholdLevel, null, null)
 
         where:
         l || thresholdLevel
@@ -131,7 +131,7 @@ class QcThresholdServiceSpec extends Specification {
         Map<String, TableCellValue> result = thresholdColorizer.colorize([testedProperty], sophiaQc)
 
         then:
-        result.get(testedProperty) == new TableCellValue(testedPropertyValue.toString(), thresholdLevel.styleClass, null, null)
+        result.get(testedProperty) == new TableCellValue(testedPropertyValue.toString(), thresholdLevel, null, null)
 
         where:
         warningThreshold | errorThreshold || thresholdLevel

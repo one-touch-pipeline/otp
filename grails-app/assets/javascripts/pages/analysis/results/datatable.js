@@ -79,7 +79,7 @@ $.otp.resultsTable = {
                     row.solutionPossible,
                     row.pluginVersion,
                     row.dateCreated,
-                    row.processingState.name,
+                    row.processingState,
                 ];
                 if (row.instanceId) {
                     result.push(
@@ -132,7 +132,7 @@ $.otp.resultsTable = {
                     row.tindaSomaticAfterRescueMedianAlleleFreqInControl,
                     row.pluginVersion,
                     row.dateCreated,
-                    row.processingState.name,
+                    row.processingState,
                 ];
                 if (row.instanceId) {
                     result.push(
@@ -175,7 +175,7 @@ $.otp.resultsTable = {
                     row.rnaDecontaminationApplied,
                     row.pluginVersion,
                     row.dateCreated,
-                    row.processingState.name,
+                    row.processingState,
                 ];
                 if (row.instanceId) {
                     result.push(
@@ -217,7 +217,7 @@ $.otp.resultsTable = {
                     row.libPrepKits,
                     row.pluginVersion,
                     row.dateCreated,
-                    row.processingState.name,
+                    row.processingState,
                 ];
                 if (row.instanceId) {
                     result.push(

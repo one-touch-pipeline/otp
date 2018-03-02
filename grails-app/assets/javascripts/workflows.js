@@ -489,7 +489,7 @@ $.otp.workflows = {
                     id: rowData[0],
                     text: rowData[0]
                 });
-                rowData[1] = $.otp.workflows.statusImageHtml(rowData[1].name);
+                rowData[1] = $.otp.workflows.statusImageHtml(rowData[1]);
                 if (rowData[2]) {
                     if (rowData[2].controller) {
                         rowData[2] = $.otp.createLinkMarkup(rowData[2]);
@@ -508,10 +508,10 @@ $.otp.workflows = {
                         action: 'processingStep',
                         id: stepId,
                         title: rowData[6].error,
-                        text: rowData[6].state.name
+                        text: rowData[6].state
                     });
                 } else {
-                    rowData[6] = rowData[6].state.name;
+                    rowData[6] = rowData[6].state;
                 }
                 if(rowData[7] != null && rowData[7].length > 0) {
                     rowData[7] = '<div class="commentSet" title="' + rowData[7] + '">&nbsp;</div>';
@@ -632,7 +632,7 @@ $.otp.workflows = {
                     id: stepId,
                     text: stepId
                 });
-                rowData[1] = $.otp.workflows.statusImageHtml(rowData[1].name);
+                rowData[1] = $.otp.workflows.statusImageHtml(rowData[1]);
                 if (rowData[3]) {
                     rowData[3] = '<span title="' + rowData[3].name + '">' + rowData[3].name.substr(rowData[3].name.lastIndexOf('.') + 1) + "</span><br/>";
                 } else {
@@ -646,9 +646,9 @@ $.otp.workflows = {
                     rowData[6] = "-";
                 }
                 if (rowData[7].error) {
-                    rowData[7] = '<span title="' + rowData[7].error + '">' + rowData[7].state.name + '</span>';
+                    rowData[7] = '<span title="' + rowData[7].error + '">' + rowData[7].state + '</span>';
                 } else {
-                    rowData[7] = rowData[7].state.name;
+                    rowData[7] = rowData[7].state;
                 }
                 actions = rowData[8].actions;
                 rowData[8] = "";
@@ -723,7 +723,7 @@ $.otp.workflows = {
                 for (i = 0; i < json.aaData.length; i += 1) {
                     rowData = json.aaData[i];
                     rowData[1] = $.otp.workflows.renderDate(rowData[1]);
-                    rowData[2] = rowData[2].name;
+                    rowData[2] = rowData[2];
                     if (!rowData[3]) {
                         rowData[3] = "-";
                     } else {

@@ -57,7 +57,7 @@ $.otp.option = {
                             row = json.aaData[i];
                             option = row.option;
                             rowData = [
-                                option.name.name.toLowerCase(),
+                                option.name.toLowerCase(),
                                 option.type,
                                 '<span title="' + $.otp.option.htmlEscape(option.value) + '">' + $.otp.option.formatValue(option.value) + '</span>',
                                 row.project,
