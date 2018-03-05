@@ -14,7 +14,7 @@ class StatisticsController {
 
     def downloadDirectoriesCSV() {
         ProjectSelection selection = projectSelectionService.getSelectedProject()
-        StringBuilder output
+        StringBuilder output = new StringBuilder()
 
         selection.projects.each { Project project ->
             output << project.projectDirectory << ","
