@@ -86,7 +86,7 @@ $.otp.resultsTable = {
                         $.otp.createLinkMarkup({
                             controller: 'aceseq',
                             action: 'plots',
-                            parameters: {'aceseqInstance.id': row.instanceId},
+                            parameters: {'bamFilePairAnalysis.id': row.instanceId, 'plotType': 'ACESEQ_ALL'},
                             text: 'Plots'
                         })
                     );
@@ -107,6 +107,25 @@ $.otp.resultsTable = {
                 action: 'dataTableResults'
             }),
             function (row) {
+                var plotIndel, plotTinda;
+                if (row.instanceId) {
+                    plotIndel = $.otp.createLinkMarkup({
+                        controller: 'indel',
+                        action: 'plots',
+                        parameters: {'bamFilePairAnalysis.id': row.instanceId, 'plotType': 'INDEL'},
+                        text: 'Plots'
+                    });
+                    plotTinda = $.otp.createLinkMarkup({
+                        controller: 'indel',
+                        action: 'plots',
+                        parameters: {'bamFilePairAnalysis.id': row.instanceId, 'plotType': 'INDEL_TINDA'},
+                        text: 'Plot'
+                    });
+                } else {
+                    plotIndel = "";
+                    plotTinda = "";
+                }
+
                 var result = [
                     $.otp.createLinkMarkup({
                         controller: 'individual',
@@ -122,6 +141,7 @@ $.otp.resultsTable = {
                     row.numDels,
                     row.numSize1_3,
                     row.numSize4_10,
+                    plotIndel,
                     row.somaticSmallVarsInTumor,
                     row.somaticSmallVarsInControl,
                     row.somaticSmallVarsInTumorCommonInGnomad,
@@ -130,22 +150,10 @@ $.otp.resultsTable = {
                     row.somaticSmallVarsInControlPass,
                     row.tindaSomaticAfterRescue,
                     row.tindaSomaticAfterRescueMedianAlleleFreqInControl,
+                    plotTinda,
                     row.pluginVersion,
                     row.dateCreated,
-                    row.processingState,
-                ];
-                if (row.instanceId) {
-                    result.push(
-                        $.otp.createLinkMarkup({
-                            controller: 'indel',
-                            action: 'plots',
-                            parameters: {'indelCallingInstance.id': row.instanceId},
-                            text: 'Plots'
-                        })
-                    );
-                } else {
-                    result.push("")
-                }
+                    row.processingState.name,];
                 return result;
             }
         );
@@ -182,7 +190,7 @@ $.otp.resultsTable = {
                         $.otp.createLinkMarkup({
                             controller: 'sophia',
                             action: 'plots',
-                            parameters: {'sophiaInstance.id': row.instanceId},
+                            parameters: {'bamFilePairAnalysis.id': row.instanceId, 'plotType': 'SOPHIA'},
                             text: 'Plots'
                         })
                     );
@@ -224,7 +232,7 @@ $.otp.resultsTable = {
                         $.otp.createLinkMarkup({
                             controller: 'snv',
                             action: 'plots',
-                            parameters: {'snvCallingInstance.id': row.instanceId},
+                            parameters: {'bamFilePairAnalysis.id': row.instanceId, 'plotType': 'SNV'},
                             text: 'Plots'
                         })
                     );

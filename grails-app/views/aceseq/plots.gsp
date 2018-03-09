@@ -3,7 +3,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="layout" content="main" />
-    <title><g:message code="aceseq.plots.title" args="[aceseqInstance.individual.pid]" /></title>
+    <title><g:message code="aceseq.plots.title" args="[bamFilePairAnalysis.individual.pid]" /></title>
 </head>
 <body>
     <g:if test="${error}">
@@ -11,11 +11,11 @@
         <p><g:message code="${error}"/></p>
     </g:if>
     <g:else>
-        <h1><g:message code="aceseq.plots.title" args="[aceseqInstance.individual.pid]" /></h1>
+        <h1><g:message code="aceseq.plots.title" args="[bamFilePairAnalysis.individual.pid]" /></h1>
         <div class="body">
             <g:each in="${plot}" var="p">
-                <g:set var="url" value="${g.createLink(controller: "aceseq", action: "plotImage",
-                        params: ["aceseqInstance.id": aceseqInstance.id, aceseqPlot: p])}" />
+                <g:set var="url" value="${g.createLink(controller: "aceseq", action: "plotImages",
+                        params: ["bamFilePairAnalysis.id": bamFilePairAnalysis.id, "plotType": p])}" />
                 <div>
                     <a target="_blank" href="${url}">
                         <img class="img-plots" src="${url}"/>
@@ -25,7 +25,7 @@
             <g:each in="${plotNumber}" var="p">
                 <g:each in="${p.value}" var="i">
                     <g:set var="url" value="${g.createLink(controller: "aceseq", action: "plotImages",
-                            params: ["aceseqInstance.id": aceseqInstance.id, aceseqPlots: p.key, index: i])}" />
+                            params: ["bamFilePairAnalysis.id": bamFilePairAnalysis.id, "plotType": p.key, index: i])}" />
                     <div>
                         <a target="_blank" href="${url}">
                             <img class="img-plots" src="${url}"/>

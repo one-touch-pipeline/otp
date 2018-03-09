@@ -42,7 +42,7 @@ class AnalysisServiceIntegrationSpec extends IntegrationSpec implements UserAndR
         when:
         File result
         SpringSecurityUtils.doWithAuth(OPERATOR) {
-            result = analysisService.checkFile(null)
+            result = analysisService.getFiles(null, null)
         }
 
         then:
@@ -59,17 +59,19 @@ class AnalysisServiceIntegrationSpec extends IntegrationSpec implements UserAndR
         when:
         File file
         SpringSecurityUtils.doWithAuth(OPERATOR) {
-            file = analysisService.checkFile(analysisInstance)
+            file = analysisService.getFiles(analysisInstance, plotType) ? analysisService.getFiles(analysisInstance, plotType).first() : null
         }
 
         then:
         !file
 
         where:
-        analysis       | instance
-        "Snv"          | SnvCallingInstance
-        "IndelCalling" | IndelCallingInstance
-        "Aceseq"       | AceseqInstance
-        "Sophia"       | SophiaInstance
+        analysis       | instance               | plotType
+        "Snv"          | SnvCallingInstance     | PlotType.SNV
+        "IndelCalling" | IndelCallingInstance   | PlotType.INDEL
+        "IndelCalling" | IndelCallingInstance   | PlotType.INDEL_TINDA
+        "Aceseq"       | AceseqInstance         | PlotType.ACESEQ_ALL
+        "Aceseq"       | AceseqInstance         | PlotType.ACESEQ_WG_COVERAGE
+        "Sophia"       | SophiaInstance         | PlotType.SOPHIA
     }
 }

@@ -1,49 +1,23 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import grails.converters.*
 
 import java.text.*
 
-class SnvController {
+class SnvController extends AbstractAnalysisController {
 
-    ProjectService projectService
-    AnalysisService analysisService
-    ProjectSelectionService projectSelectionService
-
-    Map results() {
-        String projectName = params.project ?: params.projectName
-        if (projectName) {
-            Project project
-            if ((project =  projectService.getProjectByName(projectName))) {
-                projectSelectionService.setSelectedProject([project], project.name)
-                redirect(controller: controllerName, action: actionName)
-                return
-            }
-        }
-
-        List<Project> projects = projectService.getAllProjects()
-        ProjectSelection selection = projectSelectionService.getSelectedProject()
-
-        Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects(selection)
-
-        return [
-                projects: projects,
-                project: project,
-        ]
-    }
-
-    Map plots(RenderSnvFileCommand cmd) {
+    Map plots(BamFilePairAnalysisCommand cmd) {
         if (cmd.hasErrors()) {
             render status: 404
             return
         }
-        if (analysisService.checkFile(cmd.snvCallingInstance)) {
+        if (analysisService.getFiles(cmd.bamFilePairAnalysis, cmd.plotType)) {
             return [
-                    id: cmd.snvCallingInstance.id,
-                    pid: cmd.snvCallingInstance.individual.pid,
+                    id: cmd.bamFilePairAnalysis.id,
+                    pid: cmd.bamFilePairAnalysis.individual.pid,
+                    plotType: cmd.plotType,
                     error: null
             ]
         }
@@ -53,17 +27,16 @@ class SnvController {
         ]
     }
 
-    def renderPDF(RenderSnvFileCommand cmd) {
+    def renderPDF(BamFilePairAnalysisCommand cmd) {
         if (cmd.hasErrors()) {
             response.sendError(404)
             return
         }
-        File stream = analysisService.checkFile(cmd.snvCallingInstance)
+        List<File> stream = analysisService.getFiles(cmd.bamFilePairAnalysis, cmd.plotType)
         if (stream) {
-            render file: stream , contentType: "application/pdf"
+            render file: stream.first(), contentType: "application/pdf"
         } else {
             render status: 404
-            return
         }
     }
 
@@ -95,13 +68,5 @@ class SnvController {
         dataToRender.aaData = data
 
         render dataToRender as JSON
-    }
-}
-
-class RenderSnvFileCommand {
-    SnvCallingInstance snvCallingInstance
-
-    static constraints = {
-        snvCallingInstance nullable: false
     }
 }

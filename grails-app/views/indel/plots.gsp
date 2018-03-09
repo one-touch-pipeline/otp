@@ -12,13 +12,29 @@
     </g:if>
     <g:else>
         <div class="body_pdf">
-            <object data="${g.createLink(controller: "indel",
-                action: "renderPDF",
-                params: ["indelCallingInstance.id": id])}" type="application/pdf"  height="650" width="1250">
-                <a href="${g.createLink(controller: "indel",
-                    action: "renderPDF",
-                    params: ["indelCallingInstance.id": id])}"><g:message code="indel.plots.view"/></a>
-            </object>
+            <g:if test="${plotType.name() == 'INDEL'}">
+                <object data="${g.createLink(controller: "indel",
+                        action: "renderPlot",
+                        params: ["bamFilePairAnalysis.id": id, "plotType": plotType])}" type="application/pdf"
+                        height="650" width="1250">
+                    <a href="${g.createLink(controller: "indel",
+                            action: "renderPlot",
+                            params: ["bamFilePairAnalysis.id": id, "plotType": plotType])}"><g:message
+                            code="indel.plots.view"/></a>
+                </object>
+            </g:if>
+            <g:else>
+                <object data="${g.createLink(controller: "indel",
+                        action: "renderPlot",
+                        params: ["bamFilePairAnalysis.id": id, "plotType": plotType])}" type="image/png"
+                        height="650" width="1250">
+                    <a href="${g.createLink(controller: "indel",
+                            action: "renderPlot",
+                            params: ["bamFilePairAnalysis.id": id, "plotType": plotType])}"><g:message
+                            code="indel.tinda.plot.view"/></a>
+                </object>
+            </g:else>
+
         </div>
     </g:else>
 </body>

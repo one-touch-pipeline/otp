@@ -15,14 +15,14 @@
             <div class="otpDataTables">
                 <table id="resultsTable">
                     <thead>
-                    <tr>
+                    <tr class="indel-table-header">
                         <th colspan="4"></th>
-                        <th colspan="5"><g:message code="analysis.indel.indels"/></th>
+                        <th colspan="6"><g:message code="analysis.indel.indels"/></th>
                         <th colspan="6"><g:message code="analysis.indel.swapChecker"/></th>
-                        <th colspan="2"><g:message code="analysis.indel.tinda"/></th>
+                        <th colspan="3"><g:message code="analysis.indel.tinda"/></th>
                         <th colspan="4"></th>
                     </tr>
-                    <tr>
+                    <tr class="indel-table">
                         <th><g:message code="projectOverview.index.PID"/></th>
                         <th><g:message code="analysis.sampleTypes"/></th>
                         <th><g:message code="analysis.seqType"/></th>
@@ -32,6 +32,7 @@
                         <th><g:message code="analysis.indel.indels.numDels"/></th>
                         <th><g:message code="analysis.indel.indels.numSize1_3"/></th>
                         <th><g:message code="analysis.indel.indels.numSize4_10"/></th>
+                        <th><g:message code="analysis.plots"/></th>
                         <th><g:message code="analysis.indel.swapChecker.somaticSmallVarsInTumor"/></th>
                         <th><g:message code="analysis.indel.swapChecker.somaticSmallVarsInControl"/></th>
                         <th><g:message code="analysis.indel.swapChecker.somaticSmallVarsInTumorCommonInGnomad"/></th>
@@ -40,13 +41,13 @@
                         <th><g:message code="analysis.indel.swapChecker.somaticSmallVarsInControlPass"/></th>
                         <th><g:message code="analysis.indel.tinda.tindaSomaticAfterRescue"/></th>
                         <th><g:message code="analysis.indel.tinda.tindaSomaticAfterRescueMedianAlleleFreqInControl"/></th>
+                        <th><g:message code="analysis.indel.tinda.plot"/></th>
                         <th><g:message code="analysis.pluginVersion"/></th>
                         <th><g:message code="analysis.processingDate"/></th>
                         <th><g:message code="analysis.progress"/></th>
-                        <th><g:message code="analysis.plots"/></th>
                     </tr>
                     </thead>
-                    <tbody></tbody>
+                    <tbody class="indel-table"></tbody>
                     <tfoot>
                     </tfoot>
                 </table>

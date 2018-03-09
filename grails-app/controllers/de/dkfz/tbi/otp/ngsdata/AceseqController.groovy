@@ -1,6 +1,5 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.utils.*
 import grails.converters.*
@@ -8,32 +7,7 @@ import grails.converters.*
 import java.text.*
 
 
-class AceseqController {
-    AnalysisService analysisService
-    ProjectService projectService
-    ProjectSelectionService projectSelectionService
-
-    Map results() {
-        String projectName = params.project ?: params.projectName
-        if (projectName) {
-            Project project
-            if ((project =  projectService.getProjectByName(projectName))) {
-                projectSelectionService.setSelectedProject([project], project.name)
-                redirect(controller: controllerName, action: actionName)
-                return
-            }
-        }
-
-        List<Project> projects = projectService.getAllProjects()
-        ProjectSelection selection = projectSelectionService.getSelectedProject()
-
-        Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects(selection)
-
-        return [
-                projects: projects,
-                project: project,
-        ]
-    }
+class AceseqController extends AbstractAnalysisController {
 
     JSON dataTableResults(ResultTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()
@@ -66,52 +40,47 @@ class AceseqController {
     }
 
 
-    Map plots(AceseqInstanceCommand cmd) {
+    Map plots(BamFilePairAnalysisCommand cmd) {
         if (cmd.hasErrors()) {
             render status: 404
             return
         }
-        analysisService.checkFile(cmd.aceseqInstance)
 
-        Map<AceseqInstance.AceseqPlots, Integer> plotNumber = AceseqInstance.AceseqPlots.values().collectEntries() { AceseqInstance.AceseqPlots it ->
-            int count = cmd.aceseqInstance.getPlots(it).size()
-            [(it): count ? (0..count-1) : []]
+        Map<PlotType, List<Integer>> plotNumber = [:]
+
+        if (analysisService.getFiles(cmd.bamFilePairAnalysis, PlotType.ACESEQ_EXTRA)) {
+            int count = analysisService.getFiles(cmd.bamFilePairAnalysis, PlotType.ACESEQ_EXTRA).size()
+            plotNumber.put(PlotType.ACESEQ_EXTRA, count ? (0..count - 1) : [])
+        }
+
+        if (analysisService.getFiles(cmd.bamFilePairAnalysis, PlotType.ACESEQ_ALL)) {
+            int count = analysisService.getFiles(cmd.bamFilePairAnalysis, PlotType.ACESEQ_ALL).size()
+            plotNumber.put(PlotType.ACESEQ_ALL, count ? (0..count - 1) : [])
         }
 
         return [
-                aceseqInstance: cmd.aceseqInstance,
-                plot: AceseqInstance.AceseqPlot.values(),
+                aceseqInstance: cmd.bamFilePairAnalysis,
+                plotType: [PlotType.ACESEQ_WG_COVERAGE, PlotType.ACESEQ_TCN_DISTANCE_COMBINED_STAR, PlotType.ACESEQ_QC_GC_CORRECTED, PlotType.ACESEQ_GC_CORRECTED],
                 plotNumber: plotNumber,
                 error: null,
         ]
     }
 
-    Map plotImage(AceseqPlotCommand cmd) {
+    Map plotImages(BamFilePairAnalysisCommand cmd) {
         if (cmd.hasErrors()) {
             render status: 404
             return
         }
-        analysisService.checkFile(cmd.aceseqInstance)
+        List<File> files = analysisService.getFiles(cmd.bamFilePairAnalysis, cmd.plotType)
 
-        File file = cmd.aceseqInstance.getPlot(cmd.aceseqPlot)
-        if (file.exists()) {
-            render file: file , contentType: "image/png"
+        if (files) {
+            if (cmd.plotType in [PlotType.ACESEQ_EXTRA, PlotType.ACESEQ_ALL]) {
+                render file: files[cmd.index], contentType: "image/png"
+            } else {
+                render file: files.first(), contentType: "image/png"
+            }
         }
-        return [
-                error: "File not found",
-                pid: "no File",
-        ]
-    }
 
-    Map plotImages(AceseqPlotsCommand cmd) {
-        if (cmd.hasErrors()) {
-            render status: 404
-            return
-        }
-        analysisService.checkFile(cmd.aceseqInstance)
-
-        List<File> files = cmd.aceseqInstance.getPlots(cmd.aceseqPlots)
-        render file: files[cmd.index] , contentType: "image/png"
         return [
                 error: "File not found",
                 pid: "no File",
@@ -121,15 +90,4 @@ class AceseqController {
 
 class ResultTableCommand extends DataTableCommand {
     Project project
-}
-
-class AceseqInstanceCommand {
-    AceseqInstance aceseqInstance
-}
-class AceseqPlotCommand extends AceseqInstanceCommand {
-    AceseqInstance.AceseqPlot aceseqPlot
-}
-class AceseqPlotsCommand extends AceseqInstanceCommand {
-    AceseqInstance.AceseqPlots aceseqPlots
-    int index
 }

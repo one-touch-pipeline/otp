@@ -1,39 +1,12 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.sophia.*
 import grails.converters.*
 
 import java.text.*
 
-class SophiaController {
-
-    ProjectService projectService
-    AnalysisService analysisService
-    ProjectSelectionService projectSelectionService
-
-    Map results() {
-        String projectName = params.project ?: params.projectName
-        if (projectName) {
-            Project project
-            if ((project =  projectService.getProjectByName(projectName))) {
-                projectSelectionService.setSelectedProject([project], project.name)
-                redirect(controller: controllerName, action: actionName)
-                return
-            }
-        }
-
-        List<Project> projects = projectService.getAllProjects()
-        ProjectSelection selection = projectSelectionService.getSelectedProject()
-
-        Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects(selection)
-
-        return [
-                projects: projects,
-                project: project,
-        ]
-    }
+class SophiaController extends AbstractAnalysisController {
 
     JSON dataTableResults(ResultTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()
@@ -64,15 +37,16 @@ class SophiaController {
         render dataToRender as JSON
     }
 
-    Map plots(RenderSophiaFileCommand cmd) {
+    Map plots(BamFilePairAnalysisCommand cmd) {
         if (cmd.hasErrors()) {
             render status: 404
             return
         }
-        if (analysisService.checkFile(cmd.sophiaInstance)) {
+        if (analysisService.getFiles(cmd.bamFilePairAnalysis, cmd.plotType)) {
             return [
-                    id: cmd.sophiaInstance.id,
-                    pid: cmd.sophiaInstance.individual.pid,
+                    id: cmd.bamFilePairAnalysis.id,
+                    pid: cmd.bamFilePairAnalysis.individual.pid,
+                    plotType: cmd.plotType,
                     error: null
             ]
         }
@@ -82,25 +56,16 @@ class SophiaController {
         ]
     }
 
-    def renderPDF(RenderSophiaFileCommand cmd) {
+    def renderPDF(BamFilePairAnalysisCommand cmd) {
         if (cmd.hasErrors()) {
             response.sendError(404)
             return
         }
-        File stream = analysisService.checkFile(cmd.sophiaInstance)
+        List<File> stream = analysisService.getFiles(cmd.bamFilePairAnalysis, cmd.plotType)
         if (stream) {
-            render file: stream , contentType: "application/pdf"
+            render file: stream.first(), contentType: "application/pdf"
         } else {
             render status: 404
-            return
         }
-    }
-}
-
-class RenderSophiaFileCommand {
-    SophiaInstance sophiaInstance
-
-    static constraints = {
-        sophiaInstance nullable: false
     }
 }

@@ -14,10 +14,10 @@
         <div class="body_pdf">
             <object data="${g.createLink(controller: "sophia",
                 action: "renderPDF",
-                params: ["sophiaInstance.id": id])}" type="application/pdf"  height="650" width="1250">
+                params: ["bamFilePairAnalysis.id": id, "plotType": plotType])}" type="application/pdf"  height="650" width="1250">
                 <a href="${g.createLink(controller: "sophia",
                     action: "renderPDF",
-                    params: ["sophiaInstance.id": id])}"><g:message code="sophia.plots.view"/></a>
+                    params: ["bamFilePairAnalysis.id": id, "plotType": plotType])}"><g:message code="sophia.plots.view"/></a>
             </object>
         </div>
     </g:else>

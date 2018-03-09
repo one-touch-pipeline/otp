@@ -1,8 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
-import de.dkfz.tbi.otp.dataprocessing.sophia.*
 import org.hibernate.criterion.*
 import org.hibernate.sql.*
 import org.springframework.security.access.prepost.*
@@ -72,24 +70,61 @@ class AnalysisService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#callingInstance.project, read)")
-    File checkFile(BamFilePairAnalysis callingInstance) {
+    List<File> getFiles(BamFilePairAnalysis callingInstance, PlotType plotType) {
         if (!callingInstance) {
             return null
         }
-        if (callingInstance instanceof SnvCallingInstance ||
-                callingInstance instanceof IndelCallingInstance ||
-                callingInstance instanceof SophiaInstance) {
-            if (!callingInstance.getCombinedPlotPath().exists()) {
-                return null
-            }
-            return callingInstance.getCombinedPlotPath()
-        } else if (callingInstance instanceof AceseqInstance) {
-            if (!callingInstance.getInstancePlotPath().exists()) {
-                return null
-            }
-            return callingInstance.getInstancePlotPath()
-        } else {
-            throw new RuntimeException("${callingInstance.class.name} is not a valid calling instance")
+
+        List<File> files = []
+
+        switch (plotType) {
+            case PlotType.ACESEQ_GC_CORRECTED:
+            case PlotType.ACESEQ_QC_GC_CORRECTED:
+            case PlotType.ACESEQ_TCN_DISTANCE_COMBINED_STAR:
+            case PlotType.ACESEQ_WG_COVERAGE:
+                if ((callingInstance as AceseqInstance).getPlot(plotType).exists()) {
+                    files.add((callingInstance as AceseqInstance).getPlot(plotType))
+                }
+                break
+            case PlotType.ACESEQ_ALL:
+            case PlotType.ACESEQ_EXTRA:
+                if ((callingInstance as AceseqInstance).getPlots(plotType)) {
+                    files = (callingInstance as AceseqInstance).getPlots(plotType)
+                }
+                break
+            case PlotType.SOPHIA:
+            case PlotType.SNV:
+            case PlotType.INDEL:
+                if (callingInstance.getCombinedPlotPath().exists()) {
+                    files.add(callingInstance.getCombinedPlotPath())
+                }
+                break
+            case PlotType.INDEL_TINDA:
+                if (callingInstance.getCombinedPlotPathTiNDA().exists()) {
+                    files.add(callingInstance.getCombinedPlotPathTiNDA())
+                }
+                break
+            default:
+                throw new RuntimeException("${callingInstance.class.name} is not a valid calling instance")
         }
+
+        if (files.isEmpty()) {
+            return null
+        }
+
+        return files
     }
+}
+
+enum PlotType {
+    SNV,
+    INDEL,
+    INDEL_TINDA,
+    SOPHIA,
+    ACESEQ_GC_CORRECTED,
+    ACESEQ_QC_GC_CORRECTED,
+    ACESEQ_WG_COVERAGE,
+    ACESEQ_TCN_DISTANCE_COMBINED_STAR,
+    ACESEQ_ALL,
+    ACESEQ_EXTRA,
 }

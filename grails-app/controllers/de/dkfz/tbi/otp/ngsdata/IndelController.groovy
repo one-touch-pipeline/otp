@@ -1,49 +1,23 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.utils.*
 import grails.converters.*
 
 import java.text.*
 
-class IndelController {
+class IndelController extends AbstractAnalysisController {
 
-    ProjectService projectService
-    AnalysisService analysisService
-    ProjectSelectionService projectSelectionService
-
-    Map results() {
-        String projectName = params.project ?: params.projectName
-        if (projectName) {
-            Project project
-            if ((project =  projectService.getProjectByName(projectName))) {
-                projectSelectionService.setSelectedProject([project], project.name)
-                redirect(controller: controllerName, action: actionName)
-                return
-            }
-        }
-
-        List<Project> projects = projectService.getAllProjects()
-        ProjectSelection selection = projectSelectionService.getSelectedProject()
-
-        Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects(selection)
-
-        return [
-                projects: projects,
-                project: project,
-        ]
-    }
-
-    Map plots(RenderIndelFileCommand cmd) {
+    Map plots(BamFilePairAnalysisCommand cmd) {
         if (cmd.hasErrors()) {
             render status: 404
             return
         }
-        if (analysisService.checkFile(cmd.indelCallingInstance)) {
+        if (analysisService.getFiles(cmd.bamFilePairAnalysis, cmd.plotType)) {
             return [
-                    id: cmd.indelCallingInstance.id,
-                    pid: cmd.indelCallingInstance.individual.pid,
+                    id: cmd.bamFilePairAnalysis.id,
+                    pid: cmd.bamFilePairAnalysis.individual.pid,
+                    plotType: cmd.plotType,
                     error: null
             ]
         }
@@ -53,17 +27,20 @@ class IndelController {
         ]
     }
 
-    def renderPDF(RenderIndelFileCommand cmd) {
+    def renderPlot(BamFilePairAnalysisCommand cmd) {
         if (cmd.hasErrors()) {
             response.sendError(404)
             return
         }
-        File stream = analysisService.checkFile(cmd.indelCallingInstance)
+        List<File> stream = analysisService.getFiles(cmd.bamFilePairAnalysis, cmd.plotType)
         if (stream) {
-            render file: stream , contentType: "application/pdf"
+            if (cmd.plotType == PlotType.INDEL) {
+                render file: stream.first(), contentType: "application/pdf"
+            } else {
+                render file: stream.first(), contentType: "image/png"
+            }
         } else {
             render status: 404
-            return
         }
     }
 
@@ -111,13 +88,5 @@ class IndelController {
         dataToRender.aaData = data
 
         render dataToRender as JSON
-    }
-}
-
-class RenderIndelFileCommand {
-    IndelCallingInstance indelCallingInstance
-
-    static constraints = {
-        indelCallingInstance nullable: false
     }
 }

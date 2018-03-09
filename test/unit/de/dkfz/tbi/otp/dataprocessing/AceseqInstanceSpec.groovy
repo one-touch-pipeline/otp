@@ -10,8 +10,6 @@ import org.junit.*
 import org.junit.rules.*
 import spock.lang.*
 
-import static de.dkfz.tbi.otp.dataprocessing.AceseqInstance.AceseqPlot.*
-import static de.dkfz.tbi.otp.dataprocessing.AceseqInstance.AceseqPlots.*
 
 @Mock([
         AceseqQc,
@@ -104,18 +102,18 @@ class AceseqInstanceSpec extends Specification {
     void "test getPlot with #plot, tests if Path is in a valid form"() {
 
         expect:
-        instance.getPlot(plot) == new File(instancePath, "plots/${plot == WG_COVERAGE ? 'control_' : ''}${instance.individual.pid}_${name}")
+        instance.getPlot(plot) == new File(instancePath, "plots/${plot == PlotType.ACESEQ_WG_COVERAGE ? 'control_' : ''}${instance.individual.pid}_${name}")
 
         where:
-        plot            | name
-        GC_CORRECTED    | "gc_corrected.png"
-        QC_GC_CORRECTED | "qc_rep_corrected.png"
-        WG_COVERAGE     | "wholeGenome_coverage.png"
+        plot                            | name
+        PlotType.ACESEQ_GC_CORRECTED    | "gc_corrected.png"
+        PlotType.ACESEQ_QC_GC_CORRECTED | "qc_rep_corrected.png"
+        PlotType.ACESEQ_WG_COVERAGE     | "wholeGenome_coverage.png"
     }
 
     void "test getPlot with TCN_DISTANCE_COMBINED_STAR"() {
         expect:
-        instance.getPlot(TCN_DISTANCE_COMBINED_STAR) == new File(instancePath, "${instance.individual.pid}_tcn_distances_combined_star.png")
+        instance.getPlot(PlotType.ACESEQ_TCN_DISTANCE_COMBINED_STAR) == new File(instancePath, "${instance.individual.pid}_tcn_distances_combined_star.png")
     }
 
     /**
@@ -143,11 +141,11 @@ class AceseqInstanceSpec extends Specification {
 
         where:
         plots | name                        | tcc
-        ALL   | "plot_XX_ALL.png"           | 2.0
-        EXTRA | "plot_1.0extra_2_XX.png"    | 2.0
-        EXTRA | "plot_1.0extra_0.1_XX.png"  | 0.1
-        EXTRA | "plot_1.0extra_0.42_XX.png" | 0.42
-        EXTRA | "plot_1.0extra_0_XX.png"    | 0
+        PlotType.ACESEQ_ALL   | "plot_XX_ALL.png"           | 2.0
+        PlotType.ACESEQ_EXTRA | "plot_1.0extra_2_XX.png"    | 2.0
+        PlotType.ACESEQ_EXTRA | "plot_1.0extra_0.1_XX.png"  | 0.1
+        PlotType.ACESEQ_EXTRA | "plot_1.0extra_0.42_XX.png" | 0.42
+        PlotType.ACESEQ_EXTRA | "plot_1.0extra_0_XX.png"    | 0
     }
 
     void "test getQcJsonFile"() {
