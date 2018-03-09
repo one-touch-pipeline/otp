@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.ngsdata.*
 import org.junit.Before
 import org.junit.Test
@@ -20,8 +21,12 @@ class ExternallyProcessedMergedBamFileIntegrationTests {
     ReferenceGenome referenceGenome
     ExternalMergingWorkPackage externalMergingWorkPackage
 
+    TestConfigService configService
+
     @Before
     void setUp() {
+        configService = new TestConfigService()
+
         project = DomainFactory.createProject(
                         name: "project",
                         dirName: "project-dir",
@@ -72,13 +77,16 @@ class ExternallyProcessedMergedBamFileIntegrationTests {
                 fileName: "FILE_NAME",
                 workPackage: externalMergingWorkPackage
         )
+    }
 
+    void cleanup() {
+        configService.clean()
     }
 
     @Test
-    void testGetFilePath() {
-        OtpPath otpPath = bamFile.getFilePath()
-        assert otpPath.project == bamFile.project
-        assert otpPath.relativePath == new File("project-dir/sequencing/seq-type-dir/view-by-pid/patient/sample-type/library/merged-alignment/nonOTP/analysisImport_REF_GEN/FILE_NAME")
+    void testGetFile() {
+        String otpFile = bamFile.getBamFile().absolutePath
+        String expectedFile = "${configService.getRootPath()}/project-dir/sequencing/seq-type-dir/view-by-pid/patient/sample-type/library/merged-alignment/nonOTP/analysisImport_REF_GEN/FILE_NAME"
+        assert otpFile == expectedFile
     }
 }

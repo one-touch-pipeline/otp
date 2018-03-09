@@ -37,7 +37,7 @@ class LinkFileUtils {
 
             //create command to create base directories of links
             StringBuilder command = new StringBuilder()
-            command << createClusterScriptService.makeDirs(sourceLinkMap.values()*.parentFile, CreateClusterScriptService.DIRECTORY_PERMISSION)
+            command << createClusterScriptService.makeDirs(sourceLinkMap.values()*.parentFile.unique(), CreateClusterScriptService.DIRECTORY_PERMISSION)
             command << "\n"
 
             //create command to create links

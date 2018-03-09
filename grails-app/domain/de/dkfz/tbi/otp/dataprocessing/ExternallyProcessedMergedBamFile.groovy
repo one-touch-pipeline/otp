@@ -1,7 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.logging.*
 import org.hibernate.*
 
 /**
@@ -66,7 +65,7 @@ class ExternallyProcessedMergedBamFile extends AbstractMergedBamFile {
 
     @Override
     protected File getPathForFurtherProcessingNoCheck() {
-        return getFilePath().absoluteDataManagementPath
+        return getBamFile()
     }
 
     @Override
@@ -84,22 +83,26 @@ class ExternallyProcessedMergedBamFile extends AbstractMergedBamFile {
         throw new MissingPropertyException('AlignmentConfig is not implemented for externally imported BAM files')
     }
 
-    OtpPath getFilePath() {
-        return new OtpPath(importFolder, fileName)
+    File getBamFile() {
+        return new File(importFolder, bamFileName)
     }
 
-    OtpPath getNonOtpFolder() {
+    File getBaiFile() {
+        return new File(importFolder, baiFileName)
+    }
+
+    File getNonOtpFolder() {
         String relative = MergedAlignmentDataFileService.buildRelativePath(seqType, sample)
-        return new OtpPath(project, relative, "nonOTP")
+        return new OtpPath(project, relative, "nonOTP").absoluteDataManagementPath
     }
 
-    OtpPath getImportFolder() {
-        return new OtpPath(nonOtpFolder, "analysisImport_${referenceGenome}")
+    File getImportFolder() {
+        return new File(nonOtpFolder, "analysisImport_${referenceGenome}")
     }
 
     @Override
     File getFinalInsertSizeFile() {
-        return new File(importFolder.absoluteDataManagementPath, insertSizeFile)
+        return new File(importFolder, insertSizeFile)
     }
 
     @Override

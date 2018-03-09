@@ -881,14 +881,14 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
                         seqType: seqTrack.seqType,
                 )
         )
-        CreateFileHelper.createFile(bamFile.getNonOtpFolder().absoluteDataManagementPath)
+        CreateFileHelper.createFile(bamFile.getNonOtpFolder())
 
         return bamFile
     }
 
 
     private void deleteProcessingFilesOfProject_ExternalBamFilesAttached_Verified_Validation(ExternallyProcessedMergedBamFile bamFile) {
-        File nonOtpFolder = bamFile.getNonOtpFolder().absoluteDataManagementPath
+        File nonOtpFolder = bamFile.getNonOtpFolder()
         File outputFile = new File(outputFolder.absoluteFile, "Delete_${bamFile.project.name}.sh")
 
         assert !outputFile.text.contains(nonOtpFolder.path)
