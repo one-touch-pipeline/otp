@@ -7,6 +7,7 @@ class SeqCenter implements Entity {
 
     String name
     String dirName
+    boolean autoImportable = false
 
     static constraints = {
         name(blank: false, unique: true)

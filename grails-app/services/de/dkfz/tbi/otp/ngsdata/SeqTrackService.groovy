@@ -470,16 +470,15 @@ AND entry.value = :value
      */
     void determineAndStoreIfFastqFilesHaveToBeLinked(SeqTrack seqTrack, boolean willBeAligned) {
         assert seqTrack : "The input seqTrack for determineAndStoreIfFastqFilesHaveToBeLinked must not be null"
-        SeqCenter core = CollectionUtils.exactlyOneElement(SeqCenter.findAllByName("DKFZ"))
-        boolean fromCore = seqTrack.run.seqCenter.id == core.id
+        boolean autoImportable = seqTrack.run.seqCenter.autoImportable
         boolean onMidterm = areFilesLocatedOnMidTermStorage(seqTrack)
         boolean projectAllowsLinking = !seqTrack.project.hasToBeCopied
         boolean seqTypeAllowsLinking = seqTrack.seqType.seqTypeAllowsLinking()
         boolean adapterTrimming = RoddyWorkflowConfig.getLatestForIndividual(seqTrack.individual, seqTrack.seqType,
                 Pipeline.findByName(seqTrack.seqType.isRna() ? Pipeline.Name.RODDY_RNA_ALIGNMENT : Pipeline.Name.PANCAN_ALIGNMENT))?.adapterTrimmingNeeded ?: false
-        boolean link = willBeAligned && fromCore && onMidterm && projectAllowsLinking && seqTypeAllowsLinking && !adapterTrimming
+        boolean link = willBeAligned && autoImportable && onMidterm && projectAllowsLinking && seqTypeAllowsLinking && !adapterTrimming
         seqTrack.log("Fastq files{0} will be ${link ? "linked" : "copied"}, because " +
-                "willBeAligned=${willBeAligned}, fromCore=${fromCore}, onMidterm=${onMidterm}, projectAllowsLinking=${projectAllowsLinking}, " +
+                "willBeAligned=${willBeAligned}, autoImportable=${autoImportable}, onMidterm=${onMidterm}, projectAllowsLinking=${projectAllowsLinking}, " +
                 "seqTypeAllowsLinking=${seqTypeAllowsLinking}, needs adapter trimming=${adapterTrimming}")
         if (link) {
             seqTrack.linkedExternally = true

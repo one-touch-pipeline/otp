@@ -123,10 +123,10 @@ class SeqTrackServiceUnitTests {
     }
 
     @Test
-    void testDetermineAndStoreIfFastqFilesHaveToBeLinked_NoDKFZSeqCenterFound_ShouldFail() {
+    void testDetermineAndStoreIfFastqFilesHaveToBeLinked_NotAutoImportable_ShouldFail() {
         withTestMidtermStorageMountPoint {
             SeqTrack seqTrack = createDataForDetermineAndStoreIfFastqFilesHaveToBeLinked()
-            seqTrack.run.seqCenter.name = "NotDKFZ"
+            seqTrack.run.seqCenter.autoImportable = false
 
             seqTrackService.determineAndStoreIfFastqFilesHaveToBeLinked(seqTrack, false)
 
@@ -195,7 +195,7 @@ class SeqTrackServiceUnitTests {
     }
 
     private SeqTrack createDataForDetermineAndStoreIfFastqFilesHaveToBeLinked(int pos = 0) {
-        Run run = DomainFactory.createRun(seqCenter: DomainFactory.createSeqCenter(name: "DKFZ"))
+        Run run = DomainFactory.createRun(seqCenter: DomainFactory.createSeqCenter(autoImportable: true))
         RunSegment runSegment = DomainFactory.createRunSegment()
         SeqTrack seqTrack = DomainFactory.createSeqTrack(
                 run: run,
