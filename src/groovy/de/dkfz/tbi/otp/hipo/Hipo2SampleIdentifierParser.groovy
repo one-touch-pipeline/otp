@@ -28,9 +28,7 @@ class Hipo2SampleIdentifierParser implements SampleIdentifierParser {
             if (!'DRPAWYEMT'.toCharArray().contains(analyte.charAt(0))) {
                 sampleTypeDbName += "-${analyte}"
             }
-            if (projectNumber != "K26K" && matcher.group('tissueNumber').length() != 1) {
-                return null
-            }
+
             return new DefaultParsedSampleIdentifier(
                     "hipo_${projectNumber}",
                     matcher.group('pid'),

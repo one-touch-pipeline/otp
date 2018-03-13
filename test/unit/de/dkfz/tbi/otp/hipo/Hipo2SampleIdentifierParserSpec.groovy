@@ -58,25 +58,12 @@ class Hipo2SampleIdentifierParserSpec extends Specification {
 
         'S12A-123A-T0-D1'     || 'TUMOR0'
         'T12A-123A-T0-D1'     || 'TUMOR0'
+
+        'K12A-123ABC-T00-D1'  || 'TUMOR00'
+        'K12A-123ABC-T01-D1'  || 'TUMOR01'
+        'K12A-123ABC-T10-D1'  || 'TUMOR10'
     }
 
-    @Unroll
-    void 'tryParse, when identifier is #identifier and project is hipo_K26K, parses correctly'() {
-        when:
-        ParsedSampleIdentifier parsed = parser.tryParse(identifier)
-
-        then:
-        parsed.projectName == 'hipo_K26K'
-        parsed.pid == 'K26K-123456'
-        parsed.sampleTypeDbName == sampleTypeDbName
-        parsed.fullSampleName == identifier
-
-        where:
-        identifier            || sampleTypeDbName
-        'K26K-123456-M1-D1'   || 'METASTASIS1'
-        'K26K-123456-M01-D1'  || 'METASTASIS01'
-        'K26K-123456-M10-D1'  || 'METASTASIS10'
-    }
 
     @Unroll
     void 'tryParse, when identifier is #identifier, returns null'() {
@@ -101,9 +88,6 @@ class Hipo2SampleIdentifierParserSpec extends Specification {
                 'K12A-123ABC-00-D1',
                 'K12A-123ABC-TA-D1',
                 'K12A-123ABC-T-D1',
-                'K12A-123ABC-T00-D1',
-                'K12A-123ABC-T01-D1',
-                'K12A-123ABC-T10-D1',
                 'K12A-123ABC-T0-X1',
                 'K12A-123ABC-T0-01',
                 'K12A-123ABC-T0-D',
