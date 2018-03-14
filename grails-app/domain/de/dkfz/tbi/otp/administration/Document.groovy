@@ -15,12 +15,18 @@ class Document implements Entity {
     enum Type {
         PDF("application/pdf", "pdf"),
         WORD("application/vnd.openxmlformats-officedocument.wordprocessingml.document", "docx"),
-        EXCEL("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "xslx"),
+        WORD_97("application/msword", "doc"),
+        EXCEL("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "xlsx"),
+        EXCEL_97("application/vnd.ms-excel", "xls"),
         CSV("text/csv", "csv"),
         TSV("text/tab-separated-values", "tsv"),
 
         final String mimeType
         final String extension
+
+        String getDisplayName() {
+            "${name()} (.${extension})"
+        }
     }
 
     Type type
