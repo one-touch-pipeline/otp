@@ -11,7 +11,7 @@ class CreateJobStateLogFileHelper {
         File file = new File(tempDir, JobStateLogFile.JOB_STATE_LOG_FILE_NAME)
         file.createNewFile()
 
-        file << listOfLogFileEntryValues.join("\n")
+        file << listOfLogFileEntryValues.collect { convertLogFileEntryToString(it) }.join("\n")
 
         return JobStateLogFile.getInstance(tempDir)
     }
@@ -42,12 +42,19 @@ class CreateJobStateLogFileHelper {
 
     public static LogFileEntry createJobStateLogFileEntry(Map properties = [:]) {
         return new LogFileEntry([
-                clusterJobId: "testPbsId",
-                host: "testHost",
+                clusterJobId: "testJobId",
                 statusCode: "0",
                 timeStamp: 0L,
                 jobClass: "testJobClass"
         ] + properties as HashMap)
     }
 
+    static String convertLogFileEntryToString(LogFileEntry entry) {
+        "${entry.clusterJobId}:${entry.statusCode}:${entry.timeStamp}:${entry.jobClass}"
+    }
+
+    // when using PBS, the cluster job ID also contains a host name
+    static String convertLogFileEntryToStringIncludingHost(LogFileEntry entry) {
+        "${entry.clusterJobId}.host.name:${entry.statusCode}:${entry.timeStamp}:${entry.jobClass}"
+    }
 }

@@ -70,38 +70,45 @@ class JobStateLogFileUnitTests {
 
     @Test
     void testParseJobStateLogFile_WhenEntriesMatch_ShouldReturnMapWithClusterJobIdAndCorrespondingLogFileEntry() {
-        JobStateLogFile.LogFileEntry logFileEntry = CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: "pbsId1"])
-        JobStateLogFile.LogFileEntry logFileEntry2 = CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: "pbsId2"])
+        JobStateLogFile.LogFileEntry logFileEntry = CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: "jobId1"])
+        JobStateLogFile.LogFileEntry logFileEntry2 = CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: "jobId2"])
+        JobStateLogFile.LogFileEntry logFileEntry3 = CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: "jobId3"])
 
-        String content = """${logFileEntry.toString()}
-${logFileEntry2.toString()}"""
+        String content = """\
+            ${CreateJobStateLogFileHelper.convertLogFileEntryToString(logFileEntry)}
+            ${CreateJobStateLogFileHelper.convertLogFileEntryToString(logFileEntry2)}
+            ${CreateJobStateLogFileHelper.convertLogFileEntryToStringIncludingHost(logFileEntry3)}""".stripIndent()
 
         CreateFileHelper.createFile(tmpDir.newFile(JOB_STATE_LOG_FILE_NAME), content)
 
         JobStateLogFile jobStateLogFile = JobStateLogFile.getInstance(tmpDir.root)
 
         assert jobStateLogFile.logFileEntries.get(logFileEntry.clusterJobId).first().clusterJobId == logFileEntry.clusterJobId
-        assert jobStateLogFile.logFileEntries.get(logFileEntry.clusterJobId).first().host == null
         assert jobStateLogFile.logFileEntries.get(logFileEntry.clusterJobId).first().statusCode == logFileEntry.statusCode
         assert jobStateLogFile.logFileEntries.get(logFileEntry.clusterJobId).first().timeStamp == logFileEntry.timeStamp
         assert jobStateLogFile.logFileEntries.get(logFileEntry.clusterJobId).first().jobClass == logFileEntry.jobClass
 
         assert jobStateLogFile.logFileEntries.get(logFileEntry2.clusterJobId).first().clusterJobId == logFileEntry2.clusterJobId
-        assert jobStateLogFile.logFileEntries.get(logFileEntry2.clusterJobId).first().host == null
         assert jobStateLogFile.logFileEntries.get(logFileEntry2.clusterJobId).first().statusCode == logFileEntry2.statusCode
         assert jobStateLogFile.logFileEntries.get(logFileEntry2.clusterJobId).first().timeStamp == logFileEntry2.timeStamp
         assert jobStateLogFile.logFileEntries.get(logFileEntry2.clusterJobId).first().jobClass == logFileEntry2.jobClass
+
+        assert jobStateLogFile.logFileEntries.get(logFileEntry3.clusterJobId).first().clusterJobId == logFileEntry3.clusterJobId
+        assert jobStateLogFile.logFileEntries.get(logFileEntry3.clusterJobId).first().statusCode == logFileEntry3.statusCode
+        assert jobStateLogFile.logFileEntries.get(logFileEntry3.clusterJobId).first().timeStamp == logFileEntry3.timeStamp
+        assert jobStateLogFile.logFileEntries.get(logFileEntry3.clusterJobId).first().jobClass == logFileEntry3.jobClass
     }
 
     @Test
     void testParseJobStateLogFile_WhenEntriesDoNotMatch_ShouldThrowException() {
-        JobStateLogFile.LogFileEntry logFileEntry = CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: "pbsId1"])
-        JobStateLogFile.LogFileEntry logFileEntry2 = CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: "pbsId2"])
+        JobStateLogFile.LogFileEntry logFileEntry = CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: "jobId1"])
+        JobStateLogFile.LogFileEntry logFileEntry2 = CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: "jobId2"])
 
-        String modifiedLogFileEntry = logFileEntry2.toString().replace(":", "/")
+        String modifiedLogFileEntry = CreateJobStateLogFileHelper.convertLogFileEntryToString(logFileEntry2).replace(":", "/")
 
-        String content = """${logFileEntry.toString()}
-${modifiedLogFileEntry}"""
+        String content = """\
+            ${CreateJobStateLogFileHelper.convertLogFileEntryToString(logFileEntry)}
+            ${modifiedLogFileEntry}""".stripIndent()
 
         File file = CreateFileHelper.createFile(tmpDir.newFile(JOB_STATE_LOG_FILE_NAME), content)
 
@@ -115,12 +122,13 @@ ${modifiedLogFileEntry}"""
         JobStateLogFile.LogFileEntry logFileEntry = CreateJobStateLogFileHelper.createJobStateLogFileEntry([timeStamp: 20L])
         JobStateLogFile.LogFileEntry logFileEntry2 = CreateJobStateLogFileHelper.createJobStateLogFileEntry([timeStamp: 10L])
 
-        String content = """${logFileEntry.toString()}
-${logFileEntry2.toString()}"""
+        String content = """\
+            ${CreateJobStateLogFileHelper.convertLogFileEntryToString(logFileEntry)}
+            ${CreateJobStateLogFileHelper.convertLogFileEntryToString(logFileEntry2)}""".stripIndent()
 
         CreateFileHelper.createFile(tmpDir.newFile(JOB_STATE_LOG_FILE_NAME), content)
 
-        shouldFailWithMessage(RuntimeException, "Later JobStateLogFile entry with cluster job ID: testPbsId " +
+        shouldFailWithMessage(RuntimeException, "Later JobStateLogFile entry with cluster job ID: testJobId " +
                 "has timestamp which is less than one for previous entries.") {
             JobStateLogFile.getInstance(tmpDir.root)
         }
