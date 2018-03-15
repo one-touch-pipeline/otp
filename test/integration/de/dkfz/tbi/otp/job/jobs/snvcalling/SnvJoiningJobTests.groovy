@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.job.jobs.snvcalling
 
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.AnalysisProcessingStates
+import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.ProcessHelperService
 
 import static org.junit.Assert.*
@@ -70,7 +71,7 @@ class SnvJoiningJobTests {
     @Test
     void testMaybeSubmit() {
         boolean querySshCalled = false
-        executionService.metaClass.querySsh = { String host, int port, int timeout, String username, String password, File keyFile, boolean useSshAgent, String command ->
+        executionService.metaClass.querySsh = { Realm realm, String username, String password, File keyFile, boolean useSshAgent, String command ->
             if (command.startsWith("mkdir -p ")) {
                 return ProcessHelperService.executeAndWait(command).assertExitCodeZeroAndStderrEmpty()
             } else if (!command.startsWith("qrls") && !command.startsWith("qstat")) {

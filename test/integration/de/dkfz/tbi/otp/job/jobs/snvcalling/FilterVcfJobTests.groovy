@@ -281,7 +281,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
         File pmbf1 = snvCallingInstanceTestData.createBamFile(processedMergedBamFile1)
         snvCallingInstanceTestData.createBamFile(processedMergedBamFile2)
 
-        executionService.metaClass.querySsh = { String host, int port, int timeout, String username, String password, File keyFile, boolean useSshAgent, String command ->
+        executionService.metaClass.querySsh = { Realm realm, String username, String password, File keyFile, boolean useSshAgent, String command ->
             SnvJobResult inputResult = snvCallingInstance2.findLatestResultForSameBamFiles(SnvCallingStep.SNV_DEEPANNOTATION)
             File inputResultFile = inputResult.resultFilePath.absoluteDataManagementPath
 

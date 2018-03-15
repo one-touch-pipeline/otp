@@ -23,7 +23,7 @@ class ExecutionService {
 
     private JSch jsch
 
-    private Map<String, Session> sessionPerUser = [:]
+    private Map<Realm, Session> sessionPerRealm = [:]
 
     private static Semaphore maxSshCalls
 
@@ -53,7 +53,7 @@ class ExecutionService {
         String password = configService.getPbsPassword()
         File keyFile = configService.getSshKeyFile()
         boolean useSshAgent = configService.useSshAgent()
-        return querySsh(realm.host, realm.port, realm.timeout, sshUser, password, keyFile, useSshAgent, command)
+        return querySsh(realm, sshUser, password, keyFile, useSshAgent, command)
     }
 
     /**
@@ -71,7 +71,7 @@ class ExecutionService {
      * @param command The command to be executed on the remote server
      * @return process output of the command executed
      */
-    protected ProcessOutput querySsh(String host, int port, int timeout, String username, String password, File keyFile, boolean useSshAgent, String command) {
+    protected ProcessOutput querySsh(Realm realm, String username, String password, File keyFile, boolean useSshAgent, String command) {
         assert command : "No command specified."
         if (!password && !keyFile) {
             throw new ProcessingException("Neither password nor key file for remote connection specified.")
@@ -81,7 +81,7 @@ class ExecutionService {
         }
         maxSshCalls.acquire()
         try {
-            Session session = connectSshIfNeeded(host, port, timeout, username, password, keyFile, useSshAgent)
+            Session session = connectSshIfNeeded(realm, username, password, keyFile, useSshAgent)
 
             ChannelExec channel = (ChannelExec)session.openChannel("exec")
             logToJob("executed command: " + command)
@@ -106,17 +106,17 @@ class ExecutionService {
         }
     }
 
-    private Session connectSshIfNeeded(String host, int port, int timeout, String username, String password, File keyFile, boolean useSshAgent) {
-        Session session = sessionPerUser[username]
+    private Session connectSshIfNeeded(Realm realm, String username, String password, File keyFile, boolean useSshAgent) {
+        Session session = sessionPerRealm[realm]
         if (session == null || !session.isConnected()) {
-            session = createSessionAndJsch(host, port, timeout, username, password, keyFile, useSshAgent)
+            session = createSessionAndJsch(realm, username, password, keyFile, useSshAgent)
         }
         return session
     }
 
     @Synchronized
-    private Session createSessionAndJsch(String host, int port, int timeout, String username, String password, File keyFile, boolean useSshAgent) {
-        Session session = sessionPerUser[username]
+    private Session createSessionAndJsch(Realm realm, String username, String password, File keyFile, boolean useSshAgent) {
+        Session session = sessionPerRealm[realm]
         if (session == null || !session.isConnected()) {
             log.info("create new session for ${username}")
             if (jsch == null) {
@@ -135,11 +135,11 @@ class ExecutionService {
                 }
             }
 
-            session = jsch.getSession(username, host, port)
+            session = jsch.getSession(username, realm.host, realm.port)
             if (!keyFile) {
                 session.setPassword(password)
             }
-            session.setTimeout(timeout)
+            session.setTimeout(realm.timeout)
             Properties config = new Properties()
             config.put("StrictHostKeyChecking", "no")
             if (keyFile) {
@@ -149,9 +149,9 @@ class ExecutionService {
             try {
                 session.connect()
             } catch (JSchException e) {
-                throw new ProcessingException("Connecting to ${host}:${port} with username ${username} failed.", e)
+                throw new ProcessingException("Connecting to ${realm.host}:${realm.port} with username ${username} failed.", e)
             }
-            sessionPerUser[username] = session
+            sessionPerRealm[realm] = session
         }
         return session
     }

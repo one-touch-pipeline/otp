@@ -248,7 +248,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
         snvCallingJob.metaClass.createAndSaveSnvJobResult = { SnvCallingInstance instance, ExternalScript externalScript, SnvJobResult inputResult ->
             return true
         }
-        executionService.metaClass.querySsh = { String host, int port, int timeout, String username, String password, File keyFile, boolean useSshAgent, String command ->
+        executionService.metaClass.querySsh = { Realm realm, String username, String password, File keyFile, boolean useSshAgent, String command ->
             if (command.contains('PARM_CHR_INDEX=')) {
                 String chromosome = command.split('PARM_CHR_INDEX=')[1].split(',')[0]
                 File snvFile = new OtpPath(snvCallingInstance.instancePath, SnvCallingStep.CALLING.getResultFileName(snvCallingInstance.individual, chromosome)).absoluteStagingPath

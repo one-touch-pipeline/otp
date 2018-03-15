@@ -253,7 +253,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
                     snvCallingInstance2.config.configuration)
         }
 
-        executionService.metaClass.querySsh = { String host, int port, int timeout, String username, String password, File keyFile, boolean useSshAgent, String command ->
+        executionService.metaClass.querySsh = { Realm realm, String username, String password, File keyFile, boolean useSshAgent, String command ->
             SnvCallingStep callingStep = SnvCallingStep.CALLING
             File inputFile = snvCallingInstance.findLatestResultForSameBamFiles(callingStep).resultFilePath.absoluteDataManagementPath
             File inputFileCopy = new File(snvCallingInstance2.instancePath.absoluteDataManagementPath, inputFile.name)
