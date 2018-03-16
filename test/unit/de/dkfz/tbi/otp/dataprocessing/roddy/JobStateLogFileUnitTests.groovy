@@ -70,6 +70,7 @@ class JobStateLogFileUnitTests {
 
     @Test
     void testParseJobStateLogFile_WhenEntriesMatch_ShouldReturnMapWithClusterJobIdAndCorrespondingLogFileEntry() {
+        given:
         JobStateLogFile.LogFileEntry logFileEntry = CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: "jobId1"])
         JobStateLogFile.LogFileEntry logFileEntry2 = CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: "jobId2"])
         JobStateLogFile.LogFileEntry logFileEntry3 = CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: "jobId3"])
@@ -81,26 +82,29 @@ class JobStateLogFileUnitTests {
 
         CreateFileHelper.createFile(tmpDir.newFile(JOB_STATE_LOG_FILE_NAME), content)
 
+        when:
         JobStateLogFile jobStateLogFile = JobStateLogFile.getInstance(tmpDir.root)
 
-        assert jobStateLogFile.logFileEntries.get(logFileEntry.clusterJobId).first().clusterJobId == logFileEntry.clusterJobId
-        assert jobStateLogFile.logFileEntries.get(logFileEntry.clusterJobId).first().statusCode == logFileEntry.statusCode
-        assert jobStateLogFile.logFileEntries.get(logFileEntry.clusterJobId).first().timeStamp == logFileEntry.timeStamp
-        assert jobStateLogFile.logFileEntries.get(logFileEntry.clusterJobId).first().jobClass == logFileEntry.jobClass
+        then:
+        assert jobStateLogFile.logFileEntries.get(logFileEntry.clusterJobId).clusterJobId == logFileEntry.clusterJobId
+        assert jobStateLogFile.logFileEntries.get(logFileEntry.clusterJobId).statusCode == logFileEntry.statusCode
+        assert jobStateLogFile.logFileEntries.get(logFileEntry.clusterJobId).timeStamp == logFileEntry.timeStamp
+        assert jobStateLogFile.logFileEntries.get(logFileEntry.clusterJobId).jobClass == logFileEntry.jobClass
 
-        assert jobStateLogFile.logFileEntries.get(logFileEntry2.clusterJobId).first().clusterJobId == logFileEntry2.clusterJobId
-        assert jobStateLogFile.logFileEntries.get(logFileEntry2.clusterJobId).first().statusCode == logFileEntry2.statusCode
-        assert jobStateLogFile.logFileEntries.get(logFileEntry2.clusterJobId).first().timeStamp == logFileEntry2.timeStamp
-        assert jobStateLogFile.logFileEntries.get(logFileEntry2.clusterJobId).first().jobClass == logFileEntry2.jobClass
+        assert jobStateLogFile.logFileEntries.get(logFileEntry2.clusterJobId).clusterJobId == logFileEntry2.clusterJobId
+        assert jobStateLogFile.logFileEntries.get(logFileEntry2.clusterJobId).statusCode == logFileEntry2.statusCode
+        assert jobStateLogFile.logFileEntries.get(logFileEntry2.clusterJobId).timeStamp == logFileEntry2.timeStamp
+        assert jobStateLogFile.logFileEntries.get(logFileEntry2.clusterJobId).jobClass == logFileEntry2.jobClass
 
-        assert jobStateLogFile.logFileEntries.get(logFileEntry3.clusterJobId).first().clusterJobId == logFileEntry3.clusterJobId
-        assert jobStateLogFile.logFileEntries.get(logFileEntry3.clusterJobId).first().statusCode == logFileEntry3.statusCode
-        assert jobStateLogFile.logFileEntries.get(logFileEntry3.clusterJobId).first().timeStamp == logFileEntry3.timeStamp
-        assert jobStateLogFile.logFileEntries.get(logFileEntry3.clusterJobId).first().jobClass == logFileEntry3.jobClass
+        assert jobStateLogFile.logFileEntries.get(logFileEntry3.clusterJobId).clusterJobId == logFileEntry3.clusterJobId
+        assert jobStateLogFile.logFileEntries.get(logFileEntry3.clusterJobId).statusCode == logFileEntry3.statusCode
+        assert jobStateLogFile.logFileEntries.get(logFileEntry3.clusterJobId).timeStamp == logFileEntry3.timeStamp
+        assert jobStateLogFile.logFileEntries.get(logFileEntry3.clusterJobId).jobClass == logFileEntry3.jobClass
     }
 
     @Test
     void testParseJobStateLogFile_WhenEntriesDoNotMatch_ShouldThrowException() {
+        given:
         JobStateLogFile.LogFileEntry logFileEntry = CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: "jobId1"])
         JobStateLogFile.LogFileEntry logFileEntry2 = CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: "jobId2"])
 
@@ -110,15 +114,18 @@ class JobStateLogFileUnitTests {
             ${CreateJobStateLogFileHelper.convertLogFileEntryToString(logFileEntry)}
             ${modifiedLogFileEntry}""".stripIndent()
 
+        when:
         File file = CreateFileHelper.createFile(tmpDir.newFile(JOB_STATE_LOG_FILE_NAME), content)
 
+        then:
         shouldFailWithMessage(RuntimeException, "${file} contains non-matching entry: ${modifiedLogFileEntry}") {
             JobStateLogFile.getInstance(tmpDir.root)
         }
     }
 
     @Test
-    void testParseJobStateLogFile_WhenOrderOfEntriesIsWrong_ShouldThrowException() {
+    void testParseJobStateLogFile_WhenEntriesAreUnordered_ShouldUseEntryWithTheLaterTimeStamp() {
+        given:
         JobStateLogFile.LogFileEntry logFileEntry = CreateJobStateLogFileHelper.createJobStateLogFileEntry([timeStamp: 20L])
         JobStateLogFile.LogFileEntry logFileEntry2 = CreateJobStateLogFileHelper.createJobStateLogFileEntry([timeStamp: 10L])
 
@@ -128,14 +135,40 @@ class JobStateLogFileUnitTests {
 
         CreateFileHelper.createFile(tmpDir.newFile(JOB_STATE_LOG_FILE_NAME), content)
 
-        shouldFailWithMessage(RuntimeException, "Later JobStateLogFile entry with cluster job ID: testJobId " +
-                "has timestamp which is less than one for previous entries.") {
-            JobStateLogFile.getInstance(tmpDir.root)
-        }
+        when:
+        JobStateLogFile jobStateLogFile = JobStateLogFile.getInstance(tmpDir.root)
+
+        then:
+        assert jobStateLogFile.logFileEntries.get(logFileEntry.clusterJobId).clusterJobId == logFileEntry.clusterJobId
+        assert jobStateLogFile.logFileEntries.get(logFileEntry.clusterJobId).statusCode == logFileEntry.statusCode
+        assert jobStateLogFile.logFileEntries.get(logFileEntry.clusterJobId).timeStamp == logFileEntry.timeStamp
+        assert jobStateLogFile.logFileEntries.get(logFileEntry.clusterJobId).jobClass == logFileEntry.jobClass
     }
 
     @Test
-    void testContainsClusterJobId_WhenJobStateLogFileContainsclusterJobId_ShouldReturnTrue() {
+    void testParseJobStateLogFile_WhenEntriesAreOrdered_ShouldUseEntryWithTheLaterTimeStamp() {
+        given:
+        JobStateLogFile.LogFileEntry logFileEntry = CreateJobStateLogFileHelper.createJobStateLogFileEntry([timeStamp: 10L])
+        JobStateLogFile.LogFileEntry logFileEntry2 = CreateJobStateLogFileHelper.createJobStateLogFileEntry([timeStamp: 20L])
+
+        String content = """\
+            ${CreateJobStateLogFileHelper.convertLogFileEntryToString(logFileEntry)}
+            ${CreateJobStateLogFileHelper.convertLogFileEntryToString(logFileEntry2)}""".stripIndent()
+
+        CreateFileHelper.createFile(tmpDir.newFile(JOB_STATE_LOG_FILE_NAME), content)
+
+        when:
+        JobStateLogFile jobStateLogFile = JobStateLogFile.getInstance(tmpDir.root)
+
+        then:
+        assert jobStateLogFile.logFileEntries.get(logFileEntry.clusterJobId).clusterJobId == logFileEntry2.clusterJobId
+        assert jobStateLogFile.logFileEntries.get(logFileEntry.clusterJobId).statusCode == logFileEntry2.statusCode
+        assert jobStateLogFile.logFileEntries.get(logFileEntry.clusterJobId).timeStamp == logFileEntry2.timeStamp
+        assert jobStateLogFile.logFileEntries.get(logFileEntry.clusterJobId).jobClass == logFileEntry2.jobClass
+    }
+
+    @Test
+    void testContainsClusterJobId_WhenJobStateLogFileContainsClusterJobId_ShouldReturnTrue() {
         JobStateLogFile JobStateLogFile = CreateJobStateLogFileHelper.createJobStateLogFile(
                 tmpDir.root, [
                     CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: clusterJobIdentifier.clusterJobId])

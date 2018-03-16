@@ -22,9 +22,9 @@ public class JobStateLogFile {
     private static final String JOB_STATE_LOGFILE_REGEX =
             /^(?<id>.+?)(\.(?<hostname>.+?))?:(?<statusCode>.+?):(?<timeStamp>.+?):(?<jobClass>.*)$/
     /**
-     * represents content of the file; entries of the files are grouped by cluster job id
+     * represents content of the file; key is the cluster job id, only the latest entry is stored
      */
-    private final Map<String, List<LogFileEntry>> logFileEntries
+    private final Map<String, LogFileEntry> logFileEntries
 
     /**
      * represents JobStateLogFile on the file-system
@@ -56,8 +56,8 @@ public class JobStateLogFile {
         }
     }
 
-    private Map<String, List<LogFileEntry>> parseJobStateLogFile() {
-        Map<String, List<LogFileEntry>> entries = [:]
+    private Map<String, LogFileEntry> parseJobStateLogFile() {
+        Map<String, LogFileEntry> entries = [:]
 
         file.eachLine { line ->
             Matcher matcher = line =~ JOB_STATE_LOGFILE_REGEX
@@ -69,17 +69,12 @@ public class JobStateLogFile {
                         jobClass: matcher.group("jobClass")
                 )
 
-                List<LogFileEntry> logFileEntries = entries[logFileEntry.clusterJobId]
-                if (logFileEntries) {
-                    if (logFileEntry.timeStamp < logFileEntries.last().timeStamp) {
-                        throw new RuntimeException("Later JobStateLogFile entry with cluster job ID: ${logFileEntry.clusterJobId} " +
-                                "has timestamp which is less than one for previous entries.")
-                    }
-                } else {
-                    logFileEntries = []
-                    entries.put(logFileEntry.clusterJobId, logFileEntries)
+                LogFileEntry existingLoFileEntry = entries[logFileEntry.clusterJobId]
+                // only the latest entry is stored (i.e. the entry with the highest timestamp)
+                if (!existingLoFileEntry ||
+                        logFileEntry.timeStamp > existingLoFileEntry.timeStamp) {
+                        entries.put(logFileEntry.clusterJobId, logFileEntry)
                 }
-                logFileEntries << logFileEntry
             } else {
                 throw new RuntimeException("${file} contains non-matching entry: ${line}")
             }
@@ -96,15 +91,12 @@ public class JobStateLogFile {
     }
 
     public String getPropertyFromLatestLogFileEntry(String clusterJobId, String property) {
-        return logFileEntries.get(clusterJobId)?.last()?."${property}"
+        return logFileEntries.get(clusterJobId)?."${property}"
     }
 
-    public boolean isEmpty() {
+    // only used for tests
+    private boolean isEmpty() {
         return file.length() == 0
-    }
-
-    public String getFilePath() {
-        return file.absolutePath
     }
 
     @Immutable
