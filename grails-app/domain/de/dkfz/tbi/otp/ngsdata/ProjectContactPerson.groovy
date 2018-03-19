@@ -11,4 +11,9 @@ class ProjectContactPerson implements Serializable, Entity {
     static constraints = {
         contactPersonRole(nullable: true)
     }
+
+    static mapping = {
+        contactPerson index: "project_contact_person_contact_person_idx"
+        project index: "project_contact_person_contact_person_idx"
+    }
 }

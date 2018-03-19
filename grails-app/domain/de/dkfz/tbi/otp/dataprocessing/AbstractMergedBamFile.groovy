@@ -82,6 +82,7 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile implement
 
     static mapping = {
         numberOfMergedLanes index: "abstract_merged_bam_file_number_of_merged_lanes_idx"
+        qcTrafficLightStatus index: "abstract_bam_file_qc_traffic_light_status"
         workPackage lazy: false
         workPackage index: "abstract_merged_bam_file_work_package_idx"
     }

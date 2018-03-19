@@ -210,7 +210,15 @@ if (pluginsToExclude) {
     grails.plugin.exclude = pluginsToExclude
 }
 
-grails.plugin.databasemigration.changelogFileName = 'changelog.xml'
+grails.plugin.databasemigration.changelogLocation = 'migrations'
+grails.plugin.databasemigration.changelogFileName = 'changelog.groovy'
+grails.plugin.databasemigration.updateOnStart = true
+grails.plugin.databasemigration.updateOnStartFileNames = ['changelog.groovy']
+grails.plugin.databasemigration.ignoredObjects = [
+        'aggregate_sequences',
+        'meta_data_key',
+        'sequences',
+]
 
 // WARNING: This setting (same as this entire Config.groovy) has no effect on unit tests. See:
 // * OTP-1126

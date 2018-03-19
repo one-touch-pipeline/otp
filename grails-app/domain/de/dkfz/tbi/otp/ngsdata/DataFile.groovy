@@ -157,6 +157,7 @@ class DataFile implements Commentable, Entity {
         mergingLog index: "data_file_merging_log_idx"
         alignmentLog index: "data_file_alignment_log_idx"
         fileType index: "data_file_file_type_idx"
+        initialDirectory type: 'text'
     }
 
 

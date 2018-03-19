@@ -1,11 +1,9 @@
 package de.dkfz.tbi.otp.ngsdata
-
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.utils.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
-
 
 class Project implements Commentable, Entity, AlignmentConfig {
 
@@ -118,6 +116,7 @@ class Project implements Commentable, Entity, AlignmentConfig {
     static mapping = {
         projectGroup index: "project_project_group_idx"
         processingPriority index: "project_processing_priority_idx"
+        dirAnalysis type: "text"
         description type: "text"
     }
 

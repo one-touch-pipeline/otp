@@ -64,5 +64,6 @@ class SeqPlatform implements Entity {
     static mapping = {
         sequencingKitLabel index: "seq_platform_sequencing_kit_label_idx"
         seqPlatformModelLabel index: "seq_platform_seq_platform_model_label_idx"
+        identifierInRunName index: "seq_platform_identifier_in_run_name_idx"
     }
 }

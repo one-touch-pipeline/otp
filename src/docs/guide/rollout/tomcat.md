@@ -41,7 +41,7 @@ remote as root
     firewall-cmd --reload
     ```
 
-- increase count of open files in '/etc/security/limits.conf' 
+- increase count of open files in '/etc/security/limits.conf'
     ```
     * hard nofile 131072
     * soft nofile 65536
@@ -91,7 +91,6 @@ remote as web user
     otp.database.database=otp
     otp.database.username=otp
     otp.database.password=otp
-    otp.database.dbCreate=update
 
     # URL where OTP is reachable
     otp.server.url=http://$WEB_HOST:8080/otp
@@ -160,9 +159,6 @@ remote as web user
     ```
     ~/apache-tomcat-$TOMCAT_VERSION/bin/startup.sh ; tail -f ~/apache-tomcat-$TOMCAT_VERSION/logs/catalina.out
     ```
-
-- adapt the property 'otp.database.dbCreate' in the otp property file "~.otp.properties" to 'validate'
-    <br> This ensure, that otp won't do any ddl modification automatically, instead it check that all required table and columns are available.
 
 
 

@@ -41,4 +41,8 @@ class Document implements Entity {
             }
         }
     }
+
+    static mapping = {
+        name index: "document__name_idx"
+    }
 }

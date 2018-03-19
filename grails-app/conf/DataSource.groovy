@@ -16,10 +16,6 @@ String port = databaseProperties.getProperty("otp.database.port")
 String database = databaseProperties.getProperty("otp.database.database")
 databaseProperties.setProperty("otp.database.url", "jdbc:postgresql://${server}:${port}/${database}")
 databaseProperties.setProperty("otp.database.pooled", "true")
-// If dbCreate option is not set in the properties file, set it to validate
-if (databaseProperties.getProperty("otp.database.dbCreate") == null) {
-    databaseProperties.setProperty("otp.database.dbCreate", "validate")
-}
 
 def databaseConfig = new ConfigSlurper().parse(databaseProperties)
 dataSource {

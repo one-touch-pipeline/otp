@@ -107,17 +107,11 @@ class SamplePair implements Entity {
          * The implicit unique index on (mergingWorkPackage1, mergingWorkPackage2) is used by
          * SamplePair.findMissingDiseaseControlSamplePairs.
          */
-        mergingWorkPackage1 index: 'sample_pair_snv_idx1'
-        mergingWorkPackage2 index: 'sample_pair_snv_idx1'
+        mergingWorkPackage1 index: 'sample_pair_snv_idx1,sample_pair_indel_idx1,sample_pair_sophia_idx1,sample_pair_aceseq_idx1'
+        mergingWorkPackage2 index: 'sample_pair_snv_idx1,sample_pair_indel_idx1,sample_pair_sophia_idx1,sample_pair_aceseq_idx1'
         snvProcessingStatus index: 'sample_pair_snv_idx1'
-        mergingWorkPackage1 index: 'sample_pair_indel_idx1'
-        mergingWorkPackage2 index: 'sample_pair_indel_idx1'
         indelProcessingStatus index: 'sample_pair_indel_idx1'
-        mergingWorkPackage1 index: 'sample_pair_sophia_idx1'
-        mergingWorkPackage2 index: 'sample_pair_sophia_idx1'
         sophiaProcessingStatus index: 'sample_pair_sophia_idx1'
-        mergingWorkPackage1 index: 'sample_pair_aceseq_idx1'
-        mergingWorkPackage2 index: 'sample_pair_aceseq_idx1'
         aceseqProcessingStatus index: 'sample_pair_aceseq_idx1'
     }
 

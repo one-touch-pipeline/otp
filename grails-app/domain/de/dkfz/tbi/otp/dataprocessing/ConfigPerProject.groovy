@@ -38,6 +38,10 @@ abstract class ConfigPerProject implements Entity {
         obsoleteDate nullable: true
     }
 
+    static mapping = {
+        'class' index: "config_per_project_class_idx"
+    }
+
      void createConfigPerProject() {
          Project.withTransaction {
             this.previousConfig?.makeObsolete()

@@ -1,9 +1,8 @@
 package de.dkfz.tbi.otp.job.plan
 
-import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.utils.*
 
-import java.util.regex.Pattern
-import java.util.regex.PatternSyntaxException
+import java.util.regex.*
 
 class JobErrorDefinition implements Entity {
     String errorExpression
@@ -43,6 +42,10 @@ class JobErrorDefinition implements Entity {
             checkFurtherJobErrors: JobErrorDefinition,
             jobDefinitions: JobDefinition,
     ]
+
+    static mapping = {
+        errorExpression type: 'text'
+    }
 
     @Override
     String toString() {
