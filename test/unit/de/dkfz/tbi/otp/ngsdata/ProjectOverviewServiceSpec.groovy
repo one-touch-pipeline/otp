@@ -77,26 +77,26 @@ class ProjectOverviewServiceSpec extends Specification {
         GroovyMock(ProcessHelperService, global: true)
         1 * ProcessHelperService.executeAndWait(_) >> {
             new ProcessHelperService.ProcessOutput("""
-useAcceleratedHardware=${useConvey}
-markDuplicatesVariant=${mergeTool}
+                useAcceleratedHardware=${useConvey}
+                markDuplicatesVariant=${mergeTool}
 
-BWA_BINARY=nonConvey
-BWA_MEM_OPTIONS=alnOpt
+                BWA_VERSION=1.0
+                BWA_MEM_OPTIONS=alnOpt
 
-BWA_ACCELERATED_BINARY=convey
-BWA_MEM_CONVEY_ADDITIONAL_OPTIONS=conveyOpt
+                BWA_ACCELERATED_VERSION=2.0
+                BWA_MEM_CONVEY_ADDITIONAL_OPTIONS=conveyOpt
 
-MARKDUPLICATES_BINARY=bioBamBam
-mergeAndRemoveDuplicates_argumentList=bioBamBamOpt
+                MARKDUPLICATES_VERSION=3.0
+                mergeAndRemoveDuplicates_argumentList=bioBamBamOpt
 
-PICARD_BINARY=picard
+                PICARD_VERSION=4.0
 
-SAMBAMBA_MARKDUP_BINARY=sambamba
-SAMBAMBA_MARKDUP_OPTS=sambambaOpt
+                SAMBAMBA_MARKDUP_VERSION=5.0
+                SAMBAMBA_MARKDUP_OPTS=sambambaOpt
 
-SAMTOOLS_BINARY=samTool
+                SAMTOOLS_VERSION=6.0
 
-""", '', 0)
+                """.stripIndent(), '', 0)
         }
 
         when:
@@ -108,18 +108,18 @@ SAMTOOLS_BINARY=samTool
         alignOpt == alignmentInfo.bwaOptions
         mergeCommand == alignmentInfo.mergeCommand
         mergeOpt == alignmentInfo.mergeOptions
-        'samTool' == alignmentInfo.samToolsCommand
+        'Version 6.0' == alignmentInfo.samToolsCommand
         roddyPipelineVersion == alignmentInfo.pluginVersion
 
         cleanup:
         GroovySystem.metaClassRegistry.removeMetaClass(ProcessHelperService)
 
         where:
-        useConvey | mergeTool                               || alignCommand || alignOpt           || mergeCommand || mergeOpt       || roddyPipelineVersion
-        false     | MergeConstants.MERGE_TOOL_BIOBAMBAM     || 'nonConvey'  || 'alnOpt'           || 'bioBamBam'  || 'bioBamBamOpt' || 'pluginVersion:1.1.0'
-        false     | MergeConstants.MERGE_TOOL_PICARD        || 'nonConvey'  || 'alnOpt'           || 'picard'     || ''             || 'pluginVersion:1.1.0'
-        false     | MergeConstants.MERGE_TOOL_SAMBAMBA      || 'nonConvey'  || 'alnOpt'           || 'sambamba'   || 'sambambaOpt'  || 'pluginVersion:1.1.0'
-        true      | MergeConstants.MERGE_TOOL_BIOBAMBAM     || 'convey'     || 'alnOpt conveyOpt' || 'bioBamBam'  || 'bioBamBamOpt' || 'pluginVersion:1.1.0'
+        useConvey | mergeTool                               || alignCommand         || alignOpt           || mergeCommand                              || mergeOpt       || roddyPipelineVersion
+        false     | MergeConstants.MERGE_TOOL_BIOBAMBAM     || 'BWA Version 1.0'    || 'alnOpt'           || 'Biobambam bammarkduplicates Version 3.0' || 'bioBamBamOpt' || 'pluginVersion:1.1.0'
+        false     | MergeConstants.MERGE_TOOL_PICARD        || 'BWA Version 1.0'    || 'alnOpt'           || 'Picard Version 4.0'                      || ''             || 'pluginVersion:1.1.0'
+        false     | MergeConstants.MERGE_TOOL_SAMBAMBA      || 'BWA Version 1.0'    || 'alnOpt'           || 'Sambamba Version 5.0'                    || 'sambambaOpt'  || 'pluginVersion:1.1.0'
+        true      | MergeConstants.MERGE_TOOL_BIOBAMBAM     || 'bwa-bb Version 2.0' || 'alnOpt conveyOpt' || 'Biobambam bammarkduplicates Version 3.0' || 'bioBamBamOpt' || 'pluginVersion:1.1.0'
     }
 
 
@@ -140,29 +140,26 @@ SAMTOOLS_BINARY=samTool
         GroovyMock(ProcessHelperService, global: true)
         1 * ProcessHelperService.executeAndWait(_) >> {
             new ProcessHelperService.ProcessOutput("""
-SAMTOOLS_BINARY=samTool
-SAMBAMBA_BINARY=SAMBAMBA_BINARY
-STAR_BINARY=STAR_BINARY
+                |SAMTOOLS_VERSION=1.0
+                |SAMBAMBA_VERSION=3.0
+                |STAR_VERSION=2.0
 
-${['2PASS', 'OUT', 'CHIMERIC', 'INTRONS'].collect { name ->
-    "STAR_PARAMS_${name}=${name}"
-}.join('\n')
-}
-""", '', 0)
-
+                |${['2PASS', 'OUT', 'CHIMERIC', 'INTRONS'].collect { name ->
+                        "STAR_PARAMS_${name}=${name}"
+                }.join('\n')
+                }
+            """.stripMargin(), '', 0)
         }
 
         when:
         ProjectOverviewService.AlignmentInfo alignmentInfo = service.getRoddyAlignmentInformation(roddyWorkflowConfig)
 
         then:
-        'STAR_BINARY'  == alignmentInfo.bwaCommand
-        ['2PASS', 'OUT', 'CHIMERIC', 'INTRONS'].collect { name ->
-            "${name}"
-        }.join(' ') == alignmentInfo.bwaOptions
-        'SAMBAMBA_BINARY' == alignmentInfo.mergeCommand
+        'STAR Version 2.0'  == alignmentInfo.bwaCommand
+        ['2PASS', 'OUT', 'CHIMERIC', 'INTRONS'].join(' ') == alignmentInfo.bwaOptions
+        'Sambamba Version 3.0' == alignmentInfo.mergeCommand
         ''  == alignmentInfo.mergeOptions
-        'samTool' == alignmentInfo.samToolsCommand
+        'Version 1.0' == alignmentInfo.samToolsCommand
 
         cleanup:
         GroovySystem.metaClassRegistry.removeMetaClass(ProcessHelperService)
@@ -203,7 +200,7 @@ ${['2PASS', 'OUT', 'CHIMERIC', 'INTRONS'].collect { name ->
         'file not found'      | 'some'                                          | 'The project configuration "roddyWorkflowConfig.config" could not be found' | 0        || 'Roddy could not find the configuration \'roddyWorkflowConfig\'. Probably some access problem.'
         'no config values'    | 'some'                                          | 'some'                                                                      | 0        || 'Could not extract any configuration value from the roddy output'
         'no alignment values' | 'a=b\nc=d'                                      | 'some'                                                                      | 0        || 'Could not extract alignment configuration value from the roddy output'
-        'no merging values'   | 'useAcceleratedHardware=false\nBWA_BINARY=algn' | 'some'                                                                      | 0        || 'Could not extract merging configuration value from the roddy output'
+        'no merging values'   | 'useAcceleratedHardware=false\nBWA_VERSION=aln' | 'some'                                                                      | 0        || 'Could not extract merging configuration value from the roddy output'
     }
 
 

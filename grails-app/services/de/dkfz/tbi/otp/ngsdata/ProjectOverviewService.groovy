@@ -40,7 +40,7 @@ class ProjectOverviewService {
         return PROJECT_TO_HIDE_SAMPLE_IDENTIFIER.contains(project?.name)
     }
 
-    AlignmentInfo getRoddyAlignmentInformation(RoddyWorkflowConfig workflowConfig) {
+    protected AlignmentInfo getRoddyAlignmentInformation(RoddyWorkflowConfig workflowConfig) {
         assert workflowConfig
 
         ProcessOutput output = getRoddyProcessOutput(workflowConfig)
@@ -52,7 +52,7 @@ class ProjectOverviewService {
      * get the output check it and returns result if successful
      * @param workflowConfig
      */
-    ProcessOutput getRoddyProcessOutput(RoddyWorkflowConfig workflowConfig) {
+    protected ProcessOutput getRoddyProcessOutput(RoddyWorkflowConfig workflowConfig) {
 
         String nameInConfigFile = workflowConfig.getNameUsedInConfig()
 
@@ -82,7 +82,7 @@ class ProjectOverviewService {
      * @param seqType
      * @return new Alignment info
      */
-    AlignmentInfo generateAlignmentInfo(ProcessOutput output, SeqType seqType, String pluginVersion) {
+    private AlignmentInfo generateAlignmentInfo(ProcessOutput output, SeqType seqType, String pluginVersion) {
 
         Map<String, String> res = extractConfigRoddyOutput(output)
 
@@ -93,7 +93,7 @@ class ProjectOverviewService {
         return new AlignmentInfo(
                 bwaCommand: bwa.command,
                 bwaOptions: bwa.options,
-                samToolsCommand: res.get("SAMTOOLS_BINARY"),
+                samToolsCommand: res.get("SAMTOOLS_VERSION") ? "Version ${res.get("SAMTOOLS_VERSION")}" : "",
                 mergeCommand: merge.command,
                 mergeOptions: merge.options,
                 pluginVersion: pluginVersion,
@@ -108,7 +108,7 @@ class ProjectOverviewService {
      * @param seqType
      * @return Map that holds command and options for the Merging
      */
-    Map createMergeCommandOptionsMap(Map<String, String> res, ProcessOutput output, SeqType seqType) {
+    private Map createMergeCommandOptionsMap(Map<String, String> res, ProcessOutput output, SeqType seqType) {
         Map merge = [:]
 
         // Default empty
@@ -117,18 +117,18 @@ class ProjectOverviewService {
         String tool = getMergingTool(res, seqType)
         switch (tool) {
             case MergeConstants.MERGE_TOOL_BIOBAMBAM:
-                merge.command = res.get("MARKDUPLICATES_BINARY")
+                merge.command = res.get("MARKDUPLICATES_VERSION") ? "Biobambam bammarkduplicates Version ${res.get("MARKDUPLICATES_VERSION")}" : ""
                 merge.options = res.get("mergeAndRemoveDuplicates_argumentList")
                 break
             case MergeConstants.MERGE_TOOL_PICARD:
-                merge.command = res.get("PICARD_BINARY")
+                merge.command = res.get("PICARD_VERSION") ? "Picard Version ${res.get("PICARD_VERSION")}" : ""
                 break
             case MergeConstants.MERGE_TOOL_SAMBAMBA:
-                merge.command = res.get('SAMBAMBA_MARKDUP_BINARY')
+                merge.command = res.get('SAMBAMBA_MARKDUP_VERSION') ? "Sambamba Version ${res.get('SAMBAMBA_MARKDUP_VERSION')}" : ""
                 merge.options = res.get('SAMBAMBA_MARKDUP_OPTS')
                 break
             case MergeConstants.MERGE_TOOL_SAMBAMBA_RNA:
-                merge.command = res.get('SAMBAMBA_BINARY')
+                merge.command = res.get('SAMBAMBA_VERSION') ? "Sambamba Version ${res.get('SAMBAMBA_VERSION')}" : ""
                 break
             default:
                 merge.command = "Unknown tool: ${tool}"
@@ -147,7 +147,7 @@ class ProjectOverviewService {
      * Generates and returns String that holds what Merging have to be done
      * @return String with the generated tool
      */
-    String getMergingTool(Map<String, String> res, SeqType seqType) {
+    private String getMergingTool(Map<String, String> res, SeqType seqType) {
         String tool = res.get('markDuplicatesVariant')
 
         if (seqType.isRna()) {
@@ -167,24 +167,24 @@ class ProjectOverviewService {
      * Creates a Map bwa with command and options for the alignment
      * @return Map that holds command and options for the alignment
      */
-    Map createAlignmentCommandOptionsMap(Map<String, String> res, ProcessOutput output, SeqType seqType) {
+    private Map createAlignmentCommandOptionsMap(Map<String, String> res, ProcessOutput output, SeqType seqType) {
         Map bwa = [:]
 
         if (seqType.isRna()) {
 
-            bwa.command = res.get("STAR_BINARY")
+            bwa.command = res.get("STAR_VERSION") ? "STAR Version ${res.get("STAR_VERSION")}" : ""
             bwa.options = ['2PASS', 'OUT', 'CHIMERIC', 'INTRONS'].collect { name ->
                 res.get("STAR_PARAMS_${name}".toString())
             }.join(' ')
 
         } else if (res.get("useAcceleratedHardware") == "true") {
 
-            bwa.command = res.get("BWA_ACCELERATED_BINARY")
+            bwa.command = res.get("BWA_ACCELERATED_VERSION") ? "bwa-bb Version ${res.get("BWA_ACCELERATED_VERSION")}" : ""
             bwa.options = res.get("BWA_MEM_OPTIONS") + ' ' + res.get("BWA_MEM_CONVEY_ADDITIONAL_OPTIONS")
 
         } else {
 
-            bwa.command = res.get("BWA_BINARY")
+            bwa.command = res.get("BWA_VERSION") ? "BWA Version ${res.get("BWA_VERSION")}" : ""
             bwa.options = res.get("BWA_MEM_OPTIONS")
 
         }
@@ -204,7 +204,7 @@ class ProjectOverviewService {
      * @param output of Roddy
      * @return Map with Roddy config value output
      */
-    Map<String, String> extractConfigRoddyOutput(ProcessOutput output) {
+    private Map<String, String> extractConfigRoddyOutput(ProcessOutput output) {
         Map<String, String> res = [:]
         output.stdout.eachLine { String line ->
             Matcher matcher = line =~ /(?:declare +-x +(?:-i +)?)?([^ =]*)=(.*)/
@@ -224,7 +224,7 @@ class ProjectOverviewService {
     }
 
 
-    AlignmentInfo getDefaultOtpAlignmentInformation(Project project) {
+    protected AlignmentInfo getDefaultOtpAlignmentInformation(Project project) {
         assert project
 
         return new AlignmentInfo(
