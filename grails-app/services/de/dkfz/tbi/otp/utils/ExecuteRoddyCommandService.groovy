@@ -137,6 +137,7 @@ class ExecuteRoddyCommandService {
         assert roddyResult : "roddyResult should not be null"
         String cmd = """\
             set -e
+            set -o pipefail
             cd "${roddyResult.workDirectory}"
 
             echo ""
@@ -159,6 +160,7 @@ class ExecuteRoddyCommandService {
         assert roddyResult : "roddyResult should not be null"
         String cmd = """\
             set -e
+            set -o pipefail
             cd "${roddyResult.workDirectory}"
 
             #correct group

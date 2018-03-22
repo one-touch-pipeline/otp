@@ -43,8 +43,8 @@ class ExecutionHelperServiceUnitTests {
         String group = new TestConfigService().getTestingGroup()
 
         service.executionService = [
-                executeCommand: { Realm realm, String command ->
-                    ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
+                executeCommandReturnProcessOutput: { Realm realm, String command ->
+                    ProcessHelperService.executeAndWait(command)
                 }
         ] as ExecutionService
 
@@ -114,7 +114,7 @@ class ExecutionHelperServiceUnitTests {
         final String FAIL_MESSAGE = HelperUtils.uniqueString
         File tmpFile = temporaryFolder.newFile()
         service.executionService = [
-                executeCommand: { Realm realm, String command ->
+                executeCommandReturnProcessOutput: { Realm realm, String command ->
                     assert false: FAIL_MESSAGE
                 }
         ] as ExecutionService
@@ -133,8 +133,8 @@ class ExecutionHelperServiceUnitTests {
         String PERMISSION = '777'
         File tmpFile = temporaryFolder.newFile()
         service.executionService = [
-                executeCommand: { Realm realm, String command ->
-                    ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
+                executeCommandReturnProcessOutput: { Realm realm, String command ->
+                    ProcessHelperService.executeAndWait(command)
                 }
         ] as ExecutionService
 
@@ -181,7 +181,7 @@ class ExecutionHelperServiceUnitTests {
         final String FAIL_MESSAGE = HelperUtils.uniqueString
         File tmpFile = temporaryFolder.newFile()
         service.executionService = [
-                executeCommand: { Realm realm, String command ->
+                executeCommandReturnProcessOutput: { Realm realm, String command ->
                     assert false: FAIL_MESSAGE
                 }
         ] as ExecutionService

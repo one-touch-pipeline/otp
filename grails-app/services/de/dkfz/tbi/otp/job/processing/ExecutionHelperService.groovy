@@ -21,13 +21,21 @@ class ExecutionHelperService {
         assert realm: 'realm may not be null'
         assert directory: 'directory may not be null'
         assert group: 'group may not be null'
-        executionService.executeCommand(realm, "chgrp ${group} ${directory}")
+        ProcessHelperService.ProcessOutput result = executionService.executeCommandReturnProcessOutput(realm, "chgrp ${group} ${directory}")
+        if (result.exitCode != 0 ) {
+            throw new RuntimeException("Setting group failed: ${result.stderr}; exit code: ${result.exitCode}")
+        }
+        return result.stdout
     }
 
     String setPermission(Realm realm, File directory, String permission) {
         assert realm: 'realm may not be null'
         assert directory: 'directory may not be null'
         assert permission: 'permission may not be null'
-        executionService.executeCommand(realm, "chmod  ${permission} ${directory}")
+        ProcessHelperService.ProcessOutput result = executionService.executeCommandReturnProcessOutput(realm, "chmod  ${permission} ${directory}")
+        if (result.exitCode != 0 ) {
+            throw new RuntimeException("Setting permission failed: ${result.stderr}; exit code: ${result.exitCode}")
+        }
+        return result.stdout
     }
 }
