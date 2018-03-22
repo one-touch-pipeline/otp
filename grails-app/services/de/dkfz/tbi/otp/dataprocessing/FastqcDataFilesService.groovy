@@ -54,8 +54,11 @@ class FastqcDataFilesService {
          * How the name is created from the input file name is looked up from the fastqc tool. The rule is in:
          * uk.ac.babraham.FastQC.Analysis.OfflineRunner.analysisComplete
          */
-        String body = fileName.replaceAll(".gz\$", "").replaceAll(".bz2\$", "").replaceAll(".txt\$", "").
-                        replaceAll(".fastq\$", "").replaceAll(".sam\$", "").replaceAll(".bam\$", "")
+        String body = fileName.replaceAll("stdin:","").replaceAll("\\.gz\$","")
+                .replaceAll("\\.bz2\$","").replaceAll("\\.txt\$","")
+                .replaceAll("\\.fastq\$", "").replaceAll("\\.fq\$", "")
+                .replaceAll("\\.csfastq\$", "").replaceAll("\\.sam\$", "")
+                .replaceAll("\\.bam\$", "");
         return "${body}${FASTQC_FILE_SUFFIX}"
     }
 
