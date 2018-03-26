@@ -14,14 +14,14 @@ processingOptionService.createOrUpdate(
         PIPELINE_RODDY_INDEL_PLUGIN_VERSION,
         SeqType.wholeGenomePairedSeqType.roddyName,
         null,
-        '1.2.177-4'
+        '1.2.177'
 )
 
 processingOptionService.createOrUpdate(
         PIPELINE_RODDY_INDEL_PLUGIN_VERSION,
         SeqType.exomePairedSeqType.roddyName,
         null,
-        '1.2.177-4'
+        '1.2.177'
 )
 
 processingOptionService.createOrUpdate(
