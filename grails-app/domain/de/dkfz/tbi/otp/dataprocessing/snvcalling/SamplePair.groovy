@@ -231,10 +231,10 @@ class SamplePair implements Entity {
               mwp1,
               mwp2
             FROM
-              AbstractMergingWorkPackage mwp1
+              MergingWorkPackage mwp1
                 join mwp1.sample.individual.project project_1
                 join mwp1.sample.sampleType sampleType_1,
-              AbstractMergingWorkPackage mwp2
+              MergingWorkPackage mwp2
                 join mwp2.sample.sampleType sampleType_2,
               SampleTypePerProject stpp1,
               SampleTypePerProject stpp2
