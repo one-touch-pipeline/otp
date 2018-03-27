@@ -1,6 +1,10 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import static org.springframework.util.Assert.notNull
+import de.dkfz.tbi.otp.infrastructure.FileService
+
+import java.nio.file.*
+
+import static org.springframework.util.Assert.*
 
 class ChecksumFileService {
 
@@ -32,7 +36,7 @@ class ChecksumFileService {
     public boolean compareMd5(DataFile file) {
         String path = pathToMd5File(file)
         File md5File = new File(path)
-        LsdfFilesService.ensureFileIsReadableAndNotEmpty(md5File)
+        FileService.ensureFileIsReadableAndNotEmpty(md5File.toPath())
         String md5sum
         try {
             List<String> lines = md5File.readLines()
@@ -44,21 +48,23 @@ class ChecksumFileService {
         return (md5sum.trim().toLowerCase(Locale.ENGLISH) == file.md5sum)
     }
 
-    public String firstMD5ChecksumFromFile(String file) {
-        return firstMD5ChecksumFromFile(new File(file))
-    }
 
     /**
      * @param file, the checksum file
      * @return the checksum of the first file, which is included in the checksum file
      */
-    public String firstMD5ChecksumFromFile(File file) {
+    String firstMD5ChecksumFromFile(Path file) {
         notNull(file, "the input file for the method firstMD5ChecksumFromFile is null")
-        if (file.canRead() && file.size() != 0) {
-            return file.readLines().get(0).tokenize().get(0)
-        } else {
-            throw new RuntimeException("Unable to read digest from MD5 file \"${file.path}\"")
+        if (!Files.isReadable(file)) {
+            throw new RuntimeException("MD5 file \"${file}\" is not readable or does not exist")
         }
-
+        if (Files.size(file) == 0) {
+            throw new RuntimeException("MD5 file \"${file}\" is empty")
+        }
+        String md5sum = file.readLines().get(0).tokenize().get(0)
+        if (!(md5sum ==~ /^[0-9a-fA-F]{32}$/)) {
+            throw new RuntimeException("The format of the MD5sum of the MD5 file \"${file}\" is wrong: value=${md5sum}")
+        }
+        return md5sum
     }
 }

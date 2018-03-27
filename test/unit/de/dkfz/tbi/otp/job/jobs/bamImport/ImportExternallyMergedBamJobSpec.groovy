@@ -24,6 +24,7 @@ import java.nio.file.*
         JobExecutionPlan,
         Pipeline,
         Process,
+        ProcessingOption,
         ProcessingStep,
         ProcessParameter,
         Project,
@@ -373,6 +374,7 @@ class ImportExternallyMergedBamJobSpec extends Specification {
         importExternallyMergedBamJob.configService = configService
         importExternallyMergedBamJob.checksumFileService = new ChecksumFileService()
         importExternallyMergedBamJob.executionHelperService = new ExecutionHelperService()
+        importExternallyMergedBamJob.fileSystemService = new FileSystemService()
         importExternallyMergedBamJob.metaClass.log = new NoOpLog()
 
         CreateFileHelper.createFile(new File("${importProcess.externallyProcessedMergedBamFiles[0].importedFrom}"))

@@ -1,12 +1,16 @@
 package de.dkfz.tbi.otp.job.jobs.importExternallyMergedBam
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.ast.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import org.springframework.beans.factory.annotation.*
 import org.springframework.context.annotation.*
 import org.springframework.stereotype.*
+
+import java.nio.file.FileSystem
+import java.nio.file.Path
 
 @Component
 @Scope("prototype")
@@ -24,6 +28,9 @@ class ImportExternallyMergedBamJob extends AbstractOtpJob {
 
     @Autowired
     ExecutionHelperService executionHelperService
+
+    @Autowired
+    FileSystemService fileSystemService
 
 
     @Override
@@ -114,11 +121,15 @@ touch ${checkpoint}
         final ImportProcess importProcess = getProcessParameterObject()
 
         final Collection<String> problems = importProcess.externallyProcessedMergedBamFiles.collect {
-            File target = it.getBamFile()
+            FileSystem fs = fileSystemService.getFilesystemForBamImport()
+            String path = it.getBamFile().path
+            Path target = fs.getPath(path)
+
             try {
-                LsdfFilesService.ensureFileIsReadableAndNotEmpty(target)
+                FileService.ensureFileIsReadableAndNotEmpty(target)
                 if (!it.md5sum) {
-                    it.md5sum = checksumFileService.firstMD5ChecksumFromFile(checksumFileService.md5FileName(target.absolutePath))
+                    Path md5Path = fs.getPath(checksumFileService.md5FileName(path))
+                    it.md5sum = checksumFileService.firstMD5ChecksumFromFile(md5Path)
                     it.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.PROCESSED
                     it.save(flush: true)
                 }

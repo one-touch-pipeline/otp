@@ -47,6 +47,7 @@ class BamMetadataImportService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     Map validateAndImport(String metadataFile, boolean ignoreWarnings, String previousValidationMd5sum, boolean replaceWithLink,
                           boolean triggerAnalysis, List<String> furtherFiles) {
+        FileSystem fileSystem = fileSystemService.getFilesystemForBamImport()
         Project outputProject
         ImportProcess importProcess = new ImportProcess(externallyProcessedMergedBamFiles: [])
         BamMetadataValidationContext context = validate(metadataFile, furtherFiles)
@@ -101,10 +102,10 @@ class BamMetadataImportService {
                         insertSizeFile      : insertSizeFile
                 ).save()
 
-                File bamFileParent = new File(epmbf.importedFrom).parentFile
+                Path bamFileParent = fileSystem.getPath(epmbf.importedFrom).parent
 
                 furtherFiles.findAll().findAll { String path ->
-                    new File (bamFileParent, path).exists()
+                    Files.exists(bamFileParent.resolve(path))
                 }.each {
                         epmbf.furtherFiles.add(it)
                 }

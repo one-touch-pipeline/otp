@@ -29,7 +29,7 @@ class StoreChecksumOfMergedBamFileJob extends AbstractEndStateAwareJobImpl {
         Map<String, String> locations = processedMergedBamFileService.locationsForFileCopying(file)
 
         String md5SumFile = locations.get("destinationDirectory") + "/" + locations.get("md5BamFile")
-        String md5Bam = checksumFileService.firstMD5ChecksumFromFile(md5SumFile)
+        String md5Bam = checksumFileService.firstMD5ChecksumFromFile(new File(md5SumFile).toPath())
         boolean successfulSave = processedMergedBamFileService.storeMD5Digest(file, md5Bam)
         log.debug "Stored MD5 digest for merged BAM file " + locations.get("bamFile") + " (id= " + file + " ) in database"
         abstractMergedBamFileService.setSamplePairStatusToNeedProcessing(file)
