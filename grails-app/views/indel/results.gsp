@@ -20,7 +20,7 @@
                         <th colspan="6"><g:message code="analysis.indel.indels"/></th>
                         <th colspan="6"><g:message code="analysis.indel.swapChecker"/></th>
                         <th colspan="3"><g:message code="analysis.indel.tinda"/></th>
-                        <th colspan="4"></th>
+                        <th colspan="3"></th>
                     </tr>
                     <tr class="indel-table">
                         <th><g:message code="projectOverview.index.PID"/></th>

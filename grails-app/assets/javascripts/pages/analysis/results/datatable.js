@@ -153,7 +153,7 @@ $.otp.resultsTable = {
                     plotTinda,
                     row.pluginVersion,
                     row.dateCreated,
-                    row.processingState.name,];
+                    row.processingState,];
                 return result;
             }
         );
