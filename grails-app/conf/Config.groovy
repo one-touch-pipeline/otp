@@ -132,6 +132,7 @@ log4j = {
             'grails.app.services.de.dkfz.tbi.otp',
             'grails.app.taglib.de.dkfz.tbi.otp',
             'grails.app.conf.BootStrap',
+            'de.dkfz.roddy.execution.jobs.cluster', //ClusterJobManager conversion errors
     ], jobs: [
             'de.dkfz.tbi.otp.job.jobs',
     ], additivity: false
