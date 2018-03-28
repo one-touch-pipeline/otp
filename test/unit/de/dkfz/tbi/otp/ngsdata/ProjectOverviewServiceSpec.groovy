@@ -86,7 +86,7 @@ class ProjectOverviewServiceSpec extends Specification {
                 BWA_ACCELERATED_VERSION=2.0
                 BWA_MEM_CONVEY_ADDITIONAL_OPTIONS=conveyOpt
 
-                MARKDUPLICATES_VERSION=3.0
+                BIOBAMBAM_VERSION=3.0
                 mergeAndRemoveDuplicates_argumentList=bioBamBamOpt
 
                 PICARD_VERSION=4.0

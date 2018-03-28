@@ -117,7 +117,7 @@ class ProjectOverviewService {
         String tool = getMergingTool(res, seqType)
         switch (tool) {
             case MergeConstants.MERGE_TOOL_BIOBAMBAM:
-                merge.command = res.get("MARKDUPLICATES_VERSION") ? "Biobambam bammarkduplicates Version ${res.get("MARKDUPLICATES_VERSION")}" : ""
+                merge.command = res.get("BIOBAMBAM_VERSION") ? "Biobambam bammarkduplicates Version ${res.get("BIOBAMBAM_VERSION")}" : ""
                 merge.options = res.get("mergeAndRemoveDuplicates_argumentList")
                 break
             case MergeConstants.MERGE_TOOL_PICARD:
