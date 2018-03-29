@@ -226,6 +226,7 @@
             <thead>
                     <tr>
                         <th><g:message code="dataFields.listSeqType"/></th>
+                        <th><g:message code="dataFields.listSingleCell"/></th>
                         <th><g:message code="dataFields.listSeqTypeDir"/></th>
                         <th><g:message code="dataFields.listSeqTypeLayouts"/></th>
                         <th></th>
@@ -239,6 +240,9 @@
                     <tr>
                         <td>
                             ${seqType.name}
+                        </td>
+                        <td>
+                            ${seqType.singleCell}
                         </td>
                         <td>
                             ${seqType.dirName}
@@ -272,14 +276,121 @@
                         </td>
                     </tr>
                 </g:each>
-                <td colspan="6">
-                    <otp:editorSwitchNewValues
-                        roles="ROLE_OPERATOR"
-                        labels="${["Type", "Directory", "Display Name", "Alias", "SINGLE", "PAIRED", "MATE_PAIR"]}"
-                        textFields="${["type", "dirName", "displayName", "alias"]}"
-                        checkBoxes="${[single: false, paired: true, mate_pair: false]}"
-                        link="${g.createLink(controller: 'metaDataFields', action: 'createSeqType')}"
-                    />
+                <td colspan="3">
+                    <div class="edit-switch edit-switch-new-free-text-values">
+                        <span class="edit-switch-editor" style="display: none">
+                            <h4>
+                                <g:message code="dataFields.seqType.addSeqTypeTitle" />
+                            </h4>
+                            <input type="hidden" name="target" value="/otpdevel/metaDataFields/createSeqType"/>
+                            <div class="dialog">
+                                <table>
+                                    <tbody>
+                                    <tr class="prop">
+                                        <td valign="top" class="name">
+                                            <label for="type">
+                                                <g:message code="dataFields.seqType.type"/>
+                                            </label>
+                                        </td>
+                                        <td valign="top" class="value">
+                                            <input name="type" id="type" type="text"/>
+                                        </td>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr class="prop">
+                                        <td valign="top" class="name">
+                                            <label for="directory">
+                                                <g:message code="dataFields.seqType.directory"/>
+                                            </label>
+                                        </td>
+                                        <td valign="top" class="value">
+                                            <input name="dirName" id="directory" type="text"/>
+                                        </td>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr class="prop">
+                                        <td valign="top" class="name">
+                                            <label for="name">
+                                                <g:message code="dataFields.seqType.name"/>
+                                            </label>
+                                        </td>
+                                        <td valign="top" class="value">
+                                            <input name="displayName" id="name" type="text"/>
+                                        </td>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr class="prop">
+                                        <td valign="top" class="name">
+                                            <label for="alias">
+                                                <g:message code="dataFields.seqType.alias"/>
+                                            </label>
+                                        </td>
+                                        <td valign="top" class="value">
+                                            <input name="alias" id="alias" type="text"/>
+                                        </td>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr class="prop">
+                                        <td colspan="1" valign="top" class="name">
+                                            <label for="singleCellYes">
+                                                <g:message code="dataFields.seqType.singleCell"/>
+                                            </label>
+                                        </td>
+                                        <td valign="top" class="name">
+                                            <input type="radio" id="singleCellYes"
+                                                   name="singleCell" value="true">
+                                            <label for="singleCellYes">Yes</label>
+                                            <input type="radio" id="singleCellNo"
+                                                   name="singleCell" value="false" checked>
+                                            <label for="singleCellNo">No</label>
+                                        </td>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr class="prop">
+                                        <td colspan="1" valign="top" class="name">
+                                            <label for="single">
+                                                <g:message code="dataFields.seqType.layout"/>
+                                            </label>
+                                        </td>
+                                        <td colspan="1" valign="top" class="name">
+                                            <label for="single">
+                                                <g:message code="dataFields.seqType.single"/>
+                                            </label>
+                                            <input name="single" id="single" type="checkbox"/>
+                                        </td>
+                                    </tr>
+                                    <tr class="prop">
+                                        <td colspan="1">&nbsp;</td>
+                                        <td colspan="1" valign="top" class="name">
+                                            <label for="paired">
+                                                <g:message code="dataFields.seqType.paired"/>
+                                            </label>
+                                            <input name="paired" id="paired" checked="checked" type="checkbox"/>
+                                        </td>
+                                    </tr>
+                                    <tr class="prop">
+                                        <td colspan="1">&nbsp;</td>
+                                        <td colspan="1" valign="top" class="value">
+                                            <label for="mate_pair">
+                                                <g:message code="dataFields.seqType.mate"/>
+                                            </label>
+                                            <input name="type" id="mate_pair" type="checkbox"/>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <button class="buttons save"><g:message code="default.button.save.label"/></button>
+                            <button class="buttons cancel"><g:message code="default.button.cancel.label"/></button>
+                        </span>
+                        <span class="edit-switch-label" style="display: inline;"><button class="add js-edit">+</button>
+                        </span>
+                    </div>
                 </td>
             </tbody>
         </table>

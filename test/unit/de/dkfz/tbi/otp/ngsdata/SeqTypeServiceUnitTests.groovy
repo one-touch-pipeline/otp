@@ -26,6 +26,9 @@ class SeqTypeServiceUnitTests {
     final static String SEQ_TYPE_ALIAS = "SeqTypeAlias"
     final static Set<String> SEQ_TYPE_ALIAS_SET = ["SeqTypeAlias"]
 
+    final static boolean SINGLE_CELL_TRUE = true
+    final static boolean SINGLE_CELL_FALSE = false
+
 
     @Before
     public void setUp() throws Exception {
@@ -50,46 +53,54 @@ class SeqTypeServiceUnitTests {
     @Test
     void testCreateSeqTypeUsingSeqTypeNameAndSeqTypeDirAndSeqTypeDisplayNameAndSeqTypeAliasAndSingle() {
         assertEquals(
-                seqTypeService.createSeqType(SEQ_TYPE_NAME, SEQ_TYPE_DIR, SEQ_TYPE_DISPLAY_NAME, SEQ_TYPE_ALIAS_SET, SeqType.LIBRARYLAYOUT_SINGLE),
-                SeqType.findByNameAndDirNameAndLibraryLayout(SEQ_TYPE_NAME, SEQ_TYPE_DIR,  SeqType.LIBRARYLAYOUT_SINGLE)
+                seqTypeService.createSeqType(SEQ_TYPE_NAME, SEQ_TYPE_DIR, SEQ_TYPE_DISPLAY_NAME, SEQ_TYPE_ALIAS_SET, SeqType.LIBRARYLAYOUT_SINGLE, SINGLE_CELL_FALSE),
+                SeqType.findByNameAndDirNameAndLibraryLayoutAndSingleCell(SEQ_TYPE_NAME, SEQ_TYPE_DIR,  SeqType.LIBRARYLAYOUT_SINGLE, SINGLE_CELL_FALSE)
         )
     }
 
     @Test
     void testCreateSeqTypeUsingNullAndSeqTypeDirAndSeqTypeDisplayNameAndSeqTypeAliasAndSingle() {
         shouldFail(AssertionError) {
-            seqTypeService.createSeqType(null, SEQ_TYPE_DIR, SEQ_TYPE_DISPLAY_NAME, SEQ_TYPE_ALIAS_SET, SeqType.LIBRARYLAYOUT_SINGLE)
+            seqTypeService.createSeqType(null, SEQ_TYPE_DIR, SEQ_TYPE_DISPLAY_NAME, SEQ_TYPE_ALIAS_SET, SeqType.LIBRARYLAYOUT_SINGLE, SINGLE_CELL_FALSE)
         }
     }
 
     @Test
     void testCreateSeqTypeUsingSeqTypeAndNullAndSeqTypeDisplayNameAndSeqTypeAliasAndSingle() {
         shouldFail(AssertionError) {
-            seqTypeService.createSeqType(SEQ_TYPE_NAME, null, SEQ_TYPE_DISPLAY_NAME, SEQ_TYPE_ALIAS_SET, SeqType.LIBRARYLAYOUT_SINGLE)
+            seqTypeService.createSeqType(SEQ_TYPE_NAME, null, SEQ_TYPE_DISPLAY_NAME, SEQ_TYPE_ALIAS_SET, SeqType.LIBRARYLAYOUT_SINGLE, SINGLE_CELL_FALSE)
         }
     }
 
     @Test
     void testCreateSeqTypeUsingSeqTypeAndSeqTypeDirAndSeqTypeDisplayNameAndSeqTypeAliasAndNull() {
         shouldFail(AssertionError) {
-            seqTypeService.createSeqType(SEQ_TYPE_NAME, SEQ_TYPE_DIR, SEQ_TYPE_DISPLAY_NAME, SEQ_TYPE_ALIAS_SET, null)
+            seqTypeService.createSeqType(SEQ_TYPE_NAME, SEQ_TYPE_DIR, SEQ_TYPE_DISPLAY_NAME, SEQ_TYPE_ALIAS_SET, null, SINGLE_CELL_FALSE)
         }
     }
 
     @Test
     void testCreateSeqTypeUsingSeqTypeAndSeqTypeDirAndSeqTypeAliasAndSingleTwice() {
-        seqTypeService.createSeqType(SEQ_TYPE_NAME, SEQ_TYPE_DIR, SEQ_TYPE_DISPLAY_NAME, null, SeqType.LIBRARYLAYOUT_SINGLE)
+        seqTypeService.createSeqType(SEQ_TYPE_NAME, SEQ_TYPE_DIR, SEQ_TYPE_DISPLAY_NAME, null, SeqType.LIBRARYLAYOUT_SINGLE, SINGLE_CELL_FALSE)
         shouldFail(AssertionError) {
-            seqTypeService.createSeqType(SEQ_TYPE_NAME, SEQ_TYPE_DIR, SEQ_TYPE_DISPLAY_NAME, null, SeqType.LIBRARYLAYOUT_SINGLE)
+            seqTypeService.createSeqType(SEQ_TYPE_NAME, SEQ_TYPE_DIR, SEQ_TYPE_DISPLAY_NAME, null, SeqType.LIBRARYLAYOUT_SINGLE, SINGLE_CELL_FALSE)
         }
     }
 
     @Test
     void testCreateSeqTypeUsingSeqTypeAndSeqTypeDirAndSeqTypeDisplayNameAndSeqTypeAliasAndSingleTwice() {
-        seqTypeService.createSeqType(SEQ_TYPE_NAME, SEQ_TYPE_DIR, SEQ_TYPE_DISPLAY_NAME, SEQ_TYPE_ALIAS_SET, SeqType.LIBRARYLAYOUT_SINGLE)
+        seqTypeService.createSeqType(SEQ_TYPE_NAME, SEQ_TYPE_DIR, SEQ_TYPE_DISPLAY_NAME, SEQ_TYPE_ALIAS_SET, SeqType.LIBRARYLAYOUT_SINGLE, SINGLE_CELL_FALSE)
         shouldFail(AssertionError) {
-            seqTypeService.createSeqType(SEQ_TYPE_NAME, SEQ_TYPE_DIR, SEQ_TYPE_DISPLAY_NAME, SEQ_TYPE_ALIAS_SET, SeqType.LIBRARYLAYOUT_SINGLE)
+            seqTypeService.createSeqType(SEQ_TYPE_NAME, SEQ_TYPE_DIR, SEQ_TYPE_DISPLAY_NAME, SEQ_TYPE_ALIAS_SET, SeqType.LIBRARYLAYOUT_SINGLE, SINGLE_CELL_FALSE)
         }
+    }
+
+    @Test
+    void testCreateSeqTypeUsingSeqTypeAndSeqTypeDirAndSeqTypeDisplayNameAndSeqTypeAliasAndSingleAndSingleCell() {
+        assertEquals(
+                seqTypeService.createSeqType(SEQ_TYPE_NAME, SEQ_TYPE_DIR, SEQ_TYPE_DISPLAY_NAME, SEQ_TYPE_ALIAS_SET, SeqType.LIBRARYLAYOUT_SINGLE, SINGLE_CELL_TRUE),
+                SeqType.findByNameAndDirNameAndLibraryLayoutAndSingleCell(SEQ_TYPE_NAME, SEQ_TYPE_DIR,  SeqType.LIBRARYLAYOUT_SINGLE, SINGLE_CELL_TRUE)
+        )
     }
 
     @Test
@@ -158,29 +169,41 @@ class SeqTypeServiceUnitTests {
     @Test
     void testFindSeqTypeByNameOrAliasAndLibraryLayout_FindByName() {
         SeqType seqType = DomainFactory.createSeqType(name: SEQ_TYPE_NAME, alias: [SEQ_TYPE_ALIAS], libraryLayout: SEQ_TYPE_LIBRARY_LAYOUT)
-        assert seqType == service.findSeqTypeByNameOrAliasAndLibraryLayout(SEQ_TYPE_NAME, SEQ_TYPE_LIBRARY_LAYOUT)
+        assert seqType == service.findSeqTypeByNameOrAliasAndLibraryLayoutAndSingleCell(SEQ_TYPE_NAME, SEQ_TYPE_LIBRARY_LAYOUT, SINGLE_CELL_FALSE)
     }
 
     @Test
     void testFindSeqTypeByNameOrAliasAndLibraryLayout_FindByAlias() {
         SeqType seqType = DomainFactory.createSeqType(name: SEQ_TYPE_NAME, alias: [SEQ_TYPE_ALIAS], libraryLayout: SEQ_TYPE_LIBRARY_LAYOUT)
-        assert seqType == service.findSeqTypeByNameOrAliasAndLibraryLayout(SEQ_TYPE_ALIAS, SEQ_TYPE_LIBRARY_LAYOUT)
+        assert seqType == service.findSeqTypeByNameOrAliasAndLibraryLayoutAndSingleCell(SEQ_TYPE_ALIAS, SEQ_TYPE_LIBRARY_LAYOUT, SINGLE_CELL_FALSE)
     }
 
     @Test
     void testFindSeqTypeByNameOrAliasAndLibraryLayout_FindNothing_ReturnNull() {
-        assert null == service.findSeqTypeByNameOrAliasAndLibraryLayout(SEQ_TYPE_NAME, SEQ_TYPE_LIBRARY_LAYOUT)
+        assert null == service.findSeqTypeByNameOrAliasAndLibraryLayoutAndSingleCell(SEQ_TYPE_NAME, SEQ_TYPE_LIBRARY_LAYOUT, SINGLE_CELL_FALSE)
     }
 
     @Test
     void testFindSeqTypeByNameOrAliasAndLibraryLayout_FindByName_InvalidLibraryLayout_ReturnNull() {
         DomainFactory.createSeqType(name: SEQ_TYPE_NAME, alias: [SEQ_TYPE_ALIAS], libraryLayout: UNKNOWN_LIB_LAYOUT)
-        assert null == service.findSeqTypeByNameOrAliasAndLibraryLayout(SEQ_TYPE_NAME, SEQ_TYPE_LIBRARY_LAYOUT)
+        assert null == service.findSeqTypeByNameOrAliasAndLibraryLayoutAndSingleCell(SEQ_TYPE_NAME, SEQ_TYPE_LIBRARY_LAYOUT, SINGLE_CELL_FALSE)
     }
 
     @Test
     void testFindSeqTypeByNameOrAliasAndLibraryLayout_FindByAlias_InvalidLibraryLayout_ReturnNull() {
         DomainFactory.createSeqType(name: SEQ_TYPE_NAME, alias: [SEQ_TYPE_ALIAS], libraryLayout: UNKNOWN_LIB_LAYOUT)
-        assert null == service.findSeqTypeByNameOrAliasAndLibraryLayout(SEQ_TYPE_ALIAS, SEQ_TYPE_LIBRARY_LAYOUT)
+        assert null == service.findSeqTypeByNameOrAliasAndLibraryLayoutAndSingleCell(SEQ_TYPE_ALIAS, SEQ_TYPE_LIBRARY_LAYOUT, SINGLE_CELL_FALSE)
+    }
+
+    @Test
+    void testFindSeqTypeByNameOrAliasAndLibraryLayout_FindByAlias_WrongSingleCell_ReturnNull() {
+        DomainFactory.createSeqType(name: SEQ_TYPE_NAME, alias: [SEQ_TYPE_ALIAS], libraryLayout: UNKNOWN_LIB_LAYOUT, singleCell: SINGLE_CELL_TRUE)
+        assert null == service.findSeqTypeByNameOrAliasAndLibraryLayoutAndSingleCell(SEQ_TYPE_ALIAS, SEQ_TYPE_LIBRARY_LAYOUT, SINGLE_CELL_FALSE)
+    }
+
+    @Test
+    void testFindSeqTypeByNameOrAliasAndLibraryLayout_FindByAlias_SingleCellTrue() {
+        DomainFactory.createSeqType(name: SEQ_TYPE_NAME, alias: [SEQ_TYPE_ALIAS], libraryLayout: UNKNOWN_LIB_LAYOUT, singleCell: SINGLE_CELL_TRUE)
+        assert null == service.findSeqTypeByNameOrAliasAndLibraryLayoutAndSingleCell(SEQ_TYPE_ALIAS, SEQ_TYPE_LIBRARY_LAYOUT, SINGLE_CELL_TRUE)
     }
 }

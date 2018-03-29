@@ -17,7 +17,7 @@ class LibPrepKitSeqTypeValidator extends ValueTuplesValidator<MetadataValidation
 
     @Override
     List<String> getColumnTitles(MetadataValidationContext context) {
-        return [SEQUENCING_TYPE.name(), LIBRARY_LAYOUT.name(), LIB_PREP_KIT.name(), TAGMENTATION_BASED_LIBRARY.name()]
+        return [SEQUENCING_TYPE.name(), LIBRARY_LAYOUT.name(), LIB_PREP_KIT.name(), TAGMENTATION_BASED_LIBRARY.name(), BASE_MATERIAL.name()]
     }
 
     @Override
@@ -34,12 +34,14 @@ class LibPrepKitSeqTypeValidator extends ValueTuplesValidator<MetadataValidation
         valueTuples.each { ValueTuple valueTuple ->
             String seqTypeName = MetadataImportService.getSeqTypeNameFromMetadata(valueTuple)
             String libLayout = valueTuple.getValue(LIBRARY_LAYOUT.name())
-
-            SeqType seqType = seqTypes.find {
-                it.name == seqTypeName && it.libraryLayout == libLayout
+            String baseMaterial = valueTuple.getValue(BASE_MATERIAL.name())
+            boolean singleCell = SeqTypeService.isSingleCell(baseMaterial)
+            if (seqTypeName.isEmpty()) {
+                return
             }
+            SeqType seqType = SeqTypeService.findSeqTypeByNameOrAliasAndLibraryLayoutAndSingleCell(seqTypeName, libLayout, singleCell)
 
-            if (seqType && !valueTuple.getValue(LIB_PREP_KIT.name())) {
+            if (seqType in seqTypes && !valueTuple.getValue(LIB_PREP_KIT.name())) {
                 context.addProblem(valueTuple.cells, Level.ERROR, "If the sequencing type is '${seqType.nameWithLibraryLayout}'" +
                         ", the library preparation kit must be given.")
             }

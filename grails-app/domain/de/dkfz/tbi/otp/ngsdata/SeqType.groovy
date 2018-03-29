@@ -16,6 +16,10 @@ class SeqType implements Entity {
 
     final static LIBRARYLAYOUT_MATE_PAIR = LibraryLayout.MATE_PAIR.name()
 
+    public final static SINGLE_CELL_DNA = "Single-cell DNA"
+
+    public final static SINGLE_CELL_RNA = "Single-cell RNA"
+
     public static final TAGMENTATION_SUFFIX = '_TAGMENTATION'
 
     public static final Collection<SeqTypeNames> WGBS_SEQ_TYPE_NAMES = [
@@ -35,6 +39,9 @@ class SeqType implements Entity {
     String name
     String libraryLayout
     String dirName
+
+    boolean singleCell
+
     /**
      * Display name used in the GUI.
      */
@@ -47,8 +54,21 @@ class SeqType implements Entity {
 
     static constraints = {
         name(blank: false)
-        libraryLayout(blank: false, unique: 'name', validator: { OtpPath.isValidPathComponent(it) })
-        dirName(blank: false, unique: 'libraryLayout', validator: { OtpPath.isValidPathComponent(it) })  // TODO: OTP-1124: unique constraint for (dirName, libraryLayoutDirName)
+        libraryLayout(blank: false, unique: ['name', 'singleCell'], validator: { OtpPath.isValidPathComponent(it) })
+        dirName(blank: false, unique: ['libraryLayout', 'singleCell'], validator: { String val, SeqType obj ->
+            if (!OtpPath.isValidPathComponent(val)) {
+                return "no valid path component"
+            }
+            if (SeqType.findByDirNameAndSingleCell(obj.dirName, !obj.singleCell)) {
+                return "dir name constraint"
+            }
+            if (SeqType.findByNameAndSingleCell(obj.name, obj.singleCell)) {
+                if (SeqType.findByNameAndSingleCell(obj.name, obj.singleCell).dirName != obj.dirName) {
+                    return "for same name and single cell, the dir name should be the same"
+                }
+            }
+        })
+        // TODO: OTP-1124: unique constraint for (dirName, libraryLayoutDirName)
         displayName(blank: false)
         roddyName(nullable: true, blank: false, validator: {
             !it?.contains('_')  // Roddy has problems with underscores
@@ -68,7 +88,7 @@ class SeqType implements Entity {
     }
 
     String getDisplayNameWithLibraryLayout() {
-        return "${displayName} ${libraryLayout}"
+        return "${displayName} ${libraryLayout} ${singleCell ? 'singleCell' : 'no singleCell'}"
     }
 
     String getLibraryLayoutDirName() {
@@ -118,43 +138,43 @@ class SeqType implements Entity {
 
     static SeqType getWholeGenomePairedSeqType() {
         return CollectionUtils.exactlyOneElement(
-                findAllByNameAndLibraryLayout(SeqTypeNames.WHOLE_GENOME.seqTypeName, LIBRARYLAYOUT_PAIRED), 'WGS PAIRED not found'
+                findAllByNameAndLibraryLayoutAndSingleCell(SeqTypeNames.WHOLE_GENOME.seqTypeName, LIBRARYLAYOUT_PAIRED, false), 'WGS PAIRED not found'
         )
     }
 
     static SeqType getExomePairedSeqType() {
         return CollectionUtils.exactlyOneElement(
-                findAllByNameAndLibraryLayout(SeqTypeNames.EXOME.seqTypeName, LIBRARYLAYOUT_PAIRED), 'WES PAIRED not found'
+                findAllByNameAndLibraryLayoutAndSingleCell(SeqTypeNames.EXOME.seqTypeName, LIBRARYLAYOUT_PAIRED, false), 'WES PAIRED not found'
         )
     }
 
     static SeqType getWholeGenomeBisulfitePairedSeqType() {
         return CollectionUtils.exactlyOneElement(
-                findAllByNameAndLibraryLayout(SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName, LIBRARYLAYOUT_PAIRED), 'WGBS PAIRED not found'
+                findAllByNameAndLibraryLayoutAndSingleCell(SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName, LIBRARYLAYOUT_PAIRED, false), 'WGBS PAIRED not found'
         )
     }
 
     static SeqType getWholeGenomeBisulfiteTagmentationPairedSeqType() {
         return CollectionUtils.exactlyOneElement(
-                findAllByNameAndLibraryLayout(SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName, LIBRARYLAYOUT_PAIRED), 'WGBS_TAG PAIRED not found'
+                findAllByNameAndLibraryLayoutAndSingleCell(SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName, LIBRARYLAYOUT_PAIRED, false), 'WGBS_TAG PAIRED not found'
         )
     }
 
     static SeqType getRnaPairedSeqType() {
         return CollectionUtils.exactlyOneElement(
-                findAllByNameAndLibraryLayout(SeqTypeNames.RNA.seqTypeName, LIBRARYLAYOUT_PAIRED), 'RNA PAIRED not found'
+                findAllByNameAndLibraryLayoutAndSingleCell(SeqTypeNames.RNA.seqTypeName, LIBRARYLAYOUT_PAIRED, false), 'RNA PAIRED not found'
         )
     }
 
     static SeqType getChipSeqPairedSeqType() {
         return CollectionUtils.exactlyOneElement(
-                findAllByNameAndLibraryLayout(SeqTypeNames.CHIP_SEQ.seqTypeName, LIBRARYLAYOUT_PAIRED), 'CHIP_SEQ PAIRED not found'
+                findAllByNameAndLibraryLayoutAndSingleCell(SeqTypeNames.CHIP_SEQ.seqTypeName, LIBRARYLAYOUT_PAIRED, false), 'CHIP_SEQ PAIRED not found'
         )
     }
 
     static SeqType getRnaSingleSeqType() {
         return CollectionUtils.exactlyOneElement(
-                findAllByNameAndLibraryLayout(SeqTypeNames.RNA.seqTypeName, LIBRARYLAYOUT_SINGLE), 'RNA SINGLE not found'
+                findAllByNameAndLibraryLayoutAndSingleCell(SeqTypeNames.RNA.seqTypeName, LIBRARYLAYOUT_SINGLE, false), 'RNA SINGLE not found'
         )
     }
 

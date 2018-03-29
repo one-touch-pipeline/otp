@@ -335,11 +335,7 @@ public class AbstractAlignmentDeciderTest {
         TestData testData = new TestData()
         testData.createObjects()
 
-        SeqType seqType = SeqType.build(
-                name: SeqTypeNames.WHOLE_GENOME,
-                libraryLayout: SeqType.LIBRARYLAYOUT_MATE_PAIR
-        )
-        seqType.save(failOnError: true)
+        SeqType seqType = DomainFactory.createWholeGenomeSeqType(SeqType.LIBRARYLAYOUT_MATE_PAIR)
 
         SeqTrack seqTrack = testData.createSeqTrack(seqType: seqType)
         seqTrack.save(failOnError: true)

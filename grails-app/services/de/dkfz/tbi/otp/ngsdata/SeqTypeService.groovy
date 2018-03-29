@@ -12,7 +12,7 @@ class SeqTypeService {
             SeqTypeNames.EXOME,
             SeqTypeNames.WHOLE_GENOME,
         ]*.seqTypeName
-        List<SeqType> seqTypes = SeqType.findAllByNameInListAndLibraryLayout(alignableSeqTypeNames, SeqType.LIBRARYLAYOUT_PAIRED)
+        List<SeqType> seqTypes = SeqType.findAllByNameInListAndLibraryLayoutAndSingleCell(alignableSeqTypeNames, SeqType.LIBRARYLAYOUT_PAIRED, false)
         assert alignableSeqTypeNames.size() == seqTypes.size()
         return seqTypes
     }
@@ -35,26 +35,33 @@ class SeqTypeService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public SeqType createSeqType(String name, String dirName, String displayName, Set<String> alias, String layout){
+    public SeqType createSeqType(String name, String dirName, String displayName, Set<String> alias, String layout, boolean singleCell){
         assert name : "the input name '${name}' must not be null"
         assert dirName  : "the input dirname '${dirName}' must not be null"
         assert layout  : "the input layout '${layout}' must not be null"
         assert displayName  : "the input displayName '${displayName}' must not be null"
-        assert !SeqType.findByNameAndLibraryLayout(name, layout) : "the SeqType name '${name}' and layout '${layout}' already exists"
+        assert !SeqType.findByNameAndLibraryLayoutAndSingleCell(name, layout, singleCell): "the SeqType name '${name}', layout '${layout}' and Single Cell '${singleCell}' already exists"
         SeqType seqType = new SeqType(
                 name: name,
                 dirName: dirName,
                 displayName: displayName,
                 libraryLayout: layout,
-                alias: alias
+                alias: alias,
+                singleCell: singleCell
         )
         assert seqType.save(flush: true, failOnError: true)
         return seqType
     }
 
-    public static boolean hasSeqTypeByNameOrDisplayName(String nameOrDisplayName) {
-        assert nameOrDisplayName: "the input nameoralias '${nameOrDisplayName}' is null"
-        return SeqType.findByNameOrDisplayName(nameOrDisplayName, nameOrDisplayName)
+    public static boolean hasSeqTypeByNameOrDisplayNameOrAliasAndSingleCell(String nameOrDisplayNameOrAlias, boolean singleCell) {
+        assert nameOrDisplayNameOrAlias: "the input nameOrDisplayNameOrAlias '${nameOrDisplayNameOrAlias}' is null"
+        return SeqType.createCriteria().list {
+            or {
+                eq("name", nameOrDisplayNameOrAlias)
+                eq("displayName", nameOrDisplayNameOrAlias)
+            }
+            eq("singleCell", singleCell)
+        } || SeqType.findAllBySingleCell(singleCell)*.alias.flatten().contains(nameOrDisplayNameOrAlias)
     }
 
     public static addNewAliasToSeqType(String seqTypeName, String alias) {
@@ -83,19 +90,25 @@ class SeqTypeService {
         }
     }
 
-    public static SeqType findSeqTypeByNameOrAliasAndLibraryLayout(String nameOrAlias, String libraryLayout) {
+    public static SeqType findSeqTypeByNameOrAliasAndLibraryLayoutAndSingleCell(String nameOrAlias, String libraryLayout, boolean singleCell) {
         assert nameOrAlias: "the input 'nameOrAlias' is null"
 
-        SeqType seqType = SeqType.findByNameAndLibraryLayout(nameOrAlias, libraryLayout)
+        SeqType seqType = SeqType.findByNameAndLibraryLayoutAndSingleCell(nameOrAlias, libraryLayout, singleCell)
 
         if (seqType) {
             return seqType
         }
 
         return CollectionUtils.atMostOneElement(SeqType.list().findAll {
-            it.alias.contains(nameOrAlias) && it.libraryLayout == libraryLayout
+            it.alias?.contains(nameOrAlias) && it.libraryLayout == libraryLayout && it.singleCell == singleCell
         })
 
     }
 
+    public static boolean isSingleCell(String baseMaterial){
+        if (baseMaterial in [SeqType.SINGLE_CELL_DNA, SeqType.SINGLE_CELL_RNA]) {
+            return true
+        }
+        return false
+    }
 }

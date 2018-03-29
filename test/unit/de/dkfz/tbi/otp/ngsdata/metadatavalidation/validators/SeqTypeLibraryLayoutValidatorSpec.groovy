@@ -34,7 +34,7 @@ class SeqTypeLibraryLayoutValidatorSpec extends Specification {
         List<String> columns = new SeqTypeLibraryLayoutValidator().getColumnTitles(context)
 
         then:
-        columns == [MetaDataColumn.SEQUENCING_TYPE.name(), MetaDataColumn.LIBRARY_LAYOUT.name(), MetaDataColumn.TAGMENTATION_BASED_LIBRARY.name()]
+        columns == [MetaDataColumn.SEQUENCING_TYPE.name(), MetaDataColumn.LIBRARY_LAYOUT.name(), MetaDataColumn.BASE_MATERIAL.name(), MetaDataColumn.TAGMENTATION_BASED_LIBRARY.name()]
     }
 
     void 'validate, when column(s) is/are missing, adds error(s)'() {
@@ -55,6 +55,7 @@ value1\tvalue2
         header || messages
         "${MetaDataColumn.SEQUENCING_TYPE.name()}\tlayout" || ["Mandatory column 'LIBRARY_LAYOUT' is missing."]
         "seqtype\t${MetaDataColumn.LIBRARY_LAYOUT.name()}" || ["Mandatory column 'SEQUENCING_TYPE' is missing."]
+        "seqtype\t${MetaDataColumn.BASE_MATERIAL.name()}" || ["Mandatory column 'SEQUENCING_TYPE' is missing.", "Mandatory column 'LIBRARY_LAYOUT' is missing."]
         "seqtype\tlayout" || ["Mandatory column 'SEQUENCING_TYPE' is missing.", "Mandatory column 'LIBRARY_LAYOUT' is missing."]
     }
 
@@ -62,18 +63,21 @@ value1\tvalue2
 
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
-${MetaDataColumn.SEQUENCING_TYPE}\t${MetaDataColumn.LIBRARY_LAYOUT}\t${MetaDataColumn.TAGMENTATION_BASED_LIBRARY}
+${MetaDataColumn.SEQUENCING_TYPE}\t${MetaDataColumn.LIBRARY_LAYOUT}\t${MetaDataColumn.TAGMENTATION_BASED_LIBRARY}\t${MetaDataColumn.BASE_MATERIAL}
 SeqType1\tLibraryLayout1\t
 SeqType1\tLibraryLayout2\t
 SeqType2\tLibraryLayout1\t
 SeqType2\tLibraryLayout2\t
 SeqType2\tLibraryLayout2\ttrue
+SeqType3\tLibraryLayout3\t\t${SeqType.SINGLE_CELL_RNA}
+SeqType3\tLibraryLayout3\t\t${SeqType.SINGLE_CELL_DNA}
 """)
-        DomainFactory.createSeqType(name: 'SeqType1', libraryLayout: 'LibraryLayout1')
-        DomainFactory.createSeqType(name: 'SeqType1', libraryLayout: 'LibraryLayout2')
-        DomainFactory.createSeqType(name: 'SeqType2', libraryLayout: 'LibraryLayout1')
-        DomainFactory.createSeqType(name: 'SeqType2', libraryLayout: 'LibraryLayout2')
-        DomainFactory.createSeqType(name: 'SeqType2_TAGMENTATION', libraryLayout: 'LibraryLayout2')
+        DomainFactory.createSeqType(name: 'SeqType1', dirName: 'NameSeqType1', libraryLayout: 'LibraryLayout1', singleCell: false)
+        DomainFactory.createSeqType(name: 'SeqType1', dirName: 'NameSeqType1', libraryLayout: 'LibraryLayout2', singleCell: false)
+        DomainFactory.createSeqType(name: 'SeqType2', dirName: 'NameSeqType2', libraryLayout: 'LibraryLayout1', singleCell: false)
+        DomainFactory.createSeqType(name: 'SeqType2', dirName: 'NameSeqType2', libraryLayout: 'LibraryLayout2', singleCell: false)
+        DomainFactory.createSeqType(name: 'SeqType3', dirName: 'NameSeqType3', libraryLayout: 'LibraryLayout3', singleCell: true)
+        DomainFactory.createSeqType(name: 'SeqType2_TAGMENTATION', dirName: 'SeqType2_TAGMENTATION', libraryLayout: 'LibraryLayout2', singleCell: false)
 
         when:
         new SeqTypeLibraryLayoutValidator().validate(context)
@@ -86,38 +90,44 @@ SeqType2\tLibraryLayout2\ttrue
 
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
-${MetaDataColumn.SEQUENCING_TYPE}\t${MetaDataColumn.LIBRARY_LAYOUT}\t${MetaDataColumn.TAGMENTATION_BASED_LIBRARY}
-SeqType1\tLibraryLayout1\t
-SeqType1\tLibraryLayout2\t
-SeqType1\tLibraryLayout3\t
-SeqType2\tLibraryLayout1\t
-SeqType2\tLibraryLayout2\t
-SeqType2\tLibraryLayout3\t
-SeqType3\tLibraryLayout1\t
-SeqType3\tLibraryLayout2\t
-SeqType3\tLibraryLayout3\t
-SeqType3\tLibraryLayout3\ttrue
+${MetaDataColumn.SEQUENCING_TYPE}\t${MetaDataColumn.LIBRARY_LAYOUT}\t${MetaDataColumn.TAGMENTATION_BASED_LIBRARY}\t${MetaDataColumn.BASE_MATERIAL}
+SeqType1\tLibraryLayout1\t\twer
+SeqType1\tLibraryLayout2\t\twer
+SeqType1\tLibraryLayout3\t\twer
+SeqType2\tLibraryLayout1\t\twer
+SeqType2\tLibraryLayout2\t\twer
+SeqType2\tLibraryLayout3\t\trt
+SeqType3\tLibraryLayout1\t\tert
+SeqType3\tLibraryLayout2\t\tewer
+SeqType3\tLibraryLayout3\t\twer
+SeqType3\tLibraryLayout3\ttrue\terwr
+SeqType3\tLibraryLayout2\ttrue\t${SeqType.SINGLE_CELL_DNA}
+SeqType2\tLibraryLayout2\t\t${SeqType.SINGLE_CELL_RNA}
 """)
         DomainFactory.createSeqType(name: 'SeqType1', libraryLayout: 'LibraryLayout1')
         DomainFactory.createSeqType(name: 'SeqType2', libraryLayout: 'LibraryLayout2')
 
         Collection<Problem> expectedProblems = [
                 new Problem(context.spreadsheet.dataRows[1].cells as Set, Level.ERROR,
-                        "The combination of sequencing type 'SeqType1' and library layout 'LibraryLayout2' is not registered in the OTP database.", "At least one combination of sequencing type and library layout is not registered in the OTP database."),
+                        "The combination of sequencing type 'SeqType1' and library layout 'LibraryLayout2' and without Single Cell is not registered in the OTP database.", "At least one combination of sequencing type and library layout and without Single Cell is not registered in the OTP database."),
                 new Problem(context.spreadsheet.dataRows[2].cells as Set, Level.ERROR,
-                        "The combination of sequencing type 'SeqType1' and library layout 'LibraryLayout3' is not registered in the OTP database.", "At least one combination of sequencing type and library layout is not registered in the OTP database."),
+                        "The combination of sequencing type 'SeqType1' and library layout 'LibraryLayout3' and without Single Cell is not registered in the OTP database.", "At least one combination of sequencing type and library layout and without Single Cell is not registered in the OTP database."),
                 new Problem(context.spreadsheet.dataRows[3].cells as Set, Level.ERROR,
-                        "The combination of sequencing type 'SeqType2' and library layout 'LibraryLayout1' is not registered in the OTP database.", "At least one combination of sequencing type and library layout is not registered in the OTP database."),
+                        "The combination of sequencing type 'SeqType2' and library layout 'LibraryLayout1' and without Single Cell is not registered in the OTP database.", "At least one combination of sequencing type and library layout and without Single Cell is not registered in the OTP database."),
                 new Problem(context.spreadsheet.dataRows[5].cells as Set, Level.ERROR,
-                        "The combination of sequencing type 'SeqType2' and library layout 'LibraryLayout3' is not registered in the OTP database.", "At least one combination of sequencing type and library layout is not registered in the OTP database."),
+                        "The combination of sequencing type 'SeqType2' and library layout 'LibraryLayout3' and without Single Cell is not registered in the OTP database.", "At least one combination of sequencing type and library layout and without Single Cell is not registered in the OTP database."),
                 new Problem(context.spreadsheet.dataRows[6].cells as Set, Level.ERROR,
-                        "The combination of sequencing type 'SeqType3' and library layout 'LibraryLayout1' is not registered in the OTP database.", "At least one combination of sequencing type and library layout is not registered in the OTP database."),
+                        "The combination of sequencing type 'SeqType3' and library layout 'LibraryLayout1' and without Single Cell is not registered in the OTP database.", "At least one combination of sequencing type and library layout and without Single Cell is not registered in the OTP database."),
                 new Problem(context.spreadsheet.dataRows[7].cells as Set, Level.ERROR,
-                        "The combination of sequencing type 'SeqType3' and library layout 'LibraryLayout2' is not registered in the OTP database.", "At least one combination of sequencing type and library layout is not registered in the OTP database."),
+                        "The combination of sequencing type 'SeqType3' and library layout 'LibraryLayout2' and without Single Cell is not registered in the OTP database.", "At least one combination of sequencing type and library layout and without Single Cell is not registered in the OTP database."),
                 new Problem(context.spreadsheet.dataRows[8].cells as Set, Level.ERROR,
-                        "The combination of sequencing type 'SeqType3' and library layout 'LibraryLayout3' is not registered in the OTP database.", "At least one combination of sequencing type and library layout is not registered in the OTP database."),
+                        "The combination of sequencing type 'SeqType3' and library layout 'LibraryLayout3' and without Single Cell is not registered in the OTP database.", "At least one combination of sequencing type and library layout and without Single Cell is not registered in the OTP database."),
                 new Problem(context.spreadsheet.dataRows[9].cells as Set, Level.ERROR,
-                        "The combination of sequencing type 'SeqType3_TAGMENTATION' and library layout 'LibraryLayout3' is not registered in the OTP database.", "At least one combination of sequencing type and library layout is not registered in the OTP database."),
+                        "The combination of sequencing type 'SeqType3_TAGMENTATION' and library layout 'LibraryLayout3' and without Single Cell is not registered in the OTP database.", "At least one combination of sequencing type and library layout and without Single Cell is not registered in the OTP database."),
+                new Problem(context.spreadsheet.dataRows[10].cells as Set, Level.ERROR,
+                        "The combination of sequencing type 'SeqType3_TAGMENTATION' and library layout 'LibraryLayout2' and Single Cell is not registered in the OTP database.", "At least one combination of sequencing type and library layout and Single Cell is not registered in the OTP database."),
+                new Problem(context.spreadsheet.dataRows[11].cells as Set, Level.ERROR,
+                        "The combination of sequencing type 'SeqType2' and library layout 'LibraryLayout2' and Single Cell is not registered in the OTP database.", "At least one combination of sequencing type and library layout and Single Cell is not registered in the OTP database."),
         ]
 
         when:

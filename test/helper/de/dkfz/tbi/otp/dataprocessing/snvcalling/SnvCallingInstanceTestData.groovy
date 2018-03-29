@@ -29,8 +29,6 @@ class SnvCallingInstanceTestData {
 
         this.realm = bamFileControl.project.realm
 
-        bamFileControl.seqType.name = SeqTypeNames.WHOLE_GENOME.seqTypeName
-        assert bamFileControl.seqType.save(flush: true, failOnError: true)
         (bamFileTumor, samplePair) = createDisease(bamFileControl.mergingWorkPackage)
 
         externalScript_Joining = new ExternalScript(

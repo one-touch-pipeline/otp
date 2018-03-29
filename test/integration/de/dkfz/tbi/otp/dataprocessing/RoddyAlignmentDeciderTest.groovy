@@ -353,10 +353,7 @@ public class RoddyAlignmentDeciderTest {
     @Test
     void testCanPipelineAlign_whenWrongLibraryLayout_shouldReturnFalse() {
         DomainFactory.createRoddyAlignableSeqTypes()
-        SeqType seqType = DomainFactory.createSeqType(
-                name: SeqTypeNames.WHOLE_GENOME.seqTypeName,
-                libraryLayout: SeqType.LIBRARYLAYOUT_MATE_PAIR
-        )
+        SeqType seqType = DomainFactory.createWholeGenomeSeqType(SeqType.LIBRARYLAYOUT_MATE_PAIR)
         SeqTrack seqTrack = DomainFactory.createSeqTrack(seqType: seqType)
         DomainFactory.createRoddyWorkflowConfig(project: seqTrack.project, seqType:  seqType)
 

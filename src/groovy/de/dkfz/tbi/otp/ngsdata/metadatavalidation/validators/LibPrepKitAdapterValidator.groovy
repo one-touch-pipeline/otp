@@ -27,7 +27,7 @@ class LibPrepKitAdapterValidator extends ValueTuplesValidator<MetadataValidation
 
     @Override
     List<String> getColumnTitles(MetadataValidationContext context) {
-        return [SEQUENCING_TYPE.name(), LIB_PREP_KIT.name(), SAMPLE_ID.name(), LIBRARY_LAYOUT.name()]
+        return [SEQUENCING_TYPE.name(), LIB_PREP_KIT.name(), SAMPLE_ID.name(), LIBRARY_LAYOUT.name(), BASE_MATERIAL.name()]
     }
 
     @Override
@@ -42,7 +42,12 @@ class LibPrepKitAdapterValidator extends ValueTuplesValidator<MetadataValidation
     void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {
         valueTuples.each { ValueTuple valueTuple ->
             String seqTypeName = MetadataImportService.getSeqTypeNameFromMetadata(valueTuple)
-            SeqType seqType = SeqType.findByNameAndLibraryLayout(seqTypeName, valueTuple.getValue(LIBRARY_LAYOUT.name()))
+            String baseMaterial = valueTuple.getValue(BASE_MATERIAL.name())
+            boolean singleCell = SeqTypeService.isSingleCell(baseMaterial)
+            if (seqTypeName.isEmpty()) {
+                return
+            }
+            SeqType seqType = SeqTypeService.findSeqTypeByNameOrAliasAndLibraryLayoutAndSingleCell(seqTypeName, valueTuple.getValue(LIBRARY_LAYOUT.name()),singleCell)
             LibraryPreparationKit kit
             if (valueTuple.getValue(LIB_PREP_KIT.name())) {
                 kit = libraryPreparationKitService.findLibraryPreparationKitByNameOrAlias(valueTuple.getValue(LIB_PREP_KIT.name()))

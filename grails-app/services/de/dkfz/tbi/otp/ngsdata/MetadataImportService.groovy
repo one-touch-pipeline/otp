@@ -275,9 +275,12 @@ class MetadataImportService {
                 extractBarcode(it).value) }.each { String laneId, List<Row> rows ->
             String ilseNumber = uniqueColumnValue(rows, ILSE_NO)
             String tagmentation = uniqueColumnValue(rows, TAGMENTATION_BASED_LIBRARY)?.toLowerCase()
-            SeqType seqType = SeqTypeService.findSeqTypeByNameOrAliasAndLibraryLayout(
+            String baseMaterial = uniqueColumnValue(rows, BASE_MATERIAL)
+            boolean isSingleCell = SeqTypeService.isSingleCell(baseMaterial)
+            SeqType seqType = SeqTypeService.findSeqTypeByNameOrAliasAndLibraryLayoutAndSingleCell(
                     uniqueColumnValue(rows, SEQUENCING_TYPE) + ((tagmentation && ["1", "true"].contains(tagmentation)) ? '_TAGMENTATION' : ''),
                     uniqueColumnValue(rows, LIBRARY_LAYOUT),
+                    isSingleCell,
             )
             SeqTypeNames seqTypeName = seqType.seqTypeName
             String pipelineVersionString = uniqueColumnValue(rows, PIPELINE_VERSION) ?: 'unknown'

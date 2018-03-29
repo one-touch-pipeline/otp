@@ -59,15 +59,16 @@ class MetaDataFieldsController {
             [
                     name          : it.name,
                     dirName       : it.dirName,
-                    libraryLayouts: SeqType.findAllByName(it.name)*.libraryLayout.sort().reverse().join(' | '),
+                    singleCell    : it.singleCell,
+                    libraryLayouts: SeqType.findAllByNameAndSingleCell(it.name, it.singleCell)*.libraryLayout.sort().reverse().join(' | '),
                     layouts       :
                             [
-                                    SINGLE   : SeqType.findByNameAndLibraryLayout(it.name, SeqType.LIBRARYLAYOUT_SINGLE) ? true : false,
-                                    PAIRED   : SeqType.findByNameAndLibraryLayout(it.name, SeqType.LIBRARYLAYOUT_PAIRED) ? true : false,
-                                    MATE_PAIR: SeqType.findByNameAndLibraryLayout(it.name, SeqType.LIBRARYLAYOUT_MATE_PAIR) ? true : false
+                                    SINGLE   : SeqType.findByNameAndLibraryLayoutAndSingleCell(it.name, SeqType.LIBRARYLAYOUT_SINGLE, it.singleCell) ? true : false,
+                                    PAIRED   : SeqType.findByNameAndLibraryLayoutAndSingleCell(it.name, SeqType.LIBRARYLAYOUT_PAIRED, it.singleCell) ? true : false,
+                                    MATE_PAIR: SeqType.findByNameAndLibraryLayoutAndSingleCell(it.name, SeqType.LIBRARYLAYOUT_MATE_PAIR, it.singleCell) ? true : false
                             ],
                     displayName   : it.displayName,
-                    aliases       : SeqType.findByName(it.name).alias.sort().join(' | ')
+                    aliases       : it.alias.sort().join(' | ')
             ]
         }.unique()
 
@@ -130,7 +131,7 @@ class MetaDataFieldsController {
         Set<String> alias = (cmd.alias) ? [cmd.alias] : null
 
         SeqType.withTransaction{
-            createSeqTypeHelper(cmd, cmd.type, cmd.dirName, cmd.displayName, alias)
+            createSeqTypeHelper(cmd, cmd.type, cmd.dirName, cmd.displayName, alias, cmd.singleCell)
         }
     }
 
@@ -142,19 +143,25 @@ class MetaDataFieldsController {
         }
         SeqType seqType = SeqType.findByName(cmd.id)
         SeqType.withTransaction{
-            createSeqTypeHelper(cmd, seqType.name, seqType.dirName, seqType.displayName, seqType.alias?.toSet())
+            createSeqTypeHelper(cmd, seqType.name, seqType.dirName, seqType.displayName, seqType.alias?.toSet(), seqType.singleCell)
         }
     }
 
-    private void createSeqTypeHelper(Serializable cmd, String name, String dirName, String displayName, Set<String> alias) {
+    private void createSeqTypeHelper(Serializable cmd, String name, String dirName, String displayName, Set<String> alias, boolean singleCell) {
         if (cmd.single) {
-            checkErrorAndCallMethod(cmd, { seqTypeService.createSeqType(name, dirName, displayName, alias, SeqType.LIBRARYLAYOUT_SINGLE) })
+            checkErrorAndCallMethod(cmd, {
+                seqTypeService.createSeqType(name, dirName, displayName, alias, SeqType.LIBRARYLAYOUT_SINGLE, singleCell)
+            })
         }
         if (cmd.paired) {
-            checkErrorAndCallMethod(cmd, { seqTypeService.createSeqType(name, dirName, displayName, alias, SeqType.LIBRARYLAYOUT_PAIRED) })
+            checkErrorAndCallMethod(cmd, {
+                seqTypeService.createSeqType(name, dirName, displayName, alias, SeqType.LIBRARYLAYOUT_PAIRED, singleCell)
+            })
         }
         if (cmd.mate_pair) {
-            checkErrorAndCallMethod(cmd, { seqTypeService.createSeqType(name, dirName, displayName, alias, SeqType.LIBRARYLAYOUT_MATE_PAIR) })
+            checkErrorAndCallMethod(cmd, {
+                seqTypeService.createSeqType(name, dirName, displayName, alias, SeqType.LIBRARYLAYOUT_MATE_PAIR, singleCell)
+            })
         }
     }
 
@@ -347,9 +354,10 @@ class CreateSequencingKitAliasCommand implements Serializable {
 class SeqTypeAliasCommand implements Serializable {
     String alias
     String id
+    boolean singleCell
     static constraints = {
         alias(blank: false, validator: {val, obj ->
-            if(SeqTypeService.findSeqTypeByNameOrAlias(val)) {
+            if (SeqTypeService.findSeqTypeByNameOrAlias(val)) {
                 return 'Duplicate'
             }})
         id(blank: false)
@@ -368,25 +376,30 @@ class CreateSeqTypeCommand implements Serializable {
         String dirName
         String displayName
         String alias
+        boolean singleCell
+
         static constraints = {
             anyLayout(blank: false,validator: {val, obj ->
                 if (!(obj.single || obj.paired || obj.mate_pair)) {
                     return 'Empty'
                 }})
             type(blank: false, validator: {val, obj ->
-                if (SeqTypeService.hasSeqTypeByNameOrDisplayName(val)) {
+                if (SeqTypeService.hasSeqTypeByNameOrDisplayNameOrAliasAndSingleCell(val, obj.singleCell)) {
                     return 'Duplicate'
-                }})
-            dirName(blank: false, validator: {val, obj ->
+                }
+            })
+            dirName(blank: false, validator: { val, obj ->
                 if (SeqType.findByDirName(val)) {
                     return 'Duplicate'
-                }})
-            displayName(blank: false, validator: {val, obj ->
-                if (SeqTypeService.hasSeqTypeByNameOrDisplayName(val)) {
+                }
+            })
+            displayName(blank: false, validator: { val, obj ->
+                if (SeqTypeService.hasSeqTypeByNameOrDisplayNameOrAliasAndSingleCell(val, obj.singleCell)) {
                     return 'Duplicate'
-                }})
+                }
+            })
             alias(blank: true, validator: {val, obj ->
-                if (val != '' && SeqTypeService.findSeqTypeByNameOrAlias(val)) {
+                if (val != '' && SeqTypeService.hasSeqTypeByNameOrDisplayNameOrAliasAndSingleCell(val, obj.singleCell)) {
                     return 'Duplicate'
                 }})
         }

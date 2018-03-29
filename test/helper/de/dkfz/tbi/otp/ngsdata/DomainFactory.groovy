@@ -1458,7 +1458,8 @@ class DomainFactory {
                 libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE,
                 dirName      : 'seqTypeDirName_' + (counter++),
                 displayName  : seqTypeProperties.get('displayName') ?: seqTypeProperties.get('name') ?: defaultName,
-                alias        : []
+                alias        : [],
+                singleCell   : false
         ], seqTypeProperties, saveAndValidate)
     }
 
@@ -1983,8 +1984,8 @@ class DomainFactory {
         createSeqTypeLazy(SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION, 'WGBS_TAG', 'whole_genome_bisulfite_tagmentation_sequencing', 'WGBSTAG')
     }
 
-    static SeqType createChipSeqType() {
-        createSeqTypeLazy(SeqTypeNames.CHIP_SEQ, 'ChIP', 'chip_seq_sequencing', "CHIPSEQ")
+    static SeqType createChipSeqType(String libraryLayout = SeqType.LIBRARYLAYOUT_PAIRED) {
+        createSeqTypeLazy(SeqTypeNames.CHIP_SEQ, 'ChIP', 'chip_seq_sequencing', "CHIPSEQ",  libraryLayout)
     }
 
     static SeqType createRnaPairedSeqType() {

@@ -14,7 +14,7 @@ class SeqTypeLibraryLayoutValidator extends ValueTuplesValidator<AbstractMetadat
 
     @Override
     Collection<String> getDescriptions() {
-        return ['The combination of sequencing type and library layout is registered in the OTP database.']
+        return ['The combination of sequencing type, library layout and single cell is registered in the OTP database.']
     }
 
     @Override
@@ -23,6 +23,7 @@ class SeqTypeLibraryLayoutValidator extends ValueTuplesValidator<AbstractMetadat
         if (context instanceof BamMetadataValidationContext) {
             return columns
         } else {
+            columns.add(BASE_MATERIAL.name())
             columns.add(TAGMENTATION_BASED_LIBRARY.name())
             return columns
         }
@@ -30,11 +31,12 @@ class SeqTypeLibraryLayoutValidator extends ValueTuplesValidator<AbstractMetadat
 
     @Override
     boolean columnMissing(AbstractMetadataValidationContext context, String columnTitle) {
-        if (columnTitle != TAGMENTATION_BASED_LIBRARY.name()) {
+        if (columnTitle in [TAGMENTATION_BASED_LIBRARY.name(), BASE_MATERIAL.name()]) {
+            return true
+        }else{
             mandatoryColumnMissing(context, columnTitle)
             return false
         }
-        return true
     }
 
     @Override
@@ -47,8 +49,13 @@ class SeqTypeLibraryLayoutValidator extends ValueTuplesValidator<AbstractMetadat
                 seqTypeName = MetadataImportService.getSeqTypeNameFromMetadata(it)
             }
             String libraryLayoutName = it.getValue(LIBRARY_LAYOUT.name())
-            if (!SeqTypeService.findSeqTypeByNameOrAliasAndLibraryLayout(seqTypeName, libraryLayoutName)) {
-                context.addProblem(it.cells, Level.ERROR, "The combination of sequencing type '${seqTypeName}' and library layout '${libraryLayoutName}' is not registered in the OTP database.", "At least one combination of sequencing type and library layout is not registered in the OTP database.")
+            String baseMaterial = it.getValue(BASE_MATERIAL.name())
+            boolean isSingleCell = SeqTypeService.isSingleCell(baseMaterial)
+            if (!SeqTypeService.findSeqTypeByNameOrAliasAndLibraryLayoutAndSingleCell(seqTypeName, libraryLayoutName, isSingleCell)) {
+                if (isSingleCell)
+                    context.addProblem(it.cells, Level.ERROR, "The combination of sequencing type '${seqTypeName}' and library layout '${libraryLayoutName}' and Single Cell is not registered in the OTP database.", "At least one combination of sequencing type and library layout and Single Cell is not registered in the OTP database.")
+                else
+                    context.addProblem(it.cells, Level.ERROR, "The combination of sequencing type '${seqTypeName}' and library layout '${libraryLayoutName}' and without Single Cell is not registered in the OTP database.", "At least one combination of sequencing type and library layout and without Single Cell is not registered in the OTP database.")
             }
         }
     }
