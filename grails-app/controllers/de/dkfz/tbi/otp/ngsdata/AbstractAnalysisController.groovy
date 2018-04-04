@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.*
+import groovy.transform.*
 
 class AbstractAnalysisController {
 
@@ -33,6 +34,7 @@ class AbstractAnalysisController {
 
 }
 
+@ToString
 class BamFilePairAnalysisCommand {
     BamFilePairAnalysis bamFilePairAnalysis
     PlotType plotType

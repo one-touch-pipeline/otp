@@ -13,7 +13,7 @@
     <g:else>
         <h1><g:message code="aceseq.plots.title" args="[bamFilePairAnalysis.individual.pid]" /></h1>
         <div class="body">
-            <g:each in="${plot}" var="p">
+            <g:each in="${plotType}" var="p">
                 <g:set var="url" value="${g.createLink(controller: "aceseq", action: "plotImages",
                         params: ["bamFilePairAnalysis.id": bamFilePairAnalysis.id, "plotType": p])}" />
                 <div>
