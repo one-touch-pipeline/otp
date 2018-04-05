@@ -25,21 +25,21 @@ class OtpPath {
     }
 
     /**
-     * Example: STORAGE_ROOT/dmg/otp/production/staging/...
+     * Path used in staging
      */
     File getAbsoluteStagingPath() {
         return getAbsolutePath(ConfigService.getStagingRootPathFromSelfFoundContext())
     }
 
     /**
-     * Example: ${otp.processing.root.path}/...
+     * Path used in processing directory
      */
     File getAbsoluteDataProcessingPath() {
         return getAbsolutePath(ConfigService.getProcessingRootPathFromSelfFoundContext())
     }
 
     /**
-     * Example: $OTP_ROOT_PATH/...
+     * Path used in root
      */
     File getAbsoluteDataManagementPath() {
         return getAbsolutePath(ConfigService.getRootPathFromSelfFoundContext())

@@ -6,8 +6,6 @@ import de.dkfz.tbi.otp.utils.*
  */
 
 """
-HIPO
-HIPO2
 """.split('\n')*.trim().findAll().each {
     ProjectGroup projectGroup = CollectionUtils.exactlyOneElement(ProjectGroup.findAllByName(it))
     List list = SeqTrack.createCriteria().list {

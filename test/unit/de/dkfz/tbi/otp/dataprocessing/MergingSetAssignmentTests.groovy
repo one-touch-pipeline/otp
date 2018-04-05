@@ -47,11 +47,7 @@ class MergingSetAssignmentTests {
 
         SeqType seqType = DomainFactory.createWholeGenomeSeqType(SeqType.LIBRARYLAYOUT_SINGLE)
 
-        SeqCenter seqCenter = new SeqCenter()
-        seqCenter.name = "DKFZ"
-        seqCenter.dirName = "core"
-        seqCenter.save(flush: true)
-        assertTrue(seqCenter.validate())
+        SeqCenter seqCenter = DomainFactory.createSeqCenter()
 
         SeqPlatform seqPlatform = DomainFactory.createSeqPlatformWithSeqPlatformGroup()
         Run run = new Run()

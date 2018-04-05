@@ -83,9 +83,7 @@ class LoadBedFileScriptTests extends GroovyScriptAwareTestCase {
     @Before
     void setUp() {
         File baseFolder = temporaryFolder.newFolder()
-        realm = DomainFactory.createRealm([
-            name: 'DKFZ',
-        ]).save(flush : true)
+        realm = DomainFactory.createRealm().save(flush : true)
 
         File referenceGenomeDirectory = new File(baseFolder, REFERENCE_GENOME_PATH)
         DomainFactory.createProcessingOptionBasePathReferenceGenome(referenceGenomeDirectory.path)

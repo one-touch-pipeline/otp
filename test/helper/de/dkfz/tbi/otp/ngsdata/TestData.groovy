@@ -76,10 +76,7 @@ class TestData {
             file << "test"
         }
 
-        realm = DomainFactory.createRealm([
-            name: 'DKFZ',
-        ])
-        assertNotNull(realm.save(flush: true))
+        realm = DomainFactory.createRealm()
 
         project = createProject([
             name : "otp_test_project",
@@ -100,10 +97,7 @@ class TestData {
         seqType = DomainFactory.createWholeGenomeSeqType()
         exomeSeqType = DomainFactory.createExomeSeqType()
 
-        seqCenter = new SeqCenter()
-        seqCenter.name = "DKFZ"
-        seqCenter.dirName = "core"
-        assertNotNull(seqCenter.save(flush: true))
+        seqCenter = DomainFactory.createSeqCenter()
 
         SeqPlatformGroup seqPlatformGroup = new SeqPlatformGroup()
         assert seqPlatformGroup.save(flush: true)

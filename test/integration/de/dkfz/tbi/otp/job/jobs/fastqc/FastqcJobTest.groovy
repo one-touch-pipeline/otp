@@ -124,7 +124,7 @@ class FastqcJobTest {
 
 
     @Test
-    void testValidate_DataNotFromGPCF_shallBeUploadToDB() {
+    void testValidate_FastqcAreCreatedByClusterJob_shallBeUploadToDB() {
         long nReads = 100
         String sequenceLength = "90"
 

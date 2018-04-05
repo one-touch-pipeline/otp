@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 # This script is used for extracting names and length values of entries in the fasta file (reference genome).
-# It can be used on the tbi cluster or on a local machine, and depends on BioPython.
+# It can be used on the cluster or on a local machine, and depends on BioPython.
 #
 # the call: python2 ../getReferenceGenomeInfo.py hs37d5_GRCm38mm10_PhiX.conv.fa
 #

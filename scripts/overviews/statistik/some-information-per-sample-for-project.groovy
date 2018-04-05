@@ -12,8 +12,6 @@ import de.dkfz.tbi.otp.utils.*
  */
 
 List<Project> projects = """
-PROJECT_NAME
-PROJECT_NAME
 """.split('\n')*.trim().findAll().collect {
     CollectionUtils.exactlyOneElement(Project.findAllByName(it))
 }

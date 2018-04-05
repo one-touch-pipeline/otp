@@ -133,7 +133,7 @@ class ProcessingOption implements Entity {
         CLUSTER_SUBMISSIONS_FAST_TRACK_QUEUE("name of the queue used by fast track projects", null, Type.SINGLE_WORD_TEXT),
 
         //validator
-        VALIDATOR_SAMPLE_IDENTIFIER_REGEX("regular expression for the DEEP sample id", null, Type.SINGLE_LINE_TEXT),
+        VALIDATOR_SAMPLE_IDENTIFIER_REGEX("regular expression for the sample id", null, Type.SINGLE_LINE_TEXT),
 
         //systemConfiguration
         TIME_ZONE("The default time zone", "Europe/Berlin", Type.SINGLE_LINE_TEXT),

@@ -9,8 +9,7 @@ def samplePairs = SamplePair.withCriteria {
             individual {
                 project {
                     'in'('name', [
-                            'PROJECT_NAME',
-                            'PROJECT_NAME'
+                            ''
                     ])
                 }
             }

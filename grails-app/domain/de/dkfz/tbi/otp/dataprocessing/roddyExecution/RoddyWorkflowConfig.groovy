@@ -27,10 +27,10 @@ class RoddyWorkflowConfig extends ConfigPerProject implements AlignmentConfig {
     /**
      * the full path to the config file which is used in this project and pipeline. The name of the config file contains the version number.
      *
-     * The file should be located in: $OTP_ROOT_PATH/$Project/configFiles/${Pipeline}/
+     * The file should be located in: ${otp.root.path}/${project}/configFiles/${Pipeline}/
      * The file should be named as: ${Pipeline}_${seqType.roddyName}_${seqType.libraryLayout}_${PluginVersion}_${configVersion}.xml
      *
-     * for example: $OTP_ROOT_PATH/$PROJECT/configFiles/PANCAN_ALIGNMENT/PANCAN_ALIGNMENT_WES_1.0.177_v1_0.xml
+     * for example: ${otp.root.path}/${project}/configFiles/PANCAN_ALIGNMENT/PANCAN_ALIGNMENT_WES_1.0.177_v1_0.xml
      */
     String configFilePath
 
