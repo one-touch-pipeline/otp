@@ -150,7 +150,6 @@
         <div class="footer" role="contentinfo">
             &copy;2011-2017 <a href="https://www.dkfz.de" target="_blank">DKFZ</a> -
                 <a href="http://ibios.dkfz.de/tbi/" target="_blank">eilslabs</a> |
-            <a href="http://ibios.dkfz.de/tbi/index.php/data-management/software/otp" target="_blank">About OTP</a> |
             <g:render template="/templates/version"/>
         </div>
         <div id="spinner" class="spinner" style="display:none;"><g:message code="spinner.alt" default="Loading&hellip;"/></div>

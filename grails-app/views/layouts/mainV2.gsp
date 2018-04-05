@@ -261,7 +261,6 @@
                 <li><a data-toggle="modal" href="#contact">${g.message(code: "info.contact.title")}</a></li>
                 <li>&copy;2011-2017 <a href="https://www.dkfz.de" target="_blank">DKFZ</a> -
                     <a href="http://ibios.dkfz.de/tbi/" target="_blank">eilslabs</a></li>
-                <li><a href="http://ibios.dkfz.de/tbi/index.php/data-management/software/otp" target="_blank">About OTP</a></li>
                 <li class="copyright-grey"><g:render template="/templates/version"/></li>
             </ul>
         </div>
