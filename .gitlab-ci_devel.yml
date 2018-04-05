@@ -12,10 +12,7 @@ variables:
 
 
 stages:
-  - build
-  - test
-  - war
-
+  - all
 
 
 
@@ -33,20 +30,9 @@ stages:
 
 
 
-
-compile:
-  <<: *only_branches
-  stage: build
-  dependencies: []
-  script:
-    - grails compile
-
-
-
-
 .abstract test: &test_template
   <<: *only_branches
-  stage: test
+  stage: all
   image: otp-tests
   dependencies: []
   before_script:
@@ -78,7 +64,7 @@ integration tests:
 
 codenarc:
   <<: *only_branches
-  stage: test
+  stage: all
   dependencies: []
   script:
     - grails compile
@@ -96,7 +82,7 @@ codenarc:
 
 war:
   <<: *artifacts_job_template
-  stage: war
+  stage: all
   image: otp-tests
   before_script:
     - echo 'otp.testing.group=othergroup' > /home/grails/.otp.properties
