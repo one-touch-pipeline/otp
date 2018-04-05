@@ -29,7 +29,8 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
         ReferenceGenome,
         Sample,
         SampleType,
-        SeqType
+        SeqType,
+        LibraryPreparationKit
 ])
 class BamMetadataImportServiceSpec extends Specification {
 

@@ -61,6 +61,8 @@ class BamMetadataImportService {
                 String _project = uniqueColumnValue(row, BamMetadataColumn.PROJECT)
                 String coverage = uniqueColumnValue(row, BamMetadataColumn.COVERAGE)
                 String md5sum = uniqueColumnValue(row, BamMetadataColumn.MD5)
+                String insertSizeFile = uniqueColumnValue(row, BamMetadataColumn.INSERT_SIZE_FILE)
+                String libraryPreparationKit = uniqueColumnValue(row, BamMetadataColumn.LIBRARY_PREPARATION_KIT)
 
                 Sample sample = Sample.createCriteria().get {
                     individual {
@@ -81,10 +83,11 @@ class BamMetadataImportService {
                 }
 
                 ExternalMergingWorkPackage emwp = new ExternalMergingWorkPackage(
-                        referenceGenome: ReferenceGenome.findByName(referenceGenome),
-                        sample         : sample,
-                        seqType        : SeqType.findByNameAndLibraryLayout(seqType, libraryLayout),
-                        pipeline       : Pipeline.findByNameAndType(Pipeline.Name.EXTERNALLY_PROCESSED, Pipeline.Type.ALIGNMENT)
+                        referenceGenome         : ReferenceGenome.findByName(referenceGenome),
+                        sample                  : sample,
+                        seqType                 : SeqType.findByNameAndLibraryLayout(seqType, libraryLayout),
+                        pipeline                : Pipeline.findByNameAndType(Pipeline.Name.EXTERNALLY_PROCESSED, Pipeline.Type.ALIGNMENT),
+                        libraryPreparationKit   : LibraryPreparationKit.findByName(libraryPreparationKit)
                 )
                 assert emwp.save(flush:true)
 
@@ -94,7 +97,8 @@ class BamMetadataImportService {
                         fileName            : getNameFromPath(bamFilePath),
                         coverage            : coverage ? Double.parseDouble(coverage) : null,
                         md5sum              : md5sum ?: null,
-                        furtherFiles        : [] as Set
+                        furtherFiles        : [] as Set,
+                        insertSizeFile      : insertSizeFile
                 ).save()
 
                 File bamFileParent = new File(epmbf.importedFrom).parentFile
@@ -103,6 +107,10 @@ class BamMetadataImportService {
                     new File (bamFileParent, path).exists()
                 }.each {
                         epmbf.furtherFiles.add(it)
+                }
+
+                if (insertSizeFile) {
+                    epmbf.furtherFiles.add(insertSizeFile)
                 }
 
                 emwp.bamFileInProjectFolder = null
