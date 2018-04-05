@@ -53,7 +53,17 @@ class ExecutionService {
         String password = configService.getPbsPassword()
         File keyFile = configService.getSshKeyFile()
         boolean useSshAgent = configService.useSshAgent()
-        return querySsh(realm, sshUser, password, keyFile, useSshAgent, command)
+        try {
+            return querySsh(realm, sshUser, password, keyFile, useSshAgent, command)
+        } catch (JSchException e) {
+            if (e.message.contains('channel is not opened.')) {
+                logToJob("'channel is not opened' error occur, try again in 30 seconds")
+                Thread.sleep(30000)
+                return querySsh(realm, sshUser, password, keyFile, useSshAgent, command)
+            } else {
+                throw e
+            }
+        }
     }
 
     /**
