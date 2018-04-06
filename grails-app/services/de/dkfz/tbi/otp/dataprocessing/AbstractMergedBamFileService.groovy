@@ -1,5 +1,4 @@
 package de.dkfz.tbi.otp.dataprocessing
-
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.ngsdata.*
 

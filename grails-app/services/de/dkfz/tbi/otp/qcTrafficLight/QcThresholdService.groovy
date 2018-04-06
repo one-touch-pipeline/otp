@@ -75,6 +75,8 @@ class TableCellValue implements Serializable {
     String link
     String tooltip
     Icon icon
+    String status
+    long id
 
     enum WarnColor {
         OKAY,

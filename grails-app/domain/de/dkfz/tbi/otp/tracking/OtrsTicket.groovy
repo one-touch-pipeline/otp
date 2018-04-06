@@ -168,4 +168,9 @@ class OtrsTicket implements Commentable, Entity {
     String toString() {
         return "OtrsTicket ${id}: #${ticketNumber}"
     }
+
+    @Override
+    Project getProject()  {
+        return null
+    }
 }

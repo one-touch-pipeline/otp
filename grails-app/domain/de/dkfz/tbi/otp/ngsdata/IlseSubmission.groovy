@@ -21,4 +21,9 @@ class IlseSubmission implements Entity, Commentable {
             }
         }
     }
+
+    @Override
+    Project getProject()  {
+        return null
+    }
 }

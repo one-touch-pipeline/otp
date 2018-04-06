@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.job.processing
 
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.job.plan.*
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
@@ -65,5 +66,10 @@ public class Process implements Serializable, Commentable, Entity {
 
     ProcessParameterObject getProcessParameterObject() {
         return atMostOneElement(ProcessParameter.findAllByProcess(this))?.toObject()
+    }
+
+    @Override
+    Project getProject() {
+        return getProcessParameterObject()?.project
     }
 }

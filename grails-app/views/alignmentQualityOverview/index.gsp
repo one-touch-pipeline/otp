@@ -5,6 +5,7 @@
 <meta name="layout" content="main" />
 <title><g:message code="alignment.quality.title" args="${[project, seqType]}"/></title>
     <asset:javascript src="pages/alignmentQualityOverview/index/dataTable.js"/>
+    <asset:javascript src="pages/alignmentQualityOverview/index/alignmentQualityOverview.js"/>
 </head>
 
 <body>

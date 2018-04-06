@@ -46,9 +46,6 @@ class Individual implements Commentable, Entity {
     Project project
     static belongsTo = [project : Project]
 
-
-
-
     static constraints = {
         pid(unique: true, nullable: false, validator: { OtpPath.isValidPathComponent(it) })
         internIdentifier(nullable: true)
@@ -132,6 +129,11 @@ order by type.name asc, type.libraryLayout
      */
     OtpPath getResultsPerPidPath() {
         return new OtpPath(project, project.dirName, 'results_per_pid', pid)
+    }
+
+    @Override
+    Project getProject() {
+        return project
     }
 
     static mapping = {

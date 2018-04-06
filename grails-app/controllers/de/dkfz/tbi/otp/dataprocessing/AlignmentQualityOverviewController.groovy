@@ -5,6 +5,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.qcTrafficLight.*
 import de.dkfz.tbi.otp.utils.*
 import grails.converters.*
+import org.springframework.validation.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
@@ -95,6 +96,7 @@ class AlignmentQualityOverviewController {
     ProjectService projectService
     ProjectSelectionService projectSelectionService
     QcThresholdService qcThresholdService
+    QcTrafficLightService qcTrafficLightService
 
     Map index(AlignmentQcCommand cmd) {
         String projectName = params.project
@@ -144,6 +146,21 @@ class AlignmentQualityOverviewController {
                 seqType : seqType,
                 header  : header,
         ]
+    }
+
+    JSON changeQcStatus(QcStatusCommand cmd) {
+        def dataToRender = [:]
+
+        if (cmd.hasErrors()) {
+            FieldError error = cmd.errors.getFieldError()
+            dataToRender.put("success", false)
+            dataToRender.put("error", "'${error.getRejectedValue()}' is not a valid value for '${error.getField()}'. Error code: '${error.code}'")
+        } else {
+            qcTrafficLightService.changeQcTrafficLightStatusWithComment(cmd.abstractBamFile, cmd.newValue as AbstractMergedBamFile.QcTrafficLightStatus, cmd.comment)
+            dataToRender.put("success", true)
+        }
+
+        render dataToRender as JSON
     }
 
 
@@ -196,12 +213,11 @@ class AlignmentQualityOverviewController {
             double readLength = readLengthString.contains('-') ? (readLengthString.split('-').sum {
                 it as double
             } / 2) : readLengthString as double
-
             TableCellValue.Icon icon = [
                     (AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED)  : TableCellValue.Icon.WARNING,
                     (AbstractMergedBamFile.QcTrafficLightStatus.REJECTED) : TableCellValue.Icon.ERROR,
             ].getOrDefault(abstractMergedBamFile.qcTrafficLightStatus, TableCellValue.Icon.OKAY)
-
+            String comment = abstractMergedBamFile.comment ? "\n${abstractMergedBamFile.comment?.comment}\n${abstractMergedBamFile.comment?.author}":""
             Map<String, TableCellValue> map = [
                     pid                   : new TableCellValue(
                                                 abstractMergedBamFile.individual.displayName, null,
@@ -217,11 +233,11 @@ class AlignmentQualityOverviewController {
                     pipeline              : abstractMergedBamFile.workPackage.pipeline.displayName,
                     qcStatus              : new TableCellValue(
                                                 abstractMergedBamFile.comment ?
-                                                        "${abstractMergedBamFile.comment?.comment} — ${abstractMergedBamFile.comment?.author}" :
+                                                        "${abstractMergedBamFile.comment?.comment?.take(10)}" :
                                                         "",
                                                 null, null,
-                                                (abstractMergedBamFile.qcTrafficLightStatus ?: "").toString(),
-                                                icon,
+                                                "Status: ${(abstractMergedBamFile.qcTrafficLightStatus ?: "").toString()} ${comment}",
+                                                icon, (abstractMergedBamFile.qcTrafficLightStatus ?: "").toString(), abstractMergedBamFile.id
                                             ),
                     kit                   : new TableCellValue(
                                                 kit*.shortDisplayName.join(", ") ?: "-", null, null,
@@ -321,4 +337,32 @@ class AlignmentQualityOverviewController {
 
 class AlignmentQcCommand {
     SeqType seqType
+}
+
+class QcStatusCommand implements Serializable{
+    String comment
+    AbstractBamFile abstractBamFile
+    String newValue
+
+    static constraints = {
+        comment(blank: false, nullable: false, validator: {val, obj ->
+            if (val == obj.abstractBamFile?.comment?.comment) {
+                return "Comment has to change from ${val}"
+            }
+        })
+        abstractBamFile(nullable: false, validator: {val, obj ->
+            if (!val instanceof RoddyBamFile) {
+                return "${val} is an invalid Value."
+            }
+        })
+        newValue(blank: false, nullable: false, validator: {val, obj ->
+            if (!val instanceof AbstractMergedBamFile.QcTrafficLightStatus) {
+                return "The qcTrafficLightStatus must be one of ${AbstractMergedBamFile.QcTrafficLightStatus.findAll().join(", ")} and not ${val}"
+            }
+        })
+    }
+
+    void setComment(String comment) {
+        this.comment = comment?.trim()?.replaceAll(" +", " ")
+    }
 }

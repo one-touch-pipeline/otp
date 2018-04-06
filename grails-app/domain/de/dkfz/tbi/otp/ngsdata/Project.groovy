@@ -67,7 +67,7 @@ class Project implements Commentable, Entity, AlignmentConfig {
     ]
 
     static constraints = {
-        name(blank: false, unique: true, validator: {val, obj ->
+        name(blank: false, unique: true, validator: { val, obj ->
             Project project = atMostOneElement(Project.findAllByNameInMetadataFiles(val))
             if (project && project.id != obj.id) {
                 return 'this name is already used in another project as nameInMetadataFiles entry'
@@ -122,5 +122,10 @@ class Project implements Commentable, Entity, AlignmentConfig {
 
     File getProjectDirectory() {
         new OtpPath(this, dirName).absoluteDataManagementPath
+    }
+
+    @Override
+    Project getProject() {
+        return this
     }
 }

@@ -171,6 +171,11 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile implement
         }
     }
 
+    @Override
+    Project getProject() {
+        return individual?.project
+    }
+
     protected abstract File getPathForFurtherProcessingNoCheck()
 
 }

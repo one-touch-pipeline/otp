@@ -11,7 +11,7 @@ $.otp.alignmentQualityOverviewTable = {
     tableRowsFormatter: function (row, columnNames) {
         var result = [];
         for (var i = 0; i < columnNames.length; i += 1) {
-            result.push($.otp.alignmentQualityOverviewTable.tableCellFormatter(row[columnNames[i]], row[columnNames[i]]));
+            result.push($.otp.alignmentQualityOverviewTable.tableCellFormatter(row[columnNames[i]]));
         }
         if (row.withdrawn) {
             var withdrawnRows = [];
@@ -30,28 +30,35 @@ $.otp.alignmentQualityOverviewTable = {
         if ((data.value === undefined) && (data.icon === undefined)) {
             return $('<div>').text(data).html(); // escape HTML
         }
-        var result = $('<div>').text(data.value).html(); // escape HTML
+        if (data.status == "BLOCKED" || data.status == "REJECTED") {
+            result ="<span title='" + data.tooltip + "'>" + "<select class='" + data.status + "' onchange='$.otp.alignmentQualityOverview.change(this, \"" + data.id + "\", \"" + data.status + "\")'>" +
+                 "<option value='ACCEPTED' class='ACCEPTED' " + (data.status == 'ACCEPTED' ? 'selected' : '') + ">&#10003; ACCEPTED</option>" +
+                 "<option value='BLOCKED'  class='BLOCKED'" + (data.status == 'BLOCKED' ? 'selected' : '') + ">&#9888; BLOCKED</option>" +
+                 "<option  value='REJECTED'  class='REJECTED' " + (data.status == 'REJECTED' ? 'selected' : '') + ">&#10005; REJECTED</option>" +
+                 "</select> " + $('<div>').text(data.value).html()+ "</span>";
+        } else {
+            var result = $('<div>').text(data.value).html(); // escape HTML
 
-        var cssClass = [];
-        if (data.warnColor) {
-            cssClass.push("text-" + data.warnColor)
-        }
-        if (data.icon) {
-            cssClass.push("icon-" + data.icon)
-        }
-        if (cssClass.length !== 0) {
-            result ="<span class='" + cssClass + "'>" + result + " </span>"
-        }
+            var cssClass = [];
+            if (data.warnColor) {
+                cssClass.push("text-" + data.warnColor)
+            }
+            if (data.icon) {
+                cssClass.push("icon-" + data.icon)
+            }
+            if (cssClass.length !== 0) {
+                result ="<span class='" + cssClass + "'>" + result + " </span>"
+            }
 
-        if (data.tooltip) {
-            result ="<span title='" + data.tooltip + "'>" + result + "</span>"
-        }
-        if (data.link) {
-            result ="<a href='" + data.link + "'>" + result + "</a>"
+            if (data.tooltip) {
+                result ="<span title='" + data.tooltip + "'>" + result + "</span>"
+            }
+            if (data.link) {
+                result ="<a href='" + data.link + "'>" + result + "</a>"
+            }
         }
         return result;
     },
-
 
     register : function () {
         "use strict";

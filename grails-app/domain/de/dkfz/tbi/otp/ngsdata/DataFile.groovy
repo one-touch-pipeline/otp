@@ -180,4 +180,8 @@ class DataFile implements Commentable, Entity {
         }
         return length
     }
+
+    Project getProject() {
+        return this.project
+    }
 }
