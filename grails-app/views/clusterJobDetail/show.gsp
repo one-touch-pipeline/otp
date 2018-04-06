@@ -40,12 +40,6 @@ on the general cluster job page
                 <tr>
                     <td></td>
                     <td></td>
-                    <td><g:message code="jobstats.jobSpecific.detail.table.attribute.cluster"/></td>
-                    <td>${job.cluster}</td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td></td>
                     <td><g:message code="jobstats.jobSpecific.detail.table.attribute.jobClass"/></td>
                     <td>${job.jobClass}</td>
                 </tr>
@@ -202,7 +196,7 @@ on the general cluster job page
                     <td></td>
                     <td></td>
                     <td><g:message code="jobstats.jobSpecific.detail.table.attribute.cpuAvgUtilised"/></td>
-                    <td>${job.cpuAvgUtilised.round(2)}</td>
+                    <td>${job.cpuAvgUtilised?.round(2)?:"N/A"}</td>
                 </tr>
             </table>
         </div>
@@ -233,7 +227,7 @@ on the general cluster job page
                     <td></td>
                     <td></td>
                     <td><g:message code="jobstats.jobSpecific.detail.table.attribute.memoryEfficiency"/></td>
-                    <td>${job.memoryEfficiency.round(2)}</td>
+                    <td>${job.memoryEfficiency?.round(2)?:"N/A"}</td>
                 </tr>
             </table>
         </div>

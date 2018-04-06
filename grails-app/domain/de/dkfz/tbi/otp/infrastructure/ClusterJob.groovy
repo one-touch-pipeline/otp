@@ -250,7 +250,7 @@ class ClusterJob implements Entity {
      * average cpu cores utilized
      */
     public Double getCpuAvgUtilised () {
-        if (cpuTime != null && elapsedWalltime != null) {
+        if (cpuTime != null && elapsedWalltime != null && elapsedWalltime.millis != 0) {
             (cpuTime.millis * 1.0) / elapsedWalltime.millis
         } else {
             return null

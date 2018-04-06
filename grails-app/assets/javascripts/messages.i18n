@@ -731,7 +731,6 @@ jobstats.jobSpecific.detail.table.cpu
 jobstats.jobSpecific.detail.table.memory
 jobstats.jobSpecific.detail.table.attribute.id
 jobstats.jobSpecific.detail.table.attribute.name
-jobstats.jobSpecific.detail.table.attribute.cluster
 jobstats.jobSpecific.detail.table.attribute.status
 jobstats.jobSpecific.detail.table.attribute.code
 jobstats.jobSpecific.detail.table.attribute.queued
