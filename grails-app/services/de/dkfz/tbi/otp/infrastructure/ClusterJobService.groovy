@@ -77,11 +77,6 @@ class ClusterJobService {
         job.accountName = jobInfo.account
         job.dependencies = jobInfo.parentJobIDs ? jobInfo.parentJobIDs.collect { ClusterJob.findByClusterJobId(it) } : []
 
-        job.xten = isXten(job)
-        job.nBases = getBasesSum(job)
-        job.nReads = getReadsSum(job)
-        job.fileSize = getFileSizesSum(job)
-
         assert job.save(flush: true, failOnError: true)
     }
 
@@ -119,6 +114,11 @@ class ClusterJobService {
 
         job.node = jobInfo.executionHosts?.unique()?.sort()?.join(",")
         job.startCount = jobInfo.startCount
+
+        job.xten = isXten(job)
+        job.nBases = getBasesSum(job)
+        job.nReads = getReadsSum(job)
+        job.fileSize = getFileSizesSum(job)
 
         assert job.save(flush: true, failOnError: true)
 

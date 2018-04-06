@@ -20,20 +20,19 @@
         </div>
         <div class="optionsContainer">
             <p>Referencesize in Gigabases:
-                <input list="basesList" id="basesInput" value="3.2348">
-                <datalist id="basesList">
-                    <option value="3.2348" selected="selected">WHOLE GENOME</option>
-                    <option value="0.0350">WHOLE EXOME</option>
-                </datalist></p>
+                <select list="basesList" id="basesInput" value="3.2348">
+                    <option value="3.2348" selected="selected">3.2348 (WGS)</option>
+                    <option value="0.0350">0.0350 (WES)</option>
+                </select>
+            </p>
             <p>coverage:
-                <input list="coverageList" id="coverageInput" value="30">
-                <datalist id="coverageList">
+                <select list="coverageList" id="coverageInput" value="30">
                     <option value="15">15x</option>
                     <option value="30" selected="selected">30x</option>
                     <option value="60">60x</option>
                     <option value="90">90x</option>
                     <option value="100">100x</option>
-                </datalist>
+                </select>
             </p>
         </div>
         <div id="jobTypeSpecificAverageValues">
