@@ -39,7 +39,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
     protected String getCytosinePositionsIndex() {}
 
     // some text to be used to fill in files created on the fly
-    protected final static String TEST_CONTENT = 'DummyContent'
+    protected final static String TEST_CONTENT = 'dummy file, created by OTP'
 
     // files expected to be in every roddyExecutionDir
     final List<String> filesInRoddyExecutionDir = [
