@@ -26,7 +26,7 @@ class BedFileValidator extends ValueTuplesValidator<MetadataValidationContext> i
 
     @Override
     Collection<String> getDescriptions() {
-        return ["If the sequencing type is '${SeqTypeNames.EXOME.seqTypeName}' and the library layout is '${SeqType.LIBRARYLAYOUT_PAIRED}', a BED file should be configured in OTP to be used for the sample and library preparation kit."]
+        return ["If the sequencing type is '${SeqTypeNames.EXOME.seqTypeName}' and the library layout is '${LibraryLayout.PAIRED}', a BED file should be configured in OTP to be used for the sample and library preparation kit."]
     }
 
     @Override
@@ -59,7 +59,10 @@ class BedFileValidator extends ValueTuplesValidator<MetadataValidationContext> i
         }
 
         String libraryPreparationKitName = valueTuple.getValue(LIB_PREP_KIT.name())
-        LibraryPreparationKit libraryPreparationKit = libraryPreparationKitService.findLibraryPreparationKitByNameOrAlias(libraryPreparationKitName)
+        if (!libraryPreparationKitName) {
+            return
+        }
+        LibraryPreparationKit libraryPreparationKit = libraryPreparationKitService.findByNameOrImportAlias(libraryPreparationKitName)
         if (!libraryPreparationKit) {
             return
         }

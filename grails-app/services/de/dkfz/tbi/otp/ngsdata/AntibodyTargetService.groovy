@@ -1,17 +1,11 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.security.access.prepost.*
 
-class AntibodyTargetService {
+class AntibodyTargetService extends MetadataFieldsService<AntibodyTarget> {
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public AntibodyTarget createAntibodyTarget(String name){
-        assert name : "the input name '${name}' must not be null"
-        assert !AntibodyTarget.findByNameIlike(name) : "The AntibodyTarget '${name}' exists already"
-        AntibodyTarget antibodyTarget = new AntibodyTarget(
-                name: name
-        )
-        assert antibodyTarget.save(flush: true, failOnError: true)
-        return antibodyTarget
+    @Override
+    protected Class getClazz() {
+        return AntibodyTarget
     }
 }

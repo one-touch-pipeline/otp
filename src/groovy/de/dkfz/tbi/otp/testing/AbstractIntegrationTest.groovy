@@ -1,21 +1,13 @@
 package de.dkfz.tbi.otp.testing
+import de.dkfz.tbi.otp.job.plan.*
+import de.dkfz.tbi.otp.job.processing.*
 
 import static org.junit.Assert.*
-import de.dkfz.tbi.otp.job.plan.JobDefinition
-import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
-import de.dkfz.tbi.otp.job.processing.ParameterType
-import de.dkfz.tbi.otp.job.processing.ParameterUsage
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
-import org.springframework.security.authentication.AnonymousAuthenticationToken
-import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.security.core.authority.GrantedAuthorityImpl
-import grails.plugin.springsecurity.SpringSecurityUtils
-
 /**
  * Abstract base class for all tests to have some shared functionality.
  *
  */
-abstract class AbstractIntegrationTest implements UserAndRoles{
+abstract class AbstractIntegrationTest implements UserAndRoles {
 
    /**
     * Dependency injection of Spring security's authentication manager

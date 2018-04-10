@@ -11,6 +11,9 @@
 <body>
     <div class="body">
         <h3>
+            <g:message code="dataFields.title.caseInsensitive" />
+        </h3>
+        <h3>
             <g:message code="dataFields.title.libraryPreparationKitTable" />
         </h3>
         <table>
@@ -18,7 +21,7 @@
                     <tr>
                         <th><g:message code="dataFields.libraryPreparationKit"/></th>
                         <th><g:message code="dataFields.libraryPreparationKit.shortDisplayName"/></th>
-                        <th><g:message code="dataFields.libraryPreparationKit.alias"/></th>
+                        <th><g:message code="dataFields.libraryPreparationKit.importAlias"/></th>
                         <th></th>
                         <th><g:message code="dataFields.libraryPreparationKit.adapterFile"/></th>
                         <th><g:message code="dataFields.libraryPreparationKit.reverseComplementAdapterSequenceShort"/></th>
@@ -36,14 +39,14 @@
 
                         </td>
                         <td>
-                            ${libraryPreparationKit.alias}
+                            ${libraryPreparationKit.importAliases}
                         </td>
                         <td align="right">
                             <otp:editorSwitchNewValues
                                 roles="ROLE_OPERATOR"
-                                labels="${[g.message(code: "dataFields.libraryPreparationKit.alias")]}"
-                                textFields="${["alias"]}"
-                                link="${g.createLink(controller: 'metaDataFields', action: 'createLibraryPreparationKitAlias', id: libraryPreparationKit.name)}"
+                                labels="${[g.message(code: "dataFields.libraryPreparationKit.importAlias")]}"
+                                textFields="${["importAlias"]}"
+                                link="${g.createLink(controller: 'metaDataFields', action: 'createLibraryPreparationKitImportAlias', id: libraryPreparationKit.name)}"
                             />
                         </td>
                         <td>
@@ -100,13 +103,26 @@
             <thead>
                     <tr>
                         <th><g:message code="dataFields.listAntibodyTarget"/></th>
+                        <th><g:message code="dataFields.importAlias"/></th>
+                        <th></th>
                     </tr>
             </thead>
             <tbody>
-                    <g:each var="antiBodyTarget" in="${antiBodyTargets}" >
+                    <g:each var="antibodyTarget" in="${antibodyTargets}" >
                     <tr>
                         <td>
-                            ${antiBodyTarget.name}
+                            ${antibodyTarget.name}
+                        </td>
+                        <td>
+                            ${antibodyTarget.importAliases}
+                        </td>
+                        <td>
+                            <otp:editorSwitchNewValues
+                                roles="ROLE_OPERATOR"
+                                labels="${["Import Alias"]}"
+                                textFields="${["importAlias"]}"
+                                link="${g.createLink(controller: 'metaDataFields', action: 'createAntibodyTargetImportAlias', id: antibodyTarget.name)}"
+                            />
                         </td>
                     </tr>
                 </g:each>
@@ -161,10 +177,10 @@
                     <tr>
                         <th><g:message code="dataFields.listPlatformName"/></th>
                         <th><g:message code="dataFields.listPlatformModelLabel"/></th>
-                        <th><g:message code="dataFields.listPlatformModelLabelAlias"/></th>
+                        <th><g:message code="dataFields.listPlatformModelLabelImportAlias"/></th>
                         <th></th>
                         <th><g:message code="dataFields.listSequeningKitLabel"/></th>
-                        <th><g:message code="dataFields.listSequeningKitLabelAlias"/></th>
+                        <th><g:message code="dataFields.listSequeningKitLabelImportAlias"/></th>
                         <th></th>
                     </tr>
             </thead>
@@ -178,15 +194,15 @@
                             ${seqPlatform.model}
                         </td>
                         <td>
-                            ${seqPlatform.modelAlias}
+                            ${seqPlatform.modelImportAliases}
                         </td>
                         <td>
                         <g:if  test="${seqPlatform.hasModel}">
                             <otp:editorSwitchNewValues
                                 roles="ROLE_OPERATOR"
-                                labels="${["Alias"]}"
-                                textFields="${["alias"]}"
-                                link="${g.createLink(controller: 'metaDataFields', action: 'createModelAlias', id: seqPlatform.model)}"
+                                labels="${["Import Alias"]}"
+                                textFields="${["importAlias"]}"
+                                link="${g.createLink(controller: 'metaDataFields', action: 'createModelImportAlias', id: seqPlatform.model)}"
                             />
                         </g:if>
                         </td>
@@ -194,15 +210,15 @@
                             ${seqPlatform.seqKit}
                         </td>
                         <td>
-                            ${seqPlatform.seqKitAlias}
+                            ${seqPlatform.seqKitImportAliases}
                         </td>
                         <td>
                         <g:if  test="${seqPlatform.hasSeqKit}">
                             <otp:editorSwitchNewValues
                                 roles="ROLE_OPERATOR"
-                                labels="${["Alias"]}"
-                                textFields="${["alias"]}"
-                                link="${g.createLink(controller: 'metaDataFields', action: 'createSequencingKitAlias', id: seqPlatform.seqKit)}"
+                                labels="${["Import Alias"]}"
+                                textFields="${["importAlias"]}"
+                                link="${g.createLink(controller: 'metaDataFields', action: 'createSequencingKitImportAlias', id: seqPlatform.seqKit)}"
                             />
                         </g:if>
                         </td>
@@ -231,7 +247,7 @@
                         <th><g:message code="dataFields.listSeqTypeLayouts"/></th>
                         <th></th>
                         <th><g:message code="dataFields.listSeqTypeDisplayNames"/></th>
-                        <th><g:message code="dataFields.listSeqTypeAlias"/></th>
+                        <th><g:message code="dataFields.listSeqTypeImportAlias"/></th>
                         <th></th>
                     </tr>
             </thead>
@@ -256,7 +272,7 @@
                                 roles="ROLE_OPERATOR"
                                 labels="${seqType.layouts.findAll {!it.value}.collect {it.key}}"
                                 checkBoxes="${seqType.layouts.findAll {!it.value}.collectEntries { [it.key.toLowerCase(), it.value] }}"
-                                link="${g.createLink(controller: 'metaDataFields', action: 'createLayout', id: seqType.name)}"
+                                link="${g.createLink(controller: 'metaDataFields', action: 'createLayout', id: seqType.name,  params: ["singleCell": seqType.singleCell])}"
                             />
                             </g:if>
                         </td>
@@ -264,14 +280,14 @@
                             ${seqType.displayName}
                         </td>
                         <td>
-                            ${seqType.aliases}
+                            ${seqType.importAliases}
                         </td>
                         <td>
                             <otp:editorSwitchNewValues
                                 roles="ROLE_OPERATOR"
-                                labels="${["Alias"]}"
-                                textFields="${["alias"]}"
-                                link="${g.createLink(controller: 'metaDataFields', action: 'createSeqTypeAlias', id: seqType.name)}"
+                                labels="${["Import Alias"]}"
+                                textFields="${["importAlias"]}"
+                                link="${g.createLink(controller: 'metaDataFields', action: 'createSeqTypeImportAlias', id: seqType.name)}"
                             />
                         </td>
                     </tr>
@@ -318,18 +334,6 @@
                                         </td>
                                         <td valign="top" class="value">
                                             <input name="displayName" id="name" type="text"/>
-                                        </td>
-                                        <td>
-                                        </td>
-                                    </tr>
-                                    <tr class="prop">
-                                        <td valign="top" class="name">
-                                            <label for="alias">
-                                                <g:message code="dataFields.seqType.alias"/>
-                                            </label>
-                                        </td>
-                                        <td valign="top" class="value">
-                                            <input name="alias" id="alias" type="text"/>
                                         </td>
                                         <td>
                                         </td>

@@ -16,8 +16,6 @@ class LibraryPreparationKit implements Entity {
      * It has to contain the manufacturer + kit name + kit version
      *
      * example: 'Agilent SureSelect V4+UTRs'
-     *
-     * For alternative spellings etc., see {@link LibraryPreparationKitSynonym}
      */
     String name
 
@@ -27,6 +25,8 @@ class LibraryPreparationKit implements Entity {
 
     // used for RNA workflow
     String reverseComplementAdapterSequence
+
+    static hasMany = [importAlias : String]
 
     static constraints = {
         name(unique: true, blank: false)

@@ -12,7 +12,7 @@ class SequencingKitLabel implements Entity {
 
     String name
 
-    static hasMany = [alias : String]
+    static hasMany = [importAlias : String]
 
     static constraints = {
         name(unique: true, blank: false)

@@ -6,11 +6,15 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
 import de.dkfz.tbi.util.spreadsheet.validation.*
 import org.springframework.stereotype.*
+import org.springframework.beans.factory.annotation.*
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 
 @Component
 class SeqTypeLibraryLayoutValidator extends ValueTuplesValidator<AbstractMetadataValidationContext> implements MetadataValidator, BamMetadataValidator {
+
+    @Autowired
+    SeqTypeService seqTypeService
 
     @Override
     Collection<String> getDescriptions() {
@@ -33,7 +37,7 @@ class SeqTypeLibraryLayoutValidator extends ValueTuplesValidator<AbstractMetadat
     boolean columnMissing(AbstractMetadataValidationContext context, String columnTitle) {
         if (columnTitle in [TAGMENTATION_BASED_LIBRARY.name(), BASE_MATERIAL.name()]) {
             return true
-        }else{
+        } else {
             mandatoryColumnMissing(context, columnTitle)
             return false
         }
@@ -53,9 +57,9 @@ class SeqTypeLibraryLayoutValidator extends ValueTuplesValidator<AbstractMetadat
             boolean isSingleCell = SeqTypeService.isSingleCell(baseMaterial)
             if (seqTypeName &&
                     libraryLayoutName &&
-                    SeqTypeService.findSeqTypeByNameOrAlias(seqTypeName) &&
+                    seqTypeService.findByNameOrImportAlias(seqTypeName) &&
                     SeqType.findByLibraryLayout(libraryLayoutName) &&
-                    !SeqTypeService.findSeqTypeByNameOrAliasAndLibraryLayoutAndSingleCell(seqTypeName, libraryLayoutName, isSingleCell)) {
+                    !seqTypeService.findByNameOrImportAlias(seqTypeName, [libraryLayout: libraryLayoutName, singleCell: isSingleCell])) {
                 if (isSingleCell)
                     context.addProblem(it.cells, Level.ERROR, "The combination of sequencing type '${seqTypeName}' and library layout '${libraryLayoutName}' and Single Cell is not registered in the OTP database.", "At least one combination of sequencing type and library layout and Single Cell is not registered in the OTP database.")
                 else

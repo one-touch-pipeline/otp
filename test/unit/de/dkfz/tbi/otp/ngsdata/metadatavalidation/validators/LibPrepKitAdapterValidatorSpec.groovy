@@ -18,7 +18,6 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 @Mock([
         Individual,
         LibraryPreparationKit,
-        LibraryPreparationKitSynonym,
         Pipeline,
         ProcessingOption,
         Project,
@@ -34,6 +33,10 @@ class LibPrepKitAdapterValidatorSpec extends Specification {
     void 'validate, when metadata file contains valid data, succeeds'() {
 
         given:
+        DomainFactory.createRoddyAlignableSeqTypes()
+        DomainFactory.createPanCanPipeline()
+        DomainFactory.createRnaPipeline()
+
         LibPrepKitAdapterValidator validator = new LibPrepKitAdapterValidator()
         validator.libraryPreparationKitService = new LibraryPreparationKitService()
         validator.sampleIdentifierService = [
@@ -46,10 +49,13 @@ class LibPrepKitAdapterValidatorSpec extends Specification {
                     }
                 }
         ] as SampleIdentifierService
-
-        DomainFactory.createRoddyAlignableSeqTypes()
-        DomainFactory.createPanCanPipeline()
-        DomainFactory.createRnaPipeline()
+        validator.seqTypeService = Mock(SeqTypeService) {
+            1 * findByNameOrImportAlias(SeqTypeNames.WHOLE_GENOME.seqTypeName, [libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED, singleCell: false]) >> SeqType.wholeGenomePairedSeqType
+            1 * findByNameOrImportAlias(SeqTypeNames.EXOME.seqTypeName, [libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED, singleCell: false])  >> SeqType.exomePairedSeqType
+            9 * findByNameOrImportAlias(SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName, [libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED, singleCell: false])  >> SeqType.wholeGenomeBisulfitePairedSeqType
+            1 * findByNameOrImportAlias(SeqTypeNames.RNA.seqTypeName, [libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED, singleCell: false])  >> SeqType.rnaPairedSeqType
+            1 * findByNameOrImportAlias(SeqTypeNames.CHIP_SEQ.seqTypeName, [libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED, singleCell: false])  >> SeqType.chipSeqPairedSeqType
+        }
 
         LibraryPreparationKit kitWithoutAdapterFileAndSequence = DomainFactory.createLibraryPreparationKit(name: 'lib_prep_kit_without_adapter_file_and_sequence')
         LibraryPreparationKit kitWithoutAdapterFile = DomainFactory.createLibraryPreparationKit(name: 'lib_prep_kit_without_adapter_file', reverseComplementAdapterSequence: "ACGTC")

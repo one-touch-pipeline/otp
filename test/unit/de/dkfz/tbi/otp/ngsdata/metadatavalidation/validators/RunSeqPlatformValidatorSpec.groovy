@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.util.spreadsheet.validation.*
 import grails.test.mixin.*
 import spock.lang.*
@@ -34,10 +35,10 @@ class RunSeqPlatformValidatorSpec extends Specification {
     SeqPlatform platform_2_1_X
 
     private void createPlatforms() {
-        model1 = DomainFactory.createSeqPlatformModelLabel(name: 'Model1', alias: ['Model1Alias'])
-        model2 = DomainFactory.createSeqPlatformModelLabel(name: 'Model2', alias: ['Model2Alias'])
-        kit1 = DomainFactory.createSequencingKitLabel(name: 'Kit1', alias: ['Kit1Alias'])
-        kit2 = DomainFactory.createSequencingKitLabel(name: 'Kit2', alias: ['Kit2Alias'])
+        model1 = DomainFactory.createSeqPlatformModelLabel(name: 'Model1', importAlias: ['Model1ImportAlias'])
+        model2 = DomainFactory.createSeqPlatformModelLabel(name: 'Model2', importAlias: ['Model2ImportAlias'])
+        kit1 = DomainFactory.createSequencingKitLabel(name: 'Kit1', importAlias: ['Kit1ImportAlias'])
+        kit2 = DomainFactory.createSequencingKitLabel(name: 'Kit2', importAlias: ['Kit2ImportAlias'])
         platform_1_1_1 = DomainFactory.createSeqPlatformWithSeqPlatformGroup(
                 name: 'Platform1',
                 seqPlatformModelLabel: model1,
@@ -80,19 +81,19 @@ class RunSeqPlatformValidatorSpec extends Specification {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${INSTRUMENT_PLATFORM}\t${INSTRUMENT_MODEL}\t${SEQUENCING_KIT}\t${RUN_ID}\n" +
-                        "Platform1\tModel1Alias\tKit1Alias\tInconsistentPlatformInMetadata\n" +
-                        "Platform2\tModel1Alias\tKit1Alias\tInconsistentPlatformInMetadata\n" +
-                        "Platform1\tModel1Alias\tKit1Alias\tInconsistentModelInMetadata\n" +
-                        "Platform1\tModel2Alias\tKit1Alias\tInconsistentModelInMetadata\n" +
-                        "Platform1\tModel1Alias\tKit1Alias\tInconsistentKitInMetadata\n" +
-                        "Platform1\tModel1Alias\tKit2Alias\tInconsistentKitInMetadata\n" +
-                        "Platform2\tModel1Alias\tKit1Alias\tPlatformInconsistentInDatabaseAndMetadata\n" +
-                        "Platform1\tModel2Alias\tKit1Alias\tModelInconsistentInDatabaseAndMetadata\n" +
-                        "Platform1\tModel1Alias\tKit2Alias\tKitInconsistentInDatabaseAndMetadata\n" +
-                        "Platform1\tModel1Alias\tKit1Alias\tConsistentDatabaseAndMetadataWithKit\n" +
-                        "Platform2\tModel2Alias\t\tConsistentDatabaseAndMetadataWithoutKit\n" +
-                        "Platform1\tModel1Alias\tKit1Alias\tRunNotRegistered\n" +
-                        "Platform2\tModel2Alias\tKit2Alias\tPlatformNotRegistered\n")
+                        "Platform1\tModel1ImportAlias\tKit1ImportAlias\tInconsistentPlatformInMetadata\n" +
+                        "Platform2\tModel1ImportAlias\tKit1ImportAlias\tInconsistentPlatformInMetadata\n" +
+                        "Platform1\tModel1ImportAlias\tKit1ImportAlias\tInconsistentModelInMetadata\n" +
+                        "Platform1\tModel2ImportAlias\tKit1ImportAlias\tInconsistentModelInMetadata\n" +
+                        "Platform1\tModel1ImportAlias\tKit1ImportAlias\tInconsistentKitInMetadata\n" +
+                        "Platform1\tModel1ImportAlias\tKit2ImportAlias\tInconsistentKitInMetadata\n" +
+                        "Platform2\tModel1ImportAlias\tKit1ImportAlias\tPlatformInconsistentInDatabaseAndMetadata\n" +
+                        "Platform1\tModel2ImportAlias\tKit1ImportAlias\tModelInconsistentInDatabaseAndMetadata\n" +
+                        "Platform1\tModel1ImportAlias\tKit2ImportAlias\tKitInconsistentInDatabaseAndMetadata\n" +
+                        "Platform1\tModel1ImportAlias\tKit1ImportAlias\tConsistentDatabaseAndMetadataWithKit\n" +
+                        "Platform2\tModel2ImportAlias\t\tConsistentDatabaseAndMetadataWithoutKit\n" +
+                        "Platform1\tModel1ImportAlias\tKit1ImportAlias\tRunNotRegistered\n" +
+                        "Platform2\tModel2ImportAlias\tKit2ImportAlias\tPlatformNotRegistered\n")
         createPlatforms()
         DomainFactory.createRun(name: 'PlatformInconsistentInDatabaseAndMetadata', seqPlatform: platform_1_1_1)
         DomainFactory.createRun(name: 'ModelInconsistentInDatabaseAndMetadata', seqPlatform: platform_1_1_1)
@@ -115,10 +116,19 @@ class RunSeqPlatformValidatorSpec extends Specification {
         ]
 
         when:
-        new RunSeqPlatformValidator().validate(context)
+        RunSeqPlatformValidator validator = new RunSeqPlatformValidator()
+        validator.seqPlatformService = Mock(SeqPlatformService) {
+            2 * findSeqPlatform("Platform1", "Model1ImportAlias", "Kit1ImportAlias") >> platform_1_1_1
+            1 * findSeqPlatform("Platform2", "Model1ImportAlias", "Kit1ImportAlias") >> platform_2_1_1
+            1 * findSeqPlatform("Platform1", "Model2ImportAlias", "Kit1ImportAlias") >> platform_1_2_1
+            1 * findSeqPlatform("Platform1", "Model1ImportAlias", "Kit2ImportAlias") >> platform_1_1_2
+            1 * findSeqPlatform("Platform2", "Model2ImportAlias", null) >> platform_2_2_X
+            1 * findSeqPlatform("Platform2", "Model2ImportAlias", "Kit2ImportAlias") >> null
+        }
+        validator.validate(context)
 
         then:
-        containSame(context.problems, expectedProblems)
+        assertContainSame(context.problems, expectedProblems)
     }
 
     void 'without kit column, validate adds expected problems'() {
@@ -126,16 +136,16 @@ class RunSeqPlatformValidatorSpec extends Specification {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${INSTRUMENT_PLATFORM}\t${INSTRUMENT_MODEL}\t${RUN_ID}\n" +
-                        "Platform1\tModel1Alias\tInconsistentPlatformInMetadata\n" +
-                        "Platform2\tModel1Alias\tInconsistentPlatformInMetadata\n" +
-                        "Platform1\tModel1Alias\tInconsistentModelInMetadata\n" +
-                        "Platform1\tModel2Alias\tInconsistentModelInMetadata\n" +
-                        "Platform1\tModel2Alias\tPlatformInconsistentInDatabaseAndMetadata\n" +
-                        "Platform2\tModel1Alias\tModelInconsistentInDatabaseAndMetadata\n" +
-                        "Platform1\tModel2Alias\tKitInconsistentInDatabaseAndMetadata\n" +
-                        "Platform2\tModel2Alias\tConsistentDatabaseAndMetadata\n" +
-                        "Platform1\tModel1Alias\tRunNotRegistered\n" +
-                        "Platform2\tModel2Alias\tPlatformNotRegistered\n")
+                        "Platform1\tModel1ImportAlias\tInconsistentPlatformInMetadata\n" +
+                        "Platform2\tModel1ImportAlias\tInconsistentPlatformInMetadata\n" +
+                        "Platform1\tModel1ImportAlias\tInconsistentModelInMetadata\n" +
+                        "Platform1\tModel2ImportAlias\tInconsistentModelInMetadata\n" +
+                        "Platform1\tModel2ImportAlias\tPlatformInconsistentInDatabaseAndMetadata\n" +
+                        "Platform2\tModel1ImportAlias\tModelInconsistentInDatabaseAndMetadata\n" +
+                        "Platform1\tModel2ImportAlias\tKitInconsistentInDatabaseAndMetadata\n" +
+                        "Platform2\tModel2ImportAlias\tConsistentDatabaseAndMetadata\n" +
+                        "Platform1\tModel1ImportAlias\tRunNotRegistered\n" +
+                        "Platform2\tModel2ImportAlias\tPlatformNotRegistered\n")
         createPlatforms()
         DomainFactory.createRun(name: 'PlatformInconsistentInDatabaseAndMetadata', seqPlatform: platform_2_2_X)
         DomainFactory.createRun(name: 'ModelInconsistentInDatabaseAndMetadata', seqPlatform: platform_2_2_X)
@@ -157,7 +167,14 @@ class RunSeqPlatformValidatorSpec extends Specification {
         ]
 
         when:
-        new RunSeqPlatformValidator().validate(context)
+        RunSeqPlatformValidator validator = new RunSeqPlatformValidator()
+        validator.seqPlatformService = Mock(SeqPlatformService) {
+            1 * findSeqPlatform("Platform1", "Model1ImportAlias", null) >> null
+            1 * findSeqPlatform(platform_2_1_X.name, exactlyOneElement(platform_2_1_X.seqPlatformModelLabel.importAlias), null) >> platform_2_1_X
+            2 * findSeqPlatform(platform_1_2_X.name, exactlyOneElement(platform_1_2_X.seqPlatformModelLabel.importAlias), null) >> platform_1_2_X
+            2 * findSeqPlatform(platform_2_2_X.name, exactlyOneElement(platform_2_2_X.seqPlatformModelLabel.importAlias), null) >> platform_2_2_X
+        }
+        validator.validate(context)
 
         then:
         assertContainSame(context.problems, expectedProblems)

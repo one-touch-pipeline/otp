@@ -30,14 +30,14 @@ class SeqPlatformValidatorSpec extends Specification {
     SeqPlatform platform_3_3_X
 
     private void createPlatforms() {
-        model1 = DomainFactory.createSeqPlatformModelLabel(name: 'Model1', alias: ['Model1Alias'])
-        model2 = DomainFactory.createSeqPlatformModelLabel(name: 'Model2', alias: ['Model2Alias'])
-        model3 = DomainFactory.createSeqPlatformModelLabel(name: 'Model3', alias: ['Model3Alias'])
-        model4 = DomainFactory.createSeqPlatformModelLabel(name: 'Model4', alias: ['Model4Alias'])
-        kit1 = DomainFactory.createSequencingKitLabel(name: 'Kit1', alias: ['Kit1Alias'])
-        kit2 = DomainFactory.createSequencingKitLabel(name: 'Kit2', alias: ['Kit2Alias'])
-        kit3 = DomainFactory.createSequencingKitLabel(name: 'Kit3', alias: ['Kit3Alias'])
-        kit4 = DomainFactory.createSequencingKitLabel(name: 'Kit4', alias: ['Kit4Alias'])
+        model1 = DomainFactory.createSeqPlatformModelLabel(name: 'Model1', importAlias: ['Model1ImportAlias'])
+        model2 = DomainFactory.createSeqPlatformModelLabel(name: 'Model2', importAlias: ['Model2ImportAlias'])
+        model3 = DomainFactory.createSeqPlatformModelLabel(name: 'Model3', importAlias: ['Model3ImportAlias'])
+        model4 = DomainFactory.createSeqPlatformModelLabel(name: 'Model4', importAlias: ['Model4ImportAlias'])
+        kit1 = DomainFactory.createSequencingKitLabel(name: 'Kit1', importAlias: ['Kit1ImportAlias'])
+        kit2 = DomainFactory.createSequencingKitLabel(name: 'Kit2', importAlias: ['Kit2ImportAlias'])
+        kit3 = DomainFactory.createSequencingKitLabel(name: 'Kit3', importAlias: ['Kit3ImportAlias'])
+        kit4 = DomainFactory.createSequencingKitLabel(name: 'Kit4', importAlias: ['Kit4ImportAlias'])
         platform_1_1_1 = DomainFactory.createSeqPlatformWithSeqPlatformGroup(
                 name: 'Platform1',
                 seqPlatformModelLabel: model1,
@@ -56,15 +56,15 @@ class SeqPlatformValidatorSpec extends Specification {
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${INSTRUMENT_PLATFORM}\t${INSTRUMENT_MODEL}\t${SEQUENCING_KIT}\n" +
                         "Platform1\tModel1\tKit1\n" +
-                        "Platform1\tModel1Alias\tKit1\n" +
-                        "Platform1\tModel1\tKit1Alias\n" +
-                        "Platform1\tModel1Alias\tKit1Alias\n" +
+                        "Platform1\tModel1ImportAlias\tKit1\n" +
+                        "Platform1\tModel1\tKit1ImportAlias\n" +
+                        "Platform1\tModel1ImportAlias\tKit1ImportAlias\n" +
                         "Platform2\tModel1\tKit1\n" +
                         "Platform1\tModel2\tKit1\n" +
                         "Platform1\tModel1\tKit2\n" +
                         "Platform1\tModel1\n" +
                         "Platform3\tModel3\n" +
-                        "Platform3\tModel3Alias\n" +
+                        "Platform3\tModel3ImportAlias\n" +
                         "Platform4\tModel3\n" +
                         "Platform3\tModel4\n" +
                         "Platform3\tModel3\tKit1\n" +
@@ -102,7 +102,28 @@ class SeqPlatformValidatorSpec extends Specification {
         ]
 
         when:
-        new SeqPlatformValidator().validate(context)
+        SeqPlatformValidator validator = new SeqPlatformValidator()
+        validator.seqPlatformService = Mock(SeqPlatformService) {
+            1 *findSeqPlatform("Platform1", "Model1", "Kit1") >> platform_1_1_1
+            1 *findSeqPlatform("Platform1", "Model1ImportAlias", "Kit1") >> platform_1_1_1
+            1 *findSeqPlatform("Platform1", "Model1", "Kit1ImportAlias") >> platform_1_1_1
+            1 *findSeqPlatform("Platform1", "Model1ImportAlias", "Kit1ImportAlias") >> platform_1_1_1
+            1 *findSeqPlatform("Platform2", "Model1", "Kit1") >> null
+            1 *findSeqPlatform("Platform1", "Model2", "Kit1") >> null
+            1 *findSeqPlatform("Platform1", "Model1", "Kit2") >> null
+            1 *findSeqPlatform("Platform1", "Model1", null) >> null
+            1 *findSeqPlatform("Platform3", "Model3", null) >> platform_3_3_X
+            1 *findSeqPlatform("Platform3", "Model3ImportAlias", null) >> platform_3_3_X
+            1 *findSeqPlatform("Platform4", "Model3", null) >> null
+            1 *findSeqPlatform("Platform3", "Model4", null) >> null
+            1 *findSeqPlatform("Platform3", "Model3", "Kit1") >> null
+            1 *findSeqPlatform("Platform5", "Model1", "Kit1") >> null
+            1 *findSeqPlatform("Platform1", "Model5", "Kit1") >> null
+            1 *findSeqPlatform("Platform1", "Model1", "Kit5") >> null
+            1 *findSeqPlatform("Platform5", "Model3", null) >> null
+            1 *findSeqPlatform("Platform3", "Model5", null) >> null
+        }
+        validator.validate(context)
 
         then:
         assertContainSame(context.problems, expectedProblems)
@@ -117,7 +138,7 @@ class SeqPlatformValidatorSpec extends Specification {
                         "Platform2\tModel1\n" +
                         "Platform1\tModel2\n" +
                         "Platform3\tModel3\n" +
-                        "Platform3\tModel3Alias\n" +
+                        "Platform3\tModel3ImportAlias\n" +
                         "Platform4\tModel3\n" +
                         "Platform3\tModel4\n" +
                         "Platform5\tModel3\n" +
@@ -143,8 +164,19 @@ class SeqPlatformValidatorSpec extends Specification {
         ]
 
         when:
-        new SeqPlatformValidator().validate(context)
-
+        SeqPlatformValidator validator = new SeqPlatformValidator()
+        validator.seqPlatformService = Mock(SeqPlatformService) {
+            findSeqPlatform("Platform1", "Model1", null) >> null
+            findSeqPlatform("Platform2", "Model1", null) >> null
+            findSeqPlatform("Platform1", "Model2", null) >> null
+            findSeqPlatform("Platform3", "Model3", null) >> platform_3_3_X
+            findSeqPlatform("Platform3", "Model3ImportAlias", null) >> platform_3_3_X
+            findSeqPlatform("Platform4", "Model3", null) >> null
+            findSeqPlatform("Platform3", "Model4", null) >> null
+            findSeqPlatform("Platform5", "Model3", null) >> null
+            findSeqPlatform("Platform3", "Model5", null) >> null
+        }
+        validator.validate(context)
         then:
         assertContainSame(context.problems, expectedProblems)
     }

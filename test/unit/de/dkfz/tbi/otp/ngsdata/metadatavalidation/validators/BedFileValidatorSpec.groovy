@@ -16,7 +16,6 @@ import static de.dkfz.tbi.TestCase.*
         BedFile,
         Individual,
         LibraryPreparationKit,
-        LibraryPreparationKitSynonym,
         Project,
         ProjectCategory,
         ProcessingOption,

@@ -12,7 +12,6 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 @Mock([
         LibraryPreparationKit,
-        LibraryPreparationKitSynonym,
 ])
 class LibPrepKitValidatorSpec extends Specification {
 
@@ -22,14 +21,13 @@ class LibPrepKitValidatorSpec extends Specification {
             "${MetaDataColumn.LIB_PREP_KIT}\n" +
                     "lib_prep_kit\n" +
                     "\n" +
-                    "lib_prep_kit_syno\n" +
+                    "lib_prep_kit_import_alias\n" +
                     "${InformationReliability.UNKNOWN_VERIFIED.rawValue}\n"
 
     void setup() {
         validator = new LibPrepKitValidator()
         validator.libraryPreparationKitService = new LibraryPreparationKitService()
-        LibraryPreparationKit kit = DomainFactory.createLibraryPreparationKit(name: 'lib_prep_kit')
-        new LibraryPreparationKitSynonym(name: "lib_prep_kit_syno", libraryPreparationKit: kit).save(flush: true)
+        DomainFactory.createLibraryPreparationKit(name: 'lib_prep_kit', importAlias: ["lib_prep_kit_import_alias"])
     }
 
 

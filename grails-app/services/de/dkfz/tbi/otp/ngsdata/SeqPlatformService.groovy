@@ -3,6 +3,8 @@ package de.dkfz.tbi.otp.ngsdata
 import org.springframework.context.annotation.Scope
 import org.springframework.security.access.prepost.PreAuthorize
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
+import org.springframework.beans.factory.annotation.*
+import org.springframework.security.access.*
 
 @Scope("prototype")
 class SeqPlatformService {
@@ -23,7 +25,7 @@ class SeqPlatformService {
                                                    SequencingKitLabel sequencingKitLabel = null) {
         assert seqPlatformName : "The input seqPlatformName must not be null"
 
-        assert !SeqPlatformService.findForNameAndModelAndSequencingKit(seqPlatformName, seqPlatformModelLabel, sequencingKitLabel) :
+        assert !findForNameAndModelAndSequencingKit(seqPlatformName, seqPlatformModelLabel, sequencingKitLabel) :
             "The seqPlatform for this name, model and kit exists already"
 
         SeqPlatform seqPlatform = new SeqPlatform(
@@ -42,26 +44,26 @@ class SeqPlatformService {
         SequencingKitLabel sequencingKitLabel = null
 
         if(seqPlatformModelLabelName) {
-            seqPlatformModelLabel = seqPlatformModelLabelService.findSeqPlatformModelLabelByNameOrAlias(seqPlatformModelLabelName)?: seqPlatformModelLabelService.createNewSeqPlatformModelLabel(seqPlatformModelLabelName)
+            seqPlatformModelLabel = seqPlatformModelLabelService.findByNameOrImportAlias(seqPlatformModelLabelName)?: seqPlatformModelLabelService.create(seqPlatformModelLabelName)
         }
         if(sequencingKitLabelName) {
-            sequencingKitLabel = sequencingKitLabelService.findSequencingKitLabelByNameOrAlias(sequencingKitLabelName)?: sequencingKitLabelService.createNewSequencingKitLabel(sequencingKitLabelName)
+            sequencingKitLabel = sequencingKitLabelService.findByNameOrImportAlias(sequencingKitLabelName)?: sequencingKitLabelService.create(sequencingKitLabelName)
         }
         SeqPlatform seqPlatform = createNewSeqPlatform(seqPlatformName, seqPlatformModelLabel, sequencingKitLabel)
         return seqPlatform
     }
 
-    public static SeqPlatform findSeqPlatform(String seqPlatformName, String seqPlatformModelLabelNameOrAlias, String sequencingKitLabelNameOrAlias) {
+    public SeqPlatform findSeqPlatform(String seqPlatformName, String seqPlatformModelLabelNameOrAlias, String sequencingKitLabelNameOrAlias) {
         SeqPlatformModelLabel seqPlatformModelLabel = null
         if (seqPlatformModelLabelNameOrAlias != null) {
-            seqPlatformModelLabel = SeqPlatformModelLabelService.findSeqPlatformModelLabelByNameOrAlias(seqPlatformModelLabelNameOrAlias)
+            seqPlatformModelLabel = seqPlatformModelLabelService.findByNameOrImportAlias(seqPlatformModelLabelNameOrAlias)
             if (seqPlatformModelLabel == null) {
                 return null
             }
         }
         SequencingKitLabel sequencingKitLabel = null
         if (sequencingKitLabelNameOrAlias != null) {
-            sequencingKitLabel = SequencingKitLabelService.findSequencingKitLabelByNameOrAlias(sequencingKitLabelNameOrAlias)
+            sequencingKitLabel = sequencingKitLabelService.findByNameOrImportAlias(sequencingKitLabelNameOrAlias)
             if (sequencingKitLabel == null) {
                 return null
             }

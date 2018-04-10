@@ -73,15 +73,29 @@ SeqType2\tLibraryLayout2\ttrue
 SeqType3\tLibraryLayout3\t\t${SeqType.SINGLE_CELL_RNA}
 SeqType3\tLibraryLayout3\t\t${SeqType.SINGLE_CELL_DNA}
 """)
-        DomainFactory.createSeqType(name: 'SeqType1', dirName: 'NameSeqType1', libraryLayout: 'LibraryLayout1', singleCell: false)
-        DomainFactory.createSeqType(name: 'SeqType1', dirName: 'NameSeqType1', libraryLayout: 'LibraryLayout2', singleCell: false)
-        DomainFactory.createSeqType(name: 'SeqType2', dirName: 'NameSeqType2', libraryLayout: 'LibraryLayout1', singleCell: false)
-        DomainFactory.createSeqType(name: 'SeqType2', dirName: 'NameSeqType2', libraryLayout: 'LibraryLayout2', singleCell: false)
-        DomainFactory.createSeqType(name: 'SeqType3', dirName: 'NameSeqType3', libraryLayout: 'LibraryLayout3', singleCell: true)
-        DomainFactory.createSeqType(name: 'SeqType2_TAGMENTATION', dirName: 'SeqType2_TAGMENTATION', libraryLayout: 'LibraryLayout2', singleCell: false)
+        SeqType seqType1ll1 = DomainFactory.createSeqType(name: 'SeqType1', dirName: 'NameSeqType1', libraryLayout: 'LibraryLayout1', singleCell: false)
+        SeqType seqType1ll2 = DomainFactory.createSeqType(name: 'SeqType1', dirName: 'NameSeqType1', libraryLayout: 'LibraryLayout2', singleCell: false)
+        SeqType seqType2ll1 = DomainFactory.createSeqType(name: 'SeqType2', dirName: 'NameSeqType2', libraryLayout: 'LibraryLayout1', singleCell: false)
+        SeqType seqType2ll2 = DomainFactory.createSeqType(name: 'SeqType2', dirName: 'NameSeqType2', libraryLayout: 'LibraryLayout2', singleCell: false)
+        SeqType seqType3ll3True = DomainFactory.createSeqType(name: 'SeqType3', dirName: 'NameSeqType3', libraryLayout: 'LibraryLayout3', singleCell: true)
+        SeqType seqType2Tagll2 = DomainFactory.createSeqType(name: 'SeqType2_TAGMENTATION', dirName: 'SeqType2_TAGMENTATION', libraryLayout: 'LibraryLayout2', singleCell: false)
 
         when:
-        new SeqTypeLibraryLayoutValidator().validate(context)
+        SeqTypeLibraryLayoutValidator validator = new SeqTypeLibraryLayoutValidator()
+        validator.seqTypeService = Mock(SeqTypeService) {
+            1 * findByNameOrImportAlias('SeqType1', [libraryLayout: 'LibraryLayout1', singleCell: false]) >> seqType1ll1
+            1 * findByNameOrImportAlias('SeqType1', [libraryLayout: 'LibraryLayout2', singleCell: false]) >> seqType1ll2
+            1 * findByNameOrImportAlias('SeqType2', [libraryLayout: 'LibraryLayout1', singleCell: false]) >> seqType2ll1
+            1 * findByNameOrImportAlias('SeqType2', [libraryLayout: 'LibraryLayout2', singleCell: false]) >> seqType2ll2
+            2 * findByNameOrImportAlias('SeqType3', [libraryLayout: 'LibraryLayout3', singleCell: true]) >> seqType3ll3True
+            1 * findByNameOrImportAlias('SeqType2_TAGMENTATION', [libraryLayout: 'LibraryLayout2', singleCell: false]) >> seqType2Tagll2
+            2 * findByNameOrImportAlias('SeqType1') >> seqType1ll1
+            2 * findByNameOrImportAlias('SeqType2') >> seqType2ll1
+            1 * findByNameOrImportAlias('SeqType2_TAGMENTATION') >> seqType2Tagll2
+            2 * findByNameOrImportAlias('SeqType3') >> seqType3ll3True
+            0 * _
+        }
+        validator.validate(context)
 
         then:
         context.problems.empty
@@ -96,10 +110,16 @@ SeqType1\tLibraryLayoutUnknown\t\twer
 \tLibraryLayout1\t\twer
 SeqType1\t\t\twer
 """)
-        DomainFactory.createSeqType(name: 'SeqType1', libraryLayout: 'LibraryLayout1')
+        SeqType seqType = DomainFactory.createSeqType(name: 'SeqType1', libraryLayout: 'LibraryLayout1')
+
+        SeqTypeLibraryLayoutValidator validator = new SeqTypeLibraryLayoutValidator()
+        validator.seqTypeService = Mock(SeqTypeService) {
+            1 * findByNameOrImportAlias('SeqTypeUnknown') >> null
+            1 * findByNameOrImportAlias('SeqType1') >> seqType
+        }
 
         when:
-        new SeqTypeLibraryLayoutValidator().validate(context)
+        validator.validate(context)
 
         then:
         context.problems.empty
@@ -123,12 +143,34 @@ SeqType3\tLibraryLayout3\ttrue\terwr
 SeqType3\tLibraryLayout2\ttrue\t${SeqType.SINGLE_CELL_DNA}
 SeqType2\tLibraryLayout2\t\t${SeqType.SINGLE_CELL_RNA}
 """)
-        DomainFactory.createSeqType(name: 'SeqType1', libraryLayout: 'LibraryLayout1')
-        DomainFactory.createSeqType(name: 'SeqType2', libraryLayout: 'LibraryLayout2')
-        DomainFactory.createSeqType(name: 'SeqType3')
-        DomainFactory.createSeqType(name: 'SeqType3_TAGMENTATION')
+
+        SeqType seqType1ll1 = DomainFactory.createSeqType(name: 'SeqType1', libraryLayout: 'LibraryLayout1')
+        SeqType seqType2ll2 = DomainFactory.createSeqType(name: 'SeqType2', libraryLayout: 'LibraryLayout2')
+        SeqType seqType3 = DomainFactory.createSeqType(name: 'SeqType3')
+        SeqType seqType3Tag =  DomainFactory.createSeqType(name: 'SeqType3_TAGMENTATION')
         DomainFactory.createSeqType(libraryLayout: 'LibraryLayout3')
 
+
+        SeqTypeLibraryLayoutValidator validator = new SeqTypeLibraryLayoutValidator()
+        validator.seqTypeService = Mock(SeqTypeService) {
+            1 * findByNameOrImportAlias('SeqType1', [libraryLayout: 'LibraryLayout1', singleCell: false]) >> seqType1ll1
+            1 * findByNameOrImportAlias('SeqType1', [libraryLayout: 'LibraryLayout2', singleCell: false]) >> null
+            1 * findByNameOrImportAlias('SeqType1', [libraryLayout: 'LibraryLayout3', singleCell: false]) >> null
+            1 * findByNameOrImportAlias('SeqType2', [libraryLayout: 'LibraryLayout1', singleCell: false]) >> null
+            1 * findByNameOrImportAlias('SeqType2', [libraryLayout: 'LibraryLayout2', singleCell: false]) >> seqType2ll2
+            1 * findByNameOrImportAlias('SeqType2', [libraryLayout: 'LibraryLayout3', singleCell: false]) >> null
+            1 * findByNameOrImportAlias('SeqType3', [libraryLayout: 'LibraryLayout1', singleCell: false]) >> null
+            1 * findByNameOrImportAlias('SeqType3', [libraryLayout: 'LibraryLayout2', singleCell: false]) >> null
+            1 * findByNameOrImportAlias('SeqType3', [libraryLayout: 'LibraryLayout3', singleCell: false]) >> null
+            1 * findByNameOrImportAlias('SeqType3_TAGMENTATION', [libraryLayout: 'LibraryLayout3', singleCell: false]) >> null
+            1 * findByNameOrImportAlias('SeqType3_TAGMENTATION', [libraryLayout: 'LibraryLayout2', singleCell: true]) >> null
+            1 * findByNameOrImportAlias('SeqType2', [libraryLayout: 'LibraryLayout2', singleCell: true]) >> null
+            3 * findByNameOrImportAlias('SeqType1') >> seqType1ll1
+            4 * findByNameOrImportAlias('SeqType2') >> seqType2ll2
+            3 * findByNameOrImportAlias('SeqType3') >> seqType3
+            2 * findByNameOrImportAlias('SeqType3_TAGMENTATION') >> seqType3Tag
+            0 * _
+        }
         Collection<Problem> expectedProblems = [
                 new Problem(context.spreadsheet.dataRows[1].cells as Set, Level.ERROR,
                         "The combination of sequencing type 'SeqType1' and library layout 'LibraryLayout2' and without Single Cell is not registered in the OTP database.", "At least one combination of sequencing type and library layout and without Single Cell is not registered in the OTP database."),
@@ -153,7 +195,8 @@ SeqType2\tLibraryLayout2\t\t${SeqType.SINGLE_CELL_RNA}
         ]
 
         when:
-        new SeqTypeLibraryLayoutValidator().validate(context)
+        validator.validate(context)
+
 
         then:
         TestCase.assertContainSame(context.problems, expectedProblems)

@@ -19,6 +19,8 @@ class LibPrepKitAdapterValidator extends ValueTuplesValidator<MetadataValidation
     LibraryPreparationKitService libraryPreparationKitService
     @Autowired
     SampleIdentifierService sampleIdentifierService
+    @Autowired
+    SeqTypeService seqTypeService
 
     @Override
     Collection<String> getDescriptions() {
@@ -47,10 +49,10 @@ class LibPrepKitAdapterValidator extends ValueTuplesValidator<MetadataValidation
             if (seqTypeName.isEmpty()) {
                 return
             }
-            SeqType seqType = SeqTypeService.findSeqTypeByNameOrAliasAndLibraryLayoutAndSingleCell(seqTypeName, valueTuple.getValue(LIBRARY_LAYOUT.name()),singleCell)
+            SeqType seqType = seqTypeService.findByNameOrImportAlias(seqTypeName, [libraryLayout: valueTuple.getValue(LIBRARY_LAYOUT.name()), singleCell: singleCell])
             LibraryPreparationKit kit
             if (valueTuple.getValue(LIB_PREP_KIT.name())) {
-                kit = libraryPreparationKitService.findLibraryPreparationKitByNameOrAlias(valueTuple.getValue(LIB_PREP_KIT.name()))
+                kit = libraryPreparationKitService.findByNameOrImportAlias(valueTuple.getValue(LIB_PREP_KIT.name()))
             }
             if (!seqType || ! kit) {
                 return

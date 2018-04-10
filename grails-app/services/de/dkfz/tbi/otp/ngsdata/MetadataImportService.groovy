@@ -27,17 +27,6 @@ import static de.dkfz.tbi.otp.utils.StringUtils.*
  * Metadata import 2.0 (OTP-34)
  */
 class MetadataImportService {
-
-    ExecutionService executionService
-
-    LsdfFilesService lsdfFilesService
-
-    static int MAX_ILSE_NUMBER_RANGE_SIZE = 20
-
-    static final String AUTO_DETECT_DIRECTORY_STRUCTURE_NAME = ''
-    static final String DATA_FILES_IN_SAME_DIRECTORY_BEAN_NAME = 'dataFilesInSameDirectory'
-    static final String MIDTERM_ILSE_DIRECTORY_STRUCTURE_BEAN_NAME = 'dataFilesOnGpcfMidTerm'
-
     @Autowired
     ApplicationContext applicationContext
 
@@ -45,6 +34,19 @@ class MetadataImportService {
     SeqTrackService seqTrackService
     TrackingService trackingService
     FileSystemService fileSystemService
+    SeqPlatformService seqPlatformService
+    ExecutionService executionService
+    LsdfFilesService lsdfFilesService
+    LibraryPreparationKitService libraryPreparationKitService
+    SeqTypeService seqTypeService
+
+    static int MAX_ILSE_NUMBER_RANGE_SIZE = 20
+
+    static final String AUTO_DETECT_DIRECTORY_STRUCTURE_NAME = ''
+    static final String DATA_FILES_IN_SAME_DIRECTORY_BEAN_NAME = 'dataFilesInSameDirectory'
+    static final String MIDTERM_ILSE_DIRECTORY_STRUCTURE_BEAN_NAME = 'dataFilesOnGpcfMidTerm'
+
+
 
     /**
      * @return A collection of descriptions of the validations which are performed
@@ -258,7 +260,7 @@ class MetadataImportService {
             Run run = Run.findOrSaveWhere(
                     name: runName,
                     seqCenter: exactlyOneElement(SeqCenter.findAllWhere(name: uniqueColumnValue(rows, CENTER_NAME))),
-                    seqPlatform: SeqPlatformService.findSeqPlatform(
+                    seqPlatform: seqPlatformService.findSeqPlatform(
                             uniqueColumnValue(rows, INSTRUMENT_PLATFORM),
                             uniqueColumnValue(rows, INSTRUMENT_MODEL),
                             uniqueColumnValue(rows, SEQUENCING_KIT) ?: null),
@@ -277,10 +279,9 @@ class MetadataImportService {
             String tagmentation = uniqueColumnValue(rows, TAGMENTATION_BASED_LIBRARY)?.toLowerCase()
             String baseMaterial = uniqueColumnValue(rows, BASE_MATERIAL)
             boolean isSingleCell = SeqTypeService.isSingleCell(baseMaterial)
-            SeqType seqType = SeqTypeService.findSeqTypeByNameOrAliasAndLibraryLayoutAndSingleCell(
+            SeqType seqType = seqTypeService.findByNameOrImportAlias(
                     uniqueColumnValue(rows, SEQUENCING_TYPE) + ((tagmentation && ["1", "true"].contains(tagmentation)) ? '_TAGMENTATION' : ''),
-                    uniqueColumnValue(rows, LIBRARY_LAYOUT),
-                    isSingleCell,
+                    [libraryLayout: uniqueColumnValue(rows, LIBRARY_LAYOUT), singleCell: isSingleCell]
             )
             SeqTypeNames seqTypeName = seqType.seqTypeName
             String pipelineVersionString = uniqueColumnValue(rows, PIPELINE_VERSION) ?: 'unknown'
@@ -296,7 +297,7 @@ class MetadataImportService {
             } else {
                 kitInfoReliability = InformationReliability.KNOWN
                 libraryPreparationKit = Objects.requireNonNull(
-                        LibraryPreparationKitService.findLibraryPreparationKitByNameOrAlias(libPrepKitString))
+                        libraryPreparationKitService.findByNameOrImportAlias(libPrepKitString))
             }
             String libraryName = uniqueColumnValue(rows, CUSTOMER_LIBRARY) ?: ""
             String normalizedLibraryName = SeqTrack.normalizeLibraryName(libraryName)

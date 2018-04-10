@@ -3,12 +3,16 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.util.spreadsheet.validation.*
 import org.springframework.stereotype.*
+import org.springframework.beans.factory.annotation.*
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
 
 @Component
 class LibPrepKitSeqTypeValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator{
+
+    @Autowired
+    SeqTypeService seqTypeService
 
     @Override
     Collection<String> getDescriptions() {
@@ -39,8 +43,7 @@ class LibPrepKitSeqTypeValidator extends ValueTuplesValidator<MetadataValidation
             if (seqTypeName.isEmpty()) {
                 return
             }
-            SeqType seqType = SeqTypeService.findSeqTypeByNameOrAliasAndLibraryLayoutAndSingleCell(seqTypeName, libLayout, singleCell)
-
+            SeqType seqType = seqTypeService.findByNameOrImportAlias(seqTypeName, [libraryLayout: libLayout, singleCell: singleCell])
             if (seqType in seqTypes && !valueTuple.getValue(LIB_PREP_KIT.name())) {
                 context.addProblem(valueTuple.cells, Level.ERROR, "If the sequencing type is '${seqType.nameWithLibraryLayout}'" +
                         ", the library preparation kit must be given.")

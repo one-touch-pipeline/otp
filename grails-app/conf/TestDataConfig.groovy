@@ -29,9 +29,6 @@ testDataConfig {
             name = {'name_' + (counter++)}
             shortDisplayName = {'name_' + (counter++)}
         }
-        'de.dkfz.tbi.otp.ngsdata.LibraryPreparationKitSynonym' {
-            name = {'name_' + (counter++)}
-        }
         'de.dkfz.tbi.otp.ngsdata.Individual' {
             pid = {'pid_' + (counter++)}
         }

@@ -28,8 +28,8 @@ class RunSeqPlatformSeqKitValidatorSpec extends Specification {
                         "${center}\tPlatform\t${platformName}\t${kitName}\t${runName}\n"
         )
 
-        SeqPlatformModelLabel model = DomainFactory.createSeqPlatformModelLabel(name: platformName, alias: [platformName])
-        SequencingKitLabel kit = DomainFactory.createSequencingKitLabel(name: kitName, alias: [kitName])
+        SeqPlatformModelLabel model = DomainFactory.createSeqPlatformModelLabel(name: platformName, importAlias: [platformName])
+        SequencingKitLabel kit = DomainFactory.createSequencingKitLabel(name: kitName, importAlias: [kitName])
         SeqPlatform platform = DomainFactory.createSeqPlatformWithSeqPlatformGroup(
                 name: 'Platform',
                 seqPlatformModelLabel: model,
@@ -39,7 +39,11 @@ class RunSeqPlatformSeqKitValidatorSpec extends Specification {
         DomainFactory.createRun(name: runName, seqPlatform: platform)
 
         when:
-        new RunSeqPlatformSeqKitValidator().validate(context)
+        RunSeqPlatformSeqKitValidator validator = new RunSeqPlatformSeqKitValidator()
+        validator.seqPlatformService = Mock(SeqPlatformService) {
+            1 * findSeqPlatform('Platform', 'HiSeq 2000', 'V3') >> platform
+        }
+        validator.validate(context)
 
         then:
         if (result) {

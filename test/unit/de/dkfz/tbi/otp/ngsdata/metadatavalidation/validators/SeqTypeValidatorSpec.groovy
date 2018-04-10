@@ -37,11 +37,15 @@ class SeqTypeValidatorSpec extends Specification {
                 "SeqType1\n" +
                 "SeqType2\n" +
                 "SeqType1\n")
-        DomainFactory.createSeqType(name: 'SeqType2', dirName: 'SeqType2', libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE)
+        SeqType seqType2 = DomainFactory.createSeqType(name: 'SeqType2', dirName: 'SeqType2', libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE)
         DomainFactory.createSeqType(name: 'SeqType2', dirName: 'SeqType2', libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED)
 
         when:
-        new SeqTypeValidator().validate(context)
+        SeqTypeValidator validator = new SeqTypeValidator()
+        validator.seqTypeService = Mock(SeqTypeService) {
+            1 * findByNameOrImportAlias('SeqType2') >> seqType2
+        }
+        validator.validate(context)
 
         then:
         Problem problem = exactlyOneElement(context.problems)
@@ -60,12 +64,20 @@ class SeqTypeValidatorSpec extends Specification {
                         "SeqType2\t\n" +
                         "SeqType2\ttrue\n" +
                         "SeqType2\tfalse\n")
-        DomainFactory.createSeqType(name: 'SeqType1', libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE)
-        DomainFactory.createSeqType(name: 'SeqType2', libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED)
-        DomainFactory.createSeqType(name: 'SeqType1_TAGMENTATION', libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED)
+        SeqType seqType1 = DomainFactory.createSeqType(name: 'SeqType1', libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE)
+        SeqType seqType2 = DomainFactory.createSeqType(name: 'SeqType2', libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED)
+        SeqType seqType1Tag = DomainFactory.createSeqType(name: 'SeqType1_TAGMENTATION', libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED)
 
         when:
-        new SeqTypeValidator().validate(context)
+        SeqTypeValidator validator = new SeqTypeValidator()
+        validator.seqTypeService = Mock(SeqTypeService){
+            1 * findByNameOrImportAlias('SeqType1') >> seqType1
+            1 * findByNameOrImportAlias('SeqType1_TAGMENTATION') >> seqType1Tag
+            2 * findByNameOrImportAlias('SeqType2') >> seqType2
+            1 * findByNameOrImportAlias('SeqType2_TAGMENTATION') >> null
+        }
+        validator.validate(context)
+
 
         then:
         Problem problem = exactlyOneElement(context.problems)

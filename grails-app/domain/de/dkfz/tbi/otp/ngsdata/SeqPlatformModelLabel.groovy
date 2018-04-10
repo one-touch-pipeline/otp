@@ -4,7 +4,7 @@ import de.dkfz.tbi.otp.utils.Entity
 
 /**
  * This class stores the sequencing platform models which were used for sequencing the data.
- * Furthermore a list of possible aliases is referenced.
+ * Furthermore a list of possible importAliases is referenced.
  *
  */
 class SeqPlatformModelLabel implements Entity {
@@ -15,7 +15,7 @@ class SeqPlatformModelLabel implements Entity {
         name unique: true, blank: false
     }
 
-    static hasMany = [alias : String]
+    static hasMany = [importAlias : String]
 
     @Override
     public String toString() {

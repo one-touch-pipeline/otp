@@ -43,7 +43,16 @@ class LibPrepKitSeqTypeValidatorSpec extends Specification {
         )
 
         when:
-        new LibPrepKitSeqTypeValidator().validate(context)
+        LibPrepKitSeqTypeValidator libPrepKitSeqTypeValidator = new LibPrepKitSeqTypeValidator()
+        libPrepKitSeqTypeValidator.seqTypeService = Mock(SeqTypeService) {
+            2 * findByNameOrImportAlias(SeqTypeNames.EXOME.seqTypeName, [libraryLayout: LibraryLayout.PAIRED.name(), singleCell: false]) >> SeqType.exomePairedSeqType
+            1 * findByNameOrImportAlias(SeqTypeNames.RNA.seqTypeName, [libraryLayout: LibraryLayout.SINGLE.name(), singleCell: false]) >> SeqType.rnaSingleSeqType
+            1 * findByNameOrImportAlias(SeqTypeNames.RNA.seqTypeName, [libraryLayout: LibraryLayout.PAIRED.name(), singleCell: false]) >> SeqType.rnaPairedSeqType
+            2 * findByNameOrImportAlias(SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName, [libraryLayout: LibraryLayout.PAIRED.name(), singleCell: false]) >> SeqType.wholeGenomeBisulfitePairedSeqType
+            2 * findByNameOrImportAlias(SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName, [libraryLayout: LibraryLayout.PAIRED.name(), singleCell: false]) >> SeqType.wholeGenomeBisulfiteTagmentationPairedSeqType
+            2 * findByNameOrImportAlias(SeqTypeNames.CHIP_SEQ.seqTypeName, [libraryLayout: LibraryLayout.PAIRED.name(), singleCell: false]) >> SeqType.chipSeqPairedSeqType
+        }
+        libPrepKitSeqTypeValidator.validate(context)
 
         then:
         context.problems.empty
@@ -62,7 +71,16 @@ class LibPrepKitSeqTypeValidatorSpec extends Specification {
         )
 
         when:
-        new LibPrepKitSeqTypeValidator().validate(context)
+        LibPrepKitSeqTypeValidator libPrepKitSeqTypeValidator = new LibPrepKitSeqTypeValidator()
+        libPrepKitSeqTypeValidator.seqTypeService = Mock(SeqTypeService) {
+            3 * findByNameOrImportAlias(SeqTypeNames.EXOME.seqTypeName, [libraryLayout: LibraryLayout.PAIRED.name(), singleCell: false]) >> SeqType.exomePairedSeqType
+            2 * findByNameOrImportAlias(SeqTypeNames.RNA.seqTypeName, [libraryLayout: LibraryLayout.SINGLE.name(), singleCell: false]) >> SeqType.rnaSingleSeqType
+            1 * findByNameOrImportAlias(SeqTypeNames.RNA.seqTypeName, [libraryLayout: LibraryLayout.PAIRED.name(), singleCell: false]) >> SeqType.rnaPairedSeqType
+            3 * findByNameOrImportAlias(SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName, [libraryLayout: LibraryLayout.PAIRED.name(), singleCell: false]) >> SeqType.wholeGenomeBisulfitePairedSeqType
+            3 * findByNameOrImportAlias(SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName, [libraryLayout: LibraryLayout.PAIRED.name(), singleCell: false]) >> SeqType.wholeGenomeBisulfiteTagmentationPairedSeqType
+            3 * findByNameOrImportAlias(SeqTypeNames.CHIP_SEQ.seqTypeName, [libraryLayout: LibraryLayout.PAIRED.name(), singleCell: false]) >> SeqType.chipSeqPairedSeqType
+        }
+        libPrepKitSeqTypeValidator.validate(context)
 
         then:
         context.problems.size() == 5
@@ -96,7 +114,16 @@ class LibPrepKitSeqTypeValidatorSpec extends Specification {
         )
 
         when:
-        new LibPrepKitSeqTypeValidator().validate(context)
+        LibPrepKitSeqTypeValidator libPrepKitSeqTypeValidator = new LibPrepKitSeqTypeValidator()
+        libPrepKitSeqTypeValidator.seqTypeService = Mock(SeqTypeService) {
+            2 * findByNameOrImportAlias(SeqTypeNames.EXOME.seqTypeName, [libraryLayout: LibraryLayout.PAIRED.name(), singleCell: false]) >> SeqType.exomePairedSeqType
+            1 * findByNameOrImportAlias(SeqTypeNames.RNA.seqTypeName, [libraryLayout: LibraryLayout.SINGLE.name(), singleCell: false]) >> SeqType.rnaSingleSeqType
+            1 * findByNameOrImportAlias(SeqTypeNames.RNA.seqTypeName, [libraryLayout: LibraryLayout.PAIRED.name(), singleCell: false]) >> SeqType.rnaPairedSeqType
+            2 * findByNameOrImportAlias(SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName, [libraryLayout: LibraryLayout.PAIRED.name(), singleCell: false]) >> SeqType.wholeGenomeBisulfitePairedSeqType
+            2 * findByNameOrImportAlias(SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName, [libraryLayout: LibraryLayout.PAIRED.name(), singleCell: false]) >> SeqType.wholeGenomeBisulfiteTagmentationPairedSeqType
+            2 * findByNameOrImportAlias(SeqTypeNames.CHIP_SEQ.seqTypeName, [libraryLayout: LibraryLayout.PAIRED.name(), singleCell: false]) >> SeqType.chipSeqPairedSeqType
+        }
+        libPrepKitSeqTypeValidator.validate(context)
 
         then:
         context.problems.empty
@@ -135,7 +162,15 @@ ${SeqTypeNames.CHIP_SEQ.seqTypeName}\t${LibraryLayout.PAIRED}
 """)
 
         when:
-        new LibPrepKitSeqTypeValidator().validate(context)
+        LibPrepKitSeqTypeValidator libPrepKitSeqTypeValidator = new LibPrepKitSeqTypeValidator()
+        libPrepKitSeqTypeValidator.seqTypeService = Mock(SeqTypeService) {
+            1 * findByNameOrImportAlias(SeqTypeNames.WHOLE_GENOME.seqTypeName, [libraryLayout: LibraryLayout.PAIRED.name(), singleCell: false]) >> SeqType.wholeGenomePairedSeqType
+            1 * findByNameOrImportAlias(SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName, [libraryLayout: LibraryLayout.PAIRED.name(), singleCell: false]) >> SeqType.wholeGenomeBisulfitePairedSeqType
+            1 * findByNameOrImportAlias(SeqTypeNames.EXOME.seqTypeName, [libraryLayout: LibraryLayout.PAIRED.name(), singleCell: false]) >> SeqType.exomePairedSeqType
+            1 * findByNameOrImportAlias(SeqTypeNames.RNA.seqTypeName, [libraryLayout: LibraryLayout.PAIRED.name(), singleCell: false]) >> SeqType.rnaPairedSeqType
+            1 * findByNameOrImportAlias(SeqTypeNames.CHIP_SEQ.seqTypeName, [libraryLayout: LibraryLayout.PAIRED.name(), singleCell: false]) >> SeqType.chipSeqPairedSeqType
+        }
+        libPrepKitSeqTypeValidator.validate(context)
 
         then:
         context.problems.size() == 4

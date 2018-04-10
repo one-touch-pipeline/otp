@@ -37,13 +37,19 @@ ${MetaDataColumn.SEQUENCING_KIT}
 Kit1
 Kit2
 Kit1
-Alias1
+ImportAlias1
 
 """)
-        DomainFactory.createSequencingKitLabel(name: 'Kit2', alias: ['Alias1', 'Alias2'])
+        SequencingKitLabel sequencingKitLabel = DomainFactory.createSequencingKitLabel(name: 'Kit2', importAlias: ['ImportAlias1', 'ImportAlias2'])
 
         when:
-        new SequencingKitValidator().validate(context)
+        SequencingKitValidator validator = new SequencingKitValidator()
+        validator.sequencingKitLabelService = Mock(SequencingKitLabelService) {
+            1 * findByNameOrImportAlias('Kit1') >> null
+            1 * findByNameOrImportAlias('Kit2') >> sequencingKitLabel
+            1 * findByNameOrImportAlias('ImportAlias1') >> sequencingKitLabel
+        }
+        validator.validate(context)
 
         then:
         Problem problem = exactlyOneElement(context.problems)

@@ -5,11 +5,15 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.util.spreadsheet.validation.*
 import org.springframework.stereotype.*
+import org.springframework.beans.factory.annotation.*
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 
 @Component
 class RunSeqPlatformValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
+
+    @Autowired
+    SeqPlatformService seqPlatformService
 
     @Override
     Collection<String> getDescriptions() {
@@ -44,7 +48,7 @@ class RunSeqPlatformValidator extends ValueTuplesValidator<MetadataValidationCon
             if (valueTuplesOfRun.size() == 1) {
                 ValueTuple valueTuple = CollectionUtils.exactlyOneElement(valueTuplesOfRun)
                 Run run = CollectionUtils.atMostOneElement(Run.findAllByName(runName))
-                SeqPlatform seqPlatform = SeqPlatformService.findSeqPlatform(valueTuple.getValue(INSTRUMENT_PLATFORM.name()), valueTuple.getValue(INSTRUMENT_MODEL.name()), valueTuple.getValue(SEQUENCING_KIT.name()) ?: null)
+                SeqPlatform seqPlatform = seqPlatformService.findSeqPlatform(valueTuple.getValue(INSTRUMENT_PLATFORM.name()), valueTuple.getValue(INSTRUMENT_MODEL.name()), valueTuple.getValue(SEQUENCING_KIT.name()) ?: null)
                 if (run && seqPlatform && run.seqPlatform.id != seqPlatform.id) {
                     context.addProblem(valueTuple.cells, Level.ERROR, "Run '${runName}' is already registered in the OTP database with sequencing platform '${run.seqPlatform.fullName()}', not with '${seqPlatform.fullName()}'.", "At least one run is already registered in the OTP database with another sequencing platform.")
                 }

@@ -1,9 +1,6 @@
 package de.dkfz.tbi.otp
-
-import de.dkfz.tbi.otp.ngsdata.ConfigService
-import grails.util.Environment
-
-import grails.plugin.springsecurity.SpringSecurityUtils
+import de.dkfz.tbi.otp.ngsdata.*
+import grails.plugin.springsecurity.*
 
 class OtpTagLib {
     static namespace = "otp"
@@ -154,6 +151,7 @@ class OtpTagLib {
         if (!roles || (roles && SpringSecurityUtils.ifAnyGranted(roles))) {
             model.checkBoxes = model.checkBoxes ?: [:]
             model.dropDowns = model.dropDowns ?: [:]
+
             return render(template: template, model: model)
         } else {
             // read only

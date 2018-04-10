@@ -17,11 +17,9 @@ class AntibodyTarget implements Entity {
      */
     String name
 
+    static hasMany = [importAlias : String]
+
     static constraints = {
         name(unique: true, blank: false, validator: { OtpPath.isValidPathComponent(it) })
-    }
-
-    public String toString() {
-        return "Antibody Target: ${name}"
     }
 }

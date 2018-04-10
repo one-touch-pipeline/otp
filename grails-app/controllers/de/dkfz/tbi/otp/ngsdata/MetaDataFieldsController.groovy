@@ -7,12 +7,9 @@ import org.springframework.validation.*
 
 class MetaDataFieldsController {
     LibraryPreparationKitService libraryPreparationKitService
-    SequencingKitLabelService sequencingKitLabelService
-    SeqPlatformModelLabelService seqPlatformModelLabelService
     SeqTypeService seqTypeService
     SeqPlatformService seqPlatformService
     SeqCenterService seqCenterService
-    LibraryPreparationKitSynonymService libraryPreparationKitSynonymService
     AntibodyTargetService antibodyTargetService
 
 
@@ -20,40 +17,41 @@ class MetaDataFieldsController {
 
         List libraryPreparationKits = LibraryPreparationKit.list(sort: "name", order: "asc").collect {
             [
-                    id: it.id,
-                    name : it.name,
-                    shortDisplayName : it.shortDisplayName,
-                    adapterFile: it.adapterFile,
+                    id                              : it.id,
+                    name                            : it.name,
+                    shortDisplayName                : it.shortDisplayName,
+                    adapterFile                     : it.adapterFile,
                     reverseComplementAdapterSequence: it.reverseComplementAdapterSequence,
-                    alias: LibraryPreparationKitSynonym.findAllByLibraryPreparationKit(it, [sort: "name", order: "asc"])*.name.join(' | '),
-                    referenceGenomesWithBedFiles: BedFile.findAllByLibraryPreparationKit(it, [sort: "referenceGenome.name", order: "asc"])*.referenceGenome*.name.join(' | '),
+                    importAliases                   : it.importAlias?.sort()?.join(' | '),
+                    referenceGenomesWithBedFiles    : BedFile.findAllByLibraryPreparationKit(it, [sort: "referenceGenome.name", order: "asc"])*.referenceGenome*.name.join(' | '),
             ]
         }
 
-        List antiBodyTargets = AntibodyTarget.list(sort: "name", order: "asc").collect {
+        List antibodyTargets = AntibodyTarget.list(sort: "name", order: "asc").collect {
             [
-                    name: it.name
+                    name         : it.name,
+                    importAliases: it.importAlias?.sort()?.join(' | '),
             ]
         }
 
         List seqCenters = SeqCenter.list(sort: "name", order: "asc").collect {
             [
-                    name: it.name,
-                    dirName: it.dirName
+                    name   : it.name,
+                    dirName: it.dirName,
             ]
         }
 
         List seqPlatforms = SeqPlatform.list().collect {
             [
-                    name       : it.name,
-                    model      : it.seqPlatformModelLabel?.name,
-                    modelAlias : it.seqPlatformModelLabel?.alias?.sort()?.join(' | '),
-                    hasModel   : it.seqPlatformModelLabel ? true : false,
-                    seqKit     : it.sequencingKitLabel?.name,
-                    seqKitAlias: it.sequencingKitLabel?.alias?.sort()?.join(' | '),
-                    hasSeqKit  : it.sequencingKitLabel?.name ? true : false
+                    name               : it.name,
+                    model              : it.seqPlatformModelLabel?.name,
+                    modelImportAliases : it.seqPlatformModelLabel?.importAlias?.sort()?.join(' | '),
+                    hasModel           : it.seqPlatformModelLabel ? true : false,
+                    seqKit             : it.sequencingKitLabel?.name,
+                    seqKitImportAliases: it.sequencingKitLabel?.importAlias?.sort()?.join(' | '),
+                    hasSeqKit          : it.sequencingKitLabel?.name ? true : false,
             ]
-        }.sort{"${it.name}, ${it.model}, ${it.seqKit}"}
+        }.sort { "${it.name}, ${it.model}, ${it.seqKit}" }
 
         List seqTypes = SeqType.list(sort: "name", order: "asc").collect {
             [
@@ -68,37 +66,44 @@ class MetaDataFieldsController {
                                     MATE_PAIR: SeqType.findByNameAndLibraryLayoutAndSingleCell(it.name, SeqType.LIBRARYLAYOUT_MATE_PAIR, it.singleCell) ? true : false
                             ],
                     displayName   : it.displayName,
-                    aliases       : it.alias.sort().join(' | ')
+                    importAliases : SeqType.findAllByName(it.name)*.importAlias?.flatten()?.unique()?.sort()?.join(' | '),
             ]
         }.unique()
 
         return [
-                antiBodyTargets: antiBodyTargets,
+                antibodyTargets       : antibodyTargets,
                 libraryPreparationKits: libraryPreparationKits,
-                seqCenters     : seqCenters,
-                seqPlatforms   : seqPlatforms,
-                seqTypes       : seqTypes,
+                seqCenters            : seqCenters,
+                seqPlatforms          : seqPlatforms,
+                seqTypes              : seqTypes,
         ]
     }
 
     JSON createLibraryPreparationKit(CreateLibraryPreparationKitCommand cmd) {
-        checkErrorAndCallMethod(cmd, { libraryPreparationKitService.createLibraryPreparationKit(cmd.name, cmd.shortDisplayName, cmd.adapterFile, cmd.reverseComplementAdapterSequence) })
+        checkErrorAndCallMethod(cmd, {
+            libraryPreparationKitService.create(cmd.name,
+                    [
+                            shortDisplayName                : cmd.shortDisplayName,
+                            adapterFile                     : cmd.adapterFile,
+                            reverseComplementAdapterSequence: cmd.reverseComplementAdapterSequence
+                    ])
+        })
     }
 
     JSON addAdapterFileToLibraryPreparationKit(AddAdapterFileToLibraryPreparationKitCommand cmd) {
-        checkErrorAndCallMethod(cmd, { libraryPreparationKitService.addAdapterFileToLibraryPreparationKit(cmd.libraryPreparationKit, cmd.adapterFile) })
+        checkErrorAndCallMethod(cmd, {
+            libraryPreparationKitService.addAdapterFileToLibraryPreparationKit(cmd.libraryPreparationKit, cmd.adapterFile)
+        })
     }
 
     JSON addAdapterSequenceToLibraryPreparationKit(AddAdapterSequenceToLibraryPreparationKitCommand cmd) {
-        checkErrorAndCallMethod(cmd, { libraryPreparationKitService.addAdapterSequenceToLibraryPreparationKit(cmd.libraryPreparationKit, cmd.reverseComplementAdapterSequence) })
-    }
-
-    JSON createLibraryPreparationKitAlias(CreateLibraryPreparationKitAliasCommand cmd) {
-        checkErrorAndCallMethod(cmd, { libraryPreparationKitSynonymService.createLibraryPreparationKitSynonym(cmd.alias, cmd.id) })
+        checkErrorAndCallMethod(cmd, {
+            libraryPreparationKitService.addAdapterSequenceToLibraryPreparationKit(cmd.libraryPreparationKit, cmd.reverseComplementAdapterSequence)
+        })
     }
 
     JSON createAntibodyTarget(CreateAntibodyTargetCommand cmd) {
-        checkErrorAndCallMethod(cmd, { antibodyTargetService.createAntibodyTarget(cmd.name) })
+        checkErrorAndCallMethod(cmd, { antibodyTargetService.create(cmd.name) })
     }
 
     JSON createSeqCenter(CreateSeqCenterCommand cmd) {
@@ -109,63 +114,44 @@ class MetaDataFieldsController {
         checkErrorAndCallMethod(cmd, { seqPlatformService.createNewSeqPlatform(cmd.platform, cmd.model, cmd.kit) })
     }
 
-    JSON createModelAlias(CreateModelAliasCommand cmd) {
-        checkErrorAndCallMethod(cmd, { seqPlatformModelLabelService.addNewAliasToSeqPlatformModelLabel(cmd.id, cmd.alias) })
+    JSON createModelImportAlias(CreateModelImportAliasCommand cmd) {
+        createImportAlias(cmd);
     }
 
-    JSON createSequencingKitAlias(CreateSequencingKitAliasCommand cmd) {
-        checkErrorAndCallMethod(cmd, { sequencingKitLabelService.addNewAliasToSequencingKitLabel(cmd.id, cmd.alias) })
+    JSON createSequencingKitImportAlias(CreateSequencingKitImportAliasCommand cmd) {
+        createImportAlias(cmd);
     }
 
-    JSON createSeqTypeAlias(SeqTypeAliasCommand cmd) {
-        checkErrorAndCallMethod(cmd, { seqTypeService.addNewAliasToSeqType(cmd.id, cmd.alias) })
+    JSON createSeqTypeImportAlias(CreateSeqTypeImportAliasCommand cmd) {
+        createImportAlias(cmd);
+    }
+
+    JSON createAntibodyTargetImportAlias(CreateAntibodyTargetImportAliasCommand cmd) {
+        createImportAlias(cmd);
+    }
+
+    JSON createLibraryPreparationKitImportAlias(CreateLibraryPreparationKitImportAliasCommand cmd) {
+        createImportAlias(cmd);
     }
 
     JSON createSeqType(CreateSeqTypeCommand cmd) {
-        if (cmd.hasErrors()) {
-            Map data = getErrorData(cmd.errors.getFieldError())
-            render data as JSON
-            return
-        }
-
-        Set<String> alias = (cmd.alias) ? [cmd.alias] : null
-
-        SeqType.withTransaction{
-            createSeqTypeHelper(cmd, cmd.type, cmd.dirName, cmd.displayName, alias, cmd.singleCell)
-        }
+        checkErrorAndCallMethod(cmd, {
+            seqTypeService.createMultiple(cmd.type, cmd.getLibraryLayouts(), [dirName: cmd.dirName, displayName: cmd.displayName, singleCell: cmd.singleCell])
+        })
     }
 
     JSON createLayout(CreateLayoutCommand cmd) {
-        if (cmd.hasErrors()) {
-            Map data = getErrorData(cmd.errors.getFieldError())
-            render data as JSON
-            return
-        }
-        SeqType seqType = SeqType.findByName(cmd.id)
-        SeqType.withTransaction{
-            createSeqTypeHelper(cmd, seqType.name, seqType.dirName, seqType.displayName, seqType.alias?.toSet(), seqType.singleCell)
-        }
+        SeqType seqType = seqTypeService.findByNameOrImportAlias(cmd.name, [singleCell: cmd.singleCell])
+        checkErrorAndCallMethod(cmd, {
+            seqTypeService.createMultiple(seqType.name, cmd.getLibraryLayouts(), [dirName: seqType.dirName, displayName: seqType.displayName, singleCell: cmd.singleCell], seqType.importAlias.toList())
+        })
     }
 
-    private void createSeqTypeHelper(Serializable cmd, String name, String dirName, String displayName, Set<String> alias, boolean singleCell) {
-        if (cmd.single) {
-            checkErrorAndCallMethod(cmd, {
-                seqTypeService.createSeqType(name, dirName, displayName, alias, SeqType.LIBRARYLAYOUT_SINGLE, singleCell)
-            })
-        }
-        if (cmd.paired) {
-            checkErrorAndCallMethod(cmd, {
-                seqTypeService.createSeqType(name, dirName, displayName, alias, SeqType.LIBRARYLAYOUT_PAIRED, singleCell)
-            })
-        }
-        if (cmd.mate_pair) {
-            checkErrorAndCallMethod(cmd, {
-                seqTypeService.createSeqType(name, dirName, displayName, alias, SeqType.LIBRARYLAYOUT_MATE_PAIR, singleCell)
-            })
-        }
+    void createImportAlias(CreateImportAliasCommand cmd){
+        checkErrorAndCallMethod(cmd, { cmd.service.addNewAlias(cmd.name, cmd.importAlias) })
     }
 
-    private void checkErrorAndCallMethod (Serializable cmd, Closure method) {
+    private void checkErrorAndCallMethod(Serializable cmd, Closure method) {
         Map data
         if (cmd.hasErrors()) {
             data = getErrorData(cmd.errors.getFieldError())
@@ -182,33 +168,45 @@ class MetaDataFieldsController {
 }
 
 class CreateLibraryPreparationKitCommand implements Serializable {
-        String name
-        String shortDisplayName
-        String adapterFile
-        String reverseComplementAdapterSequence
-        static constraints = {
-            name(blank: false, validator: {val, obj ->
-                if (LibraryPreparationKit.findByName(val) || LibraryPreparationKitSynonym.findByName(val)) {
-                    return 'Duplicate'
-                }
-            })
-            shortDisplayName(blank: false, validator: {val, obj ->
-                if (LibraryPreparationKit.findByShortDisplayName(val)) {
-                    return 'Duplicate'
-                }
-            })
-            adapterFile validator: {val, obj ->
-                if (val && !OtpPath.isValidAbsolutePath(val)) {
-                    return 'Not a valid file name'
-                }
+    String name
+    String shortDisplayName
+    String adapterFile
+    String reverseComplementAdapterSequence
+    LibraryPreparationKitService libraryPreparationKitService
+    static constraints = {
+        name(blank: false, validator: { val, obj ->
+            if (obj.libraryPreparationKitService.findByNameOrImportAlias(val)) {
+                return 'Duplicate'
             }
-        }
-        void setName(String name) {
-            this.name = name?.trim()?.replaceAll(" +", " ") //trims and removes additional white spaces
-        }
-        void setShortDisplayName(String shortDisplayName) {
-            this.shortDisplayName = shortDisplayName?.trim()?.replaceAll(" +", " ")
-        }
+        })
+        shortDisplayName(blank: false, validator: { val, obj ->
+            if (LibraryPreparationKit.findByShortDisplayName(val)) {
+                return 'Duplicate'
+            }
+        })
+        adapterFile (nullable: true, blank:false, validator: { val, obj ->
+            if (val && !OtpPath.isValidAbsolutePath(val)) {
+                return 'Not a valid file name'
+            }
+        })
+        reverseComplementAdapterSequence (nullable: true, blank:false)
+    }
+
+    void setName(String name) {
+        this.name = name?.trim()?.replaceAll(" +", " ") //trims and removes additional white spaces
+    }
+
+    void setShortDisplayName(String shortDisplayName) {
+        this.shortDisplayName = shortDisplayName?.trim()?.replaceAll(" +", " ")
+    }
+
+    void setAdapterFile(String adapterFile) {
+        this.adapterFile = adapterFile ?: null
+    }
+
+    void setReverseComplementAdapterSequence(String reverseComplementAdapterSequence) {
+        this.reverseComplementAdapterSequence = reverseComplementAdapterSequence ?: null
+    }
 }
 
 class AddAdapterFileToLibraryPreparationKitCommand implements Serializable {
@@ -222,6 +220,7 @@ class AddAdapterFileToLibraryPreparationKitCommand implements Serializable {
         }
         libraryPreparationKit nullable: false
     }
+
     void setAdapterFile(String adapterFile) {
         this.adapterFile = adapterFile?.trim()?.replaceAll(" +", " ")
     }
@@ -236,213 +235,247 @@ class AddAdapterSequenceToLibraryPreparationKitCommand implements Serializable {
     }
 }
 
-class CreateLibraryPreparationKitAliasCommand implements Serializable {
-    String alias
-    String id
-    static constraints = {
-        alias(blank: false,validator: {val, obj ->
-            if(LibraryPreparationKit.findByName(val) || LibraryPreparationKitSynonym.findByName(val)) {
-                return 'Duplicate'
-            }})
-        id(blank: false)
-    }
-    void setAlias(String alias) {
-        this.alias = alias?.trim()?.replaceAll(" +", " ")
-    }
-}
-
 class CreateAntibodyTargetCommand implements Serializable {
-        String name
-        static constraints = {
-            name(blank: false, validator: {val, obj ->
-                if(AntibodyTarget.findByNameIlike(val)) {
-                    return 'Duplicate'
-                }
-                if(!OtpPath.isValidPathComponent(val)) {
-                    return 'Invalid Pattern'
-                }
-            })
-        }
-        void setName(String name) {
-            this.name = name?.trim()?.replaceAll(" +", " ")
-        }
+    String name
+    AntibodyTargetService antibodyTargetService
+
+    static constraints = {
+        name(blank: false, validator: { val, obj ->
+            if (obj.antibodyTargetService.findByNameOrImportAlias(val)) {
+                return 'Duplicate'
+            }
+            if (!OtpPath.isValidPathComponent(val)) {
+                return 'Invalid Pattern'
+            }
+        })
+    }
+
+    void setName(String name) {
+        this.name = name?.trim()?.replaceAll(" +", " ")
+    }
 }
 
 class CreateSeqCenterCommand implements Serializable {
-        String name
-        String dirName
-        static constraints = {
-            name(blank: false, validator: {val, obj ->
-                if (SeqCenter.findByName(val)) {
-                    return 'Duplicate'
-                }})
-            dirName(blank: false, validator: {val, obj ->
-                if (SeqCenter.findByDirName(val)) {
-                    return 'Duplicate'
-                }})
-        }
-        void setName(String name) {
-            this.name = name?.trim()?.replaceAll(" +", " ")
-        }
-        void setDirName(String dirName) {
-            this.dirName = dirName?.trim()?.replaceAll(" +", " ")
-        }
+    String name
+    String dirName
+    static constraints = {
+        name(blank: false, validator: { val, obj ->
+            if (SeqCenter.findByName(val)) {
+                return 'Duplicate'
+            }
+        })
+        dirName(blank: false, validator: { val, obj ->
+            if (SeqCenter.findByDirName(val)) {
+                return 'Duplicate'
+            }
+        })
+    }
+
+    void setName(String name) {
+        this.name = name?.trim()?.replaceAll(" +", " ")
+    }
+
+    void setDirName(String dirName) {
+        this.dirName = dirName?.trim()?.replaceAll(" +", " ")
+    }
 }
 
 class CreateSeqPlatformCommand implements Serializable {
-        String platform
-        String model
-        String kit
-        static constraints = {
-            platform(blank: false,
-                    validator: {val, obj ->
-                        if (SeqPlatformService.findSeqPlatform(obj.platform, obj.model, obj.kit)) {
-                            return 'Duplicate'
-                        }
-                    })
-            model(blank: false, nullable: false)
-            kit(blank: false, nullable: true)
-        }
-        void setPlatform(String platform) {
-            this.platform = platform?.trim()?.replaceAll(" +", " ")
-        }
-        void setModel(String model) {
-            this.model = model?.trim()?.replaceAll(" +", " ")
-            if (this.model.equals("")) {
-                this.model = null
-            }
-        }
-        void setKit(String kit) {
-            this.kit = kit?.trim()?.replaceAll(" +", " ")
-            if (this.kit.equals("")) {
-                this.kit = null
-            }
-        }
-}
-
-class CreateModelAliasCommand implements Serializable {
-    String alias
-    String id
+    SeqPlatformService seqPlatformService
+    String platform
+    String model
+    String kit
     static constraints = {
-        alias(blank: false,validator: {val, obj ->
-            if(SeqPlatformModelLabelService.findSeqPlatformModelLabelByNameOrAlias(val)) {
-                return 'Duplicate'
-            }})
-        id(blank: false)
-    }
-    void setAlias(String alias) {
-        this.alias = alias?.trim()?.replaceAll(" +", " ")
+        platform(blank: false,
+                validator: { val, obj ->
+                    if (obj.seqPlatformService.findSeqPlatform(obj.platform, obj.model, obj.kit)) {
+                        return 'Duplicate'
+                    }
+                })
+        model(blank: false, nullable: false)
+        kit(blank: false, nullable: true)
     }
 
+    void setPlatform(String platform) {
+        this.platform = platform?.trim()?.replaceAll(" +", " ")
+    }
+
+    void setModel(String model) {
+        this.model = model?.trim()?.replaceAll(" +", " ")
+        if (this.model.equals("")) {
+            this.model = null
+        }
+    }
+
+    void setKit(String kit) {
+        this.kit = kit?.trim()?.replaceAll(" +", " ")
+        if (this.kit.equals("")) {
+            this.kit = null
+        }
+    }
 }
 
-class CreateSequencingKitAliasCommand implements Serializable {
-    String alias
-    String id
+abstract class CreateImportAliasCommand implements Serializable {
+    abstract MetadataFieldsService getService()
+    String name
+    String importAlias
+
     static constraints = {
-        alias(blank: false, validator: {val, obj ->
-            if(SequencingKitLabelService.findSequencingKitLabelByNameOrAlias(val)) {
+        name(blank: false)
+        importAlias(blank: false, validator: { val, obj ->
+            if (obj.service.findByNameOrImportAlias(val)) {
                 return 'Duplicate'
-            }})
-        id(blank: false)
+            }
+        })
     }
-    void setAlias(String alias) {
-        this.alias = alias?.trim()?.replaceAll(" +", " ")
+
+    void setImportAlias(String importAlias) {
+        this.importAlias = importAlias?.trim()?.replaceAll(" +", " ")
+    }
+
+    void setId(String id) {
+        this.name = id
     }
 }
 
-class SeqTypeAliasCommand implements Serializable {
-    String alias
-    String id
+class CreateModelImportAliasCommand extends CreateImportAliasCommand {
+    SeqPlatformModelLabelService seqPlatformModelLabelService
+
+    MetadataFieldsService getService() {
+        return seqPlatformModelLabelService
+    }
+}
+
+class CreateSequencingKitImportAliasCommand extends CreateImportAliasCommand {
+    SequencingKitLabelService sequencingKitLabelService
+
+    MetadataFieldsService getService() {
+        return sequencingKitLabelService
+    }
+}
+
+class CreateSeqTypeImportAliasCommand extends CreateImportAliasCommand {
+    SeqTypeService seqTypeService
     boolean singleCell
+
+    MetadataFieldsService getService() {
+        return seqTypeService
+    }
+}
+
+class CreateAntibodyTargetImportAliasCommand extends CreateImportAliasCommand {
+    AntibodyTargetService antibodyTargetService
+
+    MetadataFieldsService getService() {
+        return antibodyTargetService
+    }
+}
+
+class CreateLibraryPreparationKitImportAliasCommand extends CreateImportAliasCommand {
+    LibraryPreparationKitService libraryPreparationKitService
+
+    MetadataFieldsService getService() {
+        libraryPreparationKitService
+    }
+}
+
+abstract class CreateWithLayoutCommand implements Serializable {
+    SeqTypeService seqTypeService
+    boolean single
+    boolean paired
+    boolean mate_pair
+    boolean anyLayout = true
+    boolean singleCell
+
     static constraints = {
-        alias(blank: false, validator: {val, obj ->
-            if (SeqTypeService.findSeqTypeByNameOrAlias(val)) {
-                return 'Duplicate'
-            }})
-        id(blank: false)
-    }
-    void setAlias(String alias) {
-        this.alias = alias?.trim()?.replaceAll(" +", " ")
-    }
-}
-
-class CreateSeqTypeCommand implements Serializable {
-        boolean single
-        boolean paired
-        boolean mate_pair
-        boolean anyLayout = true
-        String type
-        String dirName
-        String displayName
-        String alias
-        boolean singleCell
-
-        static constraints = {
-            anyLayout(blank: false,validator: {val, obj ->
-                if (!(obj.single || obj.paired || obj.mate_pair)) {
-                    return 'Empty'
-                }})
-            type(blank: false, validator: {val, obj ->
-                if (SeqTypeService.hasSeqTypeByNameOrDisplayNameOrAliasAndSingleCell(val, obj.singleCell)) {
-                    return 'Duplicate'
-                }
-            })
-            dirName(blank: false, validator: { val, obj ->
-                if (SeqType.findByDirName(val)) {
-                    return 'Duplicate'
-                }
-            })
-            displayName(blank: false, validator: { val, obj ->
-                if (SeqTypeService.hasSeqTypeByNameOrDisplayNameOrAliasAndSingleCell(val, obj.singleCell)) {
-                    return 'Duplicate'
-                }
-            })
-            alias(blank: true, validator: {val, obj ->
-                if (val != '' && SeqTypeService.hasSeqTypeByNameOrDisplayNameOrAliasAndSingleCell(val, obj.singleCell)) {
-                    return 'Duplicate'
-                }})
-        }
-        void setType(String type) {
-            this.type = type?.trim()?.replaceAll(" +", " ")
-        }
-        void setDirName(String dirName) {
-            this.dirName = dirName?.trim()?.replaceAll(" +", " ")
-        }
-        void setDisplayName(String displayName) {
-            this.displayName = displayName?.trim()?.replaceAll(" +", " ")
-            if (this.displayName.equals("")) {
-                this.displayName = null
+        anyLayout(blank: false, validator: { val, obj ->
+            if (!(obj.single || obj.paired || obj.mate_pair)) {
+                return 'Empty'
             }
+        })
+    }
+
+    List<String> getLibraryLayouts() {
+        List<String> libraryLayouts = []
+        if (this.single) {
+            libraryLayouts.add(SeqType.LIBRARYLAYOUT_SINGLE)
         }
-        void setAlias(String alias) {
-            this.alias = alias?.trim()?.replaceAll(" +", " ")
+        if (this.paired) {
+            libraryLayouts.add(SeqType.LIBRARYLAYOUT_PAIRED)
         }
+        if (this.mate_pair) {
+            libraryLayouts.add(SeqType.LIBRARYLAYOUT_MATE_PAIR)
+        }
+        return libraryLayouts
+    }
 }
 
-class CreateLayoutCommand implements Serializable {
-        boolean single
-        boolean paired
-        boolean mate_pair
-        boolean anyLayout = true
-        String id
-        static constraints = {
-            single(validator: {val, obj ->
-                if (val && SeqType.findByNameAndLibraryLayout(obj.id, SeqType.LIBRARYLAYOUT_SINGLE)) {
-                    return 'Duplicate'
-                }
-            })
-            paired(validator: {val, obj ->
-                if (val && SeqType.findByNameAndLibraryLayout(obj.id, SeqType.LIBRARYLAYOUT_PAIRED)) {
-                    return 'Duplicate'
-                }
-            })
-            mate_pair(validator: {val, obj ->
-                if (val && SeqType.findByNameAndLibraryLayout(obj.id, SeqType.LIBRARYLAYOUT_MATE_PAIR)) {
-                    return 'Duplicate'
-                }
-            })
-            anyLayout(blank: false,validator: {val, obj -> if (!(obj.single || obj.paired || obj.mate_pair)) { return 'Empty' } })
-            id(blank: false)
+class CreateSeqTypeCommand extends CreateWithLayoutCommand {
+    String type
+    String dirName
+    String displayName
+
+    static constraints = {
+        type(blank: false, validator: { val, obj ->
+            if (obj.getLibraryLayouts().find {
+                obj.seqTypeService.findByNameOrImportAlias(val, [libraryLayout: it, singleCell: obj.singleCell])
+            }) {
+                return 'Duplicate'
+            }
+        })
+        dirName(blank: false, validator: { val, obj ->
+            if (SeqType.findByDirName(val)) {
+                return 'Duplicate'
+            }
+        })
+        displayName(blank: false, validator: { val, obj ->
+            if (obj.getLibraryLayouts().find {
+                obj.seqTypeService.findByNameOrImportAlias(val, [libraryLayout: it, singleCell: obj.singleCell])
+            }) {
+                return 'Duplicate'
+            }
+        })
+    }
+
+    void setType(String type) {
+        this.type = type?.trim()?.replaceAll(" +", " ")
+    }
+
+    void setDirName(String dirName) {
+        this.dirName = dirName?.trim()?.replaceAll(" +", " ")
+    }
+
+    void setDisplayName(String displayName) {
+        this.displayName = displayName?.trim()?.replaceAll(" +", " ")
+        if (this.displayName.equals("")) {
+            this.displayName = null
         }
+    }
+}
+
+class CreateLayoutCommand extends CreateWithLayoutCommand {
+    String name
+
+    static constraints = {
+        single(validator: { val, obj ->
+            if (val && obj.seqTypeService.findByNameOrImportAlias(obj.name, [libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE, singleCell: obj.singleCell])) {
+                return 'Duplicate'
+            }
+        })
+        paired(validator: { val, obj ->
+            if (val && obj.seqTypeService.findByNameOrImportAlias(obj.name, [libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED, singleCell: obj.singleCell])) {
+                return 'Duplicate'
+            }
+        })
+        mate_pair(validator: { val, obj ->
+            if (val && obj.seqTypeService.findByNameOrImportAlias(obj.name, [libraryLayout: SeqType.LIBRARYLAYOUT_MATE_PAIR, singleCell: obj.singleCell])) {
+                return 'Duplicate'
+            }
+        })
+        name(blank: false)
+    }
+
+    void setId(String id) {
+        this.name = id
+    }
 }

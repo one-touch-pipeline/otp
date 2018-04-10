@@ -440,17 +440,17 @@ datafile.showDetails.metaDataEntries
 datafile.showDetails.hiddenSampleIdentifier
 
 # DataFields List
+dataFields.header.alias
 dataFields.libraryPreparationKit
-dataFields.libraryPreparationKit.alias
 dataFields.listAntibodyTarget
 dataFields.listSeqCenterName
 dataFields.listSeqCenterDirName
 dataFields.listPlatformGroup
 dataFields.listPlatformName
 dataFields.listPlatformModelLabel
-dataFields.listPlatformModelLabelAlias
+dataFields.listPlatformModelLabelImportAlias
 dataFields.listSequeningKitLabel
-dataFields.listSequeningKitLabelAlias
+dataFields.listSequeningKitLabelImportAlias
 dataFields.listSeqType
 dataFields.title.libraryPreparationKitTable
 dataFields.title.antibodyTargetTable

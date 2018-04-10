@@ -10,6 +10,8 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 @Component
 class SeqTypeValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
 
+    SeqTypeService seqTypeService
+
     @Override
     Collection<String> getDescriptions() {
         return ['The sequencing type is registered in the OTP database.']
@@ -33,7 +35,7 @@ class SeqTypeValidator extends ValueTuplesValidator<MetadataValidationContext> i
     void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {
         valueTuples.each { ValueTuple valueTuple ->
             String seqType = MetadataImportService.getSeqTypeNameFromMetadata(valueTuple)
-            if (!SeqTypeService.findSeqTypeByNameOrAlias(seqType)) {
+            if (!seqTypeService.findByNameOrImportAlias(seqType)) {
                 context.addProblem(valueTuple.cells, Level.ERROR, "Sequencing type '${seqType}' is not registered in the OTP database.", "At least one sequencing type is not registered in OTP.")
             }
         }

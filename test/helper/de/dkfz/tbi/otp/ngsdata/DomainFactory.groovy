@@ -84,6 +84,14 @@ class DomainFactory {
         return domainObject
     }
 
+    static <T> T createDomainWithImportAlias(Class<T> domainClass, Map parameterProperties) {
+        Map defaultProperties = [
+                name : 'metadataName' + (counter++),
+                importAlias: [],
+        ]
+        return createDomainObject(domainClass, defaultProperties, parameterProperties)
+    }
+
     static Realm createRealm(Map realmProperties = [:]) {
         return createDomainObject(Realm, [
                 name                       : 'realmName_' + (counter++),
@@ -963,10 +971,10 @@ class DomainFactory {
         ].each {
             ExternallyProcessedMergedBamFile bamFile = DomainFactory.createExternallyProcessedMergedBamFile(
                     getRandomProcessedBamFileProperties() + [
-                            workPackage: it,
-                            coverage: 30.0,
-                            insertSizeFile: 'insertSize.txt',
-                            maximumReadLength: 101,
+                            workPackage       : it,
+                            coverage          : 30.0,
+                            insertSizeFile    : 'insertSize.txt',
+                            maximumReadLength : 101,
                     ] + bamFileProperties,
             )
             bamFile.mergingWorkPackage.bamFileInProjectFolder = bamFile
@@ -978,9 +986,9 @@ class DomainFactory {
 
         SamplePair samplePair = DomainFactory.createSamplePair(tumorMwp, controlMwp)
 
-         if (initPipelines){
-             initAnalysisForSamplePair(samplePair)
-         }
+        if (initPipelines) {
+            initAnalysisForSamplePair(samplePair)
+        }
 
         return samplePair
     }
@@ -1048,14 +1056,15 @@ class DomainFactory {
     }
 
 
-    private static Map createAnalysisInstanceWithRoddyBamFilesMapHelper(Map properties, Map bamFile1Properties, Map bamFile2Properties) {
+    private
+    static Map createAnalysisInstanceWithRoddyBamFilesMapHelper(Map properties, Map bamFile1Properties, Map bamFile2Properties) {
         Pipeline pipeline = createPanCanPipeline()
 
         SamplePair samplePair = properties.samplePair
         AbstractMergedBamFile diseaseBamFile = properties.sampleType1BamFile
         AbstractMergedBamFile controlBamFile = properties.sampleType2BamFile
 
-        AbstractMergingWorkPackage diseaseWorkPackage= diseaseBamFile?.mergingWorkPackage
+        AbstractMergingWorkPackage diseaseWorkPackage = diseaseBamFile?.mergingWorkPackage
         AbstractMergingWorkPackage controlWorkPackage = controlBamFile?.mergingWorkPackage
 
         if (samplePair) {
@@ -1071,17 +1080,17 @@ class DomainFactory {
             }
         } else {
             if (!controlWorkPackage) {
-                controlWorkPackage =  createMergingWorkPackage([
-                        pipeline: pipeline,
+                controlWorkPackage = createMergingWorkPackage([
+                        pipeline        : pipeline,
                         statSizeFileName: DEFAULT_TAB_FILE_NAME,
-                        seqType: diseaseWorkPackage?.seqType ?: createWholeGenomeSeqType(),
-                        sample: createSample([
+                        seqType         : diseaseWorkPackage?.seqType ?: createWholeGenomeSeqType(),
+                        sample          : createSample([
                                 individual: diseaseWorkPackage?.sample?.individual ?: createIndividual(),
                         ])
                 ])
             }
             if (!diseaseWorkPackage) {
-                diseaseWorkPackage =  createMergingWorkPackage(
+                diseaseWorkPackage = createMergingWorkPackage(
                         pipeline: pipeline,
                         statSizeFileName: DEFAULT_TAB_FILE_NAME,
                         seqType: controlWorkPackage.seqType,
@@ -1091,9 +1100,9 @@ class DomainFactory {
                 )
             }
             createSampleTypePerProjectLazy([
-                    project: diseaseWorkPackage.project,
+                    project   : diseaseWorkPackage.project,
                     sampleType: diseaseWorkPackage.sampleType,
-                    category: SampleType.Category.DISEASE,
+                    category  : SampleType.Category.DISEASE,
             ])
             samplePair = createSamplePair(diseaseWorkPackage, controlWorkPackage)
         }
@@ -1106,15 +1115,15 @@ class DomainFactory {
         if (!controlBamFile) {
             controlBamFile = createRoddyBamFile([
                     workPackage: controlWorkPackage,
-                    config: diseaseBamFile.config
+                    config     : diseaseBamFile.config
             ] + bamFile1Properties)
         }
 
         return [
-                instanceName              : "instance-${counter++}",
-                samplePair                : samplePair,
-                sampleType1BamFile        : diseaseBamFile,
-                sampleType2BamFile        : controlBamFile,
+                instanceName      : "instance-${counter++}",
+                samplePair        : samplePair,
+                sampleType1BamFile: diseaseBamFile,
+                sampleType2BamFile: controlBamFile,
         ]
     }
 
@@ -1145,12 +1154,12 @@ class DomainFactory {
 
     static IndelCallingInstance createIndelCallingInstanceWithSameSamplePair(BamFilePairAnalysis instance) {
         return createDomainObject(IndelCallingInstance, [
-                processingState           : AnalysisProcessingStates.FINISHED,
-                sampleType1BamFile        : instance.sampleType1BamFile,
-                sampleType2BamFile        : instance.sampleType2BamFile,
-                config                    : createRoddyWorkflowConfigLazy(pipeline: createIndelPipelineLazy()),
-                instanceName              : "instance-${counter++}",
-                samplePair                : instance.samplePair,
+                processingState   : AnalysisProcessingStates.FINISHED,
+                sampleType1BamFile: instance.sampleType1BamFile,
+                sampleType2BamFile: instance.sampleType2BamFile,
+                config            : createRoddyWorkflowConfigLazy(pipeline: createIndelPipelineLazy()),
+                instanceName      : "instance-${counter++}",
+                samplePair        : instance.samplePair,
         ], [:])
     }
 
@@ -1185,23 +1194,23 @@ class DomainFactory {
 
     static SophiaInstance createSophiaInstance(SamplePair samplePair, Map properties = [:]) {
         return createDomainObject(SophiaInstance, [
-                samplePair                : samplePair,
-                processingState           : AnalysisProcessingStates.FINISHED,
-                sampleType1BamFile        : samplePair.mergingWorkPackage1.bamFileInProjectFolder,
-                sampleType2BamFile        : samplePair.mergingWorkPackage2.bamFileInProjectFolder,
-                instanceName              : "instance-${counter++}",
-                config                    : createRoddyWorkflowConfig([pipeline: createSophiaPipelineLazy()]),
+                samplePair        : samplePair,
+                processingState   : AnalysisProcessingStates.FINISHED,
+                sampleType1BamFile: samplePair.mergingWorkPackage1.bamFileInProjectFolder,
+                sampleType2BamFile: samplePair.mergingWorkPackage2.bamFileInProjectFolder,
+                instanceName      : "instance-${counter++}",
+                config            : createRoddyWorkflowConfig([pipeline: createSophiaPipelineLazy()]),
         ], properties)
     }
 
     static SophiaInstance createSophiaInstanceWithSameSamplePair(BamFilePairAnalysis instance) {
         return createDomainObject(SophiaInstance, [
-                processingState           : AnalysisProcessingStates.FINISHED,
-                sampleType1BamFile        : instance.sampleType1BamFile,
-                sampleType2BamFile        : instance.sampleType2BamFile,
-                config                    : createRoddyWorkflowConfigLazy(pipeline: createSophiaPipelineLazy()),
-                instanceName              : "instance-${counter++}",
-                samplePair                : instance.samplePair,
+                processingState   : AnalysisProcessingStates.FINISHED,
+                sampleType1BamFile: instance.sampleType1BamFile,
+                sampleType2BamFile: instance.sampleType2BamFile,
+                config            : createRoddyWorkflowConfigLazy(pipeline: createSophiaPipelineLazy()),
+                instanceName      : "instance-${counter++}",
+                samplePair        : instance.samplePair,
         ], [:])
     }
 
@@ -1322,6 +1331,7 @@ class DomainFactory {
     public static AntibodyTarget createAntibodyTarget(Map properties = [:]) {
         return createDomainObject(AntibodyTarget, [
                 name: 'antibodyTargetName_' + (counter++),
+                importAlias: [],
         ], properties)
     }
 
@@ -1355,12 +1365,14 @@ class DomainFactory {
     public static SeqPlatformModelLabel createSeqPlatformModelLabel(Map properties = [:]) {
         return createDomainObject(SeqPlatformModelLabel, [
                 name: 'seqPlatformModelLabel_' + (counter++),
+                importAlias: [],
         ], properties)
     }
 
     public static SequencingKitLabel createSequencingKitLabel(Map properties = [:]) {
         return createDomainObject(SequencingKitLabel, [
                 name: 'SequencingKitLabel_' + (counter++),
+                importAlias: [],
         ], properties)
     }
 
@@ -1458,7 +1470,7 @@ class DomainFactory {
                 libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE,
                 dirName      : 'seqTypeDirName_' + (counter++),
                 displayName  : seqTypeProperties.get('displayName') ?: seqTypeProperties.get('name') ?: defaultName,
-                alias        : [],
+                importAlias  : [],
                 singleCell   : false
         ], seqTypeProperties, saveAndValidate)
     }
@@ -1487,13 +1499,7 @@ class DomainFactory {
         return createDomainObject(LibraryPreparationKit, [
                 name            : "library-preperation-kit-name_${counter++}",
                 shortDisplayName: "library-preperation-kit-short-name_${counter++}",
-        ], properties)
-    }
-
-    static LibraryPreparationKitSynonym createLibraryPreparationKitSynonym(Map properties = [:]) {
-        return createDomainObject(LibraryPreparationKitSynonym, [
-                name                 : "libPrepKitAlias_${counter++}",
-                libraryPreparationKit: { createLibraryPreparationKit() },
+                importAlias     : []
         ], properties)
     }
 
@@ -1531,7 +1537,7 @@ class DomainFactory {
                 referenceGenome: { createReferenceGenome() },
                 classification : ReferenceGenomeEntry.Classification.CHROMOSOME,
                 name           : "name${counter++}",
-                alias          : "alias${counter++}",
+                alias    : "alias${counter++}",
         ], properties)
     }
 
@@ -1993,7 +1999,7 @@ class DomainFactory {
     }
 
     static SeqType createRnaSingleSeqType() {
-        createSeqTypeLazy(SeqTypeNames.RNA, 'RNA', 'rna_sequencing', "RNA", SeqType.LIBRARYLAYOUT_SINGLE)
+        createSeqTypeLazy(SeqTypeNames.RNA, 'RNA', 'rna_sequencing', "RNA", LibraryLayout.SINGLE.name())
     }
 
     static List<SeqType> createDefaultOtpAlignableSeqTypes() {
@@ -2434,16 +2440,16 @@ samplePairsNotProcessed: ${samplePairsNotProcessed}
 
     static void createQcTrafficAlignmentNotificationProcessingOptions() {
         createProcessingOptionLazy([
-                name: OptionName.NOTIFICATION_TEMPLATE_QC_TRAFFIC_BLOCKED_SUBJECT,
-                type:Pipeline.Type.ALIGNMENT.name(),
+                name   : OptionName.NOTIFICATION_TEMPLATE_QC_TRAFFIC_BLOCKED_SUBJECT,
+                type   : Pipeline.Type.ALIGNMENT.name(),
                 project: null,
-                value: '''QC traffic alignment header ${roddyBamFile.sample} ${roddyBamFile.seqType}''',
+                value  : '''QC traffic alignment header ${roddyBamFile.sample} ${roddyBamFile.seqType}''',
         ])
         createProcessingOptionLazy([
-                name: OptionName.NOTIFICATION_TEMPLATE_QC_TRAFFIC_BLOCKED_MESSAGE,
-                type: Pipeline.Type.ALIGNMENT.name(),
+                name   : OptionName.NOTIFICATION_TEMPLATE_QC_TRAFFIC_BLOCKED_MESSAGE,
+                type   : Pipeline.Type.ALIGNMENT.name(),
                 project: null,
-                value: '''\
+                value  : '''\
 QC traffic alignment body
 ${roddyBamFile.sample} ${roddyBamFile.seqType} in project ${roddyBamFile.project}
 ${link}
@@ -2712,8 +2718,8 @@ ${link}
 
     static Document createDocument(Map properties = [:]) {
         return createDomainObject(Document, [
-                content : HelperUtils.getUniqueString().bytes,
-                type: Document.Type.PDF,
+                content: HelperUtils.getUniqueString().bytes,
+                type   : Document.Type.PDF,
         ], properties)
     }
 }

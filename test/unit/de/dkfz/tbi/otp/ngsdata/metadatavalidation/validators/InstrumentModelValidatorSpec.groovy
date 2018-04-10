@@ -39,10 +39,16 @@ Model2
 Model1
 Alias1
 """)
-        DomainFactory.createSeqPlatformModelLabel(name: 'Model2', alias: ['Alias1', 'Alias2'])
+        SeqPlatformModelLabel seqPlatformModelLabel = DomainFactory.createSeqPlatformModelLabel(name: 'Model2', importAlias: ['Alias1', 'Alias2'])
 
         when:
-        new InstrumentModelValidator().validate(context)
+        InstrumentModelValidator validator = new InstrumentModelValidator()
+        validator.seqPlatformModelLabelService = Mock(SeqPlatformModelLabelService) {
+            1 * findByNameOrImportAlias('Model1') >> null
+            1 * findByNameOrImportAlias('Model2') >> seqPlatformModelLabel
+            1 * findByNameOrImportAlias('Alias1') >> seqPlatformModelLabel
+        }
+        validator.validate(context)
 
         then:
         Problem problem = exactlyOneElement(context.problems)
