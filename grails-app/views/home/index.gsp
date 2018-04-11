@@ -42,20 +42,20 @@
             <div style="float: left; margin-top: 20px; border: 25px solid #E1F1FF;">
                 <canvas id="sampleCountPerSequenceTypePie" width="530" height="380">[No canvas support]</canvas>
             </div>
-            <div style="float: right; margin-top: 20px; border: 25px solid #E1F1FF;" >
-                <canvas id="patientsCountPerSequenceType" width="530" height="380">[No canvas support]</canvas>
-            </div>
-            <div style="float: left; margin-top: 20px; border: 25px solid #E1F1FF;">
-                <canvas id="projectCountPerDate" width="530" height="380">[No canvas support]</canvas>
-            </div>
             <div style="float: right; margin-top: 20px; border: 25px solid #E1F1FF;">
-                <canvas id="projectCountPerSequenceTypeBar" width="530" height="380">[No canvas support]</canvas>
+                <canvas id="projectCountPerDate" width="530" height="380">[No canvas support]</canvas>
             </div>
             <div style="float: left; margin-top: 20px; border: 25px solid #E1F1FF;">
                 <canvas id="laneCountPerDate" width="530" height="380">[No canvas support]</canvas>
             </div>
             <div style="float: right; margin-top: 20px; border: 25px solid #E1F1FF;">
                 <canvas id="gigaBasesPerDay" width="530" height="380">[No canvas support]</canvas>
+            </div>
+            <div style="float: left; margin-top: 20px; border: 25px solid #E1F1FF;" >
+                <canvas id="patientsCountPerSequenceType" width="1165" height="380">[No canvas support]</canvas>
+            </div>
+            <div style="float: left; margin-top: 20px; border: 25px solid #E1F1FF;">
+                <canvas id="projectCountPerSequenceTypeBar" width="1165" height="380">[No canvas support]</canvas>
             </div>
         </div>
         <asset:script type="text/javascript">
