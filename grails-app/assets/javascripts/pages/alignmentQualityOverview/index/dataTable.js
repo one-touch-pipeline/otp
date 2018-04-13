@@ -94,7 +94,6 @@ $.otp.alignmentQualityOverviewTable = {
                             table.fnSettings().oFeatures.bServerSide = false;
                         },
                         "success": function (json) {
-                            $("#withdrawn_description").hide();
                             var seqType = $('#seqType').find('option:selected').text();
                             var columnNames = [
                                 "pid",
@@ -163,9 +162,6 @@ $.otp.alignmentQualityOverviewTable = {
                             for (var i = 0; i < json.aaData.length; i += 1) {
                                 var row = json.aaData[i];
                                 var rowdata = $.otp.alignmentQualityOverviewTable.tableRowsFormatter(row, columnNames);
-                                if (row.withdrawn) {
-                                    $("#withdrawn_description").show();
-                                }
 
                                 json.aaData[i] = rowdata;
                             }

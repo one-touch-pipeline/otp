@@ -32,6 +32,7 @@ where
                 and mergingWorkPackage.bamFileInProjectFolder = abstractMergedBamFile
                 and abstractMergedBamFile.fileOperationStatus = :fileOperationStatus
                 and abstractMergedBamFile.qualityAssessmentStatus = :qualityAssessmentStatus
+                and abstractMergedBamFile.withdrawn = false
                 and (
                     abstractQualityAssessment.class = :overallQualityAssessmentMergedClass
                     or (

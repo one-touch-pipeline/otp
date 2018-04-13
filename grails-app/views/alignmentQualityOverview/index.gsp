@@ -20,10 +20,6 @@
                 </form>
             </div>
         </g:if>
-        <br><br><br>
-        <div id="withdrawn_description">
-            Withdrawn data is colored gray
-        </div>
         <div class="otpDataTables alignmentQualityOverviewTable">
             <otp:dataTable
                 codes="${header}"
