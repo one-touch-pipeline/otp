@@ -105,7 +105,7 @@ remote as web user
     # should ssh-agent be used to get the password for the ssh key (true or false)
     # if false, only key files without password can be used
     # if true, an ssh-agent must be running and the key must be added to it, even if the key file doesn't have a password
-    otp.ssh.useSshAgent=true
+    otp.ssh.authMethod=sshagent
     otp.ssh.user=$CLUSTER_USER
     ```
 

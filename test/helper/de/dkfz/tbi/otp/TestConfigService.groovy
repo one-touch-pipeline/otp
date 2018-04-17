@@ -14,9 +14,9 @@ class TestConfigService extends ConfigService {
         if (Environment.current.name == "WORKFLOW_TEST") {
             otpProperties = otpProperties.findAll {
                 (it.key as String) in [
+                        "otp.ssh.authMethod",
                         "otp.ssh.keyFile",
                         "otp.ssh.password",
-                        "otp.ssh.useSshAgent",
 
                         "otp.testing.workflows.account",
                         "otp.testing.workflows.host",

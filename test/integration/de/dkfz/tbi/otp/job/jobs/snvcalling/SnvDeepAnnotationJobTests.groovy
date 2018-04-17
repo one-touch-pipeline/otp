@@ -25,6 +25,7 @@ import de.dkfz.tbi.otp.utils.WaitingFileUtils
 import de.dkfz.tbi.otp.utils.ProcessHelperService.ProcessOutput
 import org.junit.After
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
@@ -289,6 +290,7 @@ CHROMOSOME_INDICES=( {1..21} X Y)
         )
     }
 
+    @Ignore
     @Test
     void testMaybeSubmit() {
         TestCase.mockCreateDirectory(lsdfFilesService)

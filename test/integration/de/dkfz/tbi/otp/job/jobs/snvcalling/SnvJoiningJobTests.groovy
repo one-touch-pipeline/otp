@@ -4,6 +4,7 @@ import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.AnalysisProcessingStates
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.ProcessHelperService
+import org.junit.Ignore
 
 import static org.junit.Assert.*
 
@@ -68,6 +69,7 @@ class SnvJoiningJobTests {
         testDirectory.deleteDir()
     }
 
+    @Ignore
     @Test
     void testMaybeSubmit() {
         boolean querySshCalled = false

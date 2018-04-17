@@ -12,6 +12,7 @@ import java.nio.file.*
 
 import static com.github.robtimus.filesystems.sftp.Identity.*
 import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
+import static de.dkfz.tbi.otp.ngsdata.ConfigService.SshAuthMethod.*
 
 class FileSystemService {
 
@@ -31,26 +32,27 @@ class FileSystemService {
             SFTPEnvironment env = new SFTPEnvironment()
                     .withUsername(configService.sshUser)
                     .withClientConnectionCount(ProcessingOptionService.findOptionAsNumber(MAXIMUM_SFTP_CONNECTIONS, null, null, 5).toInteger())
-            if (configService.sshKeyFile) {
-                env.withIdentity(fromFiles(configService.sshKeyFile))
+            Properties config = new Properties()
 
-                if (configService.useSshAgent()) {
+            switch (configService.sshAuthenticationMethod) {
+                case KEY_FILE:
+                    env.withIdentity(fromFiles(configService.sshKeyFile))
+                    config.put("PreferredAuthentications", "publickey")
+                    break
+                case SSH_AGENT:
                     Connector connector = ConnectorFactory.getDefault().createConnector()
                     if (connector != null) {
                         IdentityRepository repository = new RemoteIdentityRepository(connector)
                         env.withIdentityRepository(repository)
                     }
-                }
+                    break
+                case PASSWORD:
+                    env.withPassword(configService.getSshPassword().toCharArray())
+                    break
+            }
 
-            } else {
-                env.withPassword(configService.getPbsPassword().toCharArray())
-            }
             env.withTimeout(realm.timeout)
-            Properties config = new Properties()
             config.put("StrictHostKeyChecking", "no")
-            if (configService.sshKeyFile) {
-                config.put("PreferredAuthentications", "publickey")
-            }
             env.withConfig(config)
 
             try {

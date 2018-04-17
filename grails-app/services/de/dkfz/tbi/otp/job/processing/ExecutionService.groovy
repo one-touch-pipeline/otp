@@ -11,6 +11,8 @@ import org.apache.commons.logging.*
 
 import java.util.concurrent.*
 
+import static de.dkfz.tbi.otp.ngsdata.ConfigService.*
+
 /**
  * @short Helper class providing functionality for remote execution of jobs.
  *
@@ -50,16 +52,16 @@ class ExecutionService {
         assert realm : "No realm specified."
         assert command : "No command specified to be run remotely."
         String sshUser = configService.getSshUser()
-        String password = configService.getPbsPassword()
+        String password = configService.getSshPassword()
         File keyFile = configService.getSshKeyFile()
-        boolean useSshAgent = configService.useSshAgent()
+        SshAuthMethod sshAuthMethod = configService.getSshAuthenticationMethod()
         try {
-            return querySsh(realm, sshUser, password, keyFile, useSshAgent, command)
+            return querySsh(realm, sshUser, password, keyFile, sshAuthMethod, command)
         } catch (ProcessingException e) {
             if (e.cause && e.cause instanceof JSchException && e.cause.message.contains('channel is not opened.')) {
                 logToJob("'channel is not opened' error occur, try again in 30 seconds")
                 Thread.sleep(30000)
-                return querySsh(realm, sshUser, password, keyFile, useSshAgent, command)
+                return querySsh(realm, sshUser, password, keyFile, sshAuthMethod, command)
             } else {
                 throw e
             }
@@ -77,11 +79,11 @@ class ExecutionService {
      * @param username The user name for the connection
      * @param password The password for the user
      * @param keyFile The key file which contains the SSH key for passwordless login
-     * @param useSshAgent Whether the SSH agent should be used to decrypt the SSH key
+     * @param sshAuthMethod The authentication method used for the SSH connection
      * @param command The command to be executed on the remote server
      * @return process output of the command executed
      */
-    protected ProcessOutput querySsh(Realm realm, String username, String password, File keyFile, boolean useSshAgent, String command) {
+    protected ProcessOutput querySsh(Realm realm, String username, String password, File keyFile, SshAuthMethod sshAuthMethod, String command) {
         assert command : "No command specified."
         if (!password && !keyFile) {
             throw new ProcessingException("Neither password nor key file for remote connection specified.")
@@ -91,7 +93,7 @@ class ExecutionService {
         }
         maxSshCalls.acquire()
         try {
-            Session session = connectSshIfNeeded(realm, username, password, keyFile, useSshAgent)
+            Session session = connectSshIfNeeded(realm, username, password, keyFile, sshAuthMethod)
 
             ChannelExec channel = (ChannelExec)session.openChannel("exec")
             logToJob("executed command: " + command)
@@ -116,45 +118,45 @@ class ExecutionService {
         }
     }
 
-    private Session connectSshIfNeeded(Realm realm, String username, String password, File keyFile, boolean useSshAgent) {
+    private Session connectSshIfNeeded(Realm realm, String username, String password, File keyFile, SshAuthMethod sshAuthMethod) {
         Session session = sessionPerRealm[realm]
         if (session == null || !session.isConnected()) {
-            session = createSessionAndJsch(realm, username, password, keyFile, useSshAgent)
+            session = createSessionAndJsch(realm, username, password, keyFile, sshAuthMethod)
         }
         return session
     }
 
     @Synchronized
-    private Session createSessionAndJsch(Realm realm, String username, String password, File keyFile, boolean useSshAgent) {
+    private Session createSessionAndJsch(Realm realm, String username, String password, File keyFile, SshAuthMethod sshAuthMethod) {
         Session session = sessionPerRealm[realm]
         if (session == null || !session.isConnected()) {
             log.info("create new session for ${username}")
+            Properties config = new Properties()
             if (jsch == null) {
                 log.info("create new jsch")
                 jsch = new JSch()
-                if (keyFile) {
-                    jsch.addIdentity(keyFile.absolutePath)
 
-                    if (useSshAgent) {
+                switch (sshAuthMethod) {
+                    case SshAuthMethod.KEY_FILE:
+                        jsch.addIdentity(keyFile.absolutePath)
+                        config.put("PreferredAuthentications", "publickey")
+                        break
+                    case SshAuthMethod.SSH_AGENT:
                         Connector connector = ConnectorFactory.getDefault().createConnector()
                         if (connector != null) {
                             IdentityRepository repository = new RemoteIdentityRepository(connector)
                             jsch.setIdentityRepository(repository)
                         }
-                    }
+                        break
                 }
             }
 
             session = jsch.getSession(username, realm.host, realm.port)
-            if (!keyFile) {
+            if (sshAuthMethod == SshAuthMethod.PASSWORD) {
                 session.setPassword(password)
             }
             session.setTimeout(realm.timeout)
-            Properties config = new Properties()
             config.put("StrictHostKeyChecking", "no")
-            if (keyFile) {
-                config.put("PreferredAuthentications", "publickey")
-            }
             session.setConfig(config)
             try {
                 session.connect()

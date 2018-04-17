@@ -237,6 +237,7 @@ CHROMOSOME_INDICES=( {1..21} XY)
         )
     }
 
+    @Ignore
     @Test
     void testMaybeSubmit() {
         TestCase.mockCreateDirectory(lsdfFilesService)

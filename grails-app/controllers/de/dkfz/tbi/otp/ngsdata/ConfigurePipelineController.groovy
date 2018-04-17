@@ -4,15 +4,19 @@ import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
+import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.utils.*
 import grails.converters.*
 import groovy.transform.*
 import org.springframework.validation.*
 
+import java.nio.file.*
+
 class ConfigurePipelineController {
 
     ProjectService projectService
     ProjectSelectionService projectSelectionService
+    FileSystemService fileSystemService
 
     def alignment(ConfigureAlignmentPipelineSubmitCommand cmd) {
         Pipeline pipeline = Pipeline.Name.PANCAN_ALIGNMENT.pipeline
@@ -427,7 +431,7 @@ class ConfigurePipelineController {
         ]
     }
 
-    private static Map getValues(Project project, SeqType seqType, Pipeline pipeline) {
+    private Map getValues(Project project, SeqType seqType, Pipeline pipeline) {
         String configVersion = CollectionUtils.atMostOneElement(
                 RoddyWorkflowConfig.findAllByProjectAndSeqTypeAndPipelineAndIndividualIsNull(project, seqType, pipeline, [sort: 'id', order: 'desc', max: 1]))?.configVersion
         if (configVersion) {
@@ -439,13 +443,17 @@ class ConfigurePipelineController {
             configVersion = "v1_0"
         }
 
-        String lastRoddyConfig = (RoddyWorkflowConfig.getLatestForProject(project, seqType, pipeline)?.configFilePath as File)?.text
-        assert project.getProjectDirectory().exists()
+        String latestRoddyConfig = ""
+        RoddyWorkflowConfig config = RoddyWorkflowConfig.getLatestForProject(project, seqType, pipeline)
+        if (config) {
+            FileSystem fs = fileSystemService.getFilesystemForConfigFileChecksForRealm(project.realm)
+            latestRoddyConfig = fs.getPath(config.configFilePath).text
+        }
         return [
                 project        : project,
                 seqType        : seqType,
                 config         : configVersion,
-                lastRoddyConfig: lastRoddyConfig,
+                lastRoddyConfig: latestRoddyConfig,
         ]
     }
 

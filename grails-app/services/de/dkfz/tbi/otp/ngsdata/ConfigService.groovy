@@ -1,11 +1,13 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.utils.CollectionUtils
 import grails.util.*
+import groovy.transform.*
 import org.joda.time.*
 import org.springframework.beans.*
 import org.springframework.context.*
+
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 /**
  * This service knows all the configuration parameters like root paths,
@@ -14,6 +16,18 @@ import org.springframework.context.*
  *
  */
 class ConfigService implements ApplicationContextAware {
+
+    @TupleConstructor
+    static enum SshAuthMethod {
+        SSH_AGENT("sshagent"),
+        KEY_FILE("keyfile"),
+        PASSWORD("password"),
+        final String configName
+
+        static SshAuthMethod getByConfigName(String configName) {
+            return values().find { it.configName == configName }
+        }
+    }
 
     protected Map<String, String> otpProperties
 
@@ -31,7 +45,7 @@ class ConfigService implements ApplicationContextAware {
     }
 
     static Realm getDefaultRealm() {
-        return CollectionUtils.exactlyOneElement(Realm.findAllByName(ProcessingOptionService.findOptionSafe(ProcessingOption.OptionName.REALM_DEFAULT_VALUE, null, null)))
+        return exactlyOneElement(Realm.findAllByName(ProcessingOptionService.findOptionSafe(ProcessingOption.OptionName.REALM_DEFAULT_VALUE, null, null)))
     }
 
     static File getRootPathFromSelfFoundContext() {
@@ -74,16 +88,20 @@ class ConfigService implements ApplicationContextAware {
         return new File("${getRootPath().path}/${proj.dirName}/sequencing/")
     }
 
-    String getPbsPassword() {
+    String getSshUser() {
+        return otpProperties.get("otp.ssh.user") ?: ""
+    }
+
+    SshAuthMethod getSshAuthenticationMethod() {
+        SshAuthMethod.getByConfigName(otpProperties.get("otp.ssh.authMethod")) ?: SshAuthMethod.SSH_AGENT
+    }
+
+    String getSshPassword() {
         return otpProperties.get("otp.ssh.password") ?: ""
     }
 
     File getSshKeyFile() {
         return new File(otpProperties.get("otp.ssh.keyFile") ?: System.getProperty("user.home") + "/.ssh/id_rsa")
-    }
-
-    boolean useSshAgent() {
-        return getBooleanValue("otp.ssh.useSshAgent", true)
     }
 
     boolean otpSendsMails() {
@@ -136,10 +154,6 @@ class ConfigService implements ApplicationContextAware {
             throw new RuntimeException("${property} is \"${file}\", but only an absolute path is allowed.")
         }
         return file
-    }
-
-    String getSshUser() {
-        return otpProperties.get("otp.ssh.user") ?: ""
     }
 
     private boolean getBooleanValue(String otpPropertiesValue, boolean defaultValue) {
