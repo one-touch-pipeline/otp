@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.processing
 
+import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.scheduler.*
 import de.dkfz.tbi.otp.ngsdata.ConfigService
@@ -101,6 +102,21 @@ class ProcessService {
     @PreAuthorize("hasPermission(#step.process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read) or hasRole('ROLE_ADMIN')")
     public String processingStepLog(ProcessingStep step) {
         File file = getLogForProcessingStep(step)
+        if (!file.exists() || !file.isFile()) {
+            return ""
+        }
+        return file.getText()
+    }
+
+    /**
+     * Retrieves the cluster job log file for the given ClusterJob and returns the file content.
+     * @param clusterJob for which the log file should be retrieved
+     * @return Content of log file or empty String in case log file does not exist
+     */
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    public String processingStepClusterJobLog(ClusterJob clusterJob) {
+
+        File file = new File(clusterJob.jobLog)
         if (!file.exists() || !file.isFile()) {
             return ""
         }

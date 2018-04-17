@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.job.processing
 
 import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.job.jobs.*
 import de.dkfz.tbi.otp.job.jobs.utils.*
 import de.dkfz.tbi.otp.job.plan.*
@@ -324,12 +325,19 @@ class ProcessesController {
 
     def processingStep() {
         ProcessingStep step = processService.getProcessingStep(params.id as long)
-        [step: step, hasLog: processService.processingStepLogExists(step)]
+        [step: step, hasLog: processService.processingStepLogExists(step), clusterJobs: ClusterJob.findAllByProcessingStep(step).sort {
+            it.clusterJobId
+        }]
     }
 
     def processingStepLog() {
         ProcessingStep step = processService.getProcessingStep(params.id as long)
         render processService.processingStepLog(step)
+    }
+
+    def processingStepClusterJobLog() {
+        ClusterJob clusterJob = ClusterJob.findById(params.id as long)
+        render contentType: "text/plain", text: processService.processingStepClusterJobLog(clusterJob)
     }
 
     def restartStep() {

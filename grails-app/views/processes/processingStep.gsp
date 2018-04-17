@@ -71,6 +71,37 @@
             ]}" id="outputParametersList"/>
     </div>
     <br>
+    <h2><g:message code="processes.processingStep.logOutput"/></h2>
+        <table>
+            <thead>
+            <tr>
+                <th><g:message code="otp.blank"/></th>
+                <th><g:message code="workflow.paramater.table.headers.clusterJobName"/></th>
+                <th><g:message code="workflow.paramater.table.headers.clusterJob"/></th>
+                <th><g:message code="otp.blank"/></th>
+            </tr>
+            </thead>
+            <tbody>
+            <g:each var="clusterJob" in="${clusterJobs}" >
+                <tr>
+                    <td></td>
+                    <td>
+                        ${clusterJob.clusterJobName}
+                    </td>
+                    <td>
+                        <g:if test="${clusterJob.jobLog && new File(clusterJob.jobLog).exists()}">
+                            <g:link action="processingStepClusterJobLog" id="${clusterJob.id}">${clusterJob.clusterJobId}</g:link>
+                        </g:if>
+                        <g:else>
+                            ${clusterJob.clusterJobId} (<g:message code="processes.processingStep.log.noFile"/>)
+                        </g:else>
+                    </td>
+                    <td></td>
+                </tr>
+            </g:each>
+            </tbody>
+        </table>
+    <br>
     <h2><g:message code="processes.processingStep.updates"/></h2>
     <div class="otpDataTables">
         <otp:dataTable codes="${[
