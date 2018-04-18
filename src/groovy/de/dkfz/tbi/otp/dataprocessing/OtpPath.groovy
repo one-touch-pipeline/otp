@@ -25,13 +25,6 @@ class OtpPath {
     }
 
     /**
-     * Path used in staging
-     */
-    File getAbsoluteStagingPath() {
-        return getAbsolutePath(ConfigService.getStagingRootPathFromSelfFoundContext())
-    }
-
-    /**
      * Path used in processing directory
      */
     File getAbsoluteDataProcessingPath() {

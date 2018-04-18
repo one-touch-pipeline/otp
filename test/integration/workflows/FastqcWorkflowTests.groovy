@@ -55,7 +55,7 @@ class FastqcWorkflowTests extends WorkflowTestCase {
                 vbpFileName: 'asdf.fastq.gz',
                 seqTrack: seqTrack,
                 run: run,
-                initialDirectory: "${configService.getStagingRootPath()}/${run.name}",
+                initialDirectory: "${ftpDir}/${run.name}",
         )
 
         linkFileUtils.createAndValidateLinks([(sourceFastq): new File(lsdfFilesService.getFileFinalPath(dataFile))], realm)

@@ -6,16 +6,11 @@ import de.dkfz.tbi.otp.dataprocessing.sophia.*
 public class AnalysisDeletionService {
 
     /**
-     * Delete all SnvJobResults, subclasses of BamFilePairAnalysis (such as SnvCallingInstance, IndelCallingInstance, etc) from the database.
+     * Delete all subclasses of BamFilePairAnalysis (such as SnvCallingInstance, IndelCallingInstance, etc) from the database.
      */
     static File deleteInstance(BamFilePairAnalysis analysisInstance) {
         File directory = analysisInstance.getInstancePath().getAbsoluteDataManagementPath()
-        if (analysisInstance instanceof SnvCallingInstance) {
-            List<SnvJobResult> results = SnvJobResult.findAllBySnvCallingInstance(analysisInstance, [sort: 'id', order: 'desc'])
-            results.each {
-                it.delete(flush: true)
-            }
-        } else if (analysisInstance instanceof IndelCallingInstance) {
+        if (analysisInstance instanceof IndelCallingInstance) {
             List<IndelQualityControl> indelQualityControl = IndelQualityControl.findAllByIndelCallingInstance(analysisInstance, [sort: 'id', order: 'desc'])
             indelQualityControl.each {
                 it.delete(flush: true)
@@ -47,7 +42,7 @@ public class AnalysisDeletionService {
     static List<File> deleteSamplePairsWithoutAnalysisInstances(List<SamplePair> samplePairs) {
         List<File> directoriesToDelete = []
         samplePairs.unique().each { SamplePair samplePair ->
-            if (!SnvCallingInstance.findBySamplePair(samplePair)) {
+            if (!AbstractSnvCallingInstance.findBySamplePair(samplePair)) {
                 directoriesToDelete << samplePair.getSnvSamplePairPath().getAbsoluteDataManagementPath()
             }
             if (!IndelCallingInstance.findBySamplePair(samplePair)) {

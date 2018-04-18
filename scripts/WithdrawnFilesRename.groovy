@@ -1,6 +1,4 @@
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvJobResult
-
 
 /**
  * rename existing withdrawn result files in the project folder
@@ -8,7 +6,7 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvJobResult
  *
  * Withdrawn result files (ProcessedMergedBamFiles, RoddyBamFiles)
  * in the project folder are renamed by appending "-withdrawn",
- * for SNV results complete directories are renamed.
+ * for analysis instances complete directories are renamed.
  *
  */
 
@@ -21,11 +19,11 @@ MergingWorkPackage.list().each { MergingWorkPackage mergingWorkPackage ->
         final File file = new File(bamFile.baseDirectory, bamFile.bamFileName)
         renameFiles.add(file)
 
-        List<SnvJobResult> snvJobResult = findSnvJobResultForBamFile(bamFile)
-        snvJobResult.each { SnvJobResult result ->
+        List<BamFilePairAnalysis> analysisInstances = findAnalysisInstanceForBamFile(bamFile)
+        analysisInstances.each { BamFilePairAnalysis result ->
             assert result.withdrawn
             // rename folder containing results
-            renameFiles.add(result.snvCallingInstance.instancePath.absoluteDataManagementPath)
+            renameFiles.add(result.instancePath.absoluteDataManagementPath)
         }
     }
 }
@@ -40,13 +38,11 @@ new File("$SCRIPT_ROOT_PATH/withdraw/renameWithdrawnFiles.sh").withPrintWriter {
 
 
 
-List<SnvJobResult> findSnvJobResultForBamFile(AbstractMergedBamFile bamFile) {
-    return SnvJobResult.createCriteria().list {
-        snvCallingInstance {
-            or {
-                eq('sampleType1BamFile', bamFile)
-                eq('sampleType2BamFile', bamFile)
-            }
+List<BamFilePairAnalysis> findAnalysisInstanceForBamFile(AbstractMergedBamFile bamFile) {
+    return BamFilePairAnalysis.createCriteria().list {
+        or {
+            eq('sampleType1BamFile', bamFile)
+            eq('sampleType2BamFile', bamFile)
         }
     }
 }

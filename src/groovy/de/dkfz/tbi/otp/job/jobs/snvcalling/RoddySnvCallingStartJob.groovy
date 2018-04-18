@@ -3,14 +3,21 @@ package de.dkfz.tbi.otp.job.jobs.snvcalling
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
+import de.dkfz.tbi.otp.job.jobs.bamFilePairAnalysis.*
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.tracking.*
 import de.dkfz.tbi.otp.utils.*
+import org.springframework.beans.factory.annotation.*
 import org.springframework.context.annotation.*
 import org.springframework.stereotype.*
 
 @Component("roddySnvStartJob")
 @Scope("singleton")
-class RoddySnvCallingStartJob extends AbstractSnvCallingStartJob {
+class RoddySnvCallingStartJob extends AbstractBamFilePairAnalysisStartJob {
+
+    @Autowired
+    SnvCallingService snvCallingService
+
 
     @Override
     protected ConfigPerProject getConfig(SamplePair samplePair) {
@@ -30,7 +37,19 @@ class RoddySnvCallingStartJob extends AbstractSnvCallingStartJob {
     }
 
     @Override
-    protected Class<? extends SnvCallingInstance> getInstanceClass() {
+    protected Class<? extends RoddySnvCallingInstance> getInstanceClass() {
         return RoddySnvCallingInstance
+    }
+
+    @Override
+    SamplePair findSamplePairToProcess(short minPriority) {
+        return snvCallingService.samplePairForProcessing(minPriority, getConfigClass())
+    }
+
+    @Override
+    void prepareCreatingTheProcessAndTriggerTracking(BamFilePairAnalysis bamFilePairAnalysis) {
+        trackingService.setStartedForSeqTracks(bamFilePairAnalysis.getContainedSeqTracks(), OtrsTicket.ProcessingStep.SNV)
+        bamFilePairAnalysis.samplePair.snvProcessingStatus = SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED
+        bamFilePairAnalysis.samplePair.save()
     }
 }

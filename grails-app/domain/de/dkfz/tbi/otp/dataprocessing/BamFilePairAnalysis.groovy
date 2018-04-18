@@ -22,7 +22,7 @@ abstract class BamFilePairAnalysis implements ProcessParameterObject, Entity {
     AbstractMergedBamFile sampleType2BamFile
 
     /**
-     * Used to construct paths in {@link SnvCallingInstance#getInstancePath()}/{@link IndelCallingInstance#getInstancePath()} and {@link SnvCallingInstance#getConfigFilePath()}.
+     * Used to construct paths in {@link #getInstancePath()}.
      * For example 2014-08-25_15h32.
      */
     String instanceName

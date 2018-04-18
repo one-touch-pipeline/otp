@@ -83,6 +83,7 @@ class TestCase {
      * You should delete the returned directory using Groovy's File.deleteDir() method as
      * soon as you do not need it anymore, or delete all test directories using {@link #cleanTestDirectory()}.
      */
+    @Deprecated
     public static File createEmptyTestDirectory() {
         if (!cleanTestDirectoryShutdownHookInstalled) {
             addShutdownHook { cleanTestDirectory() }
@@ -93,6 +94,7 @@ class TestCase {
         return dir
     }
 
+    @Deprecated
     public static boolean cleanTestDirectory() {
         return TEST_DIRECTORY.deleteDir()
     }
@@ -100,6 +102,7 @@ class TestCase {
     /**
      * @see CollectionUtils#containSame(java.util.Collection, java.util.Collection)
      */
+    @Deprecated
     public static <T> boolean containSame(final Collection<? extends T> c1, final Collection<? extends T> c2) {
         return CollectionUtils.containSame(c1, c2)
     }
@@ -163,6 +166,7 @@ class TestCase {
     /**
      * Wrapper for instance method {@link GroovyTestCase#shouldFail}
      */
+    @Deprecated
     static String shouldFail(Closure code) {
         return new GroovyTestCase().shouldFail(code)
     }
@@ -170,14 +174,17 @@ class TestCase {
     /**
      * Wrapper for instance method {@link GroovyTestCase#shouldFail}
      */
+    @Deprecated
     static String shouldFail(Class clazz, Closure code) {
         return new GroovyTestCase().shouldFail(clazz, code)
     }
 
+    @Deprecated
     static shouldFailWithMessage(Class clazz, String pattern, Closure code) {
         assert shouldFail(clazz, code) ==~ pattern
     }
 
+    @Deprecated
     static shouldFailWithMessageContaining(Class clazz, String messagePart, Closure code) {
         assert shouldFail(clazz, code).contains(messagePart)
     }
@@ -199,6 +206,7 @@ class TestCase {
         assert expectedEntries == foundEntries
     }
 
+    @Deprecated
     static void withMockedExecutionService(ExecutionService executionService, Closure code) {
         assert executionService != null
         assert code != null
@@ -214,53 +222,6 @@ class TestCase {
         executionService.metaClass.executeCommandReturnProcessOutput = { Realm realm, String command, String userName = null ->
             return executeAndWait(command).assertExitCodeZeroAndStderrEmpty()
         }
-    }
-
-    /**
-     * @deprecated Use {@link #withMockedExecutionService(ExecutionService, Closure)} instead.
-     */
-    @Deprecated
-    static void withMockedExecuteCommand(ExecutionService executionService, Closure code) {
-        assert executionService != null
-        assert code != null
-        try {
-            mockExecuteCommand(executionService)
-            code()
-        } finally {
-            removeMetaClass(ExecutionService, executionService)
-        }
-    }
-
-    private static void mockExecuteCommand(ExecutionService executionService) {
-        executionService.metaClass.executeCommand = { Realm realm, String command ->
-            return ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
-        }
-    }
-
-    /**
-     * @deprecated Use {@link #withMockedExecutionService(ExecutionService, Closure)} instead.
-     */
-    @Deprecated
-    def static mockCreateDirectory(LsdfFilesService lsdfFilesService) {
-        lsdfFilesService.metaClass.createDirectory = { File file, Project project1 ->
-            file.mkdirs()
-        }
-    }
-
-    /**
-     * @deprecated Use {@link #withMockedExecutionService(ExecutionService, Closure)} instead.
-     */
-    @Deprecated
-    def static mockDeleteDirectory(Object lsdfFilesService) {
-        lsdfFilesService.metaClass.deleteDirectoryRecursive = { Realm realm, File dir ->
-            if (!dir.deleteDir()) {
-                throw new IOException("Unable to delete path '${dir}'.")
-            }
-        }
-    }
-
-    def static removeMockFileService(LsdfFilesService lsdfFilesService) {
-        TestCase.removeMetaClass(LsdfFilesService, lsdfFilesService)
     }
 
     static String primaryGroup() {

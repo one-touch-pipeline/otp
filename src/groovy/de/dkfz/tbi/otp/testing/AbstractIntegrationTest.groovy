@@ -14,6 +14,7 @@ abstract class AbstractIntegrationTest implements UserAndRoles {
     */
     def authenticationManager
 
+    @Deprecated
     @SuppressWarnings("CatchException")
     protected def shouldFail = { exception, code ->
         try {

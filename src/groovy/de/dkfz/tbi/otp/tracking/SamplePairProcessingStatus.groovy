@@ -13,7 +13,7 @@ class SamplePairProcessingStatus {
     final SamplePair samplePair
 
     final WorkflowProcessingStatus snvProcessingStatus
-    final SnvCallingInstance completeSnvCallingInstance
+    final AbstractSnvCallingInstance completeSnvCallingInstance
 
     final WorkflowProcessingStatus indelProcessingStatus
     final IndelCallingInstance completeIndelCallingInstance

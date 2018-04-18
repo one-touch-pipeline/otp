@@ -54,8 +54,6 @@ abstract class AbstractBamFilePairAnalysisStartJob extends AbstractStartJobImpl 
 
         BamFilePairAnalysis failedAnalysis = process.getProcessParameterObject()
 
-        withdrawSnvJobResultsIfAvailable(failedAnalysis)
-
         tryToDeleteResultFilesOfFailedInstance(failedAnalysis)
 
         BamFilePairAnalysis.withTransaction {
@@ -80,12 +78,10 @@ abstract class AbstractBamFilePairAnalysisStartJob extends AbstractStartJobImpl 
     private void tryToDeleteResultFilesOfFailedInstance(BamFilePairAnalysis analysis) {
         final Realm realm = analysis.project.realm
 
-        String deleteFiles = "rm -rf ${analysis.getWorkDirectory()} ${analysis.instancePath.absoluteStagingPath}"
+        String deleteFiles = "rm -rf ${analysis.getWorkDirectory()}"
 
         executionService.executeCommandReturnProcessOutput(realm, deleteFiles)
     }
-
-    protected void withdrawSnvJobResultsIfAvailable(BamFilePairAnalysis bamFilePairAnalysis) {}
 
 
     protected String getInstanceName(ConfigPerProject config) {

@@ -15,7 +15,6 @@ import spock.lang.*
         DataFile,
         ExternalMergingWorkPackage,
         ExternallyProcessedMergedBamFile,
-        ExternalScript,
         FileType,
         Individual,
         IndelCallingInstance,
@@ -50,7 +49,6 @@ import spock.lang.*
         SeqType,
         SoftwareTool,
         SophiaInstance,
-        SnvJobResult,
 ])
 class BamFilePairAnalysisSpec extends Specification {
 

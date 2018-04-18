@@ -4,7 +4,7 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.ngsdata.*
 import org.hibernate.*
 
-class RoddySnvCallingInstance extends SnvCallingInstance implements RoddyAnalysisResult {
+class RoddySnvCallingInstance extends AbstractSnvCallingInstance implements RoddyAnalysisResult {
 
     static hasMany = [
             roddyExecutionDirectoryNames: String,

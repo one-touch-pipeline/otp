@@ -219,20 +219,6 @@ class RoddyBamFileTest {
     }
 
     @Test
-    void testWithdraw_singleFileWithSnv_ShouldSnvSetToWithdrawn() {
-        SnvJobResult snvJobResult = DomainFactory.createSnvJobResultWithRoddyBamFiles()
-        assert !snvJobResult.sampleType1BamFile.withdrawn
-
-        LogThreadLocal.withThreadLog(System.out) {
-            snvJobResult.sampleType1BamFile.withdraw()
-        }
-        assert snvJobResult.sampleType1BamFile.withdrawn
-        assert snvJobResult.snvCallingInstance.withdrawn
-        assert snvJobResult.withdrawn
-    }
-
-
-    @Test
     void testGetOverallQualityAssessment() {
         RoddyBamFile bamFile = DomainFactory.createRoddyBamFile()
         QualityAssessmentMergedPass qaPass = QualityAssessmentMergedPass.build(

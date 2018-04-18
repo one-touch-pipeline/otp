@@ -249,10 +249,10 @@ class ExecuteRoddySnvJobSpec extends Specification {
                     it.getCombinedPlotPath()
                 },
                 { RoddySnvCallingInstance it ->
-                    new OtpPath(it.instancePath, SnvCallingStep.CALLING.getResultFileName(it.individual)).absoluteDataManagementPath
+                    it.getSnvCallingResult()
                 },
                 { RoddySnvCallingInstance it ->
-                    new OtpPath(it.instancePath, SnvCallingStep.SNV_DEEPANNOTATION.getResultFileName(it.individual)).absoluteDataManagementPath
+                    it.getSnvDeepAnnotationResult()
                 },
         ]
     }

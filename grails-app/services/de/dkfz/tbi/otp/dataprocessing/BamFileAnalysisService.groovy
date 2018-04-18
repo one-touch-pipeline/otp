@@ -76,13 +76,6 @@ abstract class BamFileAnalysisService {
             "       ) "
         }
 
-        String onlyOtpSnv = configClass == SnvConfig ?
-                "   AND EXISTS (from ExternalScript es " +
-                "       where es.scriptVersion = cps.externalScriptVersion " +
-                "       and es.deprecatedDate is null " +
-                "   ) " : ""
-
-
         String samplePairForProcessing =
                 "FROM SamplePair sp " +
                 //check that sample pair shall be processed
@@ -101,7 +94,6 @@ abstract class BamFileAnalysisService {
                 "   AND cps.pipeline.type = :analysis " +
                 "   AND cps.seqType = sp.mergingWorkPackage1.seqType " +
                 "   AND cps.obsoleteDate is null " +
-                onlyOtpSnv +
                 ") " +
 
 

@@ -86,8 +86,8 @@ class SamplePairTests {
 
     @Test
     void testFindLatestSnvCallingInstance_whenSnvCallingInstanceExists_ShouldReturnLatest() {
-        SnvCallingInstance first = DomainFactory.createSnvInstanceWithRoddyBamFiles()
-        SnvCallingInstance latest = DomainFactory.createSnvInstanceWithRoddyBamFiles([samplePair: first.samplePair, instanceName: '2015-08-25_15h32'])
+        AbstractSnvCallingInstance first = DomainFactory.createRoddySnvInstanceWithRoddyBamFiles()
+        AbstractSnvCallingInstance latest = DomainFactory.createRoddySnvInstanceWithRoddyBamFiles([samplePair: first.samplePair, instanceName: '2015-08-25_15h32'])
 
         assert latest == latest.samplePair.findLatestSnvCallingInstance()
     }

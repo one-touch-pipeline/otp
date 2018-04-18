@@ -89,30 +89,23 @@ class ProcessedMergedBamFileIntegrationTests {
     }
 
     @Test
-    void testWithdraw_SetBamFileAndSnvResultsWithdrawn() {
-        SnvCallingInstanceTestData testData = new SnvCallingInstanceTestData()
-        testData.createSnvObjects()
+    void testWithdraw_SetBamFileAndSnvCallingInstanceWithdrawn() {
+        SamplePair samplePair = DomainFactory.createSamplePairWithProcessedMergedBamFiles()
 
-        assert !testData.bamFileTumor.withdrawn
-        assert !testData.bamFileControl.withdrawn
+        assert !samplePair.mergingWorkPackage1.bamFileInProjectFolder.withdrawn
+        assert !samplePair.mergingWorkPackage2.bamFileInProjectFolder.withdrawn
 
-        testData.bamFileTumor.workPackage.bamFileInProjectFolder = testData.bamFileTumor
-        assert testData.bamFileTumor.workPackage.save(flush: true)
-
-        testData.bamFileControl.workPackage.bamFileInProjectFolder = testData.bamFileControl
-        assert testData.bamFileControl.workPackage.save(flush: true)
-
-        SnvCallingInstance snvCallingInstance = testData.createAndSaveSnvCallingInstance()
-
-        SnvJobResult callingResult = testData.createAndSaveSnvJobResult(snvCallingInstance, SnvCallingStep.CALLING)
-        assert !callingResult.withdrawn
+        RoddySnvCallingInstance snvCallingInstance = DomainFactory.createRoddySnvCallingInstance(
+                sampleType1BamFile: samplePair.mergingWorkPackage1.bamFileInProjectFolder,
+                sampleType2BamFile: samplePair.mergingWorkPackage2.bamFileInProjectFolder,
+                samplePair: samplePair,
+        )
 
         LogThreadLocal.withThreadLog(System.out) {
-            testData.bamFileTumor.withdraw()
+            samplePair.mergingWorkPackage1.bamFileInProjectFolder.withdraw()
         }
-        assert testData.bamFileTumor.withdrawn
+        assert samplePair.mergingWorkPackage1.bamFileInProjectFolder.withdrawn
         assert snvCallingInstance.withdrawn
-        assert callingResult.withdrawn
     }
 
 

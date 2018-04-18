@@ -815,8 +815,8 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     }
 
 
-    private SnvCallingInstance deleteProcessingFilesOfProject_RBF_SNV_Setup() {
-        SnvCallingInstance snvCallingInstance = DomainFactory.createSnvInstanceWithRoddyBamFiles(processingState: AnalysisProcessingStates.FINISHED)
+    private AbstractSnvCallingInstance deleteProcessingFilesOfProject_RBF_SNV_Setup() {
+        AbstractSnvCallingInstance snvCallingInstance = DomainFactory.createSnvInstanceWithRoddyBamFiles(processingState: AnalysisProcessingStates.FINISHED)
 
         AbstractMergedBamFile tumorBamFiles = snvCallingInstance.sampleType1BamFile
         dataBaseSetupForMergedBamFiles(tumorBamFiles)
@@ -833,21 +833,20 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     }
 
 
-    private void deleteProcessingFilesOfProject_RBF_SNV_Validation(SnvCallingInstance snvCallingInstance) {
+    private void deleteProcessingFilesOfProject_RBF_SNV_Validation(AbstractSnvCallingInstance snvCallingInstance) {
         File snvFolder = snvCallingInstance.samplePair.getSnvSamplePairPath().getAbsoluteDataManagementPath()
 
         File outputFile = new File(outputFolder.absoluteFile, "Delete_${snvCallingInstance.project.name}.sh")
         assert outputFile.text.contains(snvFolder.path) && outputFile.text.contains(snvFolder.parent)
 
-        assert SnvCallingInstance.list().empty
+        assert AbstractSnvCallingInstance.list().empty
         assert SamplePair.list().empty
-        assert SnvJobResult.list().empty
     }
 
 
     @Test
     public void testDeleteProcessingFilesOfProject_RBF_SNV() {
-        SnvCallingInstance snvCallingInstance = deleteProcessingFilesOfProject_RBF_SNV_Setup()
+        AbstractSnvCallingInstance snvCallingInstance = deleteProcessingFilesOfProject_RBF_SNV_Setup()
 
         dataSwapService.deleteProcessingFilesOfProject(snvCallingInstance.project.name, outputFolder.path, true)
 
@@ -857,7 +856,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
 
     @Test
     public void testDeleteProcessingFilesOfProject_RBF_SNV_notVerified() {
-        SnvCallingInstance snvCallingInstance = deleteProcessingFilesOfProject_RBF_SNV_Setup()
+        AbstractSnvCallingInstance snvCallingInstance = deleteProcessingFilesOfProject_RBF_SNV_Setup()
 
         dataSwapService.deleteProcessingFilesOfProject(snvCallingInstance.project.name, outputFolder.path)
 

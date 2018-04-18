@@ -10,28 +10,6 @@ class CreateClusterScriptService {
 
     final static String DIRECTORY_PERMISSION = "2750"
 
-
-    static String ensureFileDoesNotExistScript(final File file) {
-        assert file.isAbsolute()
-        return """
-if [ -e "${file}" ]; then
-    echo "File ${file} already exists."
-    exit 1
-fi
-"""
-    }
-
-    static String ensureFileHasExpectedSizeScript(final File file, final long expectedSize) {
-        assert file.isAbsolute()
-        return """
-ACTUAL_FILE_SIZE=\$(stat -Lc '%s' "$file")
-if [ \$ACTUAL_FILE_SIZE -ne ${expectedSize} ]; then
-    echo "File ${file} has size \$ACTUAL_FILE_SIZE bytes. Expected ${expectedSize} bytes."
-    exit 1
-fi
-"""
-    }
-
     /**
      * Create a string to make a directory
      * @param mode the access mode of the directory to be created. If used it must be given as a string

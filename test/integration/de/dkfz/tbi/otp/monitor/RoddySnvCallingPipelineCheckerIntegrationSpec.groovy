@@ -15,11 +15,4 @@ class RoddySnvCallingPipelineCheckerIntegrationSpec extends AbstractSnvCallingPi
     BamFilePairAnalysis createAnalysis(Map properties) {
         return DomainFactory.createRoddySnvInstanceWithRoddyBamFiles(properties)
     }
-
-
-    protected void createExpectedCall(String workFlowName, MonitorOutputCollector output, BamFilePairAnalysis runningAnalysis) {
-        1 * output.showRunning('SnvWorkflow', null)
-        1 * output.showRunning('RoddySnvWorkflow', [runningAnalysis])
-        0 * output.showRunning(_, _)
-    }
 }

@@ -33,4 +33,10 @@ databaseChangeLog = {
 	changeSet(author: "strubelp", id: "bugfix-datafile-inconsistency-sql") {
 		sqlFile(path: 'changelogs/2018/bugfix-datafile-inconsistency.sql')
 	}
+
+	include file: 'changelogs/2018/OTP-2778.groovy'
+
+	changeSet(author: "klinga", id:"OTP-2778") {
+		sqlFile(path: 'changelogs/2018/OTP-2778.sql')
+	}
 }

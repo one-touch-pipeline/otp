@@ -123,9 +123,6 @@ testDataConfig {
             configFilePath = { new File(TestCase.uniqueNonExistentPath, 'roddy-workflow-config').path }
             pipeline = { DomainFactory.createPanCanPipeline() }
         }
-        'de.dkfz.tbi.otp.utils.ExternalScript' {
-            filePath = { new File(TestCase.uniqueNonExistentPath, 'ExternalScript').path }
-        }
         'de.dkfz.tbi.otp.job.plan.JobExecutionPlan' {
             name = {'plan_' + (counter++)}
         }
@@ -145,7 +142,6 @@ testDataConfig {
         'de.dkfz.tbi.otp.dataprocessing.QualityAssessmentMergedPass': [de.dkfz.tbi.otp.dataprocessing.ProcessedMergedBamFile],
         'de.dkfz.tbi.otp.dataprocessing.MergingSet': [de.dkfz.tbi.otp.dataprocessing.MergingSetAssignment],
         'de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage': [de.dkfz.tbi.otp.ngsdata.LibraryPreparationKit],
-        'de.dkfz.tbi.otp.dataprocessing.ConfigPerProject': [de.dkfz.tbi.otp.utils.ExternalScript],
     ]
 }
 

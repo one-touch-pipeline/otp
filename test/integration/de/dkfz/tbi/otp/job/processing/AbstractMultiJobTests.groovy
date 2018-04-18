@@ -108,7 +108,7 @@ class AbstractMultiJobTests {
                     assert finishedClusterJobs == null
                     assert !job.resumable
                     clusterJobs1.each {
-                        assert createClusterJob(step, it).save(flush: true)
+                        createClusterJob(step, it)
                     }
                     return NextAction.WAIT_FOR_CLUSTER_JOBS
                 case 2:
@@ -118,7 +118,7 @@ class AbstractMultiJobTests {
                     TestCase.assertContainSame(finishedClusterJobs, clusterJobs1)
                     assert !job.resumable
                     clusterJobs2.each {
-                        assert createClusterJob(step, it).save(flush: true)
+                        createClusterJob(step, it)
                     }
                     return NextAction.WAIT_FOR_CLUSTER_JOBS
                 case 3:
@@ -231,7 +231,7 @@ class AbstractMultiJobTests {
             switch (phase) {
                 case 1:
                     clusterJobs1.each {
-                        assert createClusterJob(step, it).save(flush: true)
+                        createClusterJob(step, it)
                     }
                     return NextAction.WAIT_FOR_CLUSTER_JOBS
                 case 2:

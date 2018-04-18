@@ -59,7 +59,7 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
     }
 
 
-    void setupProcessMergedBamFile() {
+    void setupProcessedMergedBamFile() {
         MergingWorkPackage tumorMwp = DomainFactory.createMergingWorkPackage(
                 seqType: seqTypeToUse(),
                 pipeline: DomainFactory.createDefaultOtpPipeline(),
@@ -93,14 +93,14 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
         bamFileTumor = DomainFactory.createExternallyProcessedMergedBamFile([
                 workPackage      : tumorMwp,
                 insertSizeFile   : 'tumor_insertsize_plot.png_qcValues.txt',
-                meanSequenceLength: 101,
+                maximumReadLength: 101,
 
         ] + createProcessMergedBamFileProperties())
 
         bamFileControl = DomainFactory.createExternallyProcessedMergedBamFile(createProcessMergedBamFileProperties() + [
                 workPackage      : controlMwp,
                 insertSizeFile   : 'control_insertsize_plot.png_qcValues.txt',
-                meanSequenceLength: 101,
+                maximumReadLength: 101,
         ])
         commonBamFileSetup()
         createBedFileAndLibPrepKit()

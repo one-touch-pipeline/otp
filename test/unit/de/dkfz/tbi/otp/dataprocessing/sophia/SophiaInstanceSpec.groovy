@@ -13,7 +13,6 @@ import spock.lang.*
 
 @Mock([
         DataFile,
-        ExternalScript,
         FileType,
         Individual,
         LibraryPreparationKit,

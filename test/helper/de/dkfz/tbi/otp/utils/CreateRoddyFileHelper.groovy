@@ -70,8 +70,11 @@ class CreateRoddyFileHelper {
 
         CreateFileHelper.createFile(roddySnvCallingInstance.getCombinedPlotPath())
 
-        [SnvCallingStep.CALLING, SnvCallingStep.SNV_DEEPANNOTATION].each {
-            CreateFileHelper.createFile(new OtpPath(roddySnvCallingInstance.instancePath, it.getResultFileName(roddySnvCallingInstance.individual)).absoluteDataManagementPath)
+        [
+                roddySnvCallingInstance.getSnvCallingResult(),
+                roddySnvCallingInstance.getSnvDeepAnnotationResult(),
+        ].each {
+            CreateFileHelper.createFile(it)
         }
     }
 

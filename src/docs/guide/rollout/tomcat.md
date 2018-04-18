@@ -75,8 +75,6 @@ remote as web user
     otp.root.path=$WORK_DIRECTORY/project
     # basepath of the folders where the temporary processing data are stored
     otp.processing.root.path=$WORK_DIRECTORY/processing
-    # the staging paths were used to store the temporary results of the old/deprecated SNV workflow
-    otp.staging.root.path=$WORK_DIRECTORY/staging/project/
 
     # basepath for the logs of the cluster jobs
     otp.logging.root.path=$WORK_DIRECTORY/staging/log/cluster

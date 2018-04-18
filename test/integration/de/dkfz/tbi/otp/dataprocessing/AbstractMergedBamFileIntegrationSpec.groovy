@@ -15,7 +15,7 @@ class AbstractMergedBamFileIntegrationSpec extends Specification {
 
     void "withdraw, check that analysis also marked as withdrawn"() {
         given:
-        SnvCallingInstance snvCallingInstance = DomainFactory.createRoddySnvInstanceWithRoddyBamFiles()
+        AbstractSnvCallingInstance snvCallingInstance = DomainFactory.createRoddySnvInstanceWithRoddyBamFiles()
         IndelCallingInstance indelCallingInstance = DomainFactory.createIndelCallingInstanceWithSameSamplePair(snvCallingInstance)
         SophiaInstance sophiaInstance = DomainFactory.createSophiaInstanceWithSameSamplePair(snvCallingInstance)
                 AceseqInstance aceseqInstance = DomainFactory.createAceseqInstanceWithSameSamplePair(snvCallingInstance)

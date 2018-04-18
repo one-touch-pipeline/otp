@@ -16,13 +16,12 @@ class ConfigPerProjectImpl extends ConfigPerProject { }
 @Mock([Pipeline, Project, ProjectCategory, Realm])
 class ConfigPerProjectUnitTests {
 
-    String configuration = "configuration"
 
     @Test
     void testSaveWithoutProject_shouldFail() {
         ConfigPerProject configPerProject = new ConfigPerProjectImpl(
-                pipeline: DomainFactory.createOtpSnvPipelineLazy(),
-                )
+                pipeline: DomainFactory.createIndelPipelineLazy(),
+        )
         TestCase.assertValidateError(configPerProject, 'project', 'nullable', null)
 
         configPerProject.project = DomainFactory.createProject()
@@ -34,8 +33,8 @@ class ConfigPerProjectUnitTests {
         ConfigPerProject configPerProject = new ConfigPerProjectImpl(
                 project: DomainFactory.createProject(),
                 obsoleteDate: new Date(),
-                pipeline: DomainFactory.createOtpSnvPipelineLazy(),
-                )
+                pipeline: DomainFactory.createIndelPipelineLazy(),
+        )
         assertTrue(configPerProject.validate())
     }
 
@@ -43,15 +42,15 @@ class ConfigPerProjectUnitTests {
     void testSaveWithReferenceToPreviousConfigWithoutObsolete_shouldFail() {
         ConfigPerProject validConfigPerProject = new ConfigPerProjectImpl(
                 project: DomainFactory.createProject(),
-                pipeline: DomainFactory.createOtpSnvPipelineLazy(),
+                pipeline: DomainFactory.createIndelPipelineLazy(),
         )
         validConfigPerProject.save()
 
         ConfigPerProject newConfigPerProject = new ConfigPerProjectImpl(
                 project: DomainFactory.createProject(),
-                pipeline: DomainFactory.createOtpSnvPipelineLazy(),
+                pipeline: DomainFactory.createIndelPipelineLazy(),
                 previousConfig: validConfigPerProject,
-                )
+        )
         TestCase.assertValidateError(newConfigPerProject, 'previousConfig', 'validator.invalid', validConfigPerProject)
 
         validConfigPerProject.obsoleteDate = new Date()

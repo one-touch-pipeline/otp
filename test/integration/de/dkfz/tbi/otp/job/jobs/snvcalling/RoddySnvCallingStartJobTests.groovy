@@ -16,16 +16,13 @@ public class RoddySnvCallingStartJobTests {
     @Autowired
     private RoddySnvCallingStartJob roddySnvCallingStartJob
 
-    SnvCallingInstanceTestData snvTestData
-
     @Test
     void test_ConfigClass_Config_Instance() {
-        snvTestData = new SnvCallingInstanceTestData()
-        snvTestData.createSnvObjects()
+        SamplePair samplePair = DomainFactory.createSamplePairWithProcessedMergedBamFiles()
+
         DomainFactory.createProcessingOptionLazy(name: TIME_ZONE, type: null, value: 'Europe/Berlin')
 
         try {
-            SamplePair samplePair = snvTestData.samplePair
             Project project = samplePair.project
             SeqType seqType = samplePair.seqType
             RoddyWorkflowConfig config = DomainFactory.createRoddyWorkflowConfig(project: project, seqType: seqType, pipeline: DomainFactory.createRoddySnvPipelineLazy(), pluginVersion: 'pluginVersion:1.1.0', configVersion: 'v1_0')

@@ -8,8 +8,8 @@ class AnalysisDeletionServiceIntegrationSpec extends Specification {
 
     AnalysisDeletionService analysisDeletionService
 
-    SnvCallingInstanceTestData testData
-    SnvCallingInstance snvCallingInstance
+    SamplePair samplePair
+    RoddySnvCallingInstance snvCallingInstance
     IndelCallingInstance indelCallingInstance
     AceseqInstance aceseqInstance
     ProcessedMergedBamFile bamFileTumor2
@@ -19,16 +19,21 @@ class AnalysisDeletionServiceIntegrationSpec extends Specification {
     List<SamplePair> samplePairs
 
     void setup() {
-        testData = new SnvCallingInstanceTestData()
-        testData.createSnvObjects()
-        snvCallingInstance = testData.createSnvCallingInstance()
-        assert snvCallingInstance.save()
+        samplePair = DomainFactory.createSamplePairWithProcessedMergedBamFiles()
+        snvCallingInstance = DomainFactory.createRoddySnvCallingInstance(
+                sampleType1BamFile  : samplePair.mergingWorkPackage1.bamFileInProjectFolder,
+                sampleType2BamFile: samplePair.mergingWorkPackage2.bamFileInProjectFolder,
+                samplePair    : samplePair,
+        )
         indelCallingInstance = DomainFactory.createIndelCallingInstanceWithSameSamplePair(snvCallingInstance)
         aceseqInstance = DomainFactory.createAceseqInstanceWithSameSamplePair(snvCallingInstance)
         Realm realm = DomainFactory.createRealm()
-        assert realm.save()
-        createAllJobResults(snvCallingInstance)
-        (bamFileTumor2, samplePair2) = testData.createDisease(testData.bamFileControl.mergingWorkPackage)
+
+        samplePair2 = DomainFactory.createDisease(samplePair.mergingWorkPackage2)
+        bamFileTumor2 = DomainFactory.createProcessedMergedBamFile(
+                samplePair2.mergingWorkPackage1,
+                DomainFactory.randomProcessedBamFileProperties
+        )
 
         analysisInstancesDirectories = [
                 snvCallingInstance.getInstancePath().getAbsoluteDataManagementPath(),
@@ -49,20 +54,12 @@ class AnalysisDeletionServiceIntegrationSpec extends Specification {
 
     void cleanup() {
         analysisDeletionService = null
-        testData = null
         snvCallingInstance = null
         indelCallingInstance = null
         aceseqInstance = null
         analysisInstancesDirectories = null
         analysisSamplePairsDirectories = null
         samplePairs = null
-    }
-
-    void createAllJobResults(SnvCallingInstance instance) {
-        SnvJobResult callingResult = testData.createAndSaveSnvJobResult(instance, SnvCallingStep.CALLING)
-        SnvJobResult annotationResult = testData.createAndSaveSnvJobResult(instance, SnvCallingStep.SNV_ANNOTATION, callingResult)
-        SnvJobResult deepAnnotationResult = testData.createAndSaveSnvJobResult(instance, SnvCallingStep.SNV_DEEPANNOTATION, annotationResult)
-        testData.createAndSaveSnvJobResult(instance, SnvCallingStep.FILTER_VCF, deepAnnotationResult)
     }
 
     def "delete instance and then delete sample pairs without analysis instances from analysis deletion service with analysis instances finished for control tumor 1"() {
@@ -85,8 +82,7 @@ class AnalysisDeletionServiceIntegrationSpec extends Specification {
         then:
         instancesDirectories.containsAll(analysisInstancesDirectories)
         samplePairsDirectories.containsAll(analysisSamplePairsDirectories)
-        SnvCallingInstance.list() == []
-        SnvJobResult.list() == []
+        RoddySnvCallingInstance.list() == []
         IndelCallingInstance.list() == []
         AceseqInstance.list() == []
         SamplePair.list() == [samplePair2]
@@ -98,10 +94,12 @@ class AnalysisDeletionServiceIntegrationSpec extends Specification {
         indelCallingInstance.processingState = AnalysisProcessingStates.FINISHED
         aceseqInstance.processingState = AnalysisProcessingStates.FINISHED
 
-        SnvCallingInstance snvCallingInstance2 = testData.createSnvCallingInstance([
+        RoddySnvCallingInstance snvCallingInstance2 = DomainFactory.createRoddySnvCallingInstance([
                 sampleType1BamFile: bamFileTumor2,
+                sampleType2BamFile: samplePair.mergingWorkPackage2.bamFileInProjectFolder,
                 processingState: AnalysisProcessingStates.FINISHED,
                 samplePair: samplePair2,
+                config: snvCallingInstance.config,
         ])
         assert snvCallingInstance2.save()
         IndelCallingInstance indelCallingInstance2 = DomainFactory.createIndelCallingInstanceWithSameSamplePair(snvCallingInstance2)
@@ -136,7 +134,7 @@ class AnalysisDeletionServiceIntegrationSpec extends Specification {
         then:
         instancesDirectories.containsAll(analysisInstancesDirectories)
         samplePairsDirectories.containsAll(analysisSamplePairsDirectories)
-        SnvCallingInstance.list() == []
+        RoddySnvCallingInstance.list() == []
         IndelCallingInstance.list() == []
         AceseqInstance.list() == []
         SamplePair.list() == []

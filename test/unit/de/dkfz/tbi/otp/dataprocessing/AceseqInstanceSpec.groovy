@@ -14,7 +14,6 @@ import spock.lang.*
 @Mock([
         AceseqQc,
         DataFile,
-        ExternalScript,
         FileType,
         Individual,
         LibraryPreparationKit,

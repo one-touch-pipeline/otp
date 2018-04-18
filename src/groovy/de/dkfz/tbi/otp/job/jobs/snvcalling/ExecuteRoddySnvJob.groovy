@@ -76,11 +76,9 @@ class ExecuteRoddySnvJob extends AbstractExecutePanCanJob<RoddySnvCallingInstanc
 
         List<File> files = [
                 roddySnvCallingInstance.getCombinedPlotPath(),
+                roddySnvCallingInstance.getSnvCallingResult(),
+                roddySnvCallingInstance.getSnvDeepAnnotationResult(),
         ]
-
-        [SnvCallingStep.CALLING, SnvCallingStep.SNV_DEEPANNOTATION].each {
-            files.add(new OtpPath(roddySnvCallingInstance.instancePath, it.getResultFileName(roddySnvCallingInstance.individual)).absoluteDataManagementPath)
-        }
 
         directories.each {
             LsdfFilesService.ensureDirIsReadableAndNotEmpty(it)

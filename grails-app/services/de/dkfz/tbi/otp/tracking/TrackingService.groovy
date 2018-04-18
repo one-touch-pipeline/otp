@@ -355,7 +355,7 @@ class TrackingService {
     }
 
     SamplePairProcessingStatus getSamplePairProcessingStatus(SamplePair sp) {
-        SnvCallingInstance sci = sp.findLatestSnvCallingInstance()
+        AbstractSnvCallingInstance sci = sp.findLatestSnvCallingInstance()
         IndelCallingInstance ici = sp.findLatestIndelCallingInstance()
         AceseqInstance ai = sp.findLatestAceseqInstance()
         SophiaInstance si = sp.findLatestSophiaInstance()

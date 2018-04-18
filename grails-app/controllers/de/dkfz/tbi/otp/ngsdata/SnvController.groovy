@@ -43,12 +43,12 @@ class SnvController extends AbstractAnalysisController {
     JSON dataTableResults(ResultTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()
         SimpleDateFormat sdf = new SimpleDateFormat('yyyy-MM-dd HH:mm')
-        List results = analysisService.getCallingInstancesForProject(SnvCallingInstance, cmd.project?.name)
+        List results = analysisService.getCallingInstancesForProject(AbstractSnvCallingInstance, cmd.project?.name)
         List data = results.collect { Map properties ->
             Collection<String> libPrepKitShortNames
             if (SeqTypeNames.fromSeqTypeName(properties.seqTypeName)?.isWgbs()) {
                 assert properties.libPrepKit1 == null && properties.libPrepKit2 == null
-                libPrepKitShortNames = SnvCallingInstance.get(properties.instanceId).containedSeqTracks*.
+                libPrepKitShortNames = AbstractSnvCallingInstance.get(properties.instanceId).containedSeqTracks*.
                         libraryPreparationKit*.shortDisplayName
             } else {
                 libPrepKitShortNames = [(String) properties.libPrepKit1, (String) properties.libPrepKit2]

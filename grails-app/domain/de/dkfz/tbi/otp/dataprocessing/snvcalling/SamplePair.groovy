@@ -37,7 +37,7 @@ class SamplePair implements Entity {
         NEEDS_PROCESSING,
 
         /**
-         * The sample pair does not have to be processed, because there already is an {@link SnvCallingInstance} which
+         * The sample pair does not have to be processed, because there already is an {@link BamFilePairAnalysis} which
          * is up-to-date.
          */
         NO_PROCESSING_NEEDED,
@@ -171,8 +171,8 @@ class SamplePair implements Entity {
         return "SP ${id}: ${toStringWithoutId()}"
     }
 
-    SnvCallingInstance findLatestSnvCallingInstance() {
-        return findLatestInstance(SnvCallingInstance.class) as SnvCallingInstance
+    AbstractSnvCallingInstance findLatestSnvCallingInstance() {
+        return findLatestInstance(AbstractSnvCallingInstance.class) as AbstractSnvCallingInstance
     }
 
     IndelCallingInstance findLatestIndelCallingInstance() {

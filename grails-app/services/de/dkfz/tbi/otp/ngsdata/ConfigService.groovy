@@ -75,15 +75,6 @@ class ConfigService implements ApplicationContextAware {
         return new File(otpProperties.get("otp.logging.root.path") ?: "")
     }
 
-    static File getStagingRootPathFromSelfFoundContext() {
-        ConfigService configServiceBean = context.getBean("configService")
-        return configServiceBean.getStagingRootPath()
-    }
-
-    File getStagingRootPath() {
-        return new File(otpProperties.get("otp.staging.root.path") ?: "")
-    }
-
     File getToolsPath() {
         return new File(otpProperties.get("otp.path.tools") ?: "")
     }

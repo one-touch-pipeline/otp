@@ -266,23 +266,9 @@ class LsdfFilesService {
         return path
     }
 
-    public createDirectory(File dir, Project project) {
-        createDirectory(dir, project.realm)
-    }
-
     public createDirectory(File dir, Realm realm) {
         String cmd = createClusterScriptService.makeDirs([dir], "2770")
         assert executionService.executeCommand(realm, cmd) ==~ /^0\s*$/
-    }
-
-
-    public deleteDirectoryRecursive(Realm realm, File dir) {
-        waitUntilExists(dir)
-        String cmd = createClusterScriptService.removeDirs([dir], CreateClusterScriptService.RemoveOption.RECURSIVE)
-        int exitCode = executionService.executeCommand(realm, cmd).toInteger()
-        if(exitCode != 0) {
-            throw new IOException("Unable to delete path '${dir}'.")
-        }
     }
 
     public void deleteFilesRecursive(Realm realm, Collection<File> filesOrDirectories) {

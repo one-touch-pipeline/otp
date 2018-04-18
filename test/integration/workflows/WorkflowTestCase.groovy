@@ -206,7 +206,6 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
                 'otp.root.path'             : "${getBaseDirectory()}/root_path",
                 'otp.processing.root.path'  : "${getBaseDirectory()}/processing_root_path",
                 'otp.logging.root.path'     : "${getBaseDirectory()}/logging_root_path",
-                'otp.staging.root.path'     : "${getBaseDirectory()}/staging_root_path",
         ].each { key, value ->
             configService.setOtpProperty(key, value)
         }
@@ -214,7 +213,6 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         createDirectories([
                 configService.getRootPath(),
                 new File(configService.getLoggingRootPath(), JobStatusLoggingService.STATUS_LOGGING_BASE_DIR),
-                configService.getStagingRootPath(),
         ])
         DomainFactory.createProcessingOptionBasePathReferenceGenome(new File(configService.getProcessingRootPath(), "reference_genomes").absolutePath)
 

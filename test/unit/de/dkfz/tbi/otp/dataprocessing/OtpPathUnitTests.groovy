@@ -43,15 +43,6 @@ class OtpPathUnitTests {
     }
 
     @Test
-    void testGetAbsoluteStagingPath() {
-        configService.setOtpProperty('otp.staging.root.path', 'staging_root')
-        assertEquals "staging_root is not absolute.", shouldFail { path.absoluteStagingPath }
-
-        configService.setOtpProperty('otp.staging.root.path', '/staging_root')
-        assertEquals "/staging_root/first/second/third/fourth", path.absoluteStagingPath.path
-    }
-
-    @Test
     void testGetAbsoluteDataProcessingPath() {
         configService.setOtpProperty('otp.processing.root.path', 'processing_root')
         assertEquals "processing_root is not absolute.", shouldFail { path.absoluteDataProcessingPath }

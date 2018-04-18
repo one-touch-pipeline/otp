@@ -28,7 +28,7 @@ class AceseqCallingPipelineCheckerIntegrationSpec extends AbstractVariantCalling
 
     @Override
     BamFilePairAnalysis createAnalysisForCrosschecking(Map properties) {
-        return DomainFactory.createSnvInstanceWithRoddyBamFiles(properties)
+        return DomainFactory.createRoddySnvInstanceWithRoddyBamFiles(properties)
     }
 
 

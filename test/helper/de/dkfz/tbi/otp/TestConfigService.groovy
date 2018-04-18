@@ -39,7 +39,6 @@ class TestConfigService extends ConfigService {
                 'otp.root.path'             : TestCase.getUniqueNonExistentPath().path+'/root_path',
                 'otp.processing.root.path'  : TestCase.getUniqueNonExistentPath().path+'/processing_root_path',
                 'otp.logging.root.path'     : TestCase.getUniqueNonExistentPath().path+'/logging_root_path',
-                'otp.staging.root.path'     : TestCase.getUniqueNonExistentPath().path+'/staging_root_path',
         ]
         cleanProperties = new HashMap<>(otpProperties)
 

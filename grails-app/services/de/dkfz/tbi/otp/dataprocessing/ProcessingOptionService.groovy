@@ -34,6 +34,14 @@ class ProcessingOptionService {
         createOrUpdate(name, null, null, value)
     }
 
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void obsoleteOptionByName(OptionName name, String type = null, Project project = null) {
+        ProcessingOption option = findStrict(name, type, project)
+        if (option) {
+            obsoleteOption(option)
+        }
+    }
+
     private void obsoleteOption(ProcessingOption option) {
         option.dateObsoleted = new Date()
         assert(option.save(flush: true))

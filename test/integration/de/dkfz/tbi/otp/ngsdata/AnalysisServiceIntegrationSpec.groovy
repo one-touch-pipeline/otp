@@ -32,7 +32,7 @@ class AnalysisServiceIntegrationSpec extends IntegrationSpec implements UserAndR
 
         where:
         analysis       | instance
-        "Snv"          | SnvCallingInstance
+        "RoddySnv"     | RoddySnvCallingInstance
         "IndelCalling" | IndelCallingInstance
         "Aceseq"       | AceseqInstance
         "Sophia"       | SophiaInstance
@@ -67,7 +67,7 @@ class AnalysisServiceIntegrationSpec extends IntegrationSpec implements UserAndR
 
         where:
         analysis       | instance               | plotType
-        "Snv"          | SnvCallingInstance     | PlotType.SNV
+        "RoddySnv"     | RoddySnvCallingInstance| PlotType.SNV
         "IndelCalling" | IndelCallingInstance   | PlotType.INDEL
         "IndelCalling" | IndelCallingInstance   | PlotType.INDEL_TINDA
         "Aceseq"       | AceseqInstance         | PlotType.ACESEQ_ALL

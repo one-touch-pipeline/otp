@@ -5,7 +5,6 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
 import grails.test.spock.*
 import spock.lang.*
 
@@ -17,10 +16,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
     final static double COVERAGE_TOO_LOW = 20.0
 
     SamplePair samplePair1
-    SnvConfig snvConfig1
     ConfigPerProject roddyConfig1
-    ExternalScript script1
-    ExternalScript joinScript
     AbstractMergedBamFile bamFile1_1
     AbstractMergedBamFile bamFile2_1
 
@@ -35,9 +31,6 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         samplePair1 = map.samplePair
         bamFile1_1 = map.bamFile1
         bamFile2_1 = map.bamFile2
-        snvConfig1 = map.snvConfig
-        script1 = map.script
-        joinScript = map.joinScript
         roddyConfig1 = map.roddyConfig
 
         DomainFactory.createAllAnalysableSeqTypes()
@@ -47,16 +40,11 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
     @Unroll
     void "samplePairForProcessing for SnvCalling returns samplePair"() {
         given:
-
         samplePair1.snvProcessingStatus = ProcessingStatus.NEEDS_PROCESSING
         assert samplePair1.save(flush: true)
 
         expect:
-        samplePair1 == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, config)
-
-        where:
-        config << [SnvConfig, RoddyWorkflowConfig]
-
+        samplePair1 == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
     }
 
     @Unroll
@@ -264,14 +252,14 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
     void "samplePairForProcessing when config has wrong #property"() {
         given:
         if (property == "project") {
-            snvConfig1.project = DomainFactory.createProject(name: "otherProject", dirName: "tmp")
+            roddyConfig1.project = DomainFactory.createProject(name: "otherProject", dirName: "tmp")
         } else {
-            snvConfig1.seqType = DomainFactory.createExomeSeqType()
+            roddyConfig1.seqType = DomainFactory.createExomeSeqType()
         }
-        assert snvConfig1.save(flush: true)
+        assert roddyConfig1.save(flush: true)
 
         expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig)
+        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
 
         where:
         property << ["project", "seqType"]
@@ -279,100 +267,59 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
 
     void "samplePairForProcessing when config is obsolete"() {
         given:
-        snvConfig1.obsoleteDate = new Date()
-        assert snvConfig1.save(flush: true)
+        roddyConfig1.obsoleteDate = new Date()
+        assert roddyConfig1.save(flush: true)
 
         expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig)
+        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
     }
-
-    void "samplePairForProcessing when no external script exists"() {
-        given:
-        script1.scriptVersion = "v8"
-        assert script1.save(flush: true)
-        joinScript.scriptVersion = "v8"
-        assert joinScript.save(flush: true)
-
-        expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig)
-    }
-
 
     void "samplePairForProcessing when the snvCallingInstance is already in progress"() {
         given:
-        SnvCallingInstance snvCallingInstance = DomainFactory.createSnvCallingInstance(
+        DomainFactory.createRoddySnvCallingInstance(
                 instanceName: ARBITRARY_INSTANCE_NAME,
                 samplePair: samplePair1,
-                config: snvConfig1,
+                config: roddyConfig1,
                 sampleType1BamFile: bamFile1_1,
                 sampleType2BamFile: bamFile2_1
         )
-        snvCallingInstance.save()
 
         expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig)
+        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
     }
 
 
     void "samplePairForProcessing when a snvCallingInstance already finished"() {
         given:
-        SnvCallingInstance snvCallingInstance = DomainFactory.createSnvCallingInstance(
+        DomainFactory.createRoddySnvCallingInstance(
                 instanceName: ARBITRARY_INSTANCE_NAME,
                 samplePair: samplePair1,
-                config: snvConfig1,
+                config: roddyConfig1,
                 sampleType1BamFile: bamFile1_1,
                 sampleType2BamFile: bamFile2_1,
                 processingState: AnalysisProcessingStates.FINISHED
         )
-        snvCallingInstance.save()
 
         expect:
-        samplePair1 == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig)
+        samplePair1 == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
     }
-
-
-    void "samplePairForProcessing when the snvCalling failed"() {
-        given:
-        SnvCallingInstance snvCallingInstance = DomainFactory.createSnvCallingInstance(
-                instanceName: ARBITRARY_INSTANCE_NAME,
-                samplePair: samplePair1,
-                config: snvConfig1,
-                sampleType1BamFile: bamFile1_1,
-                sampleType2BamFile: bamFile2_1,
-                processingState: AnalysisProcessingStates.IN_PROGRESS,
-        )
-        assert snvCallingInstance.save(flush: true)
-
-
-        DomainFactory.createSnvJobResult(
-                snvCallingInstance: snvCallingInstance,
-                externalScript: script1,
-                chromosomeJoinExternalScript: joinScript,
-        )
-        snvCallingService.markSnvCallingInstanceAsFailed(snvCallingInstance, [SnvCallingStep.CALLING])
-
-        expect:
-        samplePair1 == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig)
-    }
-
 
     void "samplePairForProcessing when other samplePair inProcess"() {
         given:
         def map2 = DomainFactory.createProcessableSamplePair()
         SamplePair samplePair2 = map2.samplePair
 
-        SnvCallingInstance snvCallingInstance = DomainFactory.createSnvCallingInstance(
+        DomainFactory.createRoddySnvCallingInstance(
                 instanceName: ARBITRARY_INSTANCE_NAME,
                 samplePair: samplePair2,
-                config: snvConfig1,
+                config: roddyConfig1,
                 sampleType1BamFile: map2.bamFile1,
                 sampleType2BamFile: map2.bamFile2
         )
-        snvCallingInstance.save()
 
         expect:
         samplePair1.individual != samplePair2.individual
-        samplePair1 == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig)
+        samplePair1 == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
     }
 
 
@@ -386,7 +333,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         }
 
         expect:
-        samplePair1 == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig)
+        samplePair1 == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
 
         where:
         number << [1, 2]
@@ -413,7 +360,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         samplePair1.delete(flush: true)
 
         expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig)
+        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
 
         where:
         number << [1, 2]
@@ -430,7 +377,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         assert bamFileInProgress.save(flush: true)
 
         expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig)
+        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
 
         where:
         number << [1, 2]
@@ -445,7 +392,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         assert problematicBamFile.save(flush: true)
 
         expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig)
+        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
 
         where:
         number << [1, 2]
@@ -461,7 +408,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         assert thresholds.save(flush: true)
 
         expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig)
+        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
 
         where:
         number << [1, 2]
@@ -476,7 +423,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         }
 
         expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig)
+        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
     }
 
 
@@ -488,7 +435,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         }
 
         expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig)
+        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
     }
 
 
@@ -502,7 +449,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         assert thresholds.save(flush: true)
 
         expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig)
+        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
 
         where:
         number << [1, 2]
@@ -521,7 +468,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         assert thresholds.save(flush: true)
 
         expect:
-        samplePair1 == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig)
+        samplePair1 == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
 
         where:
         number | property
@@ -540,7 +487,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         assert problematicBamFile.save(flush: true)
 
         expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig)
+        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
 
         where:
         number << [1, 2]
@@ -552,7 +499,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         DomainFactory.createProcessableSamplePair()
 
         expect:
-        samplePair1 == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig)
+        samplePair1 == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
     }
 
 
@@ -564,13 +511,13 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         assert project.save(flush: true)
 
         expect:
-        samplePairFastTrack == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig)
+        samplePairFastTrack == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
     }
 
 
     void "samplePairForProcessing, make sure that min processing priority is taken into account"() {
         expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.FAST_TRACK_PRIORITY, SnvConfig)
+        null == snvCallingService.samplePairForProcessing(ProcessingPriority.FAST_TRACK_PRIORITY, RoddyWorkflowConfig)
     }
 
 
@@ -710,10 +657,10 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
 
     void "validateInputBamFiles, when all okay, return without exception"() {
         given:
-        SnvCallingInstance snvCallingInstance = DomainFactory.createSnvCallingInstance(
+        RoddySnvCallingInstance snvCallingInstance = DomainFactory.createRoddySnvCallingInstance(
                 instanceName: ARBITRARY_INSTANCE_NAME,
                 samplePair: samplePair1,
-                config: snvConfig1,
+                config: roddyConfig1,
                 sampleType1BamFile: bamFile1_1,
                 sampleType2BamFile: bamFile2_1
         )
@@ -733,7 +680,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
 
     void "validateInputBamFiles, when path throw an exception, throw a new runtime exception"() {
         given:
-        SnvCallingInstance instance = new SnvCallingInstance([
+        RoddySnvCallingInstance instance = new RoddySnvCallingInstance([
                 sampleType1BamFile: new RoddyBamFile(),
                 sampleType2BamFile: new RoddyBamFile(),
         ])

@@ -23,17 +23,16 @@ println samplePairs.size()
 /*
 LogThreadLocal.withThreadLog(System.out, {
     SamplePair.withTransaction {
-        samplePairs.each {
-            SnvCallingInstance.findAllBySamplePair(it).each {
-                if (it.processingState == AnalysisProcessingStates.IN_PROGRESS) {
-                    SnvJobResult.findAllBySnvCallingInstance(it)*.withdraw()
-                    it.withdrawn = true
-                    it.save(flush: true, failOnError: true)
+        samplePairs.each { SamplePair samplePair ->
+            AbstractSnvCallingInstance.findAllBySamplePair(samplePair).each { AbstractSnvCallingInstance instance ->
+                if (instance.processingState == AnalysisProcessingStates.IN_PROGRESS) {
+                    instance.withdrawn = true
+                    instance.save(flush: true, failOnError: true)
                 }
             }
 
-            it.snvProcessingStatus = SamplePair.ProcessingStatus.NEEDS_PROCESSING
-            println it.save(flush: true, failOnError: true)
+            samplePair.snvProcessingStatus = SamplePair.ProcessingStatus.NEEDS_PROCESSING
+            println samplePair.save(flush: true, failOnError: true)
         }
     }
 })

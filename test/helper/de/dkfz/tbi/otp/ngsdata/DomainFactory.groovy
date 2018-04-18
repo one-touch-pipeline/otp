@@ -181,6 +181,7 @@ class DomainFactory {
         createPipeline(Pipeline.Name.DEFAULT_OTP, Pipeline.Type.ALIGNMENT)
     }
 
+    @Deprecated
     static Pipeline createOtpSnvPipelineLazy() {
         createPipeline(Pipeline.Name.OTP_SNV, Pipeline.Type.SNV)
     }
@@ -872,23 +873,6 @@ class DomainFactory {
         bamFile1.mergingWorkPackage.bamFileInProjectFolder = bamFile1
         bamFile2.mergingWorkPackage.bamFileInProjectFolder = bamFile2
 
-        ExternalScript script = createExternalScript(
-                scriptIdentifier: "SnvCallingStep.CALLING",
-        )
-
-        SnvConfig snvConfig = createSnvConfig(
-                seqType: samplePair.seqType,
-                project: samplePair.project,
-                externalScriptVersion: script.scriptVersion
-        )
-
-        ExternalScript joinScript = createExternalScript(
-                scriptIdentifier: SnvCallingJob.CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER,
-                scriptVersion: snvConfig.externalScriptVersion,
-                filePath: "/tmp/scriptLocation_${counter++}/joining.sh",
-        )
-
-
         RoddyWorkflowConfig roddyConfig = createRoddyWorkflowConfig(
                 seqType: samplePair.seqType,
                 project: samplePair.project,
@@ -902,9 +886,6 @@ class DomainFactory {
                 samplePair : samplePair,
                 bamFile1   : bamFile1,
                 bamFile2   : bamFile2,
-                snvConfig  : snvConfig,
-                script     : script,
-                joinScript : joinScript,
                 roddyConfig: roddyConfig
         ]
     }
@@ -1055,10 +1036,11 @@ class DomainFactory {
         return samplePair
     }
 
+    @Deprecated
     public static SnvConfig createSnvConfig(Map properties = [:]) {
         return createDomainObject(SnvConfig, [
                 configuration        : "configuration_${counter++}",
-                externalScriptVersion: { createExternalScript().scriptVersion },
+                externalScriptVersion: "1.0",
                 seqType              : { createSeqType() },
                 project              : { createProject() },
                 pipeline             : { createOtpSnvPipelineLazy() },
@@ -1137,6 +1119,7 @@ class DomainFactory {
         ]
     }
 
+    @Deprecated
     static SnvCallingInstance createSnvInstanceWithRoddyBamFiles(Map properties = [:], Map bamFile1Properties = [:], Map bamFile2Properties = [:]) {
         Map map = createAnalysisInstanceWithRoddyBamFilesMapHelper(properties, bamFile1Properties, bamFile2Properties)
         SamplePair samplePair = map.samplePair
@@ -1281,62 +1264,6 @@ class DomainFactory {
                 solutionPossible: 1,
         ], properties)
     }
-
-    public static SnvJobResult createSnvJobResultWithRoddyBamFiles(Map properties = [:]) {
-        Map map = [
-                step           : SnvCallingStep.CALLING,
-                processingState: AnalysisProcessingStates.FINISHED,
-                md5sum         : HelperUtils.randomMd5sum,
-                fileSize       : DEFAULT_FILE_SIZE,
-        ] + properties
-
-        if (map.step == SnvCallingStep.CALLING) {
-            if (!map.snvCallingInstance) {
-                map.snvCallingInstance = createSnvInstanceWithRoddyBamFiles()
-            }
-            if (!map.chromosomeJoinExternalScript) {
-                map.chromosomeJoinExternalScript = createExternalScript([
-                        scriptIdentifier: SnvCallingJob.CHROMOSOME_VCF_JOIN_SCRIPT_IDENTIFIER,
-                        scriptVersion   : map.snvCallingInstance.config.externalScriptVersion,
-                ])
-            }
-        } else {
-            if (!map.inputResult) {
-                map.inputResult = createSnvJobResultWithRoddyBamFiles(snvCallingInstance: map.snvCallingInstance)
-            }
-            if (!map.snvCallingInstance) {
-                map.snvCallingInstance = map.inputResult?.snvCallingInstance
-            }
-        }
-        if (!map.externalScript) {
-            map.externalScript = createExternalScript([
-                    scriptIdentifier: map.step.externalScriptIdentifier,
-                    scriptVersion   : map.snvCallingInstance.config.externalScriptVersion,
-            ])
-        }
-
-        return createSnvJobResult(map)
-    }
-
-
-    public static SnvJobResult createSnvJobResult(Map properties = [:]) {
-        return createDomainObject(SnvJobResult, [
-                step              : SnvCallingStep.CALLING,
-                externalScript    : { createExternalScript() },
-                snvCallingInstance: { createSnvCallingInstance() }
-        ], properties)
-    }
-
-
-    public static ExternalScript createExternalScript(Map properties = [:]) {
-        return createDomainObject(ExternalScript, [
-                scriptIdentifier: "scriptIdentifier_${counter++}",
-                scriptVersion   : "scriptVersion_${counter++}",
-                filePath        : TestCase.uniqueNonExistentPath,
-                author          : "author_${counter++}",
-        ], properties)
-    }
-
 
     public static AntibodyTarget createAntibodyTarget(Map properties = [:]) {
         return createDomainObject(AntibodyTarget, [
@@ -1874,21 +1801,16 @@ class DomainFactory {
     }
 
 
-    public static SnvCallingInstance createSnvCallingInstance(Map properties = [:]) {
-        return new SnvCallingInstance(properties)
+    public static RoddySnvCallingInstance createRoddySnvCallingInstance(Map properties = [:]) {
+        return createDomainObject(RoddySnvCallingInstance, [
+                processingState: AnalysisProcessingStates.IN_PROGRESS,
+                config         : properties.config ?: properties.samplePair ? createRoddyWorkflowConfig(
+                        project: properties.samplePair.project,
+                        seqType: properties.samplePair.seqType,
+                ) : createRoddyWorkflowConfig(),
+                instanceName   : "2014-08-25_15h32",
+        ], properties)
     }
-
-    public
-    static SnvCallingInstance createSnvCallingInstanceBasedOnPreviousSnvCallingInstance(SnvCallingInstance snvCallingInstance, Map properties = [:]) {
-        return createSnvCallingInstance([
-                instanceName      : "instance_${counter++}",
-                samplePair        : snvCallingInstance.samplePair,
-                sampleType1BamFile: snvCallingInstance.sampleType1BamFile,
-                sampleType2BamFile: snvCallingInstance.sampleType2BamFile,
-                config            : snvCallingInstance.config,
-        ] + properties).save(flush: true)
-    }
-
 
     public static ProcessingStep createAndSaveProcessingStep(ProcessParameterObject processParameterObject = null) {
         return createAndSaveProcessingStep("de.dkfz.tbi.otp.test.job.jobs.NonExistentDummyJob", processParameterObject)
@@ -1957,21 +1879,21 @@ class DomainFactory {
     }
 
     public static ClusterJob createClusterJob(
-            final ProcessingStep processingStep, final ClusterJobIdentifier clusterJobIdentifier,
-            final Map myProps = [
-                    clusterJobName   : "testName_${processingStep.nonQualifiedJobClass}",
-                    jobClass         : processingStep.nonQualifiedJobClass,
-                    queued           : new DateTime(),
-                    requestedWalltime: Duration.standardMinutes(5),
-                    requestedCores   : 10,
-                    requestedMemory  : 1000,
-            ]) {
-        return new ClusterJob([
+        final ProcessingStep processingStep, final ClusterJobIdentifier clusterJobIdentifier,
+        final Map myProps = [
+                clusterJobName   : "testName_${processingStep.nonQualifiedJobClass}",
+                jobClass         : processingStep.nonQualifiedJobClass,
+                queued           : new DateTime(),
+                requestedWalltime: Duration.standardMinutes(5),
+                requestedCores   : 10,
+                requestedMemory  : 1000,
+        ]) {
+        createDomainObject(ClusterJob, [
                 processingStep: processingStep,
                 realm         : clusterJobIdentifier.realm,
                 clusterJobId  : clusterJobIdentifier.clusterJobId,
                 userName      : clusterJobIdentifier.userName,
-        ] + myProps)
+        ], myProps)
     }
 
     static SeqType createSeqTypeLazy(SeqTypeNames seqTypeNames, String displayName, String dirName, String roddyName = null, String libraryLayout = SeqType.LIBRARYLAYOUT_PAIRED) {

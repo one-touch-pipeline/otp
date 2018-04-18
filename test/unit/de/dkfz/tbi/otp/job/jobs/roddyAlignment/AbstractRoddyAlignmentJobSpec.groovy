@@ -4,7 +4,6 @@ import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 import grails.test.mixin.*
@@ -32,7 +31,6 @@ import spock.lang.*
         SequencingKitLabel,
         SeqTrack,
         SeqType,
-        SnvConfig,
         SoftwareTool,
         ReferenceGenome,
         ReferenceGenomeProjectSeqType,
