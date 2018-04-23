@@ -84,7 +84,6 @@ showChangeLog.table.head.source
 
 # main page
 otp.welcome.title
-otp.welcome.introduction
 otp.welcome.administration.title
 otp.welcome.administration.userAdmin
 otp.welcome.administration.groupAdmin
