@@ -12,4 +12,5 @@ databaseChangeLog = {
 		sqlFile(path: 'changelogs/2018/otp2793.sql')
 	}
 
+	include file: 'changelogs/2018/OTP-2791.groovy'
 }

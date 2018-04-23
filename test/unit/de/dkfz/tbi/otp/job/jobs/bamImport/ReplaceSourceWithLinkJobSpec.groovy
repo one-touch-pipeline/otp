@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.job.jobs.bamImport
 
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.jobs.importExternallyMergedBam.*
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.processing.*
@@ -153,6 +154,8 @@ ln -sf [^ ]+\\/subDirectory\\/file.txt [^ ]+\\/subDirectory\\/file.txt
         linkingJob.linkFileUtils.lsdfFilesService = new LsdfFilesService()
         linkingJob.linkFileUtils.lsdfFilesService.createClusterScriptService = new CreateClusterScriptService()
         linkingJob.linkFileUtils.createClusterScriptService = new CreateClusterScriptService()
+        linkingJob.fileSystemService = new TestFileSystemService()
+        linkingJob.fileService = new FileService()
     }
 
     @Unroll

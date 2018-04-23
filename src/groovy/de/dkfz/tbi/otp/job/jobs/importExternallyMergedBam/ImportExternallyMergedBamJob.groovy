@@ -1,7 +1,7 @@
 package de.dkfz.tbi.otp.job.jobs.importExternallyMergedBam
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.ast.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
@@ -9,8 +9,7 @@ import org.springframework.beans.factory.annotation.*
 import org.springframework.context.annotation.*
 import org.springframework.stereotype.*
 
-import java.nio.file.FileSystem
-import java.nio.file.Path
+import java.nio.file.*
 
 @Component
 @Scope("prototype")
@@ -37,6 +36,13 @@ class ImportExternallyMergedBamJob extends AbstractOtpJob {
     protected final AbstractMultiJob.NextAction maybeSubmit() throws Throwable {
         final ImportProcess importProcess = getProcessParameterObject()
         AbstractMultiJob.NextAction action = AbstractMultiJob.NextAction.SUCCEED
+
+        String moduleLoader = ProcessingOptionService.findOptionSafe(ProcessingOption.OptionName.COMMAND_LOAD_MODULE_LOADER, null, null)
+        String samtoolsActivation = ProcessingOptionService.findOptionSafe(ProcessingOption.OptionName.COMMAND_ACTIVATION_SAMTOOLS, null, null)
+        String groovyActivation = ProcessingOptionService.findOptionSafe(ProcessingOption.OptionName.COMMAND_ACTIVATION_GROOVY, null, null)
+        String samtoolsCommand = ProcessingOptionService.findOptionAssure(ProcessingOption.OptionName.COMMAND_SAMTOOLS, null, null)
+        String groovyCommand = ProcessingOptionService.findOptionAssure(ProcessingOption.OptionName.COMMAND_GROOVY, null, null)
+        File otpScriptDir = configService.getToolsPath()
 
         importProcess.externallyProcessedMergedBamFiles.each { ExternallyProcessedMergedBamFile epmbf ->
             Realm realm = epmbf.project.realm
@@ -80,13 +86,18 @@ class ImportExternallyMergedBamJob extends AbstractOtpJob {
 set -o pipefail
 set -v
 
+${moduleLoader}
+${samtoolsActivation}
+${groovyActivation}
+
 if [ -e "${targetBam.path}" ]; then
     echo "File ${targetBam.path} already exists."
     rm -rf ${targetBam.path}* ${furtherFilesTarget}
 fi
 
 mkdir -p -m 2750 ${targetBam.parent}
-cp -HL ${sourceBam} ${targetBam}
+# copy and calculate max read length at the same time
+cat ${sourceBam} | tee ${targetBam} | ${samtoolsCommand} view - | ${groovyCommand} ${otpScriptDir}/bamMaxReadLength.groovy > ${epmbf.bamMaxReadLengthFile}
 cp -HL ${sourceBai} ${targetBai}
 
 ${furtherFilesCopy}
@@ -126,6 +137,14 @@ touch ${checkpoint}
             Path target = fs.getPath(path)
 
             try {
+                Path maxReadLengthPath = fs.getPath(it.getBamMaxReadLengthFile().absolutePath)
+                if (Files.exists(maxReadLengthPath)) {
+                    it.maximumReadLength = maxReadLengthPath.text as Integer
+                    assert it.save(flush: true)
+                    Files.delete(maxReadLengthPath)
+                }
+                assert it.maximumReadLength
+
                 FileService.ensureFileIsReadableAndNotEmpty(target)
                 if (!it.md5sum) {
                     Path md5Path = fs.getPath(checksumFileService.md5FileName(path))

@@ -18,7 +18,7 @@ class ExternallyProcessedMergedBamFileSpec extends Specification {
                 insertSizeFile     : null,
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
                 md5sum             : DomainFactory.DEFAULT_MD5_SUM,
-                meanSequenceLength : 5,
+                maximumReadLength  : 5,
                 workPackage        : new ExternalMergingWorkPackage([
                         pipeline: new Pipeline([
                                 name: Pipeline.Name.EXTERNALLY_PROCESSED,
@@ -57,7 +57,7 @@ class ExternallyProcessedMergedBamFileSpec extends Specification {
         'insertSizeFile'      | null
         'insertSizeFile'      | 'tmp/tmp'
         'fileOperationStatus' | AbstractMergedBamFile.FileOperationStatus.DECLARED
-        'meanSequenceLength'  | null
+        'maximumReadLength'   | null
     }
 
     @Unroll
@@ -88,7 +88,7 @@ class ExternallyProcessedMergedBamFileSpec extends Specification {
         'importedFrom'       | 'validator.invalid' | '/tmp//tmp'
         'importedFrom'       | 'validator.invalid' | '/tmp&tmp'
 
-        'meanSequenceLength' | 'min.notmet'        | -5
+        'maximumReadLength'  | 'min.notmet'        | -5
     }
 
 

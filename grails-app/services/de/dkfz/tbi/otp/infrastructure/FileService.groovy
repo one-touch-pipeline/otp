@@ -11,6 +11,18 @@ import java.time.*
  */
 class FileService {
 
+    /**
+     * Convert a Path to a File object
+     * This method is necessary because the {@link Path#toFile} method is not supported on Paths not backed
+     * by the default FileSystemProvider, such as {@link com.github.robtimus.filesystems.sftp.SFTPPath}s.
+     */
+    File toFile(Path path) {
+        assert path.isAbsolute()
+        new File(File.separator + path.collect { Path part ->
+            part.toString()
+        }.join(File.separator))
+    }
+
     static boolean isFileReadableAndNotEmpty(final Path file) {
         assert file.isAbsolute()
         try {

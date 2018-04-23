@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.job.jobs.importExternallyMergedBam
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.ast.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
@@ -24,6 +25,12 @@ class ReplaceSourceWithLinkJob extends AbstractEndStateAwareJobImpl {
 
     @Autowired
     ExecutionService executionService
+
+    @Autowired
+    FileSystemService fileSystemService
+
+    @Autowired
+    FileService fileService
 
 
     @Override
@@ -55,7 +62,7 @@ class ReplaceSourceWithLinkJob extends AbstractEndStateAwareJobImpl {
                 Map filteredMap = linkMap.findAll { Path link, Path target ->
                     link != target
                 }.collectEntries { Path link, Path target ->
-                    [(link.toFile()): target.toFile()]
+                    [(fileService.toFile(link)): fileService.toFile(target)]
                 }
 
                 if (filteredMap) {
@@ -72,7 +79,8 @@ class ReplaceSourceWithLinkJob extends AbstractEndStateAwareJobImpl {
     }
 
     private void createLinkMap(File source, File target, Map linkMap) {
-        createLinkMap(source.toPath().toRealPath(), target.toPath().toRealPath(), linkMap)
+        FileSystem fs = fileSystemService.filesystemForBamImport
+        createLinkMap(fs.getPath(source.absolutePath).toRealPath(), fs.getPath(target.absolutePath).toRealPath(), linkMap)
     }
 
     private void createLinkMap(Path source, Path target, Map linkMap) {

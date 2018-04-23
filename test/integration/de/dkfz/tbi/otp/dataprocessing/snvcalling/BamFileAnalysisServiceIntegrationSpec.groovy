@@ -604,7 +604,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         property             | value
         'coverage'           | 5
         'insertSizeFile'     | null
-        'meanSequenceLength' | null
+        'maximumReadLength'  | null
     }
 
     @Unroll
@@ -624,8 +624,8 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         'coverage'           | 30
         'coverage'           | null
         'insertSizeFile'     | 'insertSize.txt'
-        'meanSequenceLength' | 5
-        'meanSequenceLength' | 200
+        'maximumReadLength'  | 5
+        'maximumReadLength'  | 200
     }
 
     void "samplePairForProcessing, for Aceseq pipeline, when sophia has not run, should not return SamplePair"() {

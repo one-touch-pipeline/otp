@@ -84,6 +84,10 @@ class ConfigService implements ApplicationContextAware {
         return new File(otpProperties.get("otp.staging.root.path") ?: "")
     }
 
+    File getToolsPath() {
+        return new File(otpProperties.get("otp.path.tools") ?: "")
+    }
+
     File getProjectSequencePath(Project proj) {
         return new File("${getRootPath().path}/${proj.dirName}/sequencing/")
     }

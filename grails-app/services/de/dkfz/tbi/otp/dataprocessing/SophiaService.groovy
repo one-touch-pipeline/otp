@@ -35,7 +35,7 @@ class SophiaService extends BamFileAnalysisService {
             OR (
                 ambf${number}.class = de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedMergedBamFile
                 AND ambf${number}.insertSizeFile IS NOT NULL
-                AND ambf${number}.meanSequenceLength IS NOT NULL
+                AND ambf${number}.maximumReadLength IS NOT NULL
             )
         )
         """.replaceAll('\n', ' ')

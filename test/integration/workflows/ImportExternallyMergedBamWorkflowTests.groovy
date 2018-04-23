@@ -1,6 +1,7 @@
 package workflows
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 import org.joda.time.*
@@ -9,11 +10,16 @@ import org.springframework.beans.factory.annotation.*
 
 import java.nio.file.*
 
+import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
+
 @Ignore
 class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase {
 
     @Autowired
     LinkFileUtils linkFileUtils
+
+    @Autowired
+    FileSystemService fileSystemService
 
     ImportProcess importProcess
 
@@ -54,13 +60,18 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase {
         String baiFileName = "${bamFileName}.bai"
 
         List<String> fileNames = [
-                bamFileName,
                 baiFileName,
         ] + ALL_FILES
 
         createFilesWithContent(fileNames.collectEntries {
             [(new File(targetDir, it)): it]
         })
+
+        File bam = new File(getDataDirectory(), "processedMergedBamFiles/tumor_SOMEPID_merged.mdup.bam")
+
+        executionService.executeCommandReturnProcessOutput(realm,
+                "cp ${bam} ${new File(targetDir, bamFileName)}"
+        )
 
         if (useLink) {
             linkFileUtils.createAndValidateLinks([
@@ -105,6 +116,37 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase {
                 state: ImportProcess.State.NOT_STARTED,
                 replaceSourceWithLink: true
         ).save(flush: true)
+
+        DomainFactory.createProcessingOptionLazy(
+                name: COMMAND_LOAD_MODULE_LOADER,
+                type: null,
+                value: ""
+        )
+        DomainFactory.createProcessingOptionLazy(
+                name: COMMAND_ACTIVATION_SAMTOOLS,
+                type: null,
+                value: "module load samtools/1.2"
+        )
+        DomainFactory.createProcessingOptionLazy(
+                name: COMMAND_SAMTOOLS,
+                type: null,
+                value: "samtools"
+        )
+        DomainFactory.createProcessingOptionLazy(
+                name: COMMAND_ACTIVATION_GROOVY,
+                type: null,
+                value: "module load groovy/2.4.15"
+        )
+        DomainFactory.createProcessingOptionLazy(
+                name: COMMAND_GROOVY,
+                type: null,
+                value: "groovy"
+        )
+        DomainFactory.createProcessingOptionLazy(
+                name: FILESYSTEM_BAM_IMPORT,
+                type: null,
+                value: realm.name
+        )
     }
 
     @Test
@@ -133,7 +175,7 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase {
     }
 
     @Test
-    void testImportProcess_FilesHaveToBeLinkedAndDeleted() {
+    void testImportProcess_FilesHaveToBeCopiedLinkedAndDeleted() {
         execute()
 
         checkThatFileCopyingWasSuccessful(importProcess)
@@ -157,6 +199,7 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase {
     }
 
     private void checkThatFileCopyingWasSuccessful(ImportProcess importProcess) {
+        FileSystem fs = fileSystemService.filesystemForBamImport
         ImportProcess.withNewSession {
             importProcess = ImportProcess.get(importProcess.id)
             assert importProcess.state == ImportProcess.State.FINISHED
@@ -172,7 +215,7 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase {
                         it.baiFileName,
                         ALL_FILES
                 ].flatten().each {
-                    checkThatFileExistAndIsNotLink(new File(baseDirectory, it))
+                    checkThatFileExistAndIsNotLink(fs.getPath(baseDirectory.absolutePath, it as String))
                 }
 
                 [
@@ -181,20 +224,20 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase {
                         SUBDIRECTORY21,
                         SUBDIRECTORY22,
                 ].each {
-                    checkThatDirectoryExistAndIsNotLink(new File(baseDirectory, it))
+                    checkThatDirectoryExistAndIsNotLink(fs.getPath(baseDirectory.absolutePath, it as String))
                 }
+
+                assert it.maximumReadLength == 251
             }
         }
     }
 
-    private void checkThatDirectoryExistAndIsNotLink(File file) {
-        Path path = file.toPath()
+    private void checkThatDirectoryExistAndIsNotLink(Path path) {
         assert Files.exists(path, LinkOption.NOFOLLOW_LINKS)
         assert Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)
     }
 
-    private void checkThatFileExistAndIsNotLink(File file) {
-        Path path = file.toPath()
+    private void checkThatFileExistAndIsNotLink(Path path) {
         assert Files.exists(path, LinkOption.NOFOLLOW_LINKS)
         assert Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS)
         assert Files.size(path) > 0

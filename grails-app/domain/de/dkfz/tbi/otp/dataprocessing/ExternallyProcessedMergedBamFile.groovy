@@ -29,7 +29,7 @@ class ExternallyProcessedMergedBamFile extends AbstractMergedBamFile {
     /**
      * The maximal read length, needed for sophia
      */
-    Integer meanSequenceLength
+    Integer maximumReadLength
 
 
     static hasMany = [
@@ -91,6 +91,10 @@ class ExternallyProcessedMergedBamFile extends AbstractMergedBamFile {
         return new File(importFolder, baiFileName)
     }
 
+    File getBamMaxReadLengthFile() {
+        return new File(importFolder, "${bamFileName}.maxReadLength")
+    }
+
     File getNonOtpFolder() {
         String relative = MergedAlignmentDataFileService.buildRelativePath(seqType, sample)
         return new OtpPath(project, relative, "nonOTP").absoluteDataManagementPath
@@ -107,7 +111,7 @@ class ExternallyProcessedMergedBamFile extends AbstractMergedBamFile {
 
     @Override
     Integer getMaximalReadLength() {
-        return meanSequenceLength
+        return maximumReadLength
     }
 
 
@@ -129,7 +133,7 @@ class ExternallyProcessedMergedBamFile extends AbstractMergedBamFile {
         insertSizeFile nullable: true, blank: false, maxSize: 1000, validator: { val ->
             val == null || OtpPath.isValidRelativePath(val)
         }
-        meanSequenceLength nullable: true, min: 0
+        maximumReadLength nullable: true, min: 0
     }
 
 }

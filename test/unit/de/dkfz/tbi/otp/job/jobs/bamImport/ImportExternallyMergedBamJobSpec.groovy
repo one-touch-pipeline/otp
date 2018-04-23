@@ -15,6 +15,8 @@ import spock.lang.*
 
 import java.nio.file.*
 
+import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
+
 @Mock([
         ExternalMergingWorkPackage,
         ExternallyProcessedMergedBamFile,
@@ -82,6 +84,27 @@ class ImportExternallyMergedBamJobSpec extends Specification {
         )
         epmbfWithoutMd5sum.individual.project = project
         assert epmbfWithoutMd5sum.individual.save(flush: true)
+
+        DomainFactory.createProcessingOptionLazy(
+                name: COMMAND_ACTIVATION_SAMTOOLS,
+                type: null,
+                value: "module load samtools"
+        )
+        DomainFactory.createProcessingOptionLazy(
+                name: COMMAND_SAMTOOLS,
+                type: null,
+                value: "samtools"
+        )
+        DomainFactory.createProcessingOptionLazy(
+                name: COMMAND_ACTIVATION_GROOVY,
+                type: null,
+                value: "module load groovy"
+        )
+        DomainFactory.createProcessingOptionLazy(
+                name: COMMAND_GROOVY,
+                type: null,
+                value: "groovy"
+        )
     }
 
     void cleanup() {
@@ -151,6 +174,7 @@ class ImportExternallyMergedBamJobSpec extends Specification {
         createHelperObjects(importProcess)
         File targetBamFile = epmbfWithMd5sum.getBamFile()
         CreateFileHelper.createFile(new File(targetBamFile.parent, ".${targetBamFile.name}.checkpoint"))
+        CreateFileHelper.createFile(epmbfWithMd5sum.bamMaxReadLengthFile, "123")
         CreateFileHelper.createFile(new File(epmbfWithMd5sum.importedFrom))
         CreateFileHelper.createFile(epmbfWithMd5sum.getBamFile())
         importExternallyMergedBamJob.clusterJobSchedulerService = Mock(ClusterJobSchedulerService) {
@@ -159,7 +183,6 @@ class ImportExternallyMergedBamJobSpec extends Specification {
 
         expect:
         AbstractMultiJob.NextAction.SUCCEED == importExternallyMergedBamJob.maybeSubmit()
-
     }
 
     void "test maybe submit, when files have to be copied and a checkpoint file exists already but not the files, then fail"() {
@@ -171,6 +194,7 @@ class ImportExternallyMergedBamJobSpec extends Specification {
         createHelperObjects(importProcess)
         File targetBamFile = epmbfWithoutMd5sum.getBamFile()
         CreateFileHelper.createFile(new File(targetBamFile.parent, ".${targetBamFile.name}.checkpoint"))
+        CreateFileHelper.createFile(epmbfWithoutMd5sum.bamMaxReadLengthFile, "123")
 
         when:
         importExternallyMergedBamJob.maybeSubmit()
@@ -299,12 +323,14 @@ class ImportExternallyMergedBamJobSpec extends Specification {
 
         createHelperObjects(importProcess)
         CreateFileHelper.createFile(epmbfWithMd5sum.getBamFile())
+        CreateFileHelper.createFile(epmbfWithMd5sum.bamMaxReadLengthFile, "123")
 
         when:
         importExternallyMergedBamJob.validate()
 
         then:
         noExceptionThrown()
+        epmbfWithMd5sum.maximalReadLength == 123
     }
 
     void "test validate when everything is valid and bam file has no md5sum yet"() {
@@ -314,15 +340,54 @@ class ImportExternallyMergedBamJobSpec extends Specification {
         ).save()
 
         createHelperObjects(importProcess)
-        CreateFileHelper.createFile(epmbfWithoutMd5sum.getBamFile())
-        CreateFileHelper.createFile(new File("${epmbfWithoutMd5sum.getBamFile()}.md5sum"),
+        File targetBamFile = epmbfWithoutMd5sum.getBamFile()
+        CreateFileHelper.createFile(targetBamFile)
+        CreateFileHelper.createFile(new File("${targetBamFile}.md5sum"),
                 "${epmbfWithMd5sum.md5sum} epmbfName")
+        CreateFileHelper.createFile(epmbfWithoutMd5sum.bamMaxReadLengthFile, "123")
 
         when:
         importExternallyMergedBamJob.validate()
 
         then:
         noExceptionThrown()
+        epmbfWithoutMd5sum.maximalReadLength == 123
+    }
+
+    void "test validate when maxReadLength file doesn't exist and read length is already set"() {
+        given:
+        ImportProcess importProcess = new ImportProcess(
+                externallyProcessedMergedBamFiles: [epmbfWithMd5sum]
+        ).save()
+
+        createHelperObjects(importProcess)
+        CreateFileHelper.createFile(epmbfWithMd5sum.getBamFile())
+
+        epmbfWithMd5sum.maximumReadLength = 123
+        epmbfWithMd5sum.save()
+
+        when:
+        importExternallyMergedBamJob.validate()
+
+        then:
+        epmbfWithMd5sum.maximalReadLength == 123
+    }
+
+    void "test validate when maxReadLength file doesn't exist and read length is not set"() {
+        given:
+        ImportProcess importProcess = new ImportProcess(
+                externallyProcessedMergedBamFiles: [epmbfWithMd5sum]
+        ).save()
+
+        createHelperObjects(importProcess)
+        CreateFileHelper.createFile(epmbfWithMd5sum.getBamFile())
+
+        when:
+        importExternallyMergedBamJob.validate()
+
+        then:
+        def e = thrown(ProcessingException)
+        e.message.contains("assert it.maximumReadLength")
     }
 
     void "test validate when everything is not equal"() {
@@ -333,9 +398,11 @@ class ImportExternallyMergedBamJobSpec extends Specification {
         ).save()
 
         createHelperObjects(importProcess)
-        CreateFileHelper.createFile(epmbfWithoutMd5sum.getBamFile())
-        CreateFileHelper.createFile(new File("${epmbfWithoutMd5sum.getBamFile()}.md5sum"),
+        File targetBamFile = epmbfWithoutMd5sum.getBamFile()
+        CreateFileHelper.createFile(targetBamFile)
+        CreateFileHelper.createFile(new File("${targetBamFile}.md5sum"),
                 "${importedMd5sum} epmbfName")
+        CreateFileHelper.createFile(epmbfWithoutMd5sum.bamMaxReadLengthFile, "123")
 
         when:
         importExternallyMergedBamJob.validate()
@@ -353,6 +420,7 @@ class ImportExternallyMergedBamJobSpec extends Specification {
         createHelperObjects(importProcess)
         CreateFileHelper.createFile(new File("${epmbfWithMd5sum.importedFrom}.md5sum"),
                 "${epmbfWithMd5sum.md5sum} epmbfName")
+        CreateFileHelper.createFile(epmbfWithMd5sum.bamMaxReadLengthFile, "123")
 
         when:
         importExternallyMergedBamJob.validate()
@@ -369,7 +437,10 @@ class ImportExternallyMergedBamJobSpec extends Specification {
                 getProcessingStep        : { -> step },
         ] as ImportExternallyMergedBamJob
 
-        configService = new TestConfigService(['otp.root.path': temporaryFolder.newFolder("root").path])
+        configService = new TestConfigService([
+                'otp.root.path': temporaryFolder.newFolder("root").path,
+                'otp.path.tools': "/asdf",
+        ])
 
         importExternallyMergedBamJob.configService = configService
         importExternallyMergedBamJob.checksumFileService = new ChecksumFileService()
@@ -391,13 +462,18 @@ class ImportExternallyMergedBamJobSpec extends Specification {
 set -o pipefail
 set -v
 
+
+module load samtools
+module load groovy
+
 if \\[ -e "[^ ]+" \\]; then
     echo "File [^ ]+.bam already exists."
     rm -rf [^ ]+\\* [^ ]+
 fi
 
 mkdir -p -m 2750 [^ ]+
-cp -HL [^ ]+.bam [^ ]+.bam
+# copy and calculate max read length at the same time
+cat [^ ]+.bam \\| tee [^ ]+.bam \\| samtools view - \\| groovy /asdf/bamMaxReadLength.groovy > [^ ]+.bam.maxReadLength
 cp -HL [^ ]+.bam.bai [^ ]+.bam.bai
 
 mkdir -p -m 2750 [^ ]+

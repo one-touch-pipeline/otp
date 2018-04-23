@@ -966,7 +966,7 @@ class DomainFactory {
                             workPackage: it,
                             coverage: 30.0,
                             insertSizeFile: 'insertSize.txt',
-                            meanSequenceLength: 101,
+                            maximumReadLength: 101,
                     ] + bamFileProperties,
             )
             bamFile.mergingWorkPackage.bamFileInProjectFolder = bamFile
