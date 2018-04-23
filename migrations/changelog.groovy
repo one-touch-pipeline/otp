@@ -93,4 +93,14 @@ databaseChangeLog = {
 	changeSet(author: "strubel", id:"OTP-2919-SQL") {
 		sqlFile(path: 'changelogs/2018/OTP-2919.sql')
 	}
+
+	changeSet(author: "kosnac", id:"OTP-2655-1-SQL") {
+		sqlFile(path: 'changelogs/2018/OTP-2655-step1.sql')
+	}
+
+	include file: 'changelogs/2018/OTP-2655-step2.groovy'
+
+	changeSet(author: "kosnac", id:"OTP-2655-3-SQL") {
+		sqlFile(path: 'changelogs/2018/OTP-2655-step3.sql')
+	}
 }

@@ -14,9 +14,4 @@ class UserProjectRole implements Serializable, Entity {
     boolean getManageUsers() {
         return manageUsers || projectRole.manageUsersAndDelegate
     }
-
-    static mapping = {
-        contactPerson index: "project_contact_person_contact_person_idx"
-        project index: "project_contact_person_contact_person_idx"
-    }
 }

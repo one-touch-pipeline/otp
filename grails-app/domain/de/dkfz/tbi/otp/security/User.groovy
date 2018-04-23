@@ -24,8 +24,8 @@ class User implements TimeStamped, Entity {
     static constraints = {
         username(blank: false, unique: true, nullable: true)
         password(blank: false)
-        email(unique: true, email: true)
-        realName(blank: false)
+        email(nullable: false, unique: true, email: true)
+        realName(nullable: true, blank: false)
         asperaAccount(blank: false, nullable: true)
     }
 
