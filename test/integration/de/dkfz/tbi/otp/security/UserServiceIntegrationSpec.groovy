@@ -15,14 +15,15 @@ class UserServiceIntegrationSpec extends Specification implements UserAndRoles {
     void "test updateEmail valid input"() {
         given:
         User user = User.findByUsername(TESTUSER)
+        String newMail = "dummy@dummy.de"
 
         when:
         SpringSecurityUtils.doWithAuth(OPERATOR) {
-            userService.updateEmail(user, "newUser@dkfz.de")
+            userService.updateEmail(user, newMail)
         }
 
         then:
-        user.email == "newUser@dkfz.de"
+        user.email == newMail
     }
 
     void "test updateEmail invalid input"() {

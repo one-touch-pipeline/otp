@@ -152,4 +152,23 @@ class OtpPermissionEvaluatorIntegrationSpec extends Specification implements Use
         true        | false       | true                   | "MANAGE_USERS"             || true
         false       | false       | true                   | "DELEGATE_USER_MANAGEMENT" || true
     }
+
+    void "hasPermission, different combinations for ADD_USER permission"() {
+        given:
+        userProjectRole.projectRole.manageUsersAndDelegate = manageUsersAndDelegate
+        userProjectRole.manageUsers = manageUsers
+
+        when:
+        boolean checkResult = permissionEvaluator.hasPermission(authentication, null, "ADD_USER")
+
+        then:
+        checkResult == access
+
+        where:
+        manageUsers | manageUsersAndDelegate || access
+        false       | false                  || false
+        true        | false                  || true
+        false       | true                   || true
+        true        | true                   || true
+    }
 }

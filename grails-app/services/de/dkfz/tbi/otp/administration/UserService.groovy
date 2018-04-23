@@ -92,7 +92,7 @@ class UserService {
         return User.count()
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(null, 'ADD_USER')")
     User createUser(CreateUserCommand command) throws RegistrationException {
         User user = new User(username: command.username,
                              email: command.email,

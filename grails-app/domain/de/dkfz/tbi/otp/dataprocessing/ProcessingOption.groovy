@@ -99,6 +99,7 @@ class ProcessingOption implements Entity {
         EMAIL_RECIPIENT_ERRORS("", null, TypeValidators.MAIL),
         EMAIL_SENDER("", null, TypeValidators.MAIL),
         EMAIL_SENDER_SALUTATION("The name and optionally email of the helpdesk team, to be used in the middle of sentences", null, TypeValidators.SINGLE_LINE_TEXT),
+        EMAIL_LINUX_GROUP_ADMINISTRATION("The mail of the responsible entity to add users to linux groups", null, TypeValidators.MAIL),
 
         NOTIFICATION_TEMPLATE_SEQ_CENTER_NOTE("", null, TypeValidators.MULTI_LINE_TEXT),
 

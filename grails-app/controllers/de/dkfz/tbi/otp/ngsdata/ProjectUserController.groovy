@@ -4,6 +4,7 @@ import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.administration.*
 import de.dkfz.tbi.otp.security.*
 import grails.converters.*
+import groovy.json.JsonBuilder
 import groovy.transform.*
 import org.springframework.validation.*
 
@@ -54,7 +55,7 @@ class ProjectUserController {
         List<UserEntry> disabledProjectUsers = []
         List<String> usersWithoutUserProjectRole = []
         projectUsers.each { User user ->
-            LdapUserDetails userMap = ldapService.getUserMapByUsername(user.username)
+            LdapUserDetails userMap = ldapService.getLdapUserDetailsByUsernameOrMailOrRealName(user.username)
             UserProjectRole userProjectRole = UserProjectRole.findByUserAndProject(user, project)
             if (userProjectRole) {
                 UserEntry userEntry = new UserEntry(user, project, userMap)
@@ -93,6 +94,49 @@ class ProjectUserController {
         redirect(action: "index")
     }
 
+    def updateProjectRole(UpdateProjectRoleCommand cmd) {
+        if (cmd.hasErrors()) {
+            flash.errors = cmd.errors.getFieldError().code
+            flash.message = "An error occurred"
+        } else {
+            flash.errors = false
+            flash.message = "Data stored successfully"
+            userProjectRoleService.updateProjectRole(cmd.userProjectRole, ProjectRole.findByName(cmd.newRole))
+        }
+        redirect(action: "index")
+    }
+
+    def addUserToProject(AddUserToProjectCommand cmd) {
+        String message = ""
+        String errorMessage = ""
+        if (cmd.hasErrors()) {
+            FieldError cmdErrors = cmd.errors.getFieldError()
+            errorMessage = "'" + cmdErrors.getRejectedValue() + "' is not a valid value for '" + cmdErrors.getField() + "'. Error code: '" + cmdErrors.code + "'"
+            message = "An error occurred"
+        } else {
+            if (cmd.addViaLdap) {
+                try {
+                    userProjectRoleService.addUserToProjectAndNotifyGroupManagementAuthority(
+                            cmd.project,
+                            ProjectRole.findByName(cmd.projectRoleName),
+                            cmd.searchString
+                    )
+                    message = "Data stored successfully"
+                } catch (AssertionError e) {
+                    message = "An error occurred"
+                    errorMessage = e.message
+                }
+            } else {
+                // TODO: remove when implementing OTP-2743
+                message = "An error occurred"
+                errorMessage = "It is not possible to add non-ldap users right now."
+            }
+        }
+        flash.message = message
+        flash.errors = errorMessage
+        redirect(controller: "projectUser")
+    }
+
     JSON updateName(UpdateUserRealNameCommand cmd) {
         checkErrorAndCallMethod(cmd, { userService.updateRealName(cmd.user, cmd.newName) })
     }
@@ -103,10 +147,6 @@ class ProjectUserController {
 
     JSON updateAspera(UpdateUserAsperaCommand cmd) {
         checkErrorAndCallMethod(cmd, { userService.updateAsperaAccount(cmd.user, cmd.newAspera) })
-    }
-
-    JSON updateProjectRole(UpdateProjectRoleCommand cmd) {
-        checkErrorAndCallMethod(cmd, { userProjectRoleService.updateProjectRole(cmd.userProjectRole, ProjectRole.findByName(cmd.newRole)) })
     }
 
     private void checkErrorAndCallMethod(Serializable cmd, Closure method) {
@@ -122,6 +162,10 @@ class ProjectUserController {
 
     private Map getErrorData(FieldError errors) {
         return [success: false, error: "'" + errors.getRejectedValue() + "' is not a valid value for '" + errors.getField() + "'. Error code: '" + errors.code + "'"]
+    }
+
+    JSON getUserSearchSuggestions(UserSearchSuggestionsCommand cmd) {
+        render new JsonBuilder(ldapService.getListOfLdapUserDetailsByUsernameOrMailOrRealName(cmd.searchString, 20)) as JSON
     }
 }
 
@@ -249,13 +293,73 @@ class UpdateProjectRoleCommand implements Serializable {
     UserProjectRole userProjectRole
     String newRole
     static constraints = {
-        newRole(validator: {val, obj ->
+        newRole(validator: { val, obj ->
             if (val == obj.userProjectRole.projectRole.name) {
                 return 'No Change'
             }
         })
     }
+
     void setValue(String value) {
         this.newRole = value
+    }
+}
+
+class AddUserToProjectCommand implements Serializable {
+    Project project
+    boolean addViaLdap
+
+    String searchString
+    String projectRoleName
+
+    String realName
+    String email
+
+    static constraints = {
+        addViaLdap(blank: false)
+        searchString(nullable: true, validator: { val, obj ->
+            if (obj.addViaLdap && !obj.searchString?.trim()) {
+                return "searchString can not be empty"
+            }
+        })
+        projectRoleName(nullable: true, validator: { val, obj ->
+            if (obj.addViaLdap && !obj.projectRoleName) {
+                return "No project role selected"
+            }
+        })
+        realName(nullable: true, validator: { val, obj ->
+            if (!obj.addViaLdap && !obj.realName?.trim()) {
+                return "Real name can not be empty"
+            }
+        })
+        email(nullable: true, email: true, validator: { val, obj ->
+            if (!obj.addViaLdap && !obj.email?.trim()) {
+                return "Email can not be empty"
+            }
+        })
+    }
+
+    void setAddViaLdap(String selectedMethod) {
+        this.addViaLdap = (selectedMethod == 'true')
+    }
+
+    void setSearchString(String searchString) {
+        this.searchString = searchString?.trim()?.replaceAll(" +", " ")
+    }
+
+    void setRealName(String realName) {
+        this.realName = realName?.trim()?.replaceAll(" +", " ")
+    }
+
+    void setEmail(String email) {
+        this.email = email?.trim()?.replaceAll(" ", "")
+    }
+}
+
+class UserSearchSuggestionsCommand implements Serializable {
+    String searchString
+
+    void setValue(String value) {
+        this.searchString = value
     }
 }

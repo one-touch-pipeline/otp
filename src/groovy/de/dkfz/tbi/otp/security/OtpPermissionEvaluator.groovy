@@ -16,17 +16,19 @@ class OtpPermissionEvaluator implements PermissionEvaluator {
 
     @Autowired AclPermissionEvaluator aclPermissionEvaluator
 
-    private static final List permissions = ["OTP_READ_ACCESS", "MANAGE_USERS", "DELEGATE_USER_MANAGEMENT"]
+    private static final List permissions = ["OTP_READ_ACCESS", "MANAGE_USERS", "DELEGATE_USER_MANAGEMENT", "ADD_USER"]
 
     @Override
     boolean hasPermission(Authentication auth, Object targetDomainObject, Object permission) throws IllegalArgumentException {
-        if (!auth || !targetDomainObject) {
+        if (!auth) {
             return false
         }
         if (permission instanceof String && permission in permissions) {
-            switch (targetDomainObject.class) {
+            switch (targetDomainObject?.class) {
                 case Project:
                     return checkProjectRolePermission(auth, (Project) targetDomainObject, permission)
+                case null:
+                    return checkObjectIndependentPermission(auth, permission)
                 default:
                     return false
             }
@@ -36,13 +38,15 @@ class OtpPermissionEvaluator implements PermissionEvaluator {
 
     @Override
     boolean hasPermission(Authentication auth, Serializable targetId, String targetType, Object permission) throws IllegalArgumentException {
-        if (!auth || !targetType) {
+        if (!auth) {
             return false
         }
         if (permission instanceof String && permission in permissions) {
             switch (targetType) {
                 case Project.name:
                     return checkProjectRolePermission(auth, Project.get(targetId), (String) permission)
+                case null:
+                    return checkObjectIndependentPermission(auth, permission)
                 default:
                     return false
             }
@@ -51,17 +55,38 @@ class OtpPermissionEvaluator implements PermissionEvaluator {
     }
 
     @CompileDynamic
-    private boolean checkProjectRolePermission(Authentication auth, Project project, String permission) {
-        User user = User.findByUsername(auth.principal.username)
-        if (!user) {
+    private boolean checkObjectIndependentPermission(Authentication auth, String permission) {
+        User activeUser = User.findByUsername(auth.principal.username)
+        if (!activeUser) {
             return false
         }
 
-        UserProjectRole userProjectRole = UserProjectRole.findByProjectAndUser(project, user)
+        if (!activeUser.enabled) {
+            return false
+        }
+
+        switch (permission) {
+            case "ADD_USER":
+                return UserProjectRole.where {
+                    user == activeUser && (manageUsers == true || projectRole.manageUsersAndDelegate == true)
+                }.findAll()
+            default:
+                return false
+        }
+    }
+
+    @CompileDynamic
+    private boolean checkProjectRolePermission(Authentication auth, Project project, String permission) {
+        User activeUser = User.findByUsername(auth.principal.username)
+        if (!activeUser) {
+            return false
+        }
+
+        UserProjectRole userProjectRole = UserProjectRole.findByProjectAndUser(project, activeUser)
         if (!userProjectRole) {
             return false
         }
-        if (!(user.enabled && userProjectRole.enabled)) {
+        if (!(activeUser.enabled && userProjectRole.enabled)) {
             return false
         }
 

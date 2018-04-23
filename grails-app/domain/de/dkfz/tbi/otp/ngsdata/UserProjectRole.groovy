@@ -11,6 +11,10 @@ class UserProjectRole implements Serializable, Entity {
     boolean enabled = true
     boolean manageUsers = false
 
+    static constraints = {
+        user(unique: ['project'])
+    }
+
     boolean getManageUsers() {
         return manageUsers || projectRole.manageUsersAndDelegate
     }

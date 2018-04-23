@@ -5,11 +5,13 @@ import jdk.nashorn.internal.ir.annotations.*
 import org.springframework.beans.factory.*
 import org.springframework.ldap.core.*
 import org.springframework.ldap.core.support.*
-import org.springframework.ldap.query.*
+import org.springframework.ldap.query.ContainerCriteria
 
 import javax.naming.*
 import javax.naming.directory.*
 import java.util.regex.*
+
+import static org.springframework.ldap.query.LdapQueryBuilder.*
 
 class LdapService implements InitializingBean {
 
@@ -30,13 +32,52 @@ class LdapService implements InitializingBean {
         ldapTemplate.setIgnorePartialResultException(true)
     }
 
-    LdapUserDetails getUserMapByUsername(String username) {
-        if (username == null) {
+    LdapUserDetails getLdapUserDetailsByUsernameOrMailOrRealName(String searchString) {
+        if (searchString == null) {
             return [:]
         }
+        String sanitizedSearchString = searchString.trim().replaceAll(" +", " ")
+        ContainerCriteria searchQuery = query().where("cn").is(sanitizedSearchString).or("mail").is(sanitizedSearchString)
+        if (sanitizedSearchString.contains(" ")) {
+            String[] splitSearch = sanitizedSearchString.split(" ", 2)
+            searchQuery = query()
+                    .where("givenName").like(splitSearch[0])
+                    .and("sn").like(splitSearch[1])
+                    .and("mail").isPresent()
+        }
         return ldapTemplate.search(
-                LdapQueryBuilder.query().where("cn").is(username),
+                query().where("objectCategory").is("user")
+                        .and(searchQuery),
                 new LdapuserDetailsAttributesMapper())[0]
+    }
+
+    List<LdapUserDetails> getListOfLdapUserDetailsByUsernameOrMailOrRealName(String searchString, int countLimit = 0) {
+        if (searchString == null) {
+            return []
+        }
+        String sanitizedSearchString = searchString.trim().replaceAll(" +", " ")
+
+        String wildcardedSearch = "*${sanitizedSearchString}*"
+        ContainerCriteria dynamicQuery = query()
+                .where("cn").like(wildcardedSearch)
+                .or("mail").like(wildcardedSearch)
+                .or("givenName").like(wildcardedSearch)
+                .or("sn").like(wildcardedSearch)
+
+        if (sanitizedSearchString.contains(" ")) {
+            String[] splitSearch = sanitizedSearchString.split(" ", 2)
+            dynamicQuery = query()
+                    .where("givenName").like("*${splitSearch[0]}*")
+                    .and("sn").like("*${splitSearch[1]}*")
+        }
+
+        return ldapTemplate.search(
+                query().countLimit(countLimit)
+                        .attributes("cn", "mail", "givenName", "sn", "department")
+                        .where("objectCategory").is("person")
+                        .and("mail").isPresent()
+                        .and(dynamicQuery),
+                new LdapuserDetailsAttributesMapper())
     }
 
     String getDistinguishedNameOfGroupByGroupName(String groupName) {
@@ -44,9 +85,8 @@ class LdapService implements InitializingBean {
             return ""
         }
         return ldapTemplate.search(
-                LdapQueryBuilder.query()
-                        .where("objectCategory").is("group")
-                        .and("cn").is(groupName),
+                query().where("objectCategory").is("group")
+                       .and("cn").is(groupName),
                 new DistinguishedNameAttributesMapper())[0]
     }
 
@@ -56,9 +96,8 @@ class LdapService implements InitializingBean {
         }
         // nested group memberships are not resolved
         return ldapTemplate.search(
-                LdapQueryBuilder.query()
-                        .where("objectCategory").is("user")
-                        .and("memberOf").is(distinguishedName),
+                query().where("objectCategory").is("user")
+                       .and("memberOf").is(distinguishedName),
                 new UsernameAttributesMapper())
     }
 }
@@ -71,10 +110,12 @@ class LdapuserDetailsAttributesMapper implements AttributesMapper<LdapUserDetail
             if (matcher.matches() && matcher.group('cn')) return matcher.group('cn')
         }
         boolean deactivated = a.get("employeeType")?.get()?.toString() == "Ausgeschieden"
+        String givenName = a.get("givenName")?.get()
+        String sn = a.get("sn")?.get()
+        boolean realNameCreatable = givenName && sn
         return new LdapUserDetails([
                 cn               : a.get("cn")?.get()?.toString(),
-                givenName        : a.get("givenName")?.get()?.toString(),
-                sn               : a.get("sn")?.get()?.toString(),
+                realName         : realNameCreatable ? "${givenName} ${sn}" : null,
                 mail             : a.get("mail")?.get()?.toString(),
                 department       : a.get("department")?.get()?.toString(),
                 thumbnailPhoto   : a.get("thumbnailPhoto")?.get() as byte[],
@@ -101,8 +142,7 @@ class UsernameAttributesMapper implements AttributesMapper<String> {
 @Immutable
 class LdapUserDetails {
     String cn // commonName, holds the username in ldap
-    String givenName
-    String sn // surname
+    String realName
     String mail
     String department
     byte[] thumbnailPhoto
