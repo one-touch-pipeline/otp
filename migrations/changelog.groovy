@@ -7,4 +7,9 @@ databaseChangeLog = {
 	changeSet(author: "strubelp", id:"fixed-alias-tables-sql") {
 		sqlFile(path: 'changelogs/2018/fixed-alias-tables.sql')
 	}
+
+	changeSet(author: "kaercher", id:"OTP-2793") {
+		sqlFile(path: 'changelogs/2018/otp2793.sql')
+	}
+
 }
