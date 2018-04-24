@@ -85,6 +85,8 @@ war:
   stage: all
   image: otp-tests
   before_script:
+    - export CI_COMMIT_REF_NAME
+    - export CI_COMMIT_SHA
     - echo 'otp.testing.group=othergroup' > /home/grails/.otp.properties
     - mkdir -p logs/jobs
   script:

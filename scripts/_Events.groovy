@@ -16,30 +16,26 @@ eventCompileStart = { target ->
 }
 
 def createFileWithGitVersionAndBranch() {
-    def proc = "git rev-parse --short HEAD".execute()
-    proc.waitFor()
-    String revision = proc.in.text.trim()
-    // get the branch name
-    // first check for an environment variable
-    // the GIT_BRANCH variable is available in Jenkins
-    String branchName = System.getenv("GIT_BRANCH")
-    if (!branchName) {
-        // not specified through environment - try to resolve through git
+    String CI_COMMIT_REF_NAME = System.getenv("CI_COMMIT_REF_NAME")
+    String CI_COMMIT_SHA = System.getenv("CI_COMMIT_SHA")
+    String version, branch, revision
+    if (CI_COMMIT_REF_NAME && CI_COMMIT_SHA) {
+        revision = CI_COMMIT_SHA.substring(0, 10)
+        if (CI_COMMIT_REF_NAME.startsWith("production")) {
+            version = "Version ${CI_COMMIT_REF_NAME.substring(11)}"
+        } else {
+            branch = "Branch ${CI_COMMIT_REF_NAME}"
+        }
+    } else {
+        def proc = "git rev-parse --short HEAD".execute()
+        proc.waitFor()
+        revision = proc.in.text.trim()
+
         proc = "git symbolic-ref HEAD".execute()
         proc.waitFor()
-        branchName = proc.in.text
+        branch = "Branch ${proc.in.text.substring(11)}" //removes "refs/heads/" prefix
     }
-    if (branchName.startsWith("refs/heads/")) {
-        branchName = branchName.substring(11, branchName.length()-1)
-    }
-    if (branchName.startsWith("origin/")) {
-        branchName = branchName.substring(7)
-    }
-    if (branchName.startsWith("production/")) {
-        branchName = "Version ${branchName.substring(11)}"
-    } else {
-        branchName = "Branch ${branchName}"
-    }
+
     ant.mkdir(dir: "grails-app/views/templates/")
-    new File("grails-app/views/templates/_version.gsp").text = "${branchName} (${revision})"
+    new File("grails-app/views/templates/_version.gsp").text = "${version ?: branch} (${revision})"
 }
