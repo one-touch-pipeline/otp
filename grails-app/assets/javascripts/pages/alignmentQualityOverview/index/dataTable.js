@@ -109,18 +109,18 @@ $.otp.alignmentQualityOverviewTable = {
                             ];
 
                             // coverage
-                            if (seqType === 'WGS PAIRED' || seqType === 'WGBS PAIRED' || seqType === 'WGBS_TAG PAIRED' || seqType === "ChIP PAIRED") {
+                            if (seqType === 'WGS PAIRED no singleCell' || seqType === 'WGBS PAIRED no singleCell' || seqType === 'WGBS_TAG PAIRED no singleCell' || seqType === "ChIP PAIRED no singleCell") {
                                 columnNames = columnNames.concat([
                                     "coverageWithoutN",
                                     "coverageX",
                                     "coverageY",
                                 ]);
-                            } else if (seqType === 'EXOME PAIRED') {
+                            } else if (seqType === 'EXOME PAIRED no singleCell') {
                                 columnNames = columnNames.concat([
                                     "onTargetRatio",
                                     "targetCoverage",
                                 ]);
-                            } else if (seqType === 'RNA PAIRED' || seqType === 'RNA SINGLE') {
+                            } else if (seqType === 'RNA PAIRED no singleCell' || seqType === 'RNA SINGLE no singleCell') {
                                 columnNames = columnNames.concat([
                                     "totalReadCounter",
                                     "percentDuplicates",
@@ -148,7 +148,7 @@ $.otp.alignmentQualityOverviewTable = {
                             }
 
                             // general information
-                            if (seqType === 'RNA PAIRED' || seqType === 'RNA SINGLE') {
+                            if (seqType === 'RNA PAIRED no singleCell' || seqType === 'RNA SINGLE no singleCell') {
                                 columnNames = columnNames.concat([
                                     "kit",
                                     "dateFromFileSystem",
