@@ -27,6 +27,8 @@ class SeqType implements Entity {
             SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION,
     ].asImmutable()
 
+    // files with these seqTypes must be copied because the corresponding workflows don't support incremental merging
+    // TODO OTP-2726
     public static final Collection<SeqTypeNames> SEQTYPES_MUST_BE_COPIED = WGBS_SEQ_TYPE_NAMES + [
             SeqTypeNames.RNA,
             SeqTypeNames.CHIP_SEQ,
