@@ -1,5 +1,9 @@
 databaseChangeLog = {
 
+	changeSet(author: "strubelp", id:"initial_database_dump") {
+		sqlFile(path: 'changelogs/2018/initial_database_dump.sql')
+	}
+
 	changeSet(author: "strubelp", id:"OTP-2633-SQL") {
 		sqlFile(path: 'changelogs/2018/OTP-2633.sql')
 	}
