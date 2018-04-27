@@ -10,7 +10,6 @@ variables:
 
 
 
-
 stages:
   - all
 
@@ -19,6 +18,8 @@ stages:
 .abstract only branches: &only_branches
   only:
     - branches
+
+
 
 .abstract artifacts: &artifacts_job_template
   <<: *only_branches
@@ -51,15 +52,20 @@ stages:
       - target/test-reports/cobertura/coverage.xml
     when: always
 
+
+
 unit tests:
   <<: *test_template
   variables:
     TEST_TYPE: unit
 
+
+
 integration tests:
   <<: *test_template
   variables:
     TEST_TYPE: integration
+
 
 
 codenarc:
@@ -76,7 +82,6 @@ codenarc:
     paths:
       - target/CodeNarc-Report.xml
     when: always
-
 
 
 
@@ -102,3 +107,32 @@ war:
     - md5sum "$WAR_FILE" | tee "$WAR_FILE.md5"
     - sha256sum "$WAR_FILE" | tee "$WAR_FILE.sha256"
     - git rev-parse HEAD | tee "$WAR_FILE.gitrev"
+
+
+
+test migration:
+  <<: *only_branches
+  stage: all
+  services:
+    - postgres:latest
+  dependencies: []
+  image: otp-test-migration
+  variables:
+    POSTGRES_DB: otp
+    POSTGRES_USER: otp
+    POSTGRES_PASSWORD: otp
+  before_script:
+    - echo 'otp.database.server=postgres' >> /home/grails/.otp.properties
+    - echo 'otp.database.port=5432' >> /home/grails/.otp.properties
+    - echo 'otp.database.database=otp' >> /home/grails/.otp.properties
+    - echo 'otp.database.username=otp' >> /home/grails/.otp.properties
+    - echo 'otp.database.password=otp' >> /home/grails/.otp.properties
+  script:
+    - grails compile
+    - grails dbm-update
+    - bash ./bashScripts/grails-migration-plugin/create-dbm-gorm-diff-without-false-changes.sh testing
+    - bash ./bashScripts/grails-migration-plugin/check-for-changelog-file.sh testing
+  artifacts:
+    paths:
+      - migrations/changelogs/*/testing.groovy
+    when: on_failure
