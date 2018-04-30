@@ -8,6 +8,7 @@ import de.dkfz.tbi.otp.utils.ProcessHelperService.ProcessOutput
 import de.dkfz.tbi.otp.utils.logging.*
 import groovy.transform.*
 import org.apache.commons.logging.*
+import org.springframework.scheduling.annotation.*
 
 import java.util.concurrent.*
 
@@ -60,7 +61,7 @@ class ExecutionService {
         } catch (ProcessingException e) {
             if (e.cause && e.cause instanceof JSchException && e.cause.message.contains('channel is not opened.')) {
                 logToJob("'channel is not opened' error occur, try again in 30 seconds")
-                Thread.sleep(30000)
+                Thread.sleep(60000)
                 return querySsh(realm, sshUser, password, keyFile, sshAuthMethod, command)
             } else {
                 throw e
@@ -112,6 +113,9 @@ class ExecutionService {
             return processOutput
         } catch (Exception e) {
             log.info(e.toString(), e)
+            synchronized (this) {
+                sessionPerRealm.remove(realm)
+            }
             throw new ProcessingException(e)
         } finally {
             maxSshCalls.release()
@@ -192,6 +196,20 @@ class ExecutionService {
                 outputErrorStream.toString("UTF-8"),
                 channel.getExitStatus()
         )
+    }
+
+    @Scheduled(fixedDelay = 60000l)
+    void keepAlive() {
+        sessionPerRealm.each { Realm realm, Session session ->
+            try {
+                session.sendKeepAliveMsg()
+            } catch (Throwable e) {
+                log.error("Send keep alive failed for ${realm} ${session}", e)
+                synchronized (this) {
+                    sessionPerRealm.remove(realm)
+                }
+            }
+        }
     }
 
     private void logToJob(String message) {
