@@ -33,7 +33,11 @@ def createFileWithGitVersionAndBranch() {
 
         proc = "git symbolic-ref HEAD".execute()
         proc.waitFor()
-        branch = "Branch ${proc.in.text.substring(11)}" //removes "refs/heads/" prefix
+        branch = proc.in.text
+        if (branch.startsWith('refs/heads/')) {
+            branch = branch.substring(11)
+        }
+        branch = "Branch ${branch}"
     }
 
     ant.mkdir(dir: "grails-app/views/templates/")
