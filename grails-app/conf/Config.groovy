@@ -119,6 +119,11 @@ log4j = {
             'net.sf.ehcache.hibernate',
     ], additivity: false
 
+    info stdout: [
+            'liquibase',                                        // migration plugin: liquibase library
+            'grails.plugin.databasemigration',                  // migration plugin: grails
+    ], additivity: false
+
     debug stdout: [
             'de.dkfz.tbi.otp',                                  // our own stuff
             'seedme',                                           // seed plugin
