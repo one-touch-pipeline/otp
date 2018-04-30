@@ -51,7 +51,11 @@ class SeqTypeLibraryLayoutValidator extends ValueTuplesValidator<AbstractMetadat
             String libraryLayoutName = it.getValue(LIBRARY_LAYOUT.name())
             String baseMaterial = it.getValue(BASE_MATERIAL.name())
             boolean isSingleCell = SeqTypeService.isSingleCell(baseMaterial)
-            if (!SeqTypeService.findSeqTypeByNameOrAliasAndLibraryLayoutAndSingleCell(seqTypeName, libraryLayoutName, isSingleCell)) {
+            if (seqTypeName &&
+                    libraryLayoutName &&
+                    SeqTypeService.findSeqTypeByNameOrAlias(seqTypeName) &&
+                    SeqType.findByLibraryLayout(libraryLayoutName) &&
+                    !SeqTypeService.findSeqTypeByNameOrAliasAndLibraryLayoutAndSingleCell(seqTypeName, libraryLayoutName, isSingleCell)) {
                 if (isSingleCell)
                     context.addProblem(it.cells, Level.ERROR, "The combination of sequencing type '${seqTypeName}' and library layout '${libraryLayoutName}' and Single Cell is not registered in the OTP database.", "At least one combination of sequencing type and library layout and Single Cell is not registered in the OTP database.")
                 else

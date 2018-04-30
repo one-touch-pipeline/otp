@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
+import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.*
@@ -86,6 +87,24 @@ SeqType3\tLibraryLayout3\t\t${SeqType.SINGLE_CELL_DNA}
         context.problems.empty
     }
 
+    void 'validate, when precondition are not valid, add no problems'() {
+        given:
+        MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
+${MetaDataColumn.SEQUENCING_TYPE}\t${MetaDataColumn.LIBRARY_LAYOUT}\t${MetaDataColumn.TAGMENTATION_BASED_LIBRARY}\t${MetaDataColumn.BASE_MATERIAL}
+SeqTypeUnknown\tLibraryLayout1\t\twer
+SeqType1\tLibraryLayoutUnknown\t\twer
+\tLibraryLayout1\t\twer
+SeqType1\t\t\twer
+""")
+        DomainFactory.createSeqType(name: 'SeqType1', libraryLayout: 'LibraryLayout1')
+
+        when:
+        new SeqTypeLibraryLayoutValidator().validate(context)
+
+        then:
+        context.problems.empty
+    }
+
     void 'validate, when combinations are not in database, adds expected errors'() {
 
         given:
@@ -106,6 +125,9 @@ SeqType2\tLibraryLayout2\t\t${SeqType.SINGLE_CELL_RNA}
 """)
         DomainFactory.createSeqType(name: 'SeqType1', libraryLayout: 'LibraryLayout1')
         DomainFactory.createSeqType(name: 'SeqType2', libraryLayout: 'LibraryLayout2')
+        DomainFactory.createSeqType(name: 'SeqType3')
+        DomainFactory.createSeqType(name: 'SeqType3_TAGMENTATION')
+        DomainFactory.createSeqType(libraryLayout: 'LibraryLayout3')
 
         Collection<Problem> expectedProblems = [
                 new Problem(context.spreadsheet.dataRows[1].cells as Set, Level.ERROR,
@@ -134,6 +156,6 @@ SeqType2\tLibraryLayout2\t\t${SeqType.SINGLE_CELL_RNA}
         new SeqTypeLibraryLayoutValidator().validate(context)
 
         then:
-        containSame(context.problems, expectedProblems)
+        TestCase.assertContainSame(context.problems, expectedProblems)
     }
 }
