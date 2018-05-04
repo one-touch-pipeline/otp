@@ -666,6 +666,7 @@ if (allProcessed) {
         return """
             mwp${number} = samplePair.mergingWorkPackage${number}
             and bamFile${number}.withdrawn = false
+            and ((bamFile${number}.qcTrafficLightStatus not in ('${AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED.name()}','${AbstractMergedBamFile.QcTrafficLightStatus.REJECTED.name()}')) or bamFile${number}.qcTrafficLightStatus is NULL)
             and bamFile${number}.id = (select max( maxBamFile.id) from AbstractMergedBamFile maxBamFile where maxBamFile.workPackage = bamFile${number}.workPackage)
             and (
                 bamFile${number}.fileOperationStatus <> '${AbstractMergedBamFile.FileOperationStatus.PROCESSED}'

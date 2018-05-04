@@ -7,6 +7,8 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 import spock.lang.*
 
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.QcTrafficLightStatus
+
 class SamplePairCheckerIntegrationSpec extends Specification {
 
     SamplePair createSamplePair(Map properties = [:]) {
@@ -192,22 +194,26 @@ class SamplePairCheckerIntegrationSpec extends Specification {
 
         SamplePair samplePair = DomainFactory.createSamplePair()
         DomainFactory.createProcessedMergedBamFile([
-                workPackage        : samplePair.mergingWorkPackage1,
-                numberOfMergedLanes: numberOfMergedLanes1,
-                coverage           : coverage1,
-                withdrawn          : withdrawn1,
-                fileOperationStatus: inProcessing1 ? AbstractMergedBamFile.FileOperationStatus.INPROGRESS : AbstractMergedBamFile.FileOperationStatus.PROCESSED,
-                md5sum             : inProcessing1 ? null : HelperUtils.randomMd5sum,
-                fileSize           : inProcessing1 ? 0 : DomainFactory.counter++,
+                workPackage         : samplePair.mergingWorkPackage1,
+                numberOfMergedLanes : numberOfMergedLanes1,
+                coverage            : coverage1,
+                withdrawn           : withdrawn1,
+                fileOperationStatus : inProcessing1 ? AbstractMergedBamFile.FileOperationStatus.INPROGRESS : AbstractMergedBamFile.FileOperationStatus.PROCESSED,
+                md5sum              : inProcessing1 ? null : HelperUtils.randomMd5sum,
+                fileSize            : inProcessing1 ? 0 : DomainFactory.counter++,
+                qcTrafficLightStatus: qcTrafficLightStatus1,
+                comment             : DomainFactory.createComment(),
         ])
         DomainFactory.createProcessedMergedBamFile([
-                workPackage        : samplePair.mergingWorkPackage2,
-                numberOfMergedLanes: numberOfMergedLanes2,
-                coverage           : coverage2,
-                withdrawn          : withdrawn2,
-                fileOperationStatus: inProcessing2 ? AbstractMergedBamFile.FileOperationStatus.INPROGRESS : AbstractMergedBamFile.FileOperationStatus.PROCESSED,
-                md5sum             : inProcessing2 ? null : HelperUtils.randomMd5sum,
-                fileSize           : inProcessing2 ? 0 : DomainFactory.counter++,
+                workPackage         : samplePair.mergingWorkPackage2,
+                numberOfMergedLanes : numberOfMergedLanes2,
+                coverage            : coverage2,
+                withdrawn           : withdrawn2,
+                fileOperationStatus : inProcessing2 ? AbstractMergedBamFile.FileOperationStatus.INPROGRESS : AbstractMergedBamFile.FileOperationStatus.PROCESSED,
+                md5sum              : inProcessing2 ? null : HelperUtils.randomMd5sum,
+                fileSize            : inProcessing2 ? 0 : DomainFactory.counter++,
+                qcTrafficLightStatus: qcTrafficLightStatus2,
+                comment             : DomainFactory.createComment(),
         ])
 
         DomainFactory.createSampleTypePerProjectForMergingWorkPackage(samplePair.mergingWorkPackage2, SampleType.Category.CONTROL)
@@ -225,16 +231,20 @@ class SamplePairCheckerIntegrationSpec extends Specification {
         }
 
         where:
-        testcase                     | withdrawn1 | inProcessing1 | numberOfMergedLanes1 | coverage1 | withdrawn2 | inProcessing2 | numberOfMergedLanes2 | coverage2 || text
-        'thresholds reached'         | false      | false         | 4                    | 40        | false      | false         | 4                    | 40        || null
-        'disease withdrawn'          | true       | false         | 4                    | 40        | false      | false         | 4                    | 40        || "disease ${SamplePairChecker.BLOCKED_BAM_IS_WITHDRAWN}"
-        'disease is in processing'   | false      | true          | 4                    | 40        | false      | false         | 4                    | 40        || "disease ${SamplePairChecker.BLOCKED_BAM_IS_IN_PROCESSING}"
-        'disease lane count to less' | false      | false         | 1                    | 40        | false      | false         | 4                    | 40        || "disease ${SamplePairChecker.BLOCKED_TO_FEW_LANES}"
-        'disease coverage to less'   | false      | false         | 4                    | 20        | false      | false         | 4                    | 40        || "disease ${SamplePairChecker.BLOCKED_TO_FEW_COVERAGE}"
-        'control withdrawn'          | false      | false         | 4                    | 40        | true       | false         | 4                    | 40        || "control ${SamplePairChecker.BLOCKED_BAM_IS_WITHDRAWN}"
-        'control is in processing'   | false      | false         | 4                    | 40        | false      | true          | 4                    | 40        || "control ${SamplePairChecker.BLOCKED_BAM_IS_IN_PROCESSING}"
-        'control lane count to less' | false      | false         | 4                    | 40        | false      | false         | 1                    | 40        || "control ${SamplePairChecker.BLOCKED_TO_FEW_LANES}"
-        'control coverage to less'   | false      | false         | 4                    | 40        | false      | false         | 4                    | 20        || "control ${SamplePairChecker.BLOCKED_TO_FEW_COVERAGE}"
+        testcase                     | withdrawn1 | inProcessing1 | numberOfMergedLanes1 | coverage1 | qcTrafficLightStatus1         | withdrawn2 | inProcessing2 | numberOfMergedLanes2 | coverage2 | qcTrafficLightStatus2         || text
+        'thresholds reached'         | false      | false         | 4                    | 40        | QcTrafficLightStatus.ACCEPTED | false      | false         | 4                    | 40        | QcTrafficLightStatus.ACCEPTED || null
+        'disease withdrawn'          | true       | false         | 4                    | 40        | QcTrafficLightStatus.ACCEPTED | false      | false         | 4                    | 40        | QcTrafficLightStatus.ACCEPTED || "disease ${SamplePairChecker.BLOCKED_BAM_IS_WITHDRAWN}"
+        'disease is in processing'   | false      | true          | 4                    | 40        | QcTrafficLightStatus.ACCEPTED | false      | false         | 4                    | 40        | QcTrafficLightStatus.ACCEPTED || "disease ${SamplePairChecker.BLOCKED_BAM_IS_IN_PROCESSING}"
+        'disease lane count to less' | false      | false         | 1                    | 40        | QcTrafficLightStatus.ACCEPTED | false      | false         | 4                    | 40        | QcTrafficLightStatus.ACCEPTED || "disease ${SamplePairChecker.BLOCKED_TO_FEW_LANES}"
+        'disease coverage to less'   | false      | false         | 4                    | 20        | QcTrafficLightStatus.ACCEPTED | false      | false         | 4                    | 40        | QcTrafficLightStatus.ACCEPTED || "disease ${SamplePairChecker.BLOCKED_TO_FEW_COVERAGE}"
+        'disease rejected qc state'  | false      | false         | 4                    | 40        | QcTrafficLightStatus.REJECTED | false      | false         | 4                    | 40        | QcTrafficLightStatus.ACCEPTED || "disease ${SamplePairChecker.BLOCKED_HAS_REJECTED_QC_STATE}"
+        'disease blocked qc state'   | false      | false         | 4                    | 40        | QcTrafficLightStatus.BLOCKED  | false      | false         | 4                    | 40        | QcTrafficLightStatus.ACCEPTED || "disease ${SamplePairChecker.BLOCKED_HAS_BLOCKED_QC_STATE}"
+        'control withdrawn'          | false      | false         | 4                    | 40        | QcTrafficLightStatus.ACCEPTED | true       | false         | 4                    | 40        | QcTrafficLightStatus.ACCEPTED || "control ${SamplePairChecker.BLOCKED_BAM_IS_WITHDRAWN}"
+        'control is in processing'   | false      | false         | 4                    | 40        | QcTrafficLightStatus.ACCEPTED | false      | true          | 4                    | 40        | QcTrafficLightStatus.ACCEPTED || "control ${SamplePairChecker.BLOCKED_BAM_IS_IN_PROCESSING}"
+        'control lane count to less' | false      | false         | 4                    | 40        | QcTrafficLightStatus.ACCEPTED | false      | false         | 1                    | 40        | QcTrafficLightStatus.ACCEPTED || "control ${SamplePairChecker.BLOCKED_TO_FEW_LANES}"
+        'control coverage to less'   | false      | false         | 4                    | 40        | QcTrafficLightStatus.ACCEPTED | false      | false         | 4                    | 20        | QcTrafficLightStatus.ACCEPTED || "control ${SamplePairChecker.BLOCKED_TO_FEW_COVERAGE}"
+        'control rejected qc state'  | false      | false         | 4                    | 40        | QcTrafficLightStatus.ACCEPTED | false      | false         | 4                    | 40        | QcTrafficLightStatus.REJECTED || "control ${SamplePairChecker.BLOCKED_HAS_REJECTED_QC_STATE}"
+        'control blocked qc state'   | false      | false         | 4                    | 40        | QcTrafficLightStatus.ACCEPTED | false      | false         | 4                    | 40        | QcTrafficLightStatus.BLOCKED  || "control ${SamplePairChecker.BLOCKED_HAS_BLOCKED_QC_STATE}"
     }
 
 

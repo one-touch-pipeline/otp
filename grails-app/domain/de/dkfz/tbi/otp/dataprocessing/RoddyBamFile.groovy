@@ -1,12 +1,9 @@
 package de.dkfz.tbi.otp.dataprocessing
-
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
-import de.dkfz.tbi.otp.utils.logging.*
 import org.hibernate.*
-
 /**
  * This bam file is produced by some Roddy alignment workflow.
  * The file is based on earlier created bam file (with the same workflow), if exists and
@@ -186,7 +183,7 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
     String toString() {
         String latest = isMostRecentBamFile() ? ' (latest)' : ''
         String withdrawn = withdrawn ? ' (withdrawn)' : ''
-        return "RBF ${id}: ${identifier}${latest}${withdrawn} ${mergingWorkPackage.toStringWithoutIdAndPipeline()}"
+        return "RBF ${id}: ${identifier}${latest}${withdrawn} ${qcTrafficLightStatus ?: 'ACCEPTED'} ${mergingWorkPackage.toStringWithoutIdAndPipeline()}"
     }
 
     // Example: blood_somePid_merged.mdup.bam

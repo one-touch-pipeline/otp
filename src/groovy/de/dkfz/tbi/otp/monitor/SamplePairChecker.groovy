@@ -4,6 +4,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.ngsdata.*
 import groovy.transform.*
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.QcTrafficLightStatus
 
 class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
 
@@ -29,6 +30,8 @@ class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
     static final String BLOCKED_BAM_IS_IN_PROCESSING = "bam file is in processing"
     static final String BLOCKED_TO_FEW_LANES = "bam file has too few lanes"
     static final String BLOCKED_TO_FEW_COVERAGE = "bam file has insufficient coverage"
+    static final String BLOCKED_HAS_BLOCKED_QC_STATE = "bam file has blocked qc state"
+    static final String BLOCKED_HAS_REJECTED_QC_STATE = "bam file has rejected qc state"
 
 
     List<SamplePair> handle(List<AbstractMergedBamFile> bamFiles, MonitorOutputCollector output) {
@@ -269,6 +272,7 @@ class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
         def testBamFileIsBlocked = { String number ->
             return """(
                             bamFile${number}.withdrawn = true
+                            or bamFile${number}.qcTrafficLightStatus in ('${QcTrafficLightStatus.BLOCKED.name()}', '${QcTrafficLightStatus.REJECTED.name()}')
                             or bamFile${number}.md5sum is null
                             or bamFile${number}.coverage < processingThresholds${number}.coverage
                             or bamFile${number}.numberOfMergedLanes < processingThresholds${number}.numberOfLanes
@@ -332,6 +336,10 @@ class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
                     reasonsForBlocking << "${key} ${BLOCKED_BAM_IS_WITHDRAWN}"
                 } else if (bamFile.md5sum == null) {
                     reasonsForBlocking << "${key} ${BLOCKED_BAM_IS_IN_PROCESSING}"
+                } else if (bamFile.qcTrafficLightStatus == QcTrafficLightStatus.BLOCKED) {
+                    reasonsForBlocking << "${key} ${BLOCKED_HAS_BLOCKED_QC_STATE}"
+                } else if (bamFile.qcTrafficLightStatus == QcTrafficLightStatus.REJECTED) {
+                    reasonsForBlocking << "${key} ${BLOCKED_HAS_REJECTED_QC_STATE}"
                 } else {
                     if (!processingThresholds.isAboveLaneThreshold(bamFile)) {
                         reasonsForBlocking << "${key} ${BLOCKED_TO_FEW_LANES} (${bamFile.numberOfMergedLanes} of ${processingThresholds.numberOfLanes})"
