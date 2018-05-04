@@ -34,8 +34,10 @@ class MovePanCanFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl 
         Realm realm = roddyBamFile.project.realm
         assert realm : "Realm should not be null"
 
-        linkFilesToFinalDestinationService.prepareRoddyBamFile(roddyBamFile)
-        linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanup(roddyBamFile, realm)
+        RoddyBamFile.withTransaction {
+            linkFilesToFinalDestinationService.prepareRoddyBamFile(roddyBamFile)
+            linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanup(roddyBamFile, realm)
+        }
 
         succeed()
     }
