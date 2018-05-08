@@ -293,6 +293,7 @@ class ProjectOverviewService {
             property("sampleTypeName")
             property("seqTypeDisplayName")
             property("libraryLayout")
+            property("singleCell")
             property("seqPlatformId")
             property("seqCenterName")
             property("laneCount")
@@ -313,6 +314,7 @@ class ProjectOverviewService {
                     track.sampleTypeName,
                     track.seqTypeDisplayName,
                     track.libraryLayout,
+                    track.singleCell,
                     track.seqCenterName,
                     SeqPlatform.get(track.seqPlatformId).toString(),
                     track.laneCount,
@@ -347,6 +349,7 @@ class ProjectOverviewService {
             projections {
                 groupProperty("seqTypeDisplayName")
                 groupProperty("libraryLayout")
+                groupProperty("singleCell")
                 countDistinct("mockPid")
                 count("sampleId")
                 sum("sum_N_BasePairsGb")

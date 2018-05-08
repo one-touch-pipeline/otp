@@ -68,6 +68,7 @@ class Sequence implements Serializable {
     /** fields from {@link SeqType} */
     String seqTypeName
     String seqTypeDisplayName
+    boolean singleCell
     String libraryLayout
     String dirName
 

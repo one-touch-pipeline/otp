@@ -53,6 +53,7 @@
                         'projectOverview.index.sampleType',
                         'projectOverview.index.sequenceTypeName',
                         'projectOverview.index.sequenceTypeLibraryLayout',
+                        'projectOverview.index.singleCell',
                         'projectOverview.index.centerName',
                         'projectOverview.index.platformId',
                         'projectOverview.index.laneCount',
@@ -69,6 +70,7 @@
                     codes="${[
                         'projectOverview.seqtype.seqName',
                         'projectOverview.seqtype.labreryLayout',
+                        'projectOverview.seqtype.singleCell',
                         'projectOverview.seqtype.individualCount',
                         'projectOverview.seqtype.sampleCount',
                         'projectOverview.seqtype.gb'

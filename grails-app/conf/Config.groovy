@@ -218,7 +218,7 @@ if (pluginsToExclude) {
 grails.plugin.databasemigration.changelogLocation = 'migrations'
 grails.plugin.databasemigration.changelogFileName = 'changelog.groovy'
 grails.plugin.databasemigration.updateOnStart = true
-grails.plugin.databasemigration.updateOnStartFileNames = ['changelog.groovy']
+grails.plugin.databasemigration.updateOnStartFileNames = ['changelog.groovy', 'createSequenceViews.groovy']
 grails.plugin.databasemigration.ignoredObjects = [
         'aggregate_sequences',
         'meta_data_key',

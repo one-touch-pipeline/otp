@@ -65,6 +65,7 @@
                     'sequence.list.headers.sampleType',
                     'sequence.list.headers.seqType',
                     'sequence.list.headers.libLayout',
+                    'sequence.list.headers.singleCell',
                     'sequence.list.headers.seqCenter',
                     'sequence.list.headers.libPrepKit',
                     'sequence.list.headers.run',

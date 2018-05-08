@@ -96,6 +96,7 @@ $.otp.sequence = {
                                 row.sampleTypeName,
                                 row.seqTypeDisplayName,
                                 row.libraryLayout,
+                                row.singleCell,
                                 row.seqCenterName,
                                 row.libraryPreparationKit ?
                                     "<span title='" + row.libraryPreparationKit + "'>" + row.libraryPreparationKit + "</span>" : "",

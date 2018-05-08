@@ -129,7 +129,7 @@ class RoddyWorkflowConfig extends ConfigPerProject implements AlignmentConfig {
         assert pluginNameAndVersion
         assert configVersion
 
-        return "${pipelineName.name()}_${seqType.roddyName}_${seqType.libraryLayout}_${pluginNameAndVersion}_${configVersion}"
+        return "${pipelineName.name()}_${seqType.roddyName}_${seqType.libraryLayout}_${seqType.singleCell ? 'SingleCell_' : ''}${pluginNameAndVersion}_${configVersion}"
     }
 
     static String getNameUsedInConfig(Pipeline.Name pipelineName, SeqType seqType, String pluginName, String pluginVersion, String configVersion) {

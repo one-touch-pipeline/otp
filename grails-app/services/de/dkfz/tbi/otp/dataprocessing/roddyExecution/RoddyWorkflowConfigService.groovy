@@ -71,7 +71,7 @@ class RoddyWorkflowConfigService {
         Path configFile = fs.getPath(config.configFilePath)
 
         FileService.ensureFileIsReadableAndNotEmpty(configFile)
-        String pattern = /^${Pattern.quote(config.pipeline.name.name())}_${Pattern.quote(config.seqType.roddyName)}_${Pattern.quote(config.seqType.libraryLayout)}_(.+)_${Pattern.quote(config.configVersion)}\.xml$/
+        String pattern = /^${Pattern.quote(config.pipeline.name.name())}_${Pattern.quote(config.seqType.roddyName)}_${Pattern.quote(config.seqType.libraryLayout)}_${config.seqType.singleCell ? 'SingleCell_' : ''}(.+)_${Pattern.quote(config.configVersion)}\.xml$/
         Matcher matcher = configFile.fileName.toString() =~ pattern
         assert matcher.matches(): "The file name '${configFile.toString()}' does not match the pattern '${pattern}'"
         assert config.pluginVersion.endsWith(":${matcher.group(1)}")

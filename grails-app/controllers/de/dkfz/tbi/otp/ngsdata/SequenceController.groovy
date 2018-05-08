@@ -77,6 +77,7 @@ class SequenceController {
                     row.sampleTypeName,
                     row.seqTypeDisplayName,
                     row.libraryLayout,
+                    row.singleCell,
                     row.seqCenterName,
                     row.libraryPreparationKit,
                     row.name,
@@ -93,6 +94,7 @@ class SequenceController {
             'Sample Type',
             'Sequence Type',
             'Library Layout',
+            'Single Cell',
             'Sequence Center',
             'Library Preparation Kit',
             'Run',
@@ -115,6 +117,7 @@ enum SequenceSortColumn {
     SAMPLE_TYPE("sampleTypeName"),
     SEQ_TYPE("seqTypeName"),
     LIBRARY_LAYOUT("libraryLayout"),
+    SINGLE_CELL("singleCell"),
     SEQ_CENTER("seqCenterName"),
     LIBRARY_PREPARATION_KIT("libraryPreparationKit"),
     RUN("name"),
@@ -144,22 +147,24 @@ enum SequenceSortColumn {
             case 4:
                 return SequenceSortColumn.LIBRARY_LAYOUT
             case 5:
-                return SequenceSortColumn.SEQ_CENTER
+                return SequenceSortColumn.SINGLE_CELL
             case 6:
-                return SequenceSortColumn.LIBRARY_PREPARATION_KIT
+                return SequenceSortColumn.SEQ_CENTER
             case 7:
-                return SequenceSortColumn.RUN
+                return SequenceSortColumn.LIBRARY_PREPARATION_KIT
             case 8:
-                return SequenceSortColumn.LANE
+                return SequenceSortColumn.RUN
             case 9:
-                return SequenceSortColumn.LIBRARY
+                return SequenceSortColumn.LANE
             case 10:
-                return SequenceSortColumn.FASTQC
+                return SequenceSortColumn.LIBRARY
             case 11:
-                return SequenceSortColumn.ILSEID
+                return SequenceSortColumn.FASTQC
             case 12:
-                return SequenceSortColumn.KNOWN_ISSUES
+                return SequenceSortColumn.ILSEID
             case 13:
+                return SequenceSortColumn.KNOWN_ISSUES
+            case 14:
                 return SequenceSortColumn.DATE
             default:
                 return SequenceSortColumn.PROJECT
