@@ -11,6 +11,7 @@ import de.dkfz.tbi.otp.utils.*
 import grails.test.spock.*
 import org.junit.*
 import org.junit.rules.*
+import org.codehaus.groovy.grails.context.support.*
 
 class LinkFilesToFinalDestinationServiceIntegrationSpec extends IntegrationSpec {
     LinkFilesToFinalDestinationService service
@@ -35,7 +36,16 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends IntegrationSpec 
         service.linkFileUtils.executionService = service.executionService
         service.executeRoddyCommandService = new ExecuteRoddyCommandService()
         service.executeRoddyCommandService.executionService = service.executionService
-        service.createNotificationTextService = new CreateNotificationTextService()
+        service.createNotificationTextService = new CreateNotificationTextService(
+                messageSource: Mock(PluginAwareResourceBundleMessageSource) {
+                    _ * getMessageInternal('notification.template.alignment.qcTrafficBlockedSubject', [], _) >> '''QC traffic alignment header ${roddyBamFile.sample} ${roddyBamFile.seqType}'''
+                    _ * getMessageInternal('notification.template.alignment.qcTrafficBlockedMessage', [], _) >> '''\
+QC traffic alignment body
+${roddyBamFile.sample} ${roddyBamFile.seqType} in project ${roddyBamFile.project}
+${link}
+'''
+                }
+        )
 
         roddyBamFile = DomainFactory.createRoddyBamFile([:], RnaRoddyBamFile)
 
@@ -104,7 +114,6 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends IntegrationSpec 
 
     void "test createResultsAreBlockedSubject when mailing list exists"() {
         given:
-        DomainFactory.createQcTrafficAlignmentNotificationProcessingOptions()
         roddyBamFile.project.mailingListName = "tr_test@MailingList"
         assert roddyBamFile.project.save(flush: true)
 
@@ -117,7 +126,6 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends IntegrationSpec 
 
     void "test createResultsAreBlockedSubject when no mailing list exists"() {
         given:
-        DomainFactory.createQcTrafficAlignmentNotificationProcessingOptions()
         roddyBamFile.project.mailingListName = null
         assert roddyBamFile.project.save(flush: true)
 
@@ -130,7 +138,7 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends IntegrationSpec 
 
     void "test createResultsAreBlockedMessage "() {
         given:
-        DomainFactory.createQcTrafficAlignmentNotificationProcessingOptions()
+        DomainFactory.createProcessingOptionForEmailSenderSalutation()
         service.createNotificationTextService.linkGenerator = Mock(LinkGenerator) {
             1* link(_) >> 'link'
         }
@@ -149,12 +157,9 @@ link
 
     void "test informResultsAreBlocked"() {
         given:
-        service.createNotificationTextService = Mock(CreateNotificationTextService) {
-            1 * createOtpLinks(_, _, _) >> {List<Project> projects, String controller, String action ->
-                return "link"
-            }
-            1 * createMessage(ProcessingOption.OptionName.NOTIFICATION_TEMPLATE_QC_TRAFFIC_BLOCKED_SUBJECT, Pipeline.Type.ALIGNMENT.name(), _) >> 'HEADER'
-            1 * createMessage(ProcessingOption.OptionName.NOTIFICATION_TEMPLATE_QC_TRAFFIC_BLOCKED_MESSAGE, Pipeline.Type.ALIGNMENT.name(), _) >> 'BODY'
+        DomainFactory.createProcessingOptionForEmailSenderSalutation()
+        service.createNotificationTextService.linkGenerator= Mock(LinkGenerator) {
+            1 * link(_) >> 'link'
         }
 
         service.mailHelperService = Mock(MailHelperService) {
@@ -163,6 +168,12 @@ link
                 assert content == 'BODY'
                 assert recipients
             }
+        }
+
+        service.createNotificationTextService.messageSource = Mock(PluginAwareResourceBundleMessageSource) {
+            1 * getMessageInternal('notification.template.alignment.qcTrafficBlockedSubject', [], _) >> '''HEADER'''
+            1 * getMessageInternal('notification.template.alignment.qcTrafficBlockedMessage', [], _) >> '''BODY'''
+            0 * _
         }
         DomainFactory.createProcessingOptionForNotificationRecipient()
 

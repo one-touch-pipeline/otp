@@ -3,20 +3,29 @@ package de.dkfz.tbi.otp.notification
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import grails.test.spock.*
 import org.codehaus.groovy.grails.commons.*
 import org.codehaus.groovy.grails.web.mapping.*
 import org.springframework.beans.factory.annotation.*
 import spock.lang.*
+import org.codehaus.groovy.grails.context.support.*
 
 import static de.dkfz.tbi.otp.tracking.OtrsTicket.ProcessingStep.*
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+
 
 class CreateNotificationTextServiceIntegrationSpec extends IntegrationSpec {
 
     static final String CONTROLLER = 'controller'
     static final String ACTION = 'action'
     static final String NOTE = "Testnote\nwith wordwrap"
+    static final String NOTIFICATION_MESSAGE = '''
+base notification
+stepInformation:${stepInformation}
+seqCenterComment:${seqCenterComment}
+addition:${addition}
+phabricatorAlias:${phabricatorAlias}
+'''
 
 
     CreateNotificationTextService createNotificationTextService
@@ -65,8 +74,8 @@ class CreateNotificationTextServiceIntegrationSpec extends IntegrationSpec {
     @Unroll
     void "notification, return message (#processingStep, otrs comment: #otrsTicketSeqCenterComment, default: #generalSeqCenterComment)"() {
         given:
-        DomainFactory.createNotificationProcessingOptions()
         Project project = DomainFactory.createProject()
+        DomainFactory.createProcessingOptionForEmailSenderSalutation()
         OtrsTicket ticket = DomainFactory.createOtrsTicket(
                 seqCenterComment: otrsTicketSeqCenterComment,
         )
@@ -75,12 +84,13 @@ class CreateNotificationTextServiceIntegrationSpec extends IntegrationSpec {
                         otrsTicket: ticket,
                 ),
         )
-        ProcessingStatus processingStatus = new ProcessingStatus()
         DomainFactory.createProcessingOptionLazy(
                 name: ProcessingOption.OptionName.NOTIFICATION_TEMPLATE_SEQ_CENTER_NOTE,
-                type: exactlyOneElement(ticket.findAllSeqTracks()*.seqCenter.unique()).name,
+                type: CollectionUtils.exactlyOneElement(ticket.findAllSeqTracks()*.seqCenter.unique()).name,
                 value: generalSeqCenterComment
         )
+
+        ProcessingStatus processingStatus = new ProcessingStatus()
 
         CreateNotificationTextService createNotificationTextService = Spy(CreateNotificationTextService) {
             (processingStep == INSTALLATION ? 1 : 0) *
@@ -95,6 +105,10 @@ class CreateNotificationTextServiceIntegrationSpec extends IntegrationSpec {
                     sophiaNotification(processingStatus) >> SOPHIA.toString()
             (processingStep == ACESEQ ? 1 : 0) *
                     aceseqNotification(processingStatus) >> ACESEQ.toString()
+        }
+        createNotificationTextService.messageSource = Mock(PluginAwareResourceBundleMessageSource) {
+            _ * getMessageInternal("notification.template.seqCenterNote.${CollectionUtils.exactlyOneElement(ticket.findAllSeqTracks()*.seqCenter.unique()).name.toLowerCase()}", [], _) >> generalSeqCenterComment
+            _ * getMessageInternal("notification.template.base", [], _) >> NOTIFICATION_MESSAGE
         }
 
         String expectedSeqCenterComment = ""
@@ -119,10 +133,10 @@ ${otrsTicketSeqCenterComment}${otrsTicketSeqCenterComment ? "\n" : ""}${generalS
 
         String expected = """
 base notification
-stepInformation: ${processingStep.toString()}
-seqCenterComment: ${expectedSeqCenterComment}
-addition: 
-phabricatorAlias: 
+stepInformation:${processingStep.toString()}
+seqCenterComment:${expectedSeqCenterComment}
+addition:
+phabricatorAlias:
 """
         if (processingStep == INSTALLATION) {
             expected = expected + "!project #\$${project.phabricatorAlias}\n"
@@ -155,8 +169,8 @@ phabricatorAlias:
         given:
         String seqCenterMessage1 = "Message of seq center 1"
         String seqCenterMessage2 = "Message of seq center 2"
-        DomainFactory.createNotificationProcessingOptions()
         Project project = DomainFactory.createProject()
+        DomainFactory.createProcessingOptionForEmailSenderSalutation()
         OtrsTicket ticket = DomainFactory.createOtrsTicket(
                 seqCenterComment: otrsTicketSeqCenterComment,
         )
@@ -170,7 +184,6 @@ phabricatorAlias:
                         otrsTicket: ticket,
                 ),
         )
-        ProcessingStatus processingStatus = new ProcessingStatus()
         DomainFactory.createProcessingOptionLazy(
                 name: ProcessingOption.OptionName.NOTIFICATION_TEMPLATE_SEQ_CENTER_NOTE,
                 type: dataFile1.run.seqCenter.name,
@@ -181,6 +194,7 @@ phabricatorAlias:
                 type: dataFile2.run.seqCenter.name,
                 value: seqCenterMessage2
         )
+        ProcessingStatus processingStatus = new ProcessingStatus()
 
         CreateNotificationTextService createNotificationTextService = Spy(CreateNotificationTextService) {
             0 * installationNotification(processingStatus) >> INSTALLATION.toString()
@@ -189,6 +203,9 @@ phabricatorAlias:
             0 * indelNotification(processingStatus) >> INDEL.toString()
             0 * sophiaNotification(processingStatus) >> SOPHIA.toString()
             0 * aceseqNotification(processingStatus) >> ACESEQ.toString()
+        }
+        createNotificationTextService.messageSource = Mock(PluginAwareResourceBundleMessageSource) {
+            _ * getMessageInternal("notification.template.base", [], _) >> NOTIFICATION_MESSAGE
         }
 
         String expectedSeqCenterComment
@@ -207,10 +224,10 @@ ${otrsTicketSeqCenterComment}
 
         String expected = """
 base notification
-stepInformation: ${processingStep.toString()}
-seqCenterComment: ${expectedSeqCenterComment}
-addition: 
-phabricatorAlias: 
+stepInformation:${processingStep.toString()}
+seqCenterComment:${expectedSeqCenterComment}
+addition:
+phabricatorAlias:
 """
 
         when:

@@ -418,6 +418,16 @@ class DomainFactory {
     }
 
     public
+    static void createProcessingOptionForEmailSenderSalutation(String message = "the service team${counter++}") {
+        createProcessingOptionLazy(
+                name: OptionName.EMAIL_SENDER_SALUTATION,
+                type: null,
+                project: null,
+                value: message,
+        )
+    }
+
+    public
     static ProcessingOption createProcessingOptionBasePathReferenceGenome(String fileName = TestCase.uniqueNonExistentPath.path) {
         return createProcessingOptionLazy(
                 name: OptionName.BASE_PATH_REFERENCE_GENOME,
@@ -2259,203 +2269,6 @@ class DomainFactory {
                 somaticSmallVarsInTumorPassPer                  : counter++ as double,
                 somaticSmallVarsInTumorCommonInGnomadPer        : counter++,
         ], properties)
-    }
-
-    static void createNotificationProcessingOptions() {
-
-        createProcessingOptionLazy([
-                name   : OptionName.NOTIFICATION_TEMPLATE_BASE,
-                type   : null,
-                project: null,
-                value  : '''
-base notification
-stepInformation: ${stepInformation}
-seqCenterComment: ${seqCenterComment}
-addition: ${addition}
-phabricatorAlias: ${phabricatorAlias}
-''',
-        ])
-
-        createProcessingOptionLazy([
-                name   : OptionName.NOTIFICATION_TEMPLATE_INSTALLATION,
-                type   : null,
-                project: null,
-                value  : '''
-data installation finished
-runs: ${runs}
-paths: ${paths}
-samples: ${samples}
-links: ${links}
-''',
-        ])
-
-        createProcessingOptionLazy([
-                name   : OptionName.NOTIFICATION_TEMPLATE_INSTALLATION_FURTHER_PROCESSING,
-                type   : null,
-                project: null,
-                value  : '''further processing''',
-        ])
-
-        createProcessingOptionLazy([
-                name   : OptionName.NOTIFICATION_TEMPLATE_ALIGNMENT,
-                type   : null,
-                project: null,
-                value  : '''
-alignment finished
-samples: ${samples}
-links: ${links}
-processingValues: ${processingValues}
-paths: ${paths}
-''',
-        ])
-
-
-        createProcessingOptionLazy([
-                name   : OptionName.NOTIFICATION_TEMPLATE_ALIGNMENT_FURTHER_PROCESSING,
-                type   : null,
-                project: null,
-                value  : '''
-run variant calling
-variantCallingPipelines: ${variantCallingPipelines}
-samplePairsWillProcess: ${samplePairsWillProcess}
-''',
-        ])
-
-        createProcessingOptionLazy([
-                name   : OptionName.NOTIFICATION_TEMPLATE_ALIGNMENT_NO_FURTHER_PROCESSING,
-                type   : null,
-                project: null,
-                value  : '''
-no variant calling
-samplePairsWontProcess: ${samplePairsWontProcess}
-''',
-        ])
-
-        createProcessingOptionLazy([
-                name   : OptionName.NOTIFICATION_TEMPLATE_ALIGNMENT_PROCESSING,
-                type   : null,
-                project: null,
-                value  : '''
-alignment information
-seqType: ${seqType}
-referenceGenome: ${referenceGenome}
-alignmentProgram: ${alignmentProgram}
-alignmentParameter: ${alignmentParameter}
-mergingProgram: ${mergingProgram}
-mergingParameter: ${mergingParameter}
-samtoolsProgram: ${samtoolsProgram}
-''',
-        ])
-
-
-        createProcessingOptionLazy([
-                name   : OptionName.NOTIFICATION_TEMPLATE_SNV_PROCESSED,
-                type   : null,
-                project: null,
-                value  : '''
-snv finished
-samplePairsFinished: ${samplePairsFinished}
-otpLinks: ${otpLinks}
-directories: ${directories}
-''',
-        ])
-
-
-        createProcessingOptionLazy([
-                name   : OptionName.NOTIFICATION_TEMPLATE_SNV_NOT_PROCESSED,
-                type   : null,
-                project: null,
-                value  : '''
-snv not processed
-samplePairsNotProcessed: ${samplePairsNotProcessed}
-''',
-        ])
-
-        createProcessingOptionLazy([
-                name   : OptionName.NOTIFICATION_TEMPLATE_INDEL_PROCESSED,
-                type   : null,
-                project: null,
-                value  : '''
-indel finished
-samplePairsFinished: ${samplePairsFinished}
-otpLinks: ${otpLinks}
-directories: ${directories}
-''',
-        ])
-
-        createProcessingOptionLazy([
-                name   : OptionName.NOTIFICATION_TEMPLATE_INDEL_NOT_PROCESSED,
-                type   : null,
-                project: null,
-                value  : '''
-indel not processed
-samplePairsNotProcessed: ${samplePairsNotProcessed}
-''',
-        ])
-
-        createProcessingOptionLazy([
-                name   : OptionName.NOTIFICATION_TEMPLATE_ACESEQ_PROCESSED,
-                type   : null,
-                project: null,
-                value  : '''
-aceseq finished
-samplePairsFinished: ${samplePairsFinished}
-otpLinks: ${otpLinks}
-directories: ${directories}
-''',
-        ])
-
-        createProcessingOptionLazy([
-                name   : OptionName.NOTIFICATION_TEMPLATE_ACESEQ_NOT_PROCESSED,
-                type   : null,
-                project: null,
-                value  : '''
-aceseq not processed
-samplePairsNotProcessed: ${samplePairsNotProcessed}
-''',
-        ])
-
-        createProcessingOptionLazy([
-                name   : OptionName.NOTIFICATION_TEMPLATE_SOPHIA_PROCESSED,
-                type   : null,
-                project: null,
-                value  : '''
-sophia finished
-samplePairsFinished: ${samplePairsFinished}
-otpLinks: ${otpLinks}
-directories: ${directories}
-''',
-        ])
-
-        createProcessingOptionLazy([
-                name   : OptionName.NOTIFICATION_TEMPLATE_SOPHIA_NOT_PROCESSED,
-                type   : null,
-                project: null,
-                value  : '''
-sophia not processed
-samplePairsNotProcessed: ${samplePairsNotProcessed}
-''',
-        ])
-    }
-
-    static void createQcTrafficAlignmentNotificationProcessingOptions() {
-        createProcessingOptionLazy([
-                name   : OptionName.NOTIFICATION_TEMPLATE_QC_TRAFFIC_BLOCKED_SUBJECT,
-                type   : Pipeline.Type.ALIGNMENT.name(),
-                project: null,
-                value  : '''QC traffic alignment header ${roddyBamFile.sample} ${roddyBamFile.seqType}''',
-        ])
-        createProcessingOptionLazy([
-                name   : OptionName.NOTIFICATION_TEMPLATE_QC_TRAFFIC_BLOCKED_MESSAGE,
-                type   : Pipeline.Type.ALIGNMENT.name(),
-                project: null,
-                value  : '''\
-QC traffic alignment body
-${roddyBamFile.sample} ${roddyBamFile.seqType} in project ${roddyBamFile.project}
-${link}
-''',
-        ])
-
     }
 
     static ProcessedMergedBamFile createIncrementalMergedBamFile(ProcessedMergedBamFile processedMergedBamFile) {

@@ -4,13 +4,13 @@ import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
-import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.*
 import grails.test.mixin.*
 import grails.test.mixin.support.*
 import org.codehaus.groovy.grails.web.mapping.*
 import spock.lang.*
+import org.codehaus.groovy.grails.context.support.*
 
 import static de.dkfz.tbi.otp.tracking.OtrsTicket.ProcessingStep.*
 
@@ -73,7 +73,7 @@ class CreateNotificationTextServiceSpec extends Specification {
                     processingStep        : SOPHIA,
                     customProcessingStatus: "sophiaProcessingStatus",
                     notification          : "sophiaNotification",
-            ],[
+            ], [
                     type                  : "aceseq",
                     processingStep        : ACESEQ,
                     customProcessingStatus: "aceseqProcessingStatus",
@@ -128,32 +128,16 @@ class CreateNotificationTextServiceSpec extends Specification {
         e.message.contains('assert templateName')
     }
 
-
-    void "createMessage, when template is not found, throw ProcessingException"() {
-        when:
-        new CreateNotificationTextService().createMessage(ProcessingOption.OptionName.NOTIFICATION_TEMPLATE_BASE, [:])
-
-        then:
-        ProcessingException e = thrown()
-        e.message.contains('no option has been found with name')
-    }
-
-
     void "createMessage, when template exist, return notification text"() {
         given:
-        ProcessingOption.OptionName templateName = ProcessingOption.OptionName.NOTIFICATION_TEMPLATE_BASE
-        String templateText = 'Some text ${placeholder} some text'
-        String placeHolder = 'information'
-
-        DomainFactory.createProcessingOptionLazy([
-                name   : templateName,
-                type   : null,
-                project: null,
-                value  : templateText,
-        ])
-
+        String templeteName = "notification.template.base"
+        CreateNotificationTextService createNotificationTextService = new CreateNotificationTextService(
+                messageSource: Mock(PluginAwareResourceBundleMessageSource) {
+                    _ * getMessageInternal("notification.template.base", [], _) >> 'Some text ${placeholder} some text'
+                }
+        )
         when:
-        String message = new CreateNotificationTextService().createMessage(templateName, [placeholder: placeHolder])
+        String message = createNotificationTextService.createMessage(templeteName, [placeholder: 'information'])
 
         then:
         'Some text information some text' == message
@@ -353,19 +337,19 @@ class CreateNotificationTextServiceSpec extends Specification {
         // roddyBamFile3 has the same path with placeholders as roddyBamFile1
         RoddyBamFile roddyBamFile3 = DomainFactory.createRoddyBamFile([
                 workPackage: DomainFactory.createMergingWorkPackage([
-                        sample: DomainFactory.createSample([
+                        sample  : DomainFactory.createSample([
                                 individual: DomainFactory.createIndividual([
                                         project: roddyBamFile1.project,
                                 ]),
                         ]),
-                        seqType: roddyBamFile1.seqType,
+                        seqType : roddyBamFile1.seqType,
                         pipeline: roddyBamFile1.pipeline,
                 ])
         ])
         configService = new TestConfigService()
 
         when:
-        String fileNameString = new CreateNotificationTextService().getMergingDirectories([roddyBamFile1,roddyBamFile2,roddyBamFile3])
+        String fileNameString = new CreateNotificationTextService().getMergingDirectories([roddyBamFile1, roddyBamFile2, roddyBamFile3])
         String expected = [
                 new File("${configService.getRootPath()}/${roddyBamFile1.project.dirName}/sequencing/${roddyBamFile1.seqType.dirName}/view-by-pid/\${PID}/\${SAMPLE_TYPE}/${roddyBamFile1.seqType.libraryLayoutDirName}/merged-alignment"),
                 new File("${configService.getRootPath()}/${roddyBamFile2.project.dirName}/sequencing/${roddyBamFile2.seqType.dirName}/view-by-pid/\${PID}/\${SAMPLE_TYPE}/${roddyBamFile2.seqType.libraryLayoutDirName}/merged-alignment"),
@@ -508,7 +492,6 @@ class CreateNotificationTextServiceSpec extends Specification {
     void "installationNotification, return message"() {
         given:
         DomainFactory.createRoddyAlignableSeqTypes()
-        DomainFactory.createNotificationProcessingOptions()
 
         Map data1 = createData([
                 sampleId1: 'sampleId1',
@@ -538,6 +521,7 @@ class CreateNotificationTextServiceSpec extends Specification {
                 },
                 configService: new TestConfigService(),
                 lsdfFilesService: new LsdfFilesService(),
+                messageSource: getMessageSource(),
         )
 
         List<SeqTrack> seqTracks = [data1.seqTrack]
@@ -591,7 +575,11 @@ ${expectedAlign}"""
     void "alignmentNotification, return message"() {
         given:
         DomainFactory.createRoddyAlignableSeqTypes()
-        DomainFactory.createNotificationProcessingOptions()
+        DomainFactory.createProcessingOptionForNotificationRecipient()
+        DomainFactory.createProcessingOptionForEmailSenderSalutation()
+
+
+
 
         Map data1 = createData([
                 sampleId1                : 'sampleId1',
@@ -626,6 +614,7 @@ ${expectedAlign}"""
                 linkGenerator: Mock(LinkGenerator) {
                     projectCount * link(_) >> 'link'
                 },
+                messageSource: getMessageSource(),
         )
 
         List<SeqTrack> seqTracks = [data1.seqTrack]
@@ -700,23 +689,23 @@ ${expectedVariantCallingRunning}${expectedVariantCallingNotRunning}"""
         expected == message
 
         where:
-        multipleSeqTypes | multipleProjects | secondSampleAligned | snv   | indel  | sophia |aceseq
-        false            | false            | true                | false | false  | false  | false
-        true             | false            | true                | false | false  | false  | false
-        false            | true             | true                | false | false  | false  | false
-        false            | false            | false               | false | false  | false  | false
-        false            | false            | true                | true  | false  | false  | false
-        false            | false            | true                | false | true   | false  | false
-        false            | false            | true                | true  | true   | false  | false
-        false            | false            | true                | false | true   | true   | false
-        false            | false            | true                | true  | true   | true   | true
-        false            | false            | true                | false | false  | true   | true
-        false            | false            | true                | true  | true   | true   | true
+        multipleSeqTypes | multipleProjects | secondSampleAligned | snv   | indel | sophia | aceseq
+        false            | false            | true                | false | false | false  | false
+        true             | false            | true                | false | false | false  | false
+        false            | true             | true                | false | false | false  | false
+        false            | false            | false               | false | false | false  | false
+        false            | false            | true                | true  | false | false  | false
+        false            | false            | true                | false | true  | false  | false
+        false            | false            | true                | true  | true  | false  | false
+        false            | false            | true                | false | true  | true   | false
+        false            | false            | true                | true  | true  | true   | true
+        false            | false            | true                | false | false | true   | true
+        false            | false            | true                | true  | true  | true   | true
 
     }
 
-    @Unroll( "#pairAnalysisList.type, when ProcessingStatus is null, throw assert")
-        void "instanceNotification, when ProcessingStatus is null, throw assert"() {
+    @Unroll("#pairAnalysisList.type, when ProcessingStatus is null, throw assert")
+    void "instanceNotification, when ProcessingStatus is null, throw assert"() {
         when:
         new CreateNotificationTextService()."${pairAnalysisList.notification}"(null)
 
@@ -725,14 +714,14 @@ ${expectedVariantCallingRunning}${expectedVariantCallingNotRunning}"""
         e.message.contains('assert status')
 
         where:
-        pairAnalysisList<<listPairAnalyses
+        pairAnalysisList << listPairAnalyses
     }
 
     @Unroll("#pairAnalysisContentsPermutationList.type, return message")
     void "instanceNotification, return message"() {
         given:
         DomainFactory.createRoddyAlignableSeqTypes()
-        DomainFactory.createNotificationProcessingOptions()
+        DomainFactory.createProcessingOptionForEmailSenderSalutation()
 
         Map data1 = createData([
                 (pairAnalysisContentsPermutationList.customProcessingStatus): ProcessingStatus.WorkflowProcessingStatus.ALL_DONE
@@ -754,6 +743,7 @@ ${expectedVariantCallingRunning}${expectedVariantCallingNotRunning}"""
                 linkGenerator: Mock(LinkGenerator) {
                     projectCount * link(_) >> 'link'
                 },
+                messageSource: getMessageSource(),
         )
 
         List<SamplePair> samplePairWithAnalysis = [data1.samplePair]
@@ -798,26 +788,28 @@ samplePairsNotProcessed: ${expectedSamplePairsNotProcessed}
         expected == message
 
         where:
-        pairAnalysisContentsPermutationList<<pairAnalysisContentsPermutation
+        pairAnalysisContentsPermutationList << pairAnalysisContentsPermutation
 
     }
 
     void "notification, when an argument is null, throw assert"() {
         when:
-        new CreateNotificationTextService().notification(ticket, status, processingStep, project)
-
+        new CreateNotificationTextService().notification(
+                ticket ? DomainFactory.createOtrsTicket() : null,
+                status ? new ProcessingStatus() : null,
+                processingStep ? SNV : null,
+                project ? DomainFactory.createProject() : null)
         then:
         AssertionError e = thrown()
         e.message.contains("assert ${text}")
 
         where:
-        ticket           | status                 | processingStep | project       || text
-        new OtrsTicket() | new ProcessingStatus() | null           | new Project() || 'processingStep'
-        new OtrsTicket() | null                   | SNV            | new Project() || 'status'
-        null             | new ProcessingStatus() | SNV            | new Project() || 'otrsTicket'
-        new OtrsTicket() | new ProcessingStatus() | SNV            | null          || 'project'
+        ticket | status | processingStep | project || text
+        true   | true   | true           | false   || 'project'
+        true   | true   | false          | true    || 'processingStep'
+        true   | false  | true           | true    || 'status'
+        false  | true   | true           | true    || 'otrsTicket'
     }
-
 
 
     void "notification, when call for ProcessingStep FASTQC, throw an exception"() {
@@ -940,4 +932,82 @@ mergingParameter: ${data.alignmentInfo.mergeOptions}
 samtoolsProgram: ${data.alignmentInfo.samToolsCommand}"""
     }
 
+    PluginAwareResourceBundleMessageSource getMessageSource() {
+        return Mock(PluginAwareResourceBundleMessageSource) {
+            _ * getMessageInternal("notification.template.installation.base", [], _) >> '''
+data installation finished
+runs: ${runs}
+paths: ${paths}
+samples: ${samples}
+links: ${links}
+'''
+            _ * getMessageInternal("notification.template.installation.furtherProcessing", [], _) >> '''further processing'''
+            _ * getMessageInternal("notification.template.alignment.base", [], _) >> '''
+alignment finished
+samples: ${samples}
+links: ${links}
+processingValues: ${processingValues}
+paths: ${paths}
+'''
+            _ * getMessageInternal("notification.template.alignment.furtherProcessing", [], _) >> '''
+run variant calling
+variantCallingPipelines: ${variantCallingPipelines}
+samplePairsWillProcess: ${samplePairsWillProcess}
+'''
+            _ * getMessageInternal("notification.template.alignment.noFurtherProcessing", [], _) >> '''
+no variant calling
+samplePairsWontProcess: ${samplePairsWontProcess}
+'''
+            _ * getMessageInternal("notification.template.alignment.processing", [], _) >> '''
+alignment information
+seqType: ${seqType}
+referenceGenome: ${referenceGenome}
+alignmentProgram: ${alignmentProgram}
+alignmentParameter: ${alignmentParameter}
+mergingProgram: ${mergingProgram}
+mergingParameter: ${mergingParameter}
+samtoolsProgram: ${samtoolsProgram}
+'''
+            _ * getMessageInternal("notification.template.snv.processed", [], _) >> '''
+snv finished
+samplePairsFinished: ${samplePairsFinished}
+otpLinks: ${otpLinks}
+directories: ${directories}
+'''
+            _ * getMessageInternal("notification.template.snv.notProcessed", [], _) >> '''
+snv not processed
+samplePairsNotProcessed: ${samplePairsNotProcessed}
+'''
+            _ * getMessageInternal("notification.template.indel.processed", [], _) >> '''
+indel finished
+samplePairsFinished: ${samplePairsFinished}
+otpLinks: ${otpLinks}
+directories: ${directories}
+'''
+            _ * getMessageInternal("notification.template.indel.notProcessed", [], _) >> '''
+indel not processed
+samplePairsNotProcessed: ${samplePairsNotProcessed}
+'''
+            _ * getMessageInternal("notification.template.aceseq.processed", [], _) >> '''
+aceseq finished
+samplePairsFinished: ${samplePairsFinished}
+otpLinks: ${otpLinks}
+directories: ${directories}
+'''
+            _ * getMessageInternal("notification.template.aceseq.notProcessed", [], _) >> '''
+aceseq not processed
+samplePairsNotProcessed: ${samplePairsNotProcessed}
+'''
+            _ * getMessageInternal("notification.template.sophia.processed", [], _) >> '''
+sophia finished
+samplePairsFinished: ${samplePairsFinished}
+otpLinks: ${otpLinks}
+directories: ${directories}
+'''
+            _ * getMessageInternal("notification.template.sophia.notProcessed", [], _) >> '''
+sophia not processed
+samplePairsNotProcessed: ${samplePairsNotProcessed}
+'''
+        }
+    }
 }

@@ -6,9 +6,13 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.*
 import de.dkfz.tbi.otp.tracking.OtrsTicket.ProcessingStep
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import groovy.text.*
 import org.codehaus.groovy.grails.web.mapping.*
 import org.springframework.beans.factory.annotation.*
+import org.codehaus.groovy.grails.context.support.*
+import org.springframework.context.i18n.*
+import org.springframework.context.NoSuchMessageException
 
 import static de.dkfz.tbi.otp.ngsdata.ProjectOverviewService.*
 import static de.dkfz.tbi.otp.tracking.OtrsTicket.ProcessingStep.*
@@ -20,6 +24,9 @@ class CreateNotificationTextService {
 
     @Autowired
     LinkGenerator linkGenerator
+
+    @Autowired
+    PluginAwareResourceBundleMessageSource messageSource
 
     ConfigService configService
 
@@ -58,23 +65,18 @@ class CreateNotificationTextService {
             seqCenterComment = "${prefix}${seqCenterComment}${suffix}"
         }
 
-        String addition = ProcessingOptionService.findOptionSafe(
-                OptionName.NOTIFICATION_TEMPLATE_ADDITION,
-                processingStep.notificationSubject,
-                null
-        ) ?: ""
-
         //TODO talk to research group which steps should be included
         String phabricatorAlias = ""
         if (project.phabricatorAlias && processingStep == INSTALLATION) {
             phabricatorAlias = "\n!project #\$${project.phabricatorAlias}"
         }
 
-        return createMessage(OptionName.NOTIFICATION_TEMPLATE_BASE, [
+        return createMessage('notification.template.base', [
                 stepInformation : stepInformation,
                 seqCenterComment: seqCenterComment,
-                addition        : addition,
+                addition        : createMessage("notification.template.${processingStep.name().toLowerCase()}.addition"),
                 phabricatorAlias: phabricatorAlias,
+                emailSenderSalutation: ProcessingOptionService.findOptionAssure(OptionName.EMAIL_SENDER_SALUTATION, null, null),
         ])
     }
 
@@ -83,7 +85,8 @@ class CreateNotificationTextService {
         assert status
 
         status = new ProcessingStatus(status.seqTrackProcessingStatuses.findAll {
-            it.installationProcessingStatus == ALL_DONE })
+            it.installationProcessingStatus == ALL_DONE
+        })
 
         List<String> samples = []
         status.seqTrackProcessingStatuses.groupBy {
@@ -104,7 +107,7 @@ class CreateNotificationTextService {
         String directories = getSeqTypeDirectories(seqTracks)
         String otpLinks = createOtpLinks(seqTracks*.project, 'projectOverview', 'laneOverview')
 
-        String message = createMessage(OptionName.NOTIFICATION_TEMPLATE_INSTALLATION, [
+        String message = createMessage('notification.template.installation.base', [
                 runs    : runNames,
                 paths   : directories,
                 samples : samples.join('\n'),
@@ -112,7 +115,7 @@ class CreateNotificationTextService {
         ])
 
         if (status.alignmentProcessingStatus != NOTHING_DONE_WONT_DO) {
-            message += '\n' + createMessage(OptionName.NOTIFICATION_TEMPLATE_INSTALLATION_FURTHER_PROCESSING, [:]).toString()
+            message += '\n' + createMessage('notification.template.installation.furtherProcessing')
         }
 
         return message
@@ -162,7 +165,7 @@ class CreateNotificationTextService {
                 bamFilePerConfig.each { AlignmentConfig config, List<AbstractMergedBamFile> configBamFiles ->
                     AlignmentInfo alignmentInfo = alignmentInfoByConfig.get(config)
                     String individuals = multipleConfigs ? (config.individual ?: "default") : ""
-                    builder << createMessage(OptionName.NOTIFICATION_TEMPLATE_ALIGNMENT_PROCESSING, [
+                    builder << createMessage("notification.template.alignment.processing", [
                             seqType           : seqType.displayNameWithLibraryLayout,
                             individuals       : individuals,
                             referenceGenome   : configBamFiles*.referenceGenome.unique().join(', '),
@@ -176,7 +179,7 @@ class CreateNotificationTextService {
             }
         }
 
-        String message = createMessage(OptionName.NOTIFICATION_TEMPLATE_ALIGNMENT, [
+        String message = createMessage("notification.template.alignment.base", [
                 samples         : sampleNames,
                 links           : links,
                 processingValues: builder.toString().trim(),
@@ -187,16 +190,19 @@ class CreateNotificationTextService {
             it.variantCallingProcessingStatus != NOTHING_DONE_WONT_DO }
         if (samplePairs[true]) {
             String variantCallingPipelines = samplePairs[true]*.variantCallingWorkflowNames().flatten().unique().sort().join(', ')
-            message += '\n' + createMessage(OptionName.NOTIFICATION_TEMPLATE_ALIGNMENT_FURTHER_PROCESSING, [
+            message += '\n' + createMessage("notification.template.alignment.furtherProcessing", [
                     samplePairsWillProcess: getSamplePairRepresentation(samplePairs[true]*.samplePair),
                     variantCallingPipelines: variantCallingPipelines,
             ])
         }
         if (samplePairs[false]) {
-            message += '\n' + createMessage(OptionName.NOTIFICATION_TEMPLATE_ALIGNMENT_NO_FURTHER_PROCESSING, [
-                    samplePairsWontProcess: getSamplePairRepresentation(samplePairs[false]*.samplePair.findAll {
-                        !it.processingDisabled }),
-            ])
+            message += '\n' + createMessage("notification.template.alignment.noFurtherProcessing",
+                    [
+                            helpdesk              : ProcessingOptionService.findOptionAssure(OptionName.EMAIL_SENDER_SALUTATION, null, null),
+                            samplePairsWontProcess: getSamplePairRepresentation(samplePairs[false]*.samplePair.findAll {
+                                !it.processingDisabled
+                            }),
+                    ])
         }
 
         return message
@@ -251,32 +257,33 @@ class CreateNotificationTextService {
                 //no links
                 break
         }
-        String message = createMessage((OptionName) OptionName."NOTIFICATION_TEMPLATE_${notificationStep.name().toUpperCase()}_PROCESSED", [
+        String message = createMessage ("notification.template.${notificationStep.name().toLowerCase()}.processed", [
                 samplePairsFinished    : getSamplePairRepresentation(samplePairsFinished),
                 directories            : directories,
                 otpLinks               : otpLinks,
         ])
 
         List<SamplePair> samplePairsNotProcessed = map[NOTHING_DONE_WONT_DO]*.samplePair.findAll {
-            it."${notificationStep}ProcessingStatus" != SamplePair.ProcessingStatus.DISABLED }
+            it."${notificationStep}ProcessingStatus" != SamplePair.ProcessingStatus.DISABLED
+        }
         if (samplePairsNotProcessed) {
-            message += '\n' + createMessage((OptionName) OptionName."NOTIFICATION_TEMPLATE_${notificationStep.name().toUpperCase()}_NOT_PROCESSED", [
+            message += '\n' + createMessage("notification.template.${notificationStep.name().toLowerCase()}.notProcessed", [
                     samplePairsNotProcessed: getSamplePairRepresentation(samplePairsNotProcessed),
+                    emailSenderSalutation: ProcessingOptionService.findOptionAssure(OptionName.EMAIL_SENDER_SALUTATION, null, null),
             ])
         }
 
         return message
     }
 
-
-    String createMessage(OptionName templateName, Map properties) {
-        return createMessage(templateName, null, properties)
-    }
-
-    String createMessage(OptionName templateName, String type, Map properties) {
+    String createMessage(String templateName, Map properties = [:]) {
         assert templateName
-
-        String template = ProcessingOptionService.findOptionAssure(templateName, type, null)
+        String template
+        try {
+            template = messageSource.getMessage(templateName, [].toArray(), LocaleContextHolder.getLocale())
+        } catch (NoSuchMessageException e) {
+            return ''
+        }
         return new SimpleTemplateEngine().createTemplate(template).make(properties).toString()
     }
 

@@ -148,8 +148,7 @@ class LinkFilesToFinalDestinationService {
         }
 
         subject << createNotificationTextService.createMessage(
-                ProcessingOption.OptionName.NOTIFICATION_TEMPLATE_QC_TRAFFIC_BLOCKED_SUBJECT,
-                Pipeline.Type.ALIGNMENT.name(),
+                "notification.template.alignment.qcTrafficBlockedSubject",
                 [
                         roddyBamFile: roddyBamFile,
                 ]
@@ -161,11 +160,11 @@ class LinkFilesToFinalDestinationService {
 
     String createResultsAreBlockedMessage(RoddyBamFile roddyBamFile) {
         return createNotificationTextService.createMessage(
-                ProcessingOption.OptionName.NOTIFICATION_TEMPLATE_QC_TRAFFIC_BLOCKED_MESSAGE,
-                Pipeline.Type.ALIGNMENT.name(),
+                "notification.template.alignment.qcTrafficBlockedMessage",
                 [
                         roddyBamFile: roddyBamFile,
-                        link: createNotificationTextService.createOtpLinks([roddyBamFile.project], 'alignmentQualityOverview', 'index')
+                        link: createNotificationTextService.createOtpLinks([roddyBamFile.project], 'alignmentQualityOverview', 'index'),
+                        emailSenderSalutation: ProcessingOptionService.findOptionAssure(ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION, null, null),
                 ]
         )
     }
