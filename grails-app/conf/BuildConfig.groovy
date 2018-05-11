@@ -79,7 +79,7 @@ grails.project.dependency.resolution = {
         compile ":executor:0.3"
         compile ":console:1.5.5"
         compile ":mail:1.0.7"
-        // used by jenkins
+        // used by gitlab
         compile ":codenarc:0.24.1"
         test ":code-coverage:1.2.7"
 
