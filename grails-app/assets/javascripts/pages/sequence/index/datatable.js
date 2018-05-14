@@ -136,7 +136,7 @@ $.otp.sequence = {
             },
             fnRowCallback: function (nRow) {
                 var fastqc;
-                fastqc = $("td:eq(10)", nRow);
+                fastqc = $("td:eq(11)", nRow);
                 if ($("a", fastqc).length > 0) {
                     fastqc.addClass("true");
                 } else {
@@ -144,7 +144,7 @@ $.otp.sequence = {
                     fastqc.addClass("false");
                     fastqc.text("");
                 }
-                var contamination = $("td:eq(12)", nRow);
+                var contamination = $("td:eq(13)", nRow);
                 if (contamination.text() === "") {
                     contamination.attr("title", "No known problems");
                     contamination.addClass("VALID");
