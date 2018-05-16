@@ -115,7 +115,8 @@ $.otp.sequence = {
                                 row.ilseId,
                                 row.problem ?
                                    "<span title='" + row.problemDescription + "'>" + row.problem + "</span>" : "",
-                                row.dateCreated
+                                row.fileExists,
+                                row.dateCreated,
                             ];
 
                             if (row.withdrawn) {
@@ -151,6 +152,14 @@ $.otp.sequence = {
                 } else {
                     contamination.addClass("warning");
                 }
+                var fileExists = $("td:eq(14)", nRow);
+                if (fileExists.text() === "true") {
+                    fileExists.addClass("VALID");
+                } else {
+                    fileExists.addClass("false");
+                }
+                fileExists.attr("title", fileExists.text());
+                fileExists.text('');
             }
         });
     }

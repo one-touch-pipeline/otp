@@ -82,6 +82,7 @@ class CreateViewByPidJobSpec extends Specification {
 
         then:
         dataFile.fileLinked
+        dataFile.dateLastChecked
         seqTrack.dataInstallationState == SeqTrack.DataProcessingState.FINISHED
         seqTrack.fastqcState == SeqTrack.DataProcessingState.NOT_STARTED
     }

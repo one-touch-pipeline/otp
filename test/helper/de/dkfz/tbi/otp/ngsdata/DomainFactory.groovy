@@ -1665,6 +1665,7 @@ class DomainFactory {
                 dateExecuted    : new Date(),
                 dateFileSystem  : new Date(),
                 dateCreated     : new Date(),
+                dateLastChecked : new Date(),
                 fileWithdrawn   : false,
                 fileType        : { createFileType() },
                 used            : true,

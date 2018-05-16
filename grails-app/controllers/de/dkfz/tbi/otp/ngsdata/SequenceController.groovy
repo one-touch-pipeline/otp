@@ -85,6 +85,7 @@ class SequenceController {
                     row.libraryName,
                     row.ilseId,
                     row.problem?.name() ?: "",
+                    row.fileExists,
                     row.dateCreated?.format("yyyy-MM-dd"),
             ].join(",")
         }.join("\n")
@@ -102,7 +103,8 @@ class SequenceController {
             'Library',
             'ILSe',
             'Known issues',
-            'Run Date'
+            'File Exists',
+            'Run Date',
         ].join(',')
         def content = "${contentHeader}\n${contentBody}\n"
         response.setContentType("application/octet-stream")
@@ -126,6 +128,7 @@ enum SequenceSortColumn {
     FASTQC("fastqcState"),
     ILSEID("ilseId"),
     KNOWN_ISSUES("problem"),
+    FILE_EXISTS("fileExists"),
     DATE("dateCreated")
 
     private final String columnName
@@ -165,6 +168,8 @@ enum SequenceSortColumn {
             case 13:
                 return SequenceSortColumn.KNOWN_ISSUES
             case 14:
+                return SequenceSortColumn.FILE_EXISTS
+            case 15:
                 return SequenceSortColumn.DATE
             default:
                 return SequenceSortColumn.PROJECT

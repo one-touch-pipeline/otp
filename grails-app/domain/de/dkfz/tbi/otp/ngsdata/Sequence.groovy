@@ -95,6 +95,9 @@ class Sequence implements Serializable {
     /** fields from {@link LibraryPreparationKit} */
     String libraryPreparationKit
 
+    /** fields from {@link DataFile} */
+    boolean fileExists
+
     // derived property for calculating the creation date without time
     Date dayCreated
 

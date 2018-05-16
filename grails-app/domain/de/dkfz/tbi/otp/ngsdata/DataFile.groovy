@@ -23,6 +23,7 @@ class DataFile implements Commentable, Entity {
     Date dateExecuted = null       // when the file was originally produced
     Date dateFileSystem = null     // when the file was created on LSDF
     Date dateCreated = null        // when the object was created in db
+    Date dateLastChecked = null    // when fileExists was last updated
 
     boolean fileWithdrawn = false
 
@@ -70,6 +71,7 @@ class DataFile implements Commentable, Entity {
     MergingLog mergingLog
     AlignmentLog alignmentLog
     FileType fileType
+
     static belongsTo = [
         run : Run,
         runSegment : RunSegment,
@@ -85,7 +87,7 @@ class DataFile implements Commentable, Entity {
         vbpFileName(validator: { OtpPath.isValidPathComponent(it) })
 
         pathName(validator: { it.isEmpty() || OtpPath.isValidRelativePath(it) })
-        md5sum(matches: /^[0-9a-f]{32}$/)
+        md5sum(matches: /^([0-9a-f]{32})|(n\/a)$/) //should not be n/a, but legacy data exists
         initialDirectory(blank: false, validator: { OtpPath.isValidAbsolutePath(it) })
 
         project(nullable: true,  // Shall not be null, but legacy data exists
@@ -124,6 +126,11 @@ class DataFile implements Commentable, Entity {
                 return true
             }
         }
+        dateLastChecked(nullable: true, validator: {val, obj ->
+            if (!val && obj.seqTrack?.dataInstallationState == SeqTrack.DataProcessingState.FINISHED) {
+                return false
+            }
+        })
     }
 
     String fileSizeString() {
@@ -158,6 +165,7 @@ class DataFile implements Commentable, Entity {
         alignmentLog index: "data_file_alignment_log_idx"
         fileType index: "data_file_file_type_idx"
         initialDirectory type: 'text'
+        dateLastChecked index: 'data_file_date_last_checked_idx'
     }
 
 
