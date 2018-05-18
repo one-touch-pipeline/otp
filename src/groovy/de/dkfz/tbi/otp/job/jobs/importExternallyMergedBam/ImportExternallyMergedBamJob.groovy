@@ -130,30 +130,40 @@ touch ${checkpoint}
     @Override
     protected void validate() throws Throwable {
         final ImportProcess importProcess = getProcessParameterObject()
+        FileSystem fs = fileSystemService.getFilesystemForBamImport()
 
         final Collection<String> problems = importProcess.externallyProcessedMergedBamFiles.collect {
-            FileSystem fs = fileSystemService.getFilesystemForBamImport()
             String path = it.getBamFile().path
             Path target = fs.getPath(path)
+            Path targetBai = fs.getPath(it.getBaiFile().path)
 
             try {
-                Path maxReadLengthPath = fs.getPath(it.getBamMaxReadLengthFile().absolutePath)
-                if (Files.exists(maxReadLengthPath)) {
-                    it.maximumReadLength = maxReadLengthPath.text as Integer
-                    assert it.save(flush: true)
-                    Files.delete(maxReadLengthPath)
-                }
-                assert it.maximumReadLength
-
                 FileService.ensureFileIsReadableAndNotEmpty(target)
+                FileService.ensureFileIsReadableAndNotEmpty(targetBai)
+
+                if (!it.maximumReadLength) {
+                    Path maxReadLengthPath = fs.getPath(it.getBamMaxReadLengthFile().absolutePath)
+                    FileService.ensureFileIsReadableAndNotEmpty(maxReadLengthPath)
+                    it.maximumReadLength = maxReadLengthPath.text as Integer
+                }
+
                 if (!it.md5sum) {
                     Path md5Path = fs.getPath(checksumFileService.md5FileName(path))
+                    FileService.ensureFileIsReadableAndNotEmpty(md5Path)
                     it.md5sum = checksumFileService.firstMD5ChecksumFromFile(md5Path)
-                    it.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.PROCESSED
-                    it.save(flush: true)
                 }
+
+                it.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.PROCESSED
+                it.fileSize = Files.size(target)
+                it.fileExists = true
+                assert it.save(flush: true)
+
+                it.workPackage.bamFileInProjectFolder = it
+                assert it.workPackage.save(flush: true)
+
                 return null
             } catch (Throwable t) {
+                log.error(t)
                 return "Copying of target ${target} failed, ${t.message}"
             }
         }.findAll()
