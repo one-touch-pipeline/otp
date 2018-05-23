@@ -1,5 +1,8 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.utils.CollectionUtils
+
 
 class IndelCallingService extends BamFileAnalysisService {
 
@@ -13,6 +16,15 @@ class IndelCallingService extends BamFileAnalysisService {
 
     protected Pipeline.Type getAnalysisType() {
         return Pipeline.Type.INDEL
+    }
+
+    protected Pipeline getPipeline() {
+        return CollectionUtils.exactlyOneElement(Pipeline.findAllByName(Pipeline.Name.RODDY_INDEL))
+    }
+
+    @Override
+    protected List<SeqType> getSeqTypes() {
+        return SeqType.indelPipelineSeqTypes
     }
 
     @Override

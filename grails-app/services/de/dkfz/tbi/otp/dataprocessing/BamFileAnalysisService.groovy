@@ -3,7 +3,7 @@ package de.dkfz.tbi.otp.dataprocessing
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.ProcessingStatus
-import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.*
 
 abstract class BamFileAnalysisService {
 
@@ -12,11 +12,6 @@ abstract class BamFileAnalysisService {
     static final List<AnalysisProcessingStates> processingStatesNotProcessable = [
             AnalysisProcessingStates.IN_PROGRESS
     ]
-
-    static Collection<Class<? extends ConfigPerProject>> ANALYSIS_CONFIG_CLASSES = [
-            SnvConfig,
-            RoddyWorkflowConfig,
-    ].asImmutable()
 
     /**
      * The method goes through the list of sample pairs and checks if there is a disease/control pair
@@ -32,12 +27,7 @@ abstract class BamFileAnalysisService {
      * - pair is not already in processing
      * - config file is available
      */
-    SamplePair samplePairForProcessing(short minPriority, Class<? extends ConfigPerProject> configClass, SamplePair sp = null) {
-        samplePairForProcessing(minPriority, configClass, [SeqType.wholeGenomePairedSeqType, SeqType.exomePairedSeqType],sp)
-    }
-
-    SamplePair samplePairForProcessing(short minPriority, Class<? extends ConfigPerProject> configClass, List<SeqType> seqTypes, SamplePair sp = null) {
-        assert ANALYSIS_CONFIG_CLASSES.contains(configClass)
+    SamplePair samplePairForProcessing(short minPriority, SamplePair sp = null) {
         final String WORKPACKAGE = "workPackage"
         final String SAMPLE = "${WORKPACKAGE}.sample"
         final String SAMPLE_TYPE = "${SAMPLE}.sampleType"
@@ -89,7 +79,7 @@ abstract class BamFileAnalysisService {
 
 
                 //check that the config file is available with at least one script with same version
-                "AND EXISTS (FROM ${configClass.name} cps " +
+                "AND EXISTS (FROM ${RoddyWorkflowConfig.name} cps " +
                 "   WHERE cps.project = sp.mergingWorkPackage1.sample.individual.project " +
                 "   AND cps.pipeline.type = :analysis " +
                 "   AND cps.seqType = sp.mergingWorkPackage1.seqType " +
@@ -157,5 +147,7 @@ abstract class BamFileAnalysisService {
     abstract protected String getProcessingStateCheck()
     abstract protected Class<BamFilePairAnalysis> getAnalysisClass()
     abstract protected Pipeline.Type getAnalysisType()
+    abstract protected Pipeline getPipeline()
+    abstract protected List<SeqType> getSeqTypes()
 
 }

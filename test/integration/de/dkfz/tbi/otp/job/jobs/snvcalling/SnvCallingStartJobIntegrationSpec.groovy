@@ -39,8 +39,10 @@ class SnvCallingStartJobIntegrationSpec extends Specification {
         failedProcess.metaClass.getProcessParameterObject = { -> failedInstance }
 
         roddySnvCallingStartJob = Spy(RoddySnvCallingStartJob) {
-            1 * getInstanceClass() >> RoddySnvCallingInstance
             1 * getInstanceName(_) >> "someOtherInstanceName"
+        }
+        roddySnvCallingStartJob.snvCallingService = Spy(SnvCallingService) {
+            1 * getAnalysisClass() >> RoddySnvCallingInstance
         }
         roddySnvCallingStartJob.executionService = Mock(ExecutionService) {
             1 * executeCommandReturnProcessOutput(_, _) >> { Realm realm, String cmd ->

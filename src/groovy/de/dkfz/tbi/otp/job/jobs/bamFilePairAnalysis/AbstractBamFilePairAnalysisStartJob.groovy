@@ -1,10 +1,12 @@
 package de.dkfz.tbi.otp.job.jobs.bamFilePairAnalysis
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.job.jobs.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import org.joda.time.*
 import org.joda.time.format.*
 import org.springframework.beans.factory.annotation.*
@@ -31,7 +33,7 @@ abstract class AbstractBamFilePairAnalysisStartJob extends AbstractStartJobImpl 
                     AbstractMergedBamFile sampleType1BamFile = samplePair.mergingWorkPackage1.processableBamFileInProjectFolder
                     AbstractMergedBamFile sampleType2BamFile = samplePair.mergingWorkPackage2.processableBamFileInProjectFolder
 
-                    BamFilePairAnalysis analysis = getInstanceClass().newInstance(
+                    BamFilePairAnalysis analysis = getBamFileAnalysisService().getAnalysisClass().newInstance(
                             samplePair: samplePair,
                             instanceName: getInstanceName(config),
                             config: config,
@@ -61,7 +63,7 @@ abstract class AbstractBamFilePairAnalysisStartJob extends AbstractStartJobImpl 
             failedAnalysis.withdrawn = true
             assert failedAnalysis.save(flush: true)
 
-            BamFilePairAnalysis newAnalysis = getInstanceClass().newInstance(
+            BamFilePairAnalysis newAnalysis = getBamFileAnalysisService().getAnalysisClass().newInstance(
                     samplePair: failedAnalysis.samplePair,
                     instanceName: getInstanceName(failedAnalysis.config),
                     config: failedAnalysis.config,
@@ -89,11 +91,22 @@ abstract class AbstractBamFilePairAnalysisStartJob extends AbstractStartJobImpl 
         return "results_${config.pluginVersion.replaceAll(":", "-")}_${config.configVersion}_${date}"
     }
 
+    protected ConfigPerProject getConfig(SamplePair samplePair) {
+        Pipeline pipeline = getBamFileAnalysisService().getPipeline()
+        RoddyWorkflowConfig config = (RoddyWorkflowConfig)RoddyWorkflowConfig.getLatestForIndividual(
+                samplePair.individual, samplePair.seqType, pipeline)
 
-    protected abstract ConfigPerProject getConfig(SamplePair samplePair)
-    protected abstract Class<? extends ConfigPerProject> getConfigClass()
-    protected abstract Class<? extends BamFilePairAnalysis> getInstanceClass()
-    protected abstract SamplePair findSamplePairToProcess(short minPriority)
+        if (config == null) {
+            throw new RuntimeException("No ${RoddyWorkflowConfig.simpleName} found for ${Pipeline.simpleName} ${pipeline}, ${Individual.simpleName} ${samplePair.individual} (${Project.simpleName} ${samplePair.project}), ${SeqType.simpleName} ${samplePair.seqType}")
+        }
+        return config
+    }
+
+    SamplePair findSamplePairToProcess(short minPriority) {
+        return getBamFileAnalysisService().samplePairForProcessing(minPriority)
+    }
+
+    protected abstract BamFileAnalysisService getBamFileAnalysisService()
     protected abstract void prepareCreatingTheProcessAndTriggerTracking(BamFilePairAnalysis bamFilePairAnalysis)
 
 

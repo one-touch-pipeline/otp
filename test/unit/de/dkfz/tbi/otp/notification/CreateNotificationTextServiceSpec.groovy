@@ -18,6 +18,7 @@ import static de.dkfz.tbi.otp.tracking.OtrsTicket.ProcessingStep.*
         AntibodyTarget,
         ChipSeqSeqTrack,
         DataFile,
+        ExomeSeqTrack,
         FileType,
         Individual,
         LibraryPreparationKit,
@@ -724,10 +725,17 @@ ${expectedVariantCallingRunning}${expectedVariantCallingNotRunning}"""
         DomainFactory.createProcessingOptionForEmailSenderSalutation()
 
         Map data1 = createData([
-                (pairAnalysisContentsPermutationList.customProcessingStatus): ProcessingStatus.WorkflowProcessingStatus.ALL_DONE
+                (pairAnalysisContentsPermutationList.customProcessingStatus): ProcessingStatus.WorkflowProcessingStatus.ALL_DONE,
+                seqType: SeqType."${pairAnalysisContentsPermutationList.type}PipelineSeqTypes".first(),
         ])
 
         Map data2 = createData(
+                project: pairAnalysisContentsPermutationList.multipleProjects ? DomainFactory.createProject() : data1.seqTrack.project,
+                (pairAnalysisContentsPermutationList.customProcessingStatus): pairAnalysisContentsPermutationList.processingStatus,
+                seqType: SeqType."${pairAnalysisContentsPermutationList.type}PipelineSeqTypes".first(),
+        )
+
+        Map data3 = createData(
                 project: pairAnalysisContentsPermutationList.multipleProjects ? DomainFactory.createProject() : data1.seqTrack.project,
                 (pairAnalysisContentsPermutationList.customProcessingStatus): pairAnalysisContentsPermutationList.processingStatus,
         )
@@ -735,6 +743,7 @@ ${expectedVariantCallingRunning}${expectedVariantCallingNotRunning}"""
         ProcessingStatus processingStatus = new ProcessingStatus([
                 data1.seqTrackProcessingStatus,
                 data2.seqTrackProcessingStatus,
+                data3.seqTrackProcessingStatus,
         ])
 
         int projectCount = pairAnalysisContentsPermutationList.multipleProjects && pairAnalysisContentsPermutationList.processingStatus == ProcessingStatus.WorkflowProcessingStatus.ALL_DONE ? 2 : 1

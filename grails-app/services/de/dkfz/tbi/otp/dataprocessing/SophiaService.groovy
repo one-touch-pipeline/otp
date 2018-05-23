@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.dataprocessing.sophia.*
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 class SophiaService extends BamFileAnalysisService {
 
@@ -23,6 +24,16 @@ class SophiaService extends BamFileAnalysisService {
     }
 
     @Override
+    protected Pipeline getPipeline() {
+        return CollectionUtils.exactlyOneElement(Pipeline.findAllByName(Pipeline.Name.RODDY_SOPHIA))
+    }
+
+    @Override
+    protected List<SeqType> getSeqTypes() {
+        return SeqType.sophiaPipelineSeqTypes
+    }
+
+    @Override
     protected String checkReferenceGenome() {
         return 'AND sp.mergingWorkPackage1.referenceGenome in (:referenceGenomes)'
     }
@@ -40,12 +51,10 @@ class SophiaService extends BamFileAnalysisService {
         )
         """.replaceAll('\n', ' ')
     }
-
     @Override
     public Map<String, Object> checkReferenceGenomeMap() {
         String referenceNamesString = processingOptionService.findOptionAssure(ProcessingOption.OptionName.PIPELINE_SOPHIA_REFERENCE_GENOME, null, null)
         List<String> referenceGenomeNames = referenceNamesString.split(',')*.trim()
         return [referenceGenomes: ReferenceGenome.findAllByNameInList(referenceGenomeNames)]
     }
-
 }

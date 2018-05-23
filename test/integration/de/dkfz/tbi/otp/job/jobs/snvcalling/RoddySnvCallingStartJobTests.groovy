@@ -28,7 +28,6 @@ public class RoddySnvCallingStartJobTests {
             RoddyWorkflowConfig config = DomainFactory.createRoddyWorkflowConfig(project: project, seqType: seqType, pipeline: DomainFactory.createRoddySnvPipelineLazy(), pluginVersion: 'pluginVersion:1.1.0', configVersion: 'v1_0')
             DateTimeUtils.setCurrentMillisFixed(ARBITRARY_TIMESTAMP)
 
-            assert roddySnvCallingStartJob.getConfigClass() == RoddyWorkflowConfig
             assert roddySnvCallingStartJob.getConfig(samplePair) == config
             assert roddySnvCallingStartJob.getInstanceName(config) == "results_pluginVersion-1.1.0_v1_0_1970-01-01_01h00_+0100".toString()
         }  finally {

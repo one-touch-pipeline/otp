@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 class AceseqService extends BamFileAnalysisService {
 
@@ -34,6 +35,16 @@ class AceseqService extends BamFileAnalysisService {
     }
 
     @Override
+    protected Pipeline getPipeline() {
+        return CollectionUtils.exactlyOneElement(Pipeline.findAllByName(Pipeline.Name.RODDY_ACESEQ))
+    }
+
+    @Override
+    protected List<SeqType> getSeqTypes() {
+        return SeqType.aceseqPipelineSeqTypes
+    }
+
+    @Override
     protected String checkReferenceGenome(){
         return 'AND sp.mergingWorkPackage1.referenceGenome in (:referenceGenomes)'
     }
@@ -44,6 +55,5 @@ class AceseqService extends BamFileAnalysisService {
         List<String> referenceGenomeNames = referenceNamesString.split(',')*.trim()
         return [referenceGenomes: ReferenceGenome.findAllByNameInList(referenceGenomeNames)]
     }
-
 }
 

@@ -72,10 +72,10 @@ class CreateNotificationTextService {
         }
 
         return createMessage('notification.template.base', [
-                stepInformation : stepInformation,
-                seqCenterComment: seqCenterComment,
-                addition        : createMessage("notification.template.${processingStep.name().toLowerCase()}.addition"),
-                phabricatorAlias: phabricatorAlias,
+                stepInformation      : stepInformation,
+                seqCenterComment     : seqCenterComment,
+                addition             : createMessage("notification.template.${processingStep.name().toLowerCase()}.addition"),
+                phabricatorAlias     : phabricatorAlias,
                 emailSenderSalutation: ProcessingOptionService.findOptionAssure(OptionName.EMAIL_SENDER_SALUTATION, null, null),
         ])
     }
@@ -108,10 +108,10 @@ class CreateNotificationTextService {
         String otpLinks = createOtpLinks(seqTracks*.project, 'projectOverview', 'laneOverview')
 
         String message = createMessage('notification.template.installation.base', [
-                runs    : runNames,
-                paths   : directories,
-                samples : samples.join('\n'),
-                links   : otpLinks,
+                runs   : runNames,
+                paths  : directories,
+                samples: samples.join('\n'),
+                links  : otpLinks,
         ])
 
         if (status.alignmentProcessingStatus != NOTHING_DONE_WONT_DO) {
@@ -126,7 +126,8 @@ class CreateNotificationTextService {
         assert status
 
         status = new ProcessingStatus(status.seqTrackProcessingStatuses.findAll {
-            it.alignmentProcessingStatus == ALL_DONE })
+            it.alignmentProcessingStatus == ALL_DONE
+        })
 
         Collection<SeqTrack> seqTracks = status.seqTrackProcessingStatuses*.seqTrack
         if (!seqTracks) {
@@ -187,11 +188,12 @@ class CreateNotificationTextService {
         ])
 
         Map<Boolean, List<SamplePairProcessingStatus>> samplePairs = status.samplePairProcessingStatuses.groupBy {
-            it.variantCallingProcessingStatus != NOTHING_DONE_WONT_DO }
+            it.variantCallingProcessingStatus != NOTHING_DONE_WONT_DO
+        }
         if (samplePairs[true]) {
             String variantCallingPipelines = samplePairs[true]*.variantCallingWorkflowNames().flatten().unique().sort().join(', ')
             message += '\n' + createMessage("notification.template.alignment.furtherProcessing", [
-                    samplePairsWillProcess: getSamplePairRepresentation(samplePairs[true]*.samplePair),
+                    samplePairsWillProcess : getSamplePairRepresentation(samplePairs[true]*.samplePair),
                     variantCallingPipelines: variantCallingPipelines,
             ])
         }
@@ -230,8 +232,11 @@ class CreateNotificationTextService {
     String variantCallingNotification(ProcessingStatus status, ProcessingStep notificationStep) {
         assert status
 
+        List<SeqType> seqTypes = SeqType."${notificationStep}PipelineSeqTypes"
         Map<WorkflowProcessingStatus, List<SamplePairProcessingStatus>> map =
-                status.samplePairProcessingStatuses.groupBy { it."${notificationStep}ProcessingStatus" }
+                status.samplePairProcessingStatuses.findAll {
+                    it.samplePair.seqType in seqTypes
+                }.groupBy { it."${notificationStep}ProcessingStatus" }
 
 
         List<SamplePair> samplePairsFinished = map[ALL_DONE]*.samplePair
@@ -242,7 +247,7 @@ class CreateNotificationTextService {
         String otpLinks = ''
         switch (notificationStep) {
             case SNV:
-            otpLinks = createOtpLinks(samplePairsFinished*.project, 'snv', 'results')
+                otpLinks = createOtpLinks(samplePairsFinished*.project, 'snv', 'results')
                 break
             case INDEL:
                 otpLinks = createOtpLinks(samplePairsFinished*.project, 'indel', 'results')
@@ -269,7 +274,7 @@ class CreateNotificationTextService {
         if (samplePairsNotProcessed) {
             message += '\n' + createMessage("notification.template.${notificationStep.name().toLowerCase()}.notProcessed", [
                     samplePairsNotProcessed: getSamplePairRepresentation(samplePairsNotProcessed),
-                    emailSenderSalutation: ProcessingOptionService.findOptionAssure(OptionName.EMAIL_SENDER_SALUTATION, null, null),
+                    emailSenderSalutation  : ProcessingOptionService.findOptionAssure(OptionName.EMAIL_SENDER_SALUTATION, null, null),
             ])
         }
 

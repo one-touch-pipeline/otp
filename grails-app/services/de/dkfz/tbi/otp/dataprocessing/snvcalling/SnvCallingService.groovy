@@ -1,6 +1,8 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.*
 
 class SnvCallingService extends BamFileAnalysisService {
 
@@ -8,11 +10,23 @@ class SnvCallingService extends BamFileAnalysisService {
         return "sp.snvProcessingStatus = :needsProcessing "
     }
 
-    protected Class<RoddySnvCallingInstance> getAnalysisClass() {
+    @Override
+    Class<RoddySnvCallingInstance> getAnalysisClass() {
         return RoddySnvCallingInstance.class
     }
 
+    @Override
     protected Pipeline.Type getAnalysisType() {
         return Pipeline.Type.SNV
+    }
+
+    @Override
+    protected Pipeline getPipeline() {
+        return CollectionUtils.exactlyOneElement(Pipeline.findAllByName(Pipeline.Name.RODDY_SNV))
+    }
+
+    @Override
+    protected List<SeqType> getSeqTypes() {
+        return SeqType.snvPipelineSeqTypes
     }
 }

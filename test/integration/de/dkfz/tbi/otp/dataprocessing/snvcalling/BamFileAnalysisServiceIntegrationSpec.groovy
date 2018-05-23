@@ -36,17 +36,6 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         DomainFactory.createAllAnalysableSeqTypes()
     }
 
-
-    @Unroll
-    void "samplePairForProcessing for SnvCalling returns samplePair"() {
-        given:
-        samplePair1.snvProcessingStatus = ProcessingStatus.NEEDS_PROCESSING
-        assert samplePair1.save(flush: true)
-
-        expect:
-        samplePair1 == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
-    }
-
     @Unroll
     void "samplePairForProcessing for Instance #processingStatus returns samplePair"() {
         given:
@@ -56,11 +45,13 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
             DomainFactory.createSophiaInstance(samplePair1)
         }
         assert samplePair1.save(flush: true)
-        DomainFactory.createRoddyWorkflowConfig(
-                seqType: samplePair1.seqType,
-                project: samplePair1.project,
-                pipeline: pipeline()
-        )
+        if (processingStatus != "snvProcessingStatus") {
+            DomainFactory.createRoddyWorkflowConfig(
+                    seqType: samplePair1.seqType,
+                    project: samplePair1.project,
+                    pipeline: pipeline()
+            )
+        }
         DomainFactory.createProcessingOptionLazy([
                 name: ProcessingOption.OptionName.PIPELINE_ACESEQ_REFERENCE_GENOME,
                 type: null,
@@ -75,13 +66,14 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         ])
 
         expect:
-        samplePair1 == service.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
+        samplePair1 == service.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
 
         where:
-        processingStatus         | pipeline                                     | service
-        "indelProcessingStatus"  | { DomainFactory.createIndelPipelineLazy() }  | this.indelCallingService
-        "sophiaProcessingStatus" | { DomainFactory.createSophiaPipelineLazy() } | this.sophiaService
-        "aceseqProcessingStatus" | { DomainFactory.createAceseqPipelineLazy() } | this.aceseqService
+        processingStatus         | pipeline                                       | service
+        "indelProcessingStatus"  | { DomainFactory.createIndelPipelineLazy() }    | this.indelCallingService
+        "sophiaProcessingStatus" | { DomainFactory.createSophiaPipelineLazy() }   | this.sophiaService
+        "aceseqProcessingStatus" | { DomainFactory.createAceseqPipelineLazy() }   | this.aceseqService
+        "snvProcessingStatus"    | { DomainFactory.createRoddySnvPipelineLazy() } | this.snvCallingService
     }
 
     @Unroll
@@ -102,7 +94,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         ])
 
         expect:
-        null == service.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
+        null == service.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
 
         where:
         processingStatus         | pipeline                                     | service            | optionName
@@ -145,7 +137,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         ])
 
         expect:
-        !service.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
+        !service.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
 
         where:
         processingStatus         | pipeline                                     | service                   | qc
@@ -159,7 +151,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
 
 
     @Unroll
-    void "samplePairForProcessing returns a sample pair since qc of bam file is okey"() {
+    void "samplePairForProcessing returns a sample pair since qc of bam file is okay"() {
         given:
         samplePair1."${processingStatus}" = ProcessingStatus.NEEDS_PROCESSING
         if (processingStatus == "aceseqProcessingStatus") {
@@ -194,7 +186,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         ])
 
         expect:
-        samplePair1 == service.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
+        samplePair1 == service.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
 
         where:
         processingStatus         | pipeline                                     | service                   | qc
@@ -220,9 +212,9 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
 
         expect:
         if (service == "INDEL") {
-            assert null == indelCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
+            assert null == indelCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
         } else {
-            assert null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig)
+            assert null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
         }
 
 
@@ -232,21 +224,6 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         "snvProcessingStatus"   | "indelProcessingStatus" | "INDEL"
 
     }
-
-
-    @Unroll
-    void "samplePairForProcessing when processing status #processingStatus"() {
-        given:
-        samplePair1.snvProcessingStatus = processingStatus
-        assert samplePair1.save(flush: true)
-
-        expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, SnvConfig)
-
-        where:
-        processingStatus << [ProcessingStatus.NO_PROCESSING_NEEDED, ProcessingStatus.DISABLED]
-    }
-
 
     @Unroll
     void "samplePairForProcessing when config has wrong #property"() {
@@ -259,7 +236,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         assert roddyConfig1.save(flush: true)
 
         expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
+        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
 
         where:
         property << ["project", "seqType"]
@@ -271,7 +248,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         assert roddyConfig1.save(flush: true)
 
         expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
+        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
     }
 
     void "samplePairForProcessing when the snvCallingInstance is already in progress"() {
@@ -285,7 +262,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         )
 
         expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
+        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
     }
 
 
@@ -301,7 +278,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         )
 
         expect:
-        samplePair1 == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
+        samplePair1 == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
     }
 
     void "samplePairForProcessing when other samplePair inProcess"() {
@@ -319,7 +296,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
 
         expect:
         samplePair1.individual != samplePair2.individual
-        samplePair1 == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
+        samplePair1 == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
     }
 
 
@@ -333,7 +310,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         }
 
         expect:
-        samplePair1 == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
+        samplePair1 == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
 
         where:
         number << [1, 2]
@@ -360,7 +337,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         samplePair1.delete(flush: true)
 
         expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
+        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
 
         where:
         number << [1, 2]
@@ -377,7 +354,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         assert bamFileInProgress.save(flush: true)
 
         expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
+        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
 
         where:
         number << [1, 2]
@@ -392,7 +369,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         assert problematicBamFile.save(flush: true)
 
         expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
+        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
 
         where:
         number << [1, 2]
@@ -408,7 +385,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         assert thresholds.save(flush: true)
 
         expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
+        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
 
         where:
         number << [1, 2]
@@ -423,7 +400,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         }
 
         expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
+        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
     }
 
 
@@ -435,7 +412,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         }
 
         expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
+        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
     }
 
 
@@ -449,7 +426,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         assert thresholds.save(flush: true)
 
         expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
+        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
 
         where:
         number << [1, 2]
@@ -468,7 +445,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         assert thresholds.save(flush: true)
 
         expect:
-        samplePair1 == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
+        samplePair1 == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
 
         where:
         number | property
@@ -487,7 +464,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         assert problematicBamFile.save(flush: true)
 
         expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
+        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
 
         where:
         number << [1, 2]
@@ -499,7 +476,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         DomainFactory.createProcessableSamplePair()
 
         expect:
-        samplePair1 == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
+        samplePair1 == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
     }
 
 
@@ -511,13 +488,13 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         assert project.save(flush: true)
 
         expect:
-        samplePairFastTrack == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
+        samplePairFastTrack == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
     }
 
 
     void "samplePairForProcessing, make sure that min processing priority is taken into account"() {
         expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.FAST_TRACK_PRIORITY, RoddyWorkflowConfig)
+        null == snvCallingService.samplePairForProcessing(ProcessingPriority.FAST_TRACK_PRIORITY)
     }
 
 
@@ -531,7 +508,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         DomainFactory.createSamplePairWithProcessedMergedBamFiles()
 
         expect:
-        !sophiaService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
+        !sophiaService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
     }
 
     @Unroll
@@ -545,7 +522,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
 
 
         expect:
-        !sophiaService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
+        !sophiaService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
 
         where:
         property             | value
@@ -564,7 +541,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         SamplePair samplePair = DomainFactory.createSamplePairWithExternalProcessedMergedBamFiles(true, [(property): value])
 
         expect:
-        samplePair == sophiaService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
+        samplePair == sophiaService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
 
         where:
         property             | value
@@ -580,7 +557,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         prepareSophiaForAceseqBase()
 
         expect:
-        null == aceseqService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
+        null == aceseqService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
     }
 
     void "samplePairForProcessing, for Aceseq pipeline, when last sophia instance is running and not withdrawn and an older finish exist, should not return SamplePair"() {
@@ -588,7 +565,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         prepareSophiaForAceseq([processingState: AnalysisProcessingStates.FINISHED, withdrawn: false], [processingState: AnalysisProcessingStates.IN_PROGRESS, withdrawn: false])
 
         expect:
-        null == aceseqService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
+        null == aceseqService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
     }
 
     void "samplePairForProcessing, for Aceseq pipeline, when last sophia instance is running and withdrawn and an older finish exist, should return SamplePair"() {
@@ -596,7 +573,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         prepareSophiaForAceseq([processingState: AnalysisProcessingStates.FINISHED, withdrawn: false], [processingState: AnalysisProcessingStates.IN_PROGRESS, withdrawn: true])
 
         expect:
-        samplePair1 == aceseqService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
+        samplePair1 == aceseqService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
     }
 
 
@@ -606,7 +583,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         prepareSophiaForAceseq([processingState: AnalysisProcessingStates.FINISHED, withdrawn: true], [processingState: AnalysisProcessingStates.FINISHED, withdrawn: true])
 
         expect:
-        null == aceseqService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
+        null == aceseqService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
     }
 
     void "samplePairForProcessing, for ACEseq pipeline, coverage is not high enough, should not return SamplePair"() {
@@ -620,7 +597,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         ])
 
         expect:
-        !aceseqService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY, RoddyWorkflowConfig)
+        !aceseqService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
     }
 
 

@@ -36,7 +36,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
                     processingStatus       : "indelProcessingStatus"
             ], [
                     analysisType           : "SCI",
-                    createRoddyBamFile     : "createSnvInstanceWithRoddyBamFiles",
+                    createRoddyBamFile     : "createRoddySnvInstanceWithRoddyBamFiles",
                     completeCallingInstance: "completeSnvCallingInstance",
                     processingStatus       : "snvProcessingStatus"
             ], [
