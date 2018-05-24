@@ -4,6 +4,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.util.spreadsheet.validation.*
+import org.springframework.beans.factory.annotation.*
 import org.springframework.stereotype.*
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
@@ -11,7 +12,8 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 @Component
 class RunRunDateValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
 
-    RunDateParserService runDateParserService = new RunDateParserService()
+    @Autowired
+    RunDateParserService runDateParserService
 
     @Override
     Collection<String> getDescriptions() {

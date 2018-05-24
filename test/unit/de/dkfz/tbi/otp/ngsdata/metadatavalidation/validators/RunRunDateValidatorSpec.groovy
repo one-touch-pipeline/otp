@@ -46,8 +46,11 @@ class RunRunDateValidatorSpec extends Specification {
                         "Run date parsed from run name '160102InconsistentRunName' is not the same as '2016-01-01'. OTP will use the run date from the '${RUN_DATE}' column.", "At least one run date parsed from run name is not the same as in the 'RUN_DATE' column."),
         ]
 
+        RunRunDateValidator validator = new RunRunDateValidator()
+        validator.runDateParserService = new RunDateParserService()
+
         when:
-        new RunRunDateValidator().validate(context)
+        validator.validate(context)
 
         then:
         containSame(context.problems, expectedProblems)

@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
 import de.dkfz.tbi.util.spreadsheet.validation.*
+import org.springframework.beans.factory.annotation.*
 import org.springframework.stereotype.*
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
@@ -10,6 +11,7 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 @Component
 class SeqTypeValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
 
+    @Autowired
     SeqTypeService seqTypeService
 
     @Override
