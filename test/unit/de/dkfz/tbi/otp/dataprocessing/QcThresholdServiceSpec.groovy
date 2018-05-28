@@ -57,9 +57,9 @@ class QcThresholdServiceSpec extends Specification {
                 project: useProject ? project : null,
                 seqType: useSeqType ? seqType : null,
                 qcProperty1: testedProperty,
-                warningThreshold: 10,
-                errorThreshold: 20,
-                compare: QcThreshold.Compare.biggerThanThreshold,
+                warningThresholdUpper: 10,
+                errorThresholdUpper: 20,
+                compare: QcThreshold.Compare.toThreshold,
                 qcClass: sophiaQc.class.name,
         )
 
@@ -89,13 +89,13 @@ class QcThresholdServiceSpec extends Specification {
         ]
 
         l.times { int i ->
-            qcThreshold = DomainFactory.createQcThreshold(
+            DomainFactory.createQcThreshold(
                     project: setProjectAndSeqType[i][0] ? project : null,
                     seqType: setProjectAndSeqType[i][1] ? seqType : null,
                     qcProperty1: testedProperty,
-                    warningThreshold: l - 1 == i ? 10 : 99,
-                    errorThreshold: l - 1 == i ? 20 : 100,
-                    compare: QcThreshold.Compare.biggerThanThreshold,
+                    warningThresholdUpper: l - 1 == i ? 10 : 99,
+                    errorThresholdUpper: l - 1 == i ? 20 : 100,
+                    compare: QcThreshold.Compare.toThreshold,
                     qcClass: sophiaQc.class.name,
             )
         }
@@ -120,9 +120,11 @@ class QcThresholdServiceSpec extends Specification {
         given:
         qcThreshold = DomainFactory.createQcThreshold(
                 qcProperty1: testedProperty,
-                warningThreshold: warningThreshold,
-                errorThreshold: errorThreshold,
-                compare: QcThreshold.Compare.biggerThanThreshold,
+                warningThresholdLower: wtl,
+                warningThresholdUpper: wtu,
+                errorThresholdLower: etl,
+                errorThresholdUpper: etu,
+                compare: QcThreshold.Compare.toThreshold,
                 qcClass: sophiaQc.class.name,
         )
 
@@ -134,15 +136,17 @@ class QcThresholdServiceSpec extends Specification {
         result.get(testedProperty) == new TableCellValue(testedPropertyValue.toString(), thresholdLevel, null, null)
 
         where:
-        warningThreshold | errorThreshold || thresholdLevel
-        0                | 0              || ERROR
-        0                | 10             || ERROR
-        0                | 20             || WARNING
-        10               | 0              || ERROR
-        10               | 10             || ERROR
-        10               | 20             || WARNING
-        20               | 0              || ERROR
-        20               | 10             || ERROR
-        20               | 20             || OKAY
+        wtl  | wtu  | etl  | etu  || thresholdLevel
+        14   | 16   | 0    | 20   || OKAY
+        null | 16   | null | 20   || OKAY
+        14   | null | 0    | null || OKAY
+        16   | 20   | 0    | 20   || WARNING
+        16   | null | 0    | null || WARNING
+        10   | 14   | 0    | 20   || WARNING
+        null | 14   | null | 20   || WARNING
+        30   | 30   | 20   | 40   || ERROR
+        30   | null | 20   | null || ERROR
+        5    | 5    | 0    | 10   || ERROR
+        null | 5    | null | 10   || ERROR
     }
 }

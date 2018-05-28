@@ -2444,10 +2444,10 @@ class DomainFactory {
 
     static QcThreshold createQcThreshold(Map properties = [:]) {
         return createDomainObject(QcThreshold, [
-                qcProperty1     : "qcProperty${counter++}",
-                warningThreshold: counter++,
-                errorThreshold  : counter++,
-                compare         : QcThreshold.Compare.biggerThanThreshold
+                qcProperty1          : "qcProperty${counter++}",
+                warningThresholdUpper: counter++,
+                errorThresholdUpper  : counter++,
+                compare              : QcThreshold.Compare.toThreshold
                 //qcClass needs to be defined per test since it depends on the QC domain the value belongs to
         ], properties)
     }
