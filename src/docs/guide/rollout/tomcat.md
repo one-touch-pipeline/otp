@@ -8,7 +8,7 @@ local
 - Download the latest [tomcat](http://tomcat.apache.org/) 8.5 version
   from [tomcat 8 download](http://tomcat.apache.org/download-80.cgi)
 
-- Download OTP from [gitlab](https://***REMOVED***gitlab.dkfz.de/DMG/otp/-/jobs/artifacts/master/download?job=war)
+- Download OTP from [gitlab](https://odcf-gitlab.dkfz.de/DMG/otp/-/jobs/artifacts/master/download?job=war)
   with name artifacts.zip
 
 - copy files the thw web server of the web host
