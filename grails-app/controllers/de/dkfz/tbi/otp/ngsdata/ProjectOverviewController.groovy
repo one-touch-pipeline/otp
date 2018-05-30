@@ -130,7 +130,6 @@ class ProjectOverviewController {
         }
 
         projectOverviewService.abstractMergedBamFilesInProjectFolder(project).each {
-            assert it.numberOfMergedLanes != null
             InfoAboutOneSample informationOfSample = getDataForMockPidAndSampleTypeName(it.individual.mockPid, it.sampleType.name)
             getOrPut(getOrPut(informationOfSample.bamFilesInProjectFolder, it.seqType.id, [:]), it.pipeline.id, []).add(it)
         }
@@ -161,6 +160,11 @@ class ProjectOverviewController {
                             String subCell
                             if (pipeline.name == Pipeline.Name.RODDY_RNA_ALIGNMENT) {
                                 subCell = "${it.numberOfMergedLanes} | ${informationOfSample.laneCountRegistered[seqType.id]}"
+                            } else if (pipeline.name == Pipeline.Name.EXTERNALLY_PROCESSED) {
+                                subCell = "<span class='icon-OKAY'></span>"
+                                if (it.coverage) {
+                                    subCell += "| ${it.coverage ? String.format(Locale.ENGLISH, '%.2f', it.coverage) : "unknown"}"
+                                }
                             } else {
                                 subCell = "${it.numberOfMergedLanes} | ${it.coverage ? String.format(Locale.ENGLISH, '%.2f', it.coverage) : "unknown"}"
                             }

@@ -86,7 +86,7 @@ class DomainFactory {
 
     static <T> T createDomainWithImportAlias(Class<T> domainClass, Map parameterProperties) {
         Map defaultProperties = [
-                name : 'metadataName' + (counter++),
+                name       : 'metadataName' + (counter++),
                 importAlias: [],
         ]
         return createDomainObject(domainClass, defaultProperties, parameterProperties)
@@ -596,6 +596,19 @@ class DomainFactory {
         return processedMergedBamFile
     }
 
+    public
+    static ProcessedMergedBamFile createFinishedProcessedMergedBamFile(Map properties = [:], boolean saveAndValidate = true) {
+        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFileWithoutProcessedBamFile([
+                fileOperationStatus: FileOperationStatus.PROCESSED,
+                md5sum             : HelperUtils.randomMd5sum,
+                fileSize           : counter++ ,
+        ] + properties)
+        MergingWorkPackage mergingWorkPackage = processedMergedBamFile.mergingWorkPackage
+        mergingWorkPackage.bamFileInProjectFolder = processedMergedBamFile
+        assert mergingWorkPackage.save(flush: true)
+        return processedMergedBamFile
+    }
+
     public static ProcessedBamFile assignNewProcessedBamFile(final ProcessedMergedBamFile processedMergedBamFile) {
         final ProcessedBamFile bamFile = assignNewProcessedBamFile(processedMergedBamFile.mergingSet)
         processedMergedBamFile.numberOfMergedLanes++
@@ -962,10 +975,10 @@ class DomainFactory {
         ].each {
             ExternallyProcessedMergedBamFile bamFile = DomainFactory.createExternallyProcessedMergedBamFile(
                     getRandomProcessedBamFileProperties() + [
-                            workPackage       : it,
-                            coverage          : 30.0,
-                            insertSizeFile    : 'insertSize.txt',
-                            maximumReadLength : 101,
+                            workPackage      : it,
+                            coverage         : 30.0,
+                            insertSizeFile   : 'insertSize.txt',
+                            maximumReadLength: 101,
                     ] + bamFileProperties,
             )
             bamFile.mergingWorkPackage.bamFileInProjectFolder = bamFile
@@ -1267,7 +1280,7 @@ class DomainFactory {
 
     public static AntibodyTarget createAntibodyTarget(Map properties = [:]) {
         return createDomainObject(AntibodyTarget, [
-                name: 'antibodyTargetName_' + (counter++),
+                name       : 'antibodyTargetName_' + (counter++),
                 importAlias: [],
         ], properties)
     }
@@ -1301,14 +1314,14 @@ class DomainFactory {
 
     public static SeqPlatformModelLabel createSeqPlatformModelLabel(Map properties = [:]) {
         return createDomainObject(SeqPlatformModelLabel, [
-                name: 'seqPlatformModelLabel_' + (counter++),
+                name       : 'seqPlatformModelLabel_' + (counter++),
                 importAlias: [],
         ], properties)
     }
 
     public static SequencingKitLabel createSequencingKitLabel(Map properties = [:]) {
         return createDomainObject(SequencingKitLabel, [
-                name: 'SequencingKitLabel_' + (counter++),
+                name       : 'SequencingKitLabel_' + (counter++),
                 importAlias: [],
         ], properties)
     }
@@ -1474,7 +1487,7 @@ class DomainFactory {
                 referenceGenome: { createReferenceGenome() },
                 classification : ReferenceGenomeEntry.Classification.CHROMOSOME,
                 name           : "name${counter++}",
-                alias    : "alias${counter++}",
+                alias          : "alias${counter++}",
         ], properties)
     }
 
@@ -1880,15 +1893,15 @@ class DomainFactory {
     }
 
     public static ClusterJob createClusterJob(
-        final ProcessingStep processingStep, final ClusterJobIdentifier clusterJobIdentifier,
-        final Map myProps = [
-                clusterJobName   : "testName_${processingStep.nonQualifiedJobClass}",
-                jobClass         : processingStep.nonQualifiedJobClass,
-                queued           : new DateTime(),
-                requestedWalltime: Duration.standardMinutes(5),
-                requestedCores   : 10,
-                requestedMemory  : 1000,
-        ]) {
+            final ProcessingStep processingStep, final ClusterJobIdentifier clusterJobIdentifier,
+            final Map myProps = [
+                    clusterJobName   : "testName_${processingStep.nonQualifiedJobClass}",
+                    jobClass         : processingStep.nonQualifiedJobClass,
+                    queued           : new DateTime(),
+                    requestedWalltime: Duration.standardMinutes(5),
+                    requestedCores   : 10,
+                    requestedMemory  : 1000,
+            ]) {
         createDomainObject(ClusterJob, [
                 processingStep: processingStep,
                 realm         : clusterJobIdentifier.realm,
@@ -1924,7 +1937,7 @@ class DomainFactory {
     }
 
     static SeqType createChipSeqType(String libraryLayout = SeqType.LIBRARYLAYOUT_PAIRED) {
-        createSeqTypeLazy(SeqTypeNames.CHIP_SEQ, 'ChIP', 'chip_seq_sequencing', "CHIPSEQ",  libraryLayout)
+        createSeqTypeLazy(SeqTypeNames.CHIP_SEQ, 'ChIP', 'chip_seq_sequencing', "CHIPSEQ", libraryLayout)
     }
 
     static SeqType createRnaPairedSeqType() {
@@ -2223,6 +2236,18 @@ class DomainFactory {
         ], properties)
     }
 
+    static ExternallyProcessedMergedBamFile createFinishedExternallyProcessedMergedBamFile(Map properties = [:]) {
+        ExternallyProcessedMergedBamFile externallyProcessedMergedBamFile = createExternallyProcessedMergedBamFile([
+                fileOperationStatus: FileOperationStatus.PROCESSED,
+                md5sum             : HelperUtils.randomMd5sum,
+                fileSize           : counter++,
+        ] + properties)
+        ExternalMergingWorkPackage externalMergingWorkPackage = externallyProcessedMergedBamFile.mergingWorkPackage
+        externalMergingWorkPackage.bamFileInProjectFolder = externallyProcessedMergedBamFile
+        assert externalMergingWorkPackage.save(flush: true)
+        return externallyProcessedMergedBamFile
+    }
+
     static ProcessingThresholds createProcessingThresholds(Map properties = [:]) {
         return createDomainObject(ProcessingThresholds, [
                 project      : { createProject() },
@@ -2456,6 +2481,39 @@ class DomainFactory {
         return createDomainObject(Document, [
                 content: HelperUtils.getUniqueString().bytes,
                 type   : Document.Type.PDF,
+        ], properties)
+    }
+
+    static AggregateSequences createAggregateSequences(Map properties = [:]) {
+        createDomainObject(AggregateSequences, [
+                seqTypeId              : counter++,
+                seqPlatformId          : counter++,
+                seqPlatformModelLabelId: counter++,
+                sequencingKitLabelId   : counter++,
+                sampleId               : counter++,
+                seqCenterId            : counter++,
+                sampleTypeId           : counter++,
+                individualId           : counter++,
+                projectId              : counter++,
+                realmId                : counter++,
+                laneCount              : counter++,
+                sum_N_BasePairs        : counter++,
+                sum_N_BasePairsGb      : counter++,
+                seqPlatformName        : "seqPlatformName${counter++}",
+                seqTypeName            : "{seqTypeName${counter++}",
+                seqTypeDisplayName     : "seqTypeDisplayName${counter}",
+                dirName                : "dirName${counter++}",
+                libraryLayout          : "libraryLayout${counter++}",
+                sampleTypeName         : "sampleTypeName${counter}",
+                pid                    : "pid${counter++}",
+                mockPid                : "mockPid${counter++}",
+                mockFullName           : "mockFullName${counter++}",
+                type                   : Individual.Type.REAL,
+                projectName            : "projectName${counter++}",
+                projectDirName         : "projectDirName${counter++}",
+                realmName              : "realmName${counter++}",
+                seqCenterName          : "seqCenterName${counter++}",
+                seqCenterDirName       : "seqCenterDirName${counter++}",
         ], properties)
     }
 }

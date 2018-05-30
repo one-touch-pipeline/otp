@@ -83,7 +83,7 @@
                                 </g:each>
                             </g:if><g:else>
                                 <g:each var="workflow" in="${pipelines}">
-                                    <th>${workflow.displayName}<br><g:message code="projectOverview.index.lanesAndCoverage"/></th>
+                                    <th>${workflow.displayName}<br><g:message code="projectOverview.index.${workflow.displayName != 'external' ? 'lanesAndCoverage' : 'existsAndCoverage'}"/></th>
                                 </g:each>
                             </g:else>
                         </g:each>
