@@ -66,6 +66,9 @@ class TrackingService {
     }
 
     public Set<OtrsTicket> findAllOtrsTickets(Collection<SeqTrack> seqTracks) {
+        if (!seqTracks) {
+            return [] as Set
+        }
         //set pessimistic lock does not work together with projection, therefore 2 queries used
         List<Long> otrsIds = DataFile.createCriteria().listDistinct {
             'in'('seqTrack', seqTracks)
