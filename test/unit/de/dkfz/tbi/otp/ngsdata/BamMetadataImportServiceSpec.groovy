@@ -6,6 +6,7 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.*
+import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.util.spreadsheet.validation.*
 import grails.test.mixin.*
 import org.junit.*
@@ -104,34 +105,33 @@ class BamMetadataImportServiceSpec extends Specification {
 
         given:
         Project project = DomainFactory.createProject(name: "project_01")
-
-        DomainFactory.createReferenceGenome(name: "refGen1")
-        Individual individual1 = DomainFactory.createIndividual(mockPid: "individual1", project: project)
-        SampleType sampleType1 = DomainFactory.createSampleType(name: "sampleType1")
-        DomainFactory.createSeqType(name: "seqType1", libraryLayout: LibraryLayout.SINGLE)
-        DomainFactory.createSample(individual: individual1, sampleType: sampleType1)
         DomainFactory.createExternallyProcessedPipelineLazy()
-
-        DomainFactory.createReferenceGenome(name: "refGen2")
-        Individual individual2 = DomainFactory.createIndividual(mockPid: "individual2", project: project)
-        SampleType sampleType2 = DomainFactory.createSampleType(name: "sampleType2")
-        DomainFactory.createSeqType(name: "seqType2", libraryLayout: LibraryLayout.SINGLE)
-        DomainFactory.createSample(individual: individual2, sampleType: sampleType2)
-        DomainFactory.createExternallyProcessedPipelineLazy()
-
         File bamFilesDir = temporaryFolder.newFolder("path-to-bam-files")
-        File pseudoBamFile1 = new File(bamFilesDir, "control_123456_merged.mdup.bam")
-        File pseudoBamFile2 = new File(bamFilesDir, "tumor_456789_merged.mdup.bam")
-        File qualityDirectory = temporaryFolder.newFolder("quality")
-        File qualityControlFile = new File(qualityDirectory, "file.qc")
-        List<String> furtherFiles = ["/quality"]
+        File qualityDirectory = temporaryFolder.newFolder("path-to-bam-files", "qualityDir")
+        CreateFileHelper.createFile(new File(bamFilesDir, "qualityFile"))
+        CreateFileHelper.createFile(new File(qualityDirectory, "file.qc"))
+
+        (1..4).each {
+            DomainFactory.createReferenceGenome(name: "refGen${it}")
+            Individual individual = DomainFactory.createIndividual(mockPid: "individual${it}", project: project)
+            SampleType sampleType = DomainFactory.createSampleType(name: "sampleType${it}")
+            DomainFactory.createSeqType(name: "seqType${it}", libraryLayout: LibraryLayout.SINGLE)
+            DomainFactory.createSample(individual: individual, sampleType: sampleType)
+        }
+
+        List<String> furtherFiles = [
+                "qualityDir",
+                "qualityFile",
+        ]
 
         Path metadataFile = temporaryFolder.newFile("bamMetadata.tsv").toPath()
-        metadataFile.bytes = (
-                "${REFERENCE_GENOME}\t${SEQUENCING_TYPE}\t${BAM_FILE_PATH}\t${SAMPLE_TYPE}\t${INDIVIDUAL}\t${LIBRARY_LAYOUT}\t${PROJECT}\t${COVERAGE}\n" +
-                        "refGen1\tseqType1\t${pseudoBamFile1.path}\tsampleType1\tindividual1\tSINGLE\tproject_01\t\n" +
-                        "refGen2\tseqType2\t${pseudoBamFile2.path}\tsampleType2\tindividual2\tSINGLE\tproject_01\t\n"
-        ).getBytes(BamMetadataValidationContext.CHARSET)
+        metadataFile.bytes = ("""\
+${REFERENCE_GENOME},${SEQUENCING_TYPE},${BAM_FILE_PATH},${SAMPLE_TYPE},${INDIVIDUAL},${LIBRARY_LAYOUT},${PROJECT},${COVERAGE},${INSERT_SIZE_FILE}
+refGen1,seqType1,${bamFilesDir}/bamfile1_merged.mdup.bam,sampleType1,individual1,SINGLE,project_01,,insertSize.txt
+refGen2,seqType2,${bamFilesDir}/bamfile2_merged.mdup.bam,sampleType2,individual2,SINGLE,project_01,,qualityDir/insertSize.txt
+refGen3,seqType3,${bamFilesDir}/bamfile3_merged.mdup.bam,sampleType3,individual3,SINGLE,project_01,,qualityDirinsertSize.txt
+refGen4,seqType4,${bamFilesDir}/bamfile4_merged.mdup.bam,sampleType4,individual4,SINGLE,project_01,,qualityFileinsertSize.txt
+""".replaceAll(',', '\t')).getBytes(BamMetadataValidationContext.CHARSET)
 
         BamMetadataValidationContext context = BamMetadataValidationContextFactory.createContext(metadataFile: metadataFile)
 
@@ -149,29 +149,45 @@ class BamMetadataImportServiceSpec extends Specification {
 
         then:
         results.context.metadataFile == metadataFile
-        results.project.name == "project_01"
-        assert results.importProcess.externallyProcessedMergedBamFiles.find {
-            (
-                    it.referenceGenome.name == "refGen1" &&
-                    it.individual.mockPid == "individual1" &&
-                    it.project.name == "project_01" &&
-                    it.seqType.libraryLayout == "SINGLE" &&
-                    it.seqType.name == "seqType1" &&
-                    it.sampleType.name == "sampleType1" &&
-                    it.importedFrom == pseudoBamFile1.absolutePath &&
-                    it.fileName == "control_123456_merged.mdup.bam"
-            )
-        } && results.importProcess.externallyProcessedMergedBamFiles.find {
-            (
-                    it.referenceGenome.name == "refGen2" &&
-                    it.individual.mockPid == "individual2" &&
-                    it.project.name == "project_01" &&
-                    it.seqType.libraryLayout == "SINGLE" &&
-                    it.seqType.name == "seqType2" &&
-                    it.sampleType.name == "sampleType2" &&
-                    it.importedFrom == pseudoBamFile2.absolutePath &&
-                    it.fileName == "tumor_456789_merged.mdup.bam"
-            )
+        results.context.problems.empty
+        results.project?.name == "project_01"
+        results.importProcess.externallyProcessedMergedBamFiles.size() == 4
+
+        (1..4).each {
+            String pid = "individual${it}"
+            ExternallyProcessedMergedBamFile epmbf = results.importProcess.externallyProcessedMergedBamFiles.find  {
+                it.individual.mockPid == pid
+            }
+            assert epmbf : "${pid} not found in the result"
+            assert epmbf.referenceGenome.name == "refGen${it}"
+            assert epmbf.project.name == "project_01"
+            assert epmbf.seqType.libraryLayout == "SINGLE"
+            assert epmbf.seqType.name == "seqType${it}"
+            assert epmbf.sampleType.name == "sampleType${it}"
+            assert epmbf.importedFrom == new File(bamFilesDir, "bamfile${it}_merged.mdup.bam").path
+            assert epmbf.furtherFiles.contains('qualityDir')
+            assert epmbf.furtherFiles.contains('qualityFile')
+            switch (it) {
+                case 1:
+                    assert epmbf.insertSizeFile == "insertSize.txt"
+                    assert epmbf.furtherFiles.contains('insertSize.txt')
+                    assert epmbf.furtherFiles.size() == 3
+                    break
+                case 2:
+                    assert epmbf.insertSizeFile == "qualityDir/insertSize.txt"
+                    assert epmbf.furtherFiles.size() == 2
+                    break
+                case 3:
+                    assert epmbf.insertSizeFile == "qualityDirinsertSize.txt"
+                    assert epmbf.furtherFiles.contains('qualityDirinsertSize.txt')
+                    assert epmbf.furtherFiles.size() == 3
+                    break
+                case 4:
+                    assert epmbf.insertSizeFile == "qualityFileinsertSize.txt"
+                    assert epmbf.furtherFiles.contains('qualityFileinsertSize.txt')
+                    assert epmbf.furtherFiles.size() == 3
+                    break
+            }
         }
     }
 }

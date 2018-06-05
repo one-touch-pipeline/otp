@@ -53,8 +53,8 @@ class BamMetadataImportService {
         BamMetadataValidationContext context = validate(metadataFile, furtherFiles)
         if (MetadataImportService.mayImport(context, ignoreWarnings, previousValidationMd5sum)) {
             context.spreadsheet.dataRows.each { Row row ->
-                String referenceGenome = uniqueColumnValue(row, BamMetadataColumn.REFERENCE_GENOME)
-                String seqType = uniqueColumnValue(row, BamMetadataColumn.SEQUENCING_TYPE)
+                String _referenceGenome = uniqueColumnValue(row, BamMetadataColumn.REFERENCE_GENOME)
+                String _seqType = uniqueColumnValue(row, BamMetadataColumn.SEQUENCING_TYPE)
                 String bamFilePath = uniqueColumnValue(row, BamMetadataColumn.BAM_FILE_PATH)
                 String _sampleType = uniqueColumnValue(row, BamMetadataColumn.SAMPLE_TYPE)
                 String _individual = uniqueColumnValue(row, BamMetadataColumn.INDIVIDUAL)
@@ -82,11 +82,18 @@ class BamMetadataImportService {
                         eq('name', _sampleType)
                     }
                 }
+                assert sample: "No sample found for ${_individual} and ${_sampleType} in ${_project}"
+
+                SeqType seqType = SeqType.findByNameAndLibraryLayoutAndSingleCell(_seqType, libraryLayout, false)
+                assert seqType : "No seqtype found for ${_seqType} and ${libraryLayout} and no single cell"
+
+                ReferenceGenome referenceGenome = ReferenceGenome.findByName(_referenceGenome)
+                assert referenceGenome: "no reference genom found for ${_referenceGenome}"
 
                 ExternalMergingWorkPackage emwp = new ExternalMergingWorkPackage(
-                        referenceGenome         : ReferenceGenome.findByName(referenceGenome),
+                        referenceGenome         : referenceGenome,
                         sample                  : sample,
-                        seqType                 : SeqType.findByNameAndLibraryLayout(seqType, libraryLayout),
+                        seqType                 : seqType,
                         pipeline                : Pipeline.findByNameAndType(Pipeline.Name.EXTERNALLY_PROCESSED, Pipeline.Type.ALIGNMENT),
                         libraryPreparationKit   : LibraryPreparationKit.findByName(libraryPreparationKit)
                 )
@@ -111,7 +118,13 @@ class BamMetadataImportService {
                 }
 
                 if (insertSizeFile) {
-                    epmbf.furtherFiles.add(insertSizeFile)
+                    Path insertSizeFilePath = bamFileParent.resolve(insertSizeFile)
+                    if (!epmbf.furtherFiles.find {
+                        Path furtherPath = bamFileParent.resolve(it)
+                        insertSizeFilePath.startsWith(furtherPath)
+                    }) {
+                        epmbf.furtherFiles.add(insertSizeFile)
+                    }
                 }
 
                 emwp.bamFileInProjectFolder = null
