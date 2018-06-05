@@ -21,6 +21,11 @@ import static de.dkfz.tbi.otp.ngsdata.ConfigService.*
  */
 class ExecutionService {
 
+    static private final int TIME_FOR_RETRY_REMOTE_ACCESS = 120
+
+    static private final int CHANNEL_TIMEOUT = 120
+
+
     @SuppressWarnings("GrailsStatelessService")
     ConfigService configService
 
@@ -60,8 +65,9 @@ class ExecutionService {
             return querySsh(realm, sshUser, password, keyFile, sshAuthMethod, command)
         } catch (ProcessingException e) {
             if (e.cause && e.cause instanceof JSchException && e.cause.message.contains('channel is not opened.')) {
-                logToJob("'channel is not opened' error occur, try again in 30 seconds")
-                Thread.sleep(60000)
+                logToJob("'channel is not opened' error occur, try again in ${TIME_FOR_RETRY_REMOTE_ACCESS} seconds")
+                log.error("'channel is not opened' error occur, try again in ${TIME_FOR_RETRY_REMOTE_ACCESS} seconds")
+                Thread.sleep(TIME_FOR_RETRY_REMOTE_ACCESS * 1000)
                 return querySsh(realm, sshUser, password, keyFile, sshAuthMethod, command)
             } else {
                 throw e
@@ -90,7 +96,11 @@ class ExecutionService {
             throw new ProcessingException("Neither password nor key file for remote connection specified.")
         }
         if (!maxSshCalls) {
-            maxSshCalls = new Semaphore((int)ProcessingOptionService.findOptionAsNumber(ProcessingOption.OptionName.MAXIMUM_PARALLEL_SSH_CALLS, null, null, 30), true)
+            synchronized (this) {
+                if (!maxSshCalls) {
+                    maxSshCalls = new Semaphore((int) ProcessingOptionService.findOptionAsNumber(ProcessingOption.OptionName.MAXIMUM_PARALLEL_SSH_CALLS, null, null, 30), true)
+                }
+            }
         }
         maxSshCalls.acquire()
         try {
@@ -187,7 +197,7 @@ class ExecutionService {
         channel.setOutputStream(outputStream)
         channel.setErrStream(outputErrorStream)
 
-        channel.connect()
+        channel.connect(CHANNEL_TIMEOUT * 1000)
         while(!channel.isClosed()) {
             Thread.sleep(10)
         }
@@ -201,6 +211,7 @@ class ExecutionService {
     @Scheduled(fixedDelay = 60000l)
     void keepAlive() {
         sessionPerRealm.each { Realm realm, Session session ->
+            log.debug("Send keep alive for ${realm}")
             try {
                 session.sendKeepAliveMsg()
             } catch (Throwable e) {
