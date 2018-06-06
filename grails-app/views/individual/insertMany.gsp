@@ -25,7 +25,7 @@
             $.otp.infoMessage('${message}')
         </asset:script>
     </g:elseif>
-    <g:uploadForm action="insertMany">
+    <g:uploadForm action="insertMany" useToken="true">
         <div class="dialog">
             <table>
                 <tbody>

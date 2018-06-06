@@ -32,6 +32,8 @@ class BootStrap {
             UserService.createFirstAdminUserIfNoUserExists()
         }
 
+        SpringSecurityUtils.clientRegisterFilter('csrfFilter', SecurityFilterPosition.LAST.order - 10)
+
         JSON.registerObjectMarshaller(Enum, { Enum e -> e.name() })
     }
 

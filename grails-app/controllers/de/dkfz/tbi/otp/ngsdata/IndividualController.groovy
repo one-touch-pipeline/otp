@@ -82,49 +82,53 @@ class IndividualController {
         String messageType = ''
 
         if (cmd.submit) {
-            String validate = cmd.validate()
-            if (validate.empty) {
-                try {
-                    String content
-                    if (!cmd.sampleFile.empty) {
-                        content = new String(cmd.sampleFile.bytes)
-                    } else {
-                        content = cmd.sampleText
-                    }
-                    String delimiter = cmd.delimiter == "space" ? ' ' : cmd.delimiter == "tab" ? '\t' : cmd.delimiter
-                    content = content.replaceAll(" *${delimiter} *", delimiter)
-
-                    Spreadsheet spreadsheet = new Spreadsheet(content, delimiter)
-                    if (!spreadsheet.getColumn(PID)) {
-                        message = "Error: The column ${PID} does not exist"
-                        messageType = 'error'
-                    } else if (!spreadsheet.getColumn(SAMPLE_TYPE)) {
-                        message = "Error: The column ${SAMPLE_TYPE} does not exist"
-                        messageType = 'error'
-                    } else if (!spreadsheet.getColumn(SAMPLE_IDENTIFIER)) {
-                        message = "Error: The column ${SAMPLE_IDENTIFIER} does not exist"
-                        messageType = 'error'
-                    } else {
-                        spreadsheet.dataRows.each { Row row ->
-                            ParsedSampleIdentifier s = new DefaultParsedSampleIdentifier(
-                                    projectName: cmd.project,
-                                    pid: row.getCellByColumnTitle(PID).text.trim(),
-                                    sampleTypeDbName: row.getCellByColumnTitle(SAMPLE_TYPE).text.trim(),
-                                    fullSampleName: row.getCellByColumnTitle(SAMPLE_IDENTIFIER).text.trim(),
-                            )
-                            sampleIdentifierService.findOrSaveSampleIdentifier(s)
+            withForm {
+                String validate = cmd.validate()
+                if (validate.empty) {
+                    try {
+                        String content
+                        if (!cmd.sampleFile.empty) {
+                            content = new String(cmd.sampleFile.bytes)
+                        } else {
+                            content = cmd.sampleText
                         }
-                        message = 'Creation was successful'
-                        messageType = 'info'
+                        String delimiter = cmd.delimiter == "space" ? ' ' : cmd.delimiter == "tab" ? '\t' : cmd.delimiter
+                        content = content.replaceAll(" *${delimiter} *", delimiter)
+
+                        Spreadsheet spreadsheet = new Spreadsheet(content, delimiter)
+                        if (!spreadsheet.getColumn(PID)) {
+                            message = "Error: The column ${PID} does not exist"
+                            messageType = 'error'
+                        } else if (!spreadsheet.getColumn(SAMPLE_TYPE)) {
+                            message = "Error: The column ${SAMPLE_TYPE} does not exist"
+                            messageType = 'error'
+                        } else if (!spreadsheet.getColumn(SAMPLE_IDENTIFIER)) {
+                            message = "Error: The column ${SAMPLE_IDENTIFIER} does not exist"
+                            messageType = 'error'
+                        } else {
+                            spreadsheet.dataRows.each { Row row ->
+                                ParsedSampleIdentifier s = new DefaultParsedSampleIdentifier(
+                                        projectName: cmd.project,
+                                        pid: row.getCellByColumnTitle(PID).text.trim(),
+                                        sampleTypeDbName: row.getCellByColumnTitle(SAMPLE_TYPE).text.trim(),
+                                        fullSampleName: row.getCellByColumnTitle(SAMPLE_IDENTIFIER).text.trim(),
+                                )
+                                sampleIdentifierService.findOrSaveSampleIdentifier(s)
+                            }
+                            message = 'Creation was successful'
+                            messageType = 'info'
+                        }
+                    } catch (Throwable t) {
+                        log.error(t.message, t)
+                        message = "Error: The creation failed for ${t.message.replaceAll('\n', ' ')}"
+                        messageType = 'error'
                     }
-                } catch (Throwable t) {
-                    log.error(t.message, t)
-                    message = "Error: The creation failed for ${t.message.replaceAll('\n', ' ')}"
+                } else {
+                    message = "Error: The input was not valid: ${validate}"
                     messageType = 'error'
                 }
-            } else {
-                message = "Error: The input was not valid: ${validate}"
-                messageType = 'error'
+            }.invalidToken {
+                flash.message = g.message(code: "document.store.fail")
             }
         }
 

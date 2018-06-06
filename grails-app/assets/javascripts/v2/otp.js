@@ -1,6 +1,16 @@
 /*jslint browser: true */
 /*global $ */
 
+//secure request with token
+$(function () {
+    var token = $("meta[name='_csrf']").attr("content");
+    var header = $("meta[name='_csrf_header']").attr("content");
+    $(document).ajaxSend(function(e, xhr, options) {
+        if (options.type == "POST") {
+            xhr.setRequestHeader(header, token);
+        }
+});
+
 OTP = {
     contextPath:    $("head meta[name=contextPath]").attr("content"),
     controllerName: $("head meta[name=controllerName]").attr("content"),
