@@ -1,4 +1,5 @@
 package de.dkfz.tbi.otp.ngsdata
+
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.utils.*
@@ -73,18 +74,25 @@ class Project implements Commentable, Entity, AlignmentConfig {
                 return 'this name is already used in another project as nameInMetadataFiles entry'
             }
         })
+
         phabricatorAlias(nullable: true, unique: true, blank: true)
+
         dirName(blank: false, unique: true, validator: { String val ->
-            OtpPath.isValidRelativePath(val) &&
-                    ['icgc', 'dkfzlsdf', 'lsdf', 'project'].every { !val.startsWith("${it}/") }
+            OtpPath.isValidRelativePath(val)
         })
+
         dirAnalysis(nullable: true, validator: { String val ->
             !val || OtpPath.isValidAbsolutePath(val)
         })
+
         realm(nullable: false)
+
         projectGroup(nullable: true)
+
         processingPriority max: ProcessingPriority.MAXIMUM_PRIORITY
+
         alignmentDeciderBeanName(blank: false)  // If no alignment is desired, set to noAlignmentDecider instead of leaving blank
+
         nameInMetadataFiles(nullable: true, blank: false,  validator: {val, obj ->
             if (val) {
                 Project projectByMetadata = atMostOneElement(Project.findAllByNameInMetadataFiles(val))
@@ -97,15 +105,21 @@ class Project implements Commentable, Entity, AlignmentConfig {
                 }
             }
         })
+
         comment(nullable: true)
+
         mailingListName(nullable: true, validator: { val, obj ->
             if (val) {
                 return val.startsWith("tr_") && val.contains('@')
             }
         })
+
         description(nullable: true)
+
         unixGroup(nullable: true)
+
         costCenter(nullable: true)
+
         tumorEntity(nullable: true)
     }
 

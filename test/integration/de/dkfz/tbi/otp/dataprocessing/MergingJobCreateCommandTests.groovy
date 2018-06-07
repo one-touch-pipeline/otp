@@ -50,7 +50,7 @@ class MergingJobCreateCommandTests {
         realm = DomainFactory.createRealm()
         configService = new TestConfigService(['otp.processing.root.path': tempFolder.root.path])
 
-        basePath = "${configService.getProcessingRootPathFromSelfFoundContext().path}/dirName/results_per_pid/pid_1"
+        basePath = "${configService.getInstance().getProcessingRootPath().path}/dirName/results_per_pid/pid_1"
         basePathAlignment = "${basePath}/alignment"
         basePathMerging = "${basePath}/merging"
         basePathMergingOutput = "${basePathMerging}//sampleType-1/${SEQ_TYPE_NAME}/${LIBRARY_LAYOUT_NAME}/DEFAULT/0/pass0"

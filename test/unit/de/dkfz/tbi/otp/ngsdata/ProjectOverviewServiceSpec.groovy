@@ -15,6 +15,8 @@ import spock.lang.*
         ProjectCategory,
         ProcessingOption,
         Realm,
+        ReferenceGenome,
+        ReferenceGenomeProjectSeqType,
         RoddyWorkflowConfig,
         SeqType,
 ])
@@ -65,7 +67,7 @@ class ProjectOverviewServiceSpec extends Specification {
     @Unroll
     void "getRoddyAlignmentInformation, when useConfig is #useConvey and mergeTool is #mergeTool, return alignment info with the correct data"() {
         given:
-        RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig(["pluginVersion":"pluginVersion:1.1.0"])
+        RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig(["pluginVersion": "pluginVersion:1.1.0"])
         ProjectOverviewService service = new ProjectOverviewService([
                 processingOptionService   : new ProcessingOptionService(),
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
@@ -115,11 +117,11 @@ class ProjectOverviewServiceSpec extends Specification {
         GroovySystem.metaClassRegistry.removeMetaClass(ProcessHelperService)
 
         where:
-        useConvey | mergeTool                               || alignCommand         || alignOpt           || mergeCommand                              || mergeOpt       || roddyPipelineVersion
-        false     | MergeConstants.MERGE_TOOL_BIOBAMBAM     || 'BWA Version 1.0'    || 'alnOpt'           || 'Biobambam bammarkduplicates Version 3.0' || 'bioBamBamOpt' || 'pluginVersion:1.1.0'
-        false     | MergeConstants.MERGE_TOOL_PICARD        || 'BWA Version 1.0'    || 'alnOpt'           || 'Picard Version 4.0'                      || ''             || 'pluginVersion:1.1.0'
-        false     | MergeConstants.MERGE_TOOL_SAMBAMBA      || 'BWA Version 1.0'    || 'alnOpt'           || 'Sambamba Version 5.0'                    || 'sambambaOpt'  || 'pluginVersion:1.1.0'
-        true      | MergeConstants.MERGE_TOOL_BIOBAMBAM     || 'bwa-bb Version 2.0' || 'alnOpt conveyOpt' || 'Biobambam bammarkduplicates Version 3.0' || 'bioBamBamOpt' || 'pluginVersion:1.1.0'
+        useConvey | mergeTool                           || alignCommand         || alignOpt           || mergeCommand                              || mergeOpt       || roddyPipelineVersion
+        false     | MergeConstants.MERGE_TOOL_BIOBAMBAM || 'BWA Version 1.0'    || 'alnOpt'           || 'Biobambam bammarkduplicates Version 3.0' || 'bioBamBamOpt' || 'pluginVersion:1.1.0'
+        false     | MergeConstants.MERGE_TOOL_PICARD    || 'BWA Version 1.0'    || 'alnOpt'           || 'Picard Version 4.0'                      || ''             || 'pluginVersion:1.1.0'
+        false     | MergeConstants.MERGE_TOOL_SAMBAMBA  || 'BWA Version 1.0'    || 'alnOpt'           || 'Sambamba Version 5.0'                    || 'sambambaOpt'  || 'pluginVersion:1.1.0'
+        true      | MergeConstants.MERGE_TOOL_BIOBAMBAM || 'bwa-bb Version 2.0' || 'alnOpt conveyOpt' || 'Biobambam bammarkduplicates Version 3.0' || 'bioBamBamOpt' || 'pluginVersion:1.1.0'
     }
 
 
@@ -144,10 +146,11 @@ class ProjectOverviewServiceSpec extends Specification {
                 |SAMBAMBA_VERSION=3.0
                 |STAR_VERSION=2.0
 
-                |${['2PASS', 'OUT', 'CHIMERIC', 'INTRONS'].collect { name ->
-                        "STAR_PARAMS_${name}=${name}"
+                |${
+                ['2PASS', 'OUT', 'CHIMERIC', 'INTRONS'].collect { name ->
+                    "STAR_PARAMS_${name}=${name}"
                 }.join('\n')
-                }
+            }
             """.stripMargin(), '', 0)
         }
 
@@ -155,10 +158,10 @@ class ProjectOverviewServiceSpec extends Specification {
         ProjectOverviewService.AlignmentInfo alignmentInfo = service.getRoddyAlignmentInformation(roddyWorkflowConfig)
 
         then:
-        'STAR Version 2.0'  == alignmentInfo.bwaCommand
+        'STAR Version 2.0' == alignmentInfo.bwaCommand
         ['2PASS', 'OUT', 'CHIMERIC', 'INTRONS'].join(' ') == alignmentInfo.bwaOptions
         'Sambamba Version 3.0' == alignmentInfo.mergeCommand
-        ''  == alignmentInfo.mergeOptions
+        '' == alignmentInfo.mergeOptions
         'Version 1.0' == alignmentInfo.samToolsCommand
 
         cleanup:
@@ -237,6 +240,58 @@ class ProjectOverviewServiceSpec extends Specification {
 
         expect:
         alignmentInfo == projectOverviewService.getAlignmentInformationFromConfig(new Project())
+    }
+
+
+    void "listReferenceGenome, when one item, show one item in listing"() {
+        given:
+        ReferenceGenomeProjectSeqType rgpst = DomainFactory.createReferenceGenomeProjectSeqType()
+
+        when:
+        List<ReferenceGenomeProjectSeqType> list = new ProjectOverviewService().listReferenceGenome(rgpst.project)
+
+        then:
+        CollectionUtils.containSame(list, [rgpst])
+    }
+
+
+    void "listReferenceGenome, when searching other project, don't find this"() {
+        given:
+        Project otherProject = DomainFactory.createProject()
+        ReferenceGenomeProjectSeqType rgpst = DomainFactory.createReferenceGenomeProjectSeqType()
+
+        when:
+        List<ReferenceGenomeProjectSeqType> list = new ProjectOverviewService().listReferenceGenome(otherProject)
+
+        then:
+        CollectionUtils.containSame(list, [])
+    }
+
+
+    void "listReferenceGenome, when searching deprecated reference genome, don't find it"() {
+        given:
+        ReferenceGenomeProjectSeqType rgpst = DomainFactory.createReferenceGenomeProjectSeqType([deprecatedDate: new Date()])
+
+        when:
+        List<ReferenceGenomeProjectSeqType> list = new ProjectOverviewService().listReferenceGenome(rgpst.project)
+
+        then:
+        CollectionUtils.containSame(list, [])
+    }
+
+
+    void "listReferenceGenome, when multiple items, show all of them"() {
+        given:
+        Project theProject = DomainFactory.createProject()
+        ReferenceGenomeProjectSeqType rgpst1 = DomainFactory.createReferenceGenomeProjectSeqType([project: theProject])
+        ReferenceGenomeProjectSeqType rgpst2 = DomainFactory.createReferenceGenomeProjectSeqType([project: theProject])
+        ReferenceGenomeProjectSeqType rgpst3 = DomainFactory.createReferenceGenomeProjectSeqType([project: theProject])
+
+        when:
+        List<ReferenceGenomeProjectSeqType> list = new ProjectOverviewService().listReferenceGenome(theProject)
+
+        then:
+        CollectionUtils.containSame(list, [rgpst1, rgpst2, rgpst3])
     }
 
 }

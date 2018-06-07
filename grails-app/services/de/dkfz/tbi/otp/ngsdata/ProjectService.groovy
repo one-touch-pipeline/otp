@@ -102,6 +102,12 @@ class ProjectService {
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     public Project createProject(String name, String dirName, Realm realm, String alignmentDeciderBeanName, List<String> categoryNames) {
+        // check that our dirName is relative to the configured data root.
+        Path rootPath = configService.getRootPath().toPath()
+        List<String> rootPathElements = rootPath.toList()*.toString()
+        assert rootPathElements.every { !dirName.startsWith("${it}${File.separator}") }:
+                "project directory (${dirName}) contains (partial) data processing root path (${rootPath})"
+
         Project project = new Project(
                 name: name,
                 dirName: dirName,
@@ -109,8 +115,10 @@ class ProjectService {
                 alignmentDeciderBeanName: alignmentDeciderBeanName,
                 projectCategories: categoryNames.collect { exactlyOneElement(ProjectCategory.findAllByName(it)) },
         )
+
         project = project.save(flush: true)
         assert (project != null)
+
         // add to groups
         Group.list().each { Group group ->
             if (group.readProject) {

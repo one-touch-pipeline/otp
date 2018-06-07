@@ -25,7 +25,7 @@ class ProcessedMergedBamFileQaFileServiceTests {
         MergingPass mergingPass = createMergingPass()
         TestConfigService configService = new TestConfigService(['otp.processing.root.path': '/processing_root_path'])
         ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile(mergingPass)
-        String destinationExp = configService.getProcessingRootPathFromSelfFoundContext().path + "/project-dir/results_per_pid/patient/merging//sample-type/seq-type/library/DEFAULT/0/pass0/QualityAssessment/pass1/MD5SUMS"
+        String destinationExp = configService.getInstance().getProcessingRootPath().path + "/project-dir/results_per_pid/patient/merging//sample-type/seq-type/library/DEFAULT/0/pass0/QualityAssessment/pass1/MD5SUMS"
         String destinationAct = processedMergedBamFileQaFileService.qaResultsMd5sumFile(mergedBamFile)
         configService.clean()
         assertEquals(destinationExp, destinationAct)

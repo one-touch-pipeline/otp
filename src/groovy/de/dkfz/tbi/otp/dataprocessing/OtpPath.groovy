@@ -28,14 +28,14 @@ class OtpPath {
      * Path used in processing directory
      */
     File getAbsoluteDataProcessingPath() {
-        return getAbsolutePath(ConfigService.getProcessingRootPathFromSelfFoundContext())
+        return getAbsolutePath(ConfigService.getInstance().getProcessingRootPath())
     }
 
     /**
      * Path used in root
      */
     File getAbsoluteDataManagementPath() {
-        return getAbsolutePath(ConfigService.getRootPathFromSelfFoundContext())
+        return getAbsolutePath(ConfigService.getInstance().getRootPath())
     }
 
     private File getAbsolutePath(File path) {

@@ -44,31 +44,20 @@ class ConfigService implements ApplicationContextAware {
         this.otpProperties = (Map) properties
     }
 
-    static Realm getDefaultRealm() {
-        return exactlyOneElement(Realm.findAllByName(ProcessingOptionService.findOptionSafe(ProcessingOption.OptionName.REALM_DEFAULT_VALUE, null, null)))
+    static ConfigService getInstance() {
+        return context.getBean("configService")
     }
 
-    static File getRootPathFromSelfFoundContext() {
-        ConfigService configServiceBean = context.getBean("configService")
-        return configServiceBean.getRootPath()
+    static Realm getDefaultRealm() {
+        return exactlyOneElement(Realm.findAllByName(ProcessingOptionService.findOptionSafe(ProcessingOption.OptionName.REALM_DEFAULT_VALUE, null, null)))
     }
 
     File getRootPath() {
         return new File(otpProperties.get("otp.root.path") ?: "")
     }
 
-    static File getProcessingRootPathFromSelfFoundContext() {
-        ConfigService configServiceBean = context.getBean("configService")
-        return configServiceBean.getProcessingRootPath()
-    }
-
     File getProcessingRootPath() {
         return new File(otpProperties.get("otp.processing.root.path") ?: "")
-    }
-
-    static File getLoggingRootPathFromSelfFoundContext() {
-        ConfigService configServiceBean = context.getBean("configService")
-        return configServiceBean.getLoggingRootPath()
     }
 
     File getLoggingRootPath() {

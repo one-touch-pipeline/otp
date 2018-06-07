@@ -211,6 +211,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         'project'      | 'dir'     | 'testProject2'      || 'this nameInMetadataFiles is already used in another project as nameInMetadataFiles entry' | 'on field \'nameInMetadataFiles\': rejected value [testProject2]'
         'project'      | 'dir'     | ''                  || 'blank' | 'on field \'nameInMetadataFiles\': rejected value []'
         'project'      | 'testDir' | ''                  || 'unique' | 'on field \'dirName\': rejected value [testDir]'
+        'project'      | '/abs/path' | 'project'         || 'custom validation' | "on field 'dirName': rejected value [/abs/path];"
     }
 
     void "test createProject invalid unix group"() {
