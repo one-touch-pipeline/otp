@@ -4,6 +4,7 @@ import de.dkfz.tbi.otp.administration.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.utils.*
+import groovy.transform.TupleConstructor
 import org.springframework.security.access.prepost.*
 
 import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
@@ -44,23 +45,52 @@ class UserProjectRoleService {
                     email: ldapUserDetails.mail,
                     realName: ldapUserDetails.realName,
             ]))
-            assert user : "user could not be created"
         }
         UserProjectRole userProjectRole = UserProjectRole.findByUserAndProject(user, project)
-        assert !userProjectRole : "User '"+user.username+"' is already part of project '"+project.name+"'"
-
+        assert !userProjectRole : "User '${user.username}' is already part of project '${project.name}'"
         userProjectRole = createUserProjectRole(user, project, projectRole, true, false)
 
+        Role role = Role.findByAuthority("ROLE_USER")
+        if (!UserRole.findByUserAndRole(user, role)) {
+            UserRole.create(user, role, true)
+        }
+
         if (projectRole.accessToFiles) {
-            notifyAdministration(userProjectRole)
+            requestToAddUserToUnixGroupIfRequired(userProjectRole.user, userProjectRole.project)
         }
     }
 
-    void notifyAdministration(UserProjectRole userProjectRole) {
-        String subject = "Request to add user '"+userProjectRole.user.username+"' to project '"+userProjectRole.project.name+"'"
-        String body = "adtool groupadduser ${userProjectRole.project.name} ${userProjectRole.user.username}"
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS')")
+    void requestToAddUserToUnixGroupIfRequired(User user, Project project) {
+        String[] groupNames = ldapService.getGroupsOfUserByUsername(user.username)
+        if (!(project.unixGroup in groupNames)) {
+            notifyAdministration(user, project, AdtoolAction.ADD)
+        }
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS')")
+    void requestToRemoveUserFromUnixGroupIfRequired(User user, Project project) {
+        if (!UserProjectRole.findAllByUserAndProjectInListAndProjectRoleInListAndEnabled(
+                    user,
+                    Project.findAllByUnixGroupAndIdNotEqual(project.unixGroup, project.id),
+                    ProjectRole.findAllByAccessToFiles(true),
+                    true)
+        ) {
+            notifyAdministration(user, project, AdtoolAction.REMOVE)
+        }
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS')")
+    void notifyAdministration(User user, Project project, AdtoolAction adtool) {
+        String formattedAction = adtool.toString().toLowerCase()
+        String subject = "Request to ${formattedAction} user '${user.username}' ${adtool == AdtoolAction.ADD ? 'to' : 'from'} project '${project.name}'"
+        String body = "adtool group${formattedAction}user ${project.name} ${user.username}"
         String email = ProcessingOptionService.getValueOfProcessingOption(EMAIL_LINUX_GROUP_ADMINISTRATION)
         mailHelperService.sendEmail(subject, body, email)
+    }
+
+    private enum AdtoolAction {
+        ADD, REMOVE
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'DELEGATE_USER_MANAGEMENT')")
@@ -68,6 +98,19 @@ class UserProjectRoleService {
         assert userProjectRole: "the input userProjectRole must not be null"
         userProjectRole.manageUsers = manageUsers
         assert userProjectRole.save(flush: true, failOnError: true)
+        return userProjectRole
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS')")
+    UserProjectRole updateEnabledStatus(UserProjectRole userProjectRole, boolean enabled) {
+        assert userProjectRole: "the input userProjectRole must not be null"
+        userProjectRole.enabled = enabled
+        assert userProjectRole.save(flush: true, failOnError: true)
+        if (enabled) {
+            requestToAddUserToUnixGroupIfRequired(userProjectRole.user, userProjectRole.project)
+        } else {
+            requestToRemoveUserFromUnixGroupIfRequired(userProjectRole.user, userProjectRole.project)
+        }
         return userProjectRole
     }
 

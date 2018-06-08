@@ -106,6 +106,18 @@ class ProjectUserController {
         redirect(action: "index")
     }
 
+    def switchEnabledStatus(SwitchEnabledStatusCommand cmd) {
+        if (cmd.hasErrors()) {
+            flash.errors = cmd.errors.getFieldError().code
+            flash.message = "An error occurred"
+        } else {
+            flash.errors = false
+            flash.message = "User successfully ${cmd.enabled ? 'activated' : 'deactivated'}"
+            userProjectRoleService.updateEnabledStatus(cmd.userProjectRole, cmd.enabled)
+        }
+        redirect(action: "index")
+    }
+
     def addUserToProject(AddUserToProjectCommand cmd) {
         String message = ""
         String errorMessage = ""
@@ -286,6 +298,23 @@ class UpdateManageUsersCommand implements Serializable {
 
     void setManageUsers(boolean value) {
         manageUsers = !value
+    }
+}
+
+class SwitchEnabledStatusCommand implements Serializable {
+    UserProjectRole userProjectRole
+    boolean enabled
+
+    static constraints = {
+        enabled(validator: {val, obj ->
+            if (val == obj.userProjectRole?.enabled) {
+                return 'No Change'
+            }
+        })
+    }
+
+    void setEnabled(boolean value) {
+        enabled = !value
     }
 }
 

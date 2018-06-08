@@ -97,7 +97,9 @@
                         </sec:access>
                         <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${project.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'MANAGE_USERS')">
                             <td>
-                                <input type="button" class="deleteButton" value="${g.message(code: 'projectUser.table.denyAccess')}" data-id="${userEntry.userProjectRole.id}"/>
+                                <g:form action="switchEnabledStatus" params='["userProjectRole.id": userEntry.userProjectRole.id, "enabled": userEntry.userProjectRole.enabled]'>
+                                    <g:submitButton name="${g.message(code: 'projectUser.table.deactivateUser')}"/>
+                                </g:form>
                             </td>
                         </sec:access>
                     </tr>
@@ -128,6 +130,22 @@
                 <g:each in="${disabledProjectUsers}" var="userEntry">
                 <tr>
                     <td>${userEntry.user.username}</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${project.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'MANAGE_USERS')">
+                        <td>
+                            <g:form action="switchEnabledStatus" params='["userProjectRole.id": userEntry.userProjectRole.id, "enabled": userEntry.userProjectRole.enabled]'>
+                                <g:submitButton name="${g.message(code: 'projectUser.table.activateUser')}"/>
+                            </g:form>
+                        </td>
+                    </sec:access>
                 </tr>
                 </g:each>
             </table>

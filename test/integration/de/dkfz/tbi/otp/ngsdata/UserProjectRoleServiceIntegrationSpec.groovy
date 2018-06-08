@@ -11,10 +11,18 @@ import spock.lang.*
 import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
 
 class UserProjectRoleServiceIntegrationSpec extends Specification implements UserAndRoles {
-    UserProjectRoleService userProjectRoleService = new UserProjectRoleService()
+    UserProjectRoleService userProjectRoleService
 
     def setup() {
+        userProjectRoleService = new UserProjectRoleService()
         createUserAndRoles()
+        userProjectRoleService.mailHelperService = Mock(MailHelperService)
+        DomainFactory.createProcessingOptionLazy(
+                name: EMAIL_LINUX_GROUP_ADMINISTRATION,
+                type: null,
+                project: null,
+                value: "administrationMail@dummy.com",
+        )
     }
 
     void "test manageUsers is removed and not granted when updating the project role"() {
@@ -89,39 +97,42 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
     void "notifyAdministration sends email with correct content"() {
         given:
-        DomainFactory.createProcessingOptionLazy(
-                name: EMAIL_LINUX_GROUP_ADMINISTRATION,
-                type: null,
-                project: null,
-                value: "administrationMail@dummy.com",
-        )
-        userProjectRoleService.mailHelperService = Mock(MailHelperService)
-        UserProjectRole userProjectRole = DomainFactory.createUserProjectRole()
+        User user = DomainFactory.createUser()
+        Project project = DomainFactory.createProject()
+        String formattedAction = adtoolaction.toString().toLowerCase()
 
         when:
-        userProjectRoleService.notifyAdministration(userProjectRole)
+        userProjectRoleService.notifyAdministration(user, project, adtoolaction)
 
         then:
         1 * userProjectRoleService.mailHelperService.sendEmail(
-                "Request to add user '${userProjectRole.user.username}' to project '${userProjectRole.project.name}'",
-                "adtool groupadduser ${userProjectRole.project.name} ${userProjectRole.user.username}",
+                "Request to ${formattedAction} user '${user.username}' ${conjunction} project '${project.name}'",
+                "adtool group${formattedAction}user ${project.name} ${user.username}",
                 ProcessingOptionService.getValueOfProcessingOption(EMAIL_LINUX_GROUP_ADMINISTRATION)
         )
+
+        where:
+        conjunction | adtoolaction
+        "to"        | UserProjectRoleService.AdtoolAction.ADD
+        "from"      | UserProjectRoleService.AdtoolAction.REMOVE
     }
 
     void "addUserToProjectAndNotifyGroupManagementAuthorities, create User if non is found for username or email"() {
         given:
+        Project project = DomainFactory.createProject()
+        ProjectRole projectRole = DomainFactory.createProjectRole()
         LdapUserDetails ldapUserDetails = new LdapUserDetails(
                 cn:       "unknownUser",
                 realName: "Unknown User",
                 mail:     "unknownUser@dummy.com",
         )
-        Project project = DomainFactory.createProject()
-        ProjectRole projectRole = DomainFactory.createProjectRole()
-        userProjectRoleService.userService = Spy(UserService)
+        userProjectRoleService.userService = new UserService()
         userProjectRoleService.ldapService = Mock(LdapService) {
             getLdapUserDetailsByUsernameOrMailOrRealName(_) >> ldapUserDetails
         }
+
+        expect:
+        User.findByUsernameAndEmail(ldapUserDetails.cn, ldapUserDetails.mail) == null
 
         when:
         SpringSecurityUtils.doWithAuth(OPERATOR) {
@@ -129,13 +140,14 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         }
 
         then:
-        1 * userProjectRoleService.userService.createUser(_)
+        User.findByUsernameAndEmail(ldapUserDetails.cn, ldapUserDetails.mail)
     }
 
     void "addUserToProjectAndNotifyGroupManagementAuthorities, throw exception when user is already connected to project"() {
         given:
         User user = DomainFactory.createUser()
         Project project = DomainFactory.createProject()
+        ProjectRole projectRole = DomainFactory.createProjectRole()
         DomainFactory.createUserProjectRole(
                 user:    user,
                 project: project
@@ -151,7 +163,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         when:
         SpringSecurityUtils.doWithAuth(OPERATOR) {
-            userProjectRoleService.addUserToProjectAndNotifyGroupManagementAuthority(project, DomainFactory.createProjectRole(), "search")
+            userProjectRoleService.addUserToProjectAndNotifyGroupManagementAuthority(project, projectRole, "search")
         }
 
         then:
@@ -169,10 +181,12 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
                 realName: user.realName,
                 mail:     user.email,
         )
-        userProjectRoleService = Spy(UserProjectRoleService)
         userProjectRoleService.ldapService = Mock(LdapService) {
             getLdapUserDetailsByUsernameOrMailOrRealName(_) >> ldapUserDetails
         }
+
+        expect:
+        UserProjectRole.findByUserAndProjectAndProjectRole(user, project, projectRole) == null
 
         when:
         SpringSecurityUtils.doWithAuth(OPERATOR) {
@@ -180,7 +194,33 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         }
 
         then:
-        1 * userProjectRoleService.createUserProjectRole(user, project, projectRole, true, false)
+        UserProjectRole.findByUserAndProjectAndProjectRole(user, project, projectRole)
+    }
+
+    void "addUserToProjectAndNotifyGroupManagementAuthorities, create UserRole with role ROLE_USER if it does not exist"() {
+        given:
+        User user = DomainFactory.createUser()
+        Project project = DomainFactory.createProject()
+        ProjectRole projectRole = DomainFactory.createProjectRole()
+        LdapUserDetails ldapUserDetails = new LdapUserDetails(
+                cn:       user.username,
+                realName: user.realName,
+                mail:     user.email,
+        )
+        userProjectRoleService.ldapService = Mock(LdapService) {
+            getLdapUserDetailsByUsernameOrMailOrRealName(_) >> ldapUserDetails
+        }
+
+        expect:
+        UserRole.findByUserAndRole(user, Role.findByAuthority("ROLE_USER")) == null
+
+        when:
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            userProjectRoleService.addUserToProjectAndNotifyGroupManagementAuthority(project, projectRole, "search")
+        }
+
+        then:
+        UserRole.findByUserAndRole(user, Role.findByAuthority("ROLE_USER"))
     }
 
     void "addUserToProjectAndNotifyGroupManagementAuthorities, unsuccessful ldap search throws exception"() {
@@ -201,27 +241,19 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         e.message.contains('can not be resolved to a user via LDAP')
     }
 
-    void "addUserToProjectAndNotifyGroupManagementAuthorities, send mail for users with access to files"() {
+    void "addUserToProjectAndNotifyGroupManagementAuthorities, send mail only for users with access to files"() {
         given:
-        DomainFactory.createProcessingOptionLazy(
-                name: EMAIL_LINUX_GROUP_ADMINISTRATION,
-                type: null,
-                project: null,
-                value: "administrationMail@dummy.com",
-        )
         User user = DomainFactory.createUser()
-        Project project = DomainFactory.createProject()
-        ProjectRole projectRole = DomainFactory.createProjectRole(accessToFiles: true)
+        Project project = DomainFactory.createProject(unixGroup: "UNIX_GROUP")
+        ProjectRole projectRole = DomainFactory.createProjectRole(accessToFiles: fileAccess)
         LdapUserDetails ldapUserDetails = new LdapUserDetails(
                 cn:       user.username,
                 realName: user.realName,
                 mail:     user.email,
         )
-        userProjectRoleService = Spy(UserProjectRoleService)
-        userProjectRoleService.userService = Mock(UserService)
-        userProjectRoleService.mailHelperService = Mock(MailHelperService)
         userProjectRoleService.ldapService = Mock(LdapService) {
             getLdapUserDetailsByUsernameOrMailOrRealName(_) >> ldapUserDetails
+            getGroupsOfUserByUsername(_) >> []
         }
 
         when:
@@ -230,11 +262,124 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         }
 
         then:
-        1 * userProjectRoleService.createUserProjectRole(user, project, projectRole, true, false)
-        1 * userProjectRoleService.mailHelperService.sendEmail(
-                "Request to add user '${user.username}' to project '${project.name}'",
-                "adtool groupadduser ${project.name} ${user.username}",
-                ProcessingOptionService.getValueOfProcessingOption(EMAIL_LINUX_GROUP_ADMINISTRATION)
+        invocations * userProjectRoleService.mailHelperService.sendEmail(_, _, _)
+
+        where:
+        fileAccess | invocations
+        true       | 1
+        false      | 0
+    }
+
+    void "requestToAddUserToUnixGroupIfRequired, only send notification when user is not already in group"() {
+        given:
+        User user = DomainFactory.createUser()
+        Project project = DomainFactory.createProject(unixGroup: "UNIX_GROUP")
+
+        userProjectRoleService.ldapService = Mock(LdapService) {
+            getGroupsOfUserByUsername(_) >> unixGroupsOfUser
+        }
+
+        when:
+        userProjectRoleService.requestToAddUserToUnixGroupIfRequired(user, project)
+
+        then:
+        invocations * userProjectRoleService.mailHelperService.sendEmail(_, _, _)
+
+        where:
+        invocations | unixGroupsOfUser
+        0           | ["UNIX_GROUP"]
+        0           | ["UNIX_GROUP", "OTHER_GROUP"]
+        1           | ["OTHER_GROUP"]
+        1           | []
+    }
+
+    void "requestToRemoveUserFromUnixGroupIfRequired, user is not in projects with shared unix groups or no others exist"() {
+        given:
+        Project project = DomainFactory.createProject(unixGroup: unixGroup1)
+        DomainFactory.createProject(unixGroup: unixGroup2)
+
+        when:
+        userProjectRoleService.requestToRemoveUserFromUnixGroupIfRequired(DomainFactory.createUser(), project)
+
+        then:
+        1 * userProjectRoleService.mailHelperService.sendEmail(_, _, _)
+
+        where:
+        unixGroup1 | unixGroup2
+        "shared"   | "shared"
+        "shared"   | "not_shared"
+    }
+
+    void "requestToRemoveUserFromUnixGroupIfRequired, removed user has no remaining file access role in projects with shared unix group"() {
+        given:
+        String unixGroup = "unix_group"
+        User user = DomainFactory.createUser()
+        Project project1 = DomainFactory.createProject(unixGroup: unixGroup)
+        Project project2 = DomainFactory.createProject(unixGroup: unixGroup)
+        DomainFactory.createUserProjectRole(
+                user: user,
+                project: project1,
+                projectRole: DomainFactory.createProjectRole(accessToFiles: true),
         )
+        DomainFactory.createUserProjectRole(
+                user: user,
+                project: project2,
+                projectRole: DomainFactory.createProjectRole(accessToFiles: false),
+        )
+
+        when:
+        userProjectRoleService.requestToRemoveUserFromUnixGroupIfRequired(user, project1)
+
+        then:
+        1 * userProjectRoleService.mailHelperService.sendEmail(_, _, _)
+    }
+
+    void "requestToRemoveUserFromUnixGroupIfRequired, file access role in disabled UserProjectRole"() {
+        given:
+        String unixGroup = "unix_group"
+        User user = DomainFactory.createUser()
+        Project project1 = DomainFactory.createProject(unixGroup: unixGroup)
+        Project project2 = DomainFactory.createProject(unixGroup: unixGroup)
+        DomainFactory.createUserProjectRole(
+                user: user,
+                project: project1,
+                projectRole: DomainFactory.createProjectRole(accessToFiles: true),
+        )
+        DomainFactory.createUserProjectRole(
+                user: user,
+                project: project2,
+                projectRole: DomainFactory.createProjectRole(accessToFiles: true),
+                enabled: false,
+        )
+
+        when:
+        userProjectRoleService.requestToRemoveUserFromUnixGroupIfRequired(user, project1)
+
+        then:
+        1 * userProjectRoleService.mailHelperService.sendEmail(_, _, _)
+    }
+
+    void "requestToRemoveUserFromUnixGroupIfRequired, removed user has file access role in project with same unix group"() {
+        given:
+        String unixGroup = "unix_group"
+        User user = DomainFactory.createUser()
+        Project project1 = DomainFactory.createProject(unixGroup: unixGroup)
+        Project project2 = DomainFactory.createProject(unixGroup: unixGroup)
+        DomainFactory.createUserProjectRole(
+                user: user,
+                project: project1,
+                projectRole: DomainFactory.createProjectRole(accessToFiles: true),
+        )
+        DomainFactory.createUserProjectRole(
+                user: user,
+                project: project2,
+                projectRole: DomainFactory.createProjectRole(accessToFiles: true),
+        )
+
+        when:
+        userProjectRoleService.requestToRemoveUserFromUnixGroupIfRequired(user, project1)
+
+        then:
+        0 * userProjectRoleService.mailHelperService.sendEmail(_, _, _)
     }
 }

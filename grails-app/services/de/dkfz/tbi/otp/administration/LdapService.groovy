@@ -100,6 +100,16 @@ class LdapService implements InitializingBean {
                        .and("memberOf").is(distinguishedName),
                 new UsernameAttributesMapper())
     }
+
+    List<String> getGroupsOfUserByUsername(String username) {
+        if (username == null) {
+            return []
+        }
+        return ldapTemplate.search(
+                query().where("objectCategory").is("user")
+                       .and("cn").is(username),
+                new MemberOfAttributesMapper())[0]
+    }
 }
 
 class LdapuserDetailsAttributesMapper implements AttributesMapper<LdapUserDetails> {
@@ -136,6 +146,16 @@ class UsernameAttributesMapper implements AttributesMapper<String> {
     @Override
     String mapFromAttributes(Attributes a) throws NamingException {
         return a.get("cn")?.get()?.toString()
+    }
+}
+
+class MemberOfAttributesMapper implements AttributesMapper<List<String>> {
+    @Override
+    List<String> mapFromAttributes(Attributes a) throws NamingException {
+        return a.get("memberOf")?.getAll()?.collect {
+            Matcher matcher = it =~ /CN=(?<cn>[^,]*),.*/
+            if (matcher.matches() && matcher.group('cn')) return matcher.group('cn')
+        }
     }
 }
 
