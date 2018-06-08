@@ -65,7 +65,7 @@
                                     template="dropDown"
                                     link="${g.createLink(controller: 'projectUser', action: 'updateProjectRole', params: ["userProjectRole.id": userEntry.userProjectRole.id])}"
                                     value="${userEntry.projectRole?.name ?: ''}"
-                                    values="${availableRoles}"/>
+                                    values="${availableRoles*.name}"/>
                         </td>
                         <td><img src="${assetPath(src: userEntry.otpAccess.iconName)}" title="${userEntry.otpAccess.description}"></td>
                         <td><img src="${assetPath(src: userEntry.fileAccess.iconName)}" title="${userEntry.fileAccess.description}"></td>
@@ -145,6 +145,26 @@
             <h3>
                 <g:message code="projectUser.addMember"/>
             </h3>
+
+            <h3>
+                <g:message code="projectUser.roleExplanation.title"/>
+            </h3>
+            <table class="projectRoleLegend">
+                <tr>
+                    <th><g:message code="projectUser.roleExplanation.role"/></th>
+                    <g:each in="${["otpAccess", "fileAccess", "userManager"]}" var="property">
+                        <th><g:message code="projectUser.roleExplanation.${property}"/></th>
+                    </g:each>
+                </tr>
+                <g:each in="${availableRoles}" var="role">
+                    <tr>
+                        <td>${role.name}</td>
+                        <g:each in="${[role.accessToOtp, role.accessToFiles, role.manageUsersAndDelegate]}" var="property">
+                            <td><img src="${assetPath(src: property ? 'ok.png' : 'error.png')}"></td>
+                        </g:each>
+                    </tr>
+                </g:each>
+            </table>
         </sec:access>
     </g:if>
     <g:else>

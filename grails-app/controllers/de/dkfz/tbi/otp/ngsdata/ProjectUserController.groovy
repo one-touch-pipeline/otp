@@ -75,7 +75,7 @@ class ProjectUserController {
                 disabledProjectUsers: disabledProjectUsers,
                 usersWithoutUserProjectRole: usersWithoutUserProjectRole,
                 unknownUsersWithFileAccess: nonDatabaseUsers,
-                availableRoles: ProjectRole.findAll()*.name,
+                availableRoles: ProjectRole.findAll(),
                 hasErrors: params.hasErrors,
                 message: params.message,
         ]
