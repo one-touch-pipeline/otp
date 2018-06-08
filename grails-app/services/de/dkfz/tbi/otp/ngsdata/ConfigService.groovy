@@ -54,6 +54,7 @@ class ConfigService implements ApplicationContextAware {
         return exactlyOneElement(Realm.findAllByName(ProcessingOptionService.findOptionSafe(ProcessingOption.OptionName.REALM_DEFAULT_VALUE, null, null)))
     }
 
+
     File getRootPath() {
         return new File(otpProperties.get("otp.root.path") ?: "")
     }
@@ -62,12 +63,21 @@ class ConfigService implements ApplicationContextAware {
         return new File(otpProperties.get("otp.processing.root.path") ?: "")
     }
 
+    File getToolsPath() {
+        return new File(otpProperties.get("otp.path.tools") ?: "")
+    }
+
+
     File getLoggingRootPath() {
         return new File(otpProperties.get("otp.logging.root.path") ?: "")
     }
 
-    File getToolsPath() {
-        return new File(otpProperties.get("otp.path.tools") ?: "")
+    File getJobLogDirectory() {
+        return getAndCheckPathFromProperty("otp.logging.jobLogDir", "logs/jobs/")
+    }
+
+    File getStackTracesDirectory() {
+        return getAndCheckPathFromProperty('otp.errorLogging.stacktraces', "logs/stacktraces/")
     }
 
     // this path is where the metadata file is copied
@@ -75,9 +85,10 @@ class ConfigService implements ApplicationContextAware {
         return new File(otpProperties.get("otp.path.seqCenterInbox") ?: "")
     }
 
-    File getProjectSequencePath(Project proj) {
-        return new File("${getRootPath().path}/${proj.dirName}/sequencing/")
+    File getProjectSequencePath(Project project) {
+        return new File("${getRootPath().path}/${project.dirName}/sequencing/")
     }
+
 
     String getSshUser() {
         return otpProperties.get("otp.ssh.user") ?: ""
@@ -94,6 +105,7 @@ class ConfigService implements ApplicationContextAware {
     File getSshKeyFile() {
         return new File(otpProperties.get("otp.ssh.keyFile") ?: System.getProperty("user.home") + "/.ssh/id_rsa")
     }
+
 
     boolean otpSendsMails() {
         return getBooleanValue("otp.mail.allowOtpToSendMails", false)
@@ -146,13 +158,6 @@ class ConfigService implements ApplicationContextAware {
         }
     }
 
-    File getJobLogDirectory() {
-        return getAndCheckPathFromProperty("otp.logging.jobLogDir", "logs/jobs/")
-    }
-
-    File getStackTracesDirectory() {
-        return getAndCheckPathFromProperty('otp.errorLogging.stacktraces', "logs/stacktraces/")
-    }
 
     private File getAndCheckPathFromProperty(String property, String defaultValue) {
         File file = new File(otpProperties.get(property) ?: defaultValue)

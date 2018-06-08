@@ -12,7 +12,7 @@ ProcessingOptionService processingOptionService = ctx.processingOptionService
         (ProcessingOption.OptionName.EMAIL_SENDER)                     : '',
         (ProcessingOption.OptionName.EMAIL_RECIPIENT_NOTIFICATION)     : '',
         (ProcessingOption.OptionName.EMAIL_RECIPIENT_ERRORS)           : '',
-        (ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)             : '',
+        (ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)             : 'otp',
         (ProcessingOption.OptionName.BASE_PATH_REFERENCE_GENOME)       : '',
 
         (ProcessingOption.OptionName.GUI_ABOUT_OTP)                    : '',
@@ -22,10 +22,13 @@ ProcessingOptionService processingOptionService = ctx.processingOptionService
         (ProcessingOption.OptionName.GUI_CONTACT_DATA_POSTAL_ADDRESS)  : '',
         (ProcessingOption.OptionName.GUI_CONTACT_DATA_SUPPORT_EMAIL)   : '',
 
-
         (ProcessingOption.OptionName.COMMAND_LOAD_MODULE_LOADER)       : '',
+        (ProcessingOption.OptionName.COMMAND_ACTIVATION_FASTQC)        : 'module load fastqc/0.11.5',
+        (ProcessingOption.OptionName.COMMAND_ACTIVATION_GROOVY)        : 'module load groovy/2.4.15',
+        (ProcessingOption.OptionName.COMMAND_ACTIVATION_SAMTOOLS)      : 'module load samtools/1.2',
+        (ProcessingOption.OptionName.COMMAND_GROOVY)                   : 'groovy',
+        (ProcessingOption.OptionName.COMMAND_SAMTOOLS)                 : 'samtools',
         (ProcessingOption.OptionName.COMMAND_FASTQC)                   : 'fastqc',
-        (ProcessingOption.OptionName.COMMAND_ACTIVATION_FASTQC)        : '',
 
         (ProcessingOption.OptionName.MAXIMUM_EXECUTED_RODDY_PROCESSES) : '10',
         (ProcessingOption.OptionName.MAXIMUM_PARALLEL_SSH_CALLS)       : '30',

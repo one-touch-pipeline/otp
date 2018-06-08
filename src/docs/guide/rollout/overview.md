@@ -23,7 +23,7 @@ CLUSTER
 
 Additional a cluster is needed, where the complex jobs are running. Currently the following system are supported:
 - PBS
-- LSF (support currently added)
+- LSF
 
 User
 ----
@@ -59,9 +59,15 @@ The following additional variables are used:
 - $IP_WEB: the ip of the host $WEB_HOST
 - $IP_DB: the ip of the host $DB_HOST
 - $TOMCAT_VERSION: the version of tomcat, here 8.5.23
-- $DOWNLOAD_PATH: the path used for download
-- $WORK_DIRECTORY
-- $FASTQC_ZIP: name of the downloaded fastqc program
 
+
+Installation
+------------
+To install you can use the ansible playbook from the ansible repository:
+```
+ansible-playbook --ask-become-pass database.yml
+ansible-playbook --ask-become-pass roddy.yml
+ansible-playbook --ask-become-pass otp-web.yml
+```
 
 [Back to Rollout Overview](index.md)

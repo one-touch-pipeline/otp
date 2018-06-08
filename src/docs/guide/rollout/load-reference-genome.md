@@ -40,8 +40,8 @@ We have also the following reference genomes, but the load script for them is ou
 Variables
 ---------
 
-- $REFERENCE_GENOME_BASE_PATH: The base path where all the reference genomes are stored,
-  for example $WORK_DIRECTORY/reference_genome
+- $REFERENCE_GENOME_BASE_PATH: The base path where all the reference genomes are stored.
+  This value was set in the previous step.
 - $REFERENCE_GENOME: The new reference genome
 
 
@@ -57,6 +57,8 @@ Prepare reference genome
 
 * Copy the script to load the reference genome into it and execute it.
 
+
+* For reference genomes to be used by the ACEseq workflow you need to load additional values into the database.
 
 
 [Back to Rollout Overview](index.md)

@@ -23,7 +23,7 @@ SoftwareTool.withTransaction {
     )
     println softwareTool.save(flush: true)
 
-    println 'Please add a SoftwareToolIdentifier on ' + ctx.getBean(ApplicationTagLib).createLink(
+    println 'Please add an alias on ' + ctx.getBean(ApplicationTagLib).createLink(
             controller: 'softwareTool', action: 'list', absolute: 'true')
 }
 ''
