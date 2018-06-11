@@ -99,6 +99,10 @@ class MetadataImportService {
 
     ValidateAndImportResult validateAndImport(Path metadataFile, String directoryStructureName, boolean align, RunSegment.ImportMode importMode, boolean ignoreWarnings, String previousValidationMd5sum, String ticketNumber, String seqCenterComment, boolean automaticNotification) {
         MetadataValidationContext context = validate(metadataFile, directoryStructureName)
+        return importHelperMethod(context, align, importMode, ignoreWarnings, previousValidationMd5sum, ticketNumber, seqCenterComment, automaticNotification)
+    }
+
+    private ValidateAndImportResult importHelperMethod(MetadataValidationContext context, boolean align, RunSegment.ImportMode importMode, boolean ignoreWarnings, String previousValidationMd5sum, String ticketNumber, String seqCenterComment, boolean automaticNotification) {
         MetaDataFile metadataFileObject = null
         if (mayImport(context, ignoreWarnings, previousValidationMd5sum)) {
             metadataFileObject = importMetadataFile(context, align, importMode, ticketNumber, seqCenterComment, automaticNotification)
@@ -151,8 +155,11 @@ class MetadataImportService {
     }
 
     List<ValidateAndImportResult> validateAndImportMultiple(String otrsTicketNumber, List<Path> metadataFiles, String directoryStructureName) {
-        List<ValidateAndImportResult> results = metadataFiles.collect {
-            validateAndImport(it, directoryStructureName, true, RunSegment.ImportMode.AUTOMATIC, false, null, otrsTicketNumber, null, true)
+        List<MetadataValidationContext> contexts = metadataFiles.collect {
+            return validate(it, directoryStructureName)
+        }
+        List<ValidateAndImportResult> results = contexts.collect {
+            return importHelperMethod(it, true, RunSegment.ImportMode.AUTOMATIC, false, null, otrsTicketNumber, null, true)
         }
         List<MetadataValidationContext> failedValidations = results.findAll { it.metadataFile == null }*.context
         if (failedValidations.isEmpty()) {
@@ -217,7 +224,7 @@ class MetadataImportService {
         return directoryStructure
     }
 
-    public static boolean mayImport(AbstractMetadataValidationContext context, boolean ignoreWarnings, String previousValidationMd5sum) {
+    static boolean mayImport(AbstractMetadataValidationContext context, boolean ignoreWarnings, String previousValidationMd5sum) {
         Level maxLevel = context.maximumProblemLevel
         if (maxLevel.intValue() < Level.WARNING.intValue()) {
             return true
