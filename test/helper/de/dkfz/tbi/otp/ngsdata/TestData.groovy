@@ -232,6 +232,7 @@ class TestData {
             project: project,
             seqType: seqType,
             referenceGenome: referenceGenome,
+            statSizeFileName: DomainFactory.DEFAULT_TAB_FILE_NAME,
         ] + properties)
     }
 
@@ -327,7 +328,9 @@ class TestData {
                 seqPlatformGroup: properties.get('seqPlatformGroup') ?: DomainFactory.createSeqPlatformGroup(),
                 referenceGenome: properties.get('referenceGenome') ?: DomainFactory.createReferenceGenome(),
                 libraryPreparationKit: properties.get('libraryPreparationKit'),
-                pipeline: properties.get('pipeline') ?: DomainFactory.createDefaultOtpPipeline(),
+                statSizeFileName     : properties.pipeline?.name == Pipeline.Name.PANCAN_ALIGNMENT || properties.pipeline == null ?
+                            DomainFactory.DEFAULT_TAB_FILE_NAME : null,
+                pipeline: properties.get('pipeline') ?: DomainFactory.createPanCanPipeline(),
         ] + properties)
         return mergingWorkPackage
     }

@@ -198,7 +198,8 @@ LIBRARY\tUNPAIRED_READS_EXAMINED\tREAD_PAIRS_EXAMINED\tUNMAPPED_READS\tUNPAIRED_
 
         MergingWorkPackage mergingWorkPackage = new TestData().createMergingWorkPackage(
                         sample: sample,
-                        seqType: seqType
+                        seqType: seqType,
+                        pipeline: DomainFactory.createDefaultOtpPipeline(),
                         )
         assertNotNull(mergingWorkPackage.save([flush: true, failOnError: true]))
 

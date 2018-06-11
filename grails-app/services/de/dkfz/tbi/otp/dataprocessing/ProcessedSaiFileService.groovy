@@ -42,32 +42,6 @@ class ProcessedSaiFileService {
         return "${sampleType}_${runName}_${filename}.sai"
     }
 
-    public ProcessedSaiFile createSaiFile(AlignmentPass alignmentPass, DataFile dataFile) {
-        ProcessedSaiFile psf = new ProcessedSaiFile(
-                alignmentPass: alignmentPass,
-                dataFile: dataFile
-            )
-        assertSave(psf)
-        return psf
-    }
-
-    /**
-     * @return <code>null</code> if successful, otherwise an error message. (It is still possible
-     * that this method throws an exception.)
-     */
-    public String updateSaiFileInfoFromDisk(ProcessedSaiFile saiFile) {
-        File file = new File(getFilePath(saiFile))
-        if (!file.canRead()) {
-            return "${file} is not readable."
-        }
-        saiFile.fileExists = true
-        saiFile.fileSize = file.length()
-        saiFile.dateFromFileSystem = new Date(file.lastModified())
-        assertSave(saiFile)
-        final def fileSize = saiFile.fileSize
-        return fileSize ? null : "File size of ${file} is ${fileSize}."
-    }
-
     /**
      * Checks consistency for {@link #deleteProcessingFiles(ProcessedSaiFile)}.
      *

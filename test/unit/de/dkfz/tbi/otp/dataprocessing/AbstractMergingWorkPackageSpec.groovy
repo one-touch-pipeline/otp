@@ -178,7 +178,7 @@ class AbstractMergingWorkPackageSpec extends Specification {
         new TestAbstractMergingWorkPackage([
                 sample:                new Sample(),
                 referenceGenome:       new ReferenceGenome(),
-                pipeline:              DomainFactory.createDefaultOtpPipeline(),
+                pipeline:              DomainFactory.createPanCanPipeline(),
         ] + properties)
     }
 }

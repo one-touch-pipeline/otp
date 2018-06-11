@@ -62,7 +62,7 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
     void setupProcessedMergedBamFile() {
         MergingWorkPackage tumorMwp = DomainFactory.createMergingWorkPackage(
                 seqType: seqTypeToUse(),
-                pipeline: DomainFactory.createDefaultOtpPipeline(),
+                pipeline: DomainFactory.createPanCanPipeline(),
                 referenceGenome: createReferenceGenome()
         )
         bamFileTumor = DomainFactory.createProcessedMergedBamFile(tumorMwp, createProcessMergedBamFileProperties())

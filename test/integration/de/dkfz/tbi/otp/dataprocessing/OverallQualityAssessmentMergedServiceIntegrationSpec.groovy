@@ -75,7 +75,8 @@ class OverallQualityAssessmentMergedServiceIntegrationSpec extends Specification
                 qualityAssessmentMergedPass: DomainFactory.createQualityAssessmentMergedPass([
                         abstractMergedBamFile: DomainFactory.createProcessedMergedBamFile(
                                 DomainFactory.createMergingWorkPackage([
-                                        referenceGenome: referenceGenome
+                                        referenceGenome: referenceGenome,
+                                        pipeline: DomainFactory.createDefaultOtpPipeline(),
                                 ])
                         )
                 ])

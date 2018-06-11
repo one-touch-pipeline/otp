@@ -44,7 +44,8 @@ class ProcessedMergedBamFileTests {
     @Before
     void setUp() {
         this.workPackage = DomainFactory.createMergingWorkPackage(
-                seqType: DomainFactory.createSeqType()
+                seqType: DomainFactory.createSeqType(),
+                pipeline: DomainFactory.createDefaultOtpPipeline(),
         )
         this.workPackage.save(flush: true)
 

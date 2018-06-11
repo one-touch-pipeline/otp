@@ -45,7 +45,7 @@ class CalculateFileChecksumMD5JobTests {
     @Before
     void setUp() {
 
-        MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage()
+        MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage(pipeline: DomainFactory.createDefaultOtpPipeline())
         processedMergedBamFile = DomainFactory.createProcessedMergedBamFile(mergingWorkPackage, [fileOperationStatus: FileOperationStatus.INPROGRESS])
         qualityAssessmentMergedPass = DomainFactory.createQualityAssessmentMergedPass(abstractMergedBamFile: processedMergedBamFile)
 

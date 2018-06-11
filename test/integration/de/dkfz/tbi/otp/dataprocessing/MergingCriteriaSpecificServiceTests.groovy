@@ -14,7 +14,7 @@ class MergingCriteriaSpecificServiceTests {
 
     @Test
     void testProcessedBamFilesForMerging_TwoBamFiles() {
-        MergingWorkPackage workPackage = DomainFactory.createMergingWorkPackage()
+        MergingWorkPackage workPackage = DomainFactory.createMergingWorkPackage(pipeline: DomainFactory.createDefaultOtpPipeline())
         ProcessedBamFile bamFile1 = DomainFactory.createProcessedBamFile(workPackage, [status: State.INPROGRESS])
         ProcessedBamFile bamFile2 = DomainFactory.createProcessedBamFile(workPackage, [status: State.NEEDS_PROCESSING])
 
@@ -24,7 +24,7 @@ class MergingCriteriaSpecificServiceTests {
 
     @Test
     void testProcessedBamFilesForMerging_TwoBamFilesWrongBamType() {
-        MergingWorkPackage workPackage = DomainFactory.createMergingWorkPackage()
+        MergingWorkPackage workPackage = DomainFactory.createMergingWorkPackage(pipeline: DomainFactory.createDefaultOtpPipeline())
         ProcessedBamFile bamFile1 = DomainFactory.createProcessedBamFile(workPackage, [status: State.INPROGRESS, type: BamType.RMDUP])
         ProcessedBamFile bamFile2 = DomainFactory.createProcessedBamFile(workPackage, [status: State.NEEDS_PROCESSING])
 
@@ -34,7 +34,7 @@ class MergingCriteriaSpecificServiceTests {
 
     @Test
     void testProcessedBamFilesForMerging_TwoBamFilesWithdrawn() {
-        MergingWorkPackage workPackage = DomainFactory.createMergingWorkPackage()
+        MergingWorkPackage workPackage = DomainFactory.createMergingWorkPackage(pipeline: DomainFactory.createDefaultOtpPipeline())
         ProcessedBamFile bamFile1 = DomainFactory.createProcessedBamFile(workPackage, [status: State.INPROGRESS, withdrawn: true])
         ProcessedBamFile bamFile2 = DomainFactory.createProcessedBamFile(workPackage, [status: State.NEEDS_PROCESSING])
 
@@ -44,7 +44,7 @@ class MergingCriteriaSpecificServiceTests {
 
     @Test
     void testProcessedBamFilesForMerging_TwoBamFilesWrongStatus() {
-        MergingWorkPackage workPackage = DomainFactory.createMergingWorkPackage()
+        MergingWorkPackage workPackage = DomainFactory.createMergingWorkPackage(pipeline: DomainFactory.createDefaultOtpPipeline())
         ProcessedBamFile bamFile1 = DomainFactory.createProcessedBamFile(workPackage, [status: State.DECLARED])
         ProcessedBamFile bamFile2 = DomainFactory.createProcessedBamFile(workPackage, [status: State.NEEDS_PROCESSING])
 
@@ -54,7 +54,7 @@ class MergingCriteriaSpecificServiceTests {
 
     @Test
     void testProcessedBamFilesForMerging_ThreeBamsOneIsOutdated() {
-        MergingWorkPackage workPackage = DomainFactory.createMergingWorkPackage()
+        MergingWorkPackage workPackage = DomainFactory.createMergingWorkPackage(pipeline: DomainFactory.createDefaultOtpPipeline())
         ProcessedBamFile bamFile1 = DomainFactory.createProcessedBamFile(workPackage, [status: State.INPROGRESS])
         ProcessedBamFile bamFile2 = DomainFactory.createProcessedBamFile(workPackage, [status: State.NEEDS_PROCESSING])
         ProcessedBamFile bamFile3 = TestData.createProcessedBamFile(

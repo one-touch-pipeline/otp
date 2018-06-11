@@ -103,17 +103,6 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         assert seqTrack == seqTrackService.getSeqTrackReadyForFastqcProcessing(ProcessingPriority.FAST_TRACK_PRIORITY)
     }
 
-
-    @Test
-    void testDecideAndPrepareForAlignment_defaultDecider_shouldReturnOneWorkPackage() {
-        SeqTrack seqTrack = setupSeqTrackProjectAndDataFile("defaultOtpAlignmentDecider")
-
-        Collection<MergingWorkPackage> workPackages = seqTrackService.decideAndPrepareForAlignment(seqTrack)
-
-        assert workPackages.size() == 1
-        assert workPackages.iterator().next().seqType == seqTrack.seqType
-    }
-
     @Test
     void testDecideAndPrepareForAlignment_noAlignmentDecider_shouldReturnEmptyList() {
         SeqTrack seqTrack = setupSeqTrackProjectAndDataFile("noAlignmentDecider")

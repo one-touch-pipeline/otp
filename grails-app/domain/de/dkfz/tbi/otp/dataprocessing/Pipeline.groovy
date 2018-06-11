@@ -8,7 +8,7 @@ class Pipeline implements Entity {
 
     @TupleConstructor
     static enum Name {
-        DEFAULT_OTP         (Type.ALIGNMENT, false, 'bwa\u00A0aln'),
+        @Deprecated DEFAULT_OTP(Type.ALIGNMENT, false, 'bwa\u00A0aln'),
         PANCAN_ALIGNMENT    (Type.ALIGNMENT, true,  'bwa\u00A0mem'),
         EXTERNALLY_PROCESSED(Type.ALIGNMENT, false, 'external'),
         @Deprecated OTP_SNV (Type.SNV,       false, null),

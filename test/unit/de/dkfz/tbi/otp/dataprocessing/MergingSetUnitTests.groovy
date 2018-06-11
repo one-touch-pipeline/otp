@@ -40,7 +40,9 @@ class MergingSetUnitTests {
 
         this.workPackage = new TestData().createMergingWorkPackage(
             sample: sample,
-            seqType: new SeqType())
+            seqType: new SeqType(),
+            pipeline: DomainFactory.createDefaultOtpPipeline(),
+        )
         this.workPackage.save(flush: true)
     }
 

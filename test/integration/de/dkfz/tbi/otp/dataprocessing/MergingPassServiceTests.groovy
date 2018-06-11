@@ -215,8 +215,9 @@ class MergingPassServiceTests {
 
         MergingWorkPackage mergingWorkPackage = testData.createMergingWorkPackage(
                         sample: sample,
-                        seqType: seqType
-                        )
+                        seqType: seqType,
+                        pipeline: DomainFactory.createDefaultOtpPipeline(),
+        )
         assertNotNull(mergingWorkPackage.save([flush: true, failOnError: true]))
 
         MergingSet mergingSet = new MergingSet(

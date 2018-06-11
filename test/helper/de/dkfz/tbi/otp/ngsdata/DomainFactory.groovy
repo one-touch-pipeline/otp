@@ -11,7 +11,6 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.dataprocessing.sophia.*
 import de.dkfz.tbi.otp.infrastructure.*
-import de.dkfz.tbi.otp.job.jobs.snvcalling.*
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.SampleType.SpecificReferenceGenome
@@ -177,6 +176,7 @@ class DomainFactory {
         createPipeline(Pipeline.Name.RODDY_RNA_ALIGNMENT, Pipeline.Type.ALIGNMENT)
     }
 
+    @Deprecated
     static Pipeline createDefaultOtpPipeline() {
         createPipeline(Pipeline.Name.DEFAULT_OTP, Pipeline.Type.ALIGNMENT)
     }
@@ -212,7 +212,7 @@ class DomainFactory {
     }
 
     public static MergingSet createMergingSet(Map properties = [:]) {
-        MergingWorkPackage mergingWorkPackage = properties.mergingWorkPackage ?: createMergingWorkPackage([:])
+        MergingWorkPackage mergingWorkPackage = properties.mergingWorkPackage ?: createMergingWorkPackage([pipeline: createDefaultOtpPipeline()])
         return createDomainObject(MergingSet, [
                 mergingWorkPackage: mergingWorkPackage,
                 identifier        : MergingSet.nextIdentifier(mergingWorkPackage),
@@ -1605,10 +1605,10 @@ class DomainFactory {
                 seqPlatformGroup     : { createSeqPlatformGroup() },
                 referenceGenome      : { createReferenceGenome() },
                 statSizeFileName     : {
-                    properties.pipeline?.name == Pipeline.Name.PANCAN_ALIGNMENT ?
+                    properties.pipeline?.name == Pipeline.Name.PANCAN_ALIGNMENT || properties.pipeline == null ?
                             "statSizeFileName_${counter++}.tab" : null
                 },
-                pipeline             : { createDefaultOtpPipeline() },
+                pipeline             : { createPanCanPipeline() },
                 antibodyTarget       : { properties.seqType?.isChipSeq() ? createAntibodyTarget() : null },
         ], properties, saveAndValidate)
     }
@@ -1637,11 +1637,11 @@ class DomainFactory {
         switch (pipelineName) {
             case Pipeline.Name.PANCAN_ALIGNMENT:
                 return createMergingWorkPackage([
-                        pipeline: createDefaultOtpPipeline()
+                        pipeline: createPanCanPipeline()
                 ] + properties)
             case Pipeline.Name.DEFAULT_OTP:
                 return createMergingWorkPackage([
-                        pipeline: createPanCanPipeline()
+                        pipeline: createDefaultOtpPipeline()
                 ] + properties)
             case Pipeline.Name.EXTERNALLY_PROCESSED:
                 return createExternalMergingWorkPackage(properties)
@@ -2073,43 +2073,6 @@ class DomainFactory {
         return createDomainObject(TumorEntity, [
                 name: "AML/ALL",
         ], properties)
-    }
-
-    static Map<String, String> createOtpAlignmentProcessingOptions(Map properties = [:]) {
-        [
-                createProcessingOptionLazy(
-                        name: OptionName.COMMAND_CONVEY_BWA,
-                        type: null,
-                        project: null,
-                        value: properties[OptionName.COMMAND_CONVEY_BWA] ?: "value ${counter++}",
-                ),
-                createProcessingOptionLazy(
-                        name: OptionName.PIPELINE_OTP_ALIGNMENT_BWA_QUEUE_PARAMETER,
-                        type: null,
-                        project: null,
-                        value: properties[OptionName.PIPELINE_OTP_ALIGNMENT_BWA_QUEUE_PARAMETER] ?: "value ${counter++}",
-                ),
-                createProcessingOptionLazy(
-                        name: OptionName.COMMAND_SAMTOOLS,
-                        type: null,
-                        project: null,
-                        value: properties[OptionName.COMMAND_SAMTOOLS] ?: "value ${counter++}",
-                ),
-                createProcessingOptionLazy(
-                        name: OptionName.COMMAND_PICARD_MDUP,
-                        type: null,
-                        project: null,
-                        value: properties[OptionName.COMMAND_PICARD_MDUP] ?: "value ${counter++}",
-                ),
-                createProcessingOptionLazy(
-                        name: OptionName.PIPELINE_OTP_ALIGNMENT_PICARD_MDUP,
-                        type: null,
-                        project: null,
-                        value: [OptionName.PIPELINE_OTP_ALIGNMENT_PICARD_MDUP] ?: "value ${counter++}",
-                )
-        ].collectEntries { ProcessingOption processingOption ->
-            [(processingOption.name): processingOption.value]
-        }
     }
 
     static void createRoddyProcessingOptions(File basePath) {

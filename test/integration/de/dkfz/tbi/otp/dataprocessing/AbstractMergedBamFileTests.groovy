@@ -74,7 +74,7 @@ class AbstractMergedBamFileTests {
 
     @Test
     void testValidateAndSetBamFileInProjectFolder_WhenOtherNonWithdrawnBamFilesWithFileOperationStatusInProgressOfSameMergingWorkPackageExist_ShouldFail() {
-        MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage()
+        MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage(pipeline: DomainFactory.createDefaultOtpPipeline())
 
         ProcessedMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFile(mergingWorkPackage, [
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.INPROGRESS,
@@ -91,7 +91,7 @@ class AbstractMergedBamFileTests {
 
     @Test
     void testValidateAndSetBamFileInProjectFolder_WhenAllFine_ShouldSetBamFileInProjectFolder() {
-        MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage()
+        MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage(pipeline: DomainFactory.createDefaultOtpPipeline())
 
         DomainFactory.createProcessedMergedBamFile(mergingWorkPackage, [
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.DECLARED,

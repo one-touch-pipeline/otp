@@ -171,7 +171,7 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
                         coverage2: 10.0,
                 ],
         ].collect {
-            SamplePair samplePair = DomainFactory.createSamplePair()
+            SamplePair samplePair = DomainFactory.createSamplePair(mergingWorkPackage1: DomainFactory.createMergingWorkPackage(pipeline: DomainFactory.createDefaultOtpPipeline()))
             DomainFactory.createProcessedMergedBamFile([
                     workPackage: samplePair.mergingWorkPackage1,
                     coverage   : it.coverage1,

@@ -2,9 +2,7 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.logging.*
 import org.hibernate.*
-
 /**
  * Represents a merged bam file stored on the file system
  * and produced by the merging process identified by the
@@ -99,9 +97,8 @@ class ProcessedMergedBamFile extends AbstractMergedBamFile implements ProcessPar
         return new File(baseDirectory, bamFileName)
     }
 
-    @Override
-    Project getAlignmentConfig() {
-        return project
+    AlignmentConfig getAlignmentConfig() {
+        throw new MissingPropertyException('AlignmentConfig is not implemented for processed merged BAM files')
     }
 
     @Override

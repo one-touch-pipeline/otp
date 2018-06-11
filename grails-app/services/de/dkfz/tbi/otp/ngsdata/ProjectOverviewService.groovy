@@ -223,28 +223,13 @@ class ProjectOverviewService {
         return res
     }
 
-
-    protected AlignmentInfo getDefaultOtpAlignmentInformation(Project project) {
-        assert project
-
-        return new AlignmentInfo(
-                bwaCommand: processingOptionService.findOptionSafe(OptionName.COMMAND_CONVEY_BWA, null, project) + " aln",
-                bwaOptions: processingOptionService.findOptionSafe(OptionName.PIPELINE_OTP_ALIGNMENT_BWA_QUEUE_PARAMETER, null, project),
-                samToolsCommand: processingOptionService.findOptionSafe(OptionName.COMMAND_SAMTOOLS, null, project),
-                mergeCommand: processingOptionService.findOptionSafe(OptionName.COMMAND_PICARD_MDUP, null, project),
-                mergeOptions: processingOptionService.findOptionSafe(OptionName.PIPELINE_OTP_ALIGNMENT_PICARD_MDUP, null, project),
-        )
-    }
-
     AlignmentInfo getAlignmentInformationFromConfig(AlignmentConfig config) {
         assert config
 
         if (config instanceof RoddyWorkflowConfig) {
             return getRoddyAlignmentInformation(config)
-        } else if (config instanceof Project) {
-            return getDefaultOtpAlignmentInformation(config)
         } else {
-            throw new UnsupportedOperationException("${config} is neither a ${RoddyWorkflowConfig.simpleName} nor a ${Project.simpleName}.")
+            throw new UnsupportedOperationException("${config} is not a ${RoddyWorkflowConfig.simpleName}.")
         }
     }
 
@@ -262,8 +247,6 @@ class ProjectOverviewService {
                         result.put(seqType.displayNameWithLibraryLayout, getRoddyAlignmentInformation(workflowConfig))
                     }
                     return result
-                case DefaultOtpAlignmentDecider:
-                    return [("OTP"): getDefaultOtpAlignmentInformation(project)]
                 case NoAlignmentDecider:
                     return null
                 default:

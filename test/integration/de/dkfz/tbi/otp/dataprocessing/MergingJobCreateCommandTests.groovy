@@ -94,6 +94,7 @@ class MergingJobCreateCommandTests {
                         sample: sample,
                         seqType: seqType,
                         seqPlatformGroup: seqPlatform.getSeqPlatformGroup(project, seqType),
+                        pipeline: DomainFactory.createDefaultOtpPipeline(),
                         )
         assertNotNull(mergingWorkPackage.save([flush: true, failOnError: true]))
 

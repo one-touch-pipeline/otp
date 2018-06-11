@@ -166,10 +166,10 @@ class SamplePairCheckerIntegrationSpec extends Specification {
         given:
         SamplePairChecker samplePairChecker = new SamplePairChecker()
 
-        SamplePair samplePair1 = DomainFactory.createSamplePair()
-        SamplePair samplePair2 = DomainFactory.createSamplePair()
-        SamplePair samplePair3 = DomainFactory.createSamplePair()
-        SamplePair samplePair4 = DomainFactory.createSamplePair()
+        SamplePair samplePair1 = DomainFactory.createSamplePair(mergingWorkPackage1: DomainFactory.createMergingWorkPackage(pipeline: DomainFactory.createDefaultOtpPipeline()))
+        SamplePair samplePair2 = DomainFactory.createSamplePair(mergingWorkPackage1: DomainFactory.createMergingWorkPackage(pipeline: DomainFactory.createDefaultOtpPipeline()))
+        SamplePair samplePair3 = DomainFactory.createSamplePair(mergingWorkPackage1: DomainFactory.createMergingWorkPackage(pipeline: DomainFactory.createDefaultOtpPipeline()))
+        SamplePair samplePair4 = DomainFactory.createSamplePair(mergingWorkPackage1: DomainFactory.createMergingWorkPackage(pipeline: DomainFactory.createDefaultOtpPipeline()))
         List<SamplePair> samplePairs = [samplePair1, samplePair2, samplePair3, samplePair4]
 
         DomainFactory.createProcessedMergedBamFile([workPackage: samplePair1.mergingWorkPackage1])
@@ -192,7 +192,7 @@ class SamplePairCheckerIntegrationSpec extends Specification {
         given:
         SamplePairChecker samplePairChecker = new SamplePairChecker()
 
-        SamplePair samplePair = DomainFactory.createSamplePair()
+        SamplePair samplePair = DomainFactory.createSamplePair(mergingWorkPackage1: DomainFactory.createMergingWorkPackage(pipeline: DomainFactory.createDefaultOtpPipeline()))
         DomainFactory.createProcessedMergedBamFile([
                 workPackage         : samplePair.mergingWorkPackage1,
                 numberOfMergedLanes : numberOfMergedLanes1,

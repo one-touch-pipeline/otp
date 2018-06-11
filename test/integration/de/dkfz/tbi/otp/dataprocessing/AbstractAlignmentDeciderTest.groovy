@@ -42,7 +42,7 @@ public class AbstractAlignmentDeciderTest {
     private AbstractAlignmentDecider newDecider(Map methods = [:]) {
         AbstractAlignmentDecider decider = ([
                 prepareForAlignment: { MergingWorkPackage workPackage, SeqTrack seqTrack, boolean forceRealign -> },
-                getPipeline: { return Pipeline.findOrSaveByNameAndType(Pipeline.Name.DEFAULT_OTP, Pipeline.Type.ALIGNMENT) },
+                getPipeline: { return Pipeline.findOrSaveByNameAndType(Pipeline.Name.PANCAN_ALIGNMENT, Pipeline.Type.ALIGNMENT) },
         ] + methods) as AbstractAlignmentDecider
         decider.applicationContext = applicationContext
         decider.mailHelperService = applicationContext.mailHelperService
@@ -66,7 +66,7 @@ public class AbstractAlignmentDeciderTest {
         SeqTrack seqTrack2 = DomainFactory.createSeqTrack(sample: seqTrack.sample, seqType: seqTrack.seqType, run: DomainFactory.createRun(seqPlatform: seqTrack.seqPlatform))
         DomainFactory.createMergingCriteriaLazy(project: seqTrack2.project, seqType: seqTrack2.seqType)
         ReferenceGenome referenceGenome = DomainFactory.createReferenceGenome()
-        DomainFactory.createReferenceGenomeProjectSeqType(project: seqTrack.project, referenceGenome: referenceGenome, seqType: seqTrack.seqType)
+        DomainFactory.createReferenceGenomeProjectSeqType(project: seqTrack.project, referenceGenome: referenceGenome, seqType: seqTrack.seqType, statSizeFileName: DomainFactory.DEFAULT_TAB_FILE_NAME)
 
         Collection<MergingWorkPackage> workPackages =  decider.findOrSaveWorkPackages(seqTrack, seqTrack.configuredReferenceGenomeProjectSeqType, decider.getPipeline(seqTrack))
         decider.findOrSaveWorkPackages(seqTrack2, seqTrack2.configuredReferenceGenomeProjectSeqType, decider.getPipeline(seqTrack2))
@@ -100,14 +100,12 @@ public class AbstractAlignmentDeciderTest {
     void testDecideAndPrepareForAlignment_whenWrongReferenceGenome_shouldThrowAssertionError() {
         SeqTrack seqTrack = buildSeqTrack()
 
-        MergingWorkPackage workPackage = new MergingWorkPackage(
+        MergingWorkPackage workPackage = DomainFactory.createMergingWorkPackage(
                 sample: seqTrack.sample,
                 seqType: seqTrack.seqType,
                 seqPlatformGroup: seqTrack.seqPlatformGroup,
-                referenceGenome: ReferenceGenome.build(),
-                pipeline: Pipeline.findOrSaveByNameAndType(Pipeline.Name.DEFAULT_OTP, Pipeline.Type.ALIGNMENT),
+                statSizeFileName: seqTrack.configuredReferenceGenomeProjectSeqType.statSizeFileName,
         )
-        workPackage.save(failOnError: true)
 
         shouldFail(AssertionError.class, {
             decider.decideAndPrepareForAlignment(seqTrack, true)
@@ -118,15 +116,13 @@ public class AbstractAlignmentDeciderTest {
     void testDecideAndPrepareForAlignment_whenWrongPipeline_shouldThrowAssertionError() {
         SeqTrack seqTrack = buildSeqTrack()
 
-        MergingWorkPackage workPackage = new MergingWorkPackage(
+        MergingWorkPackage workPackage = DomainFactory.createMergingWorkPackage(
                 sample: seqTrack.sample,
                 seqType: seqTrack.seqType,
                 seqPlatformGroup: seqTrack.seqPlatformGroup,
                 referenceGenome: exactlyOneElement(ReferenceGenome.list()),
-                pipeline: Pipeline.findOrSaveByNameAndType(Pipeline.Name.PANCAN_ALIGNMENT, Pipeline.Type.ALIGNMENT),
-                statSizeFileName: DomainFactory.DEFAULT_TAB_FILE_NAME,
+                pipeline: Pipeline.findOrSaveByNameAndType(Pipeline.Name.RODDY_RNA_ALIGNMENT, Pipeline.Type.ALIGNMENT),
         )
-        workPackage.save(failOnError: true)
 
         shouldFail(AssertionError.class, {
             decider.decideAndPrepareForAlignment(seqTrack, true)
@@ -147,14 +143,12 @@ public class AbstractAlignmentDeciderTest {
 
         boolean emailIsSent = false
 
-        MergingWorkPackage workPackage = new MergingWorkPackage(
+        MergingWorkPackage workPackage = DomainFactory.createMergingWorkPackage(
                 sample: seqTrack.sample,
                 seqType: seqTrack.seqType,
-                seqPlatformGroup: SeqPlatformGroup.build(),
                 referenceGenome: exactlyOneElement(ReferenceGenome.list()),
-                pipeline: Pipeline.findOrSaveByNameAndType(Pipeline.Name.DEFAULT_OTP, Pipeline.Type.ALIGNMENT),
+                statSizeFileName: seqTrack.configuredReferenceGenomeProjectSeqType.statSizeFileName,
         )
-        workPackage.save(failOnError: true)
 
         decider.mailHelperService.metaClass.sendEmail = {String subject, String content, String recipient ->
             assert content.contains(prefix)
@@ -175,13 +169,12 @@ public class AbstractAlignmentDeciderTest {
         seqTrack.kitInfoReliability = InformationReliability.KNOWN
         seqTrack.save(flush: true, failOnError: true)
 
-        MergingWorkPackage workPackage = new MergingWorkPackage(
+        MergingWorkPackage workPackage = DomainFactory.createMergingWorkPackage(
                 sample: seqTrack.sample,
                 seqType: seqTrack.seqType,
                 seqPlatformGroup: seqTrack.seqPlatformGroup,
                 referenceGenome: exactlyOneElement(ReferenceGenome.list()),
-                libraryPreparationKit: LibraryPreparationKit.build(),
-                pipeline: Pipeline.findOrSaveByNameAndType(Pipeline.Name.DEFAULT_OTP, Pipeline.Type.ALIGNMENT),
+                statSizeFileName: seqTrack.configuredReferenceGenomeProjectSeqType.statSizeFileName,
         )
         workPackage.save(failOnError: true)
 
@@ -246,7 +239,8 @@ public class AbstractAlignmentDeciderTest {
                 seqType: seqTrack.seqType,
                 seqPlatformGroup: seqTrack.seqPlatformGroup,
                 referenceGenome: exactlyOneElement(ReferenceGenome.list()),
-                pipeline: Pipeline.findOrSaveByNameAndType(Pipeline.Name.DEFAULT_OTP, Pipeline.Type.ALIGNMENT),
+                pipeline: Pipeline.findOrSaveByNameAndType(Pipeline.Name.PANCAN_ALIGNMENT, Pipeline.Type.ALIGNMENT),
+                statSizeFileName: seqTrack.configuredReferenceGenomeProjectSeqType.statSizeFileName,
         )
         workPackage.save(failOnError: true)
 

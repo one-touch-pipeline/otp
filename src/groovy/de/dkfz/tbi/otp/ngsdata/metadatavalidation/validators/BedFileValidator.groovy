@@ -20,9 +20,6 @@ class BedFileValidator extends ValueTuplesValidator<MetadataValidationContext> i
     @Autowired
     SampleIdentifierService sampleIdentifierService
 
-    @Autowired
-    AlignmentPassService alignmentPassService
-
 
     @Override
     Collection<String> getDescriptions() {

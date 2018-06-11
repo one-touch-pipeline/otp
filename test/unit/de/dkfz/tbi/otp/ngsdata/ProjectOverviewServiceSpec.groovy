@@ -23,37 +23,6 @@ import spock.lang.*
 class ProjectOverviewServiceSpec extends Specification {
 
 
-    void "getDefaultOtpAlignmentInformation, when project is null, throw assert"() {
-        when:
-        new ProjectOverviewService().getDefaultOtpAlignmentInformation(null)
-
-        then:
-        AssertionError e = thrown()
-        e.message.contains('assert project')
-    }
-
-
-    void "getDefaultOtpAlignmentInformation, when project is given, return OTP default alignment info"() {
-        given:
-        Project project = new Project()
-        Map map = DomainFactory.createOtpAlignmentProcessingOptions()
-        ProjectOverviewService service = new ProjectOverviewService([
-                processingOptionService: new ProcessingOptionService(),
-        ])
-
-        when:
-        ProjectOverviewService.AlignmentInfo alignmentInfo = service.getDefaultOtpAlignmentInformation(project)
-
-        then:
-        alignmentInfo
-        map[OptionName.COMMAND_CONVEY_BWA] + ' aln' == alignmentInfo.bwaCommand
-        map[OptionName.PIPELINE_OTP_ALIGNMENT_BWA_QUEUE_PARAMETER] == alignmentInfo.bwaOptions
-        map[OptionName.COMMAND_SAMTOOLS] == alignmentInfo.samToolsCommand
-        map[ProcessingOption.OptionName.COMMAND_PICARD_MDUP] == alignmentInfo.mergeCommand
-        map[OptionName.PIPELINE_OTP_ALIGNMENT_PICARD_MDUP] == alignmentInfo.mergeOptions
-    }
-
-
     void "getRoddyAlignmentInformation, when roddyWorkflowConfig is null, throw assert"() {
         when:
         new ProjectOverviewService().getRoddyAlignmentInformation(null)

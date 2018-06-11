@@ -88,13 +88,18 @@ testDataConfig {
             name = {'softwareToolIdentifier_' + (counter++)}
         }
         'de.dkfz.tbi.otp.dataprocessing.MergingSet' {
-            mergingWorkPackage = { MergingWorkPackage.build(pipeline: DomainFactory.createDefaultOtpPipeline()) }
+            mergingWorkPackage = { MergingWorkPackage.build(
+                    pipeline: DomainFactory.createDefaultOtpPipeline(),
+                    statSizeFileName: null,
+                )
+            }
         }
         'de.dkfz.tbi.otp.dataprocessing.MergingSetAssignment' {
             bamFile = {ProcessedBamFile.build()}
         }
         'de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage' {
-            pipeline = { DomainFactory.createDefaultOtpPipeline() }
+            pipeline = { DomainFactory.createPanCanPipeline() }
+            statSizeFileName: { DomainFactory.DEFAULT_TAB_FILE_NAME }
         }
         'de.dkfz.tbi.otp.ngsdata.MetaDataKey' {
             name = {'name_' + (counter++)}

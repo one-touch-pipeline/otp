@@ -66,7 +66,8 @@ class ProcessedMergedBamFileQaFileServiceTests {
 
         MergingWorkPackage mergingWorkPackage = new TestData().createMergingWorkPackage(
                         sample: sample,
-                        seqType: seqType
+                        seqType: seqType,
+                        pipeline: DomainFactory.createDefaultOtpPipeline(),
                         )
         assertNotNull(mergingWorkPackage.save([flush: true]))
 

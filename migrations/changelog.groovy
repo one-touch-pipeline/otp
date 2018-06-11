@@ -47,4 +47,10 @@ databaseChangeLog = {
 	changeSet(author: "strubelp", id:"OTP-2848") {
 		sqlFile(path: 'changelogs/2018/OTP-2848.sql')
 	}
+
+	include file: 'changelogs/2018/OTP-2854.groovy'
+
+	changeSet(author: "strubel", id:"OTP-2854-SQL") {
+		sqlFile(path: 'changelogs/2018/OTP-2854.sql')
+	}
 }

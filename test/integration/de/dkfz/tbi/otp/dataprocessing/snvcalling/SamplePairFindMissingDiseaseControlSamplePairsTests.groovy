@@ -38,7 +38,7 @@ class SamplePairFindMissingDiseaseControlSamplePairsTests {
         individual = Individual.build(project: project)
         diseaseSample = Sample.build(individual: individual, sampleType: diseaseSampleType)
         controlSample = Sample.build(individual: individual, sampleType: controlSampleType)
-        diseaseMwp = MergingWorkPackage.build(sample: diseaseSample, seqType: wholeGenome, libraryPreparationKit: libraryPreparationKit)
+        diseaseMwp = DomainFactory.createMergingWorkPackage(sample: diseaseSample, seqType: wholeGenome, libraryPreparationKit: libraryPreparationKit)
         controlMwp = DomainFactory.createMergingWorkPackage(diseaseMwp, controlSample)
     }
 

@@ -76,55 +76,6 @@ class ProcessedBamFileService {
         return "${sampleType}_${runName}_s_${lane}_${layout}${suffix}"
     }
 
-    public ProcessedBamFile createSortedBamFile(AlignmentPass alignmentPass) {
-        return createBamFile(alignmentPass, AbstractBamFile.BamType.SORTED)
-    }
-
-    private ProcessedBamFile createBamFile(AlignmentPass alignmentPass, AbstractBamFile.BamType type) {
-        ProcessedBamFile pbf = new ProcessedBamFile(
-                        alignmentPass: alignmentPass,
-                        type: type
-                        )
-        assert(pbf.save(flush: true))
-        return pbf
-    }
-
-    public ProcessedBamFile findSortedBamFile(AlignmentPass alignmentPass) {
-        def type = AbstractBamFile.BamType.SORTED
-        return ProcessedBamFile.findByAlignmentPassAndType(alignmentPass, type)
-    }
-
-    public ProcessedBamFile findBamFile(long alignmentPassId, String type) {
-        AlignmentPass alignmentPass = AlignmentPass.get(alignmentPassId)
-        return ProcessedBamFile.findByAlignmentPassAndType(alignmentPass, type)
-    }
-
-    /**
-     * @return The size of the BAM file in the file system.
-     */
-    public long updateBamFile(ProcessedBamFile bamFile) {
-        File file = new File(getFilePath(bamFile))
-        ensureReadable(file)
-        bamFile.fileExists = true
-        bamFile.fileSize = file.length()
-        bamFile.dateFromFileSystem = new Date(file.lastModified())
-        assertSave(bamFile)
-        return bamFile.fileSize
-    }
-
-    public void updateBamFileIndex(ProcessedBamFile bamFile) {
-        String path = baiFilePath(bamFile)
-        File file = new File(path)
-        ensureReadable(file)
-        bamFile.hasIndexFile = true
-        assertSave(bamFile)
-    }
-
-    private static ensureReadable(final File file) {
-        if (!file.canRead()) {
-            throw new RuntimeException("Cannot read ${file}")
-        }
-    }
 
     public Realm realm(ProcessedBamFile processedBamFile) {
         return project(processedBamFile).realm

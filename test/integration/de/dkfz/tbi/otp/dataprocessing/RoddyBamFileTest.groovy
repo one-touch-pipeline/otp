@@ -1,7 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.*
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.logging.*
 import org.junit.*

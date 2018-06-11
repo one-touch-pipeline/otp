@@ -63,10 +63,25 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
         if (seqTrack.configuredReferenceGenome == null) {
             throw new RuntimeException("Reference genome is not configured for SeqTrack ${seqTrack}.")
         }
-        if (applicationContext.alignmentPassService.isLibraryPreparationKitOrBedFileMissing(seqTrack)) {
+        if (!hasLibraryPreparationKitAndBedFile(seqTrack)) {
             throw new RuntimeException("Library preparation kit is not set or BED file is missing for SeqTrack ${seqTrack}.")
         }
     }
+
+    static boolean hasLibraryPreparationKitAndBedFile(SeqTrack seqTrack) {
+        assert seqTrack: "The input seqTrack of method hasLibraryPreparationKitAndBedFile is null"
+
+        if (seqTrack instanceof ExomeSeqTrack) {
+            return seqTrack.libraryPreparationKit && seqTrack.configuredReferenceGenome  &&
+                    BedFile.findWhere(
+                            libraryPreparationKit: seqTrack.libraryPreparationKit,
+                            referenceGenome: seqTrack.configuredReferenceGenome,
+                    )
+        } else {
+            return true
+        }
+    }
+
 
     Collection<MergingWorkPackage> findOrSaveWorkPackages(SeqTrack seqTrack,
                                                           ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType,

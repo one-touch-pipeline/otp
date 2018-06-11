@@ -152,6 +152,7 @@ class ProcessedMergedBamFileServiceUnitTests {
                 sample: sample,
                 seqType: seqType,
                 libraryPreparationKit: DomainFactory.createLibraryPreparationKit(name: 'libraryPreparationKit'),
+                pipeline: DomainFactory.createDefaultOtpPipeline(),
         )
         MergingSet mergingSet = DomainFactory.createMergingSet(
                 mergingWorkPackage: mergingWorkPackage,

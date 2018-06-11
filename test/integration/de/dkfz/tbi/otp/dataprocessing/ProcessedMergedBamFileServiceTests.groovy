@@ -508,7 +508,8 @@ class ProcessedMergedBamFileServiceTests {
         LibraryPreparationKit libraryPreparationKit = LibraryPreparationKit.build()
         MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage([
                 seqType: DomainFactory.createExomeSeqType(),
-                libraryPreparationKit: libraryPreparationKit
+                libraryPreparationKit: libraryPreparationKit,
+                pipeline: DomainFactory.createDefaultOtpPipeline(),
         ])
         ProcessedMergedBamFile processedMergedBamFile = DomainFactory.createProcessedMergedBamFile(mergingWorkPackage)
         DomainFactory.assignNewProcessedBamFile(processedMergedBamFile)
@@ -529,7 +530,8 @@ class ProcessedMergedBamFileServiceTests {
         SeqType seqType = DomainFactory.createExomeSeqType()
         MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage(
                 seqType: seqType,
-                libraryPreparationKit: libraryPreparationKit
+                libraryPreparationKit: libraryPreparationKit,
+                pipeline: DomainFactory.createDefaultOtpPipeline(),
         )
         ProcessedMergedBamFile processedMergedBamFile = DomainFactory.createProcessedMergedBamFile(mergingWorkPackage)
         DomainFactory.assignNewProcessedBamFile(processedMergedBamFile)
@@ -547,8 +549,9 @@ class ProcessedMergedBamFileServiceTests {
         LibraryPreparationKit libraryPreparationKit = LibraryPreparationKit.build()
         MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage([
                 seqType: DomainFactory.createSeqType(name: SeqTypeNames.EXOME.seqTypeName),
-                libraryPreparationKit: libraryPreparationKit
-                ])
+                libraryPreparationKit: libraryPreparationKit,
+                pipeline: DomainFactory.createDefaultOtpPipeline(),
+        ])
         ProcessedMergedBamFile processedMergedBamFile = DomainFactory.createProcessedMergedBamFile(mergingWorkPackage)
         DomainFactory.assignNewProcessedBamFile(processedMergedBamFile)
         List<SeqTrack> seqtracks = processedMergedBamFile.mergingSet.containedSeqTracks as List

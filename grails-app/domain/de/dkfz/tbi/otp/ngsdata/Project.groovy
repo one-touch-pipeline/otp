@@ -6,7 +6,7 @@ import de.dkfz.tbi.otp.utils.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
-class Project implements Commentable, Entity, AlignmentConfig {
+class Project implements Commentable, Entity {
 
     /**
      * This enum defines if SNV calling should be done for this project.

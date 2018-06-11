@@ -113,7 +113,6 @@ class BedFileValidatorSpec extends Specification {
                             }]
                         }
                 ] as SampleIdentifierService,
-                alignmentPassService: new AlignmentPassService(),
         ).validate(context)
 
         then:

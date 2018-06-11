@@ -53,7 +53,7 @@ class ProcessedMergedBamFile_PropertiesUnitTest {
         sample = DomainFactory.createSample(sampleType: sampleType, individual: individual)
         referenceGenome = DomainFactory.createReferenceGenome()
         seqType = DomainFactory.createSeqType()
-        workPackage = DomainFactory.createMergingWorkPackage(sample: sample, referenceGenome: referenceGenome, seqType: seqType)
+        workPackage = DomainFactory.createMergingWorkPackage(sample: sample, referenceGenome: referenceGenome, seqType: seqType, pipeline: DomainFactory.createDefaultOtpPipeline())
         MergingSet mergingSet = DomainFactory.createMergingSet(mergingWorkPackage: workPackage)
         MergingPass mergingPass = DomainFactory.createMergingPass(mergingSet: mergingSet)
         bamFile = DomainFactory.createProcessedMergedBamFileWithoutProcessedBamFile(mergingPass, [:], false)

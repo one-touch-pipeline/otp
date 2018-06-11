@@ -217,7 +217,7 @@ class MergingWorkPackageUnitTests {
         SeqPlatform seqPlatform = DomainFactory.createSeqPlatformWithSeqPlatformGroup(seqPlatformGroups: [seqPlatformGroup])
         SeqTrack seqTrack = DomainFactory.createSeqTrack(run: DomainFactory.createRun(seqPlatform: seqPlatform))
         DomainFactory.createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
-        MergingWorkPackage workPackage = MergingWorkPackage.build(sample: seqTrack.sample, seqType: seqTrack.seqType, seqPlatformGroup: seqPlatformGroup)
+        MergingWorkPackage workPackage = MergingWorkPackage.build(sample: seqTrack.sample, seqType: seqTrack.seqType, seqPlatformGroup: seqPlatformGroup, pipeline: DomainFactory.createDefaultOtpPipeline())
         AlignmentPass alignmentPass = AlignmentPass.build(seqTrack: seqTrack, workPackage: workPackage)
 
         ProcessedBamFile processedBamFile = ProcessedBamFile.build(alignmentPass: alignmentPass)
@@ -226,7 +226,7 @@ class MergingWorkPackageUnitTests {
 
     @Test
     void testSatisfiesCriteriaBamFile_whenInvalid() {
-        MergingWorkPackage workPackage = MergingWorkPackage.build()
+        MergingWorkPackage workPackage = MergingWorkPackage.build(statSizeFileName: DomainFactory.DEFAULT_TAB_FILE_NAME)
 
         ProcessedBamFile processedBamFile = ProcessedBamFile.build()
         assert !workPackage.satisfiesCriteria(processedBamFile)
@@ -235,43 +235,43 @@ class MergingWorkPackageUnitTests {
 
     @Test
     void test_constraint_onStatSizeFileName_withCorrectNameForPanCan_ShouldBeValid() {
-        MergingWorkPackage mergingWorkPackage = MergingWorkPackage.buildWithoutSave([
+        MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage([
                 statSizeFileName: DomainFactory.DEFAULT_TAB_FILE_NAME,
                 pipeline        : DomainFactory.createPanCanPipeline(),
-        ])
+        ], false)
         assert mergingWorkPackage.validate()
     }
 
     @Test
     void test_constraint_onStatSizeFileName_withCorrectNameNoPanCan_ShouldBeInvalid() {
-        MergingWorkPackage mergingWorkPackage = MergingWorkPackage.buildWithoutSave([
+        MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage([
                 statSizeFileName: DomainFactory.DEFAULT_TAB_FILE_NAME,
                 pipeline        : DomainFactory.createDefaultOtpPipeline(),
-        ])
+        ], false)
         TestCase.assertValidateError(mergingWorkPackage, 'statSizeFileName', 'validator.invalid', DomainFactory.DEFAULT_TAB_FILE_NAME)
     }
 
     @Test
     void test_constraint_onStatSizeFileName_withNullNoPanCan_ShouldBeValid() {
-        MergingWorkPackage mergingWorkPackage = MergingWorkPackage.buildWithoutSave([
+        MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage([
                 statSizeFileName: null,
                 pipeline        : DomainFactory.createDefaultOtpPipeline(),
-        ])
+        ], false)
         assert mergingWorkPackage.validate()
     }
 
     @Test
     void test_constraint_onStatSizeFileName_withNullForPanCan_ShouldBeInvalid() {
-        MergingWorkPackage mergingWorkPackage = MergingWorkPackage.buildWithoutSave([
+        MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage([
                 statSizeFileName: null,
                 pipeline        : DomainFactory.createPanCanPipeline(),
-        ])
+        ], false)
         TestCase.assertValidateError(mergingWorkPackage, 'statSizeFileName', 'validator.invalid', null)
     }
 
     @Test
     void test_constraint_onStatSizeFileName_WhenBlank_ShouldBeInvalid() {
-        MergingWorkPackage mergingWorkPackage = MergingWorkPackage.buildWithoutSave()
+        MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage([:], false)
         mergingWorkPackage.statSizeFileName = '' //setting empty string does not work via map
 
         TestCase.assertValidateError(mergingWorkPackage, 'statSizeFileName', 'blank', '')
@@ -284,10 +284,10 @@ class MergingWorkPackageUnitTests {
         "-_.".each {
             try {
                 String name = "File${it}.tab"
-                MergingWorkPackage mergingWorkPackage = MergingWorkPackage.buildWithoutSave([
+                MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage([
                         statSizeFileName: name,
                         pipeline        : pipeline,
-                ])
+                ], false)
                 mergingWorkPackage.validate()
                 assert 0 == mergingWorkPackage.errors.errorCount
             } catch (Throwable e) {
@@ -303,10 +303,10 @@ class MergingWorkPackageUnitTests {
         "\"',:;%\$§&<>|^§!?=äöüÄÖÜß´`".each {
             try {
                 String name = "File${it}.tab"
-                MergingWorkPackage mergingWorkPackage = MergingWorkPackage.buildWithoutSave([
+                MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage([
                         statSizeFileName: name,
                         pipeline        : pipeline,
-                ])
+                ], false)
                 TestCase.assertAtLeastExpectedValidateError(mergingWorkPackage, 'statSizeFileName', 'matches.invalid', name)
             } catch (Throwable e) {
                 collector.addError(e)
@@ -317,16 +317,16 @@ class MergingWorkPackageUnitTests {
 
     @Test
     void test_constraint_libraryPreparationKit_WhenNeitherExomeNorWgbsAndNoLibraryPreparationKit_ShouldBeValid() {
-        MergingWorkPackage mergingWorkPackage = MergingWorkPackage.buildWithoutSave([
+        MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage([
                 libraryPreparationKit: null,
                 seqType: SeqType.build(),
-        ])
+        ], false)
         assert mergingWorkPackage.validate()
     }
 
     @Test
     void test_constraint_libraryPreparationKit_WhenNeitherExomeNorWgbsAndWithLibraryPreparationKit_ShouldBeValid() {
-        MergingWorkPackage mergingWorkPackage = MergingWorkPackage.buildWithoutSave([
+        MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage([
                 libraryPreparationKit: DomainFactory.createLibraryPreparationKit(),
                 seqType: SeqType.build(),
         ])
@@ -335,37 +335,37 @@ class MergingWorkPackageUnitTests {
 
     @Test
     void test_constraint_libraryPreparationKit_WhenExomeAndWithLibraryPreparationKit_ShouldBeValid() {
-        MergingWorkPackage mergingWorkPackage = MergingWorkPackage.buildWithoutSave([
+        MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage([
                 libraryPreparationKit: DomainFactory.createLibraryPreparationKit(),
                 seqType: DomainFactory.createExomeSeqType(),
-        ])
+        ], false)
         assert mergingWorkPackage.validate()
     }
 
     @Test
     void test_constraint_libraryPreparationKit_WhenExomeAndNoLibraryPreparationKit_ShouldFail() {
-        MergingWorkPackage mergingWorkPackage = MergingWorkPackage.buildWithoutSave([
+        MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage([
                 libraryPreparationKit: null,
                 seqType: DomainFactory.createExomeSeqType(),
-        ])
+        ], false)
         TestCase.assertValidateError(mergingWorkPackage, 'libraryPreparationKit', 'validator.invalid', null)
     }
 
     @Test
     void test_constraint_libraryPreparationKit_WhenWgbsAndWithLibraryPreparationKit_ShouldFail() {
-        MergingWorkPackage mergingWorkPackage = MergingWorkPackage.buildWithoutSave([
+        MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage([
                 libraryPreparationKit: DomainFactory.createLibraryPreparationKit(),
                 seqType: DomainFactory.createSeqType(name: SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName),
-        ])
+        ], false)
         TestCase.assertValidateError(mergingWorkPackage, 'libraryPreparationKit', 'validator.invalid', mergingWorkPackage.libraryPreparationKit)
     }
 
     @Test
     void test_constraint_libraryPreparationKit_WhenWgbsAndNoLibraryPreparationKit_ShouldBeValid() {
-        MergingWorkPackage mergingWorkPackage = MergingWorkPackage.buildWithoutSave([
+        MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage([
                 libraryPreparationKit: null,
                 seqType: DomainFactory.createSeqType(name: SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName),
-        ])
+        ], false)
         assert mergingWorkPackage.validate()
     }
 
@@ -380,7 +380,7 @@ class MergingWorkPackageUnitTests {
 
     @Test
     void test_constraint_MergingWorkPackageExistsAlready_NewMergingWorkPackageHasToBaSaved() {
-        MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage()
+        MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage(pipeline: DomainFactory.createDefaultOtpPipeline())
         MergingWorkPackage mergingWorkPackage1 = new MergingWorkPackage(
                 sample: mergingWorkPackage.sample,
                 seqType: mergingWorkPackage.seqType,
