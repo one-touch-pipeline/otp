@@ -1,10 +1,9 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.dataprocessing.*
 import org.springframework.security.access.prepost.*
 
-/**
- *
- */
+
 class SampleTypeService {
 
     /**
@@ -12,16 +11,31 @@ class SampleTypeService {
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'read')")
     public List findUsedSampleTypesForProject(Project project) {
-        List seq = SeqTrack.createCriteria().list{
+        List<SeqType> allAnalysableSeqTypes = SeqType.allAnalysableSeqTypes
+
+        List<SampleType> sampleTypes = SeqTrack.createCriteria().list{
+            projections {
+                sample {
+                    individual {
+                        eq('project', project)
+                    }
+                    groupProperty("sampleType")
+                }
+            }
+            'in'("seqType", allAnalysableSeqTypes)
+        }
+
+        sampleTypes.addAll AbstractMergingWorkPackage.createCriteria().list{
             projections {
                 sample {
                     individual { eq('project', project) }
                     groupProperty("sampleType")
                 }
             }
-            'in'("seqType", SeqType.allAnalysableSeqTypes)
+            'in'("seqType", allAnalysableSeqTypes)
         }
-        return seq
+
+        return sampleTypes.unique().sort { it.name }
     }
 }
 
