@@ -9,13 +9,12 @@ image: grails:2.5.1
 
 variables:
   GRAILS_OPTS: '-Xms1G'
-  ARTIFACTS_BASE_DIRECTORY: 'deployment-scripts'
-  MIGRATION_SCRIPT_PATH: $ARTIFACTS_BASE_DIRECTORY/migration-scripts
+  ARTIFACTS_BASE_DIRECTORY: 'artifacts'
   WAR_DIRECTORY: $ARTIFACTS_BASE_DIRECTORY/war
-  WAR_FILE: $ARTIFACTS_BASE_DIRECTORY/war/otp.war
   MAVEN_CACHE: $CI_PROJECT_DIR/.m2
   PREPARE_MAVEN_CACHE1: "mkdir -p $CI_PROJECT_DIR/.m2"
   PREPARE_MAVEN_CACHE2: "ln -s $CI_PROJECT_DIR/.m2 /home/grails/.m2"
+#  CI_DEBUG_TRACE: "true"
 
 
 
@@ -116,7 +115,7 @@ war:
     - set -e -o pipefail
 
     - echo $WAR_DIRECTORY
-    - echo $WAR_FILE
+    - export WAR_FILE=$WAR_DIRECTORY/otp.war
 
     - 'grails war --non-interactive'
 
