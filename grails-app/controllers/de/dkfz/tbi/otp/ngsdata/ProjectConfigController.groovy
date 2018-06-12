@@ -309,7 +309,7 @@ class ProjectConfigController {
         }
         thresholdsTable.add(row)
 
-        sampleTypeService.findUsedSampleTypesForProject(project).sort().each() { SampleType sampleType ->
+        sampleTypeService.findUsedSampleTypesForProject(project).each() { SampleType sampleType ->
             row = []
             row.add(sampleType.name)
             row.add(sampleType.getCategory(project) ?: SampleType.Category.UNDEFINED)

@@ -25,7 +25,7 @@ class SampleTypeService {
             'in'("seqType", allAnalysableSeqTypes)
         }
 
-        sampleTypes.addAll AbstractMergingWorkPackage.createCriteria().list{
+        sampleTypes.addAll(AbstractMergingWorkPackage.createCriteria().list{
             projections {
                 sample {
                     individual { eq('project', project) }
@@ -33,7 +33,7 @@ class SampleTypeService {
                 }
             }
             'in'("seqType", allAnalysableSeqTypes)
-        }
+        })
 
         return sampleTypes.unique().sort { it.name }
     }
