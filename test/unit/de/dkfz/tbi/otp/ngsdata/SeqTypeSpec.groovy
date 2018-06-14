@@ -151,4 +151,19 @@ class SeqTypeSpec extends Specification {
         then:
         TestCase.assertValidateError(seqType, "dirName", "no valid path component", "name1\\")
     }
+
+    void "ensure only the basic Exome+WholeGenome seqtypes are the 'default' since this assumption is implicit in much old OTP code"() {
+        given:
+        DomainFactory.createDefaultOtpAlignableSeqTypes()
+        List<SeqType> alignableSeqTypes = SeqType.getDefaultOtpAlignableSeqTypes()
+
+        expect:
+        2 == alignableSeqTypes.size()
+        alignableSeqTypes.find {
+            it.name == SeqTypeNames.EXOME.seqTypeName && it.libraryLayout == SeqType.LIBRARYLAYOUT_PAIRED && !it.singleCell
+        }
+        alignableSeqTypes.find {
+            it.name == SeqTypeNames.WHOLE_GENOME.seqTypeName && it.libraryLayout == SeqType.LIBRARYLAYOUT_PAIRED && !it.singleCell
+        }
+    }
 }

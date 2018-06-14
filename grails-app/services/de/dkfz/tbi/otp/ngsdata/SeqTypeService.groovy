@@ -5,19 +5,6 @@ import org.springframework.security.access.prepost.PreAuthorize
 
 class SeqTypeService extends MetadataFieldsService<SeqType> {
 
-    @Deprecated
-    /** @deprecated Use {@link SeqType#getAllAlignableSeqTypes()}, {@link SeqType#getDefaultOtpAlignableSeqTypes()} or {@link SeqType#getRoddyAlignableSeqTypes()} instead.         */
-    static List<SeqType> alignableSeqTypes() {
-        final List<String> alignableSeqTypeNames = [
-                SeqTypeNames.EXOME,
-                SeqTypeNames.WHOLE_GENOME,
-        ]*.seqTypeName
-        List<SeqType> seqTypes = SeqType.findAllByNameInListAndLibraryLayoutAndSingleCell(alignableSeqTypeNames, SeqType.LIBRARYLAYOUT_PAIRED, false)
-        assert alignableSeqTypeNames.size() == seqTypes.size()
-        return seqTypes
-    }
-
-
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, read)")
     List<SeqType> alignableSeqTypesByProject(Project project) {
         return SeqTrack.createCriteria().listDistinct {

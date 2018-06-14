@@ -37,6 +37,8 @@ class SeqTrackService {
      * Dependency Injection of Spring Security Service.
      */
     def springSecurityService
+
+    @Autowired
     DataSource dataSource
 
 
@@ -243,19 +245,21 @@ class SeqTrackService {
      * otherwise the most high prioritized, oldest {@link SeqTrack} waiting for fastqc.
      *
      * @return a seqTrack without fastqc
-     * @see SeqTypeService#alignableSeqTypes
+     * @see SeqType#getDefaultOtpAlignableSeqTypes()
      */
     public SeqTrack getSeqTrackReadyForFastqcProcessing(short minPriority) {
 
+        List<SeqType> seqTypes = SeqType.getAllAlignableSeqTypes()
         List args = [SeqTrack.DataProcessingState.NOT_STARTED.toString(),
                      minPriority,
-        ] + SeqTypeService.alignableSeqTypes()*.id
+        ] + seqTypes*.id
+
 
         // this workaround is used because
         // HQL would support IN but doesn't support expressions in ORDER BY clauses,
         // JDBC doesn't support IN directly,
         // and the H2 driver doesn't support PreparedStatement.setArray()
-        String questionMarksSeparatedByCommas = (["?"]*SeqTypeService.alignableSeqTypes().size()).join(",")
+        String questionMarksSeparatedByCommas = (["?"]* seqTypes.size()).join(",")
 
         String query = """\
 SELECT st.id
@@ -266,6 +270,7 @@ JOIN project ON individual.project_id = project.id
 
 WHERE st.fastqc_state = ?
 AND project.processing_priority >= ?
+AND NOT EXISTS (SELECT seq_track_id FROM data_file WHERE file_withdrawn = true AND seq_track_id = st.id)
 
 ORDER BY project.processing_priority DESC, (st.seq_type_id IN (${questionMarksSeparatedByCommas})) DESC, st.id ASC
 LIMIT 1

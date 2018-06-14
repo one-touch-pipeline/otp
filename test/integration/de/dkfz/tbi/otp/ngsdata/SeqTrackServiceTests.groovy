@@ -29,78 +29,15 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         TestCase.cleanTestDirectory()
         testData = null
     }
-    @Test
-    void testGetSeqTrackReadyForFastqcProcessing_getAll_noReadySeqTrackAvailable() {
-        DomainFactory.createSeqTrack(
-                fastqcState: UNKNOWN
-        )
-
-        assert null == seqTrackService.getSeqTrackReadyForFastqcProcessing(ProcessingPriority.NORMAL_PRIORITY)
-    }
 
     @Test
-    void testGetSeqTrackReadyForFastqcProcessing_getAll_oneReadySeqTrackAvailable() {
-        SeqTrack seqTrack = SeqTrack.build (
-                fastqcState: NOT_STARTED
-        )
+    void testDecideAndPrepareForAlignment_defaultDecider_shouldReturnOneWorkPackage() {
+        SeqTrack seqTrack = setupSeqTrackProjectAndDataFile("defaultOtpAlignmentDecider")
 
-        assert seqTrack == seqTrackService.getSeqTrackReadyForFastqcProcessing(ProcessingPriority.NORMAL_PRIORITY)
-    }
+        Collection<MergingWorkPackage> workPackages = seqTrackService.decideAndPrepareForAlignment(seqTrack)
 
-    @Test
-    void testGetSeqTrackReadyForFastqcProcessing_getAlignable_noReadySeqTrackAvailable() {
-        SeqTrack.build (
-                fastqcState: UNKNOWN,
-                seqType: alignableSeqType
-        )
-
-        assert null == seqTrackService.getSeqTrackReadyForFastqcProcessing(ProcessingPriority.NORMAL_PRIORITY)
-    }
-
-    @Test
-    void testGetSeqTrackReadyForFastqcProcessing_getAlignable_withReadyAlignableSeqTrack() {
-        SeqTrack seqTrack = SeqTrack.build (
-                fastqcState: NOT_STARTED,
-                seqType: alignableSeqType
-        )
-
-        assert seqTrack == seqTrackService.getSeqTrackReadyForFastqcProcessing(ProcessingPriority.NORMAL_PRIORITY)
-    }
-
-    @Test
-    void testGetSeqTrackReadyForFastqcProcessing_TakeFirstAlignableSeqTrack() {
-        SeqTrack.build (
-                fastqcState: NOT_STARTED
-        )
-        SeqTrack seqTrack = SeqTrack.build (
-                fastqcState: NOT_STARTED,
-                seqType: alignableSeqType
-        )
-        assert seqTrack == seqTrackService.getSeqTrackReadyForFastqcProcessing(ProcessingPriority.NORMAL_PRIORITY)
-    }
-
-    @Test
-    void testGetSeqTrackReadyForFastqcProcessing_TakeOlderSeqTrack() {
-        SeqTrack seqTrack = SeqTrack.build (
-                fastqcState: NOT_STARTED
-        )
-        SeqTrack.build (
-                fastqcState: NOT_STARTED
-        )
-        assert seqTrack == seqTrackService.getSeqTrackReadyForFastqcProcessing(ProcessingPriority.NORMAL_PRIORITY)
-        assert null == seqTrackService.getSeqTrackReadyForFastqcProcessing(ProcessingPriority.FAST_TRACK_PRIORITY)
-    }
-
-    @Test
-    void testGetSeqTrackReadyForFastqcProcessing_takeWithHigherPriority() {
-        SeqTrack.build (fastqcState: NOT_STARTED)
-        SeqTrack seqTrack = SeqTrack.build (fastqcState: NOT_STARTED)
-        Project project = seqTrack.project
-        project.processingPriority = ProcessingPriority.FAST_TRACK_PRIORITY
-        project.save(flush: true)
-
-        assert seqTrack == seqTrackService.getSeqTrackReadyForFastqcProcessing(ProcessingPriority.NORMAL_PRIORITY)
-        assert seqTrack == seqTrackService.getSeqTrackReadyForFastqcProcessing(ProcessingPriority.FAST_TRACK_PRIORITY)
+        assert workPackages.size() == 1
+        assert workPackages.iterator().next().seqType == seqTrack.seqType
     }
 
     @Test

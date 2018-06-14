@@ -146,7 +146,7 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
     }
 
     boolean canPipelineAlign(SeqTrack seqTrack) {
-        return SeqTypeService.alignableSeqTypes()*.id.contains(seqTrack.seqType.id)
+        return SeqType.getDefaultOtpAlignableSeqTypes()*.id.contains(seqTrack.seqType.id)
     }
 
     abstract void prepareForAlignment(MergingWorkPackage workPackage, SeqTrack seqTrack, boolean forceRealign)

@@ -28,21 +28,6 @@ class SeqTypeServiceSpec extends MetadataFieldsServiceSpec<SeqType> {
         ]
     }
 
-    void "test alignableSeqTypes"() {
-        given:
-        DomainFactory.createDefaultOtpAlignableSeqTypes()
-        List<SeqType> alignableSeqTypes = SeqTypeService.alignableSeqTypes()
-
-        expect:
-        2 == alignableSeqTypes.size()
-        alignableSeqTypes.find {
-            it.name == SeqTypeNames.EXOME.seqTypeName && it.libraryLayout == SeqType.LIBRARYLAYOUT_PAIRED && !it.singleCell
-        }
-        alignableSeqTypes.find {
-            it.name == SeqTypeNames.WHOLE_GENOME.seqTypeName && it.libraryLayout == SeqType.LIBRARYLAYOUT_PAIRED && !it.singleCell
-        }
-    }
-
     void "test createSeqType with invalid displayName, fails"() {
         given:
         DomainFactory.<SeqType> createDomainWithImportAlias(service.clazz, [name: NAME, importAlias: [IMPORT_ALIAS]] + properties)
