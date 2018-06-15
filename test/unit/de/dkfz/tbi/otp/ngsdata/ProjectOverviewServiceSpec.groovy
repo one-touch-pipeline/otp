@@ -199,19 +199,6 @@ class ProjectOverviewServiceSpec extends Specification {
     }
 
 
-    void "getAlignmentInformationFromConfig, when config is instance of Project, then call getDefaultOtpAlignmentInformation"() {
-        given:
-        ProjectOverviewService.AlignmentInfo alignmentInfo = new ProjectOverviewService.AlignmentInfo()
-        ProjectOverviewService projectOverviewService = Spy(ProjectOverviewService) {
-            1 * getDefaultOtpAlignmentInformation(_) >> alignmentInfo
-            0 * getRoddyAlignmentInformation(_)
-        }
-
-        expect:
-        alignmentInfo == projectOverviewService.getAlignmentInformationFromConfig(new Project())
-    }
-
-
     void "listReferenceGenome, when one item, show one item in listing"() {
         given:
         ReferenceGenomeProjectSeqType rgpst = DomainFactory.createReferenceGenomeProjectSeqType()
