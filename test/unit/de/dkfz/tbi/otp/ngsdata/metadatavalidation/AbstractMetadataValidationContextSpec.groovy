@@ -53,7 +53,6 @@ class AbstractMetadataValidationContextSpec extends Specification {
         Map infoMetadata = AbstractMetadataValidationContext.readAndCheckFile(file)
 
         then:
-        println infoMetadata.problems.getProblems()
         Problem problem = exactlyOneElement(infoMetadata.problems.getProblems())
         problem.affectedCells.isEmpty()
         problem.level == Level.WARNING

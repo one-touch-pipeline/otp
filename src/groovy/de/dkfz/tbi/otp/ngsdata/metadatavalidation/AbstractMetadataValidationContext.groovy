@@ -14,6 +14,7 @@ abstract class AbstractMetadataValidationContext extends ValidationContext {
 
     static final Charset CHARSET = Charset.forName('UTF-8')
     static long MAX_METADATA_FILE_SIZE_IN_MIB = 1
+    static long MAX_ADDITIONAL_FILE_SIZE_IN_GIB = 1
 
     final Path metadataFile
     final String metadataFileMd5sum

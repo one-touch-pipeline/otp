@@ -66,9 +66,9 @@ class BamMetadataValidationContext extends AbstractMetadataValidationContext {
         if (!Files.isReadable(file)) {
             problems.addProblem(Collections.emptySet(), Level.ERROR, "${pathForMessage(file)} is not readable.")
         } else if (Files.size(file) == 0L) {
-            problems.addProblem(Collections.emptySet(), Level.ERROR, "${pathForMessage(file)} is empty.")
-        } else if (Files.size(file) > MAX_METADATA_FILE_SIZE_IN_MIB * 1024L * 1024L) {
-            problems.addProblem(Collections.emptySet(), Level.WARNING, "${pathForMessage(file)} is larger than ${MAX_METADATA_FILE_SIZE_IN_MIB} MiB.")
+            problems.addProblem(Collections.emptySet(), Level.WARNING, "${pathForMessage(file)} is empty.")
+        } else if (Files.size(file) > MAX_ADDITIONAL_FILE_SIZE_IN_GIB * 1024L * 1024L * 1024L) {
+            problems.addProblem(Collections.emptySet(), Level.WARNING, "${pathForMessage(file)} is larger than ${MAX_ADDITIONAL_FILE_SIZE_IN_GIB} GiB.")
         }
     }
 

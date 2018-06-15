@@ -77,8 +77,27 @@ class BamMetadataValidationContextSpec extends Specification {
 
         then:
         Problem problem = exactlyOneElement(problems.getProblems())
-        problem.level == Level.ERROR
+        problem.level == Level.WARNING
         problem.message.contains("is empty.")
+    }
+
+    void "checkFile, when is to large, add the corresponding problem"() {
+        given:
+        Files.metaClass.static.size = { Path path ->
+            return AbstractMetadataValidationContext.MAX_ADDITIONAL_FILE_SIZE_IN_GIB * 1024L * 1024L * 1024L + 1
+        }
+        Path bigFile = temporaryFolder.newFile('bigFile.txt').toPath()
+
+        when:
+        context.checkFile(bigFile, problems)
+
+        then:
+        Problem problem = exactlyOneElement(problems.getProblems())
+        problem.level == Level.WARNING
+        problem.message.contains("is larger than ${AbstractMetadataValidationContext.MAX_ADDITIONAL_FILE_SIZE_IN_GIB} GiB.")
+
+        cleanup:
+        GroovySystem.metaClassRegistry.removeMetaClass(Files)
     }
 
 }
