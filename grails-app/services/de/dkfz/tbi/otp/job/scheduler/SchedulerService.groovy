@@ -260,7 +260,7 @@ class SchedulerService {
     /**
      * Invokes the primitive scheduler to determine which job is to execute next if any at all.
      */
-    @Scheduled(fixedRate=100l)
+    @Scheduled(fixedRate=1000l)
     public void schedule() throws Exception {
         if (!schedulerActive) {
             return
