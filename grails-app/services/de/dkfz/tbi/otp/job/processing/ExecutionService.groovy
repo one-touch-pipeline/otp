@@ -21,9 +21,9 @@ import static de.dkfz.tbi.otp.ngsdata.ConfigService.*
  */
 class ExecutionService {
 
-    static private final int TIME_FOR_RETRY_REMOTE_ACCESS = 120
+    static private final int TIME_FOR_RETRY_REMOTE_ACCESS = 10 * 60
 
-    static private final int CHANNEL_TIMEOUT = 120
+    static private final int CHANNEL_TIMEOUT = 5 * 60
 
 
     @SuppressWarnings("GrailsStatelessService")
