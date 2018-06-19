@@ -7,6 +7,8 @@ import org.joda.time.*
 import org.springframework.beans.*
 import org.springframework.context.*
 
+import java.time.*
+
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 /**
@@ -96,8 +98,23 @@ class ConfigService implements ApplicationContextAware {
         return getBooleanValue("otp.jobsystem.start", false)
     }
 
+    @Deprecated
     static DateTimeZone getDateTimeZone() {
-        return DateTimeZone.forID(ProcessingOptionService.findOptionAssure(ProcessingOption.OptionName.TIME_ZONE, null, null))
+                String zoneName = ProcessingOptionService.findOptionSafe(ProcessingOption.OptionName.TIME_ZONE, null, null)
+        if (zoneName) {
+            return DateTimeZone.forID(zoneName)
+        } else {
+            return DateTimeZone.default
+        }
+    }
+
+    static ZoneId getTimeZoneId() {
+        String zoneName = ProcessingOptionService.findOptionSafe(ProcessingOption.OptionName.TIME_ZONE, null, null)
+        if (zoneName) {
+            return ZoneId.of(zoneName)
+        } else {
+            return ZoneId.systemDefault()
+        }
     }
 
     boolean useBackdoor() {

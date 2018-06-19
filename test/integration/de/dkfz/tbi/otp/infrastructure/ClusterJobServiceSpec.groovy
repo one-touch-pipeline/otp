@@ -96,10 +96,10 @@ class ClusterJobServiceSpec extends Specification {
         ClusterJobIdentifier clusterJobIdentifier = new ClusterJobIdentifier(job.realm, job.clusterJobId, job.userName)
         GenericJobInfo jobInfo = new GenericJobInfo(null, null, null, null, [c2.id as String])
 
-        jobInfo.submitTime = java.time.LocalDateTime.of(2017, 8, 8, 1, 0)
-        jobInfo.eligibleTime = java.time.LocalDateTime.of(2017, 8, 9, 2, 0)
-        jobInfo.startTime = java.time.LocalDateTime.of(2017, 8, 10, 3, 0)
-        jobInfo.endTime = java.time.LocalDateTime.of(2017, 8, 11, 4, 0)
+        jobInfo.submitTime = java.time.ZonedDateTime.of(2017, 8, 8, 1, 0, 0, 0, ConfigService.timeZoneId)
+        jobInfo.eligibleTime = java.time.ZonedDateTime.of(2017, 8, 9, 2, 0, 0, 0, ConfigService.timeZoneId)
+        jobInfo.startTime = java.time.ZonedDateTime.of(2017, 8, 10, 3, 0, 0, 0, ConfigService.timeZoneId)
+        jobInfo.endTime = java.time.ZonedDateTime.of(2017, 8, 11, 4, 0, 0, 0, ConfigService.timeZoneId)
         jobInfo.timeSystemSuspState = java.time.Duration.ofSeconds(123)
         jobInfo.timeUserSuspState = java.time.Duration.ofSeconds(456)
 
@@ -187,17 +187,18 @@ class ClusterJobServiceSpec extends Specification {
         java.time.Duration.ofDays(50)    || org.joda.time.Duration.standardDays(50)
     }
 
-    void "test convertFromJava8LocalDateTimeToJodaDateTime with null"() {
+    void "test convertFromJava8ZonedDateTimeToJodaDateTime with null"() {
         expect:
-        null == clusterJobService.convertFromJava8LocalDateTimeToJodaDateTime(null)
+        null == clusterJobService.convertFromJava8ZonedDateTimeToJodaDateTime(null)
     }
 
-    void "test convertFromJava8LocalDateTimeToJodaDateTime with value"() {
+    void "test convertFromJava8ZonedDateTimeToJodaDateTime with value"() {
         given:
         DomainFactory.createProcessingOptionLazy(name: ProcessingOption.OptionName.TIME_ZONE, type: null, value: "Australia/West")
 
         expect:
-        new org.joda.time.DateTime(2017, 8, 8, 1, 0, ConfigService.dateTimeZone) == clusterJobService.convertFromJava8LocalDateTimeToJodaDateTime(java.time.LocalDateTime.of(2017, 8, 8, 1, 0))
+        new org.joda.time.DateTime(2017, 8, 8, 1, 0, ConfigService.dateTimeZone) ==
+                clusterJobService.convertFromJava8ZonedDateTimeToJodaDateTime(java.time.ZonedDateTime.of(2017, 8, 8, 1, 0, 0, 0, ConfigService.timeZoneId))
     }
 
     void testFindWorkflowObjectByClusterJob() {

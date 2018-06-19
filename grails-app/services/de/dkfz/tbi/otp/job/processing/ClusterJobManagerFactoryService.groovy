@@ -20,14 +20,13 @@ class ClusterJobManagerFactoryService {
 
         if (manager == null) {
             JobManagerOptions jobManagerParameters = JobManagerOptions.create()
-                    .setStrictMode(true)
                     .setCreateDaemon(false)
                     .setUpdateInterval(Duration.ZERO)
                     .setUserIdForJobQueries(configService.getSshUser())
-                    .setTrackUserJobsOnly(true)
                     .setTrackOnlyStartedJobs(false)
                     .setUserMask("027")
                     .setPassEnvironment(true) // module system
+                    .setTimeZoneId(configService.getTimeZoneId())
                     .build()
 
             if (realm.jobScheduler == Realm.JobScheduler.PBS) {

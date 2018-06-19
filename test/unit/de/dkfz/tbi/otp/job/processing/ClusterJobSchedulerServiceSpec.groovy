@@ -16,6 +16,7 @@ import spock.lang.*
         JobDefinition,
         JobExecutionPlan,
         Process,
+        ProcessingOption,
         ProcessingStep,
         ProcessingStepUpdate,
         Realm,

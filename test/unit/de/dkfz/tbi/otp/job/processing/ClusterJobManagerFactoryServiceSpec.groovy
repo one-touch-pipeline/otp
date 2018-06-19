@@ -3,11 +3,13 @@ package de.dkfz.tbi.otp.job.processing
 import de.dkfz.roddy.execution.jobs.*
 import de.dkfz.roddy.execution.jobs.cluster.lsf.*
 import de.dkfz.roddy.execution.jobs.cluster.pbs.*
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
-import grails.test.mixin.Mock
+import grails.test.mixin.*
 import spock.lang.*
 
 @Mock([
+        ProcessingOption,
         Realm
 ])
 class ClusterJobManagerFactoryServiceSpec extends Specification {

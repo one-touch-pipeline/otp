@@ -99,11 +99,11 @@ class ClusterJobService {
         job.exitCode = jobInfo.exitCode
 
         if (job.queued && jobInfo.submitTime) {
-            job.queued = convertFromJava8LocalDateTimeToJodaDateTime(jobInfo.submitTime)
+            job.queued = convertFromJava8ZonedDateTimeToJodaDateTime(jobInfo.submitTime)
         }
-        job.eligible = convertFromJava8LocalDateTimeToJodaDateTime(jobInfo.eligibleTime)
-        job.started = convertFromJava8LocalDateTimeToJodaDateTime(jobInfo.startTime)
-        job.ended = convertFromJava8LocalDateTimeToJodaDateTime(jobInfo.endTime)
+        job.eligible = convertFromJava8ZonedDateTimeToJodaDateTime(jobInfo.eligibleTime)
+        job.started = convertFromJava8ZonedDateTimeToJodaDateTime(jobInfo.startTime)
+        job.ended = convertFromJava8ZonedDateTimeToJodaDateTime(jobInfo.endTime)
         job.systemSuspendStateDuration = convertFromJava8DurationToJodaDuration(jobInfo.timeSystemSuspState)
         job.userSuspendStateDuration = convertFromJava8DurationToJodaDuration(jobInfo.timeUserSuspState)
 
@@ -125,10 +125,10 @@ class ClusterJobService {
         handleObviouslyFailedClusterJob(job)
     }
 
-    private static DateTime convertFromJava8LocalDateTimeToJodaDateTime(java.time.LocalDateTime localDateTime) {
-        return localDateTime ?
-                new DateTime(localDateTime.year, localDateTime.monthValue, localDateTime.dayOfMonth, localDateTime.hour,
-                        localDateTime.minute, localDateTime.second, ConfigService.dateTimeZone)
+    private static DateTime convertFromJava8ZonedDateTimeToJodaDateTime(java.time.ZonedDateTime dateTime) {
+        return dateTime ?
+                new DateTime(dateTime.year, dateTime.monthValue, dateTime.dayOfMonth, dateTime.hour,
+                        dateTime.minute, dateTime.second, DateTimeZone.forID(dateTime.zone.id))
                 : null
     }
 

@@ -1,17 +1,13 @@
 package de.dkfz.tbi.otp.job.processing
 
-import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.job.plan.JobDefinition
-import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.Realm
-import grails.buildtestdata.mixin.Build
-import grails.test.mixin.TestFor
-import grails.test.mixin.TestMixin
-import grails.test.mixin.support.GrailsUnitTestMixin
-import org.junit.After
-import org.junit.Test
+import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.ngsdata.*
+import grails.buildtestdata.mixin.*
+import grails.test.mixin.*
+import grails.test.mixin.support.*
+import org.junit.*
 
 /**
  * Unit tests for the {@link JobStatusLoggingService}.
@@ -19,7 +15,7 @@ import de.dkfz.tbi.otp.ngsdata.*
  */
 @TestFor(JobStatusLoggingService)
 @TestMixin(GrailsUnitTestMixin)
-@Build([JobDefinition, JobExecutionPlan, Process, ProcessingStep, Realm])
+@Build([JobDefinition, JobExecutionPlan, Process, ProcessingOption, ProcessingStep, Realm])
 class JobStatusLoggingServiceUnitTests {
     TestConfigService configService
 
