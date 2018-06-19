@@ -1,12 +1,21 @@
 ---
 image: grails:2.5.1
 
+#notes:
+# recursive expansion of variables does not work
+# having multiple commends in one variable does not work
+# putting the expire time to a variable does not work
+
+
 variables:
   GRAILS_OPTS: '-Xms1G'
   ARTIFACTS_BASE_DIRECTORY: 'deployment-scripts'
   MIGRATION_SCRIPT_PATH: $ARTIFACTS_BASE_DIRECTORY/migration-scripts
   WAR_DIRECTORY: $ARTIFACTS_BASE_DIRECTORY/war
   WAR_FILE: $ARTIFACTS_BASE_DIRECTORY/war/otp.war
+  MAVEN_CACHE: $CI_PROJECT_DIR/.m2
+  PREPARE_MAVEN_CACHE1: "mkdir -p $CI_PROJECT_DIR/.m2"
+  PREPARE_MAVEN_CACHE2: "ln -s $CI_PROJECT_DIR/.m2 /home/grails/.m2"
 
 
 
@@ -15,36 +24,41 @@ stages:
 
 
 
-.abstract only branches: &only_branches
+#----------------------------
+# templates
+
+
+.abstract base: &base_template
+  stage: all
+  image: otp-tests
+  dependencies: []
   only:
     - branches
-
-
-
-.abstract artifacts: &artifacts_job_template
-  <<: *only_branches
-  dependencies: []
-  artifacts: &artifacts_template
+  cache:
+    key: "${CI_PROJECT_PATH_SLUG}-maven"
     paths:
-      - $ARTIFACTS_BASE_DIRECTORY
+      - $MAVEN_CACHE
+  artifacts: &artifacts_template
     expire_in: 1 week
+  before_script:
+    - $PREPARE_MAVEN_CACHE1
+    - $PREPARE_MAVEN_CACHE2
 
 
 
 .abstract test: &test_template
-  <<: *only_branches
-  stage: all
-  image: otp-tests
-  dependencies: []
+  <<: *base_template
   before_script:
     - echo 'otp.testing.group=othergroup' > /home/grails/.otp.properties
+    - $PREPARE_MAVEN_CACHE1
+    - $PREPARE_MAVEN_CACHE2
   script:
-    - grails test compile
-    - "grails test-app $TEST_TYPE: -coverage de.**.*"
+    - grails test compile --non-interactive
+    - "grails test-app --non-interactive $TEST_TYPE: -coverage de.**.*"
   after_script:
     - head -1 target/test-reports/cobertura/coverage.xml
   coverage: /line-rate="\d.(\d\d)\d+"/
-  artifacts:
+  artifacts: &artifacts_template
     <<: *artifacts_template
     paths:
       - target/test-reports/*.xml
@@ -53,6 +67,8 @@ stages:
     when: always
 
 
+#----------------------------
+# jobs
 
 unit tests:
   <<: *test_template
@@ -69,12 +85,10 @@ integration tests:
 
 
 codenarc:
-  <<: *only_branches
-  stage: all
-  dependencies: []
+  <<: *base_template
   script:
-    - grails compile
-    - grails codenarc
+    - grails compile --non-interactive
+    - grails codenarc --non-interactive
   after_script:
     - sed -i "s@<SourceDirectory></SourceDirectory>@<SourceDirectory>$(pwd)</SourceDirectory>@" target/CodeNarc-Report.xml
   artifacts:
@@ -86,21 +100,25 @@ codenarc:
 
 
 war:
-  <<: *artifacts_job_template
-  stage: all
-  image: otp-tests
+  <<: *base_template
+  artifacts:
+    <<: *artifacts_template
+    paths:
+      - $ARTIFACTS_BASE_DIRECTORY
   before_script:
     - export CI_COMMIT_REF_NAME
     - export CI_COMMIT_SHA
     - echo 'otp.testing.group=othergroup' > /home/grails/.otp.properties
     - mkdir -p logs/jobs
+    - $PREPARE_MAVEN_CACHE1
+    - $PREPARE_MAVEN_CACHE2
   script:
     - set -e -o pipefail
 
     - echo $WAR_DIRECTORY
     - echo $WAR_FILE
 
-    - 'grails war'
+    - 'grails war --non-interactive'
 
     - mkdir -p $WAR_DIRECTORY
     - mv target/otp.war $WAR_DIRECTORY
@@ -111,12 +129,10 @@ war:
 
 
 test migration:
-  <<: *only_branches
-  stage: all
+  <<: *base_template
+  image: otp-test-migration
   services:
     - postgres:latest
-  dependencies: []
-  image: otp-test-migration
   variables:
     POSTGRES_DB: otp
     POSTGRES_USER: otp
@@ -127,12 +143,15 @@ test migration:
     - echo 'otp.database.database=otp' >> /home/grails/.otp.properties
     - echo 'otp.database.username=otp' >> /home/grails/.otp.properties
     - echo 'otp.database.password=otp' >> /home/grails/.otp.properties
+    - $PREPARE_MAVEN_CACHE1
+    - $PREPARE_MAVEN_CACHE2
   script:
-    - grails compile
-    - grails dbm-update
+    - grails compile --non-interactive
+    - grails dbm-update --non-interactive
     - bash ./bashScripts/grails-migration-plugin/create-dbm-gorm-diff-without-false-changes.sh testing
     - bash ./bashScripts/grails-migration-plugin/check-for-changelog-file.sh testing
   artifacts:
+    <<: *artifacts_template
     paths:
       - migrations/changelogs/*/testing.groovy
     when: on_failure
