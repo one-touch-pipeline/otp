@@ -169,6 +169,9 @@ class ProcessedMergedBamFileServiceUnitTests {
 
 
     private def createDataForDeleteChecking(Boolean valueForDataBaseConsistence = null, Boolean valueForDestinationConsistence = null) {
+        final String dataProcessingTempDir = TestCase.getUniqueNonExistentPath() as String
+        final File projectRootDir = TestCase.getUniqueNonExistentPath()
+
         ProcessedMergedBamFile processedMergedBamFile = DomainFactory.createProcessedMergedBamFile([
             md5sum: SOME_MD5SUM_VALUE,
             fileOperationStatus: FileOperationStatus.PROCESSED,
@@ -177,7 +180,7 @@ class ProcessedMergedBamFileServiceUnitTests {
 
         ProcessedMergedBamFileService processedMergedBamFileService = new ProcessedMergedBamFileService()
 
-        ConfigService.metaClass.static.getProjectRootPath = { Project project -> return TestConstants.BASE_TEST_DIRECTORY}
+        ConfigService.metaClass.static.getProjectRootPath = { Project project -> return projectRootDir }
 
         MergedAlignmentDataFileService.metaClass.static.buildRelativePath = { SeqType type, Sample sample -> return "RelativeDirectory"}
 
@@ -187,7 +190,7 @@ class ProcessedMergedBamFileServiceUnitTests {
 
         processedMergedBamFileService.dataProcessingFilesService = [
             getOutputDirectory: { Individual individual, DataProcessingFilesService.OutputDirectories dir ->
-                return TestConstants.BASE_TEST_DIRECTORY
+                return dataProcessingTempDir
             },
 
             checkConsistencyWithDatabaseForDeletion: { final def dbFile, final File fsFile ->

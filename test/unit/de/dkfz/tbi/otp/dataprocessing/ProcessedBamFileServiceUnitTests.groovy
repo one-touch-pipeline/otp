@@ -56,9 +56,10 @@ class ProcessedBamFileServiceUnitTests {
     }
 
     private ProcessedBamFileService createProcessedBamFileService() {
+        final String pbfTempDir = TestCase.getUniqueNonExistentPath() as String
         ProcessedBamFileService processedBamFileService = new ProcessedBamFileService()
         processedBamFileService.processedAlignmentFileService = [
-            getDirectory: { AlignmentPass alignmentPass -> return TestConstants.BASE_TEST_DIRECTORY}
+            getDirectory: { AlignmentPass alignmentPass -> return pbfTempDir}
         ] as ProcessedAlignmentFileService
         return processedBamFileService
     }

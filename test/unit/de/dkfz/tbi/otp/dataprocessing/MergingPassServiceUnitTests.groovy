@@ -1,6 +1,7 @@
 
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.TestCase
 import grails.buildtestdata.mixin.Build
 import grails.test.mixin.*
 
@@ -50,11 +51,12 @@ class MergingPassServiceUnitTests {
     private void createTestData() {
         createDomains()
 
+        final File qaProcessingDirectory = TestCase.getUniqueNonExistentPath()
         mergingPassService = new MergingPassService()
         mergingPassService.processedMergedBamFileQaFileService = [
             qaProcessingDirectory: { final MergingPass mergingPass ->
                 assert this.mergingPass == mergingPass
-                return TestConstants.BASE_TEST_DIRECTORY as File
+                return qaProcessingDirectory
             },
             checkConsistencyForProcessingFilesDeletion: { final QualityAssessmentMergedPass pass ->
                 return true //
@@ -63,10 +65,12 @@ class MergingPassServiceUnitTests {
                 return SOME_FILE_LENGTH_1 //
             },
         ] as ProcessedMergedBamFileQaFileService
+
+        final String pmbfProcessingDirectory = TestCase.getUniqueNonExistentPath() as String
         mergingPassService.processedMergedBamFileService = [
             processingDirectory: { MergingPass mergingPass ->
                 assert this.mergingPass == mergingPass
-                return TestConstants.BASE_TEST_DIRECTORY
+                return pmbfProcessingDirectory
             },
             checkConsistencyForProcessingFilesDeletion: { final ProcessedMergedBamFile bamFile ->
                 assert processedMergedBamFile == bamFile
@@ -77,12 +81,14 @@ class MergingPassServiceUnitTests {
                 return SOME_FILE_LENGTH_2
             },
         ] as ProcessedMergedBamFileService
+
         mergingPassService.dataProcessingFilesService = [
             deleteProcessingDirectory: { final Project project, final File directoryPath ->
                 assert mergingPass.project == project
                 return
             }
         ] as DataProcessingFilesService
+
         //method is overloaded, this can't be done both via map
         mergingPassService.dataProcessingFilesService.metaClass.deleteProcessingDirectory = { final Project project, final String directoryPath ->
             assert mergingPass.project == project

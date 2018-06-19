@@ -25,9 +25,10 @@ class ProcessedSaiFileServiceUnitTests {
         //Therefore this method is mocked.
         AlignmentPass.metaClass.isLatestPass= {true}
 
+        final String saiFileProcessingDir = TestCase.getUniqueNonExistentPath() as String
         processedSaiFileService = new ProcessedSaiFileService()
         processedSaiFileService.processedAlignmentFileService = [
-            getDirectory: { AlignmentPass alignmentPass -> return TestConstants.BASE_TEST_DIRECTORY}
+            getDirectory: { AlignmentPass alignmentPass -> return saiFileProcessingDir }
         ] as ProcessedAlignmentFileService
     }
 

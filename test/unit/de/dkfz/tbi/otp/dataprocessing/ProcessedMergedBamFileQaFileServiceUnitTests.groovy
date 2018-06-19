@@ -2,10 +2,9 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import org.junit.Test
 
-import static org.springframework.util.Assert.*
 import grails.buildtestdata.mixin.Build
-import grails.test.mixin.*
 import de.dkfz.tbi.TestConstants
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.ngsdata.*
 
 @Build([
@@ -19,21 +18,25 @@ class ProcessedMergedBamFileQaFileServiceUnitTests {
 
 
     private def createDataForDeleteChecking(Boolean valueForDestinationConsistence = null) {
+        final File dataProcessingTempDir = TestCase.getUniqueNonExistentPath()
+        final File tempPmbfProcessingDir = TestCase.getUniqueNonExistentPath()
+        final File tempQaResultDir = TestCase.getUniqueNonExistentPath()
+
         QualityAssessmentMergedPass qualityAssessmentMergedPass = QualityAssessmentMergedPass.build()
         ProcessedMergedBamFileQaFileService processedMergedBamFileQaFileService = new ProcessedMergedBamFileQaFileService()
         processedMergedBamFileQaFileService.processedMergedBamFileService = [
-            qaResultDestinationDirectory: { ProcessedMergedBamFile file -> return TestConstants.BASE_TEST_DIRECTORY },
-            processingDirectory: {final MergingPass mergingPass -> return TestConstants.BASE_TEST_DIRECTORY },
+            qaResultDestinationDirectory: { ProcessedMergedBamFile file -> return tempQaResultDir as String },
+            processingDirectory: {final MergingPass mergingPass -> return tempPmbfProcessingDir as String },
         ] as ProcessedMergedBamFileService
 
         processedMergedBamFileQaFileService.dataProcessingFilesService = [
             getOutputDirectory: { Individual individual, DataProcessingFilesService.OutputDirectories dir ->
-                return TestConstants.BASE_TEST_DIRECTORY
+                return dataProcessingTempDir as String
             },
 
             checkConsistencyWithFinalDestinationForDeletion: {final File processingDirectory, final File finalDestinationDirectory, final Collection<String> fileNames ->
                 File expectedProcessingDirectory = processedMergedBamFileQaFileService.qaPassProcessingDirectory(qualityAssessmentMergedPass) as File
-                File expectedFinalDestinationDirectory = new File(TestConstants.BASE_TEST_DIRECTORY)
+                File expectedFinalDestinationDirectory = tempQaResultDir // fake it since we're not actually moving stuff: re-use QA as final destination in Project
                 Collection<String> expectedAdditionalFiles = processedMergedBamFileQaFileService.allFileNames(qualityAssessmentMergedPass.abstractMergedBamFile)
                 assert expectedProcessingDirectory == processingDirectory
                 assert expectedFinalDestinationDirectory == finalDestinationDirectory
