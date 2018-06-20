@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.TimeStamped
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.Entity
 
@@ -8,16 +9,11 @@ import de.dkfz.tbi.otp.utils.Entity
  * This domain stores the configuration project specific.
  * If the configuration changes, the old database entry is set to obsolete and the new entry refers to the old entry.
  */
-abstract class ConfigPerProject implements Entity {
+abstract class ConfigPerProject implements TimeStamped, Entity {
 
     static belongsTo = [
         project: Project
     ]
-
-    // The following two properties are automatically maintained by Grails.
-    // See http://grails.org/doc/latest/ref/Database%20Mapping/autoTimestamp.html
-    Date dateCreated
-    Date lastUpdated
 
     Pipeline pipeline
 

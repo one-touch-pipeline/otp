@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.TimeStamped
 import de.dkfz.tbi.otp.utils.Entity
 import groovy.transform.ToString
 import de.dkfz.tbi.otp.ngsdata.*
@@ -12,7 +13,7 @@ import de.dkfz.tbi.otp.ngsdata.*
  *
  */
 @ToString
-class ProcessingThresholds implements Entity {
+class ProcessingThresholds implements TimeStamped, Entity {
 
     Project project
 
@@ -29,12 +30,6 @@ class ProcessingThresholds implements Entity {
      * This property contains the number of lanes which have to be reached to start a process.
      */
     Integer numberOfLanes
-
-    /**
-     * These properties are handled automatically by grails.
-     */
-    Date dateCreated
-    Date lastUpdated
 
     static constraints = {
         coverage nullable: true, validator: {val, obj ->

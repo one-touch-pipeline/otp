@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.TimeStamped
 import de.dkfz.tbi.otp.utils.Entity
 import groovy.transform.ToString
 
@@ -12,7 +13,7 @@ import groovy.transform.ToString
  *
  */
 @ToString(excludes=['dateCreated','lastUpdated'], includePackage = false)
-class SampleTypePerProject implements Entity {
+class SampleTypePerProject implements TimeStamped, Entity {
 
     Project project
 
@@ -22,16 +23,6 @@ class SampleTypePerProject implements Entity {
      * Holds the information if the specified sampleType is a DISEASE or a CONTROL in this project.
      */
     SampleType.Category category
-
-    /**
-     * This property is handled automatically by grails.
-     */
-    Date dateCreated
-
-    /**
-     * This property is handled automatically by grails.
-     */
-    Date lastUpdated
 
 
     static constraints = {

@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
+import de.dkfz.tbi.otp.TimeStamped
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.sophia.*
 import de.dkfz.tbi.otp.ngsdata.*
@@ -13,7 +14,7 @@ import org.springframework.validation.*
  * This is why the properties are not call disease and control.
  * The sample pairs can also be used for other purposes i.e. coverage combination between disease and control
  */
-class SamplePair implements Entity {
+class SamplePair implements TimeStamped, Entity {
 
     final static String SNV_RESULTS_PATH_PART = 'snv_results'
     final static String INDEL_RESULTS_PATH_PART = 'indel_results'
@@ -65,12 +66,6 @@ class SamplePair implements Entity {
                 sophiaProcessingStatus == ProcessingStatus.DISABLED &&
                 aceseqProcessingStatus == ProcessingStatus.DISABLED
     }
-
-    /**
-     * These properties are handled automatically by grails.
-     */
-    Date dateCreated
-    Date lastUpdated
 
     static constraints = {
         mergingWorkPackage1 validator: { AbstractMergingWorkPackage val, SamplePair obj, Errors errors ->

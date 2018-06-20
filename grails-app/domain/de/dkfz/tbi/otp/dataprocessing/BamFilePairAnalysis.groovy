@@ -11,7 +11,7 @@ import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.*
 import org.hibernate.*
 
-abstract class BamFilePairAnalysis implements ProcessParameterObject, Entity {
+abstract class BamFilePairAnalysis implements TimeStamped, ProcessParameterObject, Entity {
     /**
      * Refers to the config file which is stored in the database and is used as a basis for all the files in the filesystem.
      */
@@ -26,10 +26,6 @@ abstract class BamFilePairAnalysis implements ProcessParameterObject, Entity {
      * For example 2014-08-25_15h32.
      */
     String instanceName
-
-    Date dateCreated
-
-    Date lastUpdated
 
     boolean withdrawn = false
 
