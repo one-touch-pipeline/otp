@@ -137,7 +137,7 @@ class QcThresholdSpec extends Specification {
         10   | 15   | 0    | 20   || QcThreshold.ThresholdLevel.ERROR
     }
 
-
+    @Unroll
     void "test qcPassed method with compare mode toQcProperty2"() {
         given:
         SophiaQc qc = DomainFactory.createSophiaQc(controlMassiveInvPrefilteringLevel: control, tumorMassiveInvFilteringLevel: tumor)
@@ -165,7 +165,7 @@ class QcThresholdSpec extends Specification {
         50      | 45    || QcThreshold.ThresholdLevel.ERROR
     }
 
-
+    @Unroll
     void "test qcPassed method with compare mode toThresholdFactorExternalValue"() {
         given:
         SophiaQc qc = DomainFactory.createSophiaQc(controlMassiveInvPrefilteringLevel: 50)
@@ -192,7 +192,8 @@ class QcThresholdSpec extends Specification {
         10  | 15  | 0   | 20  || QcThreshold.ThresholdLevel.ERROR
     }
 
-    void "test qcPassed method with compare mode toThresholdFactorExternalValue if factor is 0"() {
+    @Unroll
+    void "test qcPassed method with compare mode toThresholdFactorExternalValue if factor is #externalValue"() {
         given:
         SophiaQc qc = DomainFactory.createSophiaQc(controlMassiveInvPrefilteringLevel: 50)
         QcThreshold threshold = DomainFactory.createQcThreshold(
@@ -204,9 +205,14 @@ class QcThresholdSpec extends Specification {
                 compare: QcThreshold.Compare.toThresholdFactorExternalValue,
                 qcClass: "SophiaQc"
         )
-        double externalValue = 0
 
         expect:
         threshold.qcPassed(qc, externalValue) == QcThreshold.ThresholdLevel.OKAY
+
+        where:
+        externalValue << [
+                0,
+                null
+        ]
     }
 }

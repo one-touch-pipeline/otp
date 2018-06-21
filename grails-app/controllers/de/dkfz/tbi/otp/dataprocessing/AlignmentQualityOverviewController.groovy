@@ -210,9 +210,12 @@ class AlignmentQualityOverviewController {
             AbstractMergedBamFile abstractMergedBamFile = qualityAssessmentMergedPass.abstractMergedBamFile
             Set<LibraryPreparationKit> kit = qualityAssessmentMergedPass.containedSeqTracks*.libraryPreparationKit.findAll().unique() //findAll removes null values
             String readLengthString = sequenceLengthsMap[it.id][0][1]
-            double readLength = readLengthString.contains('-') ? (readLengthString.split('-').sum {
-                it as double
-            } / 2) : readLengthString as double
+            Double readLength = null
+            if (readLengthString) {
+                readLength = readLengthString.contains('-') ? (readLengthString.split('-').sum {
+                    it as double
+                } / 2) : readLengthString as double
+            }
             TableCellValue.Icon icon = [
                     (AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED)  : TableCellValue.Icon.WARNING,
                     (AbstractMergedBamFile.QcTrafficLightStatus.REJECTED) : TableCellValue.Icon.ERROR,

@@ -77,7 +77,7 @@ class QcThreshold implements Entity {
         ERROR,
     }
 
-    ThresholdLevel qcPassed(QcTrafficLightValue qc, double externalValue = 0) {
+    ThresholdLevel qcPassed(QcTrafficLightValue qc, Double externalValue = 0) {
         switch (this.compare) {
             case Compare.toThreshold:
                 compareToThreshold(qc)
@@ -107,8 +107,8 @@ class QcThreshold implements Entity {
     }
 
 
-    private ThresholdLevel compareToThresholdFactorExternalValue(QcTrafficLightValue qc, double externalValue) {
-        if (qc."${qcProperty1}" == null || externalValue == 0) {
+    private ThresholdLevel compareToThresholdFactorExternalValue(QcTrafficLightValue qc, Double externalValue) {
+        if (qc."${qcProperty1}" == null || externalValue == null || externalValue == 0) {
             return ThresholdLevel.OKAY
         }
         return getWarningLevel(qc."${qcProperty1}" / externalValue)
