@@ -111,7 +111,7 @@
                     <td>
                         <otp:editorSwitch
                             roles="ROLE_OPERATOR"
-                            link="${g.createLink(controller: 'projectConfig', action: 'simpleDomainParamUpdate', params: ['project.id': project.id, 'fieldName': 'mailingListName'])}"
+                            link="${g.createLink(controller: 'projectConfig', action: 'updateMailingListName', params: ['project.id': project.id, 'fieldName': 'mailingListName'])}"
                             value="${mailingListName}"/>
                     </td>
                 </tr>
@@ -130,7 +130,7 @@
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
                                 template="textArea"
-                                link="${g.createLink(controller: 'projectConfig', action: 'simpleDomainParamUpdate', params: ['project.id': project.id, 'fieldName': 'description'])}"
+                                link="${g.createLink(controller: 'projectConfig', action: 'updateDescription', params: ['project.id': project.id, 'fieldName': 'description'])}"
                                 value="${description}"/>
                     </td>
                 </tr>
@@ -143,7 +143,7 @@
                     <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
-                                link="${g.createLink(controller: 'projectConfig', action: 'simpleDomainParamUpdate', params: ['project.id': project.id, 'fieldName': 'costCenter'])}"
+                                link="${g.createLink(controller: 'projectConfig', action: 'updateCostCenter', params: ['project.id': project.id, 'fieldName': 'costCenter'])}"
                                 value="${costCenter}"/>
                     </td>
                 </tr>

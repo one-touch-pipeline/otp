@@ -11,6 +11,8 @@ import org.springframework.validation.*
 import java.sql.*
 import java.text.*
 
+
+
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 class ProjectConfigController {
@@ -148,7 +150,13 @@ class ProjectConfigController {
         return roleName.isEmpty() ? null : exactlyOneElement(ContactPersonRole.findAllByName(roleName))
     }
 
-    JSON simpleDomainParamUpdate(SimpleUpdateCommand cmd) {
+    JSON updateMailingListName(UpdateMailingListCommand cmd) {
+        checkErrorAndCallMethod(cmd, { projectService.updateProjectField(cmd.value, cmd.fieldName, cmd.project) })
+    }
+    JSON updateDescription(UpdateProjectCommand cmd) {
+        checkErrorAndCallMethod(cmd, { projectService.updateProjectField(cmd.value, cmd.fieldName, cmd.project) })
+    }
+    JSON updateCostCenter(UpdateProjectCommand cmd) {
         checkErrorAndCallMethod(cmd, { projectService.updateProjectField(cmd.value, cmd.fieldName, cmd.project) })
     }
 
@@ -160,7 +168,7 @@ class ProjectConfigController {
         checkErrorAndCallMethod(cmd, { contactPersonService.updateName(cmd.contactPerson, cmd.newName) })
     }
 
-    JSON updatePhabricatorAlias(SimpleUpdateCommand cmd) {
+    JSON updatePhabricatorAlias(UpdateProjectCommand cmd) {
         checkErrorAndCallMethod(cmd, { projectService.updatePhabricatorAlias(cmd.value, cmd.project) })
     }
 
@@ -194,19 +202,19 @@ class ProjectConfigController {
         checkErrorAndCallMethod(cmd, { projectService.updateCategory(cmd.value, cmd.project) })
     }
 
-    JSON updateProcessingPriority(SimpleUpdateCommand cmd) {
+    JSON updateProcessingPriority(UpdateProjectCommand cmd) {
         checkErrorAndCallMethod(cmd, {
             projectService.updateProjectField(ProcessingPriority."${cmd.value}_PRIORITY", cmd.fieldName, cmd.project)
         })
     }
 
-    JSON updateTumorEntity(SimpleUpdateCommand cmd) {
+    JSON updateTumorEntity(UpdateProjectCommand cmd) {
         checkErrorAndCallMethod(cmd, {
             projectService.updateProjectField(TumorEntity.findByName(cmd.value), cmd.fieldName, cmd.project)
         })
     }
 
-    JSON updateSnv(SimpleUpdateCommand cmd) {
+    JSON updateSnv(UpdateProjectCommand cmd) {
         checkErrorAndCallMethod(cmd, {
             projectService.updateProjectField(Project.Snv.valueOf(cmd.value), cmd.fieldName, cmd.project)
         })
@@ -351,13 +359,25 @@ class ProjectConfigController {
     }
 }
 
-class SimpleUpdateCommand implements Serializable {
+class UpdateProjectCommand implements Serializable {
     Project project
     String value
     String fieldName
 
     static constraints = {
         fieldName(nullable: true)
+    }
+}
+
+class UpdateMailingListCommand extends UpdateProjectCommand {
+    static constraints = {
+        value(nullable: true, validator: { val, obj ->
+            if (val) {
+                if (!(val.startsWith("tr_") && val.contains('@'))) {
+                    return "Has to Start with 'tr_' and contain a '@'."
+                }
+            }
+        })
     }
 }
 
