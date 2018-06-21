@@ -24,7 +24,7 @@ class FastqcResultsService {
     }
 
     /**
-     * Retrieves the FastQC {@link DataFile}s for the given {@link Sequence}s.
+     * Retrieves the FastQC {@link DataFile}s for the given {@link Sequence}s where FastQC is finished.
      *
      * The returned list includes the found DataFiles but does not order them by
      * Sequences. If a mapping to the Sequence is needed it's the task of the
@@ -32,13 +32,14 @@ class FastqcResultsService {
      * @param sequences The Sequences for which the FastQC DataFiles should be retrieved
      * @return The FastQC DataFiles found by the Sequences
      */
-    public List<DataFile> fastQCFiles(List<Sequence> sequences) {
-        String query = '''
-SELECT df FROM FastqcProcessedFile AS fqc
-INNER JOIN fqc.dataFile AS df
-WHERE
-df.seqTrack.id in (:seqTrackIds)
-'''
-        return DataFile.executeQuery(query, [seqTrackIds: sequences.collect{ it.seqTrackId }])
+    List<DataFile> fastQCFiles(List<Sequence> sequences) {
+        return FastqcProcessedFile.createCriteria().list {
+            dataFile {
+                seqTrack {
+                    'in'('id', sequences*.seqTrackId )
+                    eq ('fastqcState', SeqTrack.DataProcessingState.FINISHED)
+                }
+            }
+        }*.dataFile
     }
 }
