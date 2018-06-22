@@ -2,7 +2,6 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.CollectionUtils
 
 class AceseqService extends BamFileAnalysisService {
 
@@ -25,7 +24,7 @@ class AceseqService extends BamFileAnalysisService {
     }
 
     @Override
-    protected Class<AceseqInstance> getAnalysisClass() {
+    Class<AceseqInstance> getAnalysisClass() {
         return AceseqInstance.class
     }
 
@@ -35,8 +34,8 @@ class AceseqService extends BamFileAnalysisService {
     }
 
     @Override
-    protected Pipeline getPipeline() {
-        return CollectionUtils.exactlyOneElement(Pipeline.findAllByName(Pipeline.Name.RODDY_ACESEQ))
+    Pipeline.Name getPipelineName() {
+        return Pipeline.Name.RODDY_ACESEQ
     }
 
     @Override
@@ -50,7 +49,7 @@ class AceseqService extends BamFileAnalysisService {
     }
 
     @Override
-    public Map<String, Object> checkReferenceGenomeMap() {
+    Map<String, Object> checkReferenceGenomeMap() {
         String referenceNamesString = processingOptionService.findOptionAssure(OptionName.PIPELINE_ACESEQ_REFERENCE_GENOME, null, null)
         List<String> referenceGenomeNames = referenceNamesString.split(',')*.trim()
         return [referenceGenomes: ReferenceGenome.findAllByNameInList(referenceGenomeNames)]

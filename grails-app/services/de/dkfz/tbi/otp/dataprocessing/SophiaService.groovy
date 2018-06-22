@@ -2,7 +2,6 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.dataprocessing.sophia.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.CollectionUtils
 
 class SophiaService extends BamFileAnalysisService {
 
@@ -14,7 +13,7 @@ class SophiaService extends BamFileAnalysisService {
     }
 
     @Override
-    protected Class<SophiaInstance> getAnalysisClass() {
+    Class<SophiaInstance> getAnalysisClass() {
         return SophiaInstance.class
     }
 
@@ -24,8 +23,8 @@ class SophiaService extends BamFileAnalysisService {
     }
 
     @Override
-    protected Pipeline getPipeline() {
-        return CollectionUtils.exactlyOneElement(Pipeline.findAllByName(Pipeline.Name.RODDY_SOPHIA))
+    Pipeline.Name getPipelineName() {
+        return Pipeline.Name.RODDY_SOPHIA
     }
 
     @Override

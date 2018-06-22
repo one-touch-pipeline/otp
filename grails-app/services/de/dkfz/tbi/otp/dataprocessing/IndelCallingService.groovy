@@ -1,25 +1,27 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.utils.CollectionUtils
-
+import de.dkfz.tbi.otp.ngsdata.*
 
 class IndelCallingService extends BamFileAnalysisService {
 
+    @Override
     protected String getProcessingStateCheck() {
         return "sp.indelProcessingStatus = :needsProcessing "
     }
 
-    protected Class<IndelCallingInstance> getAnalysisClass() {
+    @Override
+    Class<IndelCallingInstance> getAnalysisClass() {
         return IndelCallingInstance.class
     }
 
+    @Override
     protected Pipeline.Type getAnalysisType() {
         return Pipeline.Type.INDEL
     }
 
-    protected Pipeline getPipeline() {
-        return CollectionUtils.exactlyOneElement(Pipeline.findAllByName(Pipeline.Name.RODDY_INDEL))
+    @Override
+    Pipeline.Name getPipelineName() {
+        return Pipeline.Name.RODDY_INDEL
     }
 
     @Override

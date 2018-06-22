@@ -4,6 +4,7 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.ProcessingStatus
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 abstract class BamFileAnalysisService {
 
@@ -136,18 +137,18 @@ abstract class BamFileAnalysisService {
         return ''
     }
 
-    public Map<String, Object> checkReferenceGenomeMap(){
+    Map<String, Object> checkReferenceGenomeMap(){
         return [:]
     }
 
-    protected Map<String, Object> pipelineSpecificBamFileChecksMap(){
-        return [:]
+    final Pipeline getPipeline() {
+        return CollectionUtils.<Pipeline> exactlyOneElement(Pipeline.findAllByName(getPipelineName()))
     }
 
     abstract protected String getProcessingStateCheck()
-    abstract protected Class<BamFilePairAnalysis> getAnalysisClass()
+    abstract Class<BamFilePairAnalysis> getAnalysisClass()
     abstract protected Pipeline.Type getAnalysisType()
-    abstract protected Pipeline getPipeline()
     abstract protected List<SeqType> getSeqTypes()
+    abstract Pipeline.Name getPipelineName()
 
 }

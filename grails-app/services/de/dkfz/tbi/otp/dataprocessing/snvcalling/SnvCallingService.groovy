@@ -2,10 +2,10 @@ package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
 
 class SnvCallingService extends BamFileAnalysisService {
 
+    @Override
     protected String getProcessingStateCheck() {
         return "sp.snvProcessingStatus = :needsProcessing "
     }
@@ -21,8 +21,8 @@ class SnvCallingService extends BamFileAnalysisService {
     }
 
     @Override
-    protected Pipeline getPipeline() {
-        return CollectionUtils.exactlyOneElement(Pipeline.findAllByName(Pipeline.Name.RODDY_SNV))
+    Pipeline.Name getPipelineName() {
+        return Pipeline.Name.RODDY_SNV
     }
 
     @Override
