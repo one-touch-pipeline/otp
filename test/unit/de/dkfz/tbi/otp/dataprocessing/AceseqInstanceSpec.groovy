@@ -12,6 +12,7 @@ import spock.lang.*
 
 
 @Mock([
+        AceseqInstance,
         AceseqQc,
         DataFile,
         FileType,

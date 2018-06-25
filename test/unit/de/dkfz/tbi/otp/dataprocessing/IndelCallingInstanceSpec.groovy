@@ -10,6 +10,7 @@ import spock.lang.*
 @Mock([
         DataFile,
         FileType,
+        IndelCallingInstance,
         Individual,
         LibraryPreparationKit,
         MergingCriteria,

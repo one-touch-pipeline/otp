@@ -12,6 +12,7 @@ import spock.lang.*
 @Mock([
         AlignmentPass,
         AceseqInstance,
+        BamFilePairAnalysis,
         DataFile,
         ExternalMergingWorkPackage,
         ExternallyProcessedMergedBamFile,

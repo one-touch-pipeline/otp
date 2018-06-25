@@ -1,9 +1,11 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import spock.lang.Specification
-import spock.lang.Unroll
+import grails.test.mixin.*
+import spock.lang.*
 
-
+@Mock([
+        Pipeline
+])
 class PipelineSpec extends Specification {
 
     @Unroll
