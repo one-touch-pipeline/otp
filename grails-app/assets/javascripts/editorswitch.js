@@ -2,6 +2,48 @@
  */
 
 $(function() {
+    $("td.add-table-buttons button.add").click(function (event) {
+        "use strict";
+        event.preventDefault();
+        var p = $(this).parent();
+        $(".save", p).show();
+        $(".cancel", p).show();
+        $(".add", p).hide();
+        $(".add-table-fields", p.parent().parent()).show();
+    });
+
+    $("td.add-table-buttons button.cancel").click(function (event) {
+        "use strict";
+        event.preventDefault();
+        var p = $(this).parent();
+        $(".save", p).hide();
+        $(".cancel", p).hide();
+        $(".add", p).show();
+        $(".add-table-fields", p.parent().parent()).hide();
+    });
+
+    $("tr.edit-table-buttons button.button-edit").click(function (event) {
+        "use strict";
+        event.preventDefault();
+        var p = $(this).parent();
+        $(".save", p).show();
+        $(".cancel", p).show();
+        $(".button-edit", p).hide();
+        $(".edit-fields", p.parent()).show();
+        $(".show-fields", p.parent()).hide();
+    });
+
+    $("tr.edit-table-buttons button.cancel").click(function (event) {
+        "use strict";
+        event.preventDefault();
+        var p = $(this).parent();
+        $(".save", p).hide();
+        $(".cancel", p).hide();
+        $(".button-edit", p).show();
+        $(".edit-fields", p.parent()).hide();
+        $(".show-fields", p.parent()).show();
+    });
+
     $.otp.editorswitch = {};
     $("div.edit-switch .edit-switch-label button.js-edit").click(function () {
         "use strict";

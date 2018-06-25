@@ -177,4 +177,31 @@ class OtpTagLib {
         out << "</div>"
         out << "</div>"
     }
+
+
+    def tableAdd = { attrs, body ->
+        out << '<tr class="add-table-fields" style="display: none;">'
+        out << body.call()
+        out << '</tr>'
+        out << '<tr>'
+        out << '  <td class="add-table-buttons" colspan="100">'
+        out << '    <button class="add">+</button>'
+        out <<      g.submitButton(class: "save", name: "Save", style: "display: none;")
+        out << '    <button class="cancel" style="display: none;">Cancel</button>'
+        out << '  </td>'
+        out << '</tr>'
+    }
+
+    def editTable = { attrs, body ->
+        out << '<tr class="edit-table-buttons">'
+        out << body.call("insideEdiTable": true)
+        out << '</tr>'
+
+    }
+
+    def editTableButtons = { attrs ->
+       out << '<button class="button-edit">Edit</button>'
+       out << g.submitButton(class: "save", style: "display: none;", name: "Save")
+       out << '<button class="cancel" style="display: none;">Cancel</button>'
+    }
 }

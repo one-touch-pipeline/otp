@@ -2430,14 +2430,14 @@ class DomainFactory {
         ], properties)
     }
 
-    static QcThreshold createQcThreshold(Map properties = [:]) {
+    static QcThreshold createQcThreshold(Map properties = [:], boolean saveAndValidate = true) {
         return createDomainObject(QcThreshold, [
-                qcProperty1          : "qcProperty${counter++}",
+                qcProperty1          : "controlMassiveInvPrefilteringLevel",
                 warningThresholdUpper: counter++,
                 errorThresholdUpper  : counter++,
-                compare              : QcThreshold.Compare.toThreshold
-                //qcClass needs to be defined per test since it depends on the QC domain the value belongs to
-        ], properties)
+                compare              : QcThreshold.ThresholdStrategy.ABSOLUTE_LIMITS,
+                qcClass              : SophiaQc.name,
+        ], properties, saveAndValidate)
     }
 
     static Document createDocument(Map properties = [:]) {

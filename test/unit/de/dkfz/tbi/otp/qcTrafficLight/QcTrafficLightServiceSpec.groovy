@@ -1,10 +1,11 @@
-package de.dkfz.tbi.otp.ngsdata
+package de.dkfz.tbi.otp.qcTrafficLight
 
+import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
+import de.dkfz.tbi.otp.ngsdata.*
 import grails.test.mixin.*
 import spock.lang.*
-import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 
 @Mock([
         SeqType,

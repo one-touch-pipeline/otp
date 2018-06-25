@@ -325,6 +325,10 @@
         <br>
         <h2>${g.message(code: 'projectOverview.analysis.title')}</h2>
         <div>
+            <h3>${g.message(code: 'projectOverview.qc.thresholds')}</h3>
+            <div>
+                <g:link controller="qcThreshold" action="projectConfiguration">${g.message(code: 'projectOverview.qc.link')}</g:link>
+            </div>
             <h3>${g.message(code: 'projectOverview.analysis.thresholds')}</h3>
             <sec:ifAllGranted roles="ROLE_OPERATOR">
                 <ul>

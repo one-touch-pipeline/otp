@@ -377,14 +377,14 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
         AbstractBamFile abstractBamFile = DomainFactory.createRoddyBamFile()
 
         QualityAssessmentMergedPass qualityAssessmentPass = QualityAssessmentMergedPass.build(abstractMergedBamFile: abstractBamFile)
-        RoddyQualityAssessment roddyQualityAssessment = RoddyQualityAssessment.build(qualityAssessmentMergedPass: qualityAssessmentPass, genomeWithoutNCoverageQcBases:0, referenceLength: 0)
+        RoddyLibraryQa roddyLibraryQa = RoddyLibraryQa.build(qualityAssessmentMergedPass: qualityAssessmentPass, genomeWithoutNCoverageQcBases:0, referenceLength: 0)
         RoddyMergedBamQa roddyMergedBamQa = RoddyMergedBamQa.build(qualityAssessmentMergedPass: qualityAssessmentPass, genomeWithoutNCoverageQcBases:0, referenceLength: 0)
         RoddySingleLaneQa roddySingleLaneQa = RoddySingleLaneQa.build(seqTrack: abstractBamFile.seqTracks.iterator().next(), qualityAssessmentMergedPass: qualityAssessmentPass, genomeWithoutNCoverageQcBases:0, referenceLength: 0)
 
         dataSwapService.deleteQualityAssessmentInfoForAbstractBamFile(abstractBamFile)
 
         assert !QualityAssessmentMergedPass.get(qualityAssessmentPass.id)
-        assert !ChromosomeQualityAssessmentMerged.get(roddyQualityAssessment.id)
+        assert !RoddyLibraryQa.get(roddyLibraryQa.id)
         assert !RoddyMergedBamQa.get(roddyMergedBamQa.id)
         assert !RoddySingleLaneQa.get(roddySingleLaneQa.id)
     }

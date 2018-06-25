@@ -264,6 +264,13 @@ class SeqType implements Entity {
         ].flatten().unique()
     }
 
+    static List<SeqType> getAllProcessableSeqTypes() {
+        return [
+                getAllAlignableSeqTypes(),
+                getAllAnalysableSeqTypes(),
+        ].flatten().unique()
+    }
+
 
     static List<SeqType> getSeqTypesIgnoringLibraryPreparationKitForMerging() {
         return [

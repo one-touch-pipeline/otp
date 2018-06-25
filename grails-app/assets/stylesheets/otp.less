@@ -64,7 +64,7 @@
 }
 /* FONT STACK */
 body,
-input, select, textarea, option {
+input, select, textarea, option, button {
     font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
     font-size: 10pt;
     .ACCEPTED {
@@ -310,7 +310,7 @@ label {
     display: inline-block;
     margin: 0 0.25em 0 0;
 }
-input, select, textarea {
+input, select, textarea, button {
     background-color: #fcfcfc;
     border: 1px solid #cccccc;
     font-size: 1em;
@@ -461,7 +461,25 @@ tr {
     &:nth-last-child(2n) {
         background-color: #A5D3FF;
     }
+    &.intermediateHeader {
+        background-color: white;
+        td {
+            padding-top: 3em;
+        }
+    }
 }
+
+input.threshold {
+    width: 40px;
+}
+select.threshold {
+    width:100px;
+}
+
+span.defaultThreshold {
+    color: #888;
+}
+
 tr>td:first-child, tr>th:first-child {
 }
 td, th {

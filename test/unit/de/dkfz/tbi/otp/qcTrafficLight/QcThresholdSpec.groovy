@@ -6,8 +6,10 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.dataprocessing.sophia.*
 import de.dkfz.tbi.otp.ngsdata.*
 import grails.test.mixin.*
+import grails.validation.*
 import spock.lang.*
-import grails.validation.ValidationException
+
+import static de.dkfz.tbi.otp.qcTrafficLight.QcThreshold.ThresholdStrategy.*
 
 @Mock([
         DataFile,
@@ -42,9 +44,6 @@ import grails.validation.ValidationException
 ])
 class QcThresholdSpec extends Specification {
 
-    final static String UNDIFNED_THRESHOLDS = 'At least both lower or upper thresholds must be defined'
-
-    @Unroll
     void "test saving QcThreshold with invalid threshold values"() {
         when:
         DomainFactory.createQcThreshold(
@@ -52,7 +51,7 @@ class QcThresholdSpec extends Specification {
                 warningThresholdUpper: wtu,
                 errorThresholdLower: etl,
                 errorThresholdUpper: etu,
-                qcClass: "SophiaQc"
+                qcClass: SophiaQc.name,
         )
 
         then:
@@ -61,30 +60,63 @@ class QcThresholdSpec extends Specification {
 
         where:
         wtl  | wtu  | etl  | etu  || message
-        40   | 30   | 10   | 50   || 'warningThresholdLower must be smaller than warningThresholdUpper'
-        0    | 30   | 10   | 50   || 'warningThresholdLower must be bigger than errorThresholdLower'
-        20   | 60   | 10   | 50   || 'warningThresholdUpper must be smaller than errorThresholdUpper'
-        null | 60   | 10   | 50   || UNDIFNED_THRESHOLDS
-        20   | null | 10   | 50   || UNDIFNED_THRESHOLDS
-        null | null | 10   | 50   || UNDIFNED_THRESHOLDS
-        20   | 60   | null | 50   || UNDIFNED_THRESHOLDS
-        20   | null | null | 50   || UNDIFNED_THRESHOLDS
-        null | null | null | 50   || UNDIFNED_THRESHOLDS
-        20   | 60   | 10   | null || UNDIFNED_THRESHOLDS
-        null | 60   | 10   | null || UNDIFNED_THRESHOLDS
-        null | null | 10   | null || UNDIFNED_THRESHOLDS
-        20   | 60   | null | null || UNDIFNED_THRESHOLDS
-        null | 60   | null | null || UNDIFNED_THRESHOLDS
-        20   | null | null | null || UNDIFNED_THRESHOLDS
-        null | null | null | null || UNDIFNED_THRESHOLDS
+        40   | 30   | 10   | 50   || 'LOWER warning threshold must be smaller than UPPER warning threshold'
+        0    | 30   | 10   | 50   || 'Lower WARNING threshold must be bigger than lower ERROR threshold'
+        20   | 60   | 10   | 50   || 'Upper WARNING threshold must be smaller than upper ERROR threshold'
+        null | 60   | 10   | 50   || 'Please also set a lower WARNING threshold when defining a lower ERROR threshold'
+        20   | null | 10   | 50   || 'Please also set a upper WARNING threshold when defining a upper ERROR threshold'
+        null | null | 10   | 50   || 'Please also set a lower WARNING threshold when defining a lower ERROR threshold'
+        20   | 60   | null | 50   || 'When setting a lower WARNING threshold, please also define the lower ERROR threshold'
+        20   | null | null | 50   || 'When setting a lower WARNING threshold, please also define the lower ERROR threshold'
+        null | null | null | 50   || 'When leaving the lower thresholds empty, please define BOTH upper warning and upper error thresholds'
+        20   | 60   | 10   | null || 'When setting an upper WARNING threshold, please also define an upper ERROR threshold'
+        null | 60   | 10   | null || 'Please also set a lower WARNING threshold when defining a lower ERROR threshold'
+        null | null | 10   | null || 'Please also set a lower WARNING threshold when defining a lower ERROR threshold'
+        20   | 60   | null | null || 'When setting a lower WARNING threshold, please also define the lower ERROR threshold'
+        null | 60   | null | null || 'When leaving the lower thresholds empty, please define BOTH upper warning and upper error thresholds'
+        20   | null | null | null || 'When setting a lower WARNING threshold, please also define the lower ERROR threshold'
+        null | null | null | null || 'When leaving the lower thresholds empty, please define BOTH upper warning and upper error thresholds'
+        null | 1    | 1    | 1    || 'Please also set a lower WARNING threshold when defining a lower ERROR threshold'
+        1    | 1    | null | 1    || 'When setting a lower WARNING threshold, please also define the lower ERROR threshold'
+        1    | null | 1    | 1    || 'Lower WARNING threshold must be bigger than lower ERROR threshold'
+        1    | 1    | null | 1    || 'When setting a lower WARNING threshold, please also define the lower ERROR threshold'
+        1    | 1    | 1    | null || 'LOWER warning threshold must be smaller than UPPER warning threshold'
+        1    | 1    | 1    | 1    || 'LOWER warning threshold must be smaller than UPPER warning threshold'
+        null | 1    | null | 1    || 'Upper WARNING threshold must be smaller than upper ERROR threshold'
+        1    | null | 1    | null || 'Lower WARNING threshold must be bigger than lower ERROR threshold'
+    }
+
+    @Unroll
+    void "test saving QcThreshold when comparing to other value"() {
+        when:
+        QcThreshold threshold = DomainFactory.createQcThreshold([
+                qcProperty1          : "controlMassiveInvPrefilteringLevel",
+                compare              : compare,
+                warningThresholdLower: 30,
+                warningThresholdUpper: 40,
+                errorThresholdLower  : 10,
+                errorThresholdUpper  : 50,
+                qcProperty2          : property2,
+                qcClass              : SophiaQc.name,
+        ], false)
+
+        then:
+        threshold.validate() == valid
+
+        where:
+        compare                        | property2                            || valid
+        DIFFERENCE_WITH_OTHER_PROPERTY | "rnaContaminatedGenesCount"          || true
+        DIFFERENCE_WITH_OTHER_PROPERTY | "controlMassiveInvPrefilteringLevel" || false
+        DIFFERENCE_WITH_OTHER_PROPERTY | null                                 || false
     }
 
     void "test saving QcThreshold duplicated"() {
         when:
         QcThreshold qcThreshold1 = DomainFactory.createQcThreshold(
-                qcClass: "SophiaQc",
+                qcClass: SophiaQc.name,
                 project: project(),
                 seqType: seqType(),
+                qcProperty1: "controlMassiveInvPrefilteringLevel",
         )
         QcThreshold qcThreshold2 = DomainFactory.createQcThreshold(
                 project: qcThreshold1.project,
@@ -95,7 +127,8 @@ class QcThresholdSpec extends Specification {
 
         then:
         ValidationException e = thrown()
-        e.message.contains("QcThreshold for Project: '${qcThreshold1.project}', SeqType: '${qcThreshold1.seqType}', QcClass: '${qcThreshold1.qcClass}' and QcProperty1: '${qcThreshold1.qcProperty1}' already exists")
+        e.message.contains("QcThreshold for")
+        e.message.contains("already exists")
 
         where:
         project                             | seqType
@@ -115,8 +148,8 @@ class QcThresholdSpec extends Specification {
                 warningThresholdUpper: wtu,
                 errorThresholdLower: etl,
                 errorThresholdUpper: etu,
-                compare: QcThreshold.Compare.toThreshold,
-                qcClass: "SophiaQc"
+                compare: ABSOLUTE_LIMITS,
+                qcClass: SophiaQc.name,
         )
 
         expect:
@@ -148,8 +181,8 @@ class QcThresholdSpec extends Specification {
                 warningThresholdUpper: 30,
                 errorThresholdLower: 10,
                 errorThresholdUpper: 40,
-                compare: QcThreshold.Compare.toQcProperty2,
-                qcClass: "SophiaQc"
+                compare: DIFFERENCE_WITH_OTHER_PROPERTY,
+                qcClass: SophiaQc.name,
         )
 
 
@@ -175,8 +208,8 @@ class QcThresholdSpec extends Specification {
                 warningThresholdUpper: wtu,
                 errorThresholdLower: etl,
                 errorThresholdUpper: etu,
-                compare: QcThreshold.Compare.toThresholdFactorExternalValue,
-                qcClass: "SophiaQc"
+                compare: RATIO_TO_EXTERNAL_VALUE,
+                qcClass: SophiaQc.name,
         )
         double externalValue = 2
 
@@ -202,8 +235,8 @@ class QcThresholdSpec extends Specification {
                 warningThresholdUpper: 30,
                 errorThresholdLower: 10,
                 errorThresholdUpper: 40,
-                compare: QcThreshold.Compare.toThresholdFactorExternalValue,
-                qcClass: "SophiaQc"
+                compare: RATIO_TO_EXTERNAL_VALUE,
+                qcClass: SophiaQc.name,
         )
 
         expect:

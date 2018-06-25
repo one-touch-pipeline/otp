@@ -1,9 +1,10 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.qcTrafficLight.*
 import org.hibernate.*
 
-class RoddyQualityAssessment extends AbstractQualityAssessment {
+abstract class RoddyQualityAssessment extends AbstractQualityAssessment {
 
     // We could also link directly to RoddyBamFile, but then Grails fails to start up the application context for an
     // unclear reason. So as a workaround we have an indirect link via QualityAssessmentMergedPass.
@@ -19,10 +20,13 @@ class RoddyQualityAssessment extends AbstractQualityAssessment {
      */
     String chromosome
 
+    @QcThresholdEvaluated
     Double insertSizeCV
 
+    @QcThresholdEvaluated
     Double percentageMatesOnDifferentChr
 
+    @QcThresholdEvaluated
     Double genomeWithoutNCoverageQcBases
 
     static def nullIfAndOnlyIfPerChromosomeQc = { val, RoddyQualityAssessment obj ->

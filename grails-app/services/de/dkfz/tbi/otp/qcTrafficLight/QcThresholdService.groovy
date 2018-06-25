@@ -2,7 +2,10 @@ package de.dkfz.tbi.otp.qcTrafficLight
 
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
+import grails.validation.*
 import groovy.transform.*
+import org.springframework.security.access.prepost.*
+import org.springframework.validation.*
 
 class QcThresholdService {
 
@@ -64,11 +67,123 @@ class QcThresholdService {
             ].get(t)
         }
     }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    List<ClassWithThreshold> getClassesWithProperties() {
+        List<QcThreshold> thr = QcThreshold.createCriteria().list {
+            isNull("project")
+        }
+
+        List<Class> qcTrafficLightClasses = QcThreshold.getValidQcClass()
+        List<ClassWithThreshold> classesWithProperties = qcTrafficLightClasses.collect { Class clasz ->
+            new ClassWithThreshold(clasz: clasz, availableThresholdProperties: QcThreshold.getValidQcPropertyForQcClass(clasz.name))
+        }.sort { it.clasz.simpleName }
+
+        classesWithProperties.each { ClassWithThreshold cl ->
+            cl.existingThresholds = thr.findAll { it.qcClass == cl.clasz.name }.sort { it.qcProperty1 }
+        }
+        return classesWithProperties
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, read)")
+    List<ClassWithThresholds> getClassesWithPropertiesForProjectAndSeqTypes(Project project, List<SeqType> seqTypes) {
+        seqTypes = seqTypes ?: []
+
+        List<QcThreshold> thresholds = QcThreshold.createCriteria().list {
+            or {
+                eq("project", project)
+                isNull("project")
+            }
+        }
+        List<Class> qcTrafficLightClasses = QcThreshold.getValidQcClass()
+        List<ClassWithThresholds> classesWithProperties = qcTrafficLightClasses.collect { Class clasz ->
+            new ClassWithThresholds(
+                    clasz: clasz,
+                    availableThresholdProperties: QcThreshold.getValidQcPropertyForQcClass(clasz.name),
+                    existingThresholds: [],
+            )
+        }.sort { it.clasz.simpleName }
+
+        classesWithProperties.each { ClassWithThresholds cl ->
+            cl.availableThresholdProperties.each { String property ->
+                ([null] + seqTypes).each { SeqType seqType ->
+                    QcThreshold projectThreshold = thresholds.find {
+                        it.qcClass == cl.clasz.name && it.qcProperty1 == property && it.seqType == seqType && it.project == project
+                    }
+                    QcThreshold defaultThreshold = thresholds.find {
+                        it.qcClass == cl.clasz.name && it.qcProperty1 == property && it.seqType == seqType && it.project == null
+                    }
+
+                    if (projectThreshold || defaultThreshold) {
+                        cl.existingThresholds.add(new BothQcThresholds(defaultExistingThresholds: defaultThreshold, projectExistingThresholds: projectThreshold,
+                                seqType: projectThreshold?.seqType ?: defaultThreshold?.seqType, property: projectThreshold?.qcProperty1 ?: defaultThreshold.qcProperty1
+                        ))
+                    }
+                }
+            }
+        }
+        return classesWithProperties
+    }
+
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    Errors createThreshold(Project project, String clasz, String property, SeqType seqType, QcThreshold.ThresholdStrategy condition,
+                           Double errorThresholdLower, Double warningThresholdLower,
+                           Double warningThresholdUpper, Double errorThresholdUpper, String property2) {
+
+        String className = QcThreshold.convertShortToLongName(clasz)
+
+        try {
+            new QcThreshold(
+                    project: project,
+                    qcClass: className,
+                    qcProperty1: property,
+                    seqType: seqType,
+                    compare: condition,
+                    errorThresholdLower: errorThresholdLower,
+                    warningThresholdLower: warningThresholdLower,
+                    warningThresholdUpper: warningThresholdUpper,
+                    errorThresholdUpper: errorThresholdUpper,
+                    qcProperty2: property2,
+            ).save(flush: true)
+            return null
+        } catch (ValidationException e) {
+            return e.errors
+        }
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    Errors updateThreshold(QcThreshold qcThreshold, QcThreshold.ThresholdStrategy condition,
+                           Double errorThresholdLower, Double warningThresholdLower,
+                           Double warningThresholdUpper, Double errorThresholdUpper, String property2) {
+        assert qcThreshold
+        try {
+            qcThreshold.compare = condition
+            qcThreshold.errorThresholdLower = errorThresholdLower
+            qcThreshold.warningThresholdLower = warningThresholdLower
+            qcThreshold.warningThresholdUpper = warningThresholdUpper
+            qcThreshold.errorThresholdUpper = errorThresholdUpper
+            qcThreshold.qcProperty2 = property2
+            qcThreshold.save(flush: true, failOnError: true)
+        } catch (ValidationException e) {
+            return e.errors
+        }
+        return null
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    Errors deleteThreshold(QcThreshold qcThreshold) {
+        assert qcThreshold
+        try {
+            qcThreshold.delete(flush: true)
+        } catch (ValidationException e) {
+            return e.errors
+        }
+        return null
+    }
 }
 
-@ToString
-@TupleConstructor
-@EqualsAndHashCode
+@Canonical
 class TableCellValue implements Serializable {
     String value
     WarnColor warnColor
@@ -89,4 +204,26 @@ class TableCellValue implements Serializable {
         WARNING,
         ERROR,
     }
+}
+
+@Canonical
+class ClassWithThreshold {
+    Class clasz
+    List<QcThreshold> existingThresholds
+    List<String> availableThresholdProperties
+}
+
+@Canonical
+class ClassWithThresholds {
+    Class clasz
+    List<BothQcThresholds> existingThresholds
+    List<String> availableThresholdProperties
+}
+
+@Canonical
+class BothQcThresholds {
+    SeqType seqType
+    String property
+    QcThreshold defaultExistingThresholds
+    QcThreshold projectExistingThresholds
 }

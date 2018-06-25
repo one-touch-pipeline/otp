@@ -1,11 +1,9 @@
-package de.dkfz.tbi.otp.dataprocessing
+package de.dkfz.tbi.otp.qcTrafficLight
 
 import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import org.springframework.security.access.prepost.*
-
-import static org.springframework.util.Assert.*
 
 class QcTrafficLightService {
 
