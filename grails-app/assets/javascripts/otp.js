@@ -330,7 +330,7 @@ $.otp.simpleSearch = {
 
 $.otp.highlight = function (path) {
     "use strict";
-    var menuElement = $('a[href*="' + path + '"]').not('.menuLinkContainer');
+    var menuElement = $('.menu a[href="' + path + '"]').not('.menuLinkContainer');
     var menuElementParent = menuElement.parents('.nav_container');
 
     menuElement.attr('style', 'color: #fafafa;');

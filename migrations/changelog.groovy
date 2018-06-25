@@ -67,4 +67,10 @@ databaseChangeLog = {
 	}
 
 	include file: 'changelogs/2018/OTP-2894.groovy'
+
+	changeSet(author: "klinga", id:"OTP-2877-SQL") {
+		sqlFile(path: 'changelogs/2018/OTP-2877.sql')
+	}
+
+	include file: 'changelogs/2018/OTP-2877.groovy'
 }

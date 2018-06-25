@@ -183,6 +183,7 @@ grails.plugin.springsecurity.controllerAnnotations.staticRules = [
     "/logout/**":            ['IS_AUTHENTICATED_ANONYMOUSLY'],
     "/document/download/**": ['IS_AUTHENTICATED_ANONYMOUSLY'],
     "/info/**":              ['permitAll'],
+    "/privacyPolicy/index":  ['permitAll'],
     "/root/intro*":          ['permitAll'],
     "/":                     ['permitAll'],
     "/metadataImport/autoImport": ["permitAll"],

@@ -1,3 +1,4 @@
+<%@ page import="de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName; de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService" %>
 <!doctype html>
 <!--[if lt IE 7 ]> <html lang="en" class="no-js ie6"> <![endif]-->
 <!--[if IE 7 ]>    <html lang="en" class="no-js ie7"> <![endif]-->
@@ -42,15 +43,16 @@
         <div class="headerGraphic">
             <img class="headerGraphicImg" src="${assetPath(src: 'header_graphic.png')}" alt=""/>
         </div>
+        <g:if test="${!disableMenu}">
         <div class="menu">
             <div class="menuContainer menuContainerL">
                 <ul>
                     <sec:ifLoggedIn>
-                        <li class="menuContainerLCss"><g:link controller="projectOverview" action="laneOverview"><g:message code="otp.menu.overview"/></g:link></li>
-                        <li class="menuContainerLCss"><g:link controller="individual" action="list"><g:message code="otp.menu.individuals"/></g:link></li>
-                        <li class="menuContainerLCss"><g:link controller="sequence" action="index"><g:message code="otp.menu.sequences"/></g:link></li>
-                        <li class="menuContainerLCss"><g:link controller="run" action="list"><g:message code="otp.menu.runs"/></g:link></li>
-                        <li class="navigation menuContainerLCss project">
+                        <li class="menuContainerItem"><g:link controller="projectOverview" action="laneOverview"><g:message code="otp.menu.overview"/></g:link></li>
+                        <li class="menuContainerItem"><g:link controller="individual" action="list"><g:message code="otp.menu.individuals"/></g:link></li>
+                        <li class="menuContainerItem"><g:link controller="sequence" action="index"><g:message code="otp.menu.sequences"/></g:link></li>
+                        <li class="menuContainerItem"><g:link controller="run" action="list"><g:message code="otp.menu.runs"/></g:link></li>
+                        <li class="navigation menuContainerItem project">
                             <ul>
                                 <li class="overview_nav_container nav_container"><g:link class="menuLinkContainer"><g:message code="otp.menu.project"/> &#9661;</g:link>
                                     <ul>
@@ -63,7 +65,7 @@
                                 </li>
                             </ul>
                         </li>
-                        <li class="navigation menuContainerLCss results">
+                        <li class="navigation menuContainerItem results">
                             <ul>
                                 <li class="analysis_results_nav_container nav_container"><g:link class="menuLinkContainer"><g:message code="otp.menu.results"/> &#9661;</g:link>
                                     <ul>
@@ -77,7 +79,7 @@
                             </ul>
                         </li>
                         <sec:ifAnyGranted roles="ROLE_OPERATOR">
-                            <li class="navigation menuContainerLCss statistic">
+                            <li class="navigation menuContainerItem statistic">
                                 <ul>
                                     <li class="allGranted overview_nav_container nav_container"><g:link class="menuLinkContainer"><g:message code="otp.menu.statistics"/> &#9661;</g:link>
                                         <ul>
@@ -90,7 +92,7 @@
                                     </li>
                                 </ul>
                             </li>
-                            <li class="navigation menuContainerLCss operator">
+                            <li class="navigation menuContainerItem operator">
                                 <ul>
                                     <li class="allGranted operator_nav_container nav_container"><g:link class="menuLinkContainer"><g:message code="otp.menu.operatorSection"/> &#9661;</g:link>
                                         <ul>
@@ -115,7 +117,7 @@
                             </li>
                         </sec:ifAnyGranted>
                         <sec:ifAnyGranted roles="ROLE_ADMIN">
-                            <li class="navigation menuContainerLCss admin">
+                            <li class="navigation menuContainerItem admin">
                                 <ul>
                                     <li class="allGranted admin_nav_container nav_container"><g:link class="menuLinkContainer"><g:message code="otp.menu.adminSection"/> &#9661;</g:link>
                                         <ul>
@@ -140,18 +142,36 @@
             <div class="menuContainer menuContainerR">
                 <ul>
                     <sec:ifLoggedIn>
-                        <li><g:link controller="logout" action="index"><g:message code="otp.menu.logout"/></g:link></li>
-                        <li><g:link controller="home" action="index"><g:message code="otp.menu.home"/></g:link></li>
+                        <li class="menuContainerItem"><g:link controller="logout" action="index"><g:message code="otp.menu.logout"/></g:link></li>
+                        <li class="navigation menuContainerItem info">
+                            <ul>
+                                <li class="info_nav_container nav_container"><g:link class="menuLinkContainer"><g:message code="info.info.link"/> &#9661;</g:link>
+                                    <ul>
+                                        <li><g:link controller="info" action="about"><g:message code="info.about.link"/></g:link></li>
+                                        <li><g:link controller="info" action="numbers"><g:message code="info.numbers.link"/></g:link></li>
+                                        <li><g:link controller="info" action="contact"><g:message code="info.contact.link"/></g:link></li>
+                                        <li><g:link controller="info" action="imprint"><g:message code="info.imprint.link"/></g:link></li>
+                                        <g:if test="${ProcessingOptionService.findOptionAsBoolean(OptionName.GUI_SHOW_PARTNERS, null, null)}">
+                                            <li><g:link controller="info" action="partners"><g:message code="info.partners.link"/></g:link></li>
+                                        </g:if>
+                                        <li><g:link controller="info" action="templates"><g:message code="info.templates.link"/></g:link></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="menuContainerItem"><g:link controller="home" action="index"><g:message code="otp.menu.home"/></g:link></li>
                     </sec:ifLoggedIn>
                 </ul>
             </div>
         </div>
+        </g:if>
         <div id="infoBox"></div>
         <g:layoutBody/>
         <div class="footer" role="contentinfo">
             &copy;2011-2017 <a href="https://www.dkfz.de" target="_blank">DKFZ</a> -
             <a href="http://ibios.dkfz.de/tbi/" target="_blank">eilslabs</a> |
             <g:link controller="info" action="imprint"><g:message code="info.imprint.link"/></g:link> |
+            <g:link controller="privacyPolicy"><g:message code="info.privacyPolicy.link"/></g:link> |
             <g:render template="/templates/version"/>
         </div>
         <div id="spinner" class="spinner" style="display:none;"><g:message code="spinner.alt" default="Loading&hellip;"/></div>

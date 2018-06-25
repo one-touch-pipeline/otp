@@ -231,6 +231,23 @@ class UserService {
         return role
     }
 
+    boolean isPrivacyPolicyAccepted() {
+        if (!springSecurityService.isLoggedIn()) {
+            return true
+        }
+        User user = springSecurityService.getCurrentUser()
+        return user.acceptedPrivacyPolicy
+    }
+
+    @PreAuthorize("hasRole('ROLE_USER')")
+    void acceptPrivacyPolicy() {
+        if (springSecurityService.isLoggedIn()) {
+            User user = springSecurityService.getCurrentUser()
+            user.acceptedPrivacyPolicy = true
+            user.save(flush: true)
+        }
+    }
+
     /**
      * Retrieves all the Users a User with ROLE_SWITCH_USER is allowed to switch to.
      *

@@ -9,8 +9,6 @@ import de.dkfz.tbi.otp.utils.Entity
  */
 class User implements TimeStamped, Entity {
 
-    transient springSecurityService
-
     String username
     String password
     boolean enabled
@@ -18,6 +16,8 @@ class User implements TimeStamped, Entity {
     boolean accountLocked
     boolean passwordExpired
     String email
+
+    boolean acceptedPrivacyPolicy
 
     static constraints = {
         username blank: false, unique: true
