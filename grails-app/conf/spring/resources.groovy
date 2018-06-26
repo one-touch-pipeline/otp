@@ -1,16 +1,6 @@
-import de.dkfz.tbi.otp.security.CustomAccessDeniedHandler
-import de.dkfz.tbi.otp.security.CustomRequestDataValueProcessor
-import de.dkfz.tbi.otp.security.CustomRequireCsrfProtectionMatcher
 import grails.util.Environment
 import org.springframework.cache.ehcache.EhCacheManagerFactoryBean
 import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler
-import org.springframework.security.web.csrf.CsrfFilter
-import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository
-import org.springframework.security.web.servlet.support.csrf.CsrfRequestDataValueProcessor
-import org.springframework.web.multipart.commons.CommonsMultipartResolver
-import org.springframework.web.multipart.support.MultipartFilter
-
-import javax.servlet.FilterRegistration
 
 // Place your Spring DSL code here
 beans = {
@@ -52,14 +42,5 @@ beans = {
         permissionEvaluator = ref('permissionEvaluator')
         roleHierarchy = ref('roleHierarchy')
         permissionCacheOptimizer = null
-    }
-
-    requestDataValueProcessor(CustomRequestDataValueProcessor)
-    fnAccessDeniedHandler(CustomAccessDeniedHandler)
-    fnRequireCsrfProtectionMatcher(CustomRequireCsrfProtectionMatcher)
-
-    csrfFilter(CsrfFilter, new HttpSessionCsrfTokenRepository()) {
-        accessDeniedHandler = ref('fnAccessDeniedHandler')
-        requireCsrfProtectionMatcher = ref('fnRequireCsrfProtectionMatcher')
     }
 }

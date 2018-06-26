@@ -10,7 +10,7 @@
     <div class="body">
     <g:if test="${projects}">
         <h1><g:message code="individual.insert.title"/></h1>
-        <form id="add-individual-form">
+        <form id="add-individual-form" method="POST">
             <div class="dialog">
                 <table>
                     <tbody>

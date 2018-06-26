@@ -10,9 +10,6 @@
     <meta name="contextPath" content="${request.contextPath}">
     <meta name="controllerName" content="${controllerName}">
     <meta name="actionName" content="${actionName}">
-    <meta name="_csrf" content="${_csrf?.token}"/>
-    <!-- default header name is X-CSRF-TOKEN -->
-    <meta name="_csrf_header" content="${_csrf?.headerName}"/>
     <asset:javascript src="v2/application.js"/>
     <asset:stylesheet src="v2/application.css"/>
     <asset:javascript src="v2/pages/${controllerName}/script.js"/>
