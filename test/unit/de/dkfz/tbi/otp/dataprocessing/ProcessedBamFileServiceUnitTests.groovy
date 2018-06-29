@@ -22,39 +22,6 @@ class ProcessedBamFileServiceUnitTests {
         AlignmentPass.metaClass.isLatestPass= {true}
     }
 
-
-
-    @Test
-    void testLibraryPreparationKitCorrect() {
-        Map input = createKitAndBamFile(SeqTypeNames.EXOME.seqTypeName, ExomeSeqTrack)
-        assertEquals(input.kit, service.libraryPreparationKit(input.bamFile))
-    }
-
-    @Test(expected = IllegalArgumentException)
-    void testLibraryPreparationKitNullInput() {
-        service.libraryPreparationKit(null)
-    }
-
-    private Map createKitAndBamFile(String seqTypeName, Class seqTypeClass) {
-        assert seqTypeClass == SeqTrack || seqTypeClass == ExomeSeqTrack
-        SeqType seqType = new SeqType()
-        seqType.name = seqTypeName
-        LibraryPreparationKit kit = new LibraryPreparationKit()
-        Run run = new Run(name: 'run')
-        SeqTrack seqTrack
-        if (seqTypeClass == SeqTrack) {
-            seqTrack = new SeqTrack()
-        }
-        if (seqTypeClass == ExomeSeqTrack) {
-            seqTrack = new ExomeSeqTrack(libraryPreparationKit: kit)
-        }
-        seqTrack.run = run
-        seqTrack.seqType = seqType
-        AlignmentPass pass = new AlignmentPass(seqTrack: seqTrack)
-        ProcessedBamFile bamFile = new ProcessedBamFile(alignmentPass: pass)
-        return [kit: kit, bamFile: bamFile]
-    }
-
     private ProcessedBamFileService createProcessedBamFileService() {
         final String pbfTempDir = TestCase.getUniqueNonExistentPath() as String
         ProcessedBamFileService processedBamFileService = new ProcessedBamFileService()
