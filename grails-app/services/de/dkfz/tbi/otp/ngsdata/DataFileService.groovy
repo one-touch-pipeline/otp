@@ -27,18 +27,21 @@ class DataFileService {
         Date startDate = new Date()
         try {
             (0..countDataFiles() / MAX_RESULTS).each {
-                DataFile.withTransaction {
-                    getFastqDataFiles().each {
-                        String path = lsdfFilesService.getFileFinalPath(it)
-                        if (path) {
-                            File file = new File(path)
-                            it.fileExists = file.exists()
-                        }
-                        it.dateLastChecked = new Date()
-                        try {
-                            assert it.save(flush: true)
-                        } catch (ValidationException e) {
-                            throw new RuntimeException("Error while saving datafile with id: ${it.id}", e)
+                log.info("DataFileService.setFileExistsForAllDataFiles() current iteration: $it")
+                DataFile.withNewSession {
+                    DataFile.withTransaction {
+                        getFastqDataFiles().each {
+                            String path = lsdfFilesService.getFileFinalPath(it)
+                            if (path) {
+                                File file = new File(path)
+                                it.fileExists = file.exists()
+                            }
+                            it.dateLastChecked = new Date()
+                            try {
+                                assert it.save(flush: true)
+                            } catch (ValidationException e) {
+                                throw new RuntimeException("Error while saving datafile with id: ${it.id}", e)
+                            }
                         }
                     }
                 }

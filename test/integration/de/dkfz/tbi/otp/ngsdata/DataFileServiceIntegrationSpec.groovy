@@ -59,6 +59,11 @@ class DataFileServiceIntegrationSpec extends IntegrationSpec implements UserAndR
         dataFileService.setFileExistsForAllDataFiles()
 
         then:
+        dataFile1.refresh()
+        dataFile2.refresh()
+        dataFile3.refresh()
+        dataFile4.refresh()
+
         dataFile1.fileExists
         !dataFile2.fileExists
         dataFile3.fileExists
