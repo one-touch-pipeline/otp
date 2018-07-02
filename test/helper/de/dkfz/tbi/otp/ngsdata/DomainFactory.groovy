@@ -8,6 +8,7 @@ import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
+import de.dkfz.tbi.otp.dataprocessing.runYapsa.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.dataprocessing.sophia.*
 import de.dkfz.tbi.otp.infrastructure.*
@@ -204,6 +205,10 @@ class DomainFactory {
 
     static Pipeline createExternallyProcessedPipelineLazy() {
         createPipeline(Pipeline.Name.EXTERNALLY_PROCESSED, Pipeline.Type.ALIGNMENT)
+    }
+
+    static Pipeline createRunYapsaPipelineLazy() {
+        createPipeline(Pipeline.Name.RUN_YAPSA, Pipeline.Type.RUN_YAPSA)
     }
 
 
@@ -1278,6 +1283,19 @@ class DomainFactory {
         ], properties)
     }
 
+
+    static RunYapsaInstance createRunYapsaInstance(Map properties = [:], Map bamFile1Properties = [:], Map bamFile2Properties = [:]) {
+        Map map = createAnalysisInstanceWithRoddyBamFilesMapHelper(properties, bamFile1Properties, bamFile2Properties)
+        SamplePair samplePair = map.samplePair
+        map += [
+                config                      : createRunYapsaConfig(
+                        project: samplePair.project,
+                ),
+        ]
+        return createDomainObject(RunYapsaInstance, map, properties)
+    }
+
+
     public static AntibodyTarget createAntibodyTarget(Map properties = [:]) {
         return createDomainObject(AntibodyTarget, [
                 name       : 'antibodyTargetName_' + (counter++),
@@ -1716,6 +1734,14 @@ class DomainFactory {
 
     static RoddyWorkflowConfig createRoddyWorkflowConfigLazy(Map properties = [:], boolean saveAndValidate = true) {
         return createDomainObjectLazy(RoddyWorkflowConfig, createRoddyWorkflowConfigMapHelper(properties), properties, saveAndValidate)
+    }
+
+    static RunYapsaConfig createRunYapsaConfig(Map properties = [:], boolean saveAndValidate = true) {
+        return createDomainObject(RunYapsaConfig, [
+                programVersion: "programmVersion${counter++}",
+                project: { properties.project ?: createProject()},
+                pipeline: createRunYapsaPipelineLazy(),
+        ], properties, saveAndValidate)
     }
 
     public static SeqTrack createSeqTrack(MergingWorkPackage mergingWorkPackage, Map seqTrackProperties = [:]) {

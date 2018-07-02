@@ -4,6 +4,7 @@ import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.QcTrafficLightStatus
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
+import de.dkfz.tbi.otp.dataprocessing.runYapsa.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
@@ -58,8 +59,7 @@ abstract class BamFilePairAnalysis implements TimeStamped, ProcessParameterObjec
         }
         instanceName blank: false, unique: 'samplePair', validator: { OtpPath.isValidPathComponent(it) }
         config validator: { val ->
-            (SnvConfig.isAssignableFrom(Hibernate.getClass(val)) ||
-                    RoddyWorkflowConfig.isAssignableFrom(Hibernate.getClass(val))) &&
+            ([SnvConfig, RoddyWorkflowConfig, RunYapsaConfig].any { it.isAssignableFrom(Hibernate.getClass(val)) }) &&
                     val?.pipeline?.type != Pipeline.Type.ALIGNMENT
         }
         qcTrafficLightStatus nullable: true, validator: { status, obj ->

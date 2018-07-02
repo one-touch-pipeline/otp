@@ -17,6 +17,7 @@ class Pipeline implements Entity {
         RODDY_RNA_ALIGNMENT (Type.ALIGNMENT, true, 'STAR'),
         RODDY_SOPHIA        (Type.SOPHIA, true, null),
         RODDY_ACESEQ        (Type.ACESEQ, true, null),
+        RUN_YAPSA           (Type.RUN_YAPSA, false, null),
 
         final Type type
         final boolean usesRoddy
@@ -48,11 +49,12 @@ class Pipeline implements Entity {
     Name name
 
     static enum Type {
-        ALIGNMENT,
-        SNV,
-        INDEL,
-        SOPHIA,
         ACESEQ,
+        ALIGNMENT,
+        INDEL,
+        RUN_YAPSA,
+        SNV,
+        SOPHIA,
     }
     Type type
 

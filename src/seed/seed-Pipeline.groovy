@@ -12,6 +12,8 @@ seed = {
             Pipeline.Name.RODDY_INDEL,
             Pipeline.Name.RODDY_SOPHIA,
             Pipeline.Name.RODDY_ACESEQ,
+            Pipeline.Name.RUN_YAPSA,
+
     ].each { Pipeline.Name name ->
         pipeline(
                 meta: [

@@ -56,7 +56,7 @@ class SophiaInstanceSpec extends Specification {
      */
     void setup() {
         File temporaryFile = temporaryFolder.newFolder()
-        Realm realm = DomainFactory.createRealm()
+        DomainFactory.createRealm()
         configService = new TestConfigService(['otp.root.path': temporaryFile.path])
 
         this.instance = DomainFactory.createSophiaInstanceWithRoddyBamFiles()
