@@ -259,6 +259,7 @@
         <div class="col-lg-12 footer-copyright">
             <ul>
                 <li><a data-toggle="modal" href="#contact">${g.message(code: "info.contact.title")}</a></li>
+                <li><g:link controller="info" action="imprint"><g:message code="info.imprint.link"/></g:link></li>
                 <li>&copy;2011-2017 <a href="https://www.dkfz.de" target="_blank">DKFZ</a> -
                     <a href="http://ibios.dkfz.de/tbi/" target="_blank">eilslabs</a></li>
                 <li class="copyright-grey"><g:render template="/templates/version"/></li>

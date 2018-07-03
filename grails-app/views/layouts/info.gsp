@@ -25,6 +25,11 @@
                 <div class="infoMenuButtonText"><g:message code="info.contact.link" /></div>
             </div>
         </a>
+        <a href="${g.createLink(action: "imprint")}">
+            <div class="infoMenuButton ${(actionName == "imprint") ? "infoMenuButtonActive" : ""}">
+                <div class="infoMenuButtonText"><g:message code="info.imprint.link" /></div>
+            </div>
+        </a>
         <g:if test="${ProcessingOptionService.findOptionAsBoolean(OptionName.GUI_SHOW_PARTNERS, null, null)}">
             <a href="${g.createLink(action: "partners")}">
                 <div class="infoMenuButton ${(actionName == "partners") ? "infoMenuButtonActive" : ""}">

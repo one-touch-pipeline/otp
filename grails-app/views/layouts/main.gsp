@@ -149,7 +149,8 @@
         <g:layoutBody/>
         <div class="footer" role="contentinfo">
             &copy;2011-2017 <a href="https://www.dkfz.de" target="_blank">DKFZ</a> -
-                <a href="http://ibios.dkfz.de/tbi/" target="_blank">eilslabs</a> |
+            <a href="http://ibios.dkfz.de/tbi/" target="_blank">eilslabs</a> |
+            <g:link controller="info" action="imprint"><g:message code="info.imprint.link"/></g:link> |
             <g:render template="/templates/version"/>
         </div>
         <div id="spinner" class="spinner" style="display:none;"><g:message code="spinner.alt" default="Loading&hellip;"/></div>

@@ -22,6 +22,11 @@ class InfoController {
         [aboutOtp: aboutOtp,]
     }
 
+    def imprint() {
+        String imprint = ProcessingOptionService.findOptionSafe(OptionName.GUI_IMPRINT, null, null)
+        [imprint: imprint]
+    }
+
     def numbers() {
         return [projects: projectService.getProjectCount()]
     }
