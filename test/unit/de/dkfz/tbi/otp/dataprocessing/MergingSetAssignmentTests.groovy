@@ -19,66 +19,36 @@ class MergingSetAssignmentTests {
 
     @Before
     void setUp() {
-        Project project = DomainFactory.createProject()
-        project.name = "SOME_PROJECT"
-        project.dirName = "some/relative/path"
-        project.save(flush: true)
-        assertTrue(project.validate())
+        Individual individual = DomainFactory.createIndividual()
 
-        Individual individual = new Individual()
-        individual.pid = "SOME_PATIENT_ID"
-        individual.mockPid = "PUBLIC_PID"
-        individual.mockFullName = "PUBLIC_NAME"
-        individual.type = Individual.Type.REAL
-        individual.project = project
-        individual.save(flush: true)
-        assertTrue(individual.validate())
+        SampleType sampleType = DomainFactory.createSampleType( [
+                name: "TUMOR",
+        ])
 
-        SampleType sampleType = new SampleType()
-        sampleType.name = "TUMOR"
-        sampleType.save(flush: true)
-        assertTrue(sampleType.validate())
-
-        Sample sample = new Sample()
-        sample.individual = individual
-        sample.sampleType = sampleType
-        sample.save(flush: true)
-        assertTrue(sample.validate())
+        Sample sample = DomainFactory.createSample(
+                individual: individual,
+                sampleType: sampleType,
+        )
 
         SeqType seqType = DomainFactory.createWholeGenomeSeqType(SeqType.LIBRARYLAYOUT_SINGLE)
 
-        SeqCenter seqCenter = DomainFactory.createSeqCenter()
+        Run run = DomainFactory.createRun()
 
-        SeqPlatform seqPlatform = DomainFactory.createSeqPlatformWithSeqPlatformGroup()
-        Run run = new Run()
-        run.name = "testname"
-        run.seqCenter = seqCenter
-        run.seqPlatform = seqPlatform
-        run.save(flush: true)
-        assertTrue(run.validate())
+        SoftwareTool softwareTool = DomainFactory.createSoftwareTool([
+                type: SoftwareTool.Type.ALIGNMENT
+        ])
 
-        SoftwareTool softwareTool = new SoftwareTool()
-        softwareTool.programName = "SOLID"
-        softwareTool.programVersion = "0.4.8"
-        softwareTool.type = SoftwareTool.Type.ALIGNMENT
-        softwareTool.save(flush: true)
-        assertTrue(softwareTool.validate())
-
-        SeqTrack seqTrack = new SeqTrack()
-        seqTrack.laneId = "123"
-        seqTrack.run = run
-        seqTrack.sample = sample
-        seqTrack.seqType = seqType
-        seqTrack.pipelineVersion = softwareTool
-        seqTrack.save(flush: true)
-        assertTrue(seqTrack.validate())
+        SeqTrack seqTrack = DomainFactory.createSeqTrack([
+                run: run,
+                sample: sample,
+                seqType: seqType,
+                pipelineVersion: softwareTool,
+        ])
 
         AlignmentPass alignmentPass = DomainFactory.createAlignmentPass(
             identifier: 2,
             seqTrack: seqTrack,
         )
-        alignmentPass.save(flush: true)
-        assertTrue(alignmentPass.validate())
 
         processedBamFile = new ProcessedBamFile()
         processedBamFile.type = AbstractBamFile.BamType.SORTED
@@ -94,7 +64,6 @@ class MergingSetAssignmentTests {
         this.mergingSet = new MergingSet(
             mergingWorkPackage: workPackage)
         this.mergingSet.save(flush: true)
-
     }
 
     @After

@@ -28,12 +28,7 @@ class ChromosomeIdentifierMappingServiceTests {
         chromosomeIdentifierMappingService = new ChromosomeIdentifierMappingService()
         chromosomeIdentifierMappingService.referenceGenomeService = new ReferenceGenomeService()
 
-        Realm realm = DomainFactory.createRealm()
-
         project = DomainFactory.createProject()
-        project.name = "SOME_PROJECT"
-        project.dirName = HelperUtils.uniqueString
-        project.realm = realm
         project.save(flush: true)
 
         seqType = DomainFactory.createWholeGenomeSeqType(SeqType.LIBRARYLAYOUT_SINGLE)

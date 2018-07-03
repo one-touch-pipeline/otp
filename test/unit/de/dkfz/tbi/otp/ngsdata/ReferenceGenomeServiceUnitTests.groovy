@@ -53,8 +53,6 @@ class ReferenceGenomeServiceUnitTests {
         file << "test"
 
         project = DomainFactory.createProject()
-        project.name = "SOME_PROJECT"
-        project.dirName = HelperUtils.uniqueString
         project.save(flush: true)
 
         referenceGenome = DomainFactory.createReferenceGenome(

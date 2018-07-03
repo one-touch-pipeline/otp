@@ -1,3 +1,4 @@
+import de.dkfz.tbi.otp.ngsdata.ConfigService
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import org.joda.time.*
 
@@ -13,8 +14,10 @@ final ReadableDuration maxRuntime = Duration.standardHours(1)
 
 
 try {
-    PrintWriter out = new PrintWriter(
-        "$SCRIPT_ROOT_PATH/script_output/cleanup/DeleteOldProcessingFiles_" + new Date().format("yyyy-MM-dd_HH.mm.ss.SSS_Z") + ".log")
+    PrintWriter out = new PrintWriter(new File(
+            ConfigService.getInstance().getScriptOutputPath(),
+            "DeleteOldProcessingFiles_${ new Date().format("yyyy-MM-dd_HH.mm.ss.SSS_Z") }.log"
+    ))
     try {
         final Instant startTime = Instant.now()
         long freedBytes = 0L

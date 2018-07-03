@@ -1,4 +1,5 @@
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.ngsdata.ConfigService
 
 /**
  * rename existing withdrawn result files in the project folder
@@ -11,6 +12,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
  */
 
 
+File generated_script_to_run_manually = new File(ConfigService.getInstance().getScriptOutputPath(), "/withdraw/renameWithdrawnFiles.sh")
 List<File> renameFiles = []
 
 MergingWorkPackage.list().each { MergingWorkPackage mergingWorkPackage ->
@@ -28,14 +30,14 @@ MergingWorkPackage.list().each { MergingWorkPackage mergingWorkPackage ->
     }
 }
 
-new File("$SCRIPT_ROOT_PATH/withdraw/renameWithdrawnFiles.sh").withPrintWriter { writer ->
+
+generated_script_to_run_manually.withPrintWriter { writer ->
     writer.write("#!/bin/bash\n")
 
     renameFiles.each {
         writer.write("mv ${it} ${it}-withdrawn\n")
     }
 }
-
 
 
 List<BamFilePairAnalysis> findAnalysisInstanceForBamFile(AbstractMergedBamFile bamFile) {

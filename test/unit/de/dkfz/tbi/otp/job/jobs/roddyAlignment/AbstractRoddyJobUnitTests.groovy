@@ -29,6 +29,7 @@ class AbstractRoddyJobUnitTests {
     public static final String STATUS_CODE_STARTED = "57427"
     public static final String STATUS_CODE_FINISHED = "0"
     public static final String STATUS_CODE_FAILED = "1"
+    public static final String RANDOM_RODDY_EXECUTION_DIR = "/exec_150707_142149946_USER_WGS"
 
     AbstractRoddyJob abstractRoddyJob
     RoddyBamFile roddyBamFile
@@ -173,7 +174,7 @@ class AbstractRoddyJobUnitTests {
 
     @Test
     void testParseRoddyExecutionDirectoryFromRoddyOutput_WhenMatcherMatches_ShouldReturnRoddyExecutionDirectory() {
-        String roddyExecutionDir = TestCase.uniqueNonExistentPath.absolutePath + "/exec_150707_142149946_SOMEUSER_WGS"
+        String roddyExecutionDir = TestCase.uniqueNonExistentPath.absolutePath + RANDOM_RODDY_EXECUTION_DIR
         String output = """some String
 Creating the following execution directory to store information about this process:
 ${roddyExecutionDir}
@@ -193,7 +194,7 @@ some String"""
 
     @Test
     void testParseRoddyExecutionDirectoryFromRoddyOutput_WhenMatcherMatchesMoreThanOnce_ShouldFail() {
-        String roddyExecutionDir = TestCase.uniqueNonExistentPath.absolutePath + "/exec_150707_142149946_SOMEUSER_WGS"
+        String roddyExecutionDir = TestCase.uniqueNonExistentPath.absolutePath + RANDOM_RODDY_EXECUTION_DIR
         String output = """some String
 Creating the following execution directory to store information about this process:
 ${roddyExecutionDir}

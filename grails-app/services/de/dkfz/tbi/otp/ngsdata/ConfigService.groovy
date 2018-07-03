@@ -59,6 +59,10 @@ class ConfigService implements ApplicationContextAware {
         return new File(otpProperties.get("otp.root.path") ?: "")
     }
 
+    File getScriptOutputPath() {
+        return new File(otpProperties.get("otp.path.script.root") ?: "")
+    }
+
     File getProcessingRootPath() {
         return new File(otpProperties.get("otp.processing.root.path") ?: "")
     }
@@ -78,6 +82,10 @@ class ConfigService implements ApplicationContextAware {
 
     File getStackTracesDirectory() {
         return getAndCheckPathFromProperty('otp.errorLogging.stacktraces', "logs/stacktraces/")
+    }
+
+    File getRoddyPath() {
+        return new File(otpProperties.get("otp.path.tools.roddy") ?: "")
     }
 
     // this path is where the metadata file is copied

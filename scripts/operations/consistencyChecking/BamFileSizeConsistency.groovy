@@ -3,9 +3,12 @@
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
+import de.dkfz.tbi.otp.ngsdata.ConfigService
 
-PrintWriter out = new PrintWriter(new FileOutputStream(
-        "$SCRIPT_ROOT_PATH/script_output/consistencyChecking/BamFileSizeConsistency_" + new Date().format("yyyy-MM-dd_HH.mm.ss.SSS_Z") + ".tsv"), true)
+PrintWriter out = new PrintWriter(new File(
+        ConfigService.getInstance().getScriptOutputPath(),
+        "consistencyChecking/BamFileSizeConsistency_${ new Date().format("yyyy-MM-dd_HH.mm.ss.SSS_Z") }.tsv"
+))
 try {
     Collection<MergingWorkPackage> mergingWorkPackages = MergingWorkPackage.list()
     out.println("Found ${mergingWorkPackages.size()} MergingWorkPackages")

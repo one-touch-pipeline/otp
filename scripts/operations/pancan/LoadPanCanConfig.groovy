@@ -67,7 +67,7 @@ LogThreadLocal.withThreadLog(System.out, { Project.withTransaction {
     Pipeline pipeline = Pipeline.Name.forSeqType(seqType).pipeline
 
     String individualPidPath = individualPid ? "${individualPid}/" : ''
-    assert configFilePath ==~ "$OTP_ROOT_PATH/.*/configFiles/${pipeline.name.name()}/${individualPidPath}${pipeline.name.name()}_${seqType.roddyName}_${seqType.libraryLayout}_\\d+.\\d+.\\d+_v\\d+_\\d+.xml"
+    assert configFilePath ==~ ".*/configFiles/${pipeline.name.name()}/${individualPidPath}${pipeline.name.name()}_${seqType.roddyName}_${seqType.libraryLayout}_\\d+.\\d+.\\d+_v\\d+_\\d+.xml"
 
     Project project = CollectionUtils.exactlyOneElement(Project.findAllByName(projectName))
 

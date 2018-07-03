@@ -1,28 +1,29 @@
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.ngsdata.ConfigService
 
 import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
 
 
 ProcessingOptionService processingOptionService = ctx.processingOptionService
 
-String path = "/path/to/roddy"
+String roddy_base_path = ConfigService.getInstance().getRoddyPath().toString()
 
 processingOptionService.createOrUpdate(
         RODDY_PATH,
-        "${path}/roddy/release"
+        "${roddy_base_path}/roddy/release"
 )
 
 processingOptionService.createOrUpdate(
         RODDY_BASE_CONFIGS_PATH,
-        "${path}/configs/"
+        "${roddy_base_path}/configs/"
 )
 
 processingOptionService.createOrUpdate(
         RODDY_APPLICATION_INI,
-        "${path}/configs/applicationProperties.ini"
+        "${roddy_base_path}/configs/applicationProperties.ini"
 )
 
 processingOptionService.createOrUpdate(
         RODDY_FEATURE_TOGGLES_CONFIG_PATH,
-        "${path}/configs/featureToggles.ini"
+        "${roddy_base_path}/configs/featureToggles.ini"
 )
