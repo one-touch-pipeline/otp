@@ -343,7 +343,7 @@ class CreateNotificationTextService {
         return DataFile.findAllBySeqTrackInList(seqTracks).collect { DataFile file ->
             String basePath = configService.getProjectSequencePath(file.project)
             String seqTypeDir = lsdfFilesService.seqTypeDirectory(file)
-            LsdfFilesService.normalizePathForCustomers("${basePath}/${seqTypeDir}/")
+            new File("${basePath}/${seqTypeDir}/")
         }.unique().sort()*.path.join('\n')
     }
 
@@ -357,14 +357,15 @@ class CreateNotificationTextService {
             String seqTypeDir = it.seqType.dirName
             String layout = it.seqType.libraryLayoutDirName
             String antiBodyTarget = it.seqType.isChipSeq() ? '-${ANTI_BODY_TARGET}' : ''
-            LsdfFilesService.normalizePathForCustomers("${projectDir}/sequencing/${seqTypeDir}/view-by-pid/${pid}/${sampleType}${antiBodyTarget}/${layout}/merged-alignment").absolutePath
+            "${projectDir}/sequencing/${seqTypeDir}/view-by-pid/${pid}/${sampleType}${antiBodyTarget}/${layout}/merged-alignment"
         }.unique().sort().join('\n')
     }
 
     String variantCallingDirectories(List<SamplePair> samplePairsFinished, ProcessingStep notificationStep) {
-        return samplePairsFinished*."${notificationStep}SamplePairPath"*.absoluteDataManagementPath.collect {
-            LsdfFilesService.normalizePathForCustomers((File) it)
-        }.unique().sort()*.path.join('\n')
+        assert samplePairsFinished
+        assert notificationStep
+        return (samplePairsFinished*."${notificationStep}SamplePairPath"*.absoluteDataManagementPath as List<File>)
+                .unique().sort()*.path.join('\n')
     }
 
     String getSamplePairRepresentation(List<SamplePair> samplePairs) {

@@ -5,15 +5,13 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.utils.*
-import grails.plugin.springsecurity.*
 import groovy.sql.*
 import org.springframework.beans.factory.annotation.*
 import org.springframework.context.*
 import org.springframework.security.access.prepost.*
-import org.springframework.security.acls.domain.*
-import org.springframework.security.core.userdetails.*
 
 import javax.sql.*
+import java.nio.file.*
 
 import static org.springframework.util.Assert.*
 
@@ -468,22 +466,22 @@ AND entry.value = :value
     /**
      * This method determines if a fastq file has to be linked or copied to the project folder and stores the information in the seqTrack.
      * If a fastq file fulfills the following constraints it has to be linked:
-     * - provided by GPCF
-     * - provided via the midterm storage
+     * - provided via storage that allows linking
      * - will be aligned
-     * - hasToBeCopied flag is set to false
+     * - the project allows linking
+     * - the sequencing type allows linking (depends on whether the corresponding alignment workflow allows incremental merging)
+     * - doesn't need adapter trimming
      */
     void determineAndStoreIfFastqFilesHaveToBeLinked(SeqTrack seqTrack, boolean willBeAligned) {
         assert seqTrack : "The input seqTrack for determineAndStoreIfFastqFilesHaveToBeLinked must not be null"
-        boolean autoImportable = seqTrack.run.seqCenter.autoImportable
-        boolean onMidterm = areFilesLocatedOnMidTermStorage(seqTrack)
+        boolean importDirAllowsLinking = doesImportDirAllowLinking(seqTrack)
         boolean projectAllowsLinking = !seqTrack.project.hasToBeCopied
         boolean seqTypeAllowsLinking = seqTrack.seqType.seqTypeAllowsLinking()
         boolean adapterTrimming = RoddyWorkflowConfig.getLatestForIndividual(seqTrack.individual, seqTrack.seqType,
                 Pipeline.findByName(seqTrack.seqType.isRna() ? Pipeline.Name.RODDY_RNA_ALIGNMENT : Pipeline.Name.PANCAN_ALIGNMENT))?.adapterTrimmingNeeded ?: false
-        boolean link = willBeAligned && autoImportable && onMidterm && projectAllowsLinking && seqTypeAllowsLinking && !adapterTrimming
+        boolean link = willBeAligned  && importDirAllowsLinking && projectAllowsLinking && seqTypeAllowsLinking && !adapterTrimming
         seqTrack.log("Fastq files{0} will be ${link ? "linked" : "copied"}, because " +
-                "willBeAligned=${willBeAligned}, autoImportable=${autoImportable}, onMidterm=${onMidterm}, projectAllowsLinking=${projectAllowsLinking}, " +
+                "willBeAligned=${willBeAligned}, importDirAllowsLinking=${importDirAllowsLinking}, projectAllowsLinking=${projectAllowsLinking}, " +
                 "seqTypeAllowsLinking=${seqTypeAllowsLinking}, needs adapter trimming=${adapterTrimming}")
         if (link) {
             seqTrack.linkedExternally = true
@@ -491,11 +489,13 @@ AND entry.value = :value
         }
     }
 
-    private boolean areFilesLocatedOnMidTermStorage(SeqTrack seqTrack) {
-        assert seqTrack: "The input seqTrack for areFilesLocatedOnMidTermStorage must not be null"
+    private boolean doesImportDirAllowLinking(SeqTrack seqTrack) {
+        assert seqTrack: "The input seqTrack for doesImportDirAllowLinking must not be null"
         List<DataFile> files = DataFile.findAllBySeqTrack(seqTrack)
         return files.every { DataFile dataFile ->
-            LsdfFilesService.midtermStorageMountPoint.any { dataFile.initialDirectory.startsWith(it) }
+            seqTrack.seqCenter.importDirsAllowLinking.any {
+                Paths.get(dataFile.initialDirectory).startsWith(it)
+            }
         }
     }
 

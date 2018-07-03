@@ -277,7 +277,7 @@ class CreateNotificationTextServiceSpec extends Specification {
     }
 
 
-    void "getSeqTypeDirectories, when paths do not start with icgc, then the paths should not be changed"() {
+    void "getSeqTypeDirectories, return correct paths"() {
         given:
         SeqTrack seqTrack1 = DomainFactory.createSeqTrackWithTwoDataFiles()
         SeqTrack seqTrack2 = DomainFactory.createSeqTrackWithTwoDataFiles()
@@ -299,28 +299,6 @@ class CreateNotificationTextServiceSpec extends Specification {
     }
 
 
-    void "getSeqTypeDirectories, when path starts with icgc, then the path should be changed to start with lsdf"() {
-        given:
-        SeqTrack seqTrack = DomainFactory.createSeqTrackWithTwoDataFiles()
-        configService = new TestConfigService(['otp.root.path': LsdfFilesService.MOUNTPOINT_WITH_ICGC])
-
-        when:
-        String fileNameString = new CreateNotificationTextService(
-                configService: configService,
-                lsdfFilesService: new LsdfFilesService(),
-        ).getSeqTypeDirectories([seqTrack])
-        String expected = [
-                new File("${LsdfFilesService.MOUNTPOINT_WITH_LSDF}/${seqTrack.project.dirName}/sequencing/${seqTrack.seqType.dirName}"),
-        ].join('\n')
-
-        then:
-        expected == fileNameString
-
-        cleanup:
-        configService.clean()
-    }
-
-
     void "getMergingDirectories, when bamFiles is null, throw assert"() {
         when:
         new CreateNotificationTextService().getMergingDirectories(null)
@@ -331,7 +309,7 @@ class CreateNotificationTextServiceSpec extends Specification {
     }
 
 
-    void "getMergingDirectories, when paths do not start with icgc, then the paths should not be changed"() {
+    void "getMergingDirectories, return correct paths"() {
         given:
         RoddyBamFile roddyBamFile1 = DomainFactory.createRoddyBamFile()
         RoddyBamFile roddyBamFile2 = DomainFactory.createRoddyBamFile()
@@ -361,22 +339,6 @@ class CreateNotificationTextServiceSpec extends Specification {
     }
 
 
-    void "getMergingDirectories, when path starts with icgc, then the path should be changed to start with lsdf"() {
-        given:
-        RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
-        configService = new TestConfigService(['otp.root.path': LsdfFilesService.MOUNTPOINT_WITH_ICGC])
-
-        when:
-        String fileNameString = new CreateNotificationTextService().getMergingDirectories([roddyBamFile])
-        String expected = new File("${LsdfFilesService.MOUNTPOINT_WITH_LSDF}/${roddyBamFile.project.dirName}/sequencing/${roddyBamFile.seqType.dirName}/view-by-pid/\${PID}/\${SAMPLE_TYPE}/${roddyBamFile.seqType.libraryLayoutDirName}/merged-alignment").path
-
-        then:
-        expected == fileNameString
-
-        cleanup:
-        configService.clean()
-    }
-
     void "getMergingDirectories, when seqtype is chipseq, then the path should contain antibody"() {
         given:
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile([
@@ -397,12 +359,15 @@ class CreateNotificationTextServiceSpec extends Specification {
 
 
     void "variantCallingDirectories, when samplePairsFinished is null, return empty string"() {
-        expect:
-        '' == new CreateNotificationTextService().variantCallingDirectories(null, SNV)
+        when:
+        new CreateNotificationTextService().variantCallingDirectories(null, SNV)
+
+        then:
+        thrown(AssertionError)
     }
 
 
-    void "variantCallingDirectories, when paths do not start with icgc, then the paths should not be changed"() {
+    void "variantCallingDirectories, return correct paths"() {
         given:
         SamplePair samplePair1 = DomainFactory.createSamplePair()
         SamplePair samplePair2 = DomainFactory.createSamplePair()
@@ -418,31 +383,6 @@ class CreateNotificationTextServiceSpec extends Specification {
 
         then:
         expected == fileNameString
-
-        where:
-        analysis || pathSegment
-        SNV      || "snv_results"
-        INDEL    || "indel_results"
-        SOPHIA   || "sv_results"
-        ACESEQ   || "cnv_results"
-    }
-
-    //@Unroll
-    void "variantCallingDirectories, when path starts with icgc, then the path should be changed to start with lsdf"() {
-        given:
-        SamplePair samplePair = DomainFactory.createSamplePair()
-
-        configService = new TestConfigService(['otp.root.path': LsdfFilesService.MOUNTPOINT_WITH_ICGC])
-
-        when:
-        String fileNameString = new CreateNotificationTextService().variantCallingDirectories([samplePair], analysis)
-        String expected = new File("${LsdfFilesService.MOUNTPOINT_WITH_LSDF}/${samplePair.project.dirName}/sequencing/${samplePair.seqType.dirName}/view-by-pid/${samplePair.individual.pid}/${pathSegment}/${samplePair.seqType.libraryLayoutDirName}/${samplePair.sampleType1.dirName}_${samplePair.sampleType2.dirName}").path
-
-        then:
-        expected == fileNameString
-
-        cleanup:
-        configService.clean()
 
         where:
         analysis || pathSegment

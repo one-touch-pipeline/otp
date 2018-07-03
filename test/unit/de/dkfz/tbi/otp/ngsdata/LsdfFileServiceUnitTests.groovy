@@ -162,56 +162,6 @@ class LsdfFileServiceUnitTests {
         }
     }
 
-    @Test
-    void testGetIlseFolder_nullInput_shouldFail() {
-        TestCase.shouldFailWithMessageContaining(AssertionError, 'assert ilseId =~ /^\\d{4,6}$/') {
-            service.getIlseFolder(null)
-        }
-    }
-
-    @Test
-    void testGetIlseFolder_emptyInput_shouldFail() {
-        TestCase.shouldFailWithMessageContaining(AssertionError, 'assert ilseId =~ /^\\d{4,6}$/') {
-            service.getIlseFolder('')
-        }
-    }
-
-
-    @Test
-    void testGetIlseFolder_inputHas3Digits_shouldFail() {
-        TestCase.shouldFailWithMessageContaining(AssertionError, 'assert ilseId =~ /^\\d{4,6}$/') {
-            service.getIlseFolder('123')
-        }
-    }
-
-    @Test
-    void testGetIlseFolder_inputHas4Digits_shouldReturnCorrectFile() {
-        File expected = new File("${LsdfFilesService.SEQ_CENTER_INBOX_PATH}/core/001/001234")
-
-        assert expected == service.getIlseFolder('1234')
-    }
-
-    @Test
-    void testGetIlseFolder_inputHas6Digits_shouldReturnCorrectFile() {
-        File expected = new File("${LsdfFilesService.SEQ_CENTER_INBOX_PATH}/core/123/123456")
-
-        assert expected == service.getIlseFolder('123456')
-    }
-
-    @Test
-    void testGetIlseFolder_inputHas7Digits_shouldFail() {
-        TestCase.shouldFailWithMessageContaining(AssertionError, 'assert ilseId =~ /^\\d{4,6}$/') {
-            service.getIlseFolder('1234567')
-        }
-    }
-
-    @Test
-    void testGetIlseFolder_inputContainsNonDigits_shouldFail() {
-        TestCase.shouldFailWithMessageContaining(AssertionError, 'assert ilseId =~ /^\\d{4,6}$/') {
-            service.getIlseFolder('12a3')
-        }
-    }
-
 
     private void testDeleteMethod(File file, Closure call) {
         Realm realm = new Realm()

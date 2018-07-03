@@ -70,6 +70,11 @@ class ConfigService implements ApplicationContextAware {
         return new File(otpProperties.get("otp.path.tools") ?: "")
     }
 
+    // this path is where the metadata file is copied
+    File getSeqCenterInboxPath() {
+        return new File(otpProperties.get("otp.path.seqCenterInbox") ?: "")
+    }
+
     File getProjectSequencePath(Project proj) {
         return new File("${getRootPath().path}/${proj.dirName}/sequencing/")
     }

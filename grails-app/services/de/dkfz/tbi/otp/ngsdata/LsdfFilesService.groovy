@@ -4,7 +4,6 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.utils.*
-import org.codehaus.groovy.grails.commons.*
 
 import java.util.regex.*
 
@@ -13,26 +12,10 @@ import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.*
 
 class LsdfFilesService {
 
-    GrailsApplication grailsApplication
     ConfigService configService
     ExecutionService executionService
     CreateClusterScriptService createClusterScriptService
 
-    static final String MOUNTPOINT_WITH_ICGC = 'STORAGE_ROOT'
-
-    static final String MOUNTPOINT_WITH_LSDF = 'STORAGE_ROOT'
-
-    public static final String SEQ_CENTER_INBOX_PATH = "${MOUNTPOINT_WITH_ICGC}/dmg/seq_center_inbox"
-
-    public static final String ILSE_NUMBER_TEMPLATE = "000000"
-
-
-    static List<String> midtermStorageMountPoint = [  // the first entry shall be the canonical one
-                                                      "${MOUNTPOINT_WITH_LSDF}/midterm/",
-                                                      "${SEQ_CENTER_INBOX_PATH}/core/",
-                                                      "${MOUNTPOINT_WITH_ICGC}/midterm/",
-                                                      "${MOUNTPOINT_WITH_LSDF}SEQUENCING_INBOX/",
-    ].asImmutable()
 
     /**
      * Similar to {@link java.nio.file.Paths#get(String, String...)} from Java 7.
@@ -282,25 +265,5 @@ class LsdfFilesService {
         filesOrDirectories.each {
             waitUntilDoesNotExist(it)
         }
-    }
-
-    /**
-     * Returns the absolute path to an ILSe Folder.
-     * Usually stored at STORAGE_ROOTSEQUENCING_INBOX/00[first digit of ILSe]/00[ILSe]
-     */
-    public File getIlseFolder(String ilseId) {
-        assert ilseId =~ /^\d{4,6}$/
-        String ilse = ILSE_NUMBER_TEMPLATE + ilseId
-        return new File("${SEQ_CENTER_INBOX_PATH}/core/${ilse[-6..-1][0..2]}/${ilse[-6..-1]}")
-    }
-
-    static File normalizePathForCustomers(File file) {
-        return new File(file.absolutePath.replaceFirst(
-                /^${Pattern.quote(MOUNTPOINT_WITH_ICGC)}/,
-                Matcher.quoteReplacement(MOUNTPOINT_WITH_LSDF)))
-    }
-
-    static File normalizePathForCustomers(String path) {
-        return normalizePathForCustomers(new File(path))
     }
 }

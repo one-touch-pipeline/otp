@@ -1,0 +1,223 @@
+package de.dkfz.tbi.otp.ngsdata
+
+import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
+import grails.buildtestdata.mixin.*
+import spock.lang.*
+
+@Build([
+        Individual,
+        LogMessage,
+        Pipeline,
+        Project,
+        Realm,
+        RoddyWorkflowConfig,
+        Run,
+        RunSegment,
+        Sample,
+        SampleType,
+        SeqCenter,
+        SeqPlatform,
+        SeqPlatformGroup,
+        SeqPlatformModelLabel,
+        SeqTrack,
+        SeqType,
+        SoftwareTool,
+])
+// If the class is named SeqTrackServiceSpec, Grails tries to autowire the service, which fails.
+// tested with Grails 2.5.1
+class SeqTrackServiceNoAutowireSpec extends Specification {
+
+    SeqTrackService service = new SeqTrackService()
+
+    void setup() {
+        DomainFactory.createPanCanPipeline()
+    }
+
+
+    void "test determineAndStoreIfFastqFilesHaveToBeLinked, seqTrack is null, should fail"() {
+        when:
+        service.determineAndStoreIfFastqFilesHaveToBeLinked(null, true)
+
+        then:
+        thrown(AssertionError)
+    }
+
+    void "test determineAndStoreIfFastqFilesHaveToBeLinked, can be linked"() {
+        given:
+        SeqTrack seqTrack = createDataForDetermineAndStoreIfFastqFilesHaveToBeLinked()
+
+        when:
+        service.determineAndStoreIfFastqFilesHaveToBeLinked(seqTrack, true)
+
+        then:
+        seqTrack.linkedExternally == true
+    }
+
+    void "test determineAndStoreIfFastqFilesHaveToBeLinked, will be aligned false, has to be copied"() {
+        given:
+        SeqTrack seqTrack = createDataForDetermineAndStoreIfFastqFilesHaveToBeLinked()
+
+        when:
+        service.determineAndStoreIfFastqFilesHaveToBeLinked(seqTrack, false)
+
+        then:
+        seqTrack.linkedExternally == false
+    }
+
+    void "test determineAndStoreIfFastqFilesHaveToBeLinked, seq center doesn't allow linking, has to be copied"() {
+        given:
+        SeqTrack seqTrack = createDataForDetermineAndStoreIfFastqFilesHaveToBeLinked()
+        seqTrack.run.seqCenter.importDirsAllowLinking = []
+
+        when:
+        service.determineAndStoreIfFastqFilesHaveToBeLinked(seqTrack, true)
+
+        then:
+        seqTrack.linkedExternally == false
+    }
+
+    void "test determineAndStoreIfFastqFilesHaveToBeLinked, other path, has to be copied"() {
+        given:
+        SeqTrack seqTrack = createDataForDetermineAndStoreIfFastqFilesHaveToBeLinked("/other_path")
+
+        when:
+        service.determineAndStoreIfFastqFilesHaveToBeLinked(seqTrack, true)
+
+        then:
+        seqTrack.linkedExternally == false
+    }
+
+    void "test determineAndStoreIfFastqFilesHaveToBeLinked, project doesn't allow linking, has to be copied"() {
+        given:
+        SeqTrack seqTrack = createDataForDetermineAndStoreIfFastqFilesHaveToBeLinked()
+        seqTrack.sample.individual.project.hasToBeCopied = true
+
+        when:
+        service.determineAndStoreIfFastqFilesHaveToBeLinked(seqTrack, true)
+
+        then:
+        seqTrack.linkedExternally == false
+    }
+
+    void "test determineAndStoreIfFastqFilesHaveToBeLinked, WGBS data, has to be copied"() {
+        given:
+        SeqTrack seqTrack = createDataForDetermineAndStoreIfFastqFilesHaveToBeLinked()
+        SeqType wgbsSeqType = DomainFactory.createWholeGenomeBisulfiteSeqType()
+        seqTrack.seqType = wgbsSeqType
+
+        when:
+        service.determineAndStoreIfFastqFilesHaveToBeLinked(seqTrack, true)
+
+        then:
+        seqTrack.linkedExternally == false
+    }
+
+    void "test determineAndStoreIfFastqFilesHaveToBeLinked, RNA data, has to be copied"() {
+        given:
+        DomainFactory.createRnaPipeline()
+
+        SeqTrack seqTrack = createDataForDetermineAndStoreIfFastqFilesHaveToBeLinked()
+
+        SeqType rnaSeqType = DomainFactory.createRnaPairedSeqType()
+        seqTrack.seqType = rnaSeqType
+
+        when:
+        service.determineAndStoreIfFastqFilesHaveToBeLinked(seqTrack, true)
+
+        then:
+        seqTrack.linkedExternally == false
+    }
+
+    void "test determineAndStoreIfFastqFilesHaveToBeLinked, with adapter trimming, has to be copied"() {
+        given:
+        SeqTrack seqTrack = createDataForDetermineAndStoreIfFastqFilesHaveToBeLinked()
+        DomainFactory.createRoddyWorkflowConfig([seqType: seqTrack.seqType, individual: seqTrack.individual, adapterTrimmingNeeded: true])
+
+        when:
+        service.determineAndStoreIfFastqFilesHaveToBeLinked(seqTrack, true)
+
+        then:
+        seqTrack.linkedExternally == false
+    }
+
+    private SeqTrack createDataForDetermineAndStoreIfFastqFilesHaveToBeLinked(String path = null) {
+        Run run = DomainFactory.createRun(seqCenter: DomainFactory.createSeqCenter(importDirsAllowLinking: ["/link_this", "/link_that"]))
+        RunSegment runSegment = DomainFactory.createRunSegment()
+        SeqTrack seqTrack = DomainFactory.createSeqTrack(
+                run: run,
+                sample: DomainFactory.createSample(
+                        individual: DomainFactory.createIndividual(
+                                project: DomainFactory.createProject(hasToBeCopied: false)
+                        )
+                )
+        )
+        DomainFactory.createDataFile(seqTrack: seqTrack, run: run, runSegment: runSegment, initialDirectory: path ?: "/link_this")
+        DomainFactory.createDataFile(seqTrack: seqTrack, run: run, runSegment: runSegment, initialDirectory: path ?: "/link_this")
+        return seqTrack
+    }
+
+
+    void "test doesImportDirAllowLinking, seqTrack is null, should fail"() {
+        when:
+        service.doesImportDirAllowLinking(null)
+
+        then:
+        thrown(AssertionError)
+    }
+
+    void "test doesImportDirAllowLinking, data files on linkable"() {
+        given:
+        SeqTrack seqTrack = createDataForAreFilesLocatedOnMidTermStorage()
+
+        expect:
+        true == service.doesImportDirAllowLinking(seqTrack)
+    }
+
+    void "test doesImportDirAllowLinking, data files in other linkable dir"() {
+        given:
+        SeqTrack seqTrack = createDataForAreFilesLocatedOnMidTermStorage("/link_this")
+
+        expect:
+        true == service.doesImportDirAllowLinking(seqTrack)
+    }
+
+    void "test doesImportDirAllowLinking, data files in other non linkable dir"() {
+        given:
+        SeqTrack seqTrack = createDataForAreFilesLocatedOnMidTermStorage("/link_this_too")
+
+        expect:
+        false == service.doesImportDirAllowLinking(seqTrack)
+    }
+
+    void "test doesImportDirAllowLinking, data files not in linkable dir"() {
+        given:
+        SeqTrack seqTrack = createDataForAreFilesLocatedOnMidTermStorage("/other_path")
+
+        expect:
+        false == service.doesImportDirAllowLinking(seqTrack)
+    }
+
+    void "test doesImportDirAllowLinking, seq center doesn't have linkable dir"() {
+        given:
+        SeqTrack seqTrack = createDataForAreFilesLocatedOnMidTermStorage()
+
+        seqTrack.run.seqCenter.importDirsAllowLinking = []
+        seqTrack.run.seqCenter.save(flush: true)
+
+        expect:
+        false == service.doesImportDirAllowLinking(seqTrack)
+    }
+
+    private SeqTrack createDataForAreFilesLocatedOnMidTermStorage(String path = null) {
+        RunSegment runSegment = DomainFactory.createRunSegment()
+        SeqCenter seqCenter = DomainFactory.createSeqCenter(importDirsAllowLinking: ["/link_me", "/link_this"])
+        SeqTrack seqTrack = DomainFactory.createSeqTrack()
+        seqTrack.run.seqCenter = seqCenter
+        seqTrack.run.save(flush: true)
+        DomainFactory.createDataFile(seqTrack: seqTrack, runSegment: runSegment, initialDirectory: path ?: "/link_me")
+        DomainFactory.createDataFile(seqTrack: seqTrack, runSegment: runSegment, initialDirectory: path ?: "/link_me")
+        return seqTrack
+    }
+}

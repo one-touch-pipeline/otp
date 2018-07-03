@@ -5,11 +5,9 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures.*
 import de.dkfz.tbi.otp.tracking.*
 import de.dkfz.tbi.util.spreadsheet.*
 import de.dkfz.tbi.util.spreadsheet.validation.ValueTuple
-import grails.util.*
 import groovy.transform.*
 import org.springframework.beans.factory.annotation.*
 import org.springframework.context.*
@@ -39,6 +37,7 @@ class MetadataImportService {
     LsdfFilesService lsdfFilesService
     LibraryPreparationKitService libraryPreparationKitService
     SeqTypeService seqTypeService
+    ConfigService configService
 
     static int MAX_ILSE_NUMBER_RANGE_SIZE = 20
 
@@ -106,7 +105,7 @@ class MetadataImportService {
         MetaDataFile metadataFileObject = null
         if (mayImport(context, ignoreWarnings, previousValidationMd5sum)) {
             metadataFileObject = importMetadataFile(context, align, importMode, ticketNumber, seqCenterComment, automaticNotification)
-            copyMetaDataFileIfMidterm(context)
+            copyMetaDataFileIfRequested(context)
         }
         return new ValidateAndImportResult(context, metadataFileObject)
     }
@@ -123,12 +122,13 @@ class MetadataImportService {
         assert otrsTicket.save(flush: true)
     }
 
-    protected void copyMetaDataFileIfMidterm(MetadataValidationContext context) {
-        if (context.directoryStructure instanceof DataFilesOnGpcfMidTerm) {
+    protected void copyMetaDataFileIfRequested(MetadataValidationContext context) {
+        List<SeqCenter> seqCenters = SeqCenter.findAllByNameInList(context.spreadsheet.dataRows*.getCellByColumnTitle(CENTER_NAME.name())?.text)
+        seqCenters.findAll { it?.copyMetadataFile }.unique().each { SeqCenter seqCenter->
             Path source = context.metadataFile
             try {
-                String ilse = context.spreadsheet.dataRows[0].getCellByColumnTitle(MetaDataColumn.ILSE_NO.name()).text
-                File targetDirectory = lsdfFilesService.getIlseFolder(ilse)
+                String ilse = context.spreadsheet.dataRows[0].getCellByColumnTitle(ILSE_NO.name()).text
+                File targetDirectory = getIlseFolder(ilse, seqCenter)
                 File targetFile = new File(targetDirectory, source.fileName.toString())
                 if (!targetFile.exists()) {
                     Realm realm = ConfigService.getDefaultRealm()
@@ -144,6 +144,16 @@ class MetadataImportService {
                 throw new RuntimeException("Copying of metadatafile ${source} failed", t)
             }
         }
+    }
+
+    /**
+     * Returns the absolute path to an ILSe Folder inside the sequencing center inbox
+     */
+    protected File getIlseFolder(String ilseId, SeqCenter seqCenter) {
+        assert ilseId =~ /^\d{4,6}$/
+        assert seqCenter
+        String ilse = ilseId.padLeft(6, '0')
+        return new File("${configService.getSeqCenterInboxPath()}/${seqCenter.dirName}/${ilse[0..2]}/${ilse}")
     }
 
     List<ValidateAndImportResult> validateAndImportMultiple(String otrsTicketNumber, String ilseNumbers) {
@@ -171,7 +181,8 @@ class MetadataImportService {
 
     protected static Path getMetadataFilePathForIlseNumber(int ilseNumber, FileSystem fileSystem) {
         String ilseNumberString = Integer.toString(ilseNumber)
-        return fileSystem.getPath(LsdfFilesService.midtermStorageMountPoint.first(),
+        SeqCenter seqCenter = exactlyOneElement(SeqCenter.findAllByAutoImportable(true))
+        return fileSystem.getPath(seqCenter.autoImportDir,
                 ilseNumberString.padLeft(6, '0'),
                 "data",
                 "${ilseNumberString}_meta.tsv"
