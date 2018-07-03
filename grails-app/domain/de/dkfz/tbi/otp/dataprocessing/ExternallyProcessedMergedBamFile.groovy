@@ -1,8 +1,8 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import org.hibernate.*
-
 /**
  * Represents a merged bam file stored on the file system
  * which was processed externally (not in OTP)
@@ -119,7 +119,14 @@ class ExternallyProcessedMergedBamFile extends AbstractMergedBamFile {
         type validator: { true }
         importedFrom nullable: true, blank: false, validator: { it == null || OtpPath.isValidAbsolutePath(it) }
         fileName blank: false, validator: { OtpPath.isValidPathComponent(it) }
-        workPackage validator: { val ->
+        workPackage validator: { val, obj ->
+            List<ExternallyProcessedMergedBamFile> epmbfs = ExternallyProcessedMergedBamFile.findAllByFileName(obj.fileName).findAll {
+                it.sample == val.sample && it.seqType == val.seqType && it.referenceGenome == val.referenceGenome
+            }
+            if (epmbfs && (epmbfs.size() != 1 || CollectionUtils.exactlyOneElement(epmbfs) != obj)) {
+                return "A EPMBF with this fileName, sample, seqType and referenceGenome already exists"
+            }
+
             val && val.pipeline?.name == Pipeline.Name.EXTERNALLY_PROCESSED &&
                     ExternalMergingWorkPackage.isAssignableFrom(Hibernate.getClass(val))
         }
