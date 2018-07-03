@@ -16,6 +16,7 @@ ProcessingOptionService processingOptionService = ctx.processingOptionService
         (ProcessingOption.OptionName.BASE_PATH_REFERENCE_GENOME)       : '',
 
         (ProcessingOption.OptionName.GUI_ABOUT_OTP)                    : '',
+        (ProcessingOption.OptionName.GUI_IMPRINT)                      : '',
         (ProcessingOption.OptionName.GUI_CONTACT_DATA_OPERATED_BY)     : '',
         (ProcessingOption.OptionName.GUI_CONTACT_DATA_PERSON_IN_CHARGE): '',
         (ProcessingOption.OptionName.GUI_CONTACT_DATA_POSTAL_ADDRESS)  : '',
