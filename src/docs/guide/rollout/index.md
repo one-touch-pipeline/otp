@@ -9,5 +9,3 @@ Topics
 - [Load reference genome](load-reference-genome.md)
 - [Data initialisation](initial-data.md)
 
-
-[Back to Overview](../index.md)
