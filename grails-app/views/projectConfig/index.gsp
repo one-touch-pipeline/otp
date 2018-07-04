@@ -11,6 +11,7 @@
 </head>
 <body>
     <div class="body">
+    <g:render template="/templates/messages"/>
     <g:if test="${projects}">
         <g:if test="${hasErrors == true}">
             <div class="errors"> <li>${message}</li></div>
@@ -167,6 +168,24 @@
                                 link="${g.createLink(controller: 'projectConfig', action: "updateCustomFinalNotification", id: project.id)}"
                                 values="${["true","false"]}"
                                 value="${customFinalNotification}"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="myKey"><g:message code="projectOverview.projectInfos"/></td>
+                    <td id="projectInfo">
+                        <g:each var="projectInfo" in="${projectInfos}">
+                            <p>
+                                <g:message code="projectOverview.projectInfo.creationDate"/>: <g:formatDate date="${projectInfo.dateCreated}" format="yyyy-MM-dd HH:mm:ss" /><br>
+                                <g:message code="projectOverview.projectInfo.path"/>: ${projectInfo.getPath()}
+                            </p>
+                        </g:each>
+                        <p>
+                        <g:uploadForm action="addProjectInfo" useToken="true">
+                            <input type="file" name="projectInfoFile" id="projectInfoFile" />
+                            <input type="hidden" name="project.id" value="${project.id}"/>
+                            <g:submitButton name="${g.message(code: "projectOverview.projectInfo.add")}"/>
+                        </g:uploadForm>
+                        </p>
                     </td>
                 </tr>
             </table>

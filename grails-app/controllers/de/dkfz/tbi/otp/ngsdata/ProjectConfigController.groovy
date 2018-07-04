@@ -7,6 +7,7 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.utils.*
 import grails.converters.*
 import org.springframework.validation.*
+import org.springframework.web.multipart.*
 
 import java.sql.*
 import java.text.*
@@ -109,6 +110,7 @@ class ProjectConfigController {
                 processingPriorities      : ProjectService.processingPriorities,
                 checkSophiaReferenceGenome: checkSophiaReferenceGenome,
                 checkAceseqReferenceGenome: checkAceseqReferenceGenome,
+                projectInfos              : project?.projectInfos,
                 hasErrors                 : params.hasErrors,
                 message                   : params.message,
         ]
@@ -218,6 +220,21 @@ class ProjectConfigController {
         checkErrorAndCallMethod(cmd, {
             projectService.updateProjectField(Project.Snv.valueOf(cmd.value), cmd.fieldName, cmd.project)
         })
+    }
+
+    def addProjectInfo(AddProjectInfoCommand cmd) {
+        withForm {
+            if (cmd.hasErrors()) {
+                flash.message = g.message(code: "projectOverview.projectInfos.errorMessage")
+                flash.errors = cmd.errors
+            } else {
+                projectService.createProjectInfoAndUploadFile(cmd.project, cmd.projectInfoFile)
+            }
+
+        }.invalidToken {
+            flash.message = g.message(code: "projectOverview.projectInfos.errorMessage")
+        }
+        redirect(action: "index")
     }
 
     JSON snvDropDown() {
@@ -524,6 +541,28 @@ class UpdateAnalysisDirectoryCommand implements Serializable {
 
     void setValue(String value) {
         this.analysisDirectory = value
+    }
+}
+
+class AddProjectInfoCommand implements Serializable {
+    MultipartFile projectInfoFile
+    Project project
+    static constraints = {
+        projectInfoFile(validator: { val, obj ->
+            if (val.isEmpty()) {
+                return "File is empty"
+            }
+
+            if (!OtpPath.isValidPathComponent(val.originalFilename)) {
+                return "Invalid fileName"
+            }
+            if (ProjectInfo.findAllByProjectAndFileName(obj.project, val.originalFilename).size() != 0) {
+                "A ProjectInfo with this fileName already exists"
+            }
+            if (val.getSize() > ProjectService.PROJECT_INFO_MAX_SIZE) {
+                "The File exceeds the 20mb file size limit "
+            }
+        })
     }
 }
 

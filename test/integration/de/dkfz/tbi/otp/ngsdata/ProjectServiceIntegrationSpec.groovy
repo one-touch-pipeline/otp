@@ -18,6 +18,7 @@ import spock.lang.*
 
 import java.nio.file.*
 import java.nio.file.attribute.*
+import org.springframework.mock.web.*
 
 class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRoles {
 
@@ -27,6 +28,8 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
     ReferenceGenomeService referenceGenomeService
     RoddyWorkflowConfigService roddyWorkflowConfigService
     TestConfigService configService
+
+    static final String FILE_NAME = "fileName"
 
 
     @Rule
@@ -1321,7 +1324,65 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         "Snv"        | "invalid/path"    || /baseProjectConfig '.*' is an invalid path component\..*/
     }
 
-    private File makeStatFile(Project project, ReferenceGenome referenceGenome, String statFileName) {
+    void "test createprojectInfo, succeeds"() {
+        given:
+        Project project = DomainFactory.createProject()
+
+        when:
+        ProjectInfo projectInfo = projectService.createProjectInfo(project, FILE_NAME)
+
+        then:
+        projectInfo.fileName == FILE_NAME
+    }
+
+    void "test createprojectInfo, with same fileName for different projects, succeeds"() {
+        given:
+        Project project1 = DomainFactory.createProject()
+        Project project2 = DomainFactory.createProject()
+
+        when:
+        ProjectInfo projectInfo1 = projectService.createProjectInfo(project1, FILE_NAME)
+        ProjectInfo projectInfo2 = projectService.createProjectInfo(project2, FILE_NAME)
+
+        then:
+        projectInfo1.fileName == FILE_NAME
+        projectInfo2.fileName == FILE_NAME
+    }
+
+    void "test createprojectInfo, with same fileName for same project, fails"() {
+        given:
+        Project project = DomainFactory.createProject()
+
+        when:
+        projectService.createProjectInfo(project, FILE_NAME)
+        projectService.createProjectInfo(project, FILE_NAME)
+
+        then:
+        ValidationException ex = thrown()
+        ex.message.contains('unique')
+    }
+
+    void "test copyprojectInfoToProjectFolder, succeeds"() {
+        given:
+        Project project = DomainFactory.createProject()
+        byte[] content = [0, 1 , 2 , 3]
+        MockMultipartFile mockMultipartFile = new MockMultipartFile(FILE_NAME, content)
+        mockMultipartFile.originalFilename = FILE_NAME
+
+        when:
+        SpringSecurityUtils.doWithAuth("admin") {
+            projectService.createProjectInfoAndUploadFile(project, mockMultipartFile)
+        }
+
+        then:
+        Path projectInfoFile = Paths.get("${project.getProjectDirectory()}/${projectService.PROJECT_INFO}/${FILE_NAME}")
+        PosixFileAttributes attrs = Files.readAttributes(projectInfoFile, PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS)
+
+        projectInfoFile.bytes == content
+        TestCase.assertContainSame(attrs.permissions(), [PosixFilePermission.OWNER_READ])
+    }
+
+    private File makeStatFile(ReferenceGenome referenceGenome, String statFileName) {
         File statDirectory = referenceGenomeService.pathToChromosomeSizeFilesPerReference(referenceGenome, false)
         assert statDirectory.exists() || statDirectory.mkdirs()
         File statFile = new File(statDirectory, statFileName)
@@ -1350,7 +1411,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         )
         assert projectDirectory.exists() || projectDirectory.mkdirs()
 
-        makeStatFile(configuration.project, ReferenceGenome.findByName(configuration.referenceGenome), configuration.statSizeFileName)
+        makeStatFile(ReferenceGenome.findByName(configuration.referenceGenome), configuration.statSizeFileName)
         return configuration
     }
 

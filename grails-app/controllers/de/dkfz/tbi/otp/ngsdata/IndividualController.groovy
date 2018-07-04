@@ -7,7 +7,7 @@ import grails.converters.*
 import groovy.json.*
 import groovy.transform.*
 import org.springframework.validation.*
-import org.springframework.web.multipart.commons.*
+import org.springframework.web.multipart.*
 
 class IndividualController {
 
@@ -449,7 +449,7 @@ class InsertManyCommand {
     String project
     String delimiter
     String sampleText
-    CommonsMultipartFile sampleFile
+    MultipartFile sampleFile
 
     String validate() {
         if (!submit) {

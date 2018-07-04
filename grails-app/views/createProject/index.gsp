@@ -16,7 +16,7 @@
     <g:else>
         <div class="empty"><br></div>
     </g:else>
-    <g:form controller="createProject" action="index">
+    <g:uploadForm controller="createProject" action="index">
         <table>
             <tr>
                 <td class="myKey"><g:message code="createProject.name"/></td>
@@ -79,6 +79,12 @@
                 <td><g:checkBox name="fingerPrinting" checked="${cmd == null ? true : cmd.fingerPrinting}" /></td>
             </tr>
             <tr>
+                <td class="myKey"><g:message code="createProject.projectInfo"/></td>
+                <td>
+                    <input type="file" name="projectInfoFile" id="projectInfoFile"/>
+                </td>
+            </tr>
+            <tr>
                 <td class="myKey"><g:message code="createProject.description"/></td>
                 <td><g:textArea name="description" value="${cmd.description}"/></td>
             </tr>
@@ -87,7 +93,7 @@
                 <td><g:submitButton name="submit" value="Submit"/></td>
             </tr>
         </table>
-    </g:form>
+    </g:uploadForm>
     </div>
 </body>
 </html>

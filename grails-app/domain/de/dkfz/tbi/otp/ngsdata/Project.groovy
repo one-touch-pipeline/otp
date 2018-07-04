@@ -44,8 +44,15 @@ class Project implements Commentable, Entity {
 
     boolean customFinalNotification = false
 
+    Set<ProjectInfo> projectInfos
+
     static hasMany = [
             projectCategories: ProjectCategory,
+            projectInfos: ProjectInfo,
+    ]
+
+    static mappedBy = [
+            projectInfos: "project"
     ]
 
     Comment comment

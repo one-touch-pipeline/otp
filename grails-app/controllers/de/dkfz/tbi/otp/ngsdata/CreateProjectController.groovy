@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.ngsdata
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import org.springframework.validation.*
+import org.springframework.web.multipart.*
 
 
 class CreateProjectController {
@@ -39,6 +40,7 @@ class CreateProjectController {
                         description: cmd.description,
                         processingPriority: cmd.priority,
                         tumorEntity: cmd.tumorEntity,
+                        projectInfoFile: cmd.projectInfoFile,
                 )
                 Project project = projectService.createProject(projectParams)
                 projectSelectionService.setSelectedProject([project], project.name)
@@ -69,6 +71,7 @@ class CreateProjectControllerSubmitCommand implements Serializable {
     String projectGroup
     TumorEntity tumorEntity
     List<String> projectCategories = [].withLazyDefault {new String()}
+    MultipartFile projectInfoFile
     String description
     String submit
     short priority
@@ -118,6 +121,19 @@ class CreateProjectControllerSubmitCommand implements Serializable {
             }
         })
         tumorEntity(nullable: true)
+        projectInfoFile(nullable: true, validator: { val, obj ->
+            if (val?.isEmpty()) {
+                return "File is empty"
+            }
+
+            if (val && !OtpPath.isValidPathComponent(val.originalFilename)) {
+                return "Invalid fileName"
+            }
+
+            if (val?.getSize() > ProjectService.PROJECT_INFO_MAX_SIZE) {
+                "The File exceeds the 20mb file size limit "
+            }
+        })
     }
 
     void setName(String name) {

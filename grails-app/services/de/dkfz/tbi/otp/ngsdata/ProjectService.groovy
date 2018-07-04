@@ -16,6 +16,7 @@ import org.springframework.security.access.prepost.*
 import org.springframework.security.acls.domain.*
 import org.springframework.security.acls.model.*
 
+import org.springframework.web.multipart.*
 import java.nio.file.*
 import java.nio.file.attribute.*
 
@@ -38,6 +39,9 @@ class ProjectService {
     static final String GENOME_STAR_INDEX = "GENOME_STAR_INDEX"
     static final String RUN_ARRIBA = "RUN_ARRIBA"
     static final String RUN_FEATURE_COUNTS_DEXSEQ = "RUN_FEATURE_COUNTS_DEXSEQ"
+
+    static final String PROJECT_INFO = "projectInfo"
+    static final Long PROJECT_INFO_MAX_SIZE = 20 * 1024 * 1024
 
 
     AclUtilService aclUtilService
@@ -174,7 +178,55 @@ class ProjectService {
         FileSystem fs = fileSystemService.getFilesystemForConfigFileChecksForRealm(project.realm)
         FileService.waitUntilExists(fs.getPath(projectDirectory.absolutePath))
 
+        if (projectParams.projectInfoFile) {
+            createProjectInfoAndUploadFile(project, projectParams.projectInfoFile)
+        }
+
         return project
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void createProjectInfoAndUploadFile(Project project, MultipartFile file) {
+        assert project: "No Project given"
+        assert file: "No File given"
+        assert !file.isEmpty(): "Empty file"
+        assert file.getSize() <= PROJECT_INFO_MAX_SIZE: "Too big"
+        ProjectInfo projectInfo = createProjectInfo(project, file.originalFilename)
+        uploadProjectInfoToProjectFolder(projectInfo, file.getBytes())
+    }
+
+    private ProjectInfo createProjectInfo(Project project, String fileName) {
+        ProjectInfo projectInfo = new ProjectInfo([fileName: fileName])
+        project.addToProjectInfos(projectInfo)
+        project.save(flush: true)
+        return projectInfo
+    }
+
+    private void uploadProjectInfoToProjectFolder(ProjectInfo projectInfo, byte[] content) {
+        FileSystem fs = fileSystemService.getFilesystemForConfigFileChecksForRealm(projectInfo.project.realm)
+        Path projectDirectory = fs.getPath(projectInfo.project.getProjectDirectory().toString())
+        Path projectInfoDirectory = projectDirectory.resolve(PROJECT_INFO)
+        if (!Files.exists(projectInfoDirectory)) {
+            Files.createDirectories(projectInfoDirectory)
+            Files.setPosixFilePermissions(projectDirectory,
+                    [
+                        PosixFilePermission.OWNER_READ,
+                        PosixFilePermission.OWNER_WRITE,
+                        PosixFilePermission.OWNER_EXECUTE,
+                        PosixFilePermission.GROUP_READ,
+                        PosixFilePermission.GROUP_EXECUTE,
+                    ] as Set
+            )
+        }
+
+        Path file = projectInfoDirectory.resolve(projectInfo.fileName)
+        Files.createFile(file)
+        file.bytes = content
+        Files.setPosixFilePermissions(file,
+                [
+                        PosixFilePermission.OWNER_READ,
+                ] as Set
+        )
     }
 
     public static class ProjectParams {
@@ -195,6 +247,7 @@ class ProjectService {
         String description
         short processingPriority
         TumorEntity tumorEntity
+        MultipartFile projectInfoFile
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")

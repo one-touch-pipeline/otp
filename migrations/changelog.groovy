@@ -50,7 +50,7 @@ databaseChangeLog = {
 
 	include file: 'changelogs/2018/OTP-2854.groovy'
 
-	changeSet(author: "strubel", id:"OTP-2854-SQL") {
+	changeSet(author: "strubelp", id:"OTP-2854-SQL") {
 		sqlFile(path: 'changelogs/2018/OTP-2854.sql')
 	}
 
@@ -73,4 +73,8 @@ databaseChangeLog = {
 	}
 
 	include file: 'changelogs/2018/OTP-2877.groovy'
+
+	changeSet(author: "strubelp", id:"OTP-2785") {
+		sqlFile(path: 'changelogs/2018/OTP-2785.sql')
+	}
 }
