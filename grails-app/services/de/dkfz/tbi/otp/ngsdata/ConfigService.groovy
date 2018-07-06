@@ -100,7 +100,7 @@ class ConfigService implements ApplicationContextAware {
 
     @Deprecated
     static DateTimeZone getDateTimeZone() {
-                String zoneName = ProcessingOptionService.findOptionSafe(ProcessingOption.OptionName.TIME_ZONE, null, null)
+        String zoneName = ProcessingOptionService.findOptionSafe(ProcessingOption.OptionName.TIME_ZONE, null, null)
         if (zoneName) {
             return DateTimeZone.forID(zoneName)
         } else {
