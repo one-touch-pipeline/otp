@@ -4,7 +4,6 @@ import de.dkfz.tbi.otp.administration.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.utils.*
-import groovy.transform.TupleConstructor
 import org.springframework.security.access.prepost.*
 
 import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
@@ -31,11 +30,11 @@ class UserProjectRoleService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'MANAGE_USERS')")
-    void addUserToProjectAndNotifyGroupManagementAuthority(Project project, ProjectRole projectRole, String searchString) throws AssertionError {
+    void addUserToProjectAndNotifyGroupManagementAuthority(Project project, ProjectRole projectRole, String username) throws AssertionError {
         assert project : "project must not be null"
 
-        LdapUserDetails ldapUserDetails = ldapService.getLdapUserDetailsByUsernameOrMailOrRealName(searchString)
-        assert ldapUserDetails : "'${searchString}' can not be resolved to a user via LDAP"
+        LdapUserDetails ldapUserDetails = ldapService.getLdapUserDetailsByUsername(username)
+        assert ldapUserDetails : "'${username}' can not be resolved to a user via LDAP"
         assert ldapUserDetails.mail : "Could not get a mail for this user via LDAP"
 
         User user = User.findByUsernameOrEmail(ldapUserDetails.cn, ldapUserDetails.mail)
@@ -70,7 +69,9 @@ class UserProjectRoleService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS')")
     void requestToRemoveUserFromUnixGroupIfRequired(User user, Project project) {
-        if (!UserProjectRole.findAllByUserAndProjectInListAndProjectRoleInListAndEnabled(
+        String[] groupNames = ldapService.getGroupsOfUserByUsername(user.username)
+        if (project.unixGroup in groupNames &&
+            !UserProjectRole.findAllByUserAndProjectInListAndProjectRoleInListAndEnabled(
                     user,
                     Project.findAllByUnixGroupAndIdNotEqual(project.unixGroup, project.id),
                     ProjectRole.findAllByAccessToFiles(true),
@@ -106,10 +107,12 @@ class UserProjectRoleService {
         assert userProjectRole: "the input userProjectRole must not be null"
         userProjectRole.enabled = enabled
         assert userProjectRole.save(flush: true, failOnError: true)
-        if (enabled) {
-            requestToAddUserToUnixGroupIfRequired(userProjectRole.user, userProjectRole.project)
-        } else {
-            requestToRemoveUserFromUnixGroupIfRequired(userProjectRole.user, userProjectRole.project)
+        if (userProjectRole.projectRole.accessToFiles) {
+            if (enabled) {
+                requestToAddUserToUnixGroupIfRequired(userProjectRole.user, userProjectRole.project)
+            } else {
+                requestToRemoveUserFromUnixGroupIfRequired(userProjectRole.user, userProjectRole.project)
+            }
         }
         return userProjectRole
     }
@@ -118,9 +121,17 @@ class UserProjectRoleService {
     UserProjectRole updateProjectRole(UserProjectRole userProjectRole, ProjectRole newProjectRole) {
         assert userProjectRole: "the input userProjectRole must not be null"
         assert newProjectRole: "the input projectRole must not be null"
+        ProjectRole oldProjectRole = userProjectRole.projectRole
         updateManageUsers(userProjectRole, false)
         userProjectRole.projectRole = newProjectRole
         assert userProjectRole.save(flush: true, failOnError: true)
+        if (oldProjectRole.accessToFiles != newProjectRole.accessToFiles) {
+            if (newProjectRole.accessToFiles) {
+                requestToAddUserToUnixGroupIfRequired(userProjectRole.user, userProjectRole.project)
+            } else {
+                requestToRemoveUserFromUnixGroupIfRequired(userProjectRole.user, userProjectRole.project)
+            }
+        }
         return userProjectRole
     }
 }

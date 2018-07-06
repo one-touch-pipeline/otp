@@ -1104,31 +1104,44 @@ body {
 }
 #otp .otpDataTables.projectUserTable {
     img.ldapThumbnail {
-        height: 40px;
-    }
-    td {
-        text-align: left;
+        height: auto;
+        max-height: 40px;
+        width: 30px;
     }
     td:nth-child(1) {
         text-align: center;
+        width: 30px;
     }
     td:nth-child(2) {
-        width: 12%;
+        width: 10%;
     }
     td:nth-child(3) {
-        width: 5%;
+        width: 1%;
+    }
+    td:nth-child(4) {
+        width: 4%;
     }
     td:nth-child(5) {
-        width: 18%;
+        width: 20%;
     }
     td:nth-child(6) {
-        width: 150px;
+        width: 110px;
     }
-    td:nth-child(7), td:nth-child(8) {
-        width: 82px;
+    &.enabled {
+        td:nth-child(7), td:nth-child(8) {
+            width: 80px;
+        }
+        td:nth-child(9), td:nth-child(11) {
+            width: 110px;
+        }
+        td:nth-child(10) {
+            width: 50px;
+        }
     }
-    td:nth-child(9), td:nth-child(11) {
-        width: 100px;
+    &.disabled {
+        td:nth-child(7) {
+            width: 100px;
+        }
     }
 }
 table.projectRoleLegend {

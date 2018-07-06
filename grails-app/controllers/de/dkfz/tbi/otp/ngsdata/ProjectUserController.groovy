@@ -55,7 +55,7 @@ class ProjectUserController {
         List<UserEntry> disabledProjectUsers = []
         List<String> usersWithoutUserProjectRole = []
         projectUsers.each { User user ->
-            LdapUserDetails userMap = ldapService.getLdapUserDetailsByUsernameOrMailOrRealName(user.username)
+            LdapUserDetails userMap = ldapService.getLdapUserDetailsByUsername(user.username)
             UserProjectRole userProjectRole = UserProjectRole.findByUserAndProject(user, project)
             if (userProjectRole) {
                 UserEntry userEntry = new UserEntry(user, project, userMap)
@@ -194,6 +194,7 @@ enum PermissionStatus {
 
 class UserEntry {
     User user
+    String realName
     String thumbnailPhoto
     String department
     ProjectRole projectRole
@@ -208,6 +209,7 @@ class UserEntry {
         ProjectRole projectRole = userProjectRole?.projectRole
         boolean fileAccess = projectRole?.accessToFiles ?: false
         this.user = user
+        this.realName = ldapUserDetails.realName
         this.thumbnailPhoto = ldapUserDetails.thumbnailPhoto.encodeAsBase64()
         this.department = ldapUserDetails.department
         this.projectRole = projectRole

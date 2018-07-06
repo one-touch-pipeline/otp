@@ -117,6 +117,37 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         "from"      | UserProjectRoleService.AdtoolAction.REMOVE
     }
 
+    void "updateEnabledStatus, send mails when activating a role with file access"() {
+        given:
+        UserProjectRole userProjectRole = DomainFactory.createUserProjectRole(
+                user: DomainFactory.createUser(),
+                project: DomainFactory.createProject(unixGroup: "unix_group"),
+                projectRole: DomainFactory.createProjectRole(accessToFiles: accessToFiles),
+        )
+
+        userProjectRoleService.ldapService = Mock(LdapService) {
+            getGroupsOfUserByUsername(_) >> ldapResult
+        }
+
+        when:
+        userProjectRoleService.updateEnabledStatus(userProjectRole, valueToUpdate)
+
+        then:
+        userProjectRole.enabled == valueToUpdate
+        invocations * userProjectRoleService.mailHelperService.sendEmail(_, _, _)
+
+        where:
+        ldapResult     | accessToFiles | valueToUpdate | invocations
+        ["some_group"] | true          | false         | 0
+        ["some_group"] | true          | true          | 1
+        ["some_group"] | false         | false         | 0
+        ["some_group"] | false         | true          | 0
+        ["unix_group"] | true          | false         | 1
+        ["unix_group"] | true          | true          | 0
+        ["unix_group"] | false         | false         | 0
+        ["unix_group"] | false         | true          | 0
+    }
+
     void "addUserToProjectAndNotifyGroupManagementAuthorities, create User if non is found for username or email"() {
         given:
         Project project = DomainFactory.createProject()
@@ -128,7 +159,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         )
         userProjectRoleService.userService = new UserService()
         userProjectRoleService.ldapService = Mock(LdapService) {
-            getLdapUserDetailsByUsernameOrMailOrRealName(_) >> ldapUserDetails
+            getLdapUserDetailsByUsername(_) >> ldapUserDetails
         }
 
         expect:
@@ -158,7 +189,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
                 mail:     user.email,
         )
         userProjectRoleService.ldapService = Mock(LdapService) {
-            getLdapUserDetailsByUsernameOrMailOrRealName(_) >> ldapUserDetails
+            getLdapUserDetailsByUsername(_) >> ldapUserDetails
         }
 
         when:
@@ -182,7 +213,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
                 mail:     user.email,
         )
         userProjectRoleService.ldapService = Mock(LdapService) {
-            getLdapUserDetailsByUsernameOrMailOrRealName(_) >> ldapUserDetails
+            getLdapUserDetailsByUsername(_) >> ldapUserDetails
         }
 
         expect:
@@ -208,7 +239,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
                 mail:     user.email,
         )
         userProjectRoleService.ldapService = Mock(LdapService) {
-            getLdapUserDetailsByUsernameOrMailOrRealName(_) >> ldapUserDetails
+            getLdapUserDetailsByUsername(_) >> ldapUserDetails
         }
 
         expect:
@@ -228,7 +259,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         Project project = DomainFactory.createProject()
         ProjectRole projectRole = DomainFactory.createProjectRole()
         userProjectRoleService.ldapService = Mock(LdapService) {
-            getLdapUserDetailsByUsernameOrMailOrRealName(_) >> null
+            getLdapUserDetailsByUsername(_) >> null
         }
 
         when:
@@ -252,7 +283,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
                 mail:     user.email,
         )
         userProjectRoleService.ldapService = Mock(LdapService) {
-            getLdapUserDetailsByUsernameOrMailOrRealName(_) >> ldapUserDetails
+            getLdapUserDetailsByUsername(_) >> ldapUserDetails
             getGroupsOfUserByUsername(_) >> []
         }
 
@@ -274,7 +305,6 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         given:
         User user = DomainFactory.createUser()
         Project project = DomainFactory.createProject(unixGroup: "UNIX_GROUP")
-
         userProjectRoleService.ldapService = Mock(LdapService) {
             getGroupsOfUserByUsername(_) >> unixGroupsOfUser
         }
@@ -297,6 +327,9 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         given:
         Project project = DomainFactory.createProject(unixGroup: unixGroup1)
         DomainFactory.createProject(unixGroup: unixGroup2)
+        userProjectRoleService.ldapService = Mock(LdapService) {
+            getGroupsOfUserByUsername(_) >> [unixGroup1]
+        }
 
         when:
         userProjectRoleService.requestToRemoveUserFromUnixGroupIfRequired(DomainFactory.createUser(), project)
@@ -316,6 +349,9 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         User user = DomainFactory.createUser()
         Project project1 = DomainFactory.createProject(unixGroup: unixGroup)
         Project project2 = DomainFactory.createProject(unixGroup: unixGroup)
+        userProjectRoleService.ldapService = Mock(LdapService) {
+            getGroupsOfUserByUsername(_) >> [unixGroup]
+        }
         DomainFactory.createUserProjectRole(
                 user: user,
                 project: project1,
@@ -340,17 +376,12 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         User user = DomainFactory.createUser()
         Project project1 = DomainFactory.createProject(unixGroup: unixGroup)
         Project project2 = DomainFactory.createProject(unixGroup: unixGroup)
-        DomainFactory.createUserProjectRole(
-                user: user,
-                project: project1,
-                projectRole: DomainFactory.createProjectRole(accessToFiles: true),
-        )
-        DomainFactory.createUserProjectRole(
-                user: user,
-                project: project2,
-                projectRole: DomainFactory.createProjectRole(accessToFiles: true),
-                enabled: false,
-        )
+        userProjectRoleService.ldapService = Mock(LdapService) {
+            getGroupsOfUserByUsername(_) >> [unixGroup]
+        }
+        ProjectRole fileAccessRole = DomainFactory.createProjectRole(accessToFiles: true)
+        DomainFactory.createUserProjectRole(user: user, project: project1, projectRole: fileAccessRole)
+        DomainFactory.createUserProjectRole(user: user, project: project2, projectRole: fileAccessRole, enabled: false)
 
         when:
         userProjectRoleService.requestToRemoveUserFromUnixGroupIfRequired(user, project1)
@@ -365,21 +396,39 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         User user = DomainFactory.createUser()
         Project project1 = DomainFactory.createProject(unixGroup: unixGroup)
         Project project2 = DomainFactory.createProject(unixGroup: unixGroup)
-        DomainFactory.createUserProjectRole(
-                user: user,
-                project: project1,
-                projectRole: DomainFactory.createProjectRole(accessToFiles: true),
-        )
-        DomainFactory.createUserProjectRole(
-                user: user,
-                project: project2,
-                projectRole: DomainFactory.createProjectRole(accessToFiles: true),
-        )
+        userProjectRoleService.ldapService = Mock(LdapService) {
+            getGroupsOfUserByUsername(_) >> [unixGroup]
+        }
+        ProjectRole fileAccessRole = DomainFactory.createProjectRole(accessToFiles: true)
+        DomainFactory.createUserProjectRole(user: user, project: project1, projectRole: fileAccessRole)
+        DomainFactory.createUserProjectRole(user: user, project: project2, projectRole: fileAccessRole)
 
         when:
         userProjectRoleService.requestToRemoveUserFromUnixGroupIfRequired(user, project1)
 
         then:
         0 * userProjectRoleService.mailHelperService.sendEmail(_, _, _)
+    }
+
+    void "requestToRemoveUserFromUnixGroupIfRequired, only notify when user is in unix group"() {
+        given:
+        User user = DomainFactory.createUser()
+        Project project = DomainFactory.createProject(unixGroup: "unix_group")
+        userProjectRoleService.ldapService = Mock(LdapService) {
+            getGroupsOfUserByUsername(_) >> ldapResult
+        }
+        ProjectRole fileAccessRole = DomainFactory.createProjectRole(accessToFiles: true)
+        DomainFactory.createUserProjectRole(user: user, project: project, projectRole: fileAccessRole)
+
+        when:
+        userProjectRoleService.requestToRemoveUserFromUnixGroupIfRequired(user, project)
+
+        then:
+        invocations * userProjectRoleService.mailHelperService.sendEmail(_, _, _)
+
+        where:
+        ldapResult           | invocations
+        ["unix_group"]       | 1
+        ["some_other_group"] | 0
     }
 }

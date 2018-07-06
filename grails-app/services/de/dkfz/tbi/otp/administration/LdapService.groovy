@@ -32,22 +32,13 @@ class LdapService implements InitializingBean {
         ldapTemplate.setIgnorePartialResultException(true)
     }
 
-    LdapUserDetails getLdapUserDetailsByUsernameOrMailOrRealName(String searchString) {
-        if (searchString == null) {
+    LdapUserDetails getLdapUserDetailsByUsername(String username) {
+        if (username == null) {
             return [:]
-        }
-        String sanitizedSearchString = searchString.trim().replaceAll(" +", " ")
-        ContainerCriteria searchQuery = query().where("cn").is(sanitizedSearchString).or("mail").is(sanitizedSearchString)
-        if (sanitizedSearchString.contains(" ")) {
-            String[] splitSearch = sanitizedSearchString.split(" ", 2)
-            searchQuery = query()
-                    .where("givenName").like(splitSearch[0])
-                    .and("sn").like(splitSearch[1])
-                    .and("mail").isPresent()
         }
         return ldapTemplate.search(
                 query().where("objectCategory").is("user")
-                        .and(searchQuery),
+                        .and("cn").is(username),
                 new LdapuserDetailsAttributesMapper())[0]
     }
 
@@ -119,7 +110,8 @@ class LdapuserDetailsAttributesMapper implements AttributesMapper<LdapUserDetail
             Matcher matcher = it =~ /CN=(?<cn>[^,]*),.*/
             if (matcher.matches() && matcher.group('cn')) return matcher.group('cn')
         }
-        boolean deactivated = a.get("employeeType")?.get()?.toString() == "Ausgeschieden"
+        long accountExpires = (a.get("accountExpires")?.get()?.toString()?.toLong()) ?: 0
+        boolean deactivated = convertAdTimestampToUnixTimestampInMs(accountExpires) < new Date().getTime()
         String givenName = a.get("givenName")?.get()
         String sn = a.get("sn")?.get()
         boolean realNameCreatable = givenName && sn
@@ -132,6 +124,12 @@ class LdapuserDetailsAttributesMapper implements AttributesMapper<LdapUserDetail
                 deactivated      : deactivated,
                 memberOfGroupList: memberOfList,
         ])
+    }
+
+    private static long convertAdTimestampToUnixTimestampInMs(long windowsEpoch) {
+        // http://meinit.nl/convert-active-directory-lastlogon-time-to-unix-readable-time
+        // in milliseconds because Date.getTime() also returns milliseconds
+        return ((windowsEpoch/10000000)-11644473600)*1000
     }
 }
 
