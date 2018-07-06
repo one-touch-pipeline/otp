@@ -19,7 +19,10 @@ grails.project.dependency.resolution = {
 
     repositories {
         inherits true // Whether to inherit repository definitions from plugins
-        mavenRepo "$ARTIFACTORY_URL"
+
+        String repoUrl = System.getenv("MAVEN_REPOSITORY_URL")
+        assert repoUrl : "Set the environment variable MAVEN_REPOSITORY_URL"
+        mavenRepo repoUrl
     }
 
     dependencies {
