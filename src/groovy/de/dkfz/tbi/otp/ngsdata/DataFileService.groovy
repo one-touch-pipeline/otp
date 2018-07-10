@@ -4,6 +4,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.tracking.ProcessingTimeStatisticsService
 import de.dkfz.tbi.otp.utils.MailHelperService
+import org.springframework.beans.factory.annotation.*
 import org.springframework.scheduling.annotation.*
 import org.springframework.context.annotation.*
 import org.springframework.stereotype.*
@@ -12,17 +13,21 @@ import de.dkfz.tbi.otp.ngsdata.FileType.Type
 import grails.validation.ValidationException
 import org.joda.time.*
 
+
+@Scope("singleton")
+@Component
 class DataFileService {
 
-    static transactional = false
     static final int MAX_RESULTS = 1000
 
+    @Autowired
     LsdfFilesService lsdfFilesService
 
+    @Autowired
     MailHelperService mailHelperService
 
     //12h
-    @Scheduled(fixedDelay = 43200000l)
+    @Scheduled(fixedDelay = 43200000l, initialDelay = 60000L)
     void setFileExistsForAllDataFiles() {
         Date startDate = new Date()
         try {
