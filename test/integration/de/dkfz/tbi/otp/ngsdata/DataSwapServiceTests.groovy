@@ -91,7 +91,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
         assert alignmentScript.exists()
         assert alignmentScript.text.contains("ctx.seqTrackService.decideAndPrepareForAlignment(SeqTrack.get(${bamFile.seqTracks.iterator().next().id}))")
 
-        File copyScriptOtherUser = new File(scriptFolder, "${script}-OtherUnixUser.sh")
+        File copyScriptOtherUser = new File(scriptFolder, "${script}-otherUser.sh")
         assert copyScriptOtherUser.exists()
         String copyScriptOtherUserContent = copyScriptOtherUser.text
         roddyFilesToDelete.each {
@@ -168,7 +168,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
         File alignmentScript = new File(scriptFolder, "restartAli_${script}.groovy")
         assert alignmentScript.exists()
 
-        File copyScriptOtherUser = new File(scriptFolder, "${script}-OtherUnixUser.sh")
+        File copyScriptOtherUser = new File(scriptFolder, "${script}-otherUser.sh")
         assert copyScriptOtherUser.exists()
         String copyScriptOtherUserContent = copyScriptOtherUser.text
         roddyFilesToDelete.each {
