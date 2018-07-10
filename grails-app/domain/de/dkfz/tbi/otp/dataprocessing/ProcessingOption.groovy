@@ -22,12 +22,14 @@ class ProcessingOption implements Entity {
         PIPELINE_ACESEQ_PLUGIN_NAME("Name of the Aceseq pipeline plugin", "ACEseqWorkflow", Type.SINGLE_WORD_TEXT),
         PIPELINE_ACESEQ_PLUGIN_VERSION("The version of the Aceseq pipeline plugin", "1.2.6", Type.PLUGIN),
         PIPELINE_ACESEQ_BASE_PROJECT_CONFIG("The base project file for Aceseq pipeline", "otpACEseq-1.0", Type.SINGLE_WORD_TEXT),
-        PIPELINE_ACESEQ_REFERENCE_GENOME("Name of reference genomes for Aceseq", '', Type.SINGLE_LINE_TEXT),
+        PIPELINE_ACESEQ_REFERENCE_GENOME("Name of reference genomes for Aceseq, comma-separated", '', Type.SINGLE_LINE_TEXT),
+
+        PIPELINE_RUNYAPSA_REFERENCE_GENOME("Name of reference genomes for runYapsa, comma-separated", '', Type.SINGLE_LINE_TEXT),
 
         PIPELINE_SOPHIA_PLUGIN_NAME("Name of the Sophia pipeline plugin", "SophiaWorkflow", Type.SINGLE_WORD_TEXT),
         PIPELINE_SOPHIA_PLUGIN_VERSIONS("The version of the Sophia pipeline plugin", "1.0.15", Type.PLUGIN),
         PIPELINE_SOPHIA_BASE_PROJECT_CONFIG("The base project file for Sophia pipeline", "otpSophia-1.0", Type.SINGLE_WORD_TEXT),
-        PIPELINE_SOPHIA_REFERENCE_GENOME("Name of reference genomes for Sophia", '', Type.SINGLE_LINE_TEXT),
+        PIPELINE_SOPHIA_REFERENCE_GENOME("Name of reference genomes for Sophia, comma-separated", '', Type.SINGLE_LINE_TEXT),
 
         PIPELINE_RODDY_ALIGNMENT_PLUGIN_NAME("Name of the alignment plugin, used in configure alignment", "AlignmentAndQCWorkflows", Type.SINGLE_WORD_TEXT),
         PIPELINE_RODDY_ALIGNMENT_PLUGIN_VERSION("The version of the roddy alignment plugin", null, Type.PLUGIN),

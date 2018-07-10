@@ -208,7 +208,7 @@ class DomainFactory {
     }
 
     static Pipeline createRunYapsaPipelineLazy() {
-        createPipeline(Pipeline.Name.RUN_YAPSA, Pipeline.Type.RUN_YAPSA)
+        createPipeline(Pipeline.Name.RUN_YAPSA, Pipeline.Type.MUTATIONAL_SIGNATURE)
     }
 
 
@@ -1126,7 +1126,7 @@ class DomainFactory {
             controlBamFile = createRoddyBamFile([
                     workPackage: controlWorkPackage,
                     config     : diseaseBamFile.config
-            ] + bamFile1Properties)
+            ] + bamFile2Properties)
         }
 
         return [
@@ -1284,7 +1284,7 @@ class DomainFactory {
     }
 
 
-    static RunYapsaInstance createRunYapsaInstance(Map properties = [:], Map bamFile1Properties = [:], Map bamFile2Properties = [:]) {
+    static RunYapsaInstance createRunYapsaInstanceWithRoddyBamFiles(Map properties = [:], Map bamFile1Properties = [:], Map bamFile2Properties = [:]) {
         Map map = createAnalysisInstanceWithRoddyBamFilesMapHelper(properties, bamFile1Properties, bamFile2Properties)
         SamplePair samplePair = map.samplePair
         map += [
@@ -1844,11 +1844,25 @@ class DomainFactory {
     public static RoddySnvCallingInstance createRoddySnvCallingInstance(Map properties = [:]) {
         return createDomainObject(RoddySnvCallingInstance, [
                 processingState: AnalysisProcessingStates.IN_PROGRESS,
-                config         : properties.config ?: properties.samplePair ? createRoddyWorkflowConfig(
-                        project: properties.samplePair.project,
-                        seqType: properties.samplePair.seqType,
-                ) : createRoddyWorkflowConfig(),
-                instanceName   : "2014-08-25_15h32",
+                config: properties.config ?:
+                        properties.samplePair ?
+                            createRoddyWorkflowConfig(
+                                    project: properties.samplePair.project,
+                                    seqType: properties.samplePair.seqType,
+                            )
+                            : createRoddyWorkflowConfig(),
+                instanceName: "instance-${counter++}",
+        ], properties)
+    }
+
+    static RoddySnvCallingInstance createRoddySnvCallingInstance(SamplePair samplePair, Map properties = [:]) {
+        return createDomainObject(RoddySnvCallingInstance, [
+                samplePair        : samplePair,
+                processingState   : AnalysisProcessingStates.FINISHED,
+                sampleType1BamFile: samplePair.mergingWorkPackage1.bamFileInProjectFolder,
+                sampleType2BamFile: samplePair.mergingWorkPackage2.bamFileInProjectFolder,
+                instanceName      : "instance-${counter++}",
+                config            : createRoddyWorkflowConfig([pipeline: createRoddySnvPipelineLazy()]),
         ], properties)
     }
 

@@ -193,10 +193,13 @@ class JobExecutionPlanDSL {
     }
 
     public static def plan = { String name, def ctx = null, boolean validate = false, c ->
+        // If there is a previous plan, obsolete it
         JobExecutionPlan plan = CollectionUtils.atMostOneElement(JobExecutionPlan.findAllByNameAndObsoleted(name, false))
         plan?.obsoleted = true
         plan?.save(flush: true)
         int version = plan ? plan.planVersion + 1 : 0
+
+        // create the new/updated plan
         JobExecutionPlan.withTransaction {
             JobExecutionPlan jep = new JobExecutionPlan(name: name, planVersion: version, enabled: true, previousPlan: plan)
             assert(jep.save())

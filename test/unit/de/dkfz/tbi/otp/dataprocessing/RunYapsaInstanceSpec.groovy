@@ -97,7 +97,7 @@ class RunYapsaInstanceSpec extends Specification {
     }
 
     BamFilePairAnalysis createBamFilePairAnalysis() {
-        return DomainFactory.createRunYapsaInstance([
+        return DomainFactory.createRunYapsaInstanceWithRoddyBamFiles([
                 sampleType1BamFile: samplePair.mergingWorkPackage1.bamFileInProjectFolder,
                 sampleType2BamFile: samplePair.mergingWorkPackage2.bamFileInProjectFolder,
                 samplePair        : samplePair,

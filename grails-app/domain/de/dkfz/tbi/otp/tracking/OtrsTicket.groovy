@@ -18,7 +18,9 @@ class OtrsTicket implements Commentable, Entity {
         SNV('SNV calling', 'SNV-called', ALIGNMENT),
         INDEL('Indel calling', 'Indel-called', ALIGNMENT),
         SOPHIA('SV calling', 'SV-called', ALIGNMENT),
-        ACESEQ('CNV calling', 'CNV-called', SOPHIA)
+        ACESEQ('CNV calling', 'CNV-called', SOPHIA),
+        RUN_YAPSA('YAPSA signature analysis', 'YAPSA ran', SNV),
+
         final String displayName
         /**
          * Will be used in the subject of notification e-mails: "sequencing data ${notificationSubject}"
@@ -29,8 +31,14 @@ class OtrsTicket implements Commentable, Entity {
 
         final ProcessingStep dependsOn
 
+        /**
+         * Converts UPPER_SNAKE_CASE "ENUM_NAMES" to camelCase "fieldNames".
+         *
+         * This is needed by the {@link TrackingService},
+         * which does some stringly-typed magic to dynamically determine which field to set.
+         */
         public String toString() {
-            return name().toLowerCase(Locale.ENGLISH)
+            return name().toLowerCase(Locale.ENGLISH).replaceAll( "(_)([a-z0-9])", { it -> it[2].toUpperCase() } )
         }
     }
 
@@ -68,6 +76,9 @@ class OtrsTicket implements Commentable, Entity {
     Date aceseqStarted
     Date aceseqFinished
 
+    Date runYapsaStarted
+    Date runYapsaFinished
+
     boolean finalNotificationSent = false
     boolean automaticNotification = true
 
@@ -104,6 +115,9 @@ class OtrsTicket implements Commentable, Entity {
 
         aceseqStarted(nullable: true)
         aceseqFinished(nullable: true)
+
+        runYapsaStarted(nullable: true)
+        runYapsaFinished(nullable: true)
 
         comment(nullable: true)
         seqCenterComment(nullable: true)

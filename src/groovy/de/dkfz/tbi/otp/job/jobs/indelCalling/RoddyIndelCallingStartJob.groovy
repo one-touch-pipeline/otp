@@ -10,7 +10,7 @@ import org.springframework.stereotype.*
 
 @Component("roddyIndelStartJob")
 @Scope("singleton")
-class RoddyIndelCallingStartJob extends AbstractBamFilePairAnalysisStartJob {
+class RoddyIndelCallingStartJob extends RoddyBamFilePairAnalysisStartJob {
 
     @Autowired
     IndelCallingService indelCallingService

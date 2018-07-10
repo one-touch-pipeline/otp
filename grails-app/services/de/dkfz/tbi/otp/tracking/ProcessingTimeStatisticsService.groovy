@@ -63,10 +63,13 @@ ${search ? """
 
         List<SeqTrack> seqTracks = ticket.findAllSeqTracks() as List
 
-        List<String> ilseIds = selectDistinctAndOrderByFromSeqTrack(seqTracks, "st.ilseSubmission.ilseNumber")
+        List<String> ilseIds =      selectDistinctAndOrderByFromSeqTrack(seqTracks, "st.ilseSubmission.ilseNumber")
         List<String> projectNames = selectDistinctAndOrderByFromSeqTrack(seqTracks, "st.sample.individual.project.name")
-        List<String> sampleNames = selectDistinctAndOrderByFromSeqTrack(seqTracks, ["st.sample.individual.mockFullName", "st.sample.sampleType.name"].join(", ")).collect { "${it.first()} ${it.last()}" }
-        List<String> runs = selectDistinctAndOrderByFromSeqTrack(seqTracks, "st.run.name")
+        List<String> sampleNames =  selectDistinctAndOrderByFromSeqTrack(
+                    seqTracks,
+                    ["st.sample.individual.mockFullName", "st.sample.sampleType.name"].join(", ")
+                ).collect { "${it.first()} ${it.last()}" }
+        List<String> runs =         selectDistinctAndOrderByFromSeqTrack(seqTracks, "st.run.name")
 
         List data = [
                 ticket.url,
@@ -81,15 +84,20 @@ ${search ? """
         ]
 
         String previousProcessingStep
-        (OtrsTicket.ProcessingStep.values() - [OtrsTicket.ProcessingStep.INDEL, OtrsTicket.ProcessingStep.ACESEQ, OtrsTicket.ProcessingStep.SOPHIA]).each {
+        [
+            OtrsTicket.ProcessingStep.INSTALLATION,
+            OtrsTicket.ProcessingStep.FASTQC,
+            OtrsTicket.ProcessingStep.ALIGNMENT,
+            OtrsTicket.ProcessingStep.SNV,
+        ].each {
             if (previousProcessingStep) {
                 data << getFormattedPeriod(ticket."${previousProcessingStep}Finished", ticket."${it}Started")
             } else {
                 data << getFormattedPeriod(ticket.ticketCreated, ticket."${it}Started")
             }
-            data << ticket."${it.toString().toLowerCase()}Started"?.format(DATE_FORMAT)
+            data << ticket."${it}Started"?.format(DATE_FORMAT)
             data << getFormattedPeriod(ticket."${it}Started", ticket."${it}Finished")
-            data << ticket."${it.toString().toLowerCase()}Finished"?.format(DATE_FORMAT)
+            data << ticket."${it}Finished"?.format(DATE_FORMAT)
             previousProcessingStep = it
         }
 

@@ -255,6 +255,13 @@ class SeqType implements Entity {
         ]
     }
 
+    static List<SeqType> getRunYapsaPipelineSeqTypes() {
+        return [
+                getExomePairedSeqType(),
+                getWholeGenomePairedSeqType(),
+        ]
+    }
+
     static List<SeqType> getAllAnalysableSeqTypes() {
         return [
                 getSnvPipelineSeqTypes(),
