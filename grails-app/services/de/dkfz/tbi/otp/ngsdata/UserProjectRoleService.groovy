@@ -7,15 +7,16 @@ import de.dkfz.tbi.otp.utils.*
 import org.springframework.security.access.prepost.*
 
 import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
+import static de.dkfz.tbi.otp.security.AuditLog.Action.*
 
 class UserProjectRoleService {
 
     MailHelperService mailHelperService
     UserService userService
     LdapService ldapService
+    AuditLogService auditLogService
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS')")
-    UserProjectRole createUserProjectRole(User user, Project project, ProjectRole projectRole, boolean enabled = true, boolean manageUsers) {
+    private UserProjectRole createUserProjectRole(User user, Project project, ProjectRole projectRole, boolean enabled = true, boolean manageUsers) {
         assert user : "the user must not be null"
         assert project : "the project must not be null"
         UserProjectRole userProjectRole = new UserProjectRole([
@@ -57,18 +58,18 @@ class UserProjectRoleService {
         if (projectRole.accessToFiles) {
             requestToAddUserToUnixGroupIfRequired(userProjectRole.user, userProjectRole.project)
         }
+        auditLogService.logAction(PROJECT_USER_CHANGED_ENABLED, "Enabled ${userProjectRole.user.username} for ${userProjectRole.project.name}")
+        auditLogService.logAction(PROJECT_USER_CHANGED_PROJECT_ROLE, "Project Role ${projectRole.name} granted to ${userProjectRole.user.username} in ${userProjectRole.project.name}")
     }
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS')")
-    void requestToAddUserToUnixGroupIfRequired(User user, Project project) {
+    private void requestToAddUserToUnixGroupIfRequired(User user, Project project) {
         String[] groupNames = ldapService.getGroupsOfUserByUsername(user.username)
         if (!(project.unixGroup in groupNames)) {
             notifyAdministration(user, project, AdtoolAction.ADD)
         }
     }
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS')")
-    void requestToRemoveUserFromUnixGroupIfRequired(User user, Project project) {
+    private void requestToRemoveUserFromUnixGroupIfRequired(User user, Project project) {
         String[] groupNames = ldapService.getGroupsOfUserByUsername(user.username)
         if (project.unixGroup in groupNames &&
             !UserProjectRole.findAllByUserAndProjectInListAndProjectRoleInListAndEnabled(
@@ -81,13 +82,13 @@ class UserProjectRoleService {
         }
     }
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS')")
-    void notifyAdministration(User user, Project project, AdtoolAction adtool) {
+    private void notifyAdministration(User user, Project project, AdtoolAction adtool) {
         String formattedAction = adtool.toString().toLowerCase()
         String subject = "Request to ${formattedAction} user '${user.username}' ${adtool == AdtoolAction.ADD ? 'to' : 'from'} project '${project.name}'"
         String body = "adtool group${formattedAction}user ${project.name} ${user.username}"
         String email = ProcessingOptionService.getValueOfProcessingOption(EMAIL_LINUX_GROUP_ADMINISTRATION)
         mailHelperService.sendEmail(subject, body, email)
+        auditLogService.logAction(PROJECT_USER_SENT_MAIL, "Sent mail to ${email} to ${formattedAction} ${user.username} ${adtool == AdtoolAction.ADD ? 'to' : 'from'} ${project.name}")
     }
 
     private enum AdtoolAction {
@@ -99,6 +100,7 @@ class UserProjectRoleService {
         assert userProjectRole: "the input userProjectRole must not be null"
         userProjectRole.manageUsers = manageUsers
         assert userProjectRole.save(flush: true, failOnError: true)
+        auditLogService.logAction(PROJECT_USER_CHANGED_MANAGE_USER, "Manage User ${manageUsers ? "en" : "dis"}abled for ${userProjectRole.user.username} in ${userProjectRole.project.name} with role ${userProjectRole.projectRole.name}")
         return userProjectRole
     }
 
@@ -114,6 +116,7 @@ class UserProjectRoleService {
                 requestToRemoveUserFromUnixGroupIfRequired(userProjectRole.user, userProjectRole.project)
             }
         }
+        auditLogService.logAction(PROJECT_USER_CHANGED_ENABLED, "${enabled ? "En" : "Dis"}abled ${userProjectRole.user.username} for ${userProjectRole.project.name}")
         return userProjectRole
     }
 
@@ -132,6 +135,7 @@ class UserProjectRoleService {
                 requestToRemoveUserFromUnixGroupIfRequired(userProjectRole.user, userProjectRole.project)
             }
         }
+        auditLogService.logAction(PROJECT_USER_CHANGED_PROJECT_ROLE, "Project Role updated from ${oldProjectRole.name} to ${newProjectRole.name} for ${userProjectRole.user.username} in ${userProjectRole.project.name}")
         return userProjectRole
     }
 }

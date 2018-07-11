@@ -15,6 +15,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
     def setup() {
         userProjectRoleService = new UserProjectRoleService()
+        userProjectRoleService.auditLogService = new AuditLogService()
+        userProjectRoleService.auditLogService.springSecurityService = new SpringSecurityService()
         createUserAndRoles()
         userProjectRoleService.mailHelperService = Mock(MailHelperService)
         DomainFactory.createProcessingOptionLazy(
@@ -102,7 +104,9 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         String formattedAction = adtoolaction.toString().toLowerCase()
 
         when:
-        userProjectRoleService.notifyAdministration(user, project, adtoolaction)
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            userProjectRoleService.notifyAdministration(user, project, adtoolaction)
+        }
 
         then:
         1 * userProjectRoleService.mailHelperService.sendEmail(
@@ -130,7 +134,9 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         }
 
         when:
-        userProjectRoleService.updateEnabledStatus(userProjectRole, valueToUpdate)
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            userProjectRoleService.updateEnabledStatus(userProjectRole, valueToUpdate)
+        }
 
         then:
         userProjectRole.enabled == valueToUpdate
@@ -310,8 +316,9 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         }
 
         when:
-        userProjectRoleService.requestToAddUserToUnixGroupIfRequired(user, project)
-
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            userProjectRoleService.requestToAddUserToUnixGroupIfRequired(user, project)
+        }
         then:
         invocations * userProjectRoleService.mailHelperService.sendEmail(_, _, _)
 
@@ -332,7 +339,9 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         }
 
         when:
-        userProjectRoleService.requestToRemoveUserFromUnixGroupIfRequired(DomainFactory.createUser(), project)
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            userProjectRoleService.requestToRemoveUserFromUnixGroupIfRequired(DomainFactory.createUser(), project)
+        }
 
         then:
         1 * userProjectRoleService.mailHelperService.sendEmail(_, _, _)
@@ -364,7 +373,9 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         )
 
         when:
-        userProjectRoleService.requestToRemoveUserFromUnixGroupIfRequired(user, project1)
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            userProjectRoleService.requestToRemoveUserFromUnixGroupIfRequired(user, project1)
+        }
 
         then:
         1 * userProjectRoleService.mailHelperService.sendEmail(_, _, _)
@@ -384,7 +395,9 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         DomainFactory.createUserProjectRole(user: user, project: project2, projectRole: fileAccessRole, enabled: false)
 
         when:
-        userProjectRoleService.requestToRemoveUserFromUnixGroupIfRequired(user, project1)
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            userProjectRoleService.requestToRemoveUserFromUnixGroupIfRequired(user, project1)
+        }
 
         then:
         1 * userProjectRoleService.mailHelperService.sendEmail(_, _, _)
@@ -404,7 +417,9 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         DomainFactory.createUserProjectRole(user: user, project: project2, projectRole: fileAccessRole)
 
         when:
-        userProjectRoleService.requestToRemoveUserFromUnixGroupIfRequired(user, project1)
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            userProjectRoleService.requestToRemoveUserFromUnixGroupIfRequired(user, project1)
+        }
 
         then:
         0 * userProjectRoleService.mailHelperService.sendEmail(_, _, _)
@@ -421,7 +436,9 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         DomainFactory.createUserProjectRole(user: user, project: project, projectRole: fileAccessRole)
 
         when:
-        userProjectRoleService.requestToRemoveUserFromUnixGroupIfRequired(user, project)
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            userProjectRoleService.requestToRemoveUserFromUnixGroupIfRequired(user, project)
+        }
 
         then:
         invocations * userProjectRoleService.mailHelperService.sendEmail(_, _, _)

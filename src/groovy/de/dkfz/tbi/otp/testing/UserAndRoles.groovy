@@ -8,6 +8,7 @@ import org.springframework.security.authentication.*
 import org.springframework.security.core.*
 import org.springframework.security.core.authority.*
 import org.springframework.security.core.context.*
+import org.springframework.security.web.authentication.switchuser.*
 
 import static org.junit.Assert.*
 
@@ -48,19 +49,44 @@ trait UserAndRoles {
     }
 
     static Object doWithAnonymousAuth(@SuppressWarnings("rawtypes") final Closure closure) {
-        Authentication previousAuth = SecurityContextHolder.getContext().getAuthentication();
+        Authentication previousAuth = SecurityContextHolder.getContext().getAuthentication()
         AnonymousAuthenticationToken auth = new AnonymousAuthenticationToken("test", new Principal(username: "Anonymous"), [new SimpleGrantedAuthority("ROLE_ANONYMOUS")])
         SecurityContextHolder.getContext().setAuthentication(auth)
 
         try {
-            return closure.call();
+            return closure.call()
         }
         finally {
             if (previousAuth == null) {
-                SecurityContextHolder.clearContext();
+                SecurityContextHolder.clearContext()
             }
             else {
-                SecurityContextHolder.getContext().setAuthentication(previousAuth);
+                SecurityContextHolder.getContext().setAuthentication(previousAuth)
+            }
+        }
+    }
+
+    static Object doAsSwitchedToUser(final String username, @SuppressWarnings("rawtypes") final Closure closure) {
+        Authentication previousAuth = SecurityContextHolder.getContext().getAuthentication()
+        Authentication primaryAuth = previousAuth
+        if (primaryAuth == null) {
+            primaryAuth = new UsernamePasswordAuthenticationToken(new Principal(username: DomainFactory.createUser().username), null, [])
+            SecurityContextHolder.getContext().setAuthentication(primaryAuth)
+        }
+
+        List<GrantedAuthority> authorities = [new SwitchUserGrantedAuthority(SwitchUserFilter.ROLE_PREVIOUS_ADMINISTRATOR, primaryAuth)]
+        Authentication switchedAuth = new UsernamePasswordAuthenticationToken(new Principal(username: username), null, authorities)
+        SecurityContextHolder.getContext().setAuthentication(switchedAuth)
+
+        try {
+            return closure.call()
+        }
+        finally {
+            if (previousAuth == null) {
+                SecurityContextHolder.clearContext()
+            }
+            else {
+                SecurityContextHolder.getContext().setAuthentication(previousAuth)
             }
         }
     }
