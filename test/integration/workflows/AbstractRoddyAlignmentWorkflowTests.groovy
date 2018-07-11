@@ -124,8 +124,6 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
             assert bedFile.save(flush: true, failOnError: true)
         }
 
-        //OtherUnixUser user has very limited permissions, it must be checked in the tests
-        //that roddy has enough permissions to work and does not try to damage other files
         setPermissionsRecursive(baseDirectory, TEST_DATA_MODE_DIR, TEST_DATA_MODE_FILE)
     }
 

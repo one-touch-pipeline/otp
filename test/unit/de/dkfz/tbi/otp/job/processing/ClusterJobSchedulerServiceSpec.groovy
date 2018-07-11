@@ -129,7 +129,7 @@ host.long-domain:
                                                                                   Req'd       Req'd       Elap
 Job ID                  Username    Queue    Jobname          SessID  NDS   TSK   Memory      Time    S   Time
 ----------------------- ----------- -------- ---------------- ------ ----- ------ --------- --------- - ---------
-${jobId}.host.long-doma  OtherUnixUser    fast     r160224_18005293    --      1      1     750mb  00:10:00 ${status}       --
+${jobId}.host.long-doma  someUser    fast     r160224_18005293    --      1      1     750mb  00:10:00 ${status}       --
 """
     }
 
