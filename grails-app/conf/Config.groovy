@@ -176,27 +176,30 @@ if (!Boolean.parseBoolean(otpProperties.getProperty("otp.security.ldap.enabled")
     grails.plugin.springsecurity.ldap.mapper.userDetailsClass = 'inetOrgPerson'
 }
 
-// protect everything for role user
 grails.plugin.springsecurity.controllerAnnotations.staticRules = [
-    "/adminSeed/**": ['denyAll'],
-    "/projectOverview/mmmlIdentifierMapping/**": ['ROLE_MMML_MAPPING'],
-    "/grails-errorhandler/**": ['IS_AUTHENTICATED_ANONYMOUSLY'],
-    "/seqTrackDataProvider/**": ['IS_AUTHENTICATED_ANONYMOUSLY'],
-    "/fastqFilePathDataProvider/**": ['IS_AUTHENTICATED_ANONYMOUSLY'],
-    "/login/**":             ['IS_AUTHENTICATED_ANONYMOUSLY'],
-    "/logout/**":            ['IS_AUTHENTICATED_ANONYMOUSLY'],
-    "/document/download/**": ['IS_AUTHENTICATED_ANONYMOUSLY'],
-    "/info/**":              ['permitAll'],
-    "/privacyPolicy/index":  ['permitAll'],
-    "/root/intro*":          ['permitAll'],
-    "/":                     ['permitAll'],
-    "/metadataImport/autoImport": ["permitAll"],
-    "/console/**":           ['ROLE_ADMIN'],
-    "/plugins/console*/**":  ['ROLE_ADMIN'],
-    "/plugins/**":           ['denyAll'],
-    "/snv/index/**":         ['ROLE_OPERATOR'],
-    "/j_spring_security_switch_user": ['ROLE_SWITCH_USER', 'IS_AUTHENTICATED_FULLY'],
-    "/**":                   ['ROLE_USER'],
+        // restricted access to special pages
+        "/adminSeed/**"                                        : ["denyAll"],
+        "/console/**"                                          : ["hasRole('ROLE_ADMIN')"],
+        "/plugins/console*/**"                                 : ["hasRole('ROLE_ADMIN')"],
+        "/plugins/**"                                          : ["denyAll"],
+        "/projectOverview/mmmlIdentifierMapping/**"            : ["hasRole('ROLE_MMML_MAPPING')"],
+        "/j_spring_security_switch_user"                       : ["hasRole('ROLE_SWITCH_USER')"],
+
+        // publicly available pages
+        "/grails-errorhandler/**"                              : ["permitAll"],
+        "/seqTrackDataProvider/**"                             : ["permitAll"],
+        "/fastqFilePathDataProvider/**"                        : ["permitAll"],
+        "/login/**"                                            : ["permitAll"],
+        "/logout/**"                                           : ["permitAll"],
+        "/document/download/**"                                : ["permitAll"],
+        "/info/**"                                             : ["permitAll"],
+        "/privacyPolicy/index"                                 : ["permitAll"],
+        "/root/intro*"                                         : ["permitAll"],
+        "/"                                                    : ["permitAll"],
+        "/metadataImport/autoImport"                           : ["permitAll"],
+
+        // regular pages with access for logged-in users, protected by annotations in services
+        "/**"                                                  : ["hasRole('ROLE_USER')"],
 ]
 
 // hierarchy of roles
