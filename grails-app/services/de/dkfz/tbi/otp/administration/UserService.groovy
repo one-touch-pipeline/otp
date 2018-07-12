@@ -271,60 +271,6 @@ class UserService {
     }
 
     /**
-     * Retrieves all the Users a User with ROLE_SWITCH_USER is allowed to switch to.
-     *
-     * That is it filters out admin and operators.
-     * @return List of Users the current user is allowed to switch to.
-     */
-    @PreAuthorize("hasRole('ROLE_SWITCH_USER')")
-    List<User> switchableUsers() {
-        String query = '''
-SELECT u FROM UserRole AS ur
-JOIN ur.user AS u
-JOIN ur.role AS r
-WHERE
-r.authority in ('ROLE_ADMIN', 'ROLE_OPERATOR')
-'''
-        List<User> adminUsers = User.executeQuery(query)
-        query = '''
-SELECT u FROM User AS u
-WHERE
-u.id not in (:ids)
-'''
-        return User.executeQuery(query, [ids: adminUsers.collect { it.id } ])
-    }
-
-    /**
-     * Resolves whether the current user can switch to the User identified by the given id.
-     *
-     * This method does not allow to switch to a user with ROLE_ADMIN or ROLE_OPERATOR, but
-     * the framework in general allows to switch to such users. An admin user can just use the
-     * Useradministration views to switch to any given user and a user with ROLE_SWITCH_USER could
-     * bypass the protection provided by the SwitchUserController by using the spring security URL
-     * directly. To a certain degree this is security by obscurity.
-     * @param id The Id of the User to switch to
-     * @return The username in case the User exists and is not an admin or operator. Null in that case.
-     */
-    @PreAuthorize("hasRole('ROLE_SWITCH_USER')")
-    String switchableUser(Long id) {
-        User user = User.get(id)
-        if (!user) {
-            return null
-        }
-        List<Role> userRoles = getRolesForUser(id)
-        for (Role role in userRoles) {
-            if (role.authority == Role.ROLE_ADMIN) {
-                return null
-            }
-            if (role.authority == Role.ROLE_OPERATOR) {
-                return null
-            }
-        }
-        return user.username
-    }
-
-
-    /**
      * In case that no user exists, a user with admin rights is created.
      *
      * The user name is taken from the property 'user.name'.
