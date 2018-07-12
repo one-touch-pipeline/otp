@@ -4,8 +4,6 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 List<String> pidsToDelete = [
         'pid1',
         'pid2',
-        'pid3',
-        'pid4',
 ]
 
 

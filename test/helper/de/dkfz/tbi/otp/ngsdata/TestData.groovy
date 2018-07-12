@@ -145,7 +145,7 @@ class TestData {
         return new Individual([
             pid: "654321",
             mockPid: "PID",
-            mockPid: "PID",
+            mockFullName: "PID",
             type: Individual.Type.REAL,
             project: project,
         ] + properties)

@@ -65,7 +65,7 @@ class MetaDataServiceUnitTests {
             [name: 'AB-1234_CDE_EFGH_091_lib114837_1189_7_1.fastq.tar.bz', mateNumber: 1],
             [name: 'AB-1234_5647_lib12345_1_sequence.fastq.bz2', mateNumber: 1],
             [name: 'CD-2345_6789_lib234567_7890_1.fastq.bz2', mateNumber: 1],
-            [name: 'NB_E_789_R.2.fastq.gz', mateNumber: 2],
+            [name: 'NB_E_123_R.2.fastq.gz', mateNumber: 2],
             [name: 'NB_E_234_R5.2.fastq.gz', mateNumber: 2],
             [name: 'NB_E_345_T1S.2.fastq.gz', mateNumber: 2],
             [name: 'NB_E_456_O_lane5.2.fastq.gz', mateNumber: 2],

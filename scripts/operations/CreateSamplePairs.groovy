@@ -6,7 +6,6 @@ import de.dkfz.tbi.otp.utils.*
 //Create manual SamplePairs defined by pid, sampleType1, sampleType2 and seqType:
 //PID SAMPLETYPE1 SAMPLETYPE2 SEQTYPE_NAME
 //the sample pair may not exist yet
-// for example: H000-ABCD TUMOR02 BLOOD WHOLE_GENOME
 List<List<MergingWorkPackage>> samplePairs = """
 
 

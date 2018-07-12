@@ -9,7 +9,6 @@ import de.dkfz.tbi.otp.utils.*
 //sample pair defined by:
 //PID SAMPLETYPE1 SAMPLETYPE2 SEQTYPE_NAME
 //the sample pair has to be created already by OTP, the SAMPLETYPE1 has to be a disease sample type, the SAMPLETYPE2 is usually control
-// for example: H000-ABCD TUMOR02 BLOOD WHOLE_GENOME
 List<SamplePair> samplePairs = """
 
 
