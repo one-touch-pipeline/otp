@@ -235,6 +235,9 @@ class UserService {
         if (!springSecurityService.isLoggedIn()) {
             return true
         }
+        if (SpringSecurityUtils.isSwitched()) {
+            return true
+        }
         User user = springSecurityService.getCurrentUser()
         return user.acceptedPrivacyPolicy
     }
