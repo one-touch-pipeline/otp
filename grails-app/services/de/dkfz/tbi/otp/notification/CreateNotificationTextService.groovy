@@ -200,7 +200,7 @@ class CreateNotificationTextService {
         if (samplePairs[false]) {
             message += '\n' + createMessage("notification.template.alignment.noFurtherProcessing",
                     [
-                            helpdesk              : ProcessingOptionService.findOptionAssure(OptionName.EMAIL_SENDER_SALUTATION, null, null),
+                            emailSenderSalutation : ProcessingOptionService.findOptionAssure(OptionName.EMAIL_SENDER_SALUTATION, null, null),
                             samplePairsWontProcess: getSamplePairRepresentation(samplePairs[false]*.samplePair.findAll {
                                 !it.processingDisabled
                             }),
