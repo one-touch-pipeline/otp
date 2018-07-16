@@ -62,6 +62,24 @@ class UserProjectRoleService {
         auditLogService.logAction(PROJECT_USER_CHANGED_PROJECT_ROLE, "Project Role ${projectRole.name} granted to ${userProjectRole.user.username} in ${userProjectRole.project.name}")
     }
 
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'MANAGE_USERS')")
+    void addExternalUserToProject(Project project, String realName, String email, ProjectRole projectRole) throws AssertionError {
+        assert project : "project must not be null"
+
+        User user = User.findByEmail(email)
+        if (!user) {
+            user = userService.createUser(new CreateUserCommand([
+                    email: email,
+                    realName: realName,
+            ]))
+        }
+        UserProjectRole userProjectRole = UserProjectRole.findByUserAndProject(user, project)
+        assert !userProjectRole : "User '${user.realName}' is already part of project '${project.name}'"
+        userProjectRole = createUserProjectRole(user, project, projectRole, true, false)
+        auditLogService.logAction(PROJECT_USER_CHANGED_ENABLED, "Enabled ${userProjectRole.user.realName} for ${userProjectRole.project.name}")
+        auditLogService.logAction(PROJECT_USER_CHANGED_PROJECT_ROLE, "Project Role ${projectRole.name} granted to ${userProjectRole.user.username} in ${userProjectRole.project.name}")
+    }
+
     private void requestToAddUserToUnixGroupIfRequired(User user, Project project) {
         String[] groupNames = ldapService.getGroupsOfUserByUsername(user.username)
         if (!(project.unixGroup in groupNames)) {

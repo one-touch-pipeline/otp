@@ -90,7 +90,6 @@ $.otp.projectUser = {
             var ldapUserChecked = (this.value === "true");
             $('.inputField.ldapUser').prop("disabled", !ldapUserChecked);
             $('.inputField.nonLdapUser').prop("disabled", ldapUserChecked);
-            $('.addButton').prop("disabled", !ldapUserChecked) // TODO: remove when implementing OTP-2743
         });
     }
 };

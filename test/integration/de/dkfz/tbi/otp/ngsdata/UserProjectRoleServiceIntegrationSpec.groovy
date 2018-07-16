@@ -307,6 +307,68 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         false      | 0
     }
 
+    void "addExternalUserToProject, create User if non is found for realName or email"() {
+        given:
+        ProjectRole projectRole = DomainFactory.createProjectRole()
+        String realName = "realName"
+        String email = "email@dummy.de"
+        Project project = DomainFactory.createProject()
+        userProjectRoleService.userService = new UserService()
+
+        expect:
+        User.findByEmail(email) == null
+
+        when:
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            userProjectRoleService.addExternalUserToProject(project, realName, email, projectRole)
+        }
+
+        then:
+        User.findByEmail(email)
+    }
+
+    void "addExternalUserToProject, throw exception when user is already connected to project"() {
+        given:
+        String email = "email@dummy.de"
+        ProjectRole projectRole = DomainFactory.createProjectRole()
+        Project project = DomainFactory.createProject()
+        User user = DomainFactory.createUser(
+                realName: "realName",
+                email: email,
+        )
+        DomainFactory.createUserProjectRole(
+                user:    user,
+                project: project,
+        )
+
+        when:
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            userProjectRoleService.addExternalUserToProject(project, "realName", email, projectRole)
+        }
+
+        then:
+        def e = thrown(AssertionError)
+        e.message.contains('is already part of project')
+    }
+
+    void "addExternalUserToProject, create UserProjectRole for new User"() {
+        given:
+        ProjectRole projectRole = DomainFactory.createProjectRole()
+        User user = DomainFactory.createUser(username: null)
+        Project project = DomainFactory.createProject()
+
+        expect:
+        UserProjectRole.findByUserAndProjectAndProjectRole(user, project, projectRole) == null
+
+        when:
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            userProjectRoleService.addExternalUserToProject(project, user.realName, user.email, projectRole)
+        }
+
+        then:
+        UserProjectRole.findByUserAndProjectAndProjectRole(user, project, projectRole)
+    }
+
     void "requestToAddUserToUnixGroupIfRequired, only send notification when user is not already in group"() {
         given:
         User user = DomainFactory.createUser()

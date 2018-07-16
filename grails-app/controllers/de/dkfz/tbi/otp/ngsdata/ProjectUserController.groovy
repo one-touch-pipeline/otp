@@ -14,7 +14,6 @@ class ProjectUserController {
 
     ProjectService projectService
     ProjectSelectionService projectSelectionService
-    ProjectOverviewService projectOverviewService
     UserService userService
     UserProjectRoleService userProjectRoleService
 
@@ -126,22 +125,25 @@ class ProjectUserController {
             errorMessage = "'" + cmdErrors.getRejectedValue() + "' is not a valid value for '" + cmdErrors.getField() + "'. Error code: '" + cmdErrors.code + "'"
             message = "An error occurred"
         } else {
-            if (cmd.addViaLdap) {
-                try {
+            try {
+                if (cmd.addViaLdap) {
                     userProjectRoleService.addUserToProjectAndNotifyGroupManagementAuthority(
                             cmd.project,
                             ProjectRole.findByName(cmd.projectRoleName),
                             cmd.searchString
                     )
-                    message = "Data stored successfully"
-                } catch (AssertionError e) {
-                    message = "An error occurred"
-                    errorMessage = e.message
+                } else {
+                    userProjectRoleService.addExternalUserToProject(
+                            cmd.project,
+                            cmd.realName,
+                            cmd.email,
+                            ProjectRole.findByName(cmd.projectRoleName)
+                    )
                 }
-            } else {
-                // TODO: remove when implementing OTP-2743
+                message = "Data stored successfully"
+            } catch (AssertionError e) {
                 message = "An error occurred"
-                errorMessage = "It is not possible to add non-ldap users right now."
+                errorMessage = e.message
             }
         }
         flash.message = message
@@ -193,6 +195,7 @@ enum PermissionStatus {
 }
 
 class UserEntry {
+    boolean inLdap
     User user
     String realName
     String thumbnailPhoto
@@ -208,14 +211,15 @@ class UserEntry {
         UserProjectRole userProjectRole = UserProjectRole.findByUserAndProject(user, project)
         ProjectRole projectRole = userProjectRole?.projectRole
         boolean fileAccess = projectRole?.accessToFiles ?: false
+        this.inLdap = ldapUserDetails.cn
         this.user = user
         this.realName = ldapUserDetails.realName
         this.thumbnailPhoto = ldapUserDetails.thumbnailPhoto.encodeAsBase64()
         this.department = ldapUserDetails.department
         this.projectRole = projectRole
-        this.otpAccess = projectRole?.accessToOtp ? PermissionStatus.APPROVED : PermissionStatus.DENIED
-        this.fileAccess = getPermissionStatus(fileAccess, project.unixGroup in ldapUserDetails.memberOfGroupList)
-        this.manageUsers = projectRole?.manageUsersAndDelegate || userProjectRole?.manageUsers
+        this.otpAccess = inLdap && projectRole?.accessToOtp ? PermissionStatus.APPROVED : PermissionStatus.DENIED
+        this.fileAccess = getPermissionStatus(inLdap && fileAccess, project.unixGroup in ldapUserDetails.memberOfGroupList)
+        this.manageUsers = inLdap && userProjectRole.manageUsers
         this.deactivated = ldapUserDetails.deactivated
         this.userProjectRole = userProjectRole
     }
@@ -354,7 +358,7 @@ class AddUserToProjectCommand implements Serializable {
             }
         })
         projectRoleName(nullable: true, validator: { val, obj ->
-            if (obj.addViaLdap && !obj.projectRoleName) {
+            if (!obj.projectRoleName) {
                 return "No project role selected"
             }
         })

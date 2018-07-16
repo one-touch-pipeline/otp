@@ -34,12 +34,12 @@ class LdapService implements InitializingBean {
 
     LdapUserDetails getLdapUserDetailsByUsername(String username) {
         if (username == null) {
-            return [:]
+            return new LdapUserDetails()
         }
         return ldapTemplate.search(
                 query().where("objectCategory").is("user")
                         .and("cn").is(username),
-                new LdapuserDetailsAttributesMapper())[0]
+                new LdapUserDetailsAttributesMapper())[0]
     }
 
     List<LdapUserDetails> getListOfLdapUserDetailsByUsernameOrMailOrRealName(String searchString, int countLimit = 0) {
@@ -68,7 +68,7 @@ class LdapService implements InitializingBean {
                         .where("objectCategory").is("person")
                         .and("mail").isPresent()
                         .and(dynamicQuery),
-                new LdapuserDetailsAttributesMapper())
+                new LdapUserDetailsAttributesMapper())
     }
 
     String getDistinguishedNameOfGroupByGroupName(String groupName) {
@@ -103,7 +103,7 @@ class LdapService implements InitializingBean {
     }
 }
 
-class LdapuserDetailsAttributesMapper implements AttributesMapper<LdapUserDetails> {
+class LdapUserDetailsAttributesMapper implements AttributesMapper<LdapUserDetails> {
     @Override
     LdapUserDetails mapFromAttributes(Attributes a) throws NamingException {
         List<String> memberOfList = a.get("memberOf")?.getAll()?.collect {

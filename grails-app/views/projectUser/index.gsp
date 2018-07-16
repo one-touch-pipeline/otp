@@ -42,7 +42,7 @@
                             <img class="ldapThumbnail" src="data:image/png;base64,${userEntry.thumbnailPhoto}" alt=""/>
                         </td>
                         <td>
-                            <g:if test="${userEntry.user.username}">
+                            <g:if test="${userEntry.inLdap}">
                                 ${userEntry.realName}
                                 <g:if test="${userEntry.deactivated}">
                                     <g:message code="projectUser.accessPerson.deactivated"/>
@@ -93,7 +93,7 @@
                         </td>
                         <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${project.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'DELEGATE_USER_MANAGEMENT')">
                             <td>
-                                <g:if test="${!userEntry.projectRole?.manageUsersAndDelegate}">
+                                <g:if test="${userEntry.inLdap && !userEntry.projectRole?.manageUsersAndDelegate}">
                                     <g:form action="updateManageUsers" params='["userProjectRole.id": userEntry.userProjectRole.id, "manageUsers": userEntry.userProjectRole.manageUsers]'>
                                         <g:submitButton name="${userEntry.manageUsers ? "Disallow" : "Allow"}"/>
                                     </g:form>
@@ -136,7 +136,7 @@
                         <img class="ldapThumbnail" src="data:image/png;base64,${userEntry.thumbnailPhoto}" alt=""/>
                     </td>
                     <td>
-                        <g:if test="${userEntry.user.username}">
+                        <g:if test="${userEntry.inLdap}">
                             ${userEntry.realName}
                             <g:if test="${userEntry.deactivated}">
                                 <g:message code="projectUser.accessPerson.deactivated"/>
@@ -224,7 +224,6 @@
                 </div>
                 <sec:access expression="hasRole('ROLE_OPERATOR')">
                     <div class="form right">
-                        <em>Not yet implemented</em> <!-- TODO: remove when implementing OTP-2743 -->
                         <table>
                             <tr>
                                 <td colspan="2">
@@ -241,6 +240,20 @@
                             <tr>
                                 <td><g:message code="projectUser.addMember.email"/></td>
                                 <td><input name="email" type="text" class="inputField nonLdapUser"></td>
+                            </tr>
+                            <tr>
+                                <td><g:message code="projectUser.addMember.role"/></td>
+                                <td>
+                                    <select name="projectRoleName" class="inputField nonLdapUser">
+                                        <option disabled selected hidden><g:message code="projectUser.addMember.roleSelection"/></option>
+                                        <g:each in="${availableRoles}" var="role">
+                                            <option value="${role.name}">${role.name}</option>
+                                        </g:each>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2"><g:message code="projectUser.addMember.externalUserRestrictions"/></td>
                             </tr>
                         </table>
                     </div>
