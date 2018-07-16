@@ -18,7 +18,7 @@ class RunYapsaStartJob extends AbstractBamFilePairAnalysisStartJob {
     RunYapsaService runYapsaService
 
     @Override
-    protected void prepareCreatingTheProcessAndTriggerTracking(BamFilePairAnalysis bamFilePairAnalysis) {
+    void prepareCreatingTheProcessAndTriggerTracking(BamFilePairAnalysis bamFilePairAnalysis) {
         assert bamFilePairAnalysis : "bamFilePairAnalysis must not be null"
 
         trackingService.setStartedForSeqTracks(bamFilePairAnalysis.getContainedSeqTracks(), OtrsTicket.ProcessingStep.RUN_YAPSA)
@@ -34,7 +34,7 @@ class RunYapsaStartJob extends AbstractBamFilePairAnalysisStartJob {
     @Override
     String getInstanceName(ConfigPerProject config) {
         assert RunYapsaConfig.isAssignableFrom(Hibernate.getClass(config)): "RunYapsa startjob should only ever be started with a YAPSA config, not something else; got ${ config.class }"
-        return "runYapsa_${ config.programVersion }_${ super.getInstanceName() }"
+        return "runYapsa_${ config.programVersion }_${ getFormattedDate() }"
     }
 
     @Override

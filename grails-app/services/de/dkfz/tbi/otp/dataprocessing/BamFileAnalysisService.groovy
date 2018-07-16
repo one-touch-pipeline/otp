@@ -5,7 +5,7 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.ProcessingStatus
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 
-abstract class BamFileAnalysisService {
+abstract class BamFileAnalysisService implements BamFileAnalysisServiceTrait {
 
     AbstractMergedBamFileService abstractMergedBamFileService
 
@@ -127,14 +127,6 @@ abstract class BamFileAnalysisService {
         return ''
     }
 
-    protected String checkReferenceGenome(){
-        return ''
-    }
-
-    Map<String, Object> checkReferenceGenomeMap(){
-        return [:]
-    }
-
     final Pipeline getPipeline() {
         return CollectionUtils.<Pipeline> exactlyOneElement(Pipeline.findAllByName(getPipelineName()))
     }
@@ -144,7 +136,6 @@ abstract class BamFileAnalysisService {
     abstract protected Pipeline.Type getAnalysisType()
     abstract protected List<SeqType> getSeqTypes()
     abstract Pipeline.Name getPipelineName()
-    abstract String getConfigName()
 
     String checkConfig() {
         return "AND EXISTS (FROM ${getConfigName()} cps " +
@@ -154,8 +145,4 @@ abstract class BamFileAnalysisService {
                 additionalConfigParameters() +
                 ") "
     }
-    String additionalConfigParameters() {
-        return ""
-    }
-
 }

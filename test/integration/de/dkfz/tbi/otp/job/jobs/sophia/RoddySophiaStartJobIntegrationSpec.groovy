@@ -2,49 +2,52 @@ package de.dkfz.tbi.otp.job.jobs.sophia
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
-import de.dkfz.tbi.otp.job.jobs.bamFilePairAnalysis.AbstractBamFilePairAnalysisStartJob
+import de.dkfz.tbi.otp.job.jobs.*
+import de.dkfz.tbi.otp.job.jobs.AbstractBamFilePairAnalysis.*
+import de.dkfz.tbi.otp.job.jobs.bamFilePairAnalysis.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.tracking.OtrsTicket
+import de.dkfz.tbi.otp.tracking.*
 import grails.test.spock.*
 import org.springframework.beans.factory.annotation.*
-import de.dkfz.tbi.otp.job.jobs.*
 
-class RoddySophiaStartJobIntegrationSpec extends AbstractBamFilePairAnalysisStartJobIntegrationSpec {
+class RoddySophiaStartJobIntegrationSpec extends AbstractBamFilePairAnalysisStartJobIntegrationSpec implements RoddyJobSpec, WithReferenceGenomeRestrictionSpec {
 
     @Autowired
     RoddySophiaStartJob roddySophiaStartJob
 
+    @Override
     Pipeline createPipeline() {
         DomainFactory.createSophiaPipelineLazy()
     }
 
+    @Override
     AbstractBamFilePairAnalysisStartJob getService() {
         return roddySophiaStartJob
     }
 
+    @Override
     BamFilePairAnalysis getInstance() {
         return DomainFactory.createSophiaInstanceWithRoddyBamFiles()
     }
 
+    @Override
     Date getStartedDate(OtrsTicket otrsTicket) {
         return otrsTicket.sophiaStarted
     }
 
+    @Override
     SamplePair.ProcessingStatus getProcessingStatus(SamplePair samplePair) {
         return samplePair.sophiaProcessingStatus
     }
 
     @Override
     SamplePair setupSamplePair() {
-        SamplePair samplePair = super.setupSamplePair()
-
-        DomainFactory.createProcessingOptionLazy([
-                name: ProcessingOption.OptionName.PIPELINE_SOPHIA_REFERENCE_GENOME,
-                type: null,
-                project: null,
-                value: samplePair.mergingWorkPackage1.referenceGenome.name,
-        ])
-
+        SamplePair samplePair = WithReferenceGenomeRestrictionSpec.super.setupSamplePair()
         return samplePair
+    }
+
+    @Override
+    ProcessingOption.OptionName getProcessingOptionNameForReferenceGenome() {
+        return ProcessingOption.OptionName.PIPELINE_SOPHIA_REFERENCE_GENOME
     }
 }

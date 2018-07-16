@@ -1,19 +1,16 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.job.jobs.*
+import de.dkfz.tbi.otp.job.jobs.AbstractBamFilePairAnalysis.*
 import de.dkfz.tbi.otp.job.jobs.bamFilePairAnalysis.*
-import de.dkfz.tbi.otp.job.jobs.sophia.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.*
 import grails.test.spock.*
 import org.springframework.beans.factory.annotation.*
 
-import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.TIME_ZONE
-
-class RoddySnvCallingStartJobIntegrationSpec extends AbstractBamFilePairAnalysisStartJobIntegrationSpec {
+class RoddySnvCallingStartJobIntegrationSpec extends AbstractBamFilePairAnalysisStartJobIntegrationSpec implements RoddyJobSpec {
 
     @Autowired
     RoddySnvCallingStartJob roddySnvCallingStartJob
@@ -22,22 +19,27 @@ class RoddySnvCallingStartJobIntegrationSpec extends AbstractBamFilePairAnalysis
         DomainFactory.createSnvSeqTypes()
     }
 
+    @Override
     Pipeline createPipeline() {
         DomainFactory.createRoddySnvPipelineLazy()
     }
 
+    @Override
     AbstractBamFilePairAnalysisStartJob getService() {
         return roddySnvCallingStartJob
     }
 
+    @Override
     BamFilePairAnalysis getInstance() {
         return DomainFactory.createRoddySnvInstanceWithRoddyBamFiles()
     }
 
+    @Override
     Date getStartedDate(OtrsTicket otrsTicket) {
         return otrsTicket.snvStarted
     }
 
+    @Override
     SamplePair.ProcessingStatus getProcessingStatus(SamplePair samplePair) {
         return samplePair.snvProcessingStatus
     }

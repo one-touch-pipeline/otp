@@ -3,7 +3,7 @@ package de.dkfz.tbi.otp.dataprocessing.snvcalling
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 
-class SnvCallingService extends RoddyBamFileAnalysisService {
+class SnvCallingService extends BamFileAnalysisService implements RoddyBamFileAnalysis {
 
     @Override
     protected String getProcessingStateCheck() {

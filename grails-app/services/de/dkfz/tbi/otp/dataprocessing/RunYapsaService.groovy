@@ -3,7 +3,7 @@ package de.dkfz.tbi.otp.dataprocessing
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.*
 import de.dkfz.tbi.otp.ngsdata.*
 
-class RunYapsaService extends BamFileAnalysisService {
+class RunYapsaService extends BamFileAnalysisService implements WithReferenceGenomeRestriction {
 
     ProcessingOptionService processingOptionService
 
@@ -44,15 +44,8 @@ class RunYapsaService extends BamFileAnalysisService {
     }
 
     @Override
-    protected String checkReferenceGenome() {
-        return 'AND sp.mergingWorkPackage1.referenceGenome in (:referenceGenomes)'
-    }
-
-    @Override
-    public Map<String, Object> checkReferenceGenomeMap() {
-        String referenceNamesString = processingOptionService.findOptionAssure(ProcessingOption.OptionName.PIPELINE_RUNYAPSA_REFERENCE_GENOME, null, null)
-        List<String> referenceGenomeNames = referenceNamesString.split(',')*.trim()
-        return [referenceGenomes: ReferenceGenome.findAllByNameInList(referenceGenomeNames)]
+    String getReferenceGenomeString() {
+        return processingOptionService.findOptionAssure(ProcessingOption.OptionName.PIPELINE_RUNYAPSA_REFERENCE_GENOME, null, null)
     }
 
     @Override

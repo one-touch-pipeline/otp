@@ -1,8 +1,8 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 
-abstract class RoddyBamFileAnalysisService extends BamFileAnalysisService {
+trait RoddyBamFileAnalysis implements BamFileAnalysisServiceTrait {
 
     @Override
     String additionalConfigParameters() {

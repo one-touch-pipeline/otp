@@ -27,15 +27,4 @@ abstract class AbstractBamFilePairAnalysisStartJobWithDependenciesIntegrationSpe
         expect:
         null == getService().findSamplePairToProcess(ProcessingPriority.NORMAL_PRIORITY)
     }
-
-    /**
-     * Callback to set the processing status of our dependant for the test-samplepair.
-     *
-     * Each workflow startjob that depends on another workflow being in some state MUST
-     * provide this method, so that tests in this abstract class can create the correct
-     * dependency environment.
-     */
-    abstract void setDependencyProcessingStatus(SamplePair samplePair, SamplePair.ProcessingStatus dependeeProcessingStatus)
-
-    abstract void createDependeeInstance(SamplePair samplePair, AnalysisProcessingStates dependeeAnalysisProcessingState)
 }

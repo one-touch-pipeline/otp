@@ -2,7 +2,7 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.ngsdata.*
 
-class IndelCallingService extends RoddyBamFileAnalysisService {
+class IndelCallingService extends BamFileAnalysisService implements RoddyBamFileAnalysis {
 
     @Override
     protected String getProcessingStateCheck() {

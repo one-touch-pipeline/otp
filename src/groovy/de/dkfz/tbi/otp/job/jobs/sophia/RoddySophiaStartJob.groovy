@@ -10,13 +10,13 @@ import org.springframework.stereotype.*
 
 @Component("roddySophiaStartJob")
 @Scope("singleton")
-class RoddySophiaStartJob extends RoddyBamFilePairAnalysisStartJob {
+class RoddySophiaStartJob extends AbstractBamFilePairAnalysisStartJob implements RoddyBamFilePairAnalysisStartJob {
 
     @Autowired
     SophiaService sophiaService
 
     @Override
-    protected void prepareCreatingTheProcessAndTriggerTracking(BamFilePairAnalysis bamFilePairAnalysis) {
+    void prepareCreatingTheProcessAndTriggerTracking(BamFilePairAnalysis bamFilePairAnalysis) {
         assert bamFilePairAnalysis : "bamFilePairAnalysis must not be null"
         trackingService.setStartedForSeqTracks(bamFilePairAnalysis.getContainedSeqTracks(), OtrsTicket.ProcessingStep.SOPHIA)
         bamFilePairAnalysis.samplePair.sophiaProcessingStatus = SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED

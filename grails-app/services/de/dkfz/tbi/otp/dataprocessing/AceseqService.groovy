@@ -1,9 +1,8 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.ngsdata.*
 
-class AceseqService extends RoddyBamFileAnalysisService {
+class AceseqService extends BamFileAnalysisService implements RoddyBamFileAnalysis, WithReferenceGenomeRestriction {
 
     ProcessingOptionService processingOptionService
 
@@ -44,15 +43,8 @@ class AceseqService extends RoddyBamFileAnalysisService {
     }
 
     @Override
-    protected String checkReferenceGenome(){
-        return 'AND sp.mergingWorkPackage1.referenceGenome in (:referenceGenomes)'
-    }
-
-    @Override
-    Map<String, Object> checkReferenceGenomeMap() {
-        String referenceNamesString = processingOptionService.findOptionAssure(OptionName.PIPELINE_ACESEQ_REFERENCE_GENOME, null, null)
-        List<String> referenceGenomeNames = referenceNamesString.split(',')*.trim()
-        return [referenceGenomes: ReferenceGenome.findAllByNameInList(referenceGenomeNames)]
+    String getReferenceGenomeString() {
+        return processingOptionService.findOptionAssure(ProcessingOption.OptionName.PIPELINE_ACESEQ_REFERENCE_GENOME, null, null)
     }
 }
 

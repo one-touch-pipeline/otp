@@ -5,17 +5,13 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.job.jobs.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
-import org.joda.time.*
-import org.joda.time.format.*
 import org.springframework.beans.factory.annotation.*
 import org.springframework.scheduling.annotation.*
 
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
+import java.time.*
+import java.time.format.*
 
-abstract class AbstractBamFilePairAnalysisStartJob extends AbstractStartJobImpl implements RestartableStartJob {
+abstract class AbstractBamFilePairAnalysisStartJob extends AbstractStartJobImpl implements RestartableStartJob, BamFilePairAnalysisStartJobTrait {
 
     @Autowired
     ExecutionService executionService
@@ -88,19 +84,13 @@ abstract class AbstractBamFilePairAnalysisStartJob extends AbstractStartJobImpl 
         executionService.executeCommandReturnProcessOutput(realm, deleteFiles)
     }
 
-    protected String getInstanceName(ConfigPerProject config) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH'h'mm_VV")
-        ZonedDateTime time = ZonedDateTime.of(LocalDateTime.now(), ConfigService.getTimeZoneId())
-        return time.format(formatter).replaceAll('/', '_')
-    }
-
-
     SamplePair findSamplePairToProcess(short minPriority) {
         return getBamFileAnalysisService().samplePairForProcessing(minPriority)
     }
 
-    protected abstract ConfigPerProject getConfig(SamplePair samplePair)
-    protected abstract BamFileAnalysisService getBamFileAnalysisService()
-    protected abstract void prepareCreatingTheProcessAndTriggerTracking(BamFilePairAnalysis bamFilePairAnalysis)
-
+    String getFormattedDate() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH'h'mm_VV")
+        ZonedDateTime time = ZonedDateTime.of(LocalDateTime.now(), ConfigService.getTimeZoneId())
+        return time.format(formatter).replaceAll('/', '_')
+    }
 }

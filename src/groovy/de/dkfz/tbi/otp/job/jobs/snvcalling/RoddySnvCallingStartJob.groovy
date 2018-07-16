@@ -10,7 +10,7 @@ import org.springframework.stereotype.*
 
 @Component("roddySnvStartJob")
 @Scope("singleton")
-class RoddySnvCallingStartJob extends RoddyBamFilePairAnalysisStartJob {
+class RoddySnvCallingStartJob extends AbstractBamFilePairAnalysisStartJob implements RoddyBamFilePairAnalysisStartJob {
 
     @Autowired
     SnvCallingService snvCallingService

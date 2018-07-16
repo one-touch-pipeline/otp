@@ -1,8 +1,8 @@
 package de.dkfz.tbi.otp.job.jobs
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
+import de.dkfz.tbi.otp.job.jobs.AbstractBamFilePairAnalysis.*
 import de.dkfz.tbi.otp.job.jobs.bamFilePairAnalysis.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.scheduler.*
@@ -11,12 +11,13 @@ import de.dkfz.tbi.otp.tracking.*
 import de.dkfz.tbi.otp.utils.logging.*
 import grails.test.spock.*
 import org.springframework.beans.factory.annotation.*
+import spock.lang.*
 
-abstract class AbstractBamFilePairAnalysisStartJobIntegrationSpec extends IntegrationSpec {
+abstract class AbstractBamFilePairAnalysisStartJobIntegrationSpec extends IntegrationSpec implements StartJobIntegrationSpec {
 
     void "getConfig when config is null, throw an exception"() {
         given:
-        Pipeline pipeline = createPipeline()
+        createPipeline()
         SamplePair samplePair = DomainFactory.createSamplePair()
 
         when:
@@ -31,24 +32,11 @@ abstract class AbstractBamFilePairAnalysisStartJobIntegrationSpec extends Integr
         given:
         SamplePair samplePair = DomainFactory.createSamplePair()
         Pipeline pipeline = createPipeline()
-        Map configProperties = [
-                project: samplePair.project,
-                pipeline: pipeline,
-        ]
-        ConfigPerProject configPerProject
 
-        if (pipeline.usesRoddy()) {
-            configPerProject = DomainFactory.createRoddyWorkflowConfig(
-                    configProperties +
-                    [seqType: samplePair.seqType,]
-            )
-        } else if (pipeline.name == Pipeline.Name.RUN_YAPSA) {
-            configPerProject = DomainFactory.createRunYapsaConfig(configProperties)
-        } else {
-            throw new UnsupportedOperationException("cannot figure out which workflow config to create")
-        }
+        when:
+        ConfigPerProject configPerProject = createConfig(samplePair, pipeline)
 
-        expect:
+        then:
         configPerProject == getService().getConfig(samplePair)
     }
 
@@ -113,7 +101,7 @@ abstract class AbstractBamFilePairAnalysisStartJobIntegrationSpec extends Integr
         error.message.contains("assert process")
     }
 
-    void "test method restart with RoddySnvCallingInstance"() {
+    void "test method restart with AbstractBamFilePairAnalysisStartJob"() {
         given:
         AbstractBamFilePairAnalysisStartJob service = getService()
         ExecutionService executionService = service.executionService
@@ -158,38 +146,5 @@ abstract class AbstractBamFilePairAnalysisStartJobIntegrationSpec extends Integr
         cleanup:
         service.executionService = executionService
         service.schedulerService = schedulerService
-    }
-
-
-    abstract Pipeline createPipeline()
-
-    abstract AbstractBamFilePairAnalysisStartJob getService()
-
-    abstract BamFilePairAnalysis getInstance()
-
-    abstract Date getStartedDate(OtrsTicket otrsTicket)
-
-    abstract SamplePair.ProcessingStatus getProcessingStatus(SamplePair samplePair)
-
-    SamplePair setupSamplePair() {
-        def map = DomainFactory.createProcessableSamplePair()
-        SamplePair samplePair = map.samplePair
-
-        Pipeline pipeline = createPipeline()
-        Map configProperties = [
-                project: samplePair.project,
-                pipeline: pipeline,
-        ]
-        if (pipeline.usesRoddy()) {
-            DomainFactory.createRoddyWorkflowConfig(configProperties + [
-                    seqType: samplePair.seqType,
-            ])
-        } else if (pipeline.name == Pipeline.Name.RUN_YAPSA) {
-            DomainFactory.createRunYapsaConfig(configProperties)
-        } else {
-            throw new UnsupportedOperationException("cannot figure out which workflow config to create")
-        }
-
-        return samplePair
     }
 }

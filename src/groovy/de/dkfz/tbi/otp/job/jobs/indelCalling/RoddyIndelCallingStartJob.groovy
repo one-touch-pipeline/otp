@@ -10,13 +10,13 @@ import org.springframework.stereotype.*
 
 @Component("roddyIndelStartJob")
 @Scope("singleton")
-class RoddyIndelCallingStartJob extends RoddyBamFilePairAnalysisStartJob {
+class RoddyIndelCallingStartJob extends AbstractBamFilePairAnalysisStartJob implements RoddyBamFilePairAnalysisStartJob {
 
     @Autowired
     IndelCallingService indelCallingService
 
     @Override
-    protected void prepareCreatingTheProcessAndTriggerTracking(BamFilePairAnalysis bamFilePairAnalysis) {
+    void prepareCreatingTheProcessAndTriggerTracking(BamFilePairAnalysis bamFilePairAnalysis) {
         assert bamFilePairAnalysis : "bamFilePairAnalysis must not be null"
         trackingService.setStartedForSeqTracks(bamFilePairAnalysis.getContainedSeqTracks(), OtrsTicket.ProcessingStep.INDEL)
         bamFilePairAnalysis.samplePair.indelProcessingStatus = SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED

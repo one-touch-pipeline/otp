@@ -1,19 +1,22 @@
 package de.dkfz.tbi.otp.job.jobs.runYapsa
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.job.jobs.*
 import de.dkfz.tbi.otp.job.jobs.bamFilePairAnalysis.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.*
-import de.dkfz.tbi.otp.utils.CollectionUtils
 import org.springframework.beans.factory.annotation.*
+import de.dkfz.tbi.otp.job.jobs.AbstractBamFilePairAnalysis.*
 
-class RunYapsaStartJobIntegrationSpec extends AbstractBamFilePairAnalysisStartJobWithDependenciesIntegrationSpec {
+class RunYapsaStartJobIntegrationSpec extends AbstractBamFilePairAnalysisStartJobWithDependenciesIntegrationSpec implements WithReferenceGenomeRestrictionSpec {
 
     @Autowired
     RunYapsaStartJob runYapsaStartJob
+
+    void setup() {
+        DomainFactory.createExomeSeqType()
+    }
 
     @Override
     Pipeline createPipeline() {
@@ -42,26 +45,13 @@ class RunYapsaStartJobIntegrationSpec extends AbstractBamFilePairAnalysisStartJo
 
     @Override
     SamplePair setupSamplePair() {
-        SamplePair samplePair = super.setupSamplePair()
-
-        // at time of writing, runYapsa supports only WES+WGS
-        // Make sure they are available for configs
-        DomainFactory.createExomeSeqType()
-        DomainFactory.createWholeGenomeSeqType()
+        SamplePair samplePair = WithReferenceGenomeRestrictionSpec.super.setupSamplePair()
 
         // fake a "finished" SNV calling for us to analyse
         samplePair.snvProcessingStatus = SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED
         samplePair.save(flush: true)
 
         createDependeeInstance(samplePair, AnalysisProcessingStates.FINISHED)
-
-        // use whatever auto-generated reference genome the test generated as the only "usable" one.
-        DomainFactory.createProcessingOptionLazy([
-                name   : ProcessingOption.OptionName.PIPELINE_RUNYAPSA_REFERENCE_GENOME,
-                type   : null,
-                project: null,
-                value: samplePair.mergingWorkPackage1.referenceGenome.name,
-        ])
 
         return samplePair
     }
@@ -74,5 +64,20 @@ class RunYapsaStartJobIntegrationSpec extends AbstractBamFilePairAnalysisStartJo
     @Override
     void createDependeeInstance(SamplePair samplePair, AnalysisProcessingStates dependeeAnalysisProcessingState) {
         DomainFactory.createRoddySnvCallingInstance(samplePair, [processingState: dependeeAnalysisProcessingState,])
+    }
+
+    @Override
+    ConfigPerProject createConfig(SamplePair samplePair, Pipeline pipeline) {
+        return DomainFactory.createRunYapsaConfig(
+                [
+                        project : samplePair.project,
+                        pipeline: pipeline,
+                ]
+        )
+    }
+
+    @Override
+    ProcessingOption.OptionName getProcessingOptionNameForReferenceGenome() {
+        return ProcessingOption.OptionName.PIPELINE_RUNYAPSA_REFERENCE_GENOME
     }
 }

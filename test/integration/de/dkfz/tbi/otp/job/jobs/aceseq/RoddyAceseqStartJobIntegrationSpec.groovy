@@ -3,12 +3,13 @@ package de.dkfz.tbi.otp.job.jobs.aceseq
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.job.jobs.*
+import de.dkfz.tbi.otp.job.jobs.AbstractBamFilePairAnalysis.*
 import de.dkfz.tbi.otp.job.jobs.bamFilePairAnalysis.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.*
 import org.springframework.beans.factory.annotation.*
 
-class RoddyAceseqStartJobIntegrationSpec extends AbstractBamFilePairAnalysisStartJobWithDependenciesIntegrationSpec {
+class RoddyAceseqStartJobIntegrationSpec extends AbstractBamFilePairAnalysisStartJobWithDependenciesIntegrationSpec implements RoddyJobSpec, WithReferenceGenomeRestrictionSpec {
 
     @Autowired
     RoddyAceseqStartJob roddyAceseqStartJob
@@ -40,20 +41,12 @@ class RoddyAceseqStartJobIntegrationSpec extends AbstractBamFilePairAnalysisStar
 
     @Override
     SamplePair setupSamplePair() {
-        SamplePair samplePair = super.setupSamplePair()
+        SamplePair samplePair = WithReferenceGenomeRestrictionSpec.super.setupSamplePair()
 
         // prepare a "finished" sophia analysis, since we depend on that.
         samplePair.sophiaProcessingStatus = SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED
         samplePair.save(flush: true)
         createDependeeInstance(samplePair, AnalysisProcessingStates.FINISHED)
-
-        // use whatever reference genome the tests auto-generated as the correct ones.
-        DomainFactory.createProcessingOptionLazy([
-                name: ProcessingOption.OptionName.PIPELINE_ACESEQ_REFERENCE_GENOME,
-                type: null,
-                project: null,
-                value: samplePair.mergingWorkPackage1.referenceGenome.name,
-        ])
 
         return samplePair
     }
@@ -66,5 +59,10 @@ class RoddyAceseqStartJobIntegrationSpec extends AbstractBamFilePairAnalysisStar
     @Override
     void createDependeeInstance(SamplePair samplePair, AnalysisProcessingStates dependeeAnalysisProcessingState) {
         DomainFactory.createSophiaInstance(samplePair, [processingState: dependeeAnalysisProcessingState])
+    }
+
+    @Override
+    ProcessingOption.OptionName getProcessingOptionNameForReferenceGenome() {
+        return ProcessingOption.OptionName.PIPELINE_ACESEQ_REFERENCE_GENOME
     }
 }

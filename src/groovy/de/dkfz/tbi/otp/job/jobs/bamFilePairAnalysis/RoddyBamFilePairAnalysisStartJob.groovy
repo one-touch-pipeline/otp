@@ -6,13 +6,12 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.ngsdata.*
 import org.hibernate.*
 
-abstract class RoddyBamFilePairAnalysisStartJob extends AbstractBamFilePairAnalysisStartJob {
+trait RoddyBamFilePairAnalysisStartJob implements BamFilePairAnalysisStartJobTrait {
 
     @Override
     String getInstanceName(ConfigPerProject config) {
         assert RoddyWorkflowConfig.isAssignableFrom(Hibernate.getClass(config)): "Roddy startjobs should only ever be started with a RoddyWorkFlow, not something else; got ${ config.class }"
-        String date = super.getInstanceName()
-        return "results_${config.pluginVersion.replaceAll(":", "-")}_${config.configVersion}_${ date }"
+        return "results_${config.pluginVersion.replaceAll(":", "-")}_${config.configVersion}_${ getFormattedDate() }"
     }
 
     @Override
