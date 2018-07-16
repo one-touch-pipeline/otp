@@ -91,11 +91,12 @@ trait UserAndRoles {
         }
     }
 
-    void addUserWithReadAccessToProject(User user, Project project) {
+    void addUserWithReadAccessToProject(User user, Project project, boolean enabled = true) {
         DomainFactory.createUserProjectRole(
                 user: user,
                 project: project,
                 projectRole: DomainFactory.createProjectRole(accessToOtp: true),
+                enabled: enabled,
         )
     }
 }

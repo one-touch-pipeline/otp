@@ -1,4 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page import="de.dkfz.tbi.otp.ngsdata.PermissionStatus" %>
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -27,15 +28,18 @@
                     <th><g:message code="projectUser.table.role"/></th>
                     <th><g:message code="projectUser.table.otpAccess"/></th>
                     <th><g:message code="projectUser.table.fileAccess"/></th>
-                    <th><g:message code="projectUser.table.manageUsers"/></th>
+                    <th colspan="2"><g:message code="projectUser.table.manageUsers"/></th>
                     <th><g:message code="projectUser.table.asperaAccount"/></th>
-                    <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${project.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'DELEGATE_USER_MANAGEMENT')">
-                        <th><g:message code="projectUser.table.manageUsers"/></th>
-                    </sec:access>
                     <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${project.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'MANAGE_USERS')">
                         <th><g:message code="projectUser.table.projectAccess"/></th>
                     </sec:access>
                 </tr>
+                <g:if test="${!enabledProjectUsers}">
+                    <tr>
+                        <td></td>
+                        <td><g:message code="projectUser.table.noUsers"/></td>
+                    </tr>
+                </g:if>
                 <g:each in="${enabledProjectUsers}" var="userEntry">
                     <tr>
                         <td>
@@ -76,14 +80,19 @@
                                 ${userEntry.projectRole.name}
                             </sec:noAccess>
                         </td>
-                        <td><img src="${assetPath(src: userEntry.otpAccess.iconName)}" title="${userEntry.otpAccess.description}"></td>
-                        <td><img src="${assetPath(src: userEntry.fileAccess.iconName)}" title="${userEntry.fileAccess.description}"></td>
+                        <td><span class="icon-${userEntry.otpAccess}" title="${g.message(code: "projectUser.table.tooltip.${userEntry.otpAccess}")}"></span></td>
+                        <td><span class="icon-${userEntry.fileAccess}" title="${g.message(code: "projectUser.table.tooltip.${userEntry.fileAccess}")}"></span></td>
+                        <td><span class="icon-${userEntry.manageUsers}" title="${g.message(code: "projectUser.table.tooltip.${userEntry.manageUsers == PermissionStatus.APPROVED ? "true" : "false"}")}"></span></td>
                         <td>
-                            <g:if test="${userEntry.manageUsers}">
-                                <img src="${assetPath(src: 'ok.png')}" title="${g.message(code: 'projectUser.table.tooltip.true')}">
-                            </g:if> <g:else>
-                                <img src="${assetPath(src: 'error.png')}" title="${g.message(code: 'projectUser.table.tooltip.false')}">
-                            </g:else>
+                            <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${project.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'DELEGATE_USER_MANAGEMENT')">
+                                <g:if test="${userEntry.inLdap && !userEntry.projectRole?.manageUsersAndDelegate}">
+                                    <g:form action="updateManageUsers" params='["userProjectRole.id": userEntry.userProjectRole.id, "manageUsers": userEntry.userProjectRole.manageUsers]'>
+                                        <g:submitButton
+                                                title="${g.message(code: 'projectUser.table.tooltip.manageUsersSwitchButton', args: [userEntry.manageUsers == PermissionStatus.APPROVED ? "Disallow" : "Allow"])}"
+                                                name="${userEntry.manageUsers == PermissionStatus.APPROVED ? "Disallow" : "Allow"}"/>
+                                    </g:form>
+                                </g:if>
+                            </sec:access>
                         </td>
                         <td>
                             <otp:editorSwitch
@@ -91,19 +100,12 @@
                                     link="${g.createLink(controller: 'projectUser', action: 'updateAspera', params: ["user.id": userEntry.user.id])}"
                                     value="${userEntry.user.asperaAccount}"/>
                         </td>
-                        <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${project.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'DELEGATE_USER_MANAGEMENT')">
-                            <td>
-                                <g:if test="${userEntry.inLdap && !userEntry.projectRole?.manageUsersAndDelegate}">
-                                    <g:form action="updateManageUsers" params='["userProjectRole.id": userEntry.userProjectRole.id, "manageUsers": userEntry.userProjectRole.manageUsers]'>
-                                        <g:submitButton name="${userEntry.manageUsers ? "Disallow" : "Allow"}"/>
-                                    </g:form>
-                                </g:if>
-                            </td>
-                        </sec:access>
                         <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${project.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'MANAGE_USERS')">
                             <td>
                                 <g:form action="switchEnabledStatus" params='["userProjectRole.id": userEntry.userProjectRole.id, "enabled": userEntry.userProjectRole.enabled]'>
-                                    <g:submitButton name="${g.message(code: 'projectUser.table.deactivateUser')}"/>
+                                    <g:submitButton
+                                            title="${g.message(code: 'projectUser.table.tooltip.activateSwitchButton', args: ["Deactivate"])}"
+                                            name="${g.message(code: 'projectUser.table.deactivateUser')}"/>
                                 </g:form>
                             </td>
                         </sec:access>
@@ -130,6 +132,12 @@
                         <th><g:message code="projectUser.table.projectAccess"/></th>
                     </sec:access>
                 </tr>
+                <g:if test="${!disabledProjectUsers}">
+                    <tr>
+                        <td></td>
+                        <td><g:message code="projectUser.table.noUsers"/></td>
+                    </tr>
+                </g:if>
                 <g:each in="${disabledProjectUsers}" var="userEntry">
                 <tr>
                     <td>
@@ -154,9 +162,7 @@
                                 link="${g.createLink(controller: 'projectUser', action: 'updateEmail', params: ["user.id": userEntry.user.id])}"
                                 value="${userEntry.user.email}"/>
                     </td>
-                    <td>
-                        ${userEntry.projectRole.name}
-                    </td>
+                    <td>${userEntry.projectRole.name}</td>
                     <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
@@ -166,7 +172,9 @@
                     <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${project.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'MANAGE_USERS')">
                         <td>
                             <g:form action="switchEnabledStatus" params='["userProjectRole.id": userEntry.userProjectRole.id, "enabled": userEntry.userProjectRole.enabled]'>
-                                <g:submitButton name="${g.message(code: 'projectUser.table.reactivateUser')}"/>
+                                <g:submitButton
+                                        title="${g.message(code: 'projectUser.table.tooltip.activateSwitchButton', args: ["Activate"])}"
+                                        name="${g.message(code: 'projectUser.table.reactivateUser')}"/>
                             </g:form>
                         </td>
                     </sec:access>
@@ -192,6 +200,7 @@
             <h3>
                 <g:message code="projectUser.addMember.title"/>
             </h3>
+            <g:message code="projectUser.annotation.delayedFileAccessChanges"/>
             <g:form class="addUserForm" controller="projectUser" action="addUserToProject" params='["project": project.id]'>
                 <div class="form left">
                     <table>
@@ -276,7 +285,7 @@
                     <tr>
                         <td>${role.name}</td>
                         <g:each in="${[role.accessToOtp, role.accessToFiles, role.manageUsersAndDelegate]}" var="property">
-                            <td><img src="${assetPath(src: property ? 'ok.png' : 'error.png')}"></td>
+                            <td><span class="icon-${property ? PermissionStatus.APPROVED : PermissionStatus.DENIED}"></span></td>
                         </g:each>
                     </tr>
                 </g:each>

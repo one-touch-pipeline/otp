@@ -1106,11 +1106,11 @@ body {
     img.ldapThumbnail {
         height: auto;
         max-height: 40px;
-        width: 30px;
+        max-width: 40px;
     }
     td:nth-child(1) {
         text-align: center;
-        width: 30px;
+        width: 40px;
     }
     td:nth-child(2) {
         width: 10%;
@@ -1128,20 +1128,41 @@ body {
         width: 110px;
     }
     &.enabled {
-        td:nth-child(7), td:nth-child(8) {
+        td:nth-child(7), td:nth-child(8), td:nth-child(10) {
             width: 80px;
         }
-        td:nth-child(9), td:nth-child(11) {
-            width: 110px;
+        td:nth-child(9) {
+            width: 20px;
         }
-        td:nth-child(10) {
-            width: 50px;
+        td:nth-child(11) {
+            width: 110px;
         }
     }
     &.disabled {
         td:nth-child(7) {
             width: 100px;
         }
+    }
+}
+td span {
+    .background-usage-hint {
+        padding-left: 18px;
+    }
+    &.icon-approved {
+        .background-usage-hint;
+        background: url(ok.png) left center no-repeat;
+    }
+    &.icon-pendingApproval {
+        .background-usage-hint;
+        background: url(ok_grey.png) left center no-repeat;
+    }
+    &.icon-pendingDenial {
+        .background-usage-hint;
+        background: url(error_grey.png) left center no-repeat;
+    }
+    &.icon-denied {
+        .background-usage-hint;
+        background: url(error.png) left center no-repeat;
     }
 }
 table.projectRoleLegend {

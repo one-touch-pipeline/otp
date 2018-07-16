@@ -6,6 +6,7 @@ import de.dkfz.tbi.otp.security.*
 import grails.converters.*
 import groovy.json.JsonBuilder
 import groovy.transform.*
+import org.apache.commons.lang.WordUtils
 import org.springframework.validation.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
@@ -185,13 +186,11 @@ class ProjectUserController {
 
 @TupleConstructor
 enum PermissionStatus {
-    APPROVED("ok.png", "access approved"),
-    PENDING_APPROVAL("ok_grey.png", "access will be granted"),
-    PENDING_DENIAL("error_grey.png", "access will be removed"),
-    DENIED("error.png", "access denied")
+    APPROVED, PENDING_APPROVAL, PENDING_DENIAL, DENIED
 
-    final String iconName
-    final String description
+    String toString() {
+        return WordUtils.uncapitalize(WordUtils.capitalizeFully(this.name(), ['_'] as char[]).replaceAll("_", ""))
+    }
 }
 
 class UserEntry {
@@ -203,7 +202,7 @@ class UserEntry {
     ProjectRole projectRole
     PermissionStatus otpAccess
     PermissionStatus fileAccess
-    boolean manageUsers = false
+    PermissionStatus manageUsers
     boolean deactivated
     UserProjectRole userProjectRole
 
@@ -219,7 +218,7 @@ class UserEntry {
         this.projectRole = projectRole
         this.otpAccess = inLdap && projectRole?.accessToOtp ? PermissionStatus.APPROVED : PermissionStatus.DENIED
         this.fileAccess = getPermissionStatus(inLdap && fileAccess, project.unixGroup in ldapUserDetails.memberOfGroupList)
-        this.manageUsers = inLdap && userProjectRole.manageUsers
+        this.manageUsers = inLdap && userProjectRole.manageUsers ? PermissionStatus.APPROVED : PermissionStatus.DENIED
         this.deactivated = ldapUserDetails.deactivated
         this.userProjectRole = userProjectRole
     }
@@ -342,7 +341,7 @@ class UpdateProjectRoleCommand implements Serializable {
 
 class AddUserToProjectCommand implements Serializable {
     Project project
-    boolean addViaLdap
+    boolean addViaLdap = true
 
     String searchString
     String projectRoleName
