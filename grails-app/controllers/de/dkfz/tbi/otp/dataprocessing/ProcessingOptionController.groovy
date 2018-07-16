@@ -70,7 +70,6 @@ class ProcessingOptionCommand {
     String submit
 
     static constraints = {
-        value(blank: false)
         project(validator: { val, obj ->
             if (val == "no project") {
                 return true

@@ -25,21 +25,14 @@
     <g:layoutHead/>
 </head>
 <body id="otp">
-    <div class="body_position">
-        <sec:ifAllGranted roles="ROLE_OPERATOR">
-            <div class="header">
-                <img src="${assetPath(src: 'header_operator.png')}" alt="OTP"/>
-                <g:if test="${otp.environmentName() != 'production'}">
-                    <p class="environmentName"><otp:environmentName/></p>
-                </g:if>
-            </div>
-        </sec:ifAllGranted>
-        <sec:ifNotGranted roles="ROLE_OPERATOR">
-            <div class="header">
-                <g:if test="${controllerName == "info"}"><h1><g:message code="otp.title" /></h1></g:if>
-                <img src="${assetPath(src: 'header.png')}" alt="OTP"/>
-            </div>
-        </sec:ifNotGranted>
+<div class="body_position">
+        <div class="header">
+            <img class="radiused" src="${assetPath(src: logo)}" alt=""/>
+            <img src="${assetPath(src: 'header-otp.png')}" alt="OTP"/>
+            <g:if test="${otp.environmentName() != 'production'}">
+                <p class="environmentName"><otp:environmentName/></p>
+            </g:if>
+        </div>
         <div class="headerGraphic">
             <img class="headerGraphicImg" src="${assetPath(src: 'header_graphic.png')}" alt=""/>
         </div>

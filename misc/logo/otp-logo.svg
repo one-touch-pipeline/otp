@@ -14,8 +14,10 @@
    viewBox="0 0 510.71579 610.74474"
    id="svg2"
    version="1.1"
-   inkscape:version="0.91 r13725"
-   sodipodi:docname="otp-logo.svg">
+   inkscape:version="0.92.2 (5c3e80d, 2017-08-06)"
+   sodipodi:docname="otp-logo.svg"
+   inkscape:export-xdpi="450"
+   inkscape:export-ydpi="450">
   <defs
      id="defs4" />
   <sodipodi:namedview
@@ -25,9 +27,6 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="2.8313204"
-     inkscape:cx="297.47451"
-     inkscape:cy="274.48577"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -102,7 +101,7 @@
        inkscape:export-ydpi="400" />
     <path
        style="fill:#ffffff;fill-opacity:1"
-       d="m 335.49605,358.35343 0,26.58398 0,26.58594 8,0 8,0 0,-10 0,-10 7.78711,0 c 13.93665,0 20.21168,-5.27888 20.20703,-17 -0.003,-6.55174 -2.3796,-11.07312 -7.20117,-13.69727 -2.70767,-1.47366 -6.27537,-1.85339 -20.04297,-2.13281 z m 16,11.16992 4.94141,0 c 4.56475,0.0184 8.05859,1.13989 8.05859,6.14844 0,5.00855 -3.23774,5.85156 -9.13672,5.85156 l -3.86328,0 0,-6 z"
+       d="m 335.49605,358.35359 v 26.58382 26.58594 h 8 8 v -10 -10 h 7.78711 c 13.93665,0 20.21168,-5.27888 20.20703,-17 -0.003,-6.55174 -2.3796,-11.07312 -7.20117,-13.69727 -2.70767,-1.47366 -6.27253,-2.47249 -20.04297,-2.47249 z m 16,11.16976 h 4.94177 c 4.56475,0.0184 8.05823,1.13989 8.05823,6.14844 0,5.00855 -3.38276,5.85156 -8.05823,5.85156 h -4.94177 v -6 z"
        id="path4256"
        inkscape:connector-curvature="0"
        inkscape:export-xdpi="400"

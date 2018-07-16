@@ -126,6 +126,7 @@ class ProcessingOption implements Entity {
         GUI_SHOW_PARTNERS("", null, Type.BOOLEAN),
         GUI_ABOUT_OTP("", null, Type.MULTI_LINE_TEXT),
         GUI_IMPRINT("", null, Type.MULTI_LINE_TEXT),
+        GUI_LOGO("", "", Type.SINGLE_WORD_TEXT_OPTIONAL),
 
 
 
