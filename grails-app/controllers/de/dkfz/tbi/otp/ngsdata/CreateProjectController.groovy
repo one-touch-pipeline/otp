@@ -171,4 +171,12 @@ class CreateProjectControllerSubmitCommand implements Serializable {
             tumorEntity = TumorEntity.findByName(tumorEntityName)
         }
     }
+
+    void setProjectInfoFile(MultipartFile projectInfoFile) {
+        if (!projectInfoFile?.originalFilename) {
+            this.projectInfoFile = null
+        } else  {
+            this.projectInfoFile = projectInfoFile
+        }
+    }
 }

@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.tracking.ProcessingTimeStatisticsService
 import de.dkfz.tbi.otp.utils.MailHelperService
 import org.springframework.beans.factory.annotation.*
@@ -26,43 +27,49 @@ class DataFileService {
     @Autowired
     MailHelperService mailHelperService
 
+    @Autowired
+    SchedulerService schedulerService
+
     //12h
     @Scheduled(fixedDelay = 43200000l, initialDelay = 60000L)
     void setFileExistsForAllDataFiles() {
-        Date startDate = new Date()
-        try {
-            (0..countDataFiles() / MAX_RESULTS).each {
-                log.info("DataFileService.setFileExistsForAllDataFiles() current iteration: $it")
-                DataFile.withNewSession {
-                    DataFile.withTransaction {
-                        getFastqDataFiles().each {
-                            String path = lsdfFilesService.getFileFinalPath(it)
-                            if (path) {
-                                File file = new File(path)
-                                it.fileExists = file.exists()
-                            }
-                            it.dateLastChecked = new Date()
-                            try {
-                                assert it.save(flush: true)
-                            } catch (ValidationException e) {
-                                throw new RuntimeException("Error while saving datafile with id: ${it.id}", e)
+        if (schedulerService.isActive()) {
+            Date startDate = new Date()
+            try {
+                (0..countDataFiles() / MAX_RESULTS).each {
+                    DataFile.withNewSession {
+                        DataFile.withTransaction {
+                            getFastqDataFiles().each {
+                                String path = lsdfFilesService.getFileFinalPath(it)
+                                if (path) {
+                                    File file = new File(path)
+                                    it.fileExists = file.exists()
+                                }
+                                it.dateLastChecked = new Date()
+                                try {
+                                    assert it.save(flush: true)
+                                } catch (ValidationException e) {
+                                    throw new RuntimeException("Error while saving datafile with id: ${it.id}", e)
+                                }
                             }
                         }
                     }
                 }
+            } catch (RuntimeException e) {
+                log.error("error ${e.getLocalizedMessage()}", e)
+                ProcessingOption.withNewSession {
+                    String recipientsString = ProcessingOptionService.findOption(
+                            ProcessingOption.OptionName.EMAIL_RECIPIENT_ERRORS,
+                            null,
+                            null,
+                    )
+                    if (recipientsString) {
+                        mailHelperService.sendEmail("Error: DataFileService.setFileExistsForAllDataFiles() failed", "${e.getLocalizedMessage()}\n${e.getCause()}", recipientsString)
+                    }
+                }
             }
-        } catch (RuntimeException e) {
-            log.error("error ${e.getLocalizedMessage()}", e)
-            String recipientsString = ProcessingOptionService.findOption(
-                    ProcessingOption.OptionName.EMAIL_RECIPIENT_ERRORS,
-                    null,
-                    null,
-            )
-            if (recipientsString) {
-                mailHelperService.sendEmail("Error: DataFileService.setFileExistsForAllDataFiles() failed", "${e.getLocalizedMessage()}\n${e.getCause()}", recipientsString)
-            }
+            log.info("DataFileService.setFileExistsForAllDataFiles() duration: ${ProcessingTimeStatisticsService.getFormattedPeriod(startDate, new Date())}")
         }
-        log.info("DataFileService.setFileExistsForAllDataFiles() duration: ${ProcessingTimeStatisticsService.getFormattedPeriod(startDate, new Date())}")
     }
 
     List<DataFile> getFastqDataFiles() {

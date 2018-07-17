@@ -552,15 +552,14 @@ class AddProjectInfoCommand implements Serializable {
             if (val.isEmpty()) {
                 return "File is empty"
             }
-
             if (!OtpPath.isValidPathComponent(val.originalFilename)) {
                 return "Invalid fileName"
             }
             if (ProjectInfo.findAllByProjectAndFileName(obj.project, val.originalFilename).size() != 0) {
-                "A ProjectInfo with this fileName already exists"
+                return "A ProjectInfo with this fileName already exists"
             }
             if (val.getSize() > ProjectService.PROJECT_INFO_MAX_SIZE) {
-                "The File exceeds the 20mb file size limit "
+                return "The File exceeds the 20mb file size limit "
             }
         })
     }

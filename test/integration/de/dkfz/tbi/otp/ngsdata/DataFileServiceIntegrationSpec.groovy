@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.testing.*
 import de.dkfz.tbi.otp.utils.MailHelperService
 import grails.plugin.springsecurity.*
@@ -51,6 +52,9 @@ class DataFileServiceIntegrationSpec extends IntegrationSpec implements UserAndR
             1 * getFileFinalPath(dataFile3) >> "${testFolder.absolutePath}/copiedOrLinked/fileName3"
             1 * getFileFinalPath(dataFile4) >> "${testFolder.absolutePath}/copiedOrLinked/fileName4"
         }
+        dataFileService.schedulerService = Mock(SchedulerService) {
+            1 * isActive() >> true
+        }
 
         copiedFile2.delete()
         initialFile4.delete()
@@ -99,6 +103,10 @@ class DataFileServiceIntegrationSpec extends IntegrationSpec implements UserAndR
         dataFile.mateNumber = null
         dataFile.save(validate: false)
 
+
+        dataFileService.schedulerService = Mock(SchedulerService) {
+            1 * isActive() >> true
+        }
         dataFileService.mailHelperService = Mock(MailHelperService) {
             1 * sendEmail('Error: DataFileService.setFileExistsForAllDataFiles() failed', _, errorRecipient) >> {String emailSubject, String content, String recipients ->
                 assert content.contains("Error while saving datafile with id: ${dataFile.id}")
