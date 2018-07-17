@@ -25,6 +25,14 @@ import static de.dkfz.tbi.otp.utils.StringUtils.*
  * Metadata import 2.0 (OTP-34)
  */
 class MetadataImportService {
+
+    @TupleConstructor
+    @ToString
+    static class PathWithMd5sum {
+        final Path path
+        final String md5sum
+    }
+
     @Autowired
     ApplicationContext applicationContext
 
@@ -91,14 +99,14 @@ class MetadataImportService {
      * @param previousValidationMd5sum May be {@code null}
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    ValidateAndImportResult validateAndImportWithAuth(File metadataFile, String directoryStructureName, boolean align, boolean ignoreWarnings, String previousValidationMd5sum, String ticketNumber, String seqCenterComment, boolean automaticNotification) {
-        FileSystem fs = fileSystemService.getFilesystemForFastqImport()
-        return validateAndImport(fs.getPath(metadataFile.path), directoryStructureName, align, RunSegment.ImportMode.MANUAL, ignoreWarnings, previousValidationMd5sum, ticketNumber, seqCenterComment, automaticNotification)
-    }
-
-    ValidateAndImportResult validateAndImport(Path metadataFile, String directoryStructureName, boolean align, RunSegment.ImportMode importMode, boolean ignoreWarnings, String previousValidationMd5sum, String ticketNumber, String seqCenterComment, boolean automaticNotification) {
-        MetadataValidationContext context = validate(metadataFile, directoryStructureName)
-        return importHelperMethod(context, align, importMode, ignoreWarnings, previousValidationMd5sum, ticketNumber, seqCenterComment, automaticNotification)
+    List<ValidateAndImportResult> validateAndImportWithAuth(List<PathWithMd5sum> metadataPaths, String directoryStructureName, boolean align, boolean ignoreWarnings, String ticketNumber, String seqCenterComment, boolean automaticNotification) {
+        Map<MetadataValidationContext, String> contexts = metadataPaths.collectEntries { PathWithMd5sum pathWithMd5sum ->
+            return [(validate(pathWithMd5sum.path, directoryStructureName)) : pathWithMd5sum.md5sum]
+        }
+        List<ValidateAndImportResult> results = contexts.collect { context, md5sum ->
+            return importHelperMethod(context, align, RunSegment.ImportMode.MANUAL, ignoreWarnings, md5sum, ticketNumber, seqCenterComment, automaticNotification)
+        }
+        return results
     }
 
     private ValidateAndImportResult importHelperMethod(MetadataValidationContext context, boolean align, RunSegment.ImportMode importMode, boolean ignoreWarnings, String previousValidationMd5sum, String ticketNumber, String seqCenterComment, boolean automaticNotification) {
