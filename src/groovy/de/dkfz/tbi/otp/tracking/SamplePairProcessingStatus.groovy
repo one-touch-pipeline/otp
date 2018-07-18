@@ -29,7 +29,7 @@ class SamplePairProcessingStatus {
     final RunYapsaInstance completeRunYapsaInstance
 
     WorkflowProcessingStatus getVariantCallingProcessingStatus() {
-        return TrackingService.combineStatuses([snvProcessingStatus, indelProcessingStatus, sophiaProcessingStatus, aceseqProcessingStatus], Closure.IDENTITY)
+        return TrackingService.combineStatuses([snvProcessingStatus, indelProcessingStatus, sophiaProcessingStatus, aceseqProcessingStatus, runYapsaProcessingStatus], Closure.IDENTITY)
     }
 
     List<String> variantCallingWorkflowNames() {
