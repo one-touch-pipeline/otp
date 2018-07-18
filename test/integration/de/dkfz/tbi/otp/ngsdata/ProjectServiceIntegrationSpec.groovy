@@ -1324,7 +1324,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         "Snv"        | "invalid/path"    || /baseProjectConfig '.*' is an invalid path component\..*/
     }
 
-    void "test createprojectInfo, succeeds"() {
+    void "test createProjectInfo, succeeds"() {
         given:
         Project project = DomainFactory.createProject()
 
@@ -1335,7 +1335,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         projectInfo.fileName == FILE_NAME
     }
 
-    void "test createprojectInfo, with same fileName for different projects, succeeds"() {
+    void "test createProjectInfo, with same fileName for different projects, succeeds"() {
         given:
         Project project1 = DomainFactory.createProject()
         Project project2 = DomainFactory.createProject()
@@ -1349,7 +1349,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         projectInfo2.fileName == FILE_NAME
     }
 
-    void "test createprojectInfo, with same fileName for same project, fails"() {
+    void "test createProjectInfo, with same fileName for same project, fails"() {
         given:
         Project project = DomainFactory.createProject()
 
@@ -1362,7 +1362,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         ex.message.contains('unique')
     }
 
-    void "test copyprojectInfoToProjectFolder, succeeds"() {
+    void "test createProjectInfoAndUploadFile, succeeds"() {
         given:
         Project project = DomainFactory.createProject()
         byte[] content = [0, 1 , 2 , 3]
@@ -1380,6 +1380,50 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
 
         projectInfoFile.bytes == content
         TestCase.assertContainSame(attrs.permissions(), [PosixFilePermission.OWNER_READ])
+    }
+
+    void "test copyprojectInfoToProjectFolder, succeeds"() {
+        given:
+        Project project = DomainFactory.createProject()
+        byte[] content = [0, 1, 2, 3]
+        byte[] projectInfoContent = []
+        MockMultipartFile mockMultipartFile = new MockMultipartFile(FILE_NAME, content)
+        mockMultipartFile.originalFilename = FILE_NAME
+
+
+        when:
+        SpringSecurityUtils.doWithAuth("admin") {
+            projectService.createProjectInfoAndUploadFile(project, mockMultipartFile)
+            projectInfoContent = projectService.getProjectInfoContent(CollectionUtils.exactlyOneElement(project.projectInfos))
+        }
+
+        then:
+        projectInfoContent == content
+    }
+
+    void "test copyprojectInfoToProjectFolder, when no file exists, returns []"() {
+        given:
+        Project project = DomainFactory.createProject()
+        byte[] content = [0, 1, 2, 3]
+        byte[] projectInfoContent = []
+        MockMultipartFile mockMultipartFile = new MockMultipartFile(FILE_NAME, content)
+        mockMultipartFile.originalFilename = FILE_NAME
+
+
+        when:
+        SpringSecurityUtils.doWithAuth("admin") {
+            projectService.createProjectInfoAndUploadFile(project, mockMultipartFile)
+            ProjectInfo projectInfo = CollectionUtils.exactlyOneElement(project.projectInfos)
+            FileSystem fs = projectService.fileSystemService.getFilesystemForConfigFileChecksForRealm(projectInfo.project.realm)
+            Path file = fs.getPath(projectInfo.getPath())
+            Files.delete(file)
+
+            projectInfoContent = projectService.getProjectInfoContent(CollectionUtils.exactlyOneElement(project.projectInfos))
+        }
+
+
+        then:
+        projectInfoContent == [] as byte[]
     }
 
     private File makeStatFile(ReferenceGenome referenceGenome, String statFileName) {

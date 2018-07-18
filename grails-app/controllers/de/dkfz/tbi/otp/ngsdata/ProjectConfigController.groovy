@@ -374,6 +374,23 @@ class ProjectConfigController {
         dataToRender.aaData = data
         render dataToRender as JSON
     }
+
+    def download(DownloadProjectInfoCommand cmd) {
+        if (cmd.hasErrors()) {
+            response.sendError(404)
+            return
+        }
+
+        byte[] outputFile = projectService.getProjectInfoContent(cmd.projectInfo)
+
+        if (outputFile) {
+            render(file: outputFile, contentType: "application/octet-stream", fileName: cmd.projectInfo.fileName)
+        } else {
+            flash.message = "No file '${cmd.projectInfo.fileName}' found."
+            redirect(action: "index")
+        }
+
+    }
 }
 
 class UpdateProjectCommand implements Serializable {
@@ -568,4 +585,8 @@ class AddProjectInfoCommand implements Serializable {
 class UpdateCategoryCommand implements Serializable {
     List<String> value = [].withLazyDefault { new String() }
     Project project
+}
+
+class DownloadProjectInfoCommand implements Serializable {
+    ProjectInfo projectInfo
 }

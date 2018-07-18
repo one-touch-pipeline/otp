@@ -170,24 +170,26 @@
                                 value="${customFinalNotification}"/>
                     </td>
                 </tr>
-                <tr>
-                    <td class="myKey"><g:message code="projectOverview.projectInfos"/></td>
-                    <td id="projectInfo">
-                        <g:each var="projectInfo" in="${projectInfos}">
+                <sec:ifAllGranted roles="ROLE_OPERATOR">
+                    <tr>
+                        <td class="myKey"><g:message code="projectOverview.projectInfos"/></td>
+                        <td id="projectInfo">
+                            <g:each var="projectInfo" in="${projectInfos}">
+                                <p>
+                                    <g:message code="projectOverview.projectInfo.creationDate"/>: <g:formatDate date="${projectInfo.dateCreated}" format="yyyy-MM-dd HH:mm:ss" /><br>
+                                    <g:message code="projectOverview.projectInfo.path"/>: <g:link action="download" params='["projectInfo.id": projectInfo.id]'>${projectInfo.getPath()}</g:link>
+                                </p>
+                            </g:each>
                             <p>
-                                <g:message code="projectOverview.projectInfo.creationDate"/>: <g:formatDate date="${projectInfo.dateCreated}" format="yyyy-MM-dd HH:mm:ss" /><br>
-                                <g:message code="projectOverview.projectInfo.path"/>: ${projectInfo.getPath()}
+                            <g:uploadForm action="addProjectInfo" useToken="true">
+                                <input type="file" name="projectInfoFile" id="projectInfoFile" />
+                                <input type="hidden" name="project.id" value="${project.id}"/>
+                                <g:submitButton name="${g.message(code: "projectOverview.projectInfo.add")}"/>
+                            </g:uploadForm>
                             </p>
-                        </g:each>
-                        <p>
-                        <g:uploadForm action="addProjectInfo" useToken="true">
-                            <input type="file" name="projectInfoFile" id="projectInfoFile" />
-                            <input type="hidden" name="project.id" value="${project.id}"/>
-                            <g:submitButton name="${g.message(code: "projectOverview.projectInfo.add")}"/>
-                        </g:uploadForm>
-                        </p>
-                    </td>
-                </tr>
+                        </td>
+                    </tr>
+                </sec:ifAllGranted>
             </table>
         </div>
 

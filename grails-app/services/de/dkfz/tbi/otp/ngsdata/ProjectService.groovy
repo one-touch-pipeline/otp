@@ -195,6 +195,15 @@ class ProjectService {
         uploadProjectInfoToProjectFolder(projectInfo, file.getBytes())
     }
 
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    byte[] getProjectInfoContent(ProjectInfo projectInfo) {
+        assert projectInfo: "No ProjectInfo given"
+        FileSystem fs = fileSystemService.getFilesystemForConfigFileChecksForRealm(projectInfo.project.realm)
+        Path file = fs.getPath(projectInfo.getPath())
+
+        return Files.exists(file) ? file.bytes : []
+    }
+
     private ProjectInfo createProjectInfo(Project project, String fileName) {
         ProjectInfo projectInfo = new ProjectInfo([fileName: fileName])
         project.addToProjectInfos(projectInfo)
