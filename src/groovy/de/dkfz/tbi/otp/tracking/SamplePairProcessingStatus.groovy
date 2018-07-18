@@ -1,7 +1,6 @@
 package de.dkfz.tbi.otp.tracking
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.runYapsa.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.dataprocessing.sophia.*
 import groovy.transform.*
@@ -25,11 +24,8 @@ class SamplePairProcessingStatus {
     final WorkflowProcessingStatus aceseqProcessingStatus
     final AceseqInstance completeAceseqInstance
 
-    final WorkflowProcessingStatus runYapsaProcessingStatus
-    final RunYapsaInstance completeRunYapsaInstance
-
     WorkflowProcessingStatus getVariantCallingProcessingStatus() {
-        return TrackingService.combineStatuses([snvProcessingStatus, indelProcessingStatus, sophiaProcessingStatus, aceseqProcessingStatus, runYapsaProcessingStatus], Closure.IDENTITY)
+        return TrackingService.combineStatuses([snvProcessingStatus, indelProcessingStatus, sophiaProcessingStatus, aceseqProcessingStatus], Closure.IDENTITY)
     }
 
     List<String> variantCallingWorkflowNames() {
