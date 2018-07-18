@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.tracking
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.dataprocessing.sophia.*
 import de.dkfz.tbi.otp.job.jobs.snvcalling.*
@@ -24,6 +25,7 @@ class TrackingService {
     SnvCallingService snvCallingService
     SophiaService sophiaService
     AceseqService aceseqService
+    RunYapsaService runYapsaService
 
     CreateNotificationTextService createNotificationTextService
 
@@ -360,10 +362,14 @@ class TrackingService {
         IndelCallingInstance ici = sp.findLatestIndelCallingInstance()
         AceseqInstance ai = sp.findLatestAceseqInstance()
         SophiaInstance si = sp.findLatestSophiaInstance()
+        RunYapsaInstance ryi = sp.findLatestRunYapsaInstance()
+
         WorkflowProcessingStatus snvStatus = getAnalysisProcessingStatus(sci, sp, snvCallingService)
         WorkflowProcessingStatus indelStatus = getAnalysisProcessingStatus(ici, sp, indelCallingService)
         WorkflowProcessingStatus sophiaStatus = getAnalysisProcessingStatus(si, sp, sophiaService)
         WorkflowProcessingStatus aceseqStatus = getAnalysisProcessingStatus(ai, sp, aceseqService)
+        WorkflowProcessingStatus runYapsaStatus = getAnalysisProcessingStatus(ryi, sp, runYapsaService)
+
         return new SamplePairProcessingStatus(
                 sp,
                 snvStatus,
@@ -374,6 +380,8 @@ class TrackingService {
                 sophiaStatus == ALL_DONE ? si : null,
                 aceseqStatus,
                 aceseqStatus == ALL_DONE ? ai : null,
+                runYapsaStatus,
+                runYapsaStatus == ALL_DONE ? ryi : null,
         )
     }
 

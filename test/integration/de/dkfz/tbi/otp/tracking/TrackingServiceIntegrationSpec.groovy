@@ -23,34 +23,39 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
     SnvCallingService snvCallingService
     SophiaService sophiaService
     AceseqService aceseqService
+    RunYapsaService runYapsaService
     CreateNotificationTextService createNotificationTextService
 
-    ProcessingOption processingOption
-    ProcessingOption processingOption2
+    List<ProcessingOption> referenceGenomeProcessingOptions
 
     static List listPairAnalysis = [
             [
-                    analysisType           : "ICI",
+                    analysisType           : OtrsTicket.ProcessingStep.INDEL,
                     createRoddyBamFile     : "createIndelCallingInstanceWithRoddyBamFiles",
                     completeCallingInstance: "completeIndelCallingInstance",
                     processingStatus       : "indelProcessingStatus"
             ], [
-                    analysisType           : "SCI",
+                    analysisType           : OtrsTicket.ProcessingStep.SNV,
                     createRoddyBamFile     : "createRoddySnvInstanceWithRoddyBamFiles",
                     completeCallingInstance: "completeSnvCallingInstance",
                     processingStatus       : "snvProcessingStatus"
             ], [
-                    analysisType           : "SI",
+                    analysisType           : OtrsTicket.ProcessingStep.SOPHIA,
                     createRoddyBamFile     : "createSophiaInstanceWithRoddyBamFiles",
                     completeCallingInstance: "completeSophiaInstance",
                     processingStatus       : "sophiaProcessingStatus"
             ], [
-                    analysisType           : "AI",
+                    analysisType           : OtrsTicket.ProcessingStep.ACESEQ,
                     createRoddyBamFile     : "createAceseqInstanceWithRoddyBamFiles",
                     completeCallingInstance: "completeAceseqInstance",
                     processingStatus       : "aceseqProcessingStatus"
+            ], [
+                    analysisType           : OtrsTicket.ProcessingStep.RUN_YAPSA,
+                    createRoddyBamFile     : "createRunYapsaInstanceWithRoddyBamFiles",
+                    completeCallingInstance: "completeRunYapsaInstance",
+                    processingStatus       : "runYapsaProcessingStatus"
             ],
-    ]
+    ]*.asImmutable().asImmutable()
 
     void setup() {
         // Overwrite the autowired service with a new instance for each test, so mocks do not have to be cleaned up
@@ -60,25 +65,41 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
                 snvCallingService: snvCallingService,
                 sophiaService: sophiaService,
                 aceseqService: aceseqService,
+                runYapsaService: runYapsaService,
                 createNotificationTextService: createNotificationTextService,
         )
         DomainFactory.createAllAnalysableSeqTypes()
-        processingOption = DomainFactory.createProcessingOptionLazy([
-                name: ProcessingOption.OptionName.PIPELINE_ACESEQ_REFERENCE_GENOME,
-                type: null,
-                project: null,
-                value: 'test',
-        ])
-        processingOption2 = DomainFactory.createProcessingOptionLazy([
-                name: ProcessingOption.OptionName.PIPELINE_SOPHIA_REFERENCE_GENOME,
-                type: null,
-                project: null,
-                value: 'test',
-        ])
+
+        referenceGenomeProcessingOptions = [
+                ProcessingOption.OptionName.PIPELINE_ACESEQ_REFERENCE_GENOME,
+                ProcessingOption.OptionName.PIPELINE_SOPHIA_REFERENCE_GENOME,
+                ProcessingOption.OptionName.PIPELINE_RUNYAPSA_REFERENCE_GENOME,
+        ].collect {
+            DomainFactory.createProcessingOptionLazy([
+                    name: it,
+                    type: null,
+                    project: null,
+                    value: 'test',
+            ])
+        }
     }
 
     void cleanup() {
         TestCase.removeMetaClass(TrackingService, trackingService)
+    }
+
+    void "check that all analysis are provided in the list 'listPairAnalysis'"() {
+        given:
+        List<OtrsTicket.ProcessingStep> analysisProcessingSteps = OtrsTicket.ProcessingStep.values() - [
+                OtrsTicket.ProcessingStep.INSTALLATION,
+                OtrsTicket.ProcessingStep.FASTQC,
+                OtrsTicket.ProcessingStep.ALIGNMENT,
+        ]
+
+        List<OtrsTicket.ProcessingStep> testedProcessingSteps = listPairAnalysis*.analysisType
+
+        expect:
+        TestCase.assertContainSame(analysisProcessingSteps, testedProcessingSteps)
     }
 
     def 'test findAllOtrsTickets' () {
@@ -798,6 +819,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         mwpStatus.indelProcessingStatus == NOTHING_DONE_WONT_DO
         mwpStatus.sophiaProcessingStatus == NOTHING_DONE_WONT_DO
         mwpStatus.aceseqProcessingStatus== NOTHING_DONE_WONT_DO
+        mwpStatus.runYapsaProcessingStatus== NOTHING_DONE_WONT_DO
         createSeqTrackProcessingStatus(mwpStatus).snvProcessingStatus == NOTHING_DONE_WONT_DO
     }
 
@@ -869,16 +891,22 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         MergingWorkPackageProcessingStatus mwpStatus = createMergingWorkPackageProcessingStatus(
                 analysisInstance.sampleType1BamFile)
 
-        processingOption.value = analysisInstance.samplePair.mergingWorkPackage1.referenceGenome.name
-        processingOption.save(flush: true)
+        referenceGenomeProcessingOptions.each {
+            it.value = analysisInstance.samplePair.mergingWorkPackage1.referenceGenome.name
+            it.save(flush: true)
+        }
 
-        processingOption2.value = analysisInstance.samplePair.mergingWorkPackage1.referenceGenome.name
-        processingOption2.save(flush: true)
-
-        if (pairAnalysis.analysisType == "AI") {
-            analysisInstance.samplePair.sophiaProcessingStatus = SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED
-            analysisInstance.samplePair.save(flush: true)
-            DomainFactory.createSophiaInstance(analysisInstance.samplePair)
+        switch (pairAnalysis.analysisType) {
+            case OtrsTicket.ProcessingStep.ACESEQ:
+                analysisInstance.samplePair.sophiaProcessingStatus = SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED
+                analysisInstance.samplePair.save(flush: true)
+                DomainFactory.createSophiaInstance(analysisInstance.samplePair)
+                break
+            case OtrsTicket.ProcessingStep.RUN_YAPSA:
+                analysisInstance.samplePair.snvProcessingStatus = SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED
+                analysisInstance.samplePair.save(flush: true)
+                DomainFactory.createRoddySnvInstanceWithRoddyBamFiles([samplePair:  analysisInstance.samplePair])
+                break
         }
 
         analysisInstance.delete(flush: true)
@@ -909,11 +937,10 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         MergingWorkPackageProcessingStatus mwpStatus = createMergingWorkPackageProcessingStatus(
                 analysisInstance.sampleType1BamFile)
 
-        processingOption.value = analysisInstance.samplePair.mergingWorkPackage1.referenceGenome.name
-        processingOption.save(flush: true)
-
-        processingOption2.value = analysisInstance.samplePair.mergingWorkPackage1.referenceGenome.name
-        processingOption2.save(flush: true)
+        referenceGenomeProcessingOptions.each {
+            it.value = analysisInstance.samplePair.mergingWorkPackage1.referenceGenome.name
+            it.save(flush: true)
+        }
 
         analysisInstance.delete(flush: true)
 

@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
 import de.dkfz.tbi.otp.TimeStamped
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
 import de.dkfz.tbi.otp.dataprocessing.sophia.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
@@ -188,6 +189,9 @@ class SamplePair implements TimeStamped, Entity {
         return findLatestInstance(AceseqInstance.class) as AceseqInstance
     }
 
+    RunYapsaInstance findLatestRunYapsaInstance() {
+        return findLatestInstance(RunYapsaInstance.class) as RunYapsaInstance
+    }
 
     private BamFilePairAnalysis findLatestInstance(Class instanceClass) {
         BamFilePairAnalysis criteria = instanceClass.createCriteria().get {

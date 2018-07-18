@@ -81,4 +81,6 @@ databaseChangeLog = {
 	changeSet(author: "strubel", id:"OTP-2895-SQL") {
 		sqlFile(path: 'changelogs/2018/OTP-2895.sql')
 	}
+
+	include file: 'changelogs/2018/yapsa-notification-fix.groovy'
 }

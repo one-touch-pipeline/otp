@@ -183,7 +183,8 @@ class TrackingServiceSpec extends Specification {
                 getSnvProcessingStatus         : { -> NOTHING_DONE_WONT_DO },
                 getIndelProcessingStatus       : { -> NOTHING_DONE_MIGHT_DO },
                 getSophiaProcessingStatus      : { -> NOTHING_DONE_MIGHT_DO },
-                getAceseqProcessingStatus      : { -> NOTHING_DONE_MIGHT_DO }
+                getAceseqProcessingStatus      : { -> NOTHING_DONE_MIGHT_DO },
+                getRunYapsaProcessingStatus    : { -> NOTHING_DONE_WONT_DO },
         ] as ProcessingStatus
         Run runA = DomainFactory.createRun(name: 'runA')
         Run runB = DomainFactory.createRun(name: 'runB')
@@ -314,13 +315,13 @@ ILSe 5678, runA, lane 1, ${sampleText}
         when:
         ProcessingStatus processingStatus1 = trackingService.getProcessingStatus([seqTrack1, seqTrack2])
         then:
-        TestCase.containSame(processingStatus1.seqTrackProcessingStatuses*.seqTrack, [seqTrack1, seqTrack2])
+        TestCase.assertContainSame(processingStatus1.seqTrackProcessingStatuses*.seqTrack, [seqTrack1, seqTrack2])
         processingStatus1.installationProcessingStatus == processingStatus
 
         when:
         ProcessingStatus processingStatus2 = trackingService.getProcessingStatus([seqTrack3, seqTrack4])
         then:
-        TestCase.containSame(processingStatus2.seqTrackProcessingStatuses*.seqTrack, [seqTrack3, seqTrack4])
+        TestCase.assertContainSame(processingStatus2.seqTrackProcessingStatuses*.seqTrack, [seqTrack3, seqTrack4])
         processingStatus2.fastqcProcessingStatus == processingStatus
 
         where:
