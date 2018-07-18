@@ -16,7 +16,7 @@ abstract class AbstractBamFilePairAnalysisStartJobIntegrationSpec extends Integr
 
     void "getConfig when config is null, throw an exception"() {
         given:
-        Pipeline pipeline = createPipeline()
+        createPipeline()
         SamplePair samplePair = DomainFactory.createSamplePair()
 
         when:
@@ -24,29 +24,17 @@ abstract class AbstractBamFilePairAnalysisStartJobIntegrationSpec extends Integr
 
         then:
         RuntimeException e = thrown()
-        e.message ==~ /No .*Config.* found for .*/
+        e.message.contains("No ${RoddyWorkflowConfig.simpleName} found for")
     }
 
     void "getConfig when call fine"() {
         given:
         SamplePair samplePair = DomainFactory.createSamplePair()
-        Pipeline pipeline = createPipeline()
-        Map configProperties = [
+        ConfigPerProject configPerProject = DomainFactory.createRoddyWorkflowConfig(
+                seqType: samplePair.seqType,
+                pipeline: createPipeline(),
                 project: samplePair.project,
-                pipeline: pipeline,
-        ]
-        ConfigPerProject configPerProject
-
-        if (pipeline.usesRoddy()) {
-            configPerProject = DomainFactory.createRoddyWorkflowConfig(
-                    configProperties +
-                    [seqType: samplePair.seqType,]
-            )
-        } else if (pipeline.name == Pipeline.Name.RUN_YAPSA) {
-            configPerProject = DomainFactory.createRunYapsaConfig(configProperties)
-        } else {
-            throw new UnsupportedOperationException("cannot figure out which workflow config to create")
-        }
+        )
 
         expect:
         configPerProject == getService().getConfig(samplePair)
@@ -174,22 +162,11 @@ abstract class AbstractBamFilePairAnalysisStartJobIntegrationSpec extends Integr
     SamplePair setupSamplePair() {
         def map = DomainFactory.createProcessableSamplePair()
         SamplePair samplePair = map.samplePair
-
-        Pipeline pipeline = createPipeline()
-        Map configProperties = [
+        DomainFactory.createRoddyWorkflowConfig(
+                seqType: samplePair.seqType,
                 project: samplePair.project,
-                pipeline: pipeline,
-        ]
-        if (pipeline.usesRoddy()) {
-            DomainFactory.createRoddyWorkflowConfig(configProperties + [
-                    seqType: samplePair.seqType,
-            ])
-        } else if (pipeline.name == Pipeline.Name.RUN_YAPSA) {
-            DomainFactory.createRunYapsaConfig(configProperties)
-        } else {
-            throw new UnsupportedOperationException("cannot figure out which workflow config to create")
-        }
-
+                pipeline: createPipeline()
+        )
         return samplePair
     }
 }

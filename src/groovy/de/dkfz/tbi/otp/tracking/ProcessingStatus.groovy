@@ -60,12 +60,9 @@ public class ProcessingStatus {
     }
 
     WorkflowProcessingStatus getAceseqProcessingStatus() {
-        return TrackingService.combineStatuses(seqTrackProcessingStatuses, { it.aceseqProcessingStatus })
+        return  TrackingService.combineStatuses(seqTrackProcessingStatuses, { it.aceseqProcessingStatus })
     }
 
-    WorkflowProcessingStatus getRunYapsaProcessingStatus() {
-        return TrackingService.combineStatuses(seqTrackProcessingStatuses, { it.runYapsaProcessingStatus })
-    }
 
 
     @Override
@@ -78,7 +75,6 @@ SNV:          ${snvProcessingStatus}
 Indel:        ${indelProcessingStatus}
 SOPHIA:       ${sophiaProcessingStatus}
 ACEseq:       ${aceseqProcessingStatus}
-runYAPSA:     ${runYapsaProcessingStatus}
 """
     }
 }

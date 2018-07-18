@@ -123,6 +123,16 @@ class ConfigService implements ApplicationContextAware {
         return getBooleanValue("otp.jobsystem.start", false)
     }
 
+    @Deprecated
+    static DateTimeZone getDateTimeZone() {
+        String zoneName = ProcessingOptionService.findOptionSafe(ProcessingOption.OptionName.TIME_ZONE, null, null)
+        if (zoneName) {
+            return DateTimeZone.forID(zoneName)
+        } else {
+            return DateTimeZone.default
+        }
+    }
+
     static ZoneId getTimeZoneId() {
         String zoneName = ProcessingOptionService.findOptionSafe(ProcessingOption.OptionName.TIME_ZONE, null, null)
         if (zoneName) {

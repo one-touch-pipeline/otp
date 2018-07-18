@@ -54,18 +54,18 @@ class RoddyWorkflowConfig extends ConfigPerProject implements AlignmentConfig {
                     obj.id ? true : val != null
                 }
         pluginVersion blank: false
-        obsoleteDate validator: { val, obj ->
-            if (!val) {
+        obsoleteDate validator: { obsolete, config ->
+            if (!obsolete) {
                 // This validator asserts that the config is unique for the given properties.
                 // Unique constraint can't be used since individual is optional and can be null.
                 Long id = atMostOneElement(RoddyWorkflowConfig.findAllWhere(
-                        project:        obj.project,
-                        seqType:        obj.seqType,
-                        pipeline:       obj.pipeline,
-                        individual:     obj.individual,
-                        obsoleteDate:   null,
+                        project: config.project,
+                        seqType: config.seqType,
+                        pipeline: config.pipeline,
+                        individual: config.individual,
+                        obsoleteDate: null,
                 ))?.id
-                !id || id == obj.id
+                !id || id == config.id
             }
         }
         configVersion nullable: true, //needs to be nullable because of old data

@@ -17,7 +17,7 @@ class Pipeline implements Entity {
         RODDY_RNA_ALIGNMENT (Type.ALIGNMENT, true, 'STAR'),
         RODDY_SOPHIA        (Type.SOPHIA, true, null),
         RODDY_ACESEQ        (Type.ACESEQ, true, null),
-        RUN_YAPSA           (Type.MUTATIONAL_SIGNATURE, false, null),
+        RUN_YAPSA           (Type.RUN_YAPSA, false, null),
 
         final Type type
         final boolean usesRoddy
@@ -52,7 +52,7 @@ class Pipeline implements Entity {
         ACESEQ,
         ALIGNMENT,
         INDEL,
-        MUTATIONAL_SIGNATURE,
+        RUN_YAPSA,
         SNV,
         SOPHIA,
     }

@@ -45,13 +45,11 @@ class RoddySnvCallingStartJobIntegrationSpec extends AbstractBamFilePairAnalysis
     @Override
     SamplePair setupSamplePair() {
         SamplePair samplePair = DomainFactory.createSamplePairWithProcessedMergedBamFiles()
-
         DomainFactory.createRoddyWorkflowConfig(
                 project: samplePair.project,
                 seqType: samplePair.seqType,
                 pipeline: DomainFactory.createRoddySnvPipelineLazy(),
         )
-
         return samplePair
     }
 }

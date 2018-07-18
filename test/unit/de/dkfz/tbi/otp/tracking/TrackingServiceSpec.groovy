@@ -209,7 +209,6 @@ SNV:          NOTHING_DONE_WONT_DO
 Indel:        NOTHING_DONE_MIGHT_DO
 SOPHIA:       NOTHING_DONE_MIGHT_DO
 ACEseq:       NOTHING_DONE_MIGHT_DO
-runYAPSA:     NOTHING_DONE_WONT_DO
 
 6 SeqTrack(s) in ticket ${ticket.ticketNumber}:
 runA, lane 8, ${sampleText}

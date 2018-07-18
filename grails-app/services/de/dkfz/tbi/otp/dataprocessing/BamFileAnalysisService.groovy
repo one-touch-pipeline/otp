@@ -1,9 +1,10 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.ProcessingStatus
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 abstract class BamFileAnalysisService {
 
@@ -79,7 +80,12 @@ abstract class BamFileAnalysisService {
 
 
                 //check that the config file is available with at least one script with same version
-                checkConfig() +
+                "AND EXISTS (FROM ${RoddyWorkflowConfig.name} cps " +
+                "   WHERE cps.project = sp.mergingWorkPackage1.sample.individual.project " +
+                "   AND cps.pipeline.type = :analysis " +
+                "   AND cps.seqType = sp.mergingWorkPackage1.seqType " +
+                "   AND cps.obsoleteDate is null " +
+                ") " +
 
 
                 //check that this sample pair is not in process
@@ -123,11 +129,11 @@ abstract class BamFileAnalysisService {
         }
     }
 
-    protected String pipelineSpecificBamFileChecks(String number) {
+    protected String checkReferenceGenome(){
         return ''
     }
 
-    protected String checkReferenceGenome(){
+    protected String pipelineSpecificBamFileChecks(String number) {
         return ''
     }
 
@@ -144,18 +150,5 @@ abstract class BamFileAnalysisService {
     abstract protected Pipeline.Type getAnalysisType()
     abstract protected List<SeqType> getSeqTypes()
     abstract Pipeline.Name getPipelineName()
-    abstract String getConfigName()
-
-    String checkConfig() {
-        return "AND EXISTS (FROM ${getConfigName()} cps " +
-                "   WHERE cps.project = sp.mergingWorkPackage1.sample.individual.project " +
-                "   AND cps.pipeline.type = :analysis " +
-                "   AND cps.obsoleteDate is null " +
-                additionalConfigParameters() +
-                ") "
-    }
-    String additionalConfigParameters() {
-        return ""
-    }
 
 }

@@ -3,7 +3,7 @@ package de.dkfz.tbi.otp.dataprocessing
 import de.dkfz.tbi.otp.dataprocessing.sophia.*
 import de.dkfz.tbi.otp.ngsdata.*
 
-class SophiaService extends RoddyBamFileAnalysisService {
+class SophiaService extends BamFileAnalysisService {
 
     ProcessingOptionService processingOptionService
 
@@ -33,6 +33,11 @@ class SophiaService extends RoddyBamFileAnalysisService {
     }
 
     @Override
+    protected String checkReferenceGenome() {
+        return 'AND sp.mergingWorkPackage1.referenceGenome in (:referenceGenomes)'
+    }
+
+    @Override
     protected String pipelineSpecificBamFileChecks(String number) {
         return """
         AND (
@@ -45,12 +50,6 @@ class SophiaService extends RoddyBamFileAnalysisService {
         )
         """.replaceAll('\n', ' ')
     }
-
-    @Override
-    protected String checkReferenceGenome() {
-        return 'AND sp.mergingWorkPackage1.referenceGenome in (:referenceGenomes)'
-    }
-
     @Override
     public Map<String, Object> checkReferenceGenomeMap() {
         String referenceNamesString = processingOptionService.findOptionAssure(ProcessingOption.OptionName.PIPELINE_SOPHIA_REFERENCE_GENOME, null, null)
