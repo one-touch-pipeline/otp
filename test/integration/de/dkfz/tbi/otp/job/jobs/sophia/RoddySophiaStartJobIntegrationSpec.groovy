@@ -37,12 +37,14 @@ class RoddySophiaStartJobIntegrationSpec extends AbstractBamFilePairAnalysisStar
     @Override
     SamplePair setupSamplePair() {
         SamplePair samplePair = super.setupSamplePair()
+
         DomainFactory.createProcessingOptionLazy([
                 name: ProcessingOption.OptionName.PIPELINE_SOPHIA_REFERENCE_GENOME,
                 type: null,
                 project: null,
                 value: samplePair.mergingWorkPackage1.referenceGenome.name,
         ])
+
         return samplePair
     }
 }

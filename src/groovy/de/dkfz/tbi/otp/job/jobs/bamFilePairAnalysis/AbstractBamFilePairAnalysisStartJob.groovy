@@ -1,16 +1,19 @@
 package de.dkfz.tbi.otp.job.jobs.bamFilePairAnalysis
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.job.jobs.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.CollectionUtils
 import org.joda.time.*
 import org.joda.time.format.*
 import org.springframework.beans.factory.annotation.*
 import org.springframework.scheduling.annotation.*
+
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 
 abstract class AbstractBamFilePairAnalysisStartJob extends AbstractStartJobImpl implements RestartableStartJob {
 
@@ -85,29 +88,19 @@ abstract class AbstractBamFilePairAnalysisStartJob extends AbstractStartJobImpl 
         executionService.executeCommandReturnProcessOutput(realm, deleteFiles)
     }
 
-
     protected String getInstanceName(ConfigPerProject config) {
-        String date = DateTimeFormat.forPattern("yyyy-MM-dd_HH'h'mm_Z").withZone(ConfigService.getDateTimeZone()).print(Instant.now())
-        return "results_${config.pluginVersion.replaceAll(":", "-")}_${config.configVersion}_${date}"
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH'h'mm_VV")
+        ZonedDateTime time = ZonedDateTime.of(LocalDateTime.now(), ConfigService.getTimeZoneId())
+        return time.format(formatter).replaceAll('/', '_')
     }
 
-    protected ConfigPerProject getConfig(SamplePair samplePair) {
-        Pipeline pipeline = getBamFileAnalysisService().getPipeline()
-        RoddyWorkflowConfig config = (RoddyWorkflowConfig)RoddyWorkflowConfig.getLatestForIndividual(
-                samplePair.individual, samplePair.seqType, pipeline)
-
-        if (config == null) {
-            throw new RuntimeException("No ${RoddyWorkflowConfig.simpleName} found for ${Pipeline.simpleName} ${pipeline}, ${Individual.simpleName} ${samplePair.individual} (${Project.simpleName} ${samplePair.project}), ${SeqType.simpleName} ${samplePair.seqType}")
-        }
-        return config
-    }
 
     SamplePair findSamplePairToProcess(short minPriority) {
         return getBamFileAnalysisService().samplePairForProcessing(minPriority)
     }
 
+    protected abstract ConfigPerProject getConfig(SamplePair samplePair)
     protected abstract BamFileAnalysisService getBamFileAnalysisService()
     protected abstract void prepareCreatingTheProcessAndTriggerTracking(BamFilePairAnalysis bamFilePairAnalysis)
-
 
 }

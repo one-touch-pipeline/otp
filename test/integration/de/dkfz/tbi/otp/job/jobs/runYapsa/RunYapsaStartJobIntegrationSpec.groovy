@@ -1,56 +1,64 @@
-package de.dkfz.tbi.otp.job.jobs.aceseq
+package de.dkfz.tbi.otp.job.jobs.runYapsa
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.job.jobs.*
 import de.dkfz.tbi.otp.job.jobs.bamFilePairAnalysis.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import org.springframework.beans.factory.annotation.*
 
-class RoddyAceseqStartJobIntegrationSpec extends AbstractBamFilePairAnalysisStartJobWithDependenciesIntegrationSpec {
+class RunYapsaStartJobIntegrationSpec extends AbstractBamFilePairAnalysisStartJobWithDependenciesIntegrationSpec {
 
     @Autowired
-    RoddyAceseqStartJob roddyAceseqStartJob
+    RunYapsaStartJob runYapsaStartJob
 
     @Override
     Pipeline createPipeline() {
-        DomainFactory.createAceseqPipelineLazy()
+        DomainFactory.createRunYapsaPipelineLazy()
     }
 
     @Override
     AbstractBamFilePairAnalysisStartJob getService() {
-        return roddyAceseqStartJob
+        return runYapsaStartJob
     }
 
     @Override
     BamFilePairAnalysis getInstance() {
-        return DomainFactory.createAceseqInstanceWithRoddyBamFiles()
+        return DomainFactory.createRunYapsaInstanceWithRoddyBamFiles()
     }
 
     @Override
     Date getStartedDate(OtrsTicket otrsTicket) {
-        return otrsTicket.aceseqStarted
+        return otrsTicket.runYapsaStarted
     }
 
     @Override
     SamplePair.ProcessingStatus getProcessingStatus(SamplePair samplePair) {
-        return samplePair.aceseqProcessingStatus
+        return samplePair.runYapsaProcessingStatus
     }
 
     @Override
     SamplePair setupSamplePair() {
         SamplePair samplePair = super.setupSamplePair()
 
-        // prepare a "finished" sophia analysis, since we depend on that.
-        samplePair.sophiaProcessingStatus = SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED
+        // at time of writing, runYapsa supports only WES+WGS
+        // Make sure they are available for configs
+        DomainFactory.createExomeSeqType()
+        DomainFactory.createWholeGenomeSeqType()
+
+        // fake a "finished" SNV calling for us to analyse
+        samplePair.snvProcessingStatus = SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED
         samplePair.save(flush: true)
+
         createDependeeInstance(samplePair, AnalysisProcessingStates.FINISHED)
 
-        // use whatever reference genome the tests auto-generated as the correct ones.
+        // use whatever auto-generated reference genome the test generated as the only "usable" one.
         DomainFactory.createProcessingOptionLazy([
-                name: ProcessingOption.OptionName.PIPELINE_ACESEQ_REFERENCE_GENOME,
-                type: null,
+                name   : ProcessingOption.OptionName.PIPELINE_RUNYAPSA_REFERENCE_GENOME,
+                type   : null,
                 project: null,
                 value: samplePair.mergingWorkPackage1.referenceGenome.name,
         ])
@@ -60,11 +68,11 @@ class RoddyAceseqStartJobIntegrationSpec extends AbstractBamFilePairAnalysisStar
 
     @Override
     void setDependencyProcessingStatus(SamplePair samplePair, SamplePair.ProcessingStatus dependeeProcessingStatus) {
-        samplePair.sophiaProcessingStatus = dependeeProcessingStatus
+        samplePair.snvProcessingStatus = dependeeProcessingStatus
     }
 
     @Override
     void createDependeeInstance(SamplePair samplePair, AnalysisProcessingStates dependeeAnalysisProcessingState) {
-        DomainFactory.createSophiaInstance(samplePair, [processingState: dependeeAnalysisProcessingState])
+        DomainFactory.createRoddySnvCallingInstance(samplePair, [processingState: dependeeAnalysisProcessingState,])
     }
 }

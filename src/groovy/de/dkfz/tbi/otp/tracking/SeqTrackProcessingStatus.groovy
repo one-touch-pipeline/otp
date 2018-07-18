@@ -34,4 +34,8 @@ class SeqTrackProcessingStatus {
     WorkflowProcessingStatus getAceseqProcessingStatus() {
         return TrackingService.combineStatuses(mergingWorkPackageProcessingStatuses, { it.aceseqProcessingStatus } )
     }
+
+    WorkflowProcessingStatus getRunYapsaProcessingStatus() {
+        return TrackingService.combineStatuses(mergingWorkPackageProcessingStatuses, { it.runYapsaProcessingStatus } )
+    }
 }

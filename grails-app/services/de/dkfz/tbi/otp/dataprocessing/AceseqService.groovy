@@ -3,7 +3,7 @@ package de.dkfz.tbi.otp.dataprocessing
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.ngsdata.*
 
-class AceseqService extends BamFileAnalysisService {
+class AceseqService extends RoddyBamFileAnalysisService {
 
     ProcessingOptionService processingOptionService
 

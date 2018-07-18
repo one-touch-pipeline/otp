@@ -1,9 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
-import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.ngsdata.*
 import grails.test.spock.*
 import spock.lang.*
@@ -11,9 +8,6 @@ import spock.lang.*
 import static de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.*
 
 class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
-
-    final static String ARBITRARY_INSTANCE_NAME = '2014-08-25_15h32'
-    final static double COVERAGE_TOO_LOW = 20.0
 
     SamplePair samplePair1
     ConfigPerProject roddyConfig1
@@ -24,6 +18,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
     IndelCallingService indelCallingService
     AceseqService aceseqService
     SophiaService sophiaService
+    RunYapsaService runYapsaService
 
     def setup() {
         def map = DomainFactory.createProcessableSamplePair()
@@ -36,56 +31,27 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         DomainFactory.createAllAnalysableSeqTypes()
     }
 
-    @Unroll
-    void "samplePairForProcessing for Instance #processingStatus returns samplePair"() {
-        given:
-        samplePair1."${processingStatus}" = ProcessingStatus.NEEDS_PROCESSING
-        if (processingStatus == "aceseqProcessingStatus") {
-            samplePair1.sophiaProcessingStatus = ProcessingStatus.NO_PROCESSING_NEEDED
-            DomainFactory.createSophiaInstance(samplePair1)
-        }
-        assert samplePair1.save(flush: true)
-        if (processingStatus != "snvProcessingStatus") {
-            DomainFactory.createRoddyWorkflowConfig(
-                    seqType: samplePair1.seqType,
-                    project: samplePair1.project,
-                    pipeline: pipeline()
-            )
-        }
-        DomainFactory.createProcessingOptionLazy([
-                name: ProcessingOption.OptionName.PIPELINE_ACESEQ_REFERENCE_GENOME,
-                type: null,
-                project: null,
-                value: samplePair1.mergingWorkPackage1.referenceGenome.name,
-        ])
-        DomainFactory.createProcessingOptionLazy([
-                name: ProcessingOption.OptionName.PIPELINE_SOPHIA_REFERENCE_GENOME,
-                type: null,
-                project: null,
-                value: samplePair1.mergingWorkPackage1.referenceGenome.name,
-        ])
-
-        expect:
-        samplePair1 == service.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
-
-        where:
-        processingStatus         | pipeline                                       | service
-        "indelProcessingStatus"  | { DomainFactory.createIndelPipelineLazy() }    | this.indelCallingService
-        "sophiaProcessingStatus" | { DomainFactory.createSophiaPipelineLazy() }   | this.sophiaService
-        "aceseqProcessingStatus" | { DomainFactory.createAceseqPipelineLazy() }   | this.aceseqService
-        "snvProcessingStatus"    | { DomainFactory.createRoddySnvPipelineLazy() } | this.snvCallingService
-    }
 
     @Unroll
-    void "samplePairForProcessing, wrong referenceGenome"() {
+    void "samplePairForProcessing shouldn't find anything for wrong referenceGenome"() {
         given:
         samplePair1."${processingStatus}" = ProcessingStatus.NEEDS_PROCESSING
         assert samplePair1.save(flush: true)
-        DomainFactory.createRoddyWorkflowConfig(
-                seqType: samplePair1.seqType,
+        Pipeline pipeline1 = pipeline()
+        Map configProperties = [
                 project: samplePair1.project,
-                pipeline:  pipeline()
-        )
+                pipeline:  pipeline1
+        ]
+        if (pipeline1.usesRoddy()) {
+            DomainFactory.createRoddyWorkflowConfig(configProperties + [
+                    seqType: samplePair1.seqType,
+            ])
+        } else if (pipeline1.name == Pipeline.Name.RUN_YAPSA) {
+            DomainFactory.createRunYapsaConfig(configProperties)
+        } else {
+            throw new UnsupportedOperationException("cannot figure out which workflow config to create")
+        }
+
         DomainFactory.createProcessingOptionLazy([
                 name: optionName,
                 type: null,
@@ -97,14 +63,15 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         null == service.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
 
         where:
-        processingStatus         | pipeline                                     | service            | optionName
-        "sophiaProcessingStatus" | { DomainFactory.createSophiaPipelineLazy() } | this.sophiaService | ProcessingOption.OptionName.PIPELINE_SOPHIA_REFERENCE_GENOME
-        "aceseqProcessingStatus" | { DomainFactory.createAceseqPipelineLazy() } | this.aceseqService | ProcessingOption.OptionName.PIPELINE_ACESEQ_REFERENCE_GENOME
+        processingStatus            | pipeline                                      | service               | optionName
+        "sophiaProcessingStatus"    | { DomainFactory.createSophiaPipelineLazy() }  | this.sophiaService    | ProcessingOption.OptionName.PIPELINE_SOPHIA_REFERENCE_GENOME
+        "aceseqProcessingStatus"    | { DomainFactory.createAceseqPipelineLazy() }  | this.aceseqService    | ProcessingOption.OptionName.PIPELINE_ACESEQ_REFERENCE_GENOME
+        "runYapsaProcessingStatus"  | { DomainFactory.createRunYapsaPipelineLazy() }| this.runYapsaService  | ProcessingOption.OptionName.PIPELINE_RUNYAPSA_REFERENCE_GENOME
 
     }
 
     @Unroll
-    void "samplePairForProcessing does not return a sample pair since qc of bam file is too bad"() {
+    void "samplePairForProcessing should not return a sample pair when qc of bam file is too bad"() {
         given:
         samplePair1."${processingStatus}" = ProcessingStatus.NEEDS_PROCESSING
         if (processingStatus == "aceseqProcessingStatus") {
@@ -151,7 +118,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
 
 
     @Unroll
-    void "samplePairForProcessing returns a sample pair since qc of bam file is okay"() {
+    void "samplePairForProcessing should return a sample pair when qc of bam file is okay"() {
         given:
         samplePair1."${processingStatus}" = ProcessingStatus.NEEDS_PROCESSING
         if (processingStatus == "aceseqProcessingStatus") {
@@ -196,480 +163,5 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         "indelProcessingStatus"  | { DomainFactory.createIndelPipelineLazy() }  | this.indelCallingService  | AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED
         "sophiaProcessingStatus" | { DomainFactory.createSophiaPipelineLazy() } | this.sophiaService        | AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED
         "aceseqProcessingStatus" | { DomainFactory.createAceseqPipelineLazy() } | this.aceseqService        | AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED
-    }
-
-
-    void "samplePairForProcessing when #status is NEEDS_PROCESSING but the #service is requested"() {
-        given:
-        samplePair1[status] = ProcessingStatus.NEEDS_PROCESSING
-        samplePair1[otherStatus] = ProcessingStatus.NO_PROCESSING_NEEDED
-        assert samplePair1.save(flush: true)
-        DomainFactory.createRoddyWorkflowConfig(
-                seqType: samplePair1.seqType,
-                project: samplePair1.project,
-                pipeline: DomainFactory.createIndelPipelineLazy()
-        )
-
-        expect:
-        if (service == "INDEL") {
-            assert null == indelCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
-        } else {
-            assert null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
-        }
-
-
-        where:
-        status                  | otherStatus             | service
-        "indelProcessingStatus" | "snvProcessingStatus"   | "SNV"
-        "snvProcessingStatus"   | "indelProcessingStatus" | "INDEL"
-
-    }
-
-    @Unroll
-    void "samplePairForProcessing when config has wrong #property"() {
-        given:
-        if (property == "project") {
-            roddyConfig1.project = DomainFactory.createProject(name: "otherProject", dirName: "tmp")
-        } else {
-            roddyConfig1.seqType = DomainFactory.createExomeSeqType()
-        }
-        assert roddyConfig1.save(flush: true)
-
-        expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
-
-        where:
-        property << ["project", "seqType"]
-    }
-
-    void "samplePairForProcessing when config is obsolete"() {
-        given:
-        roddyConfig1.obsoleteDate = new Date()
-        assert roddyConfig1.save(flush: true)
-
-        expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
-    }
-
-    void "samplePairForProcessing when the snvCallingInstance is already in progress"() {
-        given:
-        DomainFactory.createRoddySnvCallingInstance(
-                instanceName: ARBITRARY_INSTANCE_NAME,
-                samplePair: samplePair1,
-                config: roddyConfig1,
-                sampleType1BamFile: bamFile1_1,
-                sampleType2BamFile: bamFile2_1
-        )
-
-        expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
-    }
-
-
-    void "samplePairForProcessing when a snvCallingInstance already finished"() {
-        given:
-        DomainFactory.createRoddySnvCallingInstance(
-                instanceName: ARBITRARY_INSTANCE_NAME,
-                samplePair: samplePair1,
-                config: roddyConfig1,
-                sampleType1BamFile: bamFile1_1,
-                sampleType2BamFile: bamFile2_1,
-                processingState: AnalysisProcessingStates.FINISHED
-        )
-
-        expect:
-        samplePair1 == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
-    }
-
-    void "samplePairForProcessing when other samplePair inProcess"() {
-        given:
-        def map2 = DomainFactory.createProcessableSamplePair()
-        SamplePair samplePair2 = map2.samplePair
-
-        DomainFactory.createRoddySnvCallingInstance(
-                instanceName: ARBITRARY_INSTANCE_NAME,
-                samplePair: samplePair2,
-                config: roddyConfig1,
-                sampleType1BamFile: map2.bamFile1,
-                sampleType2BamFile: map2.bamFile2
-        )
-
-        expect:
-        samplePair1.individual != samplePair2.individual
-        samplePair1 == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
-    }
-
-
-    @Unroll
-    void "samplePairForProcessing when bamFile#number does not contain all seqTracks"() {
-        given:
-        if (number == 1) {
-            DomainFactory.createSeqTrackWithDataFiles(bamFile1_1.mergingWorkPackage)
-        } else {
-            DomainFactory.createSeqTrackWithDataFiles(bamFile2_1.mergingWorkPackage)
-        }
-
-        expect:
-        samplePair1 == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
-
-        where:
-        number << [1, 2]
-
-    }
-
-
-    @Unroll
-    void "samplePairForProcessing when no samplepair for bamFile#number exists"() {
-        given:
-        MergingWorkPackage withSamplePair
-        MergingWorkPackage withoutSamplePair
-        if (number == 1) {
-            withSamplePair = samplePair1.mergingWorkPackage2
-            withoutSamplePair = samplePair1.mergingWorkPackage1
-        } else {
-            withSamplePair = samplePair1.mergingWorkPackage1
-            withoutSamplePair = samplePair1.mergingWorkPackage2
-        }
-
-        MergingWorkPackage otherMwp = DomainFactory.createMergingWorkPackage(withSamplePair)
-        DomainFactory.createSampleTypePerProject(project: samplePair1.project, sampleType: otherMwp.sampleType, category: SampleType.Category.DISEASE)
-        DomainFactory.createSamplePair(otherMwp, withoutSamplePair)
-        samplePair1.delete(flush: true)
-
-        expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
-
-        where:
-        number << [1, 2]
-    }
-
-
-    @Unroll
-    void "samplePairForProcessing when bamFile#number is still in progress"() {
-        given:
-        AbstractMergedBamFile bamFileInProgress = (number == 1) ? bamFile1_1 : bamFile2_1
-
-        bamFileInProgress.md5sum = null
-        bamFileInProgress.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.INPROGRESS
-        assert bamFileInProgress.save(flush: true)
-
-        expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
-
-        where:
-        number << [1, 2]
-    }
-
-
-    @Unroll
-    void "samplePairForProcessing when for bamFile#number the coverage is too low"() {
-        given:
-        AbstractMergedBamFile problematicBamFile = (number == 1) ? bamFile1_1 : bamFile2_1
-        problematicBamFile.coverage = COVERAGE_TOO_LOW
-        assert problematicBamFile.save(flush: true)
-
-        expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
-
-        where:
-        number << [1, 2]
-    }
-
-
-    @Unroll
-    void "samplePairForProcessing when for bamFile#number the number of lanes is too low"() {
-        given:
-        AbstractMergedBamFile problematicBamFile = (number == 1) ? bamFile1_1 : bamFile2_1
-        ProcessingThresholds thresholds = ProcessingThresholds.findBySeqType(problematicBamFile.seqType)
-        thresholds.numberOfLanes = 5
-        assert thresholds.save(flush: true)
-
-        expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
-
-        where:
-        number << [1, 2]
-    }
-
-
-    void "samplePairForProcessing when for both bam Files the number of lanes is too low"() {
-        given:
-        ProcessingThresholds.findByProject(samplePair1.project).each {
-            it.numberOfLanes = 5
-            it.save(flush: true)
-        }
-
-        expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
-    }
-
-
-    void "samplePairForProcessing when for both bam Files the coverage is too low"() {
-        given:
-        [bamFile1_1, bamFile2_1].each {
-            it.coverage = COVERAGE_TOO_LOW
-            it.save(flush: true)
-        }
-
-        expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
-    }
-
-
-    @Unroll
-    void "samplePairForProcessing when for bamFile#number no threshold exists"() {
-        given:
-        Project otherProject = DomainFactory.createProject()
-        AbstractMergedBamFile problematicBamFile = (number == 1) ? bamFile1_1 : bamFile2_1
-        ProcessingThresholds thresholds = ProcessingThresholds.findBySeqType(problematicBamFile.seqType)
-        thresholds.project = otherProject
-        assert thresholds.save(flush: true)
-
-        expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
-
-        where:
-        number << [1, 2]
-    }
-
-
-    @Unroll
-    void "samplePairForProcessing when for bamFile#number the processing threshold #property is null"() {
-        given:
-        AbstractMergedBamFile bamFile = (number == 1) ? bamFile1_1 : bamFile2_1
-        ProcessingThresholds thresholds = ProcessingThresholds.findBySeqType(bamFile.seqType)
-        thresholds[property] = null
-        if (property == "coverage") {
-            thresholds.numberOfLanes = 1
-        }
-        assert thresholds.save(flush: true)
-
-        expect:
-        samplePair1 == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
-
-        where:
-        number | property
-        1      | "coverage"
-        2      | "coverage"
-        1      | "numberOfLanes"
-        2      | "numberOfLanes"
-    }
-
-
-    @Unroll
-    void "samplePairForProcessing when bamFile#number is withdrawn"() {
-        given:
-        AbstractMergedBamFile problematicBamFile = (number == 1) ? bamFile1_1 : bamFile2_1
-        problematicBamFile.withdrawn = true
-        assert problematicBamFile.save(flush: true)
-
-        expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
-
-        where:
-        number << [1, 2]
-    }
-
-
-    void "samplePairForProcessing when check if the order correct"() {
-        given:
-        DomainFactory.createProcessableSamplePair()
-
-        expect:
-        samplePair1 == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
-    }
-
-
-    void "samplePairForProcessing ensure that FastTrack is processed first"() {
-        given:
-        SamplePair samplePairFastTrack = DomainFactory.createProcessableSamplePair().samplePair
-        Project project = samplePairFastTrack.project
-        project.processingPriority = ProcessingPriority.FAST_TRACK_PRIORITY
-        assert project.save(flush: true)
-
-        expect:
-        samplePairFastTrack == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
-    }
-
-
-    void "samplePairForProcessing, make sure that min processing priority is taken into account"() {
-        expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.FAST_TRACK_PRIORITY)
-    }
-
-
-    void "samplePairForProcessing, for Sophia pipeline, only PMBF available, should not return any bam file"() {
-        given:
-
-        RoddyBamFile.list().each {
-            it.withdrawn = true
-            assert it.save(flush: true)
-        }
-        DomainFactory.createSamplePairWithProcessedMergedBamFiles()
-
-        expect:
-        !sophiaService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
-    }
-
-    @Unroll
-    void "samplePairForProcessing, for Sophia pipeline, only EPMBF available with #property is #value, should not return any bam file"() {
-        given:
-        RoddyBamFile.list().each {
-            it.withdrawn = true
-            assert it.save(flush: true)
-        }
-        DomainFactory.createSamplePairWithExternalProcessedMergedBamFiles(true, [(property): value])
-
-
-        expect:
-        !sophiaService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
-
-        where:
-        property             | value
-        'coverage'           | 5
-        'insertSizeFile'     | null
-        'maximumReadLength'  | null
-    }
-
-    @Unroll
-    void "samplePairForProcessing, for Sophia pipeline, only EPMBF available with #property is #value, should return new instance"() {
-        given:
-        RoddyBamFile.list().each {
-            it.withdrawn = true
-            assert it.save(flush: true)
-        }
-        SamplePair samplePair = DomainFactory.createSamplePairWithExternalProcessedMergedBamFiles(true, [(property): value])
-
-        expect:
-        samplePair == sophiaService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
-
-        where:
-        property             | value
-        'coverage'           | 30
-        'coverage'           | null
-        'insertSizeFile'     | 'insertSize.txt'
-        'maximumReadLength'  | 5
-        'maximumReadLength'  | 200
-    }
-
-    void "samplePairForProcessing, for Aceseq pipeline, when sophia has not run, should not return SamplePair"() {
-        given:
-        prepareSophiaForAceseqBase()
-
-        expect:
-        null == aceseqService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
-    }
-
-    void "samplePairForProcessing, for Aceseq pipeline, when last sophia instance is running and not withdrawn and an older finish exist, should not return SamplePair"() {
-        given:
-        prepareSophiaForAceseq([processingState: AnalysisProcessingStates.FINISHED, withdrawn: false], [processingState: AnalysisProcessingStates.IN_PROGRESS, withdrawn: false])
-
-        expect:
-        null == aceseqService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
-    }
-
-    void "samplePairForProcessing, for Aceseq pipeline, when last sophia instance is running and withdrawn and an older finish exist, should return SamplePair"() {
-        given:
-        prepareSophiaForAceseq([processingState: AnalysisProcessingStates.FINISHED, withdrawn: false], [processingState: AnalysisProcessingStates.IN_PROGRESS, withdrawn: true])
-
-        expect:
-        samplePair1 == aceseqService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
-    }
-
-
-
-    void "samplePairForProcessing, for Aceseq pipeline, when all sophia instances are withdrawn, should not return SamplePair"() {
-        given:
-        prepareSophiaForAceseq([processingState: AnalysisProcessingStates.FINISHED, withdrawn: true], [processingState: AnalysisProcessingStates.FINISHED, withdrawn: true])
-
-        expect:
-        null == aceseqService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
-    }
-
-    void "samplePairForProcessing, for ACEseq pipeline, coverage is not high enough, should not return SamplePair"() {
-        given:
-        prepareSophiaForAceseq([:], [:])
-        DomainFactory.createProcessingOptionLazy([
-                name: OptionName.PIPELINE_MIN_COVERAGE,
-                type: Pipeline.Type.ACESEQ.toString(),
-                project: null,
-                value: "40",
-        ])
-
-        expect:
-        !aceseqService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
-    }
-
-
-    private void prepareSophiaForAceseqBase() {
-        samplePair1.sophiaProcessingStatus = ProcessingStatus.NO_PROCESSING_NEEDED
-        samplePair1.save(flush: true)
-        DomainFactory.createProcessingOptionLazy([
-                name   : OptionName.PIPELINE_ACESEQ_REFERENCE_GENOME,
-                type   : null,
-                project: null,
-                value  : samplePair1.mergingWorkPackage1.referenceGenome.name,
-        ])
-        DomainFactory.createRoddyWorkflowConfig(
-                seqType: samplePair1.seqType,
-                project: samplePair1.project,
-                pipeline: DomainFactory.createAceseqPipelineLazy(),
-        )
-    }
-
-    private void prepareSophiaForAceseq(Map propertiesSophia1, Map propertiesSophia2) {
-        prepareSophiaForAceseqBase()
-
-        Map defaultMap = [
-                processingState: AnalysisProcessingStates.FINISHED,
-                withdrawn: false,
-                sampleType1BamFile: bamFile1_1,
-                sampleType2BamFile: bamFile2_1,
-        ]
-
-        DomainFactory.createSophiaInstance(samplePair1, defaultMap + propertiesSophia1)
-        DomainFactory.createSophiaInstance(samplePair1, defaultMap + propertiesSophia2)
-    }
-
-
-    void "validateInputBamFiles, when all okay, return without exception"() {
-        given:
-        RoddySnvCallingInstance snvCallingInstance = DomainFactory.createRoddySnvCallingInstance(
-                instanceName: ARBITRARY_INSTANCE_NAME,
-                samplePair: samplePair1,
-                config: roddyConfig1,
-                sampleType1BamFile: bamFile1_1,
-                sampleType2BamFile: bamFile2_1
-        )
-        snvCallingInstance.save()
-
-        snvCallingService.abstractMergedBamFileService = Mock(AbstractMergedBamFileService) {
-            2 * getExistingBamFilePath(_) >> TestCase.uniqueNonExistentPath
-        }
-
-        when:
-        snvCallingService.validateInputBamFiles(snvCallingInstance)
-
-        then:
-        noExceptionThrown()
-    }
-
-
-    void "validateInputBamFiles, when path throw an exception, throw a new runtime exception"() {
-        given:
-        RoddySnvCallingInstance instance = new RoddySnvCallingInstance([
-                sampleType1BamFile: new RoddyBamFile(),
-                sampleType2BamFile: new RoddyBamFile(),
-        ])
-        snvCallingService.abstractMergedBamFileService = Mock(AbstractMergedBamFileService) {
-            2 * getExistingBamFilePath(_) >> TestCase.uniqueNonExistentPath >> { assert false }
-        }
-
-        when:
-        snvCallingService.validateInputBamFiles(instance)
-
-        then:
-        RuntimeException e = thrown()
-        e.message.contains('The input BAM files have changed on the file system while this job processed them.')
     }
 }

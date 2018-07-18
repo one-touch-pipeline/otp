@@ -60,6 +60,7 @@ class SamplePair implements TimeStamped, Entity {
     ProcessingStatus indelProcessingStatus = ProcessingStatus.NEEDS_PROCESSING
     ProcessingStatus sophiaProcessingStatus = ProcessingStatus.NEEDS_PROCESSING
     ProcessingStatus aceseqProcessingStatus = ProcessingStatus.NEEDS_PROCESSING
+    ProcessingStatus runYapsaProcessingStatus = ProcessingStatus.NEEDS_PROCESSING
 
     boolean isProcessingDisabled() {
         return  snvProcessingStatus    == ProcessingStatus.DISABLED &&

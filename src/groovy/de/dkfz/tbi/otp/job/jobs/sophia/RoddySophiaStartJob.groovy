@@ -10,7 +10,7 @@ import org.springframework.stereotype.*
 
 @Component("roddySophiaStartJob")
 @Scope("singleton")
-class RoddySophiaStartJob extends AbstractBamFilePairAnalysisStartJob {
+class RoddySophiaStartJob extends RoddyBamFilePairAnalysisStartJob {
 
     @Autowired
     SophiaService sophiaService
