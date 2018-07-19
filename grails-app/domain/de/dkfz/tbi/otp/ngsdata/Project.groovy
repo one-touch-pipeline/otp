@@ -149,4 +149,18 @@ class Project implements Commentable, Entity {
     Project getProject() {
         return this
     }
+
+    String getProcessingPriorityAsString() {
+        switch (processingPriority) {
+            case ProcessingPriority.MINIMUM_PRIORITY:
+                return "MINIMUM"
+            case ProcessingPriority.NORMAL_PRIORITY:
+                return "NORMAL"
+            case ProcessingPriority.FAST_TRACK_PRIORITY:
+                return "FAST_TRACK"
+            default:
+                return "Unknown Priority value : '${processingPriority}'"
+        }
+
+    }
 }

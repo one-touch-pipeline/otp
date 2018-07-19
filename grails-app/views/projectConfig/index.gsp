@@ -66,7 +66,7 @@
                                 template="dropDown"
                                 link="${g.createLink(controller: 'projectConfig', action: "updateProcessingPriority", params: ['project.id': project.id, 'fieldName': 'processingPriority'])}"
                                 values="${processingPriorities}"
-                                value="${project?(project.processingPriority == 0 ? "NORMAL" : "FAST_TRACK"):""}"/>
+                                value="${project?project.getProcessingPriorityAsString():""}"/>
                     </td>
                 </tr>
                 <tr>

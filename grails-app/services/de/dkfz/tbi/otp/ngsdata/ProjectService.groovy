@@ -29,7 +29,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 class ProjectService {
 
     static final String PHIX_INFIX = 'PhiX'
-    static final List<String> processingPriorities = ["NORMAL", "FAST_TRACK"]
+    static final List<String> processingPriorities = ["MINIMUM", "NORMAL", "FAST_TRACK"]
 
     //constants for rna configurations
     static final String ARRIBA_KNOWN_FUSIONS = "ARRIBA_KNOWN_FUSIONS"

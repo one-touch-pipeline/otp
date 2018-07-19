@@ -100,7 +100,7 @@ class AbstractStartJobImplTests extends AbstractIntegrationTest {
     @Test
     void testGetMinimumProcessingPriorityForOccupyingASlot_slotsFree() {
         prepareTestGetMinimumProcessingPriorityForOccupyingASlot(1)
-        assert testStartJob2.minimumProcessingPriorityForOccupyingASlot == ProcessingPriority.NORMAL_PRIORITY
+        assert testStartJob2.minimumProcessingPriorityForOccupyingASlot == ProcessingPriority.MINIMUM_PRIORITY
     }
 
     private void prepareTestGetMinimumProcessingPriorityForOccupyingASlot(final int runningProcesses) {

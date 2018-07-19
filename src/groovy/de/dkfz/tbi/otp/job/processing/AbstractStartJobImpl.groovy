@@ -170,7 +170,7 @@ abstract class AbstractStartJobImpl implements StartJob, ApplicationListener<Job
         }
         final int slotsReservedForFastTrack = getConfiguredSlotCount(plan, OptionName.MAXIMUM_NUMBER_OF_JOBS_RESERVED_FOR_FAST_TRACK, 0)
         if (occupiedSlots < totalSlots - slotsReservedForFastTrack) {
-            return ProcessingPriority.NORMAL_PRIORITY
+            return ProcessingPriority.MINIMUM_PRIORITY
         } else {
             return ProcessingPriority.FAST_TRACK_PRIORITY
         }
