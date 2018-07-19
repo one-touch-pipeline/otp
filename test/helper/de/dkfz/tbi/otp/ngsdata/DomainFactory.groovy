@@ -1747,6 +1747,7 @@ class DomainFactory {
         return createDomainObject(RunYapsaConfig, [
                 programVersion: "programmVersion${counter++}",
                 project: { properties.project ?: createProject()},
+                seqType: { properties.seqType ?: createSeqType()},
                 pipeline: createRunYapsaPipelineLazy(),
         ], properties, saveAndValidate)
     }

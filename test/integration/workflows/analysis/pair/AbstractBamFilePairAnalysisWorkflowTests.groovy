@@ -20,7 +20,7 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
 
     AbstractMergedBamFile bamFileControl
     AbstractMergedBamFile bamFileTumor
-    ConfigPerProject config
+    ConfigPerProjectAndSeqType config
     Individual individual
     Project project
     ReferenceGenome referenceGenome
@@ -30,7 +30,7 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
     SeqType seqType
 
 
-    abstract ConfigPerProject createConfig()
+    abstract ConfigPerProjectAndSeqType createConfig()
 
     abstract ReferenceGenome createReferenceGenome()
 

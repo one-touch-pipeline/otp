@@ -40,8 +40,8 @@ try {
          */
         ProcessingOption.findAllByProject(project)*.delete(flush: true)
 
-        ConfigPerProject.findAllByProjectAndPreviousConfigIsNotNull(project)*.delete(flush: true)
-        ConfigPerProject.findAllByProject(project)*.delete(flush: true)
+        ConfigPerProjectAndSeqType.findAllByProjectAndPreviousConfigIsNotNull(project)*.delete(flush: true)
+        ConfigPerProjectAndSeqType.findAllByProject(project)*.delete(flush: true)
 
         UserProjectRole.findAllByProject(project)*.delete(flush: true)
 

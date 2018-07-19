@@ -19,7 +19,7 @@ abstract class AbstractSophiaWorkflowTests extends AbstractRoddyBamFilePairAnaly
 
 
     @Override
-    ConfigPerProject createConfig() {
+    ConfigPerProjectAndSeqType createConfig() {
         DomainFactory.createSophiaPipelineLazy()
         DomainFactory.createSophiaSeqTypes()
         DomainFactory.createReferenceGenomeProjectSeqType(

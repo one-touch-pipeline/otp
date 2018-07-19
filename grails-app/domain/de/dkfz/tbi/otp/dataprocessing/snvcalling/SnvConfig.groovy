@@ -1,10 +1,9 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.ngsdata.*
 
 @Deprecated
-class SnvConfig extends ConfigPerProject {
+class SnvConfig extends ConfigPerProjectAndSeqType {
 
     /**
      * In this String the complete content of the config file is stored.
@@ -16,10 +15,6 @@ class SnvConfig extends ConfigPerProject {
      * Defines which version of the external scripts has to be used for this project.
      */
     String externalScriptVersion
-
-    static belongsTo = [
-            seqType: SeqType
-    ]
 
     static constraints = {
         configuration blank: false

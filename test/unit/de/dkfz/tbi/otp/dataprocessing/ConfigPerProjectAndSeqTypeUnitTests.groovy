@@ -1,26 +1,23 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.Project
-import de.dkfz.tbi.otp.ngsdata.ProjectCategory
-import de.dkfz.tbi.otp.ngsdata.Realm
-import grails.test.mixin.Mock
-import grails.test.mixin.TestFor
-import org.junit.Test
+import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.ngsdata.*
+import grails.test.mixin.*
+import org.junit.*
 
-// !! This class is only to test the abstract class ConfigPerProject
-class ConfigPerProjectImpl extends ConfigPerProject { }
+// !! This class is only to test the abstract class ConfigPerProjectAndSeqType
+class ConfigPerProjectAndSeqTypeImpl extends ConfigPerProjectAndSeqType { }
 
-@TestFor(ConfigPerProjectImpl)
-@Mock([Pipeline, Project, ProjectCategory, Realm])
-class ConfigPerProjectUnitTests {
+@TestFor(ConfigPerProjectAndSeqTypeImpl)
+@Mock([Pipeline, Project, ProjectCategory, Realm, SeqType])
+class ConfigPerProjectAndSeqTypeUnitTests {
 
 
     @Test
     void testSaveWithoutProject_shouldFail() {
-        ConfigPerProject configPerProject = new ConfigPerProjectImpl(
+        ConfigPerProjectAndSeqType configPerProject = new ConfigPerProjectAndSeqTypeImpl(
                 pipeline: DomainFactory.createIndelPipelineLazy(),
+                seqType: DomainFactory.createSeqType(),
         )
         TestCase.assertValidateError(configPerProject, 'project', 'nullable', null)
 
@@ -30,24 +27,27 @@ class ConfigPerProjectUnitTests {
 
     @Test
     void testSaveWithObsoleteDate() {
-        ConfigPerProject configPerProject = new ConfigPerProjectImpl(
+        ConfigPerProjectAndSeqType configPerProject = new ConfigPerProjectAndSeqTypeImpl(
                 project: DomainFactory.createProject(),
                 obsoleteDate: new Date(),
                 pipeline: DomainFactory.createIndelPipelineLazy(),
+                seqType: DomainFactory.createSeqType(),
         )
         assertTrue(configPerProject.validate())
     }
 
     @Test
     void testSaveWithReferenceToPreviousConfigWithoutObsolete_shouldFail() {
-        ConfigPerProject validConfigPerProject = new ConfigPerProjectImpl(
+        ConfigPerProjectAndSeqType validConfigPerProject = new ConfigPerProjectAndSeqTypeImpl(
                 project: DomainFactory.createProject(),
+                seqType: DomainFactory.createSeqType(),
                 pipeline: DomainFactory.createIndelPipelineLazy(),
         )
         validConfigPerProject.save()
 
-        ConfigPerProject newConfigPerProject = new ConfigPerProjectImpl(
+        ConfigPerProjectAndSeqType newConfigPerProject = new ConfigPerProjectAndSeqTypeImpl(
                 project: DomainFactory.createProject(),
+                seqType: DomainFactory.createSeqType(),
                 pipeline: DomainFactory.createIndelPipelineLazy(),
                 previousConfig: validConfigPerProject,
         )

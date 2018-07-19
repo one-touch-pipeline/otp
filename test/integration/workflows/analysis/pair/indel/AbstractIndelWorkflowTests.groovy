@@ -4,8 +4,6 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import grails.plugin.springsecurity.*
-import htsjdk.samtools.util.CollectionUtil
-import org.junit.*
 import workflows.analysis.pair.*
 
 abstract class AbstractIndelWorkflowTests extends AbstractRoddyBamFilePairAnalysisWorkflowTests<IndelCallingInstance> {
@@ -18,7 +16,7 @@ abstract class AbstractIndelWorkflowTests extends AbstractRoddyBamFilePairAnalys
 
 
     @Override
-    ConfigPerProject createConfig() {
+    ConfigPerProjectAndSeqType createConfig() {
         DomainFactory.createIndelPipelineLazy()
         DomainFactory.createIndelSeqTypes()
         DomainFactory.createReferenceGenomeProjectSeqType(

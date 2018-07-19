@@ -25,7 +25,7 @@ trait StartJobIntegrationSpec {
 
     abstract SamplePair.ProcessingStatus getProcessingStatus(SamplePair samplePair)
 
-    abstract ConfigPerProject createConfig(SamplePair samplePair, Pipeline pipeline)
+    abstract ConfigPerProjectAndSeqType createConfig(SamplePair samplePair, Pipeline pipeline)
 
     abstract AbstractBamFilePairAnalysisStartJob getService()
 

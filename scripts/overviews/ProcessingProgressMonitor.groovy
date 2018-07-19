@@ -525,7 +525,7 @@ if (allProcessed) {
                         select
                             config
                         from
-                            ConfigPerProject config
+                            ConfigPerProjectAndSeqType config
                         where
                             config.project = samplePair.mergingWorkPackage1.sample.individual.project
                             and config.seqType = samplePair.mergingWorkPackage1.seqType

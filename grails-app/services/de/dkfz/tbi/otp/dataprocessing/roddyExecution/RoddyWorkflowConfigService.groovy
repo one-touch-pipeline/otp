@@ -60,7 +60,7 @@ class RoddyWorkflowConfigService {
                 nameUsedInConfig: RoddyWorkflowConfig.getNameUsedInConfig(pipeline.name, seqType, pluginVersionToUse, configVersion)
         )
         validateConfig(config)
-        config.createConfigPerProject()
+        config.createConfigPerProjectAndSeqType()
 
         return config
     }

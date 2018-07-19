@@ -219,13 +219,13 @@ class RoddyWorkflowConfigTests {
         Pipeline pipeline = DomainFactory.returnOrCreateAnyPipeline()
         SeqType seqType = DomainFactory.createSeqType(roddyName: TEST_RODDY_SEQ_TYPE_RODDY_NAME)
         Project project = DomainFactory.createProject()
-        ConfigPerProject firstConfigPerProject = DomainFactory.createRoddyWorkflowConfig(
+        ConfigPerProjectAndSeqType firstConfigPerProject = DomainFactory.createRoddyWorkflowConfig(
                 project: project,
                 seqType: seqType,
                 pipeline: pipeline,
         )
 
-        ConfigPerProject newConfigPerProject = DomainFactory.createRoddyWorkflowConfig([
+        ConfigPerProjectAndSeqType newConfigPerProject = DomainFactory.createRoddyWorkflowConfig([
                 project: project,
                 pipeline: pipeline,
                 seqType: seqType,
@@ -234,9 +234,9 @@ class RoddyWorkflowConfigTests {
 
         assert !firstConfigPerProject.obsoleteDate
 
-        newConfigPerProject.createConfigPerProject()
+        newConfigPerProject.createConfigPerProjectAndSeqType()
 
-        assert ConfigPerProject.findAllByProject(project).size() == 2
+        assert ConfigPerProjectAndSeqType.findAllByProject(project).size() == 2
         assert firstConfigPerProject.obsoleteDate
     }
 
@@ -244,17 +244,17 @@ class RoddyWorkflowConfigTests {
     @Test
     void testCreateConfigPerProject_PreviousConfigDoesNotExist(){
         Project project = DomainFactory.createProject()
-        ConfigPerProject configPerProject = DomainFactory.createRoddyWorkflowConfig(
+        ConfigPerProjectAndSeqType configPerProject = DomainFactory.createRoddyWorkflowConfig(
                 project: project,
         )
-        configPerProject.createConfigPerProject()
-        assert ConfigPerProject.findAllByProject(project).size() == 1
+        configPerProject.createConfigPerProjectAndSeqType()
+        assert ConfigPerProjectAndSeqType.findAllByProject(project).size() == 1
     }
 
 
     @Test
     void testMakeObsolete() {
-        ConfigPerProject configPerProject = DomainFactory.createRoddyWorkflowConfig()
+        ConfigPerProjectAndSeqType configPerProject = DomainFactory.createRoddyWorkflowConfig()
         assert !configPerProject.obsoleteDate
         configPerProject.makeObsolete()
         assert configPerProject.obsoleteDate

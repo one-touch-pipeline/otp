@@ -23,7 +23,7 @@ abstract class AbstractSnvWorkflowTests extends AbstractRoddyBamFilePairAnalysis
 
 
     @Override
-    ConfigPerProject createConfig() {
+    ConfigPerProjectAndSeqType createConfig() {
         DomainFactory.createRoddySnvPipelineLazy()
         DomainFactory.createSnvSeqTypes()
         DomainFactory.createReferenceGenomeProjectSeqType(

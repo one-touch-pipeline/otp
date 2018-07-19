@@ -36,7 +36,7 @@ SamplePair.withTransaction {
     samplePairs.each { SamplePair samplePair ->
         println "trigger: '${it}'"
 
-        ConfigPerProject config = roddySnvCallingStartJob.getConfig(samplePair)
+        ConfigPerProjectAndSeqType config = roddySnvCallingStartJob.getConfig(samplePair)
 
         AbstractMergedBamFile sampleType1BamFile = samplePair.mergingWorkPackage1.processableBamFileInProjectFolder
         AbstractMergedBamFile sampleType2BamFile = samplePair.mergingWorkPackage2.processableBamFileInProjectFolder

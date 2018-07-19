@@ -49,9 +49,10 @@ class RoddyWorkflowConfigSpec extends Specification {
         TestCase.assertValidateError(config, 'seqType', 'validator.invalid', null)
     }
 
-    void "test constraint, when seqType is null for existing object, then validate should return true"() {
+    void "test constraint, when seqType is null for obsolete object, then validate should return true"() {
         given:
         RoddyWorkflowConfig config = DomainFactory.createRoddyWorkflowConfig()
+        config.makeObsolete()
         config.seqType = null
 
         expect:

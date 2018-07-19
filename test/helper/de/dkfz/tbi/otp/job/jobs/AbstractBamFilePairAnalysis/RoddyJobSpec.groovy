@@ -7,7 +7,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 trait RoddyJobSpec implements StartJobIntegrationSpec {
 
     @Override
-    ConfigPerProject createConfig(SamplePair samplePair, Pipeline pipeline) {
+    ConfigPerProjectAndSeqType createConfig(SamplePair samplePair, Pipeline pipeline) {
         return DomainFactory.createRoddyWorkflowConfig(
                 [
                         project : samplePair.project,

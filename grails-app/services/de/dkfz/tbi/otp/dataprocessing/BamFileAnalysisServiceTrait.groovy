@@ -5,10 +5,6 @@ trait BamFileAnalysisServiceTrait {
     abstract String getConfigName()
 
     //Methods with default values
-    String additionalConfigParameters() {
-        return ""
-    }
-
     String checkReferenceGenome() {
         return ''
     }

@@ -27,7 +27,7 @@ abstract class AbstractBamFilePairAnalysisStartJob extends AbstractStartJobImpl 
                 SamplePair samplePair = findSamplePairToProcess(minPriority)
                 if (samplePair) {
 
-                    ConfigPerProject config = getConfig(samplePair)
+                    ConfigPerProjectAndSeqType config = getConfig(samplePair)
 
                     AbstractMergedBamFile sampleType1BamFile = samplePair.mergingWorkPackage1.processableBamFileInProjectFolder
                     AbstractMergedBamFile sampleType2BamFile = samplePair.mergingWorkPackage2.processableBamFileInProjectFolder

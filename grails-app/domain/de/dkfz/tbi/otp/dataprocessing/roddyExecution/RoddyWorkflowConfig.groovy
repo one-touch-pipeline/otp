@@ -15,14 +15,12 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
  * The script 'scripts/operations/pancan/LoadPanCanConfig.groovy' can be used to load a roddy config.
  *
  */
-class RoddyWorkflowConfig extends ConfigPerProject implements AlignmentConfig {
+class RoddyWorkflowConfig extends ConfigPerProjectAndSeqType implements AlignmentConfig {
 
     //dot makes problems in roddy config identifiers, therefore an underscore is used
     final static String CONFIG_VERSION_PATTERN =  /^v\d+_\d+$/
 
     final static String CONFIG_PATH_ELEMENT = 'configFiles'
-
-    SeqType seqType
 
     /**
      * the full path to the config file which is used in this project and pipeline. The name of the config file contains the version number.
@@ -49,10 +47,6 @@ class RoddyWorkflowConfig extends ConfigPerProject implements AlignmentConfig {
 
     static constraints = {
         configFilePath unique: true, validator: { OtpPath.isValidAbsolutePath(it) }
-        seqType nullable: true, //needs to be nullable because of old data, should never be null for new data
-                validator: {val, obj ->
-                    obj.id ? true : val != null
-                }
         pluginVersion blank: false
         obsoleteDate validator: { val, obj ->
             if (!val) {

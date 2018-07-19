@@ -19,7 +19,7 @@ abstract class AbstractAceseqWorkflowTests extends AbstractRoddyBamFilePairAnaly
 
 
     @Override
-    ConfigPerProject createConfig() {
+    ConfigPerProjectAndSeqType createConfig() {
         DomainFactory.createProcessingOptionLazy([
                 name: ProcessingOption.OptionName.PIPELINE_MIN_COVERAGE,
                 type: Pipeline.Type.ACESEQ.toString(),

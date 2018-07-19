@@ -126,7 +126,7 @@ abstract class AbstractRoddyAlignmentChecker extends PipelinesChecker<SeqTrack> 
                             select
                                 config
                             from
-                                ConfigPerProject config
+                                ConfigPerProjectAndSeqType config
                             where
                                 config.project = seqTrack.sample.individual.project
                                 and config.seqType = seqTrack.seqType

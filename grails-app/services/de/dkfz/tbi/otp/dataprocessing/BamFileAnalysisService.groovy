@@ -142,7 +142,7 @@ abstract class BamFileAnalysisService implements BamFileAnalysisServiceTrait {
                 "   WHERE cps.project = sp.mergingWorkPackage1.sample.individual.project " +
                 "   AND cps.pipeline.type = :analysis " +
                 "   AND cps.obsoleteDate is null " +
-                additionalConfigParameters() +
+                "   AND cps.seqType = sp.mergingWorkPackage1.seqType " +
                 ") "
     }
 }

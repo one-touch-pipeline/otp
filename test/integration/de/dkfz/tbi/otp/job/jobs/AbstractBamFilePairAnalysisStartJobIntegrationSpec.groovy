@@ -34,7 +34,7 @@ abstract class AbstractBamFilePairAnalysisStartJobIntegrationSpec extends Integr
         Pipeline pipeline = createPipeline()
 
         when:
-        ConfigPerProject configPerProject = createConfig(samplePair, pipeline)
+        ConfigPerProjectAndSeqType configPerProject = createConfig(samplePair, pipeline)
 
         then:
         configPerProject == getService().getConfig(samplePair)

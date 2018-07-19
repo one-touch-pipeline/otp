@@ -19,7 +19,7 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
         createAnalysis([:])
     }
 
-    ConfigPerProject createConfig(SamplePair samplePair, Map properties = [:]) {
+    ConfigPerProjectAndSeqType createConfig(SamplePair samplePair, Map properties = [:]) {
         DomainFactory.createRoddyWorkflowConfig([
                 pipeline: createPipeLine(),
                 seqType : samplePair.seqType,

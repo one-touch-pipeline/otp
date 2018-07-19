@@ -67,10 +67,11 @@ class RunYapsaStartJobIntegrationSpec extends AbstractBamFilePairAnalysisStartJo
     }
 
     @Override
-    ConfigPerProject createConfig(SamplePair samplePair, Pipeline pipeline) {
+    ConfigPerProjectAndSeqType createConfig(SamplePair samplePair, Pipeline pipeline) {
         return DomainFactory.createRunYapsaConfig(
                 [
                         project : samplePair.project,
+                        seqType : samplePair.seqType,
                         pipeline: pipeline,
                 ]
         )

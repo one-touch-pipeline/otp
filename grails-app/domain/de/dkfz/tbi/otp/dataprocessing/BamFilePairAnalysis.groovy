@@ -16,7 +16,7 @@ abstract class BamFilePairAnalysis implements TimeStamped, ProcessParameterObjec
     /**
      * Refers to the config file which is stored in the database and is used as a basis for all the files in the filesystem.
      */
-    ConfigPerProject config
+    ConfigPerProjectAndSeqType config
 
     AbstractMergedBamFile sampleType1BamFile
 

@@ -8,7 +8,7 @@ import spock.lang.*
 class SophiaServiceIntegrationSpec extends IntegrationSpec {
 
     SamplePair samplePair1
-    ConfigPerProject roddyConfig1
+    ConfigPerProjectAndSeqType roddyConfig1
     AbstractMergedBamFile bamFile1_1
     AbstractMergedBamFile bamFile2_1
 
