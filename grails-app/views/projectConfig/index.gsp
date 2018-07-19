@@ -458,18 +458,18 @@
             <sec:ifAllGranted roles="ROLE_OPERATOR">
                 <g:message code="projectOverview.sophia.configure"/>
                 <ul>
-                    <li>
-                        <g:if test="${!checkSophiaReferenceGenome}">
-                            <g:each in="${sophiaSeqType}" var="seqType">
+                    <g:each in="${sophiaSeqType}" var="seqType">
+                        <li>
+                            <g:if test="${!checkSophiaReferenceGenome[seqType]}">
                                 <g:link controller='configurePipeline' action='sophia' params='["project.id": project.id, "seqType.id": seqType.id]' class="configure">
                                     ${seqType.displayNameWithLibraryLayout}
                                 </g:link>
-                            </g:each>
-                        </g:if>
-                        <g:else>
-                            ${checkSophiaReferenceGenome}
-                        </g:else>
-                    </li>
+                            </g:if>
+                            <g:else>
+                                ${seqType.displayNameWithLibraryLayout}: ${checkSophiaReferenceGenome[seqType]}
+                            </g:else>
+                            </li>
+                    </g:each>
                 </ul>
             </sec:ifAllGranted>
             <table>
@@ -493,18 +493,18 @@
             <sec:ifAllGranted roles="ROLE_OPERATOR">
                 <g:message code="projectOverview.aceseq.configure"/>
                 <ul>
-                    <li>
-                        <g:if test="${!checkAceseqReferenceGenome}">
-                            <g:each in="${aceseqSeqType}" var="seqType">
+                    <g:each in="${aceseqSeqType}" var="seqType">
+                        <li>
+                            <g:if test="${!checkAceseqReferenceGenome[seqType]}">
                                 <g:link controller='configurePipeline' action='aceseq' params='["project.id": project.id, "seqType.id": seqType.id]' class="configure">
                                     ${seqType.displayNameWithLibraryLayout}
                                 </g:link>
-                            </g:each>
-                        </g:if>
-                        <g:else>
-                            ${checkAceseqReferenceGenome}
-                        </g:else>
-                    </li>
+                            </g:if>
+                            <g:else>
+                                ${seqType.displayNameWithLibraryLayout}: ${checkAceseqReferenceGenome[seqType]}
+                            </g:else>
+                        </li>
+                    </g:each>
                 </ul>
             </sec:ifAllGranted>
             <table>

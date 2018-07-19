@@ -17,6 +17,7 @@
                     codes="${[
                             'projectOverview.index.PID',
                             'analysis.sampleTypes',
+                            'analysis.seqType',
                             'sophia.controlMassiveInvPrefilteringLevel',
                             'sophia.tumorMassiveInvFilteringLevel',
                             'sophia.rnaContaminatedGenesCount',

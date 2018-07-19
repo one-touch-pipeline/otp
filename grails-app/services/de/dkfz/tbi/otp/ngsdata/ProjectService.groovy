@@ -566,14 +566,14 @@ class ProjectService {
 
         String xmlConfig
         if (pipeline.name == Pipeline.Name.RODDY_ACESEQ) {
-            checkReferenceGenomeForAceseq(configuration.project).onSuccess { ReferenceGenome referenceGenome ->
+            checkReferenceGenomeForAceseq(configuration.project, configuration.seqType).onSuccess { ReferenceGenome referenceGenome ->
                 xmlConfig = roddyConfigTemplate.createConfig(
                         configuration,
                         pipeline.name,
                 )
             }
         } else if (pipeline.name == Pipeline.Name.RODDY_SOPHIA) {
-            checkReferenceGenomeForSophia(configuration.project).onSuccess {
+            checkReferenceGenomeForSophia(configuration.project, configuration.seqType).onSuccess {
                 xmlConfig = roddyConfigTemplate.createConfig(configuration, pipeline.name)
             }
         } else {
@@ -604,11 +604,11 @@ class ProjectService {
         )
     }
 
-    Result<ReferenceGenome, String> checkReferenceGenomeForAceseq(Project project) {
+    Result<ReferenceGenome, String> checkReferenceGenomeForAceseq(Project project, SeqType seqType) {
         return Result.ofNullable(project, "project must not be null")
                 .map { Project p ->
                     ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(
-                        project, SeqType.wholeGenomePairedSeqType)
+                        project, seqType)
                 }
                 .ensure({ List<ReferenceGenomeProjectSeqType> rgpsts -> rgpsts.size() == 1 }, "No reference genome set.")
                 .map { List<ReferenceGenomeProjectSeqType> rgpsts -> rgpsts.first().referenceGenome }
@@ -627,11 +627,11 @@ class ProjectService {
     }
 
 
-    Result<ReferenceGenome, String> checkReferenceGenomeForSophia(Project project) {
+    Result<ReferenceGenome, String> checkReferenceGenomeForSophia(Project project, SeqType seqType) {
         return Result.ofNullable(project, "project must not be null")
                 .map { Project p ->
                     ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(
-                        project, SeqType.wholeGenomePairedSeqType)
+                        project, seqType)
                 }
                 .ensure({ List<ReferenceGenomeProjectSeqType> rgpsts -> rgpsts.size() == 1 }, "No reference genome set.")
                 .map { List<ReferenceGenomeProjectSeqType> rgpsts -> rgpsts.first().referenceGenome }

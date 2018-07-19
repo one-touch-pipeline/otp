@@ -2044,6 +2044,7 @@ class DomainFactory {
     static List<SeqType> createSophiaSeqTypes() {
         [
                 createWholeGenomeSeqType(),
+                createExomeSeqType(),
         ]
     }
 

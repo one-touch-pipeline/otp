@@ -176,7 +176,7 @@ $.otp.resultsTable = {
                         text: row.individualPid,
                     }),
                     row.sampleType1 + " \u2013 " + row.sampleType2,
-
+                    row.seqType,
                     row.controlMassiveInvPrefilteringLevel,
                     row.tumorMassiveInvFilteringLevel,
                     row.rnaContaminatedGenesCount,

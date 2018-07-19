@@ -43,6 +43,7 @@ abstract class AbstractBamFilePairAnalysisStartJobIntegrationSpec extends Integr
     void "findSamplePairToProcess, all fine"() {
         given:
         SamplePair samplePair = setupSamplePair()
+        DomainFactory.createExomeSeqType()
 
         expect:
         samplePair == getService().findSamplePairToProcess(ProcessingPriority.NORMAL_PRIORITY)

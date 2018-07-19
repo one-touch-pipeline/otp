@@ -245,6 +245,7 @@ class SeqType implements Entity {
 
     static List<SeqType> getSophiaPipelineSeqTypes() {
         return [
+                getExomePairedSeqType(),
                 getWholeGenomePairedSeqType(),
         ]
     }

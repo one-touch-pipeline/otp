@@ -12,8 +12,6 @@ import org.springframework.web.multipart.*
 import java.sql.*
 import java.text.*
 
-
-
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 class ProjectConfigController {
@@ -57,8 +55,12 @@ class ProjectConfigController {
         List sophiaConfigTable = createAnalysisConfigTable(project, SeqType.getSophiaPipelineSeqTypes(), Pipeline.findByName(Pipeline.Name.RODDY_SOPHIA))
         List aceseqConfigTable = createAnalysisConfigTable(project, SeqType.getAceseqPipelineSeqTypes(), Pipeline.findByName(Pipeline.Name.RODDY_ACESEQ))
 
-        String checkSophiaReferenceGenome = projectService.checkReferenceGenomeForSophia(project).getError()
-        String checkAceseqReferenceGenome = projectService.checkReferenceGenomeForAceseq(project).getError()
+        Map<SeqType, String> checkSophiaReferenceGenome = SeqType.sophiaPipelineSeqTypes.collectEntries {
+            [(it): projectService.checkReferenceGenomeForSophia(project, it).getError()]
+        }
+        Map<SeqType, String> checkAceseqReferenceGenome = SeqType.aceseqPipelineSeqTypes.collectEntries {
+            [(it): projectService.checkReferenceGenomeForAceseq(project, it).getError()]
+        }
 
         File projectDirectory
 
