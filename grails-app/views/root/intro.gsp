@@ -140,16 +140,6 @@
         </div>
     </div>
 </g:if>
-    <div class="row footer-nav">
-        <div class="copyright-claim pull-right">
-            <ul>
-                <li><g:message code="intro.powered" /></li>
-                <li>
-                    <a href="http://ibios.dkfz.de/tbi/" target="_blank"><img class="img-responsive" alt="eilslabs" src="${assetPath(src: 'v2/intro/eilslabs-logo.png')}"></a>
-                </li>
-            </ul>
-        </div>
-    </div>
 </div>
 <otp:modal modalId="register" title="${g.message(code: "login.requestAccess.title")}">
     <p>${g.message(code: "login.requestAccess.description")} <a href="mailto:${contactDataSupportEmail}">${contactDataSupportEmail}</a>.</p>

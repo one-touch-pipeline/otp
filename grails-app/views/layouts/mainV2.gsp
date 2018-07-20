@@ -263,8 +263,13 @@
                 <li><a data-toggle="modal" href="#contact">${g.message(code: "info.contact.title")}</a></li>
                 <li><g:link controller="info" action="imprint"><g:message code="info.imprint.link"/></g:link></li>
                 <li><g:link controller="privacyPolicy"><g:message code="info.privacyPolicy.link"/></g:link></li>
-                <li>&copy;2011-2017 <a href="https://www.dkfz.de" target="_blank">DKFZ</a> -
-                    <a href="http://ibios.dkfz.de/tbi/" target="_blank">eilslabs</a></li>
+                <li>
+                    &copy;2011-2018
+                    <a href="https://www.dkfz.de" target="_blank">DKFZ</a>,
+                    <a href="https://www.uni-heidelberg.de/" target="_blank">Universität Heidelberg</a>,
+                    <a href="https://www.charite.de/" target="_blank">Charité</a>,
+                    <a href="https://www.klinikum.uni-heidelberg.de/" target="_blank">Universitätsklinikum Heidelberg</a>
+                </li>
                 <li class="copyright-grey"><g:render template="/templates/version"/></li>
             </ul>
         </div>
