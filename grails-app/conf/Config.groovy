@@ -11,7 +11,6 @@ try {
 } catch (Exception e) {
     otpProperties.setProperty("otp.security.ldap.enabled", "false")
 }
-List pluginsToExclude = []
 
 grails.project.groupId = appName // change this to alter the default package name and Maven publishing destination
 grails.mime.file.extensions = true // enables the parsing of file extensions from URLs into the request format
@@ -145,12 +144,17 @@ grails.plugin.springsecurity.authority.className = 'de.dkfz.tbi.otp.security.Rol
 
 // ldap
 if (!Boolean.parseBoolean(otpProperties.getProperty("otp.security.ldap.enabled"))) {
-    otp.security.ldap.enabled = false
-    println("Excluding ldap")
-    pluginsToExclude << "spring-security-ldap"
+    println("Using database only for authentication")
+    grails.plugin.springsecurity.providerNames = [
+            'daoAuthenticationProvider',
+            'anonymousAuthenticationProvider',
+    ]
 } else {
-    println("using ldap")
-    otp.security.ldap.enabled = true
+    println("Using LDAP and database for authentication")
+    grails.plugin.springsecurity.providerNames = [
+            'ldapDaoAuthenticationProvider',
+            'anonymousAuthenticationProvider',
+    ]
     if (otpProperties.getProperty("otp.security.ldap.managerDn")) {
         grails.plugin.springsecurity.ldap.context.managerDn     = otpProperties.getProperty("otp.security.ldap.managerDn")
     }
@@ -212,10 +216,6 @@ grails.plugin.springsecurity.adh.errorPage = null
 grails.plugin.springsecurity.apf.storeLastUsername = true
 //*/
 
-// exclude unused plugins
-if (pluginsToExclude) {
-    grails.plugin.exclude = pluginsToExclude
-}
 
 grails.plugin.databasemigration.changelogLocation = 'migrations'
 grails.plugin.databasemigration.changelogFileName = 'changelog.groovy'
