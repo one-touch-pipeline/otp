@@ -48,7 +48,7 @@ class QcThresholdController {
 
     def create(CreateCommand cmd) {
         checkErrorAndCallMethod(cmd, {
-            qcThresholdService.createThreshold(cmd.project ?: null, cmd.className, cmd.property, cmd.seqType ?: null, cmd.condition,
+            qcThresholdService.createThreshold(cmd.project ?: null, cmd.className, cmd.property, cmd.seqType, cmd.condition,
                     cmd.actualErrorThresholdLower, cmd.actualWarningThresholdLower,
                     cmd.actualWarningThresholdUpper, cmd.actualErrorThresholdUpper,
                     cmd.property2 ?: null,
@@ -138,7 +138,6 @@ class CreateCommand extends AbstractCommand {
 
     static constraints = {
         project nullable: true
-        seqType nullable: true
         property blank: false
     }
 }

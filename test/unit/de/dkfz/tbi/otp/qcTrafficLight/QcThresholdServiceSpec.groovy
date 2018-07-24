@@ -52,11 +52,11 @@ class QcThresholdServiceSpec extends Specification {
     }
 
     @Unroll
-    void "test createThresholdColorizer with QcThreshold with project #useProject and seqType #useSeqType"() {
+    void "test createThresholdColorizer with QcThreshold with project #useProject"() {
         given:
         qcThreshold = DomainFactory.createQcThreshold(
                 project: useProject ? project : null,
-                seqType: useSeqType ? seqType : null,
+                seqType: seqType,
                 qcProperty1: testedProperty,
                 warningThresholdUpper: 10,
                 errorThresholdUpper: 20,
@@ -72,27 +72,20 @@ class QcThresholdServiceSpec extends Specification {
         result.get(testedProperty) == new TableCellValue(testedPropertyValue.toString(), WARNING, null, null)
 
         where:
-        useProject | useSeqType
-        false      | false
-        false      | true
-        true       | false
-        true       | true
+        useProject | _
+        false      | _
+        true       | _
     }
 
     @Unroll
     void "test createThresholdColorizer with several QcThresholds, should use the one with the highest priority"() {
         given:
-        List<List<Boolean>> setProjectAndSeqType = [
-                [false, false],
-                [false, true],
-                [true, false],
-                [true, true],
-        ]
+        List<Boolean> setProjectAndSeqType = [false, true]
 
         l.times { int i ->
             DomainFactory.createQcThreshold(
-                    project: setProjectAndSeqType[i][0] ? project : null,
-                    seqType: setProjectAndSeqType[i][1] ? seqType : null,
+                    project: setProjectAndSeqType[i] ? project : null,
+                    seqType: seqType,
                     qcProperty1: testedProperty,
                     warningThresholdUpper: l - 1 == i ? 10 : 99,
                     errorThresholdUpper: l - 1 == i ? 20 : 100,
@@ -112,8 +105,6 @@ class QcThresholdServiceSpec extends Specification {
         l || thresholdLevel
         1 || WARNING
         2 || WARNING
-        3 || WARNING
-        4 || WARNING
     }
 
     @Unroll
@@ -127,6 +118,7 @@ class QcThresholdServiceSpec extends Specification {
                 errorThresholdUpper: etu,
                 compare: QcThreshold.ThresholdStrategy.ABSOLUTE_LIMITS,
                 qcClass: sophiaQc.class.name,
+                seqType: seqType,
         )
 
         when:
@@ -190,6 +182,7 @@ class QcThresholdServiceSpec extends Specification {
                 errorThresholdUpper: 4,
                 compare: QcThreshold.ThresholdStrategy.ABSOLUTE_LIMITS,
                 qcClass: sophiaQc.class.name,
+                seqType: seqType,
         )
 
         QcThreshold threshold2 = DomainFactory.createQcThreshold(
@@ -209,8 +202,7 @@ class QcThresholdServiceSpec extends Specification {
                 new ClassWithThresholds(
                         clasz: SophiaQc,
                         existingThresholds: [
-                                new BothQcThresholds(null, testedProperty, threshold, null),
-                                new BothQcThresholds(seqType, testedProperty, null, threshold2),
+                                new BothQcThresholds(seqType, testedProperty, threshold, threshold2),
                         ],
                         availableThresholdProperties: [
                                 "controlMassiveInvPrefilteringLevel",
@@ -233,6 +225,7 @@ class QcThresholdServiceSpec extends Specification {
                 errorThresholdUpper: 4,
                 compare: QcThreshold.ThresholdStrategy.ABSOLUTE_LIMITS,
                 qcClass: sophiaQc.class.name,
+                seqType: seqType,
         )
 
         QcThreshold threshold2 = DomainFactory.createQcThreshold(
@@ -243,6 +236,7 @@ class QcThresholdServiceSpec extends Specification {
                 errorThresholdUpper: 4,
                 compare: QcThreshold.ThresholdStrategy.ABSOLUTE_LIMITS,
                 qcClass: sophiaQc.class.name,
+                seqType: seqType,
         )
 
         expect:
@@ -250,8 +244,8 @@ class QcThresholdServiceSpec extends Specification {
                 new ClassWithThresholds(
                         clasz: SophiaQc,
                         existingThresholds: [
-                                new BothQcThresholds(null, testedProperty, threshold, null),
-                                new BothQcThresholds(null, "tumorMassiveInvFilteringLevel", threshold2, null),
+                                new BothQcThresholds(seqType, testedProperty, threshold, null),
+                                new BothQcThresholds(seqType, "tumorMassiveInvFilteringLevel", threshold2, null),
                         ],
                         availableThresholdProperties: [
                                 "controlMassiveInvPrefilteringLevel",
@@ -264,12 +258,13 @@ class QcThresholdServiceSpec extends Specification {
 
 
     void "test createThreshold"() {
+        given:
         when:
         qcThresholdService.createThreshold(
                 null,
                 SophiaQc.simpleName,
                 testedProperty,
-                null,
+                seqType,
                 QcThreshold.ThresholdStrategy.ABSOLUTE_LIMITS,
                 1,
                 2,
@@ -285,7 +280,7 @@ class QcThresholdServiceSpec extends Specification {
         threshold.qcProperty1 == testedProperty
         threshold.project == null
         threshold.qcClass == SophiaQc.name
-        threshold.seqType == null
+        threshold.seqType == seqType
         threshold.compare == QcThreshold.ThresholdStrategy.ABSOLUTE_LIMITS
         threshold.errorThresholdLower == 1
         threshold.warningThresholdLower == 2

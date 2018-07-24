@@ -2477,6 +2477,7 @@ class DomainFactory {
                 errorThresholdUpper  : counter++,
                 compare              : QcThreshold.ThresholdStrategy.ABSOLUTE_LIMITS,
                 qcClass              : SophiaQc.name,
+                seqType              : createSeqType(),
         ], properties, saveAndValidate)
     }
 

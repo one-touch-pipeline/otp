@@ -18,22 +18,17 @@ class QcThresholdService {
         private Map<String, QcThreshold> thresholdList
         private Class<QcTrafficLightValue> qcClass
 
-        public ThresholdColorizer(Project project, SeqType seqType, Class<T> qcClass) {
+        ThresholdColorizer(Project project, SeqType seqType, Class<T> qcClass) {
             this.thresholdList = QcThreshold.createCriteria().list {
                 eq("qcClass", qcClass.name)
+                eq("seqType", seqType)
                 or {
                     eq("project", project)
                     isNull("project")
                 }
-                or {
-                    eq("seqType", seqType)
-                    isNull("seqType")
-                }
             } .groupBy { it.qcProperty1 }.collect {
                 it.value.find { it.project == project && it.seqType == seqType } ?:
-                        it.value.find { it.project == project && it.seqType == null } ?:
-                                it.value.find { it.project == null && it.seqType == seqType } ?:
-                                        it.value.find { it.project == null && it.seqType == null }
+                                it.value.find { it.project == null && it.seqType == seqType }
             } .collectEntries { QcThreshold threshold ->
                 [(threshold.qcProperty1): threshold]
             }
@@ -87,7 +82,7 @@ class QcThresholdService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, read)")
     List<ClassWithThresholds> getClassesWithPropertiesForProjectAndSeqTypes(Project project, List<SeqType> seqTypes) {
-        seqTypes = seqTypes ?: []
+        assert seqTypes: "No seqTypes given"
 
         List<QcThreshold> thresholds = QcThreshold.createCriteria().list {
             or {
@@ -106,7 +101,7 @@ class QcThresholdService {
 
         classesWithProperties.each { ClassWithThresholds cl ->
             cl.availableThresholdProperties.each { String property ->
-                ([null] + seqTypes).each { SeqType seqType ->
+                seqTypes.each { SeqType seqType ->
                     QcThreshold projectThreshold = thresholds.find {
                         it.qcClass == cl.clasz.name && it.qcProperty1 == property && it.seqType == seqType && it.project == project
                     }

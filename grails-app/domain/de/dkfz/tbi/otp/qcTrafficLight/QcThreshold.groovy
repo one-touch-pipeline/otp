@@ -35,7 +35,6 @@ class QcThreshold implements Entity {
             validateProperty(val, obj.qcClass, errors, "qcProperty1")
         })
         project nullable: true
-        seqType nullable: true
         qcProperty2 nullable: true, validator: { val, obj, Errors errors ->
             if (val != null && val == obj.qcProperty1) {
                 errors.rejectValue 'qcProperty2', "default.invalid.validator.message", [QcThreshold.simpleName, "qcProperty2", val].toArray(), "property 1 must not be the same as property 2"

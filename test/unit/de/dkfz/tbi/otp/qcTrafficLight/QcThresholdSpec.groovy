@@ -111,16 +111,19 @@ class QcThresholdSpec extends Specification {
     }
 
     void "test saving QcThreshold duplicated"() {
+        given:
+        SeqType seqType = DomainFactory.createSeqType()
+
         when:
         QcThreshold qcThreshold1 = DomainFactory.createQcThreshold(
                 qcClass: SophiaQc.name,
                 project: project(),
-                seqType: seqType(),
+                seqType: seqType,
                 qcProperty1: "controlMassiveInvPrefilteringLevel",
         )
-        QcThreshold qcThreshold2 = DomainFactory.createQcThreshold(
+        DomainFactory.createQcThreshold(
                 project: qcThreshold1.project,
-                seqType: qcThreshold1.seqType,
+                seqType: seqType,
                 qcProperty1: qcThreshold1.qcProperty1,
                 qcClass: qcThreshold1.qcClass,
         )
@@ -131,11 +134,9 @@ class QcThresholdSpec extends Specification {
         e.message.contains("already exists")
 
         where:
-        project                             | seqType
-        ({ DomainFactory.createProject() }) | ({ DomainFactory.createSeqType() })
-        ({ null })                          | ({ DomainFactory.createSeqType() })
-        ({ DomainFactory.createProject() }) | ({ null })
-        ({ null })                          | ({ null })
+        project                             | _
+        ({ DomainFactory.createProject() }) | _
+        ({ null })                          | _
     }
 
     @Unroll

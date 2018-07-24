@@ -89,4 +89,8 @@ databaseChangeLog = {
 	changeSet(author: "strubelp", id:"OTP-2856-SQL") {
 		sqlFile(path: 'changelogs/2018/OTP-2856.sql')
 	}
+
+	changeSet(author: "strubel", id:"OTP-2919-SQL") {
+		sqlFile(path: 'changelogs/2018/OTP-2919.sql')
+	}
 }

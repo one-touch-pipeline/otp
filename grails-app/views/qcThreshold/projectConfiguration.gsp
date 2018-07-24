@@ -12,7 +12,6 @@
 
     <div>
         <h2>${g.message(code: "qcThreshold.title2", args: [project.name])}</h2>
-        ${g.message(code: "qcThreshold.notice")}<br>
         ${g.message(code: "qcThreshold.noticeProject")}
         <table>
 
@@ -185,7 +184,7 @@
                                       noSelection="['': 'Select']"/>
                         </td>
                         <td>
-                            <g:select class="threshold" name="seqType.id" from="${seqTypes}" optionKey="id" noSelection="['': 'All']"/>
+                            <g:select class="threshold" name="seqType.id" from="${seqTypes}" optionKey="id" noSelection="['': 'Select']"/>
                         </td>
                         <td>
                             <g:select class="threshold" name="condition" from="${compare}" optionValue="displayName"
