@@ -12,9 +12,9 @@ class PrivacyPolicyFilters {
                 if (request.getAttribute(FILTER_APPLIED)) {
                     return
                 }
+                request.setAttribute(FILTER_APPLIED, true)
 
                 if (!userService.isPrivacyPolicyAccepted()) {
-                    request.setAttribute(FILTER_APPLIED, true)
                     forward(controller: "privacyPolicy", action: "index")
                 }
             }
