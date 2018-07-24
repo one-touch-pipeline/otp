@@ -47,13 +47,10 @@ class ProcessingOption implements Entity {
         PIPELINE_RODDY_ALIGNMENT_SAMBAMBA_PATHS("Path to sambamba", null, Type.PATH),
         PIPELINE_RODDY_ALIGNMENT_GENOME_STAR_INDEX("Default genome star index", null, Type.SINGLE_LINE_TEXT),
 
-        PIPELINE_OTP_ALIGNMENT_PICARD_JAVA_SETTINGS("Java options for Picard", null, Type.SINGLE_LINE_TEXT),
         PIPELINE_OTP_ALIGNMENT_QUALITY_MERGED_ASSESSMENT("Quality assessment Command and parameters template", null, Type.SINGLE_LINE_TEXT),
-        PIPELINE_OTP_ALIGNMENT_PICARD_MDUP("picard option used in duplicates marking", null, Type.SINGLE_LINE_TEXT),
 
         COMMAND_BWA("BWA command for pairing and sorting", "", Type.SINGLE_LINE_TEXT),
         COMMAND_CONVEY_BWA("BWA convey command for alignment", "", Type.SINGLE_LINE_TEXT),
-        COMMAND_PICARD_MDUP("command for versioned picard", "picard-1.61.sh MarkDuplicates", Type.SINGLE_LINE_TEXT),
 
         // modules and commands for OTP workflows
         COMMAND_LOAD_MODULE_LOADER("command to load the module system (executed in Bash, may be empty if not required)", null, Type.SINGLE_LINE_TEXT),

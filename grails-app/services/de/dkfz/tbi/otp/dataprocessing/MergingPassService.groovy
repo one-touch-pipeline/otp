@@ -1,11 +1,9 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.getThreadLog
+import de.dkfz.tbi.otp.ngsdata.*
 import static org.springframework.util.Assert.*
 
-import org.springframework.transaction.annotation.Transactional
-
-import de.dkfz.tbi.otp.ngsdata.*
+import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.*
 
 class MergingPassService {
 
@@ -19,77 +17,8 @@ class MergingPassService {
     ConfigService configService
     AbstractBamFileService abstractBamFileService
     DataProcessingFilesService dataProcessingFilesService
-    MergingSetService mergingSetService
     ProcessedMergedBamFileService processedMergedBamFileService
     ProcessedMergedBamFileQaFileService processedMergedBamFileQaFileService
-
-    @Transactional
-    MergingPass create(short minPriority) {
-        MergingSet mergingSet = mergingSetService.mergingSetInStateNeedsProcessing(minPriority)
-        if (mergingSet) {
-            MergingPass mergingPass = new MergingPass(
-                    mergingSet: mergingSet,
-                    identifier: MergingPass.nextIdentifier(mergingSet),
-            )
-            assertSave(mergingPass)
-            log.debug("created a new mergingPass ${mergingPass} for mergingSet ${mergingSet}")
-            return mergingPass
-        }
-        return null
-    }
-
-    private def assertSave(def object) {
-        object = object.save(flush: true)
-        if (!object) {
-            throw new SavingException(object.toString())
-        }
-        return object
-    }
-
-    @Transactional
-    public Realm realmForDataProcessing(MergingPass mergingPass) {
-        notNull(mergingPass, "The parameter mergingPass is not allowed to be null")
-        return project(mergingPass).realm
-    }
-
-    @Transactional
-    public Project project(MergingPass mergingPass) {
-        notNull(mergingPass, "The parameter mergingPass is not allowed to be null")
-        return mergingPass.project
-    }
-
-    @Transactional
-    public void mergingPassStarted(MergingPass mergingPass) {
-        notNull(mergingPass, "The parameter mergingPass is not allowed to be null")
-        updateMergingSet(mergingPass, MergingSet.State.INPROGRESS)
-    }
-
-    /**
-     * After the merging is finished the state of the MergingSet is set to PROCESSED
-     * and the mergedQA is triggered automatically.
-     */
-    @Transactional
-    public void mergingPassFinishedAndStartQA(MergingPass mergingPass) {
-        notNull(mergingPass, "The parameter mergingPass is not allowed to be null")
-        updateMergingSet(mergingPass, MergingSet.State.PROCESSED)
-        mergedBamFileSetQaNotStarted(mergingPass)
-    }
-
-    private void updateMergingSet(MergingPass mergingPass, MergingSet.State state) {
-        mergingPass.mergingSet.status = state
-        assertSave(mergingPass.mergingSet)
-    }
-
-    /**
-     * Change the qualityAssessmentStatus of the processedMergedBamFile, which belongs to the input mergingPass, to NOT_STARTED
-     */
-    @Transactional
-    public void mergedBamFileSetQaNotStarted(MergingPass mergingPass) {
-        notNull(mergingPass, "The input of the method passNotStarted is null")
-        ProcessedMergedBamFile processedMergedBamFile = ProcessedMergedBamFile.findByMergingPass(mergingPass)
-        processedMergedBamFile.qualityAssessmentStatus = AbstractBamFile.QaProcessingStatus.NOT_STARTED
-        assertSave(processedMergedBamFile)
-    }
 
     /**
      * Deletes the files of the specified merging pass from the "processing" directory on the file system.
@@ -192,48 +121,5 @@ class MergingPassService {
                         fileOpStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
                 ])*.mergingPass.unique()
         })
-    }
-
-    public boolean mayProcessingFilesBeDeleted(final MergingPass pass, final Date createdBefore) {
-        notNull pass
-        notNull createdBefore
-        final Collection<ProcessedMergedBamFile> bamFiles = ProcessedMergedBamFile.findAllByMergingPass(pass)
-        if (bamFiles.size() != 1) {
-            threadLog.error "Found ${bamFiles.size()} ProcessedMergedBamFiles for MergingPass ${pass}. That's weird."
-            return false
-        }
-        final ProcessedMergedBamFile bamFile = bamFiles.first()
-        if (bamFile.dateCreated >= createdBefore) {
-            // The BAM file is not old enough.
-            return false
-        }
-        if (bamFile.qualityAssessmentStatus == AbstractBamFile.QaProcessingStatus.FINISHED &&
-                bamFile.fileOperationStatus == AbstractMergedBamFile.FileOperationStatus.PROCESSED &&
-                bamFile.md5sum != null) {
-            // Processing files have already been copied to the final destination.
-            return true
-        }
-        if (bamFile.mergingSet.status == MergingSet.State.PROCESSED) {
-            if (ProcessedMergedBamFile.createCriteria().get {
-                eq("qualityAssessmentStatus", AbstractBamFile.QaProcessingStatus.FINISHED)
-                lt("dateCreated", createdBefore)
-                eq("withdrawn", false)
-                mergingPass {
-                    eq("mergingSet", pass.mergingSet)
-                    gt("identifier", pass.identifier)
-                }
-                maxResults(1)
-            } != null) {
-                // For the same merging set there is a later merging pass that has been processed.
-                return true
-            }
-        }
-        if (abstractBamFileService.hasBeenQualityAssessedAndMerged(bamFile, createdBefore)) {
-            return true
-        }
-        if (bamFile.withdrawn) {
-            return true
-        }
-        return false
     }
 }

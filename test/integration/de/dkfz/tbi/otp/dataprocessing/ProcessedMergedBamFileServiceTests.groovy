@@ -77,103 +77,6 @@ class ProcessedMergedBamFileServiceTests {
         configService.clean()
     }
 
-    @Test(expected = IllegalArgumentException)
-    void testUpdateBamMetricsFileFileIsNull() {
-        ProcessedMergedBamFile processedMergedBamFile = null
-        processedMergedBamFileService.updateBamMetricsFile(processedMergedBamFile)
-    }
-
-    @Test(expected = RuntimeException)
-    void testUpdateBamMetricsFileFileIsEmpty() {
-        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile()
-        File file = new File(processedMergedBamFileService.filePathForMetrics(processedMergedBamFile))
-        file.text = ""
-        processedMergedBamFileService.updateBamMetricsFile(processedMergedBamFile)
-    }
-
-    @Test(expected = RuntimeException)
-    void testUpdateBamMetricsFileFileNotReadable() {
-        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile()
-        File file = new File(processedMergedBamFileService.filePathForMetrics(processedMergedBamFile))
-        file.setReadable(false)
-        processedMergedBamFileService.updateBamMetricsFile(processedMergedBamFile)
-    }
-
-    @Test
-    void testUpdateBamMetricsFile() {
-        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile()
-        assertTrue(processedMergedBamFileService.updateBamMetricsFile(processedMergedBamFile))
-    }
-
-
-    @Test(expected = IllegalArgumentException)
-    void testUpdateBamFileIndexFileIsNull() {
-        ProcessedMergedBamFile processedMergedBamFile = null
-        processedMergedBamFileService.updateBamFileIndex(processedMergedBamFile)
-    }
-
-    @Test(expected = RuntimeException)
-    void testUpdateBamFileIndexFileIsEmpty() {
-        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile()
-        File file = new File(processedMergedBamFileService.filePathForBai(processedMergedBamFile))
-        file.text = ""
-        processedMergedBamFileService.updateBamFileIndex(processedMergedBamFile)
-    }
-
-    @Test(expected = RuntimeException)
-    void testUpdateBamFileIndexFileNotReadable() {
-        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile()
-        File file = new File(processedMergedBamFileService.filePathForBai(processedMergedBamFile))
-        file.setReadable(false)
-        processedMergedBamFileService.updateBamFileIndex(processedMergedBamFile)
-    }
-
-    @Test
-    void testUpdateBamFileIndex() {
-        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile()
-        assertTrue(processedMergedBamFileService.updateBamFileIndex(processedMergedBamFile))
-    }
-
-    @Test(expected = IllegalArgumentException)
-    void testUpdateBamFileBamFileIsNull() {
-        ProcessedMergedBamFile processedMergedBamFile = null
-        processedMergedBamFileService.updateBamFile(processedMergedBamFile)
-    }
-
-    @Test(expected = RuntimeException)
-    void testUpdateBamFileFileNotReadable() {
-        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile()
-        File file = new File(processedMergedBamFileService.filePath(processedMergedBamFile))
-        file.setReadable(false)
-        processedMergedBamFileService.updateBamFile(processedMergedBamFile)
-    }
-
-    @Test(expected = RuntimeException)
-    void testUpdateBamFileFileIsEmpty() {
-        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile()
-        File file = new File(processedMergedBamFileService.filePath(processedMergedBamFile))
-        file.text = ""
-        processedMergedBamFileService.updateBamFile(processedMergedBamFile)
-    }
-
-    @Test
-    void testUpdateBamFile() {
-        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile()
-        assertTrue(processedMergedBamFileService.updateBamFile(processedMergedBamFile))
-    }
-
-    @Test
-    void testCreateMergedBamFile() {
-        MergingPass mergingPass = DomainFactory.createMergingPass()
-        DomainFactory.assignNewProcessedBamFile(mergingPass.mergingSet)
-        ProcessedMergedBamFile processedMergedBamFile = processedMergedBamFileService.createMergedBamFile(mergingPass)
-        assertNotNull(processedMergedBamFile)
-    }
-
-    @Test(expected = IllegalArgumentException)
-    void testCreateMergedBamFile_mergingPassIsNull() {
-        ProcessedMergedBamFile processedMergedBamFile = processedMergedBamFileService.createMergedBamFile(null)
-    }
 
     @Test(expected = IllegalArgumentException)
     void testFilePathForBaiBamFileIsNull() {
@@ -186,20 +89,6 @@ class ProcessedMergedBamFileServiceTests {
         ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile()
         String pathExp = basePath + ".bai"
         String pathAct = processedMergedBamFileService.filePathForBai(processedMergedBamFile)
-        assertEquals(pathExp, pathAct)
-    }
-
-    @Test(expected = IllegalArgumentException)
-    void testFilePathForMetricsBamFileIsNull() {
-        ProcessedMergedBamFile processedMergedBamFile = null
-        processedMergedBamFileService.filePathForMetrics(processedMergedBamFile)
-    }
-
-    @Test
-    void testFilePathForMetrics() {
-        ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFile()
-        String pathExp = basePath + "_metrics.txt"
-        String pathAct = processedMergedBamFileService.filePathForMetrics(processedMergedBamFile)
         assertEquals(pathExp, pathAct)
     }
 

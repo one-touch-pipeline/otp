@@ -1,6 +1,5 @@
 package de.dkfz.tbi.otp.job.processing
 
-import de.dkfz.tbi.otp.job.jobs.merging.MergingJob
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
@@ -14,14 +13,6 @@ class ProcessingStepTests  {
         Class testMultiJob = AbstractOtpJob
         ProcessingStep p = ProcessingStep.build([jobClass: testMultiJob.getName()])
         assert p.belongsToMultiJob()
-    }
-
-    @Test
-    void testBelongsToMultiJob_WhenJobIsNoMultiJob_ShouldReturnFalse() {
-        // MergingJob as dummy for non-Multijob
-        Class testJob = MergingJob
-        ProcessingStep p = ProcessingStep.build([jobClass: testJob.getName()])
-        assert !p.belongsToMultiJob()
     }
 
     @Test

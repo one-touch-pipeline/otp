@@ -16,8 +16,6 @@ import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.getThreadLog
  */
 class ProcessedMergedBamFileService {
 
-    ProcessedBamFileService processedBamFileService
-
     AbstractBamFileService abstractBamFileService
 
     ProcessedAlignmentFileService processedAlignmentFileService
@@ -110,13 +108,6 @@ class ProcessedMergedBamFileService {
         return mergedBamFile.fileNameNoSuffix() + "_metrics.txt"
     }
 
-    public String filePathForMetrics(ProcessedMergedBamFile mergedBamFile) {
-        notNull(mergedBamFile, "The parameter mergedBamFile is not allowed to be null")
-        String dir = directory(mergedBamFile)
-        String filename = fileNameForMetrics(mergedBamFile)
-        return "${dir}/${filename}"
-    }
-
     public String filePathForBai(ProcessedMergedBamFile mergedBamFile) {
         notNull(mergedBamFile, "The parameter mergedBamFile is not allowed to be null")
         String dir = directory(mergedBamFile)
@@ -159,71 +150,6 @@ class ProcessedMergedBamFileService {
     public SeqType seqType(ProcessedMergedBamFile mergedBamFile) {
         notNull(mergedBamFile, 'The parameter mergedBamFile are not allowed to be null')
         return mergedBamFile.seqType
-    }
-
-    private def assertSave(def object) {
-        object = object.save(flush: true)
-        if (!object) {
-            throw new SavingException(object.toString())
-        }
-        return object
-    }
-
-    public ProcessedMergedBamFile createMergedBamFile(MergingPass mergingPass) {
-        notNull(mergingPass, "The parameter mergingPass is not allowed to be null")
-        ProcessedMergedBamFile processedMergedBamFile = new ProcessedMergedBamFile(
-                mergingPass: mergingPass,
-                type: AbstractBamFile.BamType.MDUP,
-                numberOfMergedLanes: mergingPass.mergingSet.containedSeqTracks.size(),
-                workPackage: mergingPass.mergingWorkPackage,
-        )
-        processedMergedBamFile.mergingWorkPackage.bamFileInProjectFolder = null
-        return assertSave(processedMergedBamFile)
-    }
-
-    public boolean updateBamFile(ProcessedMergedBamFile bamFile) {
-        notNull(bamFile, "The parameter bamFile is not allowed to be null")
-        File file = new File(filePath(bamFile))
-        if (!file.canRead()) {
-            throw new RuntimeException("Can not read the bam file ${file}")
-        }
-        if (!file.size()) {
-            throw new RuntimeException("The bam file ${file} is empty")
-        }
-        bamFile.fileExists = true
-        bamFile.fileSize = file.length()
-        bamFile.dateFromFileSystem = new Date(file.lastModified())
-        assertSave(bamFile)
-        return bamFile.fileSize
-    }
-
-    public boolean updateBamMetricsFile(ProcessedMergedBamFile bamFile) {
-        notNull(bamFile, "The parameter bamFile is not allowed to be null")
-        File file = new File(filePathForMetrics(bamFile))
-        if (!file.canRead()) {
-            throw new RuntimeException("Can not read the metrics file ${file}")
-        }
-        if (!file.size()) {
-            throw new RuntimeException("The metrics file ${file} is empty")
-        }
-        bamFile.hasMetricsFile = true
-        assertSave(bamFile)
-        return true
-    }
-
-    public boolean updateBamFileIndex(ProcessedMergedBamFile bamFile) {
-        notNull(bamFile, "The parameter bamFile is not allowed to be null")
-        String path = filePathForBai(bamFile)
-        File file = new File(path)
-        if (!file.canRead()) {
-            throw new RuntimeException("Can not read the index file ${file}")
-        }
-        if (!file.size()) {
-            throw new RuntimeException("The index file ${file} is empty")
-        }
-        bamFile.hasIndexFile = true
-        assertSave(bamFile)
-        return true
     }
 
     /**

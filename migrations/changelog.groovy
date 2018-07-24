@@ -83,4 +83,10 @@ databaseChangeLog = {
 	}
 
 	include file: 'changelogs/2018/yapsa-notification-fix.groovy'
+
+	include file: 'changelogs/2018/OTP-2856.groovy'
+
+	changeSet(author: "strubelp", id:"OTP-2856-SQL") {
+		sqlFile(path: 'changelogs/2018/OTP-2856.sql')
+	}
 }
