@@ -78,6 +78,7 @@ class ExecuteRoddySnvJob extends AbstractExecutePanCanJob<RoddySnvCallingInstanc
                 roddySnvCallingInstance.getCombinedPlotPath(),
                 roddySnvCallingInstance.getSnvCallingResult(),
                 roddySnvCallingInstance.getSnvDeepAnnotationResult(),
+                roddySnvCallingInstance.getResultRequiredForRunYapsa(),
         ]
 
         directories.each {

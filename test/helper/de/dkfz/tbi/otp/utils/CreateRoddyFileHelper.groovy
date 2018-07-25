@@ -73,6 +73,7 @@ class CreateRoddyFileHelper {
         [
                 roddySnvCallingInstance.getSnvCallingResult(),
                 roddySnvCallingInstance.getSnvDeepAnnotationResult(),
+                roddySnvCallingInstance.getResultRequiredForRunYapsa(),
         ].each {
             CreateFileHelper.createFile(it)
         }

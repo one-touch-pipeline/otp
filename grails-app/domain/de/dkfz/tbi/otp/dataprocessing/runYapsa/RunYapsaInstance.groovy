@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.dataprocessing.runYapsa
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 
 class RunYapsaInstance extends BamFilePairAnalysis implements ProcessParameterObject, Entity {
@@ -14,6 +15,14 @@ class RunYapsaInstance extends BamFilePairAnalysis implements ProcessParameterOb
     @Override
     RunYapsaConfig getConfig() {
         return RunYapsaConfig.get(super.config.id)
+    }
+
+    ReferenceGenome getReferenceGenome() {
+        CollectionUtils.exactlyOneElement(containedSeqTracks*.configuredReferenceGenome.unique())
+    }
+
+    LibraryPreparationKit getLibraryPreparationKit() {
+        CollectionUtils.exactlyOneElement(containedSeqTracks*.libraryPreparationKit.unique())
     }
 
     @Override

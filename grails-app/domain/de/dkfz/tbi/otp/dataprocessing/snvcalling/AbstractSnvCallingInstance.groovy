@@ -33,6 +33,10 @@ abstract class AbstractSnvCallingInstance extends BamFilePairAnalysis implements
         new File(getWorkDirectory(), "snvs_${individual.pid}.vcf.gz")
     }
 
+    File getResultRequiredForRunYapsa() {
+        new File(getWorkDirectory(), "snvs_${individual.pid}_somatic_snvs_conf_8_to_10.vcf")
+    }
+
     File getCombinedPlotPath() {
         return new File(getWorkDirectory(), "snvs_${getIndividual().pid}_allSNVdiagnosticsPlots.pdf")
     }

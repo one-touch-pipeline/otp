@@ -59,6 +59,10 @@ class ProcessingOption implements Entity {
         COMMAND_SAMTOOLS("command for samtools", null, TypeValidators.SINGLE_LINE_TEXT),
         COMMAND_ACTIVATION_GROOVY("command to enable the module containing groovy (executed in Bash, may be empty if not required)", "", TypeValidators.SINGLE_LINE_TEXT),
         COMMAND_GROOVY("command for groovy", null, TypeValidators.SINGLE_LINE_TEXT),
+        COMMAND_ACTIVATION_R("command to enable the module containing R (executed in Bash, may be empty if not required)", "", TypeValidators.SINGLE_LINE_TEXT),
+        COMMAND_R("command for R", null, TypeValidators.SINGLE_LINE_TEXT),
+        COMMAND_ACTIVATION_RUN_YAPSA_PREFIX("command to enable the module containing runYAPSA (executed in Bash, may be empty if not required)", "", TypeValidators.SINGLE_LINE_TEXT),
+        COMMAND_RUN_YAPSA("command for runYAPSA", null, TypeValidators.SINGLE_LINE_TEXT),
 
         //basePath
         BASE_PATH_REFERENCE_GENOME("Base path for reference genomes", null, TypeValidators.ABSOLUTE_PATH),

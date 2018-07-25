@@ -107,4 +107,6 @@ databaseChangeLog = {
 	changeSet(author: "strubel", id:"OTP-2883-SQL") {
 		sqlFile(path: 'changelogs/2018/OTP-2883.sql')
 	}
+
+	include file: 'changelogs/2018/OTP-2896.groovy'
 }
