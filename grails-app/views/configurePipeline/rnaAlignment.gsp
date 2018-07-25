@@ -91,6 +91,12 @@
                 <td>${defaultReferenceGenome}</td>
                 <td>&nbsp;</td>
             </tr>
+            <tr>
+                <td class="myKey"><g:message code="configurePipeline.rnaAlignment.deprecateConfigurations"/></td>
+                <td><g:checkBox name="deprecateConfigurations"/></td>
+                <td>&nbsp;</td>
+                <td><g:message code="configurePipeline.rnaAlignment.deprecateConfigurations.info"/></td>
+            </tr>
             <g:each in="${toolNames}">
                 <tr>
                     <td class="myKey">${it}:</td>
@@ -144,7 +150,7 @@
                 <td class="myKey"></td>
                 <td><g:submitButton name="submit" value="Submit"/></td>
                 <td>&nbsp;</td>
-                <td><g:message code="configurePipeline.sample.type.info"/></td>
+                <td>&nbsp;</td>
             </tr>
         </table>
     </g:form>

@@ -241,13 +241,14 @@ class ConfigurePipelineController {
 
         } else {
             RnaAlignmentReferenceGenomeConfiguration rnaConfiguration = new RnaAlignmentReferenceGenomeConfiguration([
-                    project             : cmd.project,
-                    seqType             : cmd.seqType,
-                    referenceGenome     : cmd.referenceGenome,
-                    geneModel           : cmd.geneModel,
-                    referenceGenomeIndex: cmd.referenceGenomeIndex,
-                    mouseData           : cmd.mouseData,
-                    sampleTypes         : cmd.sampleTypeIds.collect {
+                    project                : cmd.project,
+                    seqType                : cmd.seqType,
+                    referenceGenome        : cmd.referenceGenome,
+                    geneModel              : cmd.geneModel,
+                    referenceGenomeIndex   : cmd.referenceGenomeIndex,
+                    mouseData              : cmd.mouseData,
+                    deprecateConfigurations: cmd.deprecateConfigurations,
+                    sampleTypes            : cmd.sampleTypeIds.collect {
                         return CollectionUtils.exactlyOneElement(SampleType.findAllById(it))
                     }
             ])
@@ -500,6 +501,7 @@ class ConfigureAlignmentPipelineSubmitCommand extends ConfigurePipelineSubmitCom
 class ConfigureRnaAlignmentSubmitCommand extends BaseConfigurePipelineSubmitCommand {
     String referenceGenome
     boolean mouseData
+    boolean deprecateConfigurations
 
     GeneModel geneModel
     List<ReferenceGenomeIndex> referenceGenomeIndex = []

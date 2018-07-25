@@ -114,7 +114,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 description: description,
                 processingPriority: processingPriority,
         )
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             project = projectService.createProject(projectParams)
         }
 
@@ -161,7 +161,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 description: '',
                 processingPriority: ProcessingPriority.NORMAL_PRIORITY,
         )
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             project = projectService.createProject(projectParams)
         }
 
@@ -199,7 +199,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 description: '',
                 processingPriority: ProcessingPriority.NORMAL_PRIORITY,
         )
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             project = projectService.createProject(projectParams)
         }
 
@@ -237,7 +237,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 description: '',
                 processingPriority: ProcessingPriority.NORMAL_PRIORITY,
         )
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             project = projectService.createProject(projectParams)
         }
 
@@ -267,7 +267,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 description: '',
                 processingPriority: ProcessingPriority.NORMAL_PRIORITY,
         )
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             project = projectService.createProject(projectParams)
         }
 
@@ -297,7 +297,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 description: '',
                 processingPriority: ProcessingPriority.NORMAL_PRIORITY,
         )
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             project = projectService.createProject(projectParams)
         }
 
@@ -337,7 +337,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 description: '',
                 processingPriority: ProcessingPriority.NORMAL_PRIORITY,
         )
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.createProject(projectParams)
         }
         then:
@@ -347,7 +347,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
     void "test updateNameInMetadata valid input"() {
         when:
         Project project = Project.findByName("testProject")
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.updateProjectField(name, "nameInMetadataFiles", project)
         }
 
@@ -365,7 +365,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
     void "test updateNameInMetadata invalid input"() {
         when:
         Project project = Project.findByName("testProject3")
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.updateProjectField(name, "nameInMetadataFiles", project)
         }
 
@@ -402,7 +402,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 description: '',
                 processingPriority: ProcessingPriority.NORMAL_PRIORITY,
         )
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             project = projectService.createProject(projectParams)
         }
 
@@ -453,7 +453,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         Project project = Project.findByName("testProject")
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.updateCategory(['not available'], project)
         }
 
@@ -469,7 +469,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
 
         when:
         assert !project.projectCategories
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.updateCategory([projectCategory.name], project)
         }
 
@@ -484,7 +484,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
 
         when:
         assert !project.mailingListName
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.updateProjectField(mailingListName, "mailingListName", project)
         }
 
@@ -499,7 +499,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
 
         when:
         assert !project.dirAnalysis
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.updateProjectField(analysisDirectory, "dirAnalysis", project)
         }
 
@@ -513,7 +513,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
 
         when:
         assert !project.processingPriority
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.updateProjectField(ProcessingPriority.FAST_TRACK_PRIORITY, "processingPriority", project)
         }
 
@@ -528,7 +528,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
 
         when:
         assert !project.processingPriority
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.updateProjectField(tumorEntity, "tumorEntity", project)
         }
 
@@ -541,7 +541,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         Project project = Project.findByName("testProjectAlignment")
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.configureNoAlignmentDeciderProject(project)
         }
 
@@ -556,7 +556,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         ReferenceGenome referenceGenome = ReferenceGenome.findByName("testReferenceGenome")
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.configureDefaultOtpAlignmentDecider(project, referenceGenome.name)
         }
 
@@ -574,7 +574,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         ReferenceGenome referenceGenome2 = ReferenceGenome.findByName("testReferenceGenome2")
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.configureDefaultOtpAlignmentDecider(project, referenceGenome.name)
             projectService.configureDefaultOtpAlignmentDecider(project, referenceGenome2.name)
         }
@@ -592,7 +592,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         ReferenceGenome referenceGenome = ReferenceGenome.findByName("testReferenceGenome")
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.configureDefaultOtpAlignmentDecider(project, "error")
         }
 
@@ -606,7 +606,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         PanCanAlignmentConfiguration configuration = createPanCanAlignmentConfiguration()
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.configurePanCanAlignmentDeciderProject(configuration)
         }
 
@@ -635,7 +635,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         ])
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.configurePanCanAlignmentDeciderProject(configuration)
             projectService.configurePanCanAlignmentDeciderProject(configuration2)
         }
@@ -660,7 +660,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         int count = configurations.size()
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             configurations.each {
                 projectService.configurePanCanAlignmentDeciderProject(it)
             }
@@ -679,7 +679,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         configuration.referenceGenome = 'invalidReferenceGenome'
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.configurePanCanAlignmentDeciderProject(configuration)
         }
 
@@ -695,7 +695,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         )
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.configurePanCanAlignmentDeciderProject(configuration)
         }
 
@@ -711,7 +711,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         )
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.configurePanCanAlignmentDeciderProject(configuration)
         }
 
@@ -728,7 +728,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         )
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.configurePanCanAlignmentDeciderProject(configuration)
         }
 
@@ -748,7 +748,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         configuration.statSizeFileName = 'nonExistingFile.tab'
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.configurePanCanAlignmentDeciderProject(configuration)
         }
 
@@ -764,7 +764,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         )
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.configurePanCanAlignmentDeciderProject(configuration)
         }
 
@@ -780,7 +780,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         )
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.configurePanCanAlignmentDeciderProject(configuration)
         }
 
@@ -798,7 +798,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         )
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.configurePanCanAlignmentDeciderProject(configuration)
         }
 
@@ -816,7 +816,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         )
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.configurePanCanAlignmentDeciderProject(configuration)
         }
 
@@ -835,7 +835,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         )
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.configurePanCanAlignmentDeciderProject(configuration)
         }
 
@@ -849,7 +849,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         PanCanAlignmentConfiguration configuration = createPanCanAlignmentConfiguration()
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.configurePanCanAlignmentDeciderProject(configuration)
             projectService.configureDefaultOtpAlignmentDecider(configuration.project, configuration.referenceGenome)
         }
@@ -868,7 +868,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         PanCanAlignmentConfiguration configuration = createPanCanAlignmentConfiguration()
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.configurePanCanAlignmentDeciderProject(configuration)
             projectService.configureNoAlignmentDeciderProject(configuration.project)
         }
@@ -895,7 +895,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         assert projectDirectory.mkdirs()
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.configureRnaAlignmentConfig(configuration)
         }
 
@@ -920,7 +920,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         )
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.configureRnaAlignmentReferenceGenome(configuration)
         }
 
@@ -944,12 +944,57 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                       GeneModel.GENE_MODELS, GeneModel.GENE_MODELS_EXCLUDE, GeneModel.GENE_MODELS_GC]
     }
 
+    @Unroll
+    void "test configureRnaAlignmentReferenceGenome set general reference genome and deprecate = #deprecateConfigurations specific ones"() {
+        given:
+        int configuredSampleTypes = 3
+        Project project = DomainFactory.createProject()
+        SeqType seqType = DomainFactory.createSeqType()
+        ReferenceGenome referenceGenome = DomainFactory.createReferenceGenome()
+        ReferenceGenome newReferenceGenome = DomainFactory.createReferenceGenome()
+
+        List<SampleType> sampleTypes = (1..configuredSampleTypes).collect { return DomainFactory.createSampleType() }
+        sampleTypes.add(null)
+        sampleTypes.each { SampleType sampleType ->
+            DomainFactory.createReferenceGenomeProjectSeqType(
+                    project: project,
+                    seqType: seqType,
+                    referenceGenome: referenceGenome,
+                    sampleType: sampleType,
+                    deprecatedDate: null,
+            )
+        }
+        RnaAlignmentReferenceGenomeConfiguration configuration = createRnaAlignmentConfiguration(
+                project: project,
+                seqType: seqType,
+                referenceGenome: newReferenceGenome.name,
+                deprecateConfigurations: deprecateConfigurations,
+                sampleTypes: [],
+        )
+
+        when:
+        SpringSecurityUtils.doWithAuth(ADMIN) {
+            projectService.configureRnaAlignmentReferenceGenome(configuration)
+        }
+
+        then:
+        List<ReferenceGenomeProjectSeqType> leftOverConfigurations = ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndDeprecatedDateIsNull(project, seqType)
+        leftOverConfigurations.size() == (deprecateConfigurations ? 1 : configuredSampleTypes + 1)
+        ReferenceGenomeProjectSeqType generalRefGenConfig = leftOverConfigurations.find { it.sampleType == null }
+        generalRefGenConfig.referenceGenome == newReferenceGenome
+
+        where:
+        deprecateConfigurations |_
+        false                   |_
+        true                    |_
+    }
+
     void "test configureDefaultOtpAlignmentDecider to configurePanCanAlignmentDeciderProject"() {
         setup:
         PanCanAlignmentConfiguration configuration = createPanCanAlignmentConfiguration()
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.configureDefaultOtpAlignmentDecider(configuration.project, configuration.referenceGenome)
             projectService.configurePanCanAlignmentDeciderProject(configuration)
         }
@@ -972,7 +1017,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         Project project = setupOutput[2]
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.copyPanCanAlignmentXml(basedProject, seqType, project)
         }
 
@@ -992,7 +1037,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         )
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.copyPanCanAlignmentXml(basedProject, seqType, project)
         }
 
@@ -1062,7 +1107,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
 
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.configureDefaultOtpAlignmentDecider(project, referenceGenome.name)
             projectService.configureNoAlignmentDeciderProject(project)
         }
@@ -1166,7 +1211,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         "Sophia"     | SophiaService | ProcessingOption.OptionName.PIPELINE_SOPHIA_REFERENCE_GENOME
     }
 
-    void "test configureSnvPipelineProject valid input, old otp snv config exist"() {
+    void "test configure Snv PipelineProject valid input, old otp snv config exist"() {
         setup:
         SnvConfig configuration = DomainFactory.createSnvConfig([
                 project          : Project.findByName("testProjectAlignment"),
@@ -1184,7 +1229,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         ])
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.configureSnvPipelineProject(configuration2)
         }
 
@@ -1211,7 +1256,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         }
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             configurations.each {
                 projectService."configure${analysisName}PipelineProject"(it)
             }
@@ -1237,7 +1282,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         )
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService."configure${analysisName}PipelineProject"(configuration)
         }
 
@@ -1261,7 +1306,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         )
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService."configure${analysisName}PipelineProject"(configuration)
         }
 
@@ -1284,7 +1329,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         )
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService."configure${analysisName}PipelineProject"(configuration)
         }
 
@@ -1308,7 +1353,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         )
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService."configure${analysisName}PipelineProject"(configuration)
         }
 
@@ -1372,7 +1417,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         mockMultipartFile.originalFilename = FILE_NAME
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.createProjectInfoAndUploadFile(project, mockMultipartFile)
         }
 
@@ -1394,7 +1439,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
 
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.createProjectInfoAndUploadFile(project, mockMultipartFile)
             projectInfoContent = projectService.getProjectInfoContent(CollectionUtils.exactlyOneElement(project.projectInfos))
         }
@@ -1413,7 +1458,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
 
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.createProjectInfoAndUploadFile(project, mockMultipartFile)
             ProjectInfo projectInfo = CollectionUtils.exactlyOneElement(project.projectInfos)
             FileSystem fs = projectService.fileSystemService.getFilesystemForConfigFileChecksForRealm(projectInfo.project.realm)
