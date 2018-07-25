@@ -19,6 +19,7 @@ class TestConfigService extends ConfigService {
                         "otp.ssh.password",
 
                         "otp.path.tools",
+                        "otp.path.tools.roddy",
 
                         "otp.testing.workflows.account",
                         "otp.testing.workflows.host",
