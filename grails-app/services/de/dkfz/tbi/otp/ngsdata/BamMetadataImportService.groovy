@@ -85,7 +85,7 @@ class BamMetadataImportService {
                 assert sample: "No sample found for ${_individual} and ${_sampleType} in ${_project}"
 
                 SeqType seqType = SeqType.findByNameAndLibraryLayoutAndSingleCell(_seqType, libraryLayout, false)
-                assert seqType : "No seqtype found for ${_seqType} and ${libraryLayout} and no single cell"
+                assert seqType : "No seqtype found for ${_seqType}, ${libraryLayout} and bulk"
 
                 ReferenceGenome referenceGenome = ReferenceGenome.findByName(_referenceGenome)
                 assert referenceGenome: "no reference genom found for ${_referenceGenome}"

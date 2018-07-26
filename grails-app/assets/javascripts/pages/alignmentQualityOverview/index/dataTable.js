@@ -109,18 +109,18 @@ $.otp.alignmentQualityOverviewTable = {
                             ];
 
                             // coverage
-                            if (seqType === 'WGS PAIRED no singleCell' || seqType === 'WGBS PAIRED no singleCell' || seqType === 'WGBS_TAG PAIRED no singleCell' || seqType === "ChIP PAIRED no singleCell") {
+                            if (seqType === 'WGS PAIRED bulk' || seqType === 'WGBS PAIRED bulk' || seqType === 'WGBS_TAG PAIRED bulk' || seqType === "ChIP PAIRED bulk") {
                                 columnNames = columnNames.concat([
                                     "coverageWithoutN",
                                     "coverageX",
                                     "coverageY",
                                 ]);
-                            } else if (seqType === 'EXOME PAIRED no singleCell') {
+                            } else if (seqType === 'EXOME PAIRED bulk') {
                                 columnNames = columnNames.concat([
                                     "onTargetRatio",
                                     "targetCoverage",
                                 ]);
-                            } else if (seqType === 'RNA PAIRED no singleCell' || seqType === 'RNA SINGLE no singleCell') {
+                            } else if (seqType === 'RNA PAIRED bulk' || seqType === 'RNA SINGLE bulk') {
                                 columnNames = columnNames.concat([
                                     "totalReadCounter",
                                     "percentDuplicates",
@@ -148,7 +148,7 @@ $.otp.alignmentQualityOverviewTable = {
                             }
 
                             // general information
-                            if (seqType === 'RNA PAIRED no singleCell' || seqType === 'RNA SINGLE no singleCell') {
+                            if (seqType === 'RNA PAIRED bulk' || seqType === 'RNA SINGLE bulk') {
                                 columnNames = columnNames.concat([
                                     "kit",
                                     "dateFromFileSystem",

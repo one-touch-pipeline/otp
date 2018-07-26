@@ -90,7 +90,7 @@ class SeqType implements Entity {
     }
 
     String getDisplayNameWithLibraryLayout() {
-        return "${displayName} ${libraryLayout} ${singleCell ? 'singleCell' : 'no singleCell'}"
+        return "${displayName} ${libraryLayout} ${singleCell ? 'singleCell' : 'bulk'}"
     }
 
     String getLibraryLayoutDirName() {
