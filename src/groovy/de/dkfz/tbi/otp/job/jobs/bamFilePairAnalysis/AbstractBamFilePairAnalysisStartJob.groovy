@@ -14,7 +14,7 @@ import java.time.format.*
 abstract class AbstractBamFilePairAnalysisStartJob extends AbstractStartJobImpl implements RestartableStartJob, BamFilePairAnalysisStartJobTrait {
 
     @Autowired
-    ExecutionService executionService
+    RemoteShellHelper remoteShellHelper
 
     @Scheduled(fixedDelay = 60000l)
     void execute() {
@@ -81,7 +81,7 @@ abstract class AbstractBamFilePairAnalysisStartJob extends AbstractStartJobImpl 
 
         String deleteFiles = "rm -rf ${analysis.getWorkDirectory()}"
 
-        executionService.executeCommandReturnProcessOutput(realm, deleteFiles)
+        remoteShellHelper.executeCommandReturnProcessOutput(realm, deleteFiles)
     }
 
     SamplePair findSamplePairToProcess(short minPriority) {

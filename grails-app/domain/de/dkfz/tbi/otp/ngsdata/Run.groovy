@@ -40,7 +40,6 @@ class Run implements ProcessParameterObject, Entity {
     }
 
     /*
-     * is used in ExecutionService to create Cluster Jobs,
      * returns null if a run has more than one sequencing type,
      * because this case is unusable for creating Cluster Jobs
      */

@@ -86,7 +86,7 @@ class QualityAssessmentMergedWorkflowTests extends WorkflowTestCase {
         createDirectories([new File(input.path)])
         String cmdBuildSoftLinkToFileToBeProcessed = "ln -s ${softLinkFilepath} ${input.filePath}"
         String cmdBuildSoftLinkToBaiFileToBeProcessed = "ln -s ${softLinkBaiFilepath} ${input.baiFilePath}"
-        executionService.executeCommand(realm, "${cmdBuildSoftLinkToFileToBeProcessed}; ${cmdBuildSoftLinkToBaiFileToBeProcessed}")
+        remoteShellHelper.executeCommand(realm, "${cmdBuildSoftLinkToFileToBeProcessed}; ${cmdBuildSoftLinkToBaiFileToBeProcessed}")
         File file = new File(input.filePath)
         assertTrue(file.canRead())
         file = new File(input.baiFilePath)
@@ -300,7 +300,7 @@ class QualityAssessmentMergedWorkflowTests extends WorkflowTestCase {
         String referenceGenomesDir = "${getRootDirectory()}/files/reference_genomes"
         String softLinkToReferenceGenomesDir = "${configService.getProcessingRootPath().path}/reference_genomes"
         String cmdBuildSoftLinkToReferenceGenomes = "ln -s ${referenceGenomesDir} ${softLinkToReferenceGenomesDir}"
-        executionService.executeCommand(realm, "${cmdBuildSoftLinkToReferenceGenomes}")
+        remoteShellHelper.executeCommand(realm, "${cmdBuildSoftLinkToReferenceGenomes}")
         WaitingFileUtils.waitUntilExists(new File(softLinkToReferenceGenomesDir))
     }
 

@@ -33,7 +33,7 @@ class ExecutionHelperServiceUnitTests {
 
     @After
     void tearDown() {
-        GroovySystem.metaClassRegistry.removeMetaClass(ProcessHelperService)
+        GroovySystem.metaClassRegistry.removeMetaClass(LocalShellHelper)
     }
 
 
@@ -42,11 +42,11 @@ class ExecutionHelperServiceUnitTests {
         File tmpFile = temporaryFolder.newFile()
         String group = new TestConfigService().getTestingGroup()
 
-        service.executionService = [
+        service.remoteShellHelper = [
                 executeCommandReturnProcessOutput: { Realm realm, String command ->
-                    ProcessHelperService.executeAndWait(command)
+                    LocalShellHelper.executeAndWait(command)
                 }
-        ] as ExecutionService
+        ] as RemoteShellHelper
 
         LogThreadLocal.withThreadLog(System.out) {
             String output = service.getGroup(tmpFile)
@@ -71,7 +71,7 @@ class ExecutionHelperServiceUnitTests {
     void "test getGroup ProcessHelperService throws exception should fail"() {
         final String FAIL_MESSAGE = HelperUtils.uniqueString
         File tmpFile = temporaryFolder.newFile()
-        ProcessHelperService.metaClass.static.executeAndAssertExitCodeAndErrorOutAndReturnStdout = { String cmd ->
+        LocalShellHelper.metaClass.static.executeAndAssertExitCodeAndErrorOutAndReturnStdout = { String cmd ->
             assert false: FAIL_MESSAGE
         }
 
@@ -110,14 +110,14 @@ class ExecutionHelperServiceUnitTests {
     }
 
     @Test
-    void "test setGroup executionService executeCommand throws exception should fail"() {
+    void "test setGroup remoteShellHelper executeCommand throws exception should fail"() {
         final String FAIL_MESSAGE = HelperUtils.uniqueString
         File tmpFile = temporaryFolder.newFile()
-        service.executionService = [
+        service.remoteShellHelper = [
                 executeCommandReturnProcessOutput: { Realm realm, String command ->
                     assert false: FAIL_MESSAGE
                 }
-        ] as ExecutionService
+        ] as RemoteShellHelper
 
         TestCase.shouldFailWithMessageContaining (AssertionError, FAIL_MESSAGE) {
             LogThreadLocal.withThreadLog(System.out) {
@@ -132,19 +132,19 @@ class ExecutionHelperServiceUnitTests {
     void "test setPermission allFine"() {
         String PERMISSION = '777'
         File tmpFile = temporaryFolder.newFile()
-        service.executionService = [
+        service.remoteShellHelper = [
                 executeCommandReturnProcessOutput: { Realm realm, String command ->
-                    ProcessHelperService.executeAndWait(command)
+                    LocalShellHelper.executeAndWait(command)
                 }
-        ] as ExecutionService
+        ] as RemoteShellHelper
 
         LogThreadLocal.withThreadLog(System.out) {
-            String output = ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout("stat -c '%a' ${tmpFile}")
+            String output = LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout("stat -c '%a' ${tmpFile}")
             assert PERMISSION != output.trim()
             output = service.setPermission(new Realm(), tmpFile, PERMISSION)
             assert output.isEmpty()
 
-            output = ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout("stat -c '%a' ${tmpFile}")
+            output = LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout("stat -c '%a' ${tmpFile}")
             assert PERMISSION == output.trim()
         }
     }
@@ -177,14 +177,14 @@ class ExecutionHelperServiceUnitTests {
     }
 
     @Test
-    void "test setPermission executionService executeCommand throws exception should fail"() {
+    void "test setPermission remoteShellHelper executeCommand throws exception should fail"() {
         final String FAIL_MESSAGE = HelperUtils.uniqueString
         File tmpFile = temporaryFolder.newFile()
-        service.executionService = [
+        service.remoteShellHelper = [
                 executeCommandReturnProcessOutput: { Realm realm, String command ->
                     assert false: FAIL_MESSAGE
                 }
-        ] as ExecutionService
+        ] as RemoteShellHelper
 
         TestCase.shouldFailWithMessageContaining (AssertionError, FAIL_MESSAGE) {
             LogThreadLocal.withThreadLog(System.out) {

@@ -36,7 +36,7 @@ class CreateMergedChromosomeMappingFileJob extends AbstractEndStateAwareJobImpl 
     ChromosomeIdentifierSortingService chromosomeIdentifierSortingService
 
     @Autowired
-    ExecutionService executionService
+    RemoteShellHelper remoteShellHelper
 
     @Override
     public void execute() throws Exception {
@@ -56,7 +56,7 @@ class CreateMergedChromosomeMappingFileJob extends AbstractEndStateAwareJobImpl 
         Realm realm = qualityAssessmentMergedPassService.realmForDataProcessing(pass)
         String cmd = "echo '${fileContents}' > ${filePath}"
         cmd += "; chmod 440 ${filePath}"
-        String standardOutput = executionService.executeCommand(realm, cmd)
+        String standardOutput = remoteShellHelper.executeCommand(realm, cmd)
         log.debug "creating file finished with standard output " + standardOutput
         boolean fileCreated = validate(filePath)
         fileCreated ? succeed() : fail()

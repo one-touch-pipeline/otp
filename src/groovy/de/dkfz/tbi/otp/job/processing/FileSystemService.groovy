@@ -7,6 +7,10 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import org.codehaus.groovy.grails.commons.*
 import org.springframework.scheduling.annotation.*
+import org.springframework.beans.factory.annotation.*
+import org.springframework.context.annotation.*
+import org.springframework.stereotype.*
+import grails.transaction.*
 
 import java.nio.file.*
 
@@ -14,9 +18,15 @@ import static com.github.robtimus.filesystems.sftp.Identity.*
 import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
 import static de.dkfz.tbi.otp.ngsdata.ConfigService.SshAuthMethod.*
 
+@Scope("singleton")
+@Component
+@Transactional
 class FileSystemService {
 
+    @Autowired
     ConfigService configService
+
+    @Autowired
     GrailsApplication grailsApplication
 
     private Map<Realm, FileSystem> createdFileSystems = [:]
@@ -24,7 +34,7 @@ class FileSystemService {
     /**
      * Creates a SFTP-backed FileSystem based on the connection information in the Realm passed
      * If the method is called multiple times with the same Realm, the same FileSystem is returned.
-     * The same authentication values as in ExecutionService are used.
+     * The same authentication values as in RemoteShellHelper are used.
      */
     private FileSystem getFilesystem(Realm realm) throws Throwable {
         FileSystem fileSystem = createdFileSystems[realm]

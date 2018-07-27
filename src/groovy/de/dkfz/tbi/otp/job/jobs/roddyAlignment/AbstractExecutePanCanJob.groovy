@@ -22,7 +22,7 @@ abstract class AbstractExecutePanCanJob<R extends RoddyResult> extends AbstractR
     BedFileService bedFileService
 
     @Autowired
-    ExecutionService executionService
+    RemoteShellHelper remoteShellHelper
 
     @Autowired
     ChromosomeIdentifierSortingService chromosomeIdentifierSortingService

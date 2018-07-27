@@ -89,11 +89,11 @@ class LsdfFileServiceUnitTests {
     @Test
     void test_deleteFilesRecursive_shouldBeFine() {
         Realm realm = DomainFactory.createRealm()
-        service.executionService = [
+        service.remoteShellHelper = [
                 executeCommand: {Realm realm2, String command->
-                    ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
+                    LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
                 }
-                ] as ExecutionService
+                ] as RemoteShellHelper
         service.createClusterScriptService = new CreateClusterScriptService()
 
         List<File> files = [
@@ -111,11 +111,11 @@ class LsdfFileServiceUnitTests {
     @Test
     void test_deleteFilesRecursive_FilesOrDirectoriesIsEmpty_shouldDoNothing() {
         Realm realm = DomainFactory.createRealm()
-        service.executionService = [
+        service.remoteShellHelper = [
                 executeCommand: {Realm realm2, String command->
                     assert false: 'Should not be called'
                 }
-        ] as ExecutionService
+        ] as RemoteShellHelper
         service.createClusterScriptService = new CreateClusterScriptService()
 
         service.deleteFilesRecursive(realm, [])
@@ -142,11 +142,11 @@ class LsdfFileServiceUnitTests {
     void test_deleteFilesRecursive_deletionFail_shouldThrowException() {
         final String MESSAGE = HelperUtils.uniqueString
         Realm realm = DomainFactory.createRealm()
-        service.executionService = [
+        service.remoteShellHelper = [
                 executeCommand: {Realm realm2, String command->
                     assert false: MESSAGE
                 }
-        ] as ExecutionService
+        ] as RemoteShellHelper
         service.createClusterScriptService = new CreateClusterScriptService()
 
         List<File> files = [
@@ -176,12 +176,12 @@ class LsdfFileServiceUnitTests {
 
     private LsdfFilesService createInstanceWithMockedExecuteCommand(Realm expectedRealm) {
         LsdfFilesService service = new LsdfFilesService()
-        service.executionService = [
+        service.remoteShellHelper = [
                 executeCommand: { Realm realm, String command ->
                     assert realm.is(expectedRealm)
                     return ['bash', '-c', command].execute().getText()
                 }
-        ] as ExecutionService
+        ] as RemoteShellHelper
         return service
     }
 }

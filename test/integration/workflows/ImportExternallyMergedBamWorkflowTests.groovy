@@ -69,7 +69,7 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase {
 
         File bam = new File(getDataDirectory(), "processedMergedBamFiles/tumor_SOMEPID_merged.mdup.bam")
 
-        executionService.executeCommandReturnProcessOutput(realm,
+        remoteShellHelper.executeCommandReturnProcessOutput(realm,
                 "cp ${bam} ${new File(targetDir, bamFileName)}"
         )
 

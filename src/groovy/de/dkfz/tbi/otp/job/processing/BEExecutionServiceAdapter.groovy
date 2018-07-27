@@ -9,17 +9,17 @@ import de.dkfz.tbi.otp.utils.*
 
 class BEExecutionServiceAdapter implements BEExecutionService {
 
-    private final ExecutionService executionService
+    private final RemoteShellHelper remoteShellHelper
     private final Realm realm
 
-    BEExecutionServiceAdapter(ExecutionService executionService, Realm realm) {
-        this.executionService = executionService
+    BEExecutionServiceAdapter(RemoteShellHelper remoteShellHelper, Realm realm) {
+        this.remoteShellHelper = remoteShellHelper
         this.realm = realm
     }
 
     @Override
     ExecutionResult execute(String command) {
-        ProcessHelperService.ProcessOutput p = executionService.executeCommandReturnProcessOutput(realm, command)
+        LocalShellHelper.ProcessOutput p = remoteShellHelper.executeCommandReturnProcessOutput(realm, command)
         new ExecutionResult((p.exitCode == 0), p.exitCode, p.stdout.split("\n") as List, null)
     }
 

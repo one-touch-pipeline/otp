@@ -15,6 +15,7 @@ import grails.plugin.springsecurity.acl.*
 import org.springframework.security.access.prepost.*
 import org.springframework.security.acls.domain.*
 import org.springframework.security.acls.model.*
+import org.springframework.beans.factory.annotation.*
 
 import org.springframework.web.multipart.*
 import java.nio.file.*
@@ -45,7 +46,8 @@ class ProjectService {
 
 
     AclUtilService aclUtilService
-    ExecutionService executionService
+    @Autowired
+    RemoteShellHelper remoteShellHelper
     GroupService groupService
     ReferenceGenomeService referenceGenomeService
     SpringSecurityService springSecurityService
@@ -705,7 +707,7 @@ ${input}
 echo 'OK'
 """
         LogThreadLocal.withThreadLog(System.out) {
-            assert executionService.executeCommand(realm, script).trim() == "OK"
+            assert remoteShellHelper.executeCommand(realm, script).trim() == "OK"
         }
     }
 

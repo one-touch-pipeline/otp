@@ -55,12 +55,12 @@ class LinkFilesToFinalDestinationServiceTests {
     @After
     void tearDown() {
         TestCase.removeMetaClass(LinkFilesToFinalDestinationService, linkFilesToFinalDestinationService)
-        TestCase.removeMetaClass(ExecutionService, linkFilesToFinalDestinationService.executionService)
+        TestCase.removeMetaClass(RemoteShellHelper, linkFilesToFinalDestinationService.remoteShellHelper)
         TestCase.removeMetaClass(ExecutionHelperService, linkFilesToFinalDestinationService.executionHelperService)
         TestCase.removeMetaClass(ExecuteRoddyCommandService, linkFilesToFinalDestinationService.executeRoddyCommandService)
         TestCase.removeMetaClass(CreateClusterScriptService, linkFilesToFinalDestinationService.createClusterScriptService)
         TestCase.removeMetaClass(LinkFileUtils, linkFilesToFinalDestinationService.linkFileUtils)
-        GroovySystem.metaClassRegistry.removeMetaClass(ProcessHelperService)
+        GroovySystem.metaClassRegistry.removeMetaClass(LocalShellHelper)
         configService.clean()
     }
 
@@ -150,7 +150,7 @@ class LinkFilesToFinalDestinationServiceTests {
         assert new File(roddyBamFile.workDirectory, HelperUtils.uniqueString).createNewFile()
         final String FAIL_MESSAGE = HelperUtils.uniqueString
 
-        linkFilesToFinalDestinationService.executionService.metaClass.executeCommand = { Realm realm, String command ->
+        linkFilesToFinalDestinationService.remoteShellHelper.metaClass.executeCommand = { Realm realm, String command ->
             assert false: FAIL_MESSAGE
         }
 
@@ -196,7 +196,7 @@ class LinkFilesToFinalDestinationServiceTests {
         }
         assert countTmpDir == tmpDirectories.size()
 
-        linkFilesToFinalDestinationService.executionService.metaClass.executeCommand = { Realm realm, String command ->
+        linkFilesToFinalDestinationService.remoteShellHelper.metaClass.executeCommand = { Realm realm, String command ->
             assert filesNotToBeCalledFor.every{
                 !command.contains(it.path)
             }
@@ -206,7 +206,7 @@ class LinkFilesToFinalDestinationServiceTests {
             assert tmpFiles.every {
                 command.contains(it.path)
             }
-            String stdout = ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
+            String stdout = LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
             assert stdout.trim() == '0'
             callDeleted = true
             return stdout
@@ -234,7 +234,7 @@ class LinkFilesToFinalDestinationServiceTests {
             assert !it.exists()
         }
 
-        TestCase.withMockedExecutionService(linkFilesToFinalDestinationService.executionService, {
+        TestCase.withMockedremoteShellHelper(linkFilesToFinalDestinationService.remoteShellHelper, {
             linkFilesToFinalDestinationService.linkNewResults(roddyBamFile, realm)
         })
 
@@ -313,7 +313,7 @@ class LinkFilesToFinalDestinationServiceTests {
             assert !it.exists()
         }
 
-        TestCase.withMockedExecutionService(linkFilesToFinalDestinationService.executionService, {
+        TestCase.withMockedremoteShellHelper(linkFilesToFinalDestinationService.remoteShellHelper, {
             linkFilesToFinalDestinationService.linkNewResults(roddyBamFile, realm)
         })
 
@@ -356,7 +356,7 @@ class LinkFilesToFinalDestinationServiceTests {
             assert it.exists()
         }
 
-        TestCase.withMockedExecutionService(linkFilesToFinalDestinationService.executionService, {
+        TestCase.withMockedremoteShellHelper(linkFilesToFinalDestinationService.remoteShellHelper, {
             linkFilesToFinalDestinationService.cleanupOldResults(roddyBamFile2, realm)
         })
 
@@ -376,7 +376,7 @@ class LinkFilesToFinalDestinationServiceTests {
         RoddyBamFile roddyBamFile2 = DomainFactory.createRoddyBamFile(roddyBamFile)
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile2)
 
-        linkFilesToFinalDestinationService.executionService.metaClass.executeCommand = { Realm realm, String command ->
+        linkFilesToFinalDestinationService.remoteShellHelper.metaClass.executeCommand = { Realm realm, String command ->
             assert false: 'should not be called'
         }
 
@@ -392,7 +392,7 @@ class LinkFilesToFinalDestinationServiceTests {
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile2)
         assert roddyBamFile.workDirectory.exists()
 
-        TestCase.withMockedExecutionService(linkFilesToFinalDestinationService.executionService, {
+        TestCase.withMockedremoteShellHelper(linkFilesToFinalDestinationService.remoteShellHelper, {
             linkFilesToFinalDestinationService.cleanupOldResults(roddyBamFile2, realm)
         })
 
@@ -422,9 +422,9 @@ class LinkFilesToFinalDestinationServiceTests {
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile2)
         assert roddyBamFile2.workDirectory.exists()
 
-        linkFilesToFinalDestinationService.executionService.metaClass.executeCommand = { Realm realm, String command ->
+        linkFilesToFinalDestinationService.remoteShellHelper.metaClass.executeCommand = { Realm realm, String command ->
             assert latestIsOld == !command.contains(RoddyBamFile.WORK_DIR_PREFIX)
-            return ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
+            return LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
         }
 
         linkFilesToFinalDestinationService.cleanupOldResults(roddyBamFile2, realm)
@@ -441,7 +441,7 @@ class LinkFilesToFinalDestinationServiceTests {
     void testCleanupOldResults_withoutBaseBamFileAndWithoutOtherBamFilesOfTheSameWorkPackage_allFine() {
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
 
-        linkFilesToFinalDestinationService.executionService.metaClass.executeCommand = { Realm realm, String command ->
+        linkFilesToFinalDestinationService.remoteShellHelper.metaClass.executeCommand = { Realm realm, String command ->
             assert false: 'should not be called'
         }
 
@@ -499,7 +499,7 @@ class LinkFilesToFinalDestinationServiceTests {
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile2)
 
-        linkFilesToFinalDestinationService.executionService.metaClass.executeCommand = { Realm realm, String command ->
+        linkFilesToFinalDestinationService.remoteShellHelper.metaClass.executeCommand = { Realm realm, String command ->
             assert false: FAIL_MESSAGE
         }
 

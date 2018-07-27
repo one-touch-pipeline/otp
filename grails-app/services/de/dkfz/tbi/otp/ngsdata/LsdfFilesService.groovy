@@ -4,6 +4,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.utils.*
+import org.springframework.beans.factory.annotation.*
 
 import java.util.regex.*
 
@@ -13,7 +14,8 @@ import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.*
 class LsdfFilesService {
 
     ConfigService configService
-    ExecutionService executionService
+    @Autowired
+    RemoteShellHelper remoteShellHelper
     CreateClusterScriptService createClusterScriptService
 
 
@@ -192,7 +194,7 @@ class LsdfFilesService {
     void deleteFile(final Realm realm, final File file) {
         assert file.isAbsolute() && file.exists() && file.isFile()
         try {
-            assert executionService.executeCommand(realm, "rm '${file}'; echo \$?") ==~ /^0\s*$/
+            assert remoteShellHelper.executeCommand(realm, "rm '${file}'; echo \$?") ==~ /^0\s*$/
             waitUntilDoesNotExist(file)
         } catch (final Throwable e) {
             throw new RuntimeException("Could not delete file ${file}.", e)
@@ -207,7 +209,7 @@ class LsdfFilesService {
     void deleteDirectory(final Realm realm, final File directory) {
         assert directory.isAbsolute() && directory.exists() && directory.isDirectory()
         try {
-            assert executionService.executeCommand(realm, "rmdir '${directory}'; echo \$?") ==~ /^0\s*$/
+            assert remoteShellHelper.executeCommand(realm, "rmdir '${directory}'; echo \$?") ==~ /^0\s*$/
             waitUntilDoesNotExist(directory)
         } catch (final Throwable e) {
             throw new RuntimeException("Could not delete directory ${directory}.", e)
@@ -251,7 +253,7 @@ class LsdfFilesService {
 
     public createDirectory(File dir, Realm realm) {
         String cmd = createClusterScriptService.makeDirs([dir], "2770")
-        assert executionService.executeCommand(realm, cmd) ==~ /^0\s*$/
+        assert remoteShellHelper.executeCommand(realm, cmd) ==~ /^0\s*$/
     }
 
     public void deleteFilesRecursive(Realm realm, Collection<File> filesOrDirectories) {
@@ -261,7 +263,7 @@ class LsdfFilesService {
             return //nothing to do
         }
         String cmd = createClusterScriptService.removeDirs(filesOrDirectories, CreateClusterScriptService.RemoveOption.RECURSIVE_FORCE)
-        assert executionService.executeCommand(realm, cmd) ==~ /^0\s*$/
+        assert remoteShellHelper.executeCommand(realm, cmd) ==~ /^0\s*$/
         filesOrDirectories.each {
             waitUntilDoesNotExist(it)
         }

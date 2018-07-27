@@ -3,7 +3,6 @@ package de.dkfz.tbi.otp.ngsdata
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.testing.*
 import de.dkfz.tbi.otp.utils.MailHelperService
-import grails.plugin.springsecurity.*
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.*
@@ -11,7 +10,7 @@ import grails.test.spock.*
 
 import java.nio.file.*
 
-class DataFileServiceIntegrationSpec extends IntegrationSpec implements UserAndRoles {
+class DataFileConsistencyCheckerIntegrationSpec extends IntegrationSpec implements UserAndRoles {
 
     @Rule
     TemporaryFolder temporaryFolder
@@ -28,7 +27,7 @@ class DataFileServiceIntegrationSpec extends IntegrationSpec implements UserAndR
 
     void "test setFileExistsForAllDataFiles"() {
         given:
-        DataFileService dataFileService = new DataFileService()
+        DataFileConsistencyChecker dataFileConsistencyChecker = new DataFileConsistencyChecker()
         File initialFile1 = temporaryFolder.newFile("root/initial/fileName1")
         File initialFile2 = temporaryFolder.newFile("root/initial/fileName2")
         File initialFile3 = temporaryFolder.newFile("root/initial/fileName3")
@@ -46,13 +45,13 @@ class DataFileServiceIntegrationSpec extends IntegrationSpec implements UserAndR
         Files.createSymbolicLink(new File("${testFolder.absolutePath}/copiedOrLinked/fileName3").toPath(), initialFile3.toPath())
         Files.createSymbolicLink(new File("${testFolder.absolutePath}/copiedOrLinked/fileName4").toPath(), initialFile4.toPath())
 
-        dataFileService.lsdfFilesService = Mock(LsdfFilesService) {
+        dataFileConsistencyChecker.lsdfFilesService = Mock(LsdfFilesService) {
             1 * getFileFinalPath(dataFile1) >> "${testFolder.absolutePath}/copiedOrLinked/fileName1"
             1 * getFileFinalPath(dataFile2) >> "${testFolder.absolutePath}/copiedOrLinked/fileName2"
             1 * getFileFinalPath(dataFile3) >> "${testFolder.absolutePath}/copiedOrLinked/fileName3"
             1 * getFileFinalPath(dataFile4) >> "${testFolder.absolutePath}/copiedOrLinked/fileName4"
         }
-        dataFileService.schedulerService = Mock(SchedulerService) {
+        dataFileConsistencyChecker.schedulerService = Mock(SchedulerService) {
             1 * isActive() >> true
         }
 
@@ -60,7 +59,7 @@ class DataFileServiceIntegrationSpec extends IntegrationSpec implements UserAndR
         initialFile4.delete()
 
         when:
-        dataFileService.setFileExistsForAllDataFiles()
+        dataFileConsistencyChecker.setFileExistsForAllDataFiles()
 
         then:
         dataFile1.refresh()
@@ -76,11 +75,11 @@ class DataFileServiceIntegrationSpec extends IntegrationSpec implements UserAndR
 
     void "test getFastqDataFiles"() {
         when:
-        DataFileService dataFileService = new DataFileService()
+        DataFileConsistencyChecker dataFileConsistencyChecker = new DataFileConsistencyChecker()
         DomainFactory.createDataFile(fileType: DomainFactory.createFileType(type: type, subType: subType), seqTrack: DomainFactory.createSeqTrack(dataInstallationState: state), fileWithdrawn: fileWithdrawn)
 
         then:
-        dataFileService.getFastqDataFiles().size() == size
+        dataFileConsistencyChecker.getFastqDataFiles().size() == size
 
         where:
         type                   | subType    | state                                    | fileWithdrawn || size
@@ -94,7 +93,7 @@ class DataFileServiceIntegrationSpec extends IntegrationSpec implements UserAndR
 
     void "test setFileExistsForAllDataFiles with invalid datafile, sends email"() {
         given:
-        DataFileService dataFileService = new DataFileService()
+        DataFileConsistencyChecker dataFileConsistencyChecker = new DataFileConsistencyChecker()
         String errorRecipient = "test@test.com"
         DomainFactory.createProcessingOptionForErrorRecipient(errorRecipient)
         FileType fileType = DomainFactory.createFileType(type: FileType.Type.SEQUENCE, subType: 'fastq', vbpPath: "/sequence/")
@@ -104,21 +103,21 @@ class DataFileServiceIntegrationSpec extends IntegrationSpec implements UserAndR
         dataFile.save(validate: false)
 
 
-        dataFileService.schedulerService = Mock(SchedulerService) {
+        dataFileConsistencyChecker.schedulerService = Mock(SchedulerService) {
             1 * isActive() >> true
         }
-        dataFileService.mailHelperService = Mock(MailHelperService) {
-            1 * sendEmail('Error: DataFileService.setFileExistsForAllDataFiles() failed', _, errorRecipient) >> {String emailSubject, String content, String recipients ->
+        dataFileConsistencyChecker.mailHelperService = Mock(MailHelperService) {
+            1 * sendEmail('Error: DataFileConsistencyChecker.setFileExistsForAllDataFiles() failed', _, errorRecipient) >> {String emailSubject, String content, String recipients ->
                 assert content.contains("Error while saving datafile with id: ${dataFile.id}")
                 assert content.contains("on field 'mateNumber': rejected value [null]")
             }
         }
 
-        dataFileService.lsdfFilesService = Mock(LsdfFilesService) {
+        dataFileConsistencyChecker.lsdfFilesService = Mock(LsdfFilesService) {
             1 * getFileFinalPath(dataFile) >> "path"
         }
 
         expect:
-        dataFileService.setFileExistsForAllDataFiles()
+        dataFileConsistencyChecker.setFileExistsForAllDataFiles()
     }
 }

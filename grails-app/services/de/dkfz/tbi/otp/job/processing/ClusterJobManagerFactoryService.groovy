@@ -5,12 +5,14 @@ import de.dkfz.roddy.execution.jobs.cluster.lsf.*
 import de.dkfz.roddy.execution.jobs.cluster.pbs.*
 import de.dkfz.tbi.otp.ngsdata.*
 import groovy.transform.*
+import org.springframework.beans.factory.annotation.*
 
 import java.time.*
 
 @CompileStatic
 class ClusterJobManagerFactoryService {
-    ExecutionService executionService
+    @Autowired
+    RemoteShellHelper remoteShellHelper
     ConfigService configService
 
     private Map<Realm, BatchEuphoriaJobManager> managerPerRealm = [:]
@@ -30,9 +32,9 @@ class ClusterJobManagerFactoryService {
                     .build()
 
             if (realm.jobScheduler == Realm.JobScheduler.PBS) {
-                manager = new PBSJobManager(new BEExecutionServiceAdapter(executionService, realm), jobManagerParameters)
+                manager = new PBSJobManager(new BEExecutionServiceAdapter(remoteShellHelper, realm), jobManagerParameters)
             } else if (realm.jobScheduler == Realm.JobScheduler.LSF) {
-                manager = new LSFJobManager(new BEExecutionServiceAdapter(executionService, realm), jobManagerParameters)
+                manager = new LSFJobManager(new BEExecutionServiceAdapter(remoteShellHelper, realm), jobManagerParameters)
             }  else {
                 throw new Exception("Unsupported cluster job scheduler")
             }

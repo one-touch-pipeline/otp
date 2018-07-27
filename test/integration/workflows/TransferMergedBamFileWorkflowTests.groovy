@@ -469,7 +469,7 @@ class TransferMergedBamFileWorkflowTests extends WorkflowTestCase {
         ]
         String cmdBuildFileStructure = files.collect {"echo -n \"${it}\" > ${it}"}.join " && "
         // Call "sync" to block termination of script until I/O is done
-        executionService.executeCommand(realm, "${cmdBuildFileStructure} && ${createMd5SumFile(fileNameMergedBamFile1)} && ${createMd5SumFile(fileNameMergedBamFile2)} && sync")
+        remoteShellHelper.executeCommand(realm, "${cmdBuildFileStructure} && ${createMd5SumFile(fileNameMergedBamFile1)} && ${createMd5SumFile(fileNameMergedBamFile2)} && sync")
         checkFiles(files)
     }
 

@@ -6,7 +6,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
-import de.dkfz.tbi.otp.utils.ProcessHelperService.ProcessOutput
+import de.dkfz.tbi.otp.utils.LocalShellHelper.ProcessOutput
 import org.junit.*
 import org.junit.rules.*
 import org.springframework.beans.factory.annotation.*
@@ -44,8 +44,8 @@ class ExecuteWgbsAlignmentJobTests {
                         roddyBamFile.referenceGenome.cytosinePositionsIndex)
         )
 
-        executeWgbsAlignmentJob.executionService.metaClass.executeCommandReturnProcessOutput = { Realm realm, String cmd ->
-            ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(cmd)
+        executeWgbsAlignmentJob.remoteShellHelper.metaClass.executeCommandReturnProcessOutput = { Realm realm, String cmd ->
+            LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout(cmd)
             return new ProcessOutput(
                     stdout: "stdout",
                     stderr: "",
@@ -68,7 +68,7 @@ class ExecuteWgbsAlignmentJobTests {
 
     @After
     void tearDown() {
-        TestCase.removeMetaClass(ExecutionService, executeWgbsAlignmentJob.executionService)
+        TestCase.removeMetaClass(RemoteShellHelper, executeWgbsAlignmentJob.remoteShellHelper)
         configService.clean()
     }
 
@@ -144,7 +144,7 @@ class ExecuteWgbsAlignmentJobTests {
         File metaDataTableFile = roddyBamFile.workMetadataTableFile
         assert metaDataTableFile.parentFile.mkdirs()
 
-        executeWgbsAlignmentJob.executionService.metaClass.executeCommandReturnProcessOutput = { Realm realm, String cmd ->
+        executeWgbsAlignmentJob.remoteShellHelper.metaClass.executeCommandReturnProcessOutput = { Realm realm, String cmd ->
             return new ProcessOutput(
                     stdout: "stdout",
                     stderr: "",
@@ -163,7 +163,7 @@ class ExecuteWgbsAlignmentJobTests {
         File metaDataTableFile = roddyBamFile.workMetadataTableFile
         assert metaDataTableFile.parentFile.mkdirs()
 
-        executeWgbsAlignmentJob.executionService.metaClass.executeCommandReturnProcessOutput = { Realm realm, String cmd ->
+        executeWgbsAlignmentJob.remoteShellHelper.metaClass.executeCommandReturnProcessOutput = { Realm realm, String cmd ->
             return new ProcessOutput(
                     stdout: "stdout",
                     stderr: "",

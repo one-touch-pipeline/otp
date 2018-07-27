@@ -28,7 +28,7 @@ class LinkFilesToFinalDestinationService {
     CreateClusterScriptService createClusterScriptService
 
     @Autowired
-    ExecutionService executionService
+    RemoteShellHelper remoteShellHelper
 
     @Autowired
     AbstractMergedBamFileService abstractMergedBamFileService
@@ -261,6 +261,6 @@ class LinkFilesToFinalDestinationService {
             lsdfFilesService.deleteFilesRecursive(realm, workDirs)
         }
         String cmd = "find ${roddyBamFile.getBaseDirectory()} -maxdepth 1 -lname '.merging*/*' -delete;"
-        executionService.executeCommandReturnProcessOutput(realm, cmd)
+        remoteShellHelper.executeCommandReturnProcessOutput(realm, cmd)
     }
 }

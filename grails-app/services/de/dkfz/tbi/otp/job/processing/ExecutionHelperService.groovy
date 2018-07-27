@@ -1,7 +1,8 @@
 package de.dkfz.tbi.otp.job.processing
 
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.ProcessHelperService
+import de.dkfz.tbi.otp.utils.LocalShellHelper
+import org.springframework.beans.factory.annotation.*
 
 /**
  * This service provides file operations
@@ -9,19 +10,20 @@ import de.dkfz.tbi.otp.utils.ProcessHelperService
  */
 class ExecutionHelperService {
 
-    ExecutionService executionService
+    @Autowired
+    RemoteShellHelper remoteShellHelper
 
 
     String getGroup(File directory) {
         assert directory: 'directory may not be null'
-        ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout("stat -c '%G' ${directory}").trim()
+        LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout("stat -c '%G' ${directory}").trim()
     }
 
     String setGroup(Realm realm, File directory, String group) {
         assert realm: 'realm may not be null'
         assert directory: 'directory may not be null'
         assert group: 'group may not be null'
-        ProcessHelperService.ProcessOutput result = executionService.executeCommandReturnProcessOutput(realm, "chgrp ${group} ${directory}")
+        LocalShellHelper.ProcessOutput result = remoteShellHelper.executeCommandReturnProcessOutput(realm, "chgrp ${group} ${directory}")
         if (result.exitCode != 0 ) {
             throw new RuntimeException("Setting group failed: ${result.stderr}; exit code: ${result.exitCode}")
         }
@@ -32,7 +34,7 @@ class ExecutionHelperService {
         assert realm: 'realm may not be null'
         assert directory: 'directory may not be null'
         assert permission: 'permission may not be null'
-        ProcessHelperService.ProcessOutput result = executionService.executeCommandReturnProcessOutput(realm, "chmod  ${permission} ${directory}")
+        LocalShellHelper.ProcessOutput result = remoteShellHelper.executeCommandReturnProcessOutput(realm, "chmod  ${permission} ${directory}")
         if (result.exitCode != 0 ) {
             throw new RuntimeException("Setting permission failed: ${result.stderr}; exit code: ${result.exitCode}")
         }

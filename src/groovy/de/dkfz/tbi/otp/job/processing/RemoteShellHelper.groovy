@@ -4,11 +4,16 @@ import com.jcraft.jsch.*
 import com.jcraft.jsch.agentproxy.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.ProcessHelperService.ProcessOutput
+import de.dkfz.tbi.otp.utils.LocalShellHelper
+import de.dkfz.tbi.otp.utils.LocalShellHelper.ProcessOutput
 import de.dkfz.tbi.otp.utils.logging.*
 import groovy.transform.*
 import org.apache.commons.logging.*
 import org.springframework.scheduling.annotation.*
+import org.springframework.beans.factory.annotation.*
+import org.springframework.context.annotation.*
+import org.springframework.stereotype.*
+import grails.transaction.*
 
 import java.util.concurrent.*
 
@@ -18,8 +23,12 @@ import static de.dkfz.tbi.otp.ngsdata.ConfigService.*
  * @short Helper class providing functionality for remote execution of jobs.
  *
  * Provides connection to a remote host via SSH
+ *
+ * @see LocalShellHelper
  */
-class ExecutionService {
+@Scope("singleton")
+@Component
+class RemoteShellHelper {
 
     static private final int TIME_FOR_RETRY_REMOTE_ACCESS = 10 * 60
 
@@ -27,7 +36,9 @@ class ExecutionService {
 
 
     @SuppressWarnings("GrailsStatelessService")
+    @Autowired
     ConfigService configService
+
 
     private JSch jsch
 

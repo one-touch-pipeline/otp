@@ -30,7 +30,7 @@ class CopyFilesJob extends AbstractOtpJob implements AutoRestartableJob {
     ClusterJobSchedulerService clusterJobSchedulerService
 
     @Autowired
-    ExecutionService executionService
+    RemoteShellHelper remoteShellHelper
 
     @Autowired
     FileSystemService fileSystemService
@@ -56,7 +56,7 @@ class CopyFilesJob extends AbstractOtpJob implements AutoRestartableJob {
 
             if (seqTrack.linkedExternally) {
                 String cmd = getScript(sourceFile, targetFile,"ln -s")
-                executionService.executeCommand(realm, cmd)
+                remoteShellHelper.executeCommand(realm, cmd)
                 returnValue = AbstractMultiJob.NextAction.SUCCEED
             } else {
                 String cmd = getScript(sourceFile, targetFile,"cp", "md5sum ${targetFile.name} > ${md5SumFileName}", "chmod 440 ${targetFile} ${md5SumFileName}")

@@ -8,7 +8,7 @@ import spock.lang.*
 @Mock([
         Project,
 ])
-class ProjectServiceSpec extends Specification {
+class ProjectServiceWithoutAutowiredSpec extends Specification {
 
     void "createProject: dirName shouldn't overlap with root path"() {
         given:

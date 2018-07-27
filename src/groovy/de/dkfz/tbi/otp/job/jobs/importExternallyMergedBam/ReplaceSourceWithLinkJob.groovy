@@ -24,7 +24,7 @@ class ReplaceSourceWithLinkJob extends AbstractEndStateAwareJobImpl {
     LinkFileUtils linkFileUtils
 
     @Autowired
-    ExecutionService executionService
+    RemoteShellHelper remoteShellHelper
 
     @Autowired
     FileSystemService fileSystemService

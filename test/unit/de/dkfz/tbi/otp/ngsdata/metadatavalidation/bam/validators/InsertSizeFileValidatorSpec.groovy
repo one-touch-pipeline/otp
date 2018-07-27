@@ -3,7 +3,7 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.validators
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.*
-import de.dkfz.tbi.otp.utils.ProcessHelperService
+import de.dkfz.tbi.otp.utils.LocalShellHelper
 import de.dkfz.tbi.util.spreadsheet.validation.*
 import org.junit.ClassRule
 import org.junit.rules.TemporaryFolder
@@ -26,7 +26,7 @@ class InsertSizeFileValidatorSpec extends Specification {
         File insertFile = temporaryFolder.newFile('insertFile')
         File dir = temporaryFolder.newFolder('folder')
         File notReadAble = temporaryFolder.newFile('abcde')
-        assert ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout("chmod a-r ${notReadAble.absolutePath} && echo OK").trim() == 'OK'
+        assert LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout("chmod a-r ${notReadAble.absolutePath} && echo OK").trim() == 'OK'
         assert !notReadAble.canRead()
 
         BamMetadataValidationContext context = BamMetadataValidationContextFactory.createContext(

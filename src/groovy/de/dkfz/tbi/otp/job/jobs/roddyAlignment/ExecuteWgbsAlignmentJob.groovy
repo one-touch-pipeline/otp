@@ -5,7 +5,7 @@ import de.dkfz.tbi.otp.job.ast.*
 import de.dkfz.tbi.otp.job.jobs.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.ProcessHelperService.ProcessOutput
+import de.dkfz.tbi.otp.utils.LocalShellHelper.ProcessOutput
 import org.springframework.beans.factory.annotation.*
 import org.springframework.context.annotation.*
 import org.springframework.stereotype.*
@@ -17,7 +17,7 @@ class ExecuteWgbsAlignmentJob extends AbstractRoddyAlignmentJob implements AutoR
 
 
     @Autowired
-    ExecutionService executionService
+    RemoteShellHelper remoteShellHelper
 
     @Autowired
     ReferenceGenomeService referenceGenomeService
@@ -88,7 +88,7 @@ chmod 0444 ${metadataFile.path}
 """
 
 
-        ProcessOutput output = executionService.executeCommandReturnProcessOutput(realm, cmd)
+        ProcessOutput output = remoteShellHelper.executeCommandReturnProcessOutput(realm, cmd)
         assert output.exitCode == 0
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(metadataFile)
 

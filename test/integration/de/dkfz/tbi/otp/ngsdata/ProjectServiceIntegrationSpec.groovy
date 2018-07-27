@@ -23,7 +23,7 @@ import java.nio.file.attribute.*
 
 class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRoles {
 
-    ExecutionService executionService
+    RemoteShellHelper remoteShellHelper
     ProcessingOptionService processingOptionService
     ProjectService projectService
     ReferenceGenomeService referenceGenomeService
@@ -63,11 +63,11 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         DomainFactory.createIndelPipelineLazy()
         DomainFactory.createSophiaPipelineLazy()
         DomainFactory.createAceseqPipelineLazy()
-        projectService.executionService = Stub(ExecutionService) {
+        projectService.remoteShellHelper = Stub(RemoteShellHelper) {
             executeCommand(_, _) >> { Realm realm2, String command ->
                 File script = temporaryFolder.newFile('script' + counter++ + '.sh')
                 script.text = command
-                return ProcessHelperService.executeAndWait("bash ${script.absolutePath}").assertExitCodeZero().stdout
+                return LocalShellHelper.executeAndWait("bash ${script.absolutePath}").assertExitCodeZero().stdout
             }
         }
         projectService.roddyWorkflowConfigService = new RoddyWorkflowConfigService()
@@ -88,7 +88,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
     }
 
     def cleanup() {
-        projectService.executionService = executionService
+        projectService.remoteShellHelper = remoteShellHelper
         projectService.roddyWorkflowConfigService = roddyWorkflowConfigService
         configService.clean()
     }

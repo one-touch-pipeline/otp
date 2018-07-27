@@ -40,7 +40,7 @@ class FastqcJobTest {
         processingOptionService.createOrUpdate(ProcessingOption.OptionName.COMMAND_FASTQC, null, null, "fastqc-0.10.1")
 
         WaitingFileUtils.metaClass.static.waitUntilExists = { File file -> true }
-        ProcessHelperService.metaClass.static.executeAndAssertExitCodeAndErrorOutAndReturnStdout = { String cmd ->
+        LocalShellHelper.metaClass.static.executeAndAssertExitCodeAndErrorOutAndReturnStdout = { String cmd ->
             return "OK"
         }
 
@@ -57,12 +57,12 @@ class FastqcJobTest {
     void tearDown() {
 
         TestCase.removeMetaClass(ClusterJobSchedulerService, fastqcJob.clusterJobSchedulerService)
-        TestCase.removeMetaClass(ExecutionService, fastqcJob.executionService)
+        TestCase.removeMetaClass(RemoteShellHelper, fastqcJob.remoteShellHelper)
         TestCase.removeMetaClass(LsdfFilesService, fastqcJob.lsdfFilesService)
         TestCase.removeMetaClass(FastqcUploadService, fastqcJob.fastqcUploadService)
         TestCase.removeMetaClass(FastqcJob, fastqcJob)
         WaitingFileUtils.metaClass = null
-        ProcessHelperService.metaClass = null
+        LocalShellHelper.metaClass = null
 
         seqTrack = null
         dataFile = null
@@ -76,10 +76,10 @@ class FastqcJobTest {
             return 'pbsJobId'
         }
 
-        fastqcJob.executionService.metaClass.executeCommandReturnProcessOutput = { Realm inputRealm, String command ->
+        fastqcJob.remoteShellHelper.metaClass.executeCommandReturnProcessOutput = { Realm inputRealm, String command ->
             assert command.contains("umask 027; mkdir -p -m 2750")
             assert !command.contains("cp ")
-            return new ProcessHelperService.ProcessOutput('','',0)
+            return new LocalShellHelper.ProcessOutput('','',0)
         }
 
         fastqcJob.maybeSubmit()
@@ -103,9 +103,9 @@ class FastqcJobTest {
             assert false : "this method should not be reached"
         }
 
-        fastqcJob.executionService.metaClass.executeCommandReturnProcessOutput = { Realm inputRealm, String command ->
+        fastqcJob.remoteShellHelper.metaClass.executeCommandReturnProcessOutput = { Realm inputRealm, String command ->
             assert command.contains("umask 027; mkdir -p -m 2750") || command.contains("cp ")
-            return new ProcessHelperService.ProcessOutput('','',0)
+            return new LocalShellHelper.ProcessOutput('','',0)
         }
 
         fastqcJob.fastqcUploadService.metaClass.uploadFastQCFileContentsToDataBase = { FastqcProcessedFile fastqc -> }

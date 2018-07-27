@@ -20,7 +20,7 @@ class CreateMergedQaOutputDirectoryJob extends AbstractEndStateAwareJobImpl {
     QualityAssessmentMergedPassService qualityAssessmentMergedPassService
 
     @Autowired
-    ExecutionService executionService
+    RemoteShellHelper remoteShellHelper
 
     @Override
     public void execute() throws Exception {
@@ -33,7 +33,7 @@ class CreateMergedQaOutputDirectoryJob extends AbstractEndStateAwareJobImpl {
         String directory = processedMergedBamFileQaFileService.directoryPath(pass)
         Realm realm = qualityAssessmentMergedPassService.realmForDataProcessing(pass)
         String cmd = "umask 027; mkdir -p -m 2750 " + directory
-        String exitCode = executionService.executeCommand(realm, cmd)
+        String exitCode = remoteShellHelper.executeCommand(realm, cmd)
         boolean dirCreated = validate(directory)
         dirCreated ? succeed() : fail()
     }

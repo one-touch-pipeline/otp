@@ -37,10 +37,7 @@ class FastqcJob extends AbstractOtpJob implements AutoRestartableJob {
     FastqcUploadService fastqcUploadService
 
     @Autowired
-    ExecutionService executionService
-
-    @Autowired
-    ProcessHelperService processHelperService
+    RemoteShellHelper remoteShellHelper
 
     @Autowired
     FileService fileService
@@ -53,7 +50,7 @@ class FastqcJob extends AbstractOtpJob implements AutoRestartableJob {
         // create fastqc output directory
         File directory = new File(fastqcDataFilesService.fastqcOutputDirectory(seqTrack))
         String cmd = "umask 027; mkdir -p -m 2750 " + directory.path
-        executionService.executeCommandReturnProcessOutput(realm, cmd).assertExitCodeZeroAndStderrEmpty()
+        remoteShellHelper.executeCommandReturnProcessOutput(realm, cmd).assertExitCodeZeroAndStderrEmpty()
         WaitingFileUtils.waitUntilExists(directory)
 
         // copy fastqc or execute fastqc on cluster
@@ -158,11 +155,11 @@ class FastqcJob extends AbstractOtpJob implements AutoRestartableJob {
                     cp ${seqCenterFastQcFile} ${outDir};
                     chmod 0644 ${outDir}/*
                     """.stripIndent()
-            executionService.executeCommandReturnProcessOutput(realm, copyAndMd5sumCommand).assertExitCodeZeroAndStderrEmpty()
+            remoteShellHelper.executeCommandReturnProcessOutput(realm, copyAndMd5sumCommand).assertExitCodeZeroAndStderrEmpty()
             lsdfFilesService.ensureFileIsReadableAndNotEmpty(new File(outDir, seqCenterFastQcFile.fileName.toString()))
 
             String validateMd5Sum = "cd ${outDir}; md5sum -c ${seqCenterFastQcFileMd5Sum.fileName}"
-            processHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(validateMd5Sum)
+            LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout(validateMd5Sum)
 
             createFastqcProcessedFileIfNotExisting(dataFile)
             FastqcProcessedFile fastqcProcessedFile = fastqcDataFilesService.getAndUpdateFastqcProcessedFile(dataFile)

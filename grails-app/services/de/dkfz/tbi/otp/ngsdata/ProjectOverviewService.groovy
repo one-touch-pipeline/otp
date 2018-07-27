@@ -1,9 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
-import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.utils.*
 import groovy.sql.*
 import groovy.transform.*
@@ -15,11 +13,10 @@ import org.springframework.security.access.prepost.*
 import javax.sql.*
 import java.util.regex.*
 
-import static de.dkfz.tbi.otp.utils.ProcessHelperService.*
+import static de.dkfz.tbi.otp.utils.LocalShellHelper.*
 
 class ProjectOverviewService {
 
-    ExecutionService executionService
     ExecuteRoddyCommandService executeRoddyCommandService
     ProcessingOptionService processingOptionService
     @Autowired

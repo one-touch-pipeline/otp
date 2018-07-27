@@ -12,7 +12,7 @@ import spock.lang.*
         ProcessingOption,
         Realm
 ])
-class ClusterJobManagerFactoryServiceSpec extends Specification {
+class ClusterJobManagerFactoryServiceWithoutAutowiredSpec extends Specification {
 
     def "test getJobManager, get correct manager"(Realm.JobScheduler type, Class managerClass) {
         given:

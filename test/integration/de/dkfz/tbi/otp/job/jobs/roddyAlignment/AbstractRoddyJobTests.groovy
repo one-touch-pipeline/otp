@@ -13,8 +13,8 @@ import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
-import de.dkfz.tbi.otp.utils.ProcessHelperService
-import de.dkfz.tbi.otp.utils.ProcessHelperService.ProcessOutput
+import de.dkfz.tbi.otp.utils.LocalShellHelper
+import de.dkfz.tbi.otp.utils.LocalShellHelper.ProcessOutput
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import org.codehaus.groovy.control.io.NullWriter
 import org.junit.After
@@ -101,7 +101,7 @@ class AbstractRoddyJobTests {
         TestCase.removeMetaClass(ExecuteRoddyCommandService, roddyJob.executeRoddyCommandService)
         TestCase.removeMetaClass(AbstractRoddyJob, roddyJob)
         roddyBamFile = null
-        GroovySystem.metaClassRegistry.removeMetaClass(ProcessHelperService)
+        GroovySystem.metaClassRegistry.removeMetaClass(LocalShellHelper)
         configService.clean()
     }
 
@@ -121,9 +121,9 @@ Creating the following execution directory to store information about this proce
 ${workExecutionDir.absolutePath}
 newLine"""
 
-        ProcessHelperService.metaClass.static.executeAndWait = { String cmd ->
+        LocalShellHelper.metaClass.static.executeAndWait = { String cmd ->
             executeCommandCounter++
-            return new ProcessHelperService.ProcessOutput(stdout: stdout, stderr: stderr, exitCode: 0)
+            return new LocalShellHelper.ProcessOutput(stdout: stdout, stderr: stderr, exitCode: 0)
         }
 
         return workExecutionDir
@@ -137,16 +137,16 @@ Creating the following execution directory to java.lang.OutOfMemoryError store i
 ${workExecutionDir.absolutePath}
 newLine"""
 
-        ProcessHelperService.metaClass.static.executeAndWait = { String cmd ->
+        LocalShellHelper.metaClass.static.executeAndWait = { String cmd ->
             executeCommandCounter++
-            return new ProcessHelperService.ProcessOutput(stdout: "", stderr: stderr, exitCode: 0)
+            return new LocalShellHelper.ProcessOutput(stdout: "", stderr: stderr, exitCode: 0)
         }
 
         return workExecutionDir
     }
 
     private void mockProcessOutput_noClusterJobsSubmitted() {
-        ProcessHelperService.metaClass.static.executeAndWait = { String cmd ->
+        LocalShellHelper.metaClass.static.executeAndWait = { String cmd ->
             executeCommandCounter++
             return OUTPUT_NO_CLUSTER_JOBS_SUBMITTED
         }

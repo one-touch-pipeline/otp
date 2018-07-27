@@ -17,7 +17,7 @@ import org.junit.*
 import org.junit.rules.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
-import static de.dkfz.tbi.otp.utils.ProcessHelperService.*
+import static de.dkfz.tbi.otp.utils.LocalShellHelper.*
 
 abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
 

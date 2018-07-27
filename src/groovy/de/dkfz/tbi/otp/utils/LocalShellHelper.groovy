@@ -3,7 +3,10 @@ package de.dkfz.tbi.otp.utils
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import groovy.transform.Immutable
 
-class ProcessHelperService {
+/**
+ * @see de.dkfz.tbi.otp.job.processing.RemoteShellHelper
+ */
+class LocalShellHelper {
 
     @Immutable
     static class ProcessOutput {
@@ -28,13 +31,13 @@ class ProcessHelperService {
         }
     }
 
-    static Process execute(String cmd) {
+    private static Process execute(String cmd) {
         assert cmd : "The input cmd must not be null"
         LogThreadLocal.getThreadLog()?.debug("executing command:\n${cmd}")
         return [ 'bash', '-c', cmd ].execute()
     }
 
-    static ProcessOutput waitForProcess(Process process) {
+    private static ProcessOutput waitForProcess(Process process) {
         assert process : "The input process must not be null"
         StringBuffer stdout = new StringBuffer()
         StringBuffer stderr = new StringBuffer()

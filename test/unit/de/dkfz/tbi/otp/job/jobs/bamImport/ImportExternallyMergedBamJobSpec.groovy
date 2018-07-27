@@ -235,7 +235,7 @@ class ImportExternallyMergedBamJobSpec extends Specification {
 
         importExternallyMergedBamJob.clusterJobSchedulerService = Mock(ClusterJobSchedulerService) {
             1 * executeJob(_, _) >> { Realm realm, String command ->
-                ProcessHelperService.executeAndWait(command)
+                LocalShellHelper.executeAndWait(command)
             }
         }
 
@@ -297,7 +297,7 @@ class ImportExternallyMergedBamJobSpec extends Specification {
 
         importExternallyMergedBamJob.clusterJobSchedulerService = Mock(ClusterJobSchedulerService) {
             1 * executeJob(_, _) >> { Realm realm, String command ->
-                ProcessHelperService.executeAndWait(command)
+                LocalShellHelper.executeAndWait(command)
             }
         }
 

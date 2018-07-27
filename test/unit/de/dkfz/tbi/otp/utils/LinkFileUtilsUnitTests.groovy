@@ -31,21 +31,21 @@ class LinkFileUtilsUnitTests {
 
         realm = DomainFactory.createRealm()
 
-        ExecutionService executionService = [
+        RemoteShellHelper remoteShellHelper = [
                 executeCommand: { Realm realm, String command ->
-                    String stdout = ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
+                    String stdout = LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
                     assert stdout ==~ /^0?\s*$/
                     return stdout
                 }
-        ] as ExecutionService
+        ] as RemoteShellHelper
 
         linkFileUtils = new LinkFileUtils()
         linkFileUtils.createClusterScriptService = new CreateClusterScriptService()
         linkFileUtils.lsdfFilesService = new LsdfFilesService()
         linkFileUtils.lsdfFilesService.createClusterScriptService = new CreateClusterScriptService()
-        linkFileUtils.lsdfFilesService.executionService = executionService
+        linkFileUtils.lsdfFilesService.remoteShellHelper = remoteShellHelper
 
-        linkFileUtils.executionService = executionService
+        linkFileUtils.remoteShellHelper = remoteShellHelper
     }
 
     @After
@@ -130,11 +130,11 @@ class LinkFileUtilsUnitTests {
 
         linkFileUtils.lsdfFilesService = new LsdfFilesService()
         linkFileUtils.lsdfFilesService.createClusterScriptService = new CreateClusterScriptService()
-        linkFileUtils.lsdfFilesService.executionService = [
+        linkFileUtils.lsdfFilesService.remoteShellHelper = [
                 executeCommand: { Realm realm, String command ->
                     assert realm == realm
                 }
-        ] as ExecutionService
+        ] as RemoteShellHelper
 
         TestCase.shouldFail(PowerAssertionError) {
             linkFileUtils.createAndValidateLinks([(sourceFile): linkFile], realm)

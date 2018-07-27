@@ -56,7 +56,7 @@ class BamMetadataValidationContextSpec extends Specification {
     void "checkFile, when is not readable, add the corresponding problem"() {
         given:
         Path notReadAble = temporaryFolder.newFile('notReadable.txt').toPath()
-        assert ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout("chmod a-r ${notReadAble.toAbsolutePath()} && echo OK").trim() == 'OK'
+        assert LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout("chmod a-r ${notReadAble.toAbsolutePath()} && echo OK").trim() == 'OK'
         assert !Files.isReadable(notReadAble)
 
         when:

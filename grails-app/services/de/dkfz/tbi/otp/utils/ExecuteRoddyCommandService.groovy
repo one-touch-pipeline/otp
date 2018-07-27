@@ -6,10 +6,12 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import groovy.transform.*
+import org.springframework.beans.factory.annotation.*
 
 class ExecuteRoddyCommandService {
 
-    ExecutionService executionService
+    @Autowired
+    RemoteShellHelper remoteShellHelper
 
     ExecutionHelperService executionHelperService
 
@@ -118,9 +120,9 @@ class ExecuteRoddyCommandService {
         assert realm : "Realm must not be null"
         assert file : "File must not be null"
         if (file.exists()) {
-            executionService.executeCommand(realm, "umask 027; chgrp ${ProcessingOptionService.getValueOfProcessingOption(OptionName.OTP_USER_LINUX_GROUP)} ${file} ; chmod 2770 ${file}")
+            remoteShellHelper.executeCommand(realm, "umask 027; chgrp ${ProcessingOptionService.getValueOfProcessingOption(OptionName.OTP_USER_LINUX_GROUP)} ${file} ; chmod 2770 ${file}")
         } else {
-            executionService.executeCommand(realm, "umask 027; mkdir -m 2750 -p ${file.parent} && mkdir -m 2770 -p ${file} && chgrp ${ProcessingOptionService.getValueOfProcessingOption(OptionName.OTP_USER_LINUX_GROUP)} ${file};")
+            remoteShellHelper.executeCommand(realm, "umask 027; mkdir -m 2750 -p ${file.parent} && mkdir -m 2770 -p ${file} && chgrp ${ProcessingOptionService.getValueOfProcessingOption(OptionName.OTP_USER_LINUX_GROUP)} ${file};")
             WaitingFileUtils.waitUntilExists(file)
         }
     }
@@ -153,7 +155,7 @@ class ExecuteRoddyCommandService {
             echo "correct file permission for bam/bai files"
             find -type f -not -perm 444 \\( -name "*.bam" -or -name "*.bai" \\) -print -exec chmod 444 '{}' \\; | wc -l
             """.stripMargin()
-        executionService.executeCommandReturnProcessOutput(realm, cmd).assertExitCodeZeroAndStderrEmpty()
+        remoteShellHelper.executeCommandReturnProcessOutput(realm, cmd).assertExitCodeZeroAndStderrEmpty()
     }
 
     void correctGroups(RoddyResult roddyResult, Realm realm) {
@@ -169,7 +171,7 @@ class ExecuteRoddyCommandService {
             echo "correct group permission to" \$groupname
             find -not -type l -not -group \$groupname -print -exec chgrp \$groupname '{}' \\; | wc -l
             """.stripMargin()
-        executionService.executeCommandReturnProcessOutput(realm, cmd).assertExitCodeZeroAndStderrEmpty()
+        remoteShellHelper.executeCommandReturnProcessOutput(realm, cmd).assertExitCodeZeroAndStderrEmpty()
     }
 
     File featureTogglesConfigPath() {

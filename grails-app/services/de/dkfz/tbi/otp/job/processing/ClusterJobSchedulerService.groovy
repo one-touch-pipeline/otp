@@ -10,6 +10,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import grails.compiler.*
 import grails.util.Environment
 import groovy.transform.*
+import org.springframework.beans.factory.annotation.*
 
 import java.time.*
 
@@ -31,7 +32,6 @@ class ClusterJobSchedulerService {
     JobStatusLoggingService jobStatusLoggingService
     SchedulerService schedulerService
     ClusterJobService clusterJobService
-    ExecutionService executionService
     ClusterJobManagerFactoryService clusterJobManagerFactoryService
     ConfigService configService
 

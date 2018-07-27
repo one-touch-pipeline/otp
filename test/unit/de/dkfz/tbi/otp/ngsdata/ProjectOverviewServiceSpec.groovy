@@ -1,7 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.utils.*
 import grails.test.mixin.*
@@ -45,9 +44,9 @@ class ProjectOverviewServiceSpec extends Specification {
                 },
         ])
 
-        GroovyMock(ProcessHelperService, global: true)
-        1 * ProcessHelperService.executeAndWait(_) >> {
-            new ProcessHelperService.ProcessOutput("""
+        GroovyMock(LocalShellHelper, global: true)
+        1 * LocalShellHelper.executeAndWait(_) >> {
+            new LocalShellHelper.ProcessOutput("""
                 useAcceleratedHardware=${useConvey}
                 markDuplicatesVariant=${mergeTool}
 
@@ -83,7 +82,7 @@ class ProjectOverviewServiceSpec extends Specification {
         roddyPipelineVersion == alignmentInfo.pluginVersion
 
         cleanup:
-        GroovySystem.metaClassRegistry.removeMetaClass(ProcessHelperService)
+        GroovySystem.metaClassRegistry.removeMetaClass(LocalShellHelper)
 
         where:
         useConvey | mergeTool                           || alignCommand         || alignOpt           || mergeCommand                              || mergeOpt       || roddyPipelineVersion
@@ -108,9 +107,9 @@ class ProjectOverviewServiceSpec extends Specification {
                 },
         ])
 
-        GroovyMock(ProcessHelperService, global: true)
-        1 * ProcessHelperService.executeAndWait(_) >> {
-            new ProcessHelperService.ProcessOutput("""
+        GroovyMock(LocalShellHelper, global: true)
+        1 * LocalShellHelper.executeAndWait(_) >> {
+            new LocalShellHelper.ProcessOutput("""
                 |SAMTOOLS_VERSION=1.0
                 |SAMBAMBA_VERSION=3.0
                 |STAR_VERSION=2.0
@@ -134,7 +133,7 @@ class ProjectOverviewServiceSpec extends Specification {
         'Version 1.0' == alignmentInfo.samToolsCommand
 
         cleanup:
-        GroovySystem.metaClassRegistry.removeMetaClass(ProcessHelperService)
+        GroovySystem.metaClassRegistry.removeMetaClass(LocalShellHelper)
     }
 
     @Unroll
@@ -150,9 +149,9 @@ class ProjectOverviewServiceSpec extends Specification {
                 log                       : new NoOpLog(),
         ])
 
-        GroovyMock(ProcessHelperService, global: true)
-        1 * ProcessHelperService.executeAndWait(_) >> {
-            new ProcessHelperService.ProcessOutput(stdout, stderr.replaceFirst('roddyWorkflowConfig', roddyWorkflowConfig.nameUsedInConfig), exitcode)
+        GroovyMock(LocalShellHelper, global: true)
+        1 * LocalShellHelper.executeAndWait(_) >> {
+            new LocalShellHelper.ProcessOutput(stdout, stderr.replaceFirst('roddyWorkflowConfig', roddyWorkflowConfig.nameUsedInConfig), exitcode)
         }
         String expectedError = expectedErrorTemplate.replaceFirst('roddyWorkflowConfig', roddyWorkflowConfig.nameUsedInConfig)
 
@@ -164,7 +163,7 @@ class ProjectOverviewServiceSpec extends Specification {
         e.message.contains(expectedError)
 
         cleanup:
-        GroovySystem.metaClassRegistry.removeMetaClass(ProcessHelperService)
+        GroovySystem.metaClassRegistry.removeMetaClass(LocalShellHelper)
 
         where:
         name                  | stdout                                          | stderr                                                                      | exitcode || expectedErrorTemplate

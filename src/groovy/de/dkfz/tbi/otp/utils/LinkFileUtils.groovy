@@ -14,7 +14,7 @@ import static de.dkfz.tbi.otp.utils.WaitingFileUtils.*
 class LinkFileUtils {
 
     @Autowired
-    ExecutionService executionService
+    RemoteShellHelper remoteShellHelper
 
     @Autowired
     CreateClusterScriptService createClusterScriptService
@@ -48,7 +48,7 @@ class LinkFileUtils {
                 command << "ln -sf ${relativePath.toString() ?: "."}/${source.name} ${link.path}\n"
             }
 
-            executionService.executeCommand(realm, command.toString())
+            remoteShellHelper.executeCommand(realm, command.toString())
 
             sourceLinkMap.each { File source, File link ->
                 waitUntilExists(link)

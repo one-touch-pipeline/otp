@@ -3,7 +3,7 @@ package de.dkfz.tbi.otp.utils
 import de.dkfz.tbi.TestCase
 import org.junit.Test
 
-class ProcessHelperServiceUnitTests {
+class LocalShellHelperUnitTests {
 
 
     final String STDOUT_TEXT = "Stdout\nText"
@@ -14,7 +14,7 @@ class ProcessHelperServiceUnitTests {
     @Test
     void testExecute_InputCommandIsNull_ShouldFail() {
         assert TestCase.shouldFail(AssertionError) {
-            ProcessHelperService.execute(null)
+            LocalShellHelper.execute(null)
         }.contains("The input cmd must not be null")
     }
 
@@ -23,7 +23,7 @@ class ProcessHelperServiceUnitTests {
         StringBuffer stdout = new StringBuffer()
         StringBuffer stderr = new StringBuffer()
 
-        Process process = ProcessHelperService.execute(COMMAND)
+        Process process = LocalShellHelper.execute(COMMAND)
 
         process.waitForProcessOutput(stdout, stderr)
         assert stdout.toString().trim() == STDOUT_TEXT
@@ -33,7 +33,7 @@ class ProcessHelperServiceUnitTests {
     @Test
     void testWaitForProcess_AllFine() {
         Process process = [ 'bash', '-c', COMMAND ].execute()
-        ProcessHelperService.ProcessOutput actual = ProcessHelperService.waitForProcess(process)
+        LocalShellHelper.ProcessOutput actual = LocalShellHelper.waitForProcess(process)
 
         assert actual.stdout.trim() == STDOUT_TEXT
         assert actual.stderr.trim() == STDERR_TEXT
@@ -43,13 +43,13 @@ class ProcessHelperServiceUnitTests {
     @Test
     void testWaitForProcess_InputIsNull_ShouldFail() {
         assert TestCase.shouldFail(AssertionError) {
-            ProcessHelperService.waitForProcess(null as Process)
+            LocalShellHelper.waitForProcess(null as Process)
         }.contains("The input process must not be null")
     }
 
     @Test
     void testExecuteAndWait_AllFine() {
-        ProcessHelperService.ProcessOutput actual = ProcessHelperService.executeAndWait(COMMAND)
+        LocalShellHelper.ProcessOutput actual = LocalShellHelper.executeAndWait(COMMAND)
 
         assert actual.stdout.trim() == STDOUT_TEXT
         assert actual.stderr.trim() == STDERR_TEXT
@@ -59,13 +59,13 @@ class ProcessHelperServiceUnitTests {
     @Test
     void testExecuteAndWait_InputIsNull_ShouldFail() {
         assert TestCase.shouldFail(AssertionError) {
-            ProcessHelperService.executeAndWait(null as String)
+            LocalShellHelper.executeAndWait(null as String)
         }.contains("The input cmd must not be null")
     }
 
     @Test
     void testExecuteAndAssertExitCodeAndErrorOutAndReturnStdout_AllFine() {
-        String stdout = ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(COMMAND_NO_ERROR)
+        String stdout = LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout(COMMAND_NO_ERROR)
 
         assert stdout.toString().trim() == STDOUT_TEXT
     }
@@ -73,21 +73,21 @@ class ProcessHelperServiceUnitTests {
     @Test
     void testExecuteAndAssertExitCodeAndErrorOutAndReturnStdout_InputCommandIsNull_ShouldFail() {
         assert TestCase.shouldFail(AssertionError) {
-            ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(null)
+            LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout(null)
         }.contains("The input cmd must not be null")
     }
 
     @Test
     void testExecuteAndAssertExitCodeAndErrorOutAndReturnStdout_ProcessEndsNotEmptyError_ShouldFail() {
         assert TestCase.shouldFail(AssertionError) {
-            ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(COMMAND)
+            LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout(COMMAND)
         }.contains("Expected stderr to be empty, but it is")
     }
 
     @Test
     void testExecuteAndAssertExitCodeAndErrorOutAndReturnStdout_ProcessEndsNotNormal_ShouldFail() {
         assert TestCase.shouldFail(AssertionError) {
-            ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout("exit 1")
+            LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout("exit 1")
         }.contains("Expected exit code to be 0, but it is")
     }
 }

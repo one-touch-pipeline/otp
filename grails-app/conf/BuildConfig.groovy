@@ -83,7 +83,7 @@ grails.project.dependency.resolution = {
         compile ":console:1.5.12"
         compile ":mail:1.0.7"
         // used by gitlab
-        compile ":codenarc:0.24.1"
+        compile ":codenarc:1.2"
         test ":code-coverage:1.2.7"
 
         // allow to create default data
@@ -108,7 +108,7 @@ grails.project.dependency.resolution = {
 }
 
 codenarc {
-    ruleSetFiles = ['file:grails-app/conf/CodeNarcRuleSet.groovy']
+    ruleSetFiles = ['file:grails-app/conf/CodeNarcRuleSet.groovy', 'file:grails-app/conf/OtpRuleSet.groovy']
     extraIncludeDirs = ['ast']
     maxPriority1Violations = 0
     reports = {

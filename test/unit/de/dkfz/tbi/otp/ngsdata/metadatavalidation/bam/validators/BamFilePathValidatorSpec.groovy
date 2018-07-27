@@ -29,7 +29,7 @@ class BamFilePathValidatorSpec extends Specification {
         File file = temporaryFolder.newFile('abc.bam')
         File dir = temporaryFolder.newFolder('folder.bam')
         File notReadAble = temporaryFolder.newFile('abcde.bam')
-        assert ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout("chmod a-r ${notReadAble.absolutePath} && echo OK").trim() == 'OK'
+        assert LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout("chmod a-r ${notReadAble.absolutePath} && echo OK").trim() == 'OK'
         assert !notReadAble.canRead()
 
         BamMetadataValidationContext context = BamMetadataValidationContextFactory.createContext(

@@ -39,7 +39,7 @@ class ReplaceSourceWithLinkJobSpec extends Specification {
 
     ReplaceSourceWithLinkJob linkingJob
     ProcessingStep step
-    ExecutionService executionService
+    RemoteShellHelper remoteShellHelper
 
     ImportProcess importProcess
 
@@ -89,7 +89,7 @@ class ReplaceSourceWithLinkJobSpec extends Specification {
         ].each {
             CreateFileHelper.createFile(it)
         }
-        linkingJob.linkFileUtils.executionService = Mock(ExecutionService) {
+        linkingJob.linkFileUtils.remoteShellHelper = Mock(RemoteShellHelper) {
             1 * executeCommand(_, _) >> { Realm realm, String command ->
                 assert command ==~ """\
 umask 027; mkdir --parents --mode 2750 [^ ]+ [^ ]+ &>\\/dev\\/null; echo \\\$\\?
@@ -97,14 +97,14 @@ ln -sf [^ ]+.bam [^ ]+.bam
 ln -sf [^ ]+.bam.bai [^ ]+.bam.bai
 ln -sf [^ ]+\\/subDirectory\\/file.txt [^ ]+\\/subDirectory\\/file.txt
 """
-                return ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
+                return LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
             }
             0 * _
         }
-        linkingJob.linkFileUtils.lsdfFilesService.executionService = Mock(ExecutionService) {
+        linkingJob.linkFileUtils.lsdfFilesService.remoteShellHelper = Mock(RemoteShellHelper) {
             1 * executeCommand(_, _) >> { Realm realm, String command ->
                 assert command ==~ "rm -rf [^ ]+.bam [^ ]+.bam.bai [^ ]+\\/subDirectory\\/file.txt &>\\/dev\\/null\necho \\\$\\?"
-                return ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
+                return LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
             }
             0 * _
         }
@@ -149,7 +149,7 @@ ln -sf [^ ]+\\/subDirectory\\/file.txt [^ ]+\\/subDirectory\\/file.txt
         ])
 
         linkingJob.configService = configService
-        linkingJob.executionService = new ExecutionService()
+        linkingJob.remoteShellHelper = new RemoteShellHelper()
         linkingJob.linkFileUtils = new LinkFileUtils()
         linkingJob.linkFileUtils.lsdfFilesService = new LsdfFilesService()
         linkingJob.linkFileUtils.lsdfFilesService.createClusterScriptService = new CreateClusterScriptService()
@@ -197,7 +197,7 @@ ln -sf [^ ]+\\/subDirectory\\/file.txt [^ ]+\\/subDirectory\\/file.txt
         link1.parentFile.mkdirs()
         Files.createSymbolicLink(link1.toPath(), targetOfLink1.toPath())
 
-        linkingJob.linkFileUtils.executionService = Mock(ExecutionService) {
+        linkingJob.linkFileUtils.remoteShellHelper = Mock(RemoteShellHelper) {
             1 * executeCommand(_, _) >> { Realm realm, String command ->
                 assert command ==~ """\
 umask 027; mkdir --parents --mode 2750 [^ ]+ [^ ]+ &>\\/dev\\/null; echo \\\$\\?
@@ -205,14 +205,14 @@ ln -sf [^ ]+.bam [^ ]+.bam
 ln -sf [^ ]+.bam.bai [^ ]+.bam.bai
 ln -sf [^ ]+ [^ ]+
 """
-                return ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
+                return LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
             }
             0 * _
         }
-        linkingJob.linkFileUtils.lsdfFilesService.executionService = Mock(ExecutionService) {
+        linkingJob.linkFileUtils.lsdfFilesService.remoteShellHelper = Mock(RemoteShellHelper) {
             1 * executeCommand(_, _) >> { Realm realm, String command ->
                 assert command ==~ "rm -rf [^ ]+.bam [^ ]+.bam.bai [^ ]+ &>\\/dev\\/null\necho \\\$\\?"
-                return ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
+                return LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
             }
             0 * _
         }
@@ -250,10 +250,10 @@ ln -sf [^ ]+ [^ ]+
             Files.createSymbolicLink(link.toPath(), copied.toPath())
         }
 
-        linkingJob.linkFileUtils.executionService = Mock(ExecutionService) {
+        linkingJob.linkFileUtils.remoteShellHelper = Mock(RemoteShellHelper) {
             0 * _
         }
-        linkingJob.linkFileUtils.lsdfFilesService.executionService = Mock(ExecutionService) {
+        linkingJob.linkFileUtils.lsdfFilesService.remoteShellHelper = Mock(RemoteShellHelper) {
             0 * _
         }
 

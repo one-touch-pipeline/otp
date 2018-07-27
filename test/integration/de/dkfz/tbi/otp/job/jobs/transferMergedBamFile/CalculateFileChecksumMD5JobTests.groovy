@@ -9,7 +9,7 @@ import de.dkfz.tbi.otp.job.processing.ClusterJobSchedulerService
 import de.dkfz.tbi.otp.ngsdata.ChecksumFileService
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.utils.ProcessHelperService
+import de.dkfz.tbi.otp.utils.LocalShellHelper
 import org.apache.commons.logging.impl.NoOpLog
 import org.junit.After
 import org.junit.Before
@@ -56,7 +56,7 @@ class CalculateFileChecksumMD5JobTests {
         }
 
         calculateFileChecksumMD5Job.clusterJobSchedulerService.metaClass.executeJob = { Realm realm, String command ->
-            ProcessHelperService.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
+            LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
         }
 
         configService = new TestConfigService([

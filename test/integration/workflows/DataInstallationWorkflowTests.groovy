@@ -25,7 +25,7 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
 
     private String md5sum(String filepath) {
         String cmdMd5sum = "md5sum ${filepath}"
-        String output = executionService.executeCommand(realm, cmdMd5sum)
+        String output = remoteShellHelper.executeCommand(realm, cmdMd5sum)
         String md5sum = output.split().first()
         return md5sum
     }

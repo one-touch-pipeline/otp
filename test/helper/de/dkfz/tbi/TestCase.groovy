@@ -1,13 +1,9 @@
 package de.dkfz.tbi
 
-import de.dkfz.tbi.otp.job.processing.ExecutionService
-import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
-import de.dkfz.tbi.otp.ngsdata.Project
+import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.HelperUtils
-import de.dkfz.tbi.otp.utils.ProcessHelperService
-import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.junit.*
 import org.junit.runners.model.MultipleFailureException
 import org.springframework.validation.Errors
@@ -16,7 +12,7 @@ import org.springframework.validation.FieldError
 import java.nio.file.Files
 import java.util.concurrent.Callable
 
-import static de.dkfz.tbi.otp.utils.ProcessHelperService.executeAndWait
+import static de.dkfz.tbi.otp.utils.LocalShellHelper.executeAndWait
 
 /**
  * A default base class for test cases. This provides some helper methods.
@@ -207,19 +203,19 @@ class TestCase {
     }
 
     @Deprecated
-    static void withMockedExecutionService(ExecutionService executionService, Closure code) {
-        assert executionService != null
+    static void withMockedremoteShellHelper(RemoteShellHelper remoteShellHelper, Closure code) {
+        assert remoteShellHelper != null
         assert code != null
         try {
-            mockExecuteCommandReturnProcessOutput(executionService)
+            mockExecuteCommandReturnProcessOutput(remoteShellHelper)
             code()
         } finally {
-            removeMetaClass(ExecutionService, executionService)
+            removeMetaClass(RemoteShellHelper, remoteShellHelper)
         }
     }
 
-    private static void mockExecuteCommandReturnProcessOutput(ExecutionService executionService) {
-        executionService.metaClass.executeCommandReturnProcessOutput = { Realm realm, String command, String userName = null ->
+    private static void mockExecuteCommandReturnProcessOutput(RemoteShellHelper remoteShellHelper) {
+        remoteShellHelper.metaClass.executeCommandReturnProcessOutput = { Realm realm, String command, String userName = null ->
             return executeAndWait(command).assertExitCodeZeroAndStderrEmpty()
         }
     }

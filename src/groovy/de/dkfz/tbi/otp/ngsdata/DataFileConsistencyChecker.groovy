@@ -17,7 +17,7 @@ import org.joda.time.*
 
 @Scope("singleton")
 @Component
-class DataFileService {
+class DataFileConsistencyChecker {
 
     static final int MAX_RESULTS = 1000
 
@@ -64,11 +64,11 @@ class DataFileService {
                             null,
                     )
                     if (recipientsString) {
-                        mailHelperService.sendEmail("Error: DataFileService.setFileExistsForAllDataFiles() failed", "${e.getLocalizedMessage()}\n${e.getCause()}", recipientsString)
+                        mailHelperService.sendEmail("Error: DataFileConsistencyChecker.setFileExistsForAllDataFiles() failed", "${e.getLocalizedMessage()}\n${e.getCause()}", recipientsString)
                     }
                 }
             }
-            log.info("DataFileService.setFileExistsForAllDataFiles() duration: ${ProcessingTimeStatisticsService.getFormattedPeriod(startDate, new Date())}")
+            log.info("DataFileConsistencyChecker.setFileExistsForAllDataFiles() duration: ${ProcessingTimeStatisticsService.getFormattedPeriod(startDate, new Date())}")
         }
     }
 

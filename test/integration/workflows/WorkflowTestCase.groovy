@@ -29,7 +29,7 @@ import java.time.*
 import java.util.concurrent.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
-import static de.dkfz.tbi.otp.utils.ProcessHelperService.*
+import static de.dkfz.tbi.otp.utils.LocalShellHelper.*
 
 /**
  * Base class for work-flow integration test cases.
@@ -44,7 +44,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
 
     ErrorLogService errorLogService
     CreateClusterScriptService createClusterScriptService
-    ExecutionService executionService
+    RemoteShellHelper remoteShellHelper
     ExecutionHelperService executionHelperService
     SessionFactory sessionFactory
     DataSource dataSource
@@ -226,7 +226,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
 
     public void createDirectories(List<File> files, String mode) {
         String mkDirs = createClusterScriptService.makeDirs(files, mode)
-        assert executionService.executeCommand(realm, mkDirs).toInteger() == 0
+        assert remoteShellHelper.executeCommand(realm, mkDirs).toInteger() == 0
         files.each {
             WaitingFileUtils.waitUntilExists(it)
         }
@@ -241,7 +241,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         String cmd = files.collect { File key, String value ->
             "echo '${value}' > ${key}"
         }.join('\n')
-        executionService.executeCommand(realm, cmd)
+        remoteShellHelper.executeCommand(realm, cmd)
         files.each { File key, String value ->
             WaitingFileUtils.waitUntilExists(key)
             assert key.text == value + '\n'
@@ -317,7 +317,7 @@ TEMP_DIR=`mktemp -d -p ${new File(getRootDirectory(), "tmp").absolutePath} ${get
 chmod g+rwx \$TEMP_DIR
 echo \$TEMP_DIR
 """
-            baseDirectory = new File(executionService.executeCommandReturnProcessOutput(realm, mkDirs)
+            baseDirectory = new File(remoteShellHelper.executeCommandReturnProcessOutput(realm, mkDirs)
                     .assertExitCodeZeroAndStderrEmpty().stdout.trim())
         }
         return baseDirectory
@@ -491,8 +491,8 @@ echo \$TEMP_DIR
     protected void setPermissionsRecursive(File directory, String modeDir, String modeFile) {
         assert directory.absolutePath.startsWith(baseDirectory.absolutePath)
         String cmd = "find -L ${directory} -user ${configService.getWorkflowTestAccountName()} -type d -not -perm ${modeDir} -exec chmod ${modeDir} '{}' \\; 2>&1"
-        assert executionService.executeCommand(realm, cmd).empty
+        assert remoteShellHelper.executeCommand(realm, cmd).empty
         cmd = "find -L ${directory} -user ${configService.getWorkflowTestAccountName()} -type f -not -perm ${modeFile} -exec chmod ${modeFile} '{}' \\; 2>&1"
-        assert executionService.executeCommand(realm, cmd).empty
+        assert remoteShellHelper.executeCommand(realm, cmd).empty
     }
 }

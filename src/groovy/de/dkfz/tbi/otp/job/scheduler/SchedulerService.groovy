@@ -7,34 +7,42 @@ import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.*
 import org.apache.commons.logging.*
 import org.apache.log4j.*
+import org.codehaus.groovy.grails.commons.*
 import org.codehaus.groovy.grails.support.*
 import org.springframework.beans.factory.annotation.*
 import org.springframework.context.*
 import org.springframework.scheduling.annotation.*
 import org.springframework.security.access.prepost.*
+import org.springframework.context.annotation.*
+import org.springframework.stereotype.*
+import static org.springframework.util.Assert.*
 
 import java.util.concurrent.*
 import java.util.concurrent.locks.*
 
-import static org.springframework.util.Assert.*
-
+@Scope("singleton")
+@Component
+// this class is NOT transactional
 class SchedulerService {
-    static transactional = false
 
     @SuppressWarnings("GrailsStatelessService")
-    def grailsApplication
+    @Autowired
+    GrailsApplication grailsApplication
 
     @Autowired
     ApplicationContext applicationContext
 
+    @Autowired
+    ExecutorService executorService
 
-    def executorService
-
+    @Autowired
     JobMailService jobMailService
 
     @SuppressWarnings("GrailsStatelessService")
+    @Autowired
     PersistenceContextInterceptor persistenceInterceptor
 
+    @Autowired
     ProcessService processService
 
     /**

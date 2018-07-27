@@ -134,7 +134,7 @@ chmod 440 .* .*
     void "test maybe submit when file has to be linked and not exists already"() {
         given:
         SeqTrack seqTrack = createSeqTrack(true)
-        copyFilesJob.executionService = Mock(ExecutionService) {
+        copyFilesJob.remoteShellHelper = Mock(RemoteShellHelper) {
             1 * executeCommand(_, _) >> { Realm realm, String command ->
                 assert command ==~ """
 #for debug kerberos problem
@@ -166,7 +166,7 @@ ln -s .* .*
         SeqTrack seqTrack = createSeqTrack(true)
         DataFile dataFile = CollectionUtils.exactlyOneElement(seqTrack.dataFiles)
         CreateFileHelper.createFile(new File(copyFilesJob.lsdfFilesService.getFileFinalPath(dataFile)))
-        copyFilesJob.executionService = Mock(ExecutionService) {
+        copyFilesJob.remoteShellHelper = Mock(RemoteShellHelper) {
             1 * executeCommand(_, _) >> { Realm realm, String command ->
                 assert command ==~ """
 #for debug kerberos problem

@@ -58,7 +58,7 @@ class AbstractRoddyJobIntegrationTests extends AbstractRoddyAlignmentWorkflowTes
         // this will make one of the cluster jobs fail
         MergingWorkPackage workPackage = firstBamFile.workPackage
         File statDir = referenceGenomeService.pathToChromosomeSizeFilesPerReference(workPackage.referenceGenome)
-        executionService.executeCommand(realm, "chmod g+w ${statDir}")
+        remoteShellHelper.executeCommand(realm, "chmod g+w ${statDir}")
         File statFile = new File(statDir, DUMMY_STAT_SIZE_FILE_NAME)
         workPackage.refresh()
         workPackage.statSizeFileName = statFile.name

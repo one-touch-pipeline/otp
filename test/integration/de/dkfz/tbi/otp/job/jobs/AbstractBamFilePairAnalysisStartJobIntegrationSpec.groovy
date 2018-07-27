@@ -10,8 +10,6 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.*
 import de.dkfz.tbi.otp.utils.logging.*
 import grails.test.spock.*
-import org.springframework.beans.factory.annotation.*
-import spock.lang.*
 
 abstract class AbstractBamFilePairAnalysisStartJobIntegrationSpec extends IntegrationSpec implements StartJobIntegrationSpec {
 
@@ -105,7 +103,7 @@ abstract class AbstractBamFilePairAnalysisStartJobIntegrationSpec extends Integr
     void "test method restart with AbstractBamFilePairAnalysisStartJob"() {
         given:
         AbstractBamFilePairAnalysisStartJob service = getService()
-        ExecutionService executionService = service.executionService
+        RemoteShellHelper remoteShellHelper = service.remoteShellHelper
         SchedulerService schedulerService = service.schedulerService
 
         DomainFactory.createProcessingOptionLazy(name: ProcessingOption.OptionName.TIME_ZONE, type: null, value: "Europe/Berlin")
@@ -114,7 +112,7 @@ abstract class AbstractBamFilePairAnalysisStartJobIntegrationSpec extends Integr
         Process failedProcess = DomainFactory.createProcess()
         DomainFactory.createProcessParameter(failedProcess, failedInstance)
 
-        service.executionService = Mock(ExecutionService) {
+        service.remoteShellHelper = Mock(RemoteShellHelper) {
             1 * executeCommandReturnProcessOutput(_, _) >> { Realm realm, String cmd ->
                 assert cmd == "rm -rf ${failedInstance.instancePath.absoluteDataManagementPath}"
             }
@@ -145,7 +143,7 @@ abstract class AbstractBamFilePairAnalysisStartJobIntegrationSpec extends Integr
         failedInstance.withdrawn
 
         cleanup:
-        service.executionService = executionService
+        service.remoteShellHelper = remoteShellHelper
         service.schedulerService = schedulerService
     }
 }

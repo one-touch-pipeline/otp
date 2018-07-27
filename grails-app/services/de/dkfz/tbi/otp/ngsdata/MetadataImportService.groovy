@@ -41,7 +41,8 @@ class MetadataImportService {
     TrackingService trackingService
     FileSystemService fileSystemService
     SeqPlatformService seqPlatformService
-    ExecutionService executionService
+    @Autowired
+    RemoteShellHelper remoteShellHelper
     LsdfFilesService lsdfFilesService
     LibraryPreparationKitService libraryPreparationKitService
     SeqTypeService seqTypeService
@@ -143,7 +144,7 @@ class MetadataImportService {
                     assert realm
 
                     lsdfFilesService.createDirectory(targetDirectory, realm)
-                    executionService.executeCommandReturnProcessOutput(realm, "cp ${source} ${targetDirectory}").assertExitCodeZeroAndStderrEmpty()
+                    remoteShellHelper.executeCommandReturnProcessOutput(realm, "cp ${source} ${targetDirectory}").assertExitCodeZeroAndStderrEmpty()
                     LsdfFilesService.ensureFileIsReadableAndNotEmpty(targetFile)
                 }
 

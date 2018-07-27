@@ -7,7 +7,7 @@ import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.scheduler.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.ProcessHelperService.ProcessOutput
+import de.dkfz.tbi.otp.utils.LocalShellHelper.ProcessOutput
 import grails.test.mixin.*
 import spock.lang.*
 
@@ -30,15 +30,6 @@ class ClusterJobSchedulerServiceSpec extends Specification {
         given:
         Realm realm = DomainFactory.createRealm()
         ClusterJobSchedulerService service = new ClusterJobSchedulerService()
-        service.executionService = [
-                executeCommandReturnProcessOutput: { realm1, command ->
-                    new ProcessOutput(
-                            stdout: "",
-                            stderr: stderr,
-                            exitCode: exitCode,
-                    )
-                },
-        ] as ExecutionService
         service.configService = Mock(ConfigService) {
             getSshUser() >> SSHUSER
         }
@@ -61,7 +52,7 @@ class ClusterJobSchedulerServiceSpec extends Specification {
         Realm realm = DomainFactory.createRealm()
         ClusterJobSchedulerService service = new ClusterJobSchedulerService()
         service.clusterJobManagerFactoryService = new ClusterJobManagerFactoryService()
-        service.clusterJobManagerFactoryService.executionService = [
+        service.clusterJobManagerFactoryService.remoteShellHelper = [
                 executeCommandReturnProcessOutput: { realm1, command ->
                     new ProcessOutput(
                             stdout: command.tokenize().last(),
@@ -69,7 +60,7 @@ class ClusterJobSchedulerServiceSpec extends Specification {
                             exitCode: 0,
                     )
                 },
-        ] as ExecutionService
+        ] as RemoteShellHelper
         service.clusterJobManagerFactoryService.configService = Mock(ConfigService) {
             getSshUser() >> SSHUSER
         }
@@ -88,7 +79,7 @@ class ClusterJobSchedulerServiceSpec extends Specification {
         String jobId = "5075615"
         ClusterJobSchedulerService service = new ClusterJobSchedulerService()
         service.clusterJobManagerFactoryService = new ClusterJobManagerFactoryService()
-        service.clusterJobManagerFactoryService.executionService = [
+        service.clusterJobManagerFactoryService.remoteShellHelper = [
                 executeCommandReturnProcessOutput: { realm1, String command ->
                     new ProcessOutput(
                             stdout: qstatOutput(jobId, pbsStatus),
@@ -96,7 +87,7 @@ class ClusterJobSchedulerServiceSpec extends Specification {
                             exitCode: 0,
                     )
                 },
-        ] as ExecutionService
+        ] as RemoteShellHelper
         service.clusterJobManagerFactoryService.configService = Mock(ConfigService) {
             getSshUser() >> SSHUSER
         }
@@ -162,7 +153,7 @@ ${jobId}.host.long-doma  someUser    fast     r160224_18005293    --      1     
         service.clusterJobService = Mock(ClusterJobService)
         service.clusterJobLoggingService = Mock(ClusterJobLoggingService)
         service.clusterJobManagerFactoryService = new ClusterJobManagerFactoryService()
-        service.clusterJobManagerFactoryService.executionService = Mock(ExecutionService)
+        service.clusterJobManagerFactoryService.remoteShellHelper = Mock(RemoteShellHelper)
         service.clusterJobManagerFactoryService.configService = Mock(ConfigService) {
             getSshUser() >> SSHUSER
         }
@@ -175,7 +166,7 @@ ${jobId}.host.long-doma  someUser    fast     r160224_18005293    --      1     
         String result = service.executeJob(realm, "run the job")
 
         then:
-        4 * service.clusterJobManagerFactoryService.executionService.executeCommandReturnProcessOutput(realm, _ as String) >> out
+        4 * service.clusterJobManagerFactoryService.remoteShellHelper.executeCommandReturnProcessOutput(realm, _ as String) >> out
         1 * service.clusterJobService.createClusterJob(realm, clusterJobId, SSHUSER, step, seqType, _ as String) >> clusterJob
         1 * service.clusterJobLoggingService.createAndGetLogDirectory(_, _) >> { TestCase.uniqueNonExistentPath }
         result == clusterJobId

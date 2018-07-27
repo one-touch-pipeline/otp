@@ -10,13 +10,13 @@ import de.dkfz.tbi.otp.utils.logging.*
 import org.junit.*
 import org.junit.rules.*
 
-import static de.dkfz.tbi.otp.utils.ProcessHelperService.*
+import static de.dkfz.tbi.otp.utils.LocalShellHelper.*
 
 class ExecuteRoddyCommandServiceTests {
 
     ExecuteRoddyCommandService executeRoddyCommandService
 
-    ExecutionService executionService
+    RemoteShellHelper remoteShellHelper
 
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder()
@@ -74,10 +74,10 @@ class ExecuteRoddyCommandServiceTests {
         tmpOutputDir = null
         realm = null
         roddyBamFile = null
-        TestCase.removeMetaClass(ExecutionService, executeRoddyCommandService.executionService)
+        TestCase.removeMetaClass(RemoteShellHelper, executeRoddyCommandService.remoteShellHelper)
         TestCase.removeMetaClass(ExecuteRoddyCommandService, executeRoddyCommandService)
-        GroovySystem.metaClassRegistry.removeMetaClass(ProcessHelperService)
-        executeRoddyCommandService.executionService = executionService
+        GroovySystem.metaClassRegistry.removeMetaClass(LocalShellHelper)
+        executeRoddyCommandService.remoteShellHelper = remoteShellHelper
     }
 
     @Test
@@ -320,7 +320,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testCreateWorkOutputDirectory_DirectoryCreationFailed_ShouldFail() {
-        executeRoddyCommandService.executionService.metaClass.executeCommand = { Realm realm, String command -> }
+        executeRoddyCommandService.remoteShellHelper.metaClass.executeCommand = { Realm realm, String command -> }
         tmpOutputDir.absoluteFile.delete()
         TestCase.shouldFail(AssertionError) {
             executeRoddyCommandService.createWorkOutputDirectory(realm, tmpOutputDir)
@@ -329,7 +329,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testCreateWorkOutputDirectory_AllFine() {
-        executeRoddyCommandService.executionService.metaClass.executeCommand = { Realm realm, String command ->
+        executeRoddyCommandService.remoteShellHelper.metaClass.executeCommand = { Realm realm, String command ->
             ['bash', '-c', command].execute().waitFor()
         }
         assert tmpOutputDir.delete()
@@ -356,7 +356,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testCreateWorkOutputDirectory_DirectoryAlreadyExist_AllFine() {
-        executeRoddyCommandService.executionService.metaClass.executeCommand = { Realm realm, String command ->
+        executeRoddyCommandService.remoteShellHelper.metaClass.executeCommand = { Realm realm, String command ->
             ['bash', '-c', command].execute().waitFor()
         }
         assert tmpOutputDir.exists()
@@ -380,7 +380,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testCorrectPermission_AllOkay() {
-        executeRoddyCommandService.executionService = [
+        executeRoddyCommandService.remoteShellHelper = [
                 executeCommandReturnProcessOutput: { Realm realm1, String cmd ->
                     assert realm1 == realm
                     ProcessOutput out = executeAndWait(cmd)
@@ -398,7 +398,7 @@ class ExecuteRoddyCommandServiceTests {
                         """.stripIndent()
                     return out
                 }
-        ] as ExecutionService
+        ] as RemoteShellHelper
 
         CreateFileHelper.createFile(new File(roddyBamFile.workDirectory, "file"))
         CreateFileHelper.createFile(new File(roddyBamFile.workDirectory, roddyBamFile.baiFileName))
@@ -441,7 +441,7 @@ class ExecuteRoddyCommandServiceTests {
     @Test
     void testCorrectGroup_AllFine() {
         String primaryGroup = TestCase.primaryGroup()
-        executeRoddyCommandService.executionService = [
+        executeRoddyCommandService.remoteShellHelper = [
                 executeCommandReturnProcessOutput: { Realm realm1, String cmd ->
                     assert realm1 == realm
                     ProcessOutput out = executeAndWait(cmd)
@@ -453,7 +453,7 @@ class ExecuteRoddyCommandServiceTests {
                         """.stripIndent() as String
                     return out
                 }
-        ] as ExecutionService
+        ] as RemoteShellHelper
 
         String testingGroup = configService.getTestingGroup()
 
@@ -488,12 +488,12 @@ class ExecuteRoddyCommandServiceTests {
             chgrp ${primaryGroup} ${roddyBamFile.baseDirectory}
             """.stripIndent()).empty
 
-        executeRoddyCommandService.executionService.metaClass.executeCommandReturnProcessOutput = { Realm realm1, String cmd, String user ->
+        executeRoddyCommandService.remoteShellHelper.metaClass.executeCommandReturnProcessOutput = { Realm realm1, String cmd, String user ->
             ProcessOutput out = executeAndWait(cmd)
             out.assertExitCodeZeroAndStderrEmpty()
             return out
         }
-        executeRoddyCommandService.executionService.metaClass.executeCommandReturnProcessOutput = { Realm realm1, String cmd ->
+        executeRoddyCommandService.remoteShellHelper.metaClass.executeCommandReturnProcessOutput = { Realm realm1, String cmd ->
             ProcessOutput out = executeAndWait(cmd)
             out.assertExitCodeZeroAndStderrEmpty()
             return out

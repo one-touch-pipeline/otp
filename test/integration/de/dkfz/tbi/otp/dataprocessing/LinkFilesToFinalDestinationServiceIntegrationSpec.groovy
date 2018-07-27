@@ -12,9 +12,13 @@ import grails.test.spock.*
 import org.junit.*
 import org.junit.rules.*
 import org.codehaus.groovy.grails.context.support.*
+import org.springframework.beans.factory.annotation.Autowired
 
 class LinkFilesToFinalDestinationServiceIntegrationSpec extends IntegrationSpec {
     LinkFilesToFinalDestinationService service
+
+    @Autowired
+    RemoteShellHelper remoteShellHelper
 
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder()
@@ -26,16 +30,16 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends IntegrationSpec 
 
     void setup() {
         service = new LinkFilesToFinalDestinationService()
-        service.executionService = new ExecutionService()
+        service.remoteShellHelper = remoteShellHelper
         service.linkFileUtils = new LinkFileUtils()
         service.lsdfFilesService = new LsdfFilesService()
         service.lsdfFilesService.createClusterScriptService = new CreateClusterScriptService()
-        service.lsdfFilesService.executionService = service.executionService
+        service.lsdfFilesService.remoteShellHelper = remoteShellHelper
         service.linkFileUtils.createClusterScriptService = new CreateClusterScriptService()
         service.linkFileUtils.lsdfFilesService = service.lsdfFilesService
-        service.linkFileUtils.executionService = service.executionService
+        service.linkFileUtils.remoteShellHelper = remoteShellHelper
         service.executeRoddyCommandService = new ExecuteRoddyCommandService()
-        service.executeRoddyCommandService.executionService = service.executionService
+        service.executeRoddyCommandService.remoteShellHelper = service.remoteShellHelper
         service.createNotificationTextService = new CreateNotificationTextService(
                 messageSource: Mock(PluginAwareResourceBundleMessageSource) {
                     _ * getMessageInternal('notification.template.alignment.qcTrafficBlockedSubject', [], _) >> '''QC traffic alignment header ${roddyBamFile.sample} ${roddyBamFile.seqType}'''
@@ -62,7 +66,7 @@ ${link}
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
 
         when:
-        TestCase.withMockedExecutionService(service.executionService, {
+        TestCase.withMockedremoteShellHelper(service.remoteShellHelper, {
             service.linkNewRnaResults(roddyBamFile, realm)
         })
 
@@ -85,13 +89,13 @@ ${link}
 
         RnaRoddyBamFile roddyBamFile2 = DomainFactory.createRoddyBamFile([workPackage: roddyBamFile.workPackage, config: roddyBamFile.config], RnaRoddyBamFile)
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile2)
-        TestCase.withMockedExecutionService(service.executionService, {
+        TestCase.withMockedremoteShellHelper(service.remoteShellHelper, {
             service.linkNewRnaResults(roddyBamFile2, realm)
         })
         assert roddyBamFile.workDirectory.exists()
 
         when:
-        TestCase.withMockedExecutionService(service.executionService, {
+        TestCase.withMockedremoteShellHelper(service.remoteShellHelper, {
             service.cleanupOldRnaResults(roddyBamFile, realm)
         })
 
