@@ -15,7 +15,7 @@ processingOptionService.createOrUpdate(
 
 processingOptionService.createOrUpdate(
         RODDY_BASE_CONFIGS_PATH,
-        "${roddy_base_path}/configs/"
+        "${roddy_base_path}/configs"
 )
 
 processingOptionService.createOrUpdate(

@@ -26,12 +26,7 @@ public class AbstractAlignmentDeciderTest {
     void setUp() {
         decider = newDecider()
         decider.trackingService = new TrackingService()
-        DomainFactory.createProcessingOptionLazy(
-                name: OptionName.EMAIL_RECIPIENT_NOTIFICATION,
-                type: null,
-                project: null,
-                value: "a.b@c.d",
-        )
+        DomainFactory.createProcessingOptionForNotificationRecipient()
     }
 
     @After

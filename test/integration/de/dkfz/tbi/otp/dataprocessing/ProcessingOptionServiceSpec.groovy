@@ -4,6 +4,8 @@ import de.dkfz.tbi.otp.ngsdata.*
 import spock.lang.*
 
 class ProcessingOptionServiceSpec extends Specification {
+
+    @Unroll
     def "test findOptionAsBoolean"() {
         given:
         DomainFactory.createProcessingOptionLazy(name: ProcessingOption.OptionName.GUI_SHOW_PARTNERS, value: input)
@@ -15,10 +17,5 @@ class ProcessingOptionServiceSpec extends Specification {
         input   || output
         "true"  || true
         "false" || false
-        "TRUE"  || false
-        "tRuE"  || false
-        "1"     || false
-        "0"     || false
-        ""      || false
     }
 }

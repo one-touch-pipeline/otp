@@ -22,25 +22,25 @@
                 <tr>
                     <td class="myKey"><g:message code="processingOption.insert.name"/></td>
                     <td valign="top" class="value">
-                        <g:select name="optionName" from="${optionNames}" id="optionName" />
+                        <g:select name="optionName" from="${optionNames}" id="optionName" value="${cmd?.optionName}" style="width: 500px"/>
                     </td>
                 </tr>
                 <tr>
                     <td class="myKey"><g:message code="processingOption.insert.type"/></td>
                     <td valign="top" class="value">
-                        <input type="text" id="type" name="type"/>
+                        <input type="text" id="type" name="type"  value="${cmd?.type}" style="width: 500px"/>
                     </td>
                 </tr>
                 <tr>
                     <td class="myKey" ><g:message code="processingOption.insert.value"/></td>
                     <td valign="top" class="value">
-                        <input type="text" id="value" name="value"/>
+                        <input type="text" id="value" name="value"value="${cmd?.value}" style="width: 500px"/>
                     </td>
                 </tr>
                 <tr>
                     <td class="myKey"><g:message code="processingOption.insert.project"/></td>
                     <td valign="top" class="value">
-                        <g:select name="project" from="${projects}" id="project" />
+                        <g:select name="project" from="${projects}" id="project" value="${cmd?.project}"/>
                     </td>
                 </tr>
             </table>

@@ -55,6 +55,12 @@ class Pipeline implements Entity {
         MUTATIONAL_SIGNATURE,
         SNV,
         SOPHIA,
+
+        static Pipeline.Type findByName(String name) {
+            return values().find {
+                it.name() == name
+            }
+        }
     }
     Type type
 
@@ -75,5 +81,4 @@ class Pipeline implements Entity {
     String toString() {
         return "${name} ${type}"
     }
-
 }

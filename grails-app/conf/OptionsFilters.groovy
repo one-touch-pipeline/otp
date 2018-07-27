@@ -1,6 +1,6 @@
+import de.dkfz.tbi.otp.configs.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
-import groovy.transform.*
 
 class OptionsFilters {
 
@@ -13,9 +13,9 @@ class OptionsFilters {
                     model.contactDataPersonInCharge = ProcessingOptionService.findOptionSafe(OptionName.GUI_CONTACT_DATA_PERSON_IN_CHARGE, null, null)
                     model.contactDataPostalAddress = ProcessingOptionService.findOptionSafe(OptionName.GUI_CONTACT_DATA_POSTAL_ADDRESS, null, null)
 
-                    Logo logo = Logo.NONE
+                    InstanceLogo logo = InstanceLogo.NONE
                     try {
-                        logo = Logo.valueOf(ProcessingOptionService.findOptionSafe(OptionName.GUI_LOGO, null, null))
+                        logo = InstanceLogo.valueOf(ProcessingOptionService.findOptionSafe(OptionName.GUI_LOGO, null, null))
                     } catch (IllegalArgumentException e) {}
                     model.logo = logo.fileName
                 }
@@ -24,11 +24,3 @@ class OptionsFilters {
     }
 }
 
-@TupleConstructor
-enum Logo {
-    NONE("header-empty.png"),
-    CHARITE("header-charite.png"),
-    DKFZ("header-dkfz.png"),
-
-    final String fileName
-}

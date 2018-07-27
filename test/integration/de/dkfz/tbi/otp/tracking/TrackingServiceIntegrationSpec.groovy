@@ -269,7 +269,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         String prefix = "the prefix"
         DomainFactory.createProcessingOptionForOtrsTicketPrefix(prefix)
 
-        String otrsRecipient = HelperUtils.uniqueString
+        String otrsRecipient = HelperUtils.randomEmail
         String notificationText = HelperUtils.uniqueString
         DomainFactory.createProcessingOptionForNotificationRecipient(otrsRecipient)
 
@@ -349,7 +349,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         String prefix = "the prefix"
         DomainFactory.createProcessingOptionForOtrsTicketPrefix(prefix)
 
-        String otrsRecipient = HelperUtils.uniqueString
+        String otrsRecipient = HelperUtils.randomEmail
         String notificationText1 = HelperUtils.uniqueString
         String notificationText2 = HelperUtils.uniqueString
         DomainFactory.createProcessingOptionForNotificationRecipient(otrsRecipient)
@@ -427,7 +427,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         String prefix = "the prefix"
         DomainFactory.createProcessingOptionForOtrsTicketPrefix(prefix)
 
-        String otrsRecipient = HelperUtils.uniqueString
+        String otrsRecipient = HelperUtils.randomEmail
         DomainFactory.createProcessingOptionForNotificationRecipient(otrsRecipient)
 
         trackingService.mailHelperService = Mock(MailHelperService) {
@@ -449,7 +449,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         !ticket.finalNotificationSent
     }
 
-    private static final String OTRS_RECIPIENT = HelperUtils.uniqueString
+    private static final String OTRS_RECIPIENT = HelperUtils.randomEmail
 
     @Unroll
     void 'sendCustomerNotification sends expected notification'(int dataCase, boolean automaticNotification, OtrsTicket.ProcessingStep notificationStep, List<String> recipients, String subject) {
@@ -527,7 +527,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         DomainFactory.createProcessingOptionForOtrsTicketPrefix(prefix)
         subject = "[${prefix}#${ticket.ticketNumber}] ${subject}"
         int callCount = recipients.isEmpty() ? 0 : 1
-        String content = HelperUtils.uniqueString
+        String content = HelperUtils.randomEmail
         DomainFactory.createProcessingOptionForNotificationRecipient(OTRS_RECIPIENT)
 
         trackingService.mailHelperService = Mock(MailHelperService) {

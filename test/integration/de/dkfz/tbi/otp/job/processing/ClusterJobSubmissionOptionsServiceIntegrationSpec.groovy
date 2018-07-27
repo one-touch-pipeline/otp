@@ -3,11 +3,13 @@ package de.dkfz.tbi.otp.job.processing
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import grails.test.spock.*
+import spock.lang.Unroll
 
 
 class ClusterJobSubmissionOptionsServiceIntegrationSpec extends IntegrationSpec {
 
-    void "test readOptionsFromDatabase"() {
+    @Unroll
+    void "test readOptionsFromDatabase ('#realmOption', ''#jobSpecificOption', '#jobAndSeqTypeSpecific')"() {
         given:
         ClusterJobSubmissionOptionsService service = new ClusterJobSubmissionOptionsService()
         service.processingOptionService = new ProcessingOptionService()

@@ -16,6 +16,11 @@ class HelperUtils {
         return sprintf('%016x', random.nextLong()) + sprintf('%016x', random.nextLong())
     }
 
+    public static String getRandomEmail() {
+        return sprintf('%016x.%016x@%016x.com', random.nextLong(), random.nextLong(), random.nextLong())
+    }
+
+
     public static String byteArrayToHexString(byte[] bytes) {
         assert bytes
         return new BigInteger(1, bytes).toString(16).padLeft(bytes.length * 2, '0')

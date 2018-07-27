@@ -370,7 +370,7 @@ class DomainFactory {
 
     public static ProcessingOption createProcessingOptionLazy(Map properties = [:]) {
         ProcessingOption processingOption = createDomainObjectLazy(ProcessingOption,
-                [value: "processingOptionValue_${counter++}"],
+                [value: properties.containsKey("value") ? properties['value'] : "processingOptionValue_${counter++}"],
                 properties.findAll { it.key != "value" },
         )
         if (properties.containsKey("value")) {
@@ -404,7 +404,7 @@ class DomainFactory {
     }
 
     public
-    static void createProcessingOptionForNotificationRecipient(String recipientEmail = "email${counter++}@example.example") {
+    static void createProcessingOptionForNotificationRecipient(String recipientEmail = HelperUtils.randomEmail) {
         createProcessingOptionLazy(
                 name: OptionName.EMAIL_RECIPIENT_NOTIFICATION,
                 type: null,
@@ -414,7 +414,7 @@ class DomainFactory {
     }
 
     public
-    static void createProcessingOptionForErrorRecipient(String recipientEmail = "email${counter++}@example.example") {
+    static void createProcessingOptionForErrorRecipient(String recipientEmail = HelperUtils.randomEmail) {
         createProcessingOptionLazy(
                 name: OptionName.EMAIL_RECIPIENT_ERRORS,
                 type: null,
@@ -2116,13 +2116,13 @@ class DomainFactory {
         ], properties)
     }
 
-    static void createRoddyProcessingOptions(File basePath) {
+    static void createRoddyProcessingOptions(File basePath = TestCase.uniqueNonExistentPath) {
 
         ProcessingOption processingOptionPath = new ProcessingOption(
                 name: OptionName.RODDY_PATH,
                 type: null,
                 project: null,
-                value: "${basePath}/roddy/",
+                value: "${basePath}/roddy",
         )
         assert processingOptionPath.save(flush: true)
 
@@ -2130,7 +2130,7 @@ class DomainFactory {
                 name: OptionName.RODDY_BASE_CONFIGS_PATH,
                 type: null,
                 project: null,
-                value: "${basePath}/roddyBaseConfigs/",
+                value: "${basePath}/roddyBaseConfigs",
         )
         assert processingOptionBaseConfigsPath.save(flush: true)
 

@@ -14,11 +14,11 @@ import grails.test.spock.*
 import grails.validation.*
 import org.junit.*
 import org.junit.rules.*
+import org.springframework.mock.web.*
 import spock.lang.*
 
 import java.nio.file.*
 import java.nio.file.attribute.*
-import org.springframework.mock.web.*
 
 class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRoles {
 
@@ -176,7 +176,8 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 [PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE, PosixFilePermission.OWNER_EXECUTE, PosixFilePermission.GROUP_READ, PosixFilePermission.GROUP_EXECUTE])
     }
 
-    void "test createProject invalid input"() {
+    @Unroll
+    void "test createProject invalid input ('#name', '#dirName', '#nameInMetadataFiles')"() {
         given:
         String group = configService.getTestingGroup()
 
@@ -207,14 +208,14 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
 
 
         where:
-        name           | dirName   | nameInMetadataFiles || errorName | errorLocaction
-        'testProject'  | 'dir'     | 'project'           || 'unique' | 'on field \'name\': rejected value [testProject]'
-        'testProject2' | 'dir'     | 'project'           || 'this name is already used in another project as nameInMetadataFiles entry' | 'on field \'name\': rejected value [testProject2]'
-        'project'      | 'dir'     | 'testProject'       || 'this nameInMetadataFiles is already used in another project as name entry' | 'on field \'nameInMetadataFiles\': rejected value [testProject]'
-        'project'      | 'dir'     | 'testProject2'      || 'this nameInMetadataFiles is already used in another project as nameInMetadataFiles entry' | 'on field \'nameInMetadataFiles\': rejected value [testProject2]'
-        'project'      | 'dir'     | ''                  || 'blank' | 'on field \'nameInMetadataFiles\': rejected value []'
-        'project'      | 'testDir' | ''                  || 'unique' | 'on field \'dirName\': rejected value [testDir]'
-        'project'      | '/abs/path' | 'project'         || 'custom validation' | "on field 'dirName': rejected value [/abs/path];"
+        name           | dirName     | nameInMetadataFiles || errorName                                                                                  | errorLocaction
+        'testProject'  | 'dir'       | 'project'           || 'unique'                                                                                   | 'on field \'name\': rejected value [testProject]'
+        'testProject2' | 'dir'       | 'project'           || 'this name is already used in another project as nameInMetadataFiles entry'                | 'on field \'name\': rejected value [testProject2]'
+        'project'      | 'dir'       | 'testProject'       || 'this nameInMetadataFiles is already used in another project as name entry'                | 'on field \'nameInMetadataFiles\': rejected value [testProject]'
+        'project'      | 'dir'       | 'testProject2'      || 'this nameInMetadataFiles is already used in another project as nameInMetadataFiles entry' | 'on field \'nameInMetadataFiles\': rejected value [testProject2]'
+        'project'      | 'dir'       | ''                  || 'blank'                                                                                    | 'on field \'nameInMetadataFiles\': rejected value []'
+        'project'      | 'testDir'   | ''                  || 'unique'                                                                                   | 'on field \'dirName\': rejected value [testDir]'
+        'project'      | '/abs/path' | 'project'           || 'custom validation'                                                                        | "on field 'dirName': rejected value [/abs/path];"
     }
 
     void "test createProject invalid unix group"() {

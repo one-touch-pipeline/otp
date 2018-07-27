@@ -70,6 +70,10 @@ class ProcessingOptionCommand {
     String submit
 
     static constraints = {
+        value(validator: { val, obj ->
+            val != null && obj.optionName && obj.optionName.type.validate(val)
+        })
+        type(nullable: true, blank: true)
         project(validator: { val, obj ->
             if (val == "no project") {
                 return true

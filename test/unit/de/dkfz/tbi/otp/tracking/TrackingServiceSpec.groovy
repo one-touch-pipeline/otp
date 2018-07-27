@@ -221,7 +221,7 @@ ILSe 1234, runB, lane 2, ${sampleText}
 ILSe 5678, runA, lane 1, ${sampleText}
 """
 
-        String notificationRecipient = HelperUtils.uniqueString
+        String notificationRecipient = HelperUtils.randomEmail
         DomainFactory.createProcessingOptionForNotificationRecipient(notificationRecipient)
         int callCount = 0
         trackingService.mailHelperService = new MailHelperService() {
@@ -245,7 +245,7 @@ ILSe 5678, runA, lane 1, ${sampleText}
         given:
         OtrsTicket ticket = DomainFactory.createOtrsTicket()
         DomainFactory.createProcessingOptionForOtrsTicketPrefix(PREFIX)
-        String recipient = HelperUtils.uniqueString
+        String recipient = HelperUtils.randomEmail
         DomainFactory.createProcessingOptionForNotificationRecipient(recipient)
         trackingService.mailHelperService = Mock(MailHelperService) {
             1 * sendEmail("${PREFIX}#${ticket.ticketNumber} Final Processing Status Update", _, [recipient])
@@ -261,7 +261,7 @@ ILSe 5678, runA, lane 1, ${sampleText}
         String mailingListName = 'tr_a.b@c.d'
         SeqTrack seqTrack = createSeqTrackforCustomFinalNotification(DomainFactory.createProject(mailingListName: mailingListName), null, ticket)
         DomainFactory.createProcessingOptionForOtrsTicketPrefix(PREFIX)
-        String recipient = HelperUtils.uniqueString
+        String recipient = HelperUtils.randomEmail
         DomainFactory.createProcessingOptionForNotificationRecipient(recipient)
         trackingService.mailHelperService = Mock(MailHelperService) {
             1 * sendEmail("${PREFIX}#${ticket.ticketNumber} Final Processing Status Update ${seqTrack.individual.pid} (${seqTrack.seqType.displayName})", _, [mailingListName, recipient])
@@ -276,7 +276,7 @@ ILSe 5678, runA, lane 1, ${sampleText}
         OtrsTicket ticket = DomainFactory.createOtrsTicket()
         SeqTrack seqTrack = createSeqTrackforCustomFinalNotification(DomainFactory.createProject(), DomainFactory.createIlseSubmission(), ticket)
         DomainFactory.createProcessingOptionForOtrsTicketPrefix(PREFIX)
-        String recipient = HelperUtils.uniqueString
+        String recipient = HelperUtils.randomEmail
         DomainFactory.createProcessingOptionForNotificationRecipient(recipient)
         trackingService.mailHelperService = Mock(MailHelperService) {
             1 * sendEmail("${PREFIX}#${ticket.ticketNumber} Final Processing Status Update [S#${seqTrack.ilseId}] ${seqTrack.individual.pid} (${seqTrack.seqType.displayName})", _, [recipient])
@@ -295,7 +295,7 @@ ILSe 5678, runA, lane 1, ${sampleText}
         SeqTrack seqTrack3 = createSeqTrackforCustomFinalNotification(project, DomainFactory.createIlseSubmission(), ticket)
 
         DomainFactory.createProcessingOptionForOtrsTicketPrefix(PREFIX)
-        String recipient = HelperUtils.uniqueString
+        String recipient = HelperUtils.randomEmail
         DomainFactory.createProcessingOptionForNotificationRecipient(recipient)
         trackingService.mailHelperService = Mock(MailHelperService) {
             1 * sendEmail("${PREFIX}#${ticket.ticketNumber} Final Processing Status Update [S#${seqTrack1.ilseId},${seqTrack2.ilseId},${seqTrack3.ilseId}] ${seqTrack1.individual.pid}, ${seqTrack2.individual.pid}, ${seqTrack3.individual.pid} (${seqTrack1.seqType.displayName}, ${seqTrack2.seqType.displayName}, ${seqTrack3.seqType.displayName})", _, [recipient])
