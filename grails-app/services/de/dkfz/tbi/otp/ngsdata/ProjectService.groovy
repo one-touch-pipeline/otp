@@ -106,7 +106,7 @@ class ProjectService {
         // check that our dirName is relative to the configured data root.
         Path rootPath = configService.getRootPath().toPath()
         List<String> rootPathElements = rootPath.toList()*.toString()
-        assert rootPathElements.every { !dirName.startsWith("${it}${File.separator}") }:
+        assert rootPathElements.every { !dirName.startsWith("${it}${File.separator}") } :
                 "project directory (${dirName}) contains (partial) data processing root path (${rootPath})"
 
         Project project = new Project(

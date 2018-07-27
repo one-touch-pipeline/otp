@@ -118,7 +118,7 @@ class ClusterJobMonitoringService {
             // is still running on the cluster
             List<ClusterJobIdentifier> finishedJobs = []
             // again a copy for thread safety
-            (new ArrayList<ClusterJobIdentifier>(jobIdentifiers)).each { ClusterJobIdentifier jobIdentifier ->
+            jobIdentifiers.collect().each { ClusterJobIdentifier jobIdentifier ->
                 boolean completed
                 // a job is considered complete if it either has status "completed" or it is not known anymore,
                 // unless the cluster it runs on couldn't be checked

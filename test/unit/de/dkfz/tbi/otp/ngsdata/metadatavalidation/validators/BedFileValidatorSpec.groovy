@@ -96,7 +96,6 @@ class BedFileValidatorSpec extends Specification {
                                 @Override
                                 ParsedSampleIdentifier tryParse(String sampleIdentifier) {
                                     Matcher match = sampleIdentifier =~ /${PARSE_PREFIX}_(.*)_(.*)_(.*)/
-                                    println match.matches()
                                     if (match.matches()) {
                                         return new DefaultParsedSampleIdentifier(match.group(1), match.group(2), match.group(3), sampleIdentifier)
                                     } else {

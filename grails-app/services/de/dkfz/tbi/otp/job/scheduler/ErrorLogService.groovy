@@ -94,7 +94,7 @@ class ErrorLogService {
             PrintWriter pw = new PrintWriter(sw)
             thrownException.printStackTrace(pw)
             return sw.toString()
-        } catch(Exception e) {
+        } catch (Exception e) {
             return e.toString()
         }
     }

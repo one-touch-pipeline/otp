@@ -21,7 +21,7 @@ class ParameterMappingTests {
        assertEquals("nullable", mapping.errors["from"].code)
        assertEquals("nullable", mapping.errors["to"].code)
        assertEquals("nullable", mapping.errors["job"].code)
-       
+
        JobDefinition jobDefinition = new JobDefinition()
        JobDefinition jobDefinition2 = new JobDefinition()
        mapping.job = jobDefinition

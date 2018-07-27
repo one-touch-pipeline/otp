@@ -70,7 +70,7 @@ class MergingIntervalCollection implements Iterable<Interval> {
         final NavigableMap<Long, Interval> overlappingEndings = endings.subMap(interval.lowEnd, true, interval.highEnd, true)
 
         // step 3: merge step 1+2 to get complete result-set
-        final Set<Interval> result = new HashSet<Interval>()
+        final Set<Interval> result = [] as Set
         result.addAll(overlappingBeginnings.values())
         result.addAll(overlappingEndings.values())
 

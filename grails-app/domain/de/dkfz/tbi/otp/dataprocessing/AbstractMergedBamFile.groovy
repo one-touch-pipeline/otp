@@ -1,13 +1,11 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.Comment
-import de.dkfz.tbi.otp.Commentable
+import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 import org.hibernate.*
 
 import static org.springframework.util.Assert.*
-
 /**
  * Represents a single generation of one merged BAM file (whereas a {@link AbstractMergingWorkPackage} represents all
  * generations).
@@ -83,8 +81,7 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile implement
     static mapping = {
         numberOfMergedLanes index: "abstract_merged_bam_file_number_of_merged_lanes_idx"
         qcTrafficLightStatus index: "abstract_bam_file_qc_traffic_light_status"
-        workPackage lazy: false
-        workPackage index: "abstract_merged_bam_file_work_package_idx"
+        workPackage lazy: false, index: "abstract_merged_bam_file_work_package_idx"
     }
 
 /**

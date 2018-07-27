@@ -219,11 +219,9 @@ class LsdfFilesService {
     }
 
     String[] getAllPathsForRun(Run run, boolean fullPath = false) {
-        if (!run) {
-            //exception
-            return null
-        }
-        Set<String> paths = new HashSet<String>()
+        assert run: "No run given"
+
+        Set<String> paths = [] as Set
         DataFile.findAllByRun(run).each { DataFile file ->
             String path = getPathToRun(file, fullPath)
             if (path) {

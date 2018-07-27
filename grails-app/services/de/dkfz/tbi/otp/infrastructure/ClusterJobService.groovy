@@ -487,7 +487,7 @@ SELECT
         List results = []
 
         sql.eachRow(query, [startDate.millis, endDate.millis]) {
-            results << [startDate: new DateTime(it.hourStarted * HOURS_TO_MILLIS), endDate: new DateTime(it.hourEnded * HOURS_TO_MILLIS), memoryAvgUsed: it.sumAvgMemoryUsed.div(1024 * 1024)]
+            results << [startDate: new DateTime(it.hourStarted * HOURS_TO_MILLIS), endDate: new DateTime(it.hourEnded * HOURS_TO_MILLIS), memoryAvgUsed: it.sumAvgMemoryUsed / (1024 ** 2)]
         }
 
         def data = hourBuckets.collect { currentHour ->

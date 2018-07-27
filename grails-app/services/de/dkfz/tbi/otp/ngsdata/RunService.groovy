@@ -211,12 +211,12 @@ class RunService {
      * */
     @PreAuthorize("hasRole('ROLE_OPERATOR') or #run == null or hasPermission(#run.seqCenter.id, 'de.dkfz.tbi.otp.ngsdata.SeqCenter', read)")
     Map<SeqTrack, Map<String, Object>> retrieveSequenceTrackInformation(Run run) {
-        Map<SeqTrack, Map<String, Object>> returnData = new LinkedHashMap<SeqTrack, Map<String, Object>>()
+        Map<SeqTrack, Map<String, Object>> returnData = [:]
         if (!run) {
             return returnData
         }
         SeqTrack.findAllByRun(run, [sort: 'laneId']).each { track ->
-            Map<AlignmentLog, List<DataFile>> alignments = new LinkedHashMap<AlignmentLog, List<DataFile>>()
+            Map<AlignmentLog, List<DataFile>> alignments = [:]
             AlignmentLog.findAllBySeqTrack(track).each { alignment ->
                 alignments.put(alignment, DataFile.findAllByAlignmentLog(alignment))
             }

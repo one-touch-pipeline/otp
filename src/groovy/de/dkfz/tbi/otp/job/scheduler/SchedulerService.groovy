@@ -48,7 +48,7 @@ class SchedulerService {
     /**
      * Queue of next to be started ProcessingSteps
      */
-    private final Queue<ProcessingStep> queue = new LinkedList<ProcessingStep>()
+    private final Queue<ProcessingStep> queue = [] as Queue
     /**
      * List of currently running Jobs.
      */
@@ -60,14 +60,14 @@ class SchedulerService {
     /**
      * Whether the Scheduler is currently active.
      * This is false when shutting down the server
-     **/
+     */
     @SuppressWarnings("GrailsStatelessService")
     private boolean schedulerActive = false
     /**
      * Whether the scheduler startup has been successful.
      * False as long as the server has not started. If false the scheduler cannot be started,
      * if true the startup cannot be performed again.
-     **/
+     */
     @SuppressWarnings("GrailsStatelessService")
     private boolean startupOk = false
 
@@ -86,7 +86,7 @@ class SchedulerService {
      * This requires manual intervention and the server does not start up. If an unclean shutdown is
      * detected the changes to the ProcessingSteps are discarded, so that this method can be executed
      * once again after the manual intervention fixed all ProcessingSteps in unknown state.
-     **/
+     */
     public void startup() {
         if (schedulerActive || startupOk) {
             return
@@ -105,16 +105,16 @@ class SchedulerService {
                         log.error("Error during startup: ProcessingStep ${step.id} does not have any Updates")
                         return
                     }
-                    ProcessingStepUpdate last = updates.sort { it.id }.last()
+                    ProcessingStepUpdate last = updates.max { it.id }
                     if (last.state == ExecutionState.CREATED) {
                         processesToRestart << step
                     } else if (last.state == ExecutionState.SUSPENDED) {
                         processService.setOperatorIsAwareOfFailure(step.process, false)
                         ProcessingStepUpdate update = new ProcessingStepUpdate(
-                            date: new Date(),
-                            state: ExecutionState.RESUMED,
-                            previous: last,
-                            processingStep: step
+                                date: new Date(),
+                                state: ExecutionState.RESUMED,
+                                previous: last,
+                                processingStep: step
                         )
                         if (!update.save(flush: true)) {
                             ok = false
@@ -201,7 +201,7 @@ class SchedulerService {
         }
         JobDefinition nextJob = previous.jobDefinition.next
         if (!nextJob && (previous.jobDefinition instanceof DecidingJobDefinition)) {
-            nextJob = DecisionMapping.findByDecision(((DecisionProcessingStep)previous).decision).definition
+            nextJob = DecisionMapping.findByDecision(((DecisionProcessingStep) previous).decision).definition
         }
         ProcessingStep next = createProcessingStep(previous.process, nextJob, previous.output, previous)
         lock.lock()
@@ -239,8 +239,8 @@ class SchedulerService {
         }
         JobExecutionPlan plan = JobExecutionPlan.get(startJob.getJobExecutionPlan().id)
         Process process = new Process(started: new Date(),
-            jobExecutionPlan: plan,
-            startJobClass: startJob.class.getName(),
+                jobExecutionPlan: plan,
+                startJobClass: startJob.class.getName(),
         )
         if (!process.save()) {
             throw new SchedulerPersistencyException("Could not save the process for the JobExecutionPlan ${plan.id}")
@@ -268,7 +268,7 @@ class SchedulerService {
     /**
      * Invokes the primitive scheduler to determine which job is to execute next if any at all.
      */
-    @Scheduled(fixedRate=1000l)
+    @Scheduled(fixedRate = 1000l)
     public void schedule() throws Exception {
         if (!schedulerActive) {
             return
@@ -287,7 +287,7 @@ class SchedulerService {
 
         if (job) {
             // start the Job in an own thread
-            executorService.submit({grailsApplication.mainContext.scheduler.executeJob(job)} as Callable)
+            executorService.submit({ grailsApplication.mainContext.scheduler.executeJob(job) } as Callable)
         }
     }
 
@@ -297,7 +297,7 @@ class SchedulerService {
      *
      * Do not invoke this method manually.
      */
-    @Scheduled(fixedDelay=30000l)
+    @Scheduled(fixedDelay = 30000l)
     public void clusterJobCheck() {
         if (!schedulerActive) {
             return
@@ -355,11 +355,11 @@ class SchedulerService {
             // add a ProcessingStepUpdate to the ProcessingStep
             processService.setOperatorIsAwareOfFailure(step.process, false)
             ProcessingStepUpdate update = new ProcessingStepUpdate(
-                date: new Date(),
-                state: ExecutionState.FINISHED,
-                previous: step.latestProcessingStepUpdate,
-                processingStep: step
-                )
+                    date: new Date(),
+                    state: ExecutionState.FINISHED,
+                    previous: step.latestProcessingStepUpdate,
+                    processingStep: step
+            )
             if (!update.save(flush: true)) {
                 log.fatal("Could not create a FINISHED Update for Job of type ${job.class}")
                 throw new ProcessingException("Could not create a FINISHED Update for Job")
@@ -496,7 +496,7 @@ class SchedulerService {
         }
         try {
             createNextProcessingStep(step)
-        } catch(Exception se) {
+        } catch (Exception se) {
             log.error("Could not create new ProcessingStep for Process ${step.process}")
             throw new SchedulerException("Could not create new ProcessingStep", se)
         }
@@ -525,14 +525,14 @@ class SchedulerService {
      * @param errorMessage The message to be stored for the Error
      * @param jobClass The Job Class to use in logging in case of severe error
      * @throws ProcessingException In case the ProcessingError cannot be saved.
-     **/
+     */
     public void createError(ProcessingStep step, String errorMessage, Class jobClass) {
         processService.setOperatorIsAwareOfFailure(step.process, false)
         ProcessingStepUpdate update = new ProcessingStepUpdate(
-            date: new Date(),
-            state: ExecutionState.FAILURE,
-            previous: step.latestProcessingStepUpdate,
-            processingStep: step)
+                date: new Date(),
+                state: ExecutionState.FAILURE,
+                previous: step.latestProcessingStepUpdate,
+                processingStep: step)
         if (!update.save()) {
             log.fatal("Could not create a FAILURE Update for Job of type ${jobClass}")
             throw new ProcessingException("Could not create a FAILURE Update for Job of type ${jobClass}")
@@ -560,8 +560,8 @@ class SchedulerService {
             // and check for each whether our jobs appender is added
             JobAppender jobAppender = null
             while (!jobAppender && logger) {
-                jobAppender = (JobAppender)logger.getAppender("jobs")
-                logger = (Logger)logger.getParent()
+                jobAppender = (JobAppender) logger.getAppender("jobs")
+                logger = (Logger) logger.getParent()
             }
             if (jobAppender) {
                 jobAppender.unregisterProcessingStep(job.processingStep)
@@ -592,7 +592,7 @@ class SchedulerService {
      * the scheduler.
      * @param step The failed ProcessingStep which needs to be restarted.
      * @param schedule Whether to add the restarted ProcessingStep to the scheduler or not
-     **/
+     */
     public void restartProcessingStep(ProcessingStep step, boolean schedule = true, boolean resume3in1job = false) {
         ProcessingStep restartedStep = null
         ProcessingStep.withTransaction {
@@ -621,10 +621,10 @@ class SchedulerService {
                 // create restart event
                 processService.setOperatorIsAwareOfFailure(step.process, false)
                 ProcessingStepUpdate restart = new ProcessingStepUpdate(
-                    date: new Date(),
-                    state: ExecutionState.RESTARTED,
-                    previous: lastUpdate,
-                    processingStep: step)
+                        date: new Date(),
+                        state: ExecutionState.RESTARTED,
+                        previous: lastUpdate,
+                        processingStep: step)
                 if (!restart.save(flush: true)) {
                     log.fatal("Could not create a RESTARTED Update for ProcessingStep ${step.id}")
                     throw new ProcessingException("Could not create a RESTARTED Update for ProcessingStep ${step.id}")
@@ -638,7 +638,7 @@ class SchedulerService {
                 // those will not be available as it is difficult to map them back
                 // this is considered as a theoretical problem as input parameters to the first ProcessingStep are from a time when the ProcessParameter
                 // did not yet exist and all existing Workflows do not use this feature
-                mapInputParamatersToStep(restartedStep, step.previous ? step.previous.output  : [])
+                mapInputParamatersToStep(restartedStep, step.previous ? step.previous.output : [])
                 // update the previous link
                 if (restartedStep.previous) {
                     restartedStep.previous.next = restartedStep
@@ -677,7 +677,7 @@ class SchedulerService {
      * Retrieves from the database all {@link ProcessingStep}s with the latest
      * {@link ProcessingStepUpdate} in {@link ProcessingStepUpdate#state state}
      * {@link ExecutionState#STARTED STARTED} or {@link ExecutionState#RESUMED RESUMED}.
-     **/
+     */
     public List<ProcessingStep> retrieveRunningProcessingSteps() {
         List<ProcessingStep> runningSteps = []
         List<Process> process = Process.findAllByFinished(false)
@@ -699,7 +699,7 @@ class SchedulerService {
      * @return <code>true</code> if the Job is annotated with {@link ResumableJob} or the Job
      * implements {@link SometimesResumableJob} and its {@link SometimesResumableJob#isResumable()}
      * method returns <code>true</code>. Otherwise <code>false</code>.
-     **/
+     */
     boolean isJobResumable(ProcessingStep step) {
         Class jobClass = grailsApplication.classLoader.loadClass(step.jobClass)
         if (jobClass.isAnnotationPresent(ResumableJob)) {
@@ -876,7 +876,7 @@ class SchedulerService {
      *      any job.
      */
     public Job getJobExecutedByCurrentThread() {
-		return jobByThread.get()
+        return jobByThread.get()
     }
 
     /**

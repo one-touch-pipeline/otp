@@ -63,10 +63,10 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         null == service.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
 
         where:
-        processingStatus            | pipeline                                      | service               | optionName
-        "sophiaProcessingStatus"    | { DomainFactory.createSophiaPipelineLazy() }  | this.sophiaService    | ProcessingOption.OptionName.PIPELINE_SOPHIA_REFERENCE_GENOME
-        "aceseqProcessingStatus"    | { DomainFactory.createAceseqPipelineLazy() }  | this.aceseqService    | ProcessingOption.OptionName.PIPELINE_ACESEQ_REFERENCE_GENOME
-        "runYapsaProcessingStatus"  | { DomainFactory.createRunYapsaPipelineLazy() }| this.runYapsaService  | ProcessingOption.OptionName.PIPELINE_RUNYAPSA_REFERENCE_GENOME
+        processingStatus            | pipeline                                       | service               | optionName
+        "sophiaProcessingStatus"    | { DomainFactory.createSophiaPipelineLazy() }   | this.sophiaService    | ProcessingOption.OptionName.PIPELINE_SOPHIA_REFERENCE_GENOME
+        "aceseqProcessingStatus"    | { DomainFactory.createAceseqPipelineLazy() }   | this.aceseqService    | ProcessingOption.OptionName.PIPELINE_ACESEQ_REFERENCE_GENOME
+        "runYapsaProcessingStatus"  | { DomainFactory.createRunYapsaPipelineLazy() } | this.runYapsaService  | ProcessingOption.OptionName.PIPELINE_RUNYAPSA_REFERENCE_GENOME
 
     }
 

@@ -36,7 +36,7 @@ class QcThresholdServiceSpec extends Specification {
         project = DomainFactory.createProject()
         seqType = DomainFactory.createWholeGenomeSeqType()
         sophiaQc = DomainFactory.createSophiaQc([
-                "${testedProperty}": testedPropertyValue,
+                ("${testedProperty}".toString()): testedPropertyValue,
                 // don't create sophiaInstance, otherwise we have to @Mock too many domain classes
                 sophiaInstance     : null,
         ], false).save(validate: false)

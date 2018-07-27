@@ -4,7 +4,7 @@ class SeqScanController {
     def show = {
 
         SeqScan scan = SeqScan.get(params.id)
-        Set<String> runs = new HashSet<String>()
+        Set<String> runs = [] as Set
         List<SeqTrack> tracks = MergingAssignment.findAllBySeqScan(scan, [sort: "seqTrack.laneId"])
 
         tracks.each {seqTrack ->

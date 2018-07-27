@@ -16,7 +16,8 @@ class AllRoddyAlignmentsChecker extends PipelinesChecker<SeqTrack> {
             return []
         }
 
-        Map<SeqType, List<SeqTrack>> seqTracksBySeqType = seqTracks.unique().groupBy {
+        seqTracks.unique()
+        Map<SeqType, List<SeqTrack>> seqTracksBySeqType = seqTracks.groupBy {
             it.seqType
         }
 
@@ -36,9 +37,9 @@ class AllRoddyAlignmentsChecker extends PipelinesChecker<SeqTrack> {
 
         List<SeqTrack> unsupportedSeqTracks = seqTracksBySeqType.values().flatten()
 
-        output.showUniqueList(HEADER_NOT_SUPPORTED_SEQTYPES, unsupportedSeqTracks, { SeqTrack seqTrack ->
+        output.showUniqueList(HEADER_NOT_SUPPORTED_SEQTYPES, unsupportedSeqTracks) { SeqTrack seqTrack ->
             "${seqTrack.seqType.displayNameWithLibraryLayout}"
-        })
+        }
 
         return seqTracksPerChecker.collect { AbstractRoddyAlignmentChecker checker, List<SeqTrack> seqTrackList ->
             checker.handle(seqTrackList, output)

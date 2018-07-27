@@ -67,7 +67,7 @@ class AnalysisDeletionServiceIntegrationSpec extends Specification {
         snvCallingInstance.processingState = AnalysisProcessingStates.FINISHED
         indelCallingInstance.processingState = AnalysisProcessingStates.FINISHED
         aceseqInstance.processingState = AnalysisProcessingStates.FINISHED
-        List<File> instancesDirectories = new ArrayList<>()
+        List<File> instancesDirectories = []
         List<File> samplePairsDirectories
 
 
@@ -104,7 +104,7 @@ class AnalysisDeletionServiceIntegrationSpec extends Specification {
         assert snvCallingInstance2.save()
         IndelCallingInstance indelCallingInstance2 = DomainFactory.createIndelCallingInstanceWithSameSamplePair(snvCallingInstance2)
         AceseqInstance aceseqInstance2 = DomainFactory.createAceseqInstanceWithSameSamplePair(snvCallingInstance2)
-        List<File> instancesDirectories = new ArrayList<>()
+        List<File> instancesDirectories = []
         List<File> samplePairsDirectories
 
         analysisInstancesDirectories.addAll(

@@ -20,17 +20,16 @@ class JobErrorDefinitionService {
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    ArrayList getJobDefinition(Map jobErrorDefinitionMap){
-        Set jobErrorDefinitionSet = []
+    List getJobDefinition(Map jobErrorDefinitionMap){
+        List jobErrorDefinitions = []
         jobErrorDefinitionMap.each { key, value ->
             JobErrorDefinition jobErrorDefinitionObject = (JobErrorDefinition)key
             jobErrorDefinitionObject.jobDefinitions.each { JobDefinition jobDefinition ->
-                jobErrorDefinitionSet.add(jobDefinition)
+                jobErrorDefinitions << jobDefinition
             }
         }
-        ArrayList list = new ArrayList(jobErrorDefinitionSet)
-        list.sort()
-        return list
+        jobErrorDefinitions.unique().sort()
+        return jobErrorDefinitions
     }
 
     Map<Object, Object> getValues(JobErrorDefinition value) {

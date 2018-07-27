@@ -1,4 +1,3 @@
-
 package de.dkfz.tbi.otp.administration
 
 import de.dkfz.tbi.otp.job.plan.*
@@ -153,7 +152,7 @@ class CrashRecoveryServiceUnitTests {
                 ExecutionState.FINISHED,
             ])
             parameterTypeList.each { ParameterType parameterType ->
-                Parameter parameter = processingStep.output.find { Parameter parameter->
+                Parameter parameter = processingStep.output.find { Parameter parameter ->
                     parameter.type == parameterType
                 }
                 assert parameter : 'Could not found any parameter for ${parameterType} in ${step}'
@@ -324,8 +323,8 @@ class CrashRecoveryServiceUnitTests {
                 ExecutionState.FINISHED,
                 ExecutionState.SUCCESS,
             ])
-            parameterTypeList.each { ParameterType parameterType->
-                Parameter parameter = processingStep.output.find { Parameter parameter->
+            parameterTypeList.each { ParameterType parameterType ->
+                Parameter parameter = processingStep.output.find { Parameter parameter ->
                     parameter.type == parameterType
                 }
                 assert parameter : 'Could not found any parameter for ${parameterType} in ${step}'

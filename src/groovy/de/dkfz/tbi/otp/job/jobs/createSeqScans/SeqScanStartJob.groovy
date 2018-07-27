@@ -42,7 +42,7 @@ class SeqScanStartJob extends AbstractStartJobImpl  {
                 return
             }
             createProcess(seqTrack)
-            println "${name}: job started for seqTrack ${seqTrack}"
+            log.info("${name}: job started for seqTrack ${seqTrack}")
         }
     }
 

@@ -13,6 +13,7 @@ import org.joda.time.*
 import org.junit.*
 
 import static org.junit.Assert.*
+
 @Ignore
 class TransferMergedBamFileWorkflowSeqTypeExomeTests extends WorkflowTestCase {
 

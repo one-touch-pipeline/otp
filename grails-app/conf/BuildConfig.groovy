@@ -120,6 +120,10 @@ codenarc {
             outputFile = 'target/CodeNarc-Report.html'
             title = "OTP CodeNarc Report"
         }
+        CodeNarcHtmlReport('sortable') {
+            outputFile = 'target/CodeNarc-Report-Sortable.html'
+            title = "OTP CodeNarc Report"
+        }
     }
 }
 

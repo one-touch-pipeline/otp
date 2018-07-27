@@ -12,7 +12,7 @@ import org.springframework.security.authentication.*
  *
  * This service is meant for any kind of user management, such as changing password
  * and administrative tasks like enabling/disabling users, etc.
- * 
+ *
  */
 class UserService {
 

@@ -11,12 +11,12 @@ class OverviewMBController {
         cal.add(Calendar.MONTH, -6)
         Date date = cal.getTime()
 
-        List stringCenters = new ArrayList()
+        List stringCenters = []
 
 
         List<SeqCenter> centers = SeqCenter.findAll()
-        for(SeqCenter center in centers) {
-            List<String> text = new ArrayList<String>()
+        for (SeqCenter center in centers) {
+            List<String> text = []
             int nRuns = Run.countBySeqCenter(center)
             int nNew = Run.countBySeqCenterAndDateExecutedGreaterThan(center, date)
             text << center
@@ -34,9 +34,9 @@ class OverviewMBController {
             seqType("MI_RNA", SeqType.LIBRARYLAYOUT_SINGLE)
         }
 
-        List stringTypes = new ArrayList()
-        for(SeqType type in wp) {
-            List<String> text = new ArrayList<String>()
+        List stringTypes = []
+        for (SeqType type in wp) {
+            List<String> text = []
             int nTracks = SeqTrack.findAllBySeqType(type).findAll { !it.isWithdrawn() }.size()
             int nTracksNew = countNewSeqTracks(type)
             text << type
@@ -54,7 +54,7 @@ class OverviewMBController {
 
         int N = 0;
         List<SeqTrack> tracks = SeqTrack.findAllBySeqType(type).findAll { !it.isWithdrawn() }
-        for(SeqTrack track in tracks) {
+        for (SeqTrack track in tracks) {
             if (track.run.dateExecuted > date) {
                 N++
             }

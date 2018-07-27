@@ -38,6 +38,7 @@ class JobAppender extends AppenderSkeleton {
         super(isActive)
     }
 
+    @SuppressWarnings("CloseWithoutCloseable")
     @Override
     public void close() {
         appenders.each { k, v ->
@@ -67,7 +68,7 @@ class JobAppender extends AppenderSkeleton {
                 appender.append(e)
             }
         } catch (Exception e) {
-            println "Could not read the JobLogMessage: ${event.message}"
+            log.error("Could not read the JobLogMessage: ${event.message}", e)
         }
     }
 

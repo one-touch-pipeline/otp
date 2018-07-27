@@ -48,7 +48,7 @@ class SeqPlatformServiceTests {
                     sequencingKitLabel,
                     sequencingKitLabel2,
                     null
-                ].each {kit->
+                ].each { kit ->
                     DomainFactory.createSeqPlatformWithSeqPlatformGroup([
                         name: name,
                         seqPlatformModelLabel: model,

@@ -236,7 +236,7 @@ class Scheduler {
                         "original exception:\n" +
                         "${ExceptionUtils.getStackTrace(exceptionToBeHandled)}\n" +
                         "exception during exception logging:\n" +
-                        "${ExceptionUtils.getStackTrace(exceptionDuringLogging)}"
+                        "${ExceptionUtils.getStackTrace(exceptionDuringLogging)}", exceptionDuringLogging
             }
             ProcessingError error = new ProcessingError(
                     errorMessage: exceptionToBeHandled.message ?: "No Exception message",

@@ -132,7 +132,7 @@ class LinkFileUtilsUnitTests {
         linkFileUtils.lsdfFilesService.createClusterScriptService = new CreateClusterScriptService()
         linkFileUtils.lsdfFilesService.remoteShellHelper = [
                 executeCommand: { Realm realm, String command ->
-                    assert realm == realm
+                    assert this.realm == realm
                 }
         ] as RemoteShellHelper
 

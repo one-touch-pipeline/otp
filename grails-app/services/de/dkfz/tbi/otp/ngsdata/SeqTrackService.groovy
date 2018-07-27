@@ -309,7 +309,7 @@ LIMIT 1
 
     // TODO OTP-2040: Do we still need this method?
     private void assertConsistentSample(Sample sample, List<DataFile> files) {
-        for(DataFile file in files) {
+        for (DataFile file in files) {
             Sample fileSample = getSample(file)
             if (!sample.equals(fileSample)) {
                 throw new SampleInconsistentException(files, sample, fileSample)
@@ -345,7 +345,7 @@ LIMIT 1
         assertConsistentSample(sample, alignFiles)
 
 
-        for(SoftwareTool pipeline in pipelines) {
+        for (SoftwareTool pipeline in pipelines) {
 
             AlignmentParams alignParams = getAlignmentParams(pipeline)
             AlignmentLog alignLog = new AlignmentLog(
@@ -365,7 +365,7 @@ LIMIT 1
     // TODO OTP-2040: Do we still need this method?
     Set<SoftwareTool> getAlignmentPipelineSet(List<DataFile> alignFiles) {
         Set<SoftwareTool> set = new HashSet<SoftwareTool>()
-        for(DataFile file in alignFiles) {
+        for (DataFile file in alignFiles) {
             SoftwareTool pipeline = getAlignmentPipeline(file)
             set << pipeline
         }
@@ -376,7 +376,7 @@ LIMIT 1
     SoftwareTool getAlignmentPipeline(DataFile file) {
         String name = metaDataValue(file, MetaDataColumn.ALIGN_TOOL.name())
         List<SoftwareToolIdentifier> idx = SoftwareToolIdentifier.findAllByName(name)
-        for(SoftwareToolIdentifier si in idx) {
+        for (SoftwareToolIdentifier si in idx) {
             if (si.softwareTool.type == SoftwareTool.Type.ALIGNMENT) {
                 return si.softwareTool
             }
@@ -396,7 +396,7 @@ LIMIT 1
 
     // TODO OTP-2040: Do we still need this method?
     private void consumeAlignmentFiles(AlignmentLog alignLog, List<DataFile> files, SoftwareTool pipeline) {
-        for(DataFile file in files) {
+        for (DataFile file in files) {
             SoftwareTool filePipeline = getAlignmentPipeline(file)
             if (pipeline.equals(filePipeline)) {
                 file.project = alignLog.seqTrack.project

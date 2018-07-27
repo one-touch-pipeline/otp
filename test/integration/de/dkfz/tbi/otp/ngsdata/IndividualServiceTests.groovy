@@ -1,4 +1,5 @@
 package de.dkfz.tbi.otp.ngsdata
+
 import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.security.User
@@ -1205,7 +1206,7 @@ ${indOld.comment.comment}""" == indNew.comment.comment
     }
 
     private Individual mockIndividual(String pid = "test", Project project = null) {
-        Individual ind = new Individual(pid: pid, mockPid: pid, mockFullName: pid, project: project ? project : mockProject(), type: Individual.Type.REAL)
+        Individual ind = new Individual(pid: pid, mockPid: pid, mockFullName: pid, project: project ?: mockProject(), type: Individual.Type.REAL)
         assertNotNull(ind.save())
         return ind
     }

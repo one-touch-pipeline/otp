@@ -93,7 +93,7 @@ codenarc:
   artifacts:
     <<: *artifacts_template
     paths:
-      - target/CodeNarc-Report.xml
+      - target/CodeNarc-Report*
     when: always
 
 

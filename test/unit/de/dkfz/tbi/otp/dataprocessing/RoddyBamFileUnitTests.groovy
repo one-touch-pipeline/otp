@@ -202,7 +202,7 @@ class RoddyBamFileUnitTests {
         SeqTrack seqTrack = DomainFactory.createSeqTrackWithDataFiles(roddyBamFile.workPackage)
         updateDataFileNames(seqTrack)
         roddyBamFile.seqTracks.add(seqTrack)
-        Map<SeqTrack, File> expected = new HashMap<>()
+        Map<SeqTrack, File> expected = [:]
         roddyBamFile.seqTracks.each {
             File dir = new File("${testDir}/${roddyBamFile.workDirectoryName}/${RoddyBamFile.QUALITY_CONTROL_DIR}/run${it.run.name}_${COMMON_PREFIX}")
             expected.put((it), dir)
@@ -240,7 +240,7 @@ class RoddyBamFileUnitTests {
         SeqTrack seqTrack = DomainFactory.createSeqTrackWithDataFiles(roddyBamFile.workPackage)
         updateDataFileNames(seqTrack)
         roddyBamFile.seqTracks.add(seqTrack)
-        Map<SeqTrack, File> expected = new HashMap<>()
+        Map<SeqTrack, File> expected = [:]
         roddyBamFile.seqTracks.each {
             File dir = new File("${testDir}/${RoddyBamFile.QUALITY_CONTROL_DIR}/run${it.run.name}_${COMMON_PREFIX}")
             expected.put((it), dir)

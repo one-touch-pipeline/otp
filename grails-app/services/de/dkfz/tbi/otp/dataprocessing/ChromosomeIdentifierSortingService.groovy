@@ -61,7 +61,7 @@ class ChromosomeIdentifierSortingService {
         } else if (identifierAsString2 == Chromosomes.CHR_M.chr) {
             return 1
         } else {
-            return identifierAsString1.compareTo(identifierAsString2)
+            return identifierAsString1 <=> identifierAsString2
         }
     }
 

@@ -86,8 +86,6 @@ class ExecuteMergedBamFileQaAnalysisJobUnitTests {
             filePath: { a1 -> 'bedFilePath' }
             ] as BedFileService
 
-        Log log = { println it } as Log
-
         job = new ExecuteMergedBamFileQaAnalysisJob(
                 processedMergedBamFileQaFileService: processedMergedBamFileQaFileService,
                 qualityAssessmentMergedPassService: qualityAssessmentMergedPassService,
@@ -95,7 +93,6 @@ class ExecuteMergedBamFileQaAnalysisJobUnitTests {
                 referenceGenomeService: referenceGenomeService,
                 bedFileService: bedFileService,
                 clusterJobSchedulerService: clusterJobSchedulerService,
-                log: log
                 )
 
         ExecuteMergedBamFileQaAnalysisJob.metaClass.getProcessParameterValue = { -> 1 as long }

@@ -36,9 +36,9 @@ abstract class AbstractJobImpl implements Job {
      */
     private long processingStepId
 
-    private final Collection<Parameter> inputParameters = new HashSet()
+    private final Collection<Parameter> inputParameters = [] as Set
 
-    private final Set<Parameter> outputParameters = new HashSet()
+    private final Set<Parameter> outputParameters = [] as Set
 
     static enum State {
         /** The Job has been created but not yet started */

@@ -17,6 +17,7 @@ import org.junit.*
 import org.springframework.beans.factory.annotation.*
 
 import static org.junit.Assert.*
+
 @Ignore
 class TransferMergedBamFileWorkflowTests extends WorkflowTestCase {
 

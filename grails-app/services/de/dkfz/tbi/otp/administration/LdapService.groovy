@@ -1,7 +1,7 @@
 package de.dkfz.tbi.otp.administration
 
 import de.dkfz.tbi.otp.config.*
-import jdk.nashorn.internal.ir.annotations.*
+import groovy.transform.Immutable
 import org.springframework.beans.factory.*
 import org.springframework.ldap.core.*
 import org.springframework.ldap.core.support.*

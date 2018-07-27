@@ -7,7 +7,7 @@ import de.dkfz.tbi.otp.job.plan.JobDecision
  * Subinterface for Jobs which define a decision.
  * The Job has to select one possible outcome as a {@link JobDecision}.
  * The Job can query the available decisions through it's {@link ProcessingStep}.
- * 
+ *
  * A DecisionJob is an {@link EndStateAwareJob} as it makes no sense to do a decision
  * without knowing whether it is correct. This means a DecisionJob has to succeed in order
  * to use the decision.

@@ -1,4 +1,3 @@
-
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.TestCase
@@ -61,7 +60,7 @@ class MergingPassServiceUnitTests {
             checkConsistencyForProcessingFilesDeletion: { final QualityAssessmentMergedPass pass ->
                 return true //
             },
-            deleteProcessingFiles: { final QualityAssessmentMergedPass pass->
+            deleteProcessingFiles: { final QualityAssessmentMergedPass pass ->
                 return SOME_FILE_LENGTH_1 //
             },
         ] as ProcessedMergedBamFileQaFileService

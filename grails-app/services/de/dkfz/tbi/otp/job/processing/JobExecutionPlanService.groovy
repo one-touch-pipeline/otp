@@ -147,7 +147,7 @@ AND u.id IN (
         query = query + "GROUP BY p.id\n"
         query = query + "ORDER BY p.${column} ${order ? 'asc' : 'desc'}"
 
-        LinkedHashMap<Process, ProcessingStepUpdate> results = new LinkedHashMap<Process, ProcessingStepUpdate>()
+        LinkedHashMap<Process, ProcessingStepUpdate> results = [:]
         Map params = [planIds: plans]
         if (state) {
             params.put("state", state)

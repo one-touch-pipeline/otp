@@ -48,7 +48,7 @@ class ProcessedAlignmentFileServiceUnitTests {
             deleteProcessingDirectory: {final Project project, final String directoryPath ->
                 return
             },
-            getOutputDirectory: {Individual individual, OutputDirectories dir->
+            getOutputDirectory: {Individual individual, OutputDirectories dir ->
                 "SomeDirectory"
             }
         ] as DataProcessingFilesService

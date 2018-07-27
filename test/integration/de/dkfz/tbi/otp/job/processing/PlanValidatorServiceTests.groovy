@@ -81,7 +81,6 @@ class PlanValidatorServiceTests {
         }
         JobExecutionPlan jep = JobExecutionPlan.list().last()
         List<String> errors = planValidatorService.validate(jep)
-        println errors
         assertFalse(errors.isEmpty())
         assertEquals(PlanValidatorService.JOB_BEAN_MISSING + "${JobDefinition.findByNameAndPlan('testJob', jep).id}, thisBeanDoesNotExist12345", errors[0])
         // creating a second Job which exist should not change anything

@@ -8,10 +8,10 @@ import de.dkfz.tbi.otp.dataprocessing.*
 
 String sql = """
 select
-    pipeline.name, 
+    pipeline.name,
     project.name,
     realm.jobScheduler,
-    config.pluginVersion, 
+    config.pluginVersion,
     count(analysis.id) as count
 from
     BamFilePairAnalysis analysis
@@ -36,8 +36,8 @@ and
             analysis2.samplePair = analysis.samplePair
             and analysis2.config.pipeline = analysis.config.pipeline
     )
-group by 
-    pipeline.name, 
+group by
+    pipeline.name,
     project.name,
     realm.jobScheduler,
     config.pluginVersion

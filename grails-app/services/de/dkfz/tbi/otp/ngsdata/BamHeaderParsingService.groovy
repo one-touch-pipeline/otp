@@ -1,7 +1,5 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import java.util.List;
-
 class BamHeaderParsingService {
 
     SeqTrack seqTrackFromTokens(List<String> tokens) {
@@ -32,13 +30,13 @@ class BamHeaderParsingService {
      * parse format ID:runName_s_lane
      */
     private SeqTrack parseTokensV1(List<String> tokens) {
-        for(String token in tokens) {
+        for (String token in tokens) {
             if (token.startsWith("ID:")) {
                 int sepId = token.indexOf("_s_")
                 if (sepId > -1) {
                     String runName = token.substring(3, sepId);
                     String lane = token.substring(token.lastIndexOf("_")+1)
-                    println "${runName} ${lane}"
+                    log.info("${runName} ${lane}")
                     return getSeqTrack(runName, lane)
                 }
             }
@@ -47,13 +45,13 @@ class BamHeaderParsingService {
     }
 
     private SeqTrack parseTokensV2(List<String> tokens) {
-        for(String token in tokens) {
+        for (String token in tokens) {
             if (token.startsWith("ID:")) {
                 int sepId = token.indexOf("_lane")
                 if (sepId > -1) {
                     String runName = token.substring(3, sepId);
                     String lane = token.substring(sepId+5, sepId+6)
-                    println "${runName} ${lane}"
+                    log.info("${runName} ${lane}")
                     return getSeqTrack(runName, lane)
                 }
             }
@@ -64,7 +62,7 @@ class BamHeaderParsingService {
     private SeqTrack parseTokensV3(List<String> tokens) {
         String runName
         String lane
-        for(String token in tokens) {
+        for (String token in tokens) {
             if (token.startsWith("SM:")) {
                 runName = token.substring(3)
             }
@@ -78,7 +76,7 @@ class BamHeaderParsingService {
                 }
             }
         }
-        println "${runName} ${lane}"
+        log.info("${runName} ${lane}")
         if (runName && lane) {
             return getSeqTrack(runName, lane)
         }
@@ -86,7 +84,7 @@ class BamHeaderParsingService {
     }
 
     private SeqTrack parseTokensV4(List<String> tokens) {
-        for(String token in tokens) {
+        for (String token in tokens) {
             if (token.contains("DS:")) {
                 token = token.substring(token.indexOf("DS:"))
             }
@@ -95,7 +93,7 @@ class BamHeaderParsingService {
                 int idx = runName.indexOf("_FC") + 3
                 if (idx < runName.size()) {
                     String lane = runName.substring(idx)
-                    println "${runName} ${lane}"
+                    log.info("${runName} ${lane}")
                     return getSeqTrack(runName, lane)
                 }
             }
@@ -104,14 +102,14 @@ class BamHeaderParsingService {
     }
 
     private SeqTrack parseTokensV5(List<String> tokens) {
-        for(String token in tokens) {
+        for (String token in tokens) {
             if (token.startsWith("ID:")) {
                 int sepId = token.indexOf("_L")
                 if (sepId > -1) {
                     String runName = token.substring(3, sepId);
                     String lane = token.substring(sepId+2)
                     int laneNo = lane as int
-                    println "${runName} ${laneNo}"
+                    log.info("${runName} ${laneNo}")
                     return getSeqTrack(runName, laneNo as String)
                 }
             }

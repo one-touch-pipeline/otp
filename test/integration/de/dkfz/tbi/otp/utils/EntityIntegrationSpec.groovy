@@ -6,6 +6,7 @@ import org.codehaus.groovy.grails.commons.*
 import seedme.*
 import spock.lang.*
 
+@SuppressWarnings("ComparisonWithSelf")
 class EntityIntegrationSpec extends Specification {
 
     GrailsApplication grailsApplication

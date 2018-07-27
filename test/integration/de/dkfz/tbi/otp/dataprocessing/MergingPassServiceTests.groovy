@@ -185,7 +185,9 @@ class MergingPassServiceTests {
     public void testDeleteOldMergingProcessingFiles_ConditionLaterPass_OtherMergingSet() {
         Date createdBeforeDate = new Date().plus(1)
         MergingSet mergingSet = DomainFactory.createMergingSet()
-        List<ProcessedMergedBamFile> processedMergedBamFiles = createProcessedMergedBamFileWithLaterProcessedPass([workPackage: mergingSet.mergingWorkPackage], [mergingSet:mergingSet])
+        List<ProcessedMergedBamFile> processedMergedBamFiles = createProcessedMergedBamFileWithLaterProcessedPass(
+                [workPackage: mergingSet.mergingWorkPackage], [mergingSet: mergingSet]
+        )
         createMergingPassService()
 
         assert LENGTH_NO_BAMFILE == mergingPassService.deleteOldMergingProcessingFiles(createdBeforeDate)

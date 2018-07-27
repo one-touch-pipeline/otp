@@ -5,7 +5,7 @@ import de.dkfz.tbi.otp.utils.*
 
 /**
  * Domain class to store error information for a failure ProcessingStepUpdate.
- * 
+ *
  * An error can either be just a message provided by the Job itself or in cause of an exception
  * in which case the class also contains an identifier for the stack trace. The stack trace itself
  * is not stored in the database but should be stored to a log file by the container. The identifier

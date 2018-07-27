@@ -35,7 +35,7 @@ class FileTypeService {
      */
     static FileType getFileType(String filename, FileType.Type type) {
         List<FileType> types = FileType.findAllByType(type, [sort: "id", order: "asc"])
-        for(FileType subType in types) {
+        for (FileType subType in types) {
             if (filename.contains(subType.signature)) {
                 return subType
             }

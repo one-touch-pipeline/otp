@@ -90,7 +90,7 @@ class LsdfFileServiceUnitTests {
     void test_deleteFilesRecursive_shouldBeFine() {
         Realm realm = DomainFactory.createRealm()
         service.remoteShellHelper = [
-                executeCommand: {Realm realm2, String command->
+                executeCommand: {Realm realm2, String command ->
                     LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
                 }
                 ] as RemoteShellHelper
@@ -112,7 +112,7 @@ class LsdfFileServiceUnitTests {
     void test_deleteFilesRecursive_FilesOrDirectoriesIsEmpty_shouldDoNothing() {
         Realm realm = DomainFactory.createRealm()
         service.remoteShellHelper = [
-                executeCommand: {Realm realm2, String command->
+                executeCommand: {Realm realm2, String command ->
                     assert false: 'Should not be called'
                 }
         ] as RemoteShellHelper
@@ -143,7 +143,7 @@ class LsdfFileServiceUnitTests {
         final String MESSAGE = HelperUtils.uniqueString
         Realm realm = DomainFactory.createRealm()
         service.remoteShellHelper = [
-                executeCommand: {Realm realm2, String command->
+                executeCommand: {Realm realm2, String command ->
                     assert false: MESSAGE
                 }
         ] as RemoteShellHelper

@@ -75,7 +75,6 @@ class MonitorOutputCollectorIntegrationSpec extends Specification {
         if (hasComment) {
             !output.contains('comment')
         }
-        println output
 
         where:
         errorCase                            | procesCount | noProcessUpdate | hasFailure | hasComment

@@ -13,8 +13,8 @@ class AbstractAnalysisController {
     Map results() {
         String projectName = params.project ?: params.projectName
         if (projectName) {
-            Project project
-            if ((project = projectService.getProjectByName(projectName))) {
+            Project project = projectService.getProjectByName(projectName)
+            if (project) {
                 projectSelectionService.setSelectedProject([project], project.name)
                 redirect(controller: controllerName, action: actionName)
                 return

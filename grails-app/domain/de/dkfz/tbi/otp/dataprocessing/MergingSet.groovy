@@ -83,7 +83,7 @@ class MergingSet implements Entity {
     }
 
     Set<SeqTrack> getContainedSeqTracks() {
-        final Set<SeqTrack> seqTracks = new HashSet<SeqTrack>()
+        final Set<SeqTrack> seqTracks = [] as Set
         MergingSetAssignment.findAllByMergingSet(this).each {
             final Set<SeqTrack> seqTracksInIt = it.bamFile.containedSeqTracks
             if (!seqTracksInIt) {

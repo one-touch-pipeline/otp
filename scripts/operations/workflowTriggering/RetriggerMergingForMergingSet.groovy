@@ -15,7 +15,7 @@ List<MergingSet> d = MergingSet.withCriteria {
 
 println d.size()
 
-d = d.findAll { set->
+d = d.findAll { set ->
     set.identifier == MergingSet.createCriteria().get {
         eq("mergingWorkPackage", set.mergingWorkPackage)
         projections { max("identifier") }

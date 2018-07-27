@@ -12,8 +12,8 @@ class MappingFileLoader {
      * sampleName,pid/sampleType
      * where sampleType is either "tumor" or "control"
      * New individuals and samples are created if needed (with unique pid)
-     * 
-     * @param proj - project to which individuals are assigned 
+     *
+     * @param proj - project to which individuals are assigned
      * @param path - path to the mapping file
      */
     public void loadMappingFile(Project proj, String path) {
@@ -66,7 +66,7 @@ class MappingFileLoader {
             ind.project = project
             ind.type = Individual.Type.REAL
         }
-        return ind 
+        return ind
     }
 
     private Sample findOrCreateSample(Individual ind, SampleType type) {

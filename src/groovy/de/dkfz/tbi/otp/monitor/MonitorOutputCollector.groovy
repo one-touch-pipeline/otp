@@ -169,7 +169,7 @@ ${prefix(objectsToStrings(objects, valueToShow).join('\n'))}
         } else if (processes.size() > 1) {
             output << "${INDENT}Attention: There were ${processes.size()} processes created for the object ${valueToShow(object)} (${object.id}). That can cause problems."
         }
-        Process lastProcess = processes.sort { it.id }.last()
+        Process lastProcess = processes.max { it.id }
         ProcessingStep ps = ProcessingStep.findByProcessAndNextIsNull(lastProcess)
         ProcessingStepUpdate update = ps.latestProcessingStepUpdate
         def state = update?.state

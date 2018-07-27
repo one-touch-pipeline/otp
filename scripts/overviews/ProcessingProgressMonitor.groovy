@@ -137,7 +137,7 @@ def seqTracksWithReferenceGenome = {List<SeqTrack> seqTracks ->
     return mapNoReferenceGenome[false] ?: []
 }
 
-def exomeSeqTracksWithEnrichmentKit = {List<SeqTrack> seqTracks->
+def exomeSeqTracksWithEnrichmentKit = {List<SeqTrack> seqTracks ->
     if (!seqTracks) {
         return []
     }
@@ -167,7 +167,7 @@ def exomeSeqTracksWithEnrichmentKit = {List<SeqTrack> seqTracks->
     return map[false] ?: []
 }
 
-def exomeSeqTracksWithBedFile = {List<SeqTrack> seqTracks->
+def exomeSeqTracksWithBedFile = {List<SeqTrack> seqTracks ->
     if (!seqTracks) {
         return []
     }
@@ -225,7 +225,7 @@ def handleStateMap = {Map map, String workflow, Closure valueToShow, Closure obj
     def ret
     def keys = map.keySet().sort{it}
 
-    keys.each { key->
+    keys.each { key ->
         def values = map[key]
         switch (key.ordinal()) {
             case 0:

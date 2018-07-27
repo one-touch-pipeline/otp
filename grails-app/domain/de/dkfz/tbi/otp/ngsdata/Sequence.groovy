@@ -1,4 +1,5 @@
 package de.dkfz.tbi.otp.ngsdata
+
 /**
  * This domain class represents a database view called "sequences".
  *

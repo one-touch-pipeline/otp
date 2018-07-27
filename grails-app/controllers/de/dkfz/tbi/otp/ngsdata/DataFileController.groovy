@@ -26,8 +26,8 @@ class DataFileController {
         List<MetaDataEntry> entries = MetaDataEntry.findAllByDataFile(dataFile, [sort:"key.id"])
         Map<MetaDataEntry, Boolean> changelogs = metaDataService.checkForChangelog(entries)
 
-        List<String> keys = new Vector<String>()
-        List<String> values = new Vector<String>()
+        List<String> keys = []
+        List<String> values = []
 
         keys <<  "fullPath"
         values << lsdfFilesService.getFileFinalPath(dataFile)

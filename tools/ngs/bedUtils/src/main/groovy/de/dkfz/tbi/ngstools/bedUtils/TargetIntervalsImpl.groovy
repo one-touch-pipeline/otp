@@ -174,12 +174,10 @@ class TargetIntervalsImpl implements TargetIntervals {
 
         // failfast if we have no valid chromosome to work on.
         if (!intervalsPerSequence.containsKey(refSeqName)) {
-            return Collections.emptySet()
+            return Collections.emptyList()
         }
 
-        def result = new ArrayList<Interval>()
-        result.addAll(intervalsPerSequence[refSeqName].getOverlappingIntervals(targetStart, targetEnd))
-        return result
+        return intervalsPerSequence[refSeqName].getOverlappingIntervals(targetStart, targetEnd) as List
     }
 
     /**

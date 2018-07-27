@@ -1121,8 +1121,8 @@ chmod 440 ${newDirectFileName}
         Project project = Project.findByName(projectName)
         assert project : "Project does not exist"
 
-        Set<String> dirsToDelete = new HashSet<String>()
-        Set<String> externalMergedBamFolders = new HashSet<String>()
+        Set<String> dirsToDelete = [] as Set
+        Set<String> externalMergedBamFolders = [] as Set
 
         StringBuilder output = new StringBuilder()
 

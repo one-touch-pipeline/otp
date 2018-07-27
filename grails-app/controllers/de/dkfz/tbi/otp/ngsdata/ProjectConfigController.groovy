@@ -253,16 +253,16 @@ class ProjectConfigController {
         seqTypes.each { SeqType seqType ->
             List<String> row = []
             row.add(seqType.displayNameWithLibraryLayout)
-            SnvConfig snvConfig
-            RoddyWorkflowConfig roddyWorkflowConfig
-            RunYapsaConfig config
-            if (pipeline.type == Pipeline.Type.SNV && (snvConfig = atMostOneElement(SnvConfig.findAllByProjectAndSeqTypeAndObsoleteDateIsNull(project, seqType)))) {
+            SnvConfig snvConfig = atMostOneElement(SnvConfig.findAllByProjectAndSeqTypeAndObsoleteDateIsNull(project, seqType))
+            RunYapsaConfig runYapsaConfig = atMostOneElement(RunYapsaConfig.findAllByProjectAndSeqTypeAndObsoleteDateIsNull(project, seqType))
+            RoddyWorkflowConfig roddyWorkflowConfig = atMostOneElement(RoddyWorkflowConfig.findAllByProjectAndSeqTypeAndPipelineAndObsoleteDateIsNull(project, seqType, pipeline))
+            if (pipeline.type == Pipeline.Type.SNV && snvConfig) {
                 row.add("Yes")
                 row.add(snvConfig.externalScriptVersion)
-            } else if (pipeline.name == Pipeline.Name.RUN_YAPSA && (config = atMostOneElement(RunYapsaConfig.findAllByProjectAndSeqTypeAndObsoleteDateIsNull(project, seqType)))) {
+            } else if (pipeline.name == Pipeline.Name.RUN_YAPSA && runYapsaConfig) {
                 row.add("Yes")
-                row.add(config.programVersion)
-            } else if (pipeline.usesRoddy() && (roddyWorkflowConfig = atMostOneElement(RoddyWorkflowConfig.findAllByProjectAndSeqTypeAndPipelineAndObsoleteDateIsNull(project, seqType, pipeline)))) {
+                row.add(runYapsaConfig.programVersion)
+            } else if (pipeline.usesRoddy() && roddyWorkflowConfig) {
                 row.add("Yes")
                 row.add(roddyWorkflowConfig.pluginVersion)
             } else {

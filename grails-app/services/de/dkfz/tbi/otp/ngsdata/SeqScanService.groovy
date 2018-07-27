@@ -19,7 +19,7 @@ class SeqScanService {
     @Deprecated
     void buildSeqScans() {
         List<SeqTrack> seqTracks = SeqTrack.list()
-        println "- number of new tracks: ${seqTracks.size()}"
+        log.info("- number of new tracks: ${seqTracks.size()}")
         seqTracks.each { buildSeqScan(it) }
     }
 
@@ -167,7 +167,7 @@ class SeqScanService {
     private SeqType getSeqType(List<SeqTrack> tracks) {
         String name = tracks.get(0).seqType.name
         String library = tracks.get(0).seqType.libraryLayout
-        for(SeqTrack track in tracks) {
+        for (SeqTrack track in tracks) {
             name = getNewType(name, track.seqType.name)
             library = getNewLibrary(library, track.seqType.libraryLayout)
         }

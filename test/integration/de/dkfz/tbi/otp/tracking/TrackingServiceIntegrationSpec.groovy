@@ -536,9 +536,10 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         }
         trackingService.createNotificationTextService = Mock(CreateNotificationTextService) {
             Project project = exactlyOneElement(seqTracks*.project.unique())
-            callCount * notification(ticket, _, notificationStep, project) >> { OtrsTicket ticket1, ProcessingStatus status1, OtrsTicket.ProcessingStep processingStep, Project project1->
-                TestCase.assertContainSame(status.seqTrackProcessingStatuses, status1.seqTrackProcessingStatuses)
-                return content
+            callCount * notification(ticket, _, notificationStep, project) >> {
+                OtrsTicket ticket1, ProcessingStatus status1, OtrsTicket.ProcessingStep processingStep, Project project1 ->
+                    TestCase.assertContainSame(status.seqTrackProcessingStatuses, status1.seqTrackProcessingStatuses)
+                    return content
             }
         }
 

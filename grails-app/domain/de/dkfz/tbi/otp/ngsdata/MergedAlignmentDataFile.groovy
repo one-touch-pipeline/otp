@@ -12,7 +12,7 @@ class MergedAlignmentDataFile implements Entity {
     Date fileSystemDate
 
     boolean fileExists = false
-    boolean indexFileExists = false 
+    boolean indexFileExists = false
     long fileSize = 0
 
     static belongsTo = [

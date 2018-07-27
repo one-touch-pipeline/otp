@@ -134,7 +134,7 @@ class MetadataImportService {
 
     protected void copyMetaDataFileIfRequested(MetadataValidationContext context) {
         List<SeqCenter> seqCenters = SeqCenter.findAllByNameInList(context.spreadsheet.dataRows*.getCellByColumnTitle(CENTER_NAME.name())?.text)
-        seqCenters.findAll { it?.copyMetadataFile }.unique().each { SeqCenter seqCenter->
+        seqCenters.findAll { it?.copyMetadataFile }.unique().each { SeqCenter seqCenter ->
             Path source = context.metadataFile
             try {
                 String ilse = context.spreadsheet.dataRows[0].getCellByColumnTitle(ILSE_NO.name()).text
@@ -301,8 +301,9 @@ class MetadataImportService {
     }
 
     private void importSeqTracks(MetadataValidationContext context, RunSegment runSegment, Run run, Collection<Row> runRows) {
-        runRows.groupBy { MultiplexingService.combineLaneNumberAndBarcode(it.getCellByColumnTitle(LANE_NO.name()).text,
-                extractBarcode(it).value) }.each { String laneId, List<Row> rows ->
+        runRows.groupBy {
+            MultiplexingService.combineLaneNumberAndBarcode(it.getCellByColumnTitle(LANE_NO.name()).text, extractBarcode(it).value)
+        }.each { String laneId, List<Row> rows ->
             String ilseNumber = uniqueColumnValue(rows, ILSE_NO)
             String tagmentation = uniqueColumnValue(rows, TAGMENTATION_BASED_LIBRARY)?.toLowerCase()
             String baseMaterial = uniqueColumnValue(rows, BASE_MATERIAL)

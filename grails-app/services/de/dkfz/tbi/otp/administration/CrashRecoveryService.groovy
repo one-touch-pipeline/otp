@@ -41,7 +41,7 @@ class CrashRecoveryService {
         assert null != parameters
         List<ProcessingStep> steps = getProcessingSteps(ids)
         storeParameters(steps, parameters)
-        steps.each { ProcessingStep step->
+        steps.each { ProcessingStep step ->
             // finished update
             createNewProcessingStepUpdate(step, ExecutionState.FINISHED)
             // and schedule
@@ -62,7 +62,7 @@ class CrashRecoveryService {
         assert null != parameters
         List<ProcessingStep> steps = getProcessingSteps(ids)
         storeParameters(steps, parameters)
-        steps.each { ProcessingStep step->
+        steps.each { ProcessingStep step ->
             // finished and success update
             createNewProcessingStepUpdate(step, ExecutionState.FINISHED)
             createNewProcessingStepUpdate(step, ExecutionState.SUCCESS)
@@ -81,7 +81,7 @@ class CrashRecoveryService {
         assert null != ids
         assert null != reason
         List<ProcessingStep> steps = getProcessingSteps(ids)
-        steps.each { ProcessingStep processingStep->
+        steps.each { ProcessingStep processingStep ->
             performMarkProcessingStepAsFailed(processingStep, reason)
         }
     }
@@ -97,7 +97,7 @@ class CrashRecoveryService {
         assert null != ids
         assert null != reason
         List<ProcessingStep> steps = getProcessingSteps(ids)
-        steps.each { ProcessingStep processingStep->
+        steps.each { ProcessingStep processingStep ->
             performMarkProcessingStepAsFailed(processingStep, reason)
             schedulerService.restartProcessingStep(processingStep, false, true)
         }

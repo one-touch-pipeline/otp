@@ -9,7 +9,7 @@ package de.dkfz.tbi.otp.job.processing
  * @see Parameter
  */
 public enum ParameterUsage {
-    /** 
+    /**
      * Used as Input Parameter
      */
     INPUT,

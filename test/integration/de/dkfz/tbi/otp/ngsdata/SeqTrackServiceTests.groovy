@@ -1,10 +1,9 @@
 package de.dkfz.tbi.otp.ngsdata
+
 import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.testing.*
 import org.junit.*
-
-import static de.dkfz.tbi.otp.ngsdata.SeqTrack.DataProcessingState.*
 
 class SeqTrackServiceTests extends AbstractIntegrationTest {
 

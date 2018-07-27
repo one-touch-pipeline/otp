@@ -161,23 +161,23 @@ class CreateNotificationTextService {
             }
             projectBamFiles.groupBy { it.seqType }.sort { it.key.displayNameWithLibraryLayout }.
                     each { SeqType seqType, List<AbstractMergedBamFile> seqTypeBamFiles ->
-                Map<AlignmentConfig, List<AbstractMergedBamFile>> bamFilePerConfig = seqTypeBamFiles.groupBy { it.alignmentConfig }
-                boolean multipleConfigs = bamFilePerConfig.size() > 1 && project.alignmentDeciderBeanName == "panCanAlignmentDecider"
-                bamFilePerConfig.each { AlignmentConfig config, List<AbstractMergedBamFile> configBamFiles ->
-                    AlignmentInfo alignmentInfo = alignmentInfoByConfig.get(config)
-                    String individuals = multipleConfigs ? (config.individual ?: "default") : ""
-                    builder << createMessage("notification.template.alignment.processing", [
-                            seqType           : seqType.displayNameWithLibraryLayout,
-                            individuals       : individuals,
-                            referenceGenome   : configBamFiles*.referenceGenome.unique().join(', '),
-                            alignmentProgram  : alignmentInfo.bwaCommand,
-                            alignmentParameter: alignmentInfo.bwaOptions,
-                            mergingProgram    : alignmentInfo.mergeCommand,
-                            mergingParameter  : alignmentInfo.mergeOptions,
-                            samtoolsProgram   : alignmentInfo.samToolsCommand,
-                    ])
-                }
-            }
+                        Map<AlignmentConfig, List<AbstractMergedBamFile>> bamFilePerConfig = seqTypeBamFiles.groupBy { it.alignmentConfig }
+                        boolean multipleConfigs = bamFilePerConfig.size() > 1 && project.alignmentDeciderBeanName == "panCanAlignmentDecider"
+                        bamFilePerConfig.each { AlignmentConfig config, List<AbstractMergedBamFile> configBamFiles ->
+                            AlignmentInfo alignmentInfo = alignmentInfoByConfig.get(config)
+                            String individuals = multipleConfigs ? (config.individual ?: "default") : ""
+                            builder << createMessage("notification.template.alignment.processing", [
+                                    seqType           : seqType.displayNameWithLibraryLayout,
+                                    individuals       : individuals,
+                                    referenceGenome   : configBamFiles*.referenceGenome.unique().join(', '),
+                                    alignmentProgram  : alignmentInfo.bwaCommand,
+                                    alignmentParameter: alignmentInfo.bwaOptions,
+                                    mergingProgram    : alignmentInfo.mergeCommand,
+                                    mergingParameter  : alignmentInfo.mergeOptions,
+                                    samtoolsProgram   : alignmentInfo.samToolsCommand,
+                            ])
+                        }
+                    }
         }
 
         String message = createMessage("notification.template.alignment.base", [
@@ -313,7 +313,11 @@ class CreateNotificationTextService {
     String getSampleIdentifiers(Collection<SeqTrack> seqTracks) {
         assert seqTracks
 
-        if (!PROJECT_TO_HIDE_SAMPLE_IDENTIFIER.contains(exactlyOneElement(seqTracks*.project.unique(), 'seqtracks must be of the same project').name)) {
+        if (!PROJECT_TO_HIDE_SAMPLE_IDENTIFIER.contains(
+                exactlyOneElement(
+                        seqTracks*.project.unique(),'seqtracks must be of the same project'
+                ).name)
+        ) {
             return ' (' + MetaDataEntry.createCriteria().list {
                 projections {
                     dataFile {
@@ -350,7 +354,11 @@ class CreateNotificationTextService {
             String seqTypeDir = it.seqType.dirName
             String layout = it.seqType.libraryLayoutDirName
             String antiBodyTarget = it.seqType.isChipSeq() ? '-${ANTI_BODY_TARGET}' : ''
-            "${projectDir}/sequencing/${seqTypeDir}/view-by-pid/${pid}/${sampleType}${antiBodyTarget}/${layout}/merged-alignment"
+            "${projectDir}/sequencing/" +
+                    "${seqTypeDir}/" +
+                    "view-by-pid/${pid}/" +
+                    "${sampleType}${antiBodyTarget}/" +
+                    "${layout}/merged-alignment"
         }.unique().sort().join('\n')
     }
 

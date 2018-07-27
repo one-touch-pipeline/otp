@@ -6,7 +6,7 @@ class WorkPackagesDSL {
 
     def static make (closure) {
         WorkPackagesDSL wpDSL = new WorkPackagesDSL()
-        wpDSL.wp = new ArrayList<SeqType>()
+        wpDSL.wp = []
         closure.delegate = wpDSL
         closure()
         return wpDSL.wp

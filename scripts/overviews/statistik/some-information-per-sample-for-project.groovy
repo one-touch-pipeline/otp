@@ -30,7 +30,7 @@ println SeqTrack.createCriteria().list {
         }
     }
     'in'('seqType', seqTypes)
-}.groupBy { SeqTrack seqTrack->
+}.groupBy { SeqTrack seqTrack ->
     [
             seqTrack.project.name,
             seqTrack.individual.pid,

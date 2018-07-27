@@ -1,7 +1,11 @@
+final String TEST = "*/*test*/*"
+
 ruleset {
 
     description '''
-        The OTP RuleSet containing all CodeNarc Rules, grouped by category.
+        A Sample Groovy RuleSet containing all CodeNarc Rules, grouped by category.
+        You can use this as a template for your own custom RuleSet.
+        Just delete the rules that you don't want to include.
         '''
 
     // rulesets/basic.xml
@@ -86,13 +90,25 @@ ruleset {
     // rulesets/convention.xml
     ConfusingTernary
     CouldBeElvis
+    CouldBeSwitchStatement
+    //FieldTypeRequired //does not work well with Grails
     HashtableIsObsolete
     IfStatementCouldBeTernary
+    InvertedCondition
     InvertedIfElse
     LongLiteralWithLowerCaseL
+    MethodParameterTypeRequired
+    MethodReturnTypeRequired
     NoDef
+    NoJavaUtilDate
+    NoTabCharacter
     ParameterReassignment
+    //PublicMethodsBeforeNonPublicMethods //does not fit with OTP-Convention of grouping related methods by topic
+    //StaticFieldsBeforeInstanceFields //does not fit with OTP-Convention of Services before class fields including statics
+    //StaticMethodsBeforeInstanceMethods //does not fit with OTP-Convention of grouping related methods by topic
     TernaryCouldBeElvis
+    TrailingComma
+    VariableTypeRequired
     VectorIsObsolete
 
     // rulesets/design.xml
@@ -128,6 +144,7 @@ ruleset {
     // rulesets/enhanced.xml
     CloneWithoutCloneable
     JUnitAssertEqualsConstantActualValue
+    MissingOverrideAnnotation
     UnsafeImplementationAsMap
 
     // rulesets/exceptions.xml
@@ -154,6 +171,8 @@ ruleset {
 
     // rulesets/formatting.xml
     BlankLineBeforePackage
+    BlockEndsWithBlankLine
+    BlockStartsWithBlankLine
     BracesForClass
     BracesForForLoop
     BracesForIfElse
@@ -163,6 +182,7 @@ ruleset {
     ClosureStatementOnOpeningLineOfMultipleLineClosure
     ConsecutiveBlankLines
     FileEndsWithoutNewline
+    Indentation
     LineLength
     MissingBlankLineAfterImports
     MissingBlankLineAfterPackage
@@ -176,10 +196,10 @@ ruleset {
     SpaceAfterSwitch
     SpaceAfterWhile
     SpaceAroundClosureArrow
-    //SpaceAroundMapEntryColon {
-    //    //characterBeforeColonRegex = /\s*/  // Does not seem to work as expected. CodeNarc bug?
-    //    characterAfterColonRegex = /\s+/
-    //}
+    SpaceAroundMapEntryColon {
+        characterBeforeColonRegex = /.*/
+        characterAfterColonRegex = /\s+/
+    }
     SpaceAroundOperator
     SpaceBeforeClosingBrace
     SpaceBeforeOpeningBrace
@@ -197,9 +217,12 @@ ruleset {
     StatelessClass
 
     // rulesets/grails.xml
-    //GrailsDomainHasEquals
-    //GrailsDomainHasToString
+    //GrailsDomainHasEquals //we don't do this in OTP
+    //GrailsDomainHasToString //we don't do this in OTP
     GrailsDomainReservedSqlKeywordName
+    GrailsDomainStringPropertyMaxSize {
+        priority = 3
+    }
     GrailsDomainWithServiceReference
     GrailsDuplicateConstraint
     GrailsDuplicateMapping
@@ -247,7 +270,7 @@ ruleset {
     ImportFromSamePackage
     ImportFromSunPackages
     MisorderedStaticImports
-    NoWildcardImports
+    //NoWildcardImports //does not fit with OTP-Convention of using only WildcardImports
     UnnecessaryGroovyImport
     UnusedImport
 
@@ -303,7 +326,9 @@ ruleset {
     FieldName
     InterfaceName
     InterfaceNameSameAsSuperInterface
-    MethodName
+    MethodName {
+        doNotApplyToFileNames = TEST
+    }
     ObjectOverrideMisspelledMethodName
     PackageName
     PackageNameMatchesFilePath
@@ -315,7 +340,9 @@ ruleset {
     FileCreateTempFile
     InsecureRandom
     JavaIoPackageAccess
-    NonFinalPublicField
+    NonFinalPublicField {
+        doNotApplyToFileNames = TEST
+    }
     NonFinalSubclassOfSensitiveInterface
     ObjectFinalize
     PublicFinalizeMethod
@@ -344,7 +371,9 @@ ruleset {
     ConsecutiveStringConcatenation
     UnnecessaryBigDecimalInstantiation
     UnnecessaryBigIntegerInstantiation
-    UnnecessaryBooleanExpression
+    UnnecessaryBooleanExpression {
+        doNotApplyToFileNames = TEST
+    }
     UnnecessaryBooleanInstantiation
     UnnecessaryCallForLastElement
     UnnecessaryCallToSubstring
@@ -361,7 +390,7 @@ ruleset {
     UnnecessaryElseStatement
     UnnecessaryFinalOnPrivateMethod
     UnnecessaryFloatInstantiation
-    //UnnecessaryGString
+    //UnnecessaryGString //We would prefer a rule to only use GStrings
     UnnecessaryGetter
     UnnecessaryIfStatement
     UnnecessaryInstanceOfCheck
@@ -376,12 +405,13 @@ ruleset {
     UnnecessaryPackageReference
     UnnecessaryParenthesesForMethodCallWithClosure
     UnnecessaryPublicModifier
-    //UnnecessaryReturnKeyword
+    //UnnecessaryReturnKeyword //no
     UnnecessarySafeNavigationOperator
     UnnecessarySelfAssignment
     UnnecessarySemicolon
+    UnnecessarySetter
     UnnecessaryStringInstantiation
-    //UnnecessarySubstring
+    UnnecessarySubstring
     UnnecessaryTernaryExpression
     UnnecessaryToString
     UnnecessaryTransientModifier

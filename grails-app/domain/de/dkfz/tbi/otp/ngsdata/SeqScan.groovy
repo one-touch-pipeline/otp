@@ -33,14 +33,6 @@ class SeqScan implements Entity {
     ]
 
     static constraints = {
-        sample()
-        seqType()
-        nLanes()
-        nBasePairs()
-        coverage()
-        state()
-        seqCenters()
-        qcState()
         insertSize(nullable: true)
         nBasePairs (nullable: true)
     }

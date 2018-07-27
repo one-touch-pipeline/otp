@@ -4,7 +4,7 @@ import de.dkfz.tbi.otp.OtpException
 
 /**
  * @short Base class for all User management related exceptions.
- * 
+ *
  */
 abstract class UserManagementException extends OtpException implements Serializable {
     private static final long serialVersionUID = 1L

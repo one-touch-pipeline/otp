@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.dataprocessing
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import org.hibernate.*
+
 /**
  * Represents a merged bam file stored on the file system
  * which was processed externally (not in OTP)
