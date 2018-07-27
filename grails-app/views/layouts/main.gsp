@@ -51,7 +51,9 @@
                                     <ul>
                                         <li><g:link controller="projectOverview" action="index"><g:message code="otp.menu.projectSpecificStatistics"/></g:link></li><br>
                                         <li><g:link controller="projectConfig" action="index"><g:message code="otp.menu.projectConfig"/></g:link></li>
-                                        <li><g:link controller="projectUser" action="index"><g:message code="otp.menu.projectMembers"/></g:link></li>
+                                        <sec:ifAllGranted roles="ROLE_OPERATOR">
+                                            <li><g:link controller="projectUser" action="index"><g:message code="otp.menu.projectMembers"/></g:link></li>
+                                        </sec:ifAllGranted>
                                         <sec:ifAllGranted roles="ROLE_MMML_MAPPING">
                                             <li class="allGranted"><g:link controller="projectOverview" action="mmmlIdentifierMapping"><g:message code="otp.menu.mmmlIdentifierMapping"/></g:link></li><br>
                                         </sec:ifAllGranted>
