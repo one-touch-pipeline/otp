@@ -39,6 +39,10 @@ List output = []
 
 LdapService ldapService = ctx.getBean('ldapService')
 
+
+// this cache maps username to LdapUserDetails in an effort to reduce the number of duplicate ldap requests
+Map<String, LdapUserDetails> cache = [:]
+
 // Check 1
 Project.findAll().each { Project project ->
     List<User> projectUsers = UserProjectRole.findAllByProject(project)*.user
@@ -59,17 +63,36 @@ Project.findAll().each { Project project ->
     projectUsers.unique()
     projectUsers.sort { it.username }
 
-    List<String> usersWithoutUserProjectRole = []
+    List<User> usersWithoutUserProjectRole = []
     projectUsers.each { User user ->
         UserProjectRole userProjectRole = UserProjectRole.findByUserAndProject(user, project)
         if (!userProjectRole) {
-            usersWithoutUserProjectRole.add(user.username)
+            usersWithoutUserProjectRole.add(user)
         }
     }
     if (usersWithoutUserProjectRole || nonDatabaseUsers) {
         output << "Project: ${project.name} (${project.unixGroup})"
-        output << "Following Users have not been added to the project:\n${usersWithoutUserProjectRole.join(', ') ?: 'None'}\n"
-        output << "Following Users could not be resolved to a user in the OTP database:\n${nonDatabaseUsers.join(', ') ?: 'None'}\n"
+        if (usersWithoutUserProjectRole) {
+            output << "Following Users have not been added to the project:"
+            usersWithoutUserProjectRole.each { User user ->
+                output << sprintf("%-15s | %-20s | %-30s ", [user.username, user.realName, user.email])
+            }
+            output << "\n"
+        }
+        if (nonDatabaseUsers) {
+            output << "Following Users could not be resolved to a user in the OTP database:"
+            nonDatabaseUsers.each { String username ->
+                LdapUserDetails details
+                if (cache[username]) {
+                    details = cache[username]
+                } else {
+                    details = ldapService.getLdapUserDetailsByUsername(username)
+                    cache[username] = details
+                }
+                output << sprintf("%-15s | %-20s | %-30s ", [details.cn, details.realName, details.mail])
+            }
+            output << "\n"
+        }
     }
 }
 
