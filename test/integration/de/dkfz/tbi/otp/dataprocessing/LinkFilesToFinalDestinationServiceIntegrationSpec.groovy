@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.dataprocessing
 import asset.pipeline.grails.LinkGenerator
 import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
@@ -54,7 +55,7 @@ ${link}
         roddyBamFile = DomainFactory.createRoddyBamFile([:], RnaRoddyBamFile)
 
         realm = roddyBamFile.project.realm
-        configService = new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path])
+        configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
     }
 
     void cleanup() {

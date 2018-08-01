@@ -1,4 +1,4 @@
-package de.dkfz.tbi.otp.configs
+package de.dkfz.tbi.otp.config
 
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.ngsdata.*
@@ -195,6 +195,14 @@ class TypeValidatorsSpec extends Specification {
         TypeValidators.INSTANCE_LOGO                 | 'UNKNOWN'                         | emptyInit                   || false
         TypeValidators.INSTANCE_LOGO                 | 'None'                            | emptyInit                   || false
         TypeValidators.INSTANCE_LOGO                 | 'none'                            | emptyInit                   || false
+
+        TypeValidators.JOB_SCHEDULER                 | 'PBS'                             | emptyInit                   || true
+        TypeValidators.JOB_SCHEDULER                 | 'LSF'                             | emptyInit                   || true
+        TypeValidators.JOB_SCHEDULER                 | ''                                | emptyInit                   || false
+        TypeValidators.JOB_SCHEDULER                 | null                              | emptyInit                   || false
+        TypeValidators.JOB_SCHEDULER                 | 'pbs'                             | emptyInit                   || false
+        TypeValidators.JOB_SCHEDULER                 | 'lsf'                             | emptyInit                   || false
+        TypeValidators.JOB_SCHEDULER                 | 'text'                            | emptyInit                   || false
 
         TypeValidators.SEQ_CENTER_NAME               | CENTER_A                          | initSeqCenter               || true
         TypeValidators.SEQ_CENTER_NAME               | CENTER_B                          | initSeqCenter               || true

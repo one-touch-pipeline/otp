@@ -1,16 +1,7 @@
-import grails.util.Environment
+import de.dkfz.tbi.otp.config.*
+import grails.util.*
 
-Properties otpProperties = new Properties()
-try {
-    String propertiesFile = System.getenv("OTP_PROPERTIES")
-    if (propertiesFile && new File(propertiesFile).canRead()) {
-        otpProperties.load(new FileInputStream(propertiesFile))
-    } else {
-        otpProperties.load(new FileInputStream(System.getProperty("user.home") + System.getProperty("file.separator") + ".otp.properties"))
-    }
-} catch (Exception e) {
-    otpProperties.setProperty("otp.security.ldap.enabled", "false")
-}
+Properties otpProperties = ConfigService.parsePropertiesFile()
 
 grails.project.groupId = appName // change this to alter the default package name and Maven publishing destination
 grails.mime.file.extensions = true // enables the parsing of file extensions from URLs into the request format
@@ -82,7 +73,7 @@ environments {
     }
     production {
         grails.logging.jul.usebridge = false
-        grails.serverURL = otpProperties.getProperty("otp.server.url")
+        grails.serverURL = otpProperties.getProperty(OtpProperty.CONFIG_SERVER_URL.key)
     }
     WORKFLOW_TEST {
         grails.serverURL = "http://localhost:8080"
@@ -90,15 +81,13 @@ environments {
 }
 
 
-otp.logging.jobLogDir = otpProperties.getProperty("otp.logging.jobLogDir") ?: "logs/jobs"
-
-File jobLogDir = new File(otp.logging.jobLogDir)
+String jobLogDir = otpProperties.getProperty(OtpProperty.PATH_JOB_LOGS.key) ?: OtpProperty.PATH_JOB_LOGS.defaultValue
 
 // log4j configuration
 log4j = {
     appenders {
         def jobHtmlLayout = new de.dkfz.tbi.otp.utils.logging.JobHtmlLayout()
-        def jobAppender = new de.dkfz.tbi.otp.utils.logging.JobAppender(logDirectory: jobLogDir, layout : jobHtmlLayout)
+        def jobAppender = new de.dkfz.tbi.otp.utils.logging.JobAppender(logDirectory: new File(jobLogDir), layout : jobHtmlLayout)
         appender name: "jobs", jobAppender
 
         console name: 'stdout', threshold: Environment.getCurrent() == Environment.TEST ? org.apache.log4j.Level.OFF : org.apache.log4j.Level.DEBUG
@@ -143,7 +132,7 @@ grails.plugin.springsecurity.userLookup.authorityJoinClassName = 'de.dkfz.tbi.ot
 grails.plugin.springsecurity.authority.className = 'de.dkfz.tbi.otp.security.Role'
 
 // ldap
-if (!Boolean.parseBoolean(otpProperties.getProperty("otp.security.ldap.enabled"))) {
+if (!Boolean.parseBoolean(otpProperties.getProperty(OtpProperty.LDAP_ENABLED.key))) {
     println("Using database only for authentication")
     grails.plugin.springsecurity.providerNames = [
             'daoAuthenticationProvider',
@@ -155,19 +144,19 @@ if (!Boolean.parseBoolean(otpProperties.getProperty("otp.security.ldap.enabled")
             'ldapDaoAuthenticationProvider',
             'anonymousAuthenticationProvider',
     ]
-    if (otpProperties.getProperty("otp.security.ldap.managerDn")) {
-        grails.plugin.springsecurity.ldap.context.managerDn     = otpProperties.getProperty("otp.security.ldap.managerDn")
+    if (otpProperties.getProperty(OtpProperty.LDAP_MANAGER_DN.key)) {
+        grails.plugin.springsecurity.ldap.context.managerDn     = otpProperties.getProperty(OtpProperty.LDAP_MANAGER_DN.key)
     }
-    grails.plugin.springsecurity.ldap.context.managerPassword = otpProperties.getProperty("otp.security.ldap.managerPw")
-    if (otpProperties.getProperty("otp.security.ldap.managerPw")) {
+    grails.plugin.springsecurity.ldap.context.managerPassword = otpProperties.getProperty(OtpProperty.LDAP_MANAGER_PASSWORD.key)
+    if (otpProperties.getProperty(OtpProperty.LDAP_MANAGER_PASSWORD.key)) {
         grails.plugin.springsecurity.ldap.auth.useAuthPassword = true
     } else {
         grails.plugin.springsecurity.ldap.auth.useAuthPassword = false
     }
-    grails.plugin.springsecurity.ldap.context.server            = otpProperties.getProperty("otp.security.ldap.server")
-    grails.plugin.springsecurity.ldap.search.base               = otpProperties.getProperty("otp.security.ldap.search.base")
-    grails.plugin.springsecurity.ldap.authorities.searchSubtree = otpProperties.getProperty("otp.security.ldap.search.subTree")
-    grails.plugin.springsecurity.ldap.search.filter             = otpProperties.getProperty("otp.security.ldap.search.filter")
+    grails.plugin.springsecurity.ldap.context.server            = otpProperties.getProperty(OtpProperty.LDAP_SERVER.key)
+    grails.plugin.springsecurity.ldap.search.base               = otpProperties.getProperty(OtpProperty.LDAP_SEARCH_BASE.key)
+    grails.plugin.springsecurity.ldap.authorities.searchSubtree = otpProperties.getProperty(OtpProperty.LDAP_SEARCH_SUBTREE.key)
+    grails.plugin.springsecurity.ldap.search.filter             = otpProperties.getProperty(OtpProperty.LDAP_SEARCH_FILTER.key)
 
     // static options
     grails.plugin.springsecurity.ldap.authorities.ignorePartialResultException = true

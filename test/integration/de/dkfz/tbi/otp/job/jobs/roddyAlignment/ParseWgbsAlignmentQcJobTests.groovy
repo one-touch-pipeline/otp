@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
@@ -125,7 +126,7 @@ class ParseWgbsAlignmentQcJobTests {
 
     private RoddyBamFile testExecuteSetup() {
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
-        configService = new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path])
+        configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
         SeqTrack seqTrack = exactlyOneElement(roddyBamFile.seqTracks)
         seqTrack.libraryName = "library12"
         seqTrack.normalizedLibraryName = "12"

@@ -1,3 +1,4 @@
+import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.ngsdata.*
 
 /**

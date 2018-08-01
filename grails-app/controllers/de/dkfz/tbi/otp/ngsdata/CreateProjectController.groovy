@@ -1,10 +1,10 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import org.springframework.validation.*
 import org.springframework.web.multipart.*
-
 
 class CreateProjectController {
 

@@ -1,4 +1,4 @@
-package de.dkfz.tbi.otp.configs
+package de.dkfz.tbi.otp.config
 
 import de.dkfz.tbi.otp.job.jobs.dataInstallation.*
 import spock.lang.*

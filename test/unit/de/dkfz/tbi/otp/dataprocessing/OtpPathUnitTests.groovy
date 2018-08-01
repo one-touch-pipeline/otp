@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
 import static groovy.util.GroovyTestCase.assertEquals
@@ -44,19 +45,19 @@ class OtpPathUnitTests {
 
     @Test
     void testGetAbsoluteDataProcessingPath() {
-        configService.setOtpProperty('otp.processing.root.path', 'processing_root')
+        configService.setOtpProperty((OtpProperty.PATH_PROCESSING_ROOT), 'processing_root')
         assertEquals "processing_root is not absolute.", shouldFail { path.absoluteDataProcessingPath }
 
-        configService.setOtpProperty('otp.processing.root.path', '/processing_root')
+        configService.setOtpProperty((OtpProperty.PATH_PROCESSING_ROOT), '/processing_root')
         assertEquals "/processing_root/first/second/third/fourth", path.absoluteDataProcessingPath.path
     }
 
     @Test
     void testGetAbsoluteDataManagementPath() {
-        configService.setOtpProperty('otp.root.path', 'root_path')
+        configService.setOtpProperty((OtpProperty.PATH_PROJECT_ROOT), 'root_path')
         assertEquals "root_path is not absolute.", shouldFail { path.absoluteDataManagementPath }
 
-        configService.setOtpProperty('otp.root.path', '/root_path')
+        configService.setOtpProperty((OtpProperty.PATH_PROJECT_ROOT), '/root_path')
         assertEquals "/root_path/first/second/third/fourth", path.absoluteDataManagementPath.path
     }
 

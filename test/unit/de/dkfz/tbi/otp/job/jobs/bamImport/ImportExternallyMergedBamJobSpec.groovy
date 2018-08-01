@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.job.jobs.bamImport
 
 import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.jobs.importExternallyMergedBam.*
 import de.dkfz.tbi.otp.job.plan.*
@@ -452,8 +453,8 @@ class ImportExternallyMergedBamJobSpec extends Specification {
         ] as ImportExternallyMergedBamJob
 
         configService = new TestConfigService([
-                'otp.root.path': temporaryFolder.newFolder("root").path,
-                'otp.path.tools': "/asdf",
+                (OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder("root").path,
+                (OtpProperty.PATH_TOOLS)       : "/asdf",
         ])
 
         importExternallyMergedBamJob.configService = configService

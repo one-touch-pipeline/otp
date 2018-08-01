@@ -1,7 +1,7 @@
 package de.dkfz.tbi.otp.utils
 
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.ngsdata.*
 import grails.plugin.mail.*
 import org.codehaus.groovy.grails.commons.*
 import org.springframework.beans.factory.annotation.*

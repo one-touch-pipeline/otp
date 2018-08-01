@@ -1,4 +1,4 @@
-package de.dkfz.tbi.otp.configs
+package de.dkfz.tbi.otp.config
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.plan.*
@@ -34,9 +34,11 @@ enum TypeValidators {
 
     CLUSTER_JOB_SUBMISSION_OPTION({ ClusterJobSubmissionOptionsService.validateJsonString(it) }),
 
-    SSH_AUTH_METHOD({ ConfigService.SshAuthMethod.getByConfigName(it) }),
+    SSH_AUTH_METHOD({ SshAuthMethod.getByConfigName(it) }),
 
     PIPELINE_TYPE({ Pipeline.Type.findByName(it) }),
+
+    JOB_SCHEDULER({ Realm.JobScheduler.findByName(it) }),
 
     INSTANCE_LOGO({ InstanceLogo.findByName(it) }),
 

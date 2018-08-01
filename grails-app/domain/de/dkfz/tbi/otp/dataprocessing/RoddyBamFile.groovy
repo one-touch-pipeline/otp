@@ -203,7 +203,7 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
         return "${bamFileName}.md5"
     }
 
-    // Example: ${otp.root.path}/${project}/sequencing/whole_genome_sequencing/view-by-pid/somePid/control/paired/merged-alignment/.merging_3
+    // Example: ${OtpProperty#PATH_PROJECT_ROOT}/${project}/sequencing/whole_genome_sequencing/view-by-pid/somePid/control/paired/merged-alignment/.merging_3
     File getWorkDirectory() {
         return new File(baseDirectory, workDirectoryName)
     }

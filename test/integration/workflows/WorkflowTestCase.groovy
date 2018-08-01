@@ -2,9 +2,10 @@ package workflows
 
 import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
-import de.dkfz.tbi.otp.infrastructure.ClusterJob
+import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.scheduler.*
@@ -20,7 +21,6 @@ import groovy.json.*
 import groovy.sql.*
 import groovy.util.logging.*
 import org.hibernate.*
-import org.joda.time.DateTime
 import org.joda.time.format.*
 import org.junit.*
 
@@ -187,7 +187,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         File rootDirectory = getRootDirectory()
         assert rootDirectory.list()?.size(): "${rootDirectory} seems not to be mounted"
 
-        configService.setOtpProperty('otp.ssh.user', configService.getWorkflowTestAccountName())
+        configService.setOtpProperty((OtpProperty.SSH_USER), configService.getWorkflowTestAccountName())
 
         Map realmParams = [
                 name                       : 'REALM_NAME',
@@ -203,9 +203,9 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         println "Base directory: ${getBaseDirectory()}"
 
         [
-                'otp.root.path'             : "${getBaseDirectory()}/root_path",
-                'otp.processing.root.path'  : "${getBaseDirectory()}/processing_root_path",
-                'otp.logging.root.path'     : "${getBaseDirectory()}/logging_root_path",
+                (OtpProperty.PATH_PROJECT_ROOT)    : "${getBaseDirectory()}/root_path",
+                (OtpProperty.PATH_PROCESSING_ROOT) : "${getBaseDirectory()}/processing_root_path",
+                (OtpProperty.PATH_CLUSTER_LOGS_OTP): "${getBaseDirectory()}/logging_root_path",
         ].each { key, value ->
             configService.setOtpProperty(key, value)
         }
@@ -313,7 +313,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         // Create the directory like a "singleton", since randomness is involved
         if (!baseDirectory) {
             String mkDirs = """\
-TEMP_DIR=`mktemp -d -p ${new File(getRootDirectory(), "tmp").absolutePath} ${getNonQualifiedClassName()}-${System.getProperty('user.name')}-${HelperUtils.formatter.print(new DateTime())}-XXXXXXXXXXXXXXXX`
+TEMP_DIR=`mktemp -d -p ${new File(getRootDirectory(), "tmp").absolutePath} ${getNonQualifiedClassName()}-${System.getProperty('user.name')}-${HelperUtils.formatter.print(new org.joda.time.DateTime())}-XXXXXXXXXXXXXXXX`
 chmod g+rwx \$TEMP_DIR
 echo \$TEMP_DIR
 """
@@ -392,7 +392,7 @@ echo \$TEMP_DIR
     }
 
     /**
-     * The root directory for all tests. This can be overwritten by the key <code>otp.testing.workflows.rootdir</code>
+     * The root directory for all tests. This can be overwritten by the key <code>OtpProperty#TEST_WORKFLOW_ROOTDIR</code>
      * in the configuration file. This method should not be called directly; check out {@link #getBaseDirectory()}
      * first.
      *

@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.job.jobs.aceseq
 
 import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
@@ -64,7 +65,7 @@ class ExecuteRoddyAceseqJobSpec extends Specification {
         aceseqInstance.samplePair.mergingWorkPackage2.bamFileInProjectFolder = aceseqInstance.sampleType2BamFile
         assert aceseqInstance.samplePair.mergingWorkPackage2.save(flush: true)
 
-        configService = new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path])
+        configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
     }
 
     void cleanup() {

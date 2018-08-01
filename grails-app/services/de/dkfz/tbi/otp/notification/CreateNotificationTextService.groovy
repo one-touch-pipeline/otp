@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.notification
 
+import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
@@ -7,11 +8,11 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.*
 import de.dkfz.tbi.otp.tracking.OtrsTicket.ProcessingStep
 import groovy.text.*
+import org.codehaus.groovy.grails.context.support.*
 import org.codehaus.groovy.grails.web.mapping.*
 import org.springframework.beans.factory.annotation.*
-import org.codehaus.groovy.grails.context.support.*
+import org.springframework.context.*
 import org.springframework.context.i18n.*
-import org.springframework.context.NoSuchMessageException
 
 import static de.dkfz.tbi.otp.ngsdata.ProjectOverviewService.*
 import static de.dkfz.tbi.otp.tracking.OtrsTicket.ProcessingStep.*

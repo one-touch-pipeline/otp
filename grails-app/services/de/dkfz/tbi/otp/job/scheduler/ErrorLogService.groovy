@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.job.scheduler
 
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.config.*
 import groovy.xml.*
 import org.apache.commons.io.*
 

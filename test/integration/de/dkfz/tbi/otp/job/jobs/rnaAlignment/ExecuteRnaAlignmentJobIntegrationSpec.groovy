@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.job.jobs.rnaAlignment
 
-import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
 import de.dkfz.tbi.otp.job.processing.*
@@ -22,8 +23,8 @@ class ExecuteRnaAlignmentJobIntegrationSpec extends IntegrationSpec {
 
     void setup() {
         configService = new TestConfigService([
-                        'otp.root.path': tmpDir.root.path,
-                        'otp.processing.root.path': tmpDir.root.path
+                (OtpProperty.PATH_PROJECT_ROOT)   : tmpDir.root.path,
+                (OtpProperty.PATH_PROCESSING_ROOT): tmpDir.root.path
         ])
     }
 

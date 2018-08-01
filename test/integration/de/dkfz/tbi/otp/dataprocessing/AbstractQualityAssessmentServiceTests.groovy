@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.config.OtpProperty
 import org.junit.After
 
 import static de.dkfz.tbi.otp.dataprocessing.AbstractBamFileServiceTests.*
@@ -45,7 +46,7 @@ class AbstractQualityAssessmentServiceTests {
         }
         assert data.referenceGenome.save([flush: true])
         DomainFactory.createAllAlignableSeqTypes()
-        configService = new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path])
+        configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
     }
 
     @After

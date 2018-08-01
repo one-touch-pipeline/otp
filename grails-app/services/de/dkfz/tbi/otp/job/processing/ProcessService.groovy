@@ -1,17 +1,15 @@
 package de.dkfz.tbi.otp.job.processing
 
-import de.dkfz.tbi.otp.infrastructure.ClusterJob
+import de.dkfz.tbi.otp.config.*
+import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.scheduler.*
-import de.dkfz.tbi.otp.ngsdata.ConfigService
 import grails.plugin.springsecurity.*
 import grails.plugin.springsecurity.acl.*
-import org.codehaus.groovy.grails.commons.*
 import org.codehaus.groovy.grails.web.mapping.*
 import org.springframework.security.access.prepost.*
 import org.springframework.security.acls.domain.*
 import org.springframework.security.core.context.*
-
 
 /**
  * Service providing methods to access information about Processes.

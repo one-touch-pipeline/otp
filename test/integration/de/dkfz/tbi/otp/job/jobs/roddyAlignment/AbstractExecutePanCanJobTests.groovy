@@ -1,7 +1,8 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
 import de.dkfz.tbi.*
-import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
@@ -44,9 +45,9 @@ class AbstractExecutePanCanJobTests {
         roddyBamFile.workPackage.metaClass.seqTracks = SeqTrack.list()
 
         configService = new TestConfigService([
-                        'otp.root.path': tmpDir.root.path+"/root",
-                        'otp.processing.root.path': tmpDir.root.path+"/processing"
-                ]
+                (OtpProperty.PATH_PROJECT_ROOT)   : tmpDir.root.path + "/root",
+                (OtpProperty.PATH_PROCESSING_ROOT): tmpDir.root.path + "/processing"
+        ]
         )
         realm = DomainFactory.createRealm()
         abstractExecutePanCanJob = [

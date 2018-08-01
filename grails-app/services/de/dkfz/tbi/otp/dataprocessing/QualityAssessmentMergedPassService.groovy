@@ -1,8 +1,9 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import static org.springframework.util.Assert.notNull
-import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.ngsdata.*
+
+import static org.springframework.util.Assert.notNull
 
 class QualityAssessmentMergedPassService {
 

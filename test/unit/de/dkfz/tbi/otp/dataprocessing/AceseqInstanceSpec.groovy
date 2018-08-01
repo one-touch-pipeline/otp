@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.ngsdata.*
@@ -58,7 +59,7 @@ class AceseqInstanceSpec extends Specification {
     void setup() {
         File temporaryFile = temporaryFolder.newFolder()
         Realm realm = DomainFactory.createRealm()
-        configService = new TestConfigService(['otp.root.path': temporaryFile.path])
+        configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFile.path])
 
         this.instance = DomainFactory.createAceseqInstanceWithRoddyBamFiles()
         instance.project.realm = realm

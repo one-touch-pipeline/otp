@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.job.processing
 import com.github.robtimus.filesystems.sftp.*
 import com.jcraft.jsch.*
 import com.jcraft.jsch.agentproxy.*
+import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import org.codehaus.groovy.grails.commons.*
@@ -16,7 +17,7 @@ import java.nio.file.*
 
 import static com.github.robtimus.filesystems.sftp.Identity.*
 import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
-import static de.dkfz.tbi.otp.ngsdata.ConfigService.SshAuthMethod.*
+
 
 @Scope("singleton")
 @Component
@@ -45,18 +46,18 @@ class FileSystemService {
             Properties config = new Properties()
 
             switch (configService.sshAuthenticationMethod) {
-                case KEY_FILE:
+                case SshAuthMethod.KEY_FILE:
                     env.withIdentity(fromFiles(configService.sshKeyFile))
                     config.put("PreferredAuthentications", "publickey")
                     break
-                case SSH_AGENT:
+                case SshAuthMethod.SSH_AGENT:
                     Connector connector = ConnectorFactory.getDefault().createConnector()
                     if (connector != null) {
                         IdentityRepository repository = new RemoteIdentityRepository(connector)
                         env.withIdentityRepository(repository)
                     }
                     break
-                case PASSWORD:
+                case SshAuthMethod.PASSWORD:
                     env.withPassword(configService.getSshPassword().toCharArray())
                     break
             }

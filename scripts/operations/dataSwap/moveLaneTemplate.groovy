@@ -1,9 +1,5 @@
-
+import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.utils.*
-
-import static org.springframework.util.Assert.*
 
 /**
  * Template to move/rename a patient call. It can also change the SampleTypes of the patient and rename the file names.

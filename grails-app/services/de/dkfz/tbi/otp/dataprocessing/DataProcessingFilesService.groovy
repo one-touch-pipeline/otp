@@ -1,8 +1,10 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.getThreadLog
-import static org.springframework.util.Assert.notNull
+import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.ngsdata.*
+
+import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.*
+import static org.springframework.util.Assert.notNull
 
 class DataProcessingFilesService {
 

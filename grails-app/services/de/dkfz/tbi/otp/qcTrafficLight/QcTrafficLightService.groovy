@@ -1,8 +1,8 @@
 package de.dkfz.tbi.otp.qcTrafficLight
 
 import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.ngsdata.*
 import org.springframework.security.access.prepost.*
 
 class QcTrafficLightService {

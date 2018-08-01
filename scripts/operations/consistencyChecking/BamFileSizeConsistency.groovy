@@ -1,9 +1,8 @@
 // This script compares the sizes of BAM files on the file system to the file sizes stored in the database.
 // Expect inconsistencies to be reported if you run this script while the transfer workflow is running.
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
-import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
-import de.dkfz.tbi.otp.ngsdata.ConfigService
+import de.dkfz.tbi.otp.config.*
+import de.dkfz.tbi.otp.dataprocessing.*
 
 PrintWriter out = new PrintWriter(new File(
         ConfigService.getInstance().getScriptOutputPath(),

@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.job.jobs.sophia
 
 import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
@@ -48,7 +49,7 @@ class ParseSophiaQcJobSpec extends Specification {
     void "test execute"() {
         given:
         File temporaryFile = temporaryFolder.newFolder()
-        TestConfigService configService = new TestConfigService(['otp.root.path': temporaryFile.path])
+        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFile.path])
 
         SophiaInstance instance = DomainFactory.createSophiaInstanceWithRoddyBamFiles()
 

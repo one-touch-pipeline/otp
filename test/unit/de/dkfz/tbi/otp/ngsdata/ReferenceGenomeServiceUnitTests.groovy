@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 import de.dkfz.tbi.otp.utils.*
@@ -11,7 +12,6 @@ import org.junit.*
 import org.junit.rules.*
 
 import static org.junit.Assert.*
-
 
 @TestFor(ReferenceGenomeService)
 @TestMixin(GrailsUnitTestMixin)

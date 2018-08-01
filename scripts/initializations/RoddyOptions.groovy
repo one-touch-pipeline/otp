@@ -1,5 +1,5 @@
+import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.ngsdata.ConfigService
 
 import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
 

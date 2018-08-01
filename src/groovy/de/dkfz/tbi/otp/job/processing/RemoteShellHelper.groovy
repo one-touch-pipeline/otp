@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.job.processing
 
 import com.jcraft.jsch.*
 import com.jcraft.jsch.agentproxy.*
+import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.LocalShellHelper
@@ -16,8 +17,6 @@ import org.springframework.stereotype.*
 import grails.transaction.*
 
 import java.util.concurrent.*
-
-import static de.dkfz.tbi.otp.ngsdata.ConfigService.*
 
 /**
  * @short Helper class providing functionality for remote execution of jobs.
@@ -57,7 +56,6 @@ class RemoteShellHelper {
         return executeCommandReturnProcessOutput(realm, command).stdout
     }
 
-
     /**
      * Executes a command on a specified host and logs stdout and stderr
      *
@@ -66,8 +64,8 @@ class RemoteShellHelper {
      * @return process output of the command executed
      */
     public ProcessOutput executeCommandReturnProcessOutput(Realm realm, String command) {
-        assert realm : "No realm specified."
-        assert command : "No command specified to be run remotely."
+        assert realm: "No realm specified."
+        assert command: "No command specified to be run remotely."
         String sshUser = configService.getSshUser()
         String password = configService.getSshPassword()
         File keyFile = configService.getSshKeyFile()
@@ -102,7 +100,7 @@ class RemoteShellHelper {
      * @return process output of the command executed
      */
     protected ProcessOutput querySsh(Realm realm, String username, String password, File keyFile, SshAuthMethod sshAuthMethod, String command) {
-        assert command : "No command specified."
+        assert command: "No command specified."
         if (!password && !keyFile) {
             throw new ProcessingException("Neither password nor key file for remote connection specified.")
         }
@@ -117,7 +115,7 @@ class RemoteShellHelper {
         try {
             Session session = connectSshIfNeeded(realm, username, password, keyFile, sshAuthMethod)
 
-            ChannelExec channel = (ChannelExec)session.openChannel("exec")
+            ChannelExec channel = (ChannelExec) session.openChannel("exec")
             logToJob("executed command: " + command)
             channel.setCommand(command)
 
@@ -193,9 +191,6 @@ class RemoteShellHelper {
         return session
     }
 
-
-
-
     /**
      * Retrieves the command output
      *
@@ -209,7 +204,7 @@ class RemoteShellHelper {
         channel.setErrStream(outputErrorStream)
 
         channel.connect(CHANNEL_TIMEOUT * 1000)
-        while(!channel.isClosed()) {
+        while (!channel.isClosed()) {
             Thread.sleep(10)
         }
         return new ProcessOutput(

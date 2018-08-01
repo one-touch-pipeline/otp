@@ -1,31 +1,22 @@
-import org.hibernate.dialect.H2Dialect
-import org.hibernate.dialect.PostgreSQL9Dialect
+import de.dkfz.tbi.otp.config.*
+import org.hibernate.dialect.*
 
 import static java.util.concurrent.TimeUnit.*
 
+Properties otpProperties = ConfigService.parsePropertiesFile()
 
-Properties databaseProperties = new Properties()
-String propertiesFile = System.getenv("OTP_PROPERTIES")
-if (propertiesFile && new File(propertiesFile).canRead()) {
-    databaseProperties.load(new FileInputStream(propertiesFile))
-} else {
-    databaseProperties.load(new FileInputStream(System.getProperty("user.home") + "/.otp.properties"))
-}
-String server = databaseProperties.getProperty("otp.database.server")
-String port = databaseProperties.getProperty("otp.database.port")
-String database = databaseProperties.getProperty("otp.database.database")
-databaseProperties.setProperty("otp.database.url", "jdbc:postgresql://${server}:${port}/${database}")
-databaseProperties.setProperty("otp.database.pooled", "true")
+String server = otpProperties.getProperty(OtpProperty.DATABASE_SERVER.key)
+String port = otpProperties.getProperty(OtpProperty.DATABASE_PORT.key)
+String database = otpProperties.getProperty(OtpProperty.DATABASE_SCHEMA.key)
 
-def databaseConfig = new ConfigSlurper().parse(databaseProperties)
 dataSource {
-    pooled = Boolean.parseBoolean(databaseConfig.otp.database.pooled)
+    pooled = true
     driverClassName = "org.postgresql.Driver"
     dialect = PostgreSQL9Dialect
-    dbCreate = databaseConfig.otp.database.dbCreate
-    username = databaseConfig.otp.database.username
-    password = databaseConfig.otp.database.password
-    url = databaseConfig.otp.database.url
+    dbCreate = otpProperties.getProperty(OtpProperty.DATABASE_CREATE.key)
+    username = otpProperties.getProperty(OtpProperty.DATABASE_USERNAME.key)
+    password = otpProperties.getProperty(OtpProperty.DATABASE_PASSWORD.key)
+    url = "jdbc:postgresql://${server}:${port}/${database}"
 }
 
 hibernate {

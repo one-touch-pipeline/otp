@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.job.jobs.sophia
 
 import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
@@ -70,7 +71,7 @@ class ExecuteRoddySophiaJobSpec extends Specification {
         ])
 
         SophiaInstance sophiaInstance = DomainFactory.createSophiaInstanceWithRoddyBamFiles()
-        TestConfigService configService = new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path])
+        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
 
         RoddyBamFile bamFileDisease = sophiaInstance.sampleType1BamFile as RoddyBamFile
         RoddyBamFile bamFileControl = sophiaInstance.sampleType2BamFile as RoddyBamFile
@@ -125,7 +126,7 @@ class ExecuteRoddySophiaJobSpec extends Specification {
 
     void "validate, when all fine, set processing state to finished"() {
         given:
-        TestConfigService configService = new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path])
+        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
         ExecuteRoddySophiaJob job = new ExecuteRoddySophiaJob([
                 configService             : configService,
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
@@ -163,7 +164,7 @@ class ExecuteRoddySophiaJobSpec extends Specification {
     void "validate, when correctPermissionsAndGroups fail, throw assert"() {
         given:
         String md5sum = HelperUtils.uniqueString
-        TestConfigService configService = new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path])
+        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
         ExecuteRoddySophiaJob job = new ExecuteRoddySophiaJob([
                 configService             : configService,
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
@@ -192,7 +193,7 @@ class ExecuteRoddySophiaJobSpec extends Specification {
     @Unroll
     void "validate, when file not exist, throw assert"() {
         given:
-        TestConfigService configService = new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path])
+        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
         ExecuteRoddySophiaJob job = new ExecuteRoddySophiaJob([
                 configService             : configService,
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {

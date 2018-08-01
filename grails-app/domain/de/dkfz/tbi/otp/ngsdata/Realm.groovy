@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.utils.*
 
@@ -9,6 +10,12 @@ class Realm implements Entity, Serializable {
     public enum JobScheduler {
         LSF,
         PBS,
+
+        static Realm.JobScheduler findByName(String name) {
+            return values().find {
+                it.name() == name
+            }
+        }
     }
 
     String name

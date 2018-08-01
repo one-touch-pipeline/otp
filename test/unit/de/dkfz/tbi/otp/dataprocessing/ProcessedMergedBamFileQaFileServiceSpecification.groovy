@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 import grails.buildtestdata.mixin.Build
@@ -30,7 +31,7 @@ class ProcessedMergedBamFileQaFileServiceSpecification extends Specification {
     TestConfigService configService
 
     void setup() {
-        configService = new TestConfigService(['otp.processing.root.path': temporaryFolder.newFolder().path])
+        configService = new TestConfigService([(OtpProperty.PATH_PROCESSING_ROOT): temporaryFolder.newFolder().path])
     }
 
     void cleanup() {

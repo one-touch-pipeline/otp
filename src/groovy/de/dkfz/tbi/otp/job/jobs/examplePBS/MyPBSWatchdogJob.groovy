@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.examplePBS
 
+import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.ast.*
 import de.dkfz.tbi.otp.job.jobs.*

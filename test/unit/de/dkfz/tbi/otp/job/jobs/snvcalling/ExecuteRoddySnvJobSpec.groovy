@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
 import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
@@ -67,7 +68,7 @@ class ExecuteRoddySnvJobSpec extends Specification {
         File fasta = CreateFileHelper.createFile(new File(temporaryFolder.newFolder(), "fasta.fa"))
         File chromosomeLength = temporaryFolder.newFile()
 
-        TestConfigService configService = new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path])
+        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
 
         ExecuteRoddySnvJob job = new ExecuteRoddySnvJob([
                 configService         : configService,
@@ -145,7 +146,7 @@ class ExecuteRoddySnvJobSpec extends Specification {
 
     void "validate, when all fine, set processing state to finished"() {
         given:
-        TestConfigService configService = new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path])
+        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
         ExecuteRoddySnvJob job = new ExecuteRoddySnvJob([
                 configService             : configService,
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
@@ -183,7 +184,7 @@ class ExecuteRoddySnvJobSpec extends Specification {
     void "validate, when correctPermissionsAndGroups fail, throw assert"() {
         given:
         String md5sum = HelperUtils.uniqueString
-        TestConfigService configService = new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path])
+        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
         ExecuteRoddySnvJob job = new ExecuteRoddySnvJob([
                 configService             : configService,
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
@@ -212,7 +213,7 @@ class ExecuteRoddySnvJobSpec extends Specification {
     @Unroll
     void "validate, when file not exist, throw assert"() {
         given:
-        TestConfigService configService = new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path])
+        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
         ExecuteRoddySnvJob job = new ExecuteRoddySnvJob([
                 configService             : configService,
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {

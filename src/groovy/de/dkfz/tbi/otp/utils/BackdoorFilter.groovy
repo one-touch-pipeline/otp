@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.utils
 
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.config.*
 import grails.util.*
 import org.springframework.beans.factory.annotation.*
 import org.springframework.context.annotation.*
@@ -28,7 +28,8 @@ import javax.servlet.http.*
  * development mode, so that it does not even get loaded in production mode. Furthermore it
  * would be best to drop the compiled class from the war file.
  *
- * The filter is controlled by the config options "useBackdoor" (boolean) and "backdoorUser" (String).
+ * The filter is controlled by the config options {@link OtpProperty#DEVEL_USE_BACKDOOR} and
+ * {@link OtpProperty#DEVEL_BACKDOOR_USER}.
  * The first one controls whether the filter is enabled at all, the second one the user to use.
  *
  */

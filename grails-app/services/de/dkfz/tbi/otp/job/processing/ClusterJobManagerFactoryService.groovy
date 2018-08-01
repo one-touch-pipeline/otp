@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.job.processing
 import de.dkfz.roddy.execution.jobs.*
 import de.dkfz.roddy.execution.jobs.cluster.lsf.*
 import de.dkfz.roddy.execution.jobs.cluster.pbs.*
+import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.ngsdata.*
 import groovy.transform.*
 import org.springframework.beans.factory.annotation.*

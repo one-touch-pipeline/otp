@@ -1,6 +1,6 @@
 import de.dkfz.tbi.otp.administration.*
+import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.job.scheduler.*
-import de.dkfz.tbi.otp.ngsdata.*
 import grails.converters.*
 import grails.plugin.springsecurity.*
 import grails.util.*

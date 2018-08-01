@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
 import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
@@ -169,7 +170,7 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
     @Unroll
     void "validate, when #file not exist, throw assert"() {
         given:
-        TestConfigService configService = new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path])
+        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
         AbstractRoddyAlignmentJob abstractRoddyAlignmentJob = Spy(AbstractRoddyAlignmentJob) {
             getExecuteRoddyCommandService() >> Mock(ExecuteRoddyCommandService) {
                 1 * correctPermissions(_, _) >> {}
@@ -219,7 +220,7 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
 
     void "validate, when wrong operation status, throw assert"() {
         given:
-        TestConfigService configService = new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path])
+        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
         AbstractRoddyAlignmentJob abstractRoddyAlignmentJob = Spy(AbstractRoddyAlignmentJob) {
             getExecuteRoddyCommandService() >> Mock(ExecuteRoddyCommandService) {
                 1 * correctPermissions(_, _) >> {}
@@ -251,7 +252,7 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
 
     void "validate, when all fine, return without exception"() {
         given:
-        TestConfigService configService = new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path])
+        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
         AbstractRoddyAlignmentJob abstractRoddyAlignmentJob = Spy(AbstractRoddyAlignmentJob) {
             getExecuteRoddyCommandService() >> Mock(ExecuteRoddyCommandService) {
                 1 * correctPermissions(_, _) >> {}
@@ -282,7 +283,7 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
 
     void "validate, when all fine and seqtype is RNA, return without exception"() {
         given:
-        TestConfigService configService = new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path])
+        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
         AbstractRoddyAlignmentJob abstractRoddyAlignmentJob = Spy(AbstractRoddyAlignmentJob) {
             getExecuteRoddyCommandService() >> Mock(ExecuteRoddyCommandService) {
                 1 * correctPermissions(_, _) >> {}
@@ -329,7 +330,7 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
 
     void "validateReadGroups, when read groups are not as expected, throw an exception"() {
         given:
-        TestConfigService configService = new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path])
+        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
 
         roddyBamFile.workBamFile.parentFile.mkdirs()
@@ -366,7 +367,7 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
 
     void "validateReadGroups, when read groups are fine, return without exception"() {
         given:
-        TestConfigService configService = new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path])
+        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
 
         SeqTrack seqTrack = DomainFactory.createSeqTrackWithTwoDataFiles(roddyBamFile.mergingWorkPackage)
@@ -421,7 +422,7 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
 
     void "ensureCorrectBaseBamFileIsOnFileSystem, base bam file exist and is correct, return without exception"() {
         given:
-        TestConfigService configService = new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path])
+        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
         RoddyBamFile baseRoddyBamFile = DomainFactory.createRoddyBamFile()
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(baseRoddyBamFile)
 

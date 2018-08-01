@@ -1,7 +1,7 @@
 package de.dkfz.tbi.otp.job
 
-import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.processing.*
@@ -22,7 +22,7 @@ class JobMailServiceIntegrationSpec extends Specification {
     void "sendErrorNotification, when with #completedCount completed cluster jobs and with #failedCount failed cluster job, send expected email"() {
         given:
         JobStatusLoggingService jobStatusLoggingService = new JobStatusLoggingService()
-        TestConfigService configService = new TestConfigService(['otp.logging.root.path': temporaryFolder.newFolder().path])
+        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_CLUSTER_LOGS_OTP): temporaryFolder.newFolder().path])
         jobStatusLoggingService.configService = configService
 
         OtrsTicket otrsTicket = DomainFactory.createOtrsTicket()

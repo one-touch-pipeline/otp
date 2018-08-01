@@ -38,10 +38,10 @@ String libraryLayout = 'PAIRED'
 
 /**
  * the complete path to the config file.
- * The file should be located in: $OTP_ROOT_PATH/$PROJECT/configFiles/$Workflow/
+ * The file should be located in: $OtpProperty#PATH_PROJECT_ROOT/$PROJECT/configFiles/$Workflow/
  * The file should be named as: ${Pipeline}_${seqType.roddyName}_${seqType.libraryLayout}_${WorkflowVersion}_v${fileVersion}.xml
  *
- * for example: $OTP_ROOT_PATH/$PROJECT/configFiles/PANCAN_ALIGNMENT/PANCAN_ALIGNMENT_WES_1.1.39_v1_0.xml
+ * for example: $OtpProperty#PATH_PROJECT_ROOT/$PROJECT/configFiles/PANCAN_ALIGNMENT/PANCAN_ALIGNMENT_WES_1.1.39_v1_0.xml
  */
 String configFilePath = ''
 

@@ -1,17 +1,14 @@
 package de.dkfz.tbi.otp.job.processing
 
-import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
-import de.dkfz.tbi.otp.ngsdata.ConfigService
-import de.dkfz.tbi.otp.ngsdata.Realm
-import grails.buildtestdata.mixin.Build
-import grails.test.mixin.TestFor
-import grails.test.mixin.TestMixin
-import grails.test.mixin.support.GrailsUnitTestMixin
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
+import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.config.*
+import de.dkfz.tbi.otp.infrastructure.*
+import de.dkfz.tbi.otp.ngsdata.*
+import grails.buildtestdata.mixin.*
+import grails.test.mixin.*
+import grails.test.mixin.support.*
+import org.junit.*
 
 /**
  * Unit tests for the {@link JobStatusLoggingService}.
@@ -56,7 +53,7 @@ class JobStatusLoggingServiceFailedOrNotFinishedClusterJobsUnitTests extends Tes
     void setUp() {
         tempDirectory = TestCase.createEmptyTestDirectory()
 
-        configService = new TestConfigService(['otp.logging.root.path': tempDirectory.path])
+        configService = new TestConfigService([(OtpProperty.PATH_CLUSTER_LOGS_OTP): tempDirectory.path])
         service.configService = configService
 
         processingStep = JobStatusLoggingServiceUnitTests.createFakeProcessingStep()

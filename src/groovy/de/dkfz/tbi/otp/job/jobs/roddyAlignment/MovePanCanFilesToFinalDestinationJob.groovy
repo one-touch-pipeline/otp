@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.ast.*
 import de.dkfz.tbi.otp.job.jobs.*
@@ -32,7 +33,7 @@ class MovePanCanFilesToFinalDestinationJob extends AbstractEndStateAwareJobImpl 
         final RoddyBamFile roddyBamFile = getProcessParameterObject()
 
         Realm realm = roddyBamFile.project.realm
-        assert realm : "Realm should not be null"
+        assert realm: "Realm should not be null"
 
         RoddyBamFile.withTransaction {
             linkFilesToFinalDestinationService.prepareRoddyBamFile(roddyBamFile)

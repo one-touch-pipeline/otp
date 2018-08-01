@@ -1,5 +1,5 @@
-import de.dkfz.tbi.otp.ngsdata.ConfigService
-import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
+import de.dkfz.tbi.otp.config.*
+import de.dkfz.tbi.otp.utils.logging.*
 import org.joda.time.*
 
 /**

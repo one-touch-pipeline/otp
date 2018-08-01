@@ -1,20 +1,16 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.InformationReliability
-import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QaProcessingStatus
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.MergingSet.State
-import de.dkfz.tbi.otp.job.processing.ProcessingException
+import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.HelperUtils
-import grails.validation.ValidationException
-import org.junit.After
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.TemporaryFolder
+import grails.validation.*
+import org.junit.*
+import org.junit.rules.*
 
 import static org.junit.Assert.*
 
@@ -47,8 +43,8 @@ class ProcessedMergedBamFileServiceTests {
         realm =DomainFactory.createRealm()
 
         configService = new TestConfigService([
-                        'otp.root.path': testDirectory.absolutePath + '/root',
-                        'otp.processing.root.path': testDirectory.absolutePath + '/processing'
+                (OtpProperty.PATH_PROJECT_ROOT)   : testDirectory.absolutePath + '/root',
+                (OtpProperty.PATH_PROCESSING_ROOT): testDirectory.absolutePath + '/processing'
         ])
 
         baseDir = new File(directory)

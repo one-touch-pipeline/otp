@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.rnaAlignment
 
+import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
 import de.dkfz.tbi.otp.job.ast.*

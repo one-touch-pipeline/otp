@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
@@ -7,7 +8,6 @@ import groovy.transform.*
 import org.springframework.security.access.prepost.*
 
 import static org.springframework.util.Assert.*
-
 
 class ReferenceGenomeService {
 

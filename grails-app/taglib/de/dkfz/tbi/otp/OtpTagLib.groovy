@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp
-import de.dkfz.tbi.otp.ngsdata.*
+
+import de.dkfz.tbi.otp.config.*
 import grails.plugin.springsecurity.*
 
 class OtpTagLib {

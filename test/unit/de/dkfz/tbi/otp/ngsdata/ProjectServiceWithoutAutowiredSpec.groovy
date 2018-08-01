@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.*
 import de.dkfz.tbi.otp.utils.*
@@ -20,9 +21,8 @@ class ProjectServiceWithoutAutowiredSpec extends Specification {
     void "createProject: dirName shouldn't overlap with root path"() {
         given:
         ProjectService projectService = new ProjectService([
-                configService : new TestConfigService([
-                        'otp.root.path'           : "/some/nested/root/path",
-
+                configService: new TestConfigService([
+                        (OtpProperty.PATH_PROJECT_ROOT): "/some/nested/root/path",
                 ])
         ])
 

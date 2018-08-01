@@ -1,7 +1,8 @@
 package de.dkfz.tbi.otp.utils
 
 import de.dkfz.tbi.*
-import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.job.processing.*
@@ -53,8 +54,8 @@ class ExecuteRoddyCommandServiceTests {
         tmpOutputDir = temporaryFolder.newFolder("temporaryOutputDir")
         roddyBamFile = DomainFactory.createRoddyBamFile()
         configService = new TestConfigService([
-                        'otp.root.path': tmpOutputDir.path+"/root",
-                        'otp.processing.root.path': tmpOutputDir.path+"/processing"
+                (OtpProperty.PATH_PROJECT_ROOT)   : tmpOutputDir.path + "/root",
+                (OtpProperty.PATH_PROCESSING_ROOT): tmpOutputDir.path + "/processing"
         ])
         realm = roddyBamFile.project.realm
         assert realm.save(flush: true)

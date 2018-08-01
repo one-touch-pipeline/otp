@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.job.jobs
 
 import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.*
@@ -73,7 +74,7 @@ class ExecuteRunYapsaJobSpec extends Specification {
                 value: "yapsa",
         )
 
-        ConfigService configService = new TestConfigService(['otp.root.path': "/root"])
+        ConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): "/root"])
 
         RunYapsaInstance instance = DomainFactory.createRunYapsaInstanceWithRoddyBamFiles()
 

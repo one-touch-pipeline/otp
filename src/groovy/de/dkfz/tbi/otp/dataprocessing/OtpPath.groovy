@@ -1,10 +1,9 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import java.util.regex.Pattern
+import de.dkfz.tbi.otp.config.*
+import de.dkfz.tbi.otp.ngsdata.*
 
-import de.dkfz.tbi.otp.ngsdata.ConfigService
-import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
-import de.dkfz.tbi.otp.ngsdata.Project
+import java.util.regex.*
 
 /**
  * Represents a relative file system path.

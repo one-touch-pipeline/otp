@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.job.jobs.indelCalling
 
 import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
@@ -76,7 +77,7 @@ class ExecuteRoddyIndelJobSpec extends Specification {
                 },
         ])
 
-        TestConfigService configService = new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path])
+        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
 
         IndelCallingInstance indelCallingInstance = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles()
 
@@ -139,7 +140,7 @@ class ExecuteRoddyIndelJobSpec extends Specification {
                     1* filePath(_) >> bedFile
                 },
         ])
-        new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path])
+        new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
         IndelCallingInstance indelCallingInstance = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles()
         SeqType seqType = DomainFactory.createExomeSeqType()
 
@@ -222,7 +223,7 @@ class ExecuteRoddyIndelJobSpec extends Specification {
     void "validate, when all fine, set processing state to finished"() {
         given:
         ExecuteRoddyIndelJob job = new ExecuteRoddyIndelJob([
-                configService             : new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path]),
+                configService             : new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path]),
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
                     1 * correctPermissionsAndGroups(_, _) >> {}
                 },
@@ -253,7 +254,7 @@ class ExecuteRoddyIndelJobSpec extends Specification {
         given:
         String md5sum = HelperUtils.uniqueString
         ExecuteRoddyIndelJob job = new ExecuteRoddyIndelJob([
-                configService             : new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path]),
+                configService             : new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path]),
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
                     1 * correctPermissionsAndGroups(_, _) >> {
                         throw new AssertionError(md5sum)
@@ -278,7 +279,7 @@ class ExecuteRoddyIndelJobSpec extends Specification {
     void "validate, when file not exist, throw assert"() {
         given:
         ExecuteRoddyIndelJob job = new ExecuteRoddyIndelJob([
-                configService             : new TestConfigService(['otp.root.path': temporaryFolder.newFolder().path]),
+                configService             : new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path]),
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
                     1 * correctPermissionsAndGroups(_, _) >> {}
                 },

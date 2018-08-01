@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.job.jobs.bamImport
 
 import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.jobs.importExternallyMergedBam.*
@@ -140,7 +141,7 @@ ln -sf [^ ]+\\/subDirectory\\/file.txt [^ ]+\\/subDirectory\\/file.txt
 
         CreateFileHelper.createFile(new File("${importProcess.externallyProcessedMergedBamFiles[0].importedFrom}"))
 
-        configService = new TestConfigService(['otp.root.path': temporaryFolder.newFolder("root").path])
+        configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder("root").path])
 
         DomainFactory.createProcessParameter([
                 process  : step.process,

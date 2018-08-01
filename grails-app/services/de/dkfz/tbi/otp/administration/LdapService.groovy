@@ -1,11 +1,11 @@
 package de.dkfz.tbi.otp.administration
 
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.config.*
 import jdk.nashorn.internal.ir.annotations.*
 import org.springframework.beans.factory.*
 import org.springframework.ldap.core.*
 import org.springframework.ldap.core.support.*
-import org.springframework.ldap.query.ContainerCriteria
+import org.springframework.ldap.query.*
 
 import javax.naming.*
 import javax.naming.directory.*

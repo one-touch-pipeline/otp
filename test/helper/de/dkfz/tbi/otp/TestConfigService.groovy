@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp
 
 import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.ngsdata.*
 import grails.util.*
 import org.springframework.context.*
@@ -9,37 +10,38 @@ class TestConfigService extends ConfigService {
 
     static Map cleanProperties
 
-    TestConfigService (Map properties = [:]) {
+    TestConfigService (Map<OtpProperty, String> properties = [:]) {
         super()
         if (Environment.current.name == "WORKFLOW_TEST") {
             otpProperties = otpProperties.findAll {
-                (it.key as String) in [
-                        "otp.ssh.authMethod",
-                        "otp.ssh.keyFile",
-                        "otp.ssh.password",
+                it.key in [
+                        OtpProperty.SSH_AUTH_METHOD,
+                        OtpProperty.SSH_KEY_FILE,
+                        OtpProperty.SSH_PASSWORD,
 
-                        "otp.path.tools",
-                        "otp.path.tools.roddy",
+                        OtpProperty.PATH_TOOLS,
+                        OtpProperty.PATH_RODDY,
 
-                        "otp.testing.workflows.account",
-                        "otp.testing.workflows.host",
-                        "otp.testing.workflows.scheduler",
-                        "otp.testing.workflows.rootdir",
-                        "otp.testing.group",
+                        OtpProperty.TEST_WORKFLOW_ACCOUNT,
+                        OtpProperty.TEST_WORKFLOW_HOST,
+                        OtpProperty.TEST_WORKFLOW_SCHEDULER,
+                        OtpProperty.TEST_WORKFLOW_ROOTDIR,
+
+                        OtpProperty.TEST_TESTING_GROUP,
                 ]
             }
         } else {
             otpProperties = otpProperties.findAll {
-                (it.key as String) in [
-                    "otp.testing.group",
+                it.key in [
+                        OtpProperty.TEST_TESTING_GROUP,
                 ]
             }
         }
         otpProperties += [
-                'otp.ssh.user'              : "user",
-                'otp.root.path'             : TestCase.getUniqueNonExistentPath().path+'/root_path',
-                'otp.processing.root.path'  : TestCase.getUniqueNonExistentPath().path+'/processing_root_path',
-                'otp.logging.root.path'     : TestCase.getUniqueNonExistentPath().path+'/logging_root_path',
+                (OtpProperty.SSH_USER)             : "user",
+                (OtpProperty.PATH_PROJECT_ROOT)    : TestCase.getUniqueNonExistentPath().path + '/root_path',
+                (OtpProperty.PATH_PROCESSING_ROOT) : TestCase.getUniqueNonExistentPath().path + '/processing_root_path',
+                (OtpProperty.PATH_CLUSTER_LOGS_OTP): TestCase.getUniqueNonExistentPath().path + '/logging_root_path',
         ]
         cleanProperties = new HashMap<>(otpProperties)
 
@@ -56,7 +58,7 @@ class TestConfigService extends ConfigService {
         ] as ApplicationContext
     }
 
-    void setOtpProperty(String key, String value) {
+    void setOtpProperty(OtpProperty key, String value) {
         otpProperties.put(key, value)
     }
 
@@ -66,29 +68,29 @@ class TestConfigService extends ConfigService {
 
 
     String getTestingGroup() {
-        String testingGroup = getAndAssertValue("otp.testing.group")
-        assert testingGroup != TestCase.primaryGroup(): "'otp.testing.group' does not differ from your primary group"
+        String testingGroup = getAndAssertValue(OtpProperty.TEST_TESTING_GROUP)
+        assert testingGroup != TestCase.primaryGroup(): "'${OtpProperty.TEST_TESTING_GROUP.key}' does not differ from your primary group"
         return testingGroup
     }
 
     String getWorkflowTestAccountName() {
-        return getAndAssertValue("otp.testing.workflows.account")
+        return getAndAssertValue(OtpProperty.TEST_WORKFLOW_ACCOUNT)
     }
 
     Realm.JobScheduler getWorkflowTestScheduler() {
-        return Realm.JobScheduler.valueOf(getAndAssertValue("otp.testing.workflows.scheduler"))
+        return Realm.JobScheduler.valueOf(getAndAssertValue(OtpProperty.TEST_WORKFLOW_SCHEDULER))
     }
 
     String getWorkflowTestHost() {
-        return getAndAssertValue("otp.testing.workflows.host")
+        return getAndAssertValue(OtpProperty.TEST_WORKFLOW_HOST)
     }
 
     File getWorkflowTestRootDir() {
-        return new File(getAndAssertValue("otp.testing.workflows.rootdir"))
+        return new File(getAndAssertValue(OtpProperty.TEST_WORKFLOW_ROOTDIR))
     }
 
 
-    private String getAndAssertValue(String property) {
+    private String getAndAssertValue(OtpProperty property) {
         String value = otpProperties.get(property)
         assert value : "'${property}' is not set in otp.properties"
         return value

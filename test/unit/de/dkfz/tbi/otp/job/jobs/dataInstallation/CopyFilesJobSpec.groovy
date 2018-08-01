@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.job.jobs.dataInstallation
 
 import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.processing.*
@@ -49,7 +50,7 @@ class CopyFilesJobSpec extends Specification {
 
     def setup() {
         step = DomainFactory.createProcessingStep(id: PROCESSING_STEP_ID)
-        configService = new TestConfigService(['otp.root.path': temporaryFolder.newFolder("root").path])
+        configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder("root").path])
         copyFilesJob = new CopyFilesJob()
         copyFilesJob.processingStep = step
         copyFilesJob.configService = configService

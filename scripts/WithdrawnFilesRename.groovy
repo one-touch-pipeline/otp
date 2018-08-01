@@ -1,5 +1,5 @@
+import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.ngsdata.ConfigService
 
 /**
  * rename existing withdrawn result files in the project folder

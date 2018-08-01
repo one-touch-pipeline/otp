@@ -1,7 +1,7 @@
 package de.dkfz.tbi.otp.job.scheduler
 
 import de.dkfz.tbi.*
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.config.*
 import org.apache.commons.io.*
 import org.junit.*
 import org.junit.rules.*

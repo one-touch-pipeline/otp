@@ -1,22 +1,18 @@
 package de.dkfz.tbi.otp.job.jobs.transferMergedBamFile
 
-import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
-import de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys
-import de.dkfz.tbi.otp.job.processing.ClusterJobSchedulerService
-import de.dkfz.tbi.otp.ngsdata.ChecksumFileService
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.utils.LocalShellHelper
-import org.apache.commons.logging.impl.NoOpLog
-import org.junit.After
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.TemporaryFolder
-import org.springframework.beans.factory.annotation.Autowired
+import de.dkfz.tbi.otp.job.jobs.utils.*
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.*
+import org.apache.commons.logging.impl.*
+import org.junit.*
+import org.junit.rules.*
+import org.springframework.beans.factory.annotation.*
 
 class CalculateFileChecksumMD5JobTests {
 
@@ -60,8 +56,8 @@ class CalculateFileChecksumMD5JobTests {
         }
 
         configService = new TestConfigService([
-                        'otp.root.path': tmpDir.root.path,
-                        'otp.processing.root.path': tmpDir.root.path
+                (OtpProperty.PATH_PROJECT_ROOT)   : tmpDir.root.path,
+                (OtpProperty.PATH_PROCESSING_ROOT): tmpDir.root.path
         ])
         calculateFileChecksumMD5Job.log = new NoOpLog()
         calculateFileChecksumMD5Job.configService = configService

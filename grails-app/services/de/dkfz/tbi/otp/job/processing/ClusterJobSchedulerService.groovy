@@ -3,12 +3,13 @@ package de.dkfz.tbi.otp.job.processing
 import de.dkfz.roddy.config.*
 import de.dkfz.roddy.execution.jobs.*
 import de.dkfz.roddy.tools.*
+import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.scheduler.*
 import de.dkfz.tbi.otp.ngsdata.*
 import grails.compiler.*
-import grails.util.Environment
+import grails.util.*
 import groovy.transform.*
 import org.springframework.beans.factory.annotation.*
 

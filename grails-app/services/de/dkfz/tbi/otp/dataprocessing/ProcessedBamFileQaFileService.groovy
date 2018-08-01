@@ -1,11 +1,11 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.logging.*
 
 import static de.dkfz.tbi.otp.ngsdata.LsdfFilesService.*
 import static org.springframework.util.Assert.*
-
 
 class ProcessedBamFileQaFileService {
 

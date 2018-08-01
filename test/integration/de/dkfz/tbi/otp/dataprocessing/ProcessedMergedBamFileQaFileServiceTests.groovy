@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.config.OtpProperty
 
 import static org.junit.Assert.*
 
@@ -23,7 +24,7 @@ class ProcessedMergedBamFileQaFileServiceTests {
     @Test
     void testQaResultsMd5sumFile() {
         MergingPass mergingPass = createMergingPass()
-        TestConfigService configService = new TestConfigService(['otp.processing.root.path': '/processing_root_path'])
+        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROCESSING_ROOT): '/processing_root_path'])
         ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile(mergingPass)
         String destinationExp = configService.getInstance().getProcessingRootPath().path + "/project-dir/results_per_pid/patient/merging//sample-type/seq-type/library/DEFAULT/0/pass0/QualityAssessment/pass1/MD5SUMS"
         String destinationAct = processedMergedBamFileQaFileService.qaResultsMd5sumFile(mergedBamFile)

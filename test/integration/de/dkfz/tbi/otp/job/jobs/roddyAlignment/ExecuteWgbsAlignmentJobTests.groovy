@@ -1,7 +1,8 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
 import de.dkfz.tbi.*
-import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
@@ -10,7 +11,6 @@ import de.dkfz.tbi.otp.utils.LocalShellHelper.ProcessOutput
 import org.junit.*
 import org.junit.rules.*
 import org.springframework.beans.factory.annotation.*
-
 
 class ExecuteWgbsAlignmentJobTests {
 
@@ -54,8 +54,8 @@ class ExecuteWgbsAlignmentJobTests {
         }
 
         configService = new TestConfigService([
-                'otp.root.path': tmpDir.root.path,
-                'otp.processing.root.path': tmpDir.root.path
+                (OtpProperty.PATH_PROJECT_ROOT)   : tmpDir.root.path,
+                (OtpProperty.PATH_PROCESSING_ROOT): tmpDir.root.path
         ])
 
         executeWgbsAlignmentJob.lsdfFilesService.configService = configService

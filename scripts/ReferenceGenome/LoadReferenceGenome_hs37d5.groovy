@@ -6,7 +6,7 @@ import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 /*
  *  This scripts inserts a new ReferenceGenome object
  *  as well as ReferenceGenomeEntry objects obtained from the fasta file
- *  which lies in ${otp.processing.root.path}/reference_genomes/bwa06_1KGRef/
+ *  which lies in ${OtpProperty#PATH_PROCESSING_ROOT}/reference_genomes/bwa06_1KGRef/
  *  A python helper script 'scripts/ReferenceGenome/getReferenceGenomeInfo.py' which extracts
  *  information from the fasta file was used to generate the fastaEntries content.
 */

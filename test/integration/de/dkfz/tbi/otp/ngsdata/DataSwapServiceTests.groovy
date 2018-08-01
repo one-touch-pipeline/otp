@@ -1,7 +1,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.*
-import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.fileSystemConsistency.*
@@ -28,8 +29,8 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
         createUserAndRoles()
         outputFolder = temporaryFolder.newFolder("outputFolder")
         configService = new TestConfigService([
-                        'otp.root.path': outputFolder.path,
-                        'otp.processing.root.path': outputFolder.path
+                (OtpProperty.PATH_PROJECT_ROOT)   : outputFolder.path,
+                (OtpProperty.PATH_PROCESSING_ROOT): outputFolder.path
         ])
         lsdfFilesService.configService = configService
     }
