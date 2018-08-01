@@ -4,6 +4,7 @@ import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
+import de.dkfz.tbi.otp.dataprocessing.runYapsa.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.utils.*
 import grails.converters.*
@@ -17,6 +18,14 @@ class ConfigurePipelineController {
     ProjectService projectService
     ProjectSelectionService projectSelectionService
     FileSystemService fileSystemService
+
+    static allowedMethods = [
+            // TODO: incomplete (OTP-2887)
+            runYapsa                   : "GET",
+            updateRunYapsa             : "POST",
+            invalidateConfig           : "POST",
+    ]
+
 
     def alignment(ConfigureAlignmentPipelineSubmitCommand cmd) {
         Pipeline pipeline = Pipeline.Name.PANCAN_ALIGNMENT.pipeline
@@ -41,14 +50,14 @@ class ConfigurePipelineController {
             ])
             projectService.configurePanCanAlignmentDeciderProject(panCanAlignmentConfiguration)
 
-            result << [message: 'The config settings were saved successfully']
-            redirect(controller: "projectConfig", params: result)
+            flash.message = g.message(code: "configurePipeline.store.success")
+            redirect(controller: "projectConfig")
         }
 
         if (cmd.copy) {
             projectService.copyPanCanAlignmentXml(cmd.basedProject, cmd.seqType, cmd.project)
-            result << [message: 'The config settings were copied successfully']
-            redirect(controller: "projectConfig", params: result)
+            flash.message = g.message(code: "configurePipeline.copy.success")
+            redirect(controller: "projectConfig")
         }
 
         String defaultPluginName = ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_ALIGNMENT_PLUGIN_NAME, cmd.seqType.roddyName, null)
@@ -327,18 +336,49 @@ class ConfigurePipelineController {
         return createAnalysisConfig(cmd, pipeline, defaultPluginName, defaultPluginVersion, defaultBaseProjectConfig)
     }
 
+    def runYapsa(BaseConfigurePipelineSubmitCommand cmd) {
+        Pipeline pipeline = Pipeline.Name.RUN_YAPSA.pipeline
+
+        RunYapsaConfig config = projectService.getLatestRunYapsaConfig(cmd.project, cmd.seqType)
+        String currentVersion = config?.programVersion
+
+        String defaultVersion = ProcessingOptionService.findOption(OptionName.PIPELINE_RUNYAPSA_DEFAULT_VERSION, null, null)
+        List<String> availableVersions = ProcessingOptionService.findOptionSafe(OptionName.PIPELINE_RUNYAPSA_AVAILABLE_VERSIONS, null, null).split(",").collect { it.trim() }
+
+        return [
+                project: cmd.project,
+                seqType: cmd.seqType,
+                pipeline: pipeline,
+
+                defaultVersion: defaultVersion,
+                currentVersion: currentVersion,
+                availableVersions: availableVersions,
+        ]
+    }
+
+    def updateRunYapsa(ConfigureRunYapsaSubmitCommand cmd) {
+        Errors errors = projectService.createOrUpdateRunYapsaConfig(cmd.project, cmd.seqType, cmd.programVersion)
+        if (errors) {
+            flash.message = g.message(code: "configurePipeline.store.failure")
+            flash.errors = errors
+            redirect action: "runYapsa"
+        } else {
+            flash.message = g.message(code: "configurePipeline.store.success")
+            redirect controller: "projectConfig"
+        }
+    }
+
     def invalidateConfig(InvalidateConfigurationCommand cmd) {
         boolean hasErrors = cmd.hasErrors()
-        Map result = [hasErrors: hasErrors]
 
         if (hasErrors) {
-            FieldError errors = cmd.errors.getFieldError()
-            result << [message: "'${errors.getRejectedValue()}' is not a valid value for '${errors.getField()}'. Error code: '${errors.code}'"]
-            forward(action: cmd.originAction, params: result)
+            flash.message = g.message(code: "configurePipeline.invalidate.failure")
+            flash.errors = errors
+            redirect(action: cmd.originAction)
         } else {
             projectService.invalidateProjectConfig(cmd.project, cmd.seqType, cmd.pipeline)
-            result << [message: 'Successfully invalidated the config']
-            redirect(controller: "projectConfig", params: result)
+            flash.message = g.message(code: "configurePipeline.invalidate.success")
+            redirect(controller: "projectConfig")
         }
     }
 
@@ -369,8 +409,8 @@ class ConfigurePipelineController {
                     break
             }
 
-            result << [message: "The config settings were saved successfully"]
-            redirect(controller: "projectConfig", params: result)
+            flash.message = g.message(code: "configurePipeline.store.success")
+            redirect(controller: "projectConfig")
         }
 
         result << params
@@ -526,6 +566,11 @@ class ConfigureRnaAlignmentSubmitCommand extends BaseConfigurePipelineSubmitComm
     }
 }
 
+
+@ToString(includeNames = true, includeSuper = true)
+class ConfigureRunYapsaSubmitCommand extends BaseConfigurePipelineSubmitCommand {
+    String programVersion
+}
 
 @ToString(includeNames = true, includeSuper = true)
 class ConfigurePipelineSubmitCommand extends BaseConfigurePipelineSubmitCommand {

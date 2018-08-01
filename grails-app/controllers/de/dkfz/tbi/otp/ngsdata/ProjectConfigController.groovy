@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.ngsdata
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
+import de.dkfz.tbi.otp.dataprocessing.runYapsa.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.utils.*
 import grails.converters.*
@@ -50,6 +51,7 @@ class ProjectConfigController {
         List indelConfigTable = createAnalysisConfigTable(project, SeqType.getIndelPipelineSeqTypes(), Pipeline.findByName(Pipeline.Name.RODDY_INDEL))
         List sophiaConfigTable = createAnalysisConfigTable(project, SeqType.getSophiaPipelineSeqTypes(), Pipeline.findByName(Pipeline.Name.RODDY_SOPHIA))
         List aceseqConfigTable = createAnalysisConfigTable(project, SeqType.getAceseqPipelineSeqTypes(), Pipeline.findByName(Pipeline.Name.RODDY_ACESEQ))
+        List runYapsaConfigTable = createAnalysisConfigTable(project, SeqType.getRunYapsaPipelineSeqTypes(), Pipeline.findByName(Pipeline.Name.RUN_YAPSA))
 
         Map<SeqType, String> checkSophiaReferenceGenome = SeqType.sophiaPipelineSeqTypes.collectEntries {
             [(it): projectService.checkReferenceGenomeForSophia(project, it).getError()]
@@ -78,14 +80,16 @@ class ProjectConfigController {
                 seqTypes                  : SeqType.roddyAlignableSeqTypes.sort { it.displayNameWithLibraryLayout },
                 snvSeqTypes               : SeqType.snvPipelineSeqTypes,
                 indelSeqTypes             : SeqType.indelPipelineSeqTypes,
-                sophiaSeqType             : SeqType.sophiaPipelineSeqTypes,
-                aceseqSeqType             : SeqType.aceseqPipelineSeqTypes,
+                sophiaSeqTypes            : SeqType.sophiaPipelineSeqTypes,
+                aceseqSeqTypes            : SeqType.aceseqPipelineSeqTypes,
+                runYapsaSeqTypes          : SeqType.runYapsaPipelineSeqTypes,
                 snv                       : project?.snv,
                 thresholdsTable           : thresholdsTable,
                 snvConfigTable            : snvConfigTable,
                 indelConfigTable          : indelConfigTable,
                 sophiaConfigTable         : sophiaConfigTable,
                 aceseqConfigTable         : aceseqConfigTable,
+                runYapsaConfigTable       : runYapsaConfigTable,
                 snvDropDown               : Project.Snv.values(),
                 directory                 : projectDirectory ?: '',
                 analysisDirectory         : project?.dirAnalysis ?: '',
@@ -104,8 +108,6 @@ class ProjectConfigController {
                 checkSophiaReferenceGenome: checkSophiaReferenceGenome,
                 checkAceseqReferenceGenome: checkAceseqReferenceGenome,
                 projectInfos              : project?.projectInfos,
-                hasErrors                 : params.hasErrors,
-                message                   : params.message,
         ]
     }
 
@@ -252,10 +254,14 @@ class ProjectConfigController {
             row.add(seqType.displayNameWithLibraryLayout)
             SnvConfig snvConfig
             RoddyWorkflowConfig roddyWorkflowConfig
+            RunYapsaConfig config
             if (pipeline.type == Pipeline.Type.SNV && (snvConfig = atMostOneElement(SnvConfig.findAllByProjectAndSeqTypeAndObsoleteDateIsNull(project, seqType)))) {
                 row.add("Yes")
                 row.add(snvConfig.externalScriptVersion)
-            } else if ((roddyWorkflowConfig = atMostOneElement(RoddyWorkflowConfig.findAllByProjectAndSeqTypeAndPipelineAndObsoleteDateIsNull(project, seqType, pipeline)))) {
+            } else if (pipeline.name == Pipeline.Name.RUN_YAPSA && (config = atMostOneElement(RunYapsaConfig.findAllByProjectAndSeqTypeAndObsoleteDateIsNull(project, seqType)))) {
+                row.add("Yes")
+                row.add(config.programVersion)
+            } else if (pipeline.usesRoddy() && (roddyWorkflowConfig = atMostOneElement(RoddyWorkflowConfig.findAllByProjectAndSeqTypeAndPipelineAndObsoleteDateIsNull(project, seqType, pipeline)))) {
                 row.add("Yes")
                 row.add(roddyWorkflowConfig.pluginVersion)
             } else {

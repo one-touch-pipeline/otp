@@ -23,6 +23,8 @@ class ProcessingOption implements Entity {
         PIPELINE_ACESEQ_BASE_PROJECT_CONFIG("The base project file for Aceseq pipeline", "otpACEseq-1.0", TypeValidators.SINGLE_WORD_TEXT),
         PIPELINE_ACESEQ_REFERENCE_GENOME("Name of reference genomes for Aceseq, comma-separated", '', TypeValidators.SINGLE_LINE_TEXT),
 
+        PIPELINE_RUNYAPSA_DEFAULT_VERSION("runYapsa default version", '', TypeValidators.SINGLE_LINE_TEXT),
+        PIPELINE_RUNYAPSA_AVAILABLE_VERSIONS("runYapsa versions, comma-separated", '', TypeValidators.SINGLE_LINE_TEXT),
         PIPELINE_RUNYAPSA_REFERENCE_GENOME("Name of reference genomes for runYapsa, comma-separated", '', TypeValidators.SINGLE_LINE_TEXT),
 
         PIPELINE_SOPHIA_PLUGIN_NAME("Name of the Sophia pipeline plugin", "SophiaWorkflow", TypeValidators.SINGLE_WORD_TEXT),

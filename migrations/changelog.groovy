@@ -109,4 +109,6 @@ databaseChangeLog = {
 	}
 
 	include file: 'changelogs/2018/OTP-2896.groovy'
+
+	include file: 'changelogs/2018/OTP-2897.groovy'
 }

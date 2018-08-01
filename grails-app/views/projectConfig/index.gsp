@@ -13,12 +13,6 @@
     <div class="body">
     <g:render template="/templates/messages"/>
     <g:if test="${projects}">
-        <g:if test="${hasErrors == true}">
-            <div class="errors"> <li>${message}</li></div>
-        </g:if>
-        <g:elseif test="${message}">
-            <div class="message">${message}</div>
-        </g:elseif>
         <div id="projectCommentBox" class="commentBoxContainer">
             <div id="commentLabel">Comment:</div>
             <sec:ifNotGranted roles="ROLE_OPERATOR">
@@ -380,7 +374,7 @@
             <sec:ifAllGranted roles="ROLE_OPERATOR">
                 <g:message code="projectOverview.sophia.configure"/>
                 <ul>
-                    <g:each in="${sophiaSeqType}" var="seqType">
+                    <g:each in="${sophiaSeqTypes}" var="seqType">
                         <li>
                             <g:if test="${!checkSophiaReferenceGenome[seqType]}">
                                 <g:link controller='configurePipeline' action='sophia' params='["project.id": project.id, "seqType.id": seqType.id]' class="configure">
@@ -415,7 +409,7 @@
             <sec:ifAllGranted roles="ROLE_OPERATOR">
                 <g:message code="projectOverview.aceseq.configure"/>
                 <ul>
-                    <g:each in="${aceseqSeqType}" var="seqType">
+                    <g:each in="${aceseqSeqTypes}" var="seqType">
                         <li>
                             <g:if test="${!checkAceseqReferenceGenome[seqType]}">
                                 <g:link controller='configurePipeline' action='aceseq' params='["project.id": project.id, "seqType.id": seqType.id]' class="configure">
@@ -431,6 +425,36 @@
             </sec:ifAllGranted>
             <table>
                 <g:each var="row" in="${aceseqConfigTable}" status="i">
+                    <tr>
+                        <g:each var="cell" in="${row}">
+                            <g:if test="${i == 0}">
+                                <th>${cell}</th>
+                            </g:if>
+                            <g:else>
+                                <td class="tableEntry">${cell}</td>
+                            </g:else>
+                        </g:each>
+                    </tr>
+                </g:each>
+            </table>
+            <br>
+        </div>
+        <div>
+            <h3>${g.message(code: 'projectOverview.runYapsa.title')}</h3>
+            <sec:ifAllGranted roles="ROLE_OPERATOR">
+                <g:message code="projectOverview.runYapsa.configure"/>
+                <ul>
+                    <g:each in="${runYapsaSeqTypes}" var="seqType">
+                        <li>
+                            <g:link controller='configurePipeline' action='runYapsa' params='["project.id": project.id, "seqType.id": seqType.id]' class="configure">
+                                ${seqType.displayNameWithLibraryLayout}
+                            </g:link>
+                        </li>
+                    </g:each>
+                </ul>
+            </sec:ifAllGranted>
+            <table>
+                <g:each var="row" in="${runYapsaConfigTable}" status="i">
                     <tr>
                         <g:each var="cell" in="${row}">
                             <g:if test="${i == 0}">

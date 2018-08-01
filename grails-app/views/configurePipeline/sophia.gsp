@@ -7,6 +7,8 @@
 </head>
 <body>
     <div class="body">
+        <g:render template="/templates/messages"/>
+
         <h1 style="display: inline"><g:message code="configurePipeline.sophia.title" args="[project.name, seqType.displayName]"/></h1>
         <g:form controller="projectConfig" style="display: inline; float: right">
             <g:submitButton name="back" value="Back to Overview"/>

@@ -4,6 +4,7 @@ import de.dkfz.tbi.otp.administration.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
+import de.dkfz.tbi.otp.dataprocessing.runYapsa.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.processing.*
@@ -12,12 +13,14 @@ import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.*
 import grails.plugin.springsecurity.*
 import grails.plugin.springsecurity.acl.*
+import grails.validation.*
+import org.springframework.beans.factory.annotation.*
 import org.springframework.security.access.prepost.*
 import org.springframework.security.acls.domain.*
 import org.springframework.security.acls.model.*
-import org.springframework.beans.factory.annotation.*
-
+import org.springframework.validation.*
 import org.springframework.web.multipart.*
+
 import java.nio.file.*
 import java.nio.file.attribute.*
 
@@ -384,12 +387,39 @@ class ProjectService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void invalidateProjectConfig(Project project, SeqType seqType, Pipeline pipeline) {
-        RoddyWorkflowConfig roddyWorkflowConfig = RoddyWorkflowConfig.getLatestForProject(project, seqType, pipeline)
-        if (roddyWorkflowConfig) {
-            roddyWorkflowConfig.makeObsolete()
+        ConfigPerProjectAndSeqType config = atMostOneElement(ConfigPerProjectAndSeqType.findAllByProjectAndSeqTypeAndPipelineAndObsoleteDate(project, seqType, pipeline, null))
+        if (config) {
+            config.makeObsolete()
         }
     }
 
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    Errors createOrUpdateRunYapsaConfig(Project project, SeqType seqType, String programVersion) {
+        Pipeline pipeline = Pipeline.findByName(Pipeline.Name.RUN_YAPSA)
+        ConfigPerProjectAndSeqType latest = getLatestRunYapsaConfig(project, seqType)
+
+        if (latest?.programVersion != programVersion) {
+            latest?.makeObsolete()
+
+            try {
+                new RunYapsaConfig(
+                        project: project,
+                        seqType: seqType,
+                        pipeline: pipeline,
+                        programVersion: programVersion,
+                        previousConfig: latest,
+                ).save(failOnError: true)
+            } catch (ValidationException e) {
+                return e.errors
+            }
+        }
+        return null
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    RunYapsaConfig getLatestRunYapsaConfig(Project project, SeqType seqType) {
+        RunYapsaConfig.findByProjectAndSeqTypeAndObsoleteDateIsNull(project, seqType)
+    }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void configureRnaAlignmentReferenceGenome(RnaAlignmentReferenceGenomeConfiguration rnaAlignmentConfiguration) {
