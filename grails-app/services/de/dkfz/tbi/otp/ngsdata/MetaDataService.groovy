@@ -156,7 +156,7 @@ class MetaDataService {
         if (!mateNumbers) {
             throw new RuntimeException("cannot find mateNumber for $dataFileName")
         }
-        assert mateNumbers.size() == 1, "$dataFileName matches to more then one pattern"
+        assert mateNumbers.size() == 1, "$dataFileName matches to more than one pattern"
         return mateNumbers.first() as int // without the "as" the conversion is wrong
     }
 }

@@ -9,7 +9,7 @@ class RunYapsaInstance extends BamFilePairAnalysis implements ProcessParameterOb
 
     @Override
     OtpPath getInstancePath() {
-        return new OtpPath(samplePair.runYaspaSamplePairPath, instanceName)
+        return new OtpPath(samplePair.runYapsaSamplePairPath, instanceName)
     }
 
     @Override

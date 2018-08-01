@@ -105,6 +105,8 @@ phabricatorAlias:${phabricatorAlias}
                     sophiaNotification(processingStatus) >> SOPHIA.toString()
             (processingStep == ACESEQ ? 1 : 0) *
                     aceseqNotification(processingStatus) >> ACESEQ.toString()
+            (processingStep == RUN_YAPSA ? 1 : 0) *
+                    runYapsaNotification(processingStatus) >> RUN_YAPSA.toString()
         }
         createNotificationTextService.messageSource = Mock(PluginAwareResourceBundleMessageSource) {
             _ * getMessageInternal("notification.template.seqCenterNote.${CollectionUtils.exactlyOneElement(ticket.findAllSeqTracks()*.seqCenter.unique()).name.toLowerCase()}", [], _) >> generalSeqCenterComment
@@ -154,18 +156,20 @@ phabricatorAlias:
         ALIGNMENT      | null                       | ''
         SNV            | null                       | ''
         INDEL          | null                       | ''
+        RUN_YAPSA      | null                       | ''
         INSTALLATION   | 'Some comment'             | ''
         ALIGNMENT      | 'Some comment'             | ''
         SNV            | 'Some comment'             | ''
         INDEL          | 'Some comment'             | ''
         SOPHIA         | 'Some comment'             | ''
         ACESEQ         | 'Some comment'             | ''
+        RUN_YAPSA      | 'Some comment'             | ''
         INSTALLATION   | ''                         | 'Some general comment'
         INSTALLATION   | 'Some otrs comment'        | 'Some general comment'
         INSTALLATION   | NOTE                       | NOTE
     }
 
-    void "notification, when ticket has more then one seq center, ignore seq center default message"() {
+    void "notification, when ticket has more than one seq center, ignore seq center default message"() {
         given:
         String seqCenterMessage1 = "Message of seq center 1"
         String seqCenterMessage2 = "Message of seq center 2"

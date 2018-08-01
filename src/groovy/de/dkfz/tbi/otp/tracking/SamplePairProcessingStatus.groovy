@@ -29,7 +29,13 @@ class SamplePairProcessingStatus {
     final RunYapsaInstance completeRunYapsaInstance
 
     WorkflowProcessingStatus getVariantCallingProcessingStatus() {
-        return TrackingService.combineStatuses([snvProcessingStatus, indelProcessingStatus, sophiaProcessingStatus, aceseqProcessingStatus], Closure.IDENTITY)
+        return TrackingService.combineStatuses([
+                snvProcessingStatus,
+                indelProcessingStatus,
+                sophiaProcessingStatus,
+                aceseqProcessingStatus,
+                runYapsaProcessingStatus,
+        ], Closure.IDENTITY)
     }
 
     List<String> variantCallingWorkflowNames() {
@@ -38,6 +44,7 @@ class SamplePairProcessingStatus {
                 Indel: indelProcessingStatus,
                 'SV (from SOPHIA)': sophiaProcessingStatus,
                 'CNV (from ACEseq)': aceseqProcessingStatus,
+                RunYapsa: runYapsaProcessingStatus,
         ].findAll { it ->
             it.value != WorkflowProcessingStatus.NOTHING_DONE_WONT_DO
         }.keySet().toList()

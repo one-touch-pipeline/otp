@@ -51,6 +51,7 @@ class TrackingService {
             otrsTicket.indelFinished = null
             otrsTicket.sophiaFinished = null
             otrsTicket.aceseqFinished = null
+            otrsTicket.runYapsaFinished = null
             otrsTicket.finalNotificationSent = false
             otrsTicket.automaticNotification = automaticNotification
             if (!otrsTicket.seqCenterComment) {

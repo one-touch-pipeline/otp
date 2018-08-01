@@ -6,7 +6,6 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.*
 import de.dkfz.tbi.otp.tracking.OtrsTicket.ProcessingStep
-import de.dkfz.tbi.otp.utils.CollectionUtils
 import groovy.text.*
 import org.codehaus.groovy.grails.web.mapping.*
 import org.springframework.beans.factory.annotation.*
@@ -215,7 +214,6 @@ class CreateNotificationTextService {
         return variantCallingNotification(status, SNV)
     }
 
-
     String indelNotification(ProcessingStatus status) {
         return variantCallingNotification(status, INDEL)
     }
@@ -228,6 +226,9 @@ class CreateNotificationTextService {
         return variantCallingNotification(status, ACESEQ)
     }
 
+    String runYapsaNotification(ProcessingStatus status) {
+        return variantCallingNotification(status, RUN_YAPSA)
+    }
 
     String variantCallingNotification(ProcessingStatus status, ProcessingStep notificationStep) {
         assert status
@@ -244,35 +245,25 @@ class CreateNotificationTextService {
             throw new RuntimeException("No ${notificationStep.displayName} finished yet.")
         }
         String directories = variantCallingDirectories(samplePairsFinished, notificationStep)
-        String otpLinks = ''
-        switch (notificationStep) {
-            case SNV:
-                otpLinks = createOtpLinks(samplePairsFinished*.project, 'snv', 'results')
-                break
-            case INDEL:
-                otpLinks = createOtpLinks(samplePairsFinished*.project, 'indel', 'results')
-                break
-            case SOPHIA:
-                otpLinks = createOtpLinks(samplePairsFinished*.project, 'sophia', 'results')
-                break
-            case ACESEQ:
-                otpLinks = createOtpLinks(samplePairsFinished*.project, 'aceseq', 'results')
-                break
-            default:
-                //no links
-                break
+        String message = createMessage ("notification.template.step.processed", [
+                displayName        : notificationStep.displayName,
+                samplePairsFinished: getSamplePairRepresentation(samplePairsFinished),
+        ])
+        if (notificationStep.controllerName && notificationStep.actionName) {
+            message += createMessage ("notification.template.step.processed.results.links", [
+                    otpLinks: createOtpLinks(samplePairsFinished*.project, notificationStep.controllerName, notificationStep.actionName),
+            ])
         }
-        String message = createMessage ("notification.template.${notificationStep.name().toLowerCase()}.processed", [
-                samplePairsFinished    : getSamplePairRepresentation(samplePairsFinished),
-                directories            : directories,
-                otpLinks               : otpLinks,
+        message += createMessage ("notification.template.step.processed.results.directories", [
+                directories: directories,
         ])
 
         List<SamplePair> samplePairsNotProcessed = map[NOTHING_DONE_WONT_DO]*.samplePair.findAll {
             it."${notificationStep}ProcessingStatus" != SamplePair.ProcessingStatus.DISABLED
         }
         if (samplePairsNotProcessed) {
-            message += '\n' + createMessage("notification.template.${notificationStep.name().toLowerCase()}.notProcessed", [
+            message += '\n' + createMessage("notification.template.step.notProcessed", [
+                    notificationSubject    : notificationStep.notificationSubject,
                     samplePairsNotProcessed: getSamplePairRepresentation(samplePairsNotProcessed),
                     emailSenderSalutation  : ProcessingOptionService.findOptionAssure(OptionName.EMAIL_SENDER_SALUTATION, null, null),
             ])

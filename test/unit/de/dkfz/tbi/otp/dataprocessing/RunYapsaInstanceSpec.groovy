@@ -58,7 +58,7 @@ class RunYapsaInstanceSpec extends Specification {
         samplePairPath = "${samplePair.sampleType1.name}_${samplePair.sampleType2.name}"
 
 
-        SamplePair.metaClass.getRunYaspaSamplePairPath = {
+        SamplePair.metaClass.getRunYapsaSamplePairPath = {
             return new OtpPath(samplePair.project, samplePairPath)
         }
     }

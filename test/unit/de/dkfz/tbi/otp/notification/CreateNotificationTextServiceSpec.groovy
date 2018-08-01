@@ -79,6 +79,11 @@ class CreateNotificationTextServiceSpec extends Specification {
                     processingStep        : ACESEQ,
                     customProcessingStatus: "aceseqProcessingStatus",
                     notification          : "aceseqNotification",
+            ], [
+                    type                  : "runYapsa",
+                    processingStep        : RUN_YAPSA,
+                    customProcessingStatus: "runYapsaProcessingStatus",
+                    notification          : "runYapsaNotification",
             ],
     ]
 
@@ -509,7 +514,6 @@ ${expectedAlign}"""
         then:
         AssertionError e = thrown()
         e.message.contains('assert status')
-
     }
 
     @Unroll
@@ -518,9 +522,6 @@ ${expectedAlign}"""
         DomainFactory.createRoddyAlignableSeqTypes()
         DomainFactory.createProcessingOptionForNotificationRecipient()
         DomainFactory.createProcessingOptionForEmailSenderSalutation()
-
-
-
 
         Map data1 = createData([
                 sampleId1                : 'sampleId1',
@@ -537,6 +538,7 @@ ${expectedAlign}"""
                 indelProcessingStatus: indel ? ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_MIGHT_DO : ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO,
                 sophiaProcessingStatus: sophia ? ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_MIGHT_DO : ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO,
                 aceseqProcessingStatus: aceseq ? ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_MIGHT_DO : ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO,
+                runYapsaProcessingStatus: runYapsa ? ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_MIGHT_DO : ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO,
         )
 
         ProcessingStatus processingStatus = new ProcessingStatus([
@@ -566,14 +568,17 @@ ${expectedAlign}"""
         if (secondSampleAligned) {
             seqTracks.add(data2.seqTrack)
             expectedSamples << "${createNotificationTextService.getSampleName(data2.seqTrack)} (${data2.sampleId1}, ${data2.sampleId2})"
-            if (indel | snv | sophia | aceseq) {
+            if (indel | snv | sophia | aceseq | runYapsa) {
                 samplePairWithVariantCalling.add(data2.samplePair)
-                //The If cases have to be ordered alphabetic
+                //The If cases have to be ordered alphabetically
                 if (aceseq) {
                     variantCallingPipelines << 'CNV (from ACEseq)'
                 }
                 if (indel) {
                     variantCallingPipelines << 'Indel'
+                }
+                if (runYapsa) {
+                    variantCallingPipelines << 'RunYapsa'
                 }
                 if (snv) {
                     variantCallingPipelines << 'SNV'
@@ -630,19 +635,18 @@ ${expectedVariantCallingRunning}${expectedVariantCallingNotRunning}"""
         expected == message
 
         where:
-        multipleSeqTypes | multipleProjects | secondSampleAligned | snv   | indel | sophia | aceseq
-        false            | false            | true                | false | false | false  | false
-        true             | false            | true                | false | false | false  | false
-        false            | true             | true                | false | false | false  | false
-        false            | false            | false               | false | false | false  | false
-        false            | false            | true                | true  | false | false  | false
-        false            | false            | true                | false | true  | false  | false
-        false            | false            | true                | true  | true  | false  | false
-        false            | false            | true                | false | true  | true   | false
-        false            | false            | true                | true  | true  | true   | true
-        false            | false            | true                | false | false | true   | true
-        false            | false            | true                | true  | true  | true   | true
-
+        multipleSeqTypes | multipleProjects | secondSampleAligned | snv   | indel | sophia | aceseq | runYapsa
+        false            | false            | false               | false | false | false  | false  | false
+        false            | false            | true                | false | false | false  | false  | false
+        false            | true             | true                | false | false | false  | false  | false
+        true             | false            | true                | false | false | false  | false  | false
+        false            | false            | true                | false | true  | false  | false  | false
+        false            | false            | true                | true  | true  | false  | false  | false
+        false            | false            | true                | false | false | true   | true   | true
+        false            | false            | true                | false | true  | true   | false  | false
+        false            | false            | true                | true  | true  | true   | true   | true
+        false            | false            | true                | false | false | true   | true   | false
+        true             | true             | true                | true  | true  | true   | true   | true
     }
 
     @Unroll("#pairAnalysisList.type, when ProcessingStatus is null, throw assert")
@@ -686,7 +690,13 @@ ${expectedVariantCallingRunning}${expectedVariantCallingNotRunning}"""
                 data3.seqTrackProcessingStatus,
         ])
 
-        int projectCount = pairAnalysisContentsPermutationList.multipleProjects && pairAnalysisContentsPermutationList.processingStatus == ProcessingStatus.WorkflowProcessingStatus.ALL_DONE ? 2 : 1
+        OtrsTicket.ProcessingStep processingStep = (OtrsTicket.ProcessingStep) pairAnalysisContentsPermutationList.processingStep
+        boolean expectsLinks = processingStep.controllerName && processingStep.actionName
+
+        int projectCount = 0
+        if (expectsLinks) {
+            projectCount = pairAnalysisContentsPermutationList.multipleProjects && pairAnalysisContentsPermutationList.processingStatus == ProcessingStatus.WorkflowProcessingStatus.ALL_DONE ? 2 : 1
+        }
 
         CreateNotificationTextService createNotificationTextService = new CreateNotificationTextService(
                 linkGenerator: Mock(LinkGenerator) {
@@ -713,19 +723,21 @@ ${expectedVariantCallingRunning}${expectedVariantCallingNotRunning}"""
 
         String expectedSamplePairsFinished = createNotificationTextService.getSamplePairRepresentation(samplePairWithAnalysis)
         String expectedSamplePairsNotProcessed = createNotificationTextService.getSamplePairRepresentation(samplePairWithoutAnalysis)
-        String expectedDirectories = createNotificationTextService.variantCallingDirectories(samplePairWithAnalysis,
-                (OtrsTicket.ProcessingStep) pairAnalysisContentsPermutationList.processingStep)
-        String expectedLinks = samplePairWithAnalysis*.project.unique().collect { 'link' }.join('\n')
+        String expectedDirectories = createNotificationTextService.variantCallingDirectories(samplePairWithAnalysis, processingStep)
+        String expectedLinks = expectsLinks ? samplePairWithAnalysis*.project.unique().collect { 'link' }.join('\n') : ""
 
         String expected = """
-${pairAnalysisContentsPermutationList.type} finished
+${processingStep.displayName} finished
 samplePairsFinished: ${expectedSamplePairsFinished}
-otpLinks: ${expectedLinks}
-directories: ${expectedDirectories}
 """
+        if (expectsLinks) {
+            expected += "otpLinks: ${expectedLinks}\n"
+        }
+        expected += "directories: ${expectedDirectories}\n"
+
         if (expectedSamplePairsNotProcessed) {
             expected += """\n
-${pairAnalysisContentsPermutationList.type} not processed
+${processingStep.notificationSubject} not processed
 samplePairsNotProcessed: ${expectedSamplePairsNotProcessed}
 """
         }
@@ -779,6 +791,7 @@ samplePairsNotProcessed: ${expectedSamplePairsNotProcessed}
         ProcessingStatus.WorkflowProcessingStatus indelProcessingStatus = properties.indelProcessingStatus ?: ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO
         ProcessingStatus.WorkflowProcessingStatus sophiaProcessingStatus = properties.sophiaProcessingStatus ?: ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO
         ProcessingStatus.WorkflowProcessingStatus aceseqProcessingStatus = properties.aceseqProcessingStatus ?: ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO
+        ProcessingStatus.WorkflowProcessingStatus runYapsaProcessingStatus = properties.runYapsaProcessingStatus ?: ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO
         Run run = properties.run ?: DomainFactory.createRun()
         String sampleId1 = properties.sampleId1 ?: "sampleId_${DomainFactory.counter++}"
         String sampleId2 = properties.sampleId2
@@ -840,6 +853,8 @@ samplePairsNotProcessed: ${expectedSamplePairsNotProcessed}
                                                 sophiaProcessingStatus,
                                                 null,
                                                 aceseqProcessingStatus,
+                                                null,
+                                                runYapsaProcessingStatus,
                                                 null,
                                         )
                                 ]
@@ -917,44 +932,16 @@ mergingProgram: ${mergingProgram}
 mergingParameter: ${mergingParameter}
 samtoolsProgram: ${samtoolsProgram}
 '''
-            _ * getMessageInternal("notification.template.snv.processed", [], _) >> '''
-snv finished
+            _ * getMessageInternal("notification.template.step.processed", [], _) >> '''
+${displayName} finished
 samplePairsFinished: ${samplePairsFinished}
-otpLinks: ${otpLinks}
-directories: ${directories}
 '''
-            _ * getMessageInternal("notification.template.snv.notProcessed", [], _) >> '''
-snv not processed
-samplePairsNotProcessed: ${samplePairsNotProcessed}
-'''
-            _ * getMessageInternal("notification.template.indel.processed", [], _) >> '''
-indel finished
-samplePairsFinished: ${samplePairsFinished}
-otpLinks: ${otpLinks}
-directories: ${directories}
-'''
-            _ * getMessageInternal("notification.template.indel.notProcessed", [], _) >> '''
-indel not processed
-samplePairsNotProcessed: ${samplePairsNotProcessed}
-'''
-            _ * getMessageInternal("notification.template.aceseq.processed", [], _) >> '''
-aceseq finished
-samplePairsFinished: ${samplePairsFinished}
-otpLinks: ${otpLinks}
-directories: ${directories}
-'''
-            _ * getMessageInternal("notification.template.aceseq.notProcessed", [], _) >> '''
-aceseq not processed
-samplePairsNotProcessed: ${samplePairsNotProcessed}
-'''
-            _ * getMessageInternal("notification.template.sophia.processed", [], _) >> '''
-sophia finished
-samplePairsFinished: ${samplePairsFinished}
-otpLinks: ${otpLinks}
-directories: ${directories}
-'''
-            _ * getMessageInternal("notification.template.sophia.notProcessed", [], _) >> '''
-sophia not processed
+            _ * getMessageInternal("notification.template.step.processed.results.links", [], _) >> '''otpLinks: ${otpLinks}\n'''
+
+            _ * getMessageInternal("notification.template.step.processed.results.directories", [], _) >> '''directories: ${directories}\n'''
+
+            _ * getMessageInternal("notification.template.step.notProcessed", [], _) >> '''
+${notificationSubject} not processed
 samplePairsNotProcessed: ${samplePairsNotProcessed}
 '''
         }

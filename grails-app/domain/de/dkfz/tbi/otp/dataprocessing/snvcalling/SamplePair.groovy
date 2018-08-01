@@ -21,7 +21,7 @@ class SamplePair implements TimeStamped, Entity {
     final static String INDEL_RESULTS_PATH_PART = 'indel_results'
     final static String SOPHIA_RESULTS_PATH_PART = 'sv_results'
     final static String ACESEQ_RESULTS_PATH_PART = 'cnv_results'
-    final static String RUN_YASPA_RESULTS_PATH_PART = 'mutational_signatures_results'
+    final static String RUN_YAPSA_RESULTS_PATH_PART = 'mutational_signatures_results'
 
     /**
      * Creates an instance. Does <em>not</em> persist it.
@@ -156,8 +156,8 @@ class SamplePair implements TimeStamped, Entity {
         return buildPath(ACESEQ_RESULTS_PATH_PART)
     }
 
-    OtpPath getRunYaspaSamplePairPath() {
-        return buildPath(RUN_YASPA_RESULTS_PATH_PART)
+    OtpPath getRunYapsaSamplePairPath() {
+        return buildPath(RUN_YAPSA_RESULTS_PATH_PART)
     }
 
     private OtpPath buildPath(String analysisPath) {

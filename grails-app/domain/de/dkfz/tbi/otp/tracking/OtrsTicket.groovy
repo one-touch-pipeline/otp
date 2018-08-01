@@ -12,14 +12,14 @@ class OtrsTicket implements Commentable, Entity {
 
     @TupleConstructor
     enum ProcessingStep {
-        INSTALLATION('installation', 'installed', null),
-        FASTQC('FastQC', null, INSTALLATION),
-        ALIGNMENT('alignment', 'aligned', INSTALLATION),
-        SNV('SNV calling', 'SNV-called', ALIGNMENT),
-        INDEL('Indel calling', 'Indel-called', ALIGNMENT),
-        SOPHIA('SV calling', 'SV-called', ALIGNMENT),
-        ACESEQ('CNV calling', 'CNV-called', SOPHIA),
-        RUN_YAPSA('YAPSA signature analysis', 'YAPSA ran', SNV),
+        INSTALLATION('installation', 'installed', null, null, null),
+        FASTQC('FastQC', null, null, null, INSTALLATION),
+        ALIGNMENT('alignment', 'aligned', null, null, INSTALLATION),
+        SNV('SNV calling', 'SNV-called', 'snv', 'results', ALIGNMENT),
+        INDEL('Indel calling', 'Indel-called', 'indel', 'results', ALIGNMENT),
+        SOPHIA('SV calling', 'SV-called', 'sophia', 'results', ALIGNMENT),
+        ACESEQ('CNV calling', 'CNV-called', 'aceseq', 'results', SOPHIA),
+        RUN_YAPSA('YAPSA signature analysis', 'YAPSA-analysed', null, null, SNV),
 
         final String displayName
         /**
@@ -28,6 +28,9 @@ class OtrsTicket implements Commentable, Entity {
          * {@code null} means that no notification shall be sent for this step
          */
         final String notificationSubject
+
+        final String controllerName
+        final String actionName
 
         final ProcessingStep dependsOn
 
