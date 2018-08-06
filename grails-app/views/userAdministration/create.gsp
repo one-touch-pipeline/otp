@@ -26,28 +26,18 @@
                 </tr>
             </tbody>
         </table>
-        <div id="roles_container">
-            <h2><g:message code="user.administration.ui.heading.roles"/></h2>
-            <ul>
-                <g:each in="${roles}">
-                    <li><input type="checkbox" name="role" value="${it.id}"/>${it.authority}</li>
-                </g:each>
-            </ul>
-        </div>
-        <div id="groups_container">
-            <h2><g:message code="user.administration.ui.heading.grous"/></h2>
-            <ul>
-                <g:each in="${groups}">
-                    <li><input type="checkbox" name="group" value="${it.id}"/>${it.name}</li>
-                </g:each>
-            </ul>
-        </div>
+        <h2><g:message code="user.administration.ui.heading.rolesAndGroups"/></h2>
+        <ul>
+            <g:each in="${roles}">
+                <li><input type="checkbox" name="role" value="${it.id}"/>${it.authority}</li>
+            </g:each>
+        </ul>
         <div class="buttons">
             <input type="submit" value="${g.message(code: 'user.administration.createUser')}"/>
         </div>
         </form>
     </div>
-    <asset:script>
+    <asset:script type="text/javascript">
         $(function () {
             $.otp.userAdministration.create.register();
         });

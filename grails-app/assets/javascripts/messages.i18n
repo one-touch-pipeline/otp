@@ -152,7 +152,6 @@ user.administration.list.email
 user.administration.list.enabled
 user.administration.list.accountExpired
 user.administration.list.accountLocked
-user.administration.list.passwordExpired
 user.administration.userRole.error.roleNotFound
 user.administration.userRole.error.userNotFound
 user.administration.userRole.error.general
@@ -185,6 +184,10 @@ user.administration.nextUser
 user.administration.previousUser
 user.administration.backToOverview
 user.administration.createUser
+user.administration.role.addRole
+user.administration.role.removeRole
+user.administration.role.addGroup
+user.administration.role.removeGroup
 
 # Group administration
 group.create.ui.dialog.title

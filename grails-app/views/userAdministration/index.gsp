@@ -9,6 +9,8 @@
 </head>
 <body>
     <div class="body">
+        <g:render template="/templates/messages"/>
+
         <h1><g:message code="user.administration.header"/></h1>
         <div>
             <form id="switch-user-form" action="${request.contextPath}/j_spring_security_switch_user" method="POST">
@@ -22,7 +24,6 @@
                     'user.administration.list.enabled',
                     'user.administration.list.accountExpired',
                     'user.administration.list.accountLocked',
-                    'user.administration.list.passwordExpired',
                     'otp.blank'
                 ]}" id="userTable"/>
             </div>
@@ -31,7 +32,7 @@
             <g:link action="create"><g:message code="user.administration.createUser"/></g:link>
         </div>
     </div>
-    <asset:script>
+    <asset:script type="text/javascript">
         $(function() {
             $.otp.userAdministration.loadUserList();
         });

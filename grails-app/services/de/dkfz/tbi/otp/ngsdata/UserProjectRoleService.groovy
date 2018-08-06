@@ -44,11 +44,7 @@ class UserProjectRoleService {
 
         User user = User.findByUsernameOrEmail(ldapUserDetails.cn, ldapUserDetails.mail)
         if (!user) {
-            user = userService.createUser(new CreateUserCommand([
-                    username: ldapUserDetails.cn,
-                    email: ldapUserDetails.mail,
-                    realName: ldapUserDetails.realName,
-            ]))
+            user = userService.createUser(ldapUserDetails.cn, ldapUserDetails.mail, ldapUserDetails.realName)
         }
         UserProjectRole userProjectRole = UserProjectRole.findByUserAndProject(user, project)
         assert !userProjectRole : "User '${user.username}' is already part of project '${project.name}'"
@@ -66,10 +62,7 @@ class UserProjectRoleService {
 
         User user = User.findByEmail(email)
         if (!user) {
-            user = userService.createUser(new CreateUserCommand([
-                    email: email,
-                    realName: realName,
-            ]))
+            user = userService.createUser(null, email, realName)
         }
         UserProjectRole userProjectRole = UserProjectRole.findByUserAndProject(user, project)
         assert !userProjectRole : "User '${user.realName}' is already part of project '${project.name}'"

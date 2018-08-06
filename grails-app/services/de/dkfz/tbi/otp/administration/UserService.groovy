@@ -1,15 +1,12 @@
 package de.dkfz.tbi.otp.administration
 
-import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.security.*
-import de.dkfz.tbi.otp.user.*
 import de.dkfz.tbi.otp.utils.*
-import grails.plugin.mail.MailService
-import grails.plugin.springsecurity.SpringSecurityService
-import grails.plugin.springsecurity.SpringSecurityUtils
-import org.codehaus.groovy.grails.commons.GrailsApplication
+import grails.plugin.mail.*
+import grails.plugin.springsecurity.*
+import org.codehaus.groovy.grails.commons.*
 import org.springframework.security.access.prepost.*
-import org.springframework.security.authentication.*
 
 /**
  * @short Service for User administration.
@@ -20,66 +17,19 @@ import org.springframework.security.authentication.*
 class UserService {
 
     static transactional = true
-    /**
-     * Dependency injection of springSecurityService
-     */
-    SpringSecurityService springSecurityService
-    /**
-     * Dependency injection of mail Service provided by the Mail plugin
-     */
-    MailService mailService
-    /**
-     * Dependency injection for Group Service
-     */
-    GroupService groupService
-    /**
-     * Dependency injection of grails Application
-     */
+
     @SuppressWarnings("GrailsStatelessService")
     GrailsApplication grailsApplication
 
+    SpringSecurityService springSecurityService
     ConfigService configService
 
-    void changePassword(String oldPassword, String newPassword) throws BadCredentialsException {
-        User user = (User)springSecurityService.getCurrentUser()
-        if (user.password != springSecurityService.encodePassword(oldPassword, null)) {
-            throw new BadCredentialsException("Cannot change password, old password is incorrect")
-        }
-        // TODO: verify password strength?
-        user.password = springSecurityService.encodePassword(newPassword, null)
-        user.passwordExpired = false
-        user.save()
-        springSecurityService.reauthenticate(user.username, newPassword)
-    }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void editUser(EditUserCommand cmd) {
-        User origUser = cmd.user
-        updateEmail(origUser, cmd.email)
-        updateRealName(origUser, cmd.realName)
-        updateAsperaAccount(origUser, cmd.asperaAccount)
-    }
-
-    User getCurrentUser() {
-        return User.findByUsername(springSecurityService.authentication.principal.username as String)?.sanitizedUser()
-    }
-
-    @PreAuthorize("hasRole('ROLE_ADMIN') or authentication.name==#username")
-    User getUser(String username) throws UserNotFoundException {
-        User user = User.findByUsername(username)
-        if (!user) {
-            throw new UserNotFoundException(username)
-        }
-        return user.sanitizedUser()
-    }
-
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    User getUser(Long id) throws UserNotFoundException {
-        User user = User.get(id)
-        if (!user) {
-            throw new UserNotFoundException(id)
-        }
-        return user
+    void editUser(User user, String email, String realName, String asperaAccount) {
+        updateEmail(user, email)
+        updateRealName(user, realName)
+        updateAsperaAccount(user, asperaAccount)
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -93,26 +43,19 @@ class UserService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(null, 'ADD_USER')")
-    User createUser(CreateUserCommand command) throws RegistrationException {
-        User user = new User(username: command.username,
-                             email: command.email,
+    User createUser(String username, String email, String realName, String asperaAccount = null, List<Role> roles = [], List<Long> groups = []) {
+        User user = new User(username: username,
+                             email: email,
                              enabled: true,
                              accountExpired: false,
                              accountLocked: false,
                              passwordExpired: false,
                              password: "*",
-                             realName: command.realName,
-                             asperaAccount: null)
-        if (!user.validate()) {
-            throw new RegistrationException(command.username)
-        }
-        user = user.save()
-        command.role.each {
-            addRoleToUser(user.id, it)
-        }
-        command.group.each {
-            Group group = groupService.getGroup(it)
-            groupService.addUserToGroup(user, group)
+                             realName: realName,
+                             asperaAccount: asperaAccount)
+        user = user.save(flush: true)
+        roles.each { Role role ->
+            addRoleToUser(user, role)
         }
         return user
     }
@@ -144,110 +87,71 @@ class UserService {
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    Boolean enableUser(Long userId, Boolean enable) throws UserNotFoundException {
-        User user = User.get(userId)
-        if (!user) {
-            throw new UserNotFoundException(userId)
-        }
-        if (user.enabled != enable) {
-            user.enabled = enable
-            user.save(flush: true)
-            return (User.get(userId).enabled == enable)
-        } else {
-            return false
-        }
+    User enableUser(User user, boolean enable) {
+        assert user: "the input user must not be null"
+        user.enabled = enable
+        assert user.save(flush: true)
+        return user
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    Boolean lockAccount(Long userId, Boolean lock) throws UserNotFoundException {
-        User user = User.get(userId)
-        if (!user) {
-            throw new UserNotFoundException(userId)
-        }
-        if (user.accountLocked != lock) {
-            user.accountLocked = lock
-            user.save(flush: true)
-            return (User.get(userId).accountLocked == lock)
-        } else {
-            return false
-        }
+    User lockAccount(User user, boolean lock) {
+        assert user: "the input user must not be null"
+        user.accountLocked = lock
+        assert user.save(flush: true)
+        return user
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    Boolean expireAccount(Long userId, Boolean expire) throws UserNotFoundException {
-        User user = User.get(userId)
-        if (!user) {
-            throw new UserNotFoundException(userId)
-        }
-        if (user.accountExpired != expire) {
-            user.accountExpired = expire
-            user.save(flush: true)
-            return (User.get(userId).accountExpired == expire)
-        } else {
-            return false
-        }
+    User expireAccount(User user, boolean expire) {
+        assert user: "the input user must not be null"
+        user.accountExpired = expire
+        assert user.save(flush: true)
+        return user
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    Boolean expirePassword(Long userId, Boolean expire) throws UserNotFoundException {
-        User user = User.get(userId)
-        if (!user) {
-            throw new UserNotFoundException(userId)
-        }
-        if (user.passwordExpired != expire) {
-            user.passwordExpired = expire
-            user.save(flush: true)
-            return (User.get(userId).passwordExpired == expire)
-        } else {
-            return false
-        }
+    User expirePassword(User user, boolean expire) {
+        assert user: "the input user must not be null"
+        user.passwordExpired = expire
+        assert user.save(flush: true)
+        return user
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     List<Role> getAllRoles() {
-        return Role.listOrderById().findAll { !it.authority.startsWith("GROUP_") }
+        return Role.findAllByAuthorityLike("ROLE_%")
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    List<Role> getRolesForUser(Long id) {
-        return Role.executeQuery("SELECT role FROM UserRole AS userRole JOIN userRole.role AS role JOIN userRole.user AS user WHERE user.id=:id ORDER BY role.id", [id: id]).findAll { !it.authority.startsWith("GROUP_") }
+    List<Role> getAllGroups() {
+        return Role.findAllByAuthorityLike("GROUP_%")
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    void addRoleToUser(Long userId, Long roleId) throws UserNotFoundException, RoleNotFoundException {
-        User user = User.get(userId)
-        if (!user) {
-            throw new UserNotFoundException(userId)
-        }
-        Role role = Role.get(roleId)
-        if (!role) {
-            throw new RoleNotFoundException(roleId)
-        }
-        if (!UserRole.get(userId, roleId)) {
+    List<Role> getRolesOfUser(User user) {
+        return UserRole.findAllByUserAndRoleInList(user, getAllRoles())*.role
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    List<Role> getGroupsOfUser(User user) {
+        return UserRole.findAllByUserAndRoleInList(user, getAllGroups())*.role
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    void addRoleToUser(User user, Role role) {
+        assert user : "User can not be null"
+        assert role : "Role can not be null"
+        if (!UserRole.findByUserAndRole(user, role)) {
             UserRole.create(user, role, true)
         }
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    void removeRoleFromUser(Long userId, Long roleId) throws UserNotFoundException, RoleNotFoundException {
-        User user = User.get(userId)
-        if (!user) {
-            throw new UserNotFoundException(userId)
-        }
-        Role role = Role.get(roleId)
-        if (!role) {
-            throw new RoleNotFoundException(roleId)
-        }
+    void removeRoleFromUser(User user, Role role) {
+        assert user : "User can not be null"
+        assert role : "Role can not be null"
         UserRole.remove(user, role, true)
-    }
-
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    Role getRoleByAuthority(String authority) throws RoleNotFoundException {
-        Role role = Role.findByAuthority(authority)
-        if (!role) {
-            throw new RoleNotFoundException(authority)
-        }
-        return role
     }
 
     boolean isPrivacyPolicyAccepted() {

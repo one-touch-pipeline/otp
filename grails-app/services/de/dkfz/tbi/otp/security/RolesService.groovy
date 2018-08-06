@@ -7,8 +7,8 @@ class RolesService {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     List<RolesWithUsers> getRolesAndUsers() {
-        List<RolesWithUsers> roles = Role.list().collect {
-            Role role -> new RolesWithUsers(role: role)
+        List<RolesWithUsers> roles = Role.list().collect { Role role ->
+            new RolesWithUsers(role: role)
         }
         roles.each {
             it.users = UserRole.findAllByRole(it.role)*.user.flatten()
