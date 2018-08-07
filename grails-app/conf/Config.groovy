@@ -176,8 +176,6 @@ grails.plugin.springsecurity.controllerAnnotations.staticRules = [
 
         // publicly available pages
         "/grails-errorhandler/**"                              : ["permitAll"],
-        "/seqTrackDataProvider/**"                             : ["permitAll"],
-        "/fastqFilePathDataProvider/**"                        : ["permitAll"],
         "/login/**"                                            : ["permitAll"],
         "/logout/**"                                           : ["permitAll"],
         "/document/download/**"                                : ["permitAll"],
