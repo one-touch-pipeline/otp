@@ -50,11 +50,6 @@ class UserProjectRoleService {
         assert !userProjectRole : "User '${user.username}' is already part of project '${project.name}'"
         userProjectRole = createUserProjectRole(user, project, projectRole, true, false)
 
-        Role role = Role.findByAuthority("ROLE_USER")
-        if (!UserRole.findByUserAndRole(user, role)) {
-            UserRole.create(user, role, true)
-        }
-
         if (projectRole.accessToFiles) {
             requestToAddUserToUnixGroupIfRequired(userProjectRole.user, userProjectRole.project)
         }

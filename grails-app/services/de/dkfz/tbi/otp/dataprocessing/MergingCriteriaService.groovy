@@ -29,7 +29,6 @@ class MergingCriteriaService {
         return null
     }
 
-    @PreAuthorize("hasRole('ROLE_USER')")
     List<SeqPlatformGroup> findDefaultSeqPlatformGroups() {
         return SeqPlatformGroup.createCriteria().list {
             isNull("mergingCriteria")

@@ -120,12 +120,6 @@ class DomainFactory {
         ], properties)
     }
 
-    static Role createRoleUserLazy() {
-        return createRoleLazy([
-                authority: Role.ROLE_USER,
-        ])
-    }
-
     static Role createRoleOperatorLazy() {
         return createRoleLazy([
                 authority: Role.ROLE_OPERATOR,

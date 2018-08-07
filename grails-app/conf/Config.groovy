@@ -186,13 +186,12 @@ grails.plugin.springsecurity.controllerAnnotations.staticRules = [
         "/metadataImport/autoImport"                           : ["permitAll"],
 
         // regular pages with access for logged-in users, protected by annotations in services
-        "/**"                                                  : ["hasRole('ROLE_USER')"],
+        "/**"                                                  : ["isFullyAuthenticated()"],
 ]
 
 // hierarchy of roles
 grails.plugin.springsecurity.roleHierarchy = '''
     ROLE_ADMIN > ROLE_OPERATOR
-    ROLE_OPERATOR > ROLE_USER
     ROLE_OPERATOR > ROLE_MMML_MAPPING
     ROLE_ADMIN > ROLE_SWITCH_USER
 '''

@@ -111,4 +111,8 @@ databaseChangeLog = {
 	include file: 'changelogs/2018/OTP-2896.groovy'
 
 	include file: 'changelogs/2018/OTP-2897.groovy'
+
+	changeSet(author: "klinga", id:"remove-role-user-SQL") {
+		sqlFile(path: 'changelogs/2018/remove-role-user.sql')
+	}
 }

@@ -234,32 +234,6 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         UserProjectRole.findByUserAndProjectAndProjectRole(user, project, projectRole)
     }
 
-    void "addUserToProjectAndNotifyGroupManagementAuthorities, create UserRole with role ROLE_USER if it does not exist"() {
-        given:
-        User user = DomainFactory.createUser()
-        Project project = DomainFactory.createProject()
-        ProjectRole projectRole = DomainFactory.createProjectRole()
-        LdapUserDetails ldapUserDetails = new LdapUserDetails(
-                cn:       user.username,
-                realName: user.realName,
-                mail:     user.email,
-        )
-        userProjectRoleService.ldapService = Mock(LdapService) {
-            getLdapUserDetailsByUsername(_) >> ldapUserDetails
-        }
-
-        expect:
-        UserRole.findByUserAndRole(user, Role.findByAuthority("ROLE_USER")) == null
-
-        when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            userProjectRoleService.addUserToProjectAndNotifyGroupManagementAuthority(project, projectRole, "search")
-        }
-
-        then:
-        UserRole.findByUserAndRole(user, Role.findByAuthority("ROLE_USER"))
-    }
-
     void "addUserToProjectAndNotifyGroupManagementAuthorities, unsuccessful ldap search throws exception"() {
         given:
         Project project = DomainFactory.createProject()

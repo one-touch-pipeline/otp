@@ -114,7 +114,6 @@
                     <td class="myKey"><g:message code="projectOverview.phabricatorAlias"/></td>
                     <td>
                         <otp:editorSwitch
-                                roles="ROLE_USER"
                                 link="${g.createLink(controller: 'projectConfig', action: 'updatePhabricatorAlias', params: ['project.id': project.id])}"
                                 value="${project?.phabricatorAlias}"/>
                     </td>

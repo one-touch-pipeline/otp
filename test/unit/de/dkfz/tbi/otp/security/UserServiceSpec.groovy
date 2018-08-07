@@ -14,7 +14,6 @@ class UserServiceSpec extends Specification {
 
     void "createFirstAdminUserIfNoUserExists, if no user exists, create one"() {
         given:
-        DomainFactory.createRoleUserLazy()
         DomainFactory.createRoleAdminLazy()
         assert User.count == 0
 
@@ -28,7 +27,6 @@ class UserServiceSpec extends Specification {
 
     void "createFirstAdminUserIfNoUserExists, if user already exists, don't create one"() {
         given:
-        DomainFactory.createRoleUserLazy()
         DomainFactory.createRoleAdminLazy()
         DomainFactory.createUser()
         assert User.count == 1

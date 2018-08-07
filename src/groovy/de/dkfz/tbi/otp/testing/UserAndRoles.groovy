@@ -23,15 +23,12 @@ trait UserAndRoles {
 
     /**
      * Creates four users and their roles:
-     * @li testuser with role ROLE_USER
-     * @li user with role ROLE_USER
-     * @li operator with ROLE_USER and ROLE_OPERATOR
-     * @li admin with ROLE_USER and ROLE_ADMIN
+     * @li testuser
+     * @li user
+     * @li operator with ROLE_OPERATOR
+     * @li admin with ROLE_ADMIN
      */
     void createUserAndRoles() {
-        Role userRole = new Role(authority: Role.ROLE_USER)
-        assertNotNull(userRole.save(flush: true))
-
         Role adminRole = new Role(authority: Role.ROLE_ADMIN)
         assertNotNull(adminRole.save(flush: true))
 
@@ -42,7 +39,6 @@ trait UserAndRoles {
             User user = DomainFactory.createUser([username: it])
             assertNotNull(user.save(flush: true))
             assertNotNull(new AclSid(sid: user.username, principal: true).save(flush: true))
-            UserRole.create(user, userRole, true)
             it == ADMIN ? UserRole.create(user, adminRole, true) : ""
             it == OPERATOR ? UserRole.create(user, operatorRole, true) : ""
         }

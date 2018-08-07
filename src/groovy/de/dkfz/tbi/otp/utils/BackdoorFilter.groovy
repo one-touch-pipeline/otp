@@ -20,7 +20,7 @@ import javax.servlet.http.*
  *
  * The idea behind this backdoor is that in development mode the developer does not have
  * to login. For that the filter creates a UsernamePasswordAuthenticationToken which is
- * authenticated and has the authorities ROLE_USER and ROLE_ADMIN. With other words: the
+ * authenticated and has the authority ROLE_ADMIN. With other words: the
  * filter allows full access to the application.
  *
  * As that is quite a security risk the filter ensures that it is only used in development
@@ -44,10 +44,9 @@ class BackdoorFilter extends GenericFilterBean {
      */
     static final String FILTER_APPLIED = "__otp_security_caf_applied"
     /**
-     * The filter injects a user with the ROLE_USER and ROLE_ADMIN authorities
+     * The filter injects a user with the ROLE_ADMIN authority
      */
     private List<GrantedAuthority> authorities = [
-            new SimpleGrantedAuthority(de.dkfz.tbi.otp.security.Role.ROLE_USER),
             new SimpleGrantedAuthority(de.dkfz.tbi.otp.security.Role.ROLE_ADMIN),
     ]
 

@@ -59,7 +59,6 @@ class UserService {
         updateAsperaAccount(origUser, cmd.asperaAccount)
     }
 
-    @PreAuthorize("hasRole('ROLE_USER')")
     User getCurrentUser() {
         return User.findByUsername(springSecurityService.authentication.principal.username as String)?.sanitizedUser()
     }
@@ -261,7 +260,6 @@ class UserService {
         return user.acceptedPrivacyPolicy
     }
 
-    @PreAuthorize("hasRole('ROLE_USER')")
     void acceptPrivacyPolicy() {
         if (springSecurityService.isLoggedIn()) {
             User user = springSecurityService.getCurrentUser()
@@ -298,7 +296,7 @@ No user exists yet, create user ${currentUser} with admin rights.
                         asperaAccount  : null,
                 ]).save(flush: true)
 
-                [Role.ROLE_ADMIN, Role.ROLE_USER].each {
+                [Role.ROLE_ADMIN].each {
                     new UserRole([
                             user: user,
                             role: CollectionUtils.exactlyOneElement(Role.findAllByAuthority(it))
