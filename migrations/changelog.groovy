@@ -115,4 +115,8 @@ databaseChangeLog = {
 	changeSet(author: "klinga", id:"remove-role-user-SQL") {
 		sqlFile(path: 'changelogs/2018/remove-role-user.sql')
 	}
+
+	changeSet(author: "klinga", id:"clean-acl") {
+		sqlFile(path: 'changelogs/2018/clean-acl.sql')
+	}
 }
