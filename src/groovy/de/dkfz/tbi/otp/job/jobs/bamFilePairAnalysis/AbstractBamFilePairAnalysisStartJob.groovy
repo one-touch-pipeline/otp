@@ -89,7 +89,7 @@ abstract class AbstractBamFilePairAnalysisStartJob extends AbstractStartJobImpl 
     }
 
     String getFormattedDate() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH'h'mm_VV")
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH'h'mm")
         ZonedDateTime time = ZonedDateTime.of(LocalDateTime.now(), ConfigService.getTimeZoneId())
         return time.format(formatter).replaceAll('/', '_')
     }
