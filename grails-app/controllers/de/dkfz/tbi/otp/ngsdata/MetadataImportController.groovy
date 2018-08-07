@@ -47,7 +47,7 @@ class MetadataImportController {
             }
             if (allValid) {
                 if (validateAndImportResults.size() == 1) {
-                    redirect(action: "details", id: validateAndImportResults.first().runSegment.id)
+                    redirect(action: "details", id: validateAndImportResults.first().metadataFile.runSegment.id)
                 } else {
                     redirect(action: "multiDetails", params: [metaDataFiles: validateAndImportResults*.metadataFile*.id])
                 }
