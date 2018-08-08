@@ -252,6 +252,7 @@ class CreateNotificationTextService {
         ])
         if (notificationStep.controllerName && notificationStep.actionName) {
             message += createMessage ("notification.template.step.processed.results.links", [
+                    displayName     : notificationStep.displayName,
                     otpLinks: createOtpLinks(samplePairsFinished*.project, notificationStep.controllerName, notificationStep.actionName),
             ])
         }
