@@ -3,9 +3,6 @@ package de.dkfz.tbi.otp.utils
 import de.dkfz.tbi.otp.job.jobs.utils.*
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.security.*
-import org.springframework.security.acls.domain.*
-import org.springframework.security.acls.model.*
 
 class Helper {
     JobDefinition firstJob = null
@@ -228,17 +225,6 @@ class JobExecutionPlanDSL {
                     errors.each { println(it) }
                 }
                 assert(errors.isEmpty())
-            }
-            // add the ACL
-            def aclUtilService = jep.domainClass.grailsApplication.mainContext.getBean("aclUtilService")
-            Group.list().each { Group group ->
-                if (group.readJobSystem) {
-                    Sid sid = new GrantedAuthoritySid(group.role.authority)
-                    aclUtilService.addPermission(jep, sid, BasePermission.READ)
-                    if (group.writeJobSystem) {
-                        aclUtilService.addPermission(jep, sid, BasePermission.WRITE)
-                    }
-                }
             }
         }
         println("Plan created")

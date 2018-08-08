@@ -193,7 +193,7 @@
                                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Admin <span class="caret"></span></a>
                                             <ul class="dropdown-menu">
                                                 <li><g:link controller="userAdministration">${g.message(code: "otp.menu.userAdministration")}</g:link></li>
-                                                <li><g:link controller="group">${g.message(code: "otp.menu.groupAdministration")}</g:link></li>
+                                                <li><g:link controller="roles">${g.message(code: "otp.menu.roles")}</g:link></li>
                                                 <li role="separator" class="divider"></li>
                                                 <li><g:link controller="processingOption">${g.message(code: "otp.menu.processingOptions")}</g:link></li>
                                                 <li role="separator" class="divider"></li>

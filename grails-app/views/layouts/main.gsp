@@ -118,7 +118,7 @@
                                     <li class="allGranted admin_nav_container nav_container"><g:link class="menuLinkContainer"><g:message code="otp.menu.adminSection"/> &#9661;</g:link>
                                         <ul>
                                             <li><g:link controller="userAdministration"><g:message code="otp.menu.userAdministration"/></g:link></li>
-                                            <li><g:link controller="group"><g:message code="otp.menu.groupAdministration"/></g:link></li>
+                                            <li><g:link controller="roles"><g:message code="otp.menu.roles"/></g:link></li>
                                             <li><g:link controller="crashRecovery"><g:message code="otp.menu.crashRecovery"/></g:link></li>
                                             <li><g:link controller="processingOption"><g:message code="otp.menu.processingOptions"/></g:link></li>
                                             <li><g:link controller="jobErrorDefinition"><g:message code="otp.menu.jobErrorDefinition"/></g:link></li>

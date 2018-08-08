@@ -1,6 +1,5 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.administration.*
 import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
@@ -9,16 +8,11 @@ import de.dkfz.tbi.otp.dataprocessing.runYapsa.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.*
-import grails.plugin.springsecurity.*
-import grails.plugin.springsecurity.acl.*
 import grails.validation.*
 import org.springframework.beans.factory.annotation.*
 import org.springframework.security.access.prepost.*
-import org.springframework.security.acls.domain.*
-import org.springframework.security.acls.model.*
 import org.springframework.validation.*
 import org.springframework.web.multipart.*
 
@@ -49,12 +43,9 @@ class ProjectService {
     static final Long PROJECT_INFO_MAX_SIZE = 20 * 1024 * 1024
 
 
-    AclUtilService aclUtilService
     @Autowired
     RemoteShellHelper remoteShellHelper
-    GroupService groupService
     ReferenceGenomeService referenceGenomeService
-    SpringSecurityService springSecurityService
     ExecutionHelperService executionHelperService
     ReferenceGenomeIndexService referenceGenomeIndexService
     GeneModelService geneModelService
@@ -129,16 +120,6 @@ class ProjectService {
         project = project.save(flush: true)
         assert (project != null)
 
-        // add to groups
-        Group.list().each { Group group ->
-            if (group.readProject) {
-                Sid sid = new GrantedAuthoritySid(group.role.authority)
-                aclUtilService.addPermission(project, sid, BasePermission.READ)
-                if (group.writeProject) {
-                    aclUtilService.addPermission(project, sid, BasePermission.WRITE)
-                }
-            }
-        }
         return project
     }
 
@@ -159,19 +140,6 @@ class ProjectService {
         project.costCenter = projectParams.costCenter
         project.tumorEntity = projectParams.tumorEntity
         assert project.save(flush: true, failOnError: true)
-
-        GroupCommand groupCommand = new GroupCommand(
-                name: projectParams.name,
-                description: "group for ${projectParams.name}",
-                readProject: false,
-                writeProject: false,
-                readJobSystem: false,
-                writeJobSystem: false,
-                readSequenceCenter: false,
-                writeSequenceCenter: false,
-        )
-        Group group = groupService.createGroup(groupCommand)
-        aclUtilService.addPermission(project, new GrantedAuthoritySid(group.role.authority), BasePermission.READ)
 
         File projectDirectory = project.getProjectDirectory()
         if (projectDirectory.exists()) {
