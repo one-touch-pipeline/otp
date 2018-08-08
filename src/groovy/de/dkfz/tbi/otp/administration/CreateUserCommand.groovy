@@ -23,7 +23,7 @@ class CreateUserCommand implements Serializable {
             return User.findByUsername(value) == null
         })
         email(email: true)
-        realName(blank: false)
+        realName(blank: false, nullable: true)
         asperaAccount(nullable: true)
         role(nullable: true, validator: { value ->
             boolean valid = true
