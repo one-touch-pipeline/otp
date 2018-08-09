@@ -55,14 +55,14 @@ class SeqPlatformService {
 
     public SeqPlatform findSeqPlatform(String seqPlatformName, String seqPlatformModelLabelNameOrAlias, String sequencingKitLabelNameOrAlias) {
         SeqPlatformModelLabel seqPlatformModelLabel = null
-        if (seqPlatformModelLabelNameOrAlias != null) {
+        if (seqPlatformModelLabelNameOrAlias) {
             seqPlatformModelLabel = seqPlatformModelLabelService.findByNameOrImportAlias(seqPlatformModelLabelNameOrAlias)
             if (seqPlatformModelLabel == null) {
                 return null
             }
         }
         SequencingKitLabel sequencingKitLabel = null
-        if (sequencingKitLabelNameOrAlias != null) {
+        if (sequencingKitLabelNameOrAlias) {
             sequencingKitLabel = sequencingKitLabelService.findByNameOrImportAlias(sequencingKitLabelNameOrAlias)
             if (sequencingKitLabel == null) {
                 return null

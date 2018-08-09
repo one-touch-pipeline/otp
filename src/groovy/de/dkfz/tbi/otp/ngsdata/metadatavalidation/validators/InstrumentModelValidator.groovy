@@ -25,7 +25,9 @@ class InstrumentModelValidator extends SingleValueValidator<MetadataValidationCo
 
     @Override
     void validateValue(MetadataValidationContext context, String seqPlatformModelLabelNameOrAlias, Set<Cell> cells) {
-        if (!seqPlatformModelLabelService.findByNameOrImportAlias(seqPlatformModelLabelNameOrAlias)) {
+        if (!seqPlatformModelLabelNameOrAlias) {
+            context.addProblem(cells, Level.ERROR, "Instrument model must not be empty.", "At least one Instrument model is empty.")
+        } else if (!seqPlatformModelLabelService.findByNameOrImportAlias(seqPlatformModelLabelNameOrAlias)) {
             context.addProblem(cells, Level.ERROR, "Instrument model '${seqPlatformModelLabelNameOrAlias}' is not registered in the OTP database.", "At least one instrument model is not registered in the OTP database.")
         }
     }

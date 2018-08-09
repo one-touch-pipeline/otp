@@ -138,15 +138,17 @@ class SeqTrackValidator extends ColumnSetValidator<MetadataValidationContext> im
             }
         }
 
-        if (SeqTrack.createCriteria().get {
-            run {
-                eq 'name', anySeqTrackRow.runName.value
+        if (anySeqTrackRow.laneNumber.value) {
+            if (SeqTrack.createCriteria().get {
+                run {
+                    eq 'name', anySeqTrackRow.runName.value
+                }
+                eq 'laneId', combineLaneNumberAndBarcode(anySeqTrackRow.laneNumber.value, anySeqTrackRow.barcode.value)
+                maxResults 1
+            }) {
+                context.addProblem(seqTrackCells(seqTrackRows),
+                        Level.WARNING, "For ${anySeqTrackRow.seqTrackString}, data is already registered in OTP.", "For at least one seqTrack, data is already registered in OTP.")
             }
-            eq 'laneId', combineLaneNumberAndBarcode(anySeqTrackRow.laneNumber.value, anySeqTrackRow.barcode.value)
-            maxResults 1
-        }) {
-            context.addProblem(seqTrackCells(seqTrackRows),
-                    Level.WARNING, "For ${anySeqTrackRow.seqTrackString}, data is already registered in OTP.", "For at least one seqTrack, data is already registered in OTP.")
         }
 
         validateMates(context, seqTrackRows)

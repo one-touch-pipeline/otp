@@ -13,7 +13,6 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 class InstrumentModelValidatorSpec extends Specification {
 
     void 'validate, when column is missing, adds error'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "SomeColumn\n" +
@@ -29,8 +28,25 @@ class InstrumentModelValidatorSpec extends Specification {
         problem.message.contains("Mandatory column 'INSTRUMENT_MODEL' is missing.")
     }
 
-    void 'validate adds expected error'() {
 
+    void 'validate adds expected error when INSTRUMENT_MODEL is empty'() {
+        given:
+        MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
+${MetaDataColumn.INSTRUMENT_MODEL}
+
+""")
+
+        when:
+        new InstrumentModelValidator().validate(context)
+
+        then:
+        Problem problem = exactlyOneElement(context.problems)
+        problem.level == Level.ERROR
+        containSame(problem.affectedCells*.cellAddress, ['A2'])
+        problem.message.contains("Instrument model must not be empty.")
+    }
+
+    void 'validate adds expected error'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
 ${MetaDataColumn.INSTRUMENT_MODEL}

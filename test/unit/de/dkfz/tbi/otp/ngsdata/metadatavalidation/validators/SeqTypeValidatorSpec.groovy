@@ -30,13 +30,12 @@ class SeqTypeValidatorSpec extends Specification {
     }
 
     void 'validate adds expected error'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${MetaDataColumn.SEQUENCING_TYPE}\n" +
-                "SeqType1\n" +
-                "SeqType2\n" +
-                "SeqType1\n")
+                        "SeqType1\n" +
+                        "SeqType2\n" +
+                        "SeqType1\n")
         SeqType seqType2 = DomainFactory.createSeqType(name: 'SeqType2', dirName: 'SeqType2', libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE)
         DomainFactory.createSeqType(name: 'SeqType2', dirName: 'SeqType2', libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED)
 
@@ -52,6 +51,24 @@ class SeqTypeValidatorSpec extends Specification {
         problem.level == Level.ERROR
         containSame(problem.affectedCells*.cellAddress, ['A2', 'A4'])
         problem.message.contains("Sequencing type 'SeqType1' is not registered in the OTP database.")
+    }
+
+    void 'validate adds expected error when SEQUENCING_TYPE is empty'() {
+        given:
+        MetadataValidationContext context = MetadataValidationContextFactory.createContext(
+                "${MetaDataColumn.SEQUENCING_TYPE}\n" +
+                        "\n"
+        )
+
+        when:
+        SeqTypeValidator validator = new SeqTypeValidator()
+        validator.validate(context)
+
+        then:
+        Problem problem = exactlyOneElement(context.problems)
+        problem.level == Level.ERROR
+        containSame(problem.affectedCells*.cellAddress, ['A2'])
+        problem.message.contains("Sequencing type must not be empty.")
     }
 
     void 'validate, when column TAGMENTATION_BASED_LIBRARY exists, adds expected error'() {
@@ -70,7 +87,7 @@ class SeqTypeValidatorSpec extends Specification {
 
         when:
         SeqTypeValidator validator = new SeqTypeValidator()
-        validator.seqTypeService = Mock(SeqTypeService){
+        validator.seqTypeService = Mock(SeqTypeService) {
             1 * findByNameOrImportAlias('SeqType1') >> seqType1
             1 * findByNameOrImportAlias('SeqType1_TAGMENTATION') >> seqType1Tag
             2 * findByNameOrImportAlias('SeqType2') >> seqType2
