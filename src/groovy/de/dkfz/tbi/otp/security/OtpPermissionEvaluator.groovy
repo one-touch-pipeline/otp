@@ -67,9 +67,13 @@ class OtpPermissionEvaluator implements PermissionEvaluator {
 
         switch (permission) {
             case "ADD_USER":
-                return UserProjectRole.where {
-                    user == activeUser && (manageUsers == true || projectRole.manageUsersAndDelegate == true)
-                }.findAll()
+                return UserProjectRole.createCriteria().get {
+                    eq("user", activeUser)
+                    or {
+                        eq("manageUsers", true)
+                        eq("manageUsersAndDelegate", true)
+                    }
+                }
             default:
                 return false
         }
@@ -92,11 +96,11 @@ class OtpPermissionEvaluator implements PermissionEvaluator {
 
         switch (permission) {
             case "OTP_READ_ACCESS":
-                return userProjectRole.projectRole?.accessToOtp
+                return userProjectRole.accessToOtp
             case "MANAGE_USERS":
                 return userProjectRole.getManageUsers()
             case "DELEGATE_USER_MANAGEMENT":
-                return userProjectRole.projectRole?.manageUsersAndDelegate
+                return userProjectRole.manageUsersAndDelegate
             default:
                 return false
         }

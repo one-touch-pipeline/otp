@@ -1444,19 +1444,19 @@ class DomainFactory {
 
     static UserProjectRole createUserProjectRole(Map userProjectRoleProperties = [:]) {
         return createDomainObject(UserProjectRole, [
-                user       : { createUser() },
-                project    : { createProject() },
-                projectRole: { createProjectRole() },
-                manageUsers: false,
+                user                  : { createUser() },
+                project               : { createProject() },
+                projectRole           : { createProjectRole() },
+                accessToOtp           : true,
+                accessToFiles         : false,
+                manageUsers           : false,
+                manageUsersAndDelegate: false,
         ], userProjectRoleProperties)
     }
 
     static ProjectRole createProjectRole(Map projectRoleProperties = [:]) {
         return createDomainObject(ProjectRole, [
                 name                  : 'roleName_' + (counter++),
-                accessToOtp           : false,
-                accessToFiles         : false,
-                manageUsersAndDelegate: false,
         ], projectRoleProperties)
     }
 

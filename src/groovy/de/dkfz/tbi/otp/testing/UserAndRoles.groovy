@@ -91,8 +91,8 @@ trait UserAndRoles {
         DomainFactory.createUserProjectRole(
                 user: user,
                 project: project,
-                projectRole: DomainFactory.createProjectRole(accessToOtp: true),
                 enabled: enabled,
+                accessToOtp: true,
         )
     }
 }

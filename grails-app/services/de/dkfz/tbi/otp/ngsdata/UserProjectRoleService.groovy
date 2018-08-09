@@ -17,22 +17,22 @@ class UserProjectRoleService {
     AuditLogService auditLogService
     ProcessingOptionService processingOptionService
 
-    private UserProjectRole createUserProjectRole(User user, Project project, ProjectRole projectRole, boolean enabled = true, boolean manageUsers) {
+    private UserProjectRole createUserProjectRole(User user, Project project, ProjectRole projectRole, Map flags = [:]) {
         assert user : "the user must not be null"
         assert project : "the project must not be null"
+
         UserProjectRole userProjectRole = new UserProjectRole([
-                user        : user,
-                project     : project,
-                projectRole : projectRole,
-                enabled     : enabled,
-                manageUsers : manageUsers,
-        ])
+                user       : user,
+                project    : project,
+                projectRole: projectRole,
+            ] + flags
+        )
         userProjectRole.save(flush: true, failOnError: true)
         return userProjectRole
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'MANAGE_USERS')")
-    void addUserToProjectAndNotifyGroupManagementAuthority(Project project, ProjectRole projectRole, String username) throws AssertionError {
+    void addUserToProjectAndNotifyGroupManagementAuthority(Project project, ProjectRole projectRole, String username, Map flags = [:]) throws AssertionError {
         assert project : "project must not be null"
 
         LdapUserDetails ldapUserDetails = ldapService.getLdapUserDetailsByUsername(username)
@@ -49,13 +49,12 @@ class UserProjectRoleService {
         }
         UserProjectRole userProjectRole = UserProjectRole.findByUserAndProject(user, project)
         assert !userProjectRole : "User '${user.username}' is already part of project '${project.name}'"
-        userProjectRole = createUserProjectRole(user, project, projectRole, true, false)
+        userProjectRole = createUserProjectRole(user, project, projectRole, flags)
 
-        if (projectRole.accessToFiles) {
+        if (flags.accessToFiles ?: false) {
             requestToAddUserToUnixGroupIfRequired(userProjectRole.user, userProjectRole.project)
         }
         auditLogService.logAction(PROJECT_USER_CHANGED_ENABLED, "Enabled ${userProjectRole.user.username} for ${userProjectRole.project.name}")
-        auditLogService.logAction(PROJECT_USER_CHANGED_PROJECT_ROLE, "Project Role ${projectRole.name} granted to ${userProjectRole.user.username} in ${userProjectRole.project.name}")
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'MANAGE_USERS')")
@@ -71,9 +70,8 @@ class UserProjectRoleService {
         }
         UserProjectRole userProjectRole = UserProjectRole.findByUserAndProject(user, project)
         assert !userProjectRole : "User '${user.realName}' is already part of project '${project.name}'"
-        userProjectRole = createUserProjectRole(user, project, projectRole, true, false)
+        userProjectRole = createUserProjectRole(user, project, projectRole)
         auditLogService.logAction(PROJECT_USER_CHANGED_ENABLED, "Enabled ${userProjectRole.user.realName} for ${userProjectRole.project.name}")
-        auditLogService.logAction(PROJECT_USER_CHANGED_PROJECT_ROLE, "Project Role ${projectRole.name} granted to ${userProjectRole.user.username} in ${userProjectRole.project.name}")
     }
 
     private void requestToAddUserToUnixGroupIfRequired(User user, Project project) {
@@ -86,10 +84,10 @@ class UserProjectRoleService {
     private void requestToRemoveUserFromUnixGroupIfRequired(User user, Project project) {
         String[] groupNames = ldapService.getGroupsOfUserByUsername(user.username)
         if (project.unixGroup in groupNames &&
-            !UserProjectRole.findAllByUserAndProjectInListAndProjectRoleInListAndEnabled(
+            !UserProjectRole.findAllByUserAndProjectInListAndAccessToFilesAndEnabled(
                     user,
                     Project.findAllByUnixGroupAndIdNotEqual(project.unixGroup, project.id),
-                    ProjectRole.findAllByAccessToFiles(true),
+                    true,
                     true)
         ) {
             notifyAdministration(user, project, AdtoolAction.REMOVE)
@@ -99,7 +97,7 @@ class UserProjectRoleService {
     private void notifyAdministration(User user, Project project, AdtoolAction adtool) {
         String formattedAction = adtool.toString().toLowerCase()
         String subject = "Request to ${formattedAction} user '${user.username}' ${adtool == AdtoolAction.ADD ? 'to' : 'from'} project '${project.name}'"
-        String body = "adtool group${formattedAction}user ${project.name} ${user.username}"
+        String body = "adtool group${formattedAction}user ${project.unixGroup} ${user.username}"
         String email = processingOptionService.findOptionAsString(EMAIL_LINUX_GROUP_ADMINISTRATION)
         mailHelperService.sendEmail(subject, body, email)
         auditLogService.logAction(PROJECT_USER_SENT_MAIL, "Sent mail to ${email} to ${formattedAction} ${user.username} ${adtool == AdtoolAction.ADD ? 'to' : 'from'} ${project.name}")
@@ -123,7 +121,7 @@ class UserProjectRoleService {
         assert userProjectRole: "the input userProjectRole must not be null"
         userProjectRole.enabled = enabled
         assert userProjectRole.save(flush: true, failOnError: true)
-        if (userProjectRole.projectRole.accessToFiles) {
+        if (userProjectRole.accessToFiles) {
             if (enabled) {
                 requestToAddUserToUnixGroupIfRequired(userProjectRole.user, userProjectRole.project)
             } else {
@@ -138,18 +136,8 @@ class UserProjectRoleService {
     UserProjectRole updateProjectRole(UserProjectRole userProjectRole, ProjectRole newProjectRole) {
         assert userProjectRole: "the input userProjectRole must not be null"
         assert newProjectRole: "the input projectRole must not be null"
-        ProjectRole oldProjectRole = userProjectRole.projectRole
-        updateManageUsers(userProjectRole, false)
         userProjectRole.projectRole = newProjectRole
         assert userProjectRole.save(flush: true, failOnError: true)
-        if (oldProjectRole.accessToFiles != newProjectRole.accessToFiles) {
-            if (newProjectRole.accessToFiles) {
-                requestToAddUserToUnixGroupIfRequired(userProjectRole.user, userProjectRole.project)
-            } else {
-                requestToRemoveUserFromUnixGroupIfRequired(userProjectRole.user, userProjectRole.project)
-            }
-        }
-        auditLogService.logAction(PROJECT_USER_CHANGED_PROJECT_ROLE, "Project Role updated from ${oldProjectRole.name} to ${newProjectRole.name} for ${userProjectRole.user.username} in ${userProjectRole.project.name}")
         return userProjectRole
     }
 }

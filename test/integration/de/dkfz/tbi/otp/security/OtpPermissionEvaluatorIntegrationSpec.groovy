@@ -13,7 +13,6 @@ class OtpPermissionEvaluatorIntegrationSpec extends Specification implements Use
     OtpPermissionEvaluator permissionEvaluator
     Authentication authentication
     User user
-    ProjectRole projectRole
     Project project
     UserProjectRole userProjectRole
 
@@ -22,26 +21,19 @@ class OtpPermissionEvaluatorIntegrationSpec extends Specification implements Use
     void setup() {
         createUserAndRoles()
         user = DomainFactory.createUser()
-        projectRole = DomainFactory.createProjectRole()
         project = DomainFactory.createProject()
         userProjectRole = DomainFactory.createUserProjectRole(
                 user: user,
                 project: project,
-                projectRole: projectRole,
                 manageUsers: true,
         )
         authentication = new UsernamePasswordAuthenticationToken(new Principal(username: user.username), null, [])
     }
 
-    void "test evaluation of hasPermission in annotation"() {
+    @Unroll
+    void "test evaluation of hasPermission in annotation (otpAccess = #otpAccess)"() {
         given:
-        ProjectRole projectRole = DomainFactory.createProjectRole(accessToOtp: otpAccess)
-        Project project = DomainFactory.createProject()
-        DomainFactory.createUserProjectRole(
-                user: user,
-                project: project,
-                projectRole: projectRole,
-        )
+        userProjectRole.accessToOtp = otpAccess
 
         when:
         List<Project> resultList = SpringSecurityUtils.doWithAuth(user.username) {
@@ -134,8 +126,8 @@ class OtpPermissionEvaluatorIntegrationSpec extends Specification implements Use
     void "hasPermission, test conditions for project role permissions"() {
         given:
         userProjectRole.manageUsers = manageUsers
-        userProjectRole.projectRole.accessToOtp = accessToOtp
-        userProjectRole.projectRole.manageUsersAndDelegate = manageUsersAndDelegate
+        userProjectRole.accessToOtp = accessToOtp
+        userProjectRole.manageUsersAndDelegate = manageUsersAndDelegate
 
         when:
         boolean checkResult = permissionEvaluator.checkProjectRolePermission(authentication, project, permission)
@@ -153,9 +145,10 @@ class OtpPermissionEvaluatorIntegrationSpec extends Specification implements Use
         false       | false       | true                   | "DELEGATE_USER_MANAGEMENT" || true
     }
 
-    void "hasPermission, different combinations for ADD_USER permission"() {
+    @Unroll
+    void "hasPermission, different combinations for ADD_USER permission (access = #access)"() {
         given:
-        userProjectRole.projectRole.manageUsersAndDelegate = manageUsersAndDelegate
+        userProjectRole.manageUsersAndDelegate = manageUsersAndDelegate
         userProjectRole.manageUsers = manageUsers
 
         when:

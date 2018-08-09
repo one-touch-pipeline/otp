@@ -73,11 +73,11 @@
                                     <g:select onchange="submit()"
                                               name="newRole"
                                               from="${availableRoles*.name}"
-                                              value="${userEntry.projectRole.name}"/>
+                                              value="${userEntry.projectRoleName}"/>
                                 </g:form>
                             </sec:access>
                             <sec:noAccess expression="hasRole('ROLE_OPERATOR') or hasPermission(${project.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'MANAGE_USERS')">
-                                ${userEntry.projectRole.name}
+                                ${userEntry.projectRoleName}
                             </sec:noAccess>
                         </td>
                         <td><span class="icon-${userEntry.otpAccess}" title="${g.message(code: "projectUser.table.tooltip.${userEntry.otpAccess}")}"></span></td>
@@ -85,7 +85,7 @@
                         <td><span class="icon-${userEntry.manageUsers}" title="${g.message(code: "projectUser.table.tooltip.${userEntry.manageUsers == PermissionStatus.APPROVED ? "true" : "false"}")}"></span></td>
                         <td>
                             <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${project.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'DELEGATE_USER_MANAGEMENT')">
-                                <g:if test="${userEntry.inLdap && !userEntry.projectRole?.manageUsersAndDelegate}">
+                                <g:if test="${userEntry.inLdap && !userEntry.userProjectRole.manageUsersAndDelegate}">
                                     <g:form action="updateManageUsers" params='["userProjectRole.id": userEntry.userProjectRole.id, "manageUsers": userEntry.userProjectRole.manageUsers]'>
                                         <g:submitButton
                                                 title="${g.message(code: 'projectUser.table.tooltip.manageUsersSwitchButton', args: [userEntry.manageUsers == PermissionStatus.APPROVED ? "Disallow" : "Allow"])}"
@@ -162,7 +162,7 @@
                                 link="${g.createLink(controller: 'projectUser', action: 'updateEmail', params: ["user.id": userEntry.user.id])}"
                                 value="${userEntry.user.email}"/>
                     </td>
-                    <td>${userEntry.projectRole.name}</td>
+                    <td>${userEntry.projectRoleName}</td>
                     <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
@@ -270,26 +270,7 @@
                 <input type="hidden" name="projectName" value="${project}">
                 <g:submitButton class="addButton" name="${g.message(code: 'projectUser.addMember.add')}"/>
             </g:form>
-
-            <h3>
-                <g:message code="projectUser.roleExplanation.title"/>
-            </h3>
-            <table class="projectRoleLegend">
-                <tr>
-                    <th><g:message code="projectUser.roleExplanation.role"/></th>
-                    <g:each in="${["otpAccess", "fileAccess", "manageUsers"]}" var="property">
-                        <th><g:message code="projectUser.table.${property}"/></th>
-                    </g:each>
-                </tr>
-                <g:each in="${availableRoles}" var="role">
-                    <tr>
-                        <td>${role.name}</td>
-                        <g:each in="${[role.accessToOtp, role.accessToFiles, role.manageUsersAndDelegate]}" var="property">
-                            <td><span class="icon-${property ? PermissionStatus.APPROVED : PermissionStatus.DENIED}"></span></td>
-                        </g:each>
-                    </tr>
-                </g:each>
-            </table>
+            <br>
         </sec:access>
         <asset:script type="text/javascript">
             $(function() {

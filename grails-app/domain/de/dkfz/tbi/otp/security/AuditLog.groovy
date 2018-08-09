@@ -11,7 +11,6 @@ class AuditLog implements Entity {
         PROJECT_USER_CHANGED_MANAGE_USER,
         PROJECT_USER_CHANGED_ENABLED,
         PROJECT_USER_SENT_MAIL,
-        PROJECT_USER_CHANGED_PROJECT_ROLE,
     }
 
     User user

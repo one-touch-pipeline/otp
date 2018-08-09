@@ -118,7 +118,7 @@ class ProjectUserController implements CheckAndCall {
     }
 
     def addUserToProject(AddUserToProjectCommand cmd) {
-        String message = ""
+        String message
         String errorMessage = ""
         if (cmd.hasErrors()) {
             FieldError cmdErrors = cmd.errors.getFieldError()
@@ -130,7 +130,13 @@ class ProjectUserController implements CheckAndCall {
                     userProjectRoleService.addUserToProjectAndNotifyGroupManagementAuthority(
                             cmd.project,
                             ProjectRole.findByName(cmd.projectRoleName),
-                            cmd.searchString
+                            cmd.searchString,
+                            [
+                                accessToOtp           : true, //TODO: OTP-2943: replace with input from GUI
+                                accessToFiles         : false,
+                                manageUsers           : false,
+                                manageUsersAndDelegate: false,
+                            ]
                     )
                 } else {
                     userProjectRoleService.addExternalUserToProject(
@@ -184,7 +190,7 @@ class UserEntry {
     String realName
     String thumbnailPhoto
     String department
-    ProjectRole projectRole
+    String projectRoleName
     PermissionStatus otpAccess
     PermissionStatus fileAccess
     PermissionStatus manageUsers
@@ -193,15 +199,14 @@ class UserEntry {
 
     UserEntry(User user, Project project, LdapUserDetails ldapUserDetails) {
         UserProjectRole userProjectRole = UserProjectRole.findByUserAndProject(user, project)
-        ProjectRole projectRole = userProjectRole?.projectRole
-        boolean fileAccess = projectRole?.accessToFiles ?: false
+        boolean fileAccess = userProjectRole.accessToFiles
         this.inLdap = ldapUserDetails.cn
         this.user = user
         this.realName = ldapUserDetails.realName
         this.thumbnailPhoto = ldapUserDetails.thumbnailPhoto.encodeAsBase64()
         this.department = ldapUserDetails.department
-        this.projectRole = projectRole
-        this.otpAccess = inLdap && projectRole?.accessToOtp ? PermissionStatus.APPROVED : PermissionStatus.DENIED
+        this.projectRoleName = userProjectRole.projectRole.name
+        this.otpAccess = inLdap && userProjectRole.accessToOtp ? PermissionStatus.APPROVED : PermissionStatus.DENIED
         this.fileAccess = getPermissionStatus(inLdap && fileAccess, project.unixGroup in ldapUserDetails.memberOfGroupList)
         this.manageUsers = inLdap && userProjectRole.manageUsers ? PermissionStatus.APPROVED : PermissionStatus.DENIED
         this.deactivated = ldapUserDetails.deactivated
@@ -274,10 +279,10 @@ class UpdateManageUsersCommand implements Serializable {
 
     static constraints = {
         manageUsers(validator: {val, obj ->
-            if (obj.userProjectRole?.projectRole?.manageUsersAndDelegate) {
+            if (obj.userProjectRole?.manageUsersAndDelegate) {
                 return 'This right can not be changed for users of this role'
             }
-            if (!obj.userProjectRole?.projectRole?.accessToOtp) {
+            if (!obj.userProjectRole?.accessToOtp) {
                 return 'User needs access to OTP to gain this right'
             }
             if (val == obj.userProjectRole?.manageUsers) {

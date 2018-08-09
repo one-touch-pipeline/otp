@@ -6,7 +6,7 @@ import de.dkfz.tbi.otp.administration.*
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.testing.UserAndRoles
 import grails.plugin.springsecurity.SpringSecurityUtils
-import spock.lang.Specification
+import spock.lang.*
 
 import static javax.servlet.http.HttpServletResponse.SC_OK
 import static javax.servlet.http.HttpServletResponse.SC_MOVED_TEMPORARILY
@@ -61,7 +61,7 @@ class ProjectUserControllerIntegrationSpec extends Specification implements User
         createUserAndRoles()
 
         controller.userProjectRoleService = Mock(UserProjectRoleService) {
-            addUserToProjectAndNotifyGroupManagementAuthority(_, _, _) >> null
+            addUserToProjectAndNotifyGroupManagementAuthority(_, _, _, _) >> null
             addExternalUserToProject(_, _, _, _) >> null
         }
 
@@ -82,7 +82,7 @@ class ProjectUserControllerIntegrationSpec extends Specification implements User
         controller.response.status == SC_MOVED_TEMPORARILY
         controller.response.redirectedUrl == "/projectUser/index"
         controller.flash.message == "Data stored successfully"
-        intInvocations * controller.userProjectRoleService.addUserToProjectAndNotifyGroupManagementAuthority(_, _, _)
+        intInvocations * controller.userProjectRoleService.addUserToProjectAndNotifyGroupManagementAuthority(_, _, _, _)
         extInvocations * controller.userProjectRoleService.addExternalUserToProject(_, _, _, _)
 
         where:
@@ -91,12 +91,13 @@ class ProjectUserControllerIntegrationSpec extends Specification implements User
         false      | 1              | 0
     }
 
-    void "test addUserToProject, catch exceptions caused in either method"() {
+    @Unroll
+    void "test addUserToProject, catch exceptions caused in either method (#errorMessage)"() {
         given:
         createUserAndRoles()
 
         controller.userProjectRoleService = Mock(UserProjectRoleService) {
-            addUserToProjectAndNotifyGroupManagementAuthority(_, _, _) >> { throw new AssertionError("internal") }
+            addUserToProjectAndNotifyGroupManagementAuthority(_, _, _, _) >> { throw new AssertionError("internal") }
             addExternalUserToProject(_, _, _, _) >> { throw new AssertionError("external") }
         }
 
