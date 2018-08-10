@@ -3,8 +3,13 @@
 set -e
 
 if [ ! "$1" ]; then
-	echo "Please provide a filename."
-	exit 1
+    echo "Please provide a filename (without suffix) and optionally '--add'"
+    exit 1
+fi
+
+if [ "$2" -a "$2" != "--add" ]; then
+    echo "Unknown argument '$2'"
+    exit 1
 fi
 
 # see http://grails-plugins.github.io/grails-database-migration/1.4.0/ref/Diff%20Scripts/dbm-gorm-diff.html for reference
@@ -35,9 +40,15 @@ perl -0pi -e "s/databaseChangeLog = \{\n\}\n//g" $changelogPath
 
 if [ ! -s $changelogPath ]; then
     if [ "$2" ]; then
-		echo perl -0pi -e "s/\n\tinclude file: \'changelogs\/${year}\/${1}.groovy\'\n//g" migrations/changelog.groovy
-		perl -0pi -e "s/\n\tinclude file: \'changelogs\/${year}\/${1}.groovy\'\n//g" migrations/changelog.groovy
+        perl -0pi -e "s/\n\tinclude file: \'changelogs\/${year}\/${1}.groovy\'\n//g" migrations/changelog.groovy
     fi
-        rm $changelogPath
-        echo "No changes found, file was automatically deleted"
+    rm $changelogPath
+    echo "No changes found, file was automatically deleted"
+else
+    perl -0pi -e "s/\t/    /g" $changelogPath
+    echo "Created file '$changelogPath'"
+    if [ "$2" ]; then
+        perl -0pi -e "s/\t/    /g" migrations/changelog.groovy
+        echo "Added file to 'migrations/changelog.groovy'"
+    fi
 fi

@@ -33,7 +33,7 @@ CREATE TABLE public.abstract_bam_file (
     comment_id bigint,
     qc_traffic_light_status character varying(255),
     insert_size_file character varying(1000),
-    mean_sequence_length integer
+    maximum_read_length integer
 );
 
 CREATE TABLE public.abstract_merging_work_package (
@@ -230,7 +230,8 @@ CREATE TABLE public.data_file (
     comment_id bigint,
     n_reads bigint,
     sequence_length character varying(255),
-    initial_directory text NOT NULL
+    initial_directory text NOT NULL,
+    date_last_checked timestamp with time zone
 );
 
 CREATE TABLE public.individual (
@@ -277,7 +278,7 @@ CREATE TABLE public.realm (
     default_job_submission_options character varying(255) NOT NULL,
     port integer NOT NULL,
     timeout integer NOT NULL,
-    job_scheduler character varying(255)
+    job_scheduler character varying(255) NOT NULL
 );
 
 CREATE TABLE public.run (
@@ -310,7 +311,9 @@ CREATE TABLE public.seq_center (
     version bigint NOT NULL,
     dir_name character varying(255) NOT NULL,
     name character varying(255) NOT NULL,
-    auto_importable boolean NOT NULL
+    auto_importable boolean NOT NULL,
+    auto_import_dir character varying(255),
+    copy_metadata_file boolean NOT NULL
 );
 
 CREATE TABLE public.seq_platform (
@@ -360,8 +363,9 @@ CREATE TABLE public.seq_type (
     dir_name character varying(255) NOT NULL,
     library_layout character varying(255) NOT NULL,
     name character varying(255) NOT NULL,
-    display_name character varying(255),
-    roddy_name character varying(255)
+    display_name character varying(255) NOT NULL,
+    roddy_name character varying(255),
+    single_cell boolean NOT NULL
 );
 
 CREATE TABLE public.sequencing_kit_label (
@@ -372,7 +376,7 @@ CREATE TABLE public.sequencing_kit_label (
 
 CREATE VIEW public.aggregate_sequences AS
  SELECT (sum(st.n_base_pairs))::bigint AS sum_n_base_pairs,
-    (floor((sum(st.n_base_pairs) / (1000000000)::numeric)))::bigint AS sum_n_base_pairs_gb,
+    (floor((sum(st.n_base_pairs) / '1000000000'::numeric)))::bigint AS sum_n_base_pairs_gb,
     count(st.id) AS lane_count,
     st.seq_type_id,
     r.seq_platform_id,
@@ -391,6 +395,7 @@ CREATE VIEW public.aggregate_sequences AS
     seqtype.display_name AS seq_type_display_name,
     seqtype.library_layout,
     seqtype.dir_name,
+    seqtype.single_cell,
     sampletype.name AS sample_type_name,
     i.type,
     i.pid,
@@ -417,7 +422,7 @@ CREATE VIEW public.aggregate_sequences AS
            FROM (public.seq_track seq
              JOIN public.data_file df ON ((df.seq_track_id = seq.id)))
           WHERE (df.file_withdrawn <> false))))
-  GROUP BY st.seq_type_id, r.seq_platform_id, sp.seq_platform_model_label_id, sp.sequencing_kit_label_id, st.sample_id, r.seq_center_id, s.sample_type_id, s.individual_id, p.id, re.id, sp.name, spml.name, skl.name, seqtype.name, seqtype.display_name, seqtype.library_layout, seqtype.dir_name, sampletype.name, i.type, i.pid, i.mock_pid, i.mock_full_name, p.name, p.dir_name, re.name, sc.name, sc.dir_name;
+  GROUP BY st.seq_type_id, r.seq_platform_id, sp.seq_platform_model_label_id, sp.sequencing_kit_label_id, st.sample_id, r.seq_center_id, s.sample_type_id, s.individual_id, p.id, re.id, sp.name, spml.name, skl.name, seqtype.name, seqtype.display_name, seqtype.library_layout, seqtype.dir_name, seqtype.single_cell, sampletype.name, i.type, i.pid, i.mock_pid, i.mock_full_name, p.name, p.dir_name, re.name, sc.name, sc.dir_name;
 
 CREATE TABLE public.alignment_log (
     id bigint NOT NULL,
@@ -449,6 +454,20 @@ CREATE TABLE public.antibody_target (
     id bigint NOT NULL,
     version bigint NOT NULL,
     name character varying(255) NOT NULL
+);
+
+CREATE TABLE public.antibody_target_import_alias (
+    antibody_target_id bigint NOT NULL,
+    import_alias_string character varying(255) NOT NULL
+);
+
+CREATE TABLE public.audit_log (
+    id bigint NOT NULL,
+    version bigint NOT NULL,
+    user_id bigint NOT NULL,
+    "timestamp" date NOT NULL,
+    action character varying(255) NOT NULL,
+    description text
 );
 
 CREATE TABLE public.bam_file_pair_analysis (
@@ -513,7 +532,6 @@ CREATE TABLE public.cluster_job (
     ended bigint,
     cpu_time bigint,
     requested_walltime bigint,
-    multiplexing boolean,
     xten boolean,
     file_size bigint,
     n_bases bigint,
@@ -544,7 +562,7 @@ CREATE TABLE public.comment (
     modification_date timestamp with time zone NOT NULL
 );
 
-CREATE TABLE public.config_per_project (
+CREATE TABLE public.config_per_project_and_seq_type (
     id bigint NOT NULL,
     version bigint NOT NULL,
     project_id bigint NOT NULL,
@@ -561,8 +579,9 @@ CREATE TABLE public.config_per_project (
     plugin_version character varying(255),
     config_version character varying(255),
     individual_id bigint,
-    adapter_trimming_needed boolean NOT NULL,
-    name_used_in_config character varying(255)
+    adapter_trimming_needed boolean,
+    name_used_in_config character varying(255),
+    program_version character varying(255)
 );
 
 CREATE TABLE public.consistency_check (
@@ -580,20 +599,6 @@ CREATE TABLE public.consistency_status (
     status character varying(255) NOT NULL
 );
 
-CREATE TABLE public.contact_person (
-    id bigint NOT NULL,
-    version bigint NOT NULL,
-    email character varying(255) NOT NULL,
-    full_name character varying(255) NOT NULL,
-    aspera character varying(255)
-);
-
-CREATE TABLE public.contact_person_role (
-    id bigint NOT NULL,
-    version bigint NOT NULL,
-    name character varying(255)
-);
-
 CREATE TABLE public.decision_mapping (
     id bigint NOT NULL,
     version bigint NOT NULL,
@@ -607,20 +612,6 @@ CREATE TABLE public.document (
     content bytea NOT NULL,
     name character varying(255) NOT NULL,
     type character varying(255) NOT NULL
-);
-
-CREATE TABLE public.external_script (
-    id bigint NOT NULL,
-    version bigint NOT NULL,
-    author character varying(255) NOT NULL,
-    comment character varying(255),
-    deprecated_date timestamp with time zone,
-    date_created timestamp with time zone NOT NULL,
-    last_updated timestamp with time zone NOT NULL,
-    file_path character varying(255) NOT NULL,
-    script_identifier character varying(255) NOT NULL,
-    script_version character varying(255) NOT NULL,
-    CONSTRAINT external_script_author_check CHECK (((author)::text <> ''::text))
 );
 
 CREATE TABLE public.externally_processed_merged_bam_file_further_files (
@@ -703,8 +694,8 @@ CREATE TABLE public.import_process (
     id bigint NOT NULL,
     version bigint NOT NULL,
     state character varying(255) NOT NULL,
-    replace_source_with_link boolean,
-    trigger_analysis boolean
+    replace_source_with_link boolean NOT NULL,
+    trigger_analysis boolean NOT NULL
 );
 
 CREATE TABLE public.import_process_externally_processed_merged_bam_file (
@@ -842,11 +833,9 @@ CREATE TABLE public.library_preparation_kit (
     reverse_complement_adapter_sequence character varying(255)
 );
 
-CREATE TABLE public.library_preparation_kit_synonym (
-    id bigint NOT NULL,
-    version bigint NOT NULL,
+CREATE TABLE public.library_preparation_kit_import_alias (
     library_preparation_kit_id bigint NOT NULL,
-    name character varying(255) NOT NULL
+    import_alias_string character varying(255) NOT NULL
 );
 
 CREATE TABLE public.log_message (
@@ -939,7 +928,7 @@ CREATE TABLE public.meta_data_entry (
     key_id bigint NOT NULL,
     source character varying(255) NOT NULL,
     status character varying(255) NOT NULL,
-    value character varying(255) NOT NULL
+    value character varying(1000) NOT NULL
 );
 
 CREATE TABLE public.meta_data_file (
@@ -982,7 +971,9 @@ CREATE TABLE public.otrs_ticket (
     aceseq_started timestamp with time zone,
     aceseq_finished timestamp with time zone,
     sophia_started timestamp with time zone,
-    sophia_finished timestamp with time zone
+    sophia_finished timestamp with time zone,
+    run_yapsa_started timestamp with time zone,
+    run_yapsa_finished timestamp with time zone
 );
 
 CREATE TABLE public.parameter (
@@ -1130,18 +1121,18 @@ CREATE TABLE public.project_category (
     name character varying(255) NOT NULL
 );
 
-CREATE TABLE public.project_contact_person (
-    contact_person_id bigint NOT NULL,
-    project_id bigint NOT NULL,
-    id bigint NOT NULL,
-    version bigint NOT NULL,
-    contact_person_role_id bigint
-);
-
 CREATE TABLE public.project_group (
     id bigint NOT NULL,
     version bigint NOT NULL,
     name character varying(255) NOT NULL
+);
+
+CREATE TABLE public.project_info (
+    id bigint NOT NULL,
+    version bigint NOT NULL,
+    file_name text NOT NULL,
+    date_created timestamp with time zone NOT NULL,
+    project_id bigint NOT NULL
 );
 
 CREATE TABLE public.project_project_categories (
@@ -1149,17 +1140,28 @@ CREATE TABLE public.project_project_categories (
     project_category_id bigint NOT NULL
 );
 
+CREATE TABLE public.project_role (
+    id bigint NOT NULL,
+    version bigint NOT NULL,
+    name character varying(255) NOT NULL,
+    access_to_otp boolean NOT NULL,
+    access_to_files boolean NOT NULL,
+    manage_users_and_delegate boolean NOT NULL
+);
+
 CREATE TABLE public.qc_threshold (
     id bigint NOT NULL,
     version bigint NOT NULL,
     project_id bigint,
-    seq_type_id bigint,
+    seq_type_id bigint NOT NULL,
     qc_property1 character varying(255) NOT NULL,
     qc_property2 character varying(255),
-    warning_threshold double precision NOT NULL,
-    error_threshold double precision NOT NULL,
     compare character varying(255) NOT NULL,
-    qc_class character varying(255) NOT NULL
+    qc_class character varying(255) NOT NULL,
+    warning_threshold_lower double precision,
+    warning_threshold_upper double precision,
+    error_threshold_lower double precision,
+    error_threshold_upper double precision
 );
 
 CREATE TABLE public.quality_assessment_merged_pass (
@@ -1190,8 +1192,8 @@ CREATE TABLE public.reference_genome (
     length_ref_chromosomes_withoutn bigint NOT NULL,
     cytosine_positions_index character varying(255),
     chromosome_length_file_path character varying(255),
-    chromosome_prefix character varying(255),
-    chromosome_suffix character varying(255),
+    chromosome_prefix character varying(255) NOT NULL,
+    chromosome_suffix character varying(255) NOT NULL,
     finger_printing_file_name character varying(255),
     mappability_file character varying(500),
     replication_time_file character varying(500),
@@ -1278,7 +1280,7 @@ CREATE TABLE public.run_segment (
     version bigint NOT NULL,
     align boolean,
     otrs_ticket_id bigint,
-    import_mode character varying(255) DEFAULT 'MANUAL'::character varying
+    import_mode character varying(255) DEFAULT 'MANUAL'::character varying NOT NULL
 );
 
 CREATE TABLE public.sample_identifier (
@@ -1299,7 +1301,8 @@ CREATE TABLE public.sample_pair (
     relative_path character varying(255) NOT NULL,
     indel_processing_status character varying(255) NOT NULL,
     aceseq_processing_status character varying(255) NOT NULL,
-    sophia_processing_status character varying(255) NOT NULL
+    sophia_processing_status character varying(255) NOT NULL,
+    run_yapsa_processing_status character varying(255) NOT NULL
 );
 
 CREATE TABLE public.sample_type_per_project (
@@ -1321,6 +1324,11 @@ CREATE TABLE public.seed_me_checksum (
     checksum character varying(255)
 );
 
+CREATE TABLE public.seq_center_import_dirs_allow_linking (
+    seq_center_id bigint NOT NULL,
+    import_dirs_allow_linking_string character varying(255) NOT NULL
+);
+
 CREATE TABLE public.seq_platform_group (
     id bigint NOT NULL,
     version bigint NOT NULL,
@@ -1333,9 +1341,9 @@ CREATE TABLE public.seq_platform_group_comment (
     comments_idx integer
 );
 
-CREATE TABLE public.seq_platform_model_label_alias (
-    seq_platform_model_label_id bigint,
-    alias_string character varying(255)
+CREATE TABLE public.seq_platform_model_label_import_alias (
+    seq_platform_model_label_id bigint NOT NULL,
+    import_alias_string character varying(255) NOT NULL
 );
 
 CREATE TABLE public.seq_platform_seq_platform_groups (
@@ -1365,9 +1373,9 @@ CREATE TABLE public.seq_track_log_message (
     log_messages_idx integer NOT NULL
 );
 
-CREATE TABLE public.seq_type_alias (
-    seq_type_id bigint,
-    alias_string character varying(255)
+CREATE TABLE public.seq_type_import_alias (
+    seq_type_id bigint NOT NULL,
+    import_alias_string character varying(255) NOT NULL
 );
 
 CREATE VIEW public.sequences AS
@@ -1405,6 +1413,7 @@ CREATE VIEW public.sequences AS
     seqtype.display_name AS seq_type_display_name,
     seqtype.library_layout,
     seqtype.dir_name,
+    seqtype.single_cell,
     sampletype.name AS sample_type_name,
     i.type,
     i.pid,
@@ -1414,7 +1423,10 @@ CREATE VIEW public.sequences AS
     p.name AS project_name,
     p.dir_name AS project_dir_name,
     sc.name AS seq_center_name,
-    sc.dir_name AS seq_center_dir_name
+    sc.dir_name AS seq_center_dir_name,
+    COALESCE(( SELECT bool_and(df.file_exists) AS bool_and
+           FROM public.data_file df
+          WHERE (df.seq_track_id = st.id)), false) AS file_exists
    FROM (((((((((((((public.seq_track st
      JOIN public.run r ON ((r.id = st.run_id)))
      JOIN public.seq_platform sp ON ((sp.id = r.seq_platform_id)))
@@ -1430,9 +1442,9 @@ CREATE VIEW public.sequences AS
      LEFT JOIN public.sequencing_kit_label skl ON ((sp.sequencing_kit_label_id = skl.id)))
      LEFT JOIN public.library_preparation_kit lpk ON ((st.library_preparation_kit_id = lpk.id)));
 
-CREATE TABLE public.sequencing_kit_label_alias (
-    sequencing_kit_label_id bigint,
-    alias_string character varying(255)
+CREATE TABLE public.sequencing_kit_label_import_alias (
+    sequencing_kit_label_id bigint NOT NULL,
+    import_alias_string character varying(255) NOT NULL
 );
 
 CREATE TABLE public.shutdown_information (
@@ -1444,22 +1456,6 @@ CREATE TABLE public.shutdown_information (
     initiated_by_id bigint NOT NULL,
     reason character varying(255) NOT NULL,
     succeeded timestamp without time zone
-);
-
-CREATE TABLE public.snv_job_result (
-    id bigint NOT NULL,
-    version bigint NOT NULL,
-    step character varying(255) NOT NULL,
-    processing_state character varying(255) NOT NULL,
-    input_result_id bigint,
-    date_created timestamp with time zone NOT NULL,
-    last_updated timestamp with time zone NOT NULL,
-    withdrawn boolean NOT NULL,
-    snv_calling_instance_id bigint NOT NULL,
-    external_script_id bigint NOT NULL,
-    chromosome_join_external_script_id bigint,
-    md5sum character varying(255),
-    file_size bigint
 );
 
 CREATE TABLE public.software_tool (
@@ -1490,7 +1486,7 @@ CREATE TABLE public.sophia_qc (
     tumor_massive_inv_filtering_level integer NOT NULL,
     rna_contaminated_genes_more_than_two_intron character varying NOT NULL,
     rna_contaminated_genes_count integer NOT NULL,
-    rna_decontamination_applied boolean,
+    rna_decontamination_applied boolean NOT NULL,
     sophia_instance_id bigint NOT NULL
 );
 
@@ -1508,7 +1504,7 @@ CREATE TABLE public.swap_info (
     date_finished timestamp with time zone,
     comment text NOT NULL,
     description_of_changes text NOT NULL,
-    user_id bigint
+    user_id bigint NOT NULL
 );
 
 CREATE TABLE public.swap_info_seq_track (
@@ -1530,6 +1526,16 @@ CREATE TABLE public.tumor_entity (
     name character varying(255) NOT NULL
 );
 
+CREATE TABLE public.user_project_role (
+    id bigint NOT NULL,
+    version bigint NOT NULL,
+    project_id bigint NOT NULL,
+    project_role_id bigint NOT NULL,
+    user_id bigint NOT NULL,
+    enabled boolean NOT NULL,
+    manage_users boolean NOT NULL
+);
+
 CREATE TABLE public.user_role (
     role_id bigint NOT NULL,
     user_id bigint NOT NULL
@@ -1540,13 +1546,16 @@ CREATE TABLE public.users (
     version bigint NOT NULL,
     account_expired boolean NOT NULL,
     account_locked boolean NOT NULL,
-    email character varying(255),
+    email character varying(255) NOT NULL,
     enabled boolean NOT NULL,
     password character varying(255) NOT NULL,
     password_expired boolean NOT NULL,
-    username character varying(255) NOT NULL,
+    username character varying(255),
     date_created timestamp with time zone NOT NULL,
-    last_updated timestamp with time zone
+    last_updated timestamp with time zone NOT NULL,
+    accepted_privacy_policy boolean NOT NULL,
+    real_name character varying(255),
+    aspera_account character varying(255)
 );
 
 ALTER TABLE ONLY public.abstract_bam_file
@@ -1591,6 +1600,15 @@ ALTER TABLE ONLY public.alignment_pass
 ALTER TABLE ONLY public.antibody_target
     ADD CONSTRAINT "antibody_targPK" PRIMARY KEY (id);
 
+ALTER TABLE ONLY public.antibody_target_import_alias
+    ADD CONSTRAINT antibody_target_import_alias_import_alias_string_key UNIQUE (import_alias_string);
+
+ALTER TABLE ONLY public.antibody_target_import_alias
+    ADD CONSTRAINT antibody_target_import_alias_pkey PRIMARY KEY (antibody_target_id, import_alias_string);
+
+ALTER TABLE ONLY public.audit_log
+    ADD CONSTRAINT audit_log_pkey PRIMARY KEY (id);
+
 ALTER TABLE ONLY public.bed_file
     ADD CONSTRAINT "bed_filePK" PRIMARY KEY (id);
 
@@ -1603,7 +1621,7 @@ ALTER TABLE ONLY public.cluster_job
 ALTER TABLE ONLY public.comment
     ADD CONSTRAINT comment_pkey PRIMARY KEY (id);
 
-ALTER TABLE ONLY public.config_per_project
+ALTER TABLE ONLY public.config_per_project_and_seq_type
     ADD CONSTRAINT "config_per_project_and_seq_type_PK" PRIMARY KEY (id);
 
 ALTER TABLE ONLY public.consistency_check
@@ -1611,15 +1629,6 @@ ALTER TABLE ONLY public.consistency_check
 
 ALTER TABLE ONLY public.consistency_status
     ADD CONSTRAINT "consistency_sPK" PRIMARY KEY (id);
-
-ALTER TABLE ONLY public.contact_person
-    ADD CONSTRAINT contact_person_full_name_key UNIQUE (full_name);
-
-ALTER TABLE ONLY public.contact_person
-    ADD CONSTRAINT contact_person_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY public.contact_person_role
-    ADD CONSTRAINT contact_person_role_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY public.data_file
     ADD CONSTRAINT data_file_pkey PRIMARY KEY (id);
@@ -1633,17 +1642,8 @@ ALTER TABLE ONLY public.decision_mapping
 ALTER TABLE ONLY public.document
     ADD CONSTRAINT document_pkey PRIMARY KEY (id);
 
-ALTER TABLE ONLY public.library_preparation_kit_synonym
-    ADD CONSTRAINT "exome_enricIdPK" PRIMARY KEY (id);
-
 ALTER TABLE ONLY public.library_preparation_kit
     ADD CONSTRAINT "exome_enrichmPK" PRIMARY KEY (id);
-
-ALTER TABLE ONLY public.external_script
-    ADD CONSTRAINT "external_script_PK" PRIMARY KEY (id);
-
-ALTER TABLE ONLY public.external_script
-    ADD CONSTRAINT external_script_file_path_key UNIQUE (file_path);
 
 ALTER TABLE ONLY public.fastqc_processed_file
     ADD CONSTRAINT "fastqc_procesPK" PRIMARY KEY (id);
@@ -1716,6 +1716,12 @@ ALTER TABLE ONLY public.job_execution_plan
 
 ALTER TABLE ONLY public.job_execution_plan
     ADD CONSTRAINT job_execution_plan_plan_version_name_key UNIQUE (plan_version, name);
+
+ALTER TABLE ONLY public.library_preparation_kit_import_alias
+    ADD CONSTRAINT library_preparation_kit_import_alias_import_alias_string_unique UNIQUE (import_alias_string);
+
+ALTER TABLE ONLY public.library_preparation_kit_import_alias
+    ADD CONSTRAINT library_preparation_kit_import_alias_pkey PRIMARY KEY (library_preparation_kit_id, import_alias_string);
 
 ALTER TABLE ONLY public.library_preparation_kit
     ADD CONSTRAINT library_preparation_kit_short_display_name_key UNIQUE (short_display_name);
@@ -1819,11 +1825,14 @@ ALTER TABLE ONLY public.project_category
 ALTER TABLE ONLY public.project_category
     ADD CONSTRAINT project_category_pkey PRIMARY KEY (id);
 
-ALTER TABLE ONLY public.project_contact_person
-    ADD CONSTRAINT project_contact_person_pkey PRIMARY KEY (id);
-
 ALTER TABLE ONLY public.project_group
     ADD CONSTRAINT "project_groupPK" PRIMARY KEY (id);
+
+ALTER TABLE ONLY public.project_info
+    ADD CONSTRAINT project_info_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY public.project_info
+    ADD CONSTRAINT project_info_project_id_file_name_unique UNIQUE (project_id, file_name);
 
 ALTER TABLE ONLY public.project
     ADD CONSTRAINT project_name_key UNIQUE (name);
@@ -1833,6 +1842,12 @@ ALTER TABLE ONLY public.project
 
 ALTER TABLE ONLY public.project_project_categories
     ADD CONSTRAINT project_project_categories_pkey PRIMARY KEY (project_id, project_category_id);
+
+ALTER TABLE ONLY public.project_role
+    ADD CONSTRAINT project_role_pk PRIMARY KEY (id);
+
+ALTER TABLE ONLY public.qc_threshold
+    ADD CONSTRAINT qc_threshold_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY public.quality_assessment_merged_pass
     ADD CONSTRAINT "quality_assMePK" PRIMARY KEY (id);
@@ -1918,6 +1933,9 @@ ALTER TABLE ONLY public.seed_me_checksum
 ALTER TABLE ONLY public.seq_center
     ADD CONSTRAINT seq_center_dir_name_key UNIQUE (dir_name);
 
+ALTER TABLE ONLY public.seq_center_import_dirs_allow_linking
+    ADD CONSTRAINT seq_center_import_dirs_allow_linking_pkey PRIMARY KEY (seq_center_id, import_dirs_allow_linking_string);
+
 ALTER TABLE ONLY public.seq_center
     ADD CONSTRAINT seq_center_name_key UNIQUE (name);
 
@@ -1926,6 +1944,12 @@ ALTER TABLE ONLY public.seq_center
 
 ALTER TABLE ONLY public.seq_platform_group
     ADD CONSTRAINT seq_platform_group_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY public.seq_platform_model_label_import_alias
+    ADD CONSTRAINT seq_platform_model_label_alias_pkey PRIMARY KEY (seq_platform_model_label_id, import_alias_string);
+
+ALTER TABLE ONLY public.seq_platform_model_label_import_alias
+    ADD CONSTRAINT seq_platform_model_label_import_alias_import_alias_string_uniqu UNIQUE (import_alias_string);
 
 ALTER TABLE ONLY public.seq_platform_model_label
     ADD CONSTRAINT seq_platform_model_label_name_key UNIQUE (name);
@@ -1948,8 +1972,17 @@ ALTER TABLE ONLY public.seq_track_log_message
 ALTER TABLE ONLY public.seq_track
     ADD CONSTRAINT seq_track_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY public.seq_type_import_alias
+    ADD CONSTRAINT seq_type_alias_pkey PRIMARY KEY (seq_type_id, import_alias_string);
+
 ALTER TABLE ONLY public.seq_type
     ADD CONSTRAINT seq_type_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY public.sequencing_kit_label_import_alias
+    ADD CONSTRAINT sequencing_kit_label_alias_pkey PRIMARY KEY (sequencing_kit_label_id, import_alias_string);
+
+ALTER TABLE ONLY public.sequencing_kit_label_import_alias
+    ADD CONSTRAINT sequencing_kit_label_import_alias_import_alias_string_unique UNIQUE (import_alias_string);
 
 ALTER TABLE ONLY public.sequencing_kit_label
     ADD CONSTRAINT sequencing_kit_label_name_key UNIQUE (name);
@@ -1999,9 +2032,6 @@ ALTER TABLE ONLY public.tumor_entity
 ALTER TABLE ONLY public.acl_entry
     ADD CONSTRAINT unique_ace_order UNIQUE (acl_object_identity, ace_order);
 
-ALTER TABLE ONLY public.external_script
-    ADD CONSTRAINT unique_deprecated_date UNIQUE (script_version, script_identifier, deprecated_date);
-
 ALTER TABLE ONLY public.abstract_bam_file
     ADD CONSTRAINT unique_identifier UNIQUE (work_package_id, identifier);
 
@@ -2026,17 +2056,23 @@ ALTER TABLE ONLY public.parameter_mapping
 ALTER TABLE ONLY public.abstract_bam_file
     ADD CONSTRAINT unique_work_directory_name UNIQUE (work_package_id, work_directory_name);
 
+ALTER TABLE ONLY public.user_project_role
+    ADD CONSTRAINT user_project_role_pk PRIMARY KEY (id);
+
+ALTER TABLE ONLY public.user_project_role
+    ADD CONSTRAINT user_project_role_user_id_project_id_key UNIQUE (user_id, project_id);
+
 ALTER TABLE ONLY public.user_role
     ADD CONSTRAINT user_role_pkey PRIMARY KEY (role_id, user_id);
+
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT users_email_key UNIQUE (email);
 
 ALTER TABLE ONLY public.users
     ADD CONSTRAINT users_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY public.users
     ADD CONSTRAINT users_username_key UNIQUE (username);
-
-ALTER TABLE ONLY public.snv_job_result
-    ADD CONSTRAINT "vcf_file_PK" PRIMARY KEY (id);
 
 ALTER TABLE ONLY public.pipeline
     ADD CONSTRAINT workflow_name_type_key UNIQUE (name, type);
@@ -2106,7 +2142,7 @@ CREATE INDEX alignment_pass_seq_track_idx ON public.alignment_pass USING btree (
 
 CREATE INDEX alignment_pass_work_package_idx ON public.alignment_pass USING btree (work_package_id);
 
-CREATE INDEX bam_file_pair_analysis_qc_traffic_light_status ON public.bam_file_pair_analysis USING btree (qc_traffic_light_status);
+CREATE INDEX bam_file_pair_analysis_qc_traffic_light_status_idx ON public.bam_file_pair_analysis USING btree (qc_traffic_light_status);
 
 CREATE INDEX bam_file_pair_analysis_sample_pair_idx ON public.bam_file_pair_analysis USING btree (sample_pair_id);
 
@@ -2130,15 +2166,17 @@ CREATE INDEX cluster_job_cluster_job_name_idx ON public.cluster_job USING btree 
 
 CREATE INDEX cluster_job_processing_step_idx ON public.cluster_job USING btree (processing_step_id);
 
-CREATE UNIQUE INDEX config_per_project_config_file_path_idx ON public.config_per_project USING btree (config_file_path);
+CREATE INDEX config_per_project_class_idx ON public.config_per_project_and_seq_type USING btree (class);
 
-CREATE UNIQUE INDEX config_per_project_project_id_seq_type_id_obsolete_date_idx ON public.config_per_project USING btree (project_id, seq_type_id, obsolete_date) WHERE ((obsolete_date IS NULL) AND ((class)::text = 'de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig'::text));
+CREATE UNIQUE INDEX config_per_project_config_file_path_idx ON public.config_per_project_and_seq_type USING btree (config_file_path);
 
-CREATE INDEX config_per_project_project_seqtype_pipeline_individual_idx ON public.config_per_project USING btree (project_id, seq_type_id, pipeline_id, individual_id) WHERE ((class)::text = 'de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig'::text);
+CREATE UNIQUE INDEX config_per_project_project_id_seq_type_id_obsolete_date_idx ON public.config_per_project_and_seq_type USING btree (project_id, seq_type_id, obsolete_date) WHERE ((obsolete_date IS NULL) AND ((class)::text = 'de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig'::text));
 
-CREATE UNIQUE INDEX contact_person_role_name_key ON public.contact_person_role USING btree (name);
+CREATE INDEX config_per_project_project_seqtype_pipeline_individual_idx ON public.config_per_project_and_seq_type USING btree (project_id, seq_type_id, pipeline_id, individual_id) WHERE ((class)::text = 'de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig'::text);
 
 CREATE INDEX data_file_alignment_log_idx ON public.data_file USING btree (alignment_log_id);
+
+CREATE INDEX data_file_date_last_checked_idx ON public.data_file USING btree (date_last_checked);
 
 CREATE INDEX data_file_file_type_idx ON public.data_file USING btree (file_type_id);
 
@@ -2154,11 +2192,7 @@ CREATE INDEX date_idx ON public.processing_step_update USING btree (date);
 
 CREATE INDEX document__name_idx ON public.document USING btree (name);
 
-CREATE UNIQUE INDEX external_script_script_identifier_script_version_deprecated_idx ON public.external_script USING btree (script_identifier, script_version, deprecated_date) WHERE (deprecated_date IS NULL);
-
 CREATE INDEX fastqc_processed_file_data_file_idx ON public.fastqc_processed_file USING btree (data_file_id);
-
-CREATE UNIQUE INDEX file_path_uniq_1412681982199 ON public.external_script USING btree (file_path);
 
 CREATE INDEX finished_idx ON public.process USING btree (finished);
 
@@ -2174,7 +2208,7 @@ CREATE INDEX individual_project_idx ON public.individual USING btree (project_id
 
 CREATE INDEX job_execution_plan_idx ON public.process USING btree (job_execution_plan_id);
 
-CREATE INDEX library_preparation_kit_synonym_library_preparation_kit_idx ON public.library_preparation_kit_synonym USING btree (library_preparation_kit_id);
+CREATE INDEX library_preparation_kit_synonym_library_preparation_kit_idx ON public.library_preparation_kit_import_alias USING btree (library_preparation_kit_id);
 
 CREATE INDEX merged_alignment_data_file_merging_log_idx ON public.merged_alignment_data_file USING btree (merging_log_id);
 
@@ -2214,7 +2248,7 @@ CREATE UNIQUE INDEX name_uniq_1377853124899 ON public.reference_genome USING btr
 
 CREATE UNIQUE INDEX name_uniq_1383572139513 ON public.library_preparation_kit USING btree (name);
 
-CREATE UNIQUE INDEX name_uniq_1383572139514 ON public.library_preparation_kit_synonym USING btree (name);
+CREATE UNIQUE INDEX name_uniq_1383572139514 ON public.library_preparation_kit_import_alias USING btree (import_alias_string);
 
 CREATE UNIQUE INDEX name_uniq_1383572139560 ON public.meta_data_key USING btree (name);
 
@@ -2250,13 +2284,13 @@ CREATE INDEX processing_thresholds_seq_type_idx ON public.processing_thresholds 
 
 CREATE UNIQUE INDEX project__dir_name_idx ON public.project USING btree (dir_name);
 
-CREATE UNIQUE INDEX project_contact_person_contact_person_idx ON public.project_contact_person USING btree (contact_person_id, project_id);
-
 CREATE INDEX project_idx ON public.sample_type_per_project USING btree (project_id);
 
 CREATE INDEX project_processing_priority_idx ON public.project USING btree (processing_priority);
 
 CREATE INDEX project_project_group_idx ON public.project USING btree (project_group_id);
+
+CREATE UNIQUE INDEX project_role_name_idx ON public.project_role USING btree (name);
 
 CREATE INDEX qc_threshold_project_idx ON public.qc_threshold USING btree (project_id);
 
@@ -2314,6 +2348,8 @@ CREATE INDEX sample_type_idx ON public.sample_type_per_project USING btree (samp
 
 CREATE UNIQUE INDEX seed_me_checksum_seed_name_idx ON public.seed_me_checksum USING btree (seed_name);
 
+CREATE UNIQUE INDEX seq_center__auto_import_dir_idx ON public.seq_center USING btree (auto_import_dir);
+
 CREATE INDEX seq_platform_group_comments_id_idx ON public.seq_platform_group_comment USING btree (seq_platform_group_comments_id);
 
 CREATE INDEX seq_platform_identifier_in_run_name_idx ON public.seq_platform USING btree (identifier_in_run_name);
@@ -2342,8 +2378,6 @@ CREATE INDEX seq_track_sample_idx ON public.seq_track USING btree (sample_id);
 
 CREATE INDEX seq_track_seq_type_idx ON public.seq_track USING btree (seq_type_id);
 
-CREATE INDEX snv_job_result_snv_calling_instance_idx ON public.snv_job_result USING btree (snv_calling_instance_id);
-
 CREATE INDEX software_tool_identifier_software_tool_idx ON public.software_tool_identifier USING btree (software_tool_id);
 
 CREATE UNIQUE INDEX sophia_instance_idx_roddy_execution_directory_names_idx ON public.sophia_instance_roddy_execution_directory_names USING btree (sophia_instance_id, roddy_execution_directory_names_idx);
@@ -2352,23 +2386,33 @@ CREATE UNIQUE INDEX sophia_qc_sophia_instance_id_idx ON public.sophia_qc USING b
 
 CREATE INDEX state_idx ON public.processing_step_update USING btree (state);
 
+CREATE UNIQUE INDEX ui_dir_name_layout_single_cell ON public.seq_type USING btree (dir_name, library_layout, single_cell);
+
+CREATE UNIQUE INDEX ui_name_layout_single_cell ON public.seq_type USING btree (name, library_layout, single_cell);
+
 CREATE UNIQUE INDEX unique_alias ON public.reference_genome_entry USING btree (reference_genome_id, alias);
 
-CREATE UNIQUE INDEX unique_dir_name ON public.seq_type USING btree (library_layout, dir_name);
+CREATE INDEX unique_indel_quality_control_indel_calling_instance_id_idx ON public.indel_quality_control USING btree (indel_calling_instance_id);
 
 CREATE UNIQUE INDEX unique_instance_name ON public.bam_file_pair_analysis USING btree (sample_pair_id, instance_name);
 
+CREATE INDEX unique_meta_data_key_name_idx ON public.meta_data_key USING btree (name);
+
 CREATE UNIQUE INDEX unique_name ON public.reference_genome_entry USING btree (reference_genome_id, name);
+
+CREATE INDEX unique_project_phabricator_alias_idx ON public.project USING btree (phabricator_alias);
 
 CREATE UNIQUE INDEX unique_reference_genome_id ON public.bed_file USING btree (library_preparation_kit_id, reference_genome_id);
 
 CREATE UNIQUE INDEX unique_sample_type_id ON public.sample_type_per_project USING btree (project_id, sample_type_id);
 
+CREATE INDEX unique_stat_size_file_name_name_reference_genome_id_idx ON public.stat_size_file_name USING btree (reference_genome_id, name);
+
 ALTER TABLE ONLY public.abstract_bam_file
     ADD CONSTRAINT abstract_bam_file_base_bam_file_id_fkey FOREIGN KEY (base_bam_file_id) REFERENCES public.abstract_bam_file(id);
 
 ALTER TABLE ONLY public.abstract_bam_file
-    ADD CONSTRAINT abstract_bam_file_config_id_fkey FOREIGN KEY (config_id) REFERENCES public.config_per_project(id);
+    ADD CONSTRAINT abstract_bam_file_config_id_fkey FOREIGN KEY (config_id) REFERENCES public.config_per_project_and_seq_type(id);
 
 ALTER TABLE ONLY public.abstract_bam_file
     ADD CONSTRAINT abstract_bam_file_work_package_id_fkey FOREIGN KEY (work_package_id) REFERENCES public.abstract_merging_work_package(id);
@@ -2391,6 +2435,12 @@ ALTER TABLE ONLY public.aceseq_instance_roddy_execution_directory_names
 ALTER TABLE ONLY public.alignment_pass
     ADD CONSTRAINT alignment_pass_work_package_id_fkey FOREIGN KEY (work_package_id) REFERENCES public.abstract_merging_work_package(id);
 
+ALTER TABLE ONLY public.antibody_target_import_alias
+    ADD CONSTRAINT "antibody_target_import_alias_antibody_target_FK" FOREIGN KEY (antibody_target_id) REFERENCES public.antibody_target(id);
+
+ALTER TABLE ONLY public.audit_log
+    ADD CONSTRAINT audit_log_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id);
+
 ALTER TABLE ONLY public.cluster_job
     ADD CONSTRAINT cluster_job_individual_id_fkey FOREIGN KEY (individual_id) REFERENCES public.individual(id);
 
@@ -2398,9 +2448,9 @@ ALTER TABLE ONLY public.cluster_job
     ADD CONSTRAINT cluster_job_realm_id_fkey FOREIGN KEY (realm_id) REFERENCES public.realm(id);
 
 ALTER TABLE ONLY public.bam_file_pair_analysis
-    ADD CONSTRAINT "config_FK" FOREIGN KEY (config_id) REFERENCES public.config_per_project(id);
+    ADD CONSTRAINT "config_FK" FOREIGN KEY (config_id) REFERENCES public.config_per_project_and_seq_type(id);
 
-ALTER TABLE ONLY public.config_per_project
+ALTER TABLE ONLY public.config_per_project_and_seq_type
     ADD CONSTRAINT config_per_project_workflow_id_fkey FOREIGN KEY (pipeline_id) REFERENCES public.pipeline(id);
 
 ALTER TABLE ONLY public.data_file
@@ -2495,12 +2545,6 @@ ALTER TABLE ONLY public.bed_file
 
 ALTER TABLE ONLY public.bed_file
     ADD CONSTRAINT fk5317da7ae9290d8b FOREIGN KEY (reference_genome_id) REFERENCES public.reference_genome(id);
-
-ALTER TABLE ONLY public.snv_job_result
-    ADD CONSTRAINT fk5db4d82313b2e20a FOREIGN KEY (external_script_id) REFERENCES public.external_script(id);
-
-ALTER TABLE ONLY public.snv_job_result
-    ADD CONSTRAINT fk5db4d8234e725978 FOREIGN KEY (chromosome_join_external_script_id) REFERENCES public.external_script(id);
 
 ALTER TABLE ONLY public.job_decision
     ADD CONSTRAINT fk69f2aa1e4c8832f8 FOREIGN KEY (job_definition_id) REFERENCES public.job_definition(id);
@@ -2601,7 +2645,7 @@ ALTER TABLE ONLY public.abstract_bam_file
 ALTER TABLE ONLY public.bam_file_pair_analysis
     ADD CONSTRAINT fk_bam_file_pair_analysis__comment_id FOREIGN KEY (comment_id) REFERENCES public.comment(id);
 
-ALTER TABLE ONLY public.config_per_project
+ALTER TABLE ONLY public.config_per_project_and_seq_type
     ADD CONSTRAINT fk_config_per_project__individual_id FOREIGN KEY (individual_id) REFERENCES public.individual(id);
 
 ALTER TABLE ONLY public.stat_size_file_name
@@ -2730,7 +2774,7 @@ ALTER TABLE ONLY public.processing_step_parameter
 ALTER TABLE ONLY public.processing_step_parameter
     ADD CONSTRAINT fkde767ca2a7ebf604 FOREIGN KEY (processing_step_input_id) REFERENCES public.processing_step(id);
 
-ALTER TABLE ONLY public.library_preparation_kit_synonym
+ALTER TABLE ONLY public.library_preparation_kit_import_alias
     ADD CONSTRAINT fkde8fc9c3aa9ddd9a FOREIGN KEY (library_preparation_kit_id) REFERENCES public.library_preparation_kit(id);
 
 ALTER TABLE ONLY public.alignment_pass
@@ -2811,9 +2855,6 @@ ALTER TABLE ONLY public.indel_calling_instance_roddy_execution_directory_names
 ALTER TABLE ONLY public.indel_quality_control
     ADD CONSTRAINT indel_quality_control_indel_calling_instance_id_fkey FOREIGN KEY (indel_calling_instance_id) REFERENCES public.bam_file_pair_analysis(id);
 
-ALTER TABLE ONLY public.snv_job_result
-    ADD CONSTRAINT "input_result_FK" FOREIGN KEY (input_result_id) REFERENCES public.snv_job_result(id);
-
 ALTER TABLE ONLY public.job_error_definition_job_definition
     ADD CONSTRAINT job_error_definition_job_defi_job_error_definition_job_def_fkey FOREIGN KEY (job_error_definition_job_definitions_id) REFERENCES public.job_error_definition(id);
 
@@ -2847,19 +2888,19 @@ ALTER TABLE ONLY public.abstract_merging_work_package
 ALTER TABLE ONLY public.otrs_ticket
     ADD CONSTRAINT otrs_ticket_comment_id_fkey FOREIGN KEY (comment_id) REFERENCES public.comment(id);
 
-ALTER TABLE ONLY public.config_per_project
-    ADD CONSTRAINT "previous_config_FK" FOREIGN KEY (previous_config_id) REFERENCES public.config_per_project(id);
-
-ALTER TABLE ONLY public.process
-    ADD CONSTRAINT process_comment_fk FOREIGN KEY (comment_id) REFERENCES public.comment(id);
+ALTER TABLE ONLY public.config_per_project_and_seq_type
+    ADD CONSTRAINT "previous_config_FK" FOREIGN KEY (previous_config_id) REFERENCES public.config_per_project_and_seq_type(id);
 
 ALTER TABLE ONLY public.individual
     ADD CONSTRAINT process_comment_fk FOREIGN KEY (comment_id) REFERENCES public.comment(id);
 
 ALTER TABLE ONLY public.process
+    ADD CONSTRAINT process_comment_fk FOREIGN KEY (comment_id) REFERENCES public.comment(id);
+
+ALTER TABLE ONLY public.process
     ADD CONSTRAINT process_restarted_id_fkey FOREIGN KEY (restarted_id) REFERENCES public.process(id);
 
-ALTER TABLE ONLY public.config_per_project
+ALTER TABLE ONLY public.config_per_project_and_seq_type
     ADD CONSTRAINT "project_FK" FOREIGN KEY (project_id) REFERENCES public.project(id);
 
 ALTER TABLE ONLY public.processing_thresholds
@@ -2871,14 +2912,11 @@ ALTER TABLE ONLY public.sample_type_per_project
 ALTER TABLE ONLY public.project
     ADD CONSTRAINT project_comment_fk FOREIGN KEY (comment_id) REFERENCES public.comment(id);
 
-ALTER TABLE ONLY public.project_contact_person
-    ADD CONSTRAINT project_contact_person_contact_person_role_id_fkey FOREIGN KEY (contact_person_role_id) REFERENCES public.contact_person_role(id);
+ALTER TABLE ONLY public.user_project_role
+    ADD CONSTRAINT project_fk FOREIGN KEY (project_id) REFERENCES public.project(id);
 
-ALTER TABLE ONLY public.project_contact_person
-    ADD CONSTRAINT project_contact_persons_contact_person_id_fkey FOREIGN KEY (contact_person_id) REFERENCES public.contact_person(id);
-
-ALTER TABLE ONLY public.project_contact_person
-    ADD CONSTRAINT project_contact_persons_project_id_fkey FOREIGN KEY (project_id) REFERENCES public.project(id);
+ALTER TABLE ONLY public.project_info
+    ADD CONSTRAINT "project_info_project_project_id_FK" FOREIGN KEY (project_id) REFERENCES public.project(id);
 
 ALTER TABLE ONLY public.project_project_categories
     ADD CONSTRAINT project_project_categories__project_category_id_fkey FOREIGN KEY (project_category_id) REFERENCES public.project_category(id);
@@ -2888,6 +2926,9 @@ ALTER TABLE ONLY public.project_project_categories
 
 ALTER TABLE ONLY public.project
     ADD CONSTRAINT project_realm_id_fkey FOREIGN KEY (realm_id) REFERENCES public.realm(id);
+
+ALTER TABLE ONLY public.user_project_role
+    ADD CONSTRAINT project_role_fk FOREIGN KEY (project_role_id) REFERENCES public.project_role(id);
 
 ALTER TABLE ONLY public.project
     ADD CONSTRAINT project_tumor_entity_fk FOREIGN KEY (tumor_entity_id) REFERENCES public.tumor_entity(id);
@@ -2931,13 +2972,16 @@ ALTER TABLE ONLY public.processing_thresholds
 ALTER TABLE ONLY public.sample_type_per_project
     ADD CONSTRAINT "sample_type_FK" FOREIGN KEY (sample_type_id) REFERENCES public.sample_type(id);
 
+ALTER TABLE ONLY public.seq_center_import_dirs_allow_linking
+    ADD CONSTRAINT seq_center_import_dirs_allow_linking_seq_center_id_fkey FOREIGN KEY (seq_center_id) REFERENCES public.seq_center(id);
+
 ALTER TABLE ONLY public.seq_platform_group_comment
     ADD CONSTRAINT seq_platform_group_comments_comment_id_fkey FOREIGN KEY (comment_id) REFERENCES public.comment(id);
 
 ALTER TABLE ONLY public.seq_platform_group_comment
     ADD CONSTRAINT seq_platform_group_comments_fkey FOREIGN KEY (seq_platform_group_comments_id) REFERENCES public.seq_platform_group(id);
 
-ALTER TABLE ONLY public.seq_platform_model_label_alias
+ALTER TABLE ONLY public.seq_platform_model_label_import_alias
     ADD CONSTRAINT "seq_platform_model_label_FK" FOREIGN KEY (seq_platform_model_label_id) REFERENCES public.seq_platform_model_label(id);
 
 ALTER TABLE ONLY public.seq_platform
@@ -2952,23 +2996,20 @@ ALTER TABLE ONLY public.seq_track_log_message
 ALTER TABLE ONLY public.seq_track_log_message
     ADD CONSTRAINT seq_track_log_message_seq_track_log_messages_id_fkey FOREIGN KEY (seq_track_log_messages_id) REFERENCES public.seq_track(id);
 
-ALTER TABLE ONLY public.config_per_project
+ALTER TABLE ONLY public.config_per_project_and_seq_type
     ADD CONSTRAINT "seq_type_FK" FOREIGN KEY (seq_type_id) REFERENCES public.seq_type(id);
 
 ALTER TABLE ONLY public.processing_thresholds
     ADD CONSTRAINT "seq_type_FK" FOREIGN KEY (seq_type_id) REFERENCES public.seq_type(id);
 
-ALTER TABLE ONLY public.seq_type_alias
+ALTER TABLE ONLY public.seq_type_import_alias
     ADD CONSTRAINT "seq_type_FK" FOREIGN KEY (seq_type_id) REFERENCES public.seq_type(id);
 
 ALTER TABLE ONLY public.seq_platform
     ADD CONSTRAINT "sequencing_kit_label_FK" FOREIGN KEY (sequencing_kit_label_id) REFERENCES public.sequencing_kit_label(id);
 
-ALTER TABLE ONLY public.sequencing_kit_label_alias
+ALTER TABLE ONLY public.sequencing_kit_label_import_alias
     ADD CONSTRAINT "sequencing_kit_label_FK" FOREIGN KEY (sequencing_kit_label_id) REFERENCES public.sequencing_kit_label(id);
-
-ALTER TABLE ONLY public.snv_job_result
-    ADD CONSTRAINT "snv_calling_instance_FK" FOREIGN KEY (snv_calling_instance_id) REFERENCES public.bam_file_pair_analysis(id);
 
 ALTER TABLE ONLY public.sophia_qc
     ADD CONSTRAINT "sophia_instance_FK" FOREIGN KEY (sophia_instance_id) REFERENCES public.bam_file_pair_analysis(id);
@@ -2984,3 +3025,6 @@ ALTER TABLE ONLY public.swap_info_seq_track
 
 ALTER TABLE ONLY public.swap_info
     ADD CONSTRAINT swap_info_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id);
+
+ALTER TABLE ONLY public.user_project_role
+    ADD CONSTRAINT user_fk FOREIGN KEY (user_id) REFERENCES public.users(id);
