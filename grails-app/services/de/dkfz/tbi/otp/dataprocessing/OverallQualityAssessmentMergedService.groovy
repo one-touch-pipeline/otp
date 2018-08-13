@@ -55,37 +55,6 @@ where
         return qas
     }
 
-
-    List findSequenceLengthForQualityAssessmentMerged(List<AbstractQualityAssessment> abstractQualityAssessments) {
-        if (!abstractQualityAssessments) {
-            return []
-        }
-
-        /*
-            This method assumes:
-            It does not matter which seqTrack is used to get the sequencedLength. Within one merged bam file all are the same.
-            This is incorrect, see OTP-1670
-         */
-
-        final String HQL = '''
-            select distinct
-                abstractQualityAssessment.id,
-                dataFile.sequenceLength
-            from
-                AbstractQualityAssessment abstractQualityAssessment,
-                DataFile dataFile
-            where
-                dataFile.seqTrack in elements(abstractQualityAssessment.qualityAssessmentMergedPass.abstractMergedBamFile.workPackage.seqTracks)
-                and abstractQualityAssessment.id in :abstractQualityAssessmentIds
-        '''
-        Map parameters = [
-                abstractQualityAssessmentIds: abstractQualityAssessments*.id,
-        ]
-
-        List result = AbstractQualityAssessment.executeQuery(HQL, parameters, [readOnly: true])
-        return result
-    }
-
     List<ReferenceGenomeEntry> findChromosomeLengthForQualityAssessmentMerged(List<String> chromosomeAliases, List<AbstractQualityAssessment> abstractQualityAssessments) {
         if (!abstractQualityAssessments) {
             return []

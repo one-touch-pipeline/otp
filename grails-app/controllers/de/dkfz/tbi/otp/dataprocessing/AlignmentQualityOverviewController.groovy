@@ -118,7 +118,7 @@ class AlignmentQualityOverviewController {
 
         SeqType seqType = (cmd.seqType && seqTypes.contains(cmd.seqType)) ? cmd.seqType : seqTypes[0]
 
-        List<String> header = null
+        List<String> header
         switch (seqType?.name) {
             case null:
                 header = ['alignment.quality.noSeqType']
@@ -183,15 +183,8 @@ class AlignmentQualityOverviewController {
 
         List<AbstractQualityAssessment> dataOverall = overallQualityAssessmentMergedService.findAllByProjectAndSeqType(project, seqType)
         List<AbstractQualityAssessment> dataChromosomeXY = chromosomeQualityAssessmentMergedService.qualityAssessmentMergedForSpecificChromosomes(chromosomes, dataOverall*.qualityAssessmentMergedPass)
-        Map<Long, Map<String, List<AbstractQualityAssessment>>> chromosomeMapXY = dataChromosomeXY.groupBy([{
-                                                                                                                it.qualityAssessmentMergedPass.id
-                                                                                                            }, {
-                                                                                                                it.chromosomeName
-                                                                                                            }])
-
-        List sequenceLengths = overallQualityAssessmentMergedService.findSequenceLengthForQualityAssessmentMerged(dataOverall)
-        // TODO: has to be adapted when issue OTP-1670 is solved
-        Map sequenceLengthsMap = sequenceLengths.groupBy { it[0] }
+        Map<Long, Map<String, List<AbstractQualityAssessment>>> chromosomeMapXY
+        chromosomeMapXY = dataChromosomeXY.groupBy([{it.qualityAssessmentMergedPass.id}, {it.chromosomeName}])
 
         QcThresholdService.ThresholdColorizer thresholdColorizer
         if (dataOverall) {
@@ -208,14 +201,21 @@ class AlignmentQualityOverviewController {
 
             QualityAssessmentMergedPass qualityAssessmentMergedPass = it.qualityAssessmentMergedPass
             AbstractMergedBamFile abstractMergedBamFile = qualityAssessmentMergedPass.abstractMergedBamFile
-            Set<LibraryPreparationKit> kit = qualityAssessmentMergedPass.containedSeqTracks*.libraryPreparationKit.findAll().unique() //findAll removes null values
-            String readLengthString = sequenceLengthsMap[it.id][0][1]
+            Set<SeqTrack> seqTracks = abstractMergedBamFile.mergingWorkPackage.seqTracks
+            /*
+                This method assumes, that it does not matter which seqTrack is used to get the sequencedLength.
+                Within one merged bam file all are the same. This is incorrect, see OTP-1670.
+            */
+            DataFile dataFile = DataFile.findBySeqTrack(seqTracks.first())
+            String readLengthString = dataFile.sequenceLength
             Double readLength = null
             if (readLengthString) {
                 readLength = readLengthString.contains('-') ? (readLengthString.split('-').sum {
                     it as double
                 } / 2) : readLengthString as double
             }
+
+            Set<LibraryPreparationKit> kit = qualityAssessmentMergedPass.containedSeqTracks*.libraryPreparationKit.findAll().unique() //findAll removes null values
             TableCellValue.Icon icon = [
                     (AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED)  : TableCellValue.Icon.WARNING,
                     (AbstractMergedBamFile.QcTrafficLightStatus.REJECTED) : TableCellValue.Icon.ERROR,
@@ -328,7 +328,6 @@ class AlignmentQualityOverviewController {
             map += thresholdColorizer.colorize(qcKeys, it)
             return map
         }
-
         render dataToRender as JSON
     }
 

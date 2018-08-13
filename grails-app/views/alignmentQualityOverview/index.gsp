@@ -26,7 +26,7 @@
                 codes="${header}"
                 id="overviewTableProcessedMergedBMF"/>
         </div>
-    <asset:script>
+    <asset:script type="text/javascript">
         $(function() {
             $.otp.alignmentQualityOverviewTable.register();
         });
