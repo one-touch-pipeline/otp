@@ -117,6 +117,7 @@ class MetaDataService {
         def patterns = [
             //SOMEPID_L001_R2.fastq.gz
             /.+_L00\d{1,2}.R([12]).+/,
+
             //s_101202_7_1.fastq.gz
             //s_101202_7_2.fastq.gz
             //s_110421_3.read2.fastq.gz
@@ -131,6 +132,7 @@ class MetaDataService {
             /^00_MCF10A.+\.\d{6}\.[A-Z0-9]{9}\.\d{1,2}\.([12])\.fastq.+/,
             /^RB\d{1,2}_(?:Blut|Tumor)_R([12])\.fastq.+/,
             /.*[HP]\d\d[A-Z0-9]_[A-Z0-9]{4}_L\d_.+_([12])\.fastq.+/,
+
             //lane6mp25PE2_2_sequence.txt.gz
             //lane211s003107_1_sequence.txt.gz
             //lane8wwmp44PE2_1_sequence.txt.gz
@@ -138,11 +140,15 @@ class MetaDataService {
             /.*[Ll]ane\d.+_([12])_sequence.txt.gz$/,
             /^\d{6}_I\d{3}_[A-Z0-9]{11}_L\d_WHAIPI\d{6}-\d{2}(?:\+1)?_([12]).raw.fq.gz$/,
             /^.*ATRT\d+_lib\d*_([12]).fastq.gz$/,
+
             //AS-78215-LR-10213_R1.fastq.gz
             /^AS-.*-LR-.*_R([12]).fastq.gz$/,
+
             //SOMEPID_control_0097062_1.fastq.gz
             /^.*_(?:control|tumor)_.*_(\d).fastq.gz$/,
+
             /^EGAR\d*_.*_.*_([12]).fq.gz$/,
+
             //K002000023_42438_1.fq.gz
             /^K\d{9}_\d{5}_([12]).fq.gz$/,
         ]
