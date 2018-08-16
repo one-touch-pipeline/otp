@@ -291,6 +291,10 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         Collection<ProcessingStepUpdate> failureProcessingStepUpdatesAfterRestart = allFailureProcessingStepUpdates - existingFailureProcessingStepUpdate
         outputFailureInfoAndThrowException(failureProcessingStepUpdatesAfterRestart)
 
+        checkForFailedClusterJobs()
+    }
+
+    void checkForFailedClusterJobs() {
         assert ClusterJob.all.every { it.exitStatus != null }
         assert ClusterJob.all.every { it.jobLog != null }
     }

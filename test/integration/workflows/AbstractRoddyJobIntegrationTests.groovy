@@ -2,6 +2,9 @@ package workflows
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
+import de.dkfz.tbi.otp.infrastructure.ClusterJob
+import de.dkfz.tbi.otp.job.processing.ExecutionState
+import de.dkfz.tbi.otp.job.processing.ProcessingStepUpdate
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 import org.junit.*
@@ -13,7 +16,6 @@ import static de.dkfz.tbi.TestCase.*
  */
 @Ignore
 class AbstractRoddyJobIntegrationTests extends AbstractRoddyAlignmentWorkflowTests {
-
 
     @Test
     void executeRoddy_roddyCallSucceeds_noClusterJobsSent_RoddyJobFailedAndSuccessfullyRestarted() {
@@ -84,6 +86,13 @@ class AbstractRoddyJobIntegrationTests extends AbstractRoddyAlignmentWorkflowTes
 
         checkAllAfterRoddyClusterJobsRestartAndSuccessfulExecution_alignBaseBamAndNewLanes()
     }
+
+
+    @Override
+    void checkForFailedClusterJobs() {
+        assert ClusterJob.all.every { it.jobLog != null }
+    }
+
 
     @Override
     SeqType findSeqType() {
