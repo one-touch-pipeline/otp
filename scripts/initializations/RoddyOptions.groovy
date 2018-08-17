@@ -20,7 +20,7 @@ processingOptionService.createOrUpdate(
 
 processingOptionService.createOrUpdate(
         RODDY_APPLICATION_INI,
-        "${roddy_base_path}/configs/applicationProperties.ini"
+        "${roddy_base_path}/applicationProperties.ini"
 )
 
 processingOptionService.createOrUpdate(

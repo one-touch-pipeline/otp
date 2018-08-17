@@ -1,0 +1,7 @@
+# Release notes
+
+## Next version
+ * Processing options
+   * RODDY_APPLICATION_INI needs to be adjusted to the new path
+ * otp-roddy-config needs to be checked out from new repo
+ * check whether applicationProperties.ini was copied correctly
