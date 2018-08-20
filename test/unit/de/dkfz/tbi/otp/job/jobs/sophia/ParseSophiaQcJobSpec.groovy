@@ -1,12 +1,13 @@
 package de.dkfz.tbi.otp.job.jobs.sophia
 
-import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.config.OtpProperty
+import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.dataprocessing.sophia.*
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.qcTrafficLight.*
 import grails.test.mixin.*
 import org.junit.*
 import org.junit.rules.*
@@ -21,6 +22,7 @@ import spock.lang.*
         MergingWorkPackage,
         Pipeline,
         Project,
+        QcThreshold,
         Realm,
         ReferenceGenome,
         RoddyBamFile,
@@ -58,6 +60,7 @@ class ParseSophiaQcJobSpec extends Specification {
         ParseSophiaQcJob job = [
                 getProcessParameterObject: { -> instance },
         ] as ParseSophiaQcJob
+        job.qcTrafficLightService = new QcTrafficLightService()
 
         when:
         job.execute()
@@ -72,6 +75,8 @@ class ParseSophiaQcJobSpec extends Specification {
         qc.rnaDecontaminationApplied == false
 
         instance.processingState == AnalysisProcessingStates.FINISHED
+        instance.sampleType1BamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED
+        instance.sampleType2BamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED
 
         cleanup:
         configService.clean()

@@ -10,8 +10,9 @@ import org.springframework.stereotype.*
 @UseJobLog
 class ParsePanCanQcJob extends AbstractParseAlignmentQcJob {
 
-    public void parseStatistics(RoddyBamFile roddyBamFile) {
+    @Override
+    RoddyQualityAssessment parseStatistics(RoddyBamFile roddyBamFile) {
         abstractQualityAssessmentService.parseRoddySingleLaneQaStatistics(roddyBamFile)
-        abstractQualityAssessmentService.parseRoddyMergedBamQaStatistics(roddyBamFile)
+        return abstractQualityAssessmentService.parseRoddyMergedBamQaStatistics(roddyBamFile)
     }
 }

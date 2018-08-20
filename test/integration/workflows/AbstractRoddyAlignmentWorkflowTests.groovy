@@ -416,6 +416,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
         assert bamFile.coverageWithN == abstractBamFileService.calculateCoverageWithN(bamFile)
 
         assert bamFile.qualityAssessmentStatus == AbstractBamFile.QaProcessingStatus.FINISHED
+        assert bamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED
 
         if (bamFile.seqType.isWgbs() && bamFile.hasMultipleLibraries()) {
             List<RoddyLibraryQa> libraryQas = RoddyLibraryQa.findAllByQualityAssessmentMergedPass(qaPass)

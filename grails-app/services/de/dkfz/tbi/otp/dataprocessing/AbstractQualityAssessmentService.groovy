@@ -103,25 +103,30 @@ class AbstractQualityAssessmentService {
     }
 
 
-    void parseRoddyMergedBamQaStatistics(RoddyBamFile roddyBamFile) {
+    RoddyMergedBamQa parseRoddyMergedBamQaStatistics(RoddyBamFile roddyBamFile) {
         File qaFile = roddyBamFile.getWorkMergedQAJsonFile()
         Map<String, Map> chromosomeInformation = parseRoddyQaStatistics(roddyBamFile, qaFile, { roddyBamFile.workMergedQATargetExtractJsonFile })
 
-        chromosomeInformation.each { chromosome, chromosomeValues ->
+        List<RoddyMergedBamQa> chromosomeInformationQa = chromosomeInformation.collect { chromosome, chromosomeValues ->
             RoddyMergedBamQa qa = new RoddyMergedBamQa(chromosomeValues)
             assert qa.chromosome == chromosome
             qa.qualityAssessmentMergedPass = roddyBamFile.findOrSaveQaPass()
             assert qa.save(flush: true)
+            return qa
+        }
+        return chromosomeInformationQa.find {
+            it.chromosome == RoddyQualityAssessment.ALL
         }
     }
 
-    void parseRnaRoddyBamFileQaStatistics(RnaRoddyBamFile rnaRoddyBamFile) {
+    RnaQualityAssessment parseRnaRoddyBamFileQaStatistics(RnaRoddyBamFile rnaRoddyBamFile) {
         File qaFile = rnaRoddyBamFile.getWorkMergedQAJsonFile()
         Map<String, Map> chromosomeInformation = parseRoddyQaStatistics(rnaRoddyBamFile, qaFile, null)
         RnaQualityAssessment rnaQualityAssessment = new RnaQualityAssessment((chromosomeInformation.get(RnaQualityAssessment.ALL)))
         rnaQualityAssessment.chromosome = RnaQualityAssessment.ALL
         rnaQualityAssessment.qualityAssessmentMergedPass = rnaRoddyBamFile.findOrSaveQaPass()
         assert rnaQualityAssessment.save(flush: true)
+        return rnaQualityAssessment
     }
 
     void parseRoddyLibraryQaStatistics(RoddyBamFile roddyBamFile) {

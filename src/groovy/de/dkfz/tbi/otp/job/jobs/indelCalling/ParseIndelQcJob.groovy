@@ -5,8 +5,11 @@ import de.dkfz.tbi.otp.job.ast.*
 import de.dkfz.tbi.otp.job.jobs.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
+import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightService
+import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightValue
 import grails.converters.*
 import org.codehaus.groovy.grails.web.json.*
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.*
 import org.springframework.stereotype.*
 
@@ -15,13 +18,16 @@ import org.springframework.stereotype.*
 @UseJobLog
 class ParseIndelQcJob extends AbstractEndStateAwareJobImpl implements AutoRestartableJob {
 
+    @Autowired
+    QcTrafficLightService qcTrafficLightService
+
     @Override
     void execute() throws Exception {
-        final IndelCallingInstance indelCallingInstance = getProcessParameterObject()
+        final IndelCallingInstance instance = getProcessParameterObject()
 
-        File indelQcFile = indelCallingInstance.getIndelQcJsonFile()
+        File indelQcFile = instance.getIndelQcJsonFile()
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(indelQcFile)
-        File sampleSwapFile = indelCallingInstance.getSampleSwapJsonFile()
+        File sampleSwapFile = instance.getSampleSwapJsonFile()
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(sampleSwapFile)
         JSONObject qcJson = JSON.parse(indelQcFile.text)
         JSONObject sampleSwapJson = JSON.parse(sampleSwapFile.text)
@@ -29,14 +35,19 @@ class ParseIndelQcJob extends AbstractEndStateAwareJobImpl implements AutoRestar
 
             IndelQualityControl indelQc = qcJson.values()
             indelQc.file = new File(indelQc.file.replace('./', '')).path
-            indelQc.indelCallingInstance = indelCallingInstance
+            indelQc.indelCallingInstance = instance
             assert indelQc.save(flush: true)
 
             IndelSampleSwapDetection sampleSwap = sampleSwapJson
-            sampleSwap.indelCallingInstance = indelCallingInstance
+            sampleSwap.indelCallingInstance = instance
             assert sampleSwap.save(flush: true)
 
-            indelCallingInstance.updateProcessingState(AnalysisProcessingStates.FINISHED)
+
+            [indelQc, sampleSwap].each { QcTrafficLightValue qc ->
+                qcTrafficLightService.setQcTrafficLightStatusBasedOnThreshold(instance, qc)
+            }
+
+            instance.updateProcessingState(AnalysisProcessingStates.FINISHED)
             succeed()
         }
     }

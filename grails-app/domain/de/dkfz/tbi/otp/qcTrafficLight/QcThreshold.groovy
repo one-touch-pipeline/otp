@@ -192,7 +192,6 @@ class QcThreshold implements Entity {
         return getWarningLevel(qc."${qcProperty1}" - qc."${qcProperty2}")
     }
 
-
     private ThresholdLevel compareThresholdToRatioWithExternalValue(QcTrafficLightValue qc, Double externalValue) {
         if (qc."${qcProperty1}" == null || externalValue == null || externalValue == 0) {
             return ThresholdLevel.OKAY

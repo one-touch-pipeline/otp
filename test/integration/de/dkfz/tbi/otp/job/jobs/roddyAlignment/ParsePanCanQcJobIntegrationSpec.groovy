@@ -2,12 +2,12 @@ package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import org.junit.*
 import org.junit.rules.*
 import org.springframework.beans.factory.annotation.*
 import grails.test.spock.*
-
 
 class ParsePanCanQcJobIntegrationSpec extends IntegrationSpec {
 
@@ -33,10 +33,10 @@ class ParsePanCanQcJobIntegrationSpec extends IntegrationSpec {
                 getProcessParameterObject: { -> roddyBamFile },
         ] as ParsePanCanQcJob
         job.abstractQualityAssessmentService = abstractQualityAssessmentService
+        job.qcTrafficLightService = new QcTrafficLightService()
 
         when:
         job.execute()
-
 
         then:
         CollectionUtils.containSame(["8", "all", "7"], RoddySingleLaneQa.list()*.chromosome)
@@ -44,5 +44,7 @@ class ParsePanCanQcJobIntegrationSpec extends IntegrationSpec {
         roddyBamFile.coverage != null
         roddyBamFile.coverageWithN != null
         roddyBamFile.qualityAssessmentStatus == AbstractBamFile.QaProcessingStatus.FINISHED
+        roddyBamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED
+        roddyBamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED
     }
 }

@@ -1,12 +1,13 @@
 package de.dkfz.tbi.otp.job.jobs.aceseq
 
 import de.dkfz.tbi.*
-import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.config.OtpProperty
+import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.qcTrafficLight.*
 import de.dkfz.tbi.otp.utils.*
 import grails.test.mixin.*
 import org.junit.*
@@ -24,6 +25,7 @@ import spock.lang.*
         MergingWorkPackage,
         Pipeline,
         Project,
+        QcThreshold,
         Realm,
         ReferenceGenome,
         RoddyBamFile,
@@ -67,6 +69,7 @@ class ParseAceseqQcJobSpec extends Specification {
         ParseAceseqQcJob job = [
                 getProcessParameterObject: { -> instance },
         ] as ParseAceseqQcJob
+        job.qcTrafficLightService = new QcTrafficLightService()
 
         when:
         job.execute()
@@ -90,6 +93,8 @@ class ParseAceseqQcJobSpec extends Specification {
         qc2.solutionPossible == 4
 
         instance.processingState == AnalysisProcessingStates.FINISHED
+        instance.sampleType1BamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED
+        instance.sampleType2BamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED
 
         cleanup:
         configService.clean()

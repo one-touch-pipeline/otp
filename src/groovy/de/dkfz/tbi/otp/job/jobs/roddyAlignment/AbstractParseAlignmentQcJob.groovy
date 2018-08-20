@@ -1,17 +1,19 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
-import de.dkfz.tbi.otp.dataprocessing.AbstractQualityAssessmentService
-import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.jobs.AutoRestartableJob
 import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
+import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightService
+import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightValue
 import org.springframework.beans.factory.annotation.Autowired
-
 
 abstract class AbstractParseAlignmentQcJob extends AbstractEndStateAwareJobImpl implements AutoRestartableJob {
 
     @Autowired
     AbstractQualityAssessmentService abstractQualityAssessmentService
+
+    @Autowired
+    QcTrafficLightService qcTrafficLightService
 
     public void execute() {
 
@@ -26,14 +28,15 @@ abstract class AbstractParseAlignmentQcJob extends AbstractEndStateAwareJobImpl 
         roddyBamFile.containedSeqTracks
 
         RoddyBamFile.withTransaction {
-            parseStatistics(roddyBamFile)
+            RoddyQualityAssessment qa = parseStatistics(roddyBamFile)
             // Set the coverage value in roddyBamFile
             abstractQualityAssessmentService.saveCoverageToRoddyBamFile(roddyBamFile)
             roddyBamFile.qualityAssessmentStatus = AbstractBamFile.QaProcessingStatus.FINISHED
+            qcTrafficLightService.setQcTrafficLightStatusBasedOnThreshold(roddyBamFile, (QcTrafficLightValue) qa)
             assert roddyBamFile.save(flush: true)
             succeed()
         }
     }
 
-    abstract void  parseStatistics(RoddyBamFile roddyBamFile)
+    abstract RoddyQualityAssessment parseStatistics(RoddyBamFile roddyBamFile)
 }

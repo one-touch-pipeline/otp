@@ -12,7 +12,7 @@ abstract class RoddyQualityAssessment extends AbstractQualityAssessment {
 
     static belongsTo = QualityAssessmentMergedPass
 
-    static final String ALL = 'all'
+    static final String ALL = "all"
 
     /**
      * This property holds the name of the chromosome, these QC values belong to.

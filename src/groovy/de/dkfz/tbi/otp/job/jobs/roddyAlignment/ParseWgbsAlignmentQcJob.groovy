@@ -10,11 +10,11 @@ import org.springframework.stereotype.*
 @UseJobLog
 class ParseWgbsAlignmentQcJob extends AbstractParseAlignmentQcJob {
 
-    public void parseStatistics(RoddyBamFile roddyBamFile) {
+    RoddyMergedBamQa parseStatistics(RoddyBamFile roddyBamFile) {
         abstractQualityAssessmentService.parseRoddySingleLaneQaStatistics(roddyBamFile)
-        abstractQualityAssessmentService.parseRoddyMergedBamQaStatistics(roddyBamFile)
         if (roddyBamFile.getContainedSeqTracks()*.getLibraryDirectoryName().unique().size() > 1) {
             abstractQualityAssessmentService.parseRoddyLibraryQaStatistics(roddyBamFile)
         }
+        return abstractQualityAssessmentService.parseRoddyMergedBamQaStatistics(roddyBamFile)
     }
 }

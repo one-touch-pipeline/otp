@@ -1,7 +1,5 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.ngsdata.*
-
 class RoddyLibraryQa extends RoddyQualityAssessment {
 
     String libraryDirectoryName

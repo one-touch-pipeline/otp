@@ -38,6 +38,7 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
     final Map createProcessMergedBamFileProperties() {
         DomainFactory.randomProcessedBamFileProperties + [
                 coverage: COVERAGE,
+                qcTrafficLightStatus: AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED,
         ]
     }
 

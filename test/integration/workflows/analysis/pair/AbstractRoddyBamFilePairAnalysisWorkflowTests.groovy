@@ -42,6 +42,10 @@ abstract class AbstractRoddyBamFilePairAnalysisWorkflowTests<Instance extends Ba
         assert createdInstance.config == config
         assert createdInstance.sampleType1BamFile == bamFileTumor
         assert createdInstance.sampleType2BamFile == bamFileControl
+        createdInstance.sampleType1BamFile.refresh()
+        createdInstance.sampleType2BamFile.refresh()
+        assert createdInstance.sampleType1BamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED
+        assert createdInstance.sampleType2BamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED
 
         filesToCheck(createdInstance).flatten().each {
             LsdfFilesService.ensureFileIsReadableAndNotEmpty(it)

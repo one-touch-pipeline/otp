@@ -40,7 +40,7 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile implement
         ACCEPTED,
         // status is set by OTP when a QC error threshold not passed
         BLOCKED,
-        // status is set by  bioinformaticians when they decide not to use a file for further analyses
+        // status is set by bioinformaticians when they decide not to use a file for further analyses
         REJECTED
     }
 

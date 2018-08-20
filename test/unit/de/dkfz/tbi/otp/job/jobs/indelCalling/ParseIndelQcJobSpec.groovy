@@ -1,13 +1,14 @@
 package de.dkfz.tbi.otp.job.jobs.indelCalling
 
-import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.config.OtpProperty
+import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.qcTrafficLight.*
+import de.dkfz.tbi.otp.utils.*
 import grails.test.mixin.*
 import org.junit.*
 import org.junit.rules.*
@@ -28,6 +29,7 @@ import spock.lang.*
         ProcessingStep,
         Project,
         ProjectCategory,
+        QcThreshold,
         Sample,
         SamplePair,
         SampleType,
@@ -56,8 +58,16 @@ class ParseIndelQcJobSpec extends Specification {
     @Rule
     TemporaryFolder temporaryFolder
 
+    IndelCallingInstance indelCallingInstance
+    ParseIndelQcJob job
+
     void setup() {
         configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
+        indelCallingInstance = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles()
+        job = [
+                getProcessParameterObject: { -> indelCallingInstance },
+        ] as ParseIndelQcJob
+        job.qcTrafficLightService = new QcTrafficLightService()
     }
 
     void cleanup() {
@@ -67,16 +77,11 @@ class ParseIndelQcJobSpec extends Specification {
     @Unroll
     void "test execute method, throw error since #notAvailable does not exist"() {
         given:
-        IndelCallingInstance indelCallingInstance = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles()
-
         if (available == "sampleSwapJsonFile") {
             DomainFactory.createIndelSampleSwapDetectionFileOnFileSystem(indelCallingInstance.sampleSwapJsonFile, indelCallingInstance.individual)
         } else {
             DomainFactory.createIndelQcFileOnFileSystem(indelCallingInstance.indelQcJsonFile)
         }
-        ParseIndelQcJob job = [
-                getProcessParameterObject: { -> indelCallingInstance },
-        ] as ParseIndelQcJob
 
         when:
         job.execute()
@@ -93,13 +98,8 @@ class ParseIndelQcJobSpec extends Specification {
 
     void "test execute method when both files available"() {
         given:
-        IndelCallingInstance indelCallingInstance = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles()
-
         DomainFactory.createIndelQcFileOnFileSystem(indelCallingInstance.indelQcJsonFile)
         DomainFactory.createIndelSampleSwapDetectionFileOnFileSystem(indelCallingInstance.sampleSwapJsonFile, indelCallingInstance.individual)
-        ParseIndelQcJob job = [
-                getProcessParameterObject: { -> indelCallingInstance },
-        ] as ParseIndelQcJob
 
         when:
         job.execute()
@@ -108,6 +108,8 @@ class ParseIndelQcJobSpec extends Specification {
         CollectionUtils.exactlyOneElement(IndelSampleSwapDetection.list()).indelCallingInstance == indelCallingInstance
         CollectionUtils.exactlyOneElement(IndelQualityControl.list()).indelCallingInstance == indelCallingInstance
         indelCallingInstance.processingState == AnalysisProcessingStates.FINISHED
+        indelCallingInstance.sampleType1BamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED
+        indelCallingInstance.sampleType2BamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED
     }
 
 
