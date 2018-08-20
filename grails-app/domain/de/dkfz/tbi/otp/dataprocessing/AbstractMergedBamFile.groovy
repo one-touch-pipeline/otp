@@ -124,12 +124,11 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile implement
         withTransaction {
             assert fileOperationStatus == FileOperationStatus.INPROGRESS
             assert !withdrawn
-            assert CollectionUtils.exactlyOneElement(AbstractMergedBamFile.findAll {
-                workPackage == this.workPackage &&
-                        withdrawn == false &&
-                        fileOperationStatus == FileOperationStatus.INPROGRESS
-            }).id == this.id
-
+            assert CollectionUtils.exactlyOneElement(AbstractMergedBamFile.findAllWhere(
+                    workPackage        : this.workPackage,
+                    withdrawn          : false,
+                    fileOperationStatus: FileOperationStatus.INPROGRESS
+            )) == this
             workPackage.bamFileInProjectFolder = this
             assert workPackage.save(flush: true)
         }

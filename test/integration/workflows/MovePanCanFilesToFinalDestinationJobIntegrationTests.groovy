@@ -38,10 +38,11 @@ class MovePanCanFilesToFinalDestinationJobIntegrationTests extends WorkflowTestC
     }
 
     /*
-     * This cannot be tested with an integration test, because integration tests are transactional, so this must be in the workflow test.
+     * This cannot be tested with an integration test, because integration tests are transactional,
+     * so this must be in the workflow test.
      */
     @Test
-    void testBamFileInProjectFolderIsSetPersistentlyEvenIfMovingFails() {
+    void testTransactionRollbackWhenLinkingFails() {
         try {
             final String exceptionMessage = HelperUtils.uniqueString
             movePanCanFilesToFinalDestinationJob.metaClass.getProcessParameterObject = {
@@ -53,12 +54,12 @@ class MovePanCanFilesToFinalDestinationJobIntegrationTests extends WorkflowTestC
             movePanCanFilesToFinalDestinationJob.linkFilesToFinalDestinationService.metaClass.cleanupWorkDirectory = { RoddyBamFile roddyBamFile, Realm realm ->
                 throw new RuntimeException(exceptionMessage)
             }
-
+            FileOperationStatus originalFileOperationStatus = roddyBamFile.fileOperationStatus
             assert TestCase.shouldFail {
                 movePanCanFilesToFinalDestinationJob.execute()
             } == exceptionMessage
-            assert roddyBamFile.fileOperationStatus == FileOperationStatus.INPROGRESS
-            assert roddyBamFile.mergingWorkPackage.bamFileInProjectFolder == roddyBamFile
+            assert RoddyBamFile.findById(roddyBamFile.id).fileOperationStatus == originalFileOperationStatus
+            assert roddyBamFile.mergingWorkPackage.bamFileInProjectFolder == null
         } finally {
             TestCase.removeMetaClass(LinkFilesToFinalDestinationService, movePanCanFilesToFinalDestinationJob.linkFilesToFinalDestinationService)
             TestCase.removeMetaClass(MovePanCanFilesToFinalDestinationJob, movePanCanFilesToFinalDestinationJob)

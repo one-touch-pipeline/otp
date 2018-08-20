@@ -16,9 +16,7 @@ abstract class AbstractMergingWorkPackage implements Entity {
     /**
      * The BAM file which moving to the final destination has been initiated for most recently.
      *
-     * Note that if {@link AbstractMergedBamFile#fileOperationStatus} is {@link AbstractMergedBamFile.FileOperationStatus#INPROGRESS}, moving
-     * is still in progress or has failed, so the file system is in an unclear state.
-     * Also note that the referenced BAM file might be withdrawn.
+     * The referenced BAM file might be withdrawn.
      * If you want to use the referenced BAM file as input for further processing, use
      * {@link #getProcessableBamFileInProjectFolder()}).
      */
