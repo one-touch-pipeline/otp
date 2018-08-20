@@ -90,18 +90,16 @@
         </div>
     </g:each>
 </g:if>
-    <g:if test="${errorMessage}">
-        <div class="errorMessage"><g:message code="${errorMessage}"/></div>
-    </g:if>
+    <g:render template="/templates/messages"/>
     <div>
-    <g:form controller="MetadataImport" action="index">
+    <g:form controller="metadataImport" action="validateOrImport">
         <table class="options">
             <sec:ifAllGranted roles="ROLE_OPERATOR">
                 <tr>
                     <td><g:message code="metadataImport.otrs"/></td>
                     <td>
                         <g:textField name="ticketNumber" size="30" value="${cmd.ticketNumber}"/>&nbsp;&nbsp;&nbsp;
-                        <g:checkBox name="automaticNotification" checked="${cmd.automaticNotification}"/>
+                        <g:checkBox name="automaticNotification" checked="${cmd.automaticNotification}" value="true"/>
                         <g:message code="metadataImport.otrs.automaticNotificationFlag"/></td>
                 </tr>
                 <tr>
@@ -114,8 +112,17 @@
             <tr>
                 <td><g:message code="metadataImport.path"/></td>
                 <td class="input-fields-wrap">
-                    <g:textField name="paths" style="width: 1000px" value="${cmd.paths?.first()}"/>
-                    <button class="add-field-button">+</button>
+                    <g:each in="${paths}" var="path" status="i">
+                        <div>
+                            <g:textField name="paths" style="width: 1000px" value="${path}"/>
+                            <g:if test="${i == 0}">
+                                <button class="add-field-button">+</button>
+                            </g:if>
+                            <g:else>
+                                <button class="remove_field">-</button>
+                            </g:else>
+                        </div>
+                    </g:each>
                 </td>
             </tr>
             <tr>
@@ -132,7 +139,7 @@
             </tr>
             <tr>
                 <td><label><g:message code="runSubmit.align"/></label></td>
-                <td><g:checkBox name="align" checked="${cmd.align}"/></td>
+                <td><g:checkBox name="align" checked="${cmd.align}" value="true"/></td>
             </tr>
         </table>
         <g:submitButton name="submit" value="Validate"/>
@@ -145,7 +152,7 @@
             </g:if>
             <g:if test="${problems == Level.WARNING.intValue()}">
                 <label>
-                    <g:checkBox name="ignoreWarnings"/>
+                    <g:checkBox name="ignoreWarnings" value="true"/>
                     <g:message code="metadataImport.ignore"/>
                 </label>
             </g:if>
@@ -161,7 +168,6 @@
 <asset:script>
     $(function() {
         $.otp.metaDataImport.buttonAction();
-        $.otp.metaDataImport.fillFields([${raw(cmd.paths.collect{"'$it'"}.join(','))}]);
     });
 </asset:script>
 </body>

@@ -113,7 +113,7 @@
         <input type='hidden' name='individual' value='${individual?.id}' />
         <table class="options">
             <td>Hold Processing</td>
-            <td><g:checkBox name="holdProcessing" checked="${holdProcessing}"/></td>
+            <td><g:checkBox name="holdProcessing" checked="${holdProcessing}" value="true"/></td>
         </table>
         <table class="options">
             <td><g:submitButton name="submit" value="Cancel" /></td>

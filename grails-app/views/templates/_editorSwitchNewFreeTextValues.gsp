@@ -9,7 +9,7 @@
         </g:each>
         <g:each var="checkBox" in="${checkBoxes}">
             <label>${labels[i++]}:
-                <g:checkBox name="${checkBox.getKey()}" checked="${checkBox.getValue()}"/>
+                <g:checkBox name="${checkBox.getKey()}" checked="${checkBox.getValue()}" value="true"/>
             </label>
         </g:each>
         <g:each var="dropDown" in="${dropDowns}">

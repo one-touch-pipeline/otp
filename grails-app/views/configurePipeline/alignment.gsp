@@ -106,7 +106,7 @@
                 <g:if test="${!isWgbs && !isChipSeq}">
                     <tr>
                         <td class="myKey"><g:message code="configurePipeline.adapterTrimmingNeeded"/></td>
-                        <td><g:checkBox name="adapterTrimmingNeeded" checked="false"/></td>
+                        <td><g:checkBox name="adapterTrimmingNeeded" checked="false" value="true"/></td>
                         <td>-</td>
                         <td>&nbsp;</td>
                     </tr>

@@ -72,11 +72,11 @@
             </tr>
             <tr>
                 <td class="myKey"><g:message code="createProject.copyFiles"/></td>
-                <td><g:checkBox name="copyFiles" checked="${cmd == null || cmd.copyFiles}" /></td>
+                <td><g:checkBox name="copyFiles" checked="${cmd == null || cmd.copyFiles}" value="true"/></td>
             </tr>
             <tr>
                 <td class="myKey"><g:message code="createProject.fingerPrinting"/></td>
-                <td><g:checkBox name="fingerPrinting" checked="${cmd == null ? true : cmd.fingerPrinting}" /></td>
+                <td><g:checkBox name="fingerPrinting" checked="${cmd == null ? true : cmd.fingerPrinting}" value="true"/></td>
             </tr>
             <tr>
                 <td class="myKey"><g:message code="createProject.projectInfo"/></td>

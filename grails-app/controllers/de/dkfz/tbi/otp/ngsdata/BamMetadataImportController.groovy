@@ -1,37 +1,52 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.*
-import org.springframework.validation.*
 
 class BamMetadataImportController {
+
+    static allowedMethods = [
+            index           : "GET",
+            validateOrImport: "POST",
+    ]
 
     BamMetadataImportService bamMetadataImportService
 
     def index(BamMetadataControllerSubmitCommand cmd) {
         BamMetadataValidationContext bamMetadataValidationContext
-        String errorMessage
-        if (cmd.hasErrors()) {
-            FieldError fieldError = cmd.errors.getFieldError()
-            errorMessage = "'${fieldError.getRejectedValue()}' is not a valid value for '${fieldError.getField()}'. Error code: '${fieldError.code}'"
+        if (flash.mvc) {
+            bamMetadataValidationContext = flash.mvc
+        } else if (cmd.path) {
+            bamMetadataValidationContext = bamMetadataImportService.validate(cmd.path, cmd.furtherFilePaths)
         }
-        if (cmd.submit == "Import" && !errorMessage) {
 
+        return [
+                cmd                   : cmd,
+                furtherFiles          : cmd.furtherFilePaths ?: [""],
+                context               : bamMetadataValidationContext,
+                implementedValidations: bamMetadataImportService.getImplementedValidations()
+        ]
+    }
+
+    def validateOrImport(BamMetadataControllerSubmitCommand cmd) {
+        BamMetadataValidationContext bamMetadataValidationContext
+        if (cmd.hasErrors()) {
+            flash.message = "Error"
+            flash.errors = cmd.errors
+        } else if (cmd.submit == "Import") {
             Map results = bamMetadataImportService.validateAndImport(cmd.path, cmd.ignoreWarnings, cmd.md5,
                     cmd.replaceWithLink, cmd.triggerAnalysis, cmd.furtherFilePaths)
             bamMetadataValidationContext = results.context
             if (results.project != null) {
                 redirect(controller: "projectOverview", action: "laneOverview", params: [project: results.project.name])
             }
-        } else if (cmd.submit != null) {
-            bamMetadataValidationContext = bamMetadataImportService.validate(cmd.path, cmd.furtherFilePaths)
         }
-
-        return [
-                cmd: cmd,
-                errorMessage: errorMessage,
-                context: bamMetadataValidationContext,
-                implementedValidations: bamMetadataImportService.getImplementedValidations()
-        ]
+        flash.mvc = bamMetadataValidationContext
+        redirect(action: "index", params: [
+                path            : cmd.path,
+                furtherFilePaths: cmd.furtherFilePaths,
+                replaceWithLink : cmd.replaceWithLink,
+                triggerAnalysis : cmd.triggerAnalysis,
+        ])
     }
 }
 
@@ -45,7 +60,7 @@ class BamMetadataControllerSubmitCommand implements Serializable {
     boolean ignoreWarnings
 
     static constraints = {
-        path nullable: true
+        path blank: false
         submit nullable: true
         md5 nullable: true
         furtherFilePaths nullable: true

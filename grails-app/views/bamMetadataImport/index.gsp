@@ -82,11 +82,9 @@
         </div>
     </div>
 </g:if>
-<g:if test="${errorMessage}">
-    <div class="errorMessage"><g:message code="${errorMessage}"/></div>
-</g:if>
+<g:render template="/templates/messages"/>
 <div>
-    <g:form controller="BamMetadataImport" action="index">
+    <g:form controller="bamMetadataImport" action="validateOrImport">
         <table class="options">
             <tr>
                 <td><g:message code="bamMetadataImport.path"/></td>
@@ -94,18 +92,28 @@
             </tr>
             <tr>
                 <td><label><g:message code="bamMetadataImport.replaceWithLink"/></label></td>
-                <td><g:checkBox name="replaceWithLink" checked="${cmd.replaceWithLink}"/></td>
+                <td><g:checkBox name="replaceWithLink" checked="${cmd.replaceWithLink}" value="true"/></td>
             </tr>
             <tr>
                 <td><label><g:message code="bamMetadataImport.furtherFile"/></label></td>
                 <td class="input-fields-wrap">
-                    <input type="text" style="width:600px" name="furtherFilePaths"><button class="add-field-button">+</button>
-                    <label style="color: red"><g:message code="bamMetadataImport.furtherFile.info"/></label>
+                    <g:each in="${furtherFiles}" var="file" status="i">
+                        <div>
+                            <g:textField name="furtherFilePaths" style="width: 1000px" value="${file}"/>
+                            <g:if test="${i == 0}">
+                                <button class="add-field-button">+</button>
+                                <label style="color: red"><g:message code="bamMetadataImport.furtherFile.info"/></label>
+                            </g:if>
+                            <g:else>
+                                <button class="remove_field">-</button>
+                            </g:else>
+                        </div>
+                    </g:each>
                 </td>
             </tr>
             <tr>
                 <td><label><g:message code="bamMetadataImport.triggerAnalysis"/></label></td>
-                <td><g:checkBox name="triggerAnalysis" checked="${cmd.triggerAnalysis}"/><i><g:message code="bamMetadataImport.triggerAnalysis.info"/></i></td>
+                <td><g:checkBox name="triggerAnalysis" checked="${cmd.triggerAnalysis}" value="true"/><i><g:message code="bamMetadataImport.triggerAnalysis.info"/></i></td>
             </tr>
         </table>
         <br>
@@ -114,7 +122,7 @@
             <g:submitButton name="submit" value="Import"/>
             <g:if test="${context?.getMaximumProblemLevel() == Level.WARNING}">
             <label>
-                <g:checkBox name="ignoreWarnings"/>
+                <g:checkBox name="ignoreWarnings" value="true"/>
                 Ignore Warnings
             </label>
             </g:if>
@@ -131,7 +139,6 @@
 <asset:script>
     $(function() {
         $.otp.bamMetadataImport.addValues();
-        $.otp.bamMetadataImport.returnValues([${raw(cmd.furtherFilePaths.collect{"'$it'"}.join(', '))}]);
     });
 </asset:script>
 </body>

@@ -2,19 +2,27 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
-import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
 import de.dkfz.tbi.otp.tracking.*
 import de.dkfz.tbi.otp.user.*
 import grails.converters.*
 import grails.validation.*
 import groovy.transform.*
-import org.springframework.validation.*
 
-import java.nio.file.FileSystem
+import java.nio.file.*
 import java.util.regex.*
 
 class MetadataImportController {
+
+    static allowedMethods = [
+            // TODO: incomplete (OTP-2887)
+            index: "GET",
+            validateOrImport: "POST",
+            details: "GET",
+            multiDetails: "GET",
+            autoImport: "GET",
+    ]
 
     MetadataImportService metadataImportService
     ProcessingOptionService processingOptionService
@@ -28,31 +36,10 @@ class MetadataImportController {
         boolean isValidated = false
         int problems = 0
         List<MetadataValidationContext> metadataValidationContexts = []
-        List<MetaDataFile> metaDataFiles = []
-        String errorMessage
-        if (cmd.hasErrors()) {
-            FieldError fieldError = cmd.errors.getFieldError()
-            errorMessage = "'${fieldError.getRejectedValue()}' is not a valid value for '${fieldError.getField()}'. Error code: '${fieldError.code}'"
-        }
-        if (cmd.submit == "Import" && !errorMessage) {
-            FileSystem fs = fileSystemService.getFilesystemForFastqImport()
 
-            List<MetadataImportService.PathWithMd5sum> pathWithMd5sums = cmd.paths.withIndex().collect {
-                return new MetadataImportService.PathWithMd5sum(fs.getPath(it.first), cmd.md5.get(it.second))
-            }
-            List<ValidateAndImportResult> validateAndImportResults = metadataImportService.validateAndImportWithAuth(pathWithMd5sums, cmd.directory, cmd.align, cmd.ignoreWarnings, cmd.ticketNumber, cmd.seqCenterComment, cmd.automaticNotification)
-            metadataValidationContexts = validateAndImportResults*.context
-            boolean allValid = validateAndImportResults.every {
-                it.metadataFile
-            }
-            if (allValid) {
-                if (validateAndImportResults.size() == 1) {
-                    redirect(action: "details", id: validateAndImportResults.first().metadataFile.runSegment.id)
-                } else {
-                    redirect(action: "multiDetails", params: [metaDataFiles: validateAndImportResults*.metadataFile*.id])
-                }
-            }
-        } else if (cmd.submit != null) {
+        if (flash.mvc) {
+            metadataValidationContexts = flash.mvc
+        } else if (cmd.paths) {
             cmd.paths.each { path ->
                 MetadataValidationContext mvc = metadataImportService.validateWithAuth(new File(path), cmd.directory)
                 metadataValidationContexts.add(mvc)
@@ -66,12 +53,50 @@ class MetadataImportController {
         return [
                 directoryStructures   : metadataImportService.getSupportedDirectoryStructures(),
                 cmd                   : cmd,
-                errorMessage          : errorMessage,
+                paths                 : cmd.paths ?: [""],
                 contexts              : metadataValidationContexts,
                 implementedValidations: metadataImportService.getImplementedValidations(),
                 isValidated           : isValidated,
                 problems              : problems,
         ]
+    }
+
+    def validateOrImport(MetadataImportControllerSubmitCommand cmd) {
+        List<MetadataValidationContext> metadataValidationContexts = []
+        if (cmd.hasErrors()) {
+            flash.message = "Error"
+            flash.errors = cmd.errors
+        } else if (cmd.submit == "Import") {
+            FileSystem fs = fileSystemService.getFilesystemForFastqImport()
+
+            List<MetadataImportService.PathWithMd5sum> pathWithMd5sums = cmd.paths.withIndex().collect {
+                return new MetadataImportService.PathWithMd5sum(fs.getPath(it.first), cmd.md5.get(it.second))
+            }
+            List<ValidateAndImportResult> validateAndImportResults = metadataImportService.validateAndImportWithAuth(
+                    pathWithMd5sums, cmd.directory, cmd.align, cmd.ignoreWarnings, cmd.ticketNumber,
+                    cmd.seqCenterComment, cmd.automaticNotification
+            )
+            metadataValidationContexts = validateAndImportResults*.context
+            boolean allValid = validateAndImportResults.every {
+                it.metadataFile
+            }
+            if (allValid) {
+                if (validateAndImportResults.size() == 1) {
+                    redirect(action: "details", id: validateAndImportResults.first().metadataFile.runSegment.id)
+                } else {
+                    redirect(action: "multiDetails", params: [metaDataFiles: validateAndImportResults*.metadataFile*.id])
+                }
+            }
+        }
+        flash.mvc = metadataValidationContexts
+        redirect(action: "index", params: [
+                paths                : cmd.paths,
+                directory            : cmd.directory,
+                ticketNumber         : cmd.ticketNumber,
+                seqCenterComment     : cmd.seqCenterComment,
+                align                : cmd.align,
+                automaticNotification: cmd.automaticNotification
+        ])
     }
 
     def details() {

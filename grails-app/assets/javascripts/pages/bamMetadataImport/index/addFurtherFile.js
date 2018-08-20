@@ -17,19 +17,6 @@ $.otp.bamMetadataImport = {
         });
     },
 
-    returnValues: function (list) {
-        if (list !== null || !list.isEmpty()) {
-            for (var i = 0; i < list.length; i++) {
-                $(".input-fields-wrap").find('input').last().val(list[i]);
-                if (i !== list.length - 1) {
-                    $.otp.bamMetadataImport.fillInputFields();
-                } else {
-                    break;
-                }
-            }
-        }
-    },
-
     fillInputFields: function() {
         $(".input-fields-wrap").append('<div><input type="text" style="width:600px" name="furtherFilePaths"/>' +
             '<button class="remove_field">-</button></div>');
