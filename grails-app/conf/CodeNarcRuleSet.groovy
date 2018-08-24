@@ -322,7 +322,7 @@ ruleset {
     StatelessClass
 
     // rulesets/grails.xml
-    //GrailsDomainHasEquals //we don't do this in OTP
+    //GrailsDomainHasEquals //Entity provides equals()
     //GrailsDomainHasToString //we don't do this in OTP
     GrailsDomainReservedSqlKeywordName {
         priority = 1
