@@ -206,13 +206,15 @@ class AlignmentQualityOverviewController {
                 This method assumes, that it does not matter which seqTrack is used to get the sequencedLength.
                 Within one merged bam file all are the same. This is incorrect, see OTP-1670.
             */
-            DataFile dataFile = DataFile.findBySeqTrack(seqTracks.first())
-            String readLengthString = dataFile.sequenceLength
             Double readLength = null
-            if (readLengthString) {
-                readLength = readLengthString.contains('-') ? (readLengthString.split('-').sum {
-                    it as double
-                } / 2) : readLengthString as double
+            if (seqTracks) {
+                DataFile dataFile = DataFile.findBySeqTrack(seqTracks.first())
+                String readLengthString = dataFile.sequenceLength
+                if (readLengthString) {
+                    readLength = readLengthString.contains('-') ? (readLengthString.split('-').sum {
+                        it as double
+                    } / 2) : readLengthString as double
+                }
             }
 
             Set<LibraryPreparationKit> kit = qualityAssessmentMergedPass.containedSeqTracks*.libraryPreparationKit.findAll().unique() //findAll removes null values
