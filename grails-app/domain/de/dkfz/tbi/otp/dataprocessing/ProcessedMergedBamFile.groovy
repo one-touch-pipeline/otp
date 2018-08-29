@@ -7,8 +7,6 @@ import org.hibernate.*
  * Represents a merged bam file stored on the file system
  * and produced by the merging process identified by the
  * given {@link MergingPass}
- *
- *
  */
 class ProcessedMergedBamFile extends AbstractMergedBamFile implements ProcessParameterObject {
 

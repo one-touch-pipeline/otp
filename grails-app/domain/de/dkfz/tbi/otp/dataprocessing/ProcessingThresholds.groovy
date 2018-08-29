@@ -10,7 +10,6 @@ import de.dkfz.tbi.otp.ngsdata.*
  * These thresholds are stored in this domain.
  * It is project depending if the number of lanes or the coverage threshold is known. Therefore both possibilities are included in this domain.
  * At least one of the two properties have to be filled in.
- *
  */
 @ToString
 class ProcessingThresholds implements TimeStamped, Entity {

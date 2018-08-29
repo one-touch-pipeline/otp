@@ -17,11 +17,11 @@ package de.dkfz.tbi.otp.job.processing
  * is implicitly available through the instance of this class.
  *
  * @see ProcessingStep
- **/
+ */
 class RestartedProcessingStep extends ProcessingStep {
     /**
      * The original ProcessingStep from which this ProcessingStep had been created as a restart.
-     **/
+     */
     ProcessingStep original
 
     static constraints = {
@@ -32,7 +32,7 @@ class RestartedProcessingStep extends ProcessingStep {
      * Creates a RestartedProcessingStep from given ProcessingStep.
      * @param step The original to be restarted ProcessingStep
      * @return The RestartedProcessingStep
-     **/
+     */
     public static RestartedProcessingStep create(ProcessingStep step) {
         RestartedProcessingStep restartedStep = new RestartedProcessingStep()
         restartedStep.jobDefinition = step.jobDefinition

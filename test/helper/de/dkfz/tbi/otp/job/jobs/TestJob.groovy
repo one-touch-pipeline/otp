@@ -7,7 +7,6 @@ import org.springframework.stereotype.*
 
 /**
  * Very simple TestJob, just printing something to sysout.
- *
  */
 @Component
 @Scope("prototype")

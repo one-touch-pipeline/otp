@@ -7,8 +7,6 @@ import de.dkfz.tbi.otp.utils.Entity
 /**
  * Instance of this class represent instance of merging process
  * performed on the corresponding {@link MergingSet}.
- *
- *
  */
 class MergingPass implements ProcessParameterObject, Entity {
 

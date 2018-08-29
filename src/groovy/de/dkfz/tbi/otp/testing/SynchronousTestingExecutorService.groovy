@@ -8,7 +8,6 @@ import java.util.concurrent.FutureTask
  * Simple Wrapper to provide an executor service which executes synchronously <strong>on
  * the same thread</strong>. It is used during Integration Tests and not meant
  * for productive usage.
- *
  */
 class SynchronousTestingExecutorService {
     @Delegate grails.plugin.executor.PersistenceContextExecutorWrapper trueExecutorService

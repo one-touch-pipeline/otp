@@ -22,7 +22,7 @@ import org.hibernate.*
  * @see JobDefinition
  * @see Job
  * @see Parameter
- **/
+ */
 public class ProcessingStep implements Serializable, Entity {
     /**
      * Input Parameters added to this ProcessingStep.
@@ -35,11 +35,11 @@ public class ProcessingStep implements Serializable, Entity {
     static hasMany = [input: Parameter, output: Parameter]
     /**
      * The JobDefinition this ProcessingStep is generated from.
-     **/
+     */
     JobDefinition jobDefinition
     /**
      * The name of the Job class which is used for this ProcessingStep.
-     **/
+     */
     String jobClass
     /**
      * The Process this ProcessingStep belongs to.

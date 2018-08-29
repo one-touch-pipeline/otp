@@ -22,7 +22,6 @@ import java.util.concurrent.locks.*
  *
  * @see JobParameterKeys
  *
- *
  * @deprecated Do not use a separate watchdog job.
  * Instead create/use a subclass of {@link AbstractMultiJob}, so restarting the job will resubmit the cluster jobs.
  */

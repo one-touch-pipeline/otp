@@ -13,8 +13,6 @@ import de.dkfz.tbi.otp.job.processing.ProcessingStep
  *
  * The Appender can take care about adjusting the actual logging to the
  * resource by taking the ProcessingStep into account.
- *
- *
  */
 class JobLogMessage {
 

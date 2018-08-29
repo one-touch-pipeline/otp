@@ -11,8 +11,6 @@ import static org.springframework.util.Assert.notNull
 
 /**
  * This service implements alignment files organization convention
- *
- *
  */
 class ProcessedAlignmentFileService {
 

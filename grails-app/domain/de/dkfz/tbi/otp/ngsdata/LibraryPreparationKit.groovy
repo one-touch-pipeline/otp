@@ -6,8 +6,6 @@ import de.dkfz.tbi.otp.utils.Entity
 /**
  * This class represents library preparation kits which are used
  * for the library creation for sequencing purpose.
- *
- *
  */
 class LibraryPreparationKit implements Entity {
 

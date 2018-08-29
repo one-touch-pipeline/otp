@@ -2,8 +2,6 @@ package de.dkfz.tbi.otp.ngsdata
 
 /**
  * Holds possible seqType names for using in the code
- *
- *
  */
 public enum SeqTypeNames {
     WHOLE_GENOME,

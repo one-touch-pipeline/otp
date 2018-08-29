@@ -3,8 +3,6 @@ package de.dkfz.tbi.otp.dataprocessing
 /**
  * Represents bam files stored on the file system.
  * Keeps file-system related properties of a bam file.
- *
- *
  */
 abstract class AbstractFileSystemBamFile extends AbstractBamFile {
 

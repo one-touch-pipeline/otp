@@ -9,7 +9,6 @@ import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeService
  * In this service the chromosomes which are not needed can be filtered. For each case a new method should be written, which includes a
  * list with the chromosomes to filter
  * This method calls the general filtering method with the chromosome list as input
- *
  */
 
 class ChromosomeIdentifierFilteringService {

@@ -9,8 +9,6 @@ import de.dkfz.tbi.otp.job.processing.ProcessingException
 * a failure in it means that the application
 * crashes completely. THerefore this is a
 * fatal exception.
-*
-*
 */
 class SchedulerException extends ProcessingException {
 

@@ -5,8 +5,6 @@ import static org.junit.Assert.*
 
 import org.junit.*
 
-/**
- */
 class MergingIntervalCollectionTest {
     MergingIntervalCollection tree
 

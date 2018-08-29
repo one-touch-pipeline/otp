@@ -8,7 +8,6 @@ import org.springframework.stereotype.*
 /**
  * Very simple Test implementation of the EndStateAware interface.
  * Does nothing useful.
- *
  */
 @Component
 @Scope("prototype")

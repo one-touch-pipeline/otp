@@ -11,7 +11,6 @@ import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 /**
  * Base class for jobs which submit cluster jobs and wait for them to finish and optionally do other
  * things (for example validation).
- *
  */
 public abstract class AbstractMultiJob extends AbstractEndStateAwareJobImpl implements SometimesResumableJob, MonitoringJob {
 

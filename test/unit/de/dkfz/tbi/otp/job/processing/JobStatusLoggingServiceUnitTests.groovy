@@ -12,7 +12,6 @@ import org.junit.*
 
 /**
  * Unit tests for the {@link JobStatusLoggingService}.
- *
  */
 @TestFor(JobStatusLoggingService)
 @TestMixin(GrailsUnitTestMixin)

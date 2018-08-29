@@ -24,7 +24,6 @@ import org.apache.log4j.spi.LoggingEvent
  * {@link ProcessingStep} for which the LoggingEvent occurred. For each
  * ProcessingStep an own Appender is used to which a cloned LoggingEvent
  * containing the original message is forwarded.
- *
  */
 class JobAppender extends AppenderSkeleton {
     File logDirectory

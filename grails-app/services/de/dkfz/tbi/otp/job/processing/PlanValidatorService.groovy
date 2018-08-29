@@ -15,7 +15,7 @@ import de.dkfz.tbi.otp.job.plan.ValidatingJobDefinition
  * not possible to find all errors.
  *
  * The validation does not yet validate plans correctly containing DecisionJobs.
- **/
+ */
 class PlanValidatorService {
     public static final String NO_STARTJOB = "No StartJob defined for JobExecutionPlan"
     public static final String STARTJOB_BEAN_MISSING = "The bean specified as a StartJob does not exist in the Spring context"
@@ -32,7 +32,7 @@ class PlanValidatorService {
 
     /**
      * Dependency Injection of grailsApplication
-     **/
+     */
     def grailsApplication
 
     public List<String> validate(JobExecutionPlan plan) {

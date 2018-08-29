@@ -7,7 +7,6 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 /**
  * Helper class which returns job system related database objects
- *
  */
 class TestJobHelper {
 

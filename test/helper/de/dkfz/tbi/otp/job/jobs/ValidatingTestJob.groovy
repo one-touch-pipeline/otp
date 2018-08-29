@@ -7,7 +7,6 @@ import org.springframework.stereotype.*
 
 /**
  * Very simple test job which sets the validated job to succeeded.
- *
  */
 @Component
 @Scope("prototype")

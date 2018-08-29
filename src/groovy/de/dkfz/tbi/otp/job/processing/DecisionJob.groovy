@@ -11,6 +11,7 @@ import de.dkfz.tbi.otp.job.plan.JobDecision
  * A DecisionJob is an {@link EndStateAwareJob} as it makes no sense to do a decision
  * without knowing whether it is correct. This means a DecisionJob has to succeed in order
  * to use the decision.
+ *
  * @see DecisionProcessingStep
  * @see DecidingJobDefinition
  */

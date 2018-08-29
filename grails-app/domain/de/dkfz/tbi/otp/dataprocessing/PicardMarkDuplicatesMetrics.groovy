@@ -6,7 +6,6 @@ import de.dkfz.tbi.otp.utils.Entity
 /**
  * represents the MarkDuplicatesMetrics file of a BamFile and
  * stores all the information, which were generated while removing duplicates by Picard
- *
  */
 class PicardMarkDuplicatesMetrics implements Entity {
 

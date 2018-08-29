@@ -4,8 +4,6 @@ package de.dkfz.tbi.otp.ngsdata;
  * Reflects the ngs platform labels used in
  * the header of SAM file (specification version SAMv1, see @\RG PL)
  * Maps platform labels to SAM-header identifiers.
- *
- *
  */
  /*
   * It would be too much to modify the domain just to reflect

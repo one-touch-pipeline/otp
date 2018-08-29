@@ -11,7 +11,6 @@ import static org.springframework.util.Assert.*
  *
  * This script is supposed to be called from (web)console, so no
  * arguments can be specified but are inserted manually.
- *
  */
 
 ReferenceGenomeService referenceGenomeService = new ReferenceGenomeService()

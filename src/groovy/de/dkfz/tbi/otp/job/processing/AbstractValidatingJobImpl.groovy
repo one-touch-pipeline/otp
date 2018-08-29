@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.job.processing
 
 /**
  * Abstract base class for {@link ValidatingJob}s.
+ *
  * @see ValidatingJob
  */
 abstract public class AbstractValidatingJobImpl extends AbstractEndStateAwareJobImpl implements ValidatingJob {
@@ -11,7 +12,7 @@ abstract public class AbstractValidatingJobImpl extends AbstractEndStateAwareJob
     /**
      * Implementing sub-classes can use this method to mark the validated job as succeeded or failed.
      * @param succeeded true for success, false for failure
-     **/
+     */
     protected void setValidatedSucceeded(boolean succeeded) {
         validatedStepSucceeded = succeeded
     }

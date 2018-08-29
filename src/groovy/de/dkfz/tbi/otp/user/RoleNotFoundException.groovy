@@ -4,7 +4,6 @@ import de.dkfz.tbi.otp.OtpException
 
 /**
  * @short Exception indicating that a Role could not be found.
- *
  */
 class RoleNotFoundException extends OtpException implements Serializable {
     private static final long serialVersionUID = 1L

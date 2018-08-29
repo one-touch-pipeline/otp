@@ -20,7 +20,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
  * the used cluster job scheduler, not all values may be be available.
  *
  * all timestamps using joda-time, e.g. DateTime queued, get saved as UTC-timezone
- **/
+ */
 class ClusterJob implements Entity {
 
     ProcessingStep processingStep

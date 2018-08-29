@@ -2,8 +2,6 @@ package de.dkfz.tbi.otp
 
 /**
  * The possible state for {@link InformationReliability}
- *
- *
  */
 enum InformationReliability {
     /**

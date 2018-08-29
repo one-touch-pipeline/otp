@@ -18,6 +18,7 @@ import org.springframework.context.*
  *
  * This base class provides the basic functionality required by the
  * container to use a StartJob.
+ *
  * @see StartJob
  */
 abstract class AbstractStartJobImpl implements StartJob, ApplicationListener<JobExecutionPlanChangedEvent>, BeanNameAware  {

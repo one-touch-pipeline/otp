@@ -6,8 +6,6 @@ import de.dkfz.tbi.otp.utils.Entity
 /**
  * The ParameterMapping describes the mapping of an output {@link Parameter}
  * to the input Parameter of the next {@link JobDefinition}.
- *
- *
  */
 class ParameterMapping implements Serializable, Entity {
     /**

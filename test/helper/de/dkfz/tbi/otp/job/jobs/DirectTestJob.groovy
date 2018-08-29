@@ -8,7 +8,6 @@ import org.springframework.stereotype.*
 /**
  * Simple test implementing the Job interface without inheriting
  * AbstractJob.
- *
  */
 @Component
 @Scope("prototype")

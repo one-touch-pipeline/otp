@@ -4,7 +4,6 @@ package de.dkfz.tbi.otp.job.processing
  * Interface for jobs that are resumable in certain phases of execution, but not in all.
  *
  * @see ResumableJob
- *
  */
 interface SometimesResumableJob extends Job {
 

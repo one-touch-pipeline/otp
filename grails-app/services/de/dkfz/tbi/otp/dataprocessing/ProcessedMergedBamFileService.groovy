@@ -11,9 +11,6 @@ import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.getThreadLog
 
-/**
- *
- */
 class ProcessedMergedBamFileService {
 
     AbstractBamFileService abstractBamFileService

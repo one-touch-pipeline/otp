@@ -6,8 +6,6 @@ import org.hibernate.*
 /**
  * many to many connection between
  * {@link MergingSet} and {@link ProcessedBamFile}
- *
- *
  */
 class MergingSetAssignment implements Entity {
     static belongsTo = [

@@ -5,7 +5,6 @@ import de.dkfz.tbi.otp.utils.Entity
 
 /**
  * Auto generated class by spring security plugin.
- *
  */
 class User implements TimeStamped, Entity {
 

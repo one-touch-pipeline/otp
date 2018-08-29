@@ -2,8 +2,6 @@ package de.dkfz.tbi.otp.job.processing
 
 /**
  * Base exception for all exceptions thrown in Job System of OTP.
- *
- *
  */
 class ProcessingException extends RuntimeException {
     public ProcessingException() {

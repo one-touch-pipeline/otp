@@ -13,7 +13,6 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
  * The information about the config file is store in the "RoddyWorkflowConfig"-Domain.
  *
  * The script 'scripts/operations/pancan/LoadPanCanConfig.groovy' can be used to load a roddy config.
- *
  */
 class RoddyWorkflowConfig extends ConfigPerProjectAndSeqType implements AlignmentConfig {
 

@@ -16,8 +16,6 @@ import static org.springframework.util.Assert.*
  * If a specific exception occurs several times for each job only the timestamp
  * with the point in time when the exception occurred is appended as exception itself
  * is by definition of the file name completely equivalent to the already stored.
- *
- *
  */
 class ErrorLogService {
 
@@ -55,7 +53,7 @@ class ErrorLogService {
      * Retrieves the stacktrace identified by given identifier.
      * @param identifier The stacktrace's identifier
      * @return The stacktrace if found otherwise an exception is thrown with the reason why the stacktrace can not be returned
-     **/
+     */
     public String loggedError(String identifier) {
         File stacktraceFile = getStackTracesFile(identifier)
         if (!stacktraceFile.isFile()) {

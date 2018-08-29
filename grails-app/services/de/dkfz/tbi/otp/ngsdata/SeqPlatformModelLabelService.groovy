@@ -1,7 +1,5 @@
 package de.dkfz.tbi.otp.ngsdata
 
-/**
- */
 class SeqPlatformModelLabelService extends MetadataFieldsService<SeqPlatformModelLabel> {
 
     @Override

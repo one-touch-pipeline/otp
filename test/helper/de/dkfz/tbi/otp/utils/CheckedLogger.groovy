@@ -19,15 +19,11 @@ import org.junit.Assert
  * against an incomming message.
  *
  * If an exception is thrown, the further checks are disabled, because the queue may no longer be correct.
- *
- *
  */
 public class CheckedLogger implements Log {
 
     /**
      * Defines the message level.
-     *
-     *
      */
     public enum Level {
         FATAL,
@@ -40,8 +36,6 @@ public class CheckedLogger implements Log {
 
     /**
      * Defines an expected message to use for checks
-     *
-     *
      */
     //@Immutable doesn't work, since messsage is of type object, which is not immutable
     private class ExpectedMessage {

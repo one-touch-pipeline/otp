@@ -9,8 +9,6 @@ import de.dkfz.tbi.otp.utils.Entity
  * defined in the corresponding {@link MergingWorkPackage}.
  * A {@link MergingSet} instance is a part of corresponding
  * {@link MergingWorkPackage}.
- *
- *
  */
 class MergingSet implements Entity {
 

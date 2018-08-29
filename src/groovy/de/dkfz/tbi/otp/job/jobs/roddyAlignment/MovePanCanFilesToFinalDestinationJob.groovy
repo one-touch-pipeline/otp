@@ -11,7 +11,6 @@ import org.springframework.context.annotation.*
 import org.springframework.stereotype.*
 
 /**
- *
  * This is the last job of the PanCan workflow.
  * Within this job the merged bam file, the corresponding index file, the QA-folder and the roddyExecutionStore folder
  * are linked from the working processing folder in the project folder.

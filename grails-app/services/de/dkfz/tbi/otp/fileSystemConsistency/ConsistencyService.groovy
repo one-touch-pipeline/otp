@@ -5,7 +5,6 @@ import de.dkfz.tbi.otp.fileSystemConsistency.ConsistencyStatus.Status
 
 /**
  * Service to check for consistency of Database and LSDF
- *
  */
 class ConsistencyService {
 

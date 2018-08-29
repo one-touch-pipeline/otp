@@ -13,7 +13,6 @@ import org.springframework.security.core.context.*
 
 /**
  * Service providing methods to access information about Processes.
- *
  */
 class ProcessService {
     static transactional = true
@@ -125,7 +124,7 @@ class ProcessService {
      * Restarts the given ProcessingStep.
      * Thin ACL aware wrapper around schedulerService.
      * @param step The ProcessingStep to restart
-     **/
+     */
     // TODO: better ACL rights?
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#step.process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', write)")
     public void restartProcessingStep(ProcessingStep step) {
@@ -243,7 +242,7 @@ class ProcessService {
      * Provides access to the latest ProcessingStepUpdate for the given ProcessingStep.
      * @param step The ProcessingStep for which the latest ProcessingStepUpdate should be retrieved.
      * @return Latest ProcessingStepUpdate
-     **/
+     */
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#step.process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read)")
     public ProcessingStepUpdate getLatestProcessingStepUpdate(ProcessingStep step) {
         return step.latestProcessingStepUpdate
@@ -312,7 +311,7 @@ class ProcessService {
      * @param process The Process for which the information should be extracted
      * @return Process Information in a JSON ready format
      * @see JobExecutionPlanService#planInformation(JobExecutionPlan)
-     **/
+     */
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read)")
     public PlanInformation processInformation(Process process) {
         PlanInformation plan = jobExecutionPlanService.planInformation(process.jobExecutionPlan)
@@ -361,7 +360,7 @@ class ProcessService {
      * Retrieves the stacktrace saved for the ProcessingError.
      * @param id The id of the ProcessingError
      * @return The stacktrace or throws an exception if not found
-     **/
+     */
     public String getProcessingErrorStackTrace(long id) {
         ProcessingError error = ProcessingError.get(id)
         if(!error) {
@@ -381,7 +380,7 @@ class ProcessService {
      * Helper function to retrieve the last ProcessingSTepUpdate for given Process.
      * @param process
      * @return
-     **/
+     */
     private ProcessingStepUpdate lastUpdate(Process process) {
         return ProcessingStepUpdate.withCriteria {
             processingStep {

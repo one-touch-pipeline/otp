@@ -3,7 +3,7 @@
 
 /**
  * Generates the list of Runs
- **/
+ */
 $.otp.runList = function () {
     "use strict";
     $.otp.run.register();

@@ -10,7 +10,6 @@ import de.dkfz.tbi.otp.testing.GroovyScriptAwareTestCase
 /**
  * Script to test basic functionality to load bed files and it's
  * meta information to the OTP database.
- *
  */
 class LoadBedFileScriptTests extends GroovyScriptAwareTestCase {
 

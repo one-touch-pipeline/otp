@@ -8,7 +8,6 @@ import org.springframework.stereotype.*
 
 /**
  * Very simple test job which just throws an Exception during Execution.
- *
  */
 @Component
 @Scope("prototype")

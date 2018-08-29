@@ -14,7 +14,6 @@ import org.springframework.validation.FieldError
  * This controller is only useful to administrators and allows to manage all users.
  * There is a list of users which is rendered in a dataTable and allows to modify
  * the users' properties.
- *
  */
 @Secured('ROLE_ADMIN')
 class UserAdministrationController {

@@ -3,7 +3,7 @@
 
 /**
  * Generates the list of individuals
- **/
+ */
 $.otp.individualList = function () {
     "use strict";
     $.otp.individual.register();

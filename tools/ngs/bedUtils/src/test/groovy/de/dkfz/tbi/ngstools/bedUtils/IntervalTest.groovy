@@ -16,7 +16,6 @@ import org.junit.*
  * <li> {@link Interval#intersect(Interval)}
  * <li> {@link Interval#compareTo(Interval)}
  * <li> {@link Interval#union(Interval)}
- *
  */
 class IntervalTest {
 

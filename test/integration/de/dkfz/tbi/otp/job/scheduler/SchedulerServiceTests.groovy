@@ -1211,7 +1211,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
 
     /**
      * Tests that the previous next link is updated and the next job is run.
-    **/
+     */
     @Test
     void testRestartProcessingStepUpdatesLink() {
         assertTrue(schedulerService.queue.isEmpty())
@@ -1276,7 +1276,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
 
     /**
      * Test that the branching is done correctly.
-     **/
+     */
     @Test
     void testRestartProcessingStepKeepsLinks() {
         assertTrue(schedulerService.queue.isEmpty())

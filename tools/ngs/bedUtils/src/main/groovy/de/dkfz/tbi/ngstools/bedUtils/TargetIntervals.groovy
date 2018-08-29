@@ -7,7 +7,6 @@ package de.dkfz.tbi.ngstools.bedUtils
  * in a bed file the intervals are defined with the following system:
  * 0 based: start inclusive, end exclusive
  * Methods of this interface take intervals in the same system.
- *
  */
 interface TargetIntervals {
 

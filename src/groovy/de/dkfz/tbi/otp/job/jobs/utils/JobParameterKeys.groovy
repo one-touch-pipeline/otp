@@ -3,8 +3,7 @@ package de.dkfz.tbi.otp.job.jobs.utils
 import de.dkfz.tbi.otp.job.processing.AbstractMultiJob
 
 /**
- * A class that contains some valid keys for job input and output parameters.
- *
+ * Contains some valid keys for job input and output parameters.
  */
 class JobParameterKeys {
 

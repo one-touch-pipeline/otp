@@ -4,9 +4,7 @@ import de.dkfz.tbi.otp.utils.Entity
 
 /**
  * This class represents a reference genome entry as found in reference genome fasta file.
- *
  */
-
 class ReferenceGenomeEntry implements Entity {
 
     /**

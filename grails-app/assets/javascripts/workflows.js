@@ -115,7 +115,7 @@ $.otp.workflows = {
      * Performs the AJAX call to restart the step and reloads the given datatable.
      * @param id The id of the ProcessingStep to restart.
      * @param selector Selector for the datatable
-     **/
+     */
     restartProcessingStep: function (id, selector) {
         "use strict";
         $.getJSON($.otp.createLink({
@@ -131,7 +131,7 @@ $.otp.workflows = {
      * Creates HTML markup for link to restart a ProcessingStep.
      * @param id The id of the ProcessingStep to restart.
      * @param dataTable Selector for the datatable
-     **/
+     */
     createRestartProcessingStepLink: function (id, dataTable) {
         "use strict";
         var imageLink = $.otp.createLink({
@@ -252,7 +252,7 @@ $.otp.workflows = {
          * Renders a graph representing a JobExecutionPlan or Process.
          * @param idName Name of the element id where to render the graph to
          * @param data JSON data structure containing jobs and connections
-         **/
+         */
         setup: function (idName, data) {
             "use strict";
             var i, g, job, c, layouter, renderer;
@@ -281,7 +281,7 @@ $.otp.workflows = {
      * Generates the JobExecutionPlan DSL for the given plan.
      * Writes the DSL into a textarea of a dialog.
      * @param plan JSON structure of the JobExecutionPlan
-     **/
+     */
     generatePlanDSL: function (plan) {
         "use strict";
         var startJob, job, dsl, findStartJob, nextJob, renderConstantParameters, findOutputParameter, jobForParameter, renderInputParameters, renderOutputParameters;

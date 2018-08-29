@@ -15,8 +15,6 @@ import org.springframework.security.acls.model.Sid
 
 /**
  * The GroupService is responsible for handling User Groups.
- *
- *
  */
 class GroupService {
     /**

@@ -6,6 +6,7 @@ import de.dkfz.tbi.otp.utils.Entity
  * The JobDecision defines a possible outcome of a {@link DecisionJob}.
  * It does not contain any information about the next {@link JobDefinition}
  * to be executed.
+ *
  * @see JobDefinition
  * @see DecidingJobDefinition
  * @see DecisionJob

@@ -5,11 +5,6 @@ import de.dkfz.tbi.otp.utils.Entity
 
 import java.util.regex.Pattern
 
-/**
- * Represents a reference genome.
- *
- *
- */
 class ReferenceGenome implements Entity {
 
     /**

@@ -62,14 +62,14 @@ class Individual implements Commentable, Entity {
 
     /**
      * @return List of Sample for this Individual
-     **/
+     */
     List<Sample> getSamples() {
         return Sample.findAllByIndividual(this)
     }
 
     /**
      * @return List of SeqType for this Individual
-     **/
+     */
     List<SeqType> getSeqTypes() {
         return SeqType.executeQuery(
         '''
@@ -83,7 +83,7 @@ order by type.name asc, type.libraryLayout
 
     /**
      * @return List of SeqScan for this Individual ordered
-     **/
+     */
     List<SeqScan> getSeqScans() {
         def c = SeqScan.createCriteria()
         return c.list {

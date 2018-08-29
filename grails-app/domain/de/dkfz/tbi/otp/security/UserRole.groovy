@@ -5,7 +5,6 @@ import org.apache.commons.lang.builder.HashCodeBuilder
 
 /**
  * Auto generated class by spring security plugin.
- *
  */
 class UserRole implements Serializable, Entity {
 

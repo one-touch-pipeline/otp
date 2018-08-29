@@ -7,6 +7,7 @@ import de.dkfz.tbi.otp.utils.Entity
  * and {@link JobDefinition}s. It is used as a lookup table to find the
  * next to be executed JobDefinition based on the outcoming JobDecision of
  * a {@link DecisionJob}.
+ *
  * @see JobDefinition
  * @see JobDecision
  * @see DecisionJob

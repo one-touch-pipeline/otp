@@ -23,8 +23,6 @@ import de.dkfz.tbi.otp.utils.Entity
  * new Group is created the set information should also be used
  * for the existing data, but that is to be decided by the
  * service creating the domain object.
- *
- *
  */
 class Group implements Entity {
     /**

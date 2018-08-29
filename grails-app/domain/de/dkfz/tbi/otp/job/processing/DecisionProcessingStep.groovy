@@ -5,6 +5,7 @@ import de.dkfz.tbi.otp.job.plan.JobDecision
 /**
  * Subclass for a {@link ProcessingStep} which holds an outcome decision.
  * Only usable if the ProcessingStep's jobDefinition is a {@link DecidingJobDefinition}
+ *
  * @see JobDecision
  * @see DecidingJobDefinition
  */

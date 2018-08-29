@@ -9,7 +9,6 @@ BedFileService bedFileService = ctx.bedFileService
  * bed files into OTP's database. Integration tests for this script
  * exists: de.dkfz.tbi.otp.ngsdata.LoadBedFileScriptTests
  * When updating bedFilesToLoad the test must be updated as well.
- *
  */
 class Input {
     String bedName

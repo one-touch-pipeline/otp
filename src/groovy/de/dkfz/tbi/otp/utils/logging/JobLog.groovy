@@ -10,8 +10,6 @@ import org.apache.commons.logging.Log
  *
  * An instance of this class gets injected into each Job by an
  * AST transformation.
- *
- *
  */
 class JobLog implements Log {
     /**

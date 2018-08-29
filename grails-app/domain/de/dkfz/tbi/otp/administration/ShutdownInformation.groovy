@@ -8,7 +8,6 @@ import de.dkfz.tbi.otp.utils.Entity
  *
  * It stores the when, who and why about the regular shutdown. It is
  * possible to cancel a shutdown process in which case this is stored as well.
- *
  */
 class ShutdownInformation implements Entity {
     /**

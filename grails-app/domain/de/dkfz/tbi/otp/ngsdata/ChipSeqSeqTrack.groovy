@@ -1,9 +1,5 @@
 package de.dkfz.tbi.otp.ngsdata
 
-/**
- * This class represents a ChipSeq seq Track
- *
- */
 class ChipSeqSeqTrack extends SeqTrack {
 
     /**

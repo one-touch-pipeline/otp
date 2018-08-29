@@ -16,22 +16,22 @@ import org.springframework.security.access.prepost.PreAuthorize
  * Furthermore the service gets notified when the application finally shuts down and suspends all
  * running but resumable jobs. In case of non-resumable Jobs the service will log a warning
  * message.
- **/
+ */
 class ShutdownService implements DisposableBean {
     // service is not transactional as the database access has to be locked
     static transactional = false
     /**
      * Dependency Injection of GrailsApplication.
-     **/
+     */
     def grailsApplication
     /**
      * Dependency Injection of SchedulerService.
      * Required to suspend and resume the scheduler
-     **/
+     */
     def schedulerService
     /**
      * Dependency Injection of SpringSecurityService
-     **/
+     */
     def springSecurityService
 
     ProcessService processService
@@ -76,7 +76,7 @@ class ShutdownService implements DisposableBean {
      * Prepares the Server for clean Shutdown.
      * The scheduler gets stopped, so that no new Processes or ProcessingSteps get started.
      * @param reason The reason why the server is being shut down. This is logged in the database.
-     **/
+     */
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     void planShutdown(String reason) {
         lock.lock()
@@ -107,7 +107,7 @@ class ShutdownService implements DisposableBean {
     /**
      * Cancels a currently running shutdown process.
      * The scheduler gets started again.
-     **/
+     */
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     void cancelShutdown() {
         lock.lock()
@@ -142,7 +142,7 @@ class ShutdownService implements DisposableBean {
     /**
      * Checks whether a shutdown is currently planned.
      * @return true if there is a running shutdown.
-     **/
+     */
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     boolean isShutdownPlanned() {
         boolean planned = false
@@ -165,7 +165,7 @@ class ShutdownService implements DisposableBean {
     /**
      * Retrieves the shutdown information for the currently planned shutdown if any.
      * @return Currently planned shutdown information or null if there is no planned shutdown.
-     **/
+     */
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     ShutdownInformation getCurrentPlannedShutdown() {
         return findShutdownInformationForPlannedShutdown()
@@ -174,7 +174,7 @@ class ShutdownService implements DisposableBean {
     /**
      * Retrieves a list of all currently running ProcessingSteps.
      * @return The List of currently running processing steps.
-     **/
+     */
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     List<ProcessingStep> getRunningJobs() {
         return schedulerService.retrieveRunningProcessingSteps()
@@ -192,7 +192,7 @@ class ShutdownService implements DisposableBean {
 
     /**
      * Safely determines if the job of that processing step is resumeable.
-     **/
+     */
     boolean isJobResumable(ProcessingStep step) {
         try {
             return schedulerService.isJobResumable(step)

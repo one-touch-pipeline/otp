@@ -31,7 +31,6 @@ import javax.servlet.http.*
  * The filter is controlled by the config options {@link OtpProperty#DEVEL_USE_BACKDOOR} and
  * {@link OtpProperty#DEVEL_BACKDOOR_USER}.
  * The first one controls whether the filter is enabled at all, the second one the user to use.
- *
  */
 @Component("backdoorFilter")
 @Scope("singleton")

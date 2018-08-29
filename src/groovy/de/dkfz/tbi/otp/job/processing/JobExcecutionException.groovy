@@ -5,8 +5,6 @@ package de.dkfz.tbi.otp.job.processing
 *
 * Exception is thrown when jobs run into failure and terminate therefore.
 * As jobs themselves shall not catch exceptions they are caught by the container.
-*
-*
 */
 class JobExcecutionException extends ProcessingException {
 

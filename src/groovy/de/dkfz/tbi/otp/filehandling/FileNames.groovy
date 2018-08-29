@@ -2,7 +2,6 @@ package de.dkfz.tbi.otp.filehandling
 
 /**
  * All filenames, which are not created on the fly, are stored here.
- *
  */
 enum FileNames {
     FASTQ_FILES_IN_MERGEDBAMFILE("FastqFiles.tsv"),

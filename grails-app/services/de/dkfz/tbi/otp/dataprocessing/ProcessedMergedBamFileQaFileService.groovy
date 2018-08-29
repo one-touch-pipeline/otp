@@ -8,8 +8,6 @@ import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 /**
  * Service for {@link ProcessedMergedBamFile}
- *
- *
  */
 class ProcessedMergedBamFileQaFileService {
 

@@ -6,8 +6,6 @@ import org.apache.commons.logging.impl.SimpleLog
 
 /**
  * Holds a {@link Log} instance in a {@link Thread}
- *
- *
  */
 class LogThreadLocal {
 

@@ -10,7 +10,6 @@ import groovy.transform.ToString
  * These sample types are then stored in this domain per project.
  * Furthermore it is relevant to know if a sample type represents a DISEASE or a CONTROL.
  * This information will be requested via the SNV-GUI.
- *
  */
 @ToString(excludes=['dateCreated','lastUpdated'], includePackage = false)
 class SampleTypePerProject implements TimeStamped, Entity {

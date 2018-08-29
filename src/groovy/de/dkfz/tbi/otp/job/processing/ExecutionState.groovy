@@ -13,7 +13,7 @@ public enum ExecutionState {
     FAILURE,
     /** The Job has been restarted manually.
      *  The only allowed state before is FAILURE. No further update can follow after restarted. A new ProcessingStep is created.
-     **/
+     */
     RESTARTED,
     /** The execution of the Job has been suspended for a save shutdown. This state is only allowed after STARTED or RESUMED*/
     SUSPENDED,

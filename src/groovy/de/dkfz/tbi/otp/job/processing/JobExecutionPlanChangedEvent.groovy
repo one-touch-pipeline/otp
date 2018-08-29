@@ -6,7 +6,6 @@ import org.springframework.context.ApplicationEvent
  * An ApplicationEvent notifying interested parties about a change
  * in a JobExecutionPlan which requires re-fetching the JobExecutionPlan
  * from database.
- *
  */
 class JobExecutionPlanChangedEvent extends ApplicationEvent {
     /**

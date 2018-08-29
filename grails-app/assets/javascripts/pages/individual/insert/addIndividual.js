@@ -1,8 +1,6 @@
 /*jslint browser: true */
 /*global $ */
 
-/**
- */
 $.otp.addIndividual = {
     addSample: function (event) {
         "use strict";

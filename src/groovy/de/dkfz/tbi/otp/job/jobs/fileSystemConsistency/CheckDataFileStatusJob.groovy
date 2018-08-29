@@ -11,7 +11,6 @@ import org.springframework.stereotype.*
 
 /**
  * Job that verifies the consistency status of DataFiles and saves only the not consistent ones in the database.
- *
  */
 @Component
 @Scope("prototype")

@@ -12,7 +12,6 @@ import static org.springframework.util.Assert.*
 
 /**
  * A service to construct paths and messages for logging the status of cluster jobs.
- *
  */
 @CompileStatic
 class JobStatusLoggingService {

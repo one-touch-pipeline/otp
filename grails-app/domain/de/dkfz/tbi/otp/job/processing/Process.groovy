@@ -22,15 +22,15 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
  * @see JobDefinition
  * @see Job
  * @see StartJob
- **/
+ */
 public class Process implements Serializable, Commentable, Entity {
     /**
      * The Date when this process was started.
-     **/
+     */
     Date started
     /**
      * The name of the StartJob class which triggered this Process.
-     **/
+     */
     String startJobClass
     /**
      * The JobExecutionPlan this Process belongs to
@@ -38,7 +38,7 @@ public class Process implements Serializable, Commentable, Entity {
     JobExecutionPlan jobExecutionPlan
     /**
      * Whether there are Jobs still running (false) for this process or not (true).
-     **/
+     */
     boolean finished = false
 
     boolean operatorIsAwareOfFailure = false

@@ -7,7 +7,6 @@ import org.springframework.stereotype.*
 
 /**
  * Test job for a decision, taking the first available decision as it's outcome.
- *
  */
 @Component
 @Scope("prototype")

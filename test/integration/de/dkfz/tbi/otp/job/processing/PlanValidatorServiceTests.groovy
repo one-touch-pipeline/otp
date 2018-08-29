@@ -13,7 +13,7 @@ class PlanValidatorServiceTests {
 
     /**
      * Dependency Injection of PlanValidatorService
-     **/
+     */
     def planValidatorService
 
     @SuppressWarnings("EmptyMethod")

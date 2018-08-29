@@ -11,7 +11,7 @@ import de.dkfz.tbi.otp.job.processing.ProcessParameter
  * Service to retrieve information about Runs.
  * This service provides ACL protected access to Runs and the information connected with a given
  * Run. It's main usage is from a controller.
- **/
+ */
 class RunService {
     /**
      * Dependency Injection of Spring Security Service - needed for ACL checks

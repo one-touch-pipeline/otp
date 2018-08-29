@@ -23,8 +23,7 @@ import java.lang.annotation.Target
  * for a file and stop processing when the file is available.
  *
  * @see SometimesResumableJob
- *
- **/
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface ResumableJob {

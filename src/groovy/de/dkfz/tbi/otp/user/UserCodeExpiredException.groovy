@@ -5,7 +5,6 @@ package de.dkfz.tbi.otp.user
  *
  * This exception should be thrown in case a user tries to e.g. validate the registration or
  * reset the password with a code which has expired.
- *
  */
 class UserCodeExpiredException extends UserManagementException implements Serializable {
     private static final long serialVersionUID = 1L

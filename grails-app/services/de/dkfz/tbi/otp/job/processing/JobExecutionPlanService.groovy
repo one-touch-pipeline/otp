@@ -4,17 +4,13 @@ import de.dkfz.tbi.otp.job.plan.*
 import org.springframework.security.access.prepost.*
 
 
-/**
- * Service providing methods to access information about JobExecutionPlans.
- *
- */
 class JobExecutionPlanService {
     static transactional = true
 
     /**
      * Dependency Injection of Grails Application.
      * Needed to resolve job beans for introspection.
-     **/
+     */
     def grailsApplication
 
     /**
@@ -42,7 +38,7 @@ class JobExecutionPlanService {
      * In case the plan is obsoleted, it cannot be enabled.
      * @param plan The JobExecutionPlan to enable.
      * @return The enabled state after the operation. Should be true on success.
-     **/
+     */
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#plan, write)")
     public boolean enablePlan(JobExecutionPlan plan) {
         if (plan.obsoleted) {
@@ -64,7 +60,7 @@ class JobExecutionPlanService {
      * Disables the given JobExecutionPlan.
      * @param plan The JobExecutionPlan to disable.
      * @return The enabled state after the operation. Should be false(!) on success.
-     **/
+     */
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#plan, write)")
     public boolean disablePlan(JobExecutionPlan plan) {
         boolean before = plan.enabled
@@ -83,7 +79,7 @@ class JobExecutionPlanService {
      * Retrieves a list of all JobExecutionPlans the current User has access to.
      * Obsoleted JobExecutionPlans are not considered.
      * @return List of all not obsoleted JobExecutionPlans
-    **/
+     */
     @PostFilter("hasRole('ROLE_OPERATOR') or hasPermission(filterObject, read)")
     public List<JobExecutionPlan> getJobExecutionPlans() {
         return JobExecutionPlan.findAllByObsoleted(false, [sort: "name", order: "asc"])
@@ -118,7 +114,7 @@ class JobExecutionPlanService {
      * @param order The sort order, true for ascending, false for descending
      * @param state The execution state for restricting the result
      * @return Map of Processes with latest ProcessingStepUpdate
-     **/
+     */
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#plan, read)")
     public Map<Process, ProcessingStepUpdate> getLatestUpdatesForPlan(JobExecutionPlan plan, int max = 10, int offset = 0, String column = "id", boolean order = false, ExecutionState state = null) {
         final List<Long> plans = withParents(plan).collect { it.id }
@@ -178,7 +174,7 @@ AND u.id IN (
      * The method also considers the previous, but obsoleted JobExecutionPlans for the given plan.
      * @param plan The JobExecutionPlan for which it should be checked whether a Process is running
      * @return {@code true} in case there is a Process running for plan, {@code false} otherwise
-    **/
+     */
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#plan, read)")
     public boolean isProcessRunning(JobExecutionPlan plan) {
         final List<JobExecutionPlan> plans = withParents(plan)
@@ -193,7 +189,7 @@ AND u.id IN (
      * The method also considers the previous, but obsoleted JobExecutionPlans for the given plan.
      * @param plan The JobExecutionPlan for which the last created Process should be returned
      * @return The last created Process, or {@code null} if none is available
-    **/
+     */
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#plan, read)")
     public Process getLastExecutedProcess(JobExecutionPlan plan) {
         final List<Long> plans = withParents(plan).collect { it.id }
@@ -224,7 +220,7 @@ ORDER BY p.id DESC
      * @param plan The JobExecutionPlan for which the number of started processes should be retrieved.
      * @param state Optional ExecutionState to restrict the number of Processes returned
      * @return The number of Processes which have been started for plan
-    **/
+     */
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#plan, read)")
     public int getNumberOfProcesses(JobExecutionPlan plan, ExecutionState state = null) {
         final List<JobExecutionPlan> plans = withParents(plan)

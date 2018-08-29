@@ -6,7 +6,6 @@ import de.dkfz.tbi.otp.utils.Entity
 /**
  * This class represents an Antibody target which is used
  * for the library creation for chip seq sequencing purpose.
- *
  */
 class AntibodyTarget implements Entity {
 

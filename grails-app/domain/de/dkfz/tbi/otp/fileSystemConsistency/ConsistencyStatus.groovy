@@ -6,7 +6,6 @@ import de.dkfz.tbi.otp.utils.Entity
 /**
  * Class representing the status of a DataFile after a consistency check is performed.
  * Only not consistent status should be stored.
- *
  */
 class ConsistencyStatus implements Entity {
 

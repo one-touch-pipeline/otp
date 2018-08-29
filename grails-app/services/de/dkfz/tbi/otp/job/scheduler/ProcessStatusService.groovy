@@ -8,7 +8,6 @@ import static org.springframework.util.Assert.*
  * in a specified file (statusLogFile). In the next job it is checked (statusSuccessful), if the logFile contains the name of the
  * previous job/class. If this is the case the cluster job was successful.
  *
- *
  * @deprecated This service is deprecated by the new {@link JobStatusLoggingService}.
  */
 @Deprecated

@@ -9,7 +9,6 @@ import java.util.Map.Entry
  * <p>
  * Intervals newly added to this class are merged into the already contained intervals.
  * </p>
- *
  */
 @EqualsAndHashCode
 class MergingIntervalCollection implements Iterable<Interval> {

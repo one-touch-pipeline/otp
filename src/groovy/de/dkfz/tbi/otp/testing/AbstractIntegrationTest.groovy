@@ -6,7 +6,6 @@ import de.dkfz.tbi.otp.job.processing.*
 import static org.junit.Assert.*
 /**
  * Abstract base class for all tests to have some shared functionality.
- *
  */
 abstract class AbstractIntegrationTest implements UserAndRoles {
 

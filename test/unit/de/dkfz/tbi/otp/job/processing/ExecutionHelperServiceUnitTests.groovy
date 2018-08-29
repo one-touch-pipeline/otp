@@ -12,7 +12,6 @@ import org.junit.rules.*
 
 /**
  * Unit tests for the {@link ExecutionHelperService}.
- *
  */
 @TestMixin(GrailsUnitTestMixin)
 @Mock([ProcessingStep, Realm])

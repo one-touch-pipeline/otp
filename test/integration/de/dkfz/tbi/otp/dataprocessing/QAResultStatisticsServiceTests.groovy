@@ -12,8 +12,6 @@ import static org.junit.Assert.*
 
 /**
  * Integration tests for the {@link QAResultStatisticsService}.
- *
- *
  */
 class QAResultStatisticsServiceTests {
 

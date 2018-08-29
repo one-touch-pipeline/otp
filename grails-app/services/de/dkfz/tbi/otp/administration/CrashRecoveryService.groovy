@@ -22,7 +22,7 @@ class CrashRecoveryService {
 
     /**
      * @return Whether there is currently a crash recovery in process
-     **/
+     */
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     boolean isCrashRecovery() {
         return !schedulerService.isStartupOk()
@@ -34,7 +34,7 @@ class CrashRecoveryService {
      * next ProcessingStep.
      * @param ids The Ids of the ProcessingSteps
      * @param parameters Key, value pairs of the manually set parameters
-     **/
+     */
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     void markJobsAsFinished(List<Long> ids, Map parameters) {
         assert null != ids
@@ -55,7 +55,7 @@ class CrashRecoveryService {
      * next ProcessingStep.
      * @param ids The Ids of the ProcessingSteps
      * @param parameters Key, value pairs of the manually set parameters
-     **/
+     */
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     void markJobsAsSucceeded(List<Long> ids, Map parameters) {
         assert null != ids
@@ -75,7 +75,7 @@ class CrashRecoveryService {
      * Marks the ProcessingSteps identified by ids as failed and ends the step's processes.
      * @param ids The ids of the ProcessingSteps which failed
      * @param reason A reason why the ProcessingSteps failed
-     **/
+     */
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     void markJobsAsFailed(List<Long> ids, String reason) {
         assert null != ids
@@ -91,7 +91,7 @@ class CrashRecoveryService {
      * This puts the ProcessingSteps into a failed state first and reschedules the Jobs afterwards.
      * @param ids The ids of the ProcessingSteps to restart
      * @param reason Why the Jobs need to be restarted.
-     **/
+     */
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     void restartJobs(List<Long> ids, String reason) {
         assert null != ids
@@ -107,7 +107,7 @@ class CrashRecoveryService {
      * List of all ProcessingSteps which crashed during the last Shutdown.
      * This includes for all running Processes the ProcessingSteps which are in a running state.
      * @return List of all crashed ProcessingSteps
-     **/
+     */
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     List<ProcessingStep> crashedJobs() {
         if (!isCrashRecovery()) {
@@ -122,7 +122,7 @@ class CrashRecoveryService {
      * @param ids The ids of the ProcessingSteps for which the output parameters should be retrieved
      * @return List of Maps containing for each processing step the tripple processing step id, job name
      *         and the list of output parameters used by the corresponding processing step
-     **/
+     */
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     List<Map<String, Object>> getOutputParametersOfJobs(List<Long> ids) {
         assert null != ids
@@ -144,7 +144,7 @@ class CrashRecoveryService {
      * a RuntimeException is thrown.
      * @param ids The Ids for which the ProcessingSteps need to be retrieved
      * @return The found ProcessingSteps.
-     **/
+     */
     private List<ProcessingStep> getProcessingSteps(List<Long> ids) {
         if (!isCrashRecovery()) {
             throw new RuntimeException("The system is not in Crash Recovery")
@@ -162,7 +162,7 @@ class CrashRecoveryService {
      * Helper Function to create a new ProcessingStepUpdate.
      * @param step The ProcessingStep for which the Update should be created
      * @param state The ExecutionState for the update
-     **/
+     */
     private ProcessingStepUpdate createNewProcessingStepUpdate(ProcessingStep step, ExecutionState state) {
         processService.setOperatorIsAwareOfFailure(step.process, false)
         ProcessingStepUpdate update = new ProcessingStepUpdate(
@@ -183,7 +183,7 @@ class CrashRecoveryService {
      * This method also validates that all output parameters have been provided.
      * @param steps The processing steps for which the output parameters should be stored
      * @param parameters map containing for each processing step the parameter map with key is id of ParameterType and Value the value for the Parameter
-     **/
+     */
     private void storeParameters(List<ProcessingStep> steps, Map<Long, Map<String, String>> parameters) {
         Parameter.withTransaction {  status ->
             steps.each { ProcessingStep step ->

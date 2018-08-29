@@ -4,6 +4,7 @@ import de.dkfz.tbi.otp.job.plan.JobDecision
 
 /**
  * Abstract base class for {@link DecisionJob}s.
+ *
  * @see DecisionJob
  */
 abstract public class AbstractDecisionJobImpl extends AbstractEndStateAwareJobImpl implements DecisionJob {

@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.job.processing
 
 /**
  * Abstract base class for {@link EndStateAwareJob}s.
+ *
  * @see EndStateAwareJob
  */
 abstract public class AbstractEndStateAwareJobImpl extends AbstractJobImpl implements EndStateAwareJob {

@@ -51,9 +51,7 @@ class SampleType implements Entity {
     }
 
     /**
-     * enum to define, if the  {@link Project} default or a {@link SampleType} specific {@link ReferenceGenome} should be used.
-     *
-     *
+     * enum to define, if the {@link Project} default or a {@link SampleType}-specific {@link ReferenceGenome} should be used.
      */
     enum SpecificReferenceGenome {
         /**

@@ -15,8 +15,6 @@ import org.springframework.stereotype.Component
  * instance and allows to change the JobExecutionPlan during testing. For that
  * it does not inherit from AbstractStartJob, but just implements the StartJob
  * interface.
- *
- *
  */
 @Component("testSingletonStartJob")
 @Scope("singleton")

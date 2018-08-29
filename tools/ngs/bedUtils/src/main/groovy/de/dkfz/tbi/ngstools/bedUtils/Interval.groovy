@@ -7,7 +7,6 @@ import groovy.transform.EqualsAndHashCode
  *
  * Note that there is no guarantee that {@link #from} <= {@link #to}; "negative" intervals are possible.
  * Both start and end are final, to make this class effectively immutable.
- *
  */
 @EqualsAndHashCode(includeFields=true, excludes="lowEnd, highEnd")
 class Interval implements Comparable<Interval>{

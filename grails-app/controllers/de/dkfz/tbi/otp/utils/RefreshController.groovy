@@ -5,8 +5,6 @@ import grails.converters.JSON
 /**
  * Controller for enabling/disabling the auto-refresh functionality
  * of List Views.
- *
- *
  */
 class RefreshController {
 

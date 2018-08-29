@@ -21,10 +21,6 @@ import java.nio.file.attribute.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
-/**
- * Service providing methods to access information about Projects.
- *
- */
 class ProjectService {
 
     static final String PHIX_INFIX = 'PhiX'

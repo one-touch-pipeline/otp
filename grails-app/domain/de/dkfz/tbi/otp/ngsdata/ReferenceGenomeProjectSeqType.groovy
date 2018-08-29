@@ -7,8 +7,6 @@ import de.dkfz.tbi.otp.utils.Entity
 /**
  * Represents connection between {@link Project}, {@link SeqType}
  * and {@link ReferenceGenome}
- *
- *
  */
 class ReferenceGenomeProjectSeqType implements Entity {
 
