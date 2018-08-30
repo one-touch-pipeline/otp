@@ -8,12 +8,15 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.scheduler.*
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.logging.*
 import grails.compiler.*
 import grails.util.*
 import groovy.transform.*
-import org.springframework.beans.factory.annotation.*
 
+import java.nio.file.*
+import java.nio.file.attribute.*
 import java.time.*
+import java.time.format.*
 
 import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
 import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.*
@@ -29,6 +32,10 @@ class ClusterJobSchedulerService {
 
     static final int WAITING_TIME_FOR_SECOND_TRY_IN_MILLISECONDS = (Environment.getCurrent() == Environment.TEST) ? 0 : 10000
 
+    static final String CLUSTER_JOBS_STATE_LOG_DIRECTORY = "cluster-jobs-state"
+
+    final DateTimeFormatter PATH_FORMATTER = DateTimeFormatter.ofPattern("yyyy/MM/dd/HH-mm-ss'.txt'")
+
     ClusterJobSubmissionOptionsService clusterJobSubmissionOptionsService
     JobStatusLoggingService jobStatusLoggingService
     SchedulerService schedulerService
@@ -37,6 +44,8 @@ class ClusterJobSchedulerService {
     ConfigService configService
 
     ClusterJobLoggingService clusterJobLoggingService
+
+    FileService fileService
 
     /**
      * Executes a job on a cluster specified by the realm.
@@ -149,7 +158,9 @@ class ClusterJobSchedulerService {
         assert realm: "No realm specified."
         assert userName: "No user name specified."
         BatchEuphoriaJobManager jobManager = clusterJobManagerFactoryService.getJobManager(realm)
-        Map<BEJobID, JobState> jobStates = jobManager.queryJobStatusAll()
+
+
+        Map<BEJobID, JobState> jobStates = queryAndLogAllClusterJobs(jobManager)
 
         return jobStates.collectEntries { BEJobID jobId, JobState state ->
             [
@@ -158,6 +169,31 @@ class ClusterJobSchedulerService {
             ]
         } as Map<ClusterJobIdentifier, ClusterJobMonitoringService.Status>
     }
+
+    private Map<BEJobID, JobState> queryAndLogAllClusterJobs(BatchEuphoriaJobManager jobManager) {
+        Map<BEJobID, JobState> jobStates
+        StringBuilder logStringBuilder = new StringBuilder()
+        LogThreadLocal.withThreadLog(logStringBuilder) {
+            jobStates = jobManager.queryJobStatusAll()
+        }
+
+        Path logFile = pathForLogging()
+
+        fileService.createFileWithContent(logFile, logStringBuilder.toString())
+
+        return jobStates
+    }
+
+    private Path pathForLogging() {
+        String dateDirectory = LocalDateTime.now().format(PATH_FORMATTER)
+        Path baseLogDir = configService.getLoggingRootPath().toPath()
+
+        Path logFile = baseLogDir.resolve(CLUSTER_JOBS_STATE_LOG_DIRECTORY).resolve(dateDirectory)
+        assert logFile.absolute
+
+        return logFile
+    }
+
 
     public void retrieveAndSaveJobInformationAfterJobStarted(ClusterJob clusterJob) throws Exception {
         BEJobID beJobID = new BEJobID(clusterJob.clusterJobId)
@@ -177,7 +213,7 @@ class ClusterJobSchedulerService {
         }
         if (jobInfo) {
             clusterJobService.amendClusterJob(clusterJob, jobInfo)
-         }
+        }
     }
 
     public void retrieveAndSaveJobStatisticsAfterJobFinished(ClusterJobIdentifier jobIdentifier) throws Exception {

@@ -51,6 +51,8 @@ class ProjectService {
     FileSystemService fileSystemService
     RoddyWorkflowConfigService roddyWorkflowConfigService
 
+    FileService fileService
+
     /**
      *
      * @return List of all available Projects
@@ -185,27 +187,12 @@ class ProjectService {
         FileSystem fs = fileSystemService.getFilesystemForConfigFileChecksForRealm(projectInfo.project.realm)
         Path projectDirectory = fs.getPath(projectInfo.project.getProjectDirectory().toString())
         Path projectInfoDirectory = projectDirectory.resolve(PROJECT_INFO)
-        if (!Files.exists(projectInfoDirectory)) {
-            Files.createDirectories(projectInfoDirectory)
-            Files.setPosixFilePermissions(projectDirectory,
-                    [
-                        PosixFilePermission.OWNER_READ,
-                        PosixFilePermission.OWNER_WRITE,
-                        PosixFilePermission.OWNER_EXECUTE,
-                        PosixFilePermission.GROUP_READ,
-                        PosixFilePermission.GROUP_EXECUTE,
-                    ] as Set
-            )
-        }
 
         Path file = projectInfoDirectory.resolve(projectInfo.fileName)
-        Files.createFile(file)
-        file.bytes = content
-        Files.setPosixFilePermissions(file,
-                [
-                        PosixFilePermission.OWNER_READ,
-                ] as Set
-        )
+
+        fileService.createFileWithContent(file, content, [
+                PosixFilePermission.OWNER_READ,
+        ] as Set)
     }
 
     public static class ProjectParams {

@@ -8,8 +8,12 @@ import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.scheduler.*
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.LocalShellHelper.ProcessOutput
+import de.dkfz.tbi.otp.utils.logging.*
 import grails.test.mixin.*
+import org.junit.*
+import org.junit.rules.*
 import spock.lang.*
 
 @Mock([
@@ -51,6 +55,7 @@ class ClusterJobSchedulerServiceSpec extends Specification {
     void "retrieveKnownJobsWithState, when qstat output is empty, returns empty map"() {
         given:
         Realm realm = DomainFactory.createRealm()
+        File logFolder = TestCase.uniqueNonExistentPath
         ClusterJobSchedulerService service = new ClusterJobSchedulerService()
         service.clusterJobManagerFactoryService = new ClusterJobManagerFactoryService()
         service.clusterJobManagerFactoryService.remoteShellHelper = [
@@ -65,6 +70,12 @@ class ClusterJobSchedulerServiceSpec extends Specification {
         service.clusterJobManagerFactoryService.configService = Mock(ConfigService) {
             getSshUser() >> SSHUSER
         }
+        service.configService = Mock(ConfigService) {
+            1 * getLoggingRootPath() >> logFolder
+        }
+        service.fileService = Mock(FileService) {
+            1 * createFileWithContent(_, _)
+        }
 
         when:
         Map<ClusterJobIdentifier, ClusterJobMonitoringService.Status> result = service.retrieveKnownJobsWithState(realm, SSHUSER)
@@ -77,6 +88,7 @@ class ClusterJobSchedulerServiceSpec extends Specification {
     void "retrieveKnownJobsWithState, when status #pbsStatus appears in qstat, returns correct status #status"(String pbsStatus, ClusterJobMonitoringService.Status status) {
         given:
         Realm realm = DomainFactory.createRealm()
+        File logFolder = TestCase.uniqueNonExistentPath
         String jobId = "5075615"
         ClusterJobSchedulerService service = new ClusterJobSchedulerService()
         service.clusterJobManagerFactoryService = new ClusterJobManagerFactoryService()
@@ -91,6 +103,12 @@ class ClusterJobSchedulerServiceSpec extends Specification {
         ] as RemoteShellHelper
         service.clusterJobManagerFactoryService.configService = Mock(ConfigService) {
             getSshUser() >> SSHUSER
+        }
+        service.configService = Mock(ConfigService) {
+            1 * getLoggingRootPath() >> logFolder
+        }
+        service.fileService = Mock(FileService) {
+            1 * createFileWithContent(_, _)
         }
 
         when:

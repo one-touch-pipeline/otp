@@ -4,12 +4,32 @@ import de.dkfz.tbi.otp.utils.*
 import grails.util.*
 
 import java.nio.file.*
+import java.nio.file.attribute.*
 import java.time.*
 
 /**
  * Helper methods to work with file paths
  */
 class FileService {
+
+    /**
+     * The default directory permissions (750)
+     */
+    static final Set<PosixFileAttributes> DEFAULT_DIRECTORY_PERMISSION = [
+            PosixFilePermission.OWNER_READ,
+            PosixFilePermission.OWNER_WRITE,
+            PosixFilePermission.OWNER_EXECUTE,
+            PosixFilePermission.GROUP_READ,
+            PosixFilePermission.GROUP_EXECUTE,
+    ].toSet().asImmutable()
+
+    /**
+     * The default file permissions (440)
+     */
+    static final Set<PosixFileAttributes> DEFAULT_FILE_PERMISSION = [
+            PosixFilePermission.OWNER_READ,
+            PosixFilePermission.GROUP_READ,
+    ].toSet().asImmutable()
 
     /**
      * Convert a Path to a File object
@@ -27,8 +47,9 @@ class FileService {
         assert file.isAbsolute()
         try {
             waitUntilExists(file)
-        } catch (AssertionError e) {}
-        return Files.exists(file) &&  Files.isRegularFile(file) && Files.isReadable(file) && Files.size(file) > 0L
+        } catch (AssertionError e) {
+        }
+        return Files.exists(file) && Files.isRegularFile(file) && Files.isReadable(file) && Files.size(file) > 0L
     }
 
     static void ensureFileIsReadableAndNotEmpty(final Path file) {
@@ -45,6 +66,7 @@ class FileService {
     }
 
     static void ensureDirIsReadable(final Path dir) {
+        assert dir.isAbsolute()
         waitUntilExists(dir)
         assert Files.isDirectory(dir)
         assert Files.isReadable(dir)
@@ -64,9 +86,11 @@ class FileService {
         assert ThreadUtils.waitFor({
             try {
                 Files.isDirectory(file) ? Files.list(file) : Files.isReadable(file)
-            } catch (NoSuchFileException ignored) {}
+            } catch (NoSuchFileException ignored) {
+            } catch (AccessDeniedException ignored) {
+            }
             Files.exists(file)
-        }, timeout.toMillis(), 50) : "${file} not found."
+        }, timeout.toMillis(), 50): "${file} not found."
     }
 
     /**
@@ -76,14 +100,72 @@ class FileService {
         assert ThreadUtils.waitFor({
             try {
                 Files.isDirectory(file) ? Files.list(file) : Files.isReadable(file)
+            } catch (AccessDeniedException ignored) {
             } catch (NoSuchFileException ignored) {
                 return true
             }
             !Files.exists(file)
-        }, timeout.toMillis(), 50) : "${file} still exists."
+        }, timeout.toMillis(), 50): "${file} still exists."
     }
 
     private static Duration getTimeout() {
         (Environment.current == Environment.TEST) ? Duration.ZERO : Duration.ofMinutes(2)
+    }
+
+    /**
+     * Create the requested directory (absolute path) and all missing parent directories with the permission defined in {@link #DEFAULT_DIRECTORY_PERMISSION}.
+     *
+     * It won't fail if the directory already exist, but then the permissions are not changed.
+     */
+    void createDirectoryRecursively(Path path) {
+        assert path
+        assert path.isAbsolute()
+
+        createDirectoryRecursivelyIntern(path)
+    }
+
+    private void createDirectoryRecursivelyIntern(Path path) {
+        if (Files.exists(path)) {
+            assert Files.isDirectory(path): "The path ${path} already exist, but is not a directory"
+        } else {
+            createDirectoryRecursivelyIntern(path.parent)
+
+            Files.createDirectory(path)
+            Files.setPosixFilePermissions(path, DEFAULT_DIRECTORY_PERMISSION)
+        }
+    }
+
+    /**
+     * Create the requested file with the given content and permission.
+     *
+     * The path have to be absolute and may not exist yet. Missing parent directories are created automatically with the
+     * {@link #DEFAULT_DIRECTORY_PERMISSION}.
+     */
+    void createFileWithContent(Path path, String content, Set<PosixFileAttributes> filePermission = DEFAULT_FILE_PERMISSION) {
+        assert path
+        assert path.isAbsolute()
+        assert !Files.exists(path)
+
+        createDirectoryRecursively(path.parent)
+
+        path.text = content
+        Files.setPosixFilePermissions(path, filePermission)
+    }
+
+    /**
+     * Create the requested file with the given byte content and permission.
+     *
+     * The path have to be absolute and may not exist yet. Missing parent directories are created automatically with the
+     * {@link #DEFAULT_DIRECTORY_PERMISSION}.
+     */
+    void createFileWithContent(Path path, byte[] content, Set<PosixFileAttributes> filePermission = DEFAULT_FILE_PERMISSION) {
+        assert path
+        assert path.isAbsolute()
+        assert !Files.exists(path)
+
+        createDirectoryRecursively(path.parent)
+
+        path.bytes = content
+        Files.setPosixFilePermissions(path, filePermission)
     }
 }
