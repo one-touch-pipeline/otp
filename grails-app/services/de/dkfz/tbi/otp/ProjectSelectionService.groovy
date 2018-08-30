@@ -47,7 +47,7 @@ class ProjectSelectionService {
         }
     }
 
-    @PreFilter(value = "hasRole('ROLE_OPERATOR') or hasPermission(filterObject, 'read')", filterTarget = "projects")
+    @PreFilter(value = "hasRole('ROLE_OPERATOR') or hasPermission(filterObject, 'OTP_READ_ACCESS')", filterTarget = "projects")
     public setSelectedProject(List<Project> projects, String displayName) {
         GrailsHttpSession session = WebUtils.retrieveGrailsWebRequest().getSession()
         ProjectSelection projectSelection = new ProjectSelection(projects: projects, displayName: displayName)

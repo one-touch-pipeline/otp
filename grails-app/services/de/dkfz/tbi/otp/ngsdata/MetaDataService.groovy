@@ -50,7 +50,7 @@ class MetaDataService {
      * @param entries The MetaDataEntries for which it should be checked whether there is a ChangeLog
      * @return Map of MetaDataEntries with boolean information as value whether there is a ChangeLog
      */
-    @PreFilter("hasRole('ROLE_OPERATOR') or (hasPermission(filterObject.dataFile.project, 'read') or hasPermission(filterObject.dataFile.run?.seqCenter, 'read'))")
+    @PreFilter("hasRole('ROLE_OPERATOR')")
     Map<MetaDataEntry, Boolean> checkForChangelog(List<MetaDataEntry> entries) {
         ReferencedClass clazz = ReferencedClass.findByClassName(MetaDataEntry.class.getName())
         if (!clazz) {

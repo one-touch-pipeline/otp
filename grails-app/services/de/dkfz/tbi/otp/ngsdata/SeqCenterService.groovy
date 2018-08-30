@@ -9,7 +9,7 @@ class SeqCenterService {
      *
      * @return List of all available SeqCenters
      */
-    @PostFilter("hasRole('ROLE_OPERATOR') or hasPermission(filterObject, 'read')")
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     public List<SeqCenter> allSeqCenters() {
         return SeqCenter.list(sort: "name", order: "asc")
     }

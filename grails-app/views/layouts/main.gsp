@@ -44,7 +44,6 @@
                         <li class="menuContainerItem"><g:link controller="projectOverview" action="laneOverview"><g:message code="otp.menu.overview"/></g:link></li>
                         <li class="menuContainerItem"><g:link controller="individual" action="list"><g:message code="otp.menu.individuals"/></g:link></li>
                         <li class="menuContainerItem"><g:link controller="sequence" action="index"><g:message code="otp.menu.sequences"/></g:link></li>
-                        <li class="menuContainerItem"><g:link controller="run" action="list"><g:message code="otp.menu.runs"/></g:link></li>
                         <li class="navigation menuContainerItem project">
                             <ul>
                                 <li class="overview_nav_container nav_container"><g:link class="menuLinkContainer"><g:message code="otp.menu.project"/> &#9661;</g:link>
@@ -106,6 +105,7 @@
                                             <li><g:link controller="qcThreshold" action="defaultConfiguration"><g:message code="otp.menu.qcThreshold"/></g:link></li>
                                             <li><g:link controller="projectProgress" action="progress"><g:message code="otp.menu.progress"/></g:link></li>
                                             <li><g:link controller="document" action="manage"><g:message code="otp.menu.documents"/></g:link></li>
+                                            <li><g:link controller="run" action="list"><g:message code="otp.menu.runs"/></g:link></li>
                                             <%-- <li><g:link controller="sampleSwap" action="index"><g:message code="otp.menu.sampleSwap"/></g:link></li>  TODO:OTP-2240 --%>
                                         </ul>
                                     </li>
