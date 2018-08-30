@@ -297,6 +297,35 @@ $(function() {
         $("span.edit-switch-label", outerContainer).show();
     });
 
+    $("div.edit-switch-toggle p.edit-switch-editor button.toggle").click(function () {
+        "use strict";
+        var container, outerContainer, orgVal, invVal;
+        container = $(this).parent();
+        outerContainer = container.parent();
+        orgVal = $("input:hidden[name=value]", container).val();
+        invVal = (orgVal === "true" ? "false" : "true");
+        $.ajax({
+            url: $("input:hidden[name=target]", container).val(),
+            dataType: 'json',
+            success: function (data) {
+                if (data.success) {
+                    $.otp.infoMessage($L("editorswitch.notification.success"));
+                    $.each(["label", "editor"], function () {
+                        $("p.edit-switch-"+this+" span", outerContainer).removeClass("icon-"+orgVal).addClass("icon-"+invVal);
+                    });
+                    $("input:hidden[name=value]", container).attr("value", invVal);
+                } else {
+                    $.otp.warningMessage(data.error);
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                $.otp.warningMessage($L("editorswitch.notification.error", textStatus, errorThrown));
+            }
+        });
+        $("p.edit-switch-editor", outerContainer).hide();
+        $("p.edit-switch-label", outerContainer).show();
+    });
+
     $("div.edit-switch .edit-switch-editor button.cancel").click(function () {
         "use strict";
         var outerContainer = $(this).parent().parent();

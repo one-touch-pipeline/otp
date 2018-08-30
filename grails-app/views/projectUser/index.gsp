@@ -28,7 +28,10 @@
                     <th><g:message code="projectUser.table.role"/></th>
                     <th><g:message code="projectUser.table.otpAccess"/></th>
                     <th><g:message code="projectUser.table.fileAccess"/></th>
-                    <th colspan="2"><g:message code="projectUser.table.manageUsers"/></th>
+                    <th><g:message code="projectUser.table.manageUsers"/></th>
+                    <sec:access expression="hasRole('ROLE_OPERATOR')">
+                        <th><g:message code="projectUser.table.manageUsersAndDelegate"/></th>
+                    </sec:access>
                     <th><g:message code="projectUser.table.asperaAccount"/></th>
                     <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${project.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'MANAGE_USERS')">
                         <th><g:message code="projectUser.table.projectAccess"/></th>
@@ -37,7 +40,7 @@
                 <g:if test="${!enabledProjectUsers}">
                     <tr>
                         <td></td>
-                        <td><g:message code="projectUser.table.noUsers"/></td>
+                        <td colspan="3"><g:message code="projectUser.table.noUsers"/></td>
                     </tr>
                 </g:if>
                 <g:each in="${enabledProjectUsers}" var="userEntry">
@@ -48,16 +51,16 @@
                         <td>
                             <g:if test="${userEntry.inLdap}">
                                 ${userEntry.realName}
-                                <g:if test="${userEntry.deactivated}">
-                                    <g:message code="projectUser.accessPerson.deactivated"/>
-                                </g:if>
                             </g:if>
                             <g:else>
                                 <otp:editorSwitch
                                         roles="ROLE_OPERATOR"
                                         link="${g.createLink(controller: 'projectUser', action: 'updateName', params: ["user.id": userEntry.user.id])}"
-                                        value="${userEntry.user.realName}"/>
+                                        value="${userEntry.realName}"/>
                             </g:else>
+                            <g:if test="${userEntry.deactivated}">
+                                <g:message code="projectUser.accessPerson.deactivated"/>
+                            </g:if>
                         </td>
                         <td>${userEntry.user.username}</td>
                         <td>${userEntry.department}</td>
@@ -69,31 +72,68 @@
                         </td>
                         <td>
                             <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${project.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'MANAGE_USERS')">
-                                <g:form action="updateProjectRole" params="['userProjectRole.id': userEntry.userProjectRole.id]">
-                                    <g:select onchange="submit()"
-                                              name="newRole"
-                                              from="${availableRoles*.name}"
-                                              value="${userEntry.projectRoleName}"/>
-                                </g:form>
+                                <otp:editorSwitch
+                                        template="dropDown"
+                                        link="${g.createLink(controller: "projectUser", action: "updateProjectRole", params: ['userProjectRole.id': userEntry.userProjectRole.id] )}"
+                                        values="${availableRoles*.name}"
+                                        value="${userEntry.projectRoleName}"/>
                             </sec:access>
                             <sec:noAccess expression="hasRole('ROLE_OPERATOR') or hasPermission(${project.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'MANAGE_USERS')">
                                 ${userEntry.projectRoleName}
                             </sec:noAccess>
                         </td>
-                        <td><span class="icon-${userEntry.otpAccess}" title="${g.message(code: "projectUser.table.tooltip.${userEntry.otpAccess}")}"></span></td>
-                        <td><span class="icon-${userEntry.fileAccess}" title="${g.message(code: "projectUser.table.tooltip.${userEntry.fileAccess}")}"></span></td>
-                        <td><span class="icon-${userEntry.manageUsers}" title="${g.message(code: "projectUser.table.tooltip.${userEntry.manageUsers == PermissionStatus.APPROVED ? "true" : "false"}")}"></span></td>
-                        <td>
-                            <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${project.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'DELEGATE_USER_MANAGEMENT')">
-                                <g:if test="${userEntry.inLdap && !userEntry.userProjectRole.manageUsersAndDelegate}">
-                                    <g:form action="updateManageUsers" params='["userProjectRole.id": userEntry.userProjectRole.id, "manageUsers": userEntry.userProjectRole.manageUsers]'>
-                                        <g:submitButton
-                                                title="${g.message(code: 'projectUser.table.tooltip.manageUsersSwitchButton', args: [userEntry.manageUsers == PermissionStatus.APPROVED ? "Disallow" : "Allow"])}"
-                                                name="${userEntry.manageUsers == PermissionStatus.APPROVED ? "Disallow" : "Allow"}"/>
-                                    </g:form>
-                                </g:if>
+                        <g:if test="${userEntry.inLdap}">
+                            <td class="small">
+                                <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${project.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'MANAGE_USERS')">
+                                    <otp:editorSwitch
+                                            template="toggle"
+                                            link="${g.createLink(controller: "projectUser", action: "toggleAccessToOtp", params: ['userProjectRole.id': userEntry.userProjectRole.id] )}"
+                                            value="${userEntry.otpAccess.toBoolean()}"/>
+                                </sec:access>
+                                <sec:noAccess expression="hasRole('ROLE_OPERATOR') or hasPermission(${project.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'MANAGE_USERS')">
+                                    <span class="icon-${userEntry.otpAccess}"></span>
+                                </sec:noAccess>
+                            </td>
+                            <td class="small">
+                                <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${project.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'MANAGE_USERS')">
+                                    <otp:editorSwitch
+                                            template="toggle"
+                                            link="${g.createLink(controller: "projectUser", action: "toggleAccessToFiles", params: ['userProjectRole.id': userEntry.userProjectRole.id] )}"
+                                            value="${userEntry.fileAccess.toBoolean()}"/>
+                                </sec:access>
+                                <sec:noAccess expression="hasRole('ROLE_OPERATOR') or hasPermission(${project.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'MANAGE_USERS')">
+                                    <span class="icon-${userEntry.fileAccess}"></span>
+                                </sec:noAccess>
+                            </td>
+                            <td class="large">
+                                <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${project.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'DELEGATE_USER_MANAGEMENT')">
+                                    <otp:editorSwitch
+                                            template="toggle"
+                                            link="${g.createLink(controller: "projectUser", action: "toggleManageUsers", params: ['userProjectRole.id': userEntry.userProjectRole.id] )}"
+                                            value="${userEntry.manageUsers.toBoolean()}"/>
+                                </sec:access>
+                                <sec:noAccess expression="hasRole('ROLE_OPERATOR') or hasPermission(${project.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'DELEGATE_USER_MANAGEMENT')">
+                                    <span class="icon-${userEntry.manageUsers}"></span>
+                                </sec:noAccess>
+                            </td>
+                            <sec:access expression="hasRole('ROLE_OPERATOR')">
+                                <td class="large">
+                                    <otp:editorSwitch
+                                            roles="ROLE_OPERATOR"
+                                            template="toggle"
+                                            link="${g.createLink(controller: "projectUser", action: "toggleManageUsersAndDelegate", params: ['userProjectRole.id': userEntry.userProjectRole.id] )}"
+                                            value="${userEntry.manageUsersAndDelegate.toBoolean()}"/>
+                                </td>
                             </sec:access>
-                        </td>
+                        </g:if>
+                        <g:else>
+                            <td class="small"><span class="icon-${userEntry.otpAccess}"></span></td>
+                            <td class="small"><span class="icon-${userEntry.fileAccess}"></span></td>
+                            <td class="large"><span class="icon-${userEntry.manageUsers}"></span></td>
+                            <sec:access expression="hasRole('ROLE_OPERATOR')">
+                                <td class="large"><span class="icon-${userEntry.manageUsersAndDelegate}"></span></td>
+                            </sec:access>
+                        </g:else>
                         <td>
                             <otp:editorSwitch
                                     roles="ROLE_OPERATOR"
@@ -135,7 +175,7 @@
                 <g:if test="${!disabledProjectUsers}">
                     <tr>
                         <td></td>
-                        <td><g:message code="projectUser.table.noUsers"/></td>
+                        <td colspan="3"><g:message code="projectUser.table.noUsers"/></td>
                     </tr>
                 </g:if>
                 <g:each in="${disabledProjectUsers}" var="userEntry">
@@ -146,13 +186,16 @@
                     <td>
                         <g:if test="${userEntry.inLdap}">
                             ${userEntry.realName}
-                            <g:if test="${userEntry.deactivated}">
-                                <g:message code="projectUser.accessPerson.deactivated"/>
-                            </g:if>
                         </g:if>
                         <g:else>
-                            ${userEntry.user.realName}
+                            <otp:editorSwitch
+                                    roles="ROLE_OPERATOR"
+                                    link="${g.createLink(controller: 'projectUser', action: 'updateName', params: ["user.id": userEntry.user.id])}"
+                                    value="${userEntry.realName}"/>
                         </g:else>
+                        <g:if test="${userEntry.deactivated}">
+                            <g:message code="projectUser.accessPerson.deactivated"/>
+                        </g:if>
                     </td>
                     <td>${userEntry.user.username}</td>
                     <td>${userEntry.department}</td>

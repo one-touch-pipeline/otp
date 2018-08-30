@@ -11,6 +11,9 @@ import static de.dkfz.tbi.otp.security.AuditLog.Action.*
 
 class UserProjectRoleService {
 
+    final static String USER_PROJECT_ROLE_REQUIRED = "the input userProjectRole must not be null"
+    final static String USERNAME_REQUIRED = "the input user needs a username"
+
     MailHelperService mailHelperService
     UserService userService
     LdapService ldapService
@@ -107,18 +110,62 @@ class UserProjectRoleService {
         ADD, REMOVE
     }
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'DELEGATE_USER_MANAGEMENT')")
-    UserProjectRole updateManageUsers(UserProjectRole userProjectRole, boolean manageUsers) {
-        assert userProjectRole: "the input userProjectRole must not be null"
-        userProjectRole.manageUsers = manageUsers
-        assert userProjectRole.save(flush: true, failOnError: true)
-        auditLogService.logAction(PROJECT_USER_CHANGED_MANAGE_USER, "Manage User ${manageUsers ? "en" : "dis"}abled for ${userProjectRole.user.username} in ${userProjectRole.project.name} with role ${userProjectRole.projectRole.name}")
-        return userProjectRole
+    private String getFlagChangeLogMessage(String flagName, boolean newStatus, String username, String projectName) {
+        return "${flagName} ${newStatus ? "en" : "dis"}abled for ${username} in ${projectName}"
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#upr.project, 'MANAGE_USERS')")
+    UserProjectRole toggleAccessToOtp(UserProjectRole upr) {
+        assert upr: USER_PROJECT_ROLE_REQUIRED
+        assert upr.user.username: USERNAME_REQUIRED
+        upr.accessToOtp = !upr.accessToOtp
+        assert upr.save(flush: true)
+        String message = getFlagChangeLogMessage("Access to OTP", upr.accessToOtp, upr.user.username, upr.project.name)
+        auditLogService.logAction(PROJECT_USER_CHANGED_ACCESS_TO_OTP, message)
+        return upr
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#upr.project, 'MANAGE_USERS')")
+    UserProjectRole toggleAccessToFiles(UserProjectRole upr) {
+        assert upr: USER_PROJECT_ROLE_REQUIRED
+        assert upr.user.username: USERNAME_REQUIRED
+        upr.accessToFiles = !upr.accessToFiles
+        assert upr.save(flush: true)
+        if (upr.accessToFiles) {
+            requestToAddUserToUnixGroupIfRequired(upr.user, upr.project)
+        } else {
+            requestToRemoveUserFromUnixGroupIfRequired(upr.user, upr.project)
+        }
+        String message = getFlagChangeLogMessage("Access to Files", upr.accessToFiles, upr.user.username, upr.project.name)
+        auditLogService.logAction(PROJECT_USER_CHANGED_ACCESS_TO_FILES, message)
+        return upr
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#upr.project, 'DELEGATE_USER_MANAGEMENT')")
+    UserProjectRole toggleManageUsers(UserProjectRole upr) {
+        assert upr: USER_PROJECT_ROLE_REQUIRED
+        assert upr.user.username: USERNAME_REQUIRED
+        upr.manageUsers = !upr.manageUsers
+        assert upr.save(flush: true)
+        String message = getFlagChangeLogMessage("Manage Users", upr.manageUsers, upr.user.username, upr.project.name)
+        auditLogService.logAction(PROJECT_USER_CHANGED_MANAGE_USER, message)
+        return upr
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    UserProjectRole toggleManageUsersAndDelegate(UserProjectRole upr) {
+        assert upr: USER_PROJECT_ROLE_REQUIRED
+        assert upr.user.username: USERNAME_REQUIRED
+        upr.manageUsersAndDelegate = !upr.manageUsersAndDelegate
+        assert upr.save(flush: true)
+        String message = getFlagChangeLogMessage("Delegate Manage Users", upr.manageUsersAndDelegate, upr.user.username, upr.project.name)
+        auditLogService.logAction(PROJECT_USER_CHANGED_DELEGATE_MANAGE_USER, message)
+        return upr
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS')")
     UserProjectRole updateEnabledStatus(UserProjectRole userProjectRole, boolean enabled) {
-        assert userProjectRole: "the input userProjectRole must not be null"
+        assert userProjectRole: USER_PROJECT_ROLE_REQUIRED
         userProjectRole.enabled = enabled
         assert userProjectRole.save(flush: true, failOnError: true)
         if (userProjectRole.accessToFiles) {
@@ -134,7 +181,7 @@ class UserProjectRoleService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS')")
     UserProjectRole updateProjectRole(UserProjectRole userProjectRole, ProjectRole newProjectRole) {
-        assert userProjectRole: "the input userProjectRole must not be null"
+        assert userProjectRole: USER_PROJECT_ROLE_REQUIRED
         assert newProjectRole: "the input projectRole must not be null"
         userProjectRole.projectRole = newProjectRole
         assert userProjectRole.save(flush: true, failOnError: true)

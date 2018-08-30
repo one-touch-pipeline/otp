@@ -47,29 +47,6 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         userProjectRole.projectRole == newRole
     }
 
-    void "updateManageUsers updates properly"() {
-        given:
-        UserProjectRole userProjectRole = DomainFactory.createUserProjectRole(
-                user: User.findByUsername(USER),
-                manageUsers: oldStatus,
-        )
-
-        when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            userProjectRoleService.updateManageUsers(userProjectRole, newStatus)
-        }
-
-        then:
-        userProjectRole.manageUsers == result
-
-        where:
-        oldStatus | newStatus || result
-        false     | false     || false
-        false     | true      || true
-        true      | false     || false
-        true      | true      || true
-    }
-
     void "notifyAdministration sends email with correct content"() {
         given:
         User user = DomainFactory.createUser()
@@ -411,6 +388,36 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         then:
         1 * userProjectRoleService.mailHelperService.sendEmail(_, _, _)
+    }
+
+    @Unroll
+    void "test #flag toggle function"() {
+        given:
+        userProjectRoleService.ldapService = Mock(LdapService) {
+            getGroupsOfUserByUsername(_) >> []
+        }
+        UserProjectRole userProjectRole = DomainFactory.createUserProjectRole(
+                project: DomainFactory.createProject(unixGroup: UNIX_GROUP),
+                user: User.findByUsername(USER),
+                (flag): false,
+        )
+
+        expect:
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            userProjectRoleService."toggle${flag.capitalize()}"(userProjectRole)."${flag}" == true
+        }
+
+        and:
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            userProjectRoleService."toggle${flag.capitalize()}"(userProjectRole)."${flag}" == false
+        }
+
+        where:
+        flag                     |_
+        "accessToOtp"            |_
+        "accessToFiles"          |_
+        "manageUsers"            |_
+        "manageUsersAndDelegate" |_
     }
 
     void "requestToRemoveUserFromUnixGroupIfRequired, removed user has file access role in project with same unix group"() {

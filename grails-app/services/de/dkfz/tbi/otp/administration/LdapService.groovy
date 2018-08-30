@@ -35,7 +35,7 @@ class LdapService implements InitializingBean {
 
     LdapUserDetails getLdapUserDetailsByUsername(String username) {
         if (username == null) {
-            return new LdapUserDetails()
+            return null
         }
         return ldapTemplate.search(
                 query().where(LdapKey.OBJECT_CATEGORY).is(LdapKey.USER)

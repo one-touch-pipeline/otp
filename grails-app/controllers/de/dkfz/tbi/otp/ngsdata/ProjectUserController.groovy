@@ -54,10 +54,10 @@ class ProjectUserController implements CheckAndCall {
         List<UserEntry> disabledProjectUsers = []
         List<String> usersWithoutUserProjectRole = []
         projectUsers.each { User user ->
-            LdapUserDetails userMap = ldapService.getLdapUserDetailsByUsername(user.username)
+            LdapUserDetails ldapUserDetails = ldapService.getLdapUserDetailsByUsername(user.username)
             UserProjectRole userProjectRole = UserProjectRole.findByUserAndProject(user, project)
             if (userProjectRole) {
-                UserEntry userEntry = new UserEntry(user, project, userMap)
+                UserEntry userEntry = new UserEntry(user, project, ldapUserDetails)
                 if (userProjectRole.enabled) {
                     enabledProjectUsers.add(userEntry)
                 } else {
@@ -79,30 +79,6 @@ class ProjectUserController implements CheckAndCall {
                 hasErrors: params.hasErrors,
                 message: params.message,
         ]
-    }
-
-    def updateManageUsers(UpdateManageUsersCommand cmd) {
-        if (cmd.hasErrors()) {
-            flash.errors = cmd.errors.getFieldError().code
-            flash.message = "An error occurred"
-        } else {
-            flash.errors = false
-            flash.message = "Data stored successfully"
-            userProjectRoleService.updateManageUsers(cmd.userProjectRole, cmd.manageUsers)
-        }
-        redirect(action: "index")
-    }
-
-    def updateProjectRole(UpdateProjectRoleCommand cmd) {
-        if (cmd.hasErrors()) {
-            flash.errors = cmd.errors.getFieldError().code
-            flash.message = "An error occurred"
-        } else {
-            flash.errors = false
-            flash.message = "Data stored successfully"
-            userProjectRoleService.updateProjectRole(cmd.userProjectRole, ProjectRole.findByName(cmd.newRole))
-        }
-        redirect(action: "index")
     }
 
     def switchEnabledStatus(SwitchEnabledStatusCommand cmd) {
@@ -157,6 +133,26 @@ class ProjectUserController implements CheckAndCall {
         redirect(controller: "projectUser")
     }
 
+    JSON updateProjectRole(UpdateProjectRoleCommand cmd) {
+        checkErrorAndCallMethod(cmd, { userProjectRoleService.updateProjectRole(cmd.userProjectRole, ProjectRole.findByName(cmd.newRole)) })
+    }
+
+    JSON toggleAccessToOtp(ToggleValueCommand cmd) {
+        checkErrorAndCallMethod(cmd, { userProjectRoleService.toggleAccessToOtp(cmd.userProjectRole) })
+    }
+
+    JSON toggleAccessToFiles(ToggleValueCommand cmd) {
+        checkErrorAndCallMethod(cmd, { userProjectRoleService.toggleAccessToFiles(cmd.userProjectRole) })
+    }
+
+    JSON toggleManageUsers(ToggleValueCommand cmd) {
+        checkErrorAndCallMethod(cmd, { userProjectRoleService.toggleManageUsers(cmd.userProjectRole) })
+    }
+
+    JSON toggleManageUsersAndDelegate(ToggleValueCommand cmd) {
+        checkErrorAndCallMethod(cmd, { userProjectRoleService.toggleManageUsersAndDelegate(cmd.userProjectRole) })
+    }
+
     JSON updateName(UpdateUserRealNameCommand cmd) {
         checkErrorAndCallMethod(cmd, { userService.updateRealName(cmd.user, cmd.newName) })
     }
@@ -182,6 +178,10 @@ enum PermissionStatus {
     String toString() {
         return WordUtils.uncapitalize(WordUtils.capitalizeFully(this.name(), ['_'] as char[]).replaceAll("_", ""))
     }
+
+    boolean toBoolean() {
+        return this in [APPROVED, PENDING_APPROVAL]
+    }
 }
 
 class UserEntry {
@@ -194,23 +194,25 @@ class UserEntry {
     PermissionStatus otpAccess
     PermissionStatus fileAccess
     PermissionStatus manageUsers
+    PermissionStatus manageUsersAndDelegate
     boolean deactivated
     UserProjectRole userProjectRole
 
     UserEntry(User user, Project project, LdapUserDetails ldapUserDetails) {
-        UserProjectRole userProjectRole = UserProjectRole.findByUserAndProject(user, project)
-        boolean fileAccess = userProjectRole.accessToFiles
-        this.inLdap = ldapUserDetails.cn
         this.user = user
-        this.realName = ldapUserDetails.realName
-        this.thumbnailPhoto = ldapUserDetails.thumbnailPhoto.encodeAsBase64()
-        this.department = ldapUserDetails.department
+        this.userProjectRole = UserProjectRole.findByUserAndProject(user, project)
+
+        this.inLdap = ldapUserDetails?.cn ?: false
+        this.realName = inLdap ? ldapUserDetails.realName : user.realName
+        this.thumbnailPhoto = inLdap ? ldapUserDetails.thumbnailPhoto.encodeAsBase64() : ""
+        this.department = inLdap ? ldapUserDetails.department : ""
         this.projectRoleName = userProjectRole.projectRole.name
+        this.deactivated = inLdap ? ldapUserDetails.deactivated : false
+
         this.otpAccess = inLdap && userProjectRole.accessToOtp ? PermissionStatus.APPROVED : PermissionStatus.DENIED
-        this.fileAccess = getPermissionStatus(inLdap && fileAccess, project.unixGroup in ldapUserDetails.memberOfGroupList)
+        this.fileAccess = getPermissionStatus(inLdap && userProjectRole.accessToFiles, project.unixGroup in ldapUserDetails?.memberOfGroupList)
         this.manageUsers = inLdap && userProjectRole.manageUsers ? PermissionStatus.APPROVED : PermissionStatus.DENIED
-        this.deactivated = ldapUserDetails.deactivated
-        this.userProjectRole = userProjectRole
+        this.manageUsersAndDelegate = inLdap && userProjectRole.manageUsersAndDelegate ? PermissionStatus.APPROVED : PermissionStatus.DENIED
     }
 
     private static PermissionStatus getPermissionStatus(boolean hasProjectRolePermission, boolean isMemberOfGroup) {
@@ -230,7 +232,7 @@ class UpdateUserRealNameCommand implements Serializable {
     User user
     String newName
     static constraints = {
-        newName(blank: false, validator: {val, obj ->
+        newName(blank: false, validator: { val, obj ->
             if (val == obj.user?.realName) {
                 return 'No Change'
             }
@@ -245,7 +247,7 @@ class UpdateUserEmailCommand implements Serializable {
     User user
     String newEmail
     static constraints = {
-        newEmail(nullable: false, email:true, blank: false, validator: {val, obj ->
+        newEmail(nullable: false, email: true, blank: false, validator: { val, obj ->
             if (val == obj.user?.email) {
                 return 'No Change'
             } else if (User.findByEmail(val)) {
@@ -262,7 +264,7 @@ class UpdateUserAsperaCommand implements Serializable {
     User user
     String newAspera
     static constraints = {
-        newAspera(blank: true, nullable: true, validator: {val, obj ->
+        newAspera(blank: true, nullable: true, validator: { val, obj ->
             if (val == obj.user?.asperaAccount) {
                 return 'No Change'
             }
@@ -273,27 +275,8 @@ class UpdateUserAsperaCommand implements Serializable {
     }
 }
 
-class UpdateManageUsersCommand implements Serializable {
+class ToggleValueCommand implements Serializable {
     UserProjectRole userProjectRole
-    boolean manageUsers
-
-    static constraints = {
-        manageUsers(validator: {val, obj ->
-            if (obj.userProjectRole?.manageUsersAndDelegate) {
-                return 'This right can not be changed for users of this role'
-            }
-            if (!obj.userProjectRole?.accessToOtp) {
-                return 'User needs access to OTP to gain this right'
-            }
-            if (val == obj.userProjectRole?.manageUsers) {
-                return 'No Change'
-            }
-        })
-    }
-
-    void setManageUsers(boolean value) {
-        manageUsers = !value
-    }
 }
 
 class SwitchEnabledStatusCommand implements Serializable {
@@ -301,7 +284,7 @@ class SwitchEnabledStatusCommand implements Serializable {
     boolean enabled
 
     static constraints = {
-        enabled(validator: {val, obj ->
+        enabled(validator: { val, obj ->
             if (val == obj.userProjectRole?.enabled) {
                 return 'No Change'
             }

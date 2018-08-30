@@ -8,7 +8,10 @@ import java.time.LocalDate
 class AuditLog implements Entity {
 
     enum Action {
+        PROJECT_USER_CHANGED_ACCESS_TO_OTP,
+        PROJECT_USER_CHANGED_ACCESS_TO_FILES,
         PROJECT_USER_CHANGED_MANAGE_USER,
+        PROJECT_USER_CHANGED_DELEGATE_MANAGE_USER,
         PROJECT_USER_CHANGED_ENABLED,
         PROJECT_USER_SENT_MAIL,
     }
