@@ -18,17 +18,16 @@
  *
  *
  *    2.
- *    Option 1: Decide if the user should have file access or not. Adapt the roles for all mentioned projects
- *    accordingly.
+ *    Option 1: Decide if the user should have file access or not. Adapt the file access flag for all
+ *    mentioned projects accordingly.
  *
  *    Option 2: Split the projects into separate unixGroups and add the respective users to the new groups.
  *
  *
  *    3. Note: Always resolve these only after all of check 2 have been resolved!
  *    Decide if the user should have file access or not.
- *    If so, give file-access role and add to unixGroup.
- *    If not, give a non-file-access role and remove from unixGroup.
- *
+ *    If so, set the file-access flag and add the user to unixGroup.
+ *    If not, remove the file-access flag and remove the user from unixGroup.
  */
 
 import de.dkfz.tbi.otp.administration.*
@@ -98,39 +97,32 @@ Project.findAll().each { Project project ->
 
 
 // Check 2
-static boolean checkProjectRolesForFileAccessConflict(List<ProjectRole> projectRoles) {
-    return projectRoles*.accessToFiles.unique().size() > 1
-}
-
 User.findAll().each { User user ->
     UserProjectRole[] allUserProjectRolesOfUser = UserProjectRole.findAllByUser(user)
     allUserProjectRolesOfUser*.project.unixGroup.unique().each { String unixGroup ->
         List<UserProjectRole> allUserProjectRolesForUserAndUnixGroup = UserProjectRole.findAllByUserAndProjectInList(user, Project.findAllByUnixGroup(unixGroup))
-        if (checkProjectRolesForFileAccessConflict(allUserProjectRolesForUserAndUnixGroup*.projectRole.unique())) {
-            output << "Conflict detected for User ${user.username} with the unix Group ${unixGroup}. Affected projects:"
-            allUserProjectRolesForUserAndUnixGroup.each { UserProjectRole userProjectRole ->
-                output << "${userProjectRole.project.name} (${userProjectRole.projectRole.name})"
-            }
-            output << ""
+        if (allUserProjectRolesForUserAndUnixGroup*.accessToFiles.unique().size() > 1) {
+            output << "Conflict detected for User ${user.username} with the unix Group ${unixGroup}. Affected projects:\n"+
+                       allUserProjectRolesForUserAndUnixGroup*.project.name.join(", ")+"\n"
         }
     }
 }
 
 
 // Check 3
-String format = "%-10s | %-6s | %-16s | %-10s | %s (%s)"
-output << sprintf(format, ["in Unx-Grp", "Access", "Role", "User", "Project", "Unix Group"])
+String format = "%-10s | %-6s | %-10s | %s (%s)"
+output << sprintf(format, ["in Unx-Grp", "Access", "User", "Project", "Unix Group"])
 UserProjectRole.findAll().each { UserProjectRole userProjectRole ->
     if (!userProjectRole.user.username) {
         return
     }
-    boolean fileAccessInOtp = userProjectRole.projectRole.accessToFiles
+    boolean fileAccessInOtp = userProjectRole.accessToFiles
     boolean fileAccessInLdap = userProjectRole.project.unixGroup in ldapService.getGroupsOfUserByUsername(userProjectRole.user.username)
     if (fileAccessInOtp != fileAccessInLdap) {
         output << sprintf(
                 format,
-                [fileAccessInLdap, fileAccessInOtp, userProjectRole.projectRole.name,
-                 userProjectRole.user.username, userProjectRole.project.name, userProjectRole.project.unixGroup]
+                [fileAccessInLdap, fileAccessInOtp, userProjectRole.user.username,
+                 userProjectRole.project.name, userProjectRole.project.unixGroup]
         )
     }
 }
