@@ -1,0 +1,266 @@
+---
+image: grails:2.5.1
+
+# notes:
+## recursive expansion of variables does not work
+## having multiple commends in one variable does not work
+## putting the expire time to a variable does not work
+
+variables:
+  GRAILS_OPTS: '-Xms1G'
+  ARTIFACTS_BASE_DIRECTORY: 'artifacts'
+  WAR_DIRECTORY: $ARTIFACTS_BASE_DIRECTORY/war
+  MAVEN_CACHE: $CI_PROJECT_DIR/.m2
+  PREPARE_MAVEN_CACHE1: "mkdir -p $CI_PROJECT_DIR/.m2"
+  PREPARE_MAVEN_CACHE2: "ln -s $CI_PROJECT_DIR/.m2 /home/grails/.m2"
+
+
+
+stages:
+  - status start
+  - build
+  - test
+  - trigger deployment
+  - status end
+
+# ------------------------------------------------------
+# general templates
+
+.abstract only branches: &only_branches
+  only:
+    - branches
+
+.abstract cache: &cache_template
+  cache:
+    key: "${CI_PROJECT_PATH_SLUG}-maven"
+    paths:
+      - $MAVEN_CACHE
+  before_script:
+    - $PREPARE_MAVEN_CACHE1
+    - $PREPARE_MAVEN_CACHE2
+
+.abstract_trigger: &trigger_template
+  image: otp-tests
+  script:
+    - if [[ ! -v DEPLOY_PIPELINE_TOKEN || ! -v DEPLOY_PIPELINE_BRANCH || ! -v DEPLOY_PIPELINE_URL ]] ; then exit 0 ; fi
+    - curl -X POST
+        -F token=$DEPLOY_PIPELINE_TOKEN
+        -F ref=$DEPLOY_PIPELINE_BRANCH
+        -F "variables[TRIGGER_CI_PIPELINE_ID]=$CI_PIPELINE_ID"
+        -F "variables[TRIGGER_CI_JOB_ID]=$CI_JOB_ID"
+        -F "variables[TRIGGER_CI_COMMIT_REF_NAME]=$CI_COMMIT_REF_NAME"
+        -F "variables[TRIGGER_CI_COMMIT_SHA]=$CI_COMMIT_SHA"
+        -F "variables[TRIGGER_CI_COMMIT_TITLE]=$CI_COMMIT_TITLE"
+        -F "variables[TRIGGER_CI_COMMIT_DESCRIPTION]=$CI_COMMIT_DESCRIPTION"
+        -F "variables[TRIGGER_CASE]=$TRIGGER_CASE"
+        -F "variables[TRIGGER_PIPELINE_STATE]=$TRIGGER_PIPELINE_STATE"
+        $DEPLOY_PIPELINE_URL
+    - echo send
+
+
+# ------------------------------------------------------
+# job trigger status update start
+
+trigger start:
+  <<: *trigger_template
+  <<: *only_branches
+  stage: status start
+  variables:
+    GIT_STRATEGY: none
+    TRIGGER_CASE: status
+    TRIGGER_PIPELINE_STATE: start
+
+# ------------------------------------------------------
+# job compile
+
+compile:
+  <<: *only_branches
+  <<: *cache_template
+  stage: build
+  dependencies: []
+  script:
+    - grails compile --non-interactive
+
+
+
+# ------------------------------------------------------
+# job tests
+
+.abstract test: &test_template
+  <<: *only_branches
+  <<: *cache_template
+  stage: test
+  image: otp-tests
+  dependencies: []
+  before_script:
+    - echo 'otp.testing.group=othergroup' > /home/grails/.otp.properties
+    - $PREPARE_MAVEN_CACHE1
+    - $PREPARE_MAVEN_CACHE2
+  script:
+    - grails test compile --non-interactive
+    - "grails test-app --non-interactive $TEST_TYPE: -coverage de.**.*"
+  after_script:
+    - head -1 target/test-reports/cobertura/coverage.xml
+  coverage: /line-rate="\d.(\d\d)\d+"/
+  artifacts:
+    paths:
+      - target/test-reports/*.xml
+      - target/test-reports/html/
+      - target/test-reports/cobertura/coverage.xml
+    expire_in: 4 weeks
+    when: always
+
+
+unit tests:
+  <<: *test_template
+  variables:
+    TEST_TYPE: unit
+
+
+integration tests:
+  <<: *test_template
+  variables:
+    TEST_TYPE: integration
+
+
+codenarc:
+  <<: *only_branches
+  <<: *cache_template
+  stage: test
+  dependencies: []
+  script:
+    - grails compile --non-interactive
+    - grails codenarc --non-interactive
+  after_script:
+    - sed -i "s@<SourceDirectory></SourceDirectory>@<SourceDirectory>$(pwd)</SourceDirectory>@" target/CodeNarc-Report.xml
+  artifacts:
+    paths:
+      - target/CodeNarc-Report*
+    expire_in: 4 weeks
+    when: always
+
+
+war:
+  <<: *only_branches
+  <<: *cache_template
+  stage: test
+  image: otp-tests
+  dependencies: []
+  artifacts:
+    paths:
+      - $ARTIFACTS_BASE_DIRECTORY
+    expire_in: 4 weeks
+  before_script:
+    - export CI_COMMIT_REF_NAME
+    - export CI_COMMIT_SHA
+    - echo 'otp.testing.group=othergroup' > /home/grails/.otp.properties
+    - mkdir -p logs/jobs
+    - $PREPARE_MAVEN_CACHE1
+    - $PREPARE_MAVEN_CACHE2
+  script:
+    - set -e -o pipefail
+
+    - echo $WAR_DIRECTORY
+    - export WAR_FILE=$WAR_DIRECTORY/otp.war
+
+    - 'grails war --non-interactive'
+
+    - mkdir -p $WAR_DIRECTORY
+    - mv target/otp.war $WAR_DIRECTORY
+    - md5sum "$WAR_FILE" | tee "$WAR_FILE.md5"
+    - sha256sum "$WAR_FILE" | tee "$WAR_FILE.sha256"
+    - git rev-parse HEAD | tee "$WAR_FILE.gitrev"
+
+
+test migration:
+  <<: *only_branches
+  <<: *cache_template
+  stage: test
+  dependencies: []
+  image: otp-test-migration
+  services:
+    - postgres:latest
+  variables:
+    POSTGRES_DB: otp
+    POSTGRES_USER: otp
+    POSTGRES_PASSWORD: otp
+  before_script:
+    - echo 'otp.database.server=postgres' >> /home/grails/.otp.properties
+    - echo 'otp.database.port=5432' >> /home/grails/.otp.properties
+    - echo 'otp.database.database=otp' >> /home/grails/.otp.properties
+    - echo 'otp.database.username=otp' >> /home/grails/.otp.properties
+    - echo 'otp.database.password=otp' >> /home/grails/.otp.properties
+    - $PREPARE_MAVEN_CACHE1
+    - $PREPARE_MAVEN_CACHE2
+  script:
+    - grails compile --non-interactive
+    - grails dbm-update --non-interactive
+    - bash ./bashScripts/grails-migration-plugin/create-dbm-gorm-diff-without-false-changes.sh testing
+    - bash ./bashScripts/grails-migration-plugin/check-for-changelog-file.sh testing
+  artifacts:
+    paths:
+      - migrations/changelogs/*/testing.groovy
+    expire_in: 4 weeks
+    when: on_failure
+
+
+
+# ------------------------------------------------------
+# job trigger deployment
+
+.abstract_trigger_deployment: &trigger_deployment_template
+  <<: *trigger_template
+  stage: trigger deployment
+  dependencies:
+    - war
+  artifacts:
+    paths:
+      - $ARTIFACTS_BASE_DIRECTORY
+    expire_in: 1 day
+
+
+trigger master:
+  <<: *trigger_deployment_template
+  only:
+    - /^master$/
+    - /^test-master$/
+  variables:
+    GIT_STRATEGY: none
+    TRIGGER_CASE: master
+
+
+trigger release:
+  <<: *trigger_deployment_template
+  only:
+    - /^production\/.*$/
+    - /^test-release$/
+  variables:
+    GIT_STRATEGY: none
+    TRIGGER_CASE: release
+
+
+# ------------------------------------------------------
+# job trigger status update end
+
+trigger success:
+  <<: *trigger_template
+  <<: *only_branches
+  stage: status end
+  dependencies: []
+  variables:
+    GIT_STRATEGY: none
+    TRIGGER_CASE: status
+    TRIGGER_PIPELINE_STATE: success
+  when: on_success
+
+
+trigger failed:
+  <<: *trigger_template
+  <<: *only_branches
+  stage: status end
+  dependencies: []
+  variables:
+    GIT_STRATEGY: none
+    TRIGGER_CASE: status
+    TRIGGER_PIPELINE_STATE: failed
+  when: on_failure
