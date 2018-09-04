@@ -264,14 +264,14 @@ class ProjectService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void configureNoAlignmentDeciderProject(Project project) {
-        deprecateAllReferenceGenomes(project)
+        deprecateAllReferenceGenomesByProject(project)
         project.alignmentDeciderBeanName = "noAlignmentDecider"
         project.save(flush: true, failOnError: true)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void configureDefaultOtpAlignmentDecider(Project project, String referenceGenomeName) {
-        deprecateAllReferenceGenomes(project)
+        deprecateAllReferenceGenomesByProject(project)
         project.alignmentDeciderBeanName = "defaultOtpAlignmentDecider"
         project.save(flush: true, failOnError: true)
         ReferenceGenome referenceGenome = exactlyOneElement(ReferenceGenome.findAllByName(referenceGenomeName))
@@ -389,12 +389,13 @@ class ProjectService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void configureRnaAlignmentReferenceGenome(RnaAlignmentReferenceGenomeConfiguration rnaAlignmentConfiguration) {
         if (rnaAlignmentConfiguration.sampleTypes) {
-            deprecateReferenceGenomeForSampleTypes(rnaAlignmentConfiguration.project, rnaAlignmentConfiguration.seqType, rnaAlignmentConfiguration.sampleTypes)
+            deprecateAllReferenceGenomesByProjectAndSeqTypeAndSampleTypes(rnaAlignmentConfiguration.project, rnaAlignmentConfiguration.seqType, rnaAlignmentConfiguration.sampleTypes)
         } else if (rnaAlignmentConfiguration.deprecateConfigurations) {
             deprecatedReferenceGenomeProjectSeqTypeAndSetDecider(rnaAlignmentConfiguration)
         } else {
-            deprecateGeneralReferenceGenome(rnaAlignmentConfiguration.project, rnaAlignmentConfiguration.seqType)
+            deprecateReferenceGenomeByProjectAndSeqTypeAndNoSampleType(rnaAlignmentConfiguration.project, rnaAlignmentConfiguration.seqType)
         }
+        rnaAlignmentConfiguration.project.alignmentDeciderBeanName = AlignmentDeciderBeanNames.PAN_CAN_ALIGNMENT.bean
 
         Map alignmentProperties = [:]
 
@@ -439,9 +440,9 @@ class ProjectService {
 
     private void deprecatedReferenceGenomeProjectSeqTypeAndSetDecider(ProjectSeqTypeReferenceGenomeConfiguration config) {
         if (config.project.alignmentDeciderBeanName == AlignmentDeciderBeanNames.OTP_ALIGNMENT.bean) {
-            deprecateAllReferenceGenomes(config.project)
+            deprecateAllReferenceGenomesByProject(config.project)
         } else {
-            deprecateAllReferenceGenomes(config.project, config.seqType)
+            deprecateAllReferenceGenomesByProjectAndSeqType(config.project, config.seqType)
         }
         config.project.alignmentDeciderBeanName = AlignmentDeciderBeanNames.PAN_CAN_ALIGNMENT.bean
         config.project.save(flush: true, failOnError: true)
@@ -486,7 +487,7 @@ class ProjectService {
     void copyPanCanAlignmentXml(Project basedProject, SeqType seqType, Project project) {
         ReferenceGenomeProjectSeqType refSeqType = exactlyOneElement(ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(basedProject, seqType))
 
-        deprecateAllReferenceGenomes(project, seqType)
+        deprecateAllReferenceGenomesByProjectAndSeqType(project, seqType)
 
         ReferenceGenomeProjectSeqType refSeqType1 = new ReferenceGenomeProjectSeqType()
         refSeqType1.project = project
@@ -706,25 +707,25 @@ echo 'OK'
         }
     }
 
-    private void deprecateAllReferenceGenomes(Project project) {
+    private void deprecateAllReferenceGenomesByProject(Project project) {
         Set<ReferenceGenomeProjectSeqType> referenceGenomeProjectSeqTypes = ReferenceGenomeProjectSeqType.findAllByProjectAndDeprecatedDateIsNull(project)
         referenceGenomeProjectSeqTypes*.deprecatedDate = new Date()
         referenceGenomeProjectSeqTypes*.save(flush: true, failOnError: true)
     }
 
-    private void deprecateAllReferenceGenomes(Project project, SeqType seqType) {
+    private void deprecateAllReferenceGenomesByProjectAndSeqType(Project project, SeqType seqType) {
         Set<ReferenceGenomeProjectSeqType> referenceGenomeProjectSeqTypes = ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndDeprecatedDateIsNull(project, seqType)
         referenceGenomeProjectSeqTypes*.deprecatedDate = new Date()
         referenceGenomeProjectSeqTypes*.save(flush: true, failOnError: true)
     }
 
-    private void deprecateGeneralReferenceGenome(Project project, SeqType seqType) {
+    private void deprecateReferenceGenomeByProjectAndSeqTypeAndNoSampleType(Project project, SeqType seqType) {
         ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType = ReferenceGenomeProjectSeqType.findByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(project, seqType)
         referenceGenomeProjectSeqType?.deprecatedDate = new Date()
         referenceGenomeProjectSeqType?.save(flush: true, failOnError: true)
     }
 
-    private void deprecateReferenceGenomeForSampleTypes(Project project, SeqType seqType, List<SampleType> sampleTypes) {
+    private void deprecateAllReferenceGenomesByProjectAndSeqTypeAndSampleTypes(Project project, SeqType seqType, List<SampleType> sampleTypes) {
         Set<ReferenceGenomeProjectSeqType> referenceGenomeProjectSeqTypes = ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeInListAndDeprecatedDateIsNull(project, seqType, sampleTypes)
         referenceGenomeProjectSeqTypes*.deprecatedDate = new Date()
         referenceGenomeProjectSeqTypes*.save(flush: true, failOnError: true)
