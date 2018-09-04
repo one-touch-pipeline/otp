@@ -269,6 +269,7 @@ class SeqType implements Entity {
                 getIndelPipelineSeqTypes(),
                 getSophiaPipelineSeqTypes(),
                 getAceseqPipelineSeqTypes(),
+                getRunYapsaPipelineSeqTypes(),
         ].flatten().unique()
     }
 

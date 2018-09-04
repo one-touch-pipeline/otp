@@ -2056,6 +2056,13 @@ class DomainFactory {
         ]
     }
 
+    static List<SeqType> createRunYapsaSeqTypes() {
+        [
+                createWholeGenomeSeqType(),
+                createExomeSeqType(),
+        ]
+    }
+
     static List<SeqType> createAllAnalysableSeqTypes() {
         [
                 createSnvSeqTypes(),

@@ -18,11 +18,11 @@ class RunYapsaInstance extends BamFilePairAnalysis implements ProcessParameterOb
     }
 
     ReferenceGenome getReferenceGenome() {
-        CollectionUtils.exactlyOneElement(containedSeqTracks*.configuredReferenceGenome.unique())
+        return sampleType2BamFile.referenceGenome
     }
 
     LibraryPreparationKit getLibraryPreparationKit() {
-        CollectionUtils.exactlyOneElement(containedSeqTracks*.libraryPreparationKit.unique())
+        return sampleType2BamFile.workPackage.libraryPreparationKit
     }
 
     @Override

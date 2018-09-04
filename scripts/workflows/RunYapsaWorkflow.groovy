@@ -6,6 +6,7 @@ String workflowName = "RunYapsaWorkflow"
 
 plan(workflowName, ctx, true) {
     start("runYapsaStart", "runYapsaStartJob")
+    job("executeRunYapsa", "executeRunYapsaJob")
 }
 
 

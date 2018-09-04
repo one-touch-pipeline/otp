@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.runYapsa
 
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.*
 import de.dkfz.tbi.otp.job.ast.*
@@ -21,7 +22,7 @@ class ExecuteRunYapsaJob extends AbstractOtpJob implements AutoRestartableJob {
     @Autowired BedFileService bedFileService
     @Autowired ClusterJobSchedulerService clusterJobSchedulerService
     @Autowired ReferenceGenomeService referenceGenomeService
-
+    @Autowired ConfigService configService
 
     @Override
     protected final AbstractMultiJob.NextAction maybeSubmit() throws Throwable {
@@ -49,7 +50,7 @@ class ExecuteRunYapsaJob extends AbstractOtpJob implements AutoRestartableJob {
 
         List<String> runYapsaCall = []
         runYapsaCall << rCommand
-        runYapsaCall << runYapsaCommand
+        runYapsaCall << configService.getToolsPath().getAbsolutePath() + "/" + runYapsaCommand
         runYapsaCall << "-i ${instance.samplePair.findLatestSnvCallingInstance().getResultRequiredForRunYapsa()}"
         runYapsaCall << "-o ${outputDirectory.absolutePath}"
         if (instance.seqType == SeqType.wholeGenomePairedSeqType) {

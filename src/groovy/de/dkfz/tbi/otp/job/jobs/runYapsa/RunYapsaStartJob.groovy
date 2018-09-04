@@ -35,7 +35,7 @@ class RunYapsaStartJob extends AbstractBamFilePairAnalysisStartJob {
     @Override
     String getInstanceName(ConfigPerProjectAndSeqType config) {
         assert RunYapsaConfig.isAssignableFrom(Hibernate.getClass(config)): "RunYapsa startjob should only ever be started with a YAPSA config, not something else; got ${ config.class }"
-        return "runYapsa_${ config.programVersion }_${ getFormattedDate() }"
+        return "runYapsa_${ config.programVersion.replace("/", "-") }_${ getFormattedDate() }"
     }
 
     @Override
