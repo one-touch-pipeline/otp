@@ -54,7 +54,8 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
         // As soon as you loosen this constraint, un-ignore:
         // - AlignmentPassUnitTests.testIsLatestPass_2PassesDifferentWorkPackages
         sample(validator: {val, obj ->
-            MergingWorkPackage mergingWorkPackage = CollectionUtils.atMostOneElement(MergingWorkPackage.findAllBySampleAndSeqTypeAndAntibodyTarget(val, obj.seqType, obj.antibodyTarget),
+            MergingWorkPackage mergingWorkPackage = CollectionUtils.atMostOneElement(
+                    MergingWorkPackage.findAllBySampleAndSeqTypeAndAntibodyTarget(val, obj.seqType, obj.antibodyTarget),
                     "More than one MWP exists for sample ${val} and seqType ${obj.seqType} and antibodyTarget ${obj.antibodyTarget}")
             if (mergingWorkPackage && mergingWorkPackage.id != obj.id) {
                 return "The mergingWorkPackage must be unique for one sample and seqType and antibodyTarget"
