@@ -298,7 +298,7 @@
                             <h4>
                                 <g:message code="dataFields.seqType.addSeqTypeTitle" />
                             </h4>
-                            <input type="hidden" name="target" value="/otpdevel/metaDataFields/createSeqType"/>
+                            <input type="hidden" name="target" value="${g.createLink(controller: 'metaDataFields', action: 'createSeqType')}"/>
                             <div class="dialog">
                                 <table>
                                     <tbody>
@@ -344,15 +344,8 @@
                                                 <g:message code="dataFields.seqType.singleCell"/>
                                             </label>
                                         </td>
-                                        <td valign="top" class="name">
-                                            <input type="radio" id="singleCellYes"
-                                                   name="singleCell" value="true">
-                                            <label for="singleCellYes">Yes</label>
-                                            <input type="radio" id="singleCellNo"
-                                                   name="singleCell" value="false" checked>
-                                            <label for="singleCellNo">No</label>
-                                        </td>
-                                        <td>
+                                        <td colspan="1" valign="top" class="name">
+                                            <input name="singleCell" id="singleCell" type="checkbox"/>
                                         </td>
                                     </tr>
                                     <tr class="prop">
