@@ -54,6 +54,9 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
                 config     : bamFileTumor.config,
         ])
 
+        DomainFactory.createRoddyMergedBamQa(bamFileTumor)
+        DomainFactory.createRoddyMergedBamQa(bamFileControl)
+
         commonBamFileSetup()
         createBedFileAndLibPrepKit()
     }

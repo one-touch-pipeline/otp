@@ -9,6 +9,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import org.springframework.beans.factory.annotation.*
 import org.springframework.context.annotation.*
 import org.springframework.stereotype.*
+import org.hibernate.*
 
 @Component
 @Scope("prototype")
@@ -36,9 +37,22 @@ class ExecuteRoddySophiaJob extends AbstractExecutePanCanJob<SophiaInstance> imp
         Integer tumorDefaultReadLength = bamFileDisease.getMaximalReadLength()
         Integer controlDefaultReadLength = bamFileControl.getMaximalReadLength()
 
-        assert tumorDefaultReadLength && controlDefaultReadLength : "neither tumorDefaultReadLength nor controlDefaultReadLength may be null"
+        assert tumorDefaultReadLength && controlDefaultReadLength: "neither tumorDefaultReadLength nor controlDefaultReadLength may be null"
 
         List<String> cValues = []
+
+        if (([bamFileDisease, bamFileControl].every { RoddyBamFile.isAssignableFrom(Hibernate.getClass(it)) })) {
+            RoddyQualityAssessment bamFileDiseaseQualityAssessment = bamFileDisease.getOverallQualityAssessment() as RoddyQualityAssessment
+            RoddyQualityAssessment bamFileControlQualityAssessment = bamFileControl.getOverallQualityAssessment() as RoddyQualityAssessment
+
+            cValues.add("controlMedianIsize:${bamFileControlQualityAssessment.insertSizeMedian}")
+            cValues.add("tumorMedianIsize:${bamFileDiseaseQualityAssessment.insertSizeMedian}")
+            cValues.add("controlStdIsizePercentage:${bamFileControlQualityAssessment.insertSizeCV}")
+            cValues.add("tumorStdIsizePercentage:${bamFileDiseaseQualityAssessment.insertSizeCV}")
+            cValues.add("controlProperPairPercentage:${bamFileControlQualityAssessment.getPercentProperlyPaired()}")
+            cValues.add("tumorProperPairPercentage:${bamFileDiseaseQualityAssessment.getPercentProperlyPaired()}")
+        }
+
         cValues.add("bamfile_list:${bamFileControlPath};${bamFileDiseasePath}")
         cValues.add("sample_list:${bamFileControl.sampleType.dirName};${bamFileDisease.sampleType.dirName}")
         cValues.add("insertsizesfile_list:${diseaseInsertSizeFile};${controlInsertSizeFile}")
@@ -46,7 +60,6 @@ class ExecuteRoddySophiaJob extends AbstractExecutePanCanJob<SophiaInstance> imp
         cValues.add("possibleControlSampleNamePrefixes:${bamFileControl.sampleType.dirName}")
         cValues.add("controlDefaultReadLength:${controlDefaultReadLength}")
         cValues.add("tumorDefaultReadLength:${tumorDefaultReadLength}")
-
 
         return cValues
     }

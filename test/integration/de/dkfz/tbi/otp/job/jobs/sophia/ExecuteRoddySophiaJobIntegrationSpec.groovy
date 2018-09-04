@@ -3,8 +3,6 @@ package de.dkfz.tbi.otp.job.jobs.sophia
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.dataprocessing.sophia.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
@@ -12,42 +10,10 @@ import grails.test.mixin.*
 import org.junit.*
 import org.junit.rules.*
 import spock.lang.*
+import grails.test.spock.*
 
-@Mock([
-        DataFile,
-        FileType,
-        IndelCallingInstance,
-        Individual,
-        LibraryPreparationKit,
-        MergingCriteria,
-        MergingWorkPackage,
-        Pipeline,
-        Project,
-        ProjectCategory,
-        ProcessingOption,
-        Sample,
-        SamplePair,
-        SampleType,
-        SampleTypePerProject,
-        SeqCenter,
-        SeqPlatform,
-        SeqPlatformGroup,
-        SeqPlatformModelLabel,
-        SequencingKitLabel,
-        SeqTrack,
-        SeqType,
-        SoftwareTool,
-        SophiaInstance,
-        Realm,
-        ReferenceGenome,
-        ReferenceGenomeEntry,
-        ReferenceGenomeProjectSeqType,
-        RoddyBamFile,
-        RoddyWorkflowConfig,
-        Run,
-        RunSegment,
-])
-class ExecuteRoddySophiaJobSpec extends Specification {
+
+class ExecuteRoddySophiaJobIntegrationSpec extends IntegrationSpec {
 
     @Rule
     TemporaryFolder temporaryFolder
@@ -75,6 +41,8 @@ class ExecuteRoddySophiaJobSpec extends Specification {
 
         RoddyBamFile bamFileDisease = sophiaInstance.sampleType1BamFile as RoddyBamFile
         RoddyBamFile bamFileControl = sophiaInstance.sampleType2BamFile as RoddyBamFile
+        RoddyMergedBamQa bamFileDiseaseMergedBamQa = DomainFactory.createRoddyMergedBamQa(bamFileDisease)
+        RoddyMergedBamQa bamFileControlMergedBamQa = DomainFactory.createRoddyMergedBamQa(bamFileControl)
 
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(bamFileDisease)
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(bamFileControl)
@@ -91,6 +59,12 @@ class ExecuteRoddySophiaJobSpec extends Specification {
 
 
         List<String> expectedList = [
+                "controlMedianIsize:${bamFileControlMergedBamQa.insertSizeMedian}",
+                "tumorMedianIsize:${bamFileDiseaseMergedBamQa.insertSizeMedian}",
+                "controlStdIsizePercentage:${bamFileControlMergedBamQa.insertSizeCV}",
+                "tumorStdIsizePercentage:${bamFileDiseaseMergedBamQa.insertSizeCV}",
+                "controlProperPairPercentage:${bamFileControlMergedBamQa.getPercentProperlyPaired()}",
+                "tumorProperPairPercentage:${bamFileDiseaseMergedBamQa.getPercentProperlyPaired()}",
                 "bamfile_list:${bamFileControlPath};${bamFileDiseasePath}",
                 "sample_list:${bamFileControl.sampleType.dirName};${bamFileDisease.sampleType.dirName}",
                 "insertsizesfile_list:${bamFileDisease.finalInsertSizeFile};${bamFileControl.finalInsertSizeFile}",
