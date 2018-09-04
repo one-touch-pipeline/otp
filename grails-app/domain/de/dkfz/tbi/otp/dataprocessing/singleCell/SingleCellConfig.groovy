@@ -1,22 +1,22 @@
-package de.dkfz.tbi.otp.dataprocessing.runYapsa
+package de.dkfz.tbi.otp.dataprocessing.singleCell
 
 import de.dkfz.tbi.otp.dataprocessing.*
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
-class RunYapsaConfig extends ConfigPerProjectAndSeqType implements WithProgramVersion {
+class SingleCellConfig extends ConfigPerProjectAndSeqType implements WithProgramVersion {
 
     static constraints = {
         programVersion(blank: false)
         obsoleteDate validator: { val, obj ->
             if (!val) {
-                RunYapsaConfig runYapsaConfig = atMostOneElement(RunYapsaConfig.findAllWhere(
+                SingleCellConfig singleCellConfig = atMostOneElement(SingleCellConfig.findAllWhere(
                         project: obj.project,
                         seqType: obj.seqType,
                         pipeline: obj.pipeline,
                         obsoleteDate: null,
                 ))
-                !runYapsaConfig || runYapsaConfig == obj
+                !singleCellConfig || singleCellConfig == obj
             }
         }
     }
