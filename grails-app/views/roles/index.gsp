@@ -26,14 +26,6 @@
         <hr>
         <g:each in="${groupsAndUsers}" var=" roleAndUsers">
             <h3>${roleAndUsers.role.authority}</h3>
-            <g:if test="${!roleAndUsers.seqCenters.isEmpty()}">
-                ${g.message(code: "roles.seqCenters")}
-                <ul>
-                    <g:each in="${roleAndUsers.seqCenters}" var="seqCenter">
-                        <li>${seqCenter.name}</li>
-                    </g:each>
-                </ul>
-            </g:if>
             <g:if test="${roleAndUsers.users.isEmpty()}">
                 ${g.message(code: "roles.noMembers")}
             </g:if>
