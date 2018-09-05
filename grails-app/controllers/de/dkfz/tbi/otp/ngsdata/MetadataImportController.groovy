@@ -86,6 +86,7 @@ class MetadataImportController {
                 } else {
                     redirect(action: "multiDetails", params: [metaDataFiles: validateAndImportResults*.metadataFile*.id])
                 }
+                return
             }
         }
         flash.mvc = metadataValidationContexts

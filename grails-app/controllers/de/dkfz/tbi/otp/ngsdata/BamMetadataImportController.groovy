@@ -38,6 +38,7 @@ class BamMetadataImportController {
             bamMetadataValidationContext = results.context
             if (results.project != null) {
                 redirect(controller: "projectOverview", action: "laneOverview", params: [project: results.project.name])
+                return
             }
         }
         flash.mvc = bamMetadataValidationContext
