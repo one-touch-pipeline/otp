@@ -73,6 +73,8 @@ abstract class AbstractMergingWorkPackage implements Entity {
         }
     }
 
+    abstract AbstractMergedBamFile getBamFileThatIsReadyForFurtherAnalysis()
+
     Project getProject() {
         return sample.project
     }

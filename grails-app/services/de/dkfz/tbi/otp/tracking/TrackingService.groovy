@@ -296,7 +296,7 @@ class TrackingService {
                 alignableSeqTracks.groupBy { MergingWorkPackage.getMergingProperties(it.seqTrack) }
         seqTracksByMergingProperties.each { Map mergingProperties, List<SeqTrackProcessingStatus> seqTracksWithProperties ->
             MergingWorkPackage.findAllWhere(mergingProperties).each { MergingWorkPackage mwp ->
-                AbstractMergedBamFile bamFile = mwp.completeProcessableBamFileInProjectFolder
+                AbstractMergedBamFile bamFile = mwp.bamFileThatIsReadyForFurtherAnalysis
                 MergingWorkPackageProcessingStatus mwpStatus =
                         new MergingWorkPackageProcessingStatus(mwp, bamFile ? ALL_DONE : NOTHING_DONE_MIGHT_DO, bamFile, [])
                 allMwpStatuses.add(mwpStatus)
@@ -341,12 +341,12 @@ class TrackingService {
         WorkflowProcessingStatus status
         if (analysis && !analysis.withdrawn && analysis.processingState == AnalysisProcessingStates.FINISHED && [1, 2].every {
             AbstractMergedBamFile bamFile = analysis."sampleType${it}BamFile"
-            return bamFile == bamFile.mergingWorkPackage.completeProcessableBamFileInProjectFolder
+            return bamFile == bamFile.mergingWorkPackage.bamFileThatIsReadyForFurtherAnalysis
         }) {
             status = ALL_DONE
         } else if (analysis && !analysis.withdrawn && BamFileAnalysisService.processingStatesNotProcessable.contains(analysis.processingState)) {
             status = NOTHING_DONE_MIGHT_DO
-        } else if ([1, 2].every { sp."mergingWorkPackage${it}".completeProcessableBamFileInProjectFolder }) {
+        } else if ([1, 2].every { sp."mergingWorkPackage${it}".bamFileThatIsReadyForFurtherAnalysis }) {
             if (service.samplePairForProcessing(ProcessingPriority.MINIMUM_PRIORITY, sp)) {
                 status = NOTHING_DONE_MIGHT_DO
             } else {

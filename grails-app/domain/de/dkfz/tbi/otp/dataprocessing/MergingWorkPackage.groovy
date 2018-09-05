@@ -126,7 +126,8 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
         return bamFile.mergingWorkPackage.id == id
     }
 
-    AbstractMergedBamFile getCompleteProcessableBamFileInProjectFolder() {
+    @Override
+    AbstractMergedBamFile getBamFileThatIsReadyForFurtherAnalysis() {
         AbstractMergedBamFile bamFile = getProcessableBamFileInProjectFolder()
         if (bamFile && bamFile.containedSeqTracks == seqTracks) {
             return bamFile

@@ -14,4 +14,9 @@ class ExternalMergingWorkPackage extends AbstractMergingWorkPackage {
     String toString() {
         return "EMWP ${id}: ${sample} ${seqType} ${referenceGenome}"
     }
+
+    @Override
+    AbstractMergedBamFile getBamFileThatIsReadyForFurtherAnalysis() {
+        return getProcessableBamFileInProjectFolder()
+    }
 }

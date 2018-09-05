@@ -27,6 +27,12 @@ class AbstractMergingWorkPackageSpec extends Specification {
     TestAbstractMergedBamFile testAMBF
 
     class TestAbstractMergingWorkPackage extends AbstractMergingWorkPackage {
+
+        @Override
+        AbstractMergedBamFile getBamFileThatIsReadyForFurtherAnalysis() {
+            return null
+        }
+
     }
 
     class TestAbstractMergedBamFile extends AbstractMergedBamFile {

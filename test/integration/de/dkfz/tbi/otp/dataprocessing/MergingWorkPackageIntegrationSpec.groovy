@@ -99,7 +99,7 @@ class MergingWorkPackageIntegrationSpec extends IntegrationSpec {
         bamFile.workPackage.save(flush: true)
 
         expect:
-        bamFile == ((MergingWorkPackage)(bamFile.workPackage)).completeProcessableBamFileInProjectFolder
+        bamFile == ((MergingWorkPackage)(bamFile.workPackage)).bamFileThatIsReadyForFurtherAnalysis
     }
 
     void 'getCompleteProcessableBamFileInProjectFolder, when bamFileInProjectFolder not set, not withdrawn, FileOperationStatus PROCESSED, seqTracks match, returns null'() {
@@ -107,7 +107,7 @@ class MergingWorkPackageIntegrationSpec extends IntegrationSpec {
         RoddyBamFile bamFile = DomainFactory.createRoddyBamFile(DomainFactory.randomProcessedBamFileProperties)
 
         expect:
-        null == ((MergingWorkPackage)(bamFile.workPackage)).completeProcessableBamFileInProjectFolder
+        null == ((MergingWorkPackage)(bamFile.workPackage)).bamFileThatIsReadyForFurtherAnalysis
     }
 
     void 'getCompleteProcessableBamFileInProjectFolder, when bamFileInProjectFolder set, withdrawn, FileOperationStatus PROCESSED, seqTracks match, returns null'() {
@@ -120,7 +120,7 @@ class MergingWorkPackageIntegrationSpec extends IntegrationSpec {
         bamFile.workPackage.save(flush: true)
 
         expect:
-        null == ((MergingWorkPackage)(bamFile.workPackage)).completeProcessableBamFileInProjectFolder
+        null == ((MergingWorkPackage)(bamFile.workPackage)).bamFileThatIsReadyForFurtherAnalysis
     }
 
     void 'getCompleteProcessableBamFileInProjectFolder, when bamFileInProjectFolder set, not withdrawn, FileOperationStatus INPROGRESS, seqTracks match, returns null'() {
@@ -131,7 +131,7 @@ class MergingWorkPackageIntegrationSpec extends IntegrationSpec {
         bamFile.workPackage.save(flush: true)
 
         expect:
-        null == ((MergingWorkPackage)(bamFile.workPackage)).completeProcessableBamFileInProjectFolder
+        null == ((MergingWorkPackage)(bamFile.workPackage)).bamFileThatIsReadyForFurtherAnalysis
     }
 
     void 'getCompleteProcessableBamFileInProjectFolder, when bamFileInProjectFolder set, not withdrawn, FileOperationStatus PROCESSED, seqTracks do not match, returns null'() {
@@ -143,6 +143,6 @@ class MergingWorkPackageIntegrationSpec extends IntegrationSpec {
         bamFile.workPackage.save(flush: true)
 
         expect:
-        null == ((MergingWorkPackage)(bamFile.workPackage)).completeProcessableBamFileInProjectFolder
+        null == ((MergingWorkPackage)(bamFile.workPackage)).bamFileThatIsReadyForFurtherAnalysis
     }
 }
