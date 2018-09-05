@@ -122,7 +122,7 @@
             <g:submitButton name="submit" value="Import"/>
             <g:if test="${context?.getMaximumProblemLevel() == Level.WARNING}">
             <label>
-                <g:checkBox name="ignoreWarnings" value="true"/>
+                <g:checkBox name="ignoreWarnings" checked="false" value="true"/>
                 Ignore Warnings
             </label>
             </g:if>

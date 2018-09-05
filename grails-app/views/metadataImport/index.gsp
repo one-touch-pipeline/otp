@@ -152,7 +152,7 @@
             </g:if>
             <g:if test="${problems == Level.WARNING.intValue()}">
                 <label>
-                    <g:checkBox name="ignoreWarnings" value="true"/>
+                    <g:checkBox name="ignoreWarnings" checked="false" value="true"/>
                     <g:message code="metadataImport.ignore"/>
                 </label>
             </g:if>
