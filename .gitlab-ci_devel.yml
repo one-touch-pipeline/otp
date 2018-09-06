@@ -154,3 +154,21 @@ test migration:
     paths:
       - migrations/changelogs/*/testing.groovy
     when: on_failure
+
+
+
+generate_changelog:
+  stage: all
+  dependencies: []
+  only:
+    - branches
+  image: otp-generate-changelog
+  script:
+    - TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
+    - echo $TAG
+    - scripts/gitchangelog/gitchangelog.py ^$TAG HEAD >> CHANGELOG.txt
+  artifacts:
+    <<: *artifacts_template
+    paths:
+      - CHANGELOG.txt
+    when: on_success

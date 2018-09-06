@@ -19,13 +19,14 @@ ${"~" * len(section["label"])}
 % endif
 % for commit in section["commits"]:
 <%
-subject = "%s [%s]" % (commit["subject"], ", ".join(commit["authors"]))
-entry = indent('\n'.join(textwrap.wrap(subject)),
-                       first="- ").strip()
+    entry = indent('\n'.join(textwrap.wrap(commit["subject"])), first="- ").strip()
 %>${entry}
-
 % if commit["body"]:
-${indent(commit["body"])}
+<%
+    import re
+    cleaned_body = "\n".join(filter(lambda x: not re.match(r'^\s*$', x), commit["body"].split("\n")))
+    entry = indent(cleaned_body, " "*4)+"\n"
+%>${entry}
 % endif
 % endfor
 % endfor

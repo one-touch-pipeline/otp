@@ -204,6 +204,22 @@ test migration:
     when: on_failure
 
 
+generate_changelog:
+  stage: test
+  dependencies: []
+  only:
+  - branches
+  image: otp-generate-changelog
+  script:
+  - LATEST_TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
+  - echo $LATEST_TAG
+  - scripts/gitchangelog/gitchangelog.py ^$LATEST_TAG HEAD >> CHANGELOG.txt
+  artifacts:
+    paths:
+    - CHANGELOG.txt
+    expire_in: 1 weeks
+
+
 
 # ------------------------------------------------------
 # job trigger deployment

@@ -550,8 +550,7 @@ def Caret(l):
 ## PY2, ``sys.stdout.encoding`` without PYTHONIOENCODING set does not
 ## get any values set in subshells.  However, if _preferred_encoding
 ## is not set to utf-8, it leads to encoding errors.
-_preferred_encoding = os.environ.get("PYTHONIOENCODING") or \
-                      locale.getpreferredencoding()
+_preferred_encoding = 'utf-8'
 DEFAULT_GIT_LOG_ENCODING = 'utf-8'
 
 
