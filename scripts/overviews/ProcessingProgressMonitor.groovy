@@ -81,14 +81,16 @@ boolean showUnsupportedSeqTypes = false
 MonitorOutputCollector output = new MonitorOutputCollector(showFinishedEntries, showUnsupportedSeqTypes)
 
 SeqType exomePaired = SeqType.exomePairedSeqType
-List<SeqType> allignableSeqtypes = SeqType.allAlignableSeqTypes
+List<SeqType> alignableSeqtypes = SeqType.allAlignableSeqTypes
 
 MetaDataKey libPrepKitKey = MetaDataKey.findByName(MetaDataColumn.LIB_PREP_KIT.name())
-MetaDataKey enrichmentKitKey = MetaDataKey.findByName("ENRICHMENT_KIT")
+MetaDataKey enrichmentKitKey = MetaDataKey.findByName("ENRICHMENT_KIT") // old name for LIB_PREP_KIT, keep as-is!
 MetaDataKey commentKey = MetaDataKey.findByName(MetaDataColumn.COMMENT.name())
 
+// Heidelberg SeqTracksIDs for which Merging is broken
 List blackList_MergingSetId = ([12174511] as long[]) as List
 
+// Heidelberg SeqTrackIDs for which FastQc workflow is broken
 List blackList_SeqTrackForFastQc = ([
         33881224, 34409106, 34409201, 34409296, 34408057, 34409961, 34407757, 34407859, 34407957, 34408631,
         34407552, 34408346, 34408916, 34408726, 34407655, 34408441, 34409011, 34408536, 34407448, 34408251,
@@ -100,6 +102,9 @@ List blackList_SeqTrackForFastQc = ([
         33099108, 33099064, 33099152, 33099196, 33099284, 33099240, 33099372, 33099328, 33099460, 33099416,
         33099548, 33099504, 1496693, 33928984, 33929312, 33929411, 1496693,
 ] as long[]) as List
+
+long firstSeqTrackIdToCheckForFastQcWorkflow = 20077258 // Heidelberg 1.1.2015
+
 
 String INDENT = MonitorOutputCollector.INDENT
 
@@ -194,7 +199,7 @@ def findNotWithdrawn = { List<SeqTrack> seqTracks ->
 }
 
 def findAlignable = { List<SeqTrack> seqTracks ->
-    Map<Boolean, List<SeqTrack>> groupAfterAlignable = seqTracks.groupBy({allignableSeqtypes.contains(it.seqType) })
+    Map<Boolean, List<SeqTrack>> groupAfterAlignable = seqTracks.groupBy({alignableSeqtypes.contains(it.seqType) })
 
     output << "\n\n"
 
@@ -220,14 +225,16 @@ def findAlignable = { List<SeqTrack> seqTracks ->
 }
 
 
-def handleStateMap = {Map map, String workflow, Closure valueToShow, Closure objectToCheck = {it} ->
+def handleStateMap = {Map map, String workflow, Closure objectToCheck = {it} ->
     output.showWorkflow(workflow)
     def ret
     def keys = map.keySet().sort{it}
 
+    valueToShow = { "${it.sample}  ${it.seqType}  ${it.run}  ${it.laneId}  ${it.project}  ilse: ${it.ilseId} id: ${it.id}" }
+
     keys.each { key ->
         def values = map[key]
-        switch (key.ordinal()) {
+        switch (key.ordinal()) { // HACK: not all workflows use same key-enum, but all enums used have the same ordinals
             case 0:
                 output.showNotTriggered(values, valueToShow)
                 break
@@ -242,11 +249,7 @@ def handleStateMap = {Map map, String workflow, Closure valueToShow, Closure obj
                 ret = map[key]
                 break
             default:
-                switch (key) {
-                //for the case of more values
-                    default:
-                        new RuntimeException("Not handled value: ${key}. Please inform a maintainer")
-                }
+                new RuntimeException("Not handled value: ${key}. Please inform a maintainer")
         }
     }
     return ret
@@ -269,9 +272,7 @@ def showSeqTracks = {Collection<SeqTrack> seqTracks ->
             seqTracksNotWithdrawn.groupBy {it.dataInstallationState}
 
     allFinished &= dataInstallationState.keySet() == [SeqTrack.DataProcessingState.FINISHED] as Set
-    Collection<SeqTrack> seqTracksFinishedDataInstallationWorkflow = handleStateMap(dataInstallationState, "DataInstallationWorkflow", {
-        "${it.sample}  ${it.seqType}  ${it.run}  ${it.laneId}  ${it.project}  ilse: ${it.ilseId} id: ${it.id}"
-    })
+    Collection<SeqTrack> seqTracksFinishedDataInstallationWorkflow = handleStateMap(dataInstallationState, "DataInstallationWorkflow")
 
     if (!seqTracksFinishedDataInstallationWorkflow) {
         output << "\nnot all workflows are finished"
@@ -283,9 +284,7 @@ def showSeqTracks = {Collection<SeqTrack> seqTracks ->
             seqTracksFinishedDataInstallationWorkflow.groupBy {it.fastqcState}
 
     allFinished &= seqTracksNotWithdrawnByFastqcState.keySet() == [SeqTrack.DataProcessingState.FINISHED] as Set
-    Collection<SeqTrack> seqTracksNotWithdrawnFinishedFastqcWorkflow = handleStateMap(seqTracksNotWithdrawnByFastqcState, "FastqcWorkflow", {
-        "${it.sample}  ${it.seqType}  ${it.run}  ${it.laneId}  ${it.project}  ilse: ${it.ilseId} id: ${it.id}"
-    })
+    Collection<SeqTrack> seqTracksNotWithdrawnFinishedFastqcWorkflow = handleStateMap(seqTracksNotWithdrawnByFastqcState, "FastqcWorkflow")
 
     if (!seqTracksNotWithdrawnFinishedFastqcWorkflow) {
         output << "\nnot all workflows are finished"
@@ -319,18 +318,16 @@ def showSeqTracks = {Collection<SeqTrack> seqTracks ->
         }
     }
 
-    Collection<SeqTrack> seqTracksFinishedAlignment = []
+    Collection<RoddyBamFile> bamFilesFinishedAlignment =
+            new AllRoddyAlignmentsChecker().handle(seqTracksByAlignmentDeciderBeanName['panCanAlignmentDecider'], output)
 
-    //alignment Roddy
-    seqTracksFinishedAlignment += new AllRoddyAlignmentsChecker().handle(seqTracksByAlignmentDeciderBeanName['panCanAlignmentDecider'], output)
-
-    if (!seqTracksFinishedAlignment) {
+    if (!bamFilesFinishedAlignment) {
         return
     }
 
     //finished aligned
-    output << "\nFinshed aligned samples (${seqTracksFinishedAlignment.size()}): "
-    seqTracksFinishedAlignment.collect {
+    output << "\nFinished aligned samples (${bamFilesFinishedAlignment.size()}): "
+    bamFilesFinishedAlignment.collect {
         "${INDENT}${INDENT}${it} ${it.project}"
     }.sort { it }.each { output << it }
 
@@ -339,10 +336,10 @@ def showSeqTracks = {Collection<SeqTrack> seqTracks ->
     }
 
     //variant calling
-    List<SamplePair> finishedSamplePair = new VariantCallingPipelinesChecker().handle(seqTracksFinishedAlignment, output)
+    List<SamplePair> finishedSamplePair = new VariantCallingPipelinesChecker().handle(bamFilesFinishedAlignment, output)
 
     //end
-    output << "\nFinshed variant calling sample pairs (${finishedSamplePair.size()}): "
+    output << "\nFinished variant calling sample pairs (${finishedSamplePair.size()}): "
 
     finishedSamplePair.collect {
         "${INDENT}${INDENT}${it} ${it.project}"
@@ -432,9 +429,6 @@ nameStringToList(projectString).each { String projectName ->
 if (allProcessed) {
     output << "\n\n\n==============================\nseqtracks in processing (as defined in header comment)\n==============================\n"
 
-    long firstIdToCheck = 20077258 // 1.1.2015
-
-
     def  seqTracks = SeqTrack.executeQuery(
             """
     select
@@ -457,49 +451,8 @@ if (allProcessed) {
                 seqTrack.dataInstallationState not in ('${SeqTrack.DataProcessingState.FINISHED}', '${SeqTrack.DataProcessingState.UNKNOWN}')
             ) or (
                 seqTrack.fastqcState != '${SeqTrack.DataProcessingState.FINISHED}'
-                and seqTrack.id >= ${firstIdToCheck}
+                and seqTrack.id >= ${firstSeqTrackIdToCheckForFastQcWorkflow}
                 and not seqTrack.id in (${blackList_SeqTrackForFastQc.join(', ')})
-            ) or (
-                seqTrack.id in (
-                    select
-                        alignmentPass.seqTrack.id
-                    from
-                        AlignmentPass alignmentPass
-                    where
-                        alignmentPass.alignmentState != '${AlignmentPass.AlignmentState.UNKNOWN}'
-                ) and project.alignmentDeciderBeanName = 'defaultOtpAlignmentDecider'
-                and not seqTrack.id in (
-                    select
-                        seqTrack.id
-                    from
-                        DataFile datafile
-                        join datafile.seqTrack seqTrack
-                    where
-                        datafile.runSegment.align = false
-                ) and not seqTrack.id in (
-                    select
-                        seqTrack.id
-                    from
-                        MergingSetAssignment mergingSetAssignment
-                        join mergingSetAssignment.bamFile bamFile
-                        join bamFile.alignmentPass alignmentPass
-                        join alignmentPass.seqTrack seqTrack
-                    where
-                        mergingSetAssignment.mergingSet.id in (
-                            select
-                                    mergingSet.id
-                            from
-                                    ProcessedMergedBamFile processedMergedBamFile
-                                    join processedMergedBamFile.mergingPass mergingPass
-                                    join mergingPass.mergingSet mergingSet
-                                    join mergingSet.mergingWorkPackage mergingWorkPackage
-                            where
-                                    processedMergedBamFile.withdrawn = false
-                                    and processedMergedBamFile.fileOperationStatus = '${AbstractMergedBamFile.FileOperationStatus.PROCESSED}'
-                                    and processedMergedBamFile.qualityAssessmentStatus = '${AbstractBamFile.QaProcessingStatus.FINISHED}'
-                                    and mergingPass.identifier = (select max(identifier) from MergingPass mergingPass where mergingPass.mergingSet = mergingSet)
-                        )
-                )
             ) or (
                 seqTrack.id in (
                     select
@@ -541,8 +494,21 @@ if (allProcessed) {
         return """
             mwp${number} = samplePair.mergingWorkPackage${number}
             and bamFile${number}.withdrawn = false
-            and ((bamFile${number}.qcTrafficLightStatus not in ('${AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED.name()}','${AbstractMergedBamFile.QcTrafficLightStatus.REJECTED.name()}')) or bamFile${number}.qcTrafficLightStatus is NULL)
-            and bamFile${number}.id = (select max( maxBamFile.id) from AbstractMergedBamFile maxBamFile where maxBamFile.workPackage = bamFile${number}.workPackage)
+            and
+            (
+                (
+                    bamFile${number}.qcTrafficLightStatus not in (
+                        '${AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED.name()}',
+                        '${AbstractMergedBamFile.QcTrafficLightStatus.REJECTED.name()}'
+                    )
+                )
+                or bamFile${number}.qcTrafficLightStatus is NULL
+            )
+            and bamFile${number}.id = (
+                select max( maxBamFile.id)
+                from AbstractMergedBamFile maxBamFile
+                where maxBamFile.workPackage = bamFile${number}.workPackage
+            )
             and (
                 bamFile${number}.fileOperationStatus <> '${AbstractMergedBamFile.FileOperationStatus.PROCESSED}'
                 or exists (
@@ -626,7 +592,7 @@ if (allProcessed) {
     showSeqTracks(seqTracks.unique())
 
     output << "\n\nProjects in processing:"
-    output << INDENT + seqTracks*.sample*.individual*.project*.name.unique().sort().join("\n${INDENT}")
+    output << INDENT + seqTracks*.project*.name.unique().sort().join("\n${INDENT}")
 }
 
 output << '\n\n'
