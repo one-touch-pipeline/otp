@@ -343,7 +343,7 @@ class AlignmentQcCommand {
     SeqType seqType
 }
 
-class QcStatusCommand implements Serializable{
+class QcStatusCommand implements Serializable {
     String comment
     AbstractBamFile abstractBamFile
     String newValue
@@ -355,13 +355,13 @@ class QcStatusCommand implements Serializable{
             }
         })
         abstractBamFile(nullable: false, validator: {val, obj ->
-            if (!val instanceof RoddyBamFile) {
+            if (!(val instanceof RoddyBamFile)) {
                 return "${val} is an invalid Value."
             }
         })
         newValue(blank: false, nullable: false, validator: {val, obj ->
-            if (!val instanceof AbstractMergedBamFile.QcTrafficLightStatus) {
-                return "The qcTrafficLightStatus must be one of ${AbstractMergedBamFile.QcTrafficLightStatus.findAll().join(", ")} and not ${val}"
+            if (!(val in AbstractMergedBamFile.QcTrafficLightStatus.values()*.toString())) {
+                return "The qcTrafficLightStatus must be one of ${AbstractMergedBamFile.QcTrafficLightStatus.values().join(", ")} and not ${val}"
             }
         })
     }
