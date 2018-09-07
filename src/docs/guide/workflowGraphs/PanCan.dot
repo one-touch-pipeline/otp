@@ -6,12 +6,13 @@ digraph workflows {
   Fastqc [label="Fastqc (per lane)"];
   PanCan [label="PanCan (per merged BAM file)"];
   Snv [label="Snv (per pair of merged BAM files)"];
+  runYapsa [label="runYapsa (per pair of merged BAM files)"];
   Indel [label="Indel (per pair of merged BAM files)"];
   Sophia [label="Sophia (per pair of merged BAM files)"];
   ACEseq [label="ACEseq (per pair of merged BAM files)"];
 
   DataInstallation -> Fastqc
-  DataInstallation -> PanCan -> Snv
+  DataInstallation -> PanCan -> Snv -> runYapsa
   PanCan -> Indel
   PanCan -> Sophia -> ACEseq
 }
