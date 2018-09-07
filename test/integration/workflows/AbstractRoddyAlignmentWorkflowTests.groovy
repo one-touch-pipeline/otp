@@ -209,9 +209,9 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
             projectService.configurePanCanAlignmentDeciderProject(new PanCanAlignmentConfiguration([
                     project          : workPackage.project,
                     seqType          : workPackage.seqType,
-                    pluginName       : ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_ALIGNMENT_PLUGIN_NAME, null, null),
-                    pluginVersion    : ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_ALIGNMENT_PLUGIN_VERSION, null, null),
-                    baseProjectConfig: ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_ALIGNMENT_BASE_PROJECT_CONFIG, workPackage.seqType.roddyName, null),
+                    pluginName       : ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_PLUGIN_NAME, null, null),
+                    pluginVersion    : ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_PLUGIN_VERSION, null, null),
+                    baseProjectConfig: ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_BASE_PROJECT_CONFIG, workPackage.seqType.roddyName, null),
                     configVersion    : "v1_0",
                     referenceGenome  : workPackage.referenceGenome,
                     statSizeFileName : workPackage.statSizeFileName,

@@ -9,7 +9,7 @@ import static org.junit.Assert.*
 // => make the test as integration
 class ProcessingOptionServiceTests {
 
-    final OptionName NAME = OptionName.PIPELINE_RODDY_SNV_PLUGIN_NAME
+    final OptionName NAME = OptionName.OTP_USER_LINUX_GROUP
     final String VALUE = "testValue"
 
     ProcessingOptionService processingOptionService
@@ -32,7 +32,7 @@ class ProcessingOptionServiceTests {
     @Test
     void testFindOptionAssureNullName() {
         createProcessingOption()
-        shouldFail(IllegalArgumentException) {
+        shouldFail(AssertionError) {
             ProcessingOption testOption = ProcessingOptionService.findOptionAssure(null, null, null)
         }
     }

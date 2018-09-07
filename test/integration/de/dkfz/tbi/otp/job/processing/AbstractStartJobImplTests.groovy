@@ -25,46 +25,20 @@ class AbstractStartJobImplTests extends AbstractIntegrationTest {
 
     @Test
     void testGetConfiguredSlotCount_notConfigured() {
-        final ProcessingOption.OptionName optionName = OptionName.PIPELINE_RODDY_SNV_PLUGIN_NAME
+        final ProcessingOption.OptionName optionName = OptionName.MAXIMUM_NUMBER_OF_JOBS
         final JobExecutionPlan plan = JobExecutionPlan.build()
         assert testStartJob.getConfiguredSlotCount(plan, optionName, SLOT_COUNT_1) == SLOT_COUNT_1
     }
 
     @Test
     void testGetConfiguredSlotCount_properlyConfigured() {
-        final OptionName optionName = OptionName.PIPELINE_RODDY_SNV_PLUGIN_NAME
+        final OptionName optionName = OptionName.MAXIMUM_NUMBER_OF_JOBS
         final JobExecutionPlan plan = JobExecutionPlan.build()
         createUserAndRoles()
         SpringSecurityUtils.doWithAuth('operator') {
             processingOptionService.createOrUpdate(optionName, plan.name, null, Integer.toString(SLOT_COUNT_2))
         }
         assert testStartJob.getConfiguredSlotCount(plan, optionName, SLOT_COUNT_1) == SLOT_COUNT_2
-    }
-
-    @Test
-    void testGetConfiguredSlotCount_notANumber() {
-        final OptionName optionName = OptionName.PIPELINE_RODDY_SNV_PLUGIN_NAME
-        final JobExecutionPlan plan = JobExecutionPlan.build()
-        createUserAndRoles()
-        SpringSecurityUtils.doWithAuth('operator') {
-            processingOptionService.createOrUpdate(optionName, plan.name, null, 'twelve')
-        }
-        shouldFail NumberFormatException, {
-            testStartJob.getConfiguredSlotCount(plan, optionName, SLOT_COUNT_1)
-        }
-    }
-
-    @Test
-    void testGetConfiguredSlotCount_negative() {
-        final OptionName optionName = OptionName.PIPELINE_RODDY_SNV_PLUGIN_NAME
-        final JobExecutionPlan plan = JobExecutionPlan.build()
-        createUserAndRoles()
-        SpringSecurityUtils.doWithAuth('operator') {
-            processingOptionService.createOrUpdate(optionName, plan.name, null, '-1')
-        }
-        shouldFail NumberFormatException, {
-            testStartJob.getConfiguredSlotCount(plan, optionName, SLOT_COUNT_1)
-        }
     }
 
     @Test

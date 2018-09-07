@@ -5,17 +5,17 @@ import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
 ProcessingOptionService processingOptionService = ctx.processingOptionService
 
 processingOptionService.createOrUpdate(
-        PIPELINE_ACESEQ_PLUGIN_NAME,
+        PIPELINE_ACESEQ_DEFAULT_PLUGIN_NAME,
         'ACEseqWorkflow'
 )
 
 processingOptionService.createOrUpdate(
-        PIPELINE_ACESEQ_PLUGIN_VERSION,
+        PIPELINE_ACESEQ_DEFAULT_PLUGIN_VERSION,
         '1.2.8-4'
 )
 
 processingOptionService.createOrUpdate(
-        PIPELINE_ACESEQ_BASE_PROJECT_CONFIG,
+        PIPELINE_ACESEQ_DEFAULT_BASE_PROJECT_CONFIG,
         'otpACEseq-1.1'
 )
 

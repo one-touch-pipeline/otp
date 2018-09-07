@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.job.processing
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.job.jobs.dataInstallation.*
 import de.dkfz.tbi.otp.ngsdata.*
 import grails.test.spock.*
 import spock.lang.Unroll
@@ -20,7 +21,7 @@ class ClusterJobSubmissionOptionsServiceIntegrationSpec extends IntegrationSpec 
 
         SeqType seqType = DomainFactory.createWholeGenomeSeqType()
         ProcessParameterObject ppo = DomainFactory.createSeqTrack(seqType: seqType)
-        ProcessingStep processingStep = DomainFactory.createAndSaveProcessingStep("asdf", ppo)
+        ProcessingStep processingStep = DomainFactory.createAndSaveProcessingStep(CopyFilesJob.simpleName, ppo)
 
         service.processingOptionService.createOrUpdate(
                 ProcessingOption.OptionName.CLUSTER_SUBMISSIONS_OPTION,

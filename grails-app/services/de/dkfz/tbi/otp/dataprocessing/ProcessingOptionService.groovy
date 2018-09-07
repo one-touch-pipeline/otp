@@ -6,7 +6,6 @@ import de.dkfz.tbi.otp.ngsdata.*
 import org.springframework.security.access.prepost.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
-import static org.springframework.util.Assert.*
 
 class ProcessingOptionService {
 
@@ -38,6 +37,11 @@ class ProcessingOptionService {
     void obsoleteOptionByName(OptionName name, String type = null, Project project = null) {
         ProcessingOption option = findStrict(name, type, project)
         if (option) {
+            if (option.name.necessity == Necessity.REQUIRED &&
+                    !OptionName.class.getField(option.name.name()).isAnnotationPresent(Deprecated)
+            ) {
+                throw new ProcessingException("Required options can't be obsoleted")
+            }
             obsoleteOption(option)
         }
     }
@@ -104,7 +108,7 @@ class ProcessingOptionService {
      * @throws ProcessingException if no option has been found
      */
     public static String findOptionAssure(OptionName name, String type, Project project) {
-        notNull(name, "option name can not be null")
+        assert name != null :  "option name can not be null"
         ProcessingOption option = findOptionObject(name, type, project)
         if (!option) {
             throw new ProcessingException("no option has been found with name ${name} and type ${type} and project ${project}")

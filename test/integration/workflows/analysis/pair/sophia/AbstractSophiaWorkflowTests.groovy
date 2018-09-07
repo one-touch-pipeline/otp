@@ -34,9 +34,9 @@ abstract class AbstractSophiaWorkflowTests extends AbstractRoddyBamFilePairAnaly
                     new RoddyConfiguration([
                             project          : project,
                             seqType          : seqType,
-                            pluginName       : ProcessingOptionService.findOption(ProcessingOption.OptionName.PIPELINE_SOPHIA_PLUGIN_NAME, null, null),
-                            pluginVersion    : ProcessingOptionService.findOption(ProcessingOption.OptionName.PIPELINE_SOPHIA_PLUGIN_VERSIONS, null, null),
-                            baseProjectConfig: ProcessingOptionService.findOption(ProcessingOption.OptionName.PIPELINE_SOPHIA_BASE_PROJECT_CONFIG, seqType.roddyName, null),
+                            pluginName       : ProcessingOptionService.findOption(ProcessingOption.OptionName.PIPELINE_SOPHIA_DEFAULT_PLUGIN_NAME, null, null),
+                            pluginVersion    : ProcessingOptionService.findOption(ProcessingOption.OptionName.PIPELINE_SOPHIA_DEFAULT_PLUGIN_VERSIONS, null, null),
+                            baseProjectConfig: ProcessingOptionService.findOption(ProcessingOption.OptionName.PIPELINE_SOPHIA_DEFAULT_BASE_PROJECT_CONFIG, seqType.roddyName, null),
                             configVersion    : 'v1_0',
                             resources        : 't',
                     ])

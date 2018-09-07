@@ -38,9 +38,9 @@ abstract class AbstractSnvWorkflowTests extends AbstractRoddyBamFilePairAnalysis
                     new RoddyConfiguration([
                             project          : project,
                             seqType          : seqType,
-                            pluginName       : ProcessingOptionService.findOption(ProcessingOption.OptionName.PIPELINE_RODDY_SNV_PLUGIN_NAME, null, null),
-                            pluginVersion    : ProcessingOptionService.findOption(ProcessingOption.OptionName.PIPELINE_RODDY_SNV_PLUGIN_VERSION, seqType.roddyName, null),
-                            baseProjectConfig: ProcessingOptionService.findOption(ProcessingOption.OptionName.PIPELINE_RODDY_SNV_BASE_PROJECT_CONFIG, seqType.roddyName, null),
+                            pluginName       : ProcessingOptionService.findOption(ProcessingOption.OptionName.PIPELINE_RODDY_SNV_DEFAULT_PLUGIN_NAME, null, null),
+                            pluginVersion    : ProcessingOptionService.findOption(ProcessingOption.OptionName.PIPELINE_RODDY_SNV_DEFAULT_PLUGIN_VERSION, seqType.roddyName, null),
+                            baseProjectConfig: ProcessingOptionService.findOption(ProcessingOption.OptionName.PIPELINE_RODDY_SNV_DEFAULT_BASE_PROJECT_CONFIG, seqType.roddyName, null),
                             configVersion    : 'v1_0',
                             resources        : 't',
                     ])

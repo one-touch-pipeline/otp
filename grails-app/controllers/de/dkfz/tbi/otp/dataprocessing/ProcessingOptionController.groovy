@@ -71,7 +71,7 @@ class ProcessingOptionCommand {
 
     static constraints = {
         value(validator: { val, obj ->
-            val != null && obj.optionName && obj.optionName.type.validate(val)
+            val != null && obj.optionName && obj.optionName.validatorForValue.validate(val)
         })
         type(nullable: true, blank: true)
         project(validator: { val, obj ->

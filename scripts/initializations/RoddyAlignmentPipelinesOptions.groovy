@@ -15,14 +15,14 @@ List<SeqType> wgbs = [
 //general
 
 println processingOptionService.createOrUpdate(
-        OptionName.PIPELINE_RODDY_ALIGNMENT_PLUGIN_NAME,
+        OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_PLUGIN_NAME,
         null,
         null,
         "AlignmentAndQCWorkflows"
 )
 
 println processingOptionService.createOrUpdate(
-        OptionName.PIPELINE_RODDY_ALIGNMENT_PLUGIN_VERSION,
+        OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_PLUGIN_VERSION,
         null,
         null,
         "1.2.73-1"
@@ -31,7 +31,7 @@ println processingOptionService.createOrUpdate(
 //WES
 
 println processingOptionService.createOrUpdate(
-        OptionName.PIPELINE_RODDY_ALIGNMENT_BASE_PROJECT_CONFIG,
+        OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_BASE_PROJECT_CONFIG,
         SeqType.exomePairedSeqType.roddyName,
         null,
         "otpAlignmentAndQCWorkflowsWES-1.2"
@@ -53,7 +53,7 @@ println processingOptionService.createOrUpdate(
 )
 
 println processingOptionService.createOrUpdate(
-        ProcessingOption.OptionName.PIPELINE_RODDY_ALIGNMENT_ALL_MERGED_TOOLS,
+        ProcessingOption.OptionName.PIPELINE_RODDY_ALIGNMENT_ALL_MERGE_TOOLS,
         SeqType.exomePairedSeqType.roddyName,
         null,
         "picard,biobambam,sambamba"
@@ -63,7 +63,7 @@ println processingOptionService.createOrUpdate(
 //WGS
 
 println processingOptionService.createOrUpdate(
-        OptionName.PIPELINE_RODDY_ALIGNMENT_BASE_PROJECT_CONFIG,
+        OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_BASE_PROJECT_CONFIG,
         SeqType.wholeGenomePairedSeqType.roddyName,
         null,
         "otpAlignmentAndQCWorkflowsWGS-1.2"
@@ -84,7 +84,7 @@ println processingOptionService.createOrUpdate(
 )
 
 println processingOptionService.createOrUpdate(
-        OptionName.PIPELINE_RODDY_ALIGNMENT_ALL_MERGED_TOOLS,
+        OptionName.PIPELINE_RODDY_ALIGNMENT_ALL_MERGE_TOOLS,
         SeqType.wholeGenomePairedSeqType.roddyName,
         null,
         "picard,biobambam,sambamba"
@@ -95,7 +95,7 @@ println processingOptionService.createOrUpdate(
 
 wgbs.each { SeqType seqType ->
     println processingOptionService.createOrUpdate(
-            OptionName.PIPELINE_RODDY_ALIGNMENT_BASE_PROJECT_CONFIG,
+            OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_BASE_PROJECT_CONFIG,
             seqType.roddyName,
             null,
             "otpAlignmentAndQCWorkflowsWGBS-1.2"
@@ -116,7 +116,7 @@ wgbs.each { SeqType seqType ->
     )
 
     println processingOptionService.createOrUpdate(
-            OptionName.PIPELINE_RODDY_ALIGNMENT_ALL_MERGED_TOOLS,
+            OptionName.PIPELINE_RODDY_ALIGNMENT_ALL_MERGE_TOOLS,
             seqType.roddyName,
             null,
             "sambamba"
@@ -127,21 +127,21 @@ wgbs.each { SeqType seqType ->
 
 //RNA
 println processingOptionService.createOrUpdate(
-        OptionName.PIPELINE_RODDY_ALIGNMENT_PLUGIN_NAME,
+        OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_PLUGIN_NAME,
         SeqType.rnaPairedSeqType.roddyName,
         null,
         "RNAseqWorkflow"
 )
 
 println processingOptionService.createOrUpdate(
-        OptionName.PIPELINE_RODDY_ALIGNMENT_PLUGIN_VERSION,
+        OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_PLUGIN_VERSION,
         SeqType.rnaPairedSeqType.roddyName,
         null,
         "1.3.0"
 )
 
 println processingOptionService.createOrUpdate(
-        OptionName.PIPELINE_RODDY_ALIGNMENT_BASE_PROJECT_CONFIG,
+        OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_BASE_PROJECT_CONFIG,
         SeqType.rnaPairedSeqType.roddyName,
         null,
         "otpRnaAlignment-1.2"
@@ -155,7 +155,7 @@ println processingOptionService.createOrUpdate(
 )
 
 println processingOptionService.createOrUpdate(
-        OptionName.PIPELINE_RODDY_ALIGNMENT_GENOME_STAR_INDEX,
+        OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_GENOME_STAR_INDEX,
         SeqType.rnaPairedSeqType.roddyName,
         null,
         "star_200 - 2.5.2b"
@@ -191,7 +191,7 @@ processingOptionService.createOrUpdate(
 //ChipSeq
 
 processingOptionService.createOrUpdate(
-        OptionName.PIPELINE_RODDY_ALIGNMENT_BASE_PROJECT_CONFIG,
+        OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_BASE_PROJECT_CONFIG,
         SeqType.chipSeqPairedSeqType.roddyName,
         null,
         "otpAlignmentAndQCWorkflowsChipSeq-1.0"
@@ -212,7 +212,7 @@ processingOptionService.createOrUpdate(
 )
 
 processingOptionService.createOrUpdate(
-        OptionName.PIPELINE_RODDY_ALIGNMENT_ALL_MERGED_TOOLS,
+        OptionName.PIPELINE_RODDY_ALIGNMENT_ALL_MERGE_TOOLS,
         SeqType.chipSeqPairedSeqType.roddyName,
         null,
         "sambamba"

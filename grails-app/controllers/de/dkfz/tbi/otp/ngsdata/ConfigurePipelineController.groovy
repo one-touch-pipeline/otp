@@ -60,12 +60,12 @@ class ConfigurePipelineController {
             redirect(controller: "projectConfig")
         }
 
-        String defaultPluginName = ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_ALIGNMENT_PLUGIN_NAME, cmd.seqType.roddyName, null)
-        String defaultPluginVersion = ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_ALIGNMENT_PLUGIN_VERSION, cmd.seqType.roddyName, null)
-        String defaultBaseProjectConfig = ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_ALIGNMENT_BASE_PROJECT_CONFIG, cmd.seqType.roddyName, null)
+        String defaultPluginName = ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_PLUGIN_NAME, cmd.seqType.roddyName, null)
+        String defaultPluginVersion = ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_PLUGIN_VERSION, cmd.seqType.roddyName, null)
+        String defaultBaseProjectConfig = ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_BASE_PROJECT_CONFIG, cmd.seqType.roddyName, null)
         String defaultReferenceGenome = ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_REFERENCE_GENOME_NAME, cmd.seqType.roddyName, null)
         String defaultMergeTool = ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_MERGE_TOOL, cmd.seqType.roddyName, null)
-        List<String> allMergeTools = ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_ALIGNMENT_ALL_MERGED_TOOLS, cmd.seqType.roddyName, null).split(',')*.trim()
+        List<String> allMergeTools = ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_ALIGNMENT_ALL_MERGE_TOOLS, cmd.seqType.roddyName, null).split(',')*.trim()
         List<String> allSambambaVersions = ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_ALIGNMENT_SAMBAMBA_VERSION_AVAILABLE, null, null).split(',')*.trim()
         String defaultSambambaVersion = ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_ALIGNMENT_SAMBAMBA_VERSION_DEFAULT, null, null)
         List<String> allBwaMemVersions = ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_ALIGNMENT_BWA_VERSION_AVAILABLE, null, null).split(',')*.trim()
@@ -137,11 +137,11 @@ class ConfigurePipelineController {
 
         Map result = [:]
 
-        String defaultPluginName = ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_ALIGNMENT_PLUGIN_NAME, cmd.seqType.roddyName, null)
-        String defaultPluginVersion = ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_ALIGNMENT_PLUGIN_VERSION, cmd.seqType.roddyName, null)
-        String defaultBaseProjectConfig = ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_ALIGNMENT_BASE_PROJECT_CONFIG, cmd.seqType.roddyName, null)
+        String defaultPluginName = ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_PLUGIN_NAME, cmd.seqType.roddyName, null)
+        String defaultPluginVersion = ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_PLUGIN_VERSION, cmd.seqType.roddyName, null)
+        String defaultBaseProjectConfig = ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_BASE_PROJECT_CONFIG, cmd.seqType.roddyName, null)
         String defaultReferenceGenome = ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_REFERENCE_GENOME_NAME, cmd.seqType.roddyName, null)
-        String defaultGenomeStarIndex = ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_ALIGNMENT_GENOME_STAR_INDEX, cmd.seqType.roddyName, null)
+        String defaultGenomeStarIndex = ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_GENOME_STAR_INDEX, cmd.seqType.roddyName, null)
 
         assert ReferenceGenome.findByName(defaultReferenceGenome)
 
@@ -291,7 +291,7 @@ class ConfigurePipelineController {
                     (it.name): ReferenceGenomeIndex.findAllByReferenceGenomeAndToolName(refGenome, it)
             ]
         }
-        data << ["defaultGenomeStarIndex": ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_ALIGNMENT_GENOME_STAR_INDEX, SeqType.rnaPairedSeqType.roddyName, null)]
+        data << ["defaultGenomeStarIndex": ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_GENOME_STAR_INDEX, SeqType.rnaPairedSeqType.roddyName, null)]
         data << ["data": toolNamesData]
         render data as JSON
     }
@@ -299,9 +299,9 @@ class ConfigurePipelineController {
     def snv(ConfigurePipelineSubmitCommand cmd) {
         Pipeline pipeline = Pipeline.Name.RODDY_SNV.pipeline
 
-        String defaultPluginName = ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_SNV_PLUGIN_NAME, cmd.seqType.roddyName, null)
-        String defaultPluginVersion = ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_SNV_PLUGIN_VERSION, cmd.seqType.roddyName, null)
-        String defaultBaseProjectConfig = ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_SNV_BASE_PROJECT_CONFIG, cmd.seqType.roddyName, null)
+        String defaultPluginName = ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_SNV_DEFAULT_PLUGIN_NAME, cmd.seqType.roddyName, null)
+        String defaultPluginVersion = ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_SNV_DEFAULT_PLUGIN_VERSION, cmd.seqType.roddyName, null)
+        String defaultBaseProjectConfig = ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_SNV_DEFAULT_BASE_PROJECT_CONFIG, cmd.seqType.roddyName, null)
 
         return createAnalysisConfig(cmd, pipeline, defaultPluginName, defaultPluginVersion, defaultBaseProjectConfig)
     }
@@ -309,9 +309,9 @@ class ConfigurePipelineController {
     def indel(ConfigurePipelineSubmitCommand cmd) {
         Pipeline pipeline = Pipeline.Name.RODDY_INDEL.pipeline
 
-        String defaultPluginName = ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_INDEL_PLUGIN_NAME, cmd.seqType.roddyName, null)
-        String defaultPluginVersion = ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_INDEL_PLUGIN_VERSION, cmd.seqType.roddyName, null)
-        String defaultBaseProjectConfig = ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_INDEL_PLUGIN_CONFIG, cmd.seqType.roddyName, null)
+        String defaultPluginName = ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_INDEL_DEFAULT_PLUGIN_NAME, cmd.seqType.roddyName, null)
+        String defaultPluginVersion = ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_INDEL_DEFAULT_PLUGIN_VERSION, cmd.seqType.roddyName, null)
+        String defaultBaseProjectConfig = ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_INDEL_DEFAULT_BASE_PROJECT_CONFIG, cmd.seqType.roddyName, null)
 
         return createAnalysisConfig(cmd, pipeline, defaultPluginName, defaultPluginVersion, defaultBaseProjectConfig)
     }
@@ -319,9 +319,9 @@ class ConfigurePipelineController {
     def sophia(ConfigurePipelineSubmitCommand cmd) {
         Pipeline pipeline = Pipeline.Name.RODDY_SOPHIA.pipeline
 
-        String defaultPluginName = ProcessingOptionService.findOption(OptionName.PIPELINE_SOPHIA_PLUGIN_NAME, cmd.seqType.roddyName, null)
-        String defaultPluginVersion = ProcessingOptionService.findOption(OptionName.PIPELINE_SOPHIA_PLUGIN_VERSIONS, cmd.seqType.roddyName, null)
-        String defaultBaseProjectConfig = ProcessingOptionService.findOption(OptionName.PIPELINE_SOPHIA_BASE_PROJECT_CONFIG, cmd.seqType.roddyName, null)
+        String defaultPluginName = ProcessingOptionService.findOption(OptionName.PIPELINE_SOPHIA_DEFAULT_PLUGIN_NAME, cmd.seqType.roddyName, null)
+        String defaultPluginVersion = ProcessingOptionService.findOption(OptionName.PIPELINE_SOPHIA_DEFAULT_PLUGIN_VERSIONS, cmd.seqType.roddyName, null)
+        String defaultBaseProjectConfig = ProcessingOptionService.findOption(OptionName.PIPELINE_SOPHIA_DEFAULT_BASE_PROJECT_CONFIG, cmd.seqType.roddyName, null)
 
         return createAnalysisConfig(cmd, pipeline, defaultPluginName, defaultPluginVersion, defaultBaseProjectConfig)
     }
@@ -329,9 +329,9 @@ class ConfigurePipelineController {
     def aceseq(ConfigurePipelineSubmitCommand cmd) {
         Pipeline pipeline = Pipeline.Name.RODDY_ACESEQ.pipeline
 
-        String defaultPluginName = ProcessingOptionService.findOption(OptionName.PIPELINE_ACESEQ_PLUGIN_NAME, cmd.seqType.roddyName, null)
-        String defaultPluginVersion = ProcessingOptionService.findOption(OptionName.PIPELINE_ACESEQ_PLUGIN_VERSION, cmd.seqType.roddyName, null)
-        String defaultBaseProjectConfig = ProcessingOptionService.findOption(OptionName.PIPELINE_ACESEQ_BASE_PROJECT_CONFIG, cmd.seqType.roddyName, null)
+        String defaultPluginName = ProcessingOptionService.findOption(OptionName.PIPELINE_ACESEQ_DEFAULT_PLUGIN_NAME, cmd.seqType.roddyName, null)
+        String defaultPluginVersion = ProcessingOptionService.findOption(OptionName.PIPELINE_ACESEQ_DEFAULT_PLUGIN_VERSION, cmd.seqType.roddyName, null)
+        String defaultBaseProjectConfig = ProcessingOptionService.findOption(OptionName.PIPELINE_ACESEQ_DEFAULT_BASE_PROJECT_CONFIG, cmd.seqType.roddyName, null)
 
         return createAnalysisConfig(cmd, pipeline, defaultPluginName, defaultPluginVersion, defaultBaseProjectConfig)
     }
