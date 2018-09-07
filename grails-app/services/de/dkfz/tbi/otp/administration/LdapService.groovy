@@ -13,6 +13,8 @@ import java.util.regex.*
 
 import static org.springframework.ldap.query.LdapQueryBuilder.*
 
+@SuppressWarnings("ExplicitCallToAndMethod")
+@SuppressWarnings("ExplicitCallToOrMethod")
 class LdapService implements InitializingBean {
 
     ConfigService configService
@@ -77,7 +79,7 @@ class LdapService implements InitializingBean {
         }
         return ldapTemplate.search(
                 query().where("objectCategory").is("group")
-                       .and("cn").is(groupName),
+                        .and("cn").is(groupName),
                 new DistinguishedNameAttributesMapper())[0]
     }
 
@@ -88,7 +90,7 @@ class LdapService implements InitializingBean {
         // nested group memberships are not resolved
         return ldapTemplate.search(
                 query().where("objectCategory").is("user")
-                       .and("memberOf").is(distinguishedName),
+                        .and("memberOf").is(distinguishedName),
                 new UsernameAttributesMapper())
     }
 
@@ -98,7 +100,7 @@ class LdapService implements InitializingBean {
         }
         return ldapTemplate.search(
                 query().where("objectCategory").is("user")
-                       .and("cn").is(username),
+                        .and("cn").is(username),
                 new MemberOfAttributesMapper())[0]
     }
 }
@@ -108,7 +110,9 @@ class LdapUserDetailsAttributesMapper implements AttributesMapper<LdapUserDetail
     LdapUserDetails mapFromAttributes(Attributes a) throws NamingException {
         List<String> memberOfList = a.get("memberOf")?.getAll()?.collect {
             Matcher matcher = it =~ /CN=(?<cn>[^,]*),.*/
-            if (matcher.matches() && matcher.group('cn')) return matcher.group('cn')
+            if (matcher.matches() && matcher.group('cn')) {
+                return matcher.group('cn')
+            }
         }
         long accountExpires = (a.get("accountExpires")?.get()?.toString()?.toLong()) ?: 0
         boolean deactivated = convertAdTimestampToUnixTimestampInMs(accountExpires) < new Date().getTime()
@@ -129,7 +133,7 @@ class LdapUserDetailsAttributesMapper implements AttributesMapper<LdapUserDetail
     private static long convertAdTimestampToUnixTimestampInMs(long windowsEpoch) {
         // http://meinit.nl/convert-active-directory-lastlogon-time-to-unix-readable-time
         // in milliseconds because Date.getTime() also returns milliseconds
-        return ((windowsEpoch/10000000)-11644473600)*1000
+        return ((windowsEpoch / 10000000) - 11644473600) * 1000
     }
 }
 
@@ -152,7 +156,9 @@ class MemberOfAttributesMapper implements AttributesMapper<List<String>> {
     List<String> mapFromAttributes(Attributes a) throws NamingException {
         return a.get("memberOf")?.getAll()?.collect {
             Matcher matcher = it =~ /CN=(?<cn>[^,]*),.*/
-            if (matcher.matches() && matcher.group('cn')) return matcher.group('cn')
+            if (matcher.matches() && matcher.group('cn')) {
+                return matcher.group('cn')
+            }
         }
     }
 }
