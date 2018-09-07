@@ -7,4 +7,8 @@ databaseChangeLog = {
     changeSet(author: "kosnac", id:"MWP-ST-NULL-CONSTRAINT") {
         sqlFile(path: 'changelogs/2018/null-constraint-on-mwp-st.sql')
     }
+
+    changeSet(author: "wieset", id: "OTP-2882-SQL") {
+        sqlFile(path: 'changelogs/2018/OTP-2882.sql')
+    }
 }
