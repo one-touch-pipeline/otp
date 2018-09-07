@@ -5,6 +5,9 @@ import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 
+/**
+ * An execution of the RunYAPSA workflow.
+ */
 class RunYapsaInstance extends BamFilePairAnalysis implements ProcessParameterObject, Entity {
 
     @Override
@@ -27,6 +30,6 @@ class RunYapsaInstance extends BamFilePairAnalysis implements ProcessParameterOb
 
     @Override
     String toString() {
-        return "RYI ${id}${withdrawn ? ' (withdrawn)': ''}: ${instanceName} ${samplePair.toStringWithoutId()}"
+        return "RYI ${id}${withdrawn ? ' (withdrawn)' : ''}: ${instanceName} ${samplePair.toStringWithoutId()}"
     }
 }

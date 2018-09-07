@@ -1285,8 +1285,9 @@ class DomainFactory {
         Map map = createAnalysisInstanceWithRoddyBamFilesMapHelper(properties, bamFile1Properties, bamFile2Properties)
         SamplePair samplePair = map.samplePair
         map += [
-                config                      : createRunYapsaConfig(
+                config: createRunYapsaConfigLazy(
                         project: samplePair.project,
+                        seqType: samplePair.seqType,
                 ),
         ]
         return createDomainObject(RunYapsaInstance, map, properties)
@@ -1737,13 +1738,23 @@ class DomainFactory {
         return createDomainObjectLazy(RoddyWorkflowConfig, createRoddyWorkflowConfigMapHelper(properties), properties, saveAndValidate)
     }
 
-    static RunYapsaConfig createRunYapsaConfig(Map properties = [:], boolean saveAndValidate = true) {
-        return createDomainObject(RunYapsaConfig, [
+    static private Map createRunYapsaConfigMapHelper(properties) {
+        return [
+                pipeline      : createRunYapsaPipelineLazy(),
+                seqType       : { properties.seqType ?: createSeqType() },
+                project       : { properties.project ?: createProject() },
                 programVersion: "programmVersion${counter++}",
-                project: { properties.project ?: createProject()},
-                seqType: { properties.seqType ?: createSeqType()},
-                pipeline: createRunYapsaPipelineLazy(),
-        ], properties, saveAndValidate)
+                dateCreated          : { new Date() },
+                lastUpdated          : { new Date() },
+        ]
+    }
+
+    static RunYapsaConfig createRunYapsaConfig(Map properties = [:], boolean saveAndValidate = true) {
+        return createDomainObject(RunYapsaConfig, createRunYapsaConfigMapHelper(properties), properties, saveAndValidate)
+    }
+
+    static RunYapsaConfig createRunYapsaConfigLazy(Map properties = [:], boolean saveAndValidate = true) {
+        createDomainObjectLazy(RunYapsaConfig, createRunYapsaConfigMapHelper(properties), properties, saveAndValidate)
     }
 
     public static SeqTrack createSeqTrack(MergingWorkPackage mergingWorkPackage, Map seqTrackProperties = [:]) {

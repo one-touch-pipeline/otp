@@ -4,6 +4,9 @@ import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.utils.*
 import org.hibernate.*
 
+/**
+ * @deprecated: succeeded by {@link RoddySnvCallingInstance}
+ */
 @Deprecated
 class SnvCallingInstance extends AbstractSnvCallingInstance implements ProcessParameterObject, Entity {
 

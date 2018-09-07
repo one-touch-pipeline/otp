@@ -525,6 +525,23 @@ if (allProcessed) {
         """
     }
 
+    def needsProcessingWithDependency = { String processingStatusProperty, Pipeline.Type pipelineType, String dependencyInstanceClass ->
+        return """(
+            ${needsProcessing(processingStatusProperty, pipelineType)}
+            and exists (
+                select
+                    dependency
+                from
+                    ${dependencyInstanceClass} dependency
+                where
+                    dependency.samplePair = samplePair
+                    and dependency.processingState = '${AnalysisProcessingStates.FINISHED}'
+            )
+        )
+        """
+
+    }
+
     SamplePair.executeQuery("""
         select samplePair
         from
@@ -537,18 +554,8 @@ if (allProcessed) {
             ${needsProcessing('snvProcessingStatus', Pipeline.Type.SNV)}
             or ${needsProcessing('indelProcessingStatus', Pipeline.Type.INDEL)}
             or ${needsProcessing('sophiaProcessingStatus', Pipeline.Type.SOPHIA)}
-            or (
-                ${needsProcessing('aceseqProcessingStatus', Pipeline.Type.ACESEQ)}
-                and exists (
-                    select
-                        sophiaInstance
-                    from
-                        SophiaInstance sophiaInstance
-                    where
-                        sophiaInstance.samplePair = samplePair
-                        and sophiaInstance.processingState = '${AnalysisProcessingStates.FINISHED}'
-                )
-            )
+            or ${needsProcessingWithDependency('aceseqProcessingStatus', Pipeline.Type.ACESEQ, 'SophiaInstance')}
+            or ${needsProcessingWithDependency('runYapsaProcessingStatus', Pipeline.Type.MUTATIONAL_SIGNATURE, 'RoddySnvCallingInstance')}
         )
         and ${connectBamFile('1')}
         and ${connectBamFile('2')}

@@ -19,7 +19,7 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
 
     static final String PROBLEMS_NO_BAM_FILE = "bam file does not exist"
     static final String PROBLEMS_MISSING_SEQ_TRACKS = "bam file misses the following seqtracks"
-    static final String PROBLEMS_UNEXPECTED_SEQ_TRACKS = "bam file contains unexpected  seqtracks"
+    static final String PROBLEMS_UNEXPECTED_SEQ_TRACKS = "bam file contains unexpected seqtracks"
 
 
     List handle(List<SamplePair> samplePairs, MonitorOutputCollector output) {
@@ -32,17 +32,17 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
 
         List<SeqType> supportedSeqTypes = getSeqTypes()
 
-        Map samplePaarSupportedSeqType = samplePairs.groupBy {
+        Map samplePairSupportedSeqType = samplePairs.groupBy {
             supportedSeqTypes.contains(it.seqType)
         }
 
-        if (samplePaarSupportedSeqType[false]) {
-            output.showUniqueNotSupportedSeqTypes(samplePaarSupportedSeqType[false], { SamplePair samplePair ->
+        if (samplePairSupportedSeqType[false]) {
+            output.showUniqueNotSupportedSeqTypes(samplePairSupportedSeqType[false], { SamplePair samplePair ->
                 "${samplePair.seqType.displayNameWithLibraryLayout}"
             })
         }
 
-        samplePairs = samplePaarSupportedSeqType[true] ?: []
+        samplePairs = samplePairSupportedSeqType[true] ?: []
 
         List<SamplePair> noConfig = samplePairWithoutCorrespondingConfigForPipelineAndSeqTypeAndProject(samplePairs)
         output.showUniqueList(HEADER_NO_CONFIG, noConfig, { SamplePair samplePair -> "${samplePair.project} ${samplePair.seqType.name} ${samplePair.seqType.libraryLayout}" })
