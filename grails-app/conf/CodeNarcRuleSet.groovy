@@ -1,6 +1,7 @@
 final String TEST = "*/*test*/*"
 final String SPEC = "*Spec.groovy"
 final String CONTROLLER = "*Controller.groovy"
+final String SERVICE = "*Service.groovy"
 
 ruleset {
 
@@ -24,8 +25,12 @@ ruleset {
         priority = 1
     }
     ComparisonOfTwoConstants
-    ComparisonWithSelf
-    ConstantAssertExpression
+    ComparisonWithSelf {
+        priority = 1
+    }
+    ConstantAssertExpression {
+        priority = 3
+    }
     ConstantIfExpression
     ConstantTernaryExpression
     DeadCode {
@@ -34,8 +39,12 @@ ruleset {
     DoubleNegative
     DuplicateCaseStatement
     DuplicateMapKey
-    DuplicateSetValue
-    EmptyCatchBlock
+    DuplicateSetValue {
+        priority = 2
+    }
+    EmptyCatchBlock {
+        priority = 2
+    }
     EmptyClass
     EmptyElseBlock
     EmptyFinallyBlock
@@ -45,6 +54,7 @@ ruleset {
     }
     EmptyInstanceInitializer
     EmptyMethod {
+        priority = 2
         doNotApplyToFileNames = CONTROLLER
     }
     EmptyStaticInitializer
@@ -98,7 +108,9 @@ ruleset {
     SynchronizedOnThis
     SynchronizedReadObjectMethod
     SystemRunFinalizersOnExit
-    ThisReferenceEscapesConstructor
+    ThisReferenceEscapesConstructor {
+        priority = 2
+    }
     ThreadGroup
     ThreadLocalNotStaticFinal {
         priority = 1
@@ -120,9 +132,15 @@ ruleset {
         priority = 1
     }
     //FieldTypeRequired //does not work well with Grails
-    HashtableIsObsolete
-    IfStatementCouldBeTernary
-    InvertedCondition
+    HashtableIsObsolete {
+        priority = 1
+    }
+    IfStatementCouldBeTernary {
+        priority = 2
+    }
+    InvertedCondition {
+        priority = 3
+    }
     InvertedIfElse {
         priority = 2
     }
@@ -138,15 +156,21 @@ ruleset {
     NoDef {
         priority = 2
     }
-    NoJavaUtilDate
-    NoTabCharacter
+    NoJavaUtilDate {
+        priority = 2
+    }
+    NoTabCharacter {
+        priority = 1
+    }
     ParameterReassignment {
         priority = 1
     }
     //PublicMethodsBeforeNonPublicMethods //does not fit with OTP-Convention of grouping related methods by topic
     //StaticFieldsBeforeInstanceFields //does not fit with OTP-Convention of Services before class fields including statics
     //StaticMethodsBeforeInstanceMethods //does not fit with OTP-Convention of grouping related methods by topic
-    TernaryCouldBeElvis
+    TernaryCouldBeElvis {
+        priority = 1
+    }
     TrailingComma {
         priority = 1
     }
@@ -159,20 +183,33 @@ ruleset {
 
     // rulesets/design.xml
     AbstractClassWithPublicConstructor
-    AbstractClassWithoutAbstractMethod
+    AbstractClassWithoutAbstractMethod {
+        applyToFileNames = SERVICE
+        priority = 2
+    }
     AssignmentToStaticFieldFromInstanceMethod
-    BooleanMethodReturnsNull
+    BooleanMethodReturnsNull {
+        priority = 2
+    }
     BuilderMethodWithSideEffects
     CloneableWithoutClone
-    CloseWithoutCloseable
+    CloseWithoutCloseable {
+        priority = 2
+    }
     CompareToWithoutComparable
-    ConstantsOnlyInterface
-    EmptyMethodInAbstractClass
+    ConstantsOnlyInterface {
+        priority = 2
+    }
+    EmptyMethodInAbstractClass {
+        priority = 3
+    }
     FinalClassWithProtectedMember
     ImplementationAsType {
         priority = 1
     }
-    Instanceof
+    Instanceof {
+        priority = 2
+    }
     LocaleSetDefault
     NestedForLoop {
         priority = 1
@@ -180,7 +217,9 @@ ruleset {
     PrivateFieldCouldBeFinal {
         priority = 2
     }
-    PublicInstanceField
+    PublicInstanceField {
+        priority = 2
+    }
     ReturnsNullInsteadOfEmptyArray {
         priority = 1
     }
@@ -197,11 +236,11 @@ ruleset {
     DuplicateListLiteral {
         priority = 2
     }
-    DuplicateMapLiteral
+    //DuplicateMapLiteral //has problems with stuff like .save(flush: true)
     DuplicateNumberLiteral {
         priority = 2
     }
-    DuplicateStringLiteral
+    //DuplicateStringLiteral //has problems with stuff like .split(",")
 
     // rulesets/enhanced.xml
     CloneWithoutCloneable
@@ -212,15 +251,27 @@ ruleset {
     UnsafeImplementationAsMap
 
     // rulesets/exceptions.xml
-    CatchArrayIndexOutOfBoundsException
-    CatchError
+    CatchArrayIndexOutOfBoundsException {
+        priority = 1
+    }
+    CatchError {
+        priority = 1
+    }
     CatchException {
         priority = 1
     }
-    CatchIllegalMonitorStateException
-    CatchIndexOutOfBoundsException
-    CatchNullPointerException
-    CatchRuntimeException
+    CatchIllegalMonitorStateException {
+        priority = 1
+    }
+    CatchIndexOutOfBoundsException {
+        priority = 1
+    }
+    CatchNullPointerException {
+        priority = 1
+    }
+    CatchRuntimeException {
+        priority = 1
+    }
     CatchThrowable {
         priority = 1
     }
@@ -228,8 +279,12 @@ ruleset {
     ExceptionExtendsError
     ExceptionExtendsThrowable
     ExceptionNotThrown
-    MissingNewInThrowStatement
-    ReturnNullFromCatchBlock
+    MissingNewInThrowStatement {
+        priority = 1
+    }
+    ReturnNullFromCatchBlock {
+        priority = 1
+    }
     SwallowThreadDeath
     ThrowError {
         priority = 1
@@ -237,13 +292,23 @@ ruleset {
     ThrowException {
         priority = 1
     }
-    ThrowNullPointerException
-    ThrowRuntimeException
-    ThrowThrowable
+    ThrowNullPointerException {
+        priority = 1
+    }
+    ThrowRuntimeException {
+        priority = 1
+    }
+    ThrowThrowable {
+        priority = 1
+    }
 
     // rulesets/formatting.xml
-    BlankLineBeforePackage
-    BlockEndsWithBlankLine
+    BlankLineBeforePackage {
+        priority = 3
+    }
+    BlockEndsWithBlankLine {
+        priority = 3
+    }
     BlockStartsWithBlankLine
     BracesForClass
     BracesForForLoop
@@ -255,8 +320,12 @@ ruleset {
         priority = 1
     }
     ConsecutiveBlankLines
-    FileEndsWithoutNewline
-    Indentation
+    FileEndsWithoutNewline {
+        priority = 2
+    }
+    Indentation {
+        priority = 2
+    }
     LineLength
     MissingBlankLineAfterImports {
         priority = 1
@@ -267,7 +336,9 @@ ruleset {
     SpaceAfterCatch {
         priority = 1
     }
-    SpaceAfterClosingBrace
+    SpaceAfterClosingBrace {
+        priority = 3
+    }
     SpaceAfterComma {
         priority = 1
     }
@@ -344,7 +415,9 @@ ruleset {
     AssignCollectionSort {
         priority = 1
     }
-    AssignCollectionUnique
+    AssignCollectionUnique {
+        priority = 2
+    }
     ClosureAsLastMethodParameter {
         priority = 2
     }
@@ -353,7 +426,9 @@ ruleset {
     ExplicitArrayListInstantiation {
         priority = 1
     }
-    ExplicitCallToAndMethod
+    ExplicitCallToAndMethod {
+        priority = 1
+    }
     ExplicitCallToCompareToMethod {
         priority = 1
     }
@@ -363,16 +438,36 @@ ruleset {
     ExplicitCallToEqualsMethod {
         priority = 1
     }
-    ExplicitCallToGetAtMethod
-    ExplicitCallToLeftShiftMethod
-    ExplicitCallToMinusMethod
-    ExplicitCallToModMethod
-    ExplicitCallToMultiplyMethod
-    ExplicitCallToOrMethod
-    ExplicitCallToPlusMethod
-    ExplicitCallToPowerMethod
-    ExplicitCallToRightShiftMethod
-    ExplicitCallToXorMethod
+    ExplicitCallToGetAtMethod {
+        priority = 1
+    }
+    ExplicitCallToLeftShiftMethod {
+        priority = 1
+    }
+    ExplicitCallToMinusMethod {
+        priority = 1
+    }
+    ExplicitCallToModMethod {
+        priority = 1
+    }
+    ExplicitCallToMultiplyMethod {
+        priority = 1
+    }
+    ExplicitCallToOrMethod {
+        priority = 1
+    }
+    ExplicitCallToPlusMethod {
+        priority = 1
+    }
+    ExplicitCallToPowerMethod {
+        priority = 1
+    }
+    ExplicitCallToRightShiftMethod {
+        priority = 1
+    }
+    ExplicitCallToXorMethod {
+        priority = 1
+    }
     ExplicitHashMapInstantiation {
         priority = 1
     }
@@ -385,8 +480,12 @@ ruleset {
     ExplicitLinkedListInstantiation {
         priority = 1
     }
-    ExplicitStackInstantiation
-    ExplicitTreeSetInstantiation
+    ExplicitStackInstantiation {
+        priority = 1
+    }
+    ExplicitTreeSetInstantiation {
+        priority = 1
+    }
     GStringAsMapKey {
         priority = 1
     }
@@ -407,7 +506,9 @@ ruleset {
     ImportFromSamePackage {
         priority = 1
     }
-    ImportFromSunPackages
+    ImportFromSunPackages {
+        priority = 2
+    }
     //MisorderedStaticImports //we do the opposite
     //NoWildcardImports //does not fit with OTP-Convention of using only WildcardImports
     UnnecessaryGroovyImport {
@@ -424,7 +525,9 @@ ruleset {
     JdbcStatementReference
 
     // rulesets/junit.xml
-    ChainedTest
+    ChainedTest {
+        priority = 2
+    }
     CoupledTestCase
     JUnitAssertAlwaysFails
     JUnitAssertAlwaysSucceeds
@@ -452,10 +555,10 @@ ruleset {
     UnnecessaryFail
     //UseAssertEqualsInsteadOfAssertTrue
     //UseAssertFalseInsteadOfNegation
-    UseAssertNullInsteadOfAssertEquals
+    //UseAssertNullInsteadOfAssertEquals
     //UseAssertSameInsteadOfAssertTrue
-    UseAssertTrueInsteadOfAssertEquals
-    UseAssertTrueInsteadOfNegation
+    //UseAssertTrueInsteadOfAssertEquals
+    //UseAssertTrueInsteadOfNegation
 
     // rulesets/logging.xml
     LoggerForDifferentClass
@@ -479,21 +582,32 @@ ruleset {
     AbstractClassName
     ClassName
     ClassNameSameAsFilename
-    ClassNameSameAsSuperclass
+    ClassNameSameAsSuperclass {
+        priority = 2
+    }
     ConfusingMethodName
     //FactoryMethodName //we don't do this
     FieldName
     InterfaceName
     InterfaceNameSameAsSuperInterface
     MethodName {
+        priority = 2
         doNotApplyToFileNames = TEST
     }
     ObjectOverrideMisspelledMethodName
-    PackageName
+    //PackageName //we use camelCase
     PackageNameMatchesFilePath
-    ParameterName
-    PropertyName
-    VariableName
+    ParameterName {
+        priority = 2
+    }
+    PropertyName {
+        priority = 2
+        doNotApplyToFileNames = TEST
+    }
+    VariableName {
+        priority = 2
+        doNotApplyToFileNames = TEST
+    }
 
     // rulesets/security.xml
     FileCreateTempFile
@@ -502,6 +616,7 @@ ruleset {
     }
     JavaIoPackageAccess
     NonFinalPublicField {
+        priority = 2
         doNotApplyToFileNames = TEST
     }
     NonFinalSubclassOfSensitiveInterface
@@ -525,7 +640,9 @@ ruleset {
     ClassSize {
         priority = 2
     }
-    CrapMetric   // Requires the GMetrics jar and a Cobertura coverage file
+    CrapMetric {
+        priority = 2
+    }
     CyclomaticComplexity {
         priority = 1
     }
@@ -538,7 +655,9 @@ ruleset {
     NestedBlockDepth {
         priority = 2
     }
-    ParameterCount
+    ParameterCount {
+        priority = 2
+    }
 
     // rulesets/unnecessary.xml
     AddEmptyString
