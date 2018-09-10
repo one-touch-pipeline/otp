@@ -8,6 +8,7 @@ import grails.validation.*
 import spock.lang.*
 
 @Mock([
+        AbstractMergedBamFile,
         Comment,
         DataFile,
         FileType,

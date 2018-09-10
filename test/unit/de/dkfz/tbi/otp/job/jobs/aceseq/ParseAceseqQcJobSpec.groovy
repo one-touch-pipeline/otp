@@ -15,6 +15,7 @@ import org.junit.rules.*
 import spock.lang.*
 
 @Mock([
+        AbstractMergedBamFile,
         AceseqInstance,
         AceseqQc,
         DataFile,

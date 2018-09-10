@@ -12,6 +12,7 @@ import spock.lang.*
 import static de.dkfz.tbi.otp.qcTrafficLight.QcThreshold.ThresholdStrategy.*
 
 @Mock([
+        AbstractMergedBamFile,
         DataFile,
         FileType,
         Individual,

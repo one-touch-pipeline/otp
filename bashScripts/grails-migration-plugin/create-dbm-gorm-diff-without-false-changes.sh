@@ -27,9 +27,9 @@ indices="(_class_idx)|(config_per_project_project_seqtype_pipeline_individual_id
 tables="(job_error_definition_job_error_definition)|(aceseq_instance_roddy_execution_directory_names)|(externally_processed_merged_bam_file_further_files)|\
 (import_process_externally_processed_merged_bam_file)|(merging_work_package_seq_track)|(indel_calling_instance_roddy_execution_directory_names)|\
 (job_error_definition_job_definition)|(roddy_bam_file_seq_track)|(roddy_snv_calling_instance_roddy_execution_directory_names)|\
-(roddy_bam_file_roddy_execution_directory_names)|(seq_track_log_message)|(seq_platform_group_comment)|(sophia_instance_roddy_execution_directory_names)|\
-(swap_info_seq_track)|(seq_platform_model_label_import_alias)|(seq_type_import_alias)|(sequencing_kit_label_import_alias)|\
-(antibody_target_import_alias)|(library_preparation_kit_import_alias)|(seq_center_import_dirs_allow_linking)"
+(roddy_bam_file_roddy_execution_directory_names)|(seq_track_log_message)|(seq_platform_group_comment)|(single_cell_bam_file_seq_track)|\
+(sophia_instance_roddy_execution_directory_names)|(swap_info_seq_track)|(seq_platform_model_label_import_alias)|(seq_type_import_alias)|\
+(sequencing_kit_label_import_alias)|(antibody_target_import_alias)|(library_preparation_kit_import_alias)|(seq_center_import_dirs_allow_linking)"
 
 perl -0pi -e "${prefix}.*\"meta_data_key\".*\n.*\n${suffix}" $changelogPath
 perl -0pi -e "${prefix}.*file_system_changes_idx${suffix}" $changelogPath

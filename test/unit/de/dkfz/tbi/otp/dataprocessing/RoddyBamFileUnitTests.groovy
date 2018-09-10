@@ -17,6 +17,7 @@ import static de.dkfz.tbi.otp.dataprocessing.RoddyBamFile.RODDY_EXECUTION_STORE_
 import static de.dkfz.tbi.otp.dataprocessing.RoddyBamFile.QUALITY_CONTROL_JSON_FILE_NAME
 
 @Mock([
+        AbstractMergedBamFile,
         SoftwareTool,
         MergingCriteria,
         MergingWorkPackage,

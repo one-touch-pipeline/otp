@@ -10,6 +10,7 @@ import grails.test.mixin.*
 import spock.lang.*
 
 @Mock([
+        AbstractMergedBamFile,
         AlignmentPass,
         AceseqInstance,
         BamFilePairAnalysis,

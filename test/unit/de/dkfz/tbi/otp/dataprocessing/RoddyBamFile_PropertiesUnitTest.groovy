@@ -6,6 +6,7 @@ import grails.test.mixin.*
 import org.junit.*
 
 @Mock([
+        AbstractMergedBamFile,
         DataFile,
         FileType,
         Individual,

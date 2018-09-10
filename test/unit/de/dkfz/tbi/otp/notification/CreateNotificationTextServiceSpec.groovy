@@ -15,6 +15,7 @@ import org.codehaus.groovy.grails.context.support.*
 import static de.dkfz.tbi.otp.tracking.OtrsTicket.ProcessingStep.*
 
 @Mock([
+        AbstractMergedBamFile,
         AntibodyTarget,
         ChipSeqSeqTrack,
         DataFile,

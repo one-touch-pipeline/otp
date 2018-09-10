@@ -4,7 +4,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
-class SingleCellConfig extends ConfigPerProjectAndSeqType implements WithProgramVersion {
+class SingleCellConfig extends ConfigPerProjectAndSeqType implements WithProgramVersion, AlignmentConfig {
 
     static constraints = {
         programVersion(blank: false)

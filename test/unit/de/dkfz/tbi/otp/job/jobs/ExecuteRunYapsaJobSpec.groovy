@@ -15,6 +15,7 @@ import spock.lang.*
 import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
 
 @Mock([
+        AbstractMergedBamFile,
         AbstractMergingWorkPackage,
         AbstractSnvCallingInstance,
         DataFile,

@@ -13,6 +13,7 @@ import org.junit.rules.*
 import spock.lang.*
 
 @Mock([
+        AbstractMergedBamFile,
         BedFile,
         DataFile,
         FileType,

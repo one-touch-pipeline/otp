@@ -5,12 +5,13 @@ import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 import org.hibernate.*
+
 /**
  * This bam file is produced by some Roddy alignment workflow.
  * The file is based on earlier created bam file (with the same workflow), if exists and
  * new SeqTracks which were not merged into the earlier created bam file (base bam file).
  */
-class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, ProcessParameterObject {
+class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, ProcessParameterObject, HasIdentifier {
 
     static final String WORK_DIR_PREFIX = ".merging"
 
@@ -28,13 +29,12 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
     static final String INSERT_SIZE_FILE_DIRECTORY = 'insertsize_distribution'
 
 
-
     RoddyBamFile baseBamFile
 
     Set<SeqTrack> seqTracks
 
     static hasMany = [
-            seqTracks: SeqTrack,
+            seqTracks                   : SeqTrack,
             roddyExecutionDirectoryNames: String,
     ]
 
@@ -42,12 +42,6 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
      * config file used to create this bam file
      */
     RoddyWorkflowConfig config
-
-    /**
-     * unique identifier of this bam file in {@link RoddyBamFile#workPackage}
-     */
-    int identifier
-
 
     String workDirectoryName
 
@@ -101,10 +95,10 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
 
                 List<Long> duplicatedSeqTracksIds = baseBamFile.containedSeqTracks*.id.intersect(seqTracks*.id)
                 assertAndTrackOnError duplicatedSeqTracksIds.empty,
-                        "the same seqTrack is going to be merged for the second time: ${seqTracks.findAll{duplicatedSeqTracksIds.contains(it.id)}}"
+                        "the same seqTrack is going to be merged for the second time: ${seqTracks.findAll { duplicatedSeqTracksIds.contains(it.id) }}"
             }
 
-            Set<SeqTrack>  allContainedSeqTracks = this.getContainedSeqTracks()
+            Set<SeqTrack> allContainedSeqTracks = this.getContainedSeqTracks()
 
             assertAndTrackOnError withdrawn || !allContainedSeqTracks.any { it.withdrawn },
                     "not withdrawn bam file has withdrawn seq tracks"
@@ -117,6 +111,7 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
         return errors
     }
 
+    @Override
     Pipeline getPipeline() {
         return workPackage.pipeline
     }
@@ -157,27 +152,8 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
     }
 
     @Override
-    public boolean isMostRecentBamFile() {
+    boolean isMostRecentBamFile() {
         return identifier == maxIdentifier(mergingWorkPackage)
-    }
-
-    public static int nextIdentifier(final MergingWorkPackage mergingWorkPackage) {
-        assert mergingWorkPackage
-        final Integer maxIdentifier = maxIdentifier(mergingWorkPackage)
-        if (maxIdentifier == null) {
-            return 0
-        } else {
-            return maxIdentifier + 1
-        }
-    }
-
-    public static Integer maxIdentifier(MergingWorkPackage workPackage) {
-        return RoddyBamFile.createCriteria().get {
-            eq("workPackage", workPackage)
-            projections {
-                max("identifier")
-            }
-        }
     }
 
     @Override
@@ -189,22 +165,24 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
 
     // Example: blood_somePid_merged.mdup.bam
     @Override
-    public String getBamFileName() {
-        String antiBodyTarget = seqType.isChipSeq() ? "-${((MergingWorkPackage)mergingWorkPackage).antibodyTarget.name}" : ''
+    String getBamFileName() {
+        String antiBodyTarget = seqType.isChipSeq() ? "-${((MergingWorkPackage) mergingWorkPackage).antibodyTarget.name}" : ''
         return "${sampleType.dirName}${antiBodyTarget}_${individual.pid}_merged.mdup.bam"
     }
 
     // Example: blood_somePid_merged.mdup.bam.bai
-    public String getBaiFileName() {
+    @Override
+    String getBaiFileName() {
         return "${bamFileName}.bai"
     }
 
     // Example: blood_somePid_merged.mdup.bam.md5
-    public String getMd5sumFileName() {
+    String getMd5sumFileName() {
         return "${bamFileName}.md5"
     }
 
     // Example: ${OtpProperty#PATH_PROJECT_ROOT}/${project}/sequencing/whole_genome_sequencing/view-by-pid/somePid/control/paired/merged-alignment/.merging_3
+    @Override
     File getWorkDirectory() {
         return new File(baseDirectory, workDirectoryName)
     }
@@ -388,8 +366,6 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
         return !workDirectoryName
     }
 
-
-
     /**
      * return for old structure the final bam file and for the new structure the work bam file
      */
@@ -397,7 +373,6 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
     protected File getPathForFurtherProcessingNoCheck() {
         return isOldStructureUsed() ? finalBamFile : workBamFile
     }
-
 
 
     void withdraw() {
@@ -419,17 +394,17 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
 
     Long getNumberOfReadsFromFastQc() {
         Set<SeqTrack> seqTracks = containedSeqTracks
-        assert seqTracks.size() == numberOfMergedLanes : "Found ${seqTracks.size()} SeqTracks, but expected ${numberOfMergedLanes}"
+        assert seqTracks.size() == numberOfMergedLanes: "Found ${seqTracks.size()} SeqTracks, but expected ${numberOfMergedLanes}"
 
         assert seqTracks.every { SeqTrack seqTrack ->
             seqTrack.fastqcState == SeqTrack.DataProcessingState.FINISHED
-        } : "Not all Fastqc workflows of all seqtracks are finished"
+        }: "Not all Fastqc workflows of all seqtracks are finished"
 
         List<Integer> numberOfReads = seqTracks.collect { SeqTrack seqTrack ->
             seqTrack.NReads
         }
 
-        assert !numberOfReads.contains(null) : 'At least one seqTrack has no value for number of reads'
+        assert !numberOfReads.contains(null): 'At least one seqTrack has no value for number of reads'
 
         return numberOfReads.sum()
     }

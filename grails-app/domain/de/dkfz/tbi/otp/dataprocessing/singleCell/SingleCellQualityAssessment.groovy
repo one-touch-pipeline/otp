@@ -1,8 +1,12 @@
-package de.dkfz.tbi.otp.dataprocessing
+package de.dkfz.tbi.otp.dataprocessing.singleCell
 
+import de.dkfz.tbi.otp.dataprocessing.AbstractQualityAssessment
+import de.dkfz.tbi.otp.dataprocessing.QualityAssessmentMergedPass
 import de.dkfz.tbi.otp.qcTrafficLight.QcThresholdEvaluated
 
 class SingleCellQualityAssessment extends AbstractQualityAssessment {
+
+    QualityAssessmentMergedPass qualityAssessmentMergedPass
 
     /**
      * The number of barcodes associated with cell-containing partitions,
@@ -24,7 +28,7 @@ class SingleCellQualityAssessment extends AbstractQualityAssessment {
     Double medianGenesPerCell
 
     /**
-     *	Total number of sequenced reads.
+     * Total number of sequenced reads.
      */
     @QcThresholdEvaluated
     Double numberOfReads
@@ -110,7 +114,6 @@ class SingleCellQualityAssessment extends AbstractQualityAssessment {
      */
     @QcThresholdEvaluated
     Double medianUmiCountsPerCell
-
 
     static constraints = { }
 

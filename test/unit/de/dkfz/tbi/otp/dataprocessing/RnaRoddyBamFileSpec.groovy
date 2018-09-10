@@ -7,6 +7,7 @@ import grails.test.mixin.*
 import spock.lang.*
 
 @Mock([
+        AbstractMergedBamFile,
         DataFile,
         FileType,
         Individual,

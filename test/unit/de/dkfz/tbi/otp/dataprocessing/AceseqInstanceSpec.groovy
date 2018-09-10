@@ -13,6 +13,7 @@ import spock.lang.*
 
 
 @Mock([
+        AbstractMergedBamFile,
         AceseqInstance,
         AceseqQc,
         DataFile,
