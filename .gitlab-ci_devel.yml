@@ -166,11 +166,15 @@ generate_changelog:
     - branches
   image: otp-generate-changelog
   script:
-    - TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
-    - echo $TAG
-    - scripts/gitchangelog/gitchangelog.py ^$TAG HEAD >> CHANGELOG.txt
+    - LATEST_TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
+    - echo $LATEST_TAG
+    - git config gitchangelog.rc-path scripts/gitchangelog/gitchangelog.rc.reference
+    - scripts/gitchangelog/gitchangelog.py ^$LATEST_TAG HEAD >> CHANGELOG.txt
+    - git config gitchangelog.rc-path scripts/gitchangelog/release_notes_gitchangelog.rc.reference
+    - scripts/gitchangelog/gitchangelog.py ^$LATEST_TAG HEAD >> RELEASE_NOTES.txt
   artifacts:
     <<: *artifacts_template
     paths:
       - CHANGELOG.txt
+      - RELEASE_NOTES.txt
     when: on_success

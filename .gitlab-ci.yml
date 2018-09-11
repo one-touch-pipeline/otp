@@ -211,15 +211,19 @@ generate_changelog:
   stage: test
   dependencies: []
   only:
-  - branches
+    - branches
   image: otp-generate-changelog
   script:
-  - LATEST_TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
-  - echo $LATEST_TAG
-  - scripts/gitchangelog/gitchangelog.py ^$LATEST_TAG HEAD >> CHANGELOG.txt
+    - LATEST_TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
+    - echo $LATEST_TAG
+    - git config gitchangelog.rc-path scripts/gitchangelog/gitchangelog.rc.reference
+    - scripts/gitchangelog/gitchangelog.py ^$LATEST_TAG HEAD >> CHANGELOG.txt
+    - git config gitchangelog.rc-path scripts/gitchangelog/release_notes_gitchangelog.rc.reference
+    - scripts/gitchangelog/gitchangelog.py ^$LATEST_TAG HEAD >> RELEASE_NOTES.txt
   artifacts:
     paths:
-    - CHANGELOG.txt
+      - CHANGELOG.txt
+      - RELEASE_NOTES.txt
     expire_in: 1 weeks
 
 

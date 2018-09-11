@@ -83,16 +83,7 @@ ignore_regexps = [
 ## whenever you are tweaking this variable.
 ##
 section_regexps = [
-    ('New Features', [
-        r'^[nN][eE][wW]\s*:\s*((dev|use?r|pkg|test|doc)\s*:\s*)?([^\n]*)$',
-     ]),
-    ('Changes and Improvements', [
-        r'^([cC][hH](([aA][nN][gG][eE])|([gG])))\s*:\s*((dev|use?r|pkg|test|doc)\s*:\s*)?([^\n]*)$',
-     ]),
-    ('Bugfixes', [
-        r'^([bB][uU][gG])?[fF][iI][xX]\s*:\s*((dev|use?r|pkg|test|doc)\s*:\s*)?([^\n]*)$',
-     ]),
-    ('Others', None ## Match all lines
+    ('Release Notes', None ## Match all lines
      ),
 
 ]
@@ -132,8 +123,8 @@ section_regexps = [
 #body_process = Wrap(regexp=r'\n(?=\w+\s*:)') | Indent(chars="  ")
 #body_process = Wrap(regexp=r'\n(?=\w+\s*:)')
 #body_process = noop
-body_process = ReSub(r'((^|\n)[A-Z]\w+(-\w+)*: .*(\n\s+.*)*)+$', r'') | ReSub(r'(?is)(^|\n)\s*release note.*', '') | strip
-
+body_process = ReSub(r'((^|\n)[A-Z]\w+(-\w+)*: .*(\n\s+.*)*)+$', r'') | grep('(?is)(^|\n)\s*release note.*') | ReSub(r'(?is)(^|\n)\s*release\s*notes?:\s*', r'\n- ') |\
+ReSub (r'\n\s*(\w)', r'\n  \1') | strip
 
 ## ``subject_process`` is a callable
 ##
@@ -157,7 +148,7 @@ tag_filter_regexp = r'^v[0-9]+\.[0-9]+(\.[0-9]+)?$'
 ##
 ## This label will be used as the changelog Title of the last set of changes
 ## between last valid tag and HEAD if any.
-unreleased_version_label = "(unreleased)"
+unreleased_version_label = ""
 
 
 ## ``output_engine`` is a callable
@@ -191,7 +182,7 @@ unreleased_version_label = "(unreleased)"
 #output_engine = rest_py
 #output_engine = mustache("restructuredtext")
 #output_engine = mustache("markdown")
-output_engine = makotemplate("restructuredtext")
+output_engine = makotemplate("release_notes_restructuredtext")
 
 
 ## ``include_merge`` is a boolean

@@ -455,6 +455,15 @@ def paragraph_wrap(text, regexp="\n\n"):
                      for paragraph in regexp.split(text)).strip()
 
 
+
+def grep_inner(p, txt):
+    m = re.search(p, txt)
+    if m:
+        return m.group()
+    else:
+        return ''
+
+
 def curryfy(f):
     return lambda *a, **kw: TextProc(lambda txt: f(txt, *a, **kw))
 
@@ -465,10 +474,11 @@ Wrap = curryfy(paragraph_wrap)
 ReSub = lambda p, r, **k: TextProc(lambda txt: re.sub(p, r, txt, **k))
 noop = TextProc(lambda txt: txt)
 strip = TextProc(lambda txt: txt.strip())
+grep = lambda p: TextProc(lambda txt: grep_inner(p, txt))
 SetIfEmpty = curryfy(set_if_empty)
 
 for _label in ("Indent", "Wrap", "ReSub", "noop", "final_dot",
-              "ucfirst", "strip", "SetIfEmpty"):
+              "ucfirst", "strip", "grep", "SetIfEmpty"):
     _config_env[_label] = locals()[_label]
 
 ##
@@ -1589,6 +1599,10 @@ def versions_data_iter(repository, revlist=None,
 
         for commit in commits:
             if any(re.search(pattern, commit.subject) is not None
+                   for pattern in ignore_regexps):
+                continue
+
+            if any(re.search(pattern, commit.body) is not None
                    for pattern in ignore_regexps):
                 continue
 
