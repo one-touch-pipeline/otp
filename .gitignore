@@ -1,4 +1,4 @@
-# General
+### General
 ## Log files
 logs/*
 *.log
@@ -8,44 +8,43 @@ logs/*
 ## Stale NFS handles
 .nfs*
 
-# OTP
+### OTP
 ## Main application
 web-app/WEB-INF/tld/c.tld
 web-app/WEB-INF/tld/fmt.tld
 grails-app/views/templates/_version.gsp
-## Intependent tools
+## Independent tools
 tools/*/*/*/build/
 tools/*/*/*/.gradle/
 tools/*/*/build/
 tools/*/*/.gradle/
 
-# Grails
+### Grails
 .groovy/*
 target
 .asscache
 .slcache
 
-# Gradle
+### Gradle
 .gradle/
 build/
 
-# Third-party tools
+### Third-party tools
 ## CodeNarc
 CodeNarcReport.html
 ## Codertura
 cobertura.ser
 
-# IDEs
+### IDEs
 ## Eclipse
 .classpath
 .project
 .settings
 .link_to_grails_plugins
 target-eclipse
-
 ## IntelliJ
 .idea/*
-!.idea/codeStyleSettings.xml
+!.idea/codeStyles/
 *.iml
 *.ipr
 *.iws

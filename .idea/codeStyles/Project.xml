@@ -1,0 +1,10 @@
+<component name="ProjectCodeStyleConfiguration">
+  <code_scheme name="Project" version="173">
+    <GroovyCodeStyleSettings>
+      <option name="USE_FQ_CLASS_NAMES_IN_JAVADOC" value="false" />
+      <option name="USE_SINGLE_CLASS_IMPORTS" value="false" />
+      <option name="CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND" value="1" />
+      <option name="NAMES_COUNT_TO_USE_IMPORT_ON_DEMAND" value="1" />
+    </GroovyCodeStyleSettings>
+  </code_scheme>
+</component>
