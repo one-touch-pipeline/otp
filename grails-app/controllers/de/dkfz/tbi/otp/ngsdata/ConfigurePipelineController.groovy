@@ -269,7 +269,7 @@ class ConfigurePipelineController {
 
     JSON getStatSizeFileNames(String referenceGenome) {
         Map data = [
-                data: ReferenceGenome.findByName(referenceGenome)?.getStatSizeFileNames()*.name
+                data: ReferenceGenome.findByName(referenceGenome)?.getStatSizeFileNames()*.name,
         ]
         render data as JSON
     }
@@ -441,8 +441,7 @@ class ConfigurePipelineController {
                     project      : cmd.project,
                     seqType      : cmd.seqType,
                     pipeline     : pipeline,
-                    pluginVersion: "${cmd.pluginName}:${cmd.pluginVersion}"
-
+                    pluginVersion: "${cmd.pluginName}:${cmd.pluginVersion}",
             ]).each({
                 if (it.configVersion == cmd.config) {
                     duplicateConfigVersion = true

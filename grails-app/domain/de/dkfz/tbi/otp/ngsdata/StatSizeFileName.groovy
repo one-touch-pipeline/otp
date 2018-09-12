@@ -11,7 +11,6 @@ class StatSizeFileName implements Entity {
     }
 
     static belongsTo = [
-            referenceGenome: ReferenceGenome
+            referenceGenome: ReferenceGenome,
     ]
-
 }

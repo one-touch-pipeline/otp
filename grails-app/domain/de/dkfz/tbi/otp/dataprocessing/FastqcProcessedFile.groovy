@@ -20,7 +20,7 @@ class FastqcProcessedFile implements Entity {
     Date dateFromFileSystem = null
 
     static belongsTo = [
-        dataFile: DataFile
+        dataFile: DataFile,
     ]
 
     static constraints = {

@@ -23,12 +23,12 @@ class SoftwareToolController {
                 versions << [
                     id: softwareTool.id,
                     programVersion: softwareTool.programVersion,
-                    softwareToolIdentifiers: aliases
+                    softwareToolIdentifiers: aliases,
                 ]
             }
             dataToRender << [
                     programName: programName,
-                    versions: versions
+                    versions: versions,
             ]
         }
         return [softwareTools: dataToRender]

@@ -8,7 +8,7 @@ class RoddySingleLaneQa extends RoddyQualityAssessment {
     SeqTrack seqTrack
 
     static belongsTo = [
-        seqTrack: SeqTrack
+        seqTrack: SeqTrack,
     ]
 
     static constraints = {

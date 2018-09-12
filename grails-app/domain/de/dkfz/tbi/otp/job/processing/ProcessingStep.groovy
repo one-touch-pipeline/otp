@@ -218,7 +218,7 @@ public class ProcessingStep implements Serializable, Entity {
                 pid,
                 psWorkflow,
                 psId,
-                psClass
+                psClass,
         ].findAll().join('_')
     }
 

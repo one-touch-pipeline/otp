@@ -161,7 +161,7 @@ class RoddyAlignmentStartJobTest {
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.INPROGRESS,
                 md5sum: null,
                 withdrawn: true,
-                config: rbf.config
+                config: rbf.config,
         ])
 
         mwp.bamFileInProjectFolder = roddyBamFile
@@ -199,7 +199,7 @@ class RoddyAlignmentStartJobTest {
         MergingWorkPackage mwp = createMergingWorkPackage()
         RoddyBamFile bamFile = DomainFactory.createRoddyBamFile([
                 workPackage: mwp,
-                withdrawn: true
+                withdrawn: true,
         ])
 
         mwp.bamFileInProjectFolder = bamFile
@@ -211,7 +211,7 @@ class RoddyAlignmentStartJobTest {
     void testFindUsableBaseBamFile_WhenBamFileInProjectFolderIsUsable_ShouldReturnIt() {
         MergingWorkPackage mwp = createMergingWorkPackage()
         RoddyBamFile bamFile = DomainFactory.createRoddyBamFile([
-                workPackage: mwp
+                workPackage: mwp,
         ])
 
         mwp.bamFileInProjectFolder = bamFile

@@ -37,7 +37,7 @@ class BedFile implements Entity {
      */
     static belongsTo = [
         referenceGenome: ReferenceGenome,
-        libraryPreparationKit: LibraryPreparationKit
+        libraryPreparationKit: LibraryPreparationKit,
     ]
 
     static constraints = {

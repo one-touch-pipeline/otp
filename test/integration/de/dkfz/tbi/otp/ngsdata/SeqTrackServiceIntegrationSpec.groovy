@@ -79,7 +79,7 @@ class SeqTrackServiceIntegrationSpec extends IntegrationSpec {
         DomainFactory.createSeqTrack ([ fastqcState: NOT_STARTED ])
         SeqTrack alignableSeqTrack = DomainFactory.createSeqTrack ([
                 fastqcState: NOT_STARTED,
-                seqType: alignableSeqType
+                seqType: alignableSeqType,
         ])
 
         when:

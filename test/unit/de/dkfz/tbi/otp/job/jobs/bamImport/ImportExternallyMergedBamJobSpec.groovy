@@ -214,7 +214,7 @@ class ImportExternallyMergedBamJobSpec extends Specification {
         ).save()
 
         epmbfWithoutMd5sum.furtherFiles = [
-                furtherFilePattern
+                furtherFilePattern,
         ]
 
         createHelperObjects(importProcess)
@@ -268,7 +268,7 @@ class ImportExternallyMergedBamJobSpec extends Specification {
         ).save()
 
         epmbfWithoutMd5sum.furtherFiles = [
-                furtherFilePattern
+                furtherFilePattern,
         ]
 
         createHelperObjects(importProcess)
@@ -468,7 +468,7 @@ class ImportExternallyMergedBamJobSpec extends Specification {
         DomainFactory.createProcessParameter([
                 process  : step.process,
                 value    : importProcess.id.toString(),
-                className: ImportProcess.class.name
+                className: ImportProcess.class.name,
         ])
     }
 

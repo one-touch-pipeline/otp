@@ -30,7 +30,6 @@ class AbstractAlignmentDeciderIntegrationSpec extends IntegrationSpec {
         ReferenceGenome referenceGenome = referenceGenomeMethod()
         SeqTrack seqTrack = DomainFactory.createExomeSeqTrack([
                 libraryPreparationKit: libraryPreparationKit,
-
         ])
         DomainFactory.createReferenceGenomeProjectSeqType([
                 referenceGenome: referenceGenome ?: DomainFactory.createReferenceGenome(),

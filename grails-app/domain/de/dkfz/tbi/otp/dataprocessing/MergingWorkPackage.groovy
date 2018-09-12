@@ -46,7 +46,7 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
 
     static hasMany = [
             alignmentProperties: MergingWorkPackageAlignmentProperty,
-            seqTracks: SeqTrack
+            seqTracks: SeqTrack,
     ]
 
     static constraints = {

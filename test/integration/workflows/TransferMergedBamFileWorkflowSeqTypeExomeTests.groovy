@@ -473,7 +473,7 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends WorkflowTestCase {
             fileNameBaiFile1,
             fileNameBaiFile2,
             fileNameMergedBamFileQA1,
-            fileNameMergedBamFileQA2
+            fileNameMergedBamFileQA2,
         ]
         String cmdBuildFileStructure = files.collect {"echo -n \"${it}\" > ${it}"}.join " && "
 
@@ -524,7 +524,7 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends WorkflowTestCase {
             percentIncorrectPEorientation: 0.0038592457709288723,
             percentReadPairsMapToDiffChrom: 0.11828206222955773,
             onTargetMappedBases: 50,
-            allBasesMapped: 66
+            allBasesMapped: 66,
         ].each { key, value ->
             abstractQualityAssessment."${key}" = value
         }
@@ -594,7 +594,7 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends WorkflowTestCase {
             "${destinationDirMergedBamFile}/control_pid_1_EXON_PAIRED_merged.mdup.bai.md5sum",
             "${destinationDirQaResults}/MD5SUMS",
             "${destinationDirQaResults}/plot.jpg",
-            fastqFilesInMergedBamFile
+            fastqFilesInMergedBamFile,
         ])
     }
 

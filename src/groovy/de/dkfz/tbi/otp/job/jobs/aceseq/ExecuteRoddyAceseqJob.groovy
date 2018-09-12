@@ -96,7 +96,7 @@ class ExecuteRoddyAceseqJob extends AbstractExecutePanCanJob<AceseqInstance> imp
         executeRoddyCommandService.correctPermissionsAndGroups(aceseqInstance, aceseqInstance.project.realm)
 
         List<File> directories = [
-                aceseqInstance.workExecutionStoreDirectory
+                aceseqInstance.workExecutionStoreDirectory,
         ]
         directories.addAll(aceseqInstance.workExecutionDirectories)
 

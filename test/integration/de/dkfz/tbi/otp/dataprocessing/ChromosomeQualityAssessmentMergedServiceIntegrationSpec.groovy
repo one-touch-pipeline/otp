@@ -27,7 +27,7 @@ class ChromosomeQualityAssessmentMergedServiceIntegrationSpec extends Integratio
         QualityAssessmentMergedPass qualityAssessmentMergedPass2 = DomainFactory.createQualityAssessmentMergedPass()
         qualityAssessmentMergedPasses = [
                 qualityAssessmentMergedPass1,
-                qualityAssessmentMergedPass2
+                qualityAssessmentMergedPass2,
         ]
 
         ChromosomeQualityAssessmentMerged chromosomeQualityAssessmentMergedX1 = ChromosomeQualityAssessmentMerged.build(qualityAssessmentMergedPass: qualityAssessmentMergedPass1, chromosomeName: Chromosomes.CHR_X.alias, referenceLength: 0)
@@ -38,7 +38,7 @@ class ChromosomeQualityAssessmentMergedServiceIntegrationSpec extends Integratio
                 chromosomeQualityAssessmentMergedX1,
                 chromosomeQualityAssessmentMergedY1,
                 chromosomeQualityAssessmentMergedX2,
-                chromosomeQualityAssessmentMergedY2
+                chromosomeQualityAssessmentMergedY2,
         ]
     }
 

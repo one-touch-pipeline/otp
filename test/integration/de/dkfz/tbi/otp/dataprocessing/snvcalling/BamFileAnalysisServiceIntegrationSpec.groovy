@@ -40,7 +40,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         Pipeline pipeline1 = pipeline()
         Map configProperties = [
                 project: samplePair1.project,
-                pipeline:  pipeline1
+                pipeline:  pipeline1,
         ]
         if (pipeline1.usesRoddy()) {
             DomainFactory.createRoddyWorkflowConfig(configProperties + [
@@ -56,7 +56,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
                 name: optionName,
                 type: null,
                 project: null,
-                value: 'foobar'
+                value: 'foobar',
         ])
 
         expect:

@@ -37,17 +37,17 @@ class SeqPlatformServiceTests {
         SequencingKitLabel sequencingKitLabel2 = DomainFactory.createSequencingKitLabel()
         [
             PLATFORM_NAME,
-            OTHER_PLATFORM_NAME
+            OTHER_PLATFORM_NAME,
         ].each { name ->
             [
                 seqPlatformModelLabel,
                 seqPlatformModelLabel2,
-                null
+                null,
             ].each {model ->
                 [
                     sequencingKitLabel,
                     sequencingKitLabel2,
-                    null
+                    null,
                 ].each { kit ->
                     DomainFactory.createSeqPlatformWithSeqPlatformGroup([
                         name: name,
@@ -59,7 +59,7 @@ class SeqPlatformServiceTests {
         }
         return [
             seqPlatformModelLabel,
-            sequencingKitLabel
+            sequencingKitLabel,
         ]
     }
 

@@ -319,7 +319,7 @@ class DomainFactory {
                 jobDefinition: original.jobDefinition,
                 jobClass     : 'someClass',
                 process      : original.process,
-                original     : original
+                original     : original,
         ], properties)
     }
 
@@ -586,7 +586,7 @@ class DomainFactory {
     public
     static ProcessedMergedBamFile createProcessedMergedBamFileWithoutProcessedBamFile(MergingPass mergingPass, Map properties = [:], boolean saveAndValidate = true) {
         return createProcessedMergedBamFileWithoutProcessedBamFile([
-                mergingPass: mergingPass
+                mergingPass: mergingPass,
         ] + properties, saveAndValidate)
     }
 
@@ -620,7 +620,7 @@ class DomainFactory {
         final ProcessedBamFile bamFile = createProcessedBamFile(mergingSet.mergingWorkPackage)
         createMergingSetAssignment([
                 mergingSet: mergingSet,
-                bamFile   : bamFile
+                bamFile   : bamFile,
         ])
         return bamFile
     }
@@ -900,7 +900,7 @@ class DomainFactory {
                 samplePair : samplePair,
                 bamFile1   : bamFile1,
                 bamFile2   : bamFile2,
-                roddyConfig: roddyConfig
+                roddyConfig: roddyConfig,
         ]
     }
 
@@ -1114,14 +1114,16 @@ class DomainFactory {
         }
 
         if (!diseaseBamFile) {
-            diseaseBamFile = createRoddyBamFile([
-                    workPackage: diseaseWorkPackage
-            ] + (controlBamFile ? [config: controlBamFile.config] : [:]) + bamFile1Properties)
+            diseaseBamFile = createRoddyBamFile(
+                    [ workPackage: diseaseWorkPackage ] +
+                    (controlBamFile ? [ config: controlBamFile.config ] : [:]) +
+                    bamFile1Properties
+            )
         }
         if (!controlBamFile) {
             controlBamFile = createRoddyBamFile([
                     workPackage: controlWorkPackage,
-                    config     : diseaseBamFile.config
+                    config     : diseaseBamFile.config,
             ] + bamFile2Properties)
         }
 
@@ -1230,7 +1232,6 @@ class DomainFactory {
                 rnaContaminatedGenesMoreThanTwoIntron: "arbitraryGeneName",
                 rnaContaminatedGenesCount            : 1,
                 rnaDecontaminationApplied            : true,
-
         ], properties, createAndValidate)
     }
 
@@ -1363,7 +1364,7 @@ class DomainFactory {
 
     public static RunSegment createRunSegment(Map runSegmentProperties = [:]) {
         return createDomainObject(RunSegment, [
-                importMode: RunSegment.ImportMode.AUTOMATIC
+                importMode: RunSegment.ImportMode.AUTOMATIC,
         ], runSegmentProperties)
     }
 
@@ -1440,7 +1441,7 @@ class DomainFactory {
                 dirName      : 'seqTypeDirName_' + (counter++),
                 displayName  : seqTypeProperties.get('displayName') ?: seqTypeProperties.get('name') ?: defaultName,
                 importAlias  : [],
-                singleCell   : false
+                singleCell   : false,
         ], seqTypeProperties, saveAndValidate)
     }
 
@@ -1468,7 +1469,7 @@ class DomainFactory {
         return createDomainObject(LibraryPreparationKit, [
                 name            : "library-preperation-kit-name_${counter++}",
                 shortDisplayName: "library-preperation-kit-short-name_${counter++}",
-                importAlias     : []
+                importAlias     : [],
         ], properties)
     }
 
@@ -1483,7 +1484,6 @@ class DomainFactory {
                 lengthRefChromosomesWithoutN: 1,
                 chromosomePrefix            : "",
                 chromosomeSuffix            : "",
-
         ], properties, saveAndValidate)
     }
 

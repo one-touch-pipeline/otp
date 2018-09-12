@@ -55,7 +55,7 @@ class ExecuteRoddyCommandServiceTests {
         roddyBamFile = DomainFactory.createRoddyBamFile()
         configService = new TestConfigService([
                 (OtpProperty.PATH_PROJECT_ROOT)   : tmpOutputDir.path + "/root",
-                (OtpProperty.PATH_PROCESSING_ROOT): tmpOutputDir.path + "/processing"
+                (OtpProperty.PATH_PROCESSING_ROOT): tmpOutputDir.path + "/processing",
         ])
         realm = roddyBamFile.project.realm
         assert realm.save(flush: true)
@@ -266,7 +266,7 @@ class ExecuteRoddyCommandServiceTests {
     @Test
     void testDefaultRoddyExecutionCommand_restartWithoutDeletedWorkDirectory_AllFine() {
         roddyBamFile.roddyExecutionDirectoryNames = [
-                RODDY_EXECUTION_DIR_NAME_1
+                RODDY_EXECUTION_DIR_NAME_1,
         ]
         roddyBamFile.save(flush: true, failOnError: true)
         assert roddyBamFile.workDirectory.mkdirs()

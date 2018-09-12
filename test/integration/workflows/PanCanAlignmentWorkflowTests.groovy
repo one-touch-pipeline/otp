@@ -39,7 +39,7 @@ abstract class PanCanAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkfl
         assert 1 == RoddyBamFile.findAll().size()
         checkFirstBamFileState(firstBamFile, true, [
                 seqTracks: seqTracks,
-                containedSeqTracks : seqTracks
+                containedSeqTracks : seqTracks,
         ])
         assertBamFileFileSystemPropertiesSet(firstBamFile)
     }

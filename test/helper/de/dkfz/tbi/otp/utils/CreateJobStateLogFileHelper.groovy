@@ -45,7 +45,7 @@ class CreateJobStateLogFileHelper {
                 clusterJobId: "testJobId",
                 statusCode: "0",
                 timeStamp: 0L,
-                jobClass: "testJobClass"
+                jobClass: "testJobClass",
         ] + properties as HashMap)
     }
 

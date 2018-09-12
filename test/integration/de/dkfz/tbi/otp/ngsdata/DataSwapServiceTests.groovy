@@ -30,7 +30,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
         outputFolder = temporaryFolder.newFolder("outputFolder")
         configService = new TestConfigService([
                 (OtpProperty.PATH_PROJECT_ROOT)   : outputFolder.path,
-                (OtpProperty.PATH_PROCESSING_ROOT): outputFolder.path
+                (OtpProperty.PATH_PROCESSING_ROOT): outputFolder.path,
         ])
         lsdfFilesService.configService = configService
     }
@@ -44,7 +44,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     void test_moveSample() {
         DomainFactory.createAllAlignableSeqTypes()
         RoddyBamFile bamFile = DomainFactory.createRoddyBamFile([
-                roddyExecutionDirectoryNames: [DomainFactory.DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY]
+                roddyExecutionDirectoryNames: [DomainFactory.DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY],
         ])
         String script = "TEST-MOVE_SAMPLE"
         Individual individual = DomainFactory.createIndividual(project: bamFile.project)
@@ -116,7 +116,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     void test_moveIndividual() {
         DomainFactory.createAllAlignableSeqTypes()
         RoddyBamFile bamFile = DomainFactory.createRoddyBamFile([
-                roddyExecutionDirectoryNames: [DomainFactory.DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY]
+                roddyExecutionDirectoryNames: [DomainFactory.DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY],
         ])
         Project newProject = Project.build(realm: bamFile.project.realm)
         String script = "TEST-MOVE-INDIVIDUAL"
@@ -714,7 +714,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
         ProcessedMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFile([
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
                 md5sum: HelperUtils.randomMd5sum,
-                fileSize: 1000
+                fileSize: 1000,
         ])
         dataBaseSetupForMergedBamFiles(bamFile)
         createFastqFiles(bamFile)

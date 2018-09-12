@@ -15,7 +15,6 @@ class AntibodyAntibodyTargetSeqTypeValidator extends ValueTuplesValidator<Metada
         return [
                 "Antibody target must be given if the sequencing type is '${SeqTypeNames.CHIP_SEQ.seqTypeName}'.",
                 "Antibody target and antibody should not be given if the sequencing type is not '${SeqTypeNames.CHIP_SEQ.seqTypeName}'.",
-
         ]
     }
 

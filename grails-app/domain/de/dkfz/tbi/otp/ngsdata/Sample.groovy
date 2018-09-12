@@ -6,7 +6,7 @@ class Sample implements Entity {
 
     static belongsTo = [
         individual : Individual,
-        sampleType : SampleType
+        sampleType : SampleType,
     ]
     Individual individual
     SampleType sampleType

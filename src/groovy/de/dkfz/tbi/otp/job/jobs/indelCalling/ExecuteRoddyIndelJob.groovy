@@ -76,7 +76,7 @@ class ExecuteRoddyIndelJob extends AbstractExecutePanCanJob<IndelCallingInstance
         executeRoddyCommandService.correctPermissionsAndGroups(indelCallingInstance, indelCallingInstance.project.realm)
 
         List<File> directories = [
-                indelCallingInstance.workExecutionStoreDirectory
+                indelCallingInstance.workExecutionStoreDirectory,
         ]
         directories.addAll(indelCallingInstance.workExecutionDirectories)
 

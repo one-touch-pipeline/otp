@@ -72,7 +72,7 @@ abstract class AbstractMetadataValidationContext extends ValidationContext {
                 metadataFileMd5sum: metadataFileMd5sum,
                 spreadsheet       : spreadsheet,
                 bytes             : bytes,
-                problems          : problems
+                problems          : problems,
         ]
     }
 

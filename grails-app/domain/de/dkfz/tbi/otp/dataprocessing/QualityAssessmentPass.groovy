@@ -55,7 +55,7 @@ class QualityAssessmentPass implements ProcessParameterObject, Entity {
     }
 
     static belongsTo = [
-        processedBamFile: ProcessedBamFile
+        processedBamFile: ProcessedBamFile,
     ]
 
     AlignmentPass getAlignmentPass() {

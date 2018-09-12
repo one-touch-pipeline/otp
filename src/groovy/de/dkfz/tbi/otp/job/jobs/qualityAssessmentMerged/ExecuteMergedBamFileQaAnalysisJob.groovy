@@ -53,7 +53,7 @@ class ExecuteMergedBamFileQaAnalysisJob extends AbstractJobImpl {
 
         List allowedSeqTypes = [
             [name:SeqTypeNames.EXOME.seqTypeName, lib:'PAIRED'],
-            [name:SeqTypeNames.WHOLE_GENOME.seqTypeName, lib:'PAIRED']
+            [name:SeqTypeNames.WHOLE_GENOME.seqTypeName, lib:'PAIRED'],
         ]
         boolean isSupported = allowedSeqTypes.any { map ->
             [name: seqType.name, lib: seqType.libraryLayout ] == map

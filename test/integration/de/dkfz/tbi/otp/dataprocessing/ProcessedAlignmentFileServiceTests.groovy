@@ -21,7 +21,7 @@ class ProcessedAlignmentFileServiceTests {
         //The dateCreated is changed via hibernate update, since grails handle this property itself and do not allow to set the value.
         processedBamFile.executeUpdate("update ProcessedBamFile set dateCreated = :dateCreated where id = :id", [
             dateCreated: date,
-            id: processedBamFile.id
+            id: processedBamFile.id,
         ])
         processedBamFile.refresh()
     }
@@ -41,7 +41,7 @@ class ProcessedAlignmentFileServiceTests {
 
         AlignmentPass alignmentPass = DomainFactory.createAlignmentPass([
             seqTrack: seqTrack,
-            identifier: 1
+            identifier: 1,
         ])
 
         ProcessedBamFile processedBamFile = ProcessedBamFile.build([
@@ -57,7 +57,7 @@ class ProcessedAlignmentFileServiceTests {
         ProcessedBamFile processedBamFile2 = ProcessedBamFile.build([
             alignmentPass: alignmentPass2,
             qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
-            withdrawn: false
+            withdrawn: false,
         ] + secondProcessedMergedBamFileMap)
 
         return alignmentPass
@@ -91,7 +91,7 @@ class ProcessedAlignmentFileServiceTests {
     void testMayProcessingFilesBeDeleted_SecondPass_WrongQualityAssessmentStatus() {
         ProcessedAlignmentFileService processedAlignmentFileService = createServiceForMayProcessingFilesBeDeleted()
         AlignmentPass alignmentPass = createTestDataForMayProcessingFilesBeDeleted([
-            qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.IN_PROGRESS
+            qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.IN_PROGRESS,
         ])
         Date createdBefore = new Date().plus(1)
 
@@ -113,7 +113,7 @@ class ProcessedAlignmentFileServiceTests {
     void testMayProcessingFilesBeDeleted_SecondPass_Withdrawn() {
         ProcessedAlignmentFileService processedAlignmentFileService = createServiceForMayProcessingFilesBeDeleted()
         AlignmentPass alignmentPass = createTestDataForMayProcessingFilesBeDeleted([
-            withdrawn: true
+            withdrawn: true,
         ])
         Date createdBefore = new Date().plus(1)
 
@@ -193,7 +193,7 @@ class ProcessedAlignmentFileServiceTests {
         ProcessedBamFile processedBamFileLaterPass = ProcessedBamFile.build([
             alignmentPass: DomainFactory.createAlignmentPass([
                 seqTrack: seqTrack,
-                identifier: 3
+                identifier: 3,
             ] + passOfLaterBamFileMap),
             qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
         ] + laterBamFileMap).save(flush: true)
@@ -230,12 +230,12 @@ class ProcessedAlignmentFileServiceTests {
                 alignmentState: AlignmentState.FINISHED,
             ]),
             qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
-            status: AbstractBamFile.State.PROCESSED
+            status: AbstractBamFile.State.PROCESSED,
         ] + bamFileMap).save(flush: true)
 
         MergingSet mergedSet = MergingSet.build([
             mergingWorkPackage: processedBamFile.mergingWorkPackage,
-            status: MergingSet.State.PROCESSED
+            status: MergingSet.State.PROCESSED,
         ] + mergingSetMap).save(flush: true)
 
         MergingSetAssignment mergingSetAssignment = MergingSetAssignment.build([
@@ -275,7 +275,7 @@ class ProcessedAlignmentFileServiceTests {
         processedBamFiles[0].save(flush: true)
 
         ProcessedSaiFile processedSaiFile = ProcessedSaiFile.build([
-            alignmentPass: processedBamFiles[0].alignmentPass
+            alignmentPass: processedBamFiles[0].alignmentPass,
         ] + processedSaiFileMap)
 
         return processedBamFiles
@@ -303,7 +303,7 @@ class ProcessedAlignmentFileServiceTests {
         processedBamFile.save(flush: true)
 
         ProcessedSaiFile processedSaiFile = ProcessedSaiFile.build([
-            alignmentPass: processedBamFile.alignmentPass
+            alignmentPass: processedBamFile.alignmentPass,
         ] + processedSaiFileMap).save(flush: true)
 
         return processedBamFile
@@ -345,7 +345,7 @@ class ProcessedAlignmentFileServiceTests {
         Date createdBeforeDate = new Date().plus(1)
         List<ProcessedBamFile> processedBamFiles = createProcessedBamFileWithLaterProcessedPass(
                         laterBamFileMap: [
-                            qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.NOT_STARTED
+                            qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.NOT_STARTED,
                         ])
         createProcessedAlignmentFileService()
 
@@ -367,7 +367,7 @@ class ProcessedAlignmentFileServiceTests {
         Date createdBeforeDate = new Date().plus(1)
         List<ProcessedBamFile> processedBamFiles = createProcessedBamFileWithLaterProcessedPass(
                         laterBamFileMap: [
-                            withdrawn: true
+                            withdrawn: true,
                         ])
         createProcessedAlignmentFileService([processedBamFiles[1]])
 
@@ -379,7 +379,7 @@ class ProcessedAlignmentFileServiceTests {
         Date createdBeforeDate = new Date().plus(1)
         List<ProcessedBamFile> processedBamFiles = createProcessedBamFileWithLaterProcessedPass(
                         bamFileMap: [
-                            withdrawn: true
+                            withdrawn: true,
                         ])
         createProcessedAlignmentFileService([processedBamFiles[0]])
 
@@ -391,10 +391,10 @@ class ProcessedAlignmentFileServiceTests {
         Date createdBeforeDate = new Date().plus(1)
         List<ProcessedBamFile> processedBamFiles = createProcessedBamFileWithLaterProcessedPass(
                         laterBamFileMap: [
-                            withdrawn: true
+                            withdrawn: true,
                         ],
                         bamFileMap: [
-                            withdrawn: true
+                            withdrawn: true,
                         ])
         createProcessedAlignmentFileService(processedBamFiles)
 
@@ -418,7 +418,7 @@ class ProcessedAlignmentFileServiceTests {
         Date createdBeforeDate = new Date().plus(1)
         List<ProcessedBamFile> processedBamFiles = createProcessedBamFileWithLaterProcessedPass(
                         passOfLaterBamFileMap: [
-                            identifier: 0
+                            identifier: 0,
                         ])
         createProcessedAlignmentFileService()
 
@@ -583,7 +583,7 @@ class ProcessedAlignmentFileServiceTests {
         Date createdBeforeDate = new Date().plus(1)
         List<ProcessedBamFile> processedBamFiles = createProcessedBamFileWithLaterProcessedPass(
                         bamFileMap: [
-                            fileExists: true
+                            fileExists: true,
                         ])
         createProcessedAlignmentFileService([processedBamFiles[0]])
 
@@ -653,7 +653,7 @@ class ProcessedAlignmentFileServiceTests {
         Date createdBeforeDate = new Date().plus(1)
         List<ProcessedBamFile> processedBamFiles = createProcessedBamFileWithSaiFileAndWithLaterProcessedPass(
                         laterBamFileMap: [
-                            qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.NOT_STARTED
+                            qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.NOT_STARTED,
                         ])
         createProcessedAlignmentFileService()
 
@@ -675,7 +675,7 @@ class ProcessedAlignmentFileServiceTests {
         Date createdBeforeDate = new Date().plus(1)
         List<ProcessedBamFile> processedBamFiles = createProcessedBamFileWithSaiFileAndWithLaterProcessedPass(
                         laterBamFileMap: [
-                            withdrawn: true
+                            withdrawn: true,
                         ])
         createProcessedAlignmentFileService([processedBamFiles[1]])
 
@@ -687,7 +687,7 @@ class ProcessedAlignmentFileServiceTests {
         Date createdBeforeDate = new Date().plus(1)
         List<ProcessedBamFile> processedBamFiles = createProcessedBamFileWithSaiFileAndWithLaterProcessedPass(
                         bamFileMap: [
-                            withdrawn: true
+                            withdrawn: true,
                         ])
         createProcessedAlignmentFileService([processedBamFiles[0]])
 
@@ -699,10 +699,10 @@ class ProcessedAlignmentFileServiceTests {
         Date createdBeforeDate = new Date().plus(1)
         List<ProcessedBamFile> processedBamFiles = createProcessedBamFileWithSaiFileAndWithLaterProcessedPass(
                         laterBamFileMap: [
-                            withdrawn: true
+                            withdrawn: true,
                         ],
                         bamFileMap: [
-                            withdrawn: true
+                            withdrawn: true,
                         ])
         createProcessedAlignmentFileService(processedBamFiles)
 
@@ -726,7 +726,7 @@ class ProcessedAlignmentFileServiceTests {
         Date createdBeforeDate = new Date().plus(1)
         List<ProcessedBamFile> processedBamFiles = createProcessedBamFileWithSaiFileAndWithLaterProcessedPass(
                         passOfLaterBamFileMap: [
-                            identifier: 0
+                            identifier: 0,
                         ])
         createProcessedAlignmentFileService()
 
@@ -901,7 +901,7 @@ class ProcessedAlignmentFileServiceTests {
         Date createdBeforeDate = new Date().plus(1)
         List<ProcessedBamFile> processedBamFiles = createProcessedBamFileWithSaiFileAndWithLaterProcessedPass(
                         processedSaiFileMap: [
-                            fileExists: true
+                            fileExists: true,
                         ])
         createProcessedAlignmentFileService([processedBamFiles[0]])
 
@@ -941,7 +941,7 @@ class ProcessedAlignmentFileServiceTests {
         //The dateCreated is changed via hibernate update, since grails handle this property itself and do not allow to set the value.
         processedSaiFile.executeUpdate("update ProcessedSaiFile set dateCreated = :dateCreated where id = :id", [
             dateCreated: new Date().plus(2),
-            id: processedSaiFile.id
+            id: processedSaiFile.id,
         ])
         createProcessedAlignmentFileService()
 

@@ -46,14 +46,13 @@ class AbstractExecutePanCanJobTests {
 
         configService = new TestConfigService([
                 (OtpProperty.PATH_PROJECT_ROOT)   : tmpDir.root.path + "/root",
-                (OtpProperty.PATH_PROCESSING_ROOT): tmpDir.root.path + "/processing"
+                (OtpProperty.PATH_PROCESSING_ROOT): tmpDir.root.path + "/processing",
         ]
         )
         realm = DomainFactory.createRealm()
         abstractExecutePanCanJob = [
                 prepareAndReturnWorkflowSpecificCValues  : { RoddyBamFile bamFile -> ["${workflowSpecificCValues}"] },
                 prepareAndReturnWorkflowSpecificParameter: { RoddyBamFile bamFile -> "workflowSpecificParameter" },
-
         ] as AbstractExecutePanCanJob
 
         abstractExecutePanCanJob.referenceGenomeService = new ReferenceGenomeService()

@@ -36,7 +36,7 @@ class LibraryPreparationKitServiceSpec extends MetadataFieldsServiceSpec<Library
                 [
                         shortDisplayName                : OTHER_SHORT_DISPLAY_NAME,
                         adapterFile                     : ADAPTER_FILE,
-                        reverseComplementAdapterSequence: ADAPTER_SEQUENCE
+                        reverseComplementAdapterSequence: ADAPTER_SEQUENCE,
                 ]
         )
 
@@ -45,7 +45,7 @@ class LibraryPreparationKitServiceSpec extends MetadataFieldsServiceSpec<Library
                 [
                         shortDisplayName                : shortDisplayName,
                         adapterFile                     : adapterFile,
-                        reverseComplementAdapterSequence: adapterSequence
+                        reverseComplementAdapterSequence: adapterSequence,
                 ]
         )
 
@@ -65,7 +65,7 @@ class LibraryPreparationKitServiceSpec extends MetadataFieldsServiceSpec<Library
                 [
                         shortDisplayName                : shortDisplayName,
                         adapterFile                     : adapterFile,
-                        reverseComplementAdapterSequence: adapterSequence
+                        reverseComplementAdapterSequence: adapterSequence,
                 ]
         )
 
@@ -84,7 +84,7 @@ class LibraryPreparationKitServiceSpec extends MetadataFieldsServiceSpec<Library
                 [
                         shortDisplayName                : SHORT_DISPLAY_NAME,
                         adapterFile                     : ADAPTER_FILE,
-                        reverseComplementAdapterSequence: ADAPTER_SEQUENCE
+                        reverseComplementAdapterSequence: ADAPTER_SEQUENCE,
                 ]
         )
 
@@ -93,7 +93,7 @@ class LibraryPreparationKitServiceSpec extends MetadataFieldsServiceSpec<Library
                 [
                         shortDisplayName                : shortDisplayName,
                         adapterFile                     : adapterFile,
-                        reverseComplementAdapterSequence: adapterSequence
+                        reverseComplementAdapterSequence: adapterSequence,
                 ]
         )
 
@@ -113,7 +113,7 @@ class LibraryPreparationKitServiceSpec extends MetadataFieldsServiceSpec<Library
                 [
                         shortDisplayName                : SHORT_DISPLAY_NAME,
                         adapterFile                     : null,
-                        reverseComplementAdapterSequence: null
+                        reverseComplementAdapterSequence: null,
                 ]
         )
 
@@ -130,7 +130,7 @@ class LibraryPreparationKitServiceSpec extends MetadataFieldsServiceSpec<Library
                 [
                         shortDisplayName                : SHORT_DISPLAY_NAME,
                         adapterFile                     : null,
-                        reverseComplementAdapterSequence: null
+                        reverseComplementAdapterSequence: null,
                 ]
         )
 
@@ -150,7 +150,7 @@ class LibraryPreparationKitServiceSpec extends MetadataFieldsServiceSpec<Library
                 [
                         shortDisplayName                : SHORT_DISPLAY_NAME,
                         adapterFile                     : null,
-                        reverseComplementAdapterSequence: null
+                        reverseComplementAdapterSequence: null,
                 ]
         )
 
@@ -167,7 +167,7 @@ class LibraryPreparationKitServiceSpec extends MetadataFieldsServiceSpec<Library
                 [
                         shortDisplayName                : SHORT_DISPLAY_NAME,
                         adapterFile                     : null,
-                        reverseComplementAdapterSequence: null
+                        reverseComplementAdapterSequence: null,
                 ]
         )
 

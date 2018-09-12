@@ -212,7 +212,7 @@ class QAResultStatisticsService {
         String path = processedMergedBamFileService.qaResultTempDestinationDirectory(processedMergedBamFile)
         Map statisticFiles = [
             'small': path + "/" + FileNames.QA_RESULT_OVERVIEW,
-            'extended': path + "/" + FileNames.QA_RESULT_OVERVIEW_EXTENDED
+            'extended': path + "/" + FileNames.QA_RESULT_OVERVIEW_EXTENDED,
         ]
         return statisticFiles
     }
@@ -240,7 +240,7 @@ class QAResultStatisticsService {
             MOCK_FULL_NAME,
             SAMPLE_TYPE,
             RUN_ID,
-            LANE
+            LANE,
         ]
 
         List<String> sortOrderSmallWholeGenomeCoverage = sortOrderGeneralInformation + [
@@ -265,7 +265,7 @@ class QAResultStatisticsService {
             DUPLICATES,
             INSERT_SIZE_SD,
             INSERT_SIZE_MEDIAN,
-            INSERT_SIZE_MEAN
+            INSERT_SIZE_MEAN,
         ]
 
         List<String> sortOrderSmall = []
@@ -281,7 +281,7 @@ class QAResultStatisticsService {
 
         List<String> sortOrderExtendedExome = [
             TARGET_MAPPED_BASES,
-            ALL_MAPPED_BASES
+            ALL_MAPPED_BASES,
         ]
 
         List<String> sortOrderExtendedGeneral = [
@@ -299,7 +299,7 @@ class QAResultStatisticsService {
                 MAPPED_LOW_QUALITY_MATE_1,
                 MAPPED_LOW_QUALITY_MATE_2,
                 MAPPED_QUALITY_LONG_MATE_1,
-                MAPPED_QUALITY_LONG_MATE_2
+                MAPPED_QUALITY_LONG_MATE_2,
         ]
         List<String> sortOrderExtended = []
         if (seqType.name.equals(SeqTypeNames.EXOME.seqTypeName)) {

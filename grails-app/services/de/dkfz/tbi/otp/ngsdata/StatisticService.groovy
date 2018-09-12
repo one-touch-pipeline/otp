@@ -208,7 +208,7 @@ WHERE
         data.each {
             values << [
                     Days.daysBetween(firstDateLocal, new LocalDate(it[0])).days,
-                    count += multiple ? (it[1] ?: 0) : 1
+                    count += multiple ? (it[1] ?: 0) : 1,
             ]
         }
 

@@ -298,7 +298,7 @@ class ProjectOverviewService {
                     track.seqCenterName,
                     SeqPlatform.get(track.seqPlatformId).toString(),
                     track.laneCount,
-                    track.sum_N_BasePairsGb
+                    track.sum_N_BasePairsGb,
             ]
             queryList.add(queryListSingleRow)
         }

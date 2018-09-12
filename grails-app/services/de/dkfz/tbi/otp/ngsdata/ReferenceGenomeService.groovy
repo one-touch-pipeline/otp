@@ -189,8 +189,7 @@ class ReferenceGenomeService {
                 gcContentFile(mergingWorkPackage),
                 new File(mergingWorkPackage.referenceGenome.geneticMapFileX),
                 new File(mergingWorkPackage.referenceGenome.knownHaplotypesFileX),
-                new File(mergingWorkPackage.referenceGenome.knownHaplotypesLegendFileX)
-
+                new File(mergingWorkPackage.referenceGenome.knownHaplotypesLegendFileX),
         ].each {
             LsdfFilesService.ensureFileIsReadableAndNotEmpty(it)
         }

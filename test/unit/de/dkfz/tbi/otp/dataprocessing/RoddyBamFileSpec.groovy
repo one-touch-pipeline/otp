@@ -79,7 +79,7 @@ class RoddyBamFileSpec extends Specification {
         given:
         SeqTrack seqTrack = DomainFactory.createSeqTrackWithDataFiles(roddyBamFile.workPackage as MergingWorkPackage, [
                 libraryName          : libraryName,
-                normalizedLibraryName: normalizedName
+                normalizedLibraryName: normalizedName,
         ])
         roddyBamFile.seqTracks.add(seqTrack)
         roddyBamFile.numberOfMergedLanes = 2

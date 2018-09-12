@@ -26,7 +26,7 @@ class TargetIntervalsImplTest {
             "chr2",
             "chr3",
             "chr4",
-            "chr5"
+            "chr5",
         ]
         targetIntervalsImpl = new TargetIntervalsImpl(bedFilePath, referenceGenomeEntryNames)
     }
@@ -108,7 +108,7 @@ class TargetIntervalsImplTest {
             "chr1": [new Interval(0L, 100L)],
             "chr2": [new Interval(32L, 105L)],
             "chr3": [new Interval(10000000L, 249250621L)],
-            "chr4": [new Interval(5L, 49l)]
+            "chr4": [new Interval(5L, 49l)],
         ]
         Map<String, List<Interval>> intervalListAct = targetIntervalsImpl.parseBedFile(bedFilePath)
         assertEquals(intervalListExp, intervalListAct)
@@ -128,7 +128,7 @@ class TargetIntervalsImplTest {
         Map<String, List<Interval>> intervalListExp = [
             "chr1": [new Interval(0L, 100L), new Interval(150L, 300L)],
             "chr2": [new Interval(32L, 105L)],
-            "chr3": [new Interval(10000000L, 249250621L)]
+            "chr3": [new Interval(10000000L, 249250621L)],
         ]
         Map<String, List<Interval>> intervalListAct = targetIntervalsImpl.parseBedFile(bedFilePath)
         assertEquals(intervalListExp, intervalListAct)
@@ -143,7 +143,7 @@ class TargetIntervalsImplTest {
         Map<String, List<Interval>> intervalListExp = [
             "chr1": [new Interval(0L, 100L), new Interval(150L, 300L)],
             "chr2": [new Interval(32L, 105L)],
-            "chr3": [new Interval(10000000L, 249250621L)]
+            "chr3": [new Interval(10000000L, 249250621L)],
         ]
         Map<String, List<Interval>> intervalListAct = targetIntervalsImpl.parseBedFile(bedFilePath)
         assertEquals(intervalListExp, intervalListAct)
@@ -158,7 +158,7 @@ class TargetIntervalsImplTest {
         Map<String, List<Interval>> intervalListExp = [
             "chr1": [new Interval(0L, 100L), new Interval(301L, 300L)],
             "chr2": [new Interval(32L, 105L)],
-            "chr3": [new Interval(10000000L, 249250621L)]
+            "chr3": [new Interval(10000000L, 249250621L)],
         ]
         Map<String, List<Interval>> intervalListAct = targetIntervalsImpl.parseBedFile(bedFilePath)
         assertEquals(intervalListExp, intervalListAct)
@@ -176,7 +176,7 @@ class TargetIntervalsImplTest {
         Map<String, List<Interval>> map = [
             "chr1": [new Interval(0L, 100L), new Interval(150L, 300L)],
             "chr2": [new Interval(32L, 105L)],
-            "chr3": [new Interval(10000000L, 249250621L)]
+            "chr3": [new Interval(10000000L, 249250621L)],
         ]
         targetIntervalsImpl.validateBedFileContent(null, map)
     }
@@ -191,7 +191,7 @@ class TargetIntervalsImplTest {
         Map<String, List<Interval>> map = [
             "chr1": [new Interval(0L, 100L), new Interval(150L, 300L)],
             "chr2": [new Interval(32L, 105L)],
-            "chr3": [new Interval(10000000L, 249250621L)]
+            "chr3": [new Interval(10000000L, 249250621L)],
         ]
         targetIntervalsImpl.validateBedFileContent(referenceGenomeEntryNames, map)
     }
@@ -202,7 +202,7 @@ class TargetIntervalsImplTest {
             "chr1": [new Interval(0L, 100L), new Interval(150L, 300L)],
             "chr2": [new Interval(32L, 105L)],
             "chr3": [new Interval(10000000L, 249250621L)],
-            "chr6": [new Interval(100L, 200L)]
+            "chr6": [new Interval(100L, 200L)],
         ]
         targetIntervalsImpl.validateBedFileContent(referenceGenomeEntryNames, map)
     }

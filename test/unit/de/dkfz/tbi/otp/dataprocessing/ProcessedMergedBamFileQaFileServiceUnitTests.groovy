@@ -60,7 +60,7 @@ class ProcessedMergedBamFileQaFileServiceUnitTests {
 
         return [
             qualityAssessmentMergedPass,
-            processedMergedBamFileQaFileService
+            processedMergedBamFileQaFileService,
         ]
     }
 

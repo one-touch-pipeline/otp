@@ -27,7 +27,6 @@ class PrivacyPolicyController {
                 contactDataDataPrivacyOfficer: contactDataDataPrivacyOfficer,
                 disableMenu                  : disableMenu,
                 disableAccept                : disableAccept,
-
         ]
     }
 

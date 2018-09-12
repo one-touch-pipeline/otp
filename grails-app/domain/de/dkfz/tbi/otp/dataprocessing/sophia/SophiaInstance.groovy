@@ -14,7 +14,7 @@ class SophiaInstance extends BamFilePairAnalysis implements ProcessParameterObje
     private final static String COMBINED_PLOT_FILE_SUFFIX = "filtered.tsv_score_3_scaled_merged.pdf"
 
     static hasMany = [
-            roddyExecutionDirectoryNames: String
+            roddyExecutionDirectoryNames: String,
     ]
 
 

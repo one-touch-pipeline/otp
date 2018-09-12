@@ -33,27 +33,27 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
                     analysisType           : OtrsTicket.ProcessingStep.INDEL,
                     createRoddyBamFile     : "createIndelCallingInstanceWithRoddyBamFiles",
                     completeCallingInstance: "completeIndelCallingInstance",
-                    processingStatus       : "indelProcessingStatus"
+                    processingStatus       : "indelProcessingStatus",
             ], [
                     analysisType           : OtrsTicket.ProcessingStep.SNV,
                     createRoddyBamFile     : "createRoddySnvInstanceWithRoddyBamFiles",
                     completeCallingInstance: "completeSnvCallingInstance",
-                    processingStatus       : "snvProcessingStatus"
+                    processingStatus       : "snvProcessingStatus",
             ], [
                     analysisType           : OtrsTicket.ProcessingStep.SOPHIA,
                     createRoddyBamFile     : "createSophiaInstanceWithRoddyBamFiles",
                     completeCallingInstance: "completeSophiaInstance",
-                    processingStatus       : "sophiaProcessingStatus"
+                    processingStatus       : "sophiaProcessingStatus",
             ], [
                     analysisType           : OtrsTicket.ProcessingStep.ACESEQ,
                     createRoddyBamFile     : "createAceseqInstanceWithRoddyBamFiles",
                     completeCallingInstance: "completeAceseqInstance",
-                    processingStatus       : "aceseqProcessingStatus"
+                    processingStatus       : "aceseqProcessingStatus",
             ], [
                     analysisType           : OtrsTicket.ProcessingStep.RUN_YAPSA,
                     createRoddyBamFile     : "createRunYapsaInstanceWithRoddyBamFiles",
                     completeCallingInstance: "completeRunYapsaInstance",
-                    processingStatus       : "runYapsaProcessingStatus"
+                    processingStatus       : "runYapsaProcessingStatus",
             ],
     ]*.asImmutable().asImmutable()
 

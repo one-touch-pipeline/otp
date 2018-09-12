@@ -29,7 +29,6 @@ class MergingCriteriaController {
                 allSeqPlatformsWithoutGroup          : allSeqPlatformsWithoutGroup,
                 allUsedSpecificSeqPlatforms          : allUsedSpecificSeqPlatforms,
                 dontAllowCopyingAll                  : seqPlatformGroups*.seqPlatforms.flatten().intersect(allUsedSpecificSeqPlatforms) as Boolean,
-
         ]
     }
 

@@ -78,7 +78,7 @@ class ProcessedAlignmentFileServiceUnitTests {
         AlignmentPass alignmentPass = DomainFactory.createAlignmentPass()
 
         ProcessedBamFile processedBamFile = ProcessedBamFile.build([
-            alignmentPass: alignmentPass
+            alignmentPass: alignmentPass,
         ] )
 
         countQaFiles.times {
@@ -90,7 +90,7 @@ class ProcessedAlignmentFileServiceUnitTests {
 
         countProcessedSaiFiles.times {
             ProcessedSaiFile.build([
-                alignmentPass: alignmentPass
+                alignmentPass: alignmentPass,
             ])
         }
 
@@ -220,7 +220,7 @@ class ProcessedAlignmentFileServiceUnitTests {
 
         if (createSaiFile) {
             ProcessedSaiFile.build([
-                alignmentPass: alignmentPass
+                alignmentPass: alignmentPass,
             ])
         }
 

@@ -29,7 +29,7 @@ class SeqScan implements Entity {
     static belongsTo = [
         sample : Sample,
         seqType : SeqType,
-        seqPlatform : SeqPlatform
+        seqPlatform : SeqPlatform,
     ]
 
     static constraints = {

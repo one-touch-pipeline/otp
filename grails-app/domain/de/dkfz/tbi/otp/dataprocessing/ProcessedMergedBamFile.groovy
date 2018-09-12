@@ -11,7 +11,7 @@ import org.hibernate.*
 class ProcessedMergedBamFile extends AbstractMergedBamFile implements ProcessParameterObject {
 
     static belongsTo = [
-        mergingPass: MergingPass
+        mergingPass: MergingPass,
     ]
 
     static constraints = {

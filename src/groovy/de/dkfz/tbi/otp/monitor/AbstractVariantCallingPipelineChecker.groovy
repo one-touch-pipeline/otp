@@ -192,7 +192,7 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
                         or bamFile2.coverage < ${minCoverage}
                     )
             """, [
-                samplePair: samplePairs
+                samplePair: samplePairs,
         ])
 
 

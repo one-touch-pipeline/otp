@@ -70,7 +70,7 @@ class ExecuteRoddySnvJob extends AbstractExecutePanCanJob<RoddySnvCallingInstanc
         executeRoddyCommandService.correctPermissionsAndGroups(roddySnvCallingInstance, roddySnvCallingInstance.project.realm)
 
         List<File> directories = [
-                roddySnvCallingInstance.workExecutionStoreDirectory
+                roddySnvCallingInstance.workExecutionStoreDirectory,
         ]
         directories.addAll(roddySnvCallingInstance.workExecutionDirectories)
 

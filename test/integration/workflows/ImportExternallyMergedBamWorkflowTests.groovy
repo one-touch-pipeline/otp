@@ -213,7 +213,7 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase {
                 [
                         it.bamFileName,
                         it.baiFileName,
-                        ALL_FILES
+                        ALL_FILES,
                 ].flatten().each {
                     checkThatFileExistAndIsNotLink(fs.getPath(baseDirectory.absolutePath, it as String))
                 }

@@ -26,7 +26,7 @@ class ImportProcess implements Entity, ProcessParameterObject {
     Set<ExternallyProcessedMergedBamFile> externallyProcessedMergedBamFiles
 
     static hasMany = [
-            externallyProcessedMergedBamFiles: ExternallyProcessedMergedBamFile
+            externallyProcessedMergedBamFiles: ExternallyProcessedMergedBamFile,
     ]
 
     static constraints = {

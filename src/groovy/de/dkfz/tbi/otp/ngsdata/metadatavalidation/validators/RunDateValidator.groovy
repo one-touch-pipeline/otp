@@ -16,7 +16,7 @@ class RunDateValidator extends SingleValueValidator<MetadataValidationContext> i
     Collection<String> getDescriptions() {
         return [
                 "The run date has the yyyy-MM-dd format.",
-                "The run date must not be from the future."
+                "The run date must not be from the future.",
         ]
     }
 

@@ -44,7 +44,7 @@ class ProcessedMergedBamFileServiceTests {
 
         configService = new TestConfigService([
                 (OtpProperty.PATH_PROJECT_ROOT)   : testDirectory.absolutePath + '/root',
-                (OtpProperty.PATH_PROCESSING_ROOT): testDirectory.absolutePath + '/processing'
+                (OtpProperty.PATH_PROCESSING_ROOT): testDirectory.absolutePath + '/processing',
         ])
 
         baseDir = new File(directory)
@@ -468,7 +468,7 @@ class ProcessedMergedBamFileServiceTests {
                 DomainFactory.createMergingSet(status: MergingSet.State.PROCESSED), [
                 qualityAssessmentStatus: QaProcessingStatus.FINISHED,
                 fileOperationStatus: FileOperationStatus.NEEDS_PROCESSING,
-                status: AbstractBamFile.State.DECLARED
+                status: AbstractBamFile.State.DECLARED,
         ])
     }
 }

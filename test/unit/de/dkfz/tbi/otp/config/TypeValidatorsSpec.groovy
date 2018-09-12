@@ -237,7 +237,7 @@ class TypeValidatorsSpec extends Specification {
                 CENTER_B,
         ].each {
             DomainFactory.createSeqCenter([
-                    name: it
+                    name: it,
             ])
         }
     }

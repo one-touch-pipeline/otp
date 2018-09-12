@@ -12,7 +12,7 @@ class MergingWorkPackageAlignmentProperty implements Entity {
 
 
     static belongsTo = [
-            mergingWorkPackage: MergingWorkPackage
+            mergingWorkPackage: MergingWorkPackage,
     ]
 
     static constraints = {

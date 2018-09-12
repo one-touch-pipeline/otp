@@ -36,27 +36,27 @@ class MonitorOutputCollectorIntegrationSpec extends Specification {
         Process process
         procesCount.times {
             process = DomainFactory.createProcess([
-                    jobExecutionPlan: jobExecutionPlan
+                    jobExecutionPlan: jobExecutionPlan,
             ])
             ProcessingStep processingStep = DomainFactory.createProcessingStep([
-                    process: process
+                    process: process,
             ])
             if (!noProcessUpdate) {
                 DomainFactory.createProcessingStepUpdate([
                         processingStep: processingStep,
-                        state         : ExecutionState.CREATED
+                        state         : ExecutionState.CREATED,
                 ])
                 if (hasFailure) {
                     DomainFactory.createProcessingStepUpdate([
                             processingStep: processingStep,
-                            state         : ExecutionState.FAILURE
+                            state         : ExecutionState.FAILURE,
                     ])
                 }
             }
             DomainFactory.createProcessParameter([
                     value    : seqTrack.id.longValue(),
                     className: SeqTrack.class.getName(),
-                    process  : processingStep.process
+                    process  : processingStep.process,
             ])
         }
         String workflowName = jobExecutionPlan.name

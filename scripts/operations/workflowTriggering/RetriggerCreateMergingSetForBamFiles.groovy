@@ -18,6 +18,7 @@ List<ProcessedBamFile> d = ProcessedBamFile.withCriteria {
 
 d.each { println "     ${it.alignmentPass.seqTrack.sample}" }
 
+
 /*
 d.each {
     it.status = AbstractBamFile.State.NEEDS_PROCESSING

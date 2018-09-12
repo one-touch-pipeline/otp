@@ -349,7 +349,7 @@ class RoddyBamFileUnitTests {
     void testFinalRoddyExecutionDirectories_allFine() {
         helperTestFinalRoddyExecutionDirectories([
                 'exec_123456_123456789_bla_bla',
-                'exec_654321_987654321_bla_bla'
+                'exec_654321_987654321_bla_bla',
         ])
     }
 

@@ -50,7 +50,7 @@ class ReferenceGenomeProjectSeqType implements Entity {
     Set<ReferenceGenomeProjectSeqTypeAlignmentProperty> alignmentProperties
 
     static hasMany = [
-            alignmentProperties: ReferenceGenomeProjectSeqTypeAlignmentProperty
+            alignmentProperties: ReferenceGenomeProjectSeqTypeAlignmentProperty,
     ]
 
     static constraints = {

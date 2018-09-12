@@ -155,7 +155,7 @@ class ProcessedMergedBamFileService {
     public ProcessedMergedBamFile mergedBamFileWithFinishedQA(short minPriority) {
         List<AbstractBamFile.State> disallowedStatesAbstractBamFile = [
             AbstractBamFile.State.NEEDS_PROCESSING,
-            AbstractBamFile.State.INPROGRESS
+            AbstractBamFile.State.INPROGRESS,
         ]
         List<Long> workPackageIdsOfFilesInTransfer = []
         List<ProcessedMergedBamFile> workPackagesOfFilesInTransfer = mergingWorkPackageService.workPackagesOfFilesInTransfer()

@@ -1506,7 +1506,7 @@ chmod 440 ${newDirectFileName}
                         pid: inputInformationOTP.oldPid,
                         sampleType: oldSampleType.name,
                         seqType: oldSeqType.name,
-                        libraryLayout: oldSeqType.libraryLayout
+                        libraryLayout: oldSeqType.libraryLayout,
                 ],
                 [
                         individual: newIndividual,
@@ -1515,7 +1515,7 @@ chmod 440 ${newDirectFileName}
                         pid: inputInformationOTP.newPid,
                         sampleType: newSampleType.name,
                         seqType: newSeqType.name,
-                        libraryLayout: newSeqType.libraryLayout
+                        libraryLayout: newSeqType.libraryLayout,
                 ],
                 "run: ${run.name}\nlane: ${inputInformationOTP.lane}"
         )

@@ -88,7 +88,7 @@ class CrashRecoveryServiceUnitTests {
             parameterTypeList = (1..COUNT_OF_ELEMENTS).collect {
                 ParameterType.build([
                     parameterUsage: ParameterUsage.OUTPUT,
-                    jobDefinition: jobDefinition
+                    jobDefinition: jobDefinition,
                 ])
             }
 
@@ -98,7 +98,7 @@ class CrashRecoveryServiceUnitTests {
                     parameterTypeList.collectEntries { parameterType ->
                         [
                             parameterType.id,
-                            "value: ${processingStep.id} ${parameterType.name}"
+                            "value: ${processingStep.id} ${parameterType.name}",
                         ]
                     }
                 ]
@@ -211,15 +211,13 @@ class CrashRecoveryServiceUnitTests {
         ProcessingStep step2 = ProcessingStep.build([
             process: step1.process,
             jobDefinition: JobDefinition.build([
-                plan: step1.jobDefinition.plan
+                plan: step1.jobDefinition.plan,
             ])
         ])
         step1.next = step2
         step2.previous = step1
         assert step1.save()
-        List ids = [
-            step1.id
-        ]
+        List ids = [ step1.id ]
 
         assert shouldFail(RuntimeException) {
             service.markJobsAsFinished(ids, parameters)
@@ -383,15 +381,13 @@ class CrashRecoveryServiceUnitTests {
         ProcessingStep step2 = ProcessingStep.build([
             process: step1.process,
             jobDefinition: JobDefinition.build([
-                plan: step1.jobDefinition.plan
+                plan: step1.jobDefinition.plan,
             ])
         ])
         step1.next = step2
         step2.previous = step1
         assert step1.save()
-        List ids = [
-            step1.id
-        ]
+        List ids = [ step1.id ]
 
         assert shouldFail(RuntimeException) {
             service.markJobsAsSucceeded(ids, parameters)
@@ -529,15 +525,13 @@ class CrashRecoveryServiceUnitTests {
         ProcessingStep step2 = ProcessingStep.build([
             process: step1.process,
             jobDefinition: JobDefinition.build([
-                plan: step1.jobDefinition.plan
+                plan: step1.jobDefinition.plan,
             ])
         ])
         step1.next = step2
         step2.previous = step1
         assert step1.save()
-        List ids = [
-            step1.id
-        ]
+        List ids = [ step1.id ]
 
         assert shouldFail(RuntimeException) {
             service.markJobsAsFailed(ids, ERROR_MESSAGE)
@@ -622,15 +616,13 @@ class CrashRecoveryServiceUnitTests {
         ProcessingStep step2 = ProcessingStep.build([
             process: step1.process,
             jobDefinition: JobDefinition.build([
-                plan: step1.jobDefinition.plan
+                plan: step1.jobDefinition.plan,
             ])
         ])
         step1.next = step2
         step2.previous = step1
         assert step1.save()
-        List ids = [
-            step1.id
-        ]
+        List ids = [ step1.id ]
 
         assert shouldFail(RuntimeException) {
             service.restartJobs(ids, ERROR_MESSAGE)

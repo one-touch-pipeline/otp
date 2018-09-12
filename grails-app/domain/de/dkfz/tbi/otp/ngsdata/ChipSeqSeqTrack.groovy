@@ -12,7 +12,7 @@ class ChipSeqSeqTrack extends SeqTrack {
     }
 
     static belongsTo = [
-            antibodyTarget: AntibodyTarget
+            antibodyTarget: AntibodyTarget,
     ]
 
     public String toString() {

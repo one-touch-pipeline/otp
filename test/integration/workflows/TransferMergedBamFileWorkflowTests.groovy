@@ -466,7 +466,7 @@ class TransferMergedBamFileWorkflowTests extends WorkflowTestCase {
             fileNameBaiFile1,
             fileNameBaiFile2,
             fileNameMergedBamFileQA1,
-            fileNameMergedBamFileQA2
+            fileNameMergedBamFileQA2,
         ]
         String cmdBuildFileStructure = files.collect {"echo -n \"${it}\" > ${it}"}.join " && "
         // Call "sync" to block termination of script until I/O is done
@@ -514,7 +514,7 @@ class TransferMergedBamFileWorkflowTests extends WorkflowTestCase {
             insertSizeMedian: 225.0,
             insertSizeRMS: 224.77537343891422,
             percentIncorrectPEorientation: 0.0038592457709288723,
-            percentReadPairsMapToDiffChrom: 0.11828206222955773
+            percentReadPairsMapToDiffChrom: 0.11828206222955773,
         ].each { key, value ->
             abstractQualityAssessment."${key}" = value
         }
@@ -615,7 +615,7 @@ class TransferMergedBamFileWorkflowTests extends WorkflowTestCase {
             "${destinationDirMergedBamFile}/control_pid_1_WHOLE_GENOME_PAIRED_merged.mdup.bai.md5sum",
             "${destinationDirQaResults}/MD5SUMS",
             "${destinationDirQaResults}/plot.jpg",
-            fastqFilesInMergedBamFile
+            fastqFilesInMergedBamFile,
         ])
     }
 

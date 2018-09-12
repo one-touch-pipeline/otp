@@ -47,7 +47,7 @@ class OverallQualityAssessmentMergedServiceTest extends AbstractIntegrationTest 
     @Test
     void testFindAllByProjectAndSeqType_admin() {
         List expected = [
-            overallQualityAssessmentMerged
+            overallQualityAssessmentMerged,
         ]
 
         SpringSecurityUtils.doWithAuth(ADMIN) {
@@ -59,7 +59,7 @@ class OverallQualityAssessmentMergedServiceTest extends AbstractIntegrationTest 
     @Test
     void testFindAllByProjectAndSeqType_operator() {
         List expected = [
-            overallQualityAssessmentMerged
+            overallQualityAssessmentMerged,
         ]
 
         SpringSecurityUtils.doWithAuth(OPERATOR) {
@@ -71,7 +71,7 @@ class OverallQualityAssessmentMergedServiceTest extends AbstractIntegrationTest 
     @Test
     void testFindAllByProjectAndSeqType_userWithAccess() {
         List expected = [
-            overallQualityAssessmentMerged
+            overallQualityAssessmentMerged,
         ]
         addUserWithReadAccessToProject(User.findByUsername(TESTUSER), overallQualityAssessmentMerged.project)
         SpringSecurityUtils.doWithAuth(TESTUSER) {

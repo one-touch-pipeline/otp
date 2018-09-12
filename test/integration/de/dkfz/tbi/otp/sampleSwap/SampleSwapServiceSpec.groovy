@@ -684,8 +684,7 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
         sampleSwapInfos1*.description ==
                 [
                         "Column 'antibody' of '1' can't change from '' to 'antibody' because 'seqType' is 'newSeqType' and not 'ChIP'.",
-                        "Column 'antibodyTarget' of '1' can't change from '' to '${antibodyTarget.name}' because 'seqType' is 'newSeqType' and not 'ChIP'."
-
+                        "Column 'antibodyTarget' of '1' can't change from '' to '${antibodyTarget.name}' because 'seqType' is 'newSeqType' and not 'ChIP'.",
                 ]
 
         sampleSwapData2.sampleSwapInfos.size() == 4
@@ -694,8 +693,7 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
         sampleSwapInfos2*.description ==
                 [
                         "Column 'antibody' of '2' can't change from '' to 'antibody' because 'seqType' is '${seqTrack11.seqType.name}' and not 'ChIP'.",
-                        "Column 'antibodyTarget' of '2' can't change from '' to '${antibodyTarget.name}' because 'seqType' is '${seqTrack11.seqType.name}' and not 'ChIP'."
-
+                        "Column 'antibodyTarget' of '2' can't change from '' to '${antibodyTarget.name}' because 'seqType' is '${seqTrack11.seqType.name}' and not 'ChIP'.",
                 ]
     }
 

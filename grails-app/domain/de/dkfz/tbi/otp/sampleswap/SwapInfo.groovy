@@ -15,11 +15,11 @@ class SwapInfo implements Entity {
 
     static hasMany = [
             seqTracks: SeqTrack,
-            fileSystemChanges: FileSystemChanges
+            fileSystemChanges: FileSystemChanges,
     ]
 
     static mappedBy = [
-            fileSystemChanges: "swapInfo"
+            fileSystemChanges: "swapInfo",
     ]
 
 

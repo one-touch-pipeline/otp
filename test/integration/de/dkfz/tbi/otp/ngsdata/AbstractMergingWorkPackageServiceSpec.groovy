@@ -24,7 +24,7 @@ class AbstractMergingWorkPackageServiceSpec extends Specification {
                     DomainFactory.createMergingWorkPackageForPipeline(pipelineName, [
                             seqType: seqType,
                             sample : DomainFactory.createSample([
-                                    individual: individual
+                                    individual: individual,
                             ])
                     ])
                 }
@@ -61,7 +61,7 @@ class AbstractMergingWorkPackageServiceSpec extends Specification {
                     DomainFactory.createMergingWorkPackageForPipeline(pipelineName, [
                             seqType       : seqType,
                             sample        : DomainFactory.createSample([
-                                    individual: individual
+                                    individual: individual,
                             ]),
                             antibodyTarget: antibodyTarget,
                     ])
@@ -95,7 +95,7 @@ class AbstractMergingWorkPackageServiceSpec extends Specification {
                                     individual: new Individual(
                                             project: sampleTypePerProject.project
                                     ),
-                                    sampleType: sampleTypePerProject.sampleType
+                                    sampleType: sampleTypePerProject.sampleType,
                             ]),
                     ),
                     new ExternalMergingWorkPackage(
@@ -103,7 +103,7 @@ class AbstractMergingWorkPackageServiceSpec extends Specification {
                                     individual: new Individual(
                                             project: sampleTypePerProject.project
                                     ),
-                                    sampleType: sampleTypePerProject.sampleType
+                                    sampleType: sampleTypePerProject.sampleType,
                             ]),
                     ),
             ]

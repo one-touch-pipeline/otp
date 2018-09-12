@@ -242,7 +242,7 @@ class LsdfFilesServiceTests {
                 insertSize: insertSize,
                 run: run,
                 sample: sample,
-                pipelineVersion: softwareTool
+                pipelineVersion: softwareTool,
                 ] + properties
         )
     }

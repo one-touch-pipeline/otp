@@ -194,7 +194,7 @@ class ExecuteRoddyIndelJobSpec extends Specification {
                 "VCF_NORMAL_HEADER_COL:${bamFileControl.sampleType.dirName}",
                 "VCF_TUMOR_HEADER_COL:${bamFileDisease.sampleType.dirName}",
                 "SEQUENCE_TYPE:${bamFileDisease.seqType.roddyName}",
-                "EXOME_CAPTURE_KIT_BEDFILE:${bedFile}"
+                "EXOME_CAPTURE_KIT_BEDFILE:${bedFile}",
         ]
 
 

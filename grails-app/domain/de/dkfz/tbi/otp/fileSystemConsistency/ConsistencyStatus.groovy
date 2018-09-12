@@ -33,6 +33,6 @@ class ConsistencyStatus implements Entity {
 
     static belongsTo = [
         consistencyCheck: ConsistencyCheck,
-        dataFile: DataFile
+        dataFile: DataFile,
     ]
 }

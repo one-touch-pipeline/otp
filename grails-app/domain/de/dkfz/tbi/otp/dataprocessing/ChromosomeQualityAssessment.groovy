@@ -16,7 +16,7 @@ class ChromosomeQualityAssessment extends QaJarQualityAssessment {
     String chromosomeName
 
     static belongsTo = [
-        qualityAssessmentPass: QualityAssessmentPass
+        qualityAssessmentPass: QualityAssessmentPass,
     ]
 
     static constraints = {

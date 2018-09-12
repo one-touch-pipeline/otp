@@ -35,7 +35,7 @@ class MergingSetAssignmentTests {
         Run run = DomainFactory.createRun()
 
         SoftwareTool softwareTool = DomainFactory.createSoftwareTool([
-                type: SoftwareTool.Type.ALIGNMENT
+                type: SoftwareTool.Type.ALIGNMENT,
         ])
 
         SeqTrack seqTrack = DomainFactory.createSeqTrack([

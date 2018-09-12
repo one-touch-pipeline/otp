@@ -85,7 +85,7 @@ class IndelQualityControl implements Entity, QcTrafficLightValue {
     }
 
     static belongsTo = [
-        indelCallingInstance: IndelCallingInstance
+        indelCallingInstance: IndelCallingInstance,
     ]
 
     static mapping = {

@@ -16,7 +16,7 @@ class MergedAlignmentDataFile implements Entity {
     long fileSize = 0
 
     static belongsTo = [
-        mergingLog: MergingLog
+        mergingLog: MergingLog,
     ]
 
     static constraints = {

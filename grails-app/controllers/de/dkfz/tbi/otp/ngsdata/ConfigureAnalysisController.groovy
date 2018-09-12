@@ -66,7 +66,7 @@ class ConfigureAnalysisController {
                 sampleTypes: sampleTypes,
                 seqTypes: seqTypes,
                 groupedDiseaseTypes: groupedDiseaseTypes,
-                groupedThresholds: groupedThresholds
+                groupedThresholds: groupedThresholds,
         ]
     }
 }

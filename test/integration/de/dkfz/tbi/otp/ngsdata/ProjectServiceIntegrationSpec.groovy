@@ -632,7 +632,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         PanCanAlignmentConfiguration configuration2 = createPanCanAlignmentConfiguration([
                 referenceGenome : "testReferenceGenome2",
                 statSizeFileName: "testStatSizeFileName2.tab",
-                configVersion   : 'v1_1'
+                configVersion   : 'v1_1',
         ])
 
         when:
@@ -1172,7 +1172,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         setup:
         RoddyConfiguration configuration = "createRoddy${analysisName}Configuration"()
         RoddyConfiguration configuration2 = "createRoddy${analysisName}Configuration"([
-                configVersion   : 'v1_1'
+                configVersion   : 'v1_1',
         ])
         if (analysisName in ["Sophia", "Aceseq"]) {
             ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType = DomainFactory.createReferenceGenomeProjectSeqType(
@@ -1228,7 +1228,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
 
 
         RoddyConfiguration configuration2 = createRoddySnvConfiguration([
-                configVersion   : 'v1_1'
+                configVersion   : 'v1_1',
         ])
 
         when:

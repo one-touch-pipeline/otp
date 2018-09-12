@@ -10,7 +10,7 @@ class HomeController {
         Map queryResult = homeService.projectQuery()
         return [
                 projectQuery: queryResult,
-                projectGroups: ["OTP"] + projectGroupService.availableProjectGroups()*.name
+                projectGroups: ["OTP"] + projectGroupService.availableProjectGroups()*.name,
         ]
     }
 }

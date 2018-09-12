@@ -8,7 +8,7 @@ import de.dkfz.tbi.otp.utils.*
 class IndelCallingInstance extends BamFilePairAnalysis implements ProcessParameterObject, Entity, RoddyAnalysisResult {
 
     static hasMany = [
-            roddyExecutionDirectoryNames: String
+            roddyExecutionDirectoryNames: String,
     ]
 
     /**

@@ -57,7 +57,7 @@ class CalculateFileChecksumMD5JobTests {
 
         configService = new TestConfigService([
                 (OtpProperty.PATH_PROJECT_ROOT)   : tmpDir.root.path,
-                (OtpProperty.PATH_PROCESSING_ROOT): tmpDir.root.path
+                (OtpProperty.PATH_PROCESSING_ROOT): tmpDir.root.path,
         ])
         calculateFileChecksumMD5Job.log = new NoOpLog()
         calculateFileChecksumMD5Job.configService = configService

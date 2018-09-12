@@ -54,7 +54,7 @@ class SeqTypeServiceSpec extends MetadataFieldsServiceSpec<SeqType> {
                         dirName      : dirName,
                         displayName  : SEQ_TYPE_DISPLAY_NAME,
                         libraryLayout: libraryLayout,
-                        singleCell   : singleCell
+                        singleCell   : singleCell,
                 ]
         )
 
@@ -76,7 +76,7 @@ class SeqTypeServiceSpec extends MetadataFieldsServiceSpec<SeqType> {
                         dirName      : dirName,
                         displayName  : SEQ_TYPE_DISPLAY_NAME,
                         libraryLayout: libraryLayouts,
-                        singleCell   : singleCell
+                        singleCell   : singleCell,
                 ]
         )
         then:

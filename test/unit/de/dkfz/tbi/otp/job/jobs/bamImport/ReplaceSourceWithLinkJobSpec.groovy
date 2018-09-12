@@ -146,7 +146,7 @@ ln -sf [^ ]+\\/subDirectory\\/file.txt [^ ]+\\/subDirectory\\/file.txt
         DomainFactory.createProcessParameter([
                 process  : step.process,
                 value    : importProcess.id.toString(),
-                className: ImportProcess.class.name
+                className: ImportProcess.class.name,
         ])
 
         linkingJob.configService = configService
@@ -165,7 +165,7 @@ ln -sf [^ ]+\\/subDirectory\\/file.txt [^ ]+\\/subDirectory\\/file.txt
         createHelperObjects()
         ExternallyProcessedMergedBamFile bamFile = importProcess.externallyProcessedMergedBamFiles[0]
         bamFile.furtherFiles = [
-                furtherFilePattern
+                furtherFilePattern,
         ]
 
         File targetDir1 = new File(mainDirectory, 'target1')

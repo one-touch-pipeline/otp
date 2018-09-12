@@ -16,7 +16,7 @@ class SeqCenter implements Entity {
 
     /** files in this directories may be linked */
     static hasMany = [
-            importDirsAllowLinking: String
+            importDirsAllowLinking: String,
     ]
 
     /** should meta data files be copied to the seq center inbox */

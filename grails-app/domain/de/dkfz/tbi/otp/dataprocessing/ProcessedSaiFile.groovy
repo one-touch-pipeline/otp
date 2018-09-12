@@ -15,7 +15,7 @@ class ProcessedSaiFile implements Entity {
 
     static belongsTo = [
         alignmentPass: AlignmentPass,
-        dataFile: DataFile
+        dataFile: DataFile,
     ]
 
     static constraints = {

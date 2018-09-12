@@ -63,7 +63,7 @@ class MetaDataFieldsController {
                             [
                                     SINGLE   : SeqType.findByNameAndLibraryLayoutAndSingleCell(it.name, SeqType.LIBRARYLAYOUT_SINGLE, it.singleCell) ? true : false,
                                     PAIRED   : SeqType.findByNameAndLibraryLayoutAndSingleCell(it.name, SeqType.LIBRARYLAYOUT_PAIRED, it.singleCell) ? true : false,
-                                    MATE_PAIR: SeqType.findByNameAndLibraryLayoutAndSingleCell(it.name, SeqType.LIBRARYLAYOUT_MATE_PAIR, it.singleCell) ? true : false
+                                    MATE_PAIR: SeqType.findByNameAndLibraryLayoutAndSingleCell(it.name, SeqType.LIBRARYLAYOUT_MATE_PAIR, it.singleCell) ? true : false,
                             ],
                     displayName   : it.displayName,
                     importAliases : SeqType.findAllByName(it.name)*.importAlias?.flatten()?.unique()?.sort()?.join(' | '),
@@ -85,7 +85,7 @@ class MetaDataFieldsController {
                     [
                             shortDisplayName                : cmd.shortDisplayName,
                             adapterFile                     : cmd.adapterFile,
-                            reverseComplementAdapterSequence: cmd.reverseComplementAdapterSequence
+                            reverseComplementAdapterSequence: cmd.reverseComplementAdapterSequence,
                     ])
         })
     }

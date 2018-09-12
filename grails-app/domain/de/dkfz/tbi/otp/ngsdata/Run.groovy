@@ -26,7 +26,7 @@ class Run implements ProcessParameterObject, Entity {
 
     static belongsTo = [
         SeqCenter,
-        SeqPlatform
+        SeqPlatform,
     ]
 
     static constraints = {

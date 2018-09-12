@@ -13,7 +13,7 @@ class LaneNumberValidator extends SingleValueValidator<MetadataValidationContext
     @Override
     Collection<String> getDescriptions() {
         return [
-                'The lane number should be a single digit in the range of 1 to 8.'
+                'The lane number should be a single digit in the range of 1 to 8.',
         ]
     }
 

@@ -17,7 +17,7 @@ class MetaDataFile implements Entity {
     String md5sum
 
     static belongsTo = [
-        runSegment : RunSegment
+        runSegment : RunSegment,
     ]
     static constraints = {
         fileName(validator: { OtpPath.isValidPathComponent(it) })

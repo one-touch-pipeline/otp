@@ -24,7 +24,7 @@ class RnaRoddyAlignmentCheckerIntegrationSpec extends AbstractRoddyAlignmentChec
     @Override
     RoddyBamFile createRoddyBamFile(MergingWorkPackage mergingWorkPackage, Map properties = [:]) {
         DomainFactory.createRnaRoddyBamFile([
-                workPackage: mergingWorkPackage
+                workPackage: mergingWorkPackage,
         ] + properties)
     }
 

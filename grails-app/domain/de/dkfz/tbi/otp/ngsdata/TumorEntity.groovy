@@ -11,7 +11,7 @@ class TumorEntity implements Entity {
     }
 
     static hasMany = [
-            projects: Project
+            projects: Project,
     ]
 
     public String toString() {

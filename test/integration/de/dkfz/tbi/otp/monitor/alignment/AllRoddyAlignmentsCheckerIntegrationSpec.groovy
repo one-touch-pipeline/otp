@@ -25,7 +25,7 @@ class AllRoddyAlignmentsCheckerIntegrationSpec extends Specification {
             )
         }
         RnaRoddyBamFile rnaRoddyBamFile = DomainFactory.createRnaRoddyBamFile([
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED
+                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
         ])
 
         List<SeqTrack> seqTracks = [

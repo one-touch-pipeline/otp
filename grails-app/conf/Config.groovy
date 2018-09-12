@@ -8,11 +8,11 @@ grails.mime.file.extensions = true // enables the parsing of file extensions fro
 grails.mime.use.accept.header = false
 grails.mime.types = [ html: [
         'text/html',
-        'application/xhtml+xml'
+        'application/xhtml+xml',
     ],
     xml: [
         'text/xml',
-        'application/xml'
+        'application/xml',
     ],
     text: 'text/plain',
     js: 'text/javascript',
@@ -23,7 +23,7 @@ grails.mime.types = [ html: [
     all: '*/*',
     json: [
         'application/json',
-        'text/json'
+        'text/json',
     ],
     form: 'application/x-www-form-urlencoded',
     multipartForm: 'multipart/form-data'

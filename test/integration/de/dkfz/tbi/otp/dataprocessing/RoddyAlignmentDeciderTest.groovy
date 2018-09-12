@@ -39,7 +39,7 @@ public class RoddyAlignmentDeciderTest {
                 withdrawn: withdrawn,
                 md5sum: fileOperationStatus == FileOperationStatus.PROCESSED ? HelperUtils.randomMd5sum : null,
                 fileOperationStatus: fileOperationStatus,
-                fileSize: fileOperationStatus == FileOperationStatus.PROCESSED ? 10000 : -1
+                fileSize: fileOperationStatus == FileOperationStatus.PROCESSED ? 10000 : -1,
                 ]
         )
 

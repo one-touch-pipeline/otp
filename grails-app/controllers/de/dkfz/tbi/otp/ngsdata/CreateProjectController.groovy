@@ -54,7 +54,7 @@ class CreateProjectController {
             projectCategories: ProjectCategory.listOrderByName(),
             message: message,
             cmd: cmd,
-            hasErrors: hasErrors
+            hasErrors: hasErrors,
         ]
     }
 }

@@ -133,7 +133,7 @@ class QAResultStatisticsServiceTests {
                 length: 3210000,
                 lengthWithoutN: 2910000,
                 lengthRefChromosomes: 800,
-                lengthRefChromosomesWithoutN: 750
+                lengthRefChromosomesWithoutN: 750,
         ])
 
 
@@ -331,7 +331,7 @@ class QAResultStatisticsServiceTests {
             (QAResultStatisticsService.LANE): 'all_merged',
             (QAResultStatisticsService.RUN): 'all_merged',
             (QAResultStatisticsService.SEQTYPE): seqType,
-            (QAResultStatisticsService.LIBRARY_PREPARATION_KIT): null
+            (QAResultStatisticsService.LIBRARY_PREPARATION_KIT): null,
         ]
         // assertEquals will not DTRT here, we have to use the equals() method
         assertTrue expect == actual
@@ -356,7 +356,7 @@ class QAResultStatisticsServiceTests {
             (QAResultStatisticsService.LANE): 'all_merged',
             (QAResultStatisticsService.RUN): 'all_merged',
             (QAResultStatisticsService.SEQTYPE): seqType,
-            (QAResultStatisticsService.LIBRARY_PREPARATION_KIT): libraryPreparationKit
+            (QAResultStatisticsService.LIBRARY_PREPARATION_KIT): libraryPreparationKit,
         ]
         // assertEquals will not DTRT here, we have to use the equals() method
         assertTrue expect == actual

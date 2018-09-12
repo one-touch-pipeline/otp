@@ -96,7 +96,7 @@ class MetadataImportController {
                 ticketNumber         : cmd.ticketNumber,
                 seqCenterComment     : cmd.seqCenterComment,
                 align                : cmd.align,
-                automaticNotification: cmd.automaticNotification
+                automaticNotification: cmd.automaticNotification,
         ])
     }
 
@@ -205,7 +205,7 @@ class MetadataImportController {
                     params: [
                             'ticketNumber': otrsTicketNumber,
                             'paths'       : e.allPaths,
-                            'directory'   : MetadataImportService.MIDTERM_ILSE_DIRECTORY_STRUCTURE_BEAN_NAME
+                            'directory'   : MetadataImportService.MIDTERM_ILSE_DIRECTORY_STRUCTURE_BEAN_NAME,
                     ])
             )
         }

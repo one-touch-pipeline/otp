@@ -35,7 +35,7 @@ class ExecuteMergedMappingFilteringSortingToCoverageTableJob extends AbstractJob
             chromosomeMappingFilePath,
             genomeCoverageFilePath,
             mappedFilteredSortedCoverageDataFilePath,
-            overwriteOutput
+            overwriteOutput,
         ]
         String application = "coverageFileMFS.sh"
         String cmd = application

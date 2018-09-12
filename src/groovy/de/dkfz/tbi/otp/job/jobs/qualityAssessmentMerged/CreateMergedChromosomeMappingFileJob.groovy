@@ -49,7 +49,7 @@ class CreateMergedChromosomeMappingFileJob extends AbstractEndStateAwareJobImpl 
         Map data = [
             chromosomeIdentifierMap: chromosomeIdentifierMap,
             filterChromosomes: filterChromosomes,
-            sortedChromosomeIdentifiers: sortedChromosomeIdentifiers
+            sortedChromosomeIdentifiers: sortedChromosomeIdentifiers,
         ]
         String fileContents = (data as JSON).toString(true)
         String filePath = processedMergedBamFileQaFileService.chromosomeMappingFilePath(pass)

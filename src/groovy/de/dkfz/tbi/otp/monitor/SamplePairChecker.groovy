@@ -193,7 +193,7 @@ class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
                             or mergingWorkPackage2 = bamFile.workPackage
                     )
             """, [
-                bamFiles: bamFiles
+                bamFiles: bamFiles,
         ])
     }
 
@@ -240,7 +240,7 @@ class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
                         )
                     )
             """, [
-                samplePair: allSamplePairs
+                samplePair: allSamplePairs,
         ])
     }
 
@@ -305,7 +305,7 @@ class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
                         or ${testBamFileIsBlocked('2')}
                     )
             """, [
-                samplePair: allSamplePairs
+                samplePair: allSamplePairs,
         ])
     }
 

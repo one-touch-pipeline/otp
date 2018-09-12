@@ -77,7 +77,7 @@ class ExecuteRoddySophiaJob extends AbstractExecutePanCanJob<SophiaInstance> imp
         executeRoddyCommandService.correctPermissionsAndGroups(sophiaInstance, sophiaInstance.project.realm)
 
         List<File> directories = [
-                sophiaInstance.workExecutionStoreDirectory
+                sophiaInstance.workExecutionStoreDirectory,
         ]
         directories.addAll(sophiaInstance.workExecutionDirectories)
 

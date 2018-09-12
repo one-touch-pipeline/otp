@@ -70,7 +70,7 @@ class LibPrepKitAdapterValidatorSpec extends Specification {
                 individual: identifierWithIndividualRoddyConfig.individual,
                 seqType: DomainFactory.createWholeGenomeBisulfiteSeqType(),
                 pipeline: DomainFactory.createPanCanPipeline(),
-                adapterTrimmingNeeded: true
+                adapterTrimmingNeeded: true,
         ])
 
         SampleIdentifier identifierWithProjectRoddyConfig = DomainFactory.createSampleIdentifier()
@@ -80,7 +80,7 @@ class LibPrepKitAdapterValidatorSpec extends Specification {
                 project: identifierWithProjectRoddyConfig.project,
                 seqType: DomainFactory.createWholeGenomeBisulfiteSeqType(),
                 pipeline: DomainFactory.createPanCanPipeline(),
-                adapterTrimmingNeeded: true
+                adapterTrimmingNeeded: true,
         ])
 
         SampleIdentifier identifierRnaWithProjectRoddyConfig = DomainFactory.createSampleIdentifier()
@@ -90,14 +90,14 @@ class LibPrepKitAdapterValidatorSpec extends Specification {
                 project: identifierRnaWithProjectRoddyConfig.project,
                 seqType: DomainFactory.createRnaPairedSeqType(),
                 pipeline: DomainFactory.createRnaPipeline(),
-                adapterTrimmingNeeded: true
+                adapterTrimmingNeeded: true,
         ])
 
         DomainFactory.createRoddyWorkflowConfig([
                 project: DomainFactory.createProject(name: "project01", alignmentDeciderBeanName: AlignmentDeciderBeanNames.PAN_CAN_ALIGNMENT.bean),
                 seqType: DomainFactory.createWholeGenomeBisulfiteSeqType(),
                 pipeline: DomainFactory.createPanCanPipeline(),
-                adapterTrimmingNeeded: true
+                adapterTrimmingNeeded: true,
         ])
 
         SampleIdentifier identifierWithOtpAlignment = DomainFactory.createSampleIdentifier()

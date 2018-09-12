@@ -54,7 +54,7 @@ class ClusterJobJobTypeSpecificController {
                 'minCov'   : data.minCov ? "${data.minCov.round(2)} (min)" : "",
                 'maxCov'   : data.maxCov ? "${data.maxCov.round(2)} (max)" : "",
                 'avgCov'   : data.avgCov ? "${data.avgCov?.round(2)} (avg)" : "",
-                'medianCov': data.medianCov ? "${data.medianCov?.round(2)} (median)" : ""
+                'medianCov': data.medianCov ? "${data.medianCov?.round(2)} (median)" : "",
         ]
 
         render dataToRender as JSON

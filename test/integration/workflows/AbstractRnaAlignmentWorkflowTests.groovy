@@ -41,7 +41,6 @@ abstract class AbstractRnaAlignmentWorkflowTests extends AbstractRoddyAlignmentW
                 configVersion: "v2_0",
         ], [
                 mouseData: true,
-
         ])
         createSeqTrack("readGroup1")
 

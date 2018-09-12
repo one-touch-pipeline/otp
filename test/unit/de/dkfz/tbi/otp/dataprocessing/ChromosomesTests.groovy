@@ -23,7 +23,7 @@ class ChromosomesTests {
             Chromosomes.CHR_6, Chromosomes.CHR_7, Chromosomes.CHR_8, Chromosomes.CHR_9, Chromosomes.CHR_10,
             Chromosomes.CHR_11, Chromosomes.CHR_12, Chromosomes.CHR_13, Chromosomes.CHR_14, Chromosomes.CHR_15,
             Chromosomes.CHR_16, Chromosomes.CHR_17, Chromosomes.CHR_18, Chromosomes.CHR_19, Chromosomes.CHR_20,
-            Chromosomes.CHR_21, Chromosomes.CHR_22, Chromosomes.CHR_X, Chromosomes.CHR_Y, Chromosomes.CHR_M
+            Chromosomes.CHR_21, Chromosomes.CHR_22, Chromosomes.CHR_X, Chromosomes.CHR_Y, Chromosomes.CHR_M,
         ]
 
         numericChromosomes = [
@@ -31,11 +31,11 @@ class ChromosomesTests {
             Chromosomes.CHR_6, Chromosomes.CHR_7, Chromosomes.CHR_8, Chromosomes.CHR_9, Chromosomes.CHR_10,
             Chromosomes.CHR_11, Chromosomes.CHR_12, Chromosomes.CHR_13, Chromosomes.CHR_14, Chromosomes.CHR_15,
             Chromosomes.CHR_16, Chromosomes.CHR_17, Chromosomes.CHR_18, Chromosomes.CHR_19, Chromosomes.CHR_20,
-            Chromosomes.CHR_21, Chromosomes.CHR_22
+            Chromosomes.CHR_21, Chromosomes.CHR_22,
         ]
 
         characterChromosomes = [
-            Chromosomes.CHR_X, Chromosomes.CHR_Y, Chromosomes.CHR_M
+            Chromosomes.CHR_X, Chromosomes.CHR_Y, Chromosomes.CHR_M,
         ]
 
         allChromosomesLabels = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19",

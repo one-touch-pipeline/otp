@@ -378,7 +378,7 @@ class DataProcessingFilesServiceUnitTests {
         assert TEST_FILE_CONTENT_LENGTH * 3 == dataProcessingFilesService.deleteProcessingFiles(project, dir, [
             file.name,
             file2.name,
-            file3.name
+            file3.name,
         ])
         assert !file.exists()
         assert !file2.exists()
@@ -446,7 +446,7 @@ class DataProcessingFilesServiceUnitTests {
         assert TEST_FILE_CONTENT_LENGTH * 3 == dataProcessingFilesService.deleteProcessingFilesAndDirectory(project, dir, [
             file.name,
             file2.name,
-            file3.name
+            file3.name,
         ])
         assert !file.exists()
         assert !file2.exists()
@@ -519,7 +519,7 @@ class DataProcessingFilesServiceUnitTests {
     void testDeleteProcessingFiles_checkConsistencyWithDatabaseForDeletionIsFalse() {
         createTestFile()
         processedBamFile = ProcessedBamFile.build([
-            fileExists: true
+            fileExists: true,
         ])
         dataProcessingFilesService.metaClass.checkConsistencyWithDatabaseForDeletion = {final def dbFile, final File fsFile -> false} //mock method
 
@@ -761,11 +761,11 @@ class DataProcessingFilesServiceUnitTests {
 
         Project project = Project.build([
             name: "projectName",
-            realm: realm
+            realm: realm,
         ])
 
         Individual individual = Individual.build([
-            project: project
+            project: project,
         ])
 
         String pid = individual.pid

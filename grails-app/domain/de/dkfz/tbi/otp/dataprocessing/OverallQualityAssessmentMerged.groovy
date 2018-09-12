@@ -12,7 +12,7 @@ import org.hibernate.*
 class OverallQualityAssessmentMerged extends QaJarQualityAssessment implements QcTrafficLightValue {
 
     static belongsTo = [
-        qualityAssessmentMergedPass: QualityAssessmentMergedPass
+        qualityAssessmentMergedPass: QualityAssessmentMergedPass,
     ]
 
     static constraints = {

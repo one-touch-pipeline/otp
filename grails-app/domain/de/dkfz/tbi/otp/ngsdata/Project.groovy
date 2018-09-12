@@ -52,7 +52,7 @@ class Project implements Commentable, Entity {
     ]
 
     static mappedBy = [
-            projectInfos: "project"
+            projectInfos: "project",
     ]
 
     Comment comment
@@ -71,7 +71,7 @@ class Project implements Commentable, Entity {
 
     static belongsTo = [
             ProjectGroup,
-            Realm
+            Realm,
     ]
 
     static constraints = {

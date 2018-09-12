@@ -11,7 +11,7 @@ import org.hibernate.*
 class QualityAssessmentMergedPass implements ProcessParameterObject, Entity {
 
     static belongsTo = [
-            abstractMergedBamFile: AbstractMergedBamFile
+            abstractMergedBamFile: AbstractMergedBamFile,
     ]
     AbstractMergedBamFile abstractMergedBamFile
 

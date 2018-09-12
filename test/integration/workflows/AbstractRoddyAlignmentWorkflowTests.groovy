@@ -462,7 +462,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
                 seqTracks          : seqTracks,
                 containedSeqTracks : seqTracks,
                 fileOperationStatus: FileOperationStatus.PROCESSED,
-                withdrawn          : false
+                withdrawn          : false,
         ] + bamFileProperties)
     }
 
@@ -476,7 +476,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
                 seqTracks          : [secondSeqTrack],
                 containedSeqTracks : [firstSeqTrack, secondSeqTrack],
                 fileOperationStatus: FileOperationStatus.PROCESSED,
-                withdrawn          : false
+                withdrawn          : false,
         ] + latestBamFileProperties)
     }
 

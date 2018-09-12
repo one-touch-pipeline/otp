@@ -25,7 +25,7 @@ class PicardMarkDuplicatesMetrics implements Entity {
     long estimated_library_size
 
     static belongsTo = [
-        abstractBamFile: AbstractBamFile
+        abstractBamFile: AbstractBamFile,
     ]
 
     static constraints = {

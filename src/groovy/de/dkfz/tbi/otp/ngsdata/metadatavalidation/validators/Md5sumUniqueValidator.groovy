@@ -14,7 +14,7 @@ class Md5sumUniqueValidator extends ValueTuplesValidator<AbstractMetadataValidat
     @Override
     Collection<String> getDescriptions() {
         return [
-                'Each MD5 sum is unique.'
+                'Each MD5 sum is unique.',
         ]
     }
 

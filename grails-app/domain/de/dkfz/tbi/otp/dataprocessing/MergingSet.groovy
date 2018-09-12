@@ -50,7 +50,7 @@ class MergingSet implements Entity {
     State status = State.DECLARED
 
     static belongsTo = [
-        mergingWorkPackage: MergingWorkPackage
+        mergingWorkPackage: MergingWorkPackage,
     ]
 
     Project getProject() {

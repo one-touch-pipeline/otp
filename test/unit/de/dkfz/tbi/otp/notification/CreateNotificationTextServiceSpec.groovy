@@ -64,7 +64,6 @@ class CreateNotificationTextServiceSpec extends Specification {
                     processingStep        : INDEL,
                     customProcessingStatus: 'indelProcessingStatus',
                     notification          : "indelNotification",
-
             ], [
                     type                  : "snv",
                     processingStep        : SNV,
@@ -105,7 +104,6 @@ class CreateNotificationTextServiceSpec extends Specification {
                     multipleProjects: false,
                     processingStatus: ProcessingStatus.WorkflowProcessingStatus.PARTLY_DONE_MIGHT_DO_MORE,
             ],
-
     ]
 
     static List pairAnalysisContentsPermutation
@@ -526,7 +524,7 @@ ${expectedAlign}"""
 
         Map data1 = createData([
                 sampleId1                : 'sampleId1',
-                alignmentProcessingStatus: ProcessingStatus.WorkflowProcessingStatus.ALL_DONE
+                alignmentProcessingStatus: ProcessingStatus.WorkflowProcessingStatus.ALL_DONE,
         ])
         Map data2 = createData(
                 sampleId1: 'sampleId2a',
@@ -825,8 +823,7 @@ samplePairsNotProcessed: ${expectedSamplePairsNotProcessed}
                 seqType         : seqType,
                 referenceGenome : referenceGenome,
                 statSizeFileName: "statSizeFileName_${DomainFactory.counter++}.tab",
-                pipeline        : DomainFactory.createPanCanPipeline()
-
+                pipeline        : DomainFactory.createPanCanPipeline(),
         ])
 
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile([workPackage: mergingWorkPackage])

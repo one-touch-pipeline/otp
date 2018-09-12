@@ -19,7 +19,7 @@ class MergingPass implements ProcessParameterObject, Entity {
     String description
 
     static belongsTo = [
-        mergingSet: MergingSet
+        mergingSet: MergingSet,
     ]
 
     static constraints = {

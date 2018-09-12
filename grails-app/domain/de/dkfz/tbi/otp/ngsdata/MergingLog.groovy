@@ -16,7 +16,7 @@ class MergingLog implements Entity {
 
     static belongsTo = [
         alignmentParams : AlignmentParams,
-        seqScan : SeqScan
+        seqScan : SeqScan,
     ]
 
     static constraints = {

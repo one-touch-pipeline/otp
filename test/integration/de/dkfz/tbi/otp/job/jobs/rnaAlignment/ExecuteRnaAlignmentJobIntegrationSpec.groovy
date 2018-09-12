@@ -24,7 +24,7 @@ class ExecuteRnaAlignmentJobIntegrationSpec extends IntegrationSpec {
     void setup() {
         configService = new TestConfigService([
                 (OtpProperty.PATH_PROJECT_ROOT)   : tmpDir.root.path,
-                (OtpProperty.PATH_PROCESSING_ROOT): tmpDir.root.path
+                (OtpProperty.PATH_PROCESSING_ROOT): tmpDir.root.path,
         ])
     }
 

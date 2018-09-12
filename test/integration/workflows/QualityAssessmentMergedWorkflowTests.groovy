@@ -151,7 +151,7 @@ class QualityAssessmentMergedWorkflowTests extends WorkflowTestCase {
                 ["chr9", "9", 141213431, 120143431, "CHROMOSOME"],
                 ["chrM", "M", 16571, 16571, "MITOCHONDRIAL"],
                 ["chrX", "X", 155270560, 151100560, "CHROMOSOME"],
-                ["chrY", "Y", 59373566, 25653566, "CHROMOSOME"]
+                ["chrY", "Y", 59373566, 25653566, "CHROMOSOME"],
         ]
 
         // init counter for overall length values

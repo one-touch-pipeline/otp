@@ -31,19 +31,19 @@ class SampleTypePerProjectIntegrationSpec extends IntegrationSpec {
 
         sampleProject1Type1 = DomainFactory.createSample([
                 individual: DomainFactory.createIndividual([project: project1]),
-                sampleType: sampleType1
+                sampleType: sampleType1,
         ])
         sampleProject1Type2 = DomainFactory.createSample([
                 individual: DomainFactory.createIndividual([project: project1]),
-                sampleType: sampleType2
+                sampleType: sampleType2,
         ])
         sampleProject2Type1 = DomainFactory.createSample([
                 individual: DomainFactory.createIndividual([project: project2]),
-                sampleType: sampleType1
+                sampleType: sampleType1,
         ])
         sampleProject2Type2 = DomainFactory.createSample([
                 individual: DomainFactory.createIndividual([project: project2]),
-                sampleType: sampleType2
+                sampleType: sampleType2,
         ])
     }
 

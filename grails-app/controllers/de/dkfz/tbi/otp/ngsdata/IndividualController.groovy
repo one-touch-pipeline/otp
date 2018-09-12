@@ -135,7 +135,7 @@ class IndividualController {
                 messageType: messageType,
                 oldProject: cmd?.project,
                 oldContent: cmd?.sampleText ?: "${PID},${SAMPLE_TYPE},${SAMPLE_IDENTIFIER}\n",
-                oldDelimiter: cmd?.delimiter
+                oldDelimiter: cmd?.delimiter,
         ]
     }
 

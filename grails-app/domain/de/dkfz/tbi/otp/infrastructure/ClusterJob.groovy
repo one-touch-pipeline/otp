@@ -150,7 +150,7 @@ class ClusterJob implements Entity {
     Individual individual
 
     static hasMany = [
-            dependencies: ClusterJob
+            dependencies: ClusterJob,
     ]
 
 

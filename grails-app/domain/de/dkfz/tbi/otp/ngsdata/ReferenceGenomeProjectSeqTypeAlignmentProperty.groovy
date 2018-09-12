@@ -12,7 +12,7 @@ class ReferenceGenomeProjectSeqTypeAlignmentProperty implements Entity {
 
 
     static belongsTo = [
-            referenceGenomeProjectSeqType: ReferenceGenomeProjectSeqType
+            referenceGenomeProjectSeqType: ReferenceGenomeProjectSeqType,
     ]
 
     static constraints = {

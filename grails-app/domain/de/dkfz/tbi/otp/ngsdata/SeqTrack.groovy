@@ -121,7 +121,7 @@ class SeqTrack implements ProcessParameterObject, Entity {
     ]
 
     static hasMany = [
-            logMessages: LogMessage
+            logMessages: LogMessage,
     ]
     static constraints = {
         laneId(validator: { OtpPath.isValidPathComponent(it) })

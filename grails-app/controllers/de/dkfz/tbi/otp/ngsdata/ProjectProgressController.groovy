@@ -34,7 +34,7 @@ class ProjectProgressController {
         [
             startDate: new Date().minus(8).format('yyyy-MM-dd'),
             endDate: new Date().format('yyyy-MM-dd'),
-            projects: Project.list()*.name
+            projects: Project.list()*.name,
         ]
     }
 

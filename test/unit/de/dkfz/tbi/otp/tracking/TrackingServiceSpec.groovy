@@ -62,7 +62,7 @@ class TrackingServiceSpec extends Specification {
                 null,
                 '',
                 'Some Cooment',
-                'Some\nMultiline\nComment'
+                'Some\nMultiline\nComment',
         ]
     }
 
@@ -93,7 +93,7 @@ class TrackingServiceSpec extends Specification {
         given:
         OtrsTicket otrsTicket = DomainFactory.createOtrsTicket([
                 ticketNumber    : TICKET_NUMBER,
-                seqCenterComment: comment1
+                seqCenterComment: comment1,
         ])
         TrackingService trackingService = new TrackingService()
 

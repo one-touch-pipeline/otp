@@ -210,7 +210,7 @@ class ProcessesController {
                 latest.processingStep.jobDefinition.name,
                 [state: latestState, error: latest.error ? latest.error.errorMessage : null, id: latest.processingStep.id],
                 process.comment?.comment?.encodeAsHTML(),
-                [actions: actions]
+                [actions: actions],
             ]
         }
         render dataToRender as JSON
@@ -298,7 +298,7 @@ class ProcessesController {
                 data.lastUpdate,
                 data.duration,
                 [state: data.state, error: data.error],
-                [actions: actions]
+                [actions: actions],
             ]
         }
         render dataToRender as JSON
@@ -365,7 +365,7 @@ class ProcessesController {
                 update.id,
                 update.date,
                 update.state,
-                update.error
+                update.error,
             ]
         }
         render dataToRender as JSON
@@ -396,7 +396,7 @@ class ProcessesController {
                 param.type.name,
                 param.type.description,
                 formatParamValue(param),
-                jobName
+                jobName,
             ]
         }
         render dataToRender as JSON

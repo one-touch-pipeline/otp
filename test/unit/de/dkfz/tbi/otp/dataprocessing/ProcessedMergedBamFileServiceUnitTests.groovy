@@ -176,7 +176,7 @@ class ProcessedMergedBamFileServiceUnitTests {
         ProcessedMergedBamFile processedMergedBamFile = DomainFactory.createProcessedMergedBamFile([
             md5sum: SOME_MD5SUM_VALUE,
             fileOperationStatus: FileOperationStatus.PROCESSED,
-            fileSize: 10000
+            fileSize: 10000,
         ])
 
         ProcessedMergedBamFileService processedMergedBamFileService = new ProcessedMergedBamFileService()
@@ -240,7 +240,7 @@ class ProcessedMergedBamFileServiceUnitTests {
 
         return [
             processedMergedBamFile,
-            processedMergedBamFileService
+            processedMergedBamFileService,
         ]
     }
 

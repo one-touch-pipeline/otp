@@ -10,7 +10,7 @@ import org.hibernate.*
 class MergingSetAssignment implements Entity {
     static belongsTo = [
         mergingSet: MergingSet,
-        bamFile: AbstractBamFile
+        bamFile: AbstractBamFile,
     ]
 
     static constraints = {

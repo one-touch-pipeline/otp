@@ -44,13 +44,13 @@ class MergingPassServiceTests {
 
     private static List<ProcessedMergedBamFile> createProcessedMergedBamFileWithLaterProcessedPass(Map mapLaterBamFile = [:], Map mapPassOfLaterBamFile = [:], Map mapMergingSet = [:]) {
         MergingSet mergingSet = DomainFactory.createMergingSet([
-            status: MergingSet.State.PROCESSED
+            status: MergingSet.State.PROCESSED,
         ] + mapMergingSet)
 
         ProcessedMergedBamFile processedMergedBamFile = ProcessedMergedBamFile.build([
             mergingPass: DomainFactory.createMergingPass([
                 mergingSet: mergingSet,
-                identifier: 2
+                identifier: 2,
             ]),
             workPackage: mergingSet.mergingWorkPackage,
         ])
@@ -58,7 +58,7 @@ class MergingPassServiceTests {
         ProcessedMergedBamFile processedMergedBamFileLaterPass = ProcessedMergedBamFile.build([
             mergingPass: DomainFactory.createMergingPass([
                 mergingSet: mergingSet,
-                identifier: 3
+                identifier: 3,
             ] + mapPassOfLaterBamFile),
             qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
             workPackage: mergingSet.mergingWorkPackage,
@@ -69,7 +69,7 @@ class MergingPassServiceTests {
 
     private static List<ProcessedMergedBamFile> createProcessedMergedBamFileWithFurtherMerged(Map bamFileMap = [:], Map passMap = [:], Map mergingSetMap = [:], Map furtherMergedBamFileMap = [:], Map furtherMergedPassMap = [:], Map furtherMergedSetMap = [:], Map mergingSetAssignmentMap = [:] ) {
         MergingSet mergingSet = DomainFactory.createMergingSet([
-            status: MergingSet.State.PROCESSED
+            status: MergingSet.State.PROCESSED,
         ] + mergingSetMap)
 
         ProcessedMergedBamFile processedMergedBamFile = ProcessedMergedBamFile.build([
@@ -84,7 +84,7 @@ class MergingPassServiceTests {
         MergingSet furtherMergedSet = DomainFactory.createMergingSet([
             mergingWorkPackage: processedMergedBamFile.mergingWorkPackage,
             identifier: MergingSet.nextIdentifier(processedMergedBamFile.mergingWorkPackage),
-            status: MergingSet.State.PROCESSED
+            status: MergingSet.State.PROCESSED,
         ] + furtherMergedSetMap)
 
         MergingSetAssignment mergingSetAssignment = MergingSetAssignment.build([
@@ -223,7 +223,7 @@ class MergingPassServiceTests {
         //since the property createDate is always set by grails, I use HQL to change the value
         processedMergedBamFiles[0].executeUpdate("update ProcessedMergedBamFile set dateCreated = :dateCreated where id = :id", [
             dateCreated: new Date().plus(-2),
-            id: processedMergedBamFiles[0].id
+            id: processedMergedBamFiles[0].id,
         ])
 
         assert LENGTH_NO_BAMFILE == mergingPassService.deleteOldMergingProcessingFiles(createdBeforeDate)
@@ -326,7 +326,7 @@ class MergingPassServiceTests {
         //since the property createDate is always set by grails, I use HQL to change the value
         processedMergedBamFiles[0].executeUpdate("update ProcessedMergedBamFile set dateCreated = :dateCreated where id = :id", [
             dateCreated: new Date().plus(-2),
-            id: processedMergedBamFiles[0].id
+            id: processedMergedBamFiles[0].id,
         ])
 
         assert LENGTH_NO_BAMFILE == mergingPassService.deleteOldMergingProcessingFiles(createdBeforeDate)

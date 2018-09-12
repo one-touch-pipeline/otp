@@ -6,7 +6,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 class ProcessedBamFile extends AbstractFileSystemBamFile implements ProcessParameterObject {
 
     static belongsTo = [
-        alignmentPass: AlignmentPass
+        alignmentPass: AlignmentPass,
     ]
 
     static constraints = {

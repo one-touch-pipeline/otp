@@ -87,7 +87,6 @@ class PanCanChipSeqAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkflow
                 dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
                 libraryPreparationKit: exactlyOneElement(LibraryPreparationKit.findAll()),
                 kitInfoReliability   : InformationReliability.KNOWN,
-
         ])
 
         DataFile.findAllBySeqTrack(secondSeqTrack).eachWithIndex { DataFile dataFile, int index ->

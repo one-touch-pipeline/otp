@@ -138,7 +138,7 @@ coverage {
             // tests
             'test/**',
             // Controller
-            '**/*Controller*'
+            '**/*Controller*',
     ]
     xml = true
 }

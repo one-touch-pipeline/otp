@@ -34,7 +34,7 @@ abstract class AbstractRoddyAlignmentCheckerIntegrationSpec extends Specificatio
             SeqTrack seqTrack = DomainFactory.createSeqTrack([
                     seqType              : it,
                     libraryPreparationKit: properties.hasProperty('libraryPreparationKit') ? properties.libraryPreparationKit :
-                            it.isExome() ? DomainFactory.createLibraryPreparationKit() : null
+                            it.isExome() ? DomainFactory.createLibraryPreparationKit() : null,
             ])
             DomainFactory.createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
             return seqTrack
@@ -86,7 +86,7 @@ abstract class AbstractRoddyAlignmentCheckerIntegrationSpec extends Specificatio
 
     RoddyBamFile createRoddyBamFile(MergingWorkPackage mergingWorkPackage, Map properties = [:]) {
         DomainFactory.createRoddyBamFile([
-                workPackage: mergingWorkPackage
+                workPackage: mergingWorkPackage,
         ] + properties)
     }
 
@@ -220,7 +220,7 @@ abstract class AbstractRoddyAlignmentCheckerIntegrationSpec extends Specificatio
             [true, false].collect { boolean withDrawnRoddyBamFile ->
                 createRoddyBamFiles([
                         fileOperationStatus: state,
-                        withdrawn          : withDrawnRoddyBamFile
+                        withdrawn          : withDrawnRoddyBamFile,
                 ]).collect { RoddyBamFile roddyBamFile ->
                     if ((showWithdrawn || !roddyBamFile.withdrawn) &&
                             (showFinished || roddyBamFile.fileOperationStatus != AbstractMergedBamFile.FileOperationStatus.PROCESSED)) {
@@ -260,7 +260,7 @@ abstract class AbstractRoddyAlignmentCheckerIntegrationSpec extends Specificatio
         List<SeqTrack> noMergingWorkPackage = createSeqTracksWithConfig()
 
         List<RoddyBamFile> oldInstanceRunning = createRoddyBamFiles([
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.DECLARED
+                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.DECLARED,
         ], [
                 needsProcessing: true,
         ])
@@ -272,7 +272,7 @@ abstract class AbstractRoddyAlignmentCheckerIntegrationSpec extends Specificatio
             ])
         }
         List<RoddyBamFile> finishedRoddyBamFilesWithNeedsProcessing = createRoddyBamFiles([
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED
+                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
         ], [
                 needsProcessing: true,
         ])
@@ -282,39 +282,39 @@ abstract class AbstractRoddyAlignmentCheckerIntegrationSpec extends Specificatio
         List<MergingWorkPackage> mergingWorkPackagesWithoutBam = []
         List<SeqTrack> mergingWorkPackageWithoutBam = createSeqTracksWithConfig().each {
             mergingWorkPackagesWithoutBam << createMergingWorkPackage(it, [
-                    needsProcessing: false
+                    needsProcessing: false,
             ])
         }
 
         List<RoddyBamFile> roddyBamFilesDeclared = createRoddyBamFiles([
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.DECLARED
+                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.DECLARED,
         ], [
-                needsProcessing: false
+                needsProcessing: false,
         ])
 
         List<RoddyBamFile> roddyBamFilesNeedsProcessing = createRoddyBamFiles([
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING
+                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING,
         ], [
-                needsProcessing: false
+                needsProcessing: false,
         ])
 
         List<RoddyBamFile> roddyBamFilesInProgress = createRoddyBamFiles([
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.INPROGRESS
+                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.INPROGRESS,
         ], [
-                needsProcessing: false
+                needsProcessing: false,
         ])
 
         List<RoddyBamFile> roddyBamFilesProcessed = createRoddyBamFiles([
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED
+                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
         ], [
-                needsProcessing: false
+                needsProcessing: false,
         ])
 
         List<RoddyBamFile> roddyBamFilesWithdrawn = createRoddyBamFiles([
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.DECLARED,
                 withdrawn          : true,
         ], [
-                needsProcessing: false
+                needsProcessing: false,
         ])
 
         List<SeqTrack> seqTracks = [
@@ -330,7 +330,7 @@ abstract class AbstractRoddyAlignmentCheckerIntegrationSpec extends Specificatio
                         roddyBamFilesInProgress,
                         roddyBamFilesProcessed,
                         roddyBamFilesWithdrawn,
-                ].flatten()*.containedSeqTracks
+                ].flatten()*.containedSeqTracks,
         ].flatten()
 
         List<RoddyBamFile> finishedRoddyBamFiles = roddyBamFilesProcessed

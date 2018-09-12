@@ -247,7 +247,7 @@ class QcThresholdSpec extends Specification {
         where:
         externalValue << [
                 0,
-                null
+                null,
         ]
     }
 }

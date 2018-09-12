@@ -13,7 +13,7 @@ class AlignmentLog implements Entity {
 
     static belongsTo = [
         alignmentParams : AlignmentParams,
-        seqTrack : SeqTrack
+        seqTrack : SeqTrack,
     ]
 
     static constraints = {

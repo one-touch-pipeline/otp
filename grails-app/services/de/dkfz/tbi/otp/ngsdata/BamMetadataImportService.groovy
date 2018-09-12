@@ -148,7 +148,7 @@ class BamMetadataImportService {
         return [
                 context : context,
                 importProcess: importProcess,
-                project : outputProject
+                project : outputProject,
         ]
     }
 

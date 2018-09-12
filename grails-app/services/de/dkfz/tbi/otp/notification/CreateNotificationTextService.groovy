@@ -297,7 +297,7 @@ class CreateNotificationTextService {
                     action    : action,
                     absolute  : true,
                     params    : [
-                            'project': it
+                            'project': it,
                     ]
             ])
         }.join('\n')

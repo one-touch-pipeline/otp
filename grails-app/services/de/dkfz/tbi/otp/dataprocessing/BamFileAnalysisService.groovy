@@ -10,7 +10,7 @@ abstract class BamFileAnalysisService implements BamFileAnalysisServiceTrait {
     AbstractMergedBamFileService abstractMergedBamFileService
 
     static final List<AnalysisProcessingStates> processingStatesNotProcessable = [
-            AnalysisProcessingStates.IN_PROGRESS
+            AnalysisProcessingStates.IN_PROGRESS,
     ]
 
     /**

@@ -55,10 +55,10 @@ class SeqPlatform implements Entity {
 
     String fullName() {
         return [
-            name,
-            seqPlatformModelLabel?.name,
-            sequencingKitLabel?.name ?: 'unknown kit'
-            ].findAll().join(' ')
+                name,
+                seqPlatformModelLabel?.name,
+                sequencingKitLabel?.name ?: 'unknown kit',
+        ].findAll().join(' ')
     }
 
     static mapping = {

@@ -18,7 +18,7 @@ class IndelController extends AbstractAnalysisController {
                     id: cmd.bamFilePairAnalysis.id,
                     pid: cmd.bamFilePairAnalysis.individual.pid,
                     plotType: cmd.plotType,
-                    error: null
+                    error: null,
             ]
         }
         return [

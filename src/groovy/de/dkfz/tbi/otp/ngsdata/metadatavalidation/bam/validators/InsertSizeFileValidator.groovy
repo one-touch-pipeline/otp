@@ -17,7 +17,7 @@ class InsertSizeFileValidator extends ValueTuplesValidator<BamMetadataValidation
     @Override
     Collection<String> getDescriptions() {
         return [
-                "The insert size file must be an absolute path"
+                "The insert size file must be an absolute path",
         ]
     }
 

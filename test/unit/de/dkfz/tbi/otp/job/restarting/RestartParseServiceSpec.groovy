@@ -242,7 +242,7 @@ class RestartParseServiceSpec extends Specification {
         Job job = GroovyMock(Job) {
             countClusterLog * failedOrNotFinishedClusterJobs() >> [
                     new ClusterJob([
-                            jobLog: TestCase.uniqueNonExistentPath.absolutePath
+                            jobLog: TestCase.uniqueNonExistentPath.absolutePath,
                     ])
             ]
             _ * getLog() >> Mock(Log) {
@@ -348,7 +348,7 @@ class RestartParseServiceSpec extends Specification {
         Job job = GroovyMock(Job) {
             _ * failedOrNotFinishedClusterJobs() >> [
                     new ClusterJob([
-                            jobLog: CreateFileHelper.createFile(temporaryFolder.newFile(), cluster).absolutePath
+                            jobLog: CreateFileHelper.createFile(temporaryFolder.newFile(), cluster).absolutePath,
                     ])
             ]
             _ * getLog() >> Mock(Log) {

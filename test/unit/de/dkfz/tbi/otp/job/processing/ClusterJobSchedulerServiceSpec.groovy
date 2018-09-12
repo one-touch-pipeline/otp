@@ -225,7 +225,7 @@ ${jobId}.host.long-doma  someUser    fast     r160224_18005293    --      1     
         ])
         return [
                 job,
-                clusterJobSchedulerService
+                clusterJobSchedulerService,
         ]
     }
 

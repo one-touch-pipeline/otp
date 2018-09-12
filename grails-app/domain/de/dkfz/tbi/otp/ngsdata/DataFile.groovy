@@ -78,7 +78,7 @@ class DataFile implements Commentable, Entity {
         seqTrack : SeqTrack,
         mergingLog : MergingLog,
         alignmentLog : AlignmentLog,
-        fileType : FileType
+        fileType : FileType,
     ]
 
     static constraints = {

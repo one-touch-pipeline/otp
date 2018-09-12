@@ -10,7 +10,7 @@ import java.text.*
 class AceseqInstance extends BamFilePairAnalysis implements ProcessParameterObject, Entity, RoddyAnalysisResult {
 
     static hasMany = [
-            roddyExecutionDirectoryNames: String
+            roddyExecutionDirectoryNames: String,
     ]
 
     /**

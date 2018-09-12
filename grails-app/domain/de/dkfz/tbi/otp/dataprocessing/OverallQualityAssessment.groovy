@@ -10,7 +10,7 @@ import org.hibernate.*
 class OverallQualityAssessment extends QaJarQualityAssessment {
 
     static belongsTo = [
-        qualityAssessmentPass: QualityAssessmentPass
+        qualityAssessmentPass: QualityAssessmentPass,
     ]
 
     static constraints = {

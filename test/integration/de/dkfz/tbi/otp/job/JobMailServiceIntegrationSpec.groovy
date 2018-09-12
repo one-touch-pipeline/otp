@@ -34,7 +34,7 @@ class JobMailServiceIntegrationSpec extends Specification {
         DomainFactory.createDataFile([
                 seqTrack: seqTrack,
                 runSegment: DomainFactory.createRunSegment([
-                        otrsTicket: otrsTicket
+                        otrsTicket: otrsTicket,
                 ])
         ])
 
@@ -44,7 +44,7 @@ class JobMailServiceIntegrationSpec extends Specification {
         DomainFactory.createProcessingOptionLazy([
                 name: ProcessingOption.OptionName.TICKET_SYSTEM_URL,
                 type: null,
-                value: "http:/localhost:8080"
+                value: "http:/localhost:8080",
         ])
         String url = otrsTicket.getUrl()
 
@@ -57,7 +57,7 @@ class JobMailServiceIntegrationSpec extends Specification {
             ClusterJob clusterJob = DomainFactory.createClusterJob([
                     realm         : realm,
                     processingStep: step,
-                    exitStatus    : ClusterJob.Status.COMPLETED
+                    exitStatus    : ClusterJob.Status.COMPLETED,
             ])
             completedClusterJobs << clusterJob
             File logFile = new File(jobStatusLoggingService.constructLogFileLocation(realm, step, clusterJob.clusterJobId))
@@ -70,7 +70,7 @@ class JobMailServiceIntegrationSpec extends Specification {
             failedClusterJobs << DomainFactory.createClusterJob([
                     realm         : realm,
                     processingStep: step,
-                    exitStatus    : ClusterJob.Status.FAILED
+                    exitStatus    : ClusterJob.Status.FAILED,
             ])
         }
 

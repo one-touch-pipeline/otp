@@ -17,7 +17,7 @@ class BamFilePathValidator extends SingleValueValidator<BamMetadataValidationCon
         return [
                 "The bam file must be an absolute path",
                 "The bam file path must end with '.bam'.",
-                "The bam file path must contain only legal characters."
+                "The bam file path must contain only legal characters.",
         ]
     }
 
