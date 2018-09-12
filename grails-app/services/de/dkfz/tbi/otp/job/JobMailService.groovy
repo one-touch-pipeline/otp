@@ -101,7 +101,7 @@ class JobMailService {
                     logFile            : clusterJob.jobLog,
 
                     exitStatus         : clusterJob.exitStatus,
-                    existCode          : clusterJob.exitCode,
+                    exitCode           : clusterJob.exitCode,
                     node               : clusterJob.node,
                     clusterStartCount  : clusterJob.startCount,
             ]
