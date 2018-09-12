@@ -1,20 +1,15 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.CommentService
-import de.dkfz.tbi.otp.security.User
-import grails.plugin.springsecurity.SpringSecurityUtils
-import org.springframework.security.access.prepost.PostAuthorize
-import org.springframework.security.access.prepost.PostFilter
-import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.security.acls.domain.BasePermission
-import org.springframework.security.core.userdetails.UserDetails
-import de.dkfz.tbi.otp.utils.ReferencedClass
+import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.utils.*
+import grails.plugin.springsecurity.*
 import org.joda.time.*
+import org.springframework.security.access.prepost.*
 
 class IndividualService {
-    def springSecurityService
-    def sampleIdentifierService
-    def projectService
+    SpringSecurityService springSecurityService
+    SampleIdentifierService sampleIdentifierService
+    ProjectService projectService
     CommentService commentService
 
     /**

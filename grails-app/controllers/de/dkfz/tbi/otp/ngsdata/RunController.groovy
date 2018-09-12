@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
-
+import de.dkfz.tbi.otp.ngsqc.FastqcResultsService
 import grails.converters.JSON
 import groovy.json.JsonSlurper
 import de.dkfz.tbi.otp.utils.DataTableCommand
@@ -8,10 +8,10 @@ import de.dkfz.tbi.otp.utils.DataTableCommand
 class RunController {
 
     ProjectService projectService
-    def lsdfFilesService
-    def runService
-    def fastqcResultsService
-    def seqCenterService
+    LsdfFilesService lsdfFilesService
+    RunService runService
+    FastqcResultsService fastqcResultsService
+    SeqCenterService seqCenterService
 
     def display = {
         redirect(action: "show", id: params.id)

@@ -5,7 +5,7 @@ import grails.plugin.springsecurity.annotation.Secured
 
 @Secured(['ROLE_ADMIN'])
 class ShutdownController {
-    def shutdownService
+    ShutdownService shutdownService
 
     def index() {
         if (shutdownService.shutdownPlanned) {
@@ -41,7 +41,7 @@ class ShutdownController {
             e.printStackTrace()
             ok = false
         }
-        def data = [success: ok]
+        Map data = [success: ok]
         render data as JSON
     }
 
@@ -55,13 +55,13 @@ class ShutdownController {
             e.printStackTrace()
             ok = false
         }
-        def data = [success: ok]
+        Map data = [success: ok]
         render data as JSON
     }
 
     def closeApplication() {
         shutdownService.destroy()
-        def data = [shutdown: true]
+        Map data = [shutdown: true]
         render data as JSON
     }
 }

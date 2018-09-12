@@ -58,13 +58,13 @@ class CrashRecoveryController {
         try {
             assert params.ids : 'No ids given'
             assert params.message : 'No message given'
-            List<Long> ids = params.ids.split(',').collect{it as long}
+            List<Long> ids = params.ids.split(',').collect { it as long }
             crashRecoveryService.markJobsAsFailed(ids, params.message)
         } catch (Throwable e) {
             success = false
             error = e.message
         }
-        def data = [success: success, error: error]
+        Map data = [success: success, error: error]
         render data as JSON
     }
 
@@ -74,13 +74,13 @@ class CrashRecoveryController {
         try {
             assert params.ids : 'No ids given'
             assert params.message : 'No message given'
-            List<Long> ids = params.ids.split(',').collect{it as long}
+            List<Long> ids = params.ids.split(',').collect { it as long }
             crashRecoveryService.restartJobs(ids, params.message)
         } catch (Throwable e) {
             success = false
             error = e.message
         }
-        def data = [success: success, error: error]
+        Map data = [success: success, error: error]
         render data as JSON
     }
 
@@ -96,17 +96,17 @@ class CrashRecoveryController {
 
     def startScheduler() {
         if (!crashRecoveryService.crashRecovery) {
-            def data = [success: false, error: "Not in Crash Recovery"]
+            Map data = [success: false, error: "Not in Crash Recovery"]
             render data as JSON
             return
         }
         schedulerService.startup()
-        def data = [success: !crashRecoveryService.crashRecovery]
+        Map data = [success: !crashRecoveryService.crashRecovery]
         render data as JSON
     }
 
     def parametersOfJob() {
-        List<Long> ids = params.ids.split(',').collect{it as long}
+        List<Long> ids = params.ids.split(',').collect { it as long }
         [parametersPerJobs: crashRecoveryService.getOutputParametersOfJobs(ids)]
     }
 
@@ -116,7 +116,7 @@ class CrashRecoveryController {
         try {
             assert params.ids : 'No ids given'
             assert params.parameters : 'No parameters given'
-            List<Long> ids = params.ids.split(',').collect{it as long}
+            List<Long> ids = params.ids.split(',').collect { it as long }
             def jsonParameters = JSON.parse(params["parameters"])
             Map parameters = ids.collectEntries{[(it): [:]]}
             jsonParameters.each {

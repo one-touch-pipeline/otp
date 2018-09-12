@@ -239,7 +239,7 @@ class SamplePair implements TimeStamped, Entity {
               SampleTypePerProject stpp1,
               SampleTypePerProject stpp2
             WHERE
-              ${mergingWorkPackageEqualProperties.collect{
+              ${mergingWorkPackageEqualProperties.collect {
                   "(mwp1.${it} = mwp2.${it} OR mwp1.${it} IS NULL AND mwp2.${it} IS NULL)"
               }.join(' AND\n')} AND
               mwp1.seqType IN :analysableSeqTypes AND

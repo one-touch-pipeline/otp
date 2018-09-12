@@ -308,7 +308,7 @@ class ProcessesController {
     }
 
     def restartWithProcess() {
-        def data = [success: true]
+        Map data = [success: true]
         StringBuilder stringBuilder = new StringBuilder()
         LogThreadLocal.withThreadLog(stringBuilder) {
             try {
@@ -349,7 +349,7 @@ class ProcessesController {
             ok = false
             error = e.message
         }
-        def data = [success: ok, error: error]
+        Map data = [success: ok, error: error]
         render data as JSON
     }
 

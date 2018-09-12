@@ -5,6 +5,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.utils.*
+import grails.plugin.springsecurity.SpringSecurityService
 import groovy.sql.*
 import org.springframework.beans.factory.annotation.*
 import org.springframework.context.*
@@ -18,23 +19,24 @@ import static org.springframework.util.Assert.*
 
 class SeqTrackService {
 
-    def fileTypeService
+    FileTypeService fileTypeService
+
     /**
      * Dependency Injection of Project Service.
      *
      * Needed for access control on data protected by Projects.
      */
-    def projectService
+    ProjectService projectService
     /**
      * Dependency Injection of LSDF File Service.
      *
      * Required for exporting the view by pid path of a datafile
      */
-    def lsdfFilesService
+    LsdfFilesService lsdfFilesService
     /**
      * Dependency Injection of Spring Security Service.
      */
-    def springSecurityService
+    SpringSecurityService springSecurityService
 
     @Autowired
     DataSource dataSource

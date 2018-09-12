@@ -1,7 +1,9 @@
+import grails.plugin.springsecurity.SpringSecurityService
+
 import javax.servlet.http.HttpServletResponse
 
 class ErrorsController {
-    def springSecurityService
+    SpringSecurityService springSecurityService
 
     def error403 = {
         response.setStatus HttpServletResponse.SC_FORBIDDEN

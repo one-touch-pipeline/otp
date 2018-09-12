@@ -1,13 +1,14 @@
 package de.dkfz.tbi.otp.administration
 
-import de.dkfz.tbi.otp.job.processing.ExecutionState
-import de.dkfz.tbi.otp.job.processing.ProcessService
-import de.dkfz.tbi.otp.job.processing.ProcessingStep
-import de.dkfz.tbi.otp.job.processing.ProcessingStepUpdate
-import de.dkfz.tbi.otp.security.User
-import java.util.concurrent.locks.ReentrantLock
-import org.springframework.beans.factory.DisposableBean
-import org.springframework.security.access.prepost.PreAuthorize
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.job.scheduler.*
+import de.dkfz.tbi.otp.security.*
+import grails.plugin.springsecurity.*
+import org.codehaus.groovy.grails.commons.*
+import org.springframework.beans.factory.*
+import org.springframework.security.access.prepost.*
+
+import java.util.concurrent.locks.*
 
 /**
  * Service to cleanly shutdown the running application.
@@ -23,20 +24,20 @@ class ShutdownService implements DisposableBean {
     /**
      * Dependency Injection of GrailsApplication.
      */
-    def grailsApplication
+    GrailsApplication grailsApplication
     /**
      * Dependency Injection of SchedulerService.
      * Required to suspend and resume the scheduler
      */
-    def schedulerService
+    SchedulerService schedulerService
     /**
      * Dependency Injection of SpringSecurityService
      */
-    def springSecurityService
+    SpringSecurityService springSecurityService
 
     ProcessService processService
 
-    def userService
+    UserService userService
 
     // all methods in this service contain critical sections to not start two shutdowns
     private final ReentrantLock lock = new ReentrantLock()

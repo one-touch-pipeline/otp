@@ -55,11 +55,11 @@ class DataFileController {
     def updateMetaData = {
         MetaDataEntry entry = metaDataService.getMetaDataEntryById(params.id as Long)
         if (!entry) {
-            def data = [error: g.message(code: "datafile.metadata.update.notFound", args: [params.id])]
+            Map data = [error: g.message(code: "datafile.metadata.update.notFound", args: [params.id])]
             render data as JSON
             return
         }
-        def data = [:]
+        Map data = [:]
         try {
             metaDataService.updateMetaDataEntry(entry, params.value)
             data.put("success", true)

@@ -1,16 +1,11 @@
-import grails.converters.JSON
-
-import javax.servlet.http.HttpServletResponse
-
-import grails.plugin.springsecurity.SpringSecurityUtils
-
-import org.springframework.security.authentication.AccountExpiredException
-import org.springframework.security.authentication.CredentialsExpiredException
-import org.springframework.security.authentication.DisabledException
-import org.springframework.security.authentication.LockedException
+import grails.converters.*
+import grails.plugin.springsecurity.*
+import org.springframework.security.authentication.*
 import org.springframework.security.core.context.SecurityContextHolder as SCH
-import org.springframework.security.web.WebAttributes
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+import org.springframework.security.web.*
+import org.springframework.security.web.authentication.*
+
+import javax.servlet.http.*
 
 class LoginController {
 
@@ -22,7 +17,7 @@ class LoginController {
     /**
      * Dependency injection for the springSecurityService.
      */
-    def springSecurityService
+    SpringSecurityService springSecurityService
 
     /**
      * Default action; redirects to 'defaultTargetUrl' if logged in, /login/auth otherwise.

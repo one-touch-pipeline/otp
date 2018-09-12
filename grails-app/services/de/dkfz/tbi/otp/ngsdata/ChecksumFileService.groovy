@@ -8,7 +8,7 @@ import static org.springframework.util.Assert.*
 
 class ChecksumFileService {
 
-    def lsdfFilesService
+    LsdfFilesService lsdfFilesService
 
     String pathToMd5File(DataFile file) {
         String path = lsdfFilesService.getFileFinalPath(file)

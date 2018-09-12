@@ -38,7 +38,7 @@ import de.dkfz.tbi.otp.monitor.alignment.*
 import de.dkfz.tbi.otp.ngsdata.*
 
 //name of runs
-def runString = """
+String runString = """
 #run 1
 #run 2
 
@@ -46,20 +46,20 @@ def runString = """
 
 
 //pid of patients
-def individualString ="""
+String individualString ="""
 #patient 1
 #patient 2
 
 """
 
-def ilseIdString ="""
+String ilseIdString ="""
 # ilse id1
 # ilse id2
 
 """
 
 //name of projects, can take some time depending of project(s)
-def projectString ="""
+String projectString ="""
 #project 1
 #project 2
 
@@ -112,8 +112,8 @@ String INDENT = MonitorOutputCollector.INDENT
 
 List<String> outputSeqTrack = []
 
-def nameStringToList = {String nameString ->
-    List list = []
+Closure<List<String>> nameStringToList = { String nameString ->
+    List<String> list = []
     nameString.eachLine {
         if (it.trim().isEmpty() || it.trim().startsWith("#")) {
             return
@@ -124,7 +124,7 @@ def nameStringToList = {String nameString ->
 }
 
 
-def seqTracksWithReferenceGenome = {List<SeqTrack> seqTracks ->
+Closure<List<SeqTrack>> seqTracksWithReferenceGenome = { List<SeqTrack> seqTracks ->
     if (!seqTracks) {
         return []
     }
@@ -143,7 +143,7 @@ def seqTracksWithReferenceGenome = {List<SeqTrack> seqTracks ->
     return mapNoReferenceGenome[false] ?: []
 }
 
-def exomeSeqTracksWithEnrichmentKit = {List<SeqTrack> seqTracks ->
+Closure<List<SeqTrack>> exomeSeqTracksWithEnrichmentKit = { List<SeqTrack> seqTracks ->
     if (!seqTracks) {
         return []
     }
@@ -173,24 +173,29 @@ def exomeSeqTracksWithEnrichmentKit = {List<SeqTrack> seqTracks ->
     return map[false] ?: []
 }
 
-def exomeSeqTracksWithBedFile = {List<SeqTrack> seqTracks ->
+Closure<List<SeqTrack>> exomeSeqTracksWithBedFile = { List<SeqTrack> seqTracks ->
     if (!seqTracks) {
         return []
     }
-    Map map = seqTracks.groupBy {
+
+    Map<Boolean, List<SeqTrack>> seqTrackGroupedByHasReferenceBedFile = seqTracks.groupBy {
         ReferenceGenome referenceGenome = it.configuredReferenceGenome
         BedFile bedFile = BedFile.findByReferenceGenomeAndLibraryPreparationKit(referenceGenome, it.libraryPreparationKit)
-        !bedFile
+        bedFile as Boolean
     }
-    if (map[true]) {
-        output << "${INDENT}${map[true].size()} lanes removed, because no bedfile is definied for: ${map[true].collect{"${it.project.name} ${it.seqType.name}"}.unique().sort {it}.join(', ')}"
-        output << output.prefix(output.objectsToStrings(map[true]).join('\n'), "${INDENT}${INDENT}")
+
+    if (seqTrackGroupedByHasReferenceBedFile[false]) {
+        List<GString> seqTrackWithoutReferenceBedFile = seqTrackGroupedByHasReferenceBedFile[false].collect {
+            "${it.project.name} ${it.seqType.name}"
+        }.unique().sort()
+        output << "${INDENT}${seqTrackGroupedByHasReferenceBedFile[false].size()} lanes removed, because no bedfile is defined for: ${ seqTrackWithoutReferenceBedFile.join(', ')}"
+        output << output.prefix(output.objectsToStrings(seqTrackGroupedByHasReferenceBedFile[false]).join('\n'), "${INDENT}${INDENT}")
     }
-    return map[false] ?: []
+    return seqTrackGroupedByHasReferenceBedFile[true] ?: []
 }
 
-def findNotWithdrawn = { List<SeqTrack> seqTracks ->
-    Map map = seqTracks.groupBy {
+Closure<List<SeqTrack>> findNotWithdrawn = { List<SeqTrack> seqTracks ->
+    Map<Boolean, List<SeqTrack>> map = seqTracks.groupBy {
         DataFile.findAllBySeqTrackAndFileWithdrawn(it, true) as Boolean
     }
     if (map[true]) {
@@ -199,7 +204,7 @@ def findNotWithdrawn = { List<SeqTrack> seqTracks ->
     return map[false]
 }
 
-def findAlignable = { List<SeqTrack> seqTracks ->
+Closure<List<SeqTrack>> findAlignable = { List<SeqTrack> seqTracks ->
     Map<Boolean, List<SeqTrack>> groupAfterAlignable = seqTracks.groupBy({alignableSeqtypes.contains(it.seqType) })
 
     output << "\n\n"
@@ -226,7 +231,7 @@ def findAlignable = { List<SeqTrack> seqTracks ->
 }
 
 
-def handleStateMap = {Map map, String workflow, Closure objectToCheck = {it} ->
+Closure handleStateMap = { Map map, String workflow, Closure objectToCheck = {it} ->
     output.showWorkflow(workflow)
     def ret
     def keys = map.keySet().sort{it}
@@ -257,7 +262,7 @@ def handleStateMap = {Map map, String workflow, Closure objectToCheck = {it} ->
 }
 
 
-def showSeqTracks = {Collection<SeqTrack> seqTracks ->
+Closure showSeqTracks = { Collection<SeqTrack> seqTracks ->
     boolean allFinished = true
 
     //remove withdrawn
@@ -345,7 +350,6 @@ def showSeqTracks = {Collection<SeqTrack> seqTracks ->
     finishedSamplePair.collect {
         "${INDENT}${INDENT}${it} ${it.project}"
     }.sort { it }.each { output << it }
-
 }
 
 
@@ -430,7 +434,7 @@ nameStringToList(projectString).each { String projectName ->
 if (allProcessed) {
     output << "\n\n\n==============================\nseqtracks in processing (as defined in header comment)\n==============================\n"
 
-    def  seqTracks = SeqTrack.executeQuery(
+    List<SeqTrack> seqTracks = SeqTrack.executeQuery(
             """
     select
         seqTrack
@@ -469,8 +473,7 @@ if (allProcessed) {
     """)
 
     //collect waiting SamplePairs
-
-    def needsProcessing = { String property, Pipeline.Type type ->
+    Closure<GString> needsProcessing = { String property, Pipeline.Type type ->
         double minCoverage = processingOptionService.findOptionAsDouble(ProcessingOption.OptionName.PIPELINE_MIN_COVERAGE, type.toString())
         return """
                 (
@@ -491,7 +494,7 @@ if (allProcessed) {
                 )"""
     }
 
-    def connectBamFile = {String number ->
+    Closure<GString> connectBamFile = { String number ->
         return """
             mwp${number} = samplePair.mergingWorkPackage${number}
             and bamFile${number}.withdrawn = false
@@ -591,7 +594,7 @@ if (allProcessed) {
         where
             mergingWorkPackage.needsProcessing = true
     """).each {
-        def mergeableSeqTracks = it.seqTracks
+        List<SeqTrack> mergeableSeqTracks = it.seqTracks
         if(mergeableSeqTracks) {
             seqTracks += mergeableSeqTracks - (it.seqType.isWgbs() ? ctx.WgbsAlignmentStartJob : ctx.PanCanStartJob).findUsableBaseBamFile(it)?.containedSeqTracks
         }

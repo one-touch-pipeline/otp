@@ -7,9 +7,7 @@ import org.junit.*
 
 class SeqScanServiceTests {
 
-    def seqScanService
-    def runProcessingService
-    def grailsApplication
+    SeqScanService seqScanService
 
     File dataPath
     File mdPath

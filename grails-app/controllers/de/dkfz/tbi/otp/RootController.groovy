@@ -15,7 +15,8 @@ class RootController {
     StatisticService statisticService
     ProcessingOptionService processingOptionService
 
-    long FOUR_WEEKS_IN_MS = 1000L * 60 * 60 * 24 * 7 * 4
+    @SuppressWarnings('DuplicateNumberLiteral') // 60 seconds vs 60 minutes
+    private static final long FOUR_WEEKS_IN_MS = 1000L * 60 * 60 * 24 * 7 * 4
 
 
     def intro() {

@@ -75,7 +75,7 @@ class ImportExternallyMergedBamJob extends AbstractOtpJob {
                 String furtherFilesSource = epmbf.furtherFiles.collect {
                     new File(sourceBaseDir, it)
                 }.join(' ')
-                String furtherFilesTarget = epmbf.furtherFiles.collect{
+                String furtherFilesTarget = epmbf.furtherFiles.collect {
                     new File(targetBaseDir, it)
                 }.join(' ')
 

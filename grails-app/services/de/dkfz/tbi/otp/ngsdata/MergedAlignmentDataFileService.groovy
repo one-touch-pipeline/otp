@@ -2,7 +2,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 class MergedAlignmentDataFileService {
 
-    def fileTypeService
+    FileTypeService fileTypeService
 
     /**
      * This function returns all alignment files (from project folder)

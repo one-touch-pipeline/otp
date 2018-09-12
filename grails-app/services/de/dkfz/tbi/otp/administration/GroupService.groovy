@@ -1,17 +1,12 @@
 package de.dkfz.tbi.otp.administration
 
-import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
-import de.dkfz.tbi.otp.ngsdata.Project
-import de.dkfz.tbi.otp.ngsdata.SeqCenter
-import de.dkfz.tbi.otp.security.Group
-import de.dkfz.tbi.otp.security.Role
-import de.dkfz.tbi.otp.security.User
-import de.dkfz.tbi.otp.security.UserRole
-
-import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.security.acls.domain.BasePermission
-import org.springframework.security.acls.domain.GrantedAuthoritySid
-import org.springframework.security.acls.model.Sid
+import de.dkfz.tbi.otp.job.plan.*
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.security.*
+import grails.plugin.springsecurity.acl.*
+import org.springframework.security.access.prepost.*
+import org.springframework.security.acls.domain.*
+import org.springframework.security.acls.model.*
 
 /**
  * The GroupService is responsible for handling User Groups.
@@ -20,7 +15,7 @@ class GroupService {
     /**
      * Dependency Injection of ACL util service
      */
-    def aclUtilService
+    AclUtilService aclUtilService
 
     /**
      * Retrieves the Group with the given Id.

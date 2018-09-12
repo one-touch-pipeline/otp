@@ -1,11 +1,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.plugin.springsecurity.SpringSecurityUtils
-import org.springframework.security.access.prepost.PostAuthorize
-import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.security.acls.domain.BasePermission
-import org.springframework.security.core.userdetails.UserDetails
-import de.dkfz.tbi.otp.job.processing.ProcessParameter
+import de.dkfz.tbi.otp.job.processing.*
+import grails.plugin.springsecurity.*
+import org.springframework.security.access.prepost.*
 
 /**
  * Service to retrieve information about Runs.
@@ -16,9 +13,8 @@ class RunService {
     /**
      * Dependency Injection of Spring Security Service - needed for ACL checks
      */
-    def springSecurityService
-
-    def seqCenterService
+    SpringSecurityService springSecurityService
+    SeqCenterService seqCenterService
 
     /**
      * Retrieves the given Run.

@@ -1,11 +1,12 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
+import de.dkfz.tbi.otp.job.processing.ProcessParameterService
 
 class SeqTrackController {
 
-    def seqTrackService
-    def processParameterService
+    SeqTrackService seqTrackService
+    ProcessParameterService processParameterService
 
     Map show() {
         if (!params.id) {

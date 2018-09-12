@@ -26,7 +26,7 @@ class ProjectProgressDataTableCommand extends DataTableCommand {
 @Secured(['ROLE_OPERATOR'])
 class ProjectProgressController {
 
-    def projectProgressService
+    ProjectProgressService projectProgressService
 
     def progress() {
 

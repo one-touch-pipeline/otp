@@ -4,7 +4,10 @@ import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.user.*
 import de.dkfz.tbi.otp.utils.*
+import grails.plugin.mail.MailService
+import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.SpringSecurityUtils
+import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.springframework.security.access.prepost.*
 import org.springframework.security.authentication.*
 
@@ -20,19 +23,20 @@ class UserService {
     /**
      * Dependency injection of springSecurityService
      */
-    def springSecurityService
+    SpringSecurityService springSecurityService
     /**
      * Dependency injection of mail Service provided by the Mail plugin
      */
-    def mailService
+    MailService mailService
     /**
      * Dependency injection for Group Service
      */
-    def groupService
+    GroupService groupService
     /**
      * Dependency injection of grails Application
      */
-    def grailsApplication
+    @SuppressWarnings("GrailsStatelessService")
+    GrailsApplication grailsApplication
 
     ConfigService configService
 

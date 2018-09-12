@@ -7,6 +7,7 @@ import de.dkfz.tbi.otp.filehandling.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 import org.junit.*
+import org.springframework.beans.factory.annotation.*
 
 import static org.junit.Assert.*
 
@@ -15,12 +16,8 @@ import static org.junit.Assert.*
  */
 class QAResultStatisticsServiceTests {
 
-    /*
-     * NOTE: Since the name of the service class starts with two upper case letters, the name of
-     *       the property also has to (according to the JavaBeans API Specification, section 8.8).
-     *       Also, adding the type went my Eclipse go nuts. Using the def keyword works just fine.
-     */
-    def QAResultStatisticsService
+    @Autowired
+    QAResultStatisticsService qaResultStatisticsService
 
     TestData testData = new TestData()
     Project project
@@ -298,40 +295,40 @@ class QAResultStatisticsServiceTests {
 
     @Test(expected = IllegalArgumentException)
     void testFormatToTwoDecimalsWhenArgumentIsNull() {
-        QAResultStatisticsService.formatToTwoDecimals(null)
+        qaResultStatisticsService.formatToTwoDecimals(null)
     }
 
     @Test
     void testFormatToTwoDecimals() {
-        assertEquals "-1.00", QAResultStatisticsService.formatToTwoDecimals(-1)
-        assertEquals "0.00", QAResultStatisticsService.formatToTwoDecimals(0)
-        assertEquals "2.00", QAResultStatisticsService.formatToTwoDecimals(2)
-        assertEquals "3.14", QAResultStatisticsService.formatToTwoDecimals(3.14159)
-        assertEquals "123.46", QAResultStatisticsService.formatToTwoDecimals(123456789 / 1e6)
+        assertEquals "-1.00", qaResultStatisticsService.formatToTwoDecimals(-1)
+        assertEquals "0.00", qaResultStatisticsService.formatToTwoDecimals(0)
+        assertEquals "2.00", qaResultStatisticsService.formatToTwoDecimals(2)
+        assertEquals "3.14", qaResultStatisticsService.formatToTwoDecimals(3.14159)
+        assertEquals "123.46", qaResultStatisticsService.formatToTwoDecimals(123456789 / 1e6)
     }
 
 
     @Test(expected = IllegalArgumentException)
     void testPrepareFetchingMergedBamFileResultsWhenArgumentIsNull() {
-        QAResultStatisticsService.prepareFetchingMergedBamFileResults(null)
+        qaResultStatisticsService.prepareFetchingMergedBamFileResults(null)
     }
 
     @Test
     void testPrepareFetchingMergedBamFileResultsWholeGenome() {
-        Map actual = QAResultStatisticsService.prepareFetchingMergedBamFileResults(processedMergedBamFile)
+        Map actual = qaResultStatisticsService.prepareFetchingMergedBamFileResults(processedMergedBamFile)
         Map expect = [
-            (QAResultStatisticsService.CHROMOSOME_QUALITY_ASSESSMENT_CHR_X): chromosomeQualityAssessmentMergedChrX,
-            (QAResultStatisticsService.CHROMOSOME_QUALITY_ASSESSMENT_CHR_Y): chromosomeQualityAssessmentMergedChrY,
-            (QAResultStatisticsService.OVERALL_QUALITY_ASSESSMENT): overallQualityAssessmentMerged,
-            (QAResultStatisticsService.REFERENCE_GENOME_ENTRY_CHR_X): referenceGenomeEntryChrX,
-            (QAResultStatisticsService.REFERENCE_GENOME_ENTRY_CHR_Y): referenceGenomeEntryChrY,
-            (QAResultStatisticsService.REFERENCE_GENOME): referenceGenome,
-            (QAResultStatisticsService.INDIVIDUAL): individual,
-            (QAResultStatisticsService.SAMPLE): sample,
-            (QAResultStatisticsService.LANE): 'all_merged',
-            (QAResultStatisticsService.RUN): 'all_merged',
-            (QAResultStatisticsService.SEQTYPE): seqType,
-            (QAResultStatisticsService.LIBRARY_PREPARATION_KIT): null,
+            (qaResultStatisticsService.CHROMOSOME_QUALITY_ASSESSMENT_CHR_X): chromosomeQualityAssessmentMergedChrX,
+            (qaResultStatisticsService.CHROMOSOME_QUALITY_ASSESSMENT_CHR_Y): chromosomeQualityAssessmentMergedChrY,
+            (qaResultStatisticsService.OVERALL_QUALITY_ASSESSMENT)         : overallQualityAssessmentMerged,
+            (qaResultStatisticsService.REFERENCE_GENOME_ENTRY_CHR_X)       : referenceGenomeEntryChrX,
+            (qaResultStatisticsService.REFERENCE_GENOME_ENTRY_CHR_Y)       : referenceGenomeEntryChrY,
+            (qaResultStatisticsService.REFERENCE_GENOME)                   : referenceGenome,
+            (qaResultStatisticsService.INDIVIDUAL)                         : individual,
+            (qaResultStatisticsService.SAMPLE)                             : sample,
+            (qaResultStatisticsService.LANE)                               : 'all_merged',
+            (qaResultStatisticsService.RUN)                                : 'all_merged',
+            (qaResultStatisticsService.SEQTYPE)                            : seqType,
+            (qaResultStatisticsService.LIBRARY_PREPARATION_KIT)            : null,
         ]
         // assertEquals will not DTRT here, we have to use the equals() method
         assertTrue expect == actual
@@ -343,20 +340,20 @@ class QAResultStatisticsServiceTests {
         alignmentPass.save([flush: true])
         seqType.name = SeqTypeNames.EXOME.seqTypeName
         seqType.save([flush: true])
-        Map actual = QAResultStatisticsService.prepareFetchingMergedBamFileResults(processedMergedBamFile)
+        Map actual = qaResultStatisticsService.prepareFetchingMergedBamFileResults(processedMergedBamFile)
         Map expect = [
-            (QAResultStatisticsService.CHROMOSOME_QUALITY_ASSESSMENT_CHR_X): chromosomeQualityAssessmentMergedChrX,
-            (QAResultStatisticsService.CHROMOSOME_QUALITY_ASSESSMENT_CHR_Y): chromosomeQualityAssessmentMergedChrY,
-            (QAResultStatisticsService.OVERALL_QUALITY_ASSESSMENT): overallQualityAssessmentMerged,
-            (QAResultStatisticsService.REFERENCE_GENOME_ENTRY_CHR_X): referenceGenomeEntryChrX,
-            (QAResultStatisticsService.REFERENCE_GENOME_ENTRY_CHR_Y): referenceGenomeEntryChrY,
-            (QAResultStatisticsService.REFERENCE_GENOME): referenceGenome,
-            (QAResultStatisticsService.INDIVIDUAL): individual,
-            (QAResultStatisticsService.SAMPLE): sample,
-            (QAResultStatisticsService.LANE): 'all_merged',
-            (QAResultStatisticsService.RUN): 'all_merged',
-            (QAResultStatisticsService.SEQTYPE): seqType,
-            (QAResultStatisticsService.LIBRARY_PREPARATION_KIT): libraryPreparationKit,
+            (qaResultStatisticsService.CHROMOSOME_QUALITY_ASSESSMENT_CHR_X): chromosomeQualityAssessmentMergedChrX,
+            (qaResultStatisticsService.CHROMOSOME_QUALITY_ASSESSMENT_CHR_Y): chromosomeQualityAssessmentMergedChrY,
+            (qaResultStatisticsService.OVERALL_QUALITY_ASSESSMENT)         : overallQualityAssessmentMerged,
+            (qaResultStatisticsService.REFERENCE_GENOME_ENTRY_CHR_X)       : referenceGenomeEntryChrX,
+            (qaResultStatisticsService.REFERENCE_GENOME_ENTRY_CHR_Y)       : referenceGenomeEntryChrY,
+            (qaResultStatisticsService.REFERENCE_GENOME)                   : referenceGenome,
+            (qaResultStatisticsService.INDIVIDUAL)                         : individual,
+            (qaResultStatisticsService.SAMPLE)                             : sample,
+            (qaResultStatisticsService.LANE)                               : 'all_merged',
+            (qaResultStatisticsService.RUN)                                : 'all_merged',
+            (qaResultStatisticsService.SEQTYPE)                            : seqType,
+            (qaResultStatisticsService.LIBRARY_PREPARATION_KIT)            : libraryPreparationKit,
         ]
         // assertEquals will not DTRT here, we have to use the equals() method
         assertTrue expect == actual
@@ -364,40 +361,40 @@ class QAResultStatisticsServiceTests {
 
     @Test(expected = IllegalArgumentException)
     void testFetchResultsSmallWhenArgumentIsNull() {
-        QAResultStatisticsService.fetchResultsSmall(null)
+        qaResultStatisticsService.fetchResultsSmall(null)
     }
 
     @Test
     void testFetchResultsSmallWholeGenome() {
         seqType.name = SeqTypeNames.WHOLE_GENOME.seqTypeName
         seqType.save([flush: true])
-        List<Map> actual = QAResultStatisticsService.fetchResultsSmall(processedMergedBamFile)
+        List<Map> actual = qaResultStatisticsService.fetchResultsSmall(processedMergedBamFile)
         List<Map> expect = [
             // The two maps are (almost) identical. If different values are used, they need
             // to be changed accordingly.
             [
                 // Map for ProcessedMergedBamFile
-                (QAResultStatisticsService.REFERENCE_GENOME_LENGTH_WITH_N): '3.21',
-                (QAResultStatisticsService.REFERENCE_GENOME_LENGTH_WITHOUT_N): '2.91',
-                (QAResultStatisticsService.PID): 'pid_1',
-                (QAResultStatisticsService.MOCK_FULL_NAME): 'mockFullName_1',
-                (QAResultStatisticsService.SAMPLE_TYPE): 'control',
-                (QAResultStatisticsService.RUN_ID): 'all_merged',
-                (QAResultStatisticsService.LANE): 'all_merged',
-                (QAResultStatisticsService.COVERAGE_WITHOUT_N): '0.00',
-                (QAResultStatisticsService.COVERAGE_WITH_N): '0.00',
-                (QAResultStatisticsService.COVERAGE_WITHOUT_N_CHR_X): '0.16',
-                (QAResultStatisticsService.COVERAGE_WITHOUT_N_CHR_Y): '0.16',
-                (QAResultStatisticsService.QC_BASES_MAPPED): 8,
-                (QAResultStatisticsService.TOTAL_READ_COUNT): 55,
-                (QAResultStatisticsService.MAPPED_READ_COUNT): 19,
-                (QAResultStatisticsService.PERCENTAGE_MAPPED_READS): '34.55',
-                (QAResultStatisticsService.PROPERLY_PAIRED): '52.27',
-                (QAResultStatisticsService.SINGLETONS): '49.09',
-                (QAResultStatisticsService.DUPLICATES): '32.73',
-                (QAResultStatisticsService.INSERT_SIZE_SD): '29.00',
-                (QAResultStatisticsService.INSERT_SIZE_MEDIAN): '30.00',
-                (QAResultStatisticsService.INSERT_SIZE_MEAN): '28.00',
+                (qaResultStatisticsService.REFERENCE_GENOME_LENGTH_WITH_N)   : '3.21',
+                (qaResultStatisticsService.REFERENCE_GENOME_LENGTH_WITHOUT_N): '2.91',
+                (qaResultStatisticsService.PID)                              : 'pid_1',
+                (qaResultStatisticsService.MOCK_FULL_NAME)                   : 'mockFullName_1',
+                (qaResultStatisticsService.SAMPLE_TYPE)                      : 'control',
+                (qaResultStatisticsService.RUN_ID)                           : 'all_merged',
+                (qaResultStatisticsService.LANE)                             : 'all_merged',
+                (qaResultStatisticsService.COVERAGE_WITHOUT_N)               : '0.00',
+                (qaResultStatisticsService.COVERAGE_WITH_N)                  : '0.00',
+                (qaResultStatisticsService.COVERAGE_WITHOUT_N_CHR_X)         : '0.16',
+                (qaResultStatisticsService.COVERAGE_WITHOUT_N_CHR_Y)         : '0.16',
+                (qaResultStatisticsService.QC_BASES_MAPPED)                  : 8,
+                (qaResultStatisticsService.TOTAL_READ_COUNT)                 : 55,
+                (qaResultStatisticsService.MAPPED_READ_COUNT)                : 19,
+                (qaResultStatisticsService.PERCENTAGE_MAPPED_READS)          : '34.55',
+                (qaResultStatisticsService.PROPERLY_PAIRED)                  : '52.27',
+                (qaResultStatisticsService.SINGLETONS)                       : '49.09',
+                (qaResultStatisticsService.DUPLICATES)                       : '32.73',
+                (qaResultStatisticsService.INSERT_SIZE_SD)                   : '29.00',
+                (qaResultStatisticsService.INSERT_SIZE_MEDIAN)               : '30.00',
+                (qaResultStatisticsService.INSERT_SIZE_MEAN)                 : '28.00',
             ],
         ]
         assertTrue expect == actual
@@ -409,35 +406,35 @@ class QAResultStatisticsServiceTests {
         seqType.save([flush: true])
         alignmentPass.seqTrack = exomeSeqTrack
         alignmentPass.save([flush: true])
-        List<Map> actual = QAResultStatisticsService.fetchResultsSmall(processedMergedBamFile)
+        List<Map> actual = qaResultStatisticsService.fetchResultsSmall(processedMergedBamFile)
         List<Map> expect = [
             // The two maps are (almost) identical. If different values are used, they need
             // to be changed accordingly.
             [
                 // Map for ProcessedMergedBamFile
-                (QAResultStatisticsService.REFERENCE_GENOME_LENGTH_WITH_N): '3.21',
-                (QAResultStatisticsService.REFERENCE_GENOME_LENGTH_WITHOUT_N): '2.91',
-                (QAResultStatisticsService.PID): 'pid_1',
-                (QAResultStatisticsService.MOCK_FULL_NAME): 'mockFullName_1',
-                (QAResultStatisticsService.SAMPLE_TYPE): 'control',
-                (QAResultStatisticsService.RUN_ID): 'all_merged',
-                (QAResultStatisticsService.LANE): 'all_merged',
-                (QAResultStatisticsService.COVERAGE_WITHOUT_N): '0.00',
-                (QAResultStatisticsService.COVERAGE_WITH_N): '0.00',
-                (QAResultStatisticsService.COVERAGE_WITHOUT_N_CHR_X): '0.16',
-                (QAResultStatisticsService.COVERAGE_WITHOUT_N_CHR_Y): '0.16',
-                (QAResultStatisticsService.QC_BASES_MAPPED): 8,
-                (QAResultStatisticsService.TOTAL_READ_COUNT): 55,
-                (QAResultStatisticsService.MAPPED_READ_COUNT): 19,
-                (QAResultStatisticsService.PERCENTAGE_MAPPED_READS): '34.55',
-                (QAResultStatisticsService.PROPERLY_PAIRED): '52.27',
-                (QAResultStatisticsService.SINGLETONS): '49.09',
-                (QAResultStatisticsService.DUPLICATES): '32.73',
-                (QAResultStatisticsService.INSERT_SIZE_SD): '29.00',
-                (QAResultStatisticsService.INSERT_SIZE_MEDIAN): '30.00',
-                (QAResultStatisticsService.INSERT_SIZE_MEAN): '28.00',
-                (QAResultStatisticsService.TARGET_COVERAGE): '0.83',
-                (QAResultStatisticsService.ON_TARGET_RATE): '75.76',
+                (qaResultStatisticsService.REFERENCE_GENOME_LENGTH_WITH_N)   : '3.21',
+                (qaResultStatisticsService.REFERENCE_GENOME_LENGTH_WITHOUT_N): '2.91',
+                (qaResultStatisticsService.PID)                              : 'pid_1',
+                (qaResultStatisticsService.MOCK_FULL_NAME)                   : 'mockFullName_1',
+                (qaResultStatisticsService.SAMPLE_TYPE)                      : 'control',
+                (qaResultStatisticsService.RUN_ID)                           : 'all_merged',
+                (qaResultStatisticsService.LANE)                             : 'all_merged',
+                (qaResultStatisticsService.COVERAGE_WITHOUT_N)               : '0.00',
+                (qaResultStatisticsService.COVERAGE_WITH_N)                  : '0.00',
+                (qaResultStatisticsService.COVERAGE_WITHOUT_N_CHR_X)         : '0.16',
+                (qaResultStatisticsService.COVERAGE_WITHOUT_N_CHR_Y)         : '0.16',
+                (qaResultStatisticsService.QC_BASES_MAPPED)                  : 8,
+                (qaResultStatisticsService.TOTAL_READ_COUNT)                 : 55,
+                (qaResultStatisticsService.MAPPED_READ_COUNT)                : 19,
+                (qaResultStatisticsService.PERCENTAGE_MAPPED_READS)          : '34.55',
+                (qaResultStatisticsService.PROPERLY_PAIRED)                  : '52.27',
+                (qaResultStatisticsService.SINGLETONS)                       : '49.09',
+                (qaResultStatisticsService.DUPLICATES)                       : '32.73',
+                (qaResultStatisticsService.INSERT_SIZE_SD)                   : '29.00',
+                (qaResultStatisticsService.INSERT_SIZE_MEDIAN)               : '30.00',
+                (qaResultStatisticsService.INSERT_SIZE_MEAN)                 : '28.00',
+                (qaResultStatisticsService.TARGET_COVERAGE)                  : '0.83',
+                (qaResultStatisticsService.ON_TARGET_RATE)                   : '75.76',
             ],
         ]
         assertTrue expect == actual
@@ -445,7 +442,7 @@ class QAResultStatisticsServiceTests {
 
     @Test(expected = IllegalArgumentException)
     void testFetchResultsExtendedWhenArgumentIsNull() {
-        QAResultStatisticsService.fetchResultsExtended(null)
+        qaResultStatisticsService.fetchResultsExtended(null)
     }
 
     @Test
@@ -457,25 +454,25 @@ class QAResultStatisticsServiceTests {
             // to be changed accordingly. They also have a large overlap with the maps in
             // testFetchResultsSmall().
             [
-                    // Map for ProcessedMergedBamFile
-                    (QAResultStatisticsService.DUPLICATES_MATE_1)                   : 1,
-                    (QAResultStatisticsService.DUPLICATES_MATE_2)                   : 2,
-                    (QAResultStatisticsService.PE_READS_MAPPED_ON_DIFF_CHR)         : 33,
-                    (QAResultStatisticsService.INCORRECT_PE_ORIENTATION)            : 32,
-                    (QAResultStatisticsService.INCORRECT_PROPER_PAIR)               : 3,
-                    (QAResultStatisticsService.PERCENTAGE_QC_BASES_MAPPED_WITHOUT_N): '8/2910000',
-                    (QAResultStatisticsService.PERCENTAGE_QC_BASES_MAPPED_WITH_N): '8/3210000',
-                    (QAResultStatisticsService.NOT_MAPPED_MATE_1)             : 13,
-                    (QAResultStatisticsService.NOT_MAPPED_MATE_2)         : 14,
-                    (QAResultStatisticsService.MAPPED_SHORT_MATE_1)       : 11,
-                    (QAResultStatisticsService.MAPPED_SHORT_MATE_2)       : 12,
-                    (QAResultStatisticsService.MAPPED_LOW_QUALITY_MATE_1) : 9,
-                    (QAResultStatisticsService.MAPPED_LOW_QUALITY_MATE_2) : 10,
-                    (QAResultStatisticsService.MAPPED_QUALITY_LONG_MATE_1): 6,
-                    (QAResultStatisticsService.MAPPED_QUALITY_LONG_MATE_2): 7,
+                // Map for ProcessedMergedBamFile
+                (qaResultStatisticsService.DUPLICATES_MATE_1)                   : 1,
+                (qaResultStatisticsService.DUPLICATES_MATE_2)                   : 2,
+                (qaResultStatisticsService.PE_READS_MAPPED_ON_DIFF_CHR)         : 33,
+                (qaResultStatisticsService.INCORRECT_PE_ORIENTATION)            : 32,
+                (qaResultStatisticsService.INCORRECT_PROPER_PAIR)               : 3,
+                (qaResultStatisticsService.PERCENTAGE_QC_BASES_MAPPED_WITHOUT_N): '8/2910000',
+                (qaResultStatisticsService.PERCENTAGE_QC_BASES_MAPPED_WITH_N)   : '8/3210000',
+                (qaResultStatisticsService.NOT_MAPPED_MATE_1)                   : 13,
+                (qaResultStatisticsService.NOT_MAPPED_MATE_2)                   : 14,
+                (qaResultStatisticsService.MAPPED_SHORT_MATE_1)                 : 11,
+                (qaResultStatisticsService.MAPPED_SHORT_MATE_2)                 : 12,
+                (qaResultStatisticsService.MAPPED_LOW_QUALITY_MATE_1)           : 9,
+                (qaResultStatisticsService.MAPPED_LOW_QUALITY_MATE_2)           : 10,
+                (qaResultStatisticsService.MAPPED_QUALITY_LONG_MATE_1)          : 6,
+                (qaResultStatisticsService.MAPPED_QUALITY_LONG_MATE_2)          : 7,
             ],
         ]
-        List<Map> actual = QAResultStatisticsService.fetchResultsExtended(processedMergedBamFile)
+        List<Map> actual = qaResultStatisticsService.fetchResultsExtended(processedMergedBamFile)
         assertTrue EXPECT == actual
     }
 
@@ -490,67 +487,67 @@ class QAResultStatisticsServiceTests {
             // to be changed accordingly. They also have a large overlap with the maps in
             // testFetchResultsSmall().
             [
-                    // Map for ProcessedMergedBamFile
-                    (QAResultStatisticsService.DUPLICATES_MATE_1)                   : 1,
-                    (QAResultStatisticsService.DUPLICATES_MATE_2)                   : 2,
-                    (QAResultStatisticsService.PE_READS_MAPPED_ON_DIFF_CHR)         : 33,
-                    (QAResultStatisticsService.INCORRECT_PE_ORIENTATION)            : 32,
-                    (QAResultStatisticsService.INCORRECT_PROPER_PAIR)               : 3,
-                    (QAResultStatisticsService.PERCENTAGE_QC_BASES_MAPPED_WITHOUT_N): '8/2910000',
-                    (QAResultStatisticsService.PERCENTAGE_QC_BASES_MAPPED_WITH_N): '8/3210000',
-                    (QAResultStatisticsService.NOT_MAPPED_MATE_1)             : 13,
-                    (QAResultStatisticsService.NOT_MAPPED_MATE_2)         : 14,
-                    (QAResultStatisticsService.MAPPED_SHORT_MATE_1)       : 11,
-                    (QAResultStatisticsService.MAPPED_SHORT_MATE_2)       : 12,
-                    (QAResultStatisticsService.MAPPED_LOW_QUALITY_MATE_1) : 9,
-                    (QAResultStatisticsService.MAPPED_LOW_QUALITY_MATE_2) : 10,
-                    (QAResultStatisticsService.MAPPED_QUALITY_LONG_MATE_1): 6,
-                    (QAResultStatisticsService.MAPPED_QUALITY_LONG_MATE_2): 7,
-                    (QAResultStatisticsService.ALL_MAPPED_BASES)          : 66,
-                    (QAResultStatisticsService.TARGET_MAPPED_BASES)       : 50,
+                // Map for ProcessedMergedBamFile
+                (qaResultStatisticsService.DUPLICATES_MATE_1)                   : 1,
+                (qaResultStatisticsService.DUPLICATES_MATE_2)                   : 2,
+                (qaResultStatisticsService.PE_READS_MAPPED_ON_DIFF_CHR)         : 33,
+                (qaResultStatisticsService.INCORRECT_PE_ORIENTATION)            : 32,
+                (qaResultStatisticsService.INCORRECT_PROPER_PAIR)               : 3,
+                (qaResultStatisticsService.PERCENTAGE_QC_BASES_MAPPED_WITHOUT_N): '8/2910000',
+                (qaResultStatisticsService.PERCENTAGE_QC_BASES_MAPPED_WITH_N)   : '8/3210000',
+                (qaResultStatisticsService.NOT_MAPPED_MATE_1)                   : 13,
+                (qaResultStatisticsService.NOT_MAPPED_MATE_2)                   : 14,
+                (qaResultStatisticsService.MAPPED_SHORT_MATE_1)                 : 11,
+                (qaResultStatisticsService.MAPPED_SHORT_MATE_2)                 : 12,
+                (qaResultStatisticsService.MAPPED_LOW_QUALITY_MATE_1)           : 9,
+                (qaResultStatisticsService.MAPPED_LOW_QUALITY_MATE_2)           : 10,
+                (qaResultStatisticsService.MAPPED_QUALITY_LONG_MATE_1)          : 6,
+                (qaResultStatisticsService.MAPPED_QUALITY_LONG_MATE_2)          : 7,
+                (qaResultStatisticsService.ALL_MAPPED_BASES)                    : 66,
+                (qaResultStatisticsService.TARGET_MAPPED_BASES)                 : 50,
             ],
         ]
-        List<Map> actual = QAResultStatisticsService.fetchResultsExtended(processedMergedBamFile)
+        List<Map> actual = qaResultStatisticsService.fetchResultsExtended(processedMergedBamFile)
         assertTrue EXPECT == actual
     }
 
     @Test(expected = IllegalArgumentException)
     void testCreateOutputLineWhenArgumentValuesIsNull() {
-        QAResultStatisticsService.createOutputLine(null, ["first", "second"])
+        qaResultStatisticsService.createOutputLine(null, ["first", "second"])
     }
 
     @Test(expected = IllegalArgumentException)
     void testCreateOutputLineWhenArgumentSortOrderIsNull() {
-        QAResultStatisticsService.createOutputLine(["one":"1", "two":"2"], null)
+        qaResultStatisticsService.createOutputLine(["one":"1", "two":"2"], null)
     }
 
     @Test(expected = IllegalArgumentException)
     void testCreateOutputLineWhenValuesIsEmpty() {
-        QAResultStatisticsService.createOutputLine([:], ["first", "second"])
+        qaResultStatisticsService.createOutputLine([:], ["first", "second"])
     }
 
     @Test(expected = IllegalArgumentException)
     void testCreateOutputLineWhenSortOrderIsEmpty() {
-        QAResultStatisticsService.createOutputLine(["one":"1", "two":"2"], [])
+        qaResultStatisticsService.createOutputLine(["one":"1", "two":"2"], [])
     }
 
     @Test
     void testCreateOutputLine() {
         def sortOrder = ["first", "second", "third"]
         def values = [ "second": "2", "third": "3", "first": "1" ]
-        assertEquals "1\t2\t3\n", QAResultStatisticsService.createOutputLine(values, sortOrder)
+        assertEquals "1\t2\t3\n", qaResultStatisticsService.createOutputLine(values, sortOrder)
     }
 
     @Test(expected = IllegalArgumentException)
     void testStatisticsFileWhenArgumentIsNull() {
-        QAResultStatisticsService.statisticsFile(null)
+        qaResultStatisticsService.statisticsFile(null)
     }
 
     @Test
     void testStatisticsFile() {
         TestConfigService configService = new TestConfigService()
 
-        Map actual = QAResultStatisticsService.statisticsFile(processedMergedBamFile)
+        Map actual = qaResultStatisticsService.statisticsFile(processedMergedBamFile)
 
         // Location of the statistics file on the processing side, will be copied
         final FINAL_PATH_FILE = configService.getRootPath().path + "/projectDirName/sequencing/${seqType.dirName}/view-by-pid/pid_1/control/${seqType.libraryLayoutDirName}/merged-alignment/.tmp/QualityAssessment"
@@ -564,14 +561,14 @@ class QAResultStatisticsServiceTests {
 
     @Test(expected = IllegalArgumentException)
     void testDefineOutputWhenArgumentIsNull() {
-        QAResultStatisticsService.defineOutput(null)
+        qaResultStatisticsService.defineOutput(null)
     }
 
     @Test
     void testDefineOutputWholeGenome() {
         seqType.name = SeqTypeNames.WHOLE_GENOME.seqTypeName
         seqType.save([flush: true])
-        Map result = QAResultStatisticsService.defineOutput(processedMergedBamFile)
+        Map result = qaResultStatisticsService.defineOutput(processedMergedBamFile)
         String actSmall = result["small"]
         String actExtended = result["extended"]
         List<String> expSmallHeader = [
@@ -704,7 +701,7 @@ class QAResultStatisticsServiceTests {
         seqType.save([flush: true])
         alignmentPass.seqTrack = exomeSeqTrack
         alignmentPass.save([flush: true])
-        Map result = QAResultStatisticsService.defineOutput(processedMergedBamFile)
+        Map result = qaResultStatisticsService.defineOutput(processedMergedBamFile)
         String actSmall = result["small"]
         String actExtended = result["extended"]
         List<String> expSmallHeader = [

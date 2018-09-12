@@ -1,12 +1,12 @@
 package de.dkfz.tbi.otp.administration
 
-import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.user.*
 import de.dkfz.tbi.otp.utils.*
 import grails.converters.*
+import grails.plugin.springsecurity.*
 import grails.plugin.springsecurity.annotation.*
-import org.springframework.validation.FieldError
+import org.springframework.validation.*
 
 /**
  * @short Controller for user management.
@@ -20,15 +20,15 @@ class UserAdministrationController {
     /**
      * Dependency Injection of RemoteUserService
      */
-    def userService
+    UserService userService
     /**
      * Dependency Injection of SpringSecurityService
      */
-    def springSecurityService
+    SpringSecurityService springSecurityService
     /**
      * Dependency Injection of GroupService
      */
-    def groupService
+    GroupService groupService
 
     /**
      * Default action showing the DataTable markup
@@ -48,7 +48,7 @@ class UserAdministrationController {
             render cmd as JSON
             return
         }
-        def data = [success: true, user: userService.createUser(cmd).sanitizedUserMap()]
+        Map data = [success: true, user: userService.createUser(cmd).sanitizedUserMap()]
         render data as JSON
     }
 
@@ -74,10 +74,10 @@ class UserAdministrationController {
      */
     def enable = {
         try {
-            def data = [success: userService.enableUser(params.id as Long, Boolean.parseBoolean(params.value))]
+            Map data = [success: userService.enableUser(params.id as Long, Boolean.parseBoolean(params.value))]
             render data as JSON
         } catch (UserNotFoundException e) {
-            def data = [error: true, message: e.message]
+            Map data = [error: true, message: e.message]
             render data as JSON
         }
     }
@@ -87,10 +87,10 @@ class UserAdministrationController {
      */
     def lockAccount = {
         try {
-            def data = [success: userService.lockAccount(params.id as Long, Boolean.parseBoolean(params.value))]
+            Map data = [success: userService.lockAccount(params.id as Long, Boolean.parseBoolean(params.value))]
             render data as JSON
         } catch (UserNotFoundException e) {
-            def data = [error: true, message: e.message]
+            Map data = [error: true, message: e.message]
             render data as JSON
         }
     }
@@ -100,10 +100,10 @@ class UserAdministrationController {
      */
     def expireAccount = {
         try {
-            def data = [success: userService.expireAccount(params.id as Long, Boolean.parseBoolean(params.value))]
+            Map data = [success: userService.expireAccount(params.id as Long, Boolean.parseBoolean(params.value))]
             render data as JSON
         } catch (UserNotFoundException e) {
-            def data = [error: true, message: e.message]
+            Map data = [error: true, message: e.message]
             render data as JSON
         }
     }
@@ -113,10 +113,10 @@ class UserAdministrationController {
      */
     def expirePassword = {
         try {
-            def data = [success: userService.expirePassword(params.id as Long, Boolean.parseBoolean(params.value))]
+            Map data = [success: userService.expirePassword(params.id as Long, Boolean.parseBoolean(params.value))]
             render data as JSON
         } catch (UserNotFoundException e) {
-            def data = [error: true, message: e.message]
+            Map data = [error: true, message: e.message]
             render data as JSON
         }
     }

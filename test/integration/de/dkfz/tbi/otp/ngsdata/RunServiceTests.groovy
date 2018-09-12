@@ -1,19 +1,16 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.job.plan.*
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.testing.*
+import grails.plugin.springsecurity.*
+import org.junit.*
+import org.springframework.security.access.*
+
 import static org.junit.Assert.*
 
-import grails.plugin.springsecurity.SpringSecurityUtils
-import org.junit.*
-import org.springframework.security.access.AccessDeniedException
-
-import de.dkfz.tbi.otp.job.plan.JobDefinition
-import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
-import de.dkfz.tbi.otp.job.processing.Process
-import de.dkfz.tbi.otp.job.processing.ProcessParameter
-import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
-
 class RunServiceTests extends AbstractIntegrationTest {
-    def runService
+    RunService runService
 
     @Before
     void setUp() {

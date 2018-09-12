@@ -2,13 +2,14 @@ package de.dkfz.tbi.otp.fileSystemConsistency
 
 import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.fileSystemConsistency.ConsistencyStatus.Status
+import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 
 /**
  * Service to check for consistency of Database and LSDF
  */
 class ConsistencyService {
 
-    def lsdfFilesService
+    LsdfFilesService lsdfFilesService
 
     /**
      * Retrieves the consistency status of the DataFile

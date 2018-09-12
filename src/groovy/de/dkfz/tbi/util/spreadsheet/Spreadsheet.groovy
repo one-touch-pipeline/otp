@@ -64,7 +64,7 @@ class Row {
         this.spreadsheet = spreadsheet
         this.rowIndex = rowIndex
         int columnIndex = 0
-        List<Cell> cells = line.split(spreadsheet.delimiter).collect{new Cell(this, columnIndex++, it)}
+        List<Cell> cells = line.split(spreadsheet.delimiter).collect { new Cell(this, columnIndex++, it) }
         if (spreadsheet.header) {
             // Make sure that this row has at least as many cells as the header
             while (columnIndex < spreadsheet.header.cells.size()) {

@@ -15,8 +15,8 @@ class IndividualController {
     static final String SAMPLE_TYPE = "SAMPLE_TYPE"
     static final String SAMPLE_IDENTIFIER = "SAMPLE_IDENTIFIER"
 
-    def individualService
-    def projectService
+    IndividualService individualService
+    ProjectService projectService
     CommentService commentService
     SampleIdentifierService sampleIdentifierService
 
@@ -157,10 +157,10 @@ class IndividualController {
         try {
             List<SamplesParser> parsedSamples = new SamplesParser().insertSamplesFromJSON(cmd.samples)
             Individual individual = individualService.createIndividual(projectService.getProject(cmd.project), cmd, parsedSamples)
-            def data = [success: true, id: individual.id]
+            Map data = [success: true, id: individual.id]
             render data as JSON
         } catch (Throwable e) {
-            def data = [error: e.message]
+            Map data = [error: e.message]
             render data as JSON
         }
     }
@@ -168,11 +168,11 @@ class IndividualController {
     def updateField(UpdateFieldCommand cmd) {
         Individual individual = individualService.getIndividual(cmd.id)
         if (!individual) {
-            def data = [error: g.message(code: "individual.update.notFound", args: [cmd.id])]
+            Map data = [error: g.message(code: "individual.update.notFound", args: [cmd.id])]
             render data as JSON
             return
         }
-        def data = [:]
+        Map data = [:]
         try {
             individualService.updateField(individual, cmd.key, cmd.value)
             data.put("success", true)
@@ -187,11 +187,11 @@ class IndividualController {
     def updateSamples(UpdateSamplesCommand cmd) {
         Individual individual = individualService.getIndividual(cmd.id)
         if (!individual) {
-            def data = [error: g.message(code: "individual.update.notFound", args: [cmd.id])]
+            Map data = [error: g.message(code: "individual.update.notFound", args: [cmd.id])]
             render data as JSON
             return
         }
-        def data = [:]
+        Map data = [:]
         try {
             SamplesParser parsedSamples = new SamplesParser().modifySamplesFromJSON(cmd.samples)
             individualService.createOrUpdateSamples(individual, [parsedSamples])
@@ -207,11 +207,11 @@ class IndividualController {
     def newSampleType(UpdateFieldCommand cmd) {
         Individual individual = individualService.getIndividual(cmd.id)
         if (!individual) {
-            def data = [error: g.message(code: "individual.update.notFound", args: [cmd.id])]
+            Map data = [error: g.message(code: "individual.update.notFound", args: [cmd.id])]
             render data as JSON
             return
         }
-        def data = [:]
+        Map data = [:]
         try {
             individualService.createSample(individual, cmd.value)
             data.put("success", true)
@@ -263,8 +263,9 @@ enum IndividualSortColumn {
     }
 }
 class IndividualCommand {
-    def individualService
-    def projectService
+    IndividualService individualService
+    ProjectService projectService
+
     String pid
     Long project
     String mockPid
@@ -287,7 +288,8 @@ class IndividualCommand {
 }
 
 class UpdateFieldCommand {
-    def individualService
+    IndividualService individualService
+
     Long id
     String key
     String value
@@ -302,7 +304,8 @@ class UpdateFieldCommand {
 }
 
 class RetrieveSampleIdentifiersCommand {
-    def individualService
+    IndividualService individualService
+
     Long id
     String sampleType
 
@@ -315,7 +318,8 @@ class RetrieveSampleIdentifiersCommand {
 }
 
 class UpdateSamplesCommand {
-    def individualService
+    IndividualService individualService
+
     Long id
     String samples
 
