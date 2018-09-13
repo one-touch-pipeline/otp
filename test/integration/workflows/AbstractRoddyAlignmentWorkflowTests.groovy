@@ -125,6 +125,9 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
         }
 
         setPermissionsRecursive(baseDirectory, TEST_DATA_MODE_DIR, TEST_DATA_MODE_FILE)
+
+        //logging files are also created by the tomcat user, so the group needs write access
+        setPermissionsRecursive(configService.loggingRootPath, '2770', TEST_DATA_MODE_FILE)
     }
 
     void setUpFilesVariables() {
