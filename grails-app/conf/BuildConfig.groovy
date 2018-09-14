@@ -111,7 +111,7 @@ codenarc {
     ruleSetFiles = ['file:grails-app/conf/CodeNarcRuleSet.groovy', 'file:grails-app/conf/OtpRuleSet.groovy']
     extraIncludeDirs = ['ast']
     maxPriority1Violations = 2370
-    maxPriority2Violations = 7925
+    maxPriority2Violations = 7966
     reports = {
         CodeNarcXmlReport('xml') {
             outputFile = 'target/CodeNarc-Report.xml'

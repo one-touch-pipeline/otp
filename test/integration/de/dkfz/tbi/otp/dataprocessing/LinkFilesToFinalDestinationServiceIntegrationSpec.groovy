@@ -1,19 +1,20 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import asset.pipeline.grails.LinkGenerator
+import asset.pipeline.grails.*
 import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.config.OtpProperty
+import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.notification.*
 import de.dkfz.tbi.otp.utils.*
 import grails.test.spock.*
+import org.codehaus.groovy.grails.context.support.*
 import org.junit.*
 import org.junit.rules.*
-import org.codehaus.groovy.grails.context.support.*
-import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.*
+import spock.lang.*
 
 class LinkFilesToFinalDestinationServiceIntegrationSpec extends IntegrationSpec {
     LinkFilesToFinalDestinationService service
@@ -22,13 +23,14 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends IntegrationSpec 
     RemoteShellHelper remoteShellHelper
 
     @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder()
+    TemporaryFolder temporaryFolder = new TemporaryFolder()
 
     RnaRoddyBamFile roddyBamFile
     Realm realm
     TestConfigService configService
     String fileName
 
+    @Override
     void setup() {
         service = new LinkFilesToFinalDestinationService()
         service.remoteShellHelper = remoteShellHelper
@@ -145,7 +147,7 @@ ${link}
         given:
         DomainFactory.createProcessingOptionForEmailSenderSalutation()
         service.createNotificationTextService.linkGenerator = Mock(LinkGenerator) {
-            1* link(_) >> 'link'
+            1 * link(_) >> 'link'
         }
         String expected = """\
 QC traffic alignment body
@@ -160,18 +162,21 @@ link
         result == expected
     }
 
-    void "test informResultsAreBlocked"() {
+    @Unroll
+    void "test informResultsAreBlocked (#name)"() {
         given:
         DomainFactory.createProcessingOptionForEmailSenderSalutation()
-        service.createNotificationTextService.linkGenerator= Mock(LinkGenerator) {
+        service.createNotificationTextService.linkGenerator = Mock(LinkGenerator) {
             1 * link(_) >> 'link'
         }
 
         service.mailHelperService = Mock(MailHelperService) {
-            1 * sendEmail(_, _, _) >> {String emailSubject, String content, List<String> recipients ->
-                assert emailSubject == 'TO BE SENT: HEADER'
+            1 * sendEmail(_, _, _) >> { String emailSubject, String content, List<String> recipients ->
+                assert emailSubject == subjectHeader + 'HEADER'
                 assert content == 'BODY'
                 assert recipients
+                assert recipients.size() == recipientsCount
+                assert !recipients.contains(null)
             }
         }
 
@@ -182,7 +187,15 @@ link
         }
         DomainFactory.createProcessingOptionForNotificationRecipient()
 
+        roddyBamFile.project.mailingListName = projectMailingList
+        roddyBamFile.project.save()
+
         expect:
         service.informResultsAreBlocked(roddyBamFile)
+
+        where:
+        name                   | projectMailingList              | subjectHeader  || recipientsCount
+        'without mailing list' | null                            | 'TO BE SENT: ' || 1
+        'with mailing list'    | "tr_${HelperUtils.randomEmail}" | ''             || 2
     }
 }

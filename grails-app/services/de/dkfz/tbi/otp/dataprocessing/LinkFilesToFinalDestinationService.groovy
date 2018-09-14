@@ -15,6 +15,7 @@ class LinkFilesToFinalDestinationService {
     @Autowired
     ExecuteRoddyCommandService executeRoddyCommandService
 
+    @SuppressWarnings("GrailsStatelessService")
     @Autowired
     LinkFileUtils linkFileUtils
 
@@ -27,6 +28,7 @@ class LinkFilesToFinalDestinationService {
     @Autowired
     CreateClusterScriptService createClusterScriptService
 
+    @SuppressWarnings("GrailsStatelessService")
     @Autowired
     RemoteShellHelper remoteShellHelper
 
@@ -41,7 +43,7 @@ class LinkFilesToFinalDestinationService {
 
 
     public void prepareRoddyBamFile(RoddyBamFile roddyBamFile) {
-        assert roddyBamFile : "roddyBamFile must not be null"
+        assert roddyBamFile: "roddyBamFile must not be null"
         if (!roddyBamFile.withdrawn) {
             RoddyBamFile.withTransaction {
                 assert roddyBamFile.isMostRecentBamFile(): "The BamFile ${roddyBamFile} is not the most recent one. This must not happen!"
@@ -57,8 +59,8 @@ class LinkFilesToFinalDestinationService {
     }
 
     public void linkToFinalDestinationAndCleanup(RoddyBamFile roddyBamFile, Realm realm) {
-        assert roddyBamFile : "roddyBamFile must not be null"
-        assert realm : "realm must not be null"
+        assert roddyBamFile: "roddyBamFile must not be null"
+        assert realm: "realm must not be null"
         if (!roddyBamFile.withdrawn) {
             cleanupWorkDirectory(roddyBamFile, realm)
             executeRoddyCommandService.correctPermissionsAndGroups(roddyBamFile, realm)
@@ -95,8 +97,8 @@ class LinkFilesToFinalDestinationService {
      * Link files (replaces existing files)
      */
     void linkNewResults(RoddyBamFile roddyBamFile, Realm realm) {
-        assert roddyBamFile : "Input roddyBamFile must not be null"
-        assert realm : "Input realm must not be null"
+        assert roddyBamFile: "Input roddyBamFile must not be null"
+        assert realm: "Input realm must not be null"
         assert !roddyBamFile.isOldStructureUsed()
 
         Map<File, File> linkMapSourceLink = [:]
@@ -162,18 +164,18 @@ class LinkFilesToFinalDestinationService {
         return createNotificationTextService.createMessage(
                 "notification.template.alignment.qcTrafficBlockedMessage",
                 [
-                        roddyBamFile: roddyBamFile,
-                        link: createNotificationTextService.createOtpLinks([roddyBamFile.project], 'alignmentQualityOverview', 'index'),
+                        roddyBamFile         : roddyBamFile,
+                        link                 : createNotificationTextService.createOtpLinks([roddyBamFile.project], 'alignmentQualityOverview', 'index'),
                         emailSenderSalutation: ProcessingOptionService.findOptionAssure(ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION, null, null),
                 ]
         )
     }
 
-    void informResultsAreBlocked (RoddyBamFile roddyBamFile) {
+    void informResultsAreBlocked(RoddyBamFile roddyBamFile) {
         List<String> recipients = [
                 roddyBamFile.project.mailingListName,
                 ProcessingOptionService.getValueOfProcessingOption(ProcessingOption.OptionName.EMAIL_RECIPIENT_NOTIFICATION),
-        ]
+        ].findAll()
         String subject = createResultsAreBlockedSubject(roddyBamFile)
         String content = createResultsAreBlockedMessage(roddyBamFile)
         mailHelperService.sendEmail(subject, content, recipients)
@@ -191,8 +193,8 @@ class LinkFilesToFinalDestinationService {
     }
 
     void cleanupWorkDirectory(RoddyBamFile roddyBamFile, Realm realm) {
-        assert roddyBamFile : "Input roddyBamFile must not be null"
-        assert realm : "Input realm must not be null"
+        assert roddyBamFile: "Input roddyBamFile must not be null"
+        assert realm: "Input realm must not be null"
         assert !roddyBamFile.isOldStructureUsed()
 
         List<File> expectedFiles = [
@@ -214,8 +216,8 @@ class LinkFilesToFinalDestinationService {
 
 
     void cleanupOldResults(RoddyBamFile roddyBamFile, Realm realm) {
-        assert roddyBamFile : "Input roddyBamFile must not be null"
-        assert realm : "Input realm must not be null"
+        assert roddyBamFile: "Input roddyBamFile must not be null"
+        assert realm: "Input realm must not be null"
         assert !roddyBamFile.isOldStructureUsed()
 
         List<File> filesToDelete = []
@@ -243,7 +245,7 @@ class LinkFilesToFinalDestinationService {
                     roddyDirsToDelete.addAll(it.finalExecutionDirectories)
                     roddyDirsToDelete.addAll(it.finalSingleLaneQADirectories.values())
                 }
-                if (roddyBamFiles.max {it.identifier}.oldStructureUsed) {
+                if (roddyBamFiles.max { it.identifier }.oldStructureUsed) {
                     roddyDirsToDelete.add(roddyBamFile.finalMergedQADirectory)
                 }
             }
