@@ -9,6 +9,7 @@ import org.springframework.validation.*
 
 import java.lang.reflect.*
 
+@ToString(includeNames = true, includePackage = false)
 class QcThreshold implements Entity {
 
     Project project
