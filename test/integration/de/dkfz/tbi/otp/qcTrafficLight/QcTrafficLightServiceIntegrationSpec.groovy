@@ -1,11 +1,11 @@
 package de.dkfz.tbi.otp.qcTrafficLight
 
-import de.dkfz.tbi.otp.CommentService
+import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.utils.Principal
-import grails.plugin.springsecurity.SpringSecurityService
-import spock.lang.Specification
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.*
+import grails.plugin.springsecurity.*
+import spock.lang.*
 
 import static de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.QcTrafficLightStatus.*
 
@@ -39,7 +39,8 @@ class QcTrafficLightServiceIntegrationSpec extends Specification {
         aceseqQc = DomainFactory.createAceseqQc([solutionPossible: 5, goodnessOfFit: 5], [:], [:], instance)
     }
 
-    void "setQcTrafficLightStatusBasedOnThreshold"() {
+    @Unroll
+    void "setQcTrafficLightStatusBasedOnThreshold (tcc = #tcc & ploidy = #ploidy --> #resultStatus)"() {
         given:
         aceseqQc.tcc = tcc
         aceseqQc.ploidy = ploidy
@@ -59,7 +60,65 @@ class QcTrafficLightServiceIntegrationSpec extends Specification {
         9   | 9      || BLOCKED
     }
 
-    void "setQcTrafficLightStatusBasedOnThreshold, once blocked files do not get unblocked"() {
+    @Unroll
+    void "setQcTrafficLightStatusBasedOnThreshold, use project specific (tcc = #tcc --> #resultStatus)"() {
+        given:
+        aceseqQc.tcc = tcc
+        aceseqQc.ploidy = 5
+
+        DomainFactory.createQcThreshold(
+                qcProperty1: 'tcc',
+                seqType: instance.seqType,
+                qcClass: AceseqQc.name,
+                errorThresholdLower: 12,
+                warningThresholdLower: 14,
+                warningThresholdUpper: 16,
+                errorThresholdUpper: 18,
+                project: instance.project,
+        )
+        when:
+        qcTrafficLightService.setQcTrafficLightStatusBasedOnThreshold(instance.sampleType1BamFile, aceseqQc)
+
+        then:
+        instance.sampleType1BamFile.qcTrafficLightStatus == resultStatus
+
+        where:
+        tcc || resultStatus
+        3   || BLOCKED
+        5   || BLOCKED
+        7   || BLOCKED
+        11  || BLOCKED
+        13  || QC_PASSED
+        15  || QC_PASSED
+        17  || QC_PASSED
+        19  || BLOCKED
+    }
+
+    @Unroll
+    void "setQcTrafficLightStatusBasedOnThreshold, do not use project specific of other project (tcc = #tcc --> #resultStatus)"() {
+        given:
+        aceseqQc.tcc = tcc
+        aceseqQc.ploidy = 5
+
+        QcThreshold qcThreshold = QcThreshold.findByQcProperty1('tcc')
+        qcThreshold.project = DomainFactory.createProject()
+        qcThreshold.save(flush: true)
+
+        when:
+        qcTrafficLightService.setQcTrafficLightStatusBasedOnThreshold(instance.sampleType1BamFile, aceseqQc)
+
+        then:
+        instance.sampleType1BamFile.qcTrafficLightStatus == resultStatus
+
+        where:
+        tcc || resultStatus
+        0   || QC_PASSED
+        5   || QC_PASSED
+        9   || QC_PASSED
+    }
+
+    @Unroll
+    void "setQcTrafficLightStatusBasedOnThreshold, once blocked files do not get unblocked (tcc = #tcc & ploidy = #ploidy --> #resultStatus)"() {
         given:
         aceseqQc.tcc = tcc
         aceseqQc.ploidy = ploidy
