@@ -122,7 +122,6 @@ class FastqcWorkflowTests extends WorkflowTestCase {
     List<String> getWorkflowScripts() {
         return [
                 "scripts/workflows/FastqcWorkflow.groovy",
-                "scripts/initializations/LoadSoftwareModules.groovy",
         ]
     }
 

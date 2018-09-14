@@ -33,7 +33,7 @@ class ProcessingOptionService {
         ProcessingOption option = findOption(name, type, project)
         if (option) {
             if (option.name.necessity == Necessity.REQUIRED &&
-                    !OptionName.class.getField(option.name.name()).isAnnotationPresent(Deprecated)
+                    !option.name.isDeprecated()
             ) {
                 throw new ProcessingException("Required options can't be obsoleted")
             }
@@ -96,7 +96,7 @@ class ProcessingOptionService {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public List<ProcessingOption> listProcessingOptions() {
         ProcessingOption.findAllByDateObsoletedIsNull().findAll {
-            !OptionName.class.getField(it.name.name()).isAnnotationPresent(Deprecated)
+            !it.name.isDeprecated()
         }
     }
 }

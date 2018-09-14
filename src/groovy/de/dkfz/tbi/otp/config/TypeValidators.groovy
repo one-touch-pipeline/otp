@@ -47,6 +47,10 @@ enum TypeValidators {
     SEQ_CENTER_NAME({ SeqCenter.findByName(it) }, { SeqCenter.all*.name }),
 
     SEQ_TYPE_RODDY_NAME({ SeqType.findByRoddyName(it) }, { SeqType.all*.roddyName.findAll().unique() }),
+    SEQ_TYPE_RODDY_NAME_SNV({ SeqType.findByRoddyName(it) }, { SeqType.snvPipelineSeqTypes*.roddyName.findAll().unique() }),
+    SEQ_TYPE_RODDY_NAME_INDEL({ SeqType.findByRoddyName(it) }, { SeqType.indelPipelineSeqTypes*.roddyName.findAll().unique() }),
+    SEQ_TYPE_RODDY_NAME_SOPHIA({ SeqType.findByRoddyName(it) }, { SeqType.sophiaPipelineSeqTypes*.roddyName.findAll().unique() }),
+    SEQ_TYPE_RODDY_NAME_ACESEQ({ SeqType.findByRoddyName(it) }, { SeqType.aceseqPipelineSeqTypes*.roddyName.findAll().unique() }),
 
     SEQ_TYPE_PROCESSING_NAME({ SeqType.findByDisplayName(it) }, { SeqType.all*.displayName.unique() }),
 
@@ -72,7 +76,7 @@ enum TypeValidators {
         if (allowedValues) {
             return allowedValues.call()
         } else {
-            return []
+            return null
         }
     }
 

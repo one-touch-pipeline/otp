@@ -24,6 +24,9 @@ class WorkflowExecutionPlanUpdateTests extends DataInstallationWorkflowTests {
 
     @Override
     List<String> getWorkflowScripts() {
-        return ["scripts/workflows/OldDataInstallationWorkflow.groovy", "scripts/workflows/DataInstallationWorkflow.groovy"]
+        return [
+                "scripts/workflows/OldDataInstallationWorkflow.groovy",
+                "scripts/workflows/DataInstallationWorkflow.groovy",
+        ]
     }
 }

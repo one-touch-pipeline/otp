@@ -51,9 +51,6 @@ class PanCanWgbsAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkflowTes
     List<String> getWorkflowScripts() {
         return [
                 "scripts/workflows/WgbsAlignmentWorkflow.groovy",
-                "scripts/initializations/RoddyOptions.groovy",
-                "scripts/initializations/RoddyAlignmentPipelinesOptions.groovy",
-                "scripts/initializations/LoadSoftwareModules.groovy",
         ]
     }
 

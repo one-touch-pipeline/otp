@@ -21,12 +21,12 @@ class ProcessingOption implements Entity {
         PIPELINE_RODDY_SNV_DEFAULT_PLUGIN_VERSION(
                 "Default version of the Roddy SNV pipeline plugin, used when configuring the pipeline",
                 Necessity.REQUIRED, null, TypeValidators.PLUGIN,
-                TypeValidators.SEQ_TYPE_RODDY_NAME
+                TypeValidators.SEQ_TYPE_RODDY_NAME_SNV
         ),
         PIPELINE_RODDY_SNV_DEFAULT_BASE_PROJECT_CONFIG(
                 "Default base project file for Roddy SNV pipeline, used when configuring the pipeline",
                 Necessity.REQUIRED, null, TypeValidators.SINGLE_WORD_TEXT,
-                TypeValidators.SEQ_TYPE_RODDY_NAME
+                TypeValidators.SEQ_TYPE_RODDY_NAME_SNV
         ),
 
         PIPELINE_RODDY_INDEL_DEFAULT_PLUGIN_NAME(
@@ -36,12 +36,12 @@ class ProcessingOption implements Entity {
         PIPELINE_RODDY_INDEL_DEFAULT_PLUGIN_VERSION(
                 "Default version of the Indel pipeline plugin, used when configuring the pipeline",
                 Necessity.REQUIRED, null, TypeValidators.PLUGIN,
-                TypeValidators.SEQ_TYPE_RODDY_NAME
+                TypeValidators.SEQ_TYPE_RODDY_NAME_INDEL
         ),
         PIPELINE_RODDY_INDEL_DEFAULT_BASE_PROJECT_CONFIG(
                 "Default base project file for Indel pipeline, used when configuring the pipeline",
                 Necessity.REQUIRED, null, TypeValidators.SINGLE_WORD_TEXT,
-                TypeValidators.SEQ_TYPE_RODDY_NAME
+                TypeValidators.SEQ_TYPE_RODDY_NAME_INDEL
         ),
 
         PIPELINE_ACESEQ_DEFAULT_PLUGIN_NAME(
@@ -51,12 +51,12 @@ class ProcessingOption implements Entity {
         PIPELINE_ACESEQ_DEFAULT_PLUGIN_VERSION(
                 "Default version of the Aceseq pipeline plugin, used when configuring the pipeline",
                 Necessity.REQUIRED, null, TypeValidators.PLUGIN,
-                TypeValidators.SEQ_TYPE_RODDY_NAME
+                TypeValidators.SEQ_TYPE_RODDY_NAME_ACESEQ
         ),
         PIPELINE_ACESEQ_DEFAULT_BASE_PROJECT_CONFIG(
                 "Default base project file for Aceseq pipeline, used when configuring the pipeline",
                 Necessity.REQUIRED, null, TypeValidators.SINGLE_WORD_TEXT,
-                TypeValidators.SEQ_TYPE_RODDY_NAME
+                TypeValidators.SEQ_TYPE_RODDY_NAME_ACESEQ
         ),
         PIPELINE_ACESEQ_REFERENCE_GENOME(
                 "Name of reference genomes for Aceseq, comma-separated",
@@ -83,12 +83,12 @@ class ProcessingOption implements Entity {
         PIPELINE_SOPHIA_DEFAULT_PLUGIN_VERSIONS(
                 "Default version of the Sophia pipeline plugin, used when configuring the pipeline",
                 Necessity.REQUIRED, null, TypeValidators.PLUGIN,
-                TypeValidators.SEQ_TYPE_RODDY_NAME
+                TypeValidators.SEQ_TYPE_RODDY_NAME_SOPHIA
         ),
         PIPELINE_SOPHIA_DEFAULT_BASE_PROJECT_CONFIG(
                 "Default base project file for Sophia pipeline, used when configuring the pipeline",
                 Necessity.REQUIRED, null, TypeValidators.SINGLE_WORD_TEXT,
-                TypeValidators.SEQ_TYPE_RODDY_NAME
+                TypeValidators.SEQ_TYPE_RODDY_NAME_SOPHIA
         ),
         PIPELINE_SOPHIA_REFERENCE_GENOME(
                 "Name of reference genomes for Sophia, comma-separated",
@@ -151,10 +151,9 @@ class ProcessingOption implements Entity {
                 "Path to sambamba",
                 Necessity.OPTIONAL, "", TypeValidators.ABSOLUTE_PATH
         ),
-        PIPELINE_RODDY_ALIGNMENT_DEFAULT_GENOME_STAR_INDEX(
+        PIPELINE_RODDY_ALIGNMENT_RNA_DEFAULT_GENOME_STAR_INDEX(
                 "Default genome star index, used when configuring the pipeline",
                 Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT,
-                TypeValidators.SEQ_TYPE_RODDY_NAME
         ),
 
         @Deprecated
@@ -276,7 +275,7 @@ class ProcessingOption implements Entity {
         //statistics
         STATISTICS_BASES_PER_BYTES_FASTQ(
                 "Bases Per Byte for FastQ file used to calculate count of bases before FastQC-WG is finished",
-                Necessity.OPTIONAL, "2339", TypeValidators.FLOAT
+                Necessity.OPTIONAL, "2.339", TypeValidators.FLOAT
         ),
 
         //ticketSystem
@@ -386,7 +385,7 @@ class ProcessingOption implements Entity {
         ),
         GUI_CONTACT_DATA_SUPPORT_EMAIL(
                 "Email of the helpdesk team",
-                Necessity.OPTIONAL, "", TypeValidators.MAIL
+                Necessity.REQUIRED, null, TypeValidators.MAIL
         ),
         GUI_CONTACT_DATA_PERSON_IN_CHARGE(
                 "Person in charge, shown on contact page",
@@ -467,6 +466,10 @@ class ProcessingOption implements Entity {
 
         TypeValidators getValidatorForType() {
             validatorForType
+        }
+
+        boolean isDeprecated() {
+            return this.class.getField(name()).isAnnotationPresent(Deprecated)
         }
     }
 

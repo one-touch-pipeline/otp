@@ -10,17 +10,19 @@ processingOptionService.createOrUpdate(
         'ACEseqWorkflow'
 )
 
-processingOptionService.createOrUpdate(
-        PIPELINE_ACESEQ_DEFAULT_PLUGIN_VERSION,
-        '1.2.8-4',
-        SeqType.wholeGenomePairedSeqType.roddyName,
-)
+SeqType.aceseqPipelineSeqTypes.each { SeqType seqType ->
+    processingOptionService.createOrUpdate(
+            PIPELINE_ACESEQ_DEFAULT_PLUGIN_VERSION,
+            '1.2.8-4',
+            seqType.roddyName,
+    )
 
-processingOptionService.createOrUpdate(
-        PIPELINE_ACESEQ_DEFAULT_BASE_PROJECT_CONFIG,
-        'otpACEseq-1.1',
-        SeqType.wholeGenomePairedSeqType.roddyName,
-)
+    processingOptionService.createOrUpdate(
+            PIPELINE_ACESEQ_DEFAULT_BASE_PROJECT_CONFIG,
+            'otpACEseq-1.1',
+            seqType.roddyName,
+    )
+}
 
 processingOptionService.createOrUpdate(
         PIPELINE_ACESEQ_REFERENCE_GENOME,

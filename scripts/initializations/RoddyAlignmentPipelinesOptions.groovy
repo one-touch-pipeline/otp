@@ -157,9 +157,8 @@ processingOptionService.createOrUpdate(
 )
 
 processingOptionService.createOrUpdate(
-        OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_GENOME_STAR_INDEX,
+        OptionName.PIPELINE_RODDY_ALIGNMENT_RNA_DEFAULT_GENOME_STAR_INDEX,
         "star_200 - 2.5.2b",
-        SeqType.rnaPairedSeqType.roddyName,
 )
 
 

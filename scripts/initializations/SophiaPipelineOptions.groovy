@@ -10,29 +10,19 @@ processingOptionService.createOrUpdate(
         'SophiaWorkflow'
 )
 
-processingOptionService.createOrUpdate(
-        PIPELINE_SOPHIA_DEFAULT_PLUGIN_VERSIONS,
-        '1.2.16',
-        SeqType.wholeGenomePairedSeqType.roddyName,
-)
+SeqType.sophiaPipelineSeqTypes.each { SeqType seqType ->
+    processingOptionService.createOrUpdate(
+            PIPELINE_SOPHIA_DEFAULT_PLUGIN_VERSIONS,
+            '1.2.16',
+            seqType.roddyName,
+    )
 
-processingOptionService.createOrUpdate(
-        PIPELINE_SOPHIA_DEFAULT_PLUGIN_VERSIONS,
-        '1.2.16',
-        SeqType.exomePairedSeqType.roddyName,
-)
-
-processingOptionService.createOrUpdate(
-        PIPELINE_SOPHIA_DEFAULT_BASE_PROJECT_CONFIG,
-        'otpSophia-1.1',
-        SeqType.wholeGenomePairedSeqType.roddyName,
-)
-
-processingOptionService.createOrUpdate(
-        PIPELINE_SOPHIA_DEFAULT_BASE_PROJECT_CONFIG,
-        'otpSophia-1.1',
-        SeqType.exomePairedSeqType.roddyName,
-)
+    processingOptionService.createOrUpdate(
+            PIPELINE_SOPHIA_DEFAULT_BASE_PROJECT_CONFIG,
+            'otpSophia-1.1',
+            seqType.roddyName,
+    )
+}
 
 processingOptionService.createOrUpdate(
         PIPELINE_SOPHIA_REFERENCE_GENOME,

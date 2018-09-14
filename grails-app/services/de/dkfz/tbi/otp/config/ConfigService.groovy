@@ -34,15 +34,13 @@ class ConfigService implements ApplicationContextAware {
 
     ConfigService() {
         Properties properties = parsePropertiesFile()
-        this.otpProperties = properties.collectEntries {key, value ->
+        this.otpProperties = properties.collectEntries { key, value ->
             OtpProperty otpProperty = OtpProperty.findByKey(key)
-            if (!otpProperty) {
-                throw new Exception("Found unknown key'${key}' in the otp properties file")
+            if (otpProperty) {
+                return [(otpProperty): value]
+            } else {
+                return [:]
             }
-            if (!otpProperty.validator.validate(value)) {
-                throw new Exception("The value '${value}' for the key '${key}' is not valid for the check '${otpProperty.validator}'")
-            }
-            return [(otpProperty): value]
         }
     }
 
@@ -60,7 +58,7 @@ class ConfigService implements ApplicationContextAware {
     }
 
     File getScriptOutputPath() {
-        return new File(otpProperties.get(OtpProperty.PATH_SCRIPTS) ?: "")
+        return new File(otpProperties.get(OtpProperty.PATH_SCRIPTS_OUTPUT) ?: "")
     }
 
     File getProcessingRootPath() {
@@ -103,7 +101,8 @@ class ConfigService implements ApplicationContextAware {
     }
 
     SshAuthMethod getSshAuthenticationMethod() {
-        SshAuthMethod.getByConfigName(otpProperties.get(OtpProperty.SSH_AUTH_METHOD)) ?: OtpProperty.SSH_AUTH_METHOD.defaultValue
+        return SshAuthMethod.getByConfigName(otpProperties.get(OtpProperty.SSH_AUTH_METHOD)) ?:
+                SshAuthMethod.getByConfigName(OtpProperty.SSH_AUTH_METHOD.defaultValue)
     }
 
     String getSshPassword() {

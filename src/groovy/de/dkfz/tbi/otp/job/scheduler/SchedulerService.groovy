@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.job.scheduler
 
+import de.dkfz.tbi.otp.config.OptionProblem
+import de.dkfz.tbi.otp.config.PropertiesValidationService
 import de.dkfz.tbi.otp.job.*
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.processing.*
@@ -44,6 +46,9 @@ class SchedulerService {
 
     @Autowired
     ProcessService processService
+
+    @Autowired
+    PropertiesValidationService propertiesValidationService
 
     /**
      * Queue of next to be started ProcessingSteps
@@ -91,8 +96,15 @@ class SchedulerService {
         if (schedulerActive || startupOk) {
             return
         }
-        boolean ok = true
+        boolean valid = true
         List<ProcessingStep> processesToRestart = []
+
+        List<OptionProblem> validationResult = propertiesValidationService.validateProcessingOptions()
+        if (!validationResult.isEmpty()) {
+            log.error(validationResult.join("\n"))
+            valid = false
+        }
+
         try {
             ProcessingStep.withTransaction { status ->
                 List<Process> processes = Process.findAllByFinished(false)
@@ -101,7 +113,7 @@ class SchedulerService {
                     List<ProcessingStepUpdate> updates = ProcessingStepUpdate.findAllByProcessingStep(step)
                     if (updates.isEmpty()) {
                         status.setRollbackOnly()
-                        ok = false
+                        valid = false
                         log.error("Error during startup: ProcessingStep ${step.id} does not have any Updates")
                         return
                     }
@@ -117,7 +129,7 @@ class SchedulerService {
                                 processingStep: step
                         )
                         if (!update.save(flush: true)) {
-                            ok = false
+                            valid = false
                             status.setRollbackOnly()
                             log.error("ProcessingStep ${step.id} could not be resumed")
                         }
@@ -127,22 +139,22 @@ class SchedulerService {
                         RestartedProcessingStep restarted = RestartedProcessingStep.findByOriginal(step)
                         if (!restarted) {
                             status.setRollbackOnly()
-                            ok = false
+                            valid = false
                             log.error("Error during startup: ProcessingStep ${step.id} is in state ${last.state}, but no RestartedProcessingStep exists")
                         }
                     } else {
                         status.setRollbackOnly()
-                        ok = false
+                        valid = false
                         log.error("Error during startup: ProcessingStep ${step.id} is in state ${last.state}")
                     }
                 }
             }
         } catch (Exception e) {
-            ok = false
+            valid = false
             log.error(e.message)
             e.printStackTrace()
         }
-        if (ok) {
+        if (valid) {
             startupOk = true
             schedulerActive = true
             lock.lock()

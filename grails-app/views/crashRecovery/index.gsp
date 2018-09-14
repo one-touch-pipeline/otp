@@ -10,6 +10,7 @@
 </head>
 <body>
     <div class="body">
+        <g:if test="${crashRecovery}">
         <div id="dialog-select-job" title="Select a Job" style="display: none">
             <p>Please select a Job from the List to perform the operation.</p>
             <p>In case the List is empty, you can restart the Scheduler with the "Start Scheduler" button.</p>
@@ -19,6 +20,11 @@
             <input type="text"/>
         </div>
         <h1><g:message code="crashRecovery.title"/></h1>
+            <g:if test="${!processingOptionsValid}">
+                <div id="infoBox"><div class="errors">
+                    <ul><li>There are invalid processing options: <g:link controller="processingOption">view and correct them here</g:link></li></ul>
+                </div></div>
+            </g:if>
         <div>
             <p>Select one of the Crashed Jobs and click one of the actions underneath the table. Jobs that are at least sometimes resumable are preselected.</p>
             <ul>
@@ -47,6 +53,10 @@
             <button id="restart">Restart</button>
             <button id="startScheduler">Start Scheduler</button>
         </div>
+        </g:if>
+        <g:else>
+            <h2>No Crash Recovery in place</h2>
+        </g:else>
     </div>
     <asset:script>
         $(function () {

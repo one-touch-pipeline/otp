@@ -101,8 +101,6 @@ abstract class AbstractRunYapsaWorkflowTests extends AbstractRoddyBamFilePairAna
     List<String> getWorkflowScripts() {
         return [
                 "scripts/workflows/RunYapsaWorkflow.groovy",
-                "scripts/initializations/RunYapsaPipelineOptions.groovy",
-                "scripts/initializations/LoadSoftwareModules.groovy",
         ]
     }
 

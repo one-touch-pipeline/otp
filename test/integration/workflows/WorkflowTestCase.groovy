@@ -123,21 +123,33 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         sql.execute("SCRIPT NODATA DROP TO ?", [schemaDump.absolutePath])
 
         DomainFactory.createAllAlignableSeqTypes()
+
         DomainFactory.createProcessingOptionForNotificationRecipient()
-        DomainFactory.createProcessingOptionLazy([
-                name : OptionName.OTP_USER_LINUX_GROUP,
-                value: configService.getTestingGroup(),
-        ])
-        DomainFactory.createProcessingOptionLazy(name: OptionName.TIME_ZONE, type: null, value: "Europe/Berlin")
-        DomainFactory.createProcessingOptionLazy(name: OptionName.STATISTICS_BASES_PER_BYTES_FASTQ, type: null, value: 2.339)
-        DomainFactory.createProcessingOptionLazy(name: OptionName.CLUSTER_SUBMISSIONS_FAST_TRACK_QUEUE, type: null, value: "fasttrack")
+        DomainFactory.createProcessingOptionLazy(name :OptionName.OTP_USER_LINUX_GROUP, value: configService.getTestingGroup())
+        DomainFactory.createProcessingOptionLazy(name: OptionName.CLUSTER_SUBMISSIONS_FAST_TRACK_QUEUE, value: "fasttrack")
+        DomainFactory.createProcessingOptionLazy(name: OptionName.TICKET_SYSTEM_URL, value: "1234")
+        DomainFactory.createProcessingOptionLazy(name: OptionName.TICKET_SYSTEM_NUMBER_PREFIX, value: "asdf")
+        DomainFactory.createProcessingOptionLazy(name: OptionName.FILESYSTEM_FASTQ_IMPORT, value: "")
+        DomainFactory.createProcessingOptionLazy(name: OptionName.FILESYSTEM_BAM_IMPORT, value: "")
+        DomainFactory.createProcessingOptionLazy(name: OptionName.FILESYSTEM_PROCESSING_USE_REMOTE, value: "true")
+        DomainFactory.createProcessingOptionLazy(name: OptionName.FILESYSTEM_CONFIG_FILE_CHECKS_USE_REMOTE, value: "true")
+        DomainFactory.createProcessingOptionLazy(name: OptionName.REALM_DEFAULT_VALUE, value: realm.name)
+        DomainFactory.createProcessingOptionLazy(name: OptionName.EMAIL_RECIPIENT_ERRORS, value: HelperUtils.randomEmail)
+        DomainFactory.createProcessingOptionLazy(name: OptionName.EMAIL_SENDER, value: HelperUtils.randomEmail)
+        DomainFactory.createProcessingOptionLazy(name: OptionName.EMAIL_LINUX_GROUP_ADMINISTRATION, value: HelperUtils.randomEmail)
+        DomainFactory.createProcessingOptionLazy(name: OptionName.GUI_CONTACT_DATA_SUPPORT_EMAIL, value: HelperUtils.randomEmail)
 
         createUserAndRoles()
         loadWorkflow()
 
+        SpringSecurityUtils.doWithAuth(ADMIN) {
+            new File("scripts/initializations").listFiles().each { File script ->
+                runScript(script)
+            }
+        }
+
         DomainFactory.createProcessingOptionLazy(
                 name: OptionName.RODDY_APPLICATION_INI,
-                type: null,
                 value: new File(getRootDirectory(), "applicationProperties-3.0-lsf.ini").absolutePath
         )
 
@@ -415,7 +427,7 @@ echo \$TEMP_DIR
         setupForLoadingWorkflow()
 
         assert workflowScripts : 'No workflow script provided.'
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             JobExecutionPlan.withTransaction {
                 workflowScripts.each { String script ->
                     runScript(script)

@@ -13,7 +13,6 @@ dataSource {
     pooled = true
     driverClassName = "org.postgresql.Driver"
     dialect = PostgreSQL9Dialect
-    dbCreate = otpProperties.getProperty(OtpProperty.DATABASE_CREATE.key)
     username = otpProperties.getProperty(OtpProperty.DATABASE_USERNAME.key)
     password = otpProperties.getProperty(OtpProperty.DATABASE_PASSWORD.key)
     url = "jdbc:postgresql://${server}:${port}/${database}"

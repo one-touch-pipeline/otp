@@ -57,8 +57,6 @@ abstract class AbstractSnvWorkflowTests extends AbstractRoddyBamFilePairAnalysis
     List<String> getWorkflowScripts() {
         return [
                 "scripts/workflows/RoddySnvWorkflow.groovy",
-                "scripts/initializations/RoddyOptions.groovy",
-                "scripts/initializations/SnvPipelineOptions.groovy",
         ]
     }
 

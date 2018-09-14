@@ -7,13 +7,16 @@ import grails.util.*
 import org.codehaus.groovy.grails.commons.*
 
 class BootStrap {
-    GrailsApplication grailsApplication
-    SchedulerService schedulerService
     ConfigService configService
+    GrailsApplication grailsApplication
+    PropertiesValidationService propertiesValidationService
+    SchedulerService schedulerService
 
     def init = { servletContext ->
         // load the shutdown service
         grailsApplication.mainContext.getBean("shutdownService")
+
+        propertiesValidationService.validateStartUpProperties()
 
         if (configService.isJobSystemEnabled()) {
             // startup the scheduler

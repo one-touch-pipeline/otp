@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.administration
 
+import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.scheduler.*
 import de.dkfz.tbi.otp.utils.*
@@ -11,19 +12,17 @@ class CrashRecoveryController {
 
     CrashRecoveryService crashRecoveryService
     /** SchedulerService required to restart the scheduler */
+    PropertiesValidationService propertiesValidationService
     SchedulerService schedulerService
 
 
     def index() {
-        if (!crashRecoveryService.crashRecovery) {
-            redirect action: "noRecovery"
-        }
-    }
-
-    def noRecovery() {
-        if (crashRecoveryService.crashRecovery) {
-            redirect action: "index"
-        }
+        boolean crashRecovery = crashRecoveryService.crashRecovery
+        boolean processingOptionsValid = propertiesValidationService.validateProcessingOptions().isEmpty()
+        return [
+                crashRecovery: crashRecovery,
+                processingOptionsValid: processingOptionsValid,
+        ]
     }
 
     def datatable(DataTableCommand cmd) {

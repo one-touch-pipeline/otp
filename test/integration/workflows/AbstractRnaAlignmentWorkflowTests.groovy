@@ -255,10 +255,8 @@ abstract class AbstractRnaAlignmentWorkflowTests extends AbstractRoddyAlignmentW
 
     @Override
     List<String> getWorkflowScripts() {
-        ["scripts/workflows/RnaAlignmentWorkflow.groovy",
-         "scripts/initializations/RoddyOptions.groovy",
-         "scripts/initializations/RoddyAlignmentPipelinesOptions.groovy",
-         "scripts/initializations/LoadSoftwareModules.groovy",
+        return [
+                "scripts/workflows/RnaAlignmentWorkflow.groovy",
         ]
     }
 
