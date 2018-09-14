@@ -1,89 +1,101 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
-import grails.converters.*
-import org.springframework.validation.*
+import de.dkfz.tbi.otp.qcTrafficLight.*
+import grails.validation.*
+import groovy.transform.*
 
 class ProcessingOptionController {
 
-    def processingOptionService
-    def projectService
+    static allowedMethods = [
+            index : "GET",
+            update: "POST",
+    ]
 
-    def datatable(DataTableCommand cmd) {
-        Map dataToRender = cmd.dataToRender()
+    ProcessingOptionService processingOptionService
+    ProjectService projectService
+    PropertiesValidationService propertiesValidationService
 
-        List<ProcessingOption> processingOptions = processingOptionService.listProcessingOptions()
-        dataToRender.iTotalRecords = processingOptions.size()
-        dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
-
-        processingOptions.each { processingOption ->
-            dataToRender.aaData << [
-                    option : processingOption,
-                    project: processingOption.project.toString()
-            ]
-        }
-        render dataToRender as JSON
-    }
+    private static final int MAX_LENGTH = 20
 
     def index() {
-    }
+        List<ProcessingOption> existingOptions = processingOptionService.listProcessingOptions()
 
-    def insert(ProcessingOptionCommand cmd) {
-        String message
-        boolean hasErrors
-        List<String> projects = ["no project"]
-        projectService.getAllProjects().each { Project project ->
-            projects.add(project.name)
-        }
-        if (cmd.submit == "Save") {
-            hasErrors = cmd.hasErrors()
-            if (hasErrors) {
-                FieldError errors = cmd.errors.getFieldError()
-                message = "'" + errors.getRejectedValue() + "' is not a valid value for '" + errors.getField() + "'. Error code: '" + errors.code + "'"
-            } else {
-                try {
-                    processingOptionService.createOrUpdate(
-                            cmd.optionName,
-                            cmd.value,
-                            cmd.type != "" ? cmd.type : null,
-                            projectService.getProjectByName(cmd.project),
-                    )
-                    message = "Saved successfully"
-                } catch (Exception e) {
-                    message = e.message
-                }
+        List<OptionRow> options = OptionName.values().sort().collectMany { OptionName name ->
+            List<String> types = name.validatorForType?.allowedValues != null ? name.validatorForType.allowedValues : [null]
+
+            types.sort().collect { String type ->
+                ProcessingOption existingOption = existingOptions.find { it.name == name && it.type == type }
+
+                OptionProblem.ProblemType problemType = propertiesValidationService.validateProcessingOptionName(name, type)?.type
+
+                new OptionRow(
+                        new TableCellValue(
+                                name.name(),
+                                null,
+                                null,
+                                name.description,
+                        ),
+                        new TableCellValue(
+                                type ?: "",
+                                (problemType == OptionProblem.ProblemType.MISSING) ?
+                                        TableCellValue.WarnColor.ERROR : TableCellValue.WarnColor.OKAY,
+                                null,
+                                type,
+                        ),
+                        new TableCellValue(
+                                existingOption?.value ?
+                                        existingOption.value.length() > MAX_LENGTH ?
+                                                "...${existingOption.value[-MAX_LENGTH..-1]}" :
+                                                existingOption.value :
+                                        "",
+                                (problemType in [OptionProblem.ProblemType.VALUE_INVALID, OptionProblem.ProblemType.TYPE_INVALID]) ?
+                                        TableCellValue.WarnColor.ERROR : TableCellValue.WarnColor.OKAY,
+                                null,
+                                existingOption?.value,
+                        ),
+                        name.validatorForValue.allowedValues?.sort(),
+                        existingOption?.project?.name,
+                        existingOption?.dateCreated?.format("yyyy-MM-dd HH:mm:ss"),
+                )
             }
         }
+
         return [
-                projects: projects,
-                optionNames: OptionName.findAll().sort{ it.toString() },
-                message: message,
-                cmd: cmd,
-                hasErrors: hasErrors,
+                options: options,
         ]
+    }
+
+    def update(ProcessingOptionCommand cmd) {
+        try {
+            processingOptionService.createOrUpdate(cmd.optionName, cmd.value, cmd.type != "" ? cmd.type : null)
+            flash.message = g.message(code: "processingOption.store.success")
+        } catch (ValidationException e) {
+            flash.message = g.message(code: "processingOption.store.failure")
+            flash.errors = e.errors
+       }
+        redirect(action: "index")
     }
 }
 
 class ProcessingOptionCommand {
-    def projectService
     OptionName optionName
     String type
     String value
-    String project
-    String submit
 
     static constraints = {
-        value(validator: { val, obj ->
-            val != null && obj.optionName && obj.optionName.validatorForValue.validate(val)
-        })
-        type(nullable: true, blank: true)
-        project(validator: { val, obj ->
-            if (val == "no project") {
-                return true
-            }
-            return val && (obj.projectService.getProjectByName(val) != null)
-        })
+        value nullable: true
     }
+}
+
+@Canonical
+class OptionRow {
+    TableCellValue name
+    TableCellValue type
+    TableCellValue value
+    List<String> allowedValues
+    String project
+    String dateCreated
 }

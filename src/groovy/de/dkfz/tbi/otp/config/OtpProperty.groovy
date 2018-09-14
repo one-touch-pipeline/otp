@@ -23,8 +23,8 @@ enum OtpProperty {
      */
     SSH_PASSWORD('otp.ssh.password', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT, UsedIn.WORKFLOW_TEST), "invalid"),
 
-    PATH_STACK_TRACES('otp.errorLogging.stacktraces', TypeValidators.ABSOLUTE_PATH, EnumSet.of(UsedIn.PRODUCTION)),
-    PATH_JOB_LOGS('otp.logging.jobLogDir', TypeValidators.ABSOLUTE_PATH, EnumSet.of(UsedIn.PRODUCTION)),
+    PATH_STACK_TRACES('otp.errorLogging.stacktraces', TypeValidators.ABSOLUTE_PATH, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT), "logs/stacktraces/"),
+    PATH_JOB_LOGS('otp.logging.jobLogDir', TypeValidators.ABSOLUTE_PATH, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT), "logs/jobs/"),
     PATH_PROCESSING_ROOT('otp.processing.root.path', TypeValidators.ABSOLUTE_PATH, EnumSet.of(UsedIn.PRODUCTION)),
     PATH_PROJECT_ROOT('otp.root.path', TypeValidators.ABSOLUTE_PATH, EnumSet.of(UsedIn.PRODUCTION)),
     PATH_CLUSTER_LOGS_OTP('otp.logging.root.path', TypeValidators.ABSOLUTE_PATH, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT)),

@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp
 
 import de.dkfz.tbi.otp.config.*
+import de.dkfz.tbi.otp.qcTrafficLight.*
 import grails.plugin.springsecurity.*
 
 class OtpTagLib {
@@ -204,5 +205,22 @@ class OtpTagLib {
        out << '<button class="button-edit">Edit</button>'
        out << g.submitButton(class: "save", style: "display: none;", name: "Save")
        out << '<button class="cancel" style="display: none;">Cancel</button>'
+    }
+
+
+    def tableCell = { attrs ->
+        TableCellValue cell = attrs.cell
+
+        String result = cell.value
+        if (cell.icon) {
+            result = "<span class='icon-${cell.icon}'>${result}</span>"
+        }
+        if (cell.warnColor) {
+            result = "<span class='text-${cell.warnColor}'>${result}</span>"
+        }
+        if (cell.link) {
+            result = "<a href='${cell.link}'>${result}</a>"
+        }
+        out << "<span title='${cell.tooltip}'>${result}</span>"
     }
 }

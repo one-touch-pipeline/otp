@@ -10,7 +10,7 @@ class TestConfigService extends ConfigService {
 
     static Map cleanProperties
 
-    TestConfigService (Map<OtpProperty, String> properties = [:]) {
+    TestConfigService(Map<OtpProperty, String> properties = [:]) {
         super()
         if (Environment.current.name == "WORKFLOW_TEST") {
             otpProperties = otpProperties.findAll {
@@ -42,6 +42,7 @@ class TestConfigService extends ConfigService {
                 (OtpProperty.PATH_PROJECT_ROOT)    : TestCase.getUniqueNonExistentPath().path + '/root_path',
                 (OtpProperty.PATH_PROCESSING_ROOT) : TestCase.getUniqueNonExistentPath().path + '/processing_root_path',
                 (OtpProperty.PATH_CLUSTER_LOGS_OTP): TestCase.getUniqueNonExistentPath().path + '/logging_root_path',
+
         ]
         cleanProperties = new HashMap<>(otpProperties)
 
@@ -92,7 +93,7 @@ class TestConfigService extends ConfigService {
 
     private String getAndAssertValue(OtpProperty property) {
         String value = otpProperties.get(property)
-        assert value : "'${property}' is not set in otp.properties"
+        assert value: "'${property}' is not set in otp.properties"
         return value
     }
 }
