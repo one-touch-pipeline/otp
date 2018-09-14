@@ -12,19 +12,24 @@ processingOptionService.createOrUpdate(
 
 processingOptionService.createOrUpdate(
         PIPELINE_RODDY_INDEL_DEFAULT_PLUGIN_VERSION,
+        '1.2.177',
         SeqType.wholeGenomePairedSeqType.roddyName,
-        null,
-        '1.2.177'
 )
 
 processingOptionService.createOrUpdate(
         PIPELINE_RODDY_INDEL_DEFAULT_PLUGIN_VERSION,
+        '1.2.177',
         SeqType.exomePairedSeqType.roddyName,
-        null,
-        '1.2.177'
 )
 
 processingOptionService.createOrUpdate(
         PIPELINE_RODDY_INDEL_DEFAULT_BASE_PROJECT_CONFIG,
-        'otpIndelCallingWorkflow-1.0'
+        'otpIndelCallingWorkflow-1.0',
+        SeqType.wholeGenomePairedSeqType.roddyName,
+)
+
+processingOptionService.createOrUpdate(
+        PIPELINE_RODDY_INDEL_DEFAULT_BASE_PROJECT_CONFIG,
+        'otpIndelCallingWorkflow-1.0',
+        SeqType.exomePairedSeqType.roddyName,
 )

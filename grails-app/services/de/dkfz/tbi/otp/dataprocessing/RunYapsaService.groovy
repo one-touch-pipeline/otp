@@ -5,8 +5,6 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 class RunYapsaService extends BamFileAnalysisService implements WithReferenceGenomeRestriction {
 
-    ProcessingOptionService processingOptionService
-
     @Override
     protected String getProcessingStateCheck() {
         return "sp.runYapsaProcessingStatus = :needsProcessing AND " +
@@ -44,8 +42,8 @@ class RunYapsaService extends BamFileAnalysisService implements WithReferenceGen
     }
 
     @Override
-    String getReferenceGenomeString() {
-        return processingOptionService.findOptionAssure(ProcessingOption.OptionName.PIPELINE_RUNYAPSA_REFERENCE_GENOME, null, null)
+    List<String> getReferenceGenomes() {
+        return processingOptionService.findOptionAsList(ProcessingOption.OptionName.PIPELINE_RUNYAPSA_REFERENCE_GENOME)
     }
 
     @Override

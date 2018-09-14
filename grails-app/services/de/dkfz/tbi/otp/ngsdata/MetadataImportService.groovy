@@ -141,7 +141,7 @@ class MetadataImportService {
                 File targetDirectory = getIlseFolder(ilse, seqCenter)
                 File targetFile = new File(targetDirectory, source.fileName.toString())
                 if (!targetFile.exists()) {
-                    Realm realm = ConfigService.getDefaultRealm()
+                    Realm realm = configService.getDefaultRealm()
                     assert realm
 
                     lsdfFilesService.createDirectory(targetDirectory, realm)

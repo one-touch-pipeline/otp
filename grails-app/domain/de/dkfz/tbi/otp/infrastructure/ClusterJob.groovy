@@ -218,7 +218,7 @@ class ClusterJob implements Entity {
      */
     def beforeValidate() {
         if (fileSize && !nBases) {
-            basesPerBytesFastq = ProcessingOptionService.findOptionObject(ProcessingOption.OptionName.STATISTICS_BASES_PER_BYTES_FASTQ, null, null).value as float
+            basesPerBytesFastq = ProcessingOptionService.findOptionSafe(ProcessingOption.OptionName.STATISTICS_BASES_PER_BYTES_FASTQ, null, null) as float
             nBases = fileSize * basesPerBytesFastq
         }
     }

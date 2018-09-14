@@ -1,4 +1,5 @@
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 
 import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
 
@@ -11,16 +12,16 @@ plan(workflow) {
     job("replaceSourceWithLink", "replaceSourceWithLinkJob")
 }
 
-ctx.processingOptionService.createOrUpdate(
+ProcessingOptionService processingOptionService = ctx.processingOptionService
+
+processingOptionService.createOrUpdate(
         OptionName.MAXIMUM_NUMBER_OF_JOBS,
+        '2',
         workflow,
-        null,
-        '2'
 )
 
-ctx.processingOptionService.createOrUpdate(
+processingOptionService.createOrUpdate(
         OptionName.MAXIMUM_NUMBER_OF_JOBS_RESERVED_FOR_FAST_TRACK,
+        '0',
         workflow,
-        null,
-        '0'
 )

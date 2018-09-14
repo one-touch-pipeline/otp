@@ -20,6 +20,9 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
     @Autowired
     TrackingService trackingService
 
+    @Autowired
+    ProcessingOptionService processingOptionService
+
     Pipeline getPipeline(SeqTrack seqTrack) {
         Pipeline pipeline = atMostOneElement(Pipeline.findAllByNameAndType(pipelineName(seqTrack), Pipeline.Type.ALIGNMENT))
         if(!pipeline) {
@@ -111,7 +114,7 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
                 }
                 OtrsTicket ticket = atMostOneElement(trackingService.findAllOtrsTickets([seqTrack]))
                 if (ticket) {
-                    body << "\nThe corresponding ticket is: ${ProcessingOptionService.getValueOfProcessingOption(TICKET_SYSTEM_NUMBER_PREFIX)}#${ticket.ticketNumber}"
+                    body << "\nThe corresponding ticket is: ${processingOptionService.findOptionAsString(TICKET_SYSTEM_NUMBER_PREFIX)}#${ticket.ticketNumber}"
                 }
                 body << "\n\nThis e-mail was generated automatically by OTP."
 
@@ -119,7 +122,7 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
                         "Will not be aligned: ${seqTrack.ilseId ? "ILSe ${seqTrack.ilseId} " : ""} " +
                                 "${seqTrack.run.name} ${seqTrack.project} ${seqTrack.sample}",
                         body.join('\n'),
-                        ProcessingOptionService.getValueOfProcessingOption(EMAIL_RECIPIENT_NOTIFICATION),
+                        processingOptionService.findOptionAsString(EMAIL_RECIPIENT_NOTIFICATION),
                 )
                 return Collections.emptyList()
             }

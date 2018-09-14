@@ -108,6 +108,7 @@ class JobMailServiceIntegrationSpec extends Specification {
                 trackingService        : new TrackingService(),
                 log                    : new NoOpLog()
         ])
+        jobMailService.processingOptionService = new ProcessingOptionService()
 
         when:
         jobMailService.sendErrorNotification(job, new RuntimeException("RuntimeException"))

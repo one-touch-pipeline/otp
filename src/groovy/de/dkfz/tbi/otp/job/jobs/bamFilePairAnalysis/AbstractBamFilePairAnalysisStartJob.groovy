@@ -17,6 +17,9 @@ abstract class AbstractBamFilePairAnalysisStartJob extends AbstractStartJobImpl 
     @Autowired
     RemoteShellHelper remoteShellHelper
 
+    @Autowired
+    ConfigService configService
+
     @Scheduled(fixedDelay = 60000l)
     void execute() {
         doWithPersistenceInterceptor {
@@ -91,7 +94,7 @@ abstract class AbstractBamFilePairAnalysisStartJob extends AbstractStartJobImpl 
 
     String getFormattedDate() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH'h'mm")
-        ZonedDateTime time = ZonedDateTime.of(LocalDateTime.now(), ConfigService.getTimeZoneId())
+        ZonedDateTime time = ZonedDateTime.of(LocalDateTime.now(), configService.getTimeZoneId())
         return time.format(formatter).replaceAll('/', '_')
     }
 }

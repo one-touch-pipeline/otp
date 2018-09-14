@@ -1,9 +1,9 @@
 <%@ page import="grails.plugin.springsecurity.SpringSecurityUtils; de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName; de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService" %>
 
-<g:set var="PIWIK_URL" value="${ProcessingOptionService.findOption(OptionName.GUI_TRACKING_PIWIK_URL, null, null)}"/>
-<g:set var="SITE_ID" value="${(ProcessingOptionService.findOption(OptionName.GUI_TRACKING_SITE_ID, null, null)) as Integer}"/>
+<g:set var="PIWIK_URL" value="${piwikUrl}"/>
+<g:set var="SITE_ID" value="${piwikSiteId}"/>
 
-<g:if test="${(ProcessingOptionService.findOptionAsBoolean(OptionName.GUI_TRACKING_ENABLED, null, null))}">
+<g:if test="${piwikEnabled}">
     <script type="text/javascript">
         var _paq = _paq || [];
         (function () {

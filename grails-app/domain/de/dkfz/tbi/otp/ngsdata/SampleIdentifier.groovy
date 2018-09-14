@@ -21,7 +21,7 @@ class SampleIdentifier implements Entity {
                 // Using a new session prevents Hibernate from trying to auto-flush this object, which would fail
                 // because it is still in validation.
                 withNewSession { session ->
-                    regexFromProcessingOption = ProcessingOptionService.findOption(OptionName.VALIDATOR_SAMPLE_IDENTIFIER_REGEX, null, obj.sample?.project)
+                    regexFromProcessingOption = ProcessingOptionService.findOptionSafe(OptionName.VALIDATOR_SAMPLE_IDENTIFIER_REGEX, null, obj.sample?.project)
                 }
                 if (!(val ==~ (regexFromProcessingOption ?: '.+'))) {
                     return false

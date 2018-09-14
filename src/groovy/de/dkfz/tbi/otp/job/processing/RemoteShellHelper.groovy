@@ -14,7 +14,6 @@ import org.springframework.scheduling.annotation.*
 import org.springframework.beans.factory.annotation.*
 import org.springframework.context.annotation.*
 import org.springframework.stereotype.*
-import grails.transaction.*
 
 import java.util.concurrent.*
 
@@ -34,9 +33,11 @@ class RemoteShellHelper {
     static private final int CHANNEL_TIMEOUT = 5 * 60
 
 
-    @SuppressWarnings("GrailsStatelessService")
     @Autowired
     ConfigService configService
+
+    @Autowired
+    ProcessingOptionService processingOptionService
 
 
     private JSch jsch
@@ -107,7 +108,7 @@ class RemoteShellHelper {
         if (!maxSshCalls) {
             synchronized (this) {
                 if (!maxSshCalls) {
-                    maxSshCalls = new Semaphore((int) ProcessingOptionService.findOptionAsNumber(ProcessingOption.OptionName.MAXIMUM_PARALLEL_SSH_CALLS, null, null, 30), true)
+                    maxSshCalls = new Semaphore(processingOptionService.findOptionAsInteger(ProcessingOption.OptionName.MAXIMUM_PARALLEL_SSH_CALLS), true)
                 }
             }
         }

@@ -152,7 +152,7 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
         if (!samplePairs) {
             return []
         }
-        Double minCoverage = ProcessingOptionService.findOption(ProcessingOption.OptionName.PIPELINE_MIN_COVERAGE, pipelineType.toString(),null) as Double
+        Double minCoverage = ProcessingOptionService.findOptionSafe(ProcessingOption.OptionName.PIPELINE_MIN_COVERAGE, pipelineType.toString(),null) as Double
         if (minCoverage == null) {
             return []
         }

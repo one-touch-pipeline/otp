@@ -58,6 +58,8 @@ class QcTrafficLightServiceSpec extends Specification {
         qcTrafficLightService.commentService = Mock(CommentService) {
             1 * saveComment(roddyBamFile, "comment")
         }
+        qcTrafficLightService.configService = testConfigService
+        qcTrafficLightService.configService.processingOptionService = new ProcessingOptionService()
 
         when:
         qcTrafficLightService.changeQcTrafficLightStatusWithComment(roddyBamFile, qcStatus, "comment")

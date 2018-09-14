@@ -10,10 +10,11 @@ class PrivacyPolicyController {
     ]
 
     UserService userService
+    ProcessingOptionService processingOptionService
 
 
     def index() {
-        String contactDataDataPrivacyOfficer = ProcessingOptionService.findOptionSafe(GUI_CONTACT_DATA_POSTAL_ADDRESS_DATA_PROTECTION_OFFICER, null, null)
+        String contactDataDataPrivacyOfficer = processingOptionService.findOptionAsString(GUI_CONTACT_DATA_POSTAL_ADDRESS_DATA_PROTECTION_OFFICER)
 
         boolean disableMenu = true
         boolean disableAccept = true

@@ -25,6 +25,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
     AceseqService aceseqService
     RunYapsaService runYapsaService
     CreateNotificationTextService createNotificationTextService
+    ProcessingOptionService processingOptionService
 
     List<ProcessingOption> referenceGenomeProcessingOptions
 
@@ -67,6 +68,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
                 aceseqService: aceseqService,
                 runYapsaService: runYapsaService,
                 createNotificationTextService: createNotificationTextService,
+                processingOptionService: processingOptionService,
         )
         DomainFactory.createAllAnalysableSeqTypes()
 

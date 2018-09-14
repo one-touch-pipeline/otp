@@ -15,6 +15,7 @@ class ConfigService implements ApplicationContextAware {
     protected Map<OtpProperty, String> otpProperties
 
     static ApplicationContext context
+    ProcessingOptionService processingOptionService
 
     /**
      * Parses the file in the environment variable $OTP_PROPERTIES with fallback to ~/.otp.properties
@@ -49,8 +50,8 @@ class ConfigService implements ApplicationContextAware {
         return context.getBean("configService")
     }
 
-    static Realm getDefaultRealm() {
-        return exactlyOneElement(Realm.findAllByName(ProcessingOptionService.findOptionSafe(ProcessingOption.OptionName.REALM_DEFAULT_VALUE, null, null)))
+    Realm getDefaultRealm() {
+        return exactlyOneElement(Realm.findAllByName(processingOptionService.findOptionAsString(ProcessingOption.OptionName.REALM_DEFAULT_VALUE)))
     }
 
 
@@ -122,8 +123,8 @@ class ConfigService implements ApplicationContextAware {
         return getBooleanValue(OtpProperty.CONFIG_JOB_SYSTEM_START, false)
     }
 
-    static ZoneId getTimeZoneId() {
-        String zoneName = ProcessingOptionService.findOptionSafe(ProcessingOption.OptionName.TIME_ZONE, null, null)
+    ZoneId getTimeZoneId() {
+        String zoneName = processingOptionService.findOptionAsString(ProcessingOption.OptionName.TIME_ZONE)
         if (zoneName) {
             return ZoneId.of(zoneName)
         } else {

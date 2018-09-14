@@ -53,6 +53,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 (OtpProperty.PATH_PROJECT_ROOT)   : temporaryFolder.newFolder().path,
                 (OtpProperty.PATH_PROCESSING_ROOT): temporaryFolder.newFolder().path,
         ])
+        configService.processingOptionService = new ProcessingOptionService()
 
         DomainFactory.createProject(name: 'testProjectAlignment', realm: realm, alignmentDeciderBeanName: 'test')
         DomainFactory.createReferenceGenome(name: 'testReferenceGenome')
@@ -104,7 +105,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 name: name,
                 dirName: dirName,
                 dirAnalysis: dirAnalysis,
-                realm: ConfigService.getDefaultRealm(),
+                realm: configService.getDefaultRealm(),
                 alignmentDeciderBeanName: AlignmentDeciderBeanNames.NO_ALIGNMENT.bean,
                 categoryNames: category,
                 unixGroup: group,
@@ -151,7 +152,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 name: 'project',
                 dirName: 'dir',
                 dirAnalysis: '/dirA',
-                realm: ConfigService.getDefaultRealm(),
+                realm: configService.getDefaultRealm(),
                 alignmentDeciderBeanName: AlignmentDeciderBeanNames.NO_ALIGNMENT.bean,
                 categoryNames: ['category'],
                 unixGroup: group,
@@ -189,7 +190,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 name: name,
                 dirName: dirName,
                 dirAnalysis: '/dirA',
-                realm: ConfigService.getDefaultRealm(),
+                realm: configService.getDefaultRealm(),
                 alignmentDeciderBeanName: AlignmentDeciderBeanNames.NO_ALIGNMENT.bean,
                 categoryNames: ['category'],
                 unixGroup: group,
@@ -227,7 +228,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 name: 'project',
                 dirName: 'dir',
                 dirAnalysis: '/dirA',
-                realm: ConfigService.getDefaultRealm(),
+                realm: configService.getDefaultRealm(),
                 alignmentDeciderBeanName: AlignmentDeciderBeanNames.NO_ALIGNMENT.bean,
                 categoryNames: ['category'],
                 unixGroup: 'invalidValue',
@@ -257,7 +258,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 name: 'project',
                 dirName: 'dir',
                 dirAnalysis: '/dirA',
-                realm: ConfigService.getDefaultRealm(),
+                realm: configService.getDefaultRealm(),
                 alignmentDeciderBeanName: AlignmentDeciderBeanNames.NO_ALIGNMENT.bean,
                 categoryNames: ['category'],
                 unixGroup: group,
@@ -287,7 +288,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 name: 'project',
                 dirName: 'dir',
                 dirAnalysis: 'invalidDirA',
-                realm: ConfigService.getDefaultRealm(),
+                realm: configService.getDefaultRealm(),
                 alignmentDeciderBeanName: AlignmentDeciderBeanNames.NO_ALIGNMENT.bean,
                 categoryNames: ['category'],
                 unixGroup: group,
@@ -327,7 +328,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 name: 'project',
                 dirName: 'dir',
                 dirAnalysis: '/dirA',
-                realm: ConfigService.getDefaultRealm(),
+                realm: configService.getDefaultRealm(),
                 alignmentDeciderBeanName: AlignmentDeciderBeanNames.NO_ALIGNMENT.bean,
                 categoryNames: ['category'],
                 unixGroup: group,
@@ -392,7 +393,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 name: 'project',
                 dirName: 'dir',
                 dirAnalysis: '/dirA',
-                realm: ConfigService.getDefaultRealm(),
+                realm: configService.getDefaultRealm(),
                 alignmentDeciderBeanName: AlignmentDeciderBeanNames.NO_ALIGNMENT.bean,
                 categoryNames: ['invalid category'],
                 unixGroup: group,
@@ -1134,8 +1135,6 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
             SpringSecurityUtils.doWithAuth(ADMIN, {
                 processingOptionService.createOrUpdate(
                         genomeOption,
-                        null,
-                        null,
                         referenceGenomeProjectSeqType.referenceGenome.name
                 )
             })
@@ -1184,8 +1183,6 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
             SpringSecurityUtils.doWithAuth(ADMIN, {
                 processingOptionService.createOrUpdate(
                         genomeOption,
-                        null,
-                        null,
                         referenceGenomeProjectSeqType.referenceGenome.name
                 )
             })

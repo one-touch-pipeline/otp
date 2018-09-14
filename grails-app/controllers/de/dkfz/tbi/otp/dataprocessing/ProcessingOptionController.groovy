@@ -44,7 +44,12 @@ class ProcessingOptionController {
                 message = "'" + errors.getRejectedValue() + "' is not a valid value for '" + errors.getField() + "'. Error code: '" + errors.code + "'"
             } else {
                 try {
-                    processingOptionService.createOrUpdate(cmd.optionName, cmd.type != "" ? cmd.type : null, projectService.getProjectByName(cmd.project), cmd.value)
+                    processingOptionService.createOrUpdate(
+                            cmd.optionName,
+                            cmd.value,
+                            cmd.type != "" ? cmd.type : null,
+                            projectService.getProjectByName(cmd.project),
+                    )
                     message = "Saved successfully"
                 } catch (Exception e) {
                     message = e.message

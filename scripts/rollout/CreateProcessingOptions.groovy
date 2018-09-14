@@ -36,10 +36,8 @@ ProcessingOptionService processingOptionService = ctx.processingOptionService
         (ProcessingOption.OptionName.TIME_ZONE)                        : 'Europe/Berlin',
 
 ].each {
-    println processingOptionService.createOrUpdate(
+    processingOptionService.createOrUpdate(
             it.key,
-            null,
-            null,
             it.value
     )
 }

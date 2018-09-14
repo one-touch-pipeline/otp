@@ -50,6 +50,7 @@ class ProjectService {
     ConfigService configService
     FileSystemService fileSystemService
     RoddyWorkflowConfigService roddyWorkflowConfigService
+    ProcessingOptionService processingOptionService
 
     FileService fileService
 
@@ -288,7 +289,7 @@ class ProjectService {
         assert panCanAlignmentConfiguration.configVersion ==~ RoddyWorkflowConfig.CONFIG_VERSION_PATTERN: "configVersion '${panCanAlignmentConfiguration.configVersion}' has not expected pattern: ${RoddyWorkflowConfig.CONFIG_VERSION_PATTERN}"
 
         if (!panCanAlignmentConfiguration.seqType.isWgbs()) {
-            List<String> allBwaMemVersions = ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_ALIGNMENT_BWA_VERSION_AVAILABLE, null, null).split(',')*.trim()
+            List<String> allBwaMemVersions = processingOptionService.findOptionAsList(OptionName.PIPELINE_RODDY_ALIGNMENT_BWA_VERSION_AVAILABLE)
             assert panCanAlignmentConfiguration.bwaMemVersion in allBwaMemVersions: "Invalid bwa_mem version: '${panCanAlignmentConfiguration.bwaMemVersion}', possible values: ${allBwaMemVersions}"
         } else {
             panCanAlignmentConfiguration.adapterTrimmingNeeded = true
@@ -297,7 +298,7 @@ class ProjectService {
             panCanAlignmentConfiguration.adapterTrimmingNeeded = true
         }
         if (panCanAlignmentConfiguration.mergeTool == MergeConstants.MERGE_TOOL_SAMBAMBA) {
-            List<String> allSambambaVersions = ProcessingOptionService.findOption(OptionName.PIPELINE_RODDY_ALIGNMENT_SAMBAMBA_VERSION_AVAILABLE, null, null).split(',')*.trim()
+            List<String> allSambambaVersions = processingOptionService.findOptionAsList(OptionName.PIPELINE_RODDY_ALIGNMENT_SAMBAMBA_VERSION_AVAILABLE)
             assert panCanAlignmentConfiguration.sambambaVersion in allSambambaVersions: "Invalid sambamba version: '${panCanAlignmentConfiguration.sambambaVersion}', possible values: ${allSambambaVersions}"
         }
 

@@ -26,6 +26,7 @@ public class AbstractAlignmentDeciderTest {
     void setUp() {
         decider = newDecider()
         decider.trackingService = new TrackingService()
+        decider.processingOptionService = new ProcessingOptionService()
         DomainFactory.createProcessingOptionForNotificationRecipient()
     }
 

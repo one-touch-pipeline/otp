@@ -44,6 +44,10 @@ class TrackingServiceSpec extends Specification {
 
     TrackingService trackingService = new TrackingService()
 
+    def setup() {
+        trackingService.processingOptionService = new ProcessingOptionService()
+    }
+
     @Unroll
     def 'test createOrResetOtrsTicket, when no OtrsTicket with ticket number exists, creates one'() {
         given:

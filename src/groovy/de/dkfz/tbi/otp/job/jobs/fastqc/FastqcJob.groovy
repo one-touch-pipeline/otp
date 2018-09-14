@@ -42,6 +42,9 @@ class FastqcJob extends AbstractOtpJob implements AutoRestartableJob {
     @Autowired
     FileService fileService
 
+    @Autowired
+    ProcessingOptionService processingOptionService
+
 
     @Override
     protected final NextAction maybeSubmit() throws Throwable {
@@ -112,9 +115,9 @@ class FastqcJob extends AbstractOtpJob implements AutoRestartableJob {
     private void createAndExecuteFastQcCommand(Realm realm, List<DataFile> dataFiles, File outDir) {
         dataFiles.each { dataFile ->
             String rawSeq = lsdfFilesService.getFileFinalPath(dataFile)
-            String fastqcCommand = ProcessingOptionService.findOption(ProcessingOption.OptionName.COMMAND_FASTQC, null, null)
-            String fastqcActivation = ProcessingOptionService.findOption(ProcessingOption.OptionName.COMMAND_ACTIVATION_FASTQC, null, null)
-            String moduleLoader = ProcessingOptionService.findOption(ProcessingOption.OptionName.COMMAND_LOAD_MODULE_LOADER, null, null)
+            String fastqcCommand = processingOptionService.findOptionAsString(ProcessingOption.OptionName.COMMAND_FASTQC)
+            String fastqcActivation = processingOptionService.findOptionAsString(ProcessingOption.OptionName.COMMAND_ACTIVATION_FASTQC)
+            String moduleLoader = processingOptionService.findOptionAsString(ProcessingOption.OptionName.COMMAND_LOAD_MODULE_LOADER)
             String command = """\
                     ${moduleLoader}
                     ${fastqcActivation}

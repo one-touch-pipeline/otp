@@ -12,19 +12,24 @@ processingOptionService.createOrUpdate(
 
 processingOptionService.createOrUpdate(
         PIPELINE_RODDY_SNV_DEFAULT_PLUGIN_VERSION,
+        '1.2.166-1',
         SeqType.wholeGenomePairedSeqType.roddyName,
-        null,
-        '1.2.166-1'
 )
 
 processingOptionService.createOrUpdate(
         PIPELINE_RODDY_SNV_DEFAULT_PLUGIN_VERSION,
+        '1.2.166-1',
         SeqType.exomePairedSeqType.roddyName,
-        null,
-        '1.2.166-1'
 )
 
 processingOptionService.createOrUpdate(
         PIPELINE_RODDY_SNV_DEFAULT_BASE_PROJECT_CONFIG,
-        'otpSNVCallingWorkflowWGS-1.0'
+        'otpSNVCallingWorkflowWGS-1.0',
+        SeqType.wholeGenomePairedSeqType.roddyName,
+)
+
+processingOptionService.createOrUpdate(
+        PIPELINE_RODDY_SNV_DEFAULT_BASE_PROJECT_CONFIG,
+        'otpSNVCallingWorkflowWGS-1.0',
+        SeqType.exomePairedSeqType.roddyName,
 )

@@ -1,3 +1,4 @@
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 
 import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
@@ -9,5 +10,7 @@ plan(WORKFLOW_NAME, ctx, true) {
     job('samplePairDiscoveryJob', 'samplePairDiscoveryJob')
 }
 
-println ctx.processingOptionService.createOrUpdate(OptionName.MAXIMUM_NUMBER_OF_JOBS, WORKFLOW_NAME, null, '1')
-println ctx.processingOptionService.createOrUpdate(OptionName.MAXIMUM_NUMBER_OF_JOBS_RESERVED_FOR_FAST_TRACK, WORKFLOW_NAME, null, '0')
+ProcessingOptionService processingOptionService = ctx.processingOptionService
+
+processingOptionService.createOrUpdate(OptionName.MAXIMUM_NUMBER_OF_JOBS, '1', WORKFLOW_NAME)
+processingOptionService.createOrUpdate(OptionName.MAXIMUM_NUMBER_OF_JOBS_RESERVED_FOR_FAST_TRACK, '0', WORKFLOW_NAME)

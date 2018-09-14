@@ -29,7 +29,9 @@ beans = {
         }
     }
     if (Environment.getCurrent() == Environment.TEST || Environment.getCurrent().getName() == "WORKFLOW_TEST") {
-        configService(de.dkfz.tbi.otp.TestConfigService)
+        configService(de.dkfz.tbi.otp.TestConfigService) {
+            processingOptionService = ref('processingOptionService')
+        }
     }
 
     permissionEvaluator(OtpPermissionEvaluator) {}

@@ -558,6 +558,7 @@ ${expectedAlign}"""
                 },
                 messageSource: getMessageSource(),
         )
+        createNotificationTextService.processingOptionService = new ProcessingOptionService()
 
         List<SeqTrack> seqTracks = [data1.seqTrack]
         List<SamplePair> samplePairWithoutVariantCalling = [data1.samplePair]
@@ -703,6 +704,7 @@ ${expectedVariantCallingRunning}${expectedVariantCallingNotRunning}"""
                 },
                 messageSource: getMessageSource(),
         )
+        createNotificationTextService.processingOptionService = new ProcessingOptionService()
 
         List<SamplePair> samplePairWithAnalysis = [data1.samplePair]
         List<SamplePair> samplePairWithoutAnalysis = []

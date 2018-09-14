@@ -30,6 +30,9 @@ class FileSystemService {
     @Autowired
     GrailsApplication grailsApplication
 
+    @Autowired
+    ProcessingOptionService processingOptionService
+
     private Map<Realm, FileSystem> createdFileSystems = [:]
 
     /**
@@ -42,7 +45,7 @@ class FileSystemService {
         if (fileSystem == null || !fileSystem.isOpen()) {
             SFTPEnvironment env = new SFTPEnvironment()
                     .withUsername(configService.sshUser)
-                    .withClientConnectionCount(ProcessingOptionService.findOptionAsNumber(MAXIMUM_SFTP_CONNECTIONS, null, null, 5).toInteger())
+                    .withClientConnectionCount(processingOptionService.findOptionAsInteger(MAXIMUM_SFTP_CONNECTIONS))
             Properties config = new Properties()
 
             switch (configService.sshAuthenticationMethod) {
@@ -81,7 +84,7 @@ class FileSystemService {
 
     FileSystem getFilesystemForProcessingForRealm(Realm realm) throws Throwable {
         assert realm
-        if (ProcessingOptionService.findOptionAsBoolean(FILESYSTEM_PROCESSING_USE_REMOTE, null, null)) {
+        if (processingOptionService.findOptionAsBoolean(FILESYSTEM_PROCESSING_USE_REMOTE)) {
             getFilesystem(realm)
         } else {
             return FileSystems.default
@@ -90,7 +93,7 @@ class FileSystemService {
 
     FileSystem getFilesystemForConfigFileChecksForRealm(Realm realm) throws Throwable {
         assert realm
-        if (ProcessingOptionService.findOptionAsBoolean(FILESYSTEM_CONFIG_FILE_CHECKS_USE_REMOTE, null, null)) {
+        if (processingOptionService.findOptionAsBoolean(FILESYSTEM_CONFIG_FILE_CHECKS_USE_REMOTE)) {
             getFilesystem(realm)
         } else {
             return FileSystems.default
@@ -98,7 +101,7 @@ class FileSystemService {
     }
 
     FileSystem getFilesystemForFastqImport() throws Throwable {
-        String realmName = ProcessingOptionService.findOptionSafe(FILESYSTEM_FASTQ_IMPORT, null, null)
+        String realmName = processingOptionService.findOptionAsString(FILESYSTEM_FASTQ_IMPORT)
         if (realmName) {
             Realm realm = Realm.findByName(realmName)
             assert realm
@@ -109,7 +112,7 @@ class FileSystemService {
     }
 
     FileSystem getFilesystemForBamImport() throws Throwable {
-        String realmName = ProcessingOptionService.findOptionSafe(FILESYSTEM_BAM_IMPORT, null, null)
+        String realmName = processingOptionService.findOptionAsString(FILESYSTEM_BAM_IMPORT)
         if (realmName) {
             Realm realm = Realm.findByName(realmName)
             assert realm

@@ -26,6 +26,7 @@ class TrackingService {
     SophiaService sophiaService
     AceseqService aceseqService
     RunYapsaService runYapsaService
+    ProcessingOptionService processingOptionService
 
     CreateNotificationTextService createNotificationTextService
 
@@ -160,9 +161,9 @@ class TrackingService {
             if (mailingList) {
                 recipients.add(mailingList)
             }
-            recipients.add(ProcessingOptionService.getValueOfProcessingOption(EMAIL_RECIPIENT_NOTIFICATION))
+            recipients.add(processingOptionService.findOptionAsString(EMAIL_RECIPIENT_NOTIFICATION))
 
-            StringBuilder subject = new StringBuilder("[${ProcessingOptionService.getValueOfProcessingOption(TICKET_SYSTEM_NUMBER_PREFIX)}#${ticket.ticketNumber}] ")
+            StringBuilder subject = new StringBuilder("[${processingOptionService.findOptionAsString(TICKET_SYSTEM_NUMBER_PREFIX)}#${ticket.ticketNumber}] ")
             if (!mailingList) {
                 subject.append('TO BE SENT: ')
             }
@@ -179,7 +180,7 @@ class TrackingService {
     void sendOperatorNotification(OtrsTicket ticket, Set<SeqTrack> seqTracks, ProcessingStatus status, boolean finalNotification) {
         StringBuilder subject = new StringBuilder()
 
-        String prefix = ProcessingOptionService.getValueOfProcessingOption(TICKET_SYSTEM_NUMBER_PREFIX)
+        String prefix = processingOptionService.findOptionAsString(TICKET_SYSTEM_NUMBER_PREFIX)
         subject.append("$prefix#").append(ticket.ticketNumber)
         if (finalNotification) {
             subject.append(' Final')
@@ -208,7 +209,7 @@ class TrackingService {
             }
         }
 
-        recipients.add(ProcessingOptionService.getValueOfProcessingOption(EMAIL_RECIPIENT_NOTIFICATION))
+        recipients.add(processingOptionService.findOptionAsString(EMAIL_RECIPIENT_NOTIFICATION))
 
         StringBuilder content = new StringBuilder()
         content.append(status.toString())

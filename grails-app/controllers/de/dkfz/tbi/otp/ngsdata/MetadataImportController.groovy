@@ -176,7 +176,7 @@ class MetadataImportController {
     }
 
     private StringBuilder doAutoImport(String otrsTicketNumber, String ilseNumbers) {
-        boolean autoImport = ProcessingOptionService.findOptionAsBoolean(OptionName.TICKET_SYSTEM_AUTO_IMPORT_ENABLED, null, null)
+        boolean autoImport = processingOptionService.findOptionAsBoolean(OptionName.TICKET_SYSTEM_AUTO_IMPORT_ENABLED)
         if (!autoImport) {
             throw new IllegalStateException('Automatic import is currently disabled. Set processing option autoImportEnabled to "true" to enable it.')
         }
@@ -285,6 +285,8 @@ class SeqTrackWithDataFiles {
 }
 
 class MetadataImportControllerSubmitCommand implements Serializable {
+    ProcessingOptionService processingOptionService
+
     List<String> paths
     String directory
     List<String> md5
@@ -312,7 +314,7 @@ class MetadataImportControllerSubmitCommand implements Serializable {
     }
 
     void setTicketNumber(String ticketNumber) {
-        String prefix = ProcessingOptionService.findOptionSafe(OptionName.TICKET_SYSTEM_NUMBER_PREFIX, null, null)
+        String prefix = processingOptionService.findOptionAsString(OptionName.TICKET_SYSTEM_NUMBER_PREFIX)
         Matcher matcher = ticketNumber =~ /^\s*(((${Pattern.quote(prefix)})?#)?(?<number>(\d{16})))?\s*$/
         if (matcher.matches()) {
             this.ticketNumber = matcher.group('number') ?: null

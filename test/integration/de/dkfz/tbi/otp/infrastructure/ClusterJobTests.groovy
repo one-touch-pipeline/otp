@@ -25,6 +25,7 @@ class ClusterJobTests {
     public static final DateTime ENDED = STARTED.plusDays(1)
 
     TestConfigService configService
+    ProcessingOptionService processingOptionService
     ProcessingStep step
     Realm realm
 
@@ -141,7 +142,7 @@ class ClusterJobTests {
     @Test
     public void testBeforeValidate_WhenNBasesIsNullAndFileSizeGiven_ShouldFillNBases() {
         Long fileSize = 100L
-        Float basesPerBytesFastQFactor = (ProcessingOptionService.findOptionObject(ProcessingOption.OptionName.STATISTICS_BASES_PER_BYTES_FASTQ, null, null).value as float)
+        double basesPerBytesFastQFactor = processingOptionService.findOptionAsDouble(OptionName.STATISTICS_BASES_PER_BYTES_FASTQ)
         ClusterJob clusterJob = new ClusterJob(
                 processingStep: step,
                 realm: realm,
@@ -181,7 +182,7 @@ class ClusterJobTests {
     @Test
     public void testBeforeValidate_WhenClusterJobExistsAndNBasesIsNullAndFileSizeGiven_ShouldFillNBases() {
         Long fileSize = 100L
-        Float basesPerBytesFastQFactor = (ProcessingOptionService.findOptionObject(OptionName.STATISTICS_BASES_PER_BYTES_FASTQ, null, null).value as float)
+        double basesPerBytesFastQFactor = processingOptionService.findOptionAsDouble(OptionName.STATISTICS_BASES_PER_BYTES_FASTQ)
         ClusterJob clusterJob = new ClusterJob(
                 processingStep: step,
                 realm: realm,

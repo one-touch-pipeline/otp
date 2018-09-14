@@ -23,6 +23,7 @@ class ExecuteRunYapsaJob extends AbstractOtpJob implements AutoRestartableJob {
     @Autowired ClusterJobSchedulerService clusterJobSchedulerService
     @Autowired ReferenceGenomeService referenceGenomeService
     @Autowired ConfigService configService
+    @Autowired ProcessingOptionService processingOptionService
 
     @Override
     protected final AbstractMultiJob.NextAction maybeSubmit() throws Throwable {
@@ -42,11 +43,11 @@ class ExecuteRunYapsaJob extends AbstractOtpJob implements AutoRestartableJob {
         File outputDirectory = instance.getWorkDirectory()
         ReferenceGenome referenceGenome = instance.getReferenceGenome()
 
-        String moduleLoader = ProcessingOptionService.findOption(COMMAND_LOAD_MODULE_LOADER, null, null)
-        String rActivation = ProcessingOptionService.findOption(COMMAND_ACTIVATION_R, null, null)
-        String rCommand = ProcessingOptionService.findOption(COMMAND_R, null, null)
-        String runYapsaActivationPrefix = ProcessingOptionService.findOption(COMMAND_ACTIVATION_RUN_YAPSA_PREFIX, null, null)
-        String runYapsaCommand = ProcessingOptionService.findOption(COMMAND_RUN_YAPSA, null, null)
+        String moduleLoader = processingOptionService.findOptionAsString(COMMAND_LOAD_MODULE_LOADER)
+        String rActivation = processingOptionService.findOptionAsString(COMMAND_ACTIVATION_R)
+        String rCommand = processingOptionService.findOptionAsString(COMMAND_R)
+        String runYapsaActivationPrefix = processingOptionService.findOptionAsString(COMMAND_ACTIVATION_RUN_YAPSA_PREFIX)
+        String runYapsaCommand = processingOptionService.findOptionAsString(COMMAND_RUN_YAPSA)
 
         List<String> runYapsaCall = []
         runYapsaCall << rCommand

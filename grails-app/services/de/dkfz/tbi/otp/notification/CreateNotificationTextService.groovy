@@ -47,11 +47,10 @@ class CreateNotificationTextService {
 
         String otrsTicketSeqCenterComment = otrsTicket.seqCenterComment ?: ""
         List<SeqCenter> seqCenters = otrsTicket.findAllSeqTracks()*.seqCenter.unique()
-        String generalSeqCenterComment = seqCenters.size() == 1 ? ProcessingOptionService.findOptionSafe(
+        String generalSeqCenterComment = seqCenters.size() == 1 ? processingOptionService.findOptionAsString(
                 OptionName.NOTIFICATION_TEMPLATE_SEQ_CENTER_NOTE,
                 seqCenters.first().name,
-                null
-        ) ?: "" : ""
+        ) : ""
         String seqCenterComment = ""
 
         if (otrsTicketSeqCenterComment || generalSeqCenterComment) {
@@ -76,7 +75,7 @@ class CreateNotificationTextService {
                 seqCenterComment     : seqCenterComment,
                 addition             : createMessage("notification.template.${processingStep.name().toLowerCase()}.addition"),
                 phabricatorAlias     : phabricatorAlias,
-                emailSenderSalutation: ProcessingOptionService.findOptionAssure(OptionName.EMAIL_SENDER_SALUTATION, null, null),
+                emailSenderSalutation: processingOptionService.findOptionAsString(OptionName.EMAIL_SENDER_SALUTATION),
         ])
     }
 
@@ -200,7 +199,7 @@ class CreateNotificationTextService {
         if (samplePairs[false]) {
             message += '\n' + createMessage("notification.template.alignment.noFurtherProcessing",
                     [
-                            emailSenderSalutation : ProcessingOptionService.findOptionAssure(OptionName.EMAIL_SENDER_SALUTATION, null, null),
+                            emailSenderSalutation : processingOptionService.findOptionAsString(OptionName.EMAIL_SENDER_SALUTATION),
                             samplePairsWontProcess: getSamplePairRepresentation(samplePairs[false]*.samplePair.findAll {
                                 !it.processingDisabled
                             }),
@@ -267,7 +266,7 @@ class CreateNotificationTextService {
             message += '\n' + createMessage("notification.template.step.notProcessed", [
                     notificationSubject    : notificationStep.notificationSubject,
                     samplePairsNotProcessed: getSamplePairRepresentation(samplePairsNotProcessed),
-                    emailSenderSalutation  : ProcessingOptionService.findOptionAssure(OptionName.EMAIL_SENDER_SALUTATION, null, null),
+                    emailSenderSalutation  : processingOptionService.findOptionAsString(OptionName.EMAIL_SENDER_SALUTATION),
             ])
         }
 

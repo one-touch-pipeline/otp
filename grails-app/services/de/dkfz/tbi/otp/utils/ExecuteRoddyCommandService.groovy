@@ -14,6 +14,7 @@ class ExecuteRoddyCommandService {
     RemoteShellHelper remoteShellHelper
 
     ExecutionHelperService executionHelperService
+    ProcessingOptionService processingOptionService
 
 
     /**
@@ -61,8 +62,8 @@ class ExecuteRoddyCommandService {
 
 
     String commonRoddy(RoddyWorkflowConfig config, Realm.JobScheduler jobScheduler) {
-        File roddyBaseConfigsPath = ProcessingOptionService.getValueOfProcessingOption(OptionName.RODDY_BASE_CONFIGS_PATH) as File
-        File applicationIniPath = ProcessingOptionService.getValueOfProcessingOption(OptionName.RODDY_APPLICATION_INI) as File
+        File roddyBaseConfigsPath = processingOptionService.findOptionAsString(OptionName.RODDY_BASE_CONFIGS_PATH) as File
+        File applicationIniPath = processingOptionService.findOptionAsString(OptionName.RODDY_APPLICATION_INI) as File
 
         //ensure that needed input files are available on the file system
         LsdfFilesService.ensureDirIsReadableAndNotEmpty(roddyBaseConfigsPath)
@@ -86,7 +87,7 @@ class ExecuteRoddyCommandService {
 
 
     String roddyBaseCommand(String configName, String analysisId, RoddyInvocationType type) {
-        File roddyPath = ProcessingOptionService.getValueOfProcessingOption(OptionName.RODDY_PATH) as File
+        File roddyPath = processingOptionService.findOptionAsString(OptionName.RODDY_PATH) as File
         return roddyBaseCommand(roddyPath, configName, analysisId, type)
     }
 
@@ -120,9 +121,9 @@ class ExecuteRoddyCommandService {
         assert realm : "Realm must not be null"
         assert file : "File must not be null"
         if (file.exists()) {
-            remoteShellHelper.executeCommand(realm, "umask 027; chgrp ${ProcessingOptionService.getValueOfProcessingOption(OptionName.OTP_USER_LINUX_GROUP)} ${file} ; chmod 2770 ${file}")
+            remoteShellHelper.executeCommand(realm, "umask 027; chgrp ${processingOptionService.findOptionAsString(OptionName.OTP_USER_LINUX_GROUP)} ${file} ; chmod 2770 ${file}")
         } else {
-            remoteShellHelper.executeCommand(realm, "umask 027; mkdir -m 2750 -p ${file.parent} && mkdir -m 2770 -p ${file} && chgrp ${ProcessingOptionService.getValueOfProcessingOption(OptionName.OTP_USER_LINUX_GROUP)} ${file};")
+            remoteShellHelper.executeCommand(realm, "umask 027; mkdir -m 2750 -p ${file.parent} && mkdir -m 2770 -p ${file} && chgrp ${processingOptionService.findOptionAsString(OptionName.OTP_USER_LINUX_GROUP)} ${file};")
             WaitingFileUtils.waitUntilExists(file)
         }
     }
@@ -175,7 +176,7 @@ class ExecuteRoddyCommandService {
     }
 
     File featureTogglesConfigPath() {
-        return new File(ProcessingOptionService.getValueOfProcessingOption(OptionName.RODDY_FEATURE_TOGGLES_CONFIG_PATH))
+        return new File(processingOptionService.findOptionAsString(OptionName.RODDY_FEATURE_TOGGLES_CONFIG_PATH))
     }
 
     @TupleConstructor

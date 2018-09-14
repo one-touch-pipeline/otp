@@ -91,6 +91,7 @@ class ExecuteRunYapsaJobSpec extends Specification {
 
             }
         }
+        job.processingOptionService = new ProcessingOptionService()
 
         when:
         String result = job.createScript(instance)

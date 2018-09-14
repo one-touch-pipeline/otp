@@ -32,17 +32,20 @@ class ImportExternallyMergedBamJob extends AbstractOtpJob {
     @Autowired
     FileSystemService fileSystemService
 
+    @Autowired
+    ProcessingOptionService processingOptionService
+
 
     @Override
     protected final AbstractMultiJob.NextAction maybeSubmit() throws Throwable {
         final ImportProcess importProcess = getProcessParameterObject()
         AbstractMultiJob.NextAction action = AbstractMultiJob.NextAction.SUCCEED
 
-        String moduleLoader = ProcessingOptionService.findOptionSafe(ProcessingOption.OptionName.COMMAND_LOAD_MODULE_LOADER, null, null)
-        String samtoolsActivation = ProcessingOptionService.findOptionSafe(ProcessingOption.OptionName.COMMAND_ACTIVATION_SAMTOOLS, null, null)
-        String groovyActivation = ProcessingOptionService.findOptionSafe(ProcessingOption.OptionName.COMMAND_ACTIVATION_GROOVY, null, null)
-        String samtoolsCommand = ProcessingOptionService.findOptionAssure(ProcessingOption.OptionName.COMMAND_SAMTOOLS, null, null)
-        String groovyCommand = ProcessingOptionService.findOptionAssure(ProcessingOption.OptionName.COMMAND_GROOVY, null, null)
+        String moduleLoader = processingOptionService.findOptionAsString(ProcessingOption.OptionName.COMMAND_LOAD_MODULE_LOADER)
+        String samtoolsActivation = processingOptionService.findOptionAsString(ProcessingOption.OptionName.COMMAND_ACTIVATION_SAMTOOLS)
+        String groovyActivation = processingOptionService.findOptionAsString(ProcessingOption.OptionName.COMMAND_ACTIVATION_GROOVY)
+        String samtoolsCommand = processingOptionService.findOptionAsString(ProcessingOption.OptionName.COMMAND_SAMTOOLS)
+        String groovyCommand = processingOptionService.findOptionAsString(ProcessingOption.OptionName.COMMAND_GROOVY)
         File otpScriptDir = configService.getToolsPath()
 
         importProcess.externallyProcessedMergedBamFiles.each { ExternallyProcessedMergedBamFile epmbf ->

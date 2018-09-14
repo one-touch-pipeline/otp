@@ -30,6 +30,9 @@ class DataFileConsistencyChecker {
     @Autowired
     SchedulerService schedulerService
 
+    @Autowired
+    ProcessingOptionService processingOptionService
+
     //12h
     @Scheduled(fixedDelay = 43200000l, initialDelay = 60000L)
     void setFileExistsForAllDataFiles() {
@@ -58,11 +61,7 @@ class DataFileConsistencyChecker {
             } catch (RuntimeException e) {
                 log.error("error ${e.getLocalizedMessage()}", e)
                 ProcessingOption.withNewSession {
-                    String recipientsString = ProcessingOptionService.findOption(
-                            ProcessingOption.OptionName.EMAIL_RECIPIENT_ERRORS,
-                            null,
-                            null,
-                    )
+                    String recipientsString = processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_RECIPIENT_ERRORS)
                     if (recipientsString) {
                         mailHelperService.sendEmail("Error: DataFileConsistencyChecker.setFileExistsForAllDataFiles() failed", "${e.getLocalizedMessage()}\n${e.getCause()}", recipientsString)
                     }

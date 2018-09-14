@@ -44,6 +44,7 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends IntegrationSpec 
         service.linkFileUtils.remoteShellHelper = remoteShellHelper
         service.executeRoddyCommandService = new ExecuteRoddyCommandService()
         service.executeRoddyCommandService.remoteShellHelper = service.remoteShellHelper
+        service.processingOptionService = new ProcessingOptionService()
         service.createNotificationTextService = new CreateNotificationTextService(
                 messageSource: Mock(PluginAwareResourceBundleMessageSource) {
                     _ * getMessageInternal('notification.template.alignment.qcTrafficBlockedSubject', [], _) >> '''QC traffic alignment header ${roddyBamFile.sample} ${roddyBamFile.seqType}'''

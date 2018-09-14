@@ -4,8 +4,6 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 class AceseqService extends BamFileAnalysisService implements RoddyBamFileAnalysis, WithReferenceGenomeRestriction {
 
-    ProcessingOptionService processingOptionService
-
     @Override
     protected String getProcessingStateCheck() {
         return "sp.aceseqProcessingStatus = :needsProcessing AND " +
@@ -43,8 +41,8 @@ class AceseqService extends BamFileAnalysisService implements RoddyBamFileAnalys
     }
 
     @Override
-    String getReferenceGenomeString() {
-        return processingOptionService.findOptionAssure(ProcessingOption.OptionName.PIPELINE_ACESEQ_REFERENCE_GENOME, null, null)
+    List<String> getReferenceGenomes() {
+        return processingOptionService.findOptionAsList(ProcessingOption.OptionName.PIPELINE_ACESEQ_REFERENCE_GENOME)
     }
 }
 

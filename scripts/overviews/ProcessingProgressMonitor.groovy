@@ -78,6 +78,7 @@ boolean showUnsupportedSeqTypes = false
 
 //==================================================
 
+ProcessingOptionService processingOptionService = ctx.processingOptionService
 MonitorOutputCollector output = new MonitorOutputCollector(showFinishedEntries, showUnsupportedSeqTypes)
 
 SeqType exomePaired = SeqType.exomePairedSeqType
@@ -470,7 +471,7 @@ if (allProcessed) {
     //collect waiting SamplePairs
 
     def needsProcessing = { String property, Pipeline.Type type ->
-        Double minCoverage = ProcessingOptionService.findOption(ProcessingOption.OptionName.PIPELINE_MIN_COVERAGE, type.toString(),null) as Double ?: 0.0
+        double minCoverage = processingOptionService.findOptionAsDouble(ProcessingOption.OptionName.PIPELINE_MIN_COVERAGE, type.toString())
         return """
                 (
                     samplePair.${property} = '${SamplePair.ProcessingStatus.NEEDS_PROCESSING}'

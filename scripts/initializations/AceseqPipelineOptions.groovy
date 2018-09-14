@@ -1,4 +1,5 @@
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.ngsdata.*
 
 import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
 
@@ -11,12 +12,14 @@ processingOptionService.createOrUpdate(
 
 processingOptionService.createOrUpdate(
         PIPELINE_ACESEQ_DEFAULT_PLUGIN_VERSION,
-        '1.2.8-4'
+        '1.2.8-4',
+        SeqType.wholeGenomePairedSeqType.roddyName,
 )
 
 processingOptionService.createOrUpdate(
         PIPELINE_ACESEQ_DEFAULT_BASE_PROJECT_CONFIG,
-        'otpACEseq-1.1'
+        'otpACEseq-1.1',
+        SeqType.wholeGenomePairedSeqType.roddyName,
 )
 
 processingOptionService.createOrUpdate(

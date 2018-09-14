@@ -12,6 +12,7 @@ import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
 
 class UserProjectRoleServiceIntegrationSpec extends Specification implements UserAndRoles {
     UserProjectRoleService userProjectRoleService
+    String email = HelperUtils.randomEmail
 
     def setup() {
         userProjectRoleService = new UserProjectRoleService()
@@ -19,11 +20,12 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         userProjectRoleService.auditLogService.springSecurityService = new SpringSecurityService()
         createUserAndRoles()
         userProjectRoleService.mailHelperService = Mock(MailHelperService)
+        userProjectRoleService.processingOptionService = new ProcessingOptionService()
         DomainFactory.createProcessingOptionLazy(
                 name: EMAIL_LINUX_GROUP_ADMINISTRATION,
                 type: null,
                 project: null,
-                value: "administrationMail@dummy.com",
+                value: email,
         )
     }
 
@@ -112,7 +114,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         1 * userProjectRoleService.mailHelperService.sendEmail(
                 "Request to ${formattedAction} user '${user.username}' ${conjunction} project '${project.name}'",
                 "adtool group${formattedAction}user ${project.name} ${user.username}",
-                ProcessingOptionService.getValueOfProcessingOption(EMAIL_LINUX_GROUP_ADMINISTRATION)
+                email
         )
 
         where:

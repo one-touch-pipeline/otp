@@ -41,6 +41,8 @@ class LinkFilesToFinalDestinationService {
     @Autowired
     CreateNotificationTextService createNotificationTextService
 
+    @Autowired
+    ProcessingOptionService processingOptionService
 
     public void prepareRoddyBamFile(RoddyBamFile roddyBamFile) {
         assert roddyBamFile: "roddyBamFile must not be null"
@@ -181,7 +183,7 @@ class LinkFilesToFinalDestinationService {
                 [
                         roddyBamFile         : roddyBamFile,
                         link                 : createNotificationTextService.createOtpLinks([roddyBamFile.project], 'alignmentQualityOverview', 'index'),
-                        emailSenderSalutation: ProcessingOptionService.findOptionAssure(ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION, null, null),
+                        emailSenderSalutation: processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION),
                 ]
         )
     }
@@ -189,7 +191,7 @@ class LinkFilesToFinalDestinationService {
     void informResultsAreBlocked(RoddyBamFile roddyBamFile) {
         List<String> recipients = [
                 roddyBamFile.project.mailingListName,
-                ProcessingOptionService.getValueOfProcessingOption(ProcessingOption.OptionName.EMAIL_RECIPIENT_NOTIFICATION),
+                processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_RECIPIENT_NOTIFICATION),
         ].findAll()
         String subject = createResultsAreBlockedSubject(roddyBamFile)
         String content = createResultsAreBlockedMessage(roddyBamFile)

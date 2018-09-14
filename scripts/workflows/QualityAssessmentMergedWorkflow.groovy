@@ -56,10 +56,10 @@ plan(workflowName) {
 ProcessingOptionService processingOptionService = ctx.processingOptionService
 
 // number of all MergedQA workflows which can be executed in parallel
-println processingOptionService.createOrUpdate(OptionName.MAXIMUM_NUMBER_OF_JOBS, workflowName, null, '60')
+processingOptionService.createOrUpdate(OptionName.MAXIMUM_NUMBER_OF_JOBS, '60', workflowName)
 
 // number of slots which are reserved only for FastTrack Workflows
-println processingOptionService.createOrUpdate(OptionName.MAXIMUM_NUMBER_OF_JOBS_RESERVED_FOR_FAST_TRACK, workflowName, null, '30')
+processingOptionService.createOrUpdate(OptionName.MAXIMUM_NUMBER_OF_JOBS_RESERVED_FOR_FAST_TRACK, '30', workflowName)
 
 
 
@@ -79,9 +79,8 @@ String cmd = "qualityAssessment.sh \${processedBamFilePath} \${processedBaiFileP
 SeqType seqType = SeqType.findByNameAndLibraryLayout(SeqTypeNames.WHOLE_GENOME.seqTypeName, SeqType.LIBRARYLAYOUT_PAIRED)
 processingOptionService.createOrUpdate(
     OptionName.PIPELINE_OTP_ALIGNMENT_QUALITY_MERGED_ASSESSMENT,
+    cmd,
     seqType.naturalId,
-    null, // defaults to all projects
-    cmd
 )
 
 // options for qa.jar for exome
@@ -89,22 +88,19 @@ cmd = "qualityAssessment.sh \${processedBamFilePath} \${processedBaiFilePath} \$
 seqType = SeqType.findByNameAndLibraryLayout(SeqTypeNames.EXOME.seqTypeName, SeqType.LIBRARYLAYOUT_PAIRED)
 processingOptionService.createOrUpdate(
     OptionName.PIPELINE_OTP_ALIGNMENT_QUALITY_MERGED_ASSESSMENT,
+    cmd,
     seqType.naturalId,
-    null, // defaults to all projects
-    cmd
 )
 
 
-println processingOptionService.createOrUpdate(
+processingOptionService.createOrUpdate(
         OptionName.CLUSTER_SUBMISSIONS_OPTION,
-        "${ExecuteMergedBamFileQaAnalysisJob.class.simpleName}",
-        null,
         '{"WALLTIME":"PT100H","MEMORY":"15g"}',
+        "${ExecuteMergedBamFileQaAnalysisJob.class.simpleName}",
 )
 
-println processingOptionService.createOrUpdate(
+processingOptionService.createOrUpdate(
         OptionName.CLUSTER_SUBMISSIONS_OPTION,
-        "${ExecuteMergedMappingFilteringSortingToCoverageTableJob.simpleName}",
-        null,
         '{"MEMORY":"15g","CORES":"6"}',
+        "${ExecuteMergedMappingFilteringSortingToCoverageTableJob.simpleName}",
 )

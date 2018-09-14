@@ -15,6 +15,7 @@ class UserProjectRoleService {
     UserService userService
     LdapService ldapService
     AuditLogService auditLogService
+    ProcessingOptionService processingOptionService
 
     private UserProjectRole createUserProjectRole(User user, Project project, ProjectRole projectRole, boolean enabled = true, boolean manageUsers) {
         assert user : "the user must not be null"
@@ -99,7 +100,7 @@ class UserProjectRoleService {
         String formattedAction = adtool.toString().toLowerCase()
         String subject = "Request to ${formattedAction} user '${user.username}' ${adtool == AdtoolAction.ADD ? 'to' : 'from'} project '${project.name}'"
         String body = "adtool group${formattedAction}user ${project.name} ${user.username}"
-        String email = ProcessingOptionService.getValueOfProcessingOption(EMAIL_LINUX_GROUP_ADMINISTRATION)
+        String email = processingOptionService.findOptionAsString(EMAIL_LINUX_GROUP_ADMINISTRATION)
         mailHelperService.sendEmail(subject, body, email)
         auditLogService.logAction(PROJECT_USER_SENT_MAIL, "Sent mail to ${email} to ${formattedAction} ${user.username} ${adtool == AdtoolAction.ADD ? 'to' : 'from'} ${project.name}")
     }

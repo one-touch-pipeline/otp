@@ -1,4 +1,5 @@
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.ngsdata.*
 
 import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
 
@@ -11,12 +12,26 @@ processingOptionService.createOrUpdate(
 
 processingOptionService.createOrUpdate(
         PIPELINE_SOPHIA_DEFAULT_PLUGIN_VERSIONS,
-        '1.2.16'
+        '1.2.16',
+        SeqType.wholeGenomePairedSeqType.roddyName,
+)
+
+processingOptionService.createOrUpdate(
+        PIPELINE_SOPHIA_DEFAULT_PLUGIN_VERSIONS,
+        '1.2.16',
+        SeqType.exomePairedSeqType.roddyName,
 )
 
 processingOptionService.createOrUpdate(
         PIPELINE_SOPHIA_DEFAULT_BASE_PROJECT_CONFIG,
-        'otpSophia-1.1'
+        'otpSophia-1.1',
+        SeqType.wholeGenomePairedSeqType.roddyName,
+)
+
+processingOptionService.createOrUpdate(
+        PIPELINE_SOPHIA_DEFAULT_BASE_PROJECT_CONFIG,
+        'otpSophia-1.1',
+        SeqType.exomePairedSeqType.roddyName,
 )
 
 processingOptionService.createOrUpdate(

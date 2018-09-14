@@ -92,7 +92,7 @@ class ExecuteMergedBamFileQaAnalysisJob extends AbstractJobImpl {
             binding.refGenMetaInfoFilePath = refGenMetaInfoFilePath
         }
 
-        String cmdTemplate = ProcessingOptionService.findOptionAssure(ProcessingOption.OptionName.PIPELINE_OTP_ALIGNMENT_QUALITY_MERGED_ASSESSMENT, seqTypeNaturalId, project)
+        String cmdTemplate = ProcessingOptionService.findOptionSafe(ProcessingOption.OptionName.PIPELINE_OTP_ALIGNMENT_QUALITY_MERGED_ASSESSMENT, seqTypeNaturalId, project)
         SimpleTemplateEngine engine = new SimpleTemplateEngine()
         String cmd = engine.createTemplate(cmdTemplate).make(binding).toString().trim()
         cmd += "; chmod 440 ${qualityAssessmentFilePath} ${coverageDataFilePath} ${insertSizeDataFilePath}"

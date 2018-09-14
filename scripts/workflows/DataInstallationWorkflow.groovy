@@ -15,23 +15,20 @@ plan(workflow) {
 
 ProcessingOptionService processingOptionService = ctx.processingOptionService
 
-println processingOptionService.createOrUpdate(
+processingOptionService.createOrUpdate(
         OptionName.CLUSTER_SUBMISSIONS_OPTION,
-        CopyFilesJob.simpleName,
-        null,
         '{"WALLTIME":"PT12H"}',
+        CopyFilesJob.simpleName,
 )
 
 processingOptionService.createOrUpdate(
         OptionName.MAXIMUM_NUMBER_OF_JOBS,
+        '5',
         workflow,
-        null,
-        '5'
 )
 
 processingOptionService.createOrUpdate(
         OptionName.MAXIMUM_NUMBER_OF_JOBS_RESERVED_FOR_FAST_TRACK,
+        '0',
         workflow,
-        null,
-        '0'
 )

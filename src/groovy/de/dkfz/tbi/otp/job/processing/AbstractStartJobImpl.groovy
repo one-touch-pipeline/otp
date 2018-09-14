@@ -165,32 +165,15 @@ abstract class AbstractStartJobImpl implements StartJob, ApplicationListener<Job
             return ProcessingPriority.SUPREMUM_PRIORITY
         }
         final int occupiedSlots = Process.countByFinishedAndJobExecutionPlan(false, plan)
-        final int totalSlots = getConfiguredSlotCount(plan, OptionName.MAXIMUM_NUMBER_OF_JOBS, 1)
+        final int totalSlots = optionService.findOptionAsInteger(OptionName.MAXIMUM_NUMBER_OF_JOBS, plan.name)
         if (occupiedSlots >= totalSlots) {
             return ProcessingPriority.SUPREMUM_PRIORITY
         }
-        final int slotsReservedForFastTrack = getConfiguredSlotCount(plan, OptionName.MAXIMUM_NUMBER_OF_JOBS_RESERVED_FOR_FAST_TRACK, 0)
+        final int slotsReservedForFastTrack = optionService.findOptionAsInteger(OptionName.MAXIMUM_NUMBER_OF_JOBS_RESERVED_FOR_FAST_TRACK, plan.name)
         if (occupiedSlots < totalSlots - slotsReservedForFastTrack) {
             return ProcessingPriority.MINIMUM_PRIORITY
         } else {
             return ProcessingPriority.FAST_TRACK_PRIORITY
-        }
-    }
-
-    protected int getConfiguredSlotCount(final JobExecutionPlan plan, final OptionName optionName, final int defaultValue) {
-        final String optionValue = optionService.findOption(optionName, plan.name, null)
-        if (optionValue == null) {
-            log.warn "${optionName} is not configured for ${plan.name}. Defaulting to ${defaultValue}."
-            return defaultValue
-        }
-        try {
-            final int slotCount = Integer.parseInt(optionValue)
-            if (slotCount < 0) {
-                throw new NumberFormatException()
-            }
-            return slotCount
-        } catch (final NumberFormatException e) {
-            throw new NumberFormatException("Illegal value of ${optionName} for ${plan.name}: \"${optionValue}\"")
         }
     }
 }

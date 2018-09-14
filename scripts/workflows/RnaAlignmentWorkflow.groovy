@@ -15,5 +15,5 @@ plan(workflowName, ctx, true) {
 
 ProcessingOptionService processingOptionService = ctx.processingOptionService
 
-processingOptionService.createOrUpdate(MAXIMUM_NUMBER_OF_JOBS, workflowName, null, '5')
-processingOptionService.createOrUpdate(MAXIMUM_NUMBER_OF_JOBS_RESERVED_FOR_FAST_TRACK, workflowName, null, '0')
+processingOptionService.createOrUpdate(MAXIMUM_NUMBER_OF_JOBS, '5', workflowName)
+processingOptionService.createOrUpdate(MAXIMUM_NUMBER_OF_JOBS_RESERVED_FOR_FAST_TRACK, '0', workflowName)

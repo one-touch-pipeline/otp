@@ -23,7 +23,7 @@ Realm.withTransaction {
 
     assert realm.save(flush: true)
 
-    processingOptionService.createOrUpdate(ProcessingOption.OptionName.REALM_DEFAULT_VALUE, null, null, realmName)
+    processingOptionService.createOrUpdate(ProcessingOption.OptionName.REALM_DEFAULT_VALUE, realmName)
 
 }
 ''

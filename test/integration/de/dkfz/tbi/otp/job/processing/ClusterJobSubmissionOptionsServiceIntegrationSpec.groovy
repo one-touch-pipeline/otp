@@ -25,15 +25,13 @@ class ClusterJobSubmissionOptionsServiceIntegrationSpec extends IntegrationSpec 
 
         service.processingOptionService.createOrUpdate(
                 ProcessingOption.OptionName.CLUSTER_SUBMISSIONS_OPTION,
-                "${processingStep.nonQualifiedJobClass}",
-                null,
                 jobSpecificOption,
+                "${processingStep.nonQualifiedJobClass}",
         )
         service.processingOptionService.createOrUpdate(
                 ProcessingOption.OptionName.CLUSTER_SUBMISSIONS_OPTION,
-                "${processingStep.nonQualifiedJobClass}_${seqType.processingOptionName}",
-                null,
                 jobAndSeqTypeSpecific,
+                "${processingStep.nonQualifiedJobClass}_${seqType.processingOptionName}",
         )
 
         expect:

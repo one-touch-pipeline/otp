@@ -13,6 +13,7 @@ class RootController {
     ProjectSelectionService projectSelectionService
     SpringSecurityService springSecurityService
     StatisticService statisticService
+    ProcessingOptionService processingOptionService
 
     long FOUR_WEEKS_IN_MS = 1000L * 60 * 60 * 24 * 7 * 4
 
@@ -35,8 +36,7 @@ class RootController {
                 break
         }
 
-        boolean showPartners = ProcessingOptionService.findOptionAsBoolean(OptionName.GUI_SHOW_PARTNERS, null, null)
-        String aboutOtp = ProcessingOptionService.findOptionSafe(OptionName.GUI_ABOUT_OTP, null, null)
+        String aboutOtp = processingOptionService.findOptionAsString(OptionName.GUI_ABOUT_OTP)
 
         return [
                 projects    : Project.count,
@@ -44,7 +44,6 @@ class RootController {
                 username    : session.getAttribute(SpringSecurityUtils.SPRING_SECURITY_LAST_USERNAME_KEY),
                 message     : messageText,
                 type        : type,
-                showPartners: showPartners,
                 aboutOtp    : aboutOtp,
         ]
     }

@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.testing.*
 import de.dkfz.tbi.otp.utils.MailHelperService
@@ -116,6 +117,7 @@ class DataFileConsistencyCheckerIntegrationSpec extends IntegrationSpec implemen
         dataFileConsistencyChecker.lsdfFilesService = Mock(LsdfFilesService) {
             1 * getFileFinalPath(dataFile) >> "path"
         }
+        dataFileConsistencyChecker.processingOptionService = new ProcessingOptionService()
 
         expect:
         dataFileConsistencyChecker.setFileExistsForAllDataFiles()

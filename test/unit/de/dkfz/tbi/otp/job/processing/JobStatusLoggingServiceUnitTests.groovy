@@ -77,6 +77,7 @@ class JobStatusLoggingServiceUnitTests {
         ProcessingStep processingStep = createFakeProcessingStep()
         service.clusterJobManagerFactoryService = new ClusterJobManagerFactoryService()
         service.clusterJobManagerFactoryService.configService = new TestConfigService()
+        service.clusterJobManagerFactoryService.configService.processingOptionService = new ProcessingOptionService()
         def actual = service.constructLogFileLocation(realm, processingStep)
         assert "${EXPECTED_BASE_PATH}/joblog_${ARBITRARY_PROCESS_ID}_\$(echo \${PBS_JOBID} | cut -d. -f1)_${realm.id}.log" == actual
     }
@@ -98,6 +99,7 @@ class JobStatusLoggingServiceUnitTests {
         ProcessingStep processingStep = createFakeProcessingStep()
         service.clusterJobManagerFactoryService = new ClusterJobManagerFactoryService()
         service.clusterJobManagerFactoryService.configService = new TestConfigService()
+        service.clusterJobManagerFactoryService.configService.processingOptionService = new ProcessingOptionService()
         def actual = service.constructMessage(realm, processingStep)
         assert "${processingStep.jobExecutionPlan.name},DummyJob,${ARBITRARY_ID},\$(echo \${PBS_JOBID} | cut -d. -f1)" == actual
     }

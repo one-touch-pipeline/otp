@@ -112,6 +112,7 @@ phabricatorAlias:${phabricatorAlias}
             _ * getMessageInternal("notification.template.seqCenterNote.${CollectionUtils.exactlyOneElement(ticket.findAllSeqTracks()*.seqCenter.unique()).name.toLowerCase()}", [], _) >> generalSeqCenterComment
             _ * getMessageInternal("notification.template.base", [], _) >> NOTIFICATION_MESSAGE
         }
+        createNotificationTextService.processingOptionService = new ProcessingOptionService()
 
         String expectedSeqCenterComment = ""
 
@@ -211,6 +212,7 @@ phabricatorAlias:
         createNotificationTextService.messageSource = Mock(PluginAwareResourceBundleMessageSource) {
             _ * getMessageInternal("notification.template.base", [], _) >> NOTIFICATION_MESSAGE
         }
+        createNotificationTextService.processingOptionService = new ProcessingOptionService()
 
         String expectedSeqCenterComment
 

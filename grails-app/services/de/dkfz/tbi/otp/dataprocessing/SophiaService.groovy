@@ -5,8 +5,6 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 class SophiaService extends BamFileAnalysisService implements RoddyBamFileAnalysis, WithReferenceGenomeRestriction {
 
-    ProcessingOptionService processingOptionService
-
     @Override
     protected String getProcessingStateCheck() {
         return "sp.sophiaProcessingStatus = :needsProcessing "
@@ -47,7 +45,7 @@ class SophiaService extends BamFileAnalysisService implements RoddyBamFileAnalys
     }
 
     @Override
-    String getReferenceGenomeString() {
-        return processingOptionService.findOptionAssure(ProcessingOption.OptionName.PIPELINE_SOPHIA_REFERENCE_GENOME, null, null)
+    List<String> getReferenceGenomes() {
+        return processingOptionService.findOptionAsList(ProcessingOption.OptionName.PIPELINE_SOPHIA_REFERENCE_GENOME)
     }
 }

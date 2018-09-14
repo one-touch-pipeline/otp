@@ -11,9 +11,9 @@ trait WithReferenceGenomeRestriction implements BamFileAnalysisServiceTrait {
 
     @Override
     Map<String, Object> checkReferenceGenomeMap() {
-        List<String> referenceGenomeNames = getReferenceGenomeString().split(',')*.trim()
+        List<String> referenceGenomeNames = getReferenceGenomes()
         return [referenceGenomes: ReferenceGenome.findAllByNameInList(referenceGenomeNames)]
     }
 
-    abstract String getReferenceGenomeString()
+    abstract List<String> getReferenceGenomes()
 }

@@ -37,7 +37,7 @@ class FastqcJobTest {
         fastqcJob.log = new NoOpLog()
 
         ProcessingOptionService processingOptionService = new ProcessingOptionService()
-        processingOptionService.createOrUpdate(ProcessingOption.OptionName.COMMAND_FASTQC, null, null, "fastqc-0.10.1")
+        processingOptionService.createOrUpdate(ProcessingOption.OptionName.COMMAND_FASTQC, "fastqc-0.10.1")
 
         WaitingFileUtils.metaClass.static.waitUntilExists = { File file -> true }
         LocalShellHelper.metaClass.static.executeAndAssertExitCodeAndErrorOutAndReturnStdout = { String cmd ->

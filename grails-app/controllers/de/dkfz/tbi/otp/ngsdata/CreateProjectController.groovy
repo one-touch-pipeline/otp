@@ -8,6 +8,7 @@ import org.springframework.web.multipart.*
 
 class CreateProjectController {
 
+    ConfigService configService
     ProjectService projectService
     ProjectGroupService projectGroupService
     ProjectSelectionService projectSelectionService
@@ -27,7 +28,7 @@ class CreateProjectController {
                         phabricatorAlias: cmd.phabricatorAlias,
                         dirName: cmd.directory,
                         dirAnalysis: cmd.analysisDirectory,
-                        realm: ConfigService.getDefaultRealm(),
+                        realm: configService.getDefaultRealm(),
                         alignmentDeciderBeanName: 'noAlignmentDecider',
                         categoryNames: cmd.projectCategories,
                         unixGroup: cmd.unixGroup,

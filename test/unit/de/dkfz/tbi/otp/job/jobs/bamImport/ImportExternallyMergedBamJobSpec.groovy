@@ -87,6 +87,11 @@ class ImportExternallyMergedBamJobSpec extends Specification {
         assert epmbfWithoutMd5sum.individual.save(flush: true)
 
         DomainFactory.createProcessingOptionLazy(
+                name: COMMAND_LOAD_MODULE_LOADER,
+                type: null,
+                value: "",
+        )
+        DomainFactory.createProcessingOptionLazy(
                 name: COMMAND_ACTIVATION_SAMTOOLS,
                 type: null,
                 value: "module load samtools"
@@ -461,7 +466,9 @@ class ImportExternallyMergedBamJobSpec extends Specification {
         importExternallyMergedBamJob.checksumFileService = new ChecksumFileService()
         importExternallyMergedBamJob.executionHelperService = new ExecutionHelperService()
         importExternallyMergedBamJob.fileSystemService = new FileSystemService()
+        importExternallyMergedBamJob.fileSystemService.processingOptionService = new ProcessingOptionService()
         importExternallyMergedBamJob.metaClass.log = new NoOpLog()
+        importExternallyMergedBamJob.processingOptionService = new ProcessingOptionService()
 
         CreateFileHelper.createFile(new File("${importProcess.externallyProcessedMergedBamFiles[0].importedFrom}"))
 

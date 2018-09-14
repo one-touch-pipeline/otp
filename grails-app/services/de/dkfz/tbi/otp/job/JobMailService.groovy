@@ -24,6 +24,8 @@ class JobMailService {
 
     TrackingService trackingService
 
+    ProcessingOptionService processingOptionService
+
 
     public void sendErrorNotification(Job job, Throwable exceptionToBeHandled) {
         assert job: 'job may not be null'
@@ -121,11 +123,7 @@ Failed OTP Header: ${mapForLog.keySet().join(';')}
 Failed OTP Values: ${mapForLog.values().join(';')}""")
         }
 
-        String recipientsString = ProcessingOptionService.findOption(
-                OptionName.EMAIL_RECIPIENT_ERRORS,
-                null,
-                object?.project,
-        )
+        String recipientsString = processingOptionService.findOptionAsString(OptionName.EMAIL_RECIPIENT_ERRORS)
         if (recipientsString) {
             List<String> recipients = recipientsString.split(' ') as List
             String subject = "${subjectPrefix}ERROR: ${otpWorkflow.otpWorkflowName} ${object.individual?.displayName} ${object.project?.name}"

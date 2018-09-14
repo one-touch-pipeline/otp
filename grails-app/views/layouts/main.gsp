@@ -147,7 +147,7 @@
                                         <li><g:link controller="info" action="numbers"><g:message code="info.numbers.link"/></g:link></li>
                                         <li><g:link controller="info" action="contact"><g:message code="info.contact.link"/></g:link></li>
                                         <li><g:link controller="info" action="imprint"><g:message code="info.imprint.link"/></g:link></li>
-                                        <g:if test="${ProcessingOptionService.findOptionAsBoolean(OptionName.GUI_SHOW_PARTNERS, null, null)}">
+                                        <g:if test="${showPartners}">
                                             <li><g:link controller="info" action="partners"><g:message code="info.partners.link"/></g:link></li>
                                         </g:if>
                                         <li><g:link controller="info" action="templates"><g:message code="info.templates.link"/></g:link></li>

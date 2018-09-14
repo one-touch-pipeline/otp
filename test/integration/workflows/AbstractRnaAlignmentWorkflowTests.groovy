@@ -188,9 +188,9 @@ abstract class AbstractRnaAlignmentWorkflowTests extends AbstractRoddyAlignmentW
             projectService.configureRnaAlignmentConfig(new RoddyConfiguration([
                     project          : workPackage.project,
                     seqType          : workPackage.seqType,
-                    pluginName       : ProcessingOptionService.findOption(ProcessingOption.OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_PLUGIN_NAME, workPackage.seqType.roddyName, null),
-                    pluginVersion    : ProcessingOptionService.findOption(ProcessingOption.OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_PLUGIN_VERSION, workPackage.seqType.roddyName, null),
-                    baseProjectConfig: ProcessingOptionService.findOption(ProcessingOption.OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_BASE_PROJECT_CONFIG, workPackage.seqType.roddyName, null),
+                    pluginName       : processingOptionService.findOptionAsString(ProcessingOption.OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_PLUGIN_NAME, workPackage.seqType.roddyName),
+                    pluginVersion    : processingOptionService.findOptionAsString(ProcessingOption.OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_PLUGIN_VERSION, workPackage.seqType.roddyName),
+                    baseProjectConfig: processingOptionService.findOptionAsString(ProcessingOption.OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_BASE_PROJECT_CONFIG, workPackage.seqType.roddyName),
                     configVersion    : "v1_0",
                     resources        : "t",
             ] + configOptions))

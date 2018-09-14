@@ -11,6 +11,7 @@ import static de.dkfz.tbi.otp.qcTrafficLight.QcThreshold.ThresholdLevel.*
 class QcTrafficLightService {
 
     CommentService commentService
+    ConfigService configService
     LinkFilesToFinalDestinationService linkFilesToFinalDestinationService
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#bamFile?.project, 'OTP_READ_ACCESS')")
@@ -23,9 +24,9 @@ class QcTrafficLightService {
         changeQcTrafficLightStatus(bamFile, qcTrafficLightStatus)
         if (bamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.ACCEPTED) {
             if (bamFile.seqType.isRna()) {
-                linkFilesToFinalDestinationService.linkNewRnaResults((RnaRoddyBamFile) bamFile, ConfigService.getDefaultRealm())
+                linkFilesToFinalDestinationService.linkNewRnaResults((RnaRoddyBamFile) bamFile, configService.getDefaultRealm())
             } else {
-                linkFilesToFinalDestinationService.linkNewResults(bamFile, ConfigService.getDefaultRealm())
+                linkFilesToFinalDestinationService.linkNewResults(bamFile, configService.getDefaultRealm())
             }
         }
     }

@@ -60,8 +60,6 @@ abstract class AbstractRunYapsaWorkflowTests extends AbstractRoddyBamFilePairAna
         SpringSecurityUtils.doWithAuth("operator") {
             processingOptionService.createOrUpdate(
                     OptionName.PIPELINE_RUNYAPSA_REFERENCE_GENOME,
-                    null,
-                    null,
                     referenceGenome.name
             )
         }

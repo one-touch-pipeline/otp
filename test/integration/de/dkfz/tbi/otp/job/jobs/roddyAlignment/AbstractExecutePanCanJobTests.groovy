@@ -60,6 +60,7 @@ class AbstractExecutePanCanJobTests {
         abstractExecutePanCanJob.referenceGenomeService.processingOptionService = new ProcessingOptionService()
         abstractExecutePanCanJob.lsdfFilesService = new LsdfFilesService()
         abstractExecutePanCanJob.executeRoddyCommandService = new ExecuteRoddyCommandService()
+        abstractExecutePanCanJob.executeRoddyCommandService.processingOptionService = new ProcessingOptionService()
         abstractExecutePanCanJob.bedFileService = new BedFileService()
         abstractExecutePanCanJob.configService = configService
         abstractExecutePanCanJob.chromosomeIdentifierSortingService = new ChromosomeIdentifierSortingService()

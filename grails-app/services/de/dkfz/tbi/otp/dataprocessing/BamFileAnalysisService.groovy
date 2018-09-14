@@ -8,6 +8,7 @@ import de.dkfz.tbi.otp.utils.*
 abstract class BamFileAnalysisService implements BamFileAnalysisServiceTrait {
 
     AbstractMergedBamFileService abstractMergedBamFileService
+    ProcessingOptionService processingOptionService
 
     static final List<AnalysisProcessingStates> processingStatesNotProcessable = [
             AnalysisProcessingStates.IN_PROGRESS,
@@ -34,7 +35,7 @@ abstract class BamFileAnalysisService implements BamFileAnalysisServiceTrait {
         final String SEQ_TYPE = "${WORKPACKAGE}.seqType"
         final String INDIVIDUAL = "${SAMPLE}.individual"
 
-        double threshold = ProcessingOptionService.findOption(ProcessingOption.OptionName.PIPELINE_MIN_COVERAGE, getAnalysisType().toString(), null)?.toDouble() ?: 0.0
+        double threshold = processingOptionService.findOptionAsDouble(ProcessingOption.OptionName.PIPELINE_MIN_COVERAGE, getAnalysisType().toString())
 
         def testIfBamFileFulfillCriteria = { String number ->
             return "AND EXISTS (FROM AbstractMergedBamFile ambf${number} " +

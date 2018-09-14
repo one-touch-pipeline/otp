@@ -40,9 +40,9 @@ abstract class AbstractAceseqWorkflowTests extends AbstractRoddyBamFilePairAnaly
                     new RoddyConfiguration([
                             project          : project,
                             seqType          : seqType,
-                            pluginName       : ProcessingOptionService.findOption(OptionName.PIPELINE_ACESEQ_DEFAULT_PLUGIN_NAME, null, null),
-                            pluginVersion    : ProcessingOptionService.findOption(OptionName.PIPELINE_ACESEQ_DEFAULT_PLUGIN_VERSION, null, null),
-                            baseProjectConfig: ProcessingOptionService.findOption(OptionName.PIPELINE_ACESEQ_DEFAULT_BASE_PROJECT_CONFIG, seqType.roddyName, null),
+                            pluginName       : processingOptionService.findOptionAsString(OptionName.PIPELINE_ACESEQ_DEFAULT_PLUGIN_NAME),
+                            pluginVersion    : processingOptionService.findOptionAsString(OptionName.PIPELINE_ACESEQ_DEFAULT_PLUGIN_VERSION, seqType.roddyName),
+                            baseProjectConfig: processingOptionService.findOptionAsString(OptionName.PIPELINE_ACESEQ_DEFAULT_BASE_PROJECT_CONFIG, seqType.roddyName),
                             configVersion    : 'v1_0',
                             resources        : 't',
                     ])
@@ -69,9 +69,7 @@ abstract class AbstractAceseqWorkflowTests extends AbstractRoddyBamFilePairAnaly
 
         SpringSecurityUtils.doWithAuth("operator") {
             processingOptionService.createOrUpdate(
-                    ProcessingOption.OptionName.PIPELINE_ACESEQ_REFERENCE_GENOME,
-                    null,
-                    null,
+                    OptionName.PIPELINE_ACESEQ_REFERENCE_GENOME,
                     referenceGenome.name
             )
         }

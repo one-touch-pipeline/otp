@@ -99,10 +99,10 @@ class ClusterJobServiceSpec extends Specification {
         ClusterJobIdentifier clusterJobIdentifier = new ClusterJobIdentifier(job.realm, job.clusterJobId, job.userName)
         GenericJobInfo jobInfo = new GenericJobInfo(null, null, null, null, [c2.id as String])
 
-        jobInfo.submitTime = java.time.ZonedDateTime.of(2017, 8, 8, 1, 0, 0, 0, ConfigService.timeZoneId)
-        jobInfo.eligibleTime = java.time.ZonedDateTime.of(2017, 8, 9, 2, 0, 0, 0, ConfigService.timeZoneId)
-        jobInfo.startTime = java.time.ZonedDateTime.of(2017, 8, 10, 3, 0, 0, 0, ConfigService.timeZoneId)
-        jobInfo.endTime = java.time.ZonedDateTime.of(2017, 8, 11, 4, 0, 0, 0, ConfigService.timeZoneId)
+        jobInfo.submitTime = java.time.ZonedDateTime.of(2017, 8, 8, 1, 0, 0, 0, configService.timeZoneId)
+        jobInfo.eligibleTime = java.time.ZonedDateTime.of(2017, 8, 9, 2, 0, 0, 0, configService.timeZoneId)
+        jobInfo.startTime = java.time.ZonedDateTime.of(2017, 8, 10, 3, 0, 0, 0, configService.timeZoneId)
+        jobInfo.endTime = java.time.ZonedDateTime.of(2017, 8, 11, 4, 0, 0, 0, configService.timeZoneId)
         jobInfo.timeSystemSuspState = java.time.Duration.ofSeconds(123)
         jobInfo.timeUserSuspState = java.time.Duration.ofSeconds(456)
 
@@ -122,10 +122,10 @@ class ClusterJobServiceSpec extends Specification {
         job.exitStatus == ClusterJob.Status.COMPLETED
         job.exitCode == jobInfo.exitCode
 
-        job.queued == clusterJobService.convertFromJava8ZonedDateTimeToJodaDateTime(java.time.ZonedDateTime.of(2017, 8, 8, 1, 0, 0, 0, ConfigService.timeZoneId))
-        job.eligible ==clusterJobService.convertFromJava8ZonedDateTimeToJodaDateTime(java.time.ZonedDateTime.of(2017, 8, 9, 2, 0, 0, 0, ConfigService.timeZoneId))
-        job.started ==clusterJobService.convertFromJava8ZonedDateTimeToJodaDateTime(java.time.ZonedDateTime.of(2017, 8, 10, 3, 0, 0, 0, ConfigService.timeZoneId))
-        job.ended ==clusterJobService.convertFromJava8ZonedDateTimeToJodaDateTime(java.time.ZonedDateTime.of(2017, 8, 11, 4, 0, 0, 0, ConfigService.timeZoneId))
+        job.queued == clusterJobService.convertFromJava8ZonedDateTimeToJodaDateTime(java.time.ZonedDateTime.of(2017, 8, 8, 1, 0, 0, 0, configService.timeZoneId))
+        job.eligible ==clusterJobService.convertFromJava8ZonedDateTimeToJodaDateTime(java.time.ZonedDateTime.of(2017, 8, 9, 2, 0, 0, 0, configService.timeZoneId))
+        job.started ==clusterJobService.convertFromJava8ZonedDateTimeToJodaDateTime(java.time.ZonedDateTime.of(2017, 8, 10, 3, 0, 0, 0, configService.timeZoneId))
+        job.ended ==clusterJobService.convertFromJava8ZonedDateTimeToJodaDateTime(java.time.ZonedDateTime.of(2017, 8, 11, 4, 0, 0, 0, configService.timeZoneId))
 
         job.systemSuspendStateDuration == org.joda.time.Duration.standardSeconds(123)
         job.userSuspendStateDuration == org.joda.time.Duration.standardSeconds(456)

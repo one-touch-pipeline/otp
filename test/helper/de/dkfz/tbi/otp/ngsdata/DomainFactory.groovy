@@ -390,12 +390,11 @@ class DomainFactory {
     }
 
     public static void createProcessingOptionForOtrsTicketPrefix(String prefix = "Prefix ${counter++}") {
-        ProcessingOptionService option = new ProcessingOptionService()
-        option.createOrUpdate(
-                OptionName.TICKET_SYSTEM_NUMBER_PREFIX,
-                null,
-                null,
-                prefix
+        createProcessingOptionLazy(
+                 name: OptionName.TICKET_SYSTEM_NUMBER_PREFIX,
+                 type: null,
+                 project: null,
+                 value: prefix,
         )
     }
 

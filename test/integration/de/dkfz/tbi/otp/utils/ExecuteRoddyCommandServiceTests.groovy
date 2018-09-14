@@ -18,6 +18,7 @@ class ExecuteRoddyCommandServiceTests {
     ExecuteRoddyCommandService executeRoddyCommandService
 
     RemoteShellHelper remoteShellHelper
+    ProcessingOptionService processingOptionService
 
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder()
@@ -49,7 +50,7 @@ class ExecuteRoddyCommandServiceTests {
                 type: null,
         ])
 
-        roddyPath = new File(ProcessingOptionService.getValueOfProcessingOption(OptionName.RODDY_PATH))
+        roddyPath = new File(processingOptionService.findOptionAsString(OptionName.RODDY_PATH))
         roddyCommand = new File(roddyPath, 'roddy.sh')
         tmpOutputDir = temporaryFolder.newFolder("temporaryOutputDir")
         roddyBamFile = DomainFactory.createRoddyBamFile()
@@ -60,12 +61,14 @@ class ExecuteRoddyCommandServiceTests {
         realm = roddyBamFile.project.realm
         assert realm.save(flush: true)
 
-        roddyBaseConfigsPath = new File(ProcessingOptionService.getValueOfProcessingOption(OptionName.RODDY_BASE_CONFIGS_PATH))
+        roddyBaseConfigsPath = new File(processingOptionService.findOptionAsString(OptionName.RODDY_BASE_CONFIGS_PATH))
         roddyBaseConfigsPath.mkdirs()
         new File(roddyBaseConfigsPath, "file name").write("file content")
-        applicationIniPath = new File(ProcessingOptionService.getValueOfProcessingOption(OptionName.RODDY_APPLICATION_INI))
+        applicationIniPath = new File(processingOptionService.findOptionAsString(OptionName.RODDY_APPLICATION_INI))
         assert CreateFileHelper.createFile(applicationIniPath)
-        featureTogglesConfigPath = new File(ProcessingOptionService.getValueOfProcessingOption(OptionName.RODDY_FEATURE_TOGGLES_CONFIG_PATH))
+        featureTogglesConfigPath = new File(processingOptionService.findOptionAsString(OptionName.RODDY_FEATURE_TOGGLES_CONFIG_PATH))
+
+        executeRoddyCommandService.processingOptionService = new ProcessingOptionService()
     }
 
     @After
@@ -182,40 +185,6 @@ class ExecuteRoddyCommandServiceTests {
             executeRoddyCommandService.defaultRoddyExecutionCommand(roddyBamFile, CONFIG_NAME, ANALYSIS_ID, null)
         }.contains("The input realm is not allowed to be null")
     }
-
-    @Test
-    void testDefaultRoddyExecutionCommand_ProcessingOptionRoddyPathIsNull_ShouldFail() {
-        executeRoddyCommandService.metaClass.createWorkOutputDirectory = { Realm realm, File file -> }
-
-        ProcessingOption.findByName(OptionName.RODDY_PATH).delete(flush: true)
-        assert !ProcessingOption.findByName(OptionName.RODDY_PATH)
-        assert TestCase.shouldFail(AssertionError) {
-            executeRoddyCommandService.defaultRoddyExecutionCommand(roddyBamFile, CONFIG_NAME, ANALYSIS_ID, realm)
-        }.contains("Collection contains 0 elements")
-    }
-
-    @Test
-    void testDefaultRoddyExecutionCommand_ProcessingOptionRoddyBaseConfigsPathIsNull_ShouldFail() {
-        executeRoddyCommandService.metaClass.createWorkOutputDirectory = { Realm realm, File file -> }
-
-        ProcessingOption.findByName(OptionName.RODDY_BASE_CONFIGS_PATH).delete(flush: true)
-        assert !ProcessingOption.findByName(OptionName.RODDY_BASE_CONFIGS_PATH)
-        assert TestCase.shouldFail(AssertionError) {
-            executeRoddyCommandService.defaultRoddyExecutionCommand(roddyBamFile, CONFIG_NAME, ANALYSIS_ID, realm)
-        }.contains("Collection contains 0 elements")
-    }
-
-    @Test
-    void testDefaultRoddyExecutionCommand_ProcessingOptionRoddyApplicationIniIsNull_ShouldFail() {
-        executeRoddyCommandService.metaClass.createWorkOutputDirectory = { Realm realm, File file -> }
-
-        ProcessingOption.findByName(OptionName.RODDY_APPLICATION_INI).delete(flush: true)
-        assert !ProcessingOption.findByName(OptionName.RODDY_APPLICATION_INI)
-        assert TestCase.shouldFail(AssertionError) {
-            executeRoddyCommandService.defaultRoddyExecutionCommand(roddyBamFile, CONFIG_NAME, ANALYSIS_ID, realm)
-        }.contains("Collection contains 0 elements")
-    }
-
 
     @Test
     void testDefaultRoddyExecutionCommand_ProcessingOptionRoddyApplicationIniDoesNotExistInFilesystem_ShouldFail() {
@@ -348,7 +317,7 @@ class ExecuteRoddyCommandServiceTests {
         //make the 2 optional, since it does not work for all developer, allow group jenkins, since user jenkins is not part of jenkins
         String expected = """\
             2?770
-            (${ProcessingOptionService.getValueOfProcessingOption(OptionName.OTP_USER_LINUX_GROUP)}|jenkins)
+            (${processingOptionService.findOptionAsString(OptionName.OTP_USER_LINUX_GROUP)}|jenkins)
             """.stripIndent()
 
         assert permissionAndGroup ==~ expected
@@ -373,7 +342,7 @@ class ExecuteRoddyCommandServiceTests {
         //make the 2 optional, since it does not work for all developer, allow group jenkins, since user jenkins is not part of jenkins
         String expected = """\
             2?770
-            (${ProcessingOptionService.getValueOfProcessingOption(OptionName.OTP_USER_LINUX_GROUP)}|jenkins)
+            (${processingOptionService.findOptionAsString(OptionName.OTP_USER_LINUX_GROUP)}|jenkins)
             """.stripIndent()
 
         assert permissionAndGroup ==~ expected

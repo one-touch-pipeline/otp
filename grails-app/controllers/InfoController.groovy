@@ -16,14 +16,15 @@ class InfoController {
     DocumentService documentService
     StatisticService statisticService
     ProjectService projectService
+    ProcessingOptionService processingOptionService
 
     def about() {
-        String aboutOtp = ProcessingOptionService.findOptionSafe(OptionName.GUI_ABOUT_OTP, null, null)
+        String aboutOtp = processingOptionService.findOptionAsString(OptionName.GUI_ABOUT_OTP)
         [aboutOtp: aboutOtp,]
     }
 
     def imprint() {
-        String imprint = ProcessingOptionService.findOptionSafe(OptionName.GUI_IMPRINT, null, null)
+        String imprint = processingOptionService.findOptionAsString(OptionName.GUI_IMPRINT)
         [imprint: imprint]
     }
 

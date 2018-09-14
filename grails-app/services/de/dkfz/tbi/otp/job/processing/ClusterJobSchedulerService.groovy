@@ -42,6 +42,7 @@ class ClusterJobSchedulerService {
     ClusterJobService clusterJobService
     ClusterJobManagerFactoryService clusterJobManagerFactoryService
     ConfigService configService
+    ProcessingOptionService processingOptionService
 
     ClusterJobLoggingService clusterJobLoggingService
 
@@ -75,7 +76,7 @@ class ClusterJobSchedulerService {
         if (processingPriority >= ProcessingPriority.FAST_TRACK_PRIORITY) {
             options.put(
                     JobSubmissionOption.QUEUE,
-                    ProcessingOptionService.getValueOfProcessingOption(CLUSTER_SUBMISSIONS_FAST_TRACK_QUEUE)
+                    processingOptionService.findOptionAsString(CLUSTER_SUBMISSIONS_FAST_TRACK_QUEUE)
             )
         }
 

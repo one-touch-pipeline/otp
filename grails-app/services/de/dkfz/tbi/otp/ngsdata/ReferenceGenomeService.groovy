@@ -33,7 +33,7 @@ class ReferenceGenomeService {
      */
     public File referenceGenomeDirectory(ReferenceGenome referenceGenome, boolean checkExistence = true) {
         notNull referenceGenome, "The reference genome is not specified"
-        String path = processingOptionService.getValueOfProcessingOption(OptionName.BASE_PATH_REFERENCE_GENOME)
+        String path = processingOptionService.findOptionAsString(OptionName.BASE_PATH_REFERENCE_GENOME)
         assert OtpPath.isValidAbsolutePath(path)
         return checkFileExistence(new File(path, referenceGenome.path), checkExistence)
     }

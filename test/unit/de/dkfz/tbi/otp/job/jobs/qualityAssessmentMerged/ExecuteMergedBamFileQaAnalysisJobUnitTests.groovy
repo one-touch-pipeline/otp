@@ -73,7 +73,7 @@ class ExecuteMergedBamFileQaAnalysisJobUnitTests {
             executeJob: { realmIn, cmd -> 'pbsID' }
             ] as ClusterJobSchedulerService
 
-        ProcessingOptionService.metaClass.static.findOptionAssure = { OptionName a, String b, Project c ->
+        ProcessingOptionService.metaClass.static.findOptionSafe = { OptionName a, String b, Project c ->
             'qualityAssessment.sh ${processedBamFilePath} ${processedBaiFilePath} ${qualityAssessmentFilePath} ${coverageDataFilePath} ${insertSizeDataFilePath} false ${allChromosomeName} 36 25 0 1 1000 10 false ${bedFilePath} ${refGenMetaInfoFilePath}'
         }
 

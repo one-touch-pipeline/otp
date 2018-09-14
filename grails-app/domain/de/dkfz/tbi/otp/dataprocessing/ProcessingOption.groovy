@@ -17,7 +17,6 @@ class ProcessingOption implements Entity {
         PIPELINE_RODDY_SNV_DEFAULT_PLUGIN_NAME(
                 "Default name of the Roddy SNV pipeline plugin, used when configuring the pipeline",
                 Necessity.OPTIONAL, "SNVCallingWorkflow", TypeValidators.SINGLE_WORD_TEXT,
-                TypeValidators.SEQ_TYPE_RODDY_NAME
         ),
         PIPELINE_RODDY_SNV_DEFAULT_PLUGIN_VERSION(
                 "Default version of the Roddy SNV pipeline plugin, used when configuring the pipeline",
@@ -26,13 +25,13 @@ class ProcessingOption implements Entity {
         ),
         PIPELINE_RODDY_SNV_DEFAULT_BASE_PROJECT_CONFIG(
                 "Default base project file for Roddy SNV pipeline, used when configuring the pipeline",
-                Necessity.REQUIRED, null, TypeValidators.SINGLE_WORD_TEXT
+                Necessity.REQUIRED, null, TypeValidators.SINGLE_WORD_TEXT,
+                TypeValidators.SEQ_TYPE_RODDY_NAME
         ),
 
         PIPELINE_RODDY_INDEL_DEFAULT_PLUGIN_NAME(
                 "Default name of the Indel pipeline plugin, used when configuring the pipeline",
                 Necessity.OPTIONAL, "IndelCallingWorkflow", TypeValidators.SINGLE_WORD_TEXT,
-                TypeValidators.SEQ_TYPE_RODDY_NAME
         ),
         PIPELINE_RODDY_INDEL_DEFAULT_PLUGIN_VERSION(
                 "Default version of the Indel pipeline plugin, used when configuring the pipeline",
@@ -41,13 +40,13 @@ class ProcessingOption implements Entity {
         ),
         PIPELINE_RODDY_INDEL_DEFAULT_BASE_PROJECT_CONFIG(
                 "Default base project file for Indel pipeline, used when configuring the pipeline",
-                Necessity.REQUIRED, null, TypeValidators.SINGLE_WORD_TEXT
+                Necessity.REQUIRED, null, TypeValidators.SINGLE_WORD_TEXT,
+                TypeValidators.SEQ_TYPE_RODDY_NAME
         ),
 
         PIPELINE_ACESEQ_DEFAULT_PLUGIN_NAME(
                 "Default name of the Aceseq pipeline plugin, used when configuring the pipeline",
                 Necessity.OPTIONAL, "ACEseqWorkflow", TypeValidators.SINGLE_WORD_TEXT,
-                TypeValidators.SEQ_TYPE_RODDY_NAME
         ),
         PIPELINE_ACESEQ_DEFAULT_PLUGIN_VERSION(
                 "Default version of the Aceseq pipeline plugin, used when configuring the pipeline",
@@ -56,7 +55,8 @@ class ProcessingOption implements Entity {
         ),
         PIPELINE_ACESEQ_DEFAULT_BASE_PROJECT_CONFIG(
                 "Default base project file for Aceseq pipeline, used when configuring the pipeline",
-                Necessity.REQUIRED, null, TypeValidators.SINGLE_WORD_TEXT
+                Necessity.REQUIRED, null, TypeValidators.SINGLE_WORD_TEXT,
+                TypeValidators.SEQ_TYPE_RODDY_NAME
         ),
         PIPELINE_ACESEQ_REFERENCE_GENOME(
                 "Name of reference genomes for Aceseq, comma-separated",
@@ -79,7 +79,6 @@ class ProcessingOption implements Entity {
         PIPELINE_SOPHIA_DEFAULT_PLUGIN_NAME(
                 "Default name of the Sophia pipeline plugin, used when configuring the pipeline",
                 Necessity.OPTIONAL, "SophiaWorkflow", TypeValidators.SINGLE_WORD_TEXT,
-                TypeValidators.SEQ_TYPE_RODDY_NAME
         ),
         PIPELINE_SOPHIA_DEFAULT_PLUGIN_VERSIONS(
                 "Default version of the Sophia pipeline plugin, used when configuring the pipeline",
@@ -88,7 +87,8 @@ class ProcessingOption implements Entity {
         ),
         PIPELINE_SOPHIA_DEFAULT_BASE_PROJECT_CONFIG(
                 "Default base project file for Sophia pipeline, used when configuring the pipeline",
-                Necessity.REQUIRED, null, TypeValidators.SINGLE_WORD_TEXT
+                Necessity.REQUIRED, null, TypeValidators.SINGLE_WORD_TEXT,
+                TypeValidators.SEQ_TYPE_RODDY_NAME
         ),
         PIPELINE_SOPHIA_REFERENCE_GENOME(
                 "Name of reference genomes for Sophia, comma-separated",
@@ -178,7 +178,6 @@ class ProcessingOption implements Entity {
         COMMAND_LOAD_MODULE_LOADER(
                 "command to load the module system (executed in Bash, may be empty if not required)",
                 Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT
-
         ),
         COMMAND_ACTIVATION_FASTQC(
                 "command to enable the module containing fastqc (executed in Bash, may be empty if not required)",
@@ -438,6 +437,7 @@ class ProcessingOption implements Entity {
             } else {
                 assert defaultValue != null : "default value must not be null for optional values: ${name()}"
             }
+
             this.description = description
             this.necessity = necessity
             this.defaultValue = defaultValue

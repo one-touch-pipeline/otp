@@ -32,14 +32,14 @@ class ClusterJobSubmissionOptionsService {
 
         // options for the job class
         options.putAll(convertJsonStringToMap(
-                processingOptionService.findOption(OptionName.CLUSTER_SUBMISSIONS_OPTION, "${jobClass}", project))
+                processingOptionService.findOptionAsString(OptionName.CLUSTER_SUBMISSIONS_OPTION, "${jobClass}"))
         )
 
         if (seqType) {
             assert seqType.processingOptionName
             // options for the job class and SeqType
             options.putAll(convertJsonStringToMap(
-                    processingOptionService.findOption(OptionName.CLUSTER_SUBMISSIONS_OPTION, "${jobClass}_${seqType.processingOptionName}", project))
+                    processingOptionService.findOptionAsString(OptionName.CLUSTER_SUBMISSIONS_OPTION, "${jobClass}_${seqType.processingOptionName}"))
             )
         }
 
