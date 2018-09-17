@@ -12,9 +12,9 @@ import de.dkfz.tbi.otp.utils.logging.*
 import grails.compiler.*
 import grails.util.*
 import groovy.transform.*
+import org.apache.commons.logging.impl.*
 
 import java.nio.file.*
-import java.nio.file.attribute.*
 import java.time.*
 import java.time.format.*
 
@@ -60,7 +60,7 @@ class ClusterJobSchedulerService {
         if (!script) {
             throw new ProcessingException("No job script specified.")
         }
-        assert realm : 'No realm specified.'
+        assert realm: 'No realm specified.'
 
         ProcessingStep processingStep = schedulerService.jobExecutedByCurrentThread.processingStep
         ProcessParameterObject domainObject = processingStep.processParameterObject
@@ -107,7 +107,7 @@ class ClusterJobSchedulerService {
                 options.get(JobSubmissionOption.MEMORY) ? new BufferValue(options.get(JobSubmissionOption.MEMORY)) : null,
                 options.get(JobSubmissionOption.CORES) as Integer,
                 options.get(JobSubmissionOption.NODES) as Integer,
-                (Duration)(options.get(JobSubmissionOption.WALLTIME) ? Duration.parse(options.get(JobSubmissionOption.WALLTIME)) : null),
+                (Duration) (options.get(JobSubmissionOption.WALLTIME) ? Duration.parse(options.get(JobSubmissionOption.WALLTIME)) : null),
                 options.get(JobSubmissionOption.STORAGE) ? new BufferValue(options.get(JobSubmissionOption.STORAGE)) : null,
                 options.get(JobSubmissionOption.QUEUE),
                 options.get(JobSubmissionOption.NODE_FEATURE),
@@ -174,6 +174,7 @@ class ClusterJobSchedulerService {
         Map<BEJobID, JobState> jobStates
         StringBuilder logStringBuilder = new StringBuilder()
         LogThreadLocal.withThreadLog(logStringBuilder) {
+            ((SimpleLog) LogThreadLocal.threadLog).setLevel(SimpleLog.LOG_LEVEL_DEBUG)
             jobStates = jobManager.queryJobStatusAll()
         }
 
@@ -271,8 +272,8 @@ public class RealmAndUser {
     final String userName
 
     public RealmAndUser(final Realm realm, final String userName) {
-        assert realm : "Realm not specified"
-        assert userName : "User name not specified"
+        assert realm: "Realm not specified"
+        assert userName: "User name not specified"
         this.realm = realm
         this.userName = userName
     }
