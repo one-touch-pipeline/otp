@@ -73,6 +73,9 @@ class ProjectUserControllerIntegrationSpec extends Specification implements User
         controller.params.projectRoleName = "projectRole"
         controller.params.realName = "realName"
         controller.params.email = "email@dummy.de"
+        controller.params.accessToFiles = true
+        controller.params.manageUsers = true
+        controller.params.manageUsersAndDelegate = true
 
         SpringSecurityUtils.doWithAuth(OPERATOR) {
             controller.addUserToProject()
@@ -109,6 +112,9 @@ class ProjectUserControllerIntegrationSpec extends Specification implements User
         controller.params.projectRoleName = "projectRole"
         controller.params.realName = "realName"
         controller.params.email = "email@dummy.de"
+        controller.params.accessToFiles = true
+        controller.params.manageUsers = true
+        controller.params.manageUsersAndDelegate = true
 
         SpringSecurityUtils.doWithAuth(OPERATOR) {
             controller.addUserToProject()

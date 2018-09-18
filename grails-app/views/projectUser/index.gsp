@@ -259,7 +259,7 @@
                         </sec:access>
                         <tr>
                             <td><g:message code="projectUser.addMember.user"/></td>
-                            <td><input id="search" name="searchString" class="inputField ldapUser autocompleted" autocomplete="off" placeholder="${g.message(code: 'projectUser.addMember.ldapSearchValues')}"></td>
+                            <td><input id="search" name="searchString" type="text" class="inputField ldapUser autocompleted" autocomplete="off" placeholder="${g.message(code: 'projectUser.addMember.ldapSearchValues')}"></td>
                         </tr>
                         <tr>
                             <td><g:message code="projectUser.addMember.role"/></td>
@@ -272,6 +272,20 @@
                                 </select>
                             </td>
                         </tr>
+                        <tr>
+                            <td><g:message code="projectUser.addMember.accessToFiles"/></td>
+                            <td><g:checkBox name="accessToFiles" class="inputField ldapUser" value="true" checked="false"/></td>
+                        </tr>
+                        <tr>
+                            <td><g:message code="projectUser.addMember.manageUsers"/></td>
+                            <td><g:checkBox name="manageUsers" class="inputField ldapUser" value="true" checked="false"/></td>
+                        </tr>
+                        <sec:access expression="hasRole('ROLE_OPERATOR')">
+                        <tr>
+                            <td><g:message code="projectUser.addMember.manageUsersAndDelegate"/></td>
+                            <td><g:checkBox name="manageUsersAndDelegate" class="inputField ldapUser" value="true" checked="false"/></td>
+                        </tr>
+                        </sec:access>
                     </table>
                 </div>
                 <sec:access expression="hasRole('ROLE_OPERATOR')">

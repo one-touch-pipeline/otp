@@ -108,10 +108,10 @@ class ProjectUserController implements CheckAndCall {
                             ProjectRole.findByName(cmd.projectRoleName),
                             cmd.searchString,
                             [
-                                accessToOtp           : true, //TODO: OTP-2943: replace with input from GUI
-                                accessToFiles         : false,
-                                manageUsers           : false,
-                                manageUsersAndDelegate: false,
+                                accessToOtp           : true,
+                                accessToFiles         : cmd.accessToFiles,
+                                manageUsers           : cmd.manageUsers,
+                                manageUsersAndDelegate: cmd.manageUsersAndDelegate,
                             ]
                     )
                 } else {
@@ -318,6 +318,9 @@ class AddUserToProjectCommand implements Serializable {
 
     String searchString
     String projectRoleName
+    boolean accessToFiles = false
+    boolean manageUsers = false
+    boolean manageUsersAndDelegate = false
 
     String realName
     String email
@@ -334,6 +337,9 @@ class AddUserToProjectCommand implements Serializable {
                 return "No project role selected"
             }
         })
+        accessToFiles(blank: false)
+        manageUsers(blank: false)
+        manageUsersAndDelegate(blank: false)
         realName(nullable: true, validator: { val, obj ->
             if (!obj.addViaLdap && !obj.realName?.trim()) {
                 return "Real name can not be empty"

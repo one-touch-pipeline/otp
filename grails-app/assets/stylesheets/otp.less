@@ -1154,17 +1154,18 @@ td span {
 }
 #otp .addUserForm {
     overflow: auto;
-    .inputField {
+    input[type=text], select {
         width: 90%;
     }
     .methodSelection {
-        padding: 0px 10px 5px;
+        padding: 5px 10px 5px;
     }
     .form {
         width: 35%;
-        margin-right: 20px;
-        margin-bottom: 10px;
-        padding: 10px;
+        margin: 10px 20px 10px 0px;
+        td:nth-child(1) {
+            width: 25%;
+        }
     }
     .form.left {
         float: left;
